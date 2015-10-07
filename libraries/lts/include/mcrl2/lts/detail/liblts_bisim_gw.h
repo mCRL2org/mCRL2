@@ -131,14 +131,6 @@ class state_T
        is_in_P_detect2(false), 
        is_in_Lp_detect2(false) 
     {}
-	
-		// destructor
-		~state_T()
-		{
-			deleteobject (Ttgt);
-			deleteobject (Tsrc);
-			deleteobject (pos_in_P_detect2);
-		}
 };
 
 class transition_T
@@ -188,12 +180,6 @@ class constellation_T
        size(0), 
        type(TRIVIAL) 
     {}
-	
-		// destructor
-		~constellation_T()
-		{
-		  deleteobject (blocks);
-		}
 };
 
 class to_constlns_element_T
@@ -221,12 +207,6 @@ class to_constlns_element_T
         new_element(NULL), 
         SClist(NULL) 
     {}
-	
-		// destructor
-		~to_constlns_element_T()
-		{
-		  deleteobject (trans_list);
-		}
 };
 
 class block_T
@@ -239,15 +219,15 @@ class block_T
     // constellation C containing B
     constellation_T *constellation;
     // list of bottom states
-    sized_forward_list < state_T >* btm_states;
+    sized_forward_list < state_T > btm_states;
     // list of non-bottom states
-    sized_forward_list < state_T >* non_btm_states;
+    sized_forward_list < state_T > non_btm_states;
     // list of constellations reachable from block
     sized_forward_list < to_constlns_element_T > to_constlns;
     // marked bottom states
-    sized_forward_list < state_T >* marked_btm_states;
+    sized_forward_list < state_T > marked_btm_states;
     // marked non-bottom states
-    sized_forward_list < state_T >* marked_non_btm_states;
+    sized_forward_list < state_T > marked_non_btm_states;
     // different from pseudo-code: instead of list of transitions from state in block 
     // to constellation on which splitting is done, we have a pointer to a to_constlns object containing such a list
     to_constlns_element_T* constln_ref;
@@ -258,7 +238,7 @@ class block_T
     // trans_list in constant time.
     to_constlns_element_T* inconstln_ref;
     // list of new bottom states
-    sized_forward_list < state_T >* new_btm_states;
+    sized_forward_list < state_T > new_btm_states;
     
     // ADDITIONAL INFO to keep track of where the block is listed in a constellation.blocks
     sized_forward_list<block_T>::iterator ptr_in_list;
@@ -270,27 +250,27 @@ class block_T
        coconstln_ref(NULL), 
        inconstln_ref(NULL) 
     {
-      btm_states = new sized_forward_list < state_T >; 
-      non_btm_states = new sized_forward_list < state_T >; 
-      marked_btm_states = new sized_forward_list < state_T >; 
-      marked_non_btm_states = new sized_forward_list < state_T >; 
-      new_btm_states = new sized_forward_list < state_T >;
+//      btm_states = new sized_forward_list < state_T >; 
+//      non_btm_states = new sized_forward_list < state_T >; 
+//      marked_btm_states = new sized_forward_list < state_T >; 
+//      marked_non_btm_states = new sized_forward_list < state_T >; 
+//      new_btm_states = new sized_forward_list < state_T >;
     }
     
-    // destructor
-    ~block_T() 
-    {
-      assert(btm_states!=NULL);
-      delete(btm_states); 
-      assert(non_btm_states!=NULL);
-      delete(non_btm_states); 
-      assert(marked_btm_states!=NULL);
-      delete(marked_btm_states); 
-      assert(marked_non_btm_states!=NULL);
-      delete(marked_non_btm_states); 
-      assert(new_btm_states!=NULL);
-      delete(new_btm_states);
-    }
+//    // destructor
+//    ~block_T() 
+//    {
+//      assert(btm_states!=NULL);
+//      delete(btm_states); 
+//      assert(non_btm_states!=NULL);
+//      delete(non_btm_states); 
+//      assert(marked_btm_states!=NULL);
+//      delete(marked_btm_states); 
+//      assert(marked_non_btm_states!=NULL);
+//      delete(marked_non_btm_states); 
+//      assert(new_btm_states!=NULL);
+//      delete(new_btm_states);
+//    }
 };
 
 template < class LTS_TYPE>
@@ -384,20 +364,20 @@ class bisim_partitioner_gw
       switch (s->type) 
       {
            case BTM_STATE:
-                s->block->btm_states->remove_linked(s);
-                B->btm_states->insert_linked(s);
+                s->block->btm_states.remove_linked(s);
+                B->btm_states.insert_linked(s);
                 break;
            case NON_BTM_STATE:
-                s->block->non_btm_states->remove_linked(s);
-                B->non_btm_states->insert_linked(s);
+                s->block->non_btm_states.remove_linked(s);
+                B->non_btm_states.insert_linked(s);
                 break;
            case MARKED_BTM_STATE:
-                s->block->marked_btm_states->remove_linked(s);
-                B->marked_btm_states->insert_linked(s);
+                s->block->marked_btm_states.remove_linked(s);
+                B->marked_btm_states.insert_linked(s);
                 break;
            case MARKED_NON_BTM_STATE:
-                s->block->marked_non_btm_states->remove_linked(s);
-                B->marked_non_btm_states->insert_linked(s);
+                s->block->marked_non_btm_states.remove_linked(s);
+                B->marked_non_btm_states.insert_linked(s);
       }
       s->block = B;
     }
@@ -422,31 +402,31 @@ class bisim_partitioner_gw
     
     sized_forward_list < state_T>::iterator unmarked_states_begin(block_T* B)
     {
-      if (B->btm_states->size() > 0) 
+      if (B->btm_states.size() > 0) 
       {
         iterating_non_bottom2 = false;
-        return B->btm_states->begin();
+        return B->btm_states.begin();
       }
       else 
       {
         iterating_non_bottom2 = true;
-        return B->non_btm_states->begin();
+        return B->non_btm_states.begin();
       }
     }
     
     sized_forward_list < state_T>::iterator unmarked_states_end(block_T* B)
     {
-      return B->non_btm_states->end();
+      return B->non_btm_states.end();
     }
     
     sized_forward_list < state_T>::iterator unmarked_states_next(block_T* B, sized_forward_list < state_T >::iterator it)
     {
       auto tmpit = it;
       ++tmpit;
-      if (!iterating_non_bottom2 && tmpit == B->btm_states->end()) 
+      if (!iterating_non_bottom2 && tmpit == B->btm_states.end()) 
       {
            iterating_non_bottom2 = true;
-           tmpit = B->non_btm_states->begin();
+           tmpit = B->non_btm_states.begin();
       }
       return tmpit;
     }
@@ -454,30 +434,30 @@ class bisim_partitioner_gw
     // iterator functions to iterate over all marked states of a given block
     sized_forward_list < state_T >::iterator marked_states_begin(block_T* B)
     {
-      if (B->marked_btm_states->size() > 0) 
+      if (B->marked_btm_states.size() > 0) 
       {
         iterating_non_bottom2 = false;
-        return B->marked_btm_states->begin();
+        return B->marked_btm_states.begin();
       }
       else 
       {
         iterating_non_bottom2 = true;
-        return B->marked_non_btm_states->begin();
+        return B->marked_non_btm_states.begin();
       }
     }
     
     sized_forward_list < state_T >::iterator marked_states_end(block_T* B)
     {
-      return B->marked_non_btm_states->end();
+      return B->marked_non_btm_states.end();
     }
     
     sized_forward_list < state_T >::iterator marked_states_next(block_T* B, sized_forward_list < state_T >::iterator it)
     {
       auto tmpit = it;
       ++tmpit;
-      if (!iterating_non_bottom2 && tmpit == B->marked_btm_states->end()) {
+      if (!iterating_non_bottom2 && tmpit == B->marked_btm_states.end()) {
            iterating_non_bottom2 = true;
-           tmpit = B->marked_non_btm_states->begin();
+           tmpit = B->marked_non_btm_states.begin();
       }
       return tmpit;
     }
@@ -489,14 +469,14 @@ class bisim_partitioner_gw
          if (B != NULL) 
          {
               //mCRL2log(log::verbose) << "CLEANING " << B->id << "\n";
-              for (auto sit = B->marked_btm_states->begin(); sit != B->marked_btm_states->end(); ++sit) 
+              for (auto sit = B->marked_btm_states.begin(); sit != B->marked_btm_states.end(); ++sit) 
               {
                    state_T* s = *sit;
                    s->constln_cnt = NULL;
                    s->coconstln_cnt = NULL;
-                   B->btm_states->insert_state_linked(s, BTM_STATE);
+                   B->marked_btm_states.move_state_linked(s, B->btm_states, BTM_STATE);
               }
-              for (auto sit = B->marked_non_btm_states->begin(); sit != B->marked_non_btm_states->end(); ++sit) {
+              for (auto sit = B->marked_non_btm_states.begin(); sit != B->marked_non_btm_states.end(); ++sit) {
                    state_T* s = *sit;
                    s->constln_cnt = NULL;
                    if (s->coconstln_cnt != NULL) {
@@ -505,10 +485,8 @@ class bisim_partitioner_gw
                         }
                    }
                    s->coconstln_cnt = NULL;
-                   B->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
+                   B->marked_non_btm_states.move_state_linked(s, B->non_btm_states, NON_BTM_STATE);
               }
-              B->marked_btm_states->clear();
-              B->marked_non_btm_states->clear();
               if (B->constln_ref != NULL) {
                    if (size(B->constln_ref) == 0) {
                         // if the associated constellation is the one containing B, set inconstln_ref to NULL
@@ -692,20 +670,20 @@ class bisim_partitioner_gw
     inline bool has_next_state_detect1_1() {
          auto next_it = iter_state_added_detect1;
          next_it++;
-         if (next_it == block_detect->marked_btm_states->end() && !iterating_non_bottom) {
-              next_it = block_detect->marked_non_btm_states->begin();
+         if (next_it == block_detect->marked_btm_states.end() && !iterating_non_bottom) {
+              next_it = block_detect->marked_non_btm_states.begin();
               //mCRL2log(log::verbose) << "non bottom\n";
          }
-         //mCRL2log(log::verbose) << (next_it != block_detect->marked_non_btm_states->end()) << "number of non bottom states: " << block_detect->marked_non_btm_states->size() << "\n";
-         return next_it != block_detect->marked_non_btm_states->end();
+         //mCRL2log(log::verbose) << (next_it != block_detect->marked_non_btm_states.end()) << "number of non bottom states: " << block_detect->marked_non_btm_states.size() << "\n";
+         return next_it != block_detect->marked_non_btm_states.end();
      }
 
     inline state_T* next_state_detect1_1() {
          iter_state_added_detect1++;
          //mCRL2log(log::verbose) << "get next state\n";
-         if (iter_state_added_detect1 == block_detect->marked_btm_states->end() && !iterating_non_bottom) {
+         if (iter_state_added_detect1 == block_detect->marked_btm_states.end() && !iterating_non_bottom) {
               iterating_non_bottom = true;
-              iter_state_added_detect1 = block_detect->marked_non_btm_states->begin();
+              iter_state_added_detect1 = block_detect->marked_non_btm_states.begin();
          }
          // is the state suitable?
          state_T* s = *iter_state_added_detect1;
@@ -722,7 +700,7 @@ class bisim_partitioner_gw
     inline bool has_next_state_detect2_1() {
          auto next_it = iter_state_added_detect2;
          next_it++;
-         return next_it != block_detect->btm_states->end();
+         return next_it != block_detect->btm_states.end();
      }
 
     inline state_T* next_state_detect2_1() {
@@ -754,7 +732,7 @@ class bisim_partitioner_gw
     inline bool has_next_state_detect2_2() {
          auto next_it = iter_state_added_detect2;
          next_it++;
-         return next_it != block_detect->marked_btm_states->end();
+         return next_it != block_detect->marked_btm_states.end();
     }
 
     inline state_T* next_state_detect2_2() {
@@ -794,7 +772,7 @@ class bisim_partitioner_gw
     inline bool has_next_state_detect2_3() {
          auto next_it = iter_state_added_detect2;
          next_it++;
-         return next_it != block_detect->new_btm_states->end();
+         return next_it != block_detect->new_btm_states.end();
     }
     
     // compare SClist and new_btm_states. This depends on new bottom states having been added to
@@ -1324,12 +1302,12 @@ class bisim_partitioner_gw
         if (s->inert_cnt == 0) 
         {
           // state is bottom
-          s->block->btm_states->insert_state_linked(s, BTM_STATE);
+          s->block->btm_states.insert_state_linked(s, BTM_STATE);
         }
         else 
         {
           // state is not bottom
-          s->block->non_btm_states->insert_state_linked(s, NON_BTM_STATE);
+          s->block->non_btm_states.insert_state_linked(s, NON_BTM_STATE);
         }
       }
       
@@ -1371,10 +1349,10 @@ class bisim_partitioner_gw
           for (auto bit = setB->blocks.begin(); bit != setB->blocks.end(); ++bit) 
           {
             B = *bit;
-            if (B->btm_states->size()+B->non_btm_states->size() <= (setB->size)/2) 
+            if (B->btm_states.size()+B->non_btm_states.size() <= (setB->size)/2) 
             {
-              //mCRL2log(log::verbose) << B->btm_states->size() << " " << B->non_btm_states->size() << " " << B->marked_btm_states->size() << " " << B->marked_non_btm_states->size() << "\n";
-              //mCRL2log(log::verbose) << "splitter: " << B->id << " " << B->btm_states->front()->id << "\n";
+              //mCRL2log(log::verbose) << B->btm_states.size() << " " << B->non_btm_states.size() << " " << B->marked_btm_states.size() << " " << B->marked_non_btm_states.size() << "\n";
+              //mCRL2log(log::verbose) << "splitter: " << B->id << " " << B->btm_states.front()->id << "\n";
               //for (auto it = B->to_constlns.begin(); it != B->to_constlns.end(); ++it) {
               //  to_constlns_element_T* l = *it;
               //  mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
@@ -1384,10 +1362,9 @@ class bisim_partitioner_gw
               // 5.2.1
               // 5.2.1.a
               constellation_T* setC = new constellation_T(max_const_index);
-              setB->blocks.remove_linked(B, bit);
-              size_t Bsize = B->btm_states->size() + B->non_btm_states->size() + B->marked_btm_states->size() + B->marked_non_btm_states->size();
+              setB->blocks.move_linked(B, setC->blocks, bit);
+              size_t Bsize = B->btm_states.size() + B->non_btm_states.size() + B->marked_btm_states.size() + B->marked_non_btm_states.size();
               setB->size -= Bsize;
-              setC->blocks.insert_linked(B);
               setC->size += Bsize;
               B->constellation = setC;
               //mCRL2log(log::verbose) << "new constln of " << B->id << " is " << setC->id << "\n";
@@ -1397,8 +1374,7 @@ class bisim_partitioner_gw
               if (setB->blocks.size() == 1) 
               {
                 setB->type = TRIVIAL;
-                non_trivial_constlns.remove_linked(setB, const_it);
-                trivial_constlns.insert_linked(setB);
+                non_trivial_constlns.move_linked(setB, trivial_constlns, const_it);
               }
               // 5.2.2 walk through B.btm_states and B.non_btm_states, and check incoming transitions
               //check_consistency_trans_lists_2(setB);
@@ -1416,7 +1392,7 @@ class bisim_partitioner_gw
                   if (Bp != B) 
                   {
                     // 5.2.2.a
-                    if (Bp->marked_btm_states->size() == 0 && Bp->marked_non_btm_states->size() == 0) 
+                    if (Bp->marked_btm_states.size() == 0 && Bp->marked_non_btm_states.size() == 0) 
                     {
                       // 5.2.2.a.i
                       splittable_blocks.insert(Bp);
@@ -1440,14 +1416,12 @@ class bisim_partitioner_gw
                       // 5.2.2.c.i
                       if (sp->type == BTM_STATE) 
                       {
-                        Bp->btm_states->remove_linked(sp);
-                        Bp->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
+                        Bp->btm_states.move_state_linked(sp, Bp->marked_btm_states, MARKED_BTM_STATE);
                       }
                       // 5.2.2.c.ii
                       else 
                       {
-                        Bp->non_btm_states->remove_linked(sp);
-                        Bp->marked_non_btm_states->insert_state_linked(sp, MARKED_NON_BTM_STATE);
+                        Bp->non_btm_states.move_state_linked(sp, Bp->marked_non_btm_states, MARKED_NON_BTM_STATE);
                       }
                     }
                     // 5.2.2.d
@@ -1455,8 +1429,7 @@ class bisim_partitioner_gw
                     t->to_constln_cnt = sp->constln_cnt;
                     sp->coconstln_cnt->cnt--;
                     // move t
-                    Bp->coconstln_ref->trans_list.remove_linked(t);
-                    Bp->constln_ref->trans_list.insert_linked(t);
+                    Bp->coconstln_ref->trans_list.move_linked(t, Bp->constln_ref->trans_list);
                     //assert(t->target->block->constellation == s->block->constellation);
                     // Different from pseudo-code: no longer needed, since direct link to transitions from block to constellation has been removed
                     // (now goes via to_constln_ref, which is updated at 5.2.2.b.
@@ -1469,12 +1442,8 @@ class bisim_partitioner_gw
               // Different from pseudo-code: consider the case that B itself can be split
               // ALL states should be marked
               // 5.2.3
-              auto tmpptr = B->btm_states;
-              B->btm_states = B->marked_btm_states;
-              B->marked_btm_states = tmpptr;
-              tmpptr = B->non_btm_states;
-              B->non_btm_states = B->marked_non_btm_states;
-              B->marked_non_btm_states = tmpptr;
+							B->btm_states.swap(B->marked_btm_states);
+							B->non_btm_states.swap(B->marked_non_btm_states);
               splittable_blocks.insert(B);
               B->constln_ref = NULL;
               B->coconstln_ref = NULL;
@@ -1537,14 +1506,14 @@ class bisim_partitioner_gw
                 
                 // 5.2.3.a/b
                 bool split = true;
-                //mCRL2log(log::verbose) << "check " << Bp->id << " " << Bp->btm_states->size() << "\n";
-                if (Bp->btm_states->size() == 0) 
+                //mCRL2log(log::verbose) << "check " << Bp->id << " " << Bp->btm_states.size() << "\n";
+                if (Bp->btm_states.size() == 0) 
                 {
                   split = false;
                   if (size(Bp->coconstln_ref) > 0) 
                   {
                     // find a state in marked_btm_states with s->coconstln_cnt->cnt == 0
-                    for (auto sit = Bp->marked_btm_states->begin(); sit != Bp->marked_btm_states->end(); ++sit) 
+                    for (auto sit = Bp->marked_btm_states.begin(); sit != Bp->marked_btm_states.end(); ++sit) 
                     {
                       state_T* s = *sit;
                       
@@ -1592,7 +1561,7 @@ class bisim_partitioner_gw
           {
             block_T* Bp = *bit;
 
-            //mCRL2log(log::verbose) << "splitting block " << Bp->id << " with size " << Bp->btm_states->size() + Bp->non_btm_states->size() + Bp->marked_btm_states->size() + Bp->marked_non_btm_states->size() << "\n";
+            //mCRL2log(log::verbose) << "splitting block " << Bp->id << " with size " << Bp->btm_states.size() + Bp->non_btm_states.size() + Bp->marked_btm_states.size() + Bp->marked_non_btm_states.size() << "\n";
             //mCRL2log(log::verbose) << Bp->id << ": \n";
             //for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) {
             //  to_constlns_element_T* l = *it;
@@ -1616,7 +1585,7 @@ class bisim_partitioner_gw
             // check if we can jump to step 5.3.3
             //check_consistency_trans_lists(B, setB);
             //check_consistency_blocks();
-            if (Bp->btm_states->size() > 0) 
+            if (Bp->btm_states.size() > 0) 
             {
               nr_of_splits++;
               // 5.3.1. Perform detect1 and detect2 in lockstep
@@ -1625,31 +1594,31 @@ class bisim_partitioner_gw
               //P = new std::priority_queue < state_T*, std::vector< state_T* >, LessThanByInert>;
               assert(P.empty());
               Lp.clear();
-              maxsize_detect = (Bp->btm_states->size() + Bp->non_btm_states->size() + Bp->marked_btm_states->size() + Bp->marked_non_btm_states->size()) / 2;
+              maxsize_detect = (Bp->btm_states.size() + Bp->non_btm_states.size() + Bp->marked_btm_states.size() + Bp->marked_non_btm_states.size()) / 2;
               block_detect = Bp;
               current_state_detect1 = NULL;
               current_state_detect2 = NULL;
               in_forward_check_detect2 = false;
-              //for (auto sit = Bp->marked_btm_states->begin(); sit != Bp->marked_btm_states->end(); ++sit) {
+              //for (auto sit = Bp->marked_btm_states.begin(); sit != Bp->marked_btm_states.end(); ++sit) {
               //  state_T* s = *sit;
               //  mCRL2log(log::verbose) << "marked bottom state " << s->id << "\n";
               //}
-              if (Bp->marked_btm_states->size() > 0) 
+              if (Bp->marked_btm_states.size() > 0) 
               {
-                iter_state_added_detect1 = Bp->marked_btm_states->before_begin();
+                iter_state_added_detect1 = Bp->marked_btm_states.before_begin();
                 iterating_non_bottom = false;
               }
               else 
               {
-                iter_state_added_detect1 = Bp->marked_non_btm_states->before_begin();
+                iter_state_added_detect1 = Bp->marked_non_btm_states.before_begin();
                 iterating_non_bottom = true;
               }
-              iter_state_added_detect2 = Bp->btm_states->before_begin();
-              //mCRL2log(log::verbose) << "states in " << Bp->id << ": " << Bp->btm_states->size() << " " << Bp->non_btm_states->size() << " " << Bp->marked_btm_states->size() << " " << Bp->marked_non_btm_states->size() << "\n";
-              //mCRL2log(log::verbose) << Bp->marked_non_btm_states->size() << "\n";
+              iter_state_added_detect2 = Bp->btm_states.before_begin();
+              //mCRL2log(log::verbose) << "states in " << Bp->id << ": " << Bp->btm_states.size() << " " << Bp->non_btm_states.size() << " " << Bp->marked_btm_states.size() << " " << Bp->marked_non_btm_states.size() << "\n";
+              //mCRL2log(log::verbose) << Bp->marked_non_btm_states.size() << "\n";
               //print_partition();
               //mCRL2log(log::verbose) << "Launching lockstep search 1\n";
-              //for (auto sit = Bp->marked_non_btm_states->begin(); sit != Bp->marked_non_btm_states->end(); ++sit) {
+              //for (auto sit = Bp->marked_non_btm_states.begin(); sit != Bp->marked_non_btm_states.end(); ++sit) {
               //  state_T* s = *sit;
               //  mCRL2log(log::verbose) << s->id << "\n";
               //}
@@ -1754,8 +1723,7 @@ class bisim_partitioner_gw
                       //mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
                     }
                     //mCRL2log(log::verbose) << "removing transition\n";
-                    l->trans_list.remove_linked(t);
-                    lp->trans_list.insert_linked(t);
+                    l->trans_list.move_linked(t, lp->trans_list);
                     t->to_constln_ref = lp;
                     //mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
                   }
@@ -1773,13 +1741,11 @@ class bisim_partitioner_gw
                         XBpp.insert(s);
                         if (s->type == NON_BTM_STATE) 
                         {
-                          Bpp->non_btm_states->remove_linked(s);
-                          Bpp->btm_states->insert_state_linked(s, BTM_STATE);
+                          Bpp->non_btm_states.move_state_linked(s, Bpp->btm_states, BTM_STATE);
                         }
                         else if (s->type == MARKED_NON_BTM_STATE) 
                         {
-                          Bpp->marked_non_btm_states->remove_linked(s);
-                          Bpp->marked_btm_states->insert_state_linked(s, MARKED_BTM_STATE);
+                          Bpp->marked_non_btm_states.move_state_linked(s, Bpp->marked_btm_states, MARKED_BTM_STATE);
                         }
                       }
                       // Different from pseudo-code: add the transition to the corresponding trans_list
@@ -1815,13 +1781,11 @@ class bisim_partitioner_gw
                       XBp.insert(sp);
                       if (sp->type == NON_BTM_STATE) 
                       {
-                        Bp->non_btm_states->remove_linked(sp);
-                        Bp->btm_states->insert_state_linked(sp, BTM_STATE);
+                        Bp->non_btm_states.move_state_linked(sp, Bp->btm_states, BTM_STATE);
                       }
                       else if (sp->type == MARKED_NON_BTM_STATE) 
                       {
-                        Bp->marked_non_btm_states->remove_linked(sp);
-                        Bp->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
+                        Bp->marked_non_btm_states.move_state_linked(sp, Bp->marked_btm_states, MARKED_BTM_STATE);
                       }
                     }
                     // Different from pseudo-code: add the transition to the corresponding trans_list
@@ -1951,7 +1915,7 @@ class bisim_partitioner_gw
             if (!is_stable) 
             {
               is_stable = true;
-              for (auto sit = splitBpB->marked_btm_states->begin(); sit != splitBpB->marked_btm_states->end(); ++sit) 
+              for (auto sit = splitBpB->marked_btm_states.begin(); sit != splitBpB->marked_btm_states.end(); ++sit) 
               {
                 state_T* s = *sit;
                 if (s->coconstln_cnt == NULL) 
@@ -1978,8 +1942,8 @@ class bisim_partitioner_gw
               XBp3.clear();
               XBp4.clear();
               // prepare for lockstep search
-              maxsize_detect = (splitBpB->btm_states->size() + splitBpB->non_btm_states->size() + splitBpB->marked_btm_states->size() + splitBpB->marked_non_btm_states->size()) / 2;
-              //mCRL2log(log::verbose) << "sizes: " << (splitBpB->btm_states->size() + splitBpB->non_btm_states->size() + splitBpB->marked_btm_states->size() + splitBpB->marked_non_btm_states->size()) << " " << maxsize_detect << "\n";
+              maxsize_detect = (splitBpB->btm_states.size() + splitBpB->non_btm_states.size() + splitBpB->marked_btm_states.size() + splitBpB->marked_non_btm_states.size()) / 2;
+              //mCRL2log(log::verbose) << "sizes: " << (splitBpB->btm_states.size() + splitBpB->non_btm_states.size() + splitBpB->marked_btm_states.size() + splitBpB->marked_non_btm_states.size()) << " " << maxsize_detect << "\n";
               block_detect = splitBpB;
               constellation_splitter_detect = setB;
               detect1_finished = CONTINUE;
@@ -1992,7 +1956,7 @@ class bisim_partitioner_gw
               current_state_detect2 = NULL;
               in_forward_check_detect2 = false;
               iter_trans_state_added_detect1 = splitBpB->coconstln_ref->trans_list.before_begin();
-              iter_state_added_detect2 = splitBpB->marked_btm_states->before_begin();
+              iter_state_added_detect2 = splitBpB->marked_btm_states.before_begin();
               //check_consistency_trans_lists(B, setB);
               //mCRL2log(log::verbose) << "Launching lockstep search 2\n";
               //mCRL2log(log::verbose) << "block: " << Bp << " splitting const: " << setB << "\n";
@@ -2077,8 +2041,7 @@ class bisim_partitioner_gw
                       // point lp to l, to be able to efficiently reset new_element pointers later on
                       lp->new_element = l;
                     }
-                    l->trans_list.remove_linked(t);
-                    lp->trans_list.insert_linked(t);
+                    l->trans_list.move_linked(t, lp->trans_list);
                     t->to_constln_ref = lp;
                     // postpone deleting element l until cleaning up new_element pointers
                   }
@@ -2096,13 +2059,11 @@ class bisim_partitioner_gw
                         XBp3.insert(s);
                         if (s->type == NON_BTM_STATE) 
                         {
-                          Bp3->non_btm_states->remove_linked(s);
-                          Bp3->btm_states->insert_state_linked(s, BTM_STATE);
+                          Bp3->non_btm_states.move_state_linked(s, Bp3->btm_states, BTM_STATE);
                         }
                         else if (s->type == MARKED_NON_BTM_STATE) 
                         {
-                          Bp3->marked_non_btm_states->remove_linked(s);
-                          Bp3->marked_btm_states->insert_state_linked(s, MARKED_BTM_STATE);
+                          Bp3->marked_non_btm_states.move_state_linked(s, Bp3->marked_btm_states, MARKED_BTM_STATE);
                         }
                       }
                       // Different from pseudo-code: add the transition to the corresponding trans_list
@@ -2136,13 +2097,11 @@ class bisim_partitioner_gw
                       XBp4.insert(sp);
                       if (sp->type == NON_BTM_STATE) 
                       {
-                        splitBpB->non_btm_states->remove_linked(sp);
-                        splitBpB->btm_states->insert_state_linked(sp, BTM_STATE);
+                        splitBpB->non_btm_states.move_state_linked(sp, splitBpB->btm_states, BTM_STATE);
                       }
                       else if (sp->type == MARKED_NON_BTM_STATE) 
                       {
-                        splitBpB->marked_non_btm_states->remove_linked(sp);
-                        splitBpB->marked_btm_states->insert_state_linked(sp, MARKED_BTM_STATE);
+                        splitBpB->marked_non_btm_states.move_state_linked(sp, splitBpB->marked_btm_states, MARKED_BTM_STATE);
                       }
                     }
                     // Different from pseudo-code: add the transition to the corresponding trans_list
@@ -2276,8 +2235,7 @@ class bisim_partitioner_gw
                   {
                     setBp_entry->SClist = new sized_forward_list < state_T >;
                     // move the to_constln entry to the front of the list
-                    Bhat->to_constlns.remove_linked(setBp_entry);
-                    Bhat->to_constlns.insert_linked(setBp_entry);
+                    Bhat->to_constlns.move_to_front_linked(setBp_entry);
                   }
                   // 5.3.6.a.ii
                   if (setBp_entry->SClist->size() == 0) 
@@ -2292,7 +2250,7 @@ class bisim_partitioner_gw
                   }
                 }
                 // 5.3.6.b
-                Bhat->new_btm_states->insert(s);
+                Bhat->new_btm_states.insert(s);
               }
             
               // consider next block
@@ -2325,7 +2283,7 @@ class bisim_partitioner_gw
             // push blocks on the stack if they have new bottom states
             if (splitBpB != NULL) 
             {
-              if (splitBpB->new_btm_states->size() > 0) 
+              if (splitBpB->new_btm_states.size() > 0) 
               {
                 //mCRL2log(log::verbose) << "add split\n";
                 blocks_to_process.push(splitBpB);
@@ -2333,7 +2291,7 @@ class bisim_partitioner_gw
             }
             if (cosplitBpB != NULL) 
             {
-              if (cosplitBpB->new_btm_states->size() > 0) 
+              if (cosplitBpB->new_btm_states.size() > 0) 
               {
                 //mCRL2log(log::verbose) << "add cosplit\n";
                 blocks_to_process.push(cosplitBpB);
@@ -2341,9 +2299,9 @@ class bisim_partitioner_gw
             }
             if (splitsplitBpB != NULL) 
             {
-              if (splitsplitBpB->new_btm_states->size() > 0) 
+              if (splitsplitBpB->new_btm_states.size() > 0) 
               {
-                //mCRL2log(log::verbose) << "add splitsplit with # new btm states = " << splitsplitBpB->new_btm_states->size() << "\n";
+                //mCRL2log(log::verbose) << "add splitsplit with # new btm states = " << splitsplitBpB->new_btm_states.size() << "\n";
                 blocks_to_process.push(splitsplitBpB);
               }
             }
@@ -2364,7 +2322,7 @@ class bisim_partitioner_gw
                   splitcrit_met = true;
                   split = true;
                 }
-                else if (e->SClist->size() < Bhat->new_btm_states->size()) 
+                else if (e->SClist->size() < Bhat->new_btm_states.size()) 
                 {
                   //mCRL2log(log::verbose) << "size: " << e->SClist->size() << "\n";
                   splitcrit_met = true;
@@ -2385,7 +2343,7 @@ class bisim_partitioner_gw
                   // !!! Different from the pseudo-code, we prepare detect1 by walking over the transitions from Bhat to constellation pointed
                   // to by *cit. To optimise this, we should probably maintain a list of states that have a direct transition from Bhat to constellation
                   // of *cit, and instead walk over that list
-                  maxsize_detect = (Bhat->btm_states->size() + Bhat->non_btm_states->size()) / 2;
+                  maxsize_detect = (Bhat->btm_states.size() + Bhat->non_btm_states.size()) / 2;
                   block_detect = Bhat;
                   e_detect = e;
                   constellation_splitter_detect = e->C;
@@ -2395,7 +2353,7 @@ class bisim_partitioner_gw
                   current_state_detect2 = NULL;
                   in_forward_check_detect2 = false;
                   iter_trans_state_added_detect1 = e->trans_list.before_begin();
-                  iter_state_added_detect2 = Bhat->new_btm_states->before_begin();
+                  iter_state_added_detect2 = Bhat->new_btm_states.before_begin();
                   if (e->SClist == NULL) 
                   {
                     sclist_is_empty_detect2 = true;
@@ -2472,8 +2430,7 @@ class bisim_partitioner_gw
                             Bhatp->inconstln_ref = lp;
                           }
                         }
-                        l->trans_list.remove_linked(t);
-                        lp->trans_list.insert_linked(t);
+                        l->trans_list.move_linked(t, lp->trans_list);
                         t->to_constln_ref = lp;
                         // postpone deleting element l until cleaning up new_element pointers
                       }
@@ -2488,8 +2445,7 @@ class bisim_partitioner_gw
                           if (s->inert_cnt == 0) 
                           {
                             XBpp.insert(s);
-                            Bhatp->non_btm_states->remove_linked(s);
-                            Bhatp->btm_states->insert_state_linked(s, BTM_STATE);
+                            Bhatp->non_btm_states.move_state_linked(s, Bhatp->btm_states, BTM_STATE);
                           }
                           // Different from pseudo-code: add the transition to the corresponding trans_list
                           if (Bhatp->inconstln_ref == NULL) 
@@ -2519,8 +2475,7 @@ class bisim_partitioner_gw
                         if (sp->inert_cnt == 0) 
                         {
                           XBp.insert(sp);
-                          Bhat->non_btm_states->remove_linked(sp);
-                          Bhat->btm_states->insert_state_linked(sp, BTM_STATE);
+                          Bhat->non_btm_states.move_state_linked(sp, Bhat->btm_states, BTM_STATE);
                         }
                         // Different from pseudo-code: add the transition to the corresponding trans_list
                         if (Bhat->inconstln_ref == NULL) 
@@ -2542,17 +2497,14 @@ class bisim_partitioner_gw
                   sized_forward_list < state_T >* SnotinSC;
                   if (detect1_finished == TERMINATED) 
                   {
-                    // keep temp value in SinSC for swapping
-                    SinSC = Bhatp->new_btm_states;
-                    Bhatp->new_btm_states = Bhat->new_btm_states;
-                    Bhat->new_btm_states = SinSC;
-                    SinSC = Bhatp->new_btm_states;
-                    SnotinSC = Bhat->new_btm_states;
+										Bhatp->new_btm_states.swap(Bhat->new_btm_states);
+                    SinSC = &(Bhatp->new_btm_states);
+                    SnotinSC = &(Bhat->new_btm_states);
                   }
                   else 
                   {
-                    SinSC = Bhat->new_btm_states;
-                    SnotinSC = Bhatp->new_btm_states;
+                    SinSC = &(Bhat->new_btm_states);
+                    SnotinSC = &(Bhatp->new_btm_states);
                   }
                   // Walk through new states and add them to SnotinSC if they are not in SClist
                   auto prev_sit = SinSC->before_begin();
@@ -2566,18 +2518,15 @@ class bisim_partitioner_gw
                     state_T* s = *sit;
                     if (sclist_is_empty_detect2) 
                     {
-                      SinSC->remove_after(prev_sit, sit);
-                      SnotinSC->insert_back(s);
+                      SinSC->move_from_after_to_back(prev_sit, *SnotinSC, sit);
                     }
                     else if (it_SClist == e->SClist->end()) 
                     {
-                      SinSC->remove_after(prev_sit, sit);
-                      SnotinSC->insert_back(s);
+                      SinSC->move_from_after_to_back(prev_sit, *SnotinSC, sit);
                     }
                     else if (s != *it_SClist) 
                     {
-                      SinSC->remove_after(prev_sit, sit);
-                      SnotinSC->insert_back(s);
+                      SinSC->move_from_after_to_back(prev_sit, *SinSC, sit);
                     }
                     else 
                     {
@@ -2606,8 +2555,7 @@ class bisim_partitioner_gw
                         {
                           l->new_element->SClist = new sized_forward_list < state_T >;
                           // move to front in list
-                          Bhatp->to_constlns.remove_linked(l->new_element);
-                          Bhatp->to_constlns.insert_linked(l->new_element);
+                          Bhatp->to_constlns.move_to_front_linked(l->new_element);
                         }
                         l->new_element->SClist->insert_back(s);
                         l->SClist->remove_after(prev_sit, sit);
@@ -2620,8 +2568,7 @@ class bisim_partitioner_gw
                       deleteobject(l->SClist);
                       //mCRL2log(log::verbose) << "SC: " << l->SClist << "\n";
                       // move the l entry to the back of the list. We do not need to worry about keeping iterator e valid (in while loop), since we will not use it on the current list anymore.
-                      Bhat->to_constlns.remove_linked(l, bit);
-                      Bhat->to_constlns.insert_linked_back(l);
+                      Bhat->to_constlns.move_to_back_linked(l, bit);
                     }
                   }
                   // reset temporary pointers of states
@@ -2689,8 +2636,7 @@ class bisim_partitioner_gw
                         {
                           setBp_entry->SClist = new sized_forward_list < state_T >;
                           // move the to_constln entry to the front of the list
-                          Btmp->to_constlns.remove_linked(setBp_entry);
-                          Btmp->to_constlns.insert_linked(setBp_entry);
+                          Btmp->to_constlns.move_to_front_linked(setBp_entry);
                         }
                         // 5.3.4.a.ii
                         if (setBp_entry->SClist->size() == 0) 
@@ -2705,7 +2651,7 @@ class bisim_partitioner_gw
                         }
                       }
                       // 5.3.4.a.iii
-                      Btmp->new_btm_states->insert(s);
+                      Btmp->new_btm_states.insert(s);
                     }
               
                     // consider next block
@@ -2721,11 +2667,11 @@ class bisim_partitioner_gw
                   }
                   // push resulting blocks on the work stack if they have new states
                   // 5.3.7.b.iv
-                  if (Bhatp->new_btm_states->size() > 0) 
+                  if (Bhatp->new_btm_states.size() > 0) 
                   {
                     blocks_to_process.push(Bhatp);
                   }
-                  if (Bhat->new_btm_states->size() > 0) 
+                  if (Bhat->new_btm_states.size() > 0) 
                   {
                     blocks_to_process.push(Bhat);
                   }
@@ -2745,7 +2691,7 @@ class bisim_partitioner_gw
               // 5.3.7.c
               if (!split) 
               {
-                Bhat->new_btm_states->clear();
+                Bhat->new_btm_states.clear();
                 for (auto it = Bhat->to_constlns.begin(); it != Bhat->to_constlns.end(); ++it) 
                 {
                   to_constlns_element_T* l = *it;
@@ -2764,8 +2710,7 @@ class bisim_partitioner_gw
             if (Bp->constellation->type == TRIVIAL) 
             {
               Bp->constellation->type = NONTRIVIAL;
-              trivial_constlns.remove_linked(Bp->constellation);
-              non_trivial_constlns.insert_linked(Bp->constellation);
+              trivial_constlns.move_linked(Bp->constellation, non_trivial_constlns);
             }
           } // end walking over splittable blocks
         } // end walk over non-trivial constellations
@@ -2793,7 +2738,7 @@ class bisim_partitioner_gw
           for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) 
           {
             block_T* B = *bit;
-            assert(B->btm_states->size() + B->non_btm_states->size() + B->marked_btm_states->size() + B->marked_non_btm_states->size() > 0);
+            assert(B->btm_states.size() + B->non_btm_states.size() + B->marked_btm_states.size() + B->marked_non_btm_states.size() > 0);
           }
         }
       
@@ -2903,16 +2848,16 @@ class bisim_partitioner_gw
       switch (t) 
       {
         case BTM_STATE:
-          list = B->btm_states;
+          list = &(B->btm_states);
           break;
         case NON_BTM_STATE:
-          list = B->non_btm_states;
+          list = &(B->non_btm_states);
           break;
         case MARKED_BTM_STATE:
-          list = B->marked_btm_states;
+          list = &(B->marked_btm_states);
           break;
         case MARKED_NON_BTM_STATE:
-          list = B->marked_non_btm_states;
+          list = &(B->marked_non_btm_states);
           break;
       }
       sized_forward_list < state_T >::iterator prev_sit = list->before_begin();
@@ -2981,16 +2926,16 @@ class bisim_partitioner_gw
         for (auto bit = C->blocks.begin(); bit != C->blocks.end(); ++bit) 
         {
           block_T* B = *bit;
-          const_size += B->btm_states->size() + B->non_btm_states->size() + B-> marked_btm_states->size() + B->marked_non_btm_states->size();
+          const_size += B->btm_states.size() + B->non_btm_states.size() + B-> marked_btm_states.size() + B->marked_non_btm_states.size();
           assert(B->type == STD_BLOCK || B->type == EXTRA_KRIPKE_BLOCK);
           assert(B->constellation == C);
           assert(B->constellation->type == consttype);
           // check consistency of ptr_in_list
           assert(prev_bit == B->ptr_in_list);
           // empty state lists
-          assert(B->marked_btm_states->size() == 0);
-          assert(B->marked_non_btm_states->size() == 0);
-          assert(B->new_btm_states->size() == 0);
+          assert(B->marked_btm_states.size() == 0);
+          assert(B->marked_non_btm_states.size() == 0);
+          assert(B->new_btm_states.size() == 0);
           assert(B->constln_ref == NULL);
           assert(B->coconstln_ref == NULL);
           // check states
