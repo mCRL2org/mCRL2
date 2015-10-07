@@ -131,6 +131,14 @@ class state_T
        is_in_P_detect2(false), 
        is_in_Lp_detect2(false) 
     {}
+	
+		// destructor
+		~state_T()
+		{
+			deleteobject (Ttgt);
+			deleteobject (Tsrc);
+			deleteobject (pos_in_P_detect2);
+		}
 };
 
 class transition_T
@@ -180,6 +188,12 @@ class constellation_T
        size(0), 
        type(TRIVIAL) 
     {}
+	
+		// destructor
+		~constellation_T()
+		{
+		  deleteobject (blocks);
+		}
 };
 
 class to_constlns_element_T
@@ -207,6 +221,12 @@ class to_constlns_element_T
         new_element(NULL), 
         SClist(NULL) 
     {}
+	
+		// destructor
+		~to_constlns_element_T()
+		{
+		  deleteobject (trans_list);
+		}
 };
 
 class block_T
@@ -2752,6 +2772,8 @@ class bisim_partitioner_gw
       } // end while there are non-trivial constellations
 
       mCRL2log(log::verbose) << "number of splits performed: " << nr_of_splits << "\n";
+
+			// destruct the data
     }
 
 #ifndef NDEBUG

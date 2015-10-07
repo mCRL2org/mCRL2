@@ -295,7 +295,7 @@ class sized_forward_list
     // insert element at the back of the list
     void insert_linked_back(T* obj) 
     {
-      assert(check_integrity_of_sized_forward_list("LINKDED BACK1"));
+      assert(check_integrity_of_sized_forward_list("LINKED BACK1"));
       obj->ptr_in_list = last();
       insert_back(obj);
       assert(check_integrity_of_sized_forward_list("LINKED BACK2"));
