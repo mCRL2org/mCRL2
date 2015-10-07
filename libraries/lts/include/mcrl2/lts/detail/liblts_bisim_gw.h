@@ -23,6 +23,7 @@
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/sized_forward_list_gw.h"
+#include "mcrl2/lts/detail/repository_gw.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
@@ -60,7 +61,6 @@ class transition_T;
 class constellation_T;
 // to constellation counter (unique for a (state, constellation) combination)
 class to_constlns_element_T;
-class counter_T;
 
 // delete object and set pointer to NULL
 template<typename T>
@@ -73,16 +73,34 @@ void deleteobject(T*& obj)
   }
 }
 
-class counter_T
+typedef struct counter_T
 {
+  protected:
+	  // needed in repository
+		counter_T* r_next;
   public:
     // the counter
     size_t cnt;
+	
+		void set_rep_next(counter_T* e)
+		{
+			r_next = e;
+		}
+		counter_T* rep_next()
+		{
+		  return r_next;
+		}
+		void rep_init()
+		{
+		  r_next = NULL;
+			cnt = 0;
+		}
 
     counter_T()
-     : cnt(0) 
+     : r_next(NULL),
+		   cnt(0)
     {}
-};
+} counter_T;
 
 class state_T
 {
@@ -200,13 +218,59 @@ class to_constlns_element_T
     // to_constlns list
     // typename
     sized_forward_list<to_constlns_element_T>::iterator ptr_in_list;
-    
+	
+	  // pointer to next element in repository
+		to_constlns_element_T* r_next;
+	
     // constructor
+    to_constlns_element_T()
+      : C(NULL),
+        new_element(NULL), 
+        SClist(NULL),
+				r_next(NULL)
+    {}
+
     to_constlns_element_T(constellation_T *CC)
       : C(CC), 
         new_element(NULL), 
-        SClist(NULL) 
+        SClist(NULL),
+				r_next(NULL)
     {}
+	
+		// Copy constructor
+    to_constlns_element_T(const to_constlns_element_T& c)
+	    : C(c.C),
+			  new_element(c.new_element),
+				SClist(c.SClist),
+				r_next(c.r_next)
+		{
+    }
+	
+		// Assignment
+		to_constlns_element_T operator=(const to_constlns_element_T& c)
+    {
+      C = c.C;
+			new_element = c.new_element;
+			SClist = c.SClist;
+			r_next = c.r_next;
+			return *this;
+    }
+	
+		// additional methods to keep to_constlns_element_T objects in a repository
+		void set_rep_next(to_constlns_element_T* e)
+		{
+			r_next = e;
+		}
+		to_constlns_element_T* rep_next()
+		{
+		  return r_next;
+		}
+		void rep_init()
+		{
+      new_element = NULL;
+			SClist = NULL;
+		  r_next = NULL;
+		}
 };
 
 class block_T
@@ -294,7 +358,11 @@ class bisim_partitioner_gw
     size_t nr_of_states;
     // the list of states
     std::vector < state_T > states;
-     
+		// the repository of counters
+		repository < counter_T > counters;
+	  // the repository of to_constlns_element_T objects
+		repository < to_constlns_element_T > to_constlns_elements;
+	
     const label_type tau_label;
 
 
@@ -360,7 +428,7 @@ class bisim_partitioner_gw
       s->block = B;
     }
     
-    // function to check the size of a to_constln_element_T object. This size is determined by the size of the
+    // function to check the size of a to_constlns_element_T object. This size is determined by the size of the
     // associated trans_list. The function can handle NULL pointers.
     size_t size(to_constlns_element_T* l)
     {
@@ -459,7 +527,7 @@ class bisim_partitioner_gw
                    s->constln_cnt = NULL;
                    if (s->coconstln_cnt != NULL) {
                         if (s->coconstln_cnt->cnt == 0) {
-                             deleteobject (s->coconstln_cnt);
+                             counters.remove_element(s->coconstln_cnt);
                         }
                    }
                    s->coconstln_cnt = NULL;
@@ -473,7 +541,8 @@ class bisim_partitioner_gw
                           B->inconstln_ref = NULL;
                         }
                         B->to_constlns.remove_linked(B->constln_ref);
-                        deleteobject (B->constln_ref);
+										    to_constlns_elements.remove_element(B->constln_ref);
+												B->constln_ref = NULL;
                    }
                    B->constln_ref = NULL;
               }
@@ -483,7 +552,8 @@ class bisim_partitioner_gw
                              B->inconstln_ref = NULL;
                         }
                         B->to_constlns.remove_linked(B->coconstln_ref);
-                        deleteobject (B->coconstln_ref);
+												to_constlns_elements.remove_element(B->coconstln_ref);
+										    B->coconstln_ref = NULL;
                    }
                    B->coconstln_ref = NULL;
               }
@@ -1110,7 +1180,8 @@ class bisim_partitioner_gw
       // create first block in C
       block_T* B1 = new block_T(STD_BLOCK, max_block_index);
       // create associated list of transitions from block to constellation C
-      to_constlns_element_T* e = new to_constlns_element_T(C);
+      to_constlns_element_T* e = to_constlns_elements.get_element();
+			e->C = C;
       B1->to_constlns.insert_linked(e);
       B1->inconstln_ref = e;
       B1->constellation = C;
@@ -1146,10 +1217,14 @@ class bisim_partitioner_gw
       // create blocks, and add one entry in their to_constlns list for the single constellation C
       // each of these new blocks will contain extra Kripke states, therefore we increment nr_of_extra_kripke_blocks
       // each time we create a block
+			to_constlns_elements.add_elements(nr_of_blocks-1);
+			auto toc_it = to_constlns_elements.begin();
       for (size_t i = 0; i < nr_of_blocks-1; i++) 
       {
         block_T* B = new block_T(EXTRA_KRIPKE_BLOCK, max_block_index);
-        to_constlns_element_T* e = new to_constlns_element_T(C);
+        to_constlns_element_T* e = &(*toc_it);
+				e->C = C;
+				toc_it++;
         B->to_constlns.insert_linked(e);
         B->inconstln_ref = e;
         // add block to constellation
@@ -1177,8 +1252,10 @@ class bisim_partitioner_gw
         (states[it->second]).block = blocks[(action_block_map.find((it->first).first))->second];
       }
       // add transitions
-      state_type current_src_state = -1;
-      counter_T* counter;
+      state_type current_src_state = 0;
+      // create n counters
+			counters.add_elements(nr_of_states);
+			auto counter_it = counters.begin();
       for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
@@ -1187,7 +1264,7 @@ class bisim_partitioner_gw
         if (t.from() != current_src_state) 
         {
           current_src_state = t.from();
-          counter = new counter_T;
+          counter_it++;
         }
         // create transition entry
         transition_T* t_entry = new transition_T;
@@ -1210,7 +1287,7 @@ class bisim_partitioner_gw
         t_entry->target->Tsrc.push_back(t_entry);
         t_entry->source->Ttgt.push_back(t_entry);
         // add pointer to counter
-        t_entry->to_constln_cnt = counter;
+        t_entry->to_constln_cnt = &(*counter_it);
         // increment the counter
         t_entry->to_constln_cnt->cnt++;
         // Different from pseudo-code: ONLY if transition is non-inert
@@ -1239,7 +1316,8 @@ class bisim_partitioner_gw
         t_entry2->target->Tsrc.push_back(t_entry2);
         t_entry2->source->Ttgt.push_back(t_entry2);
         // add pointer to counter object of source state
-        t_entry2->to_constln_cnt = new counter_T;
+				counter_it++;
+        t_entry2->to_constln_cnt = &(*counter_it);
         // increment the counter
         t_entry2->to_constln_cnt->cnt++;
         // set pointer to C entry in to_constlns list of B. Increment the associated counter
@@ -1377,7 +1455,8 @@ class bisim_partitioner_gw
                       // 5.2.2.a.ii
                       //mCRL2log(log::verbose) << "ref: " << t->to_constln_ref << "\n";
                       Bp->coconstln_ref = t->to_constln_ref;
-                      Bp->constln_ref = new to_constlns_element_T(setC);
+                      Bp->constln_ref = to_constlns_elements.get_element();
+											Bp->constln_ref->C = setC;
                       Bp->to_constlns.insert_linked(Bp->constln_ref);
                     }
                     // 5.2.2.b
@@ -1385,7 +1464,7 @@ class bisim_partitioner_gw
                     // the pointers to counters of the individual transitions
                     if (sp->coconstln_cnt == NULL) 
                     {
-                      sp->constln_cnt = new counter_T;
+                      sp->constln_cnt = counters.get_element();
                       sp->coconstln_cnt = t->to_constln_cnt;
                     }
                     // 5.2.2.c
@@ -1450,14 +1529,15 @@ class bisim_partitioner_gw
                     if (setBp == setB && B->constln_ref == NULL) 
                     {
                       B->coconstln_ref = t->to_constln_ref;
-                      B->constln_ref = new to_constlns_element_T(setC);
+                      B->constln_ref = to_constlns_elements.get_element();
+											B->constln_ref->C = setC;
                       B->to_constlns.insert_linked(B->constln_ref);
                       B->inconstln_ref = B->constln_ref;
                     }
                     // 5.2.3.b
                     if (s->coconstln_cnt == NULL) 
                     {
-                      s->constln_cnt = new counter_T;
+                      s->constln_cnt = counters.get_element();
                       s->coconstln_cnt = t->to_constln_cnt;
                     }
                     // 5.2.3.c
@@ -1674,7 +1754,8 @@ class bisim_partitioner_gw
                     }
                     else 
                     {
-                      lp = new to_constlns_element_T(l->C);
+                      lp = to_constlns_elements.get_element();
+											lp->C = l->C;
                       l->new_element = lp;
                       //mCRL2log(log::verbose) << "create new element " << l->new_element << " " << l->new_element->C->id << "\n";
                       // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
@@ -1729,7 +1810,8 @@ class bisim_partitioner_gw
                       // Different from pseudo-code: add the transition to the corresponding trans_list
                       if (Bpp->inconstln_ref == NULL) 
                       {
-                        Bpp->inconstln_ref = new to_constlns_element_T(Bpp->constellation);
+                        Bpp->inconstln_ref = to_constlns_elements.get_element();
+												Bpp->inconstln_ref->C = Bpp->constellation;
                         Bpp->to_constlns.insert_linked(Bpp->inconstln_ref);
                         if (Bp->inconstln_ref != NULL) 
                         {
@@ -1769,7 +1851,8 @@ class bisim_partitioner_gw
                     // Different from pseudo-code: add the transition to the corresponding trans_list
                     if (Bp->inconstln_ref == NULL) 
                     {
-                      Bp->inconstln_ref = new to_constlns_element_T(Bp->constellation);
+                      Bp->inconstln_ref = to_constlns_elements.get_element();
+											Bp->inconstln_ref->C = Bp->constellation;
                       Bp->to_constlns.insert_linked(Bp->inconstln_ref);
                       if (Bpp->inconstln_ref != NULL) 
                       {
@@ -1836,7 +1919,8 @@ class bisim_partitioner_gw
                       Bp->inconstln_ref = NULL;
                     }
                     Bp->to_constlns.remove_linked(l->new_element);
-                    deleteobject (l->new_element);
+										to_constlns_elements.remove_element(l->new_element);
+										l->new_element = NULL;
                   }
                   else 
                   {
@@ -1999,7 +2083,8 @@ class bisim_partitioner_gw
                     else 
                     {
                       //assert(Bp3->inconstln_ref == NULL || l->C != Bp3->constellation);
-                      lp = new to_constlns_element_T(l->C);
+                      lp = to_constlns_elements.get_element();
+											lp->C = l->C;
                       l->new_element = lp;
                       // add lp to Bp3.to_constlns (IMPLIED IN PSEUDO-CODE)
                       Bp3->to_constlns.insert_linked(lp);
@@ -2047,7 +2132,8 @@ class bisim_partitioner_gw
                       // Different from pseudo-code: add the transition to the corresponding trans_list
                       if (Bp3->inconstln_ref == NULL) 
                       {
-                        Bp3->inconstln_ref = new to_constlns_element_T(Bp3->constellation);
+                        Bp3->inconstln_ref = to_constlns_elements.get_element();
+												Bp3->inconstln_ref->C = Bp3->constellation;
                         Bp3->to_constlns.insert_linked(Bp3->inconstln_ref);
                         if (splitBpB->inconstln_ref != NULL) 
                         {
@@ -2085,7 +2171,8 @@ class bisim_partitioner_gw
                     // Different from pseudo-code: add the transition to the corresponding trans_list
                     if (splitBpB->inconstln_ref == NULL) 
                     {
-                      splitBpB->inconstln_ref = new to_constlns_element_T(splitBpB->constellation);
+                      splitBpB->inconstln_ref = to_constlns_elements.get_element();
+											splitBpB->inconstln_ref->C = splitBpB->constellation;
                       splitBpB->to_constlns.insert_linked(splitBpB->inconstln_ref);
                       if (Bp3->inconstln_ref != NULL) 
                       {
@@ -2131,7 +2218,8 @@ class bisim_partitioner_gw
                       splitBpB->inconstln_ref = NULL;
                     }
                     splitBpB->to_constlns.remove_linked(l->new_element);
-                    deleteobject (l->new_element);
+										to_constlns_elements.remove_element(l->new_element);
+                    l->new_element = NULL;
                   }
                   else 
                   {
@@ -2392,7 +2480,8 @@ class bisim_partitioner_gw
                         {
                           //mCRL2log(log::verbose) << Bhatp->constellation->id << "\n";
                           //assert(Bhatp->inconstln_ref == NULL || l->C != Bhatp->constellation);
-                          lp = new to_constlns_element_T(l->C);
+                          lp = to_constlns_elements.get_element();
+													lp->C = l->C;
                           l->new_element = lp;
                           //mCRL2log(log::verbose) << "create new element " << l->new_element << " " << l->new_element->C->id << "\n";
                           // Different from pseudo-code: point lp->new_element back to l, to efficiently reset
@@ -2428,7 +2517,8 @@ class bisim_partitioner_gw
                           // Different from pseudo-code: add the transition to the corresponding trans_list
                           if (Bhatp->inconstln_ref == NULL) 
                           {
-                            Bhatp->inconstln_ref = new to_constlns_element_T(Bhatp->constellation);
+                            Bhatp->inconstln_ref = to_constlns_elements.get_element();
+														Bhatp->inconstln_ref->C = Bhatp->constellation;
                             Bhatp->to_constlns.insert_linked(Bhatp->inconstln_ref);
                             if (Bhat->inconstln_ref != NULL) 
                             {
@@ -2458,7 +2548,8 @@ class bisim_partitioner_gw
                         // Different from pseudo-code: add the transition to the corresponding trans_list
                         if (Bhat->inconstln_ref == NULL) 
                         {
-                          Bhat->inconstln_ref = new to_constlns_element_T(Bhat->constellation);
+                          Bhat->inconstln_ref = to_constlns_elements.get_element();
+													Bhat->inconstln_ref->C = Bhat->constellation;
                           Bhat->to_constlns.insert_linked(Bhat->inconstln_ref);
                           if (Bhatp->inconstln_ref != NULL) 
                           {
@@ -2582,8 +2673,9 @@ class bisim_partitioner_gw
                         }
                         Bhat->to_constlns.remove_linked(l->new_element);
                         /* deleteobject (l->new_element->trans_list); OEPS THIS SHOULD NOT BE DONE TWICE. IS DONE BY DEFAULT IN DESTRUCTOR */
-                        deleteobject (l->new_element);
-                      }
+											  to_constlns_elements.remove_element(l->new_element);
+												l->new_element = NULL;
+											}
                       else 
                       {
                         l->new_element->new_element = NULL;
