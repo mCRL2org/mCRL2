@@ -364,20 +364,16 @@ class bisim_partitioner_gw
       switch (s->type) 
       {
            case BTM_STATE:
-                s->block->btm_states.remove_linked(s);
-                B->btm_states.insert_linked(s);
+                s->block->btm_states.move_linked(s, B->btm_states);
                 break;
            case NON_BTM_STATE:
-                s->block->non_btm_states.remove_linked(s);
-                B->non_btm_states.insert_linked(s);
+                s->block->non_btm_states.move_linked(s, B->non_btm_states);
                 break;
            case MARKED_BTM_STATE:
-                s->block->marked_btm_states.remove_linked(s);
-                B->marked_btm_states.insert_linked(s);
+                s->block->marked_btm_states.move_linked(s, B->marked_btm_states);
                 break;
            case MARKED_NON_BTM_STATE:
-                s->block->marked_non_btm_states.remove_linked(s);
-                B->marked_non_btm_states.insert_linked(s);
+                s->block->marked_non_btm_states.move_linked(s, B->marked_non_btm_states);
       }
       s->block = B;
     }
@@ -474,7 +470,7 @@ class bisim_partitioner_gw
                    state_T* s = *sit;
                    s->constln_cnt = NULL;
                    s->coconstln_cnt = NULL;
-                   B->marked_btm_states.move_state_linked(s, B->btm_states, BTM_STATE);
+                   B->marked_btm_states.move_state_linked(s, B->btm_states, BTM_STATE, sit);
               }
               for (auto sit = B->marked_non_btm_states.begin(); sit != B->marked_non_btm_states.end(); ++sit) {
                    state_T* s = *sit;
@@ -485,7 +481,7 @@ class bisim_partitioner_gw
                         }
                    }
                    s->coconstln_cnt = NULL;
-                   B->marked_non_btm_states.move_state_linked(s, B->non_btm_states, NON_BTM_STATE);
+                   B->marked_non_btm_states.move_state_linked(s, B->non_btm_states, NON_BTM_STATE, sit);
               }
               if (B->constln_ref != NULL) {
                    if (size(B->constln_ref) == 0) {
@@ -2497,6 +2493,7 @@ class bisim_partitioner_gw
                   sized_forward_list < state_T >* SnotinSC;
                   if (detect1_finished == TERMINATED) 
                   {
+                    // keep temp value in SinSC for swapping
 										Bhatp->new_btm_states.swap(Bhat->new_btm_states);
                     SinSC = &(Bhatp->new_btm_states);
                     SnotinSC = &(Bhat->new_btm_states);
@@ -2507,6 +2504,7 @@ class bisim_partitioner_gw
                     SnotinSC = &(Bhatp->new_btm_states);
                   }
                   // Walk through new states and add them to SnotinSC if they are not in SClist
+									// TODO: change to moving
                   auto prev_sit = SinSC->before_begin();
                   typename sized_forward_list <state_T>::iterator it_SClist;
                   if (!sclist_is_empty_detect2) 
@@ -2526,7 +2524,7 @@ class bisim_partitioner_gw
                     }
                     else if (s != *it_SClist) 
                     {
-                      SinSC->move_from_after_to_back(prev_sit, *SinSC, sit);
+                      SinSC->move_from_after_to_back(prev_sit, *SnotinSC, sit);
                     }
                     else 
                     {
@@ -2557,8 +2555,7 @@ class bisim_partitioner_gw
                           // move to front in list
                           Bhatp->to_constlns.move_to_front_linked(l->new_element);
                         }
-                        l->new_element->SClist->insert_back(s);
-                        l->SClist->remove_after(prev_sit, sit);
+                        l->SClist->move_from_after_to_back(prev_sit, *(l->new_element->SClist), sit);
                       }
                       prev_sit = sit;
                     }
