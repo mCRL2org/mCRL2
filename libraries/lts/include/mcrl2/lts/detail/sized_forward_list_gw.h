@@ -265,9 +265,11 @@ class sized_forward_list
 
 		void insert_node_back(two_pointers* node)
 		{
+      assert(check_integrity_of_sized_forward_list("INSERT_NODE_BACK1",false));
 		  last()->set_next(node);
 			set_last(node);
 			m_list_size++;
+      assert(check_integrity_of_sized_forward_list("INSERT_NODE_BACK2",false));
 		}
 
     iterator insert(T* obj)
@@ -328,7 +330,6 @@ class sized_forward_list
 		two_pointers* detach_node(const iterator position)
 		{
       assert(is_in_sized_forward_list(position));
-      assert(check_integrity_of_sized_forward_list("REMOVE AFTER1",false));
       two_pointers* node=position.m_iter;
       two_pointers* node_to_remove=node->next();
       assert(node_to_remove!=NULL);
@@ -343,6 +344,7 @@ class sized_forward_list
 	
     iterator remove_after(const iterator position)
     {
+      assert(check_integrity_of_sized_forward_list("REMOVE AFTER1",false));
 			two_pointers* node_to_remove = detach_node(position);
 			deallocate_node(node_to_remove);
       assert(check_integrity_of_sized_forward_list("REMOVE AFTER2",false));
@@ -361,7 +363,6 @@ class sized_forward_list
 	
 		void rearrange_element_pointers(T* obj)
 		{
-      assert(check_integrity_of_sized_forward_list("REMOVE LINKED1"));
       assert(is_in_sized_forward_list(obj->ptr_in_list));
       iterator objptrnext = obj->ptr_in_list;
       ++objptrnext;
@@ -376,6 +377,7 @@ class sized_forward_list
 
     void remove_linked(T* obj)
     {
+      assert(check_integrity_of_sized_forward_list("REMOVE LINKED1"));
 			rearrange_element_pointers(obj);
       remove_after(obj->ptr_in_list);
       assert(check_integrity_of_sized_forward_list("REMOVE LINKED2"));
@@ -401,6 +403,7 @@ class sized_forward_list
         current=position;
       }
       two_pointers* node_to_move = detach_node(position);
+			node_to_move->set_next(NULL);
 			other.insert_node_back(node_to_move);
       assert(check_integrity_of_sized_forward_list("MOVE AFTER2_THIS",false));
       assert(other.check_integrity_of_sized_forward_list("MOVE AFTER2_OTHER",false));
@@ -410,8 +413,8 @@ class sized_forward_list
 		// move element from this list to other list
 		iterator move_linked(T* obj, sized_forward_list& other)
 		{
-      assert(check_integrity_of_sized_forward_list("MOVE1_THIS",false));
-      assert(other.check_integrity_of_sized_forward_list("MOVE1_OTHER",false));
+      assert(check_integrity_of_sized_forward_list("MOVE1_THIS"));
+      assert(other.check_integrity_of_sized_forward_list("MOVE1_OTHER"));
       rearrange_element_pointers(obj);
 			two_pointers* node_to_move = detach_node(obj->ptr_in_list);
 			node_to_move->set_next(other.m_node_before_begin->next());
@@ -423,8 +426,8 @@ class sized_forward_list
         itnext++;
         itnext->ptr_in_list = it;
       }
-      assert(check_integrity_of_sized_forward_list("MOVE2_THIS",false));
-      assert(other.check_integrity_of_sized_forward_list("MOVE2_OTHER",false));
+      assert(check_integrity_of_sized_forward_list("MOVE2_THIS"));
+      assert(other.check_integrity_of_sized_forward_list("MOVE2_OTHER"));
 		  return it;
 		}
 	
@@ -446,14 +449,15 @@ class sized_forward_list
 		// move element to back of list
     void move_to_back_linked(T* obj)
 		{
-      assert(check_integrity_of_sized_forward_list("MOVE TO BACK1",false));
+      assert(check_integrity_of_sized_forward_list("MOVE TO BACK1"));
 			rearrange_element_pointers(obj);
 			two_pointers* node_to_move = detach_node(obj->ptr_in_list);
 			node_to_move->set_next(NULL);
+			obj->ptr_in_list = iterator(last());
       last()->set_next(node_to_move);
       set_last(node_to_move);
       m_list_size++;
-      assert(check_integrity_of_sized_forward_list("MOVE TO BACK2",false));
+      assert(check_integrity_of_sized_forward_list("MOVE TO BACK2"));
 		}
 
 		void move_to_back_linked(T* obj, iterator& current)
@@ -468,12 +472,12 @@ class sized_forward_list
     // special method for moving states
     void move_state_linked(T* obj, sized_forward_list& other, statemode_type t)
     {
-      assert(check_integrity_of_sized_forward_list("MOVE1_STATE_THIS",false));
-      assert(other.check_integrity_of_sized_forward_list("MOVE1_STATE_OTHER",false));
+      assert(check_integrity_of_sized_forward_list("MOVE1_STATE_THIS"));
+      assert(other.check_integrity_of_sized_forward_list("MOVE1_STATE_OTHER"));
       move_linked(obj, other);
       obj->type=t;
-      assert(check_integrity_of_sized_forward_list("MOVE2_STATE_THIS",false));
-      assert(other.check_integrity_of_sized_forward_list("MOVE2_STATE_OTHER",false));
+      assert(check_integrity_of_sized_forward_list("MOVE2_STATE_THIS"));
+      assert(other.check_integrity_of_sized_forward_list("MOVE2_STATE_OTHER"));
     }
 
     void move_state_linked(T* obj, sized_forward_list& other, statemode_type t, iterator& current)
@@ -539,14 +543,19 @@ class sized_forward_list
       size_t length=0;
       // iterator last_seen=before_begin();
       const two_pointers* last_seen=m_node_before_begin;
+			if (m_list_size == 0 && m_node_before_begin != last())
+			{
+			  std::cerr << "wrong before begin and last values for empty list\n";
+				return false;
+			}
 // std::cerr << "LIST: " << last_seen << "{" << last_seen->next() << "," << last_seen->content() << "} ";
       for(iterator i=begin(); i!=end(); ++i)
       {
 // std::cerr << "N: " << i.m_iter << "[" << i.m_iter->next() << "," << i->ptr_in_list.m_iter << "(" << i.m_iter->content() << ")] ";
         if (!not_in_free_list(i.m_iter))
         {
-// std::cerr << "\nNODE " << i.m_iter << " IS IN FREE LIST \n";
-          std::cerr << "ERROR IN " << message << "\n";
+ std::cerr << "\nNODE " << i.m_iter << " IS IN FREE LIST \n";
+//          std::cerr << "ERROR IN " << message << "\n";
           return false;
         }
         // Check that the ptr_in_list is either NULL or points to the node before the node in the list
@@ -556,7 +565,7 @@ class sized_forward_list
           two_pointers* before_node_i=i->ptr_in_list.m_iter;
           if (before_node_i!=NULL && before_node_i->next()!=i.m_iter)
           {
-// std::cerr << "\nBEFORE NODE " << before_node_i << "  NEXT " << before_node_i->next() << "  iter " << i.m_iter << "\n";
+ std::cerr << "\nBEFORE NODE " << before_node_i << "  NEXT " << before_node_i->next() << "  iter " << i.m_iter << "\n";
             // The ptr_in_list of a node does not point to a node before this node in the list.
             return false;
           }
@@ -565,9 +574,9 @@ class sized_forward_list
         length++;
         
       }
-// std::cerr << "\n";
-// std::cerr << "Length actual: " << length << " Size supposed: " << m_list_size << " (" << message << ")\n";
-// std::cerr << "Last: " << last() << "  -- " << last_seen << " last.next: " << last()->next() << "\n";
+ //std::cerr << "\n";
+ //std::cerr << "Length actual: " << length << " Size supposed: " << m_list_size << " (" << message << ")\n";
+ //std::cerr << "Before begin: " << m_node_before_begin << " last: " << last() << "  -- " << last_seen << " last.next: " << last()->next() << "\n";
       return length==m_list_size && last()==last_seen && last()->next()==NULL;
     }
 

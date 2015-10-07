@@ -250,27 +250,25 @@ class block_T
        coconstln_ref(NULL), 
        inconstln_ref(NULL) 
     {
-//      btm_states = new sized_forward_list < state_T >; 
-//      non_btm_states = new sized_forward_list < state_T >; 
-//      marked_btm_states = new sized_forward_list < state_T >; 
-//      marked_non_btm_states = new sized_forward_list < state_T >; 
-//      new_btm_states = new sized_forward_list < state_T >;
     }
-    
-//    // destructor
-//    ~block_T() 
-//    {
-//      assert(btm_states!=NULL);
-//      delete(btm_states); 
-//      assert(non_btm_states!=NULL);
-//      delete(non_btm_states); 
-//      assert(marked_btm_states!=NULL);
-//      delete(marked_btm_states); 
-//      assert(marked_non_btm_states!=NULL);
-//      delete(marked_non_btm_states); 
-//      assert(new_btm_states!=NULL);
-//      delete(new_btm_states);
-//    }
+
+    // constructor for block of given type
+    block_T(block_type t, size_t& index)
+     : type(t),
+		   constellation(NULL),
+       constln_ref(NULL), 
+       coconstln_ref(NULL), 
+       inconstln_ref(NULL) 
+    {
+		  if (type == STD_BLOCK)
+      {
+        id = index++;
+      }
+      else 
+      {
+        id = -1;
+      }
+    }
 };
 
 template < class LTS_TYPE>
@@ -341,22 +339,6 @@ class bisim_partitioner_gw
     constellation_T* constellation_splitter_detect;
     
     // begin auxiliary functions
-    
-    // create a new block of given type
-    block_T* create_new_block(block_type t)
-    {
-      block_T* b_new = new block_T;
-      b_new->type = t;
-      if (b_new->type == STD_BLOCK) 
-      {
-        b_new->id = max_block_index++;
-      }
-      else 
-      {
-        b_new->id = -1;
-      }
-      return b_new;
-    }
     
     // move state to block
     void move_state_to_block(state_T* s, block_T* B)
@@ -1126,7 +1108,7 @@ class bisim_partitioner_gw
       constellation_T* C = new constellation_T(max_const_index);
       
       // create first block in C
-      block_T* B1 = create_new_block(STD_BLOCK);
+      block_T* B1 = new block_T(STD_BLOCK, max_block_index);
       // create associated list of transitions from block to constellation C
       to_constlns_element_T* e = new to_constlns_element_T(C);
       B1->to_constlns.insert_linked(e);
@@ -1166,7 +1148,7 @@ class bisim_partitioner_gw
       // each time we create a block
       for (size_t i = 0; i < nr_of_blocks-1; i++) 
       {
-        block_T* B = create_new_block(EXTRA_KRIPKE_BLOCK);
+        block_T* B = new block_T(EXTRA_KRIPKE_BLOCK, max_block_index);
         to_constlns_element_T* e = new to_constlns_element_T(C);
         B->to_constlns.insert_linked(e);
         B->inconstln_ref = e;
@@ -1631,7 +1613,7 @@ class bisim_partitioner_gw
               }
               // 5.3.2
               // Pseudo-code: 'add it to the list of blocks' could possibly be removed.
-              Bpp = create_new_block(Bp->type);
+              Bpp = new block_T(Bp->type, max_block_index);
               Bpp->constellation = Bp->constellation;
               Bpp->constellation->blocks.insert_linked(Bpp);
               //mCRL2log(log::verbose) << "creating new block " << Bpp->id << "\n";
@@ -1976,7 +1958,7 @@ class bisim_partitioner_gw
               check_consistency_transitions();
 #endif
               // split
-              Bp3 = create_new_block(splitBpB->type);
+              Bp3 = new block_T(splitBpB->type, max_block_index);
               Bp3->constellation = splitBpB->constellation;
               Bp3->constellation->blocks.insert_linked(Bp3);
               // Let N point to correct list
@@ -2371,7 +2353,7 @@ class bisim_partitioner_gw
                     }
                   }
                   // 5.3.7.b.ii (5.3.2)
-                  Bhatp = create_new_block(Bhat->type);
+                  Bhatp = new block_T(Bhat->type, max_block_index);
                   Bhatp->constellation = Bhat->constellation;
                   Bhatp->constellation->blocks.insert_linked(Bhatp);
                   //mCRL2log(log::verbose) << "splitting " << Bhat->id << " producing " << Bhatp->id << "\n";
