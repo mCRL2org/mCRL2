@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lts/detail/sized_forward_list_gw.h
+/// \file lts/detail/pool_gw.h
 
 
 #ifndef REPOSITORY_GW
@@ -29,7 +29,7 @@ namespace detail
  * elements are stored, and from which allocated members are taken
  * when they are needed and available.
  *
- * it is assumed that the elements have a pointer to a next element in the repository,
+ * it is assumed that the elements have a pointer to a next element in the pool,
  * and that they have functions rep_next(), set_rep_next() to get and change its
  * value.
  *
@@ -37,9 +37,9 @@ namespace detail
  * lists are non copiable, nor can they be constructed from
  * each other.  */
 
-// repository to keep elements of type T
+// pool to keep elements of type T
 template < class T>
-class repository
+class pool
 {
   protected:
 		// deque storing the elements
@@ -51,7 +51,7 @@ class repository
 	  typedef typename std::deque<T>::iterator iterator;
 		typedef typename std::deque<T>::const_iterator const_iterator;
 	
-	  repository()
+	  pool()
 		{
 		}
 	
@@ -84,13 +84,13 @@ class repository
     }
 
     // Copy constructor is not possible
-    repository(const repository&)
+    pool(const pool&)
     {
       assert(0);
     }
 
     // Assignment of lists is not possible
-    repository operator=(const repository&)
+    pool operator=(const pool&)
     {
       assert(0);
     }

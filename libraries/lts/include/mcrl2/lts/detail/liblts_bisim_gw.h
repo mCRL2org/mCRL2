@@ -23,7 +23,7 @@
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/sized_forward_list_gw.h"
-#include "mcrl2/lts/detail/repository_gw.h"
+#include "mcrl2/lts/detail/pool_gw.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
@@ -76,7 +76,7 @@ void deleteobject(T*& obj)
 typedef struct counter_T
 {
   protected:
-    // needed in repository
+    // needed in pool
     counter_T* r_next;
   public:
     // the counter
@@ -195,6 +195,24 @@ class constellation_T
        size(0), 
        type(TRIVIAL) 
     {}
+
+    // Copy constructor
+		// Does not copy lists
+    constellation_T(const constellation_T& c)
+      : id(c.id),
+			  size(0),
+        type(c.type)
+    {
+    }
+  
+    // Assignment
+    constellation_T operator=(const constellation_T& c)
+    {
+      id = c.id;
+			size = 0;
+			type = c.type;
+      return *this;
+    }
 };
 
 class to_constlns_element_T
@@ -216,7 +234,7 @@ class to_constlns_element_T
     // typename
     sized_forward_list<to_constlns_element_T>::iterator ptr_in_list;
   
-    // pointer to next element in repository
+    // pointer to next element in pool
     to_constlns_element_T* r_next;
   
     // constructor
@@ -253,7 +271,7 @@ class to_constlns_element_T
       return *this;
     }
   
-    // additional methods to keep to_constlns_element_T objects in a repository
+    // additional methods to keep to_constlns_element_T objects in a pool
     void set_rep_next(to_constlns_element_T* e)
     {
       r_next = e;
@@ -330,6 +348,30 @@ class block_T
         id = -1;
       }
     }
+
+    // Copy constructor
+		// Does not copy lists
+    block_T(const block_T& c)
+      : id(c.id),
+			  type(c.type),
+        constellation(c.constellation),
+        constln_ref(c.constln_ref),
+        coconstln_ref(c.coconstln_ref),
+				inconstln_ref(c.inconstln_ref)
+    {
+    }
+  
+    // Assignment
+    block_T operator=(const block_T& c)
+    {
+      id = c.id;
+			type = c.type;
+			constellation = c.constellation;
+			constln_ref = c.constln_ref;
+			coconstln_ref = c.coconstln_ref;
+			inconstln_ref = c.inconstln_ref;
+      return *this;
+    }
 };
 
 template < class LTS_TYPE>
@@ -356,10 +398,14 @@ class bisim_partitioner_gw
     std::vector < state_T > states;
     // the list of transitions
     std::vector < transition_T > transitions;
-    // the repository of counters
-    repository < counter_T > counters;
-    // the repository of to_constlns_element_T objects
-    repository < to_constlns_element_T > to_constlns_elements;
+		// the list of blocks
+		std::deque < block_T > blocks;
+		// the list of constellations
+		std::deque < constellation_T > constellations;
+    // the pool of counters
+    pool < counter_T > counters;
+    // the pool of to_constlns_element_T objects
+    pool < to_constlns_element_T > to_constlns_elements;
   
     const label_type tau_label;
 
@@ -1164,8 +1210,6 @@ class bisim_partitioner_gw
 
       // number of blocks
       block_type nr_of_blocks;
-      // the list of initial blocks (for fast access)
-      vector < block_T* > blocks;
       // the number of states
       nr_of_states = aut.num_states();
       // original size of input
@@ -1178,19 +1222,19 @@ class bisim_partitioner_gw
       //vector < sized_forward_list < transition_T* >* > block_trans_list;
 
       // create single initial non-trivial constellation
-      constellation_T* C = new constellation_T(max_const_index);
+			constellations.push_back(constellation_T(max_const_index));
+      constellation_T* C = &(constellations.back());
       
       // create first block in C
-      block_T* B1 = new block_T(STD_BLOCK, max_block_index);
+			blocks.push_back(block_T(STD_BLOCK, max_block_index));
+      block_T* B1 = &(blocks.back());
       // create associated list of transitions from block to constellation C
       to_constlns_element_T* e = to_constlns_elements.get_element();
       e->C = C;
-      B1->to_constlns.insert_linked(e);
-      B1->inconstln_ref = e;
-      B1->constellation = C;
-      C->blocks.insert_linked(B1);
-      // add block to initial list of blocks
-      blocks.insert(blocks.end(), B1);
+      blocks.back().to_constlns.insert_linked(e);
+      blocks.back().inconstln_ref = e;
+      blocks.back().constellation = C;
+      C->blocks.insert_linked(&(blocks.back()));
       nr_of_blocks = 1;
 
       // iterate over the transitions and collect new states
@@ -1224,17 +1268,15 @@ class bisim_partitioner_gw
       auto toc_it = to_constlns_elements.begin();
       for (size_t i = 0; i < nr_of_blocks-1; i++) 
       {
-        block_T* B = new block_T(EXTRA_KRIPKE_BLOCK, max_block_index);
+				blocks.push_back(block_T(EXTRA_KRIPKE_BLOCK, max_block_index));
         to_constlns_element_T* e = &(*toc_it);
         e->C = C;
         toc_it++;
-        B->to_constlns.insert_linked(e);
-        B->inconstln_ref = e;
+        blocks.back().to_constlns.insert_linked(e);
+        blocks.back().inconstln_ref = e;
         // add block to constellation
-        B->constellation = C;
-        C->blocks.insert_linked(B);
-        // add block to initial list of blocks
-        blocks.push_back(B);
+        blocks.back().constellation = C;
+        C->blocks.insert_linked(&(blocks.back()));
       }
 
       // create state entries in states list
@@ -1252,7 +1294,7 @@ class bisim_partitioner_gw
       // add the new states to their respective blocks
       for (auto it=extra_kripke_states.begin(); it != extra_kripke_states.end(); ++it) 
       {
-        (states[it->second]).block = blocks[(action_block_map.find((it->first).first))->second];
+        (states[it->second]).block = &(blocks[(action_block_map.find((it->first).first))->second]);
       }
       // add transitions
       state_type current_src_state = 0;
@@ -1338,25 +1380,25 @@ class bisim_partitioner_gw
       }
 #ifndef NDEBUG
       // print the Kripke structure
-      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
-      {
-           std::pair<Key, state_type> p = *sit;
-           mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
-      }
-      for (auto sit = states.begin(); sit != states.end(); ++sit) 
-      {
-        const state_T& s = *sit;
-        for (auto tit = s.Ttgt.begin(); tit != s.Ttgt.end(); ++tit) 
-        {
-          transition_T* t = *tit;
-          mCRL2log(log::verbose) << t->source->id << " -> " << t->target->id << "\n";
-        }
-        for (auto tit = s.Tsrc.begin(); tit != s.Tsrc.end(); ++tit) 
-        {
-          transition_T* t = *tit;
-          mCRL2log(log::verbose) << t->target->id << " <- " << t->source->id << "\n";
-        }
-      }
+//      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
+//      {
+//           std::pair<Key, state_type> p = *sit;
+//           mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
+//      }
+//      for (auto sit = states.begin(); sit != states.end(); ++sit) 
+//      {
+//        const state_T& s = *sit;
+//        for (auto tit = s.Ttgt.begin(); tit != s.Ttgt.end(); ++tit) 
+//        {
+//          transition_T* t = *tit;
+//          mCRL2log(log::verbose) << t->source->id << " -> " << t->target->id << "\n";
+//        }
+//        for (auto tit = s.Tsrc.begin(); tit != s.Tsrc.end(); ++tit) 
+//        {
+//          transition_T* t = *tit;
+//          mCRL2log(log::verbose) << t->target->id << " <- " << t->source->id << "\n";
+//        }
+//      }
 #endif
       
       // Add all states to their appropriate list in the block they reside in
@@ -1426,7 +1468,8 @@ class bisim_partitioner_gw
               //mCRL2log(log::verbose) << "---\n";
               // 5.2.1
               // 5.2.1.a
-              constellation_T* setC = new constellation_T(max_const_index);
+							constellations.push_back(constellation_T(max_const_index));
+              constellation_T* setC = &(constellations.back());
               setB->blocks.move_linked(B, setC->blocks, bit);
               size_t Bsize = B->btm_states.size() + B->non_btm_states.size() + B->marked_btm_states.size() + B->marked_non_btm_states.size();
               setB->size -= Bsize;
@@ -1702,7 +1745,8 @@ class bisim_partitioner_gw
               }
               // 5.3.2
               // Pseudo-code: 'add it to the list of blocks' could possibly be removed.
-              Bpp = new block_T(Bp->type, max_block_index);
+							blocks.push_back(block_T(Bp->type, max_block_index));
+							Bpp = &(blocks.back());
               Bpp->constellation = Bp->constellation;
               Bpp->constellation->blocks.insert_linked(Bpp);
               //mCRL2log(log::verbose) << "creating new block " << Bpp->id << "\n";
@@ -1718,11 +1762,11 @@ class bisim_partitioner_gw
               }
 #ifndef NDEBUG
               mCRL2log(log::verbose) << "splitting off: [";
-              for (auto sit = N->begin(); sit != N->end(); ++sit) 
-              {
-                state_T* s = *sit;
-                mCRL2log(log::verbose) << " " << s->id;
-              }
+//              for (auto sit = N->begin(); sit != N->end(); ++sit) 
+//              {
+//                state_T* s = *sit;
+//                mCRL2log(log::verbose) << " " << s->id;
+//              }
               mCRL2log(log::verbose) << "]\n";
               check_consistency_blocks();
               check_consistency_transitions();
@@ -2051,7 +2095,8 @@ class bisim_partitioner_gw
               check_consistency_transitions();
 #endif
               // split
-              Bp3 = new block_T(splitBpB->type, max_block_index);
+							blocks.push_back(block_T(splitBpB->type, max_block_index));
+              Bp3 = &(blocks.back());
               Bp3->constellation = splitBpB->constellation;
               Bp3->constellation->blocks.insert_linked(Bp3);
               // Let N point to correct list
@@ -2450,7 +2495,8 @@ class bisim_partitioner_gw
                     }
                   }
                   // 5.3.7.b.ii (5.3.2)
-                  Bhatp = new block_T(Bhat->type, max_block_index);
+									blocks.push_back(block_T(Bhat->type, max_block_index));
+									Bhatp = &(blocks.back());
                   Bhatp->constellation = Bhat->constellation;
                   Bhatp->constellation->blocks.insert_linked(Bhatp);
                   //mCRL2log(log::verbose) << "splitting " << Bhat->id << " producing " << Bhatp->id << "\n";
