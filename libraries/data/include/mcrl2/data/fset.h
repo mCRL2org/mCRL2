@@ -840,7 +840,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vt), difference(s, empty(s), vt), empty(s)));
         result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), difference(s, cons_(s, vd, vs), cons_(s, vd, vt)), difference(s, vs, vt)));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(vd, ve), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, vd, difference(s, vs, cons_(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(ve, vd), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), cons_(s, ve, difference(s, cons_(s, vd, vs), vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(ve, vd), difference(s, cons_(s, vd, vs), cons_(s, ve, vt)), difference(s, cons_(s, vd, vs), vt)));
         result.push_back(data_equation(atermpp::make_vector(vs), union_(s, vs, empty(s)), vs));
         result.push_back(data_equation(atermpp::make_vector(vt), union_(s, empty(s), vt), vt));
         result.push_back(data_equation(atermpp::make_vector(vd, vs, vt), union_(s, cons_(s, vd, vs), cons_(s, vd, vt)), cons_(s, vd, union_(s, vs, vt))));
