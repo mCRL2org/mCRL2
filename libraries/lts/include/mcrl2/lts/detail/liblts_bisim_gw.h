@@ -76,37 +76,35 @@ void deleteobject(T*& obj)
 typedef struct counter_T
 {
   protected:
-	  // needed in repository
-		counter_T* r_next;
+    // needed in repository
+    counter_T* r_next;
   public:
     // the counter
     size_t cnt;
-	
-		void set_rep_next(counter_T* e)
-		{
-			r_next = e;
-		}
-		counter_T* rep_next()
-		{
-		  return r_next;
-		}
-		void rep_init()
-		{
-		  r_next = NULL;
-			cnt = 0;
-		}
+  
+    void set_rep_next(counter_T* e)
+    {
+      r_next = e;
+    }
+    counter_T* rep_next()
+    {
+      return r_next;
+    }
+    void rep_init()
+    {
+      r_next = NULL;
+      cnt = 0;
+    }
 
     counter_T()
      : r_next(NULL),
-		   cnt(0)
+       cnt(0)
     {}
 } counter_T;
 
 class state_T
 {
   public:
-    // ID (for debugging)
-    state_type id;
     // block B' containing state s
     block_T *block;
     // static list of transitions from s (s -> s')
@@ -137,9 +135,8 @@ class state_T
     bool is_in_Lp_detect2;
     
     // constructor
-    state_T(size_t& state_index)
-     : id(state_index++), 
-       block(NULL), 
+    state_T()
+     : block(NULL), 
        inert_cnt(0), 
        priority(0),  
        constln_cnt(NULL), 
@@ -218,59 +215,59 @@ class to_constlns_element_T
     // to_constlns list
     // typename
     sized_forward_list<to_constlns_element_T>::iterator ptr_in_list;
-	
-	  // pointer to next element in repository
-		to_constlns_element_T* r_next;
-	
+  
+    // pointer to next element in repository
+    to_constlns_element_T* r_next;
+  
     // constructor
     to_constlns_element_T()
       : C(NULL),
         new_element(NULL), 
         SClist(NULL),
-				r_next(NULL)
+        r_next(NULL)
     {}
 
     to_constlns_element_T(constellation_T *CC)
       : C(CC), 
         new_element(NULL), 
         SClist(NULL),
-				r_next(NULL)
+        r_next(NULL)
     {}
-	
-		// Copy constructor
+  
+    // Copy constructor
     to_constlns_element_T(const to_constlns_element_T& c)
-	    : C(c.C),
-			  new_element(c.new_element),
-				SClist(c.SClist),
-				r_next(c.r_next)
-		{
+      : C(c.C),
+        new_element(c.new_element),
+        SClist(c.SClist),
+        r_next(c.r_next)
+    {
     }
-	
-		// Assignment
-		to_constlns_element_T operator=(const to_constlns_element_T& c)
+  
+    // Assignment
+    to_constlns_element_T operator=(const to_constlns_element_T& c)
     {
       C = c.C;
-			new_element = c.new_element;
-			SClist = c.SClist;
-			r_next = c.r_next;
-			return *this;
+      new_element = c.new_element;
+      SClist = c.SClist;
+      r_next = c.r_next;
+      return *this;
     }
-	
-		// additional methods to keep to_constlns_element_T objects in a repository
-		void set_rep_next(to_constlns_element_T* e)
-		{
-			r_next = e;
-		}
-		to_constlns_element_T* rep_next()
-		{
-		  return r_next;
-		}
-		void rep_init()
-		{
+  
+    // additional methods to keep to_constlns_element_T objects in a repository
+    void set_rep_next(to_constlns_element_T* e)
+    {
+      r_next = e;
+    }
+    to_constlns_element_T* rep_next()
+    {
+      return r_next;
+    }
+    void rep_init()
+    {
       new_element = NULL;
-			SClist = NULL;
-		  r_next = NULL;
-		}
+      SClist = NULL;
+      r_next = NULL;
+    }
 };
 
 class block_T
@@ -319,12 +316,12 @@ class block_T
     // constructor for block of given type
     block_T(block_type t, size_t& index)
      : type(t),
-		   constellation(NULL),
+       constellation(NULL),
        constln_ref(NULL), 
        coconstln_ref(NULL), 
        inconstln_ref(NULL) 
     {
-		  if (type == STD_BLOCK)
+      if (type == STD_BLOCK)
       {
         id = index++;
       }
@@ -343,7 +340,6 @@ class bisim_partitioner_gw
 
     size_t max_block_index;
     size_t max_const_index;
-    size_t state_index;
 
     size_t nr_of_splits;
      
@@ -358,13 +354,13 @@ class bisim_partitioner_gw
     size_t nr_of_states;
     // the list of states
     std::vector < state_T > states;
-		// the list of transitions
-		std::vector < transition_T > transitions;
-		// the repository of counters
-		repository < counter_T > counters;
-	  // the repository of to_constlns_element_T objects
-		repository < to_constlns_element_T > to_constlns_elements;
-	
+    // the list of transitions
+    std::vector < transition_T > transitions;
+    // the repository of counters
+    repository < counter_T > counters;
+    // the repository of to_constlns_element_T objects
+    repository < to_constlns_element_T > to_constlns_elements;
+  
     const label_type tau_label;
 
 
@@ -409,6 +405,12 @@ class bisim_partitioner_gw
     constellation_T* constellation_splitter_detect;
     
     // begin auxiliary functions
+
+
+    size_t state_id(state_T* s)
+    {
+      return (s-&states[0])/sizeof(state_T);
+    }
     
     // move state to block
     void move_state_to_block(state_T* s, block_T* B)
@@ -543,8 +545,8 @@ class bisim_partitioner_gw
                           B->inconstln_ref = NULL;
                         }
                         B->to_constlns.remove_linked(B->constln_ref);
-										    to_constlns_elements.remove_element(B->constln_ref);
-												B->constln_ref = NULL;
+                        to_constlns_elements.remove_element(B->constln_ref);
+                        B->constln_ref = NULL;
                    }
                    B->constln_ref = NULL;
               }
@@ -554,8 +556,8 @@ class bisim_partitioner_gw
                              B->inconstln_ref = NULL;
                         }
                         B->to_constlns.remove_linked(B->coconstln_ref);
-												to_constlns_elements.remove_element(B->coconstln_ref);
-										    B->coconstln_ref = NULL;
+                        to_constlns_elements.remove_element(B->coconstln_ref);
+                        B->coconstln_ref = NULL;
                    }
                    B->coconstln_ref = NULL;
               }
@@ -584,7 +586,6 @@ class bisim_partitioner_gw
                          const bool branching=false)
      : max_block_index(0),
        max_const_index(0),
-       state_index(0),
        aut(l), 
        tau_label(determine_tau_label(l))
     {
@@ -1123,12 +1124,12 @@ class bisim_partitioner_gw
           for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) 
           {
             state_T* s = *sit;
-            mCRL2log(log::verbose) << s->id << ",";
+            mCRL2log(log::verbose) << state_id(s) << ",";
           }
           for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) 
           {
             state_T* s = *sit;
-            mCRL2log(log::verbose) << "*" << s->id << "*,";
+            mCRL2log(log::verbose) << "*" << state_id(s) << "*,";
           }
           mCRL2log(log::verbose) << "], ";
         }
@@ -1144,12 +1145,12 @@ class bisim_partitioner_gw
           for (auto sit = unmarked_states_begin(B); sit != unmarked_states_end(B); sit = unmarked_states_next(B, sit)) 
           {
             state_T* s = *sit;
-            mCRL2log(log::verbose) << s->id << ",";
+            mCRL2log(log::verbose) << state_id(s) << ",";
           }
           for (auto sit = marked_states_begin(B); sit != marked_states_end(B); sit = marked_states_next(B, sit)) 
           {
             state_T* s = *sit;
-            mCRL2log(log::verbose) << "*" << s->id << "*,";
+            mCRL2log(log::verbose) << "*" << state_id(s) << "*,";
           }
           mCRL2log(log::verbose) << "], ";
         }
@@ -1183,7 +1184,7 @@ class bisim_partitioner_gw
       block_T* B1 = new block_T(STD_BLOCK, max_block_index);
       // create associated list of transitions from block to constellation C
       to_constlns_element_T* e = to_constlns_elements.get_element();
-			e->C = C;
+      e->C = C;
       B1->to_constlns.insert_linked(e);
       B1->inconstln_ref = e;
       B1->constellation = C;
@@ -1219,14 +1220,14 @@ class bisim_partitioner_gw
       // create blocks, and add one entry in their to_constlns list for the single constellation C
       // each of these new blocks will contain extra Kripke states, therefore we increment nr_of_extra_kripke_blocks
       // each time we create a block
-			to_constlns_elements.add_elements(nr_of_blocks-1);
-			auto toc_it = to_constlns_elements.begin();
+      to_constlns_elements.add_elements(nr_of_blocks-1);
+      auto toc_it = to_constlns_elements.begin();
       for (size_t i = 0; i < nr_of_blocks-1; i++) 
       {
         block_T* B = new block_T(EXTRA_KRIPKE_BLOCK, max_block_index);
         to_constlns_element_T* e = &(*toc_it);
-				e->C = C;
-				toc_it++;
+        e->C = C;
+        toc_it++;
         B->to_constlns.insert_linked(e);
         B->inconstln_ref = e;
         // add block to constellation
@@ -1240,7 +1241,7 @@ class bisim_partitioner_gw
       states.reserve(nr_of_states);
       for (size_t i = 0; i < nr_of_states; i++)
       {
-        states.emplace_back(state_T(state_index));
+        states.emplace_back(state_T());
     
         // add state to first block, if applicable
         if (i < orig_nr_of_states) 
@@ -1256,15 +1257,15 @@ class bisim_partitioner_gw
       // add transitions
       state_type current_src_state = 0;
       // create n counters
-			counters.add_elements(nr_of_states);
-			auto counter_it = counters.begin();
-			// create transitions (we need the original number in input + one for each extra kripke state)
-			transitions.insert(transitions.begin(), trans.size()+extra_kripke_states.size(), transition_T());
-			auto tit = transitions.begin();
+      counters.add_elements(nr_of_states);
+      auto counter_it = counters.begin();
+      // create transitions (we need the original number in input + one for each extra kripke state)
+      transitions.insert(transitions.begin(), trans.size()+extra_kripke_states.size(), transition_T());
+      auto tit = transitions.begin();
       for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
-				
+        
         // if we see a new source state, create a new counter for it
         if (t.from() != current_src_state) 
         {
@@ -1303,11 +1304,11 @@ class bisim_partitioner_gw
           // add transition to transition list of source block
           t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
         }
-				// move on to next transition
-				tit++;
+        // move on to next transition
+        tit++;
         // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
         //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
-			}
+      }
       // add transitions <a,t> -> t
       for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
       {
@@ -1323,7 +1324,7 @@ class bisim_partitioner_gw
         t_entry2->target->Tsrc.push_back(t_entry2);
         t_entry2->source->Ttgt.push_back(t_entry2);
         // add pointer to counter object of source state
-				counter_it++;
+        counter_it++;
         t_entry2->to_constln_cnt = &(*counter_it);
         // increment the counter
         t_entry2->to_constln_cnt->cnt++;
@@ -1333,8 +1334,8 @@ class bisim_partitioner_gw
         t_entry2->to_constln_ref->trans_list.insert_linked(t_entry2);
         // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
         //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
-			  tit++;
-			}
+        tit++;
+      }
 #ifndef NDEBUG
       // print the Kripke structure
       for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
@@ -1464,7 +1465,7 @@ class bisim_partitioner_gw
                       //mCRL2log(log::verbose) << "ref: " << t->to_constln_ref << "\n";
                       Bp->coconstln_ref = t->to_constln_ref;
                       Bp->constln_ref = to_constlns_elements.get_element();
-											Bp->constln_ref->C = setC;
+                      Bp->constln_ref->C = setC;
                       Bp->to_constlns.insert_linked(Bp->constln_ref);
                     }
                     // 5.2.2.b
@@ -1507,8 +1508,8 @@ class bisim_partitioner_gw
               // Different from pseudo-code: consider the case that B itself can be split
               // ALL states should be marked
               // 5.2.3
-							B->btm_states.swap(B->marked_btm_states);
-							B->non_btm_states.swap(B->marked_non_btm_states);
+              B->btm_states.swap(B->marked_btm_states);
+              B->non_btm_states.swap(B->marked_non_btm_states);
               splittable_blocks.insert(B);
               B->constln_ref = NULL;
               B->coconstln_ref = NULL;
@@ -1538,7 +1539,7 @@ class bisim_partitioner_gw
                     {
                       B->coconstln_ref = t->to_constln_ref;
                       B->constln_ref = to_constlns_elements.get_element();
-											B->constln_ref->C = setC;
+                      B->constln_ref->C = setC;
                       B->to_constlns.insert_linked(B->constln_ref);
                       B->inconstln_ref = B->constln_ref;
                     }
@@ -1763,7 +1764,7 @@ class bisim_partitioner_gw
                     else 
                     {
                       lp = to_constlns_elements.get_element();
-											lp->C = l->C;
+                      lp->C = l->C;
                       l->new_element = lp;
                       //mCRL2log(log::verbose) << "create new element " << l->new_element << " " << l->new_element->C->id << "\n";
                       // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
@@ -1819,7 +1820,7 @@ class bisim_partitioner_gw
                       if (Bpp->inconstln_ref == NULL) 
                       {
                         Bpp->inconstln_ref = to_constlns_elements.get_element();
-												Bpp->inconstln_ref->C = Bpp->constellation;
+                        Bpp->inconstln_ref->C = Bpp->constellation;
                         Bpp->to_constlns.insert_linked(Bpp->inconstln_ref);
                         if (Bp->inconstln_ref != NULL) 
                         {
@@ -1860,7 +1861,7 @@ class bisim_partitioner_gw
                     if (Bp->inconstln_ref == NULL) 
                     {
                       Bp->inconstln_ref = to_constlns_elements.get_element();
-											Bp->inconstln_ref->C = Bp->constellation;
+                      Bp->inconstln_ref->C = Bp->constellation;
                       Bp->to_constlns.insert_linked(Bp->inconstln_ref);
                       if (Bpp->inconstln_ref != NULL) 
                       {
@@ -1927,8 +1928,8 @@ class bisim_partitioner_gw
                       Bp->inconstln_ref = NULL;
                     }
                     Bp->to_constlns.remove_linked(l->new_element);
-										to_constlns_elements.remove_element(l->new_element);
-										l->new_element = NULL;
+                    to_constlns_elements.remove_element(l->new_element);
+                    l->new_element = NULL;
                   }
                   else 
                   {
@@ -2092,7 +2093,7 @@ class bisim_partitioner_gw
                     {
                       //assert(Bp3->inconstln_ref == NULL || l->C != Bp3->constellation);
                       lp = to_constlns_elements.get_element();
-											lp->C = l->C;
+                      lp->C = l->C;
                       l->new_element = lp;
                       // add lp to Bp3.to_constlns (IMPLIED IN PSEUDO-CODE)
                       Bp3->to_constlns.insert_linked(lp);
@@ -2141,7 +2142,7 @@ class bisim_partitioner_gw
                       if (Bp3->inconstln_ref == NULL) 
                       {
                         Bp3->inconstln_ref = to_constlns_elements.get_element();
-												Bp3->inconstln_ref->C = Bp3->constellation;
+                        Bp3->inconstln_ref->C = Bp3->constellation;
                         Bp3->to_constlns.insert_linked(Bp3->inconstln_ref);
                         if (splitBpB->inconstln_ref != NULL) 
                         {
@@ -2180,7 +2181,7 @@ class bisim_partitioner_gw
                     if (splitBpB->inconstln_ref == NULL) 
                     {
                       splitBpB->inconstln_ref = to_constlns_elements.get_element();
-											splitBpB->inconstln_ref->C = splitBpB->constellation;
+                      splitBpB->inconstln_ref->C = splitBpB->constellation;
                       splitBpB->to_constlns.insert_linked(splitBpB->inconstln_ref);
                       if (Bp3->inconstln_ref != NULL) 
                       {
@@ -2226,7 +2227,7 @@ class bisim_partitioner_gw
                       splitBpB->inconstln_ref = NULL;
                     }
                     splitBpB->to_constlns.remove_linked(l->new_element);
-										to_constlns_elements.remove_element(l->new_element);
+                    to_constlns_elements.remove_element(l->new_element);
                     l->new_element = NULL;
                   }
                   else 
@@ -2489,7 +2490,7 @@ class bisim_partitioner_gw
                           //mCRL2log(log::verbose) << Bhatp->constellation->id << "\n";
                           //assert(Bhatp->inconstln_ref == NULL || l->C != Bhatp->constellation);
                           lp = to_constlns_elements.get_element();
-													lp->C = l->C;
+                          lp->C = l->C;
                           l->new_element = lp;
                           //mCRL2log(log::verbose) << "create new element " << l->new_element << " " << l->new_element->C->id << "\n";
                           // Different from pseudo-code: point lp->new_element back to l, to efficiently reset
@@ -2526,7 +2527,7 @@ class bisim_partitioner_gw
                           if (Bhatp->inconstln_ref == NULL) 
                           {
                             Bhatp->inconstln_ref = to_constlns_elements.get_element();
-														Bhatp->inconstln_ref->C = Bhatp->constellation;
+                            Bhatp->inconstln_ref->C = Bhatp->constellation;
                             Bhatp->to_constlns.insert_linked(Bhatp->inconstln_ref);
                             if (Bhat->inconstln_ref != NULL) 
                             {
@@ -2557,7 +2558,7 @@ class bisim_partitioner_gw
                         if (Bhat->inconstln_ref == NULL) 
                         {
                           Bhat->inconstln_ref = to_constlns_elements.get_element();
-													Bhat->inconstln_ref->C = Bhat->constellation;
+                          Bhat->inconstln_ref->C = Bhat->constellation;
                           Bhat->to_constlns.insert_linked(Bhat->inconstln_ref);
                           if (Bhatp->inconstln_ref != NULL) 
                           {
@@ -2575,7 +2576,7 @@ class bisim_partitioner_gw
                   if (detect1_finished == TERMINATED) 
                   {
                     // keep temp value in SinSC for swapping
-										Bhatp->new_btm_states.swap(Bhat->new_btm_states);
+                    Bhatp->new_btm_states.swap(Bhat->new_btm_states);
                     SinSC = &(Bhatp->new_btm_states);
                     SnotinSC = &(Bhat->new_btm_states);
                   }
@@ -2585,7 +2586,7 @@ class bisim_partitioner_gw
                     SnotinSC = &(Bhatp->new_btm_states);
                   }
                   // Walk through new states and add them to SnotinSC if they are not in SClist
-									// TODO: change to moving
+                  // TODO: change to moving
                   auto prev_sit = SinSC->before_begin();
                   typename sized_forward_list <state_T>::iterator it_SClist;
                   if (!sclist_is_empty_detect2) 
@@ -2681,9 +2682,9 @@ class bisim_partitioner_gw
                         }
                         Bhat->to_constlns.remove_linked(l->new_element);
                         /* deleteobject (l->new_element->trans_list); OEPS THIS SHOULD NOT BE DONE TWICE. IS DONE BY DEFAULT IN DESTRUCTOR */
-											  to_constlns_elements.remove_element(l->new_element);
-												l->new_element = NULL;
-											}
+                        to_constlns_elements.remove_element(l->new_element);
+                        l->new_element = NULL;
+                      }
                       else 
                       {
                         l->new_element->new_element = NULL;
@@ -2797,7 +2798,6 @@ class bisim_partitioner_gw
 
       mCRL2log(log::verbose) << "number of splits performed: " << nr_of_splits << "\n";
 
-			// destruct the data
     }
 
 #ifndef NDEBUG
