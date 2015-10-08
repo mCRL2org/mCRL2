@@ -582,6 +582,36 @@ class sized_forward_list
 
 };
 
+// wrapper for repository structure
+template < class T>
+class repo_sized_forward_list
+{
+  protected:
+	  // needed in repository
+		repo_sized_forward_list* r_next;
+  public:
+	  // the actual list
+		sized_forward_list<T> list;
+
+		void set_rep_next(repo_sized_forward_list* e)
+		{
+			r_next = e;
+		}
+		repo_sized_forward_list* rep_next()
+		{
+		  return r_next;
+		}
+		void rep_init()
+		{
+		  r_next = NULL;
+			list.clear();
+		}
+
+    repo_sized_forward_list()
+     : r_next(NULL)
+    {}
+};
+
 } // namespace detail
 
 } // namespace lts

@@ -358,6 +358,8 @@ class bisim_partitioner_gw
     size_t nr_of_states;
     // the list of states
     std::vector < state_T > states;
+		// the list of transitions
+		std::vector < transition_T > transitions;
 		// the repository of counters
 		repository < counter_T > counters;
 	  // the repository of to_constlns_element_T objects
@@ -1256,10 +1258,13 @@ class bisim_partitioner_gw
       // create n counters
 			counters.add_elements(nr_of_states);
 			auto counter_it = counters.begin();
+			// create transitions (we need the original number in input + one for each extra kripke state)
+			transitions.insert(transitions.begin(), trans.size()+extra_kripke_states.size(), transition_T());
+			auto tit = transitions.begin();
       for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
-                    
+				
         // if we see a new source state, create a new counter for it
         if (t.from() != current_src_state) 
         {
@@ -1267,7 +1272,7 @@ class bisim_partitioner_gw
           counter_it++;
         }
         // create transition entry
-        transition_T* t_entry = new transition_T;
+        transition_T* t_entry = &(*tit);
         // fill in info
         t_entry->source = &states[t.from()];
         // target depends on transition label
@@ -1298,9 +1303,11 @@ class bisim_partitioner_gw
           // add transition to transition list of source block
           t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
         }
+				// move on to next transition
+				tit++;
         // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
         //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
-      }
+			}
       // add transitions <a,t> -> t
       for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
       {
@@ -1308,7 +1315,7 @@ class bisim_partitioner_gw
         state_type sid = e.second;
         state_type tid = e.first.second;
 
-        transition_T* t_entry2 = new transition_T;
+        transition_T* t_entry2 = &(*tit);
         // fill in info
         t_entry2->source = &states[sid];
         t_entry2->target = &states[tid];
@@ -1326,7 +1333,8 @@ class bisim_partitioner_gw
         t_entry2->to_constln_ref->trans_list.insert_linked(t_entry2);
         // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
         //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
-      }
+			  tit++;
+			}
 #ifndef NDEBUG
       // print the Kripke structure
       for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
