@@ -143,6 +143,22 @@ void test4()
   test_expressions(R, expr1, expr2, "c: Bool;", data_spec, sigma);
 }
 
+void test5() // Test set difference for finite sets.
+{
+  std::string DATA_SPEC1 =
+    "map f,g:FSet(Bool);\n"
+    "eqn f=({false}-{true})-{false};\n"
+    "    g={};\n"
+    ;
+  data_specification data_spec = parse_data_specification(DATA_SPEC1);
+  data::rewriter R(data_spec);
+
+  std::string expr1 = "f";
+  std::string expr2 = "g";
+  std::string sigma = "[c: Bool := true]";
+  test_expressions(R, expr1, expr2, "c: Bool;", data_spec, sigma);
+}
+
 void allocation_test()
 {
   data_specification data_spec;
@@ -185,6 +201,7 @@ int test_main(int argc, char** argv)
   test1();
   test2();
   test4();
+  test5();
   one_point_rule_preprocessor_test();
   simplify_rewriter_test();
 
