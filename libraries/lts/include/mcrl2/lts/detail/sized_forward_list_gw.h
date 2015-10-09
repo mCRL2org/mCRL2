@@ -582,22 +582,22 @@ class sized_forward_list
 
 };
 
-// wrapper for repository structure
+// wrapper for pool structure
 template < class T>
-class repo_sized_forward_list
+class pooled_sized_forward_list
 {
   protected:
 	  // needed in repository
-		repo_sized_forward_list* r_next;
+		pooled_sized_forward_list* r_next;
   public:
 	  // the actual list
 		sized_forward_list<T> list;
 
-		void set_rep_next(repo_sized_forward_list* e)
+		void set_rep_next(pooled_sized_forward_list* e)
 		{
 			r_next = e;
 		}
-		repo_sized_forward_list* rep_next()
+		pooled_sized_forward_list* rep_next()
 		{
 		  return r_next;
 		}
@@ -607,9 +607,23 @@ class repo_sized_forward_list
 			list.clear();
 		}
 
-    repo_sized_forward_list()
+    pooled_sized_forward_list()
      : r_next(NULL)
     {}
+
+    // Copy constructor
+		// Does not copy lists
+    pooled_sized_forward_list(const pooled_sized_forward_list& c)
+      : r_next(c.r_next)
+    {
+    }
+  
+    // Assignment
+    pooled_sized_forward_list operator=(const pooled_sized_forward_list& c)
+    {
+      r_next = c.r_next;
+      return *this;
+    }
 };
 
 } // namespace detail

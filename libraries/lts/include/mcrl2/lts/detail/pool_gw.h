@@ -43,9 +43,9 @@ class pool
 {
   protected:
 		// deque storing the elements
-		std::deque<T> repo_storage;
+		std::deque<T> pool_storage;
 		// head of list of free elements
-		T repo_storage_free_elements;
+		T pool_storage_free_elements;
 	
   public:
 	  typedef typename std::deque<T>::iterator iterator;
@@ -58,20 +58,20 @@ class pool
 		// create given number of new elements
 		void add_elements(size_t nr_new_elems)
 		{
-			repo_storage.insert(repo_storage.begin(), nr_new_elems, T());
+			pool_storage.insert(pool_storage.begin(), nr_new_elems, T());
 		}
 
     T* get_element()
     {
-      if (repo_storage_free_elements.rep_next()==NULL)
+      if (pool_storage_free_elements.rep_next()==NULL)
       {
-        repo_storage.push_back(T());
-        return &(repo_storage.back());
+        pool_storage.push_back(T());
+        return &(pool_storage.back());
       }
       else
       {
-        T* result=repo_storage_free_elements.rep_next();
-        repo_storage_free_elements.set_rep_next(result->rep_next());
+        T* result=pool_storage_free_elements.rep_next();
+        pool_storage_free_elements.set_rep_next(result->rep_next());
 				result->rep_init();
         return result;
       }
@@ -79,8 +79,8 @@ class pool
 
     void remove_element(T* e)
     {
-      e->set_rep_next(repo_storage_free_elements.rep_next());
-      repo_storage_free_elements.set_rep_next(e);
+      e->set_rep_next(pool_storage_free_elements.rep_next());
+      pool_storage_free_elements.set_rep_next(e);
     }
 
     // Copy constructor is not possible
@@ -97,17 +97,17 @@ class pool
 
     iterator begin()
     {
-      return repo_storage.begin();
+      return pool_storage.begin();
     }
 
     const_iterator begin() const
     {
-      return repo_storage.begin();
+      return pool_storage.begin();
     }
 
     iterator end()
     {
-      return repo_storage.end();
+      return pool_storage.end();
     }
 };
 

@@ -63,15 +63,15 @@ class constellation_T;
 class to_constlns_element_T;
 
 // delete object and set pointer to NULL
-template<typename T>
-void deleteobject(T*& obj)
-{
-  if (obj != NULL) 
-  {
-    delete (obj);
-    obj = NULL;
-  }
-}
+//template<typename T>
+//void deleteobject(T*& obj)
+//{
+//  if (obj != NULL) 
+//  {
+//    delete (obj);
+//    obj = NULL;
+//  }
+//}
 
 typedef struct counter_T
 {
@@ -176,8 +176,6 @@ class transition_T
 class constellation_T
 {
   public:
-    // id
-    size_t id;
     // size in number of states
     size_t size;
     // list of blocks
@@ -190,17 +188,15 @@ class constellation_T
     sized_forward_list<constellation_T>::iterator ptr_in_list;
     
     // constructor
-    constellation_T(size_t& max_const_index)
-     : id(max_const_index++), 
-       size(0), 
+    constellation_T()
+     : size(0),
        type(TRIVIAL) 
     {}
 
     // Copy constructor
 		// Does not copy lists
     constellation_T(const constellation_T& c)
-      : id(c.id),
-			  size(0),
+      : size(0),
         type(c.type)
     {
     }
@@ -208,7 +204,6 @@ class constellation_T
     // Assignment
     constellation_T operator=(const constellation_T& c)
     {
-      id = c.id;
 			size = 0;
 			type = c.type;
       return *this;
@@ -227,7 +222,7 @@ class to_constlns_element_T
     //size_t nr_trans_block_to_C = 0;
     to_constlns_element_T* new_element;
     // A list S_C for constellation C
-    sized_forward_list < state_T >* SClist;
+    pooled_sized_forward_list < state_T >* SClist;
 
     // ADDITIONAL INFO to keep track of where the element is listed in a (block)
     // to_constlns list
@@ -253,10 +248,11 @@ class to_constlns_element_T
     {}
   
     // Copy constructor
+		// Does not copy lists
     to_constlns_element_T(const to_constlns_element_T& c)
       : C(c.C),
         new_element(c.new_element),
-        SClist(c.SClist),
+        SClist(NULL),
         r_next(c.r_next)
     {
     }
@@ -266,7 +262,7 @@ class to_constlns_element_T
     {
       C = c.C;
       new_element = c.new_element;
-      SClist = c.SClist;
+      SClist = NULL;
       r_next = c.r_next;
       return *this;
     }
@@ -381,7 +377,6 @@ class bisim_partitioner_gw
     // Local class variables
 
     size_t max_block_index;
-    size_t max_const_index;
 
     size_t nr_of_splits;
      
@@ -406,6 +401,8 @@ class bisim_partitioner_gw
     pool < counter_T > counters;
     // the pool of to_constlns_element_T objects
     pool < to_constlns_element_T > to_constlns_elements;
+		// the pool of SClists
+		pool < pooled_sized_forward_list < state_T > > SClists;
   
     const label_type tau_label;
 
@@ -631,7 +628,6 @@ class bisim_partitioner_gw
     bisim_partitioner_gw(LTS_TYPE& l,
                          const bool branching=false)
      : max_block_index(0),
-       max_const_index(0),
        aut(l), 
        tau_label(determine_tau_label(l))
     {
@@ -881,7 +877,7 @@ class bisim_partitioner_gw
          if (sclist_is_empty_detect2) {
               return s;
          }
-         else if (iter_sclist_detect2 == e_detect->SClist->end()) {
+         else if (iter_sclist_detect2 == e_detect->SClist->list.end()) {
               return s;
          }
          else if (s != *iter_sclist_detect2) {
@@ -1222,7 +1218,7 @@ class bisim_partitioner_gw
       //vector < sized_forward_list < transition_T* >* > block_trans_list;
 
       // create single initial non-trivial constellation
-			constellations.push_back(constellation_T(max_const_index));
+			constellations.push_back(constellation_T());
       constellation_T* C = &(constellations.back());
       
       // create first block in C
@@ -1468,7 +1464,7 @@ class bisim_partitioner_gw
               //mCRL2log(log::verbose) << "---\n";
               // 5.2.1
               // 5.2.1.a
-							constellations.push_back(constellation_T(max_const_index));
+							constellations.push_back(constellation_T());
               constellation_T* setC = &(constellations.back());
               setB->blocks.move_linked(B, setC->blocks, bit);
               size_t Bsize = B->btm_states.size() + B->non_btm_states.size() + B->marked_btm_states.size() + B->marked_non_btm_states.size();
@@ -2353,20 +2349,20 @@ class bisim_partitioner_gw
                   // 5.3.6.a.i
                   if (setBp_entry->SClist == NULL) 
                   {
-                    setBp_entry->SClist = new sized_forward_list < state_T >;
+                    setBp_entry->SClist = SClists.get_element();
                     // move the to_constln entry to the front of the list
                     Bhat->to_constlns.move_to_front_linked(setBp_entry);
                   }
                   // 5.3.6.a.ii
-                  if (setBp_entry->SClist->size() == 0) 
+                  if (setBp_entry->SClist->list.size() == 0)
                   {
                     //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C << "\n";
-                    setBp_entry->SClist->insert(s);
+                    setBp_entry->SClist->list.insert(s);
                   }
-                  else if (setBp_entry->SClist->front() != s) 
+                  else if (setBp_entry->SClist->list.front() != s)
                   {
                     //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C << "\n";
-                    setBp_entry->SClist->insert(s);
+                    setBp_entry->SClist->list.insert(s);
                   }
                 }
                 // 5.3.6.b
@@ -2442,7 +2438,7 @@ class bisim_partitioner_gw
                   splitcrit_met = true;
                   split = true;
                 }
-                else if (e->SClist->size() < Bhat->new_btm_states.size()) 
+                else if (e->SClist->list.size() < Bhat->new_btm_states.size())
                 {
                   //mCRL2log(log::verbose) << "size: " << e->SClist->size() << "\n";
                   splitcrit_met = true;
@@ -2481,7 +2477,7 @@ class bisim_partitioner_gw
                   else 
                   {
                     sclist_is_empty_detect2 = false;
-                    iter_sclist_detect2 = e->SClist->begin();
+                    iter_sclist_detect2 = e->SClist->list.begin();
                   }
                   while (detect1_finished != TERMINATED && detect2_finished != TERMINATED) 
                   {
@@ -2637,7 +2633,7 @@ class bisim_partitioner_gw
                   typename sized_forward_list <state_T>::iterator it_SClist;
                   if (!sclist_is_empty_detect2) 
                   {
-                    it_SClist = e->SClist->begin();
+                    it_SClist = e->SClist->list.begin();
                   }
                   for (auto sit = SinSC->begin(); sit != SinSC->end(); ++sit) 
                   {
@@ -2646,7 +2642,7 @@ class bisim_partitioner_gw
                     {
                       SinSC->move_from_after_to_back(prev_sit, *SnotinSC, sit);
                     }
-                    else if (it_SClist == e->SClist->end()) 
+                    else if (it_SClist == e->SClist->list.end())
                     {
                       SinSC->move_from_after_to_back(prev_sit, *SnotinSC, sit);
                     }
@@ -2668,9 +2664,9 @@ class bisim_partitioner_gw
                     {
                       break;
                     }
-                    auto prev_sit = l->SClist->before_begin();
+                    auto prev_sit = l->SClist->list.before_begin();
                     // 5.3.7.b.ii.A
-                    for (auto sit = l->SClist->begin(); sit != l->SClist->end(); ++sit) 
+                    for (auto sit = l->SClist->list.begin(); sit != l->SClist->list.end(); ++sit)
                     {
                       state_T* s = *sit;
                       if (s->block == Bhatp) 
@@ -2679,18 +2675,19 @@ class bisim_partitioner_gw
                         // Note that we cannot have l->new_element == NULL, since then, l would be a new entry with an empty SClist
                         if (l->new_element->SClist == NULL) 
                         {
-                          l->new_element->SClist = new sized_forward_list < state_T >;
+                          l->new_element->SClist = SClists.get_element();
                           // move to front in list
                           Bhatp->to_constlns.move_to_front_linked(l->new_element);
                         }
-                        l->SClist->move_from_after_to_back(prev_sit, *(l->new_element->SClist), sit);
+                        l->SClist->list.move_from_after_to_back(prev_sit, l->new_element->SClist->list, sit);
                       }
                       prev_sit = sit;
                     }
                     // 5.3.7.b.ii.B
-                    if (l->SClist->size() == 0) 
+                    if (l->SClist->list.size() == 0)
                     {
-                      deleteobject(l->SClist);
+											SClists.remove_element(l->SClist);
+											l->SClist = NULL;
                       //mCRL2log(log::verbose) << "SC: " << l->SClist << "\n";
                       // move the l entry to the back of the list. We do not need to worry about keeping iterator e valid (in while loop), since we will not use it on the current list anymore.
                       Bhat->to_constlns.move_to_back_linked(l, bit);
@@ -2760,20 +2757,20 @@ class bisim_partitioner_gw
                         // 5.3.4.a.i
                         if (setBp_entry->SClist == NULL) 
                         {
-                          setBp_entry->SClist = new sized_forward_list < state_T >;
+                          setBp_entry->SClist = SClists.get_element();
                           // move the to_constln entry to the front of the list
                           Btmp->to_constlns.move_to_front_linked(setBp_entry);
                         }
                         // 5.3.4.a.ii
-                        if (setBp_entry->SClist->size() == 0) 
+                        if (setBp_entry->SClist->list.size() == 0)
                         {
                           //mCRL2log(log::verbose) << "adding1 state to constln " << setBp_entry << " " << setBp_entry->C->id << "\n";
-                          setBp_entry->SClist->insert(s);
+                          setBp_entry->SClist->list.insert(s);
                         }
-                        else if (setBp_entry->SClist->front() != s) 
+                        else if (setBp_entry->SClist->list.front() != s)
                         {
                           //mCRL2log(log::verbose) << "(" << t << "," << t->target->id << "): adding2 state " << s->id << " to constln " << setBp_entry << " " << setBp_entry->C->id << "\n";
-                          setBp_entry->SClist->insert(s);
+                          setBp_entry->SClist->list.insert(s);
                         }
                       }
                       // 5.3.4.a.iii
@@ -2823,8 +2820,9 @@ class bisim_partitioner_gw
                   to_constlns_element_T* l = *it;
                   if (l->SClist != NULL) 
                   {
-                    deleteobject (l->SClist);
-                  }
+                    SClists.remove_element(l->SClist);
+										l->SClist = NULL;
+									}
                   else 
                   {
                     break;
