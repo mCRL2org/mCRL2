@@ -50,6 +50,7 @@ typedef enum { CONTINUE, TERMINATED, STOPPED } lockstep_search_mode;
 
 
 typedef size_t state_type;
+typedef size_t trans_type;
 typedef size_t statemode_type;
 typedef size_t block_type;
 typedef size_t label_type;
@@ -107,8 +108,9 @@ class state_T
   public:
     // block B' containing state s
     block_T *block;
-    // static list of transitions from s (s -> s')
-    std::vector <transition_T*> Ttgt;
+    // begin and end indices for transitions from s (s -> s')
+    trans_type Ttgt_begin;
+    trans_type Ttgt_end;
     // static list of transitions to s (s <- s')
     std::vector <transition_T*> Tsrc;
     // number of inert transitions from s to a state in B'
@@ -136,7 +138,9 @@ class state_T
     
     // constructor
     state_T()
-     : block(NULL), 
+     : block(NULL),
+		   Ttgt_begin(0),
+			 Ttgt_end(0),
        inert_cnt(0), 
        priority(0),  
        constln_cnt(NULL), 
@@ -389,6 +393,8 @@ class bisim_partitioner_gw
     sized_forward_list < constellation_T > trivial_constlns;
     // the number of states
     size_t nr_of_states;
+		// the original number of states of input LTS
+		size_t orig_nr_of_states;
     // the list of states
     std::vector < state_T > states;
     // the list of transitions
@@ -403,7 +409,8 @@ class bisim_partitioner_gw
     pool < to_constlns_element_T > to_constlns_elements;
 		// the pool of SClists
 		pool < pooled_sized_forward_list < state_T > > SClists;
-  
+		// temporary map to keep track of states to be added when converting LTS to Kripke structure
+
     const label_type tau_label;
 
 
@@ -434,6 +441,7 @@ class bisim_partitioner_gw
     // to keep track of state of detect 2
     state_T *current_state_detect2;
     typename std::vector<transition_T*>::iterator current_trans_detect2;
+		trans_type current_trans_forward_detect2;
     // to keep track of adding states to detect 2
     typename sized_forward_list<state_T>::iterator iter_state_added_detect2;
     typename sized_forward_list<state_T>::iterator iter_sclist_detect2;
@@ -446,9 +454,41 @@ class bisim_partitioner_gw
     size_t maxsize_detect;
     // old constellation of the splitter
     constellation_T* constellation_splitter_detect;
-    
-    // begin auxiliary functions
 
+    // key and hash function for (action, target state) pair. Required since unordered_map does not
+    // directly allow to use pair keys
+    class Key 
+    {
+      public:
+        label_type first;
+        state_type second;
+
+        Key(const label_type& f, const state_type& s)
+         : first(f),
+           second(s)
+        {} 
+
+        bool operator==(const Key &other) const 
+        {
+          return (first == other.first && second == other.second);
+        }
+    };
+
+    struct KeyHasher 
+    {
+      std::size_t operator()(const Key& k) const 
+      {
+        using std::size_t;
+        using std::hash;
+
+        return (hash<label_type>()(k.first) ^ (hash<state_type>()(k.second) << 1));
+      }
+    };
+	  // Map used to convert LTS to Kripke structure
+		// (also used when converting Kripke structure back to LTS)
+		std::unordered_map < Key, state_type, KeyHasher > extra_kripke_states;
+	
+    // begin auxiliary functions
 
     size_t state_id(state_T* s)
     {
@@ -665,26 +705,61 @@ class bisim_partitioner_gw
      * \param[in] branching Causes non internal transitions to be removed. */
     void replace_transitions(const bool branching)
     {
-      // Put all the non inert transitions in a set. A set is used to remove double occurrences of transitions.
+		  std::unordered_map < state_type, Key > to_lts_map;
+			// obtain a map from state to <action, state> pair from extra_kripke_states
+			for (auto it = extra_kripke_states.begin(); it != extra_kripke_states.end(); ++it)
+			{
+				to_lts_map.insert(std::make_pair(it->second, it->first));
+			}
+			extra_kripke_states.clear();
+			
+			// Put all the non inert transitions in a set. A set is used to remove double occurrences of transitions.
       std::set < transition > resulting_transitions;
 
-      const std::vector<transition>& trans=aut.get_transitions();
-      for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
-      {
-        const transition i=*t;
-        if (!branching ||
-            !aut.is_tau(i.label()) ||
-            get_eq_class(i.from())!=get_eq_class(i.to()))
-        {
-          resulting_transitions.insert(
-            transition(
-              get_eq_class(i.from()),
-              i.label(),
-              get_eq_class(i.to())));
-        }
-      }
-      // Remove the old transitions
-      aut.clear_transitions();
+      // traverse the outgoing transitions of the original LTS states
+			for (state_type snr = 0; snr < orig_nr_of_states; snr++)
+			{
+			  state_T* s = &(states[snr]);
+				size_t s_eq = get_eq_class(snr);
+				for (trans_type tnr = s->Ttgt_begin; tnr < s->Ttgt_end; tnr++)
+				{
+				  transition_T* t = &(transitions[tnr]);
+					state_type tgt_id = t->target - &(states[0]);
+					std::cout << tgt_id << "\n";
+					if (tgt_id < orig_nr_of_states)
+					{
+					  // we have a tau transition
+						if (!branching || s_eq != get_eq_class(tgt_id))
+						{
+						  std::cout << s_eq << "-" << tau_label << "->" << get_eq_class(tgt_id) << "\n";
+						  resulting_transitions.insert(transition(s_eq, tau_label, get_eq_class(tgt_id)));
+					  }
+					}
+					else {
+						Key k = (to_lts_map.find(tgt_id))->second;
+						std::cout << s_eq << "-" << k.first << "->" << get_eq_class(k.second) << "\n";
+						resulting_transitions.insert(transition(s_eq, k.first, get_eq_class(k.second)));
+					}
+				}
+			}
+
+//      const std::vector<transition>& trans=aut.get_transitions();
+//      for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
+//      {
+//        const transition i=*t;
+//        if (!branching ||
+//            !aut.is_tau(i.label()) ||
+//            get_eq_class(i.from())!=get_eq_class(i.to()))
+//        {
+//          resulting_transitions.insert(
+//            transition(
+//              get_eq_class(i.from()),
+//              i.label(),
+//              get_eq_class(i.to())));
+//        }
+//      }
+//      // Remove the old transitions
+//      aut.clear_transitions();
 
       // Copy the transitions from the set into the transition system.
       for (std::multiset < transition >::const_iterator i=resulting_transitions.begin();
@@ -726,37 +801,7 @@ class bisim_partitioner_gw
     {
       return action + "_" + std::to_string((long long int) to);
     }
-     
-    // key and hash function for (action, target state) pair. Required since unordered_map does not
-    // directly allow to use pair keys
-    class Key 
-    {
-      public:
-        label_type first;
-        state_type second;
-
-        Key(const label_type& f, const state_type& s)
-         : first(f),
-           second(s)
-        {} 
-
-        bool operator==(const Key &other) const 
-        {
-          return (first == other.first && second == other.second);
-        }
-    };
-
-    struct KeyHasher 
-    {
-      std::size_t operator()(const Key& k) const 
-      {
-        using std::size_t;
-        using std::hash;
-
-        return (hash<label_type>()(k.first) ^ (hash<state_type>()(k.second) << 1));
-      }
-    };
-
+	
     // next_state functions to add states to detect1 and detect2 in the various phases of the algorithm
     // (1: splitting Bp, 2: splitting split(Bp, B), 3: stabilising blocks)
     // precondition: iter_state_added_detectx have been set to before the beginning of the relevant state lists
@@ -973,7 +1018,7 @@ class bisim_partitioner_gw
       // a direct outgoing transition to Bp \ B.
       if (in_forward_check_detect2) 
       {
-        if (current_trans_detect2 == current_state_detect2->Ttgt.end()) 
+        if (current_trans_forward_detect2 == current_state_detect2->Ttgt_end)
         {
           // no direct transition to Bp \ B found. State is suitable for detect2
           in_forward_check_detect2 = false;
@@ -989,7 +1034,7 @@ class bisim_partitioner_gw
         }
         else 
         {
-          transition_T* t = *current_trans_detect2;
+          transition_T* t = &(transitions[current_trans_forward_detect2]);
           //mCRL2log(log::verbose) << "compare " << t->target->block->constellation->id << " " << constellation_splitter_detect->id << "\n";
           if (t->target->block->constellation == constellation_splitter_detect && t->source->block != t->target->block) 
           {
@@ -1000,7 +1045,7 @@ class bisim_partitioner_gw
           else 
           {
             // go to next transition
-            current_trans_detect2++;
+            current_trans_forward_detect2++;
           }
         }
         return CONTINUE;
@@ -1048,7 +1093,7 @@ class bisim_partitioner_gw
               else 
               {
                 in_forward_check_detect2 = true;
-                current_trans_detect2 = current_state_detect2->Ttgt.begin();
+                current_trans_forward_detect2 = current_state_detect2->Ttgt_begin;
               }
               return CONTINUE;
             }
@@ -1209,9 +1254,7 @@ class bisim_partitioner_gw
       // the number of states
       nr_of_states = aut.num_states();
       // original size of input
-      size_t orig_nr_of_states = nr_of_states;
-      // temporary map to keep track of states to be added when converting LTS to Kripke structure
-      unordered_map < Key, state_type, KeyHasher > extra_kripke_states;
+      orig_nr_of_states = nr_of_states;
       // temporary map to keep track of blocks (maps transition labels (unequal to tau) to blocks
       unordered_map < label_type, block_type > action_block_map;
       // temporary list to keep track of lists of transitions, one for each block
@@ -1292,27 +1335,22 @@ class bisim_partitioner_gw
       {
         (states[it->second]).block = &(blocks[(action_block_map.find((it->first).first))->second]);
       }
+      // create transitions (we need the original number in input + one for each extra kripke state)
+      transitions.reserve(trans.size()+extra_kripke_states.size());
       // add transitions
-      state_type current_src_state = 0;
+      state_type current_src_state = -1;
       // create n counters
       counters.add_elements(nr_of_states);
       auto counter_it = counters.begin();
-      // create transitions (we need the original number in input + one for each extra kripke state)
-      transitions.insert(transitions.begin(), trans.size()+extra_kripke_states.size(), transition_T());
-      auto tit = transitions.begin();
+			transition_T* t_entry;
       for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
-        
-        // if we see a new source state, create a new counter for it
-        if (t.from() != current_src_state) 
-        {
-          current_src_state = t.from();
-          counter_it++;
-        }
-        // create transition entry
-        transition_T* t_entry = &(*tit);
-        // fill in info
+				
+				// create transition entry
+				transitions.emplace_back(transition_T());
+				t_entry = &(transitions.back());
+				// fill in info
         t_entry->source = &states[t.from()];
         // target depends on transition label
         if (aut.is_tau(t.label()) && branching) 
@@ -1329,8 +1367,23 @@ class bisim_partitioner_gw
         }
         // connect transition to its states
         t_entry->target->Tsrc.push_back(t_entry);
-        t_entry->source->Ttgt.push_back(t_entry);
-        // add pointer to counter
+				
+				// if we see a new source state, create a new counter for it
+        if (t.from() != current_src_state) 
+        {
+				  // set begin of Ttgt for source state
+					t_entry->source->Ttgt_begin = transitions.size()-1;
+					
+					if (t.from() > 0) {
+            counter_it++;
+						// set end of Ttgt list of previous source state
+						states[current_src_state].Ttgt_end = t_entry->source->Ttgt_begin;
+				  }
+					
+					current_src_state = t.from();
+        }
+				
+				// add pointer to counter
         t_entry->to_constln_cnt = &(*counter_it);
         // increment the counter
         t_entry->to_constln_cnt->cnt++;
@@ -1342,37 +1395,45 @@ class bisim_partitioner_gw
           // add transition to transition list of source block
           t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
         }
-        // move on to next transition
-        tit++;
         // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
         //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
       }
+			// set final state Ttgt end
+			t_entry->source->Ttgt_end = transitions.size();
+			
       // add transitions <a,t> -> t
-      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
+			for (size_t snr = orig_nr_of_states; snr < nr_of_states; ++snr)
+			{
+				transitions.emplace_back(transition_T());
+				states[snr].Ttgt_begin = transitions.size()-1;
+				states[snr].Ttgt_end = transitions.size();
+			}
+			// we no longer need original transitions
+			aut.clear_transitions();
+
+      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit)
       {
         std::pair<Key, state_type> e = *sit;
         state_type sid = e.second;
         state_type tid = e.first.second;
 
-        transition_T* t_entry2 = &(*tit);
+        t_entry = &(transitions[states[sid].Ttgt_begin]);
         // fill in info
-        t_entry2->source = &states[sid];
-        t_entry2->target = &states[tid];
+        t_entry->source = &states[sid];
+        t_entry->target = &states[tid];
         // connect transition to its states
-        t_entry2->target->Tsrc.push_back(t_entry2);
-        t_entry2->source->Ttgt.push_back(t_entry2);
+        t_entry->target->Tsrc.push_back(t_entry);
         // add pointer to counter object of source state
         counter_it++;
-        t_entry2->to_constln_cnt = &(*counter_it);
+        t_entry->to_constln_cnt = &(*counter_it);
         // increment the counter
-        t_entry2->to_constln_cnt->cnt++;
+        t_entry->to_constln_cnt->cnt++;
         // set pointer to C entry in to_constlns list of B. Increment the associated counter
-        t_entry2->to_constln_ref = t_entry2->source->block->to_constlns.front();
+        t_entry->to_constln_ref = t_entry->source->block->to_constlns.front();
         // add transition to transition list of source block
-        t_entry2->to_constln_ref->trans_list.insert_linked(t_entry2);
+        t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
         // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
         //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
-        tit++;
       }
 #ifndef NDEBUG
       // print the Kripke structure
@@ -1565,9 +1626,9 @@ class bisim_partitioner_gw
                   s->type = MARKED_NON_BTM_STATE;
                 }
                 // consider the outgoing transitions
-                for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) 
+                for (trans_type tit = s->Ttgt_begin; tit != s->Ttgt_end; ++tit)
                 {
-                  transition_T* t = *tit;
+                  transition_T* t = &(transitions[tit]);
                   block_T* Bp = t->target->block;
                   constellation_T* setBp = Bp->constellation;
                   
@@ -1784,9 +1845,9 @@ class bisim_partitioner_gw
                 // 5.3.2.b
                 // Different from pseudo-code: we need to consider all constellations that can be reached from
                 // s, not just setB \ B and B.
-                for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) 
+                for (auto tit = s->Ttgt_begin; tit != s->Ttgt_end; ++tit)
                 {
-                  transition_T* t = *tit;
+                  transition_T* t = &(transitions[tit]);
                   
                   // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
                   // Different from pseudo-code: only do this if transition is non-inert
@@ -2115,9 +2176,9 @@ class bisim_partitioner_gw
                 //print_partition();
 #endif
                 // 5.3.4 (5.3.2.b)
-                for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) 
+                for (auto tit = s->Ttgt_begin; tit != s->Ttgt_end; ++tit)
                 {
-                  transition_T* t = *tit;
+                  transition_T* t = &(transitions[tit]);
                   
                   // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
                   // Different from pseudo-code: only do this if transition is non-inert
@@ -2339,9 +2400,9 @@ class bisim_partitioner_gw
               {
                 state_T* s = *sit;
                 // 5.3.6.a
-                for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) 
+                for (auto tit = s->Ttgt_begin; tit != s->Ttgt_end; ++tit)
                 {
-                  transition_T* t = *tit;
+                  transition_T* t = &(transitions[tit]);
                   to_constlns_element_T* setBp_entry = t->to_constln_ref;
                   //mCRL2log(log::verbose) << t->to_constln_ref->C << " " << t->target->block->constellation << "\n";
                   //mCRL2log(log::verbose) << Bhat->constellation << "\n";
@@ -2512,9 +2573,9 @@ class bisim_partitioner_gw
                     move_state_to_block(s, Bhatp);
                     // Different from pseudo-code: we need to consider all constellations that can be reached from
                     // s, not just setB \ B and B. For this, we merge steps 5.3.2.c and 5.3.2.d
-                    for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) 
+                    for (auto tit = s->Ttgt_begin; tit != s->Ttgt_end; ++tit)
                     {
-                      transition_T* t = *tit;
+                      transition_T* t = &(transitions[tit]);
 
                       // Different from pseudo-code: only do this if transition is non-inert
                       if (t->to_constln_ref != NULL) 
@@ -2750,9 +2811,9 @@ class bisim_partitioner_gw
                     {
                       state_T* s = *sit;
                       //mCRL2log(log::verbose) << "state " << s->id << "\n";
-                      for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) 
+                      for (auto tit = s->Ttgt_begin; tit != s->Ttgt_end; ++tit)
                       {
-                        transition_T* t = *tit;
+                        transition_T* t = &(transitions[tit]);
                         to_constlns_element_T* setBp_entry = t->to_constln_ref;
                         // 5.3.4.a.i
                         if (setBp_entry->SClist == NULL) 
@@ -2842,6 +2903,9 @@ class bisim_partitioner_gw
 
       mCRL2log(log::verbose) << "number of splits performed: " << nr_of_splits << "\n";
 
+      // clear what is no longer needed
+			transitions.clear();
+			constellations.clear();
     }
 
 #ifndef NDEBUG
@@ -2882,9 +2946,9 @@ class bisim_partitioner_gw
       for (auto sit = states.begin(); sit != states.end(); ++sit) 
       {
         const state_T& s = *sit;
-        for (auto tit = s.Ttgt.begin(); tit != s.Ttgt.end(); ++tit) 
+        for (auto tit = s.Ttgt_begin; tit != s.Ttgt_end; ++tit)
         {
-          transition_T* t = *tit;
+          transition_T* t = &(transitions[tit]);
           block_T* B = t->source->block;
           found = false;
           if (t->to_constln_ref != NULL) 
@@ -2997,9 +3061,9 @@ class bisim_partitioner_gw
         assert(s->is_in_P_detect2 == false);
         size_t local_inert_cnt = 0;
         // check outgoing transitions
-        for (auto tit = s->Ttgt.begin(); tit != s->Ttgt.end(); ++tit) 
+        for (auto tit = s->Ttgt_begin; tit != s->Ttgt_end; ++tit)
         {
-          transition_T* t = *tit;
+          transition_T* t = &(transitions[tit]);
           assert(t->source == s);
           // TODO: CHECK TO_CONSTLN_CNT
           mCRL2log(log::verbose) << "cnts: " << t->target->block << " " << B << "\n";
