@@ -1769,7 +1769,7 @@ class bisim_partitioner_gw
               for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
               {
                 to_constlns_element_T* l = *it;
-                mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+                mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->type << "\n";
               }
               mCRL2log(log::verbose) << "---\n";
 #endif
