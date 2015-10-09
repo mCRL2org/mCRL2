@@ -19,99 +19,110 @@
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/parse.h"
 
-using namespace mcrl2::core;
-using namespace mcrl2::lts;
-using namespace mcrl2::lts::detail;
-using namespace mcrl2::log;
+namespace mcrl2 {
 
+namespace lts {
 
-static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
+struct fsm_writer
 {
-  // determine number of state parameters
-  size_t num_params;
-  num_params=l.process_parameters().size();
+  std::ostream& out;
+  const lts_fsm_t& fsm;
 
-  // print parameters with used values
-  mCRL2log(verbose) << "writing parameter table..." << std::endl;
-  for (size_t i=0; i<num_params; i++)
+  fsm_writer(std::ostream& out_, const lts_fsm_t& fsm_)
+    : out(out_), fsm(fsm_)
+  {}
+
+  void write_parameters()
   {
-
-    const std::vector < std::string > vals = l.state_element_values(i);
-    os << l.process_parameter(i).first << "(" << vals.size() << ") " << l.process_parameter(i).second << " ";
-
-    for (std::vector < std::string >::const_iterator j=vals.begin(); j!=vals.end(); ++j)
+    // print parameters with used values
+    mCRL2log(log::verbose) << "writing parameter table..." << std::endl;
+    for (std::size_t i = 0; i < fsm.process_parameters().size(); i++)
     {
-      os << " \"" << *j << "\"";
-    }
-    os << std::endl;
-  }
-
-  // print states
-  mCRL2log(verbose) << "writing states..." << std::endl;
-  os << "---" << std::endl;
-  for (size_t i=0; i<l.num_states(); i++)
-  {
-    size_t idx = i;
-    // make sure that the initial state is first
-    if (i == 0)
-    {
-      idx = l.initial_state();
-    }
-    else if (i == l.initial_state())
-    {
-      idx = 0;
-    }
-
-    if (l.has_state_info())
-    {
-      const state_label_fsm state_pars=l.state_label(idx);
-
-      for (size_t j=0; j<state_pars.size() ; j++)
+      const std::vector<std::string>& values = fsm.state_element_values(i);
+      out << fsm.process_parameter(i).first << "(" << values.size() << ") " << fsm.process_parameter(i).second << " ";
+      for (const std::string& s: values)
       {
-        if (j > 0)
-        {
-          os << " ";
-        }
-        os << state_pars[j];
-
+        out << " \"" << s << "\"";
       }
-      os << std::endl;
+      out << std::endl;
     }
   }
 
-  // print transitions
-  mCRL2log(verbose) << "writing transitions..." << std::endl;
-  os << "---" << std::endl;
-  const std::vector<transition> &trans=l.get_transitions();
-  for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
+  void write_states()
   {
-    transition::size_type from = t->from();
-    // correct state numbering
-    if (from == 0)
+    mCRL2log(log::verbose) << "writing states..." << std::endl;
+    for (std::size_t i = 0; i < fsm.num_states(); i++)
     {
-      from = l.initial_state();
-    }
-    else if (from == l.initial_state())
-    {
-      from = 0;
-    }
-    transition::size_type to = t->to();
-    if (to == 0)
-    {
-      to = l.initial_state();
-    }
-    else if (to == l.initial_state())
-    {
-      to = 0;
-    }
-    // correct state numbering
-    os << from+1 << " " << to+1 << " \"";
-    os << mcrl2::lts::pp(l.action_label(t->label()));
-    os << "\"" << std::endl;
-  }
-}
+      std::size_t idx = i;
+      // make sure that the initial state is first
+      if (i == 0)
+      {
+        idx = fsm.initial_state();
+      }
+      else if (i == fsm.initial_state())
+      {
+        idx = 0;
+      }
 
-void mcrl2::lts::lts_fsm_t::load(const std::string& filename)
+      if (fsm.has_state_info())
+      {
+        const state_label_fsm& state_parameters = fsm.state_label(idx);
+        for (std::size_t j = 0; j < state_parameters.size(); j++)
+        {
+          if (j > 0)
+          {
+            out << " ";
+          }
+          out << state_parameters[j];
+        }
+        out << std::endl;
+      }
+    }
+  }
+
+  void write_transitions()
+  {
+    mCRL2log(log::verbose) << "writing transitions..." << std::endl;
+    for (const transition& t: fsm.get_transitions())
+    {
+      transition::size_type from = t.from();
+      // correct state numbering
+      if (from == 0)
+      {
+        from = fsm.initial_state();
+      }
+      else if (from == fsm.initial_state())
+      {
+        from = 0;
+      }
+      transition::size_type to = t.to();
+      if (to == 0)
+      {
+        to = fsm.initial_state();
+      }
+      else if (to == fsm.initial_state())
+      {
+        to = 0;
+      }
+
+      // correct state numbering
+      out << from + 1 << " " << to + 1 << " \"";
+      out << mcrl2::lts::pp(fsm.action_label(t.label()));
+      out << "\"" << std::endl;
+    }
+  }
+
+  void write()
+  {
+    write_parameters();
+    out << "---" << std::endl;
+    write_states();
+    out << "---" << std::endl;
+    write_transitions();
+  }
+};
+
+void lts_fsm_t::load(const std::string& filename)
 {
   if (filename.empty())
   {
@@ -144,11 +155,11 @@ void mcrl2::lts::lts_fsm_t::load(const std::string& filename)
   }
 }
 
-void mcrl2::lts::lts_fsm_t::save(const std::string& filename) const
+void lts_fsm_t::save(const std::string& filename) const
 {
   if (filename=="")
   {
-    write_to_fsm(std::cout,*this);
+    fsm_writer(std::cout, *this).write();
   }
   else
   {
@@ -160,9 +171,11 @@ void mcrl2::lts::lts_fsm_t::save(const std::string& filename) const
       return;
     }
 
-
-    write_to_fsm(os,*this);
+    fsm_writer(os, *this).write();
     os.close();
   }
 }
 
+} // namespace lts
+
+} // namespace mcrl2
