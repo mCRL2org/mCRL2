@@ -60,20 +60,7 @@ class state_T;
 class block_T;
 class transition_T;
 class constellation_T;
-// to constellation counter (unique for a (state, constellation) combination)
 class to_constlns_element_T;
-
-// delete object and set pointer to NULL
-//template<typename T>
-//void deleteobject(T*& obj)
-//{
-//  if (obj != NULL) 
-//  {
-//    delete (obj);
-//    obj = NULL;
-//  }
-//}
-
 
 class counter_T
 {
@@ -104,15 +91,32 @@ class counter_T
      : m_cnt(0)
     {}
 
+
+    bool check_counter_free() const
+    {
+      for(counter_T* i= first_free_position(); i!=NULL; i=reinterpret_cast<counter_T*>(i->m_cnt))
+      {
+        if (this==i)
+        { 
+          std::cerr << "COUNTER FREE\n"; 
+          return true;
+        }
+      }
+      return false;
+    }
+
+
   public:
     void increment()
     {
+      assert(!check_counter_free());
       assert(this!=NULL);
       m_cnt++;
     }
 
     void decrement()
     {
+      assert(!check_counter_free());
       assert(this!=NULL);
       assert(m_cnt>0);
       m_cnt--;
@@ -120,11 +124,13 @@ class counter_T
 
     size_t counter_value() const
     {
+      assert(!check_counter_free());
       return m_cnt;
     }
 
     void delete_counter()
     {
+      assert(!check_counter_free());
       assert(m_cnt==0);
       assert(this!=NULL);
       // garbage collect this counter.
@@ -141,9 +147,11 @@ class counter_T
         counter_T* result=first_free_position();
         first_free_position()=reinterpret_cast<counter_T*>(first_free_position()->m_cnt);
         result->m_cnt=0;
+      assert(!result->check_counter_free());
         return result;
       }
       counter_pool().emplace_back(counter_T());
+      assert(!counter_pool().back().check_counter_free());
       return &counter_pool().back();
     }
 };

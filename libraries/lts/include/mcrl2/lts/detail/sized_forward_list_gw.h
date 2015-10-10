@@ -295,7 +295,7 @@ class sized_forward_list
         itnext++;
         itnext->ptr_in_list = it;
       }
-      assert(check_integrity_of_sized_forward_list("INSERT LINKED2"));
+      assert(check_integrity_of_sized_forward_list("INSERT LINKED2",true));
       return it;
     }
   
@@ -304,7 +304,7 @@ class sized_forward_list
     {
       obj->ptr_in_list = last();
       insert_back(obj);
-      assert(check_integrity_of_sized_forward_list("LINKED BACK2"));
+      assert(check_integrity_of_sized_forward_list("LINKED BACK2",true));
     }
 
     // special method for inserting states
@@ -366,7 +366,7 @@ class sized_forward_list
     {
       rearrange_element_pointers(obj);
       remove_after(obj->ptr_in_list);
-      assert(check_integrity_of_sized_forward_list("REMOVE LINKED"));
+      assert(check_integrity_of_sized_forward_list("REMOVE LINKED",true));
     }
 
     void remove_linked(T* obj, iterator& current)
@@ -433,7 +433,7 @@ class sized_forward_list
       last()->set_next(node_to_move);
       set_last(node_to_move);
       m_list_size++;
-      assert(check_integrity_of_sized_forward_list("MOVE TO BACK2"));
+      assert(check_integrity_of_sized_forward_list("MOVE TO BACK2",true));
     }
 
     void move_to_back_linked(T* obj, iterator& current)
@@ -507,8 +507,9 @@ class sized_forward_list
       return true;
     }
 
-    bool check_integrity_of_sized_forward_list(const std::string message="",bool check_ptr_in_list=true) const
+    bool check_integrity_of_sized_forward_list(const std::string message, bool check_ptr_in_list) const
     {
+      return true; // This check is very time consuming. It must be explicitly switched on.
       size_t length=0;
       const two_pointers* last_seen=m_node_before_begin;
       if (m_list_size == 0 && m_node_before_begin != last())
