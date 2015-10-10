@@ -140,7 +140,7 @@ class counter_T
       {
         counter_T* result=first_free_position();
         first_free_position()=reinterpret_cast<counter_T*>(first_free_position()->m_cnt);
-        result->m_cnt=1;
+        result->m_cnt=0;
         return result;
       }
       counter_pool().emplace_back(counter_T());
@@ -1352,7 +1352,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
 
       // iterate over the transitions and collect new states
       aut.sort_transitions(mcrl2::lts::src_lbl_tgt);
-      const std::vector<transition> &trans = aut.get_transitions();
+      const std::vector<transition>& trans = aut.get_transitions();
       for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
