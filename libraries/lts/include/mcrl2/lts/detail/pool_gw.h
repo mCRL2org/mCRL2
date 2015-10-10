@@ -72,7 +72,7 @@ class pool
       {
         T* result=pool_storage_free_elements.rep_next();
         pool_storage_free_elements.set_rep_next(result->rep_next());
-				result->rep_init();
+        result->rep_init();
         return result;
       }
     }

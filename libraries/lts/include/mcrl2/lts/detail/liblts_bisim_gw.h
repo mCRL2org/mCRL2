@@ -74,34 +74,79 @@ class to_constlns_element_T;
 //  }
 //}
 
-typedef struct counter_T
+
+class counter_T
 {
   protected:
     // needed in pool
-    counter_T* r_next;
-  public:
-    // the counter
-    size_t cnt;
-  
-    void set_rep_next(counter_T* e)
+    size_t m_cnt;
+
+    // A deque containing all the counters.
+    static std::deque<counter_T>& counter_pool()
     {
-      r_next = e;
-    }
-    counter_T* rep_next()
-    {
-      return r_next;
-    }
-    void rep_init()
-    {
-      r_next = NULL;
-      cnt = 0;
+      static std::deque<counter_T> m_counter_pool;
+      return m_counter_pool;
     }
 
+    // First free position is 0 if there is no
+    // free position. Otherwise it points to the
+    // first_free_position-1 in the counter_pool,
+    // where an unused counter can be found.
+    static counter_T*& first_free_position()
+    {
+      static counter_T* m_first_free_position=NULL;
+      return m_first_free_position;
+    }
+
+    // The constructor is intentionally not public.
+    // A counter must be created by new_counter.
     counter_T()
-     : r_next(NULL),
-       cnt(0)
+     : m_cnt(0)
     {}
-} counter_T;
+
+  public:
+    void increment()
+    {
+      assert(this!=NULL);
+      m_cnt++;
+    }
+
+    void decrement()
+    {
+      assert(this!=NULL);
+      assert(m_cnt>0);
+      m_cnt--;
+    }
+
+    size_t counter_value() const
+    {
+      return m_cnt;
+    }
+
+    void delete_counter()
+    {
+      assert(m_cnt==0);
+      assert(this!=NULL);
+      // garbage collect this counter.
+      m_cnt=reinterpret_cast<size_t>(first_free_position());
+      first_free_position()=this;
+    }
+
+    // A counter must be created using new_counter, and
+    // it cannot be constructed using a constructor.
+    static counter_T* new_counter()
+    {
+      if (first_free_position()!=NULL)
+      {
+        counter_T* result=first_free_position();
+        first_free_position()=reinterpret_cast<counter_T*>(first_free_position()->m_cnt);
+        result->m_cnt=1;
+        return result;
+      }
+      counter_pool().emplace_back(counter_T());
+      return &counter_pool().back();
+    }
+};
 
 class state_T
 {
@@ -126,13 +171,13 @@ class state_T
     statemode_type type;
     // typename
     sized_forward_list<state_T >::iterator ptr_in_list;
+    // typename
+    std::multiset<state_T*>::iterator pos_in_P_detect2;
     // is the state in stack of detect1?
     bool is_in_L_detect1;
     // is the state in priority queue of detect2?
     bool is_in_P_detect2;
     // iterator pointing to the position of the state in P
-    // typename
-    std::multiset<state_T*>::iterator pos_in_P_detect2;
     // is the state in Lp of detect2?
     bool is_in_Lp_detect2;
     
@@ -149,7 +194,8 @@ class state_T
        is_in_L_detect1(false), 
        is_in_P_detect2(false), 
        is_in_Lp_detect2(false) 
-    {}
+    {
+    }
 };
 
 class transition_T
@@ -174,7 +220,13 @@ class transition_T
     sized_forward_list<transition_T >::iterator ptr_in_list;
     
     // constructor
-    transition_T(): source(NULL), target(NULL), to_constln_cnt(NULL), to_constln_ref(NULL) {}
+    transition_T()
+     : source(NULL), 
+       target(NULL), 
+       to_constln_cnt(NULL), 
+       to_constln_ref(NULL) 
+    {
+    }
 };
 
 class constellation_T
@@ -404,7 +456,7 @@ class bisim_partitioner_gw
     // the list of constellations
     std::deque < constellation_T > constellations;
     // the pool of counters
-    pool < counter_T > counters;
+    // pool < counter_T > counters;
     // the pool of to_constlns_element_T objects
     pool < to_constlns_element_T > to_constlns_elements;
     // the pool of SClists
@@ -417,12 +469,13 @@ class bisim_partitioner_gw
     // start structures and functions for lockstep search
 
     // A Comparator class to compare states in the priority queue
-    struct LessThanByInert
+    class LessThanByInert
     {
-      bool operator()(const state_T* lhs, const state_T* rhs) const 
-      {
-        return lhs->priority < rhs->priority;
-      }
+      public:
+        bool operator()(const state_T* lhs, const state_T* rhs) const 
+        {
+          return lhs->priority < rhs->priority;
+        }
     };
 
     // detect1
@@ -474,15 +527,16 @@ class bisim_partitioner_gw
         }
     };
 
-    struct KeyHasher 
+    class KeyHasher 
     {
-      std::size_t operator()(const Key& k) const 
-      {
-        using std::size_t;
-        using std::hash;
+      public:
+        std::size_t operator()(const Key& k) const 
+        {
+          using std::size_t;
+          using std::hash;
 
-        return (hash<label_type>()(k.first) ^ (hash<state_type>()(k.second) << 1));
-      }
+          return (hash<label_type>()(k.first) ^ (hash<state_type>()(k.second) << 1));
+        }
     };
     // Map used to convert LTS to Kripke structure
     // (also used when converting Kripke structure back to LTS)
@@ -599,52 +653,60 @@ class bisim_partitioner_gw
     // B->constln_ref and B->coconstln_ref if they point to a counter with value 0
     void clean_temp_refs_block(block_T* B)
     {
-         if (B != NULL) 
+      if (B != NULL) 
+      {
+         //mCRL2log(log::verbose) << "CLEANING " << B->id << "\n";
+         for (auto sit = B->marked_btm_states.begin(); sit != B->marked_btm_states.end(); ++sit) 
          {
-              //mCRL2log(log::verbose) << "CLEANING " << B->id << "\n";
-              for (auto sit = B->marked_btm_states.begin(); sit != B->marked_btm_states.end(); ++sit) 
-              {
-                   state_T* s = *sit;
-                   s->constln_cnt = NULL;
-                   s->coconstln_cnt = NULL;
-                   B->marked_btm_states.move_state_linked(s, B->btm_states, BTM_STATE, sit);
-              }
-              for (auto sit = B->marked_non_btm_states.begin(); sit != B->marked_non_btm_states.end(); ++sit) {
-                   state_T* s = *sit;
-                   s->constln_cnt = NULL;
-                   if (s->coconstln_cnt != NULL) {
-                        if (s->coconstln_cnt->cnt == 0) {
-                             counters.remove_element(s->coconstln_cnt);
-                        }
-                   }
-                   s->coconstln_cnt = NULL;
-                   B->marked_non_btm_states.move_state_linked(s, B->non_btm_states, NON_BTM_STATE, sit);
-              }
-              if (B->constln_ref != NULL) {
-                   if (size(B->constln_ref) == 0) {
-                        // if the associated constellation is the one containing B, set inconstln_ref to NULL
-                        if (B->constln_ref->C == B->constellation) 
-                        {
-                          B->inconstln_ref = NULL;
-                        }
-                        B->to_constlns.remove_linked(B->constln_ref);
-                        to_constlns_elements.remove_element(B->constln_ref);
-                        B->constln_ref = NULL;
-                   }
-                   B->constln_ref = NULL;
-              }
-              if (B->coconstln_ref != NULL) {
-                   if (size(B->coconstln_ref) == 0) {
-                        if (B->coconstln_ref->C == B->constellation) {
-                             B->inconstln_ref = NULL;
-                        }
-                        B->to_constlns.remove_linked(B->coconstln_ref);
-                        to_constlns_elements.remove_element(B->coconstln_ref);
-                        B->coconstln_ref = NULL;
-                   }
-                   B->coconstln_ref = NULL;
-              }
+            state_T* s = *sit;
+            s->constln_cnt = NULL;
+            s->coconstln_cnt = NULL;
+            B->marked_btm_states.move_state_linked(s, B->btm_states, BTM_STATE, sit);
          }
+         for (auto sit = B->marked_non_btm_states.begin(); sit != B->marked_non_btm_states.end(); ++sit) 
+         {
+            state_T* s = *sit;
+            s->constln_cnt = NULL;
+            if (s->coconstln_cnt != NULL) 
+            {
+              if (s->coconstln_cnt->counter_value() == 0) 
+              {
+                s->coconstln_cnt->delete_counter();
+              }
+            }
+            s->coconstln_cnt = NULL;
+            B->marked_non_btm_states.move_state_linked(s, B->non_btm_states, NON_BTM_STATE, sit);
+         }
+         if (B->constln_ref != NULL) 
+         {
+           if (size(B->constln_ref) == 0) 
+           {
+             // if the associated constellation is the one containing B, set inconstln_ref to NULL
+             if (B->constln_ref->C == B->constellation) 
+             {
+               B->inconstln_ref = NULL;
+             }
+             B->to_constlns.remove_linked(B->constln_ref);
+             to_constlns_elements.remove_element(B->constln_ref);
+             B->constln_ref = NULL;
+           }
+           B->constln_ref = NULL;
+         }
+         if (B->coconstln_ref != NULL) 
+         {
+           if (size(B->coconstln_ref) == 0) 
+           {
+             if (B->coconstln_ref->C == B->constellation) 
+             {
+                B->inconstln_ref = NULL;
+             }
+             B->to_constlns.remove_linked(B->coconstln_ref);
+             to_constlns_elements.remove_element(B->coconstln_ref);
+             B->coconstln_ref = NULL;
+           }
+           B->coconstln_ref = NULL;
+         }
+      }
     }
     
     // end auxiliary functions
@@ -671,11 +733,17 @@ class bisim_partitioner_gw
        aut(l), 
        tau_label(determine_tau_label(l))
     {
-               // initialise variables
-               nr_of_splits = 0;
-               current_state_detect1 = NULL;
-               current_state_detect2 = NULL;
-               in_forward_check_detect2 = false;
+std::cerr << "size of state_T " << sizeof(state_T) << "\n";
+std::cerr << "size of transition_T " << sizeof(transition_T) << "\n";
+std::cerr << "size of block_T " << sizeof(block_T) << "\n";
+std::cerr << "size of constellation_T " << sizeof(constellation_T) << "\n";
+std::cerr << "size of to_constlns_element_T " << sizeof(to_constlns_element_T) << "\n";
+std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
+      // initialise variables
+      nr_of_splits = 0;
+      current_state_detect1 = NULL;
+      current_state_detect2 = NULL;
+      in_forward_check_detect2 = false;
           
       assert(branching);
       mCRL2log(log::verbose) << "O(m log n) " <<
@@ -864,44 +932,53 @@ class bisim_partitioner_gw
          }
     }
 
-    inline bool has_next_state_detect2_2() {
-         auto next_it = iter_state_added_detect2;
-         next_it++;
-         return next_it != block_detect->marked_btm_states.end();
+    inline bool has_next_state_detect2_2() 
+    {
+      auto next_it = iter_state_added_detect2;
+      next_it++;
+      return next_it != block_detect->marked_btm_states.end();
     }
 
-    inline state_T* next_state_detect2_2() {
-         iter_state_added_detect2++;
-         state_T* s = *iter_state_added_detect2;
-         if (s->coconstln_cnt == NULL) {
-              //mCRL2log(log::verbose) << s->id << ": NULL counter\n";
-              return s;
-         }
-         else if (s->coconstln_cnt->cnt == 0) {
-              //mCRL2log(log::verbose) << s->id << ": 0 counter\n";
-              return s;
-         }
-         else {
-              return NULL;
-         }
+    inline state_T* next_state_detect2_2() 
+    {
+      iter_state_added_detect2++;
+      state_T* s = *iter_state_added_detect2;
+      if (s->coconstln_cnt == NULL) 
+      {
+        //mCRL2log(log::verbose) << s->id << ": NULL counter\n";
+        return s;
+      }
+      else if (s->coconstln_cnt->counter_value() == 0) 
+      {
+        //mCRL2log(log::verbose) << s->id << ": 0 counter\n";
+        return s;
+      }
+      else 
+      {
+        return NULL;
+      }
     }
 
-    inline bool has_next_state_detect1_3() {
-         auto next_it = iter_trans_state_added_detect1;
-         next_it++;
-         return next_it != e_detect->trans_list.end();
+    inline bool has_next_state_detect1_3() 
+    {
+      auto next_it = iter_trans_state_added_detect1;
+      next_it++;
+      return next_it != e_detect->trans_list.end();
     }
     
-    inline state_T* next_state_detect1_3() {
-         iter_trans_state_added_detect1++;
-         transition_T* t = *iter_trans_state_added_detect1;
-         state_T* s = t->source;
-         if (!s->is_in_L_detect1) {
-              return s;
-         }
-         else {
-              return NULL;
-         }
+    inline state_T* next_state_detect1_3() 
+    {
+      iter_trans_state_added_detect1++;
+      transition_T* t = *iter_trans_state_added_detect1;
+      state_T* s = t->source;
+      if (!s->is_in_L_detect1) 
+      {
+        return s;
+      }
+      else 
+      {
+        return NULL;
+      }
     }
 
     inline bool has_next_state_detect2_3() {
@@ -1138,12 +1215,12 @@ class bisim_partitioner_gw
             // (inert transitions are counted by constln_cnt, hence should not be taken into account here).
             if (block_detect->constellation == constellation_splitter_detect) 
             {
-              if (sp->coconstln_cnt->cnt - sp->inert_cnt > 0) 
+              if (sp->coconstln_cnt->counter_value() - sp->inert_cnt > 0) 
               {
                 skip = true;
               }
             }
-            else if (sp->coconstln_cnt->cnt > 0) 
+            else if (sp->coconstln_cnt->counter_value() > 0) 
             {
               skip = true;
             }
@@ -1337,8 +1414,9 @@ class bisim_partitioner_gw
       // add transitions
       state_type current_src_state = -1;
       // create n counters
-      counters.add_elements(nr_of_states);
-      auto counter_it = counters.begin();
+      // counters.add_elements(nr_of_states);
+      // auto counter_it = counters.begin();
+      counter_T* counter_it=counter_T::new_counter();
       transition_T* t_entry;
       for (auto r=trans.begin(); r != trans.end(); ++r)
       {
@@ -1371,8 +1449,10 @@ class bisim_partitioner_gw
           // set begin of Ttgt for source state
           t_entry->source->Ttgt_begin = transitions.size()-1;
           
-          if (t.from() > 0) {
-            counter_it++;
+          if (t.from() > 0) 
+          {
+            // counter_it++;
+            counter_it=counter_T::new_counter();
             // set end of Ttgt list of previous source state
             states[current_src_state].Ttgt_end = t_entry->source->Ttgt_begin;
           }
@@ -1381,9 +1461,10 @@ class bisim_partitioner_gw
         }
         
         // add pointer to counter
-        t_entry->to_constln_cnt = &(*counter_it);
+        // t_entry->to_constln_cnt = &(*counter_it);
+        t_entry->to_constln_cnt = counter_it;
         // increment the counter
-        t_entry->to_constln_cnt->cnt++;
+        t_entry->to_constln_cnt->increment();
         // Different from pseudo-code: ONLY if transition is non-inert
         if (!aut.is_tau(t.label()) || !branching) 
         {
@@ -1421,10 +1502,10 @@ class bisim_partitioner_gw
         // connect transition to its states
         t_entry->target->Tsrc.push_back(t_entry);
         // add pointer to counter object of source state
-        counter_it++;
-        t_entry->to_constln_cnt = &(*counter_it);
+        // counter_it++;
+        t_entry->to_constln_cnt = counter_T::new_counter();
         // increment the counter
-        t_entry->to_constln_cnt->cnt++;
+        t_entry->to_constln_cnt->increment();
         // set pointer to C entry in to_constlns list of B. Increment the associated counter
         t_entry->to_constln_ref = t_entry->source->block->to_constlns.front();
         // add transition to transition list of source block
@@ -1570,7 +1651,7 @@ class bisim_partitioner_gw
                     // the pointers to counters of the individual transitions
                     if (sp->coconstln_cnt == NULL) 
                     {
-                      sp->constln_cnt = counters.get_element();
+                      sp->constln_cnt = counter_T::new_counter();
                       sp->coconstln_cnt = t->to_constln_cnt;
                     }
                     // 5.2.2.c
@@ -1588,9 +1669,9 @@ class bisim_partitioner_gw
                       }
                     }
                     // 5.2.2.d
-                    sp->constln_cnt->cnt++;
+                    sp->constln_cnt->increment();
                     t->to_constln_cnt = sp->constln_cnt;
-                    sp->coconstln_cnt->cnt--;
+                    sp->coconstln_cnt->decrement();
                     // move t
                     Bp->coconstln_ref->trans_list.move_linked(t, Bp->constln_ref->trans_list);
                     //assert(t->target->block->constellation == s->block->constellation);
@@ -1643,15 +1724,15 @@ class bisim_partitioner_gw
                     // 5.2.3.b
                     if (s->coconstln_cnt == NULL) 
                     {
-                      s->constln_cnt = counters.get_element();
+                      s->constln_cnt = counter_T::new_counter();
                       s->coconstln_cnt = t->to_constln_cnt;
                     }
                     // 5.2.3.c
                     if (Bp == B) 
                     {
-                      s->constln_cnt->cnt++;
+                      s->constln_cnt->increment();
                       t->to_constln_cnt = s->constln_cnt;
-                      s->coconstln_cnt->cnt--;
+                      s->coconstln_cnt->decrement();
                       // move t
                       // Next lines are commented out, since these transitions are inert, which are NOT in the trans_list
                       //B->coconstln_ref->trans_list.remove_linked(t);
@@ -1686,7 +1767,7 @@ class bisim_partitioner_gw
                         split = true;
                         break;
                       }
-                      if ((s->coconstln_cnt)->cnt == 0) 
+                      if ((s->coconstln_cnt)->counter_value() == 0) 
                       {
                         split = true;
                         break;
@@ -2092,7 +2173,7 @@ class bisim_partitioner_gw
                   is_stable = false;
                   break;
                 }
-                if (s->coconstln_cnt->cnt == 0) 
+                if (s->coconstln_cnt->counter_value() == 0) 
                 {
                   is_stable = false;
                   break;
@@ -3166,7 +3247,7 @@ class bisim_partitioner_gw
                   //assert(t->target->block->constellation == e->C);
                   if (t->source->coconstln_cnt != NULL) 
                   {
-                      assert(t->source->coconstln_cnt->cnt > 0);
+                      assert(t->source->coconstln_cnt->counter_value() > 0);
                   }
                 }
               }
