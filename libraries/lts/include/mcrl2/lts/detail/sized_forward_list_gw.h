@@ -23,8 +23,6 @@ namespace lts
 namespace detail
 {
 
-typedef size_t statemode_type;
-
 /* The data structure below is intended to recycle forward list
  * elements, such that they do not have to be malloced and deleted
  * which is time consuming. The forward list elements are stored
@@ -308,7 +306,8 @@ class sized_forward_list
     }
 
     // special method for inserting states
-    void insert_state_linked(T* obj, statemode_type t)
+    template <class U>
+    void insert_state_linked(T* obj, const U& t)
     {
       // make sure that element pointing before current first element will point to the newly inserted element
       // (the new position before its element)
@@ -446,13 +445,15 @@ class sized_forward_list
     }
 
     // special method for moving states
-    void move_state_linked(T* obj, sized_forward_list& other, statemode_type t)
+    template <class U>
+    void move_state_linked(T* obj, sized_forward_list& other, const U& t)
     {
       move_linked(obj, other);
       obj->type=t;
     }
 
-    void move_state_linked(T* obj, sized_forward_list& other, statemode_type t, iterator& current)
+    template <class U>
+    void move_state_linked(T* obj, sized_forward_list& other, const U& t, iterator& current)
     {
       if (obj->ptr_in_list.m_iter->next()==current.m_iter)
       {

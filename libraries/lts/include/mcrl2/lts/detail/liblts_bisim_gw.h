@@ -37,7 +37,7 @@ namespace detail
 {
 
 // markers to differentiate various states.
-typedef enum { BTM_STATE, NON_BTM_STATE, MARKED_BTM_STATE, MARKED_NON_BTM_STATE, STATE, NEW_BTM_STATE } state_marker;
+typedef enum { BTM_STATE, NON_BTM_STATE, MARKED_BTM_STATE, MARKED_NON_BTM_STATE, DEFAULT_STATE } state_marker;
 
 // definition to distinguish two types of blocks
 typedef enum { STD_BLOCK, EXTRA_KRIPKE_BLOCK } block_marker;
@@ -48,13 +48,10 @@ typedef enum { TRIVIAL, NONTRIVIAL } constellation_marker;
 // return values for procedures in lockstep search
 typedef enum { CONTINUE, TERMINATED, STOPPED } lockstep_search_mode;
 
-
 typedef size_t state_type;
 typedef size_t trans_type;
-typedef size_t statemode_type;
 typedef size_t block_type;
 typedef size_t label_type;
-typedef size_t constellation_type;
 
 class state_T;
 class block_T;
@@ -166,20 +163,17 @@ class state_T
     trans_type Ttgt_end;
     // static list of transitions to s (s <- s')
     std::vector <transition_T*> Tsrc;
-    // number of inert transitions from s to a state in B'
-    size_t inert_cnt;
-    // priority used for priority queue in detect2 when splitting
-    size_t priority;
+    // number of inert transitions from s to a state in B'. Use unsigned int to reduce memory footprint.
+    unsigned int inert_cnt;
+    // priority used for priority queue in detect2 when splitting. Use unsigned int to reduce memory footprint.
+    unsigned int priority;
     // reference to counter of number of transitions from B' to block B in constellation C (splitting is done under C)
     counter_T *constln_cnt;
     // reference to counter of number of transitions from B' to constellation C without block B (splitting is done under C)
     counter_T *coconstln_cnt;
 
     // ADDITIONAL INFO to keep track of where the state is listed into which list (pointers point to positions preceding the ones for the state)
-    statemode_type type;
-    // typename
     sized_forward_list<state_T >::iterator ptr_in_list;
-    // typename
     std::multiset<state_T*>::iterator pos_in_P_detect2;
     // is the state in stack of detect1?
     bool is_in_L_detect1;
@@ -188,6 +182,7 @@ class state_T
     // iterator pointing to the position of the state in P
     // is the state in Lp of detect2?
     bool is_in_Lp_detect2;
+    state_marker type;
     
     // constructor
     state_T()
@@ -198,10 +193,10 @@ class state_T
        priority(0),  
        constln_cnt(NULL), 
        coconstln_cnt(NULL), 
-       type(STATE), 
        is_in_L_detect1(false), 
        is_in_P_detect2(false), 
-       is_in_Lp_detect2(false) 
+       is_in_Lp_detect2(false),
+       type(DEFAULT_STATE)
     {
     }
 };
@@ -573,6 +568,8 @@ class bisim_partitioner_gw
                 break;
            case MARKED_NON_BTM_STATE:
                 s->block->marked_non_btm_states.move_linked(s, B->marked_non_btm_states);
+           case DEFAULT_STATE:
+                assert(0);
       }
       s->block = B;
     }
@@ -1380,7 +1377,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           }
         }
       }
-      mCRL2log(log::verbose) << "number of extra states: " << extra_kripke_states.size() << "\n";
+      mCRL2log(log::verbose) << "Number of extra states: " << extra_kripke_states.size() << "\n";
       // knowing the number of blocks,
       // create blocks, and add one entry in their to_constlns list for the single constellation C
       // each of these new blocks will contain extra Kripke states, therefore we increment nr_of_extra_kripke_blocks
@@ -1573,6 +1570,8 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       {
         trivial_constlns.insert_linked(C);
       }
+      mCRL2log(log::verbose) << "Size of the resulting Kripke structure: " << states.size() << " states and " << transitions.size() << " transitions.\n";
+
     }; // end create_initial_partition
 
 // Refine the partition until the partition has become stable
