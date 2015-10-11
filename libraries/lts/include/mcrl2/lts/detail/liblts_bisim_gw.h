@@ -50,7 +50,6 @@ typedef enum { CONTINUE, TERMINATED, STOPPED } lockstep_search_mode;
 
 typedef size_t state_type;
 typedef size_t trans_type;
-typedef size_t block_type;
 typedef size_t label_type;
 
 class state_T;
@@ -206,16 +205,16 @@ class transition_T
   public:
     // Struct containing information about transition s->s'. Let B be block containing s, C constellation containing s'
     // source of transition (s)
-    state_T *source;
+    state_T* source;
     // target of transition (s')
-    state_T *target;
+    state_T* target;
     // pointer to constellation counter for corresponding (s, C) combination
-    counter_T *to_constln_cnt;
+    counter_T* to_constln_cnt;
     // pointer to list of transitions from B to C containing this transition.
     // Different from pseudo-code: redundant, since C entry (below) has a reference to this list as well
     //sized_forward_list < transition_T > *block_constln_list = NULL;
     // pointer to C entry in to_constlns list of B
-    to_constlns_element_T *to_constln_ref;
+    to_constlns_element_T* to_constln_ref;
     
     // ADDITIONAL INFO to keep track of where the transition is listed in a (block)
     // constln_transitions list
@@ -239,33 +238,19 @@ class constellation_T
     size_t size;
     // list of blocks
     sized_forward_list < block_T > blocks;
-    // type of constellation
-    size_t type;
     
     // ADDITIONAL INFO to keep track of where the constellation is listed
-    // typename
     sized_forward_list<constellation_T>::iterator ptr_in_list;
     
-    // constructor
+    // constructor. This is intentionally the only constructor. No other
+    // constructors, nor an assignment are supposed to exist.
     constellation_T()
-     : size(0),
-       type(TRIVIAL) 
+     : size(0)
     {}
 
-    // Copy constructor
-    // Does not copy lists
-    constellation_T(const constellation_T& c)
-      : size(0),
-        type(c.type)
+    constellation_marker type() const
     {
-    }
-  
-    // Assignment
-    constellation_T operator=(const constellation_T& c)
-    {
-      size = 0;
-      type = c.type;
-      return *this;
+      return (blocks.size()==1?TRIVIAL:NONTRIVIAL);
     }
 };
 
@@ -345,11 +330,14 @@ class to_constlns_element_T
 
 class block_T
 {
-  public:
-    // ID of block
-    block_type id;
+  protected:
     // type of block
-    block_type type;
+    // block_marker type;
+    // ID of block. This is is size_t(-1) when the type of the block is an EXTRA_KRIPKE_BLOCK. 
+    // For a STD_BLOCK it is the sequence number of such a block.
+    const size_t id;
+
+  public:
     // constellation C containing B
     constellation_T *constellation;
     // list of bottom states
@@ -377,55 +365,29 @@ class block_T
     // ADDITIONAL INFO to keep track of where the block is listed in a constellation.blocks
     sized_forward_list<block_T>::iterator ptr_in_list;
     
-    // constructor
-    block_T()
-     : constellation(NULL), 
-       constln_ref(NULL), 
-       coconstln_ref(NULL), 
-       inconstln_ref(NULL) 
-    {
-    }
-
-    // constructor for block of given type
-    block_T(block_type t, size_t& index)
-     : type(t),
+    // constructor for block of given type. This is intentionally the only
+    // constructor of a block_T. It is not allowed to copy or assign a block.
+    block_T(block_marker t, size_t& index)
+     : id(t==STD_BLOCK?index++:size_t(-1)),
        constellation(NULL),
        constln_ref(NULL), 
        coconstln_ref(NULL), 
        inconstln_ref(NULL) 
-    {
-      if (type == STD_BLOCK)
-      {
-        id = index++;
-      }
-      else 
-      {
-        id = -1;
-      }
-    }
+    {}
 
-    // Copy constructor
-    // Does not copy lists
-    block_T(const block_T& c)
-      : id(c.id),
-        type(c.type),
-        constellation(c.constellation),
-        constln_ref(c.constln_ref),
-        coconstln_ref(c.coconstln_ref),
-        inconstln_ref(c.inconstln_ref)
+  public:
+    block_marker type() const
     {
+      if (id==size_t(-1))
+      {
+        return EXTRA_KRIPKE_BLOCK;
+      }
+      return STD_BLOCK;
     }
-  
-    // Assignment
-    block_T operator=(const block_T& c)
+    
+    size_t block_id() const
     {
-      id = c.id;
-      type = c.type;
-      constellation = c.constellation;
-      constln_ref = c.constln_ref;
-      coconstln_ref = c.coconstln_ref;
-      inconstln_ref = c.inconstln_ref;
-      return *this;
+      return id;
     }
 };
 
@@ -441,8 +403,6 @@ class bisim_partitioner_gw
      
     LTS_TYPE& aut;
 
-    // current partition
-    //sized_forward_list < block_T* > pi;
     // trivial and non-trivial constellations
     sized_forward_list < constellation_T > non_trivial_constlns;
     sized_forward_list < constellation_T > trivial_constlns;
@@ -569,7 +529,7 @@ class bisim_partitioner_gw
            case MARKED_NON_BTM_STATE:
                 s->block->marked_non_btm_states.move_linked(s, B->marked_non_btm_states);
            case DEFAULT_STATE:
-                assert(0);
+                break;
       }
       s->block = B;
     }
@@ -853,7 +813,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
     size_t get_eq_class(const size_t s) const
     {
       //assert(s<block_index_of_a_state.size());
-      return states[s].block->id;
+      return states[s].block->block_id();
     }
 
     /** \brief Returns whether two states are in the same bisimulation equivalence class.
@@ -1329,22 +1289,23 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       using namespace std;
 
       // number of blocks
-      block_type nr_of_blocks;
+      size_t nr_of_blocks;
       // the number of states
       nr_of_states = aut.num_states();
       // original size of input
       orig_nr_of_states = nr_of_states;
       // temporary map to keep track of blocks (maps transition labels (unequal to tau) to blocks
-      unordered_map < label_type, block_type > action_block_map;
+      unordered_map < label_type, size_t > action_block_map;
       // temporary list to keep track of lists of transitions, one for each block
       //vector < sized_forward_list < transition_T* >* > block_trans_list;
 
       // create single initial non-trivial constellation
-      constellations.push_back(constellation_T());
+      constellations.emplace_back();
       constellation_T* C = &(constellations.back());
       
       // create first block in C
-      blocks.push_back(block_T(STD_BLOCK, max_block_index));
+      // blocks.emplace_back(block_T(STD_BLOCK, max_block_index));
+      blocks.emplace_back(STD_BLOCK, max_block_index);
       block_T* B1 = &(blocks.back());
       // create associated list of transitions from block to constellation C
       to_constlns_element_T* e = to_constlns_elements.get_element();
@@ -1386,7 +1347,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       auto toc_it = to_constlns_elements.begin();
       for (size_t i = 0; i < nr_of_blocks-1; i++) 
       {
-        blocks.push_back(block_T(EXTRA_KRIPKE_BLOCK, max_block_index));
+        blocks.emplace_back(EXTRA_KRIPKE_BLOCK, max_block_index);
         to_constlns_element_T* e = &(*toc_it);
         e->C = C;
         toc_it++;
@@ -1563,7 +1524,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       // add C to appropriate list
       if (C->blocks.size() > 1) 
       {
-        C->type = NONTRIVIAL;
+        assert(C->type() == NONTRIVIAL);
         non_trivial_constlns.insert_linked(C);
       }
       else 
@@ -1610,7 +1571,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               //mCRL2log(log::verbose) << "---\n";
               // 5.2.1
               // 5.2.1.a
-              constellations.push_back(constellation_T());
+              constellations.emplace_back();
               constellation_T* setC = &(constellations.back());
               setB->blocks.move_linked(B, setC->blocks, bit);
               size_t Bsize = B->btm_states.size() + B->non_btm_states.size() + B->marked_btm_states.size() + B->marked_non_btm_states.size();
@@ -1623,7 +1584,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               trivial_constlns.insert_linked(setC);
               if (setB->blocks.size() == 1) 
               {
-                setB->type = TRIVIAL;
+                assert(setB->type() == TRIVIAL);
                 non_trivial_constlns.move_linked(setB, trivial_constlns, const_it);
               }
               // 5.2.2 walk through B.btm_states and B.non_btm_states, and check incoming transitions
@@ -1812,15 +1773,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           for (auto bit = splittable_blocks.begin(); bit != splittable_blocks.end(); ++bit) 
           {
             block_T* Bp = *bit;
+            const constellation_marker old_constellation_type_of_Bp =Bp->constellation->type();
 
             //mCRL2log(log::verbose) << "splitting block " << Bp->id << " with size " << Bp->btm_states.size() + Bp->non_btm_states.size() + Bp->marked_btm_states.size() + Bp->marked_non_btm_states.size() << "\n";
-            //mCRL2log(log::verbose) << Bp->id << ": \n";
-            //for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) {
-            //  to_constlns_element_T* l = *it;
-            //  mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
-            //}
-            //mCRL2log(log::verbose) << "inconstln_ref: " << Bp->inconstln_ref << "\n";
-            //mCRL2log(log::verbose) << "---\n";
             // pointer to Bp to be used when doing the nested split
             block_T* splitBpB = Bp;
             block_T* cosplitBpB = NULL;
@@ -1851,10 +1806,6 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               current_state_detect1 = NULL;
               current_state_detect2 = NULL;
               in_forward_check_detect2 = false;
-              //for (auto sit = Bp->marked_btm_states.begin(); sit != Bp->marked_btm_states.end(); ++sit) {
-              //  state_T* s = *sit;
-              //  mCRL2log(log::verbose) << "marked bottom state " << s->id << "\n";
-              //}
               if (Bp->marked_btm_states.size() > 0) 
               {
                 iter_state_added_detect1 = Bp->marked_btm_states.before_begin();
@@ -1887,7 +1838,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               }
               // 5.3.2
               // Pseudo-code: 'add it to the list of blocks' could possibly be removed.
-              blocks.push_back(block_T(Bp->type, max_block_index));
+              blocks.emplace_back(Bp->type(), max_block_index);
               Bpp = &(blocks.back());
               Bpp->constellation = Bp->constellation;
               Bpp->constellation->blocks.insert_linked(Bpp);
@@ -1915,7 +1866,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
               {
                 to_constlns_element_T* l = *it;
-                mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->type << "\n";
+                mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->type() << "\n";
               }
               mCRL2log(log::verbose) << "---\n";
 #endif
@@ -2081,7 +2032,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               //check_consistency_trans_lists(B, setB);
 #ifndef NDEBUG
               mCRL2log(log::verbose) << "---\n";
-              mCRL2log(log::verbose) << Bp->id << ": \n";
+              mCRL2log(log::verbose) << Bp->block_id() << ": \n";
               for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
               {
                 to_constlns_element_T* l = *it;
@@ -2089,7 +2040,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               }
               mCRL2log(log::verbose) << "inconstln: " << Bp->inconstln_ref << "\n";
               mCRL2log(log::verbose) << "---\n";
-              mCRL2log(log::verbose) << Bpp->id << ": \n";
+              mCRL2log(log::verbose) << Bpp->block_id() << ": \n";
               for (auto it = Bpp->to_constlns.begin(); it != Bpp->to_constlns.end(); ++it) 
               {
                 to_constlns_element_T* l = *it;
@@ -2237,7 +2188,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               check_consistency_transitions();
 #endif
               // split
-              blocks.push_back(block_T(splitBpB->type, max_block_index));
+              blocks.emplace_back(splitBpB->type(), max_block_index);
               Bp3 = &(blocks.back());
               Bp3->constellation = splitBpB->constellation;
               Bp3->constellation->blocks.insert_linked(Bp3);
@@ -2637,7 +2588,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                     }
                   }
                   // 5.3.7.b.ii (5.3.2)
-                  blocks.push_back(block_T(Bhat->type, max_block_index));
+                  blocks.emplace_back(Bhat->type(), max_block_index);
                   Bhatp = &(blocks.back());
                   Bhatp->constellation = Bhat->constellation;
                   Bhatp->constellation->blocks.insert_linked(Bhatp);
@@ -2977,9 +2928,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               }
             } // end while loop for stabilising blocks
             // 5.3.8
-            if (Bp->constellation->type == TRIVIAL) 
+            if (old_constellation_type_of_Bp == TRIVIAL) 
             {
-              Bp->constellation->type = NONTRIVIAL;
+              assert(Bp->constellation->type() == NONTRIVIAL);
               trivial_constlns.move_linked(Bp->constellation, non_trivial_constlns);
             }
           } // end walking over splittable blocks
@@ -3199,9 +3150,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
         {
           block_T* B = *bit;
           const_size += B->btm_states.size() + B->non_btm_states.size() + B-> marked_btm_states.size() + B->marked_non_btm_states.size();
-          assert(B->type == STD_BLOCK || B->type == EXTRA_KRIPKE_BLOCK);
+          assert(B->type() == STD_BLOCK || B->type() == EXTRA_KRIPKE_BLOCK);
           assert(B->constellation == C);
-          assert(B->constellation->type == consttype);
+          assert(B->constellation->type() == consttype);
           // check consistency of ptr_in_list
           assert(prev_bit == B->ptr_in_list);
           // empty state lists
