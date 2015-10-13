@@ -69,6 +69,46 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
   return os;
 }
 
+inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_variables(
+              const mcrl2::pbes_system::pbes_expression& p, const mcrl2::data::data_specification& data_spec)
+{
+  using namespace mcrl2;
+  using namespace mcrl2::pbes_system;
+  using namespace mcrl2::pbes_system::pbes_expr;
+  using namespace mcrl2::pbes_system::accessors;
+
+  if (is_pbes_and(p))
+  {
+    return pbes_expr::and_(pbes_expression_order_quantified_variables(left(p),data_spec),pbes_expression_order_quantified_variables(right(p),data_spec));
+  }
+  else if (is_pbes_or(p))
+  {
+    return pbes_expr::or_(pbes_expression_order_quantified_variables(left(p),data_spec),pbes_expression_order_quantified_variables(right(p),data_spec));
+  }
+  else if (is_pbes_imp(p))
+  {
+    return pbes_expr::imp(pbes_expression_order_quantified_variables(left(p),data_spec),pbes_expression_order_quantified_variables(right(p),data_spec));
+  }
+  else if (is_pbes_not(p))
+  {
+    return pbes_expr::not_(pbes_expression_order_quantified_variables(arg(p),data_spec));
+  }
+  else if (is_pbes_forall(p))
+  {
+    const pbes_expression expr = pbes_expression_order_quantified_variables(arg(p),data_spec);
+    return pbes_expr::forall(mcrl2::data::order_variables_to_optimise_enumeration(var(p),data_spec),expr);
+  }
+  else if (is_pbes_exists(p))
+  {
+    const pbes_expression expr = pbes_expression_order_quantified_variables(arg(p),data_spec);
+    return pbes_expr::exists(mcrl2::data::order_variables_to_optimise_enumeration(var(p),data_spec),expr);
+  }
+  else 
+  {
+    return p;
+  }
+}
+
 /// \brief An alternative lazy algorithm for instantiating a PBES, ported from
 ///         bes_deprecated.h.
 class pbesinst_alternative_lazy_algorithm
@@ -76,6 +116,8 @@ class pbesinst_alternative_lazy_algorithm
   typedef core::term_traits<pbes_expression> tr;
 
   protected:
+    const data::data_specification& m_data_spec;
+
     /// \brief Data rewriter.
     data::rewriter datar;
 
@@ -190,6 +232,7 @@ class pbesinst_alternative_lazy_algorithm
         transformation_strategy transformation_strategy = lazy
         )
       :
+        m_data_spec(data_spec),
         datar(data_spec, rewrite_strategy),
         R(datar, data_spec),
         m_equation_count(0),
@@ -368,7 +411,7 @@ class pbesinst_alternative_lazy_algorithm
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
       for (auto eqi = pbes_equations.begin(); eqi != pbes_equations.end(); eqi++)
       {
-        eqi->formula() = one_point_rule_rewriter(simplify_rewriter(eqi->formula()));
+        eqi->formula() = pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eqi->formula())), m_data_spec);
       }
 
       // initialize equation_index, instantiations, symbols and ranks
