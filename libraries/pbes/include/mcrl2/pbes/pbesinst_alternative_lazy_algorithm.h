@@ -545,6 +545,7 @@ class pbesinst_alternative_lazy_algorithm
     /// \return The computed bes in pbes format
     pbes get_result()
     {
+      mCRL2log(log::verbose) << "Generated " << m_equation_count << " BES equations in total, outputting BES" << std::endl;
       pbes result;
       int index = 0;
       for (auto i = instantiations.begin(); i != instantiations.end(); i++)
