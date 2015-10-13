@@ -389,8 +389,10 @@ class block_T
     }
 };
 
-// compare function to sort pointers to transitions based on target state
-bool compare_targets_of_transition_pointers (transition_T* t1, transition_T* t2) { return (t1->target < t2->target); }
+// compare function to sort transitions based on target state
+bool compare_targets_of_transitions (transition_T t1, transition_T t2) { return (t1.target < t2.target); }
+// compare function to sort pointers to transitions based on source state
+bool compare_sources_of_transition_pointers (transition_T* t1, transition_T* t2) {return (t1->source < t2->source); };
 
 template < class LTS_TYPE>
 class bisim_partitioner_gw
@@ -413,9 +415,9 @@ class bisim_partitioner_gw
     size_t orig_nr_of_states;
     // the list of states
     std::vector < state_T > states;
-    // the list of transitions
+    // the list of transitions (for backwards traversal)
     std::vector < transition_T > transitions;
-		// the list of pointers to transitions (for traversal against the transitions direction)
+		// the list of pointers to transitions (for forward traversal)
 		std::vector < transition_T* > transitionpointers;
     // the list of blocks
     std::deque < block_T > blocks;
@@ -756,9 +758,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       {
         state_T* s = &(states[snr]);
         size_t s_eq = get_eq_class(snr);
-        for (trans_type tnr = s->Ttgt_begin; transitions[tnr].source == s; tnr++)
+        for (trans_type tnr = s->Ttgt_begin; transitionpointers[tnr]->source == s; tnr++)
         {
-          transition_T* t = &(transitions[tnr]);
+          transition_T* t = transitionpointers[tnr];
           state_type tgt_id = t->target - &(states[0]);
           if (tgt_id < orig_nr_of_states)
           {
@@ -1015,14 +1017,14 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           //mCRL2log(log::verbose) << "detect1: processing state " << current_state_detect1->id << "\n";
           current_trans_detect1 = current_state_detect1->Tsrc_begin;
           // no incoming transitions present
-          if (transitionpointers[current_trans_detect1]->target != current_state_detect1)
+          if (transitions[current_trans_detect1].target != current_state_detect1)
           {
             current_state_detect1 = NULL;
             //mCRL2log(log::verbose) << "detect1: end2\n";
             return CONTINUE;
           }
         }
-        const transition_T* t = transitionpointers[current_trans_detect1];
+        const transition_T* t = &(transitions[current_trans_detect1]);
         state_T* sp = t->source;
           
         if (sp->block == block_detect && !sp->is_in_L_detect1) 
@@ -1034,7 +1036,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
         }
         // increment transition counter
         current_trans_detect1++;
-        if (transitionpointers[current_trans_detect1]->target != current_state_detect1)
+        if (transitions[current_trans_detect1].target != current_state_detect1)
         {
           current_state_detect1 = NULL;
           //mCRL2log(log::verbose) << "detect1: end3\n";
@@ -1059,7 +1061,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       // a direct outgoing transition to Bp \ B.
       if (in_forward_check_detect2) 
       {
-        if (transitions[current_trans_detect2].source != current_state_detect2)
+        if (transitionpointers[current_trans_detect2]->source != current_state_detect2)
         {
           // no direct transition to Bp \ B found. State is suitable for detect2
           in_forward_check_detect2 = false;
@@ -1068,14 +1070,14 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           //mCRL2log(log::verbose) << "detect2: adding state " << current_state_detect2->id << "\n";
           current_trans_detect2 = current_state_detect2->Tsrc_begin;
           // no incoming transitions present
-          if (transitionpointers[current_trans_detect2]->target != current_state_detect2)
+          if (transitions[current_trans_detect2].target != current_state_detect2)
           {
             current_state_detect2 = NULL;
           }
         }
         else 
         {
-          transition_T* t = &(transitions[current_trans_detect2]);
+          transition_T* t = transitionpointers[current_trans_detect2];
           //mCRL2log(log::verbose) << "compare " << t->target->block->constellation->id << " " << constellation_splitter_detect->id << "\n";
           if (t->target->block->constellation == constellation_splitter_detect && t->source->block != t->target->block) 
           {
@@ -1144,13 +1146,13 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           current_state_detect2->is_in_Lp_detect2 = true;
           //mCRL2log(log::verbose) << "detect2 base: adding state " << current_state_detect2->id << "\n";
           // no incoming transitions present
-          if (transitionpointers[current_trans_detect2]->target != current_state_detect2)
+          if (transitions[current_trans_detect2].target != current_state_detect2)
           {
             current_state_detect2 = NULL;
             return CONTINUE;
           }
         }
-        const transition_T* t = transitionpointers[current_trans_detect2];
+        const transition_T* t = &(transitions[current_trans_detect2]);
         state_T* sp = t->source;
         sp_newly_inserted = false;
         //mCRL2log(log::verbose) << "detect2: walking back to state " << sp->id << "\n";
@@ -1224,7 +1226,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
         }
         // increment transition counter
         current_trans_detect2++;
-        if (transitionpointers[current_trans_detect2]->target != current_state_detect2)
+        if (transitions[current_trans_detect2].target != current_state_detect2)
         {
           current_state_detect2 = NULL;
         }
@@ -1319,9 +1321,11 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       nr_of_blocks = 1;
 
       // iterate over the transitions and collect new states
-      aut.sort_transitions(mcrl2::lts::src_lbl_tgt);
+      //aut.sort_transitions(mcrl2::lts::src_lbl_tgt);
       const std::vector<transition>& trans = aut.get_transitions();
-      for (auto r=trans.begin(); r != trans.end(); ++r)
+			// sort by target state
+			//std::sort(trans.begin(), trans.end(), compare_targets_of_transitions);
+			for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
                     
@@ -1378,17 +1382,11 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       // create transitions (we need the original number in input + one for each extra kripke state,
 			// and one transition at the end indicating the end of the list)
       transitions.reserve(trans.size()+extra_kripke_states.size()+1);
-      // add transitions
-      state_type current_state = -1;
-      // create n counters
-      // counters.add_elements(nr_of_states);
-      // auto counter_it = counters.begin();
-      counter_T* counter_it=counter_T::new_counter();
-      transition_T* t_entry = NULL;
-      for (auto r=trans.begin(); r != trans.end(); ++r)
-      {
-        const transition t = *r;
-        
+			// first add the original LTS transitions
+			transition_T* t_entry = NULL;
+			for (auto r=trans.begin(); r != trans.end(); ++r)
+			{
+			  const transition t = *r;
         // create transition entry
         transitions.emplace_back(transition_T());
         t_entry = &(transitions.back());
@@ -1407,110 +1405,74 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           Key k(t.label(),t.to());
           t_entry->target = &states[(extra_kripke_states.find(k))->second];
         }
-        // connect transition to its states
-        //t_entry->target->Tsrc.push_back(t_entry);
-        
-        // if we see a new source state, create a new counter for it
-        if (t.from() != current_state) 
-        {
-          // set begin of Ttgt for source state
-          t_entry->source->Ttgt_begin = transitions.size()-1;
-          
-          if (t.from() > 0) 
-          {
-            // counter_it++;
-            counter_it=counter_T::new_counter();
-            // set end of Ttgt list of previous source state
-            //states[current_state].Ttgt_end = t_entry->source->Ttgt_begin;
-          }
-          
-          current_state = t.from();
-        }
-        
-        // add pointer to counter
-        // t_entry->to_constln_cnt = &(*counter_it);
-        t_entry->to_constln_cnt = counter_it;
-        // increment the counter
-        t_entry->to_constln_cnt->increment();
-        // Different from pseudo-code: ONLY if transition is non-inert
-        if (!aut.is_tau(t.label()) || !branching) 
-        {
-          // set pointer to C entry in to_constlns list of B.
-          t_entry->to_constln_ref = t_entry->source->block->to_constlns.front();
-          // add transition to transition list of source block
-          t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
-        }
-        // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
-        //t_entry.to_constln_ref->trans_list = t_entry.block_constln_list;
-      }
-			// set final state Ttgt end
-			//if (t_entry != NULL)
-			//{
-			//  t_entry->source->Ttgt_end = transitions.size();
-      //}
-      // add transitions <a,t> -> t
-      for (size_t snr = orig_nr_of_states; snr < nr_of_states; ++snr)
-      {
-        transitions.emplace_back(transition_T());
-        states[snr].Ttgt_begin = transitions.size()-1;
-        //states[snr].Ttgt_end = transitions.size();
-      }
-      // we no longer need original transitions
-      aut.clear_transitions();
-
+			}
+			// now add transitions <a,t> -> t
       for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit)
       {
+        transitions.emplace_back(transition_T());
         std::pair<Key, state_type> e = *sit;
         state_type sid = e.second;
         state_type tid = e.first.second;
 
-        t_entry = &(transitions[states[sid].Ttgt_begin]);
+        t_entry = &(transitions.back());
         // fill in info
         t_entry->source = &states[sid];
         t_entry->target = &states[tid];
-        // connect transition to its states
-        //t_entry->target->Tsrc.push_back(t_entry);
-        // add pointer to counter object of source state
-        // counter_it++;
-        t_entry->to_constln_cnt = counter_T::new_counter();
-        // increment the counter
-        t_entry->to_constln_cnt->increment();
-        // set pointer to C entry in to_constlns list of B. Increment the associated counter
-        t_entry->to_constln_ref = t_entry->source->block->to_constlns.front();
-        // add transition to transition list of source block
-        t_entry->to_constln_ref->trans_list.insert_linked(t_entry);
-        // !!! Not in pseudo-code: refer to block transition list (pointed to by t_entry.block_constln_list) from the C entry
-        //t_entry2.to_constln_ref->trans_list = t_entry2.block_constln_list;
       }
-			// add the dummy 'end of the list' transition
-			transitions.emplace_back(transition_T());
-			
-			// create vector of transition pointers for backward traversals
+			// sort the transitions by target
+			std::sort(transitions.begin(), transitions.end(), compare_targets_of_transitions);
+			// we no longer need original transitions
+      aut.clear_transitions();
+			// in one loop, create a vector of pointers for forward traversal, and set the Tsrc_begin pointers
+			state_T* current_state = NULL;
+			// create vector of transition pointers for forward traversals
 			// again, add a dummy transition at the end
 			transitionpointers.reserve(trans.size()+extra_kripke_states.size()+1);
-			for (auto tit = transitions.begin(); tit != transitions.end(); ++tit)
+			for (trans_type tit = 0; tit < transitions.size(); tit++)
 			{
-			  transition_T* t = &(*tit);
+			  // add pointer to transitionpointers
+			  transition_T* t = &(transitions[tit]);
 				transitionpointers.emplace_back(t);
+
+        // if we see a new target state, set begin of Tsrc to this transition
+        if (t->target != current_state)
+        {
+          current_state = t->target;
+          current_state->Tsrc_begin = tit;
+        }
+        
+        // Different from pseudo-code: ONLY if transition is non-inert
+        if ((t->source->block != t->target->block) || !branching)
+        {
+          // set pointer to C entry in to_constlns list of B.
+          t->to_constln_ref = t->source->block->to_constlns.front();
+          // add transition to transition list of source block
+          t->to_constln_ref->trans_list.insert_linked(t);
+        }
 			}
-			// sort the vector by target state
-			std::sort(transitionpointers.begin(), transitionpointers.end(), compare_targets_of_transition_pointers);
-			// initialise Tsrc_end pointers of states
-      current_state = -1;
-			for (size_t pit = 0; pit < transitionpointers.size(); pit++)
+			// sort transition pointers by source state
+			std::sort(transitionpointers.begin(), transitionpointers.end(), compare_sources_of_transition_pointers);
+			// walk over the transition pointers, add counters and set Ttgt_begin entries
+			current_state = NULL;
+			counter_T* counter_it;
+			for (trans_type tit = 0; tit < transitionpointers.size(); tit++)
 			{
-			  transition_T* t = transitionpointers[pit];
-				if (t->target != NULL)
+			  transition_T* t = transitionpointers[tit];
+				
+				if (t->source != current_state)
 				{
-				  state_type sid = t->target - &(states[0]);
-				  if (current_state != sid)
-				  {
-					  current_state = sid;
-				    // new target state
-					  states[sid].Tsrc_begin = pit;
-				  }
+				  current_state = t->source;
+					current_state->Ttgt_begin = tit;
+					// create a new counter
+					counter_it=counter_T::new_counter();
 				}
+        // add pointer to counter
+        t->to_constln_cnt = counter_it;
+        // increment the counter
+        t->to_constln_cnt->increment();
 			}
+			// add the dummy 'end of the list' transition
+			transitions.emplace_back(transition_T());
 			// add dummy 'end of the list' transition pointer
 			transitionpointers.emplace_back(&(transitions.back()));
 #ifndef NDEBUG
@@ -1627,9 +1589,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               {
                 state_T* s = *sit;
                 
-                for (auto tit = s->Tsrc_begin; transitionpointers[tit]->target == s; ++tit)
+                for (auto tit = s->Tsrc_begin; transitions[tit].target == s; ++tit)
                 {
-                  transition_T* t = transitionpointers[tit];
+                  transition_T* t = &(transitions[tit]);
                   state_T* sp = t->source;
                   block_T* Bp = sp->block;
                   // Different from pseudo-code: ignore if Bp=B. We will revisit this transition when considering
@@ -1706,9 +1668,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                   s->type = MARKED_NON_BTM_STATE;
                 }
                 // consider the outgoing transitions
-                for (trans_type tit = s->Ttgt_begin; transitions[tit].source == s; ++tit)
+                for (trans_type tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                 {
-                  transition_T* t = &(transitions[tit]);
+                  transition_T* t = transitionpointers[tit];
                   block_T* Bp = t->target->block;
                   constellation_T* setBp = Bp->constellation;
                   
@@ -1915,9 +1877,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                 // 5.3.2.b
                 // Different from pseudo-code: we need to consider all constellations that can be reached from
                 // s, not just setB \ B and B.
-                for (auto tit = s->Ttgt_begin; transitions[tit].source == s; ++tit)
+                for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                 {
-                  transition_T* t = &(transitions[tit]);
+                  transition_T* t = transitionpointers[tit];
                   
                   // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
                   // Different from pseudo-code: only do this if transition is non-inert
@@ -2007,9 +1969,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                 // 5.3.2.c
                 //check_consistency_blocks();
                 //check_consistency_trans_lists(B, setB);
-                for (auto tit = s->Tsrc_begin; transitionpointers[tit]->target == s; ++tit)
+                for (auto tit = s->Tsrc_begin; transitions[tit].target == s; ++tit)
                 {
-                  transition_T* t = transitionpointers[tit];
+                  transition_T* t = &(transitions[tit]);
                   state_T* sp = t->source;
                   
                   if (sp->block == Bp && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) 
@@ -2246,9 +2208,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                 //print_partition();
 #endif
                 // 5.3.4 (5.3.2.b)
-                for (auto tit = s->Ttgt_begin; transitions[tit].source == s; ++tit)
+                for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                 {
-                  transition_T* t = &(transitions[tit]);
+                  transition_T* t = transitionpointers[tit];
                   
                   // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
                   // Different from pseudo-code: only do this if transition is non-inert
@@ -2328,9 +2290,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                   }
                 }
                 // 5.3.4 (5.3.2.c)
-                for (auto tit = s->Tsrc_begin; transitionpointers[tit]->target == s; ++tit)
+                for (auto tit = s->Tsrc_begin; transitions[tit].target == s; ++tit)
                 {
-                  transition_T* t = transitionpointers[tit];
+                  transition_T* t = &(transitions[tit]);
                   state_T* sp = t->source;
                   
                   if (sp->block == splitBpB && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) 
@@ -2470,9 +2432,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               {
                 state_T* s = *sit;
                 // 5.3.6.a
-                for (auto tit = s->Ttgt_begin; transitions[tit].source == s; ++tit)
+                for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                 {
-                  transition_T* t = &(transitions[tit]);
+                  transition_T* t = transitionpointers[tit];
                   to_constlns_element_T* setBp_entry = t->to_constln_ref;
                   //mCRL2log(log::verbose) << t->to_constln_ref->C << " " << t->target->block->constellation << "\n";
                   //mCRL2log(log::verbose) << Bhat->constellation << "\n";
@@ -2643,9 +2605,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                     move_state_to_block(s, Bhatp);
                     // Different from pseudo-code: we need to consider all constellations that can be reached from
                     // s, not just setB \ B and B. For this, we merge steps 5.3.2.c and 5.3.2.d
-                    for (auto tit = s->Ttgt_begin; transitions[tit].source == s; ++tit)
+                    for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                     {
-                      transition_T* t = &(transitions[tit]);
+                      transition_T* t = transitionpointers[tit];
 
                       // Different from pseudo-code: only do this if transition is non-inert
                       if (t->to_constln_ref != NULL) 
@@ -2713,9 +2675,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                         }
                       }
                     }
-                    for (auto tit = s->Tsrc_begin; transitionpointers[tit]->target == s; ++tit)
+                    for (auto tit = s->Tsrc_begin; transitions[tit].target == s; ++tit)
                     {
-                      transition_T* t = transitionpointers[tit];
+                      transition_T* t = &(transitions[tit]);
                       state_T* sp = t->source;
                 
                       if (sp->block == Bhat && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) 
@@ -2880,9 +2842,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                     {
                       state_T* s = *sit;
                       //mCRL2log(log::verbose) << "state " << s->id << "\n";
-                      for (auto tit = s->Ttgt_begin; transitions[tit].source == s; ++tit)
+                      for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                       {
-                        transition_T* t = &(transitions[tit]);
+                        transition_T* t = transitionpointers[tit];
                         to_constlns_element_T* setBp_entry = t->to_constln_ref;
                         // 5.3.4.a.i
                         if (setBp_entry->SClist == NULL) 
@@ -3014,9 +2976,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       for (auto sit = states.begin(); sit != states.end(); ++sit) 
       {
         const state_T& s = *sit;
-        for (auto tit = s.Ttgt_begin; transitions[tit].source == &s; ++tit)
+        for (auto tit = s.Ttgt_begin; transitionpointers[tit]->source == &s; ++tit)
         {
-          transition_T* t = &(transitions[tit]);
+          transition_T* t = transitionpointers[tit];
           block_T* B = t->source->block;
           found = false;
           if (t->to_constln_ref != NULL) 
@@ -3129,9 +3091,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
         assert(s->is_in_P_detect2 == false);
         size_t local_inert_cnt = 0;
         // check outgoing transitions
-        for (auto tit = s->Ttgt_begin; transitions[tit].source == s; ++tit)
+        for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
         {
-          transition_T* t = &(transitions[tit]);
+          transition_T* t = transitionpointers[tit];
           assert(t->source == s);
           // TODO: CHECK TO_CONSTLN_CNT
           mCRL2log(log::verbose) << "cnts: " << t->target->block << " " << B << "\n";
@@ -3144,9 +3106,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
         mCRL2log(log::verbose) << "local inert cnt " << local_inert_cnt << " " << s->inert_cnt << "\n";
         assert(s->inert_cnt == local_inert_cnt);
         // check incoming transitions
-        for (auto tit = s->Tsrc_begin; transitionpointers[tit]->target == s; ++tit)
+        for (auto tit = s->Tsrc_begin; transitions[tit].target == s; ++tit)
         {
-          transition_T* t = transitionpointers[tit];
+          transition_T* t = &(transitions[tit]);
           assert(t->target == s);
           // TODO: CHECK TO_CONSTLN_CNT
           assert(t->to_constln_ref->C == B->constellation);
