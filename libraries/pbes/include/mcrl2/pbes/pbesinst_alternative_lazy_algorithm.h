@@ -16,6 +16,7 @@
 #include <stack>
 #include <iostream>
 #include <sstream>
+#include <unordered_set>
 #include <unordered_map>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
@@ -155,14 +156,14 @@ class pbesinst_alternative_lazy_algorithm
     std::deque<propositional_variable_instantiation> todo;
 
     /// \brief The content of todo as a set.
-    std::set<propositional_variable_instantiation> todo_set;
+    std::unordered_set<propositional_variable_instantiation> todo_set;
 
     /// \brief Propositional variable instantiations that have been handled.
-    std::set<propositional_variable_instantiation> done;
+    std::unordered_set<propositional_variable_instantiation> done;
 
     /// \brief Propositional variable instantiations that are reachable from
     ///        init.
-    std::set<propositional_variable_instantiation> reachable;
+    std::unordered_set<propositional_variable_instantiation> reachable;
 
     /// \brief Map an instantiation X to a list of other instantiations that
     ///        are found true of false and thus may justify the ultimate
@@ -178,7 +179,7 @@ class pbesinst_alternative_lazy_algorithm
 
     /// \brief Map a variable instantiation to a set of other variable
     ///        instantiations on whose right hand sides it appears.
-    std::unordered_map<propositional_variable_instantiation, std::set<propositional_variable_instantiation> > occurrence;
+    std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> > occurrence;
 
     /// \brief Map a variable instantiation to its right hand side.
     std::unordered_map<propositional_variable_instantiation, pbes_expression> equation;
@@ -505,7 +506,7 @@ class pbesinst_alternative_lazy_algorithm
             // Substitute X_e to its value in all its occurrences, and
             // substitute all other variables to their values that are found
             // to be either true or false in all their occurrences.
-            std::set<propositional_variable_instantiation> new_trivials;
+            std::unordered_set<propositional_variable_instantiation> new_trivials;
             new_trivials.insert(X_e);
             while (!new_trivials.empty())
             {
