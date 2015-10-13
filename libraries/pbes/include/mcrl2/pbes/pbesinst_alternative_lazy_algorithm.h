@@ -16,6 +16,7 @@
 #include <stack>
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
@@ -31,6 +32,18 @@
 
 #ifndef MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
+
+namespace std
+{
+template <>
+struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
+{
+  size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
+  {
+    return hash<atermpp::aterm>()(x);
+  }
+};
+}
 
 namespace mcrl2
 {
@@ -161,18 +174,18 @@ class pbesinst_alternative_lazy_algorithm
     ///        Note: Currently this map only exists in memory and is
     ///        ouputted as debug logs in result(). Later the PBES and BES
     ///        equations should be able to store justification maps.
-    std::map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> > justification;
+    std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> > justification;
 
     /// \brief Map a variable instantiation to a set of other variable
     ///        instantiations on whose right hand sides it appears.
-    std::map<propositional_variable_instantiation, std::set<propositional_variable_instantiation> > occurrence;
+    std::unordered_map<propositional_variable_instantiation, std::set<propositional_variable_instantiation> > occurrence;
 
     /// \brief Map a variable instantiation to its right hand side.
-    std::map<propositional_variable_instantiation, pbes_expression> equation;
+    std::unordered_map<propositional_variable_instantiation, pbes_expression> equation;
 
     /// \brief Map a variable instantiations to its right hand side
     ///        when the latter is trivial (either true or false).
-    std::map<propositional_variable_instantiation, pbes_expression> trivial;
+    std::unordered_map<propositional_variable_instantiation, pbes_expression> trivial;
 
     /// \brief instantiations[i] contains all instantiations of the variable
     ///        of the i-th equation in the PBES.
@@ -189,7 +202,7 @@ class pbesinst_alternative_lazy_algorithm
     propositional_variable_instantiation init;
 
     /// \brief A lookup map for PBES equations.
-    std::map<core::identifier_string, int> equation_index;
+    std::unordered_map<core::identifier_string, int> equation_index;
 
     /// \brief Print the equations to standard out.
     bool m_print_equations;
@@ -281,7 +294,7 @@ class pbesinst_alternative_lazy_algorithm
         pbes_expression expr,
         propositional_variable_instantiation X,
         int rank,
-        std::map<propositional_variable_instantiation, bool>& visited)
+        std::unordered_map<propositional_variable_instantiation, bool>& visited)
     {
       if (is_false(expr) || is_true(expr))
       {
@@ -345,7 +358,7 @@ class pbesinst_alternative_lazy_algorithm
     template <bool is_mu>
     bool find_loop(pbes_expression expr, propositional_variable_instantiation X)
     {
-      std::map<propositional_variable_instantiation, bool> visited;
+      std::unordered_map<propositional_variable_instantiation, bool> visited;
       return find_loop_rec<is_mu>(expr, X, get_rank(X), visited);
     }
 
@@ -503,7 +516,7 @@ class pbesinst_alternative_lazy_algorithm
               // TODO Instead using a map of a single element, we should
               // probably generalize propositional_variable_rewriter to take a
               // function instead of a set
-              std::map<propositional_variable_instantiation, pbes_expression> trivial_X;
+              std::unordered_map<propositional_variable_instantiation, pbes_expression> trivial_X;
               trivial_X[X] = psi_e;
               for (auto i = oc.begin(); i != oc.end(); i++)
               {
