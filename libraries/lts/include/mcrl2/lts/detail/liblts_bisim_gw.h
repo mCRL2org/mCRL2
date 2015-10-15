@@ -258,6 +258,8 @@ class to_constlns_element_T
   protected:
     // !!! Different from pseudo-code: nr_trans_block_to_C is not needed: trans_list points to the list of transitions, and its size equals nr_trans_block_to_C
     //size_t nr_trans_block_to_C = 0;
+
+    constellation_T* m_C;
     to_constlns_element_T* m_new_element;
 
     // A deque containing all the counters.
@@ -278,7 +280,6 @@ class to_constlns_element_T
     }
 
   public:
-    constellation_T *C;
     // !!! Not present in pseudo-code: a pointer to the list of transitions from block containing this element (in to_constlns list) to constellation C,
     // EXCLUDING the inert transitions, i.e., the transitions must leave the source block;
     // This is needed to efficiently find these transitions when preparing for lockstep search detect1 when stabilising blocks
@@ -302,6 +303,11 @@ class to_constlns_element_T
       m_new_element=e;
     }
 
+    constellation_T* C() const
+    {
+      return m_C;
+    }
+
     void delete_to_constlns_element()
     {
       assert(this!=NULL);
@@ -312,17 +318,21 @@ class to_constlns_element_T
 
     // A counter must be created using new_counter, and
     // it cannot be constructed using a constructor.
-    static to_constlns_element_T* new_to_constlns_element()
+    static to_constlns_element_T* new_to_constlns_element(constellation_T* C)
     {
+      to_constlns_element_T* result;
       if (first_free_position()!=NULL)
       {
-        to_constlns_element_T* result=first_free_position();
+        result=first_free_position();
         first_free_position()=first_free_position()->m_new_element;
-        result->m_new_element=0; /* TODO */
-        return result;
       }
-      element_pool().emplace_back();
-      return &element_pool().back();
+      else
+      {
+        element_pool().emplace_back();\
+        result= &element_pool().back();
+      }
+      result->m_C=C;
+      return result;
     }
 };
 
@@ -390,9 +400,16 @@ class block_T
 };
 
 // compare function to sort transitions based on target state
-bool compare_targets_of_transitions (transition_T t1, transition_T t2) { return (t1.target < t2.target); }
+inline bool compare_targets_of_transitions (const transition_T& t1, const transition_T& t2) 
+{ 
+  return (t1.target < t2.target); 
+}
+
 // compare function to sort pointers to transitions based on source state
-bool compare_sources_of_transition_pointers (transition_T* t1, transition_T* t2) {return (t1->source < t2->source); };
+inline bool compare_sources_of_transition_pointers (transition_T* t1, transition_T* t2) 
+{
+  return (t1->source < t2->source); 
+};
 
 template < class LTS_TYPE>
 class bisim_partitioner_gw
@@ -423,10 +440,6 @@ class bisim_partitioner_gw
     std::deque < block_T > blocks;
     // the list of constellations
     std::deque < constellation_T > constellations;
-    // the pool of counters
-    // pool < counter_T > counters;
-    // the pool of to_constlns_element_T objects
-    // pool < to_constlns_element_T > to_constlns_elements;
     // the pool of SClists
     pool < pooled_sized_forward_list < state_T > > SClists;
     // temporary map to keep track of states to be added when converting LTS to Kripke structure
@@ -651,7 +664,7 @@ class bisim_partitioner_gw
            if (size(B->constln_ref) == 0) 
            {
              // if the associated constellation is the one containing B, set inconstln_ref to NULL
-             if (B->constln_ref->C == B->constellation) 
+             if (B->constln_ref->C() == B->constellation) 
              {
                B->inconstln_ref = NULL;
              }
@@ -665,7 +678,7 @@ class bisim_partitioner_gw
          {
            if (size(B->coconstln_ref) == 0) 
            {
-             if (B->coconstln_ref->C == B->constellation) 
+             if (B->coconstln_ref->C() == B->constellation) 
              {
                 B->inconstln_ref = NULL;
              }
@@ -1312,8 +1325,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       blocks.emplace_back(STD_BLOCK, max_block_index);
       block_T* B1 = &(blocks.back());
       // create associated list of transitions from block to constellation C
-      to_constlns_element_T* e = to_constlns_element_T::new_to_constlns_element();
-      e->C = C;
+      to_constlns_element_T* e = to_constlns_element_T::new_to_constlns_element(C);
       blocks.back().to_constlns.insert_linked(e);
       blocks.back().inconstln_ref = e;
       blocks.back().constellation = C;
@@ -1353,8 +1365,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       for (size_t i = 0; i < nr_of_blocks-1; i++) 
       {
         blocks.emplace_back(EXTRA_KRIPKE_BLOCK, max_block_index);
-        to_constlns_element_T* e = to_constlns_element_T::new_to_constlns_element();
-        e->C = C;
+        to_constlns_element_T* e = to_constlns_element_T::new_to_constlns_element(C);
         blocks.back().to_constlns.insert_linked(e);
         blocks.back().inconstln_ref = e;
         // add block to constellation
@@ -1606,8 +1617,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                       // 5.2.2.a.ii
                       //mCRL2log(log::verbose) << "ref: " << t->to_constln_ref << "\n";
                       Bp->coconstln_ref = t->to_constln_ref;
-                      Bp->constln_ref = to_constlns_element_T::new_to_constlns_element();
-                      Bp->constln_ref->C = setC;
+                      Bp->constln_ref = to_constlns_element_T::new_to_constlns_element(setC);
                       Bp->to_constlns.insert_linked(Bp->constln_ref);
                     }
                     // 5.2.2.b
@@ -1680,8 +1690,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                     if (setBp == setB && B->constln_ref == NULL) 
                     {
                       B->coconstln_ref = t->to_constln_ref;
-                      B->constln_ref = to_constlns_element_T::new_to_constlns_element();
-                      B->constln_ref->C = setC;
+                      B->constln_ref = to_constlns_element_T::new_to_constlns_element(setC);
                       B->to_constlns.insert_linked(B->constln_ref);
                       B->inconstln_ref = B->constln_ref;
                     }
@@ -1862,7 +1871,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
               {
                 to_constlns_element_T* l = *it;
-                mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C->type() << "\n";
+                mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C()->type() << "\n";
               }
               mCRL2log(log::verbose) << "---\n";
 #endif
@@ -1887,36 +1896,35 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                   if (t->to_constln_ref != NULL) 
                   {
                     to_constlns_element_T* l = t->to_constln_ref;
-                    //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C->id << "\n";
+                    //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C()->id << "\n";
                     to_constlns_element_T* lp;
                     if (l->new_element() != NULL) 
                     {
-                      //mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C->id << "\n";
+                      //mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C()->id << "\n";
                       lp = l->new_element();
                     }
                     else 
                     {
-                      lp = to_constlns_element_T::new_to_constlns_element();
-                      lp->C = l->C;
+                      lp = to_constlns_element_T::new_to_constlns_element(l->C());
                       l->set_new_element(lp);
-                      //mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C->id << "\n";
+                      //mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C()->id << "\n";
                       // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
                       Bpp->to_constlns.insert_linked(lp);
                       // possibly set Bpp.inconstln_ref
-                      if (l->C == Bpp->constellation) 
+                      if (l->C() == Bpp->constellation) 
                       {
                         Bpp->inconstln_ref = lp;
-                        //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C->id << "\n";
+                        //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C()->id << "\n";
                       }
                       // possibly set Bpp.constln_ref and Bpp.coconstln_ref
                       if (l == Bp->constln_ref) 
                       {
-                        //mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C->id << "\n";
+                        //mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C()->id << "\n";
                         Bpp->constln_ref = lp;
                       }
                       else if (l == Bp->coconstln_ref) 
                       {
-                        //mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C->id << "\n";
+                        //mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C()->id << "\n";
                         Bpp->coconstln_ref = lp;
                       }
                       // let lp point to l, to be able to efficiently reset new_element pointers later on
@@ -1952,8 +1960,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                       // Different from pseudo-code: add the transition to the corresponding trans_list
                       if (Bpp->inconstln_ref == NULL) 
                       {
-                        Bpp->inconstln_ref = to_constlns_element_T::new_to_constlns_element();
-                        Bpp->inconstln_ref->C = Bpp->constellation;
+                        Bpp->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bpp->constellation);
                         Bpp->to_constlns.insert_linked(Bpp->inconstln_ref);
                         if (Bp->inconstln_ref != NULL) 
                         {
@@ -1993,8 +2000,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                     // Different from pseudo-code: add the transition to the corresponding trans_list
                     if (Bp->inconstln_ref == NULL) 
                     {
-                      Bp->inconstln_ref = to_constlns_element_T::new_to_constlns_element();
-                      Bp->inconstln_ref->C = Bp->constellation;
+                      Bp->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bp->constellation);
                       Bp->to_constlns.insert_linked(Bp->inconstln_ref);
                       if (Bpp->inconstln_ref != NULL) 
                       {
@@ -2056,7 +2062,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                 {
                   if (size(l->new_element()) == 0 && l->new_element() != Bp->constln_ref && l->new_element() != Bp->coconstln_ref) 
                   {
-                    if (l->new_element()->C == Bp->constellation) 
+                    if (l->new_element()->C() == Bp->constellation) 
                     {
                       Bp->inconstln_ref = NULL;
                     }
@@ -2225,14 +2231,13 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                     }
                     else 
                     {
-                      //assert(Bp3->inconstln_ref == NULL || l->C != Bp3->constellation);
-                      lp = to_constlns_element_T::new_to_constlns_element();
-                      lp->C = l->C;
+                      //assert(Bp3->inconstln_ref == NULL || l->C() != Bp3->constellation);
+                      lp = to_constlns_element_T::new_to_constlns_element(l->C());
                       l->set_new_element(lp);
                       // add lp to Bp3.to_constlns (IMPLIED IN PSEUDO-CODE)
                       Bp3->to_constlns.insert_linked(lp);
                       // possibly set Bp3.inconstln_ref
-                      if (l->C == Bp3->constellation) 
+                      if (l->C() == Bp3->constellation) 
                       {
                         //mCRL2log(log::verbose) << "bla\n";
                         Bp3->inconstln_ref = lp;
@@ -2275,8 +2280,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                       // Different from pseudo-code: add the transition to the corresponding trans_list
                       if (Bp3->inconstln_ref == NULL) 
                       {
-                        Bp3->inconstln_ref = to_constlns_element_T::new_to_constlns_element();
-                        Bp3->inconstln_ref->C = Bp3->constellation;
+                        Bp3->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bp3->constellation);
                         Bp3->to_constlns.insert_linked(Bp3->inconstln_ref);
                         if (splitBpB->inconstln_ref != NULL) 
                         {
@@ -2314,8 +2318,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                     // Different from pseudo-code: add the transition to the corresponding trans_list
                     if (splitBpB->inconstln_ref == NULL) 
                     {
-                      splitBpB->inconstln_ref = to_constlns_element_T::new_to_constlns_element();
-                      splitBpB->inconstln_ref->C = splitBpB->constellation;
+                      splitBpB->inconstln_ref = to_constlns_element_T::new_to_constlns_element(splitBpB->constellation);
                       splitBpB->to_constlns.insert_linked(splitBpB->inconstln_ref);
                       if (Bp3->inconstln_ref != NULL) 
                       {
@@ -2356,7 +2359,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                 {
                   if (size(l->new_element()) == 0 && l->new_element() != splitBpB->constln_ref && l->new_element() != splitBpB->coconstln_ref) 
                   {
-                    if (l->new_element()->C == splitBpB->constellation) 
+                    if (l->new_element()->C() == splitBpB->constellation) 
                     {
                       splitBpB->inconstln_ref = NULL;
                     }
@@ -2436,9 +2439,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                 {
                   transition_T* t = transitionpointers[tit];
                   to_constlns_element_T* setBp_entry = t->to_constln_ref;
-                  //mCRL2log(log::verbose) << t->to_constln_ref->C << " " << t->target->block->constellation << "\n";
+                  //mCRL2log(log::verbose) << t->to_constln_ref->C() << " " << t->target->block->constellation << "\n";
                   //mCRL2log(log::verbose) << Bhat->constellation << "\n";
-                  //assert(t->to_constln_ref->C == t->target->block->constellation);
+                  //assert(t->to_constln_ref->C() == t->target->block->constellation);
                   // 5.3.6.a.i
                   if (setBp_entry->SClist == NULL) 
                   {
@@ -2449,12 +2452,12 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                   // 5.3.6.a.ii
                   if (setBp_entry->SClist->list.size() == 0)
                   {
-                    //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C << "\n";
+                    //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C() << "\n";
                     setBp_entry->SClist->list.insert(s);
                   }
                   else if (setBp_entry->SClist->list.front() != s)
                   {
-                    //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C << "\n";
+                    //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C() << "\n";
                     setBp_entry->SClist->list.insert(s);
                   }
                 }
@@ -2555,7 +2558,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                   maxsize_detect = (Bhat->btm_states.size() + Bhat->non_btm_states.size()) / 2;
                   block_detect = Bhat;
                   e_detect = e;
-                  constellation_splitter_detect = e->C;
+                  constellation_splitter_detect = e->C();
                   detect1_finished = CONTINUE;
                   detect2_finished = CONTINUE;
                   current_state_detect1 = NULL;
@@ -2613,21 +2616,20 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                       if (t->to_constln_ref != NULL) 
                       {
                         to_constlns_element_T* l = t->to_constln_ref;
-                        //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C->id << "\n";
+                        //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C()->id << "\n";
                         to_constlns_element_T* lp;
                         if (l->new_element() != NULL) 
                         {
-                          //mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C->id << "\n";
+                          //mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C()->id << "\n";
                           lp = l->new_element();
                         }
                         else 
                         {
                           //mCRL2log(log::verbose) << Bhatp->constellation->id << "\n";
-                          //assert(Bhatp->inconstln_ref == NULL || l->C != Bhatp->constellation);
-                          lp = to_constlns_element_T::new_to_constlns_element();
-                          lp->C = l->C;
+                          //assert(Bhatp->inconstln_ref == NULL || l->C() != Bhatp->constellation);
+                          lp = to_constlns_element_T::new_to_constlns_element(l->C());
                           l->set_new_element(lp);
-                          //mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C->id << "\n";
+                          //mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C()->id << "\n";
                           // Different from pseudo-code: point lp->new_element back to l, to efficiently reset
                           // new_element pointers of 'old' elements later
                           lp->set_new_element(l);
@@ -2635,9 +2637,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                           // add lp to Bhatp.to_constlns (IMPLIED IN PSEUDO-CODE)
                           Bhatp->to_constlns.insert_linked(lp);
                           // possibly set Bhatp.inconstln_ref
-                          if (l->C == Bhatp->constellation) 
+                          if (l->C() == Bhatp->constellation) 
                           {
-                            //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C->id << "\n";
+                            //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C()->id << "\n";
                             Bhatp->inconstln_ref = lp;
                           }
                         }
@@ -2661,8 +2663,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                           // Different from pseudo-code: add the transition to the corresponding trans_list
                           if (Bhatp->inconstln_ref == NULL) 
                           {
-                            Bhatp->inconstln_ref = to_constlns_element_T::new_to_constlns_element();
-                            Bhatp->inconstln_ref->C = Bhatp->constellation;
+                            Bhatp->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bhatp->constellation);
                             Bhatp->to_constlns.insert_linked(Bhatp->inconstln_ref);
                             if (Bhat->inconstln_ref != NULL) 
                             {
@@ -2692,8 +2693,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                         // Different from pseudo-code: add the transition to the corresponding trans_list
                         if (Bhat->inconstln_ref == NULL) 
                         {
-                          Bhat->inconstln_ref = to_constlns_element_T::new_to_constlns_element();
-                          Bhat->inconstln_ref->C = Bhat->constellation;
+                          Bhat->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bhat->constellation);
                           Bhat->to_constlns.insert_linked(Bhat->inconstln_ref);
                           if (Bhatp->inconstln_ref != NULL) 
                           {
@@ -2812,7 +2812,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                     {
                       if (size(l->new_element()) == 0) 
                       {
-                        if (l->new_element()->C == Bhat->constellation) 
+                        if (l->new_element()->C() == Bhat->constellation) 
                         {
                           Bhat->inconstln_ref = NULL;
                         }
@@ -2856,12 +2856,12 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                         // 5.3.4.a.ii
                         if (setBp_entry->SClist->list.size() == 0)
                         {
-                          //mCRL2log(log::verbose) << "adding1 state to constln " << setBp_entry << " " << setBp_entry->C->id << "\n";
+                          //mCRL2log(log::verbose) << "adding1 state to constln " << setBp_entry << " " << setBp_entry->C()->id << "\n";
                           setBp_entry->SClist->list.insert(s);
                         }
                         else if (setBp_entry->SClist->list.front() != s)
                         {
-                          //mCRL2log(log::verbose) << "(" << t << "," << t->target->id << "): adding2 state " << s->id << " to constln " << setBp_entry << " " << setBp_entry->C->id << "\n";
+                          //mCRL2log(log::verbose) << "(" << t << "," << t->target->id << "): adding2 state " << s->id << " to constln " << setBp_entry << " " << setBp_entry->C()->id << "\n";
                           setBp_entry->SClist->list.insert(s);
                         }
                       }
@@ -2983,7 +2983,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           found = false;
           if (t->to_constln_ref != NULL) 
           {
-            assert(t->target->block->constellation == t->to_constln_ref->C);
+            assert(t->target->block->constellation == t->to_constln_ref->C());
             for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
             {
               to_constlns_element_T* e = *eit;
@@ -3024,7 +3024,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                 assert(t->ptr_in_list == prev_tit);
                 assert(t->to_constln_ref == e);
                 assert(t->source->block == B);
-                assert(t->target->block->constellation == e->C);
+                assert(t->target->block->constellation == e->C());
                 // assert that t->to_constln_ref is valid
                 count = 0;
                 for (auto eit2 = B->to_constlns.begin(); eit2 != B->to_constlns.end(); ++eit2) 
@@ -3111,7 +3111,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           transition_T* t = &(transitions[tit]);
           assert(t->target == s);
           // TODO: CHECK TO_CONSTLN_CNT
-          assert(t->to_constln_ref->C == B->constellation);
+          assert(t->to_constln_ref->C() == B->constellation);
         }
         
         prev_sit = sit;
@@ -3191,7 +3191,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
             for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
             {
               to_constlns_element_T* e = *eit;
-              if (e->C == split_const) 
+              if (e->C() == split_const) 
               {
                 for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) 
                 {
@@ -3235,7 +3235,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
             for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
             {
               to_constlns_element_T* e = *eit;
-              if (e->C == split_const) 
+              if (e->C() == split_const) 
               {
                 for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) 
                 {
