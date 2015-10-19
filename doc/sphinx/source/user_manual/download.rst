@@ -33,6 +33,10 @@ binaries are available.
    +------------------------+------------------------+
    |Source                  | |src_tgz|_             |
    +------------------------+------------------------+
+
+N.B. The tool lpsxsim fails to load .lps files under Windows. A new version
+of this tool can be downloaded here: <http://www.mcrl2.org/download/release/lpsxsim_32bit.zip>
+and <http://www.mcrl2.org/download/release/lpsxsim_64bit.zip>.
   
 .. ifconfig:: release != version
 
