@@ -35,8 +35,10 @@ binaries are available.
    +------------------------+------------------------+
 
 N.B. The tool lpsxsim fails to load .lps files under Windows. A new version
-of this tool can be downloaded here: <http://www.mcrl2.org/download/release/lpsxsim_32bit.zip>
-and <http://www.mcrl2.org/download/release/lpsxsim_64bit.zip>.
+of this tool can be downloaded here: http://www.mcrl2.org/download/release/lpsxsim_32bit.zip
+and http://www.mcrl2.org/download/release/lpsxsim_64bit.zip. The tool should
+be run standalone from the directory in which the zip archive is extracted,
+otherwise the Qt libraries may not be found.
   
 .. ifconfig:: release != version
 
