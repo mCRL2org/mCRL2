@@ -374,6 +374,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce(l,false,false);
       return;
     }
+    case lts_eq_bisim_gw:
+    {
+      detail::bisimulation_reduce_gw(l,false,false);
+      return;
+    }
     case lts_eq_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s(l);
@@ -387,7 +392,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     }
     case lts_eq_branching_bisim_gw:
     {
-      detail::bisimulation_reduce_gw(l,true);
+      detail::bisimulation_reduce_gw(l,true,false);
       return;
     }
     case lts_eq_branching_bisim_sigref:
@@ -401,6 +406,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce(l,true,true);
       return;
     }
+    case lts_eq_divergence_preserving_branching_bisim_gw:
+    {
+      detail::bisimulation_reduce_gw(l,true,true);
+      return;
+    }
     case lts_eq_divergence_preserving_branching_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s(l);
@@ -410,6 +420,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     case lts_eq_weak_bisim:
     {
       detail::weak_bisimulation_reduce(l,false);
+      return;
+    }
+    case lts_eq_weak_bisim_gw:
+    {
+      detail::weak_bisimulation_reduce(l,false,true); // weak bisimulation without divergencies and the gw algorithm.
       return;
     }
     case lts_eq_weak_bisim_sigref:
@@ -425,6 +440,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     case lts_eq_divergence_preserving_weak_bisim:
     {
       detail::weak_bisimulation_reduce(l,true);
+      return;
+    }
+    case lts_eq_divergence_preserving_weak_bisim_gw: 
+    {
+      detail::weak_bisimulation_reduce(l,true,true); // weak bisimulation with divergencies and the gw algorithm.
       return;
     }
     case lts_eq_divergence_preserving_weak_bisim_sigref:

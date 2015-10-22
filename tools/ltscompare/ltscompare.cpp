@@ -35,33 +35,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 
-static const char* equivalent_string(lts_equivalence eq)
-{
-  switch (eq)
-  {
-    case lts_eq_bisim:
-      return "strongly bisimilar";
-    case lts_eq_branching_bisim:
-      return "branching bisimilar";
-    case lts_eq_branching_bisim_gw:
-      return "branching bisimilar";
-    case lts_eq_divergence_preserving_branching_bisim:
-      return "divergence preserving branching bisimilar";
-    case lts_eq_weak_bisim:
-      return "weak bisimilar";
-    case lts_eq_divergence_preserving_weak_bisim:
-      return "divergence preserving weak bisimilar";
-    case lts_eq_sim:
-      return "strongly simulation equivalent";
-    case lts_eq_trace:
-      return "strongly trace equivalent";
-    case lts_eq_weak_trace:
-      return "weak trace equivalent";
-    default:
-      return "equivalent";
-  }
-}
-
 static const char* preorder_string(lts_preorder pre)
 {
   switch (pre)
@@ -163,7 +136,7 @@ class ltscompare_tool : public ltscompare_base
         result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
         mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
-                       << equivalent_string(tool_options.equivalence) << std::endl;
+                       << description(tool_options.equivalence) << std::endl;
       }
 
       if (tool_options.preorder != lts_pre_none)
@@ -264,11 +237,20 @@ class ltscompare_tool : public ltscompare_base
       add_option("equivalence", make_enum_argument<lts_equivalence>("NAME)")
                  .add_value(lts_eq_none, true)
                  .add_value(lts_eq_bisim)
+                 .add_value(lts_eq_bisim_gw)
+                 .add_value(lts_eq_bisim_sigref)
                  .add_value(lts_eq_branching_bisim)
                  .add_value(lts_eq_branching_bisim_gw)
+                 .add_value(lts_eq_branching_bisim_sigref)
                  .add_value(lts_eq_divergence_preserving_branching_bisim)
+                 .add_value(lts_eq_divergence_preserving_branching_bisim_gw)
+                 .add_value(lts_eq_divergence_preserving_branching_bisim_sigref)
                  .add_value(lts_eq_weak_bisim)
+                 .add_value(lts_eq_weak_bisim_gw)
+                 .add_value(lts_eq_weak_bisim_sigref)
                  .add_value(lts_eq_divergence_preserving_weak_bisim)
+                 .add_value(lts_eq_divergence_preserving_weak_bisim_gw)
+                 .add_value(lts_eq_divergence_preserving_weak_bisim_sigref)
                  .add_value(lts_eq_sim)
                  .add_value(lts_eq_trace)
                  .add_value(lts_eq_weak_trace),

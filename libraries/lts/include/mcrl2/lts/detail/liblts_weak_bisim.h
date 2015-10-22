@@ -42,7 +42,8 @@ namespace detail
 template < class LTS_TYPE>
 void weak_bisimulation_reduce(
   LTS_TYPE& l,
-  const bool preserve_divergences = false)
+  const bool preserve_divergences = false,
+  const bool use_groote_wijs_algorithm = false)
 {
   bisimulation_reduce(l,true,preserve_divergences);        // Apply branching bisimulation to l.
   size_t divergence_label;
@@ -51,7 +52,14 @@ void weak_bisimulation_reduce(
     divergence_label=mark_explicit_divergence_transitions(l);
   }
   reflexive_transitive_tau_closure(l);                    // Apply transitive tau closure to l.
-  bisimulation_reduce(l,false,false);                     // Apply strong bisimulation to l.
+  if (use_groote_wijs_algorithm)
+  {
+    bisimulation_reduce_gw(l,false,false);                     // Apply strong bisimulation to l.
+  }
+  else
+  {
+    bisimulation_reduce(l,false,false);                     // Apply strong bisimulation to l.
+  }
   scc_reduce(l);                                          // Remove tau loops.
   if (preserve_divergences)
   {

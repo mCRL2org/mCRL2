@@ -181,12 +181,12 @@ class state_T
     unsigned int inert_cnt;
     // priority used for priority queue in detect2 when splitting. Use unsigned int to reduce memory footprint.
     unsigned int priority;
-	
+  
     // constructor
     state_T()
      : block(NULL),
        Ttgt_begin(0),
-			 Tsrc_begin(0),
+       Tsrc_begin(0),
        is_in_L_detect1(false), 
        is_in_P_detect2(false), 
        is_in_Lp_detect2(false),
@@ -434,8 +434,8 @@ class bisim_partitioner_gw
     std::vector < state_T > states;
     // the list of transitions (for backwards traversal)
     std::vector < transition_T > transitions;
-		// the list of pointers to transitions (for forward traversal)
-		std::vector < transition_T* > transitionpointers;
+    // the list of pointers to transitions (for forward traversal)
+    std::vector < transition_T* > transitionpointers;
     // the list of blocks
     std::deque < block_T > blocks;
     // the list of constellations
@@ -444,8 +444,7 @@ class bisim_partitioner_gw
     pool < pooled_sized_forward_list < state_T > > SClists;
     // temporary map to keep track of states to be added when converting LTS to Kripke structure
 
-    const label_type tau_label;
-
+    const label_type tau_label; // tau_label is size_t(-1) if it does not exist.
 
     // start structures and functions for lockstep search
 
@@ -526,7 +525,7 @@ class bisim_partitioner_gw
 
     size_t state_id(state_T* s)
     {
-      return (s-&states[0])/sizeof(state_T);
+      return (s-&states[0]);
     }
     
     // move state to block
@@ -710,30 +709,31 @@ class bisim_partitioner_gw
      *  is much faster than compiled without any optimisation. The difference can go up to a factor 10.
      *  \param[in] l Reference to the LTS. The LTS l is only changed if \ref replace_transitions is called. */
     bisim_partitioner_gw(LTS_TYPE& l,
-                         const bool branching=false)
+                         const bool branching=false,
+                         const bool preserve_divergences=false)
      : max_block_index(0),
        aut(l), 
        tau_label(determine_tau_label(l))
     {
-std::cerr << "size of state_T " << sizeof(state_T) << "\n";
-std::cerr << "size of transition_T " << sizeof(transition_T) << "\n";
-std::cerr << "size of block_T " << sizeof(block_T) << "\n";
-std::cerr << "size of constellation_T " << sizeof(constellation_T) << "\n";
-std::cerr << "size of to_constlns_element_T " << sizeof(to_constlns_element_T) << "\n";
-std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
+      assert(branching || !preserve_divergences);
+      // std::cerr << "size of state_T " << sizeof(state_T) << "\n";
+      //% std::cerr << "size of transition_T " << sizeof(transition_T) << "\n";
+      //% std::cerr << "size of block_T " << sizeof(block_T) << "\n";
+      //% std::cerr << "size of constellation_T " << sizeof(constellation_T) << "\n";
+      //% std::cerr << "size of to_constlns_element_T " << sizeof(to_constlns_element_T) << "\n";
+      //% std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       // initialise variables
       nr_of_splits = 0;
       current_state_detect1 = NULL;
       current_state_detect2 = NULL;
       in_forward_check_detect2 = false;
           
-      assert(branching);
-      mCRL2log(log::verbose) << "O(m log n) " <<
-                  (branching?"branching ":"") << "bisimulation partitioner created for "
+      mCRL2log(log::verbose) << "O(m log n) " << (preserve_divergences?"Divergence preserving b":"B") <<
+                  (branching?"ranching ":"") << "bisimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
-      create_initial_partition_gw(branching);
-      refine_partition_until_it_becomes_stable_gw(branching);
+      create_initial_partition_gw(branching,preserve_divergences);
+      refine_partition_until_it_becomes_stable_gw(branching,preserve_divergences);
     }
 
 
@@ -753,7 +753,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
      *
      * \pre The bisimulation equivalence classes have been computed.
      * \param[in] branching Causes non internal transitions to be removed. */
-    void replace_transitions(const bool branching)
+    void replace_transitions(const bool branching, const bool preserve_divergences)
     {
       std::unordered_map < state_type, Key > to_lts_map;
       // obtain a map from state to <action, state> pair from extra_kripke_states
@@ -778,35 +778,23 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           if (tgt_id < orig_nr_of_states)
           {
             // we have a tau transition
-            if (!branching || s_eq != get_eq_class(tgt_id))
+            assert(branching);
+            if (branching && 
+                 (s_eq != get_eq_class(tgt_id) ||
+                  (preserve_divergences && s_eq != get_eq_class(tgt_id))
+               ))
             {
+              assert(tau_label!=size_t(-1));
               resulting_transitions.insert(transition(s_eq, tau_label, get_eq_class(tgt_id)));
             }
           }
-          else {
+          else 
+          {
             Key k = (to_lts_map.find(tgt_id))->second;
             resulting_transitions.insert(transition(s_eq, k.first, get_eq_class(k.second)));
           }
         }
       }
-
-//      const std::vector<transition>& trans=aut.get_transitions();
-//      for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
-//      {
-//        const transition i=*t;
-//        if (!branching ||
-//            !aut.is_tau(i.label()) ||
-//            get_eq_class(i.from())!=get_eq_class(i.to()))
-//        {
-//          resulting_transitions.insert(
-//            transition(
-//              get_eq_class(i.from()),
-//              i.label(),
-//              get_eq_class(i.to())));
-//        }
-//      }
-//      // Remove the old transitions
-//      aut.clear_transitions();
 
       // Copy the transitions from the set into the transition system.
       for (std::multiset < transition >::const_iterator i=resulting_transitions.begin();
@@ -1257,6 +1245,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
     // method to print current partition
     void print_partition ()
     {
+      mCRL2log(log::verbose) << "PARTITION ";
       for (auto cit = non_trivial_constlns.begin(); cit != non_trivial_constlns.end(); ++cit) 
       {
         constellation_T* C = *cit;
@@ -1301,10 +1290,14 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       mCRL2log(log::verbose) << "\n";
     }
 
-    void create_initial_partition_gw(const bool branching)
+    void create_initial_partition_gw(const bool branching,
+                                     const bool preserve_divergences)
     {
       using namespace std;
-
+      if (preserve_divergences)
+      {
+        mCRL2log(log::warning) << "Divergent transitions are not yet properly taken into account in the GW algorithm.\n";
+      }
       // number of blocks
       size_t nr_of_blocks;
       // the number of states
@@ -1335,9 +1328,9 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
       // iterate over the transitions and collect new states
       //aut.sort_transitions(mcrl2::lts::src_lbl_tgt);
       const std::vector<transition>& trans = aut.get_transitions();
-			// sort by target state
-			//std::sort(trans.begin(), trans.end(), compare_targets_of_transitions);
-			for (auto r=trans.begin(); r != trans.end(); ++r)
+      // sort by target state
+      //std::sort(trans.begin(), trans.end(), compare_targets_of_transitions);
+      for (auto r=trans.begin(); r != trans.end(); ++r)
       {
         const transition t = *r;
                     
@@ -1391,13 +1384,13 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
         (states[it->second]).block = &(blocks[(action_block_map.find((it->first).first))->second]);
       }
       // create transitions (we need the original number in input + one for each extra kripke state,
-			// and one transition at the end indicating the end of the list)
+      // and one transition at the end indicating the end of the list)
       transitions.reserve(trans.size()+extra_kripke_states.size()+1);
-			// first add the original LTS transitions
-			transition_T* t_entry = NULL;
-			for (auto r=trans.begin(); r != trans.end(); ++r)
-			{
-			  const transition t = *r;
+      // first add the original LTS transitions
+      transition_T* t_entry = NULL;
+      for (auto r=trans.begin(); r != trans.end(); ++r)
+      {
+        const transition t = *r;
         // create transition entry
         transitions.emplace_back(transition_T());
         t_entry = &(transitions.back());
@@ -1416,8 +1409,8 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           Key k(t.label(),t.to());
           t_entry->target = &states[(extra_kripke_states.find(k))->second];
         }
-			}
-			// now add transitions <a,t> -> t
+      }
+      // now add transitions <a,t> -> t
       for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit)
       {
         transitions.emplace_back(transition_T());
@@ -1430,20 +1423,20 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
         t_entry->source = &states[sid];
         t_entry->target = &states[tid];
       }
-			// sort the transitions by target
-			std::sort(transitions.begin(), transitions.end(), compare_targets_of_transitions);
-			// we no longer need original transitions
+      // sort the transitions by target
+      std::sort(transitions.begin(), transitions.end(), compare_targets_of_transitions);
+      // we no longer need original transitions
       aut.clear_transitions();
-			// in one loop, create a vector of pointers for forward traversal, and set the Tsrc_begin pointers
-			state_T* current_state = NULL;
-			// create vector of transition pointers for forward traversals
-			// again, add a dummy transition at the end
-			transitionpointers.reserve(trans.size()+extra_kripke_states.size()+1);
-			for (trans_type tit = 0; tit < transitions.size(); tit++)
-			{
-			  // add pointer to transitionpointers
-			  transition_T* t = &(transitions[tit]);
-				transitionpointers.emplace_back(t);
+      // in one loop, create a vector of pointers for forward traversal, and set the Tsrc_begin pointers
+      state_T* current_state = NULL;
+      // create vector of transition pointers for forward traversals
+      // again, add a dummy transition at the end
+      transitionpointers.reserve(trans.size()+extra_kripke_states.size()+1);
+      for (trans_type tit = 0; tit < transitions.size(); tit++)
+      {
+        // add pointer to transitionpointers
+        transition_T* t = &(transitions[tit]);
+        transitionpointers.emplace_back(t);
 
         // if we see a new target state, set begin of Tsrc to this transition
         if (t->target != current_state)
@@ -1460,53 +1453,53 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
           // add transition to transition list of source block
           t->to_constln_ref->trans_list.insert_linked(t);
         }
-			}
-			// sort transition pointers by source state
-			std::sort(transitionpointers.begin(), transitionpointers.end(), compare_sources_of_transition_pointers);
-			// walk over the transition pointers, add counters and set Ttgt_begin entries
-			current_state = NULL;
-			counter_T* counter_it;
-			for (trans_type tit = 0; tit < transitionpointers.size(); tit++)
-			{
-			  transition_T* t = transitionpointers[tit];
-				
-				if (t->source != current_state)
-				{
-				  current_state = t->source;
-					current_state->Ttgt_begin = tit;
-					// create a new counter
-					counter_it=counter_T::new_counter();
-				}
+      }
+      // sort transition pointers by source state
+      std::sort(transitionpointers.begin(), transitionpointers.end(), compare_sources_of_transition_pointers);
+      // walk over the transition pointers, add counters and set Ttgt_begin entries
+      current_state = NULL;
+      counter_T* counter_it;
+      for (trans_type tit = 0; tit < transitionpointers.size(); tit++)
+      {
+        transition_T* t = transitionpointers[tit];
+        
+        if (t->source != current_state)
+        {
+          current_state = t->source;
+          current_state->Ttgt_begin = tit;
+          // create a new counter
+          counter_it=counter_T::new_counter();
+        }
         // add pointer to counter
         t->to_constln_cnt = counter_it;
         // increment the counter
         t->to_constln_cnt->increment();
-			}
-			// add the dummy 'end of the list' transition
-			transitions.emplace_back(transition_T());
-			// add dummy 'end of the list' transition pointer
-			transitionpointers.emplace_back(&(transitions.back()));
+      }
+      // add the dummy 'end of the list' transition
+      transitions.emplace_back(transition_T());
+      // add dummy 'end of the list' transition pointer
+      transitionpointers.emplace_back(&(transitions.back()));
 #ifndef NDEBUG
       // print the Kripke structure
-//      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
-//      {
-//           std::pair<Key, state_type> p = *sit;
-//           mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
-//      }
-//      for (auto sit = states.begin(); sit != states.end(); ++sit) 
-//      {
-//        const state_T& s = *sit;
-//        for (auto tit = s.Ttgt.begin(); tit != s.Ttgt.end(); ++tit) 
-//        {
-//          transition_T* t = *tit;
-//          mCRL2log(log::verbose) << t->source->id << " -> " << t->target->id << "\n";
-//        }
-//        for (auto tit = s.Tsrc.begin(); tit != s.Tsrc.end(); ++tit) 
-//        {
-//          transition_T* t = *tit;
-//          mCRL2log(log::verbose) << t->target->id << " <- " << t->source->id << "\n";
-//        }
-//      }
+      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
+      {
+           std::pair<Key, state_type> p = *sit;
+           mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
+      }
+      for (auto sit = states.begin(); sit != states.end(); ++sit) 
+      {
+        const state_T& s = *sit;
+        for (auto tit = s.Ttgt_begin; transitionpointers[tit]->source == &s; ++tit) 
+        {
+          transition_T* t = transitionpointers[tit];
+          mCRL2log(log::verbose) << state_id(t->source) << " -> " << state_id(t->target) << "\n";
+        }
+        for (auto tit = s.Tsrc_begin; transitions[tit].source == &s; ++tit) 
+        {
+          transition_T* t = &transitions[tit];
+          mCRL2log(log::verbose) << state_id(t->target) << " <- " << state_id(t->source) << "\n";
+        }
+      }
 #endif
       
       // Add all states to their appropriate list in the block they reside in
@@ -1543,14 +1536,18 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
     }; // end create_initial_partition
 
 // Refine the partition until the partition has become stable
-    void refine_partition_until_it_becomes_stable_gw(const bool /* branching [intended to make the code also usable for strong bisimulation, which it does not calculate now] */)
+    void refine_partition_until_it_becomes_stable_gw(const bool branching, const bool preserve_divergences)
     {
+      if (preserve_divergences)
+      {
+        mCRL2log(log::warning) << "Divergent transitions are not yet properly taken into account in the GW algorithm.\n";
+      }
       while (non_trivial_constlns.size() > 0) 
       {
         // list of splittable blocks
         sized_forward_list < block_T > splittable_blocks;
 #ifndef NDEBUG
-        //print_partition();
+        print_partition();
         //check_internal_consistency_of_the_partitioning_data_structure_gw(branching);
         check_consistency_blocks();
         check_consistency_transitions();
@@ -1568,14 +1565,14 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
             B = *bit;
             if (B->btm_states.size()+B->non_btm_states.size() <= (setB->size)/2) 
             {
-              //mCRL2log(log::verbose) << B->btm_states.size() << " " << B->non_btm_states.size() << " " << B->marked_btm_states.size() << " " << B->marked_non_btm_states.size() << "\n";
-              //mCRL2log(log::verbose) << "splitter: " << B->id << " " << B->btm_states.front()->id << "\n";
+              mCRL2log(log::verbose) << B->btm_states.size() << " " << B->non_btm_states.size() << " " << B->marked_btm_states.size() << " " << B->marked_non_btm_states.size() << "\n";
+              mCRL2log(log::verbose) << "splitter: " << B->block_id() << " " << state_id(B->btm_states.front()) << "\n";
               //for (auto it = B->to_constlns.begin(); it != B->to_constlns.end(); ++it) {
               //  to_constlns_element_T* l = *it;
-              //  mCRL2log(log::verbose) << l << " " << l->new_element << " " << l->C->id << "\n";
+              //  mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
               //}
-              //mCRL2log(log::verbose) << "inconstln_ref: " << B->inconstln_ref << "\n";
-              //mCRL2log(log::verbose) << "---\n";
+              mCRL2log(log::verbose) << "inconstln_ref: " << B->inconstln_ref << "\n";
+              mCRL2log(log::verbose) << "---\n";
               // 5.2.1
               // 5.2.1.a
               constellations.emplace_back();
@@ -1860,11 +1857,11 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               }
 #ifndef NDEBUG
               mCRL2log(log::verbose) << "splitting off: [";
-//              for (auto sit = N->begin(); sit != N->end(); ++sit) 
-//              {
-//                state_T* s = *sit;
-//                mCRL2log(log::verbose) << " " << s->id;
-//              }
+              for (auto sit = N->begin(); sit != N->end(); ++sit) 
+              {
+                state_T* s = *sit;
+                mCRL2log(log::verbose) << " " << state_id(s);
+              }
               mCRL2log(log::verbose) << "]\n";
               check_consistency_blocks();
               check_consistency_transitions();
@@ -1879,7 +1876,7 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
               {
                 state_T* s = *sit;
                 
-                //mCRL2log(log::verbose) << "State " << s->id << "\n";
+                mCRL2log(log::verbose) << "State " << state_id(s) << "\n";
                 
                 // 5.3.2.a
                 move_state_to_block(s, Bpp);
@@ -1896,45 +1893,45 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                   if (t->to_constln_ref != NULL) 
                   {
                     to_constlns_element_T* l = t->to_constln_ref;
-                    //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C()->id << "\n";
+                    mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C() << "\n";
                     to_constlns_element_T* lp;
                     if (l->new_element() != NULL) 
                     {
-                      //mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C()->id << "\n";
+                      mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C() << "\n";
                       lp = l->new_element();
                     }
                     else 
                     {
                       lp = to_constlns_element_T::new_to_constlns_element(l->C());
                       l->set_new_element(lp);
-                      //mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C()->id << "\n";
+                      mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C() << "\n";
                       // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
                       Bpp->to_constlns.insert_linked(lp);
                       // possibly set Bpp.inconstln_ref
                       if (l->C() == Bpp->constellation) 
                       {
                         Bpp->inconstln_ref = lp;
-                        //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C()->id << "\n";
+                        mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C() << "\n";
                       }
                       // possibly set Bpp.constln_ref and Bpp.coconstln_ref
                       if (l == Bp->constln_ref) 
                       {
-                        //mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C()->id << "\n";
+                        mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C() << "\n";
                         Bpp->constln_ref = lp;
                       }
                       else if (l == Bp->coconstln_ref) 
                       {
-                        //mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C()->id << "\n";
+                        mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C() << "\n";
                         Bpp->coconstln_ref = lp;
                       }
                       // let lp point to l, to be able to efficiently reset new_element pointers later on
                       lp->set_new_element(l);
-                      //mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
+                      mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
                     }
-                    //mCRL2log(log::verbose) << "removing transition\n";
+                    mCRL2log(log::verbose) << "removing transition\n";
                     l->trans_list.move_linked(t, lp->trans_list);
                     t->to_constln_ref = lp;
-                    //mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
+                    mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
                   }
                   // 5.3.2.b.ii
                   else 
@@ -3024,6 +3021,8 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
                 assert(t->ptr_in_list == prev_tit);
                 assert(t->to_constln_ref == e);
                 assert(t->source->block == B);
+                mCRL2log(log::verbose) << "TEST: " << state_id(t->source) << " " << state_id(t->target) << "\n";
+                mCRL2log(log::verbose) << "CONSTELLATIONS: " << t->target->block->constellation << " " << e->C() << "\n";
                 assert(t->target->block->constellation == e->C());
                 // assert that t->to_constln_ref is valid
                 count = 0;
@@ -3271,7 +3270,8 @@ std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
 template < class LTS_TYPE>
 void bisimulation_reduce_gw(
   LTS_TYPE& l,
-  const bool branching = false);
+  const bool branching = false,
+  const bool preserve_divergences = false);
 
 
 /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
@@ -3312,17 +3312,18 @@ bool bisimulation_compare_gw(
 
 template < class LTS_TYPE>
 void bisimulation_reduce_gw(LTS_TYPE& l,
-                         const bool branching) /*=false */
+                            const bool branching/*=false */,
+                            const bool preserve_divergences/*=false */) 
 {
   // First, remove tau loops in case of branching bisimulation.
   if (branching)
   {
-    scc_reduce(l,false);
+    scc_reduce(l,preserve_divergences);
   }
 
   // Secondly, apply the branching bisimulation reduction algorithm. If there are no tau's,
   // this will automatically yield strong bisimulation.
-  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l, branching);
+  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l, branching, preserve_divergences);
 
   // Clear the state labels of the LTS l
   l.clear_state_labels();
@@ -3330,25 +3331,27 @@ void bisimulation_reduce_gw(LTS_TYPE& l,
   // Assign the reduced LTS
   l.set_num_states(bisim_part.num_eq_classes());
   l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
-  bisim_part.replace_transitions(branching);
+  bisim_part.replace_transitions(branching,preserve_divergences);
 }
 
 template < class LTS_TYPE>
 bool bisimulation_compare_gw(
   const LTS_TYPE& l1,
   const LTS_TYPE& l2,
-  const bool branching) /* =false*/
+  const bool branching, /* =false*/
+  const bool preserve_divergences /* =false*/)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_bisimulation_compare_gw(l1_copy,l2_copy,branching);
+  return destructive_bisimulation_compare_gw(l1_copy,l2_copy,branching,preserve_divergences);
 }
 
 template < class LTS_TYPE>
 bool destructive_bisimulation_compare_gw(
   LTS_TYPE& l1,
   LTS_TYPE& l2,
-  const bool branching) /* =false*/
+  const bool branching /* =false*/,
+  const bool preserve_divergences /* = false*/)
 {
   size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
@@ -3359,13 +3362,13 @@ bool destructive_bisimulation_compare_gw(
   if (branching)
   {
     detail::scc_partitioner<LTS_TYPE> scc_part(l1);
-    scc_part.replace_transitions(false);
+    scc_part.replace_transitions(preserve_divergences);
     l1.set_num_states(scc_part.num_eq_classes());
     l1.set_initial_state(scc_part.get_eq_class(l1.initial_state()));
     init_l2 = scc_part.get_eq_class(init_l2);
   }
 
-  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l1, branching);
+  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l1, branching, preserve_divergences);
   return bisim_part.in_same_class(l1.initial_state(),init_l2);
 }
 

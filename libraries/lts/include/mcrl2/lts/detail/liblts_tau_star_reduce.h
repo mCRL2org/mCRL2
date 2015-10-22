@@ -121,7 +121,12 @@ void reflexive_transitive_tau_closure(lts<STATE_LABEL_T,ACTION_LABEL_T,PROBABILI
     }
   }
 
-  const size_t tau_label=determine_tau_label(l); // Throw an exception if the tau label does not exist.
+  size_t tau_label=determine_tau_label(l); 
+  if (tau_label==size_t(-1)) // No tau label exist
+  {
+    const ACTION_LABEL_T lab; // nameless action label, representing tau.
+    tau_label= l.add_action(lab,true);
+  }
   assert(l.is_tau(tau_label));
 
   l.clear_transitions();

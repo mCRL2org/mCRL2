@@ -134,7 +134,7 @@ namespace detail
 // Determine an index of the tau label. If it does not exist, and throw exception is true,
 // throw an exception. Otherwise, a non existing index of an action label is returned.
 template < class LTS_TYPE>
-size_t determine_tau_label(LTS_TYPE& l)
+size_t determine_tau_label(const LTS_TYPE& l)
 {
   // Set the tau_label to an existing label, if possible.
   // If nothing is found the tau label becomes l.num_action_labels,
@@ -152,8 +152,7 @@ size_t determine_tau_label(LTS_TYPE& l)
   if (tau_label==l.num_action_labels())
   {
     mCRL2log(mcrl2::log::debug) << "No tau label has been found.\n";
-    const typename LTS_TYPE::action_label_t lab; // nameless action label, representing tau.
-    return l.add_action(lab,true);
+    return size_t(-1);
   }
   else
   {
@@ -188,6 +187,7 @@ void unmark_explicit_divergence_transitions(LTS_TYPE& l, const size_t divergent_
   {
     if (i->label()==divergent_transition_label)
     { 
+      assert(tau_label!=size_t(-1));
       *i = transition(i->from(),tau_label,i->from());
     }
   }
