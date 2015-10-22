@@ -3,7 +3,6 @@ if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
     INSTALL_HEADERS TRUE
     SOURCES
       logwidget.ui
-      qt_tool.cpp
       logwidget.cpp
       extendedtabwidget.cpp
       numberedtextedit.cpp

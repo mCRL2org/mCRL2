@@ -24,11 +24,6 @@
 #include "mcrl2/utilities/toolset_version.h"
 #include "mcrl2/utilities/workarounds.h"
 
-#if defined(_WIN32)
-#include <iostream>
-#include <fstream>
-#endif // defined(_WIN32)
-
 namespace mcrl2
 {
 namespace gui
@@ -48,18 +43,6 @@ class QtToolBase : public QObject
     QMainWindow *m_window;
 
   protected:
-
-#if defined(_WIN32) 
-	std::streambuf	*_cinbuf;
-	std::streambuf	*_coutbuf;
-	std::streambuf	*_cerrbuf;
-	std::ifstream	_console_cin;
-	std::ofstream	_console_cout;
-	std::ofstream	_console_cerr;
-    
-    void attachConsole();
-    void releaseConsole();
-#endif // _WIN32
 
     bool show_main_window(QMainWindow *window)
     {
@@ -135,16 +118,10 @@ class qt_tool: public Tool, public QtToolBase
         QtToolBase(QString::fromStdString(name), QString::fromStdString(author), QString::fromStdString(about_description), QString::fromStdString(manual_url)),
         m_application(NULL)
     {
-#if defined(_WIN32)
-      attachConsole();
-#endif
     }
 
     virtual bool pre_run()
     {
-#if defined(_WIN32)
-      releaseConsole();
-#endif
       m_application = new QApplication(m_argc, m_argv);
       qsrand(QDateTime::currentDateTime().toTime_t());
       return true;

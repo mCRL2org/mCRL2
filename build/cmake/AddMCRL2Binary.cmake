@@ -107,7 +107,7 @@ endfunction()
 function(_prepare_desktop_application TARGET_NAME TOOLNAME DESCRIPTION ICON)
   if(MSVC)
     set_target_properties(${TARGET_NAME} PROPERTIES
-      WIN32 TRUE)
+      WIN32_EXECUTABLE TRUE)
   elseif(UNIX AND NOT APPLE)
     set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
     set(COMMANDLINE ${TARGET_NAME})

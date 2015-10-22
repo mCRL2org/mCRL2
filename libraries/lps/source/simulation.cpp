@@ -19,7 +19,7 @@ simulation::simulation(const specification& specification, data::rewrite_strateg
     m_tau_prioritization(false)
 {
   state_t state;
-// std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE THE INITIAL DISTRIBUTION INTO ACCOUNT. IT JUST PICKS ONE (1).\n";
+  std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE THE INITIAL DISTRIBUTION INTO ACCOUNT. IT JUST PICKS ONE (1).\n";
   state.source_state = m_generator.initial_states().front().state();
   state.transitions = transitions(state.source_state);
   m_full_trace.push_back(state);
