@@ -292,6 +292,12 @@ class to_constlns_element_T
     // to_constlns list
     // typename
     sized_forward_list<to_constlns_element_T>::iterator ptr_in_list;
+
+    to_constlns_element_T()
+     : m_C(NULL),
+       m_new_element(NULL),
+       SClist(NULL)
+    {}
   
     to_constlns_element_T* new_element() const
     {
@@ -324,6 +330,9 @@ class to_constlns_element_T
       if (first_free_position()!=NULL)
       {
         result=first_free_position();
+        // reset data of this element
+        result->set_new_element(NULL);
+        result->SClist = NULL;
         first_free_position()=first_free_position()->m_new_element;
       }
       else
@@ -1481,25 +1490,25 @@ class bisim_partitioner_gw
       transitionpointers.emplace_back(&(transitions.back()));
 #ifndef NDEBUG
       // print the Kripke structure
-      for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
-      {
-           std::pair<Key, state_type> p = *sit;
-           mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
-      }
-      for (auto sit = states.begin(); sit != states.end(); ++sit) 
-      {
-        const state_T& s = *sit;
-        for (auto tit = s.Ttgt_begin; transitionpointers[tit]->source == &s; ++tit) 
-        {
-          transition_T* t = transitionpointers[tit];
-          mCRL2log(log::verbose) << state_id(t->source) << " -> " << state_id(t->target) << "\n";
-        }
-        for (auto tit = s.Tsrc_begin; transitions[tit].source == &s; ++tit) 
-        {
-          transition_T* t = &transitions[tit];
-          mCRL2log(log::verbose) << state_id(t->target) << " <- " << state_id(t->source) << "\n";
-        }
-      }
+      // for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
+      // {
+      //      std::pair<Key, state_type> p = *sit;
+      //      mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
+      // }
+      // for (auto sit = states.begin(); sit != states.end(); ++sit) 
+      // {
+      //   const state_T& s = *sit;
+      //   for (auto tit = s.Ttgt_begin; transitionpointers[tit]->source == &s; ++tit) 
+      //   {
+      //     transition_T* t = transitionpointers[tit];
+      //     mCRL2log(log::verbose) << state_id(t->source) << " -> " << state_id(t->target) << "\n";
+      //   }
+      //   for (auto tit = s.Tsrc_begin; transitions[tit].source == &s; ++tit) 
+      //   {
+      //     transition_T* t = &transitions[tit];
+      //     mCRL2log(log::verbose) << state_id(t->target) << " <- " << state_id(t->source) << "\n";
+      //   }
+      // }
 #endif
       
       // Add all states to their appropriate list in the block they reside in
@@ -1565,14 +1574,14 @@ class bisim_partitioner_gw
             B = *bit;
             if (B->btm_states.size()+B->non_btm_states.size() <= (setB->size)/2) 
             {
-              mCRL2log(log::verbose) << B->btm_states.size() << " " << B->non_btm_states.size() << " " << B->marked_btm_states.size() << " " << B->marked_non_btm_states.size() << "\n";
-              mCRL2log(log::verbose) << "splitter: " << B->block_id() << " " << state_id(B->btm_states.front()) << "\n";
-              //for (auto it = B->to_constlns.begin(); it != B->to_constlns.end(); ++it) {
-              //  to_constlns_element_T* l = *it;
-              //  mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
-              //}
-              mCRL2log(log::verbose) << "inconstln_ref: " << B->inconstln_ref << "\n";
-              mCRL2log(log::verbose) << "---\n";
+              // mCRL2log(log::verbose) << B->btm_states.size() << " " << B->non_btm_states.size() << " " << B->marked_btm_states.size() << " " << B->marked_non_btm_states.size() << "\n";
+              // mCRL2log(log::verbose) << "splitter: " << B->block_id() << " " << state_id(B->btm_states.front()) << "\n";
+              // //for (auto it = B->to_constlns.begin(); it != B->to_constlns.end(); ++it) {
+              // //  to_constlns_element_T* l = *it;
+              // //  mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
+              // //}
+              // mCRL2log(log::verbose) << "inconstln_ref: " << B->inconstln_ref << "\n";
+              // mCRL2log(log::verbose) << "---\n";
               // 5.2.1
               // 5.2.1.a
               constellations.emplace_back();
@@ -1796,7 +1805,13 @@ class bisim_partitioner_gw
             //check_consistency_blocks();
             if (Bp->btm_states.size() > 0) 
             {
-              nr_of_splits++;
+              // mCRL2log(log::verbose) << "pre to_constlns list: \n";
+              // for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
+              // {
+              //   to_constlns_element_T* l = *it;
+              //   mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
+              // }
+              // mCRL2log(log::verbose) << "---\n";              nr_of_splits++;
               // 5.3.1. Perform detect1 and detect2 in lockstep
               Q.clear(); 
               L.clear();
@@ -1865,10 +1880,11 @@ class bisim_partitioner_gw
               mCRL2log(log::verbose) << "]\n";
               check_consistency_blocks();
               check_consistency_transitions();
+              mCRL2log(log::verbose) << "to_constlns list: \n";
               for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
               {
                 to_constlns_element_T* l = *it;
-                mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C()->type() << "\n";
+                mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
               }
               mCRL2log(log::verbose) << "---\n";
 #endif
@@ -1876,7 +1892,7 @@ class bisim_partitioner_gw
               {
                 state_T* s = *sit;
                 
-                mCRL2log(log::verbose) << "State " << state_id(s) << "\n";
+                // mCRL2log(log::verbose) << "State " << state_id(s) << "\n";
                 
                 // 5.3.2.a
                 move_state_to_block(s, Bpp);
@@ -1893,45 +1909,45 @@ class bisim_partitioner_gw
                   if (t->to_constln_ref != NULL) 
                   {
                     to_constlns_element_T* l = t->to_constln_ref;
-                    mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C() << "\n";
+                    // mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C() << "\n";
                     to_constlns_element_T* lp;
                     if (l->new_element() != NULL) 
                     {
-                      mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C() << "\n";
+                      // mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C() << "\n";
                       lp = l->new_element();
                     }
                     else 
                     {
                       lp = to_constlns_element_T::new_to_constlns_element(l->C());
                       l->set_new_element(lp);
-                      mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C() << "\n";
+                      // mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C() << "\n";
                       // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
                       Bpp->to_constlns.insert_linked(lp);
                       // possibly set Bpp.inconstln_ref
                       if (l->C() == Bpp->constellation) 
                       {
                         Bpp->inconstln_ref = lp;
-                        mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C() << "\n";
+                        // mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C() << "\n";
                       }
                       // possibly set Bpp.constln_ref and Bpp.coconstln_ref
                       if (l == Bp->constln_ref) 
                       {
-                        mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C() << "\n";
+                        // mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C() << "\n";
                         Bpp->constln_ref = lp;
                       }
                       else if (l == Bp->coconstln_ref) 
                       {
-                        mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C() << "\n";
+                        // mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C() << "\n";
                         Bpp->coconstln_ref = lp;
                       }
                       // let lp point to l, to be able to efficiently reset new_element pointers later on
                       lp->set_new_element(l);
-                      mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
+                      // mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
                     }
-                    mCRL2log(log::verbose) << "removing transition\n";
+                    // mCRL2log(log::verbose) << "removing transition\n";
                     l->trans_list.move_linked(t, lp->trans_list);
                     t->to_constln_ref = lp;
-                    mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
+                    // mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
                   }
                   // 5.3.2.b.ii
                   else 
@@ -2422,6 +2438,7 @@ class bisim_partitioner_gw
             //  mCRL2log(log::verbose) << "splitsplit clean " << splitsplitBpB->id << "\n";
             //}
             clean_temp_refs_block(splitsplitBpB);
+
             // 5.3.6
             block_T* Bhat = splitBpB;
             block_T* Bhatp = NULL;
@@ -2485,6 +2502,7 @@ class bisim_partitioner_gw
             }
 #ifndef NDEBUG
             //print_partition();
+            check_consistency_blocks();
 #endif
             // 5.3.7
             // We use a stack blocks_to_process to keep track of which blocks still need to be checked for stability
@@ -2718,7 +2736,6 @@ class bisim_partitioner_gw
                     SnotinSC = &(Bhatp->new_btm_states);
                   }
                   // Walk through new states and add them to SnotinSC if they are not in SClist
-                  // TODO: change to moving
                   auto prev_sit = SinSC->before_begin();
                   typename sized_forward_list <state_T>::iterator it_SClist;
                   if (!sclist_is_empty_detect2) 
@@ -2989,6 +3006,7 @@ class bisim_partitioner_gw
                 found = true;
               }
             }
+            mCRL2log(log::verbose) << "looking for constellation " << t->to_constln_ref << "\n";
             assert(found);
           }
         }
@@ -3014,6 +3032,7 @@ class bisim_partitioner_gw
             for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
             {
               to_constlns_element_T* e = *eit;
+              assert(e->new_element() == NULL);
               sized_forward_list < transition_T >::iterator prev_tit = e->trans_list.before_begin();
               for (auto tit = e->trans_list.begin(); tit != e->trans_list.end(); ++tit) 
               {
@@ -3023,7 +3042,7 @@ class bisim_partitioner_gw
                 assert(t->source->block == B);
                 mCRL2log(log::verbose) << "TEST: " << state_id(t->source) << " " << state_id(t->target) << "\n";
                 mCRL2log(log::verbose) << "CONSTELLATIONS: " << t->target->block->constellation << " " << e->C() << "\n";
-                assert(t->target->block->constellation == e->C());
+                //assert(t->target->block->constellation == e->C());
                 // assert that t->to_constln_ref is valid
                 count = 0;
                 for (auto eit2 = B->to_constlns.begin(); eit2 != B->to_constlns.end(); ++eit2) 
