@@ -93,7 +93,6 @@ class counter_T
       {
         if (this==i)
         { 
-          std::cerr << "COUNTER FREE\n"; 
           return true;
         }
       }
@@ -645,7 +644,6 @@ class bisim_partitioner_gw
     {
       if (B != NULL) 
       {
-         //mCRL2log(log::verbose) << "CLEANING " << B->id << "\n";
          for (auto sit = B->marked_btm_states.begin(); sit != B->marked_btm_states.end(); ++sit) 
          {
             state_T* s = *sit;
@@ -701,6 +699,30 @@ class bisim_partitioner_gw
     
     // end auxiliary functions
 
+#ifndef NDEBUG
+    // print the Kripke structure
+    void print_the_Kripke_structure()
+    {
+      for (const std::pair<Key, state_type>& p: extra_kripke_states) 
+      {
+        mCRL2log(log::verbose) << "Extra Kripke state " << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
+      }
+      for (auto sit = states.begin(); sit != states.end(); ++sit) 
+      {
+        const state_T& s = *sit;
+        for (auto tit = s.Ttgt_begin; transitionpointers[tit]->source == &s; ++tit) 
+        {
+          transition_T* t = transitionpointers[tit];
+          mCRL2log(log::verbose) << state_id(t->source) << " -> " << state_id(t->target) << "\n";
+        }
+        for (auto tit = s.Tsrc_begin; transitions[tit].source == &s; ++tit) 
+        {
+          transition_T* t = &transitions[tit];
+          mCRL2log(log::verbose) << state_id(t->target) << " <- " << state_id(t->source) << "\n";
+        }
+      }
+    }
+#endif // NDEBUG
 
   public:
     /** \brief Creates a bisimulation partitioner for an LTS.
@@ -719,30 +741,24 @@ class bisim_partitioner_gw
      *  \param[in] l Reference to the LTS. The LTS l is only changed if \ref replace_transitions is called. */
     bisim_partitioner_gw(LTS_TYPE& l,
                          const bool branching=false,
-                         const bool preserve_divergences=false)
+                         const bool preserve_divergence=false)
      : max_block_index(0),
        aut(l), 
        tau_label(determine_tau_label(l))
     {
-      assert(branching || !preserve_divergences);
-      // std::cerr << "size of state_T " << sizeof(state_T) << "\n";
-      //% std::cerr << "size of transition_T " << sizeof(transition_T) << "\n";
-      //% std::cerr << "size of block_T " << sizeof(block_T) << "\n";
-      //% std::cerr << "size of constellation_T " << sizeof(constellation_T) << "\n";
-      //% std::cerr << "size of to_constlns_element_T " << sizeof(to_constlns_element_T) << "\n";
-      //% std::cerr << "size of counter_T " << sizeof(counter_T) << "\n";
+      assert(branching || !preserve_divergence);
       // initialise variables
       nr_of_splits = 0;
       current_state_detect1 = NULL;
       current_state_detect2 = NULL;
       in_forward_check_detect2 = false;
           
-      mCRL2log(log::verbose) << "O(m log n) " << (preserve_divergences?"Divergence preserving b":"B") <<
+      mCRL2log(log::verbose) << "O(m log n) " << (preserve_divergence?"Divergence preserving b":"B") <<
                   (branching?"ranching ":"") << "bisimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
-      create_initial_partition_gw(branching,preserve_divergences);
-      refine_partition_until_it_becomes_stable_gw(branching,preserve_divergences);
+      create_initial_partition_gw(branching,preserve_divergence);
+      refine_partition_until_it_becomes_stable_gw();
     }
 
 
@@ -762,7 +778,7 @@ class bisim_partitioner_gw
      *
      * \pre The bisimulation equivalence classes have been computed.
      * \param[in] branching Causes non internal transitions to be removed. */
-    void replace_transitions(const bool branching, const bool preserve_divergences)
+    void replace_transitions(const bool branching)
     {
       std::unordered_map < state_type, Key > to_lts_map;
       // obtain a map from state to <action, state> pair from extra_kripke_states
@@ -788,10 +804,7 @@ class bisim_partitioner_gw
           {
             // we have a tau transition
             assert(branching);
-            if (branching && 
-                 (s_eq != get_eq_class(tgt_id) ||
-                  (preserve_divergences && s_eq != get_eq_class(tgt_id))
-               ))
+            if (branching && s_eq != get_eq_class(tgt_id))
             {
               assert(tau_label!=size_t(-1));
               resulting_transitions.insert(transition(s_eq, tau_label, get_eq_class(tgt_id)));
@@ -849,66 +862,72 @@ class bisim_partitioner_gw
     // next_state functions to add states to detect1 and detect2 in the various phases of the algorithm
     // (1: splitting Bp, 2: splitting split(Bp, B), 3: stabilising blocks)
     // precondition: iter_state_added_detectx have been set to before the beginning of the relevant state lists
-    inline bool has_next_state_detect1_1() {
-         auto next_it = iter_state_added_detect1;
-         next_it++;
-         if (next_it == block_detect->marked_btm_states.end() && !iterating_non_bottom) {
-              next_it = block_detect->marked_non_btm_states.begin();
-              //mCRL2log(log::verbose) << "non bottom\n";
-         }
-         //mCRL2log(log::verbose) << (next_it != block_detect->marked_non_btm_states.end()) << "number of non bottom states: " << block_detect->marked_non_btm_states.size() << "\n";
-         return next_it != block_detect->marked_non_btm_states.end();
-     }
-
-    inline state_T* next_state_detect1_1() {
-         iter_state_added_detect1++;
-         //mCRL2log(log::verbose) << "get next state\n";
-         if (iter_state_added_detect1 == block_detect->marked_btm_states.end() && !iterating_non_bottom) {
-              iterating_non_bottom = true;
-              iter_state_added_detect1 = block_detect->marked_non_btm_states.begin();
-         }
-         // is the state suitable?
-         state_T* s = *iter_state_added_detect1;
-         if (!s->is_in_L_detect1) {
-         //mCRL2log(log::verbose) << "state " << s->id << " is not in L\n";
-              return s;
-         }
-         else {
-              //mCRL2log(log::verbose) << "state " << s->id << " is in L\n";
-              return NULL;
-         }
+    inline bool has_next_state_detect1_1() 
+    {
+      auto next_it = iter_state_added_detect1;
+      next_it++;
+      if (next_it == block_detect->marked_btm_states.end() && !iterating_non_bottom) 
+      {
+        next_it = block_detect->marked_non_btm_states.begin();
+      }
+      return next_it != block_detect->marked_non_btm_states.end();
     }
 
-    inline bool has_next_state_detect2_1() {
-         auto next_it = iter_state_added_detect2;
-         next_it++;
-         return next_it != block_detect->btm_states.end();
-     }
+    inline state_T* next_state_detect1_1() 
+    {
+      iter_state_added_detect1++;
+      if (iter_state_added_detect1 == block_detect->marked_btm_states.end() && !iterating_non_bottom) 
+      {
+        iterating_non_bottom = true;
+        iter_state_added_detect1 = block_detect->marked_non_btm_states.begin();
+      }
+      // is the state suitable?
+      state_T* s = *iter_state_added_detect1;
+      if (!s->is_in_L_detect1) 
+      {
+        return s;
+      }
+      else 
+      {
+        return NULL;
+      }
+    }
 
-    inline state_T* next_state_detect2_1() {
-         iter_state_added_detect2++;
-         // Note: no need to check for membership in P. Current state is a bottom state, so cannot have been reached
-         // via an incoming transition
-         return *iter_state_added_detect2;
+    inline bool has_next_state_detect2_1() 
+    {
+      auto next_it = iter_state_added_detect2;
+      next_it++;
+      return next_it != block_detect->btm_states.end();
+    }
+
+    inline state_T* next_state_detect2_1() 
+    {
+      iter_state_added_detect2++;
+      // Note: no need to check for membership in P. Current state is a bottom state, so cannot have been reached
+      // via an incoming transition
+      return *iter_state_added_detect2;
     }
     
-    inline bool has_next_state_detect1_2() {
-         auto next_it = iter_trans_state_added_detect1;
-         next_it++;
-         return next_it != block_detect->coconstln_ref->trans_list.end();
+    inline bool has_next_state_detect1_2() 
+    {
+      auto next_it = iter_trans_state_added_detect1;
+      next_it++;
+      return next_it != block_detect->coconstln_ref->trans_list.end();
     }
 
-    inline state_T* next_state_detect1_2() {
-         iter_trans_state_added_detect1++;
-         transition_T* t = *iter_trans_state_added_detect1;
-         state_T* s = t->source;
-         if (!s->is_in_L_detect1) {
-              //mCRL2log(log::verbose) << "suitable trans from " << s->id << " to " << t->target->id << " (" << t->target->block->constellation << ")\n";
-              return s;
-         }
-         else {
-              return NULL;
-         }
+    inline state_T* next_state_detect1_2() 
+    {
+      iter_trans_state_added_detect1++;
+      transition_T* t = *iter_trans_state_added_detect1;
+      state_T* s = t->source;
+      if (!s->is_in_L_detect1) 
+      {
+        return s;
+      }
+      else 
+      {
+        return NULL;
+      }
     }
 
     inline bool has_next_state_detect2_2() 
@@ -924,12 +943,10 @@ class bisim_partitioner_gw
       state_T* s = *iter_state_added_detect2;
       if (s->coconstln_cnt == NULL) 
       {
-        //mCRL2log(log::verbose) << s->id << ": NULL counter\n";
         return s;
       }
       else if (s->coconstln_cnt->counter_value() == 0) 
       {
-        //mCRL2log(log::verbose) << s->id << ": 0 counter\n";
         return s;
       }
       else 
@@ -1252,6 +1269,7 @@ class bisim_partitioner_gw
     // end structures and functions for lockstep search
 
     // method to print current partition
+#ifndef NDEBUG
     void print_partition ()
     {
       mCRL2log(log::verbose) << "PARTITION ";
@@ -1298,12 +1316,13 @@ class bisim_partitioner_gw
       }
       mCRL2log(log::verbose) << "\n";
     }
+#endif // NDEBUG
 
     void create_initial_partition_gw(const bool branching,
-                                     const bool preserve_divergences)
+                                     const bool preserve_divergence)
     {
       using namespace std;
-      if (preserve_divergences)
+      if (preserve_divergence)
       {
         mCRL2log(log::warning) << "Divergent transitions are not yet properly taken into account in the GW algorithm.\n";
       }
@@ -1315,8 +1334,6 @@ class bisim_partitioner_gw
       orig_nr_of_states = nr_of_states;
       // temporary map to keep track of blocks (maps transition labels (unequal to tau) to blocks
       unordered_map < label_type, size_t > action_block_map;
-      // temporary list to keep track of lists of transitions, one for each block
-      //vector < sized_forward_list < transition_T* >* > block_trans_list;
 
       // create single initial non-trivial constellation
       constellations.emplace_back();
@@ -1334,19 +1351,17 @@ class bisim_partitioner_gw
       C->blocks.insert_linked(&(blocks.back()));
       nr_of_blocks = 1;
 
-      // iterate over the transitions and collect new states
-      //aut.sort_transitions(mcrl2::lts::src_lbl_tgt);
-      const std::vector<transition>& trans = aut.get_transitions();
-      // sort by target state
-      //std::sort(trans.begin(), trans.end(), compare_targets_of_transitions);
-      for (auto r=trans.begin(); r != trans.end(); ++r)
+      // Iterate over the transitions and collect new states
+      // and sort by target state.
+      for (const transition& t: aut.get_transitions())
       {
-        const transition t = *r;
-                    
-        if (!aut.is_tau(t.label()) || !branching)
+        if (!aut.is_tau(t.label()) || 
+            !branching ||
+            (preserve_divergence && t.from() == t.to())
+           )
         {
           // create new state
-          Key k( t.label(),t.to());
+          Key k(t.label(),t.to());
           if ((extra_kripke_states.insert(make_pair(k, nr_of_states))).second) 
           {
             nr_of_states++;
@@ -1394,21 +1409,19 @@ class bisim_partitioner_gw
       }
       // create transitions (we need the original number in input + one for each extra kripke state,
       // and one transition at the end indicating the end of the list)
-      transitions.reserve(trans.size()+extra_kripke_states.size()+1);
+      transitions.reserve(aut.get_transitions().size()+extra_kripke_states.size()+1);
       // first add the original LTS transitions
-      transition_T* t_entry = NULL;
-      for (auto r=trans.begin(); r != trans.end(); ++r)
+      for (const transition& t: aut.get_transitions())
       {
-        const transition t = *r;
         // create transition entry
-        transitions.emplace_back(transition_T());
-        t_entry = &(transitions.back());
+        transitions.emplace_back();
+        transition_T& t_entry = transitions.back();
         // fill in info
-        t_entry->source = &states[t.from()];
+        t_entry.source = &states[t.from()];
         // target depends on transition label
-        if (aut.is_tau(t.label()) && branching) 
+        if (aut.is_tau(t.label()) && branching && (!preserve_divergence || t.from()!=t.to())) 
         {
-          t_entry->target = &states[t.to()];
+          t_entry.target = &states[t.to()];
           // initially, all tau-transitions are inert
           // number of inert transitions of source needs to be incremented
           states[t.from()].inert_cnt++;
@@ -1416,21 +1429,21 @@ class bisim_partitioner_gw
         else 
         {
           Key k(t.label(),t.to());
-          t_entry->target = &states[(extra_kripke_states.find(k))->second];
+          t_entry.target = &states[(extra_kripke_states.find(k))->second];
         }
       }
       // now add transitions <a,t> -> t
       for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit)
       {
-        transitions.emplace_back(transition_T());
+        transitions.emplace_back();
         std::pair<Key, state_type> e = *sit;
         state_type sid = e.second;
         state_type tid = e.first.second;
 
-        t_entry = &(transitions.back());
+        transition_T& t_entry = transitions.back();
         // fill in info
-        t_entry->source = &states[sid];
-        t_entry->target = &states[tid];
+        t_entry.source = &states[sid];
+        t_entry.target = &states[tid];
       }
       // sort the transitions by target
       std::sort(transitions.begin(), transitions.end(), compare_targets_of_transitions);
@@ -1440,7 +1453,7 @@ class bisim_partitioner_gw
       state_T* current_state = NULL;
       // create vector of transition pointers for forward traversals
       // again, add a dummy transition at the end
-      transitionpointers.reserve(trans.size()+extra_kripke_states.size()+1);
+      transitionpointers.reserve(aut.get_transitions().size()+extra_kripke_states.size()+1);
       for (trans_type tit = 0; tit < transitions.size(); tit++)
       {
         // add pointer to transitionpointers
@@ -1485,46 +1498,24 @@ class bisim_partitioner_gw
         t->to_constln_cnt->increment();
       }
       // add the dummy 'end of the list' transition
-      transitions.emplace_back(transition_T());
+      transitions.emplace_back();
       // add dummy 'end of the list' transition pointer
       transitionpointers.emplace_back(&(transitions.back()));
-#ifndef NDEBUG
-      // print the Kripke structure
-      // for (auto sit = extra_kripke_states.begin(); sit != extra_kripke_states.end(); ++sit) 
-      // {
-      //      std::pair<Key, state_type> p = *sit;
-      //      mCRL2log(log::verbose) << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
-      // }
-      // for (auto sit = states.begin(); sit != states.end(); ++sit) 
-      // {
-      //   const state_T& s = *sit;
-      //   for (auto tit = s.Ttgt_begin; transitionpointers[tit]->source == &s; ++tit) 
-      //   {
-      //     transition_T* t = transitionpointers[tit];
-      //     mCRL2log(log::verbose) << state_id(t->source) << " -> " << state_id(t->target) << "\n";
-      //   }
-      //   for (auto tit = s.Tsrc_begin; transitions[tit].source == &s; ++tit) 
-      //   {
-      //     transition_T* t = &transitions[tit];
-      //     mCRL2log(log::verbose) << state_id(t->target) << " <- " << state_id(t->source) << "\n";
-      //   }
-      // }
-#endif
+
+      // print_the_Kripke_structure();
       
       // Add all states to their appropriate list in the block they reside in
-      for (auto it=states.begin(); it != states.end(); ++it) 
+      for (state_T& s: states)
       {
-        state_T* s = &(*it);
-        
-        if (s->inert_cnt == 0) 
+        if (s.inert_cnt == 0) 
         {
           // state is bottom
-          s->block->btm_states.insert_state_linked(s, BTM_STATE);
+          s.block->btm_states.insert_state_linked(&s, BTM_STATE);
         }
         else 
         {
           // state is not bottom
-          s->block->non_btm_states.insert_state_linked(s, NON_BTM_STATE);
+          s.block->non_btm_states.insert_state_linked(&s, NON_BTM_STATE);
         }
       }
       
@@ -1545,18 +1536,14 @@ class bisim_partitioner_gw
     }; // end create_initial_partition
 
 // Refine the partition until the partition has become stable
-    void refine_partition_until_it_becomes_stable_gw(const bool branching, const bool preserve_divergences)
+    void refine_partition_until_it_becomes_stable_gw()
     {
-      if (preserve_divergences)
-      {
-        mCRL2log(log::warning) << "Divergent transitions are not yet properly taken into account in the GW algorithm.\n";
-      }
       while (non_trivial_constlns.size() > 0) 
       {
         // list of splittable blocks
         sized_forward_list < block_T > splittable_blocks;
 #ifndef NDEBUG
-        print_partition();
+        // print_partition();
         //check_internal_consistency_of_the_partitioning_data_structure_gw(branching);
         check_consistency_blocks();
         check_consistency_transitions();
@@ -1574,14 +1561,6 @@ class bisim_partitioner_gw
             B = *bit;
             if (B->btm_states.size()+B->non_btm_states.size() <= (setB->size)/2) 
             {
-              // mCRL2log(log::verbose) << B->btm_states.size() << " " << B->non_btm_states.size() << " " << B->marked_btm_states.size() << " " << B->marked_non_btm_states.size() << "\n";
-              // mCRL2log(log::verbose) << "splitter: " << B->block_id() << " " << state_id(B->btm_states.front()) << "\n";
-              // //for (auto it = B->to_constlns.begin(); it != B->to_constlns.end(); ++it) {
-              // //  to_constlns_element_T* l = *it;
-              // //  mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
-              // //}
-              // mCRL2log(log::verbose) << "inconstln_ref: " << B->inconstln_ref << "\n";
-              // mCRL2log(log::verbose) << "---\n";
               // 5.2.1
               // 5.2.1.a
               constellations.emplace_back();
@@ -1591,7 +1570,6 @@ class bisim_partitioner_gw
               setB->size -= Bsize;
               setC->size += Bsize;
               B->constellation = setC;
-              //mCRL2log(log::verbose) << "new constln of " << B->id << " is " << setC->id << "\n";
               B->inconstln_ref = NULL;
               // 5.2.1.b
               trivial_constlns.insert_linked(setC);
@@ -1621,7 +1599,6 @@ class bisim_partitioner_gw
                       // 5.2.2.a.i
                       splittable_blocks.insert(Bp);
                       // 5.2.2.a.ii
-                      //mCRL2log(log::verbose) << "ref: " << t->to_constln_ref << "\n";
                       Bp->coconstln_ref = t->to_constln_ref;
                       Bp->constln_ref = to_constlns_element_T::new_to_constlns_element(setC);
                       Bp->to_constlns.insert_linked(Bp->constln_ref);
@@ -1730,7 +1707,6 @@ class bisim_partitioner_gw
                 
                 // 5.2.3.a/b
                 bool split = true;
-                //mCRL2log(log::verbose) << "check " << Bp->id << " " << Bp->btm_states.size() << "\n";
                 if (Bp->btm_states.size() == 0) 
                 {
                   split = false;
@@ -1786,7 +1762,6 @@ class bisim_partitioner_gw
             block_T* Bp = *bit;
             const constellation_marker old_constellation_type_of_Bp =Bp->constellation->type();
 
-            //mCRL2log(log::verbose) << "splitting block " << Bp->id << " with size " << Bp->btm_states.size() + Bp->non_btm_states.size() + Bp->marked_btm_states.size() + Bp->marked_non_btm_states.size() << "\n";
             // pointer to Bp to be used when doing the nested split
             block_T* splitBpB = Bp;
             block_T* cosplitBpB = NULL;
@@ -1805,13 +1780,6 @@ class bisim_partitioner_gw
             //check_consistency_blocks();
             if (Bp->btm_states.size() > 0) 
             {
-              // mCRL2log(log::verbose) << "pre to_constlns list: \n";
-              // for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
-              // {
-              //   to_constlns_element_T* l = *it;
-              //   mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
-              // }
-              // mCRL2log(log::verbose) << "---\n";              nr_of_splits++;
               // 5.3.1. Perform detect1 and detect2 in lockstep
               Q.clear(); 
               L.clear();
@@ -1834,14 +1802,7 @@ class bisim_partitioner_gw
                 iterating_non_bottom = true;
               }
               iter_state_added_detect2 = Bp->btm_states.before_begin();
-              //mCRL2log(log::verbose) << "states in " << Bp->id << ": " << Bp->btm_states.size() << " " << Bp->non_btm_states.size() << " " << Bp->marked_btm_states.size() << " " << Bp->marked_non_btm_states.size() << "\n";
-              //mCRL2log(log::verbose) << Bp->marked_non_btm_states.size() << "\n";
-              //print_partition();
-              //mCRL2log(log::verbose) << "Launching lockstep search 1\n";
-              //for (auto sit = Bp->marked_non_btm_states.begin(); sit != Bp->marked_non_btm_states.end(); ++sit) {
-              //  state_T* s = *sit;
-              //  mCRL2log(log::verbose) << s->id << "\n";
-              //}
+              
               while (detect1_finished != TERMINATED && detect2_finished != TERMINATED) 
               {
                 if (detect1_finished != STOPPED) 
@@ -1859,7 +1820,6 @@ class bisim_partitioner_gw
               Bpp = &(blocks.back());
               Bpp->constellation = Bp->constellation;
               Bpp->constellation->blocks.insert_linked(Bpp);
-              //mCRL2log(log::verbose) << "creating new block " << Bpp->id << "\n";
               // Let N point to correct list
               sized_forward_list <state_T>* N;
               if (detect1_finished == TERMINATED) 
@@ -1871,29 +1831,26 @@ class bisim_partitioner_gw
                 N = &Lp;
               }
 #ifndef NDEBUG
-              mCRL2log(log::verbose) << "splitting off: [";
-              for (auto sit = N->begin(); sit != N->end(); ++sit) 
-              {
-                state_T* s = *sit;
-                mCRL2log(log::verbose) << " " << state_id(s);
-              }
-              mCRL2log(log::verbose) << "]\n";
+              // mCRL2log(log::verbose) << "splitting off: [";
+              // for (auto sit = N->begin(); sit != N->end(); ++sit) 
+              // {
+              //   state_T* s = *sit;
+                // mCRL2log(log::verbose) << " " << state_id(s);
+              // }
+              // mCRL2log(log::verbose) << "]\n";
               check_consistency_blocks();
               check_consistency_transitions();
-              mCRL2log(log::verbose) << "to_constlns list: \n";
-              for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
-              {
-                to_constlns_element_T* l = *it;
-                mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
-              }
-              mCRL2log(log::verbose) << "---\n";
+              // mCRL2log(log::verbose) << "to_constlns list: \n";
+              // for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
+              // {
+                // to_constlns_element_T* l = *it;
+                // mCRL2log(log::verbose) << l << " " << l->new_element() << " " << l->C() << "\n";
+              // }
+              // mCRL2log(log::verbose) << "---\n";
 #endif
               for (auto sit = N->begin(); sit != N->end(); ++sit) 
               {
                 state_T* s = *sit;
-                
-                // mCRL2log(log::verbose) << "State " << state_id(s) << "\n";
-                
                 // 5.3.2.a
                 move_state_to_block(s, Bpp);
                 // 5.3.2.b
@@ -1909,45 +1866,36 @@ class bisim_partitioner_gw
                   if (t->to_constln_ref != NULL) 
                   {
                     to_constlns_element_T* l = t->to_constln_ref;
-                    // mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C() << "\n";
                     to_constlns_element_T* lp;
                     if (l->new_element() != NULL) 
                     {
-                      // mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C() << "\n";
                       lp = l->new_element();
                     }
                     else 
                     {
                       lp = to_constlns_element_T::new_to_constlns_element(l->C());
                       l->set_new_element(lp);
-                      // mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C() << "\n";
                       // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
                       Bpp->to_constlns.insert_linked(lp);
                       // possibly set Bpp.inconstln_ref
                       if (l->C() == Bpp->constellation) 
                       {
                         Bpp->inconstln_ref = lp;
-                        // mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C() << "\n";
                       }
                       // possibly set Bpp.constln_ref and Bpp.coconstln_ref
                       if (l == Bp->constln_ref) 
                       {
-                        // mCRL2log(log::verbose) << "setting constln_ref " << lp << " " << lp->C() << "\n";
                         Bpp->constln_ref = lp;
                       }
                       else if (l == Bp->coconstln_ref) 
                       {
-                        // mCRL2log(log::verbose) << "setting coconstln_ref " << lp << " " << lp->C() << "\n";
                         Bpp->coconstln_ref = lp;
                       }
                       // let lp point to l, to be able to efficiently reset new_element pointers later on
                       lp->set_new_element(l);
-                      // mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
                     }
-                    // mCRL2log(log::verbose) << "removing transition\n";
                     l->trans_list.move_linked(t, lp->trans_list);
                     t->to_constln_ref = lp;
-                    // mCRL2log(log::verbose) << "setting t->to_constln_ref to " << lp << "\n";
                   }
                   // 5.3.2.b.ii
                   else 
@@ -2046,23 +1994,23 @@ class bisim_partitioner_gw
               // check
               //check_consistency_trans_lists(B, setB);
 #ifndef NDEBUG
-              mCRL2log(log::verbose) << "---\n";
-              mCRL2log(log::verbose) << Bp->block_id() << ": \n";
-              for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
-              {
-                to_constlns_element_T* l = *it;
-                mCRL2log(log::verbose) << l << " " << l->new_element() << "\n";
-              }
-              mCRL2log(log::verbose) << "inconstln: " << Bp->inconstln_ref << "\n";
-              mCRL2log(log::verbose) << "---\n";
-              mCRL2log(log::verbose) << Bpp->block_id() << ": \n";
-              for (auto it = Bpp->to_constlns.begin(); it != Bpp->to_constlns.end(); ++it) 
-              {
-                to_constlns_element_T* l = *it;
-                mCRL2log(log::verbose) << l << " " << l->new_element() << "\n";
-              }
-              mCRL2log(log::verbose) << "inconstln: " << Bpp->inconstln_ref << "\n";
-              mCRL2log(log::verbose) << "---\n";
+              // mCRL2log(log::verbose) << "---\n";
+              // mCRL2log(log::verbose) << Bp->block_id() << ": \n";
+              // for (auto it = Bp->to_constlns.begin(); it != Bp->to_constlns.end(); ++it) 
+              // {
+              //   to_constlns_element_T* l = *it;
+              //   mCRL2log(log::verbose) << l << " " << l->new_element() << "\n";
+              // }
+              // mCRL2log(log::verbose) << "inconstln: " << Bp->inconstln_ref << "\n";
+              // mCRL2log(log::verbose) << "---\n";
+              // mCRL2log(log::verbose) << Bpp->block_id() << ": \n";
+              // for (auto it = Bpp->to_constlns.begin(); it != Bpp->to_constlns.end(); ++it) 
+              // {
+                // to_constlns_element_T* l = *it;
+                // mCRL2log(log::verbose) << l << " " << l->new_element() << "\n";
+              // }
+              // mCRL2log(log::verbose) << "inconstln: " << Bpp->inconstln_ref << "\n";
+              // mCRL2log(log::verbose) << "---\n";
 #endif
               // Different from pseudo-code: reset temporary pointers (new elements) of blocks
               // Remove the associated element if the transition list is empty, UNLESS the element is pointed to
@@ -2157,7 +2105,6 @@ class bisim_partitioner_gw
             if (!is_stable) 
             {
               nr_of_splits++;
-              //mCRL2log(log::verbose) << "not stable\n";
               Q.clear();
               L.clear();
               assert(P.empty());
@@ -2166,7 +2113,6 @@ class bisim_partitioner_gw
               XBp4.clear();
               // prepare for lockstep search
               maxsize_detect = (splitBpB->btm_states.size() + splitBpB->non_btm_states.size() + splitBpB->marked_btm_states.size() + splitBpB->marked_non_btm_states.size()) / 2;
-              //mCRL2log(log::verbose) << "sizes: " << (splitBpB->btm_states.size() + splitBpB->non_btm_states.size() + splitBpB->marked_btm_states.size() + splitBpB->marked_non_btm_states.size()) << " " << maxsize_detect << "\n";
               block_detect = splitBpB;
               constellation_splitter_detect = setB;
               detect1_finished = CONTINUE;
@@ -2180,9 +2126,7 @@ class bisim_partitioner_gw
               in_forward_check_detect2 = false;
               iter_trans_state_added_detect1 = splitBpB->coconstln_ref->trans_list.before_begin();
               iter_state_added_detect2 = splitBpB->marked_btm_states.before_begin();
-              //check_consistency_trans_lists(B, setB);
-              //mCRL2log(log::verbose) << "Launching lockstep search 2\n";
-              //mCRL2log(log::verbose) << "block: " << Bp << " splitting const: " << setB << "\n";
+              
               while (detect1_finished != TERMINATED && detect2_finished != TERMINATED) 
               {
                 if (detect1_finished != STOPPED) 
@@ -2220,7 +2164,7 @@ class bisim_partitioner_gw
               for (auto sit = N->begin(); sit != N->end(); ++sit) 
               {
                 state_T* s = *sit;
-                //mCRL2log(log::verbose) << "processing state " << s->id << "\n";
+                
                 // 5.3.4 (5.3.2.a)
                 move_state_to_block(s, Bp3);
 #ifndef NDEBUG
@@ -2252,16 +2196,8 @@ class bisim_partitioner_gw
                       // possibly set Bp3.inconstln_ref
                       if (l->C() == Bp3->constellation) 
                       {
-                        //mCRL2log(log::verbose) << "bla\n";
                         Bp3->inconstln_ref = lp;
                       }
-  //                    // possibly set Bp3.constln_ref and Bp3.coconstln_ref
-  //                    if (l == splitBpB->constln_ref) {
-  //                      Bp3->constln_ref = lp;
-  //                    }
-  //                    else if (l == splitBpB->coconstln_ref) {
-  //                      Bp3->coconstln_ref = lp;
-  //                    }
                       // point lp to l, to be able to efficiently reset new_element pointers later on
                       lp->set_new_element(l);
                     }
@@ -2425,18 +2361,9 @@ class bisim_partitioner_gw
               XsplitBpB = X2;
             } // end if stable (5.3.4)
             // remove markings and reset constln_ref and coconstln_ref
-            //if (splitBpB != NULL) {
-            //  mCRL2log(log::verbose) << "split clean " << splitBpB->id << "\n";
-            //}
             // 5.3.5
             clean_temp_refs_block(splitBpB);
-            //if (cosplitBpB != NULL) {
-            //  mCRL2log(log::verbose) << "cosplit clean " << cosplitBpB->id << "\n";
-            //}
             clean_temp_refs_block(cosplitBpB);
-            //if (splitsplitBpB != NULL) {
-            //  mCRL2log(log::verbose) << "splitsplit clean " << splitsplitBpB->id << "\n";
-            //}
             clean_temp_refs_block(splitsplitBpB);
 
             // 5.3.6
@@ -2453,9 +2380,6 @@ class bisim_partitioner_gw
                 {
                   transition_T* t = transitionpointers[tit];
                   to_constlns_element_T* setBp_entry = t->to_constln_ref;
-                  //mCRL2log(log::verbose) << t->to_constln_ref->C() << " " << t->target->block->constellation << "\n";
-                  //mCRL2log(log::verbose) << Bhat->constellation << "\n";
-                  //assert(t->to_constln_ref->C() == t->target->block->constellation);
                   // 5.3.6.a.i
                   if (setBp_entry->SClist == NULL) 
                   {
@@ -2466,12 +2390,10 @@ class bisim_partitioner_gw
                   // 5.3.6.a.ii
                   if (setBp_entry->SClist->list.size() == 0)
                   {
-                    //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C() << "\n";
                     setBp_entry->SClist->list.insert(s);
                   }
                   else if (setBp_entry->SClist->list.front() != s)
                   {
-                    //mCRL2log(log::verbose) << "adding state to constln " << setBp_entry->C() << "\n";
                     setBp_entry->SClist->list.insert(s);
                   }
                 }
@@ -2512,7 +2434,6 @@ class bisim_partitioner_gw
             {
               if (splitBpB->new_btm_states.size() > 0) 
               {
-                //mCRL2log(log::verbose) << "add split\n";
                 blocks_to_process.push(splitBpB);
               }
             }
@@ -2520,7 +2441,6 @@ class bisim_partitioner_gw
             {
               if (cosplitBpB->new_btm_states.size() > 0) 
               {
-                //mCRL2log(log::verbose) << "add cosplit\n";
                 blocks_to_process.push(cosplitBpB);
               }
             }
@@ -2528,7 +2448,6 @@ class bisim_partitioner_gw
             {
               if (splitsplitBpB->new_btm_states.size() > 0) 
               {
-                //mCRL2log(log::verbose) << "add splitsplit with # new btm states = " << splitsplitBpB->new_btm_states.size() << "\n";
                 blocks_to_process.push(splitsplitBpB);
               }
             }
@@ -2551,7 +2470,6 @@ class bisim_partitioner_gw
                 }
                 else if (e->SClist->list.size() < Bhat->new_btm_states.size())
                 {
-                  //mCRL2log(log::verbose) << "size: " << e->SClist->size() << "\n";
                   splitcrit_met = true;
                   split = true;
                 }
@@ -2606,7 +2524,6 @@ class bisim_partitioner_gw
                   Bhatp = &(blocks.back());
                   Bhatp->constellation = Bhat->constellation;
                   Bhatp->constellation->blocks.insert_linked(Bhatp);
-                  //mCRL2log(log::verbose) << "splitting " << Bhat->id << " producing " << Bhatp->id << "\n";
                   // Let N point to correct list
                   sized_forward_list <state_T> *N;
                   if (detect1_finished == TERMINATED) 
@@ -2631,30 +2548,23 @@ class bisim_partitioner_gw
                       if (t->to_constln_ref != NULL) 
                       {
                         to_constlns_element_T* l = t->to_constln_ref;
-                        //mCRL2log(log::verbose) << "t->to_constln_ref: " << t->to_constln_ref << " " << t->to_constln_ref->C()->id << "\n";
                         to_constlns_element_T* lp;
                         if (l->new_element() != NULL) 
                         {
-                          //mCRL2log(log::verbose) << "point to new element " << l->new_element() << " " << l->new_element()->C()->id << "\n";
                           lp = l->new_element();
                         }
                         else 
                         {
-                          //mCRL2log(log::verbose) << Bhatp->constellation->id << "\n";
-                          //assert(Bhatp->inconstln_ref == NULL || l->C() != Bhatp->constellation);
                           lp = to_constlns_element_T::new_to_constlns_element(l->C());
                           l->set_new_element(lp);
-                          //mCRL2log(log::verbose) << "create new element " << l->new_element() << " " << l->new_element()->C()->id << "\n";
                           // Different from pseudo-code: point lp->new_element back to l, to efficiently reset
                           // new_element pointers of 'old' elements later
                           lp->set_new_element(l);
-                          //mCRL2log(log::verbose) << "pointing " << lp << "back to " << l << "\n";
                           // add lp to Bhatp.to_constlns (IMPLIED IN PSEUDO-CODE)
                           Bhatp->to_constlns.insert_linked(lp);
                           // possibly set Bhatp.inconstln_ref
                           if (l->C() == Bhatp->constellation) 
                           {
-                            //mCRL2log(log::verbose) << "setting inconstln " << lp << " " << lp->C()->id << "\n";
                             Bhatp->inconstln_ref = lp;
                           }
                         }
@@ -2795,7 +2705,6 @@ class bisim_partitioner_gw
                     {
                       SClists.remove_element(l->SClist);
                       l->SClist = NULL;
-                      //mCRL2log(log::verbose) << "SC: " << l->SClist << "\n";
                       // move the l entry to the back of the list. We do not need to worry about keeping iterator e valid (in while loop), since we will not use it on the current list anymore.
                       Bhat->to_constlns.move_to_back_linked(l, bit);
                     }
@@ -2851,11 +2760,9 @@ class bisim_partitioner_gw
                   //check_consistency_blocks();
                   while (Btmp != NULL) 
                   {
-                    //mCRL2log(log::verbose) << "processing new bottom states for " << Btmp->id << "\n";
                     for (auto sit = XBtmp->begin(); sit != XBtmp->end(); ++sit) 
                     {
                       state_T* s = *sit;
-                      //mCRL2log(log::verbose) << "state " << s->id << "\n";
                       for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                       {
                         transition_T* t = transitionpointers[tit];
@@ -2870,12 +2777,10 @@ class bisim_partitioner_gw
                         // 5.3.4.a.ii
                         if (setBp_entry->SClist->list.size() == 0)
                         {
-                          //mCRL2log(log::verbose) << "adding1 state to constln " << setBp_entry << " " << setBp_entry->C()->id << "\n";
                           setBp_entry->SClist->list.insert(s);
                         }
                         else if (setBp_entry->SClist->list.front() != s)
                         {
-                          //mCRL2log(log::verbose) << "(" << t << "," << t->target->id << "): adding2 state " << s->id << " to constln " << setBp_entry << " " << setBp_entry->C()->id << "\n";
                           setBp_entry->SClist->list.insert(s);
                         }
                       }
@@ -3006,7 +2911,6 @@ class bisim_partitioner_gw
                 found = true;
               }
             }
-            mCRL2log(log::verbose) << "looking for constellation " << t->to_constln_ref << "\n";
             assert(found);
           }
         }
@@ -3017,7 +2921,6 @@ class bisim_partitioner_gw
     {
       sized_forward_list < constellation_T >* L = &trivial_constlns;
       size_t count;
-      //size_t count2;
       while (L != NULL) 
       {
         for (auto cit = L->begin(); cit != L->end(); ++cit) 
@@ -3027,7 +2930,6 @@ class bisim_partitioner_gw
           {
             block_T* B = *bit;
             // walk over elements in to_constlns
-            //count2 = 0;
             sized_forward_list < to_constlns_element_T>::iterator prev_eit = B->to_constlns.before_begin();
             for (auto eit = B->to_constlns.begin(); eit != B->to_constlns.end(); ++eit) 
             {
@@ -3040,9 +2942,7 @@ class bisim_partitioner_gw
                 assert(t->ptr_in_list == prev_tit);
                 assert(t->to_constln_ref == e);
                 assert(t->source->block == B);
-                mCRL2log(log::verbose) << "TEST: " << state_id(t->source) << " " << state_id(t->target) << "\n";
-                mCRL2log(log::verbose) << "CONSTELLATIONS: " << t->target->block->constellation << " " << e->C() << "\n";
-                //assert(t->target->block->constellation == e->C());
+                assert(t->target->block->constellation == e->C());
                 // assert that t->to_constln_ref is valid
                 count = 0;
                 for (auto eit2 = B->to_constlns.begin(); eit2 != B->to_constlns.end(); ++eit2) 
@@ -3057,13 +2957,11 @@ class bisim_partitioner_gw
                 assert(count == 1);
                 prev_tit = tit;
               }
-              //assert(e->new_element() == NULL);
-              //assert(e->SClist == NULL);
-              assert(e->ptr_in_list == prev_eit);
+              assert(e->new_element() == NULL);  // TODO: Valid checks?
+              assert(e->ptr_in_list == prev_eit); 
               
               prev_eit = eit;
             }
-            //assert (count2 < 2);
           }
         }
         if (L == &trivial_constlns) 
@@ -3113,22 +3011,18 @@ class bisim_partitioner_gw
         {
           transition_T* t = transitionpointers[tit];
           assert(t->source == s);
-          // TODO: CHECK TO_CONSTLN_CNT
-          mCRL2log(log::verbose) << "cnts: " << t->target->block << " " << B << "\n";
+          
           if (t->target->block == B) 
           {
             local_inert_cnt++;
-            mCRL2log(log::verbose) << "inc " << local_inert_cnt << "\n";
           }
         }
-        mCRL2log(log::verbose) << "local inert cnt " << local_inert_cnt << " " << s->inert_cnt << "\n";
         assert(s->inert_cnt == local_inert_cnt);
         // check incoming transitions
         for (auto tit = s->Tsrc_begin; transitions[tit].target == s; ++tit)
         {
           transition_T* t = &(transitions[tit]);
           assert(t->target == s);
-          // TODO: CHECK TO_CONSTLN_CNT
           assert(t->to_constln_ref->C() == B->constellation);
         }
         
@@ -3284,13 +3178,13 @@ class bisim_partitioner_gw
 /** \brief Reduce transition system l with respect to strong or (divergence preserving) branching bisimulation.
  * \param[in/out] l The transition system that is reduced.
  * \param[in] branching If true branching bisimulation is applied, otherwise strong bisimulation.
- * \param[in] preserve_divergences Indicates whether loops of internal actions on states must be preserved. If false
+ * \param[in] preserve_divergence Indicates whether loops of internal actions on states must be preserved. If false
  *            these are removed. If true these are preserved.  */
 template < class LTS_TYPE>
 void bisimulation_reduce_gw(
   LTS_TYPE& l,
   const bool branching = false,
-  const bool preserve_divergences = false);
+  const bool preserve_divergence = false);
 
 
 /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
@@ -3300,14 +3194,14 @@ void bisimulation_reduce_gw(
  * \param[in/out] l1 A first transition system.
  * \param[in/out] l2 A second transistion system.
  * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
- * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
+ * \param[preserve_divergence] If true and branching is true, preserve tau loops on states.
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
 template < class LTS_TYPE>
 bool destructive_bisimulation_compare_gw(
   LTS_TYPE& l1,
   LTS_TYPE& l2,
   const bool branching=false,
-  const bool preserve_divergences=false,
+  const bool preserve_divergence=false,
   const bool generate_counter_examples = false);
 
 
@@ -3320,7 +3214,7 @@ bool destructive_bisimulation_compare_gw(
  * \param[in/out] l1 A first transition system.
  * \param[in/out] l2 A second transistion system.
  * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
- * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
+ * \param[preserve_divergence] If true and branching is true, preserve tau loops on states.
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
 template < class LTS_TYPE>
 bool bisimulation_compare_gw(
@@ -3332,17 +3226,17 @@ bool bisimulation_compare_gw(
 template < class LTS_TYPE>
 void bisimulation_reduce_gw(LTS_TYPE& l,
                             const bool branching/*=false */,
-                            const bool preserve_divergences/*=false */) 
+                            const bool preserve_divergence/*=false */) 
 {
   // First, remove tau loops in case of branching bisimulation.
   if (branching)
   {
-    scc_reduce(l,preserve_divergences);
+    scc_reduce(l,preserve_divergence);
   }
 
   // Secondly, apply the branching bisimulation reduction algorithm. If there are no tau's,
   // this will automatically yield strong bisimulation.
-  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l, branching, preserve_divergences);
+  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l, branching, preserve_divergence);
 
   // Clear the state labels of the LTS l
   l.clear_state_labels();
@@ -3350,7 +3244,7 @@ void bisimulation_reduce_gw(LTS_TYPE& l,
   // Assign the reduced LTS
   l.set_num_states(bisim_part.num_eq_classes());
   l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
-  bisim_part.replace_transitions(branching,preserve_divergences);
+  bisim_part.replace_transitions(branching);
 }
 
 template < class LTS_TYPE>
@@ -3358,11 +3252,11 @@ bool bisimulation_compare_gw(
   const LTS_TYPE& l1,
   const LTS_TYPE& l2,
   const bool branching, /* =false*/
-  const bool preserve_divergences /* =false*/)
+  const bool preserve_divergence /* =false*/)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_bisimulation_compare_gw(l1_copy,l2_copy,branching,preserve_divergences);
+  return destructive_bisimulation_compare_gw(l1_copy,l2_copy,branching,preserve_divergence);
 }
 
 template < class LTS_TYPE>
@@ -3370,7 +3264,7 @@ bool destructive_bisimulation_compare_gw(
   LTS_TYPE& l1,
   LTS_TYPE& l2,
   const bool branching /* =false*/,
-  const bool preserve_divergences /* = false*/)
+  const bool preserve_divergence /* = false*/)
 {
   size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
@@ -3381,13 +3275,13 @@ bool destructive_bisimulation_compare_gw(
   if (branching)
   {
     detail::scc_partitioner<LTS_TYPE> scc_part(l1);
-    scc_part.replace_transitions(preserve_divergences);
+    scc_part.replace_transitions(preserve_divergence);
     l1.set_num_states(scc_part.num_eq_classes());
     l1.set_initial_state(scc_part.get_eq_class(l1.initial_state()));
     init_l2 = scc_part.get_eq_class(init_l2);
   }
 
-  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l1, branching, preserve_divergences);
+  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l1, branching, preserve_divergence);
   return bisim_part.in_same_class(l1.initial_state(),init_l2);
 }
 

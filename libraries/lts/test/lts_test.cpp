@@ -309,7 +309,7 @@ void reduce_abp()
   expected.states_branching_bisimulation=3, expected.transitions_branching_bisimulation=4, expected.labels_branching_bisimulation=5;
   expected.states_divergence_preserving_branching_bisimulation=6, expected.transitions_divergence_preserving_branching_bisimulation=10, expected.labels_divergence_preserving_branching_bisimulation=5;
   expected.states_weak_bisimulation=3, expected.transitions_weak_bisimulation=4, expected.labels_weak_bisimulation=5;
-  expected.states_divergence_preserving_weak_bisimulation=6, expected.transitions_divergence_preserving_weak_bisimulation=10, expected.labels_divergence_preserving_weak_bisimulation=5;
+  expected.states_divergence_preserving_weak_bisimulation=6, expected.transitions_divergence_preserving_weak_bisimulation=25, expected.labels_divergence_preserving_weak_bisimulation=6;
   expected.states_simulation=24, expected.transitions_simulation=28, expected.labels_simulation=5;
   expected.states_trace_equivalence=19, expected.transitions_trace_equivalence=24, expected.labels_trace_equivalence=5;
   expected.states_weak_trace_equivalence=3, expected.transitions_weak_trace_equivalence=4, expected.labels_weak_trace_equivalence=5;
@@ -317,6 +317,89 @@ void reduce_abp()
   expected.is_deterministic=false;
 
   reduce_lts_in_various_ways("Alternating bit protocol", ABP_AUT, expected);
+}
+
+// Peterson's protocol has the interesting property that the number of states modulo branching bisimulation
+// differs from the number of states modulo weak bisimulation, as observed by Rob van Glabbeek.
+void reduce_peterson()
+{
+  std::string PETERSON_AUT =
+    "des (0,59,35)\n"
+    "(0,\"wish(1)\",1)\n"
+    "(0,\"wish(0)\",2)\n"
+    "(1,\"tau\",3)\n"
+    "(1,\"wish(0)\",4)\n"
+    "(2,\"wish(1)\",4)\n"
+    "(2,\"tau\",5)\n"
+    "(3,\"tau\",6)\n"
+    "(3,\"wish(0)\",7)\n"
+    "(4,\"tau\",7)\n"
+    "(4,\"tau\",8)\n"
+    "(5,\"wish(1)\",8)\n"
+    "(6,\"enter(1)\",9)\n"
+    "(6,\"wish(0)\",10)\n"
+    "(7,\"tau\",11)\n"
+    "(8,\"tau\",12)\n"
+    "(9,\"leave(1)\",13)\n"
+    "(9,\"wish(0)\",14)\n"
+    "(10,\"enter(1)\",14)\n"
+    "(10,\"tau\",15)\n"
+    "(11,\"tau\",15)\n"
+    "(12,\"tau\",16)\n"
+    "(13,\"tau\",17)\n"
+    "(13,\"wish(0)\",18)\n"
+    "(14,\"leave(1)\",18)\n"
+    "(14,\"tau\",19)\n"
+    "(15,\"enter(1)\",19)\n"
+    "(16,\"enter(0)\",20)\n"
+    "(17,\"wish(1)\",1)\n"
+    "(17,\"wish(0)\",21)\n"
+    "(18,\"tau\",21)\n"
+    "(18,\"tau\",22)\n"
+    "(19,\"leave(1)\",22)\n"
+    "(20,\"leave(0)\",23)\n"
+    "(21,\"wish(1)\",4)\n"
+    "(21,\"tau\",24)\n"
+    "(22,\"tau\",24)\n"
+    "(23,\"tau\",3)\n"
+    "(24,\"wish(1)\",8)\n"
+    "(24,\"tau\",25)\n"
+    "(25,\"enter(0)\",26)\n"
+    "(25,\"wish(1)\",27)\n"
+    "(26,\"leave(0)\",28)\n"
+    "(26,\"wish(1)\",29)\n"
+    "(27,\"enter(0)\",29)\n"
+    "(27,\"tau\",16)\n"
+    "(28,\"wish(1)\",30)\n"
+    "(28,\"tau\",31)\n"
+    "(29,\"leave(0)\",30)\n"
+    "(29,\"tau\",20)\n"
+    "(30,\"tau\",23)\n"
+    "(30,\"tau\",32)\n"
+    "(31,\"wish(1)\",32)\n"
+    "(31,\"wish(0)\",33)\n"
+    "(32,\"tau\",3)\n"
+    "(32,\"wish(0)\",34)\n"
+    "(33,\"wish(1)\",34)\n"
+    "(33,\"tau\",24)\n"
+    "(34,\"tau\",7)\n"
+    "(34,\"tau\",8)\n"
+    ;
+
+  expected_sizes expected;
+  expected.states_plain=35; expected.transitions_plain=59; expected.labels_plain=7;
+  expected.states_bisimulation=31, expected.transitions_bisimulation=51, expected.labels_bisimulation=7;
+  expected.states_branching_bisimulation=21, expected.transitions_branching_bisimulation=37, expected.labels_branching_bisimulation=7;
+  expected.states_divergence_preserving_branching_bisimulation=21, expected.transitions_divergence_preserving_branching_bisimulation=37, expected.labels_divergence_preserving_branching_bisimulation=7;
+  expected.states_weak_bisimulation=19, expected.transitions_weak_bisimulation=57, expected.labels_weak_bisimulation=7;
+  expected.states_divergence_preserving_weak_bisimulation=19, expected.transitions_divergence_preserving_weak_bisimulation=57, expected.labels_divergence_preserving_weak_bisimulation=8;
+  expected.states_simulation=31, expected.transitions_simulation=49, expected.labels_simulation=7;
+  expected.states_trace_equivalence=34, expected.transitions_trace_equivalence=52, expected.labels_trace_equivalence=7;
+  expected.states_weak_trace_equivalence=18, expected.transitions_weak_trace_equivalence=29, expected.labels_weak_trace_equivalence=6;
+  expected.states_determinisation=40, expected.transitions_determinisation=63, expected.labels_determinisation=7;
+  expected.is_deterministic=false;
+
+  reduce_lts_in_various_ways("Peterson protocol", PETERSON_AUT, expected);
 }
 
 void test_reachability()
@@ -399,7 +482,8 @@ int test_main(int argc, char* argv[])
 {
   reduce_simple_loop();
   reduce_simple_loop_with_tau();
-  // reduce_abp();
+  reduce_abp();
+  reduce_peterson();
   test_reachability();
   failing_test_groote_wijs_algorithm();
 

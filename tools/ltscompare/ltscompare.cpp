@@ -135,8 +135,9 @@ class ltscompare_tool : public ltscompare_base
 
         result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
-        mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
-                       << description(tool_options.equivalence) << std::endl;
+        mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ") 
+                       << "equal ("
+                       << description(tool_options.equivalence) << ")\n";
       }
 
       if (tool_options.preorder != lts_pre_none)

@@ -59,7 +59,9 @@ class bisim_partitioner
       LTS_TYPE& l,
       const bool branching=false,
       const bool preserve_divergence=false)
-      :max_state_index(0), aut(l), tau_label(determine_tau_label(l))  // tau_label is size_t(-1) if label does not exist
+       : max_state_index(0), 
+         aut(l), 
+         tau_label(determine_tau_label(l))  // tau_label is size_t(-1) if label does not exist
     {
       assert(branching || !preserve_divergence);
       mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b":"B") <<
