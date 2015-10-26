@@ -2539,7 +2539,7 @@ class bisim_partitioner_gw
                         {
                           lp = to_constlns_element_T::new_to_constlns_element(l->C());
                           l->set_new_element(lp);
-                          // Different from pseudo-code: point lp->new_element back to l, to efficiently reset
+                          // point lp->new_element back to l, to efficiently reset
                           // new_element pointers of 'old' elements later
                           lp->set_new_element(l);
                           // add lp to Bhatp.to_constlns
