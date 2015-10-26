@@ -208,9 +208,6 @@ class transition_T
     state_T* target;
     // pointer to constellation counter for corresponding (s, C) combination
     counter_T* to_constln_cnt;
-    // pointer to list of transitions from B to C containing this transition.
-    // Different from pseudo-code: redundant, since C entry (below) has a reference to this list as well
-    //sized_forward_list < transition_T > *block_constln_list = NULL;
     // pointer to C entry in to_constlns list of B
     to_constlns_element_T* to_constln_ref;
     
@@ -255,8 +252,6 @@ class constellation_T
 class to_constlns_element_T
 {
   protected:
-    // !!! Different from pseudo-code: nr_trans_block_to_C is not needed: trans_list points to the list of transitions, and its size equals nr_trans_block_to_C
-    //size_t nr_trans_block_to_C = 0;
 
     constellation_T* m_C;
     to_constlns_element_T* m_new_element;
@@ -366,12 +361,13 @@ class block_T
     sized_forward_list < state_T > marked_btm_states;
     // marked non-bottom states
     sized_forward_list < state_T > marked_non_btm_states;
-    // different from pseudo-code: instead of list of transitions from state in block 
-    // to constellation on which splitting is done, we have a pointer to a to_constlns object containing such a list
+    // a pointer to a to_constlns object that contains a list of transitions from state in block
+    // to constellation on which splitting is done
     to_constlns_element_T* constln_ref;
-    // different from pseudo-code: as above, now for list of transitions from state in block to (constellation \ block) on which splitting is done
+    // a pointer to a to_constlns object that contains a list of transitions from state in block
+    // to (constellation \ block) on which splitting is done
     to_constlns_element_T* coconstln_ref;
-    // different from pseudo-code: this pointer is used to find in constant time the element in to_constlns that belongs to the constellation
+    // this pointer is used to find in constant time the element in to_constlns that belongs to the constellation
     // of which the current block is a member. This is needed to allow inert transitions when becoming non-inert to be added to the associated
     // trans_list in constant time.
     to_constlns_element_T* inconstln_ref;
@@ -1187,7 +1183,7 @@ class bisim_partitioner_gw
         if (sp->block == block_detect && !sp->is_in_P_detect2 && !sp->is_in_Lp_detect2) 
         {
           // depending on isnestedsplit, check condition
-          // Different from pseudo-code: for the nested split, we check whether the state is a member of L.
+          // For the nested split, we check whether the state is a member of L.
           // This seems dangerous, since L is maintained by detect1, but we are interested in the states that
           // reach Bp \ B, and it is problematic to determine which states can do so directly. Some states
           // in L are likely to reach Bp \ B directly (at least indirectly), so a state in L should be
@@ -1238,7 +1234,7 @@ class bisim_partitioner_gw
             }
           }
         }
-        // Different from pseudo-code: priority of sp is only decremented if sp is in P.
+        // priority of sp is only decremented if sp is in P.
         if (sp->is_in_P_detect2 && !sp_newly_inserted) 
         {
           if (sp->priority > 0) 
@@ -1467,7 +1463,7 @@ class bisim_partitioner_gw
           current_state->Tsrc_begin = tit;
         }
         
-        // Different from pseudo-code: ONLY if transition is non-inert
+        // do the following only if transition is non-inert
         if ((t->source->block != t->target->block) || !branching)
         {
           // set pointer to C entry in to_constlns list of B.
@@ -1589,7 +1585,7 @@ class bisim_partitioner_gw
                   transition_T* t = &(transitions[tit]);
                   state_T* sp = t->source;
                   block_T* Bp = sp->block;
-                  // Different from pseudo-code: ignore if Bp=B. We will revisit this transition when considering
+                  // Ignore if Bp=B. We will revisit this transition when considering
                   // the outgoing transitions of each s in B
                   if (Bp != B) 
                   {
@@ -1604,7 +1600,7 @@ class bisim_partitioner_gw
                       Bp->to_constlns.insert_linked(Bp->constln_ref);
                     }
                     // 5.2.2.b
-                    // Different from pseudo-code: we split the counter into two counters differently, this one respects
+                    // we split the counter into two counters, respecting
                     // the pointers to counters of the individual transitions
                     if (sp->coconstln_cnt == NULL) 
                     {
@@ -1632,16 +1628,13 @@ class bisim_partitioner_gw
                     // move t
                     Bp->coconstln_ref->trans_list.move_linked(t, Bp->constln_ref->trans_list);
                     //assert(t->target->block->constellation == s->block->constellation);
-                    // Different from pseudo-code: no longer needed, since direct link to transitions from block to constellation has been removed
-                    // (now goes via to_constln_ref, which is updated at 5.2.2.b.
-                    //t.block_constln_list = Bp.constln_transitions;
                     t->to_constln_ref = Bp->constln_ref;
                   }
                 }
               }
               //check_consistency_trans_lists(B, setB);
-              // Different from pseudo-code: consider the case that B itself can be split
-              // ALL states should be marked
+              // Consider the case that B itself can be split.
+              // ALL states should be marked first
               // 5.2.3
               B->btm_states.swap(B->marked_btm_states);
               B->non_btm_states.swap(B->marked_non_btm_states);
@@ -1689,11 +1682,6 @@ class bisim_partitioner_gw
                       s->constln_cnt->increment();
                       t->to_constln_cnt = s->constln_cnt;
                       s->coconstln_cnt->decrement();
-                      // move t
-                      // Next lines are commented out, since these transitions are inert, which are NOT in the trans_list
-                      //B->coconstln_ref->trans_list.remove_linked(t);
-                      //B->constln_ref->trans_list.insert_linked(t);
-                      //t->to_constln_ref = B->constln_ref;
                     }
                   }
                 }
@@ -1705,7 +1693,7 @@ class bisim_partitioner_gw
               {
                 block_T* Bp = *sbit;
                 
-                // 5.2.3.a/b
+                // 5.2.4.a/b
                 bool split = true;
                 if (Bp->btm_states.size() == 0) 
                 {
@@ -1730,7 +1718,7 @@ class bisim_partitioner_gw
                     }
                   }
                 }
-                // 5.2.3.c
+                // 5.2.4.c
                 if (!split) 
                 {
                   splittable_blocks.remove_after(prev_sbit, sbit);
@@ -1739,7 +1727,7 @@ class bisim_partitioner_gw
                 }
                 prev_sbit = sbit;
               }
-              // 5.2.4
+              // 5.2.5
               if (splittable_blocks.size() > 0) 
               {
                 const_block_found = true;
@@ -1815,7 +1803,6 @@ class bisim_partitioner_gw
                 }
               }
               // 5.3.2
-              // Pseudo-code: 'add it to the list of blocks' could possibly be removed.
               blocks.emplace_back(Bp->type(), max_block_index);
               Bpp = &(blocks.back());
               Bpp->constellation = Bp->constellation;
@@ -1854,14 +1841,10 @@ class bisim_partitioner_gw
                 // 5.3.2.a
                 move_state_to_block(s, Bpp);
                 // 5.3.2.b
-                // Different from pseudo-code: we need to consider all constellations that can be reached from
-                // s, not just setB \ B and B.
                 for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                 {
                   transition_T* t = transitionpointers[tit];
-                  
-                  // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
-                  // Different from pseudo-code: only do this if transition is non-inert
+
                   // 5.3.2.b.i
                   if (t->to_constln_ref != NULL) 
                   {
@@ -1875,7 +1858,7 @@ class bisim_partitioner_gw
                     {
                       lp = to_constlns_element_T::new_to_constlns_element(l->C());
                       l->set_new_element(lp);
-                      // add lp to Bpp.to_constlns (IMPLIED IN PSEUDO-CODE)
+                      // add lp to Bpp.to_constlns
                       Bpp->to_constlns.insert_linked(lp);
                       // possibly set Bpp.inconstln_ref
                       if (l->C() == Bpp->constellation) 
@@ -1905,8 +1888,10 @@ class bisim_partitioner_gw
                     if (sp->block == Bp && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) 
                     {
                       // an inert transition becomes non-inert
+											// 5.3.2.b.ii.A
                       s->inert_cnt--;
-                      if (s->inert_cnt == 0) 
+											// 5.3.2.b.ii.B
+                      if (s->inert_cnt == 0)
                       {
                         XBpp.insert(s);
                         if (s->type == NON_BTM_STATE) 
@@ -1918,7 +1903,7 @@ class bisim_partitioner_gw
                           Bpp->marked_non_btm_states.move_state_linked(s, Bpp->marked_btm_states, MARKED_BTM_STATE);
                         }
                       }
-                      // Different from pseudo-code: add the transition to the corresponding trans_list
+                      // add the transition to the corresponding trans_list
                       if (Bpp->inconstln_ref == NULL) 
                       {
                         Bpp->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bpp->constellation);
@@ -1945,8 +1930,10 @@ class bisim_partitioner_gw
                   if (sp->block == Bp && (N == &L ? !sp->is_in_L_detect1 : !sp->is_in_Lp_detect2)) 
                   {
                     // an inert transition becomes non-inert
+										// 5.3.2.c.i
                     sp->inert_cnt--;
-                    if (sp->inert_cnt == 0) 
+										// 5.3.2.c.ii
+                    if (sp->inert_cnt == 0)
                     {
                       XBp.insert(sp);
                       if (sp->type == NON_BTM_STATE) 
@@ -1958,7 +1945,7 @@ class bisim_partitioner_gw
                         Bp->marked_non_btm_states.move_state_linked(sp, Bp->marked_btm_states, MARKED_BTM_STATE);
                       }
                     }
-                    // Different from pseudo-code: add the transition to the corresponding trans_list
+                    // add the transition to the corresponding trans_list
                     if (Bp->inconstln_ref == NULL) 
                     {
                       Bp->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bp->constellation);
@@ -2012,9 +1999,9 @@ class bisim_partitioner_gw
               // mCRL2log(log::verbose) << "inconstln: " << Bpp->inconstln_ref << "\n";
               // mCRL2log(log::verbose) << "---\n";
 #endif
-              // Different from pseudo-code: reset temporary pointers (new elements) of blocks
+              // Reset temporary pointers (new elements) of blocks.
               // Remove the associated element if the transition list is empty, UNLESS the element is pointed to
-              // by either Bp->constln_ref or Bpp->coconstln_ref
+              // by either Bp->constln_ref or Bp->coconstln_ref
               // 5.3.3
               for (auto it = Bpp->to_constlns.begin(); it != Bpp->to_constlns.end(); ++it) 
               {
@@ -2175,8 +2162,6 @@ class bisim_partitioner_gw
                 {
                   transition_T* t = transitionpointers[tit];
                   
-                  // Pseudo-code: How can s be in B'? It was removed at step 5.3.2.a
-                  // Different from pseudo-code: only do this if transition is non-inert
                   // 5.3.4 (5.3.2.b.i)
                   if (t->to_constln_ref != NULL) 
                   {
@@ -2226,7 +2211,7 @@ class bisim_partitioner_gw
                           Bp3->marked_non_btm_states.move_state_linked(s, Bp3->marked_btm_states, MARKED_BTM_STATE);
                         }
                       }
-                      // Different from pseudo-code: add the transition to the corresponding trans_list
+                      // add the transition to the corresponding trans_list
                       if (Bp3->inconstln_ref == NULL) 
                       {
                         Bp3->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bp3->constellation);
@@ -2264,7 +2249,7 @@ class bisim_partitioner_gw
                         splitBpB->marked_non_btm_states.move_state_linked(sp, splitBpB->marked_btm_states, MARKED_BTM_STATE);
                       }
                     }
-                    // Different from pseudo-code: add the transition to the corresponding trans_list
+                    // add the transition to the corresponding trans_list
                     if (splitBpB->inconstln_ref == NULL) 
                     {
                       splitBpB->inconstln_ref = to_constlns_element_T::new_to_constlns_element(splitBpB->constellation);
@@ -2297,9 +2282,9 @@ class bisim_partitioner_gw
                 P.erase(P.begin());
                 s->is_in_P_detect2 = false;
               }
-              // Different from pseudo-code: reset temporary pointers (new elements) of blocks
+              // Reset temporary pointers (new elements) of blocks.
               // Remove the associated element if the transition list is empty, UNLESS the element is pointed to
-              // by either Bp->constln_ref or Bpp->coconstln_ref
+              // by either splitBpB->constln_ref or splitBpB->coconstln_ref
               // 5.3.4 (5.3.3)
               for (auto it = Bp3->to_constlns.begin(); it != Bp3->to_constlns.end(); ++it) 
               {
@@ -2485,7 +2470,7 @@ class bisim_partitioner_gw
                   assert(P.empty());
                   Lp.clear();
                   // 5.3.7.b.i.A / B
-                  // !!! Different from the pseudo-code, we prepare detect1 by walking over the transitions from Bhat to constellation pointed
+                  // we prepare detect1 by walking over the transitions from Bhat to constellation pointed
                   // to by *cit. To optimise this, we should probably maintain a list of states that have a direct transition from Bhat to constellation
                   // of *cit, and instead walk over that list
                   maxsize_detect = (Bhat->btm_states.size() + Bhat->non_btm_states.size()) / 2;
@@ -2538,14 +2523,11 @@ class bisim_partitioner_gw
                   {
                     state_T* s = *sit;
                     move_state_to_block(s, Bhatp);
-                    // Different from pseudo-code: we need to consider all constellations that can be reached from
-                    // s, not just setB \ B and B. For this, we merge steps 5.3.2.c and 5.3.2.d
                     for (auto tit = s->Ttgt_begin; transitionpointers[tit]->source == s; ++tit)
                     {
                       transition_T* t = transitionpointers[tit];
 
-                      // Different from pseudo-code: only do this if transition is non-inert
-                      if (t->to_constln_ref != NULL) 
+                      if (t->to_constln_ref != NULL)
                       {
                         to_constlns_element_T* l = t->to_constln_ref;
                         to_constlns_element_T* lp;
@@ -2560,7 +2542,7 @@ class bisim_partitioner_gw
                           // Different from pseudo-code: point lp->new_element back to l, to efficiently reset
                           // new_element pointers of 'old' elements later
                           lp->set_new_element(l);
-                          // add lp to Bhatp.to_constlns (IMPLIED IN PSEUDO-CODE)
+                          // add lp to Bhatp.to_constlns
                           Bhatp->to_constlns.insert_linked(lp);
                           // possibly set Bhatp.inconstln_ref
                           if (l->C() == Bhatp->constellation) 
@@ -2585,7 +2567,7 @@ class bisim_partitioner_gw
                             XBpp.insert(s);
                             Bhatp->non_btm_states.move_state_linked(s, Bhatp->btm_states, BTM_STATE);
                           }
-                          // Different from pseudo-code: add the transition to the corresponding trans_list
+                          // add the transition to the corresponding trans_list
                           if (Bhatp->inconstln_ref == NULL) 
                           {
                             Bhatp->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bhatp->constellation);
@@ -2615,7 +2597,7 @@ class bisim_partitioner_gw
                           XBp.insert(sp);
                           Bhat->non_btm_states.move_state_linked(sp, Bhat->btm_states, BTM_STATE);
                         }
-                        // Different from pseudo-code: add the transition to the corresponding trans_list
+                        // add the transition to the corresponding trans_list
                         if (Bhat->inconstln_ref == NULL) 
                         {
                           Bhat->inconstln_ref = to_constlns_element_T::new_to_constlns_element(Bhat->constellation);
@@ -2673,6 +2655,7 @@ class bisim_partitioner_gw
                     }
                     prev_sit = sit;
                   }
+									// 5.3.7.b.ii
                   for (auto bit = Bhat->to_constlns.begin(); bit != Bhat->to_constlns.end(); ++bit) 
                   {
                     to_constlns_element_T* l = *bit;
@@ -2726,8 +2709,8 @@ class bisim_partitioner_gw
                     P.erase(P.begin());
                     s->is_in_P_detect2 = false;
                   }
-                  // Different from pseudo-code: reset temporary pointers (new elements) of blocks
-                  // 5.3.7.b.iii
+                  // reset temporary pointers (new elements) of blocks
+                  // 5.3.7.b.iii (5.3.3)
                   for (auto it = Bhatp->to_constlns.begin(); it != Bhatp->to_constlns.end(); ++it) 
                   {
                     to_constlns_element_T* l = *it;
@@ -2750,10 +2733,7 @@ class bisim_partitioner_gw
                       l->set_new_element(NULL);
                     }
                   }
-                  // Different from pseudo-code: remove marking on states and reset constln_ref and coconstln_ref
-                  //clean_temp_refs_block(Bhat);
-                  //clean_temp_refs_block(Bhatp);
-                  // 5.3.5 (5.3.4)
+                  // 5.3.7.b.iii (5.3.6)
                   block_T* Btmp = Bhat;
                   sized_forward_list<state_T> *XBtmp = &XBp;
                   //check_consistency_transitions();
@@ -2811,7 +2791,7 @@ class bisim_partitioner_gw
                   }
                   break;
                 } // end if splitcrit_met
-                // Different from pseudo-code: we do not clean e->SClist and move e to the back.
+                // we do not clean e->SClist and move e to the back.
                 // We reset the list only later. This, since the original moving would lead to the list
                 // of e representing a reason to split Bhat (an empty list is sufficient for that).
 //                else {
@@ -2821,7 +2801,7 @@ class bisim_partitioner_gw
 //                  Bhat->to_constlns.insert_linked_back(e);
 //                }
               } // end of walk over to_constln of block
-              // Different from pseudo-code: if block is stable, reset new_btm_states, remove remaining SClists
+              // if block is stable, reset new_btm_states, remove remaining SClists
               // 5.3.7.c
               if (!split) 
               {
