@@ -86,7 +86,7 @@ class Test:
             assert isinstance(data['tools'], dict)
             self._add_tool(data['tools'][label], label)
 
-        self.res = data['result']
+        self.result_code = data['result']
         f.close()
 
         # These are the global variables used for the computation of the test result
@@ -102,9 +102,9 @@ class Test:
     def __str__(self):
         import StringIO
         out = StringIO.StringIO()
-        out.write('name     = ' + str(self.name)     + '\n')
-        out.write('verbose  = ' + str(self.verbose)  + '\n')
-        out.write('res      = ' + str(self.res)      + '\n\n')
+        out.write('name        = ' + str(self.name)     + '\n')
+        out.write('verbose     = ' + str(self.verbose)  + '\n')
+        out.write('result_code = ' + str(self.result_code)      + '\n\n')
         out.write('\n'.join(['--- Node ---\n{0}'.format(node) for node in self.nodes]) + '\n\n')
         out.write('\n'.join(['--- Tool ---\n{0}'.format(tool) for tool in self.tools]) + '\n\n')
         out.write('\n'.join(['--- Init ---\n{0}'.format(node) for node in self.input_nodes]))
@@ -147,12 +147,16 @@ class Test:
     def result(self):
         # Returns the result of the test after all tools have been executed
         try:
-            exec(self.res, self.globals)
+            exec(self.result_code, self.globals)
         except Exception as e:
             if isinstance(e, KeyError):
                 print 'A KeyError occurred during evaluation of the test result: {}'.format(e)
+                print 'result_code', self.result_code
+                print self
             else:
                 print 'An exception occurred during evaluation of the test result: {}'.format(e)
+                print 'result_code', self.result_code
+                print self
             return False
         return self.globals['result']
 
