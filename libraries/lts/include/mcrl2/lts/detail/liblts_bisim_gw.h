@@ -194,8 +194,7 @@ class state_T
        coconstln_cnt(NULL),
        inert_cnt(0),
        priority(0)
-    {
-    }
+    {}
 };
 
 class transition_T
@@ -703,9 +702,8 @@ class bisim_partitioner_gw
       {
         mCRL2log(log::verbose) << "Extra Kripke state " << p.second << " (" << p.first.first << "," << p.first.second << ")\n";
       }
-      for (auto sit = states.begin(); sit != states.end(); ++sit) 
+      for (const state_T& s: states)
       {
-        const state_T& s = *sit;
         for (auto tit = s.Ttgt_begin; transitionpointers[tit]->source == &s; ++tit) 
         {
           transition_T* t = transitionpointers[tit];
@@ -2937,7 +2935,7 @@ class bisim_partitioner_gw
                 assert(count == 1);
                 prev_tit = tit;
               }
-              assert(e->new_element() == NULL);  // TODO: Valid checks?
+              assert(e->new_element() == NULL);  
               assert(e->ptr_in_list == prev_eit); 
               
               prev_eit = eit;
