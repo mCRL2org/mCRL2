@@ -91,7 +91,7 @@ void save_bes_cwi(const pbes_system::pbes& pbes_spec, std::ostream& stream);
 inline
 void save_bes(const boolean_equation_system& bes, std::ostream& stream,
               const utilities::file_format* format)
-{  
+{
   if (format == utilities::file_format::unknown())
   {
     format = bes_format_internal();
@@ -136,9 +136,9 @@ void save_bes(const boolean_equation_system& bes, std::ostream& stream,
 /// \param bes The bes to which the result is loaded.
 /// \param stream The file from which to load the BES.
 /// \param format The format that should be assumed for the stream.
+/// \param source The source from which the stream originates. Used for error messages.
 inline
-void load_bes(boolean_equation_system& bes, std::istream& stream,
-              const utilities::file_format* format)
+void load_bes(boolean_equation_system& bes, std::istream& stream, const utilities::file_format* format, const std::string& source = "")
 {
   if (format == utilities::file_format::unknown())
   {
@@ -173,7 +173,7 @@ void load_bes(boolean_equation_system& bes, std::istream& stream,
   if (pbes_system::is_pbes_file_format(format))
   {
     pbes_system::pbes pbes;
-    load_pbes(pbes, stream, format);
+    load_pbes(pbes, stream, format, source);
     if(!pbes_system::algorithms::is_bes(pbes))
     {
       throw mcrl2::runtime_error("The PBES that was loaded is not a BES");
@@ -210,15 +210,14 @@ void save_bes(const boolean_equation_system &bes, const std::string &filename,
 ///
 /// The format of the file in infilename is guessed.
 inline
-void load_bes(boolean_equation_system& bes, const std::string& filename,
-              const utilities::file_format* format=utilities::file_format::unknown())
+void load_bes(boolean_equation_system& bes, const std::string& filename, const utilities::file_format* format=utilities::file_format::unknown())
 {
   if (format == utilities::file_format::unknown())
   {
     format = guess_format(filename);
   }
   utilities::input_file file = format->open_input(filename);
-  load_bes(bes, file.stream(), format);
+  load_bes(bes, file.stream(), format, core::detail::file_source(filename));
 }
 
 /// \brief Loads a PBES from a file. If the file stores a BES, then it is converted to a PBES.

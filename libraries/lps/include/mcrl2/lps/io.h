@@ -103,8 +103,9 @@ void save_lps(const Specification& spec, std::ostream& stream,
 /// \param stream The stream from which to load the LPS (it is assumed to have been opened in the
 ///               right mode).
 /// \param f The format that should be assumed for the file in infilename.
+/// \param source The source from which the stream originates. Used for error messages.
 template <typename Specification>
-void load_lps(Specification& spec, std::istream& stream, const utilities::file_format* format)
+void load_lps(Specification& spec, std::istream& stream, const utilities::file_format* format, const std::string& source = "")
 {
   if (format == utilities::file_format::unknown())
   {
@@ -113,12 +114,12 @@ void load_lps(Specification& spec, std::istream& stream, const utilities::file_f
   mCRL2log(log::verbose) << "Loading LPS in " << format->shortname() << " format..." << std::endl;
   if (format == lps_format_internal())
   {
-    spec.load(stream, true);
+    spec.load(stream, true, source);
   }
   else
   if (format == lps_format_internal_text())
   {
-    spec.load(stream, false);
+    spec.load(stream, false, source);
   }
   else
   if (format == lps_format_text())
@@ -152,19 +153,19 @@ void save_lps(const Specification &spec, const std::string &filename,
 /// \param spec The LPS to which the result is loaded.
 /// \param filename The file from which to load the LPS.
 /// \param format The format in which the LPS is stored in the file.
+/// \param source The source from which the stream originates. Used for error messages.
 ///
 /// The format of the file in filename is guessed if format is not given, or if it is equal to
 /// utilities::file_format::unknown().
 template <typename Specification>
-void load_lps(Specification& spec, const std::string& filename,
-               const utilities::file_format* format=utilities::file_format::unknown())
+void load_lps(Specification& spec, const std::string& filename, const utilities::file_format* format=utilities::file_format::unknown())
 {
   if (format == utilities::file_format::unknown())
   {
     format = guess_format(filename);
   }
   utilities::input_file file = format->open_input(filename);
-  load_lps(spec, file.stream(), format);
+  load_lps(spec, file.stream(), format, core::detail::file_source(filename));
 }
 
 } // namespace lps

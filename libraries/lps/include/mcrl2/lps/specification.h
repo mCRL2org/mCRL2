@@ -22,7 +22,7 @@
 #include <cstring>
 #include <set>
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/core/load_aterm.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/linear_process.h"
@@ -144,10 +144,10 @@ class specification_base
     /// \param filename A string
     /// If filename is nonempty, input is read from the file named filename.
     /// If filename is empty, input is read from standard input.
-    void load(std::istream& stream, bool binary=true)
+    /// \param source The source from which the stream originates. Used for error messages.
+    void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {
-      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
-                                : atermpp::read_term_from_text_stream(stream);
+      atermpp::aterm t = core::load_aterm(stream, binary, "LPS", source);
       t = data::detail::add_index(t);
       if (!t.type_is_appl() || !is_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
       {
@@ -300,9 +300,9 @@ class specification: public specification_base<linear_process, process_initializ
       super::save(stream, binary);
     }
 
-    void load(std::istream& stream, bool binary = true)
+    void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {
-      super::load(stream, binary);
+      super::load(stream, binary, source);
       complete_data_specification(*this);
       assert(check_well_typedness(*this));
     }

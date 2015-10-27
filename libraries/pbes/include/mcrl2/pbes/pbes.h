@@ -17,7 +17,7 @@
 #include <map>
 #include <set>
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_io.h"
+#include "mcrl2/core/load_aterm.h"
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/detail/io.h"
@@ -248,10 +248,12 @@ class pbes
       return m_initial_state;
     }
 
-    void load(std::istream& stream, bool binary=true)
+    /// \brief Reads the parameterized boolean equation system from a stream.
+    /// \param stream The stream to read from.
+    /// \param source The source from which the stream originates. Used for error messages.
+    void load(std::istream& stream, bool binary=true, const std::string& source = "")
     {
-      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
-                                : atermpp::read_term_from_text_stream(stream);
+      atermpp::aterm t = core::load_aterm(stream, binary, "PBES", source);
       t = pbes_system::detail::add_index(t);
       if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
       {

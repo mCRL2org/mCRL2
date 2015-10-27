@@ -89,9 +89,9 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
       super::save(stream, binary);
     }
 
-    void load(std::istream& stream, bool binary=true)
+    void load(std::istream& stream, bool binary=true, const std::string& source = "")
     {
-      super::load(stream, binary);
+      super::load(stream, binary, source);
       complete_data_specification(*this);
       assert(check_well_typedness(*this));
     }

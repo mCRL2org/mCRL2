@@ -116,8 +116,9 @@ void save_pbes(const pbes& pbes, std::ostream& stream,
 /// \param stream The stream from which to load the PBES.
 /// \param format The format that should be assumed for the file in infilename. If unspecified, or
 ///        pbes_file_unknown is specified, then a default format is chosen.
+/// \param source The source from which the stream originates. Used for error messages.
 inline
-void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* format)
+void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* format, const std::string& source = "")
 {
   if (format == utilities::file_format::unknown())
   {
@@ -126,12 +127,12 @@ void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* f
   mCRL2log(log::verbose) << "Loading PBES in " << format->shortname() << " format..." << std::endl;
   if (format == pbes_format_internal())
   {
-    pbes.load(stream, true);
+    pbes.load(stream, true, source);
   }
   else
   if (format == pbes_format_internal_text())
   {
-    pbes.load(stream, false);
+    pbes.load(stream, false, source);
   }
   else
   if (format == pbes_format_text())
@@ -186,7 +187,7 @@ void load_pbes(pbes& pbes, const std::string& filename,
     format = guess_format(filename);
   }
   utilities::input_file file = format->open_input(filename);
-  load_pbes(pbes, file.stream(), format);
+  load_pbes(pbes, file.stream(), format, core::detail::file_source(filename));
 }
 
 } // namespace pbes_system

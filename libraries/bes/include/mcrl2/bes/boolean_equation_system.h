@@ -18,9 +18,9 @@
 #include <iterator>
 #include <sstream>
 #include <string>
-#include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/bes/boolean_equation.h"
 #include "mcrl2/bes/detail/io.h"
+#include "mcrl2/core/load_aterm.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -124,10 +124,10 @@ class boolean_equation_system
 
     /// \brief Reads the boolean equation system from a stream.
     /// \param stream The stream to read from.
-    void load(std::istream& stream, bool binary = true)
+    /// \param source The source from which the stream originates. Used for error messages.
+    void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {
-      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
-                                : atermpp::read_term_from_text_stream(stream);
+      atermpp::aterm t = core::load_aterm(stream, binary, "BES", source);
       t = bes::detail::add_index(t);
       if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
