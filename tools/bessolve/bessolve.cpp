@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -24,6 +25,7 @@
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/small_progress_measures.h"
 #include "mcrl2/bes/local_fixpoints.h"
+#include "mcrl2/bes/justification.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
@@ -31,6 +33,8 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2;
 using bes::tools::bes_input_tool;
+
+using mcrl2::bes::print_justification_tree;
 
 typedef enum { gauss, spm, lf } solution_strategy_t;
 
@@ -140,6 +144,7 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
                    solution_strategy_to_string(strategy) << "" << std::endl;
 
       bool result = false;
+      std::vector<bool> full_solution;
 
       timer().start("solving");
       switch (strategy)
@@ -151,7 +156,7 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
           result = small_progress_measures(bes);
           break;
         case lf:
-          result = local_fixpoints(bes);
+          result = local_fixpoints(bes, &full_solution);
           break;
         default:
           throw mcrl2::runtime_error("unhandled strategy provided");
@@ -161,11 +166,17 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
 
       std::cout << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
 
+      if (print_justification)
+      {
+        print_justification_tree(bes, full_solution, result);
+      }
+
       return true;
     }
 
   protected:
     solution_strategy_t strategy;
+    bool print_justification;
 
     void add_options(interface_description& desc)
     {
@@ -175,12 +186,14 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
                       .add_value(gauss)
                       .add_value(lf),
                       "solve the BES using the specified STRATEGY:", 's');
+      desc.add_option("print-justification", "print justification for solution", 'j');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
       strategy = parser.option_argument_as<solution_strategy_t>("strategy");
+      print_justification = parser.options.count("print-justification") > 0;
     }
 };
 
