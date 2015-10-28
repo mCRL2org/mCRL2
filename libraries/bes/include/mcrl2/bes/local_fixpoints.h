@@ -114,7 +114,7 @@ class local_fixpoints_algorithm
       return expr;
     }
 
-    bool run(const boolean_variable& /* first_variable */)
+    bool run(const boolean_variable& /* first_variable */, std::vector<bool> *full_solution)
     {
       auto eqs = m_bes.equations();
       std::vector<boolean_expression> approx(eqs.size());
@@ -184,6 +184,16 @@ class local_fixpoints_algorithm
       }
       while (r-- != 0);
 
+      if (full_solution)
+      {
+        full_solution->resize(eqs.size());
+        for (size_t i = 0; i < eqs.size(); i++)
+        {
+          assert(is_true(approx[i]) || is_false(approx[i]));
+          (*full_solution)[i] = is_true(approx[i]);
+        }
+      }
+
       boolean_expression init_value = evaluate(m_bes.initial_state(), r, approx);
       mCRL2log(log::verbose) << "init = " << init_value << std::endl;
       assert(is_true(init_value) || is_false(init_value));
@@ -192,12 +202,12 @@ class local_fixpoints_algorithm
 };
 
 inline
-bool local_fixpoints(boolean_equation_system& b)
+bool local_fixpoints(boolean_equation_system& b, std::vector<bool> *full_solution = 0)
 {
   boolean_variable first = b.equations().front().variable();
   make_standard_form(b, true);
   local_fixpoints_algorithm algorithm(b);
-  return algorithm.run(first);
+  return algorithm.run(first, full_solution);
 }
 
 } // namespace bes
