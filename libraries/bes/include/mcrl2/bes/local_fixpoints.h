@@ -50,6 +50,9 @@ class local_fixpoints_algorithm
       max_rank = ranks[eqs.size()-1];
     }
 
+    // evaluate expr by substituting all variables with their approximations.
+    // If on_rank is true, only variables on rank r are substituted
+    template <bool on_rank_only>
     boolean_expression evaluate(boolean_expression expr, size_t r, const std::vector<boolean_expression>& approx)
     {
       if (is_true(expr) || is_false(expr))
@@ -59,7 +62,7 @@ class local_fixpoints_algorithm
       if (is_boolean_variable(expr))
       {
         auto i = indices[atermpp::down_cast<boolean_variable>(expr)];
-        if (ranks[i] == r)
+        if (!on_rank_only || ranks[i] == r)
         {
           return approx[i];
         }
@@ -69,12 +72,12 @@ class local_fixpoints_algorithm
       using accessors::right;
       if (is_and(expr))
       {
-        auto eval_left = evaluate(left(expr), r, approx);
+        auto eval_left = evaluate<on_rank_only>(left(expr), r, approx);
         if (is_false(eval_left))
         {
           return false_();
         }
-        auto eval_right = evaluate(right(expr), r, approx);
+        auto eval_right = evaluate<on_rank_only>(right(expr), r, approx);
         if (is_false(eval_right))
         {
           return false_();
@@ -91,12 +94,12 @@ class local_fixpoints_algorithm
       }
       if (is_or(expr))
       {
-        auto eval_left = evaluate(left(expr), r, approx);
+        auto eval_left = evaluate<on_rank_only>(left(expr), r, approx);
         if (is_true(eval_left))
         {
           return true_();
         }
-        auto eval_right = evaluate(right(expr), r, approx);
+        auto eval_right = evaluate<on_rank_only>(right(expr), r, approx);
         if (is_true(eval_right))
         {
           return true_();
@@ -142,7 +145,7 @@ class local_fixpoints_algorithm
         {
           if (ranks[i] == r)
           {
-            auto t = evaluate(eqs[i].formula(), r, approx);
+            auto t = evaluate<true>(eqs[i].formula(), r, approx);
             if (!bdd_equal(t, approx[i]))
             {
               approx[i] = t;
@@ -160,7 +163,7 @@ class local_fixpoints_algorithm
           {
             if (ranks[v] == r && search_boolean_variable(eqs[v].formula(), eqs[i].variable()))
             {
-              auto t = evaluate(eqs[v].formula(), r, approx);
+              auto t = evaluate<true>(eqs[v].formula(), r, approx);
               if (!bdd_equal(t, approx[v]))
               {
                 approx[v] = t;
@@ -178,7 +181,7 @@ class local_fixpoints_algorithm
           }
           else
           {
-            eqs[i].formula() = evaluate(eqs[i].formula(), r, approx);
+            eqs[i].formula() = evaluate<true>(eqs[i].formula(), r, approx);
           }
         }
       }
@@ -194,7 +197,7 @@ class local_fixpoints_algorithm
         }
       }
 
-      boolean_expression init_value = evaluate(m_bes.initial_state(), r, approx);
+      boolean_expression init_value = evaluate<false>(m_bes.initial_state(), -1, approx);
       mCRL2log(log::verbose) << "init = " << init_value << std::endl;
       assert(is_true(init_value) || is_false(init_value));
       return is_true(init_value);
