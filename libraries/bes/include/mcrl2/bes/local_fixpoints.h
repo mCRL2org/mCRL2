@@ -183,10 +183,11 @@ class local_fixpoints_algorithm
         }
       }
       while (r-- != 0);
-      auto f0 = eqs[0].formula();
-      mCRL2log(log::verbose) << "f0 = " << f0 << std::endl;
-      assert(is_true(f0) || is_false(f0));
-      return is_true(f0);
+
+      boolean_expression init_value = evaluate(m_bes.initial_state(), r, approx);
+      mCRL2log(log::verbose) << "init = " << init_value << std::endl;
+      assert(is_true(init_value) || is_false(init_value));
+      return is_true(init_value);
     }
 };
 
