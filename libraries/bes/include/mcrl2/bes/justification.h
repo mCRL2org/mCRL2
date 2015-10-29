@@ -47,7 +47,7 @@ void print_justification_tree_rec(const boolean_equation_system& b, const vector
     if (visited.count(X))
     {
       // X has been visited before. Stop here.
-      cout << string(indent, ' ') << X << "?" << endl;
+      cout << string(indent, ' ') << X << "*" << endl;
       return;
     }
     visited.insert(X);
