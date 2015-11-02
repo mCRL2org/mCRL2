@@ -6,8 +6,8 @@
 #include <stdexcept>
 #include "mcrl2/utilities/logger.h"
 
-#ifdef _MSC_VER
-  #include <Windows.h>
+#ifdef _WIN32
+  #include <windows.h>
   typedef HMODULE library_handle;
   typedef FARPROC library_proc;
 

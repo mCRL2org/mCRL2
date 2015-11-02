@@ -26,7 +26,7 @@
 #define MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include "malloc.h"
 #define MCRL2_SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
 #else

@@ -119,9 +119,12 @@ if(BUILD_SHARED_LIBS)
   endif()
 endif()
 
-# Indicates that systems having a GNU compiler the rewriter can be compiled.
-# This flag is not available on MSVC because dynload is not available.
-add_definitions(-DMCRL2_JITTYC_AVAILABLE)   
+if(NOT WIN32)
+  # Indicates that systems having a GNU compiler the rewriter can be compiled.
+  # This flag is not available on MSVC because dynload is not available.
+  # It's also not available on mingw for now.
+  add_definitions(-DMCRL2_JITTYC_AVAILABLE)   
+endif()
 
 ##---------------------------------------------------
 ## Set linker flags
