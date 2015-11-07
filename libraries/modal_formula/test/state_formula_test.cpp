@@ -371,3 +371,21 @@ BOOST_AUTO_TEST_CASE(preprocess_nested_modal_operators_test)
   test_preprocess_nested_modal_operators("true && <a><a>true", lpsspec, "true && <a>mu X. <a>true");
   test_preprocess_nested_modal_operators("true => mu X. [a]<b>true", lpsspec, "true => mu X. [a]mu X1. <b>true");
 }
+
+BOOST_AUTO_TEST_CASE(parse_modal_formula_test)
+{
+  const std::string text =
+    "act a, b, c;                  \n"
+    "                              \n"
+    "proc P = delta;               \n"
+    "                              \n"
+    "init P;                       \n"
+    ;
+  lps::specification lpsspec = lps::parse_linear_process_specification(text);
+
+  const std::string formula_text = "nu X(n: Nat = 0, b: Bool = false). X(n, b)";
+  state_formula x = parse_state_formula(formula_text, lpsspec);
+  std::string s = state_formulas::pp(x);
+  BOOST_CHECK_EQUAL(s, formula_text);
+}
+

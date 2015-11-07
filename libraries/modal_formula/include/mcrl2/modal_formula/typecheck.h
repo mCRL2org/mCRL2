@@ -515,6 +515,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     {
       new_arguments.push_front(m_data_typechecker.typecheck_data_expression(*q2, *q1, m_variables));
     }
+    new_arguments = atermpp::reverse(new_arguments);
     return state_formulas::variable(x.name(), new_arguments);
   }
 
