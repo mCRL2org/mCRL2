@@ -372,14 +372,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     std::string msg = "action";
     sorts_list parameter_list = matching_action_sorts(name, parameters);
-    if (parameter_list.empty())
-    {
-      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
-                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
-                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-    }
-    action result = make_action(name, m_data_typechecker.GetNotInferredList(parameter_list), parameters);
-    auto p = m_data_typechecker.match_parameters(parameters, result.label().sorts(), parameter_list, m_variables, name, msg);
+    auto p = m_data_typechecker.match_parameters(parameters, parameter_list, m_variables, name, msg);
     return make_action(name, p.second, p.first);
   }
 
@@ -402,14 +395,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     std::string msg = "process";
     sorts_list parameter_list = matching_process_sorts(name, parameters);
-    if (parameter_list.empty())
-    {
-      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
-                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
-                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-    }
-    process_instance Result = make_process_instance(name, m_data_typechecker.GetNotInferredList(parameter_list), parameters);
-    auto p = m_data_typechecker.match_parameters(parameters, get_sorts(Result.identifier().variables()), parameter_list, m_variables, name, msg);
+    auto p = m_data_typechecker.match_parameters(parameters, parameter_list, m_variables, name, msg);
     return make_process_instance(name, p.second, p.first);
   }
 
@@ -606,19 +592,19 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   process_expression apply(const process::at& x)
   {
-    data::data_expression new_time = m_data_typechecker(x.time_stamp(), data::sort_real::real_(), m_variables);
+    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variables);
     return at((*this).apply(x.operand()), new_time);
   }
 
   process_expression apply(const process::if_then& x)
   {
-    data::data_expression condition = m_data_typechecker(x.condition(), data::sort_bool::bool_(), m_variables);
+    data::data_expression condition = m_data_typechecker.typecheck_data_expression(x.condition(), data::sort_bool::bool_(), m_variables);
     return if_then(condition, (*this).apply(x.then_case()));
   }
 
   process_expression apply(const process::if_then_else& x)
   {
-    data::data_expression condition = m_data_typechecker(x.condition(), data::sort_bool::bool_(), m_variables);
+    data::data_expression condition = m_data_typechecker.typecheck_data_expression(x.condition(), data::sort_bool::bool_(), m_variables);
     return if_then_else(condition, (*this).apply(x.then_case()), (*this).apply(x.else_case()));
   }
 
@@ -650,7 +636,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       {
         m_variables[v.name()] = v.sort();
       }
-      data::data_expression distribution = m_data_typechecker(x.distribution(), data::sort_real::real_(), m_variables);
+      data::data_expression distribution = m_data_typechecker.typecheck_data_expression(x.distribution(), data::sort_real::real_(), m_variables);
       process_expression operand = (*this).apply(x.operand());
       m_variables = m_variables_copy;
       return stochastic_operator(x.variables(), distribution, operand);
@@ -754,7 +740,7 @@ class process_type_checker
         m_data_typechecker.check_sort_list_is_declared(ProcType);
 
         //check that all formal parameters of the process are unique.
-        if (!m_data_typechecker.VarsUnique(id.variables()))
+        if (!m_data_typechecker.unique_variables(id.variables()))
         {
           throw mcrl2::runtime_error("the formal variables in process " + process::pp(id) + " are not unique");
         }

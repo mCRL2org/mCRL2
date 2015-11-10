@@ -64,7 +64,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
 
   pbes_expression apply(const data::data_expression& x)
   {
-    return m_data_typechecker(x, data::sort_bool::bool_(), m_variables);
+    return m_data_typechecker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variables);
   }
 
   pbes_expression apply(const forall& x)
@@ -128,7 +128,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     {
       try
       {
-        *xi = m_data_typechecker(*xi, *ei, m_variables);
+        *xi = m_data_typechecker.typecheck_data_expression(*xi, *ei, m_variables);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -161,7 +161,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     {
       try
       {
-        *xi = m_data_typechecker(*xi, *ei, m_variables);
+        *xi = m_data_typechecker.typecheck_data_expression(*xi, *ei, m_variables);
       }
       catch (mcrl2::runtime_error& e)
       {

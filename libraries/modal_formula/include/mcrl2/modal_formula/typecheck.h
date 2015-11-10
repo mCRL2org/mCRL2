@@ -80,14 +80,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
   {
     std::string msg = "action";
     sorts_list parameter_list = matching_action_sorts(name, parameters);
-    if (parameter_list.empty())
-    {
-      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
-                      + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
-                      + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-    }
-    process::action result = process::action(process::action_label(name, m_data_typechecker.GetNotInferredList(parameter_list)), parameters);
-    auto p = m_data_typechecker.match_parameters(parameters, result.label().sorts(), parameter_list, m_variables, name, msg);
+    auto p = m_data_typechecker.match_parameters(parameters, parameter_list, m_variables, name, msg);
     return process::action(process::action_label(name, p.second), p.first);
   }
 
