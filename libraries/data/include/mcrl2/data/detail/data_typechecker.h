@@ -485,7 +485,7 @@ class data_typechecker: protected data::data_type_checker
         result.push_front(data::assignment(a.lhs(), rhs));
         sorts.push_front(lhs_sort);
       }
-      result == atermpp::reverse(result);
+      result = atermpp::reverse(result);
       result = data::normalize_sorts(result, get_sort_specification());
       // assert(data::normalize_sorts(result, get_sort_specification()) == result);
       return result;
