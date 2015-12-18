@@ -106,8 +106,10 @@ endfunction()
 
 function(_prepare_desktop_application TARGET_NAME TOOLNAME DESCRIPTION ICON)
   if(MSVC)
+    # N.B. using WIN32_EXECUTABLE instead of WIN32 leads to linker errors in the maintainer build:
+    # error LNK2038: mismatch detected for '_ITERATOR_DEBUG_LEVEL': value '0' doesn't match value '2'
     set_target_properties(${TARGET_NAME} PROPERTIES
-      WIN32_EXECUTABLE TRUE)
+      WIN32 TRUE)
   elseif(UNIX AND NOT APPLE)
     set(DESKTOP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.desktop)
     set(COMMANDLINE ${TARGET_NAME})
