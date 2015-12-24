@@ -799,7 +799,7 @@ class bisim_partitioner_gw
             // we have a tau transition
             assert(branching);
             if (branching && (s_eq != get_eq_class(tgt_id)||
-                             (s_eq == tgt_id && preserve_divergences)))
+                             (snr == tgt_id && preserve_divergences)))
             {
               assert(tau_label!=size_t(-1));
               resulting_transitions.insert(transition(s_eq, tau_label, get_eq_class(tgt_id)));
