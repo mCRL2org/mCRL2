@@ -35,20 +35,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 
-static const char* preorder_string(lts_preorder pre)
-{
-  switch (pre)
-  {
-    case lts_pre_sim:
-      return "strongly simulated by";
-    case lts_pre_trace:
-      return "strongly trace-included in";
-    case lts_pre_weak_trace:
-      return "weakly trace-included in";
-    default:
-      return "included in";
-  }
-}
 
 struct t_tool_options
 {
@@ -144,13 +130,17 @@ class ltscompare_tool : public ltscompare_base
       {
         mCRL2log(verbose) << "comparing LTSs using " <<
                      tool_options.preorder << "..." << std::endl;
+        mCRL2log(verbose) << "comparing LTSs using " <<
+                     description(tool_options.preorder) << "..." << std::endl;
 
         result = compare(l1,l2,tool_options.preorder);
 
         mCRL2log(info) << "LTS in " << tool_options.name_for_first
                        << " is " << ((result) ? "" : "not ")
-                       << preorder_string(tool_options.preorder)
-                       << " LTS in " << tool_options.name_for_second << std::endl;
+                       << "included in"
+                       << " LTS in " << tool_options.name_for_second 
+                       << " (using " << description(tool_options.preorder) 
+                       << ")." << std::endl;
       }
 
       return result;
@@ -239,19 +229,14 @@ class ltscompare_tool : public ltscompare_base
                  .add_value(lts_eq_none, true)
                  .add_value(lts_eq_bisim)
                  .add_value(lts_eq_bisim_gw)
-                 .add_value(lts_eq_bisim_sigref)
                  .add_value(lts_eq_branching_bisim)
                  .add_value(lts_eq_branching_bisim_gw)
-                 .add_value(lts_eq_branching_bisim_sigref)
                  .add_value(lts_eq_divergence_preserving_branching_bisim)
                  .add_value(lts_eq_divergence_preserving_branching_bisim_gw)
-                 .add_value(lts_eq_divergence_preserving_branching_bisim_sigref)
                  .add_value(lts_eq_weak_bisim)
                  .add_value(lts_eq_weak_bisim_gw)
-                 .add_value(lts_eq_weak_bisim_sigref)
                  .add_value(lts_eq_divergence_preserving_weak_bisim)
                  .add_value(lts_eq_divergence_preserving_weak_bisim_gw)
-                 .add_value(lts_eq_divergence_preserving_weak_bisim_sigref)
                  .add_value(lts_eq_sim)
                  .add_value(lts_eq_trace)
                  .add_value(lts_eq_weak_trace),
@@ -260,7 +245,12 @@ class ltscompare_tool : public ltscompare_base
                  .add_value(lts_pre_none, true)
                  .add_value(lts_pre_sim)
                  .add_value(lts_pre_trace)
-                 .add_value(lts_pre_weak_trace),
+                 .add_value(lts_pre_weak_trace)
+                 .add_value(lts_pre_trace_anti_chain) 
+                 .add_value(lts_pre_weak_trace_anti_chain) 
+                 .add_value(lts_pre_failures_refinement)   
+                 .add_value(lts_pre_weak_failures_refinement) 
+                 .add_value(lts_pre_failures_divergence_refinement),
                  "use preorder NAME (not allowed in combination with -e/--equivalence):", 'p').
       add_option("tau", make_mandatory_argument("ACTNAMES"),
                  "consider actions with a name in the comma separated list ACTNAMES to "

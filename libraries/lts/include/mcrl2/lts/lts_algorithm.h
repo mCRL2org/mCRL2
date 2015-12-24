@@ -38,6 +38,7 @@
 #include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_sim.h"
+#include "mcrl2/lts/detail/liblts_failures_refinement.h"
 #include "mcrl2/lts/detail/liblts_tau_star_reduce.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/lts/detail/tree_set.h"
@@ -98,13 +99,25 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
     }
+    case lts_eq_bisim_gw:
+    {
+      return detail::destructive_bisimulation_compare_gw(l1,l2, false,false,generate_counter_examples);
+    }
     case lts_eq_branching_bisim:
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
     }
+    case lts_eq_branching_bisim_gw:
+    {
+      return detail::destructive_bisimulation_compare_gw(l1,l2, true,false,generate_counter_examples);
+    }
     case lts_eq_divergence_preserving_branching_bisim:
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
+    }
+    case lts_eq_divergence_preserving_branching_bisim_gw:
+    {
+      return detail::destructive_bisimulation_compare_gw(l1,l2, true,true,generate_counter_examples);
     }
     case lts_eq_weak_bisim:
     {
@@ -114,6 +127,14 @@ bool destructive_compare(LTS_TYPE& l1,
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2,false);
     }
+    case lts_eq_weak_bisim_gw:
+    {
+      if (generate_counter_examples)
+      {
+        mCRL2log(log::warning) << "Cannot generate counter example traces for weak bisimulation\n";
+      }
+      return detail::destructive_weak_bisimulation_compare(l1,l2,false,true);
+    }
     case lts_eq_divergence_preserving_weak_bisim:
     {
       if (generate_counter_examples)
@@ -121,6 +142,14 @@ bool destructive_compare(LTS_TYPE& l1,
         mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence preserving weak bisimulation\n";
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2, true);
+    }
+    case lts_eq_divergence_preserving_weak_bisim_gw:
+    {
+      if (generate_counter_examples)
+      {
+        mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence preserving weak bisimulation\n";
+      }
+      return detail::destructive_weak_bisimulation_compare(l1,l2, true,true);
     }
     case lts_eq_sim:
     {
@@ -168,8 +197,8 @@ bool destructive_compare(LTS_TYPE& l1,
       return detail::destructive_bisimulation_compare(l1,l2,false,false,generate_counter_examples);
     }
     default:
-      throw mcrl2::runtime_error("Comparison for this equivalence is not available");
-      return false;
+    throw mcrl2::runtime_error("Comparison for this equivalence is not available");
+    return false;
   }
 }
 
@@ -543,6 +572,7 @@ bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre)
 template <class LTS_TYPE>
 bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre)
 {
+  const bool generate_counter_example=false;
   switch (pre)
   {
     case lts_pre_sim:
@@ -596,6 +626,26 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre)
 
       // Weak trace preorder now corresponds to strong trace preorder
       return destructive_compare(l1,l2,lts_pre_trace);
+    }
+    case lts_pre_trace_anti_chain:
+    {  
+      return destructive_refinement_checker(l1, l2, trace, false, generate_counter_example);
+    }
+    case lts_pre_weak_trace_anti_chain:
+    {  
+      return destructive_refinement_checker(l1, l2, trace, true, generate_counter_example);
+    }
+    case lts_pre_failures_refinement:
+    {  
+      return destructive_refinement_checker(l1, l2, failures, false, generate_counter_example);
+    }
+    case lts_pre_weak_failures_refinement:
+    {  
+      return destructive_refinement_checker(l1, l2, failures, true, generate_counter_example);
+    }
+    case lts_pre_failures_divergence_refinement:
+    {  
+      return destructive_refinement_checker(l1, l2, failures_divergence, true, generate_counter_example);
     }
     default:
       mCRL2log(log::error) << "Comparison for this preorder is not available\n";

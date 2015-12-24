@@ -97,7 +97,7 @@ class bisim_partitioner
       // used. A set is used to remove double occurrences of transitions.
       std::set < transition > resulting_transitions;
 
-      const std::vector<transition> & trans=aut.get_transitions();
+      const std::vector<transition>& trans=aut.get_transitions();
       for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
       {
         const transition i=*t;

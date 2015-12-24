@@ -45,7 +45,15 @@ void weak_bisimulation_reduce(
   const bool preserve_divergences = false,
   const bool use_groote_wijs_algorithm = false)
 {
-  bisimulation_reduce(l,true,preserve_divergences);        // Apply branching bisimulation to l.
+  if (use_groote_wijs_algorithm)
+  {
+    bisimulation_reduce_gw(l,true,preserve_divergences);        // Apply branching bisimulation to l.
+  }
+  else
+  {
+    bisimulation_reduce(l,true,preserve_divergences);        // Apply branching bisimulation to l.
+  }
+
   size_t divergence_label;
   if (preserve_divergences)
   {
@@ -80,11 +88,16 @@ template < class LTS_TYPE>
 bool destructive_weak_bisimulation_compare(
   LTS_TYPE& l1,
   LTS_TYPE& l2,
-  const bool preserve_divergences=false) 
+  const bool preserve_divergences=false,
+  const bool use_groote_wijs_algorithm = false) 
 {
-  weak_bisimulation_reduce(l1,preserve_divergences);
-  weak_bisimulation_reduce(l2,preserve_divergences);
-  return destructive_bisimulation_compare(l1,l2);
+  weak_bisimulation_reduce(l1,preserve_divergences,use_groote_wijs_algorithm);
+  weak_bisimulation_reduce(l2,preserve_divergences,use_groote_wijs_algorithm);
+  if (use_groote_wijs_algorithm)
+  { 
+    return destructive_bisimulation_compare_gw(l1,l2);
+  }
+  return destructive_bisimulation_compare_gw(l1,l2);
 }
 
 

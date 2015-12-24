@@ -748,7 +748,7 @@ class bisim_partitioner_gw
       in_forward_check_detect2 = false;
           
       mCRL2log(log::verbose) << "O(m log n) " << (preserve_divergence?"Divergence preserving b":"B") <<
-                  (branching?"ranching ":"") << "bisimulation partitioner created for "
+                  (branching?"ranching b":"") << "isimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
       create_initial_partition_gw(branching,preserve_divergence);
@@ -772,7 +772,7 @@ class bisim_partitioner_gw
      *
      * \pre The bisimulation equivalence classes have been computed.
      * \param[in] branching Causes non internal transitions to be removed. */
-    void replace_transitions(const bool branching)
+    void replace_transitions(const bool branching, const bool preserve_divergences)
     {
       std::unordered_map < state_type, Key > to_lts_map;
       // obtain a map from state to <action, state> pair from extra_kripke_states
@@ -798,7 +798,7 @@ class bisim_partitioner_gw
           {
             // we have a tau transition
             assert(branching);
-            if (branching && s_eq != get_eq_class(tgt_id))
+            if (branching && (s_eq != get_eq_class(tgt_id)||preserve_divergences))
             {
               assert(tau_label!=size_t(-1));
               resulting_transitions.insert(transition(s_eq, tau_label, get_eq_class(tgt_id)));
@@ -1316,10 +1316,6 @@ class bisim_partitioner_gw
                                      const bool preserve_divergence)
     {
       using namespace std;
-      if (preserve_divergence)
-      {
-        mCRL2log(log::warning) << "Divergent transitions are not yet properly taken into account in the GW algorithm.\n";
-      }
       // number of blocks
       size_t nr_of_blocks;
       // the number of states
@@ -3222,7 +3218,7 @@ void bisimulation_reduce_gw(LTS_TYPE& l,
   // Assign the reduced LTS
   l.set_num_states(bisim_part.num_eq_classes());
   l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
-  bisim_part.replace_transitions(branching);
+  bisim_part.replace_transitions(branching,preserve_divergence);
 }
 
 template < class LTS_TYPE>
@@ -3242,8 +3238,13 @@ bool destructive_bisimulation_compare_gw(
   LTS_TYPE& l1,
   LTS_TYPE& l2,
   const bool branching /* =false*/,
-  const bool preserve_divergence /* = false*/)
+  const bool preserve_divergence /* = false*/,
+  const bool generate_counter_examples /* = false*/)
 {
+  if (generate_counter_examples)
+  {
+    mCRL2log(log::warning) << "The GW branching bisimulation algorithm does not generate counterexamples.\n";
+  }
   size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
   l2.clear(); // No use for l2 anymore.

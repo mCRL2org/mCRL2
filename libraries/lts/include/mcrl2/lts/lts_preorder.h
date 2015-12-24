@@ -34,8 +34,13 @@ enum lts_preorder
   lts_pre_sim,    /**< Strong simulation preorder */
   lts_pre_trace,  /**< Strong trace preorder */
   lts_pre_weak_trace,   /**< Weak trace preorder */
+  lts_pre_trace_anti_chain,  /**< Trace preorder based on anti chains */
+  lts_pre_weak_trace_anti_chain, /**< Weak trace preorder based on anti chains */
+  lts_pre_failures_refinement,    /**< Failures refinement based on anti chains */
+  lts_pre_weak_failures_refinement, /**< Weak failures refinement based on anti chains */
+  lts_pre_failures_divergence_refinement, /**< Failures divergence refinement based on anti chains, which is automatically weak */
   lts_preorder_min = lts_pre_none,
-  lts_preorder_max = lts_pre_weak_trace
+  lts_preorder_max = lts_pre_failures_divergence_refinement
 };
 
 /** \brief Determines the preorder from a string.
@@ -65,6 +70,26 @@ lts_preorder parse_preorder(std::string const& s)
   else if (s == "weak-trace")
   {
     return lts_pre_weak_trace;
+  }
+  else if (s == "trace-ac")
+  {
+    return lts_pre_trace_anti_chain;
+  }
+  else if (s == "weak-trace-ac")
+  {
+    return lts_pre_weak_trace_anti_chain;
+  }
+  else if (s == "failures")
+  {
+    return lts_pre_failures_refinement;
+  }
+  else if (s == "weak-failures")
+  {
+    return lts_pre_weak_failures_refinement;
+  }
+  else if (s == "failures-divergence")
+  {
+    return lts_pre_failures_divergence_refinement;
   }
   else
   {
@@ -107,6 +132,16 @@ std::string print_preorder(const lts_preorder pre)
       return "trace";
     case lts_pre_weak_trace:
       return "weak-trace";
+    case lts_pre_trace_anti_chain:
+      return "trace-ac";
+    case lts_pre_weak_trace_anti_chain:
+      return "weak-trace-ac";
+    case lts_pre_failures_refinement:
+      return "failures";
+    case lts_pre_weak_failures_refinement:
+      return "weak-failures";
+    case lts_pre_failures_divergence_refinement:
+      return "failures-divergence";
     default:
       throw mcrl2::runtime_error("unknown preorder");
   }
@@ -129,13 +164,23 @@ std::string description(const lts_preorder pre)
   switch(pre)
   {
     case lts_pre_none:
-      return "unknown preorder";
+      return "default void preorder";
     case lts_pre_sim:
       return "strong simulation preorder";
     case lts_pre_trace:
       return "strong trace preorder";
     case lts_pre_weak_trace:
       return "weak trace preorder";
+    case lts_pre_trace_anti_chain:
+      return "trace preorder based on an anti chain algorithm";
+    case lts_pre_weak_trace_anti_chain:
+      return "weak trace preorder based on an anti chain algorithm";
+    case lts_pre_failures_refinement:
+      return "failures refinement";
+    case lts_pre_weak_failures_refinement:
+      return "weak failures refinement";
+    case lts_pre_failures_divergence_refinement:
+      return "failures divergence refinement (automatically weak)";
     default:
       throw mcrl2::runtime_error("unknown preorder");
   }
