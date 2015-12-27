@@ -37,8 +37,8 @@ namespace detail
   typedef std::multimap <detail::state_type,detail::set_of_states> anti_chain_type;
   typedef std::set < label_type > action_label_set;
 
-  void antichain_insert(anti_chain_type& anti_chain, const state_states_pair& impl_spec);
-  bool member_of_antichain(const state_states_pair& p, const anti_chain_type& anti_chain);
+  inline void antichain_insert(anti_chain_type& anti_chain, const state_states_pair& impl_spec);
+  inline bool member_of_antichain(const state_states_pair& p, const anti_chain_type& anti_chain);
 
   // The class below recalls what the stable states and the states with a divergent
   // self loop of a transition system are, such that it does not have to be recalculated each time again.
@@ -333,7 +333,7 @@ namespace detail
      If p.second is larger than a set si, there is no need to add p.second, as a better candidate
      is already there. 
    */
-  void antichain_insert(anti_chain_type& anti_chain, const state_states_pair& impl_spec)
+  inline void antichain_insert(anti_chain_type& anti_chain, const state_states_pair& impl_spec)
   {
     // First check whether there is a set in the antichain for impl_spec.first which is smaller than impl_spec.second.
     // If so, impl_spec.second does not have to be inserted in the anti_chain.
@@ -373,7 +373,7 @@ namespace detail
      What is checked is that for the sets s1,...,sn in the antichain belonging to p.first,
      p.second is a superset of one of these si's. If so, it is considered that p.second is
      in the set, or there is a smaller set than p.second, which is even better. */
-  bool member_of_antichain(const state_states_pair& p, const anti_chain_type& anti_chain)
+  inline bool member_of_antichain(const state_states_pair& p, const anti_chain_type& anti_chain)
   {
     for(anti_chain_type::const_iterator i=anti_chain.lower_bound(p.first); i!=anti_chain.upper_bound(p.first); ++i)
     {
