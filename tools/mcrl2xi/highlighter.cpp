@@ -50,7 +50,7 @@ Highlighter::Highlighter(QTextDocument *parent)
   keywordFormat.setForeground(Qt::blue);
   keywordFormat.setFontWeight(QFont::Bold);
   QStringList ProcKeywordPatterns;
-  ProcKeywordPatterns << "\\bsum\\b" << "\\block\\b" << "\\ballow\\b"
+  ProcKeywordPatterns << "\\bsum\\b" << "\\bblock\\b" << "\\ballow\\b"
                       << "\\bhide\\b" << "\\brename\\b" << "\\bcomm\\b";
   foreach (const QString &pattern, ProcKeywordPatterns) {
     rule.pattern = QRegExp(pattern);
@@ -72,7 +72,7 @@ Highlighter::Highlighter(QTextDocument *parent)
   keywordFormat.setForeground(Qt::darkGreen);
   keywordFormat.setFontWeight(QFont::Bold);
   QStringList SortKeywordPatterns;
-  SortKeywordPatterns << "\\bList\\b" << "\\bSet\\b" << "\\bBag\\b";
+  SortKeywordPatterns << "\\bList\\b" << "\\bSet\\b" << "\\bBag\\b" << "\\bFSet\\b" << "\\bFBag\\b";
   foreach (const QString &pattern, SortKeywordPatterns) {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
