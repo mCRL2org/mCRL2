@@ -247,7 +247,6 @@ class tracepp_tool: public input_output_tool
         }
       }
 
-
       if (output_filename().empty())
       {
         mCRL2log(verbose) << "writing result to stdout..." << std::endl;
@@ -290,7 +289,7 @@ class tracepp_tool: public input_output_tool
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      parser.option_argument_as<output_type>("format");
+      format_for_output=parser.option_argument_as<output_type>("format");
     }
 };
 
