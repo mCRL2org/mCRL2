@@ -31,7 +31,7 @@ class pp_function_definition: public function_definition
       m_printer(printer)
     {}
 
-    virtual std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, data::data_expression_vector arguments) const
+    virtual std::string generate_data_expression(const std::map<data::variable, std::string>& /* declared_variables */, data::data_expression_vector arguments) const
     {
       data::data_expression term;
       if (data::is_function_sort(m_function.sort()))
