@@ -262,18 +262,18 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
                   inserter(function_symbol_set,function_symbol_set.begin()));
         datar=data::rewriter(p.data(),
                              mcrl2::data::used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()),
-                             rewrite_strategy());
+                             m_rewrite_strategy);
       }
       else
       {
         // Create a rewriter with all data equations. This is safer, but increases the time and memory to
         // compile the rewrite system.
-        data::rewriter(p.data(), rewrite_strategy());
+        datar=data::rewriter(p.data(), m_rewrite_strategy);
       }
 
       timer().start("instantiation");
 
-      pbesinst_alternative_lazy_algorithm algorithm(p.data(), m_rewrite_strategy, m_search_strategy, m_transformation_strategy);
+      pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy);
       algorithm.run(p);
       p=algorithm.get_result(false);
       boolean_equation_system bes = pbesinst_conversion(p);

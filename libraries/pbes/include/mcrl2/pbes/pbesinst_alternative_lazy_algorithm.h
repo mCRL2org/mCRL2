@@ -139,7 +139,7 @@ class pbesinst_alternative_lazy_algorithm
     const data::data_specification& m_data_spec;
 
     /// \brief Data rewriter.
-    data::rewriter datar;
+    data::rewriter m_datar;
 
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;
@@ -223,13 +223,13 @@ class pbesinst_alternative_lazy_algorithm
     /// \param print_equations If true, the generated equations are printed
     pbesinst_alternative_lazy_algorithm(
         const data::data_specification& data_spec,
-        data::rewriter::strategy rewrite_strategy = data::jitty,
+        const data::rewriter& datar,
         search_strategy search_strategy = breadth_first,
         transformation_strategy transformation_strategy = lazy
         )
       :
         m_data_spec(data_spec),
-        datar(data_spec, rewrite_strategy),
+        m_datar(datar),
         R(datar, data_spec),
         m_equation_count(0),
         m_search_strategy(search_strategy),
@@ -478,7 +478,7 @@ class pbesinst_alternative_lazy_algorithm
       //
       // forall m: Nat . exists k: Nat . val(m == k)
       pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
-      pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
+      pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(m_datar);
       for (pbes_equation eq: pbes_equations)
       {
         eq.formula() = pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), m_data_spec);
@@ -613,7 +613,7 @@ class pbesinst_alternative_lazy_algorithm
     /// \return The computed bes in pbes format
     pbes get_result(bool short_rename_scheme=true)
     {
-      mCRL2log(log::verbose) << "Generated " << m_equation_count << " BES equations in total, outputting BES" << std::endl;
+      mCRL2log(log::verbose) << "Generated " << m_equation_count << " BES equations in total, generating BES" << std::endl;
       pbes result;
       size_t index = 0;
       pbesinst_rename long_renamer;

@@ -180,7 +180,8 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
         {
           algorithms::normalize(p);
         }
-        pbesinst_alternative_lazy_algorithm algorithm(p.data(), m_rewrite_strategy, m_search_strategy, m_transformation_strategy);
+        mcrl2::data::rewriter datar(p.data(),m_rewrite_strategy);
+        pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy);
         algorithm.run(p);
         p = algorithm.get_result();
       }

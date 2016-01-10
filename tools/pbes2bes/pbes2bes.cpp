@@ -165,6 +165,8 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
   public:
     bool run()
     {
+      using namespace mcrl2::data;
+      using namespace mcrl2::pbes_system;
       mCRL2log(verbose) << "pbes2bes parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:            " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:           " << m_output_filename << std::endl;
@@ -174,20 +176,29 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       mCRL2log(verbose) << "  erase level:           " << m_erase_unused_bes_variables << std::endl;
 
       // load the pbes
-      mcrl2::pbes_system::pbes p;
+      pbes p;
       mcrl2::pbes_system::load_pbes(p, input_filename(), pbes_input_format());
 
-      mcrl2::pbes_system::normalize(p);
+      normalize(p);
       mcrl2::pbes_system::detail::instantiate_global_variables(p);
   
       // data rewriter
-      rewriter datar= (m_data_elm) ?
-                            rewriter(p.data(), used_data_equation_selector(p.data(), mcrl2::pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy()) :
-                            rewriter(p.data(), rewrite_strategy());
+      std::set < function_symbol > eqn_symbol_set=mcrl2::pbes_system::find_function_symbols(p.equations());
+      std::set < function_symbol > init_symbol_set=mcrl2::pbes_system::find_function_symbols(p.initial_state());
+      std::set < function_symbol > function_symbol_set;
+      set_union(eqn_symbol_set.begin(),eqn_symbol_set.end(),
+                  init_symbol_set.begin(),init_symbol_set.end(),
+                  inserter(function_symbol_set,function_symbol_set.begin()));
+      rewriter datar=(m_data_elm) ?
+                        rewriter(p.data(),
+                             used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()),
+                             m_rewrite_strategy) :
+                        rewriter(p.data(), rewrite_strategy());
+
 
       timer().start("instantiation");
 
-      pbesinst_alternative_lazy_algorithm algorithm(p.data(), m_rewrite_strategy, m_search_strategy, m_transformation_strategy);
+      pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy);
       algorithm.run(p);
       boolean_equation_system bes = pbesinst_conversion(algorithm.get_result());
 
