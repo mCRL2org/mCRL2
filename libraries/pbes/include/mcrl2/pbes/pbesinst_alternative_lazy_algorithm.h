@@ -1,4 +1,4 @@
-// Author(s): XIAO Qi
+// Author(s): Xiao Qi
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -18,6 +18,7 @@
 #include <sstream>
 #include <unordered_set>
 #include <unordered_map>
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
@@ -26,10 +27,8 @@
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/propositional_variable_rewriter.h"
-#include "mcrl2/bes/search_strategy.h"
-#include "mcrl2/bes/transformation_strategy.h"
-#include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/pbes/search_strategy.h"
+#include "mcrl2/pbes/transformation_strategy.h"
 
 #ifndef MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
@@ -52,70 +51,77 @@ namespace mcrl2
 namespace pbes_system
 {
 
-using mcrl2::bes::search_strategy;
-using mcrl2::bes::breadth_first;
-using mcrl2::bes::depth_first;
-using mcrl2::bes::breadth_first_short;
-using mcrl2::bes::depth_first_short;
-
-using mcrl2::bes::transformation_strategy;
-using mcrl2::bes::lazy;
-using mcrl2::bes::optimize;
-using mcrl2::bes::on_the_fly;
-using mcrl2::bes::on_the_fly_with_fixed_points;
-
-// Used for printing justifications.
-// Maybe should be moved to a more generic place.
-template <typename T>
-inline
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
+namespace detail
 {
-  os << "[";
-  for (auto i = v.begin(); i != v.end(); i++)
+  class rename_pbesinst_consecutively: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
   {
-    if (i != v.begin())
-    {
-      os << " ";
-    }
-    os << *i;
-  }
-  os << "]";
-  return os;
-}
+    protected:
+      std::map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
+
+    public:
+      rename_pbesinst_consecutively(std::vector<std::vector<propositional_variable_instantiation> >& instantiations)
+      {
+        size_t index=0;
+        for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
+        {
+          for(const propositional_variable_instantiation inst:vec)
+          {
+            std::stringstream ss;
+            ss << "X" << index;
+            pv_renaming[inst]=propositional_variable_instantiation(ss.str(),data::data_expression_list());
+            index++;
+          }
+        }
+      }
+
+      propositional_variable_instantiation operator()(const propositional_variable_instantiation& v)
+      {
+        assert(pv_renaming.count(v)>0);
+        return pv_renaming[v];
+      }
+  };
+} // end namespace detail
+
 
 inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_variables(
               const mcrl2::pbes_system::pbes_expression& p, const mcrl2::data::data_specification& data_spec)
 {
   using namespace mcrl2;
   using namespace mcrl2::pbes_system;
-  using namespace mcrl2::pbes_system::pbes_expr;
-  using namespace mcrl2::pbes_system::accessors;
 
   if (is_pbes_and(p))
   {
-    return pbes_expr::and_(pbes_expression_order_quantified_variables(left(p),data_spec),pbes_expression_order_quantified_variables(right(p),data_spec));
+    const and_& pa=atermpp::down_cast<and_>(p);
+    return pbes_expr::and_(pbes_expression_order_quantified_variables(pa.left(),data_spec),
+                           pbes_expression_order_quantified_variables(pa.right(),data_spec));
   }
   else if (is_pbes_or(p))
   {
-    return pbes_expr::or_(pbes_expression_order_quantified_variables(left(p),data_spec),pbes_expression_order_quantified_variables(right(p),data_spec));
+    const or_& po=atermpp::down_cast<or_>(p);
+    return pbes_expr::or_(pbes_expression_order_quantified_variables(po.left(),data_spec),
+                          pbes_expression_order_quantified_variables(po.right(),data_spec));
   }
   else if (is_pbes_imp(p))
   {
-    return pbes_expr::imp(pbes_expression_order_quantified_variables(left(p),data_spec),pbes_expression_order_quantified_variables(right(p),data_spec));
+    const imp& pi=atermpp::down_cast<imp>(p);
+    return pbes_expr::imp(pbes_expression_order_quantified_variables(pi.left(),data_spec),
+                          pbes_expression_order_quantified_variables(pi.right(),data_spec));
   }
   else if (is_pbes_not(p))
   {
-    return pbes_expr::not_(pbes_expression_order_quantified_variables(arg(p),data_spec));
+    return pbes_expr::not_(pbes_expression_order_quantified_variables(atermpp::down_cast<not_>(p).operand(),data_spec));
   }
   else if (is_pbes_forall(p))
   {
-    const pbes_expression expr = pbes_expression_order_quantified_variables(arg(p),data_spec);
-    return pbes_expr::forall(mcrl2::data::order_variables_to_optimise_enumeration(var(p),data_spec),expr);
+    const forall& pf=atermpp::down_cast<forall>(p);
+    const pbes_expression expr = pbes_expression_order_quantified_variables(pf.body(),data_spec);
+    return pbes_expr::forall(mcrl2::data::order_variables_to_optimise_enumeration(pf.variables(),data_spec),expr);
   }
   else if (is_pbes_exists(p))
   {
-    const pbes_expression expr = pbes_expression_order_quantified_variables(arg(p),data_spec);
-    return pbes_expr::exists(mcrl2::data::order_variables_to_optimise_enumeration(var(p),data_spec),expr);
+    const exists& pe=atermpp::down_cast<exists>(p);
+    const pbes_expression expr = pbes_expression_order_quantified_variables(pe.body(),data_spec);
+    return pbes_expr::exists(mcrl2::data::order_variables_to_optimise_enumeration(pe.variables(),data_spec),expr);
   }
   else 
   {
@@ -139,18 +145,10 @@ class pbesinst_alternative_lazy_algorithm
     enumerate_quantifiers_rewriter R;
 
     /// \brief The number of generated equations.
-    int m_equation_count;
-
-    /// \brief The number of equations generated since last state space
-    ///        regeneration.
-    int regeneration_count;
-
-    /// \brief The number of equations to generate before regenerating the
-    ///        state space.
-    int regeneration_period;
+    size_t m_equation_count;
 
     /// \brief Initial value for regeneration_period.
-    enum { regeneration_period_init = 100 };
+    static const size_t regeneration_count_init = 100;
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::deque<propositional_variable_instantiation> todo;
@@ -164,18 +162,6 @@ class pbesinst_alternative_lazy_algorithm
     /// \brief Propositional variable instantiations that are reachable from
     ///        init.
     std::unordered_set<propositional_variable_instantiation> reachable;
-
-    /// \brief Map an instantiation X to a list of other instantiations that
-    ///        are found true of false and thus may justify the ultimate
-    ///        outcome of the value of X.
-    ///
-    ///        This can be used later to build counter-examples. Only
-    ///        relevant when optimization level >= 1.
-    ///
-    ///        Note: Currently this map only exists in memory and is
-    ///        ouputted as debug logs in result(). Later the PBES and BES
-    ///        equations should be able to store justification maps.
-    std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> > justification;
 
     /// \brief Map a variable instantiation to a set of other variable
     ///        instantiations on whose right hand sides it appears.
@@ -197,16 +183,13 @@ class pbesinst_alternative_lazy_algorithm
     std::vector<fixpoint_symbol> symbols;
 
     /// \brief ranks[i] contains the rank of the i-th equation in the PBES.
-    std::vector<int> ranks;
+    std::vector<size_t> ranks;
 
     /// \brief The initial value.
     propositional_variable_instantiation init;
 
     /// \brief A lookup map for PBES equations.
-    std::unordered_map<core::identifier_string, int> equation_index;
-
-    /// \brief Print the equations to standard out.
-    bool m_print_equations;
+    std::unordered_map<core::identifier_string, size_t> equation_index;
 
     /// \brief The search strategy to use when exploring the state space.
     search_strategy m_search_strategy;
@@ -215,21 +198,21 @@ class pbesinst_alternative_lazy_algorithm
     transformation_strategy m_transformation_strategy;
 
     /// \brief Prints a log message for every 1000-th equation
-    std::string print_equation_count(size_t size) const
+    void print_equation_count(size_t size) const
     {
       if (size > 0 && size % 1000 == 0)
       {
-        std::ostringstream out;
-        out << "Generated " << size << " BES equations" << std::endl;
-        return out.str();
+        mCRL2log(log::verbose) << "Generated " << size << " BES equations" << std::endl;
       }
-      return "";
     }
 
     // renames propositional variables in x
-    pbes_expression rho(const pbes_expression& x) const
+    template <class RENAMER>
+    pbes_expression rho(const pbes_expression& x, const RENAMER renamer) const
     {
-      return replace_propositional_variables(x, pbesinst_rename());
+      // return replace_propositional_variables(x, pbesinst_rename());
+      
+      return replace_propositional_variables(x, renamer);
     }
 
   public:
@@ -239,9 +222,8 @@ class pbesinst_alternative_lazy_algorithm
     /// \param rewriter_strategy A strategy for the data rewriter
     /// \param print_equations If true, the generated equations are printed
     pbesinst_alternative_lazy_algorithm(
-        data::data_specification const& data_spec,
+        const data::data_specification& data_spec,
         data::rewriter::strategy rewrite_strategy = data::jitty,
-        bool print_equations = false,
         search_strategy search_strategy = breadth_first,
         transformation_strategy transformation_strategy = lazy
         )
@@ -250,9 +232,6 @@ class pbesinst_alternative_lazy_algorithm
         datar(data_spec, rewrite_strategy),
         R(datar, data_spec),
         m_equation_count(0),
-        regeneration_count(0),
-        regeneration_period(regeneration_period_init),
-        m_print_equations(print_equations),
         m_search_strategy(search_strategy),
         m_transformation_strategy(transformation_strategy)
     {
@@ -266,13 +245,13 @@ class pbesinst_alternative_lazy_algorithm
     {
       if (m_search_strategy == breadth_first)
       {
-        auto X_e = todo.front();
+        const propositional_variable_instantiation X_e = todo.front();
         todo.pop_front();
         return X_e;
       }
       else
       {
-        auto X_e = todo.back();
+        const propositional_variable_instantiation X_e = todo.back();
         todo.pop_back();
         return X_e;
       }
@@ -285,7 +264,7 @@ class pbesinst_alternative_lazy_algorithm
       reachable.insert(X);
     }
 
-    int get_rank(propositional_variable_instantiation X)
+    size_t get_rank(propositional_variable_instantiation X)
     {
       return ranks[equation_index[X.name()]];
     }
@@ -294,7 +273,7 @@ class pbesinst_alternative_lazy_algorithm
     bool find_loop_rec(
         pbes_expression expr,
         propositional_variable_instantiation X,
-        int rank,
+        size_t rank,
         std::unordered_map<propositional_variable_instantiation, bool>& visited)
     {
       if (is_false(expr) || is_true(expr))
@@ -303,7 +282,7 @@ class pbesinst_alternative_lazy_algorithm
       }
       if (is_propositional_variable_instantiation(expr))
       {
-        auto Y = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
+        const propositional_variable_instantiation Y = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
         if (Y == X)
         {
           return true;
@@ -324,33 +303,34 @@ class pbesinst_alternative_lazy_algorithm
         return visited[Y] = find_loop_rec<is_mu>(equation[Y], X, rank, visited);
       }
 
-      using accessors::left;
-      using accessors::right;
-
       if (is_mu)
       {
         if (is_and(expr))
         {
-          return find_loop_rec<is_mu>(left(expr), X, rank, visited) ||
-                 find_loop_rec<is_mu>(right(expr), X, rank, visited);
+          const and_& expra=atermpp::down_cast<and_>(expr);
+          return find_loop_rec<is_mu>(expra.left(), X, rank, visited) ||
+                 find_loop_rec<is_mu>(expra.right(), X, rank, visited);
         }
         if (is_or(expr))
         {
-          return find_loop_rec<is_mu>(left(expr), X, rank, visited) &&
-                 find_loop_rec<is_mu>(right(expr), X, rank, visited);
+          const or_& expro=atermpp::down_cast<or_>(expr);
+          return find_loop_rec<is_mu>(expro.left(), X, rank, visited) &&
+                 find_loop_rec<is_mu>(expro.right(), X, rank, visited);
         }
       }
       else
       {
         if (is_and(expr))
         {
-          return find_loop_rec<is_mu>(left(expr), X, rank, visited) &&
-                 find_loop_rec<is_mu>(right(expr), X, rank, visited);
+          const and_& expra=atermpp::down_cast<and_>(expr);
+          return find_loop_rec<is_mu>(expra.left(), X, rank, visited) &&
+                 find_loop_rec<is_mu>(expra.right(), X, rank, visited);
         }
         if (is_or(expr))
         {
-          return find_loop_rec<is_mu>(left(expr), X, rank, visited) ||
-                 find_loop_rec<is_mu>(right(expr), X, rank, visited);
+          const or_& expro=atermpp::down_cast<or_>(expr);
+          return find_loop_rec<is_mu>(expro.left(), X, rank, visited) ||
+                 find_loop_rec<is_mu>(expro.right(), X, rank, visited);
         }
       }
       return false;
@@ -379,7 +359,7 @@ class pbesinst_alternative_lazy_algorithm
 
         if (is_propositional_variable_instantiation(expr))
         {
-          auto X = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
+          const propositional_variable_instantiation X = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
           if (reachable.count(X) == 0)
           {
             if (done.count(X))
@@ -393,15 +373,90 @@ class pbesinst_alternative_lazy_algorithm
             }
           }
         }
-        else if (is_and(expr) || is_or(expr))
+        else if (is_and(expr))
         {
-          using accessors::left;
-          using accessors::right;
-          stack.push(left(expr));
-          stack.push(right(expr));
+          const and_& expra=atermpp::down_cast<and_>(expr);
+          stack.push(expra.left());
+          stack.push(expra.right());
+        }
+        else if (is_or(expr))
+        {
+          const or_& expro=atermpp::down_cast<or_>(expr);
+          stack.push(expro.left());
+          stack.push(expro.right());
         }
       }
     }
+
+    // The function below simplifies an boolean_expression, given the knowledge that some propositional variables in trivial
+    // are known to be true or false. The idea is that variables that are redundant can be removed. If p = p1 && p2, and p1 is
+    // false, then p2 can be removed, as its value does not influence the rewrite system. 
+    // The result of the function is a pair, with the simplified expression as first term, and the expression that is rewritten under the 
+    // simplifications in trivial as the second term.
+    typedef std::pair < pbes_expression, pbes_expression > pbes_expression_pair;
+    pbes_expression_pair simplify_pbes_expression(const pbes_expression& p, const std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial)
+    {
+      if (is_propositional_variable_instantiation(p))
+      {
+        const std::unordered_map<propositional_variable_instantiation, pbes_expression>::const_iterator i=
+                                            trivial.find(atermpp::down_cast<propositional_variable_instantiation>(p));
+        if (i!=trivial.end() && (is_true(i->second) || is_false(i->second)))
+        {
+          return pbes_expression_pair(p,i->second);
+        }
+        return pbes_expression_pair(p,p);
+      }
+      else if (is_true(p)||is_false(p))
+      {
+        return pbes_expression_pair(p,p);
+      }
+      else if (is_and(p))
+      {
+        const and_& pa=atermpp::down_cast<and_>(p);
+        const pbes_expression_pair lhs=simplify_pbes_expression(pa.left(),trivial);
+        const pbes_expression_pair rhs=simplify_pbes_expression(pa.right(),trivial);
+        if (is_false(lhs.second))
+        {
+          return lhs;
+        }
+        if (is_false(rhs.second))
+        {
+          return rhs;
+        }
+        if (is_true(lhs.second))
+        {
+          return pbes_expression_pair(and_(lhs.first,rhs.first),rhs.second);
+        }
+        if (is_true(rhs.second))
+        {
+          return pbes_expression_pair(and_(lhs.first,rhs.first),lhs.second);
+        }
+        return pbes_expression_pair(and_(lhs.first,rhs.first),and_(lhs.first,rhs.first));
+      }
+      assert(is_or(p));
+      const or_& po=atermpp::down_cast<or_>(p);
+      const pbes_expression_pair lhs=simplify_pbes_expression(po.left(),trivial);
+      const pbes_expression_pair rhs=simplify_pbes_expression(po.right(),trivial);
+      if (is_true(lhs.second))
+      {
+        return lhs;
+      }
+      if (is_true(rhs.second))
+      {
+        return rhs;
+      }
+      if (is_false(lhs.second))
+      {
+        return pbes_expression_pair(or_(lhs.first,rhs.first),rhs.second);
+      }
+      if (is_false(rhs.second))
+      {
+        return pbes_expression_pair(or_(lhs.first,rhs.first),lhs.second);;
+      }
+      return pbes_expression_pair(or_(lhs.first,rhs.first),or_(lhs.first,rhs.first));
+    }
+ 
+
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     /// \param p A PBES
@@ -410,9 +465,10 @@ class pbesinst_alternative_lazy_algorithm
       using utilities::detail::pick_element;
       using utilities::detail::contains;
 
+      size_t regeneration_count=regeneration_count_init;
       pbes_system::detail::instantiate_global_variables(p);
 
-      auto& pbes_equations = p.equations();
+      std::vector<pbes_equation>& pbes_equations = p.equations();
 
       // simplify all right hand sides of p
       //
@@ -423,18 +479,18 @@ class pbesinst_alternative_lazy_algorithm
       // forall m: Nat . exists k: Nat . val(m == k)
       pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
-      for (auto eqi = pbes_equations.begin(); eqi != pbes_equations.end(); eqi++)
+      for (pbes_equation eq: pbes_equations)
       {
-        eqi->formula() = pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eqi->formula())), m_data_spec);
+        eq.formula() = pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), m_data_spec);
       }
 
       // initialize equation_index, instantiations, symbols and ranks
-      int eqn_index = 0;
+      size_t eqn_index = 0;
       ranks.resize(pbes_equations.size());
       instantiations.resize(pbes_equations.size());
-      for (auto i = pbes_equations.begin(); i != pbes_equations.end(); ++i, ++eqn_index)
+      for (std::vector<pbes_equation>::const_iterator i = pbes_equations.begin(); i != pbes_equations.end(); ++i, ++eqn_index)
       {
-        auto const& eqn = *i;
+        const pbes_equation& eqn = *i;
         equation_index[eqn.variable().name()] = eqn_index;
         symbols.push_back(eqn.symbol());
         if (eqn_index > 0)
@@ -447,22 +503,31 @@ class pbesinst_alternative_lazy_algorithm
       add_todo(init);
       while (!todo.empty())
       {
-        auto const X_e = next_todo();
-        int index = equation_index[X_e.name()];
+        const propositional_variable_instantiation X_e = next_todo();
+        size_t index = equation_index[X_e.name()];
         done.insert(X_e);
         instantiations[index].push_back(X_e);
 
         const pbes_equation& eqn = pbes_equations[index];
         data::rewriter::substitution_type sigma;
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
-        auto const& phi = eqn.formula();
+        const pbes_expression& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
+        pbes_expression rewritten_psi_e;
 
         if (m_transformation_strategy >= optimize)
         {
           // Substitute all trivial variable instantiations by their values
-          psi_e = make_propositional_variable_rewriter(trivial, justification[X_e])(psi_e);
+          pbes_expression_pair p=simplify_pbes_expression(psi_e,trivial);
+          psi_e=p.first;
+          rewritten_psi_e=p.second;
         }
+        else
+        {
+          rewritten_psi_e=psi_e;
+        }
+        // Store the result
+        equation[X_e] = psi_e;
 
         if (m_transformation_strategy >= on_the_fly_with_fixed_points)
         {
@@ -471,14 +536,14 @@ class pbesinst_alternative_lazy_algorithm
           {
             if (find_loop<true>(psi_e, X_e))
             {
-              psi_e = false_();
+              rewritten_psi_e = false_();
             }
           }
           else
           {
             if (find_loop<false>(psi_e, X_e))
             {
-              psi_e = true_();
+              rewritten_psi_e = true_();
             }
           }
         }
@@ -486,48 +551,42 @@ class pbesinst_alternative_lazy_algorithm
         // Add all variable instantiations in psi_e to todo and generated,
         // and augment the occurrence sets
         std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi_e);
-        for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)
+        for (propositional_variable_instantiation v: psi_variables)
         {
-          if (todo_set.count(*i) == 0 && done.count(*i) == 0)
+          if (todo_set.count(v) == 0 && done.count(v) == 0)
           {
-            add_todo(*i);
+            add_todo(v);
           }
-          occurrence[*i].insert(X_e);
+          occurrence[v].insert(X_e);
         }
 
-        // Store the result
-        equation[X_e] = psi_e;
-
-        if (m_transformation_strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
+        if (m_transformation_strategy >= optimize && (is_true(rewritten_psi_e) || is_false(rewritten_psi_e)))
         {
-          trivial[X_e] = psi_e;
+          trivial[X_e] = rewritten_psi_e;
           if (m_transformation_strategy >= on_the_fly)
           {
             // Substitute X_e to its value in all its occurrences, and
             // substitute all other variables to their values that are found
             // to be either true or false in all their occurrences.
-            std::unordered_set<propositional_variable_instantiation> new_trivials;
-            new_trivials.insert(X_e);
+            std::stack<propositional_variable_instantiation> new_trivials;
+            new_trivials.push(X_e);
             while (!new_trivials.empty())
             {
-              auto X = *new_trivials.begin();
-              new_trivials.erase(new_trivials.begin());
+              const propositional_variable_instantiation X = new_trivials.top();
+              new_trivials.pop();
 
-              auto oc = occurrence[X];
-              // TODO Instead using a map of a single element, we should
-              // probably generalize propositional_variable_rewriter to take a
-              // function instead of a set
+              const std::unordered_set<propositional_variable_instantiation> oc = occurrence[X];
               std::unordered_map<propositional_variable_instantiation, pbes_expression> trivial_X;
               trivial_X[X] = psi_e;
-              for (auto i = oc.begin(); i != oc.end(); i++)
+              for (const propositional_variable_instantiation Y: oc)
               {
-                auto Y = *i;
-                pbes_expression &f = equation[Y];
-                f = make_propositional_variable_rewriter(trivial_X, justification[Y])(f);
+                pbes_expression_pair p=simplify_pbes_expression(equation[Y],trivial);
+                equation[Y]=p.first;
+                const pbes_expression f=p.second;
                 if (is_true(f) || is_false(f))
                 {
                   trivial[Y] = f;
-                  new_trivials.insert(Y);
+                  new_trivials.push(Y);
                 }
               }
               occurrence.erase(X);
@@ -537,58 +596,52 @@ class pbesinst_alternative_lazy_algorithm
 
         if (m_transformation_strategy >= on_the_fly)
         {
-          if (++regeneration_count == regeneration_period)
+          if (--regeneration_count == 0 || trivial.count(init)>0 )
           {
-            regeneration_count = 0;
-            regeneration_period = equation.size() / 2;
+            regeneration_count = equation.size() / 2;
             regenerate_states();
           }
         }
 
-        if (m_print_equations)
-        {
-          mCRL2log(log::info) << eqn.symbol() << " " << X_e << " = " << psi_e << std::endl;
-        }
-
-        mCRL2log(log::verbose) << print_equation_count(++m_equation_count);
+        m_equation_count++;
+        print_equation_count(m_equation_count); // Print the number of equations in verbose mode once for every thousand equations. 
         detail::check_bes_equation_limit(m_equation_count);
       }
     }
 
     /// \brief Returns the computed bes in pbes format
     /// \return The computed bes in pbes format
-    pbes get_result()
+    pbes get_result(bool short_rename_scheme=true)
     {
       mCRL2log(log::verbose) << "Generated " << m_equation_count << " BES equations in total, outputting BES" << std::endl;
       pbes result;
-      int index = 0;
-      for (auto i = instantiations.begin(); i != instantiations.end(); i++)
+      size_t index = 0;
+      pbesinst_rename long_renamer;
+      detail::rename_pbesinst_consecutively short_renamer(instantiations);
+      for (const std::vector<propositional_variable_instantiation> vec: instantiations)
       {
-        auto symbol = symbols[index++];
-        for (auto j = i->begin(); j != i->end(); j++)
+        const fixpoint_symbol symbol = symbols[index++];
+        for (propositional_variable_instantiation X_e: vec)
         {
-          auto X_e = *j;
           if (reachable.count(X_e) == 0)
           {
             continue;
           }
-          auto lhs = propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list());
-          auto rhs = rho(equation[X_e]);
+          const propositional_variable lhs = 
+                            (short_rename_scheme?
+                                   propositional_variable(short_renamer(X_e).name(), data::variable_list()):
+                                   propositional_variable(long_renamer(X_e).name(), data::variable_list()));
+          const pbes_expression rhs = 
+                            (short_rename_scheme?
+                                    rho(equation[X_e],short_renamer):
+                                    rho(equation[X_e],long_renamer));
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
-          mCRL2log(log::debug) << "Equation: " << symbol << " " << X_e << " = " << equation[X_e] << std::endl;
-          mCRL2log(log::debug) << "Obtained justification of " << X_e << ": " << justification[X_e] << std::endl;
+          mCRL2log(log::debug) << "Equation: " << atermpp::aterm(symbol) << " " << X_e << " = " << equation[X_e] << std::endl;
         }
       }
 
-      result.initial_state() = pbesinst_rename()(init);
+      result.initial_state() = (short_rename_scheme?short_renamer(init):long_renamer(init));
       return result;
-    }
-
-    /// \brief Returns the flag for printing the generated bes equations
-    /// \return The flag for printing the generated bes equations
-    bool& print_equations()
-    {
-      return m_print_equations;
     }
 
     enumerate_quantifiers_rewriter& rewriter()

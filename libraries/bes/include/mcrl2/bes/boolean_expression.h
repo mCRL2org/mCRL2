@@ -558,20 +558,20 @@ bool is_same_different_precedence(const or_&, const boolean_expression& x)
 namespace accessors
 {
 inline
-const boolean_expression &left(boolean_expression const& e)
+const boolean_expression& left(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
   return atermpp::down_cast<const boolean_expression>(e[0]);
 }
 
 inline
-const boolean_expression &right(boolean_expression const& e)
+const boolean_expression& right(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
   return atermpp::down_cast<const boolean_expression>(e[1]);
 }
 
-} // namespace accessors
+} // namespace accessors 
 
 } // namespace bes
 
@@ -869,7 +869,6 @@ std::set<boolean_expression> split_and(const boolean_expression& expr)
   utilities::detail::split(expr, std::insert_iterator<std::set<boolean_expression> >(result, result.begin()), is_and, left, right);
   return result;
 }
-
 } // namespace bes
 
 } // namespace mcrl2

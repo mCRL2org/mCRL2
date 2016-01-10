@@ -26,6 +26,7 @@
 #include "mcrl2/bes/small_progress_measures.h"
 #include "mcrl2/bes/local_fixpoints.h"
 #include "mcrl2/bes/justification.h"
+#include "mcrl2/bes/solution_strategy.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
@@ -34,89 +35,7 @@ using namespace mcrl2::core;
 using namespace mcrl2;
 using bes::tools::bes_input_tool;
 
-using mcrl2::bes::print_justification_tree;
-
-typedef enum { gauss, spm, lf } solution_strategy_t;
-
-static
-std::string solution_strategy_to_string(const solution_strategy_t s)
-{
-  switch (s)
-  {
-    case gauss:
-      return "gauss";
-      break;
-    case spm:
-      return "spm";
-      break;
-    case lf:
-      return "lf";
-      break;
-  }
-  throw mcrl2::runtime_error("unknown solution strategy");
-}
-
-static
-std::ostream& operator<<(std::ostream& os, const solution_strategy_t s)
-{
-  os << solution_strategy_to_string(s);
-  return os;
-}
-
-static
-solution_strategy_t parse_solution_strategy(const std::string& s)
-{
-  if (s == "gauss")
-  {
-    return gauss;
-  }
-  else if (s == "spm")
-  {
-    return spm;
-  }
-  else if (s == "lf")
-  {
-    return lf;
-  }
-  else
-  {
-    throw mcrl2::runtime_error("unsupported solution strategy '" + s + "'");
-  }
-}
-
-static
-std::istream& operator>>(std::istream& is, solution_strategy_t& s)
-{
-  try
-  {
-    std::string str;
-    is >> str;
-    s = parse_solution_strategy(str);
-  }
-  catch(mcrl2::runtime_error&)
-  {
-    is.setstate(std::ios_base::failbit);
-  }
-  return is;
-}
-
-static
-std::string description(const solution_strategy_t s)
-{
-  switch (s)
-  {
-    case gauss:
-      return "Gauss elimination";
-      break;
-    case spm:
-      return "Small Progress Measures";
-      break;
-    case lf:
-      return "Local Fixpoints";
-      break;
-  }
-  throw mcrl2::runtime_error("unknown solution strategy");
-}
+using namespace mcrl2::bes;
 
 //local declarations
 
@@ -131,7 +50,7 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
               "solve a BES",
               "Solve the BES in INFILE. If INFILE is not present, stdin is used."
              ),
-      strategy(spm)
+      strategy(small_progr_measures)
     {}
 
     bool run()
@@ -152,10 +71,10 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
         case gauss:
           result = gauss_elimination(bes);
           break;
-        case spm:
+        case small_progr_measures:
           result = small_progress_measures(bes);
           break;
-        case lf:
+        case local_fixed_point:
           result = local_fixpoints(bes, &full_solution);
           break;
         default:
@@ -182,9 +101,9 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
     {
       input_output_tool::add_options(desc);
       desc.add_option("strategy", make_enum_argument<solution_strategy_t>("STRATEGY")
-                      .add_value(spm, true)
+                      .add_value(small_progr_measures, true)
                       .add_value(gauss)
-                      .add_value(lf),
+                      .add_value(local_fixed_point),
                       "solve the BES using the specified STRATEGY:", 's');
       desc.add_option("print-justification", "print justification for solution", 'j');
     }

@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote, XIAO Qi
+// Author(s): Jan Friso Groote, Xiao Qi
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -9,8 +9,8 @@
 /// \file search_strategy.h
 /// \brief Search strategy when generating a BES from a PBES.
 
-#ifndef MCRL2_BES_SEARCH_STRATEGY_H
-#define MCRL2_BES_SEARCH_STRATEGY_H
+#ifndef MCRL2_PBES_SEARCH_STRATEGY_H
+#define MCRL2_PBES_SEARCH_STRATEGY_H
 
 #include <string>
 #include "mcrl2/utilities/exception.h"
@@ -18,7 +18,7 @@
 namespace mcrl2
 {
 
-namespace bes
+namespace pbes_system
 {
 
 /// \brief Search strategy when generating a BES from a PBES.
@@ -94,8 +94,8 @@ std::string description(const search_strategy s)
   throw mcrl2::runtime_error("unknown search strategy");
 }
 
-} // namespace bes
+} // namespace pbes
 
 } // namespace mcrl2
 
-#endif // MCRL2_SEARCH_STRATEGY_H
+#endif // MCRL2_PBES_SEARCH_STRATEGY_H

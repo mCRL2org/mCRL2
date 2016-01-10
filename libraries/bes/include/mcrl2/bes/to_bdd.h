@@ -1,4 +1,4 @@
-// Author(s): XIAO Qi
+// Author(s): Xiao Qi
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -41,15 +41,17 @@ static mcrl2::bdd::bdd_expression to_bdd(const boolean_expression& b)
   }
   else if (is_and(b))
   {
+    const and_& ba=atermpp::down_cast<and_>(b);
     result = mcrl2::bdd::ordered_and(
-        to_bdd(accessors::left(b)),
-        to_bdd(accessors::right(b)));
+        to_bdd(ba.left()),
+        to_bdd(ba.right()));
   }
   else if (is_or(b))
   {
+    const or_& bo=atermpp::down_cast<or_>(b);
     result = mcrl2::bdd::ordered_or(
-        to_bdd(accessors::left(b)),
-        to_bdd(accessors::right(b)));
+        to_bdd(bo.left()),
+        to_bdd(bo.right()));
   }
   else
   {

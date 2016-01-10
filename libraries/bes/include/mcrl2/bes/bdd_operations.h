@@ -1,4 +1,4 @@
-// Author(s): XIAO Qi
+// Author(s): Xiao Qi
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -20,8 +20,6 @@ namespace bdd {
 
 bdd_expression ordered_and(const bdd_expression& l, const bdd_expression &r)
 {
-  using accessors::left;
-  using accessors::right;
   // Basic cases.
   if (is_false(l) || is_false(r))
   {
@@ -36,27 +34,27 @@ bdd_expression ordered_and(const bdd_expression& l, const bdd_expression &r)
     return l;
   }
   // Now both l and r are if's
-  const core::identifier_string& p = atermpp::down_cast<if_>(l).name();
-  const core::identifier_string& q = atermpp::down_cast<if_>(r).name();
+  const if_& l_if = atermpp::down_cast<if_>(l);
+  const if_& r_if = atermpp::down_cast<if_>(r);
+  const core::identifier_string& p = l_if.name();
+  const core::identifier_string& q = r_if.name();
   if (p == q)
   {
     return if_(p,
-        ordered_and(left(l), left(r)), ordered_and(right(l), right(r)));
+        ordered_and(l_if.left(), r_if.left()), ordered_and(l_if.right(),r_if.right()));
   }
   else if (p < q)
   {
-    return if_(p, ordered_and(left(l), r), ordered_and(right(l), r));
+    return if_(p, ordered_and(l_if.left(), r), ordered_and(l_if.right(), r));
   }
   else // q < p
   {
-    return if_(q, ordered_and(l, left(r)), ordered_and(l, right(r)));
+    return if_(q, ordered_and(l, r_if.left()), ordered_and(l, r_if.right()));
   }
 }
 
 bdd_expression ordered_or(const bdd_expression& l, const bdd_expression& r)
 {
-  using accessors::left;
-  using accessors::right;
   // Basic cases.
   if (is_true(l) || is_true(r))
   {
@@ -71,20 +69,22 @@ bdd_expression ordered_or(const bdd_expression& l, const bdd_expression& r)
     return l;
   }
   // Now both l and r are if's
-  const core::identifier_string& p = atermpp::down_cast<if_>(l).name();
-  const core::identifier_string& q = atermpp::down_cast<if_>(r).name();
+  const if_& l_if = atermpp::down_cast<if_>(l);
+  const if_& r_if = atermpp::down_cast<if_>(r);
+  const core::identifier_string& p = l_if.name();
+  const core::identifier_string& q = r_if.name();
   if (p == q)
   {
     return if_(p,
-        ordered_or(left(l), left(r)), ordered_or(right(l), right(r)));
+        ordered_or(l_if.left(), r_if.left()), ordered_or(l_if.right(), r_if.right()));
   }
   else if (p < q)
   {
-    return if_(p, ordered_or(left(l), r), ordered_or(right(l), r));
+    return if_(p, ordered_or(l_if.left(), r), ordered_or(l_if.right(), r));
   }
   else // q < p
   {
-    return if_(q, ordered_or(l, left(r)), ordered_or(l, right(r)));
+    return if_(q, ordered_or(l, r_if.left()), ordered_or(l, r_if.right()));
   }
 }
 

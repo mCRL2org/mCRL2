@@ -19,7 +19,7 @@ function(_add_library_tests TARGET_NAME)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
       # TODO: remove the following once we get rid of the PBES/BES dependency issue
-      if(TARGET_NAME STREQUAL "mcrl2_bes")
+      if(TARGET_NAME STREQUAL "mcrl2_pbes")
         target_link_libraries(${testname} mcrl2_pbes mcrl2_bes)
       endif()
       if(${category} STREQUAL "librarytest")

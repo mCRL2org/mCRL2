@@ -284,22 +284,6 @@ std::string pp(const bdd::bdd_expression& x)
   throw mcrl2::runtime_error("unknown bdd expression " + out.str());
 }
 
-namespace accessors {
-
-bdd_expression left(const bdd_expression &e)
-{
-  assert(is_if(e));
-  return atermpp::down_cast<if_>(e).left();
-}
-
-bdd_expression right(const bdd_expression &e)
-{
-  assert(is_if(e));
-  return atermpp::down_cast<if_>(e).right();
-}
-
-} // namespace accessors
-
 } // namespace bdd
 
 } // namespace mcrl2

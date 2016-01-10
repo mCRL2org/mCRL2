@@ -1,4 +1,4 @@
-// Author(s): XIAO Qi
+// Author(s): Xiao Qi
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -33,59 +33,104 @@ namespace mcrl2
 namespace bes
 {
 
-void print_justification_tree_rec(const boolean_equation_system& b, const vector<bool>& solution, bool init_solution, const map<boolean_variable, size_t>& index_of, int indent, boolean_expression expr, set<boolean_variable>& visited)
+namespace detail
 {
-  if (is_and(expr) || is_or(expr))
+
+string get_rest_of_string_after_at_symbol(const string& s)
+{
+  const size_t i=s.find('@',1);
+  if (i==std::string::npos)
   {
-    print_justification_tree_rec(b, solution, init_solution, index_of, indent, accessors::left(expr), visited);
-    print_justification_tree_rec(b, solution, init_solution, index_of, indent, accessors::right(expr), visited);
+    return "";
   }
-  else if (is_boolean_variable(expr))
+  return s.substr(i+1);
+}
+
+string get_string_until_at_symbol(const string& s)
+{
+  const size_t i=s.find('@',1);
+  return s.substr(0,i);
+}
+
+}  // end namespace detail
+
+void print_justification_tree_rec(
+             const boolean_equation_system& b, 
+             const vector<bool>& solution, 
+             const bool init_solution, 
+             const map<boolean_variable, size_t>& index_of, 
+             int indent, 
+             boolean_expression expr, 
+             set<boolean_variable>& visited)
+{
+  if (is_and(expr))
+  {
+    const and_& expra=atermpp::down_cast<and_>(expr);
+    print_justification_tree_rec(b, solution, init_solution, index_of, indent, expra.left(), visited);
+    print_justification_tree_rec(b, solution, init_solution, index_of, indent, expra.right(), visited);
+    return;
+  }
+  else if (is_or(expr))
+  {
+    const or_& expro=atermpp::down_cast<or_>(expr);
+    print_justification_tree_rec(b, solution, init_solution, index_of, indent, expro.left(), visited);
+    print_justification_tree_rec(b, solution, init_solution, index_of, indent, expro.right(), visited);
+    return;
+  }
+  else if (is_true(expr))
+  {
+    cout << string(indent, ' ') << "True\n";
+    return;
+  }
+  else if (is_false(expr))
+  {
+    cout << string(indent, ' ') << "False\n";
+    return;
+  }
+  assert(is_boolean_variable(expr));
   {
     boolean_variable X = atermpp::down_cast<boolean_variable>(expr);
 
-    if (visited.count(X))
-    {
-      // X has been visited before. Stop here.
-      cout << string(indent, ' ') << X << "*" << endl;
-      return;
-    }
-    visited.insert(X);
-
-    if (index_of.count(X) == 0)
-    {
-      // X not found in the left-hand-side of any equation. There is some
-      // error in the solving algorithm.
-      cout << string(indent, ' ') << X << "?" << endl;
-      return;
-    }
-    size_t idx = index_of.at(X);
-    if (idx >= solution.size())
+    const map<boolean_variable, size_t>::const_iterator idx = index_of.find(X);
+    if (idx==index_of.end() || idx->second >= b.equations().size())
     {
       // X is out of the range of the solution. There is some error in the
       // solving algorithm.
-      cout << string(indent, ' ') << X << "?" << endl;
-      return;
+      throw mcrl2::runtime_error("Encountered undefined propositional variable " + string(X.name()) + " in the boolean equation system. Cannot generate a counter example. ");
     }
 
-    if (solution[idx] != init_solution)
+    const size_t variable_index=idx->second;
+    if (solution[variable_index] != init_solution)
     {
       // X is not relevant for the justification.
       return;
     }
 
     // Print justification rooted at X recursively.
-    cout << string(indent, ' ') << X << endl;
+    string X_string(X.name());
+    cout << string(indent, ' ') << variable_index << ": " << detail::get_string_until_at_symbol(X_string);
+    X_string=detail::get_rest_of_string_after_at_symbol(X_string);
+    string divider="(";
+    for( ;  !X_string.empty() ; X_string=detail::get_rest_of_string_after_at_symbol(X_string))
+    {
+      cout << divider << detail::get_string_until_at_symbol(X_string);
+      divider=",";
+    }
+    if (divider!="(")
+    {
+      cout << ")";
+    }
+
+    if (visited.count(X))
+    {
+      // X has been visited before. Indicate this with a "*" and stop.
+      cout << "*\n";
+      return;
+    }
+    visited.insert(X);
+    cout << "\n";
     print_justification_tree_rec(b, solution, init_solution, index_of, indent+1, b.equations()[index_of.at(X)].formula(), visited);
-  }
-  else if (is_true(expr) || is_false(expr))
-  {
-    // do nothing
-  }
-  else
-  {
-    mCRL2log(mcrl2::log::error) << "Unexpected boolean expression " << b << endl;
-    assert(0);
+    return;
   }
 }
 
@@ -93,6 +138,7 @@ void print_justification_tree_rec(const boolean_equation_system& b, const vector
 // BES.
 void print_justification_tree(const boolean_equation_system& b, const vector<bool>& solution, bool init_solution)
 {
+  assert(b.equations().size()==solution.size());
   set<boolean_variable> visited;
   map<boolean_variable, size_t> index_of;
   for (size_t i = 0; i < b.equations().size(); i++)

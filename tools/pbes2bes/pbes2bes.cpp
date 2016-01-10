@@ -44,29 +44,34 @@
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/data_equation.h"
 
-//Boolean equation systems
+//Parameterised boolean equation systems
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/bes/bes_deprecated.h"
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/io.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/pbesinst_alternative_lazy_algorithm.h"
+#include "mcrl2/pbes/transformation_strategy.h"
+#include "mcrl2/pbes/search_strategy.h"
+
+//Boolean equation systems
+// #include "mcrl2/bes/bes_deprecated.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/bes/io.h"
+#include "mcrl2/bes/remove_level.h"
 
 using namespace std;
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using bes::bes_expression;
-using namespace ::bes;
+using namespace mcrl2::data;
+using namespace mcrl2::bes;
+using namespace mcrl2::pbes_system;
 
-// using atermpp::make_substitution;
 
 //Function declarations used by main program
 //------------------------------------------
 
-using namespace mcrl2;
 using mcrl2::bes::tools::pbes_input_tool;
 using mcrl2::bes::tools::pbes_output_tool;
 using mcrl2::bes::tools::pbes_rewriter_tool;
@@ -79,17 +84,17 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
   protected:
     // Tool options.
     /// The output file name
-    ::bes::transformation_strategy opt_transformation_strategy; // The strategy to propagate true/false.
-    ::bes::search_strategy opt_search_strategy; // The search strategy (breadth or depth first).
-    bool opt_use_hashtables;                   // The hashtable option
-    remove_level opt_erase_unused_bes_variables;       // Remove bes variables whenever they are not used anymore.
-    bool opt_data_elm;                         // The data elimination option
+    transformation_strategy m_transformation_strategy; // The strategy to propagate true/false.
+    search_strategy m_search_strategy; // The search strategy (breadth or depth first).
+    bool m_use_hashtables;                   // The hashtable option
+    remove_level m_erase_unused_bes_variables;       // Remove bes variables whenever they are not used anymore.
+    bool m_data_elm;                         // The data elimination option
 
     typedef rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > super;
 
-    pbes_system::pbes_rewriter_type default_rewriter() const
+    pbes_rewriter_type default_rewriter() const
     {
-      return pbes_system::quantifier_all;
+      return quantifier_all;
     }
 
   public:
@@ -100,11 +105,11 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
         "Generate a BES from a PBES. ",
         "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
         "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
-      opt_transformation_strategy(::bes::lazy),
-      opt_search_strategy(::bes::breadth_first),
-      opt_use_hashtables(false),
-      opt_erase_unused_bes_variables(none),
-      opt_data_elm(true)
+      m_transformation_strategy(mcrl2::pbes_system::lazy),
+      m_search_strategy(mcrl2::pbes_system::breadth_first),
+      m_use_hashtables(false),
+      m_erase_unused_bes_variables(none),
+      m_data_elm(true)
     {}
 
 
@@ -115,11 +120,11 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
 
       input_output_tool::parse_options(parser);
 
-      opt_use_hashtables            = 0 < parser.options.count("hashtables");
-      opt_erase_unused_bes_variables= parser.option_argument_as<remove_level>("erase");
-      opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
-      opt_search_strategy           = parser.option_argument_as<search_strategy>("search");
+      m_use_hashtables            = 0 < parser.options.count("hashtables");
+      m_erase_unused_bes_variables= parser.option_argument_as<remove_level>("erase");
+      m_data_elm                  = parser.options.count("unused-data") == 0;
+      m_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
+      m_search_strategy           = parser.option_argument_as<search_strategy>("search");
 
     }
 
@@ -128,7 +133,7 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       super::add_options(desc);
       desc.
       add_option("strategy", make_enum_argument<transformation_strategy>("STRAT")
-                 .add_value(lazy, true)
+                 .add_value(mcrl2::pbes_system::lazy, true)
                  .add_value(optimize)
                  .add_value(on_the_fly)
                  .add_value(on_the_fly_with_fixed_points),
@@ -160,43 +165,35 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
   public:
     bool run()
     {
-      using namespace pbes_system;
-      using namespace utilities;
-
       mCRL2log(verbose) << "pbes2bes parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:            " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:           " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  data rewriter:         " << m_rewrite_strategy << std::endl;
-      mCRL2log(verbose) << "  substitution strategy: " << opt_transformation_strategy << std::endl;
-      mCRL2log(verbose) << "  search strategy:       " << opt_search_strategy << std::endl;
-      mCRL2log(verbose) << "  erase level:           " << opt_erase_unused_bes_variables << std::endl;
+      mCRL2log(verbose) << "  substitution strategy: " << m_transformation_strategy << std::endl;
+      mCRL2log(verbose) << "  search strategy:       " << m_search_strategy << std::endl;
+      mCRL2log(verbose) << "  erase level:           " << m_erase_unused_bes_variables << std::endl;
 
       // load the pbes
       mcrl2::pbes_system::pbes p;
-      load_pbes(p, input_filename(), pbes_input_format());
+      mcrl2::pbes_system::load_pbes(p, input_filename(), pbes_input_format());
 
-      pbes_system::normalize(p);
-      pbes_system::detail::instantiate_global_variables(p);
+      mcrl2::pbes_system::normalize(p);
+      mcrl2::pbes_system::detail::instantiate_global_variables(p);
+  
       // data rewriter
-
-      data::rewriter datar= (opt_data_elm) ?
-                            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy()) :
-                            data::rewriter(p.data(), rewrite_strategy());
+      rewriter datar= (m_data_elm) ?
+                            rewriter(p.data(), used_data_equation_selector(p.data(), mcrl2::pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy()) :
+                            rewriter(p.data(), rewrite_strategy());
 
       timer().start("instantiation");
-      ::bes::boolean_equation_system bes_equations=
-        ::bes::boolean_equation_system(
-          p,
-          datar,
-          opt_transformation_strategy,
-          opt_search_strategy,
-          false,  // No counter example
-          opt_erase_unused_bes_variables,
-          opt_use_hashtables);
+
+      pbesinst_alternative_lazy_algorithm algorithm(p.data(), m_rewrite_strategy, m_search_strategy, m_transformation_strategy);
+      algorithm.run(p);
+      boolean_equation_system bes = pbesinst_conversion(algorithm.get_result());
+
       timer().finish("instantiation");
 
-      mcrl2::bes::boolean_equation_system b(convert_to_bes(bes_equations));
-      mcrl2::bes::save_bes(b, output_filename(), bes_output_format());
+      mcrl2::bes::save_bes(bes, output_filename(), bes_output_format());
 
       return true;
     }

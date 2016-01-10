@@ -9,8 +9,8 @@
 /// \file transformation_strategy.h
 /// \brief Strategies for the generation of a BES from a PBES.
 
-#ifndef MCRL2_BES_TRANSFORMATION_STRATEGY_H
-#define MCRL2_BES_TRANSFORMATION_STRATEGY_H
+#ifndef MCRL2_PBES_TRANSFORMATION_STRATEGY_H
+#define MCRL2_PBES_TRANSFORMATION_STRATEGY_H
 
 #include <string>
 #include "mcrl2/utilities/exception.h"
@@ -18,7 +18,7 @@
 namespace mcrl2
 {
 
-namespace bes
+namespace pbes_system
 {
 
 /// \brief Strategies for the generation of a BES from a PBES
@@ -123,8 +123,8 @@ std::string description(const transformation_strategy s)
   throw mcrl2::runtime_error("unknown transformation strategy");
 }
 
-} // namespace bes
+} // namespace pbes_system
 
 } // namespace mcrl2
 
-#endif // MCRL2_BES_TRANSFORMATION_STRATEGY_H
+#endif // MCRL2_PBES_TRANSFORMATION_STRATEGY_H

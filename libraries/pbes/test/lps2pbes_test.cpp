@@ -18,6 +18,7 @@
 #include <iterator>
 #include <boost/test/included/unit_test_framework.hpp>
 #include <boost/algorithm/string.hpp>
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
@@ -31,7 +32,6 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
 
 using namespace std;

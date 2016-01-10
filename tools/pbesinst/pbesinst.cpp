@@ -86,8 +86,8 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       desc.
       add_option("strategy",
                  make_enum_argument<pbesinst_strategy>("NAME")
-                 .add_value(pbesinst_lazy_strategy, true)
-                 .add_value(pbesinst_alternative_lazy_strategy)
+                 .add_value(pbesinst_lazy_strategy)
+                 .add_value(pbesinst_alternative_lazy_strategy, true)
                  .add_value(pbesinst_finite_strategy),
                  "compute the BES using strategy NAME:", 's').
       add_option("search",
@@ -180,7 +180,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
         {
           algorithms::normalize(p);
         }
-        pbesinst_alternative_lazy_algorithm algorithm(p.data(), m_rewrite_strategy, false, m_search_strategy, m_transformation_strategy);
+        pbesinst_alternative_lazy_algorithm algorithm(p.data(), m_rewrite_strategy, m_search_strategy, m_transformation_strategy);
         algorithm.run(p);
         p = algorithm.get_result();
       }
