@@ -139,7 +139,7 @@ class pbesinst_alternative_lazy_algorithm
     const data::data_specification& m_data_spec;
 
     /// \brief Data rewriter.
-    data::rewriter m_datar;
+    const data::rewriter& m_datar;
 
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;

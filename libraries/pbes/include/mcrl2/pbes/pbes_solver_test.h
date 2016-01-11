@@ -53,7 +53,7 @@ bool pbes2_bool_test(pbes& pbes_spec, data::rewriter::strategy rewrite_strategy 
   pbes_system::algorithms::instantiate_global_variables(pbes_spec);
 
   // Generate an enumerator, a data rewriter and a pbes rewriter.
-  data::rewriter datar(pbes_spec.data(),
+  const data::rewriter datar(pbes_spec.data(),
                        mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_system::find_function_symbols(pbes_spec), pbes_spec.global_variables()),
                        rewrite_strategy);
 
@@ -72,7 +72,8 @@ std::clog << core::detail::print_set(pbes_system::find_function_symbols(pbes_spe
   // ::bes::boolean_equation_system bes_equations(pbes_spec, datar);
   // return solve_bes(bes_equations,false,false);
 
-  pbesinst_alternative_lazy_algorithm algorithm(pbes_spec.data(), rewrite_strategy, breadth_first, on_the_fly);
+  // TODO: test other algorithms and options.
+  pbesinst_alternative_lazy_algorithm algorithm(pbes_spec.data(), datar, breadth_first, on_the_fly);
   algorithm.run(pbes_spec);
   bes::boolean_equation_system bes = bes::pbesinst_conversion(algorithm.get_result());
   std::vector<bool> full_solution;
