@@ -33,22 +33,22 @@ void test_bisimulation(const std::string& s1, const std::string& s2,
   std::clog << "Testing strong bisimulation" << std::endl;
   pbes sb  = strong_bisimulation(spec1, spec2);
   BOOST_CHECK(sb.is_well_typed());
-  BOOST_CHECK_EQUAL(pbes2_bool_test(sb), strongly_bisimilar);
+  BOOST_CHECK(pbes2_bool_test(sb, strongly_bisimilar));
 
   std::clog << "Testing branching bisimulation" << std::endl;
   pbes bb  = branching_bisimulation(spec1, spec2);
   BOOST_CHECK(bb.is_well_typed());
-  BOOST_CHECK_EQUAL(pbes2_bool_test(bb), branching_bisimilar);
+  BOOST_CHECK(pbes2_bool_test(bb, branching_bisimilar));
 
   std::clog << "Testing branching simulation" << std::endl;
   pbes bs = branching_simulation_equivalence(spec1, spec2);
   BOOST_CHECK(bs.is_well_typed());
-  BOOST_CHECK_EQUAL(pbes2_bool_test(bs), branching_similar);
+  BOOST_CHECK(pbes2_bool_test(bs, branching_similar));
 
   std::clog << "Testing weak bisimulation" << std::endl;
   pbes wb  = weak_bisimulation(spec1, spec2);
   BOOST_CHECK(wb.is_well_typed());
-  BOOST_CHECK_EQUAL(pbes2_bool_test(wb), weakly_bisimilar);
+  BOOST_CHECK(pbes2_bool_test(wb, weakly_bisimilar));
 }
 
 BOOST_AUTO_TEST_CASE(ABP)

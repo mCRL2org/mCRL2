@@ -121,7 +121,7 @@ std::string PBES3 =
   "init X0;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \n"
   ;
 
-void test_pbes(std::string pbes_spec)
+void test_pbes(std::string pbes_spec, const bool expected_result)
 {
   pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::detail::parity_game_output pgg(p);
@@ -130,7 +130,7 @@ void test_pbes(std::string pbes_spec)
 // check the result
 #ifdef MCRL2_PGSOLVER_ENABLED
   static int index;
-  bool expected_result = pbes_system::pbes2_bool_test(p);
+  BOOST_CHECK(pbes_system::pbes2_bool_test(p,expected_result));
   std::string name = "parity_game_test" + boost::lexical_cast<std::string>(++index);
   std::string output_file   = name + ".pg";
   std::string solution_file = name + ".solution";
@@ -194,38 +194,38 @@ void test_pbespgsolve(std::string pbes_spec)
   }
 }
 
-void test_lps(const std::string& lps_spec, const std::string& formula = lps::detail::NO_DEADLOCK())
+void test_lps(const std::string& lps_spec, const bool expected_result, const std::string& formula = lps::detail::NO_DEADLOCK())
 {
   using namespace pbes_system;
   bool timed = false;
   pbes p = lps2pbes(lps_spec, formula, timed);
   std::string text = pbes_system::pp(p);
-  test_pbes(text);
+  test_pbes(text,expected_result);
 }
 
 int test_main(int argc, char** argv)
 {
-  test_pbes(BES1);
-  test_pbes(BES2);
-  test_pbes(BES3);
-  test_pbes(BES4);
-  test_pbes(BES5);
-  test_pbes(BES6);
-  test_pbes(BES7);
-  test_pbes(BES8);
-  test_pbes(PBES1);
-  test_pbes(PBES2);
-  test_pbes(PBES3);
+  test_pbes(BES1,false);
+  test_pbes(BES2,true);
+  test_pbes(BES3,false);
+  test_pbes(BES4,true);
+  test_pbes(BES5,true);
+  test_pbes(BES6,false);
+  test_pbes(BES7,false);
+  test_pbes(BES8,true);
+  test_pbes(PBES1,false);
+  test_pbes(PBES2,false);
+  test_pbes(PBES3,true);
 
   test_pbespgsolve(PBES1);
   test_pbespgsolve(PBES2);
   test_pbespgsolve(PBES3);
 
-  test_lps(lps::detail::ABP_SPECIFICATION());
+  test_lps(lps::detail::ABP_SPECIFICATION(),true);
 
 #ifdef MCRL2_EXTENDED_TESTS
-  test_lps(lps::detail::DINING3_SPECIFICATION());
-  test_lps(lps::detail::ONE_BIT_SLIDING_WINDOW_SPECIFICATION(), "nu X. <true>true && [true]X");
+  test_lps(lps::detail::DINING3_SPECIFICATION(),false);
+  test_lps(lps::detail::ONE_BIT_SLIDING_WINDOW_SPECIFICATION(), true, "nu X. <true>true && [true]X");
 #endif
 
   return 0;

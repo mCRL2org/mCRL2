@@ -89,7 +89,7 @@ void test_pbes(const std::string& pbes_spec,
 
 }
 
-void test_eqelm(const std::string& pbes_spec)
+void test_eqelm(const std::string& pbes_spec, const bool expected_outcome)
 {
   typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
 
@@ -101,10 +101,8 @@ void test_eqelm(const std::string& pbes_spec)
   pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
   algorithm.run(q);
 
-  bool result1 = pbes2_bool_test(p);
-  bool result2 = pbes2_bool_test(q);
-
-  BOOST_CHECK(result1 == result2);
+  BOOST_CHECK(pbes2_bool_test(p,expected_outcome));
+  BOOST_CHECK(pbes2_bool_test(q,expected_outcome));
 }
 
 std::string random1 =
@@ -124,7 +122,7 @@ int test_main(int argc, char** argv)
   bool remove_equations = true;
   test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");
   test_pbes(t2 , x2, compute_conditions, remove_equations, "test 2");
-  test_eqelm(random1);
+  test_eqelm(random1,false);
 
   return 0;
 }

@@ -93,7 +93,7 @@ void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf
     pbes_rewrite(p, R);
   }
 
-  BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_solution);
+  BOOST_CHECK(pbes2_bool_test(p, expected_solution));
 }
 
 void one_point_rule_rewrite(pbes& p)
@@ -143,7 +143,7 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "true";
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
-    BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
+    BOOST_CHECK(pbes2_bool_test(p, expected_result));
   }
 
   // test negated formula
@@ -155,7 +155,7 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "false";
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
-    BOOST_CHECK_EQUAL(pbes2_bool_test(p), expected_result);
+    BOOST_CHECK(pbes2_bool_test(p, expected_result));
   }
 }
 

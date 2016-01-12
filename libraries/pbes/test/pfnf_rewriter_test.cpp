@@ -127,14 +127,14 @@ void test_pfnf_rewriter()
   pbes_expression y = R(x);
 }
 
-void test_pfnf_rewriter2(const std::string& text)
+void test_pfnf_rewriter2(const std::string& text, const bool expected_result)
 {
   pbes p = txt2pbes(text);
   std::cout << "\ntest_pfnf_rewriter2\n" << std::endl;
   std::cout << "--- before ---\n";
   std::cout << pbes_system::pp(p) << std::endl;
 
-  bool result1 = pbes2_bool_test(p);
+  BOOST_CHECK(pbes2_bool_test(p,expected_result));
 
   pfnf_rewriter R;
   pbes_rewrite(p, R);
@@ -143,8 +143,7 @@ void test_pfnf_rewriter2(const std::string& text)
   std::cout << pbes_system::pp(p) << std::endl;
 
   BOOST_CHECK(p.is_well_typed());
-  bool result2 = pbes2_bool_test(p);
-  BOOST_CHECK(result1 == result2);
+  BOOST_CHECK(pbes2_bool_test(p,expected_result));
 }
 
 void test_pfnf_rewriter2()
@@ -156,7 +155,7 @@ void test_pfnf_rewriter2()
     "                                                             \n"
     "init X;                                                      \n"
     ;
-  test_pfnf_rewriter2(text);
+  test_pfnf_rewriter2(text,false);
 
   text =
     "pbes                                                                                   \n"
@@ -178,7 +177,7 @@ void test_pfnf_rewriter2()
     "                                                                                                                                                                                      \n"
     "init X0(0);                                                                                                                                                                           \n"
     ;
-  test_pfnf_rewriter2(text);
+  test_pfnf_rewriter2(text,true);
 }
 
 void test_is_pfnf()
