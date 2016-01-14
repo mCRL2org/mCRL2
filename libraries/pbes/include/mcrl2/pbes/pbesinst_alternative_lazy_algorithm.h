@@ -90,7 +90,7 @@ namespace detail
         {
           for(const propositional_variable_instantiation inst:vec)
           {
-            // if (reachable.count(inst) > 0)
+            if (reachable.count(inst) > 0)
             {
               if (short_renaming_scheme)
               {
