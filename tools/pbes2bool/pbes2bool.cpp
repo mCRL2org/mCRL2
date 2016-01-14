@@ -275,7 +275,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 
       pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy);
       algorithm.run(p);
-      p=algorithm.get_result(false);
+      p=algorithm.get_result(!m_construct_counter_example);
       boolean_equation_system bes = pbesinst_conversion(p);
       
       timer().finish("instantiation");

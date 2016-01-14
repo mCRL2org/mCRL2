@@ -16,6 +16,7 @@
 #include <stack>
 #include <iostream>
 #include <sstream>
+#include <ctime>
 #include <unordered_set>
 #include <unordered_map>
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -53,31 +54,64 @@ namespace pbes_system
 
 namespace detail
 {
+  template <class RENAMER>
+  const pbes_expression replace_propositional_variables_local(const pbes_expression& expr, const RENAMER& sigma)
+  {
+    if (is_propositional_variable_instantiation(expr))
+    {
+      return sigma(atermpp::vertical_cast<const propositional_variable_instantiation>(expr));
+    }
+    else if (is_and(expr))
+    {
+      const and_& expra=atermpp::down_cast<and_>(expr);
+      return and_(replace_propositional_variables_local(expra.left(),sigma), replace_propositional_variables_local(expra.right(),sigma));
+    }
+    else if (is_or(expr))
+    {
+      const or_& expro=atermpp::down_cast<or_>(expr);
+      return or_(replace_propositional_variables_local(expro.left(),sigma), replace_propositional_variables_local(expro.right(),sigma));
+    }
+    assert(is_true(expr)||is_false(expr));
+    return expr;
+  }
+
   class rename_pbesinst_consecutively: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
   {
     protected:
-      std::map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
+      std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
 
     public:
-      rename_pbesinst_consecutively(std::vector<std::vector<propositional_variable_instantiation> >& instantiations)
+      rename_pbesinst_consecutively(std::vector<std::vector<propositional_variable_instantiation> >& instantiations, 
+                                    const std::unordered_set<propositional_variable_instantiation>& reachable,
+                                    bool short_renaming_scheme)
       {
         size_t index=0;
         for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
         {
           for(const propositional_variable_instantiation inst:vec)
           {
-            std::stringstream ss;
-            ss << "X" << index;
-            pv_renaming[inst]=propositional_variable_instantiation(ss.str(),data::data_expression_list());
+            // if (reachable.count(inst) > 0)
+            {
+              if (short_renaming_scheme)
+              {
+                std::stringstream ss;
+                ss << "X" << index;
+                pv_renaming[inst]=propositional_variable_instantiation(ss.str(),data::data_expression_list());
+              }
+              else
+              {
+                pv_renaming[inst]=pbesinst_rename()(inst);
+              }
+            }
             index++;
           }
         }
       }
 
-      propositional_variable_instantiation operator()(const propositional_variable_instantiation& v)
+      propositional_variable_instantiation operator()(const propositional_variable_instantiation& v) const
       {
         assert(pv_renaming.count(v)>0);
-        return pv_renaming[v];
+        return pv_renaming.at(v);
       }
   };
 } // end namespace detail
@@ -198,21 +232,33 @@ class pbesinst_alternative_lazy_algorithm
     transformation_strategy m_transformation_strategy;
 
     /// \brief Prints a log message for every 1000-th equation
-    void print_equation_count(size_t size) const
+    void print_equation_count(const size_t nr_of_processed_variables, 
+                              const size_t nr_of_generated_variables,
+                              const size_t variable_index_size,
+                              const size_t todo_size) const
     {
-      if (size > 0 && size % 1000 == 0)
+      static time_t last_log_time = time(NULL) - 1;        
+      time_t new_log_time=0;
+      if (time(&new_log_time) > last_log_time)
+      {
+        last_log_time = new_log_time;
+        mCRL2log(mcrl2::log::verbose) << "Processed " << nr_of_processed_variables <<
+                       " and generated " << nr_of_generated_variables <<
+                       " boolean variables with a todo buffer of size ";
+        // if (transformation_strategy>=on_the_fly || search_strategy==depth_first /* || maximal_todo_size!=atermpp::npos TODO reenable maximal todo size */ )
+        // {
+          mCRL2log(mcrl2::log::verbose) << todo_size << " and " << variable_index_size << " stored bes variables";;
+        // }
+        // else
+        // {
+        //   mCRL2log(mcrl2::log::status) << nr_of_generated_variables-nr_of_processed_variables;
+        // }
+        mCRL2log(mcrl2::log::status) << ". " << std::endl;
+      }
+      /* if (size > 0 && size % 1000 == 0)
       {
         mCRL2log(log::verbose) << "Generated " << size << " BES equations" << std::endl;
-      }
-    }
-
-    // renames propositional variables in x
-    template <class RENAMER>
-    pbes_expression rho(const pbes_expression& x, const RENAMER renamer) const
-    {
-      // return replace_propositional_variables(x, pbesinst_rename());
-      
-      return replace_propositional_variables(x, renamer);
+      } */
     }
 
   public:
@@ -257,7 +303,7 @@ class pbesinst_alternative_lazy_algorithm
       }
     }
 
-    inline void add_todo(const propositional_variable_instantiation &X)
+    inline void add_todo(const propositional_variable_instantiation& X)
     {
       todo.push_back(X);
       todo_set.insert(X);
@@ -604,7 +650,7 @@ class pbesinst_alternative_lazy_algorithm
         }
 
         m_equation_count++;
-        print_equation_count(m_equation_count); // Print the number of equations in verbose mode once for every thousand equations. 
+        print_equation_count(m_equation_count, equation.size(), equation_index.size(), todo.size()); // Print the number of equations in verbose mode once for every thousand equations. 
         detail::check_bes_equation_limit(m_equation_count);
       }
     }
@@ -616,31 +662,28 @@ class pbesinst_alternative_lazy_algorithm
       mCRL2log(log::verbose) << "Generated " << m_equation_count << " BES equations in total, generating BES" << std::endl;
       pbes result;
       size_t index = 0;
-      pbesinst_rename long_renamer;
-      detail::rename_pbesinst_consecutively short_renamer(instantiations);
+      detail::rename_pbesinst_consecutively renamer(instantiations,reachable,short_rename_scheme);
       for (const std::vector<propositional_variable_instantiation> vec: instantiations)
       {
         const fixpoint_symbol symbol = symbols[index++];
         for (propositional_variable_instantiation X_e: vec)
         {
-          if (reachable.count(X_e) == 0)
+          if (reachable.count(X_e) > 0)
           {
-            continue;
+            const propositional_variable lhs = propositional_variable(renamer(X_e).name(), data::variable_list());
+            const pbes_expression rhs = replace_propositional_variables_local(equation[X_e], renamer);
+            // The code below would be preferable, using standard visitors, but for larger transition systems
+            // it is deadly slow. Therefore, the local routine replace_propositional_variables_local has been 
+            // contructed that should be replaced in due time.
+            // const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);
+            result.equations().push_back(pbes_equation(symbol, lhs, rhs));
+            // mCRL2log(log::debug) << "Equation: " << atermpp::aterm(symbol) << " " << X_e << " = " << equation[X_e] << std::endl;
+            // mCRL2log(log::debug) << "BESEquation: " << atermpp::aterm(symbol) << " " << lhs << " = " << rhs << std::endl;
           }
-          const propositional_variable lhs = 
-                            (short_rename_scheme?
-                                   propositional_variable(short_renamer(X_e).name(), data::variable_list()):
-                                   propositional_variable(long_renamer(X_e).name(), data::variable_list()));
-          const pbes_expression rhs = 
-                            (short_rename_scheme?
-                                    rho(equation[X_e],short_renamer):
-                                    rho(equation[X_e],long_renamer));
-          result.equations().push_back(pbes_equation(symbol, lhs, rhs));
-          mCRL2log(log::debug) << "Equation: " << atermpp::aterm(symbol) << " " << X_e << " = " << equation[X_e] << std::endl;
         }
       }
 
-      result.initial_state() = (short_rename_scheme?short_renamer(init):long_renamer(init));
+      result.initial_state() = renamer(init);
       return result;
     }
 

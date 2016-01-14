@@ -66,23 +66,30 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
     {
       return Ye;
     }
-    auto const& e = Ye.parameters();
+    const data::data_expression_list& e = Ye.parameters();
     std::string name = Ye.name();
-    if (!e.empty())
+    assert(!e.empty());
+    
+    for (const data::data_expression exp: e)
     {
-      for (auto i = e.begin(); i != e.end(); i++)
+      if (is_function_symbol(exp))
       {
-        if (is_function_symbol(*i) || is_application(*i) || is_abstraction(*i))
-        {
-          name += "@";
-          name += data::pp(*i);
-        }
-        else
-        {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(*i));
-        }
+        // This case is dealt with separately, as it occurs often. 
+        // The use of pp as in the next case is correct for this case also, but very time consuming. 
+        name += "@";
+        name += atermpp::down_cast<data::function_symbol>(exp).name();
+      }
+      else if (is_application(exp) || is_abstraction(exp))
+      {
+        name += "@";
+        name += data::pp(exp);
+      }
+      else
+      {
+        throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(exp));
       }
     }
+    
     return propositional_variable_instantiation(name, data::data_expression_list());
   }
 };
