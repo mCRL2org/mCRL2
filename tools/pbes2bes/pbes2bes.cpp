@@ -85,9 +85,14 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
     /// The output file name
     transformation_strategy m_transformation_strategy; // The strategy to propagate true/false.
     search_strategy m_search_strategy; // The search strategy (breadth or depth first).
-    bool m_use_hashtables;                   // The hashtable option
     remove_level m_erase_unused_bes_variables;       // Remove bes variables whenever they are not used anymore.
     bool m_data_elm;                         // The data elimination option
+    size_t m_maximal_todo_size;              // The maximal size of the todo queue when generating a bes
+    bool m_approximate_true;                 // If approximate_true holds, rhs's of variables that cannot
+                                             // be put in the todo queue are set to false, assuring that
+                                             // a true answer is correct, but false might be incorrect.
+                                             // If approximate_true is false, true is used, meaning that
+                                             // the answer false is correct, and true might be incorrect.
 
     typedef rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > super;
 
@@ -106,9 +111,11 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
         "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
       m_transformation_strategy(mcrl2::pbes_system::lazy),
       m_search_strategy(mcrl2::pbes_system::breadth_first),
-      m_use_hashtables(false),
       m_erase_unused_bes_variables(none),
-      m_data_elm(true)
+      m_data_elm(true),
+      m_maximal_todo_size(atermpp::npos),
+      m_approximate_true(true)
+
     {}
 
 
@@ -119,12 +126,20 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
 
       input_output_tool::parse_options(parser);
 
-      m_use_hashtables            = 0 < parser.options.count("hashtables");
       m_erase_unused_bes_variables= parser.option_argument_as<remove_level>("erase");
       m_data_elm                  = parser.options.count("unused-data") == 0;
       m_transformation_strategy   = parser.option_argument_as<transformation_strategy>("strategy");
       m_search_strategy           = parser.option_argument_as<search_strategy>("search");
+      if (parser.options.count("todo-max"))
+      {
+        m_maximal_todo_size         = parser.option_argument_as< unsigned long >("todo-max");
+      }
+      m_approximate_true          = 0 == parser.options.count("approximate-false");
 
+      if (m_maximal_todo_size==atermpp::npos && !m_approximate_true)
+      {
+        throw parser.error("Setting approximate-false only makes sense when setting todo-max. ");
+      }
     }
 
     void add_options(interface_description& desc)
@@ -151,11 +166,6 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
                  .add_value(all),
                  "use remove level LEVEL to remove bes variables",
                  'e').
-      add_option("hashtables",
-                 "use hashtables when substituting in bes equations, "
-                 "and translate internal expressions to binary decision "
-                 "diagrams (discouraged, due to performance)",
-                 'H').
       add_option("unused_data",
                  "do not remove unused parts of the data specification",
                  'u');
@@ -173,6 +183,12 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
       mCRL2log(verbose) << "  substitution strategy: " << m_transformation_strategy << std::endl;
       mCRL2log(verbose) << "  search strategy:       " << m_search_strategy << std::endl;
       mCRL2log(verbose) << "  erase level:           " << m_erase_unused_bes_variables << std::endl;
+      if (m_maximal_todo_size!=atermpp::npos)
+      {
+        mCRL2log(verbose) << "  limit the todo buffer to " << m_maximal_todo_size << " bes variables and replace removed variables by " <<
+               (m_approximate_true?"false":"true") << std::endl;
+      }
+
 
       // load the pbes
       pbes p;
@@ -197,7 +213,8 @@ class pbes2bes_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
 
       timer().start("instantiation");
 
-      pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy);
+      pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy,
+                                                    m_erase_unused_bes_variables, m_maximal_todo_size, m_approximate_true);
       algorithm.run(p);
       boolean_equation_system bes = pbesinst_conversion(algorithm.get_result());
 
