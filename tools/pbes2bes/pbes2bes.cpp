@@ -54,7 +54,6 @@
 #include "mcrl2/pbes/search_strategy.h"
 
 //Boolean equation systems
-// #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/io.h"

@@ -86,7 +86,7 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
     search_strategy m_search_strategy;                 // The search strategy (depth first/breadth first)
     solution_strategy_t m_solution_strategy;           // Indicates the solver used to solve the generated BES.
     bool m_construct_counter_example;                  // The counter example option
-    mcrl2::bes::remove_level m_erase_unused_bes_variables;       // Remove unused bes variables if true
+    mcrl2::bes::remove_level m_erase_unused_bes_variables;       // Remove unused bes variables according to its value of none, some or all.
     bool m_data_elm;                                   // The data elimination option
     size_t m_maximal_todo_size;                        // The maximal size of the todo queue when generating a bes
     bool m_approximate_true;                           // If approximate_true holds, rhs's of variables that cannot
@@ -146,9 +146,9 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
       }
       m_approximate_true          = 0 == parser.options.count("approximate-false");
 
-      if (parser.options.count("output")) // Output format is deprecated.
+      if (m_maximal_todo_size==atermpp::npos && !m_approximate_true) 
       {
-        throw parser.error("The option --output or -o is deprecated. Use the tool pbes2bes for this functionality. ");
+        throw parser.error("Setting approximate-false only makes sense when setting todo-max. ");
       }
 
       if (m_construct_counter_example && m_erase_unused_bes_variables!=mcrl2::bes::none)
@@ -197,10 +197,6 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
                    .add_value(all),
                  "use remove level LEVEL to remove bes variables",
                  'e').
-      add_option("output",
-                 make_mandatory_argument("FORMAT"),
-                 "use output format FORMAT (this option is deprecated. Use the tool pbes2bes instead).\n",
-                 'o').
       add_option("todo-max", make_mandatory_argument("NUM"),
                  "limit the number of boolean variables that can reside in the todo buffer. If the todo "
                  "stack is full, a random element in the buffer is removed and the rhs of this variable is "
@@ -273,7 +269,8 @@ class pbes2bool_tool: public rewriter_tool<pbes_input_tool<input_tool> >
 
       timer().start("instantiation");
 
-      pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy);
+      pbesinst_alternative_lazy_algorithm algorithm(p.data(), datar, m_search_strategy, m_transformation_strategy,
+                                                    m_erase_unused_bes_variables, m_maximal_todo_size, m_approximate_true);
       algorithm.run(p);
       p=algorithm.get_result(!m_construct_counter_example);
       boolean_equation_system bes = pbesinst_conversion(p);
