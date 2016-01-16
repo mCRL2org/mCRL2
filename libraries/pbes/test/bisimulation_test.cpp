@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(ABP)
   test_bisimulation(lps::detail::LINEAR_ABP_SPECIFICATION(), lps::detail::LINEAR_ABP_SPECIFICATION(), true, true, true, true);
 }
 
-/* BOOST_AUTO_TEST_CASE(SMALLSPEC)
+BOOST_AUTO_TEST_CASE(SMALLSPEC)
 {
   const std::string SMALLSPEC =
     "act a,b;                 \n"
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_CASE(test_fresh_variables)
   std::cout << "\ny " << data::pp(y) << std::endl;
   BOOST_CHECK(y.size() == 1);
   BOOST_CHECK(std::string(y.front().name()) != " e3_Sx0");
-} */
+} 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
