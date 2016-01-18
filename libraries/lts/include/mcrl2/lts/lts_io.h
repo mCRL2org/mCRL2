@@ -83,7 +83,7 @@ std::string mime_type_for_type(const lts_type type);
 
 /** \brief Gives the set of all supported LTS formats.
  * \return The set of all supported LTS formats. */
-const std::set<lts_type> &supported_lts_formats();
+const std::set<lts_type>& supported_lts_formats();
 
 /** \brief Gives a textual list describing supported LTS formats.
  * \param[in] default_format The format that should be marked as default
@@ -93,7 +93,7 @@ const std::set<lts_type> &supported_lts_formats();
  * \return                   A string containing lines of the form
  *                           "  'name' for the ... format". Every line
  *                           except the last is terminated with '\\n'. */
-std::string supported_lts_formats_text(lts_type default_format = lts_none, const std::set<lts_type> &supported = supported_lts_formats());
+std::string supported_lts_formats_text(lts_type default_format = lts_none, const std::set<lts_type>& supported = supported_lts_formats());
 
 /** \brief Gives a textual list describing supported LTS formats.
  * \param[in] supported      The formats that should be considered
@@ -101,7 +101,7 @@ std::string supported_lts_formats_text(lts_type default_format = lts_none, const
  * \return                   A string containing lines of the form
  *                           "  'name' for the ... format". Every line
  *                           except the last is terminated with '\\n'. */
-std::string supported_lts_formats_text(const std::set<lts_type> &supported);
+std::string supported_lts_formats_text(const std::set<lts_type>& supported);
 
 /** \brief Gives a list of extensions for supported LTS formats.
  * \param[in] sep       The separator to use between each extension.
@@ -109,14 +109,14 @@ std::string supported_lts_formats_text(const std::set<lts_type> &supported);
  * \return              A string containing a list of extensions of the
  *                      formats in \a supported, separated by \a sep.
  *                      E.g. "*.aut,*.lts" */
-std::string lts_extensions_as_string(const std::string& sep = ",", const std::set<lts_type> &supported = supported_lts_formats());
+std::string lts_extensions_as_string(const std::string& sep = ",", const std::set<lts_type>& supported = supported_lts_formats());
 
 /** \brief Gives a list of extensions for supported LTS formats.
  * \param[in] supported The formats that should be considered supported.
  * \return              A string containing a list of extensions of the
  *                      formats in \a supported, separated by \a ','.
  *                      E.g. "*.aut,*.lts" */
-std::string lts_extensions_as_string(const std::set<lts_type> &supported);
+std::string lts_extensions_as_string(const std::set<lts_type>& supported);
 
 }
 

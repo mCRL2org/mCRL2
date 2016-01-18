@@ -10,8 +10,6 @@
 
 #include <string>
 #include <set>
-#include <stack>
-#include <bitset>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -143,7 +141,7 @@ std::string mime_type_for_type(const lts_type type)
   return (mime_type_strings[type]);
 }
 
-static const std::set<lts_type> &initialise_supported_lts_formats()
+static const std::set<lts_type>& initialise_supported_lts_formats()
 {
   static std::set<lts_type> s;
   for (size_t i = lts_type_min; i<1+(size_t)lts_type_max; ++i)
@@ -155,13 +153,13 @@ static const std::set<lts_type> &initialise_supported_lts_formats()
   }
   return s;
 }
-const std::set<lts_type> &supported_lts_formats()
+const std::set<lts_type>& supported_lts_formats()
 {
-  static const std::set<lts_type> &s = initialise_supported_lts_formats();
+  static const std::set<lts_type>& s = initialise_supported_lts_formats();
   return s;
 }
 
-std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type> &supported)
+std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type>& supported)
 {
   vector<lts_type> types(supported.begin(), supported.end());
   std::sort(types.begin(), types.end(),
@@ -192,12 +190,12 @@ std::string supported_lts_formats_text(lts_type default_format, const std::set<l
   return r;
 }
 
-std::string supported_lts_formats_text(const std::set<lts_type> &supported)
+std::string supported_lts_formats_text(const std::set<lts_type>& supported)
 {
   return supported_lts_formats_text(lts_none,supported);
 }
 
-std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_type> &supported)
+std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_type>& supported)
 {
   vector<lts_type> types(supported.begin(), supported.end());
   std::sort(types.begin(), types.end(),
@@ -226,7 +224,7 @@ std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_
   return r;
 }
 
-std::string lts_extensions_as_string(const std::set<lts_type> &supported)
+std::string lts_extensions_as_string(const std::set<lts_type>& supported)
 {
   return lts_extensions_as_string(",",supported);
 }
