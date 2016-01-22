@@ -595,7 +595,7 @@ class pbesinst_alternative_lazy_algorithm
       // forall m: Nat . exists k: Nat . val(m == k)
       pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(m_datar);
-      for (pbes_equation eq: pbes_equations)
+      for (pbes_equation& eq: pbes_equations)  // & is important as we change the equation.
       {
         eq.formula() = pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), m_data_spec);
       }
@@ -604,15 +604,15 @@ class pbesinst_alternative_lazy_algorithm
       size_t eqn_index = 0;
       ranks.resize(pbes_equations.size());
       instantiations.resize(pbes_equations.size());
-      for (std::vector<pbes_equation>::const_iterator i = pbes_equations.begin(); i != pbes_equations.end(); ++i, ++eqn_index)
+      for (const pbes_equation& eqn: pbes_equations)
       {
-        const pbes_equation& eqn = *i;
         equation_index[eqn.variable().name()] = eqn_index;
         symbols.push_back(eqn.symbol());
         if (eqn_index > 0)
         {
           ranks[eqn_index] = ranks[eqn_index-1] + (symbols[eqn_index] == symbols[eqn_index-1] ? 0 : 1);
         }
+        ++eqn_index;
       }
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(p.initial_state()));
