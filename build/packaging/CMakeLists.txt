@@ -55,15 +55,20 @@ if(APPLE)
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/Resources)
 
   if(MCRL2_ENABLE_GUI_TOOLS)
+    find_program(MACDEPLOYQT NAMES macdeployqt DOC "Path to macdeployqt executable (in the Qt binary directory)")
+    if (NOT MACDEPLOYQT)
+      message(FATAL_ERROR "Could not find macdeployqt; please add it to your PATH or specify the MACDEPLOYQT variable in CMake.")
+    endif()
     set(EXECUTABLES "")
     foreach(EXECUTABLE ${MCRL2_QT_APPS})
       set(EXECUTABLES "${EXECUTABLES} -executable=${MCRL2_RUNTIME_PATH}/${EXECUTABLE}")
     endforeach()
     install(CODE "
-      message(STATUS \"Executing macdeployqt mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
+      message(STATUS \"Executing ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
       execute_process(
-        COMMAND macdeployqt mCRL2.app ${EXECUTABLES}
+        COMMAND ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES}
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
+        OUTPUT_FILE /tmp/macdeployqt.log
       )
     ")
   endif()
