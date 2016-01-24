@@ -131,7 +131,7 @@ class qt_tool: public Tool, public QtToolBase
     {
       m_argc = argc;
       m_argv = argv;
-      work_around_qtbug_38598();
+      // work_around_qtbug_38598(); This problem is resolved. 
       return static_cast<Tool *>(this)->execute(argc, argv);
     }
 

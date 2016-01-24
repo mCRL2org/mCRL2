@@ -7,7 +7,6 @@ if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
       extendedtabwidget.cpp
       numberedtextedit.cpp
       persistentfiledialog.cpp
-      workarounds_qt.cpp
     DEPENDS
       mcrl2_gui
       mcrl2_utilities
