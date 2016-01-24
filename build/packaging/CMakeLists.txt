@@ -53,6 +53,8 @@ if(APPLE)
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/MacOS)
   install(FILES ${CMAKE_SOURCE_DIR}/build/packaging/icons/mcrl2-orange.icns
           DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/Resources)
+  install(FILES ${CMAKE_SOURCE_DIR}/build/packaging/osx/Contents/bin/qt.conf
+          DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/bin)
 
   if(MCRL2_ENABLE_GUI_TOOLS)
     find_program(MACDEPLOYQT NAMES macdeployqt DOC "Path to macdeployqt executable (in the Qt binary directory)")
