@@ -444,7 +444,8 @@ namespace detail
 
     // Now walk through the tau-reachable stable states s' of impl.
     set_of_states visited;
-    std::deque < state_type > todo_stack({impl});
+    std::deque < state_type > todo_stack;
+    todo_stack.push_back(impl);
 
     while (todo_stack.size()>0)
     {
