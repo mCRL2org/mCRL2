@@ -215,7 +215,7 @@ class SolveTool(Tool):
         super(SolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
 
     def assign_outputs(self):
-        text = self.stdout.strip()
+        text = self.stdout.strip() + self.stderr.strip()
         if text.endswith('true'):
             value = True
         elif text.endswith('false'):

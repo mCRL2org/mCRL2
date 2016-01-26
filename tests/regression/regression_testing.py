@@ -6,15 +6,18 @@
 
 import copy
 import os
+import re
 import sys
 sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python'))]
 from testcommand import YmlTest
 
 MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
+MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'install', 'bin')
+PWD = os.path.abspath(os.path.dirname(__file__))
 
 def abspath(file):
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), file))
+    #return os.path.abspath(os.path.join(os.path.dirname(__file__), file))
+    return os.path.abspath(os.path.join(PWD, file))
 
 def mcrl2file(file):
     return os.path.abspath(MCRL2_ROOT + file)
@@ -61,9 +64,9 @@ regression_tests = {
     'ticket_1090'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1090'),       [abspath('tickets/1090/1.mcrl2'), abspath('tickets/1090/1.mcf')], settings),
     'ticket_1114a'  : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1114/1.mcrl2')], settings),
     'ticket_1114b'  : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1114/2.mcrl2')], settings),
-    'ticket_1143'   : lambda name, settings: PbesrewrTest(name, [abspath('tickets/1143/1.txt')], 'quantifier-one-point'),
+    'ticket_1143'   : lambda name, settings: PbesrewrTest(name, [abspath('tickets/1143/1.txt')], 'quantifier-one-point', settings),
     'ticket_1144'   : lambda name, settings: YmlTest(name, ymlfile('lpsbisim2pbes'),     [abspath('tickets/1144/test1.txt'), abspath('tickets/1144/test2.txt')], settings),
-    'ticket_1167'   : lambda name, settings: CountStatesTest(name, [mcrl2file('/examples/academic/abp/abp.mcrl2')], 74),
+    'ticket_1167'   : lambda name, settings: CountStatesTest(name, [mcrl2file('/examples/academic/abp/abp.mcrl2')], 74, settings = settings),
     'ticket_1206'   : lambda name, settings: YmlTest(name, ymlfile('lps2lts'),           [abspath('tickets/1206/1.mcrl2')], settings),
     'ticket_1218'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1218/1.mcrl2')], settings),
     'ticket_1234'   : lambda name, settings: YmlTest(name, ymlfile('lpsbinary'),         [mcrl2file('/examples/academic/cabp/cabp.mcrl2')], settings),
@@ -93,7 +96,7 @@ slow_regression_tests = {
     'lpsconfcheck_3' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('/examples/industrial/chatbox/chatbox.mcrl2')], 'x', (40, 72), settings.update({ 'timeout': 300, 'memlimit': 500000000 })),
     }
 
-if __name__ == '__main__':
+def test():
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': True, 'cleanup_files': True}
     testdir = 'output'
     if not os.path.exists(testdir):
@@ -102,3 +105,33 @@ if __name__ == '__main__':
     LpsconfcheckTest('lpsconfcheck_1', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], 'T', (0, 10), settings = settings).execute_in_sandbox()
     LpsconfcheckCtauTest('lpsconfcheck_2', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], 'T', (0, 18), settings = settings).execute_in_sandbox()
     CountStatesTest('countstates_abp', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], 74, settings = settings).execute_in_sandbox()
+
+def main(tests):
+    import argparse
+    cmdline_parser = argparse.ArgumentParser()
+    cmdline_parser.add_argument('-t', '--toolpath', dest='toolpath', help='The path where the mCRL2 tools are installed')
+    cmdline_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')
+    cmdline_parser.add_argument('-k', '--keep-files', dest='keep_files', action='store_true', help='Keep the files produced by the test')
+    cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
+    args = cmdline_parser.parse_args()
+    toolpath = args.toolpath
+    if not toolpath:
+        toolpath = MCRL2_INSTALL_DIR
+    settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
+
+    testdir = 'output'
+    if not os.path.exists(testdir):
+        os.mkdir(testdir)
+    os.chdir(testdir)
+
+    for name in sorted(tests):
+        if re.search(args.pattern, name):
+            try:
+                test = tests[name](name, settings)
+                test.execute_in_sandbox()
+            except Exception as e:
+                print 'Test {} failed!'.format(test.name)
+                print e
+
+if __name__ == '__main__':
+    main(regression_tests)
