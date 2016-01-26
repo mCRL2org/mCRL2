@@ -99,11 +99,11 @@ class scc_partitioner
 
     void group_components(const state_type t,
                           const state_type equivalence_class_index,
-                          const std::map < state_type, std::vector < state_type > > &tgt_src,
-                          std::vector < bool > &visited);
+                          const std::map < state_type, std::vector < state_type > >& tgt_src,
+                          std::vector < bool >& visited);
     void dfs_numbering(const state_type t,
-                       const std::map < state_type, std::vector < state_type > > &src_tgt,
-                       std::vector < bool > &visited);
+                       const std::map < state_type, std::vector < state_type > >& src_tgt,
+                       std::vector < bool >& visited);
 
 };
 
@@ -117,7 +117,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
 
   // read and store tau transitions.
   std::map < state_type, std::vector < state_type > > src_tgt;
-  const std::vector <transition> &trans=aut.get_transitions();
+  const std::vector <transition>& trans=aut.get_transitions();
   for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
     if (aut.is_tau(r->label()))
@@ -171,7 +171,7 @@ void scc_partitioner<LTS_TYPE>::replace_transitions(const bool preserve_divergen
   // loop. Such transitions only exist in case divergence preserving branching bisimulation is
   // used. A set is used to remove double occurrences of transitions.
   std::set < transition > resulting_transitions;
-  const std::vector <transition> &trans=aut.get_transitions();
+  const std::vector <transition>& trans=aut.get_transitions();
   for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
     if (!aut.is_tau(r->label()) ||
@@ -220,8 +220,8 @@ template < class LTS_TYPE>
 void scc_partitioner<LTS_TYPE>::group_components(
   const state_type t,
   const state_type equivalence_class_index,
-  const std::map < state_type, std::vector < state_type > > &tgt_src,
-  std::vector < bool > &visited)
+  const std::map < state_type, std::vector < state_type > >& tgt_src,
+  std::vector < bool >& visited)
 {
   if (!visited[t])
   {
@@ -231,7 +231,7 @@ void scc_partitioner<LTS_TYPE>::group_components(
     visited[t] = false;
     if (tgt_src.count(t)>0)
     {
-      const std::vector < state_type > &sources = tgt_src.find(t)->second;
+      const std::vector < state_type >& sources = tgt_src.find(t)->second;
       for (std::vector < state_type >::const_iterator i=sources.begin();
            i!=sources.end(); ++i)
       {
@@ -245,8 +245,8 @@ void scc_partitioner<LTS_TYPE>::group_components(
 template < class LTS_TYPE>
 void scc_partitioner<LTS_TYPE>::dfs_numbering(
   const state_type t,
-  const std::map < state_type, std::vector < state_type > > &src_tgt,
-  std::vector < bool > &visited)
+  const std::map < state_type, std::vector < state_type > >& src_tgt,
+  std::vector < bool >& visited)
 {
   if (visited[t])
   {
@@ -255,7 +255,7 @@ void scc_partitioner<LTS_TYPE>::dfs_numbering(
   visited[t] = true;
   if (src_tgt.count(t)>0)
   {
-    const std::vector < state_type > &targets = src_tgt.find(t)->second;
+    const std::vector < state_type >& targets = src_tgt.find(t)->second;
     for (std::vector < state_type >::const_iterator i=targets.begin();
          i!=targets.end() ; ++i)
     {

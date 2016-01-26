@@ -73,7 +73,7 @@ void Parser::parseFile(QString filename, Graph* graph)
     emit progressed(++progress);
   }
 
-  const std::vector<transition> &trans=l.get_transitions();
+  const std::vector<transition>& trans=l.get_transitions();
   for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
     graph->addEdge(
@@ -173,9 +173,9 @@ void Parser::writeFSMFile(
 void Parser::parseAttrConfig(
     QString filename,
     Graph* graph,
-    map< size_t, size_t > &attrIdxFrTo,
-    map< size_t, vector< string > > &attrCurDomains,
-    map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains)
+    map< size_t, size_t >& attrIdxFrTo,
+    map< size_t, vector< string > >& attrCurDomains,
+    map< size_t, map< size_t, size_t  > >& attrOrigToCurDomains)
 {
 
   QDomDocument xml;
@@ -520,9 +520,9 @@ QDomElement Parser::appendDOF(QDomDocument document, QDomElement root, QString n
 
 void Parser::parseAttribute(
     Graph* graph,
-    map< size_t , size_t > &attrIdxFrTo,
-    map< size_t, vector< string > > &attrCurDomains,
-    map< size_t, map< size_t, size_t  > > &attrOrigToCurDomains,
+    map< size_t , size_t >& attrIdxFrTo,
+    map< size_t, vector< string > >& attrCurDomains,
+    map< size_t, map< size_t, size_t  > >& attrOrigToCurDomains,
     QDomNode AttributeNode)
 {
   try
