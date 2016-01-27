@@ -4,7 +4,6 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import copy
 import os
 import re
 import sys
@@ -16,11 +15,10 @@ MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'install', 'bin')
 PWD = os.path.abspath(os.path.dirname(__file__))
 
 def abspath(file):
-    #return os.path.abspath(os.path.join(os.path.dirname(__file__), file))
     return os.path.abspath(os.path.join(PWD, file))
 
 def mcrl2file(file):
-    return os.path.abspath(MCRL2_ROOT + file)
+    return os.path.abspath(os.path.join(MCRL2_ROOT, file))
 
 def ymlfile(file):
     return '{}/tests/specifications/{}.yml'.format(MCRL2_ROOT, file)
@@ -66,10 +64,10 @@ regression_tests = {
     'ticket_1114b'  : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1114/2.mcrl2')], settings),
     'ticket_1143'   : lambda name, settings: PbesrewrTest(name, [abspath('tickets/1143/1.txt')], 'quantifier-one-point', settings),
     'ticket_1144'   : lambda name, settings: YmlTest(name, ymlfile('lpsbisim2pbes'),     [abspath('tickets/1144/test1.txt'), abspath('tickets/1144/test2.txt')], settings),
-    'ticket_1167'   : lambda name, settings: CountStatesTest(name, [mcrl2file('/examples/academic/abp/abp.mcrl2')], 74, settings = settings),
+    'ticket_1167'   : lambda name, settings: CountStatesTest(name, [mcrl2file('examples/academic/abp/abp.mcrl2')], 74, settings = settings),
     'ticket_1206'   : lambda name, settings: YmlTest(name, ymlfile('lps2lts'),           [abspath('tickets/1206/1.mcrl2')], settings),
     'ticket_1218'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1218/1.mcrl2')], settings),
-    'ticket_1234'   : lambda name, settings: YmlTest(name, ymlfile('lpsbinary'),         [mcrl2file('/examples/academic/cabp/cabp.mcrl2')], settings),
+    'ticket_1234'   : lambda name, settings: YmlTest(name, ymlfile('lpsbinary'),         [mcrl2file('examples/academic/cabp/cabp.mcrl2')], settings),
     'ticket_1241'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1241/1.mcrl2')], settings),
     'ticket_1249'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1249/1.mcrl2')], settings),
     'ticket_1297'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1297'),       [abspath('tickets/1297/1.mcrl2')], settings),
@@ -85,26 +83,53 @@ regression_tests = {
     'ticket_1321'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1321/1.mcrl2')], settings),
     'ticket_1322'   : lambda name, settings: YmlTest(name, ymlfile('pbesstategraph'),    [abspath('tickets/1322/1.txt')], settings),
     'ticket_1345'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1345'),       [abspath('tickets/1345/1.txt')], settings),
-    'lpsconfcheck_1': lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('/examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings),
-    'lpsconfcheck_2': lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('/examples/academic/trains/trains.mcrl2')], 'T', (0, 9), settings),
+    'lpsconfcheck_1': lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings),
+    'lpsconfcheck_2': lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/trains/trains.mcrl2')], 'T', (0, 9), settings),
     }
 
-pbessolve_tests = { 'pbessolve_{}'.format(filename[:-4]) : lambda name, settings: YmlTest(name, ymlfile('pbessolve'), [abspath('pbessolve/{}'.format(filename))]) for filename in sorted(os.listdir(abspath('pbessolve'))) }
+pbessolve_tests = { 'pbessolve_{}'.format(filename[:-4]) : lambda name, settings: YmlTest(name, ymlfile('pbessolve'), [abspath('pbessolve/{}'.format(filename))], settings) for filename in sorted(os.listdir(abspath('pbessolve'))) }
+
+def update_settings(settings, u):
+    settings.update(u)
+    return settings
 
 slow_regression_tests = {
-    'ticket_1093'    : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1093/1.mcrl2')], settings.update({ 'timeout': 300, 'memlimit': 500000000 })),
-    'lpsconfcheck_3' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('/examples/industrial/chatbox/chatbox.mcrl2')], 'x', (40, 72), settings.update({ 'timeout': 300, 'memlimit': 500000000 })),
+    'ticket_1093'    : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1093/1.mcrl2')], update_settings(settings, { 'timeout': 300, 'memlimit': 500000000 })),
+    'lpsconfcheck_3' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/industrial/chatbox/chatbox.mcrl2')], 'Z', (40, 72), update_settings(settings, { 'timeout': 300, 'memlimit': 500000000 })),
     }
 
-def test():
+def run(tests, settings, pattern = '.'):
+    testdir = 'output'
+    if not os.path.exists(testdir):
+        os.mkdir(testdir)
+    os.chdir(testdir)
+
+    for name in sorted(tests):
+        if re.search(pattern, name):
+            try:
+                test = tests[name](name, settings)
+                test.execute_in_sandbox()
+            except Exception as e:
+                print 'Test {} failed!'.format(test.name)
+                print e
+
+def test1():
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': True, 'cleanup_files': True}
     testdir = 'output'
     if not os.path.exists(testdir):
         os.mkdir(testdir)
     os.chdir(testdir)
-    LpsconfcheckTest('lpsconfcheck_1', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], 'T', (0, 10), settings = settings).execute_in_sandbox()
-    LpsconfcheckCtauTest('lpsconfcheck_2', [MCRL2_ROOT + '/examples/academic/cabp/cabp.mcrl2'], 'T', (0, 18), settings = settings).execute_in_sandbox()
-    CountStatesTest('countstates_abp', [MCRL2_ROOT + '/examples/academic/abp/abp.mcrl2'], 74, settings = settings).execute_in_sandbox()
+    LpsconfcheckTest('lpsconfcheck_1',     [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 10), settings = settings).execute_in_sandbox()
+    LpsconfcheckCtauTest('lpsconfcheck_2', [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings = settings).execute_in_sandbox()
+    CountStatesTest('countstates_abp',     [mcrl2file('examples/academic/abp/abp.mcrl2')], 74, settings = settings).execute_in_sandbox()
+
+def test2():
+    settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': True, 'cleanup_files': True}
+    testdir = 'output'
+    if not os.path.exists(testdir):
+        os.mkdir(testdir)
+    os.chdir(testdir)
+    run(slow_regression_tests, settings)
 
 def main(tests):
     import argparse
@@ -118,20 +143,9 @@ def main(tests):
     if not toolpath:
         toolpath = MCRL2_INSTALL_DIR
     settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
-
-    testdir = 'output'
-    if not os.path.exists(testdir):
-        os.mkdir(testdir)
-    os.chdir(testdir)
-
-    for name in sorted(tests):
-        if re.search(args.pattern, name):
-            try:
-                test = tests[name](name, settings)
-                test.execute_in_sandbox()
-            except Exception as e:
-                print 'Test {} failed!'.format(test.name)
-                print e
+    run(tests, settings, args.pattern)
 
 if __name__ == '__main__':
     main(regression_tests)
+    #main(pbessolve_tests)
+    #main(slow_regression_tests)

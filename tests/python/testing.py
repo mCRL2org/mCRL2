@@ -11,12 +11,8 @@ import shutil
 import sys
 sys.path += [os.path.join(os.path.dirname(__file__), '..', '..', 'build', 'python')]
 import testrunner
-from subprocess import  PIPE, STDOUT
 from text_utility import read_text, write_text
-from tools import Node, Tool, ToolFactory
-
-MCRL2_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-MCRL2_INSTALL_DIR = os.path.join(MCRL2_ROOT, 'stage', 'bin')
+from tools import Node, ToolFactory
 
 class ToolInputError(Exception):
     def __init__(self, name, value):
@@ -41,6 +37,9 @@ class Test:
     def __init__(self, file, settings):
         import yaml
         from collections import Counter
+
+        if not settings:
+            raise RuntimeError('ERROR in Test.__init__: settings == None')
 
         self.verbose = settings.get('verbose', True)
         self.toolpath = settings.get('toolpath', '')
@@ -264,6 +263,7 @@ def run_pbes_test(name, testfile, p, settings):
     inputfiles = [filename]
     result = run_yml_test(name, testfile, inputfiles, settings)
     os.remove(filename)
+    return result
 
 def run_pbes_test_with_counter_example_minimization(name, testfile, p, settings):
     result = run_pbes_test(name, testfile, p, settings)
