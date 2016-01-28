@@ -98,7 +98,9 @@ slow_regression_tests = {
     'lpsconfcheck_3' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/industrial/chatbox/chatbox.mcrl2')], 'Z', (40, 72), update_settings(settings, { 'timeout': 300, 'memlimit': 500000000 })),
     }
 
-def run(tests, settings, pattern = '.'):
+# Runs the tests that are present in the map 'tests', with the given settings.
+# Using the pattern argument, tests can be selected by name.
+def run_tests(tests, settings, pattern = '.'):
     testdir = 'output'
     if not os.path.exists(testdir):
         os.mkdir(testdir)
@@ -129,23 +131,34 @@ def test2():
     if not os.path.exists(testdir):
         os.mkdir(testdir)
     os.chdir(testdir)
-    run(slow_regression_tests, settings)
+    run_tests(slow_regression_tests, settings)
 
+def print_names(tests):
+    print '--- available tests ---'
+    for name in sorted(tests):
+        print name
+
+# Command line interface to run tests.
 def main(tests):
     import argparse
     cmdline_parser = argparse.ArgumentParser()
     cmdline_parser.add_argument('-t', '--toolpath', dest='toolpath', help='The path where the mCRL2 tools are installed')
     cmdline_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')
     cmdline_parser.add_argument('-k', '--keep-files', dest='keep_files', action='store_true', help='Keep the files produced by the test')
+    cmdline_parser.add_argument('-n', '--names', dest='names', action='store_true', help='Print the names of the available tests')
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
     args = cmdline_parser.parse_args()
+    if args.names:
+        print_names(tests)
+        return
     toolpath = args.toolpath
     if not toolpath:
         toolpath = MCRL2_INSTALL_DIR
     settings = {'toolpath': toolpath, 'verbose': args.verbose, 'cleanup_files': not args.keep_files, 'allow-non-zero-return-values': True}
-    run(tests, settings, args.pattern)
+    run_tests(tests, settings, args.pattern)
 
 if __name__ == '__main__':
-    main(regression_tests)
-    #main(pbessolve_tests)
+    tests = regression_tests
+    tests.update(pbessolve_tests)
+    main(tests)
     #main(slow_regression_tests)
