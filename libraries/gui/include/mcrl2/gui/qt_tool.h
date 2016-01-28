@@ -31,22 +31,26 @@ namespace gui
 namespace qt
 {
 
-class QtToolBase : public QObject
+class HelpMenu : public QMenu
 {
   Q_OBJECT
 
   private:
+    QMainWindow *m_window;
     QString m_name;
     QString m_author;
     QString m_description;
     QString m_manualUrl;
-    QMainWindow *m_window;
 
-  protected:
-
-    bool show_main_window(QMainWindow *window)
+  public:
+    HelpMenu(QMainWindow *window, const std::string &name, const std::string &author, const std::string &description, const std::string &manualUrl):
+      QMenu(window->menuBar()),
+      m_window(window),
+      m_name(QString::fromStdString(name)),
+      m_author(QString::fromStdString(author)),
+      m_description(QString::fromStdString(description)),
+      m_manualUrl(QString::fromStdString(manualUrl))
     {
-      m_window = window;
       QAction *actionContents = new QAction(window);
       actionContents->setText("&Contents");
       actionContents->setShortcut(QString("F1"));
@@ -56,15 +60,10 @@ class QtToolBase : public QObject
       actionAbout->setText("&About");
       connect(actionAbout, SIGNAL(triggered()), this, SLOT(showAbout()));
 
-      QMenu *menuHelp = new QMenu(window->menuBar());
-      menuHelp->setTitle("&Help");
-      menuHelp->addAction(actionContents);
-      menuHelp->addSeparator();
-      menuHelp->addAction(actionAbout);
-      window->menuBar()->addAction(menuHelp->menuAction());
-
-      window->show();
-      return QApplication::instance()->exec() == 0;
+      setTitle("&Help");
+      addAction(actionContents);
+      addSeparator();
+      addAction(actionAbout);
     }
 
   protected slots:
@@ -86,25 +85,18 @@ class QtToolBase : public QObject
       message += "<p>Version: " + version + "</p>";
       QMessageBox::about(m_window, QString("About ") + m_name, message);
     }
-
-  public:
-    QtToolBase(QString name, QString author, QString description, QString manualUrl):
-      m_name(name),
-      m_author(author),
-      m_description(description),
-      m_manualUrl(manualUrl)
-    {
-    }
 };
 
 template <typename Tool>
-class qt_tool: public Tool, public QtToolBase
+class qt_tool: public Tool
 {
-  private:
-    int m_argc;
-    char** m_argv;
   protected:
     QApplication* m_application;
+    std::string m_name;
+    std::string m_author;
+    std::string m_about_description;
+    std::string m_manual_url;
+
   public:
     qt_tool(const std::string& name,
             const std::string& author,
@@ -115,24 +107,27 @@ class qt_tool: public Tool, public QtToolBase
             std::string known_issues = ""
            )
       : Tool(name, author, what_is, tool_description, known_issues),
-        QtToolBase(QString::fromStdString(name), QString::fromStdString(author), QString::fromStdString(about_description), QString::fromStdString(manual_url)),
-        m_application(NULL)
+        m_application(NULL),
+        m_name(name),
+        m_author(author), 
+        m_about_description(about_description),
+        m_manual_url(manual_url)
     {
-    }
-
-    virtual bool pre_run()
-    {
-      m_application = new QApplication(m_argc, m_argv);
-      qsrand(QDateTime::currentDateTime().toTime_t());
-      return true;
     }
 
     int execute(int& argc, char** argv)
     {
-      m_argc = argc;
-      m_argv = argv;
-      // work_around_qtbug_38598(); This problem is resolved. 
-      return static_cast<Tool *>(this)->execute(argc, argv);
+      m_application = new QApplication(argc, argv);
+      qsrand(QDateTime::currentDateTime().toTime_t());
+      return Tool::execute(argc, argv);
+    }
+
+    bool show_main_window(QMainWindow *window)
+    {
+      HelpMenu *menu = new HelpMenu(window, m_name, m_author, m_about_description, m_manual_url);
+      window->menuBar()->addAction(menu->menuAction());
+      window->show();
+      return m_application->exec() == 0;
     }
 
     virtual ~qt_tool()
