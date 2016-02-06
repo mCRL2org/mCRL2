@@ -126,6 +126,8 @@ class qt_tool: public Tool
     {
       HelpMenu *menu = new HelpMenu(window, m_name, m_author, m_about_description, m_manual_url);
       window->menuBar()->addAction(menu->menuAction());
+      // window->menuBar()->setNativeMenuBar(false); // Possible but ugly workaround as menu bar is not shown until application 
+                                                     // is unfocused and focused again on the Mac. 
       window->show();
       return m_application->exec() == 0;
     }
