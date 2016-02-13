@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jan Friso Groote
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,11 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file linearization_test.cpp
+/// \file stochastic_linearization_test.cpp
 /// \brief Add your file description here.
 
 #include <boost/test/included/unit_test_framework.hpp>
-
 
 #include <iostream>
 #include <string>
@@ -76,78 +75,33 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
   }
 }
 
-BOOST_AUTO_TEST_CASE(The_unreachability_of_tau_is_not_properly_recognized)
+BOOST_AUTO_TEST_CASE(Check_that_a_probability_distribution_works_well_in_combination_with_a_nonterminating_initial_process)
 {
   const std::string spec =
-     "init (true -> delta <> delta) . tau;";
+    "act a:Bool;\n"
+    "init dist x:Bool[1/2].a(x);\n";
 
   run_linearisation_test_case(spec,true);
 }
 
-#ifndef MCRL2_SKIP_LONG_TESTS 
-
-BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
+BOOST_AUTO_TEST_CASE(Check_distribution_of_dist_over_plus)
 {
   const std::string spec =
-     "sort  State = struct S;\n"
-     "proc X = ((lambda x: Nat. S)(3) == S)->tau.X;\n"
-     "init X;\n";
+    "act a,b:Bool;\n"
+    "init dist x:Bool[1/2].a(x).delta+dist y:Bool[1/2].a(y).delta;\n";
 
   run_linearisation_test_case(spec,true);
 }
 
-BOOST_AUTO_TEST_CASE(Check_whether_the_sum_variable_will_not_get_the_same_name_as_the_newly_introduced_process_parameter)
+BOOST_AUTO_TEST_CASE(Check_distribution_of_dist_over_sum)
 {
   const std::string spec =
-     "act  base ;\n"
-     "     exponent: Real;\n"
-     "proc Test_exponentation =\n"
-     "       sum r: Real. base . exponent(r).delta ;\n"
-     "\n"
-     "init Test_exponentation+delta;\n";
+    "act a:Bool#Bool;\n"
+    "init dist x:Bool[1/2].sum y:Bool.a(x,y).delta;\n";
 
   run_linearisation_test_case(spec,true);
 }
 
-BOOST_AUTO_TEST_CASE(Check_whether_the_sum_variable_will_not_get_the_same_name_as_the_newly_introduced_process_parameter2)
-{
-  const std::string spec =
-     "act\n"
-     "  a,c,b,d;\n"
-     "\n"
-     "proc\n"
-     "  P = b;\n"
-     "  Q = (((tau) . (sum b1: Bool . (sum b2: Bool . (R)))) . (tau)) + (((delta) . (tau)) . (R));\n"
-     "  R = ((true) -> (a)) + ((true) -> (sum b1: Bool . ((d) + ((d) + (a)))) <> ((d) + (a)));\n"
-     "\n"
-     "init\n"
-     "  hide({b}, ((R) || (Q)) || (P));\n";
-
-  run_linearisation_test_case(spec,true);
-} 
-
-BOOST_AUTO_TEST_CASE(linearisation_of_the_enclosed_spec_caused_a_name_conflict_with_the_option_lstack)
-{
-  const std::string spec =
-     "act\n"
-     "  c;\n"
-     "\n"
-     "proc\n"
-     "  Q = sum b1: Bool . R;\n"
-     "  R = sum b1: Bool . c.delta;\n"
-     "\n"
-     "init Q;\n";
-
-  run_linearisation_test_case(spec,true);
-} 
-
-#else // ndef MCRL2_SKIP_LONG_TESTS
-
-BOOST_AUTO_TEST_CASE(skip_linearization_test)
-{
-}
-
-#endif // ndef MCRL2_SKIP_LONG_TESTS
 
 boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
 {

@@ -2790,6 +2790,24 @@ class specification_basic_type:public boost::noncopyable
                              body2));
       }
 
+      if (is_stochastic_operator(body1))
+      {
+        const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(body1);
+        variable_list stochvars=sto.variables();
+
+        // See explanation at sum operator above.
+        mutable_map_substitution<> sigma;
+        std::set < variable > lhs_variables_in_sigma;
+        alphaconvertprocess(stochvars,sigma,body2,lhs_variables_in_sigma);
+        return stochastic_operator(
+                 stochvars,
+                 sto.distribution(),
+                 putbehind(
+                       substitute_pCRLproc(sto.operand(),sigma,lhs_variables_in_sigma),
+                       body2));
+      }
+
+
       if (is_action(body1))
       {
         return seq(body1,body2);

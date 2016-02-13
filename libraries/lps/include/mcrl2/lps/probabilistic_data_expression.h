@@ -19,7 +19,6 @@
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
-// #include "mcrl2/data/standard_numbers_utility.h"
 
 
 namespace mcrl2

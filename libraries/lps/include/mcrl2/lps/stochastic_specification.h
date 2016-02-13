@@ -111,6 +111,19 @@ std::ostream& operator<<(std::ostream& out, const stochastic_specification& x)
 }
 //--- end generated class stochastic_specification ---//
 
+inline
+bool operator==(const stochastic_specification& spec1, const stochastic_specification& spec2)
+{
+  return specification_to_aterm(spec1) == specification_to_aterm(spec2);
+}
+
+/// \brief Inequality operator
+inline
+bool operator!=(const stochastic_specification& spec1, const stochastic_specification& spec2)
+{
+  return !(spec1 == spec2);
+}
+
 std::string pp_with_summand_numbers(const stochastic_specification& x);
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
