@@ -23,7 +23,7 @@ using namespace mcrl2;
 void test_fsm_parser(const std::string& text)
 {
   // parse the text
-  lts::lts_fsm_t fsm;
+  lts::probabilistic_lts_fsm_t fsm;
   lts::parse_fsm_specification(text, fsm);
 
   // write the fsm to a file

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lts/parse.h
-/// \brief add your file description here.
+/// \brief A simple straighforward parser for .fsm files.
 
 #ifndef MCRL2_LTS_PARSE_H
 #define MCRL2_LTS_PARSE_H
@@ -120,7 +120,7 @@ class simple_fsm_parser
     }
 
   public:
-    simple_fsm_parser(lts_fsm_t& fsm)
+    simple_fsm_parser(probabilistic_lts_fsm_t& fsm)
       : builder(fsm)
     {
       // \s*([a-zA-Z_][a-zA-Z0-9_'@]*)\((\d+)\)\s*([a-zA-Z_][a-zA-Z0-9_'@#\-> \t=,\\(\\):]*)?\s*((\"[^\"]*\"\s*)*)
@@ -160,14 +160,14 @@ class simple_fsm_parser
 } // namespace detail
 
 inline
-void parse_fsm_specification(std::istream& from, lts_fsm_t& result)
+void parse_fsm_specification(std::istream& from, probabilistic_lts_fsm_t& result)
 {
   detail::simple_fsm_parser fsm_parser(result);
   fsm_parser.run(from);
 }
 
 inline
-void parse_fsm_specification(const std::string& text, lts_fsm_t& result)
+void parse_fsm_specification(const std::string& text, probabilistic_lts_fsm_t& result)
 {
   std::istringstream is(text);
   parse_fsm_specification(is, result);

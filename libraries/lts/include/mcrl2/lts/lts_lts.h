@@ -33,6 +33,8 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
+#include "mcrl2/lps/probabilistic_data_expression.h"
+#include "mcrl2/lts/probabilistic_state.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 
 namespace mcrl2
@@ -116,7 +118,7 @@ inline std::string pp(const state_label_lts l)
 
 /** \brief A class containing the values for action labels for the .lts format.
     \details An action label is a multi_action. */
-class action_label_lts:public mcrl2::lps::multi_action
+class action_label_lts: public mcrl2::lps::multi_action
 {
   public:
 
@@ -199,15 +201,14 @@ inline action_label_lts parse_lts_action(
   return action_label_lts(atermpp::aterm_appl(core::detail::function_symbol_MultAct(), ma.actions()));
 }
 
-/** \brief This class contains labelled transition systems in .lts format.
-    \details In this .lts format, an action label is a multi action, and a
-           state label is an expression of the form STATE(t1,...,tn) where
-           ti are data expressions.
-*/
-class lts_lts_t : public probabilistic_lts< state_label_lts, action_label_lts, data::data_expression >
+namespace detail
 {
 
-  private:
+/** \brief a base class for lts_lts_t and probabilistic_lts_t.
+ */
+class lts_lts_base
+{
+  protected:
     bool m_has_valid_data_spec;
     data::data_specification m_data_spec;
     bool m_has_valid_parameters;
@@ -216,74 +217,44 @@ class lts_lts_t : public probabilistic_lts< state_label_lts, action_label_lts, d
     process::action_label_list m_action_decls;
 
   public:
-
-    /** \brief Creates an object containing no information. */
-    lts_lts_t():
-      // m_type(lts_none),
-      m_has_valid_data_spec(false),
+    /// \brief Default constructor
+    lts_lts_base()
+    : m_has_valid_data_spec(false),
       m_has_valid_parameters(false),
       m_has_valid_action_decls(false)
     {}
 
-    /** \brief Creates an object containing a muCRL specification.
-     * \param[in] t The muCRL specification that will be stored in the object. */
-    lts_lts_t(const atermpp::aterm& t);
-
-    /** \brief Creates an object containing an mCRL2 specification.
-     * \param[in] spec The mCRL2 specification that will be stored in the object. */
-    lts_lts_t(lps::specification const& spec);
-
-    /** \brief Copy constructor */
-    lts_lts_t(const lts_lts_t& l):
-      probabilistic_lts< state_label_lts, action_label_lts, data::data_expression >(l),
-      m_has_valid_data_spec(l.m_has_valid_data_spec),
+    /// \brief Copy constructor
+    lts_lts_base(const lts_lts_base& l)
+    : m_has_valid_data_spec(l.m_has_valid_data_spec),
       m_data_spec(l.m_data_spec),
       m_has_valid_parameters(l.m_has_valid_parameters),
       m_parameters(l.m_parameters),
       m_has_valid_action_decls(l.m_has_valid_action_decls),
-      m_action_decls(l.m_action_decls)
+      m_action_decls(l.m_action_decls) 
     {}
 
-    /** \brief Standard destructor for the class lts_lts
-    */
-    ~lts_lts_t()
-    {}
-
-    /** \brief Swap function for this lts. */
-    void swap(lts_lts_t& l)
+    void swap(lts_lts_base& l)
     {
-      probabilistic_lts< state_label_lts, action_label_lts, data::data_expression >::swap(l);
-
-      {
-        const bool aux=m_has_valid_data_spec;
-        m_has_valid_data_spec=l.m_has_valid_data_spec;
-        l.m_has_valid_data_spec=aux;
-      }
-      {
-        const data::data_specification aux=m_data_spec;
-        m_data_spec=l.m_data_spec;
-        l.m_data_spec=aux;
-      }
-      {
-        const bool aux=m_has_valid_parameters;
-        m_has_valid_parameters=l.m_has_valid_parameters;
-        l.m_has_valid_parameters=aux;
-      }
-      {
-        const data::variable_list aux=m_parameters;
-        m_parameters=l.m_parameters;
-        l.m_parameters=aux;
-      }
-      {
-        const bool aux=m_has_valid_action_decls;
-        m_has_valid_action_decls=l.m_has_valid_action_decls;
-        l.m_has_valid_action_decls=aux;
-      }
-      {
-        const process::action_label_list aux=m_action_decls;
-        m_action_decls=l.m_action_decls;
-        l.m_action_decls=aux;
-      }
+      bool aux=m_has_valid_data_spec;
+      m_has_valid_data_spec=l.m_has_valid_data_spec;
+      l.m_has_valid_data_spec=aux;
+      
+      const data::data_specification auxd=m_data_spec;
+      m_data_spec=l.m_data_spec;
+      l.m_data_spec=auxd;
+      
+      aux=m_has_valid_parameters;
+      m_has_valid_parameters=l.m_has_valid_parameters;
+      l.m_has_valid_parameters=aux;
+      
+      m_parameters.swap(l.m_parameters);
+      
+      aux=m_has_valid_action_decls;
+      m_has_valid_action_decls=l.m_has_valid_action_decls;
+      l.m_has_valid_action_decls=aux;
+      
+      m_action_decls.swap(l.m_action_decls);
     }
 
     /** \brief Yields the type of this lts, in this case lts_lts. */
@@ -294,7 +265,7 @@ class lts_lts_t : public probabilistic_lts< state_label_lts, action_label_lts, d
 
     /** \brief Returns the mCRL2 data specification of this LTS.
     */
-    data::data_specification data() const
+    const data::data_specification& data() const
     {
       assert(m_has_valid_data_spec);
       return m_data_spec;
@@ -309,7 +280,7 @@ class lts_lts_t : public probabilistic_lts< state_label_lts, action_label_lts, d
 
     /** \brief Return action label declarations stored in this LTS.
     */
-    process::action_label_list action_labels() const
+    const process::action_label_list& action_labels() const
     {
       assert(m_has_valid_action_decls);
       return m_action_decls;
@@ -334,7 +305,7 @@ class lts_lts_t : public probabilistic_lts< state_label_lts, action_label_lts, d
     /** \brief Set the mCRL2 data specification of this LTS.
      * \param[in] spec  The mCRL2 data specification for this LTS.
     */
-    void set_data(data::data_specification const& spec)
+    void set_data(const data::data_specification& spec)
     {
       m_has_valid_data_spec=true;
       m_data_spec=spec;
@@ -349,7 +320,7 @@ class lts_lts_t : public probabilistic_lts< state_label_lts, action_label_lts, d
 
     /** \brief Return the process parameters stored in this LTS.
     */
-    data::variable_list process_parameters() const
+    const data::variable_list& process_parameters() const
     {
       assert(m_has_valid_parameters);
       return m_parameters;
@@ -358,14 +329,14 @@ class lts_lts_t : public probabilistic_lts< state_label_lts, action_label_lts, d
     /** \brief Returns the i-th parameter of the state vectors stored in this LTS.
      * \return The state parameters stored in this LTS.
     */
-    data::variable process_parameter(size_t i) const
+    const data::variable& process_parameter(size_t i) const
     {
       assert(i<m_parameters.size());
       assert(m_has_valid_parameters);
       data::variable_list::const_iterator j=m_parameters.begin();
       for(size_t c=0; c!=i; ++j, ++c)
       {}
-      return data::variable(*j);
+      return *j;
     }
 
 
@@ -377,6 +348,85 @@ class lts_lts_t : public probabilistic_lts< state_label_lts, action_label_lts, d
       m_has_valid_parameters=true;
       m_parameters=params;
     }
+
+};
+
+} // namespace detail
+
+
+/** \brief This class contains labelled transition systems in .lts format.
+    \details In this .lts format, an action label is a multi action, and a
+           state label is an expression of the form STATE(t1,...,tn) where
+           ti are data expressions.
+*/
+class lts_lts_t : public lts< state_label_lts, action_label_lts, detail::lts_lts_base >
+{
+  public:
+    typedef lts< state_label_lts, action_label_lts, detail::lts_lts_base > super;
+
+    /** \brief Creates an object containing no information. */
+    lts_lts_t()
+    {}
+
+    /** \brief Creates an object containing a muCRL specification.
+     * \param[in] t The muCRL specification that will be stored in the object. */
+    lts_lts_t(const atermpp::aterm& t);
+
+    /** \brief Creates an object containing an mCRL2 specification.
+     * \param[in] spec The mCRL2 specification that will be stored in the object. */
+    lts_lts_t(lps::specification const& spec);
+
+    /** \brief Copy constructor */
+    lts_lts_t(const lts_lts_t& l):
+      super(l)
+    {}
+
+    /** \brief Load the labelled transition system from file.
+     *  \details If the filename is empty, the result is read from stdout.
+     *  \param[in] filename Name of the file to which this lts is written.
+     */
+    void load(const std::string& filename);
+
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is read from stdin.
+     *  \param[in] filename Name of the file from which this lts is read.
+     */
+    void save(const std::string& filename) const;
+};
+
+/** \brief This class contains probabilistic labelled transition systems in .lts format.
+    \details In this .lts format, an action label is a multi action, and a
+           state label is an expression of the form STATE(t1,...,tn) where
+           ti are data expressions.
+*/
+class probabilistic_lts_lts_t : 
+         public probabilistic_lts< state_label_lts, 
+                                   action_label_lts, 
+                                   probabilistic_state<size_t, lps::probabilistic_data_expression>, 
+                                   detail::lts_lts_base >
+{
+  public:
+    typedef probabilistic_lts< state_label_lts, 
+                               action_label_lts, 
+                               probabilistic_state_t,
+                               detail::lts_lts_base > super;
+
+    /** \brief Creates an object containing no information. */
+    probabilistic_lts_lts_t()
+    {}
+
+    /** \brief Creates an object containing a muCRL specification.
+     * \param[in] t The muCRL specification that will be stored in the object. */
+    probabilistic_lts_lts_t(const atermpp::aterm& t);
+
+    /** \brief Creates an object containing an mCRL2 specification.
+     * \param[in] spec The mCRL2 specification that will be stored in the object. */
+    probabilistic_lts_lts_t(lps::specification const& spec);
+
+    /** \brief Copy constructor */
+    probabilistic_lts_lts_t(const probabilistic_lts_lts_t& l):
+      super(l)
+    {}
 
     /** \brief Load the labelled transition system from file.
      *  \details If the filename is empty, the result is read from stdout.

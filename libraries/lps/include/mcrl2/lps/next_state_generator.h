@@ -25,7 +25,9 @@
 #include "mcrl2/data/find_equalities.h"
 #endif
 #include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/lps/state_probability_pair.h"
 #include "mcrl2/lps/state.h"
+#include "mcrl2/lps/probabilistic_data_expression.h"
 
 namespace mcrl2
 {
@@ -108,8 +110,8 @@ class next_state_generator
         atermpp::shared_subset<summand_t>::iterator begin(const lps::state& state_t);
     };
 
-    class state_probability_pair
-    {
+    typedef mcrl2::lps::state_probability_pair<lps::state, lps::probabilistic_data_expression> state_probability_pair;
+    /* {
       protected:
         // A state 
         lps::state m_state;
@@ -139,7 +141,7 @@ class next_state_generator
         {
           return m_probability;
         }
-    };
+    }; */
 
     class transition_t
     {

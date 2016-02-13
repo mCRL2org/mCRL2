@@ -12,8 +12,10 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/parse.h"
+#include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"
 
 using namespace mcrl2::core;
 
@@ -24,18 +26,7 @@ namespace mcrl2
 namespace lts
 {
 
-void lts_dot_t::save(const string& filename) const
-{
-  ofstream os(filename.c_str());
-  if (!os.is_open())
-  {
-    throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");
-  }
-  save(os);
-  os.close();
-}
-
-void lts_dot_t::save(std::ostream& os) const
+void probabilistic_lts_dot_t::save(std::ostream& os) const
 {
   // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
   os << "digraph G {" << endl;
@@ -46,13 +37,21 @@ void lts_dot_t::save(std::ostream& os) const
   os << "node [ width=0.25, height=0.25, label=\"\" ];" << endl;
   if (num_states() > 0)
   {
-    if (has_state_info())
-    {
-      os << state_label(initial_state()).name();
+    if (initial_probabilistic_state().size()==1)
+    { 
+      const size_t initial_state=initial_probabilistic_state().begin()->state();
+      if (has_state_info())
+      {
+        os << state_label(initial_state).name();
+      }
+      else
+      {
+        os << "S" << initial_state;
+      }
     }
     else
     {
-      os << "S" << initial_state();
+      throw mcrl2::runtime_error("Cannnot save a probabilistic transition system in .dot format.");
     }
 
     os << " [ peripheries=2 ];" << endl;
@@ -77,7 +76,11 @@ void lts_dot_t::save(std::ostream& os) const
   {
     if (has_state_info())
     {
-      os << state_label(t->from()).name() << "->" << state_label(t->to()).name() << "[label=\"" <<
+      if (probabilistic_state(t->to()).size()>1)
+      {
+        throw mcrl2::runtime_error("Cannot save probabilistic states in .dot format.");
+      }
+      os << state_label(t->from()).name() << "->" << state_label(probabilistic_state(t->to()).begin()->state()).name() << "[label=\"" <<
          mcrl2::lts::pp(action_label(t->label())) << "\"];" << endl;
     }
     else
@@ -88,6 +91,39 @@ void lts_dot_t::save(std::ostream& os) const
   }
 
   os << "}" << endl;
+}
+
+void probabilistic_lts_dot_t::save(const string& filename) const
+{
+  ofstream os(filename.c_str());
+  if (!os.is_open())
+  {
+    throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");
+  }
+  save(os);
+  os.close();
+}
+
+void lts_dot_t::save(std::ostream& os) const
+{
+  probabilistic_lts_dot_t l;
+  detail::translate_to_probabilistic_lts
+            <state_label_dot,
+             action_label_string,
+             probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+             detail::lts_dot_base>(*this,l);
+  l.save(os);
+}
+
+void lts_dot_t::save(const string& filename) const
+{
+  ofstream os(filename.c_str());
+  if (!os.is_open())
+  {
+    throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");
+  }
+  save(os);
+  os.close();
 }
 
 }

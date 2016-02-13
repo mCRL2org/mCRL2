@@ -296,7 +296,7 @@ class lts2lps_tool : public input_output_tool
         }
         case lts_dot:
         {
-          return transform_lps2lts<lts_dot_t>();
+          throw mcrl2::runtime_error("The dot format cannot serve as input anymore.");
         }
       }
       return true;

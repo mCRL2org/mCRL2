@@ -184,7 +184,7 @@ class ltsinfo_tool : public ltsinfo_base
         }
         case lts_dot:
         {
-          return provide_information<lts_dot_t>();
+          throw mcrl2::runtime_error("Cannot read .dot files anymore.");
         }
       }
       return true;

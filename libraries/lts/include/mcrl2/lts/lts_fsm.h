@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "mcrl2/lts/probabilistic_arbitrary_size_label.h"
+#include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
@@ -74,16 +74,14 @@ inline std::string pp(const state_label_fsm l)
   return s;
 }
 
-/** \brief The class lts_fsm_t contains labelled transition systems in .fsm format.
-    \details The .fsm format consists of an labelled transition system where the
-             action labels are strings, and the state labels are vectors of integers.
-             The integers at position i corresponds to a string, which are maintained
-             in a separate vector for memory efficiency.
-*/
-class lts_fsm_t : public probabilistic_lts< state_label_fsm, action_label_string, probabilistic_arbitrary_size_label >
+namespace detail
 {
+class lts_fsm_base
+{
+  public:
+    typedef mcrl2::lts::probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
+
   protected:
-    typedef probabilistic_lts< state_label_fsm, action_label_string, probabilistic_arbitrary_size_label > super;
 
     /** \brief state_element_values contain the values that can occur at the i-th
        position of a state label */
@@ -104,6 +102,13 @@ class lts_fsm_t : public probabilistic_lts< state_label_fsm, action_label_string
       return lts_fsm;
     }
 
+    /** \brief Standard swap function */
+    void swap(lts_fsm_base& other)
+    {
+      m_state_element_values.swap(other.m_state_element_values);
+      m_parameters.swap(other.m_parameters);
+    }
+
     /** \brief Clear the transitions system.
      *  \details The state values, action values and transitions are
      *  reset. The number of states, actions and transitions are set to 0.
@@ -113,7 +118,6 @@ class lts_fsm_t : public probabilistic_lts< state_label_fsm, action_label_string
     {
       m_state_element_values.clear();
       m_parameters.clear();
-      super::clear();
     }
 
     /** \brief Provides the vector of strings that correspond to the values
@@ -199,6 +203,51 @@ class lts_fsm_t : public probabilistic_lts< state_label_fsm, action_label_string
       m_parameters.push_back(std::pair<std::string,std::string>(name,sort));
       m_state_element_values.push_back(std::vector < std::string >());
     }
+
+
+};
+
+} // end namespace detail
+
+/** \brief The class lts_fsm_t contains labelled transition systems in .fsm format.
+    \details The .fsm format consists of an labelled transition system where the
+             action labels are strings, and the state labels are vectors of integers.
+             The integers at position i corresponds to a string, which are maintained
+             in a separate vector for memory efficiency.
+*/
+class lts_fsm_t : public lts< state_label_fsm, action_label_string, detail::lts_fsm_base >
+{
+  public:
+    typedef lts< state_label_fsm, action_label_string, detail::lts_fsm_base > super;
+
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is read from stdout.
+     *  \param[in] filename Name of the file from which this lts is read.
+     */
+    void load(const std::string& filename);
+
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is written to stdout.
+     *  \param[in] filename Name of the file to which this lts is written.
+     */
+    void save(const std::string& filename) const;
+};
+
+/** \brief The class lts_fsm_t contains labelled transition systems in .fsm format.
+    \details The .fsm format consists of an labelled transition system where the
+             action labels are strings, and the state labels are vectors of integers.
+             The integers at position i corresponds to a string, which are maintained
+             in a separate vector for memory efficiency.
+*/
+class probabilistic_lts_fsm_t : 
+        public probabilistic_lts< state_label_fsm, 
+                                  action_label_string, 
+                                  probabilistic_state< size_t, probabilistic_arbitrary_precision_fraction >,
+                                  detail::lts_fsm_base >
+{
+  public:
+
+    typedef probabilistic_lts< state_label_fsm, action_label_string, probabilistic_state_t, detail::lts_fsm_base > super;
 
     /** \brief Save the labelled transition system to file.
      *  \details If the filename is empty, the result is read from stdout.

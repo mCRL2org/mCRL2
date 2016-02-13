@@ -185,7 +185,7 @@ class ltscompare_tool : public ltscompare_base
         }
         case lts_dot:
         {
-          return lts_compare<lts_dot_t>();
+          throw mcrl2::runtime_error("Reading the .dot format is not supported anymore.");
         }
       }
       return true;

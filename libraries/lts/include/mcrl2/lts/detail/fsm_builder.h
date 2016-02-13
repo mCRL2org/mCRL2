@@ -151,12 +151,12 @@ class fsm_transition
 
 struct fsm_builder
 {
-  fsm_builder(lts_fsm_t& fsm_)
+  fsm_builder(probabilistic_lts_fsm_t& fsm_)
     : fsm(fsm_)
   {}
 
   // Contains the result
-  lts_fsm_t& fsm;
+  probabilistic_lts_fsm_t& fsm;
 
   // The parameters of the FSM
   std::vector<fsm_parameter> parameters;
@@ -190,7 +190,8 @@ struct fsm_builder
     {
       label_index = i->second;
     }
-    fsm.add_transition(transition(t.source(), label_index, t.target()));
+    const size_t probabilistic_state_index=fsm.add_probabilistic_state(detail::lts_fsm_base::probabilistic_state(t.target()));
+    fsm.add_transition(transition(t.source(), label_index, probabilistic_state_index));
   }
 
   void add_state(const std::vector<std::size_t>& values)
@@ -228,7 +229,7 @@ struct fsm_builder
       fsm.add_state();
     }
 
-    fsm.set_initial_state(0);
+    fsm.set_initial_probabilistic_state(detail::lts_fsm_base::probabilistic_state(0));
   }
 };
 

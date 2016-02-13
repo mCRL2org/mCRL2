@@ -45,7 +45,6 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification)
   lps2lts.initialise_lts_generation(&options);
   lps2lts.generate_lts();
   lps2lts.finalise_lts_generation();
-
   result.load(options.lts);
   remove(options.lts.c_str()); // Clean up after ourselves
   return result;

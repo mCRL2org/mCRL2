@@ -244,9 +244,7 @@ namespace Graph
         m_impl = new detail::GraphImpl<mcrl2::lts::lts_aut_t>;
         break;
       case mcrl2::lts::lts_dot:
-        m_type = mcrl2::lts::lts_dot;
-        m_impl = new detail::GraphImpl<mcrl2::lts::lts_dot_t>;
-        break;
+        throw mcrl2::runtime_error("Cannot read a .dot file anymore.");
       case mcrl2::lts::lts_fsm:
         m_type = mcrl2::lts::lts_fsm;
         m_impl = new detail::GraphImpl<mcrl2::lts::lts_fsm_t>;

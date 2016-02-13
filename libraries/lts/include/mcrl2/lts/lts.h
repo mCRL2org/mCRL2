@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg, Jan Friso Groote
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -23,7 +23,6 @@
 #include <map>
 #include <cstdio>
 #include "mcrl2/lts/transition.h"
-#include "mcrl2/lts/probabilistic_label.h"
 #include "mcrl2/lts/lts_type.h"
 
 
@@ -51,8 +50,8 @@ namespace lts
         a separate variable.
 */
 
-template < class STATE_LABEL_T, class ACTION_LABEL_T>
-class lts
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE>
+class lts: public LTS_BASE
 {
   public:
 
@@ -108,6 +107,7 @@ class lts
      * \param[in] l The LTS to swap. */
     void swap(lts& l)
     {
+      static_cast<LTS_BASE&>(*this).swap(static_cast<LTS_BASE&>(l));
       {
         const states_size_type aux=m_init_state;
         m_init_state=l.m_init_state;
@@ -122,13 +122,6 @@ class lts
       m_state_labels.swap(l.m_state_labels);
       m_taus.swap(l.m_taus);
       m_action_labels.swap(l.m_action_labels);
-    }
-
-    /** \brief Gets the lts_type of the lts.
-     */
-    lts_type type() const
-    {
-      return lts_none;
     }
 
     /** \brief Gets the number of states of this LTS.
@@ -204,7 +197,7 @@ class lts
     /** \brief Sets the initial state number of this LTS.
      * \param[in] state The number of the state that will become the initial
      * state. */
-    void set_initial_state(states_size_type state)
+    void set_initial_state(const states_size_type state)
     {
       assert(state<m_nstates);
       m_init_state = state;
@@ -217,7 +210,7 @@ class lts
      *             no state label is given, it must be the case that no
      *             state has a label.
      * \return The number of the added state label. */
-    states_size_type add_state(const STATE_LABEL_T label=STATE_LABEL_T())
+    states_size_type add_state(const STATE_LABEL_T& label=STATE_LABEL_T())
     {
       if (label!=STATE_LABEL_T())
       {
@@ -232,7 +225,7 @@ class lts
      * \param[in] label The label of the label.
      * \param[in] is_tau Indicates whether the label is a tau action.
      * \return The number of the added label. */
-    labels_size_type add_action(const ACTION_LABEL_T label, bool is_tau = false)
+    labels_size_type add_action(const ACTION_LABEL_T& label, bool is_tau = false)
     {
       assert(m_action_labels.size()==m_taus.size());
       const labels_size_type label_index=m_action_labels.size();
@@ -244,7 +237,7 @@ class lts
     /** \brief Sets the label of a state.
      * \param[in] state The number of the state.
      * \param[in] label The label that will be assigned to the state. */
-    void set_state_label(states_size_type state, STATE_LABEL_T label)
+    void set_state_label(const states_size_type state, const STATE_LABEL_T& label)
     {
       assert(state<m_nstates);
       assert(m_nstates==m_state_labels.size());
@@ -255,7 +248,7 @@ class lts
      * \param[in] action The number of the action.
      * \param[in] label The label that will be assigned to the action.
      * \param[in] is_tau Indicates whether the label is a tau action. */
-    void set_action_label(labels_size_type action, ACTION_LABEL_T label, bool is_tau = false)
+    void set_action_label(const labels_size_type action, const ACTION_LABEL_T& label, bool is_tau = false)
     {
       assert(action<m_action_labels.size());
       m_action_labels[action] = label;
@@ -328,8 +321,7 @@ class lts
     /** \brief Clear the transitions system.
      *  \details The state values, action values and transitions are
      *  reset. The number of states, actions and transitions are set to 0. */
-    void
-    clear()
+    void clear()
     {
       clear_state_labels();
       clear_actions();

@@ -11,7 +11,6 @@
 #ifndef _LIBLTS_TAUSTARREDUCE_H
 #define _LIBLTS_TAUSTARREDUCE_H
 
-// #include <cstdlib> // free
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 
@@ -36,13 +35,13 @@ enum t_reach { unknown, reached, explored };
 /// \return A map from states to sets of states indicating for each state those
 //          states that can be reached by one or more tau_steps.
 
-template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_LABEL_T >
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
 std::map < size_t,
-           std::set <typename probabilistic_lts<STATE_LABEL_T,ACTION_LABEL_T,PROBABILISTIC_LABEL_T>::states_size_type > > 
-            calculate_non_reflexive_transitive_tau_closure(probabilistic_lts<STATE_LABEL_T,ACTION_LABEL_T,PROBABILISTIC_LABEL_T>& l,
+           std::set <typename lts<STATE_LABEL_T,ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type > > 
+            calculate_non_reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>& l,
             const bool forward)
 {
-  typedef typename probabilistic_lts<STATE_LABEL_T,ACTION_LABEL_T,PROBABILISTIC_LABEL_T>::states_size_type state_t;
+  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_t;
   using namespace std;
 
   typedef map < state_t,set < state_t > > map_from_states_to_states;
@@ -90,12 +89,12 @@ std::map < size_t,
 }
 
 
-template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_LABEL_T >
-void reflexive_transitive_tau_closure(probabilistic_lts<STATE_LABEL_T,ACTION_LABEL_T,PROBABILISTIC_LABEL_T> &l)
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
+void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS> &l)
 // This method assumes there are no tau loops!
 {
   using namespace std;
-  typedef typename probabilistic_lts<STATE_LABEL_T,ACTION_LABEL_T,PROBABILISTIC_LABEL_T>::states_size_type state_t;
+  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_t;
   const vector < transition >& original_transitions=l.get_transitions();
   set < transition> new_transitions;
 
@@ -145,12 +144,12 @@ void reflexive_transitive_tau_closure(probabilistic_lts<STATE_LABEL_T,ACTION_LAB
 }
 
 
-template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_LABEL_T >
-void tau_star_reduce(probabilistic_lts< STATE_LABEL_T, ACTION_LABEL_T, PROBABILISTIC_LABEL_T > &l)
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
+void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS > &l)
 // This method assumes there are no tau loops!
 {
   using namespace std;
-  typedef typename probabilistic_lts<STATE_LABEL_T,ACTION_LABEL_T,PROBABILISTIC_LABEL_T>::states_size_type state_t;
+  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_t;
   vector < transition >& original_transitions=l.get_transitions();
   set < transition> new_transitions;
 

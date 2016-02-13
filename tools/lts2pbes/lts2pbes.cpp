@@ -246,10 +246,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
         }
         case lts_dot:
         {
-          lts_dot_t l;
-          l.load(infilename);
-          convert_to_lts_lts(l, result);
-          break;
+          throw mcrl2::runtime_error("Reading of .dot files is not supported anymore.");
         }
       }
     }

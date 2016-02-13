@@ -17,8 +17,8 @@
  */
 
 
-#ifndef MCRL2_LTS_PROBABILISTIC_ARBITRARY_SIZE_LABEL_H
-#define MCRL2_LTS_PROBABILISTIC_ARBITRARY_SIZE_LABEL_H
+#ifndef MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
+#define MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 
 #include <cstddef>
 #include <string>
@@ -36,7 +36,7 @@ namespace lts
 /** \brief This class contains labels for probabilistic transistions, consisting of a numerator and a denominator
  *         as a string of digits.
  */
-class probabilistic_arbitrary_size_label
+class probabilistic_arbitrary_precision_fraction
 {
   protected:
     utilities::big_natural_number m_enumerator;
@@ -44,9 +44,23 @@ class probabilistic_arbitrary_size_label
 
   public:
 
+    /// \brief Constant zero.
+    static probabilistic_arbitrary_precision_fraction zero()
+    {
+      static probabilistic_arbitrary_precision_fraction zero(utilities::big_natural_number(0), utilities::big_natural_number(1));
+      return zero;
+    }
+
+    /// \brief Constant one.
+    static probabilistic_arbitrary_precision_fraction one()
+    {
+      static probabilistic_arbitrary_precision_fraction one(utilities::big_natural_number(1), utilities::big_natural_number(1));
+      return one;
+    }                          
+
     /* \brief Default constructor. The label will contain the default string.
      */
-    probabilistic_arbitrary_size_label()
+    probabilistic_arbitrary_precision_fraction()
      : m_enumerator("0"),
        m_denominator("1")
     {}
@@ -54,7 +68,7 @@ class probabilistic_arbitrary_size_label
     /* \brief A constructor, where the enumerator and denominator are constructed
      *        from two strings of digits.
      */
-    probabilistic_arbitrary_size_label(const utilities::big_natural_number& enumerator, const utilities::big_natural_number& denominator)
+    probabilistic_arbitrary_precision_fraction(const utilities::big_natural_number& enumerator, const utilities::big_natural_number& denominator)
      : m_enumerator(enumerator),
        m_denominator(denominator)
     {
@@ -64,8 +78,8 @@ class probabilistic_arbitrary_size_label
     /* \brief A constructor, where the enumerator and denominator are constructed
      *        from two strings of digits.
      */
-    probabilistic_arbitrary_size_label(const std::string& enumerator, const std::string& denominator)
-     : // probabilistic_arbitrary_size_label(utilities::big_natural_number(enumerator),utilities::big_natural_number(denominator))
+    probabilistic_arbitrary_precision_fraction(const std::string& enumerator, const std::string& denominator)
+     : // probabilistic_arbitrary_precision_fraction(utilities::big_natural_number(enumerator),utilities::big_natural_number(denominator))
        m_enumerator(utilities::big_natural_number(enumerator)),
        m_denominator(utilities::big_natural_number(denominator))
     {
@@ -88,21 +102,21 @@ class probabilistic_arbitrary_size_label
 
     /* \brief Standard comparison operator.
     */
-    bool operator==(const probabilistic_arbitrary_size_label& other) const
+    bool operator==(const probabilistic_arbitrary_precision_fraction& other) const
     {
       return this->m_enumerator*other.m_denominator==other.m_enumerator*this->m_denominator;
     }
 
     /* \brief Standard comparison operator.
     */
-    bool operator!=(const probabilistic_arbitrary_size_label& other) const
+    bool operator!=(const probabilistic_arbitrary_precision_fraction& other) const
     {
       return !this->operator==(other);
     }
 
     /* \brief Standard comparison operator.
     */
-    bool operator<(const probabilistic_arbitrary_size_label& other) const
+    bool operator<(const probabilistic_arbitrary_precision_fraction& other) const
     {
       // float is used to guard against overflow.
       return this->m_enumerator*other.m_denominator<other.m_enumerator*this->m_denominator;
@@ -110,65 +124,65 @@ class probabilistic_arbitrary_size_label
 
     /* \brief Standard comparison operator.
     */
-    bool operator<=(const probabilistic_arbitrary_size_label& other) const
+    bool operator<=(const probabilistic_arbitrary_precision_fraction& other) const
     {
       return !this->operator>(other);
     }
 
     /* \brief Standard comparison operator.
     */
-    bool operator>(const probabilistic_arbitrary_size_label& other) const
+    bool operator>(const probabilistic_arbitrary_precision_fraction& other) const
     {
       return other.operator<(*this);
     }
 
     /* \brief Standard comparison operator.
     */
-    bool operator>=(const probabilistic_arbitrary_size_label& other) const
+    bool operator>=(const probabilistic_arbitrary_precision_fraction& other) const
     {
       return other.operator<=(*this);
     }
 
     /* \brief Standard addition operator.
      */
-    probabilistic_arbitrary_size_label operator+(const probabilistic_arbitrary_size_label& other) const
+    probabilistic_arbitrary_precision_fraction operator+(const probabilistic_arbitrary_precision_fraction& other) const
     {
       utilities::big_natural_number enumerator=this->enumerator()*other.denominator() +
                                                other.enumerator()*this->denominator();
       utilities::big_natural_number denominator=this->denominator()*other.denominator();
       remove_common_factors(enumerator,denominator);
-      return probabilistic_arbitrary_size_label(enumerator,denominator);
+      return probabilistic_arbitrary_precision_fraction(enumerator,denominator);
     }
 
     /* \brief Standard subtraction operator.
      */
-    probabilistic_arbitrary_size_label operator-(const probabilistic_arbitrary_size_label& other) const
+    probabilistic_arbitrary_precision_fraction operator-(const probabilistic_arbitrary_precision_fraction& other) const
     {
       utilities::big_natural_number enumerator= this->enumerator()*other.denominator() -
                                     other.enumerator()*this->denominator();
       utilities::big_natural_number denominator=this->denominator()*other.denominator();
       remove_common_factors(enumerator,denominator);
-      return probabilistic_arbitrary_size_label(enumerator,denominator);
+      return probabilistic_arbitrary_precision_fraction(enumerator,denominator);
     }
 
     /* \brief Standard multiplication operator.
      */
-    probabilistic_arbitrary_size_label operator*(const probabilistic_arbitrary_size_label& other) const
+    probabilistic_arbitrary_precision_fraction operator*(const probabilistic_arbitrary_precision_fraction& other) const
     {
       utilities::big_natural_number enumerator= this->enumerator()*other.enumerator();
       utilities::big_natural_number denominator=this->denominator()*other.denominator();
       remove_common_factors(enumerator,denominator);
-      return probabilistic_arbitrary_size_label(enumerator,denominator);
+      return probabilistic_arbitrary_precision_fraction(enumerator,denominator);
     }
 
     /* \brief Standard division operator.
      */
-    probabilistic_arbitrary_size_label operator/(const probabilistic_arbitrary_size_label& other) const
+    probabilistic_arbitrary_precision_fraction operator/(const probabilistic_arbitrary_precision_fraction& other) const
     {
       utilities::big_natural_number enumerator= this->enumerator()*other.denominator();
       utilities::big_natural_number denominator=this->denominator()*other.enumerator();
       remove_common_factors(enumerator,denominator);
-      return probabilistic_arbitrary_size_label(enumerator,denominator);
+      return probabilistic_arbitrary_precision_fraction(enumerator,denominator);
     }
 
     // An algorithm to calculate the greatest common divisor
@@ -194,27 +208,36 @@ class probabilistic_arbitrary_size_label
 
     static void remove_common_factors(utilities::big_natural_number& enumerator, utilities::big_natural_number& denominator)
     {
-      utilities::big_natural_number gcd=greatest_common_divisor(enumerator,denominator);
-      while (gcd!=1)
+      for(utilities::big_natural_number gcd=greatest_common_divisor(enumerator,denominator);
+          gcd!=1;
+          gcd=greatest_common_divisor(enumerator,denominator))
       {
         enumerator=enumerator/gcd;
         denominator=denominator/gcd;
       }
     }
+    
 };
 
 /* \brief A pretty print operator on action labels, returning it as a string.
 */
-inline std::string pp(const probabilistic_arbitrary_size_label& l)
+inline std::string pp(const probabilistic_arbitrary_precision_fraction& l)
 {
   std::stringstream s;
   s << l.enumerator() << "/" << l.denominator();
   return s.str();
 }
 
+inline
+std::ostream& operator<<(std::ostream& out, const probabilistic_arbitrary_precision_fraction& x)
+{
+  return out << pp(x);
+}
+
+
 } // namespace lts
 } // namespace mcrl2
 
-#endif // MCRL2_LTS_PROBABILISTIC_ARBITRARY_SIZE_LABEL_H
+#endif // MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 
 

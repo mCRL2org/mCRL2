@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -12,40 +12,12 @@
 #include <sstream>
 #include <fstream>
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"
 
 
 using namespace mcrl2::lts;
 using namespace std;
 
-class state_probability_pair
-{
-  protected:
-    size_t m_state;
-    probabilistic_arbitrary_size_label m_probability;
-
-  public:
-    state_probability_pair(const size_t state, const probabilistic_arbitrary_size_label& probability)
-     : m_state(state),
-       m_probability(probability)
-    {}
-
-    size_t state() const
-    {
-      return m_state;
-    }
-
-    const probabilistic_arbitrary_size_label& probability() const
-    {
-      return m_probability;
-    }
-};
-
-static string c(const size_t n)  // Awkward trick, should be a better way to do this. Please replace....
-{
-  stringstream out;
-  out << n;
-  return out.str();
-}
 
 static void read_newline(istream& is, const size_t lineno)
 {
@@ -72,7 +44,7 @@ static void read_newline(istream& is, const size_t lineno)
     }
     else
     {
-      throw mcrl2::runtime_error("Expect a newline after the transition at line " + c(lineno) + ".");
+      throw mcrl2::runtime_error("Expect a newline after the transition at line " + std::to_string(lineno) + ".");
     }
   }
 }
@@ -90,31 +62,11 @@ static void read_natural_number_to_string(istream& is, string& s, const size_t l
   is.putback(ch);
   if (s.empty())
   {
-    throw mcrl2::runtime_error("Expect a number at line " + c(lineno) + ".");
+    throw mcrl2::runtime_error("Expect a number at line " + std::to_string(lineno) + ".");
   }
 }
 
-static size_t find_probabilistic_label_index(
-                  const probabilistic_arbitrary_size_label& s,
-                  map < probabilistic_arbitrary_size_label, size_t >& labs,
-                  lts_aut_t& l)
-{
-  size_t label;
-
-  const map < probabilistic_arbitrary_size_label, size_t >::const_iterator i=labs.find(s);
-  if (i==labs.end())
-  {
-    label=l.add_probabilistic_label(s);
-    labs[s]=label;
-  }
-  else
-  {
-    label=i->second;
-  }
-  return label;
-}
-
-static size_t find_label_index(const string& s, map < string, size_t >& labs, lts_aut_t& l)
+static size_t find_label_index(const string& s, map < string, size_t >& labs, probabilistic_lts_aut_t& l)
 {
   size_t label;
 
@@ -131,44 +83,49 @@ static size_t find_label_index(const string& s, map < string, size_t >& labs, lt
   return label;
 }
 
-void static add_state(size_t& state,
-                      map <size_t,size_t>& state_number_translator,
-                      lts_aut_t& l,
-                      const bool is_probabilistic=false)
+void add_state(size_t& state,
+               map <size_t,size_t>& state_number_translator)
 {
   map <size_t,size_t>::const_iterator j=state_number_translator.find(state);
   if (j==state_number_translator.end())
   {
     // Not found.
-    const size_t new_state_number=l.add_state(lts_aut_t::state_label_t(),is_probabilistic);
-    if (!is_probabilistic)
-    {
-      // Only non probabilistic states occur in the translation tabel.
-      state_number_translator[state]=new_state_number;
-    }
+    const size_t new_state_number=state_number_translator.size(); 
+    state_number_translator[state]=new_state_number;
     state=new_state_number;
   }
   else
   {
     // found.
     state=j->second;
-    assert(l.is_probabilistic(state)==is_probabilistic);
-    assert(!is_probabilistic);
   }
+} 
+
+void add_states(detail::lts_aut_base::probabilistic_state& probability_state,
+                map <size_t,size_t>& state_number_translator)
+{
+  vector < detail::lts_aut_base::state_probability_pair> result;
+  for(const detail::lts_aut_base::state_probability_pair& p: probability_state)
+  {
+    size_t new_state_index=p.state();
+    add_state(new_state_index,state_number_translator);
+    result.push_back(detail::lts_aut_base::state_probability_pair(new_state_index,p.probability())); 
+  }
+  probability_state=detail::lts_aut_base::probabilistic_state(result.begin(), result.end());
 }
+   
 
 // This procedure tries to read states, indicated by numbers
 // with in between fractions of the shape number/number. The
 // last state number is put in state. The remainder as pairs
 // in the vector. Typical expected input is 3 2/3 4 1/6 78 1/6 3.
-static void read_probabilistic_state(
+static mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t read_probabilistic_state(
   istream& is,
-  vector<state_probability_pair>& additional_probabilistic_states,
-  size_t& state,
   const size_t lineno)
 {
-  additional_probabilistic_states.clear();
-
+  vector<detail::lts_aut_base::state_probability_pair> additional_probabilistic_states;
+  mcrl2::lts::probabilistic_arbitrary_precision_fraction remainder=mcrl2::lts::probabilistic_arbitrary_precision_fraction::one();
+  size_t state;
   bool ready=false;
   while (is.good() && !ready)
   {
@@ -176,7 +133,7 @@ static void read_probabilistic_state(
 
     if (!is.good())
     {
-      throw mcrl2::runtime_error("Expect a state number at line " + c(lineno) + ".");
+      throw mcrl2::runtime_error("Expect a state number at line " + std::to_string(lineno) + ".");
     }
 
     // Check whether the next character is a comma.
@@ -197,21 +154,28 @@ static void read_probabilistic_state(
       is >> skipws >> ch;
       if (ch != '/')
       {
-        throw mcrl2::runtime_error("Expect a / in a probability at line " + c(lineno) + ".");
+        throw mcrl2::runtime_error("Expect a / in a probability at line " + std::to_string(lineno) + ".");
       }
 
       string denominator;
       read_natural_number_to_string(is,denominator,lineno);
-      additional_probabilistic_states.push_back(state_probability_pair(state, probabilistic_arbitrary_size_label(enumerator,denominator)));
+      mcrl2::lts::probabilistic_arbitrary_precision_fraction frac(enumerator,denominator);
+      remainder=remainder-frac;
+      additional_probabilistic_states.push_back(detail::lts_aut_base::state_probability_pair(state, frac));
     }
   }
+  if (additional_probabilistic_states.size()==0)
+  {
+    return detail::lts_aut_base::probabilistic_state(state);
+  }
+  additional_probabilistic_states.push_back(detail::lts_aut_base::state_probability_pair(state, remainder));
+  return detail::lts_aut_base::probabilistic_state(additional_probabilistic_states.begin(),additional_probabilistic_states.end());
 }
 
 
 static void read_aut_header(
   istream& is,
-  size_t& initial_state,
-  vector<state_probability_pair>& additional_probabilistic_states,
+  detail::lts_aut_base::probabilistic_state& initial_state,
   size_t& num_transitions,
   size_t& num_states)
 {
@@ -233,7 +197,7 @@ static void read_aut_header(
   }
 
   // is >> skipws >> initial_state;
-  read_probabilistic_state(is,additional_probabilistic_states,initial_state,1);
+  initial_state=read_probabilistic_state(is,1);
 
   is >> skipws >> ch;
   if (ch != ',')
@@ -265,8 +229,7 @@ static bool read_aut_transition(
   istream& is,
   size_t& from,
   string& label,
-  size_t& to,
-  std::vector<state_probability_pair>& additional_probabilistic_states,
+  detail::lts_aut_base::probabilistic_state& target_probabilistic_state,
   const size_t lineno)
 {
   char ch;
@@ -277,7 +240,7 @@ static bool read_aut_transition(
   }
   if (ch != '(')
   {
-    throw mcrl2::runtime_error("Expect opening bracket at line " + c(lineno) + ".");
+    throw mcrl2::runtime_error("Expect opening bracket at line " + std::to_string(lineno) + ".");
   }
 
   is >> skipws >> from;
@@ -285,7 +248,7 @@ static bool read_aut_transition(
   is >> skipws >> ch;
   if (ch != ',')
   {
-    throw mcrl2::runtime_error("Expect that the first number is followed by a comma at line " + c(lineno) + ".");
+    throw mcrl2::runtime_error("Expect that the first number is followed by a comma at line " + std::to_string(lineno) + ".");
   }
 
   is >> skipws >> ch;
@@ -301,7 +264,7 @@ static bool read_aut_transition(
 
     if (ch != '"')
     {
-      throw mcrl2::runtime_error("Expect that the second item is a quoted label (using \") at line " + c(lineno) + ".");
+      throw mcrl2::runtime_error("Expect that the second item is a quoted label (using \") at line " + std::to_string(lineno) + ".");
     }
     is >> skipws >> ch;
   }
@@ -318,205 +281,112 @@ static bool read_aut_transition(
 
   if (ch != ',')
   {
-    throw mcrl2::runtime_error("Expect a comma after the quoted label at line " + c(lineno) + ".");
+    throw mcrl2::runtime_error("Expect a comma after the quoted label at line " + std::to_string(lineno) + ".");
   }
 
   // is >> skipws >> to;
-  read_probabilistic_state(is,additional_probabilistic_states,to,lineno);
+  target_probabilistic_state=read_probabilistic_state(is,lineno);
 
   is >> ch;
   if (ch != ')')
   {
-    throw mcrl2::runtime_error("Expect a closing bracket at the end of the transition at line " + c(lineno) + ".");
+    throw mcrl2::runtime_error("Expect a closing bracket at the end of the transition at line " + std::to_string(lineno) + ".");
   }
 
   read_newline(is,lineno);
   return true;
 }
 
-static void read_from_aut(lts_aut_t& l, istream& is)
+static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
 {
   size_t line_no = 1;
-  size_t initial_state=0, ntrans=0, nstate=0;
-  size_t number_of_probabilistic_transitions=0,
-         number_of_probabilistic_nodes=0;
+  size_t ntrans=0, nstate=0;
 
-  vector<state_probability_pair> additional_probabilistic_states;
-  read_aut_header(is,initial_state,additional_probabilistic_states,ntrans,nstate);
+  detail::lts_aut_base::probabilistic_state initial_probabilistic_state;
+  read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
 
   map <size_t,size_t> state_number_translator;
+  add_states(initial_probabilistic_state,state_number_translator);
 
   if (nstate==0)
   {
     throw mcrl2::runtime_error("cannot parse AUT input that has no states; at least an initial state is required.");
   }
 
-  // l.set_num_states(nstate,false);
-  // l.clear_transitions(ntrans); // Reserve enough space for the transitions.
-  l.clear();
+  l.set_num_states(nstate,false);
+  l.clear_transitions(ntrans); // Reserve enough space for the transitions.
+  
   map < string, size_t > action_labels;
-  map < probabilistic_arbitrary_size_label, size_t > probabilistic_labels;
-
-  // state_number_translator[initial_state]=0;
-  // initial_state=0;
-  // l.set_initial_state(initial_state);
-
-  if (additional_probabilistic_states.size()==0)
-  {
-    // This is not a probabilistic state.
-    add_state(initial_state,state_number_translator,l);
-    assert(initial_state==0);
-    l.set_initial_state(initial_state);
-  }
-  else
-  {
-    size_t probabilistic_node=0;
-    number_of_probabilistic_nodes++;
-    add_state(probabilistic_node,state_number_translator,l,true);
-    assert(probabilistic_node==0);
-    l.set_initial_state(probabilistic_node);
-    probabilistic_arbitrary_size_label remaining_probability("1","1");
-    for(vector<state_probability_pair>::const_iterator i=additional_probabilistic_states.begin();
-            i!=additional_probabilistic_states.end(); ++i)
-    {
-      size_t target=i->state();
-      add_state(target,state_number_translator,l);
-      number_of_probabilistic_transitions++;
-      l.add_transition(transition(probabilistic_node,find_probabilistic_label_index(i->probability(),probabilistic_labels,l),target));
-      remaining_probability=remaining_probability - i->probability();
-    }
-
-    add_state(initial_state,state_number_translator,l);
-    number_of_probabilistic_transitions++;
-    l.add_transition(transition(probabilistic_node,find_probabilistic_label_index(remaining_probability,probabilistic_labels,l),initial_state));
-  }
-
-
-
+  size_t initial_state=l.add_probabilistic_state(initial_probabilistic_state);
+  assert(initial_state==0);
+  l.set_initial_probabilistic_state(initial_state);
 
   while (!is.eof())
   {
-    size_t from,to;
+    size_t from;
+    detail::lts_aut_base::probabilistic_state probabilistic_target_state;
     string s;
 
     line_no++;
 
-    if (!read_aut_transition(is,from,s,to,additional_probabilistic_states,line_no))
+    if (!read_aut_transition(is,from,s,probabilistic_target_state,line_no))
     {
       break; // eof encountered
     }
 
-    add_state(from,state_number_translator,l);
+    add_state(from,state_number_translator); // This can change the number of from.
+    add_states(probabilistic_target_state,state_number_translator);
+    size_t probabilistic_state_index=l.add_probabilistic_state(probabilistic_target_state);
 
-    if (additional_probabilistic_states.size()==0)
-    {
-      // This is not a probabilistic state.
-      add_state(to,state_number_translator,l);
-      l.add_transition(transition(from,find_label_index(s,action_labels,l),to));
-    }
-    else
-    {
-      size_t probabilistic_node=l.num_states();
-      number_of_probabilistic_nodes++;
-      add_state(probabilistic_node,state_number_translator,l,true);
-      l.add_transition(transition(from,find_label_index(s,action_labels,l),probabilistic_node));
-      probabilistic_arbitrary_size_label remaining_probability("1","1");
-      for(vector<state_probability_pair>::const_iterator i=additional_probabilistic_states.begin();
-              i!=additional_probabilistic_states.end(); ++i)
-      {
-        size_t target=i->state();
-        add_state(target,state_number_translator,l);
-        number_of_probabilistic_transitions++;
-        l.add_transition(transition(probabilistic_node,find_probabilistic_label_index(i->probability(),probabilistic_labels,l),target));
-        remaining_probability=remaining_probability - i->probability();
-      }
-
-      add_state(to,state_number_translator,l);
-      number_of_probabilistic_transitions++;
-      l.add_transition(transition(probabilistic_node,find_probabilistic_label_index(remaining_probability,probabilistic_labels,l),to));
-    }
-
+    l.add_transition(transition(from,find_label_index(s,action_labels,l),probabilistic_state_index));
+    
     if (state_number_translator.size() > l.num_states())
     {
       throw mcrl2::runtime_error("Number of actual states in .aut file is higher than maximum (" +
-                                 c(l.num_states()) + ") given by header (found at line " + c(line_no) + ").");
+                                 std::to_string(l.num_states()) + ") given by header (found at line " + std::to_string(line_no) + ").");
     }
-
   }
 
-  if (ntrans+number_of_probabilistic_transitions != l.num_transitions())
+  if (ntrans != l.num_transitions())
   {
-    throw mcrl2::runtime_error("number of transitions read (" + c(l.num_transitions()-number_of_probabilistic_transitions) +
-                               ") does not correspond to the number of transition given in the header (" + c(ntrans) + ").");
+    throw mcrl2::runtime_error("number of transitions read (" + std::to_string(l.num_transitions()) +
+                               ") does not correspond to the number of transition given in the header (" + std::to_string(ntrans) + ").");
   }
 }
 
 
-static void write_state(const size_t state, ostream& os, const lts_aut_t& l, const std::map<size_t,size_t>& state_mapping)
+static void write_probabilistic_state(const detail::lts_aut_base::probabilistic_state prob_state, ostream& os)
 {
-  if (l.is_probabilistic(state))
+  mcrl2::lts::probabilistic_arbitrary_precision_fraction previous_probability;
+  bool first_element=true;
+  for (const detail::lts_aut_base::state_probability_pair& p: prob_state)
   {
-    // Inefficient.
-    std::string previous_label="";
-    for (const transition& t: l.get_transitions())
+    if (first_element)
     {
-      if (t.from()==state)
-      {
-        os << previous_label << state_mapping.at(t.to());
-        previous_label=" " + pp(l.probabilistic_label(t.label())) + " ";
-      }
+      os << p.state();
+      previous_probability=p.probability();
+      first_element=false;
     }
-  }
-  else
-  {
-    os << state_mapping.at(state);
+    else
+    {
+      os << " " << pp(previous_probability) << " " << p.state();
+      previous_probability=p.probability();
+    }
   }
 }
 
-static void write_to_aut(const lts_aut_t& l, ostream& os)
+static void write_to_aut(const probabilistic_lts_aut_t& l, ostream& os)
 {
-  // First construct a state mapping, giving non probabilistic states
-  // a consecutive numbering.
-  std::map<size_t,size_t> state_mapping;
-  if (!l.is_probabilistic(l.initial_state()))
-  {
-    state_mapping[l.initial_state()]=0;
-  }
-  for(size_t i=0; i<l.num_states(); ++i)
-  {
-    if (!l.is_probabilistic(i) && i!=l.initial_state())
-    {
-      state_mapping[i]=state_mapping.size();
-    }
-  }
-
   os << "des (";
-  write_state(l.initial_state(),os,l,state_mapping);
+  write_probabilistic_state(l.initial_probabilistic_state(),os);
 
-  // Only transitions from non probabilistic states are stored in a .aut
-  // file. So, we must first count them.
-
-  size_t num_non_probabilistic_transitions=0;
-  for (const transition& t:l.get_transitions())
-  {
-    if (!l.is_probabilistic(t.from()))
-    {
-      num_non_probabilistic_transitions++;
-    }
-  }
-
-  os << "," << num_non_probabilistic_transitions << "," << state_mapping.size() << ")" << endl;
+  os << "," << l.num_transitions() << "," << l.num_states() << ")" << endl;
 
   for (const transition& t: l.get_transitions())
   {
-    if (!l.is_probabilistic(t.from()))
-    {
-      os << "(";
-      write_state(t.from(),os,l,state_mapping);
-      os << ",\"" << pp(l.action_label(t.label())) << "\",";
-      write_state(t.to(),os,l,state_mapping);
-      os << ")" << endl;
-    }
+    os << "(" << t.from() << ",\"" << pp(l.action_label(t.label())) << "\",";
+    write_probabilistic_state(l.probabilistic_state(t.to()),os);
+    os << ")" << endl;
   }
 }
 
@@ -525,7 +395,7 @@ namespace mcrl2
 namespace lts
 {
 
-void lts_aut_t::load(const string& filename)
+void probabilistic_lts_aut_t::load(const string& filename)
 {
   if (filename=="")
   {
@@ -545,12 +415,12 @@ void lts_aut_t::load(const string& filename)
   }
 }
 
-void lts_aut_t::load(istream& is)
+void probabilistic_lts_aut_t::load(istream& is)
 {
   read_from_aut(*this,is);
 }
 
-void lts_aut_t::save(string const& filename) const
+void probabilistic_lts_aut_t::save(string const& filename) const
 {
   if (filename=="")
   {
@@ -568,6 +438,39 @@ void lts_aut_t::save(string const& filename) const
     write_to_aut(*this,os);
     os.close();
   }
+}
+
+void lts_aut_t::load(const string& filename)
+{
+  probabilistic_lts_aut_t l;
+  l.load(filename);
+  detail::swap_to_non_probabilistic_lts
+             <state_label_empty, 
+              action_label_string, 
+              detail::lts_aut_base::probabilistic_state,
+              detail::lts_aut_base>(l,*this);
+}
+
+void lts_aut_t::load(istream& is)
+{
+  probabilistic_lts_aut_t l;
+  l.load(is);
+  detail::swap_to_non_probabilistic_lts
+             <state_label_empty, 
+              action_label_string, 
+              detail::lts_aut_base::probabilistic_state,
+              detail::lts_aut_base>(l,*this);
+}
+
+void lts_aut_t::save(string const& filename) const
+{
+  probabilistic_lts_aut_t l;
+  detail::translate_to_probabilistic_lts
+            <state_label_empty, 
+             action_label_string, 
+             detail::lts_aut_base::probabilistic_state, 
+             detail::lts_aut_base>(*this,l);
+  l.save(filename);
 }
 
 

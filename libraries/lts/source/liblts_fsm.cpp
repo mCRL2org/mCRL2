@@ -11,13 +11,14 @@
 #include <string>
 #include <fstream>
 #include "mcrl2/core/print.h"
-#include "mcrl2/lps/typecheck.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/parse.h"
+#include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"
 
 namespace mcrl2 {
 
@@ -26,11 +27,28 @@ namespace lts {
 struct fsm_writer
 {
   std::ostream& out;
-  const lts_fsm_t& fsm;
+  size_t number_of_initial_state;
+  const probabilistic_lts_fsm_t& fsm;
 
-  fsm_writer(std::ostream& out_, const lts_fsm_t& fsm_)
-    : out(out_), fsm(fsm_)
-  {}
+  fsm_writer(std::ostream& out_, const probabilistic_lts_fsm_t& fsm_)
+    : out(out_), number_of_initial_state(fsm_.initial_probabilistic_state().begin()->state()), fsm(fsm_)
+  {
+    assert(fsm_.initial_probabilistic_state().size()>0);
+  }
+
+  // This functions swaps 0 with the number number_of_initial_state of the initial state.
+  size_t swap_initial_state(const size_t i)
+  {
+    if (i==number_of_initial_state)
+    {
+      return 0;
+    }
+    if (i==0)
+    {
+      return number_of_initial_state;
+    }
+    return i;
+  }
 
   void write_parameters()
   {
@@ -51,22 +69,12 @@ struct fsm_writer
   void write_states()
   {
     mCRL2log(log::verbose) << "writing states..." << std::endl;
+    assert(fsm.initial_probabilistic_state().size()>0);
     for (std::size_t i = 0; i < fsm.num_states(); i++)
     {
-      std::size_t idx = i;
-      // make sure that the initial state is first
-      if (i == 0)
-      {
-        idx = fsm.initial_state();
-      }
-      else if (i == fsm.initial_state())
-      {
-        idx = 0;
-      }
-
       if (fsm.has_state_info())
       {
-        const state_label_fsm& state_parameters = fsm.state_label(idx);
+        const state_label_fsm& state_parameters = fsm.state_label(swap_initial_state(i));
         for (std::size_t j = 0; j < state_parameters.size(); j++)
         {
           if (j > 0)
@@ -80,35 +88,43 @@ struct fsm_writer
     }
   }
 
+  // If there is only a single state with probility 1, write a single state, otherwise 
+  // write "[state1 probability1, state2 probability2, ..., state_n probability_n]".
+  void write_probabilistic_state(const detail::lts_fsm_base::probabilistic_state& probabilistic_state)
+  {
+    if (probabilistic_state.size()==1)
+    {
+      out << swap_initial_state(probabilistic_state.begin()->state())+1;
+    }
+    else
+    {
+      out << "[";
+      bool first=true;
+      for(const lps::state_probability_pair< size_t, probabilistic_arbitrary_precision_fraction>& p: probabilistic_state)
+      {
+        if (first)
+        {
+          first=false;
+        }
+        else
+        {
+          out << ", ";
+        }
+        out << swap_initial_state(p.state()) + 1 << " " << p.probability();
+      }
+      out << "]";
+    }
+  }
+
   void write_transitions()
   {
     mCRL2log(log::verbose) << "writing transitions..." << std::endl;
     for (const transition& t: fsm.get_transitions())
     {
-      transition::size_type from = t.from();
-      // correct state numbering
-      if (from == 0)
-      {
-        from = fsm.initial_state();
-      }
-      else if (from == fsm.initial_state())
-      {
-        from = 0;
-      }
-      transition::size_type to = t.to();
-      if (to == 0)
-      {
-        to = fsm.initial_state();
-      }
-      else if (to == fsm.initial_state())
-      {
-        to = 0;
-      }
-
-      // correct state numbering
-      out << from + 1 << " " << to + 1 << " \"";
-      out << mcrl2::lts::pp(fsm.action_label(t.label()));
-      out << "\"" << std::endl;
+      // correct state numbering, by adding 1.
+      out << swap_initial_state(t.from()) + 1 << " ";
+      write_probabilistic_state(fsm.probabilistic_state(t.to())); 
+      out << " \"" << mcrl2::lts::pp(fsm.action_label(t.label())) << "\"" << std::endl;
     }
   }
 
@@ -119,10 +135,16 @@ struct fsm_writer
     write_states();
     out << "---" << std::endl;
     write_transitions();
+    // If there is a initial distribution with more than one state, write the initial distribution.
+    if (fsm.initial_probabilistic_state().size()>1)
+    {
+      out << "---" << std::endl;
+      write_probabilistic_state(fsm.initial_probabilistic_state()); 
+    }
   }
 };
 
-void lts_fsm_t::load(const std::string& filename)
+void probabilistic_lts_fsm_t::load(const std::string& filename)
 {
   if (filename.empty())
   {
@@ -155,7 +177,7 @@ void lts_fsm_t::load(const std::string& filename)
   }
 }
 
-void lts_fsm_t::save(const std::string& filename) const
+void probabilistic_lts_fsm_t::save(const std::string& filename) const
 {
   if (filename=="")
   {
@@ -175,6 +197,29 @@ void lts_fsm_t::save(const std::string& filename) const
     os.close();
   }
 }
+
+void lts_fsm_t::load(const std::string& filename)
+{
+  probabilistic_lts_fsm_t l;
+  l.load(filename);
+  detail::swap_to_non_probabilistic_lts
+             <state_label_fsm,
+              action_label_string,
+              detail::lts_fsm_base::probabilistic_state,
+              detail::lts_fsm_base>(l,*this);
+}
+
+void lts_fsm_t::save(const std::string& filename) const
+{
+  probabilistic_lts_fsm_t l;
+  detail::translate_to_probabilistic_lts
+            <state_label_fsm,
+             action_label_string,
+             detail::lts_fsm_base::probabilistic_state,
+             detail::lts_fsm_base>(*this,l);
+  l.save(filename);
+}
+
 
 } // namespace lts
 

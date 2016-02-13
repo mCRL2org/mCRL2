@@ -155,10 +155,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
     }
     case lts_dot:
     {
-      lts_dot_t l1;
-      l1.load(path);
-      detail::lts_convert(l1,l);
-      return;
+      throw mcrl2::runtime_error("Reading of dot files is not supported.");
     }
   }
 }

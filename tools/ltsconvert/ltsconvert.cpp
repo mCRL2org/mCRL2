@@ -222,7 +222,7 @@ class ltsconvert_tool : public ltsconvert_base
         }
         case lts_dot:
         {
-          return load_convert_and_save<lts_dot_t>();
+          throw mcrl2::runtime_error("Cannot read a .dot file anymore.");
         }
       }
       return true;

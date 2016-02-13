@@ -23,7 +23,7 @@
 #include <map>
 #include <cstdio>
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/lts/probabilistic_label.h"
+#include "mcrl2/lts/probabilistic_state.h"
 
 
 namespace mcrl2
@@ -46,16 +46,16 @@ namespace lts
         a separate variable.
 */
 
-template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_LABEL_T = probabilistic_label>
-class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T>
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class PROBABILISTIC_STATE_T, class LTS_BASE >
+class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 {
   public:
 
-    typedef lts<STATE_LABEL_T, ACTION_LABEL_T> super;
+    typedef lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE> super;
 
     /** \brief The type of probabilistic labels.
     */
-    typedef PROBABILISTIC_LABEL_T probabilistic_label_t;
+    typedef PROBABILISTIC_STATE_T probabilistic_state_t;
 
     typedef typename super::state_label_t         state_label_t        ;
     typedef typename super::action_label_t        action_label_t       ;
@@ -65,12 +65,20 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T>
 
   protected:
 
-    std::vector<PROBABILISTIC_LABEL_T> m_probabilistic_labels;
-    std::vector<bool> m_is_probabilistic_state; // A vector indicating for each state whether
-                                                // it is an ordinary state (false), or whether
-                                                // it is a probabilistic state (true). This
-                                                // vector has at most the length of m_nstates.
-                                                // States not in this vector are not probabilistic.
+    std::vector<PROBABILISTIC_STATE_T> m_probabilistic_states;
+    PROBABILISTIC_STATE_T m_init_probabilistic_state;
+
+    /* This function is made protected to prevent its use in a probabilistic transition system */  
+    states_size_type initial_state() const
+    {
+      return super::initial_state();
+    }
+
+    /* This function is made protected to prevent its use in a probabilistic transition system */  
+    void set_initial_state(const states_size_type s)
+    {
+      super::set_initial_state(s);
+    }
 
   public:
 
@@ -83,8 +91,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T>
      * \param[in] l The LTS to copy. */
     probabilistic_lts(const probabilistic_lts& l)
       : super(l),
-        m_probabilistic_labels(l.m_probabilistic_labels),
-        m_is_probabilistic_state(l.m_is_probabilistic_state)
+        m_probabilistic_states(l.m_probabilistic_states)
     {};
 
     /** \brief Swap this lts with the supplied supplied LTS.
@@ -92,126 +99,79 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T>
     void swap(probabilistic_lts& l)
     {
       super::swap(l);
-      m_probabilistic_labels.swap(l.m_probabilistic_labels);
-      m_is_probabilistic_state.swap(l.m_is_probabilistic_state);
+      m_probabilistic_states.swap(l.m_probabilistic_states);
     };
+
+    /** \brief Gets the initial state number of this LTS.
+      * \return The number of the initial state of this LTS. */
+    const PROBABILISTIC_STATE_T& initial_probabilistic_state() const
+    {
+      return m_init_probabilistic_state;
+    }
+
+    /** \brief Sets the probabilistic initial state number of this LTS.
+     * \param[in] state The number of the state that will become the initial
+     * state. */
+    void set_initial_probabilistic_state(const PROBABILISTIC_STATE_T& state)
+    {
+      // Prevent that the initial state of the lts, which is not used in a probabilistic state
+      // has a random value.
+      set_initial_state(0);
+      m_init_probabilistic_state = state;
+    }
+
 
     /** \brief Gets the number of probabilistic labels of this LTS.
      * \return The number of action labels of this LTS. */
     labels_size_type num_probabilistic_labels() const
     {
-      return m_probabilistic_labels.size();
+      return m_probabilistic_states.size();
     }
 
-    /** \brief Adds a state to this LTS.
-     *  \details It is not checked whether the added state already exists.
-     * \param[in] label The label of the state. If one state has a state
-     *             label, all states must have state labels. If
-     *             no state label is given, it must be the case that no
-     *             state has a label.
-     * \param[in] is_probabilistic This boolean indicates whether this state
-     *            is a probabilistic state, of which the outgoing transitions are
-     *            labelled with probabilities.
-     * \return The number of the added state label. */
-    states_size_type add_state(const STATE_LABEL_T label=STATE_LABEL_T(), bool is_probabilistic=false)
-    {
-      if (label!=STATE_LABEL_T())
-      {
-        super::m_state_labels.resize(super::m_nstates);
-        super::m_state_labels.push_back(label);
-      }
-      if (is_probabilistic)
-      {
-        m_is_probabilistic_state.resize(super::m_nstates, false);
-        m_is_probabilistic_state.push_back(true);
-      }
-      return super::m_nstates++;
-    }
-
-    /** \brief Adds a probabilistic label to this LTS.
+    /** \brief Adds a probabilistic state to this LTS.
      * \details It is not checked whether this action label already exists.
      * \param[in] label The label of the label.
      * \return The number of the added label. */
-    labels_size_type add_probabilistic_label(const PROBABILISTIC_LABEL_T label)
+    labels_size_type add_probabilistic_state(const PROBABILISTIC_STATE_T& s)
     {
-      const labels_size_type label_index=m_probabilistic_labels.size();
-      m_probabilistic_labels.push_back(label);
+      const labels_size_type label_index=m_probabilistic_states.size();
+      m_probabilistic_states.push_back(s);
       return label_index;
-    }
-
-    /** \brief Sets whether this state is a probabilistic node.
-     * \param[in] state The number of the state.
-     * \param[in] is_probabilistic A boolean indicating whether state is probabilistic. */
-    void set_is_probabilistic(states_size_type state, bool is_probabilistic)
-    {
-      assert(state < super::m_nstates);
-      if (m_is_probabilistic_state.size()<=state)
-      {
-        m_is_probabilistic_state.resize(state+1);
-      }
-      m_is_probabilistic_state[state] = is_probabilistic;
     }
 
     /** \brief Sets the probabilistic label corresponding to some index.
      * \param[in] action The number of the label.
      * \param[in] label The label that will be assigned to the action.  */
-    void set_probabilistic_label(labels_size_type action, PROBABILISTIC_LABEL_T label)
+    void set_probabilistic_state(const labels_size_type index, const PROBABILISTIC_STATE_T& s)
     {
-      assert(action<m_probabilistic_labels.size());
-      m_probabilistic_labels[action] = label;
-    }
-
-    /** \brief Gets the label of a state.
-     * \param[in] state The number of the state.
-     * \return The label of the state. */
-    bool is_probabilistic(const states_size_type state) const
-    {
-      assert(state < super::m_nstates);
-      if (state<m_is_probabilistic_state.size())
-      {
-        return m_is_probabilistic_state[state];
-      }
-      return false;
+      assert(index<m_probabilistic_states.size());
+      m_probabilistic_states[index] = s;
     }
 
     /** \brief Gets the probabilistic label of an index.
      *  \param[in] action The number of the index.
      *  \return The probabilistic label of the index. */
-    const PROBABILISTIC_LABEL_T& probabilistic_label(const labels_size_type action) const
+    const PROBABILISTIC_STATE_T& probabilistic_state(const labels_size_type index) const
     {
-      assert(action < m_probabilistic_labels.size());
-      return m_probabilistic_labels[action];
+      assert(index < m_probabilistic_states.size());
+      return m_probabilistic_states[index];
     }
 
-    /** \brief Clear the action labels of an lts.
-     *  \details This removes the action labels of an lts.
-     *           It also resets the information
-     *           regarding to what actions labels are tau.
-     *           It will not change the number of action labels. */
-    void clear_actions()
+    /** \brief Clear the probabilistic states in this probabilistic transitions system.
+    */
+    void clear_probabilistic_states()
     {
-      super::clear_actions();
-      m_probabilistic_labels = std::vector<PROBABILISTIC_LABEL_T>();
-    }
-
-    /** \brief Set all states as being non-probabilistic.
-     *  \details This removes the vector with information whether states
-     *           are probabilistic, effectively indicating that states are
-     *           all non probabilistic. */
-    void clear_is_probabilistic()
-    {
-      m_is_probabilistic_state.clear();
+      m_probabilistic_states.clear();
     }
 
     /** \brief Clear the transitions system.
      *  \details The state values, action values and transitions are
      *  reset. The number of states, actions and transitions are set to 0. */
-    void
-    clear()
+    void clear()
     {
       super::clear();
-      m_probabilistic_labels.clear();
-      m_is_probabilistic_state.clear();
+      m_probabilistic_states.clear();
+      m_probabilistic_states.shrink_to_fit();
     }
 };
 
