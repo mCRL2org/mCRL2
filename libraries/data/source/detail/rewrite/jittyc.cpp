@@ -87,7 +87,7 @@ static std::vector<bool> dep_vars(const data_equation& eqn)
   return result;
 }
 
-size_t calc_max_arity(const function_symbol_vector& symbols)
+static size_t calc_max_arity(const function_symbol_vector& symbols)
 {
   size_t max_arity = 0;
   for (function_symbol_vector::const_iterator it = symbols.begin(); it != symbols.end(); ++it)

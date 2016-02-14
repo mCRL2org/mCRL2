@@ -52,7 +52,7 @@ static atermpp::function_symbol meta_data_header()
   return mdh;
 }
 
-aterm_list state_probability_list(const probabilistic_lts_lts_t::probabilistic_state_t& target)
+static aterm_list state_probability_list(const probabilistic_lts_lts_t::probabilistic_state_t& target)
 {
   aterm_list result;
   for(const lps::state_probability_pair<size_t, mcrl2::lps::probabilistic_data_expression>& p: target)
@@ -63,7 +63,7 @@ aterm_list state_probability_list(const probabilistic_lts_lts_t::probabilistic_s
   return result;
 }
 
-probabilistic_lts_lts_t::probabilistic_state_t aterm_list_to_probabilistic_state(const atermpp::aterm_list l)
+static probabilistic_lts_lts_t::probabilistic_state_t aterm_list_to_probabilistic_state(const atermpp::aterm_list l)
 {
   std::vector<lps::state_probability_pair<size_t, mcrl2::lps::probabilistic_data_expression>> result;
   for(aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)

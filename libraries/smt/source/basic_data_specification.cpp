@@ -687,7 +687,7 @@ void basic_data_specification::add_standard_operators(
 }
 
 void basic_data_specification::add_boolean_operators(
-  const data::data_specification& data_specification,
+  const data::data_specification& /* data_specification */,
   std::shared_ptr<function_definition> not_,
   std::shared_ptr<function_definition> and_,
   std::shared_ptr<function_definition> or_,
@@ -700,7 +700,7 @@ void basic_data_specification::add_boolean_operators(
 }
 
 void basic_data_specification::add_numerical_operators(
-  const data::data_specification& data_specification,
+  const data::data_specification& /* data_specification */,
   std::shared_ptr<function_definition> less,
   std::shared_ptr<function_definition> less_equal,
   std::shared_ptr<function_definition> greater,

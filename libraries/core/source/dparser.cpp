@@ -437,7 +437,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   throw mcrl2::runtime_error("Unresolved ambiguity.");
 }
 
-void log_location(struct D_Parser *ap)
+static void log_location(struct D_Parser *ap)
 {
   // We recover information about the last parsed node by casting D_Parser to Parser, which
   // is the structure that the dparser library internally uses to keep its administration in.

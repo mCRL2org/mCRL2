@@ -50,7 +50,7 @@ typedef const atermpp::detail::_aterm* unprotected_data_expression;    // Idem, 
 // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.
 
 
-const function_symbol this_term_is_in_normal_form()
+static const function_symbol this_term_is_in_normal_form()
 {
   static const function_symbol this_term_is_in_normal_form(std::string("Rewritten@@term"),function_sort({ untyped_sort() },untyped_sort()));
   return this_term_is_in_normal_form;
@@ -59,7 +59,7 @@ const function_symbol this_term_is_in_normal_form()
 // The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
 // such that it can for instance be pretty printed.
 
-data_expression remove_normal_form_function(const data_expression& t)
+static data_expression remove_normal_form_function(const data_expression& t)
 {
   if (is_variable(t))
   {

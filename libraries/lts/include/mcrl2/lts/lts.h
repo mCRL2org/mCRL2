@@ -95,6 +95,7 @@ class lts: public LTS_BASE
     /** \brief Creates a copy of the supplied LTS.
      * \param[in] l The LTS to copy. */
     lts(const lts& l):
+      LTS_BASE(l), 
       m_nstates(l.m_nstates),
       m_init_state(l.m_init_state),
       m_transitions(l.m_transitions),

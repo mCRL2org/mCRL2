@@ -36,7 +36,7 @@ std::string boolean_variables2pgsolver(Iter first, Iter last, const variable_map
 ///
 /// \brief Convert a BES expression to PGSolver format.
 ///
-std::string bes_expression2pgsolver(const term_type& p, const variable_map& variables)
+static std::string bes_expression2pgsolver(const term_type& p, const variable_map& variables)
 {
   std::string result;
   if (tr::is_and(p))

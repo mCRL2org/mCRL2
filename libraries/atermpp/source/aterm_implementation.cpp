@@ -11,6 +11,7 @@
 
 
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/detail/aterm_implementation.h"
 #include "mcrl2/atermpp/detail/aterm_int.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -28,7 +29,7 @@ std::string to_string(const aterm& t)
   std::stringstream s;
   s << t;
   return s.str();
-}
+} 
 
 typedef std::vector<std::pair<const function_symbol*,term_callback> > hook_table;
 

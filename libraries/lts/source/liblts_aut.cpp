@@ -83,7 +83,7 @@ static size_t find_label_index(const string& s, map < string, size_t >& labs, pr
   return label;
 }
 
-void add_state(size_t& state,
+static void add_state(size_t& state,
                map <size_t,size_t>& state_number_translator)
 {
   map <size_t,size_t>::const_iterator j=state_number_translator.find(state);
@@ -101,7 +101,7 @@ void add_state(size_t& state,
   }
 } 
 
-void add_states(detail::lts_aut_base::probabilistic_state& probability_state,
+static void add_states(detail::lts_aut_base::probabilistic_state& probability_state,
                 map <size_t,size_t>& state_number_translator)
 {
   vector < detail::lts_aut_base::state_probability_pair> result;
