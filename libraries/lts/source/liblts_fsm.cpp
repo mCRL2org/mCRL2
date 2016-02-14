@@ -108,7 +108,7 @@ struct fsm_writer
         }
         else
         {
-          out << ", ";
+          out << ' ';
         }
         out << swap_initial_state(p.state()) + 1 << " " << p.probability();
       }
@@ -140,6 +140,7 @@ struct fsm_writer
     {
       out << "---" << std::endl;
       write_probabilistic_state(fsm.initial_probabilistic_state()); 
+      out << "\n" << std::endl;
     }
   }
 };
@@ -152,9 +153,9 @@ void probabilistic_lts_fsm_t::load(const std::string& filename)
     {
       parse_fsm_specification(std::cin, *this);
     }
-    catch (mcrl2::runtime_error&)
+    catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error("Error parsing .fsm file from standard input.");
+      throw mcrl2::runtime_error(std::string("Error parsing .fsm file from standard input.\n") + e.what());
     }
   }
   else
@@ -169,9 +170,9 @@ void probabilistic_lts_fsm_t::load(const std::string& filename)
     {
       parse_fsm_specification(is, *this);
     }
-    catch (mcrl2::runtime_error&)
+    catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error("Error parsing .fsm file");
+      throw mcrl2::runtime_error(std::string("Error parsing .fsm file.\n") + e.what());
     }
     is.close();
   }

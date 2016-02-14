@@ -25,6 +25,64 @@ namespace lts {
 
 namespace detail {
 
+// Read a numeric value before a symbol c1 or c2, and remove it from s, including the symbol.
+inline std::string split_string_until(std::string& s, const std::string& c1, const std::string c2="")
+{
+  size_t n=s.find(c1);
+  if (c2!="")
+  {
+    n=std::min(n,s.find(c2));
+  }
+  if (n==std::string::npos)
+  {
+    if (c2=="")
+    { 
+      throw mcrl2::runtime_error("Expect '" + c1 + "' in distribution " + s + ".");
+    }
+    else
+    {
+      throw mcrl2::runtime_error("Expect either '" + c1 + "' or '" + c2 + " in distribution " + s + ".");
+    }
+  }
+  std::string result=s.substr(0,n);
+  s=s.substr(n+1);
+  return result;
+}
+
+inline lts_fsm_base::probabilistic_state parse_distribution(const std::string distribution)
+{
+  if (distribution.find("[")==std::string::npos) // So the distribution must consist of a state index.
+  {
+    size_t state_number=utilities::parse_natural_number(distribution);
+    if (state_number==0)
+    {
+      throw mcrl2::runtime_error("Transition has a zero as target state number.");
+    }
+    return lts_fsm_base::probabilistic_state(state_number-1);
+  }
+  
+  // Otherwise the distribution has the shape [state1 enumerator1/denominator1 ... staten enumeratorn/denominatorn]
+  std::vector<lts_fsm_base::state_probability_pair> result;
+  std::string s=utilities::trim_copy(distribution);
+  if (s.substr(0,1)!="[")
+  {
+    throw mcrl2::runtime_error("Distribution does not start with ']': " + distribution + ".");
+  }
+  s=s.substr(1);  // Remove initial "[";
+  for(; s.size()>1; s=utilities::trim_copy(s))
+  {
+    size_t state_number=utilities::parse_natural_number(split_string_until(s," "));
+    if (state_number==0)
+    {
+      throw mcrl2::runtime_error("Transition has a zero as target state number.");
+    }
+    std::string enumerator=split_string_until(s,"/");
+    std::string denominator=split_string_until(s," ","]");
+    result.push_back(lts_fsm_base::state_probability_pair(state_number,probabilistic_arbitrary_precision_fraction(enumerator,denominator)));
+  }
+  return lts_fsm_base::probabilistic_state(result.begin(),result.end());
+}
+
 class fsm_parameter
 {
   protected:
@@ -90,13 +148,13 @@ class fsm_transition
 {
   protected:
     std::size_t m_source;
-    std::size_t m_target;
+    detail::lts_fsm_base::probabilistic_state m_target;
     std::string m_label;
 
   public:
     fsm_transition(std::size_t source, std::size_t target, const std::string& label)
       : m_source(source - 1),
-        m_target(target - 1),
+        m_target(detail::lts_fsm_base::probabilistic_state(target - 1)),
         m_label(label)
     {
       if (source == 0 || target == 0)
@@ -109,13 +167,12 @@ class fsm_transition
       : m_label(label)
     {
       std::size_t source = utilities::parse_natural_number(source_text);
-      std::size_t target = utilities::parse_natural_number(target_text);
-      if (source == 0 || target == 0)
+      if (source == 0)
       {
         throw mcrl2::runtime_error("transition has a zero coordinate!");
       }
       m_source = source - 1;
-      m_target = target - 1;
+      m_target = parse_distribution(target_text);
     }
 
     std::size_t source() const
@@ -128,12 +185,12 @@ class fsm_transition
       return m_source;
     }
 
-    std::size_t target() const
+    const lts_fsm_base::probabilistic_state& target() const
     {
       return m_target;
     }
 
-    std::size_t& target()
+    lts_fsm_base::probabilistic_state& target()
     {
       return m_target;
     }
@@ -152,7 +209,8 @@ class fsm_transition
 struct fsm_builder
 {
   fsm_builder(probabilistic_lts_fsm_t& fsm_)
-    : fsm(fsm_)
+    : fsm(fsm_),
+      m_initial_state_is_set(false)
   {}
 
   // Contains the result
@@ -164,6 +222,10 @@ struct fsm_builder
   // Maps labels of the FSM to numbers
   std::map<std::string, std::size_t> labels;
 
+  // This variable records if the initial state is set explicitly.
+  // If not it needs to be done while finishing the fsm.
+  bool m_initial_state_is_set;
+
   void start()
   {
     parameters.clear();
@@ -174,7 +236,11 @@ struct fsm_builder
   void add_transition(const std::string& source, const std::string& target, const std::string& label)
   {
     fsm_transition t(source, target, label);
-    std::size_t max = (std::max)(t.source(), t.target());
+    std::size_t max = t.source();
+    for(const detail::lts_fsm_base::state_probability_pair& p: t.target())
+    {
+      max=std::max(max,p.state());
+    }
     if (fsm.num_states() <= max)
     {
       fsm.set_num_states(max, fsm.has_state_info());
@@ -190,6 +256,8 @@ struct fsm_builder
     {
       label_index = i->second;
     }
+
+
     const size_t probabilistic_state_index=fsm.add_probabilistic_state(detail::lts_fsm_base::probabilistic_state(t.target()));
     fsm.add_transition(transition(t.source(), label_index, probabilistic_state_index));
   }
@@ -202,6 +270,12 @@ struct fsm_builder
   void add_parameter(const std::string& name, const std::string& cardinality, const std::string& sort, const std::vector<std::string>& domain_values)
   {
     parameters.push_back(fsm_parameter(name, cardinality, sort, domain_values));
+  }
+
+  void add_initial_distribution(const std::string& distribution)
+  {
+    fsm.set_initial_probabilistic_state(parse_distribution(distribution));
+    m_initial_state_is_set=true;
   }
 
   void write_parameters()
@@ -228,8 +302,10 @@ struct fsm_builder
     {
       fsm.add_state();
     }
-
-    fsm.set_initial_probabilistic_state(detail::lts_fsm_base::probabilistic_state(0));
+    if (!m_initial_state_is_set)
+    {
+      fsm.set_initial_probabilistic_state(detail::lts_fsm_base::probabilistic_state(0));
+    }
   }
 };
 

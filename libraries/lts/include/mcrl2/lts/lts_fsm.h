@@ -80,6 +80,7 @@ class lts_fsm_base
 {
   public:
     typedef mcrl2::lts::probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
+    typedef mcrl2::lps::state_probability_pair<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> state_probability_pair;
 
   protected:
 

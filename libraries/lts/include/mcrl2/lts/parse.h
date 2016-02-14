@@ -32,7 +32,7 @@ typedef std::vector<std::size_t> fsm_state;
 class simple_fsm_parser
 {
   protected:
-    enum states { PARAMETERS, STATES, TRANSITIONS };
+    enum states { PARAMETERS, STATES, TRANSITIONS, INITIAL_DISTRIBUTION };
 
     // Maintains the parsing phase
     states state;
@@ -44,6 +44,7 @@ class simple_fsm_parser
     boost::xpressive::sregex regex_parameter;
     boost::xpressive::sregex regex_transition;
     boost::xpressive::sregex regex_quoted_string;
+    boost::xpressive::sregex regex_probabilistic_initial_distribution;
 
     states next_state(states state)
     {
@@ -55,6 +56,7 @@ class simple_fsm_parser
           return STATES;
         }
         case STATES: return TRANSITIONS;
+        case TRANSITIONS: return INITIAL_DISTRIBUTION;
         default: throw mcrl2::runtime_error("unexpected split line --- encountered while parsing FSM!");
       }
     }
@@ -119,6 +121,17 @@ class simple_fsm_parser
       builder.add_transition(source, target, label);
     }
 
+    void parse_initial_distribution(const std::string& line)
+    {
+      std::string text = utilities::trim_copy(line);
+      boost::xpressive::smatch what;
+      if (!boost::xpressive::regex_match(line, what, regex_probabilistic_initial_distribution))
+      {
+        throw mcrl2::runtime_error("Could not parse the following line as an initial distribution: " + line + ".");
+      }
+      builder.add_initial_distribution(what[0]);
+    }
+
   public:
     simple_fsm_parser(probabilistic_lts_fsm_t& fsm)
       : builder(fsm)
@@ -127,9 +140,21 @@ class simple_fsm_parser
       regex_parameter = boost::xpressive::sregex::compile("\\s*([a-zA-Z_][a-zA-Z0-9_'@]*)\\((\\d+)\\)\\s*([a-zA-Z_][a-zA-Z0-9_'@#\\-> \\t=,\\\\(\\\\):]*)?\\s*((\\\"[^\\\"]*\\\"\\s*)*)");
 
       // (0|([1-9][0-9]*))+\s+(0|([1-9][0-9]*))+\s+"([^"]*)"
-      regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*))+\\s+\"([^\"]*)\"");
+      // regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*))+\\s+\"([^\"]*)\"");
+
+      // The line above have been replaced to deal with probabilistic transitions. They have one of the following two forms.
+      //        in out "label"
+      //        in [out1 prob1 ... out_n prob_n] "label"
+      // where out is a state number of a state that can be reached with probability 1 in the first format, whereas
+      // it is precisely indicated what the probabilities of the reachable states are in the second form.
+      // (0|([1-9][0-9]*))+\s+(0|([1-9][0-9]*)|\\[[^\\]]*\\])+\s+"([^"]*)"
+      regex_transition = boost::xpressive::sregex::compile("(0|([1-9][0-9]*))+\\s+(0|([1-9][0-9]*|\\[[^\\]]*\\]))+\\s+\"([^\"]*)\"");
 
       regex_quoted_string = boost::xpressive::sregex::compile("\\\"([^\\\"]*)\\\"");
+
+      // The initial state, is either a number or it has the shape [num1 prob1 ... num_n prob_n].
+      // 0|([1-9][0-9]*)|\\[.*\\]
+      regex_probabilistic_initial_distribution = boost::xpressive::sregex::compile("0|([1-9][0-9]*)|\\[[^\\]]*\\]");
     }
 
     void run(std::istream& from)
@@ -140,17 +165,24 @@ class simple_fsm_parser
       std::string line;
       while (std::getline(from, line))
       {
+
         utilities::trim(line);
-        if (line == "---")
-        {
-          state = next_state(state);
-          continue;
-        }
-        switch (state)
-        {
-          case PARAMETERS: { parse_parameter(line); break; }
-          case STATES: { parse_state(line); break; }
-          case TRANSITIONS: { parse_transition(line); break; }
+        if (line != "")  // This deals with the case when there are empty lines in or at the end of the file.
+        { 
+          if (line == "---")
+          {
+            state = next_state(state);
+          }
+          else 
+          { 
+            switch (state)
+            {
+              case PARAMETERS: { parse_parameter(line); break; }
+              case STATES: { parse_state(line); break; }
+              case TRANSITIONS: { parse_transition(line); break; }
+              case INITIAL_DISTRIBUTION: { parse_initial_distribution(line); break; }
+            }
+          }
         }
       }
       builder.finish();

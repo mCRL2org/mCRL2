@@ -367,7 +367,6 @@ inline void lts_convert_translate_state(const state_label_lts& state_label_in, s
 
 inline void lts_convert_base_class(const lts_lts_base& /* base_in */, lts_aut_base& /* base_out */) 
 {
-std::cerr << " TRANSLATE BASE LTS TO AUT\n";
   // Nothing needs to be done.
 }
 
@@ -825,7 +824,6 @@ inline void lts_convert_aux(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& l
   {
     lts_out.add_transition(*r);
   }
-std::cerr << "INIT STATE " << lts_in.initial_state() << " size " << lts_in.num_states() << "\n";
   lts_out.set_initial_state(lts_in.initial_state());
 }
 
