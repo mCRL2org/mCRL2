@@ -375,7 +375,7 @@ process::action translate_user_notation_and_normalise_sorts_action(
   const process::action &a,
   data::data_specification& data_spec)
 {
-  return process::normalize_sorts(process::translate_user_notation(a),data_spec);
+  return process::normalize_sorts(process::translate_user_notation(a), static_cast<const data::sort_specification&>(data_spec));
 }
 
 inline

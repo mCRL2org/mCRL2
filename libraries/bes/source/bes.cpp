@@ -22,7 +22,7 @@ namespace bes
 std::string pp(const bes::and_& x) { return bes::pp< bes::and_ >(x); }
 std::string pp(const bes::boolean_equation& x) { return bes::pp< bes::boolean_equation >(x); }
 std::string pp(const bes::boolean_equation_system& x) { return bes::pp< bes::boolean_equation_system >(x); }
-std::string pp(const bes::boolean_expression& x) { return bes::pp< bes::boolean_expression >(x); } 
+std::string pp(const bes::boolean_expression& x) { return bes::pp< bes::boolean_expression >(x); }
 std::string pp(const bes::boolean_variable& x) { return bes::pp< bes::boolean_variable >(x); }
 std::string pp(const bes::false_& x) { return bes::pp< bes::false_ >(x); }
 std::string pp(const bes::imp& x) { return bes::pp< bes::imp >(x); }

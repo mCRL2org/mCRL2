@@ -64,9 +64,11 @@ std::string pp(const process::sync& x) { return process::pp< process::sync >(x);
 std::string pp(const process::tau& x) { return process::pp< process::tau >(x); }
 std::string pp(const process::untyped_multi_action& x) { return process::pp< process::untyped_multi_action >(x); }
 std::string pp(const process::untyped_process_assignment& x) { return process::pp< process::untyped_process_assignment >(x); }
+process::action normalize_sorts(const process::action& x, const data::sort_specification& sortspec) { return process::normalize_sorts< process::action >(x, sortspec); }
 process::action_label_list normalize_sorts(const process::action_label_list& x, const data::sort_specification& sortspec) { return process::normalize_sorts< process::action_label_list >(x, sortspec); }
 void normalize_sorts(process::process_equation_vector& x, const data::sort_specification& sortspec) { process::normalize_sorts< process::process_equation_vector >(x, sortspec); }
 void normalize_sorts(process::process_specification& x, const data::sort_specification& /* dataspec */) { process::normalize_sorts< process::process_specification >(x, x.data()); }
+process::action translate_user_notation(const process::action& x) { return process::translate_user_notation< process::action >(x); }
 void translate_user_notation(process::process_specification& x) { process::translate_user_notation< process::process_specification >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::action_label_list& x) { return process::find_sort_expressions< process::action_label_list >(x); }
 std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x) { return process::find_sort_expressions< process::process_equation_vector >(x); }
@@ -76,17 +78,6 @@ std::set<data::variable> find_all_variables(const process::action& x) { return p
 std::set<data::variable> find_free_variables(const process::action& x) { return process::find_free_variables< process::action >(x); }
 std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
-
-// manually added template function overloads
-action normalize_sorts(const action& x, const data::data_specification& dataspec)
-{
-  return process::normalize_sorts<action>(x, dataspec);
-}
-
-process::action translate_user_notation(const action& x)
-{
-  return process::translate_user_notation<action>(x);
-}
 
 static bool register_hooks()
 {

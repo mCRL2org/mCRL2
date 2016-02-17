@@ -64,6 +64,7 @@ data::data_expression
 data::sort_expression
 data::variable_list
 lps::multi_action
+process::action
 process::action_label_list
 process::process_equation_vector
 process::process_specification
@@ -77,6 +78,7 @@ data::data_expression
 data::data_equation
 lps::multi_action
 pbes_system::pbes
+process::action
 process::process_specification
 state_formulas::state_formula
 '''
