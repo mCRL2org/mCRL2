@@ -258,6 +258,11 @@ available_tests = {
     'bessolve'                          : lambda name, settings: BessolveTest(name, settings)                                ,
 }
 
+def print_names(tests):
+    print '--- available tests ---'
+    for name in sorted(tests):
+        print name
+
 def main(tests):
     import argparse
     cmdline_parser = argparse.ArgumentParser()
@@ -265,8 +270,12 @@ def main(tests):
     cmdline_parser.add_argument('-r', '--repetitions', dest='repetitions', metavar='N', default='10', help='Perform N repetitions of each test')
     cmdline_parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help='Display additional progress messages.')
     cmdline_parser.add_argument('-k', '--keep-files', dest='keep_files', action='store_true', help='Keep the files produced by the test')
+    cmdline_parser.add_argument('-n', '--names', dest='names', action='store_true', help='Print the names of the available tests')
     cmdline_parser.add_argument('-p', '--pattern', dest='pattern', metavar='P', default='.', action='store', help='Run the tests that match with pattern P')
     args = cmdline_parser.parse_args()
+    if args.names:
+        print_names(tests)
+        return
     toolpath = args.toolpath
     if not toolpath:
         toolpath = MCRL2_INSTALL_DIR
@@ -287,10 +296,6 @@ def main(tests):
             except Exception as e:
                 print 'Test {} failed!'.format(test.name)
                 print e
-
-    # SymbolicExplorationTest('symbolic_exploration', settings)
-    # PbesrewrTest('pbesrewr', 'bqnf-quantifier', settings)
-    # PbesabstractTest('pbesabsinthe', settings)
 
 if __name__ == '__main__':
     main(available_tests)
