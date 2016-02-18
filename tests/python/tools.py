@@ -8,7 +8,7 @@
 from subprocess import  PIPE
 import os.path
 import re
-from text_utility import read_text, write_text
+from text_utility import read_text
 
 def is_list_of(l, types):
     if not isinstance(l, list):
