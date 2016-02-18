@@ -60,30 +60,10 @@ void test_pbesrewr2()
   BOOST_CHECK(p.is_well_typed());
 }
 
-// Check that existential quantification over empty domain is not automatically
-// rewritten to false.
-void test_pbesrewr3()
-{
-  // Check that the empty sort D can be enumerated.
-  std::string pbes_text =
-    "sort D;\n"
-    "map f:D -> Bool;\n"
-    "pbes nu X = exists d:D . val(f(d));\n"
-    "init X;\n"
-    ;
-
-  pbes p = txt2pbes(pbes_text);
-  data::rewriter datar(p.data(), data::jitty);
-  bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
-  pbes_rewrite(p, pbesr);
-}
-
 int test_main(int argc, char* argv[])
 {
   test_pbesrewr1();
   test_pbesrewr2();
-  test_pbesrewr3();
 
   return 0;
 }
