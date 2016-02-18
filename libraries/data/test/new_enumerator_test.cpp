@@ -21,6 +21,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/standard_utility.h"
@@ -357,20 +358,58 @@ BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form_test)
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
-BOOST_AUTO_TEST_CASE(cannot_enumerate_real)
+BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
+{
+  typedef data::enumerator_list_element<data_expression> enumerator_element;
+
+  data_expression result = data::sort_bool::true_();
+  data::variable_list v = { data::variable("r", data::sort_real::real_()) };
+  data_expression phi = parse_data_expression("r == r", v.begin(), v.end());
+  data::data_specification dataspec;
+  dataspec.add_context_sort(data::sort_real::real_());
+  data::rewriter R(dataspec);
+  data::enumerator_identifier_generator id_generator("x");
+  data::enumerator_algorithm<> E(R, dataspec, R, id_generator, (std::numeric_limits<std::size_t>::max)(), true);
+  std::deque<enumerator_element> P;
+  data::rewriter::substitution_type sigma;
+
+  try
+  {
+    P.push_back(enumerator_element(v, phi));
+    E.next(P, sigma, data::is_not_true());
+    while (!P.empty())
+    {
+      result = data::optimized_and(result, P.front().expression());
+      P.pop_front();
+      if (result == data::sort_bool::false_())
+      {
+        break;
+      }
+      E.next(P, sigma, data::is_not_true());
+    }
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    std::cout << e.what() << std::endl;
+    return;
+  }
+  BOOST_CHECK(false);
+}
+
+BOOST_AUTO_TEST_CASE(cannot_enumerate_real_with_substitution)
 {
   typedef data::enumerator_list_element_with_substitution<data_expression> enumerator_element;
 
-  data::data_specification data_spec;
-  data_spec.add_context_sort(data::sort_real::real_());
-  data::rewriter R(data_spec);
+  data::data_specification dataspec;
+  dataspec.add_context_sort(data::sort_real::real_());
+  data::rewriter R(dataspec);
   data::variable_list v;
   v.push_front(data::variable("r", data::sort_real::real_()));
   data_expression phi = parse_data_expression("r == r", v.begin(), v.end());
   data::mutable_indexed_substitution<> sigma;
   std::size_t max_count = 1000;
   bool throw_exceptions = true;
-  data::enumerator_algorithm_with_iterator<rewriter, enumerator_element> E(R, data_spec, R, max_count, throw_exceptions);
+  data::enumerator_algorithm_with_iterator<rewriter, enumerator_element> E(R, dataspec, R, max_count, throw_exceptions);
   std::deque<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
   try {
