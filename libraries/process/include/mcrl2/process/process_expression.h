@@ -1532,7 +1532,7 @@ std::string pp(const process_expression_vector& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 std::string pp(const action_list& x);
 std::string pp(const action_vector& x);
-action normalize_sorts(const action& x, const data::data_specification& dataspec);
+action normalize_sorts(const action& x, const data::sort_specification& dataspec);
 action translate_user_notation(const action& x);
 std::set<data::variable> find_all_variables(const action& x);
 std::set<data::variable> find_free_variables(const action& x);
