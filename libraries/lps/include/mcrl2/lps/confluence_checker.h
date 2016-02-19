@@ -427,7 +427,7 @@ data::data_expression get_subst_equation_from_actions(
 
 // ----------------------------------------------------------------------------------------------
 
-data::assignment_list get_full_assignment_list(
+static data::assignment_list get_full_assignment_list(
   data::assignment_list a_assignment_list,
   const data::variable_list& a_variables)
 {

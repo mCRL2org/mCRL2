@@ -18,7 +18,7 @@ namespace mcrl2 {
 
 namespace bdd {
 
-bdd_expression ordered_and(const bdd_expression& l, const bdd_expression &r)
+inline bdd_expression ordered_and(const bdd_expression& l, const bdd_expression &r)
 {
   // Basic cases.
   if (is_false(l) || is_false(r))
@@ -53,7 +53,7 @@ bdd_expression ordered_and(const bdd_expression& l, const bdd_expression &r)
   }
 }
 
-bdd_expression ordered_or(const bdd_expression& l, const bdd_expression& r)
+inline bdd_expression ordered_or(const bdd_expression& l, const bdd_expression& r)
 {
   // Basic cases.
   if (is_true(l) || is_true(r))

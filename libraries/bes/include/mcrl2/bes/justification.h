@@ -36,7 +36,7 @@ namespace bes
 namespace detail
 {
 
-string get_rest_of_string_after_at_symbol(const string& s)
+inline string get_rest_of_string_after_at_symbol(const string& s)
 {
   const size_t i=s.find('@',1);
   if (i==std::string::npos)
@@ -46,7 +46,7 @@ string get_rest_of_string_after_at_symbol(const string& s)
   return s.substr(i+1);
 }
 
-string get_string_until_at_symbol(const string& s)
+inline string get_string_until_at_symbol(const string& s)
 {
   const size_t i=s.find('@',1);
   return s.substr(0,i);
@@ -54,7 +54,7 @@ string get_string_until_at_symbol(const string& s)
 
 }  // end namespace detail
 
-void print_justification_tree_rec(
+inline void print_justification_tree_rec(
              const boolean_equation_system& b, 
              const vector<bool>& solution, 
              const bool init_solution, 
@@ -136,7 +136,7 @@ void print_justification_tree_rec(
 
 /// \brief Print a justification tree generated from the full solution of a
 // BES.
-void print_justification_tree(const boolean_equation_system& b, const vector<bool>& solution, bool init_solution)
+inline void print_justification_tree(const boolean_equation_system& b, const vector<bool>& solution, bool init_solution)
 {
   assert(b.equations().size()==solution.size());
   set<boolean_variable> visited;
