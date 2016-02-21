@@ -85,6 +85,8 @@ class probabilistic_state
       PROBABILITY sum=PROBABILITY::zero();
       for(const state_probability_pair p: m_probabilistic_state)
       {
+        assert(p.probability()>PROBABILITY::zero());
+        assert(p.probability()<=PROBABILITY::one());
         sum=sum+p.probability();
       }
       assert(sum==PROBABILITY::one());

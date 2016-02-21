@@ -18,13 +18,6 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
-static data_expression real_one()
-{
-  static data_expression one=sort_real::creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())),sort_pos::c1());
-  return one;
-}
-
-
 // First we provide two classes, that represent lambdas.
 class rewriter_class
 {
@@ -374,10 +367,15 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
 
 struct is_not_zero
 { 
+  // The argument intentionally does not have the type probabilistic_data_expression,
+  // as this invokes == on probabilistic data expressions, which expects two fractions.
+  // The enumerator can also generate open data expressions, which == on probabilistic_data_expressions
+  // cannot handle. 
   bool operator()(const data_expression& x) const
   {
     assert(x.sort()==sort_real::real_());
-    return x!=sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1());
+// std::cerr << "CHECK PROBABILITY CANDIDATE " << x << "\n"; 
+    return x!=probabilistic_data_expression::zero(); 
   }
 };
 
@@ -386,12 +384,13 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
                          const data::data_expression_vector& state_args,
                          substitution_t& sigma)
 {
+// std::cerr << "Calculate distribution " << dist << "\n";
   rewriter_class r(m_rewriter,sigma);
   transition_t::state_probability_list resulting_state_probability_list;
   if (dist.variables().empty())
   {
     const lps::state target_state(state_args.begin(),state_args.size(),r);
-    resulting_state_probability_list.push_front(state_probability_pair(target_state,real_one()));
+    resulting_state_probability_list.push_front(state_probability_pair(target_state,probabilistic_data_expression::one()));
   }
   else
   {
@@ -401,13 +400,23 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
                                data::detail::get_enumerator_variable_limit(), throw_exceptions);
     std::deque<enumerator_list_element_with_substitution<> > enumerator_solution_deque(1,enumerator_list_element_with_substitution<>(dist.variables(), dist.distribution()));
     for(enumerator_type::iterator probabilistic_solution = enumerator.begin(sigma, enumerator_solution_deque);
-                                    probabilistic_solution != enumerator.end(); ++probabilistic_solution)
+                                  probabilistic_solution != enumerator.end(); ++probabilistic_solution)
     {
+// std::cerr << "IS_SOLUTION " << probabilistic_solution->is_solution() << "\n";
       probabilistic_solution->add_assignments(dist.variables(),sigma,m_rewriter);
+// std::cerr << "FOUND SOLUTION " << sigma(dist.variables().front()) << "\n";
       rewriter_class r(m_rewriter,sigma);
-      // const data_expression_vector& state_args=m_summand->result_state;
       const lps::state target_state(state_args.begin(),state_args.size(),r);
-      resulting_state_probability_list.push_front(state_probability_pair(target_state,probabilistic_solution->expression()));
+// std::cerr << "SOLUTION " << probabilistic_solution->expression() << "    " << m_rewriter(dist.distribution(),sigma) << "\n";
+// This assertion fails, but should be true......      assert(probabilistic_solution->expression()==m_rewriter(dist.distribution(),sigma));
+//      This line is what I expect should be the code, but it does not appear to work.
+//      if (atermpp::down_cast<probabilistic_data_expression>(probabilistic_solution->expression())>probabilistic_data_expression::zero())
+//      The line below is temporary
+      if (atermpp::down_cast<probabilistic_data_expression>(m_rewriter(dist.distribution(),sigma))>probabilistic_data_expression::zero())
+      {
+// std::cerr << "INSERTED\n";
+        resulting_state_probability_list.push_front(state_probability_pair(target_state,probabilistic_solution->expression()));
+      }
       // Reset substitution
       for(variable_list::const_iterator v=dist.variables().begin();v!=dist.variables().end(); ++v)
       {
@@ -415,6 +424,7 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
       }
     }
   }
+// std::cerr << "READY \n";
   return resulting_state_probability_list;
 }
 

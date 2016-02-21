@@ -829,6 +829,10 @@ void lps2lts_algorithm::print_target_distribution_in_aut_format(
         throw mcrl2::runtime_error("The probability " + data::pp(i->probability()) + " is not a proper rational number.");
       }
       const data::application& prob=atermpp::down_cast<data::application>(i->probability());
+      if (prob.head()!=data::sort_real::creal())
+      {
+        throw mcrl2::runtime_error("Probability is not a closed expression with a proper enumerator and denominator: " + pp(i->probability()) + ".");
+      }
       m_aut_file << probability_destination_state_number.first << " " << (prob[0]) << "/"
                                                                       << (prob[1]) << " ";
     }

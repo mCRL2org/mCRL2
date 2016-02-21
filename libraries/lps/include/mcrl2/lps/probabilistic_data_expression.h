@@ -141,7 +141,16 @@ class probabilistic_data_expression: public data::data_expression
     */
     bool operator==(const probabilistic_data_expression& other) const
     {
-      return this->m_term==other.m_term; 
+      const data_expression result= m_rewriter()(data::equal_to(*this,other));
+      if (result==data::sort_bool::true_())
+      {
+        return true;
+      }
+      if (result==data::sort_bool::false_())
+      {
+        return false;
+      }
+      throw mcrl2::runtime_error("Equality between fractions does not rewrite to true or false: " + pp(result) + ".");
     }
 
     /* \brief Standard comparison operator.
@@ -164,7 +173,7 @@ class probabilistic_data_expression: public data::data_expression
       {
         return false;
       }
-      throw mcrl2::runtime_error("Fraction does not rewrite to true or false: " + pp(result) + ".");
+      throw mcrl2::runtime_error("Comparison of fraction does not rewrite to true or false: " + pp(result) + ".");
     } 
 
     /* \brief Standard comparison operator.
