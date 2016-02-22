@@ -2012,13 +2012,6 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance(p))
       {
         assert(0);
-        const process_instance_assignment q=transform_process_instance_to_process_instance_assignment(atermpp::down_cast<process_instance>(p));
-
-        size_t n=objectIndex(q.identifier());
-        const variable_list parameters=objectdata[n].parameters;
-        const assignment_list new_assignments=substitute_assignmentlist(q.assignments(),parameters,false,true,sigma,rhs_variables_in_sigma);
-        assert(check_valid_process_instance_assignment(q.identifier(),new_assignments));
-        return process_instance_assignment(q.identifier(),new_assignments);
       }
 
       if (is_process_instance_assignment(p))
@@ -3693,7 +3686,7 @@ class specification_basic_type:public boost::noncopyable
                                    todo,regular,pCRL,objectdata[n].parameters,variables_bound_in_sum);
         if (objectdata[n].processstatus!=GNFbusy)
         {
-          throw mcrl2::runtime_error("there is something wrong with recursion");
+          throw mcrl2::runtime_error("There is something wrong with recursion.");
         }
 
         objectdata[n].processbody=t;
@@ -3716,7 +3709,7 @@ class specification_basic_type:public boost::noncopyable
 
       if ((objectdata[n].processstatus==GNFbusy) && (v==first))
       {
-        throw mcrl2::runtime_error("unguarded recursion in process " + process::pp(procIdDecl) +".");
+        throw mcrl2::runtime_error("Unguarded recursion in process " + process::pp(procIdDecl) +".");
       }
 
       if ((objectdata[n].processstatus==GNFbusy)||
@@ -5124,10 +5117,7 @@ class specification_basic_type:public boost::noncopyable
       bool regular,
       bool singlestate)
     {
-      
-      /* for (std::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
-           walker!=pCRLprocs.end(); ++walker) */
-      /* The vector pCRLprocs can be extended, while this loop is executed. Therefore, we cannot use iterator. */
+      /* The vector pCRLprocs can be extended, while this loop is executed. Therefore, we cannot use an iterator. */
       for (size_t i=0; i<pCRLprocs.size(); ++i) 
       {
         const process_identifier procId= pCRLprocs[i];
@@ -9436,7 +9426,6 @@ class specification_basic_type:public boost::noncopyable
         {
           // Remove the initial stochastic_distribution.
           const stochastic_operator& sto=down_cast<const stochastic_operator>(new_process);
-std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n";
           if (!is_process_instance_assignment(sto.operand()))
           {
             process_identifier new_identifier=
@@ -9450,7 +9439,15 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
                                        sto.distribution(),
                                        process_instance_assignment(new_identifier,u.assignments()));
           }
-          return sto;
+          std::set<variable> variables_occurring_in_rhs_of_sigma;
+          mutable_map_substitution<> local_sigma;
+          for(const assignment& a: u.assignments())
+          {
+            local_sigma[a.lhs()]=a.rhs();
+            const std::set<variable> varset=find_free_variables(a.rhs());
+            variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
+          }
+          return substitute_pCRLproc(sto,local_sigma, variables_occurring_in_rhs_of_sigma); 
         }
         return t;
 
@@ -9642,7 +9639,6 @@ std::cerr << "TODO. Warning: variables of stoch.operator and process can clash\n
                                          "The problematic variable is " + pp(*i) + ":" + pp(i->sort()) + ".");
             }
           }
-std::cerr << "TODO: Warning: variables of stoch.operator and sum operator can clash\n";
           return stochastic_operator(r.variables(),
                                      r.distribution(),
                                      sum(s.variables(),r.operand()));
@@ -9657,7 +9653,6 @@ std::cerr << "TODO: Warning: variables of stoch.operator and sum operator can cl
 
         if (is_stochastic_operator(r_))
         {
-std::cerr << "TODO: Warning: variables of stoch.operators can clash\n";
           const stochastic_operator& r=down_cast<const stochastic_operator>(r_);
           return stochastic_operator(sto.variables()+r.variables(),
                                      real_times_optimized(sto.distribution(),r.distribution()),

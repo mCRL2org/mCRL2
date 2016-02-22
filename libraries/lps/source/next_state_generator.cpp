@@ -374,7 +374,6 @@ struct is_not_zero
   bool operator()(const data_expression& x) const
   {
     assert(x.sort()==sort_real::real_());
-// std::cerr << "CHECK PROBABILITY CANDIDATE " << x << "\n"; 
     return x!=probabilistic_data_expression::zero(); 
   }
 };
@@ -384,7 +383,6 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
                          const data::data_expression_vector& state_args,
                          substitution_t& sigma)
 {
-// std::cerr << "Calculate distribution " << dist << "\n";
   rewriter_class r(m_rewriter,sigma);
   transition_t::state_probability_list resulting_state_probability_list;
   if (dist.variables().empty())
@@ -394,6 +392,15 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
   }
   else
   {
+    // Save the expressions for variables that occur in the distribution, and reset these in sigma.
+    std::vector<data_expression> old_values_for_variables;
+    old_values_for_variables.reserve(dist.variables().size());
+    for(const variable& v: dist.variables())
+    {
+      old_values_for_variables.push_back(sigma(v));
+      sigma[v]=v;
+    }
+
     typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, is_not_zero> enumerator_type;
     const bool throw_exceptions=true;
     enumerator_type enumerator(m_rewriter, m_specification.data(), m_rewriter, 
@@ -402,29 +409,30 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
     for(enumerator_type::iterator probabilistic_solution = enumerator.begin(sigma, enumerator_solution_deque);
                                   probabilistic_solution != enumerator.end(); ++probabilistic_solution)
     {
-// std::cerr << "IS_SOLUTION " << probabilistic_solution->is_solution() << "\n";
       probabilistic_solution->add_assignments(dist.variables(),sigma,m_rewriter);
-// std::cerr << "FOUND SOLUTION " << sigma(dist.variables().front()) << "\n";
       rewriter_class r(m_rewriter,sigma);
       const lps::state target_state(state_args.begin(),state_args.size(),r);
-// std::cerr << "SOLUTION " << probabilistic_solution->expression() << "    " << m_rewriter(dist.distribution(),sigma) << "\n";
-// This assertion fails, but should be true......      assert(probabilistic_solution->expression()==m_rewriter(dist.distribution(),sigma));
-//      This line is what I expect should be the code, but it does not appear to work.
-//      if (atermpp::down_cast<probabilistic_data_expression>(probabilistic_solution->expression())>probabilistic_data_expression::zero())
-//      The line below is temporary
-      if (atermpp::down_cast<probabilistic_data_expression>(m_rewriter(dist.distribution(),sigma))>probabilistic_data_expression::zero())
+      assert(probabilistic_solution->expression()==m_rewriter(dist.distribution(),sigma));
+      if (atermpp::down_cast<probabilistic_data_expression>(probabilistic_solution->expression())>probabilistic_data_expression::zero())
       {
-// std::cerr << "INSERTED\n";
         resulting_state_probability_list.push_front(state_probability_pair(target_state,probabilistic_solution->expression()));
       }
       // Reset substitution
-      for(variable_list::const_iterator v=dist.variables().begin();v!=dist.variables().end(); ++v)
+      for(const variable& v: dist.variables())
       {
-        sigma[*v]=*v;
+        sigma[v]=v;
       }
     }
+    
+    // Set the old values of sigma back again.
+    std::vector<data_expression>::const_iterator i=old_values_for_variables.begin();
+    for(const variable& v: dist.variables())
+    {
+      sigma[v]=*i;
+      assert(i!=old_values_for_variables.end());
+      i++;
+    }
   }
-// std::cerr << "READY \n";
   return resulting_state_probability_list;
 }
 
@@ -566,8 +574,8 @@ void next_state_generator::iterator::increment()
   else
   {
     // There is a non trivial distribution. We need to generate states and their probabilities.
-    // The current implementation is very inefficient, but efficiency is of a later concern.
-    // using namespace data::detail;
+    // The current implementation is inefficient, but efficiency is of a later concern.
+    
     transition_t::state_probability_list resulting_state_probability_list=
                          m_generator->calculate_distribution(dist,m_summand->result_state,*m_substitution);
     if (resulting_state_probability_list.empty())
@@ -575,7 +583,7 @@ void next_state_generator::iterator::increment()
       // There are no state probability pairs. But this is wrong. The total probabilities should add up to one.
       // This means there should at least be one probability. 
       rewriter_class r(m_generator->m_rewriter,*m_substitution);
-      throw mcrl2::runtime_error("The distribution " + pp(r(dist.distribution())) + " has an empty set of instances");
+      throw mcrl2::runtime_error("The distribution " + pp(r(dist.distribution())) + " has an empty set of instances.");
     }
     // Set one state as the resulting state, and leave the other states in the resulting_state_probability_list.
     m_transition.set_target_state(resulting_state_probability_list.front().state());
