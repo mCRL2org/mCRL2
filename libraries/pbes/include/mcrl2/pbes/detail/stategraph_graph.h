@@ -63,7 +63,25 @@ class LCFP_vertex
 inline
 std::ostream& operator<<(std::ostream& out, const LCFP_vertex& u)
 {
-  return out << '(' << u.name() << ", " << u.index() << ", " << data::pp(u.variable()) << ')';
+  out << '(' << u.name() << ", ";
+  if (u.index() == data::undefined_index())
+  {
+    out << "?";
+  }
+  else
+  {
+    out << u.index();
+  }
+  out << ", ";
+  if (u.variable() == data::undefined_variable())
+  {
+    out << "?";
+  }
+  else
+  {
+    out << u.variable();
+  }
+  return out << ')';
 }
 
 // Vertex in the graph of GCFP parameters

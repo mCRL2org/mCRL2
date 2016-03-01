@@ -93,6 +93,22 @@ class belongs_relation
     {
       return m_belongs.size();
     }
+
+    std::string print() const
+    {
+      std::ostringstream out;
+      out << "{";
+      for (auto i = m_belongs.begin(); i != m_belongs.end(); ++i)
+      {
+        if (i != m_belongs.begin())
+        {
+          out << ", ";
+        }
+        out << i->first << " -> " << core::detail::print_set(i->second);
+      }
+      out << "}";
+      return out.str();
+    }
 };
 
 /// \brief Algorithm class for the local variant of the stategraph algorithm
