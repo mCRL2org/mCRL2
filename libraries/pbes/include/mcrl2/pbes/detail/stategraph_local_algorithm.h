@@ -41,13 +41,13 @@ class belongs_relation
   protected:
     typedef std::map<core::identifier_string, std::set<data::variable> > belongs_map;
 
-    belongs_map m_belongs;
+    belongs_map m_belongs_map;
 
   public:
     const std::set<data::variable>& operator[](const core::identifier_string& X) const
     {
-      auto i = m_belongs.find(X);
-      if (i == m_belongs.end())
+      auto i = m_belongs_map.find(X);
+      if (i == m_belongs_map.end())
       {
         throw mcrl2::runtime_error("unknown key encountered in belongs_relation::operator[]");
       }
@@ -56,51 +56,51 @@ class belongs_relation
 
     belongs_map::iterator begin()
     {
-      return m_belongs.begin();
+      return m_belongs_map.begin();
     }
 
     belongs_map::const_iterator begin() const
     {
-      return m_belongs.begin();
+      return m_belongs_map.begin();
     }
 
     belongs_map::iterator end()
     {
-      return m_belongs.end();
+      return m_belongs_map.end();
     }
 
     belongs_map::const_iterator end() const
     {
-      return m_belongs.end();
+      return m_belongs_map.end();
     }
 
     belongs_map::iterator find(const core::identifier_string& X)
     {
-      return m_belongs.find(X);
+      return m_belongs_map.find(X);
     }
 
     belongs_map::const_iterator find(const core::identifier_string& X) const
     {
-      return m_belongs.find(X);
+      return m_belongs_map.find(X);
     }
 
     std::set<data::variable>& operator[](const core::identifier_string& X)
     {
-      return m_belongs[X];
+      return m_belongs_map[X];
     }
 
     std::size_t size() const
     {
-      return m_belongs.size();
+      return m_belongs_map.size();
     }
 
     std::string print() const
     {
       std::ostringstream out;
       out << "{";
-      for (auto i = m_belongs.begin(); i != m_belongs.end(); ++i)
+      for (auto i = m_belongs_map.begin(); i != m_belongs_map.end(); ++i)
       {
-        if (i != m_belongs.begin())
+        if (i != m_belongs_map.begin())
         {
           out << ", ";
         }
@@ -874,23 +874,34 @@ class stategraph_local_algorithm: public stategraph_algorithm
       }
     }
 
-    void remove_belongs(belongs_relation& B,
-                        const belongs_relation& B1)
+    void remove_belongs(std::set<data::variable>& B_X,
+                        const core::identifier_string& X,
+                        const belongs_relation& Bk,
+                        std::size_t k)
     {
-      for (auto i = B1.begin(); i != B1.end(); ++i)
+      for (auto i = Bk.begin(); i != Bk.end(); ++i)
       {
-        auto const& X = i->first;
-        auto const& V = i->second;
-        auto& B_X = B[X];
-        for (auto v = V.begin(); v != V.end(); ++v)
+        if (i->first != X)
         {
-          B_X.erase(*v);
+          continue;
+        }
+        auto const& V = i->second;
+        for (const data::variable& v: V)
+        {
+          auto j = B_X.find(v);
+          if (j != B_X.end())
+          {
+            mCRL2log(log::debug, "stategraph") <<  "removing belongs variable " << *j << " in B[" << X << "] , since it already appears in belongs relation " << k << std::endl;
+            B_X.erase(*j);
+          }
         }
       }
     }
 
     void compute_extra_local_control_flow_graph()
     {
+      mCRL2log(log::debug1, "stategraph") << "--- computing extra local control flow graph" << std::endl;
+
       local_control_flow_graph V;
       belongs_relation B;
 
@@ -902,18 +913,18 @@ class stategraph_local_algorithm: public stategraph_algorithm
         auto const& u = V.insert_vertex(local_control_flow_graph_vertex(X, data::undefined_data_expression()));
 
         auto const& d_X = eq_X.parameters();
-        B[X]; // force creation of empty set corresponding to X
+        auto& B_X = B[X];  // N.B. This forces the creation of an empty belong set B[X].
         auto const& I = eq_X.data_parameter_indices();
         for (auto i = I.begin(); i != I.end(); ++i)
         {
-          B[X].insert(d_X[*i]);
+          B_X.insert(d_X[*i]);
         }
+        mCRL2log(log::debug1, "stategraph") << "initial belongs relation B[" << X << "] = " << core::detail::print_set(B_X) << std::endl;
 
-        // Hmm, moet dit niet B[X] zijn? m.a.w. dit zou volgens mij efficienter moeten kunnen
-        for (auto j = m_belongs.begin(); j != m_belongs.end(); ++j)
+        for (std::size_t k = 0; k < m_belongs.size(); k++)
         {
-          auto const& Bj = *j;
-          remove_belongs(B, Bj);
+          auto const& Bk = m_belongs[k];
+          remove_belongs(B_X, X, Bk, k);
         }
 
         auto const& predvars = eq_X.predicate_variables();
@@ -941,9 +952,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
               used_or_changed.insert(d_X[*j]);
             }
 
-            std::set<data::variable>::const_iterator bi = B[X].begin();
+            std::set<data::variable>::const_iterator bi = B_X.begin();
             std::set<data::variable>::const_iterator ui = used_or_changed.begin();
-            while (bi != B[X].end() && ui != used_or_changed.end())
+            while (bi != B_X.end() && ui != used_or_changed.end())
             {
               if (*ui < *bi)
               {
