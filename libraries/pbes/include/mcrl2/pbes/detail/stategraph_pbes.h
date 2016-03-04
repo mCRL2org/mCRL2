@@ -127,6 +127,20 @@ class predicate_variable
       stategraph_simplify_rewriter<data::simplify_rewriter> R(r);
       m_guard = R(m_guard);
     }
+
+    std::string print() const
+    {
+      std::ostringstream out;
+      out << "predicate variable X = " << X << std::endl;
+      out << "guard = " << m_guard << std::endl;
+      out << "sigma = " << m_sigma << std::endl;
+      out << "source = " << core::detail::print_map(m_source) << std::endl;
+      out << "target = " << core::detail::print_map(m_target) << std::endl;
+      out << "copy = " << core::detail::print_map(m_copy) << std::endl;
+      out << "used = " << core::detail::print_set(m_used) << std::endl;
+      out << "changed = " << core::detail::print_set(m_changed) << std::endl;
+      return out.str();
+    }
 };
 
 inline

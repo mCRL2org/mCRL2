@@ -197,6 +197,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
     // Returns k such that cfp[k] == l. Throws an exception if no such k exists.
     std::size_t unproject(const std::vector<std::size_t>& cfp, std::size_t l) const
     {
+      mCRL2log(log::debug1, "stategraph") << "stategraph_global_algorithm::unproject: cfp = " << core::detail::print_list(cfp) << " l = " << l << std::endl;
       for (std::size_t k = 0; k < cfp.size(); k++)
       {
         if (cfp[k] == l)
@@ -230,6 +231,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
         {
           // Compute k such that (X, k) and (Y, l) are related. This implies copy(X, i, cfp_X[k]) == cfp_Y[l].
           auto p = Yf.copy(cfp_Y[l]);
+          mCRL2log(log::debug2, "stategraph") << "Yf = " << Yf << "\n" << Yf.print() << " l = " << l << " Yf.copy(" << l << ") = " << p << std::endl;
           assert(p != data::undefined_index());
           std::size_t k = unproject(cfp_X, p);
           assert(k < e.size());
