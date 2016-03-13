@@ -59,7 +59,7 @@ static const function_symbol this_term_is_in_normal_form()
 // The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
 // such that it can for instance be pretty printed.
 
-static data_expression remove_normal_form_function(const data_expression& t)
+data_expression remove_normal_form_function(const data_expression& t)
 {
   if (is_variable(t))
   {

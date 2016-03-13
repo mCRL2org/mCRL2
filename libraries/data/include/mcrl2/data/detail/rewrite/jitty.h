@@ -55,6 +55,12 @@ class RewriterJitty: public Rewriter
     strategy create_strategy(const data_equation_list& rules1);
     void rebuild_strategy();
 };
+
+/// \brief removes auxiliary expressions this_term_is_in_normal_form from data_expressions that are being rewritten.
+/// \detail The function below is intended to remove the auxiliary function this_term_is_in_normal_form from a term
+///         such that it can for instance be pretty printed. This auxiliary function is used internally in terms
+///         when rewriting to avoid to rewrite too often.
+data_expression remove_normal_form_function(const data_expression& t);
 }
 }
 }
