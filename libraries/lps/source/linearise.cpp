@@ -259,8 +259,8 @@ class specification_basic_type:public boost::noncopyable
         variable_list(),
         seq(terminationAction,delta()),
         pCRL,0,false);
-      delta_process=newprocess(variable_list(),delta(),pCRL,0,false);
-      tau_process=newprocess(variable_list(),tau(),pCRL,1,false);
+      delta_process=newprocess(variable_list(),delta(),pCRL,false,false);
+      tau_process=newprocess(variable_list(),tau(),pCRL,true,false);
     }
 
     ~specification_basic_type()
@@ -764,6 +764,31 @@ class specification_basic_type:public boost::noncopyable
           unknown,0,false);
       }
     }
+
+    bool searchProcDeclaration(
+      const variable_list parameters,  
+      const process_expression& body,
+      const processstatustype s,
+      const bool canterminate,
+      const bool containstime,
+      process_identifier& p)
+    {
+      for(const objectdatatype& d:objectdata)
+      { 
+        if (d.object==proc &&
+            d.parameters==parameters &&
+            d.processbody==body &&
+            d.canterminate==canterminate &&
+            d.containstime==containstime &&
+            d.processstatus==s)
+        {
+          p=process_identifier(d.objectname,d.parameters);
+          return true;
+        }
+      }
+      return false;
+    }
+
 
     /************ storeinit *************************************************/
 
@@ -2132,15 +2157,24 @@ class specification_basic_type:public boost::noncopyable
     process_identifier newprocess(
       const variable_list parameters,  // Intentionally not a reference.
       const process_expression body,   // Intentionally not a reference.
-      processstatustype ps,
+      const processstatustype ps,
       const bool canterminate,
       const bool containstime)
     {
+      assert(canterminatebody(body)==canterminate);
+      assert(containstimebody(body)==containstime);
+
+      process_identifier p1;
+      if (searchProcDeclaration(parameters,body,ps, canterminate,containstime,p1))
+      {
+        return p1;  // The process did already exist. No need to make a new one.
+      }
+
       static size_t numberOfNewProcesses=0, warningNumber=25;
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       {
-        mCRL2log(mcrl2::log::warning) << "generated " << numberOfNewProcesses << " new internal processes.";
+        mCRL2log(mcrl2::log::warning) << "Generated " << numberOfNewProcesses << " new internal processes.";
 
         if (options.lin_method==lmRegular)
         {
@@ -2609,7 +2643,7 @@ class specification_basic_type:public boost::noncopyable
         }
         body1=bodytovarheadGNF(body,alt_state,freevars,first,variables_bound_in_sum);
         const process_identifier newproc=newprocess(freevars,body1,pCRL,canterminatebody(body1),
-                                         containstimebody(body));
+                                         containstimebody(body1));
 
         assert(check_valid_process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum)));
         return process_instance_assignment(newproc,parameters_to_assignment_list(objectdata[objectIndex(newproc)].parameters,variables_bound_in_sum));
@@ -2635,7 +2669,7 @@ class specification_basic_type:public boost::noncopyable
           const process_identifier tempvar=newprocess(
                                              objectdata[n].parameters,
                                              objectdata[n].processbody,
-                                             GNF,1,false);
+                                             GNF,true,false);
           objectdata[n].process_representing_action=tempvar;
         }
         return transform_process_instance_to_process_instance_assignment(
@@ -2669,7 +2703,7 @@ class specification_basic_type:public boost::noncopyable
           process_identifier tempvar=newprocess(
                                        objectdata[n].parameters,
                                        objectdata[n].processbody,
-                                       GNF,1,false);
+                                       GNF,true,false);
           objectdata[n].process_representing_action=tempvar;
         }
         return transform_process_instance_to_process_instance_assignment(
@@ -4767,7 +4801,8 @@ class specification_basic_type:public boost::noncopyable
 
       /* Calculate the initial distribution */
       std::set<process_identifier> visited;
-      const process_expression initial_process_with_stochastic_distribution=obtain_initial_distribution(initialProcId,visited,pcrlprcs);
+      const process_expression initial_process_with_stochastic_distribution=
+                                         obtain_initial_distribution(initialProcId,visited,pcrlprcs);
       if (is_stochastic_operator(initial_process_with_stochastic_distribution))
       {
         const stochastic_operator& sto=atermpp::down_cast<stochastic_operator>(initial_process_with_stochastic_distribution);
@@ -9434,7 +9469,10 @@ class specification_basic_type:public boost::noncopyable
                                           objectdata[n].processstatus,
                                           objectdata[n].canterminate,
                                           objectdata[n].containstime);
-            pCRLprocs.push_back(new_identifier);
+            if (std::find(pCRLprocs.begin(),pCRLprocs.end(),new_identifier)==pCRLprocs.end())
+            {
+              pCRLprocs.push_back(new_identifier);
+            }
             return stochastic_operator(sto.variables(),
                                        sto.distribution(),
                                        process_instance_assignment(new_identifier,u.assignments()));
@@ -9717,13 +9755,17 @@ class specification_basic_type:public boost::noncopyable
         const process_identifier new_procId=
                  newprocess(objectdata[n].parameters + initial_distribution.variables(),
                             initial_distribution.operand(),
-                            pCRL, 0, true);
-        pCRLprocs.push_back(new_procId);
+                            pCRL, canterminatebody(initial_distribution.operand()), containstimebody(initial_distribution.operand()));
+
+        if (std::find(pCRLprocs.begin(),pCRLprocs.end(),new_procId)==pCRLprocs.end())
+        {
+          pCRLprocs.push_back(new_procId);
+        }
 
         return stochastic_operator(initial_distribution.variables(),
-                                 initial_distribution.distribution(),
-                                 process_instance_assignment(new_procId,assignment_list())); // TODO add correct assignment here.
-      }
+                                   initial_distribution.distribution(),
+                                   process_instance_assignment(new_procId,assignment_list())); // TODO add correct assignment here.
+      } 
       return initial_distribution;
     }
 
@@ -10437,15 +10479,15 @@ class specification_basic_type:public boost::noncopyable
           const process_identifier p=newprocess(parameters,
                                                 seq(t,process_instance_assignment(terminatedProcId,assignment_list())),
                                                 pCRL,
-                                                0,
-                                                true);
+                                                false,
+                                                containstimebody(t));
           assert(check_valid_process_instance_assignment(p,assignment_list()));
           result=process_instance_assignment(p,assignment_list());
           visited_proc[t]=result;
         }
         else
         {
-          const process_identifier p=newprocess(parameters,t,pCRL,0,true);
+          const process_identifier p=newprocess(parameters,t,pCRL,false,containstimebody(t));
           assert(check_valid_process_instance_assignment(p,assignment_list()));
           result=process_instance_assignment(p,assignment_list());
           visited_proc[t]=result;

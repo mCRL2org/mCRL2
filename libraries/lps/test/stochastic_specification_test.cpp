@@ -91,6 +91,31 @@ BOOST_AUTO_TEST_CASE(test_print)
   BOOST_CHECK_EQUAL(text, result);
 }
 
+// The following specification did not linearise, due to an infinite loop.
+BOOST_AUTO_TEST_CASE(test_linearisation)
+{
+  std::string text =
+    "act a:Bool;\n"
+    "proc X=dist b:Bool[1/2].a(b).X;\n"
+    "init X;\n"
+    ;
+
+  std::string result =
+    "act  a: Bool;\n"
+    "\n"
+    "proc P(b_X: Bool) =\n"
+    "       sum e_X: Bool.\n"
+    "         a(b_X) .\n"
+    "         dist b1_X: Bool[1 / 2] .\n"
+    "         P(b_X = b1_X);\n"
+    "\n"
+    "init dist b: Bool[1 / 2] . P(b);\n"
+    ;
+
+  stochastic_specification spec=linearise(text);
+  BOOST_CHECK_EQUAL(lps::pp(spec),result);
+}  
+
 BOOST_AUTO_TEST_CASE(test_parelm)
 {
   stochastic_specification spec = linearise(lps::detail::ABP_SPECIFICATION());
