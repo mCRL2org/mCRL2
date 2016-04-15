@@ -143,7 +143,7 @@ class ltscompare_tool : public ltscompare_base
                        << ")." << std::endl;
       }
 
-      return result;
+      return true; // The tool terminates in a correct way.
     }
 
   public:
