@@ -36,7 +36,7 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
   }
 
   ///\brief Normalise sorts.
-  sort_expression operator()(const sort_expression& e)
+  sort_expression operator()(const sort_expression& e) const
   {
     // This routine takes the map m_normalised_aliases which contains pairs of sort expressions
     // <A,B> and takes all these pairs as rewrite rules, which are applied to e using an innermost

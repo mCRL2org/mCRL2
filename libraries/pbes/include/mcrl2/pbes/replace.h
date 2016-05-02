@@ -275,7 +275,7 @@ T replace_variables_capture_avoiding(const T& x,
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
 void replace_propositional_variables(T& x,
-                                     Substitution sigma,
+                                     const Substitution& sigma,
                                      typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                                     )
 {
@@ -285,7 +285,7 @@ void replace_propositional_variables(T& x,
 /// \brief Applies a propositional variable substitution.
 template <typename T, typename Substitution>
 T replace_propositional_variables(const T& x,
-                                  Substitution sigma,
+                                  const Substitution& sigma,
                                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                                  )
 {
@@ -294,7 +294,7 @@ T replace_propositional_variables(const T& x,
 
 template <typename T, typename Substitution>
 void replace_pbes_expressions(T& x,
-                              Substitution sigma,
+                              const Substitution& sigma,
                               bool innermost = true,
                               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                              )
@@ -304,7 +304,7 @@ void replace_pbes_expressions(T& x,
 
 template <typename T, typename Substitution>
 T replace_pbes_expressions(const T& x,
-                           Substitution sigma,
+                           const Substitution& sigma,
                            bool innermost = true,
                            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                           )

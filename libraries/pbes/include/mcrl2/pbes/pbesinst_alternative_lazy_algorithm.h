@@ -55,34 +55,13 @@ namespace pbes_system
 
 namespace detail
 {
-  template <class RENAMER>
-  const pbes_expression replace_propositional_variables_local(const pbes_expression& expr, const RENAMER& sigma)
-  {
-    if (is_propositional_variable_instantiation(expr))
-    {
-      return sigma(atermpp::vertical_cast<const propositional_variable_instantiation>(expr));
-    }
-    else if (is_and(expr))
-    {
-      const and_& expra=atermpp::down_cast<and_>(expr);
-      return and_(replace_propositional_variables_local(expra.left(),sigma), replace_propositional_variables_local(expra.right(),sigma));
-    }
-    else if (is_or(expr))
-    {
-      const or_& expro=atermpp::down_cast<or_>(expr);
-      return or_(replace_propositional_variables_local(expro.left(),sigma), replace_propositional_variables_local(expro.right(),sigma));
-    }
-    assert(is_true(expr)||is_false(expr));
-    return expr;
-  }
-
   class rename_pbesinst_consecutively: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
   {
     protected:
       std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
 
     public:
-      rename_pbesinst_consecutively(std::vector<std::vector<propositional_variable_instantiation> >& instantiations, 
+      rename_pbesinst_consecutively(std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
                                     bool short_renaming_scheme)
       {
         size_t index=0;
@@ -154,7 +133,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_vari
     const pbes_expression expr = pbes_expression_order_quantified_variables(pe.body(),data_spec);
     return pbes_expr::exists(mcrl2::data::order_variables_to_optimise_enumeration(pe.variables(),data_spec),expr);
   }
-  else 
+  else
   {
     return p;
   }
@@ -194,7 +173,7 @@ class pbesinst_alternative_lazy_algorithm
     /// Indicate to which extent explored bes equations that turn out not to reachable can be thrown away.
     /// Values are: none, some or all.
     const mcrl2::bes::remove_level m_erase_unused_bes_variables;
-    
+
     /// \brief Propositional variable instantiations that need to be handled.
     std::deque<propositional_variable_instantiation> todo;
 
@@ -236,11 +215,11 @@ class pbesinst_alternative_lazy_algorithm
     transformation_strategy m_transformation_strategy;
 
     /// \brief Prints a log message for every 1000-th equation
-    void print_equation_count(const size_t nr_of_processed_variables, 
+    void print_equation_count(const size_t nr_of_processed_variables,
                               const size_t nr_of_generated_variables,
                               const size_t todo_size) const
     {
-      static time_t last_log_time = time(NULL) - 1;        
+      static time_t last_log_time = time(NULL) - 1;
       time_t new_log_time=0;
       if (time(&new_log_time) > last_log_time)
       {
@@ -318,7 +297,7 @@ class pbesinst_alternative_lazy_algorithm
     inline void add_todo(const propositional_variable_instantiation& X)
     {
       if (todo.size()<m_maximum_todo_size)  // If there is no limit on todo, m_maximimum_todo_size is equal to npos.
-      { 
+      {
         todo.push_back(X);
         todo_set.insert(X); // XXXXX
       }
@@ -342,7 +321,7 @@ class pbesinst_alternative_lazy_algorithm
           equation[X]=(m_approximate_true?false_():true_());
           instantiations[equation_index[X.name()]].push_back(X);
           trivial[X]=equation[X];
-        } 
+        }
       }
     }
 
@@ -506,8 +485,8 @@ class pbesinst_alternative_lazy_algorithm
 
     // The function below simplifies an boolean_expression, given the knowledge that some propositional variables in trivial
     // are known to be true or false. The idea is that variables that are redundant can be removed. If p = p1 && p2, and p1 is
-    // false, then p2 can be removed, as its value does not influence the rewrite system. 
-    // The result of the function is a pair, with the simplified expression as first term, and the expression that is rewritten under the 
+    // false, then p2 can be removed, as its value does not influence the rewrite system.
+    // The result of the function is a pair, with the simplified expression as first term, and the expression that is rewritten under the
     // simplifications in trivial as the second term.
     typedef std::pair < pbes_expression, pbes_expression > pbes_expression_pair;
     pbes_expression_pair simplify_pbes_expression(const pbes_expression& p, const std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial)
@@ -571,7 +550,7 @@ class pbesinst_alternative_lazy_algorithm
       }
       return pbes_expression_pair(or_(lhs.first,rhs.first),or_(lhs.first,rhs.first));
     }
- 
+
 
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
@@ -739,14 +718,10 @@ class pbesinst_alternative_lazy_algorithm
         for (propositional_variable_instantiation X_e: vec)
         {
           const propositional_variable lhs = propositional_variable(renamer(X_e).name(), data::variable_list());
-          const pbes_expression rhs = replace_propositional_variables_local(equation[X_e], renamer);
-          // The code below would be preferable, using standard visitors, but for larger transition systems
-          // it is deadly slow. Therefore, the local routine replace_propositional_variables_local has been 
-          // contructed that should be replaced in due time.
-          // const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);
+          const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
           mCRL2log(log::debug) << "BESEquation: " << atermpp::aterm(symbol) << " " << lhs << " = " << rhs << std::endl;
-          
+
         }
       }
 

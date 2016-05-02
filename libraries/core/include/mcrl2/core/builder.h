@@ -162,21 +162,21 @@ struct update_apply_builder: public Builder<update_apply_builder<Builder, Functi
   typedef typename Function::result_type result_type;
   typedef typename Function::argument_type argument_type;
 
-  Function f_;
+  const Function& f_;
 
   result_type apply(const argument_type& x)
   {
     return f_(x);
   }
 
-  update_apply_builder(Function f)
+  update_apply_builder(const Function& f)
     : f_(f)
   {}
 };
 
 template <template <class> class Builder, class Function>
 update_apply_builder<Builder, Function>
-make_update_apply_builder(Function f)
+make_update_apply_builder(const Function& f)
 {
   return update_apply_builder<Builder, Function>(f);
 }
@@ -195,14 +195,14 @@ class update_apply_builder_arg1: public Builder<update_apply_builder_arg1<Builde
   typedef typename Function::result_type result_type;
   typedef typename Function::argument_type argument_type;
 
-  Function f_;
+  const Function& f_;
 
   result_type apply(const argument_type& x)
   {
     return f_(x);
   }
 
-  update_apply_builder_arg1(Function f, const Arg1& arg1):
+  update_apply_builder_arg1(const Function& f, const Arg1& arg1):
     super(arg1),
     f_(f)
   {}
@@ -210,7 +210,7 @@ class update_apply_builder_arg1: public Builder<update_apply_builder_arg1<Builde
 
 template <template <class> class Builder, class Function, class Arg1>
 update_apply_builder_arg1<Builder, Function, Arg1>
-make_update_apply_builder_arg1(Function f)
+make_update_apply_builder_arg1(const Function& f)
 {
   return update_apply_builder_arg1<Builder, Function, Arg1>(f);
 }
