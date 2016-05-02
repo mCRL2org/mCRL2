@@ -290,7 +290,7 @@ struct process_identifier_assignment
     : lhs(lhs_), rhs(rhs_)
   {}
 
-  process_identifier operator()(const process_identifier& x)
+  process_identifier operator()(const process_identifier& x) const
   {
     if (x == lhs)
     {
@@ -302,7 +302,7 @@ struct process_identifier_assignment
 
 template <typename T, typename Substitution>
 void replace_process_identifiers(T& x,
-                       Substitution sigma,
+                       const Substitution& sigma,
                        typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                       )
 {
@@ -311,7 +311,7 @@ void replace_process_identifiers(T& x,
 
 template <typename T, typename Substitution>
 T replace_process_identifiers(const T& x,
-                    Substitution sigma,
+                    const Substitution& sigma,
                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
                    )
 {
