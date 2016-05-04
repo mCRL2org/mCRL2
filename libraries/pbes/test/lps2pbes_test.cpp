@@ -11,15 +11,11 @@
 
 // Test program for timed lps2pbes.
 
-//#define MCRL2_PBES_TRANSLATE_DEBUG
-//#define MCRL2_STATE_FORMULA_BUILDER_DEBUG
-
 #include <iostream>
 #include <iterator>
 #include <boost/test/included/unit_test_framework.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/test_input.h"
@@ -34,13 +30,7 @@
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "test_specifications.h"
 
-using namespace std;
 using namespace mcrl2;
-using namespace mcrl2::core;
-using namespace mcrl2::data;
-using namespace mcrl2::lps;
-using namespace mcrl2::lps::detail;
-using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
@@ -89,7 +79,7 @@ void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf
   // apply one point rule rewriter to p, otherwise some of the PBESs cannot be solved
   if (rewrite)
   {
-    one_point_rule_rewriter R;
+    pbes_system::one_point_rule_rewriter R;
     pbes_rewrite(p, R);
   }
 
@@ -100,13 +90,8 @@ void one_point_rule_rewrite(pbes& p)
 {
   data::rewriter datar(p.data());
 
-  // first preprocess data expressions
-  data::detail::one_point_rule_preprocessor one_point_processor;
-  data_rewriter<data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
-  pbes_rewrite(p, datar_onepoint);
-
   // apply the one point rule rewriter
-  one_point_rule_rewriter pbesr;
+  pbes_system::one_point_rule_rewriter pbesr;
   pbes_rewrite(p, pbesr);
 
   // post processing: apply the simplifying rewriter
@@ -176,11 +161,11 @@ BOOST_AUTO_TEST_CASE(test_timed)
 
   pbes p = test_lps2pbes(TIMED_SPECIFICATION, TRIVIAL_FORMULA);
 
-  const basic_sort_vector user_def_sorts(p.data().user_defined_sorts());
-  BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), sort_real::real_()) == user_def_sorts.end());
+  const data::basic_sort_vector user_def_sorts(p.data().user_defined_sorts());
+  BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), data::sort_real::real_()) == user_def_sorts.end());
 
-  const std::set<sort_expression> sorts(p.data().sorts());
-  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), sort_real::real_()) != sorts.end());
+  const std::set<data::sort_expression> sorts(p.data().sorts());
+  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), data::sort_real::real_()) != sorts.end());
 }
 
 BOOST_AUTO_TEST_CASE(test_true_implies_false)
@@ -339,72 +324,6 @@ BOOST_AUTO_TEST_CASE(bug_841)
 
   test_lps2pbes(SPEC, FORMULA);
 }
-
-#ifdef MCRL2_USE_BOOST_FILESYSTEM
-void test_directory(int argc, char** argv)
-{
-  BOOST_CHECK(argc > 1);
-
-  // The dummy file test.test is used to extract the full path of the test directory.
-  fs::path dummy_path = fs::system_complete(fs::path(argv[1], fs::native));
-  fs::path dir = dummy_path.branch_path();
-  BOOST_CHECK(fs::is_directory(dir));
-
-  fs::directory_iterator end_iter;
-  for (fs::directory_iterator dir_itr(dir); dir_itr != end_iter; ++dir_itr)
-  {
-    if (fs::is_regular(dir_itr->status()))
-    {
-      std::string filename = dir_itr->path().file_string();
-      if (boost::ends_with(filename, std::string(".form")))
-      {
-        std::string timed_result_file   = filename.substr(0, filename.find_last_of('.') + 1) + "expected_timed_result";
-        std::string untimed_result_file = filename.substr(0, filename.find_last_of('.') + 1) + "expected_untimed_result";
-        std::string formula = mcrl2::utilities::read_text(filename);
-        if (fs::exists(timed_result_file))
-        {
-          try
-          {
-            pbes result = lps2pbes(SPEC1, formula, true);
-            pbes expected_result;
-            expected_result.load(timed_result_file);
-            bool cmp = (result == expected_result);
-            if (!cmp)
-            {
-              cerr << "ERROR: test " << timed_result_file << " failed!" << endl;
-            }
-            BOOST_CHECK(cmp);
-          }
-          catch (mcrl2::runtime_error e)
-          {
-            cerr << e.what() << endl;
-          }
-        }
-        if (fs::exists(untimed_result_file))
-        {
-          try
-          {
-            pbes result = lps2pbes(SPEC1, formula, true, false);
-            BOOST_CHECK(result.is_well_typed());
-            pbes expected_result;
-            expected_result.load(untimed_result_file);
-            bool cmp = (result == expected_result);
-            if (!cmp)
-            {
-              cerr << "ERROR: test " << untimed_result_file << " failed!" << endl;
-            }
-            BOOST_CHECK(cmp);
-          }
-          catch (mcrl2::runtime_error e)
-          {
-            cerr << e.what() << endl;
-          }
-        }
-      }
-    }
-  }
-}
-#endif
 
 BOOST_AUTO_TEST_CASE(test_formulas)
 {

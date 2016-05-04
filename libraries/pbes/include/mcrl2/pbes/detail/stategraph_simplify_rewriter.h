@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H
 
-#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 

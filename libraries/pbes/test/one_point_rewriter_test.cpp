@@ -6,13 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file rewriter_test.cpp
+/// \file one_point_rewriter_test.cpp
 /// \brief Test for PBES rewriters.
-
-//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-//#define PBES_REWRITE_TEST_DEBUG
 
 #include <functional>
 #include <iostream>
@@ -88,14 +83,18 @@ class parser
 void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
 {
   one_point_rule_rewriter R;
+  data::data_specification dataspec;
+  dataspec.add_context_sort(data::sort_nat::nat()); // TODO: is there a more elegant way to achieve this?
+  data::rewriter r(dataspec);
+  simplify_data_rewriter<data::rewriter> S(r);
   BOOST_CHECK(utilities::detail::test_operation(
     expr1,
     expr2,
     parser(),
     std::equal_to<pbes_expression>(),
-    R,
+    [&](const pbes_expression& x) { return S(R(x)); },
     "R1",
-    &utilities::detail::identity<pbes_expression>,
+    S,
     "R2"
   ));
 }
@@ -103,31 +102,15 @@ void test_one_point_rule_rewriter(const std::string& expr1, const std::string& e
 void test_one_point_rule_rewriter()
 {
   std::cout << "<test_one_point_rule_rewriter>" << std::endl;
-  one_point_rule_rewriter R;
-  pbes_system::pbes_expression x;
-  pbes_system::pbes_expression y;
-
-  x = pbes_system::parse_pbes_expression("forall n: Nat. val(n != 3) || val(n == 5)");
-  y = R(x);
-  std::clog << "x = " << pbes_system::pp(x) << std::endl;
-  std::clog << "y = " << pbes_system::pp(y) << std::endl;
-  BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
-
-  x = pbes_system::parse_pbes_expression("exists n: Nat. val(n == 3) && val(n == 5)");
-  y = R(x);
-  std::clog << "x = " << pbes_system::pp(x) << std::endl;
-  std::clog << "y = " << pbes_system::pp(y) << std::endl;
-  BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
-
+  test_one_point_rule_rewriter("forall n: Nat. val(n != 3) || val(n == 5)", "val(false)");
+  test_one_point_rule_rewriter("exists n: Nat. val(n == 3) && val(n == 5)", "val(false)");
   test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "val(!false)");
   test_one_point_rule_rewriter("forall d:Nat. val(d == 1) => Y(d)", "Y(1)");
   test_one_point_rule_rewriter("forall m:Nat. exists n:Nat. val(m == n) && Y(n)", "forall m: Nat. Y(m)");
   test_one_point_rule_rewriter("forall m:Nat. exists n:Nat. val(n == m) && Y(n)", "forall m: Nat. Y(m)");
   test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(m != n) || Y(n)", "exists m: Nat. Y(m)");
   test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(n != m) || Y(n)", "exists m: Nat. Y(m)");
-
-  // N.B. The result of this test depends on the order of the clauses.
-  // test_one_point_rule_rewriter("forall p: Bool, q: Bool. val(!(p == q)) || val(!q) || val(!(p == true))", "val(false)");
+  test_one_point_rule_rewriter("forall p: Bool, q: Bool. val(!(p == q)) || val(!q) || val(!(p == true))", "val(false)");
 }
 
 int test_main(int argc, char* argv[])

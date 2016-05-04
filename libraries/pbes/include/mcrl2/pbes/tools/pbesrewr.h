@@ -71,11 +71,6 @@ void pbesrewr(const std::string& input_filename,
     }
     case quantifier_one_point:
     {
-      // first preprocess data expressions
-      data::detail::one_point_rule_preprocessor one_point_processor;
-      data_rewriter<data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
-      pbes_rewrite(p, datar_onepoint);
-
       // apply the one point rule rewriter
       one_point_rule_rewriter pbesr;
       pbes_rewrite(p, pbesr);
