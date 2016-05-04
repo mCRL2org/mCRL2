@@ -16,10 +16,14 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 
-#include "comp.h"
+// #include "comp.h"
 #include "linear_inequalities.h"
 
 
+namespace mcrl2
+{
+namespace data
+{
 
 mcrl2::lps::specification realelm(mcrl2::lps::specification s, 
                                   int max_iterations = 5,
@@ -32,57 +36,60 @@ void normalize_pair(data_expression&,data_expression&,const rewriter&, const boo
 
 class real_representing_variable
 {
-  private:
-    mcrl2::data::variable variable;
-    mcrl2::data::data_expression lowerbound;
-    mcrl2::data::data_expression upperbound;
+  protected:
+    mcrl2::data::variable m_variable;
+    mcrl2::data::data_expression m_lowerbound;
+    mcrl2::data::data_expression m_upperbound;
+    detail::comparison_t m_comparison_operator;
 
   public:
     real_representing_variable
-    (mcrl2::data::variable v,
-     mcrl2::data::data_expression lb,
-     mcrl2::data::data_expression ub)
+        (const mcrl2::data::variable& v,
+         const mcrl2::data::data_expression& lb,
+         const mcrl2::data::data_expression& ub,
+         const detail::comparison_t co)
     {
-      variable=v;
-      lowerbound=lb;
-      upperbound=ub;
-    }
-
-
-    /*  The code below gives rise to garbage collection problems. */
-    ~real_representing_variable()
-    {
-    }
-
-    real_representing_variable& operator = (const real_representing_variable& other)
-    {
-      variable=other.variable;
-      lowerbound=other.lowerbound;
-      upperbound=other.upperbound;
-      return *this;
+      m_variable=v;
+      m_lowerbound=lb;
+      m_upperbound=ub;
+      m_comparison_operator=co;
     }
 
     real_representing_variable(const real_representing_variable& other)
     {
-      variable=other.variable;
-      lowerbound=other.lowerbound;
-      upperbound=other.upperbound;
-
+      m_variable=other.m_variable;
+      m_lowerbound=other.m_lowerbound;
+      m_upperbound=other.m_upperbound;
+      m_comparison_operator=other.m_comparison_operator;
     }
 
-    mcrl2::data::variable get_variable() const
+    real_representing_variable& operator =(const real_representing_variable& other)
     {
-      return variable;
+      m_variable=other.m_variable;
+      m_lowerbound=other.m_lowerbound;
+      m_upperbound=other.m_upperbound;
+      m_comparison_operator=other.m_comparison_operator;
+      return *this;
     }
 
-    mcrl2::data::data_expression get_lowerbound() const
+    const mcrl2::data::variable& get_variable() const
     {
-      return lowerbound;
+      return m_variable;
     }
 
-    mcrl2::data::data_expression get_upperbound() const
+    const mcrl2::data::data_expression& get_lowerbound() const
     {
-      return upperbound;
+      return m_lowerbound;
+    }
+
+    const mcrl2::data::data_expression& get_upperbound() const
+    {
+      return m_upperbound;
+    }
+ 
+    const detail::comparison_t& comparison_operator() const
+    {
+      return m_comparison_operator;
     }
 };
 
@@ -114,15 +121,15 @@ class summand_information
 
   public:
     summand_information(
-      const mcrl2::lps::summand_base &s,
+      const mcrl2::lps::summand_base& s,
       bool  is_delta_summand,
-      const assignment_list &assignments,
-      const lps::multi_action &multi_action,
-      const lps::deadlock &deadlock,
-      const variable_list &rsv,
-      const variable_list &nrsv,
-      const std::vector < linear_inequality > &src,
-      const mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> > &srnm
+      const assignment_list& assignments,
+      const lps::multi_action& multi_action,
+      const lps::deadlock& deadlock,
+      const variable_list& rsv,
+      const variable_list& nrsv,
+      const std::vector < linear_inequality >& src,
+      const mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> >& srnm
     ):
       m_smd(s),
       m_is_delta_summand(is_delta_summand),
@@ -141,6 +148,8 @@ class summand_information
       nextstate_context_combinations(1,src)
       // residual_inequalities(1,vector < linear_inequality >()),
     {
+std::cerr << "NEW SUMMAND " << s.condition() <<  " -> " << pp(multi_action) << "\n"
+<< pp_vector(src) << "  assigments " << assignments << "\n";
     }
 
     summand_information(const summand_information& s)
@@ -162,27 +171,27 @@ class summand_information
     {
     }
 
-    const mcrl2::lps::summand_base &get_summand() const
+    const mcrl2::lps::summand_base& get_summand() const
     {
       return m_smd;
     }
 
-    const bool &is_delta_summand() const
+    const bool& is_delta_summand() const
     {
       return m_is_delta_summand;
     }
 
-    const mcrl2::data::assignment_list &get_assignments() const
+    const mcrl2::data::assignment_list& get_assignments() const
     {
       return m_assignments;
     }
 
-    const mcrl2::lps::multi_action &get_multi_action() const
+    const mcrl2::lps::multi_action& get_multi_action() const
     {
       return m_multi_action;
     }
 
-    const mcrl2::lps::deadlock &get_deadlock() const
+    const mcrl2::lps::deadlock& get_deadlock() const
     {
       return m_deadlock;
     }
@@ -207,8 +216,7 @@ class summand_information
       return summand_real_conditions.end();
     }
 
-    mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> >
-                          &get_summand_real_nextstate_map()
+    mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> >& get_summand_real_nextstate_map()
     {
       return summand_real_nextstate_map;
     }
@@ -269,20 +277,19 @@ class summand_information
       data_expression xi_u=new_xi_variable.get_upperbound();
       data_expression substituted_lowerbound = replace_free_variables(xi_t,summand_real_nextstate_map);
       data_expression substituted_upperbound = replace_free_variables(xi_u,summand_real_nextstate_map);
-      // mCRL2log(mcrl2::log::verbose) << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
 
       // First check whether the new value for the new xi variable is equal to itself.
       // I do not know whether optimisation below is correct.
-      if ((linear_inequality(substituted_lowerbound,xi_t,linear_inequality::equal,r).is_true(r)) &&
-          (linear_inequality(substituted_upperbound,xi_u,linear_inequality::equal,r).is_true(r)))
+      if (substituted_lowerbound==xi_t && substituted_upperbound==xi_u)
       {
-        return;
+        return;  // We do not have the create a new assignment.
       }
 
-      linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
+      linear_inequality e(substituted_lowerbound,substituted_upperbound,detail::comparison_t::less,r);
       data_expression normalized_substituted_lowerbound;
       data_expression normalized_substituted_upperbound;
-      e.typical_pair(normalized_substituted_lowerbound,normalized_substituted_upperbound,r);
+      detail::comparison_t comparison_operator;
+      e.typical_pair(normalized_substituted_lowerbound,normalized_substituted_upperbound,comparison_operator,r);
 
       // First check whether this new next state argument follows from an existing argument
       if (r(data::less(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool::true_())
@@ -313,16 +320,13 @@ class summand_information
 
       data_expression t=substituted_lowerbound;
       data_expression u=substituted_upperbound;
+      detail::comparison_t comparison=new_xi_variable.comparison_operator();
+
       std::vector < std::vector < linear_inequality > > new_nextstate_context_combinations;
       for (std::vector < std::vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin();
            i!=nextstate_context_combinations.end(); ++i)
       {
         std::vector < linear_inequality > vec_lin_eq;
-        /* if (power_of_2(i->size()))
-        { remove_redundant_inequalities(*i, vec_lin_eq, r);
-        }
-        else */
-
         vec_lin_eq.swap(*i);
         size_t old_size=vec_lin_eq.size();
 
@@ -337,67 +341,38 @@ class summand_information
         // we can simply take vec_lin_eq to remain untouched and we do not have to consider
         // t<u and t>u.
 
-        vec_lin_eq.push_back(linear_inequality(t,u,linear_inequality::equal,r));
-        if (is_inconsistent(vec_lin_eq,r))
+        vec_lin_eq.push_back(linear_inequality(t,u,comparison,r));
+        if (!is_inconsistent(vec_lin_eq,r))
         {
-          // Add the original vec_lin_eq, as any extension is redundant.
-          vec_lin_eq.pop_back();
-          new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
-          vec_lin_eq.swap(new_nextstate_context_combinations.back());
+          // Add a vector with t operator u at the end.
+          new_nextstate_context_combinations.push_back(vec_lin_eq);
+
+          vec_lin_eq[old_size]=linear_inequality(u,t,negate(comparison),r);
+          if (!is_inconsistent(vec_lin_eq,r))
+          {
+            // add a vector with u<t at the end
+            new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
+            vec_lin_eq.swap(new_nextstate_context_combinations.back());
+          }
         }
         else
         {
-          // Adding equality is consistent. Check whether adding a t<u and/or t>u is
-          // also consistent, and if so, add new context combinations with t=u, and t<u and/or t>u.
-          // If neither t<u and u>t are consistent, t=u is redundant, and vec_lin_eq can be
-          // added to the new context combinations.
-
-          vec_lin_eq[old_size].set_comparison(linear_inequality::less);
-          if (!is_inconsistent(vec_lin_eq,r))
-          {
-            // Add a vector with t<u at the end.
-            new_nextstate_context_combinations.push_back(vec_lin_eq);
-            // Add a vector with t==u at the end.
-            vec_lin_eq[old_size].set_comparison(linear_inequality::equal);
-            new_nextstate_context_combinations.push_back(vec_lin_eq);
-
-            vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
-            if (!is_inconsistent(vec_lin_eq,r))
-            {
-              // add a vector with u<t at the end
-              new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
-              vec_lin_eq.swap(new_nextstate_context_combinations.back());
-            }
-          }
-          else
-          {
-            vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
-            if (!is_inconsistent(vec_lin_eq,r))
-            {
-              // add a vector with u<t at the end
-              new_nextstate_context_combinations.push_back(vec_lin_eq);
-              // add a vector with t==u at the end
-              vec_lin_eq[old_size].set_comparison(linear_inequality::equal);
-              new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
-              vec_lin_eq.swap(new_nextstate_context_combinations.back());
-            }
-            else
-            {
-              // neither t<u, t>u hold. Only t==u, and it is redundant, so add the original vector.
-              vec_lin_eq.pop_back();
-              new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
-              vec_lin_eq.swap(new_nextstate_context_combinations.back());
-            }
-          }
+          
+          // add a vector with "u negop t" at the end. This can always consistent
+          // as "t op u" was not consistent.
+          vec_lin_eq[old_size]=linear_inequality(u,t,negate(comparison),r);
+          assert(!is_inconsistent(vec_lin_eq,r));
+          new_nextstate_context_combinations.push_back(vec_lin_eq);
+          vec_lin_eq.swap(new_nextstate_context_combinations.back());
         }
       }
       nextstate_context_combinations.swap(new_nextstate_context_combinations);
-      // mCRL2log(debug) << "SIZE new nextstate_context combinations " << nextstate_context_combinations.size() << "\n"
-      //          << "IN summand " << pp(m_smd) << "\n";
+std::cerr << nextstate_context_combinations.size() << " ";
     }
 };
 
-
+} // namespace data
+} // namsepace mcrl2
 
 
 #endif // MCRL2_LPSREALELM_REALELM_H

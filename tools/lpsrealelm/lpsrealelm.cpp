@@ -34,8 +34,8 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
-using data::tools::rewriter_tool;
-using utilities::tools::input_output_tool;
+using mcrl2::data::tools::rewriter_tool;
+using mcrl2::utilities::tools::input_output_tool;
 using namespace mcrl2::log;
 
 

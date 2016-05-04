@@ -23,7 +23,7 @@
 /// \details The defined data type is
 ///          sort Comp = struct smaller?is_smaller | equal?is_equal | larger?is_larger;
 
-using namespace mcrl2;
+/* using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 
@@ -120,7 +120,7 @@ class comp_struct:public mcrl2::data::structured_sort
     {
       return f_is_larger(e);
     }
-};
+}; */
 
 #endif //MCRL2_LPSRTA_COMP_H
 
