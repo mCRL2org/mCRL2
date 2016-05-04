@@ -58,27 +58,28 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
   {
     auto& left = below_top();
     auto const& right = top();
-    left.invert();
+    left.swap();
     left.join_or(right);
     pop();
   }
 
   void leave(const not_& x)
   {
-    top().invert();
+    top().swap();
   }
 
   void leave(const forall& x)
   {
-    top().remove_variables(x.variables());
+    top().delete_(x.variables());
   }
 
   void leave(const exists& x)
   {
-    top().remove_variables(x.variables());
+    top().delete_(x.variables());
   }
 
-  void leave(const propositional_variable_instantiation& x)
+  // N.B. Use apply here, to avoid going into the recursion
+  void apply(const propositional_variable_instantiation& x)
   {
     push(data::detail::find_equalities_expression());
   }
@@ -99,16 +100,30 @@ struct find_equalities_traverser_inst: public pbes_system::detail::find_equaliti
 
 } // namespace detail
 
-// N.B. interface is not finished yet
 inline
-std::string find_equalities(const pbes_expression& x)
+std::map<data::variable, std::set<data::data_expression> > find_equalities(const pbes_expression& x)
 {
   detail::find_equalities_traverser_inst f;
   f.apply(x);
-  std::ostringstream out;
   assert(f.expression_stack.size() == 1);
-  out << f.top();
-  return out.str();
+  f.top().close();
+  return f.top().equalities;
+}
+
+inline
+std::map<data::variable, std::set<data::data_expression> > find_inequalities(const pbes_expression& x)
+{
+  detail::find_equalities_traverser_inst f;
+  f.apply(x);
+//////////////////////////////////////
+  if (f.expression_stack.size() != 1)
+  {
+    throw std::runtime_error("expression_stack error");
+  }
+//////////////////////////////////////
+  assert(f.expression_stack.size() == 1);
+  f.top().close();
+  return f.top().inequalities;
 }
 
 } // namespace pbes_system

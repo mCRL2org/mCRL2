@@ -21,9 +21,6 @@
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
 
 #include "mcrl2/data/enumerator.h"
-#ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
-#include "mcrl2/data/find_equalities.h"
-#endif
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/state_probability_pair.h"
 #include "mcrl2/lps/state.h"
@@ -113,7 +110,7 @@ class next_state_generator
     typedef mcrl2::lps::state_probability_pair<lps::state, lps::probabilistic_data_expression> state_probability_pair;
     /* {
       protected:
-        // A state 
+        // A state
         lps::state m_state;
         // A data expression of sort Real that indicates the probability of this state
         data::data_expression m_probability;
@@ -121,18 +118,18 @@ class next_state_generator
 
         /// \Brief constructor
         state_probability_pair(const lps::state state, const data::data_expression& probability)
-         : m_state(state), 
+         : m_state(state),
            m_probability(probability)
         {
           assert(probability.sort()==data::sort_real::real_());
-        } 
+        }
 
         const lps::state& state() const
         {
           return m_state;
         }
 
-        void set_state(const lps::state& state) 
+        void set_state(const lps::state& state)
         {
           m_state=state;
         }
@@ -152,10 +149,10 @@ class next_state_generator
         lps::multi_action m_action;
         lps::state m_target_state;
         size_t m_summand_index;
-        // The following list contains all but one target states with their probabity. 
+        // The following list contains all but one target states with their probabity.
         // m_target_state is the other state, with the residual probability, such
         // that all probabilities add up to 1.
-        state_probability_list m_other_target_states; 
+        state_probability_list m_other_target_states;
 
       public:
         const lps::multi_action& action() const { return m_action; }
@@ -212,23 +209,10 @@ class next_state_generator
         /// \brief Enumerate <variables, phi> with substitution sigma.
         void enumerate(const data::variable_list& variables, const data::data_expression& phi, data::mutable_indexed_substitution<>& sigma)
         {
-#ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
-          data::detail::find_equalities_traverser_inst f;
-          f(phi);
-          auto const& equalities = f.top().equalities;
-          for (auto i = variables.begin(); i != variables.end(); ++i)
-          {
-            auto j = equalities.find(*i);
-            if (j != equalities.end())
-            {
-              std::cout << "EQUALITY: " << j->first << " -> " << core::detail::print_set(j->second) << std::endl;
-            }
-          }
-#endif
           m_enumeration_queue->clear();
           m_enumeration_queue->push_back(data::enumerator_list_element_with_substitution<>(variables, phi));
-          try 
-          { 
+          try
+          {
             m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, *m_enumeration_queue);
           }
           catch (mcrl2::runtime_error &e)
@@ -323,7 +307,7 @@ class next_state_generator
     const transition_t::state_probability_list& initial_states() const
     {
       return m_initial_states;
-    } 
+    }
 
     /// \brief Returns the rewriter associated with this generator.
     rewriter_t& get_rewriter()
