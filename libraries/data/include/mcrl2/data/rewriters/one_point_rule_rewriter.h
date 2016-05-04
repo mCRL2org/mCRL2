@@ -13,6 +13,7 @@
 #define MCRL2_DATA_REWRITERS_ONE_POINT_RULE_REWRITER_H
 
 #include "mcrl2/data/builder.h"
+#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/find_equalities.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/replace.h"
