@@ -28,6 +28,39 @@ namespace process
 
 typedef atermpp::term_list<data::sort_expression_list> sorts_list;
 
+inline
+sorts_list matching_action_sorts(const core::identifier_string& name,
+                                 const data::data_expression_list& parameters,
+                                 const std::multimap<core::identifier_string, action_label>& action_decls
+                                )
+{
+  sorts_list result;
+  auto range = action_decls.equal_range(name);
+  for (auto k = range.first; k != range.second; ++k)
+  {
+    const action_label& a = k->second;
+    if (a.sorts().size() == parameters.size())
+    {
+      result.push_front(a.sorts());
+    }
+  }
+  return atermpp::reverse(result);
+}
+
+inline
+action typecheck_action(const core::identifier_string& name,
+                        const data::data_expression_list& parameters,
+                        data::detail::data_typechecker& typechecker,
+                        const std::map<core::identifier_string, data::sort_expression>& variable_decls,
+                        const std::multimap<core::identifier_string, action_label>& action_decls
+                       )
+{
+  std::string msg = "action";
+  sorts_list parameter_list = matching_action_sorts(name, parameters, action_decls);
+  auto p = typechecker.match_action_parameters(parameters, parameter_list, variable_decls, name, msg);
+  return action(action_label(name, p.second), p.first);
+}
+
 // Adds the elements of actions to action_map
 // Throws an exception if a typecheck error is encountered
 template <typename ActionLabelContainer>
@@ -353,27 +386,9 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return m_process_identifiers.find(name) != m_process_identifiers.end();
   }
 
-  sorts_list matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters)
-  {
-    sorts_list result;
-    auto range = m_actions.equal_range(name);
-    for (auto k = range.first; k != range.second; ++k)
-    {
-      const action_label& a = k->second;
-      if (a.sorts().size() == parameters.size())
-      {
-        result.push_front(a.sorts());
-      }
-    }
-    return atermpp::reverse(result);
-  }
-
   action typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
-    std::string msg = "action";
-    sorts_list parameter_list = matching_action_sorts(name, parameters);
-    auto p = m_data_typechecker.match_parameters(parameters, parameter_list, m_variables, name, msg);
-    return make_action(name, p.second, p.first);
+    return process::typecheck_action(name, parameters, m_data_typechecker, m_variables, m_actions);
   }
 
   sorts_list matching_process_sorts(const core::identifier_string& name, const data::data_expression_list& parameters)
@@ -395,7 +410,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     std::string msg = "process";
     sorts_list parameter_list = matching_process_sorts(name, parameters);
-    auto p = m_data_typechecker.match_parameters(parameters, parameter_list, m_variables, name, msg);
+    auto p = m_data_typechecker.match_action_parameters(parameters, parameter_list, m_variables, name, msg);
     return make_process_instance(name, p.second, p.first);
   }
 
@@ -740,7 +755,7 @@ class process_type_checker
         m_data_typechecker.check_sort_list_is_declared(ProcType);
 
         //check that all formal parameters of the process are unique.
-        if (!m_data_typechecker.unique_variables(id.variables()))
+        if (!data::detail::unique_variables(id.variables()))
         {
           throw mcrl2::runtime_error("the formal variables in process " + process::pp(id) + " are not unique");
         }

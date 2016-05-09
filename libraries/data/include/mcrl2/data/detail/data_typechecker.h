@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_TYPECHECKER_H
 #define MCRL2_DATA_DETAIL_DATA_TYPECHECKER_H
 
+#include <set>
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/typecheck.h"
 
@@ -22,6 +23,20 @@ namespace data {
 namespace detail {
 
 typedef atermpp::term_list<data::sort_expression_list> sorts_list;
+
+inline
+bool unique_variables(const variable_list& x)
+{
+  std::set<core::identifier_string> names;
+  for (const variable& v: x)
+  {
+    if (!names.insert(v.name()).second) // The variable name is already in the set.
+    {
+      return false;
+    }
+  }
+  return true;
+}
 
 template <typename Container>
 data::sort_expression_list parameter_sorts(const Container& parameters)
@@ -277,6 +292,36 @@ class data_typechecker: protected data::data_type_checker
       return false;
     }
 
+    data::data_expression typecheck_data_expression_nothrow(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+    {
+      data::data_expression result;
+      try
+      {
+        result = (*this)(d, expected_sort, variables);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+      }
+      assert(data::normalize_sorts(result, get_sort_specification()) == result);
+      return result;
+    }
+
+    // Apparently this approach is too simple
+    data::assignment_list typecheck_assignments_does_not_work(const data::assignment_list& assignments, const std::map<core::identifier_string, data::sort_expression>& variables)
+    {
+      data::assignment_list result;
+      for (const data::assignment& a: assignments)
+      {
+        data::sort_expression expected_sort = expand_numeric_types_down(a.lhs().sort());
+        data::data_expression rhs = (*this)(a.rhs(), expected_sort, variables);
+        result.push_front(data::assignment(a.lhs(), rhs));
+      }
+      result = atermpp::reverse(result);
+      assert(data::normalize_sorts(result, get_sort_specification()) == result);
+      return result;
+    }
+
   public:
     /** \brief     make a data type checker.
      *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
@@ -286,20 +331,6 @@ class data_typechecker: protected data::data_type_checker
     data_typechecker(const data_specification& dataspec)
       : data_type_checker(dataspec)
     {}
-
-    bool unique_variables(const variable_list& x)
-    {
-      return data_type_checker::VarsUnique(x);
-    }
-
-    void print_variables(const std::map<core::identifier_string, data::sort_expression>& variables) const
-    {
-      std::cout << "--- variables ---" << std::endl;
-      for (auto i = variables.begin(); i != variables.end(); ++i)
-      {
-        std::cout << i->first << " -> " << i->second << std::endl;
-      }
-    }
 
     void print_context() const
     {
@@ -328,12 +359,12 @@ class data_typechecker: protected data::data_type_checker
 
     void check_sort_list_is_declared(const sort_expression_list& x) const
     {
-      return sort_type_checker::check_sort_list_is_declared(x);
+      sort_type_checker::check_sort_list_is_declared(x);
     }
 
     void check_sort_is_declared(const sort_expression& x) const
     {
-      return sort_type_checker::check_sort_is_declared(x);
+      sort_type_checker::check_sort_is_declared(x);
     }
 
     data_specification typechecked_data_specification() const
@@ -345,34 +376,18 @@ class data_typechecker: protected data::data_type_checker
     {
       mCRL2log(log::debug) << "--- Typechecking " << d << " (" << atermpp::aterm(d) << ") with expected sort = " << expected_sort << std::endl;
       // print_context();
-      // print_variables(variables);
       data::data_expression result = (*this)(d, expected_sort, variables);
       mCRL2log(log::debug) << "--- Typechecking result = " << result << std::endl;
       assert(data::normalize_sorts(result, get_sort_specification()) == result);
       return result;
     }
 
-    data::data_expression typecheck_data_expression_nothrow(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
-    {
-      data::data_expression result;
-      try
-      {
-        result = (*this)(d, expected_sort, variables);
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-      }
-      assert(data::normalize_sorts(result, get_sort_specification()) == result);
-      return result;
-    }
-
-    std::pair<data::data_expression_list, data::sort_expression_list> match_parameters(const data::data_expression_list& parameters,
-                                                                                       const sorts_list& parameter_list,
-                                                                                       const std::map<core::identifier_string, data::sort_expression>& variables,
-                                                                                       const core::identifier_string& name,
-                                                                                       const std::string& msg
-                                                                                      )
+    std::pair<data::data_expression_list, data::sort_expression_list> match_action_parameters(const data::data_expression_list& parameters,
+                                                                                              const sorts_list& parameter_list,
+                                                                                              const std::map<core::identifier_string, data::sort_expression>& variables,
+                                                                                              const core::identifier_string& name,
+                                                                                              const std::string& msg
+                                                                                             )
     {
       if (parameter_list.empty())
       {
@@ -424,21 +439,6 @@ class data_typechecker: protected data::data_type_checker
       return std::make_pair(result, possible_sorts);
     }
 
-    // Apparently this approach is too simple
-    data::assignment_list typecheck_assignments_does_not_work(const data::assignment_list& assignments, const std::map<core::identifier_string, data::sort_expression>& variables)
-    {
-      data::assignment_list result;
-      for (const data::assignment& a: assignments)
-      {
-        data::sort_expression expected_sort = expand_numeric_types_down(a.lhs().sort());
-        data::data_expression rhs = (*this)(a.rhs(), expected_sort, variables);
-        result.push_front(data::assignment(a.lhs(), rhs));
-      }
-      result = atermpp::reverse(result);
-      assert(data::normalize_sorts(result, get_sort_specification()) == result);
-      return result;
-    }
-
     data::assignment_list typecheck_assignments(const data::assignment_list& assignments, const std::map<core::identifier_string, data::sort_expression>& variables)
     {
       std::map<core::identifier_string, data::sort_expression> sort_map;
@@ -487,11 +487,10 @@ class data_typechecker: protected data::data_type_checker
       }
       result = atermpp::reverse(result);
       result = data::normalize_sorts(result, get_sort_specification());
-      // assert(data::normalize_sorts(result, get_sort_specification()) == result);
       return result;
     }
 
-    data_expression typecheck_untyped_data_parameter(const core::identifier_string& name, const data_expression_list& parameters, const std::map<core::identifier_string, data::sort_expression>& variables, const data::sort_expression& expected_sort = untyped_sort())
+    data_expression typecheck_untyped_data_parameter(const core::identifier_string& name, const data_expression_list& parameters, const std::map<core::identifier_string, data::sort_expression>& variables, const data::sort_expression& expected_sort)
     {
       data_expression result;
       if (parameters.empty())

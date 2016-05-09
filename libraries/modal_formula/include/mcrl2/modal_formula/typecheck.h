@@ -59,29 +59,9 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       m_actions(actions)
   {}
 
-  // TODO: reuse this code from process typechecker
-  sorts_list matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters)
-  {
-    sorts_list result;
-    auto range = m_actions.equal_range(name);
-    for (auto k = range.first; k != range.second; ++k)
-    {
-      const process::action_label& a = k->second;
-      if (a.sorts().size() == parameters.size())
-      {
-        result.push_front(a.sorts());
-      }
-    }
-    return atermpp::reverse(result);
-  }
-
-  // TODO: reuse this code from process typechecker
   process::action typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
-    std::string msg = "action";
-    sorts_list parameter_list = matching_action_sorts(name, parameters);
-    auto p = m_data_typechecker.match_parameters(parameters, parameter_list, m_variables, name, msg);
-    return process::action(process::action_label(name, p.second), p.first);
+    return process::typecheck_action(name, parameters, m_data_typechecker, m_variables, m_actions);
   }
 
   action_formula apply(const data::data_expression& x)
