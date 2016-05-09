@@ -83,7 +83,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       const data::untyped_data_parameter& y = x.actions().front();
       try
       {
-        return m_data_typechecker.typecheck_untyped_data_parameter(y.name(), y.arguments(), m_variables, data::sort_bool::bool_());
+        return data::typecheck_untyped_data_parameter(m_data_typechecker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variables);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -472,7 +472,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
     auto i = m_state_variables.find(x.name());
     if (i == m_state_variables.end())
     {
-      return m_data_typechecker.typecheck_untyped_data_parameter(x.name(), x.arguments(), m_variables, data::sort_bool::bool_());
+      return typecheck_untyped_data_parameter(m_data_typechecker, x.name(), x.arguments(), data::sort_bool::bool_(), m_variables);
     }
     const data::sort_expression_list& expected_sorts = i->second;
 

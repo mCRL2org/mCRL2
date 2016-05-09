@@ -144,7 +144,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     auto i = m_propositional_variables.find(name);
     if (i == m_propositional_variables.end())
     {
-      return m_data_typechecker.typecheck_untyped_data_parameter(x.name(), x.arguments(), m_variables, data::sort_bool::bool_());
+      return data::typecheck_untyped_data_parameter(m_data_typechecker, x.name(), x.arguments(), data::sort_bool::bool_(), m_variables);
     }
 
     const data::sort_expression_list& equation_sorts = propositional_variable_sorts(name);

@@ -489,21 +489,6 @@ class data_typechecker: protected data::data_type_checker
       result = data::normalize_sorts(result, get_sort_specification());
       return result;
     }
-
-    data_expression typecheck_untyped_data_parameter(const core::identifier_string& name, const data_expression_list& parameters, const std::map<core::identifier_string, data::sort_expression>& variables, const data::sort_expression& expected_sort)
-    {
-      data_expression result;
-      if (parameters.empty())
-      {
-        result = (*this)(untyped_identifier(name), expected_sort, variables);
-      }
-      else
-      {
-        result = (*this)(application(untyped_identifier(name), parameters), expected_sort, variables);
-      }
-      assert(data::normalize_sorts(result, get_sort_specification()) == result);
-      return result;
-    }
 };
 
 } // namespace detail
@@ -525,6 +510,24 @@ void add_context_variables(std::map<core::identifier_string, data::sort_expressi
     {
       throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
     }
+  }
+}
+
+inline
+data_expression typecheck_untyped_data_parameter(detail::data_typechecker& typechecker,
+                                                 const core::identifier_string& name,
+                                                 const data_expression_list& parameters,
+                                                 const data::sort_expression& expected_sort,
+                                                 const std::map<core::identifier_string, data::sort_expression>& variable_decls
+                                                )
+{
+  if (parameters.empty())
+  {
+    return typechecker.typecheck_data_expression(untyped_identifier(name), expected_sort, variable_decls);
+  }
+  else
+  {
+    return typechecker.typecheck_data_expression(application(untyped_identifier(name), parameters), expected_sort, variable_decls);
   }
 }
 
