@@ -308,9 +308,6 @@ struct equal_data_parameters_builder
       }
     }
     data::data_expression expr = data::lazy::join_and(v.begin(), v.end());
-#ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-    mCRL2log(debug) << "  <and-term> " << data::pp(expr) << std::endl;
-#endif
     result.insert(expr);
   }
 };
