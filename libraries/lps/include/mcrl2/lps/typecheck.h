@@ -27,7 +27,7 @@ class multi_action_type_checker
 {
   protected:
     data::detail::data_typechecker m_data_typechecker;
-    std::multimap<core::identifier_string, process::action_label> m_actions;
+    process::detail::action_context m_action_context;
     std::map<core::identifier_string, data::sort_expression> m_global_variables;
 
     template <typename VariableContainer>
@@ -35,7 +35,6 @@ class multi_action_type_checker
     {
       for (const data::variable& v: global_variables)
       {
-        // m_data_typechecker.check_sort_is_declared(v.sort());
         m_data_typechecker.check_sort_is_declared(v.sort());
 
         auto i = m_global_variables.find(v.name());
@@ -58,7 +57,7 @@ class multi_action_type_checker
                              )
       : m_data_typechecker(dataspec)
     {
-      add_context_action_labels(m_actions, action_labels, m_data_typechecker);
+      m_action_context.add_context_action_labels(action_labels, m_data_typechecker);
       data::add_context_variables(m_global_variables, variables, m_data_typechecker);
     }
 
@@ -79,7 +78,7 @@ class multi_action_type_checker
       {
         for (const data::untyped_data_parameter& a: x.actions())
         {
-          actions.push_back(process::typecheck_action(a.name(), a.arguments(), m_data_typechecker, m_global_variables, m_actions));
+          actions.push_back(process::typecheck_action(a.name(), a.arguments(), m_data_typechecker, m_global_variables, m_action_context));
         }
       }
       catch (mcrl2::runtime_error& e)
@@ -103,13 +102,6 @@ class action_type_checker:public data::data_type_checker
     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
     **/
     action_type_checker(const data::data_specification& data_spec, const process::action_label_list& action_decls);
-
-    /** \brief     Type check a multi action.
-    *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-    *  \param[in] ma A multi action that has not been type checked.
-    *  \return    a multi action where all untyped identifiers have been replace by typed ones.
-    **/
-    multi_action operator()(const process::untyped_multi_action& ma);
 
     /** \brief     Type check a action_rename_specification;
     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -138,17 +130,6 @@ multi_action type_check(
   const data::data_specification& data_spec,
   const process::action_label_list& action_decls)
 {
-  // multi_action result;
-  // action_type_checker type_checker(data_spec,action_decls);
-  // try
-  // {
-  //  result=type_checker(mult_act);
-  // }
-  // catch (mcrl2::runtime_error& e)
-  // {
-  //   throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check multi action " + pp(mult_act));
-  // }
-  // return result;
   multi_action_type_checker typechecker(data_spec, data::variable_list(), action_decls);
   return typechecker(mult_act);
 }

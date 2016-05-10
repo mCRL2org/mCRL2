@@ -48,20 +48,20 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
 
   data::detail::data_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
-  const std::multimap<core::identifier_string, process::action_label>& m_actions;
+  const process::detail::action_context& m_action_context;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::multimap<core::identifier_string, process::action_label>& actions
+                    const process::detail::action_context& actions
                    )
     : m_data_typechecker(data_typechecker),
       m_variables(variables),
-      m_actions(actions)
+      m_action_context(actions)
   {}
 
   process::action typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
-    return process::typecheck_action(name, parameters, m_data_typechecker, m_variables, m_actions);
+    return process::typecheck_action(name, parameters, m_data_typechecker, m_variables, m_action_context);
   }
 
   action_formula apply(const data::data_expression& x)
@@ -143,7 +143,7 @@ inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::multimap<core::identifier_string, process::action_label>& actions
+                    const process::detail::action_context& actions
                    )
 {
   return typecheck_builder(data_typechecker, variables, actions);
@@ -161,9 +161,9 @@ action_formula typecheck(const action_formula& x,
   data::detail::data_typechecker data_typechecker(dataspec);
   std::map<core::identifier_string, data::sort_expression> variable_map;
   data::add_context_variables(variable_map, variables, data_typechecker);
-  std::multimap<core::identifier_string, process::action_label> action_map;
-  process::add_context_action_labels(action_map, actions, data_typechecker);
-  return detail::make_typecheck_builder(data_typechecker, variable_map, action_map).apply(action_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+  process::detail::action_context action_context;
+  action_context.add_context_action_labels(actions, data_typechecker);
+  return detail::make_typecheck_builder(data_typechecker, variable_map, action_context).apply(action_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
 }
 
 inline
@@ -187,15 +187,15 @@ struct typecheck_builder: public regular_formula_builder<typecheck_builder>
 
   data::detail::data_typechecker& m_data_typechecker;
   const std::map<core::identifier_string, data::sort_expression>& m_variables;
-  const std::multimap<core::identifier_string, process::action_label>& m_actions;
+  const process::detail::action_context& m_action_context;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::multimap<core::identifier_string, process::action_label>& actions
+                    const process::detail::action_context& actions
                    )
     : m_data_typechecker(data_typechecker),
       m_variables(variables),
-      m_actions(actions)
+      m_action_context(actions)
   {}
 
   data::data_expression make_fbag_union(const data::data_expression& left, const data::data_expression& right)
@@ -300,7 +300,7 @@ struct typecheck_builder: public regular_formula_builder<typecheck_builder>
 
   regular_formula apply(const action_formulas::action_formula& x)
   {
-    return action_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions).apply(x);
+    return action_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_action_context).apply(x);
   }
 };
 
@@ -308,7 +308,7 @@ inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::multimap<core::identifier_string, process::action_label>& actions
+                    const process::detail::action_context& actions
                    )
 {
   return typecheck_builder(data_typechecker, variables, actions);
@@ -326,9 +326,9 @@ regular_formula typecheck(const regular_formula& x,
   data::detail::data_typechecker data_typechecker(dataspec);
   std::map<core::identifier_string, data::sort_expression> variable_map;
   data::add_context_variables(variable_map, variables, data_typechecker);
-  std::multimap<core::identifier_string, process::action_label> action_map;
-  process::add_context_action_labels(action_map, actions, data_typechecker);
-  return detail::make_typecheck_builder(data_typechecker, variable_map, action_map).apply(regular_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+  process::detail::action_context action_context;
+  action_context.add_context_action_labels(actions, data_typechecker);
+  return detail::make_typecheck_builder(data_typechecker, variable_map, action_context).apply(regular_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
 }
 
 inline
@@ -352,17 +352,17 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   data::detail::data_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variables;
-  const std::multimap<core::identifier_string, process::action_label>& m_actions;
+  const process::detail::action_context& m_action_context;
   std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::multimap<core::identifier_string, process::action_label>& actions,
+                    const process::detail::action_context& actions,
                     const std::map<core::identifier_string, data::sort_expression_list>& state_variables
                    )
     : m_data_typechecker(data_typechecker),
       m_variables(variables),
-      m_actions(actions),
+      m_action_context(actions),
       m_state_variables(state_variables)
   {}
 
@@ -423,12 +423,12 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   state_formula apply(const state_formulas::may& x)
   {
-    return may(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions).apply(x.formula()), (*this).apply(x.operand()));
+    return may(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_action_context).apply(x.formula()), (*this).apply(x.operand()));
   }
 
   state_formula apply(const state_formulas::must& x)
   {
-    return must(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions).apply(x.formula()), (*this).apply(x.operand()));
+    return must(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_action_context).apply(x.formula()), (*this).apply(x.operand()));
   }
 
   state_formula apply(const state_formulas::delay_timed& x)
@@ -551,7 +551,7 @@ inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::multimap<core::identifier_string, process::action_label>& actions,
+                    const process::detail::action_context& actions,
                     const std::map<core::identifier_string, data::sort_expression_list>& state_variables
                    )
 {
@@ -565,7 +565,7 @@ class state_formula_type_checker
   protected:
     data::detail::data_typechecker m_data_typechecker;
     std::map<core::identifier_string, data::sort_expression> m_variables;
-    std::multimap<core::identifier_string, process::action_label> m_actions;
+    process::detail::action_context m_action_context;
     std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
 
   public:
@@ -585,7 +585,7 @@ class state_formula_type_checker
       : m_data_typechecker(dataspec)
     {
       data::add_context_variables(m_variables, variables, m_data_typechecker);
-      process::add_context_action_labels(m_actions, action_labels, m_data_typechecker);
+      m_action_context.add_context_action_labels(action_labels, m_data_typechecker);
       add_state_variables(state_variables);
     }
 
@@ -602,7 +602,7 @@ class state_formula_type_checker
     {
       mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
 
-      state_formula result = detail::make_typecheck_builder(m_data_typechecker, m_variables, m_actions, m_state_variables).apply(state_formulas::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
+      state_formula result = detail::make_typecheck_builder(m_data_typechecker, m_variables, m_action_context, m_state_variables).apply(state_formulas::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
       if (check_monotonicity && !is_monotonous(result))
       {
         throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));

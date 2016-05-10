@@ -224,33 +224,6 @@ mcrl2::lps::action_type_checker::action_type_checker(
   }
 }
 
-lps::multi_action mcrl2::lps::action_type_checker::operator()(const process::untyped_multi_action& ma)
-{
-  try
-  {
-    process::action_list r;
-
-    for (auto l=ma.actions().begin(); l!=ma.actions().end(); ++l)
-    {
-      data::untyped_data_parameter o= *l;
-      const  std::map<core::identifier_string,sort_expression> NewDeclaredVars;
-      r.push_front(TraverseAct(NewDeclaredVars,o));
-    }
-// TODO: check if this is still needed
-//    if (ma.has_time())
-//    {
-//      const std::map<core::identifier_string,sort_expression> Vars;
-//      data_expression time=static_cast<data_type_checker>(*this)(ma.time(),Vars);
-//      return multi_action(reverse(r),time);
-//    }
-    return lps::multi_action(reverse(r));
-  }
-  catch (mcrl2::runtime_error& e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of multiaction failed (" + pp(ma) + ")");
-  }
-}
-
 /*************************   Here starts the action_rename_typechecker  ************************************/
 
 action_rename_specification mcrl2::lps::action_type_checker::operator()(const action_rename_specification& ar_spec)
