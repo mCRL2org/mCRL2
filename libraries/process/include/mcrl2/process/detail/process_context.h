@@ -14,7 +14,7 @@
 
 #include <algorithm>
 #include <map>
-#include "mcrl2/data/detail/data_typechecker.h"
+#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/process/action_label.h"
 #include "mcrl2/process/detail/action_context.h"
 
@@ -60,7 +60,7 @@ class process_context
     }
 
     template <typename ProcessIdentifierContainer>
-    void add_process_identifiers(const ProcessIdentifierContainer& ids, const action_context& action_ctx, const data::detail::data_typechecker& data_typechecker)
+    void add_process_identifiers(const ProcessIdentifierContainer& ids, const action_context& action_ctx, const data::sort_type_checker& sort_typechecker)
     {
       for (const process_identifier& id: ids)
       {
@@ -87,7 +87,7 @@ class process_context
 
         for (const data::variable& v: id.variables())
         {
-          data_typechecker.check_sort_is_declared(v.sort());
+          sort_typechecker(v.sort());
         }
 
         //check that all formal parameters of the process are unique.

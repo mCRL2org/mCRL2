@@ -179,6 +179,71 @@ class data_type_checker: public sort_type_checker
     bool IsTypeAllowedL(const sort_expression_list& TypeList, const sort_expression_list PosTypeList);
     bool IsNotInferredL(sort_expression_list TypeList);
     bool strict_type_check(const data_expression& d);
+
+  public:
+    // A few methods need to be exposed to the other type checkers.
+    sort_expression upcast_numeric_type(sort_expression expected_sort,
+                                        sort_expression sort,
+                                        data_expression& expr,
+                                        const std::map<core::identifier_string, sort_expression>& declared_variables,
+                                        const std::map<core::identifier_string, sort_expression>& allowed_variables,
+                                        std::map<core::identifier_string, sort_expression>& free_variables,
+                                        const bool strictly_ambiguous,
+                                        bool warn_upcasting = false,
+                                        const bool print_cast_error = false
+                                       )
+    {
+      return UpCastNumericType(expected_sort, sort, expr, declared_variables, allowed_variables, free_variables, strictly_ambiguous, warn_upcasting, print_cast_error);
+    }
+
+    sort_expression expand_numeric_types_down(const sort_expression& sort)
+    {
+      return ExpandNumTypesDown(sort);
+    }
+
+    sort_expression visit_data_expression(const std::map<core::identifier_string, sort_expression>& declared_variables,
+                                          const std::map<core::identifier_string, sort_expression>& allowed_variables,
+                                          data_expression& expr,
+                                          const sort_expression& sort
+                                         )
+    {
+      return TraverseVarConsTypeD(declared_variables, allowed_variables, expr, sort);
+    }
+
+    const data_specification& typechecked_data_specification() const
+    {
+      return type_checked_data_spec;
+    }
+
+    bool type_match(const sort_expression& sort_in, const sort_expression& pos_sort_in, sort_expression& result)
+    {
+      return TypeMatchA(sort_in, pos_sort_in, result);
+    }
+
+    void print_context() const
+    {
+      auto const& sortspec = get_sort_specification();
+      std::cout << "--- basic sorts ---" << std::endl;
+      for (auto const& x: sortspec.user_defined_sorts())
+      {
+        std::cout << x << std::endl;
+      }
+      std::cout << "--- aliases ---" << std::endl;
+      for (auto const& x: sortspec.user_defined_aliases())
+      {
+        std::cout << x << std::endl;
+      }
+      std::cout << "--- user constants ---" << std::endl;
+      for (auto i = user_constants.begin(); i != user_constants.end(); ++i)
+      {
+        std::cout << i->first << " -> " << i->second << std::endl;
+      }
+      std::cout << "--- user functions ---" << std::endl;
+      for (auto i = user_functions.begin(); i != user_functions.end(); ++i)
+      {
+        std::cout << i->first << " -> " << i->second << std::endl;
+      }
+    }
 };
 
 /** \brief     Type check a sort expression.

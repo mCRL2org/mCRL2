@@ -33,34 +33,31 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
   using super::apply;
 
   data::detail::data_typechecker& m_data_typechecker;
-  std::map<core::identifier_string, data::sort_expression> m_variables;
+  data::detail::variable_context m_variable_context;
   const detail::pbes_context& m_pbes_context;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const data::detail::variable_context& variables,
                     const detail::pbes_context& pbes_context
                    )
     : m_data_typechecker(data_typechecker),
-      m_variables(variables),
+      m_variable_context(variables),
     m_pbes_context(pbes_context)
   { }
 
   pbes_expression apply(const data::data_expression& x)
   {
-    return m_data_typechecker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variables);
+    return m_data_typechecker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
   }
 
   pbes_expression apply(const forall& x)
   {
     try
     {
-      auto m_variables_copy = m_variables;
-      for (const data::variable& v: x.variables())
-      {
-        m_variables[v.name()] = v.sort();
-      }
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_typechecker.get_sort_type_checker());
       pbes_expression body = (*this).apply(x.body());
-      m_variables = m_variables_copy;
+      m_variable_context = m_variable_context_copy;
       return forall(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
@@ -73,13 +70,10 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
   {
     try
     {
-      auto m_variables_copy = m_variables;
-      for (const data::variable& v: x.variables())
-      {
-        m_variables[v.name()] = v.sort();
-      }
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_typechecker.get_sort_type_checker());
       pbes_expression body = (*this).apply(x.body());
-      m_variables = m_variables_copy;
+      m_variable_context = m_variable_context_copy;
       return exists(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
@@ -96,7 +90,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
       throw mcrl2::runtime_error("propositional variable " + core::pp(name) + " not declared");
     }
 
-    const data::sort_expression_list& equation_sorts = m_pbes_context.propositional_variable_sorts(name);
+    data::sort_expression_list equation_sorts = m_pbes_context.propositional_variable_sorts(name);
     std::vector<data::data_expression> x_parameters(x.parameters().begin(), x.parameters().end());
 
     if (x_parameters.size() != equation_sorts.size())
@@ -110,7 +104,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     {
       try
       {
-        *xi = m_data_typechecker.typecheck_data_expression(*xi, *ei, m_variables);
+        *xi = m_data_typechecker.typecheck_data_expression(*xi, *ei, m_variable_context);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -125,10 +119,10 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     const core::identifier_string& name = x.name();
     if (!m_pbes_context.is_declared(name))
     {
-      return data::typecheck_untyped_data_parameter(m_data_typechecker, x.name(), x.arguments(), data::sort_bool::bool_(), m_variables);
+      return data::typecheck_untyped_data_parameter(m_data_typechecker, x.name(), x.arguments(), data::sort_bool::bool_(), m_variable_context);
     }
 
-    const data::sort_expression_list& equation_sorts = m_pbes_context.propositional_variable_sorts(name);
+    data::sort_expression_list equation_sorts = m_pbes_context.propositional_variable_sorts(name);
     std::vector<data::data_expression> x_parameters(x.arguments().begin(), x.arguments().end());
 
     if (x_parameters.size() != equation_sorts.size())
@@ -142,7 +136,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
     {
       try
       {
-        *xi = m_data_typechecker.typecheck_data_expression(*xi, *ei, m_variables);
+        *xi = m_data_typechecker.typecheck_data_expression(*xi, *ei, m_variable_context);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -156,7 +150,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
 inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const data::detail::variable_context& variables,
                     const detail::pbes_context& propositional_variables
                    )
 {
@@ -169,19 +163,8 @@ class pbes_type_checker
 {
   protected:
     data::detail::data_typechecker m_data_typechecker;
-    std::map<core::identifier_string, data::sort_expression> m_variables;
+    data::detail::variable_context m_variable_context;
     detail::pbes_context m_pbes_context;
-
-    // Returns m_variables with variables inserted into it
-    std::map<core::identifier_string, data::sort_expression> declared_variables(const data::variable_list& variables)
-    {
-      std::map<core::identifier_string, data::sort_expression> result = m_variables;
-      for (const data::variable& v: variables)
-      {
-        result[v.name()] = v.sort();
-      }
-      return result;
-    }
 
     data::sort_expression_list variable_sorts(const data::variable_list& variables)
     {
@@ -214,8 +197,8 @@ class pbes_type_checker
     pbes_type_checker(const data::data_specification& dataspec, const VariableContainer& global_variables, const PropositionalVariableContainer& propositional_variables)
       : m_data_typechecker(dataspec)
     {
-      data::add_context_variables(m_variables, global_variables, m_data_typechecker);
-      m_pbes_context.add_propositional_variables(propositional_variables, m_data_typechecker);
+      m_variable_context.add_context_variables(global_variables, m_data_typechecker.get_sort_type_checker());
+      m_pbes_context.add_propositional_variables(propositional_variables, m_data_typechecker.get_sort_type_checker());
     }
 
     /// \brief Typecheck the pbes pbesspec
@@ -227,19 +210,21 @@ class pbes_type_checker
 
       // reset the context
       m_data_typechecker = data::detail::data_typechecker(pbesspec.data());
-      m_variables.clear();
+      m_variable_context.clear();
       m_pbes_context.clear();
-      data::add_context_variables(m_variables, pbesspec.global_variables(), m_data_typechecker);
-      m_pbes_context.add_propositional_variables(equation_variables(pbesspec.equations()), m_data_typechecker);
+      m_variable_context.add_context_variables(pbesspec.global_variables(), m_data_typechecker.get_sort_type_checker());
+      m_pbes_context.add_propositional_variables(equation_variables(pbesspec.equations()), m_data_typechecker.get_sort_type_checker());
 
       // typecheck the equations
       for (pbes_equation& eqn: pbesspec.equations())
       {
-        eqn.formula() = detail::make_typecheck_builder(m_data_typechecker, declared_variables(eqn.variable().parameters()), m_pbes_context).apply(eqn.formula());
+        data::detail::variable_context variable_context = m_variable_context;
+        variable_context.add_context_variables(eqn.variable().parameters(), m_data_typechecker.get_sort_type_checker());
+        eqn.formula() = detail::make_typecheck_builder(m_data_typechecker, variable_context, m_pbes_context).apply(eqn.formula());
       }
 
       // typecheck the initial state
-      pbesspec.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(detail::make_typecheck_builder(m_data_typechecker, m_variables, m_pbes_context).apply(pbesspec.initial_state()));
+      pbesspec.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(detail::make_typecheck_builder(m_data_typechecker, m_variable_context, m_pbes_context).apply(pbesspec.initial_state()));
 
       // typecheck the data specification
       pbesspec.data() = m_data_typechecker.typechecked_data_specification();
@@ -252,13 +237,15 @@ class pbes_type_checker
       **/
     pbes_expression operator()(const pbes_expression& x)
     {
-      return detail::make_typecheck_builder(m_data_typechecker, m_variables, m_pbes_context).apply(pbes_system::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
+      return detail::make_typecheck_builder(m_data_typechecker, m_variable_context, m_pbes_context).apply(pbes_system::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
     }
 
     protected:
       pbes_expression typecheck(const pbes_expression& x, const data::variable_list& parameters)
       {
-        return detail::make_typecheck_builder(m_data_typechecker, declared_variables(parameters), m_pbes_context).apply(x);
+        data::detail::variable_context variable_context = m_variable_context;
+        variable_context.add_context_variables(parameters, m_data_typechecker.get_sort_type_checker());
+        return detail::make_typecheck_builder(m_data_typechecker, variable_context, m_pbes_context).apply(x);
       }
 };
 

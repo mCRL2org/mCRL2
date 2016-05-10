@@ -34,13 +34,13 @@ inline
 action typecheck_action(const core::identifier_string& name,
                         const data::data_expression_list& parameters,
                         data::detail::data_typechecker& typechecker,
-                        const std::map<core::identifier_string, data::sort_expression>& variable_decls,
+                        const data::detail::variable_context& variable_context,
                         const detail::action_context& action_context
                        )
 {
   std::string msg = "action";
   sorts_list parameter_list = action_context.matching_action_sorts(name, parameters);
-  auto p = typechecker.match_action_parameters(parameters, parameter_list, variable_decls, name, msg);
+  auto p = typechecker.match_action_parameters(parameters, parameter_list, variable_context, name, msg);
   return action(action_label(name, p.second), p.first);
 }
 
@@ -153,12 +153,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   using super::apply;
 
   data::detail::data_typechecker& m_data_typechecker;
-  std::map<core::identifier_string, data::sort_expression> m_variable_context;
+  data::detail::variable_context m_variable_context;
   const detail::process_context& m_process_context;
   const detail::action_context& m_action_context;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variable_context,
+                    const data::detail::variable_context& variable_context,
                     const detail::process_context& process_context,
                     const detail::action_context& action_context
                    )
@@ -481,13 +481,10 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     try
     {
-      auto m_variables_copy = m_variable_context;
-      for (const data::variable& v: x.variables())
-      {
-        m_variable_context[v.name()] = v.sort();
-      }
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_typechecker.get_sort_type_checker());
       process_expression operand = (*this).apply(x.operand());
-      m_variable_context = m_variables_copy;
+      m_variable_context = m_variable_context_copy;
       return sum(x.variables(), operand);
     }
     catch (mcrl2::runtime_error& e)
@@ -500,14 +497,11 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     try
     {
-      auto m_variables_copy = m_variable_context;
-      for (const data::variable& v: x.variables())
-      {
-        m_variable_context[v.name()] = v.sort();
-      }
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_typechecker.get_sort_type_checker());
       data::data_expression distribution = m_data_typechecker.typecheck_data_expression(x.distribution(), data::sort_real::real_(), m_variable_context);
       process_expression operand = (*this).apply(x.operand());
-      m_variable_context = m_variables_copy;
+      m_variable_context = m_variable_context_copy;
       return stochastic_operator(x.variables(), distribution, operand);
     }
     catch (mcrl2::runtime_error& e)
@@ -520,7 +514,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const data::detail::variable_context& variables,
                     const detail::process_context& process_identifiers,
                     const detail::action_context& action_context
                    )
@@ -536,7 +530,7 @@ class process_type_checker
     data::detail::data_typechecker m_data_typechecker;
     detail::action_context m_action_context;
     detail::process_context m_process_context;
-    std::map<core::identifier_string, data::sort_expression> m_global_variables;
+    data::detail::variable_context m_variable_context;
 
     std::vector<process_identifier> equation_identifiers(const std::vector<process_equation>& equations)
     {
@@ -548,37 +542,6 @@ class process_type_checker
       return result;
     }
 
-    // Returns m_global_variables with variables inserted into it
-    std::map<core::identifier_string, data::sort_expression> declared_variables(const data::variable_list& variables)
-    {
-      std::map<core::identifier_string, data::sort_expression> result = m_global_variables;
-      for (const data::variable& v: variables)
-      {
-        result[v.name()] = v.sort();
-      }
-      return result;
-    }
-
-    template <typename VariableContainer>
-    void add_global_variables(const VariableContainer& global_variables)
-    {
-      for (const data::variable& v: global_variables)
-      {
-        // m_data_typechecker.check_sort_is_declared(v.sort());
-        m_data_typechecker.check_sort_is_declared(v.sort());
-
-        auto i = m_global_variables.find(v.name());
-        if (i == m_global_variables.end())
-        {
-          m_global_variables[v.name()] = v.sort();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
-        }
-      }
-    }
-
   public:
     template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
     process_type_checker(const data::data_specification& dataspec,
@@ -588,9 +551,9 @@ class process_type_checker
                         )
       : m_data_typechecker(dataspec)
     {
-      m_action_context.add_context_action_labels(action_labels, m_data_typechecker);
-      data::add_context_variables(m_global_variables, variables, m_data_typechecker);
-      m_process_context.add_process_identifiers(process_identifiers, m_action_context, m_data_typechecker);
+      m_action_context.add_context_action_labels(action_labels, m_data_typechecker.get_sort_type_checker());
+      m_variable_context.add_context_variables(variables, m_data_typechecker.get_sort_type_checker());
+      m_process_context.add_process_identifiers(process_identifiers, m_action_context, m_data_typechecker.get_sort_type_checker());
     }
 
     /// \brief Default constructor
@@ -605,7 +568,7 @@ class process_type_checker
      **/    /// \brief Typecheck the pbes pbesspec
     process_expression operator()(const process_expression& x)
     {
-      return typecheck_process_expression(m_global_variables, process::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
+      return typecheck_process_expression(m_variable_context, process::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
     }
 
     /// \brief Typecheck the process specification procspec
@@ -619,20 +582,22 @@ class process_type_checker
       process::normalize_sorts(procspec, m_data_typechecker.typechecked_data_specification());
 
       m_action_context.clear();
-      m_global_variables.clear();
+      m_variable_context.clear();
       m_process_context.clear();
-      m_action_context.add_context_action_labels(procspec.action_labels(), m_data_typechecker);
-      data::add_context_variables(m_global_variables, procspec.global_variables(), m_data_typechecker);
-      m_process_context.add_process_identifiers(equation_identifiers(procspec.equations()), m_action_context, m_data_typechecker);
+      m_action_context.add_context_action_labels(procspec.action_labels(), m_data_typechecker.get_sort_type_checker());
+      m_variable_context.add_context_variables(procspec.global_variables(), m_data_typechecker.get_sort_type_checker());
+      m_process_context.add_process_identifiers(equation_identifiers(procspec.equations()), m_action_context, m_data_typechecker.get_sort_type_checker());
 
       // typecheck the equations
       for (process_equation& eqn: procspec.equations())
       {
-        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(declared_variables(eqn.identifier().variables()), eqn.expression()));
+        data::detail::variable_context variable_context = m_variable_context;
+        variable_context.add_context_variables(eqn.identifier().variables(), m_data_typechecker.get_sort_type_checker());
+        eqn = process_equation(eqn.identifier(), eqn.formal_parameters(), typecheck_process_expression(variable_context, eqn.expression()));
       }
 
       // typecheck the initial state
-      procspec.init() = typecheck_process_expression(m_global_variables, procspec.init());
+      procspec.init() = typecheck_process_expression(m_variable_context, procspec.init());
 
       // typecheck the data specification
       procspec.data() = m_data_typechecker.typechecked_data_specification();
@@ -641,7 +606,7 @@ class process_type_checker
     }
 
   protected:
-    process_expression typecheck_process_expression(const std::map<core::identifier_string, data::sort_expression>& variables, const process_expression& x)
+    process_expression typecheck_process_expression(const data::detail::variable_context& variables, const process_expression& x)
     {
       return detail::make_typecheck_builder(m_data_typechecker, variables, m_process_context, m_action_context).apply(x);
     }

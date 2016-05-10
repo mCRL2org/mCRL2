@@ -28,6 +28,7 @@
 #include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/detail/state_variable_context.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
@@ -47,31 +48,31 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
   using super::apply;
 
   data::detail::data_typechecker& m_data_typechecker;
-  std::map<core::identifier_string, data::sort_expression> m_variables;
+  data::detail::variable_context m_variable_context;
   const process::detail::action_context& m_action_context;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const process::detail::action_context& actions
+                    const data::detail::variable_context& variable_context,
+                    const process::detail::action_context& action_context
                    )
     : m_data_typechecker(data_typechecker),
-      m_variables(variables),
-      m_action_context(actions)
+      m_variable_context(variable_context),
+      m_action_context(action_context)
   {}
 
   process::action typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
-    return process::typecheck_action(name, parameters, m_data_typechecker, m_variables, m_action_context);
+    return process::typecheck_action(name, parameters, m_data_typechecker, m_variable_context, m_action_context);
   }
 
   action_formula apply(const data::data_expression& x)
   {
-    return m_data_typechecker.typecheck_data_expression(x, data::untyped_sort(), m_variables);
+    return m_data_typechecker.typecheck_data_expression(x, data::untyped_sort(), m_variable_context);
   }
 
   action_formula apply(const action_formulas::at& x)
   {
-    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variables);
+    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variable_context);
     return at((*this).apply(x.operand()), new_time);
   }
 
@@ -83,7 +84,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       const data::untyped_data_parameter& y = x.actions().front();
       try
       {
-        return data::typecheck_untyped_data_parameter(m_data_typechecker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variables);
+        return data::typecheck_untyped_data_parameter(m_data_typechecker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variable_context);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -104,13 +105,10 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
   {
     try
     {
-      auto m_variables_copy = m_variables;
-      for (const data::variable& v: x.variables())
-      {
-        m_variables[v.name()] = v.sort();
-      }
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_typechecker.get_sort_type_checker());
       action_formula body = (*this).apply(x.body());
-      m_variables = m_variables_copy;
+      m_variable_context = m_variable_context_copy;
       return forall(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
@@ -123,13 +121,10 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
   {
     try
     {
-      auto m_variables_copy = m_variables;
-      for (const data::variable& v: x.variables())
-      {
-        m_variables[v.name()] = v.sort();
-      }
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_typechecker.get_sort_type_checker());
       action_formula body = (*this).apply(x.body());
-      m_variables = m_variables_copy;
+      m_variable_context = m_variable_context_copy;
       return exists(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
@@ -142,7 +137,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
 inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const data::detail::variable_context& variables,
                     const process::detail::action_context& actions
                    )
 {
@@ -159,11 +154,11 @@ action_formula typecheck(const action_formula& x,
                         )
 {
   data::detail::data_typechecker data_typechecker(dataspec);
-  std::map<core::identifier_string, data::sort_expression> variable_map;
-  data::add_context_variables(variable_map, variables, data_typechecker);
+  data::detail::variable_context variable_context;
+  variable_context.add_context_variables(variables, data_typechecker.get_sort_type_checker());
   process::detail::action_context action_context;
-  action_context.add_context_action_labels(actions, data_typechecker);
-  return detail::make_typecheck_builder(data_typechecker, variable_map, action_context).apply(action_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+  action_context.add_context_action_labels(actions, data_typechecker.get_sort_type_checker());
+  return detail::make_typecheck_builder(data_typechecker, variable_context, action_context).apply(action_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
 }
 
 inline
@@ -186,15 +181,15 @@ struct typecheck_builder: public regular_formula_builder<typecheck_builder>
   using super::apply;
 
   data::detail::data_typechecker& m_data_typechecker;
-  const std::map<core::identifier_string, data::sort_expression>& m_variables;
+  const data::detail::variable_context& m_variable_context;
   const process::detail::action_context& m_action_context;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const data::detail::variable_context& variables,
                     const process::detail::action_context& actions
                    )
     : m_data_typechecker(data_typechecker),
-      m_variables(variables),
+      m_variable_context(variables),
       m_action_context(actions)
   {}
 
@@ -300,14 +295,14 @@ struct typecheck_builder: public regular_formula_builder<typecheck_builder>
 
   regular_formula apply(const action_formulas::action_formula& x)
   {
-    return action_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_action_context).apply(x);
+    return action_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variable_context, m_action_context).apply(x);
   }
 };
 
 inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
+                    const data::detail::variable_context& variables,
                     const process::detail::action_context& actions
                    )
 {
@@ -324,11 +319,11 @@ regular_formula typecheck(const regular_formula& x,
                          )
 {
   data::detail::data_typechecker data_typechecker(dataspec);
-  std::map<core::identifier_string, data::sort_expression> variable_map;
-  data::add_context_variables(variable_map, variables, data_typechecker);
+  data::detail::variable_context variable_context;
+  variable_context.add_context_variables(variables, data_typechecker.get_sort_type_checker());
   process::detail::action_context action_context;
-  action_context.add_context_action_labels(actions, data_typechecker);
-  return detail::make_typecheck_builder(data_typechecker, variable_map, action_context).apply(regular_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
+  action_context.add_context_action_labels(actions, data_typechecker.get_sort_type_checker());
+  return detail::make_typecheck_builder(data_typechecker, variable_context, action_context).apply(regular_formulas::normalize_sorts(x, data_typechecker.typechecked_data_specification()));
 }
 
 inline
@@ -351,19 +346,19 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   using super::apply;
 
   data::detail::data_typechecker& m_data_typechecker;
-  std::map<core::identifier_string, data::sort_expression> m_variables;
+  data::detail::variable_context m_variable_context;
   const process::detail::action_context& m_action_context;
-  std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
+  detail::state_variable_context m_state_variable_context;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const process::detail::action_context& actions,
-                    const std::map<core::identifier_string, data::sort_expression_list>& state_variables
+                    const data::detail::variable_context& variable_context,
+                    const process::detail::action_context& action_context,
+                    const detail::state_variable_context& state_variable_context
                    )
     : m_data_typechecker(data_typechecker),
-      m_variables(variables),
-      m_action_context(actions),
-      m_state_variables(state_variables)
+      m_variable_context(variable_context),
+      m_action_context(action_context),
+      m_state_variable_context(state_variable_context)
   {}
 
   void check_sort_declared(const data::sort_expression& s, const state_formula& x)
@@ -380,20 +375,17 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   state_formula apply(const data::data_expression& x)
   {
-    return m_data_typechecker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variables);
+    return m_data_typechecker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
   }
 
   state_formula apply(const state_formulas::forall& x)
   {
     try
     {
-      auto m_variables_copy = m_variables;
-      for (const data::variable& v: x.variables())
-      {
-        m_variables[v.name()] = v.sort();
-      }
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_typechecker.get_sort_type_checker());
       state_formula body = (*this).apply(x.body());
-      m_variables = m_variables_copy;
+      m_variable_context = m_variable_context_copy;
       return forall(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
@@ -406,13 +398,10 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   {
     try
     {
-      auto m_variables_copy = m_variables;
-      for (const data::variable& v: x.variables())
-      {
-        m_variables[v.name()] = v.sort();
-      }
+      auto m_variable_context_copy = m_variable_context;
+      m_variable_context.add_context_variables(x.variables(), m_data_typechecker.get_sort_type_checker());
       state_formula body = (*this).apply(x.body());
-      m_variables = m_variables_copy;
+      m_variable_context = m_variable_context_copy;
       return exists(x.variables(), body);
     }
     catch (mcrl2::runtime_error& e)
@@ -423,73 +412,58 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 
   state_formula apply(const state_formulas::may& x)
   {
-    return may(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_action_context).apply(x.formula()), (*this).apply(x.operand()));
+    return may(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variable_context, m_action_context).apply(x.formula()), (*this).apply(x.operand()));
   }
 
   state_formula apply(const state_formulas::must& x)
   {
-    return must(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variables, m_action_context).apply(x.formula()), (*this).apply(x.operand()));
+    return must(regular_formulas::detail::make_typecheck_builder(m_data_typechecker, m_variable_context, m_action_context).apply(x.formula()), (*this).apply(x.operand()));
   }
 
   state_formula apply(const state_formulas::delay_timed& x)
   {
-    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variables);
+    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variable_context);
     return delay_timed(new_time);
   }
 
   state_formula apply(const state_formulas::yaled_timed& x)
   {
-    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variables);
+    data::data_expression new_time = m_data_typechecker.typecheck_data_expression(x.time_stamp(), data::sort_real::real_(), m_variable_context);
     return yaled_timed(new_time);
+  }
+
+  state_formula apply_untyped_parameter(const core::identifier_string& name, const data::data_expression_list& arguments)
+  {
+    data::sort_expression_list expected_sorts = m_state_variable_context.matching_state_variable_sorts(name, arguments);
+    data::data_expression_list new_arguments;
+    auto q1 = expected_sorts.begin();
+    auto q2 = arguments.begin();
+    for (; q1 != expected_sorts.end(); ++q1, ++q2)
+    {
+      new_arguments.push_front(m_data_typechecker.typecheck_data_expression(*q2, *q1, m_variable_context));
+    }
+    new_arguments = atermpp::reverse(new_arguments);
+    return state_formulas::variable(name, new_arguments);
   }
 
   state_formula apply(const state_formulas::variable& x)
   {
-    auto i = m_state_variables.find(x.name());
-    if (i == m_state_variables.end())
-    {
-      throw mcrl2::runtime_error("undefined state variable " + core::pp(x.name()) + " (typechecking state formula " + state_formulas::pp(x) + ")");
-    }
-    const data::sort_expression_list& expected_sorts = i->second;
-
-    if (expected_sorts.size() != x.arguments().size())
-    {
-      throw mcrl2::runtime_error("incorrect number of parameters for state variable " + core::pp(x.name()) + " (typechecking state formula " + state_formulas::pp(x) + ")");
-    }
-
-    data::data_expression_list new_arguments;
-    auto q1 = expected_sorts.begin();
-    auto q2 = x.arguments().begin();
-    for (; q1 != expected_sorts.end(); ++q1, ++q2)
-    {
-      new_arguments.push_front(m_data_typechecker.typecheck_data_expression(*q2, *q1, m_variables));
-    }
-    return state_formulas::variable(x.name(), new_arguments);
+    return apply_untyped_parameter(x.name(), x.arguments());
   }
 
   state_formula apply(const data::untyped_data_parameter& x)
   {
-    auto i = m_state_variables.find(x.name());
-    if (i == m_state_variables.end())
-    {
-      return typecheck_untyped_data_parameter(m_data_typechecker, x.name(), x.arguments(), data::sort_bool::bool_(), m_variables);
-    }
-    const data::sort_expression_list& expected_sorts = i->second;
+    return apply_untyped_parameter(x.name(), x.arguments());
+  }
 
-    if (expected_sorts.size() != x.arguments().size())
+  data::variable_list assignment_variables(const data::assignment_list& x) const
+  {
+    std::vector<data::variable> result;
+    for (const data::assignment& a: x)
     {
-      throw mcrl2::runtime_error("incorrect number of parameters for state variable " + core::pp(x.name()) + " (typechecking state formula " + data::pp(x) + ")");
+      result.push_back(a.lhs());
     }
-
-    data::data_expression_list new_arguments;
-    auto q1 = expected_sorts.begin();
-    auto q2 = x.arguments().begin();
-    for (; q1 != expected_sorts.end(); ++q1, ++q2)
-    {
-      new_arguments.push_front(m_data_typechecker.typecheck_data_expression(*q2, *q1, m_variables));
-    }
-    new_arguments = atermpp::reverse(new_arguments);
-    return state_formulas::variable(x.name(), new_arguments);
+    return data::variable_list(result.begin(), result.end());
   }
 
   template <typename MuNuFormula>
@@ -500,31 +474,23 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
       check_sort_declared(a.lhs().sort(), x);
     }
 
-    data::assignment_list new_assignments = m_data_typechecker.typecheck_assignments(x.assignments(), m_variables);
+    data::assignment_list new_assignments = m_data_typechecker.typecheck_assignments(x.assignments(), m_variable_context);
 
     // add the assignment variables to the context
-    auto m_variables_copy = m_variables;
-    for (const data::assignment& a: x.assignments())
-    {
-      m_variables[a.lhs().name()] = a.lhs().sort();
-    }
+    auto m_variable_context_copy = m_variable_context;
+    data::variable_list x_variables = assignment_variables(x.assignments());
+    m_variable_context.add_context_variables(x_variables, m_data_typechecker.get_sort_type_checker());
 
     // add x to the state variable context
-    auto m_state_variables_copy = m_state_variables;
-    data::sort_expression_list x_lhs_sorts;
-    for (const data::assignment& a: x.assignments())
-    {
-      x_lhs_sorts.push_front(a.lhs().sort());
-    }
-    x_lhs_sorts = atermpp::reverse(x_lhs_sorts);
-    m_state_variables[x.name()] = x_lhs_sorts;
+    auto m_state_variable_context_copy = m_state_variable_context;
+    m_state_variable_context.add_state_variable(x.name(), x_variables, m_data_typechecker.get_sort_type_checker());
 
     // typecheck the operand
     state_formula new_operand = (*this).apply(x.operand());
 
     // restore the context
-    m_variables = m_variables_copy;
-    m_state_variables = m_state_variables_copy;
+    m_variable_context = m_variable_context_copy;
+    m_state_variable_context = m_state_variable_context_copy;
 
     if (is_mu)
     {
@@ -550,12 +516,12 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
 inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
-                    const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const process::detail::action_context& actions,
-                    const std::map<core::identifier_string, data::sort_expression_list>& state_variables
+                    const data::detail::variable_context& variable_context,
+                    const process::detail::action_context& action_context,
+                    const detail::state_variable_context& state_variable_context
                    )
 {
-  return typecheck_builder(data_typechecker, variables, actions, state_variables);
+  return typecheck_builder(data_typechecker, variable_context, action_context, state_variable_context);
 }
 
 } // namespace detail
@@ -564,9 +530,9 @@ class state_formula_type_checker
 {
   protected:
     data::detail::data_typechecker m_data_typechecker;
-    std::map<core::identifier_string, data::sort_expression> m_variables;
+    data::detail::variable_context m_variable_context;
     process::detail::action_context m_action_context;
-    std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
+    detail::state_variable_context m_state_variable_context;
 
   public:
     /** \brief     Type check a state formula.
@@ -576,17 +542,15 @@ class state_formula_type_checker
      *             variable occurs in the scope of an odd number of negations.
      *  \return    a state formula where all untyped identifiers have been replace by typed ones.
      **/
-    template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable>, typename StateVariableContainer = std::vector<state_formulas::variable> >
+    template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
     state_formula_type_checker(const data::data_specification& dataspec,
                                const ActionLabelContainer& action_labels = ActionLabelContainer(),
-                               const VariableContainer& variables = VariableContainer(),
-                               const StateVariableContainer& state_variables = StateVariableContainer()
+                               const VariableContainer& variables = VariableContainer()
                               )
       : m_data_typechecker(dataspec)
     {
-      data::add_context_variables(m_variables, variables, m_data_typechecker);
-      m_action_context.add_context_action_labels(action_labels, m_data_typechecker);
-      add_state_variables(state_variables);
+      m_variable_context.add_context_variables(variables, m_data_typechecker.get_sort_type_checker());
+      m_action_context.add_context_action_labels(action_labels, m_data_typechecker.get_sort_type_checker());
     }
 
     //check correctness of the state formula in state_formula using
@@ -602,32 +566,12 @@ class state_formula_type_checker
     {
       mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
 
-      state_formula result = detail::make_typecheck_builder(m_data_typechecker, m_variables, m_action_context, m_state_variables).apply(state_formulas::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
+      state_formula result = detail::make_typecheck_builder(m_data_typechecker, m_variable_context, m_action_context, m_state_variable_context).apply(state_formulas::normalize_sorts(x, m_data_typechecker.typechecked_data_specification()));
       if (check_monotonicity && !is_monotonous(result))
       {
         throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));
       }
       return result;
-    }
-
-  protected:
-    template <typename StateVariableContainer>
-    void add_state_variables(const StateVariableContainer& state_variables)
-    {
-      for (const state_formulas::variable& v: state_variables)
-      {
-        auto i = m_state_variables.find(v.name());
-        if (i == m_state_variables.end())
-        {
-          data::sort_expression_list sorts = data::detail::parameter_sorts(v.arguments());
-          m_data_typechecker.check_sort_list_is_declared(sorts);
-          m_state_variables[v.name()] = sorts;
-        }
-        else
-        {
-          throw mcrl2::runtime_error("attempt to overload state variable " + core::pp(v.name()));
-        }
-      }
     }
 };
 

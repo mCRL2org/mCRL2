@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_DETAIL_ACTION_CONTEXT_H
 
 #include <map>
-#include "mcrl2/data/detail/data_typechecker.h"
+#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/process/action_label.h"
 
 namespace mcrl2 {
@@ -38,12 +38,15 @@ class action_context
     // Adds the elements of actions to action_map
     // Throws an exception if the sorts of the actions are not declared
     template <typename ActionLabelContainer>
-    void add_context_action_labels(const ActionLabelContainer& actions, const data::detail::data_typechecker& data_typechecker)
+    void add_context_action_labels(const ActionLabelContainer& actions, const data::sort_type_checker& sort_typechecker)
     {
       for (const process::action_label& a: actions)
       {
         core::identifier_string name = a.name();
-        data_typechecker.check_sort_list_is_declared(a.sorts());
+        for (const data::sort_expression& s: a.sorts())
+        {
+          sort_typechecker(s);
+        }
 
         // Insert a in m_action_context; N.B. Before that check if it already exists
         auto range = m_actions.equal_range(a.name());

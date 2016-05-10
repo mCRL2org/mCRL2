@@ -28,26 +28,7 @@ class multi_action_type_checker
   protected:
     data::detail::data_typechecker m_data_typechecker;
     process::detail::action_context m_action_context;
-    std::map<core::identifier_string, data::sort_expression> m_global_variables;
-
-    template <typename VariableContainer>
-    void add_global_variables(const VariableContainer& global_variables)
-    {
-      for (const data::variable& v: global_variables)
-      {
-        m_data_typechecker.check_sort_is_declared(v.sort());
-
-        auto i = m_global_variables.find(v.name());
-        if (i == m_global_variables.end())
-        {
-          m_global_variables[v.name()] = v.sort();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("attempt to overload global variable " + core::pp(v.name()));
-        }
-      }
-    }
+    data::detail::variable_context m_variable_context;
 
   public:
     template <typename VariableContainer, typename ActionLabelContainer>
@@ -57,8 +38,8 @@ class multi_action_type_checker
                              )
       : m_data_typechecker(dataspec)
     {
-      m_action_context.add_context_action_labels(action_labels, m_data_typechecker);
-      data::add_context_variables(m_global_variables, variables, m_data_typechecker);
+      m_action_context.add_context_action_labels(action_labels, m_data_typechecker.get_sort_type_checker());
+      m_variable_context.add_context_variables(variables, m_data_typechecker.get_sort_type_checker());
     }
 
     /// \brief Default constructor
@@ -78,7 +59,7 @@ class multi_action_type_checker
       {
         for (const data::untyped_data_parameter& a: x.actions())
         {
-          actions.push_back(process::typecheck_action(a.name(), a.arguments(), m_data_typechecker, m_global_variables, m_action_context));
+          actions.push_back(process::typecheck_action(a.name(), a.arguments(), m_data_typechecker, m_variable_context, m_action_context));
         }
       }
       catch (mcrl2::runtime_error& e)

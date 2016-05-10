@@ -27,7 +27,7 @@ class sort_type_checker
   protected:
     sort_specification m_sort_specification; // Intentionally a copy. If this is a reference or pointer the
                                              // object to which this referred may disappear.
-                       
+
   public:
     /// \brief constructs a sort expression checker.
     sort_type_checker(const sort_specification& sort_spec, bool must_check_aliases = true)
@@ -49,7 +49,7 @@ class sort_type_checker
     *  Throws an exception if the expression is not well typed.
     *  \param[in] s A sort expression that has not been type checked.
     **/
-    void operator()(const sort_expression& x)
+    void operator()(const sort_expression& x) const
     {
       check_sort_is_declared(x);
     }
@@ -58,8 +58,8 @@ class sort_type_checker
     // Throws a runtime_error if a rewriting loop is detected via
     // basic sorts, function sorts or sort containers.
     void check_alias_circularity(
-               const data::basic_sort& lhs, 
-               const data::sort_expression& rhs, 
+               const data::basic_sort& lhs,
+               const data::sort_expression& rhs,
                std::set<basic_sort> sort_already_seen,
                const std::map < basic_sort, sort_expression >& alias_map)
     {
@@ -96,7 +96,7 @@ class sort_type_checker
       // Intentionally no further search is done through a structured sort, because aliases
       // can be circularly defined through structured sorts. Example: sort Tree = struct leaf | node(Tree,Tree);
       assert(is_structured_sort(rhs));
-    } 
+    }
 
     void check_sorts()
     {
@@ -105,19 +105,19 @@ class sort_type_checker
       for(const basic_sort& sort: get_sort_specification().user_defined_sorts())
       {
         if (!defined_sorts.insert(sort).second) // Sort did already exist.
-        { 
+        {
            throw mcrl2::runtime_error("Attempt to redeclare sort " + core::pp(sort.name()));
         }
       }
       for(const alias& a: get_sort_specification().user_defined_aliases())
       {
         if (!defined_sorts.insert(a.name()).second) // Sort did already exist.
-        { 
+        {
            throw mcrl2::runtime_error("Attempt to redeclare sort in alias " + data::pp(a));
         }
       }
-    } 
-    
+    }
+
 
     // Throws an exception if there is a problem with the alias
     void check_aliases()
@@ -158,7 +158,7 @@ class sort_type_checker
       const std::map < basic_sort, sort_expression >& alias_map)
     {
       if (is_basic_sort(start_search))
-      { 
+      {
         const basic_sort& s=atermpp::down_cast<basic_sort>(start_search);
         if (s==end_search)
         {
@@ -207,7 +207,7 @@ class sort_type_checker
       }
 
       assert(is_structured_sort(start_search));
-      
+
       const structured_sort struct_start_search=atermpp::down_cast<structured_sort>(start_search);
       for(const function_symbol& f: struct_start_search.constructor_functions())
       {
@@ -241,8 +241,8 @@ class sort_type_checker
       }
       for(const alias& a: get_sort_specification().user_defined_aliases())
       {
-        if (x==a.name())        
-        { 
+        if (x==a.name())
+        {
           return;
         }
       }

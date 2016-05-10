@@ -13,7 +13,7 @@
 #define MCRL2_PBES_DETAIL_PBES_CONTEXT_H
 
 #include <map>
-#include "mcrl2/data/detail/data_typechecker.h"
+#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2 {
@@ -52,13 +52,13 @@ class pbes_context
     }
 
     template <typename PropositionalVariableContainer>
-    void add_propositional_variables(const PropositionalVariableContainer& propositional_variables, const data::detail::data_typechecker& data_typechecker)
+    void add_propositional_variables(const PropositionalVariableContainer& propositional_variables, const data::sort_type_checker& sort_typechecker)
     {
       for (const propositional_variable& p: propositional_variables)
       {
         for (const data::variable& v: p.parameters())
         {
-          data_typechecker.check_sort_is_declared(v.sort());
+          sort_typechecker(v.sort());
         }
 
         auto i = m_propositional_variables.find(p.name());
