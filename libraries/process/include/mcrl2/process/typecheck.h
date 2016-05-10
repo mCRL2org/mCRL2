@@ -19,6 +19,7 @@
 #include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/detail/action_context.h"
+#include "mcrl2/process/detail/process_context.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
@@ -56,17 +57,6 @@ sorts_list sorts_list_intersection(const sorts_list& sorts1, const sorts_list& s
     }
   }
   return atermpp::reverse(result);
-}
-
-template <class T>
-data::sort_expression_list get_sorts(const atermpp::term_list<T>& l)
-{
-  std::vector<data::sort_expression> v;
-  for (auto i = l.begin(); i != l.end(); ++i)
-  {
-    v.push_back(i->sort());
-  }
-  return data::sort_expression_list(v.begin(),v.end());
 }
 
 inline
@@ -164,12 +154,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   data::detail::data_typechecker& m_data_typechecker;
   std::map<core::identifier_string, data::sort_expression> m_variable_context;
-  const std::multimap<core::identifier_string, process_identifier>& m_process_context;
+  const detail::process_context& m_process_context;
   const detail::action_context& m_action_context;
 
   typecheck_builder(data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variable_context,
-                    const std::multimap<core::identifier_string, process_identifier>& process_context,
+                    const detail::process_context& process_context,
                     const detail::action_context& action_context
                    )
     : m_data_typechecker(data_typechecker),
@@ -181,17 +171,6 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   sorts_list action_sorts(const core::identifier_string& name)
   {
     return m_action_context.matching_action_sorts(name);
-  }
-
-  template <typename Container>
-  data::sort_expression_list parameter_sorts(const Container& parameters)
-  {
-    data::sort_expression_list sorts;
-    for (const data::data_expression& e: parameters)
-    {
-      sorts.push_front(e.sort());
-    }
-    return atermpp::reverse(sorts);
   }
 
   void check_action_declared(const core::identifier_string& a, const process_expression& x)
@@ -263,65 +242,9 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return result;
   }
 
-  // returns true if all left hand sides of assignments appear as the name of a variable in parameters
-  bool is_matching_assignment(const data::untyped_identifier_assignment_list& assignments, const data::variable_list& parameters)
-  {
-    for (const data::untyped_identifier_assignment& a: assignments)
-    {
-      if (std::find_if(parameters.begin(), parameters.end(), [&](const data::variable& v) { return a.lhs() == v.name(); }) == parameters.end())
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  // returns the equation sorts that corresponds to the untyped process assignment x
-  data::variable_list matching_process_parameters(const untyped_process_assignment& x)
-  {
-    auto range = m_process_context.equal_range(x.name());
-    if (range.first == m_process_context.end())
-    {
-      throw mcrl2::runtime_error("process " + core::pp(x.name()) + " not declared");
-    }
-    std::vector<process_identifier> result;
-    for (auto k = range.first; k != range.second; ++k)
-    {
-      const process_identifier& id = k->second;
-      if (is_matching_assignment(x.assignments(), id.variables()))
-      {
-        result.push_back(id);
-      }
-    }
-    if (result.empty())
-    {
-      throw mcrl2::runtime_error("no process " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".\n");
-    }
-    if (result.size() > 1)
-    {
-      throw mcrl2::runtime_error("ambiguous process " + core::pp(x.name()) + " containing all assignments in " + process::pp(x) + ".");
-    }
-    return result.front().variables();
-  }
-
   action make_action(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters)
   {
     return action(action_label(name, formal_parameters), actual_parameters);
-  }
-
-  process_instance make_process_instance(const core::identifier_string& name, const data::sort_expression_list& formal_parameters, const data::data_expression_list& actual_parameters)
-  {
-    auto range = m_process_context.equal_range(name);
-    assert(range.first != m_process_context.end());
-    for (auto k = range.first; k != range.second; ++k)
-    {
-      const process_identifier& id = k->second;
-      if (parameter_sorts(id.variables()) == formal_parameters)
-      {
-        return process_instance(id, actual_parameters);
-      }
-    }
-    throw mcrl2::runtime_error("no matching process found for " + core::pp(name) + "(" + data::pp(formal_parameters) + ")");
   }
 
   bool is_action_name(const core::identifier_string& name)
@@ -331,7 +254,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
 
   bool is_process_name(const core::identifier_string& name)
   {
-    return m_process_context.find(name) != m_process_context.end();
+    return m_process_context.is_declared(name);
   }
 
   action typecheck_action(const core::identifier_string& name, const data::data_expression_list& parameters)
@@ -339,27 +262,12 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     return process::typecheck_action(name, parameters, m_data_typechecker, m_variable_context, m_action_context);
   }
 
-  sorts_list matching_process_sorts(const core::identifier_string& name, const data::data_expression_list& parameters)
-  {
-    sorts_list result;
-    auto range = m_process_context.equal_range(name);
-    for (auto k = range.first; k != range.second; ++k)
-    {
-      const process_identifier& id = k->second;
-      if (id.variables().size() == parameters.size())
-      {
-        result.push_front(parameter_sorts(id.variables()));
-      }
-    }
-    return atermpp::reverse(result);
-  }
-
   process_instance typecheck_process_instance(const core::identifier_string& name, const data::data_expression_list& parameters)
   {
     std::string msg = "process";
-    sorts_list parameter_list = matching_process_sorts(name, parameters);
+    sorts_list parameter_list = m_process_context.matching_process_sorts(name, parameters);
     auto p = m_data_typechecker.match_action_parameters(parameters, parameter_list, m_variable_context, name, msg);
-    return make_process_instance(name, p.second, p.first);
+    return m_process_context.make_process_instance(name, p.second, p.first);
   }
 
   process_expression apply(const untyped_process_assignment& x)
@@ -370,7 +278,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
       throw mcrl2::runtime_error("action or process " + core::pp(x.name()) + " not declared" + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
     }
 
-    data::variable_list formal_parameters = matching_process_parameters(x);
+    data::variable_list formal_parameters = m_process_context.matching_process_parameters(x);
     std::map<core::identifier_string, data::data_expression> assignments = make_assignment_map(x.assignments());
 
     // create actual parameters, with untyped identifiers for the parameters that are not assigned a value
@@ -613,7 +521,7 @@ inline
 typecheck_builder make_typecheck_builder(
                     data::detail::data_typechecker& data_typechecker,
                     const std::map<core::identifier_string, data::sort_expression>& variables,
-                    const std::multimap<core::identifier_string, process_identifier>& process_identifiers,
+                    const detail::process_context& process_identifiers,
                     const detail::action_context& action_context
                    )
 {
@@ -627,7 +535,7 @@ class process_type_checker
   protected:
     data::detail::data_typechecker m_data_typechecker;
     detail::action_context m_action_context;
-    std::multimap<core::identifier_string, process_identifier> m_process_context;
+    detail::process_context m_process_context;
     std::map<core::identifier_string, data::sort_expression> m_global_variables;
 
     std::vector<process_identifier> equation_identifiers(const std::vector<process_equation>& equations)
@@ -671,43 +579,6 @@ class process_type_checker
       }
     }
 
-    template <typename ProcessIdentifierContainer>
-    void add_process_identifiers(const ProcessIdentifierContainer& ids)
-    {
-      for (const process_identifier& id: ids)
-      {
-        const core::identifier_string& name = id.name();
-
-        if (m_action_context.is_declared(name))
-        {
-          throw mcrl2::runtime_error("declaration of both process and action " + core::pp(name));
-        }
-
-        // Insert id in m_process_context; N.B. Before that check if it already exists
-        auto range = m_process_context.equal_range(id.name());
-        if (range.first != m_process_context.end())
-        {
-          for (auto i = range.first; i != range.second; ++i)
-          {
-            if (i->second == id)
-            {
-              throw mcrl2::runtime_error("double declaration of process " + process::pp(id));
-            }
-          }
-        }
-        m_process_context.insert(range.first, std::make_pair(id.name(), id));
-
-        data::sort_expression_list ProcType = get_sorts(id.variables());
-        m_data_typechecker.check_sort_list_is_declared(ProcType);
-
-        //check that all formal parameters of the process are unique.
-        if (!data::detail::unique_variables(id.variables()))
-        {
-          throw mcrl2::runtime_error("the formal variables in process " + process::pp(id) + " are not unique");
-        }
-      }
-    }
-
   public:
     template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
     process_type_checker(const data::data_specification& dataspec,
@@ -719,7 +590,7 @@ class process_type_checker
     {
       m_action_context.add_context_action_labels(action_labels, m_data_typechecker);
       data::add_context_variables(m_global_variables, variables, m_data_typechecker);
-      add_process_identifiers(process_identifiers);
+      m_process_context.add_process_identifiers(process_identifiers, m_action_context, m_data_typechecker);
     }
 
     /// \brief Default constructor
@@ -752,7 +623,7 @@ class process_type_checker
       m_process_context.clear();
       m_action_context.add_context_action_labels(procspec.action_labels(), m_data_typechecker);
       data::add_context_variables(m_global_variables, procspec.global_variables(), m_data_typechecker);
-      add_process_identifiers(equation_identifiers(procspec.equations()));
+      m_process_context.add_process_identifiers(equation_identifiers(procspec.equations()), m_action_context, m_data_typechecker);
 
       // typecheck the equations
       for (process_equation& eqn: procspec.equations())
