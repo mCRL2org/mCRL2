@@ -15,7 +15,8 @@
 #include <algorithm>
 #include <map>
 #include "mcrl2/data/sort_type_checker.h"
-#include "mcrl2/process/action_label.h"
+#include "mcrl2/data/detail/data_typechecker.h"
+#include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/detail/action_context.h"
 
 namespace mcrl2 {
