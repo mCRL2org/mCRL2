@@ -147,8 +147,7 @@ class summand_information
       nextstate_context_combinations(1,src)
       // residual_inequalities(1,vector < linear_inequality >()),
     {
-std::cerr << "NEW SUMMAND " << s.condition() <<  " -> " << pp(multi_action) << "\n"
-<< pp_vector(src) << "  assigments " << assignments << "\n";
+// std::cerr << "NEW SUMMAND " << s.condition() <<  " -> " << pp(multi_action) << "\n" << pp_vector(src) << "  assigments " << assignments << "\n";
     }
 
     summand_information(const summand_information& s)
@@ -366,7 +365,7 @@ std::cerr << "NEW SUMMAND " << s.condition() <<  " -> " << pp(multi_action) << "
         }
       }
       nextstate_context_combinations.swap(new_nextstate_context_combinations);
-std::cerr << nextstate_context_combinations.size() << " ";
+// std::cerr << nextstate_context_combinations.size() << " ";
     }
 };
 
