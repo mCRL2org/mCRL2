@@ -16,8 +16,7 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 
-// #include "comp.h"
-#include "linear_inequalities.h"
+#include "mcrl2/data/linear_inequalities.h"
 
 
 namespace mcrl2

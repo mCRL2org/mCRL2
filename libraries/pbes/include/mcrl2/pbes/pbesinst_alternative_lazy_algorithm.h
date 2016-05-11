@@ -55,39 +55,50 @@ namespace pbes_system
 
 namespace detail
 {
+  // The following function is a helper function to allow to create m_pv_renaming outside
+  // the class such that the class becomes a lightweight object.
+  
+  std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> 
+  create_pv_renaming(std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
+                                bool short_renaming_scheme)
+  {
+    size_t index=0;
+    std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
+    for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
+    {
+      for(const propositional_variable_instantiation inst:vec)
+      {
+        if (short_renaming_scheme)
+        {
+          std::stringstream ss;
+          ss << "X" << index;
+          pv_renaming[inst]=propositional_variable_instantiation(ss.str(),data::data_expression_list());
+        }
+        else
+        {
+          pv_renaming[inst]=pbesinst_rename()(inst);
+        }
+        index++;
+      }
+    }
+    return pv_renaming;
+  }
+
   class rename_pbesinst_consecutively: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
   {
     protected:
-      std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
+      const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>& m_pv_renaming;
 
     public:
-      rename_pbesinst_consecutively(std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
-                                    bool short_renaming_scheme)
-      {
-        size_t index=0;
-        for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
-        {
-          for(const propositional_variable_instantiation inst:vec)
-          {
-            if (short_renaming_scheme)
-            {
-              std::stringstream ss;
-              ss << "X" << index;
-              pv_renaming[inst]=propositional_variable_instantiation(ss.str(),data::data_expression_list());
-            }
-            else
-            {
-              pv_renaming[inst]=pbesinst_rename()(inst);
-            }
-            index++;
-          }
-        }
-      }
+      rename_pbesinst_consecutively(const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>& pv_renaming)
+       :  m_pv_renaming(pv_renaming)
+      {}
+
 
       propositional_variable_instantiation operator()(const propositional_variable_instantiation& v) const
       {
-        assert(pv_renaming.count(v)>0);
-        return pv_renaming.at(v);
+        assert(m_pv_renaming.count(v)>0);
+        return m_pv_renaming.at(v);
       }
   };
 } // end namespace detail
@@ -711,7 +722,9 @@ class pbesinst_alternative_lazy_algorithm
       mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, generating BES" << std::endl;
       pbes result;
       size_t index = 0;
-      detail::rename_pbesinst_consecutively renamer(instantiations,short_rename_scheme);
+      const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> 
+            pv_renaming = detail::create_pv_renaming(instantiations,short_rename_scheme);
+      detail::rename_pbesinst_consecutively renamer(pv_renaming);
       for (const std::vector<propositional_variable_instantiation> vec: instantiations)
       {
         const fixpoint_symbol symbol = symbols[index++];

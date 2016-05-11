@@ -22,7 +22,6 @@
 #include "mcrl2/lps/print.h"
 
 #include "realelm.h"
-#include "linear_inequalities.h"
 
 namespace mcrl2
 {
@@ -30,9 +29,7 @@ namespace data
 {
 
 using namespace atermpp;
-// using namespace mcrl2;
 using namespace mcrl2::core;
-// using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::log;
 using namespace mcrl2::utilities;
@@ -722,7 +719,6 @@ static void add_postponed_inequalities_to_context(
         {
           j->add_a_new_next_state_argument(context,r);
         }
-std::cerr << "Summand info " << summand_info.size() << "\n";
       }
     }
   }
@@ -1081,14 +1077,12 @@ specification realelm(specification s, int max_iterations, const rewrite_strateg
                         condition1,
                         r);
 
-// std::cerr << "EQNS1 : " << pp_vector(condition1) << "\n";
         // First check which of these inequalities are equivalent to concrete values of xi variables.
         // Add these values for xi variables as a new condition. Remove these variables from the
         // context combinations to be considered for the xi variables.
 
         std::vector < linear_inequality > condition3;
         remove_redundant_inequalities(condition1,condition3,r);
-// std::cerr << "EQNS3 : " << pp_vector(condition3) << "\n";
 
         if (!is_inconsistent(condition3,r))
         {
