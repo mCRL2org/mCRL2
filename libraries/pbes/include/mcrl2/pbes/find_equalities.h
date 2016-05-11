@@ -38,7 +38,7 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
     return static_cast<Derived&>(*this);
   }
 
-  void leave(const and_& x)
+  void leave(const and_&)
   {
     auto& left = below_top();
     auto const& right = top();
@@ -46,7 +46,7 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
     pop();
   }
 
-  void leave(const or_& x)
+  void leave(const or_&)
   {
     auto& left = below_top();
     auto const& right = top();
@@ -54,7 +54,7 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
     pop();
   }
 
-  void leave(const imp& x)
+  void leave(const imp&)
   {
     auto& left = below_top();
     auto const& right = top();
@@ -63,7 +63,7 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
     pop();
   }
 
-  void leave(const not_& x)
+  void leave(const not_&)
   {
     top().swap();
   }
@@ -79,7 +79,7 @@ struct find_equalities_traverser: public data::detail::find_equalities_traverser
   }
 
   // N.B. Use apply here, to avoid going into the recursion
-  void apply(const propositional_variable_instantiation& x)
+  void apply(const propositional_variable_instantiation&)
   {
     push(data::detail::find_equalities_expression());
   }
@@ -115,12 +115,6 @@ std::map<data::variable, std::set<data::data_expression> > find_inequalities(con
 {
   detail::find_equalities_traverser_inst f;
   f.apply(x);
-//////////////////////////////////////
-  if (f.expression_stack.size() != 1)
-  {
-    throw std::runtime_error("expression_stack error");
-  }
-//////////////////////////////////////
   assert(f.expression_stack.size() == 1);
   f.top().close();
   return f.top().inequalities;

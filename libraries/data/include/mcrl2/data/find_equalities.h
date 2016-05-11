@@ -324,12 +324,12 @@ struct find_equalities_traverser: public Traverser<Derived>
     top().delete_(x.variables());
   }
 
-  void leave(const data::function_symbol& x)
+  void leave(const data::function_symbol&)
   {
     push(find_equalities_expression());
   }
 
-  void leave(const data::where_clause& x)
+  void leave(const data::where_clause&)
   {
     throw mcrl2::runtime_error("not implemented yet!");
   }
