@@ -85,6 +85,8 @@ regression_tests = {
     'ticket_1345'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1345'),       [abspath('tickets/1345/1.txt')], settings),
     'lpsconfcheck_1': lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings),
     'lpsconfcheck_2': lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/trains/trains.mcrl2')], 'T', (0, 9), settings),
+    'onepoint_1'    : lambda name, settings: PbesrewrTest(name, [abspath('onepoint/1.txt')], 'quantifier-one-point', settings),
+    'pfnf_1'        : lambda name, settings: PbesrewrTest(name, [abspath('pfnf/1.txt')], 'pfnf', settings),
     }
 
 pbessolve_tests = { 'pbessolve_{}'.format(filename[:-4]) : lambda name, settings: YmlTest(name, ymlfile('pbessolve'), [abspath('pbessolve/{}'.format(filename))], settings) for filename in sorted(os.listdir(abspath('pbessolve'))) }

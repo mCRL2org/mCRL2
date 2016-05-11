@@ -1,0 +1,8 @@
+% found by random testing 03-05-2016
+pbes
+nu X0 = (((forall u:Nat.((u < 3) && ((val(u > 1)) && ((forall v:Nat.((v < 3) && (X1))) && (X0))))) && (!(!X3(1)))) || ((!(val(false))) && (!(forall v:Nat.((v < 3) && (v > 1)))))) && (true);
+nu X1 = ((!((exists v:Nat.((val(v < 3)) || ((X1) || ((v > 0) => (X2))))) || ((val(false)) && (true)))) => (X3(0))) && (!(forall t:Nat.((t < 3) && (!(val(true))))));
+nu X2 = ((true) => (X2)) && (forall w:Nat.((w < 3) && ((!X0) => ((X3(1)) || ((w > 0) && ((w < 3) || (w < 2)))))));
+mu X3(n:Nat) = (((n < 3) && ((X0) || (n > 0))) || ((true) && ((!X3(n + 1)) => (X2)))) || (val(n > 1));
+
+init X0;
