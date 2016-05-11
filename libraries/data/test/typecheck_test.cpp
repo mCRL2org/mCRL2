@@ -152,7 +152,7 @@ void test_data_expression(const std::string& de_in,
   {
     if (expect_success)
     {
-      BOOST_CHECK_NO_THROW(data::type_check(x, variable_context.begin(), variable_context.end()));
+      BOOST_CHECK_NO_THROW(data::type_check_data_expression(x, variable_context.begin(), variable_context.end()));
       BOOST_CHECK_NE(x, data::data_expression());
 
       std::string de_out = data::pp(x);
@@ -174,7 +174,7 @@ void test_data_expression(const std::string& de_in,
     }
     else
     {
-      BOOST_CHECK_THROW(data::type_check(x), mcrl2::runtime_error);
+      BOOST_CHECK_THROW(data::type_check_data_expression(x), mcrl2::runtime_error);
     }
   }
 }
@@ -530,14 +530,14 @@ void test_data_specification(const std::string& ds_in,
 
     if (expect_success)
     {
-      data::type_check(ds);
+      data::type_check_data_specification(ds);
       //Cannot pretty print a data specification anymore.
       //std::string ds_out = data::pp(ds);
       //BOOST_CHECK_EQUAL(ds_in, ds_out);
     }
     else
     {
-      BOOST_CHECK_THROW(data::type_check(ds), mcrl2::runtime_error);
+      BOOST_CHECK_THROW(data::type_check_data_specification(ds), mcrl2::runtime_error);
     }
   }
 }
@@ -840,7 +840,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
 
   if (test_type_checker)
   {
-    data::type_check(ds);
+    data::type_check_data_specification(ds);
     std::string ds_out = data::pp(ds);
     if (utilities::trim_copy(ds_in) != utilities::trim_copy(ds_out))
     {
@@ -855,7 +855,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
   {
     if (expect_success)
     {
-      data::type_check(de, variable_context.begin(), variable_context.end(), ds);
+      data::type_check_data_expression(de, variable_context.begin(), variable_context.end(), ds);
 
       std::string de_out = data::pp(de);
 
@@ -867,7 +867,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
     }
     else
     {
-      BOOST_CHECK_THROW(data::type_check(de, variable_context.begin(), variable_context.end(), ds), mcrl2::runtime_error);
+      BOOST_CHECK_THROW(data::type_check_data_expression(de, variable_context.begin(), variable_context.end(), ds), mcrl2::runtime_error);
     }
   }
 }

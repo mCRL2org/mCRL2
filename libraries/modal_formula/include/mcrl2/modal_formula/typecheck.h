@@ -581,7 +581,7 @@ class state_formula_type_checker
  *  \post      formula is type checked.
  **/
 inline
-state_formula type_check(const state_formula& x, const lps::specification& lpsspec, bool check_monotonicity = true)
+state_formula type_check_state_formula(const state_formula& x, const lps::specification& lpsspec, bool check_monotonicity = true)
 {
   try
   {

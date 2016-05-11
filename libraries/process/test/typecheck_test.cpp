@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE(test_typecheck)
     "init delta;\n"
     ;
   process::process_specification procspec = process::detail::parse_process_specification_new(text);
-  process::type_check(procspec);
+  process::type_check_process_specification(procspec);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

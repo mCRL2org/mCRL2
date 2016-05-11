@@ -253,7 +253,7 @@ class data_type_checker: public sort_type_checker
  *  \post      sort_expr is type checked.
  **/
 inline
-void type_check(const sort_expression& sort_expr, const data_specification& data_spec)
+void type_check_sort_expression(const sort_expression& sort_expr, const data_specification& data_spec)
 {
   try
   {
@@ -276,10 +276,11 @@ void type_check(const sort_expression& sort_expr, const data_specification& data
  *  \post      data_expr is type checked.
  **/
 template <typename VariableIterator>
-void type_check(data_expression& data_expr,
-                const VariableIterator first,
-                const VariableIterator last,
-                const data_specification& data_spec = data_specification())
+void type_check_data_expression(data_expression& data_expr,
+                                const VariableIterator first,
+                                const VariableIterator last,
+                                const data_specification& data_spec = data_specification()
+                               )
 {
   data_expression t = data_expr;
 
@@ -313,10 +314,10 @@ void type_check(data_expression& data_expr,
  *  \post      data_expr is type checked.
  **/
 inline
-void type_check(data_expression& data_expr, const data_specification& data_spec = data_specification())
+void type_check_data_expression(data_expression& data_expr, const data_specification& data_spec = data_specification())
 {
   variable_list v;
-  return type_check(data_expr, v.begin(), v.end(), data_spec);
+  return type_check_data_expression(data_expr, v.begin(), v.end(), data_spec);
 }
 
 /** \brief     Type check a parsed mCRL2 data specification.
@@ -325,7 +326,7 @@ void type_check(data_expression& data_expr, const data_specification& data_spec 
  *  \post      data_spec is type checked.
  **/
 inline
-void type_check(data_specification& data_spec)
+void type_check_data_specification(data_specification& data_spec)
 {
   try
   {

@@ -252,7 +252,7 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
 //mCRL2log(log::verbose) << "Parsed state formula " << x << "   " << atermpp::aterm(x) << std::endl;
   if (type_check)
   {
-    x = state_formulas::type_check(x, spec, check_monotonicity);
+    x = state_formulas::type_check_state_formula(x, spec, check_monotonicity);
   }
   if (translate_regular)
   {

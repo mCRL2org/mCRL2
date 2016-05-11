@@ -256,7 +256,7 @@ class pbes_type_checker
  **/
 
 inline
-void type_check(pbes& pbesspec)
+void type_check_pbes(pbes& pbesspec)
 {
   pbes_type_checker type_checker;
   try
@@ -276,7 +276,10 @@ void type_check(pbes& pbesspec)
  *  \return    the type checked expression
  **/
 template <typename VariableContainer>
-propositional_variable type_check(const propositional_variable& x, const VariableContainer& variables, const data::data_specification& dataspec = data::data_specification())
+propositional_variable type_check_propositional_variable(const propositional_variable& x,
+                                                         const VariableContainer& variables,
+                                                         const data::data_specification& dataspec = data::data_specification()
+                                                        )
 {
   // This function should be implemented using the PBES type checker, but it is not immediately clear how to do that.
   try
@@ -286,7 +289,7 @@ propositional_variable type_check(const propositional_variable& x, const Variabl
     for (auto i = parameters.begin(); i != parameters.end(); ++i)
     {
       data::variable d = *i;
-      data::type_check(d, variables.begin(), variables.end(), dataspec);
+      data::type_check_data_expression(d, variables.begin(), variables.end(), dataspec);
       typed_parameters.push_back(d);
     }
     return propositional_variable(x.name(), data::variable_list(typed_parameters.begin(), typed_parameters.end()));
@@ -305,7 +308,11 @@ propositional_variable type_check(const propositional_variable& x, const Variabl
  *  \return    the type checked expression
  **/
 template <typename VariableContainer, typename PropositionalVariableContainer>
-pbes_expression type_check(pbes_expression& x, const VariableContainer& variables, const PropositionalVariableContainer& propositional_variables, const data::data_specification& dataspec = data::data_specification())
+pbes_expression type_check_pbes_expression(pbes_expression& x,
+                                           const VariableContainer& variables,
+                                           const PropositionalVariableContainer& propositional_variables,
+                                           const data::data_specification& dataspec = data::data_specification()
+                                          )
 {
   try
   {

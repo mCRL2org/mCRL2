@@ -30,7 +30,7 @@ MapContainer list_minus(const MapContainer& l, const MapContainer& m)
   return n;
 }
 
-process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression>& Vars, const data::untyped_data_parameter& act)
+process::action mcrl2::lps::action_rename_type_checker::RewrAct(const std::map<core::identifier_string,sort_expression>& Vars, const data::untyped_data_parameter& act)
 {
   process::action Result;
   core::identifier_string Name(act.name());
@@ -163,13 +163,13 @@ process::action mcrl2::lps::action_type_checker::RewrAct(const std::map<core::id
 
 
 
-process::action mcrl2::lps::action_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression>& Vars, const data::untyped_data_parameter& ma)
+process::action mcrl2::lps::action_rename_type_checker::TraverseAct(const std::map<core::identifier_string,sort_expression>& Vars, const data::untyped_data_parameter& ma)
 {
   return RewrAct(Vars,ma);
 }
 
 
-void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_list& Acts)
+void mcrl2::lps::action_rename_type_checker::ReadInActs(const process::action_label_list& Acts)
 {
   for (auto i=Acts.begin(); i!=Acts.end(); ++i)
   {
@@ -206,7 +206,7 @@ void mcrl2::lps::action_type_checker::ReadInActs(const process::action_label_lis
 }
 
 
-mcrl2::lps::action_type_checker::action_type_checker(
+mcrl2::lps::action_rename_type_checker::action_rename_type_checker(
             const data::data_specification& data_spec,
             const process::action_label_list& action_decls)
   : data_type_checker(data_spec)
@@ -226,7 +226,7 @@ mcrl2::lps::action_type_checker::action_type_checker(
 
 /*************************   Here starts the action_rename_typechecker  ************************************/
 
-action_rename_specification mcrl2::lps::action_type_checker::operator()(const action_rename_specification& ar_spec)
+action_rename_specification mcrl2::lps::action_rename_type_checker::operator()(const action_rename_specification& ar_spec)
 {
   mCRL2log(verbose) << "type checking action rename specification..." << std::endl;
 

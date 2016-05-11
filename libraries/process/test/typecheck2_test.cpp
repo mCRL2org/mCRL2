@@ -28,7 +28,7 @@ void test_process_specification(const std::string& ps_in, bool const expected_re
     process::process_specification ps = p;
     if (expected_result)
     {
-      process::type_check(ps);
+      process::type_check_process_specification(ps);
       ps_out = process::pp(ps);
       if (ps_in != ps_out)
       {
@@ -38,7 +38,7 @@ void test_process_specification(const std::string& ps_in, bool const expected_re
     }
     else
     {
-      BOOST_CHECK_THROW(process::type_check(ps), mcrl2::runtime_error);
+      BOOST_CHECK_THROW(process::type_check_process_specification(ps), mcrl2::runtime_error);
     }
   }
 }

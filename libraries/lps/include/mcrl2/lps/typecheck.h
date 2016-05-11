@@ -70,7 +70,7 @@ class multi_action_type_checker
     }
 };
 
-class action_type_checker:public data::data_type_checker
+class action_rename_type_checker:public data::data_type_checker
 {
   protected:
     std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
@@ -82,7 +82,7 @@ class action_type_checker:public data::data_type_checker
     *  \param[in] action_decls A list of action declarations
     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
     **/
-    action_type_checker(const data::data_specification& data_spec, const process::action_label_list& action_decls);
+    action_rename_type_checker(const data::data_specification& data_spec, const process::action_label_list& action_decls);
 
     /** \brief     Type check a action_rename_specification;
     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
@@ -106,10 +106,10 @@ class action_type_checker:public data::data_type_checker
  *  \post      mult_action is type checked and sorts have been added when necessary.
  **/
 inline
-multi_action type_check(
-  process::untyped_multi_action& mult_act,
-  const data::data_specification& data_spec,
-  const process::action_label_list& action_decls)
+multi_action type_check_multi_action(process::untyped_multi_action& mult_act,
+                                     const data::data_specification& data_spec,
+                                     const process::action_label_list& action_decls
+                                    )
 {
   multi_action_type_checker typechecker(data_spec, data::variable_list(), action_decls);
   return typechecker(mult_act);
@@ -123,7 +123,7 @@ multi_action type_check(
 inline
 action_rename_specification type_check_action_rename_specification(const action_rename_specification& ar_spec, const lps::specification& spec)
 {
-  lps::action_type_checker type_checker(spec.data(),spec.action_labels());
+  lps::action_rename_type_checker type_checker(spec.data(),spec.action_labels());
   return type_checker(ar_spec);
 }
 
