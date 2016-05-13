@@ -185,15 +185,14 @@ class data_type_checker: public sort_type_checker
     sort_expression upcast_numeric_type(sort_expression expected_sort,
                                         sort_expression sort,
                                         data_expression& expr,
-                                        const std::map<core::identifier_string, sort_expression>& declared_variables,
-                                        const std::map<core::identifier_string, sort_expression>& allowed_variables,
+                                        const std::map<core::identifier_string, sort_expression>& variable_context,
                                         std::map<core::identifier_string, sort_expression>& free_variables,
                                         const bool strictly_ambiguous,
                                         bool warn_upcasting = false,
                                         const bool print_cast_error = false
                                        )
     {
-      return UpCastNumericType(expected_sort, sort, expr, declared_variables, allowed_variables, free_variables, strictly_ambiguous, warn_upcasting, print_cast_error);
+      return UpCastNumericType(expected_sort, sort, expr, variable_context, variable_context, free_variables, strictly_ambiguous, warn_upcasting, print_cast_error);
     }
 
     sort_expression expand_numeric_types_down(const sort_expression& sort)
@@ -201,13 +200,12 @@ class data_type_checker: public sort_type_checker
       return ExpandNumTypesDown(sort);
     }
 
-    sort_expression visit_data_expression(const std::map<core::identifier_string, sort_expression>& declared_variables,
-                                          const std::map<core::identifier_string, sort_expression>& allowed_variables,
+    sort_expression visit_data_expression(const std::map<core::identifier_string, sort_expression>& variable_context,
                                           data_expression& expr,
                                           const sort_expression& sort
                                          )
     {
-      return TraverseVarConsTypeD(declared_variables, allowed_variables, expr, sort);
+      return TraverseVarConsTypeD(variable_context, variable_context, expr, sort);
     }
 
     const data_specification& typechecked_data_specification() const

@@ -19,6 +19,7 @@
 #include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/detail/action_context.h"
+#include "mcrl2/process/detail/match_action_parameters.h"
 #include "mcrl2/process/detail/process_context.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
@@ -40,7 +41,7 @@ action typecheck_action(const core::identifier_string& name,
 {
   std::string msg = "action";
   sorts_list parameter_list = action_context.matching_action_sorts(name, parameters);
-  auto p = typechecker.match_action_parameters(parameters, parameter_list, variable_context, name, msg);
+  auto p = process::detail::match_action_parameters(parameters, parameter_list, variable_context, name, msg, typechecker);
   return action(action_label(name, p.second), p.first);
 }
 
@@ -266,7 +267,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
   {
     std::string msg = "process";
     sorts_list parameter_list = m_process_context.matching_process_sorts(name, parameters);
-    auto p = m_data_typechecker.match_action_parameters(parameters, parameter_list, m_variable_context, name, msg);
+    auto p = process::detail::match_action_parameters(parameters, parameter_list, m_variable_context, name, msg, m_data_typechecker);
     return m_process_context.make_process_instance(name, p.second, p.first);
   }
 
