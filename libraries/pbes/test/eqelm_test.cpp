@@ -18,7 +18,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
-#include "mcrl2/pbes/pbes_solver_test.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -101,8 +101,8 @@ void test_eqelm(const std::string& pbes_spec, const bool expected_outcome)
   pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
   algorithm.run(q);
 
-  BOOST_CHECK(pbes2_bool_test(p,expected_outcome));
-  BOOST_CHECK(pbes2_bool_test(q,expected_outcome));
+  BOOST_CHECK(detail::pbes2bool(p,expected_outcome));
+  BOOST_CHECK(detail::pbes2bool(q,expected_outcome));
 }
 
 std::string random1 =

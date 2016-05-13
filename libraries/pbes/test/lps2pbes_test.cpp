@@ -24,7 +24,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
-#include "mcrl2/pbes/pbes_solver_test.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
@@ -83,7 +83,8 @@ void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf
     pbes_rewrite(p, R);
   }
 
-  BOOST_CHECK(pbes2_bool_test(p, expected_solution));
+  bool solution = detail::pbes2bool(p);
+  BOOST_CHECK(solution == expected_solution);
 }
 
 void one_point_rule_rewrite(pbes& p)
@@ -128,7 +129,8 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "true";
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
-    BOOST_CHECK(pbes2_bool_test(p, expected_result));
+    bool solution = detail::pbes2bool(p);
+    BOOST_CHECK(solution == expected_result);
   }
 
   // test negated formula
@@ -140,7 +142,8 @@ void solve_pbes(const std::string& lps_spec, const std::string& mcf_formula, std
     one_point_rule_rewrite(p);
     bool expected_result = expected_solution == "false";
     std::cerr << "solving pbes...\n" << pbes_system::pp(p) << std::endl;
-    BOOST_CHECK(pbes2_bool_test(p, expected_result));
+    bool solution = detail::pbes2bool(p);
+    BOOST_CHECK(solution == expected_result);
   }
 }
 

@@ -14,7 +14,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/pbes_solver_test.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_traverser.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
@@ -134,7 +134,7 @@ void test_pfnf_rewriter2(const std::string& text, const bool expected_result)
   std::cout << "--- before ---\n";
   std::cout << pbes_system::pp(p) << std::endl;
 
-  BOOST_CHECK(pbes2_bool_test(p,expected_result));
+  BOOST_CHECK(detail::pbes2bool(p,expected_result));
 
   pfnf_rewriter R;
   pbes_rewrite(p, R);
@@ -143,7 +143,7 @@ void test_pfnf_rewriter2(const std::string& text, const bool expected_result)
   std::cout << pbes_system::pp(p) << std::endl;
 
   BOOST_CHECK(p.is_well_typed());
-  BOOST_CHECK(pbes2_bool_test(p,expected_result));
+  BOOST_CHECK(detail::pbes2bool(p,expected_result));
 }
 
 void test_pfnf_rewriter2()
