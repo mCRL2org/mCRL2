@@ -328,9 +328,9 @@ static void split_condition(
        {
          ++i_search; 
          ++j_search;
-  
-         if (*i==*i_search)
+         if (i_search!=aux_real_conditions.end() && *i==*i_search)
          {
+           assert(j_search!=aux_non_real_conditions.end());
            *i_search=data_expression_list(); // Set to a default value such that it will not be considered anymore.
            non_real_conditions.back()=lazy::or_(non_real_conditions.back(),lazy::join_and(j_search->begin(), j_search->end()));
          }
