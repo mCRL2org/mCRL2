@@ -101,8 +101,10 @@ void test_eqelm(const std::string& pbes_spec, const bool expected_outcome)
   pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
   algorithm.run(q);
 
-  BOOST_CHECK(detail::pbes2bool(p,expected_outcome));
-  BOOST_CHECK(detail::pbes2bool(q,expected_outcome));
+  bool solution_p = pbes_system::detail::pbes2bool(p);
+  bool solution_q = pbes_system::detail::pbes2bool(q);
+  BOOST_CHECK(solution_p == expected_outcome);
+  BOOST_CHECK(solution_q == expected_outcome);
 }
 
 std::string random1 =
