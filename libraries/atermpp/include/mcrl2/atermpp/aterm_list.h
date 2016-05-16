@@ -39,7 +39,7 @@ class term_list:public aterm
     typedef Term& reference;
 
     /// Const reference to T.
-    typedef const Term &const_reference;
+    typedef const Term& const_reference;
 
     /// An unsigned integral type.
     typedef size_t size_type;
@@ -60,14 +60,14 @@ class term_list:public aterm
 
     /// \brief Copy constructor.
     /// \param t A list.
-    term_list(const term_list<Term> &t):aterm(t)
+    term_list(const term_list<Term>& t):aterm(t)
     {
       assert(!defined() || type_is_list());
     }
 
     /// \brief Explicit construction from an aterm.
     /// \param t An aterm.
-    explicit term_list(const aterm &t):aterm(t)
+    explicit term_list(const aterm& t):aterm(t)
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
@@ -98,7 +98,7 @@ class term_list:public aterm
     /// \param convert_to_aterm A class with a () operation, which is applied to each element
     ///                   before it is put into the list.
     template <class Iter, class ATermConverter>
-    term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm,
+    term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
               typename std::enable_if<std::is_base_of<
                 std::bidirectional_iterator_tag,
                 typename std::iterator_traits<Iter>::iterator_category
@@ -154,7 +154,7 @@ class term_list:public aterm
 
     /// Assigment operator.
     /// \param l A list.
-    term_list<Term> &operator=(const term_list &l)
+    term_list<Term>& operator=(const term_list& l)
     {
       copy_term(l);
       return *this;
@@ -170,7 +170,7 @@ class term_list:public aterm
 
     /// \brief Returns the tail of the list.
     /// \return The tail of the list.
-    const term_list<Term> &tail() const
+    const term_list<Term>& tail() const
     {
       assert(!empty());
       return (reinterpret_cast<const detail::_aterm_list<Term>*>(m_term))->tail;
@@ -184,14 +184,14 @@ class term_list:public aterm
 
     /// \brief Returns the first element of the list.
     /// \return The term at the head of the list.
-    const Term &front() const
+    const Term& front() const
     {
       return reinterpret_cast<const detail::_aterm_list<Term>*>(m_term)->head;
     }
 
     /// \brief Inserts a new element at the beginning of the current list.
     /// \param el The term that is added.
-    void push_front(const Term &el);
+    void push_front(const Term& el);
 
     /// \brief Returns the size of the term_list.
     /// \details The complexity of this function is linear in the size of the list.
@@ -269,7 +269,7 @@ typedef term_list<aterm> aterm_list;
 /// \return The reversed list.
 template <typename Term>
 inline
-term_list<Term> reverse(const term_list<Term> &l);
+term_list<Term> reverse(const term_list<Term>& l);
 
 
 /// \brief Returns the list l with one occurrence of the element x removed, or l if x is not present.
@@ -279,7 +279,7 @@ term_list<Term> reverse(const term_list<Term> &l);
 /// \return The original list where the first occurrence of t has been removed, assuming it is in t.
 template <typename Term>
 inline
-term_list<Term> remove_one_element(const term_list<Term> &l, const Term &t);
+term_list<Term> remove_one_element(const term_list<Term>& l, const Term& t);
 
 
 /// \brief Returns the concatenation of two lists.
@@ -289,7 +289,7 @@ term_list<Term> remove_one_element(const term_list<Term> &l, const Term &t);
 /// \return The concatenation of the lists l followed by m..
 template <typename Term>
 inline
-term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m);
+term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m);
 
 
 /// \brief Returns an element at a certain position in a list
@@ -300,7 +300,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m);
 /// \return The element at position i in the list l.
 template <typename Term>
 inline
-const Term &element_at(const term_list<Term> &l, size_t m)
+const Term& element_at(const term_list<Term>& l, size_t m)
 {
   assert(l.size()>m);
   typename term_list<Term>::const_iterator i=l.begin();
@@ -316,7 +316,7 @@ const Term &element_at(const term_list<Term> &l, size_t m)
 /// \return The list l with elem appended at the end.
 template <typename Term>
 inline
-term_list<Term> push_back(const term_list<Term> &l, const Term &el);
+term_list<Term> push_back(const term_list<Term>& l, const Term& el);
 
 /// \brief Swaps two term_lists.
 /// \details This operation is more efficient than exchanging terms by an assignment,
@@ -324,7 +324,7 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &el);
 /// \param t1 The first term
 /// \param t2 The second term
 template <class T>
-inline void swap(atermpp::term_list<T> &t1, atermpp::term_list<T> &t2)
+inline void swap(atermpp::term_list<T>& t1, atermpp::term_list<T>& t2)
 {
   t1.swap(t2);
 }
