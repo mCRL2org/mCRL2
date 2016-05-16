@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 #define MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 
+#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/typecheck.h"
 
 namespace mcrl2 {
