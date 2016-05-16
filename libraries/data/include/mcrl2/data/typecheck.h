@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/variable_context.h"
 
 namespace mcrl2
 {
@@ -93,13 +94,14 @@ class data_type_checker: public sort_type_checker
                         const bool strictly_ambiguous=true,
                         const bool warn_upcasting=false,
                         const bool print_cast_error=true);
+
     sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression>& DeclaredVars,
                                          const std::map<core::identifier_string,sort_expression>& AllowedVars,
                                          data_expression& t1,
                                          sort_expression t2)
     {
-      std::map<core::identifier_string,sort_expression> dummy_table;
-      return TraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2, dummy_table);
+      std::map<core::identifier_string,sort_expression> empty_context;
+      return TraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2, empty_context);
     }
 
     sort_expression TraverseVarConsTypeDN(
@@ -112,6 +114,7 @@ class data_type_checker: public sort_type_checker
                            const size_t nFactPars=std::string::npos,
                            const bool warn_upcasting=false,
                            const bool print_cast_error=true);
+
     void AddVars2Table(std::map<core::identifier_string, sort_expression>& variable_map, const variable_list& declared_variables)
     {
       for (const variable& v: declared_variables)
@@ -195,9 +198,9 @@ class data_type_checker: public sort_type_checker
       return UpCastNumericType(expected_sort, sort, expr, variable_context, variable_context, free_variables, strictly_ambiguous, warn_upcasting, print_cast_error);
     }
 
-    sort_expression expand_numeric_types_down(const sort_expression& sort)
+    sort_expression expand_numeric_types_down(const sort_expression& x)
     {
-      return ExpandNumTypesDown(sort);
+      return data::normalize_sorts(ExpandNumTypesDown(x), get_sort_specification());
     }
 
     sort_expression visit_data_expression(const std::map<core::identifier_string, sort_expression>& variable_context,
@@ -218,6 +221,97 @@ class data_type_checker: public sort_type_checker
       return TypeMatchA(sort_in, pos_sort_in, result);
     }
 
+    data::data_expression typecheck_data_expression(const data::data_expression& d, const data::sort_expression& expected_sort, const detail::variable_context& variable_context)
+    {
+      mCRL2log(log::debug) << "--- Typechecking " << d << " (" << atermpp::aterm(d) << ") with expected sort = " << expected_sort << std::endl;
+      data::data_expression result = typecheck_data_expression1(d, expected_sort, variable_context.context());
+      mCRL2log(log::debug) << "--- Typechecking result = " << result << std::endl;
+      assert(data::normalize_sorts(result, get_sort_specification()) == result);
+      return result;
+    }
+
+    data_expression typecheck_data_expression1(const data_expression& x,
+                                               const sort_expression& expected_sort,
+                                               const std::map<core::identifier_string, sort_expression>& variables
+                                              )
+    {
+      data_expression x1 = x;
+      visit_data_expression(variables, x1, expected_sort);
+      return data::normalize_sorts(x1, get_sort_specification());
+    }
+
+    data::data_expression typecheck_data_expression_nothrow(const data::data_expression& d, const data::sort_expression& expected_sort, const std::map<core::identifier_string, data::sort_expression>& variables, const core::identifier_string& name, const data::data_expression_list& parameters)
+    {
+      data::data_expression result;
+      try
+      {
+        result = typecheck_data_expression1(d, expected_sort, variables);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(d) + " as type " + data::pp(expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+      }
+      assert(data::normalize_sorts(result, get_sort_specification()) == result);
+      return result;
+    }
+
+    sort_expression typecheck_data_expression_for_assignments(const detail::variable_context& variable_context,
+                                                              const data_expression& x,
+                                                              const sort_expression& sort
+                                                             )
+    {
+      data_expression x1 = x;
+      return visit_data_expression(variable_context.context(), x1, expand_numeric_types_down(sort));
+    }
+
+    data::data_expression upcast_numeric_type(const data::data_expression& x,
+                                              const data::sort_expression& expected_sort,
+                                              const std::map<core::identifier_string, data::sort_expression>& variables,
+                                              const core::identifier_string& name,
+                                              const data::data_expression_list& parameters
+                                             )
+    {
+      try
+      {
+        std::map<core::identifier_string, data::sort_expression> empty_free_variable_context;
+        data_expression x1 = x;
+        sort_expression s = UpCastNumericType(expected_sort, x.sort(), x1, variables, variables, empty_free_variable_context, false, false, false);
+        // for example Pos -> Nat, or Nat -> Int
+        return data::normalize_sorts(x1, get_sort_specification());
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(x) + " as type " + data::pp(expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+      }
+    }
+
+/*
+    sort_expression expand_numeric_types_down1(const sort_expression& x)
+    {
+      return data::normalize_sorts(expand_numeric_types_down(x), get_sort_specification());
+    }
+
+    data::data_expression upcast_numeric_type1(const data::data_expression& x,
+                                               const data::sort_expression& expected_sort,
+                                               const std::map<core::identifier_string, data::sort_expression>& variable_context,
+                                               const core::identifier_string& name,
+                                               const data::data_expression_list& parameters
+                                              )
+    {
+      try
+      {
+        std::map<core::identifier_string,data::sort_expression> empty_context;
+        data_expression x1 = x;
+        sort_expression s = UpCastNumericType(expected_sort, x.sort(), x1, variable_context, empty_context, false, false, false);
+        assert(s == x1.sort());
+        return data::normalize_sorts(x1, get_sort_specification());
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(x) + " as type " + data::pp(expand_numeric_types_down1(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+      }
+    }
+*/
     void print_context() const
     {
       auto const& sortspec = get_sort_specification();
@@ -241,6 +335,11 @@ class data_type_checker: public sort_type_checker
       {
         std::cout << i->first << " -> " << i->second << std::endl;
       }
+    }
+
+    void check_sort_is_declared(const sort_expression& x) const
+    {
+      sort_type_checker::check_sort_is_declared(x);
     }
 };
 
@@ -336,6 +435,26 @@ void type_check_data_specification(data_specification& data_spec)
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check data specification " + pp(data_spec));
   }
 }
+
+inline
+data_expression typecheck_untyped_data_parameter(data_type_checker& typechecker,
+                                                 const core::identifier_string& name,
+                                                 const data_expression_list& parameters,
+                                                 const data::sort_expression& expected_sort,
+                                                 const detail::variable_context& variable_context
+                                                )
+{
+  if (parameters.empty())
+  {
+    return typechecker.typecheck_data_expression(untyped_identifier(name), expected_sort, variable_context);
+  }
+  else
+  {
+    return typechecker.typecheck_data_expression(application(untyped_identifier(name), parameters), expected_sort, variable_context);
+  }
+}
+
+typedef atermpp::term_list<sort_expression_list> sorts_list;
 
 } // namespace data
 

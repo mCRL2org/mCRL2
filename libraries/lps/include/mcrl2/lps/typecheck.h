@@ -26,7 +26,7 @@ namespace lps
 class multi_action_type_checker
 {
   protected:
-    data::detail::data_typechecker m_data_typechecker;
+    data::data_type_checker m_data_type_checker;
     process::detail::action_context m_action_context;
     data::detail::variable_context m_variable_context;
 
@@ -36,15 +36,15 @@ class multi_action_type_checker
                               const VariableContainer& variables,
                               const ActionLabelContainer& action_labels
                              )
-      : m_data_typechecker(dataspec)
+      : m_data_type_checker(dataspec)
     {
-      m_action_context.add_context_action_labels(action_labels, m_data_typechecker.get_sort_type_checker());
-      m_variable_context.add_context_variables(variables, m_data_typechecker.get_sort_type_checker());
+      m_action_context.add_context_action_labels(action_labels, m_data_type_checker);
+      m_variable_context.add_context_variables(variables, m_data_type_checker);
     }
 
     /// \brief Default constructor
     multi_action_type_checker(const data::data_specification& dataspec = data::data_specification())
-      : m_data_typechecker(dataspec)
+      : m_data_type_checker(dataspec)
     {}
 
     /** \brief     Type check a multi action.
@@ -59,7 +59,7 @@ class multi_action_type_checker
       {
         for (const data::untyped_data_parameter& a: x.actions())
         {
-          actions.push_back(process::typecheck_action(a.name(), a.arguments(), m_data_typechecker, m_variable_context, m_action_context));
+          actions.push_back(process::typecheck_action(a.name(), a.arguments(), m_data_type_checker, m_variable_context, m_action_context));
         }
       }
       catch (mcrl2::runtime_error& e)

@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_DETAIL_ACTION_CONTEXT_H
 
 #include <map>
-#include "mcrl2/data/sort_type_checker.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/action_label.h"
 
 namespace mcrl2 {
@@ -21,8 +21,6 @@ namespace mcrl2 {
 namespace process {
 
 namespace detail {
-
-typedef atermpp::term_list<data::sort_expression_list> sorts_list;
 
 class action_context
 {
@@ -64,11 +62,11 @@ class action_context
       }
     }
 
-    sorts_list matching_action_sorts(const core::identifier_string& name) const
+    data::sorts_list matching_action_sorts(const core::identifier_string& name) const
     {
       auto range = m_actions.equal_range(name);
       assert(range.first != m_actions.end());
-      sorts_list result;
+      data::sorts_list result;
       for (auto k = range.first; k != range.second; ++k)
       {
         const action_label& a = k->second;
@@ -77,9 +75,9 @@ class action_context
       return atermpp::reverse(result);
     }
 
-    sorts_list matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters) const
+    data::sorts_list matching_action_sorts(const core::identifier_string& name, const data::data_expression_list& parameters) const
     {
-      sorts_list result;
+      data::sorts_list result;
       auto range = m_actions.equal_range(name);
       for (auto k = range.first; k != range.second; ++k)
       {

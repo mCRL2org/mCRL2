@@ -14,8 +14,7 @@
 
 #include <algorithm>
 #include <map>
-#include "mcrl2/data/sort_type_checker.h"
-#include "mcrl2/data/detail/data_typechecker.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/detail/action_context.h"
 
@@ -24,6 +23,20 @@ namespace mcrl2 {
 namespace process {
 
 namespace detail {
+
+inline
+bool unique_variables(const data::variable_list& x)
+{
+  std::set<core::identifier_string> names;
+  for (const data::variable& v: x)
+  {
+    if (!names.insert(v.name()).second) // The variable name is already in the set.
+    {
+      return false;
+    }
+  }
+  return true;
+}
 
 class process_context
 {
@@ -92,7 +105,7 @@ class process_context
         }
 
         //check that all formal parameters of the process are unique.
-        if (!data::detail::unique_variables(id.variables()))
+        if (!unique_variables(id.variables()))
         {
           throw mcrl2::runtime_error("the formal variables in process " + process::pp(id) + " are not unique");
         }
@@ -142,9 +155,9 @@ class process_context
       throw mcrl2::runtime_error("no matching process found for " + core::pp(name) + "(" + data::pp(formal_parameters) + ")");
     }
 
-    sorts_list matching_process_sorts(const core::identifier_string& name, const data::data_expression_list& parameters) const
+    data::sorts_list matching_process_sorts(const core::identifier_string& name, const data::data_expression_list& parameters) const
     {
-      sorts_list result;
+      data::sorts_list result;
       auto range = m_process_identifiers.equal_range(name);
       for (auto k = range.first; k != range.second; ++k)
       {

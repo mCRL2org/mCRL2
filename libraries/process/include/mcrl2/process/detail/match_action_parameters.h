@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 #define MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 
-#include "mcrl2/data/detail/data_typechecker.h"
+#include "mcrl2/data/typecheck.h"
 
 namespace mcrl2 {
 
@@ -178,10 +178,10 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
                                                                                           const data::detail::variable_context& variable_context,
                                                                                           const core::identifier_string& name,
                                                                                           const std::string& msg,
-                                                                                          data::detail::data_typechecker& typechecker
+                                                                                          data::data_type_checker& typechecker
                                                                                          )
 {
-  data::sorts_list parameter_list = normalize_sorts(parameter_list1, typechecker.get_sort_type_checker().get_sort_specification());
+  data::sorts_list parameter_list = normalize_sorts(parameter_list1, typechecker.get_sort_specification());
 
   if (parameter_list.empty())
   {
@@ -229,7 +229,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
     throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name));
   }
   data::data_expression_list result(new_parameters.begin(), new_parameters.end());
-  assert(data::normalize_sorts(result, typechecker.get_sort_type_checker().get_sort_specification()) == result);
+  assert(data::normalize_sorts(result, typechecker.get_sort_specification()) == result);
   return std::make_pair(result, possible_sorts);
 }
 
