@@ -42,7 +42,7 @@ bool unique_variables(const data::variable_list& x)
 class process_context
 {
   private:
-    std::multimap<core::identifier_string, process_identifier>m_process_identifiers ;
+    std::multimap<core::identifier_string, process_identifier> m_process_identifiers;
 
     // returns true if all left hand sides of assignments appear as the name of a variable in parameters
     bool is_matching_assignment(const data::untyped_identifier_assignment_list& assignments, const data::variable_list& parameters) const

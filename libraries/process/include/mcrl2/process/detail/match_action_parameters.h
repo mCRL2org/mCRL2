@@ -163,17 +163,6 @@ std::pair<bool, data::sort_expression_list> adjust_not_inferred_list(const data:
 }
 
 inline
-data::sorts_list normalize_sorts(const data::sorts_list& x, const data::sort_specification& sortspec)
-{
-  std::vector<data::sort_expression_list> result;
-  for (const data::sort_expression_list& s: x)
-  {
-    result.push_back(data::normalize_sorts(s, sortspec));
-  }
-  return data::sorts_list(result.begin(), result.end());
-}
-
-inline
 data::data_expression typecheck_data_expression(const data::data_expression& x,
                                                 const data::sort_expression& expected_sort,
                                                 const data::detail::variable_context& variable_context,
@@ -216,15 +205,13 @@ data::data_expression upcast_numeric_type(const data::data_expression& x,
 
 inline
 std::pair<data::data_expression_list, data::sort_expression_list> match_action_parameters(const data::data_expression_list& parameters,
-                                                                                          const data::sorts_list& parameter_list1,
+                                                                                          const data::sorts_list& parameter_list,
                                                                                           const data::detail::variable_context& variable_context,
                                                                                           const core::identifier_string& name,
                                                                                           const std::string& msg,
                                                                                           data::data_type_checker& typechecker
                                                                                          )
 {
-  data::sorts_list parameter_list = normalize_sorts(parameter_list1, typechecker.get_sort_specification());
-
   if (parameter_list.empty())
   {
     throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
