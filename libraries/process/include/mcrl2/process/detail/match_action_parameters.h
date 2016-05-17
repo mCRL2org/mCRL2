@@ -199,7 +199,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
   {
     data::data_expression& e = *p1;
     const data::sort_expression& expected_sort = *p2;
-    e = typechecker.typecheck_data_expression_nothrow(e, expected_sort, variable_context.context(), name, parameters);
+    e = typechecker.typecheck_data_expression_alternative_error_message(e, expected_sort, variable_context.context(), name, parameters);
   }
 
   std::pair<bool, data::sort_expression_list> p = adjust_not_inferred_list(parameter_sorts(new_parameters), parameter_list);
@@ -214,7 +214,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
     {
       data::data_expression& e = *q1;
       data::sort_expression expected_sort = *q2;
-      e = typechecker.upcast_numeric_type(e, expected_sort, variable_context.context(), name, parameters);
+      e = typechecker.upcast_numeric_type_alternative_error_message(e, expected_sort, variable_context.context(), name, parameters);
     }
 
     std::pair<bool, data::sort_expression_list> p = adjust_not_inferred_list(parameter_sorts(new_parameters), parameter_list);

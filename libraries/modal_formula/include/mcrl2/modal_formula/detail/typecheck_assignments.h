@@ -32,7 +32,7 @@ data::assignment_list typecheck_assignments_does_not_work(const data::assignment
   for (const data::assignment& a: assignments)
   {
     data::sort_expression expected_sort = typechecker.expand_numeric_types_down(a.lhs().sort());
-    data::data_expression rhs = typechecker.typecheck_data_expression1(a.rhs(), expected_sort, variables);
+    data::data_expression rhs = typechecker.typecheck_data_expression(a.rhs(), expected_sort, variables);
     result.push_front(data::assignment(a.lhs(), rhs));
   }
   result = atermpp::reverse(result);
@@ -63,7 +63,7 @@ data::assignment_list typecheck_assignments(const data::assignment_list& assignm
 
     data::data_expression rhs = a.rhs();
     data::sort_expression expected_sort = typechecker.expand_numeric_types_down(lhs_sort);
-    rhs = typechecker.typecheck_data_expression1(rhs, expected_sort, variable_context.context());
+    rhs = typechecker.typecheck_data_expression(rhs, expected_sort, variable_context.context());
     if (!typechecker.type_match(lhs_sort, rhs.sort()))
     {
       // TODO: is it necessary to use a different expected sort here?
