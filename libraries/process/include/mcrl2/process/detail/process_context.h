@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <map>
 #include "mcrl2/data/typecheck.h"
+#include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/detail/action_context.h"
 
@@ -105,7 +106,7 @@ class process_context
         }
 
         //check that all formal parameters of the process are unique.
-        if (!unique_variables(id.variables()))
+        if (!data::detail::unique_names(id.variables()))
         {
           throw mcrl2::runtime_error("the formal variables in process " + process::pp(id) + " are not unique");
         }

@@ -46,49 +46,31 @@ data::assignment_list typecheck_assignments(const data::assignment_list& assignm
                                             data::data_type_checker& typechecker
                                            )
 {
-  std::map<core::identifier_string, data::sort_expression> sort_map;
+  std::set<core::identifier_string> names;
   data::assignment_list result;
-  data::sort_expression_list sorts;
   for (const data::assignment& a: assignments)
   {
     const core::identifier_string& name = a.lhs().name();
-    if (sort_map.count(name) > 0)
+
+    if (names.find(name) != names.end())
     {
       throw mcrl2::runtime_error("non-unique formal parameter " + core::pp(name) + ")");
     }
+    names.insert(name);
 
     data::sort_expression lhs_sort = a.lhs().sort();
     typechecker.check_sort_is_declared(lhs_sort);
 
-    sort_map[name] = lhs_sort;
-
     data::data_expression rhs = a.rhs();
-    data::sort_expression rhs_sort;
-    try
+    data::sort_expression expected_sort = typechecker.expand_numeric_types_down(lhs_sort);
+    rhs = typechecker.typecheck_data_expression1(rhs, expected_sort, variable_context.context());
+    if (!typechecker.type_match(lhs_sort, rhs.sort()))
     {
-      rhs_sort = typechecker.visit_data_expression(variable_context.context(), rhs, typechecker.expand_numeric_types_down(lhs_sort));
-    }
-    catch (mcrl2::runtime_error& e)
-    {
-      throw mcrl2::runtime_error(std::string(e.what()) + ".");
-    }
-
-    data::sort_expression temp;
-    if (!typechecker.type_match(lhs_sort, rhs_sort, temp))
-    {
-      //upcasting
-      try
-      {
-        std::map<core::identifier_string,data::sort_expression> dummy_table;
-        rhs_sort = typechecker.upcast_numeric_type(lhs_sort, rhs_sort, rhs, variable_context.context(), dummy_table, false);
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast " + data::pp(rhs) + " to type " + data::pp(lhs_sort));
-      }
+      // TODO: is it necessary to use a different expected sort here?
+      data::sort_expression expected_sort = lhs_sort;
+      rhs = typechecker.upcast_numeric_type(rhs, lhs_sort, variable_context.context());
     }
     result.push_front(data::assignment(a.lhs(), rhs));
-    sorts.push_front(lhs_sort);
   }
   result = atermpp::reverse(result);
   result = data::normalize_sorts(result, typechecker.get_sort_specification());
