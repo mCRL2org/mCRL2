@@ -174,6 +174,47 @@ data::sorts_list normalize_sorts(const data::sorts_list& x, const data::sort_spe
 }
 
 inline
+data::data_expression typecheck_data_expression(const data::data_expression& x,
+                                                const data::sort_expression& expected_sort,
+                                                const data::detail::variable_context& variable_context,
+                                                const core::identifier_string& name,
+                                                const data::data_expression_list& parameters,
+                                                data::data_type_checker& typechecker
+                                               )
+
+{
+  data::data_expression result;
+  try
+  {
+    result = typechecker.typecheck_data_expression(x, expected_sort, variable_context);
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(x) + " as type " + data::pp(typechecker.expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+  }
+  return result;
+}
+
+inline
+data::data_expression upcast_numeric_type(const data::data_expression& x,
+                                          const data::sort_expression& expected_sort,
+                                          const data::detail::variable_context& variable_context,
+                                          const core::identifier_string& name,
+                                          const data::data_expression_list& parameters,
+                                          data::data_type_checker& typechecker
+                                         )
+{
+  try
+  {
+    return typechecker.upcast_numeric_type(x, expected_sort, variable_context);
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(x) + " as type " + data::pp(typechecker.expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+  }
+}
+
+inline
 std::pair<data::data_expression_list, data::sort_expression_list> match_action_parameters(const data::data_expression_list& parameters,
                                                                                           const data::sorts_list& parameter_list1,
                                                                                           const data::detail::variable_context& variable_context,
@@ -199,7 +240,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
   {
     data::data_expression& e = *p1;
     const data::sort_expression& expected_sort = *p2;
-    e = typechecker.typecheck_data_expression_alternative_error_message(e, expected_sort, variable_context.context(), name, parameters);
+    e = typecheck_data_expression(e, expected_sort, variable_context, name, parameters, typechecker);
   }
 
   std::pair<bool, data::sort_expression_list> p = adjust_not_inferred_list(parameter_sorts(new_parameters), parameter_list);
@@ -214,7 +255,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
     {
       data::data_expression& e = *q1;
       data::sort_expression expected_sort = *q2;
-      e = typechecker.upcast_numeric_type_alternative_error_message(e, expected_sort, variable_context.context(), name, parameters);
+      e = upcast_numeric_type(e, expected_sort, variable_context, name, parameters, typechecker);
     }
 
     std::pair<bool, data::sort_expression_list> p = adjust_not_inferred_list(parameter_sorts(new_parameters), parameter_list);

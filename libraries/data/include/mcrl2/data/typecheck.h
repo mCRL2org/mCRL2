@@ -187,36 +187,19 @@ class data_type_checker: public sort_type_checker
     // for example Pos -> Nat, or Nat -> Int
     data::data_expression upcast_numeric_type(const data::data_expression& x,
                                               const data::sort_expression& expected_sort,
-                                              const std::map<core::identifier_string, data::sort_expression>& variable_context
+                                              const detail::variable_context& variable_context
                                              )
     {
       try
       {
         std::map<core::identifier_string, data::sort_expression> empty_free_variable_context;
         data_expression x1 = x;
-        UpCastNumericType(expected_sort, x.sort(), x1, variable_context, variable_context, empty_free_variable_context, false, false, false);
+        UpCastNumericType(expected_sort, x.sort(), x1, variable_context.context(), variable_context.context(), empty_free_variable_context, false, false, false);
         return data::normalize_sorts(x1, get_sort_specification());
       }
       catch (mcrl2::runtime_error& e)
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast " + data::pp(x) + " to type " + data::pp(expected_sort));
-      }
-    }
-
-    data::data_expression upcast_numeric_type_alternative_error_message(const data::data_expression& x,
-                                                                        const data::sort_expression& expected_sort,
-                                                                        const std::map<core::identifier_string, data::sort_expression>& variable_context,
-                                                                        const core::identifier_string& name,
-                                                                        const data::data_expression_list& parameters
-                                                                       )
-    {
-      try
-      {
-        return upcast_numeric_type(x, expected_sort, variable_context);
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(x) + " as type " + data::pp(expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
       }
     }
 
@@ -230,25 +213,6 @@ class data_type_checker: public sort_type_checker
       TraverseVarConsTypeD(variable_context.context(), variable_context.context(), x1, expected_sort);
       data_expression result = data::normalize_sorts(x1, get_sort_specification());
       mCRL2log(log::debug) << "--- Typechecking result = " << result << std::endl;
-      return result;
-    }
-
-    data::data_expression typecheck_data_expression_alternative_error_message(const data::data_expression& x,
-                                                                              const data::sort_expression& expected_sort,
-                                                                              const detail::variable_context& variable_context,
-                                                                              const core::identifier_string& name,
-                                                                              const data::data_expression_list& parameters
-                                                                             )
-    {
-      data::data_expression result;
-      try
-      {
-        result = typecheck_data_expression(x, expected_sort, variable_context);
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(x) + " as type " + data::pp(expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-      }
       return result;
     }
 
