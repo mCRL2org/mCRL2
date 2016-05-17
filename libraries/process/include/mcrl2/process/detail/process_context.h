@@ -25,20 +25,6 @@ namespace process {
 
 namespace detail {
 
-inline
-bool unique_variables(const data::variable_list& x)
-{
-  std::set<core::identifier_string> names;
-  for (const data::variable& v: x)
-  {
-    if (!names.insert(v.name()).second) // The variable name is already in the set.
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
 class process_context
 {
   private:

@@ -46,13 +46,7 @@ bool contains_untyped_sorts(const data::sort_expression_list& sorts)
 }
 
 inline
-bool is_contained_in(const data::sort_expression_list& l, const data::sorts_list& sorts)
-{
-  return std::find(sorts.begin(), sorts.end(), l) != sorts.end();
-}
-
-inline
-bool is_allowed_sort(const data::sort_expression& sort, const data::sort_expression& allowed_sort)
+bool is_matching_sort(const data::sort_expression& sort, const data::sort_expression& allowed_sort)
 {
   if (is_untyped_sort(allowed_sort))
   {
@@ -66,14 +60,15 @@ bool is_allowed_sort(const data::sort_expression& sort, const data::sort_express
   return sort == allowed_sort;
 }
 
+// Returns true if sorts matches allowed_sorts. That is, the holes in allowed_sorts can be filled such that the lists become equal.
 inline
-bool is_allowed_sort_list(const data::sort_expression_list& sorts, const data::sort_expression_list& allowed_sorts)
+bool is_matching_sort_list(const data::sort_expression_list& sorts, const data::sort_expression_list& allowed_sorts)
 {
   assert(sorts.size() == allowed_sorts.size());
   auto j = allowed_sorts.begin();
   for (auto i = sorts.begin(); i != sorts.end(); ++i, ++j)
   {
-    if (!is_allowed_sort(*i, *j))
+    if (!is_matching_sort(*i, *j))
     {
       return false;
     }
@@ -82,56 +77,55 @@ bool is_allowed_sort_list(const data::sort_expression_list& sorts, const data::s
 }
 
 inline
-data::sort_expression_list insert_type(const data::sort_expression_list& sorts, const data::sort_expression& sort)
+data::sort_expression make_untyped_possible_sorts(const std::set<data::sort_expression>& x)
 {
-  if (std::find(sorts.begin(), sorts.end(), sort) != sorts.end())
+  if (x.size() == 1)
   {
-    return sorts;
+    return *(x.begin());
   }
-  data::sort_expression_list result = sorts;
-  result.push_front(sort);
-  return result;
+  return data::untyped_possible_sorts(data::sort_expression_list(x.begin(), x.end()));
 }
 
+// Join the sort lists, by wrapping the set of i-th elements of the lists into an untyped_possible_sorts.
+// If a set has size one, it is not wrapped into an untyped_possible_sorts.
 inline
-data::sort_expression_list get_not_inferred_list(const data::sorts_list& sorts)
+data::sort_expression_list join_sort_lists(const data::sorts_list& sorts)
 {
   if (sorts.size() == 1)
   {
     return sorts.front();
   }
-  data::sort_expression_list result;
-  size_t n = sorts.front().size();
-  std::vector<data::sort_expression_list> parameter_lists(n, data::sort_expression_list());
-  for (data::sort_expression_list s: sorts)
+  std::size_t n = sorts.front().size();
+
+  // use sets to remove duplicates
+  std::vector<std::set<data::sort_expression> > sort_sets(n);
+  for (const data::sort_expression_list& sort_list: sorts)
   {
-    for (size_t i = 0; i < n; s = s.tail(), i++)
+    std::size_t i = 0;
+    for (const data::sort_expression& s: sort_list)
     {
-      parameter_lists[i] = insert_type(parameter_lists[i], s.front());
+      sort_sets[i++].insert(s);
     }
   }
-  for (size_t i = n; i > 0; i--)
+
+  data::sort_expression_vector result;
+  for (const std::set<data::sort_expression>& x: sort_sets)
   {
-    data::sort_expression sort;
-    if (parameter_lists[i - 1].size() == 1)
-    {
-      sort = parameter_lists[i - 1].front();
-    }
-    else
-    {
-      sort = data::untyped_possible_sorts(data::sort_expression_list(atermpp::reverse(parameter_lists[i - 1])));
-    }
-    result.push_front(sort);
+    result.push_back(make_untyped_possible_sorts(x));
   }
-  return result;
+  return data::sort_expression_list(result.begin(), result.end());
 }
 
+// Filter the possible sort lists.
+// If there is no matching sort list, the first element of the result is false.
+// The second element of the result contains the remaining alternatives. Multiple choices at a certain position are wrapped into an untyped_possible_sorts.
 inline
-std::pair<bool, data::sort_expression_list> adjust_not_inferred_list(const data::sort_expression_list& possible_sorts, const data::sorts_list& sorts)
+std::pair<bool, data::sort_expression_list> filter_sort_lists(const data::sort_expression_list& possible_sorts, const data::sorts_list& possible_parameter_sorts)
 {
+  // If possible_sorts does not contain untyped sorts, look for a precise match.
   if (!contains_untyped_sorts(possible_sorts))
   {
-    if (is_contained_in(possible_sorts, sorts))
+    if (std::find(possible_parameter_sorts.begin(), possible_parameter_sorts.end(), possible_sorts) != possible_parameter_sorts.end())
     {
       return std::make_pair(true, possible_sorts);
     }
@@ -141,25 +135,25 @@ std::pair<bool, data::sort_expression_list> adjust_not_inferred_list(const data:
     }
   }
 
-  data::sorts_list new_sorts;
-  for (const data::sort_expression_list& s: sorts)
+  data::sorts_list matching_sort_lists;
+  for (const data::sort_expression_list& s: possible_parameter_sorts)
   {
-    if (is_allowed_sort_list(s, possible_sorts))
+    if (is_matching_sort_list(s, possible_sorts))
     {
-      new_sorts.push_front(s);
+      matching_sort_lists.push_front(s);
     }
   }
-  new_sorts = atermpp::reverse(new_sorts);
+  matching_sort_lists = atermpp::reverse(matching_sort_lists);
 
-  if (new_sorts.empty())
+  if (matching_sort_lists.empty())
   {
     return std::make_pair(false, data::sort_expression_list());
   }
-  if (new_sorts.size() == 1)
+  if (matching_sort_lists.size() == 1)
   {
-    return std::make_pair(true, new_sorts.front());
+    return std::make_pair(true, matching_sort_lists.front());
   }
-  return std::make_pair(true, get_not_inferred_list(new_sorts));
+  return std::make_pair(true, join_sort_lists(matching_sort_lists));
 }
 
 inline
@@ -205,20 +199,20 @@ data::data_expression upcast_numeric_type(const data::data_expression& x,
 
 inline
 std::pair<data::data_expression_list, data::sort_expression_list> match_action_parameters(const data::data_expression_list& parameters,
-                                                                                          const data::sorts_list& parameter_list,
+                                                                                          const data::sorts_list& possible_parameter_sorts,
                                                                                           const data::detail::variable_context& variable_context,
                                                                                           const core::identifier_string& name,
                                                                                           const std::string& msg,
                                                                                           data::data_type_checker& typechecker
                                                                                          )
 {
-  if (parameter_list.empty())
+  if (possible_parameter_sorts.empty())
   {
     throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
                     + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
                     + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
   }
-  data::sort_expression_list expected_sorts = get_not_inferred_list(parameter_list);
+  data::sort_expression_list expected_sorts = join_sort_lists(possible_parameter_sorts);
   data::sort_expression_list possible_sorts = expected_sorts;
   data::data_expression_vector new_parameters(parameters.begin(), parameters.end());
   auto p1 = new_parameters.begin();
@@ -230,7 +224,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
     e = typecheck_data_expression(e, expected_sort, variable_context, name, parameters, typechecker);
   }
 
-  std::pair<bool, data::sort_expression_list> p = adjust_not_inferred_list(parameter_sorts(new_parameters), parameter_list);
+  std::pair<bool, data::sort_expression_list> p = filter_sort_lists(parameter_sorts(new_parameters), possible_parameter_sorts);
   possible_sorts = p.second;
 
   if (!p.first)
@@ -245,7 +239,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
       e = upcast_numeric_type(e, expected_sort, variable_context, name, parameters, typechecker);
     }
 
-    std::pair<bool, data::sort_expression_list> p = adjust_not_inferred_list(parameter_sorts(new_parameters), parameter_list);
+    std::pair<bool, data::sort_expression_list> p = filter_sort_lists(parameter_sorts(new_parameters), possible_parameter_sorts);
     possible_sorts = p.second;
 
     if (!p.first)
