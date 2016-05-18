@@ -10,6 +10,7 @@
 /// \brief Add your file description here.
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
@@ -137,7 +138,6 @@ void test4()
   data::rewriter R(data_spec);
 
   std::string expr1 = "exists b: Bool. if(c, c, b)";
-//  std::string expr2 = "true"; // rewriter cannot deal with abstraction yet
   std::string expr2 = "exists b: Bool. if(true, true, b)";
   std::string sigma = "[c: Bool := true]";
   test_expressions(R, expr1, expr2, "c: Bool;", data_spec, sigma);
@@ -162,8 +162,8 @@ void test5() // Test set difference for finite sets.
 void allocation_test()
 {
   data_specification data_spec;
-  std::auto_ptr< data::rewriter > R_heap(new data::rewriter(data_spec));
-  data::rewriter                  R_stack(data_spec);
+  std::shared_ptr< data::rewriter > R_heap(new data::rewriter(data_spec));
+  data::rewriter                    R_stack(data_spec);
 
   R_stack(parse_data_expression("1 == 2"));
   R_stack(parse_data_expression("1 == 2"));

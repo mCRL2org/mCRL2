@@ -170,8 +170,6 @@ void test_bes()
 {
   using namespace bes;
 
-  typedef core::term_traits<boolean_expression> tr;
-
   boolean_variable X("X");
   boolean_variable Y("Y");
 
@@ -217,7 +215,6 @@ void test_bes()
   BOOST_CHECK(gauss_elimination(bes2) == true);
   BOOST_CHECK(gauss_elimination(bes3) == false);
   BOOST_CHECK(gauss_elimination(bes4) == true);
-
 }
 
 inline
