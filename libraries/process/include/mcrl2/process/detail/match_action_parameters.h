@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/typecheck.h"
+#include "mcrl2/data/undefined.h"
 
 namespace mcrl2 {
 
@@ -32,158 +33,29 @@ data::sort_expression_list parameter_sorts(const Container& parameters)
   return atermpp::reverse(sorts);
 }
 
-inline
-bool contains_untyped_sorts(const data::sort_expression_list& sorts)
-{
-  for (const data::sort_expression& s: sorts)
-  {
-    if (data::is_untyped_sort(s) || data::is_untyped_possible_sorts(s))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
-inline
-bool is_matching_sort(const data::sort_expression& sort, const data::sort_expression& allowed_sort)
-{
-  if (is_untyped_sort(allowed_sort))
-  {
-    return true;
-  }
-  if (is_untyped_possible_sorts(allowed_sort))
-  {
-    const data::sort_expression_list& sorts = atermpp::down_cast<const data::untyped_possible_sorts>(allowed_sort).sorts();
-    return std::find(sorts.begin(), sorts.end(), sort) != sorts.end();
-  }
-  return sort == allowed_sort;
-}
-
-// Returns true if sorts matches allowed_sorts. That is, the holes in allowed_sorts can be filled such that the lists become equal.
-inline
-bool is_matching_sort_list(const data::sort_expression_list& sorts, const data::sort_expression_list& allowed_sorts)
-{
-  assert(sorts.size() == allowed_sorts.size());
-  auto j = allowed_sorts.begin();
-  for (auto i = sorts.begin(); i != sorts.end(); ++i, ++j)
-  {
-    if (!is_matching_sort(*i, *j))
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-inline
-data::sort_expression make_untyped_possible_sorts(const std::set<data::sort_expression>& x)
-{
-  if (x.size() == 1)
-  {
-    return *(x.begin());
-  }
-  return data::untyped_possible_sorts(data::sort_expression_list(x.begin(), x.end()));
-}
-
-// Join the sort lists, by wrapping the set of i-th elements of the lists into an untyped_possible_sorts.
-// If a set has size one, it is not wrapped into an untyped_possible_sorts.
-inline
-data::sort_expression_list join_sort_lists(const data::sorts_list& sorts)
-{
-  if (sorts.size() == 1)
-  {
-    return sorts.front();
-  }
-  std::size_t n = sorts.front().size();
-
-  // use sets to remove duplicates
-  std::vector<std::set<data::sort_expression> > sort_sets(n);
-  for (const data::sort_expression_list& sort_list: sorts)
-  {
-    std::size_t i = 0;
-    for (const data::sort_expression& s: sort_list)
-    {
-      sort_sets[i++].insert(s);
-    }
-  }
-
-  data::sort_expression_vector result;
-  for (const std::set<data::sort_expression>& x: sort_sets)
-  {
-    result.push_back(make_untyped_possible_sorts(x));
-  }
-  return data::sort_expression_list(result.begin(), result.end());
-}
-
-// Filter the possible sort lists.
-// If there is no matching sort list, the first element of the result is false.
-// The second element of the result contains the remaining alternatives. Multiple choices at a certain position are wrapped into an untyped_possible_sorts.
-inline
-std::pair<bool, data::sort_expression_list> filter_sort_lists(const data::sort_expression_list& possible_sorts, const data::sorts_list& possible_parameter_sorts)
-{
-  // If possible_sorts does not contain untyped sorts, look for a precise match.
-  if (!contains_untyped_sorts(possible_sorts))
-  {
-    if (std::find(possible_parameter_sorts.begin(), possible_parameter_sorts.end(), possible_sorts) != possible_parameter_sorts.end())
-    {
-      return std::make_pair(true, possible_sorts);
-    }
-    else
-    {
-      return std::make_pair(false, data::sort_expression_list());
-    }
-  }
-
-  data::sorts_list matching_sort_lists;
-  for (const data::sort_expression_list& s: possible_parameter_sorts)
-  {
-    if (is_matching_sort_list(s, possible_sorts))
-    {
-      matching_sort_lists.push_front(s);
-    }
-  }
-  matching_sort_lists = atermpp::reverse(matching_sort_lists);
-
-  if (matching_sort_lists.empty())
-  {
-    return std::make_pair(false, data::sort_expression_list());
-  }
-  if (matching_sort_lists.size() == 1)
-  {
-    return std::make_pair(true, matching_sort_lists.front());
-  }
-  return std::make_pair(true, join_sort_lists(matching_sort_lists));
-}
-
+// This function is introduced to hide the exception based interface of the data type checker.
 inline
 data::data_expression typecheck_data_expression(const data::data_expression& x,
                                                 const data::sort_expression& expected_sort,
                                                 const data::detail::variable_context& variable_context,
-                                                const core::identifier_string& name,
-                                                const data::data_expression_list& parameters,
                                                 data::data_type_checker& typechecker
                                                )
-
 {
-  data::data_expression result;
   try
   {
-    result = typechecker.typecheck_data_expression(x, expected_sort, variable_context);
+    return typechecker.typecheck_data_expression(x, expected_sort, variable_context);
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(x) + " as type " + data::pp(typechecker.expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    return data::undefined_data_expression();
   }
-  return result;
 }
 
+// This function is introduced to hide the exception based interface of the data type checker.
 inline
 data::data_expression upcast_numeric_type(const data::data_expression& x,
                                           const data::sort_expression& expected_sort,
                                           const data::detail::variable_context& variable_context,
-                                          const core::identifier_string& name,
-                                          const data::data_expression_list& parameters,
                                           data::data_type_checker& typechecker
                                          )
 {
@@ -193,8 +65,52 @@ data::data_expression upcast_numeric_type(const data::data_expression& x,
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot typecheck " + data::pp(x) + " as type " + data::pp(typechecker.expand_numeric_types_down(expected_sort)) + " (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    return data::undefined_data_expression();
   }
+}
+
+inline
+data::data_expression match_action_parameter(const data::data_expression& x,
+                                             const data::sort_expression& expected_sort,
+                                             const data::detail::variable_context& variable_context,
+                                             data::data_type_checker& typechecker
+                                            )
+{
+  data::data_expression result = typecheck_data_expression(x, expected_sort, variable_context, typechecker);
+  if (result != data::undefined_data_expression() && (result.sort() != expected_sort))
+  {
+    result = upcast_numeric_type(result, expected_sort, variable_context, typechecker);
+  }
+  if (data::is_untyped_sort(result.sort()) || data::is_untyped_possible_sorts(result.sort()))
+  {
+    result = data::undefined_data_expression();
+  }
+  return result;
+}
+
+inline
+std::pair<bool, data::data_expression_vector> match_action_parameters(const data::data_expression_list& parameters,
+                                                                      const data::sort_expression_list& expected_sorts,
+                                                                      const data::detail::variable_context& variable_context,
+                                                                      data::data_type_checker& typechecker
+                                                                     )
+{
+  data::data_expression_vector result;
+  auto i = parameters.begin();
+  auto j = expected_sorts.begin();
+  for (; i != parameters.end(); ++i, ++j)
+  {
+    data::data_expression x = match_action_parameter(*i, *j, variable_context, typechecker);
+    if (x == data::undefined_data_expression())
+    {
+      return { false, {} };
+    }
+    else
+    {
+      result.push_back(x);
+    }
+  }
+  return { true, result };
 }
 
 inline
@@ -206,54 +122,25 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
                                                                                           data::data_type_checker& typechecker
                                                                                          )
 {
-  if (possible_parameter_sorts.empty())
+  std::vector<data::data_expression_vector> matches;
+  for (const data::sort_expression_list& sorts: possible_parameter_sorts)
   {
-    throw mcrl2::runtime_error("no " + msg + " " + core::pp(name)
-                    + " with " + atermpp::to_string(parameters.size()) + " parameter" + ((parameters.size() != 1)?"s":"")
-                    + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
-  }
-  data::sort_expression_list expected_sorts = join_sort_lists(possible_parameter_sorts);
-  data::sort_expression_list possible_sorts = expected_sorts;
-  data::data_expression_vector new_parameters(parameters.begin(), parameters.end());
-  auto p1 = new_parameters.begin();
-  auto p2 = possible_sorts.begin();
-  for (; p1 != new_parameters.end(); ++p1, ++p2)
-  {
-    data::data_expression& e = *p1;
-    const data::sort_expression& expected_sort = *p2;
-    e = typecheck_data_expression(e, expected_sort, variable_context, name, parameters, typechecker);
-  }
-
-  std::pair<bool, data::sort_expression_list> p = filter_sort_lists(parameter_sorts(new_parameters), possible_parameter_sorts);
-  possible_sorts = p.second;
-
-  if (!p.first)
-  {
-    possible_sorts = expected_sorts;
-    auto q1 = new_parameters.begin();
-    auto q2 = possible_sorts.begin();
-    for (; q1 != new_parameters.end(); ++q1, ++q2)
+    auto p = match_action_parameters(parameters, sorts, variable_context, typechecker);
+    if (p.first)
     {
-      data::data_expression& e = *q1;
-      data::sort_expression expected_sort = *q2;
-      e = upcast_numeric_type(e, expected_sort, variable_context, name, parameters, typechecker);
-    }
-
-    std::pair<bool, data::sort_expression_list> p = filter_sort_lists(parameter_sorts(new_parameters), possible_parameter_sorts);
-    possible_sorts = p.second;
-
-    if (!p.first)
-    {
-      throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(parameter_sorts(new_parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+      matches.push_back(p.second);
     }
   }
-  if (contains_untyped_sorts(possible_sorts))
+  if (matches.empty())
   {
-    throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name));
+    throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(parameter_sorts(parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
   }
-  data::data_expression_list result(new_parameters.begin(), new_parameters.end());
-  assert(data::normalize_sorts(result, typechecker.get_sort_specification()) == result);
-  return std::make_pair(result, possible_sorts);
+  if (matches.size() > 1)
+  {
+    throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name) + "(" + data::pp(parameters) + ")");
+  }
+  const data::data_expression_vector& typechecked_parameters = matches.front();
+  return { data::data_expression_list(typechecked_parameters.begin(), typechecked_parameters.end()), parameter_sorts(typechecked_parameters) };
 }
 
 } // namespace detail
