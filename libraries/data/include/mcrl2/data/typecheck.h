@@ -330,11 +330,10 @@ void type_check_data_expression(data_expression& data_expr,
   try
   {
     data_type_checker type_checker(data_spec);
-    data_expr = type_checker(data_expr,variables);
-#ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
-    // assert(!search_sort_expression(data_expr, untyped_sort())); Terms with untyped sorts, such as [], {} and {:} are
-    // returned by the typechecker.
-#endif
+    detail::variable_context variable_context;
+    variable_context.add_context_variables(data::variable_list(first, last), type_checker);
+    data_expr = type_checker.typecheck_data_expression(data_expr, untyped_sort(), variable_context);
+    // data_expr = type_checker(data_expr, variables);
   }
   catch (mcrl2::runtime_error& e)
   {

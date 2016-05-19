@@ -1161,7 +1161,7 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor)
     "c",
     "sort S = struct c(Nat);\n",
     true,
-    "Nat -> struct c(Nat)"
+    "Nat -> S"
   );
 }
 
@@ -1171,7 +1171,7 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_pos_constant)
     "c(1)",
     "sort S = struct c(Nat);\n",
     true,
-    "struct c(Nat)"
+    "S"
   );
 }
 
@@ -1181,7 +1181,7 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_nat_constant)
     "c(0)",
     "sort S = struct c(Nat);\n",
     true,
-    "struct c(Nat)"
+    "S"
   );
 }
 
@@ -1201,7 +1201,7 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_pos_variable)
     "sort S = struct c(Nat);\n",
     { var("x", pos()) },
     true,
-    "struct c(Nat)"
+    "S"
   );
 }
 
@@ -1212,7 +1212,7 @@ BOOST_AUTO_TEST_CASE(test_struct_constructor_application_nat_variable)
     "sort S = struct c(Nat);\n",
     { var("x", nat()) },
     true,
-    "struct c(Nat)"
+    "S"
   );
 }
 
