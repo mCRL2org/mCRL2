@@ -36,6 +36,18 @@ namespace data
 namespace detail
 {
 
+/// \brief Returns the sorts of a sequence of parameters.
+template <typename Container>
+data::sort_expression_list parameter_sorts(const Container& parameters)
+{
+  data::sort_expression_list sorts;
+  for (auto const& param: parameters)
+  {
+    sorts.push_front(param.sort());
+  }
+  return atermpp::reverse(sorts);
+}
+
 /// \brief Returns true if the names of the given variables are unique.
 /// \param variables A sequence of data variables
 /// \return True if the names of the given variables are unique.
@@ -44,9 +56,9 @@ inline
 bool unique_names(const VariableContainer& variables)
 {
   std::set<core::identifier_string> variable_names;
-  for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
+  for (auto const& var: variables)
   {
-    variable_names.insert(i->name());
+    variable_names.insert(var.name());
   }
   if (variable_names.size() != variables.size())
   {
@@ -193,7 +205,7 @@ bool check_variable_sorts(const VariableContainer& variables, const SortContaine
 inline
 bool check_variable_names(variable_list const& variables, const std::set<core::identifier_string>& names)
 {
-	using utilities::detail::contains;
+  using utilities::detail::contains;
 
   for (auto i = variables.begin(); i != variables.end(); ++i)
   {

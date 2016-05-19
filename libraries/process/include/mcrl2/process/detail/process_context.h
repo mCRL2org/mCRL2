@@ -43,17 +43,6 @@ class process_context
       return true;
     }
 
-    template <typename Container>
-    data::sort_expression_list parameter_sorts(const Container& parameters) const
-    {
-      data::sort_expression_list sorts;
-      for (const data::data_expression& e: parameters)
-      {
-        sorts.push_front(e.sort());
-      }
-      return atermpp::reverse(sorts);
-    }
-
   public:
     bool is_declared(const core::identifier_string& name) const
     {
@@ -134,7 +123,7 @@ class process_context
       for (auto k = range.first; k != range.second; ++k)
       {
         const process_identifier& id = k->second;
-        if (parameter_sorts(id.variables()) == formal_parameters)
+        if (data::detail::parameter_sorts(id.variables()) == formal_parameters)
         {
           return process_instance(id, actual_parameters);
         }
@@ -151,7 +140,7 @@ class process_context
         const process_identifier& id = k->second;
         if (id.variables().size() == parameters.size())
         {
-          result.push_front(parameter_sorts(id.variables()));
+          result.push_front(data::detail::parameter_sorts(id.variables()));
         }
       }
       return atermpp::reverse(result);

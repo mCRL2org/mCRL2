@@ -12,44 +12,14 @@
 #ifndef MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 #define MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 
-#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/typecheck.h"
-#include "mcrl2/data/undefined.h"
+#include "mcrl2/data/detail/data_utility.h"
 
 namespace mcrl2 {
 
 namespace process {
 
 namespace detail {
-
-template <typename Container>
-data::sort_expression_list parameter_sorts(const Container& parameters)
-{
-  data::sort_expression_list sorts;
-  for (const data::data_expression& e: parameters)
-  {
-    sorts.push_front(e.sort());
-  }
-  return atermpp::reverse(sorts);
-}
-
-// This function is introduced to hide the exception based interface of the data type checker.
-inline
-data::data_expression typecheck_data_expression(const data::data_expression& x,
-                                                const data::sort_expression& expected_sort,
-                                                const data::detail::variable_context& variable_context,
-                                                data::data_type_checker& typechecker
-                                               )
-{
-  try
-  {
-    return typechecker.typecheck_data_expression(x, expected_sort, variable_context);
-  }
-  catch (mcrl2::runtime_error& e)
-  {
-    return data::undefined_data_expression();
-  }
-}
 
 inline
 std::pair<bool, data::data_expression_vector> match_action_parameters(const data::data_expression_list& parameters,
@@ -63,14 +33,13 @@ std::pair<bool, data::data_expression_vector> match_action_parameters(const data
   auto j = expected_sorts.begin();
   for (; i != parameters.end(); ++i, ++j)
   {
-    data::data_expression x = typecheck_data_expression(*i, *j, variable_context, typechecker);
-    if (x == data::undefined_data_expression())
+    try
+    {
+      result.push_back(typechecker.typecheck_data_expression(*i, *j, variable_context));
+    }
+    catch (mcrl2::runtime_error& e)
     {
       return { false, {} };
-    }
-    else
-    {
-      result.push_back(x);
     }
   }
   return { true, result };
@@ -96,14 +65,14 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
   }
   if (matches.empty())
   {
-    throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(parameter_sorts(parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(data::detail::parameter_sorts(parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
   }
   if (matches.size() > 1)
   {
     throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name) + "(" + data::pp(parameters) + ")");
   }
   const data::data_expression_vector& typechecked_parameters = matches.front();
-  return { data::data_expression_list(typechecked_parameters.begin(), typechecked_parameters.end()), parameter_sorts(typechecked_parameters) };
+  return { data::data_expression_list(typechecked_parameters.begin(), typechecked_parameters.end()), data::detail::parameter_sorts(typechecked_parameters) };
 }
 
 } // namespace detail

@@ -14,6 +14,7 @@
 
 #include <map>
 #include "mcrl2/data/sort_type_checker.h"
+#include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2 {
@@ -27,17 +28,6 @@ class pbes_context
   private:
     std::map<core::identifier_string, propositional_variable> m_propositional_variables;
 
-    template <typename Container>
-    data::sort_expression_list parameter_sorts(const Container& parameters) const
-    {
-      data::sort_expression_list sorts;
-      for (const data::data_expression& e: parameters)
-      {
-        sorts.push_front(e.sort());
-      }
-      return atermpp::reverse(sorts);
-    }
-
   public:
     bool is_declared(const core::identifier_string& name) const
     {
@@ -48,7 +38,7 @@ class pbes_context
     {
       auto i = m_propositional_variables.find(name);
       assert(i != m_propositional_variables.end());
-      return parameter_sorts(i->second.parameters());
+      return data::detail::parameter_sorts(i->second.parameters());
     }
 
     template <typename PropositionalVariableContainer>

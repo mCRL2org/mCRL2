@@ -14,6 +14,7 @@
 
 #include <map>
 #include "mcrl2/data/sort_type_checker.h"
+#include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
 
 namespace mcrl2 {
@@ -27,17 +28,6 @@ class state_variable_context
   private:
     std::map<core::identifier_string, data::sort_expression_list> m_state_variables;
 
-    template <typename Container>
-    data::sort_expression_list parameter_sorts(const Container& parameters) const
-    {
-      data::sort_expression_list sorts;
-      for (const data::data_expression& e: parameters)
-      {
-        sorts.push_front(e.sort());
-      }
-      return atermpp::reverse(sorts);
-    }
-
   public:
     bool is_declared(const core::identifier_string& name) const
     {
@@ -46,7 +36,7 @@ class state_variable_context
 
     void add_state_variable(const core::identifier_string& name, const data::variable_list& parameters, const data::sort_type_checker& sort_typechecker)
     {
-      data::sort_expression_list sorts = parameter_sorts(parameters);
+      data::sort_expression_list sorts = data::detail::parameter_sorts(parameters);
       for (const data::sort_expression& s: sorts)
       {
         sort_typechecker(s);

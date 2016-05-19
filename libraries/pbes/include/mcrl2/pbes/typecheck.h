@@ -166,16 +166,6 @@ class pbes_type_checker
     data::detail::variable_context m_variable_context;
     detail::pbes_context m_pbes_context;
 
-    data::sort_expression_list variable_sorts(const data::variable_list& variables)
-    {
-      data::sort_expression_list sorts;
-      for (const data::variable& v: variables)
-      {
-        sorts.push_front(v.sort());
-      }
-      return atermpp::reverse(sorts);
-    }
-
     std::vector<propositional_variable> equation_variables(const std::vector<pbes_equation>& equations)
     {
       std::vector<propositional_variable> result;
