@@ -1,4 +1,4 @@
-// Author(s): Yaroslav Usenko, Jan Friso Groote, Wieger Wesselink (2016)
+// Author(s): Wieger Wesselink (2016)
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -51,43 +51,6 @@ data::data_expression typecheck_data_expression(const data::data_expression& x,
   }
 }
 
-// This function is introduced to hide the exception based interface of the data type checker.
-inline
-data::data_expression upcast_numeric_type(const data::data_expression& x,
-                                          const data::sort_expression& expected_sort,
-                                          const data::detail::variable_context& variable_context,
-                                          data::data_type_checker& typechecker
-                                         )
-{
-  try
-  {
-    return typechecker.upcast_numeric_type(x, expected_sort, variable_context);
-  }
-  catch (mcrl2::runtime_error& e)
-  {
-    return data::undefined_data_expression();
-  }
-}
-
-inline
-data::data_expression match_action_parameter(const data::data_expression& x,
-                                             const data::sort_expression& expected_sort,
-                                             const data::detail::variable_context& variable_context,
-                                             data::data_type_checker& typechecker
-                                            )
-{
-  data::data_expression result = typecheck_data_expression(x, expected_sort, variable_context, typechecker);
-  if (result != data::undefined_data_expression() && (result.sort() != expected_sort))
-  {
-    result = upcast_numeric_type(result, expected_sort, variable_context, typechecker);
-  }
-  if (data::is_untyped_sort(result.sort()) || data::is_untyped_possible_sorts(result.sort()))
-  {
-    result = data::undefined_data_expression();
-  }
-  return result;
-}
-
 inline
 std::pair<bool, data::data_expression_vector> match_action_parameters(const data::data_expression_list& parameters,
                                                                       const data::sort_expression_list& expected_sorts,
@@ -100,7 +63,7 @@ std::pair<bool, data::data_expression_vector> match_action_parameters(const data
   auto j = expected_sorts.begin();
   for (; i != parameters.end(); ++i, ++j)
   {
-    data::data_expression x = match_action_parameter(*i, *j, variable_context, typechecker);
+    data::data_expression x = typecheck_data_expression(*i, *j, variable_context, typechecker);
     if (x == data::undefined_data_expression())
     {
       return { false, {} };

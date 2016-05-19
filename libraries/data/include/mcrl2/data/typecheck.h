@@ -183,16 +183,15 @@ class data_type_checker: public sort_type_checker
     bool IsNotInferredL(sort_expression_list TypeList);
     bool strict_type_check(const data_expression& d);
 
-  public:
     // for example Pos -> Nat, or Nat -> Int
-    data::data_expression upcast_numeric_type(const data::data_expression& x,
-                                              const data::sort_expression& expected_sort,
-                                              const detail::variable_context& variable_context
-                                             )
+    data_expression upcast_numeric_type(const data_expression& x,
+                                        const sort_expression& expected_sort,
+                                        const detail::variable_context& variable_context
+                                       )
     {
       try
       {
-        std::map<core::identifier_string, data::sort_expression> empty_free_variable_context;
+        std::map<core::identifier_string, sort_expression> empty_free_variable_context;
         data_expression x1 = x;
         UpCastNumericType(expected_sort, x.sort(), x1, variable_context.context(), variable_context.context(), empty_free_variable_context, false, false, false);
         return data::normalize_sorts(x1, get_sort_specification());
@@ -203,6 +202,7 @@ class data_type_checker: public sort_type_checker
       }
     }
 
+  public:
     data_expression typecheck_data_expression(const data_expression& x,
                                               const sort_expression& expected_sort,
                                               const detail::variable_context& variable_context
@@ -211,30 +211,48 @@ class data_type_checker: public sort_type_checker
       mCRL2log(log::debug) << "--- Typechecking " << x << " (" << atermpp::aterm(x) << ") with expected sort = " << expected_sort << std::endl;
       data_expression x1 = x;
       TraverseVarConsTypeD(variable_context.context(), variable_context.context(), x1, expected_sort);
-      data_expression result = data::normalize_sorts(x1, get_sort_specification());
-      mCRL2log(log::debug) << "--- Typechecking result = " << result << std::endl;
-      return result;
+      x1 = data::normalize_sorts(x1, get_sort_specification());
+      if (x1.sort() != expected_sort)
+      {
+        x1 = upcast_numeric_type(x1, expected_sort, variable_context);
+      }
+      mCRL2log(log::debug) << "--- Typechecking result = " << x1 << std::endl;
+      return x1;
     }
 
-    bool type_match(const sort_expression& sort_in, const sort_expression& pos_sort_in)
+    assignment typecheck_assignment(const assignment& x, const detail::variable_context& variable_context)
     {
-      sort_expression dummy;
-      return TypeMatchA(sort_in, pos_sort_in, dummy);
+      sort_type_checker::check_sort_is_declared(x.lhs().sort());
+      data_expression rhs = typecheck_data_expression(x.rhs(), x.lhs().sort(), variable_context);
+      return assignment(x.lhs(), rhs);
     }
 
-    sort_expression expand_numeric_types_down(const sort_expression& x)
+    assignment_list typecheck_assignment_list(const assignment_list& assignments, const detail::variable_context& variable_context)
     {
-      return data::normalize_sorts(ExpandNumTypesDown(x), get_sort_specification());
+      // check for name clashes
+      std::set<core::identifier_string> names;
+      for (const assignment& a: assignments)
+      {
+        const core::identifier_string& name = a.lhs().name();
+        if (names.find(name) != names.end())
+        {
+          throw mcrl2::runtime_error("duplicate variable names in assignments: " + data::pp(assignments) + ")");
+        }
+        names.insert(name);
+      }
+
+      // typecheck the assignments
+      assignment_vector result;
+      for (const assignment& a: assignments)
+      {
+        result.push_back(typecheck_assignment(a, variable_context));
+      }
+      return assignment_list(result.begin(), result.end());
     }
 
     const data_specification& typechecked_data_specification() const
     {
       return type_checked_data_spec;
-    }
-
-    void check_sort_is_declared(const sort_expression& x) const
-    {
-      sort_type_checker::check_sort_is_declared(x);
     }
 
     void print_context() const

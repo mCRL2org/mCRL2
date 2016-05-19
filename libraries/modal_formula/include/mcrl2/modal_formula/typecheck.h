@@ -28,7 +28,6 @@
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/state_variable_context.h"
-#include "mcrl2/modal_formula/detail/typecheck_assignments.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -360,18 +359,6 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
       m_state_variable_context(state_variable_context)
   {}
 
-  void check_sort_declared(const data::sort_expression& s, const state_formula& x)
-  {
-    try
-    {
-      m_data_type_checker.check_sort_is_declared(s);
-    }
-    catch (mcrl2::runtime_error& e)
-    {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error occurred while typechecking " + state_formulas::pp(x));
-    }
-  }
-
   state_formula apply(const data::data_expression& x)
   {
     return m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
@@ -468,12 +455,7 @@ struct typecheck_builder: public state_formula_builder<typecheck_builder>
   template <typename MuNuFormula>
   state_formula apply_mu_nu(const MuNuFormula& x, bool is_mu)
   {
-    for (const data::assignment& a: x.assignments())
-    {
-      check_sort_declared(a.lhs().sort(), x);
-    }
-
-    data::assignment_list new_assignments = detail::typecheck_assignments(x.assignments(), m_variable_context, m_data_type_checker);
+    data::assignment_list new_assignments = m_data_type_checker.typecheck_assignment_list(x.assignments(), m_variable_context);
 
     // add the assignment variables to the context
     auto m_variable_context_copy = m_variable_context;

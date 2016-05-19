@@ -1891,7 +1891,7 @@ sort_expression mcrl2::data::data_type_checker::ExpandNumTypesUp(sort_expression
 sort_expression mcrl2::data::data_type_checker::ExpandNumTypesDown(sort_expression Type)
 {
   // Expand Numeric types down
-  if (data::is_untyped_sort(data::sort_expression(Type)))
+  if (data::is_untyped_sort(Type))
   {
     return Type;
   }
