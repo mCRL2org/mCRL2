@@ -82,7 +82,6 @@ class action_rename_rule_rhs: public atermpp::aterm_appl
     action_rename_rule_rhs(const atermpp::aterm_appl& term)
       : atermpp::aterm_appl(term)
     {
-std::cout << "ACTIONRENAME " << term << std::endl;
       assert(core::detail::check_rule_ActionRenameRuleRHS(*this));
     }
 
