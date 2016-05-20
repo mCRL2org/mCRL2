@@ -61,7 +61,7 @@ void Solver::solve(QString specification, QString dataExpression)
       data_expression term =
           parse_data_expression(
             stdDataExpression.substr(dotpos+1, stdDataExpression.length()-1),
-            m_vars.begin(), m_vars.end(),
+            m_vars,
             m_data_spec
             );
 
