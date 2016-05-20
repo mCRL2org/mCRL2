@@ -158,7 +158,7 @@ void test_data_expression(const std::string& de_in,
   {
     if (expect_success)
     {
-      BOOST_CHECK_NO_THROW(data::type_check_data_expression(x, variable_context.begin(), variable_context.end()));
+      BOOST_CHECK_NO_THROW(x = data::type_check_data_expression(x, variable_context));
       BOOST_CHECK_NE(x, data::data_expression());
 
       std::string de_out = data::pp(x);
@@ -177,7 +177,7 @@ void test_data_expression(const std::string& de_in,
     }
     else
     {
-      BOOST_CHECK_THROW(data::type_check_data_expression(x), mcrl2::runtime_error);
+      BOOST_CHECK_THROW(x = data::type_check_data_expression(x), mcrl2::runtime_error);
     }
   }
 }

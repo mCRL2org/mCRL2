@@ -98,7 +98,7 @@ data::mutable_map_substitution<> parse_substitution(const std::string& text, con
       continue;
     }
     data::variable v = data::parse_variable(words[0]);
-    data::data_expression e = data::parse_data_expression(words[1], variables.begin(), variables.end());
+    data::data_expression e = data::parse_data_expression(words[1], variables);
     sigma[v] = e;
   }
   return sigma;

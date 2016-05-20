@@ -780,7 +780,7 @@ void parse_variables(const std::string& text,
                      const data_specification& data_spec = detail::default_specification())
 {
   variable_list v_list;
-  parse_variables(text,i,v_list.begin(),v_list.end(),data_spec);
+  parse_variables(text, i, v_list.begin(), v_list.end(), data_spec);
 }
 
 /// \brief Parses and type checks a data variable declaration.
@@ -844,11 +844,10 @@ variable parse_variable(std::istream& text,
 /// \param[in] last  The end of the potentially free variables in the expression.
 /// \param[in] data_spec The data specification that is used for type checking.
 
-template <typename Variable_iterator>
+template <typename VariableContainer>
 data_expression parse_data_expression(std::istream& in,
-                                      const Variable_iterator first,
-                                      const Variable_iterator last,
-                                      const data_specification& data_spec = detail::default_specification(),
+                                      const VariableContainer& variables,
+                                      const data_specification& dataspec = detail::default_specification(),
                                       bool type_check = true,
                                       bool translate_user_notation = true,
                                       bool normalize_sorts = true
@@ -858,7 +857,7 @@ data_expression parse_data_expression(std::istream& in,
   data_expression x = detail::parse_data_expression_new(text);
   if (type_check)
   {
-    data::type_check_data_expression(x, first, last, data_spec);
+    x = data::type_check_data_expression(x, variables, dataspec);
   }
   if (translate_user_notation)
   {
@@ -866,7 +865,7 @@ data_expression parse_data_expression(std::istream& in,
   }
   if (normalize_sorts)
   {
-    x = data::normalize_sorts(x, data_spec);
+    x = data::normalize_sorts(x, dataspec);
   }
   return x;
 }
@@ -879,10 +878,9 @@ data_expression parse_data_expression(std::istream& in,
 /// \param[in]  end   The end of the potentially free variables in the expression.
 /// \param[in] data_spec The data specification that is used for type checking.
 
-template <typename Variable_iterator>
+template <typename VariableContainer>
 data_expression parse_data_expression(const std::string& text,
-                                      const Variable_iterator begin,
-                                      const Variable_iterator end,
+                                      const VariableContainer& variables,
                                       const data_specification& data_spec = detail::default_specification(),
                                       bool type_check = true,
                                       bool translate_user_notation = true,
@@ -890,7 +888,7 @@ data_expression parse_data_expression(const std::string& text,
                                      )
 {
   std::istringstream spec_stream(text);
-  return parse_data_expression(spec_stream, begin, end, data_spec, type_check, translate_user_notation, normalize_sorts);
+  return parse_data_expression(spec_stream, variables, data_spec, type_check, translate_user_notation, normalize_sorts);
 }
 
 /// \brief Parses and type checks a data expression.
@@ -906,8 +904,7 @@ data_expression parse_data_expression(std::istream& text,
                                       bool normalize_sorts = true
                                      )
 {
-  variable_list v;
-  return parse_data_expression(text, v.begin(), v.end(), data_spec, type_check, translate_user_notation, normalize_sorts);
+  return parse_data_expression(text, variable_list(), data_spec, type_check, translate_user_notation, normalize_sorts);
 }
 
 /// \brief Parses and type checks a data expression.
@@ -923,31 +920,18 @@ data_expression parse_data_expression(const std::string& text,
                                       bool normalize_sorts = true
                                      )
 {
-  variable_list v;
-  return parse_data_expression(text, v.begin(), v.end(), data_spec, type_check, translate_user_notation, normalize_sorts);
+  return parse_data_expression(text, variable_list(), data_spec, type_check, translate_user_notation, normalize_sorts);
 }
 
-/// \brief Parses and type checks a data expression.
-/// \details
-///     See parsing a data expression from a string for details.
-/// \param[in] text The input text containing a data expression.
-/// \param[in] var_decl a list of variable declarations
-/// \param[in] data_spec The data specification that is used for type checking.
 inline
-data_expression parse_data_expression(const std::string& text,
-                                      const std::string& var_decl,
-                                      const data_specification& data_spec = detail::default_specification(),
-                                      bool type_check = true,
-                                      bool translate_user_notation = true,
-                                      bool normalize_sorts = true
-                                     )
+variable_list parse_variables(const std::string& text)
 {
-  std::vector<variable> v;
-  if (!var_decl.empty())
+  std::vector<variable> result;
+  if (!text.empty())
   {
-    parse_variables(var_decl,std::back_inserter(v),data_spec);
+    parse_variables(text, std::back_inserter(result));
   }
-  return parse_data_expression(text, v.begin(), v.end(), data_spec, type_check, translate_user_notation, normalize_sorts);
+  return variable_list(result.begin(), result.end());
 }
 
 /// \brief Parses and type checks a sort expression.
@@ -979,24 +963,6 @@ sort_expression parse_sort_expression(const std::string& text,
 {
   std::istringstream spec_stream(text);
   return parse_sort_expression(spec_stream, data_spec);
-}
-
-
-/// \brief Parses a single data expression.
-/// \param text A string
-/// \param var_decl A string
-/// with their types.<br>
-/// An example of this is:
-/// \code
-///   m, n: Nat;
-///   b: Bool;
-/// \endcode
-/// \param data_spec A string
-/// \return The parsed expression
-inline
-data_expression parse_data_expression(std::string text, std::string var_decl, std::string data_spec)
-{
-  return parse_data_expression(text,var_decl,data::parse_data_specification(data_spec));
 }
 
 // parse a string like 'tail: List(D) -> List(D)'

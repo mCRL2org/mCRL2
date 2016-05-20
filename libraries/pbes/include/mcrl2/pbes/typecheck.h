@@ -278,8 +278,7 @@ propositional_variable type_check_propositional_variable(const propositional_var
     std::vector<data::variable> typed_parameters;
     for (auto i = parameters.begin(); i != parameters.end(); ++i)
     {
-      data::variable d = *i;
-      data::type_check_data_expression(d, variables.begin(), variables.end(), dataspec);
+      data::variable d = atermpp::down_cast<data::variable>(data::type_check_data_expression(*i, variables, dataspec));
       typed_parameters.push_back(d);
     }
     return propositional_variable(x.name(), data::variable_list(typed_parameters.begin(), typed_parameters.end()));

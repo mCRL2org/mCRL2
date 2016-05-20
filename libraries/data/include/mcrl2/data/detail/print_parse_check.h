@@ -42,7 +42,7 @@ void print_parse_check(const data_expression& x, const data_specification& datas
 {
   std::string xtext = data::pp(x);
   std::set<variable> v = data::find_free_variables(x);
-  data_expression y = data::parse_data_expression(xtext, v.begin(), v.end(), dataspec);
+  data_expression y = data::parse_data_expression(xtext, v, dataspec);
   std::string ytext = data::pp(y);
   if (xtext != ytext)
   {

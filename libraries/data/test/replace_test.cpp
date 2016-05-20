@@ -218,7 +218,7 @@ std::vector<data::variable> variable_context()
 inline
 data::data_expression parse_expression(const std::string& text, const std::vector<data::variable>& variables = variable_context())
 {
-  return data::parse_data_expression(text, variables.begin(), variables.end());
+  return data::parse_data_expression(text, variables);
 }
 
 /// \brief Parses a string of the form "b: Bool := v, c: Bool := !w", and adds
@@ -235,7 +235,7 @@ data::mutable_map_substitution<> parse_substitution(const std::string& text, con
       continue;
     }
     data::variable v = data::parse_variable(words[0]);
-    data::data_expression e = data::parse_data_expression(words[1], variables.begin(), variables.end());
+    data::data_expression e = data::parse_data_expression(words[1], variables);
     sigma[v] = e;
   }
   return sigma;

@@ -120,7 +120,7 @@ void lpsinvelm(const std::string& input_filename,
     mCRL2log(log::verbose) << "parsing input file '" <<  invariant_filename << "'..." << std::endl;
 
     data::variable_list& parameters=spec.process().process_parameters();
-    invariant = data::parse_data_expression(instream, parameters.begin(), parameters.end(), spec.data());
+    invariant = data::parse_data_expression(instream, parameters, spec.data());
 
     instream.close();
   }

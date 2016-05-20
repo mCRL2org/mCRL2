@@ -116,7 +116,7 @@ void test_binding()
   variable_vector v;
   v.push_back(bool_("c"));
   v.push_back(bool_("d"));
-  data_expression x = parse_data_expression("exists b: Bool. if(c, c, b)", v.begin(), v.end());
+  data_expression x = parse_data_expression("exists b: Bool. if(c, c, b)", v);
   core::apply_builder<my_builder> f;
   f.apply(x);
   BOOST_CHECK(f.unbound.size() == 2);
@@ -127,7 +127,7 @@ void test_binding()
   bound_variables.insert(bool_("c"));
   data::data_expression y = make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(subst()).apply(x);
   data::data_expression z = make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(subst(), bound_variables).apply(x);
-  BOOST_CHECK(y == parse_data_expression("exists b: Bool. if(d, d, b)", v.begin(), v.end()));
+  BOOST_CHECK(y == parse_data_expression("exists b: Bool. if(d, d, b)", v));
   BOOST_CHECK(z == x);
 }
 

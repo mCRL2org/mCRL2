@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(bool_rewrite_test)
     data::variable_vector v;
     v.push_back(data::variable("b", bool_()));
     v.push_back(data::variable("c", bool_()));
-    data::data_expression e(parse_data_expression("b&&(b&&c)", v.begin(), v.end()));
+    data::data_expression e(parse_data_expression("b&&(b&&c)", v));
     data_rewrite_test(R, e, e);
   }
 
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(nat_rewrite_test)
 
     // Added a few additional checks (Wieger)
     data::rewriter datar(specification);
-    data::data_expression x = data::parse_data_expression("n >= 0", "n:Nat;");
+    data::data_expression x = data::parse_data_expression("n >= 0", parse_variables("n:Nat;"));
 
     BOOST_CHECK(datar(x) == sort_bool::true_());
     data_rewrite_test(R, greater_equal(variable("n", nat()), p0), sort_bool::true_());

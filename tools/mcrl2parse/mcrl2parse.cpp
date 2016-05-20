@@ -533,7 +533,7 @@ class mcrl2parse_tool : public input_tool
               std::string variable_text;
               separate_data_specification(text, "dataexpr", "variables", dataspec, text, variable_text);
               data::variable_vector v = parse_data_variables(variable_text, dataspec);
-              data::data_expression x = data::parse_data_expression(text, v.begin(), v.end(), dataspec);
+              data::data_expression x = data::parse_data_expression(text, v, dataspec);
               if (aterm_format)
               {
                 std::cout << x << std::endl;
@@ -705,7 +705,7 @@ class mcrl2parse_tool : public input_tool
               std::string variable_text;
               separate_data_specification(text, "dataexpr", "variables", dataspec, text, variable_text);
               data::variable_vector v = parse_data_variables(variable_text, dataspec);
-              data::data_expression x = data::parse_data_expression(text, v.begin(), v.end(), dataspec);
+              data::data_expression x = data::parse_data_expression(text, v, dataspec);
               std::cout << data::pp(x) << std::endl;
               break;
             }

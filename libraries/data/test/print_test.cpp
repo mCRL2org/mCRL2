@@ -537,7 +537,7 @@ BOOST_AUTO_TEST_CASE(test_precedence)
   data::variable a("a", sort_real::real_());
   data::variable b("b", sort_real::real_());
   std::vector<data::variable> variables = { a, b };
-  data::data_expression y = parse_data_expression("-(a + b)", variables.begin(), variables.end());
+  data::data_expression y = parse_data_expression("-(a + b)", variables);
   std::string py = data::pp(y);
   BOOST_CHECK(py == "-(a + b)");
 }

@@ -85,7 +85,7 @@ static data_expression parse_term(const string& term_string,
                                   const std::set < variable > &local_variables = std::set < variable >())
 {
   context_variables.insert(local_variables.begin(),local_variables.end());
-  return parse_data_expression(term_string,context_variables.begin(),context_variables.end(),spec);
+  return parse_data_expression(term_string, context_variables, spec);
 }
 
 static void declare_variables(

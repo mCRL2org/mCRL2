@@ -73,7 +73,8 @@ void enumerate(const std::string& dataspec_text,
 {
   data_specification dataspec = parse_data_specification(dataspec_text);
   variable_list variables = parse_variable_list(variable_text, dataspec);
-  data_expression expression = parse_data_expression(expression_text, free_variable_text, dataspec);
+  variable_list free_variables = parse_variable_list(free_variable_text, dataspec);
+  data_expression expression = parse_data_expression(expression_text, free_variables, dataspec);
   enumerate(dataspec, variables, expression, number_of_solutions, more_solutions_possible);
 }
 
@@ -364,7 +365,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
 
   data_expression result = data::sort_bool::true_();
   data::variable_list v = { data::variable("r", data::sort_real::real_()) };
-  data_expression phi = parse_data_expression("r == r", v.begin(), v.end());
+  data_expression phi = parse_data_expression("r == r", v);
   data::data_specification dataspec;
   dataspec.add_context_sort(data::sort_real::real_());
   data::rewriter R(dataspec);
@@ -405,7 +406,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_with_substitution)
   data::rewriter R(dataspec);
   data::variable_list v;
   v.push_front(data::variable("r", data::sort_real::real_()));
-  data_expression phi = parse_data_expression("r == r", v.begin(), v.end());
+  data_expression phi = parse_data_expression("r == r", v);
   data::mutable_indexed_substitution<> sigma;
   std::size_t max_count = 1000;
   bool throw_exceptions = true;

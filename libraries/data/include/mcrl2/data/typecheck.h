@@ -310,34 +310,22 @@ void type_check_sort_expression(const sort_expression& sort_expr, const data_spe
  *  \param[in] data_spec The data specification that is used for type checking.
  *  \post      data_expr is type checked.
  **/
-template <typename VariableIterator>
-void type_check_data_expression(data_expression& data_expr,
-                                const VariableIterator first,
-                                const VariableIterator last,
-                                const data_specification& data_spec = data_specification()
-                               )
+template <typename VariableContainer>
+data_expression type_check_data_expression(const data_expression& x,
+                                           const VariableContainer& variables,
+                                           const data_specification& dataspec = data_specification()
+                                          )
 {
-  data_expression t = data_expr;
-
-  std::map<core::identifier_string,sort_expression> variables;
-  for (VariableIterator v = first; v != last; ++v)
-  {
-    variables[v->name()]=v->sort();
-  }
-
-  // The typechecker replaces untyped identifiers by typed identifiers (when typechecking
-  // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
   try
   {
-    data_type_checker type_checker(data_spec);
+    data_type_checker typechecker(dataspec);
     detail::variable_context variable_context;
-    variable_context.add_context_variables(data::variable_list(first, last), type_checker);
-    data_expr = type_checker.typecheck_data_expression(data_expr, untyped_sort(), variable_context);
-    // data_expr = type_checker(data_expr, variables);
+    variable_context.add_context_variables(variables, typechecker);
+    return typechecker.typecheck_data_expression(x, untyped_sort(), variable_context);
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check data expression " + pp(t));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check data expression " + data::pp(x));
   }
 }
 
@@ -348,10 +336,9 @@ void type_check_data_expression(data_expression& data_expr,
  *  \post      data_expr is type checked.
  **/
 inline
-void type_check_data_expression(data_expression& data_expr, const data_specification& data_spec = data_specification())
+data_expression type_check_data_expression(const data_expression& x, const data_specification& dataspec = data_specification())
 {
-  variable_list v;
-  return type_check_data_expression(data_expr, v.begin(), v.end(), data_spec);
+  return type_check_data_expression(x, variable_list(), dataspec);
 }
 
 /** \brief     Type check a parsed mCRL2 data specification.

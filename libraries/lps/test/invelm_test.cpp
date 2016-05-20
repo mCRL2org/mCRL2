@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_invariant)
 
   std::string INVARIANT = "!(b1 && b2)";
 
-  data::data_expression invariant = data::parse_data_expression(INVARIANT, "b1, b2: Bool;");
+  data::data_expression invariant = data::parse_data_expression(INVARIANT, data::parse_variables("b1, b2: Bool;"));
   lps::specification spec = lps::parse_linear_process_specification(SPEC);
   bool simplify_all;
   bool no_elimination;

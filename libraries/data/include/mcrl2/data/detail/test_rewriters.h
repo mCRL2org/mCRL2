@@ -211,7 +211,7 @@ class parser
 
     data_expression operator()(const std::string& expr)
     {
-      return parse_data_expression(expr, m_var_decl, m_data_spec);
+      return parse_data_expression(expr, parse_variables(m_var_decl), parse_data_specification(m_data_spec));
     }
 };
 

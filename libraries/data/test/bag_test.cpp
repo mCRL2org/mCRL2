@@ -26,7 +26,7 @@ template <typename Predicate, typename NegativePredicate>
 void test_data_expression(const std::string& s, variable_vector v, Predicate p, NegativePredicate q)
 {
   std::cerr << "testing data expression " << s << std::endl;
-  data_expression e = parse_data_expression(s, v.begin(), v.end());
+  data_expression e = parse_data_expression(s, v);
   std::cerr << "parsed expression " << e << "\n";
   BOOST_CHECK(p(e));
   BOOST_CHECK(!q(e));
@@ -68,13 +68,13 @@ void bag_expression_test()
 
   test_data_expression("b <= {20:2} + Set2Bag({20,30,40})", v, is_less_equal_application<data_expression>, sort_bag::is_constructor_application);
 
-  data_expression e = parse_data_expression("{20:1}", v.begin(), v.end());
+  data_expression e = parse_data_expression("{20:1}", v);
   BOOST_CHECK(sort_fbag::is_cons_application(normaliser(e)));
 
-  e = parse_data_expression("{20:4, 30:3, 40:2}", v.begin(), v.end());
+  e = parse_data_expression("{20:4, 30:3, 40:2}", v);
   BOOST_CHECK(sort_fbag::is_cons_application(normaliser(e)));
 
-  e = parse_data_expression("{10:count(20,b)}", v.begin(), v.end());
+  e = parse_data_expression("{10:count(20,b)}", v);
   BOOST_CHECK(sort_fbag::is_cinsert_application(normaliser(e)));
 }
 

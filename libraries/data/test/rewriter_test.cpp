@@ -101,13 +101,13 @@ void test2()
   data_expression d2 = parse_data_expression("4+5");
   BOOST_CHECK(r(d1) == r(d2));
 
-  std::string var_decl = "m, n: Pos;\n";
+  data::variable_list variables = parse_variables("m, n: Pos;");
   data::rewriter::substitution_type sigma;
-  sigma[atermpp::down_cast<variable>(parse_data_expression("m", var_decl))] = r(parse_data_expression("3"));
-  sigma[atermpp::down_cast<variable>(parse_data_expression("n", var_decl))] = r(parse_data_expression("4"));
+  sigma[atermpp::down_cast<variable>(parse_data_expression("m", variables))] = r(parse_data_expression("3"));
+  sigma[atermpp::down_cast<variable>(parse_data_expression("n", variables))] = r(parse_data_expression("4"));
 
   // Rewrite two data expressions, and check if they are the same
-  d1 = parse_data_expression("m+n", var_decl);
+  d1 = parse_data_expression("m+n", variables);
   d2 = parse_data_expression("7");
   BOOST_CHECK(r(d1, sigma) == r(d2));
 }
@@ -117,8 +117,8 @@ void test_expressions(Rewriter R, std::string const& expr1, std::string const& e
 {
   data::rewriter::substitution_type sigma;
   data::detail::parse_substitution(substitution_text, sigma, data_spec);
-  data_expression d1 = parse_data_expression(expr1, declarations, data_spec);
-  data_expression d2 = parse_data_expression(expr2, declarations, data_spec);
+  data_expression d1 = parse_data_expression(expr1, parse_variables(declarations), data_spec);
+  data_expression d2 = parse_data_expression(expr2, parse_variables(declarations), data_spec);
   if (R(d1, sigma) != R(d2))
   {
     BOOST_CHECK(R(d1, sigma) == R(d2));
