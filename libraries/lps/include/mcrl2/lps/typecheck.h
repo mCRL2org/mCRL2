@@ -12,9 +12,9 @@
 #ifndef MCRL2_LPS_TYPECHECK_H
 #define MCRL2_LPS_TYPECHECK_H
 
-#include "mcrl2/process/typecheck.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/action_rename.h"
+#include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/untyped_multi_action.h"
 
 namespace mcrl2
@@ -70,6 +70,7 @@ class multi_action_type_checker
     }
 };
 
+#ifndef MCRL2_NEW_ACTION_RENAME_TYPE_CHECKER
 class action_rename_type_checker:public data::data_type_checker
 {
   protected:
@@ -97,6 +98,73 @@ class action_rename_type_checker:public data::data_type_checker
     process::action RewrAct(const std::map<core::identifier_string,data::sort_expression>& Vars, const data::untyped_data_parameter& ma);
 };
 
+#else // MCRL2_NEW_ACTION_RENAME_TYPE_CHECKER
+
+class action_rename_type_checker
+{
+  protected:
+    data::data_type_checker m_data_type_checker;
+    data::detail::variable_context m_variable_context; // N.B. always empty for action rename specifications
+    process::detail::action_context m_action_context;
+
+  public:
+    /** \brief Constructs an action type checker.
+    *  \param[in] dataspec A data specification that does not need to have been type checked.
+    *  \param[in] action_labels A container of action declarations
+    *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+    **/
+    template <typename ActionLabelContainer>
+    action_rename_type_checker(const data::data_specification& dataspec, const ActionLabelContainer& action_labels)
+      : m_data_type_checker(dataspec)
+    {
+      m_action_context.add_context_action_labels(action_labels, m_data_type_checker);
+    }
+
+    action_rename_rule typecheck_action_rename_rule(const action_rename_rule& x,
+                                                    const data::data_specification& dataspec,
+                                                    const process::action_label_list& action_labels
+                                                   )
+    {
+      // TODO: use x.lhs() and x.rhs() when their types have been fixed in action_rename_rule
+      data::data_expression condition = m_data_type_checker.typecheck_data_expression(x.condition(), data::sort_bool::bool_(), m_variable_context);
+      process::action lhs; // = x.lhs()
+      lhs = process::typecheck_action(lhs.label().name(), lhs.arguments(), m_data_type_checker, m_variable_context, m_action_context);
+      process::process_expression rhs; // = x.rhs()
+      rhs = process::type_check_process_expression(rhs, x.variables(), dataspec, action_labels, process::process_identifier_list());
+      return action_rename_rule(x.variables(), condition, lhs, rhs);
+    }
+
+    /** \brief    Type check an action_rename_specification;
+    *  \param[in] arspec An action rename specification that has not been type checked.
+    *  \return    a action rename specification where all untyped identifiers have been replace by typed ones.
+    **/
+    action_rename_specification operator()(const action_rename_specification& arspec)
+    {
+      mCRL2log(log::verbose) << "type checking action rename specification..." << std::endl;
+
+      m_data_type_checker = data::data_type_checker(arspec.data());
+
+      process::action_label_list action_labels = arspec.action_labels();
+
+      // TODO: uncomment this line when normalize_sorts becomes available
+      // lps::normalize_sorts(arspec, m_data_type_checker.typechecked_data_specification());
+
+      m_action_context.clear();
+      m_action_context.add_context_action_labels(arspec.action_labels(), m_data_type_checker);
+
+      // typecheck the action rename rules
+      std::vector<action_rename_rule> rules = arspec.rules();
+      for (action_rename_rule& rule: rules)
+      {
+        rule = typecheck_action_rename_rule(rule, m_data_type_checker.typechecked_data_specification(), action_labels);
+      }
+
+      mCRL2log(log::debug) << "type checking action rename specification finished" << std::endl;
+      return action_rename_specification(m_data_type_checker.typechecked_data_specification(), action_labels, rules);
+    }
+};
+
+#endif // MCRL2_NEW_ACTION_RENAME_TYPE_CHECKER
 
 /** \brief     Type check a multi action
  *  Throws an exception if something went wrong.
