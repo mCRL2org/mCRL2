@@ -53,48 +53,6 @@ namespace mcrl2
 namespace lps
 {
 
-
-/// \brief Right hand side of an action rename rule
-class action_rename_rule_rhs: public atermpp::aterm_appl
-{
-  public:
-    /// \brief Default constructor.
-    action_rename_rule_rhs()
-      : atermpp::aterm_appl(core::detail::default_values::ActionRenameRuleRHS)
-    {}
-
-    /// \brief Returns true if the right hand side is equal to delta.
-    /// \return True if the right hand side is equal to delta.
-    bool is_delta() const
-    {
-      return function() == core::detail::function_symbols::Delta;
-    }
-
-    /// \brief Returns true if the right hand side is equal to tau.
-    /// \return True if the right hand side is equal to tau.
-    bool is_tau() const
-    {
-      return function() == core::detail::function_symbols::Tau;
-    }
-
-    /// \brief Constructor.
-    /// \param term A term
-    action_rename_rule_rhs(const atermpp::aterm_appl& term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_rule_ActionRenameRuleRHS(*this));
-    }
-
-    /// \brief Returns the action.
-    /// \pre The right hand side must be an action
-    /// \return The action.
-    const process::action &act() const
-    {
-      assert(!is_tau() && !is_delta());
-      return atermpp::deprecated_cast<process::action>(*this);
-    }
-};
-
 //                ::= ActionRenameRule(<DataVarId>*, <DataExprOrNil>,
 //                      <ParamIdOrAction>, <ActionRenameRuleRHS>)
 
@@ -109,10 +67,15 @@ class action_rename_rule
     data::data_expression    m_condition;
 
     /// \brief The left hand side of the rule
-    atermpp::aterm_appl      m_lhs;
+     process::action         m_lhs;
 
-    /// \brief right hand side of the rule
-    action_rename_rule_rhs   m_rhs;
+    /// \brief right hand side of the rule. Can only be an action, tau or delta.
+    process::process_expression   m_rhs;
+
+    bool check_that_rhs_is_tau_delta_or_an_action() const
+    {
+      return is_delta(m_rhs) || is_tau(m_rhs) || process::is_action(m_rhs);
+    }
 
   public:
     /// \brief Constructor.
@@ -121,36 +84,39 @@ class action_rename_rule
 
     /// \brief Constructor.
     /// \param t A term
-    action_rename_rule(const atermpp::aterm_appl &t)
+    action_rename_rule(const atermpp::aterm_appl& t)
     {
       assert(core::detail::check_rule_ActionRenameRule(t));
       atermpp::aterm_appl::iterator i = t.begin();
       m_variables       = data::variable_list(*i++);
       m_condition       = data::data_expression(*i++);
-      m_lhs             = atermpp::aterm_appl(*i++);
-      m_rhs             = atermpp::aterm_appl(*i);
+      m_lhs             = process::action(*i++);
+      m_rhs             = process::process_expression(*i);
+      assert(check_that_rhs_is_tau_delta_or_an_action());
     }
 
     /// \brief Constructor.
     /// \param t1 A term
-    explicit action_rename_rule(const atermpp::aterm &t1)
+    explicit action_rename_rule(const atermpp::aterm& t1)
     {
       const atermpp::aterm_appl t(t1);
       assert(core::detail::check_rule_ActionRenameRule(t));
       atermpp::aterm_appl::iterator i = t.begin();
       m_variables       = data::variable_list(*i++);
       m_condition       = data::data_expression(*i++);
-      m_lhs             = atermpp::aterm_appl(*i++);
-      m_rhs             = atermpp::aterm_appl(*i);
+      m_lhs             = process::action(*i++);
+      m_rhs             = process::process_expression(*i);
+      assert(check_that_rhs_is_tau_delta_or_an_action());
     }
 
     /// \brief Constructor.
     action_rename_rule(const data::variable_list&   variables,
                        const data::data_expression& condition,
                        const process::action&       lhs,
-                       const action_rename_rule_rhs& rhs)
+                       const process::process_expression& rhs)
       : m_variables(variables), m_condition(condition), m_lhs(lhs), m_rhs(rhs)
     {
+      assert(check_that_rhs_is_tau_delta_or_an_action());
     }
 
     /// \brief Returns the variables of the rule.
@@ -183,26 +149,18 @@ class action_rename_rule
 
     /// \brief Returns the left hand side of the rule.
     /// \return The left hand side of the rule.
-    atermpp::aterm_appl lhs() const // Type should be action, but as it can be a ParamId(identifier_string,data_expression_list),
+    const process::action& lhs() const // Type should be action, but as it can be a ParamId(identifier_string,data_expression_list),
                                     // which is not accepted by the typechecker, this is a temporary fix, until this option
                                     // is added to an action.
     {
       return m_lhs;
     }
 
-    /// \brief Returns the left hand side of the rule as an aterm_appl.
-    /// Needed because it can contain a ParamId instead of an action.
-    /// This is dictated by the type checker.
-    /// \return The left hand side of the rule.
-    atermpp::aterm_appl lhs_aterm() const
-    {
-      return m_lhs;
-    }
-
     /// \brief Returns the right hand side of the rule.
     /// \return The right hand side of the rule.
-    action_rename_rule_rhs rhs() const
+    const process::process_expression& rhs() const
     {
+      assert(check_that_rhs_is_tau_delta_or_an_action());
       return m_rhs;
     }
 };
@@ -252,7 +210,7 @@ class action_rename_specification
     action_rename_specification(
       const data::data_specification& data,
       const process::action_label_list action_labels,
-      const std::vector <action_rename_rule> &rules)
+      const std::vector <action_rename_rule>& rules)
       :
       m_data(data),
       m_action_labels(action_labels),
@@ -310,7 +268,7 @@ class action_rename_specification
 inline
 atermpp::aterm_appl action_rename_rule_to_aterm(const action_rename_rule& rule)
 {
-  return atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), rule.variables(), rule.condition(), rule.lhs_aterm(), rule.rhs());
+  return atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), rule.variables(), rule.condition(), rule.lhs(), rule.rhs());
 }
 
 inline
@@ -369,31 +327,49 @@ void rename_renamerule_variables(data::data_expression& rcond, process::action& 
   rright = process::replace_variables_capture_avoiding(rright, renamings, renamings_variables);
 }
 
-inline
-process::action translate_user_notation_and_normalise_sorts_action(
-  const process::action &a,
-  data::data_specification& data_spec)
-{
-  return process::normalize_sorts(process::translate_user_notation(a), static_cast<const data::sort_specification&>(data_spec));
-}
+/* ------------------------------------------ Normalise sorts ------------------------------------------ */
 
 inline
-action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(
-  const action_rename_rule_rhs& arr,
-  data::data_specification& data_spec)
+void normalize_sorts(action_rename_specification& arspec, const data::data_specification& dataspec_not_used)
 {
-  if (arr.is_delta() || arr.is_tau())
+  data::data_specification data_spec=arspec.data();
+  arspec.action_labels()=process::normalize_sorts(arspec.action_labels(),data_spec);
+
+  for (action_rename_rule& rule: arspec.rules()) 
   {
-    return arr;
+    rule = action_rename_rule(data::normalize_sorts(rule.variables(),data_spec),
+                              data::normalize_sorts(rule.condition(),data_spec),
+                              process::normalize_sorts(rule.lhs(), data_spec),
+                              process::normalize_sorts(rule.rhs(),data_spec));
   }
-
-  return translate_user_notation_and_normalise_sorts_action(arr.act(),data_spec);
 }
 
 
+/* ------------------------------------------ Translate user notation ------------------------------------------ */
+
+inline
+void translate_user_notation(action_rename_specification& arspec)
+{
+  for (action_rename_rule& rule: arspec.rules())
+  {
+    rule = action_rename_rule(rule.variables(),
+                              data::translate_user_notation(rule.condition()),
+                              process::translate_user_notation(rule.lhs()),
+                              process::translate_user_notation(rule.rhs()));
+  }
+}
+
+
+/* ------------------------------- Old code: combination of translate user notation and normalize sort -------------------------------- */
 inline
 action_rename_specification translate_user_notation_and_normalise_sorts_action_rename_spec(const action_rename_specification& ars)
 {
+  action_rename_specification ars_working_copy=ars;
+  translate_user_notation(ars_working_copy);
+  normalize_sorts(ars_working_copy, ars_working_copy.data());
+  return ars_working_copy;
+
+  /* old code.
   data::data_specification data_spec=ars.data();
   const process::action_label_list al=process::normalize_sorts(ars.action_labels(),data_spec);
 
@@ -407,7 +383,7 @@ action_rename_specification translate_user_notation_and_normalise_sorts_action_r
                             translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(i->rhs(),data_spec));
   }
 
-  return action_rename_specification(data_spec,al,l);
+  return action_rename_specification(data_spec,al,l); */
 }
 
 
@@ -452,16 +428,16 @@ lps::specification action_rename(
     action_summand_vector lps_new_action_summands;
 
     data_expression rule_condition = i->condition();
-    process::action rule_old_action = atermpp::down_cast<process::action>(i->lhs());
+    process::action rule_old_action = i->lhs();
     process::action rule_new_action;
-    action_rename_rule_rhs new_element = i->rhs();
-    if (!new_element.is_tau() && !new_element.is_delta())
+    process::process_expression new_element = i->rhs();
+    if (!is_tau(new_element) && !is_delta(new_element))
     {
-      rule_new_action =  new_element.act();
+      rule_new_action =  atermpp::down_cast<process::action>(new_element);
     }
 
-    const bool to_tau = new_element.is_tau();
-    const bool to_delta = new_element.is_delta();
+    const bool to_tau = is_tau(new_element);
+    const bool to_delta = is_delta(new_element);
 
     // Check here that the arguments of the rule_old_action only consist
     // of uniquely occurring variables or closed terms. Furthermore, check that the variables

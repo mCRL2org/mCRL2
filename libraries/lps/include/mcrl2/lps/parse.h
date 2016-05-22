@@ -76,11 +76,11 @@ struct action_rename_actions: public process::detail::action_actions
     : process::detail::action_actions(parser_)
   {}
 
-  lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node) const
+  process::process_expression parse_ActionRenameRuleRHS(const core::parse_node& node) const
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return action_rename_rule_rhs(parse_Action(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Delta())); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return process::process_expression(parse_Action(node.child(0))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return process::process_expression(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return process::process_expression(atermpp::aterm_appl(core::detail::function_symbol_Delta())); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 

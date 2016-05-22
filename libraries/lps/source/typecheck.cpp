@@ -265,7 +265,7 @@ action_rename_specification mcrl2::lps::action_rename_type_checker::operator()(c
     if (!VarsUnique(VarList))
     {
       throw mcrl2::runtime_error("the variables " + pp(VarList) + " in action rename rule " + pp(Rule.condition()) + " -> " +
-                               data::pp(Rule.lhs()) + " => " + (Rule.rhs().is_tau()?"tau":(Rule.rhs().is_delta()?"delta":pp(Rule.rhs().act()))) + " are not unique");
+                               data::pp(Rule.lhs()) + " => " + (is_tau(Rule.rhs())?"tau":(is_delta(Rule.rhs())?"delta":pp(Rule.rhs()))) + " are not unique");
     }
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;
@@ -283,10 +283,10 @@ action_rename_specification mcrl2::lps::action_rename_type_checker::operator()(c
     data_expression Cond=Rule.condition();
     TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Cond,sort_bool::bool_());
 
-    action_rename_rule_rhs Right=Rule.rhs();
-    if (!Right.is_delta() && !Right.is_tau())
+    process::process_expression Right=Rule.rhs();
+    if (!is_delta(Right) && !is_tau(Right))
     {
-      Right = TraverseAct(DeclaredVars, atermpp::deprecated_cast<data::untyped_data_parameter>(Right.act()));
+      Right = TraverseAct(DeclaredVars, atermpp::deprecated_cast<data::untyped_data_parameter>(Right));
     }
 
     new_rules.push_back(action_rename_rule(VarList,Cond,new_action_at_the_left,Right));
