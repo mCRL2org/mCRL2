@@ -43,14 +43,6 @@ class data_type_checker: public sort_type_checker
 
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-     *  \param[in] d A data expression that has not been type checked.
-     *  \param[in] Vars a mapping of variable names to their types.
-     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
-     **/
-    data_expression operator()(const data_expression& d,const std::map<core::identifier_string,sort_expression>& Vars);
-
-    /** \brief     Type check a data expression.
-     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
      *  \param[in] l A list of variables that has not been type checked.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
@@ -63,6 +55,14 @@ class data_type_checker: public sort_type_checker
     const data_specification operator()();
 
   protected:
+    /** \brief     Type check a data expression.
+     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+     *  \param[in] d A data expression that has not been type checked.
+     *  \param[in] Vars a mapping of variable names to their types.
+     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+     **/
+    data_expression operator()(const data_expression& d,const std::map<core::identifier_string,sort_expression>& Vars);
+
     void read_sort(const sort_expression& SortExpr);
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors);
     void add_function(const data::function_symbol& f, const std::string msg, bool allow_double_decls=false);
