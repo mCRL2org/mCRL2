@@ -7,7 +7,6 @@ add_mcrl2_library(lps
     lpsparunfoldlib.cpp
     next_state_generator.cpp
     simulation.cpp
-    typecheck.cpp
   DEPENDS
     mcrl2_core
     mcrl2_data

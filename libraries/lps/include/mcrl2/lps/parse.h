@@ -76,11 +76,18 @@ struct action_rename_actions: public process::detail::action_actions
     : process::detail::action_actions(parser_)
   {}
 
+  // create an action with an incomplete action label
+  process::action parse_Action_as_action(const core::parse_node& node) const
+  {
+    process::action_label label(parse_Id(node.child(0)), {});
+    return process::action(label, parse_DataExprList(node.child(1)));
+  }
+
   process::process_expression parse_ActionRenameRuleRHS(const core::parse_node& node) const
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return process::process_expression(parse_Action(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return process::process_expression(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return process::process_expression(atermpp::aterm_appl(core::detail::function_symbol_Delta())); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action_as_action(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return process::tau(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return process::delta(); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
@@ -91,7 +98,7 @@ struct action_rename_actions: public process::detail::action_actions
     {
       condition = parse_DataExpr(node.child(0).child(0).child(0));
     }
-    return action_rename_rule(atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
+    return action_rename_rule(data::variable_list(), condition, parse_Action_as_action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3)));
   }
 
   std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node) const
@@ -170,8 +177,8 @@ void complete_action_rename_specification(action_rename_specification& x, const 
   using namespace mcrl2::data;
   x = lps::type_check_action_rename_specification(x, spec);
   x.data().declare_data_specification_to_be_type_checked();
-  x = action_rename_specification(x.data()+spec.data(),x.action_labels(),x.rules());
-  x = detail::translate_user_notation_and_normalise_sorts_action_rename_spec(x);
+  x = action_rename_specification(x.data() + spec.data(), x.action_labels(), x.rules());
+  detail::translate_user_notation(x);
 }
 
 } // namespace detail

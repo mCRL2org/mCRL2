@@ -67,7 +67,7 @@ class action_rename_rule
     data::data_expression    m_condition;
 
     /// \brief The left hand side of the rule
-     process::action         m_lhs;
+    process::action         m_lhs;
 
     /// \brief right hand side of the rule. Can only be an action, tau or delta.
     process::process_expression   m_rhs;
@@ -330,17 +330,16 @@ void rename_renamerule_variables(data::data_expression& rcond, process::action& 
 /* ------------------------------------------ Normalise sorts ------------------------------------------ */
 
 inline
-void normalize_sorts(action_rename_specification& arspec, const data::data_specification& dataspec_not_used)
+void normalize_sorts(action_rename_specification& arspec)
 {
-  data::data_specification data_spec=arspec.data();
-  arspec.action_labels()=process::normalize_sorts(arspec.action_labels(),data_spec);
+  arspec.action_labels()=process::normalize_sorts(arspec.action_labels(), arspec.data());
 
-  for (action_rename_rule& rule: arspec.rules()) 
+  for (action_rename_rule& rule: arspec.rules())
   {
-    rule = action_rename_rule(data::normalize_sorts(rule.variables(),data_spec),
-                              data::normalize_sorts(rule.condition(),data_spec),
-                              process::normalize_sorts(rule.lhs(), data_spec),
-                              process::normalize_sorts(rule.rhs(),data_spec));
+    rule = action_rename_rule(data::normalize_sorts(rule.variables(), arspec.data()),
+                              data::normalize_sorts(rule.condition(), arspec.data()),
+                              process::normalize_sorts(rule.lhs(), arspec.data()),
+                              process::normalize_sorts(rule.rhs(), arspec.data()));
   }
 }
 
@@ -358,34 +357,6 @@ void translate_user_notation(action_rename_specification& arspec)
                               process::translate_user_notation(rule.rhs()));
   }
 }
-
-
-/* ------------------------------- Old code: combination of translate user notation and normalize sort -------------------------------- */
-inline
-action_rename_specification translate_user_notation_and_normalise_sorts_action_rename_spec(const action_rename_specification& ars)
-{
-  action_rename_specification ars_working_copy=ars;
-  translate_user_notation(ars_working_copy);
-  normalize_sorts(ars_working_copy, ars_working_copy.data());
-  return ars_working_copy;
-
-  /* old code.
-  data::data_specification data_spec=ars.data();
-  const process::action_label_list al=process::normalize_sorts(ars.action_labels(),data_spec);
-
-  std::vector<action_rename_rule> l(ars.rules());
-  for (std::vector<action_rename_rule>::iterator i=l.begin();
-       i!=l.end(); ++i)
-  {
-    *i = action_rename_rule(data::normalize_sorts(i->variables(),data_spec),
-                            data::normalize_sorts(data::translate_user_notation(i->condition()),data_spec),
-                            translate_user_notation_and_normalise_sorts_action(atermpp::down_cast<const process::action>(i->lhs()), data_spec),
-                            translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(i->rhs(),data_spec));
-  }
-
-  return action_rename_specification(data_spec,al,l); */
-}
-
 
 } // namespace detail
 /// \endcond

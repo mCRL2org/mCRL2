@@ -625,7 +625,7 @@ void type_check_process_specification(process_specification& proc_spec)
 }
 
 template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
-process_expression type_check_process_expression(process_expression& x,
+process_expression type_check_process_expression(const process_expression& x,
                                                  const VariableContainer& variables = VariableContainer(),
                                                  const data::data_specification& dataspec = data::data_specification(),
                                                  const ActionLabelContainer& action_labels = ActionLabelContainer(),

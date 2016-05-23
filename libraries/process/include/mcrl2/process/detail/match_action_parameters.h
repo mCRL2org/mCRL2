@@ -65,7 +65,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
   }
   if (matches.empty())
   {
-    throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + "with type " + data::pp(data::detail::parameter_sorts(parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
+    throw mcrl2::runtime_error("no " + msg + " " + core::pp(name) + " with type " + data::pp(data::detail::parameter_sorts(parameters)) + " is declared (while typechecking " + core::pp(name) + "(" + data::pp(parameters) + "))");
   }
   if (matches.size() > 1)
   {
