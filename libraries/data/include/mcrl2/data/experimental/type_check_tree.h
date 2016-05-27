@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/type_check_tree.h
+/// \file mcrl2/data/experimental/type_check_tree.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_TYPE_CHECK_TREE_H
-#define MCRL2_DATA_TYPE_CHECK_TREE_H
+#ifndef MCRL2_DATA_EXPERIMENTAL_TYPE_CHECK_TREE_H
+#define MCRL2_DATA_EXPERIMENTAL_TYPE_CHECK_TREE_H
 
 #include <iostream>
 #include <memory>
@@ -18,33 +18,30 @@
 #include "mcrl2/data/type_checker.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/untyped_sort_variable.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 
 namespace data {
 
-// Represents an arbitrary sort
 inline
-const basic_sort& any_sort()
+bool is_bool(const sort_expression& x)
 {
-  static const basic_sort t("@any_sort");
-  return t;
+  return sort_bool::is_bool(x);
 }
 
 template <typename Container>
-std::string print_node_vector(const std::string& name, const Container& nodes)
+std::string print_node_vector(const std::string& name, const Container& nodes, const std::string& sep = ", ", const std::string& first = "", const std::string& last = "")
 {
-  std::ostringstream out;
-  out << name << "(";
+  std::vector<std::string> s;
   for (auto i = nodes.begin(); i != nodes.end(); ++i)
   {
-    if (i != nodes.begin())
-    {
-      out << ", ";
-    }
-    out << (*i)->print();
+    s.push_back((*i)->print());
   }
-  out << ")";
+  std::ostringstream out;
+  out << name << "(" << first;
+  out << utilities::string_join(s, sep);
+  out << last << ")";
   return out.str();
 }
 
@@ -176,6 +173,12 @@ struct no_constraint: public type_check_constraint
   }
 };
 
+inline
+constraint_ptr make_no_constraint()
+{
+  return constraint_ptr(new no_constraint());
+}
+
 // The sort of the corresponding data expression should be equal to 'sort'.
 struct is_sort_constraint: public type_check_constraint
 {
@@ -195,6 +198,12 @@ struct is_sort_constraint: public type_check_constraint
 inline
 constraint_ptr make_is_sort_constraint(const sort_expression& s1, const sort_expression& s2)
 {
+  // optimizations
+  if (is_untyped_sort(s1) || is_untyped_sort(s2))
+  {
+    return make_no_constraint();
+  }
+
   return constraint_ptr(new is_sort_constraint(s1, s2));
 }
 
@@ -217,6 +226,20 @@ struct subsort_constraint: public type_check_constraint
 inline
 constraint_ptr make_subsort_constraint(const sort_expression& s1, const sort_expression& s2)
 {
+  // optimizations
+  if (is_bool(s1))
+  {
+    return make_is_sort_constraint(s2, data::sort_bool::bool_());
+  }
+  if (is_bool(s2))
+  {
+    return make_is_sort_constraint(s1, data::sort_bool::bool_());
+  }
+  if (is_untyped_sort(s1) || is_untyped_sort(s2))
+  {
+    return make_no_constraint();
+  }
+
   return constraint_ptr(new subsort_constraint(s1, s2));
 }
 
@@ -230,7 +253,7 @@ struct or_constraint: public type_check_constraint
 
   std::string print() const
   {
-    return print_node_vector("or", alternatives);
+    return print_node_vector("or", alternatives, "\n  ", "\n  ", "\n  ");
   }
 };
 
@@ -329,11 +352,11 @@ struct type_check_node
   sort_expression sort;
 
   type_check_node()
-    : constraint(constraint_ptr(new no_constraint())), sort(undefined_sort_expression())
+    : constraint(constraint_ptr(new no_constraint())), sort(untyped_sort())
   {}
 
   type_check_node(const std::vector<type_check_node_ptr>& children_)
-    : children(children_), constraint(constraint_ptr(new no_constraint())), sort(undefined_sort_expression())
+    : children(children_), constraint(constraint_ptr(new no_constraint())), sort(untyped_sort())
   {}
 
   // Adds a value to the 'sort' attribute
@@ -383,21 +406,21 @@ struct id_node: public type_check_node
     std::vector<sort_expression> variable_sorts = context.find_matching_variables(value);
     if (variable_sorts.size() == 1)
     {
-      alternatives.push_back(constraint_ptr(new is_sort_constraint(sort, variable_sorts.front())));
+      alternatives.push_back(make_is_sort_constraint(sort, variable_sorts.front()));
     }
 
     // it is a constant
     std::pair<sort_expression_list, sort_expression_list> p = context.find_matching_constants(value);
     for (const sort_expression& s: p.first + p.second)
     {
-      alternatives.push_back(constraint_ptr(new is_sort_constraint(sort, s)));
+      alternatives.push_back(make_is_sort_constraint(sort, s));
     }
 
     // it is a function
     std::pair<function_sort_list, function_sort_list> q = context.find_matching_functions(value);
     for (const function_sort& s: q.first + q.second)
     {
-      alternatives.push_back(constraint_ptr(new is_sort_constraint(sort, s)));
+      alternatives.push_back(make_is_sort_constraint(sort, s));
     }
 
     if (alternatives.empty())
@@ -498,7 +521,7 @@ struct empty_list_node: public constant_node
   {
     untyped_sort_variable element_sort = context.create_sort_variable();
     sort = sort_list::list(element_sort);
-    constraint = make_subsort_constraint(any_sort(), element_sort);
+    constraint = make_subsort_constraint(untyped_sort(), element_sort);
   }
 };
 
@@ -512,7 +535,7 @@ struct empty_set_node: public constant_node
   {
     untyped_sort_variable element_sort = context.create_sort_variable();
     sort = sort_set::set_(element_sort);
-    constraint = make_subsort_constraint(any_sort(), element_sort);
+    constraint = make_subsort_constraint(untyped_sort(), element_sort);
   }
 };
 
@@ -526,7 +549,7 @@ struct empty_bag_node: public constant_node
   {
     untyped_sort_variable element_sort = context.create_sort_variable();
     sort = sort_bag::bag(element_sort);
-    constraint = make_subsort_constraint(any_sort(), element_sort);
+    constraint = make_subsort_constraint(untyped_sort(), element_sort);
   }
 };
 
@@ -629,11 +652,11 @@ struct bag_or_set_enumeration_node: public type_check_node
     sort = context.create_sort_variable();
     auto element_sort = v.sort();
     constraint_ptr set_constraint = make_and_constraint({
-      constraint_ptr(new is_sort_constraint(sort, sort_set::set_(element_sort))),
-      constraint_ptr(new is_sort_constraint(children.front()->sort, sort_bool::bool_()))
+      make_is_sort_constraint(sort, sort_set::set_(element_sort)),
+      make_is_sort_constraint(children.front()->sort, sort_bool::bool_())
     });
     constraint_ptr bag_constraint = make_and_constraint({
-        constraint_ptr(new is_sort_constraint(sort, sort_bag::bag(element_sort))),
+        make_is_sort_constraint(sort, sort_bag::bag(element_sort)),
         make_subsort_constraint(sort_nat::nat(), children.front()->sort)
        });
     constraint = make_or_constraint({ set_constraint, bag_constraint });
@@ -687,7 +710,7 @@ struct application_node: public type_check_node
     sort = codomain;
 
     std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(constraint_ptr(new is_sort_constraint(children[0]->sort, function_sort(sort_expression_list(domain.begin(), domain.end()), codomain))));
+    alternatives.push_back(make_is_sort_constraint(children[0]->sort, function_sort(sort_expression_list(domain.begin(), domain.end()), codomain)));
 
     // add missing constraints for if application
     // TODO: handle this is a more structured way
@@ -754,7 +777,7 @@ struct forall_node: public type_check_node
   {
     context.add_context_variables(variables);
     sort = context.create_sort_variable();
-    constraint = constraint_ptr(new is_sort_constraint(sort, sort_bool::bool_()));
+    constraint = make_is_sort_constraint(sort, sort_bool::bool_());
     set_children_constraints(context);
     context.remove_context_variables(variables);
   }
@@ -779,7 +802,7 @@ struct exists_node: public type_check_node
   {
     context.add_context_variables(variables);
     sort = context.create_sort_variable();
-    constraint = constraint_ptr(new is_sort_constraint(sort, sort_bool::bool_()));
+    constraint = make_is_sort_constraint(sort, sort_bool::bool_());
     set_children_constraints(context);
     context.remove_context_variables(variables);
   }
@@ -805,7 +828,7 @@ struct lambda_node: public unary_operator_node
     context.add_context_variables(variables);
     set_children_constraints(context);
     sort = context.create_sort_variable();
-    constraint = constraint_ptr(new subsort_constraint(any_sort(), sort));
+    constraint = constraint_ptr(new subsort_constraint(untyped_sort(), sort));
     context.remove_context_variables(variables);
   }
 
@@ -874,16 +897,16 @@ struct where_clause_node: public type_check_node
     variable_list variables;
     for (const std::string& name: variable_names)
     {
-      variables.push_front(variable(name, any_sort()));
+      variables.push_front(variable(name, untyped_sort()));
     }
     context.add_context_variables(variables);
     set_children_constraints(context);
     sort = context.create_sort_variable();
 
-    std::vector<constraint_ptr> constraints = { make_subsort_constraint(any_sort(), sort) };
+    std::vector<constraint_ptr> constraints = { make_subsort_constraint(untyped_sort(), sort) };
     for (type_check_node_ptr child: children)
     {
-      constraints.push_back(make_subsort_constraint(any_sort(), child->sort));
+      constraints.push_back(make_subsort_constraint(untyped_sort(), child->sort));
     }
     constraint = make_and_constraint(constraints);
     context.remove_context_variables(variables);
@@ -1120,4 +1143,4 @@ constraint_ptr expand_constraint(constraint_ptr p)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_TYPE_CHECK_TREE_H
+#endif // MCRL2_DATA_EXPERIMENTAL_TYPE_CHECK_TREE_H

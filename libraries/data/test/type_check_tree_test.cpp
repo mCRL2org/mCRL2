@@ -1,4 +1,4 @@
-// Author(s): Aad Mathijssen, Wieger Wesselink
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file typecheck_test.cpp
+/// \file type_check_tree_test.cpp
 /// \brief Add your file description here.
 
 #include <iostream>
@@ -17,7 +17,7 @@
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/type_check_tree.h"
+#include "mcrl2/data/experimental/type_check_tree.h"
 #include "mcrl2/data/type_checker.h"
 #include "mcrl2/utilities/text_utility.h"
 
