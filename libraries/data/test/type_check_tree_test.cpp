@@ -23,8 +23,9 @@
 
 using namespace mcrl2;
 
-void test_data_expression(const std::string& text, const data::data_specification& dataspec = data::data_specification())
+void test_data_expression(const std::string& text, const std::string& variable_context = "", const std::string& expected_sort = "", bool expected_result = true)
 {
+  data::data_specification dataspec;
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("DataExpr");
   bool partial_parses = false;
@@ -39,229 +40,83 @@ void test_data_expression(const std::string& text, const data::data_specificatio
   p.destroy_parse_node(node);
 }
 
-inline
-data::sort_expression pos()
+void test_data_expression_fail(const std::string& text, const std::string& variable_context = "", const std::string& expected_sort = "")
 {
-  return data::sort_pos::pos();
-}
-
-inline
-data::sort_expression nat()
-{
-  return data::sort_nat::nat();
-}
-
-inline
-data::sort_expression list(const data::sort_expression& x)
-{
-  return data::sort_list::list(x);
-}
-
-inline
-data::variable var(const std::string& name, const data::sort_expression& sort)
-{
-  return data::variable(name, sort);
-}
-
-// Parse functions that do not change any context (i.e. do not typecheck and
-// normalise sorts).
-data::sort_expression parse_sort_expression(const std::string& de_in)
-{
-  data::sort_expression result;
-  try {
-    result = data::detail::parse_sort_expression_new(de_in);
-    std::string de_out = data::pp(result);
-    if (de_in != de_out)
-    {
-      std::clog << "aterm : " << result << std::endl;
-      std::clog << "de_in : " << de_in << std::endl;
-      std::clog << "de_out: " << de_out << std::endl;
-      std::clog << "The following sort expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-      BOOST_CHECK_EQUAL(de_in, de_out);
-    }
-  }
-  catch (...)
-  {
-    BOOST_CHECK(false);
-  }
-  return result;
-}
-
-data::data_expression parse_data_expression(const std::string& de_in)
-{
-  test_data_expression(de_in);
-  data::data_expression result;
-  try {
-    result = data::detail::parse_data_expression_new(de_in);
-#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
-    std::string de_out = data::pp(result);
-    if (de_in != de_out)
-    {
-      std::clog << "aterm : " << result << std::endl;
-      std::clog << "de_in : " << de_in << std::endl;
-      std::clog << "de_out: " << de_out << std::endl;
-      std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-      BOOST_CHECK_EQUAL(de_in, de_out);
-    }
-#endif
-  }
-  catch (...)
-  {
-    BOOST_CHECK(false);
-  }
-  return result;
-}
-
-data::data_specification parse_data_specification(const std::string& de_in, bool expect_success = true)
-{
-  data::data_specification result;
-  try {
-    result = data::detail::parse_data_specification_new(de_in);
-    std::string de_out = data::pp(result);
-
-    std::string input = utilities::trim_copy(de_in);
-    std::string output = utilities::trim_copy(de_out);
-    if (input != output)
-    {
-      std::clog << "aterm : " << data::detail::data_specification_to_aterm_data_spec(result) << std::endl;
-      std::clog << "de_in : " << de_in << std::endl;
-      std::clog << "de_out: " << de_out << std::endl;
-      std::clog << "The following data specifications should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-      BOOST_CHECK_EQUAL(input, output);
-    }
-  }
-  catch (...)
-  {
-    BOOST_CHECK(!expect_success);
-  }
-  return result;
-}
-
-void test_data_expression(const std::string& de_in,
-                          const data::variable_vector& variable_context,
-                          bool expect_success = true,
-                          const std::string& expected_sort = "",
-                          bool test_type_checker = true)
-{
-  data::data_expression x(parse_data_expression(de_in));
-  std::clog << std::endl
-            << "==========================================" << std::endl
-            << "Testing type checking of data expression: " << std::endl
-            << "  de_in:  " << de_in << std::endl
-            << "  de_out: " << pp(x) << std::endl
-            << "  expect success: " << (expect_success?("yes"):("no")) << std::endl
-            << "  expected type: " << expected_sort << std::endl
-            << "  detected type: " << pp(x.sort()) << " (before typecheckeing) " << std::endl;
-
-
-  if (test_type_checker)
-  {
-    if (expect_success)
-    {
-      BOOST_CHECK_NO_THROW(x = data::type_check_data_expression(x, variable_context));
-      BOOST_CHECK_NE(x, data::data_expression());
-
-      std::string de_out = data::pp(x);
-      BOOST_CHECK_EQUAL(de_in, de_out);
-      // TODO: this check should be uncommented
-      //BOOST_CHECK(!search_sort_expression(x.sort(), data::untyped_sort()));
-      if (expected_sort != "")
-      {
-        BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
-        std::clog << "    expression x in internal format: " << x << std::endl;
-      }
-      else
-      {
-        std::clog << "  failed to typecheck" << std::endl;
-      }
-    }
-    else
-    {
-      BOOST_CHECK_THROW(x = data::type_check_data_expression(x), mcrl2::runtime_error);
-    }
-  }
-}
-
-void test_data_expression(const std::string& de_in,
-                          bool expect_success = true,
-                          const std::string& expected_sort = "",
-                          bool test_type_checker = true)
-{
-  data::variable_vector v;
-  test_data_expression(de_in, v, expect_success, expected_sort, test_type_checker);
+  test_data_expression(text, variable_context, expected_sort, false);
 }
 
 BOOST_AUTO_TEST_CASE(data_expressions_test)
 {
-  test_data_expression("true", true, "Bool");
-  test_data_expression("if(true, true, false)", true, "Bool");
-  test_data_expression("!true", true, "Bool");
-  test_data_expression("true && false", true, "Bool");
-  test_data_expression("0", true, "Nat");
-  test_data_expression("-1", true, "Int");
-  test_data_expression("0 + 1", true, "Pos");
-  test_data_expression("1 + 0", true, "Pos");
-  test_data_expression("0 + 0", true, "Nat");
-  test_data_expression("1 + 1", true, "Pos");
-  test_data_expression("1 * 2 + 3", true, "Pos");
-  test_data_expression("[]", true); // List unknown
-  test_data_expression("[] ++ []", true); // List unknown
-  test_data_expression("#[]", true, "Nat");
-  test_data_expression("true in []", true, "Bool");
-  test_data_expression("[true, false]", true, "List(Bool)");
-  test_data_expression("[0]", true, "List(Nat)");
-  test_data_expression("[1, 2]", true, "List(Pos)");
-  test_data_expression("[0] ++ [1, 2]", true, "List(Nat)");
-  test_data_expression("[0, 1, 2]", true, "List(Nat)");
-  test_data_expression("[1, 0, 2]", true, "List(Nat)");
-  test_data_expression("l ++ [1, 2]", { var("l", list(nat())) }, true, "List(Nat)");
-  test_data_expression("l ++ [1, 2]", { var("l", list(pos())) }, true, "List(Pos)");
-  test_data_expression("[0] ++ l", { var("l", list(pos())) }, false);
-  test_data_expression("[0] ++ l", { var("l", list(nat())) }, true, "List(Nat)");
-  test_data_expression("x ++ y", { var("x", list(pos())), var("y", list(nat())) }, false);
-  test_data_expression("x == y", { var("x", list(pos())),  var("y", list(nat())) }, false);
-  test_data_expression("{}", true);
-  test_data_expression("!{}", true);
-  test_data_expression("!{} <= {}", true);
-  test_data_expression("{} <= !{}", true);
-  test_data_expression("{ true, false }", true, "FSet(Bool)");
-  test_data_expression("{ 1, 2, -7 }", true, "FSet(Int)");
-  test_data_expression("{ x: Nat | x mod 2 == 0 }", true, "Set(Nat)");
-  test_data_expression("{:}", true);
-  test_data_expression("!{:}", false);
-  test_data_expression("{ true: 1, false: 2 }", true, "FBag(Bool)");
-  test_data_expression("{ 1: 1, 2: 2, -8: 8 }", true, "FBag(Int)");
-  test_data_expression("{ x: Nat | (lambda y: Nat. y * y)(x) }", true, "Bag(Nat)");
-  test_data_expression("(lambda x: Bool. x)[true -> false]", true);
-  test_data_expression("(lambda x: Bool. x)[0 -> false]", false);
-  test_data_expression("(lambda x: Bool. x)[true -> false][false -> true]", true);
-  test_data_expression("(lambda n: Nat. n mod 2 == 0)[0 -> false]", true);
-  test_data_expression("lambda x: struct t?is_t. x == t", false);
-  test_data_expression("lambda x: struct t. x == t", false);
-  test_data_expression("lambda x,y: struct t. x == y", true, "struct t # struct t -> Bool");
-  test_data_expression("lambda x: struct t?is_t, y: struct t. x == y", false);
-  test_data_expression("lambda f: Nat. lambda f: Nat -> Bool. f(f)", false);
-  test_data_expression("forall x,y: struct t. x == y", true, "Bool");
-  test_data_expression("forall n: Nat. n >= 0", true, "Bool");
-  test_data_expression("forall n: Nat. n > -1", true, "Bool");
-  test_data_expression("exists x,y: struct t. x == y", true, "Bool");
-  test_data_expression("exists n: Nat. n > 481", true, "Bool");
-  test_data_expression("x == y", { var("x", parse_sort_expression("struct t?is_t")), var("y", parse_sort_expression("struct t?is_t")) }, true, "Bool");
-  test_data_expression("x == y", { var("x", parse_sort_expression("struct t")), var("y", parse_sort_expression("struct t?is_t")) }, false);
-  test_data_expression("x + y whr x = 3, y = 10 end", true, "Pos");
-  test_data_expression("x + y whr x = 3, y = x + 10 end", false);
-  test_data_expression("x + y whr x = 3, y = x + y + 10 end", false);
-  test_data_expression("x + y whr x = y + 10, y = 3 end", false);
-  test_data_expression("x + y whr x = y + 10, y = x + 3 end", false);
-  test_data_expression("x + y whr x = 3, y = 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
-  test_data_expression("x + y whr x = 3, y = x + 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
-  test_data_expression("x + y whr x = 3, y = x + y + 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
-  test_data_expression("x + y whr x = y + 10, y = 3 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
-  test_data_expression("x + y whr x = y + 10, y = x + 3 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
-  test_data_expression("x ++ y whr x = [0, y], y = [x] end", { var("x", pos()), var("y", nat()) }, false);
-  test_data_expression("x ++ y whr x = [0, y], y = [x] end", { var("x", nat()), var("y", nat()) }, true, "List(Nat)");
-  test_data_expression("x + y", { var("x", pos()), var("y", nat()) }, true, "Pos");
-  test_data_expression("x == y", { var("x", pos()), var("y", nat()) }, true, "Bool");
+  test_data_expression("true"                                                  , ""                                   , "Bool"                       );
+  test_data_expression("if(true, true, false)"                                 , ""                                   , "Bool"                       );
+  test_data_expression("!true"                                                 , ""                                   , "Bool"                       );
+  test_data_expression("true && false"                                         , ""                                   , "Bool"                       );
+  test_data_expression("0"                                                     , ""                                   , "Nat"                        );
+  test_data_expression("-1"                                                    , ""                                   , "Int"                        );
+  test_data_expression("0 + 1"                                                 , ""                                   , "Pos"                        );
+  test_data_expression("1 + 0"                                                 , ""                                   , "Pos"                        );
+  test_data_expression("0 + 0"                                                 , ""                                   , "Nat"                        );
+  test_data_expression("1 + 1"                                                 , ""                                   , "Pos"                        );
+  test_data_expression("1 * 2 + 3"                                             , ""                                   , "Pos"                        );
+  test_data_expression("[]"                                                    , ""                                   , ""                           );
+  test_data_expression("[] ++ []"                                              , ""                                   , ""                           );
+  test_data_expression("#[]"                                                   , ""                                   , "Nat"                        );
+  test_data_expression("true in []"                                            , ""                                   , "Bool"                       );
+  test_data_expression("[true, false]"                                         , ""                                   , "List(Bool)"                 );
+  test_data_expression("[0]"                                                   , ""                                   , "List(Nat)"                  );
+  test_data_expression("[1, 2]"                                                , ""                                   , "List(Pos)"                  );
+  test_data_expression("[0] ++ [1, 2]"                                         , ""                                   , "List(Nat)"                  );
+  test_data_expression("[0, 1, 2]"                                             , ""                                   , "List(Nat)"                  );
+  test_data_expression("[1, 0, 2]"                                             , ""                                   , "List(Nat)"                  );
+  test_data_expression("l ++ [1, 2]"                                           , "l: List(Nat);"                      , "List(Nat)"                  );
+  test_data_expression("l ++ [1, 2]"                                           , "l: List(Pos);"                      , "List(Pos)"                  );
+  test_data_expression("[0] ++ l"                                              , "l: List(Nat);"                      , "List(Nat)"                  );
+  test_data_expression("{}"                                                    , ""                                   , ""                           );
+  test_data_expression("!{}"                                                   , ""                                   , ""                           );
+  test_data_expression("!{} <= {}"                                             , ""                                   , ""                           );
+  test_data_expression("{} <= !{}"                                             , ""                                   , ""                           );
+  test_data_expression("{ true, false }"                                       , ""                                   , "FSet(Bool)"                 );
+  test_data_expression("{ 1, 2, -7 }"                                          , ""                                   , "FSet(Int)"                  );
+  test_data_expression("{ x: Nat | x mod 2 == 0 }"                             , ""                                   , "Set(Nat)"                   );
+  test_data_expression("{:}"                                                   , ""                                   , ""                           );
+  test_data_expression("{ true: 1, false: 2 }"                                 , ""                                   , "FBag(Bool)"                 );
+  test_data_expression("{ 1: 1, 2: 2, -8: 8 }"                                 , ""                                   , "FBag(Int)"                  );
+  test_data_expression("{ x: Nat | (lambda y: Nat. y * y)(x) }"                , ""                                   , "Bag(Nat)"                   );
+  test_data_expression("(lambda x: Bool. x)[true -> false]"                    , ""                                   , ""                           );
+  test_data_expression("(lambda x: Bool. x)[true -> false][false -> true]"     , ""                                   , ""                           );
+  test_data_expression("(lambda n: Nat. n mod 2 == 0)[0 -> false]"             , ""                                   , ""                           );
+  test_data_expression("lambda x,y: struct t. x == y"                          , ""                                   , "struct t # struct t -> Bool");
+  test_data_expression("forall x,y: struct t. x == y"                          , ""                                   , "Bool"                       );
+  test_data_expression("forall n: Nat. n >= 0"                                 , ""                                   , "Bool"                       );
+  test_data_expression("forall n: Nat. n > -1"                                 , ""                                   , "Bool"                       );
+  test_data_expression("exists x,y: struct t. x == y"                          , ""                                   , "Bool"                       );
+  test_data_expression("exists n: Nat. n > 481"                                , ""                                   , "Bool"                       );
+  test_data_expression("x == y"                                                , "x: struct t?is_t; y: struct t?is_t;", "Bool"                       );
+  test_data_expression("x + y whr x = 3, y = 10 end"                           , ""                                   , "Pos"                        );
+  test_data_expression("x + y whr x = 3, y = 10 end"                           , "x: Pos; y: Nat;"                    , "Pos"                        );
+  test_data_expression("x + y whr x = 3, y = x + 10 end"                       , "x: Pos; y: Nat;"                    , "Pos"                        );
+  test_data_expression("x + y whr x = 3, y = x + y + 10 end"                   , "x: Pos; y: Nat;"                    , "Pos"                        );
+  test_data_expression("x + y whr x = y + 10, y = 3 end"                       , "x: Pos; y: Nat;"                    , "Pos"                        );
+  test_data_expression("x + y whr x = y + 10, y = x + 3 end"                   , "x: Pos; y: Nat;"                    , "Pos"                        );
+  test_data_expression("x ++ y whr x = [0, y], y = [x] end"                    , "x: Nat; y: Nat;"                    , "List(Nat)"                  );
+  test_data_expression("x + y"                                                 , "x: Pos; y: Nat;"                    , "Pos"                        );
+  test_data_expression("x == y"                                                , "x: Pos; y: Nat;"                    , "Bool"                       );
+
+  test_data_expression_fail("[0] ++ l"                                         , "l: List(Pos);"                 );
+  test_data_expression_fail("x ++ y"                                           , "x: List(Pos); y: List(Pos);"   );
+  test_data_expression_fail("x == y"                                           , "x: List(Pos); y: List(Nat);"   );
+  test_data_expression_fail("!{:}"                                             , ""                              );
+  test_data_expression_fail("(lambda x: Bool. x)[0 -> false]"                  , ""                              );
+  test_data_expression_fail("lambda x: struct t?is_t. x == t"                  , ""                              );
+  test_data_expression_fail("lambda x: struct t. x == t"                       , ""                              );
+  test_data_expression_fail("lambda x: struct t?is_t, y: struct t. x == y"     , ""                              );
+  test_data_expression_fail("lambda f: Nat. lambda f: Nat -> Bool. f(f)"       , ""                              );
+  test_data_expression_fail("x == y"                                           , "x: struct t; y: struct t?is_t;");
+  test_data_expression_fail("x + y whr x = 3, y = x + 10 end"                  , ""                              );
+  test_data_expression_fail("x + y whr x = 3, y = x + y + 10 end"              , ""                              );
+  test_data_expression_fail("x + y whr x = y + 10, y = 3 end"                  , ""                              );
+  test_data_expression_fail("x + y whr x = y + 10, y = x + 3 end"              , ""                              );
+  test_data_expression_fail("x ++ y whr x = [0, y], y = [x] end"               , "x: Pos; y: Nat;"               );
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
