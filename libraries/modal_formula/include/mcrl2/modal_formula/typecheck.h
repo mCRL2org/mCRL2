@@ -65,7 +65,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
 
   action_formula apply(const data::data_expression& x)
   {
-    return m_data_type_checker.typecheck_data_expression(x, data::untyped_sort(), m_variable_context);
+    return m_data_type_checker.typecheck_data_expression(x, data::sort_bool::bool_(), m_variable_context);
   }
 
   action_formula apply(const action_formulas::at& x)
