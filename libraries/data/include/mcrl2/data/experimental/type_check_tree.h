@@ -24,10 +24,20 @@ namespace mcrl2 {
 
 namespace data {
 
-inline
-bool is_bool(const sort_expression& x)
+typedef std::map<untyped_sort_variable, sort_expression> sort_substitution;
+
+inline sort_expression substitute(const sort_expression& x, const sort_substitution& sigma)
 {
-  return sort_bool::is_bool(x);
+  if (is_untyped_sort_variable(x))
+  {
+    const untyped_sort_variable& v = atermpp::down_cast<untyped_sort_variable>(x);
+    auto i = sigma.find(v);
+    if (i != sigma.end())
+    {
+      return i->second;
+    }
+  }
+  return x;
 }
 
 template <typename Container>
@@ -68,39 +78,22 @@ typedef std::shared_ptr<type_check_node> type_check_node_ptr;
 
 struct type_check_context
 {
-  const std::map<core::identifier_string, sort_expression_list>& system_constants;
-  const std::map<core::identifier_string, function_sort_list>& system_functions;
-  const std::map<core::identifier_string, sort_expression>& user_constants;
-  const std::map<core::identifier_string, function_sort_list>& user_functions;
+  std::map<core::identifier_string, sort_expression_list> system_constants;
+  std::map<core::identifier_string, function_sort_list> system_functions;
+  std::map<core::identifier_string, sort_expression> user_constants;
+  std::map<core::identifier_string, function_sort_list> user_functions;
   std::map<core::identifier_string, std::vector<sort_expression> > declared_variables;
-  // const std::map<core::identifier_string, sort_expression>& allowed_variables;
-
-  std::map<untyped_sort_variable, sort_expression> sort_variables;
   std::size_t sort_variable_index;
 
-  type_check_context(
-                     const std::map<core::identifier_string, sort_expression_list>& system_constants_,
-                     const std::map<core::identifier_string, function_sort_list>& system_functions_,
-                     const std::map<core::identifier_string, sort_expression>& user_constants_,
-                     const std::map<core::identifier_string, function_sort_list>& user_functions_,
-                     const std::map<core::identifier_string, std::vector<sort_expression> >& declared_variables_
-                    )
-    : system_constants(system_constants_),
-      system_functions(system_functions_),
-      user_constants(user_constants_),
-      user_functions(user_functions_),
-      declared_variables(declared_variables_),
-      sort_variable_index(0)
-  { }
-
-  type_check_context(const type_checker& checker, const std::map<core::identifier_string, std::vector<sort_expression> >& declared_variables_)
-    : system_constants(checker.system_constants()),
-      system_functions(checker.system_functions()),
-      user_constants(checker.user_constants()),
-      user_functions(checker.user_functions()),
-      declared_variables(declared_variables_),
-      sort_variable_index(0)
-  {}
+  type_check_context(const data::data_specification& dataspec = data::data_specification())
+    : sort_variable_index(0)
+  {
+    type_checker checker(dataspec);
+    system_constants = checker.system_constants();
+    system_functions = checker.system_functions();
+    user_constants = checker.user_constants();
+    user_functions = checker.user_functions();
+  }
 
   // Returns the system defined constants and the user defined constants matching with name
   std::pair<sort_expression_list, sort_expression_list> find_matching_constants(const std::string& name) const;
@@ -116,9 +109,7 @@ struct type_check_context
 
   untyped_sort_variable create_sort_variable()
   {
-    untyped_sort_variable result(sort_variable_index++);
-    sort_variables[result] = untyped_sort();
-    return result;
+    return untyped_sort_variable(sort_variable_index++);
   }
 
   void add_context_variable(const variable& v)
@@ -158,25 +149,58 @@ struct type_check_context
 
 struct type_check_constraint;
 typedef std::shared_ptr<type_check_constraint> constraint_ptr;
-constraint_ptr expand_constraint(constraint_ptr p);
+constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& sigma);
 
 struct type_check_constraint
 {
+  int cost;
+
+  type_check_constraint(int cost_ = 0)
+    : cost(cost_)
+  {}
+
   virtual std::string print() const = 0;
 };
 
+constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternatives);
+constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternatives);
+
 struct no_constraint: public type_check_constraint
 {
+  no_constraint(int cost = 0)
+    : type_check_constraint(cost)
+  {}
+
   std::string print() const
   {
     return "no_constraint()";
   }
 };
 
-inline
-constraint_ptr make_no_constraint()
+struct false_constraint: public type_check_constraint
 {
-  return constraint_ptr(new no_constraint());
+  std::string message;
+
+  false_constraint(const std::string& message_)
+    : message(message_)
+  {}
+
+  std::string print() const
+  {
+    return "false(" + message + ")";
+  }
+};
+
+inline
+constraint_ptr make_false_constraint(const std::string& message)
+{
+  return constraint_ptr(new false_constraint(message));
+}
+
+inline
+constraint_ptr make_no_constraint(int cost = 0)
+{
+  return constraint_ptr(new no_constraint(cost));
 }
 
 // The sort of the corresponding data expression should be equal to 'sort'.
@@ -185,8 +209,8 @@ struct is_sort_constraint: public type_check_constraint
   sort_expression s1;
   sort_expression s2;
 
-  is_sort_constraint(const sort_expression& s1_, const sort_expression& s2_)
-    : s1(s1_), s2(s2_)
+  is_sort_constraint(const sort_expression& s1_, const sort_expression& s2_, int cost = 0)
+    : type_check_constraint(cost), s1(s1_), s2(s2_)
   {}
 
   std::string print() const
@@ -196,15 +220,37 @@ struct is_sort_constraint: public type_check_constraint
 };
 
 inline
-constraint_ptr make_is_sort_constraint(const sort_expression& s1, const sort_expression& s2)
+constraint_ptr make_is_sort_constraint(const sort_expression& s1, const sort_expression& s2, int cost = 0)
 {
   // optimizations
   if (is_untyped_sort(s1) || is_untyped_sort(s2))
   {
     return make_no_constraint();
   }
+  if (is_function_sort(s1) && is_function_sort(s2))
+  {
+    const function_sort& f1 = atermpp::down_cast<function_sort>(s1);
+    const function_sort& f2 = atermpp::down_cast<function_sort>(s2);
+    auto const& domain1 = f1.domain();
+    auto const& domain2 = f2.domain();
 
-  return constraint_ptr(new is_sort_constraint(s1, s2));
+    if (domain1.size() != domain1.size())
+    {
+      return make_false_constraint("function sorts do not match");
+    }
+
+    std::vector<constraint_ptr> alternatives;
+    alternatives.push_back(make_is_sort_constraint(f1.codomain(), f2.codomain()));
+    auto i1 = domain1.begin();
+    auto i2 = domain2.begin();
+    for (; i1 != domain1.end(); ++i1, ++i2)
+    {
+      alternatives.push_back(make_is_sort_constraint(*i1, *i2));
+    }
+    return make_and_constraint(alternatives);
+  }
+
+  return constraint_ptr(new is_sort_constraint(s1, s2, cost));
 }
 
 // The sort variable s1 should be a subsort of s2.
@@ -213,8 +259,8 @@ struct subsort_constraint: public type_check_constraint
   sort_expression s1;
   sort_expression s2;
 
-  subsort_constraint(const sort_expression& s1_, const sort_expression& s2_)
-    : s1(s1_), s2(s2_)
+  subsort_constraint(const sort_expression& s1_, const sort_expression& s2_, int cost = 0)
+    : type_check_constraint(cost), s1(s1_), s2(s2_)
   {}
 
   std::string print() const
@@ -224,23 +270,114 @@ struct subsort_constraint: public type_check_constraint
 };
 
 inline
-constraint_ptr make_subsort_constraint(const sort_expression& s1, const sort_expression& s2)
+constraint_ptr make_subsort_constraint(const sort_expression& s1, const sort_expression& s2, int cost = 0)
 {
   // optimizations
-  if (is_bool(s1))
+  if (sort_bool::is_bool(s1))
   {
-    return make_is_sort_constraint(s2, data::sort_bool::bool_());
+    return make_is_sort_constraint(s2, data::sort_bool::bool_(), cost);
   }
-  if (is_bool(s2))
+  if (sort_bool::is_bool(s2))
   {
-    return make_is_sort_constraint(s1, data::sort_bool::bool_());
+    return make_is_sort_constraint(s1, data::sort_bool::bool_(), cost);
   }
   if (is_untyped_sort(s1) || is_untyped_sort(s2))
   {
-    return make_no_constraint();
+    return make_no_constraint(cost);
+  }
+  if (is_container_sort(s1) && is_container_sort(s2))
+  {
+    const container_sort& c1 = atermpp::down_cast<container_sort>(s1);
+    const container_sort& c2 = atermpp::down_cast<container_sort>(s2);
+    if (c1.container_name() == c2.container_name())
+    {
+      return make_subsort_constraint(c1.element_sort(), c2.element_sort());
+    }
+    else
+    {
+      return make_false_constraint("incompatible container sorts");
+    }
+  }
+  if (is_function_sort(s1) && is_function_sort(s2))
+  {
+    const function_sort& f1 = atermpp::down_cast<function_sort>(s1);
+    const function_sort& f2 = atermpp::down_cast<function_sort>(s2);
+    auto const& domain1 = f1.domain();
+    auto const& domain2 = f2.domain();
+
+    if (domain1.size() != domain1.size())
+    {
+      return make_false_constraint("function sorts do not match");
+    }
+
+    std::vector<constraint_ptr> alternatives;
+    alternatives.push_back(make_subsort_constraint(f1.codomain(), f2.codomain()));
+    auto i1 = domain1.begin();
+    auto i2 = domain2.begin();
+    for (; i1 != domain1.end(); ++i1, ++i2)
+    {
+      alternatives.push_back(make_subsort_constraint(*i2, *i1));
+    }
+    return make_and_constraint(alternatives);
+  }
+  if (sort_pos::is_pos(s1))
+  {
+    std::vector<constraint_ptr> alternatives;
+    alternatives.push_back(make_is_sort_constraint(s2, sort_pos::pos()));
+    alternatives.push_back(make_is_sort_constraint(s2, sort_nat::nat()));
+    alternatives.push_back(make_is_sort_constraint(s2, sort_int::int_()));
+    alternatives.push_back(make_is_sort_constraint(s2, sort_real::real_()));
+    return make_or_constraint(alternatives);
+  }
+  if (sort_nat::is_nat(s1))
+  {
+    std::vector<constraint_ptr> alternatives;
+    alternatives.push_back(make_is_sort_constraint(s2, sort_nat::nat()));
+    alternatives.push_back(make_is_sort_constraint(s2, sort_int::int_()));
+    alternatives.push_back(make_is_sort_constraint(s2, sort_real::real_()));
+    return make_or_constraint(alternatives);
+  }
+  if (sort_int::is_int(s1))
+  {
+    std::vector<constraint_ptr> alternatives;
+    alternatives.push_back(make_is_sort_constraint(s2, sort_int::int_()));
+    alternatives.push_back(make_is_sort_constraint(s2, sort_real::real_()));
+    return make_or_constraint(alternatives);
+  }
+  if (sort_real::is_real(s1))
+  {
+    return make_is_sort_constraint(s2, sort_real::real_());
+  }
+  if (sort_pos::is_pos(s2))
+  {
+    return make_is_sort_constraint(s1, sort_pos::pos());
+  }
+  if (sort_nat::is_nat(s2))
+  {
+    std::vector<constraint_ptr> alternatives;
+    alternatives.push_back(make_is_sort_constraint(s1, sort_pos::pos()));
+    alternatives.push_back(make_is_sort_constraint(s1, sort_nat::nat()));
+    return make_or_constraint(alternatives);
+  }
+  if (sort_int::is_int(s2))
+  {
+    std::vector<constraint_ptr> alternatives;
+    alternatives.push_back(make_is_sort_constraint(s1, sort_pos::pos()));
+    alternatives.push_back(make_is_sort_constraint(s1, sort_nat::nat()));
+    alternatives.push_back(make_is_sort_constraint(s1, sort_int::int_()));
+    return make_or_constraint(alternatives);
+  }
+  if (sort_real::is_real(s2))
+  {
+    std::vector<constraint_ptr> alternatives;
+    alternatives.push_back(make_is_sort_constraint(s1, sort_pos::pos()));
+    alternatives.push_back(make_is_sort_constraint(s1, sort_nat::nat()));
+    alternatives.push_back(make_is_sort_constraint(s1, sort_int::int_()));
+    alternatives.push_back(make_is_sort_constraint(s1, sort_real::real_()));
+    return make_or_constraint(alternatives);
   }
 
-  return constraint_ptr(new subsort_constraint(s1, s2));
+  return constraint_ptr(new subsort_constraint(s1, s2, cost));
 }
 
 struct or_constraint: public type_check_constraint
@@ -268,6 +405,11 @@ constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternative
     {
       continue;
     }
+    false_constraint* x_false = dynamic_cast<false_constraint*>(p.get());
+    if (x_false)
+    {
+      continue;
+    }
     or_constraint* x_or = dynamic_cast<or_constraint*>(p.get());
     if (x_or)
     {
@@ -280,7 +422,7 @@ constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternative
   {
     return constraint_ptr(new no_constraint());
   }
-  else if (alternatives.size() == 1)
+  if (v.size() == 1)
   {
     return v.front();
   }
@@ -301,26 +443,17 @@ struct and_constraint: public type_check_constraint
   }
 };
 
-struct false_constraint: public type_check_constraint
-{
-  std::string message;
-
-  false_constraint(const std::string& message_)
-    : message(message_)
-  {}
-
-  std::string print() const
-  {
-    return "false(" + message + ")";
-  }
-};
-
 inline
 constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternatives)
 {
   std::vector<constraint_ptr> v;
   for (constraint_ptr p: alternatives)
   {
+    false_constraint* x_false = dynamic_cast<false_constraint*>(p.get());
+    if (x_false)
+    {
+      return p;
+    }
     no_constraint* x_no = dynamic_cast<no_constraint*>(p.get());
     if (x_no)
     {
@@ -336,9 +469,9 @@ constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternativ
   }
   if (v.size() == 0)
   {
-    return constraint_ptr(new no_constraint());
+    return make_no_constraint();
   }
-  else if (alternatives.size() == 1)
+  if (v.size() == 1)
   {
     return v.front();
   }
@@ -350,6 +483,7 @@ struct type_check_node
   std::vector<type_check_node_ptr> children;
   constraint_ptr constraint;
   sort_expression sort;
+  std::vector<data::untyped_sort_variable> sort_variables;
 
   type_check_node()
     : constraint(constraint_ptr(new no_constraint())), sort(untyped_sort())
@@ -364,6 +498,16 @@ struct type_check_node
   virtual void set_constraint(type_check_context& context)
   {}
 
+  virtual void apply_substitution(const sort_substitution& sigma)
+  {
+    for (type_check_node_ptr child: children)
+    {
+      child->apply_substitution(sigma);
+    }
+    constraint = substitute_constraint(constraint, sigma);
+    sort = substitute(sort, sigma);
+  }
+
   void set_children_constraints(type_check_context& context)
   {
     for (type_check_node_ptr child: children)
@@ -377,15 +521,6 @@ struct type_check_node
   {}
 
   virtual std::string print() const = 0;
-
-  void expand_constraints()
-  {
-    for (type_check_node_ptr child: children)
-    {
-      child->expand_constraints();
-    }
-    constraint = expand_constraint(constraint);
-  }
 };
 
 struct id_node: public type_check_node
@@ -398,7 +533,9 @@ struct id_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
 
     std::vector<constraint_ptr> alternatives;
 
@@ -425,7 +562,7 @@ struct id_node: public type_check_node
 
     if (alternatives.empty())
     {
-      constraint = constraint_ptr(new false_constraint("The id " + value + " is not declared!"));
+      constraint = make_false_constraint("The id " + value + " is not declared!");
     }
     else
     {
@@ -449,7 +586,10 @@ struct number_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
+
     if (detail::is_pos(value))
     {
       constraint = make_subsort_constraint(sort_pos::pos(), sort);
@@ -480,7 +620,10 @@ struct constant_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
+
     std::pair<sort_expression_list, sort_expression_list> p = context.find_matching_constants(name);
     std::vector<constraint_ptr> alternatives;
     for (const sort_expression& s: p.first + p.second)
@@ -520,6 +663,7 @@ struct empty_list_node: public constant_node
   void set_constraint(type_check_context& context)
   {
     untyped_sort_variable element_sort = context.create_sort_variable();
+    sort_variables.push_back(element_sort);
     sort = sort_list::list(element_sort);
     constraint = make_subsort_constraint(untyped_sort(), element_sort);
   }
@@ -534,6 +678,7 @@ struct empty_set_node: public constant_node
   void set_constraint(type_check_context& context)
   {
     untyped_sort_variable element_sort = context.create_sort_variable();
+    sort_variables.push_back(element_sort);
     sort = sort_set::set_(element_sort);
     constraint = make_subsort_constraint(untyped_sort(), element_sort);
   }
@@ -548,6 +693,7 @@ struct empty_bag_node: public constant_node
   void set_constraint(type_check_context& context)
   {
     untyped_sort_variable element_sort = context.create_sort_variable();
+    sort_variables.push_back(element_sort);
     sort = sort_bag::bag(element_sort);
     constraint = make_subsort_constraint(untyped_sort(), element_sort);
   }
@@ -563,6 +709,7 @@ struct list_enumeration_node: public type_check_node
   {
     set_children_constraints(context);
     untyped_sort_variable element_sort = context.create_sort_variable();
+    sort_variables.push_back(element_sort);
     sort = sort_list::list(element_sort);
     std::vector<constraint_ptr> alternatives;
     for (type_check_node_ptr child: children)
@@ -588,6 +735,7 @@ struct bag_enumeration_node: public type_check_node
   {
     set_children_constraints(context);
     untyped_sort_variable element_sort = context.create_sort_variable();
+    sort_variables.push_back(element_sort);
     sort = sort_bag::bag(element_sort);
     std::vector<constraint_ptr> alternatives;
     for (std::size_t i = 0; i < children.size(); i++)
@@ -620,6 +768,7 @@ struct set_enumeration_node: public type_check_node
   {
     set_children_constraints(context);
     untyped_sort_variable element_sort = context.create_sort_variable();
+    sort_variables.push_back(element_sort);
     sort = sort_set::set_(element_sort);
     std::vector<constraint_ptr> alternatives;
     for (type_check_node_ptr child: children)
@@ -649,7 +798,11 @@ struct bag_or_set_enumeration_node: public type_check_node
   {
     context.add_context_variable(v);
     set_children_constraints(context);
-    sort = context.create_sort_variable();
+
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
+
     auto element_sort = v.sort();
     constraint_ptr set_constraint = make_and_constraint({
       make_is_sort_constraint(sort, sort_set::set_(element_sort)),
@@ -702,6 +855,7 @@ struct application_node: public type_check_node
   {
     set_children_constraints(context);
     untyped_sort_variable codomain = context.create_sort_variable();
+    sort_variables.push_back(codomain);
     std::vector<sort_expression> domain;
     for (std::size_t i = 0; i < arity; i++)
     {
@@ -710,14 +864,27 @@ struct application_node: public type_check_node
     sort = codomain;
 
     std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(make_is_sort_constraint(children[0]->sort, function_sort(sort_expression_list(domain.begin(), domain.end()), codomain)));
+    // alternatives.push_back(make_is_sort_constraint(children[0]->sort, function_sort(sort_expression_list(domain.begin(), domain.end()), codomain)));
 
     // add missing constraints for if application
-    // TODO: handle this is a more structured way
+    // TODO: handle this in a more structured way
     if (children[0]->print() == "id(if)")
     {
       alternatives.push_back(make_subsort_constraint(codomain, children[1]->sort));
       alternatives.push_back(make_subsort_constraint(codomain, children[2]->sort));
+    }
+
+    if (is_untyped_sort_variable(children[0]->sort))
+    {
+      sort_substitution sigma;
+      const untyped_sort_variable& v = atermpp::down_cast<untyped_sort_variable>(children[0]->sort);
+      function_sort head_sort(sort_expression_list(domain.begin(), domain.end()), codomain);
+      sigma[v] = head_sort;
+      children[0]->apply_substitution(sigma);
+    }
+    else
+    {
+      throw mcrl2::runtime_error("unexpected case: sort of head is not a sort variable");
     }
 
     constraint = make_and_constraint(alternatives);
@@ -739,7 +906,10 @@ struct unary_operator_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
+
     std::pair<function_sort_list, function_sort_list> p = context.find_matching_functions(name, 1);
     std::vector<constraint_ptr> alternatives;
     for (const function_sort& s: p.first + p.second)
@@ -776,7 +946,11 @@ struct forall_node: public type_check_node
   void set_constraint(type_check_context& context)
   {
     context.add_context_variables(variables);
-    sort = context.create_sort_variable();
+
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
+
     constraint = make_is_sort_constraint(sort, sort_bool::bool_());
     set_children_constraints(context);
     context.remove_context_variables(variables);
@@ -801,7 +975,11 @@ struct exists_node: public type_check_node
   void set_constraint(type_check_context& context)
   {
     context.add_context_variables(variables);
-    sort = context.create_sort_variable();
+
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
+
     constraint = make_is_sort_constraint(sort, sort_bool::bool_());
     set_children_constraints(context);
     context.remove_context_variables(variables);
@@ -827,8 +1005,12 @@ struct lambda_node: public unary_operator_node
   {
     context.add_context_variables(variables);
     set_children_constraints(context);
-    sort = context.create_sort_variable();
-    constraint = constraint_ptr(new subsort_constraint(untyped_sort(), sort));
+
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
+
+    constraint = make_no_constraint();
     context.remove_context_variables(variables);
   }
 
@@ -851,7 +1033,11 @@ struct binary_operator_node: public type_check_node
   void set_constraint(type_check_context& context)
   {
     set_children_constraints(context);
-    sort = context.create_sort_variable();
+
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
+
     std::pair<function_sort_list, function_sort_list> p = context.find_matching_functions(name, 2);
     std::vector<constraint_ptr> alternatives;
     for (const function_sort& s: p.first + p.second)
@@ -901,7 +1087,10 @@ struct where_clause_node: public type_check_node
     }
     context.add_context_variables(variables);
     set_children_constraints(context);
-    sort = context.create_sort_variable();
+
+    untyped_sort_variable s = context.create_sort_variable();
+    sort_variables.push_back(s);
+    sort = s;
 
     std::vector<constraint_ptr> constraints = { make_subsort_constraint(untyped_sort(), sort) };
     for (type_check_node_ptr child: children)
@@ -1077,8 +1266,7 @@ std::vector<sort_expression> type_check_context::find_matching_variables(const s
 inline
 void print_node(type_check_node_ptr node)
 {
-  std::cout << "\n-----------------------------" << std::endl;
-  std::cout << "node = " << node->print() << std::endl;
+  std::cout << "\nnode = " << node->print() << std::endl;
   std::cout << "sort = " << node->sort << std::endl;
   std::cout << "constraint = " << node->constraint->print() << std::endl;
   for (type_check_node_ptr child: node->children)
@@ -1089,8 +1277,7 @@ void print_node(type_check_node_ptr node)
 
 // TODO: This design is ugly, but for the moment it seems the easiest solution to modify
 // the constraint tree
-inline
-constraint_ptr expand_constraint(constraint_ptr p)
+inline constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& sigma)
 {
   {
     or_constraint* x = dynamic_cast<or_constraint*>(p.get());
@@ -1098,7 +1285,7 @@ constraint_ptr expand_constraint(constraint_ptr p)
     {
       for (constraint_ptr& q: x->alternatives)
       {
-        q = expand_constraint(q);
+        q = substitute_constraint(q, sigma);
       }
       return p;
     }
@@ -1109,31 +1296,18 @@ constraint_ptr expand_constraint(constraint_ptr p)
     {
       for (constraint_ptr& q: x->alternatives)
       {
-        q = expand_constraint(q);
+        q = substitute_constraint(q, sigma);
       }
       return p;
     }
   }
   {
-    subsort_constraint* x = dynamic_cast<subsort_constraint*>(p.get());
+    is_sort_constraint* x = dynamic_cast<is_sort_constraint*>(p.get());
     if (x)
     {
-      const sort_expression& s1 = x->s1;
-      const sort_expression& s2 = x->s2;
-      if (s1 == sort_bool::bool_())
-      {
-        return make_is_sort_constraint(s2, s1);
-      }
-      if (is_container_sort(s1) && is_container_sort(s2))
-      {
-        const container_sort& c1 = atermpp::down_cast<container_sort>(s1);
-        const container_sort& c2 = atermpp::down_cast<container_sort>(s2);
-        if (c1.container_name() == c2.container_name())
-        {
-          return make_subsort_constraint(c1.element_sort(), c2.element_sort());
-        }
-      }
-      return p;
+      sort_expression s1 = substitute(x->s1, sigma);
+      sort_expression s2 = substitute(x->s2, sigma);
+      return make_is_sort_constraint(s1, s2);
     }
   }
   return p;

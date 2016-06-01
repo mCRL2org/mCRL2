@@ -25,6 +25,11 @@ using namespace mcrl2;
 
 void test_data_expression(const std::string& text, const std::string& variable_context = "", const std::string& expected_sort = "", bool expected_result = true)
 {
+  std::cout << "--------------------------------------------------------------------" << std::endl;
+  std::cout << "text            = " << text << std::endl;
+  std::cout << "variables       = " << variable_context << std::endl;
+  std::cout << "expected sort   = " << expected_sort << std::endl;
+  std::cout << "expected result = " << std::boolalpha << expected_result << std::endl;
   data::data_specification dataspec;
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("DataExpr");
@@ -32,11 +37,12 @@ void test_data_expression(const std::string& text, const std::string& variable_c
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   data::type_check_node_ptr tnode = data::type_check_tree_generator(p).parse_DataExpr(node);
-  data::type_checker checker(dataspec);
-  std::map<core::identifier_string, data::sort_expression_vector> declared_variables;
-  data::type_check_context context(checker, declared_variables);
+  data::type_check_context context;
+  data::variable_list variables = data::parse_variables(variable_context);
+  context.add_context_variables(variables);
   tnode->set_constraint(context);
   data::print_node(tnode);
+  context.remove_context_variables(variables);
   p.destroy_parse_node(node);
 }
 
