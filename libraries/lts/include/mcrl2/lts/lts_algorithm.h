@@ -34,6 +34,7 @@
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 #include "mcrl2/lts/detail/liblts_bisim_gw.h"
+#include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
 #include "mcrl2/lts/detail/liblts_weak_bisim.h"
 #include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
@@ -103,6 +104,10 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare_gw(l1,l2, false,false,generate_counter_examples);
     }
+    case lts_eq_bisim_gjkw:
+    {
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples);
+    }
     case lts_eq_branching_bisim:
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
@@ -111,6 +116,10 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       return detail::destructive_bisimulation_compare_gw(l1,l2, true,false,generate_counter_examples);
     }
+    case lts_eq_branching_bisim_gjkw:
+    {
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples);
+    }
     case lts_eq_divergence_preserving_branching_bisim:
     {
       return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
@@ -118,6 +127,10 @@ bool destructive_compare(LTS_TYPE& l1,
     case lts_eq_divergence_preserving_branching_bisim_gw:
     {
       return detail::destructive_bisimulation_compare_gw(l1,l2, true,true,generate_counter_examples);
+    }
+    case lts_eq_divergence_preserving_branching_bisim_gjkw:
+    {
+      return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples);
     }
     case lts_eq_weak_bisim:
     {
@@ -128,6 +141,7 @@ bool destructive_compare(LTS_TYPE& l1,
       return detail::destructive_weak_bisimulation_compare(l1,l2,false);
     }
     case lts_eq_weak_bisim_gw:
+    case lts_eq_weak_bisim_gjkw:
     {
       if (generate_counter_examples)
       {
@@ -139,15 +153,16 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence preserving weak bisimulation\n";
+        mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence-preserving weak bisimulation\n";
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2, true);
     }
     case lts_eq_divergence_preserving_weak_bisim_gw:
+    case lts_eq_divergence_preserving_weak_bisim_gjkw:
     {
       if (generate_counter_examples)
       {
-        mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence preserving weak bisimulation\n";
+        mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence-preserving weak bisimulation\n";
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2, true,true);
     }
@@ -408,6 +423,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce_gw(l,false,false);
       return;
     }
+    case lts_eq_bisim_gjkw:
+    {
+      detail::bisimulation_reduce_gjkw(l,false,false);
+      return;
+    }
     case lts_eq_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s(l);
@@ -422,6 +442,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     case lts_eq_branching_bisim_gw:
     {
       detail::bisimulation_reduce_gw(l,true,false);
+      return;
+    }
+    case lts_eq_branching_bisim_gjkw:
+    {
+      detail::bisimulation_reduce_gjkw(l,true,false);
       return;
     }
     case lts_eq_branching_bisim_sigref:
@@ -440,6 +465,11 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce_gw(l,true,true);
       return;
     }
+    case lts_eq_divergence_preserving_branching_bisim_gjkw:
+    {
+      detail::bisimulation_reduce_gjkw(l,true,true);
+      return;
+    }
     case lts_eq_divergence_preserving_branching_bisim_sigref:
     {
       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s(l);
@@ -452,6 +482,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       return;
     }
     case lts_eq_weak_bisim_gw:
+    case lts_eq_weak_bisim_gjkw:
     {
       detail::weak_bisimulation_reduce(l,false,true); // weak bisimulation without divergencies and the gw algorithm.
       return;
@@ -472,6 +503,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       return;
     }
     case lts_eq_divergence_preserving_weak_bisim_gw: 
+    case lts_eq_divergence_preserving_weak_bisim_gjkw:
     {
       detail::weak_bisimulation_reduce(l,true,true); // weak bisimulation with divergencies and the gw algorithm.
       return;

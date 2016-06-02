@@ -76,6 +76,9 @@ void reduce_lts_in_various_ways(const std::string& test_description,
   reduce(l,lts::lts_eq_bisim_gw);
   test_lts(test_description + " (bisimulation gw)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
   l=l_in;
+  reduce(l,lts::lts_eq_bisim_gjkw);
+  test_lts(test_description + " (bisimulation gjkw)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
+  l=l_in;
   reduce(l,lts::lts_eq_bisim_sigref);
   test_lts(test_description + " (bisimulation signature)",l, expected.labels_bisimulation,expected.states_bisimulation, expected.transitions_bisimulation);
   l=l_in;
@@ -84,6 +87,9 @@ void reduce_lts_in_various_ways(const std::string& test_description,
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_gw);
   test_lts(test_description + " (branching bisimulation gw)",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
+  l=l_in;
+  reduce(l,lts::lts_eq_branching_bisim_gjkw);
+  test_lts(test_description + " (branching bisimulation gjkw)",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
   l=l_in;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
   test_lts(test_description + " (branching bisimulation signature)",l, expected.labels_branching_bisimulation,expected.states_branching_bisimulation, expected.transitions_branching_bisimulation);
@@ -100,6 +106,12 @@ void reduce_lts_in_various_ways(const std::string& test_description,
                                       expected.states_divergence_preserving_branching_bisimulation, 
                                       expected.transitions_divergence_preserving_branching_bisimulation);
   l=l_in;
+  reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_gjkw);
+  test_lts(test_description + " (divergence preserving branching bisimulation gjkw)",l,
+                                      expected.labels_divergence_preserving_branching_bisimulation,
+                                      expected.states_divergence_preserving_branching_bisimulation, 
+                                      expected.transitions_divergence_preserving_branching_bisimulation);
+  l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_branching_bisim_sigref);
   test_lts(test_description + " (divergence preserving branching bisimulation signature)",l, 
                                       expected.labels_divergence_preserving_branching_bisimulation,
@@ -112,6 +124,9 @@ void reduce_lts_in_various_ways(const std::string& test_description,
   reduce(l,lts::lts_eq_weak_bisim_gw);
   test_lts(test_description + " (weak bisimulation gw)",l, expected.labels_weak_bisimulation,expected.states_weak_bisimulation, expected.transitions_weak_bisimulation);
   l=l_in;
+  reduce(l,lts::lts_eq_weak_bisim_gjkw);
+  test_lts(test_description + " (weak bisimulation gjkw)",l, expected.labels_weak_bisimulation,expected.states_weak_bisimulation, expected.transitions_weak_bisimulation);
+  l=l_in;
   reduce(l,lts::lts_eq_weak_bisim_sigref);
   test_lts(test_description + " (weak bisimulation sigref)",l, expected.labels_weak_bisimulation,expected.states_weak_bisimulation, expected.transitions_weak_bisimulation);
   l=l_in;
@@ -123,6 +138,12 @@ void reduce_lts_in_various_ways(const std::string& test_description,
   l=l_in;
   reduce(l,lts::lts_eq_divergence_preserving_weak_bisim_gw);
   test_lts(test_description + " (divergence preserving weak bisimulation gw)",l, 
+                                      expected.labels_divergence_preserving_weak_bisimulation,
+                                      expected.states_divergence_preserving_weak_bisimulation, 
+                                      expected.transitions_divergence_preserving_weak_bisimulation);
+  l=l_in;
+  reduce(l,lts::lts_eq_divergence_preserving_weak_bisim_gjkw);
+  test_lts(test_description + " (divergence preserving weak bisimulation gjkw)",l,
                                       expected.labels_divergence_preserving_weak_bisimulation,
                                       expected.states_divergence_preserving_weak_bisimulation, 
                                       expected.transitions_divergence_preserving_weak_bisimulation);
