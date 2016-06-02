@@ -172,6 +172,7 @@ struct type_check_constraint
 
 constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternatives);
 constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternatives);
+constraint_ptr make_is_equal_to_constraint(const sort_expression& s1, const sort_expression& s2, int cost = 0);
 
 struct true_constraint: public type_check_constraint
 {
@@ -212,72 +213,12 @@ constraint_ptr make_true_constraint(int cost = 0)
 }
 
 // The sort of the corresponding data expression should be equal to 'sort'.
-struct is_equal_to_constraint: public type_check_constraint
-{
-  untyped_sort_variable s1;
-  sort_expression s2;
-
-  is_equal_to_constraint(const untyped_sort_variable& s1_, const sort_expression& s2_, int cost = 0)
-    : type_check_constraint(cost), s1(s1_), s2(s2_)
-  {}
-
-  std::string print() const
-  {
-    return "is_equal_to(" + data::pp(s1) + ", " + data::pp(s2) + ")";
-  }
-};
-
-inline
-constraint_ptr make_is_equal_to_constraint(const sort_expression& s1, const sort_expression& s2, int cost = 0)
-{
-  if (s1 == s2)
-  {
-    return make_true_constraint();
-  }
-  if (is_untyped_sort(s1) || is_untyped_sort(s2))
-  {
-    return make_true_constraint();
-  }
-  if (is_untyped_sort_variable(s1))
-  {
-    return constraint_ptr(new is_equal_to_constraint(make_untyped_sort_variable(s1), s2, cost));
-  }
-  if (is_untyped_sort_variable(s2))
-  {
-    return constraint_ptr(new is_equal_to_constraint(make_untyped_sort_variable(s2), s1, cost));
-  }
-  throw mcrl2::runtime_error("cannot make is_equal_to constraint");
-  // if (is_function_sort(s1) && is_function_sort(s2))
-  // {
-  //   const function_sort& f1 = atermpp::down_cast<function_sort>(s1);
-  //   const function_sort& f2 = atermpp::down_cast<function_sort>(s2);
-  //   auto const& domain1 = f1.domain();
-  //   auto const& domain2 = f2.domain();
-  //
-  //   if (domain1.size() != domain1.size())
-  //   {
-  //     return make_false_constraint("function sorts do not match");
-  //   }
-  //
-  //   std::vector<constraint_ptr> alternatives;
-  //   alternatives.push_back(make_is_equal_to_constraint(f1.codomain(), f2.codomain()));
-  //   auto i1 = domain1.begin();
-  //   auto i2 = domain2.begin();
-  //   for (; i1 != domain1.end(); ++i1, ++i2)
-  //   {
-  //     alternatives.push_back(make_is_equal_to_constraint(*i1, *i2));
-  //   }
-  //   return make_and_constraint(alternatives);
-  // }
-}
-
-// The sort of the corresponding data expression should be equal to 'sort'.
 struct is_element_of_constraint: public type_check_constraint
 {
-  sort_expression s;
+  untyped_sort_variable s;
   std::vector<sort_expression> sorts;
 
-  is_element_of_constraint(const sort_expression& s_, const std::vector<sort_expression>& sorts_, int cost = 0)
+  is_element_of_constraint(const untyped_sort_variable& s_, const std::vector<sort_expression>& sorts_, int cost = 0)
     : type_check_constraint(cost), s(s_), sorts(sorts_)
   {}
 
@@ -338,7 +279,46 @@ constraint_ptr make_is_element_of_constraint(const sort_expression& s, const std
   {
     return make_true_constraint();
   }
-  return constraint_ptr(new is_element_of_constraint(s, sorts, cost));
+  return constraint_ptr(new is_element_of_constraint(make_untyped_sort_variable(s), sorts, cost));
+}
+
+// The sort of the corresponding data expression should be equal to 'sort'.
+struct is_equal_to_constraint: public type_check_constraint
+{
+  untyped_sort_variable s1;
+  sort_expression s2;
+
+  is_equal_to_constraint(const untyped_sort_variable& s1_, const sort_expression& s2_, int cost = 0)
+    : type_check_constraint(cost), s1(s1_), s2(s2_)
+  {}
+
+  std::string print() const
+  {
+    return "is_equal_to(" + data::pp(s1) + ", " + data::pp(s2) + ")";
+  }
+};
+
+inline
+constraint_ptr make_is_equal_to_constraint(const sort_expression& s1, const sort_expression& s2, int cost)
+{
+  if (s1 == s2)
+  {
+    return make_true_constraint();
+  }
+  if (is_untyped_sort(s1) || is_untyped_sort(s2))
+  {
+    return make_true_constraint();
+  }
+  if (is_untyped_sort_variable(s1))
+  {
+    return make_is_element_of_constraint(s1, { s2 });
+  }
+  if (is_untyped_sort_variable(s2))
+  {
+    return make_is_element_of_constraint(s2, { s1 });
+    // return constraint_ptr(new is_equal_to_constraint(make_untyped_sort_variable(s2), s1, cost));
+  }
+  throw mcrl2::runtime_error("cannot make is_equal_to constraint");
 }
 
 // The sort variable s1 should be a subsort of s2.
@@ -497,6 +477,31 @@ constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternative
   return constraint_ptr(new or_constraint(v));
 }
 
+inline
+std::vector<constraint_ptr> join_is_element_of_constraints(const std::vector<constraint_ptr>& constraints)
+{
+  std::vector<constraint_ptr> result;
+  std::map<untyped_sort_variable, std::set<sort_expression> > is_element_of_constraints;
+
+  for (constraint_ptr p: constraints)
+  {
+    is_element_of_constraint* x_is_element_of = dynamic_cast<is_element_of_constraint*>(p.get());
+    if (x_is_element_of)
+    {
+      is_element_of_constraints[x_is_element_of->s].insert(x_is_element_of->sorts.begin(), x_is_element_of->sorts.end());
+    }
+    else
+    {
+      result.push_back(p);
+    }
+  }
+  for (auto i = is_element_of_constraints.begin(); i != is_element_of_constraints.end(); ++i)
+  {
+    result.push_back(make_is_element_of_constraint(i->first, std::vector<sort_expression>(i->second.begin(), i->second.end())));
+  }
+  return result;
+}
+
 struct and_constraint: public type_check_constraint
 {
   std::vector<constraint_ptr> alternatives;
@@ -535,6 +540,7 @@ constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternativ
     }
     v.push_back(p);
   }
+  v = join_is_element_of_constraints(v);
   if (v.size() == 0)
   {
     return make_true_constraint();
@@ -1303,7 +1309,8 @@ void print_node(type_check_node_ptr node)
 
 // TODO: This design is ugly, but for the moment it seems the easiest solution to modify
 // the constraint tree
-inline constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& sigma)
+inline
+constraint_ptr substitute_constraint(constraint_ptr p, const sort_substitution& sigma)
 {
   {
     or_constraint* x = dynamic_cast<or_constraint*>(p.get());
