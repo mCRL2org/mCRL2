@@ -370,7 +370,7 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
 
 #define DEFINE_COROUTINE(namespace, routine, param, local, shared_type,       \
                                                         shared_var, locations)\
-_coroutine_result_t namespace _coroutine_ ## routine ## _func(                \
+coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
                 size_t _coroutine_allowance, struct namespace                 \
                         _coroutine_ ## routine ## _struct& _coroutine_param,  \
                 shared_type& shared_var)                                      \
@@ -500,7 +500,7 @@ _coroutine_result_t namespace _coroutine_ ## routine ## _func(                \
                                             _coroutine_NO_PARENS shared_init; \
             for (size_t _coroutine_allowance = 16;; _coroutine_allowance *= 2)\
             {                                                                 \
-                _coroutine_result_t _coroutine_result =                       \
+                coroutine::_coroutine_result_t _coroutine_result =            \
                         _coroutine_ ## routine1 ## _func(_coroutine_allowance,\
                                                      _coroutine_local1,       \
                                                      _coroutine_shared_data); \
