@@ -380,6 +380,8 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
     switch (_coroutine_param._coroutine_location)                             \
     {                                                                         \
         _coroutine_SWITCHCASE locations                                       \
+        case _coroutine_BEGIN_ ## routine ## _enum:                           \
+            break;                                                            \
     }
 
 #endif // #ifndef NDEBUG
