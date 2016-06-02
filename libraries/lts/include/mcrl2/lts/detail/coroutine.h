@@ -121,9 +121,6 @@
 #endif
 #include <cstdlib>       // for EXIT_FAILURE and size_t
 
-#include <boost/preprocessor/variadic/size.hpp>
-#include <boost/preprocessor/cat.hpp>
-
 
 
 
@@ -156,10 +153,23 @@ typedef enum { _coroutine_CONTINUE, _coroutine_TERMINATE, _coroutine_ABORT }
 } // end namespace lts
 } // end namespace mcrl2
 
+/* _coroutine_N_ARGS(...) counts the number of arguments it receives */
+#define _coroutine_N_ARGS(...) _coroutine_N_ARGS_helper(__VA_ARGS__,          \
+                             20, 19, 18, 17, 16, 15, 14, 13, 12, 11,          \
+                             10,  9,  8,  7,  6,  5,  4,  3,  2,  1, )
+#define _coroutine_N_ARGS_helper(                                             \
+                             _1, _2, _3, _4, _5, _6, _7, _8, _9,_10,          \
+                            _11,_12,_13,_14,_15,_16,_17,_18,_19,_20, N, ...) N
+
+/* _coroutine_CAT(a, b) expands and then concatenates its arguments */
+#define _coroutine_CAT(a,b)   _coroutine_CAT_1(a,b)
+#define _coroutine_CAT_1(a,b) _coroutine_CAT_2(a,b)
+#define _coroutine_CAT_2(a,b) a ## b
+
 /* _coroutine_SELECT is an internal macro that chooses the correct helper
 macro, depending on the number of variadic arguments. */
 #define _coroutine_SELECT(macro, ...)                                         \
-        BOOST_PP_CAT(macro, BOOST_PP_VARIADIC_SIZE(__VA_ARGS__))(__VA_ARGS__)
+        _coroutine_CAT(macro, _coroutine_N_ARGS(__VA_ARGS__))(__VA_ARGS__)
 
 /* _coroutine_NO_PARENS is an internal macro that helps to remove parentheses
 from its argument. */
@@ -195,8 +205,7 @@ variables (parameters or locals) in the reentrant version. */
 
 /* _coroutine_ALIAS is a helper macro to define aliases for parameters and
 local variables, so that the programmer can access them easily. */
-#define _coroutine_ALIAS(...)                                                 \
-                             _coroutine_SELECT(_coroutine_ALIAS_, __VA_ARGS__)
+#define _coroutine_ALIAS(...) _coroutine_SELECT(_coroutine_ALIAS_, __VA_ARGS__)
 #define _coroutine_ALIAS_1(_)
 #define _coroutine_ALIAS_2(t1,v1)                                             \
                         t1& v1 = _coroutine_param._coroutine_ ## v1 ## _var;

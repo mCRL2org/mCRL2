@@ -29,8 +29,6 @@
 #include <cstddef>       // for size_t
 #include <cassert>
 
-#include <boost/preprocessor/cat.hpp>
-
 
 
 #ifndef NDEBUG
@@ -62,6 +60,10 @@ extern trans_type _count_iterations_m;
 } // end namespace lts
 } // end namespace mcrl2
 
+/* _count_iterations_CAT(a, b) expands and then concatenates its arguments */
+#define _count_iterations_CAT(a,b)   _count_iterations_CAT_1(a,b)
+#define _count_iterations_CAT_1(a,b) _count_iterations_CAT_2(a,b)
+#define _count_iterations_CAT_2(a,b) a ## b
 
 /// \def _count_iterations_ASSERT
 /// \brief first expands its macro argument and then generates an assert()
@@ -87,8 +89,8 @@ extern trans_type _count_iterations_m;
 #define MAX_ITERATIONS(count,max)                                             \
     do                                                                        \
     {                                                                         \
-        static size_t BOOST_PP_CAT(iterations_in_line_, __LINE__) = 0;        \
-        BOOST_PP_CAT(iterations_in_line_, __LINE__) += (count);               \
+        static size_t _count_iterations_CAT(iterations_in_line_,__LINE__) = 0;\
+        _count_iterations_CAT(iterations_in_line_, __LINE__) += (count);      \
         const struct /* functor for ilog2, simulates a nested function */ {   \
             unsigned operator() (unsigned long long i) const                  \
             {                                                                 \
@@ -117,8 +119,8 @@ extern trans_type _count_iterations_m;
 #define MAX_ITERATIONS(count,max)                                             \
     do                                                                        \
     {                                                                         \
-        static size_t BOOST_PP_CAT(iterations_in_line_, __LINE__) = 0;        \
-        BOOST_PP_CAT(iterations_in_line_, __LINE__) += (count);               \
+        static size_t _count_iterations_CAT(iterations_in_line_,__LINE__) = 0;\
+        _count_iterations_CAT(iterations_in_line_, __LINE__) += (count);      \
         const struct /* functor for ilog2, simulates a nested function */ {   \
             unsigned operator() (unsigned long i) const                       \
             {                                                                 \
@@ -151,8 +153,8 @@ extern trans_type _count_iterations_m;
 #define MAX_ITERATIONS(count,max)                                             \
     do                                                                        \
     {                                                                         \
-        static size_t BOOST_PP_CAT(iterations_in_line_, __LINE__) = 0;        \
-        BOOST_PP_CAT(iterations_in_line_, __LINE__) += (count);               \
+        static size_t _count_iterations_CAT(iterations_in_line_,__LINE__) = 0;\
+        _count_iterations_CAT(iterations_in_line_, __LINE__) += (count);      \
         const struct /* functor for ilog2, simulates a nested function */ {   \
             unsigned operator() (state_type i) const                          \
             {                                                                 \

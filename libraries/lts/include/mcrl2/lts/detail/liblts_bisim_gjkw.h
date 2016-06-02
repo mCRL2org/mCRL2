@@ -31,9 +31,6 @@
 #include <unordered_map> // used during initialisation
 #include <cassert>
 
-#include <boost/preprocessor/variadic/size.hpp>
-#include <boost/preprocessor/cat.hpp>
-
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
