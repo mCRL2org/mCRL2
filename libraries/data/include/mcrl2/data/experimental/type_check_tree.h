@@ -15,6 +15,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/type_checker.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/untyped_sort_variable.h"
@@ -25,6 +26,7 @@ namespace mcrl2 {
 namespace data {
 
 typedef std::map<untyped_sort_variable, sort_expression> sort_substitution;
+typedef std::pair<sort_substitution, int> solution; // the second element is the cost of the solution
 
 inline sort_expression substitute(const sort_expression& x, const sort_substitution& sigma)
 {
@@ -165,15 +167,15 @@ struct type_check_constraint
 constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternatives);
 constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternatives);
 
-struct no_constraint: public type_check_constraint
+struct true_constraint: public type_check_constraint
 {
-  no_constraint(int cost = 0)
+  true_constraint(int cost = 0)
     : type_check_constraint(cost)
   {}
 
   std::string print() const
   {
-    return "no_constraint()";
+    return "true_constraint()";
   }
 };
 
@@ -198,34 +200,34 @@ constraint_ptr make_false_constraint(const std::string& message)
 }
 
 inline
-constraint_ptr make_no_constraint(int cost = 0)
+constraint_ptr make_true_constraint(int cost = 0)
 {
-  return constraint_ptr(new no_constraint(cost));
+  return constraint_ptr(new true_constraint(cost));
 }
 
 // The sort of the corresponding data expression should be equal to 'sort'.
-struct is_sort_constraint: public type_check_constraint
+struct is_equal_to_constraint: public type_check_constraint
 {
   sort_expression s1;
   sort_expression s2;
 
-  is_sort_constraint(const sort_expression& s1_, const sort_expression& s2_, int cost = 0)
+  is_equal_to_constraint(const sort_expression& s1_, const sort_expression& s2_, int cost = 0)
     : type_check_constraint(cost), s1(s1_), s2(s2_)
   {}
 
   std::string print() const
   {
-    return "is_sort(" + data::pp(s1) + ", " + data::pp(s2) + ")";
+    return "is_equal_to(" + data::pp(s1) + ", " + data::pp(s2) + ")";
   }
 };
 
 inline
-constraint_ptr make_is_sort_constraint(const sort_expression& s1, const sort_expression& s2, int cost = 0)
+constraint_ptr make_is_equal_to_constraint(const sort_expression& s1, const sort_expression& s2, int cost = 0)
 {
   // optimizations
   if (is_untyped_sort(s1) || is_untyped_sort(s2))
   {
-    return make_no_constraint();
+    return make_true_constraint();
   }
   if (is_function_sort(s1) && is_function_sort(s2))
   {
@@ -240,17 +242,87 @@ constraint_ptr make_is_sort_constraint(const sort_expression& s1, const sort_exp
     }
 
     std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(make_is_sort_constraint(f1.codomain(), f2.codomain()));
+    alternatives.push_back(make_is_equal_to_constraint(f1.codomain(), f2.codomain()));
     auto i1 = domain1.begin();
     auto i2 = domain2.begin();
     for (; i1 != domain1.end(); ++i1, ++i2)
     {
-      alternatives.push_back(make_is_sort_constraint(*i1, *i2));
+      alternatives.push_back(make_is_equal_to_constraint(*i1, *i2));
     }
     return make_and_constraint(alternatives);
   }
 
-  return constraint_ptr(new is_sort_constraint(s1, s2, cost));
+  return constraint_ptr(new is_equal_to_constraint(s1, s2, cost));
+}
+
+// The sort of the corresponding data expression should be equal to 'sort'.
+struct is_element_of_constraint: public type_check_constraint
+{
+  sort_expression s;
+  std::vector<sort_expression> sorts;
+
+  is_element_of_constraint(const sort_expression& s_, const std::vector<sort_expression>& sorts_, int cost = 0)
+    : type_check_constraint(cost), s(s_), sorts(sorts_)
+  {}
+
+  std::string print() const
+  {
+    return "is_element_of(" + data::pp(s) + ", " + core::detail::print_set(sorts) + ")";
+  }
+};
+
+inline
+constraint_ptr make_function_sort_constraint(const function_sort& f1, const sort_expression& s2)
+{
+  auto const& domain1 = f1.domain();
+  if (!is_function_sort(s2))
+  {
+    throw mcrl2::runtime_error("could not make function sort constraint");
+  }
+  const function_sort& f2 = atermpp::down_cast<function_sort>(s2);
+  auto const& domain2 = f2.domain();
+  if (domain1.size() != domain1.size())
+  {
+    return make_false_constraint("function sorts do not match");
+  }
+  std::vector<constraint_ptr> alternatives;
+  alternatives.push_back(make_is_equal_to_constraint(f1.codomain(), f2.codomain()));
+  auto i1 = domain1.begin();
+  auto i2 = domain2.begin();
+  for (; i1 != domain1.end(); ++i1, ++i2)
+  {
+    alternatives.push_back(make_is_equal_to_constraint(*i1, *i2));
+  }
+  return make_and_constraint(alternatives);
+}
+
+inline
+constraint_ptr make_is_element_of_constraint(const sort_expression& s, const std::vector<sort_expression>& sorts, int cost = 0)
+{
+  // optimizations
+  if (is_untyped_sort(s))
+  {
+    return make_true_constraint();
+  }
+  if (std::find(sorts.begin(), sorts.end(), untyped_sort()) != sorts.end())
+  {
+    return make_true_constraint();
+  }
+  if (is_function_sort(s))
+  {
+    const function_sort& f1 = atermpp::down_cast<function_sort>(s);
+    std::vector<constraint_ptr> alternatives;
+    for (const sort_expression& s2: sorts)
+    {
+      alternatives.push_back(make_function_sort_constraint(f1, s2));
+    }
+    return make_and_constraint(alternatives);
+  }
+  if (std::find(sorts.begin(), sorts.end(), s) != sorts.end())
+  {
+    return make_true_constraint();
+  }
+  return constraint_ptr(new is_element_of_constraint(s, sorts, cost));
 }
 
 // The sort variable s1 should be a subsort of s2.
@@ -275,15 +347,15 @@ constraint_ptr make_subsort_constraint(const sort_expression& s1, const sort_exp
   // optimizations
   if (sort_bool::is_bool(s1))
   {
-    return make_is_sort_constraint(s2, data::sort_bool::bool_(), cost);
+    return make_is_equal_to_constraint(s2, data::sort_bool::bool_(), cost);
   }
   if (sort_bool::is_bool(s2))
   {
-    return make_is_sort_constraint(s1, data::sort_bool::bool_(), cost);
+    return make_is_equal_to_constraint(s1, data::sort_bool::bool_(), cost);
   }
   if (is_untyped_sort(s1) || is_untyped_sort(s2))
   {
-    return make_no_constraint(cost);
+    return make_true_constraint(cost);
   }
   if (is_container_sort(s1) && is_container_sort(s2))
   {
@@ -297,6 +369,14 @@ constraint_ptr make_subsort_constraint(const sort_expression& s1, const sort_exp
     {
       return make_false_constraint("incompatible container sorts");
     }
+  }
+  if (is_container_sort(s1) && is_untyped_sort_variable(s2))
+  {
+    return make_is_equal_to_constraint(s2, s1);
+  }
+  if (is_untyped_sort_variable(s1) && is_container_sort(s2))
+  {
+    return make_is_equal_to_constraint(s1, s2);
   }
   if (is_function_sort(s1) && is_function_sort(s2))
   {
@@ -322,59 +402,35 @@ constraint_ptr make_subsort_constraint(const sort_expression& s1, const sort_exp
   }
   if (sort_pos::is_pos(s1))
   {
-    std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(make_is_sort_constraint(s2, sort_pos::pos()));
-    alternatives.push_back(make_is_sort_constraint(s2, sort_nat::nat()));
-    alternatives.push_back(make_is_sort_constraint(s2, sort_int::int_()));
-    alternatives.push_back(make_is_sort_constraint(s2, sort_real::real_()));
-    return make_or_constraint(alternatives);
+    return make_is_element_of_constraint(s2, { sort_pos::pos(), sort_nat::nat(), sort_int::int_(), sort_real::real_() });
   }
   if (sort_nat::is_nat(s1))
   {
-    std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(make_is_sort_constraint(s2, sort_nat::nat()));
-    alternatives.push_back(make_is_sort_constraint(s2, sort_int::int_()));
-    alternatives.push_back(make_is_sort_constraint(s2, sort_real::real_()));
-    return make_or_constraint(alternatives);
+    return make_is_element_of_constraint(s2, { sort_nat::nat(), sort_int::int_(), sort_real::real_() });
   }
   if (sort_int::is_int(s1))
   {
-    std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(make_is_sort_constraint(s2, sort_int::int_()));
-    alternatives.push_back(make_is_sort_constraint(s2, sort_real::real_()));
-    return make_or_constraint(alternatives);
+    return make_is_element_of_constraint(s2, { sort_int::int_(), sort_real::real_() });
   }
   if (sort_real::is_real(s1))
   {
-    return make_is_sort_constraint(s2, sort_real::real_());
+    return make_is_equal_to_constraint(s2, sort_real::real_());
   }
   if (sort_pos::is_pos(s2))
   {
-    return make_is_sort_constraint(s1, sort_pos::pos());
+    return make_is_equal_to_constraint(s1, sort_pos::pos());
   }
   if (sort_nat::is_nat(s2))
   {
-    std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(make_is_sort_constraint(s1, sort_pos::pos()));
-    alternatives.push_back(make_is_sort_constraint(s1, sort_nat::nat()));
-    return make_or_constraint(alternatives);
+    return make_is_element_of_constraint(s1, { sort_pos::pos(), sort_nat::nat() });
   }
   if (sort_int::is_int(s2))
   {
-    std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(make_is_sort_constraint(s1, sort_pos::pos()));
-    alternatives.push_back(make_is_sort_constraint(s1, sort_nat::nat()));
-    alternatives.push_back(make_is_sort_constraint(s1, sort_int::int_()));
-    return make_or_constraint(alternatives);
+    return make_is_element_of_constraint(s1, { sort_pos::pos(), sort_nat::nat(), sort_int::int_() });
   }
   if (sort_real::is_real(s2))
   {
-    std::vector<constraint_ptr> alternatives;
-    alternatives.push_back(make_is_sort_constraint(s1, sort_pos::pos()));
-    alternatives.push_back(make_is_sort_constraint(s1, sort_nat::nat()));
-    alternatives.push_back(make_is_sort_constraint(s1, sort_int::int_()));
-    alternatives.push_back(make_is_sort_constraint(s1, sort_real::real_()));
-    return make_or_constraint(alternatives);
+    return make_is_element_of_constraint(s1, { sort_pos::pos(), sort_nat::nat(), sort_int::int_(), sort_real::real_() });
   }
 
   return constraint_ptr(new subsort_constraint(s1, s2, cost));
@@ -400,7 +456,7 @@ constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternative
   std::vector<constraint_ptr> v;
   for (constraint_ptr p: alternatives)
   {
-    no_constraint* x_no = dynamic_cast<no_constraint*>(p.get());
+    true_constraint* x_no = dynamic_cast<true_constraint*>(p.get());
     if (x_no)
     {
       continue;
@@ -420,7 +476,7 @@ constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternative
   }
   if (v.size() == 0)
   {
-    return constraint_ptr(new no_constraint());
+    return constraint_ptr(new true_constraint());
   }
   if (v.size() == 1)
   {
@@ -454,7 +510,7 @@ constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternativ
     {
       return p;
     }
-    no_constraint* x_no = dynamic_cast<no_constraint*>(p.get());
+    true_constraint* x_no = dynamic_cast<true_constraint*>(p.get());
     if (x_no)
     {
       continue;
@@ -469,7 +525,7 @@ constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternativ
   }
   if (v.size() == 0)
   {
-    return make_no_constraint();
+    return make_true_constraint();
   }
   if (v.size() == 1)
   {
@@ -486,11 +542,11 @@ struct type_check_node
   std::vector<data::untyped_sort_variable> sort_variables;
 
   type_check_node()
-    : constraint(constraint_ptr(new no_constraint())), sort(untyped_sort())
+    : constraint(constraint_ptr(new true_constraint())), sort(untyped_sort())
   {}
 
   type_check_node(const std::vector<type_check_node_ptr>& children_)
-    : children(children_), constraint(constraint_ptr(new no_constraint())), sort(untyped_sort())
+    : children(children_), constraint(constraint_ptr(new true_constraint())), sort(untyped_sort())
   {}
 
   // Adds a value to the 'sort' attribute
@@ -543,21 +599,21 @@ struct id_node: public type_check_node
     std::vector<sort_expression> variable_sorts = context.find_matching_variables(value);
     if (variable_sorts.size() == 1)
     {
-      alternatives.push_back(make_is_sort_constraint(sort, variable_sorts.front()));
+      alternatives.push_back(make_is_equal_to_constraint(sort, variable_sorts.front()));
     }
 
     // it is a constant
     std::pair<sort_expression_list, sort_expression_list> p = context.find_matching_constants(value);
     for (const sort_expression& s: p.first + p.second)
     {
-      alternatives.push_back(make_is_sort_constraint(sort, s));
+      alternatives.push_back(make_is_equal_to_constraint(sort, s));
     }
 
     // it is a function
     std::pair<function_sort_list, function_sort_list> q = context.find_matching_functions(value);
     for (const function_sort& s: q.first + q.second)
     {
-      alternatives.push_back(make_is_sort_constraint(sort, s));
+      alternatives.push_back(make_is_equal_to_constraint(sort, s));
     }
 
     if (alternatives.empty())
@@ -805,11 +861,11 @@ struct bag_or_set_enumeration_node: public type_check_node
 
     auto element_sort = v.sort();
     constraint_ptr set_constraint = make_and_constraint({
-      make_is_sort_constraint(sort, sort_set::set_(element_sort)),
-      make_is_sort_constraint(children.front()->sort, sort_bool::bool_())
+      make_is_equal_to_constraint(sort, sort_set::set_(element_sort)),
+      make_is_equal_to_constraint(children.front()->sort, sort_bool::bool_())
     });
     constraint_ptr bag_constraint = make_and_constraint({
-        make_is_sort_constraint(sort, sort_bag::bag(element_sort)),
+        make_is_equal_to_constraint(sort, sort_bag::bag(element_sort)),
         make_subsort_constraint(sort_nat::nat(), children.front()->sort)
        });
     constraint = make_or_constraint({ set_constraint, bag_constraint });
@@ -864,7 +920,7 @@ struct application_node: public type_check_node
     sort = codomain;
 
     std::vector<constraint_ptr> alternatives;
-    // alternatives.push_back(make_is_sort_constraint(children[0]->sort, function_sort(sort_expression_list(domain.begin(), domain.end()), codomain)));
+    // alternatives.push_back(make_is_equal_to_constraint(children[0]->sort, function_sort(sort_expression_list(domain.begin(), domain.end()), codomain)));
 
     // add missing constraints for if application
     // TODO: handle this in a more structured way
@@ -914,10 +970,8 @@ struct unary_operator_node: public type_check_node
     std::vector<constraint_ptr> alternatives;
     for (const function_sort& s: p.first + p.second)
     {
-      auto i = s.domain().begin();
-      const sort_expression& first = *i;
       alternatives.push_back(make_and_constraint({
-          make_subsort_constraint(children[0]->sort, first),
+          make_subsort_constraint(children[0]->sort, s.domain().front()),
           make_subsort_constraint(s.codomain(), sort)
          })
       );
@@ -951,7 +1005,7 @@ struct forall_node: public type_check_node
     sort_variables.push_back(s);
     sort = s;
 
-    constraint = make_is_sort_constraint(sort, sort_bool::bool_());
+    constraint = make_is_equal_to_constraint(sort, sort_bool::bool_());
     set_children_constraints(context);
     context.remove_context_variables(variables);
   }
@@ -980,7 +1034,7 @@ struct exists_node: public type_check_node
     sort_variables.push_back(s);
     sort = s;
 
-    constraint = make_is_sort_constraint(sort, sort_bool::bool_());
+    constraint = make_is_equal_to_constraint(sort, sort_bool::bool_());
     set_children_constraints(context);
     context.remove_context_variables(variables);
   }
@@ -1010,7 +1064,7 @@ struct lambda_node: public unary_operator_node
     sort_variables.push_back(s);
     sort = s;
 
-    constraint = make_no_constraint();
+    constraint = make_true_constraint();
     context.remove_context_variables(variables);
   }
 
@@ -1302,12 +1356,12 @@ inline constraint_ptr substitute_constraint(constraint_ptr p, const sort_substit
     }
   }
   {
-    is_sort_constraint* x = dynamic_cast<is_sort_constraint*>(p.get());
+    is_equal_to_constraint* x = dynamic_cast<is_equal_to_constraint*>(p.get());
     if (x)
     {
       sort_expression s1 = substitute(x->s1, sigma);
       sort_expression s2 = substitute(x->s2, sigma);
-      return make_is_sort_constraint(s1, s2);
+      return make_is_equal_to_constraint(s1, s2);
     }
   }
   return p;
