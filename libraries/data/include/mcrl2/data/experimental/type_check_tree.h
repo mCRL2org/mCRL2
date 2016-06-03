@@ -16,8 +16,10 @@
 #include <memory>
 #include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/type_checker.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/type_checker.h"
 #include "mcrl2/data/untyped_sort_variable.h"
 #include "mcrl2/utilities/text_utility.h"
 
@@ -27,6 +29,18 @@ namespace data {
 
 typedef std::map<untyped_sort_variable, sort_expression> sort_substitution;
 typedef std::pair<sort_substitution, int> solution; // the second element is the cost of the solution
+
+template <typename T>
+bool has_untyped_sort(const T& x)
+{
+  return data::search_sort_expression(x, untyped_sort());
+}
+
+template <typename T>
+T replace_untyped_sort(const T& x, const sort_expression& replacement)
+{
+  return data::replace_sort_expressions(x, [&replacement](const sort_expression& x) { return is_untyped_sort(x) ? replacement : x; }, true);
+}
 
 inline
 const untyped_sort_variable& make_untyped_sort_variable(const sort_expression& x)
@@ -91,7 +105,7 @@ struct type_check_context
   std::map<core::identifier_string, sort_expression> user_constants;
   std::map<core::identifier_string, function_sort_list> user_functions;
   std::map<core::identifier_string, std::vector<sort_expression> > declared_variables;
-  std::size_t sort_variable_index;
+  mutable std::size_t sort_variable_index;
 
   type_check_context(const data::data_specification& dataspec = data::data_specification())
     : sort_variable_index(0)
@@ -107,15 +121,17 @@ struct type_check_context
   std::pair<sort_expression_list, sort_expression_list> find_matching_constants(const std::string& name) const;
 
   // Returns the system defined functions and the user defined functions matching with (name, arity)
+  // N.B. Untyped sorts are replaced with fresh sort variables.
   std::pair<function_sort_list, function_sort_list> find_matching_functions(const std::string& name, std::size_t arity) const;
 
   // Returns the system defined functions and the user defined functions matching with name
+  // N.B. Untyped sorts are replaced with fresh sort variables.
   std::pair<function_sort_list, function_sort_list> find_matching_functions(const std::string& name) const;
 
   // Returns the variables matching with name
   std::vector<sort_expression> find_matching_variables(const std::string& name) const;
 
-  untyped_sort_variable create_sort_variable()
+  untyped_sort_variable create_sort_variable() const
   {
     return untyped_sort_variable(sort_variable_index++);
   }
@@ -152,6 +168,26 @@ struct type_check_context
     {
       remove_context_variable(v);
     }
+  }
+
+protected:
+  // replace occurrences of untyped sort in sorts by fresh sort variables
+  function_sort_list replace_untyped_sorts(const function_sort_list& sorts) const
+  {
+    std::vector<function_sort> result;
+    for (const function_sort& f: sorts)
+    {
+      if (has_untyped_sort(f))
+      {
+        function_sort f1 = replace_untyped_sort(f, create_sort_variable());
+        result.push_back(f1);
+      }
+      else
+      {
+        result.push_back(f);
+      }
+    }
+    return function_sort_list(result.begin(), result.end());
   }
 };
 
@@ -224,6 +260,10 @@ struct is_element_of_constraint: public type_check_constraint
 
   std::string print() const
   {
+    if (sorts.size() == 1)
+    {
+      return "is_equal_to(" + data::pp(s) + ", " + data::pp(*sorts.begin()) + ")";
+    }
     return "is_element_of(" + data::pp(s) + ", " + core::detail::print_set(sorts) + ")";
   }
 };
@@ -1262,7 +1302,7 @@ std::pair<function_sort_list, function_sort_list> type_check_context::find_match
   {
     user_result = filter_sorts(j->second, arity);
   }
-  return std::make_pair(system_result, user_result);
+  return { replace_untyped_sorts(system_result), user_result };
 }
 
 inline
@@ -1280,7 +1320,7 @@ std::pair<function_sort_list, function_sort_list> type_check_context::find_match
   {
     user_result = j->second;
   }
-  return std::make_pair(system_result, user_result);
+  return { replace_untyped_sorts(system_result), user_result };
 }
 
 inline

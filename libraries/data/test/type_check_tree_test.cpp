@@ -53,6 +53,7 @@ void test_data_expression_fail(const std::string& text, const std::string& varia
 
 BOOST_AUTO_TEST_CASE(data_expressions_test)
 {
+  test_data_expression("x"                                                     , "x: Pos;"                            , "Pos"                        );
   test_data_expression("true"                                                  , ""                                   , "Bool"                       );
   test_data_expression("if(true, true, false)"                                 , ""                                   , "Bool"                       );
   test_data_expression("!true"                                                 , ""                                   , "Bool"                       );
@@ -123,6 +124,18 @@ BOOST_AUTO_TEST_CASE(data_expressions_test)
   test_data_expression_fail("x + y whr x = y + 10, y = 3 end"                  , ""                              );
   test_data_expression_fail("x + y whr x = y + 10, y = x + 3 end"              , ""                              );
   test_data_expression_fail("x ++ y whr x = [0, y], y = [x] end"               , "x: Pos; y: Nat;"               );
+}
+
+BOOST_AUTO_TEST_CASE(replace_untyped_sort_test)
+{
+  using namespace mcrl2::data;
+  const sort_expression& B = sort_bool::bool_();
+  const sort_expression& U = untyped_sort();
+  data_expression s1 = sort_set::intersection(U, sort_fset::fset(U), sort_fset::fset(U));
+  data_expression s2 = sort_set::intersection(B, sort_fset::fset(B), sort_fset::fset(B));
+  BOOST_CHECK(has_untyped_sort(s1));
+  BOOST_CHECK(!has_untyped_sort(s2));
+  BOOST_CHECK(replace_untyped_sort(s1, B) == s2);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
