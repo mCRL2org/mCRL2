@@ -17,7 +17,7 @@
 /// \author David N. Jansen, Radboud Universiteit, Nijmegen, The Netherlands
 
 
-#include "mcrl2/lts/detail/count_iterations.h"
+#include "mcrl2/lts/detail/check_complexity.h"
 
 namespace mcrl2
 {
@@ -30,10 +30,15 @@ namespace bisim_gjkw
 
 #ifndef NDEBUG
 
-/// These global variables serve to provide the number of states and
-/// transitions, respectively. They are used by `MAX_ITERATIONS`.
-state_type _count_iterations_n;
-trans_type _count_iterations_m;
+std::map<const char*, check_complexity::single_counter>
+                                                check_complexity::counters;
+check_complexity::iteration_type check_complexity::n(0);
+check_complexity::iteration_type check_complexity::m(0);
+check_complexity::iteration_type check_complexity::n_log_n(0);
+check_complexity::iteration_type check_complexity::m_log_n(0);
+check_complexity::iteration_type check_complexity::primary_m_log_n(0);
+check_complexity::iteration_type check_complexity::secondary_m_log_n(0);
+check_complexity::iteration_type check_complexity::n_m(0);
 
 #endif
 

@@ -1,7 +1,7 @@
 add_mcrl2_library(lts
   INSTALL_HEADERS TRUE
   SOURCES
-    count_iterations.cpp
+    check_complexity.cpp
     liblts_bisim_gjkw.cpp
     liblts_fsm.cpp
     liblts_aut.cpp
