@@ -13,7 +13,6 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_fsm.h"
-//#include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/lts/transition.h"
 #include "mcrl2/lts/lts_utilities.h"
 
@@ -904,6 +903,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
     }
 
     // Copy the transitions from the set into the transition system.
+    aut.clear_transitions();
     for (std::set<transition>::const_iterator i=resulting_transitions.begin();
                                        i != resulting_transitions.end(); ++i)
     {

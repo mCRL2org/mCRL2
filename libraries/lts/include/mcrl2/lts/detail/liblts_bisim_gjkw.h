@@ -1587,9 +1587,9 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool branching /* = false */,
   l.clear_state_labels();
 
   // Assign the reduced LTS
+  l.set_num_states(bisim_part.num_eq_classes());
   l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
   bisim_part.replace_transitions(branching, preserve_divergence);
-  l.set_num_states(bisim_part.num_eq_classes());
 }
 
 template <class LTS_TYPE>
