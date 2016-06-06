@@ -36,9 +36,9 @@ void test_data_expression(const std::string& text, const std::string& variable_c
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
-  data::type_check_node_ptr tnode = data::type_check_tree_generator(p).parse_DataExpr(node);
   data::type_check_context context;
   data::variable_list variables = data::parse_variables(variable_context);
+  data::type_check_node_ptr tnode = data::type_check_tree_generator(context, p).parse_DataExpr(node);
   context.add_context_variables(variables);
   tnode->set_constraint(context);
   data::print_node(tnode);
@@ -99,6 +99,7 @@ BOOST_AUTO_TEST_CASE(data_expressions_test)
   test_data_expression("exists x,y: struct t. x == y"                          , ""                                   , "Bool"                       );
   test_data_expression("exists n: Nat. n > 481"                                , ""                                   , "Bool"                       );
   test_data_expression("x == y"                                                , "x: struct t?is_t; y: struct t?is_t;", "Bool"                       );
+  test_data_expression("x whr x = 3 end"                                       , "x: Nat;"                            , "Nat"                        );
   test_data_expression("x + y whr x = 3, y = 10 end"                           , ""                                   , "Pos"                        );
   test_data_expression("x + y whr x = 3, y = 10 end"                           , "x: Pos; y: Nat;"                    , "Pos"                        );
   test_data_expression("x + y whr x = 3, y = x + 10 end"                       , "x: Pos; y: Nat;"                    , "Pos"                        );

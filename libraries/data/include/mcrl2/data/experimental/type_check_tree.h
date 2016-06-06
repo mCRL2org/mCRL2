@@ -218,7 +218,7 @@ struct true_constraint: public type_check_constraint
 
   std::string print() const
   {
-    return "true_constraint()";
+    return "true";
   }
 };
 
@@ -262,9 +262,9 @@ struct is_element_of_constraint: public type_check_constraint
   {
     if (sorts.size() == 1)
     {
-      return "is_equal_to(" + data::pp(s) + ", " + data::pp(*sorts.begin()) + ")";
+      return data::pp(s) + " = " + data::pp(*sorts.begin());
     }
-    return "is_element_of(" + data::pp(s) + ", " + core::detail::print_set(sorts) + ")";
+    return data::pp(s) + " in " + core::detail::print_set(sorts);
   }
 };
 
@@ -468,6 +468,32 @@ constraint_ptr make_subsort_constraint(const sort_expression& s1, const sort_exp
   return constraint_ptr(new subsort_constraint(s1, s2, cost));
 }
 
+// joins disjunctions of is_element_of constraints
+inline
+std::vector<constraint_ptr> join_or_is_element_of_constraints(const std::vector<constraint_ptr>& constraints)
+{
+  std::vector<constraint_ptr> result;
+  std::map<untyped_sort_variable, std::set<sort_expression> > is_element_of_constraints;
+
+  for (constraint_ptr p: constraints)
+  {
+    is_element_of_constraint* x_is_element_of = dynamic_cast<is_element_of_constraint*>(p.get());
+    if (x_is_element_of)
+    {
+      is_element_of_constraints[x_is_element_of->s].insert(x_is_element_of->sorts.begin(), x_is_element_of->sorts.end());
+    }
+    else
+    {
+      result.push_back(p);
+    }
+  }
+  for (auto i = is_element_of_constraints.begin(); i != is_element_of_constraints.end(); ++i)
+  {
+    result.push_back(make_is_element_of_constraint(i->first, std::vector<sort_expression>(i->second.begin(), i->second.end())));
+  }
+  return result;
+}
+
 struct or_constraint: public type_check_constraint
 {
   std::vector<constraint_ptr> alternatives;
@@ -506,6 +532,7 @@ constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternative
     }
     v.push_back(p);
   }
+  v = join_or_is_element_of_constraints(v);
   if (v.size() == 0)
   {
     return constraint_ptr(new true_constraint());
@@ -515,31 +542,6 @@ constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternative
     return v.front();
   }
   return constraint_ptr(new or_constraint(v));
-}
-
-inline
-std::vector<constraint_ptr> join_is_element_of_constraints(const std::vector<constraint_ptr>& constraints)
-{
-  std::vector<constraint_ptr> result;
-  std::map<untyped_sort_variable, std::set<sort_expression> > is_element_of_constraints;
-
-  for (constraint_ptr p: constraints)
-  {
-    is_element_of_constraint* x_is_element_of = dynamic_cast<is_element_of_constraint*>(p.get());
-    if (x_is_element_of)
-    {
-      is_element_of_constraints[x_is_element_of->s].insert(x_is_element_of->sorts.begin(), x_is_element_of->sorts.end());
-    }
-    else
-    {
-      result.push_back(p);
-    }
-  }
-  for (auto i = is_element_of_constraints.begin(); i != is_element_of_constraints.end(); ++i)
-  {
-    result.push_back(make_is_element_of_constraint(i->first, std::vector<sort_expression>(i->second.begin(), i->second.end())));
-  }
-  return result;
 }
 
 struct and_constraint: public type_check_constraint
@@ -580,7 +582,6 @@ constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternativ
     }
     v.push_back(p);
   }
-  v = join_is_element_of_constraints(v);
   if (v.size() == 0)
   {
     return make_true_constraint();
@@ -594,17 +595,16 @@ constraint_ptr make_and_constraint(const std::vector<constraint_ptr>& alternativ
 
 struct type_check_node
 {
+  type_check_context& context;
   std::vector<type_check_node_ptr> children;
   constraint_ptr constraint;
   untyped_sort_variable sort;
 
-  type_check_node()
-    : constraint(make_true_constraint())
-  {}
-
-  type_check_node(const std::vector<type_check_node_ptr>& children_)
-    : children(children_), constraint(make_true_constraint())
-  {}
+  type_check_node(type_check_context& context_, const std::vector<type_check_node_ptr>& children_)
+    : context(context_), children(children_), constraint(make_true_constraint())
+  {
+    sort = context.create_sort_variable();
+  }
 
   // Adds a value to the 'sort' attribute
   // Sets the constraints that apply to this node to 'constraint'
@@ -639,14 +639,12 @@ struct id_node: public type_check_node
 {
   std::string value;
 
-  id_node(const std::string& value_)
-    : value(value_)
+  id_node(type_check_context& context, const std::string& value_)
+    : type_check_node(context, {}), value(value_)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
-
     std::vector<constraint_ptr> alternatives;
 
     // it is a variable
@@ -690,14 +688,12 @@ struct number_node: public type_check_node
 {
   std::string value;
 
-  number_node(const std::string& value_)
-    : value(value_)
+  number_node(type_check_context& context, const std::string& value_)
+    : type_check_node(context, {}), value(value_)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
-
     if (detail::is_pos(value))
     {
       constraint = make_subsort_constraint(sort_pos::pos(), sort);
@@ -722,14 +718,12 @@ struct constant_node: public type_check_node
 {
   std::string name;
 
-  constant_node(const std::string& name_)
-    : name(name_)
+  constant_node(type_check_context& context, const std::string& name_)
+    : type_check_node(context, {}), name(name_)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
-
     std::pair<sort_expression_list, sort_expression_list> p = context.find_matching_constants(name);
     std::vector<constraint_ptr> alternatives;
     for (const sort_expression& s: p.first + p.second)
@@ -748,27 +742,26 @@ struct constant_node: public type_check_node
 
 struct true_node: public constant_node
 {
-  true_node()
-    : constant_node("true")
+  true_node(type_check_context& context)
+    : constant_node(context, "true")
   { }
 };
 
 struct false_node: public constant_node
 {
-  false_node()
-    : constant_node("false")
+  false_node(type_check_context& context)
+    : constant_node(context, "false")
   { }
 };
 
 struct empty_list_node: public constant_node
 {
-  empty_list_node()
-    : constant_node("[]")
+  empty_list_node(type_check_context& context)
+    : constant_node(context, "[]")
   { }
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     auto element_sort = context.create_sort_variable();
     constraint = make_is_equal_to_constraint(sort, sort_list::list(element_sort));
   }
@@ -776,13 +769,12 @@ struct empty_list_node: public constant_node
 
 struct empty_set_node: public constant_node
 {
-  empty_set_node()
-    : constant_node("{}")
+  empty_set_node(type_check_context& context)
+    : constant_node(context, "{}")
   { }
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     auto element_sort = context.create_sort_variable();
     constraint = make_is_equal_to_constraint(sort, sort_set::set_(element_sort));
   }
@@ -790,13 +782,12 @@ struct empty_set_node: public constant_node
 
 struct empty_bag_node: public constant_node
 {
-  empty_bag_node()
-    : constant_node("{:}")
+  empty_bag_node(type_check_context& context)
+    : constant_node(context, "{:}")
   { }
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     auto element_sort = context.create_sort_variable();
     constraint = make_is_equal_to_constraint(sort, sort_bag::bag(element_sort));
   }
@@ -804,13 +795,12 @@ struct empty_bag_node: public constant_node
 
 struct list_enumeration_node: public type_check_node
 {
-  list_enumeration_node(const std::vector<type_check_node_ptr>& children)
-    : type_check_node(children)
+  list_enumeration_node(type_check_context& context, const std::vector<type_check_node_ptr>& children)
+    : type_check_node(context, children)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     auto element_sort = context.create_sort_variable();
     set_children_constraints(context);
 
@@ -831,13 +821,12 @@ struct list_enumeration_node: public type_check_node
 
 struct bag_enumeration_node: public type_check_node
 {
-  bag_enumeration_node(const std::vector<type_check_node_ptr>& children)
-    : type_check_node(children)
+  bag_enumeration_node(type_check_context& context, const std::vector<type_check_node_ptr>& children)
+    : type_check_node(context, children)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     auto element_sort = context.create_sort_variable();
     set_children_constraints(context);
 
@@ -865,13 +854,12 @@ struct bag_enumeration_node: public type_check_node
 
 struct set_enumeration_node: public type_check_node
 {
-  set_enumeration_node(const std::vector<type_check_node_ptr>& children)
-    : type_check_node(children)
+  set_enumeration_node(type_check_context& context, const std::vector<type_check_node_ptr>& children)
+    : type_check_node(context, children)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     auto element_sort = context.create_sort_variable();
     set_children_constraints(context);
 
@@ -894,15 +882,14 @@ struct bag_or_set_enumeration_node: public type_check_node
 {
   variable v;
 
-  bag_or_set_enumeration_node(const variable& v_, type_check_node_ptr x)
-    : v(v_)
+  bag_or_set_enumeration_node(type_check_context& context, const variable& v_, type_check_node_ptr x)
+    : type_check_node(context, {}), v(v_)
   {
     children.push_back(x);
   }
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     context.add_context_variable(v);
     set_children_constraints(context);
 
@@ -927,7 +914,8 @@ struct bag_or_set_enumeration_node: public type_check_node
 
 struct function_update_node: public type_check_node
 {
-  function_update_node(type_check_node_ptr x1, type_check_node_ptr x2, type_check_node_ptr x3)
+  function_update_node(type_check_context& context, type_check_node_ptr x1, type_check_node_ptr x2, type_check_node_ptr x3)
+    : type_check_node(context, {})
   {
     children.push_back(x1);
     children.push_back(x2);
@@ -944,8 +932,8 @@ struct application_node: public type_check_node
 {
   std::size_t arity;
 
-  application_node(type_check_node_ptr head, const std::vector<type_check_node_ptr>& arguments)
-    : arity(arguments.size())
+  application_node(type_check_context& context, type_check_node_ptr head, const std::vector<type_check_node_ptr>& arguments)
+    : type_check_node(context, {}), arity(arguments.size())
   {
     children.push_back(head);
     for (auto arg: arguments)
@@ -956,7 +944,6 @@ struct application_node: public type_check_node
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     set_children_constraints(context);
 
     const sort_expression& codomain = sort;
@@ -989,13 +976,12 @@ struct unary_operator_node: public type_check_node
 {
   std::string name;
 
-  unary_operator_node(const std::string& name_, type_check_node_ptr arg)
-    : type_check_node({ arg }), name(name_)
+  unary_operator_node(type_check_context& context, const std::string& name_, type_check_node_ptr arg)
+    : type_check_node(context, { arg }), name(name_)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     set_children_constraints(context);
 
     std::pair<function_sort_list, function_sort_list> p = context.find_matching_functions(name, 1);
@@ -1023,13 +1009,12 @@ struct forall_node: public type_check_node
 {
   variable_list variables;
 
-  forall_node(const variable_list& variables_, type_check_node_ptr arg)
-    : type_check_node({ arg }), variables(variables_)
+  forall_node(type_check_context& context, const variable_list& variables_, type_check_node_ptr arg)
+    : type_check_node(context, { arg }), variables(variables_)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     context.add_context_variables(variables);
     set_children_constraints(context);
 
@@ -1049,13 +1034,12 @@ struct exists_node: public type_check_node
 {
   variable_list variables;
 
-  exists_node(const variable_list& variables_, type_check_node_ptr arg)
-    : type_check_node({ arg }), variables(variables_)
+  exists_node(type_check_context& context, const variable_list& variables_, type_check_node_ptr arg)
+    : type_check_node(context, { arg }), variables(variables_)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     context.add_context_variables(variables);
     set_children_constraints(context);
 
@@ -1075,13 +1059,12 @@ struct lambda_node: public unary_operator_node
 {
   variable_list variables;
 
-  lambda_node(const variable_list& variables_, type_check_node_ptr arg)
-    : unary_operator_node("lambda", arg), variables(variables_)
+  lambda_node(type_check_context& context, const variable_list& variables_, type_check_node_ptr arg)
+    : unary_operator_node(context, "lambda", arg), variables(variables_)
   {}
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
     context.add_context_variables(variables);
     set_children_constraints(context);
 
@@ -1101,16 +1084,13 @@ struct binary_operator_node: public type_check_node
 {
   std::string name;
 
-  binary_operator_node(const std::string& name_, type_check_node_ptr left, type_check_node_ptr right)
-    : type_check_node({ left, right }), name(name_)
+  binary_operator_node(type_check_context& context, const std::string& name_, type_check_node_ptr left, type_check_node_ptr right)
+    : type_check_node(context, { left, right }), name(name_)
   {}
 
   void set_constraint(type_check_context& context)
   {
     set_children_constraints(context);
-
-    untyped_sort_variable s = context.create_sort_variable();
-    sort = s;
 
     std::pair<function_sort_list, function_sort_list> p = context.find_matching_functions(name, 2);
     std::vector<constraint_ptr> alternatives;
@@ -1139,38 +1119,35 @@ struct binary_operator_node: public type_check_node
 
 struct where_clause_node: public type_check_node
 {
-  std::vector<std::string> variable_names;
+  std::vector<variable> variables;
 
-  where_clause_node(type_check_node_ptr body, const std::vector<std::pair<std::string, type_check_node_ptr> >& assignments)
+  where_clause_node(type_check_context& context, type_check_node_ptr body, const std::vector<std::pair<std::string, type_check_node_ptr> >& assignments)
+    : type_check_node(context, {})
   {
     children.push_back(body);
-    variable_vector v;
     for (const std::pair<std::string, type_check_node_ptr>& a: assignments)
     {
-      variable_names.push_back(a.first);
       children.push_back(a.second);
+      variables.push_back(variable(a.first, a.second->sort));
     }
   }
 
   void set_constraint(type_check_context& context)
   {
-    sort = context.create_sort_variable();
-    variable_list variables;
-    for (const std::string& name: variable_names)
-    {
-      variables.push_front(variable(name, untyped_sort()));
-    }
-    context.add_context_variables(variables);
+    variable_list v(variables.begin(), variables.end());
+    context.add_context_variables(v);
     set_children_constraints(context);
+    context.remove_context_variables(v);
 
-    std::vector<constraint_ptr> constraints = { make_subsort_constraint(untyped_sort(), sort) };
-    for (type_check_node_ptr child: children)
+    std::vector<constraint_ptr> constraints;
+    constraints.push_back(make_is_equal_to_constraint(sort, children[0]->sort));
+    auto i = variables.begin();
+    auto j = ++children.begin();
+    for (; i != variables.end(); ++i, ++j)
     {
-      constraints.push_back(make_subsort_constraint(untyped_sort(), child->sort));
+      constraints.push_back(make_is_equal_to_constraint((*j)->sort, i->sort()));
     }
     constraint = make_and_constraint(constraints);
-
-    context.remove_context_variables(variables);
   }
 
   std::string print() const
@@ -1183,8 +1160,10 @@ struct where_clause_node: public type_check_node
 
 struct type_check_tree_generator: public detail::data_expression_actions
 {
-  type_check_tree_generator(const core::parser& parser_)
-    : data_expression_actions(parser_)
+  type_check_context& context;
+
+  type_check_tree_generator(type_check_context& context_, const core::parser& parser_)
+    : data_expression_actions(parser_), context(context_)
   {}
 
   std::vector<type_check_node_ptr> parse_DataExprList(const core::parse_node& node) const
@@ -1210,47 +1189,47 @@ struct type_check_tree_generator: public detail::data_expression_actions
   type_check_node_ptr parse_DataExpr(const core::parse_node& node) const
   {
     assert(symbol_name(node) == "DataExpr");
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return type_check_node_ptr(new id_node(parse_Id(node.child(0)))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return type_check_node_ptr(new number_node(parse_Number(node.child(0)))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return type_check_node_ptr(new true_node()); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return type_check_node_ptr(new false_node()); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "]")) { return type_check_node_ptr(new empty_list_node()); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "}")) { return type_check_node_ptr(new empty_set_node()); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == ":") && (symbol_name(node.child(2)) == "}")) { return type_check_node_ptr(new empty_bag_node()); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "DataExprList") && (symbol_name(node.child(2)) == "]")) { return type_check_node_ptr(new list_enumeration_node(parse_DataExprList(node.child(1)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "BagEnumEltList") && (symbol_name(node.child(2)) == "}")) { return type_check_node_ptr(new bag_enumeration_node(parse_BagEnumEltList(node.child(1)))); }
-    else if ((node.child_count() == 5) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "VarDecl") && (symbol_name(node.child(2)) == "|") && (symbol_name(node.child(3)) == "DataExpr") && (symbol_name(node.child(4)) == "}")) { return type_check_node_ptr(new bag_or_set_enumeration_node(parse_VarDecl(node.child(1)), parse_DataExpr(node.child(3)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "DataExprList") && (symbol_name(node.child(2)) == "}")) { return type_check_node_ptr(new set_enumeration_node(parse_DataExprList(node.child(1)))); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return type_check_node_ptr(new id_node(context, parse_Id(node.child(0)))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return type_check_node_ptr(new number_node(context, parse_Number(node.child(0)))); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return type_check_node_ptr(new true_node(context)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return type_check_node_ptr(new false_node(context)); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "]")) { return type_check_node_ptr(new empty_list_node(context)); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "}")) { return type_check_node_ptr(new empty_set_node(context)); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == ":") && (symbol_name(node.child(2)) == "}")) { return type_check_node_ptr(new empty_bag_node(context)); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "DataExprList") && (symbol_name(node.child(2)) == "]")) { return type_check_node_ptr(new list_enumeration_node(context, parse_DataExprList(node.child(1)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "BagEnumEltList") && (symbol_name(node.child(2)) == "}")) { return type_check_node_ptr(new bag_enumeration_node(context, parse_BagEnumEltList(node.child(1)))); }
+    else if ((node.child_count() == 5) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "VarDecl") && (symbol_name(node.child(2)) == "|") && (symbol_name(node.child(3)) == "DataExpr") && (symbol_name(node.child(4)) == "}")) { return type_check_node_ptr(new bag_or_set_enumeration_node(context, parse_VarDecl(node.child(1)), parse_DataExpr(node.child(3)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "{") && (symbol_name(node.child(1)) == "DataExprList") && (symbol_name(node.child(2)) == "}")) { return type_check_node_ptr(new set_enumeration_node(context, parse_DataExprList(node.child(1)))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "DataExpr") && (symbol_name(node.child(2)) == ")")) { return parse_DataExpr(node.child(1)); }
-    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "[") && (symbol_name(node.child(2)) == "DataExpr") && (symbol_name(node.child(3)) == "->") && (symbol_name(node.child(4)) == "DataExpr") && (symbol_name(node.child(5)) == "]")) { return type_check_node_ptr(new function_update_node(parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)), parse_DataExpr(node.child(4)))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "DataExprList") && (symbol_name(node.child(3)) == ")")) { return type_check_node_ptr(new application_node(parse_DataExpr(node.child(0)), parse_DataExprList(node.child(2)))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "DataExpr")) { return type_check_node_ptr(new unary_operator_node("!", parse_DataExpr(node.child(1)))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "-") && (symbol_name(node.child(1)) == "DataExpr")) { return type_check_node_ptr(new unary_operator_node("-", parse_DataExpr(node.child(1)))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "#") && (symbol_name(node.child(1)) == "DataExpr")) { return type_check_node_ptr(new unary_operator_node("#", parse_DataExpr(node.child(1)))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return type_check_node_ptr(new forall_node(parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3)))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return type_check_node_ptr(new exists_node(parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3)))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "lambda") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return type_check_node_ptr(new lambda_node(parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "=>" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("=>" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "&&" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("&&" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "||" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("||" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "==" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("==" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "!=" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("!=" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("<"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<=" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("<=" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ">=" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(">=" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ">"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(">"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "in" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("in" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "|>" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("|>" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<|" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("<|" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "++" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("++" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "+"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("+"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "-"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("-"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "/"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("/"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "div") && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("div", parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "mod") && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("mod", parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "*"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("*"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "."  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node("."  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "whr") && (symbol_name(node.child(2)) == "AssignmentList") && (symbol_name(node.child(3)) == "end")) { return type_check_node_ptr(new where_clause_node({ parse_DataExpr(node.child(0)) }, parse_AssignmentList(node.child(2)))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "[") && (symbol_name(node.child(2)) == "DataExpr") && (symbol_name(node.child(3)) == "->") && (symbol_name(node.child(4)) == "DataExpr") && (symbol_name(node.child(5)) == "]")) { return type_check_node_ptr(new function_update_node(context, parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)), parse_DataExpr(node.child(4)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "DataExprList") && (symbol_name(node.child(3)) == ")")) { return type_check_node_ptr(new application_node(context, parse_DataExpr(node.child(0)), parse_DataExprList(node.child(2)))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "DataExpr")) { return type_check_node_ptr(new unary_operator_node(context, "!", parse_DataExpr(node.child(1)))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "-") && (symbol_name(node.child(1)) == "DataExpr")) { return type_check_node_ptr(new unary_operator_node(context, "-", parse_DataExpr(node.child(1)))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "#") && (symbol_name(node.child(1)) == "DataExpr")) { return type_check_node_ptr(new unary_operator_node(context, "#", parse_DataExpr(node.child(1)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return type_check_node_ptr(new forall_node(context, parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return type_check_node_ptr(new exists_node(context, parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "lambda") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "DataExpr")) { return type_check_node_ptr(new lambda_node(context, parse_VarsDeclList(node.child(1)), parse_DataExpr(node.child(3)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "=>" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "=>" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "&&" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "&&" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "||" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "||" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "==" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "==" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "!=" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "!=" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "<"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<=" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "<=" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ">=" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, ">=" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == ">"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, ">"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "in" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "in" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "|>" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "|>" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "<|" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "<|" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "++" ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "++" , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "+"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "+"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "-"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "-"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "/"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "/"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "div") && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "div", parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "mod") && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "mod", parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "*"  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "*"  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (node.child(1).string() == "."  ) && (symbol_name(node.child(2)) == "DataExpr")) { return type_check_node_ptr(new binary_operator_node(context, "."  , parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "whr") && (symbol_name(node.child(2)) == "AssignmentList") && (symbol_name(node.child(3)) == "end")) { return type_check_node_ptr(new where_clause_node(context, { parse_DataExpr(node.child(0)) }, parse_AssignmentList(node.child(2)))); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
