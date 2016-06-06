@@ -1780,18 +1780,16 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                        std::set<core::identifier_string>& function_symbol_names
                       )
   {
-    std::set<function_symbol> f = data::find_function_symbols(eqn);
-    for (std::set<function_symbol>::iterator i = f.begin(); i != f.end(); ++i)
+    for (const function_symbol& f: data::find_function_symbols(eqn))
     {
-      function_symbol_names.insert(i->name());
+      function_symbol_names.insert(f.name());
     }
-    const variable_list& v = eqn.variables();
-    for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const variable& v: eqn.variables())
     {
-      std::pair<std::map<core::identifier_string, variable>::iterator, bool> k = variable_map.insert(std::make_pair(i->name(), *i));
+      std::pair<std::map<core::identifier_string, variable>::iterator, bool> k = variable_map.insert(std::make_pair(v.name(), v));
       if (k.second) // new variable encountered
       {
-        variables.push_back(*i);
+        variables.push_back(v);
       }
     }
   }
@@ -1800,11 +1798,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                     const std::map<core::identifier_string, variable>& variable_map
                    )
   {
-    const variable_list& v = eqn.variables();
-    for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const variable& v: eqn.variables())
     {
-      std::map<core::identifier_string, variable>::const_iterator j = variable_map.find(i->name());
-      if (j != variable_map.end() && *i != j->second)
+      std::map<core::identifier_string, variable>::const_iterator j = variable_map.find(v.name());
+      if (j != variable_map.end() && v != j->second)
       {
         return true;
       }

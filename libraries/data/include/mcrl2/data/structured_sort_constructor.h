@@ -91,9 +91,9 @@ class structured_sort_constructor: public atermpp::aterm_appl
     template <typename OutIter>
     void argument_sorts(OutIter out) const
     {
-      for(structured_sort_constructor_argument_list::const_iterator i = arguments().begin(); i != arguments().end(); ++i)
+      for(const auto & i : arguments())
       {
-        *out++ = i->sort();
+        *out++ = i.sort();
       }
     }
 
@@ -166,11 +166,11 @@ class structured_sort_constructor: public atermpp::aterm_appl
     function_symbol_vector projection_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (structured_sort_constructor_argument_list::const_iterator i = arguments().begin(); i != arguments().end(); ++i)
+      for (const auto & i : arguments())
       {
-        if (i->name() != core::empty_identifier_string())
+        if (i.name() != core::empty_identifier_string())
         {
-          result.push_back(function_symbol(i->name(), make_function_sort(s, i->sort())));
+          result.push_back(function_symbol(i.name(), make_function_sort(s, i.sort())));
         }
       }
       return result;

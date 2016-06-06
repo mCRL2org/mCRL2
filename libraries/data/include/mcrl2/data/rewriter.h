@@ -158,9 +158,9 @@ class rewriter: public basic_rewriter<data_expression>
 #endif
       substitution_type sigma_with_iterator;
       std::set < variable > free_variables=data::find_free_variables(d);
-      for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
+      for(const variable& free_variable: free_variables)
       {
-        sigma_with_iterator[*it]=sigma(*it);
+        sigma_with_iterator[free_variable]=sigma(free_variable);
       }
 
       data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));

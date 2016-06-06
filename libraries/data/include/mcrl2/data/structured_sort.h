@@ -144,9 +144,9 @@ class structured_sort: public sort_expression
     function_symbol_vector constructor_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i)
+      for (const auto & i : constructors())
       {
-        result.push_back(i->constructor_function(s));
+        result.push_back(i.constructor_function(s));
       }
       return result;
     }
@@ -164,9 +164,9 @@ class structured_sort: public sort_expression
     function_symbol_vector projection_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i)
+      for (const auto & i : constructors())
       {
-        function_symbol_vector projections(i->projection_functions(s));
+        function_symbol_vector projections(i.projection_functions(s));
 
         for (function_symbol_vector::const_iterator j = projections.begin(); j != projections.end(); ++j)
         {
@@ -179,11 +179,11 @@ class structured_sort: public sort_expression
     function_symbol_vector recogniser_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i)
+      for (const auto & i : constructors())
       {
-        if (i->recogniser() != core::empty_identifier_string())
+        if (i.recogniser() != core::empty_identifier_string())
         {
-          result.push_back(i->recogniser_function(s));
+          result.push_back(i.recogniser_function(s));
         }
       }
       return result;
@@ -212,10 +212,10 @@ class structured_sort: public sort_expression
 
           std::vector< variable > variables1;
           std::vector< variable > variables2;
-          for (structured_sort_constructor_argument_list::const_iterator k = i->arguments().begin(); k != i->arguments().end(); ++k)
+          for (const auto & k : i->arguments())
           {
-            variables1.push_back(variable(generator("v"), k->sort()));
-            variables2.push_back(variable(generator("w"), k->sort()));
+            variables1.push_back(variable(generator("v"), k.sort()));
+            variables2.push_back(variable(generator("w"), k.sort()));
           }
           application instance1(i->constructor_function(s), variables1);
           application instance2(i->constructor_function(s), variables2);
@@ -299,20 +299,20 @@ class structured_sort: public sort_expression
     {
       data_equation_vector result;
 
-      for (structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i)
+      for (const auto & i : constructors())
       {
-        if (!i->arguments().empty())
+        if (!i.arguments().empty())
         {
-          structured_sort_constructor_argument_list arguments(i->arguments());
+          structured_sort_constructor_argument_list arguments(i.arguments());
 
           set_identifier_generator generator;
 
           std::vector< variable > variables;
 
           // Create variables for equation
-          for (structured_sort_constructor_argument_list::const_iterator j(arguments.begin()); j != arguments.end(); ++j)
+          for (const auto & argument : arguments)
           {
-            variables.push_back(variable(generator("v"), j->sort()));
+            variables.push_back(variable(generator("v"), argument.sort()));
           }
 
           std::vector< variable >::const_iterator v = variables.begin();
@@ -322,7 +322,7 @@ class structured_sort: public sort_expression
             if (j->name() != core::empty_identifier_string())
             {
               application lhs(function_symbol(j->name(), make_function_sort(s, j->sort()))
-                              (application(i->constructor_function(s), variables)));
+                              (application(i.constructor_function(s), variables)));
 
               result.push_back(data_equation(variables, lhs, *v));
             }
@@ -341,15 +341,15 @@ class structured_sort: public sort_expression
 
       for (structured_sort_constructor_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
       {
-        for (structured_sort_constructor_list::const_iterator j = cl.begin(); j != cl.end(); ++j)
+        for (const auto & j : cl)
         {
-          if (j->recogniser() != core::empty_identifier_string())
+          if (j.recogniser() != core::empty_identifier_string())
           {
-            data_expression right = (*i == *j) ? sort_bool::true_() : sort_bool::false_();
+            data_expression right = (*i == j) ? sort_bool::true_() : sort_bool::false_();
 
             if (i->arguments().empty())
             {
-              result.push_back(data_equation(j->recogniser_function(s)(i->constructor_function(s)), right));
+              result.push_back(data_equation(j.recogniser_function(s)(i->constructor_function(s)), right));
             }
             else
             {
@@ -361,12 +361,12 @@ class structured_sort: public sort_expression
               // Create variables for equation
               variable_vector variables;
 
-              for (structured_sort_constructor_argument_list::const_iterator k(arguments.begin()); k != arguments.end(); ++k)
+              for (const auto & argument : arguments)
               {
-                variables.push_back(variable(generator("v"), k->sort()));
+                variables.push_back(variable(generator("v"), argument.sort()));
               }
 
-              result.push_back(data_equation(variables, j->recogniser_function(s)(
+              result.push_back(data_equation(variables, j.recogniser_function(s)(
                                                application(i->constructor_function(s), variables)), right));
             }
           }

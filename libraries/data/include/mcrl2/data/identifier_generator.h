@@ -60,18 +60,18 @@ class identifier_generator
     /// \brief Add a set of identifiers to the context.
     void add_identifiers(const std::set<core::identifier_string>& ids)
     {
-      for (std::set<core::identifier_string>::const_iterator i = ids.begin(); i != ids.end(); ++i)
+      for (const core::identifier_string& id: ids)
       {
-        add_identifier(*i);
+        add_identifier(id);
       }
     }
 
     /// \brief Remove a set of identifiers from the context.
     void remove_identifiers(const std::set<core::identifier_string>& ids)
     {
-      for (std::set<core::identifier_string>::const_iterator i = ids.begin(); i != ids.end(); ++i)
+      for (const core::identifier_string& id: ids)
       {
-        remove_identifier(*i);
+        remove_identifier(id);
       }
     }
 

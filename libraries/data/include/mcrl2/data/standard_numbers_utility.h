@@ -43,11 +43,11 @@ inline std::vector< char > string_to_vector_number(const std::string& s)
 
   result.reserve(s.size());
 
-  for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+  for (char i: s)
   {
-    assert('0' <= *i && *i <= '9');
+    assert('0' <= i && i <= '9');
 
-    result.push_back(*i - '0');
+    result.push_back(i - '0');
   }
 
   return result;
@@ -62,9 +62,9 @@ inline std::string vector_number_to_string(const std::vector< char >& v)
 
   result.reserve(v.size());
 
-  for (std::vector< char >::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (char i: v)
   {
-    result.push_back(*i + '0');
+    result.push_back(i + '0');
   }
 
   return result;

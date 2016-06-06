@@ -422,11 +422,11 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
     variable_vector xvars,yvars;
     data_expression rhs=sort_bool::true_();
     size_t index=0;
-    for(sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+    for(const sort_expression& sort: fs.domain())
     {
       std::stringstream xs;
       xs << "x" << index;
-      variable x(xs.str(),*i);
+      variable x(xs.str(),sort);
       xvars.push_back(x);
     }
     variable f("f",s);

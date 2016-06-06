@@ -41,17 +41,17 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
 
   void increase_bind_count(const assignment_list& assignments)
   {
-    for (auto i = assignments.begin(); i != assignments.end(); ++i)
+    for (const auto& assignment : assignments)
     {
-      increase_bind_count(i->lhs());
+      increase_bind_count(assignment.lhs());
     }
   }
 
   void decrease_bind_count(const assignment_list& assignments)
   {
-    for (auto i = assignments.begin(); i != assignments.end(); ++i)
+    for (const auto& assignment : assignments)
     {
-      decrease_bind_count(i->lhs());
+      decrease_bind_count(assignment.lhs());
     }
   }
 

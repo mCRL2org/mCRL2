@@ -77,9 +77,9 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
 	using utilities::detail::contains;
 
   std::set<variable> v(variables.begin(), variables.end());
-  for (auto i = assignments.begin(); i != assignments.end(); ++i)
+  for (const assignment& a: assignments)
   {
-    if (!contains(v, i->lhs()))
+    if (!contains(v, a.lhs()))
     {
       return false;
     }
@@ -121,14 +121,14 @@ inline bool check_sort(sort_expression s, const SortContainer& sorts)
 
   std::set<sort_expression> s_sorts = data::find_sort_expressions(s);
   set_remove_if(s_sorts, std::bind(&local::is_not_function_sort, std::placeholders::_1));
-  for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
+  for (const sort_expression& sort: s_sorts)
   {
-    if (std::find(sorts.begin(), sorts.end(), *i) == sorts.end())
+    if (std::find(sorts.begin(), sorts.end(), sort) == sorts.end())
     {
       // sort *i is not well-typed, a system defined sort or an alias
-      if (!(is_system_defined(*i)) && is_alias(*i))
+      if (!(is_system_defined(sort)) && is_alias(sort))
       {
-        alias sort_alias(*i);
+        alias sort_alias(sort);
 
         if (std::find(sorts.begin(), sorts.end(), sort_alias.name()) == sorts.end())
         {
@@ -207,9 +207,9 @@ bool check_variable_names(variable_list const& variables, const std::set<core::i
 {
   using utilities::detail::contains;
 
-  for (auto i = variables.begin(); i != variables.end(); ++i)
+  for (const variable& v: variables)
   {
-    if (contains(names, i->name()))
+    if (contains(names, v.name()))
     {
       return false;
     }

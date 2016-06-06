@@ -313,9 +313,9 @@ struct add_capture_avoiding_replacement: public Builder<Derived>
   {
     data::assignment_list assignments = atermpp::container_cast<data::assignment_list>(x.declarations());
     std::vector<data::variable> tmp;
-    for (data::assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
+    for (const data::assignment& a: assignments)
     {
-      tmp.push_back(i->lhs());
+      tmp.push_back(a.lhs());
     }
     std::vector<data::variable> v = update_sigma.push(tmp);
 

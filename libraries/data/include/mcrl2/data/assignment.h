@@ -307,9 +307,9 @@ inline
 variable_list left_hand_sides(const assignment_list& x)
 {
   std::vector<variable> result;
-  for (assignment_list::const_iterator i = x.begin(); i != x.end(); ++i)
+  for (const assignment& a : x)
   {
-    result.push_back(i->lhs());
+    result.push_back(a.lhs());
   }
   return variable_list(result.begin(), result.end());
 }

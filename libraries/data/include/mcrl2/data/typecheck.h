@@ -269,14 +269,14 @@ class data_type_checker: public sort_type_checker
         std::cout << x << std::endl;
       }
       std::cout << "--- user constants ---" << std::endl;
-      for (auto i = user_constants.begin(); i != user_constants.end(); ++i)
+      for (const auto& user_constant: user_constants)
       {
-        std::cout << i->first << " -> " << i->second << std::endl;
+        std::cout << user_constant.first << " -> " << user_constant.second << std::endl;
       }
       std::cout << "--- user functions ---" << std::endl;
-      for (auto i = user_functions.begin(); i != user_functions.end(); ++i)
+      for (const auto& user_function: user_functions)
       {
-        std::cout << i->first << " -> " << i->second << std::endl;
+        std::cout << user_function.first << " -> " << user_function.second << std::endl;
       }
     }
 };

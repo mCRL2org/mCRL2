@@ -42,11 +42,11 @@ inline
 data_expression make_set_(std::size_t function_index, const sort_expression& element_sort, const data_expression_vector& set_elements)
 {
   data_expression result = sort_fset::empty(element_sort);
-  for (auto i = set_elements.begin(); i != set_elements.end(); ++i)
+  for (const auto & set_element : set_elements)
   {
     if (function_index % 2 == 1)
     {
-      result=sort_fset::insert(element_sort, *i, result);
+      result=sort_fset::insert(element_sort, set_element, result);
     }
     function_index = function_index / 2;
   }
@@ -123,11 +123,11 @@ bool compute_finite_function_sorts(const function_sort& sort,
   std::size_t total_domain_size = 1;
   variable_vector function_parameters;
 
-  for (auto i = sort.domain().begin(); i != sort.domain().end(); ++i)
+  for (const sort_expression& s: sort.domain())
   {
-    domain_expressions.push_back(enumerate_expressions(*i, dataspec, datar));
+    domain_expressions.push_back(enumerate_expressions(s, dataspec, datar));
     total_domain_size = total_domain_size * domain_expressions.back().size();
-    function_parameters.push_back(variable(id_generator("x"), *i));
+    function_parameters.push_back(variable(id_generator("x"), s));
   }
 
   if (total_domain_size * utilities::ceil_log2(codomain_expressions.size()) >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
@@ -525,10 +525,10 @@ class enumerator_algorithm
             cannot_enumerate(p, "Sort " + data::pp(sort) + " has too many elements to enumerate");
           }
           const data_expression old_substituted_value = sigma(v1);
-          for (auto i = function_sorts.begin(); i != function_sorts.end(); ++i)
+          for (const data_expression& f: function_sorts)
           {
-            sigma[v1] = *i;
-            add_element(P, sigma, accept, vtail, phi, p, v1, *i);
+            sigma[v1] = f;
+            add_element(P, sigma, accept, vtail, phi, p, v1, f);
           }
           sigma[v1] = old_substituted_value;
         }
@@ -571,10 +571,10 @@ class enumerator_algorithm
             cannot_enumerate(p, "Finite set sort " + data::pp(sort) + " has too many elements to enumerate");
           }
           const data_expression old_substituted_value = sigma(v1);
-          for (auto i = set_elements.begin(); i != set_elements.end(); ++i)
+          for (const data_expression& set_element: set_elements)
           {
-            sigma[v1] = *i;
-            add_element(P, sigma, accept, vtail, phi, p, v1, *i);
+            sigma[v1] = set_element;
+            add_element(P, sigma, accept, vtail, phi, p, v1, set_element);
           }
           sigma[v1] = old_substituted_value;
         }

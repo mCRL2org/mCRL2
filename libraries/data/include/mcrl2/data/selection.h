@@ -67,17 +67,17 @@ class used_data_equation_selector
 
       // Add all constructors of all sorts as they may be used when enumerating over these sorts
       std::set< sort_expression > sorts(specification.sorts().begin(),specification.sorts().end());
-      for (std::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
+      for (const sort_expression& sort: sorts)
       {
-        add_symbols(specification.constructors(*j));
+        add_symbols(specification.constructors(sort));
         // Always add equality and inequality of each sort. The one point rewriter is using this for instance.
-        add_symbol(equal_to(*j));
-        add_symbol(not_equal_to(*j));
+        add_symbol(equal_to(sort));
+        add_symbol(not_equal_to(sort));
 
         // Always add insert for an FSet(S) function, as it is used when enumerating the elements of an FSet.
-        if (sort_fset::is_fset(*j))
+        if (sort_fset::is_fset(sort))
         {
-          const container_sort &s = atermpp::down_cast<container_sort>(*j);
+          const container_sort &s = atermpp::down_cast<container_sort>(sort);
           add_symbol(sort_fset::insert(s.element_sort()));
         }
       }
@@ -86,13 +86,13 @@ class used_data_equation_selector
 
       std::map< data_equation, std::set< function_symbol > > symbols_for_equation;
 
-      for (std::set< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      for (const data_equation& equation: equations)
       {
         std::set< function_symbol > used_symbols;
 
-        data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end())).apply(i->lhs());
+        data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end())).apply(equation.lhs());
 
-        symbols_for_equation[*i].swap(used_symbols);
+        symbols_for_equation[equation].swap(used_symbols);
       }
 
       for (std::set< data_equation >::size_type n = 0, m = equations.size(); n != m; n = m, m = equations.size())
@@ -165,10 +165,10 @@ class used_data_equation_selector
                                ):add_all(false)
     {
       // Compensate for symbols that could be used as part of an instantiation of free variables
-      for (std::set<data::variable>::const_iterator j = global_variables.begin(); j != global_variables.end(); ++j)
+      for (const variable& global_variable: global_variables)
       {
-        add_symbols(specification.constructors(j->sort()));
-        add_symbols(specification.mappings(j->sort()));
+        add_symbols(specification.constructors(global_variable.sort()));
+        add_symbols(specification.mappings(global_variable.sort()));
       }
       m_used_symbols.insert(function_symbols.begin(), function_symbols.end());
       add_data_specification_symbols(specification);
