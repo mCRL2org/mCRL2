@@ -57,9 +57,9 @@ bool check_list_argument(Term t, CheckFunction f, unsigned int minimum_size)
   {
     return false;
   }
-  for (atermpp::aterm_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (const auto& x: l)
   {
-    if (!f(*i))
+    if (!f(x))
     {
       return false;
     }
@@ -129,9 +129,9 @@ bool check_term_DataAppl(Term t)
     return false;
   }
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
-  for (atermpp::aterm_appl::const_iterator child = a.begin(); child != a.end(); ++child)
+  for (const auto& child : a)
   {
-    if (!check_term_argument(*child, check_rule_DataExpr<atermpp::aterm>))
+    if (!check_term_argument(child, check_rule_DataExpr<atermpp::aterm>))
     {
       mCRL2log(log::debug, "soundness_checks") << "check_rule_DataExpr" << std::endl;
       return false;
