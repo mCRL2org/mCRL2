@@ -49,9 +49,9 @@ struct duplicate_equation_removal
   std::string print_group(const group& g)
   {
     std::ostringstream out;
-    for (auto i = g.begin(); i != g.end(); ++i)
+    for (auto i: g)
     {
-      const process_equation& eq = **i;
+      const process_equation& eq = *i;
 
       // use a custom print for equations, since by default they are printed on multiple lines...
       bool print_parens = !eq.formal_parameters().empty();
@@ -74,9 +74,9 @@ struct duplicate_equation_removal
   {
     std::ostringstream out;
     std::size_t index = 0;
-    for (auto i = groups.begin(); i != groups.end(); ++i)
+    for (auto& group: groups)
     {
-      out << "--- group " << index++ << " ---\n" << print_group(*i) << std::endl;
+      out << "--- group " << index++ << " ---\n" << print_group(group) << std::endl;
     }
     return out.str();
   }
@@ -90,9 +90,9 @@ struct duplicate_equation_removal
       generator.add_identifier(i->identifier().name());
       s[i->formal_parameters()].insert(i);
     }
-    for (auto i = s.begin(); i != s.end(); ++i)
+    for (auto& i: s)
     {
-      groups.push_back(i->second);
+      groups.push_back(i.second);
     }
     mCRL2log(log::debug) << "==========================================================\n" << print_groups() << std::endl;
   }
@@ -101,12 +101,12 @@ struct duplicate_equation_removal
   substitution make_substitution()
   {
     substitution result;
-    for (auto i = groups.begin(); i != groups.end(); ++i)
+    for (auto& i :groups)
     {
-      const group& g = *i;
+      const group& g = i;
       const process_equation& first_equation = **g.begin();
       process_identifier id(generator("X"), first_equation.formal_parameters());
-      for (auto j = i->begin(); j != i->end(); ++j)
+      for (auto j = i.begin(); j != i.end(); ++j)
       {
         const process_equation& eq = **j;
         result[eq.identifier()] = id;
@@ -119,15 +119,15 @@ struct duplicate_equation_removal
   void split_group(const group& g, const substitution& sigma, std::vector<group>& result)
   {
     std::map<process_expression, group> m;
-    for (auto i = g.begin(); i != g.end(); ++i)
+    for (auto i: g)
     {
-      const process_equation& eq = **i;
+      const process_equation& eq = *i;
       process_expression expr = replace_process_identifiers(eq.expression(), sigma);
-      m[expr].insert(*i);
+      m[expr].insert(i);
     }
-    for (auto i = m.begin(); i != m.end(); ++i)
+    for (auto &i : m)
     {
-      result.push_back(i->second);
+      result.push_back(i.second);
     }
   }
 
@@ -137,9 +137,9 @@ struct duplicate_equation_removal
   {
     substitution sigma = make_substitution();
     std::vector<group> new_groups;
-    for (auto i = groups.begin(); i != groups.end(); ++i)
+    for (auto& group: groups)
     {
-      split_group(*i, sigma, new_groups);
+      split_group(group, sigma, new_groups);
     }
     bool result = new_groups.size() > groups.size();
     groups = new_groups;
@@ -162,18 +162,18 @@ struct duplicate_equation_removal
     // and prepare a substitution sigma that removes the others
     std::vector<process_equation> new_equations;
     substitution sigma;
-    for (auto i = groups.begin(); i != groups.end(); ++i)
+    for (auto& i : groups)
     {
       // optimization for the case of only one equation in a group
-      if (i->size() == 1)
+      if (i.size() == 1)
       {
-        new_equations.push_back(**(i->begin()));
+        new_equations.push_back(**(i.begin()));
         continue;
       }
 
-      group::const_iterator j = std::min_element(i->begin(), i->end());
+      group::const_iterator j = std::min_element(i.begin(), i.end());
       new_equations.push_back(**j);
-      for (group::const_iterator k = i->begin(); k != i->end(); ++k)
+      for (group::const_iterator k = i.begin(); k != i.end(); ++k)
       {
         if (k != j)
         {
@@ -183,9 +183,9 @@ struct duplicate_equation_removal
     }
 
     // Apply sigma to the new equations and the initial state
-    for (auto i = new_equations.begin(); i != new_equations.end(); ++i)
+    for (auto& new_equation : new_equations)
     {
-      *i = process_equation(i->identifier(), i->formal_parameters(), replace_process_identifiers(i->expression(), sigma));
+      new_equation = process_equation(new_equation.identifier(), new_equation.formal_parameters(), replace_process_identifiers(new_equation.expression(), sigma));
     }
     procspec.init() = replace_process_identifiers(procspec.init(), sigma);
     procspec.equations() = new_equations;

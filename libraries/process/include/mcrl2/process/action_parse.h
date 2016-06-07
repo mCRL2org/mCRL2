@@ -48,9 +48,9 @@ struct action_actions: public data::detail::data_specification_actions
       {
         sorts = parse_SortProduct(node.child(1).child(0).child(1));
       }
-      for (auto i = ids.begin(); i != ids.end(); ++i)
+      for (const core::identifier_string& id: ids)
       {
-        result.push_back(action_label(*i, sorts));
+        result.push_back(action_label(id, sorts));
       }
       return true;
     }

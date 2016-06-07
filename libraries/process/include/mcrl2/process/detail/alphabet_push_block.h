@@ -51,17 +51,17 @@ std::set<core::identifier_string> rename_inverse(const rename_expression_list& R
 {
   process::detail::rename_inverse_map Rinverse = process::detail::rename_inverse(R);
   std::set<core::identifier_string> result;
-  for (std::set<core::identifier_string>::const_iterator i = B.begin(); i != B.end(); ++i)
+  for (const core::identifier_string& i: B)
   {
-    auto j = Rinverse.find(*i);
+    auto j = Rinverse.find(i);
     if (j != Rinverse.end())
     {
-      std::vector<core::identifier_string> s = Rinverse[*i];
+      std::vector<core::identifier_string> s = Rinverse[i];
       result.insert(s.begin(), s.end());
     }
     else
     {
-      result.insert(*i);
+      result.insert(i);
     }
   }
   return result;
@@ -200,11 +200,11 @@ struct push_block_builder: public process_expression_builder<Derived>
     if (i != W.end())
     {
       const std::vector<std::pair<std::set<core::identifier_string>, process_instance> >& v = i->second;
-      for (auto j = v.begin(); j != v.end(); ++j)
+      for (const auto& j: v)
       {
-        if (B == j->first)
+        if (B == j.first)
         {
-          return j->second;
+          return j.second;
         }
       }
     }
@@ -260,10 +260,10 @@ struct push_block_builder: public process_expression_builder<Derived>
   bool restrict(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
   {
     using utilities::detail::contains;
-    for (auto i = C.begin(); i != C.end(); ++i)
+    for (const communication_expression& i: C)
     {
-      core::identifier_string_list gamma = i->action_name().names();
-      core::identifier_string c = i->name();
+      core::identifier_string_list gamma = i.action_name().names();
+      core::identifier_string c = i.name();
       if (contains(gamma, b) && !contains(B, c))
       {
         return true;

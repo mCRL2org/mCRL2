@@ -61,10 +61,9 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
     const process_equation& eqn = find_equation(equations, x.identifier());
     process_expression p = eqn.expression();
     data::mutable_map_substitution<> sigma;
-    data::assignment_list a = x.assignments();
-    for (auto i = a.begin(); i != a.end(); ++i)
+    for (const auto& a: x.assignments())
     {
-      sigma[i->lhs()] = i->rhs();
+      sigma[a.lhs()] = a.rhs();
     }
     process_expression result = process::replace_variables_capture_avoiding(p, sigma, data::substitution_variables(sigma));
     return result;
@@ -86,12 +85,11 @@ inline
 process_instance expand_assignments(const process::process_instance_assignment& x, const std::vector<process_equation>& equations)
 {
   const process_equation& eqn = find_equation(equations, x.identifier());
-  const data::variable_list& v = eqn.formal_parameters();
   data::assignment_sequence_substitution sigma(x.assignments());
   std::vector<data::data_expression> e;
-  for (auto i = v.begin(); i != v.end(); ++i)
+  for (const data::variable& v: eqn.formal_parameters())
   {
-    e.push_back(sigma(*i));
+    e.push_back(sigma(v));
   }
   return process_instance(x.identifier(), data::data_expression_list(e.begin(), e.end()));
 }

@@ -90,33 +90,30 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
   void apply(const process::rename& x)
   {
     super::apply(x);
-    rename_expression_list R = x.rename_set();
-    for (rename_expression_list::const_iterator i = R.begin(); i != R.end(); ++i)
+    for (const rename_expression& r: x.rename_set())
     {
-      result.insert(i->source());
-      result.insert(i->target());
+      result.insert(r.source());
+      result.insert(r.target());
     }
   }
 
   void apply(const process::comm& x)
   {
     super::apply(x);
-    communication_expression_list C = x.comm_set();
-    for (communication_expression_list::const_iterator i = C.begin(); i != C.end(); ++i)
+    for (const communication_expression& c: x.comm_set())
     {
-      core::identifier_string_list names = i->action_name().names();
+      core::identifier_string_list names = c.action_name().names();
       result.insert(names.begin(), names.end());
-      result.insert(i->name());
+      result.insert(c.name());
     }
   }
 
   void apply(const process::allow& x)
   {
     super::apply(x);
-    action_name_multiset_list V = x.allow_set();
-    for (action_name_multiset_list::const_iterator i = V.begin(); i != V.end(); ++i)
+    for (const action_name_multiset& i: x.allow_set())
     {
-      core::identifier_string_list names = i->names();
+      core::identifier_string_list names = i.names();
       result.insert(names.begin(), names.end());
     }
   }
@@ -294,11 +291,11 @@ std::set<core::identifier_string> find_action_names(const T& x)
 inline
 const process_equation& find_equation(const std::vector<process_equation>& equations, const process_identifier& id)
 {
-  for (std::vector<process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  for (const process_equation& equation: equations)
   {
-    if (i->identifier() == id)
+    if (equation.identifier() == id)
     {
-      return *i;
+      return equation;
     }
   }
   throw mcrl2::runtime_error("unknown process identifier " + process::pp(id));

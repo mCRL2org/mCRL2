@@ -47,9 +47,9 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
   alphabet_push_builder(std::vector<process_equation>& equations_)
     : equations(equations_)
   {
-    for (auto i = equations_.begin(); i != equations_.end(); ++i)
+    for (process_equation& equation: equations_)
     {
-      id_generator.add_identifier(i->identifier().name());
+      id_generator.add_identifier(equation.identifier().name());
     }
   }
 

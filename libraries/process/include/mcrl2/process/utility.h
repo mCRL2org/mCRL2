@@ -91,10 +91,9 @@ process_expression make_allow(const multi_action_name_set& A, const process_expr
 
   // convert A to an action_name_multiset_list B
   std::vector<action_name_multiset> v;
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (const multi_action_name& alpha: A)
   {
-    const multi_action_name& alpha = *i;
-    if (!i->empty()) // exclude tau
+    if (!alpha.empty()) // exclude tau
     {
       v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
     }
@@ -147,9 +146,9 @@ process_expression make_block(const core::identifier_string_list& B, const proce
 inline
 bool is_source(const rename_expression_list& R, const core::identifier_string& x)
 {
-  for (auto i = R.begin(); i != R.end(); ++i)
+  for (const rename_expression& r: R)
   {
-    if (i->source() == x)
+    if (r.source() == x)
     {
       return true;
     }
@@ -264,9 +263,9 @@ inline
 // Returns true if A contains an x such that includes(x, y)
 bool includes(const multi_action_name_set& A, const multi_action_name& y)
 {
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (const multi_action_name& alpha: A)
   {
-    if (includes(*i, y))
+    if (includes(alpha, y))
     {
       return true;
     }
@@ -283,14 +282,13 @@ void apply_comm(const communication_expression& c, multi_action_name_set& A)
   // c == alpha -> a
 
   multi_action_name_set to_be_added;
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (multi_action_name beta: A)
   {
-    multi_action_name beta = *i;
     while (includes(beta, alpha))
     {
-      for (auto j = alpha.begin(); j != alpha.end(); ++j)
+      for (const core::identifier_string& a: alpha)
       {
-        beta.erase(beta.find(*j));
+        beta.erase(beta.find(a));
       }
       beta.insert(a);
       to_be_added.insert(beta);
@@ -307,9 +305,8 @@ void apply_comm_inverse(const communication_expression& gamma, multi_action_name
   core::identifier_string c = gamma.name();
   core::identifier_string_list lhs = gamma.action_name().names();
 
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (const multi_action_name& alpha: A)
   {
-    const multi_action_name& alpha = *i;
     std::size_t n = alpha.count(c);
     if (n > 0)
     {
@@ -328,11 +325,11 @@ void apply_comm_inverse(const communication_expression& gamma, multi_action_name
 inline
 core::identifier_string apply_rename(const rename_expression_list& R, const core::identifier_string& x)
 {
-  for (auto i = R.begin(); i != R.end(); ++i)
+  for (const rename_expression& r: R)
   {
-    if (x == i->source())
+    if (x == r.source())
     {
-      return i->target();
+      return r.target();
     }
   }
   return x;
@@ -342,9 +339,9 @@ inline
 multi_action_name apply_rename(const rename_expression_list& R, const multi_action_name& a)
 {
   multi_action_name result;
-  for (auto i = a.begin(); i != a.end(); ++i)
+  for (const core::identifier_string& i: a)
   {
-    result.insert(apply_rename(R, *i));
+    result.insert(apply_rename(R, i));
   }
   return result;
 }
@@ -355,9 +352,9 @@ inline
 multi_action_name multiset_difference(const multi_action_name& alpha, const multi_action_name& beta)
 {
   multi_action_name result = alpha;
-  for (auto i = beta.begin(); i != beta.end(); ++i)
+  for (const core::identifier_string& i: beta)
   {
-    multi_action_name::iterator j = result.find(*i);
+    multi_action_name::iterator j = result.find(i);
     if (j != result.end())
     {
       result.erase(j);
@@ -394,11 +391,11 @@ inline
 multi_action_name_set concat(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   multi_action_name_set result;
-  for (auto i = A1.begin(); i != A1.end(); ++i)
+  for (const multi_action_name& i: A1)
   {
-    for (auto j = A2.begin(); j != A2.end(); ++j)
+    for (const multi_action_name& j: A2)
     {
-       result.insert(multiset_union(*i, *j));
+       result.insert(multiset_union(i, j));
     }
   }
   return result;
@@ -408,12 +405,10 @@ inline
 multi_action_name_set left_arrow1(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   multi_action_name_set result = A1; // needed because tau is not explicitly stored
-  for (auto i = A2.begin(); i != A2.end(); ++i)
+  for (const multi_action_name& beta: A2)
   {
-    const multi_action_name& beta = *i;
-    for (auto j = A1.begin(); j != A1.end(); ++j)
+    for (const multi_action_name& gamma: A1)
     {
-      const multi_action_name& gamma = *j;
       if (detail::includes(gamma, beta))
       {
         multi_action_name alpha = multiset_difference(gamma, beta);
@@ -448,9 +443,9 @@ inline
 multi_action_name_set make_name_set(const action_name_multiset_list& v)
 {
   multi_action_name_set result;
-  for (auto i = v.begin(); i != v.end(); ++i)
+  for (const action_name_multiset& i: v)
   {
-    core::identifier_string_list names = i->names();
+    core::identifier_string_list names = i.names();
     result.insert(multi_action_name(names.begin(), names.end()));
   }
   return result;
@@ -480,13 +475,13 @@ inline
 communication_expression_list filter_comm_set(const communication_expression_list& C, const multi_action_name_set& alphabet)
 {
   std::vector<communication_expression> result;
-  for (auto i = C.begin(); i != C.end(); ++i)
+  for (const communication_expression& c: C)
   {
-    core::identifier_string_list lhs = i->action_name().names();
+    core::identifier_string_list lhs = c.action_name().names();
     multi_action_name alpha(lhs.begin(), lhs.end());
     if (detail::includes(alphabet, alpha))
     {
-      result.push_back(*i);
+      result.push_back(c);
     }
   }
   return communication_expression_list(result.begin(), result.end());
@@ -500,11 +495,11 @@ inline
 multi_action_name_set remove_subsets(const multi_action_name_set& A)
 {
   multi_action_name_set result;
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (const multi_action_name& alpha: A)
   {
-    if (!detail::includes(result, *i))
+    if (!detail::includes(result, alpha))
     {
-      result.insert(*i);
+      result.insert(alpha);
     }
   }
   return result;
@@ -534,9 +529,9 @@ multi_action_name_set comm(const communication_expression_list& C, const multi_a
   multi_action_name_set result = A;
 
   // sequentially apply the communication rules to result
-  for (auto i = C.begin(); i != C.end(); ++i)
+  for (const communication_expression& c: C)
   {
-    detail::apply_comm(*i, result);
+    detail::apply_comm(c, result);
   }
 
   return result;
@@ -546,9 +541,9 @@ inline
 multi_action_name_set comm_inverse(const communication_expression_list& C, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name_set result = A;
-  for (auto i = C.begin(); i != C.end(); ++i)
+  for (const communication_expression& c: C)
   {
-    detail::apply_comm_inverse(*i, result);
+    detail::apply_comm_inverse(c, result);
   }
   mCRL2log(log::debug) << "<comm_inverse>" << process::pp(C) << ": " << process::pp(A) << " -> " << process::pp(result) << std::endl;
   return result;
@@ -559,9 +554,9 @@ inline
 multi_action_name_set rename(const rename_expression_list& R, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
 {
   multi_action_name_set result;
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (const multi_action_name& alpha: A)
   {
-    result.insert(detail::apply_rename(R, *i));
+    result.insert(detail::apply_rename(R, alpha));
   }
   return result;
 }
@@ -573,9 +568,9 @@ multi_action_name_set rename_inverse(const rename_expression_list& R, const mult
   detail::rename_inverse_map Rinverse = detail::rename_inverse(R);
 
   multi_action_name_set result;
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (const multi_action_name& alpha: A)
   {
-    detail::rename_inverse(Rinverse, *i, A_includes_subsets, result);
+    detail::rename_inverse(Rinverse, alpha, A_includes_subsets, result);
   }
   return result;
 }
@@ -585,13 +580,12 @@ multi_action_name_set allow(const action_name_multiset_list& V, const multi_acti
 {
   multi_action_name_set result;
 
-  for (auto i = V.begin(); i != V.end(); ++i)
+  for (const action_name_multiset& s: V)
   {
-    core::identifier_string_list names = i->names();
+    const core::identifier_string_list& names = s.names();
     multi_action_name v(names.begin(), names.end());
-    for (auto j = A.begin(); j != A.end(); ++j)
+    for (const multi_action_name& alpha: A)
     {
-      const multi_action_name& alpha = *j;
       bool keep = A_includes_subsets ? detail::includes(alpha, v) : alpha == v;
       if (keep)
       {
@@ -610,12 +604,11 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
 
   if (A_includes_subsets)
   {
-    for (auto i = A.begin(); i != A.end(); ++i)
+    for (multi_action_name alpha: A)
     {
-      multi_action_name alpha = *i;
-      for (auto j = B.begin(); j != B.end(); ++j)
+      for (const core::identifier_string& b: B)
       {
-        alpha.erase(*j);
+        alpha.erase(b);
       }
       if (!alpha.empty())
       {
@@ -625,11 +618,11 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
   }
   else
   {
-    for (auto i = A.begin(); i != A.end(); ++i)
+    for (const multi_action_name& alpha: A)
     {
-      if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), i->begin(), i->end()))
+      if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), alpha.begin(), alpha.end()))
       {
-        result.insert(*i);
+        result.insert(alpha);
       }
     }
   }
@@ -641,9 +634,8 @@ multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name
 {
   multi_action_name m(I.begin(), I.end());
   multi_action_name_set result;
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (multi_action_name alpha: A)
   {
-    multi_action_name alpha = *i;
     for (auto j = I.begin(); j != I.end(); ++j)
     {
       alpha.erase(*j);

@@ -59,16 +59,15 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
     data::assignment_list a = x.assignments();
     std::vector<data::assignment> v;
 
-    auto const& variables = x.identifier().variables();
-    for (auto j = variables.begin(); j != variables.end(); ++j)
+    for (const data::variable& variable: x.identifier().variables())
     {
-      auto k = find_variable(a, *j);
+      auto k = find_variable(a, variable);
       if (k == a.end())
       {
-        data::data_expression e = apply(*j);
-        if (e != *j)
+        data::data_expression e = apply(variable);
+        if (e != variable)
         {
-          v.push_back(data::assignment(*j, e));
+          v.push_back(data::assignment(variable, e));
         }
       }
       else

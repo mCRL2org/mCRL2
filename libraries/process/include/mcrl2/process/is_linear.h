@@ -26,19 +26,18 @@ namespace detail
 
 /// \brief Returns true if the process instance assignment a matches with the process equation eq.
 inline
-bool check_process_instance_assignment(const process_equation& eq, const process_instance_assignment& a)
+bool check_process_instance_assignment(const process_equation& eq, const process_instance_assignment& inst)
 {
-  if (a.identifier() != eq.identifier())
+  if (inst.identifier() != eq.identifier())
   {
     return false;
   }
-  data::assignment_list a1 = a.assignments();
-  data::variable_list v = eq.formal_parameters();
+  const data::variable_list& v = eq.formal_parameters();
 
   // check if the left hand sides of the assignments exist
-  for (data::assignment_list::iterator i = a1.begin(); i != a1.end(); ++i)
+  for (const auto& a: inst.assignments())
   {
-    if (std::find(v.begin(), v.end(), i->lhs()) == v.end())
+    if (std::find(v.begin(), v.end(), a.lhs()) == v.end())
     {
       return false;
     }

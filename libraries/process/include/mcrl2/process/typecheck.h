@@ -78,11 +78,11 @@ inline
 core::identifier_string_list list_difference(const core::identifier_string_list& l, const core::identifier_string_list& m)
 {
   core::identifier_string_list n;
-  for (auto i = l.begin(); i != l.end(); ++i)
+  for (const core::identifier_string& elem: l)
   {
-    if (std::find(m.begin(), m.end(),*i) == m.end())
+    if (std::find(m.begin(), m.end(), elem) == m.end())
     {
-      n.push_front(*i);
+      n.push_front(elem);
     }
   }
   return atermpp::reverse(n);
@@ -97,9 +97,9 @@ bool equal_multi_actions(core::identifier_string_list a1, core::identifier_strin
 inline
 bool multi_actions_contains(const core::identifier_string_list& a, const action_name_multiset_list& A)
 {
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (const action_name_multiset& i: A)
   {
-    if (equal_multi_actions(a, i->names()))
+    if (equal_multi_actions(a, i.names()))
     {
       return true;
     }
