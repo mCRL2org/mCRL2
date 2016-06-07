@@ -77,9 +77,9 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   /// \brief Removes parameters from a set container.
   void update(std::set<data::variable>& x)
   {
-    for (auto i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+    for (const data::variable& v: to_be_removed)
     {
-      x.erase(*i);
+      x.erase(v);
     }
   }
 
@@ -89,11 +89,11 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   	using utilities::detail::contains;
 
     std::vector<data::variable> result;
-    for (auto i = x.begin(); i != x.end(); ++i)
+    for (const data::variable& v: x)
     {
-      if (!contains(to_be_removed, *i))
+      if (!contains(to_be_removed, v))
       {
-        result.push_back(*i);
+        result.push_back(v);
       }
     }
     return data::variable_list(result.begin(), result.end());
@@ -171,13 +171,12 @@ void remove_singleton_sorts(Specification& spec)
 {
   data::mutable_map_substitution<> sigma;
   std::set<data::variable> to_be_removed;
-  const data::variable_list& p = spec.process().process_parameters();
-  for (auto i = p.begin(); i != p.end(); ++i)
+  for (const data::variable& v: spec.process().process_parameters())
   {
-    if (lps::detail::is_singleton_sort(spec.data())(i->sort()))
+    if (lps::detail::is_singleton_sort(spec.data())(v.sort()))
     {
-      sigma[*i] = *spec.data().constructors(i->sort()).begin();
-      to_be_removed.insert(*i);
+      sigma[v] = *spec.data().constructors(v.sort()).begin();
+      to_be_removed.insert(v);
     }
   }
   lps::replace_variables(spec, sigma);
@@ -186,16 +185,16 @@ void remove_singleton_sorts(Specification& spec)
 
 /// \brief Removes assignments of the form x := x from v for variables x that are not contained in do_not_remove.
 inline
-data::assignment_list remove_redundant_assignments(const data::assignment_list& v, const data::variable_list& do_not_remove)
+data::assignment_list remove_redundant_assignments(const data::assignment_list& assignments, const data::variable_list& do_not_remove)
 {
   using utilities::detail::contains;
 
   std::vector<data::assignment> result;
-  for (auto i = v.begin(); i != v.end(); ++i)
+  for (const data::assignment& a: assignments)
   {
-    if (i->lhs() != i->rhs() || contains(do_not_remove, i->lhs()))
+    if (a.lhs() != a.rhs() || contains(do_not_remove, a.lhs()))
     {
-      result.push_back(*i);
+      result.push_back(a);
     }
   }
   return data::assignment_list(result.begin(), result.end());

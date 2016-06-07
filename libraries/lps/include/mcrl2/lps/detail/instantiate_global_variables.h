@@ -33,15 +33,14 @@ void instantiate_global_variables(Specification& spec)
   mCRL2log(log::verbose) << "Replacing free variables with dummy values." << std::endl;
   data::mutable_map_substitution<> sigma;
   data::representative_generator default_expression_generator(spec.data());
-  const std::set<data::variable>& v = spec.global_variables();
-  for (auto i = v.begin(); i != v.end(); ++i)
+  for (const data::variable& v : spec.global_variables())
   {
-    data::data_expression d = default_expression_generator(i->sort());
+    data::data_expression d = default_expression_generator(v.sort());
     if (!d.defined())
     {
-      throw mcrl2::runtime_error("Error in lps::instantiate_global_variables: could not instantiate " + data::pp(*i) + ". ");
+      throw mcrl2::runtime_error("Error in lps::instantiate_global_variables: could not instantiate " + data::pp(v) + ". ");
     }
-    sigma[*i] = d;
+    sigma[v] = d;
   }
   lps::replace_free_variables(spec.process(), sigma);
   spec.initial_process() = lps::replace_free_variables(spec.initial_process(), sigma);

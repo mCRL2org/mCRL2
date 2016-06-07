@@ -151,13 +151,13 @@ specification remove_stochastic_operators(const stochastic_specification& spec)
 
   action_summand_vector v;
   auto const& action_summands = spec.process().action_summands();
-  for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+  for (const auto& s: action_summands)
   {
-    if (i->distribution().is_defined())
+    if (s.distribution().is_defined())
     {
       throw mcrl2::runtime_error("action summand has non-empty stochastic distribution");
     }
-    v.push_back(*i);
+    v.push_back(s);
   }
   proc.action_summands() = v;
 

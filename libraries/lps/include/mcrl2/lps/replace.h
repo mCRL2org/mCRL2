@@ -387,20 +387,18 @@ inline
 void replace_summand_variables(specification& spec, data::mutable_map_substitution<>& sigma)
 {
   std::set<data::variable> sigma_variables = data::substitution_variables(sigma);
-  action_summand_vector& a = spec.process().action_summands();
-  for (action_summand_vector::iterator i = a.begin(); i != a.end(); ++i)
+  for (action_summand& s: spec.process().action_summands())
   {
-    i->summation_variables() = data::replace_variables(i->summation_variables(), sigma);
-    i->condition() = data::replace_variables_capture_avoiding(i->condition(), sigma, sigma_variables);
-    lps::replace_variables_capture_avoiding(i->multi_action(), sigma, sigma_variables);
-    i->assignments() = data::replace_variables_capture_avoiding(i->assignments(), sigma, sigma_variables);
+    s.summation_variables() = data::replace_variables(s.summation_variables(), sigma);
+    s.condition() = data::replace_variables_capture_avoiding(s.condition(), sigma, sigma_variables);
+    lps::replace_variables_capture_avoiding(s.multi_action(), sigma, sigma_variables);
+    s.assignments() = data::replace_variables_capture_avoiding(s.assignments(), sigma, sigma_variables);
   }
-  deadlock_summand_vector& d = spec.process().deadlock_summands();
-  for (deadlock_summand_vector::iterator i = d.begin(); i != d.end(); ++i)
+  for (deadlock_summand& s: spec.process().deadlock_summands())
   {
-    i->summation_variables() = data::replace_variables(i->summation_variables(), sigma);
-    i->condition() = data::replace_variables_capture_avoiding(i->condition(), sigma, sigma_variables);
-    lps::replace_variables_capture_avoiding(i->deadlock(), sigma, sigma_variables);
+    s.summation_variables() = data::replace_variables(s.summation_variables(), sigma);
+    s.condition() = data::replace_variables_capture_avoiding(s.condition(), sigma, sigma_variables);
+    lps::replace_variables_capture_avoiding(s.deadlock(), sigma, sigma_variables);
   }
 }
 

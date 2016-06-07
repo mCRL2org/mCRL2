@@ -111,11 +111,11 @@ class linear_process_base
       using atermpp::down_cast;
       assert(core::detail::check_term_LinearProcess(lps));
       m_process_parameters = down_cast<data::variable_list>(lps[0]);
-      atermpp::aterm_list summands = down_cast<atermpp::aterm_list>(lps[1]);
-      for (auto j = summands.begin(); j != summands.end(); ++j)
+      const atermpp::aterm_list& summands = atermpp::down_cast<atermpp::aterm_list>(lps[1]);
+      for (const atermpp::aterm& summand: summands)
       {
-        assert(core::detail::check_rule_LinearProcessSummand(*j));
-        atermpp::aterm_appl t = down_cast<atermpp::aterm_appl>(*j);
+        assert(core::detail::check_rule_LinearProcessSummand(summand));
+        const atermpp::aterm_appl& t = down_cast<atermpp::aterm_appl>(summand);
 
         const data::variable_list& summation_variables = down_cast<data::variable_list>(t[0]);
         const data::data_expression& condition = down_cast<data::data_expression>(t[1]);

@@ -258,9 +258,9 @@ void lpssuminst(const std::string& input_filename,
   if(!sorts_string.empty())
   {
     std::vector<std::string> parts = utilities::split(utilities::remove_whitespace(sorts_string), ",");
-    for (auto i = parts.begin(); i != parts.end(); ++i)
+    for (auto & part : parts)
     {
-      sorts.insert(data::parse_sort_expression(*i, spec.data()));
+      sorts.insert(data::parse_sort_expression(part, spec.data()));
     }
   }
   else if (finite_sorts_only)

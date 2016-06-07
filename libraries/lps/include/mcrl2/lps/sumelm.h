@@ -56,11 +56,11 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
       using namespace mcrl2::data;
       // First apply already present substitutions to rhs
       data_expression new_rhs = data::replace_variables_capture_avoiding(rhs, replacements, substitution_variables(replacements));
-      for (data::mutable_map_substitution<>::iterator i = replacements.begin(); i != replacements.end(); ++i)
+      for (auto& replacement: replacements)
       {
         data::mutable_map_substitution<> sigma;
         sigma[lhs] = new_rhs;
-        i->second = data::replace_variables_capture_avoiding(i->second, sigma, data::substitution_variables(sigma));
+        replacement.second = data::replace_variables_capture_avoiding(replacement.second, sigma, data::substitution_variables(sigma));
       }
       replacements[lhs] = new_rhs;
     }
@@ -85,28 +85,27 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
     {
       using namespace data;
 
-      std::set<data_expression> conjuncts = data::split_and(s.condition());
       std::set<data_expression> new_conjuncts;
 
-      for(std::set<data_expression>::const_iterator i = conjuncts.begin(); i != conjuncts.end(); ++i)
+      for(const data::data_expression& conjunct: data::split_and(s.condition()))
       {
         bool replacement_added(false);
         data_expression left;
         data_expression right;
 
-        if (is_equal_to_application(*i)) // v == e
+        if (is_equal_to_application(conjunct)) // v == e
         {
-          left = data::binary_left(application(*i));
-          right = data::binary_right(application(*i));
+          left = data::binary_left(application(conjunct));
+          right = data::binary_right(application(conjunct));
         }
-        else if (is_variable(*i) && sort_bool::is_bool(i->sort())) // v equal to v == true
+        else if (is_variable(conjunct) && sort_bool::is_bool(conjunct.sort())) // v equal to v == true
         {
-          left = *i;
+          left = conjunct;
           right = sort_bool::true_();
         }
-        else if (sort_bool::is_not_application(*i) && is_variable(sort_bool::arg(*i))) // !v equal to v == false
+        else if (sort_bool::is_not_application(conjunct) && is_variable(sort_bool::arg(conjunct))) // !v equal to v == false
         {
-          left = sort_bool::arg(*i);
+          left = sort_bool::arg(conjunct);
           right = sort_bool::false_();
         }
 
@@ -157,7 +156,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
 
         if(!replacement_added)
         {
-          new_conjuncts.insert(*i);
+          new_conjuncts.insert(conjunct);
         }
       }
 

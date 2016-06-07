@@ -33,9 +33,9 @@ data::variable nat(std::string name)
 process::action act(std::string name, data_expression_list parameters)
 {
   std::vector<sort_expression> sorts;
-  for (data_expression_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
+  for (const auto & parameter : parameters)
   {
-    sorts.push_back(i->sort());
+    sorts.push_back(parameter.sort());
   }
   process::action_label label(name, sort_expression_list(sorts.begin(), sorts.end()));
   return process::action(label, parameters);

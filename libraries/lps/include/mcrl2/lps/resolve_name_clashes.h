@@ -62,11 +62,11 @@ void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core
     std::set<core::identifier_string> context = variable_names(lps::find_all_variables(summand));
     data::set_identifier_generator generator;
     generator.add_identifiers(context);
-    for (auto i = summation_variables.begin(); i != summation_variables.end(); ++i)
+    for (const data::variable& v: summation_variables)
     {
-      if (process_parameter_names.find(i->name()) != process_parameter_names.end())
+      if (process_parameter_names.find(v.name()) != process_parameter_names.end())
       {
-        sigma[*i] = data::variable(generator(i->name()), i->sort());
+        sigma[v] = data::variable(generator(v.name()), v.sort());
       }
     }
     lps::replace_all_variables(summand, sigma);
@@ -88,10 +88,9 @@ void resolve_summand_variable_name_clashes(Specification& spec)
     detail::resolve_summand_variable_name_clashes(*i, process_parameter_names);
   }
 
-  deadlock_summand_vector& deadlock_summands = proc.deadlock_summands();
-  for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
+  for (deadlock_summand& s: proc.deadlock_summands())
   {
-    detail::resolve_summand_variable_name_clashes(*i, process_parameter_names);
+    detail::resolve_summand_variable_name_clashes(s, process_parameter_names);
   }
 }
 

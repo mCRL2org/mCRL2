@@ -162,10 +162,9 @@ template <typename Specification>
 bool Invariant_Checker<Specification>::check_init(const data::data_expression& a_invariant)
 {
   data::mutable_map_substitution<> v_substitutions;
-  const data::assignment_list l=f_init.assignments();
-  for (auto i = l.begin(); i != l.end(); ++i)
+  for (const data::assignment& a: f_init.assignments())
   {
-    v_substitutions[i->lhs()]=i->rhs();
+    v_substitutions[a.lhs()] = a.rhs();
   }
 
   data::data_expression b_invariant = data::replace_variables_capture_avoiding(a_invariant, v_substitutions, data::substitution_variables(v_substitutions));
@@ -195,13 +194,12 @@ bool Invariant_Checker<Specification>::check_summand(
 {
   using namespace data::sort_bool;
   const data::data_expression v_condition = a_summand.condition();
-  const data::assignment_list v_assignments = a_summand.assignments();
 
   data::mutable_map_substitution<> v_substitutions;
 
-  for (auto i = v_assignments.begin(); i != v_assignments.end(); ++i)
+  for (const data::assignment& a: a_summand.assignments())
   {
-    v_substitutions[i->lhs()]=i->rhs();
+    v_substitutions[a.lhs()] = a.rhs();
   }
 
   const data::data_expression v_subst_invariant = data::replace_variables_capture_avoiding(a_invariant, v_substitutions, data::substitution_variables(v_substitutions));

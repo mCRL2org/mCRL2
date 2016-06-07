@@ -136,10 +136,8 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
-      for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+      for (const data::variable& par: process_parameters)
       {
-        data::variable par = *i;
-
         if (!data::sort_bool::is_bool(par.sort()) && m_spec.data().is_certainly_finite(par.sort()))
         {
           //Get all constructors for par
@@ -203,18 +201,18 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       v = data::replace_variables(v, m_if_trees);
 
       data::assignment_vector result;
-      for (data::assignment_list::const_iterator i = v.begin(); i != v.end(); ++i)
+      for (const data::assignment& a: v)
       {
-        if (m_new_parameters.find(i->lhs()) == m_new_parameters.end())
+        if (m_new_parameters.find(a.lhs()) == m_new_parameters.end())
         {
-          result.push_back(*i);
+          result.push_back(a);
         }
         else
         {
-          data::variable_vector new_parameters = m_new_parameters[i->lhs()];
-          data::data_expression_vector elements = m_enumerated_elements[i->lhs()];
+          data::variable_vector new_parameters = m_new_parameters[a.lhs()];
+          data::data_expression_vector elements = m_enumerated_elements[a.lhs()];
 
-          mCRL2log(log::debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(i->lhs()) << std::endl;
+          mCRL2log(log::debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(a.lhs()) << std::endl;
 
           for (size_t j = 0; j < new_parameters.size(); ++j)
           {
@@ -237,7 +235,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
               // Elements that get value true
               for (ssize_t l = 0; l < count && k != elements.end(); ++l)
               {
-                disjuncts.push_back(data::equal_to(i->rhs(), *k++));
+                disjuncts.push_back(data::equal_to(a.rhs(), *k++));
               }
             }
             result.push_back(data::assignment(new_parameters[j], data::lazy::join_or(disjuncts.begin(), disjuncts.end())));

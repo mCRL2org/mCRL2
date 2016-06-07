@@ -105,9 +105,9 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       if (verbose())
       {
         std::clog << "parelm removed " << to_be_removed.size() << " process parameters: " <<std::endl;
-        for (auto i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+        for (const data::variable& v: to_be_removed)
         {
-          std::clog << *i << ":" << i->sort() << std::endl;
+          std::clog << v << ":" << v.sort() << std::endl;
         }
       }
     }
@@ -181,20 +181,20 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       // create a mapping m from process parameters to integers
       std::map<data::variable, size_t> m;
       int index = 0;
-      for (auto i = process_parameters.begin(); i != process_parameters.end(); ++i)
+      for (const data::variable& process_parameter: process_parameters)
       {
 #ifdef MCRL2_LPS_PARELM_DEBUG
         std::clog << "vertex " << index << " = " << data::pp(*i) << std::endl;
 #endif
-        m[*i] = index++;
+        m[process_parameter] = index++;
       }
 
       // compute the initial set v of significant variables
       std::set<data::variable> significant_variables = transition_variables();
       std::vector<size_t> v;
-      for (auto i = significant_variables.begin(); i != significant_variables.end(); ++i)
+      for (const data::variable& significant_variable: significant_variables)
       {
-        v.push_back(m[*i]);
+        v.push_back(m[significant_variable]);
       }
 
       // compute the dependency graph G
@@ -202,15 +202,14 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       graph G(process_parameters.size());
       for (auto i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
       {
-        data::assignment_list assignments(i->assignments());
-        for (auto j = assignments.begin(); j != assignments.end(); ++j)
+        for (const data::assignment& a: i->assignments())
         {
-          size_t j0 = m[j->lhs()];
+          size_t j0 = m[a.lhs()];
           std::set<data::variable> vars;
-          data::find_all_variables(j->rhs(), std::inserter(vars, vars.end()));
-          for (auto k = vars.begin(); k != vars.end(); ++k)
+          data::find_all_variables(a.rhs(), std::inserter(vars, vars.end()));
+          for (const data::variable& var: vars)
           {
-            size_t k0 = m[*k];
+            size_t k0 = m[var];
 #ifdef MCRL2_LPS_PARELM_DEBUG
             std::clog << "edge " << j0 << " -> " << k0 << std::endl;
 #endif
@@ -240,11 +239,11 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 #endif
       std::set<size_t> r2(r1.begin(), r1.end());
       std::set<data::variable> to_be_removed;
-      for (auto i = process_parameters.begin(); i != process_parameters.end(); ++i)
+      for (const data::variable& process_parameter: process_parameters)
       {
-        if (r2.find(m[*i]) == r2.end())
+        if (r2.find(m[process_parameter]) == r2.end())
         {
-          to_be_removed.insert(*i);
+          to_be_removed.insert(process_parameter);
         }
       }
 #ifdef MCRL2_LPS_PARELM_DEBUG

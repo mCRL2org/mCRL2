@@ -35,11 +35,10 @@ class decluster_algorithm: public detail::lps_algorithm<Specification>
     template <typename SummandType, typename OutIter>
     void decluster_summand(const SummandType& summand, OutIter& out)
     {
-      std::set<data::data_expression> disjuncts = data::split_or(summand.condition());
-      for(std::set<data::data_expression>::const_iterator i = disjuncts.begin(); i != disjuncts.end(); ++i)
+      for(const data::data_expression& disjunct: data::split_or(summand.condition()))
       {
         SummandType s(summand);
-        s.condition() = *i;
+        s.condition() = disjunct;
         *out++ = s;
       }
     }

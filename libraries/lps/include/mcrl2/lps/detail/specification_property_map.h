@@ -96,9 +96,9 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
     std::string print(const std::set<std::multiset<process::action_label> >& v) const
     {
       std::set<std::string> elements;
-      for (auto i = v.begin(); i != v.end(); ++i)
+      for (const auto& s: v)
       {
-        elements.insert(print(*i));
+        elements.insert(print(s));
       }
       return utilities::string_join(elements, "; ");
     }
@@ -192,11 +192,10 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
       std::set<std::multiset<process::action_label> > result;
       for (auto i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
       {
-        process::action_list a = i->multi_action().actions();
         std::multiset<process::action_label> labels;
-        for (auto j = a.begin(); j != a.end(); ++j)
+        for (const process::action& a: i->multi_action().actions())
         {
-          labels.insert(j->label());
+          labels.insert(a.label());
         }
         result.insert(labels);
       }
@@ -208,10 +207,9 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
       std::set<process::action_label> result;
       for (auto i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
       {
-        process::action_list a = i->multi_action().actions();
-        for (auto j = a.begin(); j != a.end(); ++j)
+        for (const process::action& a: i->multi_action().actions())
         {
-          result.insert(j->label());
+          result.insert(a.label());
         }
       }
       return result;

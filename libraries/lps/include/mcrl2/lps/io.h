@@ -52,11 +52,11 @@ const utilities::file_format* lps_format_text() { return &lps_file_formats()[2];
 inline
 const utilities::file_format* guess_format(const std::string& filename)
 {
-  for (auto it = lps_file_formats().begin(); it != lps_file_formats().end(); ++it)
+  for (const utilities::file_format& it: lps_file_formats())
   {
-    if (it->matches(filename))
+    if (it.matches(filename))
     {
-      return &*it;
+      return &it;
     }
   }
   return utilities::file_format::unknown();

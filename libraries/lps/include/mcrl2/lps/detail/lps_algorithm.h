@@ -98,12 +98,11 @@ class lps_algorithm
     /// \brief Applies the next state substitution to the variable v.
     data::data_expression next_state(const action_summand& s, const data::variable& v) const
     {
-      const data::assignment_list& a = s.assignments();
-      for (auto i = a.begin(); i != a.end(); ++i)
+      for (const data::assignment& a: s.assignments())
       {
-        if (i->lhs() == v)
+        if (a.lhs() == v)
         {
-          return i->rhs();
+          return a.rhs();
         }
       }
       return v; // no assignment to v found, so return v itself

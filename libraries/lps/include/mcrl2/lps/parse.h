@@ -110,9 +110,9 @@ struct action_rename_actions: public process::detail::action_actions
   {
     data::variable_list variables = parse_VarSpec(node.child(0));
     std::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleList(node.child(2));
-    for (std::vector<lps::action_rename_rule>::iterator i = rules.begin(); i != rules.end(); ++i)
+    for (lps::action_rename_rule& rule: rules)
     {
-      i->variables() = variables;
+      rule.variables() = variables;
     }
     return rules;
   }
