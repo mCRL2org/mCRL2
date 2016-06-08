@@ -78,12 +78,11 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       m_occurring_data_parameters.clear();
 
       // first collect all parameters (X, p) that are being used in a local control flow graph
-      for (auto k = m_local_control_flow_graphs.begin(); k != m_local_control_flow_graphs.end(); ++k)
+      for (auto& G: m_local_control_flow_graphs)
       {
-        auto const& V = k->vertices;
-        for (auto j = V.begin(); j != V.end(); ++j)
+        auto const& V = G.vertices;
+        for (const auto& u: V)
         {
-          auto const& u = *j;
           auto const& X = u.name();
           auto p = u.index();
           m_occurring_data_parameters[X].insert(p);
@@ -91,12 +90,12 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
 
       // then intersect them with the data parameter indices
-      for (auto i = m_occurring_data_parameters.begin(); i != m_occurring_data_parameters.end(); ++i)
+      for (auto& i: m_occurring_data_parameters)
       {
-        auto const& X = i->first;
+        auto const& X = i.first;
         auto const& eq_X = *find_equation(m_pbes, X);
         auto const& dp_X = eq_X.data_parameter_indices();
-        i->second = data::detail::set_intersection(i->second, std::set<std::size_t>(dp_X.begin(), dp_X.end()));
+        i.second = data::detail::set_intersection(i.second, std::set<std::size_t>(dp_X.begin(), dp_X.end()));
       }
     }
 
@@ -277,9 +276,8 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
   const std::size_t J = m_local_control_flow_graphs.size();
 
   auto const& dp_Y = eq_Y.data_parameter_indices();
-  for (auto dpi = dp_Y.begin(); dpi != dp_Y.end(); ++dpi)
+  for (std::size_t k: dp_Y)
   {
-    std::size_t k = *dpi;
     bool relevant = true;
     std::set<data::data_expression> condition;
     for (std::size_t j = 0; j < J; j++)
@@ -316,9 +314,8 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
           if (contains(Bj[Y], d_Y[k]))
           {
             bool found = false;
-            for (auto wi = Vj.vertices.begin(); wi != Vj.vertices.end(); ++wi)
+            for (const auto& w: Vj.vertices)
             {
-              auto const& w = *wi;
               if (w.name() == Y && w.index() == p)  // w = (Y, p, d_Y[p]=r)
               {
                 if (contains(w.marking(), d_Y[k]))

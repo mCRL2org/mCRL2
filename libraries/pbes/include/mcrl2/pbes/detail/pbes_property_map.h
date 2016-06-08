@@ -139,9 +139,9 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
     {
       size_t mu_count = 0;
       size_t nu_count = 0;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (const pbes_equation& eqn: p.equations())
       {
-        if (i->symbol().is_mu())
+        if (eqn.symbol().is_mu())
         {
           mu_count++;
         }

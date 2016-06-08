@@ -42,9 +42,9 @@ namespace detail
 inline
 void make_constelm_substitution(const std::map<data::variable, data::data_expression>& m, data::rewriter::substitution_type& result)
 {
-  for (auto i = m.begin(); i != m.end(); ++i)
+  for (const auto& i : m)
   {
-    result[i->first] = i->second;
+    result[i.first] = i.second;
   }
 }
 
@@ -212,15 +212,15 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
                         edge_condition& ec
                        )
   {
-    for (auto i = ec1.condition.begin(); i != ec1.condition.end(); ++i)
+    for (auto& i: ec1.condition)
     {
-      i->second.push_back(ec.TCFC());
-      ec.condition.insert(*i);
+      i.second.push_back(ec.TCFC());
+      ec.condition.insert(i);
     }
-    for (auto i = ec2.condition.begin(); i != ec2.condition.end(); ++i)
+    for (auto& i: ec2.condition)
     {
-      i->second.push_back(ec.TCFC());
-      ec.condition.insert(*i);
+      i.second.push_back(ec.TCFC());
+      ec.condition.insert(i);
     }
   }
 
@@ -753,16 +753,16 @@ class pbes_constelm_algorithm
       m_redundant_parameters.clear();
 
       // compute the vertices and edges of the dependency graph
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type name = i->variable().name();
-        m_vertices[name] = vertex(i->variable());
+        string_type name = eqn.variable().name();
+        m_vertices[name] = vertex(eqn.variable());
 
         if (compute_conditions)
         {
           // use an edge_condition_traverser to compute the edges
           detail::edge_condition_traverser f;
-          f.apply(i->formula());
+          f.apply(eqn.formula());
           edge_condition ec = f.result();
           if (!ec.condition.empty())
           {
@@ -771,20 +771,20 @@ class pbes_constelm_algorithm
             {
               propositional_variable_type X = j->first;
               term_type condition = ec.compute_condition(j->second);
-              edges.push_back(edge(i->variable(), X, condition));
+              edges.push_back(edge(eqn.variable(), X, condition));
             }
           }
         }
         else
         {
           // use find function to compute the edges
-          std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(i->formula());
+          std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(eqn.formula());
           if (!inst.empty())
           {
             std::vector<edge>& edges = m_edges[name];
             for (typename std::set<propositional_variable_type>::iterator k = inst.begin(); k != inst.end(); ++k)
             {
-              edges.push_back(edge(i->variable(), *k));
+              edges.push_back(edge(eqn.variable(), *k));
             }
           }
         }
@@ -849,9 +849,9 @@ class pbes_constelm_algorithm
       mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
 
       // compute the redundant parameters and the redundant equations
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type name = i->variable().name();
+        string_type name = eqn.variable().name();
         vertex& v = m_vertices[name];
         if (!v.constraints().empty())
         {
@@ -864,20 +864,20 @@ class pbes_constelm_algorithm
       }
 
       // Apply the constraints to the equations.
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type name = i->variable().name();
+        string_type name = eqn.variable().name();
         vertex& v = m_vertices[name];
 
         if (!v.constraints().empty())
         {
           data::rewriter::substitution_type sigma;
           detail::make_constelm_substitution(v.constraints(), sigma);
-          *i = pbes_equation(
-                 i->symbol(),
-                 i->variable(),
-                 pbes_system::replace_free_variables(i->formula(), sigma)
-               );
+          eqn = pbes_equation(
+                   eqn.symbol(),
+                   eqn.variable(),
+                   pbes_system::replace_free_variables(eqn.formula(), sigma)
+                 );
         }
       }
 

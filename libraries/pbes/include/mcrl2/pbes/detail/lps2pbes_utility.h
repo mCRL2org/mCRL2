@@ -56,9 +56,9 @@ inline
 data::variable_list lhs_variables(const data::assignment_list& l)
 {
   data::variable_list result;
-  for (auto i = l.begin(); i != l.end(); ++i)
+  for (const data::assignment& a: l)
   {
-    result.push_front(i->lhs());
+    result.push_front(a.lhs());
   }
   return atermpp::reverse(result);
 }
@@ -67,9 +67,9 @@ inline
 data::data_expression_list rhs_expressions(const data::assignment_list& l)
 {
   data::data_expression_list result;
-  for (auto i = l.begin(); i != l.end(); ++i)
+  for (const data::assignment& a: l)
   {
-    result.push_front(i->rhs());
+    result.push_front(a.rhs());
   }
   return atermpp::reverse(result);
 }
@@ -132,9 +132,9 @@ std::string myprint(const std::vector<pbes_equation>& v)
 {
   std::ostringstream out;
   out << "[";
-  for (auto i = v.begin(); i != v.end(); ++i)
+  for (const pbes_equation& eqn: v)
   {
-    out << "\n  " << pbes_system::pp(i->symbol()) << " " << pbes_system::pp(i->variable()) << " = " << pbes_system::pp(i->formula());
+    out << "\n  " << pbes_system::pp(eqn.symbol()) << " " << pbes_system::pp(eqn.variable()) << " = " << pbes_system::pp(eqn.formula());
   }
   out << "\n]";
   return out.str();
@@ -148,10 +148,10 @@ inline
 data::mutable_map_substitution<> make_fresh_variables(const data::variable_list& variables, data::set_identifier_generator& id_generator, bool add_to_context = true)
 {
   data::mutable_map_substitution<> result;
-  for (auto i = variables.begin(); i != variables.end(); ++i)
+  for (const data::variable& v: variables)
   {
-    core::identifier_string name =  id_generator(std::string(i->name()));
-    result[*i] = data::variable(name, i->sort());
+    core::identifier_string name =  id_generator(std::string(v.name()));
+    result[v] = data::variable(name, v.sort());
     if (!add_to_context)
     {
       id_generator.remove_identifier(name);

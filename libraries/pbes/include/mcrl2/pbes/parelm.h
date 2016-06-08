@@ -59,12 +59,12 @@ class pbes_parelm_algorithm
     /// \param v A sequence of data variables
     /// \param d A data variable
     /// \return The index of \p d in \p v, or -1 if the variable wasn't found
-    int variable_index(const data::variable_list& v, const data::variable& d) const
+    int variable_index(const data::variable_list& variables, const data::variable& d) const
     {
       int index = 0;
-      for (auto i = v.begin(); i != v.end(); ++i)
+      for (const data::variable& v: variables)
       {
-        if (*i == d)
+        if (v == d)
         {
           return index;
         }
@@ -117,14 +117,14 @@ class pbes_parelm_algorithm
     core::identifier_string find_predicate_variable(const pbes& p, size_t index) const
     {
       size_t offset = 0;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (const pbes_equation& eqn: p.equations())
       {
-        size_t size = i->variable().parameters().size();
+        size_t size = eqn.variable().parameters().size();
         if (offset + size > index)
         {
-          return i->variable().name();
+          return eqn.variable().name();
         }
-        offset += i->variable().parameters().size();
+        offset += eqn.variable().parameters().size();
       }
       return core::identifier_string("<not found>");
     }
@@ -141,55 +141,54 @@ class pbes_parelm_algorithm
       // compute a mapping from propositional variable names to offsets
       size_t offset = 0;
       std::map<core::identifier_string, size_t> propvar_offsets;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        propvar_offsets[i->variable().name()] = offset;
-        offset += i->variable().parameters().size();
-        predicate_variables.insert(predicate_variables.end(), i->variable().parameters().begin(), i->variable().parameters().end());
+        propvar_offsets[eqn.variable().name()] = offset;
+        offset += eqn.variable().parameters().size();
+        predicate_variables.insert(predicate_variables.end(), eqn.variable().parameters().begin(), eqn.variable().parameters().end());
       }
       size_t N = offset; // # variables
 
       // compute the initial set v of significant variables
       std::set<size_t> v;
       offset = 0;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        std::set<data::variable> uvars = unbound_variables(i->formula(), fvars);
-        for (std::set<data::variable>::iterator j = uvars.begin(); j != uvars.end(); ++j)
+        std::set<data::variable> uvars = unbound_variables(eqn.formula(), fvars);
+        for (const data::variable& w: uvars)
         {
-          int k = variable_index(i->variable().parameters(), *j);
+          int k = variable_index(eqn.variable().parameters(), w);
           if (k < 0)
           {
-            mCRL2log(log::error) << "<variable error>" << data::pp(*j) << std::endl;
+            mCRL2log(log::error) << "<variable error>" << data::pp(w) << std::endl;
             continue;
           }
           v.insert(offset + k);
         }
-        offset += i->variable().parameters().size();
+        offset += eqn.variable().parameters().size();
       }
 
       // compute the dependency graph G
       graph G(N);
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
         // left hand side (X)
-        core::identifier_string X = i->variable().name();
-        data::variable_list Xparams = i->variable().parameters();
+        core::identifier_string X = eqn.variable().name();
+        data::variable_list Xparams = eqn.variable().parameters();
 
         // right hand side (Y)
-        pbes_expression phi = i->formula();
+        pbes_expression phi = eqn.formula();
         std::set<propositional_variable_instantiation> propvars = find_propositional_variable_instantiations(phi);
-        for (std::set<propositional_variable_instantiation>::iterator j = propvars.begin(); j != propvars.end(); ++j)
+        for (const propositional_variable_instantiation& propvar : propvars)
         {
-          core::identifier_string Y = j->name();
-          data::data_expression_list Yparams = j->parameters();
+          core::identifier_string Y = propvar.name();
+          data::data_expression_list Yparams = propvar.parameters();
           int Yindex = 0;
-          for (data::data_expression_list::iterator y = Yparams.begin(); y != Yparams.end(); ++y)
+          for (const data::data_expression& e: Yparams)
           {
-            std::set<data::variable> vars = data::find_all_variables(*y);
-            for (std::set<data::variable>::iterator k = vars.begin(); k != vars.end(); ++k)
+            for (const data::variable& var: data::find_all_variables(e))
             {
-              int Xindex = variable_index(Xparams, *k);
+              int Xindex = variable_index(Xparams, var);
               if (Xindex < 0)
               {
                 continue;
@@ -214,15 +213,15 @@ class pbes_parelm_algorithm
       std::map<core::identifier_string, std::vector<size_t> > removals;
       size_t index = 0;
       std::vector<size_t>::iterator sfirst = s.begin();
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        size_t maxindex = index + i->variable().parameters().size();
+        size_t maxindex = index + eqn.variable().parameters().size();
         std::vector<size_t>::iterator slast = std::find_if(sfirst, s.end(), std::bind(std::greater_equal<size_t>(), std::placeholders::_1, maxindex));
         if (slast > sfirst)
         {
           std::vector<size_t> w(sfirst, slast);
           std::transform(w.begin(), w.end(), w.begin(), std::bind(std::minus<size_t>(), std::placeholders::_1, index));
-          removals[i->variable().name()] = w;
+          removals[eqn.variable().name()] = w;
         }
         index = maxindex;
         sfirst = slast;
@@ -232,10 +231,10 @@ class pbes_parelm_algorithm
       if (mCRL2logEnabled(log::debug))
       {
         mCRL2log(log::debug) << "\ninfluential parameters:" << std::endl;
-        for (std::set<size_t>::iterator i = v.begin(); i != v.end(); ++i)
+        for (std::size_t i: v)
         {
-          core::identifier_string X1 = find_predicate_variable(p, *i);
-          data::variable v1 = predicate_variables[*i];
+          core::identifier_string X1 = find_predicate_variable(p, i);
+          data::variable v1 = predicate_variables[i];
           mCRL2log(log::debug) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
         }
         mCRL2log(log::debug) << "\ndependencies:" << std::endl;
@@ -266,9 +265,9 @@ class pbes_parelm_algorithm
         {
           core::identifier_string X1 = i->first;
 
-          for (std::vector<size_t>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
+          for (std::size_t j: (i->second))
           {
-            data::variable v1 = predicate_variables[*j + propvar_offsets[X1]];
+            data::variable v1 = predicate_variables[j + propvar_offsets[X1]];
             mCRL2log(log::verbose) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
           }
         }

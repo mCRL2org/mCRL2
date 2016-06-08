@@ -132,9 +132,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
     {
       std::vector<core::identifier_string> result;
       auto const& equations = m_pbes.equations();
-      for (auto i = equations.begin(); i != equations.end(); ++i)
+      for (const stategraph_equation& equation: equations)
       {
-        result.push_back(i->variable().name());
+        result.push_back(equation.variable().name());
       }
       return result;
     }
@@ -179,18 +179,16 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         auto const& Gk = m_local_control_flow_graphs[k];
         auto const& vertices = Gk.vertices;
-        for (auto ui = vertices.begin(); ui != vertices.end(); ++ui)
+        for (const auto& u: vertices)
         {
-          auto const& u = *ui;
           auto const& X = u.name();
           auto const& outgoing_edges = u.outgoing_edges();
-          for(auto j = outgoing_edges.begin(); j != outgoing_edges.end(); ++j)
+          for(const auto& e: outgoing_edges)
           {
-            auto const& v = *(j->first);
-            auto const& I = j->second;
-            for (auto ii = I.begin(); ii != I.end(); ++ii)
+            auto const& v = *(e.first);
+            auto const& I = e.second;
+            for (std::size_t i: I)
             {
-              std::size_t i = *ii;
               m_edge_index[X][i].insert(vertex_pair(&u, &v, k));
             }
           }
@@ -204,18 +202,17 @@ class stategraph_local_algorithm: public stategraph_algorithm
       auto const& equations = m_pbes.equations();
       std::ostringstream out;
 
-      for (auto xi = equations.begin(); xi != equations.end(); ++xi)
+      for (const stategraph_equation& eq_X: equations)
       {
-        auto const& eq_X = *xi;
         auto const& X = eq_X.variable().name();
         auto& EX = m_edge_index[X];
         out << "index for equation " << X << std::endl;
         for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
         {
           auto& EXi = EX[i];
-          for (auto ei = EXi.begin(); ei != EXi.end(); ++ei)
+          for (const auto& ei: EXi)
           {
-            out << " edge " << *ei->u << " --" << i << "--> " << *ei->v << std::endl;
+            out << " edge " << *ei.u << " --" << i << "--> " << *ei.v << std::endl;
           }
         }
       }
@@ -226,9 +223,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
     std::string print_belong_set(const stategraph_equation& eq, const std::set<std::size_t>& belongs) const
     {
       std::set<data::variable> v;
-      for (auto i = belongs.begin(); i != belongs.end(); ++i)
+      for (std::size_t i: belongs)
       {
-        v.insert(eq.parameters()[*i]);
+        v.insert(eq.parameters()[i]);
       }
       return core::detail::print_set(v);
     }
@@ -259,16 +256,15 @@ class stategraph_local_algorithm: public stategraph_algorithm
       using utilities::detail::contains;
 
       std::set<core::identifier_string> Nk; // Nk contains the names of the vertices in Vk
-      for (auto p = Vk.vertices.begin(); p != Vk.vertices.end(); ++p)
+      for (const auto& v: Vk.vertices)
       {
-        Nk.insert(p->name());
+        Nk.insert(v.name());
       }
 
       belongs_relation Bk;
       auto const& equations = m_pbes.equations();
-      for (auto xi = equations.begin(); xi != equations.end(); ++xi)
+      for (const stategraph_equation& eqn: equations)
       {
-        auto const& eqn = *xi;
         auto const& X = eqn.variable().name();
         if (!contains(Nk, X))
         {
@@ -300,9 +296,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
           }
         }
         mCRL2log(log::debug1, "stategraph") << "  final   belong set for equation " << X << " = " << print_belong_set(eq_X, belongs) << std::endl;
-        for (std::set<std::size_t>::const_iterator j = belongs.begin(); j != belongs.end(); ++j)
+        for (std::size_t i: belongs)
         {
-          Bk[X].insert(eq_X.parameters()[*j]);
+          Bk[X].insert(eq_X.parameters()[i]);
         }
       }
 
@@ -325,9 +321,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
     std::string print_belongs(const belongs_relation& B) const
     {
       std::ostringstream out;
-      for (auto i = B.begin(); i != B.end(); ++i)
+      for (const auto& b: B)
       {
-        out << i->first << " -> " << core::detail::print_set(i->second) << std::endl;
+        out << b.first << " -> " << core::detail::print_set(b.second) << std::endl;
       }
       return out.str();
     }
@@ -462,9 +458,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       auto const& Ye = eq_X.predicate_variables()[i];
       auto const& e = Ye.parameters();
       auto m = v.marking(); // N.B. a copy must be made, to handle the case u == v properly
-      for (auto di = m.begin(); di != m.end(); ++di)
+      for (const data::variable& d: m)
       {
-        auto const& d = *di;
         if (check_belongs && belongs_contains(B, Y, d))
         {
           continue;
@@ -481,10 +476,10 @@ class stategraph_local_algorithm: public stategraph_algorithm
       using utilities::detail::contains;
 
       auto const& incoming_edges = v.incoming_edges();
-      for(auto j = incoming_edges.begin(); j != incoming_edges.end(); ++j)
+      for(const auto& e: incoming_edges)
       {
-        auto const& u = *j->first;
-        auto const& I = j->second;
+        auto const& u = *e.first;
+        auto const& I = e.second;
         if (u.name() == X && contains(I, i))
         {
           return true;
@@ -504,9 +499,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         auto const& Vj = m_local_control_flow_graphs[j];
         auto const& Bj = m_belongs[j];
-        for (auto ui = Vj.vertices.begin(); ui != Vj.vertices.end(); ++ui)
+        for (const auto& u : Vj.vertices)
         {
-          auto& u = *ui;
           auto const& X = u.name();
           u.set_marking(belongs_intersection(significant_variables(u), Bj, X));
         }
@@ -527,9 +521,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
             auto const& Vj = m_local_control_flow_graphs[j];
             auto const& Bj = m_belongs[j];
             std::set<const local_control_flow_graph_vertex*> todo;
-            for (auto q = Vj.vertices.begin(); q != Vj.vertices.end(); ++q)
+            for (const auto& v: Vj.vertices)
             {
-              todo.insert(&(*q));
+              todo.insert(&v);
             }
             while (!todo.empty())
             {
@@ -538,15 +532,14 @@ class stategraph_local_algorithm: public stategraph_algorithm
               mCRL2log(log::debug1, "stategraph") << " extend marking rule1: v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
 
               auto const& incoming_edges = v.incoming_edges();
-              for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
+              for (const auto& e: incoming_edges)
               {
                 bool changed = false;
-                auto const& u = *ei->first;
-                auto const& labels = ei->second;
-                for (auto ii = labels.begin() ; ii != labels.end(); ++ii)
+                auto const& u = *e.first;
+                auto const& labels = e.second;
+                for (std::size_t i: labels)
                 {
                     // consider edge (u, i, v)
-                    std::size_t i = *ii;
                     bool updated = update_marking_rule(Bj, u, i, v, false);
                     changed = changed || updated;
                 }
@@ -569,9 +562,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
           {
             auto const& Vj = m_local_control_flow_graphs[j];
             auto const& Bj = m_belongs[j];
-            for (auto vj = Vj.vertices.begin(); vj != Vj.vertices.end(); ++vj)
+            for (const auto &u : Vj.vertices)
             {
-              auto const& u = *vj;
               auto const& X = u.name();
               if (u.marking().size() == Bj[X].size())
               {
@@ -583,12 +575,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
               auto const& eq_X = *find_equation(m_pbes, X); // slow
               auto const& predvars = eq_X.predicate_variables();
               auto const& outgoing_edges = u.outgoing_edges();
-              for (auto ei = outgoing_edges.begin(); ei != outgoing_edges.end(); ++ei)
+              for (const auto& e: outgoing_edges)
               {
-                auto const& labels = ei->second;
-                for (auto ii = labels.begin(); ii != labels.end(); ++ii)
+                auto const& labels = e.second;
+                for (std::size_t i: labels)
                 {
-                  const std::size_t i = *ii;
                   auto const& Ye = predvars[i];
                   auto const& Y = Ye.name();
                   for (std::size_t k = 0; k < J; k++)
@@ -633,14 +624,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
     void add_equation_labels(std::set<equation_label_pair>& todo, const local_control_flow_graph_vertex& v)
     {
       auto const& incoming_edges = v.incoming_edges();
-      for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
+      for (const auto& e: incoming_edges)
       {
-        auto const& u = *ei->first;
+        auto const& u = *e.first;
         auto const& X = u.name();
-        auto const& labels = ei->second;
-        for (auto ii = labels.begin(); ii != labels.end(); ++ii)
+        auto const& labels = e.second;
+        for (std::size_t i: labels)
         {
-          std::size_t i = *ii;
           todo.insert(equation_label_pair(X, i));
         }
       }
@@ -659,9 +649,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         auto const& Vj = m_local_control_flow_graphs[j];
         auto const& Bj = m_belongs[j];
-        for (auto vi = Vj.vertices.begin(); vi != Vj.vertices.end(); ++vi)
+        for (const auto& v: Vj.vertices)
         {
-          auto& v = *vi;
           auto const& Y = v.name();
           v.set_marking(belongs_intersection(significant_variables(v), Bj, Y));
           // Insert those pairs (X,i) for which some vertex u = (X,n,dX[n]=z) --i--> v and v.marking() != {}
@@ -670,14 +659,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
             continue;
           }
           auto const& incoming_edges = v.incoming_edges();
-          for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
+          for (const auto& e: incoming_edges)
           {
-            auto const& u = *ei->first;
+            auto const& u = *e.first;
             auto const& X = u.name();
-            auto const& labels = ei->second;
-            for (auto ii = labels.begin(); ii != labels.end(); ++ii)
+            auto const& labels = e.second;
+            for (std::size_t i: labels)
             {
-              std::size_t i = *ii;
               todo.insert(equation_label_pair(X, i));
             }
           }
@@ -704,11 +692,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
           mCRL2log(log::debug1, "stategraph") << " extend marking rule2: u = " << u << " marking(u) = " << core::detail::print_set(u.marking()) << std::endl;
           std::size_t j = ei->k;
           auto const& Bj = m_belongs[j];
-          for (auto ej = EXi.begin(); ej != EXi.end(); ++ej)
+          for (const auto& ej: EXi)
           {
-            const local_control_flow_graph_vertex& u1 = *ej->u;
-            const local_control_flow_graph_vertex& v1 = *ej->v;
-            std::size_t k = ej->k;
+            const local_control_flow_graph_vertex& u1 = *ej.u;
+            const local_control_flow_graph_vertex& v1 = *ej.v;
+            std::size_t k = ej.k;
             auto const& Bk = m_belongs[k];
             bool updated = update_marking_rule(Bk, u1, i, v1, false);
             if (updated)
@@ -741,9 +729,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         auto const& Vj = m_local_control_flow_graphs[j];
         auto const& Bj = m_belongs[j];
-        for (auto ui = Vj.vertices.begin(); ui != Vj.vertices.end(); ++ui)
+        for (const auto& u: Vj.vertices)
         {
-          auto& u = *ui;
           auto const& X = u.name();
           u.set_marking(belongs_intersection(significant_variables(u), Bj, X));
         }
@@ -764,9 +751,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
             auto const& Vj = m_local_control_flow_graphs[j];
             auto const& Bj = m_belongs[j];
             std::set<const local_control_flow_graph_vertex*> todo;
-            for (auto q = Vj.vertices.begin(); q != Vj.vertices.end(); ++q)
+            for (const auto& v: Vj.vertices)
             {
-              todo.insert(&(*q));
+              todo.insert(&v);
             }
             while (!todo.empty())
             {
@@ -775,15 +762,14 @@ class stategraph_local_algorithm: public stategraph_algorithm
               mCRL2log(log::debug1, "stategraph") << " extend marking rule1: v = " << v << " marking(v) = " << core::detail::print_set(v.marking()) << std::endl;
 
               auto const& incoming_edges = v.incoming_edges();
-              for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
+              for (const auto& e: incoming_edges)
               {
                 bool changed = false;
-                auto const& u = *ei->first;
-                auto const& labels = ei->second;
-                for (auto ii = labels.begin() ; ii != labels.end(); ++ii)
+                auto const& u = *e.first;
+                auto const& labels = e.second;
+                for (std::size_t i: labels)
                 {
                     // consider edge (u, i, v)
-                    std::size_t i = *ii;
                     bool updated = update_marking_rule(Bj, u, i, v, false);
                     changed = changed || updated;
                 }
@@ -821,9 +807,8 @@ class stategraph_local_algorithm: public stategraph_algorithm
         while (!stableext)
         {
           stableext = true;
-          for (auto xi = equations.begin(); xi != equations.end(); ++xi)
+          for (const auto& eq_X: equations)
           {
-            auto const& eq_X = *xi;
             auto const& X = eq_X.variable().name();
             auto& EX = m_edge_index[X];
             for (std::size_t i = 0; i < eq_X.predicate_variables().size(); i++)
@@ -839,11 +824,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
                 {
                   continue;
                 }
-                for (auto ej = EXi.begin(); ej != EXi.end(); ++ej)
+                for (const auto& ej: EXi)
                 {
                   // const local_control_flow_graph_vertex& u1 = *ej->u;
-                  const local_control_flow_graph_vertex& v1 = *ej->v;
-                  std::size_t k = ej->k;
+                  const local_control_flow_graph_vertex& v1 = *ej.v;
+                  std::size_t k = ej.k;
                   if (j == k)
                   {
                     continue;
@@ -879,13 +864,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
                         const belongs_relation& Bk,
                         std::size_t k)
     {
-      for (auto i = Bk.begin(); i != Bk.end(); ++i)
+      for (const auto& i: Bk)
       {
-        if (i->first != X)
+        if (i.first != X)
         {
           continue;
         }
-        auto const& V = i->second;
+        auto const& V = i.second;
         for (const data::variable& v: V)
         {
           auto j = B_X.find(v);
@@ -906,18 +891,17 @@ class stategraph_local_algorithm: public stategraph_algorithm
       belongs_relation B;
 
       auto const& equations = m_pbes.equations();
-      for (auto k = equations.begin(); k != equations.end(); ++k)
+      for (const auto& eq_X: equations)
       {
-        auto const& eq_X = *k;
         auto const& X = eq_X.variable().name();
         auto const& u = V.insert_vertex(local_control_flow_graph_vertex(X, data::undefined_data_expression()));
 
         auto const& d_X = eq_X.parameters();
         auto& B_X = B[X];  // N.B. This forces the creation of an empty belong set B[X].
         auto const& I = eq_X.data_parameter_indices();
-        for (auto i = I.begin(); i != I.end(); ++i)
+        for (std::size_t i : I)
         {
-          B_X.insert(d_X[*i]);
+          B_X.insert(d_X[i]);
         }
         mCRL2log(log::debug1, "stategraph") << "initial belongs relation B[" << X << "] = " << core::detail::print_set(B_X) << std::endl;
 
@@ -943,13 +927,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
           else
           {
             std::set<data::variable> used_or_changed;
-            for(auto j = Ye.changed().begin(); j != Ye.changed().end(); ++j)
+            for (std::size_t j: Ye.changed())
             {
-              used_or_changed.insert(d_X[*j]);
+              used_or_changed.insert(d_X[j]);
             }
-            for(auto j = Ye.used().begin(); j != Ye.used().end(); ++j)
+            for (std::size_t j: Ye.used())
             {
-              used_or_changed.insert(d_X[*j]);
+              used_or_changed.insert(d_X[j]);
             }
 
             std::set<data::variable>::const_iterator bi = B_X.begin();
@@ -994,9 +978,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
       local_control_flow_graph V;
       std::set<const local_control_flow_graph_vertex*> todo;
 
-      for (auto i = U.begin(); i != U.end(); ++i)
+      for (const local_control_flow_graph_vertex& u: U)
       {
-        auto k = V.insert(*i);
+        auto k = V.insert(u);
         todo.insert(&(*k.first));
       }
 
@@ -1110,19 +1094,19 @@ class stategraph_local_algorithm: public stategraph_algorithm
 
       // preprocessing
       std::map<core::identifier_string, std::size_t> component_index;
-      for (auto p = component.begin(); p != component.end(); ++p)
+      for (std::size_t p: component)
       {
-        const GCFP_vertex& w = m_GCFP_graph.vertex(*p);
+        const GCFP_vertex& w = m_GCFP_graph.vertex(p);
         component_index[w.name()] = w.index();
       }
 
       std::set<local_control_flow_graph_vertex> U;
-      for (auto p = component.begin(); p != component.end(); ++p)
+      for (std::size_t p: component)
       {
-        const GCFP_vertex& u = m_GCFP_graph.vertex(*p);
-        for (auto q = component_values.begin(); q != component_values.end(); ++q)
+        const GCFP_vertex& u = m_GCFP_graph.vertex(p);
+        for (const auto& value: component_values)
         {
-          U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), *q));
+          U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), value));
         }
       }
       compute_local_control_flow_graph(U, component_index);

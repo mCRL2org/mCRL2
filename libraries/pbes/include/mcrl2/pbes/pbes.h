@@ -93,9 +93,9 @@ class pbes
       atermpp::aterm_appl eqn_spec = atermpp::aterm_appl(*i++);
       atermpp::aterm_list eqn = static_cast<atermpp::aterm_list>(eqn_spec[0]);
       m_equations.clear();
-      for (atermpp::aterm_list::iterator j = eqn.begin(); j != eqn.end(); ++j)
+      for (const atermpp::aterm& j: eqn)
       {
-        m_equations.push_back(pbes_equation(*j));
+        m_equations.push_back(pbes_equation(j));
       }
 
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
@@ -107,9 +107,9 @@ class pbes
     std::set<propositional_variable> compute_declared_variables() const
     {
       std::set<propositional_variable> result;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const pbes_equation& eqn: equations())
       {
-        result.insert(i->variable());
+        result.insert(eqn.variable());
       }
       return result;
     }
@@ -298,9 +298,9 @@ class pbes
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       std::set<propositional_variable> result;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const pbes_equation& eqn: equations())
       {
-        result.insert(i->variable());
+        result.insert(eqn.variable());
       }
       return result;
     }
@@ -318,13 +318,13 @@ class pbes
       std::set<propositional_variable> result;
       std::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
       std::map<core::identifier_string, propositional_variable> declared_variables;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const pbes_equation& eqn: equations())
       {
-        declared_variables[i->variable().name()] = i->variable();
+        declared_variables[eqn.variable().name()] = eqn.variable();
       }
-      for (std::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
+      for (const propositional_variable_instantiation& v: occ)
       {
-        result.insert(declared_variables[i->name()]);
+        result.insert(declared_variables[v.name()]);
       }
       return result;
     }
@@ -368,9 +368,9 @@ class pbes
       }
 
       // check 2), 3) and 7)
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const pbes_equation& eqn: equations())
       {
-        if (!is_well_typed_equation(*i, declared_sorts, declared_global_variables, data()))
+        if (!is_well_typed_equation(eqn, declared_sorts, declared_global_variables, data()))
         {
           return false;
         }

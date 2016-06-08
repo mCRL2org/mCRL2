@@ -45,9 +45,9 @@ const std::vector<utilities::file_format>& pbes_file_formats()
 inline
 bool is_pbes_file_format(const utilities::file_format* format)
 {
-  for (size_t i = 0; i < pbes_file_formats().size(); ++i)
+  for (const auto& i : pbes_file_formats())
   {
-    if (&pbes_file_formats()[i] == format)
+    if (&i == format)
     {
       return true;
     }
@@ -65,11 +65,11 @@ const utilities::file_format* pbes_format_text() { return &pbes_file_formats()[2
 inline
 const utilities::file_format* guess_format(const std::string& filename)
 {
-  for (auto it = pbes_file_formats().begin(); it != pbes_file_formats().end(); ++it)
+  for (const auto& it : pbes_file_formats())
   {
-    if (it->matches(filename))
+    if (it.matches(filename))
     {
-      return &*it;
+      return &it;
     }
   }
   return utilities::file_format::unknown();

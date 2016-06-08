@@ -96,17 +96,15 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         {
           auto const& u = *ei->first;
           const std::set<std::size_t>& labels = ei->second;
-          for (auto li = labels.begin(); li != labels.end(); ++li)
+          for (std::size_t i: labels)
           {
-            std::size_t i = *li;
             std::size_t last_size = u.marking().size();
             const stategraph_equation& eq_X = *find_equation(m_pbes, u.name());
             const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].variable();
             std::set<data::variable> dx = propvar_parameters(u.name());
             mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking()) << std::endl;
-            for (auto j = I.begin(); j != I.end(); ++j)
+            for (std::size_t m: I)
             {
-              std::size_t m = *j;
               data::data_expression_list e = Y.parameters();
               data::data_expression e_m = nth_element(e, m);
               std::set<data::variable> fv = data::find_free_variables(e_m);
@@ -157,10 +155,9 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         auto const& v = i->second;
 #endif
         const stategraph_equation& eqn = *find_equation(m_pbes, v.name());
-        const std::vector<data::variable>& d = eqn.parameters();
-        for (auto j = d.begin(); j != d.end(); ++j)
+        for (const data::variable& w: eqn.parameters())
         {
-          v.add_marked_parameter(v.marking().find(*j) != v.marking().end());
+          v.add_marked_parameter(v.marking().find(w) != v.marking().end());
         }
       }
     }
@@ -210,9 +207,9 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       {
         mCRL2log(log::verbose) << "Equation " << Y << " is not reachable!" << std::endl;
       }
-      for (auto q = inst.begin(); q != inst.end(); ++q)
+      for (auto q: inst)
       {
-        auto& u = **q;
+        auto& u = *q;
         mCRL2log(log::debug, "stategraph") << "  vertex u = " << u << std::endl;
 
         if(!location_possibly_reachable(Y, u, e, eq_X, i))

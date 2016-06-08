@@ -45,9 +45,9 @@ inline
 data::variable_list fresh_variables(const data::variable_list& variables, std::set<std::string>& context, bool update_context = true)
 {
   data::variable_vector result;
-  for (auto i = variables.begin(); i != variables.end(); ++i)
+  for (const data::variable& v: variables)
   {
-    utilities::number_postfix_generator generator(std::string(i->name()));
+    utilities::number_postfix_generator generator(std::string(v.name()));
     std::string name;
     do
     {
@@ -58,7 +58,7 @@ data::variable_list fresh_variables(const data::variable_list& variables, std::s
     {
       context.insert(name);
     }
-    result.push_back(data::variable(name, i->sort()));
+    result.push_back(data::variable(name, v.sort()));
   }
   return data::variable_list(result.begin(),result.end());
 }
@@ -144,11 +144,10 @@ class bisimulation_algorithm
     void set_summand_names(const lps::linear_process& p)
     {
       data::set_identifier_generator generator;
-      for (auto i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
+      for (const lps::action_summand& s: p.action_summands())
       {
-        std::string name = generator(action_list_name(i->multi_action().actions()));
-        const lps::action_summand* t = &(*i);
-        summand_names[t] = name;
+        std::string name = generator(action_list_name(s.multi_action().actions()));
+        summand_names[&s] = name;
       }
     }
 
@@ -280,19 +279,18 @@ class bisimulation_algorithm
       std::set<data::variable> vars = lps::find_all_variables(q);
       context.insert(vars.begin(), vars.end());
       data::set_identifier_generator generator;
-      for (auto i = context.begin(); i != context.end(); ++i)
+      for (const data::variable& v: context)
       {
-        generator.add_identifier(i->name());
+        generator.add_identifier(v.name());
       }
 
       // generate renamings for variables appearing in qvars
-      data::variable_list qvars = q.process().process_parameters();
-      for (auto i = qvars.begin(); i != qvars.end(); ++i)
+      for (const data::variable& w: q.process().process_parameters())
       {
-        data::variable v(generator(i->name()), i->sort());
-        if (v != *i)
+        data::variable v(generator(w.name()), w.sort());
+        if (v != w)
         {
-          result[*i] = v;
+          result[w] = v;
         }
       }
       return result;
@@ -312,33 +310,31 @@ class bisimulation_algorithm
       std::set<data::variable> vars = lps::find_all_variables(q);
       context.insert(vars.begin(), vars.end());
       data::set_identifier_generator generator;
-      for (auto i = context.begin(); i != context.end(); ++i)
+      for (const data::variable& v: context)
       {
-        generator.add_identifier(i->name());
+        generator.add_identifier(v.name());
       }
 
       // put the summation variables of q in qvars
       std::set<data::variable> qvars;
-      const lps::action_summand_vector& qa = q.process().action_summands();
-      for (auto i = qa.begin(); i != qa.end(); ++i)
+      for (const lps::action_summand& s: q.process().action_summands())
       {
-        data::variable_list v = i->summation_variables();
+        const data::variable_list& v = s.summation_variables();
         qvars.insert(v.begin(), v.end());
       }
-      const lps::deadlock_summand_vector& qd = q.process().deadlock_summands();
-      for (auto i = qd.begin(); i != qd.end(); ++i)
+      for (const lps::deadlock_summand& s: q.process().deadlock_summands())
       {
-        data::variable_list v = i->summation_variables();
+        const data::variable_list& v = s.summation_variables();
         qvars.insert(v.begin(), v.end());
       }
 
       // generate renamings for variables appearing in qvars
-      for (auto i = qvars.begin(); i != qvars.end(); ++i)
+      for (const data::variable& w: qvars)
       {
-        data::variable v(generator(i->name()), i->sort());
-        if (v != *i)
+        data::variable v(generator(w.name()), w.sort());
+        if (v != w)
         {
-          result[*i] = v;
+          result[w] = v;
         }
       }
       return result;
@@ -760,9 +756,9 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         used_variables.insert(tmp.begin(), tmp.end());
 
         std::set<std::string> used_names;
-        for (auto k = used_variables.begin(); k != used_variables.end(); ++k)
+        for (const data::variable& w: used_variables)
         {
-          used_names.insert(std::string(k->name()));
+          used_names.insert(std::string(w.name()));
         }
         data::variable_list e1_new = detail::fresh_variables(e1, used_names);
         data::mutable_map_substitution<> sigma1;

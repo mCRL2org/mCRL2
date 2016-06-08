@@ -45,9 +45,9 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   /// \brief Returns true if the m_quantifier_stack contains a given data variable
   bool is_bound(const data::variable& v) const
   {
-    for (std::vector<data::variable_list>::const_iterator i = m_quantifier_stack.begin(); i != m_quantifier_stack.end(); ++i)
+    for (const data::variable_list& variables: m_quantifier_stack)
     {
-      for (data::variable_list::iterator j = i->begin(); j != i->end(); ++j)
+      for (data::variable_list::iterator j = variables.begin(); j != variables.end(); ++j)
       {
         if (*j == v)
         {
@@ -74,13 +74,13 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   pbes_expression apply(const data::data_expression& d)
   {
     std::set<data::variable> FV = data::find_free_variables(d);
-    for (std::set<data::variable>::iterator i = FV.begin(); i != FV.end(); ++i)
+    for (const data::variable& v: FV)
     {
-      if (std::find(m_selected_variables.begin(), m_selected_variables.end(), *i) == m_selected_variables.end())
+      if (std::find(m_selected_variables.begin(), m_selected_variables.end(), v) == m_selected_variables.end())
       {
         continue;
       }
-      if (!is_bound(*i))
+      if (!is_bound(v))
       {
         //std::clog << "Reducing data expression " << data::pp(d) << " to " << data::pp(m_value) << "." << std::endl;
         return m_value;
@@ -123,13 +123,13 @@ class pbes_abstract_algorithm
              bool value_true
             )
     {
-      for (std::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        detail::pbes_parameter_map::const_iterator j = parameter_map.find(i->variable().name());
+        detail::pbes_parameter_map::const_iterator j = parameter_map.find(eqn.variable().name());
         if (j != parameter_map.end())
         {
           detail::pbes_abstract_builder builder(j->second, value_true);
-          i->formula() = builder.apply(i->formula());
+          eqn.formula() = builder.apply(eqn.formula());
         }
       }
     }

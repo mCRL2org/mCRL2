@@ -81,13 +81,13 @@ class stategraph_influence_graph_algorithm
     void print_influence_graph() const
     {
       mCRL2log(log::verbose) << "--- influence graph ---\n";
-      for (auto i = m_influence_vertices.begin(); i != m_influence_vertices.end(); ++i)
+      for (const auto& v: m_influence_vertices)
       {
-        mCRL2log(log::verbose) << i->print() << std::endl;
+        mCRL2log(log::verbose) << v.print() << std::endl;
       }
-      for (auto i = m_influence_edges.begin(); i != m_influence_edges.end(); ++i)
+      for (const auto& e: m_influence_edges)
       {
-        mCRL2log(log::verbose) << i->print() << std::endl;
+        mCRL2log(log::verbose) << e.print() << std::endl;
       }
     }
 
@@ -120,36 +120,36 @@ class stategraph_influence_graph_algorithm
 
       // compute the vertices
       auto const& equations = m_pbes.equations();
-      for (auto i = equations.begin(); i != equations.end(); ++i)
+      for (const stategraph_equation& equation: equations)
       {
-        auto const& X = i->variable().name();
-        auto const& Xparams = i->parameters();
-        for (auto j = Xparams.begin(); j != Xparams.end(); ++j)
+        auto const& X = equation.variable().name();
+        auto const& Xparams = equation.parameters();
+        for (const auto & Xparam : Xparams)
         {
-          m_influence_vertices.push_back(influence_vertex(X, *j));
+          m_influence_vertices.push_back(influence_vertex(X, Xparam));
         }
       }
 
       // compute the edges
-      for (auto k = equations.begin(); k != equations.end(); ++k)
+      for (const stategraph_equation& equation: equations)
       {
-        const std::vector<data::variable>& d_X = k->parameters();
-        const core::identifier_string Xname = k->variable().name();
-        const std::vector<predicate_variable>& predvars = k->predicate_variables();
-        for (auto i = predvars.begin(); i != predvars.end(); ++i)
+        const std::vector<data::variable>& d_X = equation.parameters();
+        const core::identifier_string Xname = equation.variable().name();
+        const std::vector<predicate_variable>& predvars = equation.predicate_variables();
+        for (const auto & predvar : predvars)
         {
-          auto const& Y = i->variable();
+          auto const& Y = predvar.variable();
           std::vector<data::data_expression> Yparameters(Y.parameters().begin(), Y.parameters().end());
           stategraph_equation eqn = *find_equation(m_pbes, Y.name());
           const std::vector<data::variable> d_Y = eqn.parameters();
           for (std::size_t p = 0; p < Yparameters.size(); p++)
           {
             std::set<data::variable> freevars = data::find_free_variables(Yparameters[p]);
-            for (std::size_t m = 0; m < d_X.size(); m++)
+            for (const data::variable& v: d_X)
             {
-              if (contains(freevars, d_X[m]))
+              if (contains(freevars, v))
               {
-                std::vector<influence_vertex>::const_iterator source = find_vertex(Xname, d_X[m]);
+                std::vector<influence_vertex>::const_iterator source = find_vertex(Xname, v);
                 std::vector<influence_vertex>::const_iterator target = find_vertex(Y.name(), d_Y[p]);
                 influence_edge e(&(*source), &(*target));
                 m_influence_edges.push_back(e);

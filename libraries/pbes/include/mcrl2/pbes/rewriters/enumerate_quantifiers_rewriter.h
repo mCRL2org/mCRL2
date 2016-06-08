@@ -70,13 +70,13 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     return static_cast<Derived&>(*this);
   }
 
-  std::vector<data::data_expression> undo_substitution(const data::variable_list& v)
+  std::vector<data::data_expression> undo_substitution(const data::variable_list& variables)
   {
     std::vector<data::data_expression> result;
-    for (auto i = v.begin(); i != v.end(); ++i)
+    for (const data::variable& v : variables)
     {
-      result.push_back(sigma(*i));
-      sigma[*i] = *i;
+      result.push_back(sigma(v));
+      sigma[v] = v;
     }
     return result;
   }

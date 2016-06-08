@@ -108,10 +108,9 @@ inline
 bool is_pfnf_inner_and(const pbes_expression& x)
 {
   bool result = true;
-  std::set<pbes_expression> terms = pbes_expr::split_and(x);
-  for (std::set<pbes_expression>::const_iterator i = terms.begin(); i != terms.end(); ++i)
+  for (const pbes_expression& term: pbes_expr::split_and(x))
   {
-    if (!is_pfnf_imp(*i))
+    if (!is_pfnf_imp(term))
     {
       result = false;
     }
@@ -239,15 +238,15 @@ void split_pfnf_expression(const pbes_expression& phi, pbes_expression& h, std::
   std::vector<pbes_expression> v;
   split_and(x, v);
   h = true_();
-  for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
+  for (pbes_expression& expr: v)
   {
-    if (is_pfnf_simple_expression(*i))
+    if (is_pfnf_simple_expression(expr))
     {
-      h = data::optimized_and(h, *i);
+      h = data::optimized_and(h, expr);
     }
     else
     {
-      g.push_back(*i);
+      g.push_back(expr);
     }
   }
 }

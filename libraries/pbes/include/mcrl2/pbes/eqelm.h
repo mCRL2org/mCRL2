@@ -264,21 +264,21 @@ class pbes_eqelm_algorithm
     void apply_equivalence_relations(pbes& p)
     {
       // first apply the substitutions to the equations
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type X = i->variable().name();
+        string_type X = eqn.variable().name();
         data::mutable_map_substitution<> sigma = compute_substitution(X);
         if (!sigma.empty())
         {
-          i->formula() = pbes_system::replace_variables_capture_avoiding(i->formula(), sigma, data::substitution_variables(sigma));
+          eqn.formula() = pbes_system::replace_variables_capture_avoiding(eqn.formula(), sigma, data::substitution_variables(sigma));
         }
       }
 
       // then remove parameters
       std::map<string_type, std::vector<size_t> > to_be_removed;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type X = i->variable().name();
+        string_type X = eqn.variable().name();
         const std::vector<equivalence_class>& eq = m_vertices[X];
         for (auto j = eq.begin(); j != eq.end(); ++j)
         {
@@ -310,12 +310,12 @@ class pbes_eqelm_algorithm
       std::set<string_type> todo;
 
       // compute the vertices and edges of the graph
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type name = i->variable().name();
-        m_edges[name] = find_propositional_variable_instantiations(i->formula());
-        m_vertices[name] = compute_equivalence_sets(i->variable());
-        const variable_sequence_type& param = i->variable().parameters();
+        string_type name = eqn.variable().name();
+        m_edges[name] = find_propositional_variable_instantiations(eqn.formula());
+        m_vertices[name] = compute_equivalence_sets(eqn.variable());
+        const variable_sequence_type& param = eqn.variable().parameters();
         m_parameters[name] = std::vector<variable_type>(param.begin(), param.end());
         todo.insert(name);
         m_discovered[name] = ignore_initial_state;

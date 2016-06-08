@@ -244,9 +244,8 @@ class stategraph_global_algorithm: public stategraph_algorithm
     void compute_significant_variables()
     {
       pbes_system::simplify_data_rewriter<data::rewriter> pbesr(m_datar);
-      for (auto i = m_control_flow_graph.begin(); i != m_control_flow_graph.end(); ++i)
+      for (const auto& u : m_control_flow_graph)
       {
-        auto const& u = *i;
         auto const& X = u.name();
         auto const& eq_X = *find_equation(m_pbes, X);
         auto const& d = eq_X.control_flow_parameters();

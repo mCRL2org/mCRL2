@@ -27,12 +27,11 @@ namespace pbes_system {
 inline
 pbes_system::pbes complps2pbes(const process::process_specification& procspec, const state_formulas::state_formula& /* formula */)
 {
-  const std::vector<process::process_equation>& equations = procspec.equations();
-  for (std::vector<process::process_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  for (const process::process_equation& equation: procspec.equations())
   {
-    if (!process::is_linear(*i))
+    if (!process::is_linear(equation))
     {
-      throw mcrl2::runtime_error("the equation for " + process::pp(i->identifier()) + " is not linear!");
+      throw mcrl2::runtime_error("the equation for " + process::pp(equation.identifier()) + " is not linear!");
     }
   }
 

@@ -223,9 +223,9 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       expression_type p1 = Sat(ai, alpha, id_generator, TermTraits());
       expression_type p2 = ci;
       data::mutable_map_substitution<> sigma_gi;
-      for (auto k = gi.begin(); k != gi.end(); ++k)
+      for (const data::assignment& a: gi)
       {
-        sigma_gi[k->lhs()] = k->rhs();
+        sigma_gi[a.lhs()] = a.rhs();
       }
       rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_gi, data::substitution_variables(sigma_gi));
       expression_type p = tr::and_(p1, p2);
@@ -265,21 +265,19 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   {
     data::data_expression t = x.time_stamp();
     std::vector<expression_type> v;
-    const lps::action_summand_vector& asv = lps.action_summands();
-    for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
+    for (const lps::action_summand& i: lps.action_summands())
     {
-      const data::data_expression& ci = i->condition();
-      const data::data_expression& ti = i->multi_action().time();
-      const data::variable_list&   yi = i->summation_variables();
+      const data::data_expression& ci = i.condition();
+      const data::data_expression& ti = i.multi_action().time();
+      const data::variable_list&   yi = i.summation_variables();
       expression_type p = tr::forall(yi, tr::or_(data::sort_bool::not_(ci), data::greater(t, ti)));
       v.push_back(p);
     }
-    const lps::deadlock_summand_vector& dsv = lps.deadlock_summands();
-    for (lps::deadlock_summand_vector::const_iterator j = dsv.begin(); j != dsv.end(); ++j)
+    for (const lps::deadlock_summand& j: lps.deadlock_summands())
     {
-      const data::data_expression& cj = j->condition();
-      const data::data_expression& tj = j->deadlock().time();
-      const data::variable_list&   yj = j->summation_variables();
+      const data::data_expression& cj = j.condition();
+      const data::data_expression& tj = j.deadlock().time();
+      const data::variable_list&   yj = j.summation_variables();
       expression_type p = tr::forall(yj, tr::or_(data::sort_bool::not_(cj), data::greater(t, tj)));
       v.push_back(p);
     }
@@ -295,21 +293,19 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   {
     data::data_expression t = x.time_stamp();
     std::vector<expression_type> v;
-    const lps::action_summand_vector& asv = lps.action_summands();
-    for (lps::action_summand_vector::const_iterator i = asv.begin(); i != asv.end(); ++i)
+    for (const lps::action_summand& i : lps.action_summands())
     {
-      data::data_expression ci = i->condition();
-      data::data_expression ti = i->multi_action().time();
-      data::variable_list   yi = i->summation_variables();
+      data::data_expression ci = i.condition();
+      data::data_expression ti = i.multi_action().time();
+      data::variable_list   yi = i.summation_variables();
       expression_type p = tr::exists(yi, tr::and_(ci, data::less_equal(t, ti)));
       v.push_back(p);
     }
-    const lps::deadlock_summand_vector& dsv = lps.deadlock_summands();
-    for (lps::deadlock_summand_vector::const_iterator j = dsv.begin(); j != dsv.end(); ++j)
+    for (const lps::deadlock_summand& j: lps.deadlock_summands())
     {
-      data::data_expression cj = j->condition();
-      data::data_expression tj = j->deadlock().time();
-      data::variable_list   yj = j->summation_variables();
+      data::data_expression cj = j.condition();
+      data::data_expression tj = j.deadlock().time();
+      data::variable_list   yj = j.summation_variables();
       expression_type p = tr::exists(yj, tr::and_(cj, data::less_equal(t, tj)));
       v.push_back(p);
     }

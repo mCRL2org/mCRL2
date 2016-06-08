@@ -58,10 +58,9 @@ struct add_data_rewriter: public Builder<Derived>
   pbes_expression apply(const propositional_variable_instantiation& x)
   {
     std::vector<data::data_expression> d;
-    auto const& e = x.parameters();
-    for (auto i = e.begin(); i != e.end(); ++i)
+    for (const data::data_expression& e: x.parameters())
     {
-      d.push_back(data_rewrite(*i, R, sigma));
+      d.push_back(data_rewrite(e, R, sigma));
     }
     return propositional_variable_instantiation(x.name(), data::data_expression_list(d.begin(), d.end()));
   }

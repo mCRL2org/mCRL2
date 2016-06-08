@@ -291,27 +291,27 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
   std::string pbesspec = "pbes";
 
   std::vector<std::string> pwords = utilities::split(predvar_text, ";");
-  for (std::vector<std::string>::iterator i = pwords.begin(); i != pwords.end(); ++i)
+  for (const std::string& pword: pwords)
   {
-    if (boost::trim_copy(*i).empty())
+    if (boost::trim_copy(pword).empty())
     {
       continue;
     }
     std::vector<std::string> args;
-    std::vector<std::string> words = utilities::split(*i, ":");
+    std::vector<std::string> words = utilities::split(pword, ":");
     std::string var = boost::trim_copy(words[0]);
     if (words.size() >= 2 && !boost::trim_copy(words[1]).empty())
     {
       args = utilities::split(boost::trim_copy(words[1]), "#");
     }
-    for (std::vector<std::string>::iterator j = args.begin(); j != args.end(); ++j)
+    for (std::string& arg: args)
     {
-      std::vector<std::string> w = utilities::split(*j, ",");
-      for (std::vector<std::string>::iterator k = w.begin(); k != w.end(); ++k)
+      std::vector<std::string> w = utilities::split(arg, ",");
+      for (std::string& k: w)
       {
-        *k = unique_prefix + utilities::number2string(unique_prefix_index++) + ": " + *k;
+        k = unique_prefix + utilities::number2string(unique_prefix_index++) + ": " + k;
       }
-      *j = boost::algorithm::join(w, ", ");
+      arg = boost::algorithm::join(w, ", ");
     }
     std::string arg;
     if (!args.empty())
@@ -337,7 +337,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
   {
     expressions.pop_back();
   }
-  for (std::vector<std::string>::iterator i = expressions.begin(); i != expressions.end(); ++i)
+  for (std::string& expression: expressions)
   {
     pbesspec = pbesspec
                + "\nmu "
@@ -347,7 +347,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
                + datavar_text
                + (datavar_text.empty() ? "" : ")")
                + " = "
-               + boost::trim_copy(*i) + ";";
+               + boost::trim_copy(expression) + ";";
   }
 
   // add an initialization section to the pbes

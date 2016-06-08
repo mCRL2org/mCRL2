@@ -159,9 +159,9 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
       {
         std::vector<pbes_expression> terms;
         stategraph_split_or(arg, terms);
-        for (auto i = terms.begin(); i != terms.end(); ++i)
+        for (pbes_expression& term: terms)
         {
-          *i = stategraph_not(*i);
+          term = stategraph_not(term);
         }
         result = stategraph_join_and(terms);
       }
@@ -170,9 +170,9 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
       {
         std::vector<pbes_expression> terms;
         stategraph_split_and(arg, terms);
-        for (auto i = terms.begin(); i != terms.end(); ++i)
+        for (pbes_expression& term: terms)
         {
-          *i = stategraph_not(*i);
+          term = stategraph_not(term);
         }
         result = stategraph_join_or(terms);
       }

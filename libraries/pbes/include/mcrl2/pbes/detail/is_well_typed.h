@@ -81,12 +81,12 @@ struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<h
   /// \return True if the quantifier_stack contains a data variable with the given name
   bool is_in_quantifier_stack(core::identifier_string name) const
   {
-    for (auto i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+    for (const data::variable_list& vars: quantifier_stack)
     {
-      if (std::find(boost::make_transform_iterator(i->begin(), data::detail::variable_name()),
-                    boost::make_transform_iterator(i->end()  , data::detail::variable_name()),
+      if (std::find(boost::make_transform_iterator(vars.begin(), data::detail::variable_name()),
+                    boost::make_transform_iterator(vars.end()  , data::detail::variable_name()),
                     name
-                   ) != boost::make_transform_iterator(i->end()  , data::detail::variable_name())
+                   ) != boost::make_transform_iterator(vars.end()  , data::detail::variable_name())
          )
       {
         return true;
@@ -104,12 +104,12 @@ struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<h
     {
       return;
     }
-    for (auto i = variables.begin(); i != variables.end(); ++i)
+    for (const data::variable& v: variables)
     {
-      if (is_in_quantifier_stack(i->name()))
+      if (is_in_quantifier_stack(v.name()))
       {
         result = true;
-        name_clash = *i;
+        name_clash = v;
         return;
       }
     }
@@ -335,11 +335,11 @@ bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
   }
 
   // check 8)
-  for (std::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
+  for (const propositional_variable_instantiation& v: occ)
   {
-    if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i, data_spec))
+    if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), v, data_spec))
     {
-      mCRL2log(log::error) << "pbes::is_well_typed() failed: the occurring variable " << pbes_system::pp(*i) << " conflicts with its declaration!" << std::endl;
+      mCRL2log(log::error) << "pbes::is_well_typed() failed: the occurring variable " << pbes_system::pp(v) << " conflicts with its declaration!" << std::endl;
       return false;
     }
   }

@@ -166,9 +166,9 @@ struct guard_expression
     }
     else
     {
-      for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::iterator i = guards.begin(); i != guards.end(); ++i)
+      for (auto& g: guards)
       {
-        i->second = data::optimized_and(guard, i->second);
+        g.second = data::optimized_and(guard, g.second);
       }
     }
   }
@@ -181,9 +181,9 @@ struct guard_expression
     }
     else
     {
-      for (auto i = guards.begin(); i != guards.end(); ++i)
+      for (auto& g: guards)
       {
-        i->second = data::optimized_not(i->second);
+        g.second = data::optimized_not(g.second);
       }
     }
   }
@@ -239,9 +239,9 @@ std::ostream& operator<<(std::ostream& out, const guard_expression& x)
   }
   else
   {
-    for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = x.guards.begin(); i != x.guards.end(); ++i)
+    for (const auto& g: x.guards)
     {
-      out << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << std::endl;
+      out << pbes_system::pp(g.first) << " guard = " << pbes_system::pp(g.second) << std::endl;
     }
   }
   return out;

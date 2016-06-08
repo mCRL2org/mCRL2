@@ -154,13 +154,13 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
       {
         size_t count = 0;
         std::vector<pbes_expression> conjuncts = pbes_expr::split_conjuncts(x);
-        for(std::vector<pbes_expression>::iterator it = conjuncts.begin(); it != conjuncts.end(); ++it)
+        for(const pbes_expression& conjunct : conjuncts)
         {
-          if (!is_simple_expression(*it))
+          if (!is_simple_expression(conjunct))
           {
             //std::clog << "and: " << core::pp(*it) << std::endl;
             count++;
-            if (count > 1 || !is_propositional_variable_instantiation(*it))
+            if (count > 1 || !is_propositional_variable_instantiation(conjunct))
             {
               //std::clog << "Invalid: 'and' in mode " << print_mode(mode) << std::endl;
               result = false;
@@ -204,12 +204,12 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
       {
         size_t count = 0;
         std::vector<pbes_expression>  disjuncts = pbes_expr::split_disjuncts(x);
-        for(std::vector<pbes_expression>::iterator it = disjuncts.begin(); it != disjuncts.end(); ++it)
+        for(const pbes_expression& disjunct : disjuncts)
         {
-          if (!is_simple_expression(*it))
+          if (!is_simple_expression(disjunct))
           {
             count++;
-            if (count > 1 || !is_propositional_variable_instantiation(*it))
+            if (count > 1 || !is_propositional_variable_instantiation(disjunct))
             {
               ///std::clog << "Invalid: 'or' in mode " << print_mode(mode) << std::endl;
               result = false;

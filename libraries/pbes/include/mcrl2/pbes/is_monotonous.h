@@ -129,9 +129,9 @@ bool is_monotonous(const pbes_equation& e)
 inline
 bool is_monotonous(const pbes& p)
 {
-  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (const pbes_equation& eqn: p.equations())
   {
-    if (!is_monotonous(*i))
+    if (!is_monotonous(eqn))
     {
       return false;
     }

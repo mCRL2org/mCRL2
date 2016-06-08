@@ -53,9 +53,9 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
     {
       return true;
     }
-    for (auto i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+    for (const data::variable_list& vars: quantifier_stack)
     {
-      if (std::find(i->begin(), i->end(), v) != i->end())
+      if (std::find(vars.begin(), vars.end(), v) != vars.end())
       {
         return true;
       }
@@ -100,12 +100,11 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
   {
     if (search_propositional_variables)
     {
-      std::set<data::variable> variables = data::find_free_variables(x.parameters());
-      for (auto i = variables.begin(); i != variables.end(); ++i)
+      for (const data::variable& v: data::find_free_variables(x.parameters()))
       {
-        if (!is_bound(*i))
+        if (!is_bound(v))
         {
-          result.insert(*i);
+          result.insert(v);
         }
       }
     }
@@ -113,12 +112,11 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
 
   void enter(const data::data_expression& x)
   {
-    std::set<data::variable> variables = data::find_free_variables(x);
-    for (auto i = variables.begin(); i != variables.end(); ++i)
+    for (const data::variable& v: data::find_free_variables(x))
     {
-      if (!is_bound(*i))
+      if (!is_bound(v))
       {
-        result.insert(*i);
+        result.insert(v);
       }
     }
   }

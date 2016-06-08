@@ -244,11 +244,11 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   	using utilities::detail::contains;
 
     std::vector<data::variable> result;
-    for (auto i = l.begin(); i != l.end(); ++i)
+    for (const data::variable& v: l)
     {
-      if (!contains(to_be_removed, *i))
+      if (!contains(to_be_removed, v))
       {
-        result.push_back(*i);
+        result.push_back(v);
       }
     }
     return data::variable_list(result.begin(), result.end());

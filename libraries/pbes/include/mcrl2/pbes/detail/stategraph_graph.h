@@ -134,11 +134,11 @@ class GCFP_graph
 
     GCFP_vertex& find_vertex(const core::identifier_string& X, std::size_t n)
     {
-      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (GCFP_vertex& u: m_vertices)
       {
-        if (i->name() == X && i->index() == n)
+        if (u.name() == X && u.index() == n)
         {
-          return *i;
+          return u;
         }
       }
       std::ostringstream out;
@@ -155,10 +155,9 @@ class GCFP_graph
 inline
 std::ostream& operator<<(std::ostream& out, const GCFP_graph& G)
 {
-  auto const& V = G.vertices();
-  for (auto i = V.begin(); i != V.end(); ++i)
+  for (const auto& v: G.vertices())
   {
-    out << *i << std::endl;
+    out << v << std::endl;
   }
   return out;
 }
@@ -393,10 +392,10 @@ struct control_flow_graph
       {
         const Vertex& v = find_vertex(*(j->first));
         std::set<std::size_t> labels = j->second;
-        for (auto k = labels.begin(); k != labels.end(); ++k)
+        for (std::size_t label: labels)
         {
-          u.insert_outgoing_edge(&v, *k);
-          v.insert_incoming_edge(&u, *k);
+          u.insert_outgoing_edge(&v, label);
+          v.insert_incoming_edge(&u, label);
         }
       }
     }
@@ -572,9 +571,9 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
   std::string print_marking() const
   {
     std::ostringstream out;
-    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    for (const auto& v: vertices)
     {
-      out << i->print_marking() << std::endl;
+      out << v.print_marking() << std::endl;
     }
     return out.str();
   }
@@ -582,11 +581,11 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
   // finds the vertex with given name and index
   const local_control_flow_graph_vertex& find_vertex(const core::identifier_string& X, std::size_t p) const
   {
-    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    for (const auto& v: vertices)
     {
-      if (i->name() == X && i->index() == p)
+      if (v.name() == X && v.index() == p)
       {
-        return *i;
+        return v;
       }
     }
     throw mcrl2::runtime_error("stategraph_global_graph::find_vertex: vertex not found!");
@@ -595,11 +594,11 @@ struct local_control_flow_graph: public control_flow_graph<local_control_flow_gr
   // finds the vertex with given name
   const local_control_flow_graph_vertex& find_vertex(const core::identifier_string& X) const
   {
-    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    for (const auto& v: vertices)
     {
-      if (i->name() == X)
+      if (v.name() == X)
       {
-        return *i;
+        return v;
       }
     }
     throw mcrl2::runtime_error("stategraph_global_graph::find_vertex: vertex not found!");
@@ -697,14 +696,14 @@ class global_control_flow_graph_vertex: public add_edges<global_control_flow_gra
     std::set<std::size_t> marking_variable_indices(const stategraph_pbes& p) const
     {
       std::set<std::size_t> result;
-      for (auto i = marking().begin(); i != marking().end(); ++i)
+      for (const data::variable& v: marking())
       {
         // TODO: make this code more efficient
         const stategraph_equation& eqn = *find_equation(p, m_name);
         const std::vector<data::variable>& d = eqn.parameters();
         for (auto j = d.begin(); j != d.end(); ++j)
         {
-          if (*i == *j)
+          if (v == *j)
           {
             result.insert(j - d.begin());
             break;
@@ -776,9 +775,9 @@ struct global_control_flow_graph: public control_flow_graph<global_control_flow_
   std::string print_marking() const
   {
     std::ostringstream out;
-    for (auto i = vertices.begin(); i != vertices.end(); ++i)
+    for (const auto& v: vertices)
     {
-      out << i->print_marking() << std::endl;
+      out << v.print_marking() << std::endl;
     }
     return out.str();
   }

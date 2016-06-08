@@ -68,15 +68,14 @@ std::vector<data::variable> find_matching_parameters(const pbes& p, const std::s
     propositional_variable X = i->variable();
     if (name == "*" || (name == std::string(X.name())))
     {
-      data::variable_list v = X.parameters();
-      for (data::variable_list::const_iterator j = v.begin(); j != v.end(); ++j)
+      for (const data::variable& v: X.parameters())
       {
         // find a declaration *k that accepts the variable *j
-        for (std::set<std::string>::const_iterator k = declarations.begin(); k != declarations.end(); ++k)
+        for (const std::string& declaration: declarations)
         {
-          if (match_declaration(*k, *j, p.data()))
+          if (match_declaration(declaration, v, p.data()))
           {
-            result.insert(*j);
+            result.insert(v);
             break;
           }
         }
@@ -101,10 +100,9 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
   typedef std::map<std::string, std::set<std::string> > name_map;
   name_map parameter_declarations;
 
-  std::vector<std::string> lines = utilities::split(text, ";");
-  for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+  for (const std::string& s: utilities::split(text, ";"))
   {
-    std::string line = boost::trim_copy(*i);
+    std::string line = boost::trim_copy(s);
     if (line.empty())
     {
       continue;
@@ -121,9 +119,9 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
     std::string word = what[2];
     boost::trim(word);
     std::vector<std::string> parameters = utilities::regex_split(word, "\\s*,\\s*");
-    for (std::vector<std::string>::iterator j = parameters.begin(); j != parameters.end(); ++j)
+    for (const std::string& parameter: parameters)
     {
-      parameter_declarations[X].insert(*j);
+      parameter_declarations[X].insert(parameter);
     }
   }
 
@@ -133,9 +131,9 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes& p, const std::string& te
   {
     std::set<std::string> v = q->second;
     parameter_declarations.erase(q);
-    for (std::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+    for (const pbes_equation& eqn: p.equations())
     {
-      std::string name = i->variable().name();
+      std::string name = eqn.variable().name();
       parameter_declarations[name].insert(v.begin(), v.end());
     }
   }

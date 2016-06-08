@@ -51,16 +51,14 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       if (tr::is_data(e))
       {
         std::vector<data::variable> intersection;
-        data::variable_list free_vars = tr::free_variables(e);
-        for (data::variable_list::iterator v = free_vars.begin(); v != free_vars.end(); ++v)
+        for (const data::variable& var: tr::free_variables(e))
         {
-          data::variable var = *v;
           if (d.find(var) != d.end())
           {
             intersection.push_back(var);
           }
         }
-        if (intersection.size()==0)
+        if (intersection.empty())
         {
           return e;
         }
@@ -130,16 +128,14 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     {
       term_type result = tr::true_();
       data::variable_list free_g = tr::free_variables(g);
-      data::variable_list free_phi_i_list = tr::free_variables(phi_i);
       std::set<data::variable> free_phi_i;
-      for (data::variable_list::iterator v = free_phi_i_list.begin(); v != free_phi_i_list.end(); ++v)
+      for (const data::variable& v: tr::free_variables(phi_i))
       {
-        free_phi_i.insert(*v);
+        free_phi_i.insert(v);
       }
       std::set<data::variable> free_g_minus_free_phi_i;
-      for (data::variable_list::iterator v = free_g.begin(); v != free_g.end(); ++v)
+      for (data::variable var: free_g)
       {
-        data::variable var = *v;
         if (free_phi_i.find(var)==free_phi_i.end()) { // !free_phi_i.contains(v)
           free_g_minus_free_phi_i.insert(var);
         }
@@ -147,9 +143,8 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       std::vector<data::variable> d_intersects_free_g_minus_free_phi_i;
       std::set<data::variable> d_minus_free_phi_i;
       std::set<data::variable> d_intersects_free_phi_i;
-      for (data::variable_list::iterator v = d.begin(); v != d.end(); ++v)
+      for (data::variable var: d)
       {
-        data::variable var = *v;
         if (free_g_minus_free_phi_i.find(var) != free_g_minus_free_phi_i.end()) // free_g_minus_free_phi_i.contains(v)
         {
           d_intersects_free_g_minus_free_phi_i.push_back(var);
@@ -262,13 +257,12 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
             std::vector<data::variable> qvars_i;
             data::variable_list free_phi_i_list = tr::free_variables(phi_i);
             std::set<data::variable> free_phi_i;
-            for (data::variable_list::iterator v = free_phi_i_list.begin(); v != free_phi_i_list.end(); ++v)
+            for (const data::variable& v : tr::free_variables(phi_i))
             {
-              free_phi_i.insert(*v);
+              free_phi_i.insert(v);
             }
-            for (data::variable_list::iterator v = qvars.begin(); v != qvars.end(); ++v)
+            for (data::variable var: qvars)
             {
-              data::variable var = *v;
               if (free_phi_i.find(var) != free_phi_i.end()) // free_phi_i.contains(v)
               {
                 qvars_i.push_back(var);

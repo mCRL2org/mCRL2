@@ -168,14 +168,14 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
   {
     std::ostringstream out;
     out << "<finite>";
-    for (auto i = finite_parameters.begin(); i != finite_parameters.end(); ++i)
+    for (const data::data_expression& e: finite_parameters)
     {
-      out << *i << " ";
+      out << e << " ";
     }
     out << "<infinite>";
-    for (auto i = infinite_parameters.begin(); i != infinite_parameters.end(); ++i)
+    for (const data::data_expression& e: infinite_parameters)
     {
-      out << *i << " ";
+      out << e << " ";
     }
     out << std::endl;
     return out.str();
@@ -380,10 +380,10 @@ class pbesinst_finite_algorithm
           j->add_assignments(vl,sigma_j,rewr);
 
           std::vector<data::data_expression> finite;
-          for (std::vector<data::variable>::iterator k = finite_parameters.begin(); k != finite_parameters.end(); ++k)
+          for (const data::variable& v: finite_parameters)
           {
-            mCRL2log(log::debug1) << "sigma(" << data::pp(*k) << ") = " << data::pp(sigma_j(*k)) << "\n";
-            finite.push_back(sigma_j(*k));
+            mCRL2log(log::debug1) << "sigma(" << data::pp(v) << ") = " << data::pp(sigma_j(v)) << "\n";
+            finite.push_back(sigma_j(v));
           }
           core::identifier_string name = pbesinst_finite_rename()(i->variable().name(), finite);
           propositional_variable X(name, infinite);
@@ -415,14 +415,13 @@ class pbesinst_finite_algorithm
     {
       // put all finite variables in a variable map
       pbesinst_variable_map variable_map;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (const pbes_equation& eqn: p.equations())
       {
-        data::variable_list v = i->variable().parameters();
-        for (data::variable_list::const_iterator j = v.begin(); j != v.end(); ++j)
+        for (const data::variable& v: eqn.variable().parameters())
         {
-          if (p.data().is_certainly_finite(j->sort()))
+          if (p.data().is_certainly_finite(v.sort()))
           {
-            variable_map[i->variable().name()].push_back(*j);
+            variable_map[eqn.variable().name()].push_back(v);
           }
         }
       }
@@ -442,9 +441,9 @@ void pbesinst_finite(pbes& p, data::rewrite_strategy rewrite_strategy, const std
   pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, finite_parameter_selection);
 
   bool is_empty = true;
-  for (auto i = parameter_map.begin(); i != parameter_map.end(); ++i)
+  for (auto& i: parameter_map)
   {
-    if (!((i->second).empty()))
+    if (!((i.second).empty()))
     {
       is_empty = false;
       break;

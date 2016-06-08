@@ -104,20 +104,18 @@ namespace detail {
   inline
   bool is_structured_sort_constructor(const data::data_specification& dataspec, const data::function_symbol& f)
   {
-    for (data::alias_vector::const_iterator i = dataspec.user_defined_aliases().begin(); i != dataspec.user_defined_aliases().end(); ++i)
+    for (const data::alias& a: dataspec.user_defined_aliases())
     {
-      if (f.sort() != i->name())
+      if (f.sort() != a.name())
       {
         continue;
       }
-      data::sort_expression s = i->reference();
+      const data::sort_expression& s = a.reference();
       if (data::is_structured_sort(s))
       {
         const data::structured_sort& ss = atermpp::down_cast<data::structured_sort>(s);
-        data::function_symbol_vector v = ss.constructor_functions();
-        for (data::function_symbol_vector::iterator j = v.begin(); j != v.end(); ++j)
+        for (const data::function_symbol& g: ss.constructor_functions())
         {
-          data::function_symbol g = *j;
           if (f.name() == g.name())
           {
             return true;
@@ -132,10 +130,9 @@ namespace detail {
   void print_used_function_symbols(const pbes& p)
   {
     mCRL2log(log::debug, "absinthe") << "--- used function symbols ---" << std::endl;
-    std::set<data::function_symbol> find_function_symbols = pbes_system::find_function_symbols(p);
-    for (std::set<data::function_symbol>::iterator i = find_function_symbols.begin(); i != find_function_symbols.end(); ++i)
+    for (const data::function_symbol& f: pbes_system::find_function_symbols(p))
     {
-      mCRL2log(log::debug, "absinthe") << print_symbol(*i) << std::endl;
+      mCRL2log(log::debug, "absinthe") << print_symbol(f) << std::endl;
     }
   }
 
@@ -428,10 +425,9 @@ struct absinthe_algorithm
   {
     sort_expression_substitution_map result;
 
-    std::vector<std::string> lines = utilities::regex_split(text, "\\n");
-    for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+    for (const std::string& line: utilities::regex_split(text, "\\n"))
     {
-      std::vector<std::string> words = utilities::regex_split(*i, ":=");
+      std::vector<std::string> words = utilities::regex_split(line, ":=");
       if (words.size() == 2)
       {
         data::sort_expression lhs = data::parse_sort_expression(words[0], dataspec);
@@ -446,10 +442,9 @@ struct absinthe_algorithm
   void parse_right_hand_sides(const std::string& text, data::data_specification& dataspec)
   {
     std::string dataspec_text = data::pp(dataspec);
-    std::vector<std::string> lines = utilities::regex_split(text, "\\n");
-    for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+    for (const std::string& line: utilities::regex_split(text, "\\n"))
     {
-      std::vector<std::string> words = utilities::regex_split(*i, ":=");
+      std::vector<std::string> words = utilities::regex_split(line, ":=");
       if (words.size() == 2)
       {
         data::function_symbol f = data::parse_function_symbol(words[1], dataspec_text);
@@ -466,10 +461,9 @@ struct absinthe_algorithm
     function_symbol_substitution_map result;
     std::string dataspec_text = data::pp(dataspec);
 
-    std::vector<std::string> lines = utilities::regex_split(text, "\\n");
-    for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+    for (const std::string& line: utilities::regex_split(text, "\\n"))
     {
-      std::vector<std::string> words = utilities::regex_split(*i, ":=");
+      std::vector<std::string> words = utilities::regex_split(line, ":=");
       if (words.size() == 2)
       {
         data::function_symbol lhs = data::parse_function_symbol(words[0], dataspec_text);
@@ -487,15 +481,14 @@ struct absinthe_algorithm
   {
     abstraction_map result;
     data::data_specification dataspec = data::parse_data_specification(text);
-    const data::function_symbol_vector& m = dataspec.user_defined_mappings();
-    for (data::function_symbol_vector::const_iterator i = m.begin(); i != m.end(); ++i)
+    for (const data::function_symbol& i: dataspec.user_defined_mappings())
     {
-      const data::function_sort& f = atermpp::down_cast<data::function_sort>(i->sort());
+      const data::function_sort& f = atermpp::down_cast<data::function_sort>(i.sort());
       if (f.domain().size() != 1)
       {
-        throw mcrl2::runtime_error("cannot abstract the function " + data::pp(*i) + " since the arity of the domain is not equal to one!");
+        throw mcrl2::runtime_error("cannot abstract the function " + data::pp(i) + " since the arity of the domain is not equal to one!");
       }
-      result[f.domain().front()] = *i;
+      result[f.domain().front()] = i;
     }
     return result;
   }
@@ -905,21 +898,20 @@ struct absinthe_algorithm
 
     // add List containers for user defined sorts, since they are used in the translation
     const data::basic_sort_vector& sorts = dataspec.user_defined_sorts();
-    for (data::basic_sort_vector::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+    for (const data::basic_sort& sort: sorts)
     {
-      data::sort_expression s = data::container_sort(data::list_container(), *i);
+      data::sort_expression s = data::container_sort(data::list_container(), sort);
       dataspec.add_context_sort(s);
     }
 
     // add constructor functions of List containers of abstracted sorts to sigmaF
-    for (auto i = sigmaH.begin(); i != sigmaH.end(); ++i)
+    for (const auto& i: sigmaH)
     {
-      data::sort_expression s = data::container_sort(data::list_container(), i->first);
+      data::sort_expression s = data::container_sort(data::list_container(), i.first);
       dataspec.add_context_sort(s);
       data::function_symbol_vector list_constructors = dataspec.constructors(s);
-      for (auto j = list_constructors.begin(); j != list_constructors.end(); ++j)
+      for (const data::function_symbol& f1: list_constructors)
       {
-        data::function_symbol f1 = *j;
         data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
@@ -927,10 +919,9 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << f1 << " to sig
       }
     }
 
-    for (auto i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
+    for (const data::function_symbol& f1: used_function_symbols)
     {
-      mCRL2log(log::debug, "absinthe") << "lifting function symbol: " << *i << std::endl;
-      data::function_symbol f1 = *i;
+      mCRL2log(log::debug, "absinthe") << "lifting function symbol: " << f1 << std::endl;
       if (!has_key(sigmaF, f1))
       {
         data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
@@ -945,17 +936,17 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << f1 << " to sig
       }
     }
 
-    for (function_symbol_substitution_map::iterator i = sigmaF.begin(); i != sigmaF.end(); ++i)
+    for (auto& i : sigmaF)
     {
       // data::function_symbol f1 = i->first;
-      data::function_symbol f2 = i->second;
+      data::function_symbol f2 = i.second;
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 
       mCRL2log(log::debug, "absinthe") << "adding mapping: " << f3 << " " << f3.sort() << std::endl;
       dataspec.add_mapping(f3);
 
       // update sigmaF
-      i->second = f3;
+      i.second = f3;
 
       // make an equation for the lifted function symbol f
       data::data_equation eq = lift_equation_2_3()(f2, f3, sigma);
@@ -967,18 +958,18 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << f1 << " to sig
   void print_fsvec(const data::function_symbol_vector& v, const std::string& msg) const
   {
     mCRL2log(log::debug, "absinthe") << "--- " << msg << std::endl;
-    for (data::function_symbol_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const data::function_symbol& f: v)
     {
-      mCRL2log(log::debug, "absinthe") << print_symbol(*i) << std::endl;
+      mCRL2log(log::debug, "absinthe") << print_symbol(f) << std::endl;
     }
   }
 
   void print_fsmap(const function_symbol_substitution_map& v, const std::string& msg) const
   {
     mCRL2log(log::debug, "absinthe") << "--- " << msg << std::endl;
-    for (function_symbol_substitution_map::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const auto& i: v)
     {
-      mCRL2log(log::debug, "absinthe") << print_symbol(i->first) << "  -->  " << print_symbol(i->second) << std::endl;
+      mCRL2log(log::debug, "absinthe") << print_symbol(i.first) << "  -->  " << print_symbol(i.second) << std::endl;
     }
   }
 
