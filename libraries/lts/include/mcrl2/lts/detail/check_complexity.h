@@ -94,7 +94,7 @@ static inline unsigned long ilog2(unsigned __int64 i)
 
 // compiler not detected.  Use a general implementation of ilog2() (which may
 // be slower).
-#warn "I am using a slow ilog2() implementation because I cannot recognise the compiler."
+// #warn "I am using a slow ilog2() implementation because I cannot recognise the compiler."
 
 // The code used in ilog2() is inspired by the Bit Twiddling Hacks collected by
 // Sean Eron Anderson.  See http://graphics.stanford.edu/~seander/bithacks.html
@@ -117,15 +117,17 @@ static inline unsigned ilog2(size_t i)
 
 class check_complexity
 {
-private:
-    struct single_counter {
+  private:
+    struct single_counter 
+    {
         size_t count;
         unsigned short percentage;
     };
     static std::map<const char*, single_counter> counters;
-public:
-    class iteration_type  {
-    private:
+  public:
+    class iteration_type  
+    {
+      private:
         size_t value;
 
         // private constructor to disallow user to construct new instances.
@@ -136,7 +138,7 @@ public:
         void operator=(const iteration_type& other)  {  value = other.value;  }
 
         friend class check_complexity;
-    public:
+      public:
         // public copy constructor to allow user to copy existing instances.
         iteration_type(const iteration_type& other)  :value(other.value)  {  }
     };
@@ -191,7 +193,7 @@ public:
 
 #else // ifndef NDEBUG
 
-#warn "Time complexity will not be checked."
+// #warn "Time complexity will not be checked."
 
 class check_complexity
 {
@@ -206,12 +208,14 @@ public:
         void operator=(const iteration_type&)  {  }
     public:
         // public copy constructor to allow user to copy existing instances.
-        iteration_type(iteration_type&)  {  }
+        iteration_type(const iteration_type&)  {  }
     };
     static const iteration_type n;
     static const iteration_type m;
     static const iteration_type n_log_n;
     static const iteration_type m_log_n;
+    static const iteration_type primary_m_log_n;
+    static const iteration_type secondary_m_log_n;
     static const iteration_type n_m;
 
     static void init(state_type, trans_type)  {  }

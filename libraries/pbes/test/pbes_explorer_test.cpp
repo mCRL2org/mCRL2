@@ -162,14 +162,15 @@ void explorer::bfs()
     int state_length = get_info()->get_lts_type().get_state_length();
     int num_rows = get_info()->get_number_of_groups();
     // int initial_state[state_length]; N.B. This is not portable C++
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(initial_state, int, state_length);
+    int* initial_state = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
     this->initial_state(initial_state);
     std::vector<int> initial_state_vector = this->to_int_vector(state_length, initial_state);
     visited.insert(initial_state_vector);
     fresh.push_back(initial_state_vector);
     // int state[state_length]; N.B. This is not portable C++
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(state, int, state_length);
-    while (!fresh.empty()) {
+    int* state = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
+    while (!fresh.empty()) 
+    {
         std::vector<int> state_vector = fresh.front();
         fresh.pop_front();
         from_int_vector(state_length, state_vector, state);

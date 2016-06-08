@@ -599,7 +599,7 @@ public:
         //std::clog << "next_state_all: " << state->to_string() << std::endl;
         std::vector<ltsmin_state> successors = this->get_successors(state);
         // int dst[state_length]; N.B. This is not portable C++
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(dst, int, state_length);
+        int* dst = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
         for (std::vector<ltsmin_state>::iterator succ = successors.begin(); succ
                 != successors.end(); ++succ) {
 
@@ -639,7 +639,7 @@ public:
             ltsmin_state state = this->from_state_vector(src);
             std::vector<ltsmin_state> successors = this->get_successors(state, group);
             // int dst[state_length]; N.B. This is not portable C++
-            MCRL2_SYSTEM_SPECIFIC_ALLOCA(dst, int, state_length);
+            int* dst = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
             for (std::vector<ltsmin_state>::iterator succ = successors.begin(); succ
                     != successors.end(); ++succ) {
                 this->to_state_vector(*succ, dst, state, src);

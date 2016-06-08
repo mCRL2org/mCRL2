@@ -1388,9 +1388,9 @@ public:
     // LTS.
     bisim_partitioner_gjkw(LTS_TYPE& l, bool branching = false,
                                         bool preserve_divergence = false)
-        :init_helper(l, branching, preserve_divergence),
-        part_st(init_helper.get_nr_of_states()),
-        part_tr(init_helper.get_nr_of_transitions())
+        : init_helper(l, branching, preserve_divergence),
+          part_st(init_helper.get_nr_of_states()),
+          part_tr(init_helper.get_nr_of_transitions())
     {
         assert(branching || !preserve_divergence);
         create_initial_partition_gjkw(branching, preserve_divergence);

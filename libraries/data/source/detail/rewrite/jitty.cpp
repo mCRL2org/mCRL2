@@ -725,8 +725,8 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
   const size_t arity=(is_function_symbol(term)?0:detail::recursive_number_of_args(term));
 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,data_expression, arity);
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten_defined,bool, arity);
+  data_expression* rewritten = MCRL2_SPECIFIC_STACK_ALLOCATOR(data_expression, arity);
+  bool* rewritten_defined = MCRL2_SPECIFIC_STACK_ALLOCATOR(bool, arity);
 
   for(size_t i=0; i<arity; ++i)
   {
@@ -748,9 +748,9 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   const strategy strat=jitty_strat[op_value];
   if (!strat.empty())
   {
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(vars,unprotected_variable,max_vars);
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,unprotected_data_expression,max_vars);
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(variable_is_in_normal_form,bool,max_vars);
+    unprotected_variable* vars=MCRL2_SPECIFIC_STACK_ALLOCATOR(unprotected_variable,max_vars);
+    unprotected_data_expression* terms = MCRL2_SPECIFIC_STACK_ALLOCATOR(unprotected_data_expression,max_vars);
+    bool* variable_is_in_normal_form = MCRL2_SPECIFIC_STACK_ALLOCATOR(bool,max_vars);
     size_t no_assignments=0;
     for (const strategy_rule& rule: strat)
     {

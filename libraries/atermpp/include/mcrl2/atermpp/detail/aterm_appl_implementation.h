@@ -22,7 +22,7 @@ const _aterm* local_term_appl_with_converter(const function_symbol& sym,
 
   HashNumber hnr = SHIFT(addressf(sym));
   
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(temporary_args,aterm, arity);
+  aterm* temporary_args = MCRL2_SPECIFIC_STACK_ALLOCATOR(aterm, arity);
   size_t j=0;
   for (InputIterator i=begin; i!=end; ++i, ++j)
   {
@@ -82,7 +82,7 @@ const _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator 
   const size_t arity = sym.arity();
   HashNumber hnr = SHIFT(addressf(sym)); 
   
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(temporary_args,aterm, arity);
+  aterm* temporary_args=MCRL2_SPECIFIC_STACK_ALLOCATOR(aterm, arity);
   size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {

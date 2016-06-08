@@ -25,7 +25,7 @@ term_list<Term> push_back(const term_list<Term>& l, const Term& el)
   typedef typename term_list<Term>::const_iterator const_iterator;
   
   const size_t len = l.size();
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const_iterator, len);
+  const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
 
   /* Collect all elements of list in buffer */
   
@@ -83,7 +83,7 @@ term_list<Term> remove_one_element(const term_list<Term>& list, const Term& t)
     return list;
   }
 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const_iterator, len);
+  const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
 
   term_list<Term> result = list; 
   size_t k=0;
@@ -125,7 +125,7 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
 
   term_list<Term> result = m;
 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,const_iterator, len);
+  const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
 
   size_t j=0;
   for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
@@ -169,7 +169,7 @@ namespace detail
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     const size_t len=std::distance(first,last);
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,Term, len);
+    Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
     Term *const buffer_begin=buffer;
     Term* i=buffer_begin;
     for(; first != last; ++first,++i)
