@@ -242,12 +242,12 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     }
 
     /// \brief Enter a boolean equation system.
-    void enter(const boolean_equation_system& eqn)
+    void enter(const boolean_equation_system& x)
     {
-      assert(!eqn.equations().empty());
-      for (std::vector<boolean_equation>::const_iterator i = eqn.equations().begin(); i != eqn.equations().end(); ++i)
+      assert(!x.equations().empty());
+      for (const boolean_equation& eqn: x.equations())
       {
-        m_generator.add_identifier(std::string(i->variable().name()));
+        m_generator.add_identifier(std::string(eqn.variable().name()));
       }
     }
 
@@ -257,9 +257,9 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       // set the fixpoint symbol for the added equations m_equations2, and move them to m_equations
       assert(!m_equations.empty());
       fixpoint_symbol sigma = m_equations.back().symbol();
-      for (std::vector<boolean_equation>::iterator i = m_equations2.begin(); i != m_equations2.end(); ++i)
+      for (boolean_equation& eqn: m_equations2)
       {
-        i->symbol() = sigma;
+        eqn.symbol() = sigma;
       }
       std::copy(m_equations2.begin(), m_equations2.end(), std::back_inserter(m_equations));
 

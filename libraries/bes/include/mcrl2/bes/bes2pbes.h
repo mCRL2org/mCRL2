@@ -55,9 +55,9 @@ pbes_system::pbes bes2pbes(const boolean_equation_system& x)
 {
   data::data_specification data_spec;
   std::vector<pbes_system::pbes_equation> equations;
-  for (std::vector<boolean_equation>::const_iterator i = x.equations().begin(); i != x.equations().end(); ++i)
+  for (const boolean_equation& eqn: x.equations())
   {
-    equations.push_back(bes2pbes(*i));
+    equations.push_back(bes2pbes(eqn));
   }
   pbes_system::propositional_variable_instantiation initial_state = atermpp::down_cast<pbes_system::propositional_variable_instantiation>(bes2pbes(x.initial_state()));
 

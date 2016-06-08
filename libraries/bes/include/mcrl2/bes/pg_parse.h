@@ -57,10 +57,10 @@ inline
 boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, std::string prefix = "X")
 {
   std::set<boolean_expression> v_prefixed;
-  for (std::set<identifier_t>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (identifier_t i: v)
   {
     std::stringstream id;
-    id << prefix << *i;
+    id << prefix << i;
     v_prefixed.insert(boolean_variable(id.str()));
   }
 

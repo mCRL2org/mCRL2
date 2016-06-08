@@ -83,13 +83,13 @@ unsigned int mu_block_count(const boolean_equation_system& b)
 {
   unsigned int result = 0;
   fixpoint_symbol last_symbol = fixpoint_symbol::nu();
-  for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+  for (const boolean_equation& eqn: b.equations())
   {
-    if (i->symbol().is_mu() && last_symbol.is_nu())
+    if (eqn.symbol().is_mu() && last_symbol.is_nu())
     {
       result++;
     }
-    last_symbol = i->symbol();
+    last_symbol = eqn.symbol();
   }
   return result;
 }
@@ -263,9 +263,9 @@ class small_progress_measures_algorithm
       unsigned int block_size = 0;
       unsigned int last_rank = 0;
       fixpoint_symbol last_symbol = fixpoint_symbol::nu();
-      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (const boolean_equation& eqn: m_bes.equations())
       {
-        if (i->symbol() != last_symbol)
+        if (eqn.symbol() != last_symbol)
         {
           if (is_even(m_beta.size()))
           {
@@ -277,10 +277,10 @@ class small_progress_measures_algorithm
           }
           block_size = 0;
           last_rank++;
-          last_symbol = i->symbol();
+          last_symbol = eqn.symbol();
         }
         block_size++;
-        m_vertices[i->variable()] = vertex(is_disjunctive(i->formula()), last_rank, m_d);
+        m_vertices[eqn.variable()] = vertex(is_disjunctive(eqn.formula()), last_rank, m_d);
       }
       if (is_even(m_beta.size()))
       {
@@ -292,18 +292,18 @@ class small_progress_measures_algorithm
       }
 
       // add successor information
-      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (const boolean_equation& eqn: m_bes.equations())
       {
-        std::set<boolean_variable> succ = bes::find_boolean_variables(i->formula());
-        vertex_map::iterator k = m_vertices.find(i->variable());
+        std::set<boolean_variable> succ = bes::find_boolean_variables(eqn.formula());
+        vertex_map::iterator k = m_vertices.find(eqn.variable());
         std::vector<vertex*>& k_successors = k->second.successors;
-        for (std::set<boolean_variable>::iterator j = succ.begin(); j != succ.end(); ++j)
+        for (const boolean_variable& v: succ)
         {
-          k_successors.push_back(&m_vertices[*j]);
+          k_successors.push_back(&m_vertices[v]);
         }
 
 #ifdef MCRL2_SMALL_PROGRESS_MEASURES_DEBUG
-        k->second.name = std::string(i->variable().name());
+        k->second.name = std::string(eqn.variable().name());
 #endif
       }
     }
@@ -311,9 +311,9 @@ class small_progress_measures_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (const boolean_equation& eqn: m_bes.equations())
       {
-        const vertex& v = m_vertices.find(i->variable())->second;
+        const vertex& v = m_vertices.find(eqn.variable())->second;
         out << v.name << " " << v << std::endl;
       }
       return out.str();
@@ -330,9 +330,9 @@ class small_progress_measures_algorithm
     std::string print_neighbors(const progress_measures_vertex& v) const
     {
       std::ostringstream out;
-      for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
+      for (progress_measures_vertex* successor: v.successors)
       {
-        out << "\n      " << print_vertex(**i);
+        out << "\n      " << print_vertex(*successor);
       }
       return out.str();
     }
@@ -356,9 +356,9 @@ class small_progress_measures_algorithm
       for (;;) // forever
       {
         bool changed = false;
-        for (vertex_map::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+        for (auto &i: m_vertices)
         {
-          vertex& v = i->second;
+          vertex& v = i.second;
           mCRL2log(log::debug) << "\nchoose vertex " << print_vertex(v);
           unsigned int m = v.rank;
           std::vector<progress_measures_vertex*>::const_iterator j;

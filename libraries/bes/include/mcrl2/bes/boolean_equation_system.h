@@ -60,12 +60,12 @@ class boolean_equation_system
     void init_term(atermpp::aterm_appl t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      atermpp::term_list<atermpp::aterm_appl> eqn = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);
+      atermpp::term_list<atermpp::aterm_appl> equations = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);
       m_initial_state = boolean_expression(*i);
-      m_equations.reserve(eqn.size());
-      for (atermpp::term_list<atermpp::aterm_appl>::const_iterator j = eqn.begin(); j != eqn.end(); ++j)
+      m_equations.reserve(equations.size());
+      for (const atermpp::aterm& eqn: equations)
       {
-        m_equations.push_back(boolean_equation(*j));
+        m_equations.push_back(boolean_equation(eqn));
       }
     }
 
@@ -165,9 +165,9 @@ class boolean_equation_system
     std::set<boolean_variable> binding_variables() const
     {
       std::set<boolean_variable> result;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const boolean_equation& eqn: equations())
       {
-        result.insert(i->variable());
+        result.insert(eqn.variable());
       }
       return result;
     }
@@ -179,9 +179,9 @@ class boolean_equation_system
     std::set<boolean_variable> occurring_variables() const
     {
       std::set<boolean_variable> result;
-      for (auto i = m_equations.begin(); i != m_equations.end(); ++i)
+      for (const boolean_equation& eqn: m_equations)
       {
-        find_boolean_variables(i->formula(), std::inserter(result, result.end()));
+        find_boolean_variables(eqn.formula(), std::inserter(result, result.end()));
       }
       find_boolean_variables(m_initial_state, std::inserter(result, result.end()));
       return result;
