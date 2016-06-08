@@ -139,14 +139,14 @@ struct maximal_closed_subformula_node: public free_variables_node
 std::ostream& operator<<(std::ostream& out, const maximal_closed_subformula_node& node)
 {
   out << "<node>variables = ";
-  for (std::set<data::variable>::const_iterator i = node.variables.begin(); i != node.variables.end(); ++i)
+  for (const data::variable& v: node.variables)
   {
-    out << *i << " ";
+    out << v << " ";
   }
   out << " formulas = ";
-  for (auto i = node.formulas.begin(); i != node.formulas.end(); ++i)
+  for (const state_formula& f: node.formulas)
   {
-    out << *i << " ";
+    out << f << " ";
   }
   return out;
 }
@@ -181,28 +181,25 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
 
   void update_free_variables(const state_formulas::forall& x, maximal_closed_subformula_node& result)
   {
-    data::variable_list v = x.variables();
-    for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const data::variable& v: x.variables())
     {
-      result.variables.erase(*i);
+      result.variables.erase(v);
     }
   }
 
   void update_free_variables(const state_formulas::exists& x, maximal_closed_subformula_node& result)
   {
-    data::variable_list v = x.variables();
-    for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const data::variable& v: x.variables())
     {
-      result.variables.erase(*i);
+      result.variables.erase(v);
     }
   }
 
   void update_free_variables(const state_formulas::variable& x, maximal_closed_subformula_node& result)
   {
-    data::data_expression_list v = x.arguments();
-    for (data::data_expression_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const data::data_expression& e: x.arguments())
     {
-      data::find_free_variables(*i, std::inserter(result.variables, result.variables.end()));
+      data::find_free_variables(e, std::inserter(result.variables, result.variables.end()));
     }
   }
 

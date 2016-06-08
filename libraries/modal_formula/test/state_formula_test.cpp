@@ -290,9 +290,9 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
   state_formula g = exists(f).body();
   std::cout << "g = " << state_formulas::pp(g) << std::endl;
   v = maximal_closed_subformulas(g);
-  for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (const state_formula& f: v)
   {
-    std::cout << "element " << *i << std::endl;
+    std::cout << "element " << f << std::endl;
   }
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));
@@ -301,9 +301,9 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
   state_formula h = forall(g).body();
   v = maximal_closed_subformulas(h);
   std::cout << "h = " << state_formulas::pp(h) << std::endl;
-  for (std::set<state_formulas::state_formula>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (const state_formula& f: v)
   {
-    std::cout << "element " << *i << std::endl;
+    std::cout << "element " << f << std::endl;
   }
   BOOST_CHECK(v.size() == 2);
   BOOST_CHECK(contains(v, "true"));

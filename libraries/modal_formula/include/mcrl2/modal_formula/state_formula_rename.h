@@ -166,9 +166,9 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
   state_formula_variable_rename_builder(const std::set<core::identifier_string>& forbidden_identifiers_)
     : forbidden_identifiers(forbidden_identifiers_)
   {
-    for (std::set<core::identifier_string>::const_iterator i = forbidden_identifiers.begin(); i != forbidden_identifiers.end(); ++i)
+    for (const core::identifier_string& id: forbidden_identifiers)
     {
-      generator.add_identifier(std::string(*i));
+      generator.add_identifier(std::string(id));
     }
   }
 
