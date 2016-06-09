@@ -20,9 +20,6 @@
 #include <utility>
 #include <type_traits>
 
-// #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <functional>
 #include <boost/lexical_cast.hpp>
 
@@ -98,7 +95,7 @@ class data_property_map
     {
       std::set<std::string> elements;
 
-      for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
         elements.insert(static_cast< Derived const& >(*this).print(*i));
       }
@@ -112,12 +109,6 @@ class data_property_map
       return (print_separators) ? add_separators< Container >(print(v)) : print(v);
     }
 
-    /* template < typename Expression >
-    std::string print(const atermpp::term_list< Expression >& v, bool print_separators = true) const
-    {
-      return print(boost::make_iterator_range(v), print_separators);
-    } */
-
     //--------------------------------------------//
     // parse functions
     //--------------------------------------------//
@@ -128,24 +119,20 @@ class data_property_map
 
     std::set<std::string> parse_set_string(std::string const& text) const
     {
-      std::vector<std::string> v;
-      boost::algorithm::split(v, text, boost::algorithm::is_any_of(","));
-      std::for_each(v.begin(), v.end(), std::bind(boost::algorithm::trim<std::string>, std::placeholders::_1, std::locale()));
+      std::vector<std::string> v = utilities::split(text, ",");
+      std::for_each(v.begin(), v.end(), utilities::trim);
       return std::set<std::string>(v.begin(), v.end());
     }
 
     std::set<std::multiset<std::string> > parse_set_multiset_string(std::string const& text) const
     {
       std::set<std::multiset<std::string> > result;
-
-      std::set<std::string> multisets;
-      boost::algorithm::split(multisets, text, boost::algorithm::is_any_of(";"));
+      std::vector<std::string> multisets = utilities::split(text, ";");
       for (const std::string& ms: multisets)
       {
         std::string s = utilities::regex_replace("[{}]", "", ms);
-        std::vector<std::string> v;
-        boost::algorithm::split(v, s, boost::algorithm::is_any_of(","));
-        std::for_each(v.begin(), v.end(), std::bind(boost::algorithm::trim<std::string>, std::placeholders::_1, std::locale()));
+        std::vector<std::string> v = utilities::split(s, ",");
+        std::for_each(v.begin(), v.end(), utilities::trim);
         result.insert(std::multiset<std::string>(v.begin(), v.end()));
       }
       return result;
@@ -189,11 +176,11 @@ class data_property_map
       if (!plus.empty() || !minus.empty())
       {
         out << "Difference in property " << property << " detected:";
-        for (typename std::set<T>::iterator i = plus.begin(); i != plus.end(); ++i)
+        for (auto i = plus.begin(); i != plus.end(); ++i)
         {
           out << " +" << print(*i);
         }
-        for (typename std::set<T>::iterator i = minus.begin(); i != minus.end(); ++i)
+        for (auto i = minus.begin(); i != minus.end(); ++i)
         {
           out << " -" << print(*i);
         }
@@ -219,7 +206,7 @@ class data_property_map
     unsigned int max_key_length() const
     {
       unsigned int result = 0;
-      for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
+      for (auto i = m_data.begin(); i != m_data.end(); ++i)
       {
         result = (std::max)(static_cast< size_t >(result), i->first.size());
       }
@@ -241,7 +228,7 @@ class data_property_map
     std::set<core::identifier_string> names(const Container& v) const
     {
       std::set<core::identifier_string> result;
-      for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
         result.insert(i->name());
       }
@@ -257,13 +244,13 @@ class data_property_map
     /// <tt>KEY = VALUE</tt> format.
     void parse_text(const std::string& text)
     {
-      for (const std::string& line : utilities::split(text, "\n"))
+      for (const std::string& line: utilities::split(text, "\n"))
       {
         std::vector<std::string> words = utilities::split(line, "=");
         if (words.size() == 2)
         {
-          boost::trim(words[0]);
-          boost::trim(words[1]);
+          utilities::trim(words[0]);
+          utilities::trim(words[1]);
           m_data[words[0]] = words[1];
         }
       }
@@ -281,7 +268,7 @@ class data_property_map
     {
       unsigned int n = max_key_length();
       std::vector<std::string> lines;
-      for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
+      for (auto i = m_data.begin(); i != m_data.end(); ++i)
       {
         lines.push_back(align(i->first, n) + " = " + i->second);
       }

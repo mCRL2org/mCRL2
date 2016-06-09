@@ -202,10 +202,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                                  SortAccessor get_sort = get_sort_default()
                                 )
   {
-    typedef typename Container::const_iterator iterator;
-
-    iterator first = container.begin();
-    iterator last = container.end();
+    auto first = container.begin();
+    auto last = container.end();
     if (first == last)
     {
       return;
@@ -258,7 +256,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         if (print_sorts && join_sorts)
         {
           // determine a consecutive interval [first, i) with elements of the same sorts
-          iterator i = first;
+          auto i = first;
           do
           {
             ++i;
@@ -267,7 +265,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
           // print the elements of the interval [first, i)
           while (i != last && i->sort() == first->sort());
 
-          for (iterator j = first; j != i; ++j)
+          for (auto j = first; j != i; ++j)
           {
             if (j != first)
             {
@@ -1800,7 +1798,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     for (const variable& v: eqn.variables())
     {
-      std::map<core::identifier_string, variable>::const_iterator j = variable_map.find(v.name());
+      auto j = variable_map.find(v.name());
       if (j != variable_map.end() && v != j->second)
       {
         return true;
@@ -1849,7 +1847,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(opener);
 
     // print sorts
-    for (typename SortContainer::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+    for (auto i = sorts.begin(); i != sorts.end(); ++i)
     {
       if (!first_element)
       {
@@ -1860,7 +1858,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
 
     // print aliases
-    for (typename AliasContainer::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
+    for (auto i = aliases.begin(); i != aliases.end(); ++i)
     {
       if (!first_element)
       {
