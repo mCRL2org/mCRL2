@@ -59,9 +59,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       if (mCRL2logEnabled(log::verbose))
       {
         mCRL2log(log::verbose) << msg;
-        for (auto i = sigma.begin(); i != sigma.end(); ++i)
+        for (const auto& i : sigma)
         {
-          mCRL2log(log::verbose) << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
+          mCRL2log(log::verbose) << data::pp(i.first) << " := " << data::pp(i.second) << std::endl;
         }
       }
     }
@@ -135,9 +135,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
       // initialize m_index_of
       unsigned index = 0;
-      for (auto i = d.begin(); i != d.end(); ++i)
+      for (const data::variable& v: d)
       {
-        m_index_of[*i] = index++;
+        m_index_of[v] = index++;
       }
 
       // sigma contains substitutions of free variables and process parameters
@@ -145,11 +145,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
-      const data::assignment_list& assignments = super::m_spec.initial_process().assignments();
-      for (auto i = assignments.begin(); i != assignments.end(); ++i)
+      for (const data::assignment& a: super::m_spec.initial_process().assignments())
       {
         // The rewriter requires that the rhs's of a substitution are in normal form.
-        sigma[i->lhs()] = R(i->rhs());
+        sigma[a.lhs()] = R(a.rhs());
       }
 
       // undo contains undo information of instantiations of free variables
@@ -164,14 +163,14 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
           const data::data_expression& c_i = s.condition();
           if (m_ignore_conditions || (R(c_i, sigma) != data::sort_bool::false_()))
           {
-            for (auto j = G.begin(); j != G.end(); ++j)
+            for (const data::variable& j: G)
             {
-              if (dG.find(*j) != dG.end())
+              if (dG.find(j) != dG.end())
               {
                 continue;
               }
-              size_t index_j = m_index_of[*j];
-              const data::variable& d_j = *j;
+              size_t index_j = m_index_of[j];
+              const data::variable& d_j = j;
               data::data_expression g_ij = super::next_state(s, d_j);
 
               if (R(g_ij, sigma) != R(d_j, sigma))
@@ -187,10 +186,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
                 {
                   dG.insert(d_j);
                   sigma[d_j] = d_j; // erase d_j
-                  std::set<data::variable>& var = undo[d_j];
-                  for (auto w = var.begin(); w != var.end(); ++w)
+                  for (const data::variable& w: undo[d_j])
                   {
-                    sigma[*w] = *w; // erase *w
+                    sigma[w] = w; // erase *w
                   }
                   undo[d_j].clear();
                 }
@@ -206,9 +204,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
             LOG_CONDITION(i->condition(), R(c_i, sigma), sigma, "CONDITION IS FALSE: ");
           }
         }
-        for (auto k = dG.begin(); k != dG.end(); ++k)
+        for (const data::variable& v: dG)
         {
-          G.erase(*k);
+          G.erase(v);
         }
       }
       while (!dG.empty());
@@ -222,9 +220,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
       // remove the constant parameters from the specification spec
       std::set<data::variable> constant_parameters;
-      for (auto i = sigma.begin(); i != sigma.end(); ++i)
+      for (const auto& i: sigma)
       {
-        constant_parameters.insert(i->first);
+        constant_parameters.insert(i.first);
       }
       lps::remove_parameters(super::m_spec, constant_parameters);
 

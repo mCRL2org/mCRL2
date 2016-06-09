@@ -37,9 +37,9 @@ void parse_substitution(std::string text, MutableSubstitution& sigma, const data
   text = utilities::regex_replace("\\]\\s*$", "", text);
   std::cout << "text = " << text << std::endl;
   std::vector<std::string> substitutions = utilities::split(text, ";");
-  for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+  for (const std::string& substitution: substitutions)
   {
-    std::vector<std::string> words = utilities::regex_split(*i, ":=");
+    std::vector<std::string> words = utilities::regex_split(substitution, ":=");
     if (words.size() != 2)
     {
       continue;

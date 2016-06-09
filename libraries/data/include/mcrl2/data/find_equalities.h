@@ -101,9 +101,9 @@ struct find_equalities_expression
   // replace m1 by the union of m1 and m2
   void map_union(std::map<variable, std::set<data_expression> >& m1, const std::map<variable, std::set<data_expression> >& m2)
   {
-    for (auto i = m2.begin(); i != m2.end(); ++i)
+    for (const auto& i: m2)
     {
-      m1[i->first].insert(i->second.begin(), i->second.end());
+      m1[i.first].insert(i.second.begin(), i.second.end());
     }
   }
 
@@ -161,18 +161,18 @@ std::ostream& operator<<(std::ostream& out, const find_equalities_expression& x)
 {
   using core::detail::print_set;
   std::vector<data_expression> result;
-  for (auto i = x.equalities.begin(); i != x.equalities.end(); ++i)
+  for (const auto& i: x.equalities)
   {
-    for (auto j = i->second.begin(); j != i->second.end(); ++j)
+    for (auto j = i.second.begin(); j != i.second.end(); ++j)
     {
-      result.push_back(equal_to(i->first, *j));
+      result.push_back(equal_to(i.first, *j));
     }
   }
-  for (auto i = x.inequalities.begin(); i != x.inequalities.end(); ++i)
+  for (const auto& i: x.inequalities)
   {
-    for (auto j = i->second.begin(); j != i->second.end(); ++j)
+    for (auto j = i.second.begin(); j != i.second.end(); ++j)
     {
-      result.push_back(not_equal_to(i->first, *j));
+      result.push_back(not_equal_to(i.first, *j));
     }
   }
   out << print_set(result);
@@ -371,11 +371,11 @@ std::string print_equalities(const std::map<variable, std::set<data_expression> 
 {
   using core::detail::print_set;
   std::vector<data_expression> result;
-  for (auto i = equalities.begin(); i != equalities.end(); ++i)
+  for (const auto& i: equalities)
   {
-    for (auto j = i->second.begin(); j != i->second.end(); ++j)
+    for (auto j = i.second.begin(); j != i.second.end(); ++j)
     {
-      result.push_back(equal_to(i->first, *j));
+      result.push_back(equal_to(i.first, *j));
     }
   }
   return print_set(result);
@@ -386,11 +386,11 @@ std::string print_inequalities(const std::map<variable, std::set<data_expression
 {
   using core::detail::print_set;
   std::vector<data_expression> result;
-  for (auto i = inequalities.begin(); i != inequalities.end(); ++i)
+  for (const auto& i: inequalities)
   {
-    for (auto j = i->second.begin(); j != i->second.end(); ++j)
+    for (auto j = i.second.begin(); j != i.second.end(); ++j)
     {
-      result.push_back(not_equal_to(i->first, *j));
+      result.push_back(not_equal_to(i.first, *j));
     }
   }
   return print_set(result);

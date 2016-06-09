@@ -39,9 +39,9 @@ namespace detail {
     // create a regex that looks like this: "(\\beqn\\b)|(\\bcons\\b)|(\\bmap\\b)|(\\bvar\\b)"
     std::vector<std::string> v = all_keywords;
     v.erase(std::remove(v.begin(), v.end(), keyword), v.end()); // erase keyword from v
-    for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
+    for (std::string& s: v)
     {
-      *i = "(\\b" + *i + "\\b)";
+      s = "(\\b" + s + "\\b)";
     }
     std::string regex_other_keywords = boost::algorithm::join(v, "|");
 
@@ -51,14 +51,14 @@ namespace detail {
       out2 << specs.front() << std::endl;
       specs.erase(specs.begin());
     }
-    for (std::vector<std::string>::iterator i = specs.begin(); i != specs.end(); ++i)
+    for (const std::string& spec: specs)
     {
       // strip trailing map/cons/var/eqn declarations
-      std::vector<std::string> v = utilities::regex_split(*i, regex_other_keywords);
+      std::vector<std::string> v = utilities::regex_split(spec, regex_other_keywords);
       if (!v.empty())
       {
         out1 << "  " << v.front();
-        out2 << i->substr(v.front().size());
+        out2 << spec.substr(v.front().size());
       }
     }
     std::string s1 = out1.str();

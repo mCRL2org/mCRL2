@@ -172,15 +172,14 @@ class parity_game_output: public parity_game_generator
     std::string pgsolver_graph()
     {
       std::vector<std::string> lines(V.size());
-      for (std::set<size_t>::const_iterator i = V.begin(); i != V.end(); ++i)
+      for (std::size_t k: V)
       {
-        size_t k = *i;
-        lines[k] = utilities::number2string(k) + " " + utilities::number2string(priorities[k]) + " " + (odd_vertices.find(*i) == odd_vertices.end() ? "0 " : "1 ");
+        lines[k] = utilities::number2string(k) + " " + utilities::number2string(priorities[k]) + " " + (odd_vertices.find(k) == odd_vertices.end() ? "0 " : "1 ");
       }
-      for (std::set<std::pair<size_t, size_t> >::const_iterator i = E.begin(); i != E.end(); ++i)
+      for (const auto& i: E)
       {
-        size_t k = i->first;
-        size_t m = i->second;
+        size_t k = i.first;
+        size_t m = i.second;
         std::string& line = lines[k];
         line += ((line[line.size()-1] == ' ' ? "" : ", ") + utilities::number2string(m));
       }
@@ -214,13 +213,13 @@ class parity_game_output: public parity_game_generator
             assert(false);
         }
 
-        for (std::set<size_t>::iterator j = dep_i.begin(); j != dep_i.end(); ++j)
+        for (std::size_t j: dep_i)
         {
           // handle edge (i, *j)
-          E.insert(std::make_pair(i, *j));
-          if (done.find(*j) == done.end())
+          E.insert(std::make_pair(i, j));
+          if (done.find(j) == done.end())
           {
-            todo.insert(*j);
+            todo.insert(j);
           }
         }
       }

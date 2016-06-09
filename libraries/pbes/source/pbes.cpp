@@ -109,10 +109,10 @@ bool pbes_equation::is_solved() const
 std::set<propositional_variable_instantiation> pbes::occurring_variable_instantiations() const
 {
   std::set<propositional_variable_instantiation> result;
-  for (auto i = equations().begin(); i != equations().end(); ++i)
+  for (const pbes_equation& eqn: equations())
   {
     detail::occurring_variable_visitor f;
-    f.apply(i->formula());
+    f.apply(eqn.formula());
     result.insert(f.variables.begin(), f.variables.end());
   }
   return result;

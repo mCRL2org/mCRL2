@@ -161,9 +161,9 @@ public:
 
   bool matches(const std::string& filename) const
   {
-    for (auto it = m_extensions.begin(); it != m_extensions.end(); ++it)
+    for (const std::string& ext: m_extensions)
     {
-      if (filename.rfind(*it, filename.size() - it->size()) != std::string::npos)
+      if (filename.rfind(ext, filename.size() - ext.size()) != std::string::npos)
       {
         return true;
       }

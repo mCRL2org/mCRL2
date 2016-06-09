@@ -311,10 +311,9 @@ BOOST_AUTO_TEST_CASE(generate_values_test)
     ;
   data_specification dataspec = parse_data_specification(DATASPEC);
 
-  auto const& sorts = dataspec.user_defined_sorts();
-  for (auto i = sorts.begin(); i != sorts.end(); ++i)
+  for (const sort_expression& sort: dataspec.user_defined_sorts())
   {
-    sort_expression s = normalize_sorts(*i,dataspec);
+    sort_expression s = normalize_sorts(sort, dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data_expression_vector v = generate_values(dataspec, s, 10);
     std::clog << " possible values: " << core::detail::print_set(v) << std::endl;
@@ -322,11 +321,9 @@ BOOST_AUTO_TEST_CASE(generate_values_test)
     BOOST_CHECK(no_duplicates(v));
   }
 
-  const alias_vector& aliases = dataspec.user_defined_aliases();
-  for (auto i = aliases.begin(); i != aliases.end(); ++i)
+  for (const alias& a: dataspec.user_defined_aliases())
   {
-    alias a = *i;
-    sort_expression s = normalize_sorts(i->reference(),dataspec);
+    sort_expression s = normalize_sorts(a.reference(),dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data_expression_vector v = generate_values(dataspec, s, 10);
     std::clog << " possible values: " << core::detail::print_set(v) << std::endl;

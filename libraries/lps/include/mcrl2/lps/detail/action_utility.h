@@ -33,12 +33,11 @@ namespace detail
 inline
 bool check_action_sorts(const process::action_list& actions, const std::set<data::sort_expression>& sorts)
 {
-  for (auto i = actions.begin(); i != actions.end(); ++i)
+  for (const process::action& a: actions)
   {
-    const data::sort_expression_list& s = i->label().sorts();
-    for (auto j = s.begin(); j != s.end(); ++j)
+    for (const data::sort_expression& s: a.label().sorts())
     {
-      if (!data::detail::check_sort(*j, sorts))
+      if (!data::detail::check_sort(s, sorts))
       {
         return false;
       }
@@ -55,9 +54,9 @@ inline
 bool check_action_labels(const process::action_list& actions, const std::set<process::action_label>& labels)
 {
   using utilities::detail::contains;
-  for (auto i = actions.begin(); i != actions.end(); ++i)
+  for (const process::action& a: actions)
   {
-    if (!contains(labels, i->label()))
+    if (!contains(labels, a.label()))
     {
       return false;
     }
@@ -72,13 +71,11 @@ bool check_action_labels(const process::action_list& actions, const std::set<pro
 inline
 bool check_action_label_sorts(const process::action_label_list& action_labels, const std::set<data::sort_expression>& sorts)
 {
-  for (auto i = action_labels.begin(); i != action_labels.end(); ++i)
+  for (const process::action_label& label: action_labels)
   {
-    data::sort_expression_list i_sorts(i->sorts());
-
-    for (auto j = i_sorts.begin(); j != i_sorts.end(); ++j)
+    for (const data::sort_expression& s: label.sorts())
     {
-      if (!data::detail::check_sort(*j, sorts))
+      if (!data::detail::check_sort(s, sorts))
       {
         return false;
       }

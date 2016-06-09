@@ -31,15 +31,15 @@ void split_finite_variables(data::variable_list variables, const data::data_spec
 {
   std::vector<data::variable> finite;
   std::vector<data::variable> infinite;
-  for (auto i = variables.begin(); i != variables.end(); ++i)
+  for (const data::variable& v: variables)
   {
-    if (data.is_certainly_finite(i->sort()))
+    if (data.is_certainly_finite(v.sort()))
     {
-      finite.push_back(*i);
+      finite.push_back(v);
     }
     else
     {
-      infinite.push_back(*i);
+      infinite.push_back(v);
     }
   }
   finite_variables = data::variable_list(finite.begin(), finite.end());

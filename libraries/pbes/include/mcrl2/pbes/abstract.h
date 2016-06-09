@@ -47,9 +47,9 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   {
     for (const data::variable_list& variables: m_quantifier_stack)
     {
-      for (data::variable_list::iterator j = variables.begin(); j != variables.end(); ++j)
+      for (const data::variable& w: variables)
       {
-        if (*j == v)
+        if (w == v)
         {
           return true;
         }

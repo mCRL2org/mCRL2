@@ -163,14 +163,13 @@ void test_pbespgsolve(std::string pbes_spec)
 {
   pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::parity_game_generator pgg(p, true, true);
-  size_t begin = 0;
-  size_t end = 3;
-  for (size_t v = begin; v < end; ++v)
+  std::size_t begin = 0;
+  std::size_t end = 3;
+  for (std::size_t v = begin; v < end; ++v)
   {
-    std::set<size_t> deps = pgg.get_dependencies(v);
-    for (std::set<size_t>::const_iterator it = deps.begin(); it != deps.end(); ++it)
+    std::set<std::size_t> deps = pgg.get_dependencies(v);
+    for (std::size_t w: deps)
     {
-      size_t w = *it;
       assert(w >= begin);
       if (w >= end)
       {
@@ -180,12 +179,12 @@ void test_pbespgsolve(std::string pbes_spec)
     }
 
     int max_prio = 0;
-    for (size_t v = begin; v < end; ++v)
+    for (std::size_t v = begin; v < end; ++v)
     {
       max_prio = (std::max)(max_prio, (int)pgg.get_priority(v));
     }
 
-    for (size_t v = begin; v < end; ++v)
+    for (std::size_t v = begin; v < end; ++v)
     {
       // Variable below is not used; So, I removed it to avoid warnings. JFG.
       // bool and_op = pgg.get_operation(v) == mcrl2::pbes_system::parity_game_generator::PGAME_AND;

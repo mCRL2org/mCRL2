@@ -73,9 +73,9 @@ class pbesinst_symbolic_algorithm
 
       // initialize m_equation_index
       std::size_t eqn_index = 0;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (const pbes_equation& eqn: p.equations())
       {
-        m_equation_index[i->variable().name()] = eqn_index++;
+        m_equation_index[eqn.variable().name()] = eqn_index++;
       }
     }
 
@@ -98,13 +98,12 @@ class pbesinst_symbolic_algorithm
         data::rewriter::substitution_type sigma;
         make_pbesinst_substitution(eqn.variable().parameters(), X.parameters(), sigma);
         pbes_expression psi = R(phi, sigma);
-        std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi);
-        for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)
+        for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi))
         {
-          if (done.find(*i) == done.end())
+          if (done.find(v) == done.end())
           {
-            todo.insert(*i);
-            mCRL2log(log::debug, "symbolic") << "discovered vertex " << *i << std::endl;
+            todo.insert(v);
+            mCRL2log(log::debug, "symbolic") << "discovered vertex " << v << std::endl;
           }
         }
       }

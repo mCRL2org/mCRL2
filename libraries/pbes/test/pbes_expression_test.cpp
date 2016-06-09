@@ -39,9 +39,9 @@ std::string EXPRESSIONS =
 
 void print(std::set<pbes_expression> q)
 {
-  for (std::set<pbes_expression>::iterator i = q.begin(); i != q.end(); ++i)
+  for (const pbes_expression& expr: q)
   {
-    std::cout << pbes_system::pp(*i) << std::endl;
+    std::cout << pbes_system::pp(expr) << std::endl;
   }
 }
 

@@ -189,9 +189,9 @@ class parity_game_generator
         {
           max_priority = 2;
         }
-        for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
+        for (auto& i: m_priorities)
         {
-          i->second = max_priority - i->second;
+          i.second = max_priority - i.second;
         }
         // Add BES equations for true and false with priorities 0 and 1.
         add_bes_equation(tr::true_(), max_priority);
@@ -412,18 +412,16 @@ class parity_game_generator
       }
       else if (tr::is_and(psi))
       {
-        std::set<pbes_expression> terms = pbes_expr::split_and(psi);
-        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        for (const pbes_expression& term: pbes_expr::split_and(psi))
         {
-          result.insert(add_bes_equation(*i, priority));
+          result.insert(add_bes_equation(term, priority));
         }
       }
       else if (tr::is_or(psi))
       {
-        std::set<pbes_expression> terms = pbes_expr::split_or(psi);
-        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        for (const pbes_expression& term: pbes_expr::split_or(psi))
         {
-          result.insert(add_bes_equation(*i, priority));
+          result.insert(add_bes_equation(term, priority));
         }
       }
       else if (tr::is_true(psi))
@@ -460,18 +458,18 @@ class parity_game_generator
     {
       mCRL2log(log::info) << "--- variable mapping ---" << std::endl;
       std::map<size_t, pbes_expression> m;
-      for (std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.begin(); i != m_pbes_expression_index.end(); ++i)
+      for (auto& i: m_pbes_expression_index)
       {
-        m[i->second] = i->first;
+        m[i.second] = i.first;
       }
-      for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
+      for (auto& i: m)
       {
-        mCRL2log(log::info) << std::setw(4) << i->first << " " << i->second << std::endl;
+        mCRL2log(log::info) << std::setw(4) << i.first << " " << i.second << std::endl;
       }
       mCRL2log(log::info) << "--- priorities ---" << std::endl;
-      for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
+      for (auto& i: m_priorities)
       {
-        mCRL2log(log::info) << core::pp(i->first) << " " << i->second << std::endl;
+        mCRL2log(log::info) << core::pp(i.first) << " " << i.second << std::endl;
       }
     }
 };

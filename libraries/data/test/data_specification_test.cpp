@@ -466,9 +466,9 @@ bool search(Container const& container, Expression const& expression)
 
 bool search_alias(const alias_vector& v, const sort_expression& s)
 {
-  for(alias_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+  for(const alias& a: v)
   {
-    if(i->name() == s)
+    if(a.name() == s)
     {
       return true;
     }
@@ -898,20 +898,18 @@ void test_bke()
 
   data_specification data_spec = parse_data_specification(BKE);
   const alias_vector& aliases = data_spec.user_defined_aliases();
-  for (alias_vector::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
+  for (const alias& a: aliases)
   {
-    std::cout << "alias " << *i << std::endl;
-    sort_expression s = i->reference();
+    std::cout << "alias " << a << std::endl;
+    sort_expression s = a.reference();
     if (is_structured_sort(s))
     {
-      structured_sort_constructor_list constructors = structured_sort(s).constructors();
-      for (structured_sort_constructor_list::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
+      for (const structured_sort_constructor& constructor: structured_sort(s).constructors())
       {
-        structured_sort_constructor_argument_list arguments = j->arguments();
-        for (structured_sort_constructor_argument_list::const_iterator k = arguments.begin(); k != arguments.end(); ++k)
+        for (const structured_sort_constructor_argument& argument: constructor.arguments())
         {
-          std::cout << "argument: " << *k << " " << *k << std::endl;
-          atermpp::aterm_appl name = k->name();
+          std::cout << "argument: " << argument << " " << argument << std::endl;
+          atermpp::aterm_appl name = argument.name();
           if (name != core::empty_identifier_string())
           {
             std::cout << "name = " << name << std::endl;

@@ -180,17 +180,16 @@ class pbesinst_algorithm
       // forall m: Nat . exists k: Nat . val(m == k)
       pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
-      for (auto eqi = p.equations().begin(); eqi != p.equations().end(); eqi++)
+      for (pbes_equation& eqn: p.equations())
       {
-        eqi->formula() = one_point_rule_rewriter(simplify_rewriter(eqi->formula()));
+        eqn.formula() = one_point_rule_rewriter(simplify_rewriter(eqn.formula()));
       }
 
       // initialize equation_index and E
       int eqn_index = 0;
       auto const& equations = p.equations();
-      for (auto i = equations.begin(); i != equations.end(); ++i)
+      for (const pbes_equation& eqn : equations)
       {
-        auto const& eqn = *i;
         equation_index[eqn.variable().name()] = eqn_index++;
         E.push_back(std::vector<pbes_equation>());
       }
@@ -206,12 +205,11 @@ class pbesinst_algorithm
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         auto const& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
-        std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi_e);
-        for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)
+        for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
         {
-          if (!contains(done, *i))
+          if (!contains(done, v))
           {
-            todo.insert(*i);
+            todo.insert(v);
           }
         }
         pbes_equation new_eqn(eqn.symbol(), propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list()), rho(psi_e));
@@ -230,9 +228,9 @@ class pbesinst_algorithm
     pbes get_result()
     {
       pbes result;
-      for (auto i =  E.begin(); i != E.end(); ++i)
+      for (const std::vector<pbes_equation>& equations: E)
       {
-        result.equations().insert(result.equations().end(), i->begin(), i->end());
+        result.equations().insert(result.equations().end(), equations.begin(), equations.end());
       }
       result.initial_state() = pbesinst_rename()(init);
       return result;

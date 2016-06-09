@@ -74,13 +74,13 @@ void make_timed_lps(linear_process& lps, const std::set<core::identifier_string>
   data::set_identifier_generator generator;
   generator.add_identifiers(context);
   make_timed_lps_summand<data::set_identifier_generator> f(generator);
-  for (action_summand_vector::iterator i = lps.action_summands().begin(); i != lps.action_summands().end(); ++i)
+  for (action_summand& s: lps.action_summands())
   {
-    f(*i);
+    f(s);
   }
-  for (deadlock_summand_vector::iterator i = lps.deadlock_summands().begin(); i != lps.deadlock_summands().end(); ++i)
+  for (deadlock_summand& s: lps.deadlock_summands())
   {
-    f(*i);
+    f(s);
   }
 }
 

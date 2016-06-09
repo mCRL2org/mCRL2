@@ -101,14 +101,13 @@ struct duplicate_equation_removal
   substitution make_substitution()
   {
     substitution result;
-    for (auto& i :groups)
+    for (const group& g: groups)
     {
-      const group& g = i;
       const process_equation& first_equation = **g.begin();
       process_identifier id(generator("X"), first_equation.formal_parameters());
-      for (auto j = i.begin(); j != i.end(); ++j)
+      for (iterator i: g)
       {
-        const process_equation& eq = **j;
+        const process_equation& eq = *i;
         result[eq.identifier()] = id;
       }
     }

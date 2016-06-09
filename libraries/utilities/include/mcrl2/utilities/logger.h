@@ -218,9 +218,9 @@ class logger
     /// logging mechanism. Requires that output performs output in an atomic way.
     ~logger()
     {
-      for(std::set<output_policy*>::iterator i = output_policies().begin(); i != output_policies().end(); ++i)
+      for(output_policy* policy: output_policies())
       {
-        (*i)->output(m_level, m_hint, m_timestamp, m_os.str());
+        policy->output(m_level, m_hint, m_timestamp, m_os.str());
       }
     }
 

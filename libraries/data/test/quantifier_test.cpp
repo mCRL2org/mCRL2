@@ -170,11 +170,11 @@ void quantifier_in_rewrite_rules_test(mcrl2::data::rewrite_strategy s)
 int test_main(int argc, char** argv)
 {
   auto strategies = data::detail::get_test_rewrite_strategies(false);
-  for (auto strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (const auto& strategy: strategies)
   {
-    std::clog << "  Strategy: " << *strat << std::endl;
-    quantifier_expression_test(*strat);
-    quantifier_in_rewrite_rules_test(*strat);
+    std::clog << "  Strategy: " << strategy << std::endl;
+    quantifier_expression_test(strategy);
+    quantifier_in_rewrite_rules_test(strategy);
   }
 
   return EXIT_SUCCESS;

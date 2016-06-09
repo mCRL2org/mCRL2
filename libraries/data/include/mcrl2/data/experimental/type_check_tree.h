@@ -487,9 +487,9 @@ std::vector<constraint_ptr> join_or_is_element_of_constraints(const std::vector<
       result.push_back(p);
     }
   }
-  for (auto i = is_element_of_constraints.begin(); i != is_element_of_constraints.end(); ++i)
+  for (const auto& i: is_element_of_constraints)
   {
-    result.push_back(make_is_element_of_constraint(i->first, std::vector<sort_expression>(i->second.begin(), i->second.end())));
+    result.push_back(make_is_element_of_constraint(i.first, std::vector<sort_expression>(i.second.begin(), i.second.end())));
   }
   return result;
 }

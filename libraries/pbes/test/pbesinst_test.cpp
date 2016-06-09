@@ -342,9 +342,9 @@ void test_cabp()
   pbesinst_algorithm algorithm(p.data());
   enumerate_quantifiers_rewriter& R = algorithm.rewriter();
   data::mutable_indexed_substitution<> sigma1;
-  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  for (const auto& i: sigma)
   {
-    sigma1[i->first] = i->second;
+    sigma1[i.first] = i.second;
   }
   pbes_expression z = R(t, sigma1);
 }

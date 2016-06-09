@@ -140,9 +140,9 @@ class data_property_map
 
       std::set<std::string> multisets;
       boost::algorithm::split(multisets, text, boost::algorithm::is_any_of(";"));
-      for (std::set<std::string>::iterator i = multisets.begin(); i != multisets.end(); ++i)
+      for (const std::string& ms: multisets)
       {
-        std::string s = utilities::regex_replace("[{}]", "", *i);
+        std::string s = utilities::regex_replace("[{}]", "", ms);
         std::vector<std::string> v;
         boost::algorithm::split(v, s, boost::algorithm::is_any_of(","));
         std::for_each(v.begin(), v.end(), std::bind(boost::algorithm::trim<std::string>, std::placeholders::_1, std::locale()));
@@ -257,10 +257,9 @@ class data_property_map
     /// <tt>KEY = VALUE</tt> format.
     void parse_text(const std::string& text)
     {
-      std::vector<std::string> lines = utilities::split(text, "\n");
-      for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+      for (const std::string& line : utilities::split(text, "\n"))
       {
-        std::vector<std::string> words = utilities::split(*i, "=");
+        std::vector<std::string> words = utilities::split(line, "=");
         if (words.size() == 2)
         {
           boost::trim(words[0]);

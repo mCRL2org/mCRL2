@@ -181,9 +181,8 @@ void explorer::bfs()
         std::set<std::vector<int> > succ_set;
         //std::clog << successors.size() << " successors" << std::endl;
         transition_count += successors.size();
-        for(std::vector<std::vector<int> >::iterator succ = successors.begin(); succ != successors.end(); ++succ)
+        for(std::vector<int> s: successors)
         {
-          std::vector<int> s = *succ;
           std::pair<std::set<std::vector<int> >::iterator,bool> ret;
           ret = visited.insert(s);
           if (ret.second)
@@ -201,9 +200,8 @@ void explorer::bfs()
             this->next_state_long(state, g, f);
             std::vector<std::vector<int> > successors_groups = f.get_successors();
 
-            for(std::vector<std::vector<int> >::iterator succ = successors_groups.begin(); succ != successors_groups.end(); ++succ)
+            for(std::vector<int> s: successors_groups)
             {
-                std::vector<int> s = *succ;
                 succ_set_groups.insert(s);
             }
         }

@@ -27,13 +27,13 @@ using namespace mcrl2;
 using namespace pbes_system;
 
 // prints the names of the variables (sorted alphabetically)
-std::string print_set(const std::set<data::variable>& v)
+std::string print_set(const std::set<data::variable>& variables)
 {
   std::ostringstream out;
   std::set<std::string> s;
-  for (std::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (const data::variable& v: variables)
   {
-    s.insert(std::string(i->name()));
+    s.insert(std::string(v.name()));
   }
   out << "{";
   for (auto i = s.begin(); i != s.end(); ++i)
@@ -95,12 +95,11 @@ void test_significant_variables()
 // find propositional variable instantiation with the given name
 propositional_variable_instantiation find_propvar(const std::string& name, const pbes_expression& x)
 {
-  std::set<propositional_variable_instantiation> V = find_propositional_variable_instantiations(x);
-  for (std::set<propositional_variable_instantiation>::const_iterator i = V.begin(); i != V.end(); ++i)
+  for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(x))
   {
-    if (i->name() == core::identifier_string(name))
+    if (v.name() == core::identifier_string(name))
     {
-      return *i;
+      return v;
     }
   }
   throw mcrl2::runtime_error("propvar not found!");
@@ -713,12 +712,12 @@ void test_cfp()
     ;
 
   std::vector<std::string> test_cases = utilities::detail::split_text(text, "----------");
-  for (auto i = test_cases.begin(); i != test_cases.end(); ++i)
+  for (const std::string& s: test_cases)
   {
     std::vector<std::string> keywords;
     keywords.push_back("pbes");
     keywords.push_back("expected_result");
-    std::map<std::string, std::string> test_case = utilities::detail::split_text_using_keywords(*i, keywords);
+    std::map<std::string, std::string> test_case = utilities::detail::split_text_using_keywords(s, keywords);
     pbes p = txt2pbes(test_case["pbes"], false);
     std::string expected_result = boost::trim_copy(test_case["expected_result"]);
     if (!expected_result.empty())

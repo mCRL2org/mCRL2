@@ -720,9 +720,9 @@ class stategraph_algorithm
       std::map<core::identifier_string, std::set<std::size_t> > CFP; // CFP["X"] is the set of indices of control flow parameters of equation "X"
       for (const std::set<std::size_t>& component: m_connected_components)
       {
-        for (auto j = component.begin(); j != component.end(); ++j)
+        for (std::size_t j: component)
         {
-          const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
+          const GCFP_vertex& u = m_GCFP_graph.vertex(j);
           if (u.has_variable())
           {
             CFP[u.name()].insert(u.index());
@@ -747,9 +747,9 @@ class stategraph_algorithm
         }
         for (const std::set<std::size_t>& component : m_connected_components)
         {
-          for (auto j = component.begin(); j != component.end(); ++j)
+          for (std::size_t j: component)
           {
-            const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
+            const GCFP_vertex& u = m_GCFP_graph.vertex(j);
             if (u.name() == X && u.index() != data::undefined_index())
             {
               I.erase(u.index());
@@ -770,9 +770,9 @@ class stategraph_algorithm
       std::map<core::identifier_string, std::set<const GCFP_vertex*> > CFP;
       for (const std::set<std::size_t>& component: m_connected_components)
       {
-        for (auto j = component.begin(); j != component.end(); ++j)
+        for (std::size_t j: component)
         {
-          const GCFP_vertex& u = m_GCFP_graph.vertex(*j);
+          const GCFP_vertex& u = m_GCFP_graph.vertex(j);
           if (u.has_variable())
           {
             CFP[u.name()].insert(&u);
