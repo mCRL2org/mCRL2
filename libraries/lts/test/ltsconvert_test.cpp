@@ -626,6 +626,6 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }
 

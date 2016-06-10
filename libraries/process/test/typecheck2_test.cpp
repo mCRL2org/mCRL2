@@ -102,5 +102,5 @@ BOOST_AUTO_TEST_CASE(test_function_as_equation_condition)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

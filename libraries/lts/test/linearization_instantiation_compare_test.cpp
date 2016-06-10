@@ -154,6 +154,6 @@ BOOST_AUTO_TEST_CASE(where_clauses_in_conditions_of_rewrite_rules)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }
 

@@ -93,7 +93,7 @@ class sized_forward_list
 
     two_pointers* allocate_node(two_pointers* next, void* val)
     {
-      if (local_forward_list_storage_free_list_elements()==NULL)
+      if (local_forward_list_storage_free_list_elements()==nullptr)
       {
         local_forward_list_storage().push_back(two_pointers(next,val));
         return &local_forward_list_storage().back();
@@ -153,7 +153,7 @@ class sized_forward_list
   public:
     sized_forward_list()
       :  m_list_size(0),
-         m_node_before_begin(allocate_node(NULL,NULL))
+         m_node_before_begin(allocate_node(nullptr,nullptr))
     {
       set_last(m_node_before_begin);
     }
@@ -182,7 +182,7 @@ class sized_forward_list
 
       public:
         iterator()
-         : m_iter(NULL)
+         : m_iter(nullptr)
         {}
 
         iterator(two_pointers* iter)
@@ -191,7 +191,7 @@ class sized_forward_list
 
         iterator operator++(int)
         {
-          assert(m_iter!=NULL);
+          assert(m_iter!=nullptr);
           iterator old=m_iter;
           m_iter=m_iter->next();
           return old;
@@ -199,20 +199,20 @@ class sized_forward_list
 
         iterator operator++()
         {
-          assert(m_iter!=NULL);
+          assert(m_iter!=nullptr);
           m_iter=m_iter->next();
           return m_iter;
         }
 
         T* operator*() const
         {
-          assert(m_iter!=NULL);
+          assert(m_iter!=nullptr);
           return reinterpret_cast<T*>(m_iter->content());
         }
 
         T* operator->() const
         {
-          assert(m_iter!=NULL);
+          assert(m_iter!=nullptr);
           return reinterpret_cast<T*>(m_iter->content());
         }
 
@@ -239,7 +239,7 @@ class sized_forward_list
 
     iterator end() const
     {
-      return iterator(NULL);
+      return iterator(nullptr);
     }
 
     T* front() const
@@ -320,7 +320,7 @@ class sized_forward_list
       assert(is_in_sized_forward_list(position));
       two_pointers* node=position.m_iter;
       two_pointers* node_to_remove=node->next();
-      assert(node_to_remove!=NULL);
+      assert(node_to_remove!=nullptr);
       node->set_next(node_to_remove->next());
       m_list_size--;
       if (node_to_remove==last())
@@ -352,7 +352,7 @@ class sized_forward_list
       assert(is_in_sized_forward_list(obj->ptr_in_list));
       iterator objptrnext = obj->ptr_in_list;
       ++objptrnext;
-      assert(objptrnext!=NULL);
+      assert(objptrnext!=nullptr);
       // redirect pointer of next element in list
       ++objptrnext;
       if (objptrnext != end()) 
@@ -385,7 +385,7 @@ class sized_forward_list
         current=position;
       }
       two_pointers* node_to_move = detach_node(position);
-      node_to_move->set_next(NULL);
+      node_to_move->set_next(nullptr);
       other.insert_node_back(node_to_move);
       return position.m_iter->next();
     }
@@ -427,7 +427,7 @@ class sized_forward_list
     {
       rearrange_element_pointers(obj);
       two_pointers* node_to_move = detach_node(obj->ptr_in_list);
-      node_to_move->set_next(NULL);
+      node_to_move->set_next(nullptr);
       obj->ptr_in_list = iterator(last());
       last()->set_next(node_to_move);
       set_last(node_to_move);
@@ -477,7 +477,7 @@ class sized_forward_list
       last()->set_next(local_forward_list_storage_free_list_elements());
       local_forward_list_storage_free_list_elements()=first();
       set_last(m_node_before_begin);
-      set_first(NULL);
+      set_first(nullptr);
       m_list_size = 0;
     }
 
@@ -498,7 +498,7 @@ class sized_forward_list
 
     bool not_in_free_list(two_pointers* n) const
     {
-      for(two_pointers* i=local_forward_list_storage_free_list_elements(); i!=NULL; i=i->next())
+      for(two_pointers* i=local_forward_list_storage_free_list_elements(); i!=nullptr; i=i->next())
       {
         if (i==n)
         {
@@ -530,7 +530,7 @@ class sized_forward_list
         if (check_ptr_in_list)
         {
           two_pointers* before_node_i=i->ptr_in_list.m_iter;
-          if (before_node_i!=NULL && before_node_i->next()!=i.m_iter)
+          if (before_node_i!=nullptr && before_node_i->next()!=i.m_iter)
           {
             std::cerr << "\nBEFORE NODE " << before_node_i << "  NEXT " << before_node_i->next() << "  iter " << i.m_iter << "\n";
             // The ptr_in_list of a node does not point to a node before this node in the list.
@@ -541,7 +541,7 @@ class sized_forward_list
         length++;
         
       }
-      return length==m_list_size && last()==last_seen && last()->next()==NULL;
+      return length==m_list_size && last()==last_seen && last()->next()==nullptr;
     }
 };
 
@@ -566,12 +566,12 @@ class pooled_sized_forward_list
     }
     void rep_init()
     {
-      r_next = NULL;
+      r_next = nullptr;
       list.clear();
     }
 
     pooled_sized_forward_list()
-     : r_next(NULL)
+     : r_next(nullptr)
     {}
 
     // Copy constructor

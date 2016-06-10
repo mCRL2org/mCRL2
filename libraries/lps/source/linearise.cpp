@@ -243,7 +243,7 @@ class specification_basic_type:public boost::noncopyable
       fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.constructors()));
       fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.mappings()));
 
-      stack_operations_list=NULL;
+      stack_operations_list=nullptr;
       acts=as;
       storeact(acts);
       procs=ps;
@@ -265,7 +265,7 @@ class specification_basic_type:public boost::noncopyable
 
     ~specification_basic_type()
     {
-      for (; stack_operations_list!=NULL;)
+      for (; stack_operations_list!=nullptr;)
       {
         stackoperations* temp=stack_operations_list->next;
         delete stack_operations_list;
@@ -4026,9 +4026,9 @@ class specification_basic_type:public boost::noncopyable
           const variable_list& parameters,
           stackoperations* stack_operations_list)
         {
-          if (stack_operations_list==NULL)
+          if (stack_operations_list==nullptr)
           {
-            return NULL;
+            return nullptr;
           }
           if (parameters==stack_operations_list->parameter_list)
           {
@@ -4062,7 +4062,7 @@ class specification_basic_type:public boost::noncopyable
 
           if (regular)
           {
-            opns=NULL;
+            opns=nullptr;
             if (spec.options.newstate)
             {
               if (!spec.options.binary)
@@ -4098,7 +4098,7 @@ class specification_basic_type:public boost::noncopyable
             }
             opns=find_suitable_stack_operations(parlist,spec.stack_operations_list);
 
-            if (opns!=NULL)
+            if (opns!=nullptr)
             {
               stackvar=variable(spec.fresh_identifier_generator(s3),opns->stacksort);
               spec.insertvariable(stackvar,true);
@@ -9349,7 +9349,7 @@ class specification_basic_type:public boost::noncopyable
         if (objectdata[n].containstime!=ct)
         {
           objectdata[n].containstime=ct;
-          if (stable!=NULL)
+          if (stable!=nullptr)
           {
             *stable=false;
           }

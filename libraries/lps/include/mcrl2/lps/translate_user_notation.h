@@ -24,7 +24,7 @@ namespace lps
 
 template <typename T>
 void translate_user_notation(T& x,
-                             typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                             typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                             )
 {
   core::make_update_apply_builder<lps::data_expression_builder>(data::detail::translate_user_notation_function()).update(x);

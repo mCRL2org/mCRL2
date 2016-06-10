@@ -147,11 +147,11 @@ smt4_data_specification::smt4_data_specification(data::data_specification &data_
     make_operator(this, "div"),
     make_operator(this, "mod"),
     make_operator(this, "to_int"),
-    0, // ceil
-    0, // round
+    nullptr, // ceil
+    nullptr, // round
     make_operator(this, "-"),
-    0, // maximum
-    0, // minimum
+    nullptr, // maximum
+    nullptr, // minimum
     make_operator(this, "abs")
   );
   add_recursive_functions(data_specification);

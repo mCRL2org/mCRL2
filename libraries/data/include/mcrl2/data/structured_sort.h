@@ -90,7 +90,7 @@ class structured_sort: public sort_expression
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = 0)
+    structured_sort(const Container& constructors, typename atermpp::enable_if_container<Container, structured_sort_constructor>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
     {}
 

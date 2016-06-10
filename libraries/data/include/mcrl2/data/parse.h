@@ -87,7 +87,7 @@ struct sort_expression_actions: public core::default_parser_actions
     : core::default_parser_actions(parser_)
   {}
 
-  data::sort_expression parse_SortExpr(const core::parse_node& node, data::sort_expression_list* product=NULL) const
+  data::sort_expression parse_SortExpr(const core::parse_node& node, data::sort_expression_list* product=nullptr) const
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { return sort_bool::bool_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Pos")) { return sort_pos::pos(); }
@@ -105,7 +105,7 @@ struct sort_expression_actions: public core::default_parser_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortExpr") && (node.child(1).string() == "->") && (symbol_name(node.child(2)) == "SortExpr")) { return function_sort(parse_SortExpr_as_SortProduct(node.child(0)), parse_SortExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortExpr") && (node.child(1).string() == "#") && (symbol_name(node.child(2)) == "SortExpr"))
     {
-      if (product != NULL)
+      if (product != nullptr)
       {
         data::sort_expression new_element = parse_SortExpr(node.child(2), product);
         if (new_element != data::sort_expression())

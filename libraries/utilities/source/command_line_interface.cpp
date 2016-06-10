@@ -146,7 +146,7 @@ std::string interface_description::option_descriptor::textual_description(
   {
     options = "  -" + std::string(1, m_short);
 
-    if (m_argument.get() != 0)
+    if (m_argument.get() != nullptr)
     {
       options += (m_argument->is_optional()) ?
                  "[" + m_argument->get_name() + "]" : m_argument->get_name();
@@ -161,7 +161,7 @@ std::string interface_description::option_descriptor::textual_description(
 
   options += "--" + m_long;
 
-  if (m_argument.get() != 0)
+  if (m_argument.get() != nullptr)
   {
     options += ((m_argument->is_optional()) ?
                 "[=" + m_argument->get_name() + "]" : "=" + m_argument->get_name());
@@ -177,7 +177,7 @@ std::string interface_description::option_descriptor::textual_description(
   }
 
   s << word_wrap(m_description, right_width, std::string(left_width, ' ')) << std::endl;
-  if (m_argument.get() != 0 && m_argument->has_description())
+  if (m_argument.get() != nullptr && m_argument->has_description())
   {
     std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
     for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
@@ -212,7 +212,7 @@ std::string interface_description::option_descriptor::man_page_description() con
   {
     s << "\\fB-" << std::string(1, m_short) << "\\fR";
 
-    if (m_argument.get() != 0)
+    if (m_argument.get() != nullptr)
     {
       if (m_argument->is_optional())
       {
@@ -229,7 +229,7 @@ std::string interface_description::option_descriptor::man_page_description() con
 
   s << "\\fB--" << m_long << "\\fR";
 
-  if (m_argument.get() != 0)
+  if (m_argument.get() != nullptr)
   {
     s << ((m_argument->is_optional()) ?
           "[=\\fI" + m_argument->get_name() + "\\fR]" :
@@ -244,7 +244,7 @@ std::string interface_description::option_descriptor::man_page_description() con
        )
     << std::endl;
 
-  if (m_argument.get() != 0 && m_argument->has_description())
+  if (m_argument.get() != nullptr && m_argument->has_description())
   {
     std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
     for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
@@ -294,7 +294,7 @@ std::ostream& interface_description::option_descriptor::xml_page_description(std
   }
   s << std::string(--indentation, ' ') << "</description>" << std::endl;
 
-  if (m_argument.get() != 0)
+  if (m_argument.get() != nullptr)
   {
     s << std::string(indentation++, ' ') << "<option_argument optional=\"" << (m_argument->is_optional()?"yes":"no") <<"\" type=\"" << (m_argument->get_type()) << "\">" << std::endl;
     s << std::string(indentation, ' ') << "<name>" << m_argument->get_name() << "</name>" << std::endl;
@@ -754,7 +754,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
             {
               throw error("expected argument to option `--" + option + "'!");
             }
-            else if (descriptor.m_argument.get() == 0)
+            else if (descriptor.m_argument.get() == nullptr)
             {
               m_options.insert(std::make_pair(long_option, ""));
             }
@@ -961,7 +961,7 @@ std::vector< std::string > command_line_parser::parse_command_line(char const* c
 {
   std::vector< std::string > result;
 
-  if (arguments != 0)
+  if (arguments != nullptr)
   {
     char const* current = arguments;
 

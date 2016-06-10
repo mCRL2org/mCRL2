@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(test_file_logging)
 {
   FILE * pFile;
   pFile = fopen ("logger_test_file.txt" , "w");
-  BOOST_REQUIRE(pFile != NULL);
+  BOOST_REQUIRE(pFile != nullptr);
 
   file_output::set_stream(pFile);
   mCRL2log(info) << "This line is written to logger_test_file.txt" << std::endl;

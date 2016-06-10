@@ -33,17 +33,17 @@ namespace lts
 
 tree_set_store::tree_set_store()
 {
-  buckets = NULL;
+  buckets = nullptr;
   buckets_size = 0;
   buckets_next = 0;
 
-  tags = NULL;
+  tags = nullptr;
   tags_size = 0;
   tags_next = 0;
 
   hashmask = (1 << HASH_CLASS) - 1;
   hashtable = (ptrdiff_t*)malloc((hashmask+1)*sizeof(ptrdiff_t));
-  if (hashtable == NULL)
+  if (hashtable == nullptr)
   {
     throw mcrl2::runtime_error("Out of memory.");
   }
@@ -55,18 +55,18 @@ tree_set_store::tree_set_store()
 
 tree_set_store::~tree_set_store()
 {
-  if (tags != NULL)
+  if (tags != nullptr)
   {
     free(tags);
-    tags = NULL;
+    tags = nullptr;
   }
-  if (buckets != NULL)
+  if (buckets != nullptr)
   {
     free(buckets);
-    buckets = NULL;
+    buckets = nullptr;
   }
   free(hashtable);
-  hashtable = NULL;
+  hashtable = nullptr;
 }
 
 void tree_set_store::check_tags()
@@ -75,7 +75,7 @@ void tree_set_store::check_tags()
   {
     tags_size += TAGS_BLOCK;
     tags = (ptrdiff_t*)realloc(tags,tags_size*sizeof(ptrdiff_t));
-    if (tags == NULL)
+    if (tags == nullptr)
     {
       throw mcrl2::runtime_error("Out of memory.");
     }
@@ -88,7 +88,7 @@ void tree_set_store::check_buckets()
   {
     buckets_size += BUCKETS_BLOCK;
     buckets = (bucket*)realloc(buckets,buckets_size*sizeof(bucket));
-    if (buckets == NULL)
+    if (buckets == nullptr)
     {
       throw mcrl2::runtime_error("Out of memory.");
     }
@@ -97,7 +97,7 @@ void tree_set_store::check_buckets()
   {
     hashmask = hashmask + hashmask + 1;
     hashtable = (ptrdiff_t*)realloc(hashtable,(hashmask+1)*sizeof(ptrdiff_t));
-    if (hashtable == NULL)
+    if (hashtable == nullptr)
     {
       throw mcrl2::runtime_error("Out of memory.");
     }

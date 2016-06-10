@@ -564,6 +564,6 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
  // Initialise random seed to allow parallel running with lps2lts_test_old
-  return 0;
+  return nullptr;
 }
 

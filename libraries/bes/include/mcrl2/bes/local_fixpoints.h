@@ -262,7 +262,7 @@ class local_fixpoints_algorithm
 };
 
 inline
-bool local_fixpoints(boolean_equation_system& b, std::vector<bool> *full_solution = 0)
+bool local_fixpoints(boolean_equation_system& b, std::vector<bool> *full_solution = nullptr)
 {
   local_fixpoints_algorithm algorithm(b);
   return algorithm.run(full_solution);

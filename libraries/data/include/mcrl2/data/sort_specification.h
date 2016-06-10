@@ -160,7 +160,7 @@ class sort_specification
     /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
     /// the necessary constructors, mappings and equations are added to the data type.
     template <typename Container>
-    void add_context_sorts(const Container& c, typename atermpp::enable_if_container<Container>::type* = 0)
+    void add_context_sorts(const Container& c, typename atermpp::enable_if_container<Container>::type* = nullptr)
     {
       for(typename Container::const_iterator i=c.begin(); i!=c.end(); ++i)
       {

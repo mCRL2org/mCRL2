@@ -159,8 +159,8 @@ void free_term(const detail::_aterm* t)
 {
   const detail::_aterm* terms_to_be_removed=t;
   remove_from_hashtable(t);
-  t->set_next(NULL);
-  while (terms_to_be_removed!=NULL)
+  t->set_next(nullptr);
+  while (terms_to_be_removed!=nullptr)
   {
     const detail::_aterm* u=terms_to_be_removed;
     terms_to_be_removed=terms_to_be_removed->next();
@@ -186,7 +186,7 @@ void resize_aterm_hashtable()
   // hashtable.
   const _aterm* * new_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
 
-  if (new_hashtable==NULL)
+  if (new_hashtable==nullptr)
   {
     resizing_aterm_hashtable_has_failed=true;
     mCRL2log(mcrl2::log::warning) << "could not resize hashtable to size " << aterm_table_size << ". ";
@@ -226,7 +226,7 @@ void collect_terms_with_reference_count_0()
   {
     TermInfo &ti=terminfo[size];
 
-    for(Block* b=ti.at_block; b!=NULL; b=b->next_by_size)
+    for(Block* b=ti.at_block; b!=nullptr; b=b->next_by_size)
     {
       for(size_t *p=b->data; p<b->end; p=p+size)
       {
@@ -245,9 +245,9 @@ void collect_terms_with_reference_count_0()
   for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
     TermInfo &ti=terminfo[size];
-    Block* previous_block=NULL;
-    ti.at_freelist=NULL;
-    for(Block* b=ti.at_block; b!=NULL; )
+    Block* previous_block=nullptr;
+    ti.at_freelist=nullptr;
+    for(Block* b=ti.at_block; b!=nullptr; )
     {
       Block* next_block=b->next_by_size;
       bool block_is_empty_up_till_now=true;
@@ -270,7 +270,7 @@ void collect_terms_with_reference_count_0()
       if (block_is_empty_up_till_now)
       {
         ti.at_freelist=freelist_of_previous_block;
-        if (previous_block==NULL)
+        if (previous_block==nullptr)
         {
           ti.at_block=next_block;
         }
@@ -358,13 +358,13 @@ void initialise_aterm_administration()
    * due to the initialisation of a pre-main initialisation of a static variable, which some
    * compilers do. */
   aterm_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
-  if (aterm_hashtable==NULL)
+  if (aterm_hashtable==nullptr)
   {
     throw std::runtime_error("Out of memory. Cannot create an aterm symbol hashtable.");
   }
 
   terminfo=reinterpret_cast<TermInfo*>(malloc(terminfo_size*sizeof(TermInfo)));
-  if (terminfo==NULL)
+  if (terminfo==nullptr)
   {
     throw std::runtime_error("Out of memory. Failed to allocate the terminfo array.");
   }
@@ -403,7 +403,7 @@ void allocate_block(const size_t size)
   if (number_of_terms_in_data_block==0) number_of_terms_in_data_block=1; // Take care that there is room for at least one term.
 
   Block* newblock = (Block*)malloc(block_header_size+number_of_terms_in_data_block*size*sizeof(size_t));
-  if (newblock == NULL)
+  if (newblock == nullptr)
   {
     throw std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
   }
@@ -426,8 +426,8 @@ void allocate_block(const size_t size)
 
   newblock->next_by_size = ti.at_block;
   ti.at_block = newblock;
-  assert(ti.at_block != NULL);
-  assert(ti.at_freelist != NULL);
+  assert(ti.at_block != nullptr);
+  assert(ti.at_freelist != nullptr);
 }
 
 } // namespace detail

@@ -45,7 +45,7 @@ class set_comprehension: public abstraction
     template < typename Container >
     set_comprehension(const Container& variables,
            const data_expression& body,
-           typename atermpp::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
       : abstraction(set_comprehension_binder(), variables, body)
     {
       assert(!variables.empty());

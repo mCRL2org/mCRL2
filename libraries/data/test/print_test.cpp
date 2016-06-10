@@ -544,5 +544,5 @@ BOOST_AUTO_TEST_CASE(test_precedence)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

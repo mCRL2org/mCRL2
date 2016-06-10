@@ -47,7 +47,7 @@ class where_clause: public data_expression
 
     /// \brief Constructor.
     template <typename Container>
-    where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = 0)
+    where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = nullptr)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
     {}
 

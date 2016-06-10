@@ -58,7 +58,7 @@ class aterm
 
     inline size_t decrease_reference_count() const
     {
-      assert(m_term!=NULL);
+      assert(m_term!=nullptr);
       assert(m_term->reference_count()>0);
       m_term->decrease_reference_count();
       return m_term->reference_count();
@@ -67,7 +67,7 @@ class aterm
     template <bool CHECK>
     void increase_reference_count() const
     {
-      assert(m_term!=NULL);
+      assert(m_term!=nullptr);
       if (CHECK) assert(m_term->reference_count()>0);
       m_term->increase_reference_count();
     }
@@ -275,7 +275,7 @@ struct is_convertible : public
 template <class Derived, class Base>
 const Derived& down_cast(const Base& t,
                           typename std::enable_if<is_convertible<Base, Derived>::value &&
-                                                  !std::is_base_of<Derived, Base>::value>::type* = NULL)
+                                                  !std::is_base_of<Derived, Base>::value>::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
@@ -289,7 +289,7 @@ const DerivedCont& container_cast(const Cont<Base>& t,
                                 std::is_same<Cont<typename DerivedCont::value_type>, DerivedCont>::value &&
                                 !std::is_base_of<DerivedCont, Cont<Base> >::value &&
                                 is_convertible<Base, typename DerivedCont::value_type>::value
-                              >::type* = NULL)
+                              >::type* = nullptr)
 {
   static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
@@ -298,7 +298,7 @@ const DerivedCont& container_cast(const Cont<Base>& t,
 
 template <class Derived, class Base>
 const Derived& vertical_cast(const Base& t,
-                          typename std::enable_if<is_convertible<Base, Derived>::value>::type* = NULL)
+                          typename std::enable_if<is_convertible<Base, Derived>::value>::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
@@ -323,7 +323,7 @@ const Derived& deprecated_cast(const Base& t,
                           typename std::enable_if<
                              std::is_base_of<aterm, Base>::value &&
                              std::is_base_of<aterm, Derived>::value
-                          >::type* = NULL)
+                          >::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");

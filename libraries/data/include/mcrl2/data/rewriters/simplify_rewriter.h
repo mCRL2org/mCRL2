@@ -140,7 +140,7 @@ void simplify(T& x, typename std::enable_if< !std::is_base_of< atermpp::aterm, T
 }
 
 template <typename T>
-T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0)
+T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr)
 {
   T result = core::make_update_apply_builder<data::data_expression_builder>(simplify_rewriter()).apply(x);
   return result;

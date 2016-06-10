@@ -71,7 +71,7 @@ class lps2lts_algorithm
 
   public:
     lps2lts_algorithm() :
-      m_generator(0),
+      m_generator(nullptr),
       m_must_abort(false)
     {
     }

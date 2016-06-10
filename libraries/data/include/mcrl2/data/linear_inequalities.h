@@ -1585,12 +1585,12 @@ namespace detail
       }  
 
       inequality_inconsistency_cache()
-        : m_cache(NULL)
+        : m_cache(nullptr)
       {}  
 
       ~inequality_inconsistency_cache()
       {
-        if (m_cache!=NULL)
+        if (m_cache!=nullptr)
         {
           // delete m_cache;
         }
@@ -1731,7 +1731,7 @@ namespace detail
       }  
 
       inequality_consistency_cache()
-        : m_cache(NULL)
+        : m_cache(nullptr)
       {}  
 
       inequality_consistency_cache(const node_type node)
@@ -1742,7 +1742,7 @@ namespace detail
 
       ~inequality_consistency_cache()
       {
-        if (m_cache!=NULL)
+        if (m_cache!=nullptr)
         {
           // delete m_cache;
         }

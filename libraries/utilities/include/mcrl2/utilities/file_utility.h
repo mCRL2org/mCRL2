@@ -81,7 +81,7 @@ public:
   stream_wrapper(stream_wrapper&& other)
     : m_stdio(other.m_stdio), m_stream(other.m_stream)
   {
-    other.m_stream = NULL;
+    other.m_stream = nullptr;
   }
 
   stream_wrapper(const std::string& filename, bool text, stream_type* stdstream)

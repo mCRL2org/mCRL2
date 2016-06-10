@@ -39,10 +39,10 @@ namespace bisim_gjkw
 
 
 
-block_t* block_t::refinable_first = NULL;
+block_t* block_t::refinable_first = nullptr;
 const char* const block_t::mark_all_states_in_SpB = "mark all states in SpB";
 state_type constln_t::nr_of_constlns = 0;
-constln_t* constln_t::nontrivial_first = NULL;
+constln_t* constln_t::nontrivial_first = nullptr;
 
 /// \details `split_off_blue()` and `split_off_red()` use the same complexity
 /// counters because their operations belong together.
@@ -243,7 +243,7 @@ void part_trans_t::split_inert_to_C(block_t* B)
         }
         else
         {
-            B->FromRed = NULL;
+            B->FromRed = nullptr;
         }
         return;
     }
@@ -251,7 +251,7 @@ void part_trans_t::split_inert_to_C(block_t* B)
     // if all transitions are inert
     if (slice->begin == B->inert_begin())
     {
-        B->FromRed = NULL;
+        B->FromRed = nullptr;
         return;
     }
 
@@ -314,7 +314,7 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t pred_iter, constln_t* OldC,
                                         old_B_to_C_pos->B_to_C_slice->end)
     {
         delete old_B_to_C_pos->B_to_C_slice;
-        pred_iter->source->block->FromRed = NULL;
+        pred_iter->source->block->FromRed = nullptr;
     }
     swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
     new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
@@ -553,7 +553,7 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                     OldB->set_inert_end(B_to_C.begin());
 
                     if (OldB->FromRed == new_pos->B_to_C_slice)
-                        OldB->FromRed = NULL;
+                        OldB->FromRed = nullptr;
                     delete new_pos->B_to_C_slice;
                 }
             }
@@ -566,7 +566,7 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                 if (new_pos->B_to_C_slice->begin == new_pos->B_to_C_slice->end)
                 {
                     if (OldB->FromRed == new_pos->B_to_C_slice)
-                        OldB->FromRed = NULL;
+                        OldB->FromRed = nullptr;
                     delete new_pos->B_to_C_slice;
                 }
             }
@@ -1006,7 +1006,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                 refine_partition_until_it_becomes_stable_gjkw()
 {
     // 2.4: while there is a nontrivial constellation SpC do
-    while (NULL != bisim_gjkw::constln_t::get_some_nontrivial())
+    while (nullptr != bisim_gjkw::constln_t::get_some_nontrivial())
     {
         bisim_gjkw::check_complexity::count("for each nontrivial "
                         "constellation", 1, bisim_gjkw::check_complexity::n);
@@ -1023,7 +1023,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
 
         /*-------------------- find predecessors of SpB ---------------------*/
 
-        assert(NULL == bisim_gjkw::block_t::get_some_refinable());
+        assert(nullptr == bisim_gjkw::block_t::get_some_refinable());
         assert(new_bottom_states.empty());
         // 2.8: Mark block SpB as refinable
         SpB->make_refinable();
@@ -1074,7 +1074,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         /*------------------ stabilise the partition again ------------------*/
 
         // 2.20: for all refinable blocks RefB do
-        while (NULL != bisim_gjkw::block_t::get_some_refinable())
+        while (nullptr != bisim_gjkw::block_t::get_some_refinable())
         {
             bisim_gjkw::check_complexity::count("for all refinable blocks", 1,
                                         bisim_gjkw::check_complexity::m_log_n);
@@ -1473,7 +1473,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::
     // 3.29: RedB := RefB  or  RedB := NewB , respectively
     RUN_COROUTINES(secondary_blue, (RefB, SpC),   RedB = RefB,
                    secondary_red,  (RefB,FromRed),(RedB=red_end[-1]->block)==
-                                                    RefB ? (RedB=NULL) : NULL,
+                                                    RefB ? (RedB=nullptr) : nullptr,
                /* shared data: */ struct bisim_gjkw::secondary_refine_shared,
                                         ({ RefB->nonbottom_begin(), false }));
     // 4.33: return RedB
@@ -1700,7 +1700,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
 
     /*  -  -  -  -  -  -  - collect states from FromRed -  -  -  -  -  -  -  */
 
-    if (NULL != FromRed)
+    if (nullptr != FromRed)
     {
         fromred_visited_begin = FromRed->end;
         if (RefB->inert_end() == fromred_visited_begin)
@@ -1890,7 +1890,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
     /*----------------------- handle collected blocks -----------------------*/
 
     // 5.12: for all refinable blocks SplitB do
-    while (NULL != bisim_gjkw::block_t::get_some_refinable())
+    while (nullptr != bisim_gjkw::block_t::get_some_refinable())
     {
         bisim_gjkw::check_complexity::count("for all blocks with new bottom "
                                 "states", 1, bisim_gjkw::check_complexity::n);
@@ -1938,7 +1938,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
                 //                               without transition to C)
                 bisim_gjkw::block_t* RedB = secondary_refine(B, C,
                                                         B_iter->B_to_C_slice);
-                assert (NULL != RedB);
+                assert (nullptr != RedB);
                 // 5.20: for all new bottom states s in RedB do
                 for (bisim_gjkw::permutation_iter_t s_iter =
                                                 RedB->non_old_bottom_begin();

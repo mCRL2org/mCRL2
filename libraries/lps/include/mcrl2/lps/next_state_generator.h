@@ -224,7 +224,7 @@ class next_state_generator
 
       public:
         iterator()
-          : m_generator(0)
+          : m_generator(nullptr)
         {
         }
 
@@ -234,7 +234,7 @@ class next_state_generator
 
         operator bool() const
         {
-          return m_generator != 0;
+          return m_generator != nullptr;
         }
 
       private:

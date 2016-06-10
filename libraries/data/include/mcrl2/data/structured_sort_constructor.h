@@ -52,7 +52,7 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
+    structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}
 
@@ -116,7 +116,7 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort_constructor(const std::string& name, const Container& arguments, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
+    structured_sort_constructor(const std::string& name, const Container& arguments, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::empty_identifier_string())
     {}
 
@@ -137,7 +137,7 @@ class structured_sort_constructor: public atermpp::aterm_appl
     structured_sort_constructor(const char(&name)[S],
                                 const Container& arguments,
                                 const char(&recogniser)[S0],
-                                typename atermpp::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+                                typename atermpp::enable_if_container< Container, structured_sort_constructor_argument >::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}
 

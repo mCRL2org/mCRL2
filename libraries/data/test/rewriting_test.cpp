@@ -1494,5 +1494,5 @@ BOOST_AUTO_TEST_CASE(Check_function_equality)
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   //mcrl2::log::logger::set_reporting_level(log::debug);
-  return 0;
+  return nullptr;
 }

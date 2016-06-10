@@ -157,7 +157,7 @@ class BDD_Prover: protected rewriter
     /// \brief Constructs the EQ-BDD corresponding to the formula Prover::f_formula.
     void build_bdd()
     {
-      f_deadline = time(0) + f_time_limit;
+      f_deadline = time(nullptr) + f_time_limit;
 
       data_expression v_previous_1;
       data_expression v_previous_2;
@@ -198,7 +198,7 @@ class BDD_Prover: protected rewriter
     {
       a_indent.append("  ");
 
-      if (f_time_limit != 0 && (f_deadline - time(0)) <= 0)
+      if (f_time_limit != 0 && (f_deadline - time(nullptr)) <= 0)
       {
         mCRL2log(log::debug) << "The time limit has passed." << std::endl;
         return a_formula;
@@ -256,11 +256,11 @@ class BDD_Prover: protected rewriter
     {
       time_t v_new_time_limit;
 
-      v_new_time_limit = f_deadline - time(0);
+      v_new_time_limit = f_deadline - time(nullptr);
       if (v_new_time_limit > 0 || f_time_limit == 0)
       {
         mCRL2log(log::debug) << "Simplifying the BDD:" << std::endl;
-        f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(0)));
+        f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(nullptr)));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
         mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
       }
@@ -527,7 +527,7 @@ class BDD_Prover: protected rewriter
     ~BDD_Prover()
     {
       delete f_bdd_simplifier;
-      f_bdd_simplifier = 0;
+      f_bdd_simplifier = nullptr;
     }
 
     /// \brief Set the substitution to be used to construct the BDD

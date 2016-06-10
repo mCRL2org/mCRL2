@@ -57,7 +57,7 @@ template <typename T>
 void normalize(T& x, bool negated = false, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
 
 template <typename T>
-T normalize(const T& x, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0);
+T normalize(const T& x, bool negated = false, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr);
 
 // \brief Visitor for normalizing a state formula.
 struct normalize_builder: public state_formula_builder<normalize_builder>

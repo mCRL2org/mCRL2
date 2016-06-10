@@ -1377,7 +1377,7 @@ void explorer::initial_state(int* state)
 {
     ltsmin_state initial_state = this->get_initial_state();
     ltsmin_state dummy("dummy");
-    this->to_state_vector(initial_state, state, dummy, 0);
+    this->to_state_vector(initial_state, state, dummy, nullptr);
 }
 
 
@@ -1478,7 +1478,7 @@ void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const lt
     std::string varname = dst_state.get_variable();
     std::string src_varname;
     bool same_var = false;
-    if (!(src==0)) {
+    if (!(src==nullptr)) {
         src_varname = src_state.get_variable();
         same_var = (varname==src_varname);
     }
@@ -1495,7 +1495,7 @@ void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const lt
     // data_expression values[state_length]; N.B. This is not portable C++
     std::vector < data_expression > values(state_length);
 
-    if (info->get_reset_option() || src == 0) {
+    if (info->get_reset_option() || src == nullptr) {
         int type_no;
         for (int i = 1; i < state_length; i++) {
             data_expression default_value = info->get_default_value(i-1);
@@ -1526,7 +1526,7 @@ void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const lt
         {
             error = true;
         } else {
-          if (src==0) {
+          if (src==nullptr) {
                 // no source state available; compute index for value.
                 dst[i] = this->get_value_index(type_no, values[i]);
             }

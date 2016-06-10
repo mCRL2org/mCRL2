@@ -137,7 +137,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                          )
 {
   T result = core::make_update_apply_builder<data::data_expression_builder>(detail::translate_user_notation_function()).apply(x);

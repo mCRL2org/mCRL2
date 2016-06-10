@@ -364,7 +364,7 @@ class interface_description
          **/
         inline bool needs_argument() const
         {
-          return !(m_argument.get() == 0 || m_argument->is_optional());
+          return !(m_argument.get() == nullptr || m_argument->is_optional());
         }
 
         /**
@@ -372,7 +372,7 @@ class interface_description
          **/
         inline bool accepts_argument() const
         {
-          return m_argument.get() != 0;
+          return m_argument.get() != nullptr;
         }
     };
 

@@ -59,7 +59,7 @@ const _aterm* local_term_appl_with_converter(const function_symbol& sym,
     cur = cur->next();
   }
 
-  assert(cur==NULL);
+  assert(cur==nullptr);
   const detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
 
   // We copy the content of the temporary_args, without destruction/construction and adapting the reference counts.
@@ -118,7 +118,7 @@ const _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator 
     cur = cur->next();
   }
 
-  assert(cur==NULL);
+  assert(cur==nullptr);
   const detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
 
   // We copy the content of the temporary_args, without destruction/construction and adapting the reference counts.

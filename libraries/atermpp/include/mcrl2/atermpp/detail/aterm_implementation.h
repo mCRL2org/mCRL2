@@ -45,7 +45,7 @@ struct TermInfo
   Block*       at_block;
   const _aterm*       at_freelist;
 
-  TermInfo():at_block(NULL),at_freelist(NULL)
+  TermInfo():at_block(nullptr),at_freelist(nullptr)
   {}
 
 };
@@ -129,7 +129,7 @@ inline const _aterm* allocate_term(const size_t size)
       terminfo_size=size+1;
     }
     terminfo=reinterpret_cast<TermInfo*>(realloc(terminfo,terminfo_size*sizeof(TermInfo)));
-    if (terminfo==NULL)
+    if (terminfo==nullptr)
     {
       throw std::runtime_error("Out of memory. Failed to allocate an extension of terminfo.");
     }
@@ -154,36 +154,36 @@ inline const _aterm* allocate_term(const size_t size)
     garbage_collect_count_down--;
   }
 
-  if (garbage_collect_count_down==0 && ti.at_freelist==NULL) // It is time to collect free terms, and there are
+  if (garbage_collect_count_down==0 && ti.at_freelist==nullptr) // It is time to collect free terms, and there are
                                                              // no free terms left.
   {
     collect_terms_with_reference_count_0();
   }
-  if (ti.at_freelist==NULL)
+  if (ti.at_freelist==nullptr)
   {
     /* there is no more memory of the current size allocate a block */
     allocate_block(size);
-    assert(ti.at_block != NULL);
+    assert(ti.at_block != nullptr);
   }
 
   const _aterm *at = ti.at_freelist;
   ti.at_freelist = ti.at_freelist->next();
   assert(at->reference_count_indicates_is_in_freelist());
   at->reset_reference_count();
-  assert(ti.at_block != NULL);
+  assert(ti.at_block != nullptr);
   return at;
 }
 
 inline void remove_from_hashtable(const _aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
-  const _aterm *prev=NULL;
+  const _aterm *prev=nullptr;
   const HashNumber hnr = hash_number(t) & aterm_table_mask;
   const _aterm *cur = aterm_hashtable[hnr];
 
   do
   {
-    assert(cur!=NULL); /* This only occurs if the hashtable is in error. */
+    assert(cur!=nullptr); /* This only occurs if the hashtable is in error. */
     if (cur == t)
     {
       if (prev)
@@ -221,7 +221,7 @@ inline const _aterm* address(const aterm& t)
 inline
 const detail::_aterm *aterm::undefined_aterm()
 {
-  if (detail::static_undefined_aterm.m_term==NULL)
+  if (detail::static_undefined_aterm.m_term==nullptr)
   {
     detail::initialise_administration();
   }
@@ -231,7 +231,7 @@ const detail::_aterm *aterm::undefined_aterm()
 inline
 const detail::_aterm *aterm::empty_aterm_list()
 {
-  if (detail::static_empty_aterm_list.m_term==NULL)
+  if (detail::static_empty_aterm_list.m_term==nullptr)
   {
     detail::initialise_administration();
   }

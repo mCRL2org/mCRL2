@@ -184,7 +184,7 @@ class top_symbols_t
     top_symbols_t():
       nr_symbols(0),
       toptable_size(0),
-      toptable(NULL)
+      toptable(nullptr)
     {}
 
 };
@@ -215,7 +215,7 @@ class sym_entry
       nr_terms(0),
       top_symbols(0),
       termtable_size(0),
-      termtable(NULL),
+      termtable(nullptr),
       term_width(0),
       cur_index(0),
       nr_times_top(0)
@@ -238,9 +238,9 @@ class sym_read_entry
        arity(0),
        nr_terms(0),
        term_width(0),
-       nr_topsyms(NULL),
-       sym_width(NULL),
-       topsyms(NULL)
+       nr_topsyms(nullptr),
+       sym_width(nullptr),
+       topsyms(nullptr)
     {
     }
 
@@ -249,9 +249,9 @@ class sym_read_entry
 static size_t nr_unique_symbols = 0;
 static std::vector<sym_read_entry> read_symbols;
 static std::vector<sym_entry> sym_entries;
-static sym_entry* first_topsym = NULL;
+static sym_entry* first_topsym = nullptr;
 
-static char* text_buffer = NULL;
+static char* text_buffer = nullptr;
 static size_t text_buffer_size = 0;
 
 static unsigned char bit_buffer = '\0';
@@ -486,7 +486,7 @@ static void build_arg_tables(const std::vector<size_t>& index)
       for (cur_arg=0; cur_arg<arity; cur_arg++)
       {
         size_t total_top_symbols = 0;
-        first_topsym = NULL;
+        first_topsym = nullptr;
         for (cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++)
         {
           aterm term = cur_entry->terms[cur_trm].t;
@@ -721,7 +721,7 @@ static void free_write_space()
     sym_entry* entry = &sym_entries[i];
 
     free(entry->termtable);
-    entry->termtable = NULL;
+    entry->termtable = nullptr;
 
     for (size_t j=0; j<entry->arity; j++)
     {
@@ -730,7 +730,7 @@ static void free_write_space()
       if (topsyms->toptable)
       {
         free(topsyms->toptable);
-        topsyms->toptable = NULL;
+        topsyms->toptable = nullptr;
       }
     }
 
@@ -896,9 +896,9 @@ static bool read_all_symbols(istream& is)
 
     if (arity == 0)
     {
-      read_symbols[i].nr_topsyms = NULL;
-      read_symbols[i].sym_width = NULL;
-      read_symbols[i].topsyms = NULL;
+      read_symbols[i].nr_topsyms = nullptr;
+      read_symbols[i].sym_width = nullptr;
+      read_symbols[i].topsyms = nullptr;
     }
     else
     {
@@ -948,7 +948,7 @@ static aterm read_term(sym_read_entry* sym, istream& is)
   size_t value;
   std::stack<read_todo> stack;
 
-  read_todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, NULL };
+  read_todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, nullptr };
   stack.push(item);
 
   do
@@ -956,10 +956,10 @@ static aterm read_term(sym_read_entry* sym, istream& is)
     sym_read_entry* arg_sym;
     read_todo& current = stack.top();
 
-    if (current.callresult != NULL)
+    if (current.callresult != nullptr)
     {
       current.args[current.arg++] = *current.callresult;
-      current.callresult = NULL;
+      current.callresult = nullptr;
     }
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
     if (current.sym->sym != detail::function_adm.AS_INT && current.arg < current.sym->arity)

@@ -47,7 +47,7 @@ class forall: public abstraction
     template < typename Container >
     forall(const Container& variables,
            const data_expression& body,
-           typename atermpp::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
       : abstraction(forall_binder(), variables, body)
     {
       assert(!variables.empty());

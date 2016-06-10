@@ -56,7 +56,7 @@ struct builder
   {}
 
   template <typename T>
-  void update(T& x, typename atermpp::disable_if_container<T>::type* = 0)
+  void update(T& x, typename atermpp::disable_if_container<T>::type* = nullptr)
   {
     msg("non-container visit");
     x = static_cast<Derived*>(this)->apply(x);
@@ -64,7 +64,7 @@ struct builder
 
   // container visit
   template <typename T>
-  void update(T& x, typename atermpp::enable_if_container<T>::type* = 0)
+  void update(T& x, typename atermpp::enable_if_container<T>::type* = nullptr)
   {
     msg("container visit");
     for (typename T::iterator v = x.begin(); v != x.end(); ++v)

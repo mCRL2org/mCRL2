@@ -34,7 +34,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                          )
 {
   return core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(x);
@@ -55,7 +55,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                          )
 {
   return core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(x);
@@ -76,7 +76,7 @@ void translate_user_notation(T& x,
 
 template <typename T>
 T translate_user_notation(const T& x,
-                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                          typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                          )
 {
   return core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function()).apply(x);

@@ -84,7 +84,7 @@ make_rewrite_pbes_expressions_with_substitution_builder(const Rewriter& R, Subst
 template <typename T, typename Rewriter>
 void rewrite(T& x,
              Rewriter R,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
             )
 {
   data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R).update(x);
@@ -97,7 +97,7 @@ void rewrite(T& x,
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
           Rewriter R,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
   return data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R).apply(x);
@@ -111,7 +111,7 @@ template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
              const Substitution& sigma,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
             )
 {
   data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma).update(x);
@@ -126,7 +126,7 @@ template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
           const Substitution& sigma,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
   return data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma).apply(x);
@@ -139,7 +139,7 @@ T rewrite(const T& x,
 template <typename T, typename Rewriter>
 void pbes_rewrite(T& x,
                   const Rewriter& R,
-                  typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                  typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                  )
 {
   pbes_system::detail::make_rewrite_pbes_expressions_builder<pbes_system::pbes_expression_builder>(R).update(x);

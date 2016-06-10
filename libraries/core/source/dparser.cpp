@@ -180,7 +180,7 @@ parser::parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn, D_SyntaxError
   m_parser = new_D_Parser(&tables, 0);
   m_parser->initial_globals = this;
   m_parser->save_parse_tree = 1;
-  m_parser->initial_scope = NULL;
+  m_parser->initial_scope = nullptr;
   m_parser->dont_use_greediness_for_disambiguation = 1;
   m_parser->dont_use_height_for_disambiguation = 1;
   if (ambiguity_fn)
@@ -337,7 +337,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   // resolve PbesExpr ambiguities
   if (is_all_of_type(v, n, "PbesExpr", table))
   {
-    D_ParseNode* result = 0;
+    D_ParseNode* result = nullptr;
     for (int i = 0; i < n; i++)
     {
       core::parse_node node(v[i]);
@@ -361,7 +361,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   if (is_all_of_type(v, n, "ActFrm", table))
   {
 //print_ambiguous_nodes(v, n, "ActFrm", table);
-    D_ParseNode* result = 0;
+    D_ParseNode* result = nullptr;
     for (int i = 0; i < n; i++)
     {
       core::parse_node node(v[i]);
@@ -388,7 +388,7 @@ D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v
   if (is_all_of_type(v, n, "StateFrm", table))
   {
 //print_ambiguous_nodes(v, n, "StateFrm", table);
-    D_ParseNode* result = 0;
+    D_ParseNode* result = nullptr;
     for (int i = 0; i < n; i++)
     {
       core::parse_node node(v[i]);
@@ -443,10 +443,10 @@ static void log_location(struct D_Parser *ap)
   // is the structure that the dparser library internally uses to keep its administration in.
   std::string after;
   SNode *s = ((Parser*)ap)->snode_hash.last_all;
-  ZNode *z = s != NULL ? s->zns.v[0] : NULL;
-  while (z != NULL && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
+  ZNode *z = s != nullptr ? s->zns.v[0] : nullptr;
+  while (z != nullptr && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
   {
-    z = (z->sns.v && z->sns.v[0]->zns.v) ? z->sns.v[0]->zns.v[0] : NULL;
+    z = (z->sns.v && z->sns.v[0]->zns.v) ? z->sns.v[0]->zns.v[0] : nullptr;
   }
   if (z && z->pn->parse_node.start_loc.s != z->pn->parse_node.end)
   {
@@ -469,7 +469,7 @@ void syntax_error_fn(struct D_Parser *ap)
     return;
   }
   log_location(ap);
-  if (ap->loc.s == 0)
+  if (ap->loc.s == nullptr)
   {
     mCRL2log(log::error, "parser") << "Unexpected end of input." << std::endl;
   }

@@ -23,7 +23,7 @@ namespace atermpp
 
 namespace detail
 {
-  static _function_symbol *const END_OF_LIST(NULL);
+  static _function_symbol *const END_OF_LIST(nullptr);
   // The hashtables are not vectors to prevent them from being
   // destroyed prematurely.
   static size_t function_symbol_table_size=0;
@@ -48,7 +48,7 @@ namespace detail
     {
       // There is no place in the function_symbol_index_table. Double it.
       function_symbol_index_table=reinterpret_cast<_function_symbol**>(realloc(function_symbol_index_table,2*function_symbol_index_table_size*sizeof(_function_symbol*)));
-      if (function_symbol_index_table==NULL)
+      if (function_symbol_index_table==nullptr)
       {
         throw std::runtime_error("Out of memory. Cannot extend function symbol index table.");
       }
@@ -59,7 +59,7 @@ namespace detail
     function_symbol_index_table[function_symbol_index_table_number_of_elements]=
              reinterpret_cast<_function_symbol*>(
                         malloc(FUNCTION_SYMBOL_BLOCK_SIZE*sizeof(_function_symbol)));
-    if (function_symbol_index_table[function_symbol_index_table_number_of_elements]==NULL)
+    if (function_symbol_index_table[function_symbol_index_table_number_of_elements]==nullptr)
     {
       throw std::runtime_error("Out of memory. Fail to resize function_lookup_table.");
     }
@@ -159,7 +159,7 @@ namespace detail
       function_symbol_table_mask=function_symbol_table_size-1;
 
       function_symbol_hashtable=reinterpret_cast<_function_symbol**>(malloc(function_symbol_table_size*sizeof(_function_symbol*)));
-      if (function_symbol_hashtable==NULL)
+      if (function_symbol_hashtable==nullptr)
       {
         throw std::runtime_error("Out of memory. Cannot create function symbol hashtable.");
       }
@@ -170,7 +170,7 @@ namespace detail
 
       function_symbol_index_table_size=INITIAL_FUNCTION_INDEX_TABLE_SIZE;
       function_symbol_index_table=reinterpret_cast<_function_symbol**>(calloc(function_symbol_index_table_size,sizeof(_function_symbol*)));
-      if (function_symbol_index_table==NULL)
+      if (function_symbol_index_table==nullptr)
       {
         throw std::runtime_error("Out of memory. Cannot create function symbol index table.");
       }
@@ -197,7 +197,7 @@ namespace detail
 
     _function_symbol** const old_function_symbol_hashtable=function_symbol_hashtable;
     function_symbol_hashtable=reinterpret_cast<_function_symbol**>(realloc(function_symbol_hashtable,function_symbol_table_size*sizeof(_function_symbol*)));
-    if (function_symbol_hashtable==NULL)
+    if (function_symbol_hashtable==nullptr)
     {
       // resizing the hashtable failed; continue with the old hashtable.
       mCRL2log(mcrl2::log::warning) << "could not resize function symbol hashtable to class " << function_symbol_table_size << ".";

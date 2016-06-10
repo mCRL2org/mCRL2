@@ -84,7 +84,7 @@ class term_list:public aterm
     term_list(Iter first, Iter last, typename std::enable_if<std::is_base_of<
                   std::bidirectional_iterator_tag,
                   typename std::iterator_traits<Iter>::iterator_category
-              >::value>::type* = 0):
+              >::value>::type* = nullptr):
         aterm(detail::make_list_backward<Term,Iter,
                   detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>()))
     {
@@ -119,7 +119,7 @@ class term_list:public aterm
                        typename std::enable_if< !std::is_base_of<
                          std::bidirectional_iterator_tag,
                          typename std::iterator_traits<Iter>::iterator_category
-                       >::value>::type* = 0):
+                       >::value>::type* = nullptr):
          aterm(detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
                                  (first, last, detail::do_not_convert_term<Term>()))
     {
@@ -139,7 +139,7 @@ class term_list:public aterm
                        typename std::enable_if< !std::is_base_of<
                          std::random_access_iterator_tag,
                          typename std::iterator_traits<Iter>::iterator_category
-                       >::value>::type* = 0):
+                       >::value>::type* = nullptr):
          aterm(detail::make_list_forward<Term,Iter,ATermConverter>
                                  (first, last, convert_to_aterm))
     {

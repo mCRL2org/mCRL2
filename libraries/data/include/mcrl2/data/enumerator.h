@@ -711,7 +711,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
         }
 
         iterator(Filter accept_ = Filter())
-          : E(0), sigma(0), P(&default_deque()), accept(accept_), count(0)
+          : E(nullptr), sigma(nullptr), P(&default_deque()), accept(accept_), count(0)
         { }
 
       protected:

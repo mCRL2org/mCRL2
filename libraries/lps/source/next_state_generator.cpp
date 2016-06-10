@@ -322,7 +322,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_substitution(substitution),
     m_single_summand(false),
     m_use_summand_pruning(summand_subset.m_use_summand_pruning),
-    m_summand(0),
+    m_summand(nullptr),
     m_caching(false),
     m_enumeration_queue(enumeration_queue)
 {
@@ -352,7 +352,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_single_summand(true),
     m_single_summand_index(summand_index),
     m_use_summand_pruning(false),
-    m_summand(0),
+    m_summand(nullptr),
     m_caching(false),
     m_enumeration_queue(enumeration_queue)
 {
@@ -454,7 +454,7 @@ void next_state_generator::iterator::increment()
     {
       if (m_summand)
       {
-        m_generator = 0;
+        m_generator = nullptr;
         return;
       }
       m_summand = &(m_generator->m_summands[m_single_summand_index]);
@@ -463,7 +463,7 @@ void next_state_generator::iterator::increment()
     {
       if (!m_summand_subset_iterator)
       {
-        m_generator = 0;
+        m_generator = nullptr;
         return;
       }
       m_summand = &(*m_summand_subset_iterator++);
@@ -472,7 +472,7 @@ void next_state_generator::iterator::increment()
     {
       if (m_summand_iterator == m_summand_iterator_end)
       {
-        m_generator = 0;
+        m_generator = nullptr;
         return;
       }
       m_summand = &(m_generator->m_summands[*m_summand_iterator++]);

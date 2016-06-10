@@ -105,6 +105,6 @@ BOOST_AUTO_TEST_CASE(Check_distribution_of_dist_over_sum)
 
 boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
 {
-  return 0;
+  return nullptr;
 }
 

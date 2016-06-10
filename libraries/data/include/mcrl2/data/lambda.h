@@ -58,7 +58,7 @@ class lambda: public abstraction
     template < typename Container >
     lambda(const Container& variables,
            const data_expression& body,
-           typename atermpp::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
       : abstraction(lambda_binder(), variables, body)
     {
       assert(!variables.empty());

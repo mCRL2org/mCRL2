@@ -42,7 +42,7 @@ struct traverser
   {}
 
   template <typename T>
-  void apply(const T& x, typename atermpp::disable_if_container<T>::type* = 0)
+  void apply(const T& x, typename atermpp::disable_if_container<T>::type* = nullptr)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).leave(x);
@@ -50,7 +50,7 @@ struct traverser
 
   // traverse containers
   template <typename Container>
-  void apply(Container const& container, typename atermpp::enable_if_container<Container>::type* = 0)
+  void apply(Container const& container, typename atermpp::enable_if_container<Container>::type* = nullptr)
   {
     for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
     {

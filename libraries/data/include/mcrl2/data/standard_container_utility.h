@@ -43,7 +43,7 @@ template < typename Sequence >
 inline
 application list(const sort_expression& s,
                  Sequence const& range,
-                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = nullptr)
 {
   data_expression                list_expression(empty(s));
   std::vector< data_expression > elements(range.begin(), range.end());
@@ -99,7 +99,7 @@ template <typename Sequence>
 inline
 data_expression list_enumeration(const sort_expression& s,
                                  Sequence const& range,
-                                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
+                                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = nullptr)
 {
   if (range.empty())
   {
@@ -254,7 +254,7 @@ template < typename Sequence >
 inline
 application fset(const sort_expression& s,
                  Sequence const& range,
-                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = nullptr)
 {
   data_expression fset_expression(sort_fset::empty(s));
 
@@ -404,7 +404,7 @@ namespace sort_fbag
 template < typename Sequence >
 inline
 application fbag(const sort_expression& s, Sequence const& range,
-                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = nullptr)
 {
   data_expression fbag_expression(sort_fbag::empty(s));
 

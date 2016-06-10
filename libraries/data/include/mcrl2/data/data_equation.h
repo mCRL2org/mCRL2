@@ -58,7 +58,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = 0)
+    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
     {}
 
@@ -93,7 +93,7 @@ class data_equation: public atermpp::aterm_appl
     data_equation(const Container& variables,
                   const data_expression& lhs,
                   const data_expression& rhs,
-                  typename atermpp::enable_if_container< Container, variable >::type* = 0)
+                  typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs)
     {}
 

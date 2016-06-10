@@ -94,7 +94,7 @@ class term_appl:public aterm
     term_appl(const function_symbol& sym,
               const ForwardIterator begin,
               const ForwardIterator end,
-              typename std::enable_if< !std::is_base_of<atermpp::aterm, ForwardIterator>::value>::type* = 0)
+              typename std::enable_if< !std::is_base_of<atermpp::aterm, ForwardIterator>::value>::type* = nullptr)
         :aterm(detail::local_term_appl<Term,ForwardIterator>(sym,begin,end))
     {
       static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
@@ -115,8 +115,8 @@ class term_appl:public aterm
               InputIterator begin,
               InputIterator end,
               const ATermConverter& convert_to_aterm,
-              typename std::enable_if< !std::is_base_of<atermpp::aterm, InputIterator>::value>::type* = 0,
-              typename std::enable_if< !std::is_base_of<atermpp::aterm, ATermConverter>::value>::type* = 0)
+              typename std::enable_if< !std::is_base_of<atermpp::aterm, InputIterator>::value>::type* = nullptr,
+              typename std::enable_if< !std::is_base_of<atermpp::aterm, ATermConverter>::value>::type* = nullptr)
          :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convert_to_aterm))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");

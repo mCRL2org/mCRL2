@@ -230,7 +230,7 @@ class pbesinst_alternative_lazy_algorithm
                               const size_t nr_of_generated_variables,
                               const size_t todo_size) const
     {
-      static time_t last_log_time = time(NULL) - 1;
+      static time_t last_log_time = time(nullptr) - 1;
       time_t new_log_time=0;
       if (time(&new_log_time) > last_log_time)
       {
@@ -276,9 +276,9 @@ class pbesinst_alternative_lazy_algorithm
         m_transformation_strategy(transformation_strategy)
     {
       // Initialize the random generator, with an arbitrary seed, depending on a new time.
-      unsigned t=time(NULL);
-      for( ; t==time(NULL) ; ); // Wait until time changes.
-      srand((unsigned)time(NULL));
+      unsigned t=time(nullptr);
+      for( ; t==time(nullptr) ; ); // Wait until time changes.
+      srand((unsigned)time(nullptr));
 
       if (m_search_strategy == breadth_first_short)
         m_search_strategy = breadth_first;

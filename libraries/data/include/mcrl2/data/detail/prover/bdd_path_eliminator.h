@@ -124,7 +124,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
                         const data_expression &a_bdd,
                         const data_expression_list &a_path)
     {
-      if (f_deadline != 0 && (f_deadline - time(0)) < 0)
+      if (f_deadline != 0 && (f_deadline - time(nullptr)) < 0)
       {
         mCRL2log(log::debug) << "The time limit has passed." << std::endl;
         return a_bdd;

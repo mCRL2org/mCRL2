@@ -49,7 +49,7 @@ struct index_increaser
   size_t* m_index;
 
   index_increaser()
-   : m_index(NULL)
+   : m_index(nullptr)
   {}
 
   index_increaser(size_t& initial_index, size_t& index)

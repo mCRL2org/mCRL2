@@ -54,7 +54,7 @@ class term_list_iterator
 
     /// \brief Default constructor.
     term_list_iterator()
-      : m_list(NULL)
+      : m_list(nullptr)
     {}
 
     /// \brief Copy constructor.

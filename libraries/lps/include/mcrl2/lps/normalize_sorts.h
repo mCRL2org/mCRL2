@@ -25,7 +25,7 @@ namespace lps
 template <typename T>
 void normalize_sorts(T& x,
                      const data::sort_specification& sortspec,
-                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
+                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = nullptr
                     )
 {
   core::make_update_apply_builder<lps::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);

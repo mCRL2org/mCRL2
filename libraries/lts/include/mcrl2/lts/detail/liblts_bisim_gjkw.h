@@ -400,9 +400,9 @@ public:
         int_old_bottom_begin(end_), // there are no old bottom states
         int_inert_begin(), // is initialised by part_trans_t::create_new_block
         int_inert_end(), // is initialised by part_trans_t::create_new_block
-        FromRed(NULL),
+        FromRed(nullptr),
         int_constln(constln_),
-        refinable_next(NULL)
+        refinable_next(nullptr)
     {  }
 
     ~block_t()  {  }
@@ -412,7 +412,7 @@ public:
 
     /// checks whether the block is refinable
     /// \returns true if the block is refinable
-    bool is_refinable() const  {  return NULL != refinable_next;  }
+    bool is_refinable() const  {  return nullptr != refinable_next;  }
 
     /// makes a block refinable (i. e. inserts it into the respective list)
     /// \returns true if the block was not refinable before
@@ -422,7 +422,7 @@ public:
         {
             return false;
         }
-        refinable_next = NULL == refinable_first ? this : refinable_first;
+        refinable_next = nullptr == refinable_first ? this : refinable_first;
         refinable_first = this;
         return true;
     }
@@ -434,8 +434,8 @@ public:
     void make_nonrefinable()
     {
         assert(refinable_first == this);
-        refinable_first = refinable_next == this ? NULL : refinable_next;
-        refinable_next = NULL;
+        refinable_first = refinable_next == this ? nullptr : refinable_next;
+        refinable_next = nullptr;
     }
 
     /// provides the number of states in the block
@@ -857,7 +857,7 @@ public:
     constln_t(permutation_iter_t begin_, permutation_iter_t end_)
         :int_end(end_),
         int_begin(begin_),
-        nontrivial_next(NULL),
+        nontrivial_next(nullptr),
         int_seqnr(nr_of_constlns++)
     {  }
 
@@ -874,17 +874,17 @@ public:
     void make_trivial()
     {
         assert(nontrivial_first == this);
-        nontrivial_first = nontrivial_next == this ? NULL : nontrivial_next;
-        nontrivial_next = NULL;
+        nontrivial_first = nontrivial_next == this ? nullptr : nontrivial_next;
+        nontrivial_next = nullptr;
     }
 
     /// \brief makes a constellation nontrivial (i. e. inserts it into the
     /// respective list)
     void make_nontrivial()
     {
-        if (NULL == nontrivial_next)
+        if (nullptr == nontrivial_next)
         {
-            nontrivial_next = NULL==nontrivial_first ? this : nontrivial_first;
+            nontrivial_next = nullptr==nontrivial_first ? this : nontrivial_first;
             nontrivial_first = this;
         }
     }

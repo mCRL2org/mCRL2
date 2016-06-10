@@ -63,7 +63,7 @@ class pool
 
     T* get_element()
     {
-      if (pool_storage_free_elements.rep_next()==NULL)
+      if (pool_storage_free_elements.rep_next()==nullptr)
       {
         pool_storage.push_back(T());
         return &(pool_storage.back());

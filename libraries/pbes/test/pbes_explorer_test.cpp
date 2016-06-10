@@ -335,5 +335,5 @@ BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   log::mcrl2_logger::set_reporting_level(log::debug);
-  return 0;
+  return nullptr;
 }

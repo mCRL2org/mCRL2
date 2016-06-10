@@ -781,7 +781,7 @@ class Class:
                     template_parameter = 'Container'
                 template_parameters.append(template_parameter)
                 arguments1.append('const %s& %s' % (template_parameter, p.name()))
-                arguments2.append('typename atermpp::enable_if_container<%s, %s>::type* = 0' % (template_parameter, p.type(False)[:-5]))
+                arguments2.append('typename atermpp::enable_if_container<%s, %s>::type* = nullptr' % (template_parameter, p.type(False)[:-5]))
                 parameters1.append('%s(%s.begin(), %s.end())' % (p.type(False), p.name(),p.name()))
             else:
                 parameters1.append(p.name())

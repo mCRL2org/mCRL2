@@ -105,7 +105,7 @@ struct parse_node
 
   operator bool() const
   {
-    return node != 0;
+    return node != nullptr;
   }
 };
 
@@ -147,7 +147,7 @@ struct parser
   D_Parser* m_parser;
   std::size_t m_max_error_message_count;
 
-  explicit parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0, D_SyntaxErrorFn syntax_error_fn = 0, std::size_t max_error_message_count = 1);
+  explicit parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = nullptr, D_SyntaxErrorFn syntax_error_fn = nullptr, std::size_t max_error_message_count = 1);
 
   ~parser();
 

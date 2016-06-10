@@ -504,6 +504,6 @@ BOOST_AUTO_TEST_CASE(skip_linearization_test)
 
 boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
 {
-  return 0;
+  return nullptr;
 }
 

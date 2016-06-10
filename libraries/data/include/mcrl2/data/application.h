@@ -323,7 +323,7 @@ class application: public data_expression
     template <typename Container>
     application(const data_expression& head,
                 const Container& arguments,
-                typename atermpp::enable_if_container<Container, data_expression>::type* = 0)
+                typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(arguments.size() + 1),
                                          detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.begin(), &head),
                                          detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
@@ -362,7 +362,7 @@ class application: public data_expression
     application(const data_expression& head,
                 FwdIter first,
                 FwdIter last,
-                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0)
+                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                                          detail::term_appl_prepend_iterator<FwdIter>(first, &head),
                                          detail::term_appl_prepend_iterator<FwdIter>(last)))
@@ -392,8 +392,8 @@ class application: public data_expression
                 FwdIter first,
                 FwdIter last,
                 ArgumentConverter convert_arguments,
-                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = 0,
-                typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = 0)
+                typename std::enable_if< !std::is_base_of<data_expression, FwdIter>::value>::type* = nullptr,
+                typename std::enable_if< !std::is_base_of<data_expression, ArgumentConverter>::value>::type* = nullptr)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(std::distance(first, last) + 1),
                                          detail::transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(first, &head, convert_arguments),
                                          detail::transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,nullptr,convert_arguments)))

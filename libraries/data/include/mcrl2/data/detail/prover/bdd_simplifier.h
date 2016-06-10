@@ -53,7 +53,7 @@ class BDD_Simplifier
       }
       else
       {
-        f_deadline = time(0) + a_time_limit;
+        f_deadline = time(nullptr) + a_time_limit;
       }
     }
 

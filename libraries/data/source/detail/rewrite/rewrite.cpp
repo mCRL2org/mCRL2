@@ -518,7 +518,7 @@ Rewriter* createRewriter(
       return new RewriterProver(DataSpec,jitty_compiling,equations_selector);
 #endif
     default:
-      return NULL;
+      return nullptr;
   }
 }
 

@@ -42,12 +42,12 @@ struct pbesstategraph_options
     use_alternative_lcfp_criterion(false),
     use_alternative_gcfp_relation(false),
     use_alternative_gcfp_consistency(false),
-    timer(0)
+    timer(nullptr)
   {}
 
   bool timing_enabled() const
   {
-    return timer != 0;
+    return timer != nullptr;
   }
 };
 

@@ -80,7 +80,7 @@ struct normalize_and_or_builder: public data_expression_builder<Derived>
 
 template <typename T>
 T normalize_and_or(const T& x,
-                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                   )
 {
   return core::make_apply_builder<normalize_and_or_builder>().apply(x);
@@ -138,7 +138,7 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
 
 template <typename T>
 T normalize_equality(const T& x,
-                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                     typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                     )
 {
   return core::make_apply_builder<normalize_equality_builder>().apply(x);

@@ -885,7 +885,7 @@ class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_
 
     inline static void exec()
     {
-      ::execlp("cvc3", "cvc3", "-lang", "smt-lib", (char*)0);
+      ::execlp("cvc3", "cvc3", "-lang", "smt-lib", (char*)nullptr);
     }
 
   public:
@@ -922,7 +922,7 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
 
     inline static void exec()
     {
-      ::execlp("ario", "ario", (char*)0);
+      ::execlp("ario", "ario", (char*)nullptr);
     }
 
   public:

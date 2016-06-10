@@ -252,12 +252,12 @@ class basic_data_specification: public data_specification
                                const std::shared_ptr<function_definition>& div,
                                const std::shared_ptr<function_definition>& mod,
                                const std::shared_ptr<function_definition>& floor,
-                               const std::shared_ptr<function_definition>& ceil = 0,
-                               const std::shared_ptr<function_definition>& round = 0,
-                               const std::shared_ptr<function_definition>& unary_minus = 0,
-                               const std::shared_ptr<function_definition>& maximum = 0,
-                               const std::shared_ptr<function_definition>& minimum = 0,
-                               const std::shared_ptr<function_definition>& abs = 0);
+                               const std::shared_ptr<function_definition>& ceil = nullptr,
+                               const std::shared_ptr<function_definition>& round = nullptr,
+                               const std::shared_ptr<function_definition>& unary_minus = nullptr,
+                               const std::shared_ptr<function_definition>& maximum = nullptr,
+                               const std::shared_ptr<function_definition>& minimum = nullptr,
+                               const std::shared_ptr<function_definition>& abs = nullptr);
 
     void add_recursive_function(const data::function_symbol& function);
     void add_recursive_functions(const data::data_specification& data_specification);

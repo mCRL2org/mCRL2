@@ -344,9 +344,9 @@ bool lps2lts_algorithm::generate_lts()
     // the seed of a previous run and not get the same results, we wait until time gets
     // a fresh value. It is better to replace this by c++11 random generators, as this
     // is an awkward solution.
-    unsigned t=time(NULL);
-    for( ; t==time(NULL) ; ); // Wait until time changes.
-    srand((unsigned)time(NULL));
+    unsigned t=time(nullptr);
+    for( ; t==time(nullptr) ; ); // Wait until time changes.
+    srand((unsigned)time(nullptr));
 
     generate_lts_random(m_initial_states);
 
@@ -975,7 +975,7 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos()
   size_t start_level_seen = 1;
   size_t start_level_transitions = 0;
   std::vector<next_state_generator::transition_t> transitions;
-  time_t last_log_time = time(NULL) - 1, new_log_time;
+  time_t last_log_time = time(nullptr) - 1, new_log_time;
   next_state_generator::enumerator_queue_t enumeration_queue;
 
   while (!m_must_abort && (current_state < m_state_numbers.size()) &&
@@ -1025,7 +1025,7 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_not_npos(const next_sta
   size_t start_level_seen = 1;
   size_t start_level_explored = 0;
   size_t start_level_transitions = 0;
-  time_t last_log_time = time(NULL) - 1, new_log_time;
+  time_t last_log_time = time(nullptr) - 1, new_log_time;
 
   queue<lps::state> state_queue;
   state_queue.set_max_size(m_options.max_states < m_options.todo_max ? m_options.max_states : m_options.todo_max);
