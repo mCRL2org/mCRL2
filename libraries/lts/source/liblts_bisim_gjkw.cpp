@@ -55,16 +55,15 @@ static const char* const set_pointer_to_new_block = "set pointer to new block";
 /// the blue states.
 /// \param blue_nonbottom_end iterator past the last blue nonbottom state
 /// \returns pointer to the new (blue) block
-block_t* block_t::split_off_blue(permutation_entry* blue_nonbottom_end)
+block_t* block_t::split_off_blue(permutation_iter_t blue_nonbottom_end)
 {
     // It is not necessary to reset the nottoblue counters; these counters
     // are anyway only valid for the maybe-blue states.
     state_type swapcount = std::min(unmarked_bottom_size(),
                 (state_type) (marked_nonbottom_end() - blue_nonbottom_end));
     // vector swap the states:
-    permutation_entry* pos1 = blue_nonbottom_end,
-                            * pos2 = unmarked_bottom_end();
-    permutation_entry temp = *pos1;
+    permutation_iter_t pos1 = blue_nonbottom_end, pos2 = unmarked_bottom_end();
+    state_info_ptr temp = *pos1;
     for(;;)
     {
         check_complexity::count(swap_red_and_blue_states, 1,
@@ -74,22 +73,23 @@ block_t* block_t::split_off_blue(permutation_entry* blue_nonbottom_end)
         ++pos1;
         if (--swapcount == 0)  break;
         *pos2 = *pos1;
-        (*pos2)->pos = pos2;
+        (*pos2)-> pos = pos2;
     }
     *pos2 = temp;
     (*pos2)->pos = pos2;
 
     // create a new block for the blue states
-    permutation_entry* splitpoint = blue_nonbottom_end+unmarked_bottom_size();
-    block_t* NewB = new block_t(get_constln(), begin(), splitpoint);
-    // NewB->int_begin = begin();
-    NewB->int_marked_nonbottom_begin=NewB->int_bottom_begin=blue_nonbottom_end;
-    // NewB->int_marked_bottom_begin = splitpoint;
-    // NewB->int_old_bottom_begin = splitpoint;
-    // NewB->int_end = splitpoint;
-    // NewB->int_inert_begin = ?;
-    // NewB->int_inert_end = ?;
-    for (permutation_entry*s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
+    permutation_iter_t splitpoint = blue_nonbottom_end+unmarked_bottom_size();
+    block_t* NewB = new block_t(constln(), begin(), splitpoint);
+    // NewB->set_begin(begin());
+    NewB->set_marked_nonbottom_begin(blue_nonbottom_end);
+    NewB->set_bottom_begin(blue_nonbottom_end);
+    // NewB->set_marked_bottom_begin(splitpoint);
+    // NewB->set_old_bottom_begin(splitpoint);
+    // NewB->set_end(splitpoint);
+    // NewB->set_inert_begin(?);
+    // NewB->set_inert_end(?);
+    for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
         check_complexity::count(set_pointer_to_new_block, 1,
                                                     check_complexity::n_log_n);
@@ -97,11 +97,13 @@ block_t* block_t::split_off_blue(permutation_entry* blue_nonbottom_end)
     }
 
     // adapt the old block: it only keeps the red states
-    int_begin = splitpoint;
-    int_marked_nonbottom_begin = int_bottom_begin = marked_bottom_begin();
-    int_marked_bottom_begin = old_bottom_begin();
-    // int_old_bottom_begin = old_bottom_begin();
-    // int_end = end();
+    set_begin(splitpoint);
+    set_bottom_begin(marked_bottom_begin());
+    set_bottom_begin(marked_bottom_begin());
+    set_marked_nonbottom_begin(marked_bottom_begin());
+    set_marked_bottom_begin(old_bottom_begin());
+    // set_old_bottom_begin(old_bottom_begin());
+    // set_end(end());
 
     return NewB;
 }
@@ -115,16 +117,15 @@ block_t* block_t::split_off_blue(permutation_entry* blue_nonbottom_end)
 /// because their operations belong together.
 /// \param red_nonbottom_begin iterator to the first red nonbottom state
 /// \returns pointer to the new (red) block
-block_t* block_t::split_off_red(permutation_entry* red_nonbottom_begin)
+block_t* block_t::split_off_red(permutation_iter_t red_nonbottom_begin)
 {
     // It is not necessary to reset the nottoblue counters; these counters
     // are anyway only valid for the maybe-blue states.
     state_type swapcount = std::min(unmarked_bottom_size(),
                 (state_type) (marked_nonbottom_end() - red_nonbottom_begin));
     // vector swap the states:
-    permutation_entry* pos1 = red_nonbottom_begin,
-                            * pos2 = unmarked_bottom_end();
-    permutation_entry temp = *pos1;
+    permutation_iter_t pos1 = red_nonbottom_begin,pos2 = unmarked_bottom_end();
+    state_info_ptr temp = *pos1;
     for(;;)
     {
         check_complexity::count(swap_red_and_blue_states, 1,
@@ -140,17 +141,17 @@ block_t* block_t::split_off_red(permutation_entry* red_nonbottom_begin)
     (*pos2)->pos = pos2;
 
     // create a new block for the red states
-    permutation_entry* splitpoint = red_nonbottom_begin+unmarked_bottom_size();
-    block_t* NewB = new block_t(get_constln(), splitpoint, end());
+    permutation_iter_t splitpoint = red_nonbottom_begin+unmarked_bottom_size();
+    block_t* NewB = new block_t(constln(), splitpoint, end());
     // NewB->int_begin = splitpoint;
-    NewB->int_marked_nonbottom_begin =
-                                NewB->int_bottom_begin = marked_bottom_begin();
-    NewB->int_marked_bottom_begin =
-                            NewB->int_old_bottom_begin = old_bottom_begin();
-    // NewB->int_end = end();
-    // NewB->int_inert_begin = ?;
-    // NewB->int_inert_end = ?;
-    for (permutation_entry*s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
+    NewB->set_bottom_begin(marked_bottom_begin());
+    NewB->set_marked_nonbottom_begin(marked_bottom_begin());
+    NewB->set_old_bottom_begin(old_bottom_begin());
+    NewB->set_marked_bottom_begin(old_bottom_begin());
+    // NewB->set_end(end());
+    // NewB->set_inert_begin(?);
+    // NewB->set_inert_end(?);
+    for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
         check_complexity::count(set_pointer_to_new_block, 1,
                                                     check_complexity::n_log_n);
@@ -159,11 +160,53 @@ block_t* block_t::split_off_red(permutation_entry* red_nonbottom_begin)
 
     // adapt the old block: it only keeps the blue states
     // int_begin = begin();
-    int_marked_nonbottom_begin = int_bottom_begin = red_nonbottom_begin;
-    int_marked_bottom_begin = int_old_bottom_begin = int_end = splitpoint;
+    set_marked_nonbottom_begin(red_nonbottom_begin);
+    set_bottom_begin(red_nonbottom_begin);
+    set_marked_bottom_begin(splitpoint);
+    set_old_bottom_begin(splitpoint);
+    set_end(splitpoint);
 
     return NewB;
 }
+
+
+#ifndef NDEBUG
+
+void part_state_t::print_trans() const
+{
+    const fixed_vector<state_info_entry>::const_iterator state_info_end =
+                                                        state_info.end() - 1;
+    for (fixed_vector<state_info_entry>::const_iterator state_iter =
+                state_info.begin(); state_info_end != state_iter; ++state_iter)
+    {
+        // print transitions out of state
+        succ_const_iter_t succ_constln_iter = state_iter->succ_begin();
+        if (state_iter->succ_end() != succ_constln_iter)
+        {
+            std::cout << "State " << state_iter - state_info.begin() << ":\n";
+            do
+            {
+                // print transitions to a constellation
+                std::cout << "\ttransitions to constellation "
+                    << succ_constln_iter->target->constln()->seqnr() << ":\n";
+                succ_const_iter_t s_iter = succ_constln_iter;
+                // set succ_constln_iter to the end of the transitions to
+                // this constellation
+                succ_constln_iter = succ_constln_iter->constln_slice->end;
+                for ( ;s_iter != succ_constln_iter ;++s_iter)
+                {
+                    std::cout << "\t\tto state "
+                        << s_iter->target - &*state_info.begin() << "\n";
+                    assert(s_iter->B_to_C->pred->succ == s_iter);
+                    assert(s_iter->B_to_C->pred->source == &*state_iter);
+                }
+            }
+            while (state_iter->succ_end() != succ_constln_iter);
+        }
+    }
+}
+
+#endif // ifndef NDEBUG
 
 
 
@@ -193,10 +236,10 @@ void part_trans_t::split_inert_to_C(block_t* B)
     // if there are no inert transitions
     if (B->inert_begin() == B->inert_end())
     {
-        if (B->inert_end() != B_to_C)
+        if (B->inert_end() != B_to_C.begin())
         {
             // There are noninert transitions: they all go to SpC.
-            B->FromRed = B->inert_end()[-1].slice;
+            B->FromRed = B->inert_end()[-1].B_to_C_slice;
         }
         else
         {
@@ -204,7 +247,7 @@ void part_trans_t::split_inert_to_C(block_t* B)
         }
         return;
     }
-    B_to_C_descriptor* slice = B->inert_begin()->slice;
+    B_to_C_descriptor* slice = B->inert_begin()->B_to_C_slice;
     // if all transitions are inert
     if (slice->begin == B->inert_begin())
     {
@@ -230,11 +273,11 @@ void part_trans_t::split_inert_to_C(block_t* B)
         B->FromRed = slice;
     }
     // set the slice pointers of the smaller part to the new slice:
-    for (B_to_C_entry* iter = new_slice->begin; new_slice->end != iter; ++iter)
+    for (B_to_C_iter_t iter = new_slice->begin; new_slice->end != iter; ++iter)
     {
         check_complexity::count("split transitions in B_to_C", 1,
                                                     check_complexity::m_log_n);
-        iter->slice = new_slice;
+        iter->B_to_C_slice = new_slice;
     }
 }
 
@@ -245,7 +288,7 @@ data structure.  It assumes that the transition is non-inert and that the
 new constellation does not (yet) have inert incoming transitions.  It
 returns the boundary between transitions to OldC and transitions to NewC in
 the state's outgoing transition array. */
-succ_entry* part_trans_t::change_to_C(pred_entry* pred_iter, constln_t* OldC,
+succ_iter_t part_trans_t::change_to_C(pred_iter_t pred_iter, constln_t* OldC,
                             constln_t* NewC, bool first_transition_of_state,
                                                 bool first_transition_of_block)
 {
@@ -253,35 +296,38 @@ succ_entry* part_trans_t::change_to_C(pred_entry* pred_iter, constln_t* OldC,
     // always move the transition to the beginning of the slice (this will
     // make it easier because inert transitions are stored at the end of a
     // slice).
-    B_to_C_entry* old_B_to_C_pos = pred_iter->succ->B_to_C,
-                        * new_B_to_C_pos = old_B_to_C_pos->slice->begin;
+    B_to_C_iter_t old_B_to_C_pos = pred_iter->succ->B_to_C,
+                        new_B_to_C_pos = old_B_to_C_pos->B_to_C_slice->begin;
     B_to_C_descriptor* new_B_to_C_slice;
     if (first_transition_of_block)
     {
-        pred_iter->source->block->FromRed = old_B_to_C_pos->slice;
+        pred_iter->source->block->FromRed = old_B_to_C_pos->B_to_C_slice;
         new_B_to_C_slice=new B_to_C_descriptor(new_B_to_C_pos, new_B_to_C_pos);
     }
     else
     {
-        new_B_to_C_slice = new_B_to_C_pos[-1].slice;
+        new_B_to_C_slice = new_B_to_C_pos[-1].B_to_C_slice;
     }
     ++new_B_to_C_slice->end;
-    if (++old_B_to_C_pos->slice->begin == old_B_to_C_pos->slice->end)
+    ++old_B_to_C_pos->B_to_C_slice->begin;
+    if (old_B_to_C_pos->B_to_C_slice->begin ==
+                                        old_B_to_C_pos->B_to_C_slice->end)
     {
-        delete old_B_to_C_pos->slice;
+        delete old_B_to_C_pos->B_to_C_slice;
         pred_iter->source->block->FromRed = NULL;
     }
     swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
-    new_B_to_C_pos->slice = new_B_to_C_slice;
+    new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
     // adapt the outgoing transition array:
     // move the transition to the beginning or the end, depending on the
     // order of old/new constellation.
-    succ_entry* old_out_pos = pred_iter->succ, * new_out_pos;
-    out_descriptor *new_constln_slice;
+    succ_iter_t old_out_pos = pred_iter->succ, new_out_pos;
+    out_descriptor* new_constln_slice;
     if (*OldC < *NewC)
     {
         // move to end. Possibly needs three-way swap.
-        new_out_pos = --old_out_pos->constln_slice->end;
+        --old_out_pos->constln_slice->end;
+        new_out_pos = old_out_pos->constln_slice->end;
         if (first_transition_of_state)
         {
             new_constln_slice = new out_descriptor(new_out_pos + 1);
@@ -291,24 +337,30 @@ succ_entry* part_trans_t::change_to_C(pred_entry* pred_iter, constln_t* OldC,
             new_constln_slice = new_out_pos[1].constln_slice;
         }
         --new_constln_slice->begin;
-        if (pred_iter->source->get_constln() == OldC &&
-                                --pred_iter->source->state_inert_out_begin !=
-                                    --pred_iter->source->state_inert_out_end)
+        if (pred_iter->source->constln() == OldC)
         {
             // swap over the inert transitions
-            // *old_out_pos -> *new_out_pos -> *inert_pos -> *old_out_pos
-            swap3_out(pred_iter->source->state_inert_out_begin->B_to_C->pred,
+            pred_iter->source->set_inert_succ_begin(
+                                pred_iter->source->inert_succ_begin() - 1);
+            pred_iter->source->set_inert_succ_end(
+                                    pred_iter->source->inert_succ_end() - 1);
+            if (pred_iter->source->inert_succ_begin() !=
+                                        pred_iter->source->inert_succ_end())
+            {
+                // there are noninert transitions: 3-way swap needed
+                // *old_out_pos -> *new_out_pos -> *inert_pos -> *old_out_pos
+                swap3_out(pred_iter->source->inert_succ_begin()->B_to_C->pred,
                                         pred_iter, new_out_pos->B_to_C->pred);
-            // the old constln_slice cannot become empty because it
-            // contains an inert transition.
+                // the old constln_slice cannot become empty because it
+                // contains an inert transition.
+                new_out_pos->constln_slice = new_constln_slice;
+                return new_out_pos;
+            }
         }
-        else
-        {
-            // normal swap
-            if (old_out_pos->constln_slice->begin == new_out_pos)
-                delete old_out_pos->constln_slice;
-            swap_out(pred_iter, new_out_pos->B_to_C->pred);
-        }
+        // normal swap
+        if (old_out_pos->constln_slice->begin == new_out_pos)
+            delete old_out_pos->constln_slice;
+        swap_out(pred_iter, new_out_pos->B_to_C->pred);
         new_out_pos->constln_slice = new_constln_slice;
         return new_out_pos;
     }
@@ -325,8 +377,8 @@ succ_entry* part_trans_t::change_to_C(pred_entry* pred_iter, constln_t* OldC,
             new_constln_slice = new_out_pos[-1].constln_slice;
         }
         ++new_constln_slice->end;
-        if (++old_out_pos->constln_slice->begin ==
-                                            old_out_pos->constln_slice->end)
+        ++old_out_pos->constln_slice->begin;
+        if (old_out_pos->constln_slice->begin==old_out_pos->constln_slice->end)
             delete old_out_pos->constln_slice;
         swap_out(pred_iter, new_out_pos->B_to_C->pred);
         new_out_pos->constln_slice = new_constln_slice;
@@ -340,16 +392,15 @@ new constellation of which s is now part;  the non-inert transitions remain
 transitions to OldC.  It returns the boundary between transitions to
 OldC and transitions to NewC in the outgoing transition array of s.
 Its time complexity is O(1 + min { |out_\nottau(s)|, |out_\tau(s)| }). */
-succ_entry* part_trans_t::split_s_inert_out(state_info_entry*s, constln_t*OldC)
+succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
 {
-    constln_t* NewC = s->get_constln();
-    succ_entry* split = s->inert_out_begin(),
-                * to_C_end = s->inert_out_end();
+    constln_t* NewC = s->constln();
+    succ_iter_t split = s->inert_succ_begin(), to_C_end = s->inert_succ_end();
 
     if (split < to_C_end && split->constln_slice->begin < split)
     {
         // s has both inert and non-inert transitions
-        succ_entry* to_C_begin = split->constln_slice->begin;
+        succ_iter_t to_C_begin = split->constln_slice->begin;
 
         if (*NewC < *OldC)
         {
@@ -358,12 +409,12 @@ succ_entry* part_trans_t::split_s_inert_out(state_info_entry*s, constln_t*OldC)
             // the constln_slices are (still) identical.
             trans_type swapnr = std::min(to_C_end-split, split-to_C_begin);
             split = to_C_end - split + to_C_begin;
-            s->state_inert_out_begin = to_C_begin;
-            s->state_inert_out_end = split;
+            s->set_inert_succ_begin(to_C_begin);
+            s->set_inert_succ_end(split);
 
-            succ_entry* pos1 = to_C_begin, * pos2 = to_C_end;
-            state_info_entry* temp_target = pos1->target;
-            B_to_C_entry* temp_B_to_C = pos1->B_to_C;
+            succ_iter_t pos1 = to_C_begin, pos2 = to_C_end;
+            state_info_ptr temp_target = pos1->target;
+            B_to_C_iter_t temp_B_to_C = pos1->B_to_C;
             for (;;)
             {
                 check_complexity::count("swap succ_entries for inert "
@@ -396,8 +447,8 @@ succ_entry* part_trans_t::split_s_inert_out(state_info_entry*s, constln_t*OldC)
             to_C_begin->constln_slice->end = split;
         }
         // set the pointer to the slice for the smaller part.
-        for (succ_entry* succ_iter = new_constln_slice->begin;
-                        new_constln_slice->end != succ_iter; ++succ_iter)
+        for (succ_iter_t succ_iter = new_constln_slice->begin;
+                            new_constln_slice->end != succ_iter; ++succ_iter)
         {
             check_complexity::count("set pointer to new succ-constellation "
                                         "slice", 1, check_complexity::m_log_n);
@@ -412,12 +463,12 @@ succ_entry* part_trans_t::split_s_inert_out(state_info_entry*s, constln_t*OldC)
             // to OldC become transitions to NewC.
             return to_C_end;
         }
-        else if (s->out_begin() < to_C_end)
+        else if (s->succ_begin() < to_C_end)
         {
             // s has no inert transitions (but it has noninert ones). It
             // will not have transitions to NewC.
-            succ_entry* to_C_begin = to_C_end[-1].constln_slice->begin;
-            if (to_C_begin->target->get_constln() == OldC)
+            succ_iter_t to_C_begin = to_C_end[-1].constln_slice->begin;
+            if (to_C_begin->target->constln() == OldC)
             {
                 // s has transitions to OldC.
                 return to_C_begin;
@@ -433,49 +484,53 @@ the same slice as the transitions that start in the old block.
 Its time complexity is O(1 + |out(NewB)|). */
 void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
 {
-    NewB->int_inert_begin = NewB->int_inert_end = OldB->inert_end();
+    NewB->set_inert_end(OldB->inert_end());
+    NewB->set_inert_begin(OldB->inert_end());
     // for all outgoing transitions of NewB
-    for (permutation_entry*s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
+    for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
         check_complexity::count("for all states of a new block", 1,
                                                     check_complexity::n_log_n);
-        for(succ_entry* succ_iter = (*s_iter)->out_begin();
-                            (*s_iter)->out_end() != succ_iter; ++succ_iter)
+        for (succ_iter_t succ_iter = (*s_iter)->succ_begin();
+                            (*s_iter)->succ_end() != succ_iter; ++succ_iter)
         {
             check_complexity::count("for all transitions of a new block", 1,
                                                     check_complexity::m_log_n);
             // Move the transition to a new slice:
-            B_to_C_entry* const old_pos = succ_iter->B_to_C,
-                                    * after_new_pos = old_pos->slice->end;
+            B_to_C_iter_t const old_pos = succ_iter->B_to_C,
+                                after_new_pos = old_pos->B_to_C_slice->end;
             B_to_C_descriptor* new_B_to_C_slice;
-            if (&B_to_C[nr_of_transitions] == after_new_pos ||
+            if (B_to_C.end() == after_new_pos ||
                     after_new_pos->pred->source->block != NewB ||
-                        after_new_pos->pred->succ->target->get_constln() !=
-                                            succ_iter->target->get_constln())
+                        after_new_pos->pred->succ->target->constln() !=
+                                            succ_iter->target->constln())
             {
                 // create a new B_to_C-slice
                 new_B_to_C_slice = new B_to_C_descriptor(after_new_pos,
                                                             after_new_pos);
-                if (OldB->FromRed == old_pos->slice)
+                if (OldB->FromRed == old_pos->B_to_C_slice)
                     NewB->FromRed = new_B_to_C_slice;
             }
             else
             {
                 // the slice at after_new_pos is already the correct one
-                new_B_to_C_slice = after_new_pos->slice;
+                new_B_to_C_slice = after_new_pos->B_to_C_slice;
             }
-            assert(--new_B_to_C_slice->begin == --old_pos->slice->end);
-            B_to_C_entry* new_pos = after_new_pos - 1;
+            --new_B_to_C_slice->begin;
+            --old_pos->B_to_C_slice->end;
+            assert(new_B_to_C_slice->begin == old_pos->B_to_C_slice->end);
+            B_to_C_iter_t new_pos = after_new_pos - 1;
             if (OldB->inert_end() == after_new_pos)
             {
                 // The transition goes from NewB to the constellation of
                 // OldB and NewB.
-                --OldB->int_inert_end;
+                OldB->set_inert_end(OldB->inert_end() - 1);
                 if (OldB->inert_begin() <= old_pos)
                 {
                     // The transition is inert and has to be moved over the
                     // non-inert transitions of NewB.
-                    new_pos = --NewB->int_inert_begin;
+                    NewB->set_inert_begin(NewB->inert_begin() - 1);
+                    new_pos = NewB->inert_begin();
                     // old_pos --> new_pos --> new_B_to_C_slice->begin -->
                     // old_pos
                     swap3_B_to_C(succ_iter, new_pos->pred->succ,
@@ -485,20 +540,21 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                 {
                     // The transition is non-inert, but it has to be moved
                     // over the inert transitions of OldB.
-                    --OldB->int_inert_begin;
+                    OldB->set_inert_begin(OldB->inert_begin() - 1);
                     // old_pos --> new_pos --> OldB->inert_begin -> old_pos
                     swap3_B_to_C(succ_iter, new_pos->pred->succ,
                                     OldB->inert_begin()->pred->succ);
                 }
-                if (new_pos->slice->begin == new_pos->slice->end)
+                if (new_pos->B_to_C_slice->begin == new_pos->B_to_C_slice->end)
                 {
                     // This was the last transition from OldB to its own
                     // constellation.
-                    OldB->int_inert_begin = OldB->int_inert_end = B_to_C;
+                    OldB->set_inert_begin(B_to_C.begin());
+                    OldB->set_inert_end(B_to_C.begin());
 
-                    if (OldB->FromRed == new_pos->slice)
+                    if (OldB->FromRed == new_pos->B_to_C_slice)
                         OldB->FromRed = NULL;
-                    delete new_pos->slice;
+                    delete new_pos->B_to_C_slice;
                 }
             }
             else
@@ -507,21 +563,21 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                 // does not contain OldB or NewB.  No special treatment is
                 // required.
                 swap_B_to_C(succ_iter, new_pos->pred->succ);
-                if (new_pos->slice->begin == new_pos->slice->end)
+                if (new_pos->B_to_C_slice->begin == new_pos->B_to_C_slice->end)
                 {
-                    if (OldB->FromRed == new_pos->slice)
+                    if (OldB->FromRed == new_pos->B_to_C_slice)
                         OldB->FromRed = NULL;
-                    delete new_pos->slice;
+                    delete new_pos->B_to_C_slice;
                 }
             }
-            new_pos->slice = new_B_to_C_slice;
+            new_pos->B_to_C_slice = new_B_to_C_slice;
         }
     }
     if (OldB->inert_begin() == OldB->inert_end() &&
-            OldB->inert_begin() != B_to_C &&
+            OldB->inert_begin() != B_to_C.begin() &&
                 (OldB->inert_begin()[-1].pred->source->block != OldB ||
-                 OldB->inert_begin()[-1].pred->succ->target->get_constln()
-                                                    != OldB->get_constln()))
+                 OldB->inert_begin()[-1].pred->succ->target->constln()
+                                                        != OldB->constln()))
     {
         // the old block has no transitions to its own constellation, but
         // its inert_begin and inert_end pointers are not set to B_to_C.
@@ -648,55 +704,59 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
     assert(part_tr.size() == get_nr_of_transitions());
 
     // initialise blocks and B_to_C slices
-    permutation_entry* begin = part_st.permutation.begin();
+    permutation_iter_t begin = part_st.permutation.begin();
     constln_t* constln = new constln_t(begin, part_st.permutation.end());
     std::vector<block_t*> blocks(states_per_block.size());
-    B_to_C_entry* B_to_C_begin = part_tr.B_to_C;
+    B_to_C_iter_t B_to_C_begin = part_tr.B_to_C.begin();
     for (state_type B = 0; B < states_per_block.size(); ++B)
     {
         check_complexity::count("initialise blocks", 1, check_complexity::n);
-        permutation_entry* end = begin + states_per_block[B];
+        permutation_iter_t end = begin + states_per_block[B];
         blocks[B] = new block_t(constln, begin, end);
-        blocks[B]->int_inert_begin = B_to_C_begin + noninert_out_per_block[B];
-        blocks[B]->int_inert_end =
-                            blocks[B]->inert_begin() + inert_out_per_block[B];
+        blocks[B]->set_inert_begin(B_to_C_begin + noninert_out_per_block[B]);
+        blocks[B]->set_inert_end(blocks[B]->inert_begin() +
+                                                    inert_out_per_block[B]);
         B_to_C_descriptor* slice =
                     new B_to_C_descriptor(B_to_C_begin,blocks[B]->inert_end());
-        for (; B_to_C_begin != blocks[B]->inert_end(); ++B_to_C_begin)
+        assert(B_to_C_begin != slice->end);
+        for (; slice->end != B_to_C_begin; ++B_to_C_begin)
         {
             check_complexity::count("initialise B_to_C",1,check_complexity::m);
-            B_to_C_begin->slice = slice;
+            B_to_C_begin->B_to_C_slice = slice;
         }
         begin = end;
     }
     // only block 0 has nonbottom states:
-    blocks[0]->int_marked_nonbottom_begin =
-                blocks[0]->int_bottom_begin += nr_of_nonbottom_states;
+    blocks[0]->set_marked_nonbottom_begin(blocks[0]->marked_nonbottom_begin() +
+                                                    nr_of_nonbottom_states);
+    blocks[0]->set_bottom_begin(blocks[0]->marked_nonbottom_begin());
     assert(part_st.permutation.end() == begin);
-    assert(&part_tr.B_to_C[nr_of_transitions] == B_to_C_begin);
+    assert(part_tr.B_to_C.end() == B_to_C_begin);
 
     // initialise states and succ slices
-    part_st.state_info[0].state_in_begin = part_tr.pred;
-    part_st.state_info[0].state_out_begin = part_tr.succ;
+    part_st.state_info.begin()->set_pred_begin(part_tr.pred.begin());
+    part_st.state_info.begin()->set_succ_begin(part_tr.succ.begin());
     for (state_type s = 0; s < get_nr_of_states(); ++s)
     {
         check_complexity::count("initialise states", 1, check_complexity::n);
-        part_st.state_info[s].state_inert_in_begin = part_st.state_info[s].
-                                    state_in_begin + noninert_in_per_state[s];
-        part_st.state_info[s+1].state_in_begin = part_st.state_info[s].
-                                state_inert_in_begin + inert_in_per_state[s];
+        part_st.state_info[s].set_inert_pred_begin(part_st.state_info[s].
+                                    pred_begin() + noninert_in_per_state[s]);
+        part_st.state_info[s].set_pred_end(part_st.state_info[s].
+                                inert_pred_begin() + inert_in_per_state[s]);
+        // part_st.state_info[s+1].set_pred_begin(part_st.state_info[s].
+        //                                                      pred_end());
 
         out_descriptor* s_slice =
-                    new out_descriptor(part_st.state_info[s].state_out_begin);
-        part_st.state_info[s].state_inert_out_begin =
-                                    s_slice->begin + noninert_out_per_state[s];
-        part_st.state_info[s+1].state_out_begin =
-        part_st.state_info[s].state_inert_out_end =
-        part_st.state_info[s].current_constln =
-        s_slice->end = part_st.state_info[s].state_inert_out_begin +
+                    new out_descriptor(part_st.state_info[s].succ_begin());
+        part_st.state_info[s].set_inert_succ_begin(
+                                s_slice->begin + noninert_out_per_state[s]);
+        s_slice->end = part_st.state_info[s].inert_succ_begin() +
                                                         inert_out_per_state[s];
-        for (succ_entry* succ_iter = s_slice->begin; succ_iter != s_slice->end;
-                                                                ++succ_iter)
+        part_st.state_info[s].set_succ_end(s_slice->end);
+        part_st.state_info[s].set_inert_succ_end(s_slice->end);
+        part_st.state_info[s].current_constln = s_slice->end;
+        for (succ_iter_t succ_iter = s_slice->begin;
+                                    s_slice->end != succ_iter; ++succ_iter)
         {
             check_complexity::count("initialise succ-constellation slices", 1,
                                                         check_complexity::m);
@@ -712,7 +772,7 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
                 // nonbottom state:
                 assert(0 < nr_of_nonbottom_states--);
                 part_st.state_info[s].pos = blocks[0]->begin() +
-                                                        nr_of_nonbottom_states;
+                                                    nr_of_nonbottom_states;
             }
             else
             {
@@ -735,9 +795,9 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
     {
         check_complexity::count("initialise transitions", 1,
                                                         check_complexity::m);
-        pred_entry* t_pred;
-        succ_entry* t_succ;
-        B_to_C_entry* t_B_to_C;
+        pred_iter_t t_pred;
+        succ_iter_t t_succ;
+        B_to_C_iter_t t_B_to_C;
 
         if (!branching || !aut.is_tau(t.label()) ||
                                 (preserve_divergence && t.from() == t.to()))
@@ -749,10 +809,10 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
             {
                 state_type extra_block = action_block_map[t.label()];
                 // now initialise extra_state correctly
-                part_st.state_info[extra_state].block=blocks[extra_block];
+                part_st.state_info[extra_state].block = blocks[extra_block];
                 assert(0 < states_per_block[extra_block]--);
-                part_st.state_info[extra_state].pos =
-                    blocks[extra_block]->begin()+states_per_block[extra_block];
+                part_st.state_info[extra_state].pos = blocks[extra_block]->
+                                    begin() + states_per_block[extra_block];
                 *part_st.state_info[extra_state].pos =
                                             &part_st.state_info[extra_state];
                 // part_st.state_info[extra_state].notblue = 0;
@@ -761,52 +821,54 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
                 // namely a noninert transition to to t.to().  It has to be
                 // initialised now.
                 assert(0 < noninert_in_per_state[t.to()]--);
-                t_pred = part_st.state_info[t.to()].noninert_in_begin() +
+                t_pred = part_st.state_info[t.to()].noninert_pred_begin() +
                                                 noninert_in_per_state[t.to()];
                 assert(0 == --noninert_out_per_state[extra_state]);
-                t_succ = part_st.state_info[extra_state].out_begin();
+                t_succ = part_st.state_info[extra_state].succ_begin();
                 assert(0 < noninert_out_per_block[extra_block]);
                 t_B_to_C = blocks[extra_block]->inert_begin() -
                                         noninert_out_per_block[extra_block]--;
-                t_pred->source = &part_st.state_info[extra_state];
+                t_pred->source = &part_st.state_info.begin()[extra_state];
                 t_pred->succ = t_succ;
-                t_succ->target = &part_st.state_info[t.to()];
+                t_succ->target = &part_st.state_info.begin()[t.to()];
                 t_succ->B_to_C = t_B_to_C;
-                // t_B_to_C->slice = (already initialised);
+                // t_B_to_C->B_to_C_slice = (already initialised);
                 t_B_to_C->pred = t_pred;
             }
             // noninert transition from t.from() to extra_state
             assert(0 < noninert_in_per_state[extra_state]--);
-            t_pred = part_st.state_info[extra_state].noninert_in_begin() +
+            t_pred = part_st.state_info[extra_state].noninert_pred_begin() +
                                             noninert_in_per_state[extra_state];
             assert(0 < noninert_out_per_state[t.from()]--);
-            t_succ = part_st.state_info[t.from()].out_begin() +
+            t_succ = part_st.state_info[t.from()].succ_begin() +
                                             noninert_out_per_state[t.from()];
             assert(0 < noninert_out_per_block[0]);
-            t_B_to_C=blocks[0]->inert_begin()-noninert_out_per_block[0]--;
-            t_pred->source = &part_st.state_info[t.from()];
+            t_B_to_C = blocks[0]->inert_begin() - noninert_out_per_block[0]--;
+
+            t_pred->source = &part_st.state_info.begin()[t.from()];
             t_pred->succ = t_succ;
-            t_succ->target = &part_st.state_info[extra_state];
+            t_succ->target = &part_st.state_info.begin()[extra_state];
             t_succ->B_to_C = t_B_to_C;
-            // t_B_to_C->slice = (already initialised);
+            // t_B_to_C->B_to_C_slice = (already initialised);
             t_B_to_C->pred = t_pred;
         }
         else
         {
             // inert transition from t.from() to t.to()
             assert(0 < inert_in_per_state[t.to()]--);
-            t_pred = part_st.state_info[t.to()].inert_in_begin() +
+            t_pred = part_st.state_info[t.to()].inert_pred_begin() +
                                                     inert_in_per_state[t.to()];
             assert(0 < inert_out_per_state[t.from()]--);
-            t_succ = part_st.state_info[t.from()].inert_out_begin() +
+            t_succ = part_st.state_info[t.from()].inert_succ_begin() +
                                                 inert_out_per_state[t.from()];
             assert(0 < inert_out_per_block[0]--);
             t_B_to_C = blocks[0]->inert_begin() + inert_out_per_block[0];
-            t_pred->source = &part_st.state_info[t.from()];
+
+            t_pred->source = &part_st.state_info.begin()[t.from()];
             t_pred->succ = t_succ;
-            t_succ->target = &part_st.state_info[t.to()];
+            t_succ->target = &part_st.state_info.begin()[t.to()];
             t_succ->B_to_C = t_B_to_C;
-            // t_B_to_C->slice = (already initialised);
+            // t_B_to_C->B_to_C_slice = (already initialised);
             t_B_to_C->pred = t_pred;
         }
     }
@@ -814,6 +876,11 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
     noninert_in_per_state.clear();  inert_in_per_state.clear();
     noninert_out_per_block.clear(); inert_out_per_block.clear();
     states_per_block.clear();
+
+    #ifndef NDEBUG
+        part_st.print_part();
+        part_st.print_trans();
+    #endif
 }
 
 /// \brief Replaces the transition relation of the current LTS by the
@@ -851,23 +918,25 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
     const label_type tau_label = determine_tau_label(aut);
 
     // traverse the outgoing transitions of the original LTS states
-    for (const state_info_entry* s_iter=&part_st.state_info[orig_nr_of_states];
-                                            --s_iter != part_st.state_info; )
+    for (fixed_vector<state_info_entry>::const_iterator s_iter =
+                                part_st.state_info.begin() + orig_nr_of_states;
+                                    part_st.state_info.begin() != --s_iter; )
     {
-        state_type s_eq = s_iter->get_constln()->seqnr;
-        for (const succ_entry* succ_iter = s_iter->out_begin();
-                                            s_iter->out_end() != succ_iter; )
+        state_type s_eq = s_iter->constln()->seqnr();
+        for (fixed_vector<succ_entry>::const_iterator succ_iter =
+                                                        s_iter->succ_begin();
+                                            s_iter->succ_end() != succ_iter; )
         {
-            state_type tgt_id = succ_iter->target - part_st.state_info;
+            state_type tgt_id = succ_iter->target-&*part_st.state_info.begin();
             if (tgt_id < orig_nr_of_states)
             {
                 assert(branching);
                 // We have a transition that originally was inert.
-                state_type t_eq = succ_iter->target->get_constln()->seqnr;
+                state_type t_eq = succ_iter->target->constln()->seqnr();
                 if (s_eq == t_eq)
                 {
                     // The transition is still inert.
-                    if (!preserve_divergence || s_iter != succ_iter->target)
+                    if (!preserve_divergence || &*s_iter != succ_iter->target)
                     {
                         // but it was not a self-loop to start with.  So we do
                         // not add it.  (Even self-loops are not added if we
@@ -886,15 +955,15 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
                 // intermediary state goes.
                 Key k = to_lts_map.find(tgt_id)->second;
                 state_type t_eq = part_st.state_info[k.second].
-                                                        get_constln()->seqnr;
+                                                            constln()->seqnr();
                 resulting_transitions.insert(transition(s_eq, k.first, t_eq));
                 // The target state could also be found through the pointer
                 // structure (but we also need the labels, which are not stored
                 // in the refinable partition):
-                assert(&part_st.state_info[k.second] ==
-                                    succ_iter->target->out_begin()->target);
-                assert(succ_iter->target->out_end() -
-                                        succ_iter->target->out_begin() == 1);
+                assert(&part_st.state_info.begin()[k.second] ==
+                                succ_iter->target->succ_begin()->target);
+                assert(succ_iter->target->succ_end() -
+                                    succ_iter->target->succ_begin() == 1);
             }
             // Skip over other transitions to the same constellation -- they
             // would be mapped to the same resulting transition.
@@ -905,7 +974,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
     // Copy the transitions from the set into the transition system.
     aut.clear_transitions();
     for (std::set<transition>::const_iterator i=resulting_transitions.begin();
-                                       i != resulting_transitions.end(); ++i)
+                                       resulting_transitions.end() != i; ++i)
     {
         aut.add_transition(*i);
     }
@@ -966,31 +1035,31 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             // transition array.)
         part_tr.split_inert_to_C(SpB);
         // 2.10: for all s in SpB do
-        for (bisim_gjkw::permutation_entry* s_iter = SpB->begin();
+        for (bisim_gjkw::permutation_iter_t s_iter = SpB->begin();
                                                 SpB->end() != s_iter; ++s_iter)
         {
             bisim_gjkw::check_complexity::count("for all states in SpB", 1,
                                         bisim_gjkw::check_complexity::n_log_n);
-            bisim_gjkw::state_info_entry* const s = *s_iter;
+            const bisim_gjkw::state_info_ptr s = *s_iter;
             // 2.11: for all s_prime in noninert_in(s) do
-            for (bisim_gjkw::pred_entry* pred_iter = s->noninert_in_begin();
-                                s->noninert_in_end() != pred_iter; ++pred_iter)
+            for (bisim_gjkw::pred_iter_t pred_iter = s->noninert_pred_begin();
+                            s->noninert_pred_end() != pred_iter; ++pred_iter)
             {
                 bisim_gjkw::check_complexity::count(
                                 "for all incoming non-inert transitions", 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-                bisim_gjkw::state_info_entry* const s_prime=pred_iter->source;
+                const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
                 // 2.12: Mark the block of s_prime as refinable.
                 bool first_transition_of_block =
                                             s_prime->block->make_refinable();
                 // 2.13: Mark s_prime as predecessor of SpB.
-                bool first_transition_of_state = s_prime->block->mark(s_prime);
+                bool first_transition_of_state=s_prime->block->mark(s_prime);
                 // 2.14: Register that s_prime->s goes to NewC (instead of SpC)
                 // and
                 // 2.15: Store whether s' still has some transition to SpC\SpB
-                s_prime->current_constln = part_tr.change_to_C(pred_iter, SpC,
-                                SpB->get_constln(), first_transition_of_state,
-                                                    first_transition_of_block);
+                s_prime->current_constln = part_tr.change_to_C(pred_iter,
+                                SpC, SpB->constln(), first_transition_of_state,
+                                                first_transition_of_block);
             // 2.16: end for
             }
             // 2.17: Register that the transitions from s to out_inert(s) go to
@@ -1085,7 +1154,7 @@ template <class LTS_TYPE>
 bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::
                                     primary_refine(bisim_gjkw::block_t* RefB)
 {
-    bisim_gjkw::permutation_entry* const red_end = RefB->end();
+    const bisim_gjkw::permutation_iter_t red_end = RefB->end();
     bisim_gjkw::block_t* RedB;
 
     // 3.3: Spend the same amount of work on either coroutine:
@@ -1093,7 +1162,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::
     // 3.29: RedB := RefB  or  RedB := NewB , respectively
     RUN_COROUTINES(primary_blue, (RefB), RedB = RefB,
                    primary_red,  (RefB), RedB = red_end[-1]->block,
-                   /* shared data: */ bisim_gjkw::permutation_entry*,
+   /* shared data: */ bisim_gjkw::permutation_iter_t,
                                         (RefB->unmarked_nonbottom_begin()));
     // 3.31: return RedB
     return RedB;
@@ -1116,12 +1185,12 @@ static const char* const secondary_search =
 template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB),
-    /* local variables:     */ (bisim_gjkw::permutation_entry*, visited_end,
-                                bisim_gjkw::state_info_entry*, s,
-                                bisim_gjkw::pred_entry*, pred_iter,
-                                bisim_gjkw::permutation_entry*,
+    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter,
+                                bisim_gjkw::permutation_iter_t,
                                                         blue_nonbottom_end),
-    /* shared data:         */ bisim_gjkw::permutation_entry*,
+    /* shared data:         */ bisim_gjkw::permutation_iter_t,
                                                     notblue_initialised_end,
     /* interrupt locations: */ (PRIMARY_BLUE_PREDECESSOR_HANDLED,
                                 PRIMARY_BLUE_STATE_HANDLED))
@@ -1150,19 +1219,19 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
         ++visited_end;
         // 3.8l: for all s_prime in inert_in(s) \ Red do
         COROUTINE_FOR (PRIMARY_BLUE_PREDECESSOR_HANDLED,
-            pred_iter = s->inert_in_begin(), s->inert_in_end() != pred_iter,
-                                                                ++pred_iter)
+                                pred_iter = s->inert_pred_begin(),
+                                s->inert_pred_end() != pred_iter, ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(primary_search, 1,
                                 bisim_gjkw::check_complexity::primary_m_log_n);
-            bisim_gjkw::state_info_entry* const s_prime = pred_iter->source;
+            const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             if (s_prime->pos >= RefB->marked_nonbottom_begin())  continue;
             // 3.9l: if notblue(s_prime) undefined then
             if (s_prime->pos >= notblue_initialised_end)
             {
                 // 3.10l notblue(s_prime) := |out_inert(s_prime)|
-                s_prime->notblue = s_prime->inert_out_end() -
-                                                    s_prime->inert_out_begin();
+                s_prime->notblue = s_prime->inert_succ_end() -
+                                                s_prime->inert_succ_begin();
                 bisim_gjkw::swap_permutation(s_prime->pos,
                                                     notblue_initialised_end);
                 ++notblue_initialised_end;
@@ -1174,7 +1243,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
             if (0 == s_prime->notblue)
             {
                 // 3.14l: Blue := Blue union {s_prime}
-                bisim_gjkw::swap_permutation(s_prime->pos, blue_nonbottom_end);
+                bisim_gjkw::swap_permutation(s_prime->pos,
+                                                        blue_nonbottom_end);
                 ++blue_nonbottom_end;
                 // 3.4l: whenever |Blue|>|RefB|/2 do  Abort this coroutine
                 if (blue_nonbottom_end - RefB->unmarked_nonbottom_begin() +
@@ -1205,25 +1275,25 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
     bisim_gjkw::block_t* const NewB = RefB->split_off_blue(blue_nonbottom_end);
     part_tr.new_block_created(RefB, NewB);
     // 3.21l: for all s in NewB do
-    for (bisim_gjkw::permutation_entry* s_iter = NewB->begin();
+    for (bisim_gjkw::permutation_iter_t s_iter = NewB->begin();
                                             NewB->end() != s_iter; ++s_iter)
     {
         bisim_gjkw::check_complexity::count(for_all_states_in_the_new_block, 1,
                                         bisim_gjkw::check_complexity::n_log_n);
-        bisim_gjkw::state_info_entry* const s = *s_iter;
+        const bisim_gjkw::state_info_ptr s = *s_iter;
         // 3.22l: for all s_prime in inert_in(s) \ New do
-        for (bisim_gjkw::pred_entry* pred_iter = s->inert_in_begin();
-                                s->inert_in_end() != pred_iter; ++pred_iter)
+        for (bisim_gjkw::pred_iter_t pred_iter = s->inert_pred_begin();
+                                s->inert_pred_end()!=pred_iter; ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(
                             for_all_incoming_transitions_of_the_new_block, 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-            bisim_gjkw::state_info_entry* const s_prime = pred_iter->source;
+            const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             if (s_prime->block == NewB)  continue;
             // 3.23l: s_prime --> s is no longer inert
             part_tr.make_noninert(pred_iter->succ);
             // 3.24l: if |inert_out(s_prime)| == 0 then
-            if (s_prime->inert_out_begin() == s_prime->inert_out_end())
+            if (s_prime->inert_succ_begin() == s_prime->inert_succ_end())
             {
                 // 3.25l: s_prime is a new bottom state
                 new_bottom_states.push_back(s_prime);
@@ -1241,10 +1311,10 @@ END_COROUTINE
 template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_red,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB),
-    /* local variables:     */ (bisim_gjkw::permutation_entry*, visited_begin,
-                                bisim_gjkw::state_info_entry*, s,
-                                bisim_gjkw::pred_entry*, pred_iter),
-    /* shared data:         */ bisim_gjkw::permutation_entry*,
+    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_begin,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter),
+    /* shared data:         */ bisim_gjkw::permutation_iter_t,
                                                     notblue_initialised_end,
     /* interrupt locations: */ (PRIMARY_RED_PREDECESSOR_HANDLED,
                                 PRIMARY_RED_STATE_HANDLED))
@@ -1268,12 +1338,12 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_red,
         s = *visited_begin;
         // 3.8r: for all s_prime in inert_in(s) do
         COROUTINE_FOR (PRIMARY_RED_PREDECESSOR_HANDLED,
-            pred_iter = s->inert_in_begin(), s->inert_in_end() != pred_iter,
-                                                                ++pred_iter)
+            pred_iter = s->inert_pred_begin(),
+                                s->inert_pred_end() != pred_iter, ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(primary_search, 1,
                                 bisim_gjkw::check_complexity::primary_m_log_n);
-            bisim_gjkw::state_info_entry* const s_prime = pred_iter->source;
+            const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             // 3.14r: Red := Red union {s_prime}
             if (s_prime->pos < notblue_initialised_end)
             {
@@ -1311,27 +1381,27 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_red,
                         RefB->split_off_red(RefB->marked_nonbottom_begin());
     part_tr.new_block_created(RefB, NewB);
     // 3.21r: for all nonbottom s in NewB do
-    for (bisim_gjkw::permutation_entry* s_iter = NewB->nonbottom_begin();
+    for (bisim_gjkw::permutation_iter_t s_iter = NewB->nonbottom_begin();
                                     NewB->nonbottom_end() != s_iter; ++s_iter)
     {
         bisim_gjkw::check_complexity::count(for_all_states_in_the_new_block, 1,
                                         bisim_gjkw::check_complexity::n_log_n);
-        bisim_gjkw::state_info_entry* const s = *s_iter;
+        const bisim_gjkw::state_info_ptr s = *s_iter;
         // 3.22r: for all s_prime in inert_out(s) \ New do
-        for (bisim_gjkw::succ_entry* succ_iter = s->inert_out_begin();
-                                s->inert_out_end() != succ_iter; ++succ_iter)
+        for (bisim_gjkw::succ_iter_t succ_iter = s->inert_succ_begin();
+                                    s->inert_succ_end()!=succ_iter; ++succ_iter)
         {
             bisim_gjkw::check_complexity::count(
                             for_all_incoming_transitions_of_the_new_block, 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-            bisim_gjkw::state_info_entry* const s_prime = succ_iter->target;
+            const bisim_gjkw::state_info_ptr s_prime = succ_iter->target;
             if (s_prime->block == NewB)  continue;
             // 3.23r: s --> s_prime is no longer inert
             part_tr.make_noninert(succ_iter);
         // 3.24r: end for
         }
         // 3.25r: if |inert_out(s)| == 0 then
-        if (s->inert_out_begin() == s->inert_out_end())
+        if (s->inert_succ_begin() == s->inert_succ_end())
         {
             // 3.26r: s is a new bottom state
             new_bottom_states.push_back(s);
@@ -1381,7 +1451,7 @@ block into the two parts. */
 
 
 struct bisim_gjkw::secondary_refine_shared {
-    bisim_gjkw::permutation_entry* notblue_initialised_end;
+    bisim_gjkw::permutation_iter_t notblue_initialised_end;
     bool fromred_finished;
 };
 
@@ -1392,7 +1462,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::
                                 const bisim_gjkw::constln_t* SpC,
                                 const bisim_gjkw::B_to_C_descriptor* FromRed)
 {
-    bisim_gjkw::permutation_entry* const red_end = RefB->end();
+    const bisim_gjkw::permutation_iter_t red_end = RefB->end();
     bisim_gjkw::block_t* RedB;
 
     assert(RefB->non_old_marked_bottom_begin() ==
@@ -1401,8 +1471,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::
     // 4.3: Spend the same amount of work on either coroutine:
     // and
     // 3.29: RedB := RefB  or  RedB := NewB , respectively
-    RUN_COROUTINES(secondary_blue, (RefB, SpC),     RedB = RefB,
-                   secondary_red,  (RefB, FromRed), (RedB=red_end[-1]->block)==
+    RUN_COROUTINES(secondary_blue, (RefB, SpC),   RedB = RefB,
+                   secondary_red,  (RefB,FromRed),(RedB=red_end[-1]->block)==
                                                     RefB ? (RedB=NULL) : NULL,
                /* shared data: */ struct bisim_gjkw::secondary_refine_shared,
                                         ({ RefB->nonbottom_begin(), false }));
@@ -1416,14 +1486,14 @@ template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
                                 const bisim_gjkw::constln_t*, SpC),
-    /* local variables:     */ (bisim_gjkw::permutation_entry*, visited_end,
-                                bisim_gjkw::state_info_entry*, s,
-                                bisim_gjkw::pred_entry*, pred_iter,
-                                bisim_gjkw::state_info_entry*, s_prime,
-                                bisim_gjkw::permutation_entry*,
+    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter,
+                                bisim_gjkw::state_info_ptr, s_prime,
+                                bisim_gjkw::permutation_iter_t,
                                                             blue_nonbottom_end,
-                                const bisim_gjkw::succ_entry*, begin,
-                                const bisim_gjkw::succ_entry*, end),
+                                bisim_gjkw::succ_const_iter_t, begin,
+                                bisim_gjkw::succ_const_iter_t, end),
     /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
                                                                 shared_data,
     /* interrupt locations: */ (SECONDARY_BLUE_PREDECESSOR_HANDLED,
@@ -1461,7 +1531,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
             {
                 // The state s is not blue.  Move it to the slice of non-blue
                 // bottom states.
-                --RefB->int_marked_bottom_begin;
+                RefB->set_marked_bottom_begin(RefB->marked_bottom_begin() - 1);
                 bisim_gjkw::swap_permutation(visited_end,
                                             RefB->marked_bottom_begin());
                 --visited_end;
@@ -1481,8 +1551,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
         }
         // 4.16l: for all s_prime in inert_in(s) \ Red do
         COROUTINE_FOR (SECONDARY_BLUE_PREDECESSOR_HANDLED,
-            pred_iter = s->inert_in_begin(), s->inert_in_end() != pred_iter,
-                                                                ++pred_iter)
+            pred_iter = s->inert_pred_begin(),
+                            s->inert_pred_end() != pred_iter, ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(secondary_search, 1,
                             bisim_gjkw::check_complexity::secondary_m_log_n);
@@ -1495,8 +1565,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
                 // s_prime has a transition to SpC, then it is not blue.
                 if (s_prime->surely_has_transition_to(SpC))  continue;
                 // 4.18l: notblue(s_prime):=|inert_out(s_prime)|
-                s_prime->notblue = s_prime->inert_out_end() -
-                                                    s_prime->inert_out_begin();
+                s_prime->notblue = s_prime->inert_succ_end() -
+                                                s_prime->inert_succ_begin();
                 bisim_gjkw::swap_permutation(s_prime->pos,
                                         shared_data.notblue_initialised_end);
                 ++shared_data.notblue_initialised_end;
@@ -1513,19 +1583,19 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
                 // It is not yet known whether s_prime has a transition to
                 // SpC or not.  Execute the slow test now.
                 COROUTINE_FOR (SECONDARY_BLUE_TESTING,
-                    (begin = s_prime->out_begin(), end = s_prime->out_end()),
+                    (begin = s_prime->succ_begin(), end = s_prime->succ_end()),
                                                         begin < end, (void) 0)
                 {
                     bisim_gjkw::check_complexity::count(secondary_search, 1,
                             bisim_gjkw::check_complexity::secondary_m_log_n);
                     // binary search for transitions from
                     // s_prime to constellation SpC.
-                    const bisim_gjkw::succ_entry* mid = begin + (end-begin)/2;
-                    if (mid->target->get_constln() >= SpC)
+                    bisim_gjkw::succ_const_iter_t mid = begin + (end-begin)/2;
+                    if (mid->target->constln() >= SpC)
                     {
                         end = mid->constln_slice->begin;
                     }
-                    if (mid->target->get_constln() <= SpC)
+                    if (mid->target->constln() <= SpC)
                     {
                         begin = mid->constln_slice->end;
                     }
@@ -1569,25 +1639,25 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
     // (as Lines 3.21-3.28)
 
     // 3.21l: for all s in NewB do
-    for (bisim_gjkw::permutation_entry* s_iter = NewB->begin();
+    for (bisim_gjkw::permutation_iter_t s_iter = NewB->begin();
                                             NewB->end() != s_iter; ++s_iter)
     {
         bisim_gjkw::check_complexity::count(for_all_states_in_the_new_block, 1,
                                         bisim_gjkw::check_complexity::n_log_n);
-        bisim_gjkw::state_info_entry* const s = *s_iter;
+        const bisim_gjkw::state_info_ptr s = *s_iter;
         // 3.22l: for all s_prime in inert_in(s) \ New do
-        for (bisim_gjkw::pred_entry* pred_iter = s->inert_in_begin();
-                                s->inert_in_end() != pred_iter; ++pred_iter)
+        for (bisim_gjkw::pred_iter_t pred_iter = s->inert_pred_begin();
+                                s->inert_pred_end()!=pred_iter; ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(
                             for_all_incoming_transitions_of_the_new_block, 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-            bisim_gjkw::state_info_entry* const s_prime = pred_iter->source;
+            const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             if (s_prime->block == NewB)  continue;
             // 3.23l: s_prime --> s is no longer inert
             part_tr.make_noninert(pred_iter->succ);
             // 3.24l: if |inert_out(s_prime)| == 0 then
-            if (s_prime->inert_out_begin() == s_prime->inert_out_end())
+            if (s_prime->inert_succ_begin() == s_prime->inert_succ_end())
             {
                 // 3.25l: s_prime is a new bottom state
                 new_bottom_states.push_back(s_prime);
@@ -1606,11 +1676,11 @@ template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
                                 const bisim_gjkw::B_to_C_descriptor*, FromRed),
-    /* local variables:     */ (bisim_gjkw::B_to_C_entry*,
+    /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
                                                         fromred_visited_begin,
-                                bisim_gjkw::permutation_entry*, visited_begin,
-                                bisim_gjkw::state_info_entry*, s,
-                                bisim_gjkw::pred_entry*, pred_iter),
+                                bisim_gjkw::permutation_iter_t, visited_begin,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter),
     /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
                                                                 shared_data,
     /* interrupt locations: */ (SECONDARY_RED_COLLECT_FROMRED,
@@ -1696,12 +1766,12 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
         s = *visited_begin;
         // 4.16r: for all s_prime in inert_in(s) do
         COROUTINE_FOR (SECONDARY_RED_PREDECESSOR_HANDLED,
-            pred_iter = s->inert_in_begin(), s->inert_in_end() != pred_iter,
+            pred_iter = s->inert_pred_begin(), s->inert_pred_end() != pred_iter,
                                                                 ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(secondary_search, 1,
                             bisim_gjkw::check_complexity::secondary_m_log_n);
-            bisim_gjkw::state_info_entry* const s_prime = pred_iter->source;
+            const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             // 4.23r: Red := Red union {s_prime}
             if (s_prime->pos < shared_data.notblue_initialised_end)
             {
@@ -1743,27 +1813,27 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
     // (as Lines 3.21-3.28)
 
     // 3.21r: for all nonbottom s in NewB do
-    for (bisim_gjkw::permutation_entry* s_iter = NewB->nonbottom_begin();
+    for (bisim_gjkw::permutation_iter_t s_iter = NewB->nonbottom_begin();
                                     NewB->nonbottom_end() != s_iter; ++s_iter)
     {
         bisim_gjkw::check_complexity::count(for_all_states_in_the_new_block, 1,
                                         bisim_gjkw::check_complexity::n_log_n);
-        bisim_gjkw::state_info_entry* const s = *s_iter;
+        const bisim_gjkw::state_info_ptr s = *s_iter;
         // 3.22r: for all s_prime in inert_out(s) \ New do
-        for (bisim_gjkw::succ_entry* succ_iter = s->inert_out_begin();
-                                s->inert_out_end() != succ_iter; ++succ_iter)
+        for (bisim_gjkw::succ_iter_t succ_iter = s->inert_succ_begin();
+                                s->inert_succ_end()!=succ_iter; ++succ_iter)
         {
             bisim_gjkw::check_complexity::count(
                             for_all_incoming_transitions_of_the_new_block, 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-            bisim_gjkw::state_info_entry* const s_prime = succ_iter->target;
+            bisim_gjkw::state_info_ptr s_prime = succ_iter->target;
             if (s_prime->block == NewB)  continue;
             // 3.23r: s --> s_prime is no longer inert
             part_tr.make_noninert(succ_iter);
         // 3.24r: end for
         }
         // 3.25r: if |inert_out(s)| == 0 then
-        if (s->inert_out_begin() == s->inert_out_end())
+        if (s->inert_succ_begin() == s->inert_succ_end())
         {
             // 3.26r: s is a new bottom state
             new_bottom_states.push_back(s);
@@ -1795,22 +1865,23 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
     for (std::vector<bisim_gjkw::state_info_entry*>::iterator b_iter =
         new_bottom_states.begin(); new_bottom_states.end() != b_iter; ++b_iter)
     {
-        bisim_gjkw::state_info_entry* const b = *b_iter;
+        const bisim_gjkw::state_info_ptr b = *b_iter;
         // 5.6: Mark this block as refinable
         // and
         // 5.4: if the block of b is not refinable then
         if (b->block->make_refinable())
         {
             // 5.5: Mark the bottom states of this block as old
-            b->block->int_marked_bottom_begin =
-                    b->block->int_old_bottom_begin = b->block->bottom_begin();
+            b->block->set_old_bottom_begin(b->block->bottom_begin());
+            b->block->set_marked_bottom_begin(b->block->bottom_begin());
         // 5.7: end if
         }
         // 5.8: Make b a bottom state
-        bisim_gjkw::swap_permutation(b->pos, --b->block->int_bottom_begin);
+        b->block->set_bottom_begin(b->block->bottom_begin() - 1);
+        bisim_gjkw::swap_permutation(b->pos, b->block->bottom_begin());
         // 5.9: Set the current constellation pointer of b to the first
         //      constellation it can reach
-        b->current_constln = b->out_begin();
+        b->current_constln = b->succ_begin();
     // 5.10: end for
     }
     // 5.11: empty the set of new bottom states
@@ -1827,33 +1898,34 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
         // 5.13: Mark SplitB as non-refinable
         SplitB->make_nonrefinable();
         // 5.14: for all constellations C reachable from SplitB do
-        bisim_gjkw::state_info_entry* const oldbottom =
-                                                *SplitB->old_bottom_begin();
-        for (bisim_gjkw::succ_entry* C_iter = oldbottom->out_begin();
-            oldbottom->out_end() != C_iter; C_iter=C_iter->constln_slice->end)
+        const bisim_gjkw::state_info_ptr oldbottom=*SplitB->old_bottom_begin();
+        for (bisim_gjkw::succ_iter_t C_iter = oldbottom->succ_begin();
+                                        oldbottom->succ_end() != C_iter;
+                                        C_iter = C_iter->constln_slice->end)
         {
             bisim_gjkw::check_complexity::count(
                         "for all constellations C reachable from SplitB", 1,
                                             bisim_gjkw::check_complexity::m);
                                             //< I am unsure about this number
-            bisim_gjkw::constln_t* C = C_iter->target->get_constln();
+            bisim_gjkw::constln_t* C = C_iter->target->constln();
             // 5.15: Register that the transitions from SplitB to C need
             //       postprocessing
-            C->postprocess_begin = C_iter->B_to_C->slice->begin;
-            C->postprocess_end = C_iter->B_to_C->slice->end;
+            C->postprocess_begin = C_iter->B_to_C->B_to_C_slice->begin;
+            C->postprocess_end = C_iter->B_to_C->B_to_C_slice->end;
         // 5.16: end for
         }
         // 5.17: for all constellations C with incoming transitions that need
         //       postprocessing do
-        for (bisim_gjkw::succ_entry* C_iter = oldbottom->out_begin();
-                                            oldbottom->out_end() != C_iter; )
+        for (bisim_gjkw::succ_iter_t C_iter = oldbottom->succ_begin();
+                                            oldbottom->succ_end() != C_iter; )
         {
             C_iter = C_iter->constln_slice->end;
-            bisim_gjkw::constln_t* C = C_iter->target->get_constln();
+            bisim_gjkw::constln_t* C = C_iter->target->constln();
             // 5.18: for all blocks B with outgoing transitions to C that need
             //       postprocessing do
-            for (bisim_gjkw::B_to_C_entry* B_iter = C->postprocess_begin;
-                    B_iter != C->postprocess_end; B_iter = B_iter->slice->end)
+            for (bisim_gjkw::B_to_C_iter_t B_iter = C->postprocess_begin;
+                                            B_iter != C->postprocess_end;
+                                            B_iter = B_iter->B_to_C_slice->end)
             {
                 bisim_gjkw::check_complexity::count(
                                 "for all blocks B with transitions to C", 1,
@@ -1864,17 +1936,18 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
                 //                               transition to C and old bottom
                 //                               states, new bottom states in B
                 //                               without transition to C)
-                bisim_gjkw::block_t* RedB=secondary_refine(B,C,B_iter->slice);
+                bisim_gjkw::block_t* RedB = secondary_refine(B, C,
+                                                        B_iter->B_to_C_slice);
                 assert (NULL != RedB);
                 // 5.20: for all new bottom states s in RedB do
-                for (bisim_gjkw::permutation_entry* s_iter =
+                for (bisim_gjkw::permutation_iter_t s_iter =
                                                 RedB->non_old_bottom_begin();
                                 RedB->non_old_bottom_end() != s_iter; ++s_iter)
                 {
                     bisim_gjkw::check_complexity::count(
                                     "advance current constellation pointer", 1,
                                             bisim_gjkw::check_complexity::m);
-                    bisim_gjkw::state_info_entry* const s = *s_iter;
+                    const bisim_gjkw::state_info_ptr s = *s_iter;
                     // 5.21: Advance the current constellation pointer of s to
                     //       the next constellation it can reach
                     s->current_constln=s->current_constln->constln_slice->end;
@@ -1889,8 +1962,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
         // 5.25: end for
         }
         // 5.26: Destroy all temporary data
-        oldbottom->block->int_marked_bottom_begin =
-            oldbottom->block->int_old_bottom_begin = oldbottom->block->end();
+        oldbottom->block->set_marked_bottom_begin(oldbottom->block->end());
+        oldbottom->block->set_old_bottom_begin(oldbottom->block->end());
     // 5.27: end for
     }
 // 5.28: return
@@ -1910,14 +1983,12 @@ namespace bisim_gjkw
 template class bisim_partitioner_gjkw_initialise_helper<lts_lts_t>;
 template class bisim_partitioner_gjkw_initialise_helper<lts_aut_t>;
 template class bisim_partitioner_gjkw_initialise_helper<lts_fsm_t>;
-//template class bisim_partitioner_gjkw_initialise_helper<lts_dot_t>;
 
 } // end namespace bisim_gjkw
 
 template class bisim_partitioner_gjkw<lts_lts_t>;
 template class bisim_partitioner_gjkw<lts_aut_t>;
 template class bisim_partitioner_gjkw<lts_fsm_t>;
-//template class bisim_partitioner_gjkw<lts_dot_t>;
 
 } // end namespace detail
 } // end namespace lts

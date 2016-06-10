@@ -27,9 +27,7 @@
     #include <iostream>  // for cout
 #endif
 #include <cstdlib>       // for size_t
-#include <vector>        // for the list of new bottom states
 #include <unordered_map> // used during initialisation
-#include <cassert>
 
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
@@ -37,6 +35,7 @@
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/coroutine.h"
 #include "mcrl2/lts/detail/check_complexity.h"
+#include "mcrl2/lts/detail/fixed_vector.h"
 
 namespace mcrl2
 {
@@ -78,7 +77,7 @@ typedef size_t label_type;
 ///
 /// The basic structure therefore consists of the classes:
 ///
-/// permutation_entry - an entry in the permutation array; it contains a
+/// state_info_ptr - an entry in the permutation array; it contains a
 ///                     pointer to a state_info_entry.
 /// permutation_t     - an array of permutation_entries.
 /// constln_t         - contains information about a constellation, in
@@ -100,11 +99,11 @@ typedef size_t label_type;
 ///   state.  In many cases the slice of this state ends exactly where the
 ///   slice of the next state begins, so we can find the end of this state's
 ///   slice by looking at the next state's state_info_entry.  Therefore,
-///   permutation_entry actually contains a pointer to a state_info_entry with
+///   state_info_ptr actually contains a pointer to a state_info_entry with
 ///   the additional guarantee that this is not the last entry in state_info_t.
 ///   (To make this a small bit more type safe, we could change the type
-///   permutation_entry to something like ``pointer to an array with two
-///   state_info_entries'', typedef state_info_entry (*permutation_entry)[2];.
+///   state_info_ptr to something like ``pointer to an array with two
+///   state_info_entries'', typedef state_info_entry (*state_info_ptr)[2];.
 ///   Still, that would allow unsafe pointer juggling.)
 /// - A block_t also contains information about its outgoing inert transitions.
 /// - A state_info_entry also contains information used during trysplit or
@@ -117,7 +116,7 @@ namespace bisim_gjkw
 class state_info_entry;
 
 //typedef state_info_entry* state_info_t;
-typedef state_info_entry* permutation_entry;
+typedef state_info_entry* state_info_ptr;
 
 /// \class permutation_t
 /// \brief stores a permutation of the states, ordered by block
@@ -128,33 +127,9 @@ typedef state_info_entry* permutation_entry;
 ///
 /// Iterating over the states of a block or the blocks of a constellation will
 /// therefore be done using the permutation_t array.
-class permutation_t
-{
-private:
-    /// number of states in the Kripke structure
-    state_type num_states;
-
-    /// pointer to storage for permutation
-    permutation_entry* permutation;
-public:
-    permutation_t(state_type n)
-        :num_states(n),
-        permutation(new permutation_entry[n])
-    {  }
-
-    ~permutation_t()  {  delete [/* num_states */] permutation;  }
-
-    /// iterator to the first entry in the permutation array
-    permutation_entry* begin()  {  return permutation;  }
-    const permutation_entry* begin() const  {  return permutation;  }
-
-    /// iterator past the last entry in the permutation array
-    permutation_entry* end()  {  return &permutation[num_states];  }
-    const permutation_entry* end() const {  return &permutation[num_states];  }
-
-    /// provides the number of states in the Kripke structure
-    state_type size() const  {  return num_states;  }
-};
+typedef fixed_vector<state_info_ptr> permutation_t;
+typedef permutation_t::iterator permutation_iter_t;
+typedef permutation_t::const_iterator permutation_const_iter_t;
 
 class block_t;
 class constln_t;
@@ -162,7 +137,13 @@ class constln_t;
 class B_to_C_entry;
 class pred_entry;
 class succ_entry;
+typedef fixed_vector<B_to_C_entry>::iterator B_to_C_iter_t;
+typedef fixed_vector<pred_entry>::iterator pred_iter_t;
+typedef fixed_vector<succ_entry>::iterator succ_iter_t;
 
+typedef fixed_vector<B_to_C_entry>::const_iterator B_to_C_const_iter_t;
+typedef fixed_vector<pred_entry>::const_iterator pred_const_iter_t;
+typedef fixed_vector<succ_entry>::const_iterator succ_const_iter_t;
 class B_to_C_descriptor;
 
 /// \class state_info_entry
@@ -178,71 +159,121 @@ class B_to_C_descriptor;
 /// one additional ``state'' that is only used for these pointers.
 class state_info_entry
 {
-public:
+private:
     /// \brief iterator to first incoming transition
     /// \details also serves as iterator past the last incoming transition of
     /// the previous state.
-    pred_entry* state_in_begin;
+    pred_iter_t state_in_begin;
 
     /// \brief iterator to first outgoing transition
     /// \details also serves as iterator past the last outgoing transition of
     /// the previous state.
-    succ_entry* state_out_begin;
+    succ_iter_t state_out_begin;
 
     /// iterator to first _inert_ incoming transition
-    pred_entry* state_inert_in_begin;
+    pred_iter_t state_inert_in_begin;
 
     /// iterator to first _inert_ outgoing transition
-    succ_entry* state_inert_out_begin;
+    succ_iter_t state_inert_out_begin;
 
     /// iterator past the last _inert_ outgoing transition
-    succ_entry* state_inert_out_end;
-
+    succ_iter_t state_inert_out_end;
+public:
     /// block where the state belongs
     block_t* block;
 
     /// position of the state in the permutation array
-    permutation_entry* pos;
+    permutation_iter_t pos;
 
     /// number of inert transitions to non-blue states
     state_type notblue;
 
     /// iterator to first outgoing transition to the constellation of interest
-    succ_entry* current_constln;
+    succ_iter_t current_constln;
 
     /// get constellation where the state belongs
-    constln_t* get_constln() const;
+    const constln_t* constln() const;
+    constln_t* constln();
 
     /// iterator to first incoming transition
-    pred_entry* in_begin()           {  return state_in_begin;  }
+    pred_const_iter_t pred_begin() const  {  return state_in_begin;  }
+    pred_iter_t pred_begin()  {  return state_in_begin;  }
+    void set_pred_begin(pred_iter_t new_in_begin)
+    {
+        state_in_begin = new_in_begin;
+    }
 
     /// iterator past the last incoming transition
-    pred_entry* in_end()             {  return this[1].state_in_begin;  }
+    pred_const_iter_t pred_end() const  {  return this[1].state_in_begin;  }
+    pred_iter_t pred_end()  {  return this[1].state_in_begin;  }
+    void set_pred_end(pred_iter_t new_in_end)
+    {
+        this[1].set_pred_begin(new_in_end);
+    }
 
     /// iterator to first non-inert incoming transition
-    pred_entry* noninert_in_begin()  {  return state_in_begin;  }
+    pred_const_iter_t noninert_pred_begin() const  {  return state_in_begin;  }
+    pred_iter_t noninert_pred_begin()  {  return state_in_begin;  }
+    void set_noninert_pred_begin(pred_iter_t new_noninert_in_begin)
+    {
+        state_in_begin = new_noninert_in_begin;
+    }
 
     /// iterator past the last non-inert incoming transition
-    pred_entry* noninert_in_end()    {  return state_inert_in_begin;  }
+    pred_const_iter_t noninert_pred_end() const  { return inert_pred_begin(); }
+    pred_iter_t noninert_pred_end()  {  return inert_pred_begin();  }
+    void set_noninert_pred_end(pred_iter_t new_noninert_in_end)
+    {
+        set_inert_pred_begin(new_noninert_in_end);
+    }
 
     /// iterator to first inert incoming transition
-    pred_entry* inert_in_begin()     {  return state_inert_in_begin;  }
+    pred_const_iter_t inert_pred_begin() const { return state_inert_in_begin; }
+    pred_iter_t inert_pred_begin()  {  return state_inert_in_begin;  }
+    void set_inert_pred_begin(pred_iter_t new_inert_in_begin)
+    {
+        state_inert_in_begin = new_inert_in_begin;
+    }
 
     /// iterator one past the last inert incoming transition
-    const pred_entry* inert_in_end() const {  return this[1].state_in_begin;  }
+    pred_const_iter_t inert_pred_end() const { return pred_end(); }
+    pred_iter_t inert_pred_end()  {  return pred_end();  }
+    void set_inert_pred_end(pred_iter_t new_inert_in_end)
+    {
+        set_pred_end(new_inert_in_end);
+    }
 
     /// iterator to first outgoing transition
-    succ_entry* out_begin()  {  return state_out_begin;  }
-    const succ_entry* out_begin() const   {  return state_out_begin;  }
+    succ_const_iter_t succ_begin() const  {  return state_out_begin;  }
+    succ_iter_t succ_begin()  {  return state_out_begin;  }
+    void set_succ_begin(succ_iter_t new_out_begin)
+    {
+        state_out_begin = new_out_begin;
+    }
 
     /// iterator past the last outgoing transition
-    const succ_entry* out_end() const     {  return this[1].state_out_begin;  }
+    succ_const_iter_t succ_end() const  {  return this[1].state_out_begin;  }
+    succ_iter_t succ_end()  {  return this[1].state_out_begin;  }
+    void set_succ_end(succ_iter_t new_out_end)
+    {
+        this[1].set_succ_begin(new_out_end);
+    }
 
     /// iterator to first inert outgoing transition
-    succ_entry* inert_out_begin()   {  return state_inert_out_begin;  }
+    succ_const_iter_t inert_succ_begin() const  {return state_inert_out_begin;}
+    succ_iter_t inert_succ_begin()  {  return state_inert_out_begin;  }
+    void set_inert_succ_begin(succ_iter_t new_inert_out_begin)
+    {
+        state_inert_out_begin = new_inert_out_begin;
+    }
 
     /// iterator past the last inert outgoing transition
-    succ_entry* inert_out_end()     {  return state_inert_out_end  ;  }
+    succ_const_iter_t inert_succ_end() const  {  return state_inert_out_end;  }
+    succ_iter_t inert_succ_end()  {  return state_inert_out_end;  }
+    void set_inert_succ_end(succ_iter_t new_inert_out_end)
+    {
+        state_inert_out_end = new_inert_out_end;
+    }
 
     bool surely_has_transition_to(const constln_t* SpC) const;
     bool surely_has_no_transition_to(const constln_t* SpC) const;
@@ -250,7 +281,8 @@ public:
 
 
 /// swap two permutations
-static inline void swap_permutation(permutation_entry*s1, permutation_entry*s2)
+static inline void swap_permutation(permutation_iter_t s1,
+                                                        permutation_iter_t s2)
 {
     // swap contents of permutation array
     std::swap(*s1, *s2);
@@ -262,11 +294,11 @@ static inline void swap_permutation(permutation_entry*s1, permutation_entry*s2)
 /// \brief swap three permutations
 /// \details the entry in the permutation array at *s1 moves to *s2, the entry
 /// at *s2 moves to *s3, and the entry at *s3 moves to *s1.
-static inline void swap3_permutation(permutation_entry* s1,
-                                permutation_entry* s2, permutation_entry* s3)
+static inline void swap3_permutation(permutation_iter_t s1,
+                                permutation_iter_t s2, permutation_iter_t s3)
 {
     // swap contents of permutation array
-    permutation_entry temp = *s1;
+    state_info_ptr temp = *s1;
     *s1 = *s3;
     *s3 = *s2;
     *s2 = temp;
@@ -307,39 +339,39 @@ class block_t
 {
 private:
     /// iterator past the last state of the block
-    permutation_entry* int_end;
+    permutation_iter_t int_end;
 
     /// iterator to the first state of the block
-    permutation_entry* int_begin;
-public:
+    permutation_iter_t int_begin;
+
     /// iterator to the first marked nonbottom state of the block
-    permutation_entry* int_marked_nonbottom_begin;
+    permutation_iter_t int_marked_nonbottom_begin;
 
     /// iterator to the first bottom state of the block
-    permutation_entry* int_bottom_begin;
+    permutation_iter_t int_bottom_begin;
 
     /// iterator to the first marked bottom state of the block
-    permutation_entry* int_marked_bottom_begin;
+    permutation_iter_t int_marked_bottom_begin;
 
     /// iterator to the first old bottom state of the block
-    permutation_entry* int_old_bottom_begin;
+    permutation_iter_t int_old_bottom_begin;
 
     /// \brief iterator to the first inert transition of the block
     /// \details If there are no inert transitions, then `inert_begin` and
     /// `inert_end` point to the end of the B_to_C-slice containing transitions
     /// from the block to its own constellation.  If there is no such slice,
     /// both are equal to `B_to_C`.
-    B_to_C_entry* int_inert_begin;
+    B_to_C_iter_t int_inert_begin;
 
     /// iterator past the last inert transition of the block
-    B_to_C_entry* int_inert_end;
-
+    B_to_C_iter_t int_inert_end;
+public:
     /// iterator to the first transition from the block to the splitter
     B_to_C_descriptor* FromRed;
-
+private:
     /// constellation to which the block belongs
     constln_t* int_constln;
-private:
+
     /// \brief next block in the list of refinable blocks
     /// \details If this is the last block in the list, `refinable_next` points
     /// to this very block.  Consequently, it is possible to check whether some
@@ -357,8 +389,9 @@ public:
     /// \param constln_ constellation to which the block belongs
     /// \param begin_   initial iterator to the first state of the block
     /// \param end_     initial iterator past the last state of the block
-    block_t(constln_t* constln_, permutation_entry* begin_,
-                                                    permutation_entry* end_)
+    block_t(constln_t* constln_,
+                            permutation_iter_t begin_,
+                            permutation_iter_t end_)
         :int_end(end_),
         int_begin(begin_),
         int_marked_nonbottom_begin(begin_), // no nonbottom state is marked
@@ -442,137 +475,237 @@ public:
     }
 
     /// constellation where the block belongs to
-    constln_t* get_constln()  {  return int_constln;  }
-    const constln_t* get_constln() const  {  return int_constln;  }
+    const constln_t* constln() const  {  return int_constln;  }
+    constln_t* constln()  {  return int_constln;  }
+    void set_constln(constln_t* new_constln)  {  int_constln = new_constln;  }
 
     /// iterator to the first state in the block
-    permutation_entry* begin()  {  return int_begin;  }
+    permutation_const_iter_t begin()  const  {  return int_begin;  }
+    permutation_iter_t begin()  {  return int_begin;  }
+    void set_begin(permutation_iter_t new_begin)
+    {
+        int_begin = new_begin;
+    }
 
     /// iterator past the last state in the block
-    const permutation_entry* end() const  {  return int_end;  }
-    permutation_entry* end()  {  return int_end;  }
+    permutation_const_iter_t end()  const  {  return int_end;  }
+    permutation_iter_t end()  {  return int_end;  }
+    void set_end(permutation_iter_t new_end)
+    {
+        int_end = new_end;
+    }
 
     /// iterator to the first nonbottom state in the block
-    const permutation_entry* nonbottom_begin() const  { return int_begin; }
-    permutation_entry* nonbottom_begin()  { return int_begin; }
+    permutation_const_iter_t nonbottom_begin()  const  {  return int_begin;  }
+    permutation_iter_t nonbottom_begin()  {  return int_begin;  }
+    void set_nonbottom_begin(permutation_iter_t new_nonbottom_begin)
+    {
+        int_begin = new_nonbottom_begin;
+    }
 
     /// iterator past the last nonbottom state in the block
-    const permutation_entry* nonbottom_end() const { return int_bottom_begin; }
-    permutation_entry* nonbottom_end()  {  return int_bottom_begin;  }
+    permutation_const_iter_t nonbottom_end() const { return int_bottom_begin; }
+    permutation_iter_t nonbottom_end()  {  return int_bottom_begin;  }
+    void set_nonbottom_end(permutation_iter_t new_nonbottom_end)
+    {
+        int_bottom_begin = new_nonbottom_end;
+    }
 
     /// iterator to the first bottom state in the block
-    const permutation_entry* bottom_begin() const  { return int_bottom_begin; }
-    permutation_entry* bottom_begin()  {  return int_bottom_begin;  }
+    permutation_const_iter_t bottom_begin() const  { return int_bottom_begin; }
+    permutation_iter_t bottom_begin()  {  return int_bottom_begin;  }
+    void set_bottom_begin(permutation_iter_t new_bottom_begin)
+    {
+        int_bottom_begin = new_bottom_begin;
+    }
 
     /// iterator past the last bottom state in the block
-    const permutation_entry* bottom_end() const  {  return int_end;  }
-    permutation_entry* bottom_end()  {  return int_end;  }
+    permutation_const_iter_t bottom_end() const  {  return int_end;  }
+    permutation_iter_t bottom_end()  {  return int_end;  }
+    void set_bottom_end(permutation_iter_t new_bottom_end)
+    {
+        int_end = new_bottom_end;
+    }
 
     /// iterator to the first unmarked nonbottom state in the block
-    permutation_entry* unmarked_nonbottom_begin()
+    permutation_const_iter_t unmarked_nonbottom_begin()const{return int_begin;}
+    permutation_iter_t unmarked_nonbottom_begin()  {  return int_begin;  }
+    void set_unmarked_nonbottom_begin(permutation_iter_t
+                                                new_unmarked_nonbottom_begin)
     {
-        return int_begin;
+        int_begin = new_unmarked_nonbottom_begin;
     }
 
     /// iterator past the last unmarked nonbottom state in the block
-    permutation_entry* unmarked_nonbottom_end()
+    permutation_const_iter_t unmarked_nonbottom_end() const
     {
         return int_marked_nonbottom_begin;
+    }
+    permutation_iter_t unmarked_nonbottom_end()
+    {
+        return int_marked_nonbottom_begin;
+    }
+    void set_unmarked_nonbottom_end(permutation_iter_t
+                                                    new_unmarked_nonbottom_end)
+    {
+        int_marked_nonbottom_begin = new_unmarked_nonbottom_end;
     }
 
     /// iterator to the first marked nonbottom state in the block
-    const permutation_entry* marked_nonbottom_begin() const
+    permutation_const_iter_t marked_nonbottom_begin() const
     {
         return int_marked_nonbottom_begin;
     }
-    permutation_entry* marked_nonbottom_begin()
+    permutation_iter_t marked_nonbottom_begin()
     {
         return int_marked_nonbottom_begin;
+    }
+    void set_marked_nonbottom_begin(permutation_iter_t
+                                                    new_marked_nonbottom_begin)
+    {
+        int_marked_nonbottom_begin = new_marked_nonbottom_begin;
     }
 
     /// iterator one past the last marked nonbottom state in the block
-    const permutation_entry* marked_nonbottom_end() const
+    permutation_const_iter_t marked_nonbottom_end() const
     {
         return int_bottom_begin;
     }
-    permutation_entry* marked_nonbottom_end()
+    permutation_iter_t marked_nonbottom_end()  {  return int_bottom_begin;  }
+    void set_marked_nonbottom_end(permutation_iter_t new_marked_nonbottom_end)
     {
-        return int_bottom_begin;
+        int_bottom_begin = new_marked_nonbottom_end;
     }
 
     /// iterator to the first unmarked bottom state in the block
-    const permutation_entry* unmarked_bottom_begin() const
+    permutation_const_iter_t unmarked_bottom_begin() const
     {
         return int_bottom_begin;
     }
-    permutation_entry* unmarked_bottom_begin()  {  return int_bottom_begin;  }
+    permutation_iter_t unmarked_bottom_begin()  {  return int_bottom_begin;  }
+    void set_unmarked_bottom_begin(permutation_iter_t
+                                                    new_unmarked_bottom_begin)
+    {
+        int_bottom_begin = new_unmarked_bottom_begin;
+    }
 
     /// iterator past the last unmarked bottom state in the block
-    const permutation_entry* unmarked_bottom_end() const
+    permutation_const_iter_t unmarked_bottom_end() const
     {
         return int_marked_bottom_begin;
     }
-    permutation_entry* unmarked_bottom_end()
+    permutation_iter_t unmarked_bottom_end()  {return int_marked_bottom_begin;}
+    void set_unmarked_bottom_end(permutation_iter_t new_unmarked_bottom_end)
     {
-        return int_marked_bottom_begin;
+        int_marked_bottom_begin = new_unmarked_bottom_end;
     }
 
     /// iterator to the first marked bottom state in the block
-    const permutation_entry* marked_bottom_begin() const
+    permutation_const_iter_t marked_bottom_begin() const
     {
         return int_marked_bottom_begin;
     }
-    permutation_entry* marked_bottom_begin()
+    permutation_iter_t marked_bottom_begin()  {return int_marked_bottom_begin;}
+    void set_marked_bottom_begin(permutation_iter_t new_marked_bottom_begin)
     {
-        return int_marked_bottom_begin;
+        int_marked_bottom_begin = new_marked_bottom_begin;
     }
 
     /// \brief iterator past the last marked bottom state in the block
     /// \details This includes the old bottom states.
-    const permutation_entry* marked_bottom_end() const
+    permutation_const_iter_t marked_bottom_end() const  {  return int_end;  }
+    permutation_iter_t marked_bottom_end()  {  return int_end;  }
+    void set_marked_bottom_end(permutation_iter_t new_marked_bottom_end)
     {
-        return int_end;
-    }
-    permutation_entry* marked_bottom_end()
-    {
-        return int_end;
+        int_end = new_marked_bottom_end;
     }
 
     /// iterator to the first bottom state that is not old
-    permutation_entry* non_old_bottom_begin()
+    permutation_const_iter_t non_old_bottom_begin() const
     {
         return int_bottom_begin;
     }
+    permutation_iter_t non_old_bottom_begin()  {  return int_bottom_begin;  }
+    void set_non_old_bottom_begin(permutation_iter_t new_non_old_bottom_begin)
+    {
+        int_bottom_begin = new_non_old_bottom_begin;
+    }
 
     /// iterator past the last bottom state that is not old
-    permutation_entry* non_old_bottom_end()
+    permutation_const_iter_t non_old_bottom_end() const
     {
         return int_old_bottom_begin;
+    }
+    permutation_iter_t non_old_bottom_end()  {  return int_old_bottom_begin;  }
+    void set_non_old_bottom_end(permutation_iter_t new_old_bottom_begin)
+    {
+        int_old_bottom_begin= new_old_bottom_begin;
     }
 
     /// iterator to the first marked bottom state that is not old
-    permutation_entry* non_old_marked_bottom_begin()
+    permutation_const_iter_t non_old_marked_bottom_begin() const
     {
         return int_marked_bottom_begin;
     }
+    permutation_iter_t non_old_marked_bottom_begin()
+    {
+        return int_marked_bottom_begin;
+    }
+    void set_non_old_marked_bottom_begin(permutation_iter_t
+                                            new_non_old_marked_bottom_begin)
+    {
+        int_marked_bottom_begin = new_non_old_marked_bottom_begin;
+    }
 
     /// iterator past the last marked bottom state that is not old
-    permutation_entry* non_old_marked_bottom_end()
+    permutation_const_iter_t non_old_marked_bottom_end() const
     {
         return int_old_bottom_begin;
     }
+    permutation_iter_t non_old_marked_bottom_end()
+    {
+        return int_old_bottom_begin;
+    }
+    void set_non_old_marked_bottom_end(permutation_iter_t
+                                                new_non_old_marked_bottom_end)
+    {
+        int_old_bottom_begin = new_non_old_marked_bottom_end;
+    }
 
     /// iterator to the first old bottom state in the block
-    permutation_entry* old_bottom_begin()  {  return int_old_bottom_begin;  }
+    permutation_const_iter_t old_bottom_begin() const
+    {
+        return int_old_bottom_begin;
+    }
+    permutation_iter_t old_bottom_begin()  {  return int_old_bottom_begin;  }
+    void set_old_bottom_begin(permutation_iter_t new_old_bottom_begin)
+    {
+        int_old_bottom_begin = new_old_bottom_begin;
+    }
 
     /// iterator past the last old bottom state in the block
-    permutation_entry* old_bottom_end()  {  return int_end;  }
+    permutation_const_iter_t old_bottom_end() const  {  return int_end;  }
+    permutation_iter_t old_bottom_end()  {  return int_end;  }
+    void set_old_bottom_end(permutation_iter_t new_old_bottom_end)
+    {
+        int_end = new_old_bottom_end;
+    }
 
     /// iterator to the first inert transition of the block
-    B_to_C_entry* inert_begin()  {  return int_inert_begin;  }
+    B_to_C_const_iter_t inert_begin() const  {  return int_inert_begin;  }
+    B_to_C_iter_t inert_begin()  {  return int_inert_begin;  }
+    void set_inert_begin(B_to_C_iter_t new_inert_begin)
+    {
+        int_inert_begin = new_inert_begin;
+    }
 
     /// iterator past the last inert transition of the block
-    B_to_C_entry* inert_end()  {  return int_inert_end;  }
+    B_to_C_const_iter_t inert_end() const  {  return int_inert_end;  }
+    B_to_C_iter_t inert_end()  {  return int_inert_end;  }
+    void set_inert_end(B_to_C_iter_t new_inert_end)
+    {
+        int_inert_end = new_inert_end;
+    }
 
 private:
     static const char* const mark_all_states_in_SpB;
@@ -585,16 +718,18 @@ public:
                                 marked_bottom_begin() == marked_bottom_end());
         check_complexity::count(mark_all_states_in_SpB, size(),
                                                 check_complexity::n_log_n);
-        int_marked_nonbottom_begin = nonbottom_begin();
-        int_marked_bottom_begin = bottom_begin();
+        set_marked_nonbottom_begin(nonbottom_begin());
+        // set_marked_nonbottom_end(nonbottom_end());
+        set_marked_bottom_begin(bottom_begin());
+        // set_marked_bottom_end(bottom_end());
     }
 
     /// unmark all states in the block
     void unmark_all_states()
     {
-        int_marked_nonbottom_begin = marked_nonbottom_end();
-        int_marked_bottom_begin = marked_bottom_end();
-        // int_old_bottom_begin = old_bottom_end();
+        set_marked_nonbottom_begin(marked_nonbottom_end());
+        set_marked_bottom_begin(marked_bottom_end());
+        // set_old_bottom_begin(old_bottom_end());
     }
 
     /// \brief mark a nonbottom state
@@ -602,12 +737,12 @@ public:
     /// nonbottom states of the block.
     /// \param s the nonbottom state that has to be marked
     /// \returns true if the state was not marked before
-    bool mark_nonbottom(state_info_entry* s)
+    bool mark_nonbottom(state_info_ptr s)
     {
         assert(s->pos < nonbottom_end() && nonbottom_begin() <= s->pos);
 
         if (marked_nonbottom_begin() <= s->pos)  return false;
-        --int_marked_nonbottom_begin;
+        set_marked_nonbottom_begin(marked_nonbottom_begin() - 1);
         swap_permutation(s->pos, marked_nonbottom_begin());
         return true;
     }
@@ -618,14 +753,14 @@ public:
     /// state, it is treated as if it already were marked.
     /// \param s the state that has to be marked
     /// \returns true if the state was not marked before
-    bool mark(state_info_entry* s)
+    bool mark(state_info_ptr s)
     {
         assert(s->pos < end());
 
         if (bottom_begin() <= s->pos)
         {
             if (marked_bottom_begin() <= s->pos)  return false;
-            --int_marked_bottom_begin;
+            set_marked_bottom_begin(marked_bottom_begin() - 1);
             swap_permutation(s->pos, marked_bottom_begin());
             return true;
         }
@@ -638,7 +773,7 @@ public:
     /// the blue states.
     /// \param blue_nonbottom_end iterator past the last blue nonbottom state
     /// \returns pointer to the new (blue) block
-    block_t* split_off_blue(permutation_entry* blue_nonbottom_end);
+    block_t* split_off_blue(permutation_iter_t blue_nonbottom_end);
 
     /// \brief refine the block (the red subblock is smaller)
     /// \details This function is called after a refinement function has found
@@ -646,16 +781,21 @@ public:
     /// the red states.
     /// \param red_nonbottom_begin iterator to the first red nonbottom state
     /// \returns pointer to the new (red) block
-    block_t* split_off_red(permutation_entry* red_nonbottom_begin);
+    block_t* split_off_red(permutation_iter_t red_nonbottom_begin);
 };
 
 // The following member function can only be defined after the full class
 // definition of block_t because it refer to members of that class.
 
 /// get the constellation of the state
-inline constln_t* state_info_entry::get_constln() const
+inline const constln_t* state_info_entry::constln() const
 {
-    return block->get_constln();
+    return block->constln();
+}
+
+inline constln_t* state_info_entry::constln()
+{
+    return block->constln();
 }
 
 
@@ -673,10 +813,10 @@ class constln_t
 {
 private:
     /// iterator past the last state in the constellation
-    permutation_entry* int_end;
+    permutation_iter_t int_end;
 
     /// iterator to the first state in the constellation
-    permutation_entry* int_begin;
+    permutation_iter_t int_begin;
 
     /// \brief next constellation in the list of nontrivial constellations
     /// \details If this is the last constellation in the list,
@@ -687,12 +827,12 @@ private:
 
     /// first constellation in the list of nontrivial constellations
     static constln_t* nontrivial_first;
-public:
+
     /// \brief unique sequence number of this constellation
     /// \details After the stuttering equivalence algorithm has terminated,
     /// this number is used as a state number in the quotient Kripke structure.
-    state_type seqnr;
-
+    state_type int_seqnr;
+public:
     /// \brief total number of constellations allocated
     /// \details Upon starting the stuttering equivalence algorithm, the number
     /// of constellations must be zero.
@@ -705,20 +845,20 @@ public:
     /// during this process the refined block may be refined even further, we
     /// need `postprocess_begin` and `postprocess_end` to store which
     /// transitions have to be gone through overall.
-    B_to_C_entry* postprocess_begin;
+    B_to_C_iter_t postprocess_begin;
 
     /// \brief iterator past the last transition into this constellation that
     /// needs postprocessing
-    B_to_C_entry* postprocess_end;
+    B_to_C_iter_t postprocess_end;
 
     /// \brief constructor
     /// \param begin_ iterator to the first state in the constellation
     /// \param end_   iterator past the last state in the constellation
-    constln_t(permutation_entry* begin_, permutation_entry* end_)
+    constln_t(permutation_iter_t begin_, permutation_iter_t end_)
         :int_end(end_),
         int_begin(begin_),
         nontrivial_next(NULL),
-        seqnr(nr_of_constlns++)
+        int_seqnr(nr_of_constlns++)
     {  }
 
     /// destructor
@@ -750,12 +890,22 @@ public:
     }
 
     /// iterator to the first state in the constellation
-    permutation_entry* begin()  {  return int_begin;  }
-    const permutation_entry* begin() const  {  return int_begin;  }
+    permutation_const_iter_t begin() const  {  return int_begin;  }
+    permutation_iter_t begin()  {  return int_begin;  }
+    void set_begin(permutation_iter_t new_begin)
+    {
+        int_begin = new_begin;
+    }
 
     /// iterator past the last state in the constellation
-    permutation_entry* end()  {  return int_end;  }
-    const permutation_entry* end() const  {  return int_end;  }
+    permutation_const_iter_t end() const  {  return int_end;  }
+    permutation_iter_t end()  {  return int_end;  }
+    void set_end(permutation_iter_t new_end)
+    {
+        int_end = new_end;
+    }
+
+    state_type seqnr() const  {  return int_seqnr;  }
 
     /// \brief compares two constellations for ordering them
     /// \details The constellations are ordered according to their positions in
@@ -779,8 +929,8 @@ public:
         assert(FirstB != LastB);
         if (FirstB->end() == LastB->begin())  make_trivial();
 
-        assert(this == FirstB->get_constln());
-        assert(this == LastB->get_constln());
+        assert(this == FirstB->constln());
+        assert(this == LastB->constln());
         constln_t* NewC = new constln_t(begin(), end());
 
         /// It doesn't matter very much how ties are resolved here:
@@ -789,14 +939,16 @@ public:
         /// block is selected.
         if (FirstB->size() > LastB->size())
         {
-            NewC->int_begin = int_end = LastB->begin();
-            LastB->int_constln = NewC;
+            set_end(LastB->begin());
+            NewC->set_begin(end());
+            LastB->set_constln(NewC);
             return LastB;
         }
         else
         {
-            NewC->int_end = int_begin = FirstB->end();
-            FirstB->int_constln = NewC;
+            set_begin(FirstB->end());
+            NewC->set_end(begin());
+            FirstB->set_constln(NewC);
             return FirstB;
         }
     }
@@ -821,7 +973,7 @@ private:
     /// \details We allocate 1 additional ``state'' to allow for the iterators
     /// past the last transition, as described in the documentation of
     /// `state_info_entry`.
-    state_info_entry* state_info;
+    fixed_vector<state_info_entry> state_info;
 
     template <class LTS_TYPE>
     friend class bisim_partitioner_gjkw_initialise_helper;
@@ -832,7 +984,7 @@ public:
     /// \param n number of states in the Kripke structure
     part_state_t(state_type n)
         :permutation(n),
-        state_info(new state_info_entry[n+1]) // 1 additional ``state''
+        state_info(n+1) // 1 additional ``state''
     {
         assert(0 == constln_t::nr_of_constlns);
     }
@@ -846,10 +998,10 @@ public:
         #ifndef NDEBUG
             state_type deleted_constlns = 0;
         #endif
-        permutation_entry* permutation_iter = permutation.end();
+        permutation_iter_t permutation_iter = permutation.end();
         while (permutation.begin() != permutation_iter)
         {
-            constln_t* C = permutation_iter[-1]->get_constln();
+            constln_t* C = permutation_iter[-1]->constln();
             assert(C->end() == permutation_iter);
             permutation_iter = C->begin();
             delete C;
@@ -857,7 +1009,9 @@ public:
                 ++deleted_constlns;
             #endif
         }
-        assert(deleted_constlns == constln_t::nr_of_constlns);
+        #ifndef NDEBUG
+            assert(deleted_constlns == constln_t::nr_of_constlns);
+        #endif
         constln_t::nr_of_constlns = 0;
 
         permutation_iter = permutation.end();
@@ -868,23 +1022,22 @@ public:
             permutation_iter = B->begin();
             delete B;
         }
-        delete [/* size() */] state_info;
     }
 
     /// provide stored number of states
     state_type size() const  {  return permutation.size();  }
 
     /// find constellation of a state (identified by number)
-    const constln_t* get_constln(state_type s) const
+    const constln_t* constln(state_type s) const
     {
-        return state_info[s].get_constln();
+        return state_info[s].constln();
     }
 
 #ifndef NDEBUG
 
 private:
     void print_block(const char* message, const block_t* B,
-            const permutation_entry* begin, const permutation_entry* end) const
+            permutation_const_iter_t begin, permutation_const_iter_t end) const
     {
         if (end - begin != 0)
         {
@@ -905,20 +1058,20 @@ private:
     }
 public:
     /// print the partition as a tree (per constellation and block)
-    void print() const
+    void print_part() const
     {
-        const constln_t* C = (*permutation.begin())->get_constln();
+        const constln_t* C = (*permutation.begin())->constln();
         for ( ;; )
         {
-            std::cout << "Constellation " << C->seqnr << ":\n";
+            std::cout << "Constellation " << C->seqnr() << ":\n";
             const block_t* B = (*C->begin())->block;
             for ( ;; )
             {
                 std::cout << "\tBlock at " << static_cast<const void*>(B);
-                if (C != B->get_constln())
+                if (C != B->constln())
                 {
                     std::cout << ", inconsistent: points to constellation "
-                                                    << B->get_constln()->seqnr;
+                                                    << B->constln()->seqnr();
                 }
                 std::cout << ":\n";
                 print_block("Nonbottom state", B, B->nonbottom_begin(),
@@ -931,9 +1084,11 @@ public:
             }
             // go to next constellation
             if (permutation.end() == C->end())  break;
-            C = (*C->end())->get_constln();
+            C = (*C->end())->constln();
         }
     }
+
+    void print_trans() const;
 
 #endif // ifndef NDEBUG
 
@@ -992,29 +1147,25 @@ structures are linked through the iterators (used here as pointers). */
 class pred_entry
 {
 public:
-    succ_entry* succ;
-    permutation_entry source;
+    succ_iter_t succ;
+    state_info_ptr source;
 };
 
 
 class succ_entry
 {
 public:
-    B_to_C_entry* B_to_C;
-    permutation_entry target;
+    B_to_C_iter_t B_to_C;
+    state_info_ptr target;
     out_descriptor* constln_slice;
-
-    friend class part_trans_t;
 };
 
 
 class B_to_C_entry
 {
 public:
-    pred_entry* pred;
-    B_to_C_descriptor* slice;
-
-    friend class part_trans_t;
+    pred_iter_t pred;
+    B_to_C_descriptor* B_to_C_slice;
 };
 
 
@@ -1023,9 +1174,11 @@ slice of states belongs together. */
 class out_descriptor
 {
 public:
-    succ_entry* end, * begin;
+    succ_iter_t end, begin;
 
-    out_descriptor(succ_entry* iter)  :end(iter), begin(iter)  {  }
+    out_descriptor(succ_iter_t iter)
+        :end(iter), begin(iter)
+    {  }
     state_type size() const  {  return end - begin;  }
 };
 
@@ -1033,9 +1186,9 @@ public:
 class B_to_C_descriptor
 {
 public:
-    B_to_C_entry* end, * begin;
+    B_to_C_iter_t end, begin;
 
-    B_to_C_descriptor(B_to_C_entry* begin_, B_to_C_entry* end_)
+    B_to_C_descriptor(B_to_C_iter_t begin_, B_to_C_iter_t end_)
         :end(end_),
         begin(begin_)
     {  }
@@ -1046,40 +1199,39 @@ public:
 class part_trans_t
 {
 private:
-    trans_type nr_of_transitions;
-    pred_entry* pred;
-    succ_entry* succ;
-    B_to_C_entry* B_to_C;
+    fixed_vector<pred_entry> pred;
+    fixed_vector<succ_entry> succ;
+    fixed_vector<B_to_C_entry> B_to_C;
 
     template <class LTS_TYPE>
     friend class bisim_partitioner_gjkw_initialise_helper;
 
-    void swap_in(B_to_C_entry* pos1, B_to_C_entry* pos2)
+    void swap_in(B_to_C_iter_t pos1, B_to_C_iter_t pos2)
     {
         // swap contents
         pred_entry temp_entry(*pos1->pred);
         *pos1->pred = *pos2->pred;
         *pos2->pred = temp_entry;
         // swap pointers to contents
-        pred_entry* temp_iter(pos1->pred);
+        pred_iter_t temp_iter(pos1->pred);
         pos1->pred = pos2->pred;
         pos2->pred = temp_iter;
     }
 
-    void swap_out(pred_entry* pos1, pred_entry* pos2)
+    void swap_out(pred_iter_t pos1, pred_iter_t pos2)
     {
         // swap contents
         succ_entry temp_entry(*pos1->succ);
         *pos1->succ = *pos2->succ;
         *pos2->succ = temp_entry;
         // swap pointers to contents
-        succ_entry* temp_iter(pos1->succ);
+        succ_iter_t temp_iter(pos1->succ);
         pos1->succ = pos2->succ;
         pos2->succ = temp_iter;
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
-    void swap3_out(pred_entry* pos1, pred_entry* pos2, pred_entry* pos3)
+    void swap3_out(pred_iter_t pos1, pred_iter_t pos2, pred_iter_t pos3)
     {
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
@@ -1088,26 +1240,26 @@ private:
         *pos3->succ = *pos2->succ;
         *pos2->succ = temp_entry;
         // swap pointers to contents
-        succ_entry* temp_iter(pos1->succ);
+        succ_iter_t temp_iter(pos1->succ);
         pos1->succ = pos3->succ;
         pos3->succ = pos2->succ;
         pos2->succ = temp_iter;
     }
 
-    void swap_B_to_C(succ_entry* pos1, succ_entry* pos2)
+    void swap_B_to_C(succ_iter_t pos1, succ_iter_t pos2)
     {
         // swap contents
         B_to_C_entry temp_entry(*pos1->B_to_C);
         *pos1->B_to_C = *pos2->B_to_C;
         *pos2->B_to_C = temp_entry;
         // swap pointers to contents
-        B_to_C_entry* temp_iter(pos1->B_to_C);
+        B_to_C_iter_t temp_iter(pos1->B_to_C);
         pos1->B_to_C = pos2->B_to_C;
         pos2->B_to_C = temp_iter;
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
-    void swap3_B_to_C(succ_entry* pos1, succ_entry* pos2, succ_entry* pos3)
+    void swap3_B_to_C(succ_iter_t pos1, succ_iter_t pos2, succ_iter_t pos3)
     {
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
@@ -1116,41 +1268,38 @@ private:
         *pos3->B_to_C = *pos2->B_to_C;
         *pos2->B_to_C = temp_entry;
         // swap pointers to contents
-        B_to_C_entry* temp_iter(pos1->B_to_C);
+        B_to_C_iter_t temp_iter(pos1->B_to_C);
         pos1->B_to_C = pos3->B_to_C;
         pos3->B_to_C = pos2->B_to_C;
         pos2->B_to_C = temp_iter;
     }
 public:
     part_trans_t(trans_type m)
-        :nr_of_transitions(m),
-        pred(new pred_entry[m]),
-        succ(new succ_entry[m]),
-        B_to_C(new B_to_C_entry[m])
+        :pred(m),
+        succ(m),
+        B_to_C(m)
     {  }
     ~part_trans_t()
     {
         // deallocate the descriptors
-        for (B_to_C_entry* B_to_C_iter = &B_to_C[nr_of_transitions];
-                                                    B_to_C != B_to_C_iter; )
+        for (B_to_C_iter_t B_to_C_iter = B_to_C.begin();
+                                                B_to_C.end() != B_to_C_iter; )
         {
-            B_to_C_descriptor* desc = B_to_C_iter[-1].slice;
-            B_to_C_iter = desc->begin;
+            B_to_C_descriptor* desc = B_to_C_iter->B_to_C_slice;
+            assert(desc->begin == B_to_C_iter);
+            B_to_C_iter = desc->end;
             delete desc;
         }
-        for (succ_entry* succ_iter = &succ[nr_of_transitions];
-                                                        succ != succ_iter; )
+        for (succ_iter_t succ_iter = succ.begin(); succ.end() != succ_iter; )
         {
-            out_descriptor* desc = succ_iter[-1].constln_slice;
-            succ_iter = desc->begin;
+            out_descriptor* desc = succ_iter->constln_slice;
+            assert(desc->begin == succ_iter);
+            succ_iter = desc->end;
             delete desc;
         }
-        delete [/* nr_of_transitions */] B_to_C;
-        delete [/* nr_of_transitions */] succ;
-        delete [/* nr_of_transitions */] pred;
     }
 
-    trans_type size() const  {  return nr_of_transitions;  }
+    trans_type size() const  {  return pred.size();  }
 
     /* split_inert_to_C splits the B_to_C slice of block b to its own
     constellation into two slices: one for the inert and one for the non-inert
@@ -1169,8 +1318,9 @@ public:
     new constellation does not (yet) have inert incoming transitions.  It
     returns the boundary between transitions to OldC and transitions to NewC in
     the state's outgoing transition array. */
-    succ_entry* change_to_C(pred_entry*pred_iter,constln_t*OldC,constln_t*NewC,
-            bool first_transition_of_state, bool first_transition_of_block);
+    succ_iter_t change_to_C(pred_iter_t pred_iter, constln_t* OldC,
+                            constln_t* NewC, bool first_transition_of_state,
+                                            bool first_transition_of_block);
 
     /* split_s_inert_out splits the outgoing transitions from s to its own
     constellation into two:  the inert transitions become transitions to the
@@ -1178,19 +1328,23 @@ public:
     transitions to OldC.  It returns the boundary between transitions to
     OldC and transitions to NewC in the outgoing transition array of s.
     Its time complexity is O(1 + min { |out_\nottau(s)|, |out_\tau(s)| }). */
-    succ_entry* split_s_inert_out(state_info_entry* s, constln_t* OldC);
+    succ_iter_t split_s_inert_out(state_info_ptr s, constln_t* OldC);
 
     /* part_trans_t::make_noninert makes the transition identified by succ_iter
     noninert. */
-    void make_noninert(succ_entry* succ_iter)
+    void make_noninert(succ_iter_t succ_iter)
     {
-        const succ_entry* other_succ = succ_iter->B_to_C->pred->source->
-                                                    state_inert_out_begin++;
-        const B_to_C_entry* other_B_to_C = succ_iter->B_to_C->pred->source->
-                                                    block->int_inert_begin++;
-        const pred_entry* other_pred=succ_iter->target->state_inert_in_begin++;
+        succ_iter_t other_succ =
+                        succ_iter->B_to_C->pred->source->inert_succ_begin();
+        succ_iter->B_to_C->pred->source->set_inert_succ_begin(other_succ + 1);
+        B_to_C_iter_t other_B_to_C =
+                    succ_iter->B_to_C->pred->source->block->inert_begin();
+        succ_iter->B_to_C->pred->source->block->set_inert_begin(other_B_to_C+
+                                                                            1);
+        pred_iter_t other_pred = succ_iter->target->inert_pred_begin();
+        succ_iter->target->set_inert_pred_begin(other_pred + 1);
         // change B_to_C
-        assert(succ_iter->B_to_C->slice->begin <= other_B_to_C);
+        assert(succ_iter->B_to_C->B_to_C_slice->begin <= other_B_to_C);
         swap_B_to_C(succ_iter, other_B_to_C->pred->succ);
         // change pred
         swap_in(succ_iter->B_to_C, other_pred->succ->B_to_C);
@@ -1219,11 +1373,11 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* SpC)
                                                                         const
 {
     // either current_constln->target or current_constln[-1].target is in SpC
-    if (current_constln != out_end() &&
-                            current_constln->target->get_constln() == SpC)
+    if (current_constln != succ_end() &&
+                            current_constln->target->constln() == SpC)
         return true;
-    if (current_constln != out_begin() &&
-                            current_constln[-1].target->get_constln() == SpC)
+    if (current_constln != succ_begin() &&
+                            current_constln[-1].target->constln() == SpC)
         return true;
     return false;
 }
@@ -1242,11 +1396,11 @@ inline bool state_info_entry::surely_has_no_transition_to(const constln_t* SpC)
     // condition:
     // current_constln->target is in a constellation > SpC and
     // current_constln[-1].target is in a constellation < SpC.
-    if (current_constln != out_end() &&
-                        current_constln->target->get_constln() <= SpC)
+    if (current_constln != succ_end() &&
+                        current_constln->target->constln() <= SpC)
         return false;
-    if (current_constln != out_begin() &&
-                        current_constln[-1].target->get_constln() >= SpC)
+    if (current_constln != succ_begin() &&
+                        current_constln[-1].target->constln() >= SpC)
         return false;
     return true;
 }
@@ -1413,11 +1567,11 @@ public:
     }
     state_type get_eq_class(state_type s) const
     {
-        return part_st.get_constln(s)->seqnr;
+        return part_st.constln(s)->seqnr();
     }
     bool in_same_class(state_type s, state_type t) const
     {
-        return part_st.get_constln(s) == part_st.get_constln(t);
+        return part_st.constln(s) == part_st.constln(t);
     }
 private:
 
@@ -1433,22 +1587,22 @@ private:
 
     DECLARE_COROUTINE(primary_blue,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB),
-    /* local variables:     */ (bisim_gjkw::permutation_entry*, visited_end,
-                                bisim_gjkw::state_info_entry*, s,
-                                bisim_gjkw::pred_entry*, pred_iter,
-                                bisim_gjkw::permutation_entry*,
+    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter,
+                                bisim_gjkw::permutation_iter_t,
                                                         blue_nonbottom_end),
-    /* shared data:         */ bisim_gjkw::permutation_entry*,
+    /* shared data:         */ bisim_gjkw::permutation_iter_t,
                                                     notblue_initialised_end,
     /* interrupt locations: */ (PRIMARY_BLUE_PREDECESSOR_HANDLED,
                                 PRIMARY_BLUE_STATE_HANDLED));
 
     DECLARE_COROUTINE(primary_red,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB),
-    /* local variables:     */ (bisim_gjkw::permutation_entry*, visited_begin,
-                                bisim_gjkw::state_info_entry*, s,
-                                bisim_gjkw::pred_entry*, pred_iter),
-    /* shared data:         */ bisim_gjkw::permutation_entry*,
+    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_begin,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter),
+    /* shared data:         */ bisim_gjkw::permutation_iter_t,
                                                     notblue_initialised_end,
     /* interrupt locations: */ (PRIMARY_RED_PREDECESSOR_HANDLED,
                                 PRIMARY_RED_STATE_HANDLED));
@@ -1462,14 +1616,14 @@ private:
     DECLARE_COROUTINE(secondary_blue,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
                                 const bisim_gjkw::constln_t*, SpC),
-    /* local variables:     */ (bisim_gjkw::permutation_entry*, visited_end,
-                                bisim_gjkw::state_info_entry*, s,
-                                bisim_gjkw::pred_entry*, pred_iter,
-                                bisim_gjkw::state_info_entry*, s_prime,
-                                bisim_gjkw::permutation_entry*,
+    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter,
+                                bisim_gjkw::state_info_ptr, s_prime,
+                                bisim_gjkw::permutation_iter_t,
                                                             blue_nonbottom_end,
-                                const bisim_gjkw::succ_entry*, begin,
-                                const bisim_gjkw::succ_entry*, end),
+                                bisim_gjkw::succ_const_iter_t, begin,
+                                bisim_gjkw::succ_const_iter_t, end),
     /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
                                                                 shared_data,
     /* interrupt locations: */ (SECONDARY_BLUE_PREDECESSOR_HANDLED,
@@ -1479,11 +1633,11 @@ private:
     DECLARE_COROUTINE(secondary_red,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
                                 const bisim_gjkw::B_to_C_descriptor*, FromRed),
-    /* local variables:     */ (bisim_gjkw::B_to_C_entry*,
+    /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
                                                         fromred_visited_begin,
-                                bisim_gjkw::permutation_entry*, visited_begin,
-                                bisim_gjkw::state_info_entry*, s,
-                                bisim_gjkw::pred_entry*, pred_iter),
+                                bisim_gjkw::permutation_iter_t, visited_begin,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter),
     /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
                                                                 shared_data,
     /* interrupt locations: */ (SECONDARY_RED_COLLECT_FROMRED,
