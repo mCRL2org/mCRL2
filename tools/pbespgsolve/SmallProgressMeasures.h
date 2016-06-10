@@ -92,7 +92,7 @@ public:
     SmallProgressMeasures(
         const ParityGame &game, ParityGame::Player player,
         LiftingStatistics *stats = 0,
-        const verti *vertex_map = 0, verti vertex_map_size = 0 );
+        const verti *vmap = 0, verti vmap_size = 0 );
 
     virtual ~SmallProgressMeasures();
 
@@ -105,9 +105,9 @@ public:
         @see initialize_lifting_strategy
     */
     long long solve_some( LiftingStrategy &ls,
-                          long long max_attempts = work_size );
+                          long long attempts = work_size );
     long long solve_some( LiftingStrategy2 &ls,
-                          long long max_attempts = work_size );
+                          long long attempts = work_size );
 
     /*! Performs one lifting attempt, and returns the index of the vertex and
         whether lifting succeeded. Returns NO_VERTEX if no more vertices were
@@ -139,11 +139,11 @@ public:
         is greater than the current value, and returns whether it changed.
         val[] must be an array of length len(v). If carry is set, the new
         value must be strictly greater (or top). */
-    bool lift_to(verti v, const verti vec[], bool carry = 0);
+    bool lift_to(verti v, const verti vec2[], bool carry = 0);
 
     /*! Returns the same result as lift_to() but without changing any
         progress measure vectors. */
-    bool less_than(verti v, const verti vec[], bool carry = 0);
+    bool less_than(verti v, const verti vec2[], bool carry = 0);
 
     /*! For debugging: print current state to stdout */
     void debug_print() const;
@@ -336,8 +336,8 @@ public:
                                  LiftingStrategyFactory *lsf,
                                  bool alternate = false,
                                  LiftingStatistics *stats = 0,
-                                 const verti *vertex_map = 0,
-                                 verti vertex_map_size = 0 );
+                                 const verti *vmap = 0,
+                                 verti vmap_size = 0 );
     virtual ~SmallProgressMeasuresSolver();
 
     ParityGame::Strategy solve();
@@ -385,8 +385,8 @@ public:
                                   LiftingStrategyFactory *lsf,
                                   bool alternate = false,
                                   LiftingStatistics *stats = 0,
-                                  const verti *vertex_map = 0,
-                                  verti vertex_map_size = 0 );
+                                  const verti *vmap = 0,
+                                  verti vmap_size = 0 );
     ~SmallProgressMeasuresSolver2();
 
     ParityGame::Strategy solve_normal();
@@ -408,8 +408,8 @@ public:
     ~SmallProgressMeasuresSolverFactory();
 
     ParityGameSolver *create( const ParityGame &game,
-                              const verti *vertex_map,
-                              verti vertex_map_size );
+                              const verti *vmap,
+                              verti vmap_size );
 
 private:
     LiftingStrategyFactory  *lsf_;

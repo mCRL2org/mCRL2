@@ -652,7 +652,7 @@ void Visualizer::updateColors()
   update_colors = false;
 }
 
-void Visualizer::sortClusters(Vector3D viewpoint)
+void Visualizer::sortClusters(const Vector3D& viewpoint)
 {
   visObjectFactory.sortObjects(viewpoint);
 }

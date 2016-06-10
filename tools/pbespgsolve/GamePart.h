@@ -35,7 +35,7 @@ public:
     /*! Construct a partition of the global game for the given process using
         the specified vertex partition. */
     GamePart( const ParityGame &old_game,
-              const VertexPartition &vpart, int process );
+              const VertexPartition &vpart, int proc );
 
     /*! Constructs a partition as the intersection of an existing partition with
         a vertex subset, specified as a list of vertex indices local to the

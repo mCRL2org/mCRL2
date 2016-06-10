@@ -158,7 +158,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
     const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
-    state_formulas::state_formula phi = x.operand();
+    const state_formulas::state_formula& phi = x.operand();
 
     // traverse all transitions s --a--> t
     const lts2pbes_lts::edge_list& m = lts1.edges(s);
@@ -177,7 +177,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
     const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
-    state_formulas::state_formula phi = x.operand();
+    const state_formulas::state_formula& phi = x.operand();
 
     // traverse all transitions s --a--> t
     const lts2pbes_lts::edge_list& m = lts1.edges(s);
@@ -214,16 +214,16 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
   void leave(const state_formulas::variable& x)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
-    data::data_expression_list e = x.arguments();
+    const data::data_expression_list& e = x.arguments();
     push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), phi0)));
   }
 
   void apply(const state_formulas::nu& x)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
     data::data_expression_list e = detail::mu_expressions(x);
     push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), phi0)));
@@ -232,7 +232,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
   void apply(const state_formulas::mu& x)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
     data::data_expression_list e = detail::mu_expressions(x);
     push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), phi0)));

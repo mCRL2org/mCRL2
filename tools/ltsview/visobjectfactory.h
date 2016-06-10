@@ -27,7 +27,7 @@ class VisObjectFactory
     void clear();
     void drawObjects(PrimitiveFactory* pf,unsigned char alpha,bool texture);
     int makeObject(int primitive, std::vector<int> &ids);
-    void sortObjects(Vector3D viewpoint);
+    void sortObjects(const Vector3D& viewpoint);
     void updateObjectColor(int obj, QColor color);
     void updateObjectTexture(int obj, std::vector<QColor> &texColours);
     void updateObjectMatrix(int obj);

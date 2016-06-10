@@ -914,7 +914,7 @@ static void add_summand(summand_information& summand_info,
       }
       new_actions=reverse(resulting_actions);
     }
-    const lps::summand_base s=summand_info.get_summand();
+    const lps::summand_base& s=summand_info.get_summand();
     action_summands.push_back(action_summand(get_nonreal_variables(s.summation_variables()),
                                              new_condition,
                                              multi_action(new_actions,summand_info.get_multi_action().time()),

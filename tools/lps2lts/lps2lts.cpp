@@ -292,7 +292,7 @@ class lps2lts_tool : public lps2lts_base
         m_options.detect_action = true;
         std::list<std::string> actions = split_actions(parser.option_argument("action"));
         for (std::list<std::string>::iterator it = actions.begin(); it != actions.end(); ++it)
-          m_options.trace_actions.insert(mcrl2::core::identifier_string(it->c_str()));
+          m_options.trace_actions.insert(mcrl2::core::identifier_string(*it));
       }
       if (parser.options.count("multiaction"))
       {

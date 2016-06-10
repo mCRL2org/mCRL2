@@ -72,8 +72,8 @@ class LTS
     State *state(int id) const { return states[id]; }
     Cluster *cluster(int rank, int position) const { return clustersInRank[rank][position]; }
 
-    void addCluster(Cluster* c);
-    void addClusterAndBelow(Cluster* c);
+    void addCluster(Cluster* cluster);
+    void addClusterAndBelow(Cluster* cluster);
     void clearStatePositions();
     void clusterStates(bool cyclic);
     void computeClusterInfo();
@@ -141,7 +141,7 @@ class LTS
     LTS(LTS* parent, Cluster *target, bool fromAbove);
 
     void clearRanksAndClusters();
-    void clusterTree(State* s,Cluster* c,bool cyclic);
+    void clusterTree(State* v,Cluster* c,bool cyclic);
 
     friend class Cluster_iterator;
     friend class Reverse_cluster_iterator;

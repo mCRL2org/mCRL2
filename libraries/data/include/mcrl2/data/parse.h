@@ -969,13 +969,13 @@ sort_expression parse_sort_expression(const std::string& text,
 //
 // TODO: replace this by a proper parse function once the current parser and type checker have been replaced
 inline
-data::function_symbol parse_function_symbol(std::string text, const std::string& dataspec_text = "")
+data::function_symbol parse_function_symbol(const std::string& text, const std::string& dataspec_text = "")
 {
   const std::string prefix = "UNIQUE_FUNCTION_SYMBOL_PREFIX";
-  utilities::trim(text);
-  std::string::size_type pos = text.find_first_of(':');
-  std::string name = utilities::trim_copy(text.substr(0, pos));
-  std::string type = prefix + text.substr(pos);
+  std::string s = utilities::trim_copy(text);
+  std::string::size_type pos = s.find_first_of(':');
+  std::string name = utilities::trim_copy(s.substr(0, pos));
+  std::string type = prefix + s.substr(pos);
   std::string spec_text = dataspec_text + "\nmap " + prefix + type + ";\n";
   data::data_specification dataspec = data::parse_data_specification(spec_text);
   data::function_symbol f = dataspec.user_defined_mappings().back();

@@ -301,10 +301,10 @@ class VisUtils
       const double& yTop, const double& yBot);
     static void drawClearIcon(
       const double& xLft, const double& xRgt,
-      const double& uTop, const double& yBot);
+      const double& yTop, const double& yBot);
     static void fillClearIcon(
       const double& xLft, const double& xRgt,
-      const double& uTop, const double& yBot);
+      const double& yTop, const double& yBot);
     static void drawUpIcon(
       const double& xLft, const double& xRgt,
       const double& yTop, const double& yBot);

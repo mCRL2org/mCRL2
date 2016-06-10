@@ -614,7 +614,7 @@ void Shape::drawNormal(
     const bool& inSelectMode,
     double pixelSize)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     if (m_shapeType == TYPE_NOTE)
     {
@@ -761,7 +761,7 @@ void Shape::drawEdit(
 {
   double hdlDelta = hdlSzeHnt*pixelSize;
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     // draw shape
     drawNormal(inSelectMode, pixelSize);
@@ -936,7 +936,7 @@ void Shape::drawEditDOF(
     const bool& inSelectMode,
     double pixelSize)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     // draw shape
     drawNormal(inSelectMode, pixelSize);
@@ -1110,7 +1110,7 @@ void Shape::drawDOFXCtr(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {}
   else
   {
@@ -1233,7 +1233,7 @@ void Shape::drawEditDOFXCtr(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     // pointing right
     if (xEnd <= xBeg)
@@ -1406,7 +1406,7 @@ void Shape::drawDOFYCtr(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {}
   else
   {
@@ -1528,7 +1528,7 @@ void Shape::drawEditDOFYCtr(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     // pointing down
     if (yEnd < yBeg)
@@ -1697,7 +1697,7 @@ void Shape::drawEditDOFWth(
   double wBeg   = m_widthDOF->min();
   double wEnd   = m_widthDOF->max();
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     // pointing right
     if (wBeg <= wEnd)
@@ -1885,7 +1885,7 @@ void Shape::drawDOFWth(
   double wBeg   = m_widthDOF->min();
   double wEnd   = m_widthDOF->max();
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {}
   else
   {
@@ -2028,7 +2028,7 @@ void Shape::drawEditDOFHgt(
   double hBeg   = m_heightDOF->min();
   double hEnd   = m_heightDOF->max();
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     // pointing up
     if (hBeg <= hEnd)
@@ -2216,7 +2216,7 @@ void Shape::drawDOFHgt(
   double hBeg   = m_heightDOF->min();
   double hEnd   = m_heightDOF->max();
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {}
   else
   {
@@ -2360,7 +2360,7 @@ void Shape::drawEditDOFAgl(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     double dstHgeCtr, dstHgeHdl;
     double aglRef, aglBeg, aglEnd;
@@ -2695,7 +2695,7 @@ void Shape::drawDOFAgl(
   glPushMatrix();
   glRotatef(-m_angle, 0.0, 0.0, 1.0);
 
-  if (inSelectMode == true)
+  if (inSelectMode)
   {}
   else
   {

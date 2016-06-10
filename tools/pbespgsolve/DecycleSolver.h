@@ -36,7 +36,7 @@ class DecycleSolver : public ParityGameSolver
 {
 public:
     DecycleSolver( const ParityGame &game, ParityGameSolverFactory &pgsf,
-                   const verti *vertex_map, verti vertex_map_size );
+                   const verti *vmap, verti vmap_size );
     ~DecycleSolver();
 
     ParityGame::Strategy solve();

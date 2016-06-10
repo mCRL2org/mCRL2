@@ -28,7 +28,7 @@ struct CycleFinder
               DenseSet<verti> &done_set, std::deque<verti> &done_queue );
 
     // SCC callback
-    int operator()(const verti *vertices, size_t num_vertices);
+    int operator()(const verti *scc, size_t scc_size);
 
 private:
     priority_t                  prio_;          //!< selected priority

@@ -17,7 +17,7 @@ class State;
 class Transition
 {
   public:
-    Transition(State* bs,State* es,int label);
+    Transition(State* bs,State* es,int lbl);
     ~Transition();
     State*  getBeginState() const;
     State*  getEndState() const;

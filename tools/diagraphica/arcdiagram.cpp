@@ -168,7 +168,7 @@ void ArcDiagram::unmarkBundles()
 void ArcDiagram::visualize(const bool& inSelectMode)
 {
   // have textures been generated
-  if (texCharOK != true)
+  if (!texCharOK)
   {
     genCharTex();
   }

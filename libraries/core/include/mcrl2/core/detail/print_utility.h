@@ -75,7 +75,7 @@ std::string print_container(const Container& v, const std::string& begin_marker 
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container>
-std::string print_list(const Container& v, std::string message = "", bool print_index = false, bool boundary_spaces = true)
+std::string print_list(const Container& v, const std::string& message = "", bool print_index = false, bool boundary_spaces = true)
 {
   return print_container(v, "[", "]", message, print_index, boundary_spaces);
 }
@@ -85,7 +85,7 @@ std::string print_list(const Container& v, std::string message = "", bool print_
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container>
-std::string print_set(const Container& v, std::string message = "", bool print_index = false, bool boundary_spaces = true)
+std::string print_set(const Container& v, const std::string& message = "", bool print_index = false, bool boundary_spaces = true)
 {
   return print_container(v, "{", "}", message, print_index, boundary_spaces);
 }

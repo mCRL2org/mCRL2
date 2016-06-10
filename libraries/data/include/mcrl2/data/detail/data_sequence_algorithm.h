@@ -30,7 +30,7 @@ namespace detail
 /// \param y A sequence of data variables
 /// \return The intersection of two sets.
 inline
-variable_list set_intersection(variable_list x, const variable_list& y)
+variable_list set_intersection(const variable_list& x, const variable_list& y)
 {
   if (x == y)
   {

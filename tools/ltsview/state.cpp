@@ -143,27 +143,27 @@ void State::setPositionAngle(float a)
   positionAngle = a;
 }
 
-void State::setPositionAbs(Vector3D p)
+void State::setPositionAbs(const Vector3D& p)
 {
   positionAbs = p;
 }
 
-void State::setOutgoingControl(Vector3D p)
+void State::setOutgoingControl(const Vector3D& p)
 {
   outgoingControl = p;
 }
 
-void State::setIncomingControl(Vector3D p)
+void State::setIncomingControl(const Vector3D& p)
 {
   incomingControl = p;
 }
 
-void State::setLoopControl1(Vector3D p)
+void State::setLoopControl1(const Vector3D& p)
 {
   loopControl1 = p;
 }
 
-void State::setLoopControl2(Vector3D p)
+void State::setLoopControl2(const Vector3D& p)
 {
   loopControl2 = p;
 }

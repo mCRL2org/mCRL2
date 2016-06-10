@@ -403,7 +403,7 @@ pbes_expression parse_pbes_expression(const std::string& text, const std::string
 /// \param sigma A substitution function
 /// \return The parsed expression
 template <typename SubstitutionFunction>
-pbes_expression parse_pbes_expression(const std::string& expr, std::string subst, const pbes& p, SubstitutionFunction& sigma)
+pbes_expression parse_pbes_expression(const std::string& expr, const std::string& subst, const pbes& p, SubstitutionFunction& sigma)
 {
   typedef core::term_traits<pbes_expression> tr;
 

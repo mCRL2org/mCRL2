@@ -195,7 +195,7 @@ VisObjectFactory::~VisObjectFactory()
   clear();
 }
 
-void VisObjectFactory::sortObjects(Vector3D viewpoint)
+void VisObjectFactory::sortObjects(const Vector3D& viewpoint)
 {
   stable_sort(objects_sorted.begin(),objects_sorted.end(),Distance(viewpoint));
 }

@@ -41,7 +41,7 @@ private:
         other processes, and then receives any pending vertices from other
         processes, which are then added to `queue` and `attr`. When messages
         are sent or received, `num_send` and `num_recv` are incremented. */
-    void notify_others(verti v);
+    void notify_others(verti i);
 
 private:
     /* `vpart` and 'part' describe the vertex partition and corresponding game

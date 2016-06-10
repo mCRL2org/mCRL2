@@ -54,7 +54,7 @@ protected:
     /*! Combines the local strategy with the strategies from other worker
         processes. Returns the combined global strategy for the process with
         rank 0, and an empty strategy for all other processes. */
-    ParityGame::Strategy combine_strategies(ParityGame::Strategy &local);
+    ParityGame::Strategy combine_strategies(ParityGame::Strategy &local_strategy);
 
     //! Debug-print SPM vectors.
     void debug_print(const SmallProgressMeasures &spm) const;

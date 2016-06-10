@@ -411,7 +411,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         while (i != transitions.end() && i->from() == cur_state)
         {
           std::string label = pp(m_lts.action_label(i->label()));
-          size_t index = label.find(":");
+          size_t index = label.find(':');
 
           if ((m_translation == to_lts_deadlock && i->to() == deadlock_state)
               ||(m_translation == to_lts_outgoing_transition && index == std::string::npos)
@@ -424,14 +424,14 @@ class bes_reduction_algorithm: public detail::bes_algorithm
               label = label.substr(index+1, label.size());
             }
 
-            size_t comma_pos = label.find(",");
+            size_t comma_pos = label.find(',');
             std::string block_str = label.substr(0,comma_pos);
-            block_str.replace(0,block_str.find("(")+1,"");
-            block_str.replace(block_str.find(")"),1,"");
+            block_str.replace(0,block_str.find('(')+1,"");
+            block_str.replace(block_str.find(')'),1,"");
 
             std::string op_str = label.substr(comma_pos);
-            op_str.replace(0,op_str.find("(")+1,"");
-            op_str.replace(op_str.find(")"),1,"");
+            op_str.replace(0,op_str.find('(')+1,"");
+            op_str.replace(op_str.find(')'),1,"");
 
             block = atoi(block_str.c_str());
             op = string_to_operand(op_str);

@@ -30,6 +30,7 @@
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/bes/boolean_expression.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -83,6 +84,8 @@ class pbesinfo_tool: public pbes_input_tool<input_tool>
     /// - Give error
     bool run()
     {
+      bes::boolean_expression b;
+      std::cout << "b = " << b << std::endl;
       pbesinfo(input_filename(),
                input_file_message(),
                pbes_input_format(),

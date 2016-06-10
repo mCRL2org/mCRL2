@@ -48,7 +48,7 @@ class Visualizer: public QObject
                             posTrans, Transition* chosenTrans);
 
     void drawStructure();
-    void sortClusters(Vector3D viewpoint);
+    void sortClusters(const Vector3D& viewpoint);
     void exportToText(std::string filename);
 
   public slots:
@@ -79,8 +79,8 @@ class Visualizer: public QObject
 
     void computeAbsPos();
     void computeStateAbsPos(Cluster* root,int rot);
-    void computeSubtreeBounds(Cluster* root,float& boundWidth,
-                              float& boundHeight);
+    void computeSubtreeBounds(Cluster* root,float& bw,
+                              float& bh);
     void drawBackPointer(State* startState, const QColor& startColor, State* endState, const QColor& endColor);
     void drawForwardPointer(State* startState,State* endState);
     void drawLoop(State* state);

@@ -131,7 +131,7 @@ void Diagram::visualize(
 // Used by diagram editor.
 {
   drawBorder(inSelectMode, pixelSize);
-  if (m_showGrid == true)
+  if (m_showGrid)
   {
     drawGrid(inSelectMode, pixelSize);
   }
@@ -176,7 +176,7 @@ void Diagram::drawAxes(
   const bool& inSelectMode,
   double pixelSize)
 {
-  if (inSelectMode != true)
+  if (!inSelectMode)
   {
     VisUtils::setColor(VisUtils::mediumGray);
     VisUtils::drawLine(
@@ -193,7 +193,7 @@ void Diagram::drawBorder(
   const bool& inSelectMode,
   double pixelSize)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     double xLft, xRgt, yTop, yBot;
 
@@ -229,7 +229,7 @@ void Diagram::drawBorder(
 void Diagram::drawBorderFlush(
   const bool& inSelectMode)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
   }
@@ -249,7 +249,7 @@ void Diagram::drawBorderFlush(
   const bool& inSelectMode,
   const double& opacity)
 {
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
   }
@@ -270,7 +270,7 @@ void Diagram::drawGrid(
   const bool& inSelectMode,
   double pixelSize)
 {
-  if (inSelectMode != true)
+  if (!inSelectMode)
   {
     double numIntervals = GRID_NUM_INTERV_HINT;
     double sizeInterval;

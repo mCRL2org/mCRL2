@@ -35,7 +35,7 @@ public:
     char operator[](size_t i) const { return s[i]; }
 };
 
-Decimal operator+(const Decimal &a, const Decimal &b);
-Decimal operator*(const Decimal &a, const Decimal &b);
+Decimal operator+(const Decimal &s, const Decimal &t);
+Decimal operator*(const Decimal &s, const Decimal &t);
 
 #endif /* ndef DECIMAL_H_INCLUDED */

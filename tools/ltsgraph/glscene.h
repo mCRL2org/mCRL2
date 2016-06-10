@@ -225,7 +225,7 @@ class GLScene
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setRotation(const Graph::Coord3D& amount, size_t animation = 1);
+    void setRotation(const Graph::Coord3D& rotation, size_t animation = 1);
 
     /**
      * @brief Set the translation to @e amount, interpolating to the new value
@@ -235,7 +235,7 @@ class GLScene
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setTranslation(const Graph::Coord3D& amount, size_t animation = 1);
+    void setTranslation(const Graph::Coord3D& translation, size_t animation = 1);
 
     /**
      * @brief Set the world size to @e size, interpolating to the new value

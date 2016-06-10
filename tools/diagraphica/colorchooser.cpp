@@ -204,7 +204,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
   size = m_yCoordinates->size();
 
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     for (size_t i = 0; i < size-1; ++i)
     {

@@ -1692,12 +1692,12 @@ void Graph::updateBundles(size_t& progress)
       for (size_t j = 0; j < labels.size(); ++j)
       {
         bool must = true;
-        for (size_t k = 0; k < inClust->getSizeNodes() && must == true; ++k)
+        for (size_t k = 0; k < inClust->getSizeNodes() && must; ++k)
         {
           node = inClust->getNode(k);
           bool hasLbl = false;
 
-          for (size_t m = 0; m < node->getSizeOutEdges() && hasLbl != true; ++m)
+          for (size_t m = 0; m < node->getSizeOutEdges() && !hasLbl; ++m)
           {
             if (node->getOutEdge(m)->getLabel() == labels[j] &&
                 node->getOutEdge(m)->getOutNode()->getCluster() == outClust)
@@ -1706,13 +1706,13 @@ void Graph::updateBundles(size_t& progress)
             }
           }
 
-          if (hasLbl == false)
+          if (!hasLbl)
           {
             must = false;
           }
         }
 
-        if (must == true)
+        if (must)
         {
           bundles[i]->updateLabel(labels[j], "MUST");
         }

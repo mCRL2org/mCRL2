@@ -273,7 +273,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
             std::set <variable> vars;
-            string::size_type dotpos=s.find(".");
+            string::size_type dotpos=s.find('.');
             if (dotpos==string::npos)
             {
               throw mcrl2::runtime_error("Expect a `.' in the input.");
@@ -320,12 +320,12 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))
           {
-            string::size_type assign_pos = s.find("=");
+            string::size_type assign_pos = s.find('=');
             if (assign_pos==string::npos)
             {
               throw mcrl2::runtime_error("Missing symbol = in assignment.");
             }
-            string varname=trim_spaces(s.substr(0,assign_pos)).c_str();
+            string varname=trim_spaces(s.substr(0,assign_pos));
 
             if (check_whether_variable_string_is_in_use(varname,context_variables))
             {

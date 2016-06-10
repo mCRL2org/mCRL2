@@ -58,19 +58,19 @@ void CorrlPlot::setDiagram(Diagram* dgrm)
 void CorrlPlot::visualize(const bool& inSelectMode)
 {
   // have textures been generated
-  if (texCharOK != true)
+  if (!texCharOK)
   {
     genCharTex();
   }
 
   // check if positions are ok
-  if (geomChanged == true)
+  if (geomChanged)
   {
     calcPositions();
   }
 
   // visualize
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     GLint hits = 0;
     GLuint selectBuf[512];
@@ -98,7 +98,7 @@ void CorrlPlot::visualize(const bool& inSelectMode)
       "y-label");
     drawLabels(inSelectMode);
     drawPlot(inSelectMode);
-    if (showDgrm == true)
+    if (showDgrm)
     {
       drawDiagram(inSelectMode);
     }
@@ -121,7 +121,7 @@ void CorrlPlot::drawAxes(
   double yBot = -0.5*size.height()+20*pix;
 
   // rendering mode
-  if (inSelectMode != true)
+  if (!inSelectMode)
   {
     // draw guides
     VisUtils::setColor(VisUtils::lightGray);
@@ -168,7 +168,7 @@ void CorrlPlot::drawLabels(const bool& /*inSelectMode*/)
 void CorrlPlot::drawPlot(const bool& inSelectMode)
 {
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     for (size_t i = 0; i < positions.size(); ++i)
     {

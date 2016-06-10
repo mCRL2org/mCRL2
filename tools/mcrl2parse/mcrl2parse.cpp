@@ -489,7 +489,7 @@ class mcrl2parse_tool : public input_tool
             {
               separate_action_specification(text, "actfrm", lpsspec, text);
               action_formulas::action_formula x = action_formulas::detail::parse_action_formula_new(text);
-              atermpp::aterm_appl a = x;
+              const atermpp::aterm_appl& a = x;
               if (aterm_format)
               {
                 std::cout << a << std::endl;
@@ -503,7 +503,7 @@ class mcrl2parse_tool : public input_tool
             case besexpr_e  :
             {
               bes::boolean_expression x = bes::detail::parse_boolean_expression_new(text);
-              atermpp::aterm_appl a = x;
+              const atermpp::aterm_appl& a = x;
               if (aterm_format)
               {
                 std::cout << a << std::endl;

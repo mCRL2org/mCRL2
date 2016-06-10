@@ -61,19 +61,19 @@ void CombnPlot::setDiagram(Diagram* dgrm)
 void CombnPlot::visualize(const bool& inSelectMode)
 {
   // have textures been generated
-  if (texCharOK != true)
+  if (!texCharOK)
   {
     genCharTex();
   }
 
   // check if positions are ok
-  if (geomChanged == true)
+  if (geomChanged)
   {
     calcPositions();
   }
 
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     GLint hits = 0;
     GLuint selectBuf[512];
@@ -100,7 +100,7 @@ void CombnPlot::visualize(const bool& inSelectMode)
     drawAxes(inSelectMode);
     drawLabels(inSelectMode);
     drawMousePos(inSelectMode);
-    if (showDgrm == true)
+    if (showDgrm)
     {
       drawDiagram(inSelectMode);
     }
@@ -140,7 +140,7 @@ void CombnPlot::drawAxesBC(const bool& inSelectMode)
   }
 
   // rendering mode
-  if (inSelectMode != true)
+  if (!inSelectMode)
   {
     // draw guides
     VisUtils::setColor(VisUtils::lightGray);
@@ -178,7 +178,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
   }
 
   // rendering mode
-  if (inSelectMode != true)
+  if (!inSelectMode)
   {
     VisUtils::setColor(VisUtils::mediumGray);
 
@@ -342,7 +342,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
   }
 
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     for (size_t i = 0; i < sizePositions; ++i)
     {
@@ -386,7 +386,7 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
   double pix   = pixelSize();
 
   // selection mode
-  if (inSelectMode == true)
+  if (inSelectMode)
   {
     for (size_t i = 0; i < posLftTop.size(); ++i)
     {
@@ -440,7 +440,7 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
 void CombnPlot::drawMousePos(const bool& inSelectMode)
 {
   // rendering mode
-  if (inSelectMode != true)
+  if (!inSelectMode)
   {
     if (mouseCombnIdx < combinations.size())
     {
@@ -461,7 +461,7 @@ void CombnPlot::drawMousePos(const bool& inSelectMode)
 
 void CombnPlot::drawDiagram(const bool& inSelectMode)
 {
-  if (inSelectMode != true)
+  if (!inSelectMode)
   {
     double pix      = pixelSize();
     double scaleTxt = ((12*pix)/(double)CHARHEIGHT)/scaleDgrm;

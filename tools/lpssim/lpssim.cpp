@@ -45,7 +45,7 @@ class sim_tool : public rewriter_tool< input_tool >
     typedef rewriter_tool<input_tool> super;
 
   private:
-    static std::string print_state(state s)
+    static std::string print_state(const state& s)
     {
       std::string output;
       bool first = true;

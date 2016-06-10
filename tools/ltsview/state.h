@@ -57,17 +57,17 @@ class State
     void setCluster(Cluster* c);
     void setPositionAngle(float a);
     void setPositionRadius(float r);
-    void setPositionAbs(Vector3D p);
-    void setOutgoingControl(Vector3D p);
-    void setIncomingControl(Vector3D p);
-    void setLoopControl1(Vector3D p);
-    void setLoopControl2(Vector3D p);
-    void setID(int id);
+    void setPositionAbs(const Vector3D& p);
+    void setOutgoingControl(const Vector3D& p);
+    void setIncomingControl(const Vector3D& p);
+    void setLoopControl1(const Vector3D& p);
+    void setLoopControl2(const Vector3D& p);
+    void setID(int i);
     void setRank(int r);
     void increaseSimulation() { simulationCount++; }
     void decreaseSimulation() { simulationCount--; }
 
-    void setZoomLevel(const int i);
+    void setZoomLevel(const int level);
     int getZoomLevel() const;
 
   private:

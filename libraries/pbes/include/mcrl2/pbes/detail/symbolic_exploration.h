@@ -118,8 +118,8 @@ class symbolic_exploration_algorithm
 
     pbes_expression and_(const pbes_expression& x, const pbes_expression& y)
     {
-      pbes_expression left = x;
-      pbes_expression right = y;
+      const pbes_expression& left = x;
+      const pbes_expression& right = y;
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -133,8 +133,8 @@ class symbolic_exploration_algorithm
 
     pbes_expression or_(const pbes_expression& x, const pbes_expression& y)
     {
-      pbes_expression left = x;
-      pbes_expression right = y;
+      const pbes_expression& left = x;
+      const pbes_expression& right = y;
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -148,8 +148,8 @@ class symbolic_exploration_algorithm
 
     pbes_expression imp(const pbes_expression& x, const pbes_expression& y)
     {
-      pbes_expression left = x;
-      pbes_expression right = y;
+      const pbes_expression& left = x;
+      const pbes_expression& right = y;
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -163,7 +163,7 @@ class symbolic_exploration_algorithm
 
     pbes_expression forall(const data::variable_list& d, const pbes_expression& x)
     {
-      pbes_expression body = x;
+      const pbes_expression& body = x;
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
@@ -177,7 +177,7 @@ class symbolic_exploration_algorithm
 
     pbes_expression exists(const data::variable_list& d, const pbes_expression& x)
     {
-      pbes_expression body = x;
+      const pbes_expression& body = x;
       if (m_optimized)
       {
         namespace z = pbes_expr_optimized;
