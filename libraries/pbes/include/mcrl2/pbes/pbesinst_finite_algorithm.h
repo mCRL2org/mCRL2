@@ -214,7 +214,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     mCRL2log(log::debug, "pbesinst_finite") << print_parameters(finite_parameters, infinite_parameters);
     data::data_expression_list d = data::data_expression_list(finite_parameters.begin(),finite_parameters.end());
     data::data_expression_list e = data::data_expression_list(infinite_parameters.begin(),infinite_parameters.end());
-    core::identifier_string Xi = x.name();
+    const core::identifier_string& Xi = x.name();
     // x = Xi(d,e)
 
     pbesinst_variable_map::const_iterator vi = m_variable_map.find(Xi);

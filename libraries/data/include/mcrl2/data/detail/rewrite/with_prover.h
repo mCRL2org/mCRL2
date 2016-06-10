@@ -31,13 +31,13 @@ class RewriterProver: public Rewriter
     typedef Rewriter::substitution_type substitution_type;
 
   public:
-    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector);
+    RewriterProver(const data_specification& data_spec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector);
     virtual ~RewriterProver();
 
     rewrite_strategy getStrategy();
 
     data_expression rewrite(
-         const data_expression &term,
+         const data_expression &Term,
          substitution_type &sigma);
 
 };

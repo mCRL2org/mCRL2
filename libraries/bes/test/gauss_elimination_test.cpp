@@ -105,7 +105,7 @@ std::string BES10 =
   "init X;                                                  \n"
   ;
 
-void test_bes(std::string bes_spec, bool expected_result)
+void test_bes(const std::string& bes_spec, bool expected_result)
 {
   pbes_system::pbes p = pbes_system::txt2pbes(bes_spec);
   int result = pbes_system::gauss_elimination(p);
@@ -121,7 +121,7 @@ void test_bes(std::string bes_spec, bool expected_result)
       std::cout << "UNKNOWN" << std::endl;
       break;
   }
-  BOOST_CHECK((expected_result == false && result == 0) || (expected_result == true && result == 1));
+  BOOST_CHECK((!expected_result && result == 0) || (expected_result && result == 1));
 
   // BOOST_CHECK(pbes2bool(p) == expected_result);
   // this gives assertion failures in pbes2bool
@@ -211,10 +211,10 @@ void test_bes()
   bes4.equations().push_back(e4);
   bes4.equations().push_back(e3);
 
-  BOOST_CHECK(gauss_elimination(bes1) == false);
-  BOOST_CHECK(gauss_elimination(bes2) == true);
-  BOOST_CHECK(gauss_elimination(bes3) == false);
-  BOOST_CHECK(gauss_elimination(bes4) == true);
+  BOOST_CHECK(!gauss_elimination(bes1));
+  BOOST_CHECK(gauss_elimination(bes2));
+  BOOST_CHECK(!gauss_elimination(bes3));
+  BOOST_CHECK(gauss_elimination(bes4));
 }
 
 inline

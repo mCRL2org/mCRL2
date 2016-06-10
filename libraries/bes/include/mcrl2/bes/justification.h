@@ -60,7 +60,7 @@ inline void print_justification_tree_rec(
              const bool init_solution, 
              const map<boolean_variable, size_t>& index_of, 
              int indent, 
-             boolean_expression expr, 
+             const boolean_expression& expr, 
              set<boolean_variable>& visited)
 {
   if (is_and(expr))
@@ -89,7 +89,7 @@ inline void print_justification_tree_rec(
   }
   assert(is_boolean_variable(expr));
   {
-    boolean_variable X = atermpp::down_cast<boolean_variable>(expr);
+    const boolean_variable& X = atermpp::down_cast<boolean_variable>(expr);
 
     const map<boolean_variable, size_t>::const_iterator idx = index_of.find(X);
     if (idx==index_of.end() || idx->second >= b.equations().size())

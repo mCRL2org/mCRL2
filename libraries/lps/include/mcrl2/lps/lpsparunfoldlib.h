@@ -116,7 +116,7 @@ class lpsparunfold
       *         with respect to the set of sort names (sort_names).
       * \return A fresh basic sort.
     **/
-    mcrl2::data::basic_sort generate_fresh_basic_sort(std::string str);
+    mcrl2::data::basic_sort generate_fresh_basic_sort(const std::string& str);
 
     /** \brief  Generates a fresh name for a constructor or mapping.
       * \param  str a string value. The value is used to generate a fresh
@@ -159,10 +159,10 @@ class lpsparunfold
     **/
     void create_data_equations(
       mcrl2::data::function_symbol_vector pi,
-      mcrl2::data::function_symbol case_function,
-      mcrl2::data::function_symbol_vector set_of_new_sorts,
+      const mcrl2::data::function_symbol& case_function,
+      mcrl2::data::function_symbol_vector elements_of_new_sorts,
       mcrl2::data::function_symbol_vector k,
-      mcrl2::data::function_symbol determine_function);
+      const mcrl2::data::function_symbol& determine_function);
 
     /** \brief  Determines the constructors that are affected with the unfold
       *         process parameter.
@@ -196,9 +196,9 @@ class lpsparunfold
       * \return substitute function for replacing process parameters with unfolded process parameters functions.
     **/
     std::map<mcrl2::data::variable, mcrl2::data::data_expression> parameter_substitution(
-      std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i,
-      mcrl2::data::function_symbol_vector AffectedConstructors,
-      mcrl2::data::function_symbol case_function);
+      std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj,
+      mcrl2::data::function_symbol_vector k,
+      const mcrl2::data::function_symbol& case_function);
 
     /** \brief unfolds a data expression into a vector of process parameters
       * \param  de the data expression
@@ -207,8 +207,8 @@ class lpsparunfold
       * \return The following vector: < det(de), pi_0(de), ... ,pi_n(de) >
     **/
     mcrl2::data::data_expression_vector unfold_constructor(
-      mcrl2::data::data_expression de,
-      mcrl2::data::function_symbol determine_function,
+      const mcrl2::data::data_expression& de,
+      const mcrl2::data::function_symbol& determine_function,
       mcrl2::data::function_symbol_vector pi);
 
     /** \brief substitute unfold process parameter in the linear process
@@ -220,11 +220,11 @@ class lpsparunfold
       * \return a new linear process in which the process parameter at given index is unfolded
     **/
     mcrl2::lps::linear_process update_linear_process(
-      mcrl2::data::function_symbol case_function,
-      mcrl2::data::function_symbol_vector k,
-      mcrl2::data::function_symbol determine_function,
+      const mcrl2::data::function_symbol& case_function,
+      mcrl2::data::function_symbol_vector affected_constructors,
+      const mcrl2::data::function_symbol& determine_function,
       size_t parameter_at_index,
-      mcrl2::data::function_symbol_vector pi);
+      const mcrl2::data::function_symbol_vector& pi);
 
     /** \brief substitute unfold process parameter in the initialization of the linear process
       * \param  determine_function the determine function
@@ -233,20 +233,20 @@ class lpsparunfold
       * \return a new initialization for the linear process in which the process parameter at given index is unfolded
     **/
     mcrl2::lps::process_initializer update_linear_process_initialization(
-      mcrl2::data::function_symbol determine_function,
+      const mcrl2::data::function_symbol& determine_function,
       size_t parameter_at_index,
-      mcrl2::data::function_symbol_vector pi);
+      const mcrl2::data::function_symbol_vector& pi);
 
     /** \brief Create distribution rules for distribution_functions over case_functions
     **/
     mcrl2::data::data_equation create_distribution_law_over_case(
-      mcrl2::data::function_symbol distribution_function,
-      mcrl2::data::function_symbol case_function,
+      const mcrl2::data::function_symbol& function_for_distribution,
+      const mcrl2::data::function_symbol& case_function,
       const bool add_case_function_to_data_type);
 
     void generate_case_functions(
       mcrl2::data::function_symbol_vector elements_of_new_sorts,
-      mcrl2::data::function_symbol case_function);
+      const mcrl2::data::function_symbol& case_function);
 
     static bool char_filter(char c)
     {

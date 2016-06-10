@@ -65,7 +65,7 @@ class indexed_set
     /// \param elem A term.
     /// \return A pair denoting the index of the element in the set, and a boolean denoting whether the term
     /// was already contained in the set.
-    std::pair<size_t, bool> put(const ELEMENT& elem);
+    std::pair<size_t, bool> put(const ELEMENT& key);
 
     /// \brief Find the index of elem in set.
     /// The index assigned to elem is returned, except when elem is not in the set, in
@@ -111,7 +111,7 @@ class indexed_set
     /// it is freed to be reassigned to an element, that may be put into the set at some later instance. 
     /// \param elem An element of the set. 
     /// \return whether the element was successfully removed. 
-    bool erase(const ELEMENT& elem); 
+    bool erase(const ELEMENT& key); 
 
     /// \brief Returns the size of the indexed set.
     std::size_t size() const

@@ -125,7 +125,7 @@ struct push_block_printer
   std::string print(const process::rename& x, const std::set<core::identifier_string>& B1) const
   {
     std::ostringstream out;
-    auto R = x.rename_set();
+    const auto& R = x.rename_set();
     out << "push_block(" << print(B) << ", rename(" << print(R) << ", " << print(x.operand()) << ")) = "
         << "rename(" << print(R) << ", push_block(" << print(B1) << ", " << print(x.operand()) << "))" << std::endl;
     return out.str();
@@ -210,7 +210,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     }
 
     const process_equation& eqn = find_equation(equations, x.identifier());
-    data::variable_list d = eqn.formal_parameters();
+    const data::variable_list& d = eqn.formal_parameters();
     core::identifier_string name = id_generator(x.identifier().name());
     process_identifier P1(name, x.identifier().variables());
     const process_expression& p = eqn.expression();
@@ -243,7 +243,7 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   process::process_expression apply(const process::hide& x)
   {
-    core::identifier_string_list I = x.hide_set();
+    const core::identifier_string_list& I = x.hide_set();
     std::set<core::identifier_string> B1 = block_operations::set_difference(B, I);
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
     return detail::make_hide(I, push_block(B1, x.operand(), equations, W, id_generator));
@@ -251,7 +251,7 @@ struct push_block_builder: public process_expression_builder<Derived>
 
   process::process_expression apply(const process::rename& x)
   {
-    rename_expression_list R = x.rename_set();
+    const rename_expression_list& R = x.rename_set();
     std::set<core::identifier_string> B1 = block_operations::rename_inverse(R, B);
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
     return process::rename(R, push_block(B1, x.operand(), equations, W, id_generator));
@@ -263,7 +263,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     for (const communication_expression& i: C)
     {
       core::identifier_string_list gamma = i.action_name().names();
-      core::identifier_string c = i.name();
+      const core::identifier_string& c = i.name();
       if (contains(gamma, b) && !contains(B, c))
       {
         return true;

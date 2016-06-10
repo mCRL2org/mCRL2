@@ -564,7 +564,7 @@ void test_utility_functionality()
   data::function_symbol h("h", s0);
 
   {
-    const std::set<sort_expression> sorts(spec.sorts());
+    const std::set<sort_expression>& sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) == sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) == sorts.end());
     function_symbol_vector constructors(spec.constructors());
@@ -579,7 +579,7 @@ void test_utility_functionality()
   spec.add_mapping(g);
 
   {
-    const std::set<sort_expression> sorts(spec.sorts());
+    const std::set<sort_expression>& sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) != sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) != sorts.end()); // Automatically added!
     function_symbol_vector constructors(spec.constructors());
@@ -901,7 +901,7 @@ void test_bke()
   for (const alias& a: aliases)
   {
     std::cout << "alias " << a << std::endl;
-    sort_expression s = a.reference();
+    const sort_expression& s = a.reference();
     if (is_structured_sort(s))
     {
       for (const structured_sort_constructor& constructor: structured_sort(s).constructors())
@@ -909,7 +909,7 @@ void test_bke()
         for (const structured_sort_constructor_argument& argument: constructor.arguments())
         {
           std::cout << "argument: " << argument << " " << argument << std::endl;
-          atermpp::aterm_appl name = argument.name();
+          const atermpp::aterm_appl& name = argument.name();
           if (name != core::empty_identifier_string())
           {
             std::cout << "name = " << name << std::endl;

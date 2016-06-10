@@ -96,7 +96,7 @@ class Rewriter
      * \return The list Terms where each element is replaced by its
      *         normal form.
      **/
-    virtual data_expression_list rewrite_list(const data_expression_list& Terms, substitution_type& sigma);
+    virtual data_expression_list rewrite_list(const data_expression_list& terms, substitution_type& sigma);
 
     /** 
      * \brief Provide the rewriter with a () operator, such that it can also
@@ -111,7 +111,7 @@ class Rewriter
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
     data_expression existential_quantifier_enumeration(
-         const abstraction& termInInnerFormat,
+         const abstraction& t,
          substitution_type& sigma);
     data_expression existential_quantifier_enumeration(
          const variable_list& vl,
@@ -120,7 +120,7 @@ class Rewriter
          substitution_type& sigma);
 
     data_expression universal_quantifier_enumeration(
-         const abstraction& termInInnerFormat,
+         const abstraction& t,
          substitution_type& sigma);
     data_expression universal_quantifier_enumeration(
          const variable_list& vl,
@@ -151,7 +151,7 @@ class Rewriter
 
     data_expression rewrite_lambda_application(
                       const abstraction& lambda_term,
-                      const data_expression& body,
+                      const data_expression& t,
                       substitution_type& sigma);
 
 
@@ -181,14 +181,14 @@ Rewriter* createRewriter(
  * \param DataEqn The mCRL2 data equation to be checked.
  * \throw std::runtime_error containing a reason why DataEqn is not a valid rewrite rule.
  **/
-void CheckRewriteRule(const data_equation& dataeqn);
+void CheckRewriteRule(const data_equation& data_eqn);
 
 /**
  * \brief Check whether or not an mCRL2 data equation is a valid rewrite rule.
  * \param DataEqn The mCRL2 data equation to be checked.
  * \return Whether or not DataEqn is a valid rewrite rule.
  **/
-bool isValidRewriteRule(const data_equation& dataeqn);
+bool isValidRewriteRule(const data_equation& data_eqn);
 
 
 inline size_t getArity(const data::function_symbol& op)
@@ -201,7 +201,7 @@ inline size_t getArity(const data::function_symbol& op)
   while (is_function_sort(sort))
   {
     const function_sort fsort(sort);
-    sort_expression_list sort_dom = fsort.domain();
+    const sort_expression_list& sort_dom = fsort.domain();
     arity += sort_dom.size();
     sort = fsort.codomain();
   }

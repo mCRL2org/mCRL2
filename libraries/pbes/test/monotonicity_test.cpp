@@ -21,7 +21,7 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-void run_monotonicity_test_case(pbes_expression x, bool expected_result)
+void run_monotonicity_test_case(const pbes_expression& x, bool expected_result)
 {
   bool result = is_monotonous(x);
   if (result != expected_result)

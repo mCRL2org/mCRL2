@@ -4,7 +4,7 @@
 
 using namespace mcrl2;
 
-void test_parelm(std::string spec_text)
+void test_parelm(const std::string& spec_text)
 {
   lps::stochastic_specification spec1 = lps::linearise(spec_text);
   lps::stochastic_specification spec2 = spec1;

@@ -178,8 +178,8 @@ class stategraph_equation: public pbes_equation
           const data::data_expression& v_i = atermpp::down_cast<const data::data_expression>(expr);
           if (data::is_equal_to_application(v_i))
           {
-            data::data_expression left = data::binary_left1(v_i);
-            data::data_expression right = data::binary_right1(v_i);
+            const data::data_expression& left = data::binary_left1(v_i);
+            const data::data_expression& right = data::binary_right1(v_i);
             if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && is_constant(right))
             {
               const data::variable& vleft = atermpp::down_cast<data::variable>(left);

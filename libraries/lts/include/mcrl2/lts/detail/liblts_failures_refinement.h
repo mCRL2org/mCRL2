@@ -455,7 +455,7 @@ namespace detail
       {
         // Put the outgoing action labels in a set and put these in the result.
        
-        action_label_set impl_enabled_action_set=weak_property_cache.action_labels(current_state);
+        const action_label_set& impl_enabled_action_set=weak_property_cache.action_labels(current_state);
 
         bool success=false;
         // Compare the obtained enable set of s' with all those of the specification.

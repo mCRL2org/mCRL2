@@ -100,10 +100,10 @@ class lps2lts_algorithm
     data::data_expression_vector generator_state(const lps::state& storage_state);
     lps::state storage_state(const data::data_expression_vector& generator_state);
     void set_prioritised_representatives(next_state_generator::transition_t::state_probability_list& states);
-    lps::state get_prioritised_representative(const lps::state& state);
+    lps::state get_prioritised_representative(const lps::state& state1);
     void value_prioritize(std::vector<next_state_generator::transition_t>& transitions);
-    bool save_trace(const lps::state& state, const std::string& filename);
-    bool save_trace(const lps::state& state, const next_state_generator::transition_t& transition, const std::string& filename);
+    bool save_trace(const lps::state& state1, const std::string& filename);
+    bool save_trace(const lps::state& state1, const next_state_generator::transition_t& transition, const std::string& filename);
     void construct_trace(const lps::state& state1, mcrl2::trace::Trace& trace);
     bool search_divergence(const lps::state& state, std::set<lps::state>& current_path, std::set<lps::state>& visited);
     void check_divergence(const lps::state& state);
@@ -129,7 +129,7 @@ class lps2lts_algorithm
                 const lps::next_state_generator::transition_t::state_probability_list& state_probability_list,
                 const lps::state& source_state);
     probabilistic_state<size_t, lps::probabilistic_data_expression> transform_initial_probabilistic_state_list
-                 (const next_state_generator::transition_t::state_probability_list& m_initial_states);
+                 (const next_state_generator::transition_t::state_probability_list& initial_states);
     probabilistic_state<size_t, lps::probabilistic_data_expression> create_a_probabilistic_state_from_target_distribution(
                const size_t base_state_number,
                const next_state_generator::transition_t::state_probability_list& other_probabilities);

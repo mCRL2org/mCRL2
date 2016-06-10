@@ -68,7 +68,7 @@ struct has_left_hand_side_in
   /// \brief Function call operator
   /// \param[in] a An assignment to a data variable
   /// \return The function result
-  bool operator()(assignment a) const
+  bool operator()(const assignment& a) const
   {
   	using utilities::detail::contains;
     return contains(m_variables, a.lhs());

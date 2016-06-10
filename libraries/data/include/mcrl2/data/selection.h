@@ -116,7 +116,7 @@ class used_data_equation_selector
   public:
 
     /// \brief Check whether the symbol is used.
-    bool operator()(const data::function_symbol f) const
+    bool operator()(const data::function_symbol& f) const
     {
       if (add_all)
       {
@@ -126,7 +126,7 @@ class used_data_equation_selector
     }
 
     /// \brief Check whether data equation relates to used symbols, and therefore is important.
-    bool operator()(const data_equation e) const
+    bool operator()(const data_equation& e) const
     {
       if (add_all)
       {
@@ -140,7 +140,7 @@ class used_data_equation_selector
       return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
     }
 
-    void add_function_symbols(const data_expression t)
+    void add_function_symbols(const data_expression& t)
     {
       data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end())).apply(t);
     }

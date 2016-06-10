@@ -399,7 +399,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       alpha.status = alphabet_cache::busy;
 
       // N.B. A copy is made, because a call to push_allow may invalidate a reference.
-      process_equation eqn = find_equation(equations, x.identifier());
+      const process_equation& eqn = find_equation(equations, x.identifier());
       const data::variable_list& d = eqn.formal_parameters();
       const process_expression& p = eqn.expression();
 
@@ -508,7 +508,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply(const process::hide& x)
   {
-    core::identifier_string_list I = x.hide_set();
+    const core::identifier_string_list& I = x.hide_set();
     allow_set A1 = allow_set_operations::hide_inverse(I, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(push_allow_node(alphabet_operations::hide(I, node.alphabet), process::hide(I, node.expression)));
@@ -524,7 +524,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply(const process::block& x)
   {
-    core::identifier_string_list B = x.block_set();
+    const core::identifier_string_list& B = x.block_set();
     allow_set A1 = allow_set_operations::block(B, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(node);
@@ -540,7 +540,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply(const process::rename& x)
   {
-    rename_expression_list R = x.rename_set();
+    const rename_expression_list& R = x.rename_set();
     allow_set A1 = allow_set_operations::rename_inverse(R, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(push_allow_node(alphabet_operations::rename(R, node.alphabet), process::rename(R, node.expression)));
@@ -556,7 +556,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply(const process::comm& x)
   {
-    communication_expression_list C = x.comm_set();
+    const communication_expression_list& C = x.comm_set();
     allow_set A1 = allow_set_operations::comm_inverse(C, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     communication_expression_list C1 = filter_comm_set(x.comm_set(), node.alphabet);
@@ -574,7 +574,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply(const process::allow& x)
   {
-    action_name_multiset_list V = x.allow_set();
+    const action_name_multiset_list& V = x.allow_set();
     allow_set A1 = allow_set_operations::allow(V, A);
     push_allow_node node = push_allow(x.operand(), A1, equations, W);
     push(node);

@@ -58,7 +58,7 @@ class simulation
     void select(size_t transition_number);
 
     /// If enabled, tau prioritization is applied to all outgoing transitions, and in-between states are hidden from the state vector.
-    void enable_tau_prioritization(bool enable, std::string action = "ctau");
+    void enable_tau_prioritization(bool enable, const std::string& action = "ctau");
 
     /// Save the trace to a file.
     void save(const std::string &filename);
@@ -67,9 +67,9 @@ class simulation
     void load(const std::string &filename);
 
   private:
-    std::vector<transition_t> transitions(state source_state);
+    std::vector<transition_t> transitions(const state& source_state);
     std::vector<transition_t> prioritize(const std::vector<transition_t> &transitions);
-    void push_back(const lps::state& state);
+    void push_back(const lps::state& lps_state);
     bool is_prioritized(const multi_action &action);
     void prioritize_trace();
     bool match_trace(trace::Trace& trace);

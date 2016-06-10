@@ -70,7 +70,7 @@ class Disjointness_Checker
     Disjointness_Checker(const linear_process& a_process_equation);
 
     /// \brief Indicates whether or not the summands with number n_1 and n_2 are disjoint.
-    bool disjoint(std::size_t n_1, std::size_t n_2);
+    bool disjoint(std::size_t n1, std::size_t n2);
 };
 
 inline
@@ -123,7 +123,7 @@ void Disjointness_Checker::process_multi_action(std::size_t n, const multi_actio
     process_data_expression(n, a.time());
   }
 
-  const process::action_list v_actions = a.actions();
+  const process::action_list& v_actions = a.actions();
   for (auto i=v_actions.begin(); i != v_actions.end(); ++i)
   {
     const data::data_expression_list v_expressions=i->arguments();

@@ -274,7 +274,7 @@ std::string basic_data_specification::generate_smt_problem(const smt_problem& pr
   return generate_smt_problem(data_specification, variable_declarations, assertions);
 }
 
-std::string basic_data_specification::generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression_list distinct_terms) const
+std::string basic_data_specification::generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression_list& distinct_terms) const
 {
   std::string output;
   for (data::data_expression_list::const_iterator i = distinct_terms.begin(); i != distinct_terms.end(); i++)
@@ -500,7 +500,7 @@ void basic_data_specification::find_rewrite_rules(const data::data_specification
   }
 }
 
-void basic_data_specification::add_constructed_sort(const data::data_specification& data_specification, data::sort_expression sort)
+void basic_data_specification::add_constructed_sort(const data::data_specification& data_specification, const data::sort_expression& sort)
 {
   m_constructed_sort_constructors[sort].insert(data_specification.constructors(sort).begin(), data_specification.constructors(sort).end());
 
@@ -548,7 +548,7 @@ void basic_data_specification::add_constructed_sort(const data::data_specificati
 /*
  * TODO: This should be moved to the data library.
  */
-static bool is_constructed_sort(const data::data_specification& data_specification, data::sort_expression sort)
+static bool is_constructed_sort(const data::data_specification& data_specification, const data::sort_expression& sort)
 {
   data::function_symbol_vector constructors = data_specification.constructors(sort);
   if (constructors.empty())
@@ -674,9 +674,9 @@ void basic_data_specification::add_constructed_sorts(const data::data_specificat
 
 void basic_data_specification::add_standard_operators(
   const data::data_specification& data_specification,
-  std::shared_ptr<function_definition> equal_to,
-  std::shared_ptr<function_definition> not_equal_to,
-  std::shared_ptr<function_definition> if_)
+  const std::shared_ptr<function_definition>& equal_to,
+  const std::shared_ptr<function_definition>& not_equal_to,
+  const std::shared_ptr<function_definition>& if_)
 {
   for (std::set<data::sort_expression>::const_iterator i = data_specification.sorts().begin(); i != data_specification.sorts().end(); i++)
   {
@@ -688,10 +688,10 @@ void basic_data_specification::add_standard_operators(
 
 void basic_data_specification::add_boolean_operators(
   const data::data_specification& /* data_specification */,
-  std::shared_ptr<function_definition> not_,
-  std::shared_ptr<function_definition> and_,
-  std::shared_ptr<function_definition> or_,
-  std::shared_ptr<function_definition> implies)
+  const std::shared_ptr<function_definition>& not_,
+  const std::shared_ptr<function_definition>& and_,
+  const std::shared_ptr<function_definition>& or_,
+  const std::shared_ptr<function_definition>& implies)
 {
   add_function_definition(data::sort_bool::not_(), not_);
   add_function_definition(data::sort_bool::and_(), and_);
@@ -701,23 +701,23 @@ void basic_data_specification::add_boolean_operators(
 
 void basic_data_specification::add_numerical_operators(
   const data::data_specification& /* data_specification */,
-  std::shared_ptr<function_definition> less,
-  std::shared_ptr<function_definition> less_equal,
-  std::shared_ptr<function_definition> greater,
-  std::shared_ptr<function_definition> greater_equal,
-  std::shared_ptr<function_definition> plus,
-  std::shared_ptr<function_definition> minus,
-  std::shared_ptr<function_definition> times,
-  std::shared_ptr<function_definition> divides,
-  std::shared_ptr<function_definition> div,
-  std::shared_ptr<function_definition> mod,
-  std::shared_ptr<function_definition> floor,
-  std::shared_ptr<function_definition> ceil,
-  std::shared_ptr<function_definition> round,
-  std::shared_ptr<function_definition> unary_minus,
-  std::shared_ptr<function_definition> maximum,
-  std::shared_ptr<function_definition> minimum,
-  std::shared_ptr<function_definition> abs)
+  const std::shared_ptr<function_definition>& less,
+  const std::shared_ptr<function_definition>& less_equal,
+  const std::shared_ptr<function_definition>& greater,
+  const std::shared_ptr<function_definition>& greater_equal,
+  const std::shared_ptr<function_definition>& plus,
+  const std::shared_ptr<function_definition>& minus,
+  const std::shared_ptr<function_definition>& times,
+  const std::shared_ptr<function_definition>& divides,
+  const std::shared_ptr<function_definition>& div,
+  const std::shared_ptr<function_definition>& mod,
+  const std::shared_ptr<function_definition>& floor,
+  const std::shared_ptr<function_definition>& ceil,
+  const std::shared_ptr<function_definition>& round,
+  const std::shared_ptr<function_definition>& unary_minus,
+  const std::shared_ptr<function_definition>& maximum,
+  const std::shared_ptr<function_definition>& minimum,
+  const std::shared_ptr<function_definition>& abs)
 {
   /*
    * Missing functions:
@@ -725,11 +725,11 @@ void basic_data_specification::add_numerical_operators(
    * - sqrt
    */
 
-  data::basic_sort bool_ = data::sort_bool::bool_();
-  data::basic_sort pos = data::sort_pos::pos();
-  data::basic_sort nat = data::sort_nat::nat();
-  data::basic_sort int_ = data::sort_int::int_();
-  data::basic_sort real = data::sort_real::real_();
+  const data::basic_sort& bool_ = data::sort_bool::bool_();
+  const data::basic_sort& pos = data::sort_pos::pos();
+  const data::basic_sort& nat = data::sort_nat::nat();
+  const data::basic_sort& int_ = data::sort_int::int_();
+  const data::basic_sort& real = data::sort_real::real_();
 
   data::variable p1("p1", pos);
   data::variable p2("p2", pos);
@@ -740,9 +740,9 @@ void basic_data_specification::add_numerical_operators(
   data::variable r1("r1", real);
   data::variable r2("r2", real);
 
-  data::data_expression pos_one = data::sort_pos::c1();
+  const data::data_expression& pos_one = data::sort_pos::c1();
   data::data_expression pos_two = data::sort_pos::cdub(data::sort_bool::false_(), pos_one);
-  data::data_expression nat_zero = data::sort_nat::c0();
+  const data::data_expression& nat_zero = data::sort_nat::c0();
   data::data_expression nat_one = data::sort_nat::cnat(pos_one);
   data::data_expression int_zero = data::sort_int::cint(nat_zero);
   data::data_expression int_one = data::sort_int::cint(nat_one);
@@ -851,7 +851,7 @@ void basic_data_specification::add_numerical_operators(
   add_function_definition(data::sort_real::pred(real), atermpp::make_vector(r1), data::sort_real::minus(r1, real_one));
 }
 
-void basic_data_specification::add_recursive_function(data::function_symbol function)
+void basic_data_specification::add_recursive_function(const data::function_symbol& function)
 {
   if (!m_rewrite_rules.count(function))
   {

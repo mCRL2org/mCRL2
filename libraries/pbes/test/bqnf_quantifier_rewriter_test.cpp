@@ -20,7 +20,7 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 
-void rewrite_bqnf_quantifier(std::string source_text, std::string target_text)
+void rewrite_bqnf_quantifier(const std::string& source_text, const std::string& target_text)
 {
   pbes p = txt2pbes(source_text);
   bqnf_rewriter pbesr;

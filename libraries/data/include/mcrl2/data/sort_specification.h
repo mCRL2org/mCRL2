@@ -287,11 +287,11 @@ class sort_specification
         m_normalised_sorts_are_up_to_date=true;
         m_normalised_sorts.clear();
         reconstruct_m_normalised_aliases();
-        for (const sort_expression s: m_sorts_in_context)
+        for (const sort_expression& s: m_sorts_in_context)
         {
           m_normalised_sorts.insert(normalize_sorts(s,*this));
         }
-        for (const sort_expression s: m_user_defined_sorts)
+        for (const sort_expression& s: m_user_defined_sorts)
         {
           m_normalised_sorts.insert(normalize_sorts(s,*this));
         }
@@ -416,7 +416,7 @@ class sort_specification
     // through structured sorts are allowed. If a loop is detected, an exception
     // is thrown.
     void check_for_alias_loop(
-      const sort_expression s,
+      const sort_expression& s,
       std::set<sort_expression> sorts_already_seen,
       const bool toplevel=true) const;
 

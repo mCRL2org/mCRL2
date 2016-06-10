@@ -197,7 +197,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
             for (variable_list::const_iterator v=evars.begin(); v!=evars.end(); ++v)
             {
               int j=0;
-              const atermpp::term_list <variable_list> next_vars=vars.tail();
+              const atermpp::term_list <variable_list>& next_vars=vars.tail();
               for (atermpp::term_list <variable_list>::const_iterator o=next_vars.begin(); o!=next_vars.end(); ++o)
               {
                 if (std::find(o->begin(),o->end(),*v) != o->end())
@@ -381,7 +381,7 @@ RewriterJitty::RewriterJitty(
         continue;
       }
 
-      const function_symbol lhs_head_index=get_function_symbol_of_head(j->lhs());
+      const function_symbol& lhs_head_index=get_function_symbol_of_head(j->lhs());
 
       data_equation_list n;
       std::map< function_symbol, data_equation_list >::iterator it = jitty_eqns.find(lhs_head_index);
@@ -567,14 +567,7 @@ static bool match_jitty(
     {
       if (p==vars[i])
       {
-        if (t==terms[i])
-        {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
+        return t==terms[i];
       }
     }
 
@@ -628,7 +621,7 @@ data_expression RewriterJitty::rewrite_aux(
 {
   if (is_application(term))
   {
-    const application terma=atermpp::down_cast<application>(term);
+    const application& terma=atermpp::down_cast<application>(term);
     if (terma.head()==this_term_is_in_normal_form())
     {
       assert(terma.size()==1);
@@ -775,7 +768,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       else
       {
         const data_equation rule1=rule.equation();
-        const data_expression lhs=rule1.lhs();
+        const data_expression& lhs=rule1.lhs();
         size_t rule_arity = (is_function_symbol(lhs)?0:detail::recursive_number_of_args(lhs));
 
         if (rule_arity > arity)

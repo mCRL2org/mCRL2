@@ -92,7 +92,7 @@ void simulation::select(size_t transition_number)
   }
 }
 
-void simulation::enable_tau_prioritization(bool enable, std::string action)
+void simulation::enable_tau_prioritization(bool enable, const std::string& action)
 {
   m_tau_prioritization = enable;
   m_prioritized_action = action;
@@ -154,7 +154,7 @@ std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE THE INITIAL DISTRIBUTION INTO 
   }
 }
 
-std::vector<simulation::transition_t> simulation::transitions(state source_state)
+std::vector<simulation::transition_t> simulation::transitions(const state& source_state)
 {
   try
   {

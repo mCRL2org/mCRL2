@@ -22,7 +22,7 @@ using namespace mcrl2::data::sort_bool;
 
 void bool_sort_test()
 {
-  basic_sort b(bool_());
+  const basic_sort& b(bool_());
   BOOST_CHECK(b == bool_());
   BOOST_CHECK(to_string(b.name()) == "Bool");
 }

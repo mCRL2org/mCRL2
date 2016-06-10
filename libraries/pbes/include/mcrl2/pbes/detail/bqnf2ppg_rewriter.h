@@ -542,9 +542,9 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \return true if the right hand side of the equation is in BQNF.
     virtual bool visit_bqnf_equation(const equation_type& eqn)
     {
-      fixpoint_symbol sigma = eqn.symbol();
-      propositional_variable var = eqn.variable();
-      term_type e = eqn.formula();
+      const fixpoint_symbol& sigma = eqn.symbol();
+      const propositional_variable& var = eqn.variable();
+      const term_type& e = eqn.formula();
       //std::clog << "visit_bqnf_equation: rewrite equation: " << pp(sigma) << " " << var.name() << " = ..." << std::endl;
       if (tr::is_prop_var(e) || is_simple_expression(e)) {
         // Eqn of the form sigma X(d: D) = g(d) && Y(h(d)), with g(d) a simple formula

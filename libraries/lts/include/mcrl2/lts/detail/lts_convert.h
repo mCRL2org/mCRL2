@@ -86,7 +86,7 @@ inline void lts_convert(
 
 inline probabilistic_arbitrary_precision_fraction translate_probability_data_to_arbitrary_size_probability(const data::data_expression& d)
 {
-  const data::application da=atermpp::down_cast<data::application>(d);
+  const data::application& da=atermpp::down_cast<data::application>(d);
   if (!(data::sort_int::is_integer_constant(da[0]) && 
         data::sort_pos::is_positive_constant(da[1]) &&
         da.head()==data::sort_real::creal()))
@@ -139,7 +139,7 @@ lts_convert_probabilistic_state<probabilistic_state<size_t, mcrl2::lts::probabil
 
 inline mcrl2::lts::probabilistic_arbitrary_precision_fraction translate_probability_data_prob(const data::data_expression& d)
 {
-  const data::application da=atermpp::down_cast<data::application>(d);
+  const data::application& da=atermpp::down_cast<data::application>(d);
   if (!(data::sort_int::is_integer_constant(da[0]) && 
         data::sort_pos::is_positive_constant(da[1]) &&
         da.head()==data::sort_real::creal()))

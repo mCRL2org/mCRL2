@@ -56,7 +56,7 @@ class state_label_fsm:  public std::vector < size_t >
     \param[in] l  The state value to pretty print.
     \return           The pretty-printed representation of value. */
 
-inline std::string pp(const state_label_fsm l)
+inline std::string pp(const state_label_fsm& l)
 {
   std::string s;
   s = "(";

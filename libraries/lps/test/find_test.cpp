@@ -35,19 +35,19 @@ std::string SPEC =
   ;
 
 inline
-data::variable nat(std::string name)
+data::variable nat(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
 
 inline
-data::variable pos(std::string name)
+data::variable pos(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_pos::pos());
 }
 
 inline
-data::variable bool_(std::string name)
+data::variable bool_(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_bool::bool_());
 }
@@ -113,13 +113,13 @@ void test_search()
                             "init X;\n"
                           ));
   data::variable x("x", data::sort_nat::nat());
-  BOOST_CHECK(lps::search_free_variable(spec.process().action_summands(), x) == false);
+  BOOST_CHECK(!lps::search_free_variable(spec.process().action_summands(), x));
 
   data::variable y("y", data::sort_nat::nat());
-  BOOST_CHECK(lps::search_free_variable(spec.process().action_summands(), y) == false);
+  BOOST_CHECK(!lps::search_free_variable(spec.process().action_summands(), y));
 
   data::variable dc("dc", data::sort_nat::nat());
-  BOOST_CHECK(lps::search_free_variable(spec.process().action_summands(), dc) == true);
+  BOOST_CHECK(lps::search_free_variable(spec.process().action_summands(), dc));
 }
 
 void test_search_sort_expression()

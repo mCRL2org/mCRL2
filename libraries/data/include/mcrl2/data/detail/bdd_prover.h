@@ -186,7 +186,7 @@ class BDD_Prover: protected rewriter
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    data_expression bdd_down(data_expression a_formula)
+    data_expression bdd_down(const data_expression& a_formula)
     {
       std::string indent;
 
@@ -398,7 +398,7 @@ class BDD_Prover: protected rewriter
     }
 
     /// \brief Returns branch of the BDD a_bdd, depending on the polarity a_polarity.
-    data_expression get_branch(const data_expression a_bdd, const bool a_polarity)
+    data_expression get_branch(const data_expression& a_bdd, const bool a_polarity)
     {
       data_expression v_result;
 
@@ -625,7 +625,7 @@ class BDD_Prover: protected rewriter
 
     /// \brief Sets Prover::f_formula to a_formula.
     /// precondition: the argument passed as parameter a_formula is an expression of sort Bool
-    void set_formula(const data_expression a_formula)
+    void set_formula(const data_expression& a_formula)
     {
       f_formula = a_formula;
       f_processed = false;

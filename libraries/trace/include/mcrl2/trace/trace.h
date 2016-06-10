@@ -387,7 +387,7 @@ class Trace
     /// The old actions in the trace at the current at higher positions are removed.
     /// \param [in] action The multi_action to be stored in the trace.
 
-    void addAction(const mcrl2::lps::multi_action action)
+    void addAction(const mcrl2::lps::multi_action& action)
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       truncate(); // Take care that actions and states have the appropriate size.

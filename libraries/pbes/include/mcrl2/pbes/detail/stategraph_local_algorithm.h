@@ -160,7 +160,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       const core::identifier_string X;
       std::size_t i; // label
 
-      equation_label_pair(const core::identifier_string X_, std::size_t i_)
+      equation_label_pair(const core::identifier_string& X_, std::size_t i_)
         : X(X_), i(i_)
       {}
 

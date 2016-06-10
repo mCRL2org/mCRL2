@@ -243,11 +243,11 @@ void lts_info::compute_lts_type()
 }
 
 
-inline bool lts_info::is_pass_through_state(propositional_variable_instantiation propvar)
+inline bool lts_info::is_pass_through_state(const propositional_variable_instantiation& propvar)
 {
     std::string varname = std::string(propvar.name());
     data::variable_list params = this->variable_parameters[varname];
-    data::data_expression_list values = propvar.parameters();
+    const data::data_expression_list& values = propvar.parameters();
     if (params.size() != values.size())
     {
         return false;
@@ -280,7 +280,7 @@ inline bool lts_info::is_pass_through_state(propositional_variable_instantiation
 }
 
 
-inline int lts_info::count_variables(pbes_expression e)
+inline int lts_info::count_variables(const pbes_expression& e)
 {
     if (tr::is_prop_var(e))
     {
@@ -315,7 +315,7 @@ inline int lts_info::count_variables(pbes_expression e)
     }
 }
 
-std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type, std::set<std::string> vars_stack)
+std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables(const pbes_expression& e, int current_priority, operation_type current_type, std::set<std::string> vars_stack)
 {
     std::vector<pbes_expression> result;
     std::vector<pbes_expression> parts;

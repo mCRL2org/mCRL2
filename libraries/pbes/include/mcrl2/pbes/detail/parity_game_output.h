@@ -96,7 +96,7 @@ class parity_game_output: public parity_game_generator
     /// \param sep A string
     /// \return The joined elements
     template <typename Container>
-    std::string join(const Container& c, std::string sep) const
+    std::string join(const Container& c, const std::string& sep) const
     {
       std::ostringstream out;
       for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
@@ -117,7 +117,7 @@ class parity_game_output: public parity_game_generator
     /// \brief Prints the todo list
     /// \param name A string
     /// \param todo A todo list
-    void print_set(std::string name, const std::set<size_t>& todo) const
+    void print_set(const std::string& name, const std::set<size_t>& todo) const
     {
       mCRL2log(log::verbose) << name << " = {";
       for (std::set<size_t>::const_iterator i = todo.begin(); i != todo.end(); ++i)

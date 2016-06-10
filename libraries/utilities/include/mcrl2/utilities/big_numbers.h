@@ -185,7 +185,7 @@ class big_natural_number
     }
 
     // \brief This functions prints a number in internal represenation. This function is useful and only meant for debugging.
-    void print_number(std::string s) const
+    void print_number(const std::string& s) const
     {
       std::cerr << s << "  " << m_number.size() << "\n";
       for(size_t i: m_number)

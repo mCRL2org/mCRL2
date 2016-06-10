@@ -364,11 +364,7 @@ class Info
       }
 
       const data::function_symbol& f = atermpp::down_cast<function_symbol>(a.head());
-      if (static_cast<const std::string&>(f.name())=="==")
-      {
-        return true;
-      }
-      return false;
+      return static_cast<const std::string&>(f.name())=="==";
     }
 };
 

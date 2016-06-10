@@ -309,7 +309,7 @@ class specification_basic_type:public boost::noncopyable
       return at(delta(), data::sort_real::real_(0));
     }
 
-    bool isDeltaAtZero(const process_expression t)
+    bool isDeltaAtZero(const process_expression& t)
     {
       if (!is_at(t))
       {
@@ -325,7 +325,7 @@ class specification_basic_type:public boost::noncopyable
 
     /*****************  store and retrieve basic objects  ******************/
 
-    size_t addObject(aterm_appl o, bool& b)
+    size_t addObject(const aterm_appl& o, bool& b)
     {
       std::pair<size_t, bool> result=objectIndexTable.put(o);
       if (objectdata.size()<=result.first)
@@ -336,7 +336,7 @@ class specification_basic_type:public boost::noncopyable
       return result.first;
     }
 
-    size_t objectIndex(aterm_appl o)
+    size_t objectIndex(const aterm_appl& o)
     {
       size_t result=objectIndexTable.index(o);
       if (result==atermpp::npos)
@@ -353,12 +353,12 @@ class specification_basic_type:public boost::noncopyable
       return result;
     }
 
-    void addString(const identifier_string str)
+    void addString(const identifier_string& str)
     {
       fresh_identifier_generator.add_identifier(str);
     }
 
-    process_expression action_list_to_process(const action_list ma)
+    process_expression action_list_to_process(const action_list& ma)
     {
       if (ma.size()==0)
       {
@@ -371,7 +371,7 @@ class specification_basic_type:public boost::noncopyable
       return process::sync(ma.front(),action_list_to_process(ma.tail()));
     }
 
-    action_list to_action_list(const process_expression p)
+    action_list to_action_list(const process_expression& p)
     {
       if (is_tau(p))
       {
@@ -391,7 +391,7 @@ class specification_basic_type:public boost::noncopyable
       return action_list();
     }
 
-    process::action_label_list getnames(const process_expression multiAction)
+    process::action_label_list getnames(const process_expression& multiAction)
     {
       if (is_action(multiAction))
       {
@@ -404,7 +404,7 @@ class specification_basic_type:public boost::noncopyable
     // Returns a list of variables with the same sort as the expressions in the list.
     // If the expression is a variable not occurring in the occurs_set that variable
     // is used.
-    variable_list make_parameters_rec(const data_expression_list l,
+    variable_list make_parameters_rec(const data_expression_list& l,
                                       std::set < variable>& occurs_set)
     {
       variable_list result;
@@ -430,7 +430,7 @@ class specification_basic_type:public boost::noncopyable
       return reverse(result);
     }
 
-    variable_list getparameters_rec(const process_expression multiAction,
+    variable_list getparameters_rec(const process_expression& multiAction,
                                     std::set < variable>& occurs_set)
     {
       if (is_action(multiAction))
@@ -442,13 +442,13 @@ class specification_basic_type:public boost::noncopyable
              getparameters_rec(process::sync(multiAction).right(),occurs_set);
     }
 
-    variable_list getparameters(const process_expression multiAction)
+    variable_list getparameters(const process_expression& multiAction)
     {
       std::set < variable > occurs_set;
       return getparameters_rec(multiAction,occurs_set);
     }
 
-    data_expression_list getarguments(const action_list multiAction)
+    data_expression_list getarguments(const action_list& multiAction)
     {
       data_expression_list result;
       for (action_list::const_iterator l=multiAction.begin(); l!=multiAction.end(); ++l)
@@ -458,7 +458,7 @@ class specification_basic_type:public boost::noncopyable
       return reverse(result);
     }
 
-    action_list makemultiaction(const process::action_label_list actionIds, const data_expression_list args)
+    action_list makemultiaction(const process::action_label_list& actionIds, const data_expression_list& args)
     {
       action_list result;
       data_expression_list::const_iterator e_walker=args.begin();
@@ -478,7 +478,7 @@ class specification_basic_type:public boost::noncopyable
       return reverse(result);
     }
 
-    size_t addMultiAction(const process_expression multiAction, bool& isnew)
+    size_t addMultiAction(const process_expression& multiAction, bool& isnew)
     {
       const process::action_label_list actionnames=getnames(multiAction);
       size_t n=addObject((aterm_appl)(aterm_list)actionnames,isnew);
@@ -702,7 +702,7 @@ class specification_basic_type:public boost::noncopyable
         throw mcrl2::runtime_error("Action " + process::pp(actionId) + " is added twice\n");
       }
 
-      const identifier_string str=actionId.name();
+      const identifier_string& str=actionId.name();
       addString(str);
       objectdata[n].objectname=str;
       objectdata[n].object=act;
@@ -721,8 +721,8 @@ class specification_basic_type:public boost::noncopyable
     /************ storeprocs *************************************************/
 
     size_t insertProcDeclaration(
-      const process_identifier procId, // This should not be a reference.
-      const variable_list parameters,  // This should not be a reference.
+      const process_identifier& procId, // This should not be a reference.
+      const variable_list& parameters,  // This should not be a reference.
       const process_expression& body,
       processstatustype s,
       const bool canterminate,
@@ -766,7 +766,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool searchProcDeclaration(
-      const variable_list parameters,  
+      const variable_list& parameters,  
       const process_expression& body,
       const processstatustype s,
       const bool canterminate,
@@ -873,7 +873,7 @@ class specification_basic_type:public boost::noncopyable
     /************** determine_process_status ********************************/
 
     processstatustype determine_process_statusterm(
-      const process_expression body,  // intentionally not a reference.
+      const process_expression& body,  // intentionally not a reference.
       const processstatustype status)
     {
       /* In this procedure it is determined whether a process
@@ -1109,7 +1109,7 @@ class specification_basic_type:public boost::noncopyable
 
 
     void determine_process_status(
-      const process_identifier procDecl,
+      const process_identifier& procDecl,
       const processstatustype status)
     {
       processstatustype s;
@@ -1145,7 +1145,7 @@ class specification_basic_type:public boost::noncopyable
 
     /***********  collect pcrlprocessen **********************************/
 
-    void collectPcrlProcesses_term(const process_expression body,  // Intentionally not a reference.
+    void collectPcrlProcesses_term(const process_expression& body,  // Intentionally not a reference.
                                    std::vector <process_identifier>& pcrlprocesses,
                                    std::set <process_identifier>& visited)
     {
@@ -1262,7 +1262,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void collectPcrlProcesses(
-      const process_identifier procDecl,
+      const process_identifier& procDecl,
       std::vector <process_identifier>& pcrlprocesses,
       std::set <process_identifier>& visited)
     {
@@ -1279,7 +1279,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void collectPcrlProcesses(
-      const process_identifier procDecl,
+      const process_identifier& procDecl,
       std::vector <process_identifier>& pcrlprocesses)
     {
       std::set <process_identifier>  visited;
@@ -1288,13 +1288,13 @@ class specification_basic_type:public boost::noncopyable
 
     /****************  occursinterm *** occursintermlist ***********/
 
-    bool occursinterm(const variable var, const data_expression t)
+    bool occursinterm(const variable& var, const data_expression& t)
     {
       return data::search_free_variable(t, var);
     }
 
     void filter_vars_by_term(
-      const data_expression t,
+      const data_expression& t,
       const std::set < variable >& vars_set,
       std::set < variable >& vars_result_set)
     {
@@ -1417,8 +1417,8 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
-    bool occursinpCRLterm(const variable var,
-                          const process_expression p,
+    bool occursinpCRLterm(const variable& var,
+                          const process_expression& p,
                           const bool strict)
     {
       if (is_choice(p))
@@ -1504,7 +1504,7 @@ class specification_basic_type:public boost::noncopyable
     void alphaconvertprocess(
       variable_list& sumvars,
       MutableSubstitution& sigma,
-      const process_expression p,
+      const process_expression& p,
       std::set < variable >& lhs_variables_in_sigma)
     {
       /* This function replaces the variables in sumvars
@@ -1811,11 +1811,11 @@ class specification_basic_type:public boost::noncopyable
         return assignments;
       }
 
-      variable parameter=parameters.front();
+      const variable& parameter=parameters.front();
 
       if (!assignments.empty())
       {
-        assignment ass=assignments.front();
+        const assignment& ass=assignments.front();
         variable lhs=ass.lhs();
         if (parameter==lhs)
         {
@@ -1886,7 +1886,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     // Sort the assignments, such that they have the same order as the parameters
-    assignment_list sort_assignments(const assignment_list& ass, const variable_list parameters)
+    assignment_list sort_assignments(const assignment_list& ass, const variable_list& parameters)
     {
       std::map<variable,data_expression>assignment_map;
       for(assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
@@ -2092,7 +2092,7 @@ class specification_basic_type:public boost::noncopyable
     {
       size_t n=objectIndex(procId.identifier());
       const variable_list process_parameters=objectdata[n].parameters;
-      const data_expression_list rhss=procId.actual_parameters();
+      const data_expression_list& rhss=procId.actual_parameters();
 
       assignment_vector new_assignments;
       data_expression_list::const_iterator j=rhss.begin();
@@ -2155,8 +2155,8 @@ class specification_basic_type:public boost::noncopyable
     // In such a case a warning is printed suggesting to use regular2.
 
     process_identifier newprocess(
-      const variable_list parameters,  // Intentionally not a reference.
-      const process_expression body,   // Intentionally not a reference.
+      const variable_list& parameters,  // Intentionally not a reference.
+      const process_expression& body,   // Intentionally not a reference.
       const processstatustype ps,
       const bool canterminate,
       const bool containstime)
@@ -2206,9 +2206,9 @@ class specification_basic_type:public boost::noncopyable
 
 
     process_expression wraptime(
-      const process_expression body,
-      const data_expression time,
-      const variable_list freevars)
+      const process_expression& body,
+      const data_expression& time,
+      const variable_list& freevars)
     {
       if (is_choice(body))
       {
@@ -2287,7 +2287,7 @@ class specification_basic_type:public boost::noncopyable
 
     typedef enum { alt_state, sum_state, /* cond,*/ seq_state, name_state, multiaction_state } state;
 
-    variable get_fresh_variable(const std::string& s, const sort_expression sort, const int reuse_index=-1)
+    variable get_fresh_variable(const std::string& s, const sort_expression& sort, const int reuse_index=-1)
     {
       /* If reuse_index is smaller than 0 (-1 is the default value), an unused variable name is returned,
          based on the string s with sort `sort'. If reuse_index is larger or equal to
@@ -2323,7 +2323,7 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
-    variable_list make_pars(const sort_expression_list sortlist)
+    variable_list make_pars(const sort_expression_list& sortlist)
     {
       /* this function returns a list of variables,
          corresponding to the sorts in sortlist */
@@ -2333,7 +2333,7 @@ class specification_basic_type:public boost::noncopyable
         return variable_list();
       }
 
-      sort_expression sort=sortlist.front();
+      const sort_expression& sort=sortlist.front();
 
       variable_list result=make_pars(sortlist.tail());
       result.push_front(get_fresh_variable("a",sort));
@@ -2341,10 +2341,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression distributeActionOverConditions(
-      const process_expression act, // This is a multi-action, actually.
-      const data_expression condition,
-      const process_expression restterm,
-      const variable_list freevars,
+      const process_expression& act, // This is a multi-action, actually.
+      const data_expression& condition,
+      const process_expression& restterm,
+      const variable_list& freevars,
       const std::set<variable>& variables_bound_in_sum)
     {
       if (is_if_then(restterm))
@@ -2407,7 +2407,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-   assignment_list parameters_to_assignment_list(const variable_list parameters, const std::set<variable>& variables_bound_in_sum)
+   assignment_list parameters_to_assignment_list(const variable_list& parameters, const std::set<variable>& variables_bound_in_sum)
    {
      assignment_vector result;
      for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
@@ -2422,9 +2422,9 @@ class specification_basic_type:public boost::noncopyable
 
 
     process_expression bodytovarheadGNF(
-      const process_expression body, // intentionally not a reference.
+      const process_expression& body, // intentionally not a reference.
       const state s,
-      const variable_list freevars, // intentionally not a reference.
+      const variable_list& freevars, // intentionally not a reference.
       const variableposition v,
       const std::set<variable>& variables_bound_in_sum)
     {
@@ -2800,7 +2800,7 @@ class specification_basic_type:public boost::noncopyable
 
     typedef enum {terminating,infinite} terminationstatus;
 
-    process_expression putbehind(const process_expression body1, const process_expression body2)
+    process_expression putbehind(const process_expression& body1, const process_expression& body2)
     {
       if (is_choice(body1))
       {
@@ -2887,8 +2887,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression distribute_condition(
-      const process_expression body1,
-      const data_expression condition)
+      const process_expression& body1,
+      const data_expression& condition)
     {
       if (is_choice(body1))
       {
@@ -2958,8 +2958,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression distribute_sum(
-      const variable_list sumvars,
-      const process_expression body1)
+      const variable_list& sumvars,
+      const process_expression& body1)
     {
       if (is_choice(body1))
       {
@@ -3074,7 +3074,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void extract_names(
-      const process_expression sequence,
+      const process_expression& sequence,
       std::vector < process_instance_assignment >& result)
     {
       if (is_action(sequence)||is_process_instance_assignment(sequence))
@@ -3215,7 +3215,7 @@ class specification_basic_type:public boost::noncopyable
       throw mcrl2::runtime_error("Internal error. Expected a sequence of process names (3) " + process::pp(t) +".");
     }
 
-    process_expression cut_off_unreachable_tail(const process_expression t)
+    process_expression cut_off_unreachable_tail(const process_expression& t)
     {
       if (is_process_instance_assignment(t)||is_delta(t)||is_action(t)||is_tau(t)||is_sync(t))
       {
@@ -3327,9 +3327,9 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression to_regular_form(
-      const process_expression t,
+      const process_expression& t,
       std::vector <process_identifier>& todo,
-      const variable_list freevars,
+      const variable_list& freevars,
       const std::set<variable>& variables_bound_in_sum)
     /* t has the form of the sum, and condition over actions
        each followed by a sequence of variables. We replace
@@ -3412,9 +3412,9 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression distributeTime(
-      const process_expression body,
-      const data_expression time,
-      const variable_list freevars,
+      const process_expression& body,
+      const data_expression& time,
+      const variable_list& freevars,
       data_expression& timecondition)
     {
       if (is_choice(body))
@@ -3494,12 +3494,12 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression procstorealGNFbody(
-      const process_expression body,
+      const process_expression& body,
       variableposition v,
       std::vector <process_identifier>& todo,
       const bool regular,
       processstatustype mode,
-      const variable_list freevars,
+      const variable_list& freevars,
       const std::set <variable>& variables_bound_in_sum)
     /* This process delivers the transformation of body
        to GNF with actions as a head symbol, or it
@@ -3572,7 +3572,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_stochastic_operator(body))
       {
         const stochastic_operator& sto=down_cast<const stochastic_operator>(body);
-        const variable_list sumvars=sto.variables();
+        const variable_list& sumvars=sto.variables();
         std::set<variable> variables_bound_in_sum1=variables_bound_in_sum;
         variables_bound_in_sum1.insert(sumvars.begin(),sumvars.end());
         return stochastic_operator(
@@ -3699,7 +3699,7 @@ class specification_basic_type:public boost::noncopyable
 
 
     void procstorealGNFrec(
-      const process_identifier procIdDecl,
+      const process_identifier& procIdDecl,
       const variableposition v,
       std::vector <process_identifier>& todo,
       const bool regular)
@@ -3762,7 +3762,7 @@ class specification_basic_type:public boost::noncopyable
       throw mcrl2::runtime_error("strange process type: " + str(boost::format("%d") % objectdata[n].processstatus));
     }
 
-    void procstorealGNF(const process_identifier procsIdDecl,
+    void procstorealGNF(const process_identifier& procsIdDecl,
                         const bool regular)
     {
       std::vector <process_identifier> todo;
@@ -3788,7 +3788,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** Make pCRL procs  ******************************/
 
-    void makepCRLprocs(const process_expression t,
+    void makepCRLprocs(const process_expression& t,
                        std::vector <process_identifier>& pCRLprocs)
     {
       if (is_choice(t))
@@ -3844,7 +3844,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** Collectparameterlist ******************************/
 
-    bool alreadypresent(variable& var,const variable_list vl, const size_t n)
+    bool alreadypresent(variable& var,const variable_list& vl, const size_t n)
     {
       /* Note: variables can be different, although they have the
          same string, due to different types. If they have the
@@ -3855,7 +3855,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return false;
       }
-      const variable var1=vl.front();
+      const variable& var1=vl.front();
       assert(is_variable(var1));
 
       /* The variable with correct type is present: */
@@ -3891,8 +3891,8 @@ class specification_basic_type:public boost::noncopyable
       return alreadypresent(var,vl.tail(),n);
     }
 
-    variable_list joinparameters(const variable_list par1,
-                                 const variable_list par2,
+    variable_list joinparameters(const variable_list& par1,
+                                 const variable_list& par2,
                                  const size_t n)
     {
       if (par2.empty())
@@ -3959,7 +3959,7 @@ class specification_basic_type:public boost::noncopyable
         data::function_symbol getstate;
         stackoperations* next;
 
-        stackoperations(const variable_list pl,
+        stackoperations(const variable_list& pl,
                         specification_basic_type& spec)
         {
           parameter_list=pl;
@@ -4023,7 +4023,7 @@ class specification_basic_type:public boost::noncopyable
 
 
         stackoperations* find_suitable_stack_operations(
-          const variable_list parameters,
+          const variable_list& parameters,
           stackoperations* stack_operations_list)
         {
           if (stack_operations_list==NULL)
@@ -4038,7 +4038,7 @@ class specification_basic_type:public boost::noncopyable
         }
 
         /// \brief Constructor
-        stacklisttype(const variable_list parlist,
+        stacklisttype(const variable_list& parlist,
                       specification_basic_type& spec,
                       const bool regular,
                       const std::vector < process_identifier>& pCRLprocs,
@@ -4125,7 +4125,7 @@ class specification_basic_type:public boost::noncopyable
       return is_variable(d) && global_variables.count(atermpp::down_cast<variable>(d)) > 0;
     }
 
-    data_expression getvar(const variable var,
+    data_expression getvar(const variable& var,
                            const stacklisttype& stack)
     {
       /* first search whether the variable is a free process variable */
@@ -4259,7 +4259,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression correctstatecond(
-      const process_identifier procId,
+      const process_identifier& procId,
       const std::vector < process_identifier>& pCRLproc,
       const stacklisttype& stack,
       int regular)
@@ -4320,9 +4320,9 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression adapt_term_to_stack(
-      const data_expression t,
+      const data_expression& t,
       const stacklisttype& stack,
-      const variable_list vars)
+      const variable_list& vars)
     {
       if (is_function_symbol(t))
       {
@@ -4403,9 +4403,9 @@ class specification_basic_type:public boost::noncopyable
 
 
     action_list adapt_multiaction_to_stack_rec(
-      const action_list multiAction,
+      const action_list& multiAction,
       const stacklisttype& stack,
-      const variable_list vars)
+      const variable_list& vars)
     {
       if (multiAction.empty())
       {
@@ -4426,14 +4426,14 @@ class specification_basic_type:public boost::noncopyable
     }
 
     action_list adapt_multiaction_to_stack(
-      const action_list multiAction,
+      const action_list& multiAction,
       const stacklisttype& stack,
-      const variable_list vars)
+      const variable_list& vars)
     {
       return adapt_multiaction_to_stack_rec(multiAction,stack,vars);
     }
 
-    data_expression representative_generator_internal(const sort_expression s, const bool allow_dont_care_var=true)
+    data_expression representative_generator_internal(const sort_expression& s, const bool allow_dont_care_var=true)
     {
       if ((!options.noglobalvars) && allow_dont_care_var)
       {
@@ -4446,10 +4446,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression find_(
-      const variable s,
-      const assignment_list args,
+      const variable& s,
+      const assignment_list& args,
       const stacklisttype& stack,
-      const variable_list vars,
+      const variable_list& vars,
       const std::set<variable>& free_variables_in_body)
     {
       /* We generate the value for variable s in the list of
@@ -4478,12 +4478,12 @@ class specification_basic_type:public boost::noncopyable
 
 
     data_expression_list findarguments(
-      const variable_list pars,
-      const variable_list parlist,
-      const assignment_list args,
-      const data_expression_list t2,
+      const variable_list& pars,
+      const variable_list& parlist,
+      const assignment_list& args,
+      const data_expression_list& t2,
       const stacklisttype& stack,
-      const variable_list vars,
+      const variable_list& vars,
       const std::set<variable>& free_variables_in_body)
     {
       if (parlist.empty())
@@ -4498,8 +4498,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     assignment_list find_dummy_arguments(
-      const variable_list parlist,   // The list of all parameters.
-      const assignment_list args,
+      const variable_list& parlist,   // The list of all parameters.
+      const assignment_list& args,
       const std::set<variable>& free_variables_in_body,
       const variable_list& stochastic_variables)
     {
@@ -4542,8 +4542,8 @@ class specification_basic_type:public boost::noncopyable
 
 
     assignment_list push_regular(
-      const process_identifier procId,
-      const assignment_list args,
+      const process_identifier& procId,
+      const assignment_list& args,
       const stacklisttype& stack,
       const std::vector < process_identifier >& pCRLprocs,
       bool singlestate,
@@ -4593,12 +4593,12 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression push_stack(
-      const process_identifier procId,
-      const assignment_list args,
-      const data_expression_list t2,
+      const process_identifier& procId,
+      const assignment_list& args,
+      const data_expression_list& t2,
       const stacklisttype& stack,
       const std::vector < process_identifier >& pCRLprocs,
-      const variable_list vars)
+      const variable_list& vars)
     {
       const size_t n=objectIndex(procId);
       const data_expression_list t=findarguments(objectdata[n].parameters,
@@ -4625,8 +4625,8 @@ class specification_basic_type:public boost::noncopyable
       {
         const process_instance_assignment process=atermpp::down_cast<process_instance_assignment>(seq(t).left());
         const process_expression process2=seq(t).right();
-        const process_identifier procId=process.identifier();
-        const assignment_list t1=process.assignments();
+        const process_identifier& procId=process.identifier();
+        const assignment_list& t1=process.assignments();
 
         if (objectdata[objectIndex(procId)].canterminate)
         {
@@ -4712,7 +4712,7 @@ class specification_basic_type:public boost::noncopyable
         return assignment_list();
       }
 
-      const variable par=totalpars.front();
+      const variable& par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
         assignment_list result=pushdummyrec_regular(totalpars.tail(),pars,stack,stochastic_variables);
@@ -4757,7 +4757,7 @@ class specification_basic_type:public boost::noncopyable
         return { stack.opns->emptystack };
       }
 
-      const variable par=totalpars.front();
+      const variable& par=totalpars.front();
       if (std::find(pars.begin(),pars.end(),par)!=pars.end())
       {
         data_expression_list result=pushdummyrec_stack(totalpars.tail(),pars,stack,stochastic_variables);
@@ -5280,7 +5280,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list args;
       data_expression_list xxxterm;
 
-      const sort_expression normalised_sort=sort;
+      const sort_expression& normalised_sort=sort;
       const variable v1=get_fresh_variable("x",normalised_sort);
       const size_t n=enumeratedtypes[index].size;
       for (size_t j=0; (j<n); j++)
@@ -5554,7 +5554,7 @@ class specification_basic_type:public boost::noncopyable
         return sort_bool::true_();
       }
 
-      const variable var=matchinglist.front();
+      const variable& var=matchinglist.front();
       data_expression unique=representative_generator_internal(var.sort(),false);
       return lazy::and_(
                transform_matching_list(matchinglist.tail()),
@@ -5658,7 +5658,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       assert(!sums.empty());
-      variable casevar=sums.front();
+      const variable& casevar=sums.front();
 
       const data_expression t=construct_binary_case_tree_rec(n / 2,sums.tail(),terms,termsort,e);
 
@@ -5737,11 +5737,7 @@ class specification_basic_type:public boost::noncopyable
           return false;
         }
       }
-      if (i2!=multiactionlist2.end())
-      {
-        return false;
-      }
-      return true;
+      return i2 == multiactionlist2.end();
     }
 
     data_expression getRHSassignment(const variable& var, const assignment_list& as)
@@ -5810,7 +5806,7 @@ class specification_basic_type:public boost::noncopyable
       for (stochastic_action_summand_vector::const_iterator walker=action_summands.begin(); walker!=action_summands.end(); ++walker)
       {
         const stochastic_action_summand smmnd=*walker;
-        const data_expression condition=smmnd.condition();
+        const data_expression& condition=smmnd.condition();
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
         const variable_list auxpars= *auxrename_list_pars;
@@ -6453,7 +6449,7 @@ class specification_basic_type:public boost::noncopyable
       for (deadlock_summand_vector::const_iterator walker=deadlock_summands.begin(); walker!=deadlock_summands.end(); ++walker)
       {
         const deadlock_summand smmnd=*walker;
-        const data_expression condition=smmnd.condition();
+        const data_expression& condition=smmnd.condition();
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
         const variable_list auxpars= *auxrename_list_pars;
@@ -6983,7 +6979,7 @@ class specification_basic_type:public boost::noncopyable
       deadlock_summand_vector result;
 
       // const variable_list sumvars=s.summation_variables();
-      const data_expression cond=s.condition();
+      const data_expression& cond=s.condition();
       const data_expression actiontime=s.deadlock().time();
 
       // First check whether the delta summand is subsumed by an action summands.
@@ -7056,7 +7052,7 @@ class specification_basic_type:public boost::noncopyable
         // multiaction is equal to terminate. This action cannot be blocked.
         return true;
       }
-      const identifier_string_list names=allowaction.names();
+      const identifier_string_list& names=allowaction.names();
       identifier_string_list::const_iterator i=names.begin();
 
       for (action_list::const_iterator walker=multiaction.begin();
@@ -7071,11 +7067,7 @@ class specification_basic_type:public boost::noncopyable
           return false;
         }
       }
-      if (i==names.end())
-      {
-        return true;
-      }
-      return false;
+      return i==names.end();
     }
 
     bool allow_(const action_name_multiset_list& allowlist,
@@ -7154,10 +7146,10 @@ class specification_basic_type:public boost::noncopyable
       for (stochastic_action_summand_vector::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
       {
         const stochastic_action_summand smmnd= *i;
-        const variable_list sumvars=smmnd.summation_variables();
+        const variable_list& sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.multi_action().actions();
         const data_expression actiontime=smmnd.multi_action().time();
-        const data_expression condition=smmnd.condition();
+        const data_expression& condition=smmnd.condition();
 
 
         if ((is_allow && allow_(allowlist,multiaction)) ||
@@ -7223,8 +7215,8 @@ class specification_basic_type:public boost::noncopyable
 
     action rename_action(const rename_expression_list& renamings, const action& act)
     {
-      const action_label actionId=act.label();
-      const identifier_string s=actionId.name();
+      const action_label& actionId=act.label();
+      const identifier_string& s=actionId.name();
       for (rename_expression_list::const_iterator i=renamings.begin(); i!=renamings.end(); ++i)
       {
         if (s==i->source())
@@ -7331,7 +7323,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        variable var2=pars2.front();
+        const variable& var2=pars2.front();
         variable var3=var2;
         for (int i=0 ; occursin(var3,pars1) ; ++i)
         {
@@ -7372,7 +7364,7 @@ class specification_basic_type:public boost::noncopyable
         return { action };
       }
 
-      const identifier_string firstAction=actionlabels.front();
+      const identifier_string& firstAction=actionlabels.front();
 
       if (std::string(action)<std::string(firstAction))
       {
@@ -7388,7 +7380,7 @@ class specification_basic_type:public boost::noncopyable
     action_name_multiset sortActionLabels(const action_name_multiset& actionlabels1)
     {
       identifier_string_list result;
-      const identifier_string_list actionlabels(actionlabels1.names());
+      const identifier_string_list& actionlabels(actionlabels1.names());
       for (identifier_string_list::const_iterator i=actionlabels.begin(); i!=actionlabels.end(); ++i)
       {
         result=insertActionLabel(*i,result);
@@ -7425,8 +7417,8 @@ class specification_basic_type:public boost::noncopyable
         return sort_bool::false_();
       }
 
-      const data_expression t1=l1.front();
-      const data_expression t2=l2.front();
+      const data_expression& t1=l1.front();
+      const data_expression& t2=l2.front();
 
       if (t1.sort()!=t2.sort())
       {
@@ -7740,8 +7732,8 @@ class specification_basic_type:public boost::noncopyable
         return tuple_list();
       }
       /* if n=[a(f)] \oplus o */
-      const action firstaction=n.front();
-      const action_list o=n.tail();
+      const action& firstaction=n.front();
+      const action_list& o=n.tail();
       const data_expression condition=pairwiseMatch(d,firstaction.arguments());
       if (condition==sort_bool::false_())
       {
@@ -7768,21 +7760,14 @@ class specification_basic_type:public boost::noncopyable
     {
       if (beta.empty())
       {
-        if (can_communicate(alpha,comm_table)!=action_label())
-        {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
+        return can_communicate(alpha,comm_table)!=action_label();
       }
       else
       {
-        const action a = beta.front();
+        const action& a = beta.front();
         action_list l=alpha;
         l=push_back(l,a);
-        const action_list beta_next = beta.tail();
+        const action_list& beta_next = beta.tail();
 
         if (can_communicate(l,comm_table)!=action_label())
         {
@@ -7842,8 +7827,8 @@ class specification_basic_type:public boost::noncopyable
         return t;
       }
 
-      const action firstaction=multiaction.front();
-      const action_list remainingmultiaction=multiaction.tail(); /* This is m in [1] */
+      const action& firstaction=multiaction.front();
+      const action_list& remainingmultiaction=multiaction.tail(); /* This is m in [1] */
 
       const tuple_list S=phi({ firstaction },
                              firstaction.arguments(),
@@ -7917,11 +7902,11 @@ class specification_basic_type:public boost::noncopyable
            sourcesumlist!=action_summands.end(); ++sourcesumlist)
       {
         const stochastic_action_summand smmnd=*sourcesumlist;
-        const variable_list sumvars=smmnd.summation_variables();
+        const variable_list& sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.multi_action().actions();
-        const data_expression condition=smmnd.condition();
-        const assignment_list nextstate=smmnd.assignments();
-        const stochastic_distribution dist=smmnd.distribution();
+        const data_expression& condition=smmnd.condition();
+        const assignment_list& nextstate=smmnd.assignments();
+        const stochastic_distribution& dist=smmnd.distribution();
 
         if (!inline_allow)
         {
@@ -8285,7 +8270,7 @@ class specification_basic_type:public boost::noncopyable
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars,
       assignment_list& init,
-      const std::string hint="")
+      const std::string& hint="")
     {
       stochastic_action_summand_vector result_action_summands;
 
@@ -8299,7 +8284,7 @@ class specification_basic_type:public boost::noncopyable
         const stochastic_action_summand smmnd= *s;
 
         std::set<data::variable> rhs_variables_sumvars;
-        const variable_list sumvars=smmnd.summation_variables();
+        const variable_list& sumvars=smmnd.summation_variables();
         data::mutable_map_substitution<> sigma_sumvars=make_unique_variables(sumvars,hint,rhs_variables_sumvars);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
@@ -8354,7 +8339,7 @@ class specification_basic_type:public boost::noncopyable
       {
         std::set<data::variable> rhs_variables_sumvars;
         const deadlock_summand smmnd= *s;
-        const variable_list sumvars=smmnd.summation_variables();
+        const variable_list& sumvars=smmnd.summation_variables();
         data::mutable_map_substitution<> sigma_sumvars=make_unique_variables(sumvars,hint, rhs_variables_sumvars);
         const variable_list unique_sumvars=data::replace_variables(sumvars, sigma_sumvars);
 
@@ -8474,8 +8459,8 @@ class specification_basic_type:public boost::noncopyable
         action_list multiaction1=summand1.multi_action().actions();
         data_expression actiontime1=summand1.multi_action().time();
         data_expression condition1=summand1.condition();
-        assignment_list nextstate1=summand1.assignments();
-        const stochastic_distribution distribution1=summand1.distribution();
+        const assignment_list& nextstate1=summand1.assignments();
+        const stochastic_distribution& distribution1=summand1.distribution();
         bool has_time=summand1.has_time();
 
         if (multiaction1 != action_list({ terminationAction }))
@@ -8582,8 +8567,8 @@ class specification_basic_type:public boost::noncopyable
         action_list multiaction2=summand2.multi_action().actions();
         data_expression actiontime2=summand2.multi_action().time();
         data_expression condition2=summand2.condition();
-        assignment_list nextstate2=summand2.assignments();
-        const stochastic_distribution distribution2=summand2.distribution();
+        const assignment_list& nextstate2=summand2.assignments();
+        const stochastic_distribution& distribution2=summand2.distribution();
         bool has_time=summand2.multi_action().has_time();
 
         if (multiaction2 != action_list({ terminationAction }))
@@ -8640,23 +8625,23 @@ class specification_basic_type:public boost::noncopyable
       {
         const stochastic_action_summand summand1= *walker1;
 
-        const variable_list sumvars1=summand1.summation_variables();
+        const variable_list& sumvars1=summand1.summation_variables();
         const action_list multiaction1=summand1.multi_action().actions();
         const data_expression actiontime1=summand1.multi_action().time();
-        const data_expression condition1=summand1.condition();
-        const assignment_list nextstate1=summand1.assignments();
-        const stochastic_distribution distribution1=summand1.distribution();
+        const data_expression& condition1=summand1.condition();
+        const assignment_list& nextstate1=summand1.assignments();
+        const stochastic_distribution& distribution1=summand1.distribution();
 
         for (stochastic_action_summand_vector::const_iterator walker2=action_summands2.begin();
              walker2!=action_summands2.end(); ++walker2)
         {
           const stochastic_action_summand summand2= *walker2;
-          const variable_list sumvars2=summand2.summation_variables();
+          const variable_list& sumvars2=summand2.summation_variables();
           const action_list multiaction2=summand2.multi_action().actions();
           const data_expression actiontime2=summand2.multi_action().time();
-          const data_expression condition2=summand2.condition();
-          const assignment_list nextstate2=summand2.assignments();
-          const stochastic_distribution distribution2=summand2.distribution();
+          const data_expression& condition2=summand2.condition();
+          const assignment_list& nextstate2=summand2.assignments();
+          const stochastic_distribution& distribution2=summand2.distribution();
 
           if ((multiaction1 == action_list({ terminationAction })) == (multiaction2 == action_list({ terminationAction })))
           {
@@ -8797,7 +8782,7 @@ class specification_basic_type:public boost::noncopyable
     void generateLPEmCRLterm(
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
-      const process_expression t,    // This process expression cannot be a reference.
+      const process_expression& t,    // This process expression cannot be a reference.
       const bool regular,
       const bool rename_variables,
       variable_list& pars,
@@ -9418,7 +9403,7 @@ class specification_basic_type:public boost::noncopyable
           if (is_stochastic_operator(r2_))
           {
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-            process_expression new_body1=r1.operand();
+            const process_expression& new_body1=r1.operand();
             process_expression new_body2=r2.operand();
             std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
@@ -9453,7 +9438,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_process_instance_assignment(t))
       {
         const process_instance_assignment u(t);
-        const process_identifier old_identifier=u.identifier();
+        const process_identifier& old_identifier=u.identifier();
 
         size_t n=objectIndex(old_identifier);
         const process_expression new_process=obtain_initial_distribution(old_identifier,visited,pCRLprocs);
@@ -9559,7 +9544,7 @@ class specification_basic_type:public boost::noncopyable
           {
             /* both r1_ and r2_ are stochastic */
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-            process_expression new_body1=r1.operand();
+            const process_expression& new_body1=r1.operand();
             process_expression new_body2=r2.operand();
             std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
@@ -9623,7 +9608,7 @@ class specification_basic_type:public boost::noncopyable
             /* both r1_ and r2_ are stochastic */
 
             const stochastic_operator& r2=down_cast<const stochastic_operator>(r2_);
-            process_expression new_body1=r1.operand();
+            const process_expression& new_body1=r1.operand();
             process_expression new_body2=r2.operand();
             std::set<variable> variables_occurring_in_rhs_of_sigma;
             variable_list stochvars=r2.variables();
@@ -10022,7 +10007,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression transform_process_arguments_body(
-      const process_expression t, // intentionally not a reference.
+      const process_expression& t, // intentionally not a reference.
       const std::set<variable>& bound_variables,
       std::set<process_identifier>& visited_processes)
     {
@@ -10134,7 +10119,7 @@ class specification_basic_type:public boost::noncopyable
       }
       if (is_stochastic_operator(t))
       {
-        const stochastic_operator tso=down_cast<const stochastic_operator>(t);
+        const stochastic_operator& tso=down_cast<const stochastic_operator>(t);
         return stochastic_operator(
                  tso.variables(),
                  tso.distribution(),
@@ -10215,7 +10200,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression guarantee_that_parameters_have_unique_type_body(
-      const process_expression t, // intentionally not a reference.
+      const process_expression& t, // intentionally not a reference.
       std::set<process_identifier>& visited_processes,
       std::set<identifier_string>& used_variable_names,
       mutable_map_substitution<>& parameter_mapping,
@@ -10353,7 +10338,7 @@ class specification_basic_type:public boost::noncopyable
         // Also rename bound variables in a stochastic operator, such that there are no two variables with
         // the same name, but different types. We do the renaming globally, i.e. all occurrences of variables
         // x:D that require renaming are renamed to x':D.
-        const variable_list parameters=sto.variables();
+        const variable_list& parameters=sto.variables();
         for(variable_list::const_iterator i=parameters.begin(); i!=parameters.end(); ++i)
         {
           if (used_variable_names.count(i->name())==0)
@@ -10389,10 +10374,10 @@ class specification_basic_type:public boost::noncopyable
 /* -----------------------------   split body  --------------------------- */
 
     process_expression split_body(
-      const process_expression t, // intentionally not a reference.
+      const process_expression& t, // intentionally not a reference.
       std::map < process_identifier,process_identifier >& visited_id,
       std::map < process_expression,process_expression>& visited_proc,
-      const variable_list parameters)  //intentionally not a reference.
+      const variable_list& parameters)  //intentionally not a reference.
     {
       /* Replace pCRL process terms that occur in the scope of mCRL processes
          by a process identifier. E.g. (a+b)||c is replaced by X||c and

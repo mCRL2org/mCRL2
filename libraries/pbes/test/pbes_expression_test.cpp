@@ -111,7 +111,7 @@ void test_accessors()
     s = name(X);
     BOOST_CHECK(s == identifier_string("X"));
 
-    data_expression_list f = param(X);
+    const data_expression_list& f = param(X);
     data_expression_list g = { d };
     BOOST_CHECK(f == g);
 
@@ -147,7 +147,7 @@ void test_accessors()
     a = p::forall(v, x);
     a = p::exists(v, x);
     s = name(X);
-    data_expression_list f = param(X);
+    const data_expression_list& f = param(X);
     a = p::join_or(q.begin(), q.end());
     a = p::join_and(q.begin(), q.end());
     q1 = p::split_or(a);

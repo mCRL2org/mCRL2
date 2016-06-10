@@ -143,7 +143,7 @@ class data_property_map
     //--------------------------------------------//
     /// \brief Compares two integers, and returns a message if they are different.
     /// If if they are equal the empty string is returned.
-    std::string compare(std::string property, unsigned int x, unsigned int y) const
+    std::string compare(const std::string& property, unsigned int x, unsigned int y) const
     {
       if (x != y)
       {
@@ -161,7 +161,7 @@ class data_property_map
     /// operation must be defined.
     /// If no differences are found the empty string is returned.
     template <typename T>
-    std::string compare(std::string property, const std::set<T>& x, const std::set<T>& y) const
+    std::string compare(const std::string& property, const std::set<T>& x, const std::set<T>& y) const
     {
       std::ostringstream out;
 
@@ -194,7 +194,7 @@ class data_property_map
     /// be redefined in derived classes.
     /// \return An empty string if the two values are equal, otherwise a string indicating
     /// the differences between the two.
-    std::string compare_property(std::string property, std::string /* x */, std::string /* y */) const
+    std::string compare_property(const std::string& property, const std::string& /* x */, const std::string& /* y */) const
     {
       return "ERROR: unknown property " + property + " encountered!";
     }

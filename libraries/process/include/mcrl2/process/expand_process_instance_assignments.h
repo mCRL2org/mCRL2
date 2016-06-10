@@ -40,10 +40,10 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
   process_expression apply(const process::process_instance& x)
   {
     const process_equation& eqn = find_equation(equations, x.identifier());
-    process_expression p = eqn.expression();
+    const process_expression& p = eqn.expression();
     data::mutable_map_substitution<> sigma;
-    data::variable_list d = eqn.formal_parameters();
-    data::data_expression_list e = x.actual_parameters();
+    const data::variable_list& d = eqn.formal_parameters();
+    const data::data_expression_list& e = x.actual_parameters();
     data::variable_list::iterator di = d.begin();
     data::data_expression_list::iterator ei = e.begin();
     for (; di != d.end(); ++di, ++ei)
@@ -59,7 +59,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
   process_expression apply(const process::process_instance_assignment& x)
   {
     const process_equation& eqn = find_equation(equations, x.identifier());
-    process_expression p = eqn.expression();
+    const process_expression& p = eqn.expression();
     data::mutable_map_substitution<> sigma;
     for (const auto& a: x.assignments())
     {

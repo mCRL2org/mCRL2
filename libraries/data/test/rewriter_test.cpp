@@ -113,7 +113,7 @@ void test2()
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitution_text)
+void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, const std::string& substitution_text)
 {
   data::rewriter::substitution_type sigma;
   data::detail::parse_substitution(substitution_text, sigma, data_spec);

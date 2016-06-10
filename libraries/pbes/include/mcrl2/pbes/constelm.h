@@ -86,7 +86,7 @@ namespace detail
 /// \param w A term
 /// \return True if v is less than w
 inline
-bool less_term(atermpp::aterm_appl v, atermpp::aterm_appl w)
+bool less_term(const atermpp::aterm_appl& v, const atermpp::aterm_appl& w)
 {
   return v < w;
 }
@@ -793,7 +793,7 @@ class pbes_constelm_algorithm
       // initialize the todo list of vertices that need to be processed
       propositional_variable_instantiation init = p.initial_state();
       std::deque<propositional_variable_decl_type> todo;
-      data_term_sequence_type e = init.parameters();
+      const data_term_sequence_type& e = init.parameters();
       vertex& u = m_vertices[init.name()];
       u.update(e, constraint_map(), m_data_rewriter);
       todo.push_back(u.variable());

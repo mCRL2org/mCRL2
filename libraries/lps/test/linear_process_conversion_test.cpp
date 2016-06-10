@@ -160,7 +160,7 @@ const std::string ABS_SPEC_LINEARIZED =
   ;
 
 // The flag expect_exception should be set for linear processes that cannot be represented by an LPS.
-void test_process(std::string text, bool expect_exception = false)
+void test_process(const std::string& text, bool expect_exception = false)
 {
   process_specification pspec = parse_process_specification(text);
   bool linear = is_linear(pspec, true);

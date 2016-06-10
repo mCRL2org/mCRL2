@@ -25,12 +25,12 @@ using namespace mcrl2::lps;
 /// \brief Returns a data variable of type Nat with a given name
 /// \param name A string
 /// \return A data variable of type Nat with a given name
-data::variable nat(std::string name)
+data::variable nat(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
 
-process::action act(std::string name, data_expression_list parameters)
+process::action act(const std::string& name, data_expression_list parameters)
 {
   std::vector<sort_expression> sorts;
   for (const auto & parameter : parameters)
@@ -41,7 +41,7 @@ process::action act(std::string name, data_expression_list parameters)
   return process::action(label, parameters);
 }
 
-void test_multi_actions(process::action_list a, process::action_list b, data_expression expected_result = data::undefined_data_expression())
+void test_multi_actions(const process::action_list& a, const process::action_list& b, const data_expression& expected_result = data::undefined_data_expression())
 {
   std::cout << "--- test_multi_actions ---" << std::endl;
   data_expression result = equal_multi_actions(a, b);

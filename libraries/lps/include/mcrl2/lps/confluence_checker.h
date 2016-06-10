@@ -232,7 +232,7 @@ class Confluence_Checker
 
     /// \brief Checks the confluence of summand a_summand_1 and a_summand_2
     bool check_summands(
-      const data::data_expression a_invariant,
+      const data::data_expression& a_invariant,
       const action_summand_type a_summand_1,
       const size_t a_summand_number_1,
       const action_summand_type a_summand_2,
@@ -283,7 +283,7 @@ class Confluence_Checker
 // Auxiliary functions ----------------------------------------------------------------------------
 
 static
-data::mutable_map_substitution<> get_substitutions_from_assignments(const data::assignment_list a_assignments)
+data::mutable_map_substitution<> get_substitutions_from_assignments(const data::assignment_list& a_assignments)
 {
   data::mutable_map_substitution<> v_substitutions;
 
@@ -297,7 +297,7 @@ data::mutable_map_substitution<> get_substitutions_from_assignments(const data::
 // ----------------------------------------------------------------------------------------------
 static
 data::data_expression get_subst_equation_from_assignments(
-  const data::variable_list a_variables,
+  const data::variable_list& a_variables,
   data::assignment_list a_assignments_1,
   data::assignment_list a_assignments_2,
   data::mutable_map_substitution<>& a_substitutions_1,
@@ -364,7 +364,7 @@ data::data_expression get_subst_equation_from_assignments(
 
 static
 data::data_expression get_equation_from_assignments(
-  const data::variable_list a_variables,
+  const data::variable_list& a_variables,
   data::assignment_list a_assignments_1,
   data::assignment_list a_assignments_2)
 {
@@ -408,7 +408,7 @@ data::data_expression get_equation_from_assignments(
 // ----------------------------------------------------------------------------------------------
 inline
 data::data_expression get_subst_equation_from_actions(
-  const process::action_list a_actions,
+  const process::action_list& a_actions,
   data::mutable_map_substitution<>& a_substitutions)
 {
   data::data_expression v_result = data::sort_bool::true_();
@@ -473,13 +473,13 @@ data::data_expression get_confluence_condition(
 
   if (condition_type == 'c' || condition_type == 'C') //Commutative confluence.
   {
-    const data::data_expression v_condition_1 = a_summand_1.condition();
-    const data::assignment_list v_assignments_1 = a_summand_1.assignments();
+    const data::data_expression& v_condition_1 = a_summand_1.condition();
+    const data::assignment_list& v_assignments_1 = a_summand_1.assignments();
 
     data::mutable_map_substitution<> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
-    const data::data_expression v_condition_2 = a_summand_2.condition();
+    const data::data_expression& v_condition_2 = a_summand_2.condition();
     const data::data_expression v_lhs = data::sort_bool::and_(data::sort_bool::and_(v_condition_1, v_condition_2), a_invariant);
-    const data::assignment_list v_assignments_2 = a_summand_2.assignments();
+    const data::assignment_list& v_assignments_2 = a_summand_2.assignments();
 
     data::mutable_map_substitution<> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
     const data::data_expression v_subst_condition_1 = data::replace_variables_capture_avoiding(v_condition_1, v_substitutions_2, data::substitution_variables(v_substitutions_2));
@@ -510,10 +510,10 @@ data::data_expression get_confluence_condition(
   }
   else if (condition_type == 'T') //Triangular confluence
   {
-    const data::data_expression v_condition_1 = a_summand_1.condition();
-    const data::data_expression v_condition_2 = a_summand_2.condition();
+    const data::data_expression& v_condition_1 = a_summand_1.condition();
+    const data::data_expression& v_condition_2 = a_summand_2.condition();
 
-    const data::assignment_list v_assignments_1 = a_summand_1.assignments();
+    const data::assignment_list& v_assignments_1 = a_summand_1.assignments();
     const data::assignment_list v_assignments_2 = get_full_assignment_list(a_summand_2.assignments(), a_variables);
 
     const process::action_list v_actions = a_summand_2.multi_action().actions();
@@ -543,18 +543,18 @@ data::data_expression get_confluence_condition(
   }
   else if (condition_type == 'Z') //Trivial confluence
   {
-    const data::data_expression v_condition_1 = a_summand_1.condition();
-    const data::data_expression v_condition_2 = a_summand_2.condition();
+    const data::data_expression& v_condition_1 = a_summand_1.condition();
+    const data::data_expression& v_condition_2 = a_summand_2.condition();
 
-    const data::assignment_list v_assignments_1 = a_summand_1.assignments();
-    const data::assignment_list v_assignments_2 = a_summand_2.assignments();
+    const data::assignment_list& v_assignments_1 = a_summand_1.assignments();
+    const data::assignment_list& v_assignments_2 = a_summand_2.assignments();
 
     data::mutable_map_substitution<> v_substitutions_1;
     data::mutable_map_substitution<> v_substitutions_2;
 
     const process::action_list v_actions = a_summand_2.multi_action().actions();
 
-    data::data_expression v_lhs = v_condition_1;
+    const data::data_expression& v_lhs = v_condition_1;
     data::data_expression v_rhs;
 
     if (v_actions.empty())
@@ -686,7 +686,7 @@ void Confluence_Checker<Specification>::uniquely_rename_summutation_variables(
 
 template <typename Specification>
 bool Confluence_Checker<Specification>::check_summands(
-  const data::data_expression a_invariant,
+  const data::data_expression& a_invariant,
   const action_summand_type a_summand_1,
   const size_t a_summand_number_1,
   const action_summand_type a_summand_2,
@@ -906,7 +906,7 @@ Confluence_Checker<Specification>::Confluence_Checker(
       msg += v_ct;
       msg += '.';
 
-      throw mcrl2::runtime_error(msg.c_str());
+      throw mcrl2::runtime_error(msg);
     }
   }
 }

@@ -36,7 +36,7 @@ namespace bes
 
 typedef core::identifier_string boolean_variable_key_type;
 
-template <typename T> std::string pp(const T& t);
+template <typename T> std::string pp(const T& x);
 
 using namespace core::detail::precedences;
 
@@ -626,7 +626,7 @@ struct term_traits<bes::boolean_expression>
   /// \param q A term
   /// \return Operator and applied to p and q
   static inline
-  term_type and_(term_type p, term_type q)
+  term_type and_(const term_type& p, const term_type& q)
   {
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanAnd(), p, q));
   }
@@ -636,7 +636,7 @@ struct term_traits<bes::boolean_expression>
   /// \param q A term
   /// \return Operator or applied to p and q
   static inline
-  term_type or_(term_type p, term_type q)
+  term_type or_(const term_type& p, const term_type& q)
   {
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanOr(), p, q));
   }
@@ -646,7 +646,7 @@ struct term_traits<bes::boolean_expression>
   /// \param q A term
   /// \return Implication applied to p and q
   static inline
-  term_type imp(term_type p, term_type q)
+  term_type imp(const term_type& p, const term_type& q)
   {
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanImp(), p, q));
   }

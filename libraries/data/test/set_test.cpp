@@ -24,7 +24,7 @@ using namespace mcrl2::data::sort_set;
 using namespace mcrl2::data::sort_fset;
 
 template <typename Predicate>
-void test_data_expression(const std::string& s, variable_vector v, Predicate p)
+void test_data_expression(const std::string& s, const variable_vector& v, Predicate p)
 {
   std::cerr << "testing data expression " << s << std::endl;
   data_expression e = parse_data_expression(s, v);

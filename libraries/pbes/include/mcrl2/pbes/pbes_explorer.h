@@ -228,11 +228,11 @@ private:
     /// \brief Counts the number of propositional variables in an expression.
     /// \returns the number of variable occurences or INT_MAX if a variable
     /// occurs within the scope of a quantifier.
-    int count_variables(pbes_expression e);
+    int count_variables(const pbes_expression& e);
 
     /// \brief Determines if the propositional variable instantiation is one that
     /// only copies parameters from the current state.
-    bool is_pass_through_state(propositional_variable_instantiation propvar);
+    bool is_pass_through_state(const propositional_variable_instantiation& propvar);
 
     /// \brief Splits the expression into parts (disjuncts or conjuncts) and recursively tries to
     /// substitute the propositional variables with the parts of the right hand side of the
@@ -241,7 +241,7 @@ private:
     /// \param current_priority the priority of the current equation for which the parts are computed
     /// \param current_type the operation type (AND/OR) of the current equation for which the parts are computed
     /// \param vars_stack used for detection of infinite recursion. Please, initialise to the empty set.
-    std::vector<pbes_expression> split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type, std::set<std::string> vars_stack);
+    std::vector<pbes_expression> split_expression_and_substitute_variables(const pbes_expression& e, int current_priority, operation_type current_type, std::set<std::string> vars_stack);
 
     /// \brief Computes LTS Type from PBES.
     void compute_lts_type();
@@ -396,7 +396,7 @@ public:
     /// \brief Returns the index for a parameter signature in the list of parameter signatures
     /// for the system.
     /// \param signaturePBES_State the parameter signature.
-    int get_index(const std::string& signaturePBES_State);
+    int get_index(const std::string& signature);
 
     /// \brief Determines if <tt>group</tt> is read dependent on the propositional variable.
     /// Returns true, because the propositional variable is needed to determine if the group belongs
@@ -508,7 +508,7 @@ public:
     /// \param reset_flag if set, irrelevant parts of the state vector will be reset to a default value
     /// \param always_split_flag if set, equations will always be split into conjuncts or disjuncts to form transition groups,
     ///        if not set (default) the explorer assumes the pbes to be generated with lps2pbes -p and splits accordingly.
-    explorer(const pbes& p, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
+    explorer(const pbes& p_, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
 
     /// \brief Destructor.
     ~explorer();
@@ -534,7 +534,7 @@ public:
     /// \param type_no the number of the value type.
     /// \param value a string representation of the data value.
     /// \return the index of <tt>value</tt> in local store <tt>type_no</tt>.
-    int get_index(int type_no, const std::string& value);
+    int get_index(int type_no, const std::string& s);
 
     /// \brief Returns the index of <tt>s</tt> in the local store for string values.
     /// This store is reserved for the string representations of variable names.

@@ -106,7 +106,7 @@ void test1()
   BOOST_CHECK(info.to_string() == info1.to_string());
 
   // test destructor
-  rewriter r1 = r;
+  const rewriter& r1 = r;
 }
 
 const std::string SPECIFICATION2=
@@ -158,7 +158,7 @@ void test3()
 // that are used before and after rewriting :-(
 // Checks if rewriting the specification src with the substitutions sigma
 // results in the specification dest.
-void test_lps_rewriter(std::string src_text, std::string dest_text, std::string sigma_text)
+void test_lps_rewriter(const std::string& src_text, const std::string& dest_text, const std::string& sigma_text)
 {
   lps::specification src  = parse_linear_process_specification(src_text);
   lps::specification dest = parse_linear_process_specification(dest_text);

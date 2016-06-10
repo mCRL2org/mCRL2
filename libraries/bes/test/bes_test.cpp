@@ -22,8 +22,8 @@ typedef core::term_traits<boolean_expression> tr;
 void test_join()
 {
   boolean_variable X("X");
-  boolean_expression Z1 = X;
-  boolean_expression Z2(X);
+  const boolean_expression& Z1 = X;
+  const boolean_expression& Z2(X);
   boolean_expression Z3;
   Z3 = X;
 

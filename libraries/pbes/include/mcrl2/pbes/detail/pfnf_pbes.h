@@ -155,12 +155,12 @@ class pfnf_equation
     pfnf_equation(const pbes_equation& eqn)
     {
       m_symbol = eqn.symbol();
-      propositional_variable X = eqn.variable();
-      pbes_expression phi = eqn.formula();
+      const propositional_variable& X = eqn.variable();
+      const pbes_expression& phi = eqn.formula();
 
       // left hand side
       m_X = X;
-      data::variable_list d = X.parameters();
+      const data::variable_list& d = X.parameters();
       m_parameters = std::vector<data::variable>(d.begin(), d.end());
 
       // right hand side

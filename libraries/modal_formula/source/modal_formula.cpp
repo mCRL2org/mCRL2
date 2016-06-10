@@ -104,7 +104,7 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   return state_formulas::preprocess_state_formula(formula, spec);
 }
 
-bool is_monotonous(state_formula f)
+bool is_monotonous(const state_formula& f)
 {
   return state_formulas::is_monotonous(f);
 }

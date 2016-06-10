@@ -22,7 +22,7 @@ namespace process {
 namespace detail {
 
 inline
-bool contains(const core::identifier_string_list A, const core::identifier_string& a)
+bool contains(const core::identifier_string_list& A, const core::identifier_string& a)
 {
   return std::find(A.begin(), A.end(), a) != A.end();
 }
@@ -232,7 +232,7 @@ action_name_set rename_inverse(const rename_expression_list& R, const action_nam
 inline
 std::pair<multi_action_name, multi_action_name> apply_comm_inverse(const communication_expression& x, const multi_action_name& alpha1, const multi_action_name& alpha2)
 {
-  core::identifier_string c = x.name();
+  const core::identifier_string& c = x.name();
   core::identifier_string_list lhs = x.action_name().names();
   std::pair<multi_action_name, multi_action_name> result;
   result.first = alpha1;

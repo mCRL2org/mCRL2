@@ -66,7 +66,7 @@ namespace detail
     std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
     for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
     {
-      for(const propositional_variable_instantiation inst:vec)
+      for(const propositional_variable_instantiation& inst:vec)
       {
         if (short_renaming_scheme)
         {
@@ -336,14 +336,14 @@ class pbesinst_alternative_lazy_algorithm
       }
     }
 
-    size_t get_rank(propositional_variable_instantiation X)
+    size_t get_rank(const propositional_variable_instantiation& X)
     {
       return ranks[equation_index[X.name()]];
     }
 
     template <bool is_mu>
     bool find_loop_rec(
-        pbes_expression expr,
+        const pbes_expression& expr,
         propositional_variable_instantiation X,
         size_t rank,
         std::unordered_map<propositional_variable_instantiation, bool>& visited)
@@ -354,7 +354,7 @@ class pbesinst_alternative_lazy_algorithm
       }
       if (is_propositional_variable_instantiation(expr))
       {
-        const propositional_variable_instantiation Y = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
+        const propositional_variable_instantiation& Y = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
         if (Y == X)
         {
           return true;
@@ -446,7 +446,7 @@ class pbesinst_alternative_lazy_algorithm
 
         if (is_propositional_variable_instantiation(expr))
         {
-          const propositional_variable_instantiation X = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
+          const propositional_variable_instantiation& X = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
           if (reachable.count(X) == 0)
           {
             if (equation.count(X)>0)
@@ -484,7 +484,7 @@ class pbesinst_alternative_lazy_algorithm
           size_t index = equation_index[i->first.name()];
           instantiations[index].push_back(i->first);
           std::set<propositional_variable_instantiation> rhs_variables = find_propositional_variable_instantiations(i->second);
-          for (propositional_variable_instantiation v: rhs_variables)
+          for (const propositional_variable_instantiation& v: rhs_variables)
           {
             occurrence[v].insert(i->first);
           }
@@ -656,7 +656,7 @@ class pbesinst_alternative_lazy_algorithm
         // Add all variable instantiations in psi_e to todo and generated,
         // and augment the occurrence sets
         std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi_e);
-        for (propositional_variable_instantiation v: psi_variables)
+        for (const propositional_variable_instantiation& v: psi_variables)
         {
           if (todo_set.count(v) == 0 && equation.count(v) == 0)
           {
@@ -683,7 +683,7 @@ class pbesinst_alternative_lazy_algorithm
               const std::unordered_set<propositional_variable_instantiation> oc = occurrence[X];
               std::unordered_map<propositional_variable_instantiation, pbes_expression> trivial_X;
               trivial_X[X] = psi_e;
-              for (const propositional_variable_instantiation Y: oc)
+              for (const propositional_variable_instantiation& Y: oc)
               {
                 pbes_expression_pair p=simplify_pbes_expression(equation[Y],trivial);
                 equation[Y]=p.first;
@@ -725,10 +725,10 @@ class pbesinst_alternative_lazy_algorithm
       const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> 
             pv_renaming = detail::create_pv_renaming(instantiations,short_rename_scheme);
       detail::rename_pbesinst_consecutively renamer(pv_renaming);
-      for (const std::vector<propositional_variable_instantiation> vec: instantiations)
+      for (const std::vector<propositional_variable_instantiation>& vec: instantiations)
       {
         const fixpoint_symbol symbol = symbols[index++];
-        for (propositional_variable_instantiation X_e: vec)
+        for (const propositional_variable_instantiation& X_e: vec)
         {
           const propositional_variable lhs = propositional_variable(renamer(X_e).name(), data::variable_list());
           const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);

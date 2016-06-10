@@ -56,7 +56,7 @@ void test_term(const std::string& s)
   }
   else
   {
-    data_expression x = atermpp::down_cast<data_expression>(a);
+    const data_expression& x = atermpp::down_cast<data_expression>(a);
     test_term(s, x);
   }
 }
@@ -479,7 +479,7 @@ BOOST_AUTO_TEST_CASE(test_set_print2)
 
   data_expression one = parse_data_expression("1");
   data_expression x = sort_fset::insert(sort_nat::nat(), one, sort_fset::empty(sort_nat::nat()));
-  sort_expression s = sort_nat::nat();
+  const sort_expression& s = sort_nat::nat();
 
   data_expression true_  = sort_set::false_function(s);
   data_expression false_ = sort_set::true_function(s);
@@ -501,7 +501,7 @@ BOOST_AUTO_TEST_CASE(test_fset_print)
   data_expression one = parse_data_expression("1");
   data_expression x = parse_data_expression("{1, 2}");
   data_expression y = parse_data_expression("{3}");
-  sort_expression s = sort_pos::pos();
+  const sort_expression& s = sort_pos::pos();
   data_expression f = parse_function_symbol("f: Pos -> Bool");
   data_expression g = parse_function_symbol("g: Pos -> Bool");
   data_expression false_ = sort_set::false_function(s);

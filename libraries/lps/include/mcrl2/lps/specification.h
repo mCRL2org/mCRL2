@@ -44,7 +44,7 @@ class specification;
 void complete_data_specification(specification& spec);
 
 // template function overloads
-bool check_well_typedness(const specification& spec);
+bool check_well_typedness(const specification& x);
 
 /// \brief Test for a specification expression
 /// \param x A term
@@ -88,7 +88,7 @@ class specification_base
       assert(core::detail::check_term_LinProcSpec(t));
       m_data             = data::data_specification(get(t, 0));
       m_action_labels    = down_cast<process::action_label_list>(get(t, 1)[0]);
-      data::variable_list global_variables = down_cast<data::variable_list>(get(t, 2)[0]);
+      const data::variable_list& global_variables = down_cast<data::variable_list>(get(t, 2)[0]);
       m_global_variables = std::set<data::variable>(global_variables.begin(),global_variables.end());
       m_process          = LinearProcess(get(t, 3), stochastic_distributions_allowed);
       m_initial_process  = InitialProcessExpression(get(t, 4));

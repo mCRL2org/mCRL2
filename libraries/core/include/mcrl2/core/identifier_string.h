@@ -58,7 +58,7 @@ inline void swap(identifier_string& t1, identifier_string& t2)
 /// \param t A term
 /// \return Whether t is an identifier string.
 inline
-bool is_identifier_string(atermpp::aterm t)
+bool is_identifier_string(const atermpp::aterm& t)
 {
   return t.type_is_appl() && atermpp::aterm_appl(t).size() == 0;
 }

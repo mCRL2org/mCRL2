@@ -158,7 +158,7 @@ std::string t14 =
   "init X(0);                   \n"
   ;
 
-void test_pbes(std::string text)
+void test_pbes(const std::string& text)
 {
   pbes p = txt2pbes(text);
   std::set<data::sort_expression> sorts;

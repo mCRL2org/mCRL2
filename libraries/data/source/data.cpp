@@ -130,7 +130,7 @@ sort_expression data_expression::sort() const
   }
   else if (is_function_symbol(*this))
   {
-    const function_symbol f = atermpp::down_cast<function_symbol>(*this);
+    const function_symbol& f = atermpp::down_cast<function_symbol>(*this);
     return f.sort();
   }
   else if (is_abstraction(*this))

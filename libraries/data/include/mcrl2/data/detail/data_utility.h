@@ -60,11 +60,7 @@ bool unique_names(const VariableContainer& variables)
   {
     variable_names.insert(var.name());
   }
-  if (variable_names.size() != variables.size())
-  {
-    return false;
-  }
-  return true;
+  return variable_names.size() == variables.size();
 }
 
 /// \brief Returns true if the left hand sides of assignments are contained in variables.
@@ -109,11 +105,11 @@ void set_remove_if(std::set<T>& s, UnaryPredicate f)
 /// \param sorts A set of sort expressions
 /// \return True if the sort is contained in <tt>sorts</tt>
 template <typename SortContainer>
-inline bool check_sort(sort_expression s, const SortContainer& sorts)
+inline bool check_sort(const sort_expression& s, const SortContainer& sorts)
 {
   struct local
   {
-    static bool is_not_function_sort(atermpp::aterm_appl t)
+    static bool is_not_function_sort(const atermpp::aterm_appl& t)
     {
       return is_sort_expression(t) && !is_function_sort(t);
     }
@@ -133,7 +129,7 @@ inline bool check_sort(sort_expression s, const SortContainer& sorts)
         if (std::find(sorts.begin(), sorts.end(), sort_alias.name()) == sorts.end())
         {
           // sort_alias.reference() is a basic, structured or container sort
-          sort_expression sort_reference(sort_alias.reference());
+          const sort_expression& sort_reference(sort_alias.reference());
 
           if (std::find(sorts.begin(), sorts.end(), sort_reference) == sorts.end())
           {

@@ -54,7 +54,7 @@ class pos_sort_definition : public sort_definition
       sort_definition(data_specification, "Int")
     {}
 
-    std::string generate_variable_declaration(core::identifier_string name) const
+    std::string generate_variable_declaration(const core::identifier_string& name) const
     {
       return sort_definition::generate_variable_declaration(name) + "(assert (>= " + (std::string)name + " 1))\n";
     }
@@ -67,13 +67,13 @@ class nat_sort_definition : public sort_definition
       sort_definition(data_specification, "Int")
     {}
 
-    std::string generate_variable_declaration(core::identifier_string name) const
+    std::string generate_variable_declaration(const core::identifier_string& name) const
     {
       return sort_definition::generate_variable_declaration(name) + "(assert (>= " + (std::string)name + " 0))\n";
     }
 };
 
-static std::string print_nat(data::data_expression number)
+static std::string print_nat(const data::data_expression& number)
 {
   return data::pp(number);
 }
@@ -97,7 +97,7 @@ static std::string print_int(data::data_expression number)
   return output;
 }
 
-static std::string print_real(data::data_expression number)
+static std::string print_real(const data::data_expression& number)
 {
   assert(data::sort_real::is_creal_application(number));
   data::application application(number);
@@ -106,7 +106,7 @@ static std::string print_real(data::data_expression number)
   return "(/ " + numerator + " " + denominator + ")";
 }
 
-static std::shared_ptr<function_definition> make_operator(data_specification *data_specification, std::string name)
+static std::shared_ptr<function_definition> make_operator(data_specification *data_specification, const std::string& name)
 {
   return std::shared_ptr<function_definition>(new named_function_definition(data_specification, name));
 }
@@ -188,7 +188,7 @@ std::string smt4_data_specification::generate_assertion(const std::map<data::var
   return "(assert " + generate_data_expression(declared_variables, assertion) + ")\n";
 }
 
-std::string smt4_data_specification::generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression_list distinct_terms) const
+std::string smt4_data_specification::generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression_list& distinct_terms) const
 {
   std::string output = "(distinct";
   for (data::data_expression_list::const_iterator i = distinct_terms.begin(); i != distinct_terms.end(); i++)

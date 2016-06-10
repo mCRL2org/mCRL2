@@ -43,17 +43,17 @@ class smt_problem
       return m_distinct_assertions;
     }
 
-    void add_variable(data::variable variable)
+    void add_variable(const data::variable& variable)
     {
       m_variables.insert(variable);
     }
 
-    void add_assertion(data::data_expression expression)
+    void add_assertion(const data::data_expression& expression)
     {
       m_assertions.insert(expression);
     }
 
-    void add_distinct_assertion(data::data_expression_list distinct_terms)
+    void add_distinct_assertion(const data::data_expression_list& distinct_terms)
     {
       m_distinct_assertions.insert(distinct_terms);
     }

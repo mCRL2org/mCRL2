@@ -55,7 +55,7 @@ void variable_test()
   BOOST_CHECK(x != y_);
   BOOST_CHECK(y == y_);
 
-  data_expression y_e(y);
+  const data_expression& y_e(y);
   variable y_e_(y_e);
   BOOST_CHECK(y_e_ == y);
   BOOST_CHECK(y_e_.name() == y.name());
@@ -91,7 +91,7 @@ void function_symbol_test()
   BOOST_CHECK(f != g_);
   BOOST_CHECK(g == g_);
 
-  data_expression f_e(f);
+  const data_expression& f_e(f);
   data::function_symbol f_e_(f_e);
   BOOST_CHECK(f_e == f);
   BOOST_CHECK(f_e_.name() == f.name());
@@ -119,7 +119,7 @@ void application_test()
   BOOST_CHECK(*(fxy.begin()) == x);
   BOOST_CHECK(*(++fxy.begin()) == y);
 
-  data_expression fxy_e(fxy);
+  const data_expression& fxy_e(fxy);
   application fxy_e_(fxy_e);
   BOOST_CHECK(fxy == fxy_e_);
   BOOST_CHECK(fxy.sort() == fxy_e_.sort());
@@ -138,7 +138,7 @@ void abstraction_test()
   BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
 
-  data_expression I_e(I);
+  const data_expression& I_e(I);
   abstraction I_e_(I_e);
   BOOST_CHECK(I_e_ == I);
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
@@ -157,13 +157,13 @@ void lambda_test()
   BOOST_CHECK(is_lambda(I));
   BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
-  sort_expression s_(s);
+  const sort_expression& s_(s);
   sort_expression_vector s_l(atermpp::make_vector(s_));
   BOOST_CHECK(!s_l.empty());
   function_sort fs(s_l, s);
   BOOST_CHECK(I.sort() == fs);
 
-  data_expression I_e(I);
+  const data_expression& I_e(I);
   lambda I_e_(I_e);
   BOOST_CHECK(I_e_ == I);
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
@@ -187,12 +187,12 @@ void forall_test()
   BOOST_CHECK(is_forall(I));
   BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
-  sort_expression s_(s);
+  const sort_expression& s_(s);
   sort_expression_vector s_l(atermpp::make_vector(s_));
 
   // TODO Check sort
 
-  data_expression I_e(I);
+  const data_expression& I_e(I);
   forall I_e_(I_e);
   BOOST_CHECK(I_e_ == I);
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
@@ -216,12 +216,12 @@ void exists_test()
   BOOST_CHECK(is_exists(I));
   BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
-  sort_expression s_(s);
+  const sort_expression& s_(s);
   sort_expression_vector s_l(atermpp::make_vector(s_));
 
   // TODO Check sort
 
-  data_expression I_e(I);
+  const data_expression& I_e(I);
   exists I_e_(I_e);
   BOOST_CHECK(I_e_ == I);
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
@@ -264,7 +264,7 @@ void where_declaration_test()
   BOOST_CHECK(wxy.body() == x);
   BOOST_CHECK(wxy.declarations() == xyl);
 
-  data_expression wxy_e(wxy);
+  const data_expression& wxy_e(wxy);
   where_clause wxy_e_(wxy_e);
   BOOST_CHECK(wxy_e_ == wxy);
   BOOST_CHECK(wxy_e_.body() == wxy.body());

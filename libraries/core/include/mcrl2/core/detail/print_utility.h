@@ -32,7 +32,7 @@ namespace detail
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container>
-std::string print_container(const Container& v, std::string begin_marker = "(", std::string end_marker = ")", std::string message = "", bool print_index = false, bool boundary_spaces = true)
+std::string print_container(const Container& v, const std::string& begin_marker = "(", const std::string& end_marker = ")", const std::string& message = "", bool print_index = false, bool boundary_spaces = true)
 {
   std::ostringstream out;
   if (!message.empty())
@@ -95,7 +95,7 @@ std::string print_set(const Container& v, std::string message = "", bool print_i
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename MapContainer>
-std::string print_map(const MapContainer& v, std::string message = "")
+std::string print_map(const MapContainer& v, const std::string& message = "")
 {
   std::ostringstream out;
   if (!message.empty())

@@ -31,7 +31,7 @@ struct counter
     : m_sum(sum)
   {}
 
-  void operator()(const atermpp::aterm t) const
+  void operator()(const atermpp::aterm& t) const
   {
     m_sum += aterm_int(t).value();
   }
@@ -53,7 +53,7 @@ struct func
   func(int)
   {}
 
-  atermpp::aterm operator()(atermpp::aterm x) const
+  atermpp::aterm operator()(const atermpp::aterm& x) const
   {
     return read_term_from_string("f(" + to_string(x) + ")");
   } 

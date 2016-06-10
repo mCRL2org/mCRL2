@@ -69,7 +69,7 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
     const data::data_expression_list& e = Ye.parameters();
     std::string name = Ye.name();
     
-    for (const data::data_expression exp: e)
+    for (const data::data_expression& exp: e)
     {
       if (is_function_symbol(exp))
       {

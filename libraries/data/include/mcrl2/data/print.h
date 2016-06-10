@@ -487,17 +487,17 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            || sort_real::is_real(x);
   }
 
-  bool is_fset_true(data_expression x)
+  bool is_fset_true(const data_expression& x)
   {
     return sort_set::is_true_function_function_symbol(sort_set::left(x));
   }
 
-  bool is_fset_false(data_expression x)
+  bool is_fset_false(const data_expression& x)
   {
     return sort_set::is_false_function_function_symbol(sort_set::left(x));
   }
 
-  bool is_fset_lambda(data_expression x)
+  bool is_fset_lambda(const data_expression& x)
   {
     return is_lambda(sort_set::left(x)) && sort_fset::is_empty_function_symbol(sort_set::right(x));
   }
@@ -512,7 +512,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return sort_bag::is_one_function_function_symbol(sort_bag::left(x));
   }
 
-  bool is_fbag_lambda(data_expression x)
+  bool is_fbag_lambda(const data_expression& x)
   {
     return is_lambda(sort_bag::left(x)) && sort_fbag::is_empty_function_symbol(sort_bag::right(x));
   }
@@ -593,7 +593,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(" }");
   }
 
-  void print_fbag_lambda(data_expression x)
+  void print_fbag_lambda(const data_expression& x)
   {
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
     core::identifier_string name = generate_identifier("x", x);
@@ -652,13 +652,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_list(arguments, "{", "}");
   }
 
-  void print_fset_true(data_expression x)
+  void print_fset_true(const data_expression& x)
   {
     derived().print("!");
     derived().apply(sort_set::right(x));
   }
 
-  void print_fset_false(data_expression x)
+  void print_fset_false(const data_expression& x)
   {
     if (sort_fset::is_empty_function_symbol(sort_set::right(x)))
     {
@@ -670,7 +670,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
   }
 
-  void print_fset_lambda(data_expression x)
+  void print_fset_lambda(const data_expression& x)
   {
     data::lambda left(sort_set::left(x));
     derived().print("{ ");
@@ -735,7 +735,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
   }
 
-  void print_fset_default(data_expression x)
+  void print_fset_default(const data_expression& x)
   {
     data_expression right = sort_set::right(x);
     // TODO: check if this is the correct way to handle this case
@@ -1733,7 +1733,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().enter(x);
     derived().apply(x.body());
     derived().print(" whr ");
-    assignment_expression_list declarations = x.declarations();
+    const assignment_expression_list& declarations = x.declarations();
     for (assignment_expression_list::const_iterator i = declarations.begin(); i != declarations.end(); ++i)
     {
       if (i != declarations.begin())

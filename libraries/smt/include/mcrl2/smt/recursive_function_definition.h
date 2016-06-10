@@ -35,7 +35,7 @@ class recursive_function_definition: public named_function_definition
 
     virtual std::string generate_definition() const = 0;
 
-    static bool is_pattern_matching_rule(data_specification *data_specification, data::data_equation rewrite_rule);
+    static bool is_pattern_matching_rule(data_specification *data_specification, const data::data_equation& rewrite_rule);
 };
 
 }

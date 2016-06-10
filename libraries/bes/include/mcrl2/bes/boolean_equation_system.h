@@ -37,7 +37,7 @@ namespace bes
 class boolean_equation_system;
 
 template <typename Object, typename OutputIterator>
-void find_boolean_variables(const Object& x, OutputIterator o);
+void find_boolean_variables(const Object& container, OutputIterator o);
 
 atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system& p);
 
@@ -57,7 +57,7 @@ class boolean_equation_system
 
     /// \brief Initialize the boolean_equation_system with an atermpp::aterm_appl.
     /// \param t A term
-    void init_term(atermpp::aterm_appl t)
+    void init_term(const atermpp::aterm_appl& t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
       atermpp::term_list<atermpp::aterm_appl> equations = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);

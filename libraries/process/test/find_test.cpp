@@ -34,19 +34,19 @@ std::string PROC_DECL =
   ;
 
 inline
-data::variable nat(std::string name)
+data::variable nat(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
 
 inline
-data::variable pos(std::string name)
+data::variable pos(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_pos::pos());
 }
 
 inline
-data::variable bool_(std::string name)
+data::variable bool_(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_bool::bool_());
 }

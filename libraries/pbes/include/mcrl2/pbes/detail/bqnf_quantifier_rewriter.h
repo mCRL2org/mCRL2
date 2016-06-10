@@ -134,7 +134,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
         free_phi_i.insert(v);
       }
       std::set<data::variable> free_g_minus_free_phi_i;
-      for (data::variable var: free_g)
+      for (const data::variable& var: free_g)
       {
         if (free_phi_i.find(var)==free_phi_i.end()) { // !free_phi_i.contains(v)
           free_g_minus_free_phi_i.insert(var);
@@ -143,7 +143,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       std::vector<data::variable> d_intersects_free_g_minus_free_phi_i;
       std::set<data::variable> d_minus_free_phi_i;
       std::set<data::variable> d_intersects_free_phi_i;
-      for (data::variable var: d)
+      for (const data::variable& var: d)
       {
         if (free_g_minus_free_phi_i.find(var) != free_g_minus_free_phi_i.end()) // free_g_minus_free_phi_i.contains(v)
         {
@@ -261,7 +261,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
             {
               free_phi_i.insert(v);
             }
-            for (data::variable var: qvars)
+            for (const data::variable& var: qvars)
             {
               if (free_phi_i.find(var) != free_phi_i.end()) // free_phi_i.contains(v)
               {

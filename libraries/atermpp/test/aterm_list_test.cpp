@@ -44,7 +44,7 @@ struct func
   func(int)
   {}
 
-  atermpp::aterm operator()(atermpp::aterm x) const
+  atermpp::aterm operator()(const atermpp::aterm& x) const
   {
     return read_term_from_string("f(" + to_string(x) + ")");
   }

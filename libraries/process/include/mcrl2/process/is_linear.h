@@ -53,8 +53,8 @@ bool check_process_instance(const process_equation& eq, const process_instance& 
   {
     return false;
   }
-  data::variable_list v = eq.formal_parameters();
-  data::data_expression_list e = init.actual_parameters();
+  const data::variable_list& v = eq.formal_parameters();
+  const data::data_expression_list& e = init.actual_parameters();
   data::variable_list::const_iterator i = v.begin();
   data::data_expression_list::const_iterator j = e.begin();
   for (; i != v.end(); ++i, ++j)

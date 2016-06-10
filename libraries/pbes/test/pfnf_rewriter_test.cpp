@@ -58,7 +58,7 @@ pbes_system::pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
-void test_pfnf_expression(std::string s)
+void test_pfnf_expression(const std::string& s)
 {
   pbes_system::detail::pfnf_traverser visitor;
   pbes_system::pbes_expression t1 = expr(s);

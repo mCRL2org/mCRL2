@@ -475,7 +475,7 @@ std::vector<constraint_ptr> join_or_is_element_of_constraints(const std::vector<
   std::vector<constraint_ptr> result;
   std::map<untyped_sort_variable, std::set<sort_expression> > is_element_of_constraints;
 
-  for (constraint_ptr p: constraints)
+  for (const constraint_ptr& p: constraints)
   {
     is_element_of_constraint* x_is_element_of = dynamic_cast<is_element_of_constraint*>(p.get());
     if (x_is_element_of)
@@ -512,7 +512,7 @@ inline
 constraint_ptr make_or_constraint(const std::vector<constraint_ptr>& alternatives)
 {
   std::vector<constraint_ptr> v;
-  for (constraint_ptr p: alternatives)
+  for (const constraint_ptr& p: alternatives)
   {
     true_constraint* x_no = dynamic_cast<true_constraint*>(p.get());
     if (x_no)
@@ -613,7 +613,7 @@ struct type_check_node
 
   virtual void apply_substitution(const sort_substitution& sigma)
   {
-    for (type_check_node_ptr child: children)
+    for (const type_check_node_ptr& child: children)
     {
       child->apply_substitution(sigma);
     }
@@ -622,7 +622,7 @@ struct type_check_node
 
   void set_children_constraints(type_check_context& context)
   {
-    for (type_check_node_ptr child: children)
+    for (const type_check_node_ptr& child: children)
     {
       child->set_constraint(context);
     }
@@ -806,7 +806,7 @@ struct list_enumeration_node: public type_check_node
 
     std::vector<constraint_ptr> alternatives;
     alternatives.push_back(make_is_equal_to_constraint(sort, sort_list::list(element_sort)));
-    for (type_check_node_ptr child: children)
+    for (const type_check_node_ptr& child: children)
     {
       alternatives.push_back(make_subsort_constraint(element_sort, child->sort));
     }
@@ -865,7 +865,7 @@ struct set_enumeration_node: public type_check_node
 
     std::vector<constraint_ptr> alternatives;
     alternatives.push_back(make_is_equal_to_constraint(sort, sort_set::set_(element_sort)));
-    for (type_check_node_ptr child: children)
+    for (const type_check_node_ptr& child: children)
     {
       alternatives.push_back(make_subsort_constraint(element_sort, child->sort));
     }
@@ -936,7 +936,7 @@ struct application_node: public type_check_node
     : type_check_node(context, {}), arity(arguments.size())
   {
     children.push_back(head);
-    for (auto arg: arguments)
+    for (const auto& arg: arguments)
     {
       children.push_back(arg);
     }
@@ -1315,12 +1315,12 @@ std::vector<sort_expression> type_check_context::find_matching_variables(const s
 }
 
 inline
-void print_node(type_check_node_ptr node)
+void print_node(const type_check_node_ptr& node)
 {
   std::cout << "\nnode = " << node->print() << std::endl;
   std::cout << "sort = " << node->sort << std::endl;
   std::cout << "constraint = " << node->constraint->print() << std::endl;
-  for (type_check_node_ptr child: node->children)
+  for (const type_check_node_ptr& child: node->children)
   {
     print_node(child);
   }

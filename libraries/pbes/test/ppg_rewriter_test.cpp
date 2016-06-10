@@ -25,7 +25,7 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 
-void rewrite_ppg(std::string bqnf_text, std::string ppg_text)
+void rewrite_ppg(const std::string& bqnf_text, const std::string& ppg_text)
 {
   std::clog << "rewrite_ppg" << std::endl;
   std::clog << "Parsing text..." << std::endl;

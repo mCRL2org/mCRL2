@@ -211,7 +211,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       data::data_expression ci = summand.condition();
       lps::multi_action ai     = summand.multi_action();
       data::assignment_list gi = summand.assignments();
-      data::variable_list yi   = summand.summation_variables();
+      const data::variable_list& yi   = summand.summation_variables();
 
       expression_type rhs = rhs0;
       data::mutable_map_substitution<> sigma_yi = pbes_system::detail::make_fresh_variables(yi, id_generator);
@@ -263,7 +263,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   void leave(const state_formulas::yaled_timed& x)
   {
-    data::data_expression t = x.time_stamp();
+    const data::data_expression& t = x.time_stamp();
     std::vector<expression_type> v;
     for (const lps::action_summand& i: lps.action_summands())
     {
@@ -291,21 +291,21 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   void leave(const state_formulas::delay_timed& x)
   {
-    data::data_expression t = x.time_stamp();
+    const data::data_expression& t = x.time_stamp();
     std::vector<expression_type> v;
     for (const lps::action_summand& i : lps.action_summands())
     {
-      data::data_expression ci = i.condition();
+      const data::data_expression& ci = i.condition();
       data::data_expression ti = i.multi_action().time();
-      data::variable_list   yi = i.summation_variables();
+      const data::variable_list&   yi = i.summation_variables();
       expression_type p = tr::exists(yi, tr::and_(ci, data::less_equal(t, ti)));
       v.push_back(p);
     }
     for (const lps::deadlock_summand& j: lps.deadlock_summands())
     {
-      data::data_expression cj = j.condition();
+      const data::data_expression& cj = j.condition();
       data::data_expression tj = j.deadlock().time();
-      data::variable_list   yj = j.summation_variables();
+      const data::variable_list&   yj = j.summation_variables();
       expression_type p = tr::exists(yj, tr::and_(cj, data::less_equal(t, tj)));
       v.push_back(p);
     }
@@ -315,8 +315,8 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void leave(const state_formulas::variable& x)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
-    data::data_expression_list d = x.arguments();
+    const core::identifier_string& X = x.name();
+    const data::data_expression_list& d = x.arguments();
     data::variable_list xp = lps.process_parameters();
     data::data_expression_list e = d + xp + Par(X, data::variable_list(), phi0);
     if (is_timed())
@@ -329,7 +329,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void apply(const state_formulas::nu& x)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     data::data_expression_list d = detail::mu_expressions(x);
     data::variable_list xp = lps.process_parameters();
     data::data_expression_list e = d + xp + Par(X, data::variable_list(), phi0);
@@ -343,7 +343,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   void apply(const state_formulas::mu& x)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     data::data_expression_list d = detail::mu_expressions(x);
     data::variable_list xp = lps.process_parameters();
     data::data_expression_list e = d + xp + Par(X, data::variable_list(), phi0);

@@ -25,7 +25,7 @@ using namespace atermpp;
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_f
 {
-  bool operator()(atermpp::aterm t) const
+  bool operator()(const atermpp::aterm& t) const
   {
     return (t.type_is_appl()) && aterm_appl(t).function().name() == "f";
   }
@@ -34,7 +34,7 @@ struct is_f
 // function object to test if it is an aterm_appl with function symbol "a" or "b"
 struct is_a_or_b
 {
-  bool operator()(atermpp::aterm t) const
+  bool operator()(const atermpp::aterm& t) const
   {
     return (t.type_is_appl()) &&
            (aterm_appl(t).function().name() == "a" || aterm_appl(t).function().name() == "b");

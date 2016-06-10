@@ -67,7 +67,7 @@ struct rule
  * the right hand sides of match_criteria, construct a right hand side based on the
  * conditions and right hand sides of the rules.
  */
-static data::data_expression construct_condition_rhs(data_specification *data_specification, const std::vector<rule>& rules, data::sort_expression sort)
+static data::data_expression construct_condition_rhs(data_specification *data_specification, const std::vector<rule>& rules, const data::sort_expression& sort)
 {
   data::data_expression_vector negated_conditions;
   for (std::vector<rule>::const_iterator i = rules.begin(); i != rules.end(); i++)
@@ -117,7 +117,7 @@ static data::data_expression construct_condition_rhs(data_specification *data_sp
 /*
  * For a list of rules with equal left hand sides of match_criteria, construct a right hand side.
  */
-static data::data_expression construct_rhs(data_specification *data_specification, const std::vector<rule>& rules, data::sort_expression sort)
+static data::data_expression construct_rhs(data_specification *data_specification, const std::vector<rule>& rules, const data::sort_expression& sort)
 {
   if (rules.empty())
   {
@@ -316,7 +316,7 @@ static data::data_expression construct_rhs(data_specification *data_specificatio
   return result;
 }
 
-bool recursive_function_definition::is_pattern_matching_rule(data_specification *data_specification, data::data_equation rewrite_rule)
+bool recursive_function_definition::is_pattern_matching_rule(data_specification *data_specification, const data::data_equation& rewrite_rule)
 {
   /*
    * For this rewrite rule to be usable in pattern matching, its lhs must only contain

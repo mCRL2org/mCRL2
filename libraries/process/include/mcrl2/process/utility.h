@@ -52,7 +52,7 @@ bool contains_tau(const multi_action_name_set& A)
 }
 
 inline
-process_expression make_sync(const process_expression x, const process_expression& y)
+process_expression make_sync(const process_expression& x, const process_expression& y)
 {
   if (is_delta(x) || is_delta(y))
   {
@@ -62,7 +62,7 @@ process_expression make_sync(const process_expression x, const process_expressio
 }
 
 inline
-process_expression make_merge(const process_expression x, const process_expression& y)
+process_expression make_merge(const process_expression& x, const process_expression& y)
 {
   if (is_delta(x) && is_delta(y))
   {
@@ -72,7 +72,7 @@ process_expression make_merge(const process_expression x, const process_expressi
 }
 
 inline
-process_expression make_left_merge(const process_expression x, const process_expression& y)
+process_expression make_left_merge(const process_expression& x, const process_expression& y)
 {
   if (is_delta(y))
   {
@@ -277,7 +277,7 @@ inline
 void apply_comm(const communication_expression& c, multi_action_name_set& A)
 {
   core::identifier_string_list names = c.action_name().names();
-  core::identifier_string a = c.name();
+  const core::identifier_string& a = c.name();
   multi_action_name alpha(names.begin(), names.end());
   // c == alpha -> a
 
@@ -302,7 +302,7 @@ inline
 void apply_comm_inverse(const communication_expression& gamma, multi_action_name_set& A)
 {
   std::vector<multi_action_name> to_be_added;
-  core::identifier_string c = gamma.name();
+  const core::identifier_string& c = gamma.name();
   core::identifier_string_list lhs = gamma.action_name().names();
 
   for (const multi_action_name& alpha: A)
@@ -445,7 +445,7 @@ multi_action_name_set make_name_set(const action_name_multiset_list& v)
   multi_action_name_set result;
   for (const action_name_multiset& i: v)
   {
-    core::identifier_string_list names = i.names();
+    const core::identifier_string_list& names = i.names();
     result.insert(multi_action_name(names.begin(), names.end()));
   }
   return result;

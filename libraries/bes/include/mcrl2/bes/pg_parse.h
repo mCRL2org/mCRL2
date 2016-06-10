@@ -54,7 +54,7 @@ struct node_t
 // otherwise the result is a conjunction.
 // Prefix is added to each of the identifiers in v.
 inline
-boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, std::string prefix = "X")
+boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, const std::string& prefix = "X")
 {
   std::set<boolean_expression> v_prefixed;
   for (identifier_t i: v)

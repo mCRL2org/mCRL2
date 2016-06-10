@@ -129,7 +129,7 @@ class basic_data_specification: public data_specification
   protected:
     virtual std::string generate_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression assertion) const = 0;
 
-    virtual std::string generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression_list distinct_terms) const;
+    virtual std::string generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression_list& distinct_terms) const;
 
     virtual std::string generate_smt_problem(std::string data_specification, std::string variable_declarations, std::string assertions) const = 0;
 
@@ -144,7 +144,7 @@ class basic_data_specification: public data_specification
     void find_rewrite_rules(const data::data_specification& data_specification);
 
 
-    void add_sort_definition(data::sort_expression sort, std::shared_ptr<sort_definition> definition)
+    void add_sort_definition(const data::sort_expression& sort, const std::shared_ptr<sort_definition>& definition)
     {
       if (!m_sorts.count(sort) && definition)
       {
@@ -156,7 +156,7 @@ class basic_data_specification: public data_specification
       }
     }
 
-    void add_sort_bool(std::shared_ptr<sort_definition> bool_definition, std::string true_string, std::string false_string)
+    void add_sort_bool(const std::shared_ptr<sort_definition>& bool_definition, const std::string& true_string, const std::string& false_string)
     {
       add_sort_definition(data::sort_bool::bool_(), bool_definition);
       m_functions[data::sort_bool::true_()] = std::shared_ptr<function_definition>(new named_function_definition(this, data::sort_bool::bool_(), true_string));
@@ -164,7 +164,7 @@ class basic_data_specification: public data_specification
     }
 
     template<typename Printer>
-    void add_sort_pos(std::shared_ptr<sort_definition> pos_definition, Printer printer)
+    void add_sort_pos(const std::shared_ptr<sort_definition>& pos_definition, Printer printer)
     {
       add_sort_definition(data::sort_pos::pos(), pos_definition);
       m_functions[data::sort_pos::c1()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_pos::pos(), data::sort_pos::c1(), printer));
@@ -172,7 +172,7 @@ class basic_data_specification: public data_specification
     }
 
     template<typename Printer>
-    void add_sort_nat(std::shared_ptr<sort_definition> nat_definition, Printer printer)
+    void add_sort_nat(const std::shared_ptr<sort_definition>& nat_definition, Printer printer)
     {
       add_sort_definition(data::sort_nat::nat(), nat_definition);
       m_functions[data::sort_nat::c0()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_nat::nat(), data::sort_nat::c0(), printer));
@@ -180,7 +180,7 @@ class basic_data_specification: public data_specification
     }
 
     template<typename Printer>
-    void add_sort_int(std::shared_ptr<sort_definition> int_definition, Printer printer)
+    void add_sort_int(const std::shared_ptr<sort_definition>& int_definition, Printer printer)
     {
       add_sort_definition(data::sort_int::int_(), int_definition);
       m_functions[data::sort_int::cint()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_int::int_(), data::sort_int::cint(), printer));
@@ -188,24 +188,24 @@ class basic_data_specification: public data_specification
     }
 
     template<typename Printer>
-    void add_sort_real(std::shared_ptr<sort_definition> real_definition, Printer printer)
+    void add_sort_real(const std::shared_ptr<sort_definition>& real_definition, Printer printer)
     {
       add_sort_definition(data::sort_real::real_(), real_definition);
       m_functions[data::sort_real::creal()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_real::real_(), data::sort_real::creal(), printer));
     }
 
-    void add_constructed_sort(const data::data_specification& data_specification, data::sort_expression sort);
+    void add_constructed_sort(const data::data_specification& data_specification, const data::sort_expression& sort);
     void add_constructed_sorts(const data::data_specification& data_specification);
 
 
-    void add_function_definition(data::function_symbol function, std::shared_ptr<function_definition> definition)
+    void add_function_definition(const data::function_symbol& function, const std::shared_ptr<function_definition>& definition)
     {
       if (!m_functions.count(function) && definition)
       {
         m_functions[function] = definition;
       }
     }
-    void add_function_definition(data::function_symbol function, data::variable_vector parameters, data::data_expression rhs)
+    void add_function_definition(const data::function_symbol& function, const data::variable_vector& parameters, const data::data_expression& rhs)
     {
       data::data_expression lhs;
       if (parameters.empty())
@@ -220,7 +220,7 @@ class basic_data_specification: public data_specification
       function_definition *definition = create_recursive_function_definition(function, atermpp::make_vector(equation));
       add_function_definition(function, std::shared_ptr<function_definition>(definition));
     }
-    void add_function_definition(data::function_symbol function, std::shared_ptr<function_definition> definition, data::variable_vector parameters, data::data_expression rhs)
+    void add_function_definition(const data::function_symbol& function, const std::shared_ptr<function_definition>& definition, const data::variable_vector& parameters, const data::data_expression& rhs)
     {
       if (definition)
       {
@@ -232,34 +232,34 @@ class basic_data_specification: public data_specification
       }
     }
     void add_standard_operators(const data::data_specification& data_specification,
-                                std::shared_ptr<function_definition> equal_to,
-                                std::shared_ptr<function_definition> not_equal_to,
-                                std::shared_ptr<function_definition> if_);
+                                const std::shared_ptr<function_definition>& equal_to,
+                                const std::shared_ptr<function_definition>& not_equal_to,
+                                const std::shared_ptr<function_definition>& if_);
     void add_boolean_operators(const data::data_specification& data_specification,
-                               std::shared_ptr<function_definition> not_,
-                               std::shared_ptr<function_definition> and_,
-                               std::shared_ptr<function_definition> or_,
-                               std::shared_ptr<function_definition> implies);
+                               const std::shared_ptr<function_definition>& not_,
+                               const std::shared_ptr<function_definition>& and_,
+                               const std::shared_ptr<function_definition>& or_,
+                               const std::shared_ptr<function_definition>& implies);
     void add_numerical_operators(const data::data_specification& data_specification,
-                               std::shared_ptr<function_definition> less,
-                               std::shared_ptr<function_definition> less_equal,
-                               std::shared_ptr<function_definition> greater,
-                               std::shared_ptr<function_definition> greater_equal,
-                               std::shared_ptr<function_definition> plus,
-                               std::shared_ptr<function_definition> minus,
-                               std::shared_ptr<function_definition> times,
-                               std::shared_ptr<function_definition> divides,
-                               std::shared_ptr<function_definition> div,
-                               std::shared_ptr<function_definition> mod,
-                               std::shared_ptr<function_definition> floor,
-                               std::shared_ptr<function_definition> ceil = 0,
-                               std::shared_ptr<function_definition> round = 0,
-                               std::shared_ptr<function_definition> unary_minus = 0,
-                               std::shared_ptr<function_definition> maximum = 0,
-                               std::shared_ptr<function_definition> minimum = 0,
-                               std::shared_ptr<function_definition> abs = 0);
+                               const std::shared_ptr<function_definition>& less,
+                               const std::shared_ptr<function_definition>& less_equal,
+                               const std::shared_ptr<function_definition>& greater,
+                               const std::shared_ptr<function_definition>& greater_equal,
+                               const std::shared_ptr<function_definition>& plus,
+                               const std::shared_ptr<function_definition>& minus,
+                               const std::shared_ptr<function_definition>& times,
+                               const std::shared_ptr<function_definition>& divides,
+                               const std::shared_ptr<function_definition>& div,
+                               const std::shared_ptr<function_definition>& mod,
+                               const std::shared_ptr<function_definition>& floor,
+                               const std::shared_ptr<function_definition>& ceil = 0,
+                               const std::shared_ptr<function_definition>& round = 0,
+                               const std::shared_ptr<function_definition>& unary_minus = 0,
+                               const std::shared_ptr<function_definition>& maximum = 0,
+                               const std::shared_ptr<function_definition>& minimum = 0,
+                               const std::shared_ptr<function_definition>& abs = 0);
 
-    void add_recursive_function(data::function_symbol function);
+    void add_recursive_function(const data::function_symbol& function);
     void add_recursive_functions(const data::data_specification& data_specification);
 };
 

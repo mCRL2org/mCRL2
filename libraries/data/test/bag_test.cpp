@@ -23,7 +23,7 @@ using namespace mcrl2::data;
 // test whether parsing s returns an expression matching predicate p.
 // Furthermore check whether the expression does not satisfy q.
 template <typename Predicate, typename NegativePredicate>
-void test_data_expression(const std::string& s, variable_vector v, Predicate p, NegativePredicate q)
+void test_data_expression(const std::string& s, const variable_vector& v, Predicate p, NegativePredicate q)
 {
   std::cerr << "testing data expression " << s << std::endl;
   data_expression e = parse_data_expression(s, v);

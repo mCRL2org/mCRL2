@@ -585,7 +585,7 @@ static void checkPattern(const data_expression& p)
 
 void CheckRewriteRule(const data_equation& data_eqn)
 {
-  const variable_list rule_var_list = data_eqn.variables();
+  const variable_list& rule_var_list = data_eqn.variables();
   const std::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
 
   // collect variables from lhs and check that they are in rule_vars

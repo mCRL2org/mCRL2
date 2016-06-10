@@ -34,12 +34,12 @@ namespace data
 data_expression& real_zero();
 data_expression& real_one();
 data_expression& real_minus_one();
-data_expression min(const data_expression e1,const data_expression e2,const rewriter&);
-data_expression max(const data_expression e1,const data_expression e2,const rewriter&);
-bool is_closed_real_number(const data_expression e);
-bool is_negative(const data_expression e,const rewriter& r);
-bool is_positive(const data_expression e,const rewriter& r);
-bool is_zero(const data_expression e);
+data_expression min(const data_expression& e1,const data_expression& e2,const rewriter&);
+data_expression max(const data_expression& e1,const data_expression& e2,const rewriter&);
+bool is_closed_real_number(const data_expression& e);
+bool is_negative(const data_expression& e,const rewriter& r);
+bool is_positive(const data_expression& e,const rewriter& r);
+bool is_zero(const data_expression& e);
 
 
 // Efficient construction of times on reals.
@@ -75,7 +75,7 @@ inline application real_minus(const data_expression& arg0, const data_expression
 // End of functions that ought to be defined elsewhere.
 
 
-inline data_expression rewrite_with_memory(const data_expression t,const rewriter& r);
+inline data_expression rewrite_with_memory(const data_expression& t,const rewriter& r);
 
 // prototype
 class linear_inequality;
@@ -92,7 +92,7 @@ namespace detail
 {
   enum comparison_t { less, less_eq, equal };
   
-  inline std::string pp(const detail::lhs_t& l);
+  inline std::string pp(const detail::lhs_t& lhs);
 
   inline detail::comparison_t negate(const detail::comparison_t t)
   {
@@ -126,7 +126,7 @@ namespace detail
   {
     public:
       // \brief default constructor
-      variable_with_a_rational_factor(const variable& v, const data_expression f)
+      variable_with_a_rational_factor(const variable& v, const data_expression& f)
        : atermpp::aterm_appl(f_variable_with_a_rational_factor(),v,f)
       {
         assert(f!=real_zero());
@@ -244,7 +244,7 @@ namespace detail
 
   };
 
-  inline void set_factor_for_a_variable(detail::map_based_lhs_t& new_lhs, const variable x, const data_expression e)
+  inline void set_factor_for_a_variable(detail::map_based_lhs_t& new_lhs, const variable& x, const data_expression& e)
   {
     assert(is_closed_real_number(e));
     if (e==real_zero())
@@ -522,12 +522,12 @@ class linear_inequality: public atermpp::aterm_appl
   protected:
 
     static void parse_and_store_expression(
-      const data_expression e,
+      const data_expression& e,
       detail::map_based_lhs_t& new_lhs,
       data_expression& new_rhs,
       const rewriter& r,
       bool negate=false,
-      const data_expression factor=real_one())
+      const data_expression& factor=real_one())
     {
       if (sort_real::is_minus_application(e) && application(e).size()==2)
       {
@@ -609,7 +609,7 @@ class linear_inequality: public atermpp::aterm_appl
     {}
 
     /// Basic constructor. 
-    linear_inequality(const detail::lhs_t lhs, const data_expression& r, detail::comparison_t t)
+    linear_inequality(const detail::lhs_t& lhs, const data_expression& r, detail::comparison_t t)
      : atermpp::aterm_appl((t==detail::less?
                       detail::linear_inequality_less():
                       (t==detail::less_eq?detail::linear_inequality_less_equal():detail::linear_inequality_equal())),
@@ -692,7 +692,7 @@ class linear_inequality: public atermpp::aterm_appl
     /// a variable and c is a real constant.
     /// \param e Contains the expression to become a linear inequality.
 
-    linear_inequality(const data_expression e,
+    linear_inequality(const data_expression& e,
                       const rewriter& r)
     {
       detail::comparison_t comparison;
@@ -795,7 +795,7 @@ class linear_inequality: public atermpp::aterm_appl
       return other < *this;
     } */
 
-    data_expression get_factor_for_a_variable(const variable x)
+    data_expression get_factor_for_a_variable(const variable& x)
     {
       return lhs()[x];
       /* for(const detail::variable_with_a_rational_factor& p:lhs())
@@ -929,8 +929,8 @@ inline std::string pp(const linear_inequality& l)
 //         where the comparison operator of e1 is kept.
 inline linear_inequality subtract(const linear_inequality& e1,
                                   const linear_inequality& e2,
-                                  const data_expression f1,
-                                  const data_expression f2,
+                                  const data_expression& f1,
+                                  const data_expression& f2,
                                   const rewriter& r)
 {
   const data_expression f=rewrite_with_memory(real_divides(f1,f2),r);
@@ -964,7 +964,7 @@ inline data_expression& real_minus_one()
   return real_minus_one;
 }
 
-inline data_expression min(const data_expression e1,const data_expression e2,const rewriter& r)
+inline data_expression min(const data_expression& e1,const data_expression& e2,const rewriter& r)
 {
   if (rewrite_with_memory(less_equal(e1,e2),r)==sort_bool::true_())
   {
@@ -977,7 +977,7 @@ inline data_expression min(const data_expression e1,const data_expression e2,con
   throw mcrl2::runtime_error("Fail to determine the minimum of: " + pp(e1) + " and " + pp(e2) + "\n");
 }
 
-inline data_expression max(const data_expression e1,const data_expression e2,const rewriter& r)
+inline data_expression max(const data_expression& e1,const data_expression& e2,const rewriter& r)
 {
   if (rewrite_with_memory(less_equal(e2,e1),r)==sort_bool::true_())
   {
@@ -991,7 +991,7 @@ inline data_expression max(const data_expression e1,const data_expression e2,con
 }
 
 
-inline bool is_closed_real_number(const data_expression e)
+inline bool is_closed_real_number(const data_expression& e)
 {
   // TODO: Check that the number is closed.
   if (e.sort()!=sort_real::real_())
@@ -1007,7 +1007,7 @@ inline bool is_closed_real_number(const data_expression e)
   return true;
 }
 
-inline bool is_negative(const data_expression e,const rewriter& r)
+inline bool is_negative(const data_expression& e,const rewriter& r)
 {
   data_expression result=rewrite_with_memory(less(e,real_zero()),r);
   if (result==sort_bool::true_())
@@ -1021,7 +1021,7 @@ inline bool is_negative(const data_expression e,const rewriter& r)
   throw mcrl2::runtime_error("Cannot determine that " + pp(e) + " is smaller than 0");
 }
 
-inline bool is_positive(const data_expression e,const rewriter& r)
+inline bool is_positive(const data_expression& e,const rewriter& r)
 {
   data_expression result=rewrite_with_memory(greater(e,real_zero()),r);
   if (result==sort_bool::true_())
@@ -1035,7 +1035,7 @@ inline bool is_positive(const data_expression e,const rewriter& r)
   throw mcrl2::runtime_error("Cannot determine that " + pp(e) + " is larger than or equal to 0");
 }
 
-inline bool is_zero(const data_expression e)
+inline bool is_zero(const data_expression& e)
 {
   // Assume data_expression is in normal form.
   assert(is_closed_real_number(e));
@@ -1058,7 +1058,7 @@ inline std::string pp_vector(const TYPE& inequalities)
 }
 
 bool is_inconsistent(
-  const std::vector < linear_inequality >& inequalities,
+  const std::vector < linear_inequality >& inequalities_in,
   const rewriter& r,
   const bool use_cache=true);
 
@@ -1232,7 +1232,7 @@ void fourier_motzkin(const std::vector < linear_inequality >& inequalities_in,
     // This is equivalent to N/bi + M/bj <= ci/bi + cj/bj
     for (const linear_inequality& e1: inequalities_with_positive_variable)
     {
-      for (const linear_inequality e2: inequalities_with_negative_variable)
+      for (const linear_inequality& e2: inequalities_with_negative_variable)
       {
         const detail::lhs_t::const_iterator e1_best_variable_it=e1.lhs().find(best_variable);
         const data_expression& e1_factor=e1_best_variable_it->factor();
@@ -1409,10 +1409,10 @@ inline void remove_redundant_inequalities(
 //---------------------------------------------------------------------------------------------------
 
 static void pivot_and_update(
-  const variable xi,  // a basic variable
-  const variable xj,  // a non basic variable
-  const data_expression v,
-  const data_expression v_delta_correction,
+  const variable& xi,  // a basic variable
+  const variable& xj,  // a non basic variable
+  const data_expression& v,
+  const data_expression& v_delta_correction,
   std::map < variable,data_expression >& beta,
   std::map < variable,data_expression >& beta_delta_correction,
   std::set < variable >& basic_variables,
@@ -1601,7 +1601,7 @@ namespace detail
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
 // std::cerr << "IS INCONSISTENT " << pp_vector(inequalities_in) << "\n";
         cache_type* current_root=m_cache;
-        for(linear_inequality l: inequalities_in)
+        for(const linear_inequality& l: inequalities_in)
         {
           /* First walk down the three until an endnode is found
              that with l<=current_root.m_inequality. */
@@ -1648,7 +1648,7 @@ namespace detail
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
 //std::cerr << "ADD INCONSISTENT " << pp_vector(inequalities_in) << "\n";
         cache_type** current_root=&m_cache;
-        for(linear_inequality l: inequalities_in)
+        for(const linear_inequality& l: inequalities_in)
         {
 //std::cerr << "CHECK INPUT " << pp(l) << "\n";
           /* First walk down the three until an endnode is found
@@ -1805,7 +1805,7 @@ namespace detail
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
 // std::cerr << "ADD CONSISTENT " << pp_vector(inequalities_in) << "\n";
         cache_type** current_root=&m_cache;
-        for(linear_inequality l: inequalities_in)
+        for(const linear_inequality& l: inequalities_in)
         {
 // std::cerr << "INSERT " << pp(l) << std::endl;
           /* First walk down the three until an endnode is found
@@ -2410,7 +2410,7 @@ std::set < variable >  gauss_elimination(
 // rewrite format.
 
 inline data_expression rewrite_with_memory(
-  const data_expression t,const rewriter& r)
+  const data_expression& t,const rewriter& r)
 {
   static std::map < data_expression, data_expression > rewrite_hash_table;
   std::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);

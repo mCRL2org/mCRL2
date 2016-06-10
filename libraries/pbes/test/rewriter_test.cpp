@@ -340,7 +340,7 @@ void test_expressions(Rewriter1& R1, std::string expr1, Rewriter2& R2, std::stri
   }
 }
 
-void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, std::string var_decl, std::string sigma, std::string data_spec)
+void test_enumerate_quantifiers_rewriter(const std::string& expr1, const std::string& expr2, const std::string& var_decl, const std::string& sigma, const std::string& data_spec)
 {
   std::cout << "<enumerate_quantifiers_rewriter>" << std::endl;
 

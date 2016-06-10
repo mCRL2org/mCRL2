@@ -181,7 +181,7 @@ void explorer::bfs()
         std::set<std::vector<int> > succ_set;
         //std::clog << successors.size() << " successors" << std::endl;
         transition_count += successors.size();
-        for(std::vector<int> s: successors)
+        for(const std::vector<int>& s: successors)
         {
           std::pair<std::set<std::vector<int> >::iterator,bool> ret;
           ret = visited.insert(s);
@@ -200,7 +200,7 @@ void explorer::bfs()
             this->next_state_long(state, g, f);
             std::vector<std::vector<int> > successors_groups = f.get_successors();
 
-            for(std::vector<int> s: successors_groups)
+            for(const std::vector<int>& s: successors_groups)
             {
                 succ_set_groups.insert(s);
             }
@@ -214,7 +214,7 @@ void explorer::bfs()
 } // namespace ltsmin
 
 
-void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int num_states, int num_transitions,
+void run_pbes_explorer(const std::string& pbes_text, int num_parts, int num_groups, int num_states, int num_transitions,
     const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer" << std::endl;
@@ -250,7 +250,7 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
 
 }
 
-void run_pbes_explorer_file(std::string filename, int num_parts, int num_groups, int num_states, int num_transitions,
+void run_pbes_explorer_file(const std::string& filename, int num_parts, int num_groups, int num_states, int num_transitions,
     const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer_file" << std::endl;

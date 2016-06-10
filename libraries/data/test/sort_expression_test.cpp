@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(basic_sort_test)
   BOOST_CHECK(s != t);
   BOOST_CHECK(s.name() != t.name());
 
-  sort_expression t_e(t);
+  const sort_expression& t_e(t);
   basic_sort t_e_(t_e);
   BOOST_CHECK_EQUAL(t_e_, t);
   BOOST_CHECK_EQUAL(t_e_.name(), t.name());
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(function_sort_test)
   BOOST_CHECK_EQUAL(fs.domain(), s01);
   BOOST_CHECK_EQUAL(fs.codomain(), s);
 
-  sort_expression fs_e(fs);
+  const sort_expression& fs_e(fs);
   function_sort fs_e_(fs_e);
   BOOST_CHECK_EQUAL(fs_e_, fs);
   BOOST_CHECK_EQUAL(fs_e_.domain(), fs.domain());
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(alias_test)
   BOOST_CHECK_EQUAL(s0_.name(), s0_name);
   BOOST_CHECK_EQUAL(s0_.reference(), s0);
 
-  alias s0_e_(s0_);
+  const alias& s0_e_(s0_);
   BOOST_CHECK_EQUAL(s0_e_, s0_);
   BOOST_CHECK_EQUAL(s0_e_.name(), s0_.name());
   BOOST_CHECK_EQUAL(s0_e_.reference(), s0_.reference());
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
 
   BOOST_CHECK_EQUAL(s.constructors(), cs);
 
-  sort_expression s_e(s);
+  const sort_expression& s_e(s);
   structured_sort s_e_(s_e);
   BOOST_CHECK_EQUAL(s_e_, s);
   BOOST_CHECK_EQUAL(s_e_.constructors(), s.constructors());

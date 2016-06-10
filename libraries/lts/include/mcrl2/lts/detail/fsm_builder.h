@@ -26,7 +26,7 @@ namespace lts {
 namespace detail {
 
 // Read a numeric value before a symbol c1 or c2, and remove it from s, including the symbol.
-inline std::string split_string_until(std::string& s, const std::string& c1, const std::string c2="")
+inline std::string split_string_until(std::string& s, const std::string& c1, const std::string& c2="")
 {
   size_t n=s.find(c1);
   if (c2!="")
@@ -49,9 +49,9 @@ inline std::string split_string_until(std::string& s, const std::string& c1, con
   return result;
 }
 
-inline lts_fsm_base::probabilistic_state parse_distribution(const std::string distribution)
+inline lts_fsm_base::probabilistic_state parse_distribution(const std::string& distribution)
 {
-  if (distribution.find("[")==std::string::npos) // So the distribution must consist of a state index.
+  if (distribution.find('[')==std::string::npos) // So the distribution must consist of a state index.
   {
     size_t state_number=utilities::parse_natural_number(distribution);
     if (state_number==0)

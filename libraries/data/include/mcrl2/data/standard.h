@@ -420,7 +420,6 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
   {
     const function_sort& fs = atermpp::down_cast<function_sort>(s);
     variable_vector xvars,yvars;
-    data_expression rhs=sort_bool::true_();
     size_t index=0;
     for(const sort_expression& sort: fs.domain())
     {

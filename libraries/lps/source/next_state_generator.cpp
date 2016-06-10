@@ -212,8 +212,8 @@ static float condition_selectivity(const data_expression& e, const variable& v)
   }
   else if (is_equal_to_application(e))
   {
-    data_expression left = data::binary_left(atermpp::down_cast<data::application>(e));
-    data_expression right = data::binary_right(atermpp::down_cast<data::application>(e));
+    const data_expression& left = data::binary_left(atermpp::down_cast<data::application>(e));
+    const data_expression& right = data::binary_right(atermpp::down_cast<data::application>(e));
 
     if (is_variable(left) && variable(left) == v)
     {
@@ -295,7 +295,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
   for (size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
     size_t parameter = m_pruning_parameters[i];
-    data_expression argument = state.element_at(parameter,m_generator->m_process_parameters.size());
+    const data_expression& argument = state.element_at(parameter,m_generator->m_process_parameters.size());
     m_pruning_substitution[m_generator->m_process_parameters[parameter]] = argument;
     std::map<data_expression, pruning_tree_node_t>::iterator position = node->children.find(argument);
     if (position == node->children.end())

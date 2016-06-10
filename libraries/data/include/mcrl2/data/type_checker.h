@@ -46,7 +46,7 @@ template <typename Function, typename T>
 atermpp::term_list<T> transform_aterm_list(const Function& f, const atermpp::term_list<T>& x)
 {
   atermpp::term_list<T> result;
-  for (T t: x)
+  for (const T& t: x)
   {
     result.push_front(f(t));
   }

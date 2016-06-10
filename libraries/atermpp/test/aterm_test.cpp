@@ -36,13 +36,13 @@ void test_aterm()
 
 void test_aterm_string()
 {
-  aterm_string empty = empty_string();
+  const aterm_string& empty = empty_string();
   std::ostringstream out;
   out << empty;
   BOOST_CHECK(out.str() == "");
 }
 
-void test_aterm_io(const std::string input_string)
+void test_aterm_io(const std::string& input_string)
 {
   const aterm input=read_term_from_string(input_string);
   std::ostringstream out;

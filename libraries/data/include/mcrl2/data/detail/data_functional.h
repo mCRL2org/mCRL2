@@ -60,7 +60,7 @@ struct compare_sort : public std::unary_function< bool, atermpp::aterm_appl >
     : s(s_)
   {}
 
-  bool operator()(atermpp::aterm_appl t) const
+  bool operator()(const atermpp::aterm_appl& t) const
   {
     return is_sort_expression(t) && s == t;
   }
@@ -126,7 +126,7 @@ struct sort_has_name
   /// \brief Function call operator
   /// \param s A sort expression
   /// \return The function result
-  bool operator()(sort_expression s) const
+  bool operator()(const sort_expression& s) const
   {
     return is_basic_sort(s) && std::string(basic_sort(s).name()) == m_name;
   }
@@ -143,7 +143,7 @@ struct function_symbol_has_name
   /// \brief Function call operator
   /// \param c A data operation
   /// \return The function result
-  bool operator()(function_symbol c) const
+  bool operator()(const function_symbol& c) const
   {
     return std::string(c.name()) == m_name;
   }

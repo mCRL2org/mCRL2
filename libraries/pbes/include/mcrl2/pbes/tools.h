@@ -31,7 +31,7 @@ void pbesrewr(const std::string& input_filename,
               const utilities::file_format* input_format,
               const utilities::file_format* output_format,
               const data::rewrite_strategy rewrite_strategy,
-              pbes_rewriter_type rewriter_typ);
+              pbes_rewriter_type rewriter_type);
 
 void pbesconstelm(const std::string& input_filename,
                   const std::string& output_filename,

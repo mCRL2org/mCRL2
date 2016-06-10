@@ -24,19 +24,19 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 
 inline
-variable nat(std::string name)
+variable nat(const std::string& name)
 {
   return variable(identifier_string(name), sort_nat::nat());
 }
 
 inline
-variable pos(std::string name)
+variable pos(const std::string& name)
 {
   return variable(identifier_string(name), sort_pos::pos());
 }
 
 inline
-variable bool_(std::string name)
+variable bool_(const std::string& name)
 {
   return variable(identifier_string(name), sort_bool::bool_());
 }

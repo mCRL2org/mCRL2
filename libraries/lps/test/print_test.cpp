@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(rational)
   // Check whether the symbol @ occurs in the pretty printed output. If this is
   // the case, still some internal symbol is exposed. As a result, our parsers
   // will not be able to handle the specification as input.
-  BOOST_CHECK(output.find("@") == std::string::npos);
+  BOOST_CHECK(output.find('@') == std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(no_summands)

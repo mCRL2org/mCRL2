@@ -38,10 +38,10 @@ namespace data
 
 // template function overloads
 data_expression normalize_sorts(const data_expression& x, const data::sort_specification& sortspec);
-variable_list normalize_sorts(const variable_list& x, const data::sort_specification& dataspec);
-data::data_equation normalize_sorts(const data::data_equation& x, const data::sort_specification& dataspec);
-data_equation_list normalize_sorts(const data_equation_list& x, const data::sort_specification& dataspec);
-void normalize_sorts(data_equation_vector& x, const data::sort_specification& dataspec);
+variable_list normalize_sorts(const variable_list& x, const data::sort_specification& sortspec);
+data::data_equation normalize_sorts(const data::data_equation& x, const data::sort_specification& sortspec);
+data_equation_list normalize_sorts(const data_equation_list& x, const data::sort_specification& sortspec);
+void normalize_sorts(data_equation_vector& x, const data::sort_specification& sortspec);
 
 // prototype
 class data_specification;
@@ -115,7 +115,7 @@ class data_specification: public sort_specification
     friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&);
 
     ///\brief Builds a specification from aterm
-    void build_from_aterm(const atermpp::aterm_appl& t);
+    void build_from_aterm(const atermpp::aterm_appl& term);
     /// \endcond
 
 
@@ -233,7 +233,7 @@ class data_specification: public sort_specification
     /// \param[in] sort A sort expression that is representing the structured sort.
     void insert_mappings_constructors_for_structured_sort(const structured_sort& sort) const
     {
-      structured_sort s_sort(sort);
+      const structured_sort& s_sort(sort);
       function_symbol_vector f(s_sort.constructor_functions(sort));
       add_normalised_constructors(f.begin(),f.end());
       f = s_sort.projection_functions(sort);
@@ -786,7 +786,7 @@ inline data_specification operator +(data_specification spec1, const data_specif
 inline
 function_symbol find_mapping(data_specification const& data, std::string const& s)
 {
-  const function_symbol_vector r(data.mappings());
+  const function_symbol_vector& r(data.mappings());
   function_symbol_vector::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
   return (i == r.end()) ? function_symbol() : *i;
 }
@@ -799,7 +799,7 @@ function_symbol find_mapping(data_specification const& data, std::string const& 
 inline
 function_symbol find_constructor(data_specification const& data, std::string const& s)
 {
-  const function_symbol_vector r(data.constructors());
+  const function_symbol_vector& r(data.constructors());
   function_symbol_vector::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
   return (i == r.end()) ? function_symbol() : *i;
 }
@@ -812,7 +812,7 @@ function_symbol find_constructor(data_specification const& data, std::string con
 inline
 sort_expression find_sort(data_specification const& data, std::string const& s)
 {
-  const std::set<sort_expression> r(data.sorts());
+  const std::set<sort_expression>& r(data.sorts());
   const std::set<sort_expression>::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
   return (i == r.end()) ? sort_expression() : *i;
 }

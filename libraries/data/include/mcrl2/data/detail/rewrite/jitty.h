@@ -27,7 +27,7 @@ class RewriterJitty: public Rewriter
   public:
     typedef Rewriter::substitution_type substitution_type;
 
-    RewriterJitty(const data_specification& DataSpec, const used_data_equation_selector &);
+    RewriterJitty(const data_specification& data_spec, const used_data_equation_selector &);
     virtual ~RewriterJitty();
 
     rewrite_strategy getStrategy();

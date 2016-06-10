@@ -478,9 +478,9 @@ struct bqnf_visitor
   virtual bool visit_bqnf_equation(const equation_type& eqn)
   {
     if (debug) std::clog << "visit_bqnf_equation." << std::endl;
-    fixpoint_symbol sigma = eqn.symbol();
-    propositional_variable var = eqn.variable();
-    term_type e = eqn.formula();
+    const fixpoint_symbol& sigma = eqn.symbol();
+    const propositional_variable& var = eqn.variable();
+    const term_type& e = eqn.formula();
     bool result = visit_bqnf_expression(sigma, var, e);
     if (debug) std::clog << "visit_bqnf_equation: equation " << var.name() << " is " << (result ? "" : "NOT ") << "in BQNF." << std::endl;
     return result;

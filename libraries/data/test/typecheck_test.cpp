@@ -1578,7 +1578,7 @@ class testable_sort_type_checker: public data::sort_type_checker
     }
 
     /// \brief constructs a sort expression checker.
-    testable_sort_type_checker(const data::sort_specification sort_spec)
+    testable_sort_type_checker(const data::sort_specification& sort_spec)
       : data::sort_type_checker(sort_spec, false)
     {}
 
@@ -1627,7 +1627,7 @@ BOOST_AUTO_TEST_CASE(test_sort_aliases)
   );
 
   std::map<std::string, std::pair<bool, bool> > expected_result_map;
-  for (std::string line: utilities::regex_split(expected_results, "\\n"))
+  for (const std::string& line: utilities::regex_split(expected_results, "\\n"))
   {
     auto words = utilities::regex_split(utilities::trim_copy(line), "\\s+");
     if (words.size() == 3)

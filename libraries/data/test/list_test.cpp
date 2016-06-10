@@ -21,7 +21,7 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::sort_list;
 
 template <typename Predicate>
-void test_data_expression(std::string s, mcrl2::data::variable_vector v, Predicate p)
+void test_data_expression(const std::string& s, const mcrl2::data::variable_vector& v, Predicate p)
 {
   data_expression e = parse_data_expression(s, v);
   BOOST_CHECK(p(e));

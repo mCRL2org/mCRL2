@@ -153,7 +153,7 @@ std::string CASE10 =
   "init P(0);\n"
   ;
 
-void test_process(std::string text)
+void test_process(const std::string& text)
 {
   process_specification spec = parse_process_specification(text);
   std::set<data::sort_expression> sorts;

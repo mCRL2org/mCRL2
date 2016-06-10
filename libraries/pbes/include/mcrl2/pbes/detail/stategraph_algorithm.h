@@ -643,7 +643,7 @@ class stategraph_algorithm
       for (std::size_t i: component)
       {
         const GCFP_vertex& u = m_GCFP_graph.vertex(i);
-        auto X = u.name();
+        const auto& X = u.name();
         auto m = u.index();
         if (is_not_only_copied(X, m))
         {
@@ -837,7 +837,7 @@ class stategraph_algorithm
         const GCFP_vertex& u = m_GCFP_graph.vertex(j);
         if (u.name() == Xinit)
         {
-          data::data_expression d = nth_element(init.parameters(), u.index());
+          const data::data_expression& d = nth_element(init.parameters(), u.index());
           result.insert(d);
         }
       }

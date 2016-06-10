@@ -81,7 +81,7 @@ class bit_hash_table
       }
     }
 
-    void calc_hash_aterm(atermpp::aterm t,
+    void calc_hash_aterm(const atermpp::aterm& t,
                          size_t& sh_a,
                          size_t& sh_b,
                          size_t& sh_c,
@@ -131,7 +131,7 @@ class bit_hash_table
              ((sh_a & 0x0000ffff)^(sh_b & 0x0000ffff)^(sh_c & 0x0000ffff));
     }
 
-    size_t calc_hash(atermpp::aterm state)
+    size_t calc_hash(const atermpp::aterm& state)
     {
       assert(m_bit_hash_table.size()>0);
       size_t sh_a = 0x9e3779b9;
@@ -144,14 +144,14 @@ class bit_hash_table
     }
 
   public:
-    void remove_state_from_bithash(const atermpp::aterm state)
+    void remove_state_from_bithash(const atermpp::aterm& state)
     {
       size_t i = calc_hash(state);
       m_bit_hash_table[i] = false;
     }
 
 
-    size_t add_state(atermpp::aterm state, bool& is_new)
+    size_t add_state(const atermpp::aterm& state, bool& is_new)
     {
       size_t i = calc_hash(state);
       is_new = !m_bit_hash_table[i];
@@ -168,14 +168,14 @@ class bit_hash_table
     }
 
 
-    std::pair<size_t, bool> add_state(atermpp::aterm state)
+    std::pair<size_t, bool> add_state(const atermpp::aterm& state)
     {
       std::pair<size_t, bool> output;
       output.first = add_state(state, output.second);
       return output;
     }
 
-    size_t state_index(atermpp::aterm state)
+    size_t state_index(const atermpp::aterm& state)
     {
       assert(m_bit_hash_table[calc_hash(state)]);
       return calc_hash(state);

@@ -121,7 +121,7 @@ std::string PBES3 =
   "init X0;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \n"
   ;
 
-void test_pbes(std::string pbes_spec, const bool expected_result)
+void test_pbes(const std::string& pbes_spec, const bool expected_result)
 {
   pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::detail::parity_game_output pgg(p);
@@ -159,7 +159,7 @@ void test_pbes(std::string pbes_spec, const bool expected_result)
 }
 
 // mimick the way parity_game_generator is used in parity game solver from Twente
-void test_pbespgsolve(std::string pbes_spec)
+void test_pbespgsolve(const std::string& pbes_spec)
 {
   pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::parity_game_generator pgg(p, true, true);

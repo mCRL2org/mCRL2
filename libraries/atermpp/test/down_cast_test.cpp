@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(aterm_down_cast)
   atermpp::aterm_appl fxy(fs,atermpp::aterm_appl(x),atermpp::aterm_appl(y));
   atermpp::aterm fxy_term(fxy);
 
-  atermpp::aterm_appl test = atermpp::down_cast<atermpp::aterm_appl>(fxy_term);
+  const atermpp::aterm_appl& test = atermpp::down_cast<atermpp::aterm_appl>(fxy_term);
   BOOST_CHECK(fxy_term == test);
   BOOST_CHECK(fxy == test);
   BOOST_CHECK(fxy == fxy_term);
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(no_down_cast_needed)
   t2 x2(x1);
   t3 x31(x1);
   t3 x32(x2);
-  t3 x33(x31);
+  const t3& x33(x31);
 }
 
 BOOST_AUTO_TEST_CASE(function_calls)

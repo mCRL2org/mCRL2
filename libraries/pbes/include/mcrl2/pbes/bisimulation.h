@@ -225,7 +225,7 @@ class bisimulation_algorithm
     /// \param name A
     /// \param parameters A sequence of data variables
     /// \return The created propositional variable
-    propositional_variable_instantiation var(core::identifier_string name, data::variable_list const& parameters) const
+    propositional_variable_instantiation var(const core::identifier_string& name, data::variable_list const& parameters) const
     {
       return propositional_variable_instantiation(name, data::data_expression_list(parameters));
     }
@@ -234,7 +234,7 @@ class bisimulation_algorithm
     /// \param name A
     /// \param parameters A sequence of data expressions
     /// \return The created propositional variable
-    propositional_variable_instantiation var(core::identifier_string name, data::data_expression_list const& parameters) const
+    propositional_variable_instantiation var(const core::identifier_string& name, data::data_expression_list const& parameters) const
     {
       return propositional_variable_instantiation(name, parameters);
     }
@@ -381,7 +381,7 @@ class bisimulation_algorithm
       const lps::linear_process& s = S.process();
 
       // TODO: the data of the two specification needs to be merged!
-      data::data_specification data = M.data();
+      const data::data_specification& data = M.data();
       propositional_variable_instantiation init(X(m, s), M.initial_process().state(M.process().process_parameters()) + S.initial_process().state(S.process().process_parameters()));
 
       pbes result(data, equations, init);

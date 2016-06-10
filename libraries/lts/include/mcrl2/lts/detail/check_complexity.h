@@ -163,7 +163,7 @@ class check_complexity
         n_m = n_ * m_;
     }
 
-    static void count(const char* id, size_t counter, const iteration_type max)
+    static void count(const char* id, size_t counter, const iteration_type& max)
     {
         struct single_counter& ctr = counters[id];
         ctr.count += counter;

@@ -298,7 +298,7 @@ class interface_description
         std::string man_page_description() const;
 
         /// Returns a man page description for the option
-        std::ostream& xml_page_description(std::ostream& s, const bool is_default = false, unsigned int indentation = 0) const;
+        std::ostream& xml_page_description(std::ostream& s, const bool is_standard = false, unsigned int indentation = 0) const;
 
       public:
 
@@ -1100,7 +1100,7 @@ make_mandatory_argument(std::string const& name, std::string const& standard_val
  *
  **/
 interface_description::mandatory_argument< std::string >
-make_mandatory_argument(std::string const& name, std::string const& standard_value);
+make_mandatory_argument(std::string const& name, std::string const& default_value);
 /// \cond INTERNAL
 
 /// Creates a option argument specification object for an enumerated type

@@ -135,9 +135,9 @@ class sim_partitioner
     void touch(size_t a,size_t alpha);
     void untouch(size_t alpha);
 
-    void reverse_topological_sort(std::vector<size_t> &result);
+    void reverse_topological_sort(std::vector<size_t> &Sort);
     void dfs_visit(size_t u,std::vector<bool> &visited,
-                   std::vector<size_t> &result);
+                   std::vector<size_t> &Sort);
 
     void initialise_Sigma(size_t gamma,size_t l);
     void initialise_Pi(size_t gamma,size_t l);

@@ -26,7 +26,7 @@ using namespace atermpp;
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_f
 {
-  bool operator()(aterm_appl t) const
+  bool operator()(const aterm_appl& t) const
   {
     return t.function().name() == "f";
   }
@@ -35,7 +35,7 @@ struct is_f
 // function object to test if it is an aterm_appl with function symbol "g"
 struct is_g
 {
-  bool operator()(aterm_appl t) const
+  bool operator()(const aterm_appl& t) const
   {
     return t.function().name() == "g";
   }
@@ -44,7 +44,7 @@ struct is_g
 // function object to test if it is an aterm_appl with function symbol "z"
 struct is_z
 {
-  bool operator()(aterm_appl t) const
+  bool operator()(const aterm_appl& t) const
   {
     return t.function().name() == "z";
   }
@@ -53,7 +53,7 @@ struct is_z
 // function object to test if it is an aterm_appl with function symbol "a" or "b"
 struct is_a_or_b
 {
-  bool operator()(aterm_appl t) const
+  bool operator()(const aterm_appl& t) const
   {
     return t.function().name() == "a" || t.function().name() == "b";
   }
@@ -62,7 +62,7 @@ struct is_a_or_b
 // replaces function names f by g and vice versa
 struct fg_replacer
 {
-  aterm_appl operator()(aterm_appl t) const
+  aterm_appl operator()(const aterm_appl& t) const
   {
     if (t.function().name() == "f")
     {

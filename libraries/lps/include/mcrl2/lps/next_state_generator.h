@@ -104,7 +104,7 @@ class next_state_generator
         static bool summand_set_contains(const std::set<stochastic_action_summand>& summand_set, const summand_t& summand);
         void build_pruning_parameters(const stochastic_action_summand_vector& summands);
         bool is_not_false(const summand_t& summand);
-        atermpp::shared_subset<summand_t>::iterator begin(const lps::state& state_t);
+        atermpp::shared_subset<summand_t>::iterator begin(const lps::state& state);
     };
 
     typedef mcrl2::lps::state_probability_pair<lps::state, lps::probabilistic_data_expression> state_probability_pair;
@@ -228,9 +228,9 @@ class next_state_generator
         {
         }
 
-        iterator(next_state_generator* generator, const lps::state& state_t, substitution_t* substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue);
+        iterator(next_state_generator* generator, const lps::state& state, substitution_t* substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue);
 
-        iterator(next_state_generator* generator, const lps::state& state_t, substitution_t* substitution, size_t summand_index, enumerator_queue_t* enumeration_queue);
+        iterator(next_state_generator* generator, const lps::state& state, substitution_t* substitution, size_t summand_index, enumerator_queue_t* enumeration_queue);
 
         operator bool() const
         {
@@ -274,7 +274,7 @@ class next_state_generator
     /// \param rewriter The rewriter used
     /// \param use_enumeration_caching Cache intermediate enumeration results
     /// \param use_summand_pruning Preprocess summands using pruning strategy.
-    next_state_generator(const stochastic_specification& specification, const data::rewriter& rewriter, bool use_enumeration_caching = false, bool use_summand_pruning = false);
+    next_state_generator(const stochastic_specification& spec, const data::rewriter& rewriter, bool use_enumeration_caching = false, bool use_summand_pruning = false);
 
     ~next_state_generator();
 
@@ -326,7 +326,7 @@ class next_state_generator
     // The result is a list of closed states with associated probabilities.
     const transition_t::state_probability_list calculate_distribution(
                          const stochastic_distribution& dist,
-                         const data::data_expression_vector& state,
+                         const data::data_expression_vector& state_args,
                          substitution_t& sigma);
 };
 

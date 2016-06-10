@@ -66,10 +66,9 @@ class lps2pbes_algorithm
     /// \param preprocess_modal_operators insert dummy fixpoints in modal operators, which may lead to smaller PBESs
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \return A PBES that encodes the property applied to the given specification
-    pbes run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false, data::variable T = data::undefined_real_variable())
+    pbes run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false, const data::variable& T = data::undefined_real_variable())
     {
       using atermpp::detail::operator+;
-      lps::linear_process lps = spec.process();
 
       if (!state_formulas::algorithms::is_monotonous(formula))
       {
@@ -138,7 +137,7 @@ class lps2pbes_algorithm
       pbes_equation e1 = eqn.front();
       core::identifier_string Xe(e1.variable().name());
       assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
-      core::identifier_string Xf = detail::mu_name(f);
+      const core::identifier_string& Xf = detail::mu_name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
       data::data_expression_list pi = spec.initial_process().state(spec.process().process_parameters());
       data::data_expression_list e = fi + pi + detail::Par(Xf, data::variable_list(), f);

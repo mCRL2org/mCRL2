@@ -94,7 +94,7 @@ class pbesinst_symbolic_algorithm
         done.insert(X);
         std::size_t index = m_equation_index[X.name()];
         const pbes_equation& eqn = m_pbes.equations()[index];
-        pbes_expression phi = eqn.formula();
+        const pbes_expression& phi = eqn.formula();
         data::rewriter::substitution_type sigma;
         make_pbesinst_substitution(eqn.variable().parameters(), X.parameters(), sigma);
         pbes_expression psi = R(phi, sigma);

@@ -849,7 +849,7 @@ class bisim_partitioner_gw
     }
 
   private:
-    std::string keypair_to_string(std::string action, state_type to)
+    std::string keypair_to_string(const std::string& action, state_type to)
     {
       return action + "_" + std::to_string((long long int) to);
     }

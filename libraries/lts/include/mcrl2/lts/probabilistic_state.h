@@ -83,7 +83,7 @@ class probabilistic_state
       m_probabilistic_state.shrink_to_fit();
 #ifndef NDEBUG
       PROBABILITY sum=PROBABILITY::zero();
-      for(const state_probability_pair p: m_probabilistic_state)
+      for(const state_probability_pair& p: m_probabilistic_state)
       {
         assert(p.probability()>PROBABILITY::zero());
         assert(p.probability()<=PROBABILITY::one());

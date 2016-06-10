@@ -112,7 +112,7 @@ log_level_t log_level_from_string(const std::string& s)
 }
 
 
-std::string format_time(const time_t* timestamp);
+std::string format_time(const time_t* t);
 
 /// \brief Interface class for output policy.
 ///

@@ -865,7 +865,7 @@ bool lps2lts_algorithm::add_transition(const lps::state& source_state, next_stat
     source_state_number = m_state_numbers[source_state];
   }
 
-  const lps::state destination = transition.target_state();
+  const lps::state& destination = transition.target_state();
   const std::pair<size_t, bool> destination_state_number=add_target_state(source_state,destination);
 
   if (m_options.detect_action && m_detected_action_summands[transition.summand_index()])

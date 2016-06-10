@@ -76,14 +76,14 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
   void apply(const process::block& x)
   {
     super::apply(x);
-    core::identifier_string_list B = x.block_set();
+    const core::identifier_string_list& B = x.block_set();
     result.insert(B.begin(), B.end());
   }
 
   void apply(const process::hide& x)
   {
     super::apply(x);
-    core::identifier_string_list I = x.hide_set();
+    const core::identifier_string_list& I = x.hide_set();
     result.insert(I.begin(), I.end());
   }
 
@@ -113,7 +113,7 @@ struct find_action_names_traverser: public process::action_label_traverser<find_
     super::apply(x);
     for (const action_name_multiset& i: x.allow_set())
     {
-      core::identifier_string_list names = i.names();
+      const core::identifier_string_list& names = i.names();
       result.insert(names.begin(), names.end());
     }
   }

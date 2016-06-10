@@ -15,7 +15,7 @@
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 
-void test_print(const std::string xs)
+void test_print(const std::string& xs)
 {
   const big_natural_number x(xs);
   std::stringstream ss;
@@ -24,7 +24,7 @@ void test_print(const std::string xs)
   BOOST_CHECK(xs==ss.str());
 }
 
-void test_simple(const std::string xs, const std::string ys)
+void test_simple(const std::string& xs, const std::string& ys)
 {
   const big_natural_number x(xs);
   const big_natural_number y(ys);
@@ -35,7 +35,7 @@ void test_simple(const std::string xs, const std::string ys)
   BOOST_CHECK(x==(x+y)-y);
 }
 
-void test_div_mod(const std::string xs, const std::string ys)
+void test_div_mod(const std::string& xs, const std::string& ys)
 {
   const big_natural_number x(xs);
   const big_natural_number y(ys);
@@ -49,7 +49,7 @@ void test_div_mod(const std::string xs, const std::string ys)
   BOOST_CHECK(x==y*(x/y)+(x % y));
 }
 
-void test_multiply(const std::string xs, const std::string ys)
+void test_multiply(const std::string& xs, const std::string& ys)
 { 
   big_natural_number x(xs);
   big_natural_number y(ys);
@@ -60,7 +60,7 @@ void test_multiply(const std::string xs, const std::string ys)
   BOOST_CHECK(x*y==y*x);
 }
 
-void test_plus_minus_multiply(const std::string xs, const std::string ys)
+void test_plus_minus_multiply(const std::string& xs, const std::string& ys)
 { 
   big_natural_number x(xs);
   big_natural_number y(ys);
@@ -82,7 +82,7 @@ void test_plus_minus_multiply(const std::string xs, const std::string ys)
   BOOST_CHECK((x+y)*(x-y)==x*x-y*y);
 }
 
-void test(const std::string xs, const std::string ys)
+void test(const std::string& xs, const std::string& ys)
 {
   test_print(xs);
   test_print(ys);

@@ -49,7 +49,7 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
 /// \brief Returns true if the state formula is monotonous.
 /// \param f A modal formula
 /// \return True if the state formula is monotonous.
-bool is_monotonous(state_formula f);
+bool is_monotonous(const state_formula& f);
 
 /// \brief Normalizes a state formula, i.e. removes any occurrences of ! or =>.
 state_formula normalize(const state_formula& x);

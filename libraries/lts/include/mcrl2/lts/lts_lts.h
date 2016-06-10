@@ -100,7 +100,7 @@ class state_label_lts : public atermpp::term_balanced_tree< data::data_expressio
     \param[in] l  The state value to pretty print.
     \return           The pretty-printed representation of value. */
 
-inline std::string pp(const state_label_lts l)
+inline std::string pp(const state_label_lts& l)
 {
   std::string s;
   s = "(";
@@ -127,17 +127,17 @@ class action_label_lts: public mcrl2::lps::multi_action
     {}
 
     /** \brief Constructor. Sets action label to the multi_action a. */
-    action_label_lts(const atermpp::aterm a):mcrl2::lps::multi_action(a)
+    action_label_lts(const atermpp::aterm& a):mcrl2::lps::multi_action(a)
     {
     }
 
     /** \brief Constructor. Transforms action label a to form a multi_action a. */
-    action_label_lts(const process::action a):mcrl2::lps::multi_action(a)
+    action_label_lts(const process::action& a):mcrl2::lps::multi_action(a)
     {
     }
 
     /** \brief Constructor. */
-    action_label_lts(const mcrl2::lps::multi_action a):mcrl2::lps::multi_action(a)
+    action_label_lts(const mcrl2::lps::multi_action& a):mcrl2::lps::multi_action(a)
     {
     }
 
@@ -179,7 +179,7 @@ class action_label_lts: public mcrl2::lps::multi_action
 };
 
 /** \brief Print the action label to string. */
-inline std::string pp(const action_label_lts l)
+inline std::string pp(const action_label_lts& l)
 {
   return lps::pp(mcrl2::lps::multi_action(l));
 }

@@ -36,7 +36,7 @@ static mcrl2::bdd::bdd_expression to_bdd(const boolean_expression& b)
   mcrl2::bdd::bdd_expression result;
   if (is_boolean_variable(b))
   {
-    const core::identifier_string name = atermpp::down_cast<const core::identifier_string>(b[0]);
+    const core::identifier_string& name = atermpp::down_cast<const core::identifier_string>(b[0]);
     result = mcrl2::bdd::if_(name, mcrl2::bdd::true_(), mcrl2::bdd::false_());
   }
   else if (is_and(b))

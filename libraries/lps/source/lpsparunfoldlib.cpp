@@ -82,7 +82,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
   m_identifier_generator.add_identifiers(mapping_and_constructor_names);
 }
 
-mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort(std::string str)
+mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort(const std::string& str)
 {
   //Generate a fresh Basic Sort
   mcrl2::core::identifier_string nstr = m_identifier_generator(str);
@@ -186,7 +186,7 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
     if (is_function_sort(i->sort()))
     {
       function_sort fs = function_sort(i->sort());
-      sort_expression_list sel  = fs.domain();
+      const sort_expression_list& sel  = fs.domain();
       for (sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++)
       {
         mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
@@ -206,10 +206,10 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
 
 void lpsparunfold::create_data_equations(
                 function_symbol_vector pi,
-                data::function_symbol case_function,
+                const data::function_symbol& case_function,
                 function_symbol_vector elements_of_new_sorts,
                 function_symbol_vector k,
-                data::function_symbol determine_function)
+                const data::function_symbol& determine_function)
 {
   variable_vector vars;        /* Equation variables  */
   // data_equation_vector del;    /* Generated equations */
@@ -261,7 +261,7 @@ void lpsparunfold::create_data_equations(
     if (is_function_sort(i -> sort()))
     {
       function_sort fs = function_sort(i -> sort());
-      sort_expression_list sel = fs.domain();
+      const sort_expression_list& sel = fs.domain();
 
       data_expression_vector dal;
       for (sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); ++j)
@@ -337,7 +337,7 @@ void lpsparunfold::create_data_equations(
     if (is_container_sort(i -> sort()))
     {
       container_sort cs = container_sort(i -> sort());
-      sort_expression element_sort = cs.element_sort();
+      const sort_expression& element_sort = cs.element_sort();
 
       if (sort_vars[element_sort].size() == sort_index[ element_sort ])
       {
@@ -441,7 +441,7 @@ void lpsparunfold::unfold_summands(mcrl2::lps::action_summand_vector& summands, 
   }
 }
 
-mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol case_function , function_symbol_vector affected_constructors, function_symbol determine_function, size_t parameter_at_index, function_symbol_vector pi)
+mcrl2::lps::linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , function_symbol_vector affected_constructors, const function_symbol& determine_function, size_t parameter_at_index, const function_symbol_vector& pi)
 {
   /* Get process parameters from lps */
   mcrl2::data::variable_list lps_proc_pars =  m_lps.process_parameters();
@@ -558,7 +558,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   return new_lps;
 }
 
-mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initialization(data::function_symbol determine_function, size_t parameter_at_index, function_symbol_vector pi)
+mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initialization(const data::function_symbol& determine_function, size_t parameter_at_index, const function_symbol_vector& pi)
 {
   //
   //update inital process
@@ -625,7 +625,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
   return new_init;
 }
 
-std::map<mcrl2::data::variable, mcrl2::data::data_expression> lpsparunfold::parameter_substitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol case_function)
+std::map<mcrl2::data::variable, mcrl2::data::data_expression> lpsparunfold::parameter_substitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector k, const mcrl2::data::function_symbol& case_function)
 {
   std::map<mcrl2::data::variable, mcrl2::data::data_expression> result;
   data_expression_vector dev;
@@ -693,7 +693,7 @@ std::map<mcrl2::data::variable, mcrl2::data::data_expression> lpsparunfold::para
   return result ;
 }
 
-mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor(data_expression de, data::function_symbol determine_function, function_symbol_vector pi)
+mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor(const data_expression& de, const data::function_symbol& determine_function, function_symbol_vector pi)
 {
   mcrl2::data::data_expression_vector result;
   {
@@ -751,8 +751,8 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
 }
 
 mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
-  mcrl2::data::function_symbol function_for_distribution,
-  mcrl2::data::function_symbol case_function,
+  const mcrl2::data::function_symbol& function_for_distribution,
+  const mcrl2::data::function_symbol& case_function,
   const bool add_case_function_to_data_type)
 {
   assert(function_sort(case_function.sort()).codomain() == function_sort(function_for_distribution.sort()).domain().front());
@@ -812,7 +812,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
   return data_equation(variables_used, lhs, rhs);
 }
 
-void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_new_sorts, data::function_symbol case_function)
+void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_new_sorts, const data::function_symbol& case_function)
 {
   mCRL2log(verbose) << "- Generating case function for:\t" <<  mcrl2::data::pp(case_function) << ": " <<  mcrl2::data::pp(case_function.sort()) << "" << std::endl;
 

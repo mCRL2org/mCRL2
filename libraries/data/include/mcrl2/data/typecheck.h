@@ -61,19 +61,19 @@ class data_type_checker: public sort_type_checker
      *  \param[in] Vars a mapping of variable names to their types.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
-    data_expression operator()(const data_expression& d,const std::map<core::identifier_string,sort_expression>& Vars);
+    data_expression operator()(const data_expression& data_expr,const std::map<core::identifier_string,sort_expression>& Vars);
 
     void read_sort(const sort_expression& SortExpr);
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors);
-    void add_function(const data::function_symbol& f, const std::string msg, bool allow_double_decls=false);
-    void add_constant(const data::function_symbol& OpId, const std::string msg);
+    void add_function(const data::function_symbol& f, const std::string& msg, bool allow_double_decls=false);
+    void add_constant(const data::function_symbol& f, const std::string& msg);
     void initialise_system_defined_functions(void);
     void add_system_constant(const data::function_symbol& f);
     void add_system_function(const data::function_symbol& f);
     bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result);
     bool TypeMatchL(const sort_expression_list& TypeList, const sort_expression_list& PosTypeList, sort_expression_list& result);
     sort_expression UnwindType(const sort_expression& Type);
-    variable UnwindType(const variable& Type);
+    variable UnwindType(const variable& v);
     template <class T>
     atermpp::term_list<T> UnwindType(const atermpp::term_list<T>& l)
     {
@@ -89,7 +89,7 @@ class data_type_checker: public sort_type_checker
                         const std::map<core::identifier_string,sort_expression>& DeclaredVars,
                         const std::map<core::identifier_string,sort_expression>& AllowedVars,
                         data_expression& DataTerm,
-                        sort_expression PosType,
+                        const sort_expression& PosType,
                         std::map<core::identifier_string,sort_expression>& FreeVars,
                         const bool strictly_ambiguous=true,
                         const bool warn_upcasting=false,
@@ -98,7 +98,7 @@ class data_type_checker: public sort_type_checker
     sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression>& DeclaredVars,
                                          const std::map<core::identifier_string,sort_expression>& AllowedVars,
                                          data_expression& t1,
-                                         sort_expression t2)
+                                         const sort_expression& t2)
     {
       std::map<core::identifier_string,sort_expression> empty_context;
       return TraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2, empty_context);
@@ -125,9 +125,9 @@ class data_type_checker: public sort_type_checker
       }
     }
 
-    bool InTypesA(sort_expression Type, sort_expression_list Types);
-    bool EqTypesA(sort_expression Type1, sort_expression Type2);
-    bool InTypesL(sort_expression_list Type, atermpp::term_list<sort_expression_list> Types);
+    bool InTypesA(const sort_expression& Type, sort_expression_list Types);
+    bool EqTypesA(const sort_expression& Type1, const sort_expression& Type2);
+    bool InTypesL(const sort_expression_list& Type, atermpp::term_list<sort_expression_list> Types);
     bool EqTypesL(sort_expression_list Type1, sort_expression_list Type2);
     bool MaximumType(const sort_expression& Type1, const sort_expression& Type2, sort_expression& result);
     sort_expression ExpandNumTypesUp(sort_expression Type);
@@ -156,7 +156,7 @@ class data_type_checker: public sort_type_checker
     bool MatchFuncUpdate(const function_sort& type, sort_expression& result);
     bool MatchSetConstructor(const function_sort& type, sort_expression& result);
     bool MatchBagConstructor(const function_sort& type, sort_expression& result);
-    bool UnArrowProd(sort_expression_list ArgTypes, sort_expression PosType, sort_expression& result);
+    bool UnArrowProd(const sort_expression_list& ArgTypes, sort_expression PosType, sort_expression& result);
     bool UnFSet(sort_expression PosType, sort_expression& result);
     bool UnFBag(sort_expression PosType, sort_expression& result);
     bool UnList(sort_expression PosType, sort_expression& result);
@@ -174,12 +174,12 @@ class data_type_checker: public sort_type_checker
     bool VarsUnique(const variable_list& VarDecls);
     void TransformVarConsTypeData(data_specification& data_spec);
     sort_expression_list GetNotInferredList(const atermpp::term_list<sort_expression_list>& TypeListList);
-    sort_expression_list InsertType(const sort_expression_list TypeList, const sort_expression Type);
+    sort_expression_list InsertType(const sort_expression_list& TypeList, const sort_expression& Type);
     std::pair<bool,sort_expression_list> AdjustNotInferredList(
             const sort_expression_list& PosTypeList,
             const atermpp::term_list<sort_expression_list>& TypeListList);
     bool IsTypeAllowedA(const sort_expression& Type, const sort_expression& PosType);
-    bool IsTypeAllowedL(const sort_expression_list& TypeList, const sort_expression_list PosTypeList);
+    bool IsTypeAllowedL(const sort_expression_list& TypeList, const sort_expression_list& PosTypeList);
     bool IsNotInferredL(sort_expression_list TypeList);
     bool strict_type_check(const data_expression& d);
 

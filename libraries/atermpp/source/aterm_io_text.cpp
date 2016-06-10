@@ -123,7 +123,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
   else // t.type_is_appl()
   {
     const aterm_appl &appl = down_cast<aterm_appl>(t);
-    const function_symbol sym = appl.function();
+    const function_symbol& sym = appl.function();
     write_string_with_escape_symbols(sym.name(),os);
     if (sym.arity() > 0)
     {

@@ -57,7 +57,7 @@ class finiteness_helper
     const data_specification& m_specification;
     std::set< sort_expression > m_visiting;
 
-    bool is_finite_aux(const sort_expression s)
+    bool is_finite_aux(const sort_expression& s)
     {
       function_symbol_vector constructors(m_specification.constructors(s));
       if(constructors.empty())
@@ -70,7 +70,7 @@ class finiteness_helper
         if (is_function_sort(f.sort()))
         {
           const function_sort f_sort(f.sort());
-          const sort_expression_list l=f_sort.domain();
+          const sort_expression_list& l=f_sort.domain();
 
           for(const sort_expression& e: l)
           {
@@ -173,7 +173,7 @@ bool data_specification::is_certainly_finite(const sort_expression& s) const
 // through structured sorts are allowed. If a loop is detected, an exception
 // is thrown.
 void sort_specification::check_for_alias_loop(
-  const sort_expression s,
+  const sort_expression& s,
   std::set<sort_expression> sorts_already_seen,
   const bool toplevel) const
 {
@@ -253,7 +253,7 @@ sort_expression find_normal_form(
     const function_sort fs(e);
     const sort_expression normalised_codomain=
       find_normal_form(fs.codomain(),map1,map2,sorts_already_seen);
-    const sort_expression_list domain=fs.domain();
+    const sort_expression_list& domain=fs.domain();
     sort_expression_list normalised_domain;
     for(const sort_expression& s: domain)
     {
@@ -394,7 +394,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
         const sort_expression left_hand_side=(rhs_to_s1?rhs:s1);
         const sort_expression pre_normal_form=(rhs_to_s1?s1:rhs);
         assert(is_basic_sort(pre_normal_form));
-        const sort_expression e1=pre_normal_form;
+        const sort_expression& e1=pre_normal_form;
         if (e1!=left_hand_side)
         {
           sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e1));
@@ -412,7 +412,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
           const sort_expression left_hand_side=(i_second_to_s2?p.second:s2);
           const sort_expression pre_normal_form=(i_second_to_s2?s2:p.second);
           assert(is_basic_sort(pre_normal_form));
-          const sort_expression e2=pre_normal_form;
+          const sort_expression& e2=pre_normal_form;
           if (e2!=left_hand_side)
           {
             sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e2));

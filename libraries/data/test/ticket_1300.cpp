@@ -195,7 +195,7 @@ void test1()
   atermpp::aterm t = atermpp::read_term_from_string(expression_text);
   t = data::detail::remove_index(t);
   t = data::detail::add_index(t);
-  data::data_expression d = atermpp::down_cast<data::data_expression>(t);
+  const data::data_expression& d = atermpp::down_cast<data::data_expression>(t);
   std::string s = data::pp(d);
   std::cout << s << std::endl;
 }

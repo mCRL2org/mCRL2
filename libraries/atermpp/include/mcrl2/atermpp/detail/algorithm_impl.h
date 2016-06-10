@@ -154,7 +154,6 @@ void find_all_if_impl(const aterm &t, MatchPredicate op, OutputIterator& destBeg
     aterm_appl a(t);
     if (op(a))
     {
-      value_type v(a);
       *destBegin++ = vertical_cast<value_type>(a);
     }
     for (aterm_appl::iterator i = a.begin(); i != a.end(); ++i)
@@ -175,7 +174,7 @@ void find_all_if_impl(const aterm &t, MatchPredicate op, OutputIterator& destBeg
 /// \param match A predicate function on terms
 /// \param stop A predicate function on terms
 template <typename MatchPredicate, typename StopPredicate>
-aterm_appl partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate stop)
+aterm_appl partial_find_if_impl(const aterm& t, MatchPredicate match, StopPredicate stop)
 {
   if (t.type_is_appl())
   {
@@ -217,7 +216,7 @@ aterm_appl partial_find_if_impl(aterm t, MatchPredicate match, StopPredicate sto
 /// \param stop A predicate function on terms
 /// \param destBegin The beginning of a range to where the results are written
 template <typename MatchPredicate, typename StopPredicate, typename OutputIterator>
-void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
+void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicate stop, OutputIterator& destBegin)
 {
   if (t.type_is_appl())
   {
@@ -247,7 +246,7 @@ void partial_find_all_if_impl(aterm t, MatchPredicate match, StopPredicate stop,
 //--- replace -------------------------------------------------------------//
 
 template <typename ReplaceFunction>
-aterm replace_impl(const aterm &t, ReplaceFunction replace);
+aterm replace_impl(const aterm &t, ReplaceFunction f);
 
 template <typename ReplaceFunction>
 struct replace_helper
@@ -310,7 +309,7 @@ struct default_replace
 //--- partial replace -----------------------------------------------------//
 
 template <typename ReplaceFunction>
-aterm partial_replace_impl(const aterm &t, ReplaceFunction replace);
+aterm partial_replace_impl(const aterm &t, ReplaceFunction f);
 
 template <typename ReplaceFunction>
 struct partial_replace_helpsr
@@ -361,7 +360,7 @@ aterm partial_replace_impl(const aterm &t, ReplaceFunction f)
 //--- bottom-up replace ---------------------------------------------------//
 
 template <typename ReplaceFunction>
-aterm bottom_up_replace_impl(const aterm &t, ReplaceFunction bottom_up_replace);
+aterm bottom_up_replace_impl(const aterm &t, ReplaceFunction f);
 
 template <typename ReplaceFunction>
 struct bottom_up_replace_helpsr

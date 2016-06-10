@@ -209,7 +209,7 @@ class action_rename_specification
     /// \param rules A sequence of action rename rules
     action_rename_specification(
       const data::data_specification& data,
-      const process::action_label_list action_labels,
+      const process::action_label_list& action_labels,
       const std::vector <action_rename_rule>& rules)
       :
       m_data(data),
@@ -384,7 +384,7 @@ lps::specification action_rename(
   using namespace mcrl2::lps;
   using namespace std;
 
-  const std::vector <action_rename_rule> rename_rules = action_rename_spec.rules();
+  const std::vector <action_rename_rule>& rename_rules = action_rename_spec.rules();
   action_summand_vector lps_old_action_summands = lps_old_spec.process().action_summands();
   deadlock_summand_vector lps_deadlock_summands = lps_old_spec.process().deadlock_summands();
   process::action_list lps_new_actions;

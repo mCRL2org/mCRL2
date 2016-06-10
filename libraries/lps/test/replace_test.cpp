@@ -43,7 +43,7 @@ void test_replace()
   variable c("c", sort_bool::bool_());
   variable d("d", sort_bool::bool_());
   assignment a(c, d);
-  action_summand t = s;
+  const action_summand& t = s;
 }
 
 std::string SPEC1a =
@@ -96,7 +96,7 @@ void test_lps_substituter()
 void test_lps_substitute()
 {
   data::variable v("v", data::sort_bool::bool_());
-  data::data_expression w = data::sort_bool::true_();
+  const data::data_expression& w = data::sort_bool::true_();
   data::mutable_map_substitution<> sigma;
   sigma[v] = w;
   data::data_expression e = v;

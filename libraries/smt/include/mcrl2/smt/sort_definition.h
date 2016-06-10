@@ -95,7 +95,7 @@ class sort_definition
       return "";
     }
 
-    virtual std::string generate_variable_declaration(core::identifier_string name) const
+    virtual std::string generate_variable_declaration(const core::identifier_string& name) const
     {
       return m_data_specification->generate_variable_declaration(m_name, name);
     }

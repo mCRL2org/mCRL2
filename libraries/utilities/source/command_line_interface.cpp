@@ -492,7 +492,7 @@ std::string interface_description::textual_description() const
   return s.str();
 }
 
-inline static std::string mark_name_in_usage(std::string const& usage, std::string begin, std::string end)
+inline static std::string mark_name_in_usage(std::string const& usage, const std::string& begin, const std::string& end)
 {
   std::string result;
   bool        name_character = false;

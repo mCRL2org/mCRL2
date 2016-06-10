@@ -181,10 +181,10 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   void apply_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     data::variable_list xf = detail::mu_variables(x);
     data::variable_list xp = lps.process_parameters();
-    state_formulas::state_formula phi = x.operand();
+    const state_formulas::state_formula& phi = x.operand();
     data::variable_list e = xf + xp + Par(X, data::variable_list(), phi0);
     e = is_timed() ? T + e : e;
     propositional_variable v(X, e);
@@ -294,10 +294,10 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits, EquationT
   void apply_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     data::variable_list xf = detail::mu_variables(x);
     data::variable_list xp = lps.process_parameters();
-    state_formulas::state_formula phi = x.operand();
+    const state_formulas::state_formula& phi = x.operand();
     data::variable_list d = xf + xp + Par(X, data::variable_list(), phi0);
     d = is_timed() ? T + d : d;
     data::data_expression_list e = data::make_data_expression_list(d);

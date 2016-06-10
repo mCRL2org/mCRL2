@@ -355,7 +355,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
 }
 
 
-static void write_probabilistic_state(const detail::lts_aut_base::probabilistic_state prob_state, ostream& os)
+static void write_probabilistic_state(const detail::lts_aut_base::probabilistic_state& prob_state, ostream& os)
 {
   mcrl2::lts::probabilistic_arbitrary_precision_fraction previous_probability;
   bool first_element=true;

@@ -76,11 +76,11 @@ const utilities::file_format* guess_format(const std::string& filename)
   return utilities::file_format::unknown();
 }
 
-void save_bes_pgsolver(const boolean_equation_system& bes_spec, std::ostream& stream, bool maxpg=true);
+void save_bes_pgsolver(const boolean_equation_system& bes, std::ostream& stream, bool maxpg=true);
 
-void save_bes_cwi(const boolean_equation_system& bes_spec, std::ostream& stream);
+void save_bes_cwi(const boolean_equation_system& bes, std::ostream& stream);
 
-void save_bes_cwi(const pbes_system::pbes& pbes_spec, std::ostream& stream);
+void save_bes_cwi(const pbes_system::pbes& bes, std::ostream& stream);
 
 /// \brief Save a BES in the format specified.
 /// \param bes The bes to be stored

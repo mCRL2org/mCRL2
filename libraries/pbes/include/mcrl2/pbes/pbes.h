@@ -82,7 +82,7 @@ class pbes
 
     /// \brief Initialize the pbes from an aterm
     /// \param t A term
-    void init_term(atermpp::aterm_appl t)
+    void init_term(const atermpp::aterm_appl& t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data = atermpp::aterm_appl(*i++);
@@ -377,12 +377,7 @@ class pbes
       }
 
       // check 10)
-      if (!data().is_well_typed())
-      {
-        return false;
-      }
-
-      return true;
+      return data().is_well_typed();
     }
 };
 

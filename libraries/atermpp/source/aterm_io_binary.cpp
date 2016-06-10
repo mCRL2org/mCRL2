@@ -364,7 +364,7 @@ static size_t readString(istream& is)
  * Write a symbol to file.
  */
 
-static void write_symbol(const function_symbol sym, ostream& os)
+static void write_symbol(const function_symbol& sym, ostream& os)
 {
   const char* name = sym.name().c_str();
   writeString(name, strlen(name), os);
@@ -628,7 +628,7 @@ static void write_symbols(ostream& os)
   * Find a term in a sym_entry.
   */
 
-static size_t find_term(sym_entry* entry, const aterm t)
+static size_t find_term(sym_entry* entry, const aterm& t)
 {
   size_t hnr = hash_number(detail::address(t)) % entry->termtable_size;
   trm_bucket* cur = entry->termtable[hnr];
@@ -647,7 +647,7 @@ static size_t find_term(sym_entry* entry, const aterm t)
  * Find a top symbol in a topsymbol table.
  */
 
-static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol sym)
+static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol& sym)
 {
   size_t hnr = sym.number() % syms->toptable_size;
   top_symbol* cur = syms->toptable[hnr];
@@ -666,7 +666,7 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol sy
  * Write a term using a writer.
  */
 
-static bool write_term(const aterm t, const std::vector<size_t>& index, ostream& os)
+static bool write_term(const aterm& t, const std::vector<size_t>& index, ostream& os)
 {
   std::stack<write_todo> stack;
 

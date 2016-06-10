@@ -65,7 +65,7 @@ struct t_lin_options
 /// \return An LPS equivalent to spec, which is linearised using lin_options
 /// \exception mcrl2::runtime_error Linearisation failed
 mcrl2::lps::stochastic_specification linearise(
-  const mcrl2::process::process_specification& spec,
+  const mcrl2::process::process_specification& type_checked_spec,
   mcrl2::lps::t_lin_options lin_options = t_lin_options());
 
 /// \brief Linearises a process specification from a textual specification

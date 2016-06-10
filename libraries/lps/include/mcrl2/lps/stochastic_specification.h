@@ -36,7 +36,7 @@ std::set<data::function_symbol> find_function_symbols(const lps::stochastic_spec
 std::set<core::identifier_string> find_identifiers(const lps::stochastic_specification& x);
 
 // template function overloads
-bool check_well_typedness(const stochastic_specification& spec);
+bool check_well_typedness(const stochastic_specification& x);
 
 /// \brief Linear process specification.
 class stochastic_specification: public specification_base<stochastic_linear_process, stochastic_process_initializer>

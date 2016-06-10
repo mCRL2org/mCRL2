@@ -85,7 +85,7 @@ class sort_type_checker
       }
       if (data::is_function_sort(rhs))
       {
-        const function_sort sort=atermpp::down_cast<function_sort>(rhs);
+        const function_sort& sort=atermpp::down_cast<function_sort>(rhs);
         for(const sort_expression& s: sort.domain())
         {
           check_alias_circularity(lhs,s,sort_already_seen, alias_map);
@@ -184,7 +184,7 @@ class sort_type_checker
       {
         // A loop through a list container is allowed, but a loop through a set or bag container
         // is problematic.
-        const container_sort start_search_container=atermpp::down_cast<container_sort>(start_search);
+        const container_sort& start_search_container=atermpp::down_cast<container_sort>(start_search);
         check_for_sort_alias_loop_through_function_sort(
                        end_search,
                        start_search_container.element_sort(),
@@ -196,7 +196,7 @@ class sort_type_checker
 
       if (is_function_sort(start_search))
       {
-        const function_sort f_start_search=atermpp::down_cast<function_sort>(start_search);
+        const function_sort& f_start_search=atermpp::down_cast<function_sort>(start_search);
         check_for_sort_alias_loop_through_function_sort(end_search,f_start_search.codomain(),visited,true,alias_map);
         for(const sort_expression& s: f_start_search.domain())
         {
@@ -208,7 +208,7 @@ class sort_type_checker
 
       assert(is_structured_sort(start_search));
 
-      const structured_sort struct_start_search=atermpp::down_cast<structured_sort>(start_search);
+      const structured_sort& struct_start_search=atermpp::down_cast<structured_sort>(start_search);
       for(const function_symbol& f: struct_start_search.constructor_functions())
       {
         if (is_function_sort(f.sort()))

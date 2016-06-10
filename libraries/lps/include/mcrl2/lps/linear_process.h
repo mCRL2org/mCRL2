@@ -60,10 +60,10 @@ action_summand make_action_summand<action_summand>(const data::variable_list& su
 } // namespace detail
 
 class linear_process; // prototype declaration
-bool check_well_typedness(const linear_process& proc);
+bool check_well_typedness(const linear_process& x);
 
 class stochastic_linear_process; // prototype declaration
-bool check_well_typedness(const stochastic_linear_process& proc);
+bool check_well_typedness(const stochastic_linear_process& x);
 
 template <typename ActionSummand>
 class linear_process_base

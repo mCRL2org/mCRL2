@@ -63,7 +63,7 @@ static aterm_list state_probability_list(const probabilistic_lts_lts_t::probabil
   return result;
 }
 
-static probabilistic_lts_lts_t::probabilistic_state_t aterm_list_to_probabilistic_state(const atermpp::aterm_list l)
+static probabilistic_lts_lts_t::probabilistic_state_t aterm_list_to_probabilistic_state(const atermpp::aterm_list& l)
 {
   std::vector<lps::state_probability_pair<size_t, mcrl2::lps::probabilistic_data_expression>> result;
   for(aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -71,7 +71,7 @@ static probabilistic_lts_lts_t::probabilistic_state_t aterm_list_to_probabilisti
     const size_t state_number=down_cast<aterm_int>(*i).value();
     assert(i!=l.end());
     ++i;
-    const lps::probabilistic_data_expression t=down_cast<lps::probabilistic_data_expression>(*i);
+    const lps::probabilistic_data_expression& t=down_cast<lps::probabilistic_data_expression>(*i);
     result.push_back(lps::state_probability_pair<size_t, mcrl2::lps::probabilistic_data_expression>(state_number,t));
   }
   return probabilistic_lts_lts_t::probabilistic_state_t(result.begin(),result.end());
@@ -172,21 +172,21 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
 
     size_t num_states() const
     {
-      const aterm_appl t=down_cast<aterm_appl>(meta_data()[3]);
+      const aterm_appl& t=down_cast<aterm_appl>(meta_data()[3]);
       assert(t.function()==num_of_states_labels_and_initial_state());
       return down_cast<aterm_int>(t[0]).value();
     }
 
     size_t num_action_labels() const
     {
-      const aterm_appl t=down_cast<aterm_appl>(meta_data()[3]);
+      const aterm_appl& t=down_cast<aterm_appl>(meta_data()[3]);
       assert(t.function()==num_of_states_labels_and_initial_state());
       return down_cast<aterm_int>(t[1]).value();
     }
 
     probabilistic_lts_lts_t::probabilistic_state_t initial_probabilistic_state() const
     {
-      const aterm_appl t=down_cast<aterm_appl>(meta_data()[3]);
+      const aterm_appl& t=down_cast<aterm_appl>(meta_data()[3]);
       assert(t.function()==num_of_states_labels_and_initial_state());
       
       return aterm_list_to_probabilistic_state(down_cast<aterm_list>(t[2]));

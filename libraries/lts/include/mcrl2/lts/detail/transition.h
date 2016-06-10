@@ -21,7 +21,7 @@ namespace lts
 namespace detail
 {
 
-inline bool compare_transitions_slt(const transition t1, const transition t2)
+inline bool compare_transitions_slt(const transition& t1, const transition& t2)
 {
   if (t1.from() != t2.from())
   {
@@ -37,7 +37,7 @@ inline bool compare_transitions_slt(const transition t1, const transition t2)
   }
 }
 
-inline bool compare_transitions_lts(const transition t1, const transition t2)
+inline bool compare_transitions_lts(const transition& t1, const transition& t2)
 {
   if (t1.label() != t2.label())
   {

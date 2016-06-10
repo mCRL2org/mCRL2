@@ -108,8 +108,8 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
     data_expression y = super::apply(x);
     if (data::is_equal_to_application(y))
     {
-      data_expression left = data::binary_left1(y);
-      data_expression right = data::binary_right1(y);
+      const data_expression& left = data::binary_left1(y);
+      const data_expression& right = data::binary_right1(y);
       if (left < right)
       {
         return data::equal_to(left, right);
@@ -121,8 +121,8 @@ struct normalize_equality_builder: public data_expression_builder<Derived>
     }
     else if (data::is_not_equal_to_application(y))
     {
-      data_expression left = data::binary_left1(y);
-      data_expression right = data::binary_right1(y);
+      const data_expression& left = data::binary_left1(y);
+      const data_expression& right = data::binary_right1(y);
       if (left < right)
       {
         return data::not_equal_to(left, right);

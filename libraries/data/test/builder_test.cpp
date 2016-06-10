@@ -20,7 +20,7 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
-variable bool_(std::string name)
+variable bool_(const std::string& name)
 {
   return variable(name, sort_bool::bool_());
 }

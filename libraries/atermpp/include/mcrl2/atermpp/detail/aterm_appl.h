@@ -52,25 +52,25 @@ inline
 const _aterm* term_appl0(const function_symbol& sym);
 
 template <class Term>
-const _aterm* term_appl1(const function_symbol& sym, const Term& t1);
+const _aterm* term_appl1(const function_symbol& sym, const Term& arg0);
 
 template <class Term>
-const _aterm* term_appl2(const function_symbol& sym, const Term& t1, const Term& t2);
+const _aterm* term_appl2(const function_symbol& sym, const Term& arg0, const Term& arg1);
 
 template <class Term>
-const _aterm* term_appl3(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3);
+const _aterm* term_appl3(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2);
 
 template <class Term>
-const _aterm* term_appl4(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3, const Term& t4);
+const _aterm* term_appl4(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3);
 
 template <class Term>
-const _aterm* term_appl5(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3, const Term& t4, const Term& t5);
+const _aterm* term_appl5(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4);
 
 template <class Term>
-const _aterm* term_appl6(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3, const Term& t4, const Term& t5, const Term& t6);
+const _aterm* term_appl6(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4, const Term& arg5);
 
 template <class Term>
-const _aterm* term_appl7(const function_symbol& sym, const Term& t1, const Term& t2, const Term& t3, const Term& t4, const Term& t5, const Term& t6, const Term& t7);
+const _aterm* term_appl7(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4, const Term& arg5, const Term& arg6);
 
 
 } // namespace detail

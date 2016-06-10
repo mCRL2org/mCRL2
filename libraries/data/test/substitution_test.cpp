@@ -191,11 +191,11 @@ void test_my_list_substitution()
   variable u("u", sort_nat::nat());
   variable v("v", sort_nat::nat());
 
-  data_expression x1 = x;
-  data_expression y1 = y;
-  data_expression z1 = z;
-  data_expression u1 = u;
-  data_expression v1 = v;
+  const data_expression& x1 = x;
+  const data_expression& y1 = y;
+  const data_expression& z1 = z;
+  const data_expression& u1 = u;
+  const data_expression& v1 = v;
 
   assignment xy(x,y);
   assignment uz(u,z);

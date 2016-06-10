@@ -203,7 +203,7 @@ std::string t17 =
 
 std::string x17 = "binding_variables = X1, X(s3_X: Pos)";
 
-void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
+void test_pbes(const std::string& pbes_spec, const std::string& expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
 

@@ -508,7 +508,7 @@ class sized_forward_list
       return true;
     }
 
-    bool check_integrity_of_sized_forward_list(const std::string message, bool check_ptr_in_list) const
+    bool check_integrity_of_sized_forward_list(const std::string& message, bool check_ptr_in_list) const
     {
       return true; // This check is very time consuming. It must be explicitly switched on.
       size_t length=0;

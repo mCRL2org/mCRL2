@@ -73,9 +73,9 @@ void test_variable_replace()
   variable x("x", basic_sort("D"));
   variable y("y", basic_sort("D"));
   variable z("z", basic_sort("D"));
-  data_expression e1 = x;
-  data_expression e2 = z;
-  data_expression e3 = y;
+  const data_expression& e1 = x;
+  const data_expression& e2 = z;
+  const data_expression& e3 = y;
   data_expression_vector replacements;
   replacements.push_back(e1);
   replacements.push_back(e2);

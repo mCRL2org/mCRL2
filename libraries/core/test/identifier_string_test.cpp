@@ -19,10 +19,10 @@ using namespace mcrl2;
 void test_identifier_string()
 {
   core::identifier_string a("abc");
-  const core::identifier_string b = a;
+  const core::identifier_string& b = a;
 
   const core::identifier_string_list l;
-  for (auto s: l)
+  for (const auto& s: l)
   {
     std::cout << s;
   }

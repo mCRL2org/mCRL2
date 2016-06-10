@@ -36,7 +36,7 @@ template <class LTS_TYPE>
 LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewrite_strategy const rewrite_strategy = mcrl2::data::jitty,
-                              std::string priority_action = "")
+                              const std::string& priority_action = "")
 {
   std::clog << "Translating LPS to LTS with exploration strategy " << strategy << ", rewrite strategy " << rewrite_strategy << "." << std::endl;
   lts::lts_generation_options options;
@@ -89,7 +89,7 @@ static void check_lps2lts_specification(std::string const& specification,
                                  const size_t expected_states,
                                  const size_t expected_transitions,
                                  const size_t expected_labels,
-                                 std::string priority_action = "")
+                                 const std::string& priority_action = "")
 {
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
   lps::specification lps = lps::parse_linear_process_specification(specification);

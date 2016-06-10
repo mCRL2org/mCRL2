@@ -112,7 +112,7 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
     {
       const mu& g = atermpp::down_cast<mu>(f);
       std::set<core::identifier_string> neg = negated_variables;
-      core::identifier_string X = g.name();
+      const core::identifier_string& X = g.name();
       neg.insert(X);
       return is_monotonous(not_(g.operand()), neg);
     }
@@ -120,7 +120,7 @@ bool is_monotonous(state_formula f, const std::set<core::identifier_string>& neg
     {
       const nu& g = atermpp::down_cast<nu>(f);
       std::set<core::identifier_string> neg = negated_variables;
-      core::identifier_string X = g.name();
+      const core::identifier_string& X = g.name();
       neg.insert(X);
       return is_monotonous(not_(g.operand()), neg);
     }

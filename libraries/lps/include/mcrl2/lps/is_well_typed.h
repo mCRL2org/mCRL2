@@ -221,11 +221,7 @@ struct lps_well_typed_checker
   /// </ul>
   bool is_well_typed(const process_initializer& i) const
   {
-    if (!check_assignments(i.assignments(), "process_initializer"))
-    {
-      return false;
-    }
-    return true;
+    return !!check_assignments(i.assignments(), "process_initializer");
   }
 
   /// \brief Checks well typedness of a linear process

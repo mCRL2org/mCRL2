@@ -257,7 +257,7 @@ pbes_expression parse_pbes_expression(const std::string& text,
 /// for types like Pos and Nat are generated or not.
 /// \return The parsed expression and the data specification that was used.
 inline
-std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
+std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, const std::string& data_spec = "")
 {
   std::string unique_prefix("UNIQUE_PREFIX");
   std::size_t unique_prefix_index = 0;
@@ -391,7 +391,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
 /// \param data_spec A string
 /// \return The parsed expression
 inline
-pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "datavar\npredvar\n", std::string data_spec = "")
+pbes_expression parse_pbes_expression(const std::string& text, const std::string& var_decl = "datavar\npredvar\n", const std::string& data_spec = "")
 {
   return parse_pbes_expressions(var_decl + "\nexpressions\n" + text, data_spec).first.front();
 }
@@ -403,7 +403,7 @@ pbes_expression parse_pbes_expression(std::string text, std::string var_decl = "
 /// \param sigma A substitution function
 /// \return The parsed expression
 template <typename SubstitutionFunction>
-pbes_expression parse_pbes_expression(std::string expr, std::string subst, const pbes& p, SubstitutionFunction& sigma)
+pbes_expression parse_pbes_expression(const std::string& expr, std::string subst, const pbes& p, SubstitutionFunction& sigma)
 {
   typedef core::term_traits<pbes_expression> tr;
 

@@ -105,8 +105,8 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking()) << std::endl;
             for (std::size_t m: I)
             {
-              data::data_expression_list e = Y.parameters();
-              data::data_expression e_m = nth_element(e, m);
+              const data::data_expression_list& e = Y.parameters();
+              const data::data_expression& e_m = nth_element(e, m);
               std::set<data::variable> fv = data::find_free_variables(e_m);
               u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking()));
               mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << core::detail::print_set(fv) << " dx = " << core::detail::print_set(dx) << "\n";
@@ -198,7 +198,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       assert(eq_X.predicate_variables()[i].variable() == x);
 
       std::vector<pbes_expression> phi;
-      core::identifier_string Y = x.name();
+      const core::identifier_string& Y = x.name();
       std::vector<data::data_expression> e(x.parameters().begin(),x.parameters().end());
 
       // iterate over the alternatives as defined by the control flow graph

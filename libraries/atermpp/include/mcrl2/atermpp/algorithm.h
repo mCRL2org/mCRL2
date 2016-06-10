@@ -137,7 +137,7 @@ Term bottom_up_replace(Term t, ReplaceFunction r)
 /// \param new_value The value that is substituted.
 /// \return The result of the replacement.
 template <typename Term>
-Term bottom_up_replace(Term t, aterm_appl old_value, aterm_appl new_value)
+Term bottom_up_replace(Term t, const aterm_appl& old_value, const aterm_appl& new_value)
 {
   return bottom_up_replace(t, detail::default_replace(old_value, new_value));
 }

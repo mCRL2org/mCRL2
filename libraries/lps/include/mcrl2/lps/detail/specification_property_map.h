@@ -248,7 +248,7 @@ class specification_property_map: protected mcrl2::data::detail::data_property_m
       std::size_t                            summand_count           = spec.process().summand_count();
       std::size_t                            tau_summand_count       = compute_tau_summand_count(spec);
       std::size_t                            delta_summand_count     = spec.process().deadlock_summands().size();
-      std::set<data::variable>               declared_free_variables = spec.global_variables();
+      const std::set<data::variable>&               declared_free_variables = spec.global_variables();
       std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);
       auto const&                            params                  = spec.process().process_parameters();
       std::set<data::variable>               process_parameters(params.begin(), params.end());

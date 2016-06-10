@@ -82,7 +82,7 @@ class pbes_parelm_algorithm
     /// \param v PARAM_DESCRIPTION
     /// \param message A string
     template <typename Container>
-    void print_container(const Container& v, std::string message = "<variables>") const
+    void print_container(const Container& v, const std::string& message = "<variables>") const
     {
       mCRL2log(log::info) << message << std::endl;
       for (auto i = v.begin(); i != v.end(); ++i)
@@ -96,7 +96,7 @@ class pbes_parelm_algorithm
     /// \param v A map container
     /// \param message A string
     template <typename Container>
-    void print_map(const Container& v, std::string message = "<variables>") const
+    void print_map(const Container& v, const std::string& message = "<variables>") const
     {
       mCRL2log(log::info) << message << std::endl;
       for (auto i = v.begin(); i != v.end(); ++i)
@@ -181,7 +181,7 @@ class pbes_parelm_algorithm
         std::set<propositional_variable_instantiation> propvars = find_propositional_variable_instantiations(phi);
         for (const propositional_variable_instantiation& propvar : propvars)
         {
-          core::identifier_string Y = propvar.name();
+          const core::identifier_string& Y = propvar.name();
           data::data_expression_list Yparams = propvar.parameters();
           int Yindex = 0;
           for (const data::data_expression& e: Yparams)

@@ -56,7 +56,7 @@ struct add_capture_avoiding_replacement: public data::detail::add_capture_avoidi
   process::process_expression apply(const process::process_instance_assignment& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::assignment_list a = x.assignments();
+    const data::assignment_list& a = x.assignments();
     std::vector<data::assignment> v;
 
     for (const data::variable& variable: x.identifier().variables())

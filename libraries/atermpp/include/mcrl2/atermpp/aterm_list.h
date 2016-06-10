@@ -279,7 +279,7 @@ term_list<Term> reverse(const term_list<Term>& l);
 /// \return The original list where the first occurrence of t has been removed, assuming it is in t.
 template <typename Term>
 inline
-term_list<Term> remove_one_element(const term_list<Term>& l, const Term& t);
+term_list<Term> remove_one_element(const term_list<Term>& list, const Term& t);
 
 
 /// \brief Returns the concatenation of two lists.

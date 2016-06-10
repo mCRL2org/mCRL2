@@ -32,7 +32,7 @@ class smt4_data_specification: public basic_data_specification
   protected:
     std::string generate_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression assertion) const;
 
-    std::string generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression_list distinct_terms) const;
+    std::string generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression_list& distinct_terms) const;
 
     std::string generate_smt_problem(std::string data_specification, std::string variable_declarations, std::string assertions) const;
 

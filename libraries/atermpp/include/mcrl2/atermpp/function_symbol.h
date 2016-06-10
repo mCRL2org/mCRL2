@@ -64,7 +64,7 @@ class function_symbol
     /// \brief Constructor.
     /// \param name A string
     /// \param arity The arity of the function.
-    function_symbol(const std::string& name, const size_t arity);
+    function_symbol(const std::string& name, const size_t arity_);
 
     /// \brief default constructor
     /// \details This function is deprecated and should not be used

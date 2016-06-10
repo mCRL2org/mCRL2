@@ -40,7 +40,6 @@ class action_context
     {
       for (const process::action_label& a: actions)
       {
-        core::identifier_string name = a.name();
         for (const data::sort_expression& s: a.sorts())
         {
           sort_typechecker(s);

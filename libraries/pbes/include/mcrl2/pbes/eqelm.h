@@ -325,7 +325,7 @@ class pbes_eqelm_algorithm
       {
         todo.clear();
         propositional_variable_type kappa = p.initial_state();
-        string_type X = kappa.name();
+        const string_type& X = kappa.name();
         data::mutable_map_substitution<> vX = compute_substitution(X);
 
         // propagate the equivalence relations in X over the edge kappa

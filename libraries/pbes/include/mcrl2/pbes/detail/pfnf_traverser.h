@@ -339,7 +339,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
 
   /// \brief Prints the expression stack
   /// \param msg A string
-  void print(std::string msg = "") const
+  void print(const std::string& msg = "") const
   {
     std::cout << "--- " << msg << std::endl;
     for (const pfnf_traverser_expression& expr: expression_stack)

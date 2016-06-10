@@ -193,7 +193,7 @@ bool Invariant_Checker<Specification>::check_summand(
   const size_t a_summand_number)
 {
   using namespace data::sort_bool;
-  const data::data_expression v_condition = a_summand.condition();
+  const data::data_expression& v_condition = a_summand.condition();
 
   data::mutable_map_substitution<> v_substitutions;
 

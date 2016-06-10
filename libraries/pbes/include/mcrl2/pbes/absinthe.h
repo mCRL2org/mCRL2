@@ -582,7 +582,7 @@ struct absinthe_algorithm
         name = name + print_cleaned(f.sort());
       }
 
-      data::sort_expression s = f.sort();
+      const data::sort_expression& s = f.sort();
       if (data::is_basic_sort(s))
       {
         return data::function_symbol(name, sigma(s));
@@ -656,7 +656,7 @@ struct absinthe_algorithm
     {
       mCRL2log(log::debug, "absinthe") << "lift_equation_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
       data::variable_list variables;
-      data::data_expression condition = data::sort_bool::true_();
+      const data::data_expression& condition = data::sort_bool::true_();
       data::data_expression lhs;
       data::data_expression rhs;
 
@@ -779,11 +779,11 @@ struct absinthe_algorithm
     {
       //mCRL2log(log::debug, "absinthe") << "lift_equation_2_3 f2 = " << print_symbol(f2) << " f3 = " << print_symbol(f3) << std::endl;
       data::variable_list variables;
-      data::data_expression condition = data::sort_bool::true_();
+      const data::data_expression& condition = data::sort_bool::true_();
       data::data_expression lhs;
       data::data_expression rhs;
 
-      data::sort_expression s2 = f2.sort();
+      const data::sort_expression& s2 = f2.sort();
 
       if (data::is_basic_sort(s2))
       {
@@ -852,8 +852,8 @@ struct absinthe_algorithm
   // This function checks if the correspondence si -> ti conflicts with sigmaS.
   void check_consistency(const data::function_symbol& f1, const data::function_symbol& f2, sort_expression_substitution_map& sigmaS) const
   {
-    data::sort_expression s1 = f1.sort();
-    data::sort_expression s2 = f2.sort();
+    const data::sort_expression& s1 = f1.sort();
+    const data::sort_expression& s2 = f2.sort();
 
     if (data::is_basic_sort(s1))
     {
@@ -864,8 +864,8 @@ struct absinthe_algorithm
       data::function_sort fs1(s1);
       data::function_sort fs2(s2);
 
-      data::sort_expression_list domain1 = fs1.domain();
-      data::sort_expression_list domain2 = fs2.domain();
+      const data::sort_expression_list& domain1 = fs1.domain();
+      const data::sort_expression_list& domain2 = fs2.domain();
 
       data::sort_expression_list::iterator i1 = domain1.begin();
       data::sort_expression_list::iterator i2 = domain2.begin();

@@ -45,7 +45,7 @@ public:
 
   data_expression apply(const abstraction& x)
   {
-    variable_list bound_variables = x.variables();
+    const variable_list& bound_variables = x.variables();
 
     if (is_set_comprehension(x))
     {

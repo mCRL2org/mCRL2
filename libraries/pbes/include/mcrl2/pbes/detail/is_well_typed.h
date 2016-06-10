@@ -79,7 +79,7 @@ struct has_quantifier_name_clashes_traverser: public pbes_expression_traverser<h
   /// \brief Returns true if the quantifier_stack contains a data variable with the given name
   /// \param name A
   /// \return True if the quantifier_stack contains a data variable with the given name
-  bool is_in_quantifier_stack(core::identifier_string name) const
+  bool is_in_quantifier_stack(const core::identifier_string& name) const
   {
     for (const data::variable_list& vars: quantifier_stack)
     {
