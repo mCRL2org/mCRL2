@@ -2155,8 +2155,8 @@ void VisUtils::drawLabelInBoundBox(
   const double& scaling,
   const std::string& label)
 {
-  double w = abs(xRgt - xLft);
-  double h = abs(yTop - yBot);
+  double w = std::abs(xRgt - xLft);
+  double h = std::abs(yTop - yBot);
 
   double charWidth = (CHARWIDTH*scaling);
   double charHeight = (CHARHEIGHT*scaling);
