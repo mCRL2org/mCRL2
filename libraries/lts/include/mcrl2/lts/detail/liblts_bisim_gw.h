@@ -103,14 +103,12 @@ class counter_T
     void increment()
     {
       assert(!check_counter_free());
-      assert(this!=nullptr);
       m_cnt++;
     }
 
     void decrement()
     {
       assert(!check_counter_free());
-      assert(this!=nullptr);
       assert(m_cnt>0);
       m_cnt--;
     }
@@ -125,7 +123,6 @@ class counter_T
     {
       assert(!check_counter_free());
       assert(m_cnt==0);
-      assert(this!=nullptr);
       // garbage collect this counter.
       m_cnt=reinterpret_cast<size_t>(first_free_position());
       first_free_position()=this;
@@ -309,7 +306,6 @@ class to_constlns_element_T
 
     void delete_to_constlns_element()
     {
-      assert(this!=nullptr);
       // garbage collect this counter.
       m_new_element=first_free_position();
       first_free_position()=this;
