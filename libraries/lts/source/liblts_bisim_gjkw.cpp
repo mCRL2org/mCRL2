@@ -1288,8 +1288,10 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.28: end while
         }
     // 2.29: end while
+    #ifndef NDEBUG
 part_st.print_part(part_tr);
 part_st.print_trans();
+    #endif
     }
     // 2.30: return C
         // (this happens implicitly, through the bisim_partitioner_gjkw object
