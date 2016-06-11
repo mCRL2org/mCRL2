@@ -28,6 +28,7 @@
 #endif
 #include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
+#include <string>        // for debug_id()
 
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/utilities/logger.h"
@@ -46,6 +47,7 @@ namespace detail
 
 /// type used to store state numbers and counts
 typedef size_t state_type;
+#define PRIstate_type "zu" // printf format specifier for state_type
 
 /// type used to store transition (numbers and) counts
 typedef size_t trans_type;
@@ -117,6 +119,7 @@ class state_info_entry;
 
 //typedef state_info_entry* state_info_t;
 typedef state_info_entry* state_info_ptr;
+typedef const state_info_entry* state_info_const_ptr;
 
 /// \class permutation_t
 /// \brief stores a permutation of the states, ordered by block
@@ -277,6 +280,18 @@ public:
 
     bool surely_has_transition_to(const constln_t* SpC) const;
     bool surely_has_no_transition_to(const constln_t* SpC) const;
+
+    std::string debug_id() const
+    {
+        char buffer[7 + 5 * sizeof(state_type) / 2];
+        snprintf(buffer, sizeof(buffer), "state %" PRIstate_type,
+                                    (state_type) (this - state_info_begin));
+        return std::string(buffer);
+    }
+private:
+    static state_info_const_ptr state_info_begin;
+
+    friend class part_state_t;
 };
 
 
@@ -335,6 +350,10 @@ static inline void swap3_permutation(permutation_iter_t s1,
 /// (During the execution of some functions, more slices are subdivided
 /// further;  however, as these subdivisions are local to a single function,
 /// they are not stored here.)
+///
+/// The blocks keep track of the total number of blocks allocated and number
+/// themselves sequentially using the static member `nr_of_blocks`.  It is
+/// therefore impossible to have multiple refinements running at the same time.
 class block_t
 {
 private:
@@ -381,17 +400,29 @@ private:
     /// first block in the list of refinable blocks
     static block_t* refinable_first;
 
-    //friend class constln_t;
+    /// \brief unique sequence number of this block
+    /// \details After the stuttering equivalence algorithm has terminated,
+    /// this number is used as a state number in the quotient Kripke structure.
+    /// (For blocks that contain extra Kripke states, the number is set to
+    /// BLOCK_NO_SEQNR).
+    state_type int_seqnr;
+
+#define BLOCK_NO_SEQNR ((state_type) -1)
+
 public:
+    /// \brief total number of blocks with unique sequence number allocated
+    /// \details Upon starting the stuttering equivalence algorithm, the number
+    /// of blocks must be zero.
+    static state_type nr_of_blocks;
+
     /// \brief constructor
     /// \details The constructor initialises the block to: all states are
     /// bottom states, no state is marked, the block is not refinable.
     /// \param constln_ constellation to which the block belongs
     /// \param begin_   initial iterator to the first state of the block
     /// \param end_     initial iterator past the last state of the block
-    block_t(constln_t* constln_,
-                            permutation_iter_t begin_,
-                            permutation_iter_t end_)
+    block_t(constln_t* constln_, permutation_iter_t begin_,
+                                                    permutation_iter_t end_)
         :int_end(end_),
         int_begin(begin_),
         int_marked_nonbottom_begin(begin_), // no nonbottom state is marked
@@ -402,10 +433,20 @@ public:
         int_inert_end(), // is initialised by part_trans_t::create_new_block
         FromRed(nullptr),
         int_constln(constln_),
-        refinable_next(nullptr)
+        refinable_next(nullptr),
+        int_seqnr(BLOCK_NO_SEQNR)
     {  }
 
     ~block_t()  {  }
+
+    /// assigns a unique sequence number
+    void assign_seqnr()
+    {
+        assert(BLOCK_NO_SEQNR == int_seqnr);
+        int_seqnr = nr_of_blocks++;
+    }
+
+    state_type seqnr() const  {  return int_seqnr;  }
 
     /// provides an arbitrary refinable block
     static block_t* get_some_refinable()  {  return refinable_first;  }
@@ -744,6 +785,7 @@ public:
         if (marked_nonbottom_begin() <= s->pos)  return false;
         set_marked_nonbottom_begin(marked_nonbottom_begin() - 1);
         swap_permutation(s->pos, marked_nonbottom_begin());
+        mCRL2log(log::debug) << " mkn";
         return true;
     }
 
@@ -762,6 +804,7 @@ public:
             if (marked_bottom_begin() <= s->pos)  return false;
             set_marked_bottom_begin(marked_bottom_begin() - 1);
             swap_permutation(s->pos, marked_bottom_begin());
+            mCRL2log(log::debug) << " mkb";
             return true;
         }
         return mark_nonbottom(s);
@@ -782,6 +825,21 @@ public:
     /// \param red_nonbottom_begin iterator to the first red nonbottom state
     /// \returns pointer to the new (red) block
     block_t* split_off_red(permutation_iter_t red_nonbottom_begin);
+
+    std::string debug_id() const
+    {
+        char buffer[std::max(12 + 2 * sizeof(const void*),
+                                                7 + 5 * sizeof(seqnr()) / 2)];
+        if (BLOCK_NO_SEQNR == seqnr())
+        {
+            snprintf(buffer, sizeof(buffer), "block at %p", this);
+        }
+        else
+        {
+            snprintf(buffer, sizeof(buffer), "block %" PRIstate_type, seqnr());
+        }
+        return std::string(buffer);
+    }
 };
 
 // The following member function can only be defined after the full class
@@ -804,11 +862,6 @@ inline constln_t* state_info_entry::constln()
 /// \details A constellation corresponds to a slice in the permutation array;
 /// its boundaries are also block boundaries.  As the number of constellations
 /// is initially unknown, we will allocate it dynamically.
-///
-/// The constellations keep track of the total number of constellations
-/// allocated and number themselves sequentially using the static member
-/// `nr_of_constlns`.  It is therefore impossible to have multiple refinements
-/// running at the same time.
 class constln_t
 {
 private:
@@ -827,17 +880,7 @@ private:
 
     /// first constellation in the list of nontrivial constellations
     static constln_t* nontrivial_first;
-
-    /// \brief unique sequence number of this constellation
-    /// \details After the stuttering equivalence algorithm has terminated,
-    /// this number is used as a state number in the quotient Kripke structure.
-    state_type int_seqnr;
 public:
-    /// \brief total number of constellations allocated
-    /// \details Upon starting the stuttering equivalence algorithm, the number
-    /// of constellations must be zero.
-    static state_type nr_of_constlns;
-
     /// \brief iterator to the first transition into this constellation that
     /// needs postprocessing
     /// \details In `PostprocessNewBottom()`, all transitions from a refined
@@ -857,8 +900,7 @@ public:
     constln_t(permutation_iter_t begin_, permutation_iter_t end_)
         :int_end(end_),
         int_begin(begin_),
-        nontrivial_next(nullptr),
-        int_seqnr(nr_of_constlns++)
+        nontrivial_next(nullptr)
     {  }
 
     /// destructor
@@ -905,8 +947,6 @@ public:
         int_end = new_end;
     }
 
-    state_type seqnr() const  {  return int_seqnr;  }
-
     /// \brief compares two constellations for ordering them
     /// \details The constellations are ordered according to their positions in
     /// the permutation array.  This is a suitable order, as constellations may
@@ -952,12 +992,20 @@ public:
             return FirstB;
         }
     }
+
+    std::string debug_id() const  {
+        char buffer[20 + 2 * sizeof(const void*)];
+        snprintf(buffer, sizeof(buffer), "constellation at %p", this);
+        return std::string(buffer);
+    }
 };
 
 
 
 template <class LTS_TYPE>
 class bisim_partitioner_gjkw_initialise_helper;
+
+class part_trans_t;
 
 /// \class part_state_t
 /// \brief refinable partition data structure
@@ -986,7 +1034,8 @@ public:
         :permutation(n),
         state_info(n+1) // 1 additional ``state''
     {
-        assert(0 == constln_t::nr_of_constlns);
+        assert(0 == block_t::nr_of_blocks);
+        state_info_entry::state_info_begin = state_info_begin();
     }
 
     /// destructor
@@ -995,9 +1044,6 @@ public:
         // the destructor deallocates constellations and blocks.
         // We have to deallocate constellations first because deallocating
         // blocks makes the constellations inaccessible.
-        #ifndef NDEBUG
-            state_type deleted_constlns = 0;
-        #endif
         permutation_iter_t permutation_iter = permutation.end();
         while (permutation.begin() != permutation_iter)
         {
@@ -1005,32 +1051,35 @@ public:
             assert(C->end() == permutation_iter);
             permutation_iter = C->begin();
             delete C;
-            #ifndef NDEBUG
-                ++deleted_constlns;
-            #endif
         }
-        #ifndef NDEBUG
-            assert(deleted_constlns == constln_t::nr_of_constlns);
-        #endif
-        constln_t::nr_of_constlns = 0;
 
+        #ifndef NDEBUG
+            state_type deleted_blocks = 0;
+        #endif
         permutation_iter = permutation.end();
         while (permutation.begin() != permutation_iter)
         {
             block_t* B = permutation_iter[-1]->block;
             assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
+            #ifndef NDEBUG
+                if (BLOCK_NO_SEQNR != B->seqnr())  ++deleted_blocks;
+            #endif
             delete B;
         }
+        #ifndef NDEBUG
+            assert(deleted_blocks == block_t::nr_of_blocks);
+        #endif
+        block_t::nr_of_blocks = 0;
     }
 
     /// provide stored number of states
     state_type size() const  {  return permutation.size();  }
 
     /// find constellation of a state (identified by number)
-    const constln_t* constln(state_type s) const
+    const block_t* block(state_type s) const
     {
-        return state_info[s].constln();
+        return state_info[s].block;
     }
 
 #ifndef NDEBUG
@@ -1041,56 +1090,37 @@ private:
     {
         if (end - begin != 0)
         {
-            std::cout << "\t\t" << message << (end-begin > 1 ? "s:\n" : ":\n");
+            mCRL2log(log::debug) << "\t\t" << message
+                                        << (end-begin > 1 ? "s:\n" : ":\n");
             do
             {
-                std::cout << "\t\t\tState "
-                                << (state_type) (begin - permutation.begin());
+                mCRL2log(log::debug) << "\t\t\t" << (*begin)->debug_id();
                 if (B != (*begin)->block)
                 {
-                    std::cout << ", inconsistent: points to block at "
-                                << static_cast<const void*>((*begin)->block);
+                    mCRL2log(log::debug) << ", inconsistent: points to "
+                                                << (*begin)->block->debug_id();
                 }
-                std::cout << "\n";
+                if (begin != (*begin)->pos)
+                {
+                    mCRL2log(log::debug) << ", inconsistent pointer to "
+                                                            "state_info_entry";
+                }
+                mCRL2log(log::debug) << "\n";
             }
             while (++begin != end);
         }
     }
 public:
     /// print the partition as a tree (per constellation and block)
-    void print_part() const
-    {
-        const constln_t* C = (*permutation.begin())->constln();
-        for ( ;; )
-        {
-            std::cout << "Constellation " << C->seqnr() << ":\n";
-            const block_t* B = (*C->begin())->block;
-            for ( ;; )
-            {
-                std::cout << "\tBlock at " << static_cast<const void*>(B);
-                if (C != B->constln())
-                {
-                    std::cout << ", inconsistent: points to constellation "
-                                                    << B->constln()->seqnr();
-                }
-                std::cout << ":\n";
-                print_block("Nonbottom state", B, B->nonbottom_begin(),
-                                                        B->nonbottom_end());
-                print_block("Bottom state", B, B->bottom_begin(),
-                                                        B->bottom_end());
-                // go to next block
-                if (C->end() == B->end())  break;
-                B = (*B->end())->block;
-            }
-            // go to next constellation
-            if (permutation.end() == C->end())  break;
-            C = (*C->end())->constln();
-        }
-    }
-
+    void print_part(const part_trans_t& part_tr) const;
     void print_trans() const;
 
 #endif // ifndef NDEBUG
+
+    state_info_const_ptr state_info_begin() const
+    {
+        return &*state_info.begin();
+    }
 
 };
 
@@ -1208,6 +1238,9 @@ private:
 
     void swap_in(B_to_C_iter_t pos1, B_to_C_iter_t pos2)
     {
+        assert(B_to_C.end() != pos1 && pos1->pred->succ->B_to_C == pos1);
+        assert(B_to_C.end() != pos2 && pos2->pred->succ->B_to_C == pos2);
+
         // swap contents
         pred_entry temp_entry(*pos1->pred);
         *pos1->pred = *pos2->pred;
@@ -1216,10 +1249,16 @@ private:
         pred_iter_t temp_iter(pos1->pred);
         pos1->pred = pos2->pred;
         pos2->pred = temp_iter;
+
+        assert(B_to_C.end() != pos1 && pos1->pred->succ->B_to_C == pos1);
+        assert(B_to_C.end() != pos2 && pos2->pred->succ->B_to_C == pos2);
     }
 
     void swap_out(pred_iter_t pos1, pred_iter_t pos2)
     {
+        assert(pred.end() != pos1 && pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() != pos2 && pos2->succ->B_to_C->pred == pos2);
+
         // swap contents
         succ_entry temp_entry(*pos1->succ);
         *pos1->succ = *pos2->succ;
@@ -1228,11 +1267,18 @@ private:
         succ_iter_t temp_iter(pos1->succ);
         pos1->succ = pos2->succ;
         pos2->succ = temp_iter;
+
+        assert(pred.end() != pos1 && pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() != pos2 && pos2->succ->B_to_C->pred == pos2);
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
     void swap3_out(pred_iter_t pos1, pred_iter_t pos2, pred_iter_t pos3)
     {
+        assert(pred.end() != pos1 && pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() != pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pred.end() != pos3 && pos3->succ->B_to_C->pred == pos3);
+
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
         succ_entry temp_entry(*pos1->succ);
@@ -1240,14 +1286,21 @@ private:
         *pos3->succ = *pos2->succ;
         *pos2->succ = temp_entry;
         // swap pointers to contents
-        succ_iter_t temp_iter(pos1->succ);
-        pos1->succ = pos3->succ;
-        pos3->succ = pos2->succ;
-        pos2->succ = temp_iter;
+        succ_iter_t temp_iter(pos2->succ);
+        pos2->succ = pos3->succ;
+        pos3->succ = pos1->succ;
+        pos1->succ = temp_iter;
+
+        assert(pred.end() != pos1 && pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() != pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pred.end() != pos3 && pos3->succ->B_to_C->pred == pos3);
     }
 
     void swap_B_to_C(succ_iter_t pos1, succ_iter_t pos2)
     {
+        assert(succ.end() != pos1 && pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
+
         // swap contents
         B_to_C_entry temp_entry(*pos1->B_to_C);
         *pos1->B_to_C = *pos2->B_to_C;
@@ -1256,11 +1309,18 @@ private:
         B_to_C_iter_t temp_iter(pos1->B_to_C);
         pos1->B_to_C = pos2->B_to_C;
         pos2->B_to_C = temp_iter;
+
+        assert(succ.end() != pos1 && pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
     void swap3_B_to_C(succ_iter_t pos1, succ_iter_t pos2, succ_iter_t pos3)
     {
+        assert(succ.end() != pos1 && pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() != pos3 && pos3->B_to_C->pred->succ == pos3);
+
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
         B_to_C_entry temp_entry(*pos1->B_to_C);
@@ -1268,10 +1328,14 @@ private:
         *pos3->B_to_C = *pos2->B_to_C;
         *pos2->B_to_C = temp_entry;
         // swap pointers to contents
-        B_to_C_iter_t temp_iter(pos1->B_to_C);
-        pos1->B_to_C = pos3->B_to_C;
-        pos3->B_to_C = pos2->B_to_C;
-        pos2->B_to_C = temp_iter;
+        B_to_C_iter_t temp_iter(pos2->B_to_C);
+        pos2->B_to_C = pos3->B_to_C;
+        pos3->B_to_C = pos1->B_to_C;
+        pos1->B_to_C = temp_iter;
+
+        assert(succ.end() != pos1 && pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() != pos3 && pos3->B_to_C->pred->succ == pos3);
     }
 public:
     part_trans_t(trans_type m)
@@ -1357,6 +1421,11 @@ public:
     the same slice as the transitions that start in the old block.
     Its time complexity is O(1 + |out(NewB)|). */
     void new_block_created(block_t* OldB, block_t* NewB);
+
+    /// check whether the data structure is consistent
+    bool is_consistent() const;
+
+    B_to_C_const_iter_t B_to_C_begin() const  {  return B_to_C.begin();  }
 };
 
 // The following functions can only be implemented after the definition of
@@ -1372,13 +1441,25 @@ public:
 inline bool state_info_entry::surely_has_transition_to(const constln_t* SpC)
                                                                         const
 {
+    assert(succ_begin() <= current_constln && succ_end() >= current_constln);
+    // Only non-inert transitions count.
+    if (constln() == SpC)
+    {
+        if (inert_succ_begin() == succ_begin())  return false;
+        if (inert_succ_begin()[-1].target->constln() != SpC)  return false;
+        return true;
+    }
     // either current_constln->target or current_constln[-1].target is in SpC
     if (current_constln != succ_end() &&
-                            current_constln->target->constln() == SpC)
+                                current_constln->target->constln() == SpC)
+    {
         return true;
+    }
     if (current_constln != succ_begin() &&
-                            current_constln[-1].target->constln() == SpC)
+                                current_constln[-1].target->constln() == SpC)
+    {
         return true;
+    }
     return false;
 }
 
@@ -1393,15 +1474,27 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* SpC)
 inline bool state_info_entry::surely_has_no_transition_to(const constln_t* SpC)
                                                                         const
 {
+    assert(succ_begin() <= current_constln && succ_end() >= current_constln);
+    // Only noninert transitions count:
+    if (constln() == SpC)
+    {
+        if (inert_succ_begin() == succ_begin())  return true;
+        if (inert_succ_begin()[-1].target->constln() != SpC)  return true;
+        return false;
+    }
     // condition:
     // current_constln->target is in a constellation > SpC and
     // current_constln[-1].target is in a constellation < SpC.
     if (current_constln != succ_end() &&
-                        current_constln->target->constln() <= SpC)
+                                    current_constln->target->constln() <= SpC)
+    {
         return false;
+    }
     if (current_constln != succ_begin() &&
-                        current_constln[-1].target->constln() >= SpC)
+                                current_constln[-1].target->constln() >= SpC)
+    {
         return false;
+    }
     return true;
 }
 
@@ -1563,15 +1656,15 @@ public:
 
     static state_type num_eq_classes()
     {
-        return bisim_gjkw::constln_t::nr_of_constlns;
+        return bisim_gjkw::block_t::nr_of_blocks;
     }
     state_type get_eq_class(state_type s) const
     {
-        return part_st.constln(s)->seqnr();
+        return part_st.block(s)->seqnr();
     }
     bool in_same_class(state_type s, state_type t) const
     {
-        return part_st.constln(s) == part_st.constln(t);
+        return part_st.block(s) == part_st.block(t);
     }
 private:
 
@@ -1628,7 +1721,8 @@ private:
                                                                 shared_data,
     /* interrupt locations: */ (SECONDARY_BLUE_PREDECESSOR_HANDLED,
                                 SECONDARY_BLUE_TESTING,
-                                SECONDARY_BLUE_STATE_HANDLED));
+                                SECONDARY_BLUE_STATE_HANDLED,
+                                SECONDARY_BLUE_COLLECT_BOTTOM));
 
     DECLARE_COROUTINE(secondary_red,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
