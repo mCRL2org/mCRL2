@@ -102,7 +102,6 @@ bool mcrl2::data::data_type_checker::strict_type_check(const data_expression& d)
 
     if (is_lambda_binder(BindingOperator))
     {
-      const variable_list& VarList=abstr.variables();
       strict_type_check(abstr.body());
     }
     return true;
