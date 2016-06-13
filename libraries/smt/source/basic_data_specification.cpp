@@ -725,7 +725,6 @@ void basic_data_specification::add_numerical_operators(
    * - sqrt
    */
 
-  const data::basic_sort& bool_ = data::sort_bool::bool_();
   const data::basic_sort& pos = data::sort_pos::pos();
   const data::basic_sort& nat = data::sort_nat::nat();
   const data::basic_sort& int_ = data::sort_int::int_();
