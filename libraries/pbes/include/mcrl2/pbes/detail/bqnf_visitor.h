@@ -97,8 +97,8 @@ struct bqnf_visitor
     bool result = true;
     if (!(tr::is_prop_var(e) || is_simple_expression(e))) {
       if (tr::is_and(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+        term_type l = pbes_system::accessors::left(e);
+        term_type r = pbes_system::accessors::right(e);
         if (is_simple_expression(l)) {
           result = is_inner_and(r);
         } else {
@@ -121,8 +121,8 @@ struct bqnf_visitor
     bool result = true;
     if (!(tr::is_prop_var(e) || is_simple_expression(e))) {
       if (tr::is_or(e) || tr::is_imp(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+        term_type l = pbes_system::accessors::left(e);
+        term_type r = pbes_system::accessors::right(e);
         if (is_simple_expression(l)) {
           result = is_inner_implies(r);
         } else {
@@ -156,15 +156,15 @@ struct bqnf_visitor
     if (tr::is_data(e) || tr::is_true(e) || tr::is_false(e)) {
       result = true;
     } else if (tr::is_not(e)) {
-      term_type n = tr::arg(e);
+      term_type n = pbes_system::accessors::arg(e);
       result &= visit_simple_expression(sigma, var, n);
     } else if (tr::is_and(e) || tr::is_or(e) || tr::is_imp(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
+      term_type l = pbes_system::accessors::left(e);
+      term_type r = pbes_system::accessors::right(e);
       result &= visit_simple_expression(sigma, var, l);
       result &= visit_simple_expression(sigma, var, r);
     } else if (tr::is_forall(e) || tr::is_exists(e)) {
-      term_type a = tr::arg(e);
+      term_type a = pbes_system::accessors::arg(e);
       result &= visit_simple_expression(sigma, var, a);
     } else if (tr::is_prop_var(e)) {
       if (debug) {
@@ -217,8 +217,8 @@ struct bqnf_visitor
     inc_indent();
     bool result = true;
     if (tr::is_and(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
+      term_type l = pbes_system::accessors::left(e);
+      term_type r = pbes_system::accessors::right(e);
       if (is_simple_expression(l)) {
         result &= visit_simple_expression(sigma, var, l);
         // std::clog << pp(l) << " /\\ " << std::endl;
@@ -248,7 +248,7 @@ struct bqnf_visitor
     data::variable_list qvars;
     while (tr::is_exists(qexpr)) {
       qvars = qvars + tr::var(qexpr);
-      qexpr = tr::arg(qexpr);
+      qexpr = pbes_system::accessors::arg(qexpr);
     }
     bool result = visit_inner_and(sigma, var, qexpr);
     if (debug) {
@@ -268,8 +268,8 @@ struct bqnf_visitor
     inc_indent();
     bool result = true;
     if (tr::is_or(e) || tr::is_imp(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
+      term_type l = pbes_system::accessors::left(e);
+      term_type r = pbes_system::accessors::right(e);
       result &= visit_or(sigma, var, l);
       result &= visit_or(sigma, var, r);
     } else {
@@ -294,12 +294,12 @@ struct bqnf_visitor
     data::variable_list qvars;
     while (tr::is_forall(qexpr)) {
       qvars = qvars + tr::var(qexpr);
-      qexpr = tr::arg(qexpr);
+      qexpr = pbes_system::accessors::arg(qexpr);
     }
     bool result = true;
     if (tr::is_or(qexpr) || tr::is_imp(qexpr)) {
-      term_type l = tr::left(qexpr);
-      term_type r = tr::right(qexpr);
+      term_type l = pbes_system::accessors::left(qexpr);
+      term_type r = pbes_system::accessors::right(qexpr);
       if (is_simple_expression(l)) {
         result &= visit_simple_expression(sigma, var, l);
         // std::clog << pp(l) << (tr::is_or(qexpr) ? " \\/ " : " => ") << std::endl;
@@ -327,8 +327,8 @@ struct bqnf_visitor
     inc_indent();
     bool result = true;
     if (tr::is_and(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
+      term_type l = pbes_system::accessors::left(e);
+      term_type r = pbes_system::accessors::right(e);
       result &= visit_and(sigma, var, l);
       // std::clog << " /\\ " << std::endl;
       result &= visit_and(sigma, var, r);
@@ -355,13 +355,13 @@ struct bqnf_visitor
     data::variable_list qvars;
     while (tr::is_forall(qexpr)) {
       qvars = qvars + tr::var(qexpr);
-      qexpr = tr::arg(qexpr);
+      qexpr = pbes_system::accessors::arg(qexpr);
     }
     //std::clog << "  Bounded forall: " << pp(qvars) << " . " << std::endl;
     bool result = true;
     if (tr::is_or(qexpr) || tr::is_imp(qexpr)) {
-      term_type l = tr::left(qexpr);
-      term_type r = tr::right(qexpr);
+      term_type l = pbes_system::accessors::left(qexpr);
+      term_type r = pbes_system::accessors::right(qexpr);
       if (is_simple_expression(l)) {
         result &= visit_simple_expression(sigma, var, l);
         // std::clog << pp(l) << (tr::is_or(qexpr) ? " \\/ " : " => ") << std::endl;
@@ -392,12 +392,12 @@ struct bqnf_visitor
     data::variable_list qvars;
     while (tr::is_exists(qexpr)) {
       qvars = qvars + tr::var(qexpr);
-      qexpr = tr::arg(qexpr);
+      qexpr = pbes_system::accessors::arg(qexpr);
     }
     bool result = true;
     if (tr::is_and(qexpr)) {
-      term_type l = tr::left(qexpr);
-      term_type r = tr::right(qexpr);
+      term_type l = pbes_system::accessors::left(qexpr);
+      term_type r = pbes_system::accessors::right(qexpr);
       if (is_simple_expression(l)) {
         result &= visit_simple_expression(sigma, var, l);
         result &= visit_bqnf_expression(sigma, var, r);

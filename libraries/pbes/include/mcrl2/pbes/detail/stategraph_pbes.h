@@ -20,6 +20,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
+#include "mcrl2/pbes/detail/stategraph_split.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -160,17 +161,11 @@ class stategraph_equation: public pbes_equation
     mutable std::vector<std::size_t> m_data_parameter_indices;
     mutable data::variable_vector m_data_parameters;
 
-    void split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
-    {
-      namespace a = combined_access;
-      utilities::detail::split(expr, std::back_inserter(result), a::is_and, a::left, a::right);
-    }
-
     // Extracts all conjuncts d[i] == e from the pbes expression x, for some i in 0 ... d.size(), and with e a constant.
     void find_equality_conjuncts(const pbes_expression& x, const std::vector<data::variable>& d, std::map<data::variable, data::data_expression>& result) const
     {
       std::vector<pbes_expression> v;
-      split_and(x, v);
+      detail::stategraph_split_and(x, v);
       for (const pbes_expression& expr: v)
       {
         if (data::is_data_expression(expr))

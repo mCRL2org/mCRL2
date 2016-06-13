@@ -177,60 +177,60 @@ void test_term_traits()
 
   // and 1
   x = parse_pbes_expression("Y(1) && Y(2)", VARSPEC);
-  z = tr::left(x);
-  z = tr::right(x);
+  z = pbes_system::accessors::left(x);
+  z = pbes_system::accessors::right(x);
 
   // and 2
   x = parse_pbes_expression("val(b && c)", VARSPEC);
   if (tr::is_and(x))
   {
     BOOST_CHECK(false);
-    z = tr::left(x);
-    z = tr::right(x);
+    z = pbes_system::accessors::left(x);
+    z = pbes_system::accessors::right(x);
   }
 
   // or 1
   x = parse_pbes_expression("Y(1) || Y(2)", VARSPEC);
-  z = tr::left(x);
-  z = tr::right(x);
+  z = pbes_system::accessors::left(x);
+  z = pbes_system::accessors::right(x);
 
   // or 2
   x = parse_pbes_expression("val(b || c)", VARSPEC);
   if (tr::is_or(x))
   {
     BOOST_CHECK(false);
-    z = tr::left(x);
-    z = tr::right(x);
+    z = pbes_system::accessors::left(x);
+    z = pbes_system::accessors::right(x);
   }
 
   // imp 1
   x = parse_pbes_expression("Y(1) => !Y(2)", VARSPEC);
-  z = tr::left(x);
-  z = tr::right(x);
+  z = pbes_system::accessors::left(x);
+  z = pbes_system::accessors::right(x);
 
   // imp 2
   x = parse_pbes_expression("val(b => c)", VARSPEC);
   if (tr::is_imp(x))
   {
     BOOST_CHECK(false);
-    z = tr::left(x);
-    z = tr::right(x);
+    z = pbes_system::accessors::left(x);
+    z = pbes_system::accessors::right(x);
   }
 
   // not 1
   x = parse_pbes_expression("!(Y(1) || Y(2))", VARSPEC);
-  z = tr::arg(x);
+  z = pbes_system::accessors::arg(x);
 
   // not 2
   x = parse_pbes_expression("!val(n < 10)", VARSPEC);
-  z = tr::arg(x);
+  z = pbes_system::accessors::arg(x);
 
   // not 3
   x = parse_pbes_expression("val(!(n < 10))", VARSPEC);
   if (tr::is_not(x))
   {
     BOOST_CHECK(false);
-    z = tr::arg(x);
+    z = pbes_system::accessors::arg(x);
   }
 
   // prop var 1
@@ -240,12 +240,12 @@ void test_term_traits()
   // forall 1
   x = parse_pbes_expression("forall k:Nat.Y(k)", VARSPEC);
   v = tr::var(x);
-  z = tr::arg(x);
+  z = pbes_system::accessors::arg(x);
 
   // exists 1
   x = parse_pbes_expression("exists k:Nat.Y(k)", VARSPEC);
   v = tr::var(x);
-  z = tr::arg(x);
+  z = pbes_system::accessors::arg(x);
 
 }
 

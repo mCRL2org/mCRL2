@@ -104,8 +104,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         term_type phi = tr::is_or(qexpr) ? tr::true_() : tr::false_();
         term_type psi = qexpr;
         if (tr::is_or(qexpr) || tr::is_imp(qexpr)) {
-          term_type l = tr::left(qexpr);
-          term_type r = tr::right(qexpr);
+          term_type l = pbes_system::accessors::left(qexpr);
+          term_type r = pbes_system::accessors::right(qexpr);
           if (is_simple_expression(l)) {
             phi = l;
             psi = r;
@@ -174,10 +174,10 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       //indent(); std::clog << "visit_bounded_forall: " << print_brief(e) << std::endl;
       assert(tr::is_forall(e));
       data::variable_list qvars = tr::var(e);
-      term_type qexpr = tr::arg(e);
+      term_type qexpr = pbes_system::accessors::arg(e);
       while (tr::is_forall(qexpr)) {
         qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
       bool result = visit_inner_implies(sigma, var, e, qvars, qexpr);
       if (!result) {
@@ -214,8 +214,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         term_type phi = tr::true_();
         term_type psi = qexpr;
         if (tr::is_and(qexpr)) {
-          term_type l = tr::left(qexpr);
-          term_type r = tr::right(qexpr);
+          term_type l = pbes_system::accessors::left(qexpr);
+          term_type r = pbes_system::accessors::right(qexpr);
           bool l_is_simple = is_simple_expression(l);
           if (l_is_simple) {
             phi = l;
@@ -277,11 +277,11 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       inc_indent();
       //indent(); std::clog << "visit_bounded_exists" << print_brief(e) << std::endl;
       assert(tr::is_exists(e));
-      term_type qexpr = tr::arg(e);
+      term_type qexpr = pbes_system::accessors::arg(e);
       data::variable_list qvars = tr::var(e);
       while (tr::is_exists(qexpr)) {
         qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
       bool result = visit_inner_and(sigma, var, e, qvars, qexpr);
       if (!result) {
@@ -310,7 +310,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       data::variable_list qvars;
       while (tr::is_forall(qexpr)) {
         qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
 
       term_type expr;
@@ -323,8 +323,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         term_type phi = tr::is_or(qexpr) ? tr::true_() : tr::false_();
         term_type psi = qexpr;
         if (tr::is_or(qexpr) || tr::is_imp(qexpr)) {
-          term_type l = tr::left(qexpr);
-          term_type r = tr::right(qexpr);
+          term_type l = pbes_system::accessors::left(qexpr);
+          term_type r = pbes_system::accessors::right(qexpr);
           if (is_simple_expression(l)) {
             phi = l;
             psi = r;
@@ -422,7 +422,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       data::variable_list qvars;
       while (tr::is_exists(qexpr)) {
         qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
 
       term_type expr;
@@ -435,8 +435,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
         term_type phi = tr::true_();
         term_type psi = qexpr;
         if (tr::is_and(qexpr)) {
-          term_type l = tr::left(qexpr);
-          term_type r = tr::right(qexpr);
+          term_type l = pbes_system::accessors::left(qexpr);
+          term_type r = pbes_system::accessors::right(qexpr);
           if (is_simple_expression(l)) {
             phi = l;
             psi = r;

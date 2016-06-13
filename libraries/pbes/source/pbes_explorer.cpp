@@ -288,11 +288,11 @@ inline int lts_info::count_variables(const pbes_expression& e)
     }
     else if (tr::is_and(e) || tr::is_or(e) || tr::is_imp(e))
     {
-        return count_variables(tr::left(e)) + count_variables(tr::right(e));
+        return count_variables(pbes_system::accessors::left(e)) + count_variables(pbes_system::accessors::right(e));
     }
     else if (tr::is_forall(e) || tr::is_exists(e))
     {
-        if (count_variables(tr::arg(e)) > 0)
+        if (count_variables(pbes_system::accessors::arg(e)) > 0)
         {
             return INT_MAX;
         }
@@ -303,7 +303,7 @@ inline int lts_info::count_variables(const pbes_expression& e)
     }
     else if (tr::is_not(e))
     {
-        return count_variables(tr::arg(e));
+        return count_variables(pbes_system::accessors::arg(e));
     }
     else if (tr::is_data(e))
     {
@@ -792,13 +792,13 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
     std::set<std::string> result;
     if (tr::is_not(phi))
     {
-        result = changed(tr::arg(phi), L);
+        result = changed(pbes_system::accessors::arg(phi), L);
     }
     else if (tr::is_and(phi) || tr::is_or(phi) || tr::is_imp(phi))
     {
-        std::set<std::string> l = changed(tr::left(phi), L);
+        std::set<std::string> l = changed(pbes_system::accessors::left(phi), L);
         result.insert(l.begin(), l.end());
-        std::set<std::string> r = changed(tr::right(phi), L);
+        std::set<std::string> r = changed(pbes_system::accessors::right(phi), L);
         result.insert(r.begin(), r.end());
     }
     else if (tr::is_forall(phi) || tr::is_exists(phi))
@@ -812,7 +812,7 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
             variable variable = *var;
             LL.insert(get_param_signature(variable));
         }
-        result = changed(tr::arg(phi), LL);
+        result = changed(pbes_system::accessors::arg(phi), LL);
     }
     else if (tr::is_prop_var(phi))
     {
@@ -851,18 +851,18 @@ std::set<std::string> lts_info::reset(const pbes_expression& phi, const std::set
     std::set<std::string> result;
     if (tr::is_not(phi))
     {
-        result = reset(tr::arg(phi), d);
+        result = reset(pbes_system::accessors::arg(phi), d);
     }
     else if (tr::is_and(phi) || tr::is_or(phi) || tr::is_imp(phi))
     {
-        std::set<std::string> l = reset(tr::left(phi), d);
+        std::set<std::string> l = reset(pbes_system::accessors::left(phi), d);
         result.insert(l.begin(), l.end());
-        std::set<std::string> r = reset(tr::right(phi), d);
+        std::set<std::string> r = reset(pbes_system::accessors::right(phi), d);
         result.insert(r.begin(), r.end());
     }
     else if (tr::is_forall(phi) || tr::is_exists(phi))
     {
-        result = reset(tr::arg(phi), d);
+        result = reset(pbes_system::accessors::arg(phi), d);
     }
     else if (tr::is_prop_var(phi))
     {
@@ -890,15 +890,15 @@ bool lts_info::tf(const pbes_expression& phi)
 {
     if (tr::is_not(phi))
     {
-        return tf(tr::arg(phi));
+        return tf(pbes_system::accessors::arg(phi));
     }
     else if (tr::is_and(phi) || tr::is_or(phi) || tr::is_imp(phi))
     {
-        return tf(tr::left(phi)) || tf(tr::right(phi));
+        return tf(pbes_system::accessors::left(phi)) || tf(pbes_system::accessors::right(phi));
     }
     else if (tr::is_forall(phi) || tr::is_exists(phi))
     {
-        return tf(tr::arg(phi));
+        return tf(pbes_system::accessors::arg(phi));
     }
     else if (tr::is_prop_var(phi))
     {
@@ -917,14 +917,14 @@ std::set<std::string> lts_info::occ(const pbes_expression& expr)
     }
     else if (tr::is_and(expr) || tr::is_or(expr) ||tr::is_imp(expr))
     {
-        std::set<std::string> l = occ(tr::left(expr));
+        std::set<std::string> l = occ(pbes_system::accessors::left(expr));
         result.insert(l.begin(), l.end());
-        std::set<std::string> r = occ(tr::right(expr));
+        std::set<std::string> r = occ(pbes_system::accessors::right(expr));
         result.insert(r.begin(), r.end());
     }
     else if (tr::is_forall(expr) || tr::is_exists(expr) || tr::is_not(expr))
     {
-        result = occ(tr::arg(expr));
+        result = occ(pbes_system::accessors::arg(expr));
     }
     return result;
 }
@@ -992,14 +992,14 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
     }
     else if (tr::is_and(expr) || tr::is_or(expr) || tr::is_imp(expr))
     {
-        std::set<std::string> l = used(tr::left(expr), L);
+        std::set<std::string> l = used(pbes_system::accessors::left(expr), L);
         result.insert(l.begin(), l.end());
-        std::set<std::string> r = used(tr::right(expr), L);
+        std::set<std::string> r = used(pbes_system::accessors::right(expr), L);
         result.insert(r.begin(), r.end());
     }
     else if (tr::is_not(expr))
     {
-        result = used(tr::arg(expr), L);
+        result = used(pbes_system::accessors::arg(expr), L);
     }
     else if (tr::is_forall(expr) || tr::is_exists(expr))
     {
@@ -1012,7 +1012,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
             variable variable = *var;
             LL.insert(get_param_signature(variable));
         }
-        result = used(tr::arg(expr), LL);
+        result = used(pbes_system::accessors::arg(expr), LL);
     }
     return result;
 }
@@ -1060,14 +1060,14 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
     }
     else if (tr::is_and(expr) || tr::is_or(expr) || tr::is_imp(expr))
     {
-        std::set<std::string> l = copied(tr::left(expr), L);
+        std::set<std::string> l = copied(pbes_system::accessors::left(expr), L);
         result.insert(l.begin(), l.end());
-        std::set<std::string> r = copied(tr::right(expr), L);
+        std::set<std::string> r = copied(pbes_system::accessors::right(expr), L);
         result.insert(r.begin(), r.end());
     }
     else if (tr::is_not(expr))
     {
-        result = copied(tr::arg(expr), L);
+        result = copied(pbes_system::accessors::arg(expr), L);
     }
     else if (tr::is_forall(expr) || tr::is_exists(expr))
     {
@@ -1080,7 +1080,7 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
             variable variable = *var;
             LL.insert(get_param_signature(variable));
         }
-        result = copied(tr::arg(expr), LL);
+        result = copied(pbes_system::accessors::arg(expr), LL);
     }
     return result;
 }

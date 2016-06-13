@@ -1158,102 +1158,6 @@ pbes_expression exists(const data::variable_list& l, const pbes_expression& p)
 
 } // namespace pbes_expr_optimized
 
-/// \brief The namespace for access functions that operate on both pbes and data expressions
-// TODO: unfinished!
-namespace combined_access
-{
-/// \brief Test for the value true
-/// \param t A PBES expression
-/// \return True if it is the value \p true
-inline bool is_true(const pbes_expression& t)
-{
-  return data::sort_bool::is_true_function_symbol(t);
-}
-
-/// \brief Test for the value false
-/// \param t A PBES expression
-/// \return True if it is the value \p false
-inline bool is_false(const pbes_expression& t)
-{
-  return data::sort_bool::is_false_function_symbol(t);
-}
-
-/// \brief Test for a negation
-/// \param t A PBES expression
-/// \return True if it is a negation
-inline bool is_not(const pbes_expression& t)
-{
-  return is_pbes_not(t) || data::sort_bool::is_not_application(t);
-}
-
-/// \brief Test for a conjunction
-/// \param t A PBES expression
-/// \return True if it is a conjunction
-inline bool is_and(const pbes_expression& t)
-{
-  return is_pbes_and(t) || data::sort_bool::is_and_application(t);
-}
-
-/// \brief Test for a disjunction
-/// \param t A PBES expression
-/// \return True if it is a disjunction
-inline bool is_or(const pbes_expression& t)
-{
-  return is_pbes_or(t) || data::sort_bool::is_or_application(t);
-}
-
-/// \brief Test for an implication
-/// \param t A PBES expression
-/// \return True if it is an implication
-inline bool is_imp(const pbes_expression& t)
-{
-  return is_pbes_imp(t);
-}
-
-/// \brief Test for an universal quantification
-/// \param t A PBES expression
-/// \return True if it is a universal quantification
-inline bool is_forall(const pbes_expression& t)
-{
-  return is_pbes_forall(t);
-}
-
-/// \brief Test for an existential quantification
-/// \param t A PBES expression
-/// \return True if it is an existential quantification
-inline bool is_exists(const pbes_expression& t)
-{
-  return is_pbes_exists(t);
-}
-
-/// \brief Returns true if the term t is a propositional variable expression
-/// \param t A PBES expression
-/// \return True if the term t is a propositional variable expression
-inline bool is_propositional_variable_instantiation(const pbes_expression& t)
-{
-  return pbes_system::is_propositional_variable_instantiation(t);
-}
-
-/// \brief Returns the left hand side of an expression of type and, or or imp.
-/// \param t A PBES expression or a data expression
-/// \return The left hand side of an expression of type and, or or imp.
-inline
-pbes_expression left(const pbes_expression& t)
-{
-  return accessors::data_left(t);
-}
-
-/// \brief Returns the left hand side of an expression of type and, or or imp.
-/// \param t A PBES expression or a data expression
-/// \return The left hand side of an expression of type and, or or imp.
-inline
-pbes_expression right(const pbes_expression& t)
-{
-  return accessors::data_right(t);
-}
-
-}; // namespace pbes_data
-
 } // namespace pbes_system
 
 } // namespace mcrl2
@@ -1489,15 +1393,6 @@ struct term_traits<pbes_system::pbes_expression>
   bool is_prop_var(const term_type& t)
   {
     return pbes_system::is_propositional_variable_instantiation(t);
-  }
-
-  /// \brief Returns the argument of a term of type not, exists or forall
-  /// \param t A term
-  /// \return The requested argument. Partially works for data terms
-  static inline
-  term_type arg(const term_type& t)
-  {
-    return pbes_system::accessors::arg(t);
   }
 
   /// \brief Returns the left argument of a term of type and, or or imp

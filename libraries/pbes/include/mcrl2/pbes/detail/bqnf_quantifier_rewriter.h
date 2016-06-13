@@ -69,8 +69,8 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       }
       else if (tr::is_and(e) || tr::is_or(e) || tr::is_imp(e))
       {
-        term_type l = filter(tr::left(e), d);
-        term_type r = filter(tr::right(e), d);
+        term_type l = filter(pbes_system::accessors::left(e), d);
+        term_type r = filter(pbes_system::accessors::right(e), d);
         if (l==empty && r==empty)
         {
           return empty;
@@ -207,10 +207,10 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       //std::clog << "rewrite_bounded_forall: " << pp(e) << std::endl;
       assert(tr::is_forall(e));
       data::variable_list qvars = tr::var(e);
-      term_type qexpr = tr::arg(e);
+      term_type qexpr = pbes_system::accessors::arg(e);
       while (tr::is_forall(qexpr)) {
         qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
       // forall qvars . qexpr
       term_type result;
@@ -221,8 +221,8 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
         term_type phi = tr::is_or(qexpr) ? tr::true_() : tr::false_();
         term_type psi = qexpr;
         if (tr::is_or(qexpr) || tr::is_imp(qexpr)) {
-          term_type l = tr::left(qexpr);
-          term_type r = tr::right(qexpr);
+          term_type l = pbes_system::accessors::left(qexpr);
+          term_type r = pbes_system::accessors::right(qexpr);
           if (is_simple_expression(l)) {
             phi = l;
             psi = r;
@@ -298,11 +298,11 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     {
       //std::clog << "rewrite_bounded_exists" << pp(e) << std::endl;
       assert(tr::is_exists(e));
-      term_type qexpr = tr::arg(e);
+      term_type qexpr = pbes_system::accessors::arg(e);
       data::variable_list qvars = tr::var(e);
       while (tr::is_exists(qexpr)) {
         qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
       term_type r = rewrite_bqnf_expression(qexpr);
       term_type result = tr::exists(qvars, r);
@@ -364,8 +364,8 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     virtual term_type rewrite_imp(const term_type& e)
     {
       //std::clog << "rewrite_imp: " << pp(e) << std::endl;
-      term_type l = rewrite_bqnf_expression(tr::left(e));
-      term_type r = rewrite_bqnf_expression(tr::right(e));
+      term_type l = rewrite_bqnf_expression(pbes_system::accessors::left(e));
+      term_type r = rewrite_bqnf_expression(pbes_system::accessors::right(e));
       term_type result = tr::imp(l, r);
       return result;
     }

@@ -80,8 +80,8 @@ class ppg_visitor
       //std::clog << "visit_inner_and: " << print_brief(e) << std::endl;
       bool result = true;
       if (tr::is_and(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+        term_type l = pbes_system::accessors::left(e);
+        term_type r = pbes_system::accessors::right(e);
         if (visit_simple_expression(l)) {
           result &= visit_inner_and(r);
         } else {
@@ -103,7 +103,7 @@ class ppg_visitor
       data::variable_list qvars;
       while (tr::is_exists(qexpr)) {
         qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
       return visit_inner_and(qexpr);
     }
@@ -116,8 +116,8 @@ class ppg_visitor
       //std::clog << "visit_or: " << print_brief(e) << std::endl;
       bool result = true;
       if (tr::is_or(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+        term_type l = pbes_system::accessors::left(e);
+        term_type r = pbes_system::accessors::right(e);
         result &= visit_or(l);
         result &= visit_or(r);
       } else {
@@ -134,8 +134,8 @@ class ppg_visitor
       //std::clog << "visit_inner_implies: " << print_brief(e) << std::endl;
       bool result = true;
       if (tr::is_or(e) || tr::is_imp(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+        term_type l = pbes_system::accessors::left(e);
+        term_type r = pbes_system::accessors::right(e);
         if (visit_simple_expression(l)) {
           result &= visit_inner_implies(r);
         } else {
@@ -157,7 +157,7 @@ class ppg_visitor
       data::variable_list qvars;
       while (tr::is_forall(qexpr)) {
         qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
       return visit_inner_implies(qexpr);
     }
@@ -170,8 +170,8 @@ class ppg_visitor
       //std::clog << "visit_and: " << print_brief(e) << std::endl;
       bool result = true;
       if (tr::is_and(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+        term_type l = pbes_system::accessors::left(e);
+        term_type r = pbes_system::accessors::right(e);
         result &= visit_and(l);
         result &= visit_and(r);
       } else {

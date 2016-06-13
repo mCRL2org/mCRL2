@@ -14,6 +14,7 @@
 
 #include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+#include "mcrl2/pbes/detail/stategraph_split.h"
 
 namespace mcrl2 {
 
@@ -117,20 +118,8 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
     }
     else
     {
-      return tr::not_arg(x);
+      return atermpp::down_cast<not_>(x).operand();
     }
-  }
-
-  void stategraph_split_or(const pbes_expression& expr, std::vector<pbes_expression>& result) const
-  {
-    namespace a = combined_access;
-    utilities::detail::split(expr, std::back_inserter(result), a::is_or, a::left, a::right);
-  }
-
-  void stategraph_split_and(const pbes_expression& expr, std::vector<pbes_expression>& result) const
-  {
-    namespace a = combined_access;
-    utilities::detail::split(expr, std::back_inserter(result), a::is_and, a::left, a::right);
   }
 
   pbes_expression stategraph_join_or(const std::vector<pbes_expression>& terms) const
@@ -158,7 +147,7 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
       if (is_universal_or(arg))
       {
         std::vector<pbes_expression> terms;
-        stategraph_split_or(arg, terms);
+        detail::stategraph_split_or(arg, terms);
         for (pbes_expression& term: terms)
         {
           term = stategraph_not(term);
@@ -169,7 +158,7 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
       else if (is_universal_and(arg))
       {
         std::vector<pbes_expression> terms;
-        stategraph_split_and(arg, terms);
+        detail::stategraph_split_and(arg, terms);
         for (pbes_expression& term: terms)
         {
           term = stategraph_not(term);
