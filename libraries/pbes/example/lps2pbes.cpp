@@ -25,7 +25,6 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::state_formulas;
 using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::pbes_expr;
 using mcrl2::state_formulas::algorithms::parse_state_formula;
 
 int main(int argc, char* argv[])

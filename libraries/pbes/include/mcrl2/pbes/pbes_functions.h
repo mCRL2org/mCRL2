@@ -125,8 +125,6 @@ inline bool is_non_simple_conjunct(const pbes_expression& t)
   return is_pbes_and(t) && !is_simple_expression(t);
 }
 
-namespace pbes_expr {
-
 /// \brief Splits a disjunction into a sequence of operands
 /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
@@ -182,8 +180,6 @@ std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool s
 
   return result;
 }
-
-} // namespace pbes_expr
 
 } // namespace pbes_system
 

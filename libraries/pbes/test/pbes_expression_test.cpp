@@ -20,10 +20,7 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
 
-using namespace std;
 using namespace mcrl2;
-using namespace mcrl2::data;
-using namespace mcrl2::core;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
@@ -48,16 +45,15 @@ void print(std::set<pbes_expression> q)
 
 void test_accessors()
 {
-  namespace p = mcrl2::pbes_system::pbes_expr;
   using namespace mcrl2::pbes_system::accessors;
 
   std::vector<pbes_expression> expressions = parse_pbes_expressions(EXPRESSIONS).first;
   pbes_expression x = expressions[0];
   pbes_expression y = expressions[1];
-  variable d(identifier_string("d"), sort_nat::nat());
-  variable_list v = { d };
+  data::variable d(core::identifier_string("d"), data::sort_nat::nat());
+  data::variable_list v = { d };
   pbes_expression z = d;
-  propositional_variable_instantiation X(identifier_string("X"), { d });
+  propositional_variable_instantiation X(core::identifier_string("X"), { d });
 
   std::set<pbes_expression> q;
   q.insert(x);
@@ -68,52 +64,52 @@ void test_accessors()
     using namespace mcrl2::pbes_system::accessors;
 
     pbes_expression a, b, c;
-    variable_list w;
-    identifier_string s;
-    data_expression e;
+    data::variable_list w;
+    core::identifier_string s;
+    data::data_expression e;
     std::set<pbes_expression> q1;
 
     e = val(z);
 
-    a = p::not_(x);
+    a = not_(x);
     b = arg(a);
     BOOST_CHECK(x == b);
 
-    a = p::and_(x, y);
+    a = and_(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = p::or_(x, y);
+    a = or_(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = p::imp(x, y);
+    a = imp(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = p::forall(v, x);
+    a = forall(v, x);
     w = var(a);
     b = arg(a);
     BOOST_CHECK(v == w);
     BOOST_CHECK(x == b);
 
-    a = p::exists(v, x);
+    a = exists(v, x);
     w = var(a);
     b = arg(a);
     BOOST_CHECK(v == w);
     BOOST_CHECK(x == b);
 
     s = name(X);
-    BOOST_CHECK(s == identifier_string("X"));
+    BOOST_CHECK(s == core::identifier_string("X"));
 
-    const data_expression_list& f = param(X);
-    data_expression_list g = { d };
+    const data::data_expression_list& f = param(X);
+    data::data_expression_list g = { d };
     BOOST_CHECK(f == g);
 
     print(q);
@@ -132,23 +128,21 @@ void test_accessors()
   }
 
   {
-    using namespace pbes_expr_optimized;
-
     pbes_expression a;
-    identifier_string s;
-    data_expression e;
+    core::identifier_string s;
+    data::data_expression e;
     std::set<pbes_expression> q1;
 
     e = val(z);
 
-    a = p::not_(x);
-    a = p::and_(x, y);
-    a = p::or_(x, y);
-    a = p::imp(x, y);
-    a = p::forall(v, x);
-    a = p::exists(v, x);
+    a = not_(x);
+    a = and_(x, y);
+    a = or_(x, y);
+    a = imp(x, y);
+    a = forall(v, x);
+    a = exists(v, x);
     s = name(X);
-    const data_expression_list& f = param(X);
+    param(X);
     a = join_or(q.begin(), q.end());
     a = join_and(q.begin(), q.end());
     q1 = split_or(a);

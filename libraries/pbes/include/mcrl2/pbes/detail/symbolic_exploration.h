@@ -107,8 +107,7 @@ class symbolic_exploration_algorithm
     {
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::not_(x);
+        return optimized_not(x);
       }
       else
       {
@@ -122,8 +121,7 @@ class symbolic_exploration_algorithm
       const pbes_expression& right = y;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::and_(left, right);
+        return optimized_and(left, right);
       }
       else
       {
@@ -137,8 +135,7 @@ class symbolic_exploration_algorithm
       const pbes_expression& right = y;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::or_(left, right);
+        return optimized_or(left, right);
       }
       else
       {
@@ -152,8 +149,7 @@ class symbolic_exploration_algorithm
       const pbes_expression& right = y;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::imp(left, right);
+        return optimized_imp(left, right);
       }
       else
       {
@@ -166,8 +162,7 @@ class symbolic_exploration_algorithm
       const pbes_expression& body = x;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::forall(d, body);
+        return optimized_forall(d, body);
       }
       else
       {
@@ -180,8 +175,7 @@ class symbolic_exploration_algorithm
       const pbes_expression& body = x;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::exists(d, body);
+        return optimized_exists(d, body);
       }
       else
       {

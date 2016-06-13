@@ -253,7 +253,7 @@ struct fixpoint_equation_solver
 
   void operator()(pbes_equation& e) const
   {
-    pbes_expression phi = e.symbol().is_mu() ? pbes_expr::false_() : pbes_expr::true_();
+    pbes_expression phi = e.symbol().is_mu() ? false_() : true_();
     e.formula() = replace_propositional_variables(e.formula(), propositional_variable_substitution(e.variable(), phi));
   }
 };

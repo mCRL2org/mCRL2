@@ -27,8 +27,6 @@ namespace pbes_system
 inline
 bool is_monotonous(pbes_expression f)
 {
-  namespace p = pbes_expr;
-
   //--- handle negations ---//
   if (is_not(f))
   {
@@ -53,29 +51,29 @@ bool is_monotonous(pbes_expression f)
     {
       const auto& left = atermpp::down_cast<and_>(f).left();
       const auto& right = atermpp::down_cast<and_>(f).right();
-      return is_monotonous(p::not_(left)) && is_monotonous(p::not_(right));
+      return is_monotonous(not_(left)) && is_monotonous(not_(right));
     }
     else if (is_or(f))
     {
       const auto& left = atermpp::down_cast<or_>(f).left();
       const auto& right = atermpp::down_cast<or_>(f).right();
-      return is_monotonous(p::not_(left)) && is_monotonous(p::not_(right));
+      return is_monotonous(not_(left)) && is_monotonous(not_(right));
     }
     else if (is_imp(f))
     {
       const auto& left = atermpp::down_cast<imp>(f).left();
       const auto& right = atermpp::down_cast<imp>(f).right();
-      return is_monotonous(left) && is_monotonous(p::not_(right));
+      return is_monotonous(left) && is_monotonous(not_(right));
     }
     else if (is_forall(f))
     {
       const auto& body = atermpp::down_cast<forall>(f).body();
-      return is_monotonous(p::not_(body));
+      return is_monotonous(not_(body));
     }
     else if (is_exists(f))
     {
       const auto& body = atermpp::down_cast<exists>(f).body();
-      return is_monotonous(p::not_(body));
+      return is_monotonous(not_(body));
     }
     else if (is_propositional_variable_instantiation(f))
     {
@@ -112,7 +110,7 @@ bool is_monotonous(pbes_expression f)
   {
     const auto& left = atermpp::down_cast<imp>(f).left();
     const auto& right = atermpp::down_cast<imp>(f).right();
-    return is_monotonous(p::not_(left)) && is_monotonous(right);
+    return is_monotonous(not_(left)) && is_monotonous(right);
   }
   else if (is_forall(f))
   {

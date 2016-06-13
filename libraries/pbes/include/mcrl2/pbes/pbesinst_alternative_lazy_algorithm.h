@@ -113,36 +113,36 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_vari
   if (is_pbes_and(p))
   {
     const and_& pa=atermpp::down_cast<and_>(p);
-    return pbes_expr::and_(pbes_expression_order_quantified_variables(pa.left(),data_spec),
-                           pbes_expression_order_quantified_variables(pa.right(),data_spec));
+    return and_(pbes_expression_order_quantified_variables(pa.left(),data_spec),
+                pbes_expression_order_quantified_variables(pa.right(),data_spec));
   }
   else if (is_pbes_or(p))
   {
     const or_& po=atermpp::down_cast<or_>(p);
-    return pbes_expr::or_(pbes_expression_order_quantified_variables(po.left(),data_spec),
-                          pbes_expression_order_quantified_variables(po.right(),data_spec));
+    return or_(pbes_expression_order_quantified_variables(po.left(),data_spec),
+               pbes_expression_order_quantified_variables(po.right(),data_spec));
   }
   else if (is_pbes_imp(p))
   {
     const imp& pi=atermpp::down_cast<imp>(p);
-    return pbes_expr::imp(pbes_expression_order_quantified_variables(pi.left(),data_spec),
-                          pbes_expression_order_quantified_variables(pi.right(),data_spec));
+    return imp(pbes_expression_order_quantified_variables(pi.left(),data_spec),
+               pbes_expression_order_quantified_variables(pi.right(),data_spec));
   }
   else if (is_pbes_not(p))
   {
-    return pbes_expr::not_(pbes_expression_order_quantified_variables(atermpp::down_cast<not_>(p).operand(),data_spec));
+    return not_(pbes_expression_order_quantified_variables(atermpp::down_cast<not_>(p).operand(),data_spec));
   }
   else if (is_pbes_forall(p))
   {
     const forall& pf=atermpp::down_cast<forall>(p);
     const pbes_expression expr = pbes_expression_order_quantified_variables(pf.body(),data_spec);
-    return pbes_expr::forall(mcrl2::data::order_variables_to_optimise_enumeration(pf.variables(),data_spec),expr);
+    return make_forall(mcrl2::data::order_variables_to_optimise_enumeration(pf.variables(),data_spec),expr);
   }
   else if (is_pbes_exists(p))
   {
     const exists& pe=atermpp::down_cast<exists>(p);
     const pbes_expression expr = pbes_expression_order_quantified_variables(pe.body(),data_spec);
-    return pbes_expr::exists(mcrl2::data::order_variables_to_optimise_enumeration(pe.variables(),data_spec),expr);
+    return make_exists(mcrl2::data::order_variables_to_optimise_enumeration(pe.variables(),data_spec),expr);
   }
   else
   {

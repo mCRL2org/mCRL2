@@ -328,9 +328,9 @@ std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables
         result.push_back(e);
     }
     else if (tr::is_and(e)) {
-        parts = pbes_expr::split_conjuncts(e, true);
+        parts = split_conjuncts(e, true);
     } else if (tr::is_or(e)) {
-        parts = pbes_expr::split_disjuncts(e, true);
+        parts = split_disjuncts(e, true);
     } else {
         parts.push_back(e);
     }

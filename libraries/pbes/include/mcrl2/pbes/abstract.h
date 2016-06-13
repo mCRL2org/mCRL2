@@ -95,7 +95,7 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
     push_variables(x.variables());
     pbes_expression new_expression = apply(x.body());
     pop_variables();
-    return pbes_expr::forall(x.variables(), new_expression);
+    return make_forall(x.variables(), new_expression);
   }
 
   /// \brief Visit exists node
@@ -104,7 +104,7 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
     push_variables(x.variables());
     pbes_expression new_expression = apply(x.body());
     pop_variables();
-    return pbes_expr::exists(x.variables(), new_expression);
+    return make_exists(x.variables(), new_expression);
   }
 };
 

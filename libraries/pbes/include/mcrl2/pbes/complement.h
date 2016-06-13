@@ -54,12 +54,12 @@ struct complement_builder: public pbes_expression_builder<Derived>
 
   pbes_expression apply(const and_& x)
   {
-    return pbes_expr_optimized::or_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    return optimized_or(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
   }
 
   pbes_expression apply(const or_& x)
   {
-    return pbes_expr_optimized::and_(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
+    return optimized_and(static_cast<Derived&>(*this).apply(x.left()), static_cast<Derived&>(*this).apply(x.right()));
   }
 
   pbes_expression apply(const propositional_variable_instantiation& x)

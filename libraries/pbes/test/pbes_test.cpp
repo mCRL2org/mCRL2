@@ -204,8 +204,6 @@ void test_complement_method_builder()
 
 void test_pbes_expression()
 {
-  namespace p = pbes_system::pbes_expr;
-
   variable x1("x1", basic_sort("X"));
   pbes_expression e = x1;
   data_expression x2 = mcrl2::pbes_system::accessors::val(e);

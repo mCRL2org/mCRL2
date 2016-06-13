@@ -235,7 +235,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
           // forall d . phi => psi
           std::vector<term_type> conjuncts;
           if (tr::is_and(psi)) {
-            conjuncts = pbes_expr::split_conjuncts(psi);
+            conjuncts = split_conjuncts(psi);
           } else {
             conjuncts.push_back(psi);
           }
@@ -319,7 +319,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       //std::clog << "rewrite_and: " << pp(e) << std::endl;
       term_type conjunction = tr::true_();
       std::vector<equation_type> new_eqns;
-      std::vector<term_type> conjuncts = pbes_expr::split_conjuncts(e);
+      std::vector<term_type> conjuncts = split_conjuncts(e);
       for (std::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
         term_type expr = *c;
         term_type r = rewrite_bqnf_expression(expr);
@@ -342,7 +342,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       //std::clog << "rewrite_or: " << pp(e) << std::endl;
       term_type disjunction = tr::false_();
       std::vector<term_type> new_exprs;
-      std::vector<term_type> disjuncts = pbes_expr::split_disjuncts(e);
+      std::vector<term_type> disjuncts = split_disjuncts(e);
       for (std::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
         term_type expr = *d;
         term_type r = rewrite_bqnf_expression(expr);

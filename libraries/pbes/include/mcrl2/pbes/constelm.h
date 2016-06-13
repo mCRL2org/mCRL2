@@ -424,7 +424,7 @@ class pbes_constelm_algorithm
         /// \param src A propositional variable declaration
         /// \param tgt A propositional variable
         /// \param c A term
-        edge(propositional_variable_decl_type src, propositional_variable_type tgt, term_type c = pbes_expr::true_())
+        edge(propositional_variable_decl_type src, propositional_variable_type tgt, term_type c = true_())
           : term_type(c), m_source(src), m_target(tgt)
         {}
 

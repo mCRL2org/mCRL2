@@ -59,7 +59,7 @@ void test_pbes_expression()
   propositional_variable_instantiation x1 = propvarinst("X1", e1);
   propositional_variable_instantiation x2 = propvarinst("X2", e2);
 
-  pbes_expression p = pbes_expr::and_(x1, x2);
+  pbes_expression p = and_(x1, x2);
 
   std::map<identifier_string, std::vector<size_t> > to_be_removed;
   std::vector<size_t> v1;
@@ -84,7 +84,7 @@ void test_pbes_expression()
     propositional_variable_instantiation x1 = propvarinst("X1", e1);
     propositional_variable_instantiation x2 = propvarinst("X2", e2);
 
-    r = pbes_expr::and_(x1, x2);
+    r = and_(x1, x2);
   }
   BOOST_CHECK(q == r);
 }

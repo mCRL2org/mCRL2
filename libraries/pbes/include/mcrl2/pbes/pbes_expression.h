@@ -881,71 +881,13 @@ const data::data_expression_list& param(const pbes_expression& t)
 }
 } // accessors
 
-/// Accessor functions and predicates for pbes expressions.
-namespace pbes_expr
-{
-
-/// \brief Make the value true
-/// \return The value \p true
-inline
-pbes_expression true_()
-{
-  return pbes_system::true_();
-}
-
-/// \brief Make the value false
-/// \return The value \p false
-inline
-pbes_expression false_()
-{
-  return pbes_system::false_();
-}
-
-/// \brief Make a negation
-/// \param p A PBES expression
-/// \return The value <tt>!p</tt>
-inline
-pbes_expression not_(const pbes_expression& p)
-{
-  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), p));
-}
-
-/// \brief Make a conjunction
-/// \param p A PBES expression
-/// \param q A PBES expression
-/// \return The value <tt>p && q</tt>
-inline
-pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
-{
-  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p,q));
-}
-
-/// \brief Make a disjunction
-/// \param p A PBES expression
-/// \param q A PBES expression
-/// \return The value <tt>p || q</tt>
-inline
-pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
-{
-  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), p,q));
-}
-
-/// \brief Make an implication
-/// \param p A PBES expression
-/// \param q A PBES expression
-/// \return The value <tt>p => q</tt>
-inline
-pbes_expression imp(const pbes_expression& p, const pbes_expression& q)
-{
-  return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), p,q));
-}
-
-/// \brief Make a universal quantification
+/// \brief Make a universal quantification. It checks for an empty variable list,
+/// which is not allowed.
 /// \param l A sequence of data variables
 /// \param p A PBES expression
 /// \return The value <tt>forall l.p</tt>
 inline
-pbes_expression forall(const data::variable_list& l, const pbes_expression& p)
+pbes_expression make_forall(const data::variable_list& l, const pbes_expression& p)
 {
   if (l.empty())
   {
@@ -954,12 +896,13 @@ pbes_expression forall(const data::variable_list& l, const pbes_expression& p)
   return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), l, p));
 }
 
-/// \brief Make an existential quantification
+/// \brief Make an existential quantification. It checks for an empty variable list,
+/// which is not allowed.
 /// \param l A sequence of data variables
 /// \param p A PBES expression
 /// \return The value <tt>exists l.p</tt>
 inline
-pbes_expression exists(const data::variable_list& l, const pbes_expression& p)
+pbes_expression make_exists(const data::variable_list& l, const pbes_expression& p)
 {
   if (l.empty())
   {
@@ -968,18 +911,11 @@ pbes_expression exists(const data::variable_list& l, const pbes_expression& p)
   return pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
 }
 
-} // namespace pbes_expr
-
-namespace pbes_expr_optimized
-{
-using pbes_expr::true_;
-using pbes_expr::false_;
-
 /// \brief Make a negation
 /// \param p A PBES expression
 /// \return The value <tt>!p</tt>
 inline
-pbes_expression not_(const pbes_expression& p)
+pbes_expression optimized_not(const pbes_expression& p)
 {
   return data::optimized_not(p);
 }
@@ -989,7 +925,7 @@ pbes_expression not_(const pbes_expression& p)
 /// \param q A PBES expression
 /// \return The value <tt>p && q</tt>
 inline
-pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
+pbes_expression optimized_and(const pbes_expression& p, const pbes_expression& q)
 {
   return data::optimized_and(p, q);
 }
@@ -999,7 +935,7 @@ pbes_expression and_(const pbes_expression& p, const pbes_expression& q)
 /// \param q A PBES expression
 /// \return The value <tt>p || q</tt>
 inline
-pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
+pbes_expression optimized_or(const pbes_expression& p, const pbes_expression& q)
 {
   return data::optimized_or(p, q);
 }
@@ -1009,7 +945,7 @@ pbes_expression or_(const pbes_expression& p, const pbes_expression& q)
 /// \param q A PBES expression
 /// \return The value <tt>p => q</tt>
 inline
-pbes_expression imp(const pbes_expression& p, const pbes_expression& q)
+pbes_expression optimized_imp(const pbes_expression& p, const pbes_expression& q)
 {
   return data::optimized_imp(p, q);
 }
@@ -1020,7 +956,7 @@ pbes_expression imp(const pbes_expression& p, const pbes_expression& q)
 /// \param p A PBES expression
 /// \return The value <tt>forall l.p</tt>
 inline
-pbes_expression forall(const data::variable_list& l, const pbes_expression& p)
+pbes_expression optimized_forall(const data::variable_list& l, const pbes_expression& p)
 {
   if (l.empty())
   {
@@ -1035,7 +971,7 @@ pbes_expression forall(const data::variable_list& l, const pbes_expression& p)
   {
     return true_();
   }
-  return pbes_expr::forall(l, p);
+  return forall(l, p);
 }
 
 /// \brief Make an existential quantification
@@ -1044,7 +980,7 @@ pbes_expression forall(const data::variable_list& l, const pbes_expression& p)
 /// \param p A PBES expression
 /// \return The value <tt>exists l.p</tt>
 inline
-pbes_expression exists(const data::variable_list& l, const pbes_expression& p)
+pbes_expression optimized_exists(const data::variable_list& l, const pbes_expression& p)
 {
   if (l.empty())
   {
@@ -1059,10 +995,8 @@ pbes_expression exists(const data::variable_list& l, const pbes_expression& p)
     // N.B. Here we use the fact that mCRL2 data types are never empty.
     return data::sort_bool::true_();
   }
-  return pbes_expr::exists(l, p);
+  return exists(l, p);
 }
-
-} // namespace pbes_expr_optimized
 
 } // namespace pbes_system
 

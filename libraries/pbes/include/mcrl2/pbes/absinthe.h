@@ -59,26 +59,6 @@ namespace pbes_system {
     return data::pp(x) + ": " + data::pp(x.sort());
   }
 
-  inline
-  pbes_expression make_exists(const data::variable_list& variables, const pbes_expression& body)
-  {
-    if (variables.empty())
-    {
-      return body;
-    }
-    return pbes_system::exists(variables, body);
-  }
-
-  inline
-  pbes_expression make_forall(const data::variable_list& variables, const pbes_expression& body)
-  {
-    if (variables.empty())
-    {
-      return body;
-    }
-    return pbes_system::forall(variables, body);
-  }
-
 namespace detail {
 
   inline

@@ -380,7 +380,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       equation_type dummy;
       term_type conjunction = tr::true_();
       std::vector<equation_type> new_eqns;
-      std::vector<term_type> conjuncts = pbes_expr::split_conjuncts(e);
+      std::vector<term_type> conjuncts = split_conjuncts(e);
       for (std::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
         term_type expr = *c;
         std::pair<term_type,equation_type> p = rewrite_inner_bounded_forall(sigma, var, expr, dummy);
@@ -484,7 +484,7 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
       equation_type dummy;
       term_type disjunction = tr::false_();
       std::vector<equation_type> new_eqns;
-      std::vector<term_type> disjuncts = pbes_expr::split_disjuncts(e);
+      std::vector<term_type> disjuncts = split_disjuncts(e);
       for (std::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
         term_type expr = *d;
         std::pair<term_type,equation_type> p = rewrite_inner_bounded_exists(sigma, var, expr, dummy);
