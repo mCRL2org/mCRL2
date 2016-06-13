@@ -12,6 +12,9 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_SPLIT_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_SPLIT_H
 
+#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/utilities/detail/join.h"
+
 namespace mcrl2 {
 
 namespace pbes_system {
@@ -21,29 +24,6 @@ namespace detail {
 /// \brief The namespace for access functions that operate on both pbes and data expressions
 namespace combined_access
 {
-/// \brief Test for the value true
-/// \param t A PBES expression
-/// \return True if it is the value \p true
-inline bool is_true(const pbes_expression& t)
-{
-  return data::sort_bool::is_true_function_symbol(t);
-}
-
-/// \brief Test for the value false
-/// \param t A PBES expression
-/// \return True if it is the value \p false
-inline bool is_false(const pbes_expression& t)
-{
-  return data::sort_bool::is_false_function_symbol(t);
-}
-
-/// \brief Test for a negation
-/// \param t A PBES expression
-/// \return True if it is a negation
-inline bool is_not(const pbes_expression& t)
-{
-  return is_pbes_not(t) || data::sort_bool::is_not_application(t);
-}
 
 /// \brief Test for a conjunction
 /// \param t A PBES expression
@@ -59,38 +39,6 @@ inline bool is_and(const pbes_expression& t)
 inline bool is_or(const pbes_expression& t)
 {
   return is_pbes_or(t) || data::sort_bool::is_or_application(t);
-}
-
-/// \brief Test for an implication
-/// \param t A PBES expression
-/// \return True if it is an implication
-inline bool is_imp(const pbes_expression& t)
-{
-  return is_pbes_imp(t);
-}
-
-/// \brief Test for an universal quantification
-/// \param t A PBES expression
-/// \return True if it is a universal quantification
-inline bool is_forall(const pbes_expression& t)
-{
-  return is_pbes_forall(t);
-}
-
-/// \brief Test for an existential quantification
-/// \param t A PBES expression
-/// \return True if it is an existential quantification
-inline bool is_exists(const pbes_expression& t)
-{
-  return is_pbes_exists(t);
-}
-
-/// \brief Returns true if the term t is a propositional variable expression
-/// \param t A PBES expression
-/// \return True if the term t is a propositional variable expression
-inline bool is_propositional_variable_instantiation(const pbes_expression& t)
-{
-  return pbes_system::is_propositional_variable_instantiation(t);
 }
 
 /// \brief Returns the left hand side of an expression of type and, or or imp.
