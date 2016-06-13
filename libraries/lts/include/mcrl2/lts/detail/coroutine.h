@@ -424,7 +424,7 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
             _Pragma("GCC diagnostic pop")                                     \
             shared_type _coroutine_shared_data =                              \
                                             _coroutine_NO_PARENS shared_init; \
-            for (size_t _coroutine_allowance = 16;; )                         \
+            for (size_t _coroutine_allowance = 1;; )                          \
             {                                                                 \
                 coroutine::_coroutine_result_t _coroutine_result =            \
                         _coroutine_ ## routine1 ## _func(_coroutine_allowance,\
@@ -453,9 +453,13 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
                                             << " takes too many steps\n";     \
                     exit(EXIT_FAILURE);                                       \
                 }                                                             \
+                else                                                          \
+                {                                                             \
+                    _coroutine_allowance = 2;                                 \
+                }                                                             \
                 _coroutine_result = _coroutine_ ## routine2 ## _func(         \
-                            (_coroutine_allowance+3)/5*7, _coroutine_local2,  \
-                            _coroutine_shared_data);                          \
+                                     _coroutine_allowance, _coroutine_local2, \
+                                                     _coroutine_shared_data); \
                 if (coroutine::_coroutine_CONTINUE != _coroutine_result)      \
                 {                                                             \
                     if (coroutine::_coroutine_TERMINATE == _coroutine_result) \
@@ -472,7 +476,7 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
                     }                                                         \
                     _coroutine_allowance = 0;                                 \
                 }                                                             \
-                else if ((_coroutine_allowance *= 2) == 0)                    \
+                else if (0 == _coroutine_allowance)                           \
                 {                                                             \
                     std::cerr << __FILE__ << "(" << __LINE__ <<"): Coroutine "\
                                             << "_coroutine_" #routine2 "_func"\
@@ -536,9 +540,7 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
 /// \def COROUTINE_WHILE
 /// \brief a `while` loop where every iteration incurs one unit of work
 /// \details A `COROUTINE_WHILE` may be interrupted at the end of an iteration
-/// to allow the other coroutine to catch up.  (It will not be interrupted at
-/// the end of the last iteration, to avoid the situation that the other
-/// coroutine does work while this one is already about to terminate.)
+/// to allow the other coroutine to catch up.
 /// \param location  a unique interrupt location (one of the locations given as
 ///                  parameter to `DEFINE_COROUTINE`)
 /// \param condition the while condition
@@ -550,10 +552,10 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
     {                                                                         \
         if (1)                                                                \
         {                                                                     \
-            if ((condition))                                                  \
+            if (1)                                                            \
             {                                                                 \
                 goto _coroutine_ ## location ## _label;                       \
-                while((condition))                                            \
+                for ( ;; )                                                    \
                 {                                                             \
                     if (0 == --_coroutine_allowance)                          \
                     {                                                         \
@@ -561,7 +563,8 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
                                             _coroutine_ ## location ## _enum; \
                         return coroutine::_coroutine_CONTINUE;                \
                     }                                                         \
-                    _coroutine_ ## location ## _label:
+                    _coroutine_ ## location ## _label:                        \
+                    if (!(condition))  break;
 
 /// \def END_COROUTINE_WHILE
 /// \brief ends a loop started with `COROUTINE_WHILE`
@@ -577,9 +580,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
 /// \def COROUTINE_FOR
 /// \brief a `for` loop where every iteration incurs one unit of work
 /// \details A `COROUTINE_FOR` may be interrupted at the end of an iteration
-/// to allow the other coroutine to catch up.  (It will not be interrupted at
-/// the end of the last iteration, to avoid the situation that the other
-/// coroutine does work while this one is already about to terminate.)
+/// to allow the other coroutine to catch up.
 /// \param location  a unique interrupt location (one of the locations given as
 ///                  parameter to `DEFINE_COROUTINE`)
 /// \param init      the for initialiser expression
@@ -590,19 +591,21 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
     do                                                                        \
     {                                                                         \
         (init);                                                               \
-        if ((condition))                                                      \
+        if (1)                                                                \
             do                                                                \
             {{                                                                \
                 goto _coroutine_ ## location ## _label;                       \
-                for(; (condition); (update))                                  \
+                for( ;; )                                                     \
                 {                                                             \
+                    (update);                                                 \
                     if (0 == --_coroutine_allowance)                          \
                     {                                                         \
                         _coroutine_param._coroutine_location =                \
                                             _coroutine_ ## location ## _enum; \
                         return coroutine::_coroutine_CONTINUE;                \
                     }                                                         \
-                    _coroutine_ ## location ## _label:
+                    _coroutine_ ## location ## _label:                        \
+                    if (!(condition))  break;
 
 /// \def END_COROUTINE_FOR
 /// \brief ends a loop started with `COROUTINE_FOR`
@@ -617,17 +620,17 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
 /// \def COROUTINE_DO_WHILE
 /// \brief a `do { } while` loop where every iteration incurs one unit of work
 /// \details A `COROUTINE_DO_WHILE` may be interrupted at the end of an
-/// iteration to allow the other coroutine to catch up.  (It will not be
-/// interrupted at the end of the last iteration, to avoid the situation that
-/// the other coroutine does work while this one is already about to
-/// terminate.)
+/// iteration to allow the other coroutine to catch up.
+/// Note that one has to specify the condition at the beginnin of the loop,
+/// even though it will not be tested before the first iteration.
 /// \param location  a unique interrupt location (one of the locations given as
 ///                  parameter to `DEFINE_COROUTINE`)
-#define COROUTINE_DO_WHILE(location)                                          \
+/// \param condition the while condition
+#define COROUTINE_DO_WHILE(location,condition)                                \
     do                                                                        \
         if (1)                                                                \
         {{                                                                    \
-            goto _coroutine_ ## location ## _label;                           \
+            goto _coroutine_ ## location ## _do_while_begin;                  \
             do                                                                \
             {                                                                 \
                 if (0 == --_coroutine_allowance)                              \
@@ -636,14 +639,15 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
                                             _coroutine_ ## location ## _enum; \
                     return coroutine::_coroutine_CONTINUE;                    \
                 }                                                             \
-                _coroutine_ ## location ## _label:
+                _coroutine_ ## location ## _label:                            \
+                if (!(condition))  break;                                     \
+                _coroutine_ ## location ## _do_while_begin:
 
 /// \def END_COROUTINE_DO_WHILE
 /// \brief ends a loop started with `COROUTINE_DO_WHILE`
-/// \param condition the while condition
-#define END_COROUTINE_DO_WHILE(condition)                                     \
+#define END_COROUTINE_DO_WHILE                                                \
             }                                                                 \
-            while ((condition));                                              \
+            while (1);                                                        \
         }}                                                                    \
         else  ;                                                               \
     while (0)

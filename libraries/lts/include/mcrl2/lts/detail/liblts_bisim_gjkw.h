@@ -31,7 +31,6 @@
 #include <string>        // for debug_id()
 
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/coroutine.h"
@@ -47,7 +46,7 @@ namespace detail
 
 /// type used to store state numbers and counts
 typedef size_t state_type;
-#define PRIstate_type "zu" // printf format specifier for state_type
+#define PRIstate_type "zu" ///< printf format specifier for state_type
 
 /// type used to store transition (numbers and) counts
 typedef size_t trans_type;
@@ -59,11 +58,11 @@ typedef size_t label_type;
 
 
 
-/*****************************************************************************/
+/* ************************************************************************* */
 /*                                                                           */
 /*                   R E F I N A B L E   P A R T I T I O N                   */
 /*                                                                           */
-/*****************************************************************************/
+/* ************************************************************************* */
 
 
 
@@ -285,11 +284,15 @@ public:
     {
         char buffer[7 + 5 * sizeof(state_type) / 2];
         snprintf(buffer, sizeof(buffer), "state %" PRIstate_type,
-                                    (state_type) (this - state_info_begin));
+                                    (state_type) (this - state_info_begin()));
         return std::string(buffer);
     }
+
+    static state_info_const_ptr state_info_begin()  {  return s_i_begin;  }
+    static permutation_const_iter_t permutation_begin()  { return perm_begin; }
 private:
-    static state_info_const_ptr state_info_begin;
+    static state_info_const_ptr s_i_begin;
+    static permutation_const_iter_t perm_begin;
 
     friend class part_state_t;
 };
@@ -785,7 +788,7 @@ public:
         if (marked_nonbottom_begin() <= s->pos)  return false;
         set_marked_nonbottom_begin(marked_nonbottom_begin() - 1);
         swap_permutation(s->pos, marked_nonbottom_begin());
-        mCRL2log(log::debug) << " mkn";
+        mCRL2log(log::debug, "bisim_gjkw") << " mkn";
         return true;
     }
 
@@ -804,7 +807,7 @@ public:
             if (marked_bottom_begin() <= s->pos)  return false;
             set_marked_bottom_begin(marked_bottom_begin() - 1);
             swap_permutation(s->pos, marked_bottom_begin());
-            mCRL2log(log::debug) << " mkb";
+            mCRL2log(log::debug, "bisim_gjkw") << " mkb";
             return true;
         }
         return mark_nonbottom(s);
@@ -828,15 +831,15 @@ public:
 
     std::string debug_id() const
     {
-        char buffer[std::max(12 + 2 * sizeof(const void*),
-                                                7 + 5 * sizeof(seqnr()) / 2)];
-        if (BLOCK_NO_SEQNR == seqnr())
+        char buffer[14 + 15 * sizeof(state_type) / 2];
+        snprintf(buffer, sizeof(buffer), "block [%" PRIstate_type ",%"
+                PRIstate_type ")",
+                (state_type) (begin() - state_info_entry::permutation_begin()),
+                (state_type) (end() - state_info_entry::permutation_begin()));
+        if (BLOCK_NO_SEQNR != seqnr())
         {
-            snprintf(buffer, sizeof(buffer), "block at %p", this);
-        }
-        else
-        {
-            snprintf(buffer, sizeof(buffer), "block %" PRIstate_type, seqnr());
+            snprintf(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer),
+                                            " (#%" PRIstate_type ")", seqnr());
         }
         return std::string(buffer);
     }
@@ -994,8 +997,11 @@ public:
     }
 
     std::string debug_id() const  {
-        char buffer[20 + 2 * sizeof(const void*)];
-        snprintf(buffer, sizeof(buffer), "constellation at %p", this);
+        char buffer[18 + 5 * sizeof(state_type)];
+        snprintf(buffer, sizeof(buffer), "constellation [%" PRIstate_type ",%"
+                PRIstate_type ")",
+                (state_type) (begin() - state_info_entry::permutation_begin()),
+                (state_type) (end() - state_info_entry::permutation_begin()));
         return std::string(buffer);
     }
 };
@@ -1035,7 +1041,8 @@ public:
         state_info(n+1) // 1 additional ``state''
     {
         assert(0 == block_t::nr_of_blocks);
-        state_info_entry::state_info_begin = state_info_begin();
+        state_info_entry::perm_begin = permutation.begin();
+        state_info_entry::s_i_begin = &*state_info.begin();
     }
 
     /// destructor
@@ -1086,41 +1093,13 @@ public:
 
 private:
     void print_block(const char* message, const block_t* B,
-            permutation_const_iter_t begin, permutation_const_iter_t end) const
-    {
-        if (end - begin != 0)
-        {
-            mCRL2log(log::debug) << "\t\t" << message
-                                        << (end-begin > 1 ? "s:\n" : ":\n");
-            do
-            {
-                mCRL2log(log::debug) << "\t\t\t" << (*begin)->debug_id();
-                if (B != (*begin)->block)
-                {
-                    mCRL2log(log::debug) << ", inconsistent: points to "
-                                                << (*begin)->block->debug_id();
-                }
-                if (begin != (*begin)->pos)
-                {
-                    mCRL2log(log::debug) << ", inconsistent pointer to "
-                                                            "state_info_entry";
-                }
-                mCRL2log(log::debug) << "\n";
-            }
-            while (++begin != end);
-        }
-    }
+        permutation_const_iter_t begin, permutation_const_iter_t end) const;
 public:
     /// print the partition as a tree (per constellation and block)
     void print_part(const part_trans_t& part_tr) const;
     void print_trans() const;
 
 #endif // ifndef NDEBUG
-
-    state_info_const_ptr state_info_begin() const
-    {
-        return &*state_info.begin();
-    }
 
 };
 
@@ -1130,11 +1109,11 @@ public:
 
 
 
-/*****************************************************************************/
+/* ************************************************************************* */
 /*                                                                           */
 /*                           T R A N S I T I O N S                           */
 /*                                                                           */
-/*****************************************************************************/
+/* ************************************************************************* */
 
 
 
@@ -1174,20 +1153,39 @@ class B_to_C_descriptor;
 /* pred_entry, succ_entry, and B_to_C_entry contain the data that is stored
 about a transition.  Every transition has one of each data structure; the three
 structures are linked through the iterators (used here as pointers). */
-class pred_entry
-{
-public:
-    succ_iter_t succ;
-    state_info_ptr source;
-};
-
-
 class succ_entry
 {
 public:
     B_to_C_iter_t B_to_C;
     state_info_ptr target;
     out_descriptor* constln_slice;
+};
+
+
+class pred_entry
+{
+public:
+    succ_iter_t succ;
+    state_info_ptr source;
+
+    std::string debug_id() const
+    {
+        char buffer[21 + 5 * sizeof(state_type)];
+        snprintf(buffer, sizeof(buffer),
+            "transition from %" PRIstate_type " to %" PRIstate_type,
+            (state_type) (source - state_info_entry::state_info_begin()),
+            (state_type) (succ->target-state_info_entry::state_info_begin()));
+        return std::string(buffer);
+    }
+    std::string debug_id_short() const
+    {
+        char buffer[10 + 5 * sizeof(state_type)];
+        snprintf(buffer, sizeof(buffer),
+            "from %" PRIstate_type " to %" PRIstate_type,
+            (state_type) (source - state_info_entry::state_info_begin()),
+            (state_type) (succ->target-state_info_entry::state_info_begin()));
+        return std::string(buffer);
+    }
 };
 
 
@@ -1222,6 +1220,31 @@ public:
         :end(end_),
         begin(begin_)
     {  }
+
+    std::string debug_id() const
+    {
+        assert(begin != end);
+        std::string result("slice containing transition");
+        if (end - begin > 1)
+            result += "s ";
+        else
+            result += " ";
+        B_to_C_const_iter_t iter = begin;
+        result += iter->pred->debug_id_short();
+        if (end - iter > 4)
+        {
+            result += ", ";
+            result += iter[1].pred->debug_id_short();
+            result += ", ...";
+            iter = end - 3;
+        }
+        while (++iter != end)
+        {
+            result += ", ";
+            result += iter->pred->debug_id_short();
+        }
+        return result;
+    }
 };
 
 
@@ -1505,11 +1528,11 @@ inline bool state_info_entry::surely_has_no_transition_to(const constln_t* SpC)
 
 
 
-/*****************************************************************************/
+/* ************************************************************************* */
 /*                                                                           */
 /*                            A L G O R I T H M S                            */
 /*                                                                           */
-/*****************************************************************************/
+/* ************************************************************************* */
 
 
 
@@ -1539,7 +1562,7 @@ inline bool state_info_entry::surely_has_no_transition_to(const constln_t* SpC)
 template<class LTS_TYPE>
 class bisim_partitioner_gjkw_initialise_helper
 {
-private:
+  private:
     LTS_TYPE& aut;
     state_type nr_of_states, orig_nr_of_states;
     trans_type nr_of_transitions;
@@ -1548,7 +1571,7 @@ private:
     // unordered_map does not directly allow to use pair keys
     class Key 
     {
-    public:
+      public:
         label_type first;
         state_type second;
 
@@ -1565,7 +1588,7 @@ private:
 
     class KeyHasher 
     {
-    public:
+      public:
         std::size_t operator()(const Key& k) const
         {
             return std::hash<label_type>()(k.first) ^
@@ -1585,20 +1608,20 @@ private:
     std::vector<state_type> noninert_out_per_block, inert_out_per_block;
     std::vector<state_type> states_per_block;
     state_type nr_of_nonbottom_states;
-public:
+  public:
     bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool branching,
-                                                    bool preserve_divergence);
+                                                     bool preserve_divergence);
 
     /// initialise the state in part_st and the transitions in part_tr
     void init_transitions(part_state_t& part_st, part_trans_t& part_tr,
-                                    bool branching, bool preserve_divergence);
+                                     bool branching, bool preserve_divergence);
 
     // replace_transitions() replaces the transitions of the LTS stored here by
     // those of its bisimulation quotient.  However, it does not change
     // anything else; in particular, it does not change the number of states of
     // the LTS.
     void replace_transitions(const part_state_t& part_st, bool branching,
-                                                    bool preserve_divergence);
+                                                     bool preserve_divergence);
 
     /// provides the number of states in the Kripke structure
     state_type get_nr_of_states() const  {  return nr_of_states;  }
@@ -1624,12 +1647,12 @@ struct secondary_refine_shared;
 template <class LTS_TYPE>
 class bisim_partitioner_gjkw
 {
-private:
+  private:
     bisim_gjkw::bisim_partitioner_gjkw_initialise_helper<LTS_TYPE> init_helper;
     bisim_gjkw::part_state_t part_st;
     bisim_gjkw::part_trans_t part_tr;
     std::vector<bisim_gjkw::state_info_entry*> new_bottom_states;
-public:
+  public:
     // The constructor constructs the data structures and immediately
     // calculates the bisimulation quotient.  However, it does not change the
     // LTS.
@@ -1671,7 +1694,7 @@ private:
     /*-------- dbStutteringEquivalence -- Algorithm 2 of [GJKW 2017] --------*/
 
     void create_initial_partition_gjkw(bool branching,
-                                                    bool preserve_divergence);
+                                                     bool preserve_divergence);
     void refine_partition_until_it_becomes_stable_gjkw();
 
     /*------------- PrimaryRefine -- Algorithm 3 of [GJKW 2017] -------------*/
@@ -1749,11 +1772,11 @@ private:
 
 
 
-/*****************************************************************************/
+/* ************************************************************************* */
 /*                                                                           */
 /*                             I N T E R F A C E                             */
 /*                                                                           */
-/*****************************************************************************/
+/* ************************************************************************* */
 
 
 
@@ -1829,7 +1852,7 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool branching /* = false */,
   // Second, apply the branching bisimulation reduction algorithm. If there are
   // no taus, this will automatically yield strong bisimulation.
   detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l, branching,
-                                                        preserve_divergence);
+                                                          preserve_divergence);
 
   // Clear the state labels of the LTS l
   l.clear_state_labels();
@@ -1842,18 +1865,18 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool branching /* = false */,
 
 template <class LTS_TYPE>
 inline bool bisimulation_compare_gjkw(const LTS_TYPE& l1, const LTS_TYPE& l2,
-        bool branching /* = false */, bool preserve_divergence /* = false */)
+          bool branching /* = false */, bool preserve_divergence /* = false */)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
   return destructive_bisimulation_compare_gjkw(l1_copy, l2_copy, branching,
-                                                        preserve_divergence);
+                                                          preserve_divergence);
 }
 
 template <class LTS_TYPE>
 bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
-        bool branching /* = false */, bool preserve_divergence /* = false */,
-                                bool generate_counter_examples /* = false */)
+          bool branching /* = false */, bool preserve_divergence /* = false */,
+                                  bool generate_counter_examples /* = false */)
 {
   if (generate_counter_examples)
   {
@@ -1875,7 +1898,7 @@ bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
   }
 
   detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l1, branching,
-                                                        preserve_divergence);
+                                                          preserve_divergence);
   return bisim_part.in_same_class(l1.initial_state(), init_l2);
 }
 

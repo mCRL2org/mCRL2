@@ -23,12 +23,13 @@
 #define _COUNT_ITERATIONS_H
 
 #ifndef NDEBUG
-    #include <iostream>  // for cerr
     #include <limits>    // used in ilog2() for Clang and g++
 #endif
 #include <cstddef>       // for size_t
 #include <cassert>
 #include <map>
+#include <cmath>         // for log2()
+#include "mcrl2/utilities/logger.h"
 
 
 namespace mcrl2
@@ -54,7 +55,8 @@ namespace bisim_gjkw
 /// \brief calculate floor(log_2(i))
 /// \details Because some compilers provide a more efficient implementation
 /// (using a single, simple assembly instruction) than the standard loop (as
-/// shown near the end), we distinguish them:
+/// shown near the end), we distinguish several versions depending on the
+/// compiler.
 #if defined(__clang__) || defined(__GNUG__) // Clang, GNU g++
 
 static inline unsigned ilog2(unsigned long long i)
@@ -156,21 +158,21 @@ class check_complexity
         counters.clear();
         n = n_;
         m = m_;
-        n_log_n = n_ * ilog2(n_);
+        n_log_n = n_ * log2((double) n_) * 0.5;
         m_log_n = m_ * ilog2(n_);
         primary_m_log_n = m_ * ilog2(n_) * 5 / 2; // I am unsure about this bound.
         secondary_m_log_n = m_ * ilog2(n_) * 5 / 2 + m_; // I am unsure about this bound.
         n_m = n_ * m_;
     }
 
-    static void count(const char* id, size_t counter, const iteration_type& max)
+    static void count(const char* id, size_t counter,const iteration_type& max)
     {
         struct single_counter& ctr = counters[id];
         ctr.count += counter;
         if (ctr.count > max.value)
         {
             std::cerr << "Error: counter \"" << id << "\" too large: "
-                            "maximum allowed value is " << max.value << "\n";
+                              "maximum allowed value is " << max.value << "\n";
             exit(EXIT_FAILURE);
         }
         // assert(ctr.count <= (SIZE_MAX - max.value) / 200);
@@ -179,14 +181,15 @@ class check_complexity
 
     static void stats()
     {
-        std::cout << "Statistics for LTS with " << n.value << " states and "
-                                            << m.value << " transitions:\n";
+        mCRL2log(log::debug, "check_complexity") << "Statistics for LTS with "
+                  << n.value << " states and " << m.value << " transitions:\n";
         for (std::map<const char*, single_counter>::const_iterator iter =
-                            counters.begin(); counters.end() != iter; ++iter)
+                              counters.begin(); counters.end() != iter; ++iter)
         {
             const struct single_counter& ctr = iter->second;
-            std::cout << "Counter \"" << iter->first << "\" reached value "
-                << ctr.count << " (" << ctr.percentage << "% of maximum)\n";
+            mCRL2log(log::debug, "check_complexity") << "Counter \""
+                             << iter->first << "\" reached value " << ctr.count
+                                << " (" << ctr.percentage << "% of maximum)\n";
         }
     }
 };
@@ -197,16 +200,16 @@ class check_complexity
 
 class check_complexity
 {
-public:
+  public:
     class iteration_type  {
-    private:
+      private:
         // private constructor to disallow user to construct new instances.
         iteration_type()  {  }
 
         // private assignment operators to disallow user to assign other values
         void operator=(size_t)  {  }
         void operator=(const iteration_type&)  {  }
-    public:
+      public:
         // public copy constructor to allow user to copy existing instances.
         iteration_type(const iteration_type&)  {  }
     };
