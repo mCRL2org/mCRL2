@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <iostream>
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"

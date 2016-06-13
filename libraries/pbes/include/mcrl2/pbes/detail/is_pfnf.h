@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_IS_PFNF_H
 #define MCRL2_PBES_DETAIL_IS_PFNF_H
 
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"

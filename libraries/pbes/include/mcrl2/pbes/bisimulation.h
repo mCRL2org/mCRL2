@@ -23,6 +23,7 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/utilities/logger.h"

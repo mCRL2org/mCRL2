@@ -14,6 +14,7 @@
 #define MCRL2_PBES_DETAIL_PPG_REWRITER_H
 
 #include <stack>
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
 

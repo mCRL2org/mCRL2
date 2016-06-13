@@ -15,6 +15,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"

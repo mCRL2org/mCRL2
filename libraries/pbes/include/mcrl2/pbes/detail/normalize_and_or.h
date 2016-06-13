@@ -16,6 +16,7 @@
 #include <utility>
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2

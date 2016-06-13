@@ -23,6 +23,7 @@
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
