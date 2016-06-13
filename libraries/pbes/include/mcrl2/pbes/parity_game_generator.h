@@ -413,14 +413,14 @@ class parity_game_generator
       }
       else if (tr::is_and(psi))
       {
-        for (const pbes_expression& term: pbes_expr::split_and(psi))
+        for (const pbes_expression& term: split_and(psi))
         {
           result.insert(add_bes_equation(term, priority));
         }
       }
       else if (tr::is_or(psi))
       {
-        for (const pbes_expression& term: pbes_expr::split_or(psi))
+        for (const pbes_expression& term: split_or(psi))
         {
           result.insert(add_bes_equation(term, priority));
         }

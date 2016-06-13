@@ -416,7 +416,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = pbes_expr::forall(e, z::imp(ci, var(Y(p, q, i), d + d1 + e)));
         result.push_back(expr);
       }
-      return z::join_and(result.begin(), result.end());
+      return optimized_join_and(result.begin(), result.end());
     }
 
     /// \brief The step function.
@@ -444,7 +444,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
           pbes_expression expr = pbes_expr::exists(e1, z::and_(cj, var(X(p, q), gi + gj)));
           v.push_back(expr);
         }
-        return z::or_(z::join_or(v.begin(), v.end()), var(X(p, q), gi + d1));
+        return z::or_(optimized_join_or(v.begin(), v.end()), var(X(p, q), gi + d1));
       }
       else
       {
@@ -459,7 +459,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
           pbes_expression expr = pbes_expr::exists(e1, z::and_(z::and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
           v.push_back(expr);
         }
-        return z::join_or(v.begin(), v.end());
+        return optimized_join_or(v.begin(), v.end());
       }
     }
 
@@ -487,7 +487,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = pbes_expr::exists(e1, z::and_(cj, var(Y(p, q, i), data::data_expression_list(d) + gj + data::data_expression_list(e))));
         v.push_back(expr);
       }
-      return z::or_(z::join_or(v.begin(), v.end()), z::and_(var(X(p, q), d + d1), step(p, q, i)));
+      return z::or_(optimized_join_or(v.begin(), v.end()), z::and_(var(X(p, q), d + d1), step(p, q, i)));
     }
 
     /// \brief Returns a pbes that expresses branching bisimulation between
@@ -566,7 +566,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression  expr = pbes_expr::forall(e, z::imp(ci, step(p, q, i)));
         result.push_back(expr);
       }
-      return z::join_and(result.begin(), result.end());
+      return optimized_join_and(result.begin(), result.end());
     }
 
     /// \brief The step function.
@@ -590,7 +590,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = pbes_expr::exists(e1, z::and_(z::and_(cj, equals(ai, aj)), var(X(p, q), gi + gj)));
         result.push_back(expr);
       }
-      return z::join_or(result.begin(), result.end());
+      return optimized_join_or(result.begin(), result.end());
     }
 
     /// \brief Runs the algorithm
@@ -654,7 +654,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = pbes_expr::forall(e, z::imp(ci, var(Y1(p, q, i), d + d1 + e)));
         result.push_back(expr);
       }
-      return z::join_and(result.begin(), result.end());
+      return optimized_join_and(result.begin(), result.end());
     }
 
     /// \brief The step function.
@@ -684,7 +684,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
           pbes_expression expr = pbes_expr::exists(e1, z::and_(z::and_(cj, equals(ai, aj)), close2(p, q, i, gi, gj)));
           v.push_back(expr);
         }
-        return z::join_or(v.begin(), v.end());
+        return optimized_join_or(v.begin(), v.end());
       }
     }
 
@@ -712,7 +712,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = pbes_expr::exists(e1, z::and_(cj, var(Y1(p, q, i), data::data_expression_list(d) + gj + data::data_expression_list(e))));
         v.push_back(expr);
       }
-      return z::or_(z::join_or(v.begin(), v.end()), step(p, q, i));
+      return z::or_(optimized_join_or(v.begin(), v.end()), step(p, q, i));
     }
 
     /// \brief The close function.
@@ -771,7 +771,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         pbes_expression expr = pbes_expr::exists(e1_new, z::and_(cj_new, var(Y2(p, q, i), d + gj_new)));
         v.push_back(expr);
       }
-      return z::or_(var(X(p, q), d + d1), z::join_or(v.begin(), v.end()));
+      return z::or_(var(X(p, q), d + d1), optimized_join_or(v.begin(), v.end()));
     }
 
     /// \brief Runs the algorithm

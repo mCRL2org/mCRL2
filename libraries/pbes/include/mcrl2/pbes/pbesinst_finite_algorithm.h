@@ -256,7 +256,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
       result.insert(tr::and_(c, propositional_variable_instantiation(Y, e_copy)));
     }
 
-    pbes_expression result1 = pbes_expr::join_or(result.begin(), result.end());
+    pbes_expression result1 = join_or(result.begin(), result.end());
     mCRL2log(log::debug1) << "result1 = " << pbes_system::pp(result1) << "\n";
     return result1;
   }

@@ -71,12 +71,12 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
     if (is_and(x))
     {
       std::multiset<pbes_expression> s = split_and(x);
-      return pbes_expr::join_and(s.begin(), s.end());
+      return join_and(s.begin(), s.end());
     }
     else if (is_or(x))
     {
       std::multiset<pbes_expression> s = split_or(x);
-      return pbes_expr::join_or(s.begin(), s.end());
+      return join_or(s.begin(), s.end());
     }
     return x;
   }

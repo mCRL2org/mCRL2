@@ -105,7 +105,7 @@ namespace detail {
       }
       else if (tr::is_and(psi))
       {
-        std::set<pbes_expression> terms = pbes_expr::split_and(psi);
+        std::set<pbes_expression> terms = split_and(psi);
         for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
         {
           result.insert(*i);
@@ -113,7 +113,7 @@ namespace detail {
       }
       else if (tr::is_or(psi))
       {
-        std::set<pbes_expression> terms = pbes_expr::split_or(psi);
+        std::set<pbes_expression> terms = split_or(psi);
         for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
         {
           result.insert(*i);
@@ -217,7 +217,7 @@ namespace detail {
         }
         else if (tr::is_and(psi))
         {
-          std::set<pbes_expression> terms = pbes_expr::split_and(psi);
+          std::set<pbes_expression> terms = split_and(psi);
           for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(*i);
@@ -225,7 +225,7 @@ namespace detail {
         }
         else if (tr::is_or(psi))
         {
-          std::set<pbes_expression> terms = pbes_expr::split_or(psi);
+          std::set<pbes_expression> terms = split_or(psi);
           for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
           {
             result.insert(*i);

@@ -92,14 +92,14 @@ class pfnf_implication
     // convert to pbes_expression
     pbes_expression convert() const
     {
-      return imp(m_g, pbes_expr::join_or(m_v.begin(), m_v.end()));
+      return imp(m_g, join_or(m_v.begin(), m_v.end()));
     }
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const pfnf_implication& x)
 {
-  return out << pbes_system::pp(imp(x.g(), pbes_expr::join_or(x.variables().begin(), x.variables().end())));
+  return out << pbes_system::pp(imp(x.g(), join_or(x.variables().begin(), x.variables().end())));
 }
 
 // represents forall d:D or exists d:D
@@ -230,7 +230,7 @@ class pfnf_equation
       {
         v.push_back(impl.convert());
       }
-      pbes_expression phi = pbes_expr::join_and(v.begin(), v.end());
+      pbes_expression phi = join_and(v.begin(), v.end());
 
       phi = and_(m_h, phi);
 

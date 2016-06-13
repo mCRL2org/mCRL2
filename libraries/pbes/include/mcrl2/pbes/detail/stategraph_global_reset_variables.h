@@ -273,7 +273,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
           phi.push_back(imp(condition, Yr));
         }
       }
-      return pbes_expr::join_and(phi.begin(), phi.end());
+      return join_and(phi.begin(), phi.end());
     }
 
     // Applies resetting of variables to the original PBES p.

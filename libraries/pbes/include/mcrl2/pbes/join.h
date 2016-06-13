@@ -19,9 +19,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-namespace pbes_expr
-{
-
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)
 /// \param first Start of a sequence of pbes expressions
 /// \param last End of a sequence of of pbes expressions
@@ -29,7 +26,7 @@ namespace pbes_expr
 template <typename FwdIt>
 pbes_expression join_or(FwdIt first, FwdIt last)
 {
-  return utilities::detail::join(first, last, or_, false_());
+  return utilities::detail::join(first, last, [](const pbes_expression& x, const pbes_expression& y) { return or_(x, y); }, false_());
 }
 
 /// \brief Returns and applied to the sequence of pbes expressions [first, last)
@@ -39,7 +36,7 @@ pbes_expression join_or(FwdIt first, FwdIt last)
 template <typename FwdIt>
 pbes_expression join_and(FwdIt first, FwdIt last)
 {
-  return utilities::detail::join(first, last, and_, true_());
+  return utilities::detail::join(first, last, [](const pbes_expression& x, const pbes_expression& y) { return and_(x, y); }, true_());
 }
 
 /// \brief Splits a disjunction into a sequence of operands
@@ -94,17 +91,12 @@ std::set<pbes_expression> split_and(const pbes_expression& expr, bool split_data
   return result;
 }
 
-} // namespace pbes_expr
-
-namespace pbes_expr_optimized
-{
-
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)
 /// \param first Start of a sequence of pbes expressions
 /// \param last End of a sequence of pbes expressions
 /// \return Or applied to the sequence of pbes expressions [first, last)
 template <typename FwdIt>
-inline pbes_expression join_or(FwdIt first, FwdIt last)
+inline pbes_expression optimized_join_or(FwdIt first, FwdIt last)
 {
   return utilities::detail::join(first, last, data::optimized_or<pbes_expression>, false_());
 }
@@ -114,12 +106,10 @@ inline pbes_expression join_or(FwdIt first, FwdIt last)
 /// \param last End of a sequence of pbes expressions
 /// \return And applied to the sequence of pbes expressions [first, last)
 template <typename FwdIt>
-inline pbes_expression join_and(FwdIt first, FwdIt last)
+inline pbes_expression optimized_join_and(FwdIt first, FwdIt last)
 {
   return utilities::detail::join(first, last, data::optimized_and<pbes_expression>, true_());
 }
-
-} // pbes_expr_optimized
 
 } // namespace pbes_system
 

@@ -118,14 +118,14 @@ void test_accessors()
 
     print(q);
 
-    a = p::join_or(q.begin(), q.end());
-    q1 = p::split_or(a);
+    a = join_or(q.begin(), q.end());
+    q1 = split_or(a);
     BOOST_CHECK(q == q1);
 
     print(q1);
 
-    a = p::join_and(q.begin(), q.end());
-    q1 = p::split_and(a);
+    a = join_and(q.begin(), q.end());
+    q1 = split_and(a);
     BOOST_CHECK(q == q1);
 
     print(q1);
@@ -149,10 +149,10 @@ void test_accessors()
     a = p::exists(v, x);
     s = name(X);
     const data_expression_list& f = param(X);
-    a = p::join_or(q.begin(), q.end());
-    a = p::join_and(q.begin(), q.end());
-    q1 = p::split_or(a);
-    q1 = p::split_and(a);
+    a = join_or(q.begin(), q.end());
+    a = join_and(q.begin(), q.end());
+    q1 = split_or(a);
+    q1 = split_and(a);
   }
 }
 

@@ -278,11 +278,11 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
               new_conjuncts.push_back(conjunct);
             }
           }
-          pbes_expression new_conj = pbes_expr::join_and(new_conjuncts.begin(), new_conjuncts.end());
+          pbes_expression new_conj = join_and(new_conjuncts.begin(), new_conjuncts.end());
           pbes_expression expr = split_here(new_conj);
           if (simple_conjuncts.size() > 0)
           {
-            pbes_expression simple_conj = pbes_expr::join_and(simple_conjuncts.begin(), simple_conjuncts.end());
+            pbes_expression simple_conj = join_and(simple_conjuncts.begin(), simple_conjuncts.end());
             expr = and_(simple_conj, expr);
           }
           expression_stack.push(expr);
@@ -367,11 +367,11 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
               new_disjuncts.push_back(disjunct);
             }
           }
-          pbes_expression new_disj = pbes_expr::join_or(new_disjuncts.begin(), new_disjuncts.end());
+          pbes_expression new_disj = join_or(new_disjuncts.begin(), new_disjuncts.end());
           pbes_expression expr = split_here(new_disj);
           if (simple_disjuncts.size() > 0)
           {
-            pbes_expression simple_disj = pbes_expr::join_or(simple_disjuncts.begin(), simple_disjuncts.end());
+            pbes_expression simple_disj = join_or(simple_disjuncts.begin(), simple_disjuncts.end());
             expr = or_(simple_disj, expr);
           }
           expression_stack.push(expr);
