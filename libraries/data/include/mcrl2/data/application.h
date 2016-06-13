@@ -433,7 +433,6 @@ class application: public data_expression
     ///        application.
     size_t size() const
     {
-      using namespace atermpp;
       return atermpp::aterm_appl::size() - 1;
     }
 };
