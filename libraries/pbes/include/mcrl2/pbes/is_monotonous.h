@@ -28,12 +28,11 @@ inline
 bool is_monotonous(pbes_expression f)
 {
   namespace p = pbes_expr;
-  using namespace accessors;
 
   //--- handle negations ---//
   if (is_not(f))
   {
-    f = arg(f); // remove the not
+    f = atermpp::down_cast<not_>(f).operand(); // remove the not
     if (data::is_data_expression(f))
     {
       return true;
@@ -48,27 +47,35 @@ bool is_monotonous(pbes_expression f)
     }
     else if (is_not(f))
     {
-      return is_monotonous(arg(f));
+      return is_monotonous(atermpp::down_cast<not_>(f).operand());
     }
     else if (is_and(f))
     {
-      return is_monotonous(p::not_(left(f))) && is_monotonous(p::not_(right(f)));
+      const auto& left = atermpp::down_cast<and_>(f).left();
+      const auto& right = atermpp::down_cast<and_>(f).right();
+      return is_monotonous(p::not_(left)) && is_monotonous(p::not_(right));
     }
     else if (is_or(f))
     {
-      return is_monotonous(p::not_(left(f))) && is_monotonous(p::not_(right(f)));
+      const auto& left = atermpp::down_cast<or_>(f).left();
+      const auto& right = atermpp::down_cast<or_>(f).right();
+      return is_monotonous(p::not_(left)) && is_monotonous(p::not_(right));
     }
     else if (is_imp(f))
     {
-      return is_monotonous(left(f)) && is_monotonous(p::not_(right(f)));
+      const auto& left = atermpp::down_cast<imp>(f).left();
+      const auto& right = atermpp::down_cast<imp>(f).right();
+      return is_monotonous(left) && is_monotonous(p::not_(right));
     }
     else if (is_forall(f))
     {
-      return is_monotonous(p::not_(arg(f)));
+      const auto& body = atermpp::down_cast<forall>(f).body();
+      return is_monotonous(p::not_(body));
     }
     else if (is_exists(f))
     {
-      return is_monotonous(p::not_(arg(f)));
+      const auto& body = atermpp::down_cast<exists>(f).body();
+      return is_monotonous(p::not_(body));
     }
     else if (is_propositional_variable_instantiation(f))
     {
@@ -91,23 +98,31 @@ bool is_monotonous(pbes_expression f)
   }
   else if (is_and(f))
   {
-    return is_monotonous(left(f)) && is_monotonous(right(f));
+    const auto& left = atermpp::down_cast<and_>(f).left();
+    const auto& right = atermpp::down_cast<and_>(f).right();
+    return is_monotonous(left) && is_monotonous(right);
   }
   else if (is_or(f))
   {
-    return is_monotonous(left(f)) && is_monotonous(right(f));
+    const auto& left = atermpp::down_cast<or_>(f).left();
+    const auto& right = atermpp::down_cast<or_>(f).right();
+    return is_monotonous(left) && is_monotonous(right);
   }
   else if (is_imp(f))
   {
-    return is_monotonous(p::not_(left(f))) && is_monotonous(right(f));
+    const auto& left = atermpp::down_cast<imp>(f).left();
+    const auto& right = atermpp::down_cast<imp>(f).right();
+    return is_monotonous(p::not_(left)) && is_monotonous(right);
   }
   else if (is_forall(f))
   {
-    return is_monotonous(arg(f));
+    const auto& body = atermpp::down_cast<forall>(f).body();
+    return is_monotonous(body);
   }
   else if (is_exists(f))
   {
-    return is_monotonous(arg(f));
+    const auto& body = atermpp::down_cast<exists>(f).body();
+    return is_monotonous(body);
   }
   else if (is_propositional_variable_instantiation(f))
   {
