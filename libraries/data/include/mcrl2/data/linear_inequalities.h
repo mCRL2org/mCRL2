@@ -101,7 +101,6 @@ namespace detail
       case detail::less:  return detail::less_eq;
       case detail::less_eq: return detail::less;
       case detail::equal: return detail::equal;
-      default: assert(0);
     };
   }
   
@@ -112,7 +111,6 @@ namespace detail
       case detail::less:  return "<";
       case detail::less_eq: return "<=";
       case detail::equal: return "==";
-      default: assert(0);
     };
   }
   
