@@ -57,13 +57,6 @@ const data::data_expression& nth_element(const data::data_expression_list& e, st
 }
 
 inline
-bool is_constant(const data::data_expression& x)
-{
-  typedef core::term_traits<data::data_expression> tr;
-  return tr::is_constant(x);
-}
-
-inline
 std::string print_pbes_expressions(const std::set<pbes_expression>& v)
 {
   std::ostringstream out;

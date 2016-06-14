@@ -1001,7 +1001,28 @@ pbes_expression optimized_exists(const data::variable_list& l, const pbes_expres
 inline
 bool is_constant(const pbes_expression& x)
 {
-  return pbes_system::find_free_variables(x).empty();
+  return find_free_variables(x).empty();
+}
+
+inline
+const data::variable_list& quantifier_variables(const pbes_expression& x)
+{
+  assert(is_exists(x) || is_forall(x));
+  if (is_exists(x))
+  {
+    return atermpp::down_cast<exists>(x).variables();
+  }
+  else
+  {
+    return atermpp::down_cast<forall>(x).variables();
+  }
+}
+
+inline
+data::variable_list free_variables(const pbes_expression& x)
+{
+  std::set<data::variable> v = find_free_variables(x);
+  return data::variable_list(v.begin(), v.end());
 }
 
 } // namespace pbes_system
@@ -1320,16 +1341,6 @@ struct term_traits<pbes_system::pbes_expression>
     return data::is_variable(t);
   }
 
-  /// \brief Returns the free variables of a term
-  /// \param t A term
-  /// \return The free variables of a term
-  static inline
-  variable_sequence_type free_variables(const term_type& t)
-  {
-    std::set<data::variable> v = find_free_variables(t);
-    return variable_sequence_type(v.begin(), v.end());
-  }
-
   /// \brief Conversion from data term to term
   /// \param t A data term
   /// \return The converted term
@@ -1355,24 +1366,6 @@ struct term_traits<pbes_system::pbes_expression>
   const propositional_variable_type& term2propvar(const term_type& t)
   {
     return atermpp::down_cast<propositional_variable_type>(t);
-  }
-
-  /// \brief Returns the difference of two unordered sets of variables
-  /// \param v A sequence of data variables
-  /// \param w A sequence of data variables
-  /// \return The difference of two sets.
-  static inline
-  variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
-  {
-    return term_traits<data::data_expression>::set_intersection(v, w);
-  }
-
-  /// \brief Test if a term is constant
-  /// \return True if the term is constant
-  static inline
-  bool is_constant(const term_type& t)
-  {
-    return pbes_system::find_free_variables(t).empty();
   }
 
   /// \brief Pretty print function

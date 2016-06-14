@@ -48,20 +48,16 @@ void make_constelm_substitution(const std::map<data::variable, data::data_expres
   }
 }
 
-template <typename Term>
 struct true_false_pair
 {
-  typedef typename core::term_traits<Term>::term_type term_type;
-  typedef typename core::term_traits<Term> tr;
-
-  term_type TC;
-  term_type FC;
+  pbes_expression TC;
+  pbes_expression FC;
 
   true_false_pair()
-    : TC(tr::true_()), FC(tr::true_())
+    : TC(true_()), FC(true_())
   {}
 
-  true_false_pair(term_type t, term_type f)
+  true_false_pair(pbes_expression t, pbes_expression f)
     : TC(t), FC(f)
   {}
 };
@@ -91,77 +87,65 @@ bool less_term(const atermpp::aterm_appl& v, const atermpp::aterm_appl& w)
   return v < w;
 }
 
-template <typename Term>
 struct apply_exists
 {
-  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
-  typedef typename core::term_traits<Term> tr;
+  data::variable_list variables_;
 
-  variable_sequence_type variables_;
-
-  apply_exists(variable_sequence_type variables)
+  apply_exists(data::variable_list variables)
     : variables_(variables)
   {}
 
   /// \brief Function call operator
   /// \param p A true-false pair
-  void operator()(true_false_pair<Term>& p) const
+  void operator()(true_false_pair& p) const
   {
-    p.TC = tr::exists(variables_, p.TC);
-    p.FC = tr::forall(variables_, p.FC);
+    p.TC = exists(variables_, p.TC);
+    p.FC = forall(variables_, p.FC);
   }
 };
 
-template <typename Term>
 struct apply_forall
 {
-  typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
-  typedef typename core::term_traits<Term> tr;
+  data::variable_list variables_;
 
-  variable_sequence_type variables_;
-
-  apply_forall(variable_sequence_type variables)
+  apply_forall(data::variable_list variables)
     : variables_(variables)
   {}
 
   /// \brief Function call operator
   /// \param p A true-false pair
-  void operator()(true_false_pair<Term>& p) const
+  void operator()(true_false_pair& p) const
   {
-    p.TC = tr::forall(variables_, p.TC);
-    p.FC = tr::exists(variables_, p.FC);
+    p.TC = forall(variables_, p.TC);
+    p.FC = exists(variables_, p.FC);
   }
 };
 
-template <typename Term>
 struct constelm_edge_condition
 {
-  typedef typename core::term_traits<Term>::term_type term_type;
-  typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
-  typedef typename core::term_traits<Term> tr;
-  typedef std::multimap<propositional_variable_type, std::vector<true_false_pair<Term> > > condition_map;
+  typedef std::multimap<propositional_variable_instantiation, std::vector<true_false_pair > > condition_map;
 
-  term_type TC;
-  term_type FC;
+  pbes_expression TC;
+  pbes_expression FC;
   condition_map condition;  // condT + condF
 
-  constelm_edge_condition(const term_type& tc, const term_type& fc)
+  constelm_edge_condition(const pbes_expression& tc, const pbes_expression& fc)
     : TC(tc), FC(fc)
   {}
 
   /// \brief Returns the true-false pair corresponding to the edge condition
   /// \return The true-false pair corresponding to the edge condition
-  true_false_pair<Term> TCFC() const
+  true_false_pair TCFC() const
   {
-    return true_false_pair<Term>(TC, FC);
+    return true_false_pair(TC, FC);
   }
 
   /// \brief Returns the condition
   /// \param c A sequence of true-false pairs
   /// \return The condition
-  term_type compute_condition(const std::vector<true_false_pair<Term> >& c) const
+  pbes_expression compute_condition(const std::vector<true_false_pair >& c) const
   {
-    term_type result = tr::true_();
+    pbes_expression result = true_();
     for (auto i = c.begin(); i != c.end(); ++i)
     {
       result = data::optimized_and(result, data::optimized_not(i->TC));
@@ -178,9 +162,8 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
   using super::leave;
   using super::apply;
 
-  typedef constelm_edge_condition<pbes_expression> edge_condition;
+  typedef constelm_edge_condition edge_condition;
   typedef edge_condition::condition_map condition_map;
-  typedef core::term_traits<pbes_expression> tr;
 
   std::vector<edge_condition> condition_stack;
 
@@ -269,7 +252,7 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     for (auto i = ec.condition.begin(); i != ec.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
-      std::for_each(i->second.begin(), i->second.end(), apply_forall<pbes_expression>(x.variables()));
+      std::for_each(i->second.begin(), i->second.end(), apply_forall(x.variables()));
     }
     push(ec);
   }
@@ -280,16 +263,16 @@ struct edge_condition_traverser: public pbes_expression_traverser<edge_condition
     for (auto i = ec.condition.begin(); i != ec.condition.end(); ++i)
     {
       i->second.push_back(ec.TCFC());
-      std::for_each(i->second.begin(), i->second.end(), apply_exists<pbes_expression>(x.variables()));
+      std::for_each(i->second.begin(), i->second.end(), apply_exists(x.variables()));
     }
     push(ec);
   }
 
   void leave(const propositional_variable_instantiation& x)
   {
-    edge_condition ec(tr::false_(), tr::false_());
-    std::vector<true_false_pair<pbes_expression> > c;
-    c.push_back(true_false_pair<pbes_expression>(tr::false_(), tr::false_()));
+    edge_condition ec(false_(), false_());
+    std::vector<true_false_pair > c;
+    c.push_back(true_false_pair(false_(), false_()));
     ec.condition.insert(std::make_pair(x, c));
     push(ec);
   }
@@ -350,46 +333,19 @@ void print_constraint_map(const MapContainer& constraints)
 /// \endcond
 
 /// \brief Algorithm class for the constelm algorithm
-template <typename Term, typename DataRewriter, typename PbesRewriter>
+template <typename DataRewriter, typename PbesRewriter>
 class pbes_constelm_algorithm
 {
   public:
-    /// \brief The term type
-    typedef typename core::term_traits<Term>::term_type term_type;
-
-    /// \brief The variable type
-    typedef typename core::term_traits<Term>::variable_type variable_type;
-
-    /// \brief The variable sequence type
-    typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
-
-    /// \brief The data term type
-    typedef typename core::term_traits<Term>::data_term_type data_term_type;
-
-    /// \brief The data term sequence type
-    typedef typename core::term_traits<Term>::data_term_sequence_type data_term_sequence_type;
-
-    /// \brief The string type
-    typedef typename core::term_traits<Term>::string_type string_type;
-
-    /// \brief The propositional variable declaration type
-    typedef typename core::term_traits<Term>::propositional_variable_decl_type propositional_variable_decl_type;
-
-    /// \brief The propositional variable instantiation type
-    typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
-
     /// \brief The edge condition type
     typedef detail::edge_condition_traverser::edge_condition edge_condition;
 
     /// \brief The edge condition map type
     typedef detail::edge_condition_traverser::condition_map condition_map;
 
-    /// \brief The term traits
-    typedef typename core::term_traits<Term> tr;
-
   protected:
     /// \brief A map with constraints on the vertices of the graph
-    typedef std::map<variable_type, data_term_type> constraint_map;
+    typedef std::map<data::variable, data::data_expression> constraint_map;
 
     /// \brief Compares data expressions for equality.
     const DataRewriter& m_data_rewriter;
@@ -402,18 +358,18 @@ class pbes_constelm_algorithm
     /// what circumstances the influence of the edge is propagated to its target
     /// vertex.
     //
-    // N.B. The attribute condition "term_type condition;" needs to be protected.
-    // This is achieved by deriving from term_type. This is very ugly, but AFAIK
+    // N.B. The attribute condition "pbes_expression condition;" needs to be protected.
+    // This is achieved by deriving from pbes_expression. This is very ugly, but AFAIK
     // this is the least destructive solution to garbage collection problems.
     // Note that source and target are protected elsewhere.
-    class edge: public term_type
+    class edge: public pbes_expression
     {
       protected:
         /// \brief The propositional variable at the source of the edge
-        propositional_variable_decl_type m_source;
+        propositional_variable m_source;
 
         /// \brief The propositional variable instantiation that determines the target of the edge
-        propositional_variable_type m_target;
+        propositional_variable_instantiation m_target;
 
       public:
         /// \brief Constructor
@@ -424,8 +380,8 @@ class pbes_constelm_algorithm
         /// \param src A propositional variable declaration
         /// \param tgt A propositional variable
         /// \param c A term
-        edge(propositional_variable_decl_type src, propositional_variable_type tgt, term_type c = true_())
-          : term_type(c), m_source(src), m_target(tgt)
+        edge(propositional_variable src, propositional_variable_instantiation tgt, pbes_expression c = true_())
+          : pbes_expression(c), m_source(src), m_target(tgt)
         {}
 
         /// \brief Returns a string representation of the edge.
@@ -438,19 +394,19 @@ class pbes_constelm_algorithm
         }
 
         /// \brief The propositional variable at the source of the edge
-        const propositional_variable_decl_type& source() const
+        const propositional_variable& source() const
         {
           return m_source;
         }
 
         /// \brief The propositional variable instantiation that determines the target of the edge
-        const propositional_variable_type& target() const
+        const propositional_variable_instantiation& target() const
         {
           return m_target;
         }
 
         /// \brief The condition of the edge
-        const term_type& condition() const
+        const pbes_expression& condition() const
         {
           return *this;
         }
@@ -461,7 +417,7 @@ class pbes_constelm_algorithm
     {
       protected:
         /// \brief The propositional variable that corresponds to the vertex
-        propositional_variable_decl_type m_variable;
+        propositional_variable m_variable;
 
         /// \brief Maps data variables to data expressions. If the right hand side is a data
         /// variable, it means that it represents NaC ("not a constant").
@@ -474,12 +430,12 @@ class pbes_constelm_algorithm
 
         /// \brief Constructor
         /// \param x A propositional variable declaration
-        vertex(propositional_variable_decl_type x)
+        vertex(propositional_variable x)
           : m_variable(x)
         {}
 
         /// \brief The propositional variable that corresponds to the vertex
-        const propositional_variable_decl_type& variable() const
+        const propositional_variable& variable() const
         {
           return m_variable;
         }
@@ -494,27 +450,27 @@ class pbes_constelm_algorithm
         /// \brief Returns true if the data variable v has been assigned a constant expression.
         /// \param v A variable
         /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant(const variable_type& v) const
+        bool is_constant(const data::variable& v) const
         {
           auto i = m_constraints.find(v);
-          return i != m_constraints.end() && !core::term_traits<data_term_type>::is_variable(i->second);
+          return i != m_constraints.end() && !data::is_variable(i->second);
         }
 
         /// \brief Returns true if the expression x has the value undefined_data_expression or if x is a constant data expression.
         /// \param x A
         /// \return True if the data variable v has been assigned a constant expression.
-        bool is_constant_expression(const data_term_type& x) const
+        bool is_constant_expression(const data::data_expression& x) const
         {
-          return x == data::undefined_data_expression() || core::term_traits<data_term_type>::is_constant(x);
+          return x == data::undefined_data_expression() || data::is_constant(x);
         }
 
         /// \brief Returns the constant parameters of this vertex.
         /// \return The constant parameters of this vertex.
-        std::vector<variable_type> constant_parameters() const
+        std::vector<data::variable> constant_parameters() const
         {
-          std::vector<variable_type> result;
-          variable_sequence_type parameters(m_variable.parameters());
-          for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i)
+          std::vector<data::variable> result;
+          data::variable_list parameters(m_variable.parameters());
+          for (typename data::variable_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
           {
             if (is_constant(*i))
             {
@@ -530,8 +486,8 @@ class pbes_constelm_algorithm
         {
           std::vector<size_t> result;
           int index = 0;
-          variable_sequence_type parameters(m_variable.parameters());
-          for (typename variable_sequence_type::iterator i = parameters.begin(); i != parameters.end(); ++i, index++)
+          data::variable_list parameters(m_variable.parameters());
+          for (typename data::variable_list::iterator i = parameters.begin(); i != parameters.end(); ++i, index++)
           {
             if (is_constant(*i))
             {
@@ -556,11 +512,11 @@ class pbes_constelm_algorithm
 
         /// \brief Assign new values to the parameters of this vertex, and update the constraints accordingly.
         /// The new values have a number of constraints.
-        bool update(data_term_sequence_type e, const constraint_map& e_constraints, const DataRewriter& datar)
+        bool update(data::data_expression_list e, const constraint_map& e_constraints, const DataRewriter& datar)
         {
           bool changed = false;
 
-          variable_sequence_type params = m_variable.parameters();
+          data::variable_list params = m_variable.parameters();
 
           if (m_constraints.empty())
           {
@@ -575,7 +531,7 @@ class pbes_constelm_algorithm
               {
                 data::rewriter::substitution_type sigma;
                 detail::make_constelm_substitution(e_constraints, sigma);
-                data_term_type e1 = datar(*i, sigma);
+                data::data_expression e1 = datar(*i, sigma);
                 if (is_constant_expression(e1))
                 {
                   m_constraints[*j] = e1;
@@ -595,14 +551,14 @@ class pbes_constelm_algorithm
             {
               auto k = m_constraints.find(*j);
               assert(k != m_constraints.end());
-              data_term_type& ci = k->second;
+              data::data_expression& ci = k->second;
               if (ci == *j)
               {
                 continue;
               }
               data::rewriter::substitution_type sigma;
               detail::make_constelm_substitution(e_constraints, sigma);
-              data_term_type ei = datar(*i, sigma);
+              data::data_expression ei = datar(*i, sigma);
               if (ci != ei)
               {
                 ci = *j;
@@ -625,10 +581,10 @@ class pbes_constelm_algorithm
     };
 
     /// \brief The storage type for vertices
-    typedef std::map<string_type, vertex> vertex_map;
+    typedef std::map<core::identifier_string, vertex> vertex_map;
 
     /// \brief The storage type for edges
-    typedef std::map<string_type, std::vector<edge> > edge_map;
+    typedef std::map<core::identifier_string, std::vector<edge> > edge_map;
 
     /// \brief The vertices of the dependency graph. They are stored in a map, to
     /// support searching for a vertex.
@@ -639,7 +595,7 @@ class pbes_constelm_algorithm
     edge_map m_edges;
 
     /// \brief The redundant parameters.
-    std::map<string_type, std::vector<size_t> > m_redundant_parameters;
+    std::map<core::identifier_string, std::vector<size_t> > m_redundant_parameters;
 
     /// \brief Logs the vertices of the dependency graph.
     std::string print_vertices() const
@@ -666,11 +622,11 @@ class pbes_constelm_algorithm
       return out.str();
     }
 
-    std::string print_todo_list(const std::deque<propositional_variable_decl_type>& todo)
+    std::string print_todo_list(const std::deque<propositional_variable>& todo)
     {
       std::ostringstream out;
       out << "\n<todo list> [";
-      for (typename std::deque<propositional_variable_decl_type>::const_iterator i = todo.begin(); i != todo.end(); ++i)
+      for (typename std::deque<propositional_variable>::const_iterator i = todo.begin(); i != todo.end(); ++i)
       {
         if (i != todo.begin())
         {
@@ -691,7 +647,7 @@ class pbes_constelm_algorithm
       return out.str();
     }
 
-    std::string print_condition(const edge& e, const vertex& u, const term_type& value)
+    std::string print_condition(const edge& e, const vertex& u, const pbes_expression& value)
     {
       std::ostringstream out;
       data::rewriter::substitution_type sigma;
@@ -720,18 +676,18 @@ class pbes_constelm_algorithm
 
     /// \brief Returns the parameters that have been removed by the constelm algorithm
     /// \return The removed parameters
-    std::map<propositional_variable_decl_type, std::vector<variable_type> > redundant_parameters() const
+    std::map<propositional_variable, std::vector<data::variable> > redundant_parameters() const
     {
-      std::map<propositional_variable_decl_type, std::vector<variable_type> > result;
+      std::map<propositional_variable, std::vector<data::variable> > result;
       for (auto i = m_redundant_parameters.begin(); i != m_redundant_parameters.end(); ++i)
       {
         const vertex& v = m_vertices.find(i->first)->second;
-        std::vector<variable_type>& variables = result[v.variable()];
+        std::vector<data::variable>& variables = result[v.variable()];
         for (auto j = i->second.begin(); j != i->second.end(); ++j)
         {
           // std::advance doesn't work for aterm lists :-(
-          variable_sequence_type parameters(v.variable().parameters());
-          typename variable_sequence_type::iterator k = parameters.begin();
+          data::variable_list parameters(v.variable().parameters());
+          typename data::variable_list::iterator k = parameters.begin();
           for (size_t i = 0; i < *j; i++)
           {
             ++k;
@@ -755,7 +711,7 @@ class pbes_constelm_algorithm
       // compute the vertices and edges of the dependency graph
       for (pbes_equation& eqn: p.equations())
       {
-        string_type name = eqn.variable().name();
+        core::identifier_string name = eqn.variable().name();
         m_vertices[name] = vertex(eqn.variable());
 
         if (compute_conditions)
@@ -769,8 +725,8 @@ class pbes_constelm_algorithm
             std::vector<edge>& edges = m_edges[name];
             for (auto j = ec.condition.begin(); j != ec.condition.end(); ++j)
             {
-              propositional_variable_type X = j->first;
-              term_type condition = ec.compute_condition(j->second);
+              propositional_variable_instantiation X = j->first;
+              pbes_expression condition = ec.compute_condition(j->second);
               edges.push_back(edge(eqn.variable(), X, condition));
             }
           }
@@ -778,11 +734,11 @@ class pbes_constelm_algorithm
         else
         {
           // use find function to compute the edges
-          std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(eqn.formula());
+          std::set<propositional_variable_instantiation> inst = find_propositional_variable_instantiations(eqn.formula());
           if (!inst.empty())
           {
             std::vector<edge>& edges = m_edges[name];
-            for (typename std::set<propositional_variable_type>::iterator k = inst.begin(); k != inst.end(); ++k)
+            for (typename std::set<propositional_variable_instantiation>::iterator k = inst.begin(); k != inst.end(); ++k)
             {
               edges.push_back(edge(eqn.variable(), *k));
             }
@@ -792,8 +748,8 @@ class pbes_constelm_algorithm
 
       // initialize the todo list of vertices that need to be processed
       propositional_variable_instantiation init = p.initial_state();
-      std::deque<propositional_variable_decl_type> todo;
-      const data_term_sequence_type& e = init.parameters();
+      std::deque<propositional_variable> todo;
+      const data::data_expression_list& e = init.parameters();
       vertex& u = m_vertices[init.name()];
       u.update(e, constraint_map(), m_data_rewriter);
       todo.push_back(u.variable());
@@ -805,7 +761,7 @@ class pbes_constelm_algorithm
       while (!todo.empty())
       {
         mCRL2log(log::debug) << print_todo_list(todo);
-        propositional_variable_decl_type var = todo.front();
+        propositional_variable var = todo.front();
 
         // remove all occurrences of var from todo
         todo.erase(std::remove(todo.begin(), todo.end(), var), todo.end());
@@ -821,14 +777,14 @@ class pbes_constelm_algorithm
 
           data::rewriter::substitution_type sigma;
           detail::make_constelm_substitution(u.constraints(), sigma);
-          term_type value = m_pbes_rewriter(e.condition(), sigma);
+          pbes_expression value = m_pbes_rewriter(e.condition(), sigma);
           mCRL2log(log::debug) << print_condition(e, u, value);
 
-          if (!tr::is_false(value) && !tr::is_true(value))
+          if (!is_false(value) && !is_true(value))
           {
             mCRL2log(log::debug) << print_evaluation_failure(e, u);
           }
-          if (!tr::is_false(value))
+          if (!is_false(value))
           {
             bool changed = v.update(e.target().parameters(), u.constraints(), m_data_rewriter);
             if (changed)
@@ -851,7 +807,7 @@ class pbes_constelm_algorithm
       // compute the redundant parameters and the redundant equations
       for (pbes_equation& eqn: p.equations())
       {
-        string_type name = eqn.variable().name();
+        core::identifier_string name = eqn.variable().name();
         vertex& v = m_vertices[name];
         if (!v.constraints().empty())
         {
@@ -866,7 +822,7 @@ class pbes_constelm_algorithm
       // Apply the constraints to the equations.
       for (pbes_equation& eqn: p.equations())
       {
-        string_type name = eqn.variable().name();
+        core::identifier_string name = eqn.variable().name();
         vertex& v = m_vertices[name];
 
         if (!v.constraints().empty())
@@ -888,10 +844,10 @@ class pbes_constelm_algorithm
       if (mCRL2logEnabled(log::verbose))
       {
         mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
-        std::map<propositional_variable_decl_type, std::vector<variable_type> > v = redundant_parameters();
-        for (typename std::map<propositional_variable_decl_type, std::vector<variable_type> >::iterator i = v.begin(); i != v.end(); ++i)
+        std::map<propositional_variable, std::vector<data::variable> > v = redundant_parameters();
+        for (typename std::map<propositional_variable, std::vector<data::variable> >::iterator i = v.begin(); i != v.end(); ++i)
         {
-          for (typename std::vector<variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+          for (typename std::vector<data::variable>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
             mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i->first.name()) << ", " << data::pp(*j) << ")" << std::endl;
           }

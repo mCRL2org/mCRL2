@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H
 
+#include "mcrl2/data/detail/data_sequence_algorithm.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 
@@ -26,8 +27,6 @@ struct add_simplify_quantifiers: public Builder<Derived>
 {
   typedef Builder<Derived> super;
   using super::apply;
-
-  typedef core::term_traits<pbes_expression> tr;
 
   pbes_expression apply(const forall& x)
   {
@@ -53,8 +52,8 @@ struct add_simplify_quantifiers: public Builder<Derived>
     {
       auto const& left = atermpp::down_cast<or_>(body).left();
       auto const& right = atermpp::down_cast<or_>(body).right();
-      data::variable_list lv = tr::set_intersection(variables, tr::free_variables(left));
-      data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
+      data::variable_list lv = data::detail::set_intersection(variables, free_variables(left));
+      data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
       if (lv.empty())
       {
         result = data::optimized_or(left, data::optimized_forall_no_empty_domain(rv, right, true));
@@ -99,8 +98,8 @@ struct add_simplify_quantifiers: public Builder<Derived>
     {
       auto const& left = atermpp::down_cast<and_>(body).left();
       auto const& right = atermpp::down_cast<and_>(body).right();
-      data::variable_list lv = tr::set_intersection(variables, tr::free_variables(left));
-      data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
+      data::variable_list lv = data::detail::set_intersection(variables, free_variables(left));
+      data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
       if (lv.empty())
       {
         result = data::optimized_and(left, data::optimized_exists_no_empty_domain(rv, right, true));

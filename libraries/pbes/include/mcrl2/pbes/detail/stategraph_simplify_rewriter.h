@@ -78,9 +78,6 @@ struct stategraph_simplify_builder: public simplify_quantifiers_data_rewriter_bu
   typedef simplify_quantifiers_data_rewriter_builder<Derived, DataRewriter, SubstitutionFunction> super;
   using super::apply;
 
-  typedef core::term_traits<data::data_expression> tt;
-  typedef core::term_traits<pbes_expression> tr;
-
   /// \brief Constructor.
   /// \param rewr A data rewriter
   stategraph_simplify_builder(const DataRewriter& R, SubstitutionFunction& sigma)

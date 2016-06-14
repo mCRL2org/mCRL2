@@ -34,7 +34,7 @@ data::data_expression one_point_rule_select_element(const std::set<data::data_ex
   }
   for (const data::data_expression& x: V)
   {
-    if (core::term_traits<data::data_expression>::is_constant(x))
+    if (data::is_constant(x))
     {
       return x;
     }

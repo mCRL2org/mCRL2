@@ -217,7 +217,7 @@ void test_pbes(const std::string& pbes_spec, const std::string& expected_result,
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+  pbes_constelm_algorithm<data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
   // run the algorithm
   algorithm.run(q, compute_conditions);

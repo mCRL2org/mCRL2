@@ -19,7 +19,6 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
-#include "mcrl2/data/detail/data_sequence_algorithm.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
@@ -213,46 +212,6 @@ struct term_traits<data::data_expression>
   bool is_variable(const term_type& t)
   {
     return data::is_variable(t);
-  }
-
-  /// \brief Returns the free variables of a term
-  /// \param t A term
-  /// \return The free variables of a term
-  static inline
-  variable_sequence_type free_variables(const term_type& t)
-  {
-    std::set<variable_type> v = data::find_free_variables(data::data_expression(t));
-    return variable_sequence_type(v.begin(), v.end());
-  }
-
-  /// \brief Returns the intersection of two unordered sets of variables
-  /// \param v A sequence of data variables
-  /// \param w A sequence of data variables
-  /// \return The difference of two sets.
-  static inline
-  variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
-  {
-    return data::detail::set_intersection(v, w);
-  }
-
-  /// \brief Returns the difference of two unordered sets of variables
-  /// \param v A sequence of data variables
-  /// \param w A sequence of data variables
-  /// \return The difference of two sets.
-  static inline
-  variable_sequence_type set_difference(const variable_sequence_type& v, const variable_sequence_type& w)
-  {
-    return data::detail::set_difference(v, w);
-  }
-
-  /// \brief Test if a term is constant
-  /// \param t A term
-  /// \return True if the term is constant. N.B. It is unknown if the current implementation
-  /// works for quantifier expressions.
-  static inline
-  bool is_constant(const term_type& t)
-  {
-    return data::find_all_variables(t).empty();
   }
 
   /// \brief Get the n-th argument of a data expression, provided it is an application.

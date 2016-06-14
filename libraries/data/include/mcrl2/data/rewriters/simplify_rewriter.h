@@ -37,12 +37,6 @@ class simplify_rewrite_builder: public data_expression_builder<Derived>
       return static_cast<Derived&>(*this);
     }
 
-    variable_list free_variables(const data_expression& x) const
-    {
-      std::set<variable> v = data::find_free_variables(x);
-      return variable_list(v.begin(), v.end());
-    }
-
     bool is_not(const data_expression& x) const
     {
       return data::sort_bool::is_not_application(x);

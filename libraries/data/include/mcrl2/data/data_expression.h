@@ -228,6 +228,15 @@ std::set<data::variable> find_free_variables(const data::data_expression& x);
 std::set<data::variable> find_free_variables(const data::data_expression_list& x);
 bool search_variable(const data::data_expression& x, const data::variable& v);
 
+inline
+bool is_constant(const data_expression& x)
+{
+  return find_free_variables(x).empty();
+}
+
+typedef atermpp::term_list<variable> variable_list;
+variable_list free_variables(const data_expression& x);
+
 } // namespace data
 
 } // namespace mcrl2

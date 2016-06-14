@@ -175,12 +175,12 @@ class stategraph_equation: public pbes_equation
           {
             const data::data_expression& left = data::binary_left1(v_i);
             const data::data_expression& right = data::binary_right1(v_i);
-            if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && is_constant(right))
+            if (data::is_variable(left) && std::find(d.begin(), d.end(), data::variable(left)) != d.end() && data::is_constant(right))
             {
               const data::variable& vleft = atermpp::down_cast<data::variable>(left);
               result[vleft] = right;
             }
-            else if (data::is_variable(right) && std::find(d.begin(), d.end(), data::variable(right)) != d.end() && is_constant(left))
+            else if (data::is_variable(right) && std::find(d.begin(), d.end(), data::variable(right)) != d.end() && data::is_constant(left))
             {
               const data::variable& vright = atermpp::down_cast<data::variable>(right);
               result[vright] = left;
@@ -247,7 +247,7 @@ class stategraph_equation: public pbes_equation
         for (auto j = e.begin(); j != e.end(); ++j, ++j_index)
         {
           data::data_expression c = R(*j, Ye.sigma());
-          if (is_constant(c))
+          if (data::is_constant(c))
           {
             Ye.m_target[j_index] = c;
           }

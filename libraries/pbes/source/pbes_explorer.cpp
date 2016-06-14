@@ -33,20 +33,6 @@ namespace mcrl2
 namespace pbes_system
 {
 
-inline
-const data::variable_list& quantifier_variables(const pbes_expression& x)
-{
-  assert(is_exists(x) || is_forall(x));
-  if (is_exists(x))
-  {
-    return atermpp::down_cast<exists>(x).variables();
-  }
-  else
-  {
-    return atermpp::down_cast<forall>(x).variables();
-  }
-}
-
 namespace detail
 {
   template <typename MapContainer>

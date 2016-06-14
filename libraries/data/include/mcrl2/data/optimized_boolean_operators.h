@@ -13,6 +13,7 @@
 #define MCRL2_DATA_OPTIMIZED_BOOLEAN_OPERATORS_H
 
 #include "mcrl2/core/term_traits.h"
+#include "mcrl2/data/detail/data_sequence_algorithm.h"
 
 namespace mcrl2
 {
@@ -192,7 +193,7 @@ typename TermTraits::term_type optimized_forall(const typename TermTraits::varia
   {
     if (remove_variables)
     {
-      typename tr::variable_sequence_type variables = tr::set_intersection(v, tr::free_variables(arg));
+      data::variable_list variables = data::detail::set_intersection(v, free_variables(arg));
       if (variables.empty())
       {
         return arg;
@@ -246,7 +247,7 @@ typename TermTraits::term_type optimized_exists(const typename TermTraits::varia
   {
     if (remove_variables)
     {
-      typename tr::variable_sequence_type variables = tr::set_intersection(v, tr::free_variables(arg));
+      data::variable_list variables = data::detail::set_intersection(v, free_variables(arg));
       if (variables.empty())
       {
         return arg;

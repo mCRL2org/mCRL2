@@ -25,12 +25,6 @@ namespace detail {
 
 struct bqnf_quantifier_rewriter: public bqnf_visitor
   {
-    /// \brief The equation type.
-    typedef pbes_equation equation_type;
-    /// \brief The expression type of the equation.
-    typedef pbes_expression term_type;
-    typedef core::term_traits<pbes_expression> tr;
-
     /// \brief Constructor.
     bqnf_quantifier_rewriter()
     {
@@ -44,14 +38,14 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \param e a simple PBES expression.
     /// \param d a set of variables.
     /// \return the filtered expression.
-    virtual term_type filter(const term_type& e, const std::set<data::variable>& d)
+    virtual pbes_expression filter(const pbes_expression& e, const std::set<data::variable>& d)
     {
       assert(is_simple_expression(e));
-      term_type empty;
+      pbes_expression empty;
       if (is_data(e))
       {
         std::vector<data::variable> intersection;
-        for (const data::variable& var: tr::free_variables(e))
+        for (const data::variable& var: pbes_system::find_free_variables(e))
         {
           if (d.find(var) != d.end())
           {
@@ -69,8 +63,8 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
       }
       else if (is_and(e) || is_or(e) || is_imp(e))
       {
-        term_type l = filter(pbes_system::accessors::left(e), d);
-        term_type r = filter(pbes_system::accessors::right(e), d);
+        pbes_expression l = filter(pbes_system::accessors::left(e), d);
+        pbes_expression r = filter(pbes_system::accessors::right(e), d);
         if (l==empty && r==empty)
         {
           return empty;
@@ -124,12 +118,12 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// \param phi_i a PBES expression.
     /// \param d a set of relevant variables.
     /// \return the expression g filtered with respect to phi_i and d.
-    virtual term_type filter_guard(const term_type& g, const term_type& phi_i, const data::variable_list& d)
+    virtual pbes_expression filter_guard(const pbes_expression& g, const pbes_expression& phi_i, const data::variable_list& d)
     {
-      term_type result = true_();
-      data::variable_list free_g = tr::free_variables(g);
+      pbes_expression result = true_();
+      data::variable_list free_g = free_variables(g);
       std::set<data::variable> free_phi_i;
-      for (const data::variable& v: tr::free_variables(phi_i))
+      for (const data::variable& v: pbes_system::find_free_variables(phi_i))
       {
         free_phi_i.insert(v);
       }
@@ -159,7 +153,7 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
         }
       }
       // Now I have the sets I need; let's generate terms.
-      term_type e_1 = filter(g, d_minus_free_phi_i);
+      pbes_expression e_1 = filter(g, d_minus_free_phi_i);
       if (!d_intersects_free_g_minus_free_phi_i.empty())
       {
         e_1 =
@@ -170,8 +164,8 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
 // )
            ;
       }
-      term_type e_2 = filter(g, d_intersects_free_phi_i);
-      term_type empty;
+      pbes_expression e_2 = filter(g, d_intersects_free_phi_i);
+      pbes_expression empty;
       if (e_1 == empty)
       {
         if (e_2 != empty)
@@ -202,27 +196,27 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     ///   filter_guard(phi, psi_i, x) => rewrite_bqnf_expression(psi_i).
     /// \param e a PBES expression
     /// \return the expression resulting from the transformation.
-    virtual term_type rewrite_bounded_forall(const term_type& e)
+    virtual pbes_expression rewrite_bounded_forall(const pbes_expression& e)
     {
       //std::clog << "rewrite_bounded_forall: " << pp(e) << std::endl;
       assert(is_forall(e));
-      data::variable_list qvars = tr::var(e);
-      term_type qexpr = pbes_system::accessors::arg(e);
+      data::variable_list qvars = quantifier_variables(e);
+      pbes_expression qexpr = pbes_system::accessors::arg(e);
       while (is_forall(qexpr)) {
-        qvars = qvars + tr::var(qexpr);
+        qvars = qvars + quantifier_variables(qexpr);
         qexpr = pbes_system::accessors::arg(qexpr);
       }
       // forall qvars . qexpr
-      term_type result;
+      pbes_expression result;
       if (is_propositional_variable_instantiation(qexpr) || is_simple_expression(qexpr)) {
         // forall d . phi | forall d . X(e)
         result = e;
       } else {
-        term_type phi = is_or(qexpr) ? static_cast<const pbes_expression&>(true_()) : static_cast<const pbes_expression&>(false_());
-        term_type psi = qexpr;
+        pbes_expression phi = is_or(qexpr) ? static_cast<const pbes_expression&>(true_()) : static_cast<const pbes_expression&>(false_());
+        pbes_expression psi = qexpr;
         if (is_or(qexpr) || is_imp(qexpr)) {
-          term_type l = pbes_system::accessors::left(qexpr);
-          term_type r = pbes_system::accessors::right(qexpr);
+          pbes_expression l = pbes_system::accessors::left(qexpr);
+          pbes_expression r = pbes_system::accessors::right(qexpr);
           if (is_simple_expression(l)) {
             phi = l;
             psi = r;
@@ -233,16 +227,16 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
           result = e;
         } else if (!qvars.empty() || !(is_or(qexpr) ? is_true(phi) : is_false(phi))) {
           // forall d . phi => psi
-          std::vector<term_type> conjuncts;
+          std::vector<pbes_expression> conjuncts;
           if (is_and(psi)) {
             conjuncts = split_conjuncts(psi);
           } else {
             conjuncts.push_back(psi);
           }
-          term_type conjunction = true_();
-          for (std::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
-            term_type phi_i = *c;
-            term_type r = rewrite_bqnf_expression(phi_i);
+          pbes_expression conjunction = true_();
+          for (std::vector<pbes_expression>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
+            pbes_expression phi_i = *c;
+            pbes_expression r = rewrite_bqnf_expression(phi_i);
             if (is_or(qexpr)) {
               if (!is_true(phi)) {
                 phi = filter_guard(phi, r, qvars);
@@ -255,9 +249,8 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
               }
             }
             std::vector<data::variable> qvars_i;
-            data::variable_list free_phi_i_list = tr::free_variables(phi_i);
             std::set<data::variable> free_phi_i;
-            for (const data::variable& v : tr::free_variables(phi_i))
+            for (const data::variable& v : pbes_system::find_free_variables(phi_i))
             {
               free_phi_i.insert(v);
             }
@@ -294,18 +287,18 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// rewrite_bounded_exists(exists v . phi) = exists v. rewrite_bqnf_expression(phi)
     /// \param e a PBES expression
     /// \return the expression resulting from the transformation.
-    virtual term_type rewrite_bounded_exists(const term_type& e)
+    virtual pbes_expression rewrite_bounded_exists(const pbes_expression& e)
     {
       //std::clog << "rewrite_bounded_exists" << pp(e) << std::endl;
       assert(is_exists(e));
-      term_type qexpr = pbes_system::accessors::arg(e);
-      data::variable_list qvars = tr::var(e);
+      pbes_expression qexpr = pbes_system::accessors::arg(e);
+      data::variable_list qvars = quantifier_variables(e);
       while (is_exists(qexpr)) {
-        qvars = qvars + tr::var(qexpr);
+        qvars = qvars + quantifier_variables(qexpr);
         qexpr = pbes_system::accessors::arg(qexpr);
       }
-      term_type r = rewrite_bqnf_expression(qexpr);
-      term_type result = make_exists(qvars, r);
+      pbes_expression r = rewrite_bqnf_expression(qexpr);
+      pbes_expression result = make_exists(qvars, r);
       return result;
     }
 
@@ -314,15 +307,15 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// rewrite_imp(/\_i phi_i) = /\_i rewrite_bqnf_expression(phi_i).
     /// \param e a PBES expression
     /// \return the expression resulting from the transformation.
-    virtual term_type rewrite_and(const term_type& e)
+    virtual pbes_expression rewrite_and(const pbes_expression& e)
     {
       //std::clog << "rewrite_and: " << pp(e) << std::endl;
-      term_type conjunction = true_();
-      std::vector<equation_type> new_eqns;
-      std::vector<term_type> conjuncts = split_conjuncts(e);
-      for (std::vector<term_type>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
-        term_type expr = *c;
-        term_type r = rewrite_bqnf_expression(expr);
+      pbes_expression conjunction = true_();
+      std::vector<pbes_equation> new_eqns;
+      std::vector<pbes_expression> conjuncts = split_conjuncts(e);
+      for (std::vector<pbes_expression>::const_iterator c = conjuncts.begin(); c != conjuncts.end(); ++c) {
+        pbes_expression expr = *c;
+        pbes_expression r = rewrite_bqnf_expression(expr);
         if (is_true(conjunction)) {
           conjunction = r;
         } else {
@@ -337,15 +330,15 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     /// rewrite_imp(\/_i phi_i) = \/_i rewrite_bqnf_expression(phi_i).
     /// \param e a PBES expression
     /// \return the expression resulting from the transformation.
-    virtual term_type rewrite_or(const term_type& e)
+    virtual pbes_expression rewrite_or(const pbes_expression& e)
     {
       //std::clog << "rewrite_or: " << pp(e) << std::endl;
-      term_type disjunction = false_();
-      std::vector<term_type> new_exprs;
-      std::vector<term_type> disjuncts = split_disjuncts(e);
-      for (std::vector<term_type>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
-        term_type expr = *d;
-        term_type r = rewrite_bqnf_expression(expr);
+      pbes_expression disjunction = false_();
+      std::vector<pbes_expression> new_exprs;
+      std::vector<pbes_expression> disjuncts = split_disjuncts(e);
+      for (std::vector<pbes_expression>::const_iterator d = disjuncts.begin(); d != disjuncts.end(); ++d) {
+        pbes_expression expr = *d;
+        pbes_expression r = rewrite_bqnf_expression(expr);
         if (is_false(disjunction)) {
           disjunction = r;
         } else {
@@ -361,12 +354,12 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     ///   rewrite_bqnf_expression(phi) => rewrite_bqnf_expression(psi).
     /// \param e a PBES expression
     /// \return the expression resulting from the transformation.
-    virtual term_type rewrite_imp(const term_type& e)
+    virtual pbes_expression rewrite_imp(const pbes_expression& e)
     {
       //std::clog << "rewrite_imp: " << pp(e) << std::endl;
-      term_type l = rewrite_bqnf_expression(pbes_system::accessors::left(e));
-      term_type r = rewrite_bqnf_expression(pbes_system::accessors::right(e));
-      term_type result = imp(l, r);
+      pbes_expression l = rewrite_bqnf_expression(pbes_system::accessors::left(e));
+      pbes_expression r = rewrite_bqnf_expression(pbes_system::accessors::right(e));
+      pbes_expression result = imp(l, r);
       return result;
     }
 
@@ -380,10 +373,10 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
     ///   rewrite_bqnf_expression(phi) 'op' rewrite_bqnf_expression(psi).
     /// \param e a PBES expression
     /// \return the expression resulting from the transformation.
-    virtual term_type rewrite_bqnf_expression(const term_type& e)
+    virtual pbes_expression rewrite_bqnf_expression(const pbes_expression& e)
     {
       //std::clog << "rewrite_bqnf_expression: " << pp(e) << std::endl;
-      term_type result;
+      pbes_expression result;
       if (is_propositional_variable_instantiation(e) || is_simple_expression(e)) {
         // Eqn of the form sigma X(d: D) = phi && Y(h(d, l)), with phi a simple formula.
         // Add sigma X(d) = e.
