@@ -1,3 +1,14 @@
+// Author(s): Sjoerd Cranen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file pgsolver.cpp
+/// \brief Add your file description here.
+
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/normal_forms.h"
 
@@ -7,11 +18,7 @@ namespace mcrl2
 namespace bes
 {
 
-typedef boolean_equation_system::equation_type equation_type;
-typedef equation_type::term_type term_type;
-typedef core::term_traits<term_type> tr;
-typedef tr::string_type string_type;
-typedef std::map<string_type, size_t> variable_map;
+typedef std::map<core::identifier_string, size_t> variable_map;
 
 ///
 /// \brief Convert a sequence of Boolean variables to PGSolver format.
@@ -22,11 +29,11 @@ std::string boolean_variables2pgsolver(Iter first, Iter last, const variable_map
   std::set<size_t> variables_int;
   for (Iter i = first; i != last; ++i)
   {
-    assert(tr::is_prop_var(*i));
-    variable_map::const_iterator j = variables.find(tr::name(*i));
+    const boolean_variable& b = atermpp::down_cast<boolean_variable>(*i);
+    variable_map::const_iterator j = variables.find(b.name());
     if (j == variables.end())
     {
-      throw mcrl2::runtime_error("Found undeclared variable in boolean_variables2pgsolver: " + tr::pp(*i));
+      throw mcrl2::runtime_error("Found undeclared variable in boolean_variables2pgsolver: " + bes::pp(b));
     }
     variables_int.insert(j->second);
   }
@@ -36,25 +43,26 @@ std::string boolean_variables2pgsolver(Iter first, Iter last, const variable_map
 ///
 /// \brief Convert a BES expression to PGSolver format.
 ///
-static std::string bes_expression2pgsolver(const term_type& p, const variable_map& variables)
+static std::string bes_expression2pgsolver(const boolean_expression& p, const variable_map& variables)
 {
   std::string result;
-  if (tr::is_and(p))
+  if (is_and(p))
   {
-    std::set<term_type> expressions = split_and(p);
+    std::set<boolean_expression> expressions = split_and(p);
     result = boolean_variables2pgsolver(expressions.begin(), expressions.end(), variables);
   }
-  else if (tr::is_or(p))
+  else if (is_or(p))
   {
-    std::set<term_type> expressions = split_or(p);
+    std::set<boolean_expression> expressions = split_or(p);
     result = boolean_variables2pgsolver(expressions.begin(), expressions.end(), variables);
   }
-  else if (tr::is_prop_var(p))
+  else if (is_boolean_variable(p))
   {
-    variable_map::const_iterator i = variables.find(tr::name(p));
+    const boolean_variable& b = atermpp::down_cast<boolean_variable>(p);
+    variable_map::const_iterator i = variables.find(b.name());
     if (i == variables.end())
     {
-      throw mcrl2::runtime_error("Found undeclared variable in bes_expression2cwi: " + tr::pp(p));
+      throw mcrl2::runtime_error("Found undeclared variable in bes_expression2cwi: " + bes::pp(p));
     }
     std::stringstream out;
     out << i->second;
@@ -62,7 +70,7 @@ static std::string bes_expression2pgsolver(const term_type& p, const variable_ma
   }
   else
   {
-    throw mcrl2::runtime_error("Unknown or unsupported expression encountered in bes_expression2cwi: " + tr::pp(p));
+    throw mcrl2::runtime_error("Unknown or unsupported expression encountered in bes_expression2cwi: " + bes::pp(p));
   }
   return result;
 }
@@ -92,7 +100,7 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out, bool maxpg)
       sigma = i->symbol();
     }
     variables[i->variable().name()] = index++;
-    and_in_block = and_in_block || tr::is_and(i->formula());
+    and_in_block = and_in_block || is_and(i->formula());
   }
   block_to_player[block] = (and_in_block)?1:0;
 
@@ -117,13 +125,13 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out, bool maxpg)
         << " "
         << (maxpg?(block-priority):priority)
         << " "
-        << (tr::is_and(i->formula()) ? 1 : (tr::is_or(i->formula())?0:block_to_player[priority]))
+        << (is_and(i->formula()) ? 1 : (is_or(i->formula())?0:block_to_player[priority]))
         << " "
         << bes_expression2pgsolver(i->formula(), variables)
 #ifdef MCRL2_BES2PGSOLVER_PRINT_VARIABLE_NAMES
         << " "
         << "\""
-        << tr::pp(i->variable())
+        << bes::pp(i->variable())
         << "\""
 #endif
       << ";\n";
