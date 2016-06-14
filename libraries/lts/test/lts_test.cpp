@@ -225,6 +225,34 @@ void reduce_simple_loop_with_tau()
   reduce_lts_in_various_ways("Simple loop with tau", SIMPLE_AUT, expected);
 }
 
+/* The example below was encountered by David Jansen. The problem is that
+ * for branching bisimulations the tau may supersede the b, not leading to the
+ * necessary splitting into two equivalence classes. */
+void tricky_example_for_branching_bisimulation()
+{
+  std::string TRICKY_BB =
+    "des (0,3,2)\n"
+    "(0,\"a\",1)\n"
+    "(1,\"b\",0)\n"
+    "(1,\"tau\",0)\n"
+    ;
+
+  expected_sizes expected;
+  expected.states_plain=2; expected.transitions_plain=3; expected.labels_plain=3;
+  expected.states_bisimulation=2, expected.transitions_bisimulation=3, expected.labels_bisimulation=3;
+  expected.states_branching_bisimulation=2, expected.transitions_branching_bisimulation=3, expected.labels_branching_bisimulation=3;
+  expected.states_divergence_preserving_branching_bisimulation=2, expected.transitions_divergence_preserving_branching_bisimulation=3, expected.labels_divergence_preserving_branching_bisimulation=3;
+  expected.states_weak_bisimulation=2, expected.transitions_weak_bisimulation=3, expected.labels_weak_bisimulation=3;
+  expected.states_divergence_preserving_weak_bisimulation=2, expected.transitions_divergence_preserving_weak_bisimulation=3, expected.labels_divergence_preserving_weak_bisimulation=3;
+  expected.states_simulation=2, expected.transitions_simulation=3, expected.labels_simulation=3;
+  expected.states_trace_equivalence=2, expected.transitions_trace_equivalence=3, expected.labels_trace_equivalence=3;
+  expected.states_weak_trace_equivalence=1, expected.transitions_weak_trace_equivalence=2, expected.labels_weak_trace_equivalence=3;
+  expected.states_determinisation=2, expected.transitions_determinisation=3, expected.labels_determinisation=3;
+  expected.is_deterministic=true;
+
+  reduce_lts_in_various_ways("Tricky example for branching bisimulation", TRICKY_BB, expected);
+}
+
 
 void reduce_abp()
 {
@@ -503,6 +531,7 @@ int test_main(int argc, char* argv[])
 {
   reduce_simple_loop();
   reduce_simple_loop_with_tau();
+  tricky_example_for_branching_bisimulation();
   reduce_abp();
   reduce_peterson();
   test_reachability();
