@@ -22,7 +22,7 @@ std::string boolean_variables2pgsolver(Iter first, Iter last, const variable_map
   std::set<size_t> variables_int;
   for (Iter i = first; i != last; ++i)
   {
-    assert(tr::is_variable(*i));
+    assert(tr::is_prop_var(*i));
     variable_map::const_iterator j = variables.find(tr::name(*i));
     if (j == variables.end())
     {

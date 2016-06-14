@@ -1160,18 +1160,6 @@ struct term_traits<pbes_system::pbes_expression>
     return term_type(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), l, p));
   }
 
-  /// \brief Propositional variable instantiation
-  /// \param name A string
-  /// \param first Start of a sequence of data terms
-  /// \param last End of a sequence of data terms
-  /// \return Propositional variable instantiation with the given name, and the range [first, last) as data parameters
-  template <typename Iter>
-  static
-  term_type prop_var(const string_type& name, Iter first, Iter last)
-  {
-    return propositional_variable_type(name, data_term_sequence_type(first, last));
-  }
-
   /// \brief Test for the value true
   /// \param t A term
   /// \return True if it is the value \p true
@@ -1327,7 +1315,7 @@ struct term_traits<pbes_system::pbes_expression>
   /// \param v A variable
   /// \return The converted variable
   static inline
-  const term_type &variable2term(const variable_type& v)
+  const term_type& variable2term(const variable_type& v)
   {
     return atermpp::down_cast<term_type>(v);
   }
@@ -1339,33 +1327,6 @@ struct term_traits<pbes_system::pbes_expression>
   bool is_variable(const term_type& t)
   {
     return data::is_variable(t);
-  }
-
-  /// \brief Conversion from data term to term
-  /// \param t A data term
-  /// \return The converted term
-  static inline
-  term_type dataterm2term(const data_term_type& t)
-  {
-    return t;
-  }
-
-  /// \brief Conversion from term to data term
-  /// \param t A term
-  /// \return The converted term
-  static inline
-  data_term_type term2dataterm(const term_type& t)
-  {
-    return data_term_type(t);
-  }
-
-  /// \brief Conversion from term to propositional variable instantiation
-  /// \param t A term
-  /// \return The converted term
-  static inline
-  const propositional_variable_type& term2propvar(const term_type& t)
-  {
-    return atermpp::down_cast<propositional_variable_type>(t);
   }
 
   /// \brief Pretty print function

@@ -162,7 +162,7 @@ struct boolean_expr_builder
     }
     else if (tr::is_not(e))
     {
-      term_type n = tr::arg(e);
+      term_type n = tr::not_arg(e);
       result = visit_not(e, n, arg1);
       if (!is_finished(result))
       {
@@ -199,7 +199,7 @@ struct boolean_expr_builder
         result = data::optimized_imp(visit(l, arg1), visit(r, arg1));
       }
     }
-    else if (tr::is_variable(e))
+    else if (tr::is_prop_var(e))
     {
       result = visit_var(e, variable_type(e), arg1);
       if (!is_finished(result))

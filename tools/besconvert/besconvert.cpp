@@ -134,7 +134,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       {
         return BOOL_OR;
       }
-      else if (tr::is_variable(e))
+      else if (tr::is_prop_var(e))
       {
         return BOOL_VAR;
       }

@@ -17,7 +17,6 @@
 #include <type_traits>
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -26,7 +25,6 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
@@ -571,7 +569,7 @@ const boolean_expression& right(boolean_expression const& e)
   return atermpp::down_cast<const boolean_expression>(e[1]);
 }
 
-} // namespace accessors 
+} // namespace accessors
 
 } // namespace bes
 
@@ -599,26 +597,26 @@ struct term_traits<bes::boolean_expression>
   /// \brief The value true
   /// \return The value true
   static inline
-  term_type true_()
+  bes::boolean_expression true_()
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanTrue()));
+    return bes::true_();
   }
 
   /// \brief The value false
   /// \return The value false
   static inline
-  term_type false_()
+  bes::boolean_expression false_()
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanFalse()));
+    return bes::false_();
   }
 
   /// \brief Operator not
   /// \param p A term
   /// \return Operator not applied to p
   static inline
-  term_type not_(const term_type& p)
+  bes::boolean_expression not_(const bes::boolean_expression& x)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanNot(), p));
+    return bes::not_(x);
   }
 
   /// \brief Operator and
@@ -626,9 +624,9 @@ struct term_traits<bes::boolean_expression>
   /// \param q A term
   /// \return Operator and applied to p and q
   static inline
-  term_type and_(const term_type& p, const term_type& q)
+  bes::boolean_expression and_(const bes::boolean_expression& p, const bes::boolean_expression& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanAnd(), p, q));
+    return bes::and_(p, q);
   }
 
   /// \brief Operator or
@@ -636,9 +634,9 @@ struct term_traits<bes::boolean_expression>
   /// \param q A term
   /// \return Operator or applied to p and q
   static inline
-  term_type or_(const term_type& p, const term_type& q)
+  bes::boolean_expression or_(const bes::boolean_expression& p, const bes::boolean_expression& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanOr(), p, q));
+    return bes::or_(p, q);
   }
 
   /// \brief Implication
@@ -646,16 +644,16 @@ struct term_traits<bes::boolean_expression>
   /// \param q A term
   /// \return Implication applied to p and q
   static inline
-  term_type imp(const term_type& p, const term_type& q)
+  bes::boolean_expression imp(const bes::boolean_expression& p, const bes::boolean_expression& q)
   {
-    return term_type(atermpp::aterm_appl(core::detail::function_symbol_BooleanImp(), p, q));
+    return bes::imp(p, q);
   }
 
   /// \brief Test for value true
   /// \param t A term
   /// \return True if the term has the value true
   static inline
-  bool is_true(const term_type& t)
+  bool is_true(const bes::boolean_expression& t)
   {
     return bes::is_true(t);
   }
@@ -664,7 +662,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term has the value false
   static inline
-  bool is_false(const term_type& t)
+  bool is_false(const bes::boolean_expression& t)
   {
     return bes::is_false(t);
   }
@@ -673,7 +671,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is of type and
   static inline
-  bool is_not(const term_type& t)
+  bool is_not(const bes::boolean_expression& t)
   {
     return bes::is_not(t);
   }
@@ -682,7 +680,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is of type and
   static inline
-  bool is_and(const term_type& t)
+  bool is_and(const bes::boolean_expression& t)
   {
     return bes::is_and(t);
   }
@@ -691,7 +689,7 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is of type or
   static inline
-  bool is_or(const term_type& t)
+  bool is_or(const bes::boolean_expression& t)
   {
     return bes::is_or(t);
   }
@@ -700,83 +698,64 @@ struct term_traits<bes::boolean_expression>
   /// \param t A term
   /// \return True if the term is an implication
   static inline
-  bool is_imp(const term_type& t)
+  bool is_imp(const bes::boolean_expression& t)
   {
     return bes::is_imp(t);
-  }
-
-  /// \brief Test for boolean variable
-  /// \param t A term
-  /// \return True if the term is a boolean variable
-  static inline
-  bool is_variable(const term_type& t)
-  {
-    return bes::is_boolean_variable(t);
   }
 
   /// \brief Test for propositional variable
   /// \param t A term
   /// \return True if the term is a propositional variable
   static inline
-  bool is_prop_var(const term_type& t)
+  bool is_prop_var(const bes::boolean_expression& t)
   {
-    return is_variable(t);
-  }
-
-  /// \brief Returns the argument of a term of type not
-  /// \param t A term
-  /// \return The requested argument
-  static inline
-  const term_type &arg(const term_type& t)
-  {
-    assert(is_not(t));
-    return atermpp::down_cast<const term_type>(t[0]);
+    return bes::is_boolean_variable(t);
   }
 
   /// \brief Returns the left argument of a term of type and, or or imp
   /// \param t A term
   /// \return The left argument of the term
   static inline
-  const term_type &left(const term_type& t)
+  const bes::boolean_expression& left(const bes::boolean_expression& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::down_cast<const term_type>(t[0]);
+    return atermpp::down_cast<const bes::boolean_expression>(t[0]);
   }
 
   /// \brief Returns the right argument of a term of type and, or or imp
   /// \param t A term
   /// \return The right argument of the term
   static inline
-  const term_type &right(const term_type& t)
+  const bes::boolean_expression& right(const bes::boolean_expression& t)
   {
     assert(is_and(t) || is_or(t) || is_imp(t));
-    return atermpp::down_cast<const term_type>(t[1]);
+    return atermpp::down_cast<const bes::boolean_expression>(t[1]);
   }
 
   /// \brief Returns the argument of a term of type not
   /// \param t A term
   static inline
-  const term_type &not_arg(const term_type& t)
+  const bes::boolean_expression& not_arg(const bes::boolean_expression& t)
   {
     assert(is_not(t));
-    return atermpp::down_cast<const term_type>(t[0]);
+    return atermpp::down_cast<bes::not_>(t).operand();
   }
 
   /// \brief Returns the name of a boolean variable
   /// \param t A term
   /// \return The name of the boolean variable
   static inline
-  const string_type &name(const term_type& t)
+  const core::identifier_string& name(const bes::boolean_expression& t)
   {
-    assert(is_variable(t));
-    return atermpp::down_cast<const string_type>(t[0]);
+    assert(bes::is_boolean_variable(t));
+    return atermpp::down_cast<bes::boolean_variable>(t).name();
   }
 
   /// \brief Conversion from variable to term
   /// \param v A variable
   /// \returns The converted variable
   static inline
-  const term_type &variable2term(const variable_type &v)
+  const bes::boolean_expression& variable2term(const bes::boolean_variable& v)
   {
     return v;
   }
@@ -785,91 +764,22 @@ struct term_traits<bes::boolean_expression>
   /// \param t a term
   /// \returns The converted term
   static inline
-  const variable_type &term2variable(const term_type& t)
+  const bes::boolean_variable& term2variable(const bes::boolean_expression& t)
   {
-    return atermpp::down_cast<const variable_type>(t);
+    return atermpp::down_cast<bes::boolean_variable>(t);
   }
 
   /// \brief Pretty print function
   /// \param t A term
   /// \return Returns a pretty print representation of the term
   static inline
-  std::string pp(const term_type& t)
+  std::string pp(const bes::boolean_expression& t)
   {
     return bes::pp(t);
   }
 };
 
 } // namespace core
-
-} // namespace mcrl2
-
-namespace mcrl2
-{
-
-namespace bes
-{
-
-/// \brief Returns or applied to the sequence of boolean expressions [first, last)
-/// \param first Start of a sequence of boolean expressions
-/// \param last End of a sequence of of boolean expressions
-/// \return Or applied to the sequence of boolean expressions [first, last)
-template <typename FwdIt>
-inline
-boolean_expression join_or(FwdIt first, FwdIt last)
-{
-  typedef core::term_traits<boolean_expression> tr;
-  return utilities::detail::join(first, last, tr::or_, tr::false_());
-}
-
-/// \brief Returns and applied to the sequence of boolean expressions [first, last)
-/// \param first Start of a sequence of boolean expressions
-/// \param last End of a sequence of of boolean expressions
-/// \return And applied to the sequence of boolean expressions [first, last)
-template <typename FwdIt>
-inline
-boolean_expression join_and(FwdIt first, FwdIt last)
-{
-  typedef core::term_traits<boolean_expression> tr;
-  return utilities::detail::join(first, last, tr::and_, tr::true_());
-}
-
-/* inline bool
-operator<(const boolean_expression& x, const boolean_expression& y)
-{
-  return aterm_appl(x) < aterm_appl(y);
-} */
-
-/// \brief Splits a disjunction into a sequence of operands
-/// Given a boolean expression of the form p1 || p2 || .... || pn, this will yield a
-/// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
-/// function symbol.
-/// \param expr A boolean expression
-/// \return A sequence of operands
-inline
-std::set<boolean_expression> split_or(const boolean_expression& expr)
-{
-  using namespace accessors;
-  std::set<boolean_expression> result;
-  utilities::detail::split(expr, std::insert_iterator<std::set<boolean_expression> >(result, result.begin()), is_or, left, right);
-  return result;
-}
-
-/// \brief Splits a conjunction into a sequence of operands
-/// Given a boolean expression of the form p1 && p2 && .... && pn, this will yield a
-/// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
-/// function symbol.
-/// \param expr A boolean expression
-/// \return A sequence of operands
-inline
-std::set<boolean_expression> split_and(const boolean_expression& expr)
-{
-  using namespace accessors;
-  std::set<boolean_expression> result;
-  utilities::detail::split(expr, std::insert_iterator<std::set<boolean_expression> >(result, result.begin()), is_and, left, right);
-  return result;
-}
-} // namespace bes
 
 } // namespace mcrl2
 

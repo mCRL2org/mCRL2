@@ -12,6 +12,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
+#include "mcrl2/bes/join.h"
 #include "mcrl2/bes/print.h"
 
 using namespace mcrl2;
@@ -57,8 +58,8 @@ void test_expressions()
   boolean_variable X("X");
   boolean_variable Y("Y");
 
-  BOOST_CHECK(tr::is_variable(X));
-  BOOST_CHECK(tr::is_variable(Y));
+  BOOST_CHECK(tr::is_prop_var(X));
+  BOOST_CHECK(tr::is_prop_var(Y));
 
   boolean_expression true_(tr::true_());
   boolean_expression false_(tr::false_());
