@@ -37,19 +37,19 @@ struct add_simplify_quantifiers: public Builder<Derived>
 
     if (variables.empty())
     {
-      result = tr::true_();
+      result = true_();
     }
-    else if (tr::is_not(body))
+    else if (is_not(body))
     {
       result = data::optimized_not(data::optimized_exists(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
-    if (tr::is_and(body))
+    if (is_and(body))
     {
       auto const& left = atermpp::down_cast<and_>(body).left();
       auto const& right = atermpp::down_cast<and_>(body).right();
       result = data::optimized_and(data::optimized_forall(variables, left, true), data::optimized_forall(variables, right, true));
     }
-    else if (tr::is_or(body))
+    else if (is_or(body))
     {
       auto const& left = atermpp::down_cast<or_>(body).left();
       auto const& right = atermpp::down_cast<or_>(body).right();
@@ -83,19 +83,19 @@ struct add_simplify_quantifiers: public Builder<Derived>
 
     if (variables.empty())
     {
-      result = tr::false_();
+      result = false_();
     }
-    else if (tr::is_not(body))
+    else if (is_not(body))
     {
       result = data::optimized_not(data::optimized_forall(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
-    if (tr::is_or(body))
+    if (is_or(body))
     {
       auto const& left = atermpp::down_cast<or_>(body).left();
       auto const& right = atermpp::down_cast<or_>(body).right();
       result = data::optimized_or(data::optimized_exists(variables, left, true), data::optimized_exists(variables, right, true));
     }
-    else if (tr::is_and(body))
+    else if (is_and(body))
     {
       auto const& left = atermpp::down_cast<and_>(body).left();
       auto const& right = atermpp::down_cast<and_>(body).right();

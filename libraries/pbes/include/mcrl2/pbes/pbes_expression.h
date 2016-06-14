@@ -998,6 +998,12 @@ pbes_expression optimized_exists(const data::variable_list& l, const pbes_expres
   return exists(l, p);
 }
 
+inline
+bool is_constant(const pbes_expression& x)
+{
+  return pbes_system::find_free_variables(x).empty();
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2

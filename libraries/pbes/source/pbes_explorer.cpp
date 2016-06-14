@@ -282,7 +282,7 @@ inline bool lts_info::is_pass_through_state(const propositional_variable_instant
 
 inline int lts_info::count_variables(const pbes_expression& e)
 {
-    if (tr::is_prop_var(e))
+    if (is_propositional_variable_instantiation(e))
     {
         return 1;
     }
@@ -323,7 +323,7 @@ std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables
     {
         result.push_back(e);
     }
-    else if (!tr::is_prop_var(e) && count_variables(e) <= 1 && !always_split_option)
+    else if (!is_propositional_variable_instantiation(e) && count_variables(e) <= 1 && !always_split_option)
     {
         result.push_back(e);
     }
@@ -340,7 +340,7 @@ std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables
     for(std::vector<pbes_expression>::iterator p_it = parts.begin(); pass_through && p_it != parts.end(); ++p_it)
     {
         pbes_expression part = *p_it;
-        if (tr::is_prop_var(part))
+        if (is_propositional_variable_instantiation(part))
         {
             // Try to substitute the variable instantiation with the associated expression
 
@@ -814,11 +814,11 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
         }
         result = changed(pbes_system::accessors::arg(phi), LL);
     }
-    else if (tr::is_prop_var(phi))
+    else if (is_propositional_variable_instantiation(phi))
     {
         std::vector<std::string> var_param_signatures =
-                    variable_parameter_signatures[tr::name(phi)];
-        data::data_expression_list values = tr::param(phi);
+                    variable_parameter_signatures[atermpp::down_cast<propositional_variable_instantiation>(phi).name()];
+        data::data_expression_list values = atermpp::down_cast<propositional_variable_instantiation>(phi).parameters();
         assert(var_param_signatures.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
         for (std::vector<std::string>::const_iterator param =
@@ -864,11 +864,11 @@ std::set<std::string> lts_info::reset(const pbes_expression& phi, const std::set
     {
         result = reset(pbes_system::accessors::arg(phi), d);
     }
-    else if (tr::is_prop_var(phi))
+    else if (is_propositional_variable_instantiation(phi))
     {
         std::set<std::string> params;
         std::vector<std::string> var_params =
-                    variable_parameter_signatures[tr::name(phi)];
+                    variable_parameter_signatures[atermpp::down_cast<propositional_variable_instantiation>(phi).name()];
         for (std::vector<std::string>::const_iterator param =
                 var_params.begin(); param != var_params.end(); ++param) {
             std::string signature = *param;
@@ -900,7 +900,7 @@ bool lts_info::tf(const pbes_expression& phi)
     {
         return tf(pbes_system::accessors::arg(phi));
     }
-    else if (tr::is_prop_var(phi))
+    else if (is_propositional_variable_instantiation(phi))
     {
         return false;
     }
@@ -911,9 +911,9 @@ bool lts_info::tf(const pbes_expression& phi)
 std::set<std::string> lts_info::occ(const pbes_expression& expr)
 {
     std::set<std::string> result;
-    if (tr::is_prop_var(expr))
+    if (is_propositional_variable_instantiation(expr))
     {
-        result.insert(tr::name(expr));
+        result.insert(atermpp::down_cast<propositional_variable_instantiation>(expr).name());
     }
     else if (tr::is_and(expr) || tr::is_or(expr) ||tr::is_imp(expr))
     {
@@ -959,11 +959,11 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
         std::set<std::string> fv = free(expr);
         result.insert(fv.begin(), fv.end());
     }
-    if (tr::is_prop_var(expr))
+    if (is_propositional_variable_instantiation(expr))
     {
         data::variable_list var_params =
-                    variable_parameters[tr::name(expr)];
-        data::data_expression_list values = tr::param(expr);
+                    variable_parameters[atermpp::down_cast<propositional_variable_instantiation>(expr).name()];
+        data::data_expression_list values = atermpp::down_cast<propositional_variable_instantiation>(expr).parameters();
         assert(var_params.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
         for (data::variable_list::const_iterator param =
@@ -1033,11 +1033,11 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
     {
         // skip
     }
-    if (tr::is_prop_var(expr))
+    if (is_propositional_variable_instantiation(expr))
     {
         data::variable_list var_params =
-                    variable_parameters[tr::name(expr)];
-        data::data_expression_list values = tr::param(expr);
+                    variable_parameters[atermpp::down_cast<propositional_variable_instantiation>(expr).name()];
+        data::data_expression_list values = atermpp::down_cast<propositional_variable_instantiation>(expr).parameters();
         assert(var_params.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
         for (data::variable_list::const_iterator param =
@@ -1210,10 +1210,10 @@ ltsmin_state::ltsmin_state(const std::string& varname,
     data_expression novalue;
     //std::clog << "ltsmin_state v = " << pp(v) << std::endl;
     this->var = varname;
-    if (tr::is_prop_var(e)) {
-        assert(std::string(tr::name(e)) == varname);
-        //std::clog << "ltsmin_state: var = " << tr::name(e) << std::endl;
-        const data::data_expression_list& values = tr::param(e);
+    if (is_propositional_variable_instantiation(e)) {
+        assert(std::string(atermpp::down_cast<propositional_variable_instantiation>(e).name()) == varname);
+        //std::clog << "ltsmin_state: var = " << atermpp::down_cast<propositional_variable_instantiation>(e).name() << std::endl;
+        const data::data_expression_list& values = atermpp::down_cast<propositional_variable_instantiation>(e).parameters();
         for (data::data_expression_list::iterator val = values.begin(); val != values.end(); ++val)
         {
             if (*val == novalue)
@@ -1386,8 +1386,8 @@ ltsmin_state explorer::get_state(const propositional_variable_instantiation& exp
     //std::clog << "-- get_state --" << std::endl;
     //std::clog << "  expr = " << expr << std::endl;
     propositional_variable_instantiation novalue;
-    assert(tr::is_prop_var(expr) && expr != novalue);
-    std::string varname = tr::name(expr);
+    assert(is_propositional_variable_instantiation(expr) && expr != novalue);
+    std::string varname = expr.name();
     //std::clog << "  varname = " << varname << std::endl;
     ltsmin_state s(varname, expr);
     return s;
@@ -1676,7 +1676,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
         operation_type type = detail::map_at(info->get_variable_types(), state.get_variable());
         for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                 != successors.end(); ++expr) {
-            if (tr::is_prop_var(*expr)) {
+            if (is_propositional_variable_instantiation(*expr)) {
                 result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
             } else if (tr::is_true(*expr)) {
                 if (type != parity_game_generator::PGAME_AND)
@@ -1727,7 +1727,7 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
             for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
                     != successors.end(); ++expr) {
                 //std::clog << " * successor: " << pp(*expr) << std::endl;
-                if (tr::is_prop_var(*expr)) {
+                if (is_propositional_variable_instantiation(*expr)) {
                     result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
                 } else if (tr::is_true(*expr)) {
                     if (type != parity_game_generator::PGAME_AND)

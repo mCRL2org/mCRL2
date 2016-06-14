@@ -23,18 +23,17 @@ void pbes_transform(pbes& x, unsigned int iterations, bool mu_value = false, boo
 {
   propositional_variable_substitution sigma;
   propositional_variable_substitution sigma_final;
-  typedef core::term_traits<pbes_expression> tr;
 
   for (auto i = x.equations().begin(); i != x.equations().end(); ++i)
   {
     sigma[i->variable()] = i->formula();
     if (i->symbol().is_mu())
     {
-      sigma_final[i->variable()] = mu_value ? tr::true_() : tr::false_();
+      sigma_final[i->variable()] = mu_value ? true_() : false_();
     }
     else
     {
-      sigma_final[i->variable()] = nu_value ? tr::true_() : tr::false_();
+      sigma_final[i->variable()] = nu_value ? true_() : false_();
     }
   }
 

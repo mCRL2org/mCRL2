@@ -39,7 +39,6 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
 {
   typedef simplify_data_rewriter_builder<Derived, DataRewriter, MutableSubstitution> super;
   typedef enumerate_quantifiers_builder<Derived, DataRewriter, MutableSubstitution> self;
-  typedef core::term_traits<pbes_expression> tr;
   typedef data::enumerator_list_element<pbes_expression> enumerator_element;
   using super::enter;
   using super::leave;
@@ -95,7 +94,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   pbes_expression enumerate_forall(const data::variable_list& v, const pbes_expression& phi)
   {
     auto undo = undo_substitution(v);
-    pbes_expression result = tr::true_();
+    pbes_expression result = true_();
     std::deque<enumerator_element> P;
     P.push_back(enumerator_element(v, derived().apply(phi)));
     E.next(P, sigma, is_not_true());
@@ -103,7 +102,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     {
       result = data::optimized_and(result, P.front().expression());
       P.pop_front();
-      if (tr::is_false(result))
+      if (is_false(result))
       {
         break;
       }
@@ -116,7 +115,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
   pbes_expression enumerate_exists(const data::variable_list& v, const pbes_expression& phi)
   {
     auto undo = undo_substitution(v);
-    pbes_expression result = tr::false_();
+    pbes_expression result = false_();
     std::deque<enumerator_element> P;
     P.push_back(enumerator_element(v, derived().apply(phi)));
     E.next(P, sigma, is_not_false());
@@ -124,7 +123,7 @@ struct enumerate_quantifiers_builder: public simplify_data_rewriter_builder<Deri
     {
       result = data::optimized_or(result, P.front().expression());
       P.pop_front();
-      if (tr::is_true(result))
+      if (is_true(result))
       {
         break;
       }

@@ -142,8 +142,6 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
   using super::apply;
   using super::sigma;
 
-  typedef core::term_traits<pbes_expression> tr;
-
   const pbesinst_finite_rename& m_rename;
   const data::data_specification& m_data_spec;
   const pbesinst_index_map& m_index_map;
@@ -253,7 +251,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
       mCRL2log(log::debug1) << "c = " << data::pp(c) << "\n";
 
       core::identifier_string Y = m_rename(Xi, di_copy);
-      result.insert(tr::and_(c, propositional_variable_instantiation(Y, e_copy)));
+      result.insert(and_(c, propositional_variable_instantiation(Y, e_copy)));
     }
 
     pbes_expression result1 = join_or(result.begin(), result.end());

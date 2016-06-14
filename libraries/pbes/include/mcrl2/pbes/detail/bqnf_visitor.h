@@ -68,8 +68,8 @@ struct bqnf_visitor
   /// \return a string representation of the type of the root node of the expression.
   static std::string print_brief(const term_type& e)
   {
-    if (tr::is_prop_var(e)) {
-      return std::string("PropVar ") + std::string(tr::name(e));
+    if (is_propositional_variable_instantiation(e)) {
+      return std::string("PropVar ") + std::string(atermpp::down_cast<propositional_variable_instantiation>(e).name());
     } else if (is_simple_expression(e)) {
       return "SimpleExpr";
     } else if (tr::is_and(e)) {
@@ -95,7 +95,7 @@ struct bqnf_visitor
   static bool is_inner_and(const term_type& e)
   {
     bool result = true;
-    if (!(tr::is_prop_var(e) || is_simple_expression(e))) {
+    if (!(is_propositional_variable_instantiation(e) || is_simple_expression(e))) {
       if (tr::is_and(e)) {
         term_type l = pbes_system::accessors::left(e);
         term_type r = pbes_system::accessors::right(e);
@@ -119,7 +119,7 @@ struct bqnf_visitor
   static bool is_inner_implies(const term_type& e)
   {
     bool result = true;
-    if (!(tr::is_prop_var(e) || is_simple_expression(e))) {
+    if (!(is_propositional_variable_instantiation(e) || is_simple_expression(e))) {
       if (tr::is_or(e) || tr::is_imp(e)) {
         term_type l = pbes_system::accessors::left(e);
         term_type r = pbes_system::accessors::right(e);
@@ -166,7 +166,7 @@ struct bqnf_visitor
     } else if (tr::is_forall(e) || tr::is_exists(e)) {
       term_type a = pbes_system::accessors::arg(e);
       result &= visit_simple_expression(sigma, var, a);
-    } else if (tr::is_prop_var(e)) {
+    } else if (is_propositional_variable_instantiation(e)) {
       if (debug) {
         indent(); std::clog << "Not a simple expression!" << std::endl;
       } else {
@@ -190,7 +190,7 @@ struct bqnf_visitor
   {
     inc_indent();
     bool result = true;
-    if (tr::is_prop_var(e) || is_simple_expression(e)) {
+    if (is_propositional_variable_instantiation(e) || is_simple_expression(e)) {
       // std::clog << pp(e) << std::endl;
     } else {
       result = false;

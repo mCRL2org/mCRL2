@@ -99,11 +99,11 @@ namespace detail {
       pbes_expression psi = expand_rhs(phi);
 
       // top_flatten
-      if (tr::is_prop_var(psi))
+      if (is_propositional_variable_instantiation(psi))
       {
         result.insert(psi);
       }
-      else if (tr::is_and(psi))
+      else if (is_and(psi))
       {
         std::set<pbes_expression> terms = split_and(psi);
         for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
@@ -111,7 +111,7 @@ namespace detail {
           result.insert(*i);
         }
       }
-      else if (tr::is_or(psi))
+      else if (is_or(psi))
       {
         std::set<pbes_expression> terms = split_or(psi);
         for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
@@ -119,18 +119,18 @@ namespace detail {
           result.insert(*i);
         }
       }
-      else if (tr::is_true(psi))
+      else if (is_true(psi))
       {
         if (m_true_false_dependencies)
         {
-          result.insert(tr::true_());
+          result.insert(true_());
         }
       }
-      else if (tr::is_false(psi))
+      else if (is_false(psi))
       {
         if (m_true_false_dependencies)
         {
-          result.insert(tr::false_());
+          result.insert(false_());
         }
       }
       else
@@ -151,16 +151,16 @@ namespace detail {
     pbes_expression expand_group(const pbes_expression& psi, const pbes_expression& expr)
     {
       // expand the right hand side if needed
-      if (tr::is_prop_var(psi))
+      if (is_propositional_variable_instantiation(psi))
       {
-        const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
+        const pbes_equation& pbes_eqn = *m_pbes_equation_index[atermpp::down_cast<propositional_variable_instantiation>(psi).name()];
 
         mCRL2log(log::debug2, "pbes_greybox_interface") << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << expr << " into ";
 
         pbes_expression result;
 
         data::rewriter::substitution_type sigma;
-        make_substitution(pbes_eqn.variable().parameters(), tr::param(psi),sigma);
+        make_substitution(pbes_eqn.variable().parameters(), atermpp::down_cast<propositional_variable_instantiation>(psi).parameters(),sigma);
         result = pbes_rewriter(expr,sigma);
 
         mCRL2log(log::debug2, "pbes_greybox_interface") << result << std::endl;
@@ -202,8 +202,8 @@ namespace detail {
       mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression "  << phi << " (var = " << var
                                                                                                << ", expr = " << expr << ")" <<std::endl;
 
-      assert(tr::is_prop_var(phi));
-      std::string varname = tr::name(phi);
+      assert(is_propositional_variable_instantiation(phi));
+      std::string varname = atermpp::down_cast<propositional_variable_instantiation>(phi).name();
       // check that varname for current group equals varname.
       if (varname==var)
       {
@@ -211,11 +211,11 @@ namespace detail {
         pbes_expression psi = expand_group(phi, expr);
 
         // top_flatten
-        if (tr::is_prop_var(psi))
+        if (is_propositional_variable_instantiation(psi))
         {
           result.insert(psi);
         }
-        else if (tr::is_and(psi))
+        else if (is_and(psi))
         {
           std::set<pbes_expression> terms = split_and(psi);
           for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
@@ -223,7 +223,7 @@ namespace detail {
             result.insert(*i);
           }
         }
-        else if (tr::is_or(psi))
+        else if (is_or(psi))
         {
           std::set<pbes_expression> terms = split_or(psi);
           for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
@@ -231,18 +231,18 @@ namespace detail {
             result.insert(*i);
           }
         }
-        else if (tr::is_true(psi))
+        else if (is_true(psi))
         {
           if (m_true_false_dependencies)
           {
-            result.insert(tr::true_());
+            result.insert(true_());
           }
         }
-        else if (tr::is_false(psi))
+        else if (is_false(psi))
         {
           if (m_true_false_dependencies)
           {
-            result.insert(tr::false_());
+            result.insert(false_());
           }
         }
         else

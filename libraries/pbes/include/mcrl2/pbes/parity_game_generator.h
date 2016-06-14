@@ -46,9 +46,6 @@ namespace pbes_system
 class parity_game_generator
 {
   protected:
-    /// \brief The traits class of the expression type.
-    typedef core::term_traits<pbes_expression> tr;
-
     /// \brief Substitution function type used by the PBES rewriter.
     typedef data::rewriter::substitution_type substitution_function;
 
@@ -107,9 +104,9 @@ class parity_game_generator
       {
         size_t p = m_pbes_expression_index.size();
         m_pbes_expression_index[t] = p;
-        if (tr::is_prop_var(t))
+        if (is_propositional_variable_instantiation(t))
         {
-          priority = m_priorities[tr::name(t)];
+          priority = m_priorities[atermpp::down_cast<propositional_variable_instantiation>(t).name()];
         }
         m_bes.push_back(std::make_pair(t, priority));
         detail::check_bes_equation_limit(m_bes.size());
@@ -138,11 +135,12 @@ class parity_game_generator
     pbes_expression expand_rhs(const pbes_expression& psi)
     {
       // expand the right hand side if needed
-      if (tr::is_prop_var(psi))
+      if (is_propositional_variable_instantiation(psi))
       {
-        const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
+        const propositional_variable_instantiation& psi1 = atermpp::down_cast<propositional_variable_instantiation>(psi);
+        const pbes_equation& pbes_eqn = *m_pbes_equation_index[psi1.name()];
         substitution_function sigma;
-        make_substitution(pbes_eqn.variable().parameters(), tr::param(psi), sigma);
+        make_substitution(pbes_eqn.variable().parameters(), psi1.parameters(), sigma);
         mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << pbes_eqn.formula() << " into " << std::flush;
         pbes_expression result = R(pbes_eqn.formula(), sigma);
         mCRL2log(log::debug2, "parity_game_generator") << result << std::endl;
@@ -195,14 +193,14 @@ class parity_game_generator
           i.second = max_priority - i.second;
         }
         // Add BES equations for true and false with priorities 0 and 1.
-        add_bes_equation(tr::true_(), max_priority);
-        add_bes_equation(tr::false_(), max_priority - 1);
+        add_bes_equation(true_(), max_priority);
+        add_bes_equation(false_(), max_priority - 1);
       }
       else
       {
         // Add BES equations for true and false with priorities 0 and 1.
-        add_bes_equation(tr::true_(), 0);
-        add_bes_equation(tr::false_(), 1);
+        add_bes_equation(true_(), 0);
+        add_bes_equation(false_(), 1);
       }
     }
 
@@ -316,35 +314,35 @@ class parity_game_generator
     virtual
     operation_type get_expression_operation(const pbes_expression& phi)
     {
-      if (tr::is_and(phi))
+      if (is_and(phi))
       {
         return PGAME_AND;
       }
-      else if (tr::is_or(phi))
+      else if (is_or(phi))
       {
         return PGAME_OR;
       }
-      else if (tr::is_prop_var(phi))
+      else if (is_propositional_variable_instantiation(phi))
       {
         return PGAME_OR;
       }
-      else if (tr::is_true(phi))
+      else if (is_true(phi))
       {
         return PGAME_AND;
       }
-      else if (tr::is_false(phi))
+      else if (is_false(phi))
       {
         return PGAME_OR;
       }
-      else if (tr::is_forall(phi))
+      else if (is_forall(phi))
       {
         return PGAME_AND;
       }
-      else if (tr::is_exists(phi))
+      else if (is_exists(phi))
       {
         return PGAME_OR;
       }
-      else if (tr::is_data(phi))
+      else if (is_data(phi))
       {
         return PGAME_OR;
       }
@@ -407,38 +405,38 @@ class parity_game_generator
       psi = expand_rhs(psi);
 
       // top_flatten
-      if (tr::is_prop_var(psi))
+      if (is_propositional_variable_instantiation(psi))
       {
-        result.insert(add_bes_equation(psi, m_priorities[tr::name(psi)]));
+        result.insert(add_bes_equation(psi, m_priorities[atermpp::down_cast<propositional_variable_instantiation>(psi).name()]));
       }
-      else if (tr::is_and(psi))
+      else if (is_and(psi))
       {
         for (const pbes_expression& term: split_and(psi))
         {
           result.insert(add_bes_equation(term, priority));
         }
       }
-      else if (tr::is_or(psi))
+      else if (is_or(psi))
       {
         for (const pbes_expression& term: split_or(psi))
         {
           result.insert(add_bes_equation(term, priority));
         }
       }
-      else if (tr::is_true(psi))
+      else if (is_true(psi))
       {
         if (m_true_false_dependencies)
         {
-          std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(tr::true_());
+          std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(true_());
           assert(i != m_pbes_expression_index.end());
           result.insert(i->second);
         }
       }
-      else if (tr::is_false(psi))
+      else if (is_false(psi))
       {
         if (m_true_false_dependencies)
         {
-          std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(tr::false_());
+          std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(false_());
           assert(i != m_pbes_expression_index.end());
           result.insert(i->second);
         }

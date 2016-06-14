@@ -41,8 +41,6 @@ struct add_data_rewriter: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::apply;
 
-  typedef core::term_traits<pbes_expression> tr;
-
   const DataRewriter& R;
   SubstitutionFunction& sigma;
 

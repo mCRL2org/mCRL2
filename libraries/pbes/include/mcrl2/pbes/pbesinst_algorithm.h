@@ -68,13 +68,13 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
     }
     const data::data_expression_list& e = Ye.parameters();
     std::string name = Ye.name();
-    
+
     for (const data::data_expression& exp: e)
     {
       if (is_function_symbol(exp))
       {
-        // This case is dealt with separately, as it occurs often. 
-        // The use of pp as in the next case is correct for this case also, but very time consuming. 
+        // This case is dealt with separately, as it occurs often.
+        // The use of pp as in the next case is correct for this case also, but very time consuming.
         name += "@";
         name += atermpp::down_cast<data::function_symbol>(exp).name();
       }
@@ -88,7 +88,7 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
         throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(exp));
       }
     }
-    
+
     return propositional_variable_instantiation(name, data::data_expression_list());
   }
 };
@@ -96,8 +96,6 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
 /// \brief Algorithm class for the pbesinst instantiation algorithm.
 class pbesinst_algorithm
 {
-  typedef core::term_traits<pbes_expression> tr;
-
   protected:
     /// \brief Data rewriter.
     data::rewriter datar;

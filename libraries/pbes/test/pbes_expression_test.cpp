@@ -230,7 +230,7 @@ void test_term_traits()
 
   // prop var 1
   x = parse_pbes_expression("Y(1)", VARSPEC);
-  e = tr::param(x);
+  e = atermpp::down_cast<propositional_variable_instantiation>(x).parameters();
 
   // forall 1
   x = parse_pbes_expression("forall k:Nat.Y(k)", VARSPEC);

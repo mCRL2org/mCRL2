@@ -60,8 +60,6 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
   typedef pbes_expression_builder<normalize_builder> super;
   using super::apply;
 
-  typedef core::term_traits<pbes_expression> tr;
-
   bool negated;
 
   normalize_builder()
@@ -85,14 +83,28 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
   {
     pbes_expression left = super::apply(x.left());
     pbes_expression right = super::apply(x.right());
-    return negated ? tr::or_(left, right) : tr::and_(left, right);
+    if (negated)
+    {
+      return or_(left, right);
+    }
+    else
+    {
+      return and_(left, right);
+    }
   }
 
   pbes_expression apply(const or_& x)
   {
     pbes_expression left = super::apply(x.left());
     pbes_expression right = super::apply(x.right());
-    return negated ? tr::and_(left, right) : tr::or_(left, right);
+    if (negated)
+    {
+      return and_(left, right);
+    }
+    else
+    {
+      return or_(left, right);
+    }
   }
 
   pbes_expression apply(const imp& x)
@@ -101,19 +113,26 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
     pbes_expression left = super::apply(x.left());
     negated = !negated;
     pbes_expression right = super::apply(x.right());
-    return negated ? tr::and_(left, right) : tr::or_(left, right);
+    if (negated)
+    {
+      return and_(left, right);
+    }
+    else
+    {
+      return or_(left, right);
+    }
   }
 
   pbes_expression apply(const forall& x)
   {
     pbes_expression body = super::apply(x.body());
-    return negated ? tr::exists(x.variables(), body) : tr::forall(x.variables(), body);
+    return negated ? make_exists(x.variables(), body) : make_forall(x.variables(), body);
   }
 
   pbes_expression apply(const exists& x)
   {
     pbes_expression body = super::apply(x.body());
-    return negated ? tr::forall(x.variables(), body) : tr::exists(x.variables(), body);
+    return negated ? make_forall(x.variables(), body) : make_exists(x.variables(), body);
   }
 
   pbes_expression apply(const propositional_variable_instantiation& x)

@@ -35,7 +35,6 @@ class pbesinst_symbolic_algorithm
 {
   public:
     typedef propositional_variable_instantiation state_type;
-    typedef core::term_traits<pbes_expression> tr;
 
   protected:
     /// \brief The PBES that is being instantiated.

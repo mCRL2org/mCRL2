@@ -405,8 +405,6 @@ pbes_expression parse_pbes_expression(const std::string& text, const std::string
 template <typename SubstitutionFunction>
 pbes_expression parse_pbes_expression(const std::string& expr, const std::string& subst, const pbes& p, SubstitutionFunction& sigma)
 {
-  typedef core::term_traits<pbes_expression> tr;
-
   data::detail::parse_substitution(subst, sigma, p.data());
 
   std::string datavar_text;
@@ -417,7 +415,7 @@ pbes_expression parse_pbes_expression(const std::string& expr, const std::string
   }
 
   pbes q = p;
-  q.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(tr::true_());
+  q.initial_state() = atermpp::down_cast<propositional_variable_instantiation>(true_());
   std::string pbesspec = pbes_system::pp(q);
   std::string init("init");
   // remove the init declaration

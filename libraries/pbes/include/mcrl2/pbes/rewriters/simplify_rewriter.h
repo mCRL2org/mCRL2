@@ -27,8 +27,6 @@ struct add_simplify: public Builder<Derived>
   typedef Builder<Derived> super;
   using super::apply;
 
-  typedef core::term_traits<pbes_expression> tr;
-
   pbes_expression apply(const not_& x)
   {
     return data::optimized_not(apply(x.operand()));
@@ -37,9 +35,9 @@ struct add_simplify: public Builder<Derived>
   pbes_expression apply(const and_& x)
   {
     auto left = apply(x.left());
-    if (tr::is_false(left))
+    if (is_false(left))
     {
-      return tr::false_();
+      return false_();
     }
     auto right = apply(x.right());
     return data::optimized_and(left, right);
@@ -48,9 +46,9 @@ struct add_simplify: public Builder<Derived>
   pbes_expression apply(const or_& x)
   {
     auto left = apply(x.left());
-    if (tr::is_true(left))
+    if (is_true(left))
     {
-      return tr::true_();
+      return true_();
     }
     auto right = apply(x.right());
     return data::optimized_or(left, right);
@@ -59,9 +57,9 @@ struct add_simplify: public Builder<Derived>
   pbes_expression apply(const imp& x)
   {
     auto left = apply(x.left());
-    if (tr::is_false(left))
+    if (is_false(left))
     {
-      return tr::true_();
+      return true_();
     }
     auto right = apply(x.right());
     return data::optimized_imp(left, right);

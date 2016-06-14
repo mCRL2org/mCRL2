@@ -25,25 +25,23 @@ namespace detail {
 inline
 pbes_expression stategraph_not(const pbes_expression& x)
 {
-  typedef core::term_traits<data::data_expression> tt;
-  typedef core::term_traits<pbes_expression> tr;
   if (is_data(x))
   {
     auto const& x1 = atermpp::down_cast<data::data_expression>(x);
     if (data::sort_bool::is_not_application(x1))
     {
-      return tt::not_arg(x1);
+      return data::unary_operand1(x1);
     }
     else if (data::is_not_equal_to_application(x1))
     {
-      auto const& left  = tt::left(x1);
-      auto const& right = tt::right(x1);
+      auto const& left  = data::binary_left1(x1);
+      auto const& right = data::binary_right1(x1);
       return data::equal_to(left, right);
     }
     else if (data::is_equal_to_application(x1))
     {
-      auto const& left  = tt::left(x1);
-      auto const& right = tt::right(x1);
+      auto const& left  = data::binary_left1(x1);
+      auto const& right = data::binary_right1(x1);
       return data::not_equal_to(left, right);
     }
     else
@@ -51,7 +49,7 @@ pbes_expression stategraph_not(const pbes_expression& x)
       return data::sort_bool::not_(x1);
     }
   }
-  return tr::not_(x);
+  return not_(x);
 }
 
 inline

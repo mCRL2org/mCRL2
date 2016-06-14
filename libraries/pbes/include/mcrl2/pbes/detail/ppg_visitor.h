@@ -65,7 +65,7 @@ class ppg_visitor
     {
       //std::clog << "visit_propositional_variable: " << print_brief(e) << std::endl;
       bool result = true;
-      if (!(tr::is_prop_var(e) || visit_simple_expression(e))) {
+      if (!(is_propositional_variable_instantiation(e) || visit_simple_expression(e))) {
         //std::clog << "Not a propositional variable or simple expression!" << std::endl;
         result = false;
       }
