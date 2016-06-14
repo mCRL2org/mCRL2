@@ -57,8 +57,8 @@ namespace detail
 {
   // The following function is a helper function to allow to create m_pv_renaming outside
   // the class such that the class becomes a lightweight object.
-  
-  std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> 
+
+  std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
   create_pv_renaming(std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
                                 bool short_renaming_scheme)
   {
@@ -154,8 +154,6 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_vari
 ///         bes_deprecated.h.
 class pbesinst_alternative_lazy_algorithm
 {
-  typedef core::term_traits<pbes_expression> tr;
-
   protected:
     const data::data_specification& m_data_spec;
 
@@ -722,7 +720,7 @@ class pbesinst_alternative_lazy_algorithm
       mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, generating BES" << std::endl;
       pbes result;
       size_t index = 0;
-      const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> 
+      const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
             pv_renaming = detail::create_pv_renaming(instantiations,short_rename_scheme);
       detail::rename_pbesinst_consecutively renamer(pv_renaming);
       for (const std::vector<propositional_variable_instantiation>& vec: instantiations)

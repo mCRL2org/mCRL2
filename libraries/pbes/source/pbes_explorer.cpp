@@ -33,6 +33,20 @@ namespace mcrl2
 namespace pbes_system
 {
 
+inline
+const data::variable_list& quantifier_variables(const pbes_expression& x)
+{
+  assert(is_exists(x) || is_forall(x));
+  if (is_exists(x))
+  {
+    return atermpp::down_cast<exists>(x).variables();
+  }
+  else
+  {
+    return atermpp::down_cast<forall>(x).variables();
+  }
+}
+
 namespace detail
 {
   template <typename MapContainer>
@@ -257,7 +271,7 @@ inline bool lts_info::is_pass_through_state(const propositional_variable_instant
         data::variable_list::const_iterator param_it = params.begin();
         for(data::data_expression_list::const_iterator value_it = values.begin(); value_it != values.end(); ++value_it)
         {
-            if (!tr::is_variable(*value_it))
+            if (!data::is_variable(*value_it))
             {
                 return false;
             }
@@ -286,11 +300,11 @@ inline int lts_info::count_variables(const pbes_expression& e)
     {
         return 1;
     }
-    else if (tr::is_and(e) || tr::is_or(e) || tr::is_imp(e))
+    else if (is_and(e) || is_or(e) || is_imp(e))
     {
         return count_variables(pbes_system::accessors::left(e)) + count_variables(pbes_system::accessors::right(e));
     }
-    else if (tr::is_forall(e) || tr::is_exists(e))
+    else if (is_forall(e) || is_exists(e))
     {
         if (count_variables(pbes_system::accessors::arg(e)) > 0)
         {
@@ -301,11 +315,11 @@ inline int lts_info::count_variables(const pbes_expression& e)
             return 0;
         }
     }
-    else if (tr::is_not(e))
+    else if (is_not(e))
     {
         return count_variables(pbes_system::accessors::arg(e));
     }
-    else if (tr::is_data(e))
+    else if (is_data(e))
     {
         return 0;
     }
@@ -327,9 +341,9 @@ std::vector<pbes_expression> lts_info::split_expression_and_substitute_variables
     {
         result.push_back(e);
     }
-    else if (tr::is_and(e)) {
+    else if (is_and(e)) {
         parts = split_conjuncts(e, true);
-    } else if (tr::is_or(e)) {
+    } else if (is_or(e)) {
         parts = split_disjuncts(e, true);
     } else {
         parts.push_back(e);
@@ -427,8 +441,8 @@ void lts_info::compute_transition_groups()
     this->variable_parameter_signatures[name] = get_param_sequence(t.parameters());
     this->variable_parameter_indices[name] = this->get_param_indices(t.parameters());
     this->variable_parameter_index_positions[name] = this->get_param_index_positions(t.parameters());
-    this->transition_expression_plain.push_back(tr::true_());
-    this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(tr::true_()));
+    this->transition_expression_plain.push_back(true_());
+    this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(true_()));
     this->transition_variable_name.push_back(name);
     this->transition_type.push_back(type);
     group++;
@@ -446,8 +460,8 @@ void lts_info::compute_transition_groups()
     this->variable_parameter_signatures[name] = get_param_sequence(f.parameters());
     this->variable_parameter_indices[name] = this->get_param_indices(f.parameters());
     this->variable_parameter_index_positions[name] = this->get_param_index_positions(f.parameters());
-    this->transition_expression_plain.push_back(tr::false_());
-    this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(tr::false_()));
+    this->transition_expression_plain.push_back(false_());
+    this->transition_expression.push_back(pgg->rewrite_and_simplify_expression(false_()));
     this->transition_variable_name.push_back(name);
     this->transition_type.push_back(type);
     group++;
@@ -790,22 +804,22 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi)
 std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::set<std::string>& L)
 {
     std::set<std::string> result;
-    if (tr::is_not(phi))
+    if (is_not(phi))
     {
         result = changed(pbes_system::accessors::arg(phi), L);
     }
-    else if (tr::is_and(phi) || tr::is_or(phi) || tr::is_imp(phi))
+    else if (is_and(phi) || is_or(phi) || is_imp(phi))
     {
         std::set<std::string> l = changed(pbes_system::accessors::left(phi), L);
         result.insert(l.begin(), l.end());
         std::set<std::string> r = changed(pbes_system::accessors::right(phi), L);
         result.insert(r.begin(), r.end());
     }
-    else if (tr::is_forall(phi) || tr::is_exists(phi))
+    else if (is_forall(phi) || is_exists(phi))
     {
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
-        data::variable_list vars = tr::var(phi);
+        data::variable_list vars = quantifier_variables(phi);
         for (data::variable_list::const_iterator var =
                 vars.begin(); var != vars.end(); ++var)
         {
@@ -824,7 +838,7 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
         for (std::vector<std::string>::const_iterator param =
                 var_param_signatures.begin(); param != var_param_signatures.end(); ++param) {
             std::string param_signature = *param;
-            if (tr::is_variable(*val))
+            if (data::is_variable(*val))
             {
                 const variable& value = atermpp::down_cast<variable>(*val);
                 std::string value_signature = get_param_signature(value);
@@ -849,18 +863,18 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
 std::set<std::string> lts_info::reset(const pbes_expression& phi, const std::set<std::string>& d)
 {
     std::set<std::string> result;
-    if (tr::is_not(phi))
+    if (is_not(phi))
     {
         result = reset(pbes_system::accessors::arg(phi), d);
     }
-    else if (tr::is_and(phi) || tr::is_or(phi) || tr::is_imp(phi))
+    else if (is_and(phi) || is_or(phi) || is_imp(phi))
     {
         std::set<std::string> l = reset(pbes_system::accessors::left(phi), d);
         result.insert(l.begin(), l.end());
         std::set<std::string> r = reset(pbes_system::accessors::right(phi), d);
         result.insert(r.begin(), r.end());
     }
-    else if (tr::is_forall(phi) || tr::is_exists(phi))
+    else if (is_forall(phi) || is_exists(phi))
     {
         result = reset(pbes_system::accessors::arg(phi), d);
     }
@@ -888,15 +902,15 @@ std::set<std::string> lts_info::reset(const pbes_expression& phi, const std::set
 
 bool lts_info::tf(const pbes_expression& phi)
 {
-    if (tr::is_not(phi))
+    if (is_not(phi))
     {
         return tf(pbes_system::accessors::arg(phi));
     }
-    else if (tr::is_and(phi) || tr::is_or(phi) || tr::is_imp(phi))
+    else if (is_and(phi) || is_or(phi) || is_imp(phi))
     {
         return tf(pbes_system::accessors::left(phi)) || tf(pbes_system::accessors::right(phi));
     }
-    else if (tr::is_forall(phi) || tr::is_exists(phi))
+    else if (is_forall(phi) || is_exists(phi))
     {
         return tf(pbes_system::accessors::arg(phi));
     }
@@ -915,14 +929,14 @@ std::set<std::string> lts_info::occ(const pbes_expression& expr)
     {
         result.insert(atermpp::down_cast<propositional_variable_instantiation>(expr).name());
     }
-    else if (tr::is_and(expr) || tr::is_or(expr) ||tr::is_imp(expr))
+    else if (is_and(expr) || is_or(expr) ||is_imp(expr))
     {
         std::set<std::string> l = occ(pbes_system::accessors::left(expr));
         result.insert(l.begin(), l.end());
         std::set<std::string> r = occ(pbes_system::accessors::right(expr));
         result.insert(r.begin(), r.end());
     }
-    else if (tr::is_forall(expr) || tr::is_exists(expr) || tr::is_not(expr))
+    else if (is_forall(expr) || is_exists(expr) || is_not(expr))
     {
         result = occ(pbes_system::accessors::arg(expr));
     }
@@ -933,10 +947,8 @@ std::set<std::string> lts_info::occ(const pbes_expression& expr)
 std::set<std::string> lts_info::free(const pbes_expression& expr)
 {
     std::set<std::string> result;
-    data::variable_list free_vars = tr::free_variables(expr);
-    for (data::variable_list::iterator v = free_vars.begin(); v != free_vars.end(); ++v)
+    for (const data::variable& var: pbes_system::find_free_variables(expr))
     {
-        variable var = *v;
         result.insert(get_param_signature(var));
     }
     return result;
@@ -954,7 +966,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
 {
     //std::clog << "lts_info::used(" << bqnf_visitor<equation_type, term_type>::print_brief(expr) << ", L)" << std::endl;
     std::set<std::string> result;
-    if (tr::is_data(expr))
+    if (is_data(expr))
     {
         std::set<std::string> fv = free(expr);
         result.insert(fv.begin(), fv.end());
@@ -970,7 +982,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
                 var_params.begin(); param != var_params.end(); ++param) {
             variable parameter = *param;
             std::string param_signature = get_param_signature(parameter);
-            if (tr::is_variable(*val))
+            if (data::is_variable(*val))
             {
                 const variable& value = atermpp::down_cast<variable>(*val);
                 std::string value_signature = get_param_signature(value);
@@ -990,22 +1002,22 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
             }
         }
     }
-    else if (tr::is_and(expr) || tr::is_or(expr) || tr::is_imp(expr))
+    else if (is_and(expr) || is_or(expr) || is_imp(expr))
     {
         std::set<std::string> l = used(pbes_system::accessors::left(expr), L);
         result.insert(l.begin(), l.end());
         std::set<std::string> r = used(pbes_system::accessors::right(expr), L);
         result.insert(r.begin(), r.end());
     }
-    else if (tr::is_not(expr))
+    else if (is_not(expr))
     {
         result = used(pbes_system::accessors::arg(expr), L);
     }
-    else if (tr::is_forall(expr) || tr::is_exists(expr))
+    else if (is_forall(expr) || is_exists(expr))
     {
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
-        data::variable_list vars = tr::var(expr);
+        data::variable_list vars = quantifier_variables(expr);
         for (data::variable_list::const_iterator var =
                 vars.begin(); var != vars.end(); ++var)
         {
@@ -1029,7 +1041,7 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
 {
     //std::clog << "lts_info::copied(" << bqnf_visitor<equation_type, term_type>::print_brief(expr) << ", L)" << std::endl;
     std::set<std::string> result;
-    if (tr::is_data(expr))
+    if (is_data(expr))
     {
         // skip
     }
@@ -1044,7 +1056,7 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
                 var_params.begin(); param != var_params.end(); ++param) {
             variable parameter = *param;
             std::string param_signature = get_param_signature(parameter);
-            if (tr::is_variable(*val))
+            if (data::is_variable(*val))
             {
                 const variable& value = atermpp::down_cast<variable>(*val);
                 std::string value_signature = get_param_signature(value);
@@ -1058,22 +1070,22 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
             }
         }
     }
-    else if (tr::is_and(expr) || tr::is_or(expr) || tr::is_imp(expr))
+    else if (is_and(expr) || is_or(expr) || is_imp(expr))
     {
         std::set<std::string> l = copied(pbes_system::accessors::left(expr), L);
         result.insert(l.begin(), l.end());
         std::set<std::string> r = copied(pbes_system::accessors::right(expr), L);
         result.insert(r.begin(), r.end());
     }
-    else if (tr::is_not(expr))
+    else if (is_not(expr))
     {
         result = copied(pbes_system::accessors::arg(expr), L);
     }
-    else if (tr::is_forall(expr) || tr::is_exists(expr))
+    else if (is_forall(expr) || is_exists(expr))
     {
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
-        data::variable_list vars = tr::var(expr);
+        data::variable_list vars = quantifier_variables(expr);
         for (data::variable_list::const_iterator var =
                 vars.begin(); var != vars.end(); ++var)
         {
@@ -1678,12 +1690,12 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
                 != successors.end(); ++expr) {
             if (is_propositional_variable_instantiation(*expr)) {
                 result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
-            } else if (tr::is_true(*expr)) {
+            } else if (is_true(*expr)) {
                 if (type != parity_game_generator::PGAME_AND)
                 {
                     result.push_back(true_state());
                 }
-            } else if (tr::is_false(*expr)) {
+            } else if (is_false(*expr)) {
                 if (type != parity_game_generator::PGAME_OR)
                 {
                     result.push_back(false_state());
@@ -1729,12 +1741,12 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                 //std::clog << " * successor: " << pp(*expr) << std::endl;
                 if (is_propositional_variable_instantiation(*expr)) {
                     result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
-                } else if (tr::is_true(*expr)) {
+                } else if (is_true(*expr)) {
                     if (type != parity_game_generator::PGAME_AND)
                     {
                         result.push_back(true_state());
                     }
-                } else if (tr::is_false(*expr)) {
+                } else if (is_false(*expr)) {
                     if (type != parity_game_generator::PGAME_OR)
                     {
                         result.push_back(false_state());

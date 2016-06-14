@@ -124,9 +124,6 @@ class ltsmin_state {
 friend class lts_info;
 friend class explorer;
 
-protected:
-    typedef core::term_traits<pbes_expression> tr;
-
 public:
     typedef parity_game_generator::operation_type operation_type;
 
@@ -192,8 +189,6 @@ class lts_info {
 friend class ltsmin_state;
 friend class explorer;
 
-protected:
-    typedef core::term_traits<pbes_expression> tr;
 public:
     /// \brief The variable sequence type
     typedef parity_game_generator::operation_type operation_type;
@@ -443,9 +438,6 @@ public:
 
 /// \brief
 class explorer {
-
-protected:
-    typedef core::term_traits<pbes_expression> tr;
 
 public:
     /// \brief The expression type of the equation.
