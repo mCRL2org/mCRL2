@@ -1381,7 +1381,7 @@ inline void remove_redundant_inequalities(
     if (resulting_inequalities[i].comparison()==detail::equal)
     {
       // Do nothing, as removing redundant inequalities is expensive.
-      i++;
+      ++i;
     }
     else
     {
@@ -1389,12 +1389,14 @@ inline void remove_redundant_inequalities(
                                     resulting_inequalities.begin()+i,
                                     r))
       {
+        /* The code below does not preserve the ordering in inequalities. 
         if (i+1<resulting_inequalities.size())
         {
           // Copy the last element to the current position.
           resulting_inequalities[i].swap(resulting_inequalities.back());
         }
-        resulting_inequalities.pop_back();
+        resulting_inequalities.pop_back(); */
+        resulting_inequalities.erase(resulting_inequalities.begin()+i);
       }
       else
       {

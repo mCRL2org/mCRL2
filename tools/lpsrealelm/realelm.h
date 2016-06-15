@@ -174,6 +174,11 @@ class summand_information
       return m_smd;
     }
 
+    mcrl2::lps::summand_base& get_summand()
+    {
+      return m_smd;
+    }
+
     const bool& is_delta_summand() const
     {
       return m_is_delta_summand;
@@ -202,6 +207,11 @@ class summand_information
     variable_list get_non_real_summation_variables() const
     {
       return non_real_summation_variables;
+    }
+
+    const std::vector < linear_inequality >& get_summand_real_conditions() const
+    {
+      return summand_real_conditions;
     }
 
     std::vector < linear_inequality >::const_iterator get_summand_real_conditions_begin() const

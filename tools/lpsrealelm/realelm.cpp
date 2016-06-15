@@ -510,10 +510,9 @@ static void normalize_specification(
     for (std::vector <data_expression_list>::const_iterator j_r=real_conditions.begin();
          j_r!=real_conditions.end(); ++j_r, ++j_n)
     {
-      const data_expression c=*j_n;
-      if (!sort_bool::is_false_function_symbol(c))
+      const data_expression non_real_condition=*j_n;
+      if (!sort_bool::is_false_function_symbol(non_real_condition))
       {
-        const summand_base t(i->summation_variables(),c);
 
         std::vector < linear_inequality > inequalities;
         // Collect all real conditions from the condition from this summand and put them
@@ -555,6 +554,7 @@ static void normalize_specification(
                         r);
         inequalities.clear();
         remove_redundant_inequalities(new_inequalities,inequalities,r);
+// std::cerr << "CONDITION " << i->multi_action() << " Inequalities " << pp_vector(inequalities) << "  " << *j_n << "\n";
 
         if (!((inequalities.size()>0) && (inequalities.front().is_false(r))))
         {
@@ -575,25 +575,46 @@ static void normalize_specification(
             inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less,r));
           } */
 
-          // Construct replacements to contain the nextstate values for real variables in a map
-          std::map<variable, data_expression> replacements;
-          for (assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+          // First check whether a similar summand with the same action, sum variables, and assignment already 
+          // exists. If so, XXXXX
+          
+          bool found=false;
+          for(summand_information& s: summand_info)
           {
-            if (j->lhs().sort() == sort_real::real_())
-            {
-              replacements[j->lhs()] = j->rhs();
-            }
+            if (s.get_summand().summation_variables()==i->summation_variables() &&
+                s.get_multi_action()==i->multi_action() &&
+                s.get_assignments()==i->assignments() &&
+                s.get_summand_real_conditions()==inequalities)
+            { // A similar summand has been found. Extend the condition. 
+              // Adding the condition could be optimised. Generally it is equal to existing summands.
+              s.get_summand().condition()=sort_bool::or_(s.get_summand().condition(),non_real_condition);
+              found=true;
+            }               
           }
-          const summand_information s(t,
-                                      false, // This is not a delta summand.
-                                      i->assignments(),
-                                      i->multi_action(),
-                                      lps::deadlock(),  // default deadlock summand.
-                                      real_sum_variables,
-                                      get_nonreal_variables(t.summation_variables()),
-                                      inequalities,
-                                      replacements);
-          summand_info.push_back(s);
+
+          if (!found)
+          {
+            // Construct replacements to contain the nextstate values for real variables in a map
+            std::map<variable, data_expression> replacements;
+            for (assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+            {
+              if (j->lhs().sort() == sort_real::real_())
+              {
+                replacements[j->lhs()] = j->rhs();
+              }
+            }
+            const summand_base t(i->summation_variables(),non_real_condition);
+            const summand_information s(t,
+                                        false, // This is not a delta summand.
+                                        i->assignments(),
+                                        i->multi_action(),
+                                        lps::deadlock(),  // default deadlock summand.
+                                        real_sum_variables,
+                                        get_nonreal_variables(t.summation_variables()),
+                                        inequalities,
+                                        replacements);
+            summand_info.push_back(s);
+          }
         }
       }
     }
