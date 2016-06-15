@@ -14,6 +14,10 @@
 #include "mcrl2/data/data_expression.h"
 #endif
 
+#ifndef MCRL2_DATA_VARIABLE_H
+#include "mcrl2/data/variable.h"
+#endif
+
 #ifndef MCRL2_DATA_APPLICATION_H
 #define MCRL2_DATA_APPLICATION_H
 
