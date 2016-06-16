@@ -26,6 +26,8 @@
 #ifndef NDEBUG
     #include <iostream>  // for cout
 #endif
+#include <cstdio>        // for snprintf
+#include <cstring>       // for strlen
 #include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
 #include <string>        // for debug_id()
@@ -838,7 +840,7 @@ public:
                 (state_type) (end() - state_info_entry::permutation_begin()));
         if (BLOCK_NO_SEQNR != seqnr())
         {
-            snprintf(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer),
+            std::snprintf(buffer + std::strlen(buffer), sizeof(buffer) - std::strlen(buffer),
                                             " (#%" PRIstate_type ")", seqnr());
         }
         return std::string(buffer);
