@@ -373,7 +373,6 @@ void premature_termination_handler(int)
   // Reset signal handlers.
   signal(SIGABRT,NULL);
   signal(SIGINT,NULL);
-  signal(SIGTERM,NULL);
   tool_instance->abort();
 }
 
@@ -383,8 +382,7 @@ int main(int argc, char** argv)
   tool_instance = new lps2lts_tool();
 
   signal(SIGABRT,premature_termination_handler);
-  signal(SIGINT,premature_termination_handler);
-  signal(SIGTERM,premature_termination_handler); // At ^C print a message.
+  signal(SIGINT,premature_termination_handler); // At ^C invoke the termination handler.
 
   try
   {
