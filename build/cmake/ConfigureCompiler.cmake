@@ -25,11 +25,13 @@ if(CMAKE_CONFIGURATION_TYPES)
   FORCE)
 endif()
 # Document maintainer mode for single-configuration builds
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Debug")
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  # Default type is set to Release as the performance of the toolset is bad in Debug or Maintainer mode.
+  # The unitialised user of the toolset may not realise that this is the case causing a bad impression.
+  message(STATUS "Setting build type to 'Release' as none was specified.")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "One of Debug, Release, RelWithDebInfo, MinSizeRel, Maintainer. Defaults to Release." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Maintainer" "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
-set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE}
-    CACHE STRING "One of Debug, Release, RelWithDebInfo, MinSizeRel, Maintainer. Defaults to Debug." FORCE)
 
 # Mark as debug property to ensure that MSVC links against debug QT libraries
 set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS "Debug;Maintainer;RelWithDebInfo")
