@@ -4129,14 +4129,9 @@ class specification_basic_type:public boost::noncopyable
                            const stacklisttype& stack)
     {
       /* first search whether the variable is a free process variable */
-
-      for (std::set <variable>::const_iterator walker=global_variables.begin() ;
-           walker!=global_variables.end() ; ++walker)
+      if (global_variables.count(var)>0)
       {
-        if (*walker==var)
-        {
-          return var;
-        }
+        return var;
       }
 
       /* otherwise find out whether the variable matches a parameter */
