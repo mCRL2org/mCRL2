@@ -42,7 +42,6 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
 {
   public:
     typedef bes::boolean_expression_traverser<standard_form_traverser> super;
-    typedef core::term_traits<boolean_expression> tr;
 
     using super::apply;
     using super::enter;
@@ -141,8 +140,8 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       }
       else
       {
-        m_true = tr::true_();
-        m_false = tr::false_();
+        m_true = true_();
+        m_false = false_();
       }
     }
 
@@ -201,7 +200,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       {
         right.first = create_variable(right.first, standard_form_or, m_name);
       }
-      push(tr::and_(left.first, right.first), standard_form_and);
+      push(and_(left.first, right.first), standard_form_and);
     }
 
     /// \brief Leave or node
@@ -217,7 +216,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       {
         right.first = create_variable(right.first, standard_form_and, m_name);
       }
-      push(tr::or_(left.first, right.first), standard_form_or);
+      push(or_(left.first, right.first), standard_form_or);
     }
 
     /// \brief Leave imp node

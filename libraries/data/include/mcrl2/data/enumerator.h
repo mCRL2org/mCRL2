@@ -163,19 +163,17 @@ bool compute_finite_function_sorts(const function_sort& sort,
 
 struct is_not_false
 {
-  typedef core::term_traits<data_expression> tr;
   bool operator()(const data_expression& x) const
   {
-    return !tr::is_false(x);
+    return !sort_bool::is_false_function_symbol(x);
   }
 };
 
 struct is_not_true
 {
-  typedef core::term_traits<data_expression> tr;
   bool operator()(const data_expression& x) const
   {
-    return !tr::is_true(x);
+    return !sort_bool::is_true_function_symbol(x);
   }
 };
 

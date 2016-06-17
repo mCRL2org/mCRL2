@@ -206,8 +206,6 @@ void test_pbes_expression()
 {
   variable x1("x1", basic_sort("X"));
   pbes_expression e = x1;
-  data_expression x2 = mcrl2::pbes_system::accessors::val(e);
-  BOOST_CHECK(x1 == x2);
 }
 
 void test_trivial()

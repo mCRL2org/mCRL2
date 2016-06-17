@@ -69,8 +69,6 @@ void test_accessors()
     data::data_expression e;
     std::set<pbes_expression> q1;
 
-    e = val(z);
-
     a = not_(x);
     b = arg(a);
     BOOST_CHECK(x == b);
@@ -132,8 +130,6 @@ void test_accessors()
     core::identifier_string s;
     data::data_expression e;
     std::set<pbes_expression> q1;
-
-    e = val(z);
 
     a = not_(x);
     a = and_(x, y);

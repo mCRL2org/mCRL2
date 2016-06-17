@@ -753,17 +753,6 @@ bool is_same_different_precedence(const or_&, const pbes_expression& x)
 namespace accessors
 {
 
-/// \brief Conversion of a pbes expression to a data expression.
-/// \pre The pbes expression must be of the form val(d) for some data variable d.
-/// \param t A PBES expression
-/// \return The converted expression
-inline
-data::data_expression val(const pbes_expression& t)
-{
-  assert(data::is_data_expression(t));
-  return data::data_expression(atermpp::aterm_appl(t));
-}
-
 /// \brief Returns the pbes expression argument of expressions of type not, exists and forall.
 /// \param t A PBES expression
 /// \return The pbes expression argument of expressions of type not, exists and forall.
