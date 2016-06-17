@@ -148,7 +148,7 @@ struct pbespgsolve_options
 class pbespgsolve_algorithm
 {
   protected:
-    std::auto_ptr<ParityGameSolverFactory> solver_factory;
+    std::unique_ptr<ParityGameSolverFactory> solver_factory;
     mcrl2::utilities::execution_timer& m_timer;
     pbespgsolve_options m_options;
 
@@ -205,7 +205,7 @@ class pbespgsolve_algorithm
         mCRL2log(log::verbose) << "Solving..." << std::endl;
 
         // Create a solver:
-        std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
+        std::unique_ptr<ParityGameSolver> solver(solver_factory->create(pg));
 
         // Solve the game:
         m_timer.start("solving");

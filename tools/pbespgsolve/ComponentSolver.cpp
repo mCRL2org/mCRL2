@@ -94,7 +94,7 @@ int ComponentSolver::operator()(const verti *vertices, size_t num_vertices)
         mCRL2log(mcrl2::log::verbose, "ComponentSolver")  << "Solving subgame of size "
                                                           << unsolved.size() << "..." << std::endl;
         std::vector<verti> submap;  // declared here so it survives subsolver
-        std::auto_ptr<ParityGameSolver> subsolver;
+        std::unique_ptr<ParityGameSolver> subsolver;
         if (vmap_size_ > 0)
         {
             submap = unsolved;

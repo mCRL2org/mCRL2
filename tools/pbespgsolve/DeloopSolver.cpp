@@ -62,7 +62,7 @@ ParityGame::Strategy DeloopSolver::solve()
     std::vector<verti> unsolved;
     ParityGame subgame;
     std::vector<verti> submap;  // must survive subsolver!
-    std::auto_ptr<ParityGameSolver> subsolver;
+    std::unique_ptr<ParityGameSolver> subsolver;
     ParityGame::Strategy substrat;
 
     if (solved.empty())
