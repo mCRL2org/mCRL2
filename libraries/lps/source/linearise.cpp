@@ -5182,7 +5182,6 @@ class specification_basic_type:public boost::noncopyable
           if (n==2)
           {
             sortId = sort_bool::bool_();
-            // elementnames = make_list(data_expression(sort_bool::false_()),data_expression(sort_bool::true_()));
             elementnames = { sort_bool::false_(), sort_bool::true_()};
           }
           else
@@ -5386,7 +5385,6 @@ class specification_basic_type:public boost::noncopyable
                  const sort_expression_list& gsorts,
                  specification_basic_type& spec)
         {
-
           enumeratedtype_index=spec.create_enumeratedtype(n);
 
           var=variable(spec.fresh_identifier_generator("e"),spec.enumeratedtypes[enumeratedtype_index].sortId);

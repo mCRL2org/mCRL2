@@ -21,6 +21,10 @@ if(CMAKE_BUILD_TYPE)
   set(R_CXXFLAGS "${R_CXXFLAGS} ${${R_CXXFLAGS_NAME}}")
 endif()
 
+# Add compiler flags to allow to compile rewritercode with a large number
+# of recursively used templates. 
+set(R_CXXFLAGS "${R_CXXFLAGS} -ftemplate-depth=2000 -fbracket-depth=1024")
+
 # Add the other definitions that were added using add_definitions to build flags
 get_directory_property(R_COMPILER_DEFINITIONS COMPILE_DEFINITIONS)
 foreach(d ${R_COMPILER_DEFINITIONS})
