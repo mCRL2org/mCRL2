@@ -23,7 +23,11 @@ endif()
 
 # Add compiler flags to allow to compile rewritercode with a large number
 # of recursively used templates. 
-set(R_CXXFLAGS "${R_CXXFLAGS} -ftemplate-depth=2000 -fbracket-depth=1024")
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set(R_CXXFLAGS "${R_CXXFLAGS} -ftemplate-depth=2000 -fbracket-depth=1024")
+else()
+  set(R_CXXFLAGS "${R_CXXFLAGS} -ftemplate-depth=2000")
+endif()
 
 # Add the other definitions that were added using add_definitions to build flags
 get_directory_property(R_COMPILER_DEFINITIONS COMPILE_DEFINITIONS)
