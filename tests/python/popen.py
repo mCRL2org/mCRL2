@@ -61,11 +61,19 @@ class Popen(subprocess.Popen):
         self.__sysTime = 0
         self.__maxVirt = 0
         self.__maxResident = 0
-        self.__perfThread = threading.Thread(target=self.__measure)
+
+        # workaround for interface changes in psutil
+        process = psutil.Process(self.pid)
+	if "get_cpu_times" in dir(process):
+            self.__perfThread = threading.Thread(target=self.__measure_old)
+        else:
+            self.__perfThread = threading.Thread(target=self.__measure_new)
+
         self.__perfThread.daemon = True
         self.__perfThread.start()
 
-    def __measure(self):
+    # uses old interface of psutil
+    def __measure_old(self):
         try:
             process = psutil.Process(self.pid)
             while self.returncode is None:
@@ -79,9 +87,26 @@ class Popen(subprocess.Popen):
                 if self.__usrTime > self.__usrTimeLimit:
                     self.kill()
                     # raise TimeExceededError(self.__usrTime)
-                #with open("info.txt", "a") as myfile:
-                #  myfile.write('usr = ' + str(self.__usrTime) + '\n')
-                #  myfile.write('vms = ' + str(self.__maxVirt) + '\n')
+                time.sleep(0.05)
+        except psutil.NoSuchProcess:
+            pass
+
+    # uses new interface of psutil
+    def __measure_new(self):
+        try:
+            process = psutil.Process(self.pid)
+            while self.returncode is None:
+                t = process.cpu_times()
+                m = process.memory_info()
+                self.__usrTime, self.__sysTime = t.user, t.system
+                self.__maxVirt = max(self.__maxVirt, m.vms)
+                self.__maxResident = max(self.__maxResident, m.rss)
+                if self.__maxVirt > self.__maxVirtLimit:
+                    self.kill()
+                    # raise MemoryExceededError(self.__maxVirt)
+                if self.__usrTime > self.__usrTimeLimit:
+                    self.kill()
+                    # raise TimeExceededError(self.__usrTime)
                 time.sleep(0.05)
         except psutil.NoSuchProcess:
             pass
