@@ -208,7 +208,6 @@ class data_type_checker: public sort_type_checker
                                               const detail::variable_context& variable_context
                                              )
     {
-      mCRL2log(log::debug) << "--- Typechecking " << x << " (" << atermpp::aterm(x) << ") with expected sort = " << expected_sort << std::endl;
       data_expression x1 = x;
       TraverseVarConsTypeD(variable_context.context(), variable_context.context(), x1, expected_sort);
       x1 = data::normalize_sorts(x1, get_sort_specification());
@@ -216,7 +215,6 @@ class data_type_checker: public sort_type_checker
       {
         x1 = upcast_numeric_type(x1, expected_sort, variable_context);
       }
-      mCRL2log(log::debug) << "--- Typechecking result = " << x1 << std::endl;
       return x1;
     }
 
