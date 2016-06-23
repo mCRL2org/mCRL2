@@ -14,7 +14,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Monday, January 26, 2015 11:04:39}
+%TCIDATA{LastRevised=Thursday, June 23, 2016 15:51:58}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -353,14 +353,14 @@ is an over approximation of the alphabet of process expression $p$.%
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\emptyset & \text{if }P\in W \\ 
+\emptyset  & \text{if }P\in W \\ 
 \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 \text{ where }P=p\text{ is the equation of }P%
 \end{array}
 \\ 
-\alpha (\delta ,W) & = & \emptyset \\ 
+\alpha (\delta ,W) & = & \emptyset  \\ 
 \alpha (\tau ,W) & = & \{\tau \} \\ 
 \alpha (p+q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
 \alpha (p\cdot q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
@@ -381,20 +381,40 @@ is an over approximation of the alphabet of process expression $p$.%
 \alpha (\nabla _{V}(p),W) & = & \alpha (p,W)\cap (V\cup \{\tau \})%
 \end{array}%
 \]%
+Example 1
+
+If $C=\{a\mid b\rightarrow c\}$, then $\alpha (\Gamma _{C}(a(1)\mid
+b(2)))=\{a,b,c,a\mid b\}$. Note that the action $c$ does not occur in the
+transition system of this process expression.
+
+\paragraph{Example 2}
+
+In the computation of $\left\{ a_{1},a_{2},\ldots ,a_{20}\right\} \cap
+\alpha \left( a_{1}\parallel a_{2}\parallel \ldots \parallel a_{20}\right) $
+the above mentioned optimization is really needed.
+
+\subsubsection{Computation of the alphabet}
+
 When computing $A\cap \alpha (p,W)$ for some multi action name set $A$, it
 may be beneficial to apply an optimization. This is done to keep
 intermediate expressions small. We introduce $\alpha (p,W,A)$ $=A\cap \alpha
 (p,W)$, and define it as follows:%
 \[
 \begin{array}{lll}
+\alpha (\overline{a},W,A) & = & \left\{ 
+\begin{array}{ll}
+\{a\} & \text{if }a\in A \\ 
+\emptyset  & \text{if }a\notin A%
+\end{array}%
+\right.  \\ 
 \alpha (P,W,A) & = & 
 \begin{array}{l}
 \left\{ 
 \begin{array}{ll}
-\emptyset & \text{if }P\in W \\ 
-A\cap \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
+\emptyset  & \text{if }P\in W \\ 
+\alpha (p,W\cup \{P\},A) & \text{if }P\notin W,%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 \text{ where }P=p\text{ is the equation of }P%
 \end{array}
 \\ 
@@ -415,17 +435,40 @@ A\cap \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
 \end{array}%
 \]
 
-\paragraph{Example 1}
+\subsubsection{More efficient computation of the alphabet}
 
-If $C=\{a\mid b\rightarrow c\}$, then $\alpha (\Gamma _{C}(a(1)\mid
-b(2)))=\{a,b,c,a\mid b\}$. Note that the action $c$ does not occur in the
-transition system of this process expression.
-
-\paragraph{Example 2}
-
-In the computation of $\left\{ a_{1},a_{2},\ldots ,a_{20}\right\} \cap
-\alpha \left( a_{1}\parallel a_{2}\parallel \ldots \parallel a_{20}\right) $
-the above mentioned optimization is really needed.
+The computation of $\alpha (p,W,A)$ can be done more efficiently. We define
+the function $proc(p,W)$ as follows:%
+\[
+\begin{array}{lll}
+proc(\overline{a},W) & = & \emptyset  \\ 
+proc(P,W) & = & \left\{ 
+\begin{array}{ll}
+\emptyset  & \text{if }P\in W \\ 
+\{P\}\cup proc(p,W) & \text{if }P\notin W%
+\end{array}%
+\right.  \\ 
+proc(p+q,W) & = & proc(p,W)\cup proc(q,W) \\ 
+proc(p\cdot q,W) & = & proc(p,W)\cup proc(q,W) \\ 
+proc(c\rightarrow p,W) & = & proc(p,W) \\ 
+proc(c\rightarrow p\diamond q,W) & = & proc(p,W)\cup proc(q,W) \\ 
+proc(\Sigma _{d:D}p,W) & = & proc(p,W) \\ 
+proc(p\at t,W) & = & proc(p,W)%
+\end{array}%
+\]%
+Using this function we can change the computation of $\alpha (p,W,A)$ at
+three places:%
+\[
+\begin{array}{lll}
+\alpha (p+q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W\cup proc(p,W),A) \\ 
+\alpha (p\cdot q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W\cup proc(p,W),A)
+\\ 
+\alpha (c\rightarrow p\diamond q,W,A) & = & \alpha (p,W,A)\cup \alpha
+(q,W\cup proc(p,W),A)%
+\end{array}%
+\]%
+Note that the value $proc(p,W)$ can be computed on the fly during the
+computation of $\alpha (p,W,A)$.
 
 \subsubsection{The mappings $push$, $push_{\protect\nabla }$ and $%
 push_{\partial }$}
@@ -463,7 +506,7 @@ expressions $e$.%
 $push_{\nabla }\left( A,\overline{a}\right) $ & $=$ & $\left\{ 
 \begin{array}{ll}
 \overline{a} & \text{if }N(\overline{a})\in A \\ 
-\delta  & \text{otherwise}%
+\delta & \text{otherwise}%
 \end{array}%
 \right. $ \\ 
 $push_{\nabla }\left( A,P\left( e\right) \right) $ & $=$ & $%
@@ -531,7 +574,7 @@ where%
 p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
 \nabla _{A\cap \alpha (p)}(p) & \text{otherwise}%
 \end{array}%
-\right. 
+\right.%
 \end{array}%
 \]%
 Note that the alphabet $\alpha (p)$ is computed on the fly during the
@@ -561,8 +604,8 @@ expressions $e$.%
 \begin{tabular}{lll}
 $push_{\partial }(B,\overline{a})$ & $=$ & $\left\{ \text{ }%
 \begin{array}{lll}
-\overline{a} &  & \text{if }N(\overline{a})\cap B=\emptyset \\ 
-\delta &  & \text{otherwise}%
+\overline{a} &  & \text{if }N(\overline{a})\cap B=\emptyset  \\ 
+\delta  &  & \text{otherwise}%
 \end{array}%
 \right. $ \\ 
 $push_{\partial }(B,P(e))$ & $=$ & $%
@@ -611,12 +654,12 @@ _{B}(A),p,\emptyset ),$%
 where%
 \[
 \begin{array}{lll}
-\mathsf{block}(B,p & = & \left\{ 
+\mathsf{block}(B,p) & = & \left\{ 
 \begin{array}{ll}
-p & \text{if }B=\emptyset \\ 
+p & \text{if }B=\emptyset  \\ 
 \partial _{B}(p) & \text{otherwise}%
 \end{array}%
-\right.%
+\right. 
 \end{array}%
 \]
 
