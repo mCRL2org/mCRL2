@@ -359,18 +359,12 @@ void part_trans_t::split_inert_to_C(block_t* B)
             B->FromRed = B->inert_end()[-1].B_to_C_slice;
             mCRL2log(log::debug, "bisim_gjkw") << "FromRed of " <<B->debug_id()
                         << " set to " << B->FromRed->debug_id() << " (1)\n";
-            assert(B->FromRed->begin->pred->source->block == B);
+            assert(B->FromRed->from_block() == B);
             // So there are no more transitions from B to its own constellation
             B->set_inert_end(B_to_C.begin());
             B->set_inert_begin(B_to_C.begin());
             mCRL2log(log::debug, "bisim_gjkw") << B->debug_id()
                << " no longer has transitions to its own constellation (1).\n";
-        }
-        else
-        {
-            B->FromRed = nullptr;
-            mCRL2log(log::debug, "bisim_gjkw") << "FromRed of "
-                                          << B->debug_id() << " cleared (1)\n";
         }
         return;
     }
@@ -378,9 +372,6 @@ void part_trans_t::split_inert_to_C(block_t* B)
     // if all transitions are inert
     if (slice->begin == B->inert_begin())
     {
-        B->FromRed = nullptr;
-        mCRL2log(log::debug, "bisim_gjkw") << "FromRed of " << B->debug_id()
-                                                           << " cleared (2)\n";
         return;
     }
 
@@ -396,7 +387,7 @@ void part_trans_t::split_inert_to_C(block_t* B)
         B->FromRed = new_slice;
         mCRL2log(log::debug, "bisim_gjkw") << "FromRed of " << B->debug_id()
                            << " set to " << B->FromRed->debug_id() << " (2)\n";
-        assert(B->FromRed->begin->pred->source->block == B);
+        assert(B->FromRed->from_block() == B);
     }
     else
     {
@@ -405,8 +396,12 @@ void part_trans_t::split_inert_to_C(block_t* B)
         B->FromRed = slice;
         mCRL2log(log::debug, "bisim_gjkw") << "FromRed of " << B->debug_id()
                            << " set to " << B->FromRed->debug_id() << " (3)\n";
-        assert(B->FromRed->begin->pred->source->block == B);
+        assert(B->FromRed->from_block() == B);
     }
+    new_slice->prev = slice;
+    new_slice->next = slice->next;
+    new_slice->next->prev = new_slice;
+    new_slice->prev->next = new_slice;
     // set the slice pointers of the smaller part to the new slice:
     for (B_to_C_iter_t iter = new_slice->begin; new_slice->end != iter; ++iter)
     {
@@ -432,33 +427,38 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t pred_iter, constln_t* OldC,
     // adapt the B_to_C array:
     // always move the transition to the beginning of the slice (this will make
     // it easier because inert transitions are stored at the end of a slice).
-    B_to_C_iter_t old_B_to_C_pos = pred_iter->succ->B_to_C,
-                          new_B_to_C_pos = old_B_to_C_pos->B_to_C_slice->begin;
+    B_to_C_iter_t old_B_to_C_pos = pred_iter->succ->B_to_C;
+    B_to_C_descriptor* old_B_to_C_slice = old_B_to_C_pos->B_to_C_slice;
+    B_to_C_iter_t new_B_to_C_pos = old_B_to_C_slice->begin;
     assert(new_B_to_C_pos != B_to_C.end() &&
                          new_B_to_C_pos->pred->succ->B_to_C == new_B_to_C_pos);
     B_to_C_descriptor* new_B_to_C_slice;
     if (first_transition_of_block)
     {
-        pred_iter->source->block->FromRed = old_B_to_C_pos->B_to_C_slice;
+        pred_iter->source->block->FromRed = old_B_to_C_slice;
         mCRL2log(log::debug, "bisim_gjkw") << "FromRed of "
                   << pred_iter->source->block->debug_id() << " set to "
                   << pred_iter->source->block->FromRed->debug_id() << " (4)\n";
-        assert(pred_iter->source->block->FromRed->begin->pred->source->block ==
+        assert(pred_iter->source->block->FromRed->from_block() ==
                                                      pred_iter->source->block);
         new_B_to_C_slice=new B_to_C_descriptor(new_B_to_C_pos, new_B_to_C_pos);
+        new_B_to_C_slice->prev = old_B_to_C_slice;
+        new_B_to_C_slice->next = old_B_to_C_slice->next;
+        new_B_to_C_slice->next->prev = new_B_to_C_slice;
+        new_B_to_C_slice->prev->next = new_B_to_C_slice;
     }
     else
     {
         new_B_to_C_slice = new_B_to_C_pos[-1].B_to_C_slice;
     }
     ++new_B_to_C_slice->end;
-    ++old_B_to_C_pos->B_to_C_slice->begin;
-    assert(new_B_to_C_slice->end == old_B_to_C_pos->B_to_C_slice->begin);
-    if (old_B_to_C_pos->B_to_C_slice->begin==old_B_to_C_pos->B_to_C_slice->end)
+    ++old_B_to_C_slice->begin;
+    assert(new_B_to_C_slice->end == old_B_to_C_slice->begin);
+    if (old_B_to_C_slice->begin == old_B_to_C_slice->end)
     {
         mCRL2log(log::debug, "bisim_gjkw") << " lb";
         block_t* B = pred_iter->source->block;
-        if (B->inert_end() == old_B_to_C_pos->B_to_C_slice->begin)
+        if (B->inert_end() == old_B_to_C_slice->begin)
         {
             // this was the last transition from B to its own constellation
             assert(B->inert_begin() == B->inert_end());
@@ -467,10 +467,20 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t pred_iter, constln_t* OldC,
             mCRL2log(log::debug, "bisim_gjkw") << B->debug_id()
                << " no longer has transitions to its own constellation (2).\n";
         }
-        delete old_B_to_C_pos->B_to_C_slice;
-        pred_iter->source->block->FromRed = nullptr;
-        mCRL2log(log::debug, "bisim_gjkw") << "FromRed of "
-                   << pred_iter->source->block->debug_id() << " cleared (5)\n";
+        assert(B->FromRed == old_B_to_C_slice);
+        if (old_B_to_C_slice->prev == old_B_to_C_slice)
+        {
+            B->FromRed = nullptr;
+        }
+        else
+        {
+            B->FromRed =
+            old_B_to_C_slice->next->prev = old_B_to_C_slice->prev;
+            old_B_to_C_slice->prev->next = old_B_to_C_slice->next;
+        }
+        delete old_B_to_C_slice;
+        mCRL2log(log::debug, "bisim_gjkw") << "FromRed of " << B->debug_id()
+                                                           << " cleared (5)\n";
     }
     swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
     new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
@@ -660,6 +670,7 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
     assert(OldB->constln() == NewB->constln());
     NewB->set_inert_begin(B_to_C.begin());
     NewB->set_inert_end(B_to_C.begin());
+    bool old_fromred_invalid = false;
     // for all outgoing transitions of NewB
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
@@ -675,8 +686,9 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
             // Move the transition to a new slice:
             mCRL2log(log::debug, "bisim_gjkw") << "Moving "
                                 << succ_iter->B_to_C->pred->debug_id() << ": ";
-            B_to_C_iter_t const old_pos = succ_iter->B_to_C,
-                                    after_new_pos = old_pos->B_to_C_slice->end;
+            B_to_C_iter_t const old_pos = succ_iter->B_to_C;
+            B_to_C_descriptor* old_B_to_C_slice = old_pos->B_to_C_slice;
+            B_to_C_iter_t const after_new_pos = old_B_to_C_slice->end;
             assert(B_to_C.end() != old_pos &&
                                        old_pos->pred->succ->B_to_C == old_pos);
             assert(B_to_C.end() == after_new_pos ||
@@ -695,14 +707,15 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                 // reachable from *s_iter).
                 new_B_to_C_slice = new B_to_C_descriptor(after_new_pos,
                                                             after_new_pos);
-                if (OldB->FromRed == old_pos->B_to_C_slice)
+                if (nullptr == NewB->FromRed ||
+                     (!old_fromred_invalid && OldB->FromRed==old_B_to_C_slice))
                 {
                     mCRL2log(log::debug, "bisim_gjkw") << "set FromRed to "
                         "slice that will contain " <<old_pos->pred->debug_id();
                     NewB->FromRed = new_B_to_C_slice;
                     // new_B_to_C_slice is not yet fully initialised, therefore
                     // the assertion fails:
-                    // assert(NewB->FromRed->begin->pred->source->block==NewB);
+                    // assert(NewB->FromRed->from_block() == NewB);
                 }
                 if (OldB->inert_end() == after_new_pos)
                 {
@@ -713,6 +726,10 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                     NewB->set_inert_begin(after_new_pos);
                     NewB->set_inert_end(after_new_pos);
                 }
+                new_B_to_C_slice->prev = NewB->FromRed;
+                new_B_to_C_slice->next = NewB->FromRed->next;
+                new_B_to_C_slice->next->prev = new_B_to_C_slice;
+                new_B_to_C_slice->prev->next = new_B_to_C_slice;
             }
             else
             {
@@ -720,8 +737,8 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                 new_B_to_C_slice = after_new_pos->B_to_C_slice;
             }
             --new_B_to_C_slice->begin;
-            --old_pos->B_to_C_slice->end;
-            assert(new_B_to_C_slice->begin == old_pos->B_to_C_slice->end);
+            --old_B_to_C_slice->end;
+            assert(new_B_to_C_slice->begin == old_B_to_C_slice->end);
             B_to_C_iter_t new_pos = after_new_pos - 1;
             assert(B_to_C.end() != new_pos &&
                                     new_pos->pred->succ->B_to_C == new_pos);
@@ -753,7 +770,7 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                     swap3_B_to_C(succ_iter, new_pos->pred->succ,
                                     OldB->inert_begin()->pred->succ);
                 }
-                if (new_pos->B_to_C_slice->begin == new_pos->B_to_C_slice->end)
+                if (old_B_to_C_slice->begin == old_B_to_C_slice->end)
                 {
                     // This was the last transition from OldB to its own
                     // constellation.
@@ -763,13 +780,24 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                     OldB->set_inert_begin(B_to_C.begin());
                     OldB->set_inert_end(B_to_C.begin());
 
-                    if (OldB->FromRed == new_pos->B_to_C_slice)
+                    if (old_B_to_C_slice->prev == old_B_to_C_slice)
                     {
+                        assert(OldB->FromRed == old_B_to_C_slice);
                         OldB->FromRed = nullptr;
                         mCRL2log(log::debug, "bisim_gjkw") << "FromRed of "
                                     << OldB->debug_id() << " cleared (3)\n";
                     }
-                    delete new_pos->B_to_C_slice;
+                    else
+                    {
+                        if (OldB->FromRed == old_B_to_C_slice)
+                        {
+                            OldB->FromRed = old_B_to_C_slice->prev;
+                            old_fromred_invalid = true;
+                        }
+                        old_B_to_C_slice->next->prev = old_B_to_C_slice->prev;
+                        old_B_to_C_slice->prev->next = old_B_to_C_slice->next;
+                    }
+                    delete old_B_to_C_slice;
                 }
             }
             else
@@ -780,15 +808,25 @@ void part_trans_t::new_block_created(block_t* OldB, block_t* NewB)
                 // does not contain OldB or NewB.  No special treatment is
                 // required.
                 swap_B_to_C(succ_iter, new_pos->pred->succ);
-                if (new_pos->B_to_C_slice->begin == new_pos->B_to_C_slice->end)
+                if (old_B_to_C_slice->begin == old_B_to_C_slice->end)
                 {
-                    if (OldB->FromRed == new_pos->B_to_C_slice)
+                    if (old_B_to_C_slice->prev == old_B_to_C_slice)
                     {
+                        assert(OldB->FromRed == old_B_to_C_slice);
                         OldB->FromRed = nullptr;
                         mCRL2log(log::debug, "bisim_gjkw") << "FromRed of "
                                     << OldB->debug_id() << " cleared (4)\n";
                     }
-                    delete new_pos->B_to_C_slice;
+                    else
+                    {
+                        if (OldB->FromRed == old_B_to_C_slice)
+                        {
+                            OldB->FromRed = old_B_to_C_slice->prev;
+                        }
+                        old_B_to_C_slice->next->prev = old_B_to_C_slice->prev;
+                        old_B_to_C_slice->prev->next = old_B_to_C_slice->next;
+                    }
+                    delete old_B_to_C_slice;
                 }
             }
             new_pos->B_to_C_slice = new_B_to_C_slice;
@@ -973,6 +1011,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
                                                        inert_out_per_block[B]);
         B_to_C_descriptor* slice =
                     new B_to_C_descriptor(B_to_C_begin,blocks[B]->inert_end());
+        slice->next = slice;
+        slice->prev = slice;
         assert(B_to_C_begin != slice->end);
         for (; slice->end != B_to_C_begin; ++B_to_C_begin)
         {
@@ -1370,7 +1410,12 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             bisim_gjkw::block_t* RedB = primary_refine(RefB);
             // 2.23: Unmark all states of RefB
                 // (this is already done in primary_refine)
-            if (RedB->size() <= 1)  continue;
+            if (RedB->size() <= 1 || RedB->FromRed->to_constln() != SpC)
+            {
+                // If the block has 1 element, or it has no transitions to SpC,
+                // the refinement would be trivial anyway.
+                continue;
+            }
             // 2.24: SecondaryRefine(RedB, SpC\SpB, states in RedB with a
             //                       transition to SpC\SpB, bottom states in
             //                       RedB without transition to SpC\SpB)
@@ -1782,9 +1827,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::
     assert(RefB->non_old_marked_bottom_begin() ==
                                             RefB->non_old_marked_bottom_end());
     assert(RefB->marked_nonbottom_begin() == RefB->marked_nonbottom_end());
-    assert(nullptr == FromRed || FromRed->begin->pred->source->block == RefB);
-    assert(nullptr == FromRed ||
-                         FromRed->begin->pred->succ->target->constln() == SpC);
+    assert(nullptr == FromRed || FromRed->from_block() == RefB);
+    assert(nullptr == FromRed || FromRed->to_constln() == SpC);
     mCRL2log(log::debug, "bisim_gjkw") << "secondary_refine("
         << RefB->debug_id() << "," << SpC->debug_id() << ","
         <<(nullptr!=FromRed ?FromRed->debug_id() :std::string("NULL")) <<")\n";

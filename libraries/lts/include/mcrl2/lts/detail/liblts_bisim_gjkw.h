@@ -390,7 +390,12 @@ private:
     /// iterator past the last inert transition of the block
     B_to_C_iter_t int_inert_end;
 public:
-    /// iterator to the first transition from the block to the splitter
+    /// pointer to a B_to_C with transitions from this block, preferably the
+    /// transitions to the splitter
+    /// \details This pointer serves two purposes: it points to the list of
+    /// B_to_C_descriptors, so that the constellations reachable from this
+    /// block can be found; and if this block has transitions to the current
+    /// splitter SpC\SpB, then the pointer points to these transitions.
     B_to_C_descriptor* FromRed;
 private:
     /// constellation to which the block belongs
@@ -1150,7 +1155,6 @@ public:
 ///@{
 
 class out_descriptor;
-class B_to_C_descriptor;
 
 /* pred_entry, succ_entry, and B_to_C_entry contain the data that is stored
 about a transition.  Every transition has one of each data structure; the three
@@ -1218,11 +1222,41 @@ class B_to_C_descriptor
 public:
     B_to_C_iter_t end, begin;
 
+    /// \brief next and previous in the (circular) list of B_to_C_descriptors
+    /// that belong to the same block.
+    /// \details We cannot use std::list<B_to_C_descriptor> because we
+    /// sometimes need to remove a descriptor from its list without deleting
+    /// it.
+    B_to_C_descriptor* next, * prev;
+
     B_to_C_descriptor(B_to_C_iter_t begin_, B_to_C_iter_t end_)
         :end(end_),
-        begin(begin_)
+        begin(begin_),
+        next(nullptr),
+        prev(nullptr)
     {  }
 
+    /// compute the source block of the transitions in this slice
+    const block_t* from_block() const
+    {
+        return begin->pred->source->block;
+    }
+    block_t* from_block()
+    {
+        return begin->pred->source->block;
+    }
+
+    /// compute the goal constellation of the transitions in this slice
+    const constln_t* to_constln() const
+    {
+        return begin->pred->succ->target->constln();
+    }
+    constln_t* to_constln()
+    {
+        return begin->pred->succ->target->constln();
+    }
+
+    /// convert to a string (for debugging)
     std::string debug_id() const
     {
         assert(begin != end);
