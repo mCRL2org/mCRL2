@@ -26,7 +26,7 @@
 #ifndef NDEBUG
     #include <iostream>  // for cout
 #endif
-#include <cstdio>        // for snprintf
+#include <stdio.h>      // for snprintf (cstdio does not always know about snprintf);
 #include <cstring>       // for strlen
 #include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
@@ -285,7 +285,7 @@ public:
     std::string debug_id() const
     {
         char buffer[7 + 5 * sizeof(state_type) / 2];
-        snprintf(buffer, sizeof(buffer), "state %" PRIstate_type,
+        std::snprintf(buffer, sizeof(buffer), "state %" PRIstate_type,
                                     (state_type) (this - state_info_begin()));
         return std::string(buffer);
     }
@@ -839,7 +839,7 @@ public:
     std::string debug_id() const
     {
         char buffer[14 + 15 * sizeof(state_type) / 2];
-        snprintf(buffer, sizeof(buffer), "block [%" PRIstate_type ",%"
+        std::snprintf(buffer, sizeof(buffer), "block [%" PRIstate_type ",%"
                 PRIstate_type ")",
                 (state_type) (begin() - state_info_entry::permutation_begin()),
                 (state_type) (end() - state_info_entry::permutation_begin()));
@@ -1005,7 +1005,7 @@ public:
 
     std::string debug_id() const  {
         char buffer[18 + 5 * sizeof(state_type)];
-        snprintf(buffer, sizeof(buffer), "constellation [%" PRIstate_type ",%"
+        std::snprintf(buffer, sizeof(buffer), "constellation [%" PRIstate_type ",%"
                 PRIstate_type ")",
                 (state_type) (begin() - state_info_entry::permutation_begin()),
                 (state_type) (end() - state_info_entry::permutation_begin()));
@@ -1177,7 +1177,7 @@ public:
     std::string debug_id() const
     {
         char buffer[21 + 5 * sizeof(state_type)];
-        snprintf(buffer, sizeof(buffer),
+        std::snprintf(buffer, sizeof(buffer),
             "transition from %" PRIstate_type " to %" PRIstate_type,
             (state_type) (source - state_info_entry::state_info_begin()),
             (state_type) (succ->target-state_info_entry::state_info_begin()));
@@ -1186,7 +1186,7 @@ public:
     std::string debug_id_short() const
     {
         char buffer[10 + 5 * sizeof(state_type)];
-        snprintf(buffer, sizeof(buffer),
+        std::snprintf(buffer, sizeof(buffer),
             "from %" PRIstate_type " to %" PRIstate_type,
             (state_type) (source - state_info_entry::state_info_begin()),
             (state_type) (succ->target-state_info_entry::state_info_begin()));
