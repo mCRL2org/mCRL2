@@ -22,17 +22,12 @@ if(CMAKE_BUILD_TYPE)
 endif()
 
 # Add compiler flags to allow to compile rewritercode with a large number
-# of recursively used templates and nested curly brackets. The values 1024 and 2000 are taken
+# of recursively used templates. The value 2000 is taken
 # rather arbitrarily, and may need to be increased for more complex 
-# rewriters. They are larger than the defaults on some compilers 
-# (being 256 and 900).
-check_cxx_compiler_flag(-fbracket-depth=1024 CXX_ACCEPTS_BRACKET_DEPTH )
-if (CXX_ACCEPTS_BRACKET_DEPTH)
-  set(R_CXXFLAGS "${R_CXXFLAGS} -fbracket-depth=1024")
-endif()
+# rewriters. The default on some compilers appears to be 900.
 
 check_cxx_compiler_flag(-ftemplate-depth=2000 CXX_ACCEPTS_TEMPLATE_DEPTH )
-if (CXX_ACCEPTS_BRACKET_DEPTH)
+if (CXX_ACCEPTS_TEMPLATE_DEPTH)
   set(R_CXXFLAGS "${R_CXXFLAGS} -ftemplate-depth=2000")
 endif()
 
