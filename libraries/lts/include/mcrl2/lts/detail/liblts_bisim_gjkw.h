@@ -26,8 +26,8 @@
 #ifndef NDEBUG
     #include <iostream>  // for cout
 #endif
-#include <stdio.h>      // for snprintf (cstdio does not always know about snprintf);
-#include <cstring>       // for strlen
+// #include <stdio.h>      // for snprintf (snprintf should not be used). 
+//#include <cstring>       // for strlen (strlen should not be used.
 #include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
 #include <string>        // for debug_id()
@@ -284,10 +284,11 @@ public:
 
     std::string debug_id() const
     {
-        char buffer[7 + 5 * sizeof(state_type) / 2];
+        /* char buffer[7 + 5 * sizeof(state_type) / 2];
         snprintf(buffer, sizeof(buffer), "state %" PRIstate_type,
                                     (state_type) (this - state_info_begin()));
-        return std::string(buffer);
+        return std::string(buffer); */
+        return "state " + std::to_string(this - state_info_begin());
     }
 
     static state_info_const_ptr state_info_begin()  {  return s_i_begin;  }
@@ -838,7 +839,7 @@ public:
 
     std::string debug_id() const
     {
-        char buffer[14 + 15 * sizeof(state_type) / 2];
+        /* char buffer[14 + 15 * sizeof(state_type) / 2];
         snprintf(buffer, sizeof(buffer), "block [%" PRIstate_type ",%"
                 PRIstate_type ")",
                 (state_type) (begin() - state_info_entry::permutation_begin()),
@@ -848,7 +849,11 @@ public:
             snprintf(buffer + std::strlen(buffer), sizeof(buffer) - std::strlen(buffer),
                                             " (#%" PRIstate_type ")", seqnr());
         }
-        return std::string(buffer);
+        return std::string(buffer); */
+        return "block [" + std::to_string(begin() - state_info_entry::permutation_begin()) + 
+                     "," + std::to_string(end() - state_info_entry::permutation_begin()) +
+                     ")" +
+                     (BLOCK_NO_SEQNR != seqnr()?" (#" + std::to_string(seqnr()) + ")":"");
     }
 };
 
@@ -1004,12 +1009,14 @@ public:
     }
 
     std::string debug_id() const  {
-        char buffer[18 + 5 * sizeof(state_type)];
+        /* char buffer[18 + 5 * sizeof(state_type)];
         snprintf(buffer, sizeof(buffer), "constellation [%" PRIstate_type ",%"
                 PRIstate_type ")",
                 (state_type) (begin() - state_info_entry::permutation_begin()),
                 (state_type) (end() - state_info_entry::permutation_begin()));
-        return std::string(buffer);
+        return std::string(buffer); */
+        return "constellation [" + std::to_string(begin() - state_info_entry::permutation_begin()) + 
+                             "," + std::to_string(end() - state_info_entry::permutation_begin()) + ")";
     }
 };
 
@@ -1176,21 +1183,25 @@ public:
 
     std::string debug_id() const
     {
-        char buffer[21 + 5 * sizeof(state_type)];
+        /* char buffer[21 + 5 * sizeof(state_type)];
         snprintf(buffer, sizeof(buffer),
             "transition from %" PRIstate_type " to %" PRIstate_type,
             (state_type) (source - state_info_entry::state_info_begin()),
             (state_type) (succ->target-state_info_entry::state_info_begin()));
-        return std::string(buffer);
+        return std::string(buffer); */
+        return "transition from " + std::to_string(source - state_info_entry::state_info_begin()) +
+               " to " + std::to_string(succ->target-state_info_entry::state_info_begin());
     }
     std::string debug_id_short() const
     {
-        char buffer[10 + 5 * sizeof(state_type)];
+        /* char buffer[10 + 5 * sizeof(state_type)];
         snprintf(buffer, sizeof(buffer),
             "from %" PRIstate_type " to %" PRIstate_type,
             (state_type) (source - state_info_entry::state_info_begin()),
             (state_type) (succ->target-state_info_entry::state_info_begin()));
-        return std::string(buffer);
+        return std::string(buffer); */
+        return "from " + std::to_string(source - state_info_entry::state_info_begin()) + 
+               " to " + std::to_string(succ->target-state_info_entry::state_info_begin());
     }
 };
 
