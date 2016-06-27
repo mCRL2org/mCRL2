@@ -7127,7 +7127,7 @@ class specification_basic_type:public boost::noncopyable
         // message about the block operator is very confusing.
       {
         mCRL2log(mcrl2::log::verbose) << "- calculating the " << (is_allow?"allow":"block") <<
-              " operator on " << sourcesumlist.size() << " action summands and " << resultdeltasumlist.size() << " delta summands ";
+              " operator on " << sourcesumlist.size() << " action summands and " << resultdeltasumlist.size() << " delta summands";
       }
 
       /* First add the resulting sums in two separate lists
