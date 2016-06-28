@@ -70,7 +70,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
   }
   if (matches.size() > 1)
   {
-    throw mcrl2::runtime_error("Ambiguous " + msg + " expression " + core::pp(name) + core::detail::print_arguments(parameters) + ".");
+    throw mcrl2::runtime_error("Multiple matching " + msg + " declarations for " + core::pp(name) + core::detail::print_arguments(parameters) + ".");
   }
   const data::data_expression_vector& typechecked_parameters = matches.front();
   return { data::data_expression_list(typechecked_parameters.begin(), typechecked_parameters.end()), data::detail::parameter_sorts(typechecked_parameters) };
