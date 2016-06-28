@@ -57,6 +57,30 @@ namespace data
 namespace detail
 {
 
+// Some compilers can only deal with a limited number of nested curly brackets. 
+// This limit can be increased by using -fbracket-depth=C where C is a new constant
+// value. By default this value C often appears to be 256. But not all compilers 
+// recognize -fbracket-depth=C, making its use unreliable and therefore not advisable.
+// In order to generate the these auxiliary code fragments, we need to recall 
+// what the template and data parameters of the current process are. 
+
+class bracket_level_data
+{
+  public:
+    const size_t MCRL2_BRACKET_NESTING_LEVEL=250;  // Some compilers limit the nesting to 256 brackets.
+
+    size_t bracket_nesting_level;
+    std::string current_template_parameters;
+    std::stack< std::string > current_data_parameters;
+    std::stack< std::string > current_data_arguments;
+
+    bracket_level_data()
+     : bracket_nesting_level(0)
+    {}
+};
+
+
+
 typedef atermpp::term_list<variable_list> variable_list_list;
 
 static const match_tree dummy=match_tree();
@@ -947,29 +971,30 @@ class rewr_function_spec
 
 class RewriterCompilingJitty::ImplementTree
 {
-private:
-  class padding
-  {
   private:
-    size_t m_indent;
-  public:
-    padding(size_t indent) : m_indent(indent) { }
-    void indent() { m_indent += 2; }
-    void unindent() { m_indent -= 2; }
-
-    friend
-    std::ostream& operator<<(std::ostream& stream, const padding& p)
+    class padding
     {
-      for (size_t i = p.m_indent; i != 0; --i)
-      {
-        stream << ' ';
-      }
-      return stream;
-    }
-  };
+      private:
+        size_t m_indent;
+      public:
+        padding(size_t indent) : m_indent(indent) { }
+        void indent() { m_indent += 2; }
+        void unindent() { m_indent -= 2; }
+        size_t reset() { size_t old = m_indent; m_indent = 4; return old; }
+        void restore(const size_t i){ m_indent = i; }
+  
+        friend
+        std::ostream& operator<<(std::ostream& stream, const padding& p)
+        {
+          for (size_t i = p.m_indent; i != 0; --i)
+          {
+            stream << ' ';
+          }
+          return stream;
+        }
+    };
 
   RewriterCompilingJitty& m_rewriter;
-  std::ostream& m_stream;
   std::stack<rewr_function_spec> m_rewr_functions;
   std::set<rewr_function_spec> m_rewr_functions_implemented;
   std::set<size_t>m_delayed_application_functions; // Recalls the arities of the required functions 'delayed_application';
@@ -1524,11 +1549,11 @@ private:
   ///        calls as a vector.
   ///
   void calc_inner_terms(std::ostream& s,
-                             const application& appl,
-                             const size_t startarg,
-                             const variable_or_number_list nnfvars,
-                             const nfs_array& rewr,
-                             std::ostream& argument_types)
+                        const application& appl,
+                        const size_t startarg,
+                        const variable_or_number_list nnfvars,
+                        const nfs_array& rewr,
+                        std::ostream& argument_types)
   {
     for(size_t i=0; i<recursive_number_of_args(appl); ++i)
     {
@@ -1551,35 +1576,81 @@ private:
    *
    */
 
-  void implement_tree(const match_tree& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_tree(std::ostream& m_stream,
+                      const match_tree& tree, 
+                      size_t cur_arg, 
+                      size_t parent, 
+                      size_t level, 
+                      size_t cnt,
+                      const size_t arity,
+                      const function_symbol& opid,
+                      bracket_level_data& brackets, 
+                      std::stack<std::string>& auxiliary_code_fragments)
   {
+    /* Some c++ compilers cannot deal with more than 256 nestings of curly braces ({...}). 
+       If too many curly braces are generated, a new method is generated, with as only  purpose
+       to avoid too many brackets. The resulting code fragments are stored in auxiliary_code_fragments.
+    */
+    if (brackets.bracket_nesting_level>brackets.MCRL2_BRACKET_NESTING_LEVEL)
+    {
+      static size_t auxiliary_method_name_index=0;
+
+      m_stream << m_padding 
+               << "const data_expression result" << auxiliary_method_name_index << "= auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index << "("
+               << brackets.current_data_arguments.top() << ");\n";
+      m_stream << m_padding 
+               << "if (result" << auxiliary_method_name_index << " != data_expression()) { return result" << auxiliary_method_name_index << "; }\n";
+
+      const size_t old_indent=m_padding.reset();
+      std::stringstream s;
+      s << "  template < " << brackets.current_template_parameters << ">\n"
+        << "  static inline data_expression auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index 
+        << "(" 
+        << brackets.current_data_parameters.top() << ")\n" 
+        << "  {\n";
+      
+      auxiliary_method_name_index++;
+
+      size_t old_bracket_nesting_level=brackets.bracket_nesting_level;
+      brackets.bracket_nesting_level=0;
+      implement_tree(s,tree,cur_arg,parent,level,cnt,arity, opid, brackets,auxiliary_code_fragments);
+      brackets.bracket_nesting_level=old_bracket_nesting_level;
+      s << "    return data_expression(); // This indicates that no result has been calculated;\n";
+      // rewr_function_finish(s, arity, opid); 
+      s << "  }\n"
+        << "\n";
+      m_padding.restore(old_indent);
+      auxiliary_code_fragments.push(s.str());  
+      return;
+    }
+
     if (tree.isS())
     {
-      implement_treeS(atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt);
+      implement_treeS(m_stream,atermpp::down_cast<match_tree_S>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     }
     else if (tree.isM())
     {
-      implement_treeM(atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt);
+      implement_treeM(m_stream,atermpp::down_cast<match_tree_M>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     }
     else if (tree.isF())
     {
-      implement_treeF(atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt);
+      implement_treeF(m_stream, atermpp::down_cast<match_tree_F>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     }
     else if (tree.isD())
     {
-      implement_treeD(atermpp::down_cast<match_tree_D>(tree), level, cnt);
+      implement_treeD(m_stream, atermpp::down_cast<match_tree_D>(tree), level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     }
     else if (tree.isN())
     {
-      implement_treeN(atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt);
+      implement_treeN(m_stream, atermpp::down_cast<match_tree_N>(tree), cur_arg, parent, level, cnt, arity, opid, brackets,auxiliary_code_fragments);
     }
     else if (tree.isC())
     {
-      implement_treeC(atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt);
+      implement_treeC(m_stream, atermpp::down_cast<match_tree_C>(tree), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     }
     else if (tree.isR())
     {
-      implement_treeR(atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
+      implement_treeR(m_stream, atermpp::down_cast<match_tree_R>(tree), cur_arg, level);
     }
     else
     {
@@ -1604,11 +1675,28 @@ private:
       }
   };
 
-  void implement_treeS(const match_tree_S& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeS(
+             std::ostream& m_stream,
+             const match_tree_S& tree, 
+             size_t cur_arg, 
+             size_t parent, 
+             size_t level, 
+             size_t cnt,
+             const size_t arity,
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments)
   {
     const match_tree_S& treeS(tree);
+    bool reset_current_data_parameters=false;
     if (atermpp::find_if(treeS.subtree(),matches(treeS.target_variable()))!=aterm_appl()) // treeS.target_variable occurs in treeS.subtree
     {
+      const std::string parameters = brackets.current_data_parameters.top(); 
+      brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& " + (string(treeS.target_variable().name()).c_str() + 1));
+      const std::string arguments = brackets.current_data_arguments.top();
+      brackets.current_data_arguments.push(arguments + (arguments.empty()?"":", ") + (string(treeS.target_variable().name()).c_str() + 1));
+      reset_current_data_parameters=true;
+
       m_stream << m_padding << "const data_expression& " << string(treeS.target_variable().name()).c_str() + 1 << " = ";
       if (level == 0)
       {
@@ -1629,10 +1717,25 @@ private:
                  << "); // S2\n";
       }
     }
-    implement_tree(tree.subtree(), cur_arg, parent, level, cnt);
+    implement_tree(m_stream, tree.subtree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
+    if (reset_current_data_parameters)
+    {
+      brackets.current_data_parameters.pop();
+      brackets.current_data_arguments.pop();
+    }
   }
 
-  void implement_treeM(const match_tree_M& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeM(
+             std::ostream& m_stream, 
+             const match_tree_M& tree, 
+             size_t cur_arg, 
+             size_t parent, 
+             size_t level, 
+             size_t cnt,
+             const size_t arity,
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments)
   {
     m_stream << m_padding << "if (" << string(tree.match_variable().name()).c_str() + 1 << " == ";
     if (level == 0)
@@ -1645,24 +1748,40 @@ private:
     }
     m_stream << ") // M\n" << m_padding
              << "{\n";
+    brackets.bracket_nesting_level++;
     m_padding.indent();
-    implement_tree(tree.true_tree(), cur_arg, parent, level, cnt);
+    implement_tree(m_stream, tree.true_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     m_padding.unindent();
+    brackets.bracket_nesting_level--;
     m_stream << m_padding
              << "}\n" << m_padding
              << "else\n" << m_padding
              << "{\n";
+    brackets.bracket_nesting_level++;
     m_padding.indent();
-    implement_tree(tree.false_tree(), cur_arg, parent, level, cnt);
+    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     m_padding.unindent();
+    brackets.bracket_nesting_level--;
     m_stream << m_padding
              << "}\n";
   }
 
-  void implement_treeF(const match_tree_F& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeF(
+             std::ostream& m_stream, 
+             const match_tree_F& tree, 
+             size_t cur_arg, 
+             size_t parent, 
+             size_t level, 
+             size_t cnt,
+             const size_t arity,
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments)
   {
+    bool reset_current_data_parameters=false;
     const void* func = (void*)(atermpp::detail::address(tree.function()));
     m_stream << m_padding;
+    brackets.bracket_nesting_level++;
     if (level == 0)
     {
       if (!is_function_sort(tree.function().sort()))
@@ -1695,11 +1814,22 @@ private:
                  << "{\n" << m_padding
                  << "  const data_expression& t" << cnt << " = down_cast<data_expression>(" << arg_or_t << parent << "[" << cur_arg << "]);\n";
       }
+      const std::string parameters = brackets.current_data_parameters.top();
+      brackets.current_data_parameters.push(parameters + (parameters.empty()?"":", ") + "const data_expression& t" + to_string(cnt));
+      const std::string arguments = brackets.current_data_arguments.top();
+      brackets.current_data_arguments.push(arguments + (arguments.empty()?"t":", t") + to_string(cnt));
+
+      reset_current_data_parameters=true;
     }
     m_stack.push_back(cur_arg);
     m_stack.push_back(parent);
     m_padding.indent();
-    implement_tree(tree.true_tree(), 1, level == 0 ? cur_arg : cnt, level + 1, cnt + 1);
+    implement_tree(m_stream, tree.true_tree(), 1, level == 0 ? cur_arg : cnt, level + 1, cnt + 1, arity, opid, brackets, auxiliary_code_fragments);
+    if (reset_current_data_parameters)
+    {
+      brackets.current_data_parameters.pop();
+      brackets.current_data_arguments.pop();
+    }
     m_padding.unindent();
     m_stack.pop_back();
     m_stack.pop_back();
@@ -1708,39 +1838,69 @@ private:
              << "else\n" << m_padding
              << "{\n";
     m_padding.indent();
-    implement_tree(tree.false_tree(), cur_arg, parent, level, cnt);
+    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     m_padding.unindent();
     m_stream << m_padding
              << "}\n";
+    brackets.bracket_nesting_level--;
   }
 
-  void implement_treeD(const match_tree_D& tree, size_t level, size_t cnt)
+  void implement_treeD(
+             std::ostream& m_stream, 
+             const match_tree_D& tree, 
+             size_t level, 
+             size_t cnt,
+             const size_t arity,
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments)
   {
     int i = m_stack.back();
     m_stack.pop_back();
     int j = m_stack.back();
     m_stack.pop_back();
-    implement_tree(tree.subtree(), j, i, level - 1, cnt);
+    implement_tree(m_stream, tree.subtree(), j, i, level - 1, cnt, arity, opid, brackets, auxiliary_code_fragments);
     m_stack.push_back(j);
     m_stack.push_back(i);
   }
 
-  void implement_treeN(const match_tree_N& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeN(
+             std::ostream& m_stream, 
+             const match_tree_N& tree, 
+             size_t cur_arg, 
+             size_t parent, 
+             size_t level, 
+             size_t cnt,
+             const size_t arity,
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments)
   {
-    implement_tree(tree.subtree(), cur_arg + 1, parent, level, cnt);
+    implement_tree(m_stream, tree.subtree(), cur_arg + 1, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
   }
 
-  void implement_treeC(const match_tree_C& tree, size_t cur_arg, size_t parent, size_t level, size_t cnt)
+  void implement_treeC(
+             std::ostream& m_stream, 
+             const match_tree_C& tree, 
+             size_t cur_arg, 
+             size_t parent, 
+             size_t level, 
+             size_t cnt,
+             const size_t arity,
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments)
   {
-    stringstream result_type_string;
+    std::stringstream result_type_string;
     m_stream << m_padding
              << "if (";
     calc_inner_term(m_stream, tree.condition(), 0, m_nnfvars, true, result_type_string);
     m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n";
 
+    brackets.bracket_nesting_level++;
     m_padding.indent();
-    implement_tree(tree.true_tree(), cur_arg, parent, level, cnt);
+    implement_tree(m_stream, tree.true_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     m_padding.unindent();
 
     m_stream << m_padding
@@ -1749,26 +1909,35 @@ private:
              << "{\n";
 
     m_padding.indent();
-    implement_tree(tree.false_tree(), cur_arg, parent, level, cnt);
+    implement_tree(m_stream, tree.false_tree(), cur_arg, parent, level, cnt, arity, opid, brackets, auxiliary_code_fragments);
     m_padding.unindent();
 
     m_stream << m_padding
              << "}\n";
+    brackets.bracket_nesting_level--;
   }
 
-  void implement_treeR(const match_tree_R& tree, size_t cur_arg, size_t level)
+  void implement_treeR(
+             std::ostream& m_stream, 
+             const match_tree_R& tree, 
+             size_t cur_arg, 
+             size_t level)
   {
     if (level > 0)
     {
       cur_arg = m_stack[2 * level - 1];
     }
+    
     m_stream << m_padding << "return ";
     stringstream result_type_string;
     calc_inner_term(m_stream, tree.result(), cur_arg + 1, m_nnfvars, true, result_type_string);
-    m_stream << "; // R1 " << tree.result() << "\n";
+    m_stream << "; // R1 " << tree.result() << "\n"; 
   }
 
-  const match_tree& implement_treeC(const match_tree_C& tree)
+  const match_tree& implement_treeC(
+             std::ostream& m_stream, 
+             const match_tree_C& tree,
+             bracket_level_data& brackets)
   {
     stringstream result_type_string;
     assert(tree.true_tree().isR());
@@ -1778,7 +1947,9 @@ private:
     m_stream << " == sort_bool::true_()) // C\n" << m_padding
              << "{\n" << m_padding
              << "  return ";
+    brackets.bracket_nesting_level++;
     calc_inner_term(m_stream, match_tree_R(tree.true_tree()).result(), 0, m_nnfvars, true, result_type_string);
+    brackets.bracket_nesting_level--;
     m_stream << ";\n" << m_padding
              << "}\n" << m_padding
              << "else\n" << m_padding
@@ -1787,7 +1958,10 @@ private:
     return tree.false_tree();
   }
 
-  void implement_treeR(const match_tree_R& tree, size_t arity)
+  void implement_treeR(
+             std::ostream& m_stream, 
+             const match_tree_R& tree, 
+             size_t arity)
   {
     stringstream result_type_string;
     if (arity == 0)
@@ -1809,8 +1983,8 @@ private:
   }
 
 public:
-  ImplementTree(RewriterCompilingJitty& rewr, std::ostream& stream, function_symbol_vector& function_symbols)
-    : m_rewriter(rewr), m_stream(stream), m_padding(2)
+  ImplementTree(RewriterCompilingJitty& rewr, function_symbol_vector& function_symbols)
+    : m_rewriter(rewr), m_padding(2)
   {
     for (function_symbol_vector::const_iterator it = function_symbols.begin(); it != function_symbols.end(); ++it)
     {
@@ -1836,7 +2010,13 @@ public:
   /// \param tree
   /// \param arity
   ///
-  void implement_tree(match_tree tree, const size_t arity)
+  void implement_tree(
+             std::ostream& m_stream, 
+             match_tree tree, 
+             const size_t arity,
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments)
   {
     for (size_t i = 0; i < arity; ++i)
     {
@@ -1849,20 +2029,20 @@ public:
     size_t l = 0;
     while (tree.isC())
     {
-      tree = implement_treeC(down_cast<match_tree_C>(tree));
+      tree = implement_treeC(m_stream, down_cast<match_tree_C>(tree),brackets);
       l++;
     }
 
     if (tree.isR())
     {
-      implement_treeR(down_cast<match_tree_R>(tree), arity);
+      implement_treeR(m_stream, down_cast<match_tree_R>(tree), arity);
     }
     else
     {
-      implement_tree(tree, 0, 0, 0, 0);
+      implement_tree(m_stream, tree, 0, 0, 0, 0, arity, opid, brackets, auxiliary_code_fragments);
     }
 
-    // Close braces opened by implement_tree(const match_tree_C&)
+    // Close braces opened by implement_tree(std ostream&, onst match_tree_C&)
     while (0 < l--)
     {
       m_padding.unindent();
@@ -1870,8 +2050,15 @@ public:
     }
   }
 
-  void implement_strategy(match_tree_list strat, size_t arity, const function_symbol& opid)
+  void implement_strategy(
+             std::ostream& m_stream, 
+             match_tree_list strat, 
+             size_t arity, 
+             const function_symbol& opid,
+             bracket_level_data& brackets,
+             std::stack<std::string>& auxiliary_code_fragments)
   {
+    bool added_new_parameters_in_brackets=false;
     m_used=nfs_array(arity); // This vector maintains which arguments are in normal form.
     while (!strat.empty())
     {
@@ -1883,6 +2070,16 @@ public:
         {
           m_stream << m_padding << "const data_expression arg" << arg << " = local_rewrite(arg_not_nf" << arg << ");\n";
           m_used[arg] = true;
+          if (!added_new_parameters_in_brackets)
+          {
+            added_new_parameters_in_brackets=true;
+            brackets.current_data_parameters.push(brackets.current_data_parameters.top()); 
+            brackets.current_data_arguments.push(brackets.current_data_arguments.top()); 
+          }
+          const std::string& parameters=brackets.current_data_parameters.top();
+          brackets.current_data_parameters.top()=parameters + (parameters.empty()?"":", ") + "const data_expression& arg" + to_string(arg);
+          const std::string arguments = brackets.current_data_arguments.top();
+          brackets.current_data_arguments.top()=arguments + (arguments.empty()?"":", ") + "arg" + to_string(arg);
         }
         m_stream << m_padding << "// Considering argument " << arg << "\n";
       }
@@ -1890,13 +2087,18 @@ public:
       {
         m_stream << m_padding << "{\n";
         m_padding.indent();
-        implement_tree(strat.front(), arity);
+        implement_tree(m_stream, strat.front(), arity, opid, brackets, auxiliary_code_fragments);
         m_padding.unindent();
         m_stream << m_padding << "}\n";
       }
       strat = strat.tail();
     }
-    rewr_function_finish(arity, opid);
+    rewr_function_finish(m_stream, arity, opid);
+    if (added_new_parameters_in_brackets)
+    {
+      brackets.current_data_parameters.pop();
+      brackets.current_data_arguments.pop();
+    }
   }
 
   std::string get_heads(const sort_expression& s, const std::string& base_string, const size_t number_of_arguments)
@@ -1922,7 +2124,7 @@ public:
   /// \param number_of_arguments
   /// \return
   ///
-  void get_recursive_argument(function_sort s, size_t index, const std::string& base_string, size_t number_of_arguments)
+  void get_recursive_argument(std::ostream& m_stream, function_sort s, size_t index, const std::string& base_string, size_t number_of_arguments)
   {
     while (index >= s.domain().size())
     {
@@ -2033,10 +2235,10 @@ public:
   }
 
 
-  void rewr_function_finish(size_t arity, const data::function_symbol& opid)
+  void rewr_function_finish(std::ostream& m_stream, size_t arity, const data::function_symbol& opid)
   {
-    m_stream << m_padding << "return ";
     // Note that arity is the total arity, of all function symbols.
+    m_stream << m_padding << "return ";
     if (arity == 0)
     {
       m_stream << m_rewriter.m_nf_cache.insert(opid) << ";\n";
@@ -2048,43 +2250,59 @@ public:
       size_t used_arguments = 0;
       m_stream << rewr_function_finish_term(arity, ss.str(), down_cast<function_sort>(opid.sort()), used_arguments) << ";\n";
       assert(used_arguments == arity);
-    }
+    } 
   }
 
-  void rewr_function_signature(size_t index, size_t arity)
+  void rewr_function_signature(std::ostream& m_stream, size_t index, size_t arity, bracket_level_data& brackets)
   {
     // Constant function symbols (a == 0) can be passed by reference
     if (arity>0)
     {
       m_stream << m_padding << "template < ";
+      std::stringstream s;
       for (size_t i = 0; i < arity; ++i)
       {
-        m_stream << (i == 0 ? "" : ", ")
+        
+        s << (i == 0 ? "" : ", ")
                  << "class DATA_EXPR" << i;
       }
-      m_stream << ">\n";
+      m_stream << s.str() << ">\n";
+      brackets.current_template_parameters = s.str();
     }
     m_stream << m_padding << "static inline "
              << (arity == 0 ? "const data_expression&" : "data_expression")
              << " rewr_" << index << "_" << arity << "(";
 
+    std::stringstream arguments;
+    std::stringstream parameters;
     for (size_t i = 0; i < arity; ++i)
     {
-      m_stream << (i == 0 ? "" : ", ")
-               << "const DATA_EXPR" << i << "& arg_not_nf"
-               << i;
+      parameters << (i == 0 ? "" : ", ")
+                 << "const DATA_EXPR" << i << "& arg_not_nf"
+                 << i;
+      arguments  << (i == 0 ? "" : ", ") << "arg_not_nf" << i;
     }
-    m_stream << ")\n";
+    m_stream << parameters.str() << ")\n";
+    brackets.current_data_arguments.push(arguments.str());
+    brackets.current_data_parameters.push(parameters.str());
   }
 
-  void rewr_function_implementation(const data::function_symbol& func, size_t arity, match_tree_list strategy)
+  void rewr_function_implementation(
+             std::ostream& m_stream, 
+             const data::function_symbol& func, 
+             size_t arity, 
+             match_tree_list strategy)
+
   {
+    bracket_level_data brackets;
+    std::stack<std::string> auxiliary_code_fragments;
+
     size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
-    rewr_function_signature(index, arity);
+    rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << "\n" << m_padding << "{\n";
     m_padding.indent();
-    implement_strategy(strategy, arity, func);
+    implement_strategy(m_stream, strategy, arity, func, brackets, auxiliary_code_fragments);
     m_padding.unindent();
     m_stream << m_padding << "}\n\n";
 
@@ -2097,7 +2315,7 @@ public:
       assert(is_function_sort(func.sort()));
       m_stream << (i == 0 ? "" : ", ");
       m_stream << "term_not_in_normal_form(";
-      get_recursive_argument(down_cast<function_sort>(func.sort()), i, "t", arity);
+      get_recursive_argument(m_stream, down_cast<function_sort>(func.sort()), i, "t", arity);
       m_stream << ")";
     }
     m_stream << "); }\n\n";
@@ -2110,12 +2328,19 @@ public:
     {
       assert(is_function_sort(func.sort()));
       m_stream << (i == 0 ? "" : ", ");
-      get_recursive_argument(down_cast<function_sort>(func.sort()), i, "t", arity);
+      get_recursive_argument(m_stream, down_cast<function_sort>(func.sort()), i, "t", arity);
     }
     m_stream << "); }\n\n";
+
+    while (!auxiliary_code_fragments.empty())
+    {
+      m_stream << auxiliary_code_fragments.top();
+      auxiliary_code_fragments.pop();
+    }
+    m_stream << "\n";
   }
 
-  void generate_delayed_normal_form_generating_function(const data::function_symbol& func, size_t arity)
+  void generate_delayed_normal_form_generating_function(std::ostream& m_stream, const data::function_symbol& func, size_t arity)
   {
     size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
@@ -2170,7 +2395,7 @@ public:
     m_stream << m_padding << "\n";
   }
 
-  void generate_rewr_functions()
+  void generate_rewr_functions(std::ostream& m_stream)
   {
     while (!m_rewr_functions.empty())
     {
@@ -2178,12 +2403,12 @@ public:
       m_rewr_functions.pop();
       if (spec.delayed())
       {
-        generate_delayed_normal_form_generating_function(spec.fs(), spec.arity());
+        generate_delayed_normal_form_generating_function(m_stream, spec.fs(), spec.arity());
       }
       else
       {
         const match_tree_list strategy = m_rewriter.create_strategy(m_rewriter.jittyc_eqns[spec.fs()], spec.arity());
-        rewr_function_implementation(spec.fs(), spec.arity(), strategy);
+        rewr_function_implementation(m_stream, spec.fs(), spec.arity(), strategy);
       }
     }
   }
@@ -2299,7 +2524,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   // because during the generation process, new function symbols are created. This
   // affects the value that the macro INDEX_BOUND should have before loading
   // jittycpreamble.h.
-  ImplementTree code_generator(*this, rewr_code, function_symbols);
+  ImplementTree code_generator(*this, function_symbols);
 
   const size_t index_bound = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::max_index() + 1;
   cpp_file << "#define INDEX_BOUND " << index_bound << "\n"
@@ -2329,7 +2554,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 
   rewr_code << "  // We're declaring static members in a struct rather than simple functions in\n"
                "  // the global scope, so that we don't have to worry about forward declarations.\n";
-  code_generator.generate_rewr_functions();
+  code_generator.generate_rewr_functions(rewr_code);
   rewr_code << "};\n"
                "} // namespace\n";
 
