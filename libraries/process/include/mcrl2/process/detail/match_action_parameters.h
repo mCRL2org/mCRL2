@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 #define MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/detail/data_utility.h"
 
@@ -65,11 +66,11 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
   }
   if (matches.empty())
   {
-    throw mcrl2::runtime_error("could not find a matching " + msg + " for " + core::pp(name) + "(" + data::pp(parameters) + ")");
+    throw mcrl2::runtime_error("Could not find a matching " + msg + " declaration for " + core::pp(name) + core::detail::print_arguments(parameters) + ".");
   }
   if (matches.size() > 1)
   {
-    throw mcrl2::runtime_error("ambiguous " + msg + " " + core::pp(name) + "(" + data::pp(parameters) + ")");
+    throw mcrl2::runtime_error("Ambiguous " + msg + " expression " + core::pp(name) + core::detail::print_arguments(parameters) + ".");
   }
   const data::data_expression_vector& typechecked_parameters = matches.front();
   return { data::data_expression_list(typechecked_parameters.begin(), typechecked_parameters.end()), data::detail::parameter_sorts(typechecked_parameters) };

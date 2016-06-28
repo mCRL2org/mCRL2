@@ -274,7 +274,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     mCRL2log(log::debug) << "typechecking a process call with short-hand assignments " << x << "" << std::endl;
     if (!is_process_name(x.name()))
     {
-      throw mcrl2::runtime_error("action or process " + core::pp(x.name()) + " not declared" + "\ntype error occurred while typechecking the process call with short-hand assignments " + process::pp(x));
+      throw mcrl2::runtime_error("Could not find a matching declaration for action or process expression " + core::pp(x.name()) + core::detail::print_arguments(x.assignments()) + ".");
     }
 
     data::variable_list formal_parameters = m_process_context.matching_process_parameters(x);
@@ -337,7 +337,7 @@ struct typecheck_builder: public process_expression_builder<typecheck_builder>
     }
     else
     {
-      throw mcrl2::runtime_error("action or process " + core::pp(x.name()) + " not declared");
+      throw mcrl2::runtime_error("Could not find a matching declaration for action or process expression " + core::pp(x.name()) + core::detail::print_arguments(x.arguments()) + ".");
     }
   }
 

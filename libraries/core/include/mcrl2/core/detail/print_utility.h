@@ -115,6 +115,18 @@ std::string print_map(const MapContainer& v, const std::string& message = "")
   return out.str();
 }
 
+/// \brief Prints a comma separated list of the elements of v. If v is empty, the empty string is returned.
+/// \param v A container
+template <typename Container>
+std::string print_arguments(const Container& v)
+{
+  if (v.empty())
+  {
+    return "";
+  }
+  return print_container(v, "(", ")", "", false, false);
+}
+
 } // namespace detail
 
 } // namespace core
