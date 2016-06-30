@@ -14,6 +14,7 @@
 
 #include <functional>
 #include "mcrl2/core/term_traits.h"
+#include "mcrl2/data/application.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/variable.h"
@@ -305,7 +306,7 @@ struct expression_traits : public core::term_traits< Expression >
 
   static const data_expression& head(const data_expression& e)
   {
-    return atermpp::down_cast<application>(e).head();
+    return atermpp::down_cast<mcrl2::data::application>(e).head();
   }
 
   static const data_expression_list &variables(const data_expression& a)
