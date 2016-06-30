@@ -38,7 +38,7 @@ std::pair<bool, data::data_expression_vector> match_action_parameters(const data
     {
       result.push_back(typechecker.typecheck_data_expression(*i, *j, variable_context));
     }
-    catch (mcrl2::runtime_error& e)
+    catch (mcrl2::runtime_error&)
     {
       return { false, {} };
     }
