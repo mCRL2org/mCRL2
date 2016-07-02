@@ -647,7 +647,7 @@ void part_trans_t::new_blue_block_created(block_t* RefB, block_t* NewB,
     mCRL2log(log::debug, "bisim_gjkw") << "new_blue_block_created("
                        << RefB->debug_id() << "," << NewB->debug_id() << ")\n";
     assert(RefB->constln() == NewB->constln());
-    NewB->set_inert_begin(B_to_C.begin());
+    NewB->set_inert_begin_nocheck(B_to_C.begin());
     NewB->set_inert_end(B_to_C.begin());
     bool old_fromred_invalid = false;
     // for all outgoing transitions of NewB
@@ -847,7 +847,7 @@ void part_trans_t::new_red_block_created(block_t* RefB, block_t* NewB,
     mCRL2log(log::debug, "bisim_gjkw") << "new_red_block_created("
                        << RefB->debug_id() << "," << NewB->debug_id() << ")\n";
     assert(RefB->constln() == NewB->constln());
-    NewB->set_inert_begin(B_to_C.begin());
+    NewB->set_inert_begin_nocheck(B_to_C.begin());
     NewB->set_inert_end(B_to_C.begin());
     bool old_fromred_invalid = false;
     // for all outgoing transitions of NewB
@@ -941,6 +941,7 @@ void part_trans_t::new_red_block_created(block_t* RefB, block_t* NewB,
             {
                 // The transition goes from NewB to the constellation of
                 // RefB and NewB.
+                NewB->set_inert_end(NewB->inert_end() + 1);
                 if (RefB->inert_begin() <= old_pos)
                 {
                     mCRL2log(log::debug, "bisim_gjkw") << "inert transition\n";
@@ -959,11 +960,10 @@ void part_trans_t::new_red_block_created(block_t* RefB, block_t* NewB,
                     // over the inert transitions of NewB.
                     new_pos = NewB->inert_begin();
                     NewB->set_inert_begin(NewB->inert_begin() + 1);
-                    // old_pos --> new_pos --> NewB->inert_end() -> old_pos
+                    // old_pos --> new_pos --> NewB->inert_end() - 1 -> old_pos
                     swap3_B_to_C(succ_iter, new_pos->pred->succ,
-                                                NewB->inert_end()->pred->succ);
+                                             NewB->inert_end()[-1].pred->succ);
                 }
-                NewB->set_inert_end(NewB->inert_end() + 1);
                 if (old_B_to_C_slice->begin == old_B_to_C_slice->end)
                 {
                     // This was the last transition from RefB to its own
@@ -1178,13 +1178,12 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
         }
         begin = end;
     }
-    // only block 0 has a sequence number and nonbottom states:
-    blocks[0]->assign_seqnr();
-    blocks[0]->set_marked_nonbottom_begin(blocks[0]->marked_nonbottom_begin() +
-                                                       nr_of_nonbottom_states);
-    blocks[0]->set_bottom_begin(blocks[0]->marked_nonbottom_begin());
     assert(part_st.permutation.end() == begin);
     assert(part_tr.B_to_C.end() == B_to_C_begin);
+    // only block 0 has a sequence number and nonbottom states:
+    blocks[0]->assign_seqnr();
+    blocks[0]->set_bottom_begin(blocks[0]->begin() + nr_of_nonbottom_states);
+    blocks[0]->set_marked_nonbottom_begin(blocks[0]->bottom_begin());
 
     // initialise states and succ slices
     part_st.state_info.begin()->set_pred_begin(part_tr.pred.begin());
@@ -1800,7 +1799,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
                 mCRL2log(log::debug, "bisim_gjkw") << "found new bottom "
                                                 << s_prime->debug_id() << "\n";
                 // moved here from line 5.8: move s_prime to bottom states
-                RefB->set_bottom_begin(RefB->bottom_begin() - 1);
+                RefB->set_marked_nonbottom_begin(RefB->bottom_begin() - 1);
+                RefB->set_bottom_begin(RefB->marked_nonbottom_begin());
                 swap_permutation(s_prime->pos, RefB->bottom_begin());
             // 3.26l: end if
             }
@@ -1915,7 +1915,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_red,
             mCRL2log(log::debug, "bisim_gjkw") << "found new bottom "
                                                       << s->debug_id() << "\n";
             // moved here from line 5.8: move s to bottom states
-            NewB->set_bottom_begin(NewB->bottom_begin() - 1);
+            NewB->set_marked_nonbottom_begin(NewB->bottom_begin() - 1);
+            NewB->set_bottom_begin(NewB->marked_nonbottom_begin());
             swap_permutation(s->pos, NewB->bottom_begin());
         // 3.27r: end if
         }
@@ -2228,7 +2229,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
                 mCRL2log(log::debug, "bisim_gjkw") << "found new bottom "
                                                 << s_prime->debug_id() << "\n";
                 // moved here from line 5.8: move s_prime to bottom states
-                RefB->set_bottom_begin(RefB->bottom_begin() - 1);
+                RefB->set_marked_nonbottom_begin(RefB->bottom_begin() - 1);
+                RefB->set_bottom_begin(RefB->marked_nonbottom_begin());
                 swap_permutation(s_prime->pos, RefB->bottom_begin());
             // 3.26l: end if
             }
@@ -2431,7 +2433,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
             mCRL2log(log::debug, "bisim_gjkw") << "found new bottom "
                                                       << s->debug_id() << "\n";
             // moved here from line 5.8: move s to bottom states
-            NewB->set_bottom_begin(NewB->bottom_begin() - 1);
+            NewB->set_marked_nonbottom_begin(NewB->bottom_begin() - 1);
+            NewB->set_bottom_begin(NewB->marked_nonbottom_begin());
             swap_permutation(s->pos, NewB->bottom_begin());
         // 3.27r: end if
         }

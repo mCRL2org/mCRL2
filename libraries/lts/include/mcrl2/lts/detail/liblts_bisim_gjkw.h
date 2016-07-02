@@ -538,7 +538,8 @@ public:
     void set_end(permutation_iter_t new_end)
     {
         int_end = new_end;
-        assert(int_marked_bottom_begin <= int_end && int_bottom_begin<int_end);
+        assert(int_marked_bottom_begin <= int_end);
+        assert(int_bottom_begin < int_end);
     }
 
     /// iterator to the first nonbottom state in the block
@@ -556,9 +557,9 @@ public:
     void set_nonbottom_end(permutation_iter_t new_nonbottom_end)
     {
         int_bottom_begin = new_nonbottom_end;
-        assert(int_marked_nonbottom_begin <= int_bottom_begin &&
-                                int_bottom_begin <= int_marked_bottom_begin &&
-                                                   int_bottom_begin < int_end);
+        assert(int_marked_nonbottom_begin <= int_bottom_begin);
+        assert(int_bottom_begin <= int_marked_bottom_begin);
+        assert(int_bottom_begin < int_end);
     }
 
     /// iterator to the first bottom state in the block
@@ -567,9 +568,9 @@ public:
     void set_bottom_begin(permutation_iter_t new_bottom_begin)
     {
         int_bottom_begin = new_bottom_begin;
-        assert(int_marked_nonbottom_begin <= int_bottom_begin &&
-                                int_bottom_begin <= int_marked_bottom_begin &&
-                                                   int_bottom_begin < int_end);
+        assert(int_marked_nonbottom_begin <= int_bottom_begin);
+        assert(int_bottom_begin <= int_marked_bottom_begin);
+        // assert(int_bottom_begin < int_end);
     }
 
     /// iterator past the last bottom state in the block
@@ -578,7 +579,8 @@ public:
     void set_bottom_end(permutation_iter_t new_bottom_end)
     {
         int_end = new_bottom_end;
-        assert(int_marked_bottom_begin <= int_end && int_bottom_begin<int_end);
+        assert(int_marked_bottom_begin <= int_end);
+        assert(int_bottom_begin < int_end);
     }
 
     /// iterator to the first unmarked nonbottom state in the block
@@ -604,8 +606,8 @@ public:
                                                     new_unmarked_nonbottom_end)
     {
         int_marked_nonbottom_begin = new_unmarked_nonbottom_end;
-        assert(int_begin <= int_marked_nonbottom_begin &&
-                               int_marked_nonbottom_begin <= int_bottom_begin);
+        assert(int_begin <= int_marked_nonbottom_begin);
+        assert(int_marked_nonbottom_begin <= int_bottom_begin);
     }
 
     /// iterator to the first marked nonbottom state in the block
@@ -621,8 +623,8 @@ public:
                                                     new_marked_nonbottom_begin)
     {
         int_marked_nonbottom_begin = new_marked_nonbottom_begin;
-        assert(int_begin <= int_marked_nonbottom_begin &&
-                               int_marked_nonbottom_begin <= int_bottom_begin);
+        assert(int_begin <= int_marked_nonbottom_begin);
+        assert(int_marked_nonbottom_begin <= int_bottom_begin);
     }
 
     /// iterator one past the last marked nonbottom state in the block
@@ -634,9 +636,9 @@ public:
     void set_marked_nonbottom_end(permutation_iter_t new_marked_nonbottom_end)
     {
         int_bottom_begin = new_marked_nonbottom_end;
-        assert(int_marked_nonbottom_begin <= int_bottom_begin &&
-                                int_bottom_begin <= int_marked_bottom_begin &&
-                                                   int_bottom_begin < int_end);
+        assert(int_marked_nonbottom_begin <= int_bottom_begin);
+        assert(int_bottom_begin <= int_marked_bottom_begin);
+        assert(int_bottom_begin < int_end);
     }
 
     /// iterator to the first unmarked bottom state in the block
@@ -649,9 +651,9 @@ public:
                                                      new_unmarked_bottom_begin)
     {
         int_bottom_begin = new_unmarked_bottom_begin;
-        assert(int_marked_nonbottom_begin <= int_bottom_begin &&
-                                int_bottom_begin <= int_marked_bottom_begin &&
-                                                   int_bottom_begin < int_end);
+        assert(int_marked_nonbottom_begin <= int_bottom_begin);
+        assert(int_bottom_begin <= int_marked_bottom_begin);
+        assert(int_bottom_begin < int_end);
     }
 
     /// iterator past the last unmarked bottom state in the block
@@ -663,8 +665,8 @@ public:
     void set_unmarked_bottom_end(permutation_iter_t new_unmarked_bottom_end)
     {
         int_marked_bottom_begin = new_unmarked_bottom_end;
-        assert(int_bottom_begin <= int_marked_bottom_begin &&
-                                           int_marked_bottom_begin <= int_end);
+        assert(int_bottom_begin <= int_marked_bottom_begin);
+        assert(int_marked_bottom_begin <= int_end);
     }
 
     /// iterator to the first marked bottom state in the block
@@ -676,8 +678,8 @@ public:
     void set_marked_bottom_begin(permutation_iter_t new_marked_bottom_begin)
     {
         int_marked_bottom_begin = new_marked_bottom_begin;
-        assert(int_bottom_begin <= int_marked_bottom_begin &&
-                                           int_marked_bottom_begin <= int_end);
+        assert(int_bottom_begin <= int_marked_bottom_begin);
+        assert(int_marked_bottom_begin <= int_end);
     }
 
     /// \brief iterator past the last marked bottom state in the block
@@ -687,7 +689,8 @@ public:
     void set_marked_bottom_end(permutation_iter_t new_marked_bottom_end)
     {
         int_end = new_marked_bottom_end;
-        assert(int_marked_bottom_begin <= int_end && int_bottom_begin<int_end);
+        assert(int_marked_bottom_begin <= int_end);
+        assert(int_bottom_begin < int_end);
     }
 
     /// iterator to the first inert transition of the block
