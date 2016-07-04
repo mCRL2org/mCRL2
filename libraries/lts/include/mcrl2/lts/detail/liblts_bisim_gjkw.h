@@ -163,7 +163,7 @@ typedef B_to_C_desc_list::iterator B_to_C_desc_iter_t;
 /// one additional ``state'' that is only used for these pointers.
 class state_info_entry
 {
-private:
+  private:
     /// \brief iterator to first incoming transition
     /// \details also serves as iterator past the last incoming transition of
     /// the previous state.
@@ -182,7 +182,7 @@ private:
 
     /// iterator past the last _inert_ outgoing transition
     succ_iter_t state_inert_out_end;
-public:
+  public:
     /// block where the state belongs
     block_t* block;
 
@@ -191,13 +191,17 @@ public:
 
     /// number of inert transitions to non-blue states
     state_type notblue;
-
+  private:
     /// iterator to first outgoing transition to the constellation of interest
-    succ_iter_t current_constln;
-
+    succ_iter_t int_current_constln;
+  public:
     /// get constellation where the state belongs
     const constln_t* constln() const;
     constln_t* constln();
+
+    succ_const_iter_t current_constln() const {  return int_current_constln;  }
+    succ_iter_t current_constln()  {  return int_current_constln;  }
+    void set_current_constln(succ_iter_t new_current_constln);
 
     /// iterator to first incoming transition
     pred_const_iter_t pred_begin() const  {  return state_in_begin;  }
@@ -218,18 +222,10 @@ public:
     /// iterator to first non-inert incoming transition
     pred_const_iter_t noninert_pred_begin() const  {  return state_in_begin;  }
     pred_iter_t noninert_pred_begin()  {  return state_in_begin;  }
-    void set_noninert_pred_begin(pred_iter_t new_noninert_in_begin)
-    {
-        state_in_begin = new_noninert_in_begin;
-    }
 
     /// iterator past the last non-inert incoming transition
     pred_const_iter_t noninert_pred_end() const  { return inert_pred_begin(); }
     pred_iter_t noninert_pred_end()  {  return inert_pred_begin();  }
-    void set_noninert_pred_end(pred_iter_t new_noninert_in_end)
-    {
-        set_inert_pred_begin(new_noninert_in_end);
-    }
 
     /// iterator to first inert incoming transition
     pred_const_iter_t inert_pred_begin() const { return state_inert_in_begin; }
@@ -237,15 +233,13 @@ public:
     void set_inert_pred_begin(pred_iter_t new_inert_in_begin)
     {
         state_inert_in_begin = new_inert_in_begin;
+        assert(pred_begin() <= inert_pred_begin());
+        assert(inert_pred_begin() <= pred_end());
     }
 
     /// iterator one past the last inert incoming transition
     pred_const_iter_t inert_pred_end() const { return pred_end(); }
     pred_iter_t inert_pred_end()  {  return pred_end();  }
-    void set_inert_pred_end(pred_iter_t new_inert_in_end)
-    {
-        set_pred_end(new_inert_in_end);
-    }
 
     /// iterator to first outgoing transition
     succ_const_iter_t succ_begin() const  {  return state_out_begin;  }
@@ -261,22 +255,37 @@ public:
     void set_succ_end(succ_iter_t new_out_end)
     {
         this[1].set_succ_begin(new_out_end);
+        assert(succ_begin() <= succ_end());
     }
 
     /// iterator to first inert outgoing transition
     succ_const_iter_t inert_succ_begin() const  {return state_inert_out_begin;}
     succ_iter_t inert_succ_begin()  {  return state_inert_out_begin;  }
-    void set_inert_succ_begin(succ_iter_t new_inert_out_begin)
-    {
-        state_inert_out_begin = new_inert_out_begin;
-    }
+    void set_inert_succ_begin(succ_iter_t new_inert_out_begin);
 
     /// iterator past the last inert outgoing transition
     succ_const_iter_t inert_succ_end() const  {  return state_inert_out_end;  }
     succ_iter_t inert_succ_end()  {  return state_inert_out_end;  }
-    void set_inert_succ_end(succ_iter_t new_inert_out_end)
+    void set_inert_succ_end(succ_iter_t new_inert_out_end);
+    void set_inert_succ_begin_and_end(succ_iter_t new_inert_out_begin,
+                                                 succ_iter_t new_inert_out_end)
     {
+        state_inert_out_begin = new_inert_out_begin;
         state_inert_out_end = new_inert_out_end;
+        assert(succ_begin() <= inert_succ_begin());
+        assert(inert_succ_begin() <= inert_succ_end());
+        assert(inert_succ_end() <= succ_end());
+        // The following assertions cannot be tested always, as the function
+        // may be called earlier than the assertions are reestablished.
+        // assert(succ_begin() == inert_succ_begin() ||
+        //          !(*constln() < *inert_succ_begin()[-1].target->constln()));
+        // assert(succ_begin() == inert_succ_begin() ||
+        //                      inert_succ_begin()[-1].target->block != block);
+        // assert(inert_succ_begin() == inert_succ_end() ||
+        //                      (inert_succ_begin()->target->block == block &&
+        //                       inert_succ_end()[-1].target->block == block));
+        // assert(succ_end() == inert_succ_end() ||
+        //                  *constln() < *inert_succ_end()->target->constln());
     }
 
     bool surely_has_transition_to(const constln_t* SpC) const;
@@ -509,7 +518,7 @@ public:
     /// larger block.
     bool operator<(const block_t& other) const
     {
-        return int_begin < other.int_begin;
+        return begin() < other.begin();
     }
 
     /// constellation where the block belongs to
@@ -701,16 +710,19 @@ public:
         int_inert_begin = new_inert_begin;
         assert(int_inert_begin <= int_inert_end);
     }
-    void set_inert_begin_nocheck(B_to_C_iter_t new_inert_begin)
-    {
-        int_inert_begin = new_inert_begin;
-    }
 
     /// iterator past the last inert transition of the block
     B_to_C_const_iter_t inert_end() const  {  return int_inert_end;  }
     B_to_C_iter_t inert_end()  {  return int_inert_end;  }
     void set_inert_end(B_to_C_iter_t new_inert_end)
     {
+        int_inert_end = new_inert_end;
+        assert(int_inert_begin <= int_inert_end);
+    }
+    void set_inert_begin_and_end(B_to_C_iter_t new_inert_begin,
+                                                   B_to_C_iter_t new_inert_end)
+    {
+        int_inert_begin = new_inert_begin;
         int_inert_end = new_inert_end;
         assert(int_inert_begin <= int_inert_end);
     }
@@ -904,7 +916,7 @@ public:
     /// constellations as the original, larger constellation.
     bool operator<(const constln_t& other) const
     {
-        return *begin() < *other.begin();
+        return begin() < other.begin();
     }
 
     /// \brief split off a single block from the constellation
@@ -1380,22 +1392,22 @@ public:
     noninert. */
     void make_noninert(succ_iter_t succ_iter)
     {
-        succ_iter_t other_succ =
-                        succ_iter->B_to_C->pred->source->inert_succ_begin();
-        succ_iter->B_to_C->pred->source->set_inert_succ_begin(other_succ + 1);
+        // change B_to_C
         B_to_C_iter_t other_B_to_C =
                     succ_iter->B_to_C->pred->source->block->inert_begin();
-        succ_iter->B_to_C->pred->source->block->set_inert_begin(other_B_to_C+
-                                                                            1);
-        pred_iter_t other_pred = succ_iter->target->inert_pred_begin();
-        succ_iter->target->set_inert_pred_begin(other_pred + 1);
-        // change B_to_C
         assert(succ_iter->B_to_C->B_to_C_slice->begin <= other_B_to_C);
         swap_B_to_C(succ_iter, other_B_to_C->pred->succ);
+        succ_iter->B_to_C->pred->source->block->set_inert_begin(other_B_to_C +
+                                                                            1);
         // change pred
+        pred_iter_t other_pred = succ_iter->target->inert_pred_begin();
         swap_in(succ_iter->B_to_C, other_pred->succ->B_to_C);
+        succ_iter->target->set_inert_pred_begin(other_pred + 1);
         // change succ
+        succ_iter_t other_succ =
+                        succ_iter->B_to_C->pred->source->inert_succ_begin();
         swap_out(succ_iter->B_to_C->pred, other_succ->B_to_C->pred);
+        succ_iter->B_to_C->pred->source->set_inert_succ_begin(other_succ + 1);
     }
 
     /* part_trans_t::new_block_created splits the B_to_C-slices to reflect that
@@ -1592,10 +1604,12 @@ class bisim_partitioner_gjkw
 
     /*------------- PrimaryRefine -- Algorithm 3 of [GJKW 2017] -------------*/
 
-    bisim_gjkw::block_t* primary_refine(bisim_gjkw::block_t* RefB);
+    bisim_gjkw::block_t* primary_refine(bisim_gjkw::block_t* RefB,
+                                            const bisim_gjkw::constln_t* NewC);
 
     DECLARE_COROUTINE(primary_blue,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB),
+    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
+                                const bisim_gjkw::constln_t*, NewC),
     /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
                                 bisim_gjkw::state_info_ptr, s,
                                 bisim_gjkw::pred_iter_t, pred_iter,
@@ -1607,7 +1621,8 @@ class bisim_partitioner_gjkw
                                 PRIMARY_BLUE_STATE_HANDLED));
 
     DECLARE_COROUTINE(primary_red,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB),
+    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
+                                const bisim_gjkw::constln_t*, NewC),
     /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_begin,
                                 bisim_gjkw::state_info_ptr, s,
                                 bisim_gjkw::pred_iter_t, pred_iter),
@@ -1620,11 +1635,13 @@ class bisim_partitioner_gjkw
 
     bisim_gjkw::block_t* secondary_refine(bisim_gjkw::block_t* RefB,
                                 const bisim_gjkw::constln_t* SpC,
-                                const bisim_gjkw::B_to_C_descriptor* FromRed);
+                                const bisim_gjkw::B_to_C_descriptor* FromRed,
+                                bool split_unreachable_new_bottom = false);
 
     DECLARE_COROUTINE(secondary_blue,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, SpC),
+                                const bisim_gjkw::constln_t*, SpC,
+                                bool, split_unreachable_new_bottom),
     /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
                                 bisim_gjkw::state_info_ptr, s,
                                 bisim_gjkw::pred_iter_t, pred_iter,
@@ -1642,6 +1659,7 @@ class bisim_partitioner_gjkw
 
     DECLARE_COROUTINE(secondary_red,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
+                                const bisim_gjkw::constln_t*, SpC,
                                 const bisim_gjkw::B_to_C_descriptor*, FromRed),
     /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
                                                         fromred_visited_begin,
@@ -1754,6 +1772,10 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool branching /* = false */,
 
   // Assign the reduced LTS
   l.set_num_states(bisim_part.num_eq_classes());
+mCRL2log(log::debug, "bisim_gjkw") << "number of states in the lumped chain: "
+<< bisim_part.num_eq_classes() << "; initial state: originally state "
+<< l.initial_state() << ", lumped state "
+<< bisim_part.get_eq_class(l.initial_state()) << "\n";
   l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
   bisim_part.replace_transitions(branching, preserve_divergence);
 }
@@ -1819,6 +1841,54 @@ bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
 namespace bisim_gjkw
 {
 
+inline void state_info_entry::set_current_constln(succ_iter_t
+                                                           new_current_constln)
+{
+    int_current_constln = new_current_constln;
+    // current_constln points to a successor transition of this state:
+    assert(succ_begin() <= int_current_constln);
+    assert(int_current_constln <= succ_end());
+    // it points to a place where a constellation slice starts or ends:
+    assert(succ_begin() == int_current_constln ||
+        succ_end() == int_current_constln ||
+        int_current_constln[-1].constln_slice !=
+                                           int_current_constln->constln_slice);
+    // it points to the relevant constellation:
+    // The following assertions cannot be executed immediately after each call.
+    // assert(succ_begin() == current_constln() ||
+    //                     !(*SpC < *current_constln()[-1].target->constln()));
+    // assert(succ_end() == current_constln() ||
+    //                        !(*current_constln()->target->constln() < *SpC));
+}
+
+
+inline void state_info_entry::set_inert_succ_begin(
+                                               succ_iter_t new_inert_out_begin)
+{
+    state_inert_out_begin = new_inert_out_begin;
+    assert(succ_begin() <= inert_succ_begin());
+    assert(inert_succ_begin() <= inert_succ_end());
+    assert(succ_begin() == inert_succ_begin() ||
+                    !(*constln() < *inert_succ_begin()[-1].target->constln()));
+    assert(succ_begin() == inert_succ_begin() ||
+                                inert_succ_begin()[-1].target->block != block);
+    assert(inert_succ_begin() == inert_succ_end() ||
+                                   inert_succ_begin()->target->block == block);
+}
+
+
+inline void state_info_entry::set_inert_succ_end(succ_iter_t new_inert_out_end)
+{
+    state_inert_out_end = new_inert_out_end;
+    assert(inert_succ_begin() <= inert_succ_end());
+    assert(inert_succ_end() <= succ_end());
+    assert(inert_succ_begin() == inert_succ_end() ||
+                                  inert_succ_end()[-1].target->block == block);
+    assert(succ_end() == inert_succ_end() ||
+                            *constln() < *inert_succ_end()->target->constln());
+}
+
+
 /// get the constellation of the state
 inline const constln_t* state_info_entry::constln() const
 {
@@ -1850,20 +1920,19 @@ inline block_t::block_t(constln_t* constln_, permutation_iter_t begin_,
     refinable_next(nullptr),
     int_seqnr(BLOCK_NO_SEQNR)
 {
-    assert(int_begin <= int_marked_nonbottom_begin &&
-                        int_marked_nonbottom_begin <= int_bottom_begin &&
-                        int_bottom_begin <= int_marked_bottom_begin &&
-                        int_marked_bottom_begin <= int_end &&
-                        int_bottom_begin < int_end);
-    assert(int_constln->begin()<=int_begin && int_end<=int_constln->end());
+    assert(int_begin <= int_marked_nonbottom_begin);
+    assert(int_marked_nonbottom_begin <= int_bottom_begin);
+    assert(int_bottom_begin <= int_marked_bottom_begin);
+    assert(int_marked_bottom_begin <= int_end);
+    assert(int_bottom_begin < int_end);
+    assert(int_constln->begin() <= int_begin && int_end <= int_constln->end());
 }
 
 
 inline void block_t::set_constln(constln_t* new_constln)
 {
     int_constln = new_constln;
-    assert(int_constln->begin() <= int_begin &&
-                                                int_end <= int_constln->end());
+    assert(int_constln->begin() <= int_begin && int_end <= int_constln->end());
 }
 
 
@@ -1902,7 +1971,7 @@ inline void block_t::SetFromRed(B_to_C_desc_iter_t new_fromred)
 inline bool state_info_entry::surely_has_transition_to(const constln_t* SpC)
                                                                           const
 {
-    assert(succ_begin() <= current_constln && succ_end() >= current_constln);
+    assert(succ_begin() <= current_constln() && current_constln()<=succ_end());
     // Only non-inert transitions count.
     if (constln() == SpC)
     {
@@ -1910,13 +1979,15 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* SpC)
         if (inert_succ_begin()[-1].target->constln() != SpC)  return false;
         return true;
     }
-    // either current_constln->target or current_constln[-1].target is in SpC
-    if (current_constln!=succ_end() && current_constln->target->constln()==SpC)
+    // either current_constln()->target or current_constln()[-1].target is in
+    // SpC
+    if (current_constln() != succ_end() &&
+                                   current_constln()->target->constln() == SpC)
     {
         return true;
     }
-    if (current_constln != succ_begin() &&
-                                  current_constln[-1].target->constln() == SpC)
+    if (current_constln() != succ_begin() &&
+                                current_constln()[-1].target->constln() == SpC)
     {
         return true;
     }
@@ -1935,7 +2006,7 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* SpC)
 inline bool state_info_entry::surely_has_no_transition_to(const constln_t* SpC)
                                                                           const
 {
-    assert(succ_begin() <= current_constln && succ_end() >= current_constln);
+    assert(succ_begin() <= current_constln() && current_constln()<=succ_end());
     // Only noninert transitions count:
     if (constln() == SpC)
     {
@@ -1944,14 +2015,15 @@ inline bool state_info_entry::surely_has_no_transition_to(const constln_t* SpC)
         return false;
     }
     // condition:
-    // current_constln->target is in a constellation > SpC and
-    // current_constln[-1].target is in a constellation < SpC.
-    if (current_constln!=succ_end() && current_constln->target->constln()<=SpC)
+    // current_constln()->target is in a constellation > SpC and
+    // current_constln()[-1].target is in a constellation < SpC.
+    if (current_constln() != succ_end() &&
+                               !(*SpC < *current_constln()->target->constln()))
     {
         return false;
     }
-    if (current_constln != succ_begin() &&
-                                  current_constln[-1].target->constln() >= SpC)
+    if (current_constln() != succ_begin() &&
+                            !(*current_constln()[-1].target->constln() < *SpC))
     {
         return false;
     }
