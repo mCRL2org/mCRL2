@@ -2217,7 +2217,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
             // already done by incrementing visited_end
             mCRL2log(log::debug, "bisim_gjkw") <<s->debug_id() <<" is blue.\n";
         // 4.5l: whenever |Blue| > |RefB|/2 do  Abort this coroutine
-        if (visited_end - RefB->unmarked_bottom_begin() > RefB->size() / 2)
+        if ((state_type) (visited_end - RefB->unmarked_bottom_begin()) >
+                                                              RefB->size() / 2)
         {
             ABORT_THIS_COROUTINE();
         }

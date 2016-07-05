@@ -309,9 +309,6 @@ where the coroutine was interrupted. */
 ///                    data
 /// \param locations   locations where the coroutine can be interrupted, in
 ///                    parentheses
-/* The function is declared with __attribute__((always_inline)) because it is
-typically called exactly once (in the macro RUN_COROUTINES), so it should be
-inlined there. */
 #define DECLARE_COROUTINE(routine, param, local, shared_type, shared_var,     \
                                                                     locations)\
     enum _coroutine_ ## routine ## _location                                  \
@@ -330,7 +327,7 @@ inlined there. */
     inline coroutine::_coroutine_result_t _coroutine_ ## routine ## _func(    \
                    size_t _coroutine_allowance,                               \
                    struct _coroutine_ ## routine ## _struct& _coroutine_param,\
-                   shared_type& shared_var) __attribute__((always_inline));
+                   shared_type& shared_var);
 
 /// \def DEFINE_COROUTINE
 /// \brief define a member method or a function as a coroutine
@@ -415,12 +412,15 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
         {                                                                     \
             _Pragma("GCC diagnostic push")                                    \
             _Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")\
+            _Pragma("clang diagnostic push")                                  \
+          _Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")\
             struct _coroutine_ ## routine1 ## _struct _coroutine_local1 =     \
                                 { _coroutine_NO_PARENS param1,                \
                                   _coroutine_BEGIN_ ## routine1 ## _enum };   \
             struct _coroutine_ ## routine2 ## _struct _coroutine_local2 =     \
                                 { _coroutine_NO_PARENS param2,                \
                                   _coroutine_BEGIN_ ## routine2 ## _enum };   \
+            _Pragma("clang diagnostic pop")                                   \
             _Pragma("GCC diagnostic pop")                                     \
             shared_type _coroutine_shared_data =                              \
                                             _coroutine_NO_PARENS shared_init; \
@@ -495,12 +495,15 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
         {                                                                     \
             _Pragma("GCC diagnostic push")                                    \
             _Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")\
+            _Pragma("clang diagnostic push")                                  \
+          _Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")\
             struct _coroutine_ ## routine1 ## _struct _coroutine_local1 =     \
                                 { _coroutine_NO_PARENS param1,                \
                                   _coroutine_BEGIN_ ## routine1 ## _enum };   \
             struct _coroutine_ ## routine2 ## _struct _coroutine_local2 =     \
                                 { _coroutine_NO_PARENS param2,                \
                                   _coroutine_BEGIN_ ## routine2 ## _enum };   \
+            _Pragma("clang diagnostic pop")                                   \
             _Pragma("GCC diagnostic pop")                                     \
             shared_type _coroutine_shared_data =                              \
                                             _coroutine_NO_PARENS shared_init; \
@@ -571,9 +574,9 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
 #define END_COROUTINE_WHILE                                                   \
                 }                                                             \
             }                                                                 \
-            else  ;                                                           \
+            else  {  }                                                        \
         }                                                                     \
-        else  ;                                                               \
+        else  {  }                                                            \
     }                                                                         \
     while (0)
 
@@ -613,7 +616,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
                 }                                                             \
             }}                                                                \
             while (0);                                                        \
-        else  ;                                                               \
+        else  {  }                                                            \
     }                                                                         \
     while (0)
 
@@ -649,7 +652,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
             }                                                                 \
             while (1);                                                        \
         }}                                                                    \
-        else  ;                                                               \
+        else  {  }                                                            \
     while (0)
 
 /// \def TERMINATE_COROUTINE_SUCCESSFULLY
