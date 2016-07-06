@@ -55,9 +55,9 @@ set(MCRL2_TOOLS
   pbesstategraph
   symbolic_exploration
   txt2bes
-
   formulacheck
 
+  mcrl2transform
   mcrl2parse
 )
 
