@@ -58,7 +58,6 @@ set(MCRL2_TOOLS
 
   formulacheck
 
-  alphabet
   mcrl2parse
 )
 
