@@ -115,10 +115,6 @@
 #ifndef _COROUTINE_H
 #define _COROUTINE_H
 
-#ifndef NDEBUG
-    #include <iostream>  // for cerr
-    #include <limits>    // used in ilog2() for Clang and g++
-#endif
 #include <cstdlib>       // for EXIT_FAILURE and size_t
 
 
@@ -404,8 +400,6 @@ where the coroutine was interrupted. */
 ///                    data
 /// \param locations   locations where the coroutine can be interrupted, in
 ///                    parentheses
-#ifndef NDEBUG
-
 #define DEFINE_COROUTINE(namespace, routine, param, local, shared_type,       \
                                                         shared_var, locations)\
 coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
@@ -421,30 +415,8 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
         case _coroutine_BEGIN_ ## routine ## _enum:                           \
             break;                                                            \
         default:                                                              \
-            std::cerr << __FILE__ << "(" << __LINE__ << "): Corrupted "       \
-                        "internal state in coroutine " << __func__ << "\n";   \
-            exit(EXIT_FAILURE);                                               \
+            assert(0 && "Corrupted internal coroutine state");                \
     }
-
-#else // #ifndef NDEBUG
-
-#define DEFINE_COROUTINE(namespace, routine, param, local, shared_type,       \
-                                                        shared_var, locations)\
-coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
-                size_t _coroutine_allowance, namespace                        \
-                          _coroutine_ ## routine ## _struct& _coroutine_param,\
-                shared_type& shared_var)                                      \
-{                                                                             \
-    _coroutine_ALIAS param                                                    \
-    _coroutine_ALIAS local                                                    \
-    switch (_coroutine_param._coroutine_location)                             \
-    {                                                                         \
-        _coroutine_SWITCHCASE locations                                       \
-        case _coroutine_BEGIN_ ## routine ## _enum:                           \
-            break;                                                            \
-    }
-
-#endif // #ifndef NDEBUG
 
 /// \def END_COROUTINE
 /// \brief end a coroutine that was started with `DEFINE_COROUTINE`
@@ -467,8 +439,6 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
 /// \param final2      statement to be executed if routine2 terminates first
 /// \param shared_type type of the data shared between the two coroutines
 /// \param shared_init initial value of the shared data, in parentheses
-#ifndef NDEBUG
-
 #define RUN_COROUTINES(routine1, param1, final1, routine2, param2, final2,    \
                                                     shared_type, shared_init) \
         do                                                                    \
@@ -485,107 +455,41 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
                         _coroutine_ ## routine1 ## _func(_coroutine_allowance,\
                                                      _coroutine_local1,       \
                                                      _coroutine_shared_data); \
-                if (coroutine::_coroutine_CONTINUE != _coroutine_result)      \
+                if (coroutine::_coroutine_CONTINUE == _coroutine_result)      \
                 {                                                             \
-                    if (coroutine::_coroutine_TERMINATE == _coroutine_result) \
-                    {                                                         \
-                        {  final1;  }                                         \
-                        break;                                                \
-                    }                                                         \
-                    else if(coroutine::_coroutine_ABORT != _coroutine_result) \
-                    {                                                         \
-                        std::cerr << __FILE__ << "(" << __LINE__              \
-                                << "): Illegal return value of coroutine "    \
-                                << "_coroutine_" #routine1 "_func" << "\n";   \
-                        exit(EXIT_FAILURE);                                   \
-                    }                                                         \
-                    _coroutine_allowance = 0;                                 \
+                    assert(0 != _coroutine_allowance);                        \
+                    _coroutine_allowance = 2;                                 \
                 }                                                             \
-                else if (0 == _coroutine_allowance)                           \
+                else if (coroutine::_coroutine_TERMINATE == _coroutine_result)\
                 {                                                             \
-                    std::cerr << __FILE__ << "(" << __LINE__ <<"): Coroutine "\
-                                            << "_coroutine_" #routine1 "_func"\
-                                            << " takes too many steps\n";     \
-                    exit(EXIT_FAILURE);                                       \
+                    {  final1;  }                                             \
+                    break;                                                    \
                 }                                                             \
                 else                                                          \
                 {                                                             \
-                    _coroutine_allowance = 2;                                 \
+                    assert(coroutine::_coroutine_ABORT == _coroutine_result); \
+                    _coroutine_allowance = 0;                                 \
                 }                                                             \
                 _coroutine_result = _coroutine_ ## routine2 ## _func(         \
                                      _coroutine_allowance, _coroutine_local2, \
                                                      _coroutine_shared_data); \
-                if (coroutine::_coroutine_CONTINUE != _coroutine_result)      \
+                if (coroutine::_coroutine_CONTINUE == _coroutine_result)      \
                 {                                                             \
-                    if (coroutine::_coroutine_TERMINATE == _coroutine_result) \
-                    {                                                         \
-                        {  final2;  }                                         \
-                        break;                                                \
-                    }                                                         \
-                    else if(coroutine::_coroutine_ABORT != _coroutine_result) \
-                    {                                                         \
-                        std::cerr << __FILE__ << "(" << __LINE__              \
-                                << "): Illegal return value of coroutine "    \
-                                << "_coroutine_" #routine2 "_func" << "\n";   \
-                        exit(EXIT_FAILURE);                                   \
-                    }                                                         \
-                    _coroutine_allowance = 0;                                 \
+                    assert(0 != _coroutine_allowance);                        \
                 }                                                             \
-                else if (0 == _coroutine_allowance)                           \
+                else if (coroutine::_coroutine_TERMINATE == _coroutine_result)\
                 {                                                             \
-                    std::cerr << __FILE__ << "(" << __LINE__ <<"): Coroutine "\
-                                            << "_coroutine_" #routine2 "_func"\
-                                            << " takes too many steps\n";     \
-                    exit(EXIT_FAILURE);                                       \
+                    {  final2;  }                                             \
+                    break;                                                    \
                 }                                                             \
-            }                                                                 \
-        }                                                                     \
-        while (0)
-
-#else // #ifndef NDEBUG
-
-#define RUN_COROUTINES(routine1, param1, final1, routine2, param2, final2,    \
-                                                    shared_type, shared_init) \
-        do                                                                    \
-        {                                                                     \
-            _coroutine_ ## routine1 ## _struct _coroutine_local1 =            \
-                                    _coroutine_ ## routine1 ## _struct param1;\
-            _coroutine_ ## routine2 ## _struct _coroutine_local2 =            \
-                                    _coroutine_ ## routine2 ## _struct param2;\
-            shared_type _coroutine_shared_data =                              \
-                                             _coroutine_NO_PARENS shared_init;\
-            for (size_t _coroutine_allowance = 16;; _coroutine_allowance *= 2)\
-            {                                                                 \
-                coroutine::_coroutine_result_t _coroutine_result =            \
-                        _coroutine_ ## routine1 ## _func(_coroutine_allowance,\
-                                                     _coroutine_local1,       \
-                                                     _coroutine_shared_data); \
-                if (coroutine::_coroutine_CONTINUE != _coroutine_result)      \
+                else                                                          \
                 {                                                             \
-                    if (coroutine::_coroutine_TERMINATE == _coroutine_result) \
-                    {                                                         \
-                        {  final1;  }                                         \
-                        break;                                                \
-                    }                                                         \
-                    _coroutine_allowance = 0;                                 \
-                }                                                             \
-                _coroutine_result = _coroutine_ ## routine2 ## _func(         \
-                            (_coroutine_allowance+3)/5*7, _coroutine_local2,  \
-                            _coroutine_shared_data);                          \
-                if (coroutine::_coroutine_CONTINUE != _coroutine_result)      \
-                {                                                             \
-                    if (coroutine::_coroutine_TERMINATE == _coroutine_result) \
-                    {                                                         \
-                        {  final2;  }                                         \
-                        break;                                                \
-                    }                                                         \
+                    assert(coroutine::_coroutine_ABORT == _coroutine_result); \
                     _coroutine_allowance = 0;                                 \
                 }                                                             \
             }                                                                 \
         }                                                                     \
         while (0)
-
-#endif // #ifndef NDEBUG
 
 /// \def COROUTINE_WHILE
 /// \brief a `while` loop where every iteration incurs one unit of work

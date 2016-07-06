@@ -130,8 +130,6 @@ class check_complexity
 
 #else // ifndef NDEBUG
 
-// #warn "Time complexity will not be checked."
-
 class check_complexity
 {
   public:

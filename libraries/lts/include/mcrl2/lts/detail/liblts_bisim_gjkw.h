@@ -23,9 +23,6 @@
 #ifndef _LIBLTS_BISIM_GJKW_H
 #define _LIBLTS_BISIM_GJKW_H
 
-#ifndef NDEBUG
-    #include <iostream>  // for cout
-#endif
 #include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
 #include <list>          // for the list of B_to_C_descriptors
@@ -278,7 +275,7 @@ class state_info_entry
         // The following assertions cannot be tested always, as the function
         // may be called earlier than the assertions are reestablished.
         // assert(succ_begin() == inert_succ_begin() ||
-        //          !(*constln() < *inert_succ_begin()[-1].target->constln()));
+        //            *inert_succ_begin()[-1].target->constln() <= *constln());
         // assert(succ_begin() == inert_succ_begin() ||
         //                      inert_succ_begin()[-1].target->block != block);
         // assert(inert_succ_begin() == inert_succ_end() ||
@@ -918,6 +915,9 @@ public:
     {
         return begin() < other.begin();
     }
+    bool operator> (const constln_t& other) const  {  return other < *this;  }
+    bool operator<=(const constln_t& other) const  { return !(other < *this); }
+    bool operator>=(const constln_t& other) const  { return !(*this < other); }
 
     /// \brief split off a single block from the constellation
     /// \details The function splits the current constellation after its first
@@ -926,7 +926,7 @@ public:
     /// block.
     block_t* split_off_small_block()
     {
-        block_t* FirstB = (*begin())->block, * LastB = int_end[-1]->block;
+        block_t* FirstB = (*begin())->block, * LastB = end()[-1]->block;
         assert(FirstB != LastB);
         if (FirstB->end() == LastB->begin())  make_trivial();
 
@@ -1856,9 +1856,9 @@ inline void state_info_entry::set_current_constln(succ_iter_t
     // it points to the relevant constellation:
     // The following assertions cannot be executed immediately after each call.
     // assert(succ_begin() == current_constln() ||
-    //                     !(*SpC < *current_constln()[-1].target->constln()));
+    //                       *current_constln()[-1].target->constln() <= *SpC);
     // assert(succ_end() == current_constln() ||
-    //                        !(*current_constln()->target->constln() < *SpC));
+    //                          *SpC <= *current_constln()->target->constln());
 }
 
 
@@ -1867,13 +1867,12 @@ inline void state_info_entry::set_inert_succ_begin(
 {
     if (new_inert_out_begin > inert_succ_begin())
     {
-        assert(!(*constln() < *new_inert_out_begin[-1].target->constln()));
+        assert(*new_inert_out_begin[-1].target->constln() <= *constln());
         assert(new_inert_out_begin[-1].target->block != block);
     }
     else if (new_inert_out_begin < inert_succ_begin())
     {
-        assert(new_inert_out_begin == inert_succ_end() ||
-                                  new_inert_out_begin->target->block == block);
+        assert(new_inert_out_begin->target->block == block);
     }
     state_inert_out_begin = new_inert_out_begin;
     assert(succ_begin() <= inert_succ_begin());
@@ -2022,12 +2021,12 @@ inline bool state_info_entry::surely_has_no_transition_to(const constln_t* SpC)
     // current_constln()->target is in a constellation > SpC and
     // current_constln()[-1].target is in a constellation < SpC.
     if (current_constln() != succ_end() &&
-                               !(*SpC < *current_constln()->target->constln()))
+                                 *current_constln()->target->constln() <= *SpC)
     {
         return false;
     }
     if (current_constln() != succ_begin() &&
-                            !(*current_constln()[-1].target->constln() < *SpC))
+                              *SpC <= *current_constln()[-1].target->constln())
     {
         return false;
     }

@@ -302,8 +302,8 @@ void part_state_t::print_trans() const
             assert(state_iter->inert_succ_begin() <=
                                                  state_iter->inert_succ_end());
             assert(state_iter->succ_begin()==state_iter->inert_succ_begin() ||
-                     !(*state_iter->constln() <
-                       *state_iter->inert_succ_begin()[-1].target->constln()));
+                       *state_iter->inert_succ_begin()[-1].target->constln() <=
+                                                       *state_iter->constln());
             assert(state_iter->succ_begin()==state_iter->inert_succ_begin() ||
                             state_iter->inert_succ_begin()[-1].target->block !=
                                                             state_iter->block);
@@ -524,7 +524,7 @@ mCRL2log(log::debug, "bisim_gjkw") << "*SpC<*NewC";
                 swap3_out(pred_iter, new_out_pos->B_to_C->pred,
                                           s->inert_succ_begin()->B_to_C->pred);
                 assert(s->succ_begin() == s->inert_succ_begin() ||
-                       !(*SpC < *s->inert_succ_begin()[-1].target->constln()));
+                         *s->inert_succ_begin()[-1].target->constln() <= *SpC);
                 assert(s->succ_begin() == s->inert_succ_begin() ||
                           s->inert_succ_begin()[-1].target->block != s->block);
                 assert(s->inert_succ_begin()->target->block == s->block);
@@ -1628,9 +1628,9 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             // 2.18: Store whether s still has some transition to SpC\SpB
             s->set_current_constln(part_tr.split_s_inert_out(s, SpC));
             assert(s->succ_begin() == s->current_constln() ||
-                        !(*SpC < *s->current_constln()[-1].target->constln()));
+                          *s->current_constln()[-1].target->constln() <= *SpC);
             assert(s->succ_end() == s->current_constln() ||
-                           !(*s->current_constln()->target->constln() < *SpC));
+                             *SpC <= *s->current_constln()->target->constln());
         // 2.19: end for
         }
         mCRL2log(log::debug, "bisim_gjkw") << "\n";
@@ -1647,14 +1647,14 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                 const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
                 // check consistency of s_prime->current_constln()
                 assert(s_prime->succ_begin() == s_prime->current_constln() ||
-                    !(*SpC<*s_prime->current_constln()[-1].target->constln()));
+                      *s_prime->current_constln()[-1].target->constln()<=*SpC);
                 assert(s_prime->succ_end() == s_prime->current_constln() ||
-                     !(*s_prime->current_constln()->target->constln() < *SpC));
+                       *SpC <= *s_prime->current_constln()->target->constln());
                 // check consistency of s_prime->inert_succ_begin() and
                 // s_prime->inert_succ_end()
                 assert(s_prime->succ_begin() == s_prime->inert_succ_begin() ||
-                  !(*s_prime->constln() <
-                          *s_prime->inert_succ_begin()[-1].target->constln()));
+                          *s_prime->inert_succ_begin()[-1].target->constln() <=
+                                                          *s_prime->constln());
                 assert(s_prime->succ_begin() == s_prime->inert_succ_begin() ||
                                s_prime->inert_succ_begin()[-1].target->block !=
                                                                s_prime->block);
@@ -1670,7 +1670,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             // check consistency of s->inert_succ_begin() and
             // s->inert_succ_end()
             assert(s->succ_begin() == s->inert_succ_begin() ||
-                !(*s->constln()<*s->inert_succ_begin()[-1].target->constln()));
+                  *s->inert_succ_begin()[-1].target->constln()<=*s->constln());
             assert(s->succ_begin() == s->inert_succ_begin() ||
                           s->inert_succ_begin()[-1].target->block != s->block);
             assert(s->inert_succ_begin() == s->inert_succ_end() ||
@@ -2367,11 +2367,11 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
                     // binary search for transitions from
                     // s_prime to constellation SpC.
                     bisim_gjkw::succ_const_iter_t mid = begin + (end-begin)/2;
-                    if (!(*mid->target->constln() < *SpC))
+                    if (*SpC <= *mid->target->constln())
                     {
                         end = mid->constln_slice->begin;
                     }
-                    if (!(*SpC < *mid->target->constln()))
+                    if (*mid->target->constln() <= *SpC)
                     {
                         begin = mid->constln_slice->end;
                     }
