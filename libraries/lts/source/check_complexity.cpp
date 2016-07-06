@@ -36,9 +36,6 @@ check_complexity::iteration_type check_complexity::n(0);
 check_complexity::iteration_type check_complexity::m(0);
 check_complexity::iteration_type check_complexity::n_log_n(0);
 check_complexity::iteration_type check_complexity::m_log_n(0);
-check_complexity::iteration_type check_complexity::primary_m_log_n(0);
-check_complexity::iteration_type check_complexity::secondary_m_log_n(0);
-check_complexity::iteration_type check_complexity::n_m(0);
 
 #endif
 

@@ -1153,10 +1153,6 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool branching,
      states_per_block(1, l.num_states()),
      nr_of_nonbottom_states(0)
 {
-    #ifndef NDEBUG
-        log::mcrl2_logger::set_reporting_level(log::debug);
-    #endif
-
     mCRL2log(log::verbose) << "O(m log n) "
                 << (preserve_divergence ? "Divergence preserving b" : "B")
                 << (branching ? "ranching b" : "")
@@ -1690,8 +1686,12 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.20: for all refinable blocks RefB do
         while (nullptr != bisim_gjkw::block_t::get_some_refinable())
         {
+            // There are at most m log n blocks that contain predecessors of
+            // splitters, but there may be an additional n splitters that need
+            // to be refined.
             bisim_gjkw::check_complexity::count("for all refinable blocks", 1,
-                                        bisim_gjkw::check_complexity::m_log_n);
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                              bisim_gjkw::check_complexity::n);
             bisim_gjkw::block_t* RefB =
                                     bisim_gjkw::block_t::get_some_refinable();
             mCRL2log(log::debug, "bisim_gjkw") << "Refining "
@@ -1846,8 +1846,15 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
     COROUTINE_DO_WHILE(PRIMARY_BLUE_STATE_HANDLED,
                                              blue_nonbottom_end != visited_end)
     {
+        // The time complexity to find the smaller block is the number of its
+        // incoming (inert) edges, but at least 1 per state (m log n+n log n).
+        // Additionally, the other procedure may take one superfluous step per
+        // refinement (m log n+n).
         bisim_gjkw::check_complexity::count(primary_search, 1,
-                                bisim_gjkw::check_complexity::primary_m_log_n);
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                        bisim_gjkw::check_complexity::n_log_n +
+                                              bisim_gjkw::check_complexity::n);
         // 3.6l: Choose an unvisited s in Blue
         s = *visited_end;
         // 3.7l: Mark s as visited
@@ -1858,7 +1865,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
                                 s->inert_pred_end() != pred_iter, ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(primary_search, 1,
-                                bisim_gjkw::check_complexity::primary_m_log_n);
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                        bisim_gjkw::check_complexity::n_log_n +
+                                              bisim_gjkw::check_complexity::n);
             const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             if (s_prime->pos >= RefB->marked_nonbottom_begin())  continue;
             // 3.9l: if notblue(s_prime) undefined then
@@ -1982,7 +1992,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_red,
                                RefB->marked_nonbottom_begin() != visited_begin)
     {
         bisim_gjkw::check_complexity::count(primary_search, 1,
-                                bisim_gjkw::check_complexity::primary_m_log_n);
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                        bisim_gjkw::check_complexity::n_log_n +
+                                              bisim_gjkw::check_complexity::n);
         // 3.7r (order of lines changed): Mark s as visited
         --visited_begin;
         // 3.6r: Choose an unvisited s in Red
@@ -1993,7 +2006,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_red,
                                 s->inert_pred_end() != pred_iter, ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(primary_search, 1,
-                                bisim_gjkw::check_complexity::primary_m_log_n);
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                        bisim_gjkw::check_complexity::m_log_n +
+                                        bisim_gjkw::check_complexity::n_log_n +
+                                              bisim_gjkw::check_complexity::n);
             const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             // 3.14r: Red := Red union {s_prime}
             if (s_prime->pos < notblue_initialised_end)
@@ -2191,8 +2207,41 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
     COROUTINE_WHILE (SECONDARY_BLUE_COLLECT_BOTTOM,
                                     RefB->unmarked_bottom_end() != visited_end)
     {
+        // A consequence of the changed order of states is that the blue bottom
+        // states are counted twice:  once here and once when we look for their
+        // predecessors.
+        //
+        // If the blue subblock is smaller, we spend the following time:
+        // * to find the blue bottom states:
+        //   + if called from the main loop: the number of marked bottom states
+        //     m_noninert log n (predecessors) + n_bottom log n (splitters)
+        //   + if called from postprocess_new_bottom: the number of blue bottom
+        //     states: n_bottom log n, plus all outgoing non-inert edges of new
+        //     bottom states: m_noninert
+        //   The maximum of these two is m_noninert log n + n_bottom log n.
+        //   (The second case only happens if n >= 2, and then log n >= 1.)
+        // * to find predecessors of blue states: all states and all incoming
+        //   (inert) edges of this subblock: n log n + m_inert log n
+        // * for the (slow) test whether some state is really blue:
+        //   + all outgoing edges of this subblock: m log n
+        //   + all outgoing edges of new bottom states: m
+        // * the red coroutine may spend the same amount of time, plus one
+        //   extra step per refinement: m_noninert log n + n
+        // The total is, therefore, 5m log n + 4n log n + 2m + n.
+        // If the red subblock is smaller, we spend the following time:
+        // * to find the FromRed states:
+        //   + all outgoing edges of this subblock: m_noninert log n
+        // * all states and all incoming (inert) edges of this subblock:
+        //   n log n + m_inert log n
+        // * the blue coroutine may spend the same amount of time, plus one
+        //   extra step per refinement: m_noninert log n + n
+        // The total is, therefore, 3m log n + 2n log n + n.
+        // Obviously, the first of the two totals is larger.
         bisim_gjkw::check_complexity::count(secondary_search, 1,
-                            bisim_gjkw::check_complexity::secondary_m_log_n);
+                                    bisim_gjkw::check_complexity::m_log_n * 5 +
+                                    bisim_gjkw::check_complexity::n_log_n * 4 +
+                                          bisim_gjkw::check_complexity::m * 2 +
+                                              bisim_gjkw::check_complexity::n);
         // 4.7l: Choose an unvisited s in MaybeBlue.
         s = *visited_end;
         // 4.8l (order of lines changed): Mark s as visited.
@@ -2242,7 +2291,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
                                              visited_end != blue_nonbottom_end)
     {
         bisim_gjkw::check_complexity::count(secondary_search, 1,
-                            bisim_gjkw::check_complexity::secondary_m_log_n);
+                                    bisim_gjkw::check_complexity::m_log_n * 5 +
+                                    bisim_gjkw::check_complexity::n_log_n * 4 +
+                                          bisim_gjkw::check_complexity::m * 2 +
+                                              bisim_gjkw::check_complexity::n);
         // 4.7l: Choose an unvisited s in Blue
         s = *visited_end;
         assert(visited_end < blue_nonbottom_end ||
@@ -2260,7 +2312,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
                                  s->inert_pred_end() != pred_iter, ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(secondary_search, 1,
-                            bisim_gjkw::check_complexity::secondary_m_log_n);
+                                    bisim_gjkw::check_complexity::m_log_n * 5 +
+                                    bisim_gjkw::check_complexity::n_log_n * 4 +
+                                          bisim_gjkw::check_complexity::m * 2 +
+                                              bisim_gjkw::check_complexity::n);
             s_prime = pred_iter->source;
             if (s_prime->pos >= RefB->marked_nonbottom_begin())
             {
@@ -2305,7 +2360,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
                                                         begin < end, (void) 0)
                 {
                     bisim_gjkw::check_complexity::count(secondary_search, 1,
-                            bisim_gjkw::check_complexity::secondary_m_log_n);
+                                    bisim_gjkw::check_complexity::m_log_n * 5 +
+                                    bisim_gjkw::check_complexity::n_log_n * 4 +
+                                          bisim_gjkw::check_complexity::m * 2 +
+                                              bisim_gjkw::check_complexity::n);
                     // binary search for transitions from
                     // s_prime to constellation SpC.
                     bisim_gjkw::succ_const_iter_t mid = begin + (end-begin)/2;
@@ -2455,7 +2513,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
                 FromRed->begin != fromred_visited_begin)
         {
             bisim_gjkw::check_complexity::count(secondary_search, 1,
-                              bisim_gjkw::check_complexity::secondary_m_log_n);
+                                    bisim_gjkw::check_complexity::m_log_n * 5 +
+                                    bisim_gjkw::check_complexity::n_log_n * 4 +
+                                          bisim_gjkw::check_complexity::m * 2 +
+                                              bisim_gjkw::check_complexity::n);
             // 4.9r (order of lines changed): Mark s --> s'' as visited
             --fromred_visited_begin;
             // 4.7r: Choose an unvisited s --> s'' in FromRed
@@ -2511,7 +2572,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
                                RefB->marked_nonbottom_begin() != visited_begin)
     {
         bisim_gjkw::check_complexity::count(secondary_search, 1,
-                            bisim_gjkw::check_complexity::secondary_m_log_n);
+                                    bisim_gjkw::check_complexity::m_log_n * 5 +
+                                    bisim_gjkw::check_complexity::n_log_n * 4 +
+                                          bisim_gjkw::check_complexity::m * 2 +
+                                              bisim_gjkw::check_complexity::n);
         // 4.15r (order of lines changed): Mark s as visited
         --visited_begin;
         assert(RefB->marked_bottom_begin() <= visited_begin ||
@@ -2525,7 +2589,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
                                                                 ++pred_iter)
         {
             bisim_gjkw::check_complexity::count(secondary_search, 1,
-                            bisim_gjkw::check_complexity::secondary_m_log_n);
+                                    bisim_gjkw::check_complexity::m_log_n * 5 +
+                                    bisim_gjkw::check_complexity::n_log_n * 4 +
+                                          bisim_gjkw::check_complexity::m * 2 +
+                                              bisim_gjkw::check_complexity::n);
             const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             // 4.23r: Red := Red union {s_prime}
             if (s_prime->pos < shared_data.notblue_initialised_end)

@@ -203,6 +203,63 @@ variables (parameters or locals) in the reentrant version. */
                                 _coroutine_VARDEF_8(t1,v1,t2,v2,t3,v3,t4,v4)  \
                                 _coroutine_VARDEF_8(t5,v5,t6,v6,t7,v7,t8,v8)
 
+/* _coroutine_PARLST is a helper macro to define a parameter list for the
+constructor. */
+#define _coroutine_PARLST(...)                                                \
+                    _coroutine_SELECT(_coroutine_PARLST_, __VA_ARGS__)
+#define _coroutine_PARLST_1(_)
+#define _coroutine_PARLST_2(t1,v1) t1 _coroutine_ ## v1 ## _new
+#define _coroutine_PARLST_4(t1,v1,t2,v2)                                      \
+                                _coroutine_PARLST_2(t1,v1),                   \
+                                _coroutine_PARLST_2(t2,v2)
+#define _coroutine_PARLST_6(t1,v1,t2,v2,t3,v3)                                \
+                                _coroutine_PARLST_4(t1,v1,t2,v2),             \
+                                _coroutine_PARLST_2(t3,v3)
+#define _coroutine_PARLST_8(t1,v1,t2,v2,t3,v3,t4,v4)                          \
+                                _coroutine_PARLST_4(t1,v1,t2,v2),             \
+                                _coroutine_PARLST_4(t3,v3,t4,v4)
+#define _coroutine_PARLST_10(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5)                   \
+                                _coroutine_PARLST_8(t1,v1,t2,v2,t3,v3,t4,v4), \
+                                _coroutine_PARLST_2(t5,v5)
+#define _coroutine_PARLST_12(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6)             \
+                                _coroutine_PARLST_8(t1,v1,t2,v2,t3,v3,t4,v4), \
+                                _coroutine_PARLST_4(t5,v5,t6,v6)
+#define _coroutine_PARLST_14(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7)       \
+                                _coroutine_PARLST_8(t1,v1,t2,v2,t3,v3,t4,v4), \
+                                _coroutine_PARLST_6(t5,v5,t6,v6,t7,v7)
+#define _coroutine_PARLST_16(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8) \
+                                _coroutine_PARLST_8(t1,v1,t2,v2,t3,v3,t4,v4), \
+                                _coroutine_PARLST_8(t5,v5,t6,v6,t7,v7,t8,v8)
+
+/* _coroutine_INITLST is a helper macro to define a member initializer list for
+the constructor. */
+#define _coroutine_INITLST(...)                                               \
+                    _coroutine_SELECT(_coroutine_INITLST_, __VA_ARGS__)
+#define _coroutine_INITLST_1(_)
+#define _coroutine_INITLST_2(t1,v1)                                           \
+                    _coroutine_ ## v1 ## _var(_coroutine_ ## v1 ## _new),
+#define _coroutine_INITLST_4(t1,v1,t2,v2)                                     \
+                                _coroutine_INITLST_2(t1,v1)                   \
+                                _coroutine_INITLST_2(t2,v2)
+#define _coroutine_INITLST_6(t1,v1,t2,v2,t3,v3)                               \
+                                _coroutine_INITLST_4(t1,v1,t2,v2)             \
+                                _coroutine_INITLST_2(t3,v3)
+#define _coroutine_INITLST_8(t1,v1,t2,v2,t3,v3,t4,v4)                         \
+                                _coroutine_INITLST_4(t1,v1,t2,v2)             \
+                                _coroutine_INITLST_4(t3,v3,t4,v4)
+#define _coroutine_INITLST_10(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5)                  \
+                                _coroutine_INITLST_8(t1,v1,t2,v2,t3,v3,t4,v4) \
+                                _coroutine_INITLST_2(t5,v5)
+#define _coroutine_INITLST_12(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6)            \
+                                _coroutine_INITLST_8(t1,v1,t2,v2,t3,v3,t4,v4) \
+                                _coroutine_INITLST_4(t5,v5,t6,v6)
+#define _coroutine_INITLST_14(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7)      \
+                                _coroutine_INITLST_8(t1,v1,t2,v2,t3,v3,t4,v4) \
+                                _coroutine_INITLST_6(t5,v5,t6,v6,t7,v7)
+#define _coroutine_INITLST_16(t1,v1,t2,v2,t3,v3,t4,v4,t5,v5,t6,v6,t7,v7,t8,v8)\
+                                _coroutine_INITLST_8(t1,v1,t2,v2,t3,v3,t4,v4) \
+                                _coroutine_INITLST_8(t5,v5,t6,v6,t7,v7,t8,v8)
+
 /* _coroutine_ALIAS is a helper macro to define aliases for parameters and
 local variables, so that the programmer can access them easily. */
 #define _coroutine_ALIAS(...) _coroutine_SELECT(_coroutine_ALIAS_, __VA_ARGS__)
@@ -317,17 +374,23 @@ where the coroutine was interrupted. */
          _coroutine_ENUMDEF locations                                         \
     };                                                                        \
                                                                               \
-    struct _coroutine_ ## routine ## _struct                                  \
+    class _coroutine_ ## routine ## _struct                                   \
     {                                                                         \
+      public:                                                                 \
          _coroutine_VARDEF param                                              \
          enum _coroutine_ ## routine ## _location _coroutine_location;        \
          _coroutine_VARDEF local                                              \
+         /* constructor: */                                                   \
+         _coroutine_ ## routine ## _struct(_coroutine_PARLST param)           \
+           : _coroutine_INITLST param /* no comma here */                     \
+             _coroutine_location(_coroutine_BEGIN_ ## routine ## _enum)       \
+        {  }                                                                  \
     };                                                                        \
                                                                               \
     inline coroutine::_coroutine_result_t _coroutine_ ## routine ## _func(    \
-                   size_t _coroutine_allowance,                               \
-                   struct _coroutine_ ## routine ## _struct& _coroutine_param,\
-                   shared_type& shared_var);
+                          size_t _coroutine_allowance,                        \
+                          _coroutine_ ## routine ## _struct& _coroutine_param,\
+                          shared_type& shared_var);
 
 /// \def DEFINE_COROUTINE
 /// \brief define a member method or a function as a coroutine
@@ -346,8 +409,8 @@ where the coroutine was interrupted. */
 #define DEFINE_COROUTINE(namespace, routine, param, local, shared_type,       \
                                                         shared_var, locations)\
 coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
-                   size_t _coroutine_allowance,                               \
-                   struct _coroutine_ ## routine ## _struct& _coroutine_param,\
+                   size_t _coroutine_allowance, namespace                     \
+                          _coroutine_ ## routine ## _struct& _coroutine_param,\
                    shared_type& shared_var)                                   \
 {                                                                             \
     _coroutine_ALIAS param                                                    \
@@ -368,8 +431,8 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
 #define DEFINE_COROUTINE(namespace, routine, param, local, shared_type,       \
                                                         shared_var, locations)\
 coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
-                size_t _coroutine_allowance, struct namespace                 \
-                        _coroutine_ ## routine ## _struct& _coroutine_param,  \
+                size_t _coroutine_allowance, namespace                        \
+                          _coroutine_ ## routine ## _struct& _coroutine_param,\
                 shared_type& shared_var)                                      \
 {                                                                             \
     _coroutine_ALIAS param                                                    \
@@ -410,20 +473,12 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
                                                     shared_type, shared_init) \
         do                                                                    \
         {                                                                     \
-            _Pragma("GCC diagnostic push")                                    \
-            _Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")\
-            _Pragma("clang diagnostic push")                                  \
-          _Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")\
-            struct _coroutine_ ## routine1 ## _struct _coroutine_local1 =     \
-                                { _coroutine_NO_PARENS param1,                \
-                                  _coroutine_BEGIN_ ## routine1 ## _enum };   \
-            struct _coroutine_ ## routine2 ## _struct _coroutine_local2 =     \
-                                { _coroutine_NO_PARENS param2,                \
-                                  _coroutine_BEGIN_ ## routine2 ## _enum };   \
-            _Pragma("clang diagnostic pop")                                   \
-            _Pragma("GCC diagnostic pop")                                     \
+            _coroutine_ ## routine1 ## _struct _coroutine_local1 =            \
+                                    _coroutine_ ## routine1 ## _struct param1;\
+            _coroutine_ ## routine2 ## _struct _coroutine_local2 =            \
+                                    _coroutine_ ## routine2 ## _struct param2;\
             shared_type _coroutine_shared_data =                              \
-                                            _coroutine_NO_PARENS shared_init; \
+                                             _coroutine_NO_PARENS shared_init;\
             for (size_t _coroutine_allowance = 1;; )                          \
             {                                                                 \
                 coroutine::_coroutine_result_t _coroutine_result =            \
@@ -493,20 +548,12 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
                                                     shared_type, shared_init) \
         do                                                                    \
         {                                                                     \
-            _Pragma("GCC diagnostic push")                                    \
-            _Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")\
-            _Pragma("clang diagnostic push")                                  \
-          _Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")\
-            struct _coroutine_ ## routine1 ## _struct _coroutine_local1 =     \
-                                { _coroutine_NO_PARENS param1,                \
-                                  _coroutine_BEGIN_ ## routine1 ## _enum };   \
-            struct _coroutine_ ## routine2 ## _struct _coroutine_local2 =     \
-                                { _coroutine_NO_PARENS param2,                \
-                                  _coroutine_BEGIN_ ## routine2 ## _enum };   \
-            _Pragma("clang diagnostic pop")                                   \
-            _Pragma("GCC diagnostic pop")                                     \
+            _coroutine_ ## routine1 ## _struct _coroutine_local1 =            \
+                                    _coroutine_ ## routine1 ## _struct param1;\
+            _coroutine_ ## routine2 ## _struct _coroutine_local2 =            \
+                                    _coroutine_ ## routine2 ## _struct param2;\
             shared_type _coroutine_shared_data =                              \
-                                            _coroutine_NO_PARENS shared_init; \
+                                             _coroutine_NO_PARENS shared_init;\
             for (size_t _coroutine_allowance = 16;; _coroutine_allowance *= 2)\
             {                                                                 \
                 coroutine::_coroutine_result_t _coroutine_result =            \

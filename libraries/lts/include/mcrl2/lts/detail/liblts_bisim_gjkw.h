@@ -1865,15 +1865,19 @@ inline void state_info_entry::set_current_constln(succ_iter_t
 inline void state_info_entry::set_inert_succ_begin(
                                                succ_iter_t new_inert_out_begin)
 {
+    if (new_inert_out_begin > inert_succ_begin())
+    {
+        assert(!(*constln() < *new_inert_out_begin[-1].target->constln()));
+        assert(new_inert_out_begin[-1].target->block != block);
+    }
+    else if (new_inert_out_begin < inert_succ_begin())
+    {
+        assert(new_inert_out_begin == inert_succ_end() ||
+                                  new_inert_out_begin->target->block == block);
+    }
     state_inert_out_begin = new_inert_out_begin;
     assert(succ_begin() <= inert_succ_begin());
     assert(inert_succ_begin() <= inert_succ_end());
-    assert(succ_begin() == inert_succ_begin() ||
-                    !(*constln() < *inert_succ_begin()[-1].target->constln()));
-    assert(succ_begin() == inert_succ_begin() ||
-                                inert_succ_begin()[-1].target->block != block);
-    assert(inert_succ_begin() == inert_succ_end() ||
-                                   inert_succ_begin()->target->block == block);
 }
 
 

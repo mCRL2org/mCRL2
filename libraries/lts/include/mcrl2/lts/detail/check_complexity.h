@@ -22,9 +22,6 @@
 #ifndef _COUNT_ITERATIONS_H
 #define _COUNT_ITERATIONS_H
 
-#ifndef NDEBUG
-    #include <limits>    // used in ilog2() for Clang and g++
-#endif
 #include <cstddef>       // for size_t
 #include <cassert>
 #include <map>
@@ -50,72 +47,6 @@ namespace bisim_gjkw
 {
 
 #ifndef NDEBUG
-
-/// \fn ilog2(<integer type> i)
-/// \brief calculate floor(log_2(i))
-/// \details Because some compilers provide a more efficient implementation
-/// (using a single, simple assembly instruction) than the standard loop (as
-/// shown near the end), we distinguish several versions depending on the
-/// compiler.
-#if defined(__clang__) || defined(__GNUG__) // Clang, GNU g++
-
-static inline unsigned ilog2(unsigned long long i)
-                                                __attribute__((const, unused));
-static inline unsigned ilog2(unsigned long i) __attribute__((const, unused));
-static inline unsigned ilog2(unsigned i) __attribute__((const, unused));
-static inline unsigned ilog2(unsigned long long i)
-{
-    return std::numeric_limits<unsigned long long>::digits - 1 -
-                                                            __builtin_clzll(i);
-}
-static inline unsigned ilog2(unsigned long i)
-{
-    return std::numeric_limits<unsigned long>::digits - 1 - __builtin_clzl(i);
-}
-static inline unsigned ilog2(unsigned i)
-{
-    return std::numeric_limits<unsigned>::digits - 1 - __builtin_clz(i);
-}
-
-#elif defined(_MSC_VER) // Microsoft Visual Studio
-
-static inline unsigned long ilog2(unsigned long i)
-{
-    unsigned long result;
-    _BitScanReverse(&result, i);
-    return result;
-}
-static inline unsigned long ilog2(unsigned __int64 i)
-{
-    unsigned long result;
-    _BitScanReverse64(&result, i);
-    return result;
-}
-
-#else
-
-// compiler not detected.  Use a general implementation of ilog2() (which may
-// be slower).
-// #warn "I am using a slow ilog2() implementation because I cannot recognise the compiler."
-
-// The code used in ilog2() is inspired by the Bit Twiddling Hacks collected by
-// Sean Eron Anderson.  See http://graphics.stanford.edu/~seander/bithacks.html
-
-static inline unsigned ilog2(size_t i)
-{
-    register unsigned char r = 0;
-    assert(std::numeric_limits<state_type>::digits <= 64);
-    if (i > 0xFFFFFFFF)  {  i >>= 32; r  = 32;  }
-    if (i >     0xFFFF)  {  i >>= 16; r |= 16;  }
-    if (i >       0xFF)  {  i >>=  8; r |=  8;  }
-    if (i >        0xF)  {  i >>=  4; r |=  4;  }
-    if (i >        0x3)  {  i >>=  2; r |=  2;  }
-                                      r |= (i >> 1);
-    return r;
-}
-
-#endif // compiler version detection
-
 
 class check_complexity
 {
@@ -143,26 +74,29 @@ class check_complexity
       public:
         // public copy constructor to allow user to copy existing instances.
         iteration_type(const iteration_type& other)  :value(other.value)  {  }
+        iteration_type operator+(const iteration_type& other) const
+        {
+            return iteration_type(value + other.value);
+        }
+        iteration_type operator*(size_t other) const
+        {
+            return iteration_type(value * other);
+        }
     };
     static iteration_type n;
     static iteration_type m;
     static iteration_type n_log_n;
     static iteration_type m_log_n;
-    static iteration_type primary_m_log_n;
-    static iteration_type secondary_m_log_n;
-    static iteration_type n_m;
 
     static void init(state_type n_, trans_type m_)
     {
-        assert(n_ <= m_);
+        assert(n_ > 0);
+        // assert(m_ > 0);
         counters.clear();
         n = n_;
         m = m_;
-        n_log_n = n_ * log2((double) n_) * 0.5;
-        m_log_n = m_ * ilog2(n_);
-        primary_m_log_n = m_ * ilog2(n_) * 5 / 2; // I am unsure about this bound.
-        secondary_m_log_n = m_ * ilog2(n_) * 5 / 2 + m_; // I am unsure about this bound.
-        n_m = n_ * m_;
+        n_log_n = size_t(n_ * log2((double) n_)) / 2;
+        m_log_n = m_ * (unsigned) log2((double) n_);
     }
 
     static void count(const char* id, size_t counter,const iteration_type& max)
@@ -212,14 +146,19 @@ class check_complexity
       public:
         // public copy constructor to allow user to copy existing instances.
         iteration_type(const iteration_type&)  {  }
+        const iteration_type& operator+(const iteration_type&) const
+        {
+            return *this;
+        }
+        const iteration_type& operator*(size_t) const
+        {
+            return *this;
+        }
     };
     static const iteration_type n;
     static const iteration_type m;
     static const iteration_type n_log_n;
     static const iteration_type m_log_n;
-    static const iteration_type primary_m_log_n;
-    static const iteration_type secondary_m_log_n;
-    static const iteration_type n_m;
 
     static void init(state_type, trans_type)  {  }
 
