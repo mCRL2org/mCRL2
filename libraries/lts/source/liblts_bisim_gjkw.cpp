@@ -1153,6 +1153,8 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool branching,
      states_per_block(1, l.num_states()),
      nr_of_nonbottom_states(0)
 {
+//log::mcrl2_logger::set_reporting_level(log::debug);
+
     mCRL2log(log::verbose) << "O(m log n) "
                 << (preserve_divergence ? "Divergence preserving b" : "B")
                 << (branching ? "ranching b" : "")
@@ -1306,7 +1308,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
             if (0 < inert_out_per_state[s])
             {
                 // nonbottom state:
-                assert(0 < nr_of_nonbottom_states--);
+                assert(0 < nr_of_nonbottom_states);
+                --nr_of_nonbottom_states;
                 part_st.state_info[s].pos = blocks[0]->begin() +
                                                         nr_of_nonbottom_states;
             }
@@ -1316,7 +1319,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
                 // The following assertion is incomplete; only the second
                 // assertion (after the assignment) makes sure that not too
                 // many states become part of this slice.
-                assert(0 < states_per_block[0]--);
+                assert(0 < states_per_block[0]);
+                --states_per_block[0];
                 part_st.state_info[s].pos = blocks[0]->begin() +
                                                            states_per_block[0];
                 assert(part_st.state_info[s].pos >= blocks[0]->bottom_begin());
@@ -1346,7 +1350,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
                 state_type extra_block = action_block_map[t.label()];
                 // now initialise extra_state correctly
                 part_st.state_info[extra_state].block = blocks[extra_block];
-                assert(0 < states_per_block[extra_block]--);
+                assert(0 < states_per_block[extra_block]);
+                --states_per_block[extra_block];
                 part_st.state_info[extra_state].pos = blocks[extra_block]->
                                        begin() + states_per_block[extra_block];
                 *part_st.state_info[extra_state].pos =
@@ -1356,10 +1361,12 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
                 // state extra_state has exactly one outgoing transition,
                 // namely a noninert transition to to t.to().  It has to be
                 // initialised now.
-                assert(0 < noninert_in_per_state[t.to()]--);
+                assert(0 < noninert_in_per_state[t.to()]);
+                --noninert_in_per_state[t.to()];
                 t_pred = part_st.state_info[t.to()].noninert_pred_begin() +
                                                  noninert_in_per_state[t.to()];
-                assert(0 == --noninert_out_per_state[extra_state]);
+                --noninert_out_per_state[extra_state];
+                assert(0 == noninert_out_per_state[extra_state]);
                 t_succ = part_st.state_info[extra_state].succ_begin();
                 assert(0 < noninert_out_per_block[extra_block]);
                 t_B_to_C = blocks[extra_block]->inert_begin() -
@@ -1372,10 +1379,12 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
                 t_B_to_C->pred = t_pred;
             }
             // noninert transition from t.from() to extra_state
-            assert(0 < noninert_in_per_state[extra_state]--);
+            assert(0 < noninert_in_per_state[extra_state]);
+            --noninert_in_per_state[extra_state];
             t_pred = part_st.state_info[extra_state].noninert_pred_begin() +
                                             noninert_in_per_state[extra_state];
-            assert(0 < noninert_out_per_state[t.from()]--);
+            assert(0 < noninert_out_per_state[t.from()]);
+            --noninert_out_per_state[t.from()];
             t_succ = part_st.state_info[t.from()].succ_begin() +
                                               noninert_out_per_state[t.from()];
             assert(0 < noninert_out_per_block[0]);
@@ -1391,13 +1400,16 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr, bool branching,
         else
         {
             // inert transition from t.from() to t.to()
-            assert(0 < inert_in_per_state[t.to()]--);
+            assert(0 < inert_in_per_state[t.to()]);
+            --inert_in_per_state[t.to()];
             t_pred = part_st.state_info[t.to()].inert_pred_begin() +
                                                     inert_in_per_state[t.to()];
-            assert(0 < inert_out_per_state[t.from()]--);
+            assert(0 < inert_out_per_state[t.from()]);
+            --inert_out_per_state[t.from()];
             t_succ = part_st.state_info[t.from()].inert_succ_begin() +
                                                  inert_out_per_state[t.from()];
-            assert(0 < inert_out_per_block[0]--);
+            assert(0 < inert_out_per_block[0]);
+            --inert_out_per_block[0];
             t_B_to_C = blocks[0]->inert_begin() + inert_out_per_block[0];
 
             t_pred->source = &part_st.state_info.begin()[t.from()];
@@ -1447,7 +1459,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
         to_lts_map.insert(std::make_pair(it->second, it->first));
     }
     extra_kripke_states.clear();
-      
+
     // Put all the non-inert transitions in a set.  A set is used to remove
     // double occurrences of transitions.
     std::set<transition> resulting_transitions;
@@ -1559,6 +1571,10 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                         "constellation", 1, bisim_gjkw::check_complexity::n);
         bisim_gjkw::constln_t* const SpC =
                                 bisim_gjkw::constln_t::get_some_nontrivial();
+std::cerr << "SpC==" << (const void*) SpC
+<< ", SpC->begin()==" << (const void*) &*SpC->begin()
+<< ", *SpC->begin()==" << (const void*) &*(*SpC->begin())
+<< '\n';
         // 2.5: Choose a small splitter block SpB subset of SpC from P,
         //      i.e. |SpB| <= 1/2*|SpC|
         // and
@@ -1955,6 +1971,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
                     s_prime->current_constln()->target->constln() == NewC) ||
                    (s_prime->current_constln() != s_prime->succ_begin() &&
                     s_prime->current_constln()[-1].target->constln() == NewC));
+                (void) NewC; //< avoid warning about unused variable
             // 3.26l: end if
             }
         // 3.27l: end for
@@ -2087,6 +2104,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_red,
                     s->current_constln()->target->constln() == NewC) ||
                    (s->current_constln() != s->succ_begin() &&
                     s->current_constln()[-1].target->constln() == NewC));
+            (void) NewC; /* avoid warning about unused variable */
         // 3.27r: end if
         }
     // 3.28r: end for
@@ -2250,6 +2268,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
         if (s->surely_has_transition_to(SpC))
         {
             assert(!split_unreachable_new_bottom);
+            (void) split_unreachable_new_bottom; //< avoid warning about unused
+                                                 //  variable
             // The state s is not blue.  Move it to the slice of non-blue
             // bottom states.
             --visited_end;
@@ -2501,6 +2521,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
     if (nullptr != FromRed)
     {
         assert(FromRed->to_constln() == SpC);
+        (void) SpC; //< avoid warning about unused variable
         fromred_visited_begin = FromRed->end;
         if (RefB->inert_end() == fromred_visited_begin)
         {
