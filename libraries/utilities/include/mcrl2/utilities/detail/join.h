@@ -28,8 +28,8 @@ namespace detail
 /// \param match If this functions returns true in a node, the node will be split.
 /// \param lhs Function for getting the left subtree of a node.
 /// \param rhs Function for getting the right subtree of a node.
-template <typename T, typename OutputIterator, typename MatchFunction, typename AccessorFunction>
-void split(const T& t, OutputIterator i, MatchFunction match, AccessorFunction lhs, AccessorFunction rhs)
+template <typename T, typename OutputIterator, typename MatchFunction, typename AccessorFunction1, typename AccessorFunction2>
+void split(const T& t, OutputIterator i, MatchFunction match, AccessorFunction1 lhs, AccessorFunction2 rhs)
 {
   if (match(t))
   {
