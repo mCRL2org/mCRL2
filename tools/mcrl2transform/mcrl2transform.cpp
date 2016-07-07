@@ -18,8 +18,11 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/eliminate_single_usage_equations.h"
 #include "mcrl2/process/eliminate_trivial_equations.h"
+#include "mcrl2/process/eliminate_unused_equations.h"
 #include "mcrl2/process/parse.h"
+#include "mcrl2/process/process_info.h"
 #include "mcrl2/process/process_variable_strongly_connected_components.h"
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -160,6 +163,50 @@ struct process_scc_command: public processcommand
   }
 };
 
+/// \brief Eliminates equations that are used in a single place
+struct eliminate_single_usage_equations_command: public processcommand
+{
+  eliminate_single_usage_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : processcommand("eliminate-single-usage-equations", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    processcommand::execute();
+    process::eliminate_single_usage_equations(procspec);
+    write_text(output_filename, process::pp(procspec));
+  }
+};
+
+/// \brief Eliminates unused equations
+struct eliminate_unused_equations_command: public processcommand
+{
+  eliminate_unused_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : processcommand("eliminate-unused-equations", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    processcommand::execute();
+    process::eliminate_unused_equations(procspec);
+    write_text(output_filename, process::pp(procspec));
+  }
+};
+
+/// \brief Prints information about a process specification
+struct process_info_command: public processcommand
+{
+  process_info_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : processcommand("process-info", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    processcommand::execute();
+    process_info(procspec);
+  }
+};
+
 class transform_tool: public utilities::tools::input_output_tool
 {
   protected:
@@ -209,6 +256,9 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<eliminate_trivial_equations_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<join_bisimilar_equations_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_reduce_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<eliminate_single_usage_equations_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<process_info_command>(input_filename(), output_filename(), options));
 
       if (print_algorithms)
       {
