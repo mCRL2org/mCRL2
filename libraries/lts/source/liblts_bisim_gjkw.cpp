@@ -277,8 +277,8 @@ void part_state_t::print_part(const part_trans_t& part_tr) const
             else
             {
                 assert(B->inert_end() == B->inert_end()[-1].B_to_C_slice->end);
-                assert(B->inert_end()[-1].from_block() == B);
-                assert(B->inert_end()[-1].to_constln() == C);
+                assert(B->inert_end()[-1].B_to_C_slice->from_block() == B);
+                assert(B->inert_end()[-1].B_to_C_slice->to_constln() == C);
                 mCRL2log(log::debug, "bisim_gjkw") << B->inert_end() -
                                          B->inert_end()[-1].B_to_C_slice->begin
                     <<" transition(s) to its own constellation,\n\t\tof which "
@@ -1694,7 +1694,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                 bisim_gjkw::check_complexity::count(
                                 "for all incoming non-inert transitions", 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-                assert(pred.end() > pred_iter &&
+                assert(part_tr.pred_end() > pred_iter &&
                                 pred_iter->succ->B_to_C->pred == pred_iter);
                 const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
                 mCRL2log(log::debug, "bisim_gjkw") << pred_iter->debug_id();
@@ -2030,7 +2030,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
             bisim_gjkw::check_complexity::count(
                             for_all_incoming_transitions_of_the_new_block, 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-            assert(pred.end() > pred_iter &&
+            assert(part_tr.pred_end() > pred_iter &&
                                 pred_iter->succ->B_to_C->pred == pred_iter);
             const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             if (s_prime->block == NewB)  continue;
@@ -2161,7 +2161,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_red,
             bisim_gjkw::check_complexity::count(
                               for_all_incoming_transitions_of_the_new_block, 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-            assert(succ.end() > succ_iter &&
+            assert(part_tr.succ_end() > succ_iter &&
                                 succ_iter->B_to_C->pred->succ == succ_iter);
             const bisim_gjkw::state_info_ptr s_prime = succ_iter->target;
             if (s_prime->block == NewB)  continue;
@@ -2533,7 +2533,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
             bisim_gjkw::check_complexity::count(
                             for_all_incoming_transitions_of_the_new_block, 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-            assert(pred.end() > pred_iter &&
+            assert(part_tr.pred_end() > pred_iter &&
                                 pred_iter->succ->B_to_C->pred == pred_iter);
             const bisim_gjkw::state_info_ptr s_prime = pred_iter->source;
             if (s_prime->block == NewB)  continue;
@@ -2759,7 +2759,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
             bisim_gjkw::check_complexity::count(
                             for_all_incoming_transitions_of_the_new_block, 1,
                                         bisim_gjkw::check_complexity::m_log_n);
-            assert(succ.end() > succ_iter &&
+            assert(part_tr.succ_end() > succ_iter &&
                                 succ_iter->B_to_C->pred->succ == succ_iter);
             bisim_gjkw::state_info_ptr s_prime = succ_iter->target;
             if (s_prime->block == NewB)  continue;
@@ -2858,7 +2858,7 @@ Line_5_4:
             {
                 bisim_gjkw::check_complexity::count("for all constellations C "
                        "reachable from b", 1, bisim_gjkw::check_complexity::m);
-                assert(succ.end() > C_iter &&
+                assert(part_tr.succ_end() > C_iter &&
                                          C_iter->B_to_C->pred->succ == C_iter);
                 bisim_gjkw::constln_t* C = C_iter->target->constln();
                 bisim_gjkw::B_to_C_desc_iter_t new_slice =
@@ -2895,6 +2895,7 @@ Line_5_4:
                 C->postprocess_begin = new_slice->begin;
                 assert(C->postprocess_begin < C->postprocess_end);
                 new_slice->new_bottom_end = orig_new_bottom_end;
+                assert(new_slice->from_block() == SplitB);
                 SplitB->to_constln.splice(SplitB->to_constln.end(),
                                                 SplitB->to_constln, new_slice);
             // 5.9: end for
@@ -2905,6 +2906,7 @@ Line_5_4:
         // 5.11: end for
         }
         // 5.12: if SplitB can reach some constellation C not in R then
+        assert(SplitB->to_constln.begin() != SplitB->to_constln.end());
         if (!SplitB->to_constln.begin()->needs_postprocessing())
         {
             bisim_gjkw::constln_t*C = SplitB->to_constln.begin()->to_constln();
@@ -2945,7 +2947,7 @@ Line_5_4:
                                         bisim_gjkw::check_complexity::m_log_n);
                                                         //< or perhaps m * 2?
             bisim_gjkw::B_to_C_iter_t B_iter = SpC->postprocess_begin;
-            assert(B_to_C.end() > B_iter &&
+            assert(part_tr.B_to_C_end() > B_iter &&
                                          B_iter->pred->succ->B_to_C == B_iter);
             bisim_gjkw::block_t* B = B_iter->pred->source->block;
             mCRL2log(log::debug, "bisim_gjkw") << "Now postprocessing "
@@ -2958,8 +2960,10 @@ Line_5_4:
             //       postprocessing
             SpC->postprocess_begin = FromRed->end;
             assert(SpC->postprocess_begin <= SpC->postprocess_end);
+            assert(B->to_constln.begin() != B->to_constln.end());
             if (B->to_constln.begin() != FromRed)
             {
+                assert(FromRed->from_block() == B);
                 B->to_constln.splice(B->to_constln.begin(), B->to_constln,
                                                                       FromRed);
             }

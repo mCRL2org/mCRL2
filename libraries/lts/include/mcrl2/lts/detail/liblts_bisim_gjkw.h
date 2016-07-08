@@ -1468,6 +1468,8 @@ class part_trans_t
 
     B_to_C_const_iter_t B_to_C_begin() const  {  return B_to_C.begin();  }
     B_to_C_iter_t       B_to_C_end  ()        {  return B_to_C.end  ();  }
+    pred_const_iter_t pred_end() const  {  return pred.end();  }
+    succ_const_iter_t succ_end() const  {  return succ.end();  }
 };
 
 ///@} (end of group part_trans)
@@ -1994,7 +1996,8 @@ inline void block_t::set_constln(constln_t* new_constln)
 /// read FromRed
 inline B_to_C_descriptor* block_t::FromRed(const constln_t* SpC)
 {
-    if (to_constln.begin()->to_constln() == SpC)
+    if (to_constln.begin() != to_constln.end() &&
+                                       to_constln.begin()->to_constln() == SpC)
     {
         return &*to_constln.begin();
     }
@@ -2008,6 +2011,7 @@ inline B_to_C_descriptor* block_t::FromRed(const constln_t* SpC)
 /// set FromRed to an existing element in to_constln
 inline void block_t::SetFromRed(B_to_C_desc_iter_t new_fromred)
 {
+    assert(to_constln.begin() != to_constln.end());
     if (to_constln.begin() != new_fromred)
     {
         to_constln.splice(to_constln.begin(), to_constln, new_fromred);
