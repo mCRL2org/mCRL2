@@ -21,7 +21,7 @@
 #include "mcrl2/process/action_parse.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
-#include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/alphabet_reduce.h"
 
 namespace mcrl2
 {

@@ -12,20 +12,10 @@
 #ifndef MCRL2_PROCESS_ALPHABET_H
 #define MCRL2_PROCESS_ALPHABET_H
 
-#include <algorithm>
-#include <iterator>
-#include <iostream>
-#include <limits>
-#include <sstream>
-#include "mcrl2/process/detail/alphabet_push_allow.h"
-#include "mcrl2/process/detail/alphabet_push_block.h"
-#include "mcrl2/process/detail/alphabet_traverser.h"
-#include "mcrl2/process/expand_process_instance_assignments.h"
-#include "mcrl2/process/builder.h"
-#include "mcrl2/process/remove_equations.h"
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
-#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -33,73 +23,258 @@ namespace process {
 
 namespace detail {
 
-struct alphabet_push_builder: public process_expression_builder<alphabet_push_builder>
+struct alphabet_node
 {
-  typedef process_expression_builder<alphabet_push_builder> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-  using super::update;
+  multi_action_name_set alphabet;
 
-  std::vector<process_equation>& equations;
-  data::set_identifier_generator id_generator;
+  alphabet_node()
+  {}
 
-  alphabet_push_builder(std::vector<process_equation>& equations_)
-    : equations(equations_)
-  {
-    for (process_equation& equation: equations_)
-    {
-      id_generator.add_identifier(equation.identifier().name());
-    }
-  }
-
-  process_expression apply(const process::allow& x)
-  {
-    return push_allow(x.operand(), x.allow_set(), equations, id_generator);
-  }
-
-  process_expression apply(const process::block& x)
-  {
-    return push_block(x.block_set(), x.operand(), equations, id_generator);
-  }
+  alphabet_node(const multi_action_name_set& alphabet_)
+    : alphabet(alphabet_)
+  {}
 };
 
 inline
-process_expression alphabet_reduce(const process_expression& x, std::vector<process_equation>& equations)
+std::ostream& operator<<(std::ostream& out, const alphabet_node& x)
 {
-  alphabet_push_builder f(equations);
-  return f.apply(x);
+  return out << "alphabet = " << pp(x.alphabet);
 }
 
-} // detail
-
-/// \brief Applies alphabet reduction to a process specification.
-/// \param procspec A process specification
-/// \param duplicate_equation_limit If the number of equations is less than
-/// duplicate_equation_limit, the remove duplicate equations procedure is applied.
-/// Note that this procedure is not efficient, so it should not be used if the number
-/// of equations is big.
-inline
-void alphabet_reduce(process_specification& procspec, std::size_t duplicate_equation_limit = (std::numeric_limits<size_t>::max)())
+/// \brief Traverser that computes the alphabet of process expressions
+template <typename Derived, typename Node = alphabet_node>
+struct alphabet_traverser: public process_expression_traverser<Derived>
 {
-  mCRL2log(log::verbose) << "applying alphabet reduction..." << std::endl;
-  process_expression init = procspec.init();
-  if (is_pcrl(init))
+  typedef process_expression_traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  Derived& derived()
   {
-    init = expand_process_instance_assignments(init, procspec.equations());
+    return static_cast<Derived&>(*this);
   }
-  process_expression init_reduced = detail::alphabet_reduce(init, procspec.equations());
-  if (init != init_reduced)
+
+  const std::vector<process_equation>& equations;
+  std::set<process_identifier>& W;
+  std::vector<Node> node_stack;
+
+  alphabet_traverser(const std::vector<process_equation>& equations_, std::set<process_identifier>& W_)
+    : equations(equations_), W(W_)
+  {}
+
+  // Push a node to node_stack
+  void push(const Node& node)
   {
-    procspec.init() = init_reduced;
+    mCRL2log(log::debug1) << "<push> A = " << pp(node.alphabet) << std::endl;
+    node_stack.push_back(node);
   }
-  if (procspec.equations().size() < duplicate_equation_limit)
+
+  // Push A to node_stack
+  void push(const multi_action_name_set& A)
   {
-    mCRL2log(log::debug) << "removing duplicate equations..." << std::endl;
-    remove_duplicate_equations(procspec);
-    mCRL2log(log::debug) << "removing duplicate equations finished" << std::endl;
+    push(Node(A));
   }
-  mCRL2log(log::debug) << "alphabet reduction finished" << std::endl;
+
+  // Pop the top element of node_stack and return it
+  Node pop()
+  {
+    Node result = node_stack.back();
+    mCRL2log(log::debug1) << "<pop> A = " << pp(result.alphabet) << std::endl;
+    node_stack.pop_back();
+    return result;
+  }
+
+  // Return the top element of node_stack
+  Node& top()
+  {
+    return node_stack.back();
+  }
+
+  // Return the top element of node_stack
+  const Node& top() const
+  {
+    return node_stack.back();
+  }
+
+  // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2)
+  void join()
+  {
+    Node right = pop();
+    Node left = pop();
+    push(set_union(left.alphabet, right.alphabet));
+  }
+
+  // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2, A1 | A2)
+  void join_merge()
+  {
+    Node right = pop();
+    Node left = pop();
+    push(alphabet_operations::merge(left.alphabet, right.alphabet));
+  }
+
+  // Pops two elements A1 and A2 from the stack, and pushes back A1 | A2
+  void join_sync()
+  {
+    Node right = pop();
+    Node left = pop();
+    push(alphabet_operations::sync(left.alphabet, right.alphabet));
+  }
+
+  void leave(const process::action& x)
+  {
+    multi_action_name alpha;
+    alpha.insert(x.label().name());
+    multi_action_name_set A;
+    A.insert(alpha);
+    push(A);
+  }
+
+  void leave(const process::process_instance& x)
+  {
+    using utilities::detail::contains;
+    if (!contains(W, x.identifier()))
+    {
+      W.insert(x.identifier());
+      const process_equation& eqn = find_equation(equations, x.identifier());
+      derived().apply(eqn.expression());
+      W.erase(x.identifier());
+    }
+    else
+    {
+      push(multi_action_name_set());
+    }
+  }
+
+  void leave(const process::process_instance_assignment& x)
+  {
+    using utilities::detail::contains;
+    if (!contains(W, x.identifier()))
+    {
+      W.insert(x.identifier());
+      const process_equation& eqn = find_equation(equations, x.identifier());
+      derived().apply(eqn.expression());
+      W.erase(x.identifier());
+    }
+    else
+    {
+      push(multi_action_name_set());
+    }
+  }
+
+  void leave(const process::delta& /* x */)
+  {
+    push(multi_action_name_set());
+  }
+
+  void leave(const process::tau& /* x */)
+  {
+    multi_action_name_set A;
+    A.insert(multi_action_name()); // A = { tau }
+    push(A);
+  }
+
+  void leave(const process::sum& /* x */)
+  {
+  }
+
+  void leave(const process::block& x)
+  {
+    top().alphabet = alphabet_operations::block(x.block_set(), top().alphabet);
+  }
+
+  void leave(const process::hide& x)
+  {
+    top().alphabet = alphabet_operations::hide(x.hide_set(), top().alphabet);
+  }
+
+  void leave(const process::rename& x)
+  {
+    top().alphabet = alphabet_operations::rename(x.rename_set(), top().alphabet);
+  }
+
+  void leave(const process::comm& x)
+  {
+    top().alphabet = alphabet_operations::comm(x.comm_set(), top().alphabet);
+  }
+
+  void leave(const process::allow& x)
+  {
+    top().alphabet = alphabet_operations::allow(x.allow_set(), top().alphabet);
+  }
+
+  void leave(const process::sync& /* x */)
+  {
+    join_sync();
+  }
+
+  void leave(const process::at& /* x */)
+  {
+  }
+
+  void leave(const process::seq& /* x */)
+  {
+    join();
+  }
+
+  void leave(const process::if_then& /* x */)
+  {
+  }
+
+  void leave(const process::if_then_else& /* x */)
+  {
+    join();
+  }
+
+  void leave(const process::bounded_init& /* x */)
+  {
+    join();
+  }
+
+  void leave(const process::merge& /* x */)
+  {
+    join_merge();
+  }
+
+  void leave(const process::left_merge& /* x */)
+  {
+    join_merge();
+  }
+
+  void leave(const process::choice& /* x */)
+  {
+    join();
+  }
+};
+
+struct apply_alphabet_traverser: public alphabet_traverser<apply_alphabet_traverser>
+{
+  typedef alphabet_traverser<apply_alphabet_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::node_stack;
+
+  apply_alphabet_traverser(const std::vector<process_equation>& equations, std::set<process_identifier>& W)
+    : super(equations, W)
+  {}
+};
+
+inline
+alphabet_node alphabet(const process_expression& x, const std::vector<process_equation>& equations, std::set<process_identifier>& W)
+{
+  detail::apply_alphabet_traverser f(equations, W);
+  f.apply(x);
+  return f.node_stack.back();
+}
+
+} // namespace detail
+
+inline
+multi_action_name_set alphabet(const process_expression& x, const std::vector<process_equation>& equations)
+{
+  std::set<process_identifier> W;
+  return detail::alphabet(x, equations, W).alphabet;
 }
 
 } // namespace process

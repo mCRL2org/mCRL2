@@ -17,8 +17,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/tuple/tuple.hpp>
 #include "mcrl2/core/detail/print_utility.h"
-// #include "mcrl2/lps/parse.h"
-#include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/parse.h"
