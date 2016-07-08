@@ -141,7 +141,7 @@ struct alphabet_reduce_command: public processcommand
   void execute()
   {
     processcommand::execute();
-    process::remove_duplicate_equations(procspec);
+    process::alphabet_reduce(procspec, 0);
     write_text(output_filename, process::pp(procspec));
   }
 };
