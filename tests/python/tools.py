@@ -89,7 +89,11 @@ class Tool(object):
 
     def assign_outputs(self):
         for node in self.output_nodes:
-            node.value = 'executed'
+            if node.type == 'TEXT':
+                text = read_text(node.filename())
+                node.value = text
+            else:
+                node.value = 'executed'
 
     def parse_number(self, text, key, regex):
         m = re.search(regex, text)
@@ -200,16 +204,6 @@ class Tool(object):
         out.write('executed = ' + str(self.executed) + '\n')
         return out.getvalue()
 
-class PrintTool(Tool):
-    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
-        assert len(input_nodes) == 1
-        assert len(output_nodes) == 1
-        super(PrintTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
-
-    def assign_outputs(self):
-        text = read_text(self.output_nodes[0].filename())
-        self.output_nodes[0].value = text
-
 class SolveTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         super(SolveTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
@@ -272,6 +266,4 @@ class ToolFactory(object):
             return Lts2LpsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name in ['pbespgsolve', 'pbes2bool', 'bessolve']:
             return SolveTool(label, name, toolpath, input_nodes, output_nodes, args)
-        elif name in ['bespp', 'lpspp', 'pbespp']:
-            return PrintTool(label, name, toolpath, input_nodes, output_nodes, args)
         return Tool(label, name, toolpath, input_nodes, output_nodes, args)
