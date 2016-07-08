@@ -223,6 +223,21 @@ struct remove_data_parameters_command: public processcommand
   }
 };
 
+/// \brief Computes the alphabet of the initial state of a process
+struct compute_alphabet_command: public processcommand
+{
+  compute_alphabet_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : processcommand("compute-alphabet", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    processcommand::execute();
+    process::multi_action_name_set alpha = process::alphabet(procspec.init(), procspec.equations());
+    std::cout << process::pp(alpha) << std::endl;
+  }
+};
+
 class transform_tool: public utilities::tools::input_output_tool
 {
   protected:
@@ -276,6 +291,7 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<process_info_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<remove_data_parameters_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<compute_alphabet_command>(input_filename(), output_filename(), options));
 
       if (print_algorithms)
       {
