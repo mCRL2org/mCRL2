@@ -12,6 +12,8 @@
 #ifndef MCRL2_PROCESS_ALPHABET_EFFICIENT_H
 #define MCRL2_PROCESS_ALPHABET_EFFICIENT_H
 
+#include "mcrl2/process/alphabet.h"
+
 namespace mcrl2 {
 
 namespace process {
