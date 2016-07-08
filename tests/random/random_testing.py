@@ -80,9 +80,13 @@ class ProcessTauTest(ProcessTest):
                                make_seq: 5,
                              }
 
-class AlphabetTest(ProcessTest):
+class AlphabetReduceTest(ProcessTest):
     def __init__(self, name, settings = dict()):
-        super(AlphabetTest, self).__init__(name, ymlfile('alphabet'), settings)
+        super(AlphabetReduceTest, self).__init__(name, ymlfile('alphabet-reduce'), settings)
+
+class AlphabetComputeTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(AlphabetComputeTest, self).__init__(name, ymlfile('alphabet-compute'), settings)
 
 class LpsSuminstTest(ProcessTest):
     def __init__(self, name, settings = dict()):
@@ -218,7 +222,8 @@ class BessolveTest(BesTest):
         super(BessolveTest, self).__init__(name, ymlfile('bessolve'), settings)
 
 available_tests = {
-    'alphabet'                          : lambda name, settings: AlphabetTest(name, settings)                                ,
+    'alphabet-compute'                  : lambda name, settings: AlphabetComputeTest(name, settings)                         ,
+    'alphabet-reduce'                   : lambda name, settings: AlphabetReduceTest(name, settings)                          ,
     'lpssuminst'                        : lambda name, settings: LpsSuminstTest(name, settings)                              ,
     'lpssumelm'                         : lambda name, settings: LpsSumelmTest(name, settings)                               ,
     'lpsparelm'                         : lambda name, settings: LpsParelmTest(name, settings)                               ,
