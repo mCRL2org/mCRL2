@@ -1190,20 +1190,28 @@ class B_to_C_descriptor
     /// compute the source block of the transitions in this slice
     const block_t* from_block() const
     {
+        assert(begin < end);
+        assert(begin->pred->succ->B_to_C == begin);
         return begin->pred->source->block;
     }
     block_t* from_block()
     {
+        assert(begin < end);
+        assert(begin->pred->succ->B_to_C == begin);
         return begin->pred->source->block;
     }
 
     /// compute the goal constellation of the transitions in this slice
     const constln_t* to_constln() const
     {
+        assert(begin < end);
+        assert(begin->pred->succ->B_to_C == begin);
         return begin->pred->succ->target->constln();
     }
     constln_t* to_constln()
     {
+        assert(begin < end);
+        assert(begin->pred->succ->B_to_C == begin);
         return begin->pred->succ->target->constln();
     }
 
@@ -1217,16 +1225,18 @@ class B_to_C_descriptor
     /// convert to a string (for debugging)
     std::string debug_id() const
     {
-        assert(begin != end);
+        assert(begin < end);
         std::string result("slice containing transition");
         if (end - begin > 1)
             result += "s ";
         else
             result += " ";
         B_to_C_const_iter_t iter = begin;
+        assert(iter->pred->succ->B_to_C == iter);
         result += iter->pred->debug_id_short();
         if (end - iter > 4)
         {
+            assert(iter[1].pred->succ->B_to_C == iter+1);
             result += ", ";
             result += iter[1].pred->debug_id_short();
             result += ", ...";
@@ -1234,6 +1244,7 @@ class B_to_C_descriptor
         }
         while (++iter != end)
         {
+            assert(iter->pred->succ->B_to_C == iter);
             result += ", ";
             result += iter->pred->debug_id_short();
         }
@@ -1255,8 +1266,8 @@ class part_trans_t
 
     void swap_in(B_to_C_iter_t pos1, B_to_C_iter_t pos2)
     {
-        assert(B_to_C.end() != pos1 && pos1->pred->succ->B_to_C == pos1);
-        assert(B_to_C.end() != pos2 && pos2->pred->succ->B_to_C == pos2);
+        assert(B_to_C.end() > pos1 && pos1->pred->succ->B_to_C == pos1);
+        assert(B_to_C.end() > pos2 && pos2->pred->succ->B_to_C == pos2);
 
         // swap contents
         pred_entry temp_entry(*pos1->pred);
@@ -1267,14 +1278,14 @@ class part_trans_t
         pos1->pred = pos2->pred;
         pos2->pred = temp_iter;
 
-        assert(B_to_C.end() != pos1 && pos1->pred->succ->B_to_C == pos1);
-        assert(B_to_C.end() != pos2 && pos2->pred->succ->B_to_C == pos2);
+        assert(B_to_C.end() > pos1 && pos1->pred->succ->B_to_C == pos1);
+        assert(B_to_C.end() > pos2 && pos2->pred->succ->B_to_C == pos2);
     }
 
     void swap_out(pred_iter_t pos1, pred_iter_t pos2)
     {
-        assert(pred.end() != pos1 && pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() != pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
 
         // swap contents
         succ_entry temp_entry(*pos1->succ);
@@ -1285,16 +1296,16 @@ class part_trans_t
         pos1->succ = pos2->succ;
         pos2->succ = temp_iter;
 
-        assert(pred.end() != pos1 && pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() != pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
     void swap3_out(pred_iter_t pos1, pred_iter_t pos2, pred_iter_t pos3)
     {
-        assert(pred.end() != pos1 && pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() != pos2 && pos2->succ->B_to_C->pred == pos2);
-        assert(pred.end() != pos3 && pos3->succ->B_to_C->pred == pos3);
+        assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pred.end() > pos3 && pos3->succ->B_to_C->pred == pos3);
 
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
@@ -1308,15 +1319,15 @@ class part_trans_t
         pos3->succ = pos1->succ;
         pos1->succ = temp_iter;
 
-        assert(pred.end() != pos1 && pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() != pos2 && pos2->succ->B_to_C->pred == pos2);
-        assert(pred.end() != pos3 && pos3->succ->B_to_C->pred == pos3);
+        assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
+        assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pred.end() > pos3 && pos3->succ->B_to_C->pred == pos3);
     }
 
     void swap_B_to_C(succ_iter_t pos1, succ_iter_t pos2)
     {
-        assert(succ.end() != pos1 && pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
 
         // swap contents
         B_to_C_entry temp_entry(*pos1->B_to_C);
@@ -1327,16 +1338,16 @@ class part_trans_t
         pos1->B_to_C = pos2->B_to_C;
         pos2->B_to_C = temp_iter;
 
-        assert(succ.end() != pos1 && pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
     void swap3_B_to_C(succ_iter_t pos1, succ_iter_t pos2, succ_iter_t pos3)
     {
-        assert(succ.end() != pos1 && pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
-        assert(succ.end() != pos3 && pos3->B_to_C->pred->succ == pos3);
+        assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() > pos3 && pos3->B_to_C->pred->succ == pos3);
 
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
@@ -1350,9 +1361,9 @@ class part_trans_t
         pos3->B_to_C = pos1->B_to_C;
         pos1->B_to_C = temp_iter;
 
-        assert(succ.end() != pos1 && pos1->B_to_C->pred->succ == pos1);
-        assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
-        assert(succ.end() != pos3 && pos3->B_to_C->pred->succ == pos3);
+        assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
+        assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
+        assert(succ.end() > pos3 && pos3->B_to_C->pred->succ == pos3);
     }
   public:
     part_trans_t(trans_type m)
@@ -1976,7 +1987,7 @@ inline void block_t::set_constln(constln_t* new_constln)
 {
     int_constln = new_constln;
     assert(nullptr == int_constln ||
-           int_constln->begin() <= int_begin && int_end <= int_constln->end());
+         (int_constln->begin() <= int_begin && int_end <= int_constln->end()));
 }
 
 
