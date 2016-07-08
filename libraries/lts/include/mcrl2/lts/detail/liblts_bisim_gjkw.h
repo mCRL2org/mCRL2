@@ -295,7 +295,7 @@ class state_info_entry
 
     static state_info_const_ptr state_info_begin()  {  return s_i_begin;  }
     static permutation_const_iter_t permutation_begin()  { return perm_begin; }
-private:
+  private:
     static state_info_const_ptr s_i_begin;
     static permutation_const_iter_t perm_begin;
 
@@ -364,7 +364,7 @@ static inline void swap3_permutation(permutation_iter_t s1,
 /// therefore impossible to have multiple refinements running at the same time.
 class block_t
 {
-private:
+  private:
     /// iterator past the last state of the block
     permutation_iter_t int_end;
 
@@ -389,7 +389,7 @@ private:
 
     /// iterator past the last inert transition of the block
     B_to_C_iter_t int_inert_end;
-public:
+  public:
     /// list of B_to_C with transitions from this block
     /// \details This list serves two purposes: it contains all
     /// B_to_C_descriptors, so that the constellations reachable from this
@@ -401,7 +401,7 @@ public:
     /// of its elements are temporarily moved to the list of B_to_C_descriptors
     /// that need postprocessing.
     B_to_C_desc_list to_constln;
-private:
+  private:
     /// constellation to which the block belongs
     constln_t* int_constln;
 
@@ -423,7 +423,7 @@ private:
 
 #define BLOCK_NO_SEQNR ((state_type) -1)
 
-public:
+  public:
     /// \brief total number of blocks with unique sequence number allocated
     /// \details Upon starting the stuttering equivalence algorithm, the number
     /// of blocks must be zero.
@@ -724,9 +724,9 @@ public:
         assert(int_inert_begin <= int_inert_end);
     }
 
-private:
-    static const char* const mark_all_states_in_SpB;
-public:
+  private:
+    static const char mark_all_states_in_SpB[];
+  public:
     /// \brief mark all states in the block
     /// \details This function is used to mark all states of the splitter.
     void mark_all_states()
@@ -811,7 +811,7 @@ public:
 /// is initially unknown, we will allocate it dynamically.
 class constln_t
 {
-private:
+  private:
     /// iterator past the last state in the constellation
     permutation_iter_t int_end;
 
@@ -827,7 +827,7 @@ private:
 
     /// first constellation in the list of nontrivial constellations
     static constln_t* nontrivial_first;
-public:
+  public:
     /// \brief iterator to the first transition into this constellation that
     /// needs postprocessing
     /// \details In `PostprocessNewBottom()`, all transitions from a refined
@@ -955,7 +955,8 @@ public:
         }
     }
 
-    std::string debug_id() const  {
+    std::string debug_id() const
+    {
         return "constellation [" + std::to_string(begin() - state_info_entry::permutation_begin()) +
                              "," + std::to_string(end() - state_info_entry::permutation_begin()) + ")";
     }
@@ -976,7 +977,7 @@ class part_trans_t;
 /// states.
 class part_state_t
 {
-private:
+  private:
     /// permutation array
     permutation_t permutation;
 
@@ -988,7 +989,7 @@ private:
 
     template <class LTS_TYPE>
     friend class bisim_partitioner_gjkw_initialise_helper;
-public:
+  public:
     /// \brief constructor
     /// \details The constructor allocates memory, but does not actually
     /// initialise the partition.
@@ -1005,27 +1006,44 @@ public:
     /// destructor
     ~part_state_t()
     {
-        // the destructor deallocates constellations and blocks.
+        assert(state_info.empty());
+        assert(permutation.empty());
+    }
+  private:
+    static const char delete_constellations[];
+    static const char delete_blocks[];
+  public:
+    /// deallocates constellations and blocks
+    void clear()
+    {
         // We have to deallocate constellations first because deallocating
         // blocks makes the constellations inaccessible.
         permutation_iter_t permutation_iter = permutation.end();
         while (permutation.begin() != permutation_iter)
         {
+            bisim_gjkw::check_complexity::count(delete_constellations, 1,
+                                              bisim_gjkw::check_complexity::n);
             constln_t* C = permutation_iter[-1]->constln();
+            permutation_iter[-1]->block->set_constln(nullptr);
             assert(C->end() == permutation_iter);
             permutation_iter = C->begin();
             delete C;
         }
 
+        mCRL2log(log::debug, "bisim_gjkw") << "halfway part_state_t::clear\n";
         #ifndef NDEBUG
             state_type deleted_blocks = 0;
         #endif
         permutation_iter = permutation.end();
         while (permutation.begin() != permutation_iter)
         {
+            bisim_gjkw::check_complexity::count(delete_blocks, 1,
+                                              bisim_gjkw::check_complexity::n);
             block_t* B = permutation_iter[-1]->block;
+            permutation_iter[-1]->block = nullptr;
             assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
+            (*permutation_iter)->block = nullptr;
             #ifndef NDEBUG
                 if (BLOCK_NO_SEQNR != B->seqnr())  ++deleted_blocks;
             #endif
@@ -1035,6 +1053,8 @@ public:
             assert(deleted_blocks == block_t::nr_of_blocks);
         #endif
         block_t::nr_of_blocks = 0;
+        state_info.clear();
+        permutation.clear();
     }
 
     /// provide stored number of states
@@ -1045,19 +1065,15 @@ public:
     {
         return state_info[s].block;
     }
-
 #ifndef NDEBUG
-
-private:
+  private:
     void print_block(const char* message, const block_t* B,
         permutation_const_iter_t begin, permutation_const_iter_t end) const;
-public:
+  public:
     /// print the partition as a tree (per constellation and block)
     void print_part(const part_trans_t& part_tr) const;
     void print_trans() const;
-
-#endif // ifndef NDEBUG
-
+#endif
 };
 
 ///@} (end of group part_state)
@@ -1111,7 +1127,7 @@ about a transition.  Every transition has one of each data structure; the three
 structures are linked through the iterators (used here as pointers). */
 class succ_entry
 {
-public:
+  public:
     B_to_C_iter_t B_to_C;
     state_info_ptr target;
     out_descriptor* constln_slice;
@@ -1120,7 +1136,7 @@ public:
 
 class pred_entry
 {
-public:
+  public:
     succ_iter_t succ;
     state_info_ptr source;
 
@@ -1139,7 +1155,7 @@ public:
 
 class B_to_C_entry
 {
-public:
+  public:
     pred_iter_t pred;
     B_to_C_desc_iter_t B_to_C_slice;
 };
@@ -1149,11 +1165,12 @@ public:
 slice of states belongs together. */
 class out_descriptor
 {
-public:
+  public:
     succ_iter_t end, begin;
 
     out_descriptor(succ_iter_t iter)
-      : end(iter), begin(iter)
+      : end(iter),
+        begin(iter)
     {  }
     state_type size() const  {  return end - begin;  }
 };
@@ -1161,7 +1178,7 @@ public:
 
 class B_to_C_descriptor
 {
-public:
+  public:
     B_to_C_iter_t end, begin;
     permutation_iter_t new_bottom_end; // used in postprocess_new_bottom
 
@@ -1228,7 +1245,7 @@ public:
 /* part_trans_t collects and organises all data for the transitions. */
 class part_trans_t
 {
-private:
+  private:
     fixed_vector<pred_entry> pred;
     fixed_vector<succ_entry> succ;
     fixed_vector<B_to_C_entry> B_to_C;
@@ -1337,7 +1354,7 @@ private:
         assert(succ.end() != pos2 && pos2->B_to_C->pred->succ == pos2);
         assert(succ.end() != pos3 && pos3->B_to_C->pred->succ == pos3);
     }
-public:
+  public:
     part_trans_t(trans_type m)
       : pred(m),
         succ(m),
@@ -1345,16 +1362,32 @@ public:
     {  }
     ~part_trans_t()
     {
+        assert(B_to_C.empty());
+        assert(succ.empty());
+        assert(pred.empty());
+    }
+  private:
+    static const char delete_out_descriptors[];
+  public:
+    /// clear allocated memory
+    void clear()
+    {
         // B_to_C_descriptors are deallocated when their respective lists are
-        // deallocated.  No need to do it here.
+        // deallocated:
+        B_to_C.clear();
         // deallocate the out_descriptors
         for (succ_iter_t succ_iter = succ.begin(); succ.end() != succ_iter; )
         {
+            bisim_gjkw::check_complexity::count(delete_out_descriptors, 1,
+                                              bisim_gjkw::check_complexity::m);
             out_descriptor* desc = succ_iter->constln_slice;
+            succ_iter->constln_slice = nullptr;
             assert(desc->begin == succ_iter);
             succ_iter = desc->end;
             delete desc;
         }
+        succ.clear();
+        pred.clear();
     }
 
     trans_type size() const  {  return pred.size();  }
@@ -1469,7 +1502,8 @@ class bisim_partitioner_gjkw_initialise_helper
 {
   private:
     LTS_TYPE& aut;
-    state_type nr_of_states, orig_nr_of_states;
+    state_type nr_of_states;
+    const state_type orig_nr_of_states;
     trans_type nr_of_transitions;
 
     // key and hash function for (action, target state) pair. Required since
@@ -1571,7 +1605,13 @@ class bisim_partitioner_gjkw
         create_initial_partition_gjkw(branching, preserve_divergence);
         refine_partition_until_it_becomes_stable_gjkw();
     }
-    ~bisim_partitioner_gjkw()  {  }
+    ~bisim_partitioner_gjkw()
+    {
+        assert(new_bottom_states.empty());
+        part_tr.clear();
+        part_st.clear();
+        bisim_gjkw::check_complexity::stats();
+    }
 
     // replace_transitions() replaces the transitions of the LTS stored here by
     // those of its bisimulation quotient.  However, it does not change
@@ -1935,7 +1975,8 @@ inline block_t::block_t(constln_t* constln_, permutation_iter_t begin_,
 inline void block_t::set_constln(constln_t* new_constln)
 {
     int_constln = new_constln;
-    assert(int_constln->begin() <= int_begin && int_end <= int_constln->end());
+    assert(nullptr == int_constln ||
+           int_constln->begin() <= int_begin && int_end <= int_constln->end());
 }
 
 
