@@ -24,6 +24,7 @@
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_info.h"
 #include "mcrl2/process/process_variable_strongly_connected_components.h"
+#include "mcrl2/process/remove_data_parameters.h"
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
@@ -207,6 +208,21 @@ struct process_info_command: public processcommand
   }
 };
 
+/// \brief Removes data parameters from a process
+struct remove_data_parameters_command: public processcommand
+{
+  remove_data_parameters_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : processcommand("remove-data-parameters", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    processcommand::execute();
+    remove_data_parameters(procspec);
+    write_text(output_filename, process::pp(procspec));
+  }
+};
+
 class transform_tool: public utilities::tools::input_output_tool
 {
   protected:
@@ -259,6 +275,7 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<eliminate_single_usage_equations_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<eliminate_unused_equations_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<process_info_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<remove_data_parameters_command>(input_filename(), output_filename(), options));
 
       if (print_algorithms)
       {
