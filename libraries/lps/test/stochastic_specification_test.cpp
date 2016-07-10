@@ -104,10 +104,9 @@ BOOST_AUTO_TEST_CASE(test_linearisation)
     "act  a: Bool;\n"
     "\n"
     "proc P(b_X: Bool) =\n"
-    "       sum e_X: Bool.\n"
-    "         a(b_X) .\n"
-    "         dist b1_X: Bool[1 / 2] .\n"
-    "         P(b_X = b1_X);\n"
+    "       a(b_X) .\n"
+    "         dist b_X1: Bool[1 / 2] .\n"
+    "         P(b_X = b_X1);\n"
     "\n"
     "init dist b: Bool[1 / 2] . P(b);\n"
     ;
@@ -115,6 +114,33 @@ BOOST_AUTO_TEST_CASE(test_linearisation)
   stochastic_specification spec=linearise(text);
   BOOST_CHECK_EQUAL(lps::pp(spec),result);
 }  
+
+// This test checks whether multiple parameters in a stochastic operator are translated 
+// correctely.
+BOOST_AUTO_TEST_CASE(test_multiple_stochastic_parameters)
+{
+  std::string text =
+    "act a:Bool#Bool;\n"
+    "proc X=dist b1,b2:Bool[if(b1,1/8,3/8)].a(b1,b2).X;\n"
+    "init X;\n"
+    ;
+
+  std::string result =
+    "act  a: Bool # Bool;\n"
+    "\n"
+    "proc P(b1_X,b2_X: Bool) =\n"
+    "       a(b1_X, b2_X) .\n"
+    "         dist b1_X1,b2_X1: Bool[if(b1_X1, 1 / 8, 3 / 8)] .\n"
+    "         P(b1_X = b1_X1, b2_X = b2_X1);\n"
+    "\n"
+    "init dist b1,b2: Bool[if(b1, 1 / 8, 3 / 8)] . P(b1, b2);\n"
+    ;
+
+  stochastic_specification spec=linearise(text);
+  BOOST_CHECK_EQUAL(lps::pp(spec),result);
+}  
+
+
 
 BOOST_AUTO_TEST_CASE(test_parelm)
 {
