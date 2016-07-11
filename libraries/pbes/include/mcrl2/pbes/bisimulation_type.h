@@ -26,8 +26,6 @@ enum bisimulation_type
   strong_bisim,
   weak_bisim,
   branching_bisim,
-  branching_bisim_gw,
-  branching_bisim_gjkw,
   branching_sim
 };
 
@@ -38,8 +36,6 @@ bisimulation_type parse_bisimulation_type(const std::string& type)
   if (type == "strong-bisim"        ) return strong_bisim;
   else if (type == "weak-bisim"     ) return weak_bisim;
   else if (type == "branching-bisim") return branching_bisim;
-  else if (type == "branching-bisim-gw")    return branching_bisim_gw;
-  else if (type == "branching-bisim-gjkw")  return branching_bisim_gjkw;
   else if (type == "branching-sim"  ) return branching_sim;
   throw mcrl2::runtime_error(std::string("unknown bisimulation type ") + type + "!");
   return strong_bisim;
@@ -57,10 +53,6 @@ std::string print_bisimulation_type(const bisimulation_type t)
       return "weak-bisim";
     case branching_bisim:
       return "branching-bisim";
-    case branching_bisim_gw:
-      return "branching-bisim-gw";
-    case branching_bisim_gjkw:
-      return "branching-bisim-gjkw";
     case branching_sim:
       return "branching-sim";
   }
@@ -79,10 +71,6 @@ std::string description(const bisimulation_type t)
       return "weak bisimulation";
     case branching_bisim:
       return "branching bisimulation";
-    case branching_bisim_gw:
-      return "almost-O(m log n) branching bisimulation [GW]";
-    case branching_bisim_gjkw:
-      return "O(m log n) branching bisimulation [GJKW]";
     case branching_sim:
       return "branching simulation equivalence";
   }

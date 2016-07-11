@@ -129,7 +129,10 @@ class BisimulationTest(ProcessTauTest):
         super(BisimulationTest, self).__init__(name, ymlfile('bisimulation'), settings)
         self.set_command_line_options('t3', ['-e' + equivalence_type])
         self.set_command_line_options('t4', ['-e' + equivalence_type])
-        self.set_command_line_options('t7', ['-b' + bisimulation_type])
+        if bisimulation_type in ['branching-bisim-gw', 'branching-bisim-gjkw']:
+            self.set_command_line_options('t7', ['-bbranching-bisim'])
+        else:
+            self.set_command_line_options('t7', ['-b' + bisimulation_type])
 
 class LpsConstelmTest(ProcessTest):
     def __init__(self, name, settings = dict()):

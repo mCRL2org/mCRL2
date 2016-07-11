@@ -55,8 +55,6 @@ class lpsbisim2pbes_tool: public super
                       .add_value(strong_bisim)
                       .add_value(weak_bisim)
                       .add_value(branching_bisim)
-                      .add_value(branching_bisim_gw)
-                      .add_value(branching_bisim_gjkw)
                       .add_value(branching_sim)
                       ,"generate a PBES for the bisimulation type NAME:"
                       ,'b'
