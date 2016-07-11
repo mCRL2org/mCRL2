@@ -122,7 +122,7 @@ class LtscompareTest(ProcessTauTest):
 
 class BisimulationTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings = dict()):
-        assert equivalence_type in ['bisim', 'branching-bisim', 'branching-bisim-gw', 'branching-bisim-gjkw', 'weak-bisim']
+        assert equivalence_type in ['bisim', 'branching-bisim', 'weak-bisim']
         bisimulation_type = equivalence_type
         if bisimulation_type == 'bisim':
             bisimulation_type = 'strong-bisim'
@@ -303,7 +303,6 @@ def main(tests):
                     test = tests[name]('{}_{}'.format(name, i), settings)
                     test.execute_in_sandbox()
             except Exception as e:
-                print 'Test {} failed!'.format(test.name)
                 print e
 
 if __name__ == '__main__':
