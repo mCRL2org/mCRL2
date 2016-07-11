@@ -107,8 +107,7 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   BOOST_CHECK(G == 13);
   BOOST_CHECK(p.guard_parameters(0).size() == 1);
   BOOST_CHECK(p.guard_info(5).size() == 2);
-std::cerr << "GUARD NAME " << p.guard_name(0) << "\n";
-  BOOST_CHECK(p.guard_name(0) == "s1_S == 2");
+  BOOST_CHECK(p.guard_name(0) == "s1_S == 2" || p.guard_name(0) == "s1_S == 1");  // The naming of states depends on the ordering of aterms and is now nondeterministic.
 
   BOOST_CHECK(p.edge_label_count() == 1);
   for (std::size_t i = 0; i < p.edge_label_count(); i++)
