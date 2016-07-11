@@ -47,6 +47,14 @@ void lpsbisim2pbes(const std::string& input_filename1,
     case branching_bisim:
       result = branching_bisimulation(M, S);
       break;
+    case branching_bisim_gw:
+      // does not really use the Groote/Wijs algorithm
+      result = branching_bisimulation(M, S);
+      break;
+    case branching_bisim_gjkw:
+      // does not really use the Groote/Jansen/Keiren/Wijs algorithm
+      result = branching_bisimulation(M, S);
+      break;
     case branching_sim:
       result = branching_simulation_equivalence(M, S);
       break;

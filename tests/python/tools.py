@@ -143,6 +143,8 @@ class Tool(object):
         self.parse_boolean(text, 'has-deadlock'               , 'deadlock-detect: deadlock found')
         self.parse_boolean(text, 'result'                     , r'LTSs are strongly bisimilar', 'LTSs are not strongly bisimilar')
         self.parse_boolean(text, 'result'                     , r'LTSs are branching bisimilar', 'LTSs are not branching bisimilar')
+        self.parse_boolean(text, 'result'                     , r'LTSs are equal \(branching bisimilarity using the almost-O\(m log n\) Groote/Wijs algorithm\)', 'LTSs are not equal \(branching bisimilarity using the almost-O\(m log n\) Groote/Wijs algorithm\)')
+        self.parse_boolean(text, 'result'                     , r'LTSs are equal \(branching bisimilarity using the O\(m log n\) Groote/Keiren/Jansen/Wijs algorithm\)', 'LTSs are not equal \(branching bisimilarity using the O\(m log n\) Groote/Keiren/Jansen/Wijs algorithm\)')
         self.parse_boolean(text, 'result'                     , r'LTSs are divergence preserving branching bisimilar', 'LTSs are not divergence preserving branching bisimilar')
         self.parse_boolean(text, 'result'                     , r'LTSs are weak bisimilar', 'LTSs are not weak bisimilar')
         self.parse_boolean(text, 'result'                     , r'LTSs are divergence preserving weak bisimilar', 'LTSs are not divergence preserving weak bisimilar')
