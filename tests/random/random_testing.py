@@ -247,8 +247,6 @@ available_tests = {
     'ltscompare_weak-trace'             : lambda name, settings: LtscompareTest(name, 'weak-trace', settings)                ,
     'bisimulation_bisim'                : lambda name, settings: BisimulationTest(name, 'bisim', settings)                   ,
     'bisimulation_branching-bisim'      : lambda name, settings: BisimulationTest(name, 'branching-bisim', settings)         ,
-    'bisimulation_branching-bisim-gw'   : lambda name, settings: BisimulationTest(name, 'branching-bisim-gw', settings)      ,
-    'bisimulation_branching-bisim-gjkw' : lambda name, settings: BisimulationTest(name, 'branching-bisim-gjkw', settings)    ,
     'bisimulation_weak-bisim'           : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)              ,
     'pbesabstract'                      : lambda name, settings: PbesabstractTest(name, settings)                            ,
     'pbesconstelm'                      : lambda name, settings: PbesconstelmTest(name, settings)                            ,
