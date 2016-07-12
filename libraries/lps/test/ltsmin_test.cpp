@@ -107,7 +107,9 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   BOOST_CHECK(G == 13);
   BOOST_CHECK(p.guard_parameters(0).size() == 1);
   BOOST_CHECK(p.guard_info(5).size() == 2);
-  BOOST_CHECK(p.guard_name(0) == "s1_S == 2" || p.guard_name(0) == "s1_S == 1");  // The naming of states depends on the ordering of aterms and is now nondeterministic.
+  // Check below is removed as the result is unpredictable, since processes are put into a set instead of
+  // a vector. The result below depends on the ordering in which process identifiers are stored in memory.
+  // BOOST_CHECK(p.guard_name(0) == "s1_S == 2" || p.guard_name(0) == "s1_S == 1");  
 
   BOOST_CHECK(p.edge_label_count() == 1);
   for (std::size_t i = 0; i < p.edge_label_count(); i++)
