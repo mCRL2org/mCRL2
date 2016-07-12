@@ -346,12 +346,21 @@ void part_state_t::print_trans() const
                     {
                         mCRL2log(log::debug, "bisim_gjkw") << " (inert)";
                     }
+                    if (state_iter->current_constln() == s_iter)
+                    {
+                        mCRL2log(log::debug, "bisim_gjkw")
+                                                      << " <- current_constln";
+                    }
                     mCRL2log(log::debug, "bisim_gjkw") << "\n";
                     assert(s_iter->B_to_C->pred->succ == s_iter);
                     assert(s_iter->B_to_C->pred->source == &*state_iter);
                 }
             }
             while (state_iter->succ_end() != succ_constln_iter);
+            if (state_iter->current_constln() == state_iter->succ_end())
+            {
+                mCRL2log(log::debug, "bisim_gjkw")<<"\t\t<- current_constln\n";
+            }
         }
     }
 }
@@ -1744,6 +1753,15 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                       *s_prime->current_constln()[-1].target->constln()<=*SpC);
                 assert(s_prime->succ_end() == s_prime->current_constln() ||
                        *SpC <= *s_prime->current_constln()->target->constln());
+                    // s_prime must have a transition to the new constellation
+                assert((s_prime->succ_begin() < s_prime->current_constln() &&
+                        *SpB->constln() < *SpC &&
+                        s_prime->current_constln()[-1].target->constln() ==
+                                                             SpB->constln()) ||
+                       (s_prime->succ_end() > s_prime->current_constln() &&
+                        *SpC < *SpB->constln() &&
+                        s_prime->current_constln()->target->constln() ==
+                                                              SpB->constln()));
                 // check consistency of s_prime->inert_succ_begin() and
                 // s_prime->inert_succ_end()
                 assert(s_prime->succ_begin() == s_prime->inert_succ_begin() ||
@@ -2547,10 +2565,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
                 RefB->set_marked_nonbottom_begin(RefB->bottom_begin() - 1);
                 RefB->set_bottom_begin(RefB->marked_nonbottom_begin());
                 swap_permutation(s_prime->pos, RefB->bottom_begin());
-                assert((s_prime->current_constln() < s_prime->succ_end() &&
-                    s_prime->current_constln()->target->constln() == SpC) ||
-                   (s_prime->current_constln() > s_prime->succ_begin() &&
-                    s_prime->current_constln()[-1].target->constln() == SpC));
                 // the following statement is only needed to let the assertion
                 // ``assert(s->surely_has_no_transition_to(SpC));'' (just above
                 // Line 4.13) go through.
@@ -2775,10 +2789,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
             NewB->set_marked_nonbottom_begin(NewB->bottom_begin() - 1);
             NewB->set_bottom_begin(NewB->marked_nonbottom_begin());
             swap_permutation(s->pos, NewB->bottom_begin());
-            assert((s->current_constln() < s->succ_end() &&
-                    s->current_constln()->target->constln() == SpC) ||
-                   (s->current_constln() > s->succ_begin() &&
-                    s->current_constln()[-1].target->constln() == SpC));
             // the following statement is only needed to let the assertion
             // ``assert(s->surely_has_no_transition_to(SpC));'' (just above
             // Line 4.13) go through.
