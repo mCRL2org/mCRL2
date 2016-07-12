@@ -50,7 +50,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   // Push A to node_stack
   void push(const multi_action_name_set& A1)
   {
-    node_stack.push_back(allow_set(A1));
+    push(allow_set(A1));
   }
 
   // Push A to node_stack
@@ -140,7 +140,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   {
   }
 
-  void block(const process::block& x)
+  void apply(const process::block& x)
   {
     const core::identifier_string_list& B = x.block_set();
     allow_set A1 = allow_set_operations::block(B, A);
@@ -266,7 +266,13 @@ allow_set alphabet_bounded(const process_expression& x, const multi_action_name_
       cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), equations);
     }
   }
-  std::cout << "computed variable cache" << std::endl;
+
+  // print cache
+  mCRL2log(log::verbose) << "--- computed variable cache ---" << std::endl;
+  for (const auto& i: cache)
+  {
+    mCRL2log(log::verbose) << i.first << " -> " << i.second << std::endl;
+  }
 
   allow_set result = detail::alphabet_bounded(x, allow_set(A), equations, cache);
   result.intersect(A);

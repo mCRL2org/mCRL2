@@ -29,11 +29,11 @@ struct alphabet_new_traverser: public process_expression_traverser<alphabet_new_
   using super::apply;
 
   const std::vector<process_equation>& equations;
-  const std::map<process_identifier, multi_action_name_set>& variable_cache;
+  const std::map<process_identifier, multi_action_name_set>& cache;
   std::vector<multi_action_name_set> node_stack;
 
   alphabet_new_traverser(const std::vector<process_equation>& equations_, const std::map<process_identifier, multi_action_name_set>& variable_cache_)
-    : equations(equations_), variable_cache(variable_cache_)
+    : equations(equations_), cache(variable_cache_)
   {}
 
   // Push A to node_stack
@@ -97,8 +97,8 @@ struct alphabet_new_traverser: public process_expression_traverser<alphabet_new_
 
   void leave(const process::process_instance& x)
   {
-    auto i = variable_cache.find(x.identifier());
-    if (i != variable_cache.end())
+    auto i = cache.find(x.identifier());
+    if (i != cache.end())
     {
       push(i->second);
     }
@@ -111,8 +111,8 @@ struct alphabet_new_traverser: public process_expression_traverser<alphabet_new_
 
   void leave(const process::process_instance_assignment& x)
   {
-    auto i = variable_cache.find(x.identifier());
-    if (i != variable_cache.end())
+    auto i = cache.find(x.identifier());
+    if (i != cache.end())
     {
       push(i->second);
     }
@@ -215,17 +215,23 @@ multi_action_name_set alphabet_new(const process_expression& x, const std::vecto
 {
   // compute variable cache
   // TODO: This can be implemented more efficiently, using an SCC graph
-  std::map<process_identifier, multi_action_name_set> variable_cache;
+  std::map<process_identifier, multi_action_name_set> cache;
   for (const process_equation& eqn: equations)
   {
     if (is_pcrl(eqn.expression()))
     {
-      variable_cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), equations);
+      cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), equations);
     }
   }
-  std::cout << "computed variable cache" << std::endl;
 
-  detail::alphabet_new_traverser f(equations, variable_cache);
+  // print cache
+  mCRL2log(log::verbose) << "--- computed variable cache ---" << std::endl;
+  for (const auto& i: cache)
+  {
+    mCRL2log(log::verbose) << i.first << " -> " << i.second << std::endl;
+  }
+
+  detail::alphabet_new_traverser f(equations, cache);
   f.apply(x);
   return f.node_stack.back();
 }
