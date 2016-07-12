@@ -539,10 +539,6 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t pred_iter, constln_t* SpC,
                 // *old_out_pos -> *new_out_pos -> *inert_pos -> *old_out_pos
                 swap3_out(pred_iter, new_out_pos->B_to_C->pred,
                                           s->inert_succ_begin()->B_to_C->pred);
-                assert(s->succ_begin() == s->inert_succ_begin() ||
-                         *s->inert_succ_begin()[-1].target->constln() <= *SpC);
-                assert(s->succ_begin() == s->inert_succ_begin() ||
-                          s->inert_succ_begin()[-1].target->block != s->block);
                 assert(s->inert_succ_begin()->target->block == s->block);
                 assert(s->inert_succ_end()[-1].target->block == s->block);
                 assert(s->succ_end() > s->inert_succ_end() &&
@@ -1732,9 +1728,9 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.19: end for
         }
         mCRL2log(log::debug, "bisim_gjkw") << "\n";
+#ifndef NDEBUG
         // The following tests cannot be executed during the above loops
         // because a state s_prime may have multiple transitions to SpB.
-#ifndef NDEBUG
         for (bisim_gjkw::permutation_iter_t s_iter = SpB->begin();
                                                 SpB->end() != s_iter; ++s_iter)
         {
