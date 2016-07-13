@@ -12,10 +12,10 @@
 #include <algorithm>
 #include <set>
 #include <sstream>
+#include <tuple>
 #include <vector>
 #include <boost/test/included/unit_test_framework.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/tuple/tuple.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_print)
 {
   multi_action_name_set A;
   bool dummy;
-  boost::tuples::tie(A, dummy) = detail::parse_multi_action_name_set("{a}");
+  std::tie(A, dummy) = detail::parse_simple_multi_action_name_set("{a}");
   multi_action_name tau;
   A.insert(tau);
   std::cout << print(A) << std::endl;
@@ -96,15 +96,15 @@ BOOST_AUTO_TEST_CASE(test_parse)
 {
   multi_action_name_set B;
   bool dummy;
-  boost::tuples::tie(B, dummy) = detail::parse_multi_action_name_set("{a, ab}");
+  std::tie(B, dummy) = detail::parse_simple_multi_action_name_set("{a, ab}");
   std::cout << "B = " << print(B) << std::endl;
   BOOST_CHECK(print(B) == "{a, ab}");
 }
 
 BOOST_AUTO_TEST_CASE(test_includes)
 {
-  multi_action_name alpha = detail::parse_multi_action_name("abb");
-  multi_action_name beta = detail::parse_multi_action_name("aabb");
+  multi_action_name alpha = detail::parse_simple_multi_action_name("abb");
+  multi_action_name beta = detail::parse_simple_multi_action_name("aabb");
   BOOST_CHECK(!detail::includes(alpha, beta));
   BOOST_CHECK(detail::includes(beta, alpha));
 }
@@ -157,8 +157,8 @@ void test_alphabet_operation(const std::string& text1, const std::string& text2,
 {
   bool dummy;
   multi_action_name_set A1, A2;
-  boost::tuples::tie(A1, dummy) = detail::parse_multi_action_name_set(text1);
-  boost::tuples::tie(A2, dummy) = detail::parse_multi_action_name_set(text2);
+  std::tie(A1, dummy) = detail::parse_simple_multi_action_name_set(text1);
+  std::tie(A2, dummy) = detail::parse_simple_multi_action_name_set(text2);
   multi_action_name_set A3 = op(A1, A2);
   std::string result = print(A3);
   check_result(text1 + ", " + text2, result, expected_result, title);
@@ -181,7 +181,7 @@ void test_push_allow(const std::string& expression, const std::string& Atext, co
   process_specification procspec = parse_process_specification(text);
   multi_action_name_set A;
   bool A_includes_subsets;
-  boost::tuples::tie(A, A_includes_subsets) = detail::parse_multi_action_name_set(Atext);
+  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
   data::set_identifier_generator id_generator;
   process::detail::alphabet_cache W(id_generator);
   process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), allow_set(A, A_includes_subsets), procspec.equations(), W);
@@ -200,7 +200,7 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
   communication_expression_list C = detail::parse_comm_set(comm_text);
   multi_action_name_set A;
   bool A_includes_subsets;
-  boost::tuples::tie(A, A_includes_subsets) = detail::parse_multi_action_name_set(Atext);
+  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = op(C, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(comm_text + ", " + Atext, result, expected_result, title);
@@ -227,7 +227,7 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
   rename_expression_list R = detail::parse_rename_set(rename_text);
   multi_action_name_set A;
   bool A_includes_subsets;
-  boost::tuples::tie(A, A_includes_subsets) = detail::parse_multi_action_name_set(Atext);
+  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = op(R, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(rename_text + ", " + Atext, result, expected_result, title);
@@ -258,7 +258,7 @@ void test_hide_operation(const std::string& hide_text, const std::string& Atext,
   core::identifier_string_list I = detail::parse_block_set(hide_text);
   multi_action_name_set A;
   bool A_includes_subsets;
-  boost::tuples::tie(A, A_includes_subsets) = detail::parse_multi_action_name_set(Atext);
+  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = op(I, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(hide_text + ", " + Atext, result, expected_result, title);
@@ -274,7 +274,7 @@ void test_allow(const std::string& allow_text, const std::string& Atext, const s
   action_name_multiset_list V = detail::parse_allow_set(allow_text);
   multi_action_name_set A;
   bool A_includes_subsets;
-  boost::tuples::tie(A, A_includes_subsets) = detail::parse_multi_action_name_set(Atext);
+  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = alphabet_operations::allow(V, A, A_includes_subsets);
   std::string result = print(A1);
   check_result(allow_text + ", " + Atext, result, expected_result, title);
@@ -295,7 +295,7 @@ void test_block(const std::string& block_text, const std::string& Atext, const s
   core::identifier_string_list B = detail::parse_block_set(block_text);
   multi_action_name_set A;
   bool A_includes_subsets;
-  boost::tuples::tie(A, A_includes_subsets) = detail::parse_multi_action_name_set(Atext);
+  std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
   multi_action_name_set A1 = alphabet_operations::block(B, A, A_includes_subsets);
   std::string result = print(A1, A_includes_subsets);
   check_result(block_text + ", " + Atext, result, expected_result, title);
