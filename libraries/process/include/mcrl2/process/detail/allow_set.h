@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_DETAIL_ALLOW_SET_H
 
 #include <algorithm>
+#include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/utility.h"
 
 namespace mcrl2 {
@@ -136,7 +137,7 @@ struct allow_set
   bool contains(const multi_action_name& alpha) const
   {
     multi_action_name beta = detail::hide(I, alpha);
-    return beta.empty() || (A_includes_subsets ? detail::includes(A, beta) : detail::contains(A, beta));
+    return beta.empty() || (A_includes_subsets ? alphabet_operations::includes(A, beta) : detail::contains(A, beta));
   }
 
   /// \brief Returns the intersection of the allow set with alphabet.
@@ -211,7 +212,7 @@ namespace allow_set_operations {
 inline
 action_name_set rename_inverse(const rename_expression_list& R, const action_name_set& I)
 {
-  detail::rename_inverse_map Rinverse = detail::rename_inverse(R);
+  alphabet_operations::rename_inverse_map Rinverse = alphabet_operations::rename_inverse(R);
 
   action_name_set result;
   for (const core::identifier_string& i: I)
@@ -245,7 +246,7 @@ std::pair<multi_action_name, multi_action_name> apply_comm_inverse(const communi
 inline
 void comm_inverse(const communication_expression_list& C, const multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
 {
-  result.insert(multiset_union(alpha1, alpha2));
+  result.insert(alphabet_operations::multiset_union(alpha1, alpha2));
   for (auto i = C.begin(); i != C.end(); ++i)
   {
     if (detail::contains(alpha1, i->name()))
@@ -318,7 +319,7 @@ allow_set allow(const action_name_multiset_list& V, const allow_set& x)
   {
     const core::identifier_string_list& names = v.names();
     multi_action_name beta(names.begin(), names.end());
-    bool add = x.A_includes_subsets ? detail::includes(x.A, beta) : detail::contains(x.A, detail::hide(x.I, beta));
+    bool add = x.A_includes_subsets ? alphabet_operations::includes(x.A, beta) : detail::contains(x.A, detail::hide(x.I, beta));
     if (add)
     {
       A.insert(beta);
@@ -352,9 +353,9 @@ multi_action_name_set left_arrow2(const multi_action_name_set& A1, const action_
     multi_action_name beta = detail::hide(I, i);
     for (const multi_action_name& gamma: A1)
     {
-      if (detail::includes(gamma, beta))
+      if (alphabet_operations::includes(gamma, beta))
       {
-        multi_action_name alpha = multiset_difference(gamma, beta);
+        multi_action_name alpha = alphabet_operations::multiset_difference(gamma, beta);
         if (!alpha.empty())
         {
           result.insert(detail::hide(I, alpha));

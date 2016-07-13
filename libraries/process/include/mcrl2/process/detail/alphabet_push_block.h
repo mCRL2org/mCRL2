@@ -49,7 +49,7 @@ std::set<core::identifier_string> set_difference(const std::set<core::identifier
 inline
 std::set<core::identifier_string> rename_inverse(const rename_expression_list& R, const std::set<core::identifier_string>& B)
 {
-  process::detail::rename_inverse_map Rinverse = process::detail::rename_inverse(R);
+  alphabet_operations::rename_inverse_map Rinverse = alphabet_operations::rename_inverse(R);
   std::set<core::identifier_string> result;
   for (const core::identifier_string& i: B)
   {
@@ -246,7 +246,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     const core::identifier_string_list& I = x.hide_set();
     std::set<core::identifier_string> B1 = block_operations::set_difference(B, I);
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
-    return detail::make_hide(I, push_block(B1, x.operand(), equations, W, id_generator));
+    return make_hide(I, push_block(B1, x.operand(), equations, W, id_generator));
   }
 
   process::process_expression apply(const process::rename& x)
@@ -289,14 +289,14 @@ struct push_block_builder: public process_expression_builder<Derived>
   {
     std::set<core::identifier_string> B1 = restrict_block(B, x.comm_set());
     process_expression y = push_block(B1, x.operand(), equations, W, id_generator);
-    process_expression result = detail::make_block(core::identifier_string_list(B.begin(), B.end()), detail::make_comm(x.comm_set(), y));
+    process_expression result = make_block(core::identifier_string_list(B.begin(), B.end()), make_comm(x.comm_set(), y));
     mCRL2log(log::debug) << push_block_printer(B).print(x, result);
     return result;
   }
 
   process::process_expression apply(const process::allow& x)
   {
-    allow_set A(make_name_set(x.allow_set()));
+    allow_set A(alphabet_operations::make_name_set(x.allow_set()));
     core::identifier_string_list B1(B.begin(), B.end());
     allow_set A1(alphabet_operations::block(B1, A.A));
     detail::alphabet_cache W(id_generator);
@@ -310,7 +310,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   {
     process_expression left = derived().apply(x.left());
     process_expression right = derived().apply(x.right());
-    return detail::make_sync(left, right);
+    return make_sync(left, right);
   }
 };
 

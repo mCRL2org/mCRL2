@@ -84,7 +84,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   {
     auto right = pop();
     auto left = pop();
-    push(set_union(left.A, right.A));
+    push(alphabet_operations::set_union(left.A, right.A));
   }
 
   void leave(const process::action& x)
@@ -170,7 +170,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
     const communication_expression_list& C = x.comm_set();
     allow_set A1 = allow_set_operations::comm_inverse(C, A);
     allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
-    communication_expression_list C1 = filter_comm_set(x.comm_set(), A2.A);
+    communication_expression_list C1 = alphabet_operations::filter_comm_set(x.comm_set(), A2.A);
     A2.A = alphabet_operations::comm(C1, A2.A);
     push(A2);
   }

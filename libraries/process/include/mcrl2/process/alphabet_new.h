@@ -67,7 +67,7 @@ struct alphabet_new_traverser: public process_expression_traverser<alphabet_new_
   {
     auto right = pop();
     auto left = pop();
-    push(set_union(left, right));
+    push(alphabet_operations::set_union(left, right));
   }
 
   // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2, A1 | A2)
@@ -228,7 +228,7 @@ multi_action_name_set alphabet_new(const process_expression& x, const std::vecto
   mCRL2log(log::verbose) << "--- computed variable cache ---" << std::endl;
   for (const auto& i: cache)
   {
-    mCRL2log(log::verbose) << i.first << " -> " << i.second << std::endl;
+    mCRL2log(log::verbose) << i.first << " -> " << process::pp(i.second) << std::endl;
   }
 
   detail::alphabet_new_traverser f(equations, cache);

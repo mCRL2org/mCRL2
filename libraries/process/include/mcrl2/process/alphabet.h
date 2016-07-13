@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_ALPHABET_H
 #define MCRL2_PROCESS_ALPHABET_H
 
+#include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
@@ -102,7 +103,7 @@ struct alphabet_traverser: public process_expression_traverser<Derived>
   {
     Node right = pop();
     Node left = pop();
-    push(set_union(left.alphabet, right.alphabet));
+    push(alphabet_operations::set_union(left.alphabet, right.alphabet));
   }
 
   // Pops two elements A1 and A2 from the stack, and pushes back union(A1, A2, A1 | A2)

@@ -105,8 +105,8 @@ BOOST_AUTO_TEST_CASE(test_includes)
 {
   multi_action_name alpha = detail::parse_simple_multi_action_name("abb");
   multi_action_name beta = detail::parse_simple_multi_action_name("aabb");
-  BOOST_CHECK(!detail::includes(alpha, beta));
-  BOOST_CHECK(detail::includes(beta, alpha));
+  BOOST_CHECK(!alphabet_operations::includes(alpha, beta));
+  BOOST_CHECK(alphabet_operations::includes(beta, alpha));
 }
 
 BOOST_AUTO_TEST_CASE(test_alphabet_reduce)
@@ -166,13 +166,14 @@ void test_alphabet_operation(const std::string& text1, const std::string& text2,
 
 BOOST_AUTO_TEST_CASE(test_alphabet_operations)
 {
-  test_alphabet_operation("{a}", "{b}", "{ab}", process::concat, "concat");
-  test_alphabet_operation("{ab}", "{b, c}", "{abb, abc}", process::concat, "concat");
-  test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aabc, aac, ab}", process::left_arrow1, "left_arrow1");
-  test_alphabet_operation("{aa, b}", "{a}", "{a, aa, b}", process::left_arrow1, "left_arrow1");
-  test_alphabet_operation("{ab, b}", "{b}", "{a, ab, b}", process::left_arrow1, "left_arrow1"); // N.B. tau is excluded!
-  test_alphabet_operation("{bc}", "{c}", "{b, bc}", process::left_arrow1, "left_arrow1");
-  test_alphabet_operation("{a}", "{a}", "{a}", process::left_arrow1, "left_arrow1");
+  using namespace alphabet_operations;
+  test_alphabet_operation("{a}", "{b}", "{ab}", concat, "concat");
+  test_alphabet_operation("{ab}", "{b, c}", "{abb, abc}", concat, "concat");
+  test_alphabet_operation("{ab, aabc}", "{b, bc}", "{a, aa, aabc, aac, ab}", left_arrow1, "left_arrow1");
+  test_alphabet_operation("{aa, b}", "{a}", "{a, aa, b}", left_arrow1, "left_arrow1");
+  test_alphabet_operation("{ab, b}", "{b}", "{a, ab, b}", left_arrow1, "left_arrow1"); // N.B. tau is excluded!
+  test_alphabet_operation("{bc}", "{c}", "{b, bc}", left_arrow1, "left_arrow1");
+  test_alphabet_operation("{a}", "{a}", "{a}", left_arrow1, "left_arrow1");
 }
 
 void test_push_allow(const std::string& expression, const std::string& Atext, const std::string& expected_result, const std::string& equations = "")
@@ -242,14 +243,16 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
 
 BOOST_AUTO_TEST_CASE(test_rename_operations)
 {
+  // resolve ambiguity
+  auto rename_inverse = [](const rename_expression_list& R, const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::rename_inverse(R, A, A_includes_subsets); };
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}", "{bb, bbdd}", alphabet_operations::rename, "rename");
   test_rename_operation("{a -> b, c -> d}", "{ab, aacc}@", "{bb, bbdd}@", alphabet_operations::rename, "rename");
-  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{b, bb}", "{a, aa, ab, b, bb}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{bb}@", "{aa, ab, bb}@", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{b}", "{a, b}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{a -> b}", "{a}", "{}", alphabet_operations::rename_inverse, "rename_inverse");
-  test_rename_operation("{b -> a}", "{a, bc}@", "{a, b, c}@", alphabet_operations::rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b, c -> d}", "{abd, bcdd}", "{}", rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{b, bb}", "{a, aa, ab, b, bb}", rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{bb}@", "{aa, ab, bb}@", rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{b}", "{a, b}", rename_inverse, "rename_inverse");
+  test_rename_operation("{a -> b}", "{a}", "{}", rename_inverse, "rename_inverse");
+  test_rename_operation("{b -> a}", "{a, bc}@", "{a, b, c}@", rename_inverse, "rename_inverse");
 }
 
 template <typename Operation>

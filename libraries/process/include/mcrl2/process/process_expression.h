@@ -1561,56 +1561,6 @@ bool equal_signatures(const action& a, const action& b)
   return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
 }
 
-/// \brief Represents the name of a multi action
-typedef std::multiset<core::identifier_string> multi_action_name;
-
-/// \brief Represents a set of multi action names
-typedef std::set<multi_action_name> multi_action_name_set;
-
-/// \brief Represents a set of action names
-typedef std::set<core::identifier_string> action_name_set;
-
-/// \brief Pretty print function for a multi action name
-inline
-std::string pp(const multi_action_name& x)
-{
-  std::ostringstream out;
-  if (x.empty())
-  {
-    out << "tau";
-  }
-  else
-  {
-    for (auto i = x.begin(); i != x.end(); ++i)
-    {
-      if (i != x.begin())
-      {
-        out << " | ";
-      }
-      out << core::pp(*i);
-    }
-  }
-  return out.str();
-}
-
-/// \brief Pretty print function for a set of multi action names
-inline
-std::string pp(const multi_action_name_set& A)
-{
-  std::ostringstream out;
-  out << "{";
-  for (auto i = A.begin(); i != A.end(); ++i)
-  {
-    if (i != A.begin())
-    {
-      out << ", ";
-    }
-    out << pp(*i);
-  }
-  out << "}";
-  return out.str();
-}
-
 } // namespace process
 
 } // namespace mcrl2
