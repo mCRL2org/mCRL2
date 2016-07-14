@@ -13,7 +13,7 @@
 #define MCRL2_PROCESS_ALPHABET_BOUNDED_H
 
 #include "mcrl2/process/alphabet_efficient.h"
-#include "mcrl2/process/detail/allow_set.h"
+#include "mcrl2/process/allow_set.h"
 
 namespace mcrl2 {
 
@@ -143,14 +143,14 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   void apply(const process::block& x)
   {
     const core::identifier_string_list& B = x.block_set();
-    allow_set A1 = allow_set_operations::block(B, A);
+    allow_set A1 = alphabet_operations::block(B, A);
     push(A1);
   }
 
   void apply(const process::hide& x)
   {
     const core::identifier_string_list& I = x.hide_set();
-    allow_set A1 = allow_set_operations::hide_inverse(I, A);
+    allow_set A1 = alphabet_operations::hide_inverse(I, A);
     allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
     A2.A = alphabet_operations::hide(I, A2.A);
     push(A2);
@@ -159,7 +159,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   void apply(const process::rename& x)
   {
     const rename_expression_list& R = x.rename_set();
-    allow_set A1 = allow_set_operations::rename_inverse(R, A);
+    allow_set A1 = alphabet_operations::rename_inverse(R, A);
     allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
     A2.A = alphabet_operations::rename(R, A2.A);
     push(A2);
@@ -168,7 +168,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   void apply(const process::comm& x)
   {
     const communication_expression_list& C = x.comm_set();
-    allow_set A1 = allow_set_operations::comm_inverse(C, A);
+    allow_set A1 = alphabet_operations::comm_inverse(C, A);
     allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
     communication_expression_list C1 = alphabet_operations::filter_comm_set(x.comm_set(), A2.A);
     A2.A = alphabet_operations::comm(C1, A2.A);
@@ -178,34 +178,34 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   void apply(const process::allow& x)
   {
     const action_name_multiset_list& V = x.allow_set();
-    allow_set A1 = allow_set_operations::allow(V, A);
+    allow_set A1 = alphabet_operations::allow(V, A);
     allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
     push(A2);
   }
 
   void apply(const process::merge& x)
   {
-    allow_set A_sub = allow_set_operations::subsets(A);
+    allow_set A_sub = alphabet_operations::subsets(A);
     allow_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
-    allow_set A_arrow = allow_set_operations::left_arrow(A, Aleft.A);
+    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft.A);
     allow_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
     push(alphabet_operations::merge(Aleft.A, Aright.A));
   }
 
   void apply(const process::left_merge& x)
   {
-    allow_set A_sub = allow_set_operations::subsets(A);
+    allow_set A_sub = alphabet_operations::subsets(A);
     allow_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
-    allow_set A_arrow = allow_set_operations::left_arrow(A, Aleft.A);
+    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft.A);
     allow_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
     push(alphabet_operations::merge(Aleft.A, Aright.A));
   }
 
   void apply(const process::sync& x)
   {
-    allow_set A_sub = allow_set_operations::subsets(A);
+    allow_set A_sub = alphabet_operations::subsets(A);
     allow_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
-    allow_set A_arrow = allow_set_operations::left_arrow(A, Aleft.A);
+    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft.A);
     allow_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
     push(alphabet_operations::sync(Aleft.A, Aright.A));
   }

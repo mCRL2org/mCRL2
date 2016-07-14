@@ -36,6 +36,12 @@ bool includes(const multi_action_name& x, const multi_action_name& y)
 }
 
 inline
+bool contains(const multi_action_name& alpha, const core::identifier_string& a)
+{
+  return alpha.find(a) != alpha.end();
+}
+
+inline
 multi_action_name multiset_difference(const multi_action_name& alpha, const multi_action_name& beta)
 {
   multi_action_name result = alpha;
@@ -58,6 +64,10 @@ multi_action_name multiset_union(const multi_action_name& alpha, const multi_act
   return result;
 }
 
+//-----------------------------------------------------//
+// multi_action_name_set operations
+//-----------------------------------------------------//
+
 inline
 multi_action_name_set make_name_set(const action_name_multiset_list& v)
 {
@@ -70,9 +80,12 @@ multi_action_name_set make_name_set(const action_name_multiset_list& v)
   return result;
 }
 
-//-----------------------------------------------------//
-// multi_action_name_set operations
-//-----------------------------------------------------//
+inline
+bool contains(const multi_action_name_set& A, const multi_action_name& a)
+{
+  // note that A implicitly contains the empty multi_action_name
+  return a.empty() || A.find(a) != A.end();
+}
 
 inline
 // Returns true if A contains an x such that includes(x, y)
@@ -137,6 +150,100 @@ multi_action_name_set remove_subsets(const multi_action_name_set& A)
     }
   }
   return result;
+}
+
+//-----------------------------------------------------//
+// block operations
+//-----------------------------------------------------//
+
+inline
+multi_action_name_set block(const core::identifier_string_list& B, const multi_action_name_set& A, bool A_includes_subsets = false)
+{
+  multi_action_name_set result;
+  multi_action_name beta(B.begin(), B.end());
+
+  if (A_includes_subsets)
+  {
+    for (multi_action_name alpha: A)
+    {
+      for (const core::identifier_string& b: B)
+      {
+        alpha.erase(b);
+      }
+      if (!alpha.empty())
+      {
+        result.insert(alpha);
+      }
+    }
+  }
+  else
+  {
+    for (const multi_action_name& alpha: A)
+    {
+      if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), alpha.begin(), alpha.end()))
+      {
+        result.insert(alpha);
+      }
+    }
+  }
+  return result;
+}
+
+//-----------------------------------------------------//
+// hide operations
+//-----------------------------------------------------//
+
+// Hides (or: removes) elements in I from C
+inline
+std::set<core::identifier_string> hide(const core::identifier_string_list& I, const std::set<core::identifier_string>& J)
+{
+  using utilities::detail::contains;
+  std::set<core::identifier_string> result;
+  for (const core::identifier_string& j: J)
+  {
+    if (!contains(I, j))
+    {
+      result.insert(j);
+    }
+  }
+  return result;
+}
+
+inline
+multi_action_name hide(const std::set<core::identifier_string>& I, const multi_action_name& alpha)
+{
+  using utilities::detail::contains;
+  multi_action_name result;
+  for (const core::identifier_string& i: alpha)
+  {
+    if (!contains(I, i))
+    {
+      result.insert(i);
+    }
+  }
+  return result;
+}
+
+template <typename IdentifierContainer>
+multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
+{
+  multi_action_name m(I.begin(), I.end());
+  multi_action_name_set result;
+  for (multi_action_name alpha: A)
+  {
+    for (const core::identifier_string& i: I)
+    {
+      alpha.erase(i);
+    }
+    result.insert(alpha);
+  }
+  return result;
+}
+
+inline
+multi_action_name_set hide_inverse(const core::identifier_string_list& I, const multi_action_name_set& A, bool A_includes_subsets = false)
+{
+  return block(I, A, A_includes_subsets);
 }
 
 //-----------------------------------------------------//
@@ -213,6 +320,28 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, bool A1_includ
 }
 
 inline
+multi_action_name_set left_arrow2(const multi_action_name_set& A1, const std::set<core::identifier_string>& I, const multi_action_name_set& A2)
+{
+  multi_action_name_set result = A1; // needed because tau is not explicitly stored
+  for (const multi_action_name& i: A2)
+  {
+    multi_action_name beta = hide(I, i);
+    for (const multi_action_name& gamma: A1)
+    {
+      if (alphabet_operations::includes(gamma, beta))
+      {
+        multi_action_name alpha = multiset_difference(gamma, beta);
+        if (!alpha.empty())
+        {
+          result.insert(hide(I, alpha));
+        }
+      }
+    }
+  }
+  return result;
+}
+
+inline
 multi_action_name_set merge(const multi_action_name_set& A1, const multi_action_name_set& A2)
 {
   return set_union(set_union(A1, A2), concat(A1, A2));
@@ -249,27 +378,16 @@ multi_action_name_set bounded_sync(const multi_action_name_set& A1, const multi_
 //-----------------------------------------------------//
 
 inline
-void apply_comm(const communication_expression& c, multi_action_name_set& A)
+std::pair<multi_action_name, multi_action_name> apply_comm_inverse(const communication_expression& x, const multi_action_name& alpha1, const multi_action_name& alpha2)
 {
-  core::identifier_string_list names = c.action_name().names();
-  const core::identifier_string& a = c.name();
-  multi_action_name alpha(names.begin(), names.end());
-  // c == alpha -> a
-
-  multi_action_name_set to_be_added;
-  for (multi_action_name beta: A)
-  {
-    while (includes(beta, alpha))
-    {
-      for (const core::identifier_string& a: alpha)
-      {
-        beta.erase(beta.find(a));
-      }
-      beta.insert(a);
-      to_be_added.insert(beta);
-    }
-  }
-  A.insert(to_be_added.begin(), to_be_added.end());
+  const core::identifier_string& c = x.name();
+  core::identifier_string_list lhs = x.action_name().names();
+  std::pair<multi_action_name, multi_action_name> result;
+  result.first = alpha1;
+  result.second = alpha2;
+  result.first.erase(result.first.find(c));
+  result.second.insert(lhs.begin(), lhs.end());
+  return result;
 }
 
 // Add inverse communication to A
@@ -298,16 +416,29 @@ void apply_comm_inverse(const communication_expression& gamma, multi_action_name
 }
 
 inline
-multi_action_name_set comm(const communication_expression_list& C, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
+void comm_inverse(const communication_expression_list& C, const multi_action_name& alpha1, const multi_action_name& alpha2, multi_action_name_set& result)
 {
-  multi_action_name_set result = A;
-
-  // sequentially apply the communication rules to result
+  using utilities::detail::contains;
+  result.insert(alphabet_operations::multiset_union(alpha1, alpha2));
   for (const communication_expression& c: C)
   {
-    apply_comm(c, result);
+    if (contains(alpha1, c.name()))
+    {
+      std::pair<multi_action_name, multi_action_name> beta = apply_comm_inverse(c, alpha1, alpha2);
+      comm_inverse(C, beta.first, beta.second, result);
+    }
   }
+}
 
+inline
+multi_action_name_set comm_inverse1(const communication_expression_list& C, const multi_action_name_set& A)
+{
+  multi_action_name_set result;
+  multi_action_name empty;
+  for (const multi_action_name& alpha: A)
+  {
+    comm_inverse(C, alpha, empty, result);
+  }
   return result;
 }
 
@@ -319,6 +450,63 @@ multi_action_name_set comm_inverse(const communication_expression_list& C, const
   {
     apply_comm_inverse(c, result);
   }
+  return result;
+}
+
+// Note that the result is flattened.
+inline
+std::set<core::identifier_string> comm_inverse(const communication_expression_list& C, const std::set<core::identifier_string>& I)
+{
+  std::set<core::identifier_string> result = I;
+  for (const core::identifier_string& i: I)
+  {
+    for (const communication_expression& j: C)
+    {
+      if (i == j.name())
+      {
+        core::identifier_string_list lhs = j.action_name().names();
+        result.insert(lhs.begin(), lhs.end());
+      }
+    }
+  }
+  return result;
+}
+
+inline
+void apply_comm(const communication_expression& c, multi_action_name_set& A)
+{
+  core::identifier_string_list names = c.action_name().names();
+  const core::identifier_string& a = c.name();
+  multi_action_name alpha(names.begin(), names.end());
+  // c == alpha -> a
+
+  multi_action_name_set to_be_added;
+  for (multi_action_name beta: A)
+  {
+    while (includes(beta, alpha))
+    {
+      for (const core::identifier_string& a: alpha)
+      {
+        beta.erase(beta.find(a));
+      }
+      beta.insert(a);
+      to_be_added.insert(beta);
+    }
+  }
+  A.insert(to_be_added.begin(), to_be_added.end());
+}
+
+inline
+multi_action_name_set comm(const communication_expression_list& C, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
+{
+  multi_action_name_set result = A;
+
+  // sequentially apply the communication rules to result
+  for (const communication_expression& c: C)
+  {
+    apply_comm(c, result);
+  }
+
   return result;
 }
 
@@ -457,6 +645,27 @@ struct rename_inverse_apply
 };
 
 inline
+std::set<core::identifier_string> rename_inverse(const rename_expression_list& R, const std::set<core::identifier_string>& I)
+{
+  alphabet_operations::rename_inverse_map Rinverse = alphabet_operations::rename_inverse(R);
+
+  std::set<core::identifier_string> result;
+  for (const core::identifier_string& i: I)
+  {
+    auto j = Rinverse.find(i);
+    if (j != Rinverse.end())
+    {
+      result.insert(j->second.begin(), j->second.end());
+    }
+    else
+    {
+      result.insert(i);
+    }
+  }
+  return result;
+}
+
+inline
 void rename_inverse(const rename_inverse_map& Rinverse, const multi_action_name& x, bool x_includes_subsets, multi_action_name_set& result)
 {
   std::vector<std::vector<core::identifier_string> > V;
@@ -525,69 +734,6 @@ multi_action_name_set allow(const action_name_multiset_list& V, const multi_acti
     }
   }
   return result;
-}
-
-//-----------------------------------------------------//
-// block operations
-//-----------------------------------------------------//
-
-inline
-multi_action_name_set block(const core::identifier_string_list& B, const multi_action_name_set& A, bool A_includes_subsets = false)
-{
-  multi_action_name_set result;
-  multi_action_name beta(B.begin(), B.end());
-
-  if (A_includes_subsets)
-  {
-    for (multi_action_name alpha: A)
-    {
-      for (const core::identifier_string& b: B)
-      {
-        alpha.erase(b);
-      }
-      if (!alpha.empty())
-      {
-        result.insert(alpha);
-      }
-    }
-  }
-  else
-  {
-    for (const multi_action_name& alpha: A)
-    {
-      if (utilities::detail::has_empty_intersection(beta.begin(), beta.end(), alpha.begin(), alpha.end()))
-      {
-        result.insert(alpha);
-      }
-    }
-  }
-  return result;
-}
-
-//-----------------------------------------------------//
-// hide operations
-//-----------------------------------------------------//
-
-template <typename IdentifierContainer>
-multi_action_name_set hide(const IdentifierContainer& I, const multi_action_name_set& A, bool /* A_includes_subsets */ = false)
-{
-  multi_action_name m(I.begin(), I.end());
-  multi_action_name_set result;
-  for (multi_action_name alpha: A)
-  {
-    for (const core::identifier_string& i: I)
-    {
-      alpha.erase(i);
-    }
-    result.insert(alpha);
-  }
-  return result;
-}
-
-inline
-multi_action_name_set hide_inverse(const core::identifier_string_list& I, const multi_action_name_set& A, bool A_includes_subsets = false)
-{
-  return block(I, A, A_includes_subsets);
 }
 
 } // namespace alphabet_operations

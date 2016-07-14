@@ -38,9 +38,6 @@ struct multi_action_name: public std::multiset<core::identifier_string>
 /// \brief Represents a set of multi action names
 typedef std::set<multi_action_name> multi_action_name_set;
 
-/// \brief Represents a set of action names
-typedef std::set<core::identifier_string> action_name_set;
-
 /// \brief Pretty print function for a multi action name
 inline
 std::string pp(const multi_action_name& x)

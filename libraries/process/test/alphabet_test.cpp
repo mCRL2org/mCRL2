@@ -208,7 +208,7 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
 
   if (title == "comm_inverse")
   {
-    allow_set A2 = allow_set_operations::comm_inverse(C, allow_set(A, A_includes_subsets));
+    allow_set A2 = alphabet_operations::comm_inverse(C, allow_set(A, A_includes_subsets));
     std::string result_allow = print(A2);
     check_result(comm_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
   }
@@ -216,8 +216,10 @@ void test_comm_operation(const std::string& comm_text, const std::string& Atext,
 
 BOOST_AUTO_TEST_CASE(test_comm_operations)
 {
-  test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", alphabet_operations::comm_inverse, "comm_inverse");
-  test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", alphabet_operations::comm_inverse, "comm_inverse");
+  // resolve ambiguity
+  auto comm_inverse = [](const communication_expression_list& C, const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::comm_inverse(C, A, A_includes_subsets); };
+  test_comm_operation("{a|b -> c}", "{c}", "{ab, c}", comm_inverse, "comm_inverse");
+  test_comm_operation("{a|a -> b}", "{b, bb}", "{aa, aaaa, aab, b, bb}", comm_inverse, "comm_inverse");
   test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}", alphabet_operations::comm, "comm");
   test_comm_operation("{a|b -> c}", "{ab, aab, aabb, abd}@", "{aab, aabb, ab, abc, abd, ac, c, cc, cd}@", alphabet_operations::comm, "comm");
 }
@@ -235,7 +237,7 @@ void test_rename_operation(const std::string& rename_text, const std::string& At
 
   if (title == "rename_inverse")
   {
-    allow_set A2 = allow_set_operations::rename_inverse(R, allow_set(A, A_includes_subsets));
+    allow_set A2 = alphabet_operations::rename_inverse(R, allow_set(A, A_includes_subsets));
     std::string result_allow = print(A2);
     check_result(rename_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
   }
@@ -269,7 +271,8 @@ void test_hide_operation(const std::string& hide_text, const std::string& Atext,
 
 BOOST_AUTO_TEST_CASE(test_hide_operations)
 {
-  test_hide_operation("{b}", "{ab}", "{}", alphabet_operations::hide_inverse, "hide_inverse");
+  auto hide_inverse = [](const core::identifier_string_list& I, const multi_action_name_set& A, bool A_includes_subsets) { return alphabet_operations::hide_inverse(I, A, A_includes_subsets); };
+  test_hide_operation("{b}", "{ab}", "{}", hide_inverse, "hide_inverse");
 }
 
 void test_allow(const std::string& allow_text, const std::string& Atext, const std::string& expected_result, const std::string& title)
@@ -282,7 +285,7 @@ void test_allow(const std::string& allow_text, const std::string& Atext, const s
   std::string result = print(A1);
   check_result(allow_text + ", " + Atext, result, expected_result, title);
 
-  allow_set A2 = allow_set_operations::allow(V, allow_set(A, A_includes_subsets));
+  allow_set A2 = alphabet_operations::allow(V, allow_set(A, A_includes_subsets));
   std::string result_allow = print(A2);
   check_result(allow_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
 }
@@ -303,7 +306,7 @@ void test_block(const std::string& block_text, const std::string& Atext, const s
   std::string result = print(A1, A_includes_subsets);
   check_result(block_text + ", " + Atext, result, expected_result, title);
 
-  allow_set A2 = allow_set_operations::block(B, allow_set(A, A_includes_subsets));
+  allow_set A2 = alphabet_operations::block(B, allow_set(A, A_includes_subsets));
   std::string result_allow = print(A2);
   check_result(block_text + ", " + Atext, result_allow, expected_result, title + "<allow>");
 }
