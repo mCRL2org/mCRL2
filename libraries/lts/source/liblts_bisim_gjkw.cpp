@@ -1953,6 +1953,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
         mCRL2log(log::debug, "bisim_gjkw") << "primary_blue: empty\n";
         TERMINATE_COROUTINE_SUCCESSFULLY();
     }
+    assert(RefB->constln() != NewC);
     blue_nonbottom_end = RefB->unmarked_nonbottom_begin();
     COROUTINE_DO_WHILE(PRIMARY_BLUE_STATE_HANDLED,
                                              blue_nonbottom_end != visited_end)
@@ -2267,6 +2268,15 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::
     mCRL2log(log::debug, "bisim_gjkw") << "secondary_refine("
         << RefB->debug_id() << "," << SpC->debug_id() << ","
         <<(nullptr!=FromRed ?FromRed->debug_id() :std::string("NULL")) <<")\n";
+
+    if (RefB->constln() == SpC)
+    {
+        RefB->set_marked_nonbottom_begin(RefB->nonbottom_end());
+        RefB->set_unmarked_bottom_end(RefB->unmarked_bottom_begin());
+        mCRL2log(log::debug, "bisim_gjkw")
+                                   << "secondary_refine: same constellation\n";
+        return RefB;
+    }
     // 4.3: Spend the same amount of work on either coroutine:
     // and
     // 3.29: RedB := RefB  or  RedB := NewB , respectively
