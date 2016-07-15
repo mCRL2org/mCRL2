@@ -4122,7 +4122,7 @@ class specification_basic_type:public boost::noncopyable
         process_expression proc_=obtain_initial_distribution_term(objectdata[n].processbody);
         if (!is_stochastic_operator(proc_))
         {
-          processes_with_stochastic_distribution_first.emplace(p, process_pid_pair(proc_,p));
+          processes_with_stochastic_distribution_first.insert(std::pair< process_identifier, process_pid_pair >(p, process_pid_pair(proc_,p)));
           result.insert(p);
         }
         else
@@ -4136,7 +4136,7 @@ class specification_basic_type:public boost::noncopyable
                                            pCRL,
                                            canterminatebody(proc.operand()),
                                            containstimebody(proc.operand()));
-          processes_with_stochastic_distribution_first.emplace(p,process_pid_pair(proc,newproc));
+          processes_with_stochastic_distribution_first.insert(std::pair< process_identifier, process_pid_pair >(p,process_pid_pair(proc,newproc)));
           result.insert(newproc);
         }
       }
