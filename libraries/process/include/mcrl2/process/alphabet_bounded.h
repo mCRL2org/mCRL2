@@ -151,8 +151,8 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   {
     const core::identifier_string_list& I = x.hide_set();
     allow_set A1 = alphabet_operations::hide_inverse(I, A);
-    allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
-    A2.A = alphabet_operations::hide(I, A2.A);
+    multi_action_name_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
+    A2 = alphabet_operations::hide(I, A2);
     push(A2);
   }
 
@@ -160,8 +160,8 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   {
     const rename_expression_list& R = x.rename_set();
     allow_set A1 = alphabet_operations::rename_inverse(R, A);
-    allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
-    A2.A = alphabet_operations::rename(R, A2.A);
+    multi_action_name_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
+    A2 = alphabet_operations::rename(R, A2);
     push(A2);
   }
 
@@ -169,9 +169,9 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   {
     const communication_expression_list& C = x.comm_set();
     allow_set A1 = alphabet_operations::comm_inverse(C, A);
-    allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
-    communication_expression_list C1 = alphabet_operations::filter_comm_set(x.comm_set(), A2.A);
-    A2.A = alphabet_operations::comm(C1, A2.A);
+    multi_action_name_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
+    communication_expression_list C1 = alphabet_operations::filter_comm_set(x.comm_set(), A2);
+    A2 = alphabet_operations::comm(C1, A2);
     push(A2);
   }
 
@@ -179,7 +179,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   {
     const action_name_multiset_list& V = x.allow_set();
     allow_set A1 = alphabet_operations::allow(V, A);
-    allow_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
+    multi_action_name_set A2 = alphabet_bounded(x.operand(), A1, equations, cache);
     push(A2);
   }
 
@@ -189,7 +189,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
     multi_action_name_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
     allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft);
     multi_action_name_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
-    push(alphabet_operations::bounded_merge(Aleft, Aright, A));
+    push(alphabet_operations::bounded_merge(Aleft, Aright, A).first);
   }
 
   void apply(const process::left_merge& x)
@@ -198,7 +198,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
     multi_action_name_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
     allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft);
     multi_action_name_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
-    push(alphabet_operations::bounded_merge(Aleft, Aright, A));
+    push(alphabet_operations::bounded_left_merge(Aleft, Aright, A).first);
   }
 
   void apply(const process::sync& x)
@@ -207,7 +207,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
     multi_action_name_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
     allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft);
     multi_action_name_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
-    push(alphabet_operations::bounded_merge(Aleft, Aright, A));
+    push(alphabet_operations::bounded_sync(Aleft, Aright, A).first);
   }
 
   void leave(const process::at& /* x */)

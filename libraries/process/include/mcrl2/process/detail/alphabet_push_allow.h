@@ -13,14 +13,15 @@
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_ALLOW_H
 
 #include <sstream>
+#include <tuple>
 #include <utility>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/allow_set.h"
 #include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/replace.h"
 #include "mcrl2/process/utility.h"
-#include "mcrl2/process/allow_set.h"
 
 namespace mcrl2 {
 
@@ -37,11 +38,15 @@ struct push_allow_node: public alphabet_node
     : alphabet_node(alphabet), expression(expression_)
   {}
 
-  void apply_allow(const allow_set& A)
+  void apply_allow(const allow_set& A, bool allow_required = false)
   {
+    if (A.A.empty()) // TODO: why is this needed?
+    {
+      return;
+    }
     std::size_t alphabet_size = alphabet.size();
     alphabet = A.intersect(alphabet);
-    bool needs_allow = alphabet.size() < alphabet_size;
+    bool needs_allow = allow_required || alphabet.size() < alphabet_size;
     if (needs_allow)
     {
       if (alphabet.size() == 1 && contains_tau(alphabet)) // alphabet == { tau }
@@ -596,8 +601,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
-    push(push_allow_node(alphabet_operations::merge(p1.alphabet, q1.alphabet), make_merge(p1.expression, q1.expression)));
-    top().apply_allow(A);
+    bool allow_required;
+    multi_action_name_set Apq;
+    std::tie(Apq, allow_required) = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
+    push(push_allow_node(Apq, make_merge(p1.expression, q1.expression)));
+    top().apply_allow(A, allow_required);
     mCRL2log(log::debug) << log(x, log_merge(x, A, A_sub, A_arrow));
   }
 
@@ -614,8 +622,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
-    push(push_allow_node(alphabet_operations::left_merge(p1.alphabet, q1.alphabet), make_left_merge(p1.expression, q1.expression)));
-    top().apply_allow(A);
+    bool allow_required;
+    multi_action_name_set Apq;
+    std::tie(Apq, allow_required) = alphabet_operations::bounded_left_merge(p1.alphabet, q1.alphabet, A);
+    push(push_allow_node(Apq, make_left_merge(p1.expression, q1.expression)));
+    top().apply_allow(A, allow_required);
     mCRL2log(log::debug) << log(x, log_left_merge(x, A, A_sub, A_arrow));
   }
 
@@ -632,8 +643,11 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
     push_allow_node q1 = push_allow(x.right(), A_arrow, equations, W);
-    push(push_allow_node(alphabet_operations::sync(p1.alphabet, q1.alphabet), make_sync(p1.expression, q1.expression)));
-    top().apply_allow(A);
+    bool allow_required;
+    multi_action_name_set Apq;
+    std::tie(Apq, allow_required) = alphabet_operations::bounded_merge(p1.alphabet, q1.alphabet, A);
+    push(push_allow_node(Apq, make_sync(p1.expression, q1.expression)));
+    top().apply_allow(A, allow_required);
     mCRL2log(log::debug) << log(x, log_sync(x, A, A_sub, A_arrow));
   }
 };

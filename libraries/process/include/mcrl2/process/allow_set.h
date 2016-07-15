@@ -67,7 +67,7 @@ struct allow_set
   allow_set()
   {}
 
-  allow_set(const multi_action_name_set& A_, bool A_includes_subsets_ = false, const std::set<core::identifier_string>& I_ = std::set<core::identifier_string>())
+  explicit allow_set(const multi_action_name_set& A_, bool A_includes_subsets_ = false, const std::set<core::identifier_string>& I_ = std::set<core::identifier_string>())
     : A_includes_subsets(A_includes_subsets_), I(I_)
   {
     for (const multi_action_name& i: A_)
@@ -167,36 +167,6 @@ bool subset_includes(const allow_set& A, const multi_action_name& alpha)
   return false;
 }
 
-// Returns the intersection of concat(A1, A2) and A
-inline
-multi_action_name_set bounded_concat(const allow_set& A1, const allow_set& A2, const multi_action_name_set& A)
-{
-  multi_action_name_set result;
-  std::set<core::identifier_string> I = data::detail::set_union(A1.I, A2.I);
-
-  // TODO: implement the case A2.A_includes_subsets
-  if (A2.A_includes_subsets)
-  {
-    throw mcrl2::runtime_error("Operation bounded_concat is not implemented for this case");
-  }
-  for (const multi_action_name& alpha: A)
-  {
-    multi_action_name beta = hide(alpha, I);
-    for (const multi_action_name& alpha2: A2.A)
-    {
-      if (!includes(beta, alpha2))
-      {
-        continue;
-      }
-      multi_action_name gamma = multiset_difference(beta, alpha2);
-      if ((A1.A_includes_subsets && subset_includes(A1.A, gamma)) || (!A1.A_includes_subsets && includes(A1.A, gamma)))
-      {
-        result.insert(alpha);
-      }
-    }
-  }
-}
-
 // Returns the intersection of A1 and A
 inline
 multi_action_name_set set_intersection(const allow_set& A1, const multi_action_name_set& A)
@@ -212,31 +182,11 @@ multi_action_name_set set_intersection(const allow_set& A1, const multi_action_n
   return result;
 }
 
-// Returns the intersection of set_union(A1, A2) and A
+// Returns the intersection of concat(A1, A2) and A, and a boolean indicating if the intersection actually removed some elements.
 inline
-multi_action_name_set bounded_set_union(const allow_set& A1, const allow_set& A2, const multi_action_name_set& A)
+std::pair<multi_action_name_set, bool> bounded_concat(const multi_action_name_set& A1, const multi_action_name_set& A2, const allow_set& A)
 {
-  return set_union(set_intersection(A1, A), set_intersection(A2, A));
-}
-
-// Returns the intersection of merge(A1, A2) and A
-inline
-multi_action_name_set bounded_merge(const allow_set& A1, const allow_set& A2, const multi_action_name_set& A)
-{
-  return set_union(bounded_set_union(A1, A2, A), bounded_concat(A1, A2, A));
-}
-
-// Returns the intersection of sync(A1, A2) and A
-inline
-multi_action_name_set bounded_sync(const allow_set& A1, const allow_set& A2, const multi_action_name_set& A)
-{
-  return bounded_concat(A1, A2, A);
-}
-
-// Returns the intersection of concat(A1, A2) and A
-inline
-multi_action_name_set bounded_concat(const multi_action_name_set& A1, const multi_action_name_set& A2, const allow_set& A)
-{
+  bool removed = false;
   multi_action_name_set result;
   for (const multi_action_name& i: A1)
   {
@@ -247,16 +197,35 @@ multi_action_name_set bounded_concat(const multi_action_name_set& A1, const mult
       {
         result.insert(alpha);
       }
+      else
+      {
+        removed = true;
+      }
     }
   }
-  return result;
+  return { result, removed };
 }
 
 // Returns the intersection of merge(A1, A2) and A
 inline
-multi_action_name_set bounded_merge(const multi_action_name_set& A1, const multi_action_name_set& A2, const allow_set& A)
+std::pair<multi_action_name_set, bool> bounded_merge(const multi_action_name_set& A1, const multi_action_name_set& A2, const allow_set& A)
 {
-  return set_union(set_union(A1, A2), bounded_concat(A1, A2, A));
+  std::pair<multi_action_name_set, bool> A1A2 = bounded_concat(A1, A2, A);
+  return { set_union(set_union(A1, A2), A1A2.first), A1A2.second };
+}
+
+// Returns the intersection of left_merge(A1, A2) and A
+inline
+std::pair<multi_action_name_set, bool> bounded_left_merge(const multi_action_name_set& A1, const multi_action_name_set& A2, const allow_set& A)
+{
+  return bounded_merge(A1, A2, A);
+}
+
+// Returns the intersection of sync(A1, A2) and A
+inline
+std::pair<multi_action_name_set, bool> bounded_sync(const multi_action_name_set& A1, const multi_action_name_set& A2, const allow_set& A)
+{
+  return bounded_concat(A1, A2, A);
 }
 
 inline

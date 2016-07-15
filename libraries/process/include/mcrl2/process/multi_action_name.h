@@ -62,7 +62,7 @@ std::string pp(const multi_action_name& x)
 }
 
 inline
-std::ostream& operator<<(std::ostream& out, multi_action_name& alpha)
+std::ostream& operator<<(std::ostream& out, const multi_action_name& alpha)
 {
   return out << pp(alpha);
 }
@@ -86,7 +86,7 @@ std::string pp(const multi_action_name_set& A)
 }
 
 inline
-std::ostream& operator<<(std::ostream& out, multi_action_name_set& A)
+std::ostream& operator<<(std::ostream& out, const multi_action_name_set& A)
 {
   return out << pp(A);
 }
