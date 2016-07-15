@@ -21,11 +21,11 @@ namespace process {
 
 namespace detail {
 
-allow_set alphabet_bounded(const process_expression& x,
-                           const allow_set& A,
-                           const std::vector<process_equation>& equations,
-                           const std::map<process_identifier, multi_action_name_set>& cache
-                          );
+multi_action_name_set alphabet_bounded(const process_expression& x,
+                                       const allow_set& A,
+                                       const std::vector<process_equation>& equations,
+                                       const std::map<process_identifier, multi_action_name_set>& cache
+                                      );
 
 /// \brief Traverser that computes the alphabet of process expressions
 struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_bounded_traverser>
@@ -96,7 +96,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
     push(A);
   }
 
-  void leave(const process::process_instance& x)
+  void apply(const process::process_instance& x)
   {
     auto i = cache.find(x.identifier());
     if (i != cache.end())
@@ -110,7 +110,7 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
     }
   }
 
-  void leave(const process::process_instance_assignment& x)
+  void apply(const process::process_instance_assignment& x)
   {
     auto i = cache.find(x.identifier());
     if (i != cache.end())
@@ -186,28 +186,28 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
   void apply(const process::merge& x)
   {
     allow_set A_sub = alphabet_operations::subsets(A);
-    allow_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
-    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft.A);
-    allow_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
-    push(alphabet_operations::merge(Aleft.A, Aright.A));
+    multi_action_name_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
+    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft);
+    multi_action_name_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
+    push(alphabet_operations::bounded_merge(Aleft, Aright, A));
   }
 
   void apply(const process::left_merge& x)
   {
     allow_set A_sub = alphabet_operations::subsets(A);
-    allow_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
-    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft.A);
-    allow_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
-    push(alphabet_operations::merge(Aleft.A, Aright.A));
+    multi_action_name_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
+    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft);
+    multi_action_name_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
+    push(alphabet_operations::bounded_merge(Aleft, Aright, A));
   }
 
   void apply(const process::sync& x)
   {
     allow_set A_sub = alphabet_operations::subsets(A);
-    allow_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
-    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft.A);
-    allow_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
-    push(alphabet_operations::sync(Aleft.A, Aright.A));
+    multi_action_name_set Aleft = alphabet_bounded(x.left(), A_sub, equations, cache);
+    allow_set A_arrow = alphabet_operations::left_arrow(A, Aleft);
+    multi_action_name_set Aright = alphabet_bounded(x.right(), A_arrow, equations, cache);
+    push(alphabet_operations::bounded_merge(Aleft, Aright, A));
   }
 
   void leave(const process::at& /* x */)
@@ -240,21 +240,21 @@ struct alphabet_bounded_traverser: public process_expression_traverser<alphabet_
 };
 
 inline
-allow_set alphabet_bounded(const process_expression& x,
-                           const allow_set& A,
-                           const std::vector<process_equation>& equations,
-                           const std::map<process_identifier, multi_action_name_set>& cache
-                          )
+multi_action_name_set alphabet_bounded(const process_expression& x,
+                                       const allow_set& A,
+                                       const std::vector<process_equation>& equations,
+                                       const std::map<process_identifier, multi_action_name_set>& cache
+                                      )
 {
   alphabet_bounded_traverser f(A, equations, cache);
   f.apply(x);
-  return f.node_stack.back();
+  return f.node_stack.back().A;
 }
 
 } // namespace detail
 
 inline
-allow_set alphabet_bounded(const process_expression& x, const multi_action_name_set& A, const std::vector<process_equation>& equations)
+multi_action_name_set alphabet_bounded(const process_expression& x, const multi_action_name_set& A, const std::vector<process_equation>& equations)
 {
   // compute variable cache
   // TODO: This can be implemented more efficiently, using an SCC graph
@@ -274,9 +274,7 @@ allow_set alphabet_bounded(const process_expression& x, const multi_action_name_
     mCRL2log(log::verbose) << i.first << " -> " << i.second << std::endl;
   }
 
-  allow_set result = detail::alphabet_bounded(x, allow_set(A), equations, cache);
-  result.intersect(A);
-  return result;
+  return detail::alphabet_bounded(x, allow_set(A), equations, cache);
 }
 
 } // namespace process

@@ -41,6 +41,7 @@ bool contains(const multi_action_name& alpha, const core::identifier_string& a)
   return alpha.find(a) != alpha.end();
 }
 
+// Returns alpha \ beta
 inline
 multi_action_name multiset_difference(const multi_action_name& alpha, const multi_action_name& beta)
 {
@@ -193,6 +194,22 @@ multi_action_name_set block(const core::identifier_string_list& B, const multi_a
 // hide operations
 //-----------------------------------------------------//
 
+// Hides elements in I from alpha
+inline
+multi_action_name hide(const multi_action_name& alpha, const std::set<core::identifier_string>& I)
+{
+  using utilities::detail::contains;
+  multi_action_name result;
+  for (const core::identifier_string& a: alpha)
+  {
+    if (!contains(I, a))
+    {
+      result.insert(a);
+    }
+  }
+  return result;
+}
+
 // Hides (or: removes) elements in I from C
 inline
 std::set<core::identifier_string> hide(const core::identifier_string_list& I, const std::set<core::identifier_string>& J)
@@ -264,6 +281,24 @@ multi_action_name_set concat(const multi_action_name_set& A1, const multi_action
   return result;
 }
 
+// Returns true if alpha in concat(A1, A2).
+// TODO: Make the implementation more inefficient!
+inline
+bool concat_includes(const multi_action_name_set& A1, const multi_action_name_set& A2, const multi_action_name& alpha)
+{
+  for (const multi_action_name& alpha1: A1)
+  {
+    for (const multi_action_name& alpha2: A2)
+    {
+      if (alpha == multiset_union(alpha1, alpha2))
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 // Returns the intersection of concat(A1, A2) and subsets(A)
 inline
 multi_action_name_set bounded_concat(const multi_action_name_set& A1, const multi_action_name_set& A2, const multi_action_name_set& A)
@@ -319,21 +354,22 @@ multi_action_name_set left_arrow(const multi_action_name_set& A1, bool A1_includ
   return result;
 }
 
+// returns left_arrow(A I*, A2)
 inline
-multi_action_name_set left_arrow2(const multi_action_name_set& A1, const std::set<core::identifier_string>& I, const multi_action_name_set& A2)
+multi_action_name_set left_arrow2(const multi_action_name_set& A, const std::set<core::identifier_string>& I, const multi_action_name_set& A2)
 {
-  multi_action_name_set result = A1; // needed because tau is not explicitly stored
-  for (const multi_action_name& i: A2)
+  multi_action_name_set result = A; // needed because tau is not explicitly stored
+  for (const multi_action_name& alpha2: A2)
   {
-    multi_action_name beta = hide(I, i);
-    for (const multi_action_name& gamma: A1)
+    multi_action_name beta = hide(I, alpha2);
+    for (const multi_action_name& alpha: A)
     {
-      if (alphabet_operations::includes(gamma, beta))
+      if (includes(alpha, beta))
       {
-        multi_action_name alpha = multiset_difference(gamma, beta);
-        if (!alpha.empty())
+        multi_action_name gamma = multiset_difference(alpha, beta);
+        if (!gamma.empty())
         {
-          result.insert(hide(I, alpha));
+          result.insert(hide(I, gamma));
         }
       }
     }

@@ -61,6 +61,12 @@ std::string pp(const multi_action_name& x)
   return out.str();
 }
 
+inline
+std::ostream& operator<<(std::ostream& out, multi_action_name& alpha)
+{
+  return out << pp(alpha);
+}
+
 /// \brief Pretty print function for a set of multi action names
 inline
 std::string pp(const multi_action_name_set& A)
@@ -77,6 +83,12 @@ std::string pp(const multi_action_name_set& A)
   }
   out << "}";
   return out.str();
+}
+
+inline
+std::ostream& operator<<(std::ostream& out, multi_action_name_set& A)
+{
+  return out << pp(A);
 }
 
 } // namespace process
