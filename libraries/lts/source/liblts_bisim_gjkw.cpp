@@ -1835,7 +1835,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             RefB->make_nonrefinable();
             // 2.22: RedB := PrimaryRefine(RefB, SpB, marked states in RefB,
             //                             unmarked bottom states in RefB)
-            bisim_gjkw::block_t*const RedB=primary_refine(RefB,SpB->constln());
+            bisim_gjkw::block_t* RedB = primary_refine(RefB,SpB->constln());
             // 2.23: Unmark all states of RefB
                 // (for the blue block and the red nonbottom states, is already
                 // done in primary_refine)
