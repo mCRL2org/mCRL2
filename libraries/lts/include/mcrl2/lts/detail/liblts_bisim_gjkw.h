@@ -844,7 +844,8 @@ class constln_t
     {
         if (nullptr == nontrivial_next)
         {
-            nontrivial_next = nullptr==nontrivial_first ? this : nontrivial_first;
+            nontrivial_next = nullptr == nontrivial_first ? this
+                                                          : nontrivial_first;
             nontrivial_first = this;
         }
     }
@@ -888,14 +889,15 @@ class constln_t
     /// block.
     block_t* split_off_small_block()
     {
-        block_t* FirstB = (*begin())->block, * LastB = end()[-1]->block;
+        block_t* const FirstB = (*begin())->block;
+        block_t* const LastB = end()[-1]->block;
         assert(FirstB != LastB);
         if (FirstB->end() == LastB->begin())  make_trivial();
 
         assert(this == FirstB->constln());
         assert(this == LastB->constln());
         assert(postprocess_begin == postprocess_end);
-        constln_t* NewC = new constln_t(begin(), end(), postprocess_end);
+        constln_t* const NewC = new constln_t(begin(), end(), postprocess_end);
 
         /// It doesn't matter very much how ties are resolved here:
         /// `part_tr.change_to_C()` is faster if the first block is selected to
@@ -985,8 +987,8 @@ class part_state_t
         {
             bisim_gjkw::check_complexity::count(delete_constellations, 1,
                                               bisim_gjkw::check_complexity::n);
-            constln_t* C = permutation_iter[-1]->constln();
-            permutation_iter[-1]->block->set_constln(nullptr);
+            constln_t* const C = permutation_iter[-1]->constln();
+            // permutation_iter[-1]->block->set_constln(nullptr);
             assert(C->end() == permutation_iter);
             permutation_iter = C->begin();
             delete C;
@@ -1001,7 +1003,7 @@ class part_state_t
         {
             bisim_gjkw::check_complexity::count(delete_blocks, 1,
                                               bisim_gjkw::check_complexity::n);
-            block_t* B = permutation_iter[-1]->block;
+            block_t* const B = permutation_iter[-1]->block;
             permutation_iter[-1]->block = nullptr;
             assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
@@ -1177,9 +1179,20 @@ class B_to_C_descriptor
         return begin->pred->succ->target->constln();
     }
 
-    /// returns true if the slice is marked for postprocessing
+    /// \brief returns true iff the slice is marked for postprocessing
+    /// \details The function uses the data registered with the goal
+    /// constellation.  In principle, one could also use the data registered
+    /// with the source block (namely, whether `this->new_bottom_end` lies in
+    /// the block or not); however, this method is often called during changes
+    /// in the block structure, and therefore `from_block()` is not as reliable
+    /// as `to_constln()`.
+    /// The caller is encouraged to check `this->new_bottom_end`.
     bool needs_postprocessing() const
     {
+        assert(to_constln()->postprocess_end <= begin ||
+                                         end <= to_constln()->postprocess_end);
+        assert(to_constln()->postprocess_begin <= begin ||
+                                       end <= to_constln()->postprocess_begin);
         return to_constln()->postprocess_begin <= begin &&
                                           end <= to_constln()->postprocess_end;
     }
@@ -1226,17 +1239,17 @@ class part_trans_t
     template <class LTS_TYPE>
     friend class bisim_partitioner_gjkw_initialise_helper;
 
-    void swap_in(B_to_C_iter_t pos1, B_to_C_iter_t pos2)
+    void swap_in(B_to_C_iter_t const pos1, B_to_C_iter_t const pos2)
     {
         assert(B_to_C.end() > pos1 && pos1->pred->succ->B_to_C == pos1);
         assert(B_to_C.end() > pos2 && pos2->pred->succ->B_to_C == pos2);
 
         // swap contents
-        pred_entry temp_entry(*pos1->pred);
+        pred_entry const temp_entry(*pos1->pred);
         *pos1->pred = *pos2->pred;
         *pos2->pred = temp_entry;
         // swap pointers to contents
-        pred_iter_t temp_iter(pos1->pred);
+        pred_iter_t const temp_iter(pos1->pred);
         pos1->pred = pos2->pred;
         pos2->pred = temp_iter;
 
@@ -1244,17 +1257,17 @@ class part_trans_t
         assert(B_to_C.end() > pos2 && pos2->pred->succ->B_to_C == pos2);
     }
 
-    void swap_out(pred_iter_t pos1, pred_iter_t pos2)
+    void swap_out(pred_iter_t const pos1, pred_iter_t const pos2)
     {
         assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
         assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
 
         // swap contents
-        succ_entry temp_entry(*pos1->succ);
+        succ_entry const temp_entry(*pos1->succ);
         *pos1->succ = *pos2->succ;
         *pos2->succ = temp_entry;
         // swap pointers to contents
-        succ_iter_t temp_iter(pos1->succ);
+        succ_iter_t const temp_iter(pos1->succ);
         pos1->succ = pos2->succ;
         pos2->succ = temp_iter;
 
@@ -1263,7 +1276,8 @@ class part_trans_t
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
-    void swap3_out(pred_iter_t pos1, pred_iter_t pos2, pred_iter_t pos3)
+    void swap3_out(pred_iter_t const pos1, pred_iter_t const pos2,
+                                                        pred_iter_t const pos3)
     {
         assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
         assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
@@ -1271,12 +1285,12 @@ class part_trans_t
 
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
-        succ_entry temp_entry(*pos1->succ);
+        succ_entry const temp_entry(*pos1->succ);
         *pos1->succ = *pos3->succ;
         *pos3->succ = *pos2->succ;
         *pos2->succ = temp_entry;
         // swap pointers to contents
-        succ_iter_t temp_iter(pos2->succ);
+        succ_iter_t const temp_iter(pos2->succ);
         pos2->succ = pos3->succ;
         pos3->succ = pos1->succ;
         pos1->succ = temp_iter;
@@ -1286,17 +1300,17 @@ class part_trans_t
         assert(pred.end() > pos3 && pos3->succ->B_to_C->pred == pos3);
     }
 
-    void swap_B_to_C(succ_iter_t pos1, succ_iter_t pos2)
+    void swap_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2)
     {
         assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
         assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
 
         // swap contents
-        B_to_C_entry temp_entry(*pos1->B_to_C);
+        B_to_C_entry const temp_entry(*pos1->B_to_C);
         *pos1->B_to_C = *pos2->B_to_C;
         *pos2->B_to_C = temp_entry;
         // swap pointers to contents
-        B_to_C_iter_t temp_iter(pos1->B_to_C);
+        B_to_C_iter_t const temp_iter(pos1->B_to_C);
         pos1->B_to_C = pos2->B_to_C;
         pos2->B_to_C = temp_iter;
 
@@ -1305,7 +1319,8 @@ class part_trans_t
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
-    void swap3_B_to_C(succ_iter_t pos1, succ_iter_t pos2, succ_iter_t pos3)
+    void swap3_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2,
+                                                        succ_iter_t const pos3)
     {
         assert(succ.end() > pos1 && pos1->B_to_C->pred->succ == pos1);
         assert(succ.end() > pos2 && pos2->B_to_C->pred->succ == pos2);
@@ -1313,12 +1328,12 @@ class part_trans_t
 
         assert(pos1 != pos2 || pos1 == pos3);
         // swap contents
-        B_to_C_entry temp_entry(*pos1->B_to_C);
+        B_to_C_entry const temp_entry(*pos1->B_to_C);
         *pos1->B_to_C = *pos3->B_to_C;
         *pos3->B_to_C = *pos2->B_to_C;
         *pos2->B_to_C = temp_entry;
         // swap pointers to contents
-        B_to_C_iter_t temp_iter(pos2->B_to_C);
+        B_to_C_iter_t const temp_iter(pos2->B_to_C);
         pos2->B_to_C = pos3->B_to_C;
         pos3->B_to_C = pos1->B_to_C;
         pos1->B_to_C = temp_iter;
@@ -1346,19 +1361,19 @@ class part_trans_t
     void clear()
     {
         // B_to_C_descriptors are deallocated when their respective lists are
-        // deallocated:
-        B_to_C.clear();
+        // deallocated by destructing the blocks.
         // deallocate the out_descriptors
         for (succ_iter_t succ_iter = succ.begin(); succ.end() != succ_iter; )
         {
             bisim_gjkw::check_complexity::count(delete_out_descriptors, 1,
                                               bisim_gjkw::check_complexity::m);
-            out_descriptor* desc = succ_iter->constln_slice;
+            out_descriptor* const desc = succ_iter->constln_slice;
             succ_iter->constln_slice = nullptr;
             assert(desc->begin == succ_iter);
             succ_iter = desc->end;
             delete desc;
         }
+        B_to_C.clear();
         succ.clear();
         pred.clear();
     }
@@ -1396,21 +1411,21 @@ class part_trans_t
 
     /* part_trans_t::make_noninert makes the transition identified by succ_iter
     noninert. */
-    void make_noninert(succ_iter_t succ_iter)
+    void make_noninert(succ_iter_t const succ_iter)
     {
         // change B_to_C
-        B_to_C_iter_t other_B_to_C =
+        B_to_C_iter_t const other_B_to_C =
                     succ_iter->B_to_C->pred->source->block->inert_begin();
         assert(succ_iter->B_to_C->B_to_C_slice->begin <= other_B_to_C);
         swap_B_to_C(succ_iter, other_B_to_C->pred->succ);
         succ_iter->B_to_C->pred->source->block->set_inert_begin(other_B_to_C +
                                                                             1);
         // change pred
-        pred_iter_t other_pred = succ_iter->target->inert_pred_begin();
+        pred_iter_t const other_pred = succ_iter->target->inert_pred_begin();
         swap_in(succ_iter->B_to_C, other_pred->succ->B_to_C);
         succ_iter->target->set_inert_pred_begin(other_pred + 1);
         // change succ
-        succ_iter_t other_succ =
+        succ_iter_t const other_succ =
                         succ_iter->B_to_C->pred->source->inert_succ_begin();
         swap_out(succ_iter->B_to_C->pred, other_succ->B_to_C->pred);
         succ_iter->B_to_C->pred->source->set_inert_succ_begin(other_succ + 1);
@@ -1506,7 +1521,7 @@ class bisim_partitioner_gjkw_initialise_helper
         std::size_t operator()(const Key& k) const
         {
             return std::hash<label_type>()(k.first) ^
-                                    (std::hash<state_type>()(k.second) << 1);
+                                      (std::hash<state_type>()(k.second) << 1);
         }
     };
     // Map used to convert LTS to Kripke structure
@@ -1617,6 +1632,71 @@ class bisim_partitioner_gjkw
                                                      bool preserve_divergence);
     void refine_partition_until_it_becomes_stable_gjkw();
 
+#define SINGLE_REFINE
+
+#ifdef SINGLE_REFINE
+
+    /*------------- Refine -- Algorithms 3 and 4 of [GJKW 2017] -------------*/
+
+    bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RefB,
+                        const bisim_gjkw::constln_t* SpC,
+                        const bisim_gjkw::B_to_C_descriptor* FromRed,
+                        bool all_unmarked_bottom_states_are_blue,
+                        bool postprocessing);
+
+    DECLARE_COROUTINE(refine_blue,
+    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
+                                const bisim_gjkw::constln_t*, SpC,
+                                bool, all_unmarked_bottom_states_are_blue,
+                                bool, postprocessing),
+    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter,
+                                bisim_gjkw::state_info_ptr, s_prime,
+                                bisim_gjkw::permutation_iter_t,
+                                                            blue_nonbottom_end,
+                                bisim_gjkw::succ_const_iter_t, begin,
+                                bisim_gjkw::succ_const_iter_t, end),
+    /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
+                                                                   shared_data,
+    /* interrupt locations: */ (REFINE_BLUE_PREDECESSOR_HANDLED,
+                                REFINE_BLUE_TESTING,
+                                REFINE_BLUE_STATE_HANDLED,
+                                REFINE_BLUE_COLLECT_BOTTOM));
+
+    DECLARE_COROUTINE(refine_red,
+    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
+                                const bisim_gjkw::constln_t*, SpC,
+                                const bisim_gjkw::B_to_C_descriptor*, FromRed,
+                                bool, postprocessing),
+    /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
+                                                         fromred_visited_begin,
+                                bisim_gjkw::permutation_iter_t, visited_begin,
+                                bisim_gjkw::state_info_ptr, s,
+                                bisim_gjkw::pred_iter_t, pred_iter),
+    /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
+                                                                   shared_data,
+    /* interrupt locations: */ (REFINE_RED_COLLECT_FROMRED,
+                                REFINE_RED_PREDECESSOR_HANDLED,
+                                REFINE_RED_STATE_HANDLED));
+
+    bisim_gjkw::block_t* primary_refine(bisim_gjkw::block_t* RefB,
+                                            const bisim_gjkw::constln_t* NewC)
+    {
+        return refine(RefB, NewC, nullptr, true, false);
+    }
+
+    bisim_gjkw::block_t* secondary_refine(bisim_gjkw::block_t* RefB,
+                                const bisim_gjkw::constln_t* SpC,
+                                const bisim_gjkw::B_to_C_descriptor* FromRed,
+                                bool all_unmarked_bottom_states_are_blue)
+    {
+        return refine(RefB, SpC, FromRed, all_unmarked_bottom_states_are_blue,
+                                                                         true);
+    }
+
+#else // ifdef SINGLE_REFINE
+
     /*------------- PrimaryRefine -- Algorithm 3 of [GJKW 2017] -------------*/
 
     bisim_gjkw::block_t* primary_refine(bisim_gjkw::block_t* RefB,
@@ -1651,7 +1731,7 @@ class bisim_partitioner_gjkw
     bisim_gjkw::block_t* secondary_refine(bisim_gjkw::block_t* RefB,
                                 const bisim_gjkw::constln_t* SpC,
                                 const bisim_gjkw::B_to_C_descriptor* FromRed,
-                                bool split_unreachable_new_bottom = false);
+                                bool all_unmarked_bottom_states_are_blue);
 
     DECLARE_COROUTINE(secondary_blue,
     /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
@@ -1686,6 +1766,8 @@ class bisim_partitioner_gjkw
     /* interrupt locations: */ (SECONDARY_RED_COLLECT_FROMRED,
                                 SECONDARY_RED_PREDECESSOR_HANDLED,
                                 SECONDARY_RED_STATE_HANDLED));
+
+#endif // ifdef SINGLE_REFINE
 
     /*--------- PostprocessNewBottom -- Algorithm 5 of [GJKW 2017] ----------*/
 
@@ -1768,8 +1850,8 @@ bool bisimulation_compare_gjkw(const LTS_TYPE& l1, const LTS_TYPE& l2,
 
 /// calculates the bisimulation quotient of a LTS.
 template <class LTS_TYPE>
-void bisimulation_reduce_gjkw(LTS_TYPE& l, bool branching /* = false */,
-                                        bool preserve_divergence /* = false */)
+void bisimulation_reduce_gjkw(LTS_TYPE& l, bool const branching /* = false */,
+                                  bool const preserve_divergence /* = false */)
 {
   // First, remove tau loops in case of branching bisimulation.
   if (branching)
@@ -1856,7 +1938,7 @@ bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
 namespace bisim_gjkw
 {
 
-inline void state_info_entry::set_current_constln(succ_iter_t
+inline void state_info_entry::set_current_constln(succ_iter_t const
                                                            new_current_constln)
 {
     int_current_constln = new_current_constln;
@@ -1877,8 +1959,8 @@ inline void state_info_entry::set_current_constln(succ_iter_t
 }
 
 
-inline void state_info_entry::set_inert_succ_begin(
-                                               succ_iter_t new_inert_out_begin)
+inline void state_info_entry::set_inert_succ_begin(succ_iter_t const
+                                                           new_inert_out_begin)
 {
     if (new_inert_out_begin > inert_succ_begin())
     {
@@ -1895,7 +1977,8 @@ inline void state_info_entry::set_inert_succ_begin(
 }
 
 
-inline void state_info_entry::set_inert_succ_end(succ_iter_t new_inert_out_end)
+inline void state_info_entry::set_inert_succ_end(succ_iter_t const
+                                                             new_inert_out_end)
 {
     state_inert_out_end = new_inert_out_end;
     assert(inert_succ_begin() <= inert_succ_end());
@@ -1924,8 +2007,8 @@ inline constln_t* state_info_entry::constln()
 /// \param constln_ constellation to which the block belongs
 /// \param begin_   initial iterator to the first state of the block
 /// \param end_     initial iterator past the last state of the block
-inline block_t::block_t(constln_t* constln_, permutation_iter_t begin_,
-                                                       permutation_iter_t end_)
+inline block_t::block_t(constln_t* const constln_,
+                permutation_iter_t const begin_, permutation_iter_t const end_)
   : int_end(end_),
     int_begin(begin_),
     int_marked_nonbottom_begin(begin_), // no nonbottom state is marked
@@ -1947,7 +2030,7 @@ inline block_t::block_t(constln_t* constln_, permutation_iter_t begin_,
 }
 
 
-inline void block_t::set_constln(constln_t* new_constln)
+inline void block_t::set_constln(constln_t* const new_constln)
 {
     int_constln = new_constln;
     assert(nullptr == int_constln ||
@@ -1956,7 +2039,7 @@ inline void block_t::set_constln(constln_t* new_constln)
 
 
 /// read FromRed
-inline B_to_C_descriptor* block_t::FromRed(const constln_t* SpC)
+inline B_to_C_descriptor* block_t::FromRed(const constln_t* const SpC)
 {
     if (to_constln.begin() != to_constln.end() &&
                                        to_constln.begin()->to_constln() == SpC)
@@ -1971,7 +2054,7 @@ inline B_to_C_descriptor* block_t::FromRed(const constln_t* SpC)
 
 
 /// set FromRed to an existing element in to_constln
-inline void block_t::SetFromRed(B_to_C_desc_iter_t new_fromred)
+inline void block_t::SetFromRed(B_to_C_desc_iter_t const new_fromred)
 {
     assert(to_constln.begin() != to_constln.end());
     if (to_constln.begin() != new_fromred)
@@ -1989,17 +2072,14 @@ inline void block_t::SetFromRed(B_to_C_desc_iter_t new_fromred)
 /// \param SpC constellation of interest
 /// \returns true if the state is known to have a transition to `SpC`
 /// \memberof state_info_entry
-inline bool state_info_entry::surely_has_transition_to(const constln_t* SpC)
-                                                                          const
+inline bool state_info_entry::surely_has_transition_to(const constln_t* const
+                                                                     SpC) const
 {
     assert(succ_begin() <= current_constln() && current_constln()<=succ_end());
-    // Only non-inert transitions count.
-    if (constln() == SpC)
-    {
-        if (inert_succ_begin() == succ_begin())  return false;
-        if (inert_succ_begin()[-1].target->constln() != SpC)  return false;
-        return true;
-    }
+    assert(succ_begin()==current_constln() || succ_end()==current_constln() ||
+                            *current_constln()[-1].target->constln() <
+                                        *current_constln()->target->constln());
+    assert(constln() != SpC);
     // either current_constln()->target or current_constln()[-1].target is in
     // SpC
     if (current_constln() != succ_end() &&
@@ -2024,17 +2104,14 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* SpC)
 /// \param SpC constellation of interest
 /// \returns true if the state is known to have _no_ transition to `SpC`
 /// \memberof state_info_entry
-inline bool state_info_entry::surely_has_no_transition_to(const constln_t* SpC)
-                                                                          const
+inline bool state_info_entry::surely_has_no_transition_to(
+                                              const constln_t* const SpC) const
 {
     assert(succ_begin() <= current_constln() && current_constln()<=succ_end());
-    // Only noninert transitions count:
-    if (constln() == SpC)
-    {
-        if (inert_succ_begin() == succ_begin())  return true;
-        if (inert_succ_begin()[-1].target->constln() != SpC)  return true;
-        return false;
-    }
+    assert(succ_begin()==current_constln() || succ_end()==current_constln() ||
+                            *current_constln()[-1].target->constln() <
+                                        *current_constln()->target->constln());
+    assert(constln() != SpC);
     // condition:
     // current_constln()->target is in a constellation > SpC and
     // current_constln()[-1].target is in a constellation < SpC.
