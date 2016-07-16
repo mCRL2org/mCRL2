@@ -521,10 +521,67 @@ void failing_test_groote_wijs_algorithm()
   l_gw.load(is);
   lts::lts_aut_t l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim);
-  test_lts("gw problem branching bisimulation",l,expected_label_count, expected_state_count, expected_transition_count);
+  test_lts("gw problem (branching bisimulation)",l,expected_label_count, expected_state_count, expected_transition_count);
+  l=l_gw;
+  reduce(l,lts::lts_eq_branching_bisim_gw);
+  test_lts("gw problem (branching bisimulation gw)",l,expected_label_count, expected_state_count, expected_transition_count);
+  l=l_gw;
+  reduce(l,lts::lts_eq_branching_bisim_gjkw);
+  test_lts("gw problem (branching bisimulation gjkw)",l,expected_label_count, expected_state_count, expected_transition_count);
   l=l_gw;
   reduce(l,lts::lts_eq_branching_bisim_sigref);
-  test_lts("gw problem branching bisimulation signature based",l,expected_label_count, expected_state_count, expected_transition_count);
+  test_lts("gw problem (branching bisimulation signature)",l,expected_label_count, expected_state_count, expected_transition_count);
+}
+
+// The following counterexample was taken from
+// Jansen/Keiren: Stuttering equivalence is too slow! Eprint arXiv: 1603.05789,
+// 2016. http://arxiv.org/abs/1603.05789
+
+void counterexample_jk_1(size_t k)
+{
+    // numbering scheme of states:
+    // states 0..k-1 are the blue squares
+    // state k is the orange circle
+    // states k+1..2k are the red triangles
+    // states 2k+1 and 2k+2 are the grey pentagons
+    // The grey diamonds are inserted as extra Kripke states.
+
+    assert(1 < k);
+    std::string CJK1 = "des(0," + std::to_string(5*k+2) + "," + std::to_string(2*k+3) + ")\n";
+    int i;
+
+    for (i = 0; i < k; ++i)
+    {
+        CJK1 += "(" + std::to_string(k) + ",a" + std::to_string(i) + "," + std::to_string(k) + ")\n"
+                "(" + std::to_string(k) + ",tau," + std::to_string(i) + ")\n"
+                "(0,a" + std::to_string(i) + "," + std::to_string(k) + ")\n";
+    }
+    for (i = k-1; i > 0; --i)
+    {
+        CJK1 += "(" + std::to_string(i) + ",tau," + std::to_string(i-1) + ")\n"
+                "(" + std::to_string(i+k+1) + ",tau," + std::to_string(i+k) + ")\n";
+    }
+    CJK1 += "(" + std::to_string(k+1) + ",tau," + std::to_string(k) + ")\n"
+            "(" + std::to_string(2*k+1) + ",a," + std::to_string(2*k+2) + ")\n"
+            "(" + std::to_string(k) + ",tau," + std::to_string(2*k+1) + ")\n"
+            "(0,tau," + std::to_string(2*k+2) + ")\n";
+
+    size_t expected_label_count = 5;
+    size_t expected_state_count = 4;
+    size_t expected_transition_count = 10;
+
+    std::istringstream is(CJK1);
+    lts::lts_aut_t l_cjk1;
+    l_cjk1.load(is);
+    lts::lts_aut_t l=l_cjk1;
+    reduce(l,lts::lts_eq_branching_bisim);
+    test_lts("counterexample JK 1 (branching bisimulation)",l,expected_label_count, expected_state_count, expected_transition_count);
+    l=l_cjk1;
+    reduce(l,lts::lts_eq_branching_bisim_gw);
+    test_lts("counterexample JK 1 (branching bisimulation gw)",l,expected_label_count, expected_state_count, expected_transition_count);
+    l=l_cjk1;
+    reduce(l,lts::lts_eq_branching_bisim_gjkw);
+    test_lts("counterexample JK 1 (branching bisimulation gjkw)",l,expected_label_count, expected_state_count, expected_transition_count);
 }
 
 int test_main(int argc, char* argv[])
@@ -536,7 +593,7 @@ int test_main(int argc, char* argv[])
   reduce_peterson();
   test_reachability();
   failing_test_groote_wijs_algorithm();
-
+  counterexample_jk_1(3);
   // TODO: Add groote wijs branching bisimulation and add weak bisimulation tests. For the last Peterson is a good candidate. 
   return 0;
 }

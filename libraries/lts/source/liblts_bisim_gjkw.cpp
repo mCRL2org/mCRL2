@@ -1981,7 +1981,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
         << RefB->debug_id() << "," << SpC->debug_id() << ","
         << (nullptr != FromRed ? FromRed->debug_id() : std::string("NULL"))
         << (all_unmarked_bottom_states_are_blue ? ",true" : ",false")
-        << (postprocessing ? ",true" : ",false") << ")\n";
+        << (postprocessing ? ",true)\n" : ",false)\n");
     assert(nullptr == FromRed || FromRed->from_block() == RefB);
     assert(nullptr == FromRed || FromRed->to_constln() == SpC);
 
@@ -1995,8 +1995,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
     // 4.3: Spend the same amount of work on either coroutine:
     // and
     // 3.29: RedB := RefB  or  RedB := NewB , respectively
-    RUN_COROUTINES(refine_blue, (RefB,SpC,all_unmarked_bottom_states_are_blue,
-                                                               postprocessing),
+    RUN_COROUTINES(refine_blue, (RefB,SpC,all_unmarked_bottom_states_are_blue||
+                                           nullptr == FromRed, postprocessing),
                                             RedB = RefB,
                    refine_red,  (RefB, SpC, FromRed, postprocessing),
                                             RedB = (red_end[-1]->block == RefB
@@ -2022,10 +2022,10 @@ static const char* const secondary_search =
 
 template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, SpC,
-                                bool, all_unmarked_bottom_states_are_blue,
-                                bool, postprocessing),
+    /* formal parameters:   */ (bisim_gjkw::block_t* const, RefB,
+                                const bisim_gjkw::constln_t* const, SpC,
+                                bool const,all_unmarked_bottom_states_are_blue,
+                                bool const, postprocessing),
     /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
                                 bisim_gjkw::state_info_ptr, s,
                                 bisim_gjkw::pred_iter_t, pred_iter,
@@ -2056,8 +2056,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
 
         // 4.6l: while MaybeBlue contains unvisited states do
         COROUTINE_WHILE (REFINE_BLUE_COLLECT_BOTTOM,
-                                  RefB->unmarked_bottom_end() != visited_end &&
-                                                 !shared_data.fromred_finished)
+                                    RefB->unmarked_bottom_end() != visited_end)
         {
             // A consequence of the changed order of states is that the blue
             // bottom states are counted twice:  once here and once when we
@@ -2096,6 +2095,16 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                                     bisim_gjkw::check_complexity::n_log_n * 4 +
                                           bisim_gjkw::check_complexity::m * 2 +
                                               bisim_gjkw::check_complexity::n);
+            if (shared_data.fromred_finished)
+            {
+                // we can stop looking for blue bottom states: all bottom
+                // states that are not known to be red are actually blue.
+                if (RefB->unmarked_bottom_size() > RefB->size() / 2)
+                {
+                    ABORT_THIS_COROUTINE();
+                }
+                break;
+            }
             // 4.7l: Choose an unvisited s in MaybeBlue.
             s = *visited_end;
             // 4.8l (order of lines changed): Mark s as visited.
@@ -2331,17 +2340,18 @@ END_COROUTINE
 
 template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, SpC,
-                                const bisim_gjkw::B_to_C_descriptor*, FromRed,
-                                bool, postprocessing),
+    /* formal parameters:   */ (bisim_gjkw::block_t* const, RefB,
+                                const bisim_gjkw::constln_t* const, SpC,
+                                const bisim_gjkw::B_to_C_descriptor* const,
+                                                                       FromRed,
+                                bool const, postprocessing),
     /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
-                                                        fromred_visited_begin,
+                                                         fromred_visited_begin,
                                 bisim_gjkw::permutation_iter_t, visited_begin,
                                 bisim_gjkw::state_info_ptr, s,
                                 bisim_gjkw::pred_iter_t, pred_iter),
     /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
-                                                                shared_data,
+                                                                   shared_data,
     /* interrupt locations: */ (REFINE_RED_COLLECT_FROMRED,
                                 REFINE_RED_PREDECESSOR_HANDLED,
                                 REFINE_RED_STATE_HANDLED))

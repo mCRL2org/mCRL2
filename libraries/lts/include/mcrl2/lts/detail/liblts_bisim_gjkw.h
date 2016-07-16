@@ -928,8 +928,6 @@ class constln_t
 
 
 
-
-
 template <class LTS_TYPE>
 class bisim_partitioner_gjkw_initialise_helper;
 
@@ -1645,10 +1643,10 @@ class bisim_partitioner_gjkw
                         bool postprocessing);
 
     DECLARE_COROUTINE(refine_blue,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, SpC,
-                                bool, all_unmarked_bottom_states_are_blue,
-                                bool, postprocessing),
+    /* formal parameters:   */ (bisim_gjkw::block_t* const, RefB,
+                                const bisim_gjkw::constln_t* const, SpC,
+                                bool const,all_unmarked_bottom_states_are_blue,
+                                bool const, postprocessing),
     /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
                                 bisim_gjkw::state_info_ptr, s,
                                 bisim_gjkw::pred_iter_t, pred_iter,
@@ -1665,10 +1663,11 @@ class bisim_partitioner_gjkw
                                 REFINE_BLUE_COLLECT_BOTTOM));
 
     DECLARE_COROUTINE(refine_red,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, SpC,
-                                const bisim_gjkw::B_to_C_descriptor*, FromRed,
-                                bool, postprocessing),
+    /* formal parameters:   */ (bisim_gjkw::block_t* const, RefB,
+                                const bisim_gjkw::constln_t* const, SpC,
+                                const bisim_gjkw::B_to_C_descriptor* const,
+                                                                       FromRed,
+                                bool const, postprocessing),
     /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
                                                          fromred_visited_begin,
                                 bisim_gjkw::permutation_iter_t, visited_begin,
