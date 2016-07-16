@@ -46,8 +46,7 @@ class RewriterJitty: public Rewriter
     data_expression rewrite_aux_function_symbol(
                       const function_symbol& op,
                       const data_expression& term,
-                      substitution_type& sigma,
-                      const bool first_term_is_a_normal_form);
+                      substitution_type& sigma);
 
     /* Auxiliary function to take care that the array jitty_strat is sufficiently large
        to access element i */

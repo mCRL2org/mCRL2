@@ -1483,8 +1483,33 @@ BOOST_AUTO_TEST_CASE(Check_function_equality)
     f(parse_data_expression("false", specification));
     data_rewrite_test(R, e, f);
   }
-}
+} 
 
+BOOST_AUTO_TEST_CASE(Check_normal_forms_in_function_update)   // In the jitty rewriter the internally used annotation Rewritten@@term
+                                                              // was not always properly removed.
+{
+  std::string s(
+  "sort F = Nat->Nat->Nat;\n"
+  "map a:F;\n"
+  "    update:F#Nat#Nat#Nat->F;\n"
+  "var c:F;\n"
+  "    i,j,x:Nat;\n"
+  "eqn update(c,i,j,x)=c[i->c(i)[j->x]];\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy31: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("update(a,0,0,0)", specification));
+    data::data_expression f(parse_data_expression("a[0 -> a(0)[0 -> 0]]", specification));
+    data_rewrite_test(R, e, f);
+  }
+}
 
 
 

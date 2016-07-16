@@ -625,13 +625,14 @@ data_expression RewriterJitty::rewrite_aux(
     if (terma.head()==this_term_is_in_normal_form())
     {
       assert(terma.size()==1);
+      assert(remove_normal_form_function(terma[0])==terma[0]);
       return terma[0];
     }
   }
   if (is_function_symbol(term))
   {
     assert(term!=this_term_is_in_normal_form());
-    return rewrite_aux_function_symbol(atermpp::down_cast<const function_symbol>(term),term,sigma,false);
+    return rewrite_aux_function_symbol(atermpp::down_cast<const function_symbol>(term),term,sigma);
   }
   if (is_variable(term))
   {
@@ -668,7 +669,7 @@ data_expression RewriterJitty::rewrite_aux(
 
   if (detail::head_is_function_symbol(term,head) && head!=this_term_is_in_normal_form())
   {
-    return rewrite_aux_function_symbol(head,term,sigma,false);
+    return rewrite_aux_function_symbol(head,term,sigma);
   }
 
   const application& tapp=atermpp::down_cast<application>(term);
@@ -682,8 +683,8 @@ data_expression RewriterJitty::rewrite_aux(
   {
     // In this case t has the shape f(u1...un)(u1'...um')....  where all u1,...,un,u1',...,um' are normal formas.
     // In the invocation of rewrite_aux_function_symbol these terms are rewritten to normalform again.
-    const data_expression result=application(t,tapp.begin(), tapp.end());
-    return rewrite_aux_function_symbol(head,result,sigma,true);
+    const data_expression result=application(t,tapp.begin(), tapp.end()); 
+    return rewrite_aux_function_symbol(head,result,sigma);
   }
   else if (head_is_variable(t))
   {
@@ -711,8 +712,7 @@ data_expression RewriterJitty::rewrite_aux(
 data_expression RewriterJitty::rewrite_aux_function_symbol(
                       const function_symbol& op,
                       const data_expression& term,
-                      substitution_type& sigma,
-                      const bool first_term_is_a_normal_form)
+                      substitution_type& sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
 
@@ -724,12 +724,6 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   for(size_t i=0; i<arity; ++i)
   {
     rewritten_defined[i]=false;
-  }
-  if (first_term_is_a_normal_form)
-  {
-    assert(arity>0);
-    new (&rewritten[0]) data_expression(detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),0));
-    rewritten_defined[0]=true;
   }
 
   const size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
