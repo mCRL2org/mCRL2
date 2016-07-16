@@ -715,7 +715,6 @@ class block_t
         if (marked_nonbottom_begin() <= s->pos)  return false;
         set_marked_nonbottom_begin(marked_nonbottom_begin() - 1);
         swap_permutation(s->pos, marked_nonbottom_begin());
-        mCRL2log(log::debug, "bisim_gjkw") << " mkn";
         return true;
     }
 
@@ -734,7 +733,6 @@ class block_t
             if (marked_bottom_begin() <= s->pos)  return false;
             set_marked_bottom_begin(marked_bottom_begin() - 1);
             swap_permutation(s->pos, marked_bottom_begin());
-            mCRL2log(log::debug, "bisim_gjkw") << " mkb";
             return true;
         }
         return mark_nonbottom(s);
@@ -992,7 +990,6 @@ class part_state_t
             delete C;
         }
 
-        mCRL2log(log::debug, "bisim_gjkw") << "halfway part_state_t::clear\n";
         #ifndef NDEBUG
             state_type deleted_blocks = 0;
         #endif
@@ -1868,10 +1865,10 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool const branching /* = false */,
 
   // Assign the reduced LTS
   l.set_num_states(bisim_part.num_eq_classes());
-mCRL2log(log::debug, "bisim_gjkw") << "number of states in the lumped chain: "
-<< bisim_part.num_eq_classes() << "; initial state: originally state "
-<< l.initial_state() << ", lumped state "
-<< bisim_part.get_eq_class(l.initial_state()) << "\n";
+  mCRL2log(log::debug, "bisim_gjkw") << "number of states in the lumped "
+        "chain: " << bisim_part.num_eq_classes()
+        << "; initial state: originally state " << l.initial_state()
+        <<" = lumped state "<<bisim_part.get_eq_class(l.initial_state())<<"\n";
   l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
   bisim_part.replace_transitions(branching, preserve_divergence);
 }

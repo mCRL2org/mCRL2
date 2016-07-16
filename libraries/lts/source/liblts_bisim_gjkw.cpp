@@ -1642,8 +1642,6 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
             // constellation -- they would be mapped to the same resulting
             // transition.
             succ_iter = succ_iter->constln_slice->end;
-            mCRL2log(log::debug, "bisim_gjkw") << "succ_iter is now "
-                                                        << &*succ_iter << '\n';
         }
     }
 }
@@ -1724,21 +1722,12 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                 assert(part_tr.pred_end() > pred_iter &&
                                 pred_iter->succ->B_to_C->pred == pred_iter);
                 bisim_gjkw::state_info_ptr const s_prime = pred_iter->source;
-                mCRL2log(log::debug, "bisim_gjkw") << pred_iter->debug_id();
                 // 2.12: Mark the block of s_prime as refinable
                 bool const first_transition_of_block =
                                               s_prime->block->make_refinable();
-                if (first_transition_of_block)
-                {
-                    mCRL2log(log::debug, "bisim_gjkw") << " fb";
-                }
                 // 2.13: Mark s_prime as predecessor of SpB
                 bool const first_transition_of_state =
                                                  s_prime->block->mark(s_prime);
-                if (first_transition_of_state)
-                {
-                    mCRL2log(log::debug, "bisim_gjkw") << " fs";
-                }
                 // 2.14: Register that s_prime->s goes to NewC (instead of SpC)
                 // and
                 // 2.15: Store whether s' still has some transition to SpC\SpB
@@ -1989,7 +1978,6 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
     {
         RefB->set_marked_nonbottom_begin(RefB->nonbottom_end());
         RefB->set_unmarked_bottom_end(RefB->unmarked_bottom_begin());
-        mCRL2log(log::debug, "bisim_gjkw") << "refine: same constellation\n";
         return RefB;
     }
     // 4.3: Spend the same amount of work on either coroutine:
@@ -2114,10 +2102,16 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             {
                 // The state s is not blue.  Move it to the slice of non-blue
                 // bottom states.
+                mCRL2log(log::debug, "bisim_gjkw") << s->debug_id()
+                                                          << " is not blue.\n";
                 --visited_end;
                 RefB->set_marked_bottom_begin(RefB->marked_bottom_begin() - 1);
                 bisim_gjkw::swap_permutation(visited_end,
                                                   RefB->marked_bottom_begin());
+                if (RefB->marked_size() > RefB->size() / 2)
+                {
+                    ABORT_OTHER_COROUTINE();
+                }
                 // 4.11l: continue to Line 4.6l
                 continue;
             // 4.12l: end if
@@ -2147,7 +2141,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
         // all bottom states are red, so there cannot be any blue states.
         RefB->set_marked_nonbottom_begin(RefB->marked_nonbottom_end());
         // RefB->set_marked_bottom_begin(RefB->bottom_begin());
-        mCRL2log(log::debug, "bisim_gjkw") << "refine_blue: empty\n";
         TERMINATE_COROUTINE_SUCCESSFULLY();
     }
 
@@ -2259,8 +2252,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
     // 4.27l: end while
         if (RefB->unmarked_bottom_end() == visited_end)
         {
-            mCRL2log(log::debug, "bisim_gjkw")
-                                           << "Finished with bottom states.\n";
             visited_end = RefB->unmarked_nonbottom_begin();
         }
     }
@@ -2423,7 +2414,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
     if (0 == RefB->marked_size())
     {
         // RefB->unmark_all_states(); // not needed: there are no marked states
-        mCRL2log(log::debug, "bisim_gjkw") << "refine_red: empty\n";
         TERMINATE_COROUTINE_SUCCESSFULLY();
     }
 
@@ -2668,7 +2658,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, primary_blue,
     {
         RefB->set_marked_nonbottom_begin(RefB->nonbottom_end());
         // RefB->set_unmarked_bottom_end(RefB->unmarked_bottom_begin());
-        mCRL2log(log::debug, "bisim_gjkw") << "primary_blue: empty\n";
         TERMINATE_COROUTINE_SUCCESSFULLY();
     }
     assert(RefB->constln() != NewC);
@@ -2991,8 +2980,6 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::
     {
         RefB->set_marked_nonbottom_begin(RefB->nonbottom_end());
         RefB->set_unmarked_bottom_end(RefB->unmarked_bottom_begin());
-        mCRL2log(log::debug, "bisim_gjkw")
-                                   << "secondary_refine: same constellation\n";
         return RefB;
     }
     // 4.3: Spend the same amount of work on either coroutine:
@@ -3122,7 +3109,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
     {
         RefB->set_marked_nonbottom_begin(RefB->marked_nonbottom_end());
         // RefB->set_marked_bottom_begin(RefB->bottom_begin());
-        mCRL2log(log::debug, "bisim_gjkw") << "secondary_blue: empty\n";
         TERMINATE_COROUTINE_SUCCESSFULLY();
     }
 
@@ -3239,8 +3225,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_blue,
     // 4.27l: end while
         if (RefB->unmarked_bottom_end() == visited_end)
         {
-            mCRL2log(log::debug, "bisim_gjkw")
-                                           << "Finished with bottom states.\n";
             visited_end = RefB->unmarked_nonbottom_begin();
         }
     }
@@ -3387,7 +3371,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, secondary_red,
     if (0 == RefB->marked_size())
     {
         // RefB->unmark_all_states(); // not needed: there are no marked states
-        mCRL2log(log::debug, "bisim_gjkw") << "secondary_red: empty\n";
         TERMINATE_COROUTINE_SUCCESSFULLY();
     }
 
