@@ -71,14 +71,16 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
 
     for (const data::data_expression& exp: e)
     {
-      if (is_function_symbol(exp))
+      if (is_function_symbol(exp) && exp.sort()!=data::sort_pos::pos() &&
+                                     exp.sort()!=data::sort_nat::nat())
       {
         // This case is dealt with separately, as it occurs often.
         // The use of pp as in the next case is correct for this case also, but very time consuming.
+        // The exception to this rule is constants @c1 of sort Pos, @c0 of sort Nat. 
         name += "@";
         name += atermpp::down_cast<data::function_symbol>(exp).name();
       }
-      else if (is_application(exp) || is_abstraction(exp))
+      else if (is_function_symbol(exp) || is_application(exp) || is_abstraction(exp))
       {
         name += "@";
         name += data::pp(exp);
