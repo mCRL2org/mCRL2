@@ -7354,11 +7354,10 @@ class specification_basic_type:public boost::noncopyable
     bool allowsingleaction(const action_name_multiset& allowaction,
                            const action_list& multiaction)
     {
-      if (multiaction == action_list({ terminationAction }))
-      {
-        // multiaction is equal to terminate. This action cannot be blocked.
-        return true;
-      }
+      /* The special cases where multiaction==tau and multiaction=={ Terminated } must have been 
+         dealt with separately. */
+      assert(multiaction.size()!=0 && multiaction != action_list({ terminationAction }));
+
       const identifier_string_list& names=allowaction.names();
       identifier_string_list::const_iterator i=names.begin();
 
@@ -7382,6 +7381,12 @@ class specification_basic_type:public boost::noncopyable
     {
       /* The empty multiaction, i.e. tau, is never blocked by allow */
       if (multiaction.empty())
+      {
+        return true;
+      }
+
+      /* The multiaction is equal to the special Terminate action. This action cannot be blocked. */
+      if (multiaction == action_list({ terminationAction }))
       {
         return true;
       }
@@ -7459,8 +7464,7 @@ class specification_basic_type:public boost::noncopyable
         const data_expression& condition=smmnd.condition();
 
         // Explicitly allow the termination action in any allow. 
-        if ((i->multi_action().actions().size()==1 && i->multi_action().actions().front()==terminationAction) ||
-            (is_allow && allow_(allowlist,multiaction)) ||
+        if ((is_allow && allow_(allowlist,multiaction)) ||
             (!is_allow && !encap(deprecated_cast<identifier_string_list>(allowlist),multiaction)))    
         {
           action_summands.push_back(smmnd);
@@ -8961,7 +8965,6 @@ class specification_basic_type:public boost::noncopyable
             else
             {
               multiaction3=linMergeMultiActionList(multiaction1,multiaction2);
-
             }
 
             if (is_allow && !allow_(allowlist,multiaction3))
