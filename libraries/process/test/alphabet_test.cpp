@@ -184,7 +184,18 @@ void test_push_allow(const std::string& expression, const std::string& Atext, co
   bool A_includes_subsets;
   std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
   data::set_identifier_generator id_generator;
-  process::detail::alphabet_cache W(id_generator);
+
+  // compute equation cache
+  std::map<process_identifier, multi_action_name_set> pcrl_equation_cache;
+  for (const process_equation& eqn: procspec.equations())
+  {
+    if (is_pcrl(eqn.expression()))
+    {
+      pcrl_equation_cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), procspec.equations());
+    }
+  }
+
+  process::detail::push_allow_cache W(id_generator, pcrl_equation_cache);
   process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), allow_set(A, A_includes_subsets), procspec.equations(), W);
   std::string result = process::pp(node.expression);
   check_result(expression, result, expected_result, "push_allow");

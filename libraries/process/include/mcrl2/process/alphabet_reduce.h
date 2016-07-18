@@ -23,6 +23,7 @@
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
+#include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/utilities/logger.h"
@@ -43,6 +44,7 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
 
   std::vector<process_equation>& equations;
   data::set_identifier_generator id_generator;
+  std::map<process_identifier, multi_action_name_set> pcrl_equation_cache;
 
   alphabet_push_builder(std::vector<process_equation>& equations_)
     : equations(equations_)
@@ -51,16 +53,26 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
     {
       id_generator.add_identifier(equation.identifier().name());
     }
+
+    // compute variable cache
+    // TODO: This can be implemented more efficiently, using an SCC graph
+    for (const process_equation& eqn: equations)
+    {
+      if (is_pcrl(eqn.expression()))
+      {
+        pcrl_equation_cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), equations);
+      }
+    }
   }
 
   process_expression apply(const process::allow& x)
   {
-    return push_allow(x.operand(), x.allow_set(), equations, id_generator);
+    return push_allow(x.operand(), x.allow_set(), equations, id_generator, pcrl_equation_cache);
   }
 
   process_expression apply(const process::block& x)
   {
-    return push_block(x.block_set(), x.operand(), equations, id_generator);
+    return push_block(x.block_set(), x.operand(), equations, id_generator, pcrl_equation_cache);
   }
 };
 

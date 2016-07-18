@@ -29,8 +29,31 @@ namespace process {
 
 namespace detail {
 
+// Returns allow(alphabet, x)
+inline
+process_expression construct_allow(const multi_action_name_set& A, const process_expression& x, bool allow_required)
+{
+  // convert alphabet to an action_name_multiset_list v
+  std::vector<action_name_multiset> v;
+  for (const multi_action_name& alpha: A)
+  {
+    if (!alpha.empty()) // exclude tau
+    {
+      v.push_back(action_name_multiset(core::identifier_string_list(alpha.begin(), alpha.end())));
+    }
+  }
+  action_name_multiset_list B(v.begin(), v.end());
+  if (allow_required || !B.empty())
+  {
+    return allow(B, x);
+  }
+  return x;
+}
+
 struct push_allow_node: public alphabet_node
 {
+  process_expression expression;
+
   push_allow_node()
   {}
 
@@ -40,35 +63,13 @@ struct push_allow_node: public alphabet_node
 
   void apply_allow(const allow_set& A, bool allow_required = false)
   {
-    if (A.A.empty()) // TODO: why is this needed?
-    {
-      return;
-    }
-    std::size_t alphabet_size = alphabet.size();
-    alphabet = A.intersect(alphabet);
-    bool needs_allow = allow_required || alphabet.size() < alphabet_size;
-    if (needs_allow)
-    {
-      if (alphabet.size() == 1 && contains_tau(alphabet)) // alphabet == { tau }
-      {
-        // N.B. This is a tricky case. We can't return allow({tau}, expression),
-        // as this is not allowed in mCRL2. We can take an arbitrary element of
-        // A instead.
-        multi_action_name_set A1;
-        A1.insert(*A.A.begin());
-        expression = make_allow(A1, expression);
-      }
-      else
-      {
-        expression = make_allow(alphabet, expression);
-      }
-    }
+    multi_action_name_set restricted_alphabet = A.intersect(alphabet);
+    bool needs_allow = allow_required || alphabet.size() != restricted_alphabet.size();
+    expression = construct_allow(restricted_alphabet, expression, needs_allow);
   }
-
-  process_expression expression;
 };
 
-struct alphabet_cache
+struct push_allow_cache
 {
   // This attribute denotes the status of the alphabet computation.
   // - unknown: the alphabet computation has not started yet
@@ -149,8 +150,11 @@ struct alphabet_cache
   // to invalidate alphabet values in the cache.
   std::set<alphabet_key> dependent_nodes;
 
-  alphabet_cache(data::set_identifier_generator& id_generator_)
-    : id_generator(id_generator_)
+  // Caches the alphabet of pCRL equations
+  std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache;
+
+  push_allow_cache(data::set_identifier_generator& id_generator_, std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache_)
+    : id_generator(id_generator_), pcrl_equation_cache(pcrl_equation_cache_)
   {}
 
   std::string print_status(alphabet_status status) const
@@ -209,37 +213,37 @@ struct alphabet_cache
 };
 
 inline
-std::ostream& operator<<(std::ostream& out, const alphabet_cache::alphabet_key& x)
+std::ostream& operator<<(std::ostream& out, const push_allow_cache::alphabet_key& x)
 {
   return out << "(" << x.A << ", " << x.P << ")";
 }
 
 inline
-char print_alphabet_status(alphabet_cache::alphabet_status status)
+char print_alphabet_status(push_allow_cache::alphabet_status status)
 {
   switch (status)
   {
-    case alphabet_cache::unknown:  { return 'u'; }
-    case alphabet_cache::busy:     { return 'b'; }
-    case alphabet_cache::finished: { return 'f'; }
+    case push_allow_cache::unknown:  { return 'u'; }
+    case push_allow_cache::busy:     { return 'b'; }
+    case push_allow_cache::finished: { return 'f'; }
   }
   return '?';
 }
 
 inline
-std::ostream& operator<<(std::ostream& out, const alphabet_cache::alphabet_value& x)
+std::ostream& operator<<(std::ostream& out, const push_allow_cache::alphabet_value& x)
 {
   return out << "(" << process::pp(x.alphabet) << ", " << print_alphabet_status(x.status) << ", " << x.P << ")";
 }
 
 inline
-std::ostream& operator<<(std::ostream& out, const alphabet_cache::unfinished_value& x)
+std::ostream& operator<<(std::ostream& out, const push_allow_cache::unfinished_value& x)
 {
   return out << "(" << x.A << ", " << x.P << ")";
 }
 
 inline
-std::ostream& operator<<(std::ostream& out, const alphabet_cache& W)
+std::ostream& operator<<(std::ostream& out, const push_allow_cache& W)
 {
   out << "map: {";
   for (auto i = W.alphabet_map.begin(); i != W.alphabet_map.end(); ++i)
@@ -280,7 +284,7 @@ std::ostream& operator<<(std::ostream& out, const push_allow_node& x)
   return out << "Node(" << pp(x.alphabet) << ", " << process::pp(x.expression) << ")";
 }
 
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W, bool generate_missing_equations = false);
+push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_cache& W, bool generate_missing_equations = false);
 
 template <typename Derived, typename Node = push_allow_node>
 struct push_allow_traverser: public process_expression_traverser<Derived>
@@ -292,14 +296,14 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   // used for computing the alphabet
   std::vector<process_equation>& equations;
-  alphabet_cache& W;
+  push_allow_cache& W;
 
   // the parameter A
   const allow_set& A;
 
   std::vector<Node> node_stack;
 
-  push_allow_traverser(std::vector<process_equation>& equations_, alphabet_cache& W_, const allow_set& A_)
+  push_allow_traverser(std::vector<process_equation>& equations_, push_allow_cache& W_, const allow_set& A_)
     : equations(equations_), W(W_), A(A_)
   {}
 
@@ -334,7 +338,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     return node_stack.back();
   }
 
-  std::string log_push_result(const process_expression& x, const allow_set& A, const alphabet_cache& W, const push_allow_node& result, const std::string& msg = "", const std::string& text = "")
+  std::string log_push_result(const process_expression& x, const allow_set& A, const push_allow_cache& W, const push_allow_node& result, const std::string& msg = "", const std::string& text = "")
   {
     std::ostringstream out;
     std::string text1 = text;
@@ -375,14 +379,27 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
   void leave(const process::process_instance& x)
   {
     const process_identifier& P = x.identifier();
-    alphabet_cache::alphabet_key key(A, P);
-    alphabet_cache::alphabet_value& alpha = W.alphabet(A, P);
+
+    push_allow_cache::alphabet_key key(A, P);
+    push_allow_cache::alphabet_value& alpha = W.alphabet(A, P);
     const multi_action_name_set& alphabet = alpha.alphabet;
-    alphabet_cache::alphabet_status status = alpha.status;
+    push_allow_cache::alphabet_status status = alpha.status;
     const process_identifier& P1 = alpha.P;
     process_instance P1e(P1, x.actual_parameters());
 
-    if (status == alphabet_cache::finished)
+    // if the node is in the pCRL equation cache, do not go into the recursion
+    auto i = W.pcrl_equation_cache.find(P);
+    if (i != W.pcrl_equation_cache.end())
+    {
+      push_allow_node node(i->second, x);
+      node.apply_allow(A);
+      push(node);
+      alpha.alphabet = node.alphabet;
+      alpha.status = push_allow_cache::finished;
+      return;
+    }
+
+    if (status == push_allow_cache::finished)
     {
       // we already know the result for (A, P)
       push_allow_node node(alphabet, P1e);
@@ -390,7 +407,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       mCRL2log(log::debug) << log(x);
       return;
     }
-    else if (status == alphabet_cache::busy)
+    else if (status == push_allow_cache::busy)
     {
       // the alphabet of (A, x) is currently being computed; it suffices to return (emptyset, P1e)
       W.dependent_nodes.insert(key);
@@ -401,17 +418,19 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       return;
     }
 
-    if (status == alphabet_cache::unknown)
+    if (status == push_allow_cache::unknown)
     {
-      alpha.status = alphabet_cache::busy;
+      alpha.status = push_allow_cache::busy;
 
       // N.B. A copy is made, because a call to push_allow may invalidate a reference.
       const process_equation& eqn = find_equation(equations, x.identifier());
       const data::variable_list& d = eqn.formal_parameters();
       const process_expression& p = eqn.expression();
 
+      push_allow_node node;
+
       // compute the alphabet for (A, P)
-      push_allow_node node = push_allow(p, A, equations, W);
+      node = push_allow(p, A, equations, W);
 
       W.dependent_nodes.erase(key);
       if (W.dependent_nodes.empty())
@@ -422,13 +441,12 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
         equations.push_back(eqn1);
 
         alpha.alphabet = node.alphabet;
-        alpha.status = alphabet_cache::finished;
-
+        alpha.status = push_allow_cache::finished;
         node.apply_allow(A);
       }
       else
       {
-        alpha.status = alphabet_cache::unknown;
+        alpha.status = push_allow_cache::unknown;
         W.set_unfinished(A, x);
       }
 
@@ -660,13 +678,13 @@ struct apply_push_allow_traverser: public Traverser<apply_push_allow_traverser<T
   using super::leave;
   using super::apply;
 
-  apply_push_allow_traverser(std::vector<process_equation>& equations, alphabet_cache& W, const allow_set& A)
+  apply_push_allow_traverser(std::vector<process_equation>& equations, push_allow_cache& W, const allow_set& A)
     : super(equations, W, A)
   {}
 };
 
 inline
-push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, alphabet_cache& W, bool generate_missing_equations)
+push_allow_node push_allow(const process_expression& x, const allow_set& A, std::vector<process_equation>& equations, push_allow_cache& W, bool generate_missing_equations)
 {
   apply_push_allow_traverser<push_allow_traverser> f(equations, W, A);
   f.apply(x);
@@ -676,11 +694,11 @@ push_allow_node push_allow(const process_expression& x, const allow_set& A, std:
   {
     while (!W.unfinished.empty())
     {
-      detail::alphabet_cache::unfinished_value v = *W.unfinished.begin();
-      detail::alphabet_cache::alphabet_key key(v.A, v.P.identifier());
+      detail::push_allow_cache::unfinished_value v = *W.unfinished.begin();
+      detail::push_allow_cache::alphabet_key key(v.A, v.P.identifier());
       W.unfinished.erase(W.unfinished.begin());
-      detail::alphabet_cache::alphabet_value& value = W.alphabet(key.A, key.P);
-      if (value.status != detail::alphabet_cache::finished)
+      detail::push_allow_cache::alphabet_value& value = W.alphabet(key.A, key.P);
+      if (value.status != detail::push_allow_cache::finished)
       {
         mCRL2log(log::debug) << "generating unfinished equation for " << key << " -> " << value << std::endl;
         push_allow(v.P, v.A, equations, W);
@@ -695,10 +713,15 @@ push_allow_node push_allow(const process_expression& x, const allow_set& A, std:
 } // namespace detail
 
 inline
-process_expression push_allow(const process_expression& x, const action_name_multiset_list& V, std::vector<process_equation>& equations, data::set_identifier_generator& id_generator)
+process_expression push_allow(const process_expression& x,
+                              const action_name_multiset_list& V,
+                              std::vector<process_equation>& equations,
+                              data::set_identifier_generator& id_generator,
+                              std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache
+                            )
 {
   allow_set A(alphabet_operations::make_name_set(V));
-  detail::alphabet_cache W(id_generator);
+  detail::push_allow_cache W(id_generator, pcrl_equation_cache);
   detail::push_allow_node node = detail::push_allow(x, A, equations, W, true);
   return node.expression;
 }

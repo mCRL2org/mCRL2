@@ -33,6 +33,26 @@ struct allow_set
   bool A_includes_subsets;
   std::set<core::identifier_string> I;
 
+  bool is_empty() const
+  {
+    return A.empty() && I.empty();
+  }
+
+  multi_action_name pick_element() const
+  {
+    if (!A.empty())
+    {
+      return *A.begin();
+    }
+    if (!I.empty())
+    {
+      multi_action_name alpha;
+      alpha.insert(*I.begin());
+      return alpha;
+    }
+    throw mcrl2::runtime_error("cannot pick element from empty allow_set!");
+  }
+
   void establish_invariant()
   {
     multi_action_name_set A1;
