@@ -7421,6 +7421,7 @@ class specification_basic_type:public boost::noncopyable
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
+std::cerr << "ALLOWBLOCK " << allowlist1 << "\n";
       /* This function calculates the allow or the block operator,
          depending on whether is_allow is true */
 
@@ -7458,9 +7459,10 @@ class specification_basic_type:public boost::noncopyable
         const data_expression actiontime=smmnd.multi_action().time();
         const data_expression& condition=smmnd.condition();
 
-
-        if ((is_allow && allow_(allowlist,multiaction)) ||
-             (!is_allow && !encap(deprecated_cast<identifier_string_list>(allowlist),multiaction)))
+        // Explicitly allow the termination action in any allow. 
+        if ((i->multi_action().actions().size()==1 && i->multi_action().actions().front()==terminationAction) ||
+            (is_allow && allow_(allowlist,multiaction)) ||
+            (!is_allow && !encap(deprecated_cast<identifier_string_list>(allowlist),multiaction)))    
         {
           action_summands.push_back(smmnd);
         }
