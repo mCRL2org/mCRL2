@@ -33,16 +33,6 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
     : result(true)
   {}
 
-  void enter(const not_& /* x */)
-  {
-    result = false;
-  }
-
-  void enter(const imp& /* x */)
-  {
-    result = false;
-  }
-
   void enter(const forall& /* x */)
   {
     result = false;
@@ -51,6 +41,14 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
   void enter(const exists& /* x */)
   {
     result = false;
+  }
+
+  void enter(const data::data_expression& x)
+  {
+    if (x != data::sort_bool::true_() && x != data::sort_bool::false_())
+    {
+      result = false;
+    }
   }
 
   void enter(const propositional_variable_instantiation& x)
