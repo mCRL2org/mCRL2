@@ -319,8 +319,8 @@ class transform_tool: public utilities::tools::input_output_tool
     void add_options(utilities::interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("algorithm", utilities::make_optional_argument("NAME", ""), "the algorithm that is to be applied", 'a');
-      desc.add_option("number", utilities::make_optional_argument("NAME", "-1"), "the number of the algorithm that is to be applied", 'n');
+      desc.add_option("algorithm", utilities::make_optional_argument<std::string>("NAME", ""), "the algorithm that is to be applied", 'a');
+      desc.add_option("number", utilities::make_optional_argument<int>("NAME", "-1"), "the number of the algorithm that is to be applied", 'n');
       desc.add_option("print-algorithms", "print the available algorithms", 'p');
     }
 
@@ -332,7 +332,7 @@ class transform_tool: public utilities::tools::input_output_tool
 
   public:
     transform_tool()
-      : super("transform",
+      : super("mcrl2transform",
               "Wieger Wesselink",
               "applies a transformation to an mCRL2 object",
               "Transform the object in INFILE and write the result to OUTFILE. If OUTFILE "
@@ -383,7 +383,7 @@ class transform_tool: public utilities::tools::input_output_tool
       }
 
       // if a number was specified, lookup the corresponding algorithm
-      if (algorithm.empty())
+      if (algorithm_number >= 0)
       {
         int index = 1;
         for (auto const& algo: algorithms)
