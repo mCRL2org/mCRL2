@@ -30,6 +30,7 @@
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
+#include "mcrl2/pbes/detail/check_well_formed_bes.h"
 #include "mcrl2/bes/remove_level.h"
 
 #ifndef MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
@@ -492,7 +493,7 @@ class pbesinst_alternative_lazy_algorithm
       equation.swap(new_equations);
     }
 
-    // The function below simplifies an boolean_expression, given the knowledge that some propositional variables in trivial
+    // The function below simplifies a boolean_expression, given the knowledge that some propositional variables in trivial
     // are known to be true or false. The idea is that variables that are redundant can be removed. If p = p1 && p2, and p1 is
     // false, then p2 can be removed, as its value does not influence the rewrite system.
     // The result of the function is a pair, with the simplified expression as first term, and the expression that is rewritten under the
@@ -616,6 +617,14 @@ class pbesinst_alternative_lazy_algorithm
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         const pbes_expression& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
+        try
+        {
+          check_whether_argument_is_a_well_formed_bes(psi_e);
+        }
+        catch (mcrl2::runtime_error& e)
+        {
+          throw mcrl2::runtime_error("Generated boolean equation system is not well formed.\n" + std::string(e.what()));
+        }
         pbes_expression rewritten_psi_e;
 
         if (m_transformation_strategy >= optimize)
@@ -650,6 +659,7 @@ class pbesinst_alternative_lazy_algorithm
             }
           }
         }
+
 
         // Add all variable instantiations in psi_e to todo and generated,
         // and augment the occurrence sets
