@@ -516,11 +516,9 @@ class enumerator_algorithm
           variable_list function_parameter_list;
           bool result = detail::compute_finite_function_sorts(function, id_generator, dataspec, datar, function_sorts, function_parameter_list);
 
-// std::cout << "<function_sorts>" << core::detail::print_list(function_sorts) << std::endl;
-
           if (!result)
           {
-            cannot_enumerate(p, "Sort " + data::pp(sort) + " has too many elements to enumerate");
+            cannot_enumerate(p, "Sort " + data::pp(sort) + " has too many elements to enumerate.");
           }
           const data_expression old_substituted_value = sigma(v1);
           for (const data_expression& f: function_sorts)
@@ -532,7 +530,7 @@ class enumerator_algorithm
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of function sort " + data::pp(sort));
+          cannot_enumerate(p, "Cannot enumerate elements of function sort " + data::pp(sort) + ".");
         }
       }
       else if (sort_set::is_set(sort))
@@ -550,7 +548,7 @@ class enumerator_algorithm
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of set sort " + data::pp(sort));
+          cannot_enumerate(p, "Cannot enumerate elements of set sort " + data::pp(sort) + ".");
           return;
         }
       }
@@ -562,11 +560,9 @@ class enumerator_algorithm
           data_expression_vector set_elements;
           bool result = detail::compute_finite_set_elements(fset, dataspec, datar, sigma, set_elements);
 
-// std::cout << "<set_elements>" << core::detail::print_list(set_elements) << std::endl;
-
           if (!result)
           {
-            cannot_enumerate(p, "Finite set sort " + data::pp(sort) + " has too many elements to enumerate");
+            cannot_enumerate(p, "Finite set sort " + data::pp(sort) + " has too many elements to enumerate.");
           }
           const data_expression old_substituted_value = sigma(v1);
           for (const data_expression& set_element: set_elements)
@@ -578,18 +574,18 @@ class enumerator_algorithm
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of finite set sort " + data::pp(sort));
+          cannot_enumerate(p, "Cannot enumerate elements of finite set sort " + data::pp(sort) + ".");
           return;
         }
       }
       else if (sort_bag::is_bag(sort))
       {
-        cannot_enumerate(p, "Cannot enumerate elements of bag sort " + data::pp(sort));
+        cannot_enumerate(p, "Cannot enumerate elements of bag sort " + data::pp(sort) + ".");
         return;
       }
       else if (sort_fbag::is_fbag(sort))
       {
-        cannot_enumerate(p, "Cannot enumerate elements of finite bag sort " + data::pp(sort));
+        cannot_enumerate(p, "Cannot enumerate elements of finite bag sort " + data::pp(sort) + ".");
         return;
       }
       else
@@ -622,7 +618,7 @@ class enumerator_algorithm
         }
         else
         {
-          cannot_enumerate(p, "Cannot enumerate elements of sort without constructors " + data::pp(sort));
+          cannot_enumerate(p, "Cannot enumerate elements of sort " + data::pp(sort) + " without constructors.");
           return;
         }
       }
