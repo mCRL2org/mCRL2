@@ -35,8 +35,6 @@ template <typename Specification = specification>
 class sumelm_algorithm: public detail::lps_algorithm<Specification>
 {
   typedef typename detail::lps_algorithm<Specification> super;
-  typedef typename Specification::process_type process_type;
-  typedef typename process_type::action_summand_type action_summand_type;
   using super::m_spec;
 
   protected:
@@ -80,8 +78,9 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
       y = temp;
     }
 
-    data::data_expression compute_substitutions(const summand_base& s,
-      data::mutable_map_substitution<>& substitutions)
+    data::data_expression compute_substitutions(
+                  const summand_base& s,
+                  data::mutable_map_substitution<>& substitutions)
     {
       using namespace data;
 
@@ -89,6 +88,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
 
       for(const data::data_expression& conjunct: data::split_and(s.condition()))
       {
+
         bool replacement_added(false);
         data_expression left;
         data_expression right;
@@ -179,7 +179,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
     ///        specification.
     void run()
     {
-      if(m_decluster)
+      if (m_decluster)
       {
         // First decluster specification
         decluster_algorithm<Specification>(m_spec).run();
@@ -187,15 +187,14 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
 
       m_removed = 0; // Re-initialise number of removed variables for a fresh run.
 
-      for (auto i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
+      for (action_summand& s: m_spec.process().action_summands())
       {
-        (*this)(*i);
+        (*this)(s);
       }
 
-      for (deadlock_summand_vector::iterator i = m_spec.process().deadlock_summands().begin();
-           i != m_spec.process().deadlock_summands().end(); ++i)
+      for (deadlock_summand& s: m_spec.process().deadlock_summands())
       {
-        (*this)(*i);
+        (*this)(s);
       }
 
       mCRL2log(log::verbose) << "Removed " << m_removed << " summation variables" << std::endl;
@@ -203,13 +202,13 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
 
     /// \brief Apply the sum elimination lemma to summand s.
     /// \param s an action_summand.
-    void operator()(action_summand_type& s)
+    void operator()(action_summand& s)
     {
       data::mutable_map_substitution<> substitutions;
       s.condition() = compute_substitutions(s, substitutions);
 
       // temporarily remove the summation variables, otherwise the capture avoiding substitution will touch them
-      auto summmation_variables = s.summation_variables();
+      const data::variable_list summmation_variables = s.summation_variables();
       s.summation_variables() = data::variable_list();
 
       lps::replace_variables_capture_avoiding(s, substitutions, data::substitution_variables(substitutions));
