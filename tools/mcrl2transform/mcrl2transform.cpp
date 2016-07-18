@@ -18,7 +18,9 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/alphabet_bounded.h"
 #include "mcrl2/process/alphabet_efficient.h"
+#include "mcrl2/process/alphabet_new.h"
 #include "mcrl2/process/eliminate_single_usage_equations.h"
 #include "mcrl2/process/eliminate_trivial_equations.h"
 #include "mcrl2/process/eliminate_unused_equations.h"
@@ -35,7 +37,7 @@ using namespace mcrl2;
 inline
 void write_text(const std::string& filename, const std::string& text)
 {
-  if (filename == "-")
+  if (filename.empty())
   {
     std::cout << text;
   }
@@ -254,25 +256,71 @@ struct alphabet_efficient_command: public processcommand
   }
 };
 
+/// \brief Computes the alphabet of the initial state of a process
+struct alphabet_new_command: public processcommand
+{
+  alphabet_new_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : processcommand("alphabet-new", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    processcommand::execute();
+    process::multi_action_name_set alpha = process::alphabet_new(procspec.init(), procspec.equations());
+    write_text(output_filename, process::pp(alpha));
+  }
+};
+
+/// \brief Computes the alphabet of the initial state of a process, if it is an allow
+struct alphabet_bounded_command: public processcommand
+{
+  alphabet_bounded_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : processcommand("alphabet-bounded", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    processcommand::execute();
+    if (!process::is_allow(procspec.init()))
+    {
+      std::cout << "Error: expected an allow set!" << std::endl;
+      return;
+    }
+    const process::allow& init = atermpp::down_cast<process::allow>(procspec.init());
+
+    process::multi_action_name_set A;
+    for (const process::action_name_multiset& alpha: init.allow_set())
+    {
+      const auto& names = alpha.names();
+      A.insert(process::multi_action_name(names.begin(), names.end()));
+    }
+    process::multi_action_name_set A1 = process::alphabet_bounded(init.operand(), A, procspec.equations());
+    write_text(output_filename, process::pp(A1));
+  }
+};
+
 class transform_tool: public utilities::tools::input_output_tool
 {
   protected:
     typedef utilities::tools::input_output_tool super;
 
     std::string algorithm_and_options;
+    int algorithm_number = -1;
     bool print_algorithms = false;
 
     void parse_options(const utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
       algorithm_and_options = parser.option_argument("algorithm");
+      algorithm_number = parser.option_argument_as<int>("number");
       print_algorithms = parser.options.count("print-algorithms") > 0;
     }
 
     void add_options(utilities::interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("algorithm", utilities::make_mandatory_argument("NAME", "novalue"), "the algorithm that is to be applied", 'a');
+      desc.add_option("algorithm", utilities::make_optional_argument("NAME", ""), "the algorithm that is to be applied", 'a');
+      desc.add_option("number", utilities::make_optional_argument("NAME", "-1"), "the number of the algorithm that is to be applied", 'n');
       desc.add_option("print-algorithms", "print the available algorithms", 'p');
     }
 
@@ -294,9 +342,9 @@ class transform_tool: public utilities::tools::input_output_tool
 
     bool run()
     {
-      std::vector<std::string> options = utilities::regex_split(algorithm_and_options, "\\s+");
-      std::string algorithm = options[0];
-      options.erase(options.begin());
+      std::vector<std::string> options;
+      std::set<std::string> algorithms;
+      std::string algorithm;
 
       std::map<std::string, std::shared_ptr<command>> commands;
       add_command(commands, std::make_shared<process_scc_command>(input_filename(), output_filename(), options));
@@ -309,29 +357,58 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<remove_data_parameters_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_efficient_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<alphabet_new_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<alphabet_bounded_command>(input_filename(), output_filename(), options));
 
-      if (print_algorithms)
+      for (auto i = commands.begin(); i != commands.end(); ++i)
       {
-        std::set<std::string> algorithms;
-        for (auto i = commands.begin(); i != commands.end(); ++i)
-        {
-          algorithms.insert(i->first);
-        }
+        algorithms.insert(i->first);
+      }
+
+      if (algorithm_number >= 0 && !algorithm_and_options.empty())
+      {
+        throw mcrl2::runtime_error("It is not allowed to set both number and algorithm!");
+      }
+
+      // print the algorithms
+      if (print_algorithms || (algorithm_number < 0 && algorithm_and_options.empty()))
+      {
+        int index = 1;
         std::cout << "The following algorithms are available:" << std::endl;
         for (auto const& algorithm: algorithms)
         {
-          std::cout << algorithm << std::endl;
+          std::cout << index++ << ") " << algorithm << std::endl;
+        }
+        return true;
+      }
+
+      // if a number was specified, lookup the corresponding algorithm
+      if (algorithm.empty())
+      {
+        int index = 1;
+        for (auto const& algo: algorithms)
+        {
+          if (index++ == algorithm_number)
+          {
+            algorithm = algo;
+          }
         }
       }
       else
       {
-        auto i = commands.find(algorithm);
-        if (i == commands.end())
-        {
-          throw std::runtime_error("Unknown algorithm " + algorithm);
-        }
-        i->second->execute();
+        options = utilities::regex_split(algorithm_and_options, "\\s+");
+        algorithm = options[0];
+        options.erase(options.begin());
       }
+
+      // run the algorithm
+      auto i = commands.find(algorithm);
+      if (i == commands.end())
+      {
+        throw std::runtime_error("Unknown algorithm " + algorithm);
+      }
+      i->second->execute();
+
       return true;
     }
 };
