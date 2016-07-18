@@ -7421,7 +7421,6 @@ class specification_basic_type:public boost::noncopyable
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
-std::cerr << "ALLOWBLOCK " << allowlist1 << "\n";
       /* This function calculates the allow or the block operator,
          depending on whether is_allow is true */
 
