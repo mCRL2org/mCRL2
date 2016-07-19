@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 
-#~ Copyright 2014 Wieger Wesselink.
+#~ Copyright 2014-2016 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+import argparse
 import glob
 import os
 import os.path
 import re
 import sys
+import traceback
 import yaml
 import StringIO
 
@@ -68,15 +70,18 @@ def generate_dotfile(ymlfile):
         text_file.write(out.getvalue())
     os.system('dot -Tpdf {0} -o {1}'.format(dotfile, pdffile))
 
-if len(sys.argv) != 2:
-  print('Usage: draw <path> where <path> is an yml file or a directory containing yml files')
-if os.path.isdir(sys.argv[1]):
-  files = glob.glob('tests/*.yml')
-else:
-  files = [sys.argv[1]]
-for ymlfile in files:
-  generate_dotfile(ymlfile)
-if len(files) == 1:
-  ymlfile = files[0]
-  pdffile = remove_extension(ymlfile) + '.pdf'
-  os.system('evince "{0}"'.format(pdffile))
+def main():
+    cmdline_parser = argparse.ArgumentParser()
+    cmdline_parser.add_argument('ymlfile', metavar='INFILE', type=str, help='a .yml file containing a test')
+    args = cmdline_parser.parse_args()
+    ymlfile = args.ymlfile
+    generate_dotfile(ymlfile)
+    pdffile = remove_extension(ymlfile) + '.pdf'
+    os.system('evince "{0}"'.format(pdffile))
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        print 'ERROR:', e
+        traceback.print_exc()
