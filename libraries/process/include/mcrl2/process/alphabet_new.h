@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_ALPHABET_NEW_H
 
 #include "mcrl2/process/alphabet_efficient.h"
+#include "mcrl2/process/detail/pcrl_equation_cache.h"
 
 namespace mcrl2 {
 
@@ -29,11 +30,11 @@ struct alphabet_new_traverser: public process_expression_traverser<alphabet_new_
   using super::apply;
 
   const std::vector<process_equation>& equations;
-  const std::map<process_identifier, multi_action_name_set>& cache;
+  const std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache;
   std::vector<multi_action_name_set> node_stack;
 
   alphabet_new_traverser(const std::vector<process_equation>& equations_, const std::map<process_identifier, multi_action_name_set>& variable_cache_)
-    : equations(equations_), cache(variable_cache_)
+    : equations(equations_), pcrl_equation_cache(variable_cache_)
   {}
 
   // Push A to node_stack
@@ -97,8 +98,8 @@ struct alphabet_new_traverser: public process_expression_traverser<alphabet_new_
 
   void leave(const process::process_instance& x)
   {
-    auto i = cache.find(x.identifier());
-    if (i != cache.end())
+    auto i = pcrl_equation_cache.find(x.identifier());
+    if (i != pcrl_equation_cache.end())
     {
       push(i->second);
     }
@@ -111,8 +112,8 @@ struct alphabet_new_traverser: public process_expression_traverser<alphabet_new_
 
   void leave(const process::process_instance_assignment& x)
   {
-    auto i = cache.find(x.identifier());
-    if (i != cache.end())
+    auto i = pcrl_equation_cache.find(x.identifier());
+    if (i != pcrl_equation_cache.end())
     {
       push(i->second);
     }
@@ -213,25 +214,16 @@ struct alphabet_new_traverser: public process_expression_traverser<alphabet_new_
 inline
 multi_action_name_set alphabet_new(const process_expression& x, const std::vector<process_equation>& equations)
 {
-  // compute variable cache
-  // TODO: This can be implemented more efficiently, using an SCC graph
-  std::map<process_identifier, multi_action_name_set> cache;
-  for (const process_equation& eqn: equations)
-  {
-    if (is_pcrl(eqn.expression()))
-    {
-      cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), equations);
-    }
-  }
+  std::map<process_identifier, multi_action_name_set> pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations);
 
-  // print cache
-  mCRL2log(log::verbose) << "--- computed variable cache ---" << std::endl;
-  for (const auto& i: cache)
+  // print pcrl_equation_cache
+  mCRL2log(log::verbose) << "--- computed variable pcrl_equation_cache ---" << std::endl;
+  for (const auto& i: pcrl_equation_cache)
   {
     mCRL2log(log::verbose) << i.first << " -> " << process::pp(i.second) << std::endl;
   }
 
-  detail::alphabet_new_traverser f(equations, cache);
+  detail::alphabet_new_traverser f(equations, pcrl_equation_cache);
   f.apply(x);
   return f.node_stack.back();
 }

@@ -26,6 +26,7 @@
 #include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
+#include "mcrl2/process/detail/pcrl_equation_cache.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
@@ -53,16 +54,7 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
     {
       id_generator.add_identifier(equation.identifier().name());
     }
-
-    // compute variable cache
-    // TODO: This can be implemented more efficiently, using an SCC graph
-    for (const process_equation& eqn: equations)
-    {
-      if (is_pcrl(eqn.expression()))
-      {
-        pcrl_equation_cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), equations);
-      }
-    }
+    pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations);
   }
 
   process_expression apply(const process::allow& x)

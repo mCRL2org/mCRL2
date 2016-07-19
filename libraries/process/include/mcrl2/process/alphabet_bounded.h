@@ -14,6 +14,7 @@
 
 #include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/allow_set.h"
+#include "mcrl2/process/detail/pcrl_equation_cache.h"
 
 namespace mcrl2 {
 
@@ -256,16 +257,7 @@ multi_action_name_set alphabet_bounded(const process_expression& x,
 inline
 multi_action_name_set alphabet_bounded(const process_expression& x, const multi_action_name_set& A, const std::vector<process_equation>& equations)
 {
-  // compute variable cache
-  // TODO: This can be implemented more efficiently, using an SCC graph
-  std::map<process_identifier, multi_action_name_set> cache;
-  for (const process_equation& eqn: equations)
-  {
-    if (is_pcrl(eqn.expression()))
-    {
-      cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), equations);
-    }
-  }
+  std::map<process_identifier, multi_action_name_set> cache = detail::compute_pcrl_equation_cache(equations);
 
   // print cache
   mCRL2log(log::verbose) << "--- computed variable cache ---" << std::endl;

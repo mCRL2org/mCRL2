@@ -20,6 +20,7 @@
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/process/detail/alphabet_parse.h"
+#include "mcrl2/process/detail/pcrl_equation_cache.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
@@ -185,16 +186,7 @@ void test_push_allow(const std::string& expression, const std::string& Atext, co
   std::tie(A, A_includes_subsets) = detail::parse_simple_multi_action_name_set(Atext);
   data::set_identifier_generator id_generator;
 
-  // compute equation cache
-  std::map<process_identifier, multi_action_name_set> pcrl_equation_cache;
-  for (const process_equation& eqn: procspec.equations())
-  {
-    if (is_pcrl(eqn.expression()))
-    {
-      pcrl_equation_cache[eqn.identifier()] = alphabet_efficient(eqn.expression(), procspec.equations());
-    }
-  }
-
+  std::map<process_identifier, multi_action_name_set> pcrl_equation_cache = detail::compute_pcrl_equation_cache(procspec.equations());
   process::detail::push_allow_cache W(id_generator, pcrl_equation_cache);
   process::detail::push_allow_node node = process::detail::push_allow(procspec.init(), allow_set(A, A_includes_subsets), procspec.equations(), W);
   std::string result = process::pp(node.expression);
