@@ -1,0 +1,8 @@
+act
+  a,c,b,d;
+
+proc
+  P = tau + b;
+
+init
+  allow({}, (tau + b) || tau);

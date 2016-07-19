@@ -55,49 +55,50 @@ class PbesstategraphTest(YmlTest):
         self.set_command_line_options('t2', command_line_options)
 
 regression_tests = {
-    'ticket_283'    : lambda name, settings: YmlTest(name, ymlfile('mcrl22lps'),         [abspath('tickets/283/1.mcrl2')], settings),
-    'ticket_325'    : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/325/1.mcrl2')], settings),
-    'ticket_904'    : lambda name, settings: YmlTest(name, ymlfile('mcrl22lps'),         [abspath('tickets/904/1.mcrl2')], settings),
-    'ticket_952'    : lambda name, settings: YmlTest(name, ymlfile('txt2pbes'),          [abspath('tickets/952/1.txt')], settings),
-    'ticket_1090'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1090'),       [abspath('tickets/1090/1.mcrl2'), abspath('tickets/1090/1.mcf')], settings),
-    'ticket_1114a'  : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1114/1.mcrl2')], settings),
-    'ticket_1114b'  : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1114/2.mcrl2')], settings),
-    'ticket_1143'   : lambda name, settings: PbesrewrTest(name, [abspath('tickets/1143/1.txt')], 'quantifier-one-point', settings),
-    'ticket_1144'   : lambda name, settings: YmlTest(name, ymlfile('lpsbisim2pbes'),     [abspath('tickets/1144/test1.txt'), abspath('tickets/1144/test2.txt')], settings),
-    'ticket_1167'   : lambda name, settings: CountStatesTest(name, [mcrl2file('examples/academic/abp/abp.mcrl2')], 74, settings = settings),
-    'ticket_1206'   : lambda name, settings: YmlTest(name, ymlfile('lps2lts'),           [abspath('tickets/1206/1.mcrl2')], settings),
-    'ticket_1218'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1218/1.mcrl2')], settings),
-    'ticket_1234'   : lambda name, settings: YmlTest(name, ymlfile('lpsbinary'),         [mcrl2file('examples/academic/cabp/cabp.mcrl2')], settings),
-    'ticket_1241'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1241/1.mcrl2')], settings),
-    'ticket_1249'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1249/1.mcrl2')], settings),
-    'ticket_1297'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1297'),       [abspath('tickets/1297/1.mcrl2')], settings),
-    'ticket_1301'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1301'),       [abspath('tickets/1301/1.mcrl2'), abspath('tickets/1301/1.mcf')], settings),
-    'ticket_1311'   : lambda name, settings: PbesstategraphTest(name,                    [abspath('tickets/1311/1.txt')], ['-g'], settings),
-    'ticket_1314'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1314'),       [abspath('tickets/1314/1.mcrl2'), abspath('tickets/1314/1.mcf')], settings),
-    'ticket_1315'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1315/1.mcrl2')], settings),
-    'ticket_1316'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1316/1.mcrl2')], settings),
-    'ticket_1317'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1317/1.mcrl2')], settings),
-    'ticket_1318'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1318/1.mcrl2')], settings),
-    'ticket_1319'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1319/1.mcrl2')], settings),
-    'ticket_1320'   : lambda name, settings: YmlTest(name, ymlfile('lps2pbes'),          [abspath('tickets/1320/1.mcrl2'), abspath('tickets/1320/1.mcf')], settings),
-    'ticket_1321'   : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1321/1.mcrl2')], settings),
-    'ticket_1322'   : lambda name, settings: YmlTest(name, ymlfile('pbesstategraph'),    [abspath('tickets/1322/1.txt')], settings),
-    'ticket_1345'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1345'),       [abspath('tickets/1345/1.txt')], settings),
-    'lpsconfcheck_1': lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings),
-    'lpsconfcheck_2': lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/trains/trains.mcrl2')], 'T', (0, 9), settings),
-    'onepoint_1'    : lambda name, settings: PbesrewrTest(name, [abspath('onepoint/1.txt')], 'quantifier-one-point', settings),
-    'pfnf_1'        : lambda name, settings: PbesrewrTest(name, [abspath('pfnf/1.txt')], 'pfnf', settings),
+    'ticket-283'    : lambda name, settings: YmlTest(name, ymlfile('mcrl22lps'),         [abspath('tickets/283/1.mcrl2')], settings),
+    'ticket-325'    : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/325/1.mcrl2')], settings),
+    'ticket-904'    : lambda name, settings: YmlTest(name, ymlfile('mcrl22lps'),         [abspath('tickets/904/1.mcrl2')], settings),
+    'ticket-952'    : lambda name, settings: YmlTest(name, ymlfile('txt2pbes'),          [abspath('tickets/952/1.txt')], settings),
+    'ticket-1090'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1090'),       [abspath('tickets/1090/1.mcrl2'), abspath('tickets/1090/1.mcf')], settings),
+    'ticket-1114a'  : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1114/1.mcrl2')], settings),
+    'ticket-1114b'  : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1114/2.mcrl2')], settings),
+    'ticket-1143'   : lambda name, settings: PbesrewrTest(name, [abspath('tickets/1143/1.txt')], 'quantifier-one-point', settings),
+    'ticket-1144'   : lambda name, settings: YmlTest(name, ymlfile('lpsbisim2pbes'),     [abspath('tickets/1144/test1.txt'), abspath('tickets/1144/test2.txt')], settings),
+    'ticket-1167'   : lambda name, settings: CountStatesTest(name, [mcrl2file('examples/academic/abp/abp.mcrl2')], 74, settings = settings),
+    'ticket-1206'   : lambda name, settings: YmlTest(name, ymlfile('lps2lts'),           [abspath('tickets/1206/1.mcrl2')], settings),
+    'ticket-1218'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1218/1.mcrl2')], settings),
+    'ticket-1234'   : lambda name, settings: YmlTest(name, ymlfile('lpsbinary'),         [mcrl2file('examples/academic/cabp/cabp.mcrl2')], settings),
+    'ticket-1241'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1241/1.mcrl2')], settings),
+    'ticket-1249'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1249/1.mcrl2')], settings),
+    'ticket-1297'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1297'),       [abspath('tickets/1297/1.mcrl2')], settings),
+    'ticket-1301'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1301'),       [abspath('tickets/1301/1.mcrl2'), abspath('tickets/1301/1.mcf')], settings),
+    'ticket-1311'   : lambda name, settings: PbesstategraphTest(name,                    [abspath('tickets/1311/1.txt')], ['-g'], settings),
+    'ticket-1314'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1314'),       [abspath('tickets/1314/1.mcrl2'), abspath('tickets/1314/1.mcf')], settings),
+    'ticket-1315'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1315/1.mcrl2')], settings),
+    'ticket-1316'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1316/1.mcrl2')], settings),
+    'ticket-1317'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1317/1.mcrl2')], settings),
+    'ticket-1318'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1318/1.mcrl2')], settings),
+    'ticket-1319'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1319/1.mcrl2')], settings),
+    'ticket-1320'   : lambda name, settings: YmlTest(name, ymlfile('lps2pbes'),          [abspath('tickets/1320/1.mcrl2'), abspath('tickets/1320/1.mcf')], settings),
+    'ticket-1321'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1321/1.mcrl2')], settings),
+    'ticket-1322'   : lambda name, settings: YmlTest(name, ymlfile('pbesstategraph'),    [abspath('tickets/1322/1.txt')], settings),
+    'ticket-1345'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1345'),       [abspath('tickets/1345/1.txt')], settings),
+    'lpsconfcheck1' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings),
+    'onepoint1'     : lambda name, settings: PbesrewrTest(name, [abspath('onepoint/1.txt')], 'quantifier-one-point', settings),
+    'pfnf1'         : lambda name, settings: PbesrewrTest(name, [abspath('pfnf/1.txt')], 'pfnf', settings),
     }
 
-pbessolve_tests = { 'pbessolve_{}'.format(filename[:-4]) : lambda name, settings: YmlTest(name, ymlfile('pbessolve'), [abspath('pbessolve/{}'.format(filename))], settings) for filename in sorted(os.listdir(abspath('pbessolve'))) }
+pbessolve_tests       = { 'pbessolve-{}'.format(filename[:-4]) : lambda name, settings: YmlTest(name, ymlfile('pbessolve'), [abspath('pbessolve/{}'.format(filename))], settings) for filename in sorted(os.listdir(abspath('pbessolve'))) }
+alphabet_reduce_tests = { 'alphabet-reduce-{}'.format(filename[:-6]) : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'), [abspath('alphabet-reduce/{}'.format(filename))], settings) for filename in sorted(os.listdir(abspath('alphabet-reduce'))) }
 
 def update_settings(settings, u):
     settings.update(u)
     return settings
 
 slow_regression_tests = {
-    'ticket_1093'    : lambda name, settings: YmlTest(name, ymlfile('alphabet'),          [abspath('tickets/1093/1.mcrl2')], update_settings(settings, { 'timeout': 300, 'memlimit': 500000000 })),
-    'lpsconfcheck_3' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/industrial/chatbox/chatbox.mcrl2')], 'Z', (40, 72), update_settings(settings, { 'timeout': 300, 'memlimit': 500000000 })),
+    'ticket-1093'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),          [abspath('tickets/1093/1.mcrl2')], update_settings(settings, { 'timeout': 300, 'memlimit': 500000000 })),
+    'lpsconfcheck2' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/trains/trains.mcrl2')], 'T', (0, 9), settings),
+    'lpsconfcheck3' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/industrial/chatbox/chatbox.mcrl2')], 'Z', (40, 72), update_settings(settings, { 'timeout': 300, 'memlimit': 500000000 })),
     }
 
 # Runs the tests that are present in the map 'tests', with the given settings.
@@ -162,5 +163,6 @@ def main(tests):
 if __name__ == '__main__':
     tests = regression_tests
     tests.update(pbessolve_tests)
+    tests.update(alphabet_reduce_tests)
     main(tests)
     #main(slow_regression_tests)
