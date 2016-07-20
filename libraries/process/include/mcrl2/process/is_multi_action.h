@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_IS_MULTI_ACTION_H
 
 #include "mcrl2/process/traverser.h"
+#include "mcrl2/process/multi_action_name.h"
 
 namespace mcrl2 {
 
