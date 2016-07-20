@@ -20,6 +20,7 @@
 #include "mcrl2/process/allow_set.h"
 #include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/find.h"
+#include "mcrl2/process/is_multi_action.h"
 #include "mcrl2/process/replace.h"
 #include "mcrl2/process/utility.h"
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
@@ -658,6 +659,23 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
 
   void apply(const process::sync& x)
   {
+    if (is_multi_action(x))
+    {
+      // Do not go into the recursion if x is a multi action
+      multi_action_name alpha = sync_multi_action_name(x);
+      if (A.contains(alpha))
+      {
+        push_allow_node node({ alpha }, x);
+        push(node);
+      }
+      else
+      {
+        push_allow_node node({}, delta());
+        push(node);
+      }
+      return;
+    }
+
     allow_set A_sub = alphabet_operations::subsets(A);
     push_allow_node p1 = push_allow(x.left(), A_sub, equations, W);
     allow_set A_arrow = alphabet_operations::left_arrow(A, p1.alphabet);
