@@ -745,13 +745,13 @@ void lps2lts_algorithm::save_deadlock(const lps::state& state)
     std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, filename_stream.str(), "trc");
     if (save_trace(state, filename))
     {
-      mCRL2log(verbose) << "deadlock-detect: deadlock found and saved to '" << filename
-                        << "' (state index: " << state_number << ").\n";
+      mCRL2log(info) << "deadlock-detect: deadlock found and saved to '" << filename
+                     << "' (state index: " << state_number << ").\n";
     }
     else
     {
-      mCRL2log(verbose) << "deadlock-detect: deadlock found, but could not be saved to '" << filename
-                        << "' (state index: " << state_number << ").\n";
+      mCRL2log(info) << "deadlock-detect: deadlock found, but could not be saved to '" << filename
+                     << "' (state index: " << state_number << ").\n";
     }
   }
   else
