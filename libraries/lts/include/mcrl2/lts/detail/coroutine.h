@@ -402,9 +402,9 @@ where the coroutine was interrupted. */
 ///                    parentheses
 #define DEFINE_COROUTINE(namespace, routine, param, local, shared_type,       \
                                                         shared_var, locations)\
-typename coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
-                   size_t _coroutine_allowance, namespace                     \
-                          _coroutine_ ## routine ## _struct& _coroutine_param,\
+coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
+                   size_t _coroutine_allowance,                               \
+                   typename namespace _coroutine_ ## routine ## _struct& _coroutine_param,\
                    shared_type& shared_var)                                   \
 {                                                                             \
     _coroutine_ALIAS param                                                    \
