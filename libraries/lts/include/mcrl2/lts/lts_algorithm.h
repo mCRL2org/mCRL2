@@ -106,7 +106,12 @@ bool destructive_compare(LTS_TYPE& l1,
     }
     case lts_eq_bisim_gjkw:
     {
+#ifdef _MSC_VER
+      mCRL2log(log::warning) << "The GJKW bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
+      return detail::destructive_bisimulation_compare_gw(l1,l2, false,false,generate_counter_examples);
+#else
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples);
+#endif
     }
     case lts_eq_branching_bisim:
     {
@@ -118,7 +123,12 @@ bool destructive_compare(LTS_TYPE& l1,
     }
     case lts_eq_branching_bisim_gjkw:
     {
+#ifdef _MSC_VER
+      mCRL2log(log::warning) << "The GJKW branching bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
+      return detail::destructive_bisimulation_compare_gw(l1,l2, true,false,generate_counter_examples);
+#else
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples);
+#endif
     }
     case lts_eq_divergence_preserving_branching_bisim:
     {
@@ -130,7 +140,12 @@ bool destructive_compare(LTS_TYPE& l1,
     }
     case lts_eq_divergence_preserving_branching_bisim_gjkw:
     {
+#ifdef _MSC_VER
+      mCRL2log(log::warning) << "The GJKW divergence preserving branching bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
+      return detail::destructive_bisimulation_compare_gw(l1,l2, true,true,generate_counter_examples);
+#else
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples);
+#endif
     }
     case lts_eq_weak_bisim:
     {
@@ -425,7 +440,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     }
     case lts_eq_bisim_gjkw:
     {
+#ifdef _MSC_VER
+      mCRL2log(log::warning) << "The GJKW bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
+      detail::bisimulation_reduce_gw(l,false,false);
+#else
       detail::bisimulation_reduce_gjkw(l,false,false);
+#endif
       return;
     }
     case lts_eq_bisim_sigref:
@@ -446,7 +466,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     }
     case lts_eq_branching_bisim_gjkw:
     {
+#ifdef _MSC_VER
+      mCRL2log(log::warning) << "The GJKW branching bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
+      detail::bisimulation_reduce_gw(l,true,false);
+#else
       detail::bisimulation_reduce_gjkw(l,true,false);
+#endif
       return;
     }
     case lts_eq_branching_bisim_sigref:
@@ -467,7 +492,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     }
     case lts_eq_divergence_preserving_branching_bisim_gjkw:
     {
+#ifdef _MSC_VER
+      mCRL2log(log::warning) << "The GJKW divergence preserving branching bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
+      detail::bisimulation_reduce_gw(l,true,true);
+#else
       detail::bisimulation_reduce_gjkw(l,true,true);
+#endif
       return;
     }
     case lts_eq_divergence_preserving_branching_bisim_sigref:
