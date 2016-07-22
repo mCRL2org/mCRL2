@@ -23,6 +23,9 @@
 #ifndef _LIBLTS_BISIM_GJKW_H
 #define _LIBLTS_BISIM_GJKW_H
 
+#ifndef _MSC_VER  // This code does not compile on the microsoft compiler due to the use of
+                  // COROUTINES as defined in mcrl2/lts/detail/coroutine.h.
+
 #include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
 #include <list>          // for the list of B_to_C_descriptors
@@ -2130,4 +2133,5 @@ inline bool state_info_entry::surely_has_no_transition_to(
 } // end namespace lts
 } // end namespace mcrl2
 
+#endif // ifndef _MSC_VER
 #endif // ifndef _LIBLTS_BISIM_GJKW_H

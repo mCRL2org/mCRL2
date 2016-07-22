@@ -9,6 +9,9 @@
 
 /// \file liblts_bisim_gjkw.cpp
 
+#ifndef _MSC_VER  // This code does not compile on the microsoft compiler due to the use of
+                  // COROUTINES as defined in mcrl2/lts/detail/coroutine.h.
+
 #include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
@@ -3845,3 +3848,5 @@ template class bisim_partitioner_gjkw<lts_fsm_t>;
 } // end namespace detail
 } // end namespace lts
 } // end namespace mcrl2
+
+#endif // ifndef _MSC_VER  
