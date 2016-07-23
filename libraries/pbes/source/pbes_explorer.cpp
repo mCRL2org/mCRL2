@@ -65,7 +65,7 @@ int lts_type::get_state_length() const
 }
 
 
-int lts_type::get_number_of_state_types() const
+size_t lts_type::get_number_of_state_types() const
 {
     return this->state_type_list.size();
 }
@@ -136,7 +136,7 @@ void lts_type::add_state(const std::string& name, const std::string& type)
     //        << std::endl;
     this->state_names.push_back(name);
     this->state_types.push_back(type);
-    int type_index;
+    size_t type_index;
     std::map<std::string,int>::iterator type_index_it = this->state_type_index.find(type);
     if (type_index_it != this->state_type_index.end()) {
         type_index = type_index_it->second;
@@ -1432,7 +1432,7 @@ int explorer::get_index(int type_no, const std::string& s)
 int explorer::get_string_index(const std::string& s)
 {
     std::map<std::string,int>::iterator it = this->localmap_string2int.find(s);
-    int index;
+    size_t index;
     if (it != this->localmap_string2int.end()) {
         index = it->second;
     } else {
@@ -1453,7 +1453,7 @@ int explorer::get_value_index(int type_no, const data_expression& value)
     //std::clog << "                value=" << value << std::endl;
     std::map<data_expression,int>& data2int_map = this->localmaps_data2int.at(type_no);
     std::map<data_expression,int>::iterator it = data2int_map.find(value);
-    int index;
+    size_t index;
     if (it != data2int_map.end()) {
         index = it->second;
     } else {

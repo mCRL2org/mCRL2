@@ -745,7 +745,7 @@ void GLScene::renderEdge(size_t i)
   glEndName();
 }
 
-void GLScene::renderNode(size_t i)
+void GLScene::renderNode(GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
   Color3f fill;
@@ -777,7 +777,7 @@ void GLScene::renderNode(size_t i)
   glEndName();
 }
 
-void GLScene::renderTransitionLabel(size_t i)
+void GLScene::renderTransitionLabel(GLuint i)
 {
   Graph::Edge edge = m_graph.edge(i);
   if (edge.from == edge.to && !m_drawselfloops)
@@ -812,7 +812,7 @@ void GLScene::renderTransitionLabel(size_t i)
   }
 }
 
-void GLScene::renderStateLabel(size_t i)
+void GLScene::renderStateLabel(GLuint i)
 {
   Graph::LabelNode& label = m_graph.stateLabel(i);
   if (!m_graph.stateLabelstring(label.labelindex).isEmpty()) {
@@ -841,7 +841,7 @@ void GLScene::renderStateLabel(size_t i)
   }
 }
 
-void GLScene::renderStateNumber(size_t i)
+void GLScene::renderStateNumber(GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
   glStartName(so_node, i);
@@ -868,7 +868,7 @@ void GLScene::renderStateNumber(size_t i)
   glEndName();
 }
 
-void GLScene::renderHandle(size_t i)
+void GLScene::renderHandle(GLuint i)
 {
   Graph::Node& handle = m_graph.handle(i);
   if (handle.selected > 0.1 || handle.locked)

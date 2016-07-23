@@ -65,7 +65,7 @@ public:
   int get_state_length() const;
 
   /// \brief Returns the number of state types.
-  int get_number_of_state_types() const;
+  size_t get_number_of_state_types() const;
 
   /// \brief Returns the sequence of state part names.
   const std::vector<std::string>& get_state_names() const;

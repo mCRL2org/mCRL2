@@ -67,31 +67,31 @@ class GLScene
      * @brief Renders a single edge handle.
      * @param i The index of the edge of the handle to render.
      */
-    void renderHandle(size_t i);
+    void renderHandle(GLuint i);
 
     /**
      * @brief Renders a single node.
      * @param i The index of the node to render.
      */
-    void renderNode(size_t i);
+    void renderNode(GLuint i);
 
     /**
      * @brief Renders a single edge label.
      * @param i The index of the edge of the label to render.
      */
-    void renderTransitionLabel(size_t i);
+    void renderTransitionLabel(GLuint i);
 
     /**
      * @brief Renders a single state label.
      * @param i The index of the state of the label to render.
      */
-    void renderStateLabel(size_t i);
+    void renderStateLabel(GLuint i);
 
     /**
      * @brief Renders a single state number.
      * @param i The index of the state number to render.
      */
-    void renderStateNumber(size_t i);
+    void renderStateNumber(GLuint i);
 
     /**
      * @brief Generates TikZ code for a single edge.
