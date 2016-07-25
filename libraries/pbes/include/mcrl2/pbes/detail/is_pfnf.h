@@ -109,7 +109,7 @@ inline
 bool is_pfnf_inner_and(const pbes_expression& x)
 {
   bool result = true;
-  for (const pbes_expression& term: split_and(x))
+  for (const pbes_expression& term: pbes_system::split_and(x))
   {
     if (!is_pfnf_imp(term))
     {
