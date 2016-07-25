@@ -18,7 +18,9 @@
 #ifndef _LIBLTS_COUNTER_EXAMPLE_FAILURE_REF_H
 #define _LIBLTS_COUNTER_EXAMPLE_FAILURE_REF_H
 
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/trace/trace.h"
+
 
 namespace mcrl2
 {
