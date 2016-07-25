@@ -8,7 +8,6 @@
 //
 /// \file lts/detail/liblts_failures_refinement.h
 
-
 // This file contains an implementation of 
 // T. Wang, S. Song, J. Sun, Y. Liu, J.S. Dong, X. Wang and S. Li.
 // More Anti-Chain Based Refinement Checking. In proceedings ICFEM 2012, editors T. Aoki and K. Tagushi,
@@ -22,23 +21,77 @@
 #define _LIBLTS_FAILURES_REFINEMENT_H
 
 #include <mcrl2/lts/detail/liblts_bisim_gw.h>
+#include <mcrl2/lts/detail/liblts_counter_example_failure_ref.h>
 
 namespace mcrl2
 {
 namespace lts
 {
-
 namespace detail
 {
   typedef size_t state_type;
   typedef size_t label_type;
   typedef std::set<state_type> set_of_states;
-  typedef std::pair<detail::state_type,detail::set_of_states> state_states_pair;
   typedef std::multimap <detail::state_type,detail::set_of_states> anti_chain_type;
   typedef std::set < label_type > action_label_set;
 
-  inline void antichain_insert(anti_chain_type& anti_chain, const state_states_pair& impl_spec);
-  inline bool member_of_antichain(const state_states_pair& p, const anti_chain_type& anti_chain);
+  template < class COUNTER_EXAMPLE_CONSTRUCTOR >
+  class state_states_counter_example_index_triple
+  {
+    protected:
+      detail::state_type m_state;
+      detail::set_of_states m_states;
+      typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type m_counter_example_index;
+
+    public:
+      state_states_counter_example_index_triple()
+      {}
+
+      /// \brief Constructor.
+      state_states_counter_example_index_triple(
+              const state_type state, 
+              const set_of_states& states, 
+              const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type& counter_example_index)
+       : m_state(state),
+         m_states(states),
+         m_counter_example_index(counter_example_index)
+      {}
+
+      /// \brief Get the state.
+      state_type state() const
+      {
+        return m_state;
+      }
+
+      void swap(state_states_counter_example_index_triple& other)
+      {
+        std::swap(m_state,other.m_state);
+        std::swap(m_states,other.m_states);
+        std::swap(m_counter_example_index,other.m_counter_example_index);
+      }
+
+      /// \brief Get the set of states.
+      const set_of_states& states() const
+      {
+        return m_states;
+      }
+
+      /// \brief Get the counter example index.
+      const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type& counter_example_index() const
+      {
+        return m_counter_example_index;
+      }
+  };
+ 
+  template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
+  inline void antichain_insert(
+                  anti_chain_type& anti_chain, 
+                  const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& impl_spec);
+  template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
+  inline bool member_of_antichain(
+                  const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& p, 
+                  const anti_chain_type& anti_chain);
+
 
   // The class below recalls what the stable states and the states with a divergent
   // self loop of a transition system are, such that it does not have to be recalculated each time again.
@@ -142,22 +195,18 @@ enum refinement_type { trace, failures, failures_divergence };
  * whether transition system l1 is included in transition system l2, in the
  * sense of trace inclusions, failures inclusion and divergence failures 
  * inclusion. If the bool weak_reduction is set, it will do so where tau's 
- * are included. When generate_counterexample is set, a labelled transition 
+ * are included. When generate_counter_example is set, a labelled transition 
  * system is generated that can act as a counterexample. It consists of a 
  * trace, followed by outgoing transitions representing a refusal set. */
 
-template < class LTS_TYPE >
+template < class LTS_TYPE, class COUNTER_EXAMPLE_CONSTRUCTOR = detail::dummy_counter_example_constructor >
 bool destructive_refinement_checker(
                         LTS_TYPE& l1, 
                         LTS_TYPE& l2, 
                         const refinement_type refinement, 
                         const bool weak_reduction, 
-                        const bool generate_counterexample)
+                        COUNTER_EXAMPLE_CONSTRUCTOR generate_counter_example = detail::dummy_counter_example_constructor())
 {
-  if (generate_counterexample)
-  {
-    mCRL2log(log::warning) << "The trace inclusion/failures refinement/failures-divergence refinement does not generate counterexamples at the moment\n";
-  }
   size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
   l2.clear(); // No use for l2 anymore.
@@ -175,25 +224,27 @@ bool destructive_refinement_checker(
   bisim_part.replace_transitions(weak_reduction,weak_reduction && (refinement!=trace));
   
   const detail::lts_cache<LTS_TYPE> weak_property_cache(l1,weak_reduction);
-  std::deque< detail::state_states_pair > working;  // let working be a stack containg the pair (init1,{s|init2-->s});
-
-  working.push_back(detail::state_states_pair(l1.initial_state(), 
-                    detail::collect_reachable_states_via_taus(init_l2,weak_property_cache,weak_reduction)));
+  std::deque< detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > > 
+              working(  // let working be a stack containg the triple (init1,{s|init2-->s},root_index);
+                    { detail::state_states_counter_example_index_triple< COUNTER_EXAMPLE_CONSTRUCTOR >(
+                                  l1.initial_state(), 
+                                  detail::collect_reachable_states_via_taus(init_l2,weak_property_cache,weak_reduction),
+                                  generate_counter_example.root_index() ) });
                                                       // let antichain := emptyset;
   detail::anti_chain_type anti_chain;
   while (working.size()>0)                            // while working!=empty
   {
-    detail::state_states_pair impl_spec;              // pop (impl,spec) from working;
+    detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > impl_spec;   // pop (impl,spec) from working;
     impl_spec.swap(working.front());  
     working.pop_front();
     detail::antichain_insert(anti_chain,impl_spec);   // antichain := antichain united with (impl,spec);
                                                       // refusals(impl) not included in refusals(spec);
 
-    if (refinement==failures_divergence && weak_property_cache.diverges(impl_spec.first))
+    if (refinement==failures_divergence && weak_property_cache.diverges(impl_spec.state()))
                                                       // if impl diverges
     {
       bool spec_diverges=false;
-      for(const detail::state_type s: impl_spec.second)       // if spec does not diverge
+      for(const detail::state_type s: impl_spec.states())       // if spec does not diverge
       {
         if (weak_property_cache.diverges(s))
         {
@@ -203,31 +254,34 @@ bool destructive_refinement_checker(
       }
       if (!spec_diverges)
       {
-        return false;                                 // return false; TODO generate a counter example.
+        generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1);
+        return false;                                 // return false; 
       }
     }
     else 
     {
       if (refinement==failures || refinement==failures_divergence)
       { 
-        if (!detail::refusals_contained_in(impl_spec.first,impl_spec.second,weak_property_cache))
+        if (!detail::refusals_contained_in(impl_spec.state(),impl_spec.states(),weak_property_cache))
         {
-          return false;                               // return false; TODO generate counter example
+          generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1);
+          return false;                               // return false; 
         }
       }
       
-      for(std::vector<transition>::const_iterator i=weak_property_cache.transitions_begin(impl_spec.first);
-               i!=weak_property_cache.transitions_end(impl_spec.first); ++i)
+      for(std::vector<transition>::const_iterator i=weak_property_cache.transitions_begin(impl_spec.state());
+               i!=weak_property_cache.transitions_end(impl_spec.state()); ++i)
       {
         const transition& t=*i;
+        typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index=generate_counter_example.add_transition(t.label(),impl_spec.counter_example_index());
         detail::set_of_states spec_prime;
         if (l1.is_tau(t.label()) && weak_reduction)                   // if e=tau then
         {
-          spec_prime=impl_spec.second;        // spec' := spec;
+          spec_prime=impl_spec.states();        // spec' := spec;
         }
         else
         {                                           // spec' := {s' | exists s in spec. s-e->s'};
-          for(const detail::state_type s: impl_spec.second)  
+          for(const detail::state_type s: impl_spec.states())  
           {
             detail::set_of_states reachable_states_from_s_via_e=
                     detail::collect_reachable_states_via_an_action(s,t.label(),weak_property_cache,weak_reduction);
@@ -236,13 +290,15 @@ bool destructive_refinement_checker(
         }
         if (spec_prime.empty())                     // if spec'={} then
         {
-          return false;                             //    return false;  TODO generate counter example.
+          generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1);
+          return false;                             //    return false;  
         }
                                                       // if (impl',spec') in antichain is not true then
-        if (!detail::member_of_antichain(detail::state_states_pair(t.to(),spec_prime),anti_chain))
+        if (!detail::member_of_antichain(detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR >
+                                     (t.to(),spec_prime,new_counterexample_index),anti_chain))
         {
                                                       // push(impl,spec') into working;
-            working.push_back(detail::state_states_pair(t.to(),spec_prime));
+            working.push_back(detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR >(t.to(),spec_prime,new_counterexample_index));
         }
       }
     }
@@ -324,35 +380,38 @@ namespace detail
     return collect_reachable_states_via_taus(states_reachable_via_e, weak_property_cache, weak_reduction);
   }
 
-  /* This function implements the insertion of <p,first, p.second> in the anti_chain.
-     Concretely, this means that p.second is inserted among the sets s1,...,sn associated to p.first.
+  /* This function implements the insertion of <p,state(), p.states()> in the anti_chain.
+     Concretely, this means that p.states() is inserted among the sets s1,...,sn associated to p.state().
      It is important that an anti_chain contains for each state a set of states of which 
      no set is a subset of another. The idea is that if such two sets occur, it is enough
      to keep the smallest.
-     If p.second is smaller than a set si associated to p.first, this set is removed.
-     If p.second is larger than a set si, there is no need to add p.second, as a better candidate
+     If p.states() is smaller than a set si associated to p.state(), this set is removed.
+     If p.states() is larger than a set si, there is no need to add p.states(), as a better candidate
      is already there. 
    */
-  inline void antichain_insert(anti_chain_type& anti_chain, const state_states_pair& impl_spec)
+  template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
+  inline void antichain_insert(
+                  anti_chain_type& anti_chain, 
+                  const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& impl_spec)
   {
-    // First check whether there is a set in the antichain for impl_spec.first which is smaller than impl_spec.second.
-    // If so, impl_spec.second does not have to be inserted in the anti_chain.
-    for(anti_chain_type::const_iterator i=anti_chain.lower_bound(impl_spec.first); i!=anti_chain.upper_bound(impl_spec.first); ++i)
+    // First check whether there is a set in the antichain for impl_spec.state() which is smaller than impl_spec.states().
+    // If so, impl_spec.states() does not have to be inserted in the anti_chain.
+    for(anti_chain_type::const_iterator i=anti_chain.lower_bound(impl_spec.state()); i!=anti_chain.upper_bound(impl_spec.state()); ++i)
     {
       const set_of_states s=i->second;
-      if (std::includes(s.begin(),s.end(),impl_spec.second.begin(),impl_spec.second.end()))  
+      if (std::includes(s.begin(),s.end(),impl_spec.states().begin(),impl_spec.states().end()))  
       {
         return;
       }
     }
 
-    // Here impl_spec.second must be inserted in the antichain. Moreover, all sets in the antichain that 
-    // are a superset of impl_spec.second must be removed.
+    // Here impl_spec.states() must be inserted in the antichain. Moreover, all sets in the antichain that 
+    // are a superset of impl_spec.states() must be removed.
     
-    for(anti_chain_type::iterator i=anti_chain.lower_bound(impl_spec.first); i!=anti_chain.upper_bound(impl_spec.first); )
+    for(anti_chain_type::iterator i=anti_chain.lower_bound(impl_spec.state()); i!=anti_chain.upper_bound(impl_spec.state()); )
     {
       const set_of_states s=i->second;
-      if (std::includes(impl_spec.second.begin(),impl_spec.second.end(),s.begin(),s.end()))  
+      if (std::includes(impl_spec.states().begin(),impl_spec.states().end(),s.begin(),s.end()))  
       {
         // set s must be removed. 
         i=anti_chain.erase(i);
@@ -362,7 +421,7 @@ namespace detail
         ++i;
       }
     }
-    anti_chain.insert(impl_spec);
+    anti_chain.emplace(impl_spec.state(),impl_spec.states());
   }
   
   /* This function checks whether p is contained in anti_chain. This is rather subtle.
@@ -370,15 +429,18 @@ namespace detail
      no set is a subset of another. The idea is that if such two sets occur, it is enough
      to keep the smallest.
 
-     What is checked is that for the sets s1,...,sn in the antichain belonging to p.first,
-     p.second is a superset of one of these si's. If so, it is considered that p.second is
-     in the set, or there is a smaller set than p.second, which is even better. */
-  inline bool member_of_antichain(const state_states_pair& p, const anti_chain_type& anti_chain)
+     What is checked is that for the sets s1,...,sn in the antichain belonging to p.state(),
+     p.states() is a superset of one of these si's. If so, it is considered that p.states() is
+     in the set, or there is a smaller set than p.states(), which is even better. */
+  template <  class COUNTER_EXAMPLE_CONSTRUCTOR >
+  inline bool member_of_antichain(
+                   const state_states_counter_example_index_triple<COUNTER_EXAMPLE_CONSTRUCTOR>& p, 
+                   const anti_chain_type& anti_chain)
   {
-    for(anti_chain_type::const_iterator i=anti_chain.lower_bound(p.first); i!=anti_chain.upper_bound(p.first); ++i)
+    for(anti_chain_type::const_iterator i=anti_chain.lower_bound(p.state()); i!=anti_chain.upper_bound(p.state()); ++i)
     {
       const set_of_states s=i->second;
-      if (std::includes(s.begin(),s.end(),p.second.begin(),p.second.end()))  // Check that there is a set s in anti_chain which is contained in p.second.
+      if (std::includes(s.begin(),s.end(),p.states().begin(),p.states().end()))  // Check that there is a set s in anti_chain which is contained in p.states().
       {
         return true;
       }

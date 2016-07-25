@@ -46,6 +46,7 @@
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_preorder.h"
 #include "mcrl2/lts/sigref.h"
+#include "mcrl2/lts/detail/liblts_counter_example_failure_ref.h"
 
 namespace mcrl2
 {
@@ -269,7 +270,8 @@ bool compare(const LTS_TYPE& l1,
 template <class LTS_TYPE >
 bool destructive_compare(LTS_TYPE& l1,
                          LTS_TYPE& l2,
-                         const lts_preorder pre);
+                         const lts_preorder pre,
+                         const bool generate_counter_example);
 
 /** \brief Checks whether this LTS is smaller than another LTS according
  * to a preorder.
@@ -284,7 +286,8 @@ bool destructive_compare(LTS_TYPE& l1,
 template <class  LTS_TYPE >
 bool compare(const LTS_TYPE&  l1,
              const  LTS_TYPE& l2,
-             const lts_preorder pre);
+             const lts_preorder pre,
+             const bool generate_counter_example);
 
 /** \brief Determinises this LTS. */
 template <class LTS_TYPE>
@@ -624,17 +627,16 @@ bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_equivalence eq, c
 }
 
 template <class LTS_TYPE>
-bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre)
+bool compare(const LTS_TYPE& l1, const LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_compare(l1_copy,l2_copy,pre);
+  return destructive_compare(l1_copy,l2_copy,pre,generate_counter_example);
 }
 
 template <class LTS_TYPE>
-bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre)
+bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, const bool generate_counter_example)
 {
-  const bool generate_counter_example=false;
   switch (pre)
   {
     case lts_pre_sim:
@@ -674,7 +676,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre)
       detail::bisimulation_reduce(l2,false);
 
       // Trace preorder now corresponds to simulation preorder
-      return destructive_compare(l1,l2,lts_pre_sim);
+      return destructive_compare(l1,l2,lts_pre_sim,generate_counter_example);
     }
     case lts_pre_weak_trace:
     {
@@ -687,27 +689,52 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre)
       detail::tau_star_reduce(l2);
 
       // Weak trace preorder now corresponds to strong trace preorder
-      return destructive_compare(l1,l2,lts_pre_trace);
+      return destructive_compare(l1,l2,lts_pre_trace,generate_counter_example);
     }
     case lts_pre_trace_anti_chain:
     {  
-      return destructive_refinement_checker(l1, l2, trace, false, generate_counter_example);
+      if (generate_counter_example)
+      {
+        detail::counter_example_constructor cec("counter_example_trace");
+        return destructive_refinement_checker(l1, l2, trace, false, cec);
+      }
+      return destructive_refinement_checker(l1, l2, trace, false);
     }
     case lts_pre_weak_trace_anti_chain:
     {  
-      return destructive_refinement_checker(l1, l2, trace, true, generate_counter_example);
+      if (generate_counter_example)
+      {
+        detail::counter_example_constructor cec("counter_example_weak_trace");
+        return destructive_refinement_checker(l1, l2, trace, true, cec);
+      }
+      return destructive_refinement_checker(l1, l2, trace, true);
     }
     case lts_pre_failures_refinement:
     {  
-      return destructive_refinement_checker(l1, l2, failures, false, generate_counter_example);
+      if (generate_counter_example)
+      {
+        detail::counter_example_constructor cec("counter_example_failures_refinement");
+        return destructive_refinement_checker(l1, l2, failures, false, cec);
+      }
+      return destructive_refinement_checker(l1, l2, failures, false);
     }
     case lts_pre_weak_failures_refinement:
     {  
-      return destructive_refinement_checker(l1, l2, failures, true, generate_counter_example);
+      if (generate_counter_example)
+      {
+        detail::counter_example_constructor cec("counter_example_weak_failures_refinement");
+        return destructive_refinement_checker(l1, l2, failures, true, cec);
+      }
+      return destructive_refinement_checker(l1, l2, failures, true);
     }
     case lts_pre_failures_divergence_refinement:
     {  
-      return destructive_refinement_checker(l1, l2, failures_divergence, true, generate_counter_example);
+      if (generate_counter_example)
+      {
+        detail::counter_example_constructor cec("counter_example_failures_divergence_refinement");
+        return destructive_refinement_checker(l1, l2, failures_divergence, true,cec);
+      }
+      return destructive_refinement_checker(l1, l2, failures_divergence, true);
     }
     default:
       mCRL2log(log::error) << "Comparison for this preorder is not available\n";

@@ -133,7 +133,7 @@ class ltscompare_tool : public ltscompare_base
         mCRL2log(verbose) << "comparing LTSs using " <<
                      description(tool_options.preorder) << "..." << std::endl;
 
-        result = compare(l1,l2,tool_options.preorder);
+        result = compare(l1,l2,tool_options.preorder,tool_options.generate_counter_examples);
 
         mCRL2log(info) << "LTS in " << tool_options.name_for_first
                        << " is " << ((result) ? "" : "not ")
@@ -279,13 +279,24 @@ class ltscompare_tool : public ltscompare_base
         throw parser.error("multiple use of option -p/--preorder; only one occurrence is allowed");
       }
 
-      if (parser.options.count("counter-example")>0 && parser.options.count("equivalence")==0)
-      {
-        throw parser.error("counter examples can only be used in combination with an equivalence");
-      }
-
       tool_options.equivalence = parser.option_argument_as<lts_equivalence>("equivalence");
       tool_options.preorder = parser.option_argument_as<lts_preorder>("preorder");
+
+      if (parser.options.count("counter-example")>0 && parser.options.count("preorder")==1)
+      { 
+        if (tool_options.preorder==lts_pre_sim)
+        {
+          throw parser.error("counter examples cannot be used with simulation pre-order");
+        }
+        if (tool_options.preorder==lts_pre_trace)
+        {
+          throw parser.error("counter examples cannot be used with the plain trace pre-order (use trace-ac instead)");
+        }
+        if (tool_options.preorder==lts_pre_weak_trace)
+        {
+          throw parser.error("counter examples cannot be used with the plain weak trace pre-order (use weak-trace-ac instead");
+        }
+      }
 
       if (parser.options.count("tau"))
       {
