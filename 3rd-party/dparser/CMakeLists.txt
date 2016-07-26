@@ -17,13 +17,18 @@ add_definitions(
   -DD_USE_FREELISTS=1
 )
 
-if(MSVC AND MSVC_VERSION LESS 1900)
+if(MSVC)
 add_definitions(
   -Dstrtoll=_strtoi64
   -Dstrncasecmp=_strnicmp
-  -Dsnprintf=_snprintf
 )
 endif(MSVC)
+
+if(MSVC AND MSVC_VERSION LESS 1900)
+add_definitions(
+  -Dsnprintf=_snprintf
+)
+endif(MSVC AND MSVC_VERSION LESS 1900)
 
 add_library(dparser STATIC
   arg.c
