@@ -17,7 +17,7 @@ add_definitions(
   -DD_USE_FREELISTS=1
 )
 
-if(MSVC)
+if(MSVC AND MSVC_VERSION LESS 1900)
 add_definitions(
   -Dstrtoll=_strtoi64
   -Dstrncasecmp=_strnicmp
