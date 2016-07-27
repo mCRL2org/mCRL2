@@ -97,7 +97,7 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
       m_no_check        = 0 < parser.options.count("no-check");
       m_no_elimination  = 0 < parser.options.count("no-elimination");
-      m_simplify_all    = 0 < parser.options.count("simplify-all");
+      m_simplify_all    = 0 < parser.options.count("simplify-all")||m_no_elimination; // If no_elimation is true all summands must be simplified.
       m_all_violations  = 0 < parser.options.count("all-violations");
       m_counter_example = 0 < parser.options.count("counter-example");
       m_apply_induction = 0 < parser.options.count("induction");
@@ -130,9 +130,9 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       add_option("invariant", make_file_argument("INVFILE"),
                  "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
       add_option("no-check",
-                 "do not check if the invariant holds before eliminating unreachable summands", 'n').
+                 "do not check if the invariant holds before applying the invariant", 'n').
       add_option("no-elimination",
-                 "do not eliminate or simplify summands, but add the invariant to each condition", 'e').
+                 "do not eliminate or simplify summands, but add the invariant to each condition. This implies setting the flag --simplify-all.", 'e').
       add_option("simplify-all",
                  "simplify the conditions of all summands, instead of just eliminating the summands "
                  "whose conditions in conjunction with the invariant are contradictions", 'l').
@@ -176,22 +176,20 @@ class lpsinvelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     bool run()
     {
-      lps::lpsinvelm(m_input_filename,
-                m_output_filename,
-                m_invariant_file_name,
-                m_dot_file_name,
-                rewrite_strategy(),
-                solver_type(),
-                m_no_check,
-                m_no_elimination,
-                m_simplify_all,
-                m_all_violations,
-                m_counter_example,
-                m_path_eliminator,
-                m_apply_induction,
-                m_time_limit);
-
-      return true;
+      return lps::lpsinvelm(m_input_filename,
+                            m_output_filename,
+                            m_invariant_file_name,
+                            m_dot_file_name,
+                            rewrite_strategy(),
+                            solver_type(),
+                            m_no_check,
+                            m_no_elimination,
+                            m_simplify_all,
+                            m_all_violations,
+                            m_counter_example,
+                            m_path_eliminator,
+                            m_apply_induction,
+                            m_time_limit);
     }
 };
 

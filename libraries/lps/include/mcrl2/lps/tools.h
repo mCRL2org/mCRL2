@@ -37,7 +37,7 @@ void lpsinfo(const std::string& input_filename,
              const std::string& input_file_message
             );
 
-void lpsinvelm(const std::string& input_filename,
+bool lpsinvelm(const std::string& input_filename,
                const std::string& output_filename,
                const std::string& invariant_filename,
                const std::string& dot_file_name,

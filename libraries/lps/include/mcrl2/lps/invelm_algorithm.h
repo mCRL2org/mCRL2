@@ -95,6 +95,7 @@ class invelm_algorithm: public detail::lps_algorithm<Specification>
     void simplify_summand(summand_base& s, const data::data_expression& invariant, bool apply_prover)
     {
       data::data_expression new_condition = data::lazy::and_(invariant, s.condition());
+
       if (apply_prover)
       {
         f_bdd_prover.set_formula(new_condition);
@@ -109,9 +110,9 @@ class invelm_algorithm: public detail::lps_algorithm<Specification>
     template <typename SummandSequence>
     void simplify_summands(SummandSequence& summands, const data::data_expression& invariant, bool apply_prover)
     {
-      for (auto i = summands.begin(); i != summands.end(); ++i)
+      for (summand_base& s: summands)
       {
-        simplify_summand(*i, invariant, apply_prover);
+        simplify_summand(s, invariant, apply_prover);
       }
     }
 

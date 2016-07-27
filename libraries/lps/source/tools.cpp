@@ -88,7 +88,7 @@ void lpsinfo(const std::string& input_filename,
   std::cout << info.info();
 }
 
-void lpsinvelm(const std::string& input_filename,
+bool lpsinvelm(const std::string& input_filename,
                const std::string& output_filename,
                const std::string& invariant_filename,
                const std::string& dot_file_name,
@@ -126,11 +126,9 @@ void lpsinvelm(const std::string& input_filename,
   }
   else
   {
-    mCRL2log(log::error) << "A file containing an invariant must be specified using the option --invariant=INVFILE" << std::endl;
-    return;
+    throw mcrl2::runtime_error("A file containing an invariant must be specified using the option --invariant=INVFILE.");
   }
 
-  bool invariance_result = true;
   if (no_check)
   {
     mCRL2log(log::warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
@@ -147,21 +145,22 @@ void lpsinvelm(const std::string& input_filename,
                                           all_violations,
                                           dot_file_name);
 
-    invariance_result = v_invariant_checker.check_invariant(invariant);
+    if (!v_invariant_checker.check_invariant(invariant))
+    { 
+      return false; // The invariant was checked and found invalid. 
+    }
   }
 
-  if (invariance_result)
-  {
-    invelm_algorithm<stochastic_specification> algorithm(spec,
+  invelm_algorithm<stochastic_specification> algorithm(spec,
                                rewrite_strategy,
                                time_limit,
                                path_eliminator,
                                solver_type,
                                apply_induction,
                                simplify_all);
-    algorithm.run(invariant, !no_elimination);
-    save_lps(spec, output_filename);
-  }
+  algorithm.run(invariant, !no_elimination);
+  save_lps(spec, output_filename);
+  return true;
 }
 
 void lpsparelm(const std::string& input_filename,

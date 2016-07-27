@@ -187,7 +187,7 @@ function(gen_lpsinvelm_release_tests LPSFILE TESTDIR TRUEFILE FALSEFILE)
   foreach(arglist ${ARGUMENTS})
     add_tool_test(lpsinvelm -i${TRUEFILE} ${arglist} ${tagIN} ${LPSFILE})
   endforeach()
-  add_tool_test(lpsinvelm -i${FALSEFILE} -y ${tagIN} ${LPSFILE})
+  add_tool_test(lpsinvelm -i${FALSEFILE} -n -e ${tagIN} ${LPSFILE})
 endfunction()
 
 # lpsconfcheck
