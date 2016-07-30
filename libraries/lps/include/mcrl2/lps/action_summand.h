@@ -132,11 +132,9 @@ inline void swap(action_summand& t1, action_summand& t2)
 }
 //--- end generated class action_summand ---//
 
-namespace detail {
-
 /// \brief Comparison operator for action summands.
 inline
-bool less(const action_summand& x, const action_summand& y, bool default_result = false)
+bool operator<(const action_summand& x, const action_summand& y)
 {
   if (x.summation_variables() != y.summation_variables())
   {
@@ -146,31 +144,21 @@ bool less(const action_summand& x, const action_summand& y, bool default_result 
   {
     return x.condition() < y.condition();
   }
-  if (x.assignments() != y.assignments())
-  {
-    return x.assignments() < y.assignments();
-  }
   if (x.multi_action() != y.multi_action())
   {
     return x.multi_action() < y.multi_action();
   }
-  return default_result;
-}
-
-} // namespace detail
-
-/// \brief Comparison operator for action summands.
-inline
-bool operator<(const action_summand& x, const action_summand& y)
-{
-  return detail::less(x, y);
+  return x.assignments() < y.assignments();
 }
 
 /// \brief Equality operator of action summands
 inline
 bool operator==(const action_summand& x, const action_summand& y)
 {
-  return x.condition() == y.condition() && x.multi_action() == y.multi_action() && x.assignments() == y.assignments();
+  return x.summation_variables() == y.summation_variables() && 
+         x.condition() == y.condition() && 
+         x.multi_action() == y.multi_action() && 
+         x.assignments() == y.assignments();
 }
 
 /// \brief Conversion to aterm_appl.

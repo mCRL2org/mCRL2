@@ -92,7 +92,11 @@ inline void swap(stochastic_action_summand& t1, stochastic_action_summand& t2)
 inline
 bool operator<(const stochastic_action_summand& x, const stochastic_action_summand& y)
 {
-  return detail::less(static_cast<const action_summand&>(x), static_cast<const action_summand&>(y), x.distribution() < y.distribution());
+  if (x.distribution() == y.distribution())
+  {
+    return static_cast<const action_summand&>(x) < static_cast<const action_summand&>(y);
+  }
+  return x.distribution() < y.distribution();
 }
 
 /// \brief Equality operator of stochastic action summands

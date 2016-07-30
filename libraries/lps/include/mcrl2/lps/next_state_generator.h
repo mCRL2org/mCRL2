@@ -108,37 +108,6 @@ class next_state_generator
     };
 
     typedef mcrl2::lps::state_probability_pair<lps::state, lps::probabilistic_data_expression> state_probability_pair;
-    /* {
-      protected:
-        // A state
-        lps::state m_state;
-        // A data expression of sort Real that indicates the probability of this state
-        data::data_expression m_probability;
-      public:
-
-        /// \Brief constructor
-        state_probability_pair(const lps::state state, const data::data_expression& probability)
-         : m_state(state),
-           m_probability(probability)
-        {
-          assert(probability.sort()==data::sort_real::real_());
-        }
-
-        const lps::state& state() const
-        {
-          return m_state;
-        }
-
-        void set_state(const lps::state& state)
-        {
-          m_state=state;
-        }
-
-        const data::data_expression& probability() const
-        {
-          return m_probability;
-        }
-    }; */
 
     class transition_t
     {

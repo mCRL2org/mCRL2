@@ -152,14 +152,15 @@ bool next_state_generator::summand_subset_t::summand_set_contains(
 
 next_state_generator::summand_subset_t::summand_subset_t(
                 next_state_generator *generator, 
-                const stochastic_action_summand_vector& summands, bool use_summand_pruning)
+                const stochastic_action_summand_vector& summands, 
+                bool use_summand_pruning)
   : m_generator(generator),
     m_use_summand_pruning(use_summand_pruning)
 {
   std::set<stochastic_action_summand> summand_set;
-  for (stochastic_action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); i++)
+  for (const stochastic_action_summand& i: summands)
   {
-    summand_set.insert(*i);
+    summand_set.insert(i);
   }
 
   if (m_use_summand_pruning)

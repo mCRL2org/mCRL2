@@ -70,32 +70,45 @@ struct lts_generation_options
 
   void validate_actions()
   {
-    for (std::set < std::string >::const_iterator it = trace_multiaction_strings.begin(); it != trace_multiaction_strings.end(); ++it)
+    for (const std::string& s: trace_multiaction_strings)
     {
       try
       {
-        trace_multiactions.insert(mcrl2::lps::parse_multi_action(*it, specification.action_labels(), specification.data()));
+        trace_multiactions.insert(mcrl2::lps::parse_multi_action(s, specification.action_labels(), specification.data()));
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(*it + ": " + e.what());
+        throw mcrl2::runtime_error(std::string("Multi-action ") + s + " does not exist: " + e.what());
       }
-      mCRL2log(log::verbose) << "Checking for action \"" << *it << "\"\n";
+      mCRL2log(log::verbose) << "Checking for action \"" << s << "\"\n";
     }
     if (detect_action)
     {
-      for (std::set<mcrl2::core::identifier_string>::iterator ta = trace_actions.begin(); ta != trace_actions.end(); ++ta)
+      for (const mcrl2::core::identifier_string& ta: trace_actions)
       {
         mcrl2::process::action_label_list::iterator it = specification.action_labels().begin();
-        bool found = (std::string(*ta) == "tau");
+        bool found = (std::string(ta) == "tau");
         while (!found && it != specification.action_labels().end())
         {
-            found = (it++->name() == *ta);
+            found = (it++->name() == ta);
         }
         if (!found)
-          throw mcrl2::runtime_error(*ta);
+          throw mcrl2::runtime_error(std::string("Action label ") + pp(ta) + " is not declared.");
         else
-          mCRL2log(log::verbose) << "Checking for action " << *ta << "\n";
+          mCRL2log(log::verbose) << "Checking for action " << ta << "\n";
+      }
+    }
+    for (const mcrl2::core::identifier_string& ta: actions_internal_for_divergencies)
+    {
+      mcrl2::process::action_label_list::iterator it = specification.action_labels().begin();
+      bool found = (std::string(ta) == "tau");
+      while (!found && it != specification.action_labels().end())
+      {
+        found = (it++->name() == ta);
+      }
+      if (!found)
+      {
+        throw mcrl2::runtime_error(std::string("Action label ") + pp(ta) + " is not declared.");
       }
     }
   }
@@ -134,6 +147,7 @@ struct lts_generation_options
 
   bool use_enumeration_caching;
   bool use_summand_pruning;
+  std::set< mcrl2::core::identifier_string > actions_internal_for_divergencies;
 };
 
 } // namespace lts

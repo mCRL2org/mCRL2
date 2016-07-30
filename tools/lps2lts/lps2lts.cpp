@@ -123,16 +123,7 @@ class lps2lts_tool : public lps2lts_base
       load_lps(m_options.specification, m_filename);
       m_options.trace_prefix = m_filename.substr(0, m_options.trace_prefix.find_last_of('.'));
 
-      // check_whether_actions_on_commandline_exist(m_options.trace_actions, m_options.specification.action_labels());
-      try
-      {
-        m_options.validate_actions();
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        mCRL2log(error) << "Invalid (multi-)action given: " << e.what() << std::endl;
-        return false;
-      }
+      m_options.validate_actions(); // Throws an exception if actions are not properly declared.
 
       if (!m_lps2lts.initialise_lts_generation(&m_options))
       {
@@ -241,7 +232,10 @@ class lps2lts_tool : public lps2lts_base
                  "horrendous. This feature helps to suppress those. Other verbose messages, "
                  "such as the total number of states explored, just remain visible.").
       add_option("init-tsize", make_mandatory_argument("NUM"),
-                 "set the initial size of the internally used hash tables (default is 10000)");
+                 "set the initial size of the internally used hash tables (default is 10000)").
+      add_option("tau",make_mandatory_argument("ACTNAMES"),
+                 "consider actions with a name in the comma separated list ACTNAMES to be internal. "
+                 "This list is only used and allowed when searching for divergencies. ");
     }
 
     void parse_options(const command_line_parser& parser)
@@ -261,7 +255,7 @@ class lps2lts_tool : public lps2lts_base
       {
         if (parser.options.count("dummy") > 1)
         {
-          parser.error("multiple use of option -y/--dummy; only one occurrence is allowed");
+          parser.error("Multiple use of option -y/--dummy; only one occurrence is allowed.");
         }
         std::string dummy_str(parser.option_argument("dummy"));
         if (dummy_str == "yes")
@@ -274,7 +268,7 @@ class lps2lts_tool : public lps2lts_base
         }
         else
         {
-          parser.error("option -y/--dummy has illegal argument '" + dummy_str + "'");
+          parser.error("Option -y/--dummy has illegal argument '" + dummy_str + "'.");
         }
       }
 
@@ -291,13 +285,27 @@ class lps2lts_tool : public lps2lts_base
       {
         m_options.detect_action = true;
         std::list<std::string> actions = split_actions(parser.option_argument("action"));
-        for (std::list<std::string>::iterator it = actions.begin(); it != actions.end(); ++it)
-          m_options.trace_actions.insert(mcrl2::core::identifier_string(*it));
+        for (const std::string& s: actions)
+        {
+          m_options.trace_actions.insert(mcrl2::core::identifier_string(s));
+        }
       }
       if (parser.options.count("multiaction"))
       {
         std::list<std::string> actions = split_actions(parser.option_argument("multiaction"));
         m_options.trace_multiaction_strings.insert(actions.begin(), actions.end());
+      }
+      if (parser.options.count("tau")>0)
+      {
+        if (parser.options.count("divergence")==0)
+        {
+          parser.error("Option --tau requires the option --divergence.");
+        }
+        std::list<std::string> actions = split_actions(parser.option_argument("tau"));
+        for (const std::string& s: actions)
+        {
+          m_options.actions_internal_for_divergencies.insert(mcrl2::core::identifier_string(s));
+        }
       }
       if (parser.options.count("trace"))
       {
@@ -317,7 +325,7 @@ class lps2lts_tool : public lps2lts_base
 
         if (m_options.outformat == lts_none)
         {
-          parser.error("format '" + parser.option_argument("out") + "' is not recognised");
+          parser.error("Format '" + parser.option_argument("out") + "' is not recognised.");
         }
       }
       if (parser.options.count("init-tsize"))
@@ -335,12 +343,12 @@ class lps2lts_tool : public lps2lts_base
 
       if (parser.options.count("suppress") && !mCRL2logEnabled(verbose))
       {
-        parser.error("option --suppress requires --verbose (of -v)");
+        parser.error("Option --suppress requires --verbose (of -v).");
       }
 
       if (2 < parser.arguments.size())
       {
-        parser.error("too many file arguments");
+        parser.error("Too many file arguments.");
       }
       if (0 < parser.arguments.size())
       {

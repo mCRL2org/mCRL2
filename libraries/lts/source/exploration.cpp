@@ -72,6 +72,20 @@ probabilistic_state<size_t, probabilistic_data_expression> lps2lts_algorithm::cr
   return  probabilistic_state<size_t, probabilistic_data_expression>(result.begin(),result.end());
 }
 
+bool is_hidden_summand(const mcrl2::process::action_list& l,
+                       const std::set<core::identifier_string>& internal_action_labels)
+{
+  // Note that if l is empty, true is returned, as desired.
+  for(const mcrl2::process::action& a: l)
+  {
+    if (internal_action_labels.count(a.label().name())==0) // Not found, s has a visible action among its multi-actions.
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *options)
 {
   m_options=*options;
@@ -176,12 +190,19 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
   stochastic_action_summand_vector tau_summands;
   if (m_options.detect_divergence)
   {
-    mCRL2log(verbose) << "Detect divergences with tau action is `tau'.\n";
-    for (size_t i = 0; i < specification.process().action_summands().size(); i++)
+    mCRL2log(verbose) << "Detect divergences where actions with the following labels are hidden: tau";
+    for(const core::identifier_string& a: m_options.actions_internal_for_divergencies)
     {
-      if (specification.process().action_summands()[i].is_tau())
+      mCRL2log(verbose) << ", " << a;
+    }
+    mCRL2log(verbose) << ".\n";
+ 
+    for (const stochastic_action_summand& s: specification.process().action_summands())
+    {
+      // if (s.is_tau())
+      if (is_hidden_summand(s.multi_action().actions(),m_options.actions_internal_for_divergencies))
       {
-        tau_summands.push_back(specification.process().action_summands()[i]);
+        tau_summands.push_back(s);
       }
     }
   }
@@ -205,7 +226,8 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
     }
   }
 
-  bool compute_actions = m_options.outformat != lts_none || m_options.detect_action || m_maintain_traces || m_value_prioritize;
+  bool compute_actions = m_options.outformat != lts_none || m_options.detect_action || 
+                         m_maintain_traces || m_value_prioritize || !m_options.actions_internal_for_divergencies.empty();
   if (!compute_actions)
   {
     for (size_t i = 0; i < specification.process().action_summands().size(); i++)
@@ -225,7 +247,6 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
       }
     }
   }
-
   m_generator = new next_state_generator(specification, rewriter, m_options.use_enumeration_caching, m_options.use_summand_pruning);
 
   if (m_use_confluence_reduction)
@@ -645,12 +666,11 @@ bool lps2lts_algorithm::search_divergence(
               std::set<lps::state>& visited)
 {
   current_path.insert(state);
-
   std::vector<lps::state> new_states;
   next_state_generator::enumerator_queue_t enumeration_queue;
   for (next_state_generator::iterator j = m_generator->begin(state, m_tau_summands, &enumeration_queue); j != m_generator->end(); j++)
   {
-    assert(j->action().actions().size() == 0);
+    assert(is_hidden_summand(j->action().actions(),m_options.actions_internal_for_divergencies));
 
     if (visited.insert(j->target_state()).second)
     {
