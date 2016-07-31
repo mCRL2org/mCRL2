@@ -660,7 +660,7 @@ bool lps2lts_algorithm::save_trace(const lps::state& state1, const next_state_ge
 
 template <class COUNTER_EXAMPLE_GENERATOR>
 bool lps2lts_algorithm::search_divergence(
-              const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state_pair,
+              const mcrl2::lts::detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state_pair,
               std::set<lps::state>& current_path,
               std::set<lps::state>& visited,
               COUNTER_EXAMPLE_GENERATOR& divergence_loop)
@@ -708,7 +708,7 @@ bool lps2lts_algorithm::search_divergence(
 
 template <class COUNTER_EXAMPLE_GENERATOR>
 void lps2lts_algorithm::check_divergence(
-              const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state_pair, 
+              const mcrl2::lts::detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state_pair, 
               COUNTER_EXAMPLE_GENERATOR divergence_loop)
 {
   std::set<lps::state> visited;
