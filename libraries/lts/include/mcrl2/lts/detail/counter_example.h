@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lts/detail/liblts_liblts_counter_example_failure_ref.h
+/// \file lts/detail/liblts_liblts_counter_example.h
 /// \details This file contains a class in which counter examples 
 ///          for divergence preserving failures refinement can 
 ///          be constructed. A counterexample is a trace from 
@@ -15,8 +15,8 @@
 ///          is labelled with an action. By walking from a leaf to
 ///          the root the desired counterexample can be constructed.
 
-#ifndef _LIBLTS_COUNTER_EXAMPLE_FAILURE_REF_H
-#define _LIBLTS_COUNTER_EXAMPLE_FAILURE_REF_H
+#ifndef _LIBLTS_COUNTER_EXAMPLE_H
+#define _LIBLTS_COUNTER_EXAMPLE_H
 
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/trace/trace.h"
@@ -67,7 +67,7 @@ class counter_example_constructor
     // The backward three is stored in a deque. 
     // The root has entry size_t(-1).
 
-    const size_t m_root_index=-1;
+    static const index_type m_root_index=-1;
     std::deque< action_index_pair > m_backward_tree;
     const std::string m_filename;
   
@@ -77,7 +77,7 @@ class counter_example_constructor
     {}
 
     /// \brief Return the index of the root.
-    size_t root_index() const
+    static index_type root_index() 
     {
       return m_root_index;
     }
@@ -87,18 +87,18 @@ class counter_example_constructor
     //  \param previous_entry The index of the counterexample trace to which
     //                        this action label must be attached.
     //  \ret It returns a new index which can be used to extend the counterexample.
-    size_t add_transition(size_t label_index, size_t previous_entry)
+    index_type add_transition(size_t label_index, index_type previous_entry)
     {
       m_backward_tree.emplace_back(label_index, previous_entry);
       return m_backward_tree.size()-1;
     }
 
     template < class LTS_TYPE >
-    void save_counter_example(size_t index, const LTS_TYPE& l) const
+    void save_counter_example(index_type index, const LTS_TYPE& l) const
     {
       // We first store the label indices in reverse order in a stack.
-      std::stack< size_t > reversed_label_indices;
-      for(size_t current_index=index; 
+      std::stack< index_type > reversed_label_indices;
+      for(index_type current_index=index; 
           current_index!=m_root_index; 
           current_index=m_backward_tree[current_index].previous_entry_index())
       {
@@ -109,7 +109,9 @@ class counter_example_constructor
       while (!reversed_label_indices.empty())
       {
         result.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
-                                mcrl2::process::action_label(core::identifier_string(mcrl2::lts::pp(l.action_label(reversed_label_indices.top()))),mcrl2::data::sort_expression_list()),
+                                mcrl2::process::action_label(
+                                       core::identifier_string(mcrl2::lts::pp(l.action_label(reversed_label_indices.top()))),
+                                       mcrl2::data::sort_expression_list()),
                                 mcrl2::data::data_expression_list())));
         reversed_label_indices.pop();
       }
@@ -126,9 +128,9 @@ class dummy_counter_example_constructor
   public:
     typedef dummy_counter_example_constructor index_type;  // This yields an empty type.
 
-    index_type root_index() const
+    static index_type root_index()
     {
-      return *this;
+      return dummy_counter_example_constructor();  // This returns nothing. 
     }
 
     index_type add_transition(size_t /* label_index*/, index_type /* previous_entry*/)
@@ -148,4 +150,4 @@ class dummy_counter_example_constructor
 } // namespace lts
 } // namespace mcrl2
 
-#endif // _LIBLTS_COUNTER_EXAMPLE_FAILURE_REF_H
+#endif // _LIBLTS_COUNTER_EXAMPLE_H

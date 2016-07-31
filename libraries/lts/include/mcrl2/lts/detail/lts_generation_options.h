@@ -12,8 +12,8 @@
 #ifndef MCRL2_LTS_DETAIL_LTS_GENERATION_OPTIONS_H
 #define MCRL2_LTS_DETAIL_LTS_GENERATION_OPTIONS_H
 
-#include "functional"
-#include "boost/function.hpp"
+// #include "functional"
+// #include "boost/function.hpp"
 
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/lts/lts_io.h"
@@ -53,20 +53,7 @@ struct lts_generation_options
     detect_action(false),
     use_enumeration_caching(false),
     use_summand_pruning(false)
-  {
-    generate_filename_for_trace = std::bind(&lts_generation_options::generate_trace_file_name, this,
-                                            std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-  }
-
-  /* Method that takes an info string and an extension to produce a unique filename */
-  boost::function< std::string(std::string const&, std::string const&, std::string const&) >
-  generate_filename_for_trace;
-
-  /* Default function for generate_filename_for_trace */
-  std::string generate_trace_file_name(std::string const& basefilename, std::string const& info, std::string const& extension)
-  {
-    return basefilename + std::string("_") + info + std::string(".") + extension;
-  }
+  {}
 
   void validate_actions()
   {

@@ -27,9 +27,35 @@
 
 namespace mcrl2
 {
-
 namespace lts
 {
+namespace detail
+{
+
+    template <class COUNTER_EXAMPLE_GENERATOR>
+    class state_index_pair
+    {
+      protected:
+        lps::state m_state;
+        typename COUNTER_EXAMPLE_GENERATOR::index_type m_index;
+    
+      public:
+        state_index_pair(const lps::state& state, typename COUNTER_EXAMPLE_GENERATOR::index_type index)
+         : m_state(state),
+           m_index(index)
+        {}
+    
+        lps::state state() const
+        {
+          return m_state;
+        }
+    
+        typename COUNTER_EXAMPLE_GENERATOR::index_type index() const
+        {
+          return m_index;
+        }
+    };
+} // end namespace detail
 
 class lps2lts_algorithm
 {
@@ -105,8 +131,14 @@ class lps2lts_algorithm
     bool save_trace(const lps::state& state1, const std::string& filename);
     bool save_trace(const lps::state& state1, const next_state_generator::transition_t& transition, const std::string& filename);
     void construct_trace(const lps::state& state1, mcrl2::trace::Trace& trace);
-    bool search_divergence(const lps::state& state, std::set<lps::state>& current_path, std::set<lps::state>& visited);
-    void check_divergence(const lps::state& state);
+
+    template <class COUNTER_EXAMPLE_GENERATOR>
+    bool search_divergence(const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state, 
+                           std::set<lps::state>& current_path, std::set<lps::state>& visited, 
+                           COUNTER_EXAMPLE_GENERATOR& divergence_loop);
+    template <class COUNTER_EXAMPLE_GENERATOR>
+    void check_divergence(const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state, 
+                          COUNTER_EXAMPLE_GENERATOR divergence_loop);
     void save_actions(const lps::state& state, const next_state_generator::transition_t& transition);
     void save_deadlock(const lps::state& state);
     void save_error(const lps::state& state);

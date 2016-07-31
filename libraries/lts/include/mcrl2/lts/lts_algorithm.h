@@ -46,7 +46,7 @@
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_preorder.h"
 #include "mcrl2/lts/sigref.h"
-#include "mcrl2/lts/detail/liblts_counter_example_failure_ref.h"
+// #include "mcrl2/lts/detail/counter_example.h"
 
 namespace mcrl2
 {

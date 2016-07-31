@@ -21,7 +21,7 @@
 #define _LIBLTS_FAILURES_REFINEMENT_H
 
 #include <mcrl2/lts/detail/liblts_bisim_gw.h>
-#include <mcrl2/lts/detail/liblts_counter_example_failure_ref.h>
+#include <mcrl2/lts/detail/counter_example.h>
 
 namespace mcrl2
 {

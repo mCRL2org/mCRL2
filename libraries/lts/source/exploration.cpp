@@ -15,6 +15,7 @@
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"
 #include "mcrl2/lts/detail/exploration.h"
+#include "mcrl2/lts/detail/counter_example.h"
 #include "mcrl2/lts/lts_io.h"
 
 using namespace mcrl2;
@@ -657,73 +658,79 @@ bool lps2lts_algorithm::save_trace(const lps::state& state1, const next_state_ge
   }
 }
 
-
-
-
+template <class COUNTER_EXAMPLE_GENERATOR>
 bool lps2lts_algorithm::search_divergence(
-              const lps::state& state,
+              const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state_pair,
               std::set<lps::state>& current_path,
-              std::set<lps::state>& visited)
+              std::set<lps::state>& visited,
+              COUNTER_EXAMPLE_GENERATOR& divergence_loop)
 {
-  current_path.insert(state);
-  std::vector<lps::state> new_states;
+  current_path.insert(state_pair.state());
+  std::vector<detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR> > new_states;
   next_state_generator::enumerator_queue_t enumeration_queue;
-  for (next_state_generator::iterator j = m_generator->begin(state, m_tau_summands, &enumeration_queue); j != m_generator->end(); j++)
+  for (next_state_generator::iterator j = m_generator->begin(state_pair.state(), m_tau_summands, &enumeration_queue); j != m_generator->end(); j++)
   {
     assert(is_hidden_summand(j->action().actions(),m_options.actions_internal_for_divergencies));
 
+    std::pair<size_t, bool> action_label_number = m_action_label_numbers.put(lps::detail::multi_action_to_aterm(j->action()));
+    if (action_label_number.second)
+    {
+      size_t action_number = m_output_lts.add_action(j->action(), j->action().actions().size() == 0);
+      assert(action_number == action_label_number.first);
+      static_cast <void>(action_number); // Avoid a warning when compiling in non debug mode.
+    }
+
+    typename COUNTER_EXAMPLE_GENERATOR::index_type i=divergence_loop.add_transition(action_label_number.first,state_pair.index());
     if (visited.insert(j->target_state()).second)
     {
-      new_states.push_back(j->target_state());
+      new_states.push_back(detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>(j->target_state(),i));
     }
     else if (current_path.count(j->target_state()) != 0)
     {
-      return true;
+      mCRL2log(info) << "divergence-detect: divergence found." << std::endl; 
+      divergence_loop.save_counter_example(i,m_output_lts);
+      return true; 
     }
   }
 
-  for (std::vector<lps::state>::iterator i = new_states.begin(); i != new_states.end(); i++)
+  for (const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& p: new_states)
   {
-    if (search_divergence(*i, current_path, visited))
+    if (search_divergence(p, current_path, visited,divergence_loop))
     {
       return true;
     }
   }
 
-  assert(current_path.count(state)==1);
-  current_path.erase(state);
+  assert(current_path.count(state_pair.state())==1);
+  current_path.erase(state_pair.state());
   return false;
 }
 
-void lps2lts_algorithm::check_divergence(const lps::state& state)
+template <class COUNTER_EXAMPLE_GENERATOR>
+void lps2lts_algorithm::check_divergence(
+              const detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>& state_pair, 
+              COUNTER_EXAMPLE_GENERATOR divergence_loop)
 {
   std::set<lps::state> visited;
   std::set<lps::state> current_path;
-  visited.insert(state);
+  visited.insert(state_pair.state());
 
-  if (search_divergence(state, current_path, visited))
+  if (search_divergence(state_pair, current_path, visited,divergence_loop))
   {
-    size_t state_number = m_state_numbers.index(state);
     if (m_options.trace && m_traces_saved < m_options.max_traces)
     {
-      std::ostringstream filename_stream;
-      filename_stream << "divergence_" << m_traces_saved;
-      std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, filename_stream.str(), "trc");
-      if (save_trace(state, filename))
+      std::string filename = m_options.trace_prefix + "_divergence_" + std::to_string(m_traces_saved) + ".trc";
+      if (save_trace(state_pair.state(), filename))
       {
-        mCRL2log(info) << "divergence-detect: divergence found and saved to '" << filename
-                       << "' (state index: " << state_number << ")." << std::endl;
+        mCRL2log(info) << "Trace to the divergencing state is saved to '" << filename << std::endl;
       }
       else
       {
-        mCRL2log(info) << "divergence-detect: divergence found, but could not be saved to '" << filename
-                       << "' (state index: " << state_number << ")." << std::endl;
+        mCRL2log(info) << "Failed to save trace to diverging state to the file " << filename << "." << std::endl;
       }
     }
-    else
-    {
-      mCRL2log(info) << "divergence-detect: divergence found (state index: " << state_number << ")." << std::endl;
-    }
+    size_t state_number = m_state_numbers.index(state_pair.state());
+    mCRL2log(info) << "State index of diverging state is " << state_number << "." << std::endl;
   }
 }
 
@@ -733,20 +740,19 @@ void lps2lts_algorithm::save_actions(const lps::state& state, const next_state_g
   mCRL2log(info) << "Detected action '" << pp(transition.action()) << "' (state index " << state_number << ")";
   if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
-    std::ostringstream filename_stream;
-    filename_stream << "act_" << m_traces_saved;
+    std::string filename = m_options.trace_prefix + "_act_" + std::to_string(m_traces_saved);
     if (m_options.trace_multiactions.find(transition.action()) != m_options.trace_multiactions.end())
     {
-      filename_stream << "_" << pp(transition.action());
+      filename = filename + "_" + pp(transition.action());
     }
     for (process::action_list::const_iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
     {
       if (m_options.trace_actions.count(i->label().name()) > 0)
       {
-        filename_stream << "_" << i->label().name();
+        filename = filename + "_" + pp(i->label().name());
       }
     }
-    std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, filename_stream.str(), "trc");
+    filename = filename + ".trc";
     if (save_trace(state,transition, filename))
       mCRL2log(info) << " and saved to '" << filename << "'";
     else
@@ -760,9 +766,7 @@ void lps2lts_algorithm::save_deadlock(const lps::state& state)
   size_t state_number = m_state_numbers.index(state);
   if (m_options.trace && m_traces_saved < m_options.max_traces)
   {
-    std::ostringstream filename_stream;
-    filename_stream << "dlk_" << m_traces_saved;
-    std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, filename_stream.str(), "trc");
+    std::string filename = m_options.trace_prefix + "_dlk_" + std::to_string(m_traces_saved) + ".trc";
     if (save_trace(state, filename))
     {
       mCRL2log(info) << "deadlock-detect: deadlock found and saved to '" << filename
@@ -784,7 +788,7 @@ void lps2lts_algorithm::save_error(const lps::state& state)
 {
   if (m_options.save_error_trace)
   {
-    std::string filename = m_options.generate_filename_for_trace(m_options.trace_prefix, "error", "trc");
+    std::string filename = m_options.trace_prefix + "_error.trc";
     if (save_trace(state, filename))
     {
       mCRL2log(verbose) << "saved trace to error in '" << filename << "'.\n";
@@ -946,7 +950,19 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
   assert(transitions.empty());
   if (m_options.detect_divergence)
   {
-    check_divergence(state);
+    if (m_options.trace)
+    {
+      std::string filename_divergence_loop = m_options.trace_prefix + "_divergence_loop" + std::to_string(m_traces_saved) + ".trc";
+      check_divergence<detail::counter_example_constructor>(
+                detail::state_index_pair<detail::counter_example_constructor>(state,detail::counter_example_constructor::root_index()),
+                detail::counter_example_constructor(filename_divergence_loop));
+    }
+    else
+    {
+      check_divergence(
+                detail::state_index_pair<detail::dummy_counter_example_constructor>(state,detail::dummy_counter_example_constructor::root_index()),
+                detail::dummy_counter_example_constructor());
+    }
   }
 
   try
