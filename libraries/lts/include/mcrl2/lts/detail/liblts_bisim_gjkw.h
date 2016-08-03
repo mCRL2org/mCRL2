@@ -293,6 +293,7 @@ class state_info_entry
 
     std::string debug_id() const
     {
+        assert(state_info_begin() <= this);
         return "state " + std::to_string(this - state_info_begin());
     }
 
@@ -890,6 +891,7 @@ class constln_t
     /// block.
     block_t* split_off_small_block()
     {
+        assert(begin() < end());
         block_t* const FirstB = (*begin())->block;
         block_t* const LastB = end()[-1]->block;
         assert(FirstB != LastB);
@@ -1415,16 +1417,24 @@ class part_trans_t
         B_to_C_iter_t const other_B_to_C =
                     succ_iter->B_to_C->pred->source->block->inert_begin();
         assert(succ_iter->B_to_C->B_to_C_slice->begin <= other_B_to_C);
+        assert(other_B_to_C <= succ_iter->B_to_C);
+        assert(succ_iter->B_to_C < succ_iter->B_to_C->B_to_C_slice->end);
         swap_B_to_C(succ_iter, other_B_to_C->pred->succ);
         succ_iter->B_to_C->pred->source->block->set_inert_begin(other_B_to_C +
                                                                             1);
         // change pred
         pred_iter_t const other_pred = succ_iter->target->inert_pred_begin();
+        assert(succ_iter->target->pred_begin() <= other_pred);
+        assert(other_pred <= succ_iter->B_to_C->pred);
+        assert(succ_iter->B_to_C->pred < succ_iter->target->pred_end());
         swap_in(succ_iter->B_to_C, other_pred->succ->B_to_C);
         succ_iter->target->set_inert_pred_begin(other_pred + 1);
         // change succ
         succ_iter_t const other_succ =
                         succ_iter->B_to_C->pred->source->inert_succ_begin();
+        assert(succ_iter->B_to_C->pred->source->succ_begin() <= other_succ);
+        assert(other_succ <= succ_iter);
+        assert(succ_iter < succ_iter->B_to_C->pred->source->succ_end());
         swap_out(succ_iter->B_to_C->pred, other_succ->B_to_C->pred);
         succ_iter->B_to_C->pred->source->set_inert_succ_begin(other_succ + 1);
     }
@@ -1630,10 +1640,6 @@ class bisim_partitioner_gjkw
                                                      bool preserve_divergence);
     void refine_partition_until_it_becomes_stable_gjkw();
 
-#define SINGLE_REFINE
-
-#ifdef SINGLE_REFINE
-
     /*------------- Refine -- Algorithms 3 and 4 of [GJKW 2017] -------------*/
 
     bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RefB,
@@ -1693,80 +1699,6 @@ class bisim_partitioner_gjkw
         return refine(RefB, SpC, FromRed, all_unmarked_bottom_states_are_blue,
                                                                          true);
     }
-
-#else // ifdef SINGLE_REFINE
-
-    /*------------- PrimaryRefine -- Algorithm 3 of [GJKW 2017] -------------*/
-
-    bisim_gjkw::block_t* primary_refine(bisim_gjkw::block_t* RefB,
-                                            const bisim_gjkw::constln_t* NewC);
-
-    DECLARE_COROUTINE(primary_blue,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, NewC),
-    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
-                                bisim_gjkw::state_info_ptr, s,
-                                bisim_gjkw::pred_iter_t, pred_iter,
-                                bisim_gjkw::permutation_iter_t,
-                                                        blue_nonbottom_end),
-    /* shared data:         */ bisim_gjkw::permutation_iter_t,
-                                                    notblue_initialised_end,
-    /* interrupt locations: */ (PRIMARY_BLUE_PREDECESSOR_HANDLED,
-                                PRIMARY_BLUE_STATE_HANDLED));
-
-    DECLARE_COROUTINE(primary_red,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, NewC),
-    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_begin,
-                                bisim_gjkw::state_info_ptr, s,
-                                bisim_gjkw::pred_iter_t, pred_iter),
-    /* shared data:         */ bisim_gjkw::permutation_iter_t,
-                                                    notblue_initialised_end,
-    /* interrupt locations: */ (PRIMARY_RED_PREDECESSOR_HANDLED,
-                                PRIMARY_RED_STATE_HANDLED));
-
-    /*------------ SecondaryRefine -- Algorithm 4 of [GJKW 2017] ------------*/
-
-    bisim_gjkw::block_t* secondary_refine(bisim_gjkw::block_t* RefB,
-                                const bisim_gjkw::constln_t* SpC,
-                                const bisim_gjkw::B_to_C_descriptor* FromRed,
-                                bool all_unmarked_bottom_states_are_blue);
-
-    DECLARE_COROUTINE(secondary_blue,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, SpC,
-                                bool, split_unreachable_new_bottom),
-    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
-                                bisim_gjkw::state_info_ptr, s,
-                                bisim_gjkw::pred_iter_t, pred_iter,
-                                bisim_gjkw::state_info_ptr, s_prime,
-                                bisim_gjkw::permutation_iter_t,
-                                                            blue_nonbottom_end,
-                                bisim_gjkw::succ_const_iter_t, begin,
-                                bisim_gjkw::succ_const_iter_t, end),
-    /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
-                                                                shared_data,
-    /* interrupt locations: */ (SECONDARY_BLUE_PREDECESSOR_HANDLED,
-                                SECONDARY_BLUE_TESTING,
-                                SECONDARY_BLUE_STATE_HANDLED,
-                                SECONDARY_BLUE_COLLECT_BOTTOM));
-
-    DECLARE_COROUTINE(secondary_red,
-    /* formal parameters:   */ (bisim_gjkw::block_t*, RefB,
-                                const bisim_gjkw::constln_t*, SpC,
-                                const bisim_gjkw::B_to_C_descriptor*, FromRed),
-    /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
-                                                        fromred_visited_begin,
-                                bisim_gjkw::permutation_iter_t, visited_begin,
-                                bisim_gjkw::state_info_ptr, s,
-                                bisim_gjkw::pred_iter_t, pred_iter),
-    /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
-                                                                shared_data,
-    /* interrupt locations: */ (SECONDARY_RED_COLLECT_FROMRED,
-                                SECONDARY_RED_PREDECESSOR_HANDLED,
-                                SECONDARY_RED_STATE_HANDLED));
-
-#endif // ifdef SINGLE_REFINE
 
     /*--------- PostprocessNewBottom -- Algorithm 5 of [GJKW 2017] ----------*/
 
@@ -1868,10 +1800,10 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool const branching /* = false */,
 
   // Assign the reduced LTS
   l.set_num_states(bisim_part.num_eq_classes());
-  mCRL2log(log::debug, "bisim_gjkw") << "number of states in the lumped "
-        "chain: " << bisim_part.num_eq_classes()
-        << "; initial state: originally state " << l.initial_state()
-        <<" = lumped state "<<bisim_part.get_eq_class(l.initial_state())<<"\n";
+  //mCRL2log(log::debug, "bisim_gjkw") << "number of states in the lumped "
+  //    "chain: " << bisim_part.num_eq_classes()
+  //    << "; initial state: originally state " << l.initial_state()
+  //    <<" = lumped state "<<bisim_part.get_eq_class(l.initial_state())<<"\n";
   l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
   bisim_part.replace_transitions(branching, preserve_divergence);
 }
@@ -2013,8 +1945,8 @@ inline block_t::block_t(constln_t* const constln_,
     int_marked_nonbottom_begin(begin_), // no nonbottom state is marked
     int_bottom_begin(begin_), // all states are bottom states
     int_marked_bottom_begin(end_), // no bottom state is marked
-    int_inert_begin(), // is initialised by part_trans_t::create_new_block
-    int_inert_end(), // is initialised by part_trans_t::create_new_block
+    // int_inert_begin -- is initialised by part_trans_t::create_new_block
+    // int_inert_end -- is initialised by part_trans_t::create_new_block
     to_constln(), // empty list
     int_constln(constln_),
     refinable_next(nullptr),
