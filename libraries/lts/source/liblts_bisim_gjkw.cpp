@@ -1551,7 +1551,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
     }
     extra_kripke_states.clear();
 
-    label_type const tau_label = determine_tau_label(aut);
+    label_type const tau_label = aut.tau_label_index();
     // In the following loop, we visit a bottom state of each block and take
     // its transitions.  As the partition is (assumed to be) stable, in this
     // way we visit each transition of a lumped state exactly once.

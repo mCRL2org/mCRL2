@@ -365,32 +365,31 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
       }
     }
 
-    const std::vector<transition> &trans=l.get_transitions();
-    for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+    for (const transition& t: l.get_transitions())
     {
-      if (visited[r->from()])
+      if (visited[t.from()])
       {
-        label_map[r->label(transition::default_label_map())] = 1;
+        label_map[t.label(transition::default_label_map())] = 1;
       }
     }
 
+    label_map[0]=1; // Declare the tau action explicitly present.
     size_t new_nlabels = 0;
     for (size_t i=0; i<l.num_action_labels(); i++)
     {
       if (label_map.count(i)>0)   // Label i is used.
       {
         label_map[i] = new_nlabels;
-        new_lts.add_action(l.action_label(i),l.is_tau(i));
+        new_lts.add_action(l.action_label(i));
         new_nlabels++;
       }
     }
 
-    const std::vector<transition> &trans1=l.get_transitions();
-    for (std::vector<transition>::const_iterator r=trans1.begin(); r!=trans1.end(); ++r)
+    for (const transition& t: l.get_transitions())
     {
-      if (visited[r->from()])
+      if (visited[t.from()])
       {
-        new_lts.add_transition(transition(state_map[r->from()],label_map[r->label(transition::default_label_map())],state_map[r->to()]));
+        new_lts.add_transition(transition(state_map[t.from()],label_map[t.label(transition::default_label_map())],state_map[t.to()]));
       }
     }
 

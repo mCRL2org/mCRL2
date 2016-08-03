@@ -230,6 +230,7 @@ struct fsm_builder
   {
     parameters.clear();
     labels.clear();
+    labels[action_label_string::tau_action()]=0; // The label 0 is the tau action by default.
     fsm.clear();
   }
 
@@ -249,7 +250,8 @@ struct fsm_builder
     lts_fsm_t::labels_size_type label_index = 0;
     if (i == labels.end())
     {
-      label_index = fsm.add_action(t.label(), t.label() == "tau");
+      assert(t.label() != action_label_string::tau_action());
+      label_index = fsm.add_action(t.label());
       labels[t.label()] = label_index;
     }
     else

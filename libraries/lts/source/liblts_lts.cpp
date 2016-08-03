@@ -328,10 +328,12 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
   else
   {
     assert(input_lts.num_action_labels()==input_lts.get_action_labels().size());
-    const process::action_list tau = process::action_list();
-    for (const process::action_list& action_label:input_lts.get_action_labels())
+    for (const process::action_list& action_label: input_lts.get_action_labels())
     {
-      l.add_action(lps::multi_action(action_label), action_label == tau); 
+      if (!action_label.empty()) // The empty label is tau, which is present by default.
+      {
+        l.add_action(lps::multi_action(action_label)); 
+      }
     }
   }
   l.set_initial_probabilistic_state(input_lts.initial_probabilistic_state());

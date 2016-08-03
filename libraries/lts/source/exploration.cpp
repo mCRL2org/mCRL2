@@ -672,10 +672,11 @@ bool lps2lts_algorithm::search_divergence(
   {
     assert(is_hidden_summand(j->action().actions(),m_options.actions_internal_for_divergencies));
 
-    std::pair<size_t, bool> action_label_number = m_action_label_numbers.put(lps::detail::multi_action_to_aterm(j->action()));
+    std::pair<size_t, bool> action_label_number = m_action_label_numbers.put(j->action().actions());
     if (action_label_number.second)
     {
-      size_t action_number = m_output_lts.add_action(j->action(), j->action().actions().size() == 0);
+      assert(j->action().actions().size() != 0);
+      size_t action_number = m_output_lts.add_action(j->action());
       assert(action_number == action_label_number.first);
       static_cast <void>(action_number); // Avoid a warning when compiling in non debug mode.
     }
@@ -915,10 +916,11 @@ bool lps2lts_algorithm::add_transition(const lps::state& source_state, next_stat
   }
   else
   {
-    std::pair<size_t, bool> action_label_number = m_action_label_numbers.put(lps::detail::multi_action_to_aterm(transition.action()));
+    std::pair<size_t, bool> action_label_number = m_action_label_numbers.put(transition.action().actions());
     if (action_label_number.second)
     {
-      size_t action_number = m_output_lts.add_action(transition.action(), transition.action().actions().size() == 0);
+      assert(transition.action().actions().size() != 0);
+      size_t action_number = m_output_lts.add_action(transition.action());
       assert(action_number == action_label_number.first);
       static_cast <void>(action_number); // Avoid a warning when compiling in non debug mode.
     }

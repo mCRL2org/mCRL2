@@ -186,16 +186,16 @@ void reduce_simple_loop()
     ;
 
   expected_sizes expected;
-  expected.states_plain=2; expected.transitions_plain=2; expected.labels_plain=1;
-  expected.states_bisimulation=1, expected.transitions_bisimulation=1, expected.labels_bisimulation=1;
-  expected.states_branching_bisimulation=1, expected.transitions_branching_bisimulation=1, expected.labels_branching_bisimulation=1;
-  expected.states_divergence_preserving_branching_bisimulation=1, expected.transitions_divergence_preserving_branching_bisimulation=1, expected.labels_divergence_preserving_branching_bisimulation=1;
+  expected.states_plain=2; expected.transitions_plain=2; expected.labels_plain=2;
+  expected.states_bisimulation=1, expected.transitions_bisimulation=1, expected.labels_bisimulation=2;
+  expected.states_branching_bisimulation=1, expected.transitions_branching_bisimulation=1, expected.labels_branching_bisimulation=2;
+  expected.states_divergence_preserving_branching_bisimulation=1, expected.transitions_divergence_preserving_branching_bisimulation=1, expected.labels_divergence_preserving_branching_bisimulation=2;
   expected.states_weak_bisimulation=1, expected.transitions_weak_bisimulation=1, expected.labels_weak_bisimulation=2;
   expected.states_divergence_preserving_weak_bisimulation=1, expected.transitions_divergence_preserving_weak_bisimulation=1, expected.labels_divergence_preserving_weak_bisimulation=3;
-  expected.states_simulation=1, expected.transitions_simulation=1, expected.labels_simulation=1;
-  expected.states_trace_equivalence=1, expected.transitions_trace_equivalence=1, expected.labels_trace_equivalence=1;
-  expected.states_weak_trace_equivalence=1, expected.transitions_weak_trace_equivalence=1, expected.labels_weak_trace_equivalence=1;
-  expected.states_determinisation=2, expected.transitions_determinisation=2, expected.labels_determinisation=1;
+  expected.states_simulation=1, expected.transitions_simulation=1, expected.labels_simulation=2;
+  expected.states_trace_equivalence=1, expected.transitions_trace_equivalence=1, expected.labels_trace_equivalence=2;
+  expected.states_weak_trace_equivalence=1, expected.transitions_weak_trace_equivalence=1, expected.labels_weak_trace_equivalence=2;
+  expected.states_determinisation=2, expected.transitions_determinisation=2, expected.labels_determinisation=2;
   expected.is_deterministic=true;
 
   reduce_lts_in_various_ways("Simple loop", SIMPLE_AUT, expected);
@@ -444,7 +444,7 @@ void reduce_peterson()
   expected.states_divergence_preserving_weak_bisimulation=19, expected.transitions_divergence_preserving_weak_bisimulation=57, expected.labels_divergence_preserving_weak_bisimulation=8;
   expected.states_simulation=31, expected.transitions_simulation=49, expected.labels_simulation=7;
   expected.states_trace_equivalence=34, expected.transitions_trace_equivalence=52, expected.labels_trace_equivalence=7;
-  expected.states_weak_trace_equivalence=18, expected.transitions_weak_trace_equivalence=29, expected.labels_weak_trace_equivalence=6;
+  expected.states_weak_trace_equivalence=18, expected.transitions_weak_trace_equivalence=29, expected.labels_weak_trace_equivalence=7;
   expected.states_determinisation=40, expected.transitions_determinisation=63, expected.labels_determinisation=7;
   expected.is_deterministic=false;
 
@@ -461,7 +461,7 @@ void test_reachability()
     "(4,\"unreachable\",0)\n"
     ;
 
-  size_t expected_label_count = 4;
+  size_t expected_label_count = 5;
   size_t expected_state_count = 5;
   size_t expected_transition_count = 4;
 
@@ -583,7 +583,7 @@ void counterexample_jk_1(size_t k)
     test_lts("counterexample JK 1 (branching bisimulation gjkw)",l,expected_label_count, expected_state_count, expected_transition_count);
 }
 
-int test_main(int argc, char* argv[])
+int test_main(int /* argc*/, char** /* argv */)
 {
   reduce_simple_loop();
   reduce_simple_loop_with_tau();

@@ -443,8 +443,6 @@ class bisim_partitioner_gw
     pool < pooled_sized_forward_list < state_T > > SClists;
     // temporary map to keep track of states to be added when converting LTS to Kripke structure
 
-    const label_type tau_label; // tau_label is size_t(-1) if it does not exist.
-
     // start structures and functions for lockstep search
 
     // A Comparator class to compare states in the priority queue
@@ -733,8 +731,7 @@ class bisim_partitioner_gw
                          const bool branching=false,
                          const bool preserve_divergence=false)
      : max_block_index(0),
-       aut(l), 
-       tau_label(determine_tau_label(l))
+       aut(l) 
     {
       assert(branching || !preserve_divergence);
       // initialise variables
@@ -797,8 +794,7 @@ class bisim_partitioner_gw
             if (branching && (s_eq != get_eq_class(tgt_id)||
                              (snr == tgt_id && preserve_divergences)))
             {
-              assert(tau_label!=size_t(-1));
-              resulting_transitions.insert(transition(s_eq, tau_label, get_eq_class(tgt_id)));
+              resulting_transitions.insert(transition(s_eq, aut.tau_label_index(), get_eq_class(tgt_id)));
             }
           }
           else 

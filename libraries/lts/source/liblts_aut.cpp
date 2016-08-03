@@ -70,10 +70,11 @@ static size_t find_label_index(const string& s, map < string, size_t >& labs, pr
 {
   size_t label;
 
+  assert(labs.at(action_label_string::tau_action())==0);
   const map < string, size_t >::const_iterator i=labs.find(s);
   if (i==labs.end())
   {
-    label=l.add_action(s,s=="tau");
+    label=l.add_action(s);
     labs[s]=label;
   }
   else
@@ -317,6 +318,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   l.clear_transitions(ntrans); // Reserve enough space for the transitions.
   
   map < string, size_t > action_labels;
+  action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
   size_t initial_state=l.add_probabilistic_state(initial_probabilistic_state);
   assert(initial_state==0);
   l.set_initial_probabilistic_state(initial_state);

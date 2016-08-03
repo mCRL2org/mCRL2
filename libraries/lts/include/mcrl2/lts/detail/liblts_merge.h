@@ -89,7 +89,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
     if (it.second) 
     {
       // New element has been inserted.
-      new_index=l1.add_action(l2.action_label(i),l2.is_tau(i));
+      new_index=l1.add_action(l2.action_label(i));
     }
     else 
     {
@@ -112,7 +112,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
     if (it_hidden.second) 
     {
       // New element has been inserted.
-      new_hidden_index=l1.add_action(l2.action_label(hidden_index_in_l2),l2.is_tau(hidden_index_in_l2));
+      new_hidden_index=l1.add_action(l2.action_label(hidden_index_in_l2));
     }
     else 
     {

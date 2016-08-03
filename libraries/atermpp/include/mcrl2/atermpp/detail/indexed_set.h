@@ -67,7 +67,7 @@ size_t indexed_set<ELEMENT>::put_in_hashtable(const ELEMENT& key, size_t n)
      and find whether key already exists */
 
   size_t deleted_position=detail::EMPTY; // This variable recalls a proper deleted position to insert n. EMPTY means not yet found.
-  size_t start = std::hash<ELEMENT>()(key) & sizeMinus1;
+  size_t start = std::hash<aterm>()(key) & sizeMinus1;
   size_t c = start;
 
   while (true)

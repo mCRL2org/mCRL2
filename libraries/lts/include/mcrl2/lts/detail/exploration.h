@@ -75,7 +75,7 @@ class lps2lts_algorithm
     bit_hash_table m_bit_hash_table;
 
     probabilistic_lts_lts_t m_output_lts;
-    atermpp::indexed_set<atermpp::aterm> m_action_label_numbers; // aterm should be replace by proper type.
+    atermpp::indexed_set<process::action_list> m_action_label_numbers; 
     std::ofstream m_aut_file;
 
     bool m_maintain_traces;
@@ -100,6 +100,7 @@ class lps2lts_algorithm
       m_generator(nullptr),
       m_must_abort(false)
     {
+      m_action_label_numbers.put(action_label_lts::tau_action().actions());  // The action tau has index 0 by default.
     }
 
     ~lps2lts_algorithm()

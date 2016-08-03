@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(test_a_delta)
     "               + delta;\n"
     "init P(true);\n"
   );
-  check_lps2lts_specification(lps, 2, 1, 1);
+  check_lps2lts_specification(lps, 2, 1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_abp)
@@ -196,8 +196,8 @@ BOOST_AUTO_TEST_CASE(test_abp)
     "\n"
     "init P(1, dc, true, 1, dc1, dc2, 1, dc9, 1, dc13, true);\n"
   );
-  check_lps2lts_specification(abp, 74, 92, 19);
-  check_lps2lts_specification(abp, 74, 92, 19, "tau");
+  check_lps2lts_specification(abp, 74, 92, 20);
+  check_lps2lts_specification(abp, 74, 92, 20, "tau");
 }
 
 BOOST_AUTO_TEST_CASE(test_confluence)
@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(test_confluence)
     "init P(1, S_FSM_UNINITIALIZED, []);\n"
   );
   check_lps2lts_specification(spec, 4, 3, 3);
-  check_lps2lts_specification(spec, 3, 2, 2, "tau");
+  check_lps2lts_specification(spec, 3, 2, 3, "tau");
 }
 
 BOOST_AUTO_TEST_CASE(test_function_updates)
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE(test_function_updates)
     "\n"
     "init P(f);\n"
   );
-  check_lps2lts_specification(spec, 4, 12, 4);
+  check_lps2lts_specification(spec, 4, 12, 5);
 }
 
 BOOST_AUTO_TEST_CASE(test_timed) // For bug #756
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(test_timed) // For bug #756
     "\n"
     "init P(1);\n"
   );
-  check_lps2lts_specification(spec, 3, 2, 2);
+  check_lps2lts_specification(spec, 3, 2, 3);
 }
 
 BOOST_AUTO_TEST_CASE(test_struct)
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(test_struct)
     "     + delta;\n"
     "init P(1);\n"
   );
-  check_lps2lts_specification(spec, 2, 1, 1);
+  check_lps2lts_specification(spec, 2, 1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_alias_complex)
@@ -311,7 +311,7 @@ BOOST_AUTO_TEST_CASE(test_alias_complex)
     "\n"
     "init P(1);\n"
   );
-  check_lps2lts_specification(spec, 2, 1, 1);
+  check_lps2lts_specification(spec, 2, 1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_equality_with_empty_set)
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(test_plus)
     "proc P = a.P + a.P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 2, 1);
+  check_lps2lts_specification(spec, 1, 2, 2);
 }
 
 // The example below fails if #[0,1] does not have a decent
@@ -450,7 +450,7 @@ BOOST_AUTO_TEST_CASE(test_whether_function_update_is_declared)
     "proc P(f: Bool -> T) = int . P(f[true->b]);\n"
     "init P(g) ;\n"
   );
-  check_lps2lts_specification(spec, 2, 2, 1);
+  check_lps2lts_specification(spec, 2, 2, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_bag_enumeration_with_similar_elements_is_allowed)
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(test_whether_bag_enumeration_with_similar_elements_is_allow
     "proc P(b: Bag(S)) = (count(s1, b) < 3) -> int.P();\n"
     "init P({s1: 1, s1: 1});\n"
   );
-  check_lps2lts_specification(spec, 1, 1, 1);
+  check_lps2lts_specification(spec, 1, 1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
@@ -476,7 +476,7 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
     "proc P = int(f(1)(2)(3)).P();\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 1, 1);
+  check_lps2lts_specification(spec, 1, 1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_functions_can_be_enumerated)
@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_can_be_enumerated)
     "proc P = sum f:Bool->Bool.int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 4, 4);
+  check_lps2lts_specification(spec, 1, 4, 5);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerated)
@@ -496,7 +496,7 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerate
     "proc P = sum f:Bool#Bool#Bool->Bool.f(true,true,true)->int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 128, 128);
+  check_lps2lts_specification(spec, 1, 128, 129);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
@@ -506,7 +506,7 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
     "proc P = sum f:FSet(Bool).int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 4, 4);
+  check_lps2lts_specification(spec, 1, 4, 5);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_sets_can_be_enumerated)
@@ -516,7 +516,7 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_can_be_enumerated)
     "proc P = sum f:FSet(Bool).int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 4, 4);
+  check_lps2lts_specification(spec, 1, 4, 5);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_with_conditions_can_be_enumerated)
@@ -526,7 +526,7 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_with_conditions_can_be_enumerated)
     "proc P = sum f:FSet(Bool).(true in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 2, 2);
+  check_lps2lts_specification(spec, 1, 2, 3);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_sets_with_conditions_can_be_enumerated)
@@ -536,7 +536,7 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_with_conditions_can_be_enumerated)
     "proc P = sum f:Set(Bool).(true in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 2, 2);
+  check_lps2lts_specification(spec, 1, 2, 3);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_of_functions_can_be_enumerated)
@@ -546,7 +546,7 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_of_functions_can_be_enumerated)
     "proc P = sum f:FSet(Bool->Bool).((lambda x:Bool.true) in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 8, 8);
+  check_lps2lts_specification(spec, 1, 8, 9);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
@@ -556,14 +556,13 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
     "proc P = sum f:Set(Bool->Bool).((lambda x:Bool.true) in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 8, 8);
+  check_lps2lts_specification(spec, 1, 8, 9);
 }
 
 
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+boost::unit_test::test_suite* init_unit_test_suite(int /* argc */, char** /*argv[]*/)
 {
- // Initialise random seed to allow parallel running with lps2lts_test_old
   return nullptr;
 }
 

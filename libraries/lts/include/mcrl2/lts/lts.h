@@ -81,8 +81,7 @@ class lts: public LTS_BASE
     states_size_type m_init_state;
     std::vector<transition> m_transitions;
     std::vector<STATE_LABEL_T> m_state_labels;
-    std::vector<ACTION_LABEL_T> m_action_labels;
-    std::vector<bool> m_taus; // A vector indicating which labels are to be viewed as tau's. OBSOLETE.
+    std::vector<ACTION_LABEL_T> m_action_labels; // At position 0 we always find the label that corresponds to tau.
     // The following map indicates for every label index, which label is obtained after hiding
     // actions. This is the identity map by default, and it is filled using a call to the
     // function hide_actions. 
@@ -94,7 +93,9 @@ class lts: public LTS_BASE
      */
     lts()
      : m_nstates(0)
-    {}
+    {
+      m_action_labels.push_back(ACTION_LABEL_T::tau_action());
+    }
 
     /** \brief Creates a copy of the supplied LTS.
      * \param[in] l The LTS to copy. */
@@ -105,9 +106,10 @@ class lts: public LTS_BASE
       m_transitions(l.m_transitions),
       m_state_labels(l.m_state_labels),
       m_action_labels(l.m_action_labels),
-      m_taus(l.m_taus),
       m_hidden_label_map(l.m_hidden_label_map)
-    {}
+    {
+      assert(m_action_labels.size()>0 && m_action_labels[0]==ACTION_LABEL_T::tau_action());
+    }
 
     /** \brief Swap this lts with the supplied supplied LTS.
      * \param[in] l The LTS to swap. */
@@ -127,7 +129,8 @@ class lts: public LTS_BASE
       m_transitions.swap(l.m_transitions);
       m_state_labels.swap(l.m_state_labels);
       m_action_labels.swap(l.m_action_labels);
-      m_taus.swap(l.m_taus);
+      assert(m_action_labels.size()>0 && m_action_labels[0]==ACTION_LABEL_T::tau_action());
+      assert(l.m_action_labels.size()>0 && l.m_action_labels[0]==ACTION_LABEL_T::tau_action());
       m_hidden_label_map.swap(l.m_hidden_label_map);
     }
 
@@ -185,12 +188,14 @@ class lts: public LTS_BASE
     void set_num_action_labels(const labels_size_type n)
     {
       m_action_labels.resize(n);
+      assert(m_action_labels.size()>0 && m_action_labels[0]==ACTION_LABEL_T::tau_action());
     } 
 
     /** \brief Gets the number of action labels of this LTS.
      * \return The number of action labels of this LTS. */
     labels_size_type num_action_labels() const
     {
+      assert(m_action_labels.size()>0 && m_action_labels[0]==ACTION_LABEL_T::tau_action());
       return m_action_labels.size();
     }
 
@@ -232,13 +237,24 @@ class lts: public LTS_BASE
      * \param[in] label The label of the label.
      * \param[in] is_tau Indicates whether the label is a tau action.
      * \return The number of the added label. */
-    labels_size_type add_action(const ACTION_LABEL_T& label, bool is_tau = false)
+    labels_size_type add_action(const ACTION_LABEL_T& label)
     {
-      assert(m_action_labels.size()==m_taus.size());
+      if (label==ACTION_LABEL_T::tau_action())
+      {
+        return 0;
+      }
       const labels_size_type label_index=m_action_labels.size();
-      m_taus.push_back(is_tau);
       m_action_labels.push_back(label);
       return label_index;
+    }
+
+    /** \brief Provide the index of the label that represents tau.
+     *  \return 0, i.e. the index of the label tau.
+     */
+    const labels_size_type tau_label_index() const
+    {
+      assert(is_tau(0));
+      return 0;
     }
 
     /** \brief Sets the label of a state.
@@ -255,12 +271,11 @@ class lts: public LTS_BASE
      * \param[in] action The number of the action.
      * \param[in] label The label that will be assigned to the action.
      * \param[in] is_tau Indicates whether the label is a tau action. */
-    void set_action_label(const labels_size_type action, const ACTION_LABEL_T& label, bool is_tau = false)
+    void set_action_label(const labels_size_type action, const ACTION_LABEL_T& label)
     {
       assert(action<m_action_labels.size());
+      assert(action==0 == (label==ACTION_LABEL_T::tau_action())); // a tau action is always stored at index 0.
       m_action_labels[action] = label;
-      assert(action<m_taus.size());
-      m_taus[action] = is_tau;
     }
 
     /** \brief Returns the hidden label map that tells for each label what its corresponding
@@ -334,8 +349,8 @@ class lts: public LTS_BASE
     void clear_actions()
     {
       m_action_labels.clear();
+      m_action_labels.push_back(ACTION_LABEL_T::tau_action());
       m_hidden_label_map.clear();
-      m_taus.clear();
     }
 
     /** \brief Clear the labels of an lts.
@@ -391,17 +406,8 @@ class lts: public LTS_BASE
      * \retval false otherwise.  */
     bool is_tau(labels_size_type action) const
     {
-      assert(action<m_taus.size());
-      return m_taus[action];
-    }
-
-    /** \brief Sets whether an action is internal, i.e., a tau action.
-     * \param[in] action The number of the action.
-     * \param[in] is_tau Indicates whether the action should become a tau action. */
-    void set_tau(labels_size_type action, bool is_tau = true)
-    {
-      assert(action<m_taus.size());
-      m_taus[action] = is_tau;
+      assert(m_action_labels.size()>0 && m_action_labels[0]==ACTION_LABEL_T::tau_action());
+      return (action==0);
     }
 
     /** \brief Sets all actions with a string that occurs in tau_actions to tau.
@@ -439,8 +445,8 @@ class lts: public LTS_BASE
           }
           if (!found)
           {
-            // assert(a!=ACTION_LABEL_T::tau_action());
-            m_hidden_label_map[i]=add_action(a,a==ACTION_LABEL_T::tau_action());
+            assert(a!=ACTION_LABEL_T::tau_action());
+            m_hidden_label_map[i]=add_action(a);
           }
         }
       }
@@ -461,7 +467,7 @@ class lts: public LTS_BASE
     */
     bool has_action_info() const
     {
-      return m_action_labels.size() > 0;
+      return m_action_labels.size() > 1;
     }
 
     /** \brief Sorts the transitions using a sort style.

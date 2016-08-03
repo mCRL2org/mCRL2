@@ -132,36 +132,6 @@ inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_ac
 namespace detail
 {
 
-// Determine an index of the tau label. If it does not exist, and throw exception is true,
-// throw an exception. Otherwise, a non existing index of an action label is returned.
-template < class LTS_TYPE>
-size_t determine_tau_label(const LTS_TYPE& l)
-{
-  // Set the tau_label to an existing label, if possible.
-  // If nothing is found the tau label becomes l.num_action_labels,
-  // but there will not be a tau anyhow in this case.
-  size_t tau_label=l.num_action_labels();
-
-  for (size_t i=0; i<l.num_action_labels(); ++i)
-  {
-    if (l.is_tau(i))
-    {
-      tau_label=i;
-      break;
-    }
-  }
-  if (tau_label==l.num_action_labels())
-  {
-    mCRL2log(mcrl2::log::debug) << "No tau label has been found.\n";
-    return size_t(-1);
-  }
-  else
-  {
-    mCRL2log(mcrl2::log::debug) << "Using <" << pp(l.action_label(tau_label)) << "> as tau label.\n";
-  }
-  return tau_label;
-}
-
 // Make a new divergent_transition_label and replace each self loop with it.
 // Return the number of the divergent transition label.
 template < class LTS_TYPE >
@@ -183,13 +153,11 @@ size_t mark_explicit_divergence_transitions(LTS_TYPE& l)
 template < class LTS_TYPE >
 void unmark_explicit_divergence_transitions(LTS_TYPE& l, const size_t divergent_transition_label)
 {
-  size_t tau_label=determine_tau_label(l);
   for(std::vector<transition>::iterator i=l.get_transitions().begin(); i!=l.get_transitions().end(); ++i)
   {
     if (i->label(l.hidden_label_map())==divergent_transition_label)
     { 
-      assert(tau_label!=size_t(-1));
-      *i = transition(i->from(),tau_label,i->from());
+      *i = transition(i->from(),l.tau_label_index(),i->from());
     }
   }
 }

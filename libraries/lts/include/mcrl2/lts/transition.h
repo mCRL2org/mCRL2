@@ -17,6 +17,7 @@
 #ifndef MCRL2_LTS_TRANSITION_H
 #define MCRL2_LTS_TRANSITION_H
 
+#include "map"
 #include "mcrl2/atermpp/container_utility.h"
 
 

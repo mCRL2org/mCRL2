@@ -60,8 +60,7 @@ class bisim_partitioner
       const bool branching=false,
       const bool preserve_divergence=false)
        : max_state_index(0), 
-         aut(l), 
-         tau_label(determine_tau_label(l))  // tau_label is size_t(-1) if label does not exist
+         aut(l) 
     {
       assert(branching || !preserve_divergence);
       mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b":"B") <<
@@ -240,7 +239,6 @@ class bisim_partitioner
 
     std::vector< block_index_type > to_be_processed;
     std::vector< block_index_type > BL;
-    const label_type tau_label;
 
     void create_initial_partition(const bool branching,
                                   const bool preserve_divergences)
@@ -295,8 +293,7 @@ class bisim_partitioner
         {
           if (preserve_divergences && t.from()==t.to())
           {
-            assert(tau_label!=size_t(-1));
-            initial_partition.non_inert_transitions.push_back(transition(t.from(),tau_label,t.to()));
+            initial_partition.non_inert_transitions.push_back(transition(t.from(),aut.tau_label_index(),t.to()));
           }
           else
           {
@@ -608,8 +605,7 @@ class bisim_partitioner
               {
                 // The transition *l (*k,tau_label,*l) becomes a non inert transition in the new
                 // block.
-                assert(tau_label!=size_t(-1));
-                non_flagged_non_inert_transitions.push_back(transition(k->state,tau_label,*l));
+                non_flagged_non_inert_transitions.push_back(transition(k->state,aut.tau_label_index(),*l));
               }
               else
               {
@@ -1095,10 +1091,6 @@ class bisim_partitioner
       // Check that BL is empty.
       assert(BL.empty());
 
-      // Check that tau_label is smaller or equal to the number of labels.
-      // If no tau label is used, it is equal to the number of labels, which
-      // is a number of labels that is not used.
-      assert(tau_label<=aut.num_action_labels() || tau_label==size_t(-1));
     }
 
 #endif // not NDEBUG

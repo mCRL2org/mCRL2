@@ -243,17 +243,18 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       m_lts.set_initial_state(initial_state);
 
       atermpp::indexed_set<process::action> labs(100,50);
+      labs.put(process::action(process::action_label(core::identifier_string("tau"), data::sort_expression_list()), data::data_expression_list()));  // Take care that the internal action has number 1.
 
-      for (auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (const boolean_equation& i: m_bes.equations())
       {
-        std::pair<unsigned int, boolean_operand_t> info = statistics[i->variable()];
+        std::pair<unsigned int, boolean_operand_t> info = statistics[i.variable()];
         // If variable, map to operand that was precomputed for variables.
         if (info.second == BOOL_VAR)
         {
           info.second = block_to_operand[info.first];
         }
 
-        unsigned int from = indices[i->variable()];
+        unsigned int from = indices[i.variable()];
 
         // Create selfloop self:block(...),op(...)
         // recording block and operand.
@@ -266,7 +267,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           {
             std::pair<size_t, bool> put_result = labs.put(t);
             label_index = put_result.first;
-            m_lts.add_action(mcrl2::lts::action_label_string(t.label().name()),false);
+            m_lts.add_action(mcrl2::lts::action_label_string(t.label().name()));
           }
 
           switch (m_translation)
@@ -293,7 +294,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
         }
 
         // Edges to successors
-        std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
+        std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i.formula());
         for (std::set<boolean_variable>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
         {
           std::stringstream label;
@@ -322,9 +323,10 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           size_t label_index = labs.index(t);
           if (label_index == atermpp::npos)
           {
+            assert(label.str()!="tau");
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
-            m_lts.add_action(mcrl2::lts::action_label_string(t.label().name()),label.str()=="tau");
+            m_lts.add_action(mcrl2::lts::action_label_string(t.label().name()));
           }
           m_lts.add_transition(lts::transition(from,label_index,to));
         }

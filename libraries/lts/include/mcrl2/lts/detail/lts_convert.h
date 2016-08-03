@@ -813,10 +813,10 @@ inline void lts_convert_aux(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& l
   for (size_t i=0; i<lts_in.num_action_labels(); ++i)
   {
     lts_out.add_action(lts_convert_translate_label(lts_in.action_label(i),c));
-    if (lts_in.is_tau(i))
+    /* if (lts_in.is_tau(i))
     {
       lts_out.set_tau(i);
-    }
+    } */
   }
 
   const std::vector<transition> &trans=lts_in.get_transitions();

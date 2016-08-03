@@ -120,19 +120,11 @@ void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BAS
     }
   }
 
-  size_t tau_label=determine_tau_label(l); 
-  if (tau_label==size_t(-1)) // No tau label exist
-  {
-    const ACTION_LABEL_T lab; // nameless action label, representing tau.
-    tau_label= l.add_action(lab,true);
-  }
-  assert(l.is_tau(tau_label));
-
   l.clear_transitions();
 
   for(state_t i=0; i<l.num_states(); ++i)
   {
-    new_transitions.insert(transition(i,tau_label,i));
+    new_transitions.insert(transition(i,l.tau_label_index(),i));
   }
   
   // Add the newly generated transitions
