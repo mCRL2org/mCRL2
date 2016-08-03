@@ -124,7 +124,7 @@ struct fsm_writer
       // correct state numbering, by adding 1.
       out << swap_initial_state(t.from()) + 1 << " ";
       write_probabilistic_state(fsm.probabilistic_state(t.to())); 
-      out << " \"" << mcrl2::lts::pp(fsm.action_label(t.label())) << "\"" << std::endl;
+      out << " \"" << mcrl2::lts::pp(fsm.action_label(t.label(transition::default_label_map()))) << "\"" << std::endl;
     }
   }
 

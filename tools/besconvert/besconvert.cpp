@@ -410,7 +410,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
 
         while (i != transitions.end() && i->from() == cur_state)
         {
-          std::string label = pp(m_lts.action_label(i->label()));
+          std::string label = pp(m_lts.action_label(i->label(lts::transition::default_label_map())));
           size_t index = label.find(':');
 
           if ((m_translation == to_lts_deadlock && i->to() == deadlock_state)

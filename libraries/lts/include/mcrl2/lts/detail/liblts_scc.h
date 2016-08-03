@@ -120,7 +120,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   const std::vector <transition>& trans=aut.get_transitions();
   for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    if (aut.is_tau(r->label()))
+    if (aut.is_tau(r->label(l.hidden_label_map())))
     {
       src_tgt[r->from()].push_back(r->to());
     }
@@ -138,7 +138,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   std::map < state_type, std::vector < state_type > > tgt_src;
   for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    if (aut.is_tau(r->label()))
+    if (aut.is_tau(r->label(l.hidden_label_map())))
     {
       tgt_src[r->to()].push_back(r->from());
     }
@@ -174,14 +174,14 @@ void scc_partitioner<LTS_TYPE>::replace_transitions(const bool preserve_divergen
   const std::vector <transition>& trans=aut.get_transitions();
   for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    if (!aut.is_tau(r->label()) ||
+    if (!aut.is_tau(r->label(aut.hidden_label_map())) ||
         preserve_divergence_loops ||
         block_index_of_a_state[r->from()]!=block_index_of_a_state[r->to()])
     {
       resulting_transitions.insert(
         transition(
           block_index_of_a_state[r->from()],
-          r->label(),
+          r->label(transition::default_label_map()),
           block_index_of_a_state[r->to()]));
     }
   }
@@ -192,7 +192,7 @@ void scc_partitioner<LTS_TYPE>::replace_transitions(const bool preserve_divergen
   for (std::set < transition >::const_iterator i=resulting_transitions.begin();
        i!=resulting_transitions.end(); ++i)
   {
-    aut.add_transition(transition(i->from(),i->label(),i->to()));
+    aut.add_transition(transition(i->from(),i->label(transition::default_label_map()),i->to()));
   }
 }
 

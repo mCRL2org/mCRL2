@@ -77,7 +77,7 @@ void Parser::parseFile(QString filename, Graph* graph)
   for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
     graph->addEdge(
-          pp(l.action_label(r->label())),
+          pp(l.action_label(r->label(transition::default_label_map()))),
           r->from(),
           r->to());
     emit progressed(++progress);

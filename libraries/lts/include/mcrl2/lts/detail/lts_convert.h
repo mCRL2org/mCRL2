@@ -878,7 +878,7 @@ void remove_probabilities(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, P
     }
     else
     {
-      t=transition(t.from(), t.label(), lts_in.probabilistic_state(probabilistic_target_state_number).begin()->state());
+      t=transition(t.from(), t.label(transition::default_label_map()), lts_in.probabilistic_state(probabilistic_target_state_number).begin()->state());
     }
     transition_number++;
   }

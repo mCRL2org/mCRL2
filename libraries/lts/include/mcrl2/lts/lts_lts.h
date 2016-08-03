@@ -156,7 +156,7 @@ class action_label_lts: public mcrl2::lps::multi_action
     /** \brief Hide the actions with labels in tau_actions.
         \return Returns whether the hidden action becomes empty, i.e. a tau or hidden action.
     */
-    bool hide_actions(const std::vector<std::string>& tau_actions)
+    void hide_actions(const std::vector<std::string>& tau_actions)
     {
       const process::action_list mas = this->actions();
       process::action_list new_action_list;
@@ -170,12 +170,21 @@ class action_label_lts: public mcrl2::lps::multi_action
           new_action_list.push_front(a);
         }
       }
-      const bool is_tau=new_action_list.empty();
+      // const bool is_tau=new_action_list.empty();
 
       m_actions=new_action_list;
 
-      return is_tau;
+      // return is_tau;
     }
+
+    /* \brief The action label that represents the internal action.
+    */
+    static const action_label_lts& tau_action()
+    {
+      static action_label_lts tau_action=action_label_lts();
+      return tau_action;
+    }
+
 };
 
 /** \brief Print the action label to string. */

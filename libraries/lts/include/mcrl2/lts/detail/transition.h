@@ -21,37 +21,59 @@ namespace lts
 namespace detail
 {
 
-inline bool compare_transitions_slt(const transition& t1, const transition& t2)
+class compare_transitions_slt
 {
-  if (t1.from() != t2.from())
-  {
-    return t1.from() < t2.from();
-  }
-  else if (t1.label() != t2.label())
-  {
-    return t1.label() < t2.label();
-  }
-  else
-  {
-    return t1.to() < t2.to();
-  }
-}
+  protected:
+    const std::map<size_t,size_t>& m_hide_action_map;
 
-inline bool compare_transitions_lts(const transition& t1, const transition& t2)
+  public:
+    compare_transitions_slt(const std::map<size_t,size_t>& hide_action_map)
+     : m_hide_action_map(hide_action_map)
+    {}
+
+    bool operator()(const transition& t1, const transition& t2)
+    {
+      if (t1.from() != t2.from())
+      {
+        return t1.from() < t2.from();
+      }
+      else if (t1.label(m_hide_action_map) != t2.label(m_hide_action_map))
+      {
+        return t1.label(m_hide_action_map) < t2.label(m_hide_action_map);
+      }
+      else
+      {
+        return t1.to() < t2.to();
+      }
+    }
+};
+
+class compare_transitions_lts
 {
-  if (t1.label() != t2.label())
+  protected:
+    const std::map<size_t,size_t>& m_hide_action_map;
+
+  public:
+    compare_transitions_lts(const std::map<size_t,size_t>& hide_action_map)
+     : m_hide_action_map(hide_action_map)
+    {}
+
+  bool operator()(const transition& t1, const transition& t2)
   {
-    return t1.label() < t2.label();
+    if (t1.label(m_hide_action_map) != t2.label(m_hide_action_map))
+    {
+      return t1.label(m_hide_action_map) < t2.label(m_hide_action_map);
+    }
+    else if (t1.to() != t2.to())
+    {
+      return t1.to() < t2.to();
+    }
+    else
+    {
+      return t1.from() < t2.from();
+    }
   }
-  else if (t1.to() != t2.to())
-  {
-    return t1.to() < t2.to();
-  }
-  else
-  {
-    return t1.from() < t2.from();
-  }
-}
+};
 
 } // detail
 } // lts

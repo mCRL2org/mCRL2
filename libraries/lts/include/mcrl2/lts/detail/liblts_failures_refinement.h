@@ -111,16 +111,16 @@ namespace detail
         for(const transition& t: m_l.get_transitions()) 
         {
           assert(t.from()<m_l.num_states());
-          if (m_l.is_tau(t.label()) && weak_reduction)
+          if (m_l.is_tau(t.label(m_l.hidden_label_map())) && weak_reduction)
           {
             m_tau_reachable_states[t.from()].push_back(t.to());  // There is an outgoing tau. 
           }
           m_sorted_transitions[t.from()].push_back(t);
-          if (m_l.is_tau(t.label()) && t.from()==t.to() && weak_reduction)
+          if (m_l.is_tau(t.label(m_l.hidden_label_map())) && t.from()==t.to() && weak_reduction)
           {
             m_divergent[t.from()]=true;  // There is a self loop.
           }
-          m_enabled_actions[t.from()].insert(t.label());
+          m_enabled_actions[t.from()].insert(t.label(m_l.hidden_label_map()));
         }
       }
 
@@ -180,7 +180,8 @@ namespace detail
                  const state_type s, 
                  const label_type e,
                  const lts_cache<LTS_TYPE>& weak_property_cache,
-                 const bool weak_reduction);
+                 const bool weak_reduction,
+                 const LTS_TYPE& l);
 
   template < class LTS_TYPE >
   bool refusals_contained_in(
@@ -214,15 +215,20 @@ bool destructive_refinement_checker(
   // Therefore, we apply bisimulation reduction preserving divergences.
   // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
   // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
-  detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l1,weak_reduction,weak_reduction && (refinement!=trace));
-  l1.clear_state_labels();
   
-  // Assign the reduced LTS, and set init_l2.
-  l1.set_num_states(bisim_part.num_eq_classes());
-  l1.set_initial_state(bisim_part.get_eq_class(l1.initial_state()));
-  init_l2=bisim_part.get_eq_class(init_l2);
-  bisim_part.replace_transitions(weak_reduction,weak_reduction && (refinement!=trace));
-  
+  const bool allow_the_use_of_bisimulation_as_preprocessing=false;
+  if (allow_the_use_of_bisimulation_as_preprocessing)
+  {
+    detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l1,weak_reduction,weak_reduction && (refinement!=trace));
+    l1.clear_state_labels();
+    
+    // Assign the reduced LTS, and set init_l2.
+    l1.set_num_states(bisim_part.num_eq_classes());
+    l1.set_initial_state(bisim_part.get_eq_class(l1.initial_state()));
+    init_l2=bisim_part.get_eq_class(init_l2);
+    bisim_part.replace_transitions(weak_reduction,weak_reduction && (refinement!=trace));
+  }
+
   const detail::lts_cache<LTS_TYPE> weak_property_cache(l1,weak_reduction);
   std::deque< detail::state_states_counter_example_index_triple < COUNTER_EXAMPLE_CONSTRUCTOR > > 
               working(  // let working be a stack containg the triple (init1,{s|init2-->s},root_index);
@@ -273,9 +279,10 @@ bool destructive_refinement_checker(
                i!=weak_property_cache.transitions_end(impl_spec.state()); ++i)
       {
         const transition& t=*i;
-        typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index=generate_counter_example.add_transition(t.label(),impl_spec.counter_example_index());
+        const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index=
+               generate_counter_example.add_transition(t.label(transition::default_label_map()),impl_spec.counter_example_index());
         detail::set_of_states spec_prime;
-        if (l1.is_tau(t.label()) && weak_reduction)                   // if e=tau then
+        if (l1.is_tau(t.label(l1.hidden_label_map())) && weak_reduction)                   // if e=tau then
         {
           spec_prime=impl_spec.states();        // spec' := spec;
         }
@@ -284,13 +291,13 @@ bool destructive_refinement_checker(
           for(const detail::state_type s: impl_spec.states())  
           {
             detail::set_of_states reachable_states_from_s_via_e=
-                    detail::collect_reachable_states_via_an_action(s,t.label(),weak_property_cache,weak_reduction);
+                    detail::collect_reachable_states_via_an_action(s,t.label(l1.hidden_label_map()),weak_property_cache,weak_reduction,l1);
             spec_prime.insert(reachable_states_from_s_via_e.begin(),reachable_states_from_s_via_e.end());
           }
         }
         if (spec_prime.empty())                     // if spec'={} then
         {
-          generate_counter_example.save_counter_example(impl_spec.counter_example_index(),l1);
+          generate_counter_example.save_counter_example(new_counterexample_index,l1);
           return false;                             //    return false;  
         }
                                                       // if (impl',spec') in antichain is not true then
@@ -356,9 +363,10 @@ namespace detail
   template < class LTS_TYPE >
   set_of_states collect_reachable_states_via_an_action(
                  const state_type s,
-                 const label_type e,
+                 const label_type e,  // This is already the hidden action.
                  const lts_cache<LTS_TYPE>& weak_property_cache,
-                 const bool weak_reduction)
+                 const bool weak_reduction,
+                 const LTS_TYPE& l)
   {
     const set_of_states set_before_action_e=collect_reachable_states_via_taus(s,weak_property_cache,weak_reduction);
     set_of_states states_reachable_via_e;
@@ -369,7 +377,7 @@ namespace detail
       {
         const transition& t=*i;
         {
-          if (t.label()==e)
+          if (t.label(l.hidden_label_map())==e)
           { 
             assert(set_before_action_e.count(t.from())>0);
             states_reachable_via_e.insert(t.to());

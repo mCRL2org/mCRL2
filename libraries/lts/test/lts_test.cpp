@@ -548,15 +548,14 @@ void counterexample_jk_1(size_t k)
 
     assert(1 < k);
     std::string CJK1 = "des(0," + std::to_string(5*k+2) + "," + std::to_string(2*k+3) + ")\n";
-    int i;
 
-    for (i = 0; i < k; ++i)
+    for (size_t i = 0; i < k; ++i)
     {
         CJK1 += "(" + std::to_string(k) + ",a" + std::to_string(i) + "," + std::to_string(k) + ")\n"
                 "(" + std::to_string(k) + ",tau," + std::to_string(i) + ")\n"
                 "(0,a" + std::to_string(i) + "," + std::to_string(k) + ")\n";
     }
-    for (i = k-1; i > 0; --i)
+    for (size_t i = k-1; i > 0; --i)
     {
         CJK1 += "(" + std::to_string(i) + ",tau," + std::to_string(i-1) + ")\n"
                 "(" + std::to_string(i+k+1) + ",tau," + std::to_string(i+k) + ")\n";

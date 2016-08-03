@@ -1240,11 +1240,11 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
     {
         check_complexity::count("visit transitions to find extra Kripke "
                                              "states", 1, check_complexity::m);
-        if (!branching || !aut.is_tau(t.label()) ||
+        if (!branching || !aut.is_tau(t.label(aut.hidden_label_map())) ||
                                    (preserve_divergence && t.from() == t.to()))
         {
             // (possibly) create new state
-            Key const k(t.label(), t.to());
+            Key const k(t.label(aut.hidden_label_map()), t.to());
             std::pair<typename std::unordered_map<Key, state_type,
                 KeyHasher>::iterator,bool> extra_state = extra_kripke_states.
                                     insert(std::make_pair(k, nr_of_states));
@@ -1258,7 +1258,7 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
                 // (possibly) create new block
                 std::pair<std::unordered_map<label_type, state_type>::iterator,
                             bool> const action_block =
-                              action_block_map.insert(std::make_pair(t.label(),
+                              action_block_map.insert(std::make_pair(t.label(aut.hidden_label_map()),
                                                      states_per_block.size()));
                 if (action_block.second)
                 {
@@ -1418,15 +1418,15 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
     {
         check_complexity::count("initialise transitions", 1,
                                                           check_complexity::m);
-        if (!branching || !aut.is_tau(t.label()) ||
+        if (!branching || !aut.is_tau(t.label(aut.hidden_label_map())) ||
                                    (preserve_divergence && t.from() == t.to()))
         {
             // take transition through an extra intermediary state
-            Key const k(t.label(), t.to());
+            Key const k(t.label(aut.hidden_label_map()), t.to());
             state_type const extra_state = extra_kripke_states[k];
             if (0 != noninert_out_per_state[extra_state])
             {
-                state_type const extra_block = action_block_map[t.label()];
+                state_type const extra_block = action_block_map[t.label(aut.hidden_label_map())];
                 // now initialise extra_state correctly
                 part_st.state_info[extra_state].block = blocks[extra_block];
                 assert(0 < states_per_block[extra_block]);

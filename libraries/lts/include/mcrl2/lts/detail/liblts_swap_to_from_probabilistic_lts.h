@@ -53,7 +53,7 @@ void swap_to_non_probabilistic_lts(
     }
     else
     {
-      t=transition(t.from(), t.label(), l_probabilistic.probabilistic_state(probabilistic_target_state_number).begin()->state());
+      t=transition(t.from(), t.label(transition::default_label_map()), l_probabilistic.probabilistic_state(probabilistic_target_state_number).begin()->state());
     }
     transition_number++;
   }

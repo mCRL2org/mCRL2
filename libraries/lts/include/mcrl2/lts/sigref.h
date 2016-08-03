@@ -60,7 +60,7 @@ public:
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      transitions.insert(transition(partition[i->from()], i->label(), partition[i->to()]));
+      transitions.insert(transition(partition[i->from()], i->label(transition::default_label_map()), partition[i->to()]));
     }
   }
 
@@ -98,7 +98,7 @@ public:
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      m_sig[i->from()].insert(std::make_pair(i->label(), partition[i->to()]));
+      m_sig[i->from()].insert(std::make_pair(i->label(m_lts.hidden_label_map()), partition[i->to()]));
     }
   }
 
@@ -150,7 +150,7 @@ public:
   /** \brief Constructor  */
   signature_branching_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_),
-      m_prev_transitions(transitions_per_outgoing_state_reversed(lts_.get_transitions()))
+      m_prev_transitions(transitions_per_outgoing_state_reversed(lts_.get_transitions(),lts_.hidden_label_map()))
   {
     mCRL2log(log::verbose, "sigref") << "initialising signature computation for branching bisimulation" << std::endl;
   }
@@ -162,9 +162,9 @@ public:
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if (!(m_lts.is_tau(i->label()) && (partition[i->from()] == partition[i->to()])))
+      if (!(m_lts.is_tau(i->label(m_lts.hidden_label_map())) && (partition[i->from()] == partition[i->to()])))
       {
-        insert(partition, i->from(), i->label(), partition[i->to()]);
+        insert(partition, i->from(), i->label(m_lts.hidden_label_map()), partition[i->to()]);
       }
     }
   }
@@ -174,9 +174,9 @@ public:
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(partition[i->from()] != partition[i->to()] || !m_lts.is_tau(i->label()))
+      if(partition[i->from()] != partition[i->to()] || !m_lts.is_tau(i->label(m_lts.hidden_label_map())))
       {
-        transitions.insert(transition(partition[i->from()], i->label(), partition[i->to()]));
+        transitions.insert(transition(partition[i->from()], i->label(m_lts.hidden_label_map()), partition[i->to()]));
       }
     }
   }
@@ -210,7 +210,7 @@ protected:
 	  std::stack<size_t> sccstack;
 
     // Record forward transition relation sorted by state.
-	  outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions()));
+	  outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions(),m_lts.hidden_label_map()));
 
 	  for (size_t i = 0; i < m_lts.num_states(); ++i)
 	  {
@@ -308,10 +308,10 @@ public:
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(i->label()))
+      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(i->label(m_lts.hidden_label_map())))
          || m_divergent[i->to()])
       {
-        insert(partition, i->from(), i->label(), partition[i->to()]);
+        insert(partition, i->from(), i->label(m_lts.hidden_label_map()), partition[i->to()]);
       }
     }
   }
@@ -321,10 +321,10 @@ public:
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(i->label()))
-         || m_sig[i->from()].find(std::make_pair(i->label(), partition[i->to()])) != m_sig[i->from()].end())
+      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(i->label(m_lts.hidden_label_map())))
+         || m_sig[i->from()].find(std::make_pair(i->label(m_lts.hidden_label_map()), partition[i->to()])) != m_sig[i->from()].end())
       {
-        transitions.insert(transition(partition[i->from()], i->label(), partition[i->to()]));
+        transitions.insert(transition(partition[i->from()], i->label(m_lts.hidden_label_map()), partition[i->to()]));
       }
     }
   }

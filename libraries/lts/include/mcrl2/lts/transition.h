@@ -50,9 +50,13 @@ class transition
     size_type m_to;
 
   public:
+    static std::map<size_type,size_type>& default_label_map()
+    {
+      static std::map<size_type,size_type> default_label_map;
+      return default_label_map;
+    }
     // There is no default constructor
-    //   transition():from(0),label(0),to(0)
-    //   {}
+    transition() = delete;
 
     /// \brief Constructor (there is no default constructor).
     transition(const size_t f,
@@ -61,12 +65,12 @@ class transition
     {}
 
     /// \brief Copy constructor.
-    transition(const transition& t)
-    {
+    transition(const transition& t) = default;
+    /* {
       m_from = t.m_from;
       m_label = t.m_label;
       m_to = t.m_to;
-    }
+    } */
 
     /// \brief The source of the transition.
     size_type
@@ -76,10 +80,14 @@ class transition
     }
 
     /// \brief The label of the transition.
-    size_type
-    label() const
+    size_type label(const std::map<size_type,size_type>& hide_label_map) const
     {
-      return m_label;
+      const std::map<size_type,size_type>::const_iterator i=hide_label_map.find(m_label);
+      if (i==hide_label_map.end())
+      {
+        return m_label;
+      }
+      return i->second;
     }
 
     ///\brief The target of the transition.

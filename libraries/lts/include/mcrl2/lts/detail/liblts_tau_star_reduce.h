@@ -50,7 +50,7 @@ std::map < size_t,
   // Copy the internal transitions into the result.
   for(std::vector < mcrl2::lts::transition>::const_iterator i=l.get_transitions().begin(); i!=l.get_transitions().end(); ++i)
   {
-    if (l.is_tau(i->label()))
+    if (l.is_tau(i->label(l.hidden_label_map())))
     {
       if (forward) 
       { 
@@ -101,22 +101,22 @@ void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BAS
   // Add for every tau*.a tau* transitions sequence a single transition a;
   map <state_t, set <state_t> > backward_tau_closure=calculate_non_reflexive_transitive_tau_closure(l,false);
   map <state_t, set <state_t> > forward_tau_closure=calculate_non_reflexive_transitive_tau_closure(l,true);
-  for(std::vector < transition >::const_iterator i=original_transitions.begin(); i!=original_transitions.end(); ++i)
+  for(const transition& t: original_transitions)
   {
-    new_transitions.insert(*i);
-    set<state_t>& new_from_states=backward_tau_closure[i->from()];
-    set<state_t>& new_to_states=forward_tau_closure[i->to()];
+    new_transitions.insert(t);
+    set<state_t>& new_from_states=backward_tau_closure[t.from()];
+    set<state_t>& new_to_states=forward_tau_closure[t.to()];
     for(typename set<state_t>::const_iterator j_from=new_from_states.begin(); j_from!=new_from_states.end(); ++j_from)
     {
-      new_transitions.insert(transition(*j_from,i->label(),i->to()));
+      new_transitions.insert(transition(*j_from,t.label(transition::default_label_map()),t.to()));
       for(typename set<state_t>::const_iterator j_to=new_to_states.begin(); j_to!=new_to_states.end(); ++j_to)
       {
-        new_transitions.insert(transition(*j_from,i->label(),*j_to));
+        new_transitions.insert(transition(*j_from,t.label(transition::default_label_map()),*j_to));
       }
     }
     for(typename set<state_t>::const_iterator j_to=new_to_states.begin(); j_to!=new_to_states.end(); ++j_to)
     {
-      new_transitions.insert(transition(i->from(),i->label(),*j_to));
+      new_transitions.insert(transition(t.from(),t.label(transition::default_label_map()),*j_to));
     }
   }
 
@@ -156,7 +156,7 @@ void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS > &l)
   // Add all the original non tau transitions.
   for(std::vector < transition >::const_iterator i=original_transitions.begin(); i!=original_transitions.end(); ++i)
   {
-    if (!l.is_tau(i->label()))
+    if (!l.is_tau(i->label(l.hidden_label_map())))
     {
       new_transitions.insert(*i);
     }
@@ -166,12 +166,12 @@ void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS > &l)
   map <state_t, set <state_t> > backward_tau_closure=calculate_non_reflexive_transitive_tau_closure(l,false);
   for(std::vector < transition >::const_iterator i=original_transitions.begin(); i!=original_transitions.end(); ++i)
   {
-    if (!l.is_tau(i->label()))
+    if (!l.is_tau(i->label(l.hidden_label_map())))
     {
       set<state_t>& new_from_states=backward_tau_closure[i->from()];
       for(typename set<state_t>::const_iterator j=new_from_states.begin(); j!=new_from_states.end(); ++j)
       {
-        new_transitions.insert(transition(*j,i->label(),i->to()));
+        new_transitions.insert(transition(*j,i->label(transition::default_label_map()),i->to()));
       }
     }
   }

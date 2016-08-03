@@ -307,7 +307,7 @@ template < class LTS_TYPE >
 bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
 {
   // First calculate which states can be reached, and store this in the array visited.
-  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
+  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions(),transition::default_label_map());
 
   std::vector < bool > visited(l.num_states(),false);
   visited[l.initial_state()]=true;
@@ -370,7 +370,7 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     {
       if (visited[r->from()])
       {
-        label_map[r->label()] = 1;
+        label_map[r->label(transition::default_label_map())] = 1;
       }
     }
 
@@ -390,7 +390,7 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     {
       if (visited[r->from()])
       {
-        new_lts.add_transition(transition(state_map[r->from()],label_map[r->label()],state_map[r->to()]));
+        new_lts.add_transition(transition(state_map[r->from()],label_map[r->label(transition::default_label_map())],state_map[r->to()]));
       }
     }
 
@@ -695,7 +695,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {  
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_trace");
+        detail::counter_example_constructor cec("counter_example_trace_preorder.trc");
         return destructive_refinement_checker(l1, l2, trace, false, cec);
       }
       return destructive_refinement_checker(l1, l2, trace, false);
@@ -704,7 +704,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {  
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_weak_trace");
+        detail::counter_example_constructor cec("counter_example_weak_trace_preorder.trc");
         return destructive_refinement_checker(l1, l2, trace, true, cec);
       }
       return destructive_refinement_checker(l1, l2, trace, true);
@@ -713,7 +713,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {  
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_failures_refinement");
+        detail::counter_example_constructor cec("counter_example_failures_refinement.trc");
         return destructive_refinement_checker(l1, l2, failures, false, cec);
       }
       return destructive_refinement_checker(l1, l2, failures, false);
@@ -722,7 +722,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {  
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_weak_failures_refinement");
+        detail::counter_example_constructor cec("counter_example_weak_failures_refinement.trc");
         return destructive_refinement_checker(l1, l2, failures, true, cec);
       }
       return destructive_refinement_checker(l1, l2, failures, true);
@@ -731,7 +731,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
     {  
       if (generate_counter_example)
       {
-        detail::counter_example_constructor cec("counter_example_failures_divergence_refinement");
+        detail::counter_example_constructor cec("counter_example_failures_divergence_refinement.trc");
         return destructive_refinement_checker(l1, l2, failures_divergence, true,cec);
       }
       return destructive_refinement_checker(l1, l2, failures_divergence, true);
@@ -746,7 +746,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 template <class LTS_TYPE>
 bool is_deterministic(const LTS_TYPE& l)
 {
-  outgoing_transitions_per_state_action_t trans_lut=transitions_per_outgoing_state_action_pair(l.get_transitions());
+  outgoing_transitions_per_state_action_t trans_lut=transitions_per_outgoing_state_action_pair(l.get_transitions(),l.hidden_label_map());
 
   for (outgoing_transitions_per_state_action_t::const_iterator i=trans_lut.begin(); i!=trans_lut.end(); ++i)
   {
@@ -762,12 +762,12 @@ bool is_deterministic(const LTS_TYPE& l)
 }
 
 
-inline
-bool compare_transition_label_to_from(const transition& t1, const transition& t2)
+/* inline
+bool compare_transition_label_to_from(const transition& t1, const transition& t2, const std::map<transition::size_type,transition::size_type>& hidden_label_map)
 {
-  if (t1.label() != t2.label())
+  if (t1.label(hidden_label_map) != t2.label(hidden_label_map))
   {
-    return t1.label() < t2.label();
+    return t1.label(hidden_label_map) < t2.label(hidden_label_map);
   }
   else if (t1.to() != t2.to())
   {
@@ -777,7 +777,7 @@ bool compare_transition_label_to_from(const transition& t1, const transition& t2
   {
     return t1.from() < t2.from();
   }
-}
+} */
 
 namespace detail
 {
@@ -821,7 +821,7 @@ void determinise(LTS_TYPE& l)
   d_states.clear();
 
   std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > >
-  begin=transitions_per_outgoing_state(l.get_transitions());
+  begin=transitions_per_outgoing_state(l.get_transitions(),l.hidden_label_map());
 
   l.clear_transitions();
   l.clear_state_labels();
@@ -838,22 +838,23 @@ void determinise(LTS_TYPE& l)
     detail::get_trans(begin,tss,tss->get_set(d_id),d_transs);
 
     // sort d_transs by label and (if labels are equal) by destination
-    sort(d_transs.begin(),d_transs.end(),compare_transition_label_to_from);
+    const detail::compare_transitions_lts compare(l.hidden_label_map());
+    sort(d_transs.begin(),d_transs.end(),compare);
 
     n_t = d_transs.size();
     i = 0;
     for (lbl = 0; lbl < l.num_action_labels(); ++lbl)
     {
       // compute the destination of the transition with label lbl
-      while (i < n_t && d_transs[i].label() < lbl)
+      while (i < n_t && d_transs[i].label(l.hidden_label_map()) < lbl)
       {
         ++i;
       }
-      while (i < n_t && d_transs[i].label() == lbl)
+      while (i < n_t && d_transs[i].label(l.hidden_label_map()) == lbl)
       {
         to = d_transs[i].to();
         d_states.push_back(to);
-        while (i < n_t && d_transs[i].label() == lbl &&
+        while (i < n_t && d_transs[i].label(l.hidden_label_map()) == lbl &&
                d_transs[i].to() == to)
         {
           ++i;

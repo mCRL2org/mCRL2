@@ -64,6 +64,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
 
   typedef typename LTS_TYPE::action_label_t type1;
   typedef typename LTS_TYPE::labels_size_type type2;
+  typedef typename std::pair< typename std::map < type1,type2 >::const_iterator, bool > insert_type;
   std::map < type1,type2 > labs;
 
   // Put the labels of the LTS l1 in a map.
@@ -74,13 +75,56 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   }
   // Add the labels for the LTS l2, and put them there with a new index if it was
   // not added yet.
+  // Furthermore, update the hidden_action_map. 
+  // If label a1 is mapped on a2 in l2, then this must be the same
+  // in l1. It may be that label a1 did not exist yet in which case it needs
+  // to be added too.
+
 
   for (size_t i=0; i<l2.num_action_labels(); ++i)
   {
-    if (labs.insert(std::pair <type1,type2>
-                    (l2.action_label(i),l1.num_action_labels())).second)
+    typename LTS_TYPE::labels_size_type new_index;
+    const insert_type it= labs.insert(std::pair < type1,type2 >
+                               (l2.action_label(i),l1.num_action_labels()));
+    if (it.second) 
     {
-      l1.add_action(l2.action_label(i),l2.is_tau(i));
+      // New element has been inserted.
+      new_index=l1.add_action(l2.action_label(i),l2.is_tau(i));
+    }
+    else 
+    {
+      new_index=it.first->second; // Old index to which i is mapped.
+    }
+    assert(new_index==it.first->second);
+    // Now update the hidden_label_map by setting hidden_label_map[new_index]
+    // to the index corresponding to the value of hidden_label_map(i) in l2.
+    // The values of hidden_label_map(new_index) and hidden_label_map(i) may
+    // differ due to the fact that corresponding actions in l1 and l2 are
+    // hidden in different ways. In this case an exception is raised. 
+
+    const typename LTS_TYPE::labels_size_type hidden_index_in_l1=l1.apply_hidden_label_map(new_index);
+    const typename LTS_TYPE::labels_size_type hidden_index_in_l2=l2.apply_hidden_label_map(i);
+
+    // Find the corresponding index in l1 of hidden_index_in_l2. If it does not exist, insert it.
+    const insert_type it_hidden= labs.insert(std::pair <type1,type2>
+                                  (l2.action_label(hidden_index_in_l2),l1.num_action_labels()));
+    typename LTS_TYPE::labels_size_type new_hidden_index;
+    if (it_hidden.second) 
+    {
+      // New element has been inserted.
+      new_hidden_index=l1.add_action(l2.action_label(hidden_index_in_l2),l2.is_tau(hidden_index_in_l2));
+    }
+    else 
+    {
+      new_hidden_index=it_hidden.first->second; // Old index to which i is mapped.
+    }
+    assert(new_hidden_index==it_hidden.first->second);
+
+    // If label i occurred in l1 and was not mapped to the same hidden label, raise an exception.
+    if (!it.second && new_hidden_index!=hidden_index_in_l1) 
+    {
+      throw mcrl2::runtime_error("The action " + pp(l2.action_label(i)) + " has incompatible hidden actions " +
+                                 pp(l1.action_label(hidden_index_in_l1)) + " and " + pp(l2.action_label(hidden_index_in_l2)) + ".");
     }
   }
 
@@ -89,7 +133,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   std::vector<transition> &trans1=l1.get_transitions();
   for (std::vector<transition>::iterator r=trans1.begin(); r!=trans1.end(); ++r)
   {
-    r->set_label(labs[l1.action_label(r->label())]);
+    r->set_label(labs[l1.action_label(r->label(transition::default_label_map()))]);
   }
 
   // Now add the transition labels of LTS l2
@@ -101,7 +145,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   {
     const transition transition_to_add=*r;
     l1.add_transition(transition(transition_to_add.from()+old_nstates,
-                                 labs[l2.action_label(transition_to_add.label())],
+                                 labs[l2.action_label(transition_to_add.label(transition::default_label_map()))],
                                  transition_to_add.to()+old_nstates));
   }
 }

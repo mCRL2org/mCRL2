@@ -89,19 +89,23 @@ class counter_example_constructor
     //  \ret It returns a new index which can be used to extend the counterexample.
     index_type add_transition(size_t label_index, index_type previous_entry)
     {
+// std::cerr << "ADD COUNTER TRANS " << label_index << "  " << "    INDEX " << previous_entry << "\n";
       m_backward_tree.emplace_back(label_index, previous_entry);
+// std::cerr << "NEW INDEX " << m_backward_tree.size()-1 << "\n";
       return m_backward_tree.size()-1;
     }
 
     template < class LTS_TYPE >
     void save_counter_example(index_type index, const LTS_TYPE& l) const
     {
+// std::cerr << "Print counter example " << index << "\n";
       // We first store the label indices in reverse order in a stack.
       std::stack< index_type > reversed_label_indices;
       for(index_type current_index=index; 
           current_index!=m_root_index; 
           current_index=m_backward_tree[current_index].previous_entry_index())
       {
+// std::cerr << "PRINT INDEX1 " << m_backward_tree[current_index].label_index() << "\n";
         reversed_label_indices.push(m_backward_tree[current_index].label_index());
       }
 

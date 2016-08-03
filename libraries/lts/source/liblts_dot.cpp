@@ -81,12 +81,12 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
         throw mcrl2::runtime_error("Cannot save probabilistic states in .dot format.");
       }
       os << state_label(t->from()).name() << "->" << state_label(probabilistic_state(t->to()).begin()->state()).name() << "[label=\"" <<
-         mcrl2::lts::pp(action_label(t->label())) << "\"];" << endl;
+         mcrl2::lts::pp(action_label(t->label(transition::default_label_map()))) << "\"];" << endl;
     }
     else
     {
       os << "S" << t->from() << " -> " << "S" << t->to() << "[label=\"" <<
-         mcrl2::lts::pp(action_label(t->label())) << "\"];" << endl;
+         mcrl2::lts::pp(action_label(t->label(transition::default_label_map()))) << "\"];" << endl;
     }
   }
 
