@@ -1852,7 +1852,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // (this happens implicitly, through the bisim_partitioner_gjkw object
         // data)
     mCRL2log(log::verbose) << "number of blocks in the quotient: "
-                                              << block_t::nr_of_blocks << "\n";
+                                  << bisim_gjkw::block_t::nr_of_blocks << "\n";
     #ifndef NDEBUG
         part_st.print_part(part_tr);
         part_st.print_trans();
