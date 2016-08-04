@@ -216,8 +216,7 @@ bool destructive_refinement_checker(
   // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
   // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
   
-  const bool allow_the_use_of_bisimulation_as_preprocessing=false;
-  if (allow_the_use_of_bisimulation_as_preprocessing)
+  if (!generate_counter_example.is_dummy())  // A counter example is requested. Don't use bisimulation preprocessing.
   {
     detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l1,weak_reduction,weak_reduction && (refinement!=trace));
     l1.clear_state_labels();

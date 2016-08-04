@@ -118,6 +118,12 @@ class counter_example_constructor
       mCRL2log(log::verbose) << "Saved trace to file " + m_filename + "\n";
       result.save(m_filename);
     }
+
+    /// \brief This function indicates that this is not a dummy counterexample class and that a serious counterexample is required.
+    bool is_dummy() const
+    {
+      return false;
+    }
 };
 
 
@@ -143,6 +149,12 @@ class dummy_counter_example_constructor
     void save_counter_example(index_type /* index */, const LTS_TYPE& /*l*/) const
     {
       // This dummy counter example generator intentionally does not save anything.
+    }
+
+    /// \brief This function indicates that this is a dummy counterexample class and that no counterexample is required.
+    bool is_dummy() const
+    {
+      return true;
     }
 };
 
