@@ -9,9 +9,6 @@
 
 /// \file liblts_bisim_gjkw.cpp
 
-#ifndef _MSC_VER  // This code does not compile on the microsoft compiler due to the use of
-                  // COROUTINES as defined in mcrl2/lts/detail/coroutine.h.
-
 #include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_aut.h"
@@ -1972,14 +1969,17 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
     // 4.3: Spend the same amount of work on either coroutine:
     // and
     // 3.29: RedB := RefB  or  RedB := NewB , respectively
-    RUN_COROUTINES(refine_blue, (RefB,SpC,all_unmarked_bottom_states_are_blue||
-                                           nullptr == FromRed, postprocessing),
+    RUN_COROUTINES(refine_blue,
+                        (RefB)(SpC)
+                        (all_unmarked_bottom_states_are_blue||nullptr==FromRed)
+                        (postprocessing),
                                             RedB = RefB,
-                   refine_red,  (RefB, SpC, FromRed, postprocessing),
+                   refine_red,
+                        (RefB)(SpC)(FromRed)(postprocessing),
                                             RedB = (red_end[-1]->block == RefB
                                                  ?nullptr :red_end[-1]->block),
                /* shared data: */ struct bisim_gjkw::secondary_refine_shared,
-                            ({ RefB->nonbottom_begin(), nullptr == FromRed }));
+                                (RefB->nonbottom_begin())(nullptr == FromRed));
     // 4.33: return RedB
     return RedB;
 }
@@ -1999,24 +1999,24 @@ static const char* const secondary_search =
 
 template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
-    /* formal parameters:   */ (bisim_gjkw::block_t* const, RefB,
-                                const bisim_gjkw::constln_t* const, SpC,
-                                bool const,all_unmarked_bottom_states_are_blue,
-                                bool const, postprocessing),
-    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
-                                bisim_gjkw::state_info_ptr, s,
-                                bisim_gjkw::pred_iter_t, pred_iter,
-                                bisim_gjkw::state_info_ptr, s_prime,
-                                bisim_gjkw::permutation_iter_t,
-                                                            blue_nonbottom_end,
-                                bisim_gjkw::succ_const_iter_t, begin,
-                                bisim_gjkw::succ_const_iter_t, end),
-    /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
-                                                                shared_data,
-    /* interrupt locations: */ (REFINE_BLUE_PREDECESSOR_HANDLED,
-                                REFINE_BLUE_TESTING,
-                                REFINE_BLUE_STATE_HANDLED,
-                                REFINE_BLUE_COLLECT_BOTTOM))
+    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RefB))
+                            ((const bisim_gjkw::constln_t* const, SpC))
+                            ((bool const, all_unmarked_bottom_states_are_blue))
+                            ((bool const, postprocessing)),
+    /* local variables:  */ ((bisim_gjkw::permutation_iter_t, visited_end))
+                            ((bisim_gjkw::state_info_ptr, s))
+                            ((bisim_gjkw::pred_iter_t, pred_iter))
+                            ((bisim_gjkw::state_info_ptr, s_prime))
+                            ((bisim_gjkw::permutation_iter_t,
+                                                           blue_nonbottom_end))
+                            ((bisim_gjkw::succ_const_iter_t, begin))
+                            ((bisim_gjkw::succ_const_iter_t, end)),
+    /* shared data:      */ struct bisim_gjkw::secondary_refine_shared,
+                                                                   shared_data,
+    /* interrupt locatns:*/ (REFINE_BLUE_PREDECESSOR_HANDLED)
+                            (REFINE_BLUE_TESTING)
+                            (REFINE_BLUE_STATE_HANDLED)
+                            (REFINE_BLUE_COLLECT_BOTTOM))
 {
     // 4.4l: Blue := {}
     assert(RefB->nonbottom_begin() == shared_data.notblue_initialised_end);
@@ -2314,21 +2314,20 @@ END_COROUTINE
 
 template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
-    /* formal parameters:   */ (bisim_gjkw::block_t* const, RefB,
-                                const bisim_gjkw::constln_t* const, SpC,
-                                const bisim_gjkw::B_to_C_descriptor* const,
-                                                                       FromRed,
-                                bool const, postprocessing),
-    /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
-                                                         fromred_visited_begin,
-                                bisim_gjkw::permutation_iter_t, visited_begin,
-                                bisim_gjkw::state_info_ptr, s,
-                                bisim_gjkw::pred_iter_t, pred_iter),
-    /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
+    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RefB))
+                            ((const bisim_gjkw::constln_t* const, SpC))
+                            ((const bisim_gjkw::B_to_C_descriptor* const,
+                                                                      FromRed))
+                            ((bool const, postprocessing)),
+    /* local variables:  */ ((bisim_gjkw::B_to_C_iter_t,fromred_visited_begin))
+                            ((bisim_gjkw::permutation_iter_t, visited_begin))
+                            ((bisim_gjkw::state_info_ptr, s))
+                            ((bisim_gjkw::pred_iter_t, pred_iter)),
+    /* shared data:      */ struct bisim_gjkw::secondary_refine_shared,
                                                                    shared_data,
-    /* interrupt locations: */ (REFINE_RED_COLLECT_FROMRED,
-                                REFINE_RED_PREDECESSOR_HANDLED,
-                                REFINE_RED_STATE_HANDLED))
+    /* interrupt locatns:*/ (REFINE_RED_COLLECT_FROMRED)
+                            (REFINE_RED_PREDECESSOR_HANDLED)
+                            (REFINE_RED_STATE_HANDLED))
 {
     // 4.5r: whenever |Red| > |RefB|/2 then  Abort this coroutine
     if (RefB->marked_size() > RefB->size() / 2)  ABORT_THIS_COROUTINE();
@@ -2869,5 +2868,3 @@ template class bisim_partitioner_gjkw<lts_fsm_t>;
 } // end namespace detail
 } // end namespace lts
 } // end namespace mcrl2
-
-#endif // ifndef _MSC_VER  

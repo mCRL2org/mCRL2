@@ -23,9 +23,6 @@
 #ifndef _LIBLTS_BISIM_GJKW_H
 #define _LIBLTS_BISIM_GJKW_H
 
-#ifndef _MSC_VER  // This code does not compile on the microsoft compiler due to the use of
-                  // COROUTINES as defined in mcrl2/lts/detail/coroutine.h.
-
 #include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
 #include <list>          // for the list of B_to_C_descriptors
@@ -1649,41 +1646,40 @@ class bisim_partitioner_gjkw
                         bool postprocessing);
 
     DECLARE_COROUTINE(refine_blue,
-    /* formal parameters:   */ (bisim_gjkw::block_t* const, RefB,
-                                const bisim_gjkw::constln_t* const, SpC,
-                                bool const,all_unmarked_bottom_states_are_blue,
-                                bool const, postprocessing),
-    /* local variables:     */ (bisim_gjkw::permutation_iter_t, visited_end,
-                                bisim_gjkw::state_info_ptr, s,
-                                bisim_gjkw::pred_iter_t, pred_iter,
-                                bisim_gjkw::state_info_ptr, s_prime,
-                                bisim_gjkw::permutation_iter_t,
-                                                            blue_nonbottom_end,
-                                bisim_gjkw::succ_const_iter_t, begin,
-                                bisim_gjkw::succ_const_iter_t, end),
-    /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
+    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RefB))
+                            ((const bisim_gjkw::constln_t* const, SpC))
+                            ((bool const, all_unmarked_bottom_states_are_blue))
+                            ((bool const, postprocessing)),
+    /* local variables:  */ ((bisim_gjkw::permutation_iter_t, visited_end))
+                            ((bisim_gjkw::state_info_ptr, s))
+                            ((bisim_gjkw::pred_iter_t, pred_iter))
+                            ((bisim_gjkw::state_info_ptr, s_prime))
+                            ((bisim_gjkw::permutation_iter_t,
+                                                           blue_nonbottom_end))
+                            ((bisim_gjkw::succ_const_iter_t, begin))
+                            ((bisim_gjkw::succ_const_iter_t, end)),
+    /* shared data:      */ struct bisim_gjkw::secondary_refine_shared,
                                                                    shared_data,
-    /* interrupt locations: */ (REFINE_BLUE_PREDECESSOR_HANDLED,
-                                REFINE_BLUE_TESTING,
-                                REFINE_BLUE_STATE_HANDLED,
-                                REFINE_BLUE_COLLECT_BOTTOM));
+    /* interrupt locatns:*/ (REFINE_BLUE_PREDECESSOR_HANDLED)
+                            (REFINE_BLUE_TESTING)
+                            (REFINE_BLUE_STATE_HANDLED)
+                            (REFINE_BLUE_COLLECT_BOTTOM));
 
     DECLARE_COROUTINE(refine_red,
-    /* formal parameters:   */ (bisim_gjkw::block_t* const, RefB,
-                                const bisim_gjkw::constln_t* const, SpC,
-                                const bisim_gjkw::B_to_C_descriptor* const,
-                                                                       FromRed,
-                                bool const, postprocessing),
-    /* local variables:     */ (bisim_gjkw::B_to_C_iter_t,
-                                                         fromred_visited_begin,
-                                bisim_gjkw::permutation_iter_t, visited_begin,
-                                bisim_gjkw::state_info_ptr, s,
-                                bisim_gjkw::pred_iter_t, pred_iter),
-    /* shared data:         */ struct bisim_gjkw::secondary_refine_shared,
+    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RefB))
+                            ((const bisim_gjkw::constln_t* const, SpC))
+                            ((const bisim_gjkw::B_to_C_descriptor* const,
+                                                                      FromRed))
+                            ((bool const, postprocessing)),
+    /* local variables:  */ ((bisim_gjkw::B_to_C_iter_t,fromred_visited_begin))
+                            ((bisim_gjkw::permutation_iter_t, visited_begin))
+                            ((bisim_gjkw::state_info_ptr, s))
+                            ((bisim_gjkw::pred_iter_t, pred_iter)),
+    /* shared data:      */ struct bisim_gjkw::secondary_refine_shared,
                                                                    shared_data,
-    /* interrupt locations: */ (REFINE_RED_COLLECT_FROMRED,
-                                REFINE_RED_PREDECESSOR_HANDLED,
-                                REFINE_RED_STATE_HANDLED));
+    /* interrupt locatns:*/ (REFINE_RED_COLLECT_FROMRED)
+                            (REFINE_RED_PREDECESSOR_HANDLED)
+                            (REFINE_RED_STATE_HANDLED));
 
     bisim_gjkw::block_t* primary_refine(bisim_gjkw::block_t* RefB,
                                             const bisim_gjkw::constln_t* NewC)
@@ -2065,5 +2061,4 @@ inline bool state_info_entry::surely_has_no_transition_to(
 } // end namespace lts
 } // end namespace mcrl2
 
-#endif // ifndef _MSC_VER
 #endif // ifndef _LIBLTS_BISIM_GJKW_H
