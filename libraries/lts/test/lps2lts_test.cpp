@@ -561,7 +561,7 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
 
 
 
-boost::unit_test::test_suite* init_unit_test_suite(int /* argc */, char** /*argv[]*/)
+boost::unit_test::test_suite* init_unit_test_suite(int /* argc*/, char* argv[])
 {
   return nullptr;
 }
