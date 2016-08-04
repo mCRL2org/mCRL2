@@ -428,7 +428,7 @@ namespace detail
         ++i;
       }
     }
-    anti_chain.emplace(impl_spec.state(),impl_spec.states());
+    anti_chain.insert(std::pair<detail::state_type,detail::set_of_states>(impl_spec.state(),impl_spec.states()));
   }
   
   /* This function checks whether p is contained in anti_chain. This is rather subtle.

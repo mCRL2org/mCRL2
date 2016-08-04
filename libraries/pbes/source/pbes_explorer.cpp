@@ -1325,7 +1325,7 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
     this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
     //std::clog << "explorer" << std::endl;
-    for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
+    for (size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); ++i) {
         std::map<data_expression,int> data2int_map;
         this->localmaps_data2int.push_back(data2int_map);
         std::vector<data_expression> int2data_map;
@@ -1341,7 +1341,7 @@ explorer::explorer(const pbes& p_, const std::string& rewrite_strategy = "jittyc
     this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
     //std::clog << "explorer" << std::endl;
-    for (int i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
+    for (size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
         std::map<data_expression,int> data2int_map;
         this->localmaps_data2int.push_back(data2int_map);
         std::vector<data_expression> int2data_map;
