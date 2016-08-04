@@ -297,7 +297,7 @@ bool LTS::readFromFile(const std::string& filename)
   {
     State* s1 = states[r->from()];
     State* s2 = states[r->to()];
-    Transition* t = new Transition(s1,s2,static_cast<int>(r->label(transition::default_label_map())));
+    Transition* t = new Transition(s1,s2,static_cast<int>(r->label()));
     if (s1 != s2)
     {
       s1->addOutTransition(t);

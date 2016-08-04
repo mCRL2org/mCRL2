@@ -246,7 +246,7 @@ class lts2lps_tool : public input_output_tool
       const std::vector<transition>& trans=l.get_transitions();
       for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
       {
-        const lps::multi_action actions=l.action_label(r->label(transition::default_label_map()));
+        const lps::multi_action actions=l.action_label(r->label());
 
         assignment_list assignments;
         if (r->from()!=r->to())

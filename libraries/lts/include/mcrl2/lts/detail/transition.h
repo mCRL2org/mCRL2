@@ -21,6 +21,16 @@ namespace lts
 namespace detail
 {
 
+inline size_t apply_map(const size_t n, const std::map<size_t,size_t>& mapping)
+{
+  const std::map<size_t,size_t>::const_iterator i=mapping.find(n);
+  if (i==mapping.end())
+  {
+    return n;
+  }
+  return i->second;
+}
+
 class compare_transitions_slt
 {
   protected:
@@ -37,13 +47,18 @@ class compare_transitions_slt
       {
         return t1.from() < t2.from();
       }
-      else if (t1.label(m_hide_action_map) != t2.label(m_hide_action_map))
+      else 
       {
-        return t1.label(m_hide_action_map) < t2.label(m_hide_action_map);
-      }
-      else
-      {
-        return t1.to() < t2.to();
+        const size_t n1=apply_map(t1.label(), m_hide_action_map);
+        const size_t n2=apply_map(t2.label(), m_hide_action_map);
+        if (n1 != n2)
+        {
+          return n1 < n2;
+        }
+        else
+        {
+          return t1.to() < t2.to();
+        }
       }
     }
 };
@@ -58,21 +73,23 @@ class compare_transitions_lts
      : m_hide_action_map(hide_action_map)
     {}
 
-  bool operator()(const transition& t1, const transition& t2)
-  {
-    if (t1.label(m_hide_action_map) != t2.label(m_hide_action_map))
+    bool operator()(const transition& t1, const transition& t2)
     {
-      return t1.label(m_hide_action_map) < t2.label(m_hide_action_map);
+      const size_t n1=apply_map(t1.label(), m_hide_action_map);
+      const size_t n2=apply_map(t2.label(), m_hide_action_map);
+      if (n1 != n2)
+      {
+        return n1 < n2;
+      }
+      else if (t1.to() != t2.to())
+      {
+        return t1.to() < t2.to();
+      }
+      else
+      {
+        return t1.from() < t2.from();
+      }
     }
-    else if (t1.to() != t2.to())
-    {
-      return t1.to() < t2.to();
-    }
-    else
-    {
-      return t1.from() < t2.from();
-    }
-  }
 };
 
 } // detail

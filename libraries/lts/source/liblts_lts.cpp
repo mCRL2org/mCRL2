@@ -349,7 +349,7 @@ static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& fi
     // The transitions are stored in reverse order.
     transitions.push_front(aterm_probabilistic_transition(
                                 i->from(), 
-                                i->label(transition::default_label_map()), 
+                                i->label(), 
                                 l.probabilistic_state(i->to())));
   }
 

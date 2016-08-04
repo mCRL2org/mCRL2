@@ -307,7 +307,7 @@ template < class LTS_TYPE >
 bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
 {
   // First calculate which states can be reached, and store this in the array visited.
-  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions(),transition::default_label_map());
+  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
 
   std::vector < bool > visited(l.num_states(),false);
   visited[l.initial_state()]=true;
@@ -369,7 +369,7 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     {
       if (visited[t.from()])
       {
-        label_map[t.label(transition::default_label_map())] = 1;
+        label_map[t.label()] = 1;
       }
     }
 
@@ -389,7 +389,7 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     {
       if (visited[t.from()])
       {
-        new_lts.add_transition(transition(state_map[t.from()],label_map[t.label(transition::default_label_map())],state_map[t.to()]));
+        new_lts.add_transition(transition(state_map[t.from()],label_map[t.label()],state_map[t.to()]));
       }
     }
 
@@ -761,23 +761,6 @@ bool is_deterministic(const LTS_TYPE& l)
 }
 
 
-/* inline
-bool compare_transition_label_to_from(const transition& t1, const transition& t2, const std::map<transition::size_type,transition::size_type>& hidden_label_map)
-{
-  if (t1.label(hidden_label_map) != t2.label(hidden_label_map))
-  {
-    return t1.label(hidden_label_map) < t2.label(hidden_label_map);
-  }
-  else if (t1.to() != t2.to())
-  {
-    return t1.to() < t2.to();
-  }
-  else
-  {
-    return t1.from() < t2.from();
-  }
-} */
-
 namespace detail
 {
 inline
@@ -845,15 +828,15 @@ void determinise(LTS_TYPE& l)
     for (lbl = 0; lbl < l.num_action_labels(); ++lbl)
     {
       // compute the destination of the transition with label lbl
-      while (i < n_t && d_transs[i].label(l.hidden_label_map()) < lbl)
+      while (i < n_t && l.apply_hidden_label_map(d_transs[i].label()) < lbl)
       {
         ++i;
       }
-      while (i < n_t && d_transs[i].label(l.hidden_label_map()) == lbl)
+      while (i < n_t && l.apply_hidden_label_map(d_transs[i].label()) == lbl)
       {
         to = d_transs[i].to();
         d_states.push_back(to);
-        while (i < n_t && d_transs[i].label(l.hidden_label_map()) == lbl &&
+        while (i < n_t && l.apply_hidden_label_map(d_transs[i].label()) == lbl &&
                d_transs[i].to() == to)
         {
           ++i;

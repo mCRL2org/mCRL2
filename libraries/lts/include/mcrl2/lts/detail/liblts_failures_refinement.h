@@ -111,16 +111,16 @@ namespace detail
         for(const transition& t: m_l.get_transitions()) 
         {
           assert(t.from()<m_l.num_states());
-          if (m_l.is_tau(t.label(m_l.hidden_label_map())) && weak_reduction)
+          if (m_l.is_tau(m_l.apply_hidden_label_map(t.label())) && weak_reduction)
           {
             m_tau_reachable_states[t.from()].push_back(t.to());  // There is an outgoing tau. 
           }
           m_sorted_transitions[t.from()].push_back(t);
-          if (m_l.is_tau(t.label(m_l.hidden_label_map())) && t.from()==t.to() && weak_reduction)
+          if (m_l.is_tau(m_l.apply_hidden_label_map(t.label())) && t.from()==t.to() && weak_reduction)
           {
             m_divergent[t.from()]=true;  // There is a self loop.
           }
-          m_enabled_actions[t.from()].insert(t.label(m_l.hidden_label_map()));
+          m_enabled_actions[t.from()].insert(m_l.apply_hidden_label_map(t.label()));
         }
       }
 
@@ -280,9 +280,9 @@ bool destructive_refinement_checker(
       {
         const transition& t=*i;
         const typename COUNTER_EXAMPLE_CONSTRUCTOR::index_type new_counterexample_index=
-               generate_counter_example.add_transition(t.label(transition::default_label_map()),impl_spec.counter_example_index());
+               generate_counter_example.add_transition(t.label(),impl_spec.counter_example_index());
         detail::set_of_states spec_prime;
-        if (l1.is_tau(t.label(l1.hidden_label_map())) && weak_reduction)                   // if e=tau then
+        if (l1.is_tau(l1.apply_hidden_label_map(t.label())) && weak_reduction)                   // if e=tau then
         {
           spec_prime=impl_spec.states();        // spec' := spec;
         }
@@ -291,7 +291,7 @@ bool destructive_refinement_checker(
           for(const detail::state_type s: impl_spec.states())  
           {
             detail::set_of_states reachable_states_from_s_via_e=
-                    detail::collect_reachable_states_via_an_action(s,t.label(l1.hidden_label_map()),weak_property_cache,weak_reduction,l1);
+                    detail::collect_reachable_states_via_an_action(s,l1.apply_hidden_label_map(t.label()),weak_property_cache,weak_reduction,l1);
             spec_prime.insert(reachable_states_from_s_via_e.begin(),reachable_states_from_s_via_e.end());
           }
         }
@@ -377,7 +377,7 @@ namespace detail
       {
         const transition& t=*i;
         {
-          if (t.label(l.hidden_label_map())==e)
+          if (l.apply_hidden_label_map(t.label())==e)
           { 
             assert(set_before_action_e.count(t.from())>0);
             states_reachable_via_e.insert(t.to());

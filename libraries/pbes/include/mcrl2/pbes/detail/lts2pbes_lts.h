@@ -43,7 +43,7 @@ class lts2pbes_lts
       for (std::vector<lts::transition>::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
       {
         state_type s = i->from();
-        label_type a = i->label(lts::transition::default_label_map());
+        label_type a = i->label();
         state_type t = i->to();
         m_map[s].push_back(std::make_pair(a, t));
       }

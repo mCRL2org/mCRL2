@@ -1338,19 +1338,19 @@ class bisim_partitioner_gw
       // and sort by target state.
       for (const transition& t: aut.get_transitions())
       {
-        if (!aut.is_tau(t.label(aut.hidden_label_map())) || 
+        if (!aut.is_tau(aut.apply_hidden_label_map(t.label())) || 
             !branching ||
             (preserve_divergence && t.from() == t.to())
            )
         {
           // create new state
-          Key k(t.label(aut.hidden_label_map()),t.to());
+          Key k(aut.apply_hidden_label_map(t.label()),t.to());
           if ((extra_kripke_states.insert(make_pair(k, nr_of_states))).second) 
           {
             nr_of_states++;
           }
           // (possibly) create new block
-          if (action_block_map.insert(make_pair(t.label(aut.hidden_label_map()), nr_of_blocks)).second) 
+          if (action_block_map.insert(make_pair(aut.apply_hidden_label_map(t.label()), nr_of_blocks)).second) 
           {
             nr_of_blocks++;
           }
@@ -1402,7 +1402,7 @@ class bisim_partitioner_gw
         // fill in info
         t_entry.source = &states[t.from()];
         // target depends on transition label
-        if (aut.is_tau(t.label(aut.hidden_label_map())) && branching && (!preserve_divergence || t.from()!=t.to())) 
+        if (aut.is_tau(aut.apply_hidden_label_map(t.label())) && branching && (!preserve_divergence || t.from()!=t.to())) 
         {
           t_entry.target = &states[t.to()];
           // initially, all tau-transitions are inert
@@ -1411,7 +1411,7 @@ class bisim_partitioner_gw
         }
         else 
         {
-          Key k(t.label(aut.hidden_label_map()),t.to());
+          Key k(aut.apply_hidden_label_map(t.label()),t.to());
           t_entry.target = &states[(extra_kripke_states.find(k))->second];
         }
       }

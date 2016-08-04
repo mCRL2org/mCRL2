@@ -154,7 +154,7 @@ namespace Graph
             transitionLabelnodes[i].locked = false;
             transitionLabelnodes[i].anchored = false;
             transitionLabelnodes[i].selected = 0.0;
-            transitionLabelnodes[i].labelindex = t.label(mcrl2::lts::transition::default_label_map());
+            transitionLabelnodes[i].labelindex = t.label();
             transitionLabelnodes[i].color[0] = 0.0;
             transitionLabelnodes[i].color[1] = 0.0;
             transitionLabelnodes[i].color[2] = 0.0;

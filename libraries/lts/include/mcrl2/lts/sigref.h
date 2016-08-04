@@ -60,7 +60,7 @@ public:
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      transitions.insert(transition(partition[i->from()], i->label(transition::default_label_map()), partition[i->to()]));
+      transitions.insert(transition(partition[i->from()], i->label(), partition[i->to()]));
     }
   }
 
@@ -98,7 +98,7 @@ public:
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      m_sig[i->from()].insert(std::make_pair(i->label(m_lts.hidden_label_map()), partition[i->to()]));
+      m_sig[i->from()].insert(std::make_pair(m_lts.apply_hidden_label_map(i->label()), partition[i->to()]));
     }
   }
 
@@ -162,9 +162,9 @@ public:
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if (!(m_lts.is_tau(i->label(m_lts.hidden_label_map())) && (partition[i->from()] == partition[i->to()])))
+      if (!(m_lts.is_tau(m_lts.apply_hidden_label_map(i->label())) && (partition[i->from()] == partition[i->to()])))
       {
-        insert(partition, i->from(), i->label(m_lts.hidden_label_map()), partition[i->to()]);
+        insert(partition, i->from(), m_lts.apply_hidden_label_map(i->label()), partition[i->to()]);
       }
     }
   }
@@ -174,9 +174,9 @@ public:
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(partition[i->from()] != partition[i->to()] || !m_lts.is_tau(i->label(m_lts.hidden_label_map())))
+      if(partition[i->from()] != partition[i->to()] || !m_lts.is_tau(m_lts.apply_hidden_label_map(i->label())))
       {
-        transitions.insert(transition(partition[i->from()], i->label(m_lts.hidden_label_map()), partition[i->to()]));
+        transitions.insert(transition(partition[i->from()], m_lts.apply_hidden_label_map(i->label()), partition[i->to()]));
       }
     }
   }
@@ -308,10 +308,10 @@ public:
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(i->label(m_lts.hidden_label_map())))
+      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(m_lts.apply_hidden_label_map(i->label())))
          || m_divergent[i->to()])
       {
-        insert(partition, i->from(), i->label(m_lts.hidden_label_map()), partition[i->to()]);
+        insert(partition, i->from(), m_lts.apply_hidden_label_map(i->label()), partition[i->to()]);
       }
     }
   }
@@ -321,10 +321,10 @@ public:
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(i->label(m_lts.hidden_label_map())))
-         || m_sig[i->from()].find(std::make_pair(i->label(m_lts.hidden_label_map()), partition[i->to()])) != m_sig[i->from()].end())
+      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(m_lts.apply_hidden_label_map(i->label())))
+         || m_sig[i->from()].find(std::make_pair(m_lts.apply_hidden_label_map(i->label()), partition[i->to()])) != m_sig[i->from()].end())
       {
-        transitions.insert(transition(partition[i->from()], i->label(m_lts.hidden_label_map()), partition[i->to()]));
+        transitions.insert(transition(partition[i->from()], m_lts.apply_hidden_label_map(i->label()), partition[i->to()]));
       }
     }
   }

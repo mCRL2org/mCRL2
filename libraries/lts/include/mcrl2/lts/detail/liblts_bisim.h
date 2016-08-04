@@ -101,14 +101,14 @@ class bisim_partitioner
       {
         const transition i=*t;
         if (!branching ||
-            !aut.is_tau(i.label(aut.hidden_label_map())) ||
+            !aut.is_tau(aut.apply_hidden_label_map(i.label())) ||
             get_eq_class(i.from())!=get_eq_class(i.to()) ||
             (preserve_divergences && i.from()==i.to()))
         {
           resulting_transitions.insert(
             transition(
               get_eq_class(i.from()),
-              i.label(transition::default_label_map()),
+              i.label(),
               get_eq_class(i.to())));
         }
       }
@@ -268,7 +268,7 @@ class bisim_partitioner
         for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         {
           const transition t= *r;
-          if (branching && aut.is_tau(t.label(aut.hidden_label_map())))
+          if (branching && aut.is_tau(aut.apply_hidden_label_map(t.label())))
           {
             if (preserve_divergences && t.from()==t.to())
             {
@@ -289,7 +289,7 @@ class bisim_partitioner
       {
         const transition t=* r;
 
-        if (branching && aut.is_tau(t.label(aut.hidden_label_map())))
+        if (branching && aut.is_tau(aut.apply_hidden_label_map(t.label())))
         {
           if (preserve_divergences && t.from()==t.to())
           {
@@ -342,7 +342,7 @@ class bisim_partitioner
       for (std::vector<transition>::const_iterator r=trans1.begin(); r!=trans1.end(); ++r)
       {
         const transition t= *r;
-        if (!branching || !aut.is_tau(t.label(aut.hidden_label_map())))
+        if (!branching || !aut.is_tau(aut.apply_hidden_label_map(t.label())))
         {
           // Note that by sorting the transitions first, the non_inert_transitions are grouped per label.
           initial_partition.non_inert_transitions.push_back(t);
@@ -428,13 +428,14 @@ class bisim_partitioner
 
           // If the label of the next action is different, we must carry out the splitting.
           if ((i+1)==blocks[splitter_index].non_inert_transitions.size() ||
-              blocks[splitter_index].non_inert_transitions[i].label(aut.hidden_label_map())!=blocks[splitter_index].non_inert_transitions[i+1].label(aut.hidden_label_map()))
+              aut.apply_hidden_label_map(blocks[splitter_index].non_inert_transitions[i].label())!=
+              aut.apply_hidden_label_map(blocks[splitter_index].non_inert_transitions[i+1].label()))
           {
             // We consider BL which contains references to all blocks from which a state from splitter
             // can be reached. If not all flags of the non bottom states in a block in BL are set, the
             // non flagged non bottom states are moved to a new block.
 
-            split_the_blocks_in_BL(partition_is_unstable,blocks[splitter_index].non_inert_transitions[i].label(aut.hidden_label_map()),splitter_index);
+            split_the_blocks_in_BL(partition_is_unstable,aut.apply_hidden_label_map(blocks[splitter_index].non_inert_transitions[i].label()),splitter_index);
 
           }
 
@@ -1031,14 +1032,14 @@ class bisim_partitioner
           // Check proper grouping of action labels.
           std::vector < transition >::const_iterator j_next=j;
           j_next++;
-          if (j_next==i_non_inert_transitions.end() || (j->label(aut.hidden_label_map())!=j_next->label(aut.hidden_label_map())))
+          if (j_next==i_non_inert_transitions.end() || (aut.apply_hidden_label_map(j->label())!=aut.apply_hidden_label_map(j_next->label())))
           {
-            assert(observed_action_labels.count(j->label(aut.hidden_label_map()))==0);
-            observed_action_labels.insert(j->label(aut.hidden_label_map()));
+            assert(observed_action_labels.count(aut.apply_hidden_label_map(j->label()))==0);
+            observed_action_labels.insert(aut.apply_hidden_label_map(j->label()));
           }
 
           // Check whether tau transition in non inert transition vector is inert.
-          if (!preserve_divergence && branching && aut.is_tau(j->label(aut.hidden_label_map())))
+          if (!preserve_divergence && branching && aut.is_tau(aut.apply_hidden_label_map(j->label())))
           {
             assert(j->to()!=j->from());
           }
@@ -1115,7 +1116,7 @@ void bisimulation_reduce(
  *          The space consumption is O(n) and time is O(nm). It uses the branching bisimulation
  *          algorithm by Groote and Vaandrager from 1990.
  * \param[in/out] l1 A first transition system.
- * \param[in/out] l2 A second transistion system.
+ * \param[in/out] l2 A second transition system.
  * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
  * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
@@ -1162,7 +1163,7 @@ std::set < mcrl2::trace::Trace > bisim_partitioner<LTS_TYPE>::counter_traces(
     throw mcrl2::runtime_error("Requesting a counter trace for two bisimilar states. Such a trace is not useful.");
   }
 
-  const outgoing_transitions_per_state_action_t outgoing_transitions=transitions_per_outgoing_state_action_pair(aut.get_transitions(),transition::default_label_map());
+  const outgoing_transitions_per_state_action_t outgoing_transitions=transitions_per_outgoing_state_action_pair(aut.get_transitions(),aut.hidden_label_map());
   return counter_traces_aux(s,t,outgoing_transitions,branching_bisimulation);
 }
 

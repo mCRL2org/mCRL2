@@ -17,7 +17,6 @@
 #ifndef MCRL2_LTS_TRANSITION_H
 #define MCRL2_LTS_TRANSITION_H
 
-#include "map"
 #include "mcrl2/atermpp/container_utility.h"
 
 
@@ -51,11 +50,6 @@ class transition
     size_type m_to;
 
   public:
-    static std::map<size_type,size_type>& default_label_map()
-    {
-      static std::map<size_type,size_type> default_label_map;
-      return default_label_map;
-    }
     // There is no default constructor
     transition() = delete;
 
@@ -81,14 +75,9 @@ class transition
     }
 
     /// \brief The label of the transition.
-    size_type label(const std::map<size_type,size_type>& hide_label_map) const
+    size_type label() const
     {
-      const std::map<size_type,size_type>::const_iterator i=hide_label_map.find(m_label);
-      if (i==hide_label_map.end())
-      {
-        return m_label;
-      }
-      return i->second;
+      return m_label;
     }
 
     ///\brief The target of the transition.

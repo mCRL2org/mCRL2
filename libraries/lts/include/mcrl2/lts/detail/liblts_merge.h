@@ -133,7 +133,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   std::vector<transition> &trans1=l1.get_transitions();
   for (std::vector<transition>::iterator r=trans1.begin(); r!=trans1.end(); ++r)
   {
-    r->set_label(labs[l1.action_label(r->label(transition::default_label_map()))]);
+    r->set_label(labs[l1.action_label(r->label())]);
   }
 
   // Now add the transition labels of LTS l2
@@ -145,7 +145,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   {
     const transition transition_to_add=*r;
     l1.add_transition(transition(transition_to_add.from()+old_nstates,
-                                 labs[l2.action_label(transition_to_add.label(transition::default_label_map()))],
+                                 labs[l2.action_label(transition_to_add.label())],
                                  transition_to_add.to()+old_nstates));
   }
 }
