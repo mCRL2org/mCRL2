@@ -11,6 +11,7 @@
 #ifndef MCRL2_LTS_DETAIL_TRANSITION_H
 #define MCRL2_LTS_DETAIL_TRANSITION_H
 
+#include "map"
 #include "mcrl2/lts/transition.h"
 
 namespace mcrl2
