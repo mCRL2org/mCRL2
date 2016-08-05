@@ -45,36 +45,36 @@
 /// First, the coroutine has to be _declared_ (if it is a class method, the
 /// declaration is in the body of the class).  One writes:
 ///
-///     DECLARE_COROUTINE(function name, (formal parameters),
-///                 (local variables), shared data type, shared variable name,
-///                 (interrupt locations));
+///     DECLARE_COROUTINE(function name, formal parameters,
+///                 local variables, shared data type, shared variable name,
+///                 interrupt locations);
 ///
 /// Later (outside the class body), one can _define_ the coroutine, i. e. give
 /// its function body.  This is written as:
 ///
-///     DEFINE_COROUTINE(namespace, function name, (formal parameters),
-///                 (local variables), shared data type, shared variable name,
-///                 (interrupt locations))
+///     DEFINE_COROUTINE(namespace, function name, formal parameters,
+///                 local variables, shared data type, shared variable name,
+///                 interrupt locations)
 ///     {
 ///         function body;
 ///     } END_COROUTINE
 ///
-/// The declaration and definition must have the same parameter
-/// list (except for the namespace).  The formal parameters and
-/// the local variables are given as a so-called boost sequence:
-/// ((type1,var1))((type2,var2))((type3,var3)) etc.  In the
-/// coroutine, parameters and variables can be accessed normally.
-/// The interrupt locations are a similar (but simpler) boost
-/// sequence: (location1)(location2)(location3) etc.
-/// The macros assume that there are at least one parameter, at least one local
-/// variable and at least one interrupt location.
+/// The  declaration  and  definition  must  have  the  same  parameter
+/// list  (except  for  the  namespace).    The  formal  parameters  and
+/// the  local  variables  are  given  as  a  so-called  boost  sequence:
+/// `((type1, var1)) ((type2, var2)) ((type3, var3))`  etc.    In  the
+/// coroutine,  parameters  and  variables  can  be  accessed  normally.
+/// The  interrupt  locations  are  a  similar  (but  simpler)  boost
+/// sequence:  `(location1) (location2) (location3)`  etc.
+/// The macros assume that there is at least one parameter, at least one
+/// local variable and at least one interrupt location.
 ///
 /// Local variables also must be declared/defined using the macro because if
 /// one coroutine is interrupted, its local variables have to be stored
 /// temporarily until it resumes.
 ///
 /// There is one shared parameter for communication between the coroutines.  If
-/// one wants more than one shared parameter, a class or struct holding all
+/// one needs more than one shared parameter, a class or struct holding all
 /// shared parameters has to be defined.  Both coroutines will access the same
 /// shared variable.
 ///
@@ -100,11 +100,11 @@
 ///     }                                               }
 ///     END_COROUTINE_FOR;
 ///
-///     COROUTINE_DO_WHILE(interrupt location)          do
+///     COROUTINE_DO_WHILE(interrupt locatn,condition)  do
 ///     {                                               {
 ///         loop body;                                      loop body;
 ///     }                                               }
-///     END_COROUTINE_DO_WHILE(condition);              while (condition);
+///     END_COROUTINE_DO_WHILE;                         while (condition);
 ///
 /// These macros hide some code that counts how many iterations have been
 /// executed in a loop at the end of each iteration;  if one coroutine has done
@@ -134,11 +134,9 @@
 /// terminates, its associated final statement is executed and `RUN_COROUTINES`
 /// terminates.
 ///
-/// ``Approximately the same amount of work'' is defined as:  The second
-/// coroutine will not do no more than 10/7 = ~1.4286 times the amount of work
-/// of the first, and the first coroutine will not do more than 16 steps in
-/// addition to 16/11 = ~1.4545 times the amount of work of the second.  (These
-/// numbers are approximations of sqrt(2) = ~1.4142.)
+/// ``Approximately the same amount of work'' is defined as:  The difference
+/// between the number of steps taken by the two coroutines (i. e. the balance
+/// of work) always is between -1 and +1.
 ///
 /// \author David N. Jansen, Radboud Universiteit, Nijmegen, The Netherlands
 
@@ -246,13 +244,16 @@ where the coroutine was interrupted. */
 /// \def DECLARE_COROUTINE
 /// \brief declare a member method or a function as a coroutine
 /// \param routine     name of the coroutine
-/// \param param       formal parameter list of the coroutine, in parentheses
-/// \param local       local variables used by the coroutine, in parentheses
+/// \param param       formal parameter list, as a boost sequence:
+///                    `((type1, var1)) ((type2, var2)) ((type3, var3))` etc.
+/// \param local       local variables, as a boost sequence:
+///                    `((type1, var1)) ((type2, var2)) ((type3, var3))` etc.
 /// \param shared_type type of data shared between the two coroutines
 /// \param shared_var  name of the formal parameter that contains the shared
 ///                    data
-/// \param locations   locations where the coroutine can be interrupted, in
-///                    parentheses
+/// \param locations   locations where the coroutine can be interrupted, as a
+///                    boost sequence: `(location1) (location2) (location3)`
+///                    etc.
 #define DECLARE_COROUTINE(routine, param, local, shared_type, shared_var,     \
                                                                     locations)\
     enum _coroutine_ ## routine ## _location                                  \
@@ -284,13 +285,16 @@ where the coroutine was interrupted. */
 /// \param namespace   namespace of the coroutine.  If it is a member method,
 ///                    use `class name::`.
 /// \param routine     name of the coroutine
-/// \param param       formal parameter list of the coroutine, in parentheses
-/// \param local       local variables used by the coroutine, in parentheses
+/// \param param       formal parameter list, as a boost sequence:
+///                    `((type1, var1)) ((type2, var2)) ((type3, var3))` etc.
+/// \param local       local variables, as a boost sequence:
+///                    `((type1, var1)) ((type2, var2)) ((type3, var3))` etc.
 /// \param shared_type type of data shared between the two coroutines
 /// \param shared_var  name of the formal parameter that contains the shared
 ///                    data
-/// \param locations   locations where the coroutine can be interrupted, in
-///                    parentheses
+/// \param locations   locations where the coroutine can be interrupted, as a
+///                    boost sequence: `(location1) (location2) (location3)`
+///                    etc.
 #define DEFINE_COROUTINE(namespace, routine, param, local, shared_type,       \
                                                         shared_var, locations)\
 coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
@@ -322,15 +326,17 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
 /// generated).
 /// \param routine1    the first coroutine to be started (defined with
 ///                    `DEFINE_COROUTINE`)
-/// \param param1      actual parameter list of routine1, in parentheses
+/// \param param1      actual parameter list of routine1, as a boost sequence:
+///                    `(value1) (value2) (value3)` etc.
 /// \param final1      statement to be executed if routine1 terminates first
 /// \param routine2    the second coroutine to be started (defined with
 ///                    `DEFINE_COROUTINE`)
-/// \param param2      actual parameter list of routine2, in parentheses
+/// \param param2      actual parameter list of routine2, as a boost sequence:
+///                    `(value1) (value2) (value3)` etc.
 /// \param final2      statement to be executed if routine2 terminates first
 /// \param shared_type type of the data shared between the two coroutines
 /// \param shared_init initial value of the shared data, as a boost sequence:
-///                    (value1)(value2)(value3) etc.
+///                    `(value1) (value2) (value3)` etc.
 #define RUN_COROUTINES(routine1, param1, final1, routine2, param2, final2,    \
                                                     shared_type, shared_init) \
         do                                                                    \
