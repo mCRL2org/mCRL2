@@ -1879,8 +1879,8 @@ struct bisim_gjkw::secondary_refine_shared {
 /// \brief refine a block into the part that can reach `SpC` and the part that
 /// cannot
 ///
-/// \details When calling `refine()`, the block RefB is sliced into these
-/// parts:
+/// \details At the beginning of a call to `refine()`, the block RefB is sliced
+/// into these parts:
 ///
 ///     |          unmarked         |marked |         unmarked         |marked|
 ///     |         nonbottom         |nonbott|          bottom          |bottom|

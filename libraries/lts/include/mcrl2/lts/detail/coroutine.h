@@ -143,7 +143,7 @@
 #ifndef _COROUTINE_H
 #define _COROUTINE_H
 
-#include <cstdlib>       // for EXIT_FAILURE and size_t
+#include <cstdlib>       // for size_t
 #include <boost/preprocessor.hpp>
 
 
