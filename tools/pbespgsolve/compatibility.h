@@ -25,21 +25,21 @@
 */
 
 /* Figure out which hashtable implementation to use: */
-#ifdef MCRL2_HAVE_UNORDERED_SET // Preferably use this one.
+// #ifdef MCRL2_HAVE_UNORDERED_SET // Preferably use this one.
 #include <unordered_set>
 #include <unordered_map>
 #define HASH_SET(k) std::unordered_set<k>
 #define HASH_MAP(k,v) std::unordered_map<k, v>
-#elif (__cplusplus > 199711L || __GNUC__ >= 4)  /* C++ TR1 supported (GCC 4) */
+/* #elif (__cplusplus > 199711L || __GNUC__ >= 4)  /* C++ TR1 supported (GCC 4) * /
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
 #define HASH_SET(k) std::tr1::unordered_set<k>
 #define HASH_MAP(k,v) std::tr1::unordered_map<k, v>
-#else  /* generic/old C++ compiler */
+#else  /* generic/old C++ compiler * /
 #include <map>
 #include <set>
 #define HASH_SET(k) std::set<k>
 #define HASH_MAP(k,v) std::map<k, v>
-#endif // MCRL2_HAVE_UNORDERED_SET
+#endif // MCRL2_HAVE_UNORDERED_SET */
 
 #endif /* ndef COMPATIBILITY_H_INCLUDED */
