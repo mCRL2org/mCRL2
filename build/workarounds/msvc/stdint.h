@@ -502,7 +502,7 @@ typedef uint64_t uintmax_t;
 #  define PRINTF_INTMAX_DEC_WIDTH PRINTF_INT64_DEC_WIDTH
 # endif
 #else
-typedef int32_t intmax_t;
+// typedef int32_t intmax_t; Outcommented by jfg as int32_t causes conflicts.
 typedef uint32_t uintmax_t;
 # define  INTMAX_MAX   INT32_MAX
 # define UINTMAX_MAX  UINT32_MAX
@@ -531,7 +531,7 @@ typedef   int8_t   int_least8_t;
 typedef  uint8_t  uint_least8_t;
 typedef  int16_t  int_least16_t;
 typedef uint16_t uint_least16_t;
-typedef  int32_t  int_least32_t;
+// typedef  int32_t  int_least32_t;  Outcommented by jfg as int32_t causes conflicts.
 typedef uint32_t uint_least32_t;
 # define PRINTF_LEAST32_MODIFIER PRINTF_INT32_MODIFIER
 # define PRINTF_LEAST16_MODIFIER PRINTF_INT16_MODIFIER
@@ -570,7 +570,7 @@ typedef   int_least8_t   int_fast8_t;
 typedef  uint_least8_t  uint_fast8_t;
 typedef  int_least16_t  int_fast16_t;
 typedef uint_least16_t uint_fast16_t;
-typedef  int_least32_t  int_fast32_t;
+// typedef  int_least32_t  int_fast32_t;  Outcommented by jfg as int32_t causes conflicts.
 typedef uint_least32_t uint_fast32_t;
 #define  UINT_FAST8_MAX  UINT_LEAST8_MAX
 #define   INT_FAST8_MAX   INT_LEAST8_MAX
