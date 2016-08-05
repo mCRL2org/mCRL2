@@ -10,7 +10,7 @@
 #ifndef COMPATIBILITY_H_INCLUDED
 #define COMPATIBILITY_H_INCLUDED
 
-#include <stdint.h>
+// #include <stdint.h> Removed by jfg because it is doubtful whether this is still needed, and is causing conflicts with QT.
 
 /*! \file compatibility.h
     \brief Cross-platform compatibility functions.
