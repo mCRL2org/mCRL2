@@ -357,7 +357,7 @@ typedef unsigned short uint32_t;
 #endif
 #ifndef int32_t
 #if (LONG_MAX == INT32_MAX) || defined (S_SPLINT_S)
-typedef signed long int32_t;
+// typedef signed long int32_t;   Outcommented by jfg as this definition clashes with a definition in Qt.
 # define INT32_C(v) v ## L
 # ifndef PRINTF_INT32_MODIFIER
 #  define PRINTF_INT32_MODIFIER "l"
