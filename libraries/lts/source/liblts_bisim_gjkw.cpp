@@ -2085,7 +2085,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             // 3.11l: if out(s) intersect SpC == emptyset then
             if (s->surely_has_no_transition_to(SpC))
             {
-                assert(s->surely_has_transition_to(SpC));
                 // 3.12l: Blue := Blue union {s}
                     // already done by incrementing visited_end
                 //mCRL2log(log::debug, "bisim_gjkw") << s->debug_id()
@@ -2100,6 +2099,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             }
             else
             {
+                assert(s->surely_has_transition_to(SpC));
                 // The state s is not blue.  Move it to the slice of non-blue
                 // bottom states.
                 //mCRL2log(log::debug, "bisim_gjkw") << s->debug_id()
