@@ -437,7 +437,7 @@ void lps2lts_algorithm::set_prioritised_representatives(next_state_generator::tr
 {
   for(next_state_generator::transition_t::state_probability_list::iterator i=states.begin(); i!=states.end(); ++i)
   {
-    i->set_state(get_prioritised_representative(i->state()));
+    i->state()=get_prioritised_representative(i->state());
   }
 }
 

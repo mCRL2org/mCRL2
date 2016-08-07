@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <unordered_map>
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"
 
@@ -85,9 +86,9 @@ static size_t find_label_index(const string& s, map < string, size_t >& labs, pr
 }
 
 static void add_state(size_t& state,
-               map <size_t,size_t>& state_number_translator)
+               unordered_map <size_t,size_t>& state_number_translator)
 {
-  map <size_t,size_t>::const_iterator j=state_number_translator.find(state);
+  unordered_map <size_t,size_t>::const_iterator j=state_number_translator.find(state);
   if (j==state_number_translator.end())
   {
     // Not found.
@@ -103,16 +104,15 @@ static void add_state(size_t& state,
 } 
 
 static void add_states(detail::lts_aut_base::probabilistic_state& probability_state,
-                map <size_t,size_t>& state_number_translator)
+                       unordered_map <size_t,size_t>& state_number_translator)
 {
-  vector < detail::lts_aut_base::state_probability_pair> result;
-  for(const detail::lts_aut_base::state_probability_pair& p: probability_state)
+  for(detail::lts_aut_base::state_probability_pair& p: probability_state)
   {
-    size_t new_state_index=p.state();
-    add_state(new_state_index,state_number_translator);
-    result.push_back(detail::lts_aut_base::state_probability_pair(new_state_index,p.probability())); 
+    add_state(p.state(),state_number_translator);
+    // size_t new_state_index=p.state();
+    // add_state(new_state_index,state_number_translator);
+    // p.set_state(new_state_index);
   }
-  probability_state=detail::lts_aut_base::probabilistic_state(result.begin(), result.end());
 }
    
 
@@ -120,16 +120,53 @@ static void add_states(detail::lts_aut_base::probabilistic_state& probability_st
 // with in between fractions of the shape number/number. The
 // last state number is put in state. The remainder as pairs
 // in the vector. Typical expected input is 3 2/3 4 1/6 78 1/6 3.
-static mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t read_probabilistic_state(
+static void read_probabilistic_state(
   istream& is,
+  mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& result,
   const size_t lineno)
 {
-  vector<detail::lts_aut_base::state_probability_pair> additional_probabilistic_states;
-  mcrl2::lts::probabilistic_arbitrary_precision_fraction remainder=mcrl2::lts::probabilistic_arbitrary_precision_fraction::one();
+  assert(result.size()==0);
+
   size_t state;
+
+  is >> skipws >> state;
+
+  if (!is.good())
+  {
+    throw mcrl2::runtime_error("Expect a state number at line " + std::to_string(lineno) + ".");
+  }
+
+  // Check whether the next character is a digit. If so a probability follows.
+  char ch;
+  is >> skipws >> ch;
+  is.putback(ch);
+
+  if (!isdigit(ch))
+  {
+    result.set(state);
+    return;
+  }
   bool ready=false;
+
+  mcrl2::lts::probabilistic_arbitrary_precision_fraction remainder=mcrl2::lts::probabilistic_arbitrary_precision_fraction::one();
   while (is.good() && !ready)
   {
+    // Now read a probabilities followed by the next state.
+    string enumerator;
+    read_natural_number_to_string(is,enumerator,lineno);
+    char ch;
+    is >> skipws >> ch;
+    if (ch != '/')
+    {
+      throw mcrl2::runtime_error("Expect a / in a probability at line " + std::to_string(lineno) + ".");
+    }
+
+    string denominator;
+    read_natural_number_to_string(is,denominator,lineno);
+    mcrl2::lts::probabilistic_arbitrary_precision_fraction frac(enumerator,denominator);
+    remainder=remainder-frac;
+    result.add(state, frac);
+    
     is >> skipws >> state;
 
     if (!is.good())
@@ -137,8 +174,8 @@ static mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t read_probabili
       throw mcrl2::runtime_error("Expect a state number at line " + std::to_string(lineno) + ".");
     }
 
-    // Check whether the next character is a comma.
-    char ch;
+    // Check whether the next character is a digit.
+    
     is >> skipws >> ch;
     is.putback(ch);
 
@@ -146,31 +183,9 @@ static mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t read_probabili
     {
       ready=true;
     }
-    else
-    {
-      // Now attempt to read probabilities followed by a state.
-      string enumerator;
-      read_natural_number_to_string(is,enumerator,lineno);
-      char ch;
-      is >> skipws >> ch;
-      if (ch != '/')
-      {
-        throw mcrl2::runtime_error("Expect a / in a probability at line " + std::to_string(lineno) + ".");
-      }
-
-      string denominator;
-      read_natural_number_to_string(is,denominator,lineno);
-      mcrl2::lts::probabilistic_arbitrary_precision_fraction frac(enumerator,denominator);
-      remainder=remainder-frac;
-      additional_probabilistic_states.push_back(detail::lts_aut_base::state_probability_pair(state, frac));
-    }
   }
-  if (additional_probabilistic_states.size()==0)
-  {
-    return detail::lts_aut_base::probabilistic_state(state);
-  }
-  additional_probabilistic_states.push_back(detail::lts_aut_base::state_probability_pair(state, remainder));
-  return detail::lts_aut_base::probabilistic_state(additional_probabilistic_states.begin(),additional_probabilistic_states.end());
+  
+  result.add(state, remainder);
 }
 
 
@@ -197,8 +212,7 @@ static void read_aut_header(
     throw mcrl2::runtime_error("Expect an opening bracket '(' after 'des' in the first line of a .aut file.");
   }
 
-  // is >> skipws >> initial_state;
-  initial_state=read_probabilistic_state(is,1);
+  read_probabilistic_state(is,initial_state,1);
 
   is >> skipws >> ch;
   if (ch != ',')
@@ -285,8 +299,7 @@ static bool read_aut_transition(
     throw mcrl2::runtime_error("Expect a comma after the quoted label at line " + std::to_string(lineno) + ".");
   }
 
-  // is >> skipws >> to;
-  target_probabilistic_state=read_probabilistic_state(is,lineno);
+  read_probabilistic_state(is,target_probabilistic_state,lineno);
 
   is >> ch;
   if (ch != ')')
@@ -306,7 +319,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   detail::lts_aut_base::probabilistic_state initial_probabilistic_state;
   read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
 
-  map <size_t,size_t> state_number_translator;
+  unordered_map <size_t,size_t> state_number_translator;
   add_states(initial_probabilistic_state,state_number_translator);
 
   if (nstate==0)
@@ -319,15 +332,16 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   
   map < string, size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
-  size_t initial_state=l.add_probabilistic_state(initial_probabilistic_state);
+  size_t initial_state=l.add_and_reset_probabilistic_state(initial_probabilistic_state);
   assert(initial_state==0);
   l.set_initial_probabilistic_state(initial_state);
 
+  detail::lts_aut_base::probabilistic_state probabilistic_target_state;
   while (!is.eof())
   {
     size_t from;
-    detail::lts_aut_base::probabilistic_state probabilistic_target_state;
     string s;
+    probabilistic_target_state.clear();
 
     line_no++;
 
@@ -338,7 +352,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
 
     add_state(from,state_number_translator); // This can change the number of from.
     add_states(probabilistic_target_state,state_number_translator);
-    size_t probabilistic_state_index=l.add_probabilistic_state(probabilistic_target_state);
+    size_t probabilistic_state_index=l.add_and_reset_probabilistic_state(probabilistic_target_state);
 
     l.add_transition(transition(from,find_label_index(s,action_labels,l),probabilistic_state_index));
     

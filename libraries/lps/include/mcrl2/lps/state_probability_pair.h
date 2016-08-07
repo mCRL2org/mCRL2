@@ -50,10 +50,10 @@ class state_probability_pair
       return m_state;
     }
 
-    /// \brief Set the state in a state probability pair.
-    void set_state(const STATE& state) 
+    /// \brief Get the state in a state probability pair.
+    STATE& state() 
     {
-      m_state=state;
+      return m_state;
     }
 
     /// \brief get the probability from a state proability pair.
@@ -63,10 +63,9 @@ class state_probability_pair
     }
 
     /// \brief Set the probability in a state probability pair.
-    void set_state(const PROBABILITY& probability) 
+    PROBABILITY& probability() 
     {
-      assert(probability!=PROBABILITY::zero());
-      m_probability=probability;
+      return m_probability;
     }
 
 };

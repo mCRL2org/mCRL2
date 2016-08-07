@@ -43,7 +43,7 @@ class probabilistic_state
   public:
 
     typedef typename lps::state_probability_pair< STATE, PROBABILITY > state_probability_pair;
-    typedef typename std::vector<state_probability_pair>::const_iterator iterator;
+    typedef typename std::vector<state_probability_pair>::iterator iterator;
     typedef typename std::vector<state_probability_pair>::const_iterator const_iterator;
 
   protected:
@@ -56,21 +56,22 @@ class probabilistic_state
     /** \brief Default constructor 
      */
     probabilistic_state()
-    {}
-
+    {
+      m_probabilistic_state.reserve(1);
+    }
 
     /** \brief Creates an empty LTS.
      */
     probabilistic_state(const STATE& s)
       : m_probabilistic_state(1,state_probability_pair(s,PROBABILITY::one()))
     {
-      m_probabilistic_state.shrink_to_fit();
+      shrink_to_fit();
     }
 
     probabilistic_state(const probabilistic_state& s)
       : m_probabilistic_state(s.m_probabilistic_state)
     {
-      m_probabilistic_state.shrink_to_fit();
+      shrink_to_fit();
     }
 
     /** \brief Creates a copy of the supplied LTS.
@@ -80,7 +81,42 @@ class probabilistic_state
       : m_probabilistic_state(begin,end)
     {
       assert(begin!=end); 
-      m_probabilistic_state.shrink_to_fit();
+      shrink_to_fit();
+    };
+
+    /** \brief Swap this lts with the supplied supplied LTS.
+     * \param[in] l The LTS to swap. */
+    void swap(probabilistic_state& s)
+    {
+      m_probabilistic_state.swap(s.m_probabilistic_state);
+    };
+
+    /** \brief Set the vector to a single state with probability zero.
+     * \detail It is assumed that the given state probability pair does not have
+               any element. 
+     * \param[in] s The state. */
+    void set(const STATE& s)
+    {
+      assert(size()==0);
+      m_probabilistic_state.emplace_back(s, PROBABILITY::one());
+    };
+
+    /** \brief Add a state with a probability to the probabilistic state
+     * \param[in] s The state to be added.
+     * \param[in] p The probability of this state.
+     **/
+    void add(const STATE& s, const PROBABILITY& p)
+    {
+      m_probabilistic_state.emplace_back(s,p);
+    }
+
+    /** \brief If a probabilistic state is ready, shrinking it to minimal size might be useful
+     *         to reduce its memory usage. A requirement is that the sum of the probabilities must
+     *         be one.
+     */
+    void shrink_to_fit()
+    {
+      m_probabilistic_state.shrink_to_fit();  
 #ifndef NDEBUG
       PROBABILITY sum=PROBABILITY::zero();
       for(const state_probability_pair& p: m_probabilistic_state)
@@ -91,20 +127,20 @@ class probabilistic_state
       }
       assert(sum==PROBABILITY::one());
 #endif
-    };
-
-    /** \brief Swap this lts with the supplied supplied LTS.
-     * \param[in] l The LTS to swap. */
-    void swap(probabilistic_state& s)
-    {
-      m_probabilistic_state.swap(s.m_probabilistic_state);
-    };
+    }
 
     /** \brief Gets the number of probabilistic labels of this LTS.
      * \return The number of action labels of this LTS. */
     size_t size() const
     {
       return m_probabilistic_state.size();
+    }
+
+    /** \brief Makes the probabilistic state empty.
+     */
+    void clear()
+    {
+      m_probabilistic_state.clear();
     }
 
     /** \brief Gets an iterator over pairs of state and probability.

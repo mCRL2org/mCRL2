@@ -129,13 +129,26 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
     }
 
     /** \brief Adds a probabilistic state to this LTS.
-     * \details It is not checked whether this action label already exists.
-     * \param[in] label The label of the label.
-     * \return The number of the added label. */
+     * \details It is not checked whether this probabilistic state already exists.
+     * \param[in] s The probabilistic state.
+     * \return The index of the added probabilistic. */
     labels_size_type add_probabilistic_state(const PROBABILISTIC_STATE_T& s)
     {
       const labels_size_type label_index=m_probabilistic_states.size();
       m_probabilistic_states.push_back(s);
+      return label_index;
+    }
+
+    /** \brief Adds a probabilistic state to this LTS and resets the state to empty.
+     * \details This is more efficient than using add_probabilistic state, as this variant
+     *          does not copy the probabilistic state. It is not checked whether this probabilistic state already exists.
+     * \param[in] s The probabilistic state.
+     * \return The index of the added probabilistic state. */
+    labels_size_type add_and_reset_probabilistic_state(PROBABILISTIC_STATE_T& s)
+    {
+      const labels_size_type label_index=m_probabilistic_states.size();
+      m_probabilistic_states.emplace_back();
+      m_probabilistic_states.back().swap(s);
       return label_index;
     }
 
