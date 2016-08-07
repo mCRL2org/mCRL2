@@ -9,10 +9,11 @@
 
 // Don't include this directly; include Graph.h instead!
 
-#include "DenseMap.h"
+#include <unordered_map>
 #include <algorithm>
 #include <iterator>
 #include <assert.h>
+#include "DenseMap.h"
 
 // Note: code below is not currently used and has not been properly tested.
 #if 0
@@ -55,7 +56,7 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
     // FIXME: determine which cut-off value works best:
     if (static_cast<verti>(std::distance(vertices_begin, vertices_end)) < graph.V()/3)
     {
-        HASH_MAP(verti, verti) map;
+        std::unordered_map<verti, verti> map;
         return make_subgraph(graph, vertices_begin,
                              vertices_end, map, proper, edge_dir);
     }

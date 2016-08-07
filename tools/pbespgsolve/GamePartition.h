@@ -50,7 +50,7 @@ public:
         NO_VERTEX if the index does not correspond to a local vertex. */
     verti local(verti v) const
     {
-        HASH_MAP(verti, verti)::const_iterator it = local_.find(v);
+        std::unordered_map<verti, verti>::const_iterator it = local_.find(v);
         if (it == local_.end()) return NO_VERTEX;
         return it->second;
     }
@@ -93,7 +93,7 @@ private:
     ParityGame game_;               //! Local subgame
     std::vector<verti> internal_;   //! Local indices of internal vertex set
     std::vector<verti> global_;     //! Local to global vertex index map
-    HASH_MAP(verti, verti) local_;  //! Global to local vertex index map
+    std::unordered_map<verti, verti> local_;  //! Global to local vertex index map
 };
 
 inline

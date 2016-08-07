@@ -19,8 +19,6 @@
 
 #include <stdlib.h>
 
-#include "compatibility.h"
-
 /// \brief Convert string to lowercase.
 /// \param in An input string
 /// \return The text in \a in in lowercase

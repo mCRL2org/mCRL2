@@ -20,8 +20,6 @@
 #include <utility>
 #include <vector>
 
-#include "compatibility.h"
-
 // Note: these should be unsigned types; some algorithms depend on it!
 typedef size_t verti;    //!< type used to number vertices
 typedef size_t edgei;    //!< type used to number edges

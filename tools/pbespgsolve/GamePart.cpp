@@ -81,7 +81,7 @@ GamePart::GamePart( const GamePart &part,
     //        to the internal vertex set, but this is a bit ugly:
     {
         const StaticGraph &g = part.game_.graph();
-        HASH_SET(verti) used(internal_.begin(), internal_.end());
+        std::unordered_set<verti> used(internal_.begin(), internal_.end());
         for (std::vector<verti>::const_iterator it = verts.begin();
                 it != verts.end(); ++it)
         {
@@ -124,7 +124,7 @@ GamePart::GamePart( const GamePart &part,
     {
         assert(local_[global_[i]] == i);
     }
-    for (HASH_MAP(verti, verti)::const_iterator it = local_.begin();
+    for (std::unordered_map<verti, verti>::const_iterator it = local_.begin();
             it != local_.end(); ++it)
     {
         assert(global_[it->second] == it->first);
