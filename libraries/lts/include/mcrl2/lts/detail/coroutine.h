@@ -144,6 +144,7 @@
 #define _COROUTINE_H
 
 #include <cstdlib>       // for size_t
+#include <cassert>
 #include <boost/preprocessor.hpp>
 
 

@@ -524,15 +524,18 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
     {
         //mCRL2log(log::debug, "bisim_gjkw") << "*SpC<*NewC";
         // move to end. Possibly needs three-way swap.
-        --old_out_pos->constln_slice->end;
-        assert(old_out_pos->constln_slice->begin <=
-                                              old_out_pos->constln_slice->end);
-        assert(old_out_pos->B_to_C->pred->source->succ_begin() <=
-                                              old_out_pos->constln_slice->end);
-        succ_iter_t const new_out_pos = old_out_pos->constln_slice->end;
+        succ_iter_t const new_out_pos = old_out_pos->constln_slice->end - 1;
         out_descriptor* new_constln_slice;
         if (first_transition_of_state)
         {
+            if (1 == old_out_pos->constln_slice->size())
+            {
+                // There was only one transition from pred_iter->source to SpC.
+                // This transition now points to NewC; the out_descriptors do
+                // not have to be changed.
+                assert(new_out_pos == old_out_pos);
+                return new_out_pos;
+            }
             new_constln_slice = new out_descriptor(new_out_pos + 1);
         }
         else
@@ -540,7 +543,12 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
             new_constln_slice = new_out_pos[1].constln_slice;
         }
         --new_constln_slice->begin;
+        --old_out_pos->constln_slice->end;
         assert(old_out_pos->constln_slice->end == new_constln_slice->begin);
+        assert(old_out_pos->constln_slice->begin <=
+                                              old_out_pos->constln_slice->end);
+        assert(old_out_pos->B_to_C->pred->source->succ_begin() <=
+                                              old_out_pos->constln_slice->end);
         const state_info_ptr s = pred_iter->source;
         if (s->constln() == SpC)
         {
@@ -581,6 +589,14 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
         out_descriptor* new_constln_slice;
         if (first_transition_of_state)
         {
+            if (1 == old_out_pos->constln_slice->size())
+            {
+                // There was only one transition from pred_iter->source to SpC.
+                // This transition now points to NewC; the out_descriptors do
+                // not have to be changed.
+                assert(new_out_pos == old_out_pos);
+                return new_out_pos + 1;
+            }
             new_constln_slice = new out_descriptor(new_out_pos);
         }
         else
@@ -923,6 +939,7 @@ void part_trans_t::new_blue_block_created(block_t* const RefB,
             new_pos->B_to_C_slice = new_B_to_C_slice;
         }
     }
+#ifndef NDEBUG
     if (RefB->inert_begin() == RefB->inert_end() &&
             RefB->inert_end() != B_to_C.begin() &&
                 (RefB->inert_end()[-1].pred->source->block != RefB ||
@@ -954,6 +971,7 @@ void part_trans_t::new_blue_block_created(block_t* const RefB,
         assert(NewB->inert_end()[-1].pred->succ->target->constln() ==
                                                               NewB->constln());
     }
+#endif
 }
 
 
@@ -1135,6 +1153,7 @@ void part_trans_t::new_red_block_created(block_t* const RefB,
             new_pos->B_to_C_slice = new_B_to_C_slice;
         }
     }
+#ifndef NDEBUG
     if (RefB->inert_begin() == RefB->inert_end() &&
             RefB->inert_end() != B_to_C.begin() &&
                 (RefB->inert_end()[-1].pred->source->block != RefB ||
@@ -1166,6 +1185,7 @@ void part_trans_t::new_red_block_created(block_t* const RefB,
         assert(NewB->inert_end()[-1].pred->succ->target->constln() ==
                                                               NewB->constln());
     }
+#endif
 }
 
 
