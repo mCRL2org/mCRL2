@@ -1133,92 +1133,95 @@ slice of states belongs together. */
 class out_descriptor
 {
   private:
-    union u_
+    succ_iter_t int_end, int_begin;
+
+    struct free_entry
     {
-        succ_iter_t int_end;
         out_descriptor* next_free;
-        u_(succ_iter_t new_end)  : int_end(new_end)  {  }
-    } u;
-    union v_
+        void* null_if_free;
+    };
+    bool is_free() const
     {
-        succ_iter_t int_begin;
-        const succ_entry* int_begin_ptr;
-        v_(succ_iter_t new_begin)  : int_begin(new_begin)  {  }
-    } v;
+        return nullptr ==
+                       reinterpret_cast<const free_entry*>(this)->null_if_free;
+    }
   public:
 
     out_descriptor(succ_iter_t iter)
-      : u(iter),
-        v(iter)
+      : int_end(iter),
+        int_begin(iter)
     {
+        assert(sizeof(*this) >= sizeof(free_entry));
         // always start out occupied
-        assert(nullptr != v.int_begin_ptr);
-        // assert(v.int_begin <= u.int_end);
+        assert(!is_free());
+        // assert(int_begin <= int_end);
     }
 
     state_type size() const
     {
-        assert(nullptr != v.int_begin_ptr);
-        return u.int_end - v.int_begin;
+        assert(!is_free());
+        return int_end - int_begin;
     }
 
     succ_iter_t begin()
     {
-        assert(nullptr != v.int_begin_ptr);
-        return v.int_begin;
+        assert(!is_free());
+        return int_begin;
     }
     succ_const_iter_t begin() const
     {
-        assert(nullptr != v.int_begin_ptr);
-        return v.int_begin;
+        assert(!is_free());
+        return int_begin;
     }
     void set_begin(succ_iter_t new_begin)
     {
-        assert(nullptr != v.int_begin_ptr);
-        v.int_begin = new_begin;
-        assert(nullptr != v.int_begin_ptr);
-        assert(v.int_begin <= u.int_end);
+        assert(!is_free());
+        int_begin = new_begin;
+        assert(!is_free());
+        assert(int_begin <= int_end);
     }
     succ_iter_t end()
     {
-        assert(nullptr != v.int_begin_ptr);
-        return u.int_end;
+        assert(!is_free());
+        return int_end;
     }
     succ_const_iter_t end() const
     {
-        assert(nullptr != v.int_begin_ptr);
-        return u.int_end;
+        assert(!is_free());
+        return int_end;
     }
     void set_end(succ_iter_t new_end)
     {
-        assert(nullptr != v.int_begin_ptr);
-        u.int_end = new_end;
-        assert(v.int_begin <= u.int_end);
+        assert(!is_free());
+        int_end = new_end;
+        assert(!is_free());
+        assert(int_begin <= int_end);
     }
 
     // access functions for pooling required by pool_gw.h:
     out_descriptor* rep_next()
     {
-        assert(nullptr == v.int_begin_ptr);
-        return u.next_free;
+        assert(is_free());
+        return reinterpret_cast<free_entry*>(this)->next_free;
     }
     void set_rep_next(out_descriptor* new_next_free)
     {
         // change from occupied to free
-        u.next_free = new_next_free;
+        assert(!is_free());
 #ifndef NDEBUG
-        assert(nullptr != v.int_begin_ptr);
-        v.int_begin_ptr = nullptr;
+        reinterpret_cast<free_entry*>(this)->null_if_free = nullptr;
 #endif
+        reinterpret_cast<free_entry*>(this)->next_free = new_next_free;
+        assert(is_free());
     }
     void rep_init(succ_iter_t iter)
     {
         // change from free to occupied
-        assert(nullptr == v.int_begin_ptr);
-        u.int_end = iter;
-        v.int_begin = iter;
-        assert(nullptr != v.int_begin_ptr);
-        // assert(v.int_begin <= u.int_end);
+        assert(is_free());
+        int_end = iter;
+        int_begin = iter;
+        assert(!is_free());
+        // assert(int_begin <= int_end);
     }
 };
 
