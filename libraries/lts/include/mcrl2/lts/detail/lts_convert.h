@@ -47,8 +47,8 @@ inline void convert_core_lts(CONVERTOR& c,
             because more information is required (such as data types), then
             a mcrl2::runtime error is thrown. This also happens if the particular
             translation is not implemented.
-*/
-/* template < class LTS_IN_TYPE, class LTS_OUT_TYPE >
+
+template < class LTS_IN_TYPE, class LTS_OUT_TYPE >
 inline void lts_convert(const LTS_IN_TYPE&, LTS_OUT_TYPE&)
 {
   throw mcrl2::runtime_error("Conversion between lts types is not defined (without extra information).");
@@ -62,7 +62,8 @@ inline void lts_convert(const LTS_IN_TYPE&, LTS_OUT_TYPE&)
              false, and the extra data will not be used. If the extra information is not needed in
              the translation, it is not used and a message is printed to stderr.
 */
-template < class LTS_IN_TYPE, class LTS_OUT_TYPE >
+/* Enabling this leads to selecting this class as the default, always causing the error messages.
+ * template < class LTS_IN_TYPE, class LTS_OUT_TYPE >
 inline void lts_convert(
   const LTS_IN_TYPE& lts_in,
   LTS_OUT_TYPE& lts_out,
@@ -79,7 +80,7 @@ inline void lts_convert(
   {
     throw mcrl2::runtime_error("Conversion between lts types is not defined (with extra information).");
   }
-}
+} */
 
 /** \brief Translate a fraction given as a data_expression to a representation
  *         with an arbitrary size fraction */
