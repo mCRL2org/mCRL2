@@ -34,6 +34,7 @@
 #include "mcrl2/lts/detail/coroutine.h"
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
+#include "mcrl2/lts/detail/pool_gw.h"
 
 namespace mcrl2
 {
@@ -113,7 +114,6 @@ namespace bisim_gjkw
 
 class state_info_entry;
 
-//typedef state_info_entry* state_info_t;
 typedef state_info_entry* state_info_ptr;
 typedef const state_info_entry* state_info_const_ptr;
 
@@ -391,7 +391,7 @@ class block_t
     /// iterator past the last inert transition of the block
     B_to_C_iter_t int_inert_end;
   public:
-    /// list of B_to_C with transitions from this block
+    /// \brief list of B_to_C with transitions from this block
     /// \details This list serves two purposes: it contains all
     /// B_to_C_descriptors, so that the constellations reachable from this
     /// block can be found; and if this block has transitions to the current
@@ -455,11 +455,12 @@ class block_t
     /// provides an arbitrary refinable block
     static block_t* get_some_refinable()  {  return refinable_first;  }
 
-    /// checks whether the block is refinable
+    /// \brief checks whether the block is refinable
     /// \returns true if the block is refinable
     bool is_refinable() const  {  return nullptr != refinable_next;  }
 
-    /// makes a block refinable (i. e. inserts it into the respective list)
+    /// \brief makes a block refinable (i. e. inserts it into the respective
+    /// list)
     /// \returns true if the block was not refinable before
     bool make_refinable()
     {
@@ -1124,16 +1125,101 @@ class B_to_C_entry
 
 /* out_descriptor and B_to_C_descriptor are data types that indicate which
 slice of states belongs together. */
+/// The class out_descriptor is prepared to be pooled, i. e. to be used in
+/// class pool<out_descriptor>.  It is assumed that the begin pointer is never
+/// a null pointer when the out_descriptor is actually used;  this allows to
+/// check whether the out_descriptor is part of the free list in the pool or
+/// not, because we set it to NULL as soon as it is freed.
 class out_descriptor
 {
+  private:
+    union u_
+    {
+        succ_iter_t int_end;
+        out_descriptor* next_free;
+        u_(succ_iter_t new_end)  : int_end(new_end)  {  }
+    } u;
+    union v_
+    {
+        succ_iter_t int_begin;
+        const succ_entry* int_begin_ptr;
+        v_(succ_iter_t new_begin)  : int_begin(new_begin)  {  }
+    } v;
   public:
-    succ_iter_t end, begin;
 
     out_descriptor(succ_iter_t iter)
-      : end(iter),
-        begin(iter)
-    {  }
-    state_type size() const  {  return end - begin;  }
+      : u(iter),
+        v(iter)
+    {
+        // always start out occupied
+        assert(nullptr != v.int_begin_ptr);
+        // assert(v.int_begin <= u.int_end);
+    }
+
+    state_type size() const
+    {
+        assert(nullptr != v.int_begin_ptr);
+        return u.int_end - v.int_begin;
+    }
+
+    succ_iter_t begin()
+    {
+        assert(nullptr != v.int_begin_ptr);
+        return v.int_begin;
+    }
+    succ_const_iter_t begin() const
+    {
+        assert(nullptr != v.int_begin_ptr);
+        return v.int_begin;
+    }
+    void set_begin(succ_iter_t new_begin)
+    {
+        assert(nullptr != v.int_begin_ptr);
+        v.int_begin = new_begin;
+        assert(nullptr != v.int_begin_ptr);
+        assert(v.int_begin <= u.int_end);
+    }
+    succ_iter_t end()
+    {
+        assert(nullptr != v.int_begin_ptr);
+        return u.int_end;
+    }
+    succ_const_iter_t end() const
+    {
+        assert(nullptr != v.int_begin_ptr);
+        return u.int_end;
+    }
+    void set_end(succ_iter_t new_end)
+    {
+        assert(nullptr != v.int_begin_ptr);
+        u.int_end = new_end;
+        assert(v.int_begin <= u.int_end);
+    }
+
+    // access functions for pooling required by pool_gw.h:
+    out_descriptor* rep_next()
+    {
+        assert(nullptr == v.int_begin_ptr);
+        return u.next_free;
+    }
+    void set_rep_next(out_descriptor* new_next_free)
+    {
+        // change from occupied to free
+        u.next_free = new_next_free;
+#ifndef NDEBUG
+        assert(nullptr != v.int_begin_ptr);
+        v.int_begin_ptr = nullptr;
+#endif
+    }
+    void rep_init(succ_iter_t iter)
+    {
+        // change from free to occupied
+        assert(nullptr == v.int_begin_ptr);
+        u.int_end = iter;
+        v.int_begin = iter;
+        assert(nullptr != v.int_begin_ptr);
+        // assert(v.int_begin <= u.int_end);
+    }
 };
 
 
@@ -1232,6 +1318,7 @@ class part_trans_t
     fixed_vector<pred_entry> pred;
     fixed_vector<succ_entry> succ;
     fixed_vector<B_to_C_entry> B_to_C;
+    pool<out_descriptor> constln_slice_pool;
 
     template <class LTS_TYPE>
     friend class bisim_partitioner_gjkw_initialise_helper;
@@ -1343,7 +1430,8 @@ class part_trans_t
     part_trans_t(trans_type m)
       : pred(m),
         succ(m),
-        B_to_C(m)
+        B_to_C(m),
+        constln_slice_pool()
     {  }
     ~part_trans_t()
     {
@@ -1359,17 +1447,9 @@ class part_trans_t
     {
         // B_to_C_descriptors are deallocated when their respective lists are
         // deallocated by destructing the blocks.
-        // deallocate the out_descriptors
-        for (succ_iter_t succ_iter = succ.begin(); succ.end() != succ_iter; )
-        {
-            bisim_gjkw::check_complexity::count(delete_out_descriptors, 1,
-                                              bisim_gjkw::check_complexity::m);
-            out_descriptor* const desc = succ_iter->constln_slice;
-            succ_iter->constln_slice = nullptr;
-            assert(desc->begin == succ_iter);
-            succ_iter = desc->end;
-            delete desc;
-        }
+        // out_descriptors do not need to be deallocated individually, but they
+        // are cleared by deleting the constln_slice_pool.
+        constln_slice_pool.clear();
         B_to_C.clear();
         succ.clear();
         pred.clear();
@@ -1442,7 +1522,7 @@ class part_trans_t
     
     We need separate functions for blue and red blocks because the B_to_C-slice
     of the red block should come after the B_to_C-slice of the blue block,
-    at least in secondary_refine.
+    at least while postprocessing.
 
     Its time complexity is O(1 + |out(NewB)|). */
     void new_blue_block_created(block_t* OldB, block_t* NewB, bool primary);

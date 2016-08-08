@@ -151,11 +151,11 @@
 
 
 
-/*****************************************************************************/
+/* ************************************************************************* */
 /*                                                                           */
 /*                             I N T E R N A L S                             */
 /*                                                                           */
-/*****************************************************************************/
+/* ************************************************************************* */
 
 
 
@@ -179,24 +179,24 @@ typedef enum { _coroutine_CONTINUE, _coroutine_TERMINATE, _coroutine_ABORT }
 } // end namespace lts
 } // end namespace mcrl2
 
-/* _coroutine_VARDEF is a helper macro to define structure members for
-variables (parameters or locals) in the reentrant version. */
+/// _coroutine_VARDEF is an internal macro to define structure members for
+/// variables (parameters or locals).
 #define _coroutine_VARDEF(varseq)                                             \
                     BOOST_PP_SEQ_FOR_EACH(_coroutine_VARDEF_1, , varseq)
 #define _coroutine_VARDEF_1(r,data,elem) _coroutine_VARDEF_2 elem
 #define _coroutine_VARDEF_2(t1,v1)                                            \
                     t1 BOOST_PP_CAT(BOOST_PP_CAT(_coroutine_, v1), _var);
 
-/* _coroutine_PARLST is a helper macro to define a parameter list for the
-constructor. */
+/// _coroutine_PARLST is an internal macro to define a parameter list for the
+/// constructor.
 #define _coroutine_PARLST(varseq)                                             \
     BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(_coroutine_PARLST_1, , varseq))
 #define _coroutine_PARLST_1(s,data,elem) _coroutine_PARLST_2 elem
 #define _coroutine_PARLST_2(t1,v1)                                            \
                     t1 BOOST_PP_CAT(BOOST_PP_CAT(_coroutine_, v1), _new)
 
-/* _coroutine_INITLST is a helper macro to define a member initializer list for
-the constructor. */
+/// _coroutine_INITLST is an internal macro to define a member initializer list
+/// for the constructor.
 #define _coroutine_INITLST(varseq)                                            \
                     BOOST_PP_SEQ_FOR_EACH(_coroutine_INITLST_1, , varseq)
 #define _coroutine_INITLST_1(r,data,elem) _coroutine_INITLST_2 elem
@@ -204,8 +204,8 @@ the constructor. */
                     BOOST_PP_CAT(BOOST_PP_CAT(_coroutine_, v1), _var)         \
                         (BOOST_PP_CAT(BOOST_PP_CAT(_coroutine_, v1), _new)),
 
-/* _coroutine_ALIAS is a helper macro to define aliases for parameters and
-local variables, so that the programmer can access them easily. */
+/// _coroutine_ALIAS is an internal macro to define aliases for parameters and
+/// local variables, so that the programmer can access them easily.
 #define _coroutine_ALIAS(varseq)                                              \
                     BOOST_PP_SEQ_FOR_EACH(_coroutine_ALIAS_1, , varseq)
 #define _coroutine_ALIAS_1(r,data,elem) _coroutine_ALIAS_2 elem
@@ -213,15 +213,15 @@ local variables, so that the programmer can access them easily. */
                     t1& v1 = BOOST_PP_CAT(BOOST_PP_CAT(_coroutine_param.      \
                                                     _coroutine_, v1), _var);
 
-/* _coroutine_ENUMDEF is a helper macro to define an appropriate enumeration
-type for interrupt locations in a coroutine. */
+/// _coroutine_ENUMDEF is an internal macro to define an appropriate
+/// enumeration type for interrupt locations in a coroutine.
 #define _coroutine_ENUMDEF(lblseq)                                            \
                     BOOST_PP_SEQ_FOR_EACH(_coroutine_ENUMDEF_1, , lblseq)
 #define _coroutine_ENUMDEF_1(r,data,label)                                    \
                     , BOOST_PP_CAT(BOOST_PP_CAT(_coroutine_, label), _enum)
 
-/* _coroutine_SWITCHCASE is a helper macro to jump to the interrupt location
-where the coroutine was interrupted. */
+/// _coroutine_SWITCHCASE is an internal macro to jump to the interrupt
+/// location where the coroutine was interrupted.
 #define _coroutine_SWITCHCASE(lblseq)                                         \
                     BOOST_PP_SEQ_FOR_EACH(_coroutine_SWITCHCASE_1, , lblseq)
 #define _coroutine_SWITCHCASE_1(r,data,label)                                 \
@@ -232,11 +232,11 @@ where the coroutine was interrupted. */
 
 
 
-/*****************************************************************************/
+/* ************************************************************************* */
 /*                                                                           */
 /*                    E X T E R N A L   I N T E R F A C E                    */
 /*                                                                           */
-/*****************************************************************************/
+/* ************************************************************************* */
 
 
 
@@ -244,6 +244,8 @@ where the coroutine was interrupted. */
 
 /// \def DECLARE_COROUTINE
 /// \brief declare a member method or a function as a coroutine
+/// \details A coroutine should first be _declared_ and then _defined._  For
+/// the latter, see the macro `DEFINE_COROUTINE`.
 /// \param routine     name of the coroutine
 /// \param param       formal parameter list, as a boost sequence:
 ///                    `((type1, var1)) ((type2, var2)) ((type3, var3))` etc.
@@ -283,6 +285,8 @@ where the coroutine was interrupted. */
 
 /// \def DEFINE_COROUTINE
 /// \brief define a member method or a function as a coroutine
+/// \details A coroutine should first be _declared_ and then _defined._  For
+/// the former, see the macro `DECLARE_COROUTINE`.
 /// \param namespace   namespace of the coroutine.  If it is a member method,
 ///                    use `class name::`.
 /// \param routine     name of the coroutine
@@ -322,8 +326,8 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
 
 /// \def RUN_COROUTINES
 /// \brief starts two coroutines more or less in lockstep
-/// If the coroutines are member methods, also `RUN_COROUTINES` has to be
-/// called within a member method (otherwise, a namespace error will be
+/// \details If the coroutines are member methods, also `RUN_COROUTINES` has to
+/// be called within a member method (otherwise, a namespace error will be
 /// generated).
 /// \param routine1    the first coroutine to be started (defined with
 ///                    `DEFINE_COROUTINE`)

@@ -624,7 +624,7 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   BOOST_CHECK(t13.num_states()==2 && t13.num_transitions()==1);
 }
 
-boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+boost::unit_test::test_suite* init_unit_test_suite(int/*argc*/, char**/*argv*/)
 {
   return nullptr;
 }

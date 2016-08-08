@@ -33,7 +33,7 @@ class expected_sizes
     bool is_deterministic;
 };
 
-void test_lts(const std::string& test_description,
+static void test_lts(const std::string& test_description,
               const lts::lts_aut_t& l,
               size_t expected_label_count,
               size_t expected_state_count,
@@ -58,7 +58,7 @@ void test_lts(const std::string& test_description,
   }
 }
 
-void reduce_lts_in_various_ways(const std::string& test_description,
+static void reduce_lts_in_various_ways(const std::string& test_description,
                                 const std::string& lts,
                                 const expected_sizes& expected)
 {
@@ -177,7 +177,7 @@ void reduce_lts_in_various_ways(const std::string& test_description,
   BOOST_CHECK(is_deterministic(l));
 }
 
-void reduce_simple_loop()
+static void reduce_simple_loop()
 {
   std::string SIMPLE_AUT =
     "des (0,2,2)\n"
@@ -201,7 +201,7 @@ void reduce_simple_loop()
   reduce_lts_in_various_ways("Simple loop", SIMPLE_AUT, expected);
 }
 
-void reduce_simple_loop_with_tau()
+static void reduce_simple_loop_with_tau()
 {
   std::string SIMPLE_AUT =
     "des (0,2,2)\n"
@@ -228,7 +228,7 @@ void reduce_simple_loop_with_tau()
 /* The example below was encountered by David Jansen. The problem is that
  * for branching bisimulations the tau may supersede the b, not leading to the
  * necessary splitting into two equivalence classes. */
-void tricky_example_for_branching_bisimulation()
+static void tricky_example_for_branching_bisimulation()
 {
   std::string TRICKY_BB =
     "des (0,3,2)\n"
@@ -254,7 +254,7 @@ void tricky_example_for_branching_bisimulation()
 }
 
 
-void reduce_abp()
+static void reduce_abp()
 {
   std::string ABP_AUT =
     "des (0,92,74)\n"
@@ -370,7 +370,7 @@ void reduce_abp()
 
 // Peterson's protocol has the interesting property that the number of states modulo branching bisimulation
 // differs from the number of states modulo weak bisimulation, as observed by Rob van Glabbeek.
-void reduce_peterson()
+static void reduce_peterson()
 {
   std::string PETERSON_AUT =
     "des (0,59,35)\n"
@@ -451,7 +451,7 @@ void reduce_peterson()
   reduce_lts_in_various_ways("Peterson protocol", PETERSON_AUT, expected);
 }
 
-void test_reachability()
+static void test_reachability()
 {
   std::string REACH =
     "des (0,4,5)       \n"
@@ -477,7 +477,7 @@ void test_reachability()
 
 // The example below caused failures in the GW mlogn branching bisimulation 
 // algorithm when cleaning the code up.
-void failing_test_groote_wijs_algorithm()
+static void failing_test_groote_wijs_algorithm()
 {
   std::string GWLTS =
     "des(0,29,10)\n"
@@ -537,7 +537,7 @@ void failing_test_groote_wijs_algorithm()
 // Jansen/Keiren: Stuttering equivalence is too slow! Eprint arXiv: 1603.05789,
 // 2016. http://arxiv.org/abs/1603.05789
 
-void counterexample_jk_1(size_t k)
+static void counterexample_jk_1(size_t k)
 {
     // numbering scheme of states:
     // states 0..k-1 are the blue squares
