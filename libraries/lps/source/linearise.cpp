@@ -4335,7 +4335,7 @@ class specification_basic_type:public boost::noncopyable
 
           no_of_states=pCRLprocs.size();
           process_identifier last= *pCRLprocs.begin();
-          const std::string s3((spec.options.statenames)?std::string(last.name()):std::string("s3"));
+          const std::string s3((spec.options.statenames)?std::string(last.name()):std::string("s"));
           if ((spec.options.binary) && (spec.options.newstate))
           {
             size_t i=spec.upperpowerof2(no_of_states);

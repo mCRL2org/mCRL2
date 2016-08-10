@@ -91,9 +91,10 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
                       "n-ary; in the presence of -w/--newstate, state variables are "
                       "encoded by a vector of boolean variables", 'b');
       desc.add_option("statenames",
-                      "the names of generated data parameters are extended with the "
-                      "name of the process in which they occur. This makes it "
-                      "easier to determine where the parameter comes from.", 'a');
+                      "the name of the variable encoding the state of a parallel process has the shape \"si\", "
+                      "with i an optional number. Using this flag this name is \"Pi\", where P is the name"
+                      "of the process. This makes it "
+                      "easier to determine to which process the state variable belongs from.", 'a');
       desc.add_option("no-rewrite",
                       "do not rewrite data terms while linearising; useful when the rewrite "
                       "system does not terminate. This option also switches off the application of "
