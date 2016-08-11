@@ -16,7 +16,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/lpsparunfoldlib.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/parse.h"
 
 using namespace mcrl2;
@@ -45,7 +45,8 @@ int test_main(int, char**)
       ;
 
 
-    specification s0 = parse_linear_process_specification(case_1);
+    stochastic_specification s0;
+    parse_lps(case_1,s0);
     variable_list p0 = s0.process().process_parameters();
 
     /* Requirements */
@@ -72,7 +73,7 @@ int test_main(int, char**)
 
     std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > unfold_cache;
     lpsparunfold lpsparunfold(s0, &unfold_cache);
-    specification s1 = lpsparunfold.algorithm(0);
+    stochastic_specification s1 = lpsparunfold.algorithm(0);
     variable_list p1 = s1.process().process_parameters();
     if (p1.size() != 3)
     {

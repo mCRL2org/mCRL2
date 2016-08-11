@@ -22,8 +22,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_linear_process.h"
+#include "mcrl2/lps/stochastic_specification.h"
 
 namespace lspparunfold
 {
@@ -50,7 +50,7 @@ class lpsparunfold
       * \param[in] add_distribution_laws If true, additional rewrite rules are introduced.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
-    lpsparunfold(mcrl2::lps::specification spec,
+    lpsparunfold(mcrl2::lps::stochastic_specification spec,
         std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
         bool add_distribution_laws=false
     );
@@ -65,7 +65,7 @@ class lpsparunfold
       * \post   The process parameter at index parameter_at_index is unfolded in the mCRL process specification.
       * \return The process specification in which the process parameter at parameter_at_index is unfolded.
     **/
-    mcrl2::lps::specification algorithm(size_t parameter_at_index);
+    mcrl2::lps::stochastic_specification algorithm(size_t parameter_at_index);
 
   private:
     /// set of identifiers to use during fresh variable generation
@@ -83,13 +83,13 @@ class lpsparunfold
     mcrl2::data::data_specification m_data_specification;
 
     /// \brief The linear process used for manipulation
-    mcrl2::lps::linear_process m_lps;
+    mcrl2::lps::stochastic_linear_process m_lps;
 
     /// \brief The global variables of the specification
     std::set< mcrl2::data::variable > m_glob_vars;
 
     /// \brief The initialization of a linear process used for manipulation
-    mcrl2::lps::process_initializer m_init_process;
+    mcrl2::lps::stochastic_process_initializer m_init_process;
 
     /// \brief The initialization of a linear process
     mcrl2::process::action_label_list m_action_label_list;
@@ -219,7 +219,7 @@ class lpsparunfold
       * \param  pi the projection functions
       * \return a new linear process in which the process parameter at given index is unfolded
     **/
-    mcrl2::lps::linear_process update_linear_process(
+    mcrl2::lps::stochastic_linear_process update_linear_process(
       const mcrl2::data::function_symbol& case_function,
       mcrl2::data::function_symbol_vector affected_constructors,
       const mcrl2::data::function_symbol& determine_function,
@@ -232,7 +232,7 @@ class lpsparunfold
       * \param  pi the projection functions
       * \return a new initialization for the linear process in which the process parameter at given index is unfolded
     **/
-    mcrl2::lps::process_initializer update_linear_process_initialization(
+    mcrl2::lps::stochastic_process_initializer update_linear_process_initialization(
       const mcrl2::data::function_symbol& determine_function,
       size_t parameter_at_index,
       const mcrl2::data::function_symbol_vector& pi);
@@ -259,7 +259,7 @@ class lpsparunfold
     }
 
     // Applies 'process unfolding' to a sequence of summands.
-    void unfold_summands(mcrl2::lps::action_summand_vector& summands, const mcrl2::data::function_symbol& determine_function, const mcrl2::data::function_symbol_vector& pi);
+    void unfold_summands(mcrl2::lps::stochastic_action_summand_vector& summands, const mcrl2::data::function_symbol& determine_function, const mcrl2::data::function_symbol_vector& pi);
 };
 
 

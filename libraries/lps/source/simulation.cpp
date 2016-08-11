@@ -12,14 +12,17 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-simulation::simulation(const specification& specification, data::rewrite_strategy strategy)
+simulation::simulation(const stochastic_specification& specification, data::rewrite_strategy strategy)
   : m_specification(specification),
     m_rewriter(m_specification.data(), strategy),
     m_generator(stochastic_specification(m_specification), m_rewriter),
     m_tau_prioritization(false)
 {
   state_t state;
-  std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE THE INITIAL DISTRIBUTION INTO ACCOUNT. IT JUST PICKS ONE (1).\n";
+  if (++m_generator.initial_states().begin()!=m_generator.initial_states().end()) // size()>1
+  {
+    mCRL2log(mcrl2::log::warning) << "This simulator does not take the initial distribution into account. It just picks one state.\n";
+  }
   state.source_state = m_generator.initial_states().front().state();
   state.transitions = transitions(state.source_state);
   m_full_trace.push_back(state);
@@ -125,7 +128,10 @@ void simulation::load(const std::string &filename)
 
   // Get the first state from the generator
   m_full_trace.clear();
-std::cerr << "TODO:: THIS SIMULATOR DOES NOT TAKE THE INITIAL DISTRIBUTION INTO ACCOUNT. IT JUST PICKS ONE (2).\n";
+  if (++m_generator.initial_states().begin()!=m_generator.initial_states().end()) // size()>1
+  {
+    mCRL2log(mcrl2::log::warning) << "This simulator does not take distributions into account. It just picks a state.\n";
+  }
   // push_back(m_generator.initial_state());
   push_back(m_generator.initial_states().front().state());
 

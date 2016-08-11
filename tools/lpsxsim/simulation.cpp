@@ -25,7 +25,7 @@ Simulation::Simulation(QString filename, QThread *atermThread, mcrl2::data::rewr
 
 void Simulation::init()
 {
-  mcrl2::lps::specification spec;
+  mcrl2::lps::stochastic_specification spec;
   try
   {
     load_lps(spec, m_filename.toStdString());

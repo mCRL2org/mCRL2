@@ -464,7 +464,6 @@ class bisim_partitioner
       for (std::vector < block_index_type > :: const_iterator i1=BL.begin();
            i1!=BL.end(); ++i1)
       {
-// std::cerr << "Splitter label " << splitter_label << "   "  << aut.action_label(splitter_label) << "\n";
         // assert(block_is_active[*i1]);
         block_flags[*i1]=false;
         std::vector < state_type > flagged_states;
@@ -767,7 +766,6 @@ class bisim_partitioner
 
       const label_type l=blocks[b_C].splitter.first;
       const block_index_type B__=blocks[b_C].splitter.second;
-// std::cerr << "splitter label counter example" << l << "   " << aut.action_label(l) << "\n";
       std::set < state_type > l_reachable_states_for_s;
       std::set < state_type > visited1;
       reachable_states_in_block_s_via_label_l(s,b_C,l,outgoing_transitions, l_reachable_states_for_s,visited1,branching_bisimulation);
@@ -828,7 +826,6 @@ class bisim_partitioner
           B_t_nonreacha.insert(*i);
         }
       }
-// std::cerr << "ASSERTION FAILURE " << B_s_reacha.empty() << "   " << B_t_reacha.empty() << "\n";
       assert((B_s_reacha.empty() && !B_t_reacha.empty()) ||
              (!B_s_reacha.empty() && B_t_reacha.empty()));
 
@@ -861,12 +858,12 @@ class bisim_partitioner
                i_t!=B_t_nonreacha.end(); ++i_t)
           {
             const std::set < mcrl2::trace::Trace > counter_traces=
-              counter_traces_aux(*i_s,*i_t,outgoing_transitions,branching_bisimulation);
+                            counter_traces_aux(*i_s,*i_t,outgoing_transitions,branching_bisimulation);
             // Add l to these traces and add them to resulting_counter_traces
             for (std::set< mcrl2::trace::Trace >::const_iterator j=counter_traces.begin();
                  j!=counter_traces.end(); ++j)
             {
-               mcrl2::trace::Trace new_counter_trace;
+              mcrl2::trace::Trace new_counter_trace;
               new_counter_trace.addAction(mcrl2::lps::multi_action(mcrl2::process::action(
                                 mcrl2::process::action_label(core::identifier_string(mcrl2::lts::pp(aut.action_label(l))),mcrl2::data::sort_expression_list()),
                                 mcrl2::data::data_expression_list())));

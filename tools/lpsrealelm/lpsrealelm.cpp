@@ -88,12 +88,12 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       mCRL2log(verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
       mCRL2log(verbose) << "  max_iterations:     " << max_iterations << std::endl;
 
-      specification spec;
+      stochastic_specification spec;
       load_lps(spec, input_filename());
 
       // Untime lps_specification and save the output to a binary file
       // rewriter r=create_rewriter(lps_specification.data());
-      specification new_spec = realelm(spec, max_iterations, rewrite_strategy());
+      stochastic_specification new_spec = realelm(spec, max_iterations, rewrite_strategy());
 
       mCRL2log(verbose) << "Real time abstraction completed, saving to " << m_output_filename << "\n";
       save_lps(new_spec, output_filename());

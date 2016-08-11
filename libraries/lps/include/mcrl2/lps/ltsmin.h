@@ -695,10 +695,10 @@ class pins
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     pins(const std::string& filename, const std::string& rewriter_strategy)
       : m_specification(load_specification(filename)),
-        m_generator(m_specification, data::rewriter(m_specification.data(), data::used_data_equation_selector(m_specification.data(), lps::find_function_symbols(m_specification), m_specification.global_variables()), data::parse_rewrite_strategy(rewriter_strategy))),
+        m_generator(stochastic_specification(m_specification), data::rewriter(m_specification.data(), data::used_data_equation_selector(m_specification.data(), lps::find_function_symbols(m_specification), m_specification.global_variables()), data::parse_rewrite_strategy(rewriter_strategy))),
         m_parameters_list(process().process_parameters().begin(), process().process_parameters().end()),
         m_specification_reduced(reduce_specification(m_specification)),
-        m_generator_reduced(m_specification_reduced, m_generator.get_rewriter())
+        m_generator_reduced(stochastic_specification(m_specification_reduced), m_generator.get_rewriter())
     {
       initialize_read_write_groups();
 

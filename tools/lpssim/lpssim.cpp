@@ -99,7 +99,7 @@ class sim_tool : public rewriter_tool< input_tool >
 
     bool run()
     {
-      mcrl2::lps::specification spec;
+      mcrl2::lps::stochastic_specification spec;
       load_lps(spec, input_filename());
 
       if (!m_do_not_use_dummies)

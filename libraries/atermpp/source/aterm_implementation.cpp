@@ -309,9 +309,9 @@ static void check_that_all_objects_are_free()
         if (!p1->reference_count_is_zero() && !p1->reference_count_indicates_is_in_freelist() &&
             ((p1->function()!=function_adm.AS_DEFAULT && p1->function()!=function_adm.AS_EMPTY_LIST) || p1->reference_count()>1))
         {
-          std::cerr << "CHECK: Non free term " << p1 << " (size " << size << "). ";
-          std::cerr << "Reference count " << p1->reference_count() << " nr. " << p1->function().number() << ". ";
-          std::cerr << "Func: " << p1->function().name() << ". Arity: " << p1->function().arity() << ".\n";
+          mCRL2log(mcrl2::log::error) << "CHECK: Non free term " << p1 << " (size " << size << "). ";
+          mCRL2log(mcrl2::log::error) << "Reference count " << p1->reference_count() << " nr. " << p1->function().number() << ". ";
+          mCRL2log(mcrl2::log::error) << "Func: " << p1->function().name() << ". Arity: " << p1->function().arity() << ".\n";
           result=false;
         }
 
@@ -335,14 +335,17 @@ static void check_that_all_objects_are_free()
             (i==2 && function_symbol_index_table[i][j].reference_count<=1) || //AS_LIST
             (i==3 && function_symbol_index_table[i][j].reference_count<=2)))  //AS_EMPTY_LIST
       {
-        std::cerr << "Symbol " << function_symbol_index_table[i][j].name << " has positive reference count (nr. " <<
-                    function_symbol_index_table[i][j].number << ", ref.count " << function_symbol_index_table[i][j].reference_count << ").\n";
+        mCRL2log(mcrl2::log::error) << "Symbol " << function_symbol_index_table[i][j].name << 
+                                       " has positive reference count (nr. " <<
+                                       function_symbol_index_table[i][j].number << ", ref.count " << 
+                                       function_symbol_index_table[i][j].reference_count << ").\n";
         result=false;
       }
       if (function_symbol_index_table[i][j].number!=j+i*FUNCTION_SYMBOL_BLOCK_SIZE)
       {
-        std::cerr << "Symbol " << function_symbol_index_table[i][j].name << " has incorrect index " << function_symbol_index_table[i][j].number <<
-                          ". This should be " << j+i*FUNCTION_SYMBOL_BLOCK_SIZE << ".\n";
+        mCRL2log(mcrl2::log::error) << "Symbol " << function_symbol_index_table[i][j].name << 
+                                       " has incorrect index " << function_symbol_index_table[i][j].number <<
+                                       ". This should be " << j+i*FUNCTION_SYMBOL_BLOCK_SIZE << ".\n";
         result=false;
       }
     }

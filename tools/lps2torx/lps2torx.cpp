@@ -27,7 +27,7 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 
@@ -84,12 +84,12 @@ class torx_tool : public rewriter_tool< input_tool >
       for (process::action_list::const_iterator i = ma.actions().begin(); i != ma.actions().end(); i++)
       {
         result += process::pp(i->label());
-        for (data::data_expression_list::const_iterator j = i->arguments().begin(); j != i->arguments().end(); j++)
+        for (const mcrl2::data::data_expression& d: i->arguments())
         {
-          result += "!" + data::pp(*j);
+          result += "!" + data::pp(d);
         }
 
-        auto next = i;
+        process::action_list::const_iterator next = i;
         next++;
         if (next != ma.actions().end())
         {
@@ -113,12 +113,15 @@ class torx_tool : public rewriter_tool< input_tool >
 
     bool run()
     {
-      specification spec;
+      stochastic_specification spec;
       load_lps(spec, m_input_filename);
 
       next_state_generator generator(spec, data::rewriter(spec.data(), rewrite_strategy()));
 
-std::cerr << "TODO: TORX DOES NOT WORK WITH STOCHASTIC INITIAL STATE\n";
+      if (++generator.initial_states().begin()!=generator.initial_states().end())   // size()>1
+      {
+        mCRL2log(mcrl2::log::warning) << "Lps2torx does not work with a stochastic initial state. It just picks one state.\n";
+      }
       state current = generator.initial_states().front().state();
       std::deque<state> states;
       std::map<state, int> state_numbers;

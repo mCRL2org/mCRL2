@@ -24,7 +24,7 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
-void test_initial_state_successors(const specification& lps_spec)
+void test_initial_state_successors(const stochastic_specification& lps_spec)
 {
   data::rewriter rewriter(lps_spec.data());
   next_state_generator generator(lps_spec, rewriter);
@@ -37,7 +37,7 @@ void test_initial_state_successors(const specification& lps_spec)
   }
 }
 
-void test_next_state_generator(const specification& lps_spec, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels, bool enumeration_caching, bool summand_pruning, bool per_summand)
+void test_next_state_generator(const stochastic_specification& lps_spec, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels, bool enumeration_caching, bool summand_pruning, bool per_summand)
 {
   data::rewriter rewriter(lps_spec.data());
   next_state_generator generator(lps_spec, rewriter, enumeration_caching, summand_pruning);
@@ -109,7 +109,8 @@ BOOST_AUTO_TEST_CASE(single_state_test)
     "init P(1);\n"
   );
 
-  specification spec = parse_linear_process_specification(text);
+  stochastic_specification spec;
+  parse_lps(text,spec);
   test_initial_state_successors(spec);
   // Test all 2**3 possible feature flags
   for (size_t i = 0; i < 8; i++)
@@ -120,7 +121,8 @@ BOOST_AUTO_TEST_CASE(single_state_test)
 
 BOOST_AUTO_TEST_CASE(test_abp)
 {
-  specification spec = parse_linear_process_specification(LINEAR_ABP);
+  stochastic_specification spec;
+  parse_lps(LINEAR_ABP,spec);
 
   test_initial_state_successors(spec);
   // Test all 2**3 possible feature flags
@@ -142,7 +144,8 @@ BOOST_AUTO_TEST_CASE(test_non_true_condition)
     "     + delta;\n"
     "init P(1);\n"
   );
-  specification spec = parse_linear_process_specification(text);
+  stochastic_specification spec;
+  parse_lps(text,spec);
   for (size_t i = 0; i < 8; i++)
   {
     // The respective sizes do not matter here, since we should get an exception in the nextstate

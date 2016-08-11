@@ -78,10 +78,10 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
       complete_data_specification(*this);
     }
 
-    /// \brief Constructor.
-    stochastic_specification(const specification &other)
-      : super(other.data(), other.action_labels(), other.global_variables(), other.process(), other.initial_process())
-    { }
+    /// \brief Constructor. This constructor is explicit as implicit conversions of this kind is a source of bugs.
+    explicit stochastic_specification(const specification &other)
+      : super(other.data(), other.action_labels(), other.global_variables(), other.process(), stochastic_process_initializer(other.initial_process().assignments(),stochastic_distribution()))
+    { } 
 
     void save(std::ostream& stream, bool binary=true) const
     {

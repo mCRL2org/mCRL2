@@ -19,7 +19,7 @@
 
 //mCRL2
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 
 //LPS framework
 #include "mcrl2/lps/io.h"
@@ -152,7 +152,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
         return false;
       }
 
-      lps::specification spec;
+      lps::stochastic_specification spec;
       load_lps(spec, input_filename());
 
       /* lpsparunfold-cache is used to avoid the introduction of equations for already unfolded sorts */

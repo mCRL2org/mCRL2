@@ -15,7 +15,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/trace/trace.h"
 
 namespace mcrl2
@@ -46,7 +46,7 @@ class simulation
     };
 
     /// Constructor.
-    simulation(const specification& specification, data::rewrite_strategy strategy = data::rewrite_strategy());
+    simulation(const stochastic_specification& specification, data::rewrite_strategy strategy = data::rewrite_strategy());
 
     /// Returns the current annotated state vector.
     const std::deque<state_t> &trace() const { return m_tau_prioritization ? m_prioritized_trace : m_full_trace; }
@@ -66,7 +66,7 @@ class simulation
     /// Load a trace from a file.
     void load(const std::string &filename);
 
-  private:
+  protected:
     std::vector<transition_t> transitions(const state& source_state);
     std::vector<transition_t> prioritize(const std::vector<transition_t> &transitions);
     void push_back(const lps::state& lps_state);
@@ -75,8 +75,7 @@ class simulation
     bool match_trace(trace::Trace& trace);
     bool match(const state &left, const state &right);
 
-  private:
-    specification m_specification;
+    stochastic_specification m_specification;
     data::rewriter m_rewriter;
     next_state_generator m_generator;
     next_state_generator::substitution_t m_substitution;

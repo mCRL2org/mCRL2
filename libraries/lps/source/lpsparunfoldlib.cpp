@@ -12,7 +12,6 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 #include "mcrl2/lps/lpsparunfoldlib.h"
-#include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/replace.h"
 
@@ -28,7 +27,7 @@ using namespace mcrl2::log;
 - alias::name() [basic_sort] results in a basic sort, differs form basic_sort::name() [string]
 */
 
-lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
+lpsparunfold::lpsparunfold(mcrl2::lps::stochastic_specification spec,
     std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
     bool add_distribution_laws
 )
@@ -394,9 +393,9 @@ mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_na
   return idstr;
 }
 
-void lpsparunfold::unfold_summands(mcrl2::lps::action_summand_vector& summands, const mcrl2::data::function_symbol& determine_function, const mcrl2::data::function_symbol_vector& pi)
+void lpsparunfold::unfold_summands(mcrl2::lps::stochastic_action_summand_vector& summands, const mcrl2::data::function_symbol& determine_function, const mcrl2::data::function_symbol_vector& pi)
 {
-  for (mcrl2::lps::action_summand_vector::iterator j = summands.begin(); j != summands.end(); ++j)
+  for (mcrl2::lps::stochastic_action_summand_vector::iterator j = summands.begin(); j != summands.end(); ++j)
   {
     mcrl2::data::assignment_list ass = j->assignments();
     //Create new left-hand assignment_list & right-hand assignment_list
@@ -424,11 +423,6 @@ void lpsparunfold::unfold_summands(mcrl2::lps::action_summand_vector& summands, 
       }
     }
 
-    //cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
-    //cout << mcrl2::data::pp(*j) << endl;
-    //cout << mcrl2::data::pp(new_ass_left)  << endl;
-    //cout << mcrl2::data::pp(new_ass_right)  << endl;
-
     assert(new_ass_left.size() == new_ass_right.size());
     mcrl2::data::assignment_vector new_ass;
     while (!new_ass_left.empty())
@@ -441,7 +435,7 @@ void lpsparunfold::unfold_summands(mcrl2::lps::action_summand_vector& summands, 
   }
 }
 
-mcrl2::lps::linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , function_symbol_vector affected_constructors, const function_symbol& determine_function, size_t parameter_at_index, const function_symbol_vector& pi)
+mcrl2::lps::stochastic_linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , function_symbol_vector affected_constructors, const function_symbol& determine_function, size_t parameter_at_index, const function_symbol_vector& pi)
 {
   /* Get process parameters from lps */
   mcrl2::data::variable_list lps_proc_pars =  m_lps.process_parameters();
@@ -477,8 +471,6 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(const function_sy
            ; j != affected_constructors.end()
            ; ++j)
       {
-        //cout << *j << endl;
-
         bool processed = false;
         if (is_function_sort(j -> sort()))
         {
@@ -533,7 +525,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(const function_sy
   std::map<mcrl2::data::variable, mcrl2::data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
 
   // TODO: avoid unnecessary copies of the LPS
-  mcrl2::lps::linear_process new_lps;
+  mcrl2::lps::stochastic_linear_process new_lps;
   new_lps.action_summands() = m_lps.action_summands();
   new_lps.deadlock_summands() = m_lps.deadlock_summands();
 
@@ -558,7 +550,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(const function_sy
   return new_lps;
 }
 
-mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initialization(const data::function_symbol& determine_function, size_t parameter_at_index, const function_symbol_vector& pi)
+mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_initialization(const data::function_symbol& determine_function, size_t parameter_at_index, const function_symbol_vector& pi)
 {
   //
   //update inital process
@@ -606,10 +598,6 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
     }
   }
 
-  //cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
-  //cout << mcrl2::data::pp(new_ass_left)  << endl;
-  //cout << mcrl2::data::pp(new_ass_right)  << endl;
-
   assert(new_ass_left.size() == new_ass_right.size());
   mcrl2::data::assignment_vector new_ass;
   while (!new_ass_left.empty())
@@ -619,7 +607,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
     new_ass_right.erase(new_ass_right.begin());
   }
 
-  mcrl2::lps::process_initializer new_init = mcrl2::lps::process_initializer(mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()));
+  const mcrl2::lps::stochastic_process_initializer new_init(mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()), m_init_process.distribution());
   mCRL2log(debug) << lps::pp(new_init) << std::endl;
 
   return new_init;
@@ -857,13 +845,13 @@ void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_ne
   }
 }
 
-mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
+mcrl2::lps::stochastic_specification lpsparunfold::algorithm(size_t parameter_at_index)
 {
   m_unfold_process_parameter = sort_at_process_parameter_index(parameter_at_index);
 
   /* Var Dec */
-  mcrl2::lps::linear_process new_lps;
-  mcrl2::lps::process_initializer new_init;
+  mcrl2::lps::stochastic_linear_process new_lps;
+  mcrl2::lps::stochastic_process_initializer new_init;
   function_symbol_vector k;
   function_symbol_vector elements_of_new_sorts;
   function_symbol_vector projection_functions;
@@ -919,7 +907,6 @@ mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
       e.cached_fresh_basic_sort = fresh_basic_sort;
 
       m_cache->insert( pair<mcrl2::data::sort_expression , lspparunfold::unfold_cache_element>( m_unfold_process_parameter , e ));
-
     }
   }
   else
@@ -947,7 +934,7 @@ mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
     new_init = update_linear_process_initialization(determine_function, parameter_at_index, projection_functions);
   }
 
-  mcrl2::lps::specification new_spec = mcrl2::lps::specification(m_data_specification, m_action_label_list, m_glob_vars, new_lps, new_init);
+  mcrl2::lps::stochastic_specification new_spec(m_data_specification, m_action_label_list, m_glob_vars, new_lps, new_init);
 
   assert(check_well_typedness(new_spec));
 

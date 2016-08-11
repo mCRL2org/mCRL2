@@ -191,7 +191,7 @@ int test_main(int argc, char** argv)
   check_info(linearise(case_summands));
   check_info(linearise(case_last));
 
-  lps::specification model=remove_stochastic_operators(linearise(case_no_influenced_parameters));
+  lps::stochastic_specification model=linearise(case_no_influenced_parameters);
 
   if (1 < argc)
   {

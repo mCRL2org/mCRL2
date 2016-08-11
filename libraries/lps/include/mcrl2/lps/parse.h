@@ -172,7 +172,7 @@ action_rename_specification parse_action_rename_specification_new(const std::str
 }
 
 inline
-void complete_action_rename_specification(action_rename_specification& x, const lps::specification& spec)
+void complete_action_rename_specification(action_rename_specification& x, const lps::stochastic_specification& spec)
 {
   using namespace mcrl2::data;
   x = lps::type_check_action_rename_specification(x, spec);
@@ -215,7 +215,7 @@ multi_action parse_multi_action(const std::string& text, const process::action_l
 /// \param spec A linear process specification.
 /// \return The parse result
 inline
-action_rename_specification parse_action_rename_specification(std::istream& in, const lps::specification& spec)
+action_rename_specification parse_action_rename_specification(std::istream& in, const lps::stochastic_specification& spec)
 {
   std::string text = utilities::read_text(in);
   action_rename_specification result = detail::parse_action_rename_specification_new(text);
@@ -231,7 +231,9 @@ action_rename_specification parse_action_rename_specification(std::istream& in, 
 /// \param spec A linear process specification
 /// \return An action rename specification
 inline
-action_rename_specification parse_action_rename_specification(const std::string& spec_string, const lps::specification& spec)
+action_rename_specification parse_action_rename_specification(
+           const std::string& spec_string, 
+           const lps::stochastic_specification& spec)
 {
   std::istringstream in(spec_string);
   return parse_action_rename_specification(in, spec);
@@ -318,6 +320,8 @@ void parse_lps(const std::string& text, Specification& result)
   std::istringstream stream(text);
   parse_lps(stream, result);
 }
+
+
 
 /// \brief Parses an action from a string
 /// \param text A string containing an action

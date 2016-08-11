@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_TYPECHECK_H
 #define MCRL2_LPS_TYPECHECK_H
 
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/untyped_multi_action.h"
@@ -101,7 +101,7 @@ class action_rename_type_checker
     *  \param[in] arspec An action rename specification that has not been type checked.
     *  \return    a action rename specification where all untyped identifiers have been replace by typed ones.
     **/
-    action_rename_specification operator()(const action_rename_specification& arspec, const specification& lpsspec)
+    action_rename_specification operator()(const action_rename_specification& arspec, const stochastic_specification& lpsspec)
     {
       mCRL2log(log::verbose) << "type checking action rename specification..." << std::endl;
       m_data_type_checker = data::data_type_checker(lpsspec.data() + arspec.data());
@@ -143,7 +143,9 @@ multi_action type_check_multi_action(process::untyped_multi_action& mult_act,
 /// \return A type checked rename specification.
 
 inline
-action_rename_specification type_check_action_rename_specification(const action_rename_specification& arspec, const lps::specification& lpsspec)
+action_rename_specification type_check_action_rename_specification(
+                                const action_rename_specification& arspec, 
+                                const lps::stochastic_specification& lpsspec)
 {
   lps::action_rename_type_checker typechecker;
   return typechecker(arspec, lpsspec);

@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
   {
     std::string filename(argv[1]);
     std::cout << "loading LPS from file " << filename << std::endl;
-    lps::specification spec;
+    lps::stochastic_specification spec;
     std::ifstream stream(filename);
     spec.load(stream);
     std::cout << "traversing states..." << std::endl;

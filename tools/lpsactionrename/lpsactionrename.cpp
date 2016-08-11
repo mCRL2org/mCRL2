@@ -16,7 +16,7 @@
 #include <iostream>
 #include <algorithm>
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/action_rename.h"
@@ -132,7 +132,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       {
         mCRL2log(verbose) << "reading LPS from file '" <<  input_filename() << "'..." << std::endl;
       }
-      specification old_spec;
+      stochastic_specification old_spec;
       load_lps(old_spec, input_filename());
 
       //load action rename file
@@ -152,7 +152,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 
       //rename all assigned actions
       mCRL2log(verbose) << "renaming actions in LPS..." << std::endl;
-      specification new_spec = action_rename(action_rename_spec, old_spec);
+      stochastic_specification new_spec = action_rename(action_rename_spec, old_spec);
       data::rewriter datar;
       if (m_rewrite)
       {
@@ -164,7 +164,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       if (m_sumelm)
       {
         mCRL2log(verbose) << "applying sum elimination..." << std::endl;
-        sumelm_algorithm<lps::specification>(new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
+        sumelm_algorithm<lps::stochastic_specification>(new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
         if (m_rewrite)
         {
           mCRL2log(verbose) << "rewriting data expressions in LPS again..." << std::endl;

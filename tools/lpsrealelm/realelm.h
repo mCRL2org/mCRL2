@@ -14,7 +14,7 @@
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
 
 #include "mcrl2/data/linear_inequalities.h"
 
@@ -24,9 +24,9 @@ namespace mcrl2
 namespace data
 {
 
-mcrl2::lps::specification realelm(mcrl2::lps::specification s, 
-                                  int max_iterations = 5,
-                                  const rewrite_strategy strat=jitty);
+mcrl2::lps::stochastic_specification realelm(mcrl2::lps::stochastic_specification s, 
+                                             const size_t max_iterations = 5,
+                                             const rewrite_strategy strat=jitty);
 
 template <typename Term, typename MapContainer>
 Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements);
@@ -101,6 +101,7 @@ class summand_information
     mcrl2::lps::summand_base m_smd;
     bool m_is_delta_summand;
     assignment_list m_assignments;
+    lps::stochastic_distribution m_distribution;
     lps::multi_action m_multi_action;
     lps::deadlock m_deadlock;
     
@@ -123,6 +124,7 @@ class summand_information
       const mcrl2::lps::summand_base& s,
       bool  is_delta_summand,
       const assignment_list& assignments,
+      const lps::stochastic_distribution& distribution,
       const lps::multi_action& multi_action,
       const lps::deadlock& deadlock,
       const variable_list& rsv,
@@ -133,6 +135,7 @@ class summand_information
       m_smd(s),
       m_is_delta_summand(is_delta_summand),
       m_assignments(assignments),
+      m_distribution(distribution),
       m_multi_action(multi_action),
       m_deadlock(deadlock),
       real_summation_variables(rsv),
@@ -145,9 +148,7 @@ class summand_information
       // fourier_motzkin(src,vars.begin(),vars().end(),reduced_src);
       // nextstate_context_combinations(1,reduced_src),
       nextstate_context_combinations(1,src)
-      // residual_inequalities(1,vector < linear_inequality >()),
     {
-// std::cerr << "NEW SUMMAND " << s.condition() <<  " -> " << pp(multi_action) << "\n" << pp_vector(src) << "  assigments " << assignments << "\n";
     }
 
     summand_information(const summand_information& s)
@@ -155,6 +156,7 @@ class summand_information
       m_smd=s.m_smd;
       m_is_delta_summand=s.m_is_delta_summand;
       m_assignments=s.m_assignments;
+      m_distribution=s.m_distribution;
       m_multi_action=s.m_multi_action;
       m_deadlock=s.m_deadlock;
       real_summation_variables=s.real_summation_variables;
@@ -187,6 +189,11 @@ class summand_information
     const mcrl2::data::assignment_list& get_assignments() const
     {
       return m_assignments;
+    }
+
+    const mcrl2::lps::stochastic_distribution& get_distribution() const
+    {
+      return m_distribution;
     }
 
     const mcrl2::lps::multi_action& get_multi_action() const

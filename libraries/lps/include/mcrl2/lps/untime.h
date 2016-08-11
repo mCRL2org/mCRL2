@@ -21,6 +21,26 @@ namespace mcrl2
 namespace lps
 {
 
+namespace detail
+{
+
+template <class INITIALIZER>
+INITIALIZER make_process_initializer(const data::assignment_list& ass, const INITIALIZER& init);
+
+template <>
+process_initializer make_process_initializer(const data::assignment_list& ass, const process_initializer& )
+{
+ return process_initializer(ass);
+}
+
+template <>
+stochastic_process_initializer make_process_initializer(const data::assignment_list& ass, const stochastic_process_initializer& init)
+{
+  return stochastic_process_initializer(ass,init.distribution());
+}
+
+} // namespace detail
+
 template <typename Specification>
 class untime_algorithm: public detail::lps_algorithm<Specification>
 {
@@ -119,7 +139,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         s.assignments()=push_back(s.assignments(),data::assignment(m_last_action_time,s.multi_action().time()));
 
         // Remove time
-        s.multi_action() = multi_action(s.multi_action().actions()); // TODO: if Nil is removed, just remove time
+        s.multi_action() = multi_action(s.multi_action().actions()); 
       }
       else
       {
@@ -140,6 +160,9 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
       // Add the condition m_last_action_time>=0, which holds, and which is generally a useful fact for further processing.
       s.condition() = data::lazy::and_(s.condition(),m_time_invariant);
     }
+
+
+
 
   public:
     untime_algorithm(Specification& spec)
@@ -169,7 +192,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         m_spec.process().process_parameters()=push_back(m_spec.process().process_parameters(),m_last_action_time);
         data::assignment_list init = m_spec.initial_process().assignments();
         init=push_back(init,data::assignment(m_last_action_time, data::sort_real::real_(0)));
-        m_spec.initial_process() = process_initializer(init);
+        m_spec.initial_process() = detail::make_process_initializer(init,m_spec.initial_process());
 
         std::for_each(m_spec.process().action_summands().begin(),
                       m_spec.process().action_summands().end(),

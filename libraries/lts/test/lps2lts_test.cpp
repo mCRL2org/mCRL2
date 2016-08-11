@@ -33,7 +33,7 @@ using namespace mcrl2::lps;
 
 
 template <class LTS_TYPE>
-LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
+LTS_TYPE translate_lps_to_lts(lps::stochastic_specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewrite_strategy const rewrite_strategy = mcrl2::data::jitty,
                               const std::string& priority_action = "")
@@ -85,14 +85,16 @@ exploration_strategy_vector exploration_strategies()
   return exploration_strategies;
 }
 
-static void check_lps2lts_specification(std::string const& specification,
-                                 const size_t expected_states,
-                                 const size_t expected_transitions,
-                                 const size_t expected_labels,
-                                 const std::string& priority_action = "")
+static void check_lps2lts_specification(const std::string& specification,
+                                        const size_t expected_states,
+                                        const size_t expected_transitions,
+                                        const size_t expected_labels,
+                                        const std::string& priority_action = "")
 {
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
-  lps::specification lps = lps::parse_linear_process_specification(specification);
+  lps::stochastic_specification lps;
+  parse_lps(specification,lps);
+
 
   rewrite_strategy_vector rstrategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
@@ -400,7 +402,8 @@ BOOST_AUTO_TEST_CASE(test_max_states)
   "  (s <= 10) -> a . P(s+1);\n"
   "init P(1);\n");
 
-  lps::specification specification = lps::parse_linear_process_specification(spec);
+  lps::stochastic_specification specification;
+  parse_lps(spec,specification);
 
   lts::lts_generation_options options;
   options.trace_prefix = "lps2lts_test";

@@ -32,7 +32,7 @@ typedef std::vector<rewrite_strategy> rewrite_strategy_vector;
 
 template <class LTS_TYPE>
 inline
-LTS_TYPE translate_lps_to_lts(lps::specification const& specification)
+LTS_TYPE translate_lps_to_lts(const lps::stochastic_specification& specification)
 {
   lts::lts_generation_options options;
   options.trace_prefix = "linearization_instantiation_compare_test";
@@ -58,8 +58,8 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
             << "    binary: " << std::boolalpha << options.binary << std::endl
             << "    nocluster: " << std::boolalpha << options.no_intermediate_cluster << std::endl;
 
-  lps::specification s=remove_stochastic_operators(linearise(spec, options));
-  BOOST_CHECK(s != lps::specification());
+  lps::stochastic_specification s=linearise(spec, options);
+  BOOST_CHECK(s != lps::stochastic_specification());
 
   lts::lts_aut_t result = translate_lps_to_lts<lts::lts_aut_t>(s);
   BOOST_CHECK(lts::compare(result, expected_statespace, lts::lts_eq_bisim));
