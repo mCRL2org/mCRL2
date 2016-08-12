@@ -4130,13 +4130,29 @@ class specification_basic_type:public boost::noncopyable
           const stochastic_operator& proc=down_cast<const stochastic_operator>(proc_);
           assert(!is_process_instance_assignment(proc.operand()));
           const size_t n=objectIndex(p);
+          std::set<variable> variables_occurring_in_rhs_of_sigma;
+          mutable_map_substitution<> local_sigma;
+          variable_list vars=proc.variables();
+          alphaconvert(vars,local_sigma, vars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
+
           const process_identifier newproc=newprocess(
-                                           objectdata[n].parameters + proc.variables(),
+                                           proc.variables() + objectdata[n].parameters,
                                            proc.operand(),
                                            pCRL,
                                            canterminatebody(proc.operand()),
                                            containstimebody(proc.operand()));
-          processes_with_stochastic_distribution_first.insert(std::pair< process_identifier, process_pid_pair >(p,process_pid_pair(proc,newproc)));
+          // calculate the substitution to be applied on proc.distribution() which is moved outside the 
+          // body the process. 
+          processes_with_stochastic_distribution_first.insert(
+                        std::pair< process_identifier, process_pid_pair >
+                                 (p,
+                                  process_pid_pair(stochastic_operator(
+                                                        vars,
+                                                        data::replace_variables_capture_avoiding(proc.distribution(),
+                                                                                                 local_sigma,
+                                                                                                 variables_occurring_in_rhs_of_sigma),
+                                                        proc.operand()),
+                                                   newproc)));
           result.insert(newproc);
         }
       }
@@ -4162,6 +4178,7 @@ class specification_basic_type:public boost::noncopyable
       }
       return result;
     } 
+
 
     /**************** Collectparameterlist ******************************/
 
@@ -7113,8 +7130,8 @@ class specification_basic_type:public boost::noncopyable
       /* The equations can still contain stochastic operators that occur before the first action.
          We translate the equations such that the stochastic operators do not occur in front anymore.
          Moving the stochastic operators to the front means that the number of parameters of each 
-         process can increase. Therefore, we add them explicitly to the mapping. The initial
-         stochastic distribution is set simultaneously. */
+         process can increase. In this case we introduce a new process identifiers. The resulting
+         ids of processes occur in stochastic_normalized_process_identifiers. */
 
       process_identifier initial_proc_id=procId;  // the initial process id may be renamed.
       const std::set< process_identifier > stochastic_normalized_process_identifiers =
@@ -9709,25 +9726,20 @@ class specification_basic_type:public boost::noncopyable
         if (is_stochastic_operator(new_process))
         {
           // Add the initial stochastic_distribution.
+          const process_identifier new_identifier=processes_with_initial_distribution.at(u.identifier()).process_id();
+          const size_t n=objectIndex(new_identifier);
+          variable_list new_parameters=objectdata[n].parameters;
           const stochastic_operator& sto=down_cast<const stochastic_operator>(new_process);
-          assignment_list new_assignments=u.assignments();
+          assignment_list new_assignments; 
           for(const variable& v: sto.variables())
           {
-            new_assignments=push_back(new_assignments,assignment(v,v)); // push_back is used as the assignments must remain ordered.
+            new_assignments=push_back(new_assignments,assignment(new_parameters.front(),v)); 
+            new_parameters.pop_front();
           }
-          // calculate the substitution to be applied on sto.distribution() which is moved outside the 
-          // body the process. 
-          mutable_map_substitution<> local_sigma;
-          std::set<variable> variables_occurring_in_rhs_of_sigma;
-          for(const assignment& a: u.assignments())
-          {
-            local_sigma[a.lhs()]=a.rhs();
-            std::set<variable> s=find_free_variables(a.rhs());
-            variables_occurring_in_rhs_of_sigma.insert(s.begin(),s.end());
-          }
+          new_assignments=new_assignments + u.assignments();
           return stochastic_operator(sto.variables(),
-                                     data::replace_variables_capture_avoiding(sto.distribution(),local_sigma,variables_occurring_in_rhs_of_sigma),
-                                     process_instance_assignment(processes_with_initial_distribution.at(u.identifier()).process_id(),new_assignments)); 
+                                     sto.distribution(),
+                                     process_instance_assignment(new_identifier,new_assignments)); 
         }
         return t;
 
@@ -9919,16 +9931,6 @@ class specification_basic_type:public boost::noncopyable
 
       throw mcrl2::runtime_error("unexpected process format in transform_initial_distribution_term " + process::pp(t) +".");
     } 
-
-    /* process_expression transform_initial_distribution(
-                                    const process_identifier& procId,
-                                    const std::map < process_identifier, process_pid_pair >& pCRLprocs)
-    {
-      const size_t n=objectIndex(procId);
-      const process_expression initial_distribution_=objectdata[n].processbody;
-      return transform_initial_distribution_term(initial_distribution_,pCRLprocs); 
-    }  */
-
 
     /***** obtain_initial_distribution **********/
 

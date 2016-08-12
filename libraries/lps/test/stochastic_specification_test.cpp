@@ -105,8 +105,8 @@ BOOST_AUTO_TEST_CASE(test_linearisation)
     "\n"
     "proc P(b_X: Bool) =\n"
     "       a(b_X) .\n"
-    "         dist b_X1: Bool[1 / 2] .\n"
-    "         P(b_X = b_X1);\n"
+    "         dist b1_X: Bool[1 / 2] .\n"
+    "         P(b_X = b1_X);\n"
     "\n"
     "init dist b: Bool[1 / 2] . P(b);\n"
     ;
@@ -130,8 +130,8 @@ BOOST_AUTO_TEST_CASE(test_multiple_stochastic_parameters)
     "\n"
     "proc P(b1_X,b2_X: Bool) =\n"
     "       a(b1_X, b2_X) .\n"
-    "         dist b1_X1,b2_X1: Bool[if(b1_X1, 1 / 8, 3 / 8)] .\n"
-    "         P(b1_X = b1_X1, b2_X = b2_X1);\n"
+    "         dist b3_X,b4_X: Bool[if(b3_X, 1 / 8, 3 / 8)] .\n"
+    "         P(b1_X = b3_X, b2_X = b4_X);\n"
     "\n"
     "init dist b1,b2: Bool[if(b1, 1 / 8, 3 / 8)] . P(b1, b2);\n"
     ;
@@ -140,6 +140,77 @@ BOOST_AUTO_TEST_CASE(test_multiple_stochastic_parameters)
   BOOST_CHECK_EQUAL(lps::pp(spec),result);
 }  
 
+// This test checks whether the outward distribution of dist operators is going 
+// correctely.
+BOOST_AUTO_TEST_CASE(test_push_dist_outward)
+{
+  std::string text =
+    "sort Coin = struct head_ | tail_;\n"
+    "\n"
+    "act throw:Coin;\n"
+    "    success;\n"
+    "\n"
+    "proc X(head_seen:Bool) =  dist c:Coin[1/2].throw(c).\n"
+    "                           ((c==head_ && head_seen) -> success.delta+\n"
+    "                            (c==head_ && !head_seen) -> X(true)+\n"
+    "                            (c==tail_) -> X(false));\n"
+    "\n"
+    "init X(false);\n"
+    ;
+
+  std::string result =
+    "sort Coin = struct head_ | tail_;\n"
+    "     Enum3 = struct e2_3 | e1_3 | e0_3;\n"
+    "\n"
+    "map  C3_: Enum3 # Coin # Coin # Coin -> Coin;\n"
+    "     C3_1: Enum3 # Pos # Pos # Pos -> Pos;\n"
+    "     C3_2: Enum3 # Bool # Bool # Bool -> Bool;\n"
+    "     C3_3: Enum3 # Real # Real # Real -> Real;\n"
+    "\n"
+    "var  x1,y3,y2,y1: Coin;\n"
+    "     e1,e2,e3,e4: Enum3;\n"
+    "     x2,y6,y5,y4: Pos;\n"
+    "     x3,y9,y8,y7: Bool;\n"
+    "     x4,y12,y11,y10: Real;\n"
+    "eqn  C3_(e1, x1, x1, x1)  =  x1;\n"
+    "     C3_(e2_3, y3, y2, y1)  =  y3;\n"
+    "     C3_(e1_3, y3, y2, y1)  =  y2;\n"
+    "     C3_(e0_3, y3, y2, y1)  =  y1;\n"
+    "     C3_1(e2, x2, x2, x2)  =  x2;\n"
+    "     C3_1(e2_3, y6, y5, y4)  =  y6;\n"
+    "     C3_1(e1_3, y6, y5, y4)  =  y5;\n"
+    "     C3_1(e0_3, y6, y5, y4)  =  y4;\n"
+    "     C3_2(e3, x3, x3, x3)  =  x3;\n"
+    "     C3_2(e2_3, y9, y8, y7)  =  y9;\n"
+    "     C3_2(e1_3, y9, y8, y7)  =  y8;\n"
+    "     C3_2(e0_3, y9, y8, y7)  =  y7;\n"
+    "     C3_3(e4, x4, x4, x4)  =  x4;\n"
+    "     C3_3(e2_3, y12, y11, y10)  =  y12;\n"
+    "     C3_3(e1_3, y12, y11, y10)  =  y11;\n"
+    "     C3_3(e0_3, y12, y11, y10)  =  y10;\n"
+    "\n"
+    "act  throw: Coin;\n"
+    "     success;\n"
+    "\n"
+    "glob dc5: Bool;\n"
+    "     dc4,dc3,dc2,dc1,dc: Coin;\n"
+    "\n"
+    "proc P(s1_X: Pos, c1_X,c2_X,c_X: Coin, head_seen_X: Bool) =\n"
+    "       (s1_X == 1 && c_X == head_ && head_seen_X) ->\n"
+    "         success .\n"
+    "         P(s1_X = 3, c1_X = dc2, c2_X = dc3, c_X = dc4, head_seen_X = dc5)\n"
+    "     + sum e_X: Enum3.\n"
+    "         C3_2(e_X, s1_X == 2, s1_X == 1 && c_X == tail_, s1_X == 1 && c_X == head_ && !head_seen_X) ->\n"
+    "         throw(C3_(e_X, c_X, c2_X, c1_X)) .\n"
+    "         dist c4_X,c5_X: Coin[1 / 4] .\n"
+    "         P(s1_X = 1, c1_X = c4_X, c2_X = c5_X, c_X = C3_(e_X, c_X, c2_X, c1_X), head_seen_X = C3_2(e_X, head_seen_X, false, true));\n"
+    "\n"
+    "init dist c: Coin[1 / 2] . P(2, dc1, dc, c, false);\n"
+    ;
+
+  stochastic_specification spec=linearise(text);
+  BOOST_CHECK_EQUAL(lps::pp(spec),result);
+}  
 
 
 BOOST_AUTO_TEST_CASE(test_parelm)
