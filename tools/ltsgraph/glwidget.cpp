@@ -22,18 +22,18 @@ struct MoveRecord
     Graph::Node* node;
     virtual void move(const Graph::Coord3D& pos)
     {
-      node->pos = pos;
+      node->pos() = pos;
     }
     virtual void grab(Graph::Graph& graph, size_t index) = 0;
     virtual void release(bool toggleLocked)
     {
       if (toggleLocked)
-        node->locked = !node->locked;
-      node->anchored = node->locked;
+        node->set_locked(!node->locked());
+      node->set_anchored(node->locked());
     }
     const Graph::Coord3D& pos()
     {
-      return node->pos;
+      return node->pos();
     }
 };
 
@@ -41,7 +41,7 @@ struct LabelMoveRecord : public MoveRecord {
     void grab(Graph::Graph &graph, size_t index)
     {
       node = &graph.transitionLabel(index);
-      node->anchored = true;
+      node->set_anchored(true);
     }
 };
 
@@ -49,7 +49,7 @@ struct StateLabelMoveRecord : public MoveRecord {
     void grab(Graph::Graph &graph, size_t index)
     {
       node = &graph.stateLabel(index);
-      node->anchored = true;
+      node->set_anchored(true);
     }
 };
 
@@ -60,8 +60,8 @@ struct HandleMoveRecord : public MoveRecord
     void grab(Graph::Graph& graph, size_t index)
     {
       node = &graph.handle(index);
-      node->anchored = true;
-      movingLabel = !graph.transitionLabel(index).anchored;
+      node->set_anchored(true);
+      movingLabel = !graph.transitionLabel(index).anchored();
       if (movingLabel)
         label.grab(graph, index);
     }
@@ -86,22 +86,22 @@ struct NodeMoveRecord : public MoveRecord
     void grab(Graph::Graph& graph, size_t index)
     {
       node = &graph.node(index);
-      node->anchored = true;
+      node->set_anchored(true);
       size_t nlabels = 0;
       for (size_t i = 0; i < graph.edgeCount(); ++i)
       {
         Graph::Edge e = graph.edge(i);
-        if (e.from != index)
+        if (e.from() != index)
         {
-          size_t temp = e.from;
-          e.from = e.to;
-          e.to = temp;
+          size_t temp = e.from();
+          e.from() = e.to();
+          e.to() = temp;
         }
-        if (e.from == index && !graph.handle(i).anchored)
+        if (e.from() == index && !graph.handle(i).anchored())
         {
           edges.resize(nlabels + 1);
           endpoints.resize(nlabels + 1);
-          endpoints[nlabels] = &graph.node(e.to);
+          endpoints[nlabels] = &graph.node(e.to());
           edges[nlabels++].grab(graph, i);
         }
       }
@@ -121,7 +121,7 @@ struct NodeMoveRecord : public MoveRecord
       MoveRecord::move(pos);
       for (size_t i = 0; i < edges.size(); ++i)
       {
-        edges[i].move((pos + endpoints[i]->pos) / 2.0);
+        edges[i].move((pos + endpoints[i]->pos()) / 2.0);
       }
       label.move(pos);
     }
@@ -182,14 +182,14 @@ void GLWidget::updateSelection()
   for (std::list<GLScene::Selection>::iterator it = m_selections.begin(); it != m_selections.end();)
   {
     selnode = select_object(*it, m_graph);
-    if (selnode->selected > 0.05f)
+    if (selnode->selected() > 0.05f)
     {
-      selnode->selected -= 0.05f;
+      selnode->selected() -= 0.05f;
       ++it;
     }
     else
     {
-      selnode->selected = 0.0f;
+      selnode->selected() = 0.0f;
       it = m_selections.erase(it);
     }
   }
@@ -200,9 +200,9 @@ void GLWidget::updateSelection()
   selnode = select_object(m_hover, m_graph);
   if (selnode)
   {
-    if (selnode->selected <= 0)
+    if (selnode->selected() <= 0)
       m_selections.push_back(m_hover);
-    selnode->selected = 1.0f;
+    selnode->selected() = 1.0f;
 
   }
   if (m_hover.selectionType == GLScene::so_label || m_hover.selectionType == GLScene::so_edge)
@@ -210,9 +210,9 @@ void GLWidget::updateSelection()
     GLScene::Selection s = m_hover;
     s.selectionType = GLScene::so_handle;
     selnode = select_object(s, m_graph);
-    if (selnode->selected <= 0)
+    if (selnode->selected() <= 0)
       m_selections.push_back(s);
-    selnode->selected = 0.5f;
+    selnode->selected() = 0.5f;
   }
 }
 
@@ -258,23 +258,23 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
     if (m_hover.selectionType == GLScene::so_node)
     {
       Graph::NodeNode& node = m_graph.node(m_hover.index);
-      node.color[0] = m_paintcolor.redF();
-      node.color[1] = m_paintcolor.greenF();
-      node.color[2] = m_paintcolor.blueF();
+      node.color(0) = m_paintcolor.redF();
+      node.color(1) = m_paintcolor.greenF();
+      node.color(2) = m_paintcolor.blueF();
     }
     if (m_hover.selectionType == GLScene::so_label)
     {
       Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
-      node.color[0] = m_paintcolor.redF();
-      node.color[1] = m_paintcolor.greenF();
-      node.color[2] = m_paintcolor.blueF();
+      node.color(0) = m_paintcolor.redF();
+      node.color(1) = m_paintcolor.greenF();
+      node.color(2) = m_paintcolor.blueF();
     }
     if (m_hover.selectionType == GLScene::so_slabel)
     {
       Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
-      node.color[0] = m_paintcolor.redF();
-      node.color[1] = m_paintcolor.greenF();
-      node.color[2] = m_paintcolor.blueF();
+      node.color(0) = m_paintcolor.redF();
+      node.color(1) = m_paintcolor.greenF();
+      node.color(2) = m_paintcolor.blueF();
     }
     m_dragmode = dm_paint;
   }
@@ -366,23 +366,23 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
         if (m_hover.selectionType == GLScene::so_node)
         {
           Graph::NodeNode& node = m_graph.node(m_hover.index);
-          node.color[0] = m_paintcolor.redF();
-          node.color[1] = m_paintcolor.greenF();
-          node.color[2] = m_paintcolor.blueF();
+          node.color(0) = m_paintcolor.redF();
+          node.color(1) = m_paintcolor.greenF();
+          node.color(2) = m_paintcolor.blueF();
         }
         if (m_hover.selectionType == GLScene::so_label)
         {
           Graph::LabelNode& node = m_graph.transitionLabel(m_hover.index);
-          node.color[0] = m_paintcolor.redF();
-          node.color[1] = m_paintcolor.greenF();
-          node.color[2] = m_paintcolor.blueF();
+          node.color(0) = m_paintcolor.redF();
+          node.color(1) = m_paintcolor.greenF();
+          node.color(2) = m_paintcolor.blueF();
         }
         if (m_hover.selectionType == GLScene::so_slabel)
         {
           Graph::LabelNode& node = m_graph.stateLabel(m_hover.index);
-          node.color[0] = m_paintcolor.redF();
-          node.color[1] = m_paintcolor.greenF();
-          node.color[2] = m_paintcolor.blueF();
+          node.color(0) = m_paintcolor.redF();
+          node.color(1) = m_paintcolor.greenF();
+          node.color(2) = m_paintcolor.blueF();
         }
         break;
       case dm_rotate:

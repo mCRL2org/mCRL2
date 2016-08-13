@@ -356,7 +356,7 @@ struct CameraView
      *
      *  @param pos The position of the billboard.
      */
-    void billboard_spherical(const Coord3D &pos)
+    void billboard_spherical(const Coord3D& pos)
     {
       Coord3D rt, up, lk;
       GLfloat mm[16];
@@ -383,7 +383,7 @@ struct CameraView
      *
      *  @param pos The position of the billboard.
      */
-    void billboard_cylindrical(const Coord3D &pos)
+    void billboard_cylindrical(const Coord3D& pos)
     {
       glTranslatef(pos.x, pos.y, pos.z);
       glRotatef(-rotation.z, 0, 0, 1);
@@ -691,11 +691,11 @@ void GLScene::renderEdge(size_t i)
 {
   Graph::Edge edge = m_graph.edge(i);
   Coord3D ctrl[4];
-  Coord3D &from = ctrl[0];
-  Coord3D &to = ctrl[3];
-  Coord3D via = m_graph.handle(i).pos;
-  from = m_graph.node(edge.from).pos;
-  to = m_graph.node(edge.to).pos;
+  Coord3D& from = ctrl[0];
+  Coord3D& to = ctrl[3];
+  Coord3D via = m_graph.handle(i).pos();
+  from = m_graph.node(edge.from()).pos();
+  to = m_graph.node(edge.to()).pos();
 
   // Calculate control points from handle
   ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
@@ -703,7 +703,7 @@ void GLScene::renderEdge(size_t i)
 
   // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
   // them in x-y direction.
-  if (edge.from == edge.to)
+  if (edge.from() == edge.to())
   {
     if (!m_drawselfloops)
       return;
@@ -717,7 +717,7 @@ void GLScene::renderEdge(size_t i)
   glStartName(so_edge, i);
   glPushMatrix();
 
-  glColor3f(m_graph.handle(i).selected, 0.0, 0.0);
+  glColor3f(m_graph.handle(i).selected(), 0.0, 0.0);
 
   // Draw the arc
   drawArc(ctrl);
@@ -749,28 +749,28 @@ void GLScene::renderNode(GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
   Color3f fill;
-  Color3f line(node.color);
+  Color3f line(node.color());
 
   bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
   if (mark) // Initial node (green or dark green) => selected (red or darker red)
   {
-    if (node.locked)
-      fill = Color3f(0.1f + 0.9f * node.selected, 0.7f - 0.4f * node.selected,  0.1f + 0.2f * node.selected );
+    if (node.locked())
+      fill = Color3f(0.1f + 0.9f * node.selected(), 0.7f - 0.4f * node.selected(),  0.1f + 0.2f * node.selected() );
     else
-      fill = Color3f(0.1f + 0.9f * node.selected, 1.0f - 0.5f * node.selected,  0.1f + 0.4f * node.selected );
+      fill = Color3f(0.1f + 0.9f * node.selected(), 1.0f - 0.5f * node.selected(),  0.1f + 0.4f * node.selected() );
   }
   else // Normal node (white or gray) => selected (red or darker red)
   {
-    if (node.locked)
-      fill = Color3f(0.7f + 0.3f * node.selected, 0.7f - 0.2f * node.selected,  0.7f - 0.2f * node.selected );
+    if (node.locked())
+      fill = Color3f(0.7f + 0.3f * node.selected(), 0.7f - 0.2f * node.selected(),  0.7f - 0.2f * node.selected() );
     else
-      fill = Color3f(1.0f,                        1.0f - 0.3f * node.selected,  1.0f - 0.3f * node.selected );
+      fill = Color3f(1.0f,                        1.0f - 0.3f * node.selected(),  1.0f - 0.3f * node.selected() );
   }
 
   glStartName(so_node, i);
   glPushMatrix();
 
-  m_camera->billboard_spherical(node.pos);
+  m_camera->billboard_spherical(node.pos());
   drawNode(*m_vertexdata, line, fill, mark);
 
   glPopMatrix();
@@ -780,22 +780,22 @@ void GLScene::renderNode(GLuint i)
 void GLScene::renderTransitionLabel(GLuint i)
 {
   Graph::Edge edge = m_graph.edge(i);
-  if (edge.from == edge.to && !m_drawselfloops)
+  if (edge.from() == edge.to() && !m_drawselfloops)
     return;
   Graph::LabelNode& label = m_graph.transitionLabel(i);
-  if (!m_graph.transitionLabelstring(label.labelindex).isEmpty()) {
+  if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty()) {
     glStartName(so_label, i);
 
-    Color3f fill = Color3f((std::max)(label.color[0], label.selected), (std::min)(label.color[1], 1.0f - label.selected), (std::min)(label.color[2], 1.0f - label.selected));
+    Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
     glColor3fv(fill);
     if (gl2ps())
     {
-      Coord3D pos = label.pos;
-      pos.x -= m_camera->pixelsize * m_texturedata->transition_widths[label.labelindex] / 2;
-      pos.y -= m_camera->pixelsize * m_texturedata->transition_heights[label.labelindex] / 2;
+      Coord3D pos = label.pos();
+      pos.x -= m_camera->pixelsize * m_texturedata->transition_widths[label.labelindex()] / 2;
+      pos.y -= m_camera->pixelsize * m_texturedata->transition_heights[label.labelindex()] / 2;
       glRasterPos3fv(pos);
-      if (!m_graph.isTau(label.labelindex))
-        gl2psText(m_graph.transitionLabelstring(label.labelindex).toUtf8(), "", 10);
+      if (!m_graph.isTau(label.labelindex()))
+        gl2psText(m_graph.transitionLabelstring(label.labelindex()).toUtf8(), "", 10);
       else
         gl2psText("t", "Symbol", 10);
     }
@@ -803,8 +803,8 @@ void GLScene::renderTransitionLabel(GLuint i)
     {
       glPushMatrix();
 
-      m_camera->billboard_cylindrical(label.pos);
-      drawTransitionLabel(*m_vertexdata, *m_texturedata, label.labelindex);
+      m_camera->billboard_cylindrical(label.pos());
+      drawTransitionLabel(*m_vertexdata, *m_texturedata, label.labelindex());
 
       glPopMatrix();
     }
@@ -815,25 +815,25 @@ void GLScene::renderTransitionLabel(GLuint i)
 void GLScene::renderStateLabel(GLuint i)
 {
   Graph::LabelNode& label = m_graph.stateLabel(i);
-  if (!m_graph.stateLabelstring(label.labelindex).isEmpty()) {
+  if (!m_graph.stateLabelstring(label.labelindex()).isEmpty()) {
     glStartName(so_slabel, i);
-    Color3f fill = Color3f((std::max)(label.color[0], label.selected), (std::min)(label.color[1], 1.0f - label.selected), (std::min)(label.color[2], 1.0f - label.selected));
+    Color3f fill = Color3f((std::max)(label.color(0), label.selected()), (std::min)(label.color(1), 1.0f - label.selected()), (std::min)(label.color(2), 1.0f - label.selected()));
     glColor3fv(fill);
     if (gl2ps())
     {
-      Coord3D pos = label.pos;
-      pos.x -= m_camera->pixelsize * m_texturedata->state_widths[label.labelindex] / 2;
-      pos.y -= m_camera->pixelsize * m_texturedata->state_heights[label.labelindex] / 2;
+      Coord3D pos = label.pos();
+      pos.x -= m_camera->pixelsize * m_texturedata->state_widths[label.labelindex()] / 2;
+      pos.y -= m_camera->pixelsize * m_texturedata->state_heights[label.labelindex()] / 2;
       glRasterPos3fv(pos);
-      gl2psText(m_graph.stateLabelstring(label.labelindex).toUtf8(), "", 10);
+      gl2psText(m_graph.stateLabelstring(label.labelindex()).toUtf8(), "", 10);
     }
     else
     {
       glPushMatrix();
 
-      m_camera->billboard_cylindrical(label.pos);
+      m_camera->billboard_cylindrical(label.pos());
       glTranslatef(0, 0, m_size_node * m_camera->pixelsize * 1.01); // Position state label above state number
-      drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex);
+      drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex());
 
       glPopMatrix();
     }
@@ -847,7 +847,7 @@ void GLScene::renderStateNumber(GLuint i)
   glStartName(so_node, i);
   if (gl2ps())
   {
-    Coord3D pos = node.pos;
+    Coord3D pos = node.pos();
     pos.x -= m_camera->pixelsize * m_texturedata->number_widths[i] / 2;
     pos.y -= m_camera->pixelsize * m_texturedata->number_heights[i] / 2;
     pos.z += m_size_node*m_camera->pixelsize;
@@ -858,8 +858,8 @@ void GLScene::renderStateNumber(GLuint i)
   {
     glPushMatrix();
 
-    glColor3f(node.selected, 0.0, 0.0);
-    m_camera->billboard_spherical(node.pos);
+    glColor3f(node.selected(), 0.0, 0.0);
+    m_camera->billboard_spherical(node.pos());
     glTranslatef(0, 0, m_size_node * m_camera->pixelsize);
     drawNumber(*m_vertexdata, *m_texturedata, i);
 
@@ -871,18 +871,18 @@ void GLScene::renderStateNumber(GLuint i)
 void GLScene::renderHandle(GLuint i)
 {
   Graph::Node& handle = m_graph.handle(i);
-  if (handle.selected > 0.1 || handle.locked)
+  if (handle.selected() > 0.1 || handle.locked())
   {
-    Color3f line(2 * handle.selected - 1.0f, 0.0f, 0.0f);
+    Color3f line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
     Color3f fill(1.0f, 1.0f, 1.0f);
-    if (handle.locked)
+    if (handle.locked())
       fill = Color3f(0.7f, 0.7f, 0.7f);
 
     glDisable(GL_LINE_SMOOTH);
     glStartName(so_handle, i);
     glPushMatrix();
 
-    m_camera->billboard_cylindrical(handle.pos);
+    m_camera->billboard_cylindrical(handle.pos());
     drawHandle(*m_vertexdata, line, fill);
 
     glPopMatrix();
@@ -895,7 +895,7 @@ void GLScene::renderHandle(GLuint i)
 // GLScene public methods
 //
 
-GLScene::GLScene(Graph::Graph &g, float device_pixel_ratio)
+GLScene::GLScene(Graph::Graph& g, float device_pixel_ratio)
   : m_graph(g),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
@@ -1228,12 +1228,12 @@ void GLScene::renderLatexGraphics(QString filename, float aspectRatio)
 QString GLScene::tikzNode(size_t i, float aspectRatio)
 {
   Graph::NodeNode& node = m_graph.node(i);
-  Color3f line(node.color);
+  Color3f line(node.color());
 
   QString ret = "\\definecolor{currentcolor}{rgb}{%1,%2,%3}\n\\node at (%4pt, %5pt) [%6state, draw=currentcolor] (state%7) {%7};\n";
 
   ret = ret.arg(line.r, 0, 'f', 3).arg(line.g, 0, 'f', 3).arg(line.b, 0, 'f', 3);
-  ret = ret.arg(node.pos.x / 10.0f * aspectRatio, 6, 'f').arg(node.pos.y / 10.0f, 6, 'f');
+  ret = ret.arg(node.pos().x / 10.0f * aspectRatio, 6, 'f').arg(node.pos().y / 10.0f, 6, 'f');
   ret = ret.arg(m_graph.initialState() == i ? "init" : "");
   ret = ret.arg(i);
 
@@ -1245,11 +1245,11 @@ QString GLScene::tikzEdge(size_t i, float aspectRatio)
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   Graph::Edge edge = m_graph.edge(i);
   Coord3D ctrl[4];
-  Coord3D &from = ctrl[0];
-  Coord3D &to = ctrl[3];
-  Coord3D via = m_graph.handle(i).pos;
-  from = m_graph.node(edge.from).pos;
-  to = m_graph.node(edge.to).pos;
+  Coord3D& from = ctrl[0];
+  Coord3D& to = ctrl[3];
+  Coord3D via = m_graph.handle(i).pos();
+  from = m_graph.node(edge.from()).pos();
+  to = m_graph.node(edge.to()).pos();
 
   // Calculate control points from handle
   ctrl[1] = via * 1.33333f - (from + to) / 6.0f;
@@ -1259,7 +1259,7 @@ QString GLScene::tikzEdge(size_t i, float aspectRatio)
 
   // For self-loops, ctrl[1] and ctrl[2] need to lie apart, we'll spread
   // them in x-y direction.
-  if (edge.from == edge.to)
+  if (edge.from() == edge.to())
   {
     Coord3D diff = ctrl[1] - ctrl[0];
     diff = diff.cross(Coord3D(0, 0, 1));
@@ -1271,8 +1271,8 @@ QString GLScene::tikzEdge(size_t i, float aspectRatio)
   }
 
   QString ret = "\\draw [transition] (state%1) .. node[auto] {%3} controls (%4pt, %5pt)%6 .. (state%2);\n";
-  ret = ret.arg(edge.from).arg(edge.to);
-  ret = ret.arg(m_graph.transitionLabelstring(label.labelindex));
+  ret = ret.arg(edge.from()).arg(edge.to());
+  ret = ret.arg(m_graph.transitionLabelstring(label.labelindex()));
   ret = ret.arg(ctrl[1].x / 10.0f * aspectRatio, 6, 'f').arg(ctrl[1].y / 10.0f, 6, 'f');
   ret = ret.arg(extraControls);
 
