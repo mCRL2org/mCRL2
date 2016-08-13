@@ -34,7 +34,7 @@
 
 #define RES_ARROWHEAD  30  ///< Amount of segments in arrowhead cone
 #define RES_ARC        20  ///< Amount of segments for edge arc
-#define RES_NODE_SLICE 16
+#define RES_NODE_SLICE 64  ///< Number of segments from which a circle representing a node is constructed.
 #define RES_NODE_STACK  4
 
 #define SIZE_HANDLE     8
