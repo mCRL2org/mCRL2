@@ -400,8 +400,8 @@ namespace Graph
       NodeNode()=default;
 
       /// \brief Constructor.
-      NodeNode(const Coord3D& p)
-        : NodeWithColor(p)
+      NodeNode(const Coord3D& p, const bool is_probabilistic)
+        : NodeWithColor(p), m_is_probabilistic(is_probabilistic)
       {}
 
       /// \brief Constructor

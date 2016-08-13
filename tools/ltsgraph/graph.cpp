@@ -13,7 +13,7 @@
 #include <QtOpenGL>
 
 #include "graph.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -85,11 +85,64 @@ namespace Graph
     {
       private:
         graph_t m_graph;
+
+        // This local function adds a probabilistic state to the data structures of this graph.
+        // For each probabilistic node with two or more outgoing transitions a new node is drawn.
+        // For each probability/state pair a new transition is generated labelled with the probability.
+        // The index of the newly generated state is returned.
+        // If there is only one state in the probabilistic state, then the index of this new state
+        // is returned and no new transition is made. 
+        
+        size_t add_probabilistic_state(const typename graph_t::probabilistic_state_t& probabilistic_state,
+                                       const Coord3D& min, 
+                                       const Coord3D& max)
+        {
+          if (probabilistic_state.size()==1)
+          {
+            return probabilistic_state.begin()->state();
+          }
+          else
+          {
+            // There are multiple probabilistic states. Make a new state
+            // with outgoing probabilistic transitions to all states. 
+            size_t index_of_the_new_probabilistic_state=nodes.size();
+            const bool is_probabilistic=true;
+            nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_probabilistic));
+            stateLabelnodes.push_back(LabelNode(nodes[index_of_the_new_probabilistic_state].pos(),index_of_the_new_probabilistic_state));
+            
+            // The following map recalls where probabilities are stored in transitionLabels.
+            typedef std::map < typename graph_t::probabilistic_state_t::probability_t, size_t> probability_map_t;
+            probability_map_t probability_label_indices;
+            for(const typename graph_t::probabilistic_state_t::state_probability_pair& p: probabilistic_state)
+            {
+              // Find an index for the probabilistic label of the outgoing transition of the probabilistic state.
+              size_t label_index;
+              const typename probability_map_t::const_iterator i=probability_label_indices.find(p.probability());
+              if (i==probability_label_indices.end()) // not found
+              {
+                label_index=transitionLabels.size();
+                probability_label_indices[p.probability()]=label_index;
+                transitionLabels.push_back(LabelString(false,QString::fromStdString(pp(p.probability()))));
+              }
+              else
+              {
+                label_index=i->second;
+              }
+
+              edges.push_back(Edge(index_of_the_new_probabilistic_state,p.state()));
+              handles.push_back(Node((nodes[index_of_the_new_probabilistic_state].pos() + nodes[p.state()].pos()) / 2.0));
+              transitionLabelnodes.push_back(LabelNode((nodes[index_of_the_new_probabilistic_state].pos() + nodes[p.state()].pos()) / 2.0,label_index));
+            } 
+            return index_of_the_new_probabilistic_state;
+          }
+        }
+
       public:
         virtual bool is_tau(size_t labelindex) const
         {
           return transitionLabels[labelindex].is_tau();
         }
+
         virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max)
         {
           // Remove old graph (if it wasn't deleted yet) and load new one
@@ -114,7 +167,8 @@ namespace Graph
           // Position nodes randomly
           for (size_t i = 0; i < m_graph.num_states(); ++i)
           {
-            nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z))));
+            const bool is_not_probabilistic=false;
+            nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_not_probabilistic));
             stateLabelnodes.push_back(LabelNode(nodes[i].pos(),i));
           }
 
@@ -128,12 +182,14 @@ namespace Graph
           for (size_t i = 0; i < m_graph.num_transitions(); ++i)
           {
             mcrl2::lts::transition& t = m_graph.get_transitions()[i];
-            edges.push_back(Edge(t.from(),t.to()));
-            handles.push_back(Node((nodes[t.from()].pos() + nodes[t.to()].pos()) / 2.0));
-            transitionLabelnodes.push_back(LabelNode((nodes[t.from()].pos() + nodes[t.to()].pos()) / 2.0,t.label()));
+            size_t new_probabilistic_state=add_probabilistic_state(m_graph.probabilistic_state(t.to()),min,max);
+            edges.push_back(Edge(t.from(),new_probabilistic_state));
+            handles.push_back(Node((nodes[t.from()].pos() + nodes[new_probabilistic_state].pos()) / 2.0));
+            transitionLabelnodes.push_back(LabelNode((nodes[t.from()].pos() + nodes[new_probabilistic_state].pos()) / 2.0,t.label()));
           }
 
-          initialState = m_graph.initial_state();
+          /* initialState = m_graph.initial_state(); */
+          initialState = add_probabilistic_state(m_graph.initial_probabilistic_state(),min,max);
         }
     };
 
@@ -169,7 +225,7 @@ namespace Graph
   Graph::Graph()
   {
     m_type = mcrl2::lts::lts_lts;
-    m_impl = new detail::GraphImpl<mcrl2::lts::lts_lts_t>;
+    m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_lts_t>;
     m_empty = QString("");
   }
 
@@ -214,21 +270,21 @@ namespace Graph
     {
       case mcrl2::lts::lts_aut:
         m_type = mcrl2::lts::lts_aut;
-        // m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_aut_t>;
-        m_impl = new detail::GraphImpl<mcrl2::lts::lts_aut_t>;
+        m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_aut_t>;
+        // m_impl = new detail::GraphImpl<mcrl2::lts::lts_aut_t>;
         break;
       case mcrl2::lts::lts_dot:
         throw mcrl2::runtime_error("Cannot read a .dot file anymore.");
       case mcrl2::lts::lts_fsm:
         m_type = mcrl2::lts::lts_fsm;
-        // m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_fsm_t>;
-        m_impl = new detail::GraphImpl<mcrl2::lts::lts_fsm_t>;
+        m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_fsm_t>;
+        // m_impl = new detail::GraphImpl<mcrl2::lts::lts_fsm_t>;
         break;
       case mcrl2::lts::lts_lts:
       default:
         m_type = mcrl2::lts::lts_lts;
-        // m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_lts_t>;
-        m_impl = new detail::GraphImpl<mcrl2::lts::lts_lts_t>;
+        m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_lts_t>;
+        // m_impl = new detail::GraphImpl<mcrl2::lts::lts_lts_t>;
         break;
     }
   }

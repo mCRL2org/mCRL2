@@ -332,9 +332,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   
   map < string, size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
-  size_t initial_state=l.add_and_reset_probabilistic_state(initial_probabilistic_state);
-  assert(initial_state==0);
-  l.set_initial_probabilistic_state(initial_state);
+  l.set_initial_probabilistic_state(initial_probabilistic_state); 
 
   detail::lts_aut_base::probabilistic_state probabilistic_target_state;
   while (!is.eof())

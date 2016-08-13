@@ -43,6 +43,8 @@ class probabilistic_state
   public:
 
     typedef typename lps::state_probability_pair< STATE, PROBABILITY > state_probability_pair;
+    typedef STATE state_t;
+    typedef PROBABILITY probability_t;
     typedef typename std::vector<state_probability_pair>::iterator iterator;
     typedef typename std::vector<state_probability_pair>::const_iterator const_iterator;
 
@@ -62,7 +64,7 @@ class probabilistic_state
 
     /** \brief Creates an empty LTS.
      */
-    probabilistic_state(const STATE& s)
+    explicit probabilistic_state(const STATE& s)
       : m_probabilistic_state(1,state_probability_pair(s,PROBABILITY::one()))
     {
       shrink_to_fit();
