@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test_push_dist_outward)
     "init X(false);\n"
     ;
 
-  std::string result =
+  std::string result1 =
     "sort Coin = struct head_ | tail_;\n"
     "     Enum3 = struct e2_3 | e1_3 | e0_3;\n"
     "\n"
@@ -208,8 +208,64 @@ BOOST_AUTO_TEST_CASE(test_push_dist_outward)
     "init dist c: Coin[1 / 2] . P(2, dc1, dc, c, false);\n"
     ;
 
+std::string result2 =
+    "sort Coin = struct head_ | tail_;\n"
+    "     Enum3 = struct e2_3 | e1_3 | e0_3;\n"
+    "\n"
+    "map  C3_: Enum3 # Coin # Coin # Coin -> Coin;\n"
+    "     C3_1: Enum3 # Pos # Pos # Pos -> Pos;\n"
+    "     C3_2: Enum3 # Bool # Bool # Bool -> Bool;\n"
+    "     C3_3: Enum3 # Real # Real # Real -> Real;\n"
+    "\n"
+    "var  x1,y3,y2,y1: Coin;\n"
+    "     e1,e2,e3,e4: Enum3;\n"
+    "     x2,y6,y5,y4: Pos;\n"
+    "     x3,y9,y8,y7: Bool;\n"
+    "     x4,y12,y11,y10: Real;\n"
+    "eqn  C3_(e1, x1, x1, x1)  =  x1;\n"
+    "     C3_(e2_3, y3, y2, y1)  =  y3;\n"
+    "     C3_(e1_3, y3, y2, y1)  =  y2;\n"
+    "     C3_(e0_3, y3, y2, y1)  =  y1;\n"
+    "     C3_1(e2, x2, x2, x2)  =  x2;\n"
+    "     C3_1(e2_3, y6, y5, y4)  =  y6;\n"
+    "     C3_1(e1_3, y6, y5, y4)  =  y5;\n"
+    "     C3_1(e0_3, y6, y5, y4)  =  y4;\n"
+    "     C3_2(e3, x3, x3, x3)  =  x3;\n"
+    "     C3_2(e2_3, y9, y8, y7)  =  y9;\n"
+    "     C3_2(e1_3, y9, y8, y7)  =  y8;\n"
+    "     C3_2(e0_3, y9, y8, y7)  =  y7;\n"
+    "     C3_3(e4, x4, x4, x4)  =  x4;\n"
+    "     C3_3(e2_3, y12, y11, y10)  =  y12;\n"
+    "     C3_3(e1_3, y12, y11, y10)  =  y11;\n"
+    "     C3_3(e0_3, y12, y11, y10)  =  y10;\n"
+    "\n"
+    "act  throw: Coin;\n"
+    "     success;\n"
+    "\n"
+    "glob dc5: Bool;\n"
+    "     dc4,dc3,dc2,dc1,dc: Coin;\n"
+    "\n"
+    "proc P(s1_X: Pos, c1_X,c2_X,c_X: Coin, head_seen_X: Bool) =\n"
+    "       (s1_X == 2 && c_X == head_ && head_seen_X) ->\n"
+    "         success .\n"
+    "         P(s1_X = 3, c1_X = dc2, c2_X = dc3, c_X = dc4, head_seen_X = dc5)\n"
+    "     + sum e_X: Enum3.\n"
+    "         C3_2(e_X, s1_X == 2 && c_X == tail_, s1_X == 2 && c_X == head_ && !head_seen_X, s1_X == 1) ->\n"
+    "         throw(C3_(e_X, c2_X, c1_X, c_X)) .\n"
+    "         dist c3_X,c4_X: Coin[1 / 4] .\n"
+    "         P(s1_X = 2, c1_X = c3_X, c2_X = c4_X, c_X = C3_(e_X, c2_X, c1_X, c_X), head_seen_X = C3_2(e_X, false, true, head_seen_X));\n"
+    "\n"
+    "init dist c: Coin[1 / 2] . P(1, dc1, dc, c, false);\n"
+    ;
+
+
+
   stochastic_specification spec=linearise(text);
-  BOOST_CHECK_EQUAL(lps::pp(spec),result);
+  // The result can either be result1 or result2.
+  if (lps::pp(spec)!=result1)
+  {
+    BOOST_CHECK_EQUAL(lps::pp(spec),result2);
+  }
 }  
 
 
