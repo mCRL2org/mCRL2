@@ -144,7 +144,7 @@ class lps2lts_algorithm
     void save_deadlock(const lps::state& state);
     void save_error(const lps::state& state);
     std::pair<size_t, bool> add_target_state(const lps::state& source_state, const lps::state& target_state);
-    bool add_transition(const lps::state& source_state, next_state_generator::transition_t& transition);
+    bool add_transition(const lps::state& source_state, const next_state_generator::transition_t& transition);
     void get_transitions(const lps::state& state,
                          std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
                          next_state_generator::enumerator_queue_t& enumeration_queue
@@ -165,7 +165,8 @@ class lps2lts_algorithm
                  (const next_state_generator::transition_t::state_probability_list& initial_states);
     probabilistic_state<size_t, lps::probabilistic_data_expression> create_a_probabilistic_state_from_target_distribution(
                const size_t base_state_number,
-               const next_state_generator::transition_t::state_probability_list& other_probabilities);
+               const next_state_generator::transition_t::state_probability_list& other_probabilities,
+               const lps::state& source_state);
 
 
 };

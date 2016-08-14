@@ -44,7 +44,8 @@ probabilistic_state<size_t, probabilistic_data_expression> lps2lts_algorithm::tr
 
 probabilistic_state<size_t, probabilistic_data_expression> lps2lts_algorithm::create_a_probabilistic_state_from_target_distribution(
                const size_t base_state_number, 
-               const next_state_generator::transition_t::state_probability_list& other_probabilities) 
+               const next_state_generator::transition_t::state_probability_list& other_probabilities,
+               const lps::state& source_state) 
 {
   if (other_probabilities.empty())
   {
@@ -64,8 +65,8 @@ probabilistic_state<size_t, probabilistic_data_expression> lps2lts_algorithm::cr
       throw mcrl2::runtime_error("The probability " + data::pp(i->probability()) + " is not a proper rational number.");
     }
     residual_probability=data::sort_real::minus(residual_probability,i->probability());
-    size_t state_number=m_state_numbers.put(i->state()).first;
-    result.push_back(state_probability_pair<size_t, probabilistic_data_expression>(state_number, i->probability()));
+    const std::pair<size_t, bool> probability_destination_state_number=add_target_state(source_state,i->state());
+    result.push_back(state_probability_pair<size_t, probabilistic_data_expression>(probability_destination_state_number.first, i->probability()));
   }
 
   residual_probability= (m_generator->get_rewriter())(residual_probability);
@@ -877,7 +878,7 @@ void lps2lts_algorithm::print_target_distribution_in_aut_format(
 }
 
 
-bool lps2lts_algorithm::add_transition(const lps::state& source_state, next_state_generator::transition_t& transition)
+bool lps2lts_algorithm::add_transition(const lps::state& source_state, const next_state_generator::transition_t& transition)
 {
 
   size_t source_state_number;
@@ -927,7 +928,8 @@ bool lps2lts_algorithm::add_transition(const lps::state& source_state, next_stat
     size_t number_of_a_new_probabilistic_state=m_output_lts.add_probabilistic_state(
                                     create_a_probabilistic_state_from_target_distribution(
                                                destination_state_number.first,
-                                               transition.other_target_states())); // Add a new probabilistic state.
+                                               transition.other_target_states(),
+                                               source_state)); // Add a new probabilistic state.
     m_output_lts.add_transition(mcrl2::lts::transition(source_state_number, action_label_number.first, number_of_a_new_probabilistic_state));
   }
 
@@ -1021,10 +1023,9 @@ void lps2lts_algorithm::generate_lts_breadth_todo_max_is_npos()
   {
     lps::state state=m_state_numbers.get(current_state);
     get_transitions(state,transitions,enumeration_queue);
-
-    for (std::vector<next_state_generator::transition_t>::iterator i = transitions.begin(); i != transitions.end(); i++)
+    for (const next_state_generator::transition_t& t: transitions)
     {
-      add_transition(state, *i);
+      add_transition(state, t);
     }
     transitions.clear();
 
@@ -1256,8 +1257,12 @@ void lps2lts_algorithm::generate_lts_depth(const next_state_generator::transitio
 
 void lps2lts_algorithm::generate_lts_random(const next_state_generator::transition_t::state_probability_list& initial_states)
 {
-//std::cerr << "TODO: PICK A RANDOM INITIAL STATE\n";
+  if (initial_states.size()>1)
+  {
+    mCRL2log(warning) << "The initial state is not selected at random, conform its distribution. One specific state is chosen.";
+  }
   lps::state state = initial_states.front().state();
+  
   std::vector<next_state_generator::transition_t> transitions;
   size_t current_state = 0;
   next_state_generator::enumerator_queue_t enumeration_queue;

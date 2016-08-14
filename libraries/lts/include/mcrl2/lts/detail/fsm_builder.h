@@ -143,7 +143,7 @@ class fsm_parameter
 
 /// \brief Transitions in an FSM
 ///
-/// \note The source and target are 1-based!
+/// \note All state numbers in an FSM file are larger or equal to 1. When reading one is subtracted.
 class fsm_transition
 {
   protected:
@@ -159,7 +159,7 @@ class fsm_transition
     {
       if (source == 0 || target == 0)
       {
-        throw mcrl2::runtime_error("transition has a zero coordinate!");
+        throw mcrl2::runtime_error("A transition contains a state with state number 0.");
       }
     }
 
@@ -169,7 +169,7 @@ class fsm_transition
       std::size_t source = utilities::parse_natural_number(source_text);
       if (source == 0)
       {
-        throw mcrl2::runtime_error("transition has a zero coordinate!");
+        throw mcrl2::runtime_error("A transition constains a source state with number 0.");
       }
       m_source = source - 1;
       m_target = parse_distribution(target_text);
