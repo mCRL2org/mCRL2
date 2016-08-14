@@ -73,8 +73,8 @@ namespace Graph
           return QString::fromStdString(label);
         }
 
-        template <typename label_t>
-        QString stateLabel(const label_t& label)
+        template <typename label_t, class FSM>
+        QString stateLabel(const label_t& label, const FSM&)
         {
           return QString::fromStdString(label);
         }
@@ -161,7 +161,7 @@ namespace Graph
 
           for (size_t i = 0; i < m_graph.num_state_labels(); ++i)
           {
-            stateLabels.push_back(stateLabel(m_graph.state_label(i)));
+            stateLabels.push_back(stateLabel(m_graph.state_label(i),m_graph));
           }
 
           // Position nodes randomly
@@ -200,24 +200,32 @@ namespace Graph
       return QString::fromStdString(mcrl2::lts::pp(label));
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_lts>(const mcrl2::lts::state_label_lts& label)
+    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_lts,mcrl2::lts::probabilistic_lts_lts_t>(
+                         const mcrl2::lts::state_label_lts& label,
+                         const mcrl2::lts::probabilistic_lts_lts_t&)
     {
       return QString::fromStdString(mcrl2::lts::pp(label));
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_empty>(const mcrl2::lts::state_label_empty& /*label*/)
+    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_empty,mcrl2::lts::probabilistic_lts_aut_t>(
+                         const mcrl2::lts::state_label_empty& /*label*/,
+                         const mcrl2::lts::probabilistic_lts_aut_t&)
     {
       return QString("");
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_dot>(const mcrl2::lts::state_label_dot& label)
+    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_dot,mcrl2::lts::probabilistic_lts_dot_t>(
+                         const mcrl2::lts::state_label_dot& label,
+                         const mcrl2::lts::probabilistic_lts_dot_t&)
     {
       return QString::fromStdString(mcrl2::lts::pp(label));
     }
     template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_fsm>(const mcrl2::lts::state_label_fsm& label)
+    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_fsm,mcrl2::lts::probabilistic_lts_fsm_t>(
+                         const mcrl2::lts::state_label_fsm& label, 
+                         const mcrl2::lts::probabilistic_lts_fsm_t& lts)
     {
-      return QString::fromStdString(mcrl2::lts::pp(label));
+      return QString::fromStdString(lts.state_label_to_string(label));
     }
 
   }

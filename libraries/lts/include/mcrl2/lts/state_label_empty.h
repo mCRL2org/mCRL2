@@ -43,7 +43,14 @@ class state_label_empty
     {
       return !(*this==other);
     }
+
 };
+
+inline std::string pp(const state_label_empty& )
+{
+  return "empty";
+}
+
 
 } // namespace lts
 } // namespace mcrl2

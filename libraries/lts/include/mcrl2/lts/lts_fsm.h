@@ -21,7 +21,6 @@
 
 #include <string>
 #include <vector>
-#include <sstream>
 #include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/action_label_string.h"
@@ -51,29 +50,6 @@ class state_label_fsm:  public std::vector < size_t >
       std::vector < size_t >(v)
     {}
 };
-/** \brief Pretty print a state value of this FSM.
-    \details The label l is printed as (t1,...,tn).
-    \param[in] l  The state value to pretty print.
-    \return           The pretty-printed representation of value. */
-
-inline std::string pp(const state_label_fsm& l)
-{
-  std::string s;
-  s = "(";
-  for (size_t i=0; i<l.size(); ++i)
-  {
-    std::stringstream sNr;
-    sNr << l[i];
-    s += sNr.str();
-    if (i+1<l.size())
-    {
-      s += ",";
-    }
-  }
-  s += ")";
-  return s;
-}
-
 namespace detail
 {
 class lts_fsm_base
@@ -133,6 +109,26 @@ class lts_fsm_base
       return m_state_element_values[idx];
     }
 
+    /** \brief Pretty print a state value of this FSM.
+        \details The label l is printed as (t1,...,tn). It uses information from the lts.
+        \param[in] l  The state value to pretty print.
+        \return           The pretty-printed representation of value. */
+    inline std::string state_label_to_string(const state_label_fsm& l) const
+    {
+      std::string s;
+      s = "(";
+      for (size_t i=0; i<l.size(); ++i)
+      {
+        s += state_element_value(i,l[i]);
+        if (i+1<l.size())
+        {
+          s += ",";
+        }
+      }
+      s += ")";
+      return s;
+    }
+
     /** \brief Adds a string to the state element values for the idx-th
                position in a state vector. Returns the number given to this string.
         \param[in] idx The parameter index.
@@ -160,9 +156,7 @@ class lts_fsm_base
       if (m_state_element_values[parameter_index].size()==0)
       {
         // The domain for this parameter has no string; return the string "i"
-        std::stringstream number_stream;
-        number_stream << element_index;
-        return number_stream.str();
+        return std::to_string(element_index); 
       }
       assert(element_index<m_state_element_values[parameter_index].size());
       return m_state_element_values[parameter_index][element_index];
