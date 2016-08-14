@@ -17,6 +17,8 @@
 #ifndef MCRL2_LTS_STATE_LABEL_EMPTY_H
 #define MCRL2_LTS_STATE_LABEL_EMPTY_H
 
+#include "string"
+
 namespace mcrl2
 {
 namespace lts
