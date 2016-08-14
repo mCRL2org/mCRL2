@@ -1257,7 +1257,7 @@ void lps2lts_algorithm::generate_lts_depth(const next_state_generator::transitio
 
 void lps2lts_algorithm::generate_lts_random(const next_state_generator::transition_t::state_probability_list& initial_states)
 {
-  if (initial_states.size()>1)
+  if (++initial_states.begin()!=initial_states.end())  // There is more than one element in the set of initial states. 
   {
     mCRL2log(warning) << "The initial state is not selected at random, conform its distribution. One specific state is chosen.";
   }
