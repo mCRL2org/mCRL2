@@ -2383,13 +2383,11 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
         assert(FromRed->to_constln() == SpC);
         (void) SpC; //< avoid warning about unused variable
         fromred_visited_begin = FromRed->end;
-        if (RefB->inert_end() == fromred_visited_begin)
-        {
-            assert(RefB->constln() == SpC);
-            // skip inert transitions in FromRed.
-            fromred_visited_begin = RefB->inert_begin();
-        }
-        else  assert(RefB->constln() != SpC);
+        assert(RefB->inert_end() <= FromRed->begin ||
+                               (RefB->inert_begin() >= fromred_visited_begin &&
+                                   RefB->inert_end() > fromred_visited_begin));
+        assert(RefB->constln() != SpC); //< so there is no need to skip inert
+                                        //  transitions
 
         // 3.8r: while FromRed contains unvisited transitions do
         COROUTINE_WHILE (REFINE_RED_COLLECT_FROMRED,
