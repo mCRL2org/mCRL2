@@ -26,7 +26,9 @@
 #include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
 #include <list>          // for the list of B_to_C_descriptors
-#include <string>        // for debug_id()
+#ifndef NDEBUG
+    #include <string>    // for debug_id()
+#endif
 
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
@@ -288,11 +290,13 @@ class state_info_entry
     bool surely_has_transition_to(const constln_t* SpC) const;
     bool surely_has_no_transition_to(const constln_t* SpC) const;
 
+#ifndef NDEBUG
     std::string debug_id() const
     {
         assert(state_info_begin() <= this);
         return "state " + std::to_string(this - state_info_begin());
     }
+#endif
 
     static state_info_const_ptr state_info_begin()  {  return s_i_begin;  }
     static permutation_const_iter_t permutation_begin()  { return perm_begin; }
@@ -756,6 +760,7 @@ class block_t
     /// \returns pointer to the new (red) block
     block_t* split_off_red(permutation_iter_t red_nonbottom_begin);
 
+#ifndef NDEBUG
     std::string debug_id() const
     {
         return "block [" + std::to_string(begin() - state_info_entry::permutation_begin()) +
@@ -763,6 +768,7 @@ class block_t
                      ")" +
                      (BLOCK_NO_SEQNR != seqnr()?" (#" + std::to_string(seqnr()) + ")":"");
     }
+#endif
 };
 
 
@@ -920,11 +926,13 @@ class constln_t
         }
     }
 
+#ifndef NDEBUG
     std::string debug_id() const
     {
         return "constellation [" + std::to_string(begin() - state_info_entry::permutation_begin()) +
                              "," + std::to_string(end() - state_info_entry::permutation_begin()) + ")";
     }
+#endif
 };
 
 
@@ -1102,6 +1110,7 @@ class pred_entry
     succ_iter_t succ;
     state_info_ptr source;
 
+#ifndef NDEBUG
     std::string debug_id() const
     {
         return "transition from " + std::to_string(source - state_info_entry::state_info_begin()) +
@@ -1112,6 +1121,7 @@ class pred_entry
         return "from " + std::to_string(source - state_info_entry::state_info_begin()) +
                " to " + std::to_string(succ->target-state_info_entry::state_info_begin());
     }
+#endif
 };
 
 
@@ -1140,11 +1150,13 @@ class out_descriptor
         out_descriptor* next_free;
         void* null_if_free;
     };
+#ifndef NDEBUG
     bool is_free() const
     {
         return nullptr ==
                        reinterpret_cast<const free_entry*>(this)->null_if_free;
     }
+#endif
   public:
 
     out_descriptor(succ_iter_t iter)
@@ -1283,6 +1295,7 @@ class B_to_C_descriptor
                                           end <= to_constln()->postprocess_end;
     }
 
+#ifndef NDEBUG
     /// convert to a string (for debugging)
     std::string debug_id() const
     {
@@ -1311,6 +1324,7 @@ class B_to_C_descriptor
         }
         return result;
     }
+#endif
 };
 
 
@@ -1435,16 +1449,20 @@ class part_trans_t
         succ(m),
         B_to_C(m),
         constln_slice_pool()
-    {  }
+    {
+#ifndef NDEBUG
+        succ.reserve(1); //< make sure that the succ array is not a nullptr;
+                         // otherwise, an assertion in the out_descriptor pool
+                         // may fail because &*succ.begin() == nullptr.
+#endif
+    }
     ~part_trans_t()
     {
         assert(B_to_C.empty());
         assert(succ.empty());
         assert(pred.empty());
     }
-  private:
-    static const char delete_out_descriptors[];
-  public:
+
     /// clear allocated memory
     void clear()
     {
@@ -2079,6 +2097,8 @@ inline void block_t::SetFromRed(B_to_C_desc_iter_t const new_fromred)
 /// \details If the current constellation pointer happens to be set to `SpC` or
 /// its successor, the function can quickly find out whether the state has a
 /// transition to `SpC`.
+/// The function should not be called for the constellation in which the state
+/// resides.
 /// \param SpC constellation of interest
 /// \returns true if the state is known to have a transition to `SpC`
 /// \memberof state_info_entry
@@ -2111,6 +2131,8 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* const
 /// \details If the current constellation pointer happens to be set to `SpC` or
 /// its successor, the function can quickly find out whether the state has a
 /// transition to `SpC`.
+/// The function should not be called for the constellation in which the state
+/// resides.
 /// \param SpC constellation of interest
 /// \returns true if the state is known to have _no_ transition to `SpC`
 /// \memberof state_info_entry

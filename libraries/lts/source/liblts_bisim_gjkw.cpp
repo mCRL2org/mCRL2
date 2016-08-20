@@ -8,6 +8,17 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 /// \file liblts_bisim_gjkw.cpp
+///
+/// \brief O(m log n)-time stuttering equivalence algorithm
+///
+/// \details This file implements the efficient partition refinement algorithm
+/// by Groote / Jansen / Keiren / Wijs to calculate the stuttering equivalence
+/// quotient of a Kripke structure.  (Labelled transition systems are converted
+/// to Kripke structures before the main algorithm).
+/// The file accompanies the planned publication in the ACM Trans. Comput. Log.
+/// Log. special issue for TACAS 2016, to appear in 2017.
+///
+/// \author David N. Jansen, Radboud Universiteit, Nijmegen, The Netherlands
 
 #include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
 #include "mcrl2/lts/lts_lts.h"
@@ -52,7 +63,6 @@ constln_t* constln_t::nontrivial_first = nullptr;
 #ifndef NDEBUG
     const char part_state_t::delete_constellations[] = "delete constellations";
     const char part_state_t::delete_blocks[] = "delete blocks";
-    const char part_trans_t::delete_out_descriptors[]="delete out_descriptors";
 #endif
 
 /// \details `split_off_blue()` and `split_off_red()` use the same complexity
@@ -1367,6 +1377,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
 
     // initialise states and succ slices
     part_st.state_info.begin()->set_pred_begin(part_tr.pred.begin());
+    assert(nullptr != &*part_tr.succ.begin()); //< needed to ensure that the
+            // constln_slice_pool does not regard too many elements as free.
     part_st.state_info.begin()->set_succ_begin(part_tr.succ.begin());
     for (state_type s = 0; s < get_nr_of_states(); ++s)
     {
