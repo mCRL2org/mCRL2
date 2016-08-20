@@ -160,14 +160,6 @@ class term_list:public aterm
       return *this;
     }
 
-    /// \brief Conversion to aterm_list.
-    /// \deprecated
-    /// \return This list as an aterm_list.
-    operator term_list<aterm>() const
-    {
-      return atermpp::down_cast<term_list<aterm> >(*this);
-    }
-
     /// \brief Returns the tail of the list.
     /// \return The tail of the list.
     const term_list<Term>& tail() const

@@ -44,7 +44,7 @@ class data_type_checker: public sort_type_checker
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
      *  \param[in] l A list of variables that has not been type checked.
-     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+     *  \return    a variable list which has been typechecked.
      **/
     variable_list operator()(const variable_list& l);
 

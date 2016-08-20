@@ -692,16 +692,8 @@ void parse_variables(std::istream& in,
   if (!text.empty())
   {
     data_vars = detail::parse_variables_new(text);
-
-    atermpp::aterm_list temporary_data_vars = data_vars;
     data_type_checker type_checker(data_spec);
-    temporary_data_vars = type_checker(data_vars);
-
-    if (temporary_data_vars == atermpp::aterm_list(atermpp::aterm()))
-    {
-      throw mcrl2::runtime_error("Error while type checking data variable declarations.");
-    }
-    data_vars = variable_list(temporary_data_vars);
+    data_vars = type_checker(data_vars); 
 
     // Undo sort renamings for compatibility with type checker
     // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
