@@ -44,7 +44,7 @@ process::action act(const std::string& name, data_expression_list parameters)
 void test_multi_actions(const process::action_list& a, const process::action_list& b, const data_expression& expected_result = data::undefined_data_expression())
 {
   std::cout << "--- test_multi_actions ---" << std::endl;
-  data_expression result = equal_multi_actions(a, b);
+  data_expression result = equal_multi_actions(multi_action(a), multi_action(b));
   std::cout << "a               = " << lps::pp(a) << std::endl;
   std::cout << "b               = " << lps::pp(b) << std::endl;
   std::cout << "result          = " << lps::pp(result) << std::endl;
@@ -82,8 +82,8 @@ void test_equal_multi_actions()
   test_multi_actions(a12, a34);
   test_multi_actions(a12b1, a34b2);
 
-  data_expression m1 = equal_multi_actions(a12, a34);
-  data_expression m2 = equal_multi_actions(a34, a12);
+  data_expression m1 = equal_multi_actions(multi_action(a12), multi_action(a34));
+  data_expression m2 = equal_multi_actions(multi_action(a34), multi_action(a12));
   data_expression n1 = data::detail::normalize_equality(m1);
   data_expression n2 = data::detail::normalize_equality(m2);
   data_expression p1 = data::detail::normalize_and_or(n1);

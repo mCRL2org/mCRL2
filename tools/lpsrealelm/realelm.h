@@ -256,14 +256,6 @@ class summand_information
       return nextstate_context_combinations.end();
     }
 
-    /* vector < vector < linear_inequality > > :: const_iterator residual_inequalities_begin() const
-    { return residual_inequalities.begin();
-    }
-
-    vector < vector < linear_inequality > > :: const_iterator residual_inequalities_end() const
-    { return residual_inequalities.end();
-    } */
-
     static bool power_of_2(const size_t i)
     {
       size_t k=2;
@@ -292,6 +284,8 @@ class summand_information
       data_expression xi_u=new_xi_variable.get_upperbound();
       data_expression substituted_lowerbound = replace_free_variables(xi_t,summand_real_nextstate_map);
       data_expression substituted_upperbound = replace_free_variables(xi_u,summand_real_nextstate_map);
+std::cerr << "ADD " << xi_t << "   " << xi_u << "\n";
+std::cerr << "INFO " << get_multi_action() << "   " << get_assignments() << "\n";
 
       // First check whether the new value for the new xi variable is equal to itself.
       // I do not know whether optimisation below is correct.
@@ -336,6 +330,7 @@ class summand_information
       data_expression t=substituted_lowerbound;
       data_expression u=substituted_upperbound;
       detail::comparison_t comparison=new_xi_variable.comparison_operator();
+std::cerr << "ADD " << t << "   " << u << "\n";
 
       std::vector < std::vector < linear_inequality > > new_nextstate_context_combinations;
       for (std::vector < std::vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin();
@@ -356,6 +351,7 @@ class summand_information
         // we can simply take vec_lin_eq to remain untouched and we do not have to consider
         // t<u and t>u.
 
+std::cerr << "OLD INEQUALITIES " << pp_vector(vec_lin_eq) << "\n";
         vec_lin_eq.push_back(linear_inequality(t,u,comparison,r));
         if (!is_inconsistent(vec_lin_eq,r))
         {
@@ -382,7 +378,7 @@ class summand_information
         }
       }
       nextstate_context_combinations.swap(new_nextstate_context_combinations);
-// std::cerr << nextstate_context_combinations.size() << " ";
+for (std::vector < std::vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin(); i!=nextstate_context_combinations.end(); ++i){ std::cerr << "EQS " << pp_vector(*i) << "\n"; }
     }
 };
 

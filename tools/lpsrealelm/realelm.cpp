@@ -573,6 +573,7 @@ static void normalize_specification(
           } */
 
           // First check whether a similar summand with the same action, sum variables, and assignment already 
+          // exists. 
           // exists. If so, merge the two.
           
           bool found=false;
@@ -801,6 +802,7 @@ static void add_inequalities_to_context_postponed(
           }
           else
           {
+std::cerr << "ADD INEQUALITY " << pp(*i) << "\n";
             inequalities_to_add_lhs_size.push_back(i->lhs().size()); // store the number of variables at the lhs.
             inequalities_to_add_lhs.push_back(left);
             inequalities_to_add_rhs.push_back(right);
@@ -1076,8 +1078,10 @@ stochastic_specification realelm(stochastic_specification s, const size_t max_it
         std::vector < linear_inequality > condition3;
         remove_redundant_inequalities(condition1,condition3,r);
 
-        if (!is_inconsistent(condition3,r))
+        if (!condition3.empty() && !is_inconsistent(condition3,r))
         {
+          mCRL2log(debug) << "Add new conditions " << pp_vector(condition3) << "\nin summand " << i.get_real_summation_variables() << "  " << i.get_multi_action() << "  " << i.get_assignments() << "\n" << 
+                "Linear inequality " << pp_vector(*nextstate_combination) << "\n";; 
           // condition contains the inequalities over the process parameters
           add_inequalities_to_context_postponed(new_inequalities_sizes,
                                                 new_inequalities_lhss,
