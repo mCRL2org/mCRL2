@@ -802,7 +802,6 @@ static void add_inequalities_to_context_postponed(
           }
           else
           {
-std::cerr << "ADD INEQUALITY " << pp(*i) << "\n";
             inequalities_to_add_lhs_size.push_back(i->lhs().size()); // store the number of variables at the lhs.
             inequalities_to_add_lhs.push_back(left);
             inequalities_to_add_rhs.push_back(right);

@@ -1540,7 +1540,6 @@ namespace detail
       bool is_inconsistent(const std::vector < linear_inequality >& inequalities_in_) const
       {
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
-// std::cerr << "IS INCONSISTENT " << pp_vector(inequalities_in) << "\n";
         cache_type* current_root=m_cache;
         for(const linear_inequality& l: inequalities_in)
         {
@@ -1562,24 +1561,20 @@ namespace detail
           {
             if (current_root->m_node==true_end_node)
             {
-// std::cerr << "IS INCONSISTENT: TRUE 1\n";
               return true;
             }
             else
             {
-// std::cerr << "IS INCONSISTENT: FALSE 1\n";
               return false;
             }
           }
         }
         if (current_root->m_node==true_end_node)
         {
-// std::cerr << "IS INCONSISTENT: TRUE 2\n";
           return true;
         }
         else
         {
-// std::cerr << "IS INCONSISTENT: FALSE 2\n";
           return false;
         }
       }
@@ -1587,29 +1582,24 @@ namespace detail
       void add_inconsistent_inequality_set(const std::vector < linear_inequality >& inequalities_in_)
       {
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
-//std::cerr << "ADD INCONSISTENT " << pp_vector(inequalities_in) << "\n";
         cache_type** current_root=&m_cache;
         for(const linear_inequality& l: inequalities_in)
         {
-//std::cerr << "CHECK INPUT " << pp(l) << "\n";
           /* First walk down the three until an endnode is found
                 that with l<=current_root->m_inequality. */
           while ((*current_root)->m_node==intermediate_node && l>(*current_root)->m_inequality)
           {
-//std::cerr << "INSERT WHILE TREE " << pp((*current_root)->m_inequality) << "\n";
             current_root=&((*current_root)->m_non_present_branch.m_cache);
           }
           if ((*current_root)->m_node==intermediate_node)
           {
             if (l==(*current_root)->m_inequality)
             {
-//std::cerr << "INSERT EQUAL " << pp((*current_root)->m_inequality) << "\n";
               current_root=&((*current_root)->m_present_branch.m_cache);
               assert((*current_root)->m_node!=intermediate_node || l<(*current_root)->m_inequality);
             }
             else 
             {
-//std::cerr << "INSERT NODE BEFORE NEXT NODE " << pp((*current_root)->m_inequality) << "\n";
               // Add the node.
               inequality_inconsistency_cache new_false_node(false_end_node); 
               cache_type* new_node = inequality_inconsistency_cache(intermediate_node,l,new_false_node,*reinterpret_cast<inequality_inconsistency_cache*>(current_root)).m_cache;
@@ -1619,7 +1609,6 @@ namespace detail
           }
           else
           {
-//std::cerr << "AT AN ENDNODE " << pp((*current_root)->m_inequality) << "\n";
             if ((*current_root)->m_node==true_end_node)
             {
               // A shorter sequence that the linear inequality set is already inconsistent.
@@ -1630,7 +1619,6 @@ namespace detail
             else
             {
               // Add the remaining sequence. 
-//std::cerr << "AT A FALSE  ENDNODE " << pp((*current_root)->m_inequality) << "\n";
               inequality_inconsistency_cache new_false_node(false_end_node); 
               cache_type* new_node = inequality_inconsistency_cache(
                                    intermediate_node,l,new_false_node,*reinterpret_cast<inequality_inconsistency_cache*>(current_root)).m_cache;
@@ -1643,7 +1631,6 @@ namespace detail
         // We expect the current node to be a true_end_node. If not, we replace it by one.
         if ((*current_root)->m_node!=true_end_node)
         {
-//std::cerr << "SET TRUE  ENDNODE " << pp((*current_root)->m_inequality) << "\n";
           *current_root=inequality_inconsistency_cache(true_end_node).m_cache;
         }
       }
@@ -1668,7 +1655,6 @@ namespace detail
                   const inequality_consistency_cache& non_present_branch)
         : m_cache(new cache_type(node,inequality,present_branch,non_present_branch))
       {
-// std::cerr << "CREATED CONSISTENCY NODE: " << m_cache << " LEFT: " << m_cache->m_present_branch.m_cache << " RIGHT: " << m_cache->m_non_present_branch.m_cache << "\n";
       }  
 
       inequality_consistency_cache()
@@ -1678,7 +1664,6 @@ namespace detail
       inequality_consistency_cache(const node_type node)
         : m_cache(new cache_type(node))
       {
-// std::cerr << "CREATED CONSISTENCY NODE: " << m_cache << " VALUE: " << node << "\n";
       }  
 
       ~inequality_consistency_cache()
@@ -1693,80 +1678,65 @@ namespace detail
       bool is_consistent(const std::vector < linear_inequality >& inequalities_in_) const
       {
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
-// std::cerr << "IS CONSISTENT " << pp_vector(inequalities_in) << "\n";
         cache_type* current_root=m_cache;
         for(std::set < linear_inequality >::const_iterator i=inequalities_in.begin(); i!=inequalities_in.end(); ++i)
         {
-// std::cerr << "CHECK INPUT " << pp(*i) << "\n";
           while (current_root->m_node==intermediate_node && *i>current_root->m_inequality)
           {
-// std::cerr << "WHILE TREE " << pp(current_root->m_inequality) << "\n";
             current_root=current_root->m_non_present_branch.m_cache;
           }
           if (current_root->m_node==intermediate_node)
           {
             if (*i==current_root->m_inequality)
             {
-// std::cerr << "EQUAL TREE " << pp(current_root->m_inequality) << "\n";
               current_root=current_root->m_present_branch.m_cache;
             }
             else
             {
-//std::cerr << "IS CONSISTENT: FALSE 1\n";
               return false; // there are more inequalities than available in the tree. We know nothing about being consistent.
             }
-// std::cerr << "WASDADAN " << pp(current_root->m_inequality) << "\n";
             assert(current_root->m_node!=intermediate_node || *i<current_root->m_inequality);
           }
           else
           {
             if (current_root->m_node==false_end_node)
             {
-//std::cerr << "IS CONSISTENT: FALSE 2\n";
               return false;
             }
             if (i==inequalities_in.end())
             {
-//std::cerr << "IS CONSISTENT: TRUE 1\n";
               return true;
             }
             else 
             {
-//std::cerr << "IS CONSISTENT: FALSE 3\n";
               return false;
             }
           }
         }
-//std::cerr << "IS CONSISTENT: TRUE 2\n";
         return true;
       }
 
       void add_consistent_inequality_set(const std::vector < linear_inequality >& inequalities_in_)
       {
         std::set < linear_inequality > inequalities_in(inequalities_in_.begin(),inequalities_in_.end());
-// std::cerr << "ADD CONSISTENT " << pp_vector(inequalities_in) << "\n";
         cache_type** current_root=&m_cache;
         for(const linear_inequality& l: inequalities_in)
         {
-// std::cerr << "INSERT " << pp(l) << std::endl;
           /* First walk down the three until an endnode is found
              with l<=current_root->m_inequality. */
           while ((*current_root)->m_node==intermediate_node && l>(*current_root)->m_inequality)
           {
-// std::cerr << "INSERT WHILE TREE " << pp((*current_root)->m_inequality) << "\n";
             current_root=&((*current_root)->m_non_present_branch.m_cache);
           }
           if ((*current_root)->m_node==intermediate_node)
           {
             if (l==(*current_root)->m_inequality)
             {
-// std::cerr << "INSERT EQUAL TREE " << pp((*current_root)->m_inequality) << "\n";
               current_root=&((*current_root)->m_present_branch.m_cache);
               assert((*current_root)->m_node!=intermediate_node || l<(*current_root)->m_inequality);
             }
             else 
             {
-// std::cerr << "INSERT NODE BEFORE NEXT NODE " << pp((*current_root)->m_inequality) << "\n";
               // Add the node.
               inequality_consistency_cache new_true_node(true_end_node); 
               cache_type* new_node = inequality_consistency_cache(intermediate_node,l,new_true_node,*reinterpret_cast<inequality_consistency_cache*>(current_root)).m_cache;
@@ -1776,7 +1746,6 @@ namespace detail
           }
           else
           {
-// std::cerr << "INSERT ADD NODE " << pp((*current_root)->m_inequality) << "\n";
             // Add the remaining sequence. 
             inequality_consistency_cache new_true_node(true_end_node); 
             cache_type* new_node = inequality_consistency_cache(intermediate_node,l,new_true_node,*reinterpret_cast<inequality_consistency_cache*>(current_root)).m_cache;
