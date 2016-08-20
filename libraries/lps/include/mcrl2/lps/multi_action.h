@@ -61,7 +61,7 @@ class multi_action
     }
 
     /// \brief Constructor
-    multi_action(const process::action& l)
+    explicit multi_action(const process::action& l)
       : m_actions({ l }),
         m_time(data::undefined_real())
     {}

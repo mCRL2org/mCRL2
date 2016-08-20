@@ -15,8 +15,6 @@
 #include <cassert>
 #include <signal.h>
 
-#include "boost/lexical_cast.hpp"
-
 #include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
@@ -79,7 +77,7 @@ class lps2lts_tool : public lps2lts_base
     std::string m_filename;
 
   public:
-    ~lps2lts_tool() { m_options.m_rewriter.reset(); }
+    
     lps2lts_tool() :
       lps2lts_base("lps2lts",AUTHOR,
                    "generate an LTS from an LPS",
@@ -192,7 +190,7 @@ class lps2lts_tool : public lps2lts_base
                  "detect and report multiactions in the transitions system "
                  "from NAMES, a comma-separated list. Works like -a, except that multi-actions "
                  "are matched exactly, including data parameters.", 'm').
-      add_option("trace", make_optional_argument("NUM", boost::lexical_cast<string>(DEFAULT_MAX_TRACES)),
+      add_option("trace", make_optional_argument("NUM", std::to_string(lts_generation_options::default_max_traces)),
                  "Write a shortest trace to each state that is reached with an action from NAMES "
                  "from option --action, is a deadlock detected with --deadlock, or is a "
                  "divergence detected with --divergence to a file. "

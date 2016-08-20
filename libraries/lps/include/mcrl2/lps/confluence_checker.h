@@ -856,7 +856,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
   {
     mCRL2log(log::info) << "Confluent with all summands.";
     a_is_marked = true;
-    a_summand.multi_action() = make_ctau_action();
+    a_summand.multi_action() = multi_action(make_ctau_action());
   }
 }
 
