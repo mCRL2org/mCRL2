@@ -657,7 +657,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       const data::variable_list& d1 = q.process_parameters();
       data::data_expression_list gi = i->next_state(p.process_parameters());
-      lps::multi_action ai = i->multi_action().actions();
+      lps::multi_action ai(i->multi_action().actions());
       if (i->is_tau())
       {
         return close2(p, q, i, gi, data::data_expression_list(d1.begin(), d1.end()));
@@ -670,7 +670,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
           data::data_expression cj = j->condition();
           data::variable_list e1 = j->summation_variables();
           data::data_expression_list gj = j->next_state(q.process_parameters());
-          lps::multi_action aj = j->multi_action().actions();
+          lps::multi_action aj(j->multi_action().actions());
           pbes_expression expr = make_exists(e1, optimized_and(optimized_and(cj, equals(ai, aj)), close2(p, q, i, gi, gj)));
           v.push_back(expr);
         }

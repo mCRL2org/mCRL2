@@ -45,7 +45,7 @@ class multi_action
 
   public:
     /// \brief Constructor
-    multi_action(const process::action_list& actions = process::action_list(), data::data_expression time = data::undefined_real())
+    explicit multi_action(const process::action_list& actions = process::action_list(), data::data_expression time = data::undefined_real())
       : m_actions(actions), m_time(time)
     {
       assert(data::sort_real::is_real(m_time.sort()));

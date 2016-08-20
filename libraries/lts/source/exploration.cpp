@@ -747,11 +747,11 @@ void lps2lts_algorithm::save_actions(const lps::state& state, const next_state_g
     {
       filename = filename + "_" + pp(transition.action());
     }
-    for (process::action_list::const_iterator i = transition.action().actions().begin(); i != transition.action().actions().end(); i++)
+    for (const process::action& a: transition.action().actions())
     {
-      if (m_options.trace_actions.count(i->label().name()) > 0)
+      if (m_options.trace_actions.count(a.label().name()) > 0)
       {
-        filename = filename + "_" + pp(i->label().name());
+        filename = filename + "_" + core::pp(a.label().name());
       }
     }
     filename = filename + ".trc";
