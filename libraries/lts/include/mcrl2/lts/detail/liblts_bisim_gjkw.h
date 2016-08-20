@@ -1284,7 +1284,8 @@ class B_to_C_descriptor
     /// the block or not); however, this method is often called during changes
     /// in the block structure, and therefore `from_block()` is not as reliable
     /// as `to_constln()`.
-    /// The caller is encouraged to check `this->new_bottom_end`.
+    /// The caller is encouraged to check whether `this->new_bottom_end` lies
+    /// in the block as an additional consistency check.
     bool needs_postprocessing() const
     {
         assert(to_constln()->postprocess_end <= begin ||
@@ -1451,9 +1452,12 @@ class part_trans_t
         constln_slice_pool()
     {
 #ifndef NDEBUG
-        succ.reserve(1); //< make sure that the succ array is not a nullptr;
+        if (succ.empty())
+        {
+            succ.reserve(1); //< make sure that the succ array is not nullptr;
                          // otherwise, an assertion in the out_descriptor pool
                          // may fail because &*succ.begin() == nullptr.
+        }
 #endif
     }
     ~part_trans_t()
