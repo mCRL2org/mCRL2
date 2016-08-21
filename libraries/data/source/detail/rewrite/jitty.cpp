@@ -52,7 +52,9 @@ typedef const atermpp::detail::_aterm* unprotected_data_expression;    // Idem, 
 
 static const function_symbol this_term_is_in_normal_form()
 {
-  static const function_symbol this_term_is_in_normal_form(std::string("Rewritten@@term"),function_sort(sort_expression_list({ untyped_sort() }),untyped_sort()));
+  static const function_symbol this_term_is_in_normal_form(
+                         std::string("Rewritten@@term"),
+                         function_sort(sort_expression_list({ sort_expression(untyped_sort()) }),untyped_sort()));
   return this_term_is_in_normal_form;
 }
 
