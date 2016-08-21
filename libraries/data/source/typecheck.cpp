@@ -1016,7 +1016,7 @@ bool mcrl2::data::data_type_checker::MatchListOpHead(const function_sort& type, 
   }
   Res=new_result;
 
-  result=function_sort(sort_expression_list({ sort_list::list(sort_expression(Res)) }),Res);
+  result=function_sort(sort_expression_list({ sort_expression(sort_list::list(sort_expression(Res))) }),Res);
   return true;
 }
 
@@ -1058,7 +1058,7 @@ bool mcrl2::data::data_type_checker::MatchListOpTail(const function_sort& type, 
   }
   Res=new_result;
 
-  result=function_sort(sort_expression_list({ sort_list::list(sort_expression(Res)) }),
+  result=function_sort(sort_expression_list({ sort_expression(sort_list::list(sort_expression(Res))) }),
                    sort_list::list(sort_expression(Res)));
   return true;
 }
@@ -1105,7 +1105,7 @@ bool mcrl2::data::data_type_checker::MatchSetOpSet2Bag(const function_sort& type
   }
   Arg=new_result;
 
-  result=function_sort(sort_expression_list({ sort_set::set_(sort_expression(Arg)) }),
+  result=function_sort(sort_expression_list({ sort_expression(sort_set::set_(sort_expression(Arg))) }),
                   sort_bag::bag(sort_expression(Arg)));
   return true;
 }
@@ -1539,7 +1539,7 @@ bool mcrl2::data::data_type_checker::MatchSetOpSetCompl(const function_sort& typ
   }
   Res=temp_result;
 
-  result=function_sort(sort_expression_list({ sort_set::set_(sort_expression(Res)) }),sort_set::set_(sort_expression(Res)));
+  result=function_sort(sort_expression_list({ sort_expression(sort_set::set_(sort_expression(Res))) }),sort_set::set_(sort_expression(Res)));
   return true;
 }
 
@@ -1585,7 +1585,7 @@ bool mcrl2::data::data_type_checker::MatchBagOpBag2Set(const function_sort& type
   }
   Arg=temp_result;
 
-  result=function_sort(sort_expression_list({ sort_bag::bag(sort_expression(Arg)) }),sort_set::set_(sort_expression(Arg)));
+  result=function_sort(sort_expression_list({ sort_expression(sort_bag::bag(sort_expression(Arg))) }),sort_set::set_(sort_expression(Arg)));
   return true;
 }
 
