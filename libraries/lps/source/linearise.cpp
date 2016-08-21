@@ -4952,7 +4952,7 @@ class specification_basic_type:public boost::noncopyable
           return push_stack(procId,t1, data_expression_list({ stackframe }),stack,pcrlprcs,vars);
         }
 
-        return push_stack(procId,t1, data_expression_list({ stack.opns->emptystack }),
+        return push_stack(procId,t1, data_expression_list({ data_expression(stack.opns->emptystack) }),
                                            stack,pcrlprcs,vars);
       }
 
@@ -4965,14 +4965,14 @@ class specification_basic_type:public boost::noncopyable
         {
           return push_stack(procId,
                             t1,
-                            data_expression_list({ application(stack.opns->pop,stack.stackvar) }),
+                            data_expression_list({ data_expression(application(stack.opns->pop,stack.stackvar)) }),
                             stack,
                             pcrlprcs,
                             vars);
         }
         return push_stack(procId,
                           t1,
-                          data_expression_list({ stack.opns->emptystack }),
+                          data_expression_list({ data_expression(stack.opns->emptystack) }),
                           stack,
                           pcrlprcs,
                           vars);
@@ -5073,7 +5073,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (totalpars.empty())
       {
-        return data_expression_list({ stack.opns->emptystack });
+        return data_expression_list({ data_expression(stack.opns->emptystack) });
       }
 
       const variable& par=totalpars.front();
