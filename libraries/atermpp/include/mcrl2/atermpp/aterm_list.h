@@ -81,7 +81,7 @@ class term_list:public aterm
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
-    term_list(Iter first, Iter last, typename std::enable_if<std::is_base_of<
+    explicit term_list(Iter first, Iter last, typename std::enable_if<std::is_base_of<
                   std::bidirectional_iterator_tag,
                   typename std::iterator_traits<Iter>::iterator_category
               >::value>::type* = nullptr):
@@ -98,7 +98,7 @@ class term_list:public aterm
     /// \param convert_to_aterm A class with a () operation, which is applied to each element
     ///                   before it is put into the list.
     template <class Iter, class ATermConverter>
-    term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
+    explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
               typename std::enable_if<std::is_base_of<
                 std::bidirectional_iterator_tag,
                 typename std::iterator_traits<Iter>::iterator_category
@@ -115,7 +115,7 @@ class term_list:public aterm
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
-             term_list(Iter first, Iter last,
+    explicit term_list(Iter first, Iter last,
                        typename std::enable_if< !std::is_base_of<
                          std::bidirectional_iterator_tag,
                          typename std::iterator_traits<Iter>::iterator_category
@@ -132,10 +132,10 @@ class term_list:public aterm
     ///           than this function with random access iterators as arguments.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
-    ///  \param convert_to_aterm A class with a () operation, whic is applied to each element
+    /// \param convert_to_aterm A class with a () operation, whic is applied to each element
     ///                      before it is put into the list.
     template <class Iter, class  ATermConverter>
-             term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
+    explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
                        typename std::enable_if< !std::is_base_of<
                          std::random_access_iterator_tag,
                          typename std::iterator_traits<Iter>::iterator_category
@@ -146,8 +146,14 @@ class term_list:public aterm
       assert(!defined() || type_is_list());
     }
 
-    term_list(std::initializer_list<Term> init)
-      : aterm(detail::make_list_backward<Term, typename std::initializer_list<Term>::const_iterator, detail::do_not_convert_term<Term> >(init.begin(), init.end(), detail::do_not_convert_term<Term>()))
+    /// \brief A constructor based on an initializer list.
+    /// \details This constructor is made explicit to prevent silent transformations of constructor lists to the wrong list type.
+    /// \param init The initialiser list.
+    explicit term_list(std::initializer_list<Term> init)
+      : aterm(detail::make_list_backward<Term, 
+                                         typename std::initializer_list<Term>::const_iterator, 
+                                         detail::do_not_convert_term<Term> >
+                  (init.begin(), init.end(), detail::do_not_convert_term<Term>()))
     {
       assert(!defined() || type_is_list());
     }

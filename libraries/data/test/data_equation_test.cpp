@@ -28,7 +28,7 @@ void data_equation_test()
   data::function_symbol c("c", s);
   data::function_symbol f("f", s);
   variable x("x", s);
-  variable_list xl = { x };
+  variable_list xl ({ x });
 
   data_equation e(xl, c, x, f);
   BOOST_CHECK(e.variables() == xl);

@@ -221,7 +221,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
       //check formula
       Formula_Checker v_formula_checker(
         specification, rewrite_strategy(), f_time_limit, f_path_eliminator, solver_type(), f_apply_induction, f_counter_example, f_witness, f_dot_file_name.c_str());
-        v_formula_checker.check_formulas({ formula });
+        v_formula_checker.check_formulas(data_expression_list({ formula }));
 
       return true;
     }

@@ -263,12 +263,12 @@ static void split_condition_aux(
     }
     if (negate)
     {
-      real_conditions.push_back({ negate_inequality(e) });
+      real_conditions.push_back(data_expression_list({ negate_inequality(e) }));
       non_real_conditions.push_back(data_expression_list());
     }
     else
     {
-      real_conditions.push_back({ e });
+      real_conditions.push_back(data_expression_list({ e }));
       non_real_conditions.push_back(data_expression_list());
     }
   }
@@ -286,12 +286,12 @@ static void split_condition_aux(
     }
     if (negate)
     {
-      non_real_conditions.push_back({ data_expression(sort_bool::not_(e)) });
+      non_real_conditions.push_back(data_expression_list({ data_expression(sort_bool::not_(e)) }));
       real_conditions.push_back(data_expression_list());
     }
     else
     {
-      non_real_conditions.push_back({ e });
+      non_real_conditions.push_back(data_expression_list({ e }));
       real_conditions.push_back(data_expression_list());
     }
   }

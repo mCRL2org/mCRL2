@@ -380,7 +380,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_action(p))
       {
-        return { action(p) };
+        return action_list({ action(p) });
       }
 
       if (is_sync(p))
@@ -395,7 +395,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_action(multiAction))
       {
-        return { action(multiAction).label() };
+        return action_label_list({ action(multiAction).label() });
       }
       assert(is_sync(multiAction));
       return getnames(process::sync(multiAction).left())+getnames(process::sync(multiAction).right());
@@ -834,7 +834,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (multiAction.empty())
       {
-        return { act };
+        return action_list({ act });
       }
       const action firstAction=multiAction.front();
 
@@ -2915,7 +2915,7 @@ class specification_basic_type:public boost::noncopyable
         variable_list sumvars=sum(body1).variables();
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(sumvars,sigma,variable_list(), { condition },variables_occurring_in_rhs_of_sigma);
+        alphaconvert(sumvars,sigma,variable_list(), data_expression_list({ condition }),variables_occurring_in_rhs_of_sigma);
         return sum(
                  sumvars,
                  distribute_condition(
@@ -2931,7 +2931,7 @@ class specification_basic_type:public boost::noncopyable
         variable_list stochvars=sto.variables();
         mutable_map_substitution<> sigma;
         std::set<variable> variables_occurring_in_rhs_of_sigma;
-        alphaconvert(stochvars,sigma,variable_list(), { condition },variables_occurring_in_rhs_of_sigma);
+        alphaconvert(stochvars,sigma,variable_list(), data_expression_list({ condition }),variables_occurring_in_rhs_of_sigma);
         return stochastic_operator(
                  stochvars,
                  data::replace_variables_capture_avoiding(
@@ -4949,10 +4949,10 @@ class specification_basic_type:public boost::noncopyable
         if (objectdata[objectIndex(procId)].canterminate)
         {
           const data_expression stackframe=make_procargs_stack(process2,stack,pcrlprcs, vars,stochastic_variables);
-          return push_stack(procId,t1, { stackframe },stack,pcrlprcs,vars);
+          return push_stack(procId,t1, data_expression_list({ stackframe }),stack,pcrlprcs,vars);
         }
 
-        return push_stack(procId,t1, { stack.opns->emptystack },
+        return push_stack(procId,t1, data_expression_list({ stack.opns->emptystack }),
                                            stack,pcrlprcs,vars);
       }
 
@@ -4965,14 +4965,14 @@ class specification_basic_type:public boost::noncopyable
         {
           return push_stack(procId,
                             t1,
-                            { application(stack.opns->pop,stack.stackvar) },
+                            data_expression_list({ application(stack.opns->pop,stack.stackvar) }),
                             stack,
                             pcrlprcs,
                             vars);
         }
         return push_stack(procId,
                           t1,
-                          { stack.opns->emptystack },
+                          data_expression_list({ stack.opns->emptystack }),
                           stack,
                           pcrlprcs,
                           vars);
@@ -4996,7 +4996,7 @@ class specification_basic_type:public boost::noncopyable
       }
       /* return a stackframe */
       data_expression sf=make_procargs_stack(t,stack,pcrlprcs,vars,stochastic_variables);
-      return { assignment(stack.stackvar,sf) };
+      return assignment_list({ assignment(stack.stackvar,sf) });
     }
 
     bool occursin(const variable& name,
@@ -5073,7 +5073,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (totalpars.empty())
       {
-        return { stack.opns->emptystack };
+        return data_expression_list({ stack.opns->emptystack });
       }
 
       const variable& par=totalpars.front();
@@ -5145,7 +5145,7 @@ class specification_basic_type:public boost::noncopyable
                                 initial_stochastic_distribution.variables());
         const data_expression_list l=processencoding(i,result,stack);
         assert(l.size()==function_sort(stack.opns->push.sort()).domain().size());
-        return { assignment(stack.stackvar,application(stack.opns->push,l)) };
+        return assignment_list({ assignment(stack.stackvar,application(stack.opns->push,l)) });
       }
     }
 
@@ -5400,7 +5400,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
-      assignment_list procargs = { assignment(stack.stackvar,application(stack.opns->pop,stack.stackvar)) };
+      assignment_list procargs ({ assignment(stack.stackvar,application(stack.opns->pop,stack.stackvar)) });
 
       insert_summand(
                 action_summands,deadlock_summands,
@@ -5498,7 +5498,7 @@ class specification_basic_type:public boost::noncopyable
           if (n==2)
           {
             sortId = sort_bool::bool_();
-            elementnames = { sort_bool::false_(), sort_bool::true_()};
+            elementnames = data_expression_list({ sort_bool::false_(), sort_bool::true_()});
           }
           else
           {
@@ -7171,7 +7171,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else /* not regular, use a stack */
       {
-        parameters = { stack.stackvar };
+        parameters = variable_list({ stack.stackvar });
       }
       init=make_initialstate(initial_proc_id,stack,stochastic_normalized_process_identifiers,regular,singlecontrolstate,initial_stochastic_distribution);
 
@@ -7690,7 +7690,7 @@ class specification_basic_type:public boost::noncopyable
          list */
       if (actionlabels.empty())
       {
-        return { action };
+        return identifier_string_list({ action });
       }
 
       const identifier_string& firstAction=actionlabels.front();
@@ -8124,7 +8124,7 @@ class specification_basic_type:public boost::noncopyable
 
         while (!beta.empty())
         {
-          const action_list actl = { a, beta.front() };
+          const action_list actl({ a, beta.front() });
           if (might_communicate(actl,comm_table,beta.tail(),false) && xi(actl,beta.tail(),comm_table))
           {
             // sort and remove duplicates??
@@ -8159,7 +8159,7 @@ class specification_basic_type:public boost::noncopyable
       const action& firstaction=multiaction.front();
       const action_list& remainingmultiaction=multiaction.tail(); /* This is m in [1] */
 
-      const tuple_list S=phi({ firstaction },
+      const tuple_list S=phi(action_list({ firstaction }),
                              firstaction.arguments(),
                              action_list(),
                              remainingmultiaction,

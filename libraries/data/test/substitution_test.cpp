@@ -174,7 +174,7 @@ void test_my_assignment_sequence_substitution()
   BOOST_CHECK(f(u) == z);
 
   assignment yz(y,z);
-  l = { xy, uz, yz };
+  l = assignment_list({ xy, uz, yz });
   my_assignment_sequence_substitution g(l);
 
   BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
@@ -191,16 +191,15 @@ void test_my_list_substitution()
   variable u("u", sort_nat::nat());
   variable v("v", sort_nat::nat());
 
-  const data_expression& x1 = x;
   const data_expression& y1 = y;
-  const data_expression& z1 = z;
-  const data_expression& u1 = u;
-  const data_expression& v1 = v;
+  // const data_expression& z1 = z;
+  // const data_expression& u1 = u;
+  // const data_expression& v1 = v;
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l = { xy, uz };
-  assignment_list r = { assignment(x, y1) };
+  assignment_list l ({ xy, uz });
+  assignment_list r ({ assignment(x, y1) });
 
 // TODO: This does not longer work, can it be fixed?
 //  BOOST_CHECK(replace_variables(x,  my_assignment_sequence_substitution(r)) == v1);
@@ -219,7 +218,7 @@ void test_assignment_sequence_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l = { xy, uz };
+  assignment_list l ({ xy, uz });
 
   assignment_sequence_substitution f(l);
 
@@ -229,7 +228,7 @@ void test_assignment_sequence_substitution()
   BOOST_CHECK(f(u) == z);
 
   assignment yz(y,z);
-  l = { xy, uz, yz };
+  l = assignment_list({ xy, uz, yz });
   assignment_sequence_substitution g(l);
 
   BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
@@ -249,8 +248,8 @@ void test_list_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l = { xy, uz };
-  assignment_list r = { assignment(x, y1) };
+  assignment_list l ({ xy, uz });
+  assignment_list r ({ assignment(x, y1) });
 
 // TODO: This does not longer work, can it be fixed?
 //  BOOST_CHECK(replace_variables(x, assignment_sequence_substitution(r)) == y1);

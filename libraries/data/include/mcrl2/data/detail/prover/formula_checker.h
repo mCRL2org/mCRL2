@@ -161,7 +161,7 @@ class Formula_Checker
 
     /// \brief Checks the formulas in the list a_formulas.
     /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
-    void check_formulas(const data_expression_list &a_formulas)
+    void check_formulas(const data_expression_list& a_formulas)
     {
       int v_formula_number = 1;
 

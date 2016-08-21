@@ -46,7 +46,7 @@ class lambda: public abstraction
     /// \pre variables is not empty.
     lambda(const variable& variable,
            const data_expression& body)
-      : abstraction(lambda_binder(), { variable }, body)
+      : abstraction(lambda_binder(), variable_list({ variable }), body)
     {
     }
 

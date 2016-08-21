@@ -144,7 +144,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
           data::mutable_indexed_substitution<> local_sigma;
-        const data::variable_list vl = { par };
+        const data::variable_list vl ({ par });
           std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
           for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end() ; ++j)
           {

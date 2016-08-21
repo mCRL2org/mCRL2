@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
   typedef data::enumerator_list_element<data_expression> enumerator_element;
 
   data_expression result = data::sort_bool::true_();
-  data::variable_list v = { data::variable("r", data::sort_real::real_()) };
+  data::variable_list v ({ data::variable("r", data::sort_real::real_()) });
   data_expression phi = parse_data_expression("r == r", v);
   data::data_specification dataspec;
   dataspec.add_context_sort(data::sort_real::real_());

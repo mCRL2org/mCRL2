@@ -39,7 +39,7 @@ bool is_nat(const core::identifier_string& Number)
 inline
 function_sort make_function_sort(const sort_expression& domain, const sort_expression& codomain)
 {
-  return function_sort({ domain }, codomain);
+  return function_sort(sort_expression_list({ domain }), codomain);
 }
 
 template <typename Function, typename T>
@@ -417,7 +417,7 @@ class type_checker: public sort_type_checker
             read_sort(arg.sort());
             if (arg.name() != core::empty_identifier_string())
             {
-              add_function(function_symbol(arg.name(), function_sort({ x }, arg.sort())), "projection", true);
+              add_function(function_symbol(arg.name(), function_sort(sort_expression_list({ x }), arg.sort())), "projection", true);
             }
             sorts.push_front(arg.sort());
           }

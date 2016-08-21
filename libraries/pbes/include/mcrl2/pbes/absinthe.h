@@ -248,7 +248,7 @@ struct absinthe_algorithm
         abstraction_map::const_iterator i = sigmaH.find(x.sort());
         if (i != sigmaH.end() && data::find_all_variables(x).empty())
         {
-          data::data_expression_list args = { x };
+          data::data_expression_list args ({ x });
           result = data::detail::create_finite_set(data::application(i->second, args));
           //pbes_system::detail::absinthe_check_expression(result);
         }

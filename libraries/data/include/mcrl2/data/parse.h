@@ -199,7 +199,7 @@ struct data_expression_actions: public sort_expression_actions
 
   data_expression make_untyped_set_or_bag_comprehension(const variable& v, const data_expression& x) const
   {
-    return abstraction(untyped_set_or_bag_comprehension_binder(), { v }, x);
+    return abstraction(untyped_set_or_bag_comprehension_binder(), variable_list({ v }), x);
   }
 
   data_expression make_list_enumeration(const data_expression_list& x) const

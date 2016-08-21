@@ -1247,7 +1247,7 @@ std::pair<sort_expression_list, sort_expression_list> type_check_context::find_m
   auto j = user_constants.find(core::identifier_string(name));
   if (j != user_constants.end())
   {
-    user_result = { j->second };
+    user_result = sort_expression_list({ j->second });
   }
   return std::make_pair(system_result, user_result);
 }
