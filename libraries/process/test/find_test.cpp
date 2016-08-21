@@ -70,7 +70,7 @@ void test_find()
 void test_free_variables()
 {
   data::variable b = bool_("b");
-  data::data_expression_list d ({ b });
+  data::data_expression_list d ({ data::data_expression(b) });
   process_identifier P(core::identifier_string("P"), data::variable_list({ b }));
   process_instance pi(P, d);
 

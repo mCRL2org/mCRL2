@@ -53,7 +53,7 @@ void test_accessors()
   data::variable d(core::identifier_string("d"), data::sort_nat::nat());
   data::variable_list v ( { d } );
   pbes_expression z = d;
-  propositional_variable_instantiation X(core::identifier_string("X"), data::data_expression_list({ d }));
+  propositional_variable_instantiation X(core::identifier_string("X"), data::data_expression_list({ data::data_expression(d) }));
 
   std::set<pbes_expression> q;
   q.insert(x);

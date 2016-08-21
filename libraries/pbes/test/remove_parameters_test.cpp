@@ -79,8 +79,8 @@ void test_pbes_expression()
     propositional_variable X1 = propvar("X1", d1);
     propositional_variable X2 = propvar("X2", d2);
 
-    data_expression_list e1 ( { sort_nat::plus(nat("m"), nat("n")) });
-    data_expression_list e2 ( { bool_("b") });
+    data_expression_list e1 ( { data::data_expression(sort_nat::plus(nat("m"), nat("n"))) });
+    data_expression_list e2 ( { data::data_expression(bool_("b")) });
     propositional_variable_instantiation x1 = propvarinst("X1", e1);
     propositional_variable_instantiation x2 = propvarinst("X2", e2);
 

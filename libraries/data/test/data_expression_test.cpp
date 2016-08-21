@@ -259,7 +259,7 @@ void where_declaration_test()
   variable y("y", s);
 
   assignment xy(x,y);
-  assignment_expression_list xyl({ xy });
+  assignment_expression_list xyl({ assignment_expression(xy) });
   where_clause wxy(x, xyl);
   BOOST_CHECK(wxy.body() == x);
   BOOST_CHECK(wxy.declarations() == xyl);
