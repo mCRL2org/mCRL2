@@ -2,7 +2,7 @@
 .. _bin_w32n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_x86.exe
 
 .. |bin_w64n| replace:: Windows Installer (64-bit)
-.. _bin_w64n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_x86_64.exe
+.. _bin_w64n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_AMD64.exe
 
 .. |bin_deb32n| replace:: Ubuntu DEB (32-bit)
 .. _bin_deb32n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_x86.deb
