@@ -107,7 +107,7 @@ void test_accessors()
     BOOST_CHECK(s == core::identifier_string("X"));
 
     const data::data_expression_list& f = param(X);
-    data::data_expression_list g ({ d });
+    data::data_expression_list g ({ data::data_expression(d) });
     BOOST_CHECK(f == g);
 
     print(q);
