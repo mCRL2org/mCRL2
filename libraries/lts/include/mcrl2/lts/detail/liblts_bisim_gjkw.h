@@ -904,14 +904,18 @@ class constln_t
         assert(this == FirstB->constln());
         assert(this == LastB->constln());
         assert(postprocess_begin == postprocess_end);
+        // 2.6: Create a new constellation NewC and ...
         constln_t* const NewC = new constln_t(begin(), end(), postprocess_end);
 
+        // 2.5: Choose a small splitter block SpB subset of SpC from P,
+        //      i.e. |SpB| <= 1/2*|SpC|
         /// It doesn't matter very much how ties are resolved here:
         /// `part_tr.change_to_C()` is faster if the first block is selected to
         /// be split off.  `part_tr.split_s_inert_out()` is faster if the last
         /// block is selected.
         if (FirstB->size() > LastB->size())
         {
+            // 2.6: ... and move SpB from SpC to NewC
             set_end(LastB->begin());
             NewC->set_begin(end());
             LastB->set_constln(NewC);
@@ -919,6 +923,7 @@ class constln_t
         }
         else
         {
+            // 2.6: ... and move SpB from SpC to NewC
             set_begin(FirstB->end());
             NewC->set_end(begin());
             FirstB->set_constln(NewC);
@@ -1677,7 +1682,7 @@ class bisim_partitioner_gjkw_initialise_helper
 
 
 
-struct secondary_refine_shared;
+struct refine_shared_t;
 
 } // end namespace bisim_gjkw
 
@@ -1690,7 +1695,6 @@ class bisim_partitioner_gjkw
     bisim_gjkw::bisim_partitioner_gjkw_initialise_helper<LTS_TYPE> init_helper;
     bisim_gjkw::part_state_t part_st;
     bisim_gjkw::part_trans_t part_tr;
-    std::vector<bisim_gjkw::state_info_ptr> new_bottom_states;
   public:
     // The constructor constructs the data structures and immediately
     // calculates the bisimulation quotient.  However, it does not change the
@@ -1707,7 +1711,6 @@ class bisim_partitioner_gjkw
     }
     ~bisim_partitioner_gjkw()
     {
-        assert(new_bottom_states.empty());
         part_tr.clear();
         part_st.clear();
         bisim_gjkw::check_complexity::stats();
@@ -1747,13 +1750,13 @@ class bisim_partitioner_gjkw
     bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RefB,
                         const bisim_gjkw::constln_t* SpC,
                         const bisim_gjkw::B_to_C_descriptor* FromRed,
-                        bool all_unmarked_bottom_states_are_blue,
+                        bool all_other_bottom_blue,
                         bool postprocessing);
 
     DECLARE_COROUTINE(refine_blue,
     /* formal parameters:*/ ((bisim_gjkw::block_t* const, RefB))
                             ((const bisim_gjkw::constln_t* const, SpC))
-                            ((bool const, all_unmarked_bottom_states_are_blue))
+                            ((bool const, all_other_bottom_blue))
                             ((bool const, postprocessing)),
     /* local variables:  */ ((bisim_gjkw::permutation_iter_t, visited_end))
                             ((bisim_gjkw::state_info_ptr, s))
@@ -1763,8 +1766,7 @@ class bisim_partitioner_gjkw
                                                            blue_nonbottom_end))
                             ((bisim_gjkw::succ_const_iter_t, begin))
                             ((bisim_gjkw::succ_const_iter_t, end)),
-    /* shared data:      */ struct bisim_gjkw::secondary_refine_shared,
-                                                                   shared_data,
+    /* shared data:      */ struct bisim_gjkw::refine_shared_t, shared_data,
     /* interrupt locatns:*/ (REFINE_BLUE_PREDECESSOR_HANDLED)
                             (REFINE_BLUE_TESTING)
                             (REFINE_BLUE_STATE_HANDLED)
@@ -1780,32 +1782,17 @@ class bisim_partitioner_gjkw
                             ((bisim_gjkw::permutation_iter_t, visited_begin))
                             ((bisim_gjkw::state_info_ptr, s))
                             ((bisim_gjkw::pred_iter_t, pred_iter)),
-    /* shared data:      */ struct bisim_gjkw::secondary_refine_shared,
-                                                                   shared_data,
+    /* shared data:      */ struct bisim_gjkw::refine_shared_t, shared_data,
     /* interrupt locatns:*/ (REFINE_RED_COLLECT_FROMRED)
                             (REFINE_RED_PREDECESSOR_HANDLED)
                             (REFINE_RED_STATE_HANDLED));
-
-    bisim_gjkw::block_t* primary_refine(bisim_gjkw::block_t* RefB,
-                                            const bisim_gjkw::constln_t* NewC)
-    {
-        return refine(RefB, NewC, nullptr, true, false);
-    }
-
-    bisim_gjkw::block_t* secondary_refine(bisim_gjkw::block_t* RefB,
-                                const bisim_gjkw::constln_t* SpC,
-                                const bisim_gjkw::B_to_C_descriptor* FromRed,
-                                bool all_unmarked_bottom_states_are_blue)
-    {
-        return refine(RefB, SpC, FromRed, all_unmarked_bottom_states_are_blue,
-                                                                         true);
-    }
 
     /*--------- PostprocessNewBottom -- Algorithm 5 of [GJKW 2017] ----------*/
 
     void postprocess_block(bisim_gjkw::block_t* SplitB);
 
-    void postprocess_new_bottom();
+    void postprocess_new_bottom(const std::vector<bisim_gjkw::state_info_ptr>
+                                  &new_bottom_states, bisim_gjkw::block_t* B1);
 };
 
 ///@} (end of group part_refine)

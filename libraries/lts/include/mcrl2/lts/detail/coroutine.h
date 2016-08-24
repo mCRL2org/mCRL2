@@ -342,6 +342,9 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
 /// \param shared_type type of the data shared between the two coroutines
 /// \param shared_init initial value of the shared data, as a boost sequence:
 ///                    `(value1) (value2) (value3)` etc.
+#ifndef NDEBUG
+
+// In debug mode, the steps are strictly alternated.
 #define RUN_COROUTINES(routine1, param1, final1, routine2, param2, final2,    \
                                                     shared_type, shared_init) \
         do                                                                    \
@@ -394,6 +397,65 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
         }                                                                     \
         while (0)
 
+#else
+
+// If not in Debug mode, steps are alternated in Fibonacci numbers.
+#define RUN_COROUTINES(routine1, param1, final1, routine2, param2, final2,    \
+                                                    shared_type, shared_init) \
+        do                                                                    \
+        {                                                                     \
+            _coroutine_ ## routine1 ## _struct _coroutine_local1 =            \
+                _coroutine_ ## routine1 ## _struct(BOOST_PP_SEQ_ENUM(param1));\
+            _coroutine_ ## routine2 ## _struct _coroutine_local2 =            \
+                _coroutine_ ## routine2 ## _struct(BOOST_PP_SEQ_ENUM(param2));\
+            shared_type _coroutine_shared_data =                              \
+                                           { BOOST_PP_SEQ_ENUM(shared_init) };\
+            size_t _coroutine_old_allowance = 1;                              \
+            for (size_t _coroutine_allowance = 1;; )                          \
+            {                                                                 \
+                coroutine::_coroutine_result_t _coroutine_result =            \
+                        _coroutine_ ## routine1 ## _func(_coroutine_allowance,\
+                                                     _coroutine_local1,       \
+                                                     _coroutine_shared_data); \
+                if (coroutine::_coroutine_CONTINUE == _coroutine_result)      \
+                {                                                             \
+                    size_t temp = _coroutine_allowance;                       \
+                    _coroutine_allowance += _coroutine_old_allowance;         \
+                    _coroutine_old_allowance = temp;                          \
+                }                                                             \
+                else if (coroutine::_coroutine_TERMINATE == _coroutine_result)\
+                {                                                             \
+                    {  final1;  }                                             \
+                    break;                                                    \
+                }                                                             \
+                else                                                          \
+                {                                                             \
+                    _coroutine_allowance = 0;                                 \
+                }                                                             \
+                _coroutine_result = _coroutine_ ## routine2 ## _func(         \
+                                     _coroutine_allowance, _coroutine_local2, \
+                                                     _coroutine_shared_data); \
+                if (coroutine::_coroutine_CONTINUE == _coroutine_result)      \
+                {                                                             \
+                    size_t temp = _coroutine_allowance;                       \
+                    _coroutine_allowance += _coroutine_old_allowance;         \
+                    _coroutine_old_allowance = temp;                          \
+                }                                                             \
+                else if (coroutine::_coroutine_TERMINATE == _coroutine_result)\
+                {                                                             \
+                    {  final2;  }                                             \
+                    break;                                                    \
+                }                                                             \
+                else                                                          \
+                {                                                             \
+                    _coroutine_allowance = 0;                                 \
+                }                                                             \
+            }                                                                 \
+        }                                                                     \
+        while (0)
+
+#endif
+
 /// \def COROUTINE_WHILE
 /// \brief a `while` loop where every iteration incurs one unit of work
 /// \details A `COROUTINE_WHILE` may be interrupted at the end of an iteration
@@ -428,9 +490,9 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
 #define END_COROUTINE_WHILE                                                   \
                 }                                                             \
             }                                                                 \
-            else  {  }                                                        \
+            else  assert(0 && "mismatched if/else pair");                     \
         }                                                                     \
-        else  {  }                                                            \
+        else  assert(0 && "mismatched if/else pair");                         \
     }                                                                         \
     while (0)
 
@@ -470,7 +532,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
                 }                                                             \
             }}                                                                \
             while (0);                                                        \
-        else  {  }                                                            \
+        else  assert(0 && "mismatched if/else pair");                         \
     }                                                                         \
     while (0)
 
@@ -506,7 +568,7 @@ unmatched COROUTINE_WHILE or END_COROUTINE_WHILE. */
             }                                                                 \
             while (1);                                                        \
         }}                                                                    \
-        else  {  }                                                            \
+        else  assert(0 && "mismatched if/else pair");                         \
     while (0)
 
 /// \def TERMINATE_COROUTINE_SUCCESSFULLY

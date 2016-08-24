@@ -1699,7 +1699,9 @@ template <class LTS_TYPE>
 void bisim_partitioner_gjkw<LTS_TYPE>::
                                 refine_partition_until_it_becomes_stable_gjkw()
 {
-    // 2.4: while there is a nontrivial constellation SpC do
+    std::vector<bisim_gjkw::state_info_ptr> new_bottom_states;
+
+    // 2.4: while C contains a nontrivial constellation SpC do
     while (nullptr != bisim_gjkw::constln_t::get_some_nontrivial())
     {
         bisim_gjkw::check_complexity::count("for each nontrivial "
@@ -1849,35 +1851,43 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                     bisim_gjkw::block_t::get_some_refinable();
             //mCRL2log(log::debug, "bisim_gjkw") << "Refining "
             //                                    << RefB->debug_id() << ".\n";
-            // 2.21: Mark RefB as non-refinable
-            RefB->make_nonrefinable();
-            // 2.22: RedB := Refine(RefB, SpB, FromRed := emptyset,
-            //                      blueTest := false)
+            // 2.21: RedB := Refine(RefB, SpB, Red := {marked states in RefB},
+            //                      FromRed := {}, allOtherBottomBlue := true)
             bisim_gjkw::block_t* RedB = refine(RefB, SpB->constln(), nullptr,
                                                                   true, false);
-            // 2.23: Unmark all states of RefB as predecessors
-                // (for the blue block and the red nonbottom states, is already
-                // done in primary_refine)
-            RedB->set_marked_bottom_begin(RedB->end());
-
             if (RedB->size() > 1 && nullptr != RedB->FromRed(SpC))
             {
                 // If the block has 1 element, or it has no transitions to SpC,
                 // the refinement would be trivial anyway.
 
-                // 2.24: Refine(RedB, SpC\SpB, FromRed := {transition from RedB
-                //              to SpC\SpB}, blueTest := true)
+                // store the new bottom states of this block:
+                new_bottom_states.reserve(RedB->unmarked_bottom_size());
+                new_bottom_states.assign(RedB->unmarked_bottom_begin(),
+                                                  RedB->unmarked_bottom_end());
+
+                // 2.22: Refine(RedB, SpC\SpB, Red := {}, FromRed :=
+                //              {transitions from RedB to SpC\SpB},
+                //              allOtherBottomBlue := false)
+                RedB->set_marked_bottom_begin(RedB->bottom_end());
                 RedB = refine(RedB, SpC, RedB->FromRed(SpC), false, true);
-                if (nullptr != RedB)
-                {
-                    RedB->set_marked_bottom_begin(RedB->end());
-                }
             }
+            else
+            {
+                new_bottom_states.clear();
+            }
+            // 2.23: Unmark all states of the original RefB as predecessors
+                // (For the blue block and the red nonbottom states: was
+                // already done in `refine`.  For the red bottom states,
+                // we should keep them marked for now, to help
+                // `postprocess_new_bottom`.  That method will unmark
+                // the states.)
+            // 2.24: Mark RefB as non-refinable
+            RefB->make_nonrefinable();
 
             /*---------------- postprocess new bottom states ----------------*/
 
             // 2.25-2.28: Postprocess new bottom states
-            postprocess_new_bottom();
+            postprocess_new_bottom(new_bottom_states, RedB);
         // 2.29: end for
         }
         #ifndef NDEBUG
@@ -1886,7 +1896,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         #endif
     // 2.30: end while
     }
-    // 2.31: return C
+    // 2.31: return P
         // (this happens implicitly, through the bisim_partitioner_gjkw object
         // data)
     mCRL2log(log::verbose) << "number of blocks in the quotient: "
@@ -1906,9 +1916,9 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
 
 
 /// \brief structure containing information shared between the coroutines
-struct bisim_gjkw::secondary_refine_shared {
+struct bisim_gjkw::refine_shared_t {
     bisim_gjkw::permutation_iter_t notblue_initialised_end;
-    bool fromred_finished;
+    bool FromRed_is_empty;
 };
 
 /// \brief refine a block into the part that can reach `SpC` and the part that
@@ -1939,14 +1949,14 @@ struct bisim_gjkw::secondary_refine_shared {
 ///
 /// Refine slices these states further as follows:
 ///
-///                                        secondary_blue()  secondary_red()
+///                                          refine_blue()    refine_red()
 ///              shared variable            local variable   local variable
 ///          notblue_initialised_end          visited_end     visited_begin
 ///                     v                          v                v
 ///     | blue  |notblue|notblue|    red    | blue |unknown|not blue|   red   |
 ///     |nonbott|  > 0  |undef'd| nonbottom |bottom|bottom | bottom | bottom  |
 ///             ^               ^                          ^
-///     secondary_blue()   block.unmarked_          block.unmarked_
+///       refine_blue()    block.unmarked_          block.unmarked_
 ///      local variable    nonbottom_end()           bottom_end()
 ///     blue_nonbottom_end
 ///
@@ -1974,16 +1984,14 @@ struct bisim_gjkw::secondary_refine_shared {
 /// \param FromRed          the set of transitions from `RefB` to `SpC`
 /// \param postprocessing   true iff `refine()` is called during postprocessing
 ///                         new bottom states
-/// \param all_unmarked_bottom_states_are_blue   true iff all unmarked bottom
-///                         states are blue (the negation of what is called
-///                         `blueTest` in the article)
+/// \param all_other_bottom_blue   true iff all unmarked bottom states are blue
 /// \result a pointer to the block that contains the red part of `RefB`
 
 template <class LTS_TYPE>
 bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
      bisim_gjkw::block_t* const RefB, const bisim_gjkw::constln_t* const SpC,
      const bisim_gjkw::B_to_C_descriptor* const FromRed,
-     bool const all_unmarked_bottom_states_are_blue, bool const postprocessing)
+     bool const all_other_bottom_blue, bool const postprocessing)
 {
     bisim_gjkw::permutation_iter_t const red_end = RefB->end();
     bisim_gjkw::block_t* RedB;
@@ -1991,7 +1999,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
     //mCRL2log(log::debug, "bisim_gjkw") << "refine("
     //    << RefB->debug_id() << "," << SpC->debug_id() << ","
     //    << (nullptr != FromRed ? FromRed->debug_id() : std::string("NULL"))
-    //    << (all_unmarked_bottom_states_are_blue ? ",true" : ",false")
+    //    << (all_other_bottom_blue ? ",true" : ",false")
     //    << (postprocessing ? ",true)\n" : ",false)\n");
     assert(nullptr == FromRed || FromRed->from_block() == RefB);
     assert(nullptr == FromRed || FromRed->to_constln() == SpC);
@@ -1999,24 +2007,27 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
     if (RefB->constln() == SpC)
     {
         RefB->set_marked_nonbottom_begin(RefB->nonbottom_end());
-        RefB->set_unmarked_bottom_end(RefB->unmarked_bottom_begin());
+        RefB->set_marked_bottom_begin(RefB->bottom_begin());
         return RefB;
     }
-    // 3.3: Spend the same amount of work on either coroutine:
+    // 3.3: Test := {bottom states}\Red, ...
+    // 3.4: Spend the same amount of work on either coroutine:
     // and
-    // 3.48: RedB := RefB  or  RedB := NewB , respectively
+    // 3.41: RedB := RefB  or  RedB := NewB , respectively
     RUN_COROUTINES(refine_blue,
-                        (RefB)(SpC)
-                        (all_unmarked_bottom_states_are_blue||nullptr==FromRed)
+                        (RefB)(SpC)(all_other_bottom_blue || nullptr==FromRed)
                         (postprocessing),
                                             RedB = RefB,
                    refine_red,
                         (RefB)(SpC)(FromRed)(postprocessing),
                                             RedB = (red_end[-1]->block == RefB
                                                  ?nullptr :red_end[-1]->block),
-               /* shared data: */ struct bisim_gjkw::secondary_refine_shared,
+               /* shared data: */ struct bisim_gjkw::refine_shared_t,
                                 (RefB->nonbottom_begin())(nullptr == FromRed));
-    // 3.50: return RedB
+    // 3.43 P := partition P where NewB is added and the states in NewB are
+    //                             removed from RefB
+        // done through adapting the data structures in the coroutines.
+    // 3.44: return RedB (with old and new bottom states separated)
     return RedB;
 }
 
@@ -2037,7 +2048,7 @@ template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
     /* formal parameters:*/ ((bisim_gjkw::block_t* const, RefB))
                             ((const bisim_gjkw::constln_t* const, SpC))
-                            ((bool const, all_unmarked_bottom_states_are_blue))
+                            ((bool const, all_other_bottom_blue))
                             ((bool const, postprocessing)),
     /* local variables:  */ ((bisim_gjkw::permutation_iter_t, visited_end))
                             ((bisim_gjkw::state_info_ptr, s))
@@ -2047,32 +2058,50 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                                                            blue_nonbottom_end))
                             ((bisim_gjkw::succ_const_iter_t, begin))
                             ((bisim_gjkw::succ_const_iter_t, end)),
-    /* shared data:      */ struct bisim_gjkw::secondary_refine_shared,
-                                                                   shared_data,
+    /* shared data:      */ struct bisim_gjkw::refine_shared_t, shared_data,
     /* interrupt locatns:*/ (REFINE_BLUE_PREDECESSOR_HANDLED)
                             (REFINE_BLUE_TESTING)
                             (REFINE_BLUE_STATE_HANDLED)
                             (REFINE_BLUE_COLLECT_BOTTOM))
 {
-    // 3.5l Test := {unmarked bottom states}
     assert(RefB->nonbottom_begin() == shared_data.notblue_initialised_end);
-    // 3.6l: if blueTest && FromRed != emptyset then
-    if (!all_unmarked_bottom_states_are_blue)
+    // 3.6l: if !all_other_bottom_blue then
+    if (!all_other_bottom_blue)
     {
         // we have to decide which unmarked bottom states are blue.  So we walk
         // over all of them and check whether they have a transition to SpC or
         // not.
-        // 3.7l: Blue := {}
+        // 3.3: ..., Blue := {}
         visited_end = RefB->unmarked_bottom_begin();
-        // 3.4l: whenever |Blue| > |RefB|/2 do  Abort this coroutine
+        // 3.5l: whenever |Blue| > |RefB|/2 do  Abort this coroutine
             // nothing needs to be done now, as |Blue| = 0 here.
 
         /*  -  -  -  -  -  - collect blue bottom states -  -  -  -  -  -  */
 
-        // 3.8: while Test contains unvisited states do
+        // 3.7l: while Test is not empty and FromRed is not empty do
+            // We use the variable visited_end in this loop to indicate the
+            // boundary between blue states (namely those in the interval
+            // [RefB->unmarked_bottom_begin(), visited_end) ) and Test states
+            // (namely those in [visited_end, RefB->unmarked_bottom_end()) ).
         COROUTINE_WHILE (REFINE_BLUE_COLLECT_BOTTOM,
-                                    RefB->unmarked_bottom_end() != visited_end)
+                                     RefB->unmarked_bottom_end() > visited_end)
         {
+            if (shared_data.FromRed_is_empty)
+            {
+                // 3.16l: Blue := Blue union Test
+                    // done implicitly: we now regard all unmarked
+                    // bottom states as blue, i. e. the whole
+                    // interval [RefB->unmarked_bottom_begin(),
+                    // RefB->unmarked_bottom_end()).
+                // 3.5l: whenever |Blue| > |RefB|/2 do  Abort this coroutine
+                    // In this case, Test may not yet be empty, so here we have
+                    // to check the condition of Line 3.5l.
+                if (RefB->unmarked_bottom_size() > RefB->size() / 2)
+                {
+                    ABORT_THIS_COROUTINE();
+                }
+                break;
+            }
             // A detailed calculation of the number of steps needed here:
             //
             // If the blue subblock is smaller, we spend the following time:
@@ -2108,67 +2137,58 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                                     bisim_gjkw::check_complexity::n_log_n * 4 +
                                           bisim_gjkw::check_complexity::m * 2 +
                                               bisim_gjkw::check_complexity::n);
-            if (shared_data.fromred_finished)
-            {
-                // we can stop looking for blue bottom states: all bottom
-                // states that are not known to be red are actually blue.
-                if (RefB->unmarked_bottom_size() > RefB->size() / 2)
-                {
-                    ABORT_THIS_COROUTINE();
-                }
-                break;
-            }
-            // 3.9l: Choose an unvisited s in Test
+            // 3.8l: Choose s in Test
             s = *visited_end;
-            // 3.10l: Mark s as visited.
-            ++visited_end;
-            // 3.11l: if out(s) intersect SpC == emptyset then
-            if (s->surely_has_no_transition_to(SpC))
+            // 3.9l: if s --> SpC then
+            if (s->surely_has_transition_to(SpC))
             {
-                // 3.12l: Blue := Blue union {s}
-                    // already done by incrementing visited_end
+                assert(!s->surely_has_no_transition_to(SpC));
+                // 3.10l: Move s from Test to Red
+                // The state s is not blue.  Move it to the slice of non-blue
+                // bottom states.
                 //mCRL2log(log::debug, "bisim_gjkw") << s->debug_id()
-                //                                            << " is blue.\n";
-                // 3.4l: whenever |Blue| > |RefB|/2 do  Abort this coroutine
+                //                                        << " is not blue.\n";
+                RefB->set_marked_bottom_begin(RefB->marked_bottom_begin() - 1);
+                bisim_gjkw::swap_permutation(visited_end,
+                                                  RefB->marked_bottom_begin());
+                // 3.5r: whenever |Red| > |RefB|/2 do  Abort the red coroutine
+                if (RefB->marked_size() > RefB->size() / 2)
+                {
+                    ABORT_OTHER_COROUTINE();
+                }
+
+            // 3.11l: else
+            }
+            else
+            {
+                // 3.12l: Move s from Test to Blue
+                ++visited_end;
+                // 3.5l: whenever |Blue| > |RefB|/2 do  Abort this coroutine
                 if ((state_type) (visited_end-RefB->unmarked_bottom_begin()) >
                                                               RefB->size() / 2)
                 {
                     ABORT_THIS_COROUTINE();
                 }
-            // 3.13l: else
+            // 3.13l: end if
             }
-            else
-            {
-                assert(s->surely_has_transition_to(SpC));
-                // The state s is not blue.  Move it to the slice of non-blue
-                // bottom states.
-                //mCRL2log(log::debug, "bisim_gjkw") << s->debug_id()
-                //                                        << " is not blue.\n";
-                // 3.14l: Red := Red union {s}
-                --visited_end;
-                RefB->set_marked_bottom_begin(RefB->marked_bottom_begin() - 1);
-                bisim_gjkw::swap_permutation(visited_end,
-                                                  RefB->marked_bottom_begin());
-                // 3.4r: whenever |Red| > |RefB|/2 do  Abort the red coroutine
-                if (RefB->marked_size() > RefB->size() / 2)
-                {
-                    ABORT_OTHER_COROUTINE();
-                }
-            // 3.15l: end if
-            }
-        // 3.16l: end while
+        // 3.14l: end while
         }
         END_COROUTINE_WHILE;
-    // 3.17l: else
+    // 3.15l: end if
     }
     else
     {
-        // 3.18l: Blue := Test
+        // 3.16l: Blue := Blue union Test
+            // done implicitly: we now regard all unmarked bottom states as
+            // blue, i. e. the whole interval [RefB->unmarked_bottom_begin(),
+            // RefB->unmarked_bottom_end()).
+        // 3.5l: whenever |Blue| > |RefB|/2 do  Abort this coroutine
+            // This is another case when Test is not yet empty, so we have to
+            // check the condition of Line 3.5l.
         if (RefB->unmarked_bottom_size() > RefB->size() / 2)
         {
             ABORT_THIS_COROUTINE();
         }
-    // 3.19l: end if
     }
 
     assert(RefB->constln() != SpC);
@@ -2182,7 +2202,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
 
     /*  -  -  -  -  -  -  -  - visit blue states -  -  -  -  -  -  -  -  */
 
-    // 3.20l: while Blue contains unvisited states do
+    // 3.17l: while Blue contains unvisited states do
     visited_end = RefB->unmarked_bottom_begin();
     blue_nonbottom_end = RefB->unmarked_nonbottom_begin();
     COROUTINE_DO_WHILE (REFINE_BLUE_STATE_HANDLED,
@@ -2193,7 +2213,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                                     bisim_gjkw::check_complexity::n_log_n * 4 +
                                           bisim_gjkw::check_complexity::m * 2 +
                                               bisim_gjkw::check_complexity::n);
-        // 3.21l: Choose an unvisited s in Blue
+        // 3.18l: Choose an unvisited s in Blue
         s = *visited_end;
         assert(visited_end < blue_nonbottom_end ||
                                (RefB->unmarked_bottom_begin() <= visited_end &&
@@ -2202,9 +2222,9 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
         assert(blue_nonbottom_end <= shared_data.notblue_initialised_end);
         assert(RefB->unmarked_nonbottom_end() >=
                                           shared_data.notblue_initialised_end);
-        // 3.22l: Mark s as visited
+        // 3.19l: Mark s as visited
         ++visited_end;
-        // 3.23l: for all s_prime in inert_in(s) \ Red do
+        // 3.20l: for all s_prime in inert_in(s) \ Red do
         COROUTINE_FOR (REFINE_BLUE_PREDECESSOR_HANDLED,
                             pred_iter = s->inert_pred_begin(),
                                  s->inert_pred_end() != pred_iter, ++pred_iter)
@@ -2221,10 +2241,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                 //                                     << " is already red.\n";
                 continue;
             }
-            // 3.24l: if notblue(s_prime) undefined then
+            // 3.21l: if notblue(s_prime) undefined then
             if (s_prime->pos >= shared_data.notblue_initialised_end)
             {
-                // 3.25l: notblue(s_prime):=|inert_out(s_prime)|
+                // 3.22l: notblue(s_prime):=|inert_out(s_prime)|
                 s_prime->notblue = s_prime->inert_succ_end() -
                                                    s_prime->inert_succ_begin();
                 //mCRL2log(log::debug, "bisim_gjkw") << s_prime->debug_id()
@@ -2233,63 +2253,64 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                 bisim_gjkw::swap_permutation(s_prime->pos,
                                           shared_data.notblue_initialised_end);
                 ++shared_data.notblue_initialised_end;
-            // 3.26l: end if
+            // 3.23l: end if
             }
-            // 3.27l: notblue(s_prime) := notblue(s_prime) - 1
+            // 3.24l: notblue(s_prime) := notblue(s_prime) - 1
             --s_prime->notblue;
-            // 3.28l: if notblue(s_prime) == 0 then
+            // 3.25l: if notblue(s_prime) == 0 && ...
             if (0 != s_prime->notblue)  continue;
-            // 3.29l: if out_noninert(s_prime) intersect SpC == {} then
-            if (!shared_data.fromred_finished &&
-                                    !s_prime->surely_has_no_transition_to(SpC))
+            // 3.25l: ... && (FromRed == {} ||
+            //                out_noninert(s_prime) intersect SpC == {}) then
+            if (!shared_data.FromRed_is_empty)
             {
                 if (s_prime->surely_has_transition_to(SpC))  continue;
-                // It is not yet known whether s_prime has a transition to
-                // SpC or not.  Execute the slow test now.
-                COROUTINE_FOR (REFINE_BLUE_TESTING,
-                    (begin = s_prime->succ_begin(), end = s_prime->succ_end()),
-                                                         begin < end, (void) 0)
+                if (!s_prime->surely_has_no_transition_to(SpC))
                 {
-                    bisim_gjkw::check_complexity::count(secondary_search, 1,
+                    // It is not yet known whether s_prime has a transition to
+                    // SpC or not.  Execute the slow test now.
+                    COROUTINE_FOR (REFINE_BLUE_TESTING,
+                        (begin=s_prime->succ_begin(), end=s_prime->succ_end()),
+                                                         begin < end, (void) 0)
+                    {
+                        bisim_gjkw::check_complexity::count(secondary_search,1,
                                     bisim_gjkw::check_complexity::m_log_n * 5 +
                                     bisim_gjkw::check_complexity::n_log_n * 4 +
                                           bisim_gjkw::check_complexity::m * 2 +
                                               bisim_gjkw::check_complexity::n);
-                    // binary search for transitions from
-                    // s_prime to constellation SpC.
-                    bisim_gjkw::succ_const_iter_t const mid =
+                        // binary search for transitions from
+                        // s_prime to constellation SpC.
+                        bisim_gjkw::succ_const_iter_t const mid =
                                                      begin + (end - begin) / 2;
-                    if (*SpC <= *mid->target->constln())
-                    {
-                        end = mid->constln_slice->begin();
+                        if (*SpC <= *mid->target->constln())
+                        {
+                            end = mid->constln_slice->begin();
+                        }
+                        if (*mid->target->constln() <= *SpC)
+                        {
+                            begin = mid->constln_slice->end();
+                        }
                     }
-                    if (*mid->target->constln() <= *SpC)
-                    {
-                        begin = mid->constln_slice->end();
-                    }
+                    END_COROUTINE_FOR;
+                    if (begin != end)  continue;
                 }
-                END_COROUTINE_FOR;
-                if (begin != end)  continue;
             }
             //mCRL2log(log::debug, "bisim_gjkw") << "Nonbottom "
             //                         << s_prime->debug_id() << " is blue.\n";
-            // 3.30l: Blue := Blue union {s_prime}
+            // 3.26l: Blue := Blue union {s_prime}
             bisim_gjkw::swap_permutation(s_prime->pos, blue_nonbottom_end);
             ++blue_nonbottom_end;
-            // 3.4l: whenever |Blue| > |RefB| / 2 do  Abort this coroutine
+            // 3.5l: whenever |Blue| > |RefB| / 2 do  Abort this coroutine
             if (blue_nonbottom_end - RefB->unmarked_nonbottom_begin() +
                                RefB->unmarked_bottom_size() > RefB->size() / 2)
             {
                 ABORT_THIS_COROUTINE();
             }
-            // 3.31l: end if
-            // and
-            // 3.32l: end if
+            // 3.27l: end if
                 // this is implicit in the `continue` statements above.
-        // 3.33l: end for
+        // 3.28l: end for
         }
         END_COROUTINE_FOR;
-    // 3.34l: end while
+    // 3.29l: end while
         if (RefB->unmarked_bottom_end() == visited_end)
         {
             visited_end = RefB->unmarked_nonbottom_begin();
@@ -2299,28 +2320,24 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
 
     /*  -  -  -  -  -  -  -  - split off blue block -  -  -  -  -  -  -  -  */
 
-    // 3.35l: Abort the other coroutine
+    // 3.30l: Abort the other coroutine
     ABORT_OTHER_COROUTINE();
     // From now on, we do no longer need the reentrant ``local'' variables.
     // All non-blue states are red.
-    // 3.36l: Move Blue to a new block NewB
+    // 3.31l: Move Blue to a new block NewB
     // and
-    // 3.37l: Destroy all temporary data
-    // and
-    // 3.38l: Mark all bottom states of RefB
-    // and
-    // 3.39l: Unmark all other states
+    // 3.32l: Destroy all temporary data
     bisim_gjkw::block_t* const NewB = RefB->split_off_blue(blue_nonbottom_end);
     part_tr.new_blue_block_created(RefB, NewB, postprocessing);
 
-    // 3.40l: for all s in NewB do
+    // 3.33l: for all s in NewB do
     for (bisim_gjkw::permutation_iter_t s_iter = NewB->begin();
                                                NewB->end() != s_iter; ++s_iter)
     {
         bisim_gjkw::check_complexity::count(for_all_states_in_the_new_block, 1,
                                         bisim_gjkw::check_complexity::n_log_n);
         bisim_gjkw::state_info_ptr const s = *s_iter;
-        // 3.41l: for all s_prime in inert_in(s) \ New do
+        // 3.34l: for all s_prime in inert_in(s) \ NewB do
         for (bisim_gjkw::pred_iter_t pred_iter = s->inert_pred_begin();
                                  s->inert_pred_end() != pred_iter; ++pred_iter)
         {
@@ -2332,32 +2349,30 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             bisim_gjkw::state_info_ptr const s_prime = pred_iter->source;
             if (s_prime->block == NewB)  continue;
             assert(s_prime->block == RefB);
-            // 3.42l: s_prime --> s is no longer inert
+            // 3.35l: s_prime --> s is no longer inert
             part_tr.make_noninert(pred_iter->succ);
-            // 3.43l: if |inert_out(s_prime)| == 0 then
+            // 3.36l: if |inert_out(s_prime)| == 0 then
             if (s_prime->inert_succ_begin() == s_prime->inert_succ_end())
             {
-                // 3.44l: s_prime is a new bottom state
-                new_bottom_states.push_back(s_prime);
+                // 3.37l: s_prime is a new bottom state
                 //mCRL2log(log::debug, "bisim_gjkw") << "found new bottom "
                 //                              << s_prime->debug_id() << "\n";
-                // moved here from line 5.8: move s_prime to bottom states
                 RefB->set_marked_nonbottom_begin(RefB->bottom_begin() - 1);
                 RefB->set_bottom_begin(RefB->marked_nonbottom_begin());
                 swap_permutation(s_prime->pos, RefB->bottom_begin());
                 // Strictly speaking, the following assertion may be false when
-                // called from Line 2.24.  However, that call also sets
+                // called from Line 2.22.  However, that call also sets
                 // postprocessing to true.
                 assert(postprocessing ||
                     (s_prime->current_constln() < s_prime->succ_end() &&
                      s_prime->current_constln()->target->constln() == SpC)   ||
                     (s_prime->current_constln() > s_prime->succ_begin() &&
                      s_prime->current_constln()[-1].target->constln() == SpC));
-            // 3.45l: end if
+            // 3.38l: end if
             }
-        // 3.46l: end for
+        // 3.39l: end for
         }
-    // 3.47l: end for
+    // 3.40l: end for
     }
 }
 END_COROUTINE
@@ -2375,20 +2390,17 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                             ((bisim_gjkw::permutation_iter_t, visited_begin))
                             ((bisim_gjkw::state_info_ptr, s))
                             ((bisim_gjkw::pred_iter_t, pred_iter)),
-    /* shared data:      */ struct bisim_gjkw::secondary_refine_shared,
-                                                                   shared_data,
+    /* shared data:      */ struct bisim_gjkw::refine_shared_t, shared_data,
     /* interrupt locatns:*/ (REFINE_RED_COLLECT_FROMRED)
                             (REFINE_RED_PREDECESSOR_HANDLED)
                             (REFINE_RED_STATE_HANDLED))
 {
-    // 3.5r: Red := {marked states}
-    // and
-    // 3.4r: whenever |Red| > |RefB|/2 then  Abort this coroutine
+    // 3.5r: whenever |Red| > |RefB|/2 then  Abort this coroutine
     if (RefB->marked_size() > RefB->size() / 2)  ABORT_THIS_COROUTINE();
 
     /*  -  -  -  -  -  -  - collect states from FromRed -  -  -  -  -  -  -  */
 
-    // 3.6r: if FromRed != {} then
+    // 3.7r: while FromRed != {} do
     if (nullptr != FromRed)
     {
         assert(FromRed->from_block() == RefB);
@@ -2401,7 +2413,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
         assert(RefB->constln() != SpC); //< so there is no need to skip inert
                                         //  transitions
 
-        // 3.8r: while FromRed contains unvisited transitions do
         COROUTINE_WHILE (REFINE_RED_COLLECT_FROMRED,
                                        FromRed->begin != fromred_visited_begin)
         {
@@ -2410,18 +2421,21 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                                     bisim_gjkw::check_complexity::n_log_n * 4 +
                                           bisim_gjkw::check_complexity::m * 2 +
                                               bisim_gjkw::check_complexity::n);
-            // 3.10r (order of lines changed): Mark s --> t as visited
+            // 3.11r (order of lines changed): FromRed := FromRed \ {s --> t}
+                // We can change the order of lines because the coroutine is
+                // not interrupted in between.
             --fromred_visited_begin;
-            // 3.9r: Choose an unvisited s --> t in FromRed
+            // 3.8r: Choose s --> t in FromRed
             bisim_gjkw::state_info_ptr const s =
                                            fromred_visited_begin->pred->source;
             assert(RefB->begin() <= s->pos && s->pos < RefB->end());
-            // 3.14r: Red := Red union {s}
+            // 3.9r: Test := Test \ {s}
+            // and
+            // 3.10r: Red := Red union {s}
             if (s->pos < shared_data.notblue_initialised_end)
             {
-                // three-way swap would be slightly more efficient,
-                // but the data is put into the cache after the
-                // first swap anyway.
+                // The state has a transition to a blue state, so notblue is
+                // initialised; however, now it is revealed to be red anyway.
                 bisim_gjkw::swap_permutation(s->pos,
                                         --shared_data.notblue_initialised_end);
             }
@@ -2429,19 +2443,19 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
             //            << " is red (FromRed: "
             //            << fromred_visited_begin->pred->debug_id() << ").\n";
             if (RefB->mark(s) &&
-            // 3.4r: whenever |Red| > |RefB|/2 do  Abort this coroutine
+            // 3.5r: whenever |Red| > |RefB|/2 do  Abort this coroutine
                                         RefB->marked_size() > RefB->size() / 2)
             {
                 ABORT_THIS_COROUTINE();
             }
-        // 3.16r: end while
+        // 3.14r: end while
         }
         END_COROUTINE_WHILE;
 
-        // Now we can set a boolean variable to convey to secondary_blue() the
-        // information that all transitions in FromRed have been handled and no
-        // slow tests are needed any more.
-        shared_data.fromred_finished = true;
+        // The shared variable FromRed_is_empty is set to true as soon as
+        // FromRed should be considered empty.  (From that moment on, no slow
+        // tests are needed any more.)
+        shared_data.FromRed_is_empty = true;
     }
     if (0 == RefB->marked_size())
     {
@@ -2458,7 +2472,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
         // case, some of these states will become new bottom states.)
         visited_begin = RefB->marked_nonbottom_end();
     }
-    // 3.20r: while Red contains unvisited states do
+    // 3.17r: while Red contains unvisited states do
     COROUTINE_DO_WHILE(REFINE_RED_STATE_HANDLED,
                                RefB->marked_nonbottom_begin() != visited_begin)
     {
@@ -2467,14 +2481,14 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                                     bisim_gjkw::check_complexity::n_log_n * 4 +
                                           bisim_gjkw::check_complexity::m * 2 +
                                               bisim_gjkw::check_complexity::n);
-        // 3.22r (order of lines changed): Mark s as visited
+        // 3.19r (order of lines changed): Mark s as visited
         --visited_begin;
         assert(RefB->marked_bottom_begin() <= visited_begin ||
                             (RefB->marked_nonbottom_begin() <= visited_begin &&
                                 RefB->marked_nonbottom_end() > visited_begin));
-        // 3.21r: Choose an unvisited s in Red
+        // 3.18r: Choose an unvisited s in Red
         s = *visited_begin;
-        // 3.23r: for all s_prime in inert_in(s) do
+        // 3.20r: for all s_prime in inert_in(s) do
         COROUTINE_FOR (REFINE_RED_PREDECESSOR_HANDLED,
             pred_iter = s->inert_pred_begin(),s->inert_pred_end() != pred_iter,
                                                                    ++pred_iter)
@@ -2485,12 +2499,11 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                                           bisim_gjkw::check_complexity::m * 2 +
                                               bisim_gjkw::check_complexity::n);
             bisim_gjkw::state_info_ptr const s_prime = pred_iter->source;
-            // 3.30r: Red := Red union {s_prime}
+            // 3.26r: Red := Red union {s_prime}
             if (s_prime->pos < shared_data.notblue_initialised_end)
             {
-                // three-way swap would be slightly more efficient,
-                // but the data is put into the cache after the
-                // first swap anyway.
+                // The state has a transition to a blue state, so notblue is
+                // initialised; however, now it is revealed to be red anyway.
                 bisim_gjkw::swap_permutation(s_prime->pos,
                                         --shared_data.notblue_initialised_end);
             }
@@ -2498,15 +2511,15 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
             //                            << s_prime->debug_id() << " is red ("
             //                              << pred_iter->debug_id() << ").\n";
             if (RefB->mark_nonbottom(s_prime) &&
-            // 3.4r: whenever |Red| > |RefB|/2 do  Abort this coroutine
+            // 3.5r: whenever |Red| > |RefB|/2 do  Abort this coroutine
                                         RefB->marked_size() > RefB->size() / 2)
             {
                 ABORT_THIS_COROUTINE();
             }
-        // 3.33r: end for
+        // 3.28r: end for
         }
         END_COROUTINE_FOR;
-    // 3.34r: end while
+    // 3.29r: end while
         if (RefB->marked_bottom_begin() == visited_begin)
         {
             visited_begin = RefB->marked_nonbottom_end();
@@ -2516,22 +2529,18 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
 
     /*  -  -  -  -  -  -  -  - split off red block -  -  -  -  -  -  -  -  */
 
-    // 3.35r: Abort the other coroutine
+    // 3.30r: Abort the other coroutine
     ABORT_OTHER_COROUTINE();
     // From now on, we do no longer need the reentrant ``local'' variables.
     // All non-red states are blue.
-    // 3.36r: Move Red to a new block NewB
+    // 3.31r: Move Red to a new block NewB
     // and
-    // 3.37r: Destroy all temporary data
-    // and
-    // 3.38r: Mark all bottom states of NewB
-    // and
-    // 3.39r: Unmark all other states
+    // 3.32r: Destroy all temporary data
     bisim_gjkw::block_t* const NewB =
                            RefB->split_off_red(RefB->marked_nonbottom_begin());
     part_tr.new_red_block_created(RefB, NewB, postprocessing);
 
-    // 3.40r: for all nonbottom s in NewB do
+    // 3.33r: for all nonbottom s in NewB do
         // we have to run through the states backwards because otherwise, we
         // might miss out some states.
     for (bisim_gjkw::permutation_iter_t s_iter = NewB->nonbottom_end();
@@ -2541,7 +2550,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                                         bisim_gjkw::check_complexity::n_log_n);
         --s_iter;
         bisim_gjkw::state_info_ptr const s = *s_iter;
-        // 3.41r: for all s_prime in inert_out(s) \ New do
+        // 3.34r: for all s_prime in inert_out(s) \ NewB do
         for (bisim_gjkw::succ_iter_t succ_iter = s->inert_succ_begin();
                                    s->inert_succ_end()!=succ_iter; ++succ_iter)
         {
@@ -2553,18 +2562,16 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
             bisim_gjkw::state_info_ptr const s_prime = succ_iter->target;
             if (s_prime->block == NewB)  continue;
             assert(s_prime->block == RefB);
-            // 3.42r: s --> s_prime is no longer inert
+            // 3.35r: s --> s_prime is no longer inert
             part_tr.make_noninert(succ_iter);
-        // 3.43r: end for
+        // 3.36r: end for
         }
-        // 3.44r: if |inert_out(s)| == 0 then
+        // 3.37r: if |inert_out(s)| == 0 then
         if (s->inert_succ_begin() == s->inert_succ_end())
         {
-            // 3.45r: s is a new bottom state
-            new_bottom_states.push_back(s);
+            // 3.38r: s is a new bottom state
             //mCRL2log(log::debug, "bisim_gjkw") << "found new bottom "
             //                                        << s->debug_id() << "\n";
-            // moved here from line 5.8: move s to bottom states
             NewB->set_marked_nonbottom_begin(NewB->bottom_begin() - 1);
             NewB->set_bottom_begin(NewB->marked_nonbottom_begin());
             swap_permutation(s->pos, NewB->bottom_begin());
@@ -2576,9 +2583,9 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                      s->current_constln()->target->constln() == SpC)   ||
                     (s->current_constln() > s->succ_begin() &&
                      s->current_constln()[-1].target->constln() == SpC) );
-        // 3.46r: end if
+        // 3.39r: end if
         }
-    // 3.47r: end for
+    // 3.40r: end for
     }
 }
 END_COROUTINE
@@ -2610,9 +2617,8 @@ typedef std::set<bisim_gjkw::constln_t*, constln_ptr_less> R_map_t;
 /// \details The function splits SplitB by checking whether all new bottom
 /// states can reach the constellations that SplitB can reach.
 ///
-/// When this function starts, it assumes that the general new_bottom_states
-/// list already has been processed and the old bottom states of SplitB are
-/// marked.
+/// When this function starts, it assumes that the old bottom states of SplitB
+/// are marked.
 template <class LTS_TYPE>
 void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_block(
                                                    bisim_gjkw::block_t* SplitB)
@@ -2624,16 +2630,18 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_block(
 
     // 4.3: Create an empty search tree R
     R_map_t R;
-    // 4.4: repeat
 Line_4_4:
+    // 4.4: Red := {old bottom states and new bottom states handled earlier in
+    //              SplitB}
     bisim_gjkw::permutation_iter_t const orig_new_bottom_end =
                                                  SplitB->unmarked_bottom_end();
-    assert(SplitB->unmarked_bottom_begin() < SplitB->unmarked_bottom_end());
+    assert(0 < SplitB->unmarked_bottom_size());
+    // 4.5: repeat
     do
     {
         bisim_gjkw::check_complexity::count("repeat until no more new bottom "
                        "states are found", 1, bisim_gjkw::check_complexity::n);
-        // 4.5: for all unmarked (i. e. new) bottom states b in SplitB do
+        // 4.6: for all new bottom states b in SplitB not handled earlier do
         for (bisim_gjkw::permutation_iter_t
                         b_iter = SplitB->unmarked_bottom_begin();
                              SplitB->unmarked_bottom_end() != b_iter; ++b_iter)
@@ -2641,7 +2649,7 @@ Line_4_4:
             bisim_gjkw::check_complexity::count("for all new bottom states in "
                                  "SplitB", 1, bisim_gjkw::check_complexity::n);
             bisim_gjkw::state_info_ptr const b = *b_iter;
-            // 4.6: for all constellations C reachable from b do
+            // 4.7: for all constellations C reachable from b do
             for (bisim_gjkw::succ_iter_t C_iter = b->succ_begin();
                 b->succ_end() != C_iter; C_iter = C_iter->constln_slice->end())
             {
@@ -2652,10 +2660,10 @@ Line_4_4:
                 bisim_gjkw::constln_t* const C = C_iter->target->constln();
                 bisim_gjkw::B_to_C_desc_iter_t const new_slice =
                                                   C_iter->B_to_C->B_to_C_slice;
-                // 4.7: Add C to R
+                // 4.8: Add C to R
                 // and
-                // 4.8: Register that the transitions from SplitB to C need
-                //      postprocessing
+                // 4.9: if the transitions SplitB --> C do not need
+                //         postprocessing then
                 if (R.insert(C).second) //< complexity log(n)
                 {
                     //mCRL2log(log::debug, "bisim_gjkw") << "\tcan reach "
@@ -2663,6 +2671,9 @@ Line_4_4:
                     // the constellation was not yet in R: no transitions to C
                     // are registered as needing postprocessing.
                     assert(C->postprocess_begin == C->postprocess_end);
+                    // 4.10: Register that the transitions from SplitB to C
+                    //       need postprocessing
+                        // set pointer to the end of the slice
                     C->postprocess_end = new_slice->end;
                 }
                 else if (C->postprocess_begin <= new_slice->begin)
@@ -2680,22 +2691,33 @@ Line_4_4:
                     // the constellation already was in R, but the transitions
                     // still need to be registered.  This only happens after
                     // backtracking (see Line 5.25 below).
+
+                    // 4.10: Register that the transitions from SplitB to C
+                    //       need postprocessing
+                        // make sure the pointer to the end of the slice is
+                        // already set to the correct value
                     assert(C->postprocess_begin == new_slice->end);
                 }
+                // 4.10: Register that the transitions from SplitB to C need
+                //      postprocessing
+                    // set pointer to the beginning of the slice
                 C->postprocess_begin = new_slice->begin;
                 assert(C->postprocess_begin < C->postprocess_end);
+                // 4.11: Store Red with this postprocessing step
                 new_slice->new_bottom_end = orig_new_bottom_end;
                 assert(new_slice->from_block() == SplitB);
                 SplitB->to_constln.splice(SplitB->to_constln.end(),
                                                 SplitB->to_constln, new_slice);
-            // 4.9: end for
+                // 4.12: end if
+                    // is implicit in the `continue` statement above
+            // 4.13: end for
             }
-            // 4.10: Set the current constellation pointer of b to the first
+            // 4.14: Set the current constellation pointer of b to the first
             //       constellation it can reach
             b->set_current_constln(b->succ_begin());
-        // 4.11: end for
+        // 4.15: end for
         }
-        // 4.12: if SplitB can reach some constellation C not in R then
+        // 4.16: if SplitB can reach some constellation C not in R then
         assert(SplitB->to_constln.begin() != SplitB->to_constln.end());
         if (!SplitB->to_constln.begin()->needs_postprocessing())
         {
@@ -2704,15 +2726,16 @@ Line_4_4:
                                       SplitB->to_constln.begin()->to_constln();
             //mCRL2log(log::debug, "bisim_gjkw") << "\tcanNOT reach "
             //                                        << C->debug_id() << "\n";
-            // 4.13: SplitB := Refine(SplitB, C, FromRed := {transition to C},
-            //                        blueTest := false)
+            // 4.17: SplitB := Refine(SplitB, C, Red := {old bottom states and
+            //                        new bottom states handled earlier in
+            //                        SplitB}, FromRed := {transition to C},
+            //                        allOtherBottomBlue := true)
             SplitB = refine(SplitB, C, SplitB->FromRed(C), true, true);
-            new_bottom_states.clear();
             assert(SplitB->marked_bottom_begin() <= orig_new_bottom_end &&
                            orig_new_bottom_end <= SplitB->marked_bottom_end());
-        // 4.14: end if
+        // 4.18: end if
         }
-    // 4.15: until Line 4.13 was skipped ...
+    // 4.19: until Line 4.17 was skipped or ...
         else
         {
             assert(SplitB->bottom_begin() <=
@@ -2721,20 +2744,20 @@ Line_4_4:
                                                          SplitB->bottom_end());
             break;
         }
-    // 4.15 (continued): ... or Line 4.13 did not find more new bottom states
+    // 4.19 (continued): ... or Line 4.17 did not find more new bottom states
     }
-    while (SplitB->unmarked_bottom_begin() != SplitB->unmarked_bottom_end());
+    while (0 < SplitB->unmarked_bottom_size());
 
     /*---------------- stabilise w.r.t. found constellations ----------------*/
 
-    // 4.16: for all constellations SpC in R (in order) do
-    while (R.begin() != R.end())
+    // 4.20: for all constellations SpC in R (in order) do
+    while (!R.empty())
     {
         bisim_gjkw::check_complexity::count(
                                    "for all constellations in R (in order)", 1,
                                               bisim_gjkw::check_complexity::m);
         bisim_gjkw::constln_t* const SpC = *R.begin();
-        // 4.17: for all blocks B with transitions to SpC that need
+        // 4.21: for all blocks B with transitions to SpC that need
         //               postprocessing do
         while (SpC->postprocess_begin != SpC->postprocess_end)
         {
@@ -2762,7 +2785,7 @@ Line_4_4:
             bisim_gjkw::permutation_iter_t const new_bottom_end =
                                                        FromRed->new_bottom_end;
             assert(FromRed->begin == B_iter);
-            // 4.18: Delete the transitions from B to SpC from those that need
+            // 4.22: Delete the transitions from B to SpC from those that need
             //       postprocessing
             SpC->postprocess_begin = FromRed->end;
             assert(SpC->postprocess_begin <= SpC->postprocess_end);
@@ -2775,15 +2798,13 @@ Line_4_4:
             }
             // set new_bottom_end to some invalid value:
             FromRed->new_bottom_end = B->begin() - 1;
-            // 4.19: Mark the old bottom states of B and unmark all other
-            //       states
+            // 4.23: RedB := Refine(B, SpC, Red := B intersect (the set stored
+            //                      in Line 4.11), FromRed := {transitions to
+            //                      SpC}, allOtherBottomBlue := false)
             B->set_marked_bottom_begin(new_bottom_end);
-            // 4.20: RedB := Refine(B, SpC, FromRed := {transitions to SpC},
-            //                      blueTest := true)
             bisim_gjkw::block_t* const RedB = refine(B, SpC, &*FromRed, false,
                                                                          true);
-            new_bottom_states.clear();
-            // 4.21: for all new bottom states s in RedB (except those just
+            // 4.24: for all new bottom states s in RedB (except those just
             //                                      found in Line 4.20) do
             for (bisim_gjkw::permutation_iter_t
                                 s_iter = RedB->marked_bottom_begin();
@@ -2793,7 +2814,7 @@ Line_4_4:
                                             "for all red new bottom states", 1,
                                               bisim_gjkw::check_complexity::m);
                 bisim_gjkw::state_info_ptr const s = *s_iter;
-                // 4.22: Advance the current constellation pointer of s to the
+                // 4.25: Advance the current constellation pointer of s to the
                 //       next constellation it can reach
                 if (s->current_constln() < s->succ_end() &&
                                 s->current_constln()->target->constln() == SpC)
@@ -2804,29 +2825,28 @@ Line_4_4:
                 else  assert(B == RedB && B->constln() == SpC);
                 assert(s->succ_end() == s->current_constln() ||
                               *SpC < *s->current_constln()->target->constln());
-            // 4.23: end for
+            // 4.26: end for
             }
-            // 4.24: if Line 4.20 has found more new bottom states then
-            if (RedB->unmarked_bottom_begin() != RedB->unmarked_bottom_end())
+            // 4.27: if Line 4.23 has found more new bottom states then
+            if (0 < RedB->unmarked_bottom_size())
             {
-                // 4.25: SplitB := RedB
+                // 4.28: SplitB := RedB
                 SplitB = RedB;
-                // 4.26: Restart the procedure (but keep R),
+                // 4.29: Restart the procedure (but keep R),
                 //       i. e. go to Line 4.4
                 goto Line_4_4;
-            // 4.27: end if
+            // 4.30: end if
             }
-            // 4.31: Destroy all temporary data
-                // As part of this line, we register that no more states are to
-                // be regarded as old
-            RedB->set_marked_bottom_begin(RedB->end());
-        // 4.28: end for
+            // 4.34: Destroy all temporary data
+                // As part of this line, we unmark all states.
+            RedB->set_marked_bottom_begin(RedB->bottom_end());
+        // 4.31: end for
         }
-        // 4.29: Delete SpC from R
+        // 4.32: Delete SpC from R
         R.erase(R.begin());
-    // 4.30: end for
+    // 4.33: end for
     }
-    // 4.31: Destroy all temporary data
+    // 4.34: Destroy all temporary data
     assert(R.empty());
 
     //mCRL2log(log::debug, "bisim_gjkw") << "Finished postprocessing\n";
@@ -2834,22 +2854,29 @@ Line_4_4:
 
 
 template <class LTS_TYPE>
-void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
+void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom(
+              const std::vector<bisim_gjkw::state_info_ptr> &new_bottom_states,
+                                                       bisim_gjkw::block_t* B1)
 {
-    bisim_gjkw::block_t* B1 = nullptr, * B2 = nullptr;
+    bisim_gjkw::block_t* B2 = nullptr;
 
     /*---------------- collect blocks with new bottom states ----------------*/
 
+    // 2.26: Separate the new bottom states of B from the old ones
+        // new bottom states are presented in two ways:  first, the unmarked
+        // bottom states of B1;  then, the contents of new_bottom_states.  For
+        // the first way, there is nothing to do;  for the second way, we have
+        // to separate the new from the old bottom states.
+        // Additionally, this loop also finds the (at most two) blocks
+        // containing new bottom states.
+
     // for all new bottom states b do
-        // (we iterate over the new bottom states backwards because we expect
-        // to do fewer swaps then)
-    for (std::vector<bisim_gjkw::state_info_ptr>::iterator b_iter =
-                new_bottom_states.end(); new_bottom_states.begin() != b_iter; )
+    for (std::vector<bisim_gjkw::state_info_ptr>::const_iterator b_iter =
+        new_bottom_states.begin(); new_bottom_states.end() != b_iter; ++b_iter)
     {
         bisim_gjkw::check_complexity::count(
                                     "collect blocks with new bottom states", 1,
                                               bisim_gjkw::check_complexity::n);
-        --b_iter;
         bisim_gjkw::state_info_ptr const b = *b_iter;
 
         if (b->block != B1)
@@ -2858,25 +2885,21 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
             if (b->block != B2)
             {
                 assert(nullptr == B2);
-                // 2.26: Mark the old bottom states of this block and unmark
-                //       all other states
-                    // (Unmarking nonbottom states is not necessary -- as the
-                    // block results from a call to refine(), it will not have
-                    // any marked nonbottom states.)
+                // In this new block, mark all bottom states to indicate that
+                // they are old bottom states.
+                // (Unmarking nonbottom states is not necessary -- as the block
+                // results from a call to refine(), it will not have any marked
+                // nonbottom states.)
                 b->block->set_marked_bottom_begin(b->block->bottom_begin());
             }
             B2 = B1;
             B1 = b->block;
         }
-        // Move b to the non-old bottom states
-            // (this swap is trivial if b was added to the new bottom states as
-            // a result of the most recent refinement)
+        // Move b to the new bottom states
         bisim_gjkw::swap_permutation(b->pos, B1->marked_bottom_begin());
         B1->set_marked_bottom_begin(B1->marked_bottom_begin() + 1);
     // end for
     }
-    // empty the set of new bottom states
-    new_bottom_states.clear();
 
     /*----------------------- handle collected blocks -----------------------*/
 
@@ -2884,19 +2907,33 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom()
     if (nullptr != B1)
     {
         // 2.27: PostprocessNewBottom(B1)
-        postprocess_block(B1);
+        if (0 < B1->unmarked_bottom_size())
+        {
+            postprocess_block(B1);
+        }
+        else
+        {
+            B1->set_marked_bottom_begin(B1->bottom_end());
+        }
         if (nullptr != B2)
         {
             // 2.27: PostprocessNewBottom(B2)
-            postprocess_block(B2);
+            if (0 < B2->unmarked_bottom_size())
+            {
+                postprocess_block(B2);
+            }
+            else
+            {
+                B2->set_marked_bottom_begin(B2->bottom_end());
+            }
         }
-    }
     // 2.28: end for
+    }
     else
     {
         assert(nullptr == B2);
     }
-// 5.28: return
+// 4.35: return
 }
 
 
