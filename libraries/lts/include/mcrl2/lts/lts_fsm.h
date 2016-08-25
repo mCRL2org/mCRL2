@@ -44,11 +44,19 @@ class state_label_fsm:  public std::vector < size_t >
     state_label_fsm()
     {}
 
+    /** \brief Copy constructor. */
+    state_label_fsm(const state_label_fsm& other)=default;
+
+    /** \brief Copy assignment. */
+    state_label_fsm& operator=(const state_label_fsm& other)=default;
+
     /** \brief Default constructor. The label is set to the vector v.
     */
-    state_label_fsm(const std::vector < size_t >& v):
+    explicit state_label_fsm(const std::vector < size_t >& v):
       std::vector < size_t >(v)
     {}
+
+    
 };
 namespace detail
 {

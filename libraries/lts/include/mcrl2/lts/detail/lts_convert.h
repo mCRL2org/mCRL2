@@ -325,7 +325,7 @@ inline void lts_convert_base_class(const lts_lts_base& base_in, lts_fsm_base& ba
 
 inline action_label_string lts_convert_translate_label(const action_label_lts& l_in, convertor<lts_lts_base, lts_fsm_base>& )
 {
-  return pp(l_in);
+  return action_label_string(pp(l_in));
 }
 
 inline void lts_convert_base_class(const lts_lts_base& base_in, 
@@ -387,7 +387,7 @@ inline void lts_convert_base_class(const lts_lts_base& base_in,
 
 inline action_label_string lts_convert_translate_label(const action_label_lts& l_in, convertor<lts_lts_base, lts_aut_base>& )
 {
-  return pp(l_in);
+  return action_label_string(pp(l_in));
 }
 
 inline void lts_convert_translate_state(const state_label_lts& /* state_label_in */, state_label_empty& state_label_out, convertor<lts_lts_base, lts_aut_base>& /* c */)
@@ -430,7 +430,7 @@ inline void lts_convert_base_class(const lts_lts_base& base_in,
 
 inline action_label_string lts_convert_translate_label(const action_label_lts& l_in, convertor<lts_lts_base, lts_dot_base>& )
 {
-  return pp(l_in);
+  return action_label_string(pp(l_in));
 }
 
 inline void lts_convert_translate_state(const state_label_lts& state_label_in, state_label_dot& state_label_out, convertor<lts_lts_base, lts_dot_base>& c)

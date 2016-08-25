@@ -306,7 +306,7 @@ bool lps2lts_algorithm::generate_lts()
     {
       if (m_state_numbers.put(i->state()).second && m_options.outformat != lts_aut) // The state is new.
       {
-        m_output_lts.add_state(i->state());
+        m_output_lts.add_state(state_label_lts(i->state()));
       }
     }
   }
@@ -677,7 +677,7 @@ bool lps2lts_algorithm::search_divergence(
     if (action_label_number.second)
     {
       assert(j->action().actions().size() != 0);
-      size_t action_number = m_output_lts.add_action(j->action());
+      size_t action_number = m_output_lts.add_action(action_label_lts(j->action()));
       assert(action_number == action_label_number.first);
       static_cast <void>(action_number); // Avoid a warning when compiling in non debug mode.
     }
@@ -827,7 +827,7 @@ std::pair<size_t, bool> lps2lts_algorithm::add_target_state(const lps::state& so
     if (m_options.outformat != lts_none && m_options.outformat != lts_aut)
     {
       assert(!m_options.bithashing);
-      m_output_lts.add_state(target_state);
+      m_output_lts.add_state(state_label_lts(target_state));
     }
   }
   return destination_state_number;
@@ -921,7 +921,7 @@ bool lps2lts_algorithm::add_transition(const lps::state& source_state, const nex
     if (action_label_number.second)
     {
       assert(transition.action().actions().size() != 0);
-      size_t action_number = m_output_lts.add_action(transition.action());
+      size_t action_number = m_output_lts.add_action(action_label_lts(transition.action()));
       assert(action_number == action_label_number.first);
       static_cast <void>(action_number); // Avoid a warning when compiling in non debug mode.
     }

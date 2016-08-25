@@ -50,26 +50,32 @@ class state_label_lts : public atermpp::term_balanced_tree< data::data_expressio
 
   public:
 
-    /** \brief Default constructor. The state label becomes some default aterm.
+    /** \brief Default constructor. 
     */
     state_label_lts()
     {}
 
+    /** \brief Copy constructor. */
+    state_label_lts(const state_label_lts& other)=default;
+
+    /** \brief Copy assignment. */
+    state_label_lts& operator=(const state_label_lts& other)=default;
+
     /** \brief Construct a state label out of a data_expression_list.
     */
-    state_label_lts(const mcrl2::data::data_expression_list& l)
+    explicit state_label_lts(const mcrl2::data::data_expression_list& l)
       : term_balanced_tree<data::data_expression>(l.begin(),l.size())
     {}
 
     /** \brief Construct a state label out of a data_expression_vector.
     */
-    state_label_lts(const std::vector < mcrl2::data::data_expression >& l)
+    explicit state_label_lts(const std::vector < mcrl2::data::data_expression >& l)
       : term_balanced_tree<data::data_expression>(l.begin(),l.size())
     {}
 
     /** \brief Construct a state label out of a balanced tree of data expressions, representing a state label.
     */
-    state_label_lts(const atermpp::term_balanced_tree<mcrl2::data::data_expression>& l)
+    explicit state_label_lts(const atermpp::term_balanced_tree<mcrl2::data::data_expression>& l)
       : atermpp::term_balanced_tree<mcrl2::data::data_expression>(l)
     {}
 
@@ -91,7 +97,7 @@ class state_label_lts : public atermpp::term_balanced_tree< data::data_expressio
       assert(i<this->size());
       std::vector<data::data_expression> v(this->begin(),this->end());
       v[i]=e;
-      *this=term_balanced_tree<data::data_expression>(v.begin(),v.size());
+      *this=state_label_lts(term_balanced_tree<data::data_expression>(v.begin(),v.size()));
     }
 };
 
@@ -126,31 +132,25 @@ class action_label_lts: public mcrl2::lps::multi_action
     action_label_lts()
     {}
 
+    /** \brief Copy constructor. */
+    action_label_lts(const action_label_lts& other)=default;
+
+    /** \brief Copy assignment. */
+    action_label_lts& operator=(const action_label_lts& other)=default;
+
     /** \brief Constructor. Sets action label to the multi_action a. */
-    action_label_lts(const atermpp::aterm& a):mcrl2::lps::multi_action(a)
+    explicit action_label_lts(const atermpp::aterm& a):mcrl2::lps::multi_action(a)
     {
     }
 
     /** \brief Constructor. Transforms action label a to form a multi_action a. */
-    action_label_lts(const process::action& a):mcrl2::lps::multi_action(a)
+    explicit action_label_lts(const process::action& a):mcrl2::lps::multi_action(a)
     {
     }
 
     /** \brief Constructor. */
-    action_label_lts(const mcrl2::lps::multi_action& a):mcrl2::lps::multi_action(a)
+    explicit action_label_lts(const mcrl2::lps::multi_action& a):mcrl2::lps::multi_action(a)
     {
-    }
-
-    /** \brief Returns this multi_action as an aterm without the time tag.
-    */
-    atermpp::aterm aterm_without_time() const
-    {
-      if (this->has_time())
-      {
-        throw mcrl2::runtime_error("Cannot transform multi action " +
-                                   lps::pp(*this) + " to an atermpp::aterm as it contains time.");
-      }
-      return atermpp::aterm_appl(core::detail::function_symbol_MultAct(), this->actions());
     }
 
     /** \brief Hide the actions with labels in tau_actions.

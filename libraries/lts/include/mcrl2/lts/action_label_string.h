@@ -44,9 +44,15 @@ class action_label_string: public std::string
     action_label_string()
     {}
 
+    /** \brief Copy constructor. */
+    action_label_string(const action_label_string& other)=default;
+
+    /** \brief Copy assignment. */
+    action_label_string& operator=(const action_label_string& other)=default;
+
     /* \brief A constructor, where the string s is taken to become the action label.
      */
-    action_label_string(const std::string& s):std::string(s)
+    explicit action_label_string(const std::string& s):std::string(s)
     {}
 
     /* \brief An auxiliary function to hide actions. Makes a best-effort attempt at

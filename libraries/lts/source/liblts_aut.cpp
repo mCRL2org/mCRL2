@@ -75,7 +75,7 @@ static size_t find_label_index(const string& s, map < string, size_t >& labs, pr
   const map < string, size_t >::const_iterator i=labs.find(s);
   if (i==labs.end())
   {
-    label=l.add_action(s);
+    label=l.add_action(action_label_string(s));
     labs[s]=label;
   }
   else

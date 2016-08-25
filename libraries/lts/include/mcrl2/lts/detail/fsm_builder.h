@@ -251,7 +251,7 @@ struct fsm_builder
     if (i == labels.end())
     {
       assert(t.label() != action_label_string::tau_action());
-      label_index = fsm.add_action(t.label());
+      label_index = fsm.add_action(action_label_string(t.label()));
       labels[t.label()] = label_index;
     }
     else

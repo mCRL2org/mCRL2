@@ -317,7 +317,7 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
     assert(input_lts.num_states()==input_lts.get_state_labels().size());
     for (const term_balanced_tree<data::data_expression>& state_label:input_lts.get_state_labels())
     {
-      l.add_state(state_label);
+      l.add_state(state_label_lts(state_label));
     }
   }
 
@@ -332,7 +332,7 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
     {
       if (!action_label.empty()) // The empty label is tau, which is present by default.
       {
-        l.add_action(lps::multi_action(action_label)); 
+        l.add_action(action_label_lts(lps::multi_action(action_label))); 
       }
     }
   }
