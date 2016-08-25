@@ -147,9 +147,9 @@ class term_list:public aterm
     }
 
     /// \brief A constructor based on an initializer list.
-    /// \details This constructor is made explicit to prevent silent transformations of constructor lists to the wrong list type.
+    /// \details This constructor is not made explicit to conform to initializer lists in standard containers. 
     /// \param init The initialiser list.
-    explicit term_list(std::initializer_list<Term> init)
+    term_list(std::initializer_list<Term> init)
       : aterm(detail::make_list_backward<Term, 
                                          typename std::initializer_list<Term>::const_iterator, 
                                          detail::do_not_convert_term<Term> >
