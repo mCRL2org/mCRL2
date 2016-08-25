@@ -21,7 +21,6 @@
 
 #include <string>
 #include <vector>
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/utilities/logger.h"
@@ -138,11 +137,6 @@ class action_label_lts: public mcrl2::lps::multi_action
     /** \brief Copy assignment. */
     action_label_lts& operator=(const action_label_lts& other)=default;
 
-    /** \brief Constructor. Sets action label to the multi_action a. */
-    explicit action_label_lts(const atermpp::aterm& a):mcrl2::lps::multi_action(a)
-    {
-    }
-
     /** \brief Constructor. Transforms action label a to form a multi_action a. */
     explicit action_label_lts(const process::action& a):mcrl2::lps::multi_action(a)
     {
@@ -170,11 +164,7 @@ class action_label_lts: public mcrl2::lps::multi_action
           new_action_list.push_front(a);
         }
       }
-      // const bool is_tau=new_action_list.empty();
-
       m_actions=new_action_list;
-
-      // return is_tau;
     }
 
     /* \brief The action label that represents the internal action.
@@ -206,8 +196,7 @@ inline action_label_lts parse_lts_action(
   const data::data_specification& data_spec,
   const process::action_label_list& act_decls)
 {
-  lps::multi_action ma = lps::parse_multi_action(multi_action_string, act_decls, data_spec);
-  return action_label_lts(atermpp::aterm_appl(core::detail::function_symbol_MultAct(), ma.actions()));
+  return action_label_lts(lps::parse_multi_action(multi_action_string, act_decls, data_spec));
 }
 
 namespace detail
