@@ -1377,8 +1377,6 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
 
     // initialise states and succ slices
     part_st.state_info.begin()->set_pred_begin(part_tr.pred.begin());
-    assert(nullptr != &*part_tr.succ.begin()); //< needed to ensure that the
-            // constln_slice_pool does not regard too many elements as free.
     part_st.state_info.begin()->set_succ_begin(part_tr.succ.begin());
     for (state_type s = 0; s < get_nr_of_states(); ++s)
     {
