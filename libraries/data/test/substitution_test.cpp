@@ -228,7 +228,7 @@ void test_assignment_sequence_substitution()
   BOOST_CHECK(f(u) == z);
 
   assignment yz(y,z);
-  l = assignment_list = { xy, uz, yz };
+  l = { xy, uz, yz };
   assignment_sequence_substitution g(l);
 
   BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
