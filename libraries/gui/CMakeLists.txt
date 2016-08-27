@@ -8,7 +8,6 @@ if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
       numberedtextedit.cpp
       persistentfiledialog.cpp
     DEPENDS
-      mcrl2_gui
       mcrl2_utilities
       QtCore
       QtGui
