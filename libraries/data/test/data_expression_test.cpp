@@ -111,7 +111,7 @@ void application_test()
   data::function_symbol f("f", s01s);
   data_expression x(variable("x", s0));
   data_expression y(variable("y", s1));
-  data_expression_list xy ({ x, y });
+  data_expression_list xy = { x, y };
   application fxy(f, xy);
   BOOST_CHECK(fxy.sort() == s);
   BOOST_CHECK(fxy.head() == f);
@@ -132,7 +132,7 @@ void abstraction_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_list xl ( { x });
+  variable_list xl = { x };
   abstraction I(lambda_binder(), xl, x);
   BOOST_CHECK(I.binding_operator() == lambda_binder());
   BOOST_CHECK(I.variables() == xl);
@@ -151,7 +151,7 @@ void lambda_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_list xl ({ x });
+  variable_list xl = { x };
   lambda I(xl, x);
   BOOST_CHECK(I.binding_operator() == lambda_binder());
   BOOST_CHECK(is_lambda(I));
@@ -181,7 +181,7 @@ void forall_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_list xl({ x });
+  variable_list xl = { x };
   forall I(xl, x);
   BOOST_CHECK(I.binding_operator() == forall_binder());
   BOOST_CHECK(is_forall(I));
@@ -210,7 +210,7 @@ void exists_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_list xl ({ x });
+  variable_list xl = { x };
   exists I(xl, x);
   BOOST_CHECK(I.binding_operator() == exists_binder());
   BOOST_CHECK(is_exists(I));
@@ -259,7 +259,7 @@ void where_declaration_test()
   variable y("y", s);
 
   assignment xy(x,y);
-  assignment_expression_list xyl({ assignment_expression(xy) });
+  assignment_expression_list xyl = { xy };
   where_clause wxy(x, xyl);
   BOOST_CHECK(wxy.body() == x);
   BOOST_CHECK(wxy.declarations() == xyl);

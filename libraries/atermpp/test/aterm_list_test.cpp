@@ -119,7 +119,7 @@ void test_initializer_list()
 {
   atermpp::aterm x = read_term_from_string("x");
   atermpp::aterm y = read_term_from_string("y");
-  aterm_list l ({ x, y });
+  aterm_list l = { x, y };
 }
 
 int test_main(int argc, char* argv[])

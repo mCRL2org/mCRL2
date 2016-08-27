@@ -100,7 +100,7 @@ typedef std::vector<function_sort> function_sort_vector;
 inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& codomain)
 {
-  return function_sort(sort_expression_list({ dom1 }), codomain);
+  return function_sort({ dom1 }, codomain);
 }
 
 /// \brief Convenience constructor for function sort with domain size 2
@@ -113,7 +113,7 @@ inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& dom2,
                                         const sort_expression& codomain)
 {
-  return function_sort(sort_expression_list({ dom1, dom2 }), codomain);
+  return function_sort({ dom1, dom2 }, codomain);
 }
 
 /// \brief Convenience constructor for function sort with domain size 3
@@ -128,7 +128,7 @@ inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& dom3,
                                         const sort_expression& codomain)
 {
-  return function_sort(sort_expression_list({ dom1, dom2, dom3 }), codomain);
+  return function_sort({ dom1, dom2, dom3 }, codomain);
 }
 
 /// \brief Convenience constructor for function sort with domain size 4
@@ -145,7 +145,7 @@ inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& dom4,
                                         const sort_expression& codomain)
 {
-  return function_sort(sort_expression_list({ dom1, dom2, dom3, dom4 }), codomain);
+  return function_sort({ dom1, dom2, dom3, dom4 }, codomain);
 }
 
 } // namespace data

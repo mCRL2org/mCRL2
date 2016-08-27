@@ -272,7 +272,7 @@ static void initialise_build_pars(build_pars* p)
   p->Flist = match_tree_list_list();
   p->Slist = match_tree_list_list();
   p->Mlist = match_tree_list_list();
-  p->stack = term_list<match_tree_list_list>({ match_tree_list_list() });
+  p->stack = { match_tree_list_list() };
   p->upstack = match_tree_list_list();
 }
 

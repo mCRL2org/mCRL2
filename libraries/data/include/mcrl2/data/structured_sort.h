@@ -271,7 +271,7 @@ class structured_sort: public sort_expression
 
       variable x("x", s);
       variable y("y", s);
-      variable_list xy({ x, y });
+      variable_list xy = { x, y };
       application to_pos_x = application(to_pos_function(s), x);
       application to_pos_y = application(to_pos_function(s), y);
       application equal_arguments_xy         = application(equal_arguments_function(s), x, y);

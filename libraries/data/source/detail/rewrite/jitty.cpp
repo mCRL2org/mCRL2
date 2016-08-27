@@ -54,7 +54,7 @@ static const function_symbol this_term_is_in_normal_form()
 {
   static const function_symbol this_term_is_in_normal_form(
                          std::string("Rewritten@@term"),
-                         function_sort(sort_expression_list({ sort_expression(untyped_sort()) }),untyped_sort()));
+                         function_sort({ untyped_sort() },untyped_sort()));
   return this_term_is_in_normal_form;
 }
 
@@ -185,7 +185,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
       if ((is_function_symbol(this_rule_lhs)?1:detail::recursive_number_of_args(this_rule_lhs)+1) == arity + 1)
       {
         const data_expression& cond = this_rule.condition();
-        atermpp::term_list<variable_list> vars({ get_free_vars(cond) });
+        atermpp::term_list<variable_list> vars = { get_free_vars(cond) };
 
         std::vector < bool> bs(arity,false);
 

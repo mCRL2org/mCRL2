@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(function_sort_test)
   basic_sort s1("S1");
   basic_sort s("S");
 
-  sort_expression_list s01 ({ s0, s1 });
+  sort_expression_list s01 = { s0, s1 };
   function_sort fs(s01, s);
   BOOST_CHECK(!is_basic_sort(fs));
   BOOST_CHECK(is_function_sort(fs));
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
   BOOST_CHECK(structured_sort_constructor_argument_vector(c2.arguments().begin(),c2.arguments().end()) == a2);
   BOOST_CHECK_EQUAL(c2.recogniser(), core::empty_identifier_string());
 
-  structured_sort_constructor_list cs({ c1, c2 });
+  structured_sort_constructor_list cs = { c1, c2 };
 
   structured_sort s(cs);
 

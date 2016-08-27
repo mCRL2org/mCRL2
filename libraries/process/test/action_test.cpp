@@ -27,18 +27,18 @@ int test_main(int argc, char** argv)
   data::sort_expression X(data::basic_sort("X"));
   data::sort_expression Y(data::basic_sort("Y"));
 
-  process::action_label aX(core::identifier_string("a"),  data::sort_expression_list({ X }));
-  process::action_label aY(core::identifier_string("a"),  data::sort_expression_list({ Y }));
-  process::action_label aXY(core::identifier_string("a"), data::sort_expression_list({ X, Y }));
-  process::action_label bX(core::identifier_string("b"),  data::sort_expression_list({ X }));
+  process::action_label aX(core::identifier_string("a"),  { X });
+  process::action_label aY(core::identifier_string("a"),  { Y });
+  process::action_label aXY(core::identifier_string("a"), { X, Y });
+  process::action_label bX(core::identifier_string("b"),  { X });
 
   data::data_expression x_X = data::variable("x", X);
   data::data_expression y_X = data::variable("y", X);
   data::data_expression y_Y = data::variable("y", Y);
 
-  process::action a1(aX, data::data_expression_list({ x_X }));
-  process::action a2(aX, data::data_expression_list({ y_X }));
-  process::action a3(bX, data::data_expression_list({ x_X }));
+  process::action a1(aX, { x_X });
+  process::action a2(aX, { y_X });
+  process::action a3(bX, { x_X });
 
   BOOST_CHECK(process::equal_signatures(a1, a1));
   BOOST_CHECK(process::equal_signatures(a1, a2));

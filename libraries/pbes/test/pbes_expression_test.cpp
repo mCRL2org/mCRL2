@@ -51,9 +51,9 @@ void test_accessors()
   pbes_expression x = expressions[0];
   pbes_expression y = expressions[1];
   data::variable d(core::identifier_string("d"), data::sort_nat::nat());
-  data::variable_list v ( { d } );
+  data::variable_list v = { d };
   pbes_expression z = d;
-  propositional_variable_instantiation X(core::identifier_string("X"), data::data_expression_list({ data::data_expression(d) }));
+  propositional_variable_instantiation X(core::identifier_string("X"), { d });
 
   std::set<pbes_expression> q;
   q.insert(x);
@@ -107,7 +107,7 @@ void test_accessors()
     BOOST_CHECK(s == core::identifier_string("X"));
 
     const data::data_expression_list& f = param(X);
-    data::data_expression_list g ({ data::data_expression(d) });
+    data::data_expression_list g = { d };
     BOOST_CHECK(f == g);
 
     print(q);
