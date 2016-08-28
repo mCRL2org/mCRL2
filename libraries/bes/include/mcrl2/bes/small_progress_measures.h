@@ -19,7 +19,6 @@
 #include <map>
 #include <sstream>
 #include <vector>
-#include <boost/lexical_cast.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/normal_forms.h"
@@ -378,7 +377,7 @@ class small_progress_measures_algorithm
           std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m + 1, alpha.begin());
           if (is_odd(m))
           {
-            mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha) << ", " << boost::lexical_cast<std::string>(m) << ") = ";
+            mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha) << ", " << std::to_string(m) << ") = ";
             inc(alpha, m, m_beta);
             mCRL2log(log::debug) << (alpha[0] < 0 ? "top" : core::detail::print_list(alpha));
           }

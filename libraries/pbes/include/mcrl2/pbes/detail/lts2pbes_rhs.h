@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 #define MCRL2_PBES_DETAIL_LTS2PBES_RHS_H
 
-#include "boost/lexical_cast.hpp"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/traverser.h"
@@ -35,7 +34,7 @@ typedef lts::lts_lts_t::states_size_type lts2pbes_state_type;
 inline
 core::identifier_string make_identifier(const core::identifier_string& name, lts2pbes_state_type s)
 {
-  return core::identifier_string(std::string(name) + "'" + boost::lexical_cast<std::string>(s));
+  return core::identifier_string(std::string(name) + "'" + std::to_string(s));
 }
 
 template <typename TermTraits>

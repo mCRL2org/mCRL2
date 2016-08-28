@@ -11,7 +11,6 @@
 #include <queue>
 #include <set>
 
-#include "boost/lexical_cast.hpp"
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/representative_generator.h"
@@ -197,14 +196,14 @@ void lts_info::compute_lts_type()
     data::representative_generator default_expression_generator(p.data());
 
     for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
-            != p.equations().end(); ++eqn) {
+            != p.equations().end(); ++eqn) 
+    {
         //std::clog << core::pp((*eqn).symbol()) << " " << (*eqn).variable().name()
         //        << std::endl;
 
         propositional_variable var = (*eqn).variable();
-        for (atermpp::term_list<variable>::const_iterator param =
-                var.parameters().begin(); param != var.parameters().end(); ++param) {
-            variable varparam = (*param);
+        for (const variable& varparam: var.parameters())
+        {
             std::string signature = get_param_signature(varparam);
             bool new_param = true;
             for (std::vector<std::string>::iterator par = params.begin(); par
@@ -1585,7 +1584,7 @@ const std::string& explorer::get_string_value(int index)
 {
     if (index >= (int)(localmap_int2string.size()))
     {
-        throw(std::runtime_error("Error in get_string_value: Value not found for index " + boost::lexical_cast<std::string>(index) + "."));
+        throw(std::runtime_error("Error in get_string_value: Value not found for index " + std::to_string(index) + "."));
     }
     return localmap_int2string.at(index);
 }
@@ -1597,7 +1596,7 @@ const data_expression& explorer::get_data_value(int type_no, int index)
     if (index >= (int)(int2data_map.size()))
     {
         throw(std::runtime_error("Error in get_data_value: Value not found for type_no "
-                                            + boost::lexical_cast<std::string>(type_no) + " at index " + boost::lexical_cast<std::string>(index) + "."));
+                                            + std::to_string(type_no) + " at index " + std::to_string(index) + "."));
     }
     return int2data_map.at(index);
 }

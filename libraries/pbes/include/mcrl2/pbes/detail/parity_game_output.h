@@ -15,7 +15,6 @@
 #include <vector>
 #include <boost/algorithm/string/join.hpp>
 #include <functional>
-#include <boost/lexical_cast.hpp>
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 

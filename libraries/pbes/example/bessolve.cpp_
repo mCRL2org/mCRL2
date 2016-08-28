@@ -2,7 +2,6 @@
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #include <iostream>
 #include <string>
-#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"

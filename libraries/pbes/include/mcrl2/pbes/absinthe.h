@@ -19,7 +19,6 @@
 #include <sstream>
 #include <utility>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 #include "mcrl2/data/parse.h"
