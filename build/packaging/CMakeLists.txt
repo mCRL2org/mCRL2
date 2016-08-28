@@ -68,11 +68,28 @@ if(APPLE)
     install(CODE "
       message(STATUS \"Executing ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES} in directory \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}\")
       execute_process(
-        COMMAND ${MACDEPLOYQT} mCRL2.app ${EXECUTABLES}
+        COMMAND ${MACDEPLOYQT} -verbose=3 -always-overwrite -appstore-compliant mCRL2.app ${EXECUTABLES}
         WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}
         OUTPUT_FILE /tmp/macdeployqt.log
       )
     ")
+# Explicitly install the Qt frameworks in the lib subdirectory. The program macdeployqt 
+# does not do this by itself. A more logical place appears to install the files in Contents/Frameworks
+# but the loader on the mac is not able to find them in that directory.
+# It is helpful to set the environment variable QT_DEBUG_PLUGINS to 1 if investigating issues.
+    install(DIRECTORY ${Qt5Core_DIR}/../../QtCore.framework
+            DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/lib)
+    install(DIRECTORY ${Qt5Gui_DIR}/../../QtGui.framework
+            DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/lib)
+    install(DIRECTORY ${Qt5OpenGL_DIR}/../../QtOpenGL.framework
+            DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/lib)
+    install(DIRECTORY ${Qt5Widgets_DIR}/../../QtWidgets.framework
+            DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/lib)
+# The frameworks below are needed by libqcocoa.dylib
+    install(DIRECTORY ${Qt5Xml_DIR}/../../QtDBus.framework
+            DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/lib)
+    install(DIRECTORY ${Qt5Xml_DIR}/../../QtPrintSupport.framework
+            DESTINATION ${MCRL2_BUNDLE_PATH}/Contents/lib)
   endif()
 endif()
 
