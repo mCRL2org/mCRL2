@@ -41,6 +41,8 @@ template < class STATE, class PROBABILITY >
 class probabilistic_state
 {
   public:
+    
+    friend std::hash<probabilistic_state>;
 
     typedef typename lps::state_probability_pair< STATE, PROBABILITY > state_probability_pair;
     typedef STATE state_t;
@@ -86,6 +88,14 @@ class probabilistic_state
       shrink_to_fit();
     };
 
+    /** \brief Standard equality operator.
+     *  \result Returns true iff the probabilistic states are equal.
+     */
+    bool operator==(const probabilistic_state& other) const
+    {
+      return m_probabilistic_state==other.m_probabilistic_state;
+    }
+
     /** \brief Swap this lts with the supplied supplied LTS.
      * \param[in] l The LTS to swap. */
     void swap(probabilistic_state& s)
@@ -101,6 +111,7 @@ class probabilistic_state
     {
       assert(size()==0);
       m_probabilistic_state.emplace_back(s, PROBABILITY::one());
+      shrink_to_fit();
     };
 
     /** \brief Add a state with a probability to the probabilistic state
@@ -210,7 +221,23 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_state<STATE, PRO
 
 
 
-}
-}
+} // namespace lts
+} // namespace mcrl2
+
+namespace std
+{
+
+/// \brief specialization of the standard std::hash function.
+template < class STATE, class PROBABILITY >
+struct hash< mcrl2::lts::probabilistic_state<STATE, PROBABILITY> >
+{
+  std::size_t operator()(const mcrl2::lts::probabilistic_state<STATE, PROBABILITY>& p) const
+  {
+    hash<vector<typename mcrl2::lps::state_probability_pair< STATE, PROBABILITY > > > hasher;
+    return hasher(p.m_probabilistic_state);
+  }
+};
+
+} // namespace std
 
 #endif // MCRL2_LTS_PROBABILISTIC_STATE_H

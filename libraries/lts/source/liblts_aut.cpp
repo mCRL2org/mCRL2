@@ -143,6 +143,7 @@ static void read_probabilistic_state(
 
   if (!isdigit(ch))
   {
+    // There is only a single state.
     result.set(state);
     return;
   }
@@ -320,6 +321,12 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
 
   unordered_map <size_t,size_t> state_number_translator;
+  // The two unordered maps below are used to determine a unique index for each probabilistic state.
+  // Because most states consist of one probabilistic state, the unordered maps are duplicated into
+  // indices_of_single_probabilistic_states and indices_of_multiple_probabilistic_states.
+  // The map indices_of_single_probabilistic_states requires far less memory.
+  map < size_t, size_t> indices_of_single_probabilistic_states;
+  unordered_map < detail::lts_aut_base::probabilistic_state, size_t> indices_of_multiple_probabilistic_states;
   add_states(initial_probabilistic_state,state_number_translator);
 
   if (nstate==0)
@@ -350,9 +357,31 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
 
     add_state(from,state_number_translator); // This can change the number of from.
     add_states(probabilistic_target_state,state_number_translator);
-    size_t probabilistic_state_index=l.add_and_reset_probabilistic_state(probabilistic_target_state);
+    // Check whether probabilistic state exists. 
+    size_t fresh_index = indices_of_single_probabilistic_states.size()+indices_of_multiple_probabilistic_states.size();
+    size_t index;
+    if (probabilistic_target_state.size()==1)
+    {
+      index = indices_of_single_probabilistic_states.insert(
+                       std::pair< size_t, size_t>
+                       (probabilistic_target_state.begin()->state(),fresh_index)).first->second;
+    }
+    else
+    {
+      assert(probabilistic_target_state.size()>1);
+      index = indices_of_multiple_probabilistic_states.insert(
+                       std::pair< detail::lts_aut_base::probabilistic_state, size_t>
+                       (probabilistic_target_state,fresh_index)).first->second;
+    }
+    
+    if (index==fresh_index) 
+    {
+      size_t probabilistic_state_index=l.add_and_reset_probabilistic_state(probabilistic_target_state);
+      assert(probabilistic_state_index==index);
+      (void)probabilistic_state_index; // Avoid unused variable warning.
+    }
 
-    l.add_transition(transition(from,find_label_index(s,action_labels,l),probabilistic_state_index));
+    l.add_transition(transition(from,find_label_index(s,action_labels,l),index));
     
     if (state_number_translator.size() > l.num_states())
     {

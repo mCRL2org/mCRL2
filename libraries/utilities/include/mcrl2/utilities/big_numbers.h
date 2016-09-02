@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/hash_utility.h"
 
 
 namespace mcrl2
@@ -121,6 +122,7 @@ inline std::string pp(const big_natural_number& l);
 
 class big_natural_number
 {
+    friend std::hash<big_natural_number>;
     friend inline void swap(big_natural_number& x, big_natural_number& y);
 
   protected:
@@ -538,7 +540,21 @@ inline void swap(big_natural_number& x, big_natural_number& y)
 } // namespace utilities
 } // namespace mcrl2
 
+namespace std
+{
 
+template <>
+struct hash< mcrl2::utilities::big_natural_number >
+{
+  std::size_t operator()(const mcrl2::utilities::big_natural_number& n) const
+  {
+    hash<std::vector<size_t> > hasher;
+    return hasher(n.m_number);
+  }
+};
+
+  
+} // namespace std
 
 
 #endif // MCRL2_UTILITIES_BIG_NUMBERS_H

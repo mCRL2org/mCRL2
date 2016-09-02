@@ -25,6 +25,7 @@
 #include <cassert>
 #include <sstream>
 #include <limits>
+#include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/utilities/big_numbers.h"
 
 
@@ -78,7 +79,7 @@ class probabilistic_arbitrary_precision_fraction
     /* \brief A constructor, where the enumerator and denominator are constructed
      *        from two strings of digits.
      */
-    probabilistic_arbitrary_precision_fraction(const std::string& enumerator, const std::string& denominator)
+    explicit probabilistic_arbitrary_precision_fraction(const std::string& enumerator, const std::string& denominator)
      : // probabilistic_arbitrary_precision_fraction(utilities::big_natural_number(enumerator),utilities::big_natural_number(denominator))
        m_enumerator(utilities::big_natural_number(enumerator)),
        m_denominator(utilities::big_natural_number(denominator))
@@ -90,14 +91,14 @@ class probabilistic_arbitrary_precision_fraction
     */
     utilities::big_natural_number enumerator() const
     {
-      return pp(m_enumerator);
+      return m_enumerator;
     }
 
     /* \brief Return the denominator of the label.
     */
     utilities::big_natural_number denominator() const
     {
-      return pp(m_denominator);
+      return m_denominator;
     }
 
     /* \brief Standard comparison operator.
@@ -237,6 +238,22 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_arbitrary_precis
 
 } // namespace lts
 } // namespace mcrl2
+
+namespace std
+{
+
+/// \brief specialization of the standard std::hash function.
+template <>
+struct hash< mcrl2::lts::probabilistic_arbitrary_precision_fraction >
+{
+  std::size_t operator()(const mcrl2::lts::probabilistic_arbitrary_precision_fraction& p) const
+  {
+    hash<mcrl2::utilities::big_natural_number> hasher;
+    return mcrl2::utilities::detail::hash_combine(hasher(p.enumerator()), hasher(p.denominator()));
+  }
+};
+
+} // namespace std
 
 #endif // MCRL2_LTS_PROBABILISTIC_ARBITRARY_PRECISION_FRACTION_H
 

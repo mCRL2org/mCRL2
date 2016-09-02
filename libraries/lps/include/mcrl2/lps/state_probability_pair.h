@@ -20,6 +20,7 @@
 #define MCRL2_LPS_STATE_PROBABILITY_PAIR_H
 
 #include <cassert>
+#include "mcrl2/utilities/hash_utility.h"
 
 namespace mcrl2
 {
@@ -43,6 +44,14 @@ class state_probability_pair
     {
       assert(probability!=PROBABILITY::zero());
     } 
+
+    /** \brief Standard equality operator.
+     *  \result Returns true iff the probabilistic states are equal.
+     */
+    bool operator==(const state_probability_pair& other) const
+    {
+      return m_state==other.m_state && m_probability==other.m_probability;
+    }
 
     /// \brief Get the state from a state probability pair.
     const STATE& state() const
@@ -72,5 +81,21 @@ class state_probability_pair
 
 } // namespace lps
 } // namespace mcrl2 
+
+namespace std
+{
+
+template < class STATE, class PROBABILITY >
+struct hash<mcrl2::lps::state_probability_pair<STATE,PROBABILITY> >
+{
+  std::size_t operator()(const mcrl2::lps::state_probability_pair<STATE,PROBABILITY>& p) const
+  {
+    hash<STATE> state_hasher;
+    hash<PROBABILITY> probability_hasher;
+    return mcrl2::utilities::detail::hash_combine(state_hasher(p.state()), probability_hasher(p.probability()));
+  }
+};
+
+} // end namespace std
 
 #endif // MCRL2_LPS_STATE_PROBABILITY_PAIR_H
