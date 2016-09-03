@@ -104,7 +104,7 @@ class aterm_probabilistic_transition: public atermpp::aterm_appl
 };
 
 typedef term_list<aterm_probabilistic_transition> aterm_transition_list;
-typedef term_list<term_balanced_tree<data::data_expression> > state_labels_t; // The state labels have the shape STATE(a1,...,an).
+typedef term_list<lps::state> state_labels_t; // The state labels have the shape STATE(a1,...,an).
 typedef term_list<process::action_list> action_labels_t;         // An action label is a lists of actions.
 typedef term_list<data::data_expression> probabilistic_labels_t; // This contains a list of probabilities.
 typedef term_list<data::function_symbol> boolean_list_t;         // A list with constants true or false, indicating
@@ -315,7 +315,7 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
   else
   {
     assert(input_lts.num_states()==input_lts.get_state_labels().size());
-    for (const term_balanced_tree<data::data_expression>& state_label:input_lts.get_state_labels())
+    for (const lps::state& state_label:input_lts.get_state_labels())
     {
       l.add_state(state_label_lts(state_label));
     }

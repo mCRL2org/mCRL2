@@ -15,6 +15,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/state.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/trace/trace.h"
 
@@ -31,16 +32,15 @@ class simulation
 {
   public:
 
-    typedef atermpp::term_balanced_tree<data::data_expression> state;
     struct transition_t
     {
-      state destination;
+      lps::state destination;
       multi_action action;
     };
 
     struct state_t
     {
-      state source_state;
+      lps::state source_state;
       std::vector<transition_t> transitions;
       size_t transition_number; // Undefined for the last state in the trace
     };
@@ -67,7 +67,7 @@ class simulation
     void load(const std::string &filename);
 
   protected:
-    std::vector<transition_t> transitions(const state& source_state);
+    std::vector<transition_t> transitions(const lps::state& source_state);
     std::vector<transition_t> prioritize(const std::vector<transition_t> &transitions);
     void push_back(const lps::state& lps_state);
     bool is_prioritized(const multi_action &action);

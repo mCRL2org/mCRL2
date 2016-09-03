@@ -502,8 +502,8 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
   const big_natural_number ten(10);
   for( ; !n.is_zero() ; )
   {
-    const big_natural_number m=n % ten; // TODO: Optimize.
-    n=n/ten; // TODO: Optimize.
+    const big_natural_number m=n % ten; 
+    n=n/ten; 
     s.push_back(static_cast<char>(static_cast<size_t>(m)+'0'));
   }
   if (s.empty())

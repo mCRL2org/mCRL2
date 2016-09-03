@@ -9,7 +9,6 @@
 #include <iomanip>
 #include <ctime>
 
-#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"

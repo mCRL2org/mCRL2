@@ -18,8 +18,6 @@
 #include <boost/iterator/iterator_facade.hpp>
 
 #include "mcrl2/atermpp/shared_subset.h"
-#include "mcrl2/atermpp/aterm_balanced_tree.h"
-
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/state_probability_pair.h"
