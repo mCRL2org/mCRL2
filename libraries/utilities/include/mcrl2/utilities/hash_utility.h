@@ -32,7 +32,7 @@ namespace detail
 inline size_t hash_combine(const size_t h1, const size_t h2)
 {
   // This hash function is inpired by boost.
-  return h1 ^  h2 + 0x9e3779b9 + (h1<<6) + (h1>>2);
+  return h1 ^  (h2 + 0x9e3779b9 + (h1<<6) + (h1>>2));
 }
 
 
