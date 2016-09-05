@@ -20,6 +20,7 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bqnf_traverser.h"
@@ -66,6 +67,12 @@ void pbesrewr(const std::string& input_filename,
     {
       bool enumerate_infinite_sorts = false;
       enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
+      pbes_rewrite(p, pbesr);
+      break;
+    }
+    case quantifier_inside:
+    {
+      quantifiers_inside_rewriter pbesr;
       pbes_rewrite(p, pbesr);
       break;
     }

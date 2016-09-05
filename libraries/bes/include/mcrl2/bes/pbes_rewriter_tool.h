@@ -45,6 +45,8 @@ class pbes_rewriter_tool: public Tool
       result.insert(pbes_system::simplify);
       result.insert(pbes_system::quantifier_all);
       result.insert(pbes_system::quantifier_finite);
+      result.insert(pbes_system::quantifier_inside);
+      result.insert(pbes_system::quantifier_one_point);
       result.insert(pbes_system::pfnf);
       result.insert(pbes_system::ppg);
       result.insert(pbes_system::bqnf_quantifier);
