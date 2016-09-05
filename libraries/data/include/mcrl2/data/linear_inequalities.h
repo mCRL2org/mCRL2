@@ -102,6 +102,7 @@ namespace detail
       case detail::less_eq: return detail::less;
       case detail::equal: return detail::equal;
     };
+    return detail::equal;  // This return statement should be unreachable. It is added to suppress a compiler warning.
   }
   
   inline std::string pp(const detail::comparison_t t)
@@ -112,6 +113,7 @@ namespace detail
       case detail::less_eq: return "<=";
       case detail::equal: return "==";
     };
+    return "##";  // This return statement should be unreachable. It is added to suppress a compiler warning.
   }
   
   inline atermpp::function_symbol f_variable_with_a_rational_factor()
