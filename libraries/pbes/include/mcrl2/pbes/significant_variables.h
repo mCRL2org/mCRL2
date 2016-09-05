@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_SIGNIFICANT_VARIABLES_H
 #define MCRL2_PBES_SIGNIFICANT_VARIABLES_H
 
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/traverser.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -61,7 +61,7 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
   {
     std::set<data::variable> right = pop();
     std::set<data::variable> left = pop();
-    push(data::detail::set_union(left, right));
+    push(utilities::detail::set_union(left, right));
   }
 
   void leave(const and_& /* x */)

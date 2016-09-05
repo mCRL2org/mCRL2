@@ -12,6 +12,8 @@
 #ifndef MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 
+#include <algorithm>
+#include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
@@ -158,6 +160,42 @@ template <typename T>
 bool has_empty_intersection(const std::set<T>& s1, const std::set<T>& s2)
 {
   return has_empty_intersection(s1.begin(), s1.end(), s2.begin(), s2.end());
+}
+
+/// \brief Returns the union of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The union of two sets.
+template <typename T>
+std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
+{
+  std::set<T> result;
+  std::set_union(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  return result;
+}
+
+/// \brief Returns the difference of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The difference of two sets.
+template <typename T>
+std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
+{
+  std::set<T> result;
+  std::set_difference(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  return result;
+}
+
+/// \brief Returns the intersection of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The intersection of two sets.
+template <typename T>
+std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
+{
+  std::set<T> result;
+  std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  return result;
 }
 
 } // namespace detail

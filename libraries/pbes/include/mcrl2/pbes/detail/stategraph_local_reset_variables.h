@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
@@ -95,7 +94,7 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
         auto const& X = i.first;
         auto const& eq_X = *find_equation(m_pbes, X);
         auto const& dp_X = eq_X.data_parameter_indices();
-        i.second = data::detail::set_intersection(i.second, std::set<std::size_t>(dp_X.begin(), dp_X.end()));
+        i.second = utilities::detail::set_intersection(i.second, std::set<std::size_t>(dp_X.begin(), dp_X.end()));
       }
     }
 

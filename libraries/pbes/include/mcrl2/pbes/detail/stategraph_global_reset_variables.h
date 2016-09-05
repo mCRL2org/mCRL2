@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
 #include "mcrl2/pbes/traverser.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -67,7 +68,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         auto const& v = i->second;
 #endif
         std::set<data::variable> dx = propvar_parameters(v.name());
-        v.set_marking(data::detail::set_intersection(v.sig(), dx));
+        v.set_marking(utilities::detail::set_intersection(v.sig(), dx));
         mCRL2log(log::debug, "stategraph") << "vertex " << v << " sig = " << core::detail::print_set(v.sig()) << " dx = " << core::detail::print_set(dx) << "\n";
       }
       mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << G.print_marking();
@@ -108,7 +109,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
               const data::data_expression_list& e = Y.parameters();
               const data::data_expression& e_m = nth_element(e, m);
               std::set<data::variable> fv = data::find_free_variables(e_m);
-              u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking()));
+              u.set_marking(utilities::detail::set_union(utilities::detail::set_intersection(fv, dx), u.marking()));
               mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << core::detail::print_set(fv) << " dx = " << core::detail::print_set(dx) << "\n";
             }
             if (u.marking().size() > last_size)
@@ -134,7 +135,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             data::data_expression_list e = Y.parameters();
             data::data_expression e_m = nth_element(e, m);
             std::set<data::variable> fv = data::find_free_variables(e_m);
-            u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking()));
+            u.set_marking(utilities::detail::set_union(utilities::detail::set_intersection(fv, dx), u.marking()));
             mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << core::detail::print_set(fv) << " dx = " << core::detail::print_set(dx) << "\n";
           }
           if (u.marking().size() > last_size)

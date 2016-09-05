@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_ALLOW_SET_H
 
 #include <algorithm>
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/utility.h"
 
@@ -231,7 +230,7 @@ inline
 std::pair<multi_action_name_set, bool> bounded_merge(const multi_action_name_set& A1, const multi_action_name_set& A2, const allow_set& A)
 {
   std::pair<multi_action_name_set, bool> A1A2 = bounded_concat(A1, A2, A);
-  return { set_union(set_union(A1, A2), A1A2.first), A1A2.second };
+  return { alphabet_operations::set_union(alphabet_operations::set_union(A1, A2), A1A2.first), A1A2.second };
 }
 
 // Returns the intersection of left_merge(A1, A2) and A

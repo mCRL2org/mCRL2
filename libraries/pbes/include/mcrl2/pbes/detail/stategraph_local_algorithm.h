@@ -15,6 +15,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/stategraph_algorithm.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -391,7 +392,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       {
         return std::set<data::variable>();
       }
-      return data::detail::set_intersection(V, i->second);
+      return utilities::detail::set_intersection(V, i->second);
     }
 
     template <typename Substitution>

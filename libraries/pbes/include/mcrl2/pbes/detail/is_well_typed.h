@@ -15,12 +15,12 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/equal_sorts.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
 #include "mcrl2/pbes/traverser.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -263,7 +263,7 @@ bool is_well_typed_equation(const pbes_equation& eqn,
   }
 
   // check 7)
-  if (!data::detail::set_intersection(declared_global_variables, quantifier_variables).empty())
+  if (!utilities::detail::set_intersection(declared_global_variables, quantifier_variables).empty())
   {
     mCRL2log(log::error) << "pbes::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
     return false;

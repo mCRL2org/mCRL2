@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <sstream>
 #include "mcrl2/data/detail/print_utility.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/utilities/detail/container_utility.h"

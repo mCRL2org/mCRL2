@@ -21,7 +21,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/data/detail/assignment_functional.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/pbes/pbes.h"

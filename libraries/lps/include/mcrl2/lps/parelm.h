@@ -22,10 +22,10 @@
 #include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {
@@ -148,7 +148,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
           {
             std::set<data::variable> vars;
             data::find_all_variables(j->rhs(), std::inserter(vars, vars.end()));
-            std::set<data::variable> new_variables = data::detail::set_difference(vars, significant_variables);
+            std::set<data::variable> new_variables = utilities::detail::set_difference(vars, significant_variables);
             todo.insert(new_variables.begin(), new_variables.end());
             significant_variables.insert(new_variables.begin(), new_variables.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
@@ -160,7 +160,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
           }
         }
       }
-      std::set<data::variable> to_be_removed = data::detail::set_difference(process_parameters, significant_variables);
+      std::set<data::variable> to_be_removed = utilities::detail::set_difference(process_parameters, significant_variables);
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "to be removed: " << data::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
 #endif

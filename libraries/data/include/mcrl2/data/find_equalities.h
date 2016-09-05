@@ -19,7 +19,6 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/exception.h"
 
@@ -84,7 +83,7 @@ struct find_equalities_expression
       }
       else
       {
-        i1->second = data::detail::set_intersection(i1->second, i2->second);
+        i1->second = utilities::detail::set_intersection(i1->second, i2->second);
         if (i1->second.empty())
         {
           m1.erase(i1++);
