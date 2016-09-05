@@ -21,6 +21,7 @@
 #include "mcrl2/process/alphabet_bounded.h"
 #include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/alphabet_new.h"
+#include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/eliminate_single_usage_equations.h"
 #include "mcrl2/process/eliminate_trivial_equations.h"
 #include "mcrl2/process/eliminate_unused_equations.h"
