@@ -263,6 +263,7 @@ available_tests = {
     'pbesrewr_pfnf'                     : lambda name, settings: PbesrewrTest(name, 'pfnf', settings)                        ,
     'pbesrewr_quantifier-all'           : lambda name, settings: PbesrewrTest(name, 'quantifier-all', settings)              ,
     'pbesrewr_quantifier-finite'        : lambda name, settings: PbesrewrTest(name, 'quantifier-finite', settings)           ,
+    'pbesrewr_quantifier-inside'        : lambda name, settings: PbesrewrTest(name, 'quantifier-inside', settings)           ,
     'pbesrewr_quantifier-one-point'     : lambda name, settings: PbesrewrTest(name, 'quantifier-one-point', settings)        ,
     'pbesinst_lazy'                     : lambda name, settings: PbesinstTest(name, ['-slazy'], settings)                    ,
     'pbesinst_alternative_lazy'         : lambda name, settings: PbesinstTest(name, ['-salternative-lazy'], settings)        ,
