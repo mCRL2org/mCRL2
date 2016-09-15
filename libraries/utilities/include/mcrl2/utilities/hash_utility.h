@@ -18,6 +18,7 @@
 #ifndef MCRL2_UTILITIES_HASH_UTILITY_H
 #define MCRL2_UTILITIES_HASH_UTILITY_H
 
+#include <cstddef>
 #include <vector>
 
 namespace mcrl2
@@ -29,7 +30,7 @@ namespace utilities
 namespace detail
 {
 
-inline size_t hash_combine(const size_t h1, const size_t h2)
+inline std::size_t hash_combine(const std::size_t h1, const std::size_t h2)
 {
   // This hash function is inpired by boost.
   return h1 ^  (h2 + 0x9e3779b9 + (h1<<6) + (h1>>2));
@@ -50,7 +51,7 @@ struct hash< std::vector < X > >
   {
     hash<X> hasher;
     // This follows boost.
-    size_t hash=0;
+    std::size_t hash=0;
     for(const X& x: v)
     {
       hash ^=  hasher(x) + 0x9e3779b9 + (hash<<6) + (hash>>2);
