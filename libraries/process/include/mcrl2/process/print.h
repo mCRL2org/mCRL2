@@ -404,7 +404,7 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
   {
     derived().enter(x);
     derived().apply(x.name());
-    print_assignments(x.assignments(), false);
+    print_assignments(x.assignments(), false, "(", ")", ", ");
     derived().leave(x);
   }
 };
