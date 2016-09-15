@@ -766,7 +766,7 @@ class linear_inequality: public atermpp::aterm_appl
       {
         return detail::less_eq;
       }
-      assert(this->function()==detail::linear_inequality_less_equal());
+      assert(this->function()==detail::linear_inequality_equal());
       return detail::equal;
     }
 
