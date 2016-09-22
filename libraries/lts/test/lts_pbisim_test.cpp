@@ -27,27 +27,27 @@ static probabilistic_lts_aut_t parse_aut(const std::string& s)
 
 // Example below represents a.(1/2 b + 1/2 b) which can be reduced to a.b.
 const std::string test1 =
-"des(1 1 / 9 2 1 / 9 3 1 / 9 4 1 / 9 5 1 / 9 6 1 / 9 7 1 / 9 8 1 / 9 0, 9, 10)
-(0, "player_collects_prize(false)", 9)
-(1, "player_collects_prize(true)", 9)
-(2, "player_collects_prize(true)", 9)
-(3, "player_collects_prize(true)", 9)
-(4, "player_collects_prize(false)", 9)
-(5, "player_collects_prize(true)", 9)
-(6, "player_collects_prize(true)", 9)
-(7, "player_collects_prize(true)", 9)
-(8, "player_collects_prize(false)", 9)";
+"des(1 1 / 9 2 1 / 9 3 1 / 9 4 1 / 9 5 1 / 9 6 1 / 9 7 1 / 9 8 1 / 9 0, 9, 10)\n"
+"(0, \"player_collects_prize(false)\", 9)\n"
+"(1, \"player_collects_prize(true)\", 9)\n"
+"(2, \"player_collects_prize(true)\", 9)\n"
+"(3, \"player_collects_prize(true)\", 9)\n"
+"(4, \"player_collects_prize(false)\", 9)\n"
+"(5, \"player_collects_prize(true)\", 9)\n"
+"(6, \"player_collects_prize(true)\", 9)\n"
+"(7, \"player_collects_prize(true)\", 9)\n"
+"(8, \"player_collects_prize(false)\", 9)\n";
 
 
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 {
-	std::cerr << "Test_running\n";
-	probabilistic_lts_aut_t t1 = parse_aut(test1);
-	detail::probabilistic_bisimulation_reduce(t1); //probabilistic bisimulation reduction
+  std::cerr << "Test_running\n";
+  probabilistic_lts_aut_t t1 = parse_aut(test1);
+  detail::probabilistic_bisimulation_reduce(t1); //probabilistic bisimulation reduction
   std::cerr << "Test_finished\n";
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-	return 0;
+  return 0;
 }

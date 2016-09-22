@@ -204,7 +204,7 @@ class prob_bisim_partitioner
       TreeNode *right;			  // Pointer to the right subtree.
 	} tree_node;
 
-	void destroy_tree(struct tree_node *node)
+	void destroy_tree(tree_node *node)
 	{
 	  if( node != NULL )
 	  {
