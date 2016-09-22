@@ -94,15 +94,14 @@ class t_tool_options
 
 using namespace std;
 
-typedef input_output_tool ltsconvert_base;
-class ltsconvert_tool : public ltsconvert_base
+class ltsconvert_tool : public input_output_tool
 {
   private:
     t_tool_options tool_options;
 
   public:
     ltsconvert_tool() :
-      ltsconvert_base(NAME,AUTHOR,
+      input_output_tool(NAME,AUTHOR,
                       "convert and optionally minimise an LTS",
                       "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
                       "requested format after applying the selected minimisation method (default is\n"
@@ -231,7 +230,7 @@ class ltsconvert_tool : public ltsconvert_base
   protected:
     void add_options(interface_description& desc)
     {
-      ltsconvert_base::add_options(desc);
+      input_output_tool::add_options(desc);
 
       desc.add_option("no-reach",
                       "do not perform a reachability check on the input LTS");
@@ -293,7 +292,7 @@ class ltsconvert_tool : public ltsconvert_base
 
     void parse_options(const command_line_parser& parser)
     {
-      ltsconvert_base::parse_options(parser);
+      input_output_tool::parse_options(parser);
 
       if (parser.options.count("lps"))
       {
