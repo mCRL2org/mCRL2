@@ -1774,6 +1774,38 @@ class specification_basic_type:public boost::noncopyable
       find_free_variables_process(p,free_variables_in_p);
       return free_variables_in_p;
     }
+
+    /* Remove assignments that do not appear in the parameter list. */
+    assignment_list filter_assignments(const assignment_list& assignments, const variable_list& parameters)
+    {
+      assignment_vector result;
+      for(const assignment& a: assignments)
+      {
+        if (std::find(parameters.begin(),parameters.end(),a.lhs())!=parameters.end())   // found.
+        {
+          result.push_back(a);
+        }
+      }
+      return assignment_list(result.begin(),result.end());
+    }
+
+    /* Check whether the assignments occur in the same order in the list of parameters */
+    static bool check_assignment_list(
+              const assignment_list& assignments,
+              const variable_list& parameters)
+    {
+      assignment_list::iterator i=assignments.begin();
+      for(const variable& v: parameters)
+      {
+        if (i!=assignments.end() && v==i->lhs())
+        {
+          ++i;
+        }
+      }
+      return i==assignments.end();
+
+    }
+
     /******************* substitute *****************************************/
 
 
@@ -1786,6 +1818,7 @@ class specification_basic_type:public boost::noncopyable
       Substitution& sigma,
       const std::set<variable>& variables_in_rhs_of_sigma)
     {
+      assert(check_assignment_list(assignments, parameters));
       /* precondition: the variables in the assignment occur in
          the same sequence as in the parameters, which stands for the
          total list of parameters.
@@ -1802,6 +1835,7 @@ class specification_basic_type:public boost::noncopyable
          If the substitution sigma(b)=t is applied to P() the result should be P(b=t).
          The standard substitutions do not take this parameterlist into account, as it stands.
       */
+
       assert(replacelhs==0 || replacelhs==1);
       assert(replacerhs==0 || replacerhs==1);
       if (parameters.empty())
@@ -7174,7 +7208,6 @@ class specification_basic_type:public boost::noncopyable
         parameters = variable_list({ stack.stackvar });
       }
       init=make_initialstate(initial_proc_id,stack,stochastic_normalized_process_identifiers,regular,singlecontrolstate,initial_stochastic_distribution);
-
       collectsumlist(action_summands,deadlock_summands,stochastic_normalized_process_identifiers,parameters,stack,regular,singlecontrolstate);
 
       if (!options.no_intermediate_cluster)
@@ -9736,9 +9769,24 @@ class specification_basic_type:public boost::noncopyable
             new_assignments=push_back(new_assignments,assignment(new_parameters.front(),v)); 
             new_parameters.pop_front();
           }
-          new_assignments=new_assignments + u.assignments();
+          // Some of the variables may occur only in the distribution, which is now moved out.
+          // Therefore, the assignments must be filtered.
+          new_assignments=filter_assignments(new_assignments + u.assignments(),objectdata[n].parameters);
+
+          // Furthermore, the old assignment must be applied to the distribution, when it is moved
+          // outside of the process body.
+          std::set<variable> variables_occurring_in_rhs_of_sigma;
+          mutable_map_substitution<> local_sigma;
+          for(const assignment& a:u.assignments())
+          {
+            local_sigma[a.lhs()]=a.rhs();
+            const std::set<variable> varset=find_free_variables(a.rhs());
+            variables_occurring_in_rhs_of_sigma.insert(varset.begin(),varset.end());
+          }
           return stochastic_operator(sto.variables(),
-                                     sto.distribution(),
+                                     data::replace_variables_capture_avoiding(sto.distribution(),
+                                                                              local_sigma,
+                                                                              variables_occurring_in_rhs_of_sigma),
                                      process_instance_assignment(new_identifier,new_assignments)); 
         }
         return t;

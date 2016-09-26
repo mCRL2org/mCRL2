@@ -55,7 +55,7 @@ class process_initializer: public atermpp::aterm_appl
     }
 
     /// \brief Constructor.
-    process_initializer(const data::assignment_list& assignments)
+    explicit process_initializer(const data::assignment_list& assignments)
       : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, stochastic_distribution())
     {}
 

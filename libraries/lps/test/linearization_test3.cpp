@@ -84,6 +84,31 @@ BOOST_AUTO_TEST_CASE(The_unreachability_of_tau_is_not_properly_recognized)
   run_linearisation_test_case(spec,true);
 }
 
+BOOST_AUTO_TEST_CASE(Moving_a_distribution_out_of_a_process_is_tricky)
+{
+  const std::string spec =
+     "map  N:Pos;\n"
+     "eqn  N=2;\n"
+     "\n"
+     "act  last_passenger_has_his_own_seat:Bool;\n"
+     "     enter_plane:Bool#Bool;\n"
+     "     enter;\n"
+     "\n"
+     "\n"
+     "proc Plane(everybody_has_his_own_seat:Bool, number_of_empty_seats:Int)=\n"
+     "             (enter.\n"
+     "                dist b0:Bool[if(everybody_has_his_own_seat,if(b0,1,0),if(b0,1-1/number_of_empty_seats,1/number_of_empty_seats))].\n"
+     "                b0 -> enter_plane(true,false).delta.Plane(everybody_has_his_own_seat,number_of_empty_seats-1)\n"
+     "                   <>dist b1:Bool[if(b1,1/number_of_empty_seats,1-1/number_of_empty_seats)].\n"
+     "                      enter_plane(false,b1).delta\n"
+     "             );\n"
+     "\n"
+     "\n"
+     "init dist b:Bool[if(b,1/N,(N-1)/N)].Plane(b,N-1);\n";
+
+  run_linearisation_test_case(spec,true);
+}
+
 #ifndef MCRL2_SKIP_LONG_TESTS 
 
 BOOST_AUTO_TEST_CASE(Type_checking_of_function_can_be_problematic)
