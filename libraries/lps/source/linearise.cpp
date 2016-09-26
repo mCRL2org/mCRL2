@@ -4661,7 +4661,8 @@ class specification_basic_type:public boost::noncopyable
     data_expression adapt_term_to_stack(
       const data_expression& t,
       const stacklisttype& stack,
-      const variable_list& vars)
+      const variable_list& vars,
+      const variable_list& stochastic_variables)
     {
       if (is_function_symbol(t))
       {
@@ -4677,6 +4678,13 @@ class specification_basic_type:public boost::noncopyable
           return t;
         }
         else
+        if (std::find(stochastic_variables.begin(),stochastic_variables.end(),t)!=stochastic_variables.end())
+        {
+          /* t occurs in stochastic_variables, so, t does not have to be reconstructed
+             from the stack */
+          return t;
+        }
+        else
         {
           return getvar(atermpp::down_cast<variable>(t), stack);
         }
@@ -4686,8 +4694,8 @@ class specification_basic_type:public boost::noncopyable
       {
         const application&a=atermpp::down_cast<application>(t);
         return application(
-                 adapt_term_to_stack(a.head(),stack,vars),
-                 adapt_termlist_to_stack(a.begin(),a.end(),stack,vars));
+                 adapt_term_to_stack(a.head(),stack,vars,stochastic_variables),
+                 adapt_termlist_to_stack(a.begin(),a.end(),stack,vars,stochastic_variables));
       }
 
       if (is_abstraction(t))
@@ -4696,7 +4704,7 @@ class specification_basic_type:public boost::noncopyable
         return abstraction(
                  abs_t.binding_operator(),
                  abs_t.variables(),
-                 adapt_term_to_stack(abs_t.body(),stack,abs_t.variables() + vars));
+                 adapt_term_to_stack(abs_t.body(),stack,abs_t.variables() + vars,stochastic_variables));
       }
 
       if (is_where_clause(t))
@@ -4712,11 +4720,11 @@ class specification_basic_type:public boost::noncopyable
           new_assignments.push_front(
                              assignment(
                                i->lhs(),
-                               adapt_term_to_stack(i->rhs(),stack,vars)));
+                               adapt_term_to_stack(i->rhs(),stack,vars,stochastic_variables)));
 
         }
         return where_clause(
-                 adapt_term_to_stack(where_t,stack,new_vars),
+                 adapt_term_to_stack(where_t,stack,new_vars,stochastic_variables),
                  new_assignments);
 
       }
@@ -4730,12 +4738,13 @@ class specification_basic_type:public boost::noncopyable
       Iterator begin,
       const Iterator& end,
       const stacklisttype& stack,
-      const variable_list& vars)
+      const variable_list& vars,
+      const variable_list& stochastic_variables)
     {
       data_expression_vector result;
       for (; begin != end; ++begin)
       {
-        result.push_back(adapt_term_to_stack(*begin,stack, vars));
+        result.push_back(adapt_term_to_stack(*begin,stack, vars,stochastic_variables));
       }
       return result;
     }
@@ -4759,7 +4768,8 @@ class specification_basic_type:public boost::noncopyable
                             act.arguments().begin(),
                             act.arguments().end(),
                             stack,
-                            vars));
+                            vars,
+                            variable_list()));
       result.push_front(action(act.label(),data_expression_list(vec.begin(),vec.end())));
       return result;
     }
@@ -4789,7 +4799,8 @@ class specification_basic_type:public boost::noncopyable
       const assignment_list& args,
       const stacklisttype& stack,
       const variable_list& vars,
-      const std::set<variable>& free_variables_in_body)
+      const std::set<variable>& free_variables_in_body,
+      const variable_list& stochastic_variables)
     {
       /* We generate the value for variable s in the list of
          the parameters of the process. If s is equal to some
@@ -4803,16 +4814,16 @@ class specification_basic_type:public boost::noncopyable
       {
         if (s==i->lhs())
         {
-          return adapt_term_to_stack(i->rhs(),stack,vars);
+          return adapt_term_to_stack(i->rhs(),stack,vars,stochastic_variables);
         }
       }
 
       if (free_variables_in_body.find(s)==free_variables_in_body.end())
       {
         const data_expression result=representative_generator_internal(s.sort());
-        return adapt_term_to_stack(result,stack,vars);
+        return adapt_term_to_stack(result,stack,vars,stochastic_variables);
       }
-      return adapt_term_to_stack(s,stack,vars);
+      return adapt_term_to_stack(s,stack,vars,stochastic_variables);
     }
 
 
@@ -4823,14 +4834,15 @@ class specification_basic_type:public boost::noncopyable
       const data_expression_list& t2,
       const stacklisttype& stack,
       const variable_list& vars,
-      const std::set<variable>& free_variables_in_body)
+      const std::set<variable>& free_variables_in_body,
+      const variable_list& stochastic_variables)
     {
       if (parlist.empty())
       {
         return t2;
       }
-      data_expression_list result=findarguments(pars,parlist.tail(),args,t2,stack,vars,free_variables_in_body);
-      data_expression rhs=find_(parlist.front(),args,stack,vars,free_variables_in_body);
+      data_expression_list result=findarguments(pars,parlist.tail(),args,t2,stack,vars,free_variables_in_body,stochastic_variables);
+      data_expression rhs=find_(parlist.front(),args,stack,vars,free_variables_in_body,stochastic_variables);
 
       result.push_front(rhs);
       return result;
@@ -4944,11 +4956,15 @@ class specification_basic_type:public boost::noncopyable
       const data_expression_list& t2,
       const stacklisttype& stack,
       const std::set < process_identifier >& pCRLprocs,
-      const variable_list& vars)
+      const variable_list& vars,
+      const variable_list& stochastic_variables)
     {
       const size_t n=objectIndex(procId);
-      const data_expression_list t=findarguments(objectdata[n].parameters,
-                                                 stack.parameters,args,t2,stack,vars,get_free_variables(n));
+      const data_expression_list t=findarguments(objectdata[n].parameters,  
+                                                 stack.parameters,
+                                                 args,t2,stack,vars,
+                                                 get_free_variables(n), 
+                                                 stochastic_variables);    
 
       size_t i=1;
       for (const process_identifier& p: pCRLprocs)
@@ -4983,11 +4999,11 @@ class specification_basic_type:public boost::noncopyable
         if (objectdata[objectIndex(procId)].canterminate)
         {
           const data_expression stackframe=make_procargs_stack(process2,stack,pcrlprcs, vars,stochastic_variables);
-          return push_stack(procId,t1, data_expression_list({ stackframe }),stack,pcrlprcs,vars);
+          return push_stack(procId,t1, data_expression_list({ stackframe }),stack,pcrlprcs,vars,stochastic_variables);
         }
 
         return push_stack(procId,t1, data_expression_list({ data_expression(stack.opns->emptystack) }),
-                                           stack,pcrlprcs,vars);
+                                           stack,pcrlprcs,vars,stochastic_variables);
       }
 
       if (is_process_instance_assignment(t))
@@ -5002,14 +5018,16 @@ class specification_basic_type:public boost::noncopyable
                             data_expression_list({ data_expression(application(stack.opns->pop,stack.stackvar)) }),
                             stack,
                             pcrlprcs,
-                            vars);
+                            vars,
+                            stochastic_variables);
         }
-        return push_stack(procId,
+        return push_stack(procId, 
                           t1,
                           data_expression_list({ data_expression(stack.opns->emptystack) }),
                           stack,
                           pcrlprcs,
-                          vars);
+                          vars,
+                          stochastic_variables);
       }
 
       throw mcrl2::runtime_error("Expect seq or name putting processes on a stack: " + process::pp(t) +".");
@@ -5303,7 +5321,8 @@ class specification_basic_type:public boost::noncopyable
                           adapt_term_to_stack(
                             localcondition,
                             stack,
-                            sumvars)));
+                            sumvars,
+                            cumulative_distribution.variables())));
           }
           else
           {
@@ -5370,8 +5389,11 @@ class specification_basic_type:public boost::noncopyable
           if (has_time)
           {
             atTime=adapt_term_to_stack(
-                     atTime,stack,sumvars);
+                     atTime,stack,sumvars,variable_list());
           }
+          distribution=stochastic_distribution(
+                                  distribution.variables(),
+                                  adapt_term_to_stack(distribution.distribution(),stack,sumvars,distribution.variables()));
         }
         insert_summand(action_summands,deadlock_summands,
                        sumvars,condition1,multiAction,
