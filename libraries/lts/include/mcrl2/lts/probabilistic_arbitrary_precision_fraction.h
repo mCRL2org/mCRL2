@@ -46,14 +46,14 @@ class probabilistic_arbitrary_precision_fraction
   public:
 
     /// \brief Constant zero.
-    static probabilistic_arbitrary_precision_fraction zero()
+    static probabilistic_arbitrary_precision_fraction& zero()
     {
       static probabilistic_arbitrary_precision_fraction zero(utilities::big_natural_number(0), utilities::big_natural_number(1));
       return zero;
     }
 
     /// \brief Constant one.
-    static probabilistic_arbitrary_precision_fraction one()
+    static probabilistic_arbitrary_precision_fraction& one()
     {
       static probabilistic_arbitrary_precision_fraction one(utilities::big_natural_number(1), utilities::big_natural_number(1));
       return one;
