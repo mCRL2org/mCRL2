@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lts/detail/liblts_weak_bisim.h
-/// \brief This file defines an algorithm for weak bisimulation, by 
+/// \brief This file defines an algorithm for weak bisimulation, by
 ///        calculating the transitive tau closure and apply strong
 ///        bisimulation afterwards. In order to apply this algorithm
 ///        it is advisable to first apply a branching bisimulation reduction.
@@ -34,25 +34,17 @@ namespace lts
 namespace detail
 {
 
-/** \brief Reduce transition system l with respect to strong or (divergence preserving) branching bisimulation.
+/** \brief Reduce LTS l with respect to (divergence-preserving) weak bisimulation.
  * \param[in/out] l The transition system that is reduced.
- * \param[in] branching If true branching bisimulation is applied, otherwise strong bisimulation.
  * \param[in] preserve_divergences Indicates whether loops of internal actions on states must be preserved. If false
  *            these are removed. If true these are preserved.  */
 template < class LTS_TYPE>
 void weak_bisimulation_reduce(
   LTS_TYPE& l,
-  const bool preserve_divergences = false,
-  const bool use_groote_wijs_algorithm = false)
+  const bool preserve_divergences = false)
 {
-  if (use_groote_wijs_algorithm)
-  {
-    bisimulation_reduce_gw(l,true,preserve_divergences);        // Apply branching bisimulation to l.
-  }
-  else
-  {
-    bisimulation_reduce(l,true,preserve_divergences);        // Apply branching bisimulation to l.
-  }
+  bisimulation_reduce_gjkw(l, true, preserve_divergences);
+  //< Apply branching bisimulation to l.
 
   size_t divergence_label;
   if (preserve_divergences)
@@ -60,14 +52,8 @@ void weak_bisimulation_reduce(
     divergence_label=mark_explicit_divergence_transitions(l);
   }
   reflexive_transitive_tau_closure(l);                    // Apply transitive tau closure to l.
-  if (use_groote_wijs_algorithm)
-  {
-    bisimulation_reduce_gw(l,false,false);                     // Apply strong bisimulation to l.
-  }
-  else
-  {
-    bisimulation_reduce(l,false,false);                     // Apply strong bisimulation to l.
-  }
+  bisimulation_reduce_gjkw(l, false, false);
+  //< Apply strong bisimulation to l.
   scc_reduce(l);                                          // Remove tau loops.
   if (preserve_divergences)
   {
@@ -76,10 +62,10 @@ void weak_bisimulation_reduce(
 }
 
 
-/** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
- * \details This lts and the lts l2 are not usable anymore after this call.
- *          The space consumption is O(n) and time is O(nm). It uses the branching bisimulation
- *          algorithm by Groote and Vaandrager from 1990.
+/** \brief Checks whether the initial states of two LTSs are weakly bisimilar.
+ * \details The LTSs l1 and l2 are not usable anymore after this call.
+ *          The space consumption is O(n) and running time is dominated by the
+ *          transitive closure (after branching bisimulation).
  * \param[in/out] l1 A first transition system.
  * \param[in/out] l2 A second transistion system.
  * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
@@ -88,38 +74,36 @@ template < class LTS_TYPE>
 bool destructive_weak_bisimulation_compare(
   LTS_TYPE& l1,
   LTS_TYPE& l2,
-  const bool preserve_divergences=false,
-  const bool use_groote_wijs_algorithm = false) 
+  const bool preserve_divergences=false)
 {
-  weak_bisimulation_reduce(l1,preserve_divergences,use_groote_wijs_algorithm);
-  weak_bisimulation_reduce(l2,preserve_divergences,use_groote_wijs_algorithm);
-  if (use_groote_wijs_algorithm)
-  { 
-    return destructive_bisimulation_compare_gw(l1,l2);
-  }
-  return destructive_bisimulation_compare_gw(l1,l2);
+  weak_bisimulation_reduce(l1,preserve_divergences);
+  weak_bisimulation_reduce(l2,preserve_divergences);
+  return destructive_bisimulation_compare_gjkw(l1,l2);
 }
 
 
-/** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
- *  \details The current transitions system and the lts l2 are first duplicated and subsequently
+/** \brief Checks whether the initial states of two LTSs are weakly bisimilar.
+ *  \details The LTSs l1 and l2 are first duplicated and subsequently
  *           reduced modulo bisimulation. If memory space is a concern, one could consider to
- *           use destructive_weak_bisimulation_compare. This routine uses the Groote-Vaandrager
- *           branching bisimulation routine. It runs in O(mn) and uses O(n) memory where n is the
+ *           use destructive_weak_bisimulation_compare.  The running time
+ *           of this routine is dominated by the transitive closure
+ *           (after branching bisimulation).  It uses O(m+n) memory
+ *           in addition to the copies of l1 and l2, where n is the
  *           number of states and m is the number of transitions.
  * \param[in/out] l1 A first transition system.
  * \param[in/out] l2 A second transistion system.
- * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
  * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
  * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
 template < class LTS_TYPE>
 bool weak_bisimulation_compare(
   const LTS_TYPE& l1,
-  const LTS_TYPE& l2)
+  const LTS_TYPE& l2,
+  const bool preserve_divergences = false)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_weak_bisimulation_compare(l1_copy,l2_copy);
+  return destructive_weak_bisimulation_compare(l1_copy, l2_copy,
+                                                         preserve_divergences);
 }
 
 }

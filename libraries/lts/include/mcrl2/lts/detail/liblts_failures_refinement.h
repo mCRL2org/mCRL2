@@ -20,7 +20,7 @@
 #ifndef _LIBLTS_FAILURES_REFINEMENT_H
 #define _LIBLTS_FAILURES_REFINEMENT_H
 
-#include <mcrl2/lts/detail/liblts_bisim_gw.h>
+#include <mcrl2/lts/detail/liblts_bisim_gjkw.h>
 #include <mcrl2/lts/detail/counter_example.h>
 
 namespace mcrl2
@@ -218,7 +218,7 @@ bool destructive_refinement_checker(
   
   if (!generate_counter_example.is_dummy())  // A counter example is requested. Don't use bisimulation preprocessing.
   {
-    detail::bisim_partitioner_gw<LTS_TYPE> bisim_part(l1,weak_reduction,weak_reduction && (refinement!=trace));
+    detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l1,weak_reduction,weak_reduction && (refinement!=trace));
     l1.clear_state_labels();
     
     // Assign the reduced LTS, and set init_l2.

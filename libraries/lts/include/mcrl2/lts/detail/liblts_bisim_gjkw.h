@@ -1814,7 +1814,7 @@ class bisim_partitioner_gjkw
 /// \defgroup part_interface
 /// \brief nonmember functions serving as interface with the rest of mCRL2
 /// \details These functions are copied, almost without changes, from
-/// liblts_bisim_gw.h.
+/// liblts_bisim_gw.h, which was written by Anton Wijs.
 ///@{
 
 /** \brief Reduce transition system l with respect to strong or (divergence

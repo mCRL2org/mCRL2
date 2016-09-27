@@ -33,7 +33,6 @@
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/lts_utilities.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
-#include "mcrl2/lts/detail/liblts_bisim_gw.h"
 #include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
 #include "mcrl2/lts/detail/liblts_weak_bisim.h"
 #include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
@@ -99,54 +98,27 @@ bool destructive_compare(LTS_TYPE& l1,
       return false;
     case lts_eq_bisim:
     {
-      return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
-    }
-    case lts_eq_bisim_gw:
-    {
-      return detail::destructive_bisimulation_compare_gw(l1,l2, false,false,generate_counter_examples);
-    }
-    case lts_eq_bisim_gjkw:
-    {
-#ifdef _MSC_VER
-      mCRL2log(log::warning) << "The GJKW bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
-      return detail::destructive_bisimulation_compare_gw(l1,l2, false,false,generate_counter_examples);
-#else
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples);
-#endif
+    }
+    case lts_eq_bisim_gv:
+    {
+      return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
     }
     case lts_eq_branching_bisim:
     {
-      return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
-    }
-    case lts_eq_branching_bisim_gw:
-    {
-      return detail::destructive_bisimulation_compare_gw(l1,l2, true,false,generate_counter_examples);
-    }
-    case lts_eq_branching_bisim_gjkw:
-    {
-#ifdef _MSC_VER
-      mCRL2log(log::warning) << "The GJKW branching bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
-      return detail::destructive_bisimulation_compare_gw(l1,l2, true,false,generate_counter_examples);
-#else
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples);
-#endif
+    }
+    case lts_eq_branching_bisim_gv:
+    {
+      return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
     }
     case lts_eq_divergence_preserving_branching_bisim:
     {
-      return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
-    }
-    case lts_eq_divergence_preserving_branching_bisim_gw:
-    {
-      return detail::destructive_bisimulation_compare_gw(l1,l2, true,true,generate_counter_examples);
-    }
-    case lts_eq_divergence_preserving_branching_bisim_gjkw:
-    {
-#ifdef _MSC_VER
-      mCRL2log(log::warning) << "The GJKW divergence preserving branching bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
-      return detail::destructive_bisimulation_compare_gw(l1,l2, true,true,generate_counter_examples);
-#else
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples);
-#endif
+    }
+    case lts_eq_divergence_preserving_branching_bisim_gv:
+    {
+      return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
     }
     case lts_eq_weak_bisim:
     {
@@ -156,15 +128,6 @@ bool destructive_compare(LTS_TYPE& l1,
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2,false);
     }
-    case lts_eq_weak_bisim_gw:
-    case lts_eq_weak_bisim_gjkw:
-    {
-      if (generate_counter_examples)
-      {
-        mCRL2log(log::warning) << "Cannot generate counter example traces for weak bisimulation\n";
-      }
-      return detail::destructive_weak_bisimulation_compare(l1,l2,false,true);
-    }
     case lts_eq_divergence_preserving_weak_bisim:
     {
       if (generate_counter_examples)
@@ -172,15 +135,6 @@ bool destructive_compare(LTS_TYPE& l1,
         mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence-preserving weak bisimulation\n";
       }
       return detail::destructive_weak_bisimulation_compare(l1,l2, true);
-    }
-    case lts_eq_divergence_preserving_weak_bisim_gw:
-    case lts_eq_divergence_preserving_weak_bisim_gjkw:
-    {
-      if (generate_counter_examples)
-      {
-        mCRL2log(log::warning) << "Cannot generate counter example traces for for divergence-preserving weak bisimulation\n";
-      }
-      return detail::destructive_weak_bisimulation_compare(l1,l2, true,true);
     }
     case lts_eq_sim:
     {
@@ -432,22 +386,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       return;
     case lts_eq_bisim:
     {
-      detail::bisimulation_reduce(l,false,false);
-      return;
-    }
-    case lts_eq_bisim_gw:
-    {
-      detail::bisimulation_reduce_gw(l,false,false);
-      return;
-    }
-    case lts_eq_bisim_gjkw:
-    {
-#ifdef _MSC_VER
-      mCRL2log(log::warning) << "The GJKW bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
-      detail::bisimulation_reduce_gw(l,false,false);
-#else
       detail::bisimulation_reduce_gjkw(l,false,false);
-#endif
+      return;
+    }
+    case lts_eq_bisim_gv:
+    {
+      detail::bisimulation_reduce(l,false,false);
       return;
     }
     case lts_eq_bisim_sigref:
@@ -458,22 +402,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     }
     case lts_eq_branching_bisim:
     {
-      detail::bisimulation_reduce(l,true,false);
-      return;
-    }
-    case lts_eq_branching_bisim_gw:
-    {
-      detail::bisimulation_reduce_gw(l,true,false);
-      return;
-    }
-    case lts_eq_branching_bisim_gjkw:
-    {
-#ifdef _MSC_VER
-      mCRL2log(log::warning) << "The GJKW branching bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
-      detail::bisimulation_reduce_gw(l,true,false);
-#else
       detail::bisimulation_reduce_gjkw(l,true,false);
-#endif
+      return;
+    }
+    case lts_eq_branching_bisim_gv:
+    {
+      detail::bisimulation_reduce(l,true,false);
       return;
     }
     case lts_eq_branching_bisim_sigref:
@@ -484,22 +418,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     }
     case lts_eq_divergence_preserving_branching_bisim:
     {
-      detail::bisimulation_reduce(l,true,true);
-      return;
-    }
-    case lts_eq_divergence_preserving_branching_bisim_gw:
-    {
-      detail::bisimulation_reduce_gw(l,true,true);
-      return;
-    }
-    case lts_eq_divergence_preserving_branching_bisim_gjkw:
-    {
-#ifdef _MSC_VER
-      mCRL2log(log::warning) << "The GJKW divergence preserving branching bisimulation reduction algorithm is not defined on windows. Use the GW algorithm instead.\n";
-      detail::bisimulation_reduce_gw(l,true,true);
-#else
       detail::bisimulation_reduce_gjkw(l,true,true);
-#endif
+      return;
+    }
+    case lts_eq_divergence_preserving_branching_bisim_gv:
+    {
+      detail::bisimulation_reduce(l,true,true);
       return;
     }
     case lts_eq_divergence_preserving_branching_bisim_sigref:
@@ -513,45 +437,45 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::weak_bisimulation_reduce(l,false);
       return;
     }
-    case lts_eq_weak_bisim_gw:
-    case lts_eq_weak_bisim_gjkw:
-    {
-      detail::weak_bisimulation_reduce(l,false,true); // weak bisimulation without divergencies and the gw algorithm.
-      return;
-    }
+    /*
     case lts_eq_weak_bisim_sigref:
     {
+     {
       sigref<LTS_TYPE, signature_branching_bisim<LTS_TYPE> > s1(l);
       s1.run();
-      detail::reflexive_transitive_tau_closure(l); 
+     }
+      detail::reflexive_transitive_tau_closure(l);
+     {
       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s2(l);
       s2.run();
+     }
       scc_reduce(l); // Remove tau loops
       return;
     }
+    */
     case lts_eq_divergence_preserving_weak_bisim:
     {
       detail::weak_bisimulation_reduce(l,true);
       return;
     }
-    case lts_eq_divergence_preserving_weak_bisim_gw: 
-    case lts_eq_divergence_preserving_weak_bisim_gjkw:
-    {
-      detail::weak_bisimulation_reduce(l,true,true); // weak bisimulation with divergencies and the gw algorithm.
-      return;
-    }
+    /*
     case lts_eq_divergence_preserving_weak_bisim_sigref:
     {
+     {
       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s1(l);
       s1.run();
+     }
       size_t divergence_label=detail::mark_explicit_divergence_transitions(l);
-      detail::reflexive_transitive_tau_closure(l);  
+      detail::reflexive_transitive_tau_closure(l);
+     {
       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s2(l);
       s2.run();
+     }
       scc_reduce(l); // Remove tau loops
       detail::unmark_explicit_divergence_transitions(l,divergence_label);
       return;
     }
+    */
     case lts_eq_sim:
     {
       // Run the partitioning algorithm on this LTS
@@ -691,7 +615,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       return destructive_compare(l1,l2,lts_pre_trace,generate_counter_example);
     }
     case lts_pre_trace_anti_chain:
-    {  
+    {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_trace_preorder.trc");
@@ -700,7 +624,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       return destructive_refinement_checker(l1, l2, trace, false);
     }
     case lts_pre_weak_trace_anti_chain:
-    {  
+    {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_weak_trace_preorder.trc");
@@ -709,7 +633,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       return destructive_refinement_checker(l1, l2, trace, true);
     }
     case lts_pre_failures_refinement:
-    {  
+    {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_failures_refinement.trc");
@@ -718,7 +642,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       return destructive_refinement_checker(l1, l2, failures, false);
     }
     case lts_pre_weak_failures_refinement:
-    {  
+    {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_weak_failures_refinement.trc");
@@ -727,7 +651,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       return destructive_refinement_checker(l1, l2, failures, true);
     }
     case lts_pre_failures_divergence_refinement:
-    {  
+    {
       if (generate_counter_example)
       {
         detail::counter_example_constructor cec("counter_example_failures_divergence_refinement.trc");
