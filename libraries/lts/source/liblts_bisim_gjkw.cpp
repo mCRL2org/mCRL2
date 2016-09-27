@@ -1554,7 +1554,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
 /// Note that the number of states nor the initial state are not adapted by
 /// this method.  These must be set separately.
 ///
-/// The code is very much inspired by liblts_bisim_gw.h.
+/// The code is very much inspired by liblts_bisim_gw.h, which was written by
+/// Anton Wijs.
 ///
 /// \pre The bisimulation equivalence classes have been computed.
 /// \param branching Causes non-internal transitions to be removed.
@@ -2395,6 +2396,11 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
 {
     // 3.5r: whenever |Red| > |RefB|/2 then  Abort this coroutine
     if (RefB->marked_size() > RefB->size() / 2)  ABORT_THIS_COROUTINE();
+    // The red block contains at most RefB->size()-RefB->unmarked_bottom_size()
+    // + FromRed->size() states.  If that is <= RefB->size() / 2, we could
+    // abort the other coroutine immediately.  We don't do it here because
+    // we want to investigate the effect of this and similar heuristics more
+    // systematically.
 
     /*  -  -  -  -  -  -  - collect states from FromRed -  -  -  -  -  -  -  */
 

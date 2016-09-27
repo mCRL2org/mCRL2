@@ -108,11 +108,8 @@
 ///
 /// These macros hide some code that counts how many iterations have been
 /// executed in a loop at the end of each iteration;  if one coroutine has done
-/// enough work, it is interrupted to let the other catch up (except at the end
-/// of the last iteration).  That means that no work is counted if the loop
-/// body is executed at most once;  so if there are multiple nested loops it is
-/// not enough to let only the innermost loop count work.  It is assumed that a
-/// coroutine does at most `SIZE_MAX + 1` units of work.
+/// enough work, it is interrupted to let the other catch up.  It is assumed
+/// that a coroutine does at most `SIZE_MAX + 1` units of work.
 ///
 /// A coroutine may also terminate explicitly by executing the statement
 /// `TERMINATE_COROUTINE_SUCCESSFULLY();`.  If it should no longer execute but
@@ -124,19 +121,21 @@
 /// macro takes two coroutine names, two actual parameter lists, and two
 /// ``final'' statements:
 ///
-///     RUN_COROUTINES(function name 1, (actual parameters), final statement 1,
-///                    function name 2, (actual parameters), final statement 2,
-///                    shared data type, (shared data initialiser));
+///     RUN_COROUTINES(function name 1, actual parameters, final statement 1,
+///                    function name 2, actual parameters, final statement 2,
+///                    shared data type, shared data initialiser);
 ///
-/// It initialises the shared data with the indicated initialiser (in
-/// parentheses); then, it starts the two coroutines and makes sure that they
-/// do (approximately) the same amount of work.  As soon as the first one
-/// terminates, its associated final statement is executed and `RUN_COROUTINES`
-/// terminates.
+/// It initialises the shared data with the indicated initialiser, given
+/// as boost sequence `(initialiser1) (initialiser2) (initialiser3)` etc.;
+/// then, it calls the two coroutines with the respective actual parameters,
+/// given as `(param1) (param2) (param3)` etc., and makes sure that they do
+/// approximately the same amount of work.  As soon as the first one finishes,
+/// its associated final statement is executed and `RUN_COROUTINES` terminates.
 ///
 /// ``Approximately the same amount of work'' is defined as:  The difference
 /// between the number of steps taken by the two coroutines (i. e. the balance
-/// of work) always is between -1 and +1.
+/// of work) always is between -1 and +1.  In Release mode, the balance may
+/// be off a bit more, but is still bounded by Fibonacci numbers to about 24%.
 ///
 /// \author David N. Jansen, Radboud Universiteit, Nijmegen, The Netherlands
 
