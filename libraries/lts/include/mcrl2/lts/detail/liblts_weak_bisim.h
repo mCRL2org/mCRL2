@@ -50,15 +50,14 @@ void weak_bisimulation_reduce(
   if (preserve_divergences)
   {
     divergence_label=mark_explicit_divergence_transitions(l);
-  }
-  reflexive_transitive_tau_closure(l);                    // Apply transitive tau closure to l.
-  bisimulation_reduce_gjkw(l, false, false);
-  //< Apply strong bisimulation to l.
-  scc_reduce(l);                                          // Remove tau loops.
+  } 
+  reflexive_transitive_tau_closure(l);                        // Apply transitive tau closure to l.
+  bisimulation_reduce_gjkw(l, false, false);                  // Apply strong bisimulation to l.
+  scc_reduce(l);                                              // Remove tau loops.
   if (preserve_divergences)
   {
     unmark_explicit_divergence_transitions(l,divergence_label);
-  }
+  } 
 }
 
 

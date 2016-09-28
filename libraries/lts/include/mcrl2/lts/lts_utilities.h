@@ -20,7 +20,9 @@
 
 #include <map>
 #include <set>
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts.h"
 
 namespace mcrl2
@@ -199,19 +201,35 @@ inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_ac
 
 namespace detail
 {
+// Yields a label with an obscure name referring to divergence.
+
+template < class LABEL_TYPE >
+// LABEL_TYPE make_divergence_label(const std::string& s, const LABEL_TYPE& l)
+LABEL_TYPE make_divergence_label(const std::string& s)
+{
+  return LABEL_TYPE(s);
+}
+
+template <>
+inline mcrl2::lts::action_label_lts make_divergence_label<mcrl2::lts::action_label_lts>(const std::string& s)
+{
+  return action_label_lts(process::action(process::action_label(core::identifier_string(s),data::sort_expression_list()),data::data_expression_list()));
+}
 
 // Make a new divergent_transition_label and replace each self loop with it.
 // Return the number of the divergent transition label.
 template < class LTS_TYPE >
 size_t mark_explicit_divergence_transitions(LTS_TYPE& l)
 {
-  const typename LTS_TYPE::action_label_t lab; // nameless action label, representing divergence.
+  // Below we create an odd action label, representing divergence.
+  const typename LTS_TYPE::action_label_t lab=make_divergence_label<typename LTS_TYPE::action_label_t>("!@*&divergence&*@!"); 
   size_t divergent_transition_label=l.add_action(lab);
-  for(std::vector<transition>::iterator i=l.get_transitions().begin(); i!=l.get_transitions().end(); ++i)
+  assert(divergent_transition_label+1==l.num_action_labels());
+  for(transition& t: l.get_transitions())
   {
-    if (l.is_tau(l.apply_hidden_label_map(i->label())) && i->to()==i->from())
+    if (l.is_tau(l.apply_hidden_label_map(t.label())) && t.to()==t.from())
     {
-      *i = transition(i->to(),divergent_transition_label,i->to());
+      t = transition(t.to(),divergent_transition_label,t.to());
     }
   }
   return divergent_transition_label;
@@ -221,11 +239,11 @@ size_t mark_explicit_divergence_transitions(LTS_TYPE& l)
 template < class LTS_TYPE >
 void unmark_explicit_divergence_transitions(LTS_TYPE& l, const size_t divergent_transition_label)
 {
-  for(std::vector<transition>::iterator i=l.get_transitions().begin(); i!=l.get_transitions().end(); ++i)
+  for(transition& t: l.get_transitions())
   {
-    if (i->label()==divergent_transition_label)
+    if (t.label()==divergent_transition_label)
     { 
-      *i = transition(i->from(),l.tau_label_index(),i->from());
+      t = transition(t.from(),l.tau_label_index(),t.from());
     }
   }
 }
