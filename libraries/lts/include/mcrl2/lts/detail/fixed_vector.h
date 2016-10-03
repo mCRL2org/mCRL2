@@ -62,7 +62,7 @@ public:
     }
 
     // Reserve for a vector is usable in a fixed vector.
-    void reserve(size_t n)
+    void reserve(const typename std::vector<T>::size_type n)
     {
       std::vector<T>::reserve(n);
     }
