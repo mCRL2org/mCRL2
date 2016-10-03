@@ -54,6 +54,18 @@ public:
     // operator[] calls std::vector<T>::at because the latter checks bounds.
     T& operator[](size_type n)  {  return std::vector<T>::at(n);  }
     const T& operator[](size_type n) const  {  return std::vector<T>::at(n);  }
+
+    // The empty test for a vector is usable in a fixed vector.
+    bool empty()
+    {
+      return std::vector<T>::empty();
+    }
+
+    // Reserve for a vector is usable in a fixed vector.
+    void reserve(size_t n)
+    {
+      std::vector<T>::reserve(n);
+    }
 };
 
 } // end namespace bisim_gjkw
