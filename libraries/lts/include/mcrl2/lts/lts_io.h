@@ -19,19 +19,11 @@
 #ifndef MCRL2_LTS_LTS_IO_H
 #define MCRL2_LTS_LTS_IO_H
 
-#include <string>
-#include <vector>
-#include <set>
-#include <iostream>
-#include <cstdio>
-#include <cstdlib>
 
-#include "boost/iterator/transform_iterator.hpp"
+#include <boost/iterator/transform_iterator.hpp>
 
-#include "mcrl2/atermpp/container_utility.h"
 
 #include "mcrl2/lts/transition.h"
-#include "mcrl2/utilities/exception.h"
 
 #include "mcrl2/lts/detail/lts_convert.h"
 

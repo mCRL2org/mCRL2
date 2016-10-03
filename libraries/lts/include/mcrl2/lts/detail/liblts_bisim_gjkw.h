@@ -23,14 +23,9 @@
 #ifndef _LIBLTS_BISIM_GJKW_H
 #define _LIBLTS_BISIM_GJKW_H
 
-#include <cstdlib>       // for size_t
 #include <unordered_map> // used during initialisation
 #include <list>          // for the list of B_to_C_descriptors
-#ifndef NDEBUG
-    #include <string>    // for debug_id()
-#endif
 
-#include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/detail/coroutine.h"
@@ -45,11 +40,7 @@ namespace lts
 namespace detail
 {
 
-/// type used to store state numbers and counts
-typedef size_t state_type;
-
-/// type used to store transition (numbers and) counts
-typedef size_t trans_type;
+// state_type and trans_type are defined in check_complexity.h.
 
 /// type used to store label numbers and counts
 typedef size_t label_type;
@@ -148,6 +139,7 @@ typedef fixed_vector<succ_entry>::const_iterator succ_const_iter_t;
 class B_to_C_descriptor;
 typedef std::list<B_to_C_descriptor> B_to_C_desc_list;
 typedef B_to_C_desc_list::iterator B_to_C_desc_iter_t;
+typedef B_to_C_desc_list::const_iterator B_to_C_desc_const_iter_t;
 
 /// \class state_info_entry
 /// \brief stores information about a single state
@@ -345,8 +337,8 @@ static inline void swap3_permutation(permutation_iter_t s1,
 ///
 /// The slice in the permutation array containing the states of the block is
 /// subdivided into the following subslices (in this order):
-/// 1. unmarked nonbottom states
-/// 2. marked nonbottom states (initially empty)
+/// 1. unmarked non-bottom states
+/// 2. marked non-bottom states (initially empty)
 /// 3. unmarked bottom states
 /// 4. marked bottom states (initially empty)
 /// 5. old bottom states (only nonempty during PostprocessNewBottom)
@@ -376,7 +368,7 @@ class block_t
     /// iterator to the first state of the block
     permutation_iter_t int_begin;
 
-    /// iterator to the first marked nonbottom state of the block
+    /// iterator to the first marked non-bottom state of the block
     permutation_iter_t int_marked_nonbottom_begin;
 
     /// iterator to the first bottom state of the block
@@ -554,11 +546,11 @@ class block_t
         assert(int_bottom_begin < int_end);
     }
 
-    /// iterator to the first nonbottom state in the block
+    /// iterator to the first non-bottom state in the block
     permutation_const_iter_t nonbottom_begin()  const  {  return int_begin;  }
     permutation_iter_t nonbottom_begin()  {  return int_begin;  }
 
-    /// iterator past the last nonbottom state in the block
+    /// iterator past the last non-bottom state in the block
     permutation_const_iter_t nonbottom_end() const { return int_bottom_begin; }
     permutation_iter_t nonbottom_end()  {  return int_bottom_begin;  }
     void set_nonbottom_end(permutation_iter_t new_nonbottom_end)
@@ -584,11 +576,11 @@ class block_t
     permutation_const_iter_t bottom_end() const  {  return int_end;  }
     permutation_iter_t bottom_end()  {  return int_end;  }
 
-    /// iterator to the first unmarked nonbottom state in the block
+    /// iterator to the first unmarked non-bottom state in the block
     permutation_const_iter_t unmarked_nonbottom_begin()const{return int_begin;}
     permutation_iter_t unmarked_nonbottom_begin()  {  return int_begin;  }
 
-    /// iterator past the last unmarked nonbottom state in the block
+    /// iterator past the last unmarked non-bottom state in the block
     permutation_const_iter_t unmarked_nonbottom_end() const
     {
         return int_marked_nonbottom_begin;
@@ -605,7 +597,7 @@ class block_t
         assert(int_marked_nonbottom_begin <= int_bottom_begin);
     }
 
-    /// iterator to the first marked nonbottom state in the block
+    /// iterator to the first marked non-bottom state in the block
     permutation_const_iter_t marked_nonbottom_begin() const
     {
         return int_marked_nonbottom_begin;
@@ -622,7 +614,7 @@ class block_t
         assert(int_marked_nonbottom_begin <= int_bottom_begin);
     }
 
-    /// iterator one past the last marked nonbottom state in the block
+    /// iterator one past the last marked non-bottom state in the block
     permutation_const_iter_t marked_nonbottom_end() const
     {
         return int_bottom_begin;
@@ -709,10 +701,10 @@ class block_t
         // set_marked_bottom_end(bottom_end());
     }
 
-    /// \brief mark a nonbottom state
+    /// \brief mark a non-bottom state
     /// \details Marking is done by moving the state to the slice of the marked
-    /// nonbottom states of the block.
-    /// \param s the nonbottom state that has to be marked
+    /// non-bottom states of the block.
+    /// \param s the non-bottom state that has to be marked
     /// \returns true if the state was not marked before
     bool mark_nonbottom(state_info_ptr s)
     {
@@ -726,7 +718,7 @@ class block_t
 
     /// \brief mark a state
     /// \details Marking is done by moving the state to the slice of the marked
-    /// bottom or nonbottom states of the block.  If `s` is an old bottom
+    /// bottom or non-bottom states of the block.  If `s` is an old bottom
     /// state, it is treated as if it already were marked.
     /// \param s the state that has to be marked
     /// \returns true if the state was not marked before
@@ -748,7 +740,7 @@ class block_t
     /// \details This function is called after a refinement function has found
     /// that the blue subblock is the smaller one.  It creates a new block for
     /// the blue states.
-    /// \param blue_nonbottom_end iterator past the last blue nonbottom state
+    /// \param blue_nonbottom_end iterator past the last blue non-bottom state
     /// \returns pointer to the new (blue) block
     block_t* split_off_blue(permutation_iter_t blue_nonbottom_end);
 
@@ -756,7 +748,7 @@ class block_t
     /// \details This function is called after a refinement function has found
     /// that the red subblock is the smaller one.  It creates a new block for
     /// the red states.
-    /// \param red_nonbottom_begin iterator to the first red nonbottom state
+    /// \param red_nonbottom_begin iterator to the first red non-bottom state
     /// \returns pointer to the new (red) block
     block_t* split_off_red(permutation_iter_t red_nonbottom_begin);
 
@@ -1747,14 +1739,14 @@ class bisim_partitioner_gjkw
 
     /*------------- Refine -- Algorithms 3 and 4 of [GJKW 2017] -------------*/
 
-    bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RefB,
+    bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RfnB,
                         const bisim_gjkw::constln_t* SpC,
                         const bisim_gjkw::B_to_C_descriptor* FromRed,
                         bool all_other_bottom_blue,
                         bool postprocessing);
 
     DECLARE_COROUTINE(refine_blue,
-    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RefB))
+    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
                             ((const bisim_gjkw::constln_t* const, SpC))
                             ((bool const, all_other_bottom_blue))
                             ((bool const, postprocessing)),
@@ -1773,7 +1765,7 @@ class bisim_partitioner_gjkw
                             (REFINE_BLUE_COLLECT_BOTTOM));
 
     DECLARE_COROUTINE(refine_red,
-    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RefB))
+    /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
                             ((const bisim_gjkw::constln_t* const, SpC))
                             ((const bisim_gjkw::B_to_C_descriptor* const,
                                                                       FromRed))
@@ -2030,7 +2022,7 @@ inline block_t::block_t(constln_t* const constln_,
                 permutation_iter_t const begin_, permutation_iter_t const end_)
   : int_end(end_),
     int_begin(begin_),
-    int_marked_nonbottom_begin(begin_), // no nonbottom state is marked
+    int_marked_nonbottom_begin(begin_), // no non-bottom state is marked
     int_bottom_begin(begin_), // all states are bottom states
     int_marked_bottom_begin(end_), // no bottom state is marked
     // int_inert_begin -- is initialised by part_trans_t::create_new_block

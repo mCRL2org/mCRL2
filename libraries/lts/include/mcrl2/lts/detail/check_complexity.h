@@ -9,9 +9,9 @@
 
 /// \file lts/detail/check_complexity.h
 ///
-/// \brief helper macro for time complexity checks during test runs
+/// \brief helper class for time complexity checks during test runs
 ///
-/// \details We use the macro in this group to check whether the overall time
+/// \details We use the class in this group to check whether the overall time
 /// complexity fits in O(m log n).  Although it is difficult to test this in
 /// general because of the constant factor in the definition of the O()
 /// notation, it is often possible to give a (rather tight) upper bound on the
@@ -24,7 +24,6 @@
 
 #include <cstddef>       // for size_t
 #include <cassert>
-#include <map>
 #include <cmath>         // for log2()
 #include "mcrl2/utilities/logger.h"
 
@@ -110,7 +109,8 @@ class check_complexity
             exit(EXIT_FAILURE);
         }
         // assert(ctr.count <= (SIZE_MAX - max.value) / 200);
-        ctr.percentage = (ctr.count * 200 + max.value) / max.value >> 1;
+        ctr.percentage = (unsigned short)
+                              ((ctr.count * 200 + max.value) / max.value >> 1);
     }
 
     static void stats()

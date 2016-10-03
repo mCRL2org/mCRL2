@@ -20,8 +20,8 @@
 #ifndef _LIBLTS_FAILURES_REFINEMENT_H
 #define _LIBLTS_FAILURES_REFINEMENT_H
 
-#include <mcrl2/lts/detail/liblts_bisim_gjkw.h>
-#include <mcrl2/lts/detail/counter_example.h>
+#include "mcrl2/lts/detail/liblts_bisim_gjkw.h"
+#include "mcrl2/lts/detail/counter_example.h"
 
 namespace mcrl2
 {
