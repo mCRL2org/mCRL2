@@ -59,6 +59,8 @@ set(MCRL2_TOOLS
 
   mcrl2transform
   mcrl2parse
+  
+  ltspbisim
 )
 
 foreach(TOOL ${MCRL2_TOOLS})
