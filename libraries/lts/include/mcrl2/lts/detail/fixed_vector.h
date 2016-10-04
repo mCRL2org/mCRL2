@@ -47,6 +47,7 @@ public:
     using std::vector<T>::begin;
     using std::vector<T>::end;
     using std::vector<T>::size;
+    using std::vector<T>::empty;
     using std::vector<T>::clear;
 
     explicit fixed_vector(size_type n)  :std::vector<T>(n)  {  }
@@ -55,16 +56,22 @@ public:
     T& operator[](size_type n)  {  return std::vector<T>::at(n);  }
     const T& operator[](size_type n) const  {  return std::vector<T>::at(n);  }
 
-    // The empty test for a vector is usable in a fixed vector.
-    bool empty()
-    {
-      return std::vector<T>::empty();
-    }
 
-    // Reserve for a vector is usable in a fixed vector.
-    void reserve(const typename std::vector<T>::size_type n)
+    // Reserve for a vector is usable in a fixed vector if it is empty.
+    // (The function is required in Maintainer mode to make sure that even for
+    // an empty fixed_vector, iterators are not null pointers.)
+    void reserve(size_type n)
     {
-      std::vector<T>::reserve(n);
+        if (empty())
+        {
+            std::vector<T>::reserve(n);
+        }
+        else
+        {
+            // This might invalidate some iterators.
+            assert(0 &&
+                  "fixed_vector::reserve() is only allowed for empty vectors");
+        }
     }
 };
 
