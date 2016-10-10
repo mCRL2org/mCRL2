@@ -56,7 +56,7 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
     {
       id_generator.add_identifier(equation.identifier().name());
     }
-    eliminate_unused_equations(equations, init);
+    // eliminate_unused_equations(equations, init);
     pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations);
   }
 
