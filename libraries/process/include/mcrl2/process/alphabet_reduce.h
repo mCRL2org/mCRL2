@@ -20,6 +20,7 @@
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/eliminate_unused_equations.h"
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
@@ -44,16 +45,18 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
   using super::update;
 
   std::vector<process_equation>& equations;
+  process_expression init;
   data::set_identifier_generator id_generator;
   std::map<process_identifier, multi_action_name_set> pcrl_equation_cache;
 
-  alphabet_push_builder(std::vector<process_equation>& equations_)
-    : equations(equations_)
+  alphabet_push_builder(std::vector<process_equation>& equations_, const process_expression& init_)
+    : equations(equations_), init(init_)
   {
     for (process_equation& equation: equations_)
     {
       id_generator.add_identifier(equation.identifier().name());
     }
+    eliminate_unused_equations(equations, init);
     pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations);
   }
 
@@ -71,7 +74,7 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
 inline
 process_expression alphabet_reduce(const process_expression& x, std::vector<process_equation>& equations)
 {
-  alphabet_push_builder f(equations);
+  alphabet_push_builder f(equations, x);
   return f.apply(x);
 }
 

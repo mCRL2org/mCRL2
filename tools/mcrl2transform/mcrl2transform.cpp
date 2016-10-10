@@ -193,7 +193,7 @@ struct eliminate_unused_equations_command: public processcommand
   void execute()
   {
     processcommand::execute();
-    process::eliminate_unused_equations(procspec);
+    process::eliminate_unused_equations(procspec.equations(), procspec.init());
     write_text(output_filename, process::pp(procspec));
   }
 };

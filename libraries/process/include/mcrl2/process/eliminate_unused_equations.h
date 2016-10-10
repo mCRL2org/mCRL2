@@ -80,10 +80,11 @@ struct eliminate_unused_equations_algorithm
 {
   typedef std::vector<process_equation>::iterator equation_iterator;
 
-  process_specification& procspec;
+  std::vector<process_equation>& equations;
+  process_expression init;
 
-  eliminate_unused_equations_algorithm(process_specification& procspec_)
-    : procspec(procspec_)
+  eliminate_unused_equations_algorithm(std::vector<process_equation>& equations_, const process_expression& init_)
+    : equations(equations_), init(init_)
   {}
 
   void run()
@@ -92,21 +93,21 @@ struct eliminate_unused_equations_algorithm
 
     // compute dependencies
     detail::process_variable_dependency_graph_traverser f;
-    f.apply(procspec);
+    f.apply(equations);
 
     // compute dependencies of
     detail::process_variable_dependency_traverser g;
-    g.apply(procspec.init());
+    g.apply(init);
 
     // make an index of the equations
     std::map<process_identifier, process_equation*> equation_index;
-    for (process_equation& eqn: procspec.equations())
+    for (process_equation& eqn: equations)
     {
       equation_index[eqn.identifier()] = &eqn;
     }
 
     // make new list of equations
-    std::vector<process_equation> equations;
+    std::vector<process_equation> new_equations;
 
     std::set<process_identifier> todo = g.dependencies;
     std::set<process_identifier> done;
@@ -115,7 +116,7 @@ struct eliminate_unused_equations_algorithm
       process_identifier P = *todo.begin();
       todo.erase(todo.begin());
       done.insert(P);
-      equations.push_back(*equation_index[P]);
+      new_equations.push_back(*equation_index[P]);
 
       for (const process_identifier& Q: f.dependencies[P])
       {
@@ -125,13 +126,11 @@ struct eliminate_unused_equations_algorithm
         }
       }
     }
-    procspec.equations() = equations;
-
     mCRL2log(log::verbose) << "done = " << core::detail::print_set(done) << std::endl;
 
     // print the removed equations
     std::vector<process_identifier> removed_equations;
-    for (process_equation& eqn: procspec.equations())
+    for (process_equation& eqn: equations)
     {
       if (!contains(done, eqn.identifier()))
       {
@@ -139,12 +138,15 @@ struct eliminate_unused_equations_algorithm
       }
     }
     mCRL2log(log::verbose) << "removed unused equations: " << core::detail::print_list(removed_equations) << std::endl;
+
+    equations = new_equations;
   }
 };
 
-void eliminate_unused_equations(process_specification& procspec)
+inline
+void eliminate_unused_equations(std::vector<process_equation>& equations, const process_expression& init)
 {
-  eliminate_unused_equations_algorithm algorithm(procspec);
+  eliminate_unused_equations_algorithm algorithm(equations, init);
   algorithm.run();
 }
 

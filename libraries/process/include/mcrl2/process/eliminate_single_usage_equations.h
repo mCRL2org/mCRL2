@@ -255,7 +255,7 @@ struct eliminate_single_usage_equations_algorithm
     compute_to_be_eliminated();
     compute_substitution_order();
     apply_substitutions();
-    eliminate_unused_equations(procspec);
+    eliminate_unused_equations(procspec.equations(), procspec.init());
   }
 };
 
