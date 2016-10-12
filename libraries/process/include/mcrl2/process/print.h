@@ -407,6 +407,13 @@ struct printer: public process::add_traverser_sort_expressions<data::detail::pri
     print_assignments(x.assignments(), true, "(", ")", ", ");
     derived().leave(x);
   }
+
+  void apply(const process::untyped_multi_action& x)
+  {
+    derived().enter(x);
+    print_list(x.actions(), "", "", " | ");
+    derived().leave(x);
+  }
 };
 
 } // namespace detail
