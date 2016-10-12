@@ -249,6 +249,7 @@ struct process_variable_scc_algorithm
 
 } // namespace detail
 
+inline
 std::vector<std::set<process_identifier> > process_variable_strongly_connected_components(const std::vector<process_equation>& equations)
 {
   detail::process_variable_scc_algorithm algorithm;

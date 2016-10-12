@@ -114,8 +114,6 @@ struct eliminate_single_usage_builder: public process_expression_builder<elimina
 // Removes trivial equations of the form P() = P1() + ... + Pn()
 struct eliminate_single_usage_equations_algorithm
 {
-  typedef std::vector<process_equation>::iterator equation_iterator;
-
   process_specification& procspec;
 
   // Contains the number of times each process variable is used

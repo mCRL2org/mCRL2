@@ -20,7 +20,6 @@
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/builder.h"
-#include "mcrl2/process/eliminate_unused_equations.h"
 #include "mcrl2/process/remove_equations.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
@@ -56,8 +55,7 @@ struct alphabet_push_builder: public process_expression_builder<alphabet_push_bu
     {
       id_generator.add_identifier(equation.identifier().name());
     }
-    // eliminate_unused_equations(equations, init);
-    pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations);
+    pcrl_equation_cache = detail::compute_pcrl_equation_cache(equations, init);
   }
 
   process_expression apply(const process::allow& x)

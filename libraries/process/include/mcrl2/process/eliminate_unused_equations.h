@@ -78,8 +78,6 @@ struct process_variable_dependency_graph_traverser: public process_expression_tr
 // Removes unused equations
 struct eliminate_unused_equations_algorithm
 {
-  typedef std::vector<process_equation>::iterator equation_iterator;
-
   std::vector<process_equation>& equations;
   process_expression init;
 
