@@ -17,6 +17,7 @@
 #include <utility>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/alphabet.h"
+#include "mcrl2/process/alphabet_pcrl.h"
 #include "mcrl2/process/allow_set.h"
 #include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/find.h"
@@ -464,65 +465,79 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
     derived().apply(x1);
   }
 
+  void apply_pcrl_node(const process_expression& x)
+  {
+    push(push_allow_node(process::alphabet_pcrl(x, W.pcrl_equation_cache), x));
+  }
+
   void leave(const process::delta& x)
   {
-    push(push_allow_node(process::alphabet(x, equations), x));
+    apply_pcrl_node(x);
+    // push(push_allow_node(process::alphabet(x, equations), x));
     mCRL2log(log::debug) << log(x);
   }
 
   void leave(const process::tau& x)
   {
-    push(push_allow_node(process::alphabet(x, equations), x));
+    apply_pcrl_node(x);
+    // push(push_allow_node(process::alphabet(x, equations), x));
     mCRL2log(log::debug) << log(x);
   }
 
   void leave(const process::sum& x)
   {
-    top().expression = process::sum(x.variables(), top().expression);
+    apply_pcrl_node(x);
+    // top().expression = process::sum(x.variables(), top().expression);
     mCRL2log(log::debug) << log(x);
   }
 
   void leave(const process::at& x)
   {
-    top().expression = process::at(top().expression, x.time_stamp());
+    apply_pcrl_node(x);
+    // top().expression = process::at(top().expression, x.time_stamp());
     mCRL2log(log::debug) << log(x);
   }
 
   void leave(const process::seq& x)
   {
-    Node right = pop();
-    Node left = pop();
-    push(push_allow_node(alphabet_operations::set_union(left.alphabet, right.alphabet), process::seq(left.expression, right.expression)));
+    apply_pcrl_node(x);
+    // Node right = pop();
+    // Node left = pop();
+    // push(push_allow_node(alphabet_operations::set_union(left.alphabet, right.alphabet), process::seq(left.expression, right.expression)));
     mCRL2log(log::debug) << log(x);
   }
 
   void leave(const process::if_then& x)
   {
-    top().expression = process::if_then(x.condition(), top().expression);
+    apply_pcrl_node(x);
+    // top().expression = process::if_then(x.condition(), top().expression);
     mCRL2log(log::debug) << log(x);
   }
 
   void leave(const process::if_then_else& x)
   {
-    Node right = pop();
-    Node left = pop();
-    push(push_allow_node(alphabet_operations::set_union(left.alphabet, right.alphabet), process::if_then_else(x.condition(), left.expression, right.expression)));
+    apply_pcrl_node(x);
+    // Node right = pop();
+    // Node left = pop();
+    // push(push_allow_node(alphabet_operations::set_union(left.alphabet, right.alphabet), process::if_then_else(x.condition(), left.expression, right.expression)));
     mCRL2log(log::debug) << log(x);
   }
 
   void leave(const process::bounded_init& x)
   {
-    Node right = pop();
-    Node left = pop();
-    push(push_allow_node(alphabet_operations::set_union(left.alphabet, right.alphabet), process::bounded_init(left.expression, right.expression)));
+    apply_pcrl_node(x);
+    // Node right = pop();
+    // Node left = pop();
+    // push(push_allow_node(alphabet_operations::set_union(left.alphabet, right.alphabet), process::bounded_init(left.expression, right.expression)));
     mCRL2log(log::debug) << log(x);
   }
 
   void leave(const process::choice& x)
   {
-    Node right = pop();
-    Node left = pop();
-    push(push_allow_node(alphabet_operations::set_union(left.alphabet, right.alphabet), process::choice(left.expression, right.expression)));
+    apply_pcrl_node(x);
+    // Node right = pop();
+    // Node left = pop();
+    // push(push_allow_node(alphabet_operations::set_union(left.alphabet, right.alphabet), process::choice(left.expression, right.expression)));
     mCRL2log(log::debug) << log(x);
   }
 
