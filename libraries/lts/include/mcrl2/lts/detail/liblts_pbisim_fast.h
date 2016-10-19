@@ -311,11 +311,11 @@ class prob_bisim_partitioner_fast
 
       // remove all empty blocks in action_constellation. todo: find a more efficient way to remove these blocks
       size_t partition_size = pi_partition.action_blocks.size();
-      std::vector<action_block_type>::iterator block_iterator = pi_partition.action_blocks.end();
+      typename std::vector<action_block_type>::iterator block_iterator = pi_partition.action_blocks.end();
       block_iterator--; // to point to last reachable element
       for (size_t i = partition_size; i > 0; i--)
       {
-        std::vector<action_block_type>::iterator block_iterator_temp;
+        typename std::vector<action_block_type>::iterator block_iterator_temp;
 
         block_iterator_temp = block_iterator;
         if (i > 1) // avoid decrement iterator in the last iteration because it would go out of scope
