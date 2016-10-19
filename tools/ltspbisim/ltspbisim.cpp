@@ -19,6 +19,7 @@
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/detail/liblts_pbisim.h"
+#include "mcrl2/lts/detail/liblts_pbisim_fast.h"
 
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
@@ -142,12 +143,12 @@ class ltsconvert_tool : public input_output_tool
 		{
 		  case lts_probabilistic_eq_pbisim:
 		  {
-			mcrl2::lts::detail::probabilistic_bisimulation_reduce(l);
-			break;
+			  mcrl2::lts::detail::probabilistic_bisimulation_reduce(l);
+			  break;
 		  }
 		  case lts_probabilistic_eq_pbisim_fast:
 		  {
-			  //add here the probabilistic (fast) reduce algorithm 
+        mcrl2::lts::detail::probabilistic_bisimulation_reduce_fast(l);
 			  break;
 		  }
 		  default:
@@ -217,8 +218,8 @@ class ltsconvert_tool : public input_output_tool
 	  
       desc.add_option("equivalence",make_enum_argument<lts_probabilistic_equivalence>("NAME")
                       .add_value(lts_probabilistic_eq_none, true)
-                      .add_value(lts_probabilistic_eq_pbisim),
-	                  //.add_value(lts_probabilistic_eq_pbisim_fast),
+                      .add_value(lts_probabilistic_eq_pbisim)
+	                    .add_value(lts_probabilistic_eq_pbisim_fast),
                       "generate an equivalent LTS, preserving equivalence NAME:"
                       , 'e');
     }

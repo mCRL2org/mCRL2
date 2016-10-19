@@ -95,6 +95,8 @@ inline std::string print_probabilistic_equivalence(const lts_probabilistic_equiv
       return "none";
     case lts_probabilistic_eq_pbisim:
       return "pbisim";
+    case lts_probabilistic_eq_pbisim_fast:
+      return "pbisim_fast";
     default:
       throw mcrl2::runtime_error("Unknown equivalence.");
   }
