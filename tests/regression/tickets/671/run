@@ -1,0 +1,4 @@
+time mcrl2transform -aalphabet-reduce 1.mcrl2 1a.mcrl2
+time mcrl2transform -aalphabet-reduce 2.mcrl2 2a.mcrl2
+time mcrl22lps -vz 1a.mcrl2 1a.lps # N.B. very slow!
+time mcrl22lps -vz 2a.mcrl2 2a.lps # N.B. very slow!

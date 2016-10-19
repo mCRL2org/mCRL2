@@ -1,0 +1,5 @@
+act a;
+
+proc P(x: Real) = a .  P(x = (1 / 2) * x);
+
+init P(1);
