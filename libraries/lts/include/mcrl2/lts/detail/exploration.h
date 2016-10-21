@@ -12,6 +12,7 @@
 #include <string>
 #include <limits>
 #include <memory>
+#include <unordered_set>
 
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/trace/trace.h"
@@ -91,6 +92,9 @@ class lps2lts_algorithm
     size_t m_num_transitions;
     next_state_generator::transition_t::state_probability_list m_initial_states;
     size_t m_level;
+
+    std::unordered_set<lps::state> non_divergent_states;  // This set is filled with states proven not to be divergent, 
+                                                          // when lps2lts_algorithm is requested to search for divergencies.
 
     volatile bool m_must_abort;
 

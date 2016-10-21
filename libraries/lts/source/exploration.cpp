@@ -200,7 +200,6 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
  
     for (const stochastic_action_summand& s: specification.process().action_summands())
     {
-      // if (s.is_tau())
       if (is_hidden_summand(s.multi_action().actions(),m_options.actions_internal_for_divergencies))
       {
         tau_summands.push_back(s);
@@ -681,16 +680,19 @@ bool lps2lts_algorithm::search_divergence(
       static_cast <void>(action_number); // Avoid a warning when compiling in non debug mode.
     }
 
-    typename COUNTER_EXAMPLE_GENERATOR::index_type i=divergence_loop.add_transition(action_label_number.first,state_pair.index());
-    if (visited.insert(j->target_state()).second)
+    if (non_divergent_states.count(j->target_state())==0) // This state is not shown to be non convergent. So, an investigation is in order. 
     {
-      new_states.push_back(detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>(j->target_state(),i));
-    }
-    else if (current_path.count(j->target_state()) != 0)
-    {
-      mCRL2log(info) << "divergence-detect: divergence found." << std::endl; 
-      divergence_loop.save_counter_example(i,m_output_lts);
-      return true; 
+      typename COUNTER_EXAMPLE_GENERATOR::index_type i=divergence_loop.add_transition(action_label_number.first,state_pair.index());
+      if (visited.insert(j->target_state()).second)
+      {
+        new_states.push_back(detail::state_index_pair<COUNTER_EXAMPLE_GENERATOR>(j->target_state(),i));
+      }
+      else if (current_path.count(j->target_state()) != 0)
+      {
+        mCRL2log(info) << "divergence-detect: divergence found." << std::endl; 
+        divergence_loop.save_counter_example(i,m_output_lts);
+        return true; 
+      }
     }
   }
 
@@ -732,6 +734,15 @@ void lps2lts_algorithm::check_divergence(
     }
     size_t state_number = m_state_numbers.index(state_pair.state());
     mCRL2log(info) << "State index of diverging state is " << state_number << "." << std::endl;
+  }
+  else 
+  {
+    // No divergence has been found. Register all states as being non divergent. 
+    for(const lps::state s: visited)
+    { 
+      assert(non_divergent_states.count(s)==0); 
+      non_divergent_states.insert(s);
+    }
   }
 }
 
@@ -953,18 +964,21 @@ void lps2lts_algorithm::get_transitions(const lps::state& state,
   assert(transitions.empty());
   if (m_options.detect_divergence)
   {
-    if (m_options.trace)
-    {
-      std::string filename_divergence_loop = m_options.trace_prefix + "_divergence_loop" + std::to_string(m_traces_saved) + ".trc";
-      check_divergence<detail::counter_example_constructor>(
+    if (non_divergent_states.count(state)==0)  // This state was not already investigated earlier. 
+    { if (m_options.trace)
+      {
+        // Onderstaande string generatie kan duur uitpakken. 
+        std::string filename_divergence_loop = m_options.trace_prefix + "_divergence_loop" + std::to_string(m_traces_saved) + ".trc";
+        check_divergence<detail::counter_example_constructor>(
                 detail::state_index_pair<detail::counter_example_constructor>(state,detail::counter_example_constructor::root_index()),
                 detail::counter_example_constructor(filename_divergence_loop));
-    }
-    else
-    {
-      check_divergence(
+      }
+      else
+      {
+        check_divergence(
                 detail::state_index_pair<detail::dummy_counter_example_constructor>(state,detail::dummy_counter_example_constructor::root_index()),
                 detail::dummy_counter_example_constructor());
+      }
     }
   }
 
