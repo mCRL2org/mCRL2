@@ -92,14 +92,30 @@ struct process_traversal_algorithm
 inline
 std::map<process_identifier, multi_action_name_set> compute_pcrl_equation_cache(const std::vector<process_equation>& equations, const process_expression& init)
 {
+  // use the scc decomposition to ensure that the alphabet for equations in the same scc is computed only once
+  std::vector<std::set<process_identifier> > sccs = process_variable_strongly_connected_components(equations);
+  std::map<process_identifier, std::size_t> scc_index;
+  for (std::size_t i = 0; i < sccs.size(); i++)
+  {
+    for (const process_identifier& id: sccs[i])
+    {
+      scc_index[id] = i;
+    }
+  }
+
   std::map<process_identifier, multi_action_name_set> result;
   process_traversal_algorithm algorithm(equations, init);
   while (algorithm.has_next())
   {
     const process_equation& eqn = algorithm.next();
-    if (is_pcrl(eqn.expression()))
+    if (is_pcrl(eqn.expression()) && result.find(eqn.identifier()) == result.end())
     {
-      result[eqn.identifier()] = alphabet_efficient(eqn.expression(), equations);
+      multi_action_name_set A = alphabet_efficient(eqn.expression(), equations);
+      const std::set<process_identifier>& scc = sccs[scc_index[eqn.identifier()]];
+      for (const process_identifier& id: scc)
+      {
+        result[id] = A;
+      }
     }
   }
   return result;
