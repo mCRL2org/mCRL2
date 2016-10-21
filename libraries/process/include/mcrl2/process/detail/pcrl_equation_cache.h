@@ -48,10 +48,6 @@ struct process_traversal_algorithm
   std::set<process_identifier> todo;
   std::set<process_identifier> done;
 
-  void expand_expression(const process_expression& x)
-  {
-  }
-
   process_traversal_algorithm(const std::vector<process_equation>& equations_, const process_expression& init_)
     : equations(equations_), init(init_)
   {
