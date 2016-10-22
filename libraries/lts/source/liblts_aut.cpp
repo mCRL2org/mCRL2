@@ -37,7 +37,7 @@ static void read_newline(istream& is, const size_t lineno)
     is.get(ch);
   }
 
-  if (ch != '\n')
+  if (ch != '\n' && !is.eof()) // Last line does not need to be terminated with an eoln.
   {
     if (lineno==1)
     {
