@@ -271,7 +271,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
         return r;
       }
     }
-    throw mcrl2::runtime_error("cannot transform " + data::pp(Type) + " to a number.");
+    throw mcrl2::runtime_error("Cannot transform " + data::pp(Type) + " to a number.");
   }
 
   if (warn_upcasting && data::is_function_symbol(Par) && utilities::is_numeric_string(down_cast<function_symbol>(Par).name().function().name()))
@@ -400,7 +400,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     const sort_expression needed_similar_container_type=container_sort(container_type.container_name(),needed_argument_type);
     if (needed_similar_container_type==NeededType)
     {
-      throw mcrl2::runtime_error("Cannot typecast " + data::pp(Type) + " into " + data::pp(NeededType) + " for data expression " + data::pp(Par));
+      throw mcrl2::runtime_error("Cannot typecast " + data::pp(Type) + " into " + data::pp(NeededType) + " for data expression " + data::pp(Par) + ".");
     }
     try
     {
@@ -411,8 +411,8 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nerror occurred while trying to match argument types of " + data::pp(NeededType) + " and " +
-                          data::pp(Type) + " in data expression " + data::pp(Par));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while trying to match argument types of " + data::pp(NeededType) + " and " +
+                          data::pp(Type) + " in data expression " + data::pp(Par) + ".");
     }
   }
 
@@ -434,7 +434,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       }
       else
       {
-        throw mcrl2::runtime_error("Upcasting " + data::pp(Type) + " to " + data::pp(NeededType) + " fails (1)");
+        throw mcrl2::runtime_error("Upcasting " + data::pp(Type) + " to " + data::pp(NeededType) + " fails (1).");
       }
     }
   }
@@ -456,7 +456,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       }
       else
       {
-        throw mcrl2::runtime_error("Upcasting " + data::pp(Type) + " to " + data::pp(NeededType) + " fails (1)");
+        throw mcrl2::runtime_error("Upcasting " + data::pp(Type) + " to " + data::pp(NeededType) + " fails (1).");
       }
     }
   }
@@ -482,7 +482,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     }
   }
 
-  throw mcrl2::runtime_error("Upcasting " + data::pp(Type) + " to " + data::pp(NeededType) + " fails (3)");
+  throw mcrl2::runtime_error("Upcasting " + data::pp(Type) + " to " + data::pp(NeededType) + " fails (3).");
 }
 
 
@@ -2028,7 +2028,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchIf(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function if has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function if has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2044,7 +2044,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchEqNeqComparison(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function " + core::pp(data_term_name) + " has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function " + core::pp(data_term_name) + " has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2054,7 +2054,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchSqrt(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function sqrt has an incorrect argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function sqrt has an incorrect argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2064,7 +2064,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchListOpCons(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function |> has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function |> has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2074,7 +2074,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchListOpSnoc(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function <| has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function <| has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2084,7 +2084,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchListOpConcat(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function ++ has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function ++ has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2094,7 +2094,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchListOpEltAt(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function @ has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function @ has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2106,7 +2106,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchListOpHead(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function {R,L}head has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function {R,L}head has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2117,7 +2117,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchListOpTail(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function {R,L}tail has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function {R,L}tail has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2127,7 +2127,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchSetOpSet2Bag(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function Set2Bag has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function Set2Bag has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2137,7 +2137,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchListSetBagOpIn(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function {List,Set,Bag}In has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function {List,Set,Bag}In has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2149,7 +2149,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchSetBagOpUnionDiffIntersect(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2160,7 +2160,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!match_fset_insert(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("set enumeration has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("Set enumeration has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2170,7 +2170,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!match_fbag_cinsert(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("bag enumeration has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("Bag enumeration has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2182,7 +2182,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchSetOpSetCompl(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function SetCompl has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function SetCompl has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2192,7 +2192,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchBagOpBag2Set(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function Bag2Set has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function Bag2Set has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2202,7 +2202,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchBagOpBagCount(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("the function BagCount has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("The function BagCount has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2213,7 +2213,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchFuncUpdate(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("function update has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("Function update has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2223,7 +2223,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchSetConstructor(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("set constructor has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("Set constructor has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2234,7 +2234,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchBagConstructor(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("bag constructor has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("Bag constructor has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2244,7 +2244,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchFalseFunction(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("bag constructor has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("Bag constructor has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2254,7 +2254,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
     sort_expression NewType;
     if (!MatchBagConstructor(atermpp::down_cast<function_sort>(Type), NewType))
     {
-      throw mcrl2::runtime_error("bag constructor has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ")");
+      throw mcrl2::runtime_error("Bag constructor has incompatible argument types " + data::pp(Type) + " (while typechecking " + data::pp(d) + ").");
     }
     Type=NewType;
   }
@@ -2296,7 +2296,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         variable_=true;
         if (AllowedVars.count(Name)==0)
         {
-          throw mcrl2::runtime_error("variable " + core::pp(Name) + " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side");
+          throw mcrl2::runtime_error("Variable " + core::pp(Name) + " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side.");
         }
 
         //Add to free variables list
@@ -2319,8 +2319,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         sort_expression temp;
         if (!TypeMatchA(TypeA,PosType,temp))
         {
-          throw mcrl2::runtime_error("the type " + data::pp(TypeA) + " of variable " + core::pp(Name)
-                          + " is incompatible with " + data::pp(PosType) + " (typechecking " + data::pp(DataTerm) + ")");
+          throw mcrl2::runtime_error("The type " + data::pp(TypeA) + " of variable " + core::pp(Name)
+                          + " is incompatible with " + data::pp(PosType) + " (typechecking " + data::pp(DataTerm) + ").");
         }
         DataTerm=variable(Name,TypeA);
         return TypeA;
@@ -2335,8 +2335,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
           sort_expression temp;
           if (!TypeMatchA(TypeA,PosType,temp))
           {
-            throw mcrl2::runtime_error("the type " + data::pp(TypeA) + " of constant " + core::pp(Name)
-                            + " is incompatible with " + data::pp(PosType) + " (typechecking " + data::pp(DataTerm) + ")");
+            throw mcrl2::runtime_error("The type " + data::pp(TypeA) + " of constant " + core::pp(Name)
+                            + " is incompatible with " + data::pp(PosType) + " (typechecking " + data::pp(DataTerm) + ").");
           }
           DataTerm=data::function_symbol(Name,TypeA);
           return TypeA;
@@ -2357,12 +2357,12 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
             else
             {
               DataTerm=data::function_symbol(Name,data::untyped_sort());
-              throw  mcrl2::runtime_error("ambiguous system constant " + core::pp(Name));
+              throw  mcrl2::runtime_error("Ambiguous system constant " + core::pp(Name) + ".");
             }
           }
           else
           {
-            throw mcrl2::runtime_error("unknown constant " + core::pp(Name));
+            throw mcrl2::runtime_error("Unknown constant " + core::pp(Name) + ".");
           }
         }
       }
@@ -2387,11 +2387,11 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         {
           if (nFactPars!=std::string::npos)
           {
-            throw mcrl2::runtime_error("unknown operation " + core::pp(Name) + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":""));
+            throw mcrl2::runtime_error("Unknown operation " + core::pp(Name) + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s.":"."));
           }
           else
           {
-            throw mcrl2::runtime_error("unknown operation " + core::pp(Name));
+            throw mcrl2::runtime_error("Unknown operation " + core::pp(Name) + ".");
           }
         }
       }
@@ -2522,13 +2522,13 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       DataTerm=data::function_symbol(Name,Sort);
       if (nFactPars!=std::string::npos)
       {
-        throw mcrl2::runtime_error("unknown operation/variable " + core::pp(Name)
+        throw mcrl2::runtime_error("Unknown operation/variable " + core::pp(Name)
                         + " with " + to_string(nFactPars) + " argument" + ((nFactPars != 1)?"s":"")
-                        + " that matches type " + data::pp(PosType));
+                        + " that matches type " + data::pp(PosType) + ".");
       }
       else
       {
-        throw mcrl2::runtime_error("unknown operation/variable " + core::pp(Name) + " that matches type " + data::pp(PosType));
+        throw mcrl2::runtime_error("Unknown operation/variable " + core::pp(Name) + " that matches type " + data::pp(PosType) + ".");
       }
     }
 
@@ -2556,7 +2556,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
 
       if (!result)
       {
-        throw mcrl2::runtime_error("fail to match sort " + data::pp(OldType) + " with " + data::pp(PosType));
+        throw mcrl2::runtime_error("Fail to match sort " + data::pp(OldType) + " with " + data::pp(PosType) + ".");
       }
 
       Type=determine_allowed_type(DataTerm,Type);
@@ -2585,11 +2585,11 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         if (nFactPars!=std::string::npos)
         {
-          throw mcrl2::runtime_error("ambiguous operation " + core::pp(Name) + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s":""));
+          throw mcrl2::runtime_error("Ambiguous operation " + core::pp(Name) + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s.":"."));
         }
         else
         {
-          throw mcrl2::runtime_error("ambiguous operation " + core::pp(Name));
+          throw mcrl2::runtime_error("Ambiguous operation " + core::pp(Name) + ".");
         }
       }
       else
@@ -2629,7 +2629,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     //The variable declaration of a binder should have at least 1 declaration
     if (abstr.variables().size()==0)
     {
-      throw mcrl2::runtime_error("binder " + data::pp(DataTerm) + " should have at least one declared variable");
+      throw mcrl2::runtime_error("Binder " + data::pp(DataTerm) + " should have at least one declared variable.");
     }
 
     const binder_type& BindingOperator = abstr.binding_operator();
@@ -2645,7 +2645,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       //A Set/bag comprehension should have exactly one variable declared
       if (VarDecls.size()!=1)
       {
-        throw mcrl2::runtime_error("set/bag comprehension " + data::pp(DataTerm) + " should have exactly one declared variable");
+        throw mcrl2::runtime_error("Set/bag comprehension " + data::pp(DataTerm) + " should have exactly one declared variable.");
       }
 
       const variable& VarDecl=VarDecls.front();
@@ -2668,7 +2668,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\nthe condition or count of a set/bag comprehension " + data::pp(DataTerm) + " cannot be determined");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nThe condition or count of a set/bag comprehension " + data::pp(DataTerm) + " cannot be determined.");
       }
       sort_expression temp;
       if (TypeMatchA(sort_bool::bool_(),ResType,temp))
@@ -2689,13 +2689,13 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       }
       else
       {
-        throw mcrl2::runtime_error("the condition or count of a set/bag comprehension is not of sort Bool, Nat or Pos, but of sort " + data::pp(ResType));
+        throw mcrl2::runtime_error("The condition or count of a set/bag comprehension is not of sort Bool, Nat or Pos, but of sort " + data::pp(ResType) + ".");
       }
 
       if (!TypeMatchA(NewType,PosType,NewType))
       {
-        throw mcrl2::runtime_error("a set or bag comprehension of type " + data::pp(VarDecl.sort()) + " does not match possible type " +
-                            data::pp(PosType) + " (while typechecking " + data::pp(DataTerm) + ")");
+        throw mcrl2::runtime_error("A set or bag comprehension of type " + data::pp(VarDecl.sort()) + " does not match possible type " +
+                            data::pp(PosType) + " (while typechecking " + data::pp(DataTerm) + ").");
       }
 
       detail::RemoveVars(FreeVars,VarList);
@@ -2717,13 +2717,13 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       sort_expression temp;
       if (!TypeMatchA(sort_bool::bool_(),PosType,temp))
       {
-        throw mcrl2::runtime_error("the type of an exist/forall for " + data::pp(DataTerm) + " cannot be determined");
+        throw mcrl2::runtime_error("The type of an exist/forall for " + data::pp(DataTerm) + " cannot be determined.");
       }
       sort_expression NewType=TraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,Data,sort_bool::bool_(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
 
       if (!TypeMatchA(sort_bool::bool_(),NewType,temp))
       {
-        throw mcrl2::runtime_error("the type of an exist/forall for " + data::pp(DataTerm) + " cannot be determined");
+        throw mcrl2::runtime_error("The type of an exist/forall for " + data::pp(DataTerm) + " cannot be determined.");
       }
 
       detail::RemoveVars(FreeVars,VarList);
@@ -2747,7 +2747,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       sort_expression NewType;
       if (!UnArrowProd(ArgTypes,PosType,NewType))
       {
-        throw mcrl2::runtime_error("no functions with arguments " + data::pp(ArgTypes) + " among " + data::pp(PosType) + " (while typechecking " + data::pp(DataTerm) + ")");
+        throw mcrl2::runtime_error("No functions with arguments " + data::pp(ArgTypes) + " among " + data::pp(PosType) + " (while typechecking " + data::pp(DataTerm) + ").");
       }
       data_expression Data=abstr.body();
 
@@ -2839,7 +2839,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         sort_expression Type;
         if (!UnList(PosType,Type))
         {
-          throw mcrl2::runtime_error("not possible to cast list to " + data::pp(PosType) + " (while typechecking " + data::pp(data_expression_list(appl.begin(),appl.end())) + ")");
+          throw mcrl2::runtime_error("It is not possible to cast list to " + data::pp(PosType) + " (while typechecking " + data::pp(data_expression_list(appl.begin(),appl.end())) + ").");
         }
 
         //First time to determine the common type only!
@@ -2887,7 +2887,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         sort_expression Type;
         if (!UnFSet(PosType,Type))
         {
-          throw mcrl2::runtime_error("not possible to cast set to " + data::pp(PosType) + " (while typechecking " + data::pp(data_expression_list(appl.begin(),appl.end())) + ")");
+          throw mcrl2::runtime_error("It is not possible to cast set to " + data::pp(PosType) + " (while typechecking " + data::pp(data_expression_list(appl.begin(),appl.end())) + ").");
         }
 
         //First time to determine the common type only (which will be NewType)!
@@ -2903,7 +2903,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           }
           catch (mcrl2::runtime_error& e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + data::pp(Type) + " (while typechecking " + data::pp(Argument) + ")");
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nImpossible to cast element to " + data::pp(Type) + " (while typechecking " + data::pp(Argument) + ").");
           }
 
           sort_expression OldNewType=NewType;
@@ -2917,7 +2917,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
             sort_expression temp;
             if (!MaximumType(NewType,Type0,temp))
             {
-              throw mcrl2::runtime_error("Set contains incompatible elements of sorts " + data::pp(OldNewType) + " and " + data::pp(Type0) + " (while typechecking " + data::pp(Argument));
+              throw mcrl2::runtime_error("Set contains incompatible elements of sorts " + data::pp(OldNewType) + " and " + data::pp(Type0) + " (while typechecking " + data::pp(Argument) + ".");
             }
             NewType=temp;
             NewTypeDefined=true;
@@ -2942,7 +2942,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           }
           catch (mcrl2::runtime_error& e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + data::pp(Type) + " (while typechecking " + data::pp(Argument) + ")");
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nImpossible to cast element to " + data::pp(Type) + " (while typechecking " + data::pp(Argument) + ").");
           }
           NewArguments.push_front(Argument);
           Type=Type0;
@@ -2961,8 +2961,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         sort_expression Type;
         if (!UnFBag(PosType,Type))
         {
-          throw mcrl2::runtime_error("not possible to cast bag to " + data::pp(PosType) + "(while typechecking " +
-                                      data::pp(data_expression_list(appl.begin(),appl.end())) + ")");
+          throw mcrl2::runtime_error("Impossible to cast bag to " + data::pp(PosType) + "(while typechecking " +
+                                      data::pp(data_expression_list(appl.begin(),appl.end())) + ").");
         }
 
         //First time to determine the common type only!
@@ -2980,7 +2980,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           }
           catch (mcrl2::runtime_error& e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + data::pp(Type) + " (while typechecking " + data::pp(Argument0) + ")");
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nImpossible to cast element to " + data::pp(Type) + " (while typechecking " + data::pp(Argument0) + ").");
           }
           sort_expression Type1;
           try
@@ -2991,7 +2991,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             if (print_cast_error)
             {
-              throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast number to " + data::pp(sort_nat::nat()) + " (while typechecking " + data::pp(Argument1) + ")");
+              throw mcrl2::runtime_error(std::string(e.what()) + "\nImpossible to cast number to " + data::pp(sort_nat::nat()) + " (while typechecking " + data::pp(Argument1) + ").");
             }
             else
             {
@@ -3009,7 +3009,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
             sort_expression temp;
             if (!MaximumType(NewType,Type0,temp))
             {
-              throw mcrl2::runtime_error("Bag contains incompatible elements of sorts " + data::pp(OldNewType) + " and " + data::pp(Type0) + " (while typechecking " + data::pp(Argument0) + ")");
+              throw mcrl2::runtime_error("Bag contains incompatible elements of sorts " + data::pp(OldNewType) + " and " + data::pp(Type0) + " (while typechecking " + data::pp(Argument0) + ").");
             }
 
             NewType=temp;
@@ -3037,7 +3037,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             if (print_cast_error)
             {
-              throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast element to " + data::pp(Type) + " (while typechecking " + data::pp(Argument0) + ")");
+              throw mcrl2::runtime_error(std::string(e.what()) + "\nImpossible to cast element to " + data::pp(Type) + " (while typechecking " + data::pp(Argument0) + ").");
             }
             else
             {
@@ -3053,7 +3053,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             if (print_cast_error)
             {
-              throw mcrl2::runtime_error(std::string(e.what()) + "\nnot possible to cast number to " + data::pp(sort_nat::nat()) + " (while typechecking " + data::pp(Argument1) + ")");
+              throw mcrl2::runtime_error(std::string(e.what()) + "\nImpossible to cast number to " + data::pp(sort_nat::nat()) + " (while typechecking " + data::pp(Argument1) + ").");
             }
             else
             {
@@ -3105,8 +3105,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       {
         was_ambiguous=false;
       }
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast an application of " +
-                            data::pp(Data) + " to arguments " + data::pp(Arguments) + " to type " + data::pp(PosType));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nType error while trying to cast an application of " +
+                            data::pp(Data) + " to arguments " + data::pp(Arguments) + " to type " + data::pp(PosType) + ".");
     }
 
     //it is possible that:
@@ -3121,10 +3121,10 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
       if (NeededArgumentTypes.size()!=Arguments.size())
       {
-         throw mcrl2::runtime_error("need argumens of sorts " + data::pp(NeededArgumentTypes) +
+         throw mcrl2::runtime_error("Need argumens of sorts " + data::pp(NeededArgumentTypes) +
                          " which does not match the number of provided arguments "
                             + data::pp(Arguments) + " (while typechecking "
-                            + data::pp(DataTerm) + ")");
+                            + data::pp(DataTerm) + ").");
       }
       //arguments again
       sort_expression_list NewArgumentTypes;
@@ -3164,8 +3164,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           }
           catch (mcrl2::runtime_error& e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\nrequired type " + data::pp(NeededType) + " does not match possible type "
-                            + data::pp(Type) + " (while typechecking " + data::pp(Arg) + " in " + data::pp(DataTerm) + ")");
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nRequired type " + data::pp(NeededType) + " does not match possible type "
+                            + data::pp(Type) + " (while typechecking " + data::pp(Arg) + " in " + data::pp(DataTerm) + ").");
           }
           Type=NewArgType;
         }
@@ -3189,8 +3189,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       {
         was_ambiguous=false;
       }
-      throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while trying to cast " +
-                   data::pp(application(Data,Arguments)) + " to type " + data::pp(PosType));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nType error while trying to cast " +
+                   data::pp(application(Data,Arguments)) + " to type " + data::pp(PosType) + ".");
     }
 
     //and the arguments once more
@@ -3233,8 +3233,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           }
           catch (mcrl2::runtime_error& e)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\nneeded type " + data::pp(NeededType) + " does not match possible type "
-                            + data::pp(Type) + " (while typechecking " + data::pp(Arg) + " in " + data::pp(DataTerm) + ")");
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nNeeded type " + data::pp(NeededType) + " does not match possible type "
+                            + data::pp(Type) + " (while typechecking " + data::pp(Arg) + " in " + data::pp(DataTerm) + ").");
           }
           Type=NewArgType;
         }
@@ -3256,11 +3256,11 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     sort_expression temp_type;
     if (!UnArrowProd(ArgumentTypes,NewType,temp_type))
     {
-      throw mcrl2::runtime_error("Fail to properly type " + data::pp(DataTerm));
+      throw mcrl2::runtime_error("Fail to properly type " + data::pp(DataTerm) + ".");
     }
     if (detail::HasUnknown(temp_type))
     {
-      throw mcrl2::runtime_error("Fail to properly type " + data::pp(DataTerm));
+      throw mcrl2::runtime_error("Fail to properly type " + data::pp(DataTerm) + ".");
     }
     return temp_type;
   }
@@ -3298,7 +3298,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast number " + data::pp(DataTerm) + " to type " + data::pp(PosType));
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nCannot (up)cast number " + data::pp(DataTerm) + " to type " + data::pp(PosType) + ".");
       }
       return CastedNewType;
     }
@@ -3311,7 +3311,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
       if (AllowedVars.count(Name)==0)
       {
-        throw mcrl2::runtime_error("variable " + core::pp(Name) + " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side");
+        throw mcrl2::runtime_error("Variable " + core::pp(Name) + " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side.");
       }
 
       sort_expression NewType;
@@ -3331,7 +3331,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         {
           if (print_cast_error)
           {
-            throw mcrl2::runtime_error(std::string(e.what()) + "\ncannot (up)cast variable " + data::pp(DataTerm) + " to type " + data::pp(PosType));
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nCannot (up)cast variable " + data::pp(DataTerm) + " to type " + data::pp(PosType) + ".");
           }
           else
           {
@@ -3368,7 +3368,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         }
         catch (mcrl2::runtime_error& e)
         {
-          throw mcrl2::runtime_error(std::string(e.what()) + "\nno constant " + data::pp(DataTerm) + " with type " + data::pp(PosType));
+          throw mcrl2::runtime_error(std::string(e.what()) + "\nNo constant " + data::pp(DataTerm) + " with type " + data::pp(PosType) + ".");
         }
       }
     }
@@ -3412,7 +3412,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
       if (ParList.empty())
       {
-        throw mcrl2::runtime_error("no system constant " + data::pp(DataTerm) + " with type " + data::pp(PosType));
+        throw mcrl2::runtime_error("No system constant " + data::pp(DataTerm) + " with type " + data::pp(PosType) + ".");
       }
 
       if (ParList.size()==1)
@@ -3431,7 +3431,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         }
         catch (mcrl2::runtime_error& e)
         {
-          throw mcrl2::runtime_error(std::string(e.what()) + "\nno constant " + data::pp(DataTerm) + " with type " + data::pp(PosType));
+          throw mcrl2::runtime_error(std::string(e.what()) + "\nNo constant " + data::pp(DataTerm) + " with type " + data::pp(PosType) + ".");
         }
       }
       else
@@ -3454,7 +3454,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       else
       {
 
-        throw mcrl2::runtime_error("unknown operation " + core::pp(Name));
+        throw mcrl2::runtime_error("Unknown operation " + core::pp(Name) + ".");
       }
     }
     else if (j_gssystem==system_functions.end())
@@ -3477,7 +3477,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\nno constant " + data::pp(DataTerm) + " with type " + data::pp(PosType));
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nNo constant " + data::pp(DataTerm) + " with type " + data::pp(PosType) + ".");
       }
     }
     else
@@ -3523,7 +3523,7 @@ void mcrl2::data::data_type_checker::read_constructors_and_mappings(const functi
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not add constant");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nCould not add constant.");
       }
     }
 
@@ -3565,12 +3565,12 @@ void mcrl2::data::data_type_checker::add_constant(const data::function_symbol& f
 
   if (user_constants.count(Name)>0)
   {
-    throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(Name));
+    throw mcrl2::runtime_error("Double declaration of " + msg + " " + core::pp(Name) + ".");
   }
 
   if (system_constants.count(Name)>0 || system_functions.count(Name)>0)
   {
-    throw mcrl2::runtime_error("attempt to declare a constant with the name that is a built-in identifier (" + core::pp(Name) + ")");
+    throw mcrl2::runtime_error("Attempt to declare a constant with the name that is a built-in identifier (" + core::pp(Name) + ").");
   }
 
   user_constants[Name]=Sort;
@@ -4060,12 +4060,12 @@ void mcrl2::data::data_type_checker::add_function(const data::function_symbol& f
 
   if (system_constants.count(Name)>0)
   {
-    throw mcrl2::runtime_error("attempt to redeclare the system constant with a " + msg + " " + data::pp(f));
+    throw mcrl2::runtime_error("Attempt to redeclare the system constant with a " + msg + " " + data::pp(f) + ".");
   }
 
   if (system_functions.count(Name)>0)
   {
-    throw mcrl2::runtime_error("attempt to redeclare a system function with a " + msg + " " + data::pp(f));
+    throw mcrl2::runtime_error("Attempt to redeclare a system function with a " + msg + " " + data::pp(f) + ".");
   }
 
   std::map <core::identifier_string,sort_expression_list>::const_iterator j=user_functions.find(Name);
@@ -4080,7 +4080,7 @@ void mcrl2::data::data_type_checker::add_function(const data::function_symbol& f
     {
       if (!allow_double_decls)
       {
-        throw mcrl2::runtime_error("double declaration of " + msg + " " + core::pp(Name));
+        throw mcrl2::runtime_error("Double declaration of " + msg + " " + core::pp(Name) + ".");
       }
     }
     Types = Types + sort_expression_list({ Sort });
@@ -4333,7 +4333,7 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification& data
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
+    throw mcrl2::runtime_error(std::string(e.what()) + "\nType checking of data expression failed.");
   }
 
   type_checked_data_spec=data_spec;
@@ -4347,7 +4347,7 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification& data
   catch (mcrl2::runtime_error& e)
   {
     type_checked_data_spec=data_specification(); // Type checking failed. Data specification is not usable.
-    throw mcrl2::runtime_error(std::string(e.what()) + "\nFailed to type check data specification");
+    throw mcrl2::runtime_error(std::string(e.what()) + "\nFailed to type check data specification.");
   }
 }
 
@@ -4363,11 +4363,11 @@ data_expression mcrl2::data::data_type_checker::operator()(
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of data expression failed");
+    throw mcrl2::runtime_error(std::string(e.what()) + "\nType checking of data expression failed.");
   }
   if (data::is_untyped_sort(Type))
   {
-    throw mcrl2::runtime_error("type checking of data expression failed. Result is an unknown sort.");
+    throw mcrl2::runtime_error("Type checking of data expression failed. Result is an unknown sort.");
   }
 
   assert(strict_type_check(data));
@@ -4388,7 +4388,7 @@ variable_list mcrl2::data::data_type_checker::operator()(
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ntype error while typechecking data variables");
+    throw mcrl2::runtime_error(std::string(e.what()) + "\nType error while typechecking data variables.");
   }
 
   return data_vars;
@@ -4430,7 +4430,7 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
 
     if (!VarsUnique(VarList))
     {
-      throw mcrl2::runtime_error("the variables " + data::pp(VarList) + " in equation declaration " + data::pp(Eqn) + " are not unique");
+      throw mcrl2::runtime_error("The variables " + data::pp(VarList) + " in equation declaration " + data::pp(Eqn) + " are not unique.");
     }
 
     std::map<core::identifier_string,sort_expression> NewDeclaredVars;
@@ -4447,13 +4447,13 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nerror occurred while typechecking " + data::pp(Left) + " as left hand side of equation " + data::pp(Eqn));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking " + data::pp(Left) + " as left hand side of equation " + data::pp(Eqn) + ".");
     }
 
     if (was_warning_upcasting)
     {
       was_warning_upcasting=false;
-      mCRL2log(warning) << "warning occurred while typechecking " << Left << " as left hand side of equation " << Eqn << std::endl;
+      mCRL2log(warning) << "Warning occurred while typechecking " << Left << " as left hand side of equation " << Eqn << "." << std::endl;
     }
 
     data_expression Cond=Eqn.condition();
@@ -4468,7 +4468,7 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nerror occurred while typechecking " + data::pp(Right) + " as right hand side of equation " + data::pp(Eqn));
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking " + data::pp(Right) + " as right hand side of equation " + data::pp(Eqn) + ".");
     }
 
     //If the types are not uniquely the same now: do once more:
@@ -4477,7 +4477,7 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
       sort_expression Type;
       if (!TypeMatchA(LeftType,RightType,Type))
       {
-        throw mcrl2::runtime_error("types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(Eqn) + " do not match.");
+        throw mcrl2::runtime_error("Types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(Eqn) + " do not match.");
       }
       Left=Eqn.lhs();
       FreeVars.clear();
@@ -4487,12 +4487,12 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ntypes of the left- and right-hand-sides of the equation " + data::pp(Eqn) + " do not match.");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nTypes of the left- and right-hand-sides of the equation " + data::pp(Eqn) + " do not match.");
       }
       if (was_warning_upcasting)
       {
         was_warning_upcasting=false;
-        mCRL2log(warning) << "warning occurred while typechecking " << Left << " as left hand side of equation " << Eqn << std::endl;
+        mCRL2log(warning) << "Warning occurred while typechecking " << Left << " as left hand side of equation " << Eqn << "." << std::endl;
       }
       Right=Eqn.rhs();
       try
@@ -4501,15 +4501,15 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
       }
       catch (mcrl2::runtime_error& e)
       {
-        throw mcrl2::runtime_error(std::string(e.what()) + "\ntypes of the left- and right-hand-sides of the equation " + data::pp(Eqn) + " do not match.");
+        throw mcrl2::runtime_error(std::string(e.what()) + "\nTypes of the left- and right-hand-sides of the equation " + data::pp(Eqn) + " do not match.");
       }
       if (!TypeMatchA(LeftType,RightType,Type))
       {
-        throw mcrl2::runtime_error("types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(Eqn) + " do not match");
+        throw mcrl2::runtime_error("Types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(Eqn) + " do not match.");
       }
       if (detail::HasUnknown(Type))
       {
-        throw mcrl2::runtime_error("types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(Eqn) + " cannot be uniquely determined");
+        throw mcrl2::runtime_error("Types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(Eqn) + " cannot be uniquely determined.");
       }
     }
     DeclaredVars.clear();

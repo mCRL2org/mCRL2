@@ -88,7 +88,7 @@ std::pair<data::data_expression_list, data::sort_expression_list> match_action_p
         }
         out << *k;
       }
-      out << " does not match due to " << *j << ".";
+      out << " does not match.\n" << *j;
     }
     throw mcrl2::runtime_error(out.str());
   }
