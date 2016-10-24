@@ -9,7 +9,7 @@
 /// \file lts/detail/liblts_pbisim.h
 
 #ifndef _LIBLTS_PBISIM_FAST_H
-#define _LIBLTS_PBISIM__FAST_H
+#define _LIBLTS_PBISIM_FAST_H
 #include <cmath>
 #include <vector>
 #include <map>
@@ -280,7 +280,7 @@ namespace mcrl2
           // Init action states
           a_states.resize(num_action_states);
           state_key_type key = 0;
-          for (std::list<state_type>::iterator i = a_states.begin(); i != a_states.end(); ++i)
+          for (typename std::list<state_type>::iterator i = a_states.begin(); i != a_states.end(); ++i)
           {
             state_type& state = *i;
             state.key = key;
@@ -291,7 +291,7 @@ namespace mcrl2
           // Init probabilistic states
           p_states.resize(num_prob_states);
           key = 0;
-          for (std::list<state_type>::iterator i = p_states.begin(); i != p_states.end(); ++i)
+          for (typename std::list<state_type>::iterator i = p_states.begin(); i != p_states.end(); ++i)
           {
             state_type& state = *i;
             state.key = key;
@@ -429,7 +429,7 @@ namespace mcrl2
 
           // remove all empty blocks in action_pi_partition.
           std::vector<typename std::list<action_block_type>::iterator > empty_blocks;
-          for (std::list<action_block_type>::iterator i = action_pi_partition.begin(); i != action_pi_partition.end(); ++i)
+          for (typename std::list<action_block_type>::iterator i = action_pi_partition.begin(); i != action_pi_partition.end(); ++i)
           {
             action_block_type block = *i;
             if (block.states.size() == 0)
@@ -437,14 +437,14 @@ namespace mcrl2
               empty_blocks.push_back(i);
             }
           }
-          for (std::list<action_block_type>::iterator empty_i : empty_blocks)
+          for (typename std::list<action_block_type>::iterator empty_i : empty_blocks)
           {
             action_pi_partition.erase(empty_i);
           }
 
           // Adjust the block key of all states and init incomming probabilistic transitions per block
           key = 0;
-          for (std::list<action_block_type>::iterator i = action_pi_partition.begin(); i != action_pi_partition.end(); ++i)
+          for (typename std::list<action_block_type>::iterator i = action_pi_partition.begin(); i != action_pi_partition.end(); ++i)
           {
             action_block_type& ab = *i;
             for (state_type& s : ab.states)
@@ -456,7 +456,7 @@ namespace mcrl2
             key++;
           }
 
-          for (std::list<probabilistic_transition_type>::iterator pt_iter : probabilistic_transitions_iter)
+          for (typename std::list<probabilistic_transition_type>::iterator pt_iter : probabilistic_transitions_iter)
           {
             probabilistic_transition_type& pt = *pt_iter;
             state_type& s = *action_states_iter[pt.to];
@@ -802,7 +802,7 @@ namespace mcrl2
             // construct the middle set based on the gropued probabilities
             B.mark.middle.resize(grouped_probabilities_in_block.size());
             size_t middle_key = 0;
-            for (std::unordered_map<probability_label_type, std::list<state_type> >::iterator i = grouped_probabilities_in_block.begin();
+            for (typename std::unordered_map<probability_label_type, std::list<state_type> >::iterator i = grouped_probabilities_in_block.begin();
                     i != grouped_probabilities_in_block.end(); i++)
             {
               B.mark.middle[middle_key].swap(i->second);
@@ -993,7 +993,7 @@ namespace mcrl2
           lts_aut_base::probabilistic_state equivalent_prob_state;
 
           /* Select the first probabilistic state of the step class */
-          std::list<state_type>::iterator i = pb.states.begin();
+          typename std::list<state_type>::iterator i = pb.states.begin();
           state_type& s = *i;
 
           lts_aut_base::probabilistic_state old_prob_state = aut.probabilistic_state(s.key);
