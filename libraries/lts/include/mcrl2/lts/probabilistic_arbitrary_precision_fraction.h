@@ -84,7 +84,7 @@ class probabilistic_arbitrary_precision_fraction
        m_enumerator(utilities::big_natural_number(enumerator)),
        m_denominator(utilities::big_natural_number(denominator))
     {
-      assert(enumerator<= denominator);
+      assert(m_enumerator<= m_denominator);
     }
 
     /* \brief Return the enumerator of the label.
