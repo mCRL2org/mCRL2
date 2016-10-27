@@ -89,7 +89,7 @@ inline
 std::map<process_identifier, multi_action_name_set> compute_pcrl_equation_cache(const std::vector<process_equation>& equations, const process_expression& init)
 {
   // use the scc decomposition to ensure that the alphabet for equations in the same scc is computed only once
-  std::vector<std::set<process_identifier> > sccs = process_variable_strongly_connected_components(equations);
+  std::vector<std::set<process_identifier> > sccs = process_variable_strongly_connected_components(equations, init);
   std::map<process_identifier, std::size_t> scc_index;
   for (std::size_t i = 0; i < sccs.size(); i++)
   {

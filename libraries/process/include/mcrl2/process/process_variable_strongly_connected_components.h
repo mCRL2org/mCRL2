@@ -211,11 +211,37 @@ struct process_variable_scc_algorithm
     }
   }
 
-  std::vector<std::set<process_identifier> > run(const std::vector<process_equation>& equations)
+  // only add dependencies for equations reachable from init
+  void compute_dependencies(const std::vector<process_equation>& equations, const process_expression& init)
   {
-    compute_index(equations);
-    compute_dependencies(equations);
+    dependencies.clear();
+    std::set<process_identifier> todo;
+    std::set<process_identifier> done;
 
+    todo = find_process_identifiers(init);
+    while (!todo.empty())
+    {
+      // pick an element from todo
+      process_identifier source = *todo.begin();
+      todo.erase(todo.begin());
+      done.insert(source);
+
+      const process_equation& eqn = find_equation(equations, source);
+
+      // search for new identifiers in the rhs of the equation
+      for (const process_identifier& target: find_process_identifiers(eqn.expression()))
+      {
+        add_edge(source, target);
+        if (done.find(target) == done.end())
+        {
+          todo.insert(target);
+        }
+      }
+    }
+  }
+
+  std::vector<std::set<process_identifier> > run_impl(const std::vector<process_equation>& equations)
+  {
     // convert dependency graph to edge list
     std::vector<std::pair<std::size_t, std::size_t> > E;
     for (const auto& p: dependencies)
@@ -245,15 +271,40 @@ struct process_variable_scc_algorithm
     }
     return result;
   }
+
+  // make scc for all equations
+  std::vector<std::set<process_identifier> > run(const std::vector<process_equation>& equations)
+  {
+    compute_index(equations);
+    compute_dependencies(equations);
+    return run_impl(equations);
+  }
+
+  // make scc for the equations reachable from init
+  std::vector<std::set<process_identifier> > run(const std::vector<process_equation>& equations, const process_expression& init)
+  {
+    compute_index(equations);
+    compute_dependencies(equations, init);
+    return run_impl(equations);
+  }
 };
 
 } // namespace detail
 
+/// \brief Computes an SCC graph of the equations
 inline
 std::vector<std::set<process_identifier> > process_variable_strongly_connected_components(const std::vector<process_equation>& equations)
 {
   detail::process_variable_scc_algorithm algorithm;
   return algorithm.run(equations);
+}
+
+/// \brief Compute an SCC graph of the equations reachable from init
+inline
+std::vector<std::set<process_identifier> > process_variable_strongly_connected_components(const std::vector<process_equation>& equations, const process_expression& init)
+{
+  detail::process_variable_scc_algorithm algorithm;
+  return algorithm.run(equations, init);
 }
 
 } // namespace process
