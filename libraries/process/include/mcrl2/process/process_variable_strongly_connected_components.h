@@ -18,6 +18,7 @@
 #include <utility>
 #include <vector>
 #include "mcrl2/process/traverser.h"
+#include "mcrl2/process/find.h"
 
 namespace mcrl2 {
 
