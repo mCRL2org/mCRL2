@@ -57,10 +57,8 @@ constln_t* constln_t::nontrivial_first = nullptr;
     // These variables are only accessed in debug mode.  In release mode,
     // accessing them would lead to a linker error.
     const char block_t::mark_all_states_in_SpB[] = "mark all states in SpB";
-#endif
     state_info_const_ptr state_info_entry::s_i_begin;
     permutation_const_iter_t state_info_entry::perm_begin;
-#ifndef NDEBUG
     const char part_state_t::delete_constellations[] = "delete constellations";
     const char part_state_t::delete_blocks[] = "delete blocks";
 #endif
@@ -454,7 +452,9 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
         SpB->SetFromRed(slice);
     }
     // new_bottom_end is set to some invalid value:
-    new_slice->new_bottom_end = SpB->begin() - 1;
+    #ifndef NDEBUG
+        new_slice->new_bottom_end = permutation.begin();
+    #endif
     // set the slice pointers of the smaller part to the new slice:
     for (B_to_C_iter_t iter = new_slice->begin; new_slice->end != iter; ++iter)
     {
@@ -494,7 +494,9 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
         new_B_to_C_slice = std::prev(RfnB->to_constln.end());
         RfnB->SetFromRed(old_B_to_C_slice);
         // set new_bottom_end to some invalid value:
-        new_B_to_C_slice->new_bottom_end = RfnB->begin() - 1;
+        #ifndef NDEBUG
+            new_B_to_C_slice->new_bottom_end = permutation.begin();
+        #endif
     }
     else
     {
@@ -554,7 +556,7 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
                 assert(new_out_pos == old_out_pos);
                 return new_out_pos;
             }
-            new_constln_slice = constln_slice_pool.get_element(new_out_pos+1);
+            new_constln_slice = new out_descriptor(new_out_pos + 1);
         }
         else
         {
@@ -592,7 +594,7 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
         // normal swap
         if (0 == old_out_pos->constln_slice->size())
         {
-            constln_slice_pool.remove_element(old_out_pos->constln_slice);
+            delete old_out_pos->constln_slice;
         }
         swap_out(pred_iter, new_out_pos->B_to_C->pred);
         new_out_pos->constln_slice = new_constln_slice;
@@ -614,7 +616,7 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
                 assert(new_out_pos == old_out_pos);
                 return new_out_pos + 1;
             }
-            new_constln_slice = constln_slice_pool.get_element(new_out_pos);
+            new_constln_slice = new out_descriptor(new_out_pos);
         }
         else
         {
@@ -628,7 +630,7 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
                                 old_out_pos->B_to_C->pred->source->succ_end());
         if (0 == old_out_pos->constln_slice->size())
         {
-            constln_slice_pool.remove_element(old_out_pos->constln_slice);
+            delete old_out_pos->constln_slice;
         }
         swap_out(pred_iter, new_out_pos->B_to_C->pred);
         new_out_pos->constln_slice = new_constln_slice;
@@ -699,7 +701,7 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
             assert(OldC == s->inert_succ_end()->target->constln());
         }
         // create a new constln_slice
-        out_descriptor*new_constln_slice=constln_slice_pool.get_element(split);
+        out_descriptor* new_constln_slice = new out_descriptor(split);
         // make the smaller part the new slice.
         if (split - to_C_begin < to_C_end - split)
         {
@@ -861,9 +863,12 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                     // the assertion fails:
                     // assert(new_B_to_C_slice->from_block() == NewB);
 
-                    assert(RfnB->begin() > old_B_to_C_slice->new_bottom_end);
+                    assert(permutation.begin() ==
+                                             old_B_to_C_slice->new_bottom_end);
                     // set new_bottom_end to some invalid value
-                    new_B_to_C_slice->new_bottom_end = NewB->begin() - 1;
+                    #ifndef NDEBUG
+                        new_B_to_C_slice->new_bottom_end = permutation.begin();
+                    #endif
                 }
                 else
                 {
@@ -1078,9 +1083,12 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                 }
                 if (!postprocessing||!old_B_to_C_slice->needs_postprocessing())
                 {
-                    assert(RfnB->begin() > old_B_to_C_slice->new_bottom_end);
+                    assert(permutation.begin() ==
+                                             old_B_to_C_slice->new_bottom_end);
                     // set new_bottom_end to some invalid value
-                    new_B_to_C_slice->new_bottom_end = NewB->begin() - 1;
+                    #ifndef NDEBUG
+                        new_B_to_C_slice->new_bottom_end = permutation.begin();
+                    #endif
                 }
                 else
                 {
@@ -1319,15 +1327,15 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
 /// initialise the state in part_st and the transitions in part_tr
 template<class LTS_TYPE>
 inline void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
-init_transitions(part_state_t& part_st, part_trans_t& part_tr,
+init_transitions(part_trans_t& part_tr,
                           bool const branching, bool const preserve_divergence)
 {
-    assert(part_st.size() == get_nr_of_states());
-    assert(part_tr.size() == get_nr_of_transitions());
+    assert(part_tr.state_size() == get_nr_of_states());
+    assert(part_tr.trans_size() == get_nr_of_transitions());
 
     // initialise blocks and B_to_C slices
-    permutation_iter_t begin = part_st.permutation.begin();
-    constln_t* const constln = new constln_t(begin, part_st.permutation.end(),
+    permutation_iter_t begin = part_tr.permutation.begin();
+    constln_t* const constln = new constln_t(begin, part_tr.permutation.end(),
                                                          part_tr.B_to_C_end());
     if (states_per_block.size() > 1)
     {
@@ -1357,7 +1365,9 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             B_to_C_desc_iter_t const slice =
                                         std::prev(blocks[B]->to_constln.end());
             // set new_bottom_end to some invalid value:
-            slice->new_bottom_end = begin - 1;
+            #ifndef NDEBUG
+                slice->new_bottom_end = part_tr.permutation.begin();
+            #endif
             assert(B_to_C_begin < slice->end);
             for (; slice->end != B_to_C_begin; ++B_to_C_begin)
             {
@@ -1368,7 +1378,7 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
         }
         begin = end;
     }
-    assert(part_st.permutation.end() == begin);
+    assert(part_tr.permutation.end() == begin);
     assert(part_tr.B_to_C.end() == B_to_C_begin);
     // only block 0 has a sequence number and non-bottom states:
     blocks[0]->assign_seqnr();
@@ -1376,24 +1386,24 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
     blocks[0]->set_marked_nonbottom_begin(blocks[0]->bottom_begin());
 
     // initialise states and succ slices
-    part_st.state_info.begin()->set_pred_begin(part_tr.pred.begin());
-    part_st.state_info.begin()->set_succ_begin(part_tr.succ.begin());
+    part_tr.state_info.begin()->set_pred_begin(part_tr.pred.begin());
+    part_tr.state_info.begin()->set_succ_begin(part_tr.succ.begin());
     for (state_type s = 0; s < get_nr_of_states(); ++s)
     {
         check_complexity::count("initialise states", 1, check_complexity::n);
-        part_st.state_info[s].set_pred_end(part_st.state_info[s].pred_begin() +
+        part_tr.state_info[s].set_pred_end(part_tr.state_info[s].pred_begin() +
                              noninert_in_per_state[s] + inert_in_per_state[s]);
-        part_st.state_info[s].set_inert_pred_begin(part_st.state_info[s].
+        part_tr.state_info[s].set_inert_pred_begin(part_tr.state_info[s].
                                       pred_begin() + noninert_in_per_state[s]);
-        // part_st.state_info[s+1].set_pred_begin(part_st.state_info[s].
+        // part_tr.state_info[s+1].set_pred_begin(part_tr.state_info[s].
         //                                                         pred_end());
 
-        out_descriptor* const s_slice = part_tr.constln_slice_pool.get_element(
-                                           part_st.state_info[s].succ_begin());
+        out_descriptor* const s_slice = new out_descriptor(
+                                           part_tr.state_info[s].succ_begin());
         s_slice->set_end(s_slice->end() + noninert_out_per_state[s] +
                                                        inert_out_per_state[s]);
-        part_st.state_info[s].set_succ_end(s_slice->end());
-        part_st.state_info[s].set_inert_succ_begin_and_end(s_slice->begin() +
+        part_tr.state_info[s].set_succ_end(s_slice->end());
+        part_tr.state_info[s].set_inert_succ_begin_and_end(s_slice->begin() +
                                     noninert_out_per_state[s], s_slice->end());
         for (succ_iter_t succ_iter = s_slice->begin();
                                       s_slice->end() != succ_iter; ++succ_iter)
@@ -1402,18 +1412,18 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                                                           check_complexity::m);
             succ_iter->constln_slice = s_slice;
         }
-        part_st.state_info[s].set_current_constln(s_slice->end());
+        part_tr.state_info[s].set_current_constln(s_slice->end());
 
         if (s < aut.num_states())
         {
             // s is not an extra Kripke state.  It is in block 0.
-            part_st.state_info[s].block = blocks[0];
+            part_tr.state_info[s].block = blocks[0];
             if (0 < inert_out_per_state[s])
             {
                 // non-bottom state:
                 assert(0 < nr_of_nonbottom_states);
                 --nr_of_nonbottom_states;
-                part_st.state_info[s].pos = blocks[0]->begin() +
+                part_tr.state_info[s].pos = blocks[0]->begin() +
                                                         nr_of_nonbottom_states;
             }
             else
@@ -1424,12 +1434,12 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                 // many states become part of this slice.
                 assert(0 < states_per_block[0]);
                 --states_per_block[0];
-                part_st.state_info[s].pos = blocks[0]->begin() +
+                part_tr.state_info[s].pos = blocks[0]->begin() +
                                                            states_per_block[0];
-                assert(part_st.state_info[s].pos >= blocks[0]->bottom_begin());
+                assert(part_tr.state_info[s].pos >= blocks[0]->bottom_begin());
             }
-            *part_st.state_info[s].pos = &part_st.state_info[s];
-            // part_st.state_info[s].notblue = 0;
+            *part_tr.state_info[s].pos = &part_tr.state_info[s];
+            // part_tr.state_info[s].notblue = 0;
         }
     }
 
@@ -1448,14 +1458,14 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             {
                 state_type const extra_block = action_block_map[aut.apply_hidden_label_map(t.label())];
                 // now initialise extra_state correctly
-                part_st.state_info[extra_state].block = blocks[extra_block];
+                part_tr.state_info[extra_state].block = blocks[extra_block];
                 assert(0 < states_per_block[extra_block]);
                 --states_per_block[extra_block];
-                part_st.state_info[extra_state].pos = blocks[extra_block]->
+                part_tr.state_info[extra_state].pos = blocks[extra_block]->
                                        begin() + states_per_block[extra_block];
-                *part_st.state_info[extra_state].pos =
-                                              &part_st.state_info[extra_state];
-                // part_st.state_info[extra_state].notblue = 0;
+                *part_tr.state_info[extra_state].pos =
+                                              &part_tr.state_info[extra_state];
+                // part_tr.state_info[extra_state].notblue = 0;
 
                 // state extra_state has exactly one outgoing transition,
                 // namely a noninert transition to to t.to().  It has to be
@@ -1463,19 +1473,19 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                 assert(0 < noninert_in_per_state[t.to()]);
                 --noninert_in_per_state[t.to()];
                 pred_iter_t const t_pred =
-                             part_st.state_info[t.to()].noninert_pred_begin() +
+                             part_tr.state_info[t.to()].noninert_pred_begin() +
                                                  noninert_in_per_state[t.to()];
                 --noninert_out_per_state[extra_state];
                 assert(0 == noninert_out_per_state[extra_state]);
                 succ_iter_t const t_succ =
-                                  part_st.state_info[extra_state].succ_begin();
+                                  part_tr.state_info[extra_state].succ_begin();
                 assert(0 < noninert_out_per_block[extra_block]);
                 B_to_C_iter_t const t_B_to_C =
                                          blocks[extra_block]->inert_begin() -
                                          noninert_out_per_block[extra_block]--;
-                t_pred->source = &part_st.state_info.begin()[extra_state];
+                t_pred->source = &part_tr.state_info.begin()[extra_state];
                 t_pred->succ = t_succ;
-                t_succ->target = &part_st.state_info.begin()[t.to()];
+                t_succ->target = &part_tr.state_info.begin()[t.to()];
                 t_succ->B_to_C = t_B_to_C;
                 // t_B_to_C->B_to_C_slice = (already initialised);
                 t_B_to_C->pred = t_pred;
@@ -1484,19 +1494,19 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             assert(0 < noninert_in_per_state[extra_state]);
             --noninert_in_per_state[extra_state];
             pred_iter_t const t_pred =
-                        part_st.state_info[extra_state].noninert_pred_begin() +
+                        part_tr.state_info[extra_state].noninert_pred_begin() +
                                             noninert_in_per_state[extra_state];
             assert(0 < noninert_out_per_state[t.from()]);
             --noninert_out_per_state[t.from()];
-            succ_iter_t const t_succ=part_st.state_info[t.from()].succ_begin()+
+            succ_iter_t const t_succ=part_tr.state_info[t.from()].succ_begin()+
                                               noninert_out_per_state[t.from()];
             assert(0 < noninert_out_per_block[0]);
             B_to_C_iter_t const t_B_to_C = blocks[0]->inert_begin() -
                                                    noninert_out_per_block[0]--;
 
-            t_pred->source = &part_st.state_info.begin()[t.from()];
+            t_pred->source = &part_tr.state_info.begin()[t.from()];
             t_pred->succ = t_succ;
-            t_succ->target = &part_st.state_info.begin()[extra_state];
+            t_succ->target = &part_tr.state_info.begin()[extra_state];
             t_succ->B_to_C = t_B_to_C;
             // t_B_to_C->B_to_C_slice = (already initialised);
             t_B_to_C->pred = t_pred;
@@ -1507,21 +1517,21 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             assert(0 < inert_in_per_state[t.to()]);
             --inert_in_per_state[t.to()];
             pred_iter_t const t_pred =
-                                part_st.state_info[t.to()].inert_pred_begin() +
+                                part_tr.state_info[t.to()].inert_pred_begin() +
                                                     inert_in_per_state[t.to()];
             assert(0 < inert_out_per_state[t.from()]);
             --inert_out_per_state[t.from()];
             succ_iter_t const t_succ =
-                              part_st.state_info[t.from()].inert_succ_begin() +
+                              part_tr.state_info[t.from()].inert_succ_begin() +
                                                  inert_out_per_state[t.from()];
             assert(0 < inert_out_per_block[0]);
             --inert_out_per_block[0];
             B_to_C_iter_t const t_B_to_C = blocks[0]->inert_begin() +
                                                         inert_out_per_block[0];
 
-            t_pred->source = &part_st.state_info.begin()[t.from()];
+            t_pred->source = &part_tr.state_info.begin()[t.from()];
             t_pred->succ = t_succ;
-            t_succ->target = &part_st.state_info.begin()[t.to()];
+            t_succ->target = &part_tr.state_info.begin()[t.to()];
             t_succ->B_to_C = t_B_to_C;
             // t_B_to_C->B_to_C_slice = (already initialised);
             t_B_to_C->pred = t_pred;
@@ -1538,8 +1548,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                                << get_nr_of_states() << " states and "
                                << get_nr_of_transitions() << " transitions.\n";
     #ifndef NDEBUG
-        part_st.print_part(part_tr);
-        part_st.print_trans();
+        part_tr.print_part(part_tr);
+        part_tr.print_trans();
     #endif
 }
 
@@ -1690,8 +1700,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::create_initial_partition_gjkw(
     // 2.2: P := P_0, i. e. the initial, cycle-free partition; C = {S}
     // and
     // 2.3: Initialise all temporary data
-    init_helper.init_transitions(part_st, part_tr, branching,
-                                                          preserve_divergence);
+    init_helper.init_transitions(part_tr, branching, preserve_divergence);
 }
 
 template <class LTS_TYPE>
@@ -1892,8 +1901,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.29: end for
         }
         #ifndef NDEBUG
-            part_st.print_part(part_tr);
-            part_st.print_trans();
+            part_tr.print_part(part_tr);
+            part_tr.print_trans();
         #endif
     // 2.30: end while
     }
@@ -1903,8 +1912,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
     mCRL2log(log::verbose) << "number of blocks in the quotient: "
                                   << bisim_gjkw::block_t::nr_of_blocks << "\n";
     #ifndef NDEBUG
-        part_st.print_part(part_tr);
-        part_st.print_trans();
+        part_tr.print_part(part_tr);
+        part_tr.print_trans();
     #endif
 }
 
@@ -2730,14 +2739,15 @@ Line_4_4:
         assert(SplitB->to_constln.begin() != SplitB->to_constln.end());
         if (!SplitB->to_constln.begin()->needs_postprocessing())
         {
-            assert(SplitB->begin()>SplitB->to_constln.begin()->new_bottom_end);
+            assert(part_tr.permutation.begin() ==
+                                   SplitB->to_constln.begin()->new_bottom_end);
             bisim_gjkw::constln_t* const C =
                                       SplitB->to_constln.begin()->to_constln();
             //mCRL2log(log::debug, "bisim_gjkw") << "\tcanNOT reach "
             //                                        << C->debug_id() << "\n";
             // 4.17: SplitB := Refine(SplitB, C, Red := {old bottom states and
             //                        new bottom states handled earlier in
-            //                        SplitB}, FromRed := {transition to C},
+            //                        SplitB}, FromRed := {transitions to C},
             //                        allOtherBottomBlue := true)
             SplitB = refine(SplitB, C, SplitB->FromRed(C), true, true);
             assert(SplitB->marked_bottom_begin() <= orig_new_bottom_end &&
@@ -2806,7 +2816,9 @@ Line_4_4:
                                                                       FromRed);
             }
             // set new_bottom_end to some invalid value:
-            FromRed->new_bottom_end = B->begin() - 1;
+            #ifndef NDEBUG
+                FromRed->new_bottom_end = part_tr.permutation.begin();
+            #endif
             // 4.23: RedB := Refine(B, SpC, Red := B intersect (the set stored
             //                      in Line 4.11), FromRed := {transitions to
             //                      SpC}, allOtherBottomBlue := false)

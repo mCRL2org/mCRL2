@@ -31,7 +31,6 @@
 #include "mcrl2/lts/detail/coroutine.h"
 #include "mcrl2/lts/detail/check_complexity.h"
 #include "mcrl2/lts/detail/fixed_vector.h"
-#include "mcrl2/lts/detail/pool_gw.h"
 
 namespace mcrl2
 {
@@ -288,13 +287,13 @@ class state_info_entry
         assert(state_info_begin() <= this);
         return "state " + std::to_string(this - state_info_begin());
     }
-#endif
 
     static state_info_const_ptr state_info_begin()  {  return s_i_begin;  }
     static permutation_const_iter_t permutation_begin()  { return perm_begin; }
   private:
     static state_info_const_ptr s_i_begin;
     static permutation_const_iter_t perm_begin;
+#endif
 
     friend class part_state_t;
 };
@@ -945,10 +944,11 @@ class part_trans_t;
 /// states.
 class part_state_t
 {
-  private:
+  public:
     /// permutation array
     permutation_t permutation;
 
+  private:
     /// \brief pointer to array with all other information about states
     /// \details We allocate 1 additional ``state'' to allow for the iterators
     /// past the last transition, as described in the documentation of
@@ -964,11 +964,14 @@ class part_state_t
     /// \param n number of states in the Kripke structure
     part_state_t(state_type n)
       : permutation(n),
-        state_info(n+1) // 1 additional ``state''
+        state_info(n+1) //< an additional ``state'' is needed to store pointers
+            // to the end of the slices of transitions of the last state
     {
         assert(0 == block_t::nr_of_blocks);
-        state_info_entry::perm_begin = permutation.begin();
-        state_info_entry::s_i_begin = &*state_info.begin();
+        #ifndef NDEBUG
+            state_info_entry::perm_begin = permutation.begin();
+            state_info_entry::s_i_begin = state_info.data();
+        #endif
     }
 
     /// destructor
@@ -1025,7 +1028,7 @@ class part_state_t
     }
 
     /// provide stored number of states
-    state_type size() const  {  return permutation.size();  }
+    state_type state_size() const  {  return permutation.size();  }
 
     /// find constellation of a state (identified by number)
     const block_t* block(state_type s) const
@@ -1141,96 +1144,45 @@ class out_descriptor
 {
   private:
     succ_iter_t int_end, int_begin;
-
-    struct free_entry
-    {
-        out_descriptor* next_free;
-        void* null_if_free;
-    };
-#ifndef NDEBUG
-    bool is_free() const
-    {
-        return nullptr ==
-                       reinterpret_cast<const free_entry*>(this)->null_if_free;
-    }
-#endif
   public:
 
     out_descriptor(succ_iter_t iter)
       : int_end(iter),
         int_begin(iter)
     {
-        assert(sizeof(*this) >= sizeof(free_entry));
-        // always start out occupied
-        assert(!is_free());
         // assert(int_begin <= int_end);
     }
 
     state_type size() const
     {
-        assert(!is_free());
         return int_end - int_begin;
     }
 
     succ_iter_t begin()
     {
-        assert(!is_free());
         return int_begin;
     }
     succ_const_iter_t begin() const
     {
-        assert(!is_free());
         return int_begin;
     }
     void set_begin(succ_iter_t new_begin)
     {
-        assert(!is_free());
         int_begin = new_begin;
-        assert(!is_free());
         assert(int_begin <= int_end);
     }
     succ_iter_t end()
     {
-        assert(!is_free());
         return int_end;
     }
     succ_const_iter_t end() const
     {
-        assert(!is_free());
         return int_end;
     }
     void set_end(succ_iter_t new_end)
     {
-        assert(!is_free());
         int_end = new_end;
-        assert(!is_free());
         assert(int_begin <= int_end);
-    }
-
-    // access functions for pooling required by pool_gw.h:
-    out_descriptor* rep_next()
-    {
-        assert(is_free());
-        return reinterpret_cast<free_entry*>(this)->next_free;
-    }
-    void set_rep_next(out_descriptor* new_next_free)
-    {
-        // change from occupied to free
-        assert(!is_free());
-#ifndef NDEBUG
-        reinterpret_cast<free_entry*>(this)->null_if_free = nullptr;
-#endif
-        reinterpret_cast<free_entry*>(this)->next_free = new_next_free;
-        assert(is_free());
-    }
-    void rep_init(succ_iter_t iter)
-    {
-        // change from free to occupied
-        assert(is_free());
-        int_end = iter;
-        int_begin = iter;
-        assert(!is_free());
-        // assert(int_begin <= int_end);
     }
 };
 
@@ -1276,11 +1228,11 @@ class B_to_C_descriptor
 
     /// \brief returns true iff the slice is marked for postprocessing
     /// \details The function uses the data registered with the goal
-    /// constellation.  In principle, one could also use the data registered
-    /// with the source block (namely, whether `this->new_bottom_end` lies in
-    /// the block or not); however, this method is often called during changes
-    /// in the block structure, and therefore `from_block()` is not as reliable
-    /// as `to_constln()`.
+    /// constellation.  If the slice is not marked for postprocessing,
+    /// `this->new_bottom_end` is invalid.  In debug mode, it is normally set
+    /// to part_tr.permutation.begin(), because that almost never is a valid
+    /// value (but it is a value that is allowed by the compiler, in particular
+    /// also by Microsoft Visual C, which does check for out-of-range errors).
     /// The caller is encouraged to check whether `this->new_bottom_end` lies
     /// in the block as an additional consistency check.
     bool needs_postprocessing() const
@@ -1327,13 +1279,12 @@ class B_to_C_descriptor
 
 
 /* part_trans_t collects and organises all data for the transitions. */
-class part_trans_t
+class part_trans_t: public part_state_t
 {
   private:
     fixed_vector<pred_entry> pred;
     fixed_vector<succ_entry> succ;
     fixed_vector<B_to_C_entry> B_to_C;
-    pool<out_descriptor> constln_slice_pool;
 
     template <class LTS_TYPE>
     friend class bisim_partitioner_gjkw_initialise_helper;
@@ -1442,11 +1393,11 @@ class part_trans_t
         assert(succ.end() > pos3 && pos3->B_to_C->pred->succ == pos3);
     }
   public:
-    part_trans_t(trans_type m)
-      : pred(m),
+    part_trans_t(state_type n, trans_type m)
+      : part_state_t(n),
+        pred(m),
         succ(m),
-        B_to_C(m),
-        constln_slice_pool()
+        B_to_C(m)
     {
 #ifndef NDEBUG
         if (succ.empty())
@@ -1471,13 +1422,14 @@ class part_trans_t
         // deallocated by destructing the blocks.
         // out_descriptors do not need to be deallocated individually, but they
         // are cleared by deleting the constln_slice_pool.
-        constln_slice_pool.clear();
+//        constln_slice_pool.clear();
         B_to_C.clear();
         succ.clear();
         pred.clear();
+        part_state_t::clear();
     }
 
-    trans_type size() const  {  return pred.size();  }
+    trans_type trans_size() const  {  return pred.size();  }
 
     /* split_inert_to_C splits the B_to_C slice of block b to its own
     constellation into two slices: one for the inert and one for the non-inert
@@ -1649,7 +1601,7 @@ class bisim_partitioner_gjkw_initialise_helper
                                                      bool preserve_divergence);
 
     /// initialise the state in part_st and the transitions in part_tr
-    void init_transitions(part_state_t& part_st, part_trans_t& part_tr,
+    void init_transitions(part_trans_t& part_tr,
                                      bool branching, bool preserve_divergence);
 
     // replace_transitions() replaces the transitions of the LTS stored here by
@@ -1685,7 +1637,6 @@ class bisim_partitioner_gjkw
 {
   private:
     bisim_gjkw::bisim_partitioner_gjkw_initialise_helper<LTS_TYPE> init_helper;
-    bisim_gjkw::part_state_t part_st;
     bisim_gjkw::part_trans_t part_tr;
   public:
     // The constructor constructs the data structures and immediately
@@ -1694,8 +1645,8 @@ class bisim_partitioner_gjkw
     bisim_partitioner_gjkw(LTS_TYPE& l, bool branching = false,
                                         bool preserve_divergence = false)
       : init_helper(l, branching, preserve_divergence),
-        part_st(init_helper.get_nr_of_states()),
-        part_tr(init_helper.get_nr_of_transitions())
+        part_tr(init_helper.get_nr_of_states(),
+                init_helper.get_nr_of_transitions())
     {
         assert(branching || !preserve_divergence);
         create_initial_partition_gjkw(branching, preserve_divergence);
@@ -1704,7 +1655,6 @@ class bisim_partitioner_gjkw
     ~bisim_partitioner_gjkw()
     {
         part_tr.clear();
-        part_st.clear();
         bisim_gjkw::check_complexity::stats();
     }
 
@@ -1714,7 +1664,7 @@ class bisim_partitioner_gjkw
     // the LTS.
     void replace_transitions(bool branching, bool preserve_divergence)
     {
-        init_helper.replace_transitions(part_st,branching,preserve_divergence);
+        init_helper.replace_transitions(part_tr,branching,preserve_divergence);
     }
 
     static state_type num_eq_classes()
@@ -1723,11 +1673,11 @@ class bisim_partitioner_gjkw
     }
     state_type get_eq_class(state_type s) const
     {
-        return part_st.block(s)->seqnr();
+        return part_tr.block(s)->seqnr();
     }
     bool in_same_class(state_type s, state_type t) const
     {
-        return part_st.block(s) == part_st.block(t);
+        return part_tr.block(s) == part_tr.block(t);
     }
   private:
 
