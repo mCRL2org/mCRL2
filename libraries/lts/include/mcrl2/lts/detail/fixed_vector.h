@@ -47,10 +47,15 @@ public:
     using std::vector<T>::begin;
     using std::vector<T>::end;
     using std::vector<T>::size;
-    using std::vector<T>::empty;
     using std::vector<T>::clear;
 
     explicit fixed_vector(size_type n)  :std::vector<T>(n)  {  }
+
+#ifdef NDEBUG
+    using std::vector<T>::operator[];
+#else
+    using std::vector<T>::empty;
+    using std::vector<T>::data;
 
     // operator[] calls std::vector<T>::at because the latter checks bounds.
     T& operator[](size_type n)  {  return std::vector<T>::at(n);  }
@@ -73,6 +78,7 @@ public:
                   "fixed_vector::reserve() is only allowed for empty vectors");
         }
     }
+#endif
 };
 
 } // end namespace bisim_gjkw
