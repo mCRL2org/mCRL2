@@ -514,7 +514,6 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<alphabet_efficient_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_new_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_bounded_command>(input_filename(), output_filename(), options));
-      add_command(commands, std::make_shared<alphabet_bounded_command>(input_filename(), output_filename(), options));
 
       // PBES algorithms
       add_command(commands, std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options));
