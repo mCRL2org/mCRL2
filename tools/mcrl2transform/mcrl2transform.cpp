@@ -17,6 +17,16 @@
 #include <boost/lexical_cast.hpp>
 
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/data_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/alphabet_bounded.h"
 #include "mcrl2/process/alphabet_efficient.h"
@@ -103,6 +113,24 @@ struct processcommand: public command
   void execute()
   {
     procspec = parse_process_specification(input_filename);
+  }
+};
+
+struct pbescommand: public command
+{
+  pbes_system::pbes pbesspec;
+
+  pbescommand(const std::string& name,
+              const std::string& input_filename,
+              const std::string& output_filename,
+              const std::vector<std::string>& options
+             )
+    : command(name, input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_system::load_pbes(pbesspec, input_filename);
   }
 };
 
@@ -300,6 +328,131 @@ struct alphabet_bounded_command: public processcommand
   }
 };
 
+// PBES rewriters
+struct rewrite_pbes_data_rewriter_command: public pbescommand
+{
+  rewrite_pbes_data_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbes-data-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    data::rewriter r(pbesspec.data());
+    pbes_system::data_rewriter<data::rewriter> R(r);
+    pbes_rewrite(pbesspec, R);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct rewrite_pbes_enumerate_quantifiers_rewriter_command: public pbescommand
+{
+  rewrite_pbes_enumerate_quantifiers_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbes-enumerate-quantifiers-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    data::rewriter r(pbesspec.data());
+    pbes_system::enumerate_quantifiers_rewriter R(r, pbesspec.data());
+    pbes_rewrite(pbesspec, R);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct rewrite_pbes_simplify_rewriter_command: public pbescommand
+{
+  rewrite_pbes_simplify_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbes-simplify-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbes_system::simplify_rewriter R;
+    pbes_rewrite(pbesspec, R);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct rewrite_pbes_simplify_data_rewriter_command: public pbescommand
+{
+  rewrite_pbes_simplify_data_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbes-simplify-data-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    data::rewriter r(pbesspec.data());
+    pbes_system::simplify_data_rewriter<data::rewriter> R(r);
+    pbes_rewrite(pbesspec, R);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct rewrite_pbes_simplify_quantifiers_rewriter_command: public pbescommand
+{
+  rewrite_pbes_simplify_quantifiers_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbes-simplify-quantifiers-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbes_system::simplify_quantifiers_rewriter R;
+    pbes_rewrite(pbesspec, R);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct rewrite_pbes_simplify_quantifiers_data_rewriter_command: public pbescommand
+{
+  rewrite_pbes_simplify_quantifiers_data_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbes-simplify-quantifiers-data-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    data::rewriter r(pbesspec.data());
+    pbes_system::simplify_data_rewriter<data::rewriter> R(r);
+    pbes_rewrite(pbesspec, R);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct rewrite_pbes_one_point_rule_rewriter_command: public pbescommand
+{
+  rewrite_pbes_one_point_rule_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbes-one-point-rule-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbes_system::one_point_rule_rewriter R;
+    pbes_rewrite(pbesspec, R);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct rewrite_pbes_quantifiers_inside_rewriter_command: public pbescommand
+{
+  rewrite_pbes_quantifiers_inside_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbes-quantifiers-inside-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbes_system::quantifiers_inside_rewriter R;
+    pbes_rewrite(pbesspec, R);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
 class transform_tool: public utilities::tools::input_output_tool
 {
   protected:
@@ -346,8 +499,9 @@ class transform_tool: public utilities::tools::input_output_tool
       std::vector<std::string> options;
       std::set<std::string> algorithms;
       std::string algorithm;
-
       std::map<std::string, std::shared_ptr<command>> commands;
+
+      // process algorithms
       add_command(commands, std::make_shared<process_scc_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<eliminate_trivial_equations_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<join_bisimilar_equations_command>(input_filename(), output_filename(), options));
@@ -360,6 +514,17 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<alphabet_efficient_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_new_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_bounded_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<alphabet_bounded_command>(input_filename(), output_filename(), options));
+
+      // PBES algorithms
+      add_command(commands, std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_simplify_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_simplify_data_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_data_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_quantifiers_inside_rewriter_command>(input_filename(), output_filename(), options));
 
       for (auto i = commands.begin(); i != commands.end(); ++i)
       {
