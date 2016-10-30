@@ -120,19 +120,20 @@ void set_remove(std::set<T>& s, const Container& c)
   }
 }
 
-// Removes elements of the set c that satisfy predicate pred.
-template <typename T, typename Predicate>
-void set_remove_if(std::set<T>& c, Predicate pred)
+// C++11; works for sets and maps
+// Removes elements that satisfy predicate pred.
+template< typename ContainerT, typename PredicateT >
+void remove_if(ContainerT& items, const PredicateT& predicate)
 {
-  for (auto pos = c.begin(); pos != c.end(); ) {
-    if (pred(*pos)) {
-      c.erase(pos++);
-    }
-    else  {
-      ++pos;
-    }
+  for (auto it = items.begin(); it != items.end();)
+  {
+	if (predicate(*it))
+	{
+	  it = items.erase(it);
+	}
+	else ++it;
   }
-}
+};
 
 /// Returns true if the sorted ranges [first1, ..., last1) and [first2, ..., last2) have an empty intersection
 template <typename InputIterator1, typename InputIterator2>

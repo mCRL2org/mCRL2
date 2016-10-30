@@ -83,23 +83,6 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
   return true;
 }
 
-/// \brief Removes elements from the set s that satisfy predicate f.
-template <typename T, typename UnaryPredicate>
-void set_remove_if(std::set<T>& s, UnaryPredicate f)
-{
-  for (auto i = s.begin(); i != s.end();)
-  {
-    if (f(*i))
-    {
-      s.erase(i++);
-    }
-    else
-    {
-      ++i;
-    }
-  }
-}
-
 /// \brief Returns true if the domain sorts and the codomain sort of the given sort s are contained in sorts.
 /// \param s A sort expression
 /// \param sorts A set of sort expressions
@@ -107,16 +90,10 @@ void set_remove_if(std::set<T>& s, UnaryPredicate f)
 template <typename SortContainer>
 inline bool check_sort(const sort_expression& s, const SortContainer& sorts)
 {
-  struct local
-  {
-    static bool is_not_function_sort(const atermpp::aterm_appl& t)
-    {
-      return is_sort_expression(t) && !is_function_sort(t);
-    }
-  };
+  using utilities::detail::remove_if;
 
   std::set<sort_expression> s_sorts = data::find_sort_expressions(s);
-  set_remove_if(s_sorts, std::bind(&local::is_not_function_sort, std::placeholders::_1));
+  remove_if(s_sorts, [](const atermpp::aterm_appl& t) { return is_sort_expression(t) && !is_function_sort(t); });
   for (const sort_expression& sort: s_sorts)
   {
     if (std::find(sorts.begin(), sorts.end(), sort) == sorts.end())
