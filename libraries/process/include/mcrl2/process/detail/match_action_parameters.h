@@ -45,7 +45,7 @@ std::tuple<bool, data::data_expression_vector, std::string> match_action_paramet
       return std::make_tuple(false, data::data_expression_vector(), std::string(e.what()));
     }
   }
-  return std::make_tuple(true, result, "");
+  return std::make_tuple(true, result, std::string(""));
 }
 
 inline
