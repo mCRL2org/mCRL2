@@ -118,12 +118,58 @@ struct find_equalities_expression
     map_union(inequalities, other.inequalities);
   }
 
+  bool non_empty_intersection(const data::variable_list& variables, const std::set<data::variable>& V) const
+  {
+    using utilities::detail::contains;
+    for (const data::variable& v: variables)
+    {
+      if (contains(V, v))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool must_delete(const data::variable_list& variables, const data::variable& lhs, std::set<data::data_expression>& rhs)
+  {
+    using utilities::detail::contains;
+    using utilities::detail::remove_if;
+    if (contains(variables, lhs))
+    {
+      return true;
+    }
+    remove_if(rhs, [&](const data::data_expression& x) { return non_empty_intersection(variables, data::find_free_variables(x)); });
+    if (rhs.empty())
+    {
+      return true;
+    }
+    return false;
+  }
+
   void delete_(const data::variable_list& variables)
   {
-    for (const variable& v: variables)
+    for (auto i = equalities.begin(); i != equalities.end(); )
     {
-      equalities.erase(v);
-      inequalities.erase(v);
+      if (must_delete(variables, i->first, i->second))
+      {
+        equalities.erase(i++);
+      }
+      else
+      {
+        ++i;
+      }
+    }
+    for (auto i = inequalities.begin(); i != inequalities.end(); )
+    {
+      if (must_delete(variables, i->first, i->second))
+      {
+        inequalities.erase(i++);
+      }
+      else
+      {
+        ++i;
+      }
     }
   }
 
