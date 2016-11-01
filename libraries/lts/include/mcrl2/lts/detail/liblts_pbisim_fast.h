@@ -164,6 +164,10 @@ namespace mcrl2
           state_key_type key;
           block_key_type block_key;
           std::vector<transition_key_type> incomming_transitions;
+          size_t mark_state;
+
+          probability_label_type commulative_probability; 
+          size_t residual_transition_cnt;
         };
 
         struct mark_type
@@ -173,6 +177,7 @@ namespace mcrl2
           std::vector< std::list<state_type> > middle;
           std::list<state_type> right;
           std::list<state_type>* large_block_ptr;
+          std::vector<state_key_type> left_temp; //temporal
         };
 
         struct action_transition_type
@@ -200,6 +205,7 @@ namespace mcrl2
           std::vector< std::list <action_transition_type> > incomming_action_transitions;  // a probabilistic block has incomming action transitions ordered by label
           std::vector<label_type> incomming_labels;
           mark_type mark;
+          probability_label_type max_commulative_probability;
         };
 
         struct action_block_type
@@ -738,15 +744,7 @@ namespace mcrl2
 
         void mark_probabilistic(action_block_type& Bc, std::vector<block_key_type>& marked_blocks)
         {
-          std::vector< std::vector<state_type> > left_temp;
-          std::vector<probability_label_type> commulative_probability;
-          std::vector<probability_label_type> max_commulative_probability;
-          std::vector<size_t> marked_states;
-          commulative_probability.resize(probabilistic_states_iter.size());
-          marked_states.resize(probabilistic_states_iter.size());
-          max_commulative_probability.resize(probabilistic_blocks_iter.size());
-          left_temp.resize(probabilistic_blocks_iter.size());
-          
+          std::vector<state_key_type> marked_states;
          
           // for all incomming probabilistic transitions of block BC calculate left, middle and right
           for (probabilistic_transition_type& pt : Bc.incomming_probabilistic_transitions)
@@ -761,25 +759,26 @@ namespace mcrl2
               marked_blocks.push_back(B.key);
               B.mark.right.swap(B.states);
               B.mark.large_block_ptr = &B.mark.right;
-              max_commulative_probability[B.key] = p;
+              B.max_commulative_probability = p;
             }
             // if u is not yet in left, then init commulative probability and move u from right to left
-            if (marked_states[u.key] == 0)
+            if (u.mark_state == 0)
             {
-              marked_states[u.key] = 1;
-              commulative_probability[u.key] = p;
+              u.mark_state = 1;
+              marked_states.push_back(u.key);
+              u.commulative_probability = p;
 
               B.mark.left.splice(B.mark.left.begin(), B.mark.right, probabilistic_states_iter[u.key]);
-              left_temp[B.key].push_back(u);
+              B.mark.left_temp.push_back(u.key);
             }
             else {
               // u was already added to left, then just add its commulative probability
-              commulative_probability[u.key] = commulative_probability[u.key] + p;
+              u.commulative_probability = u.commulative_probability + p;
             }
 
-            if (max_commulative_probability[B.key] < commulative_probability[u.key])
+            if (B.max_commulative_probability < u.commulative_probability)
             {
-              max_commulative_probability[B.key] = commulative_probability[u.key];
+              B.max_commulative_probability = u.commulative_probability;
             }
           }
 
@@ -788,18 +787,19 @@ namespace mcrl2
           {
             probabilistic_block_type& B = *probabilistic_blocks_iter[B_key];
             std::unordered_map<probability_label_type, std::list<state_type> >  grouped_probabilities_in_block;
-            for (state_type& u : left_temp[B_key])
+            for (state_key_type& u_key : B.mark.left_temp)
             {
-              if (commulative_probability[u.key] < max_commulative_probability[B.key])
+              state_type& u = *probabilistic_states_iter[u_key];
+              if (u.commulative_probability < B.max_commulative_probability)
               {
                 // group u by its probability and erase from left set
-                grouped_probabilities_in_block[commulative_probability[u.key]].splice(
-                                                             grouped_probabilities_in_block[commulative_probability[u.key]].begin(),
-                                                             B.mark.left, probabilistic_states_iter[u.key]);
+                grouped_probabilities_in_block[u.commulative_probability].splice(
+                                                             grouped_probabilities_in_block[u.commulative_probability].begin(),
+                                                             B.mark.left, probabilistic_states_iter[u_key]);
               }
             }
 
-            // construct the middle set based on the gropued probabilities
+            // construct the middle set based on the grouped probabilities
             B.mark.middle.resize(grouped_probabilities_in_block.size());
             size_t middle_key = 0;
             for (typename std::unordered_map<probability_label_type, std::list<state_type> >::iterator i = grouped_probabilities_in_block.begin();
@@ -824,16 +824,27 @@ namespace mcrl2
             }
           }
 
+          //clean temporal variables of all marked blocks
+          for (block_key_type B_key : marked_blocks)
+          {
+            probabilistic_block_type& B = *probabilistic_blocks_iter[B_key];
+            B.mark.left_temp.erase(B.mark.left_temp.begin(), B.mark.left_temp.end());
+            B.max_commulative_probability = probability_label_type().zero();
+          }
+
+          //clean temporal variable of states marked
+          for (state_key_type u_key : marked_states)
+          {
+            state_type& u = *probabilistic_states_iter[u_key];
+            u.commulative_probability = probability_label_type().zero();
+            u.mark_state = 0;
+          }
+
         }
 
         void mark_action(probabilistic_block_type& Bc, std::vector<block_key_type>& marked_blocks, label_type a)
         {
-          std::vector< std::vector<state_type> > left_temp;
-          std::vector<size_t> residual_transition_cnt;
-          std::vector<size_t> marked_states;
-          marked_states.resize(action_states_iter.size());
-          residual_transition_cnt.resize(action_states_iter.size());
-          left_temp.resize(action_blocks_iter.size());
+          std::vector<state_key_type> marked_states;
 
           // for all incomming a transitions of block Bc calculate left, middle and right
           for (action_transition_type& at : Bc.incomming_action_transitions[a])
@@ -850,15 +861,16 @@ namespace mcrl2
             }
 
             // if u is not yet in left, then init commulative probability and move u from right to left
-            if (marked_states[u.key] == 0)
+            if (u.mark_state == 0)
             {
-              marked_states[u.key] = 1;
-              residual_transition_cnt[u.key] = at.block_to_constellation_count;
+              u.mark_state = 1;
+              marked_states.push_back(u.key);
+              u.residual_transition_cnt = at.block_to_constellation_count;
               B.mark.left.splice(B.mark.left.begin(), B.mark.right, action_states_iter[u.key]);
-              left_temp[B.key].push_back(u);
+              B.mark.left_temp.push_back(u.key);
             }
 
-            residual_transition_cnt[u.key]--;
+            u.residual_transition_cnt--;
           }
 
           // Group all states which its residual_transition_cnt is not zero to form the middle set
@@ -867,16 +879,17 @@ namespace mcrl2
             action_block_type& B = *action_blocks_iter[B_key];
 
             // iterate over all states of B.mark.left
-            for (state_type& u : left_temp[B_key])
+            for (state_key_type& u_key : B.mark.left_temp)
             {
-              if (residual_transition_cnt[u.key] > 0)
+              state_type& u = *action_states_iter[u_key];
+              if (u.residual_transition_cnt > 0)
               {
                 if (B.mark.middle.size() == 0) 
                 {
                   B.mark.middle.resize(1);
                 }
                 // the residual count is not zero, then move to middle_set
-                B.mark.middle[0].splice(B.mark.middle[0].begin(), B.mark.left, action_states_iter[u.key]);
+                B.mark.middle[0].splice(B.mark.middle[0].begin(), B.mark.left, action_states_iter[u_key]);
               }
             }
 
@@ -895,6 +908,20 @@ namespace mcrl2
             }
           }
 
+          //clean left_t of all marked blocks
+          for (block_key_type B_key : marked_blocks)
+          {
+            action_block_type& B = *action_blocks_iter[B_key];
+            B.mark.left_temp.erase(B.mark.left_temp.begin(), B.mark.left_temp.end());
+          }
+
+          //clean temporal variable of states marked
+          for (state_key_type u_key : marked_states)
+          {
+            state_type& u = *action_states_iter[u_key];
+            u.mark_state = 0;
+            u.residual_transition_cnt = 0;
+          }
         }
 
         action_block_type* choose_action_splitter(constellation_key_type constellation_key)
@@ -986,7 +1013,6 @@ namespace mcrl2
 
           return new_prob_state;
         }
-
 
         lts_aut_base::probabilistic_state calculate_equivalent_probabilistic_state(probabilistic_block_type& pb)
         {
