@@ -166,7 +166,7 @@ namespace mcrl2
           std::vector<transition_key_type> incomming_transitions;
           size_t mark_state;
 
-          probability_label_type commulative_probability; 
+          probability_label_type comulative_probability; 
           size_t residual_transition_cnt;
         };
 
@@ -178,6 +178,7 @@ namespace mcrl2
           std::list<state_type> right;
           std::list<state_type>* large_block_ptr;
           std::vector<state_key_type> left_temp; //temporal
+          std::vector<state_key_type> middle_temp; //temporal
         };
 
         struct action_transition_type
@@ -205,7 +206,9 @@ namespace mcrl2
           std::vector< std::list <action_transition_type> > incomming_action_transitions;  // a probabilistic block has incomming action transitions ordered by label
           std::vector<label_type> incomming_labels;
           mark_type mark;
-          probability_label_type max_commulative_probability;
+          probability_label_type max_comulative_probability;
+          probability_label_type bigger_middle_probability;
+          probability_label_type smaller_middle_probability;
         };
 
         struct action_block_type
@@ -759,54 +762,126 @@ namespace mcrl2
               marked_blocks.push_back(B.key);
               B.mark.right.swap(B.states);
               B.mark.large_block_ptr = &B.mark.right;
-              B.max_commulative_probability = p;
+              B.max_comulative_probability = p;
             }
-            // if u is not yet in left, then init commulative probability and move u from right to left
+            // if u is not yet in left, then init comulative probability and move u from right to left
             if (u.mark_state == 0)
             {
               u.mark_state = 1;
               marked_states.push_back(u.key);
-              u.commulative_probability = p;
+              u.comulative_probability = p;
 
               B.mark.left.splice(B.mark.left.begin(), B.mark.right, probabilistic_states_iter[u.key]);
               B.mark.left_temp.push_back(u.key);
             }
             else {
-              // u was already added to left, then just add its commulative probability
-              u.commulative_probability = u.commulative_probability + p;
+              // u was already added to left, then just add its comulative probability
+              u.comulative_probability = u.comulative_probability + p;
             }
 
-            if (B.max_commulative_probability < u.commulative_probability)
+            if (B.max_comulative_probability < u.comulative_probability)
             {
-              B.max_commulative_probability = u.commulative_probability;
+              B.max_comulative_probability = u.comulative_probability;
             }
+
           }
 
-          // Group all states with the same commulative probability to construct the middle set
+          // Group all states with the same comulative probability to construct the middle set
           for (block_key_type B_key : marked_blocks)
           {
             probabilistic_block_type& B = *probabilistic_blocks_iter[B_key];
-            std::unordered_map<probability_label_type, std::list<state_type> >  grouped_probabilities_in_block;
+            //std::unordered_map<probability_label_type, std::list<state_type> >  grouped_probabilities_in_block;
+            std::vector< std::pair<probability_label_type, state_key_type> > grouped_states_per_probability_in_block;
+
+            // First, add all states lower than max_comulative_probability to middle_temp
             for (state_key_type& u_key : B.mark.left_temp)
             {
               state_type& u = *probabilistic_states_iter[u_key];
-              if (u.commulative_probability < B.max_commulative_probability)
+              if (u.comulative_probability < B.max_comulative_probability)
               {
-                // group u by its probability and erase from left set
-                grouped_probabilities_in_block[u.commulative_probability].splice(
-                                                             grouped_probabilities_in_block[u.commulative_probability].begin(),
-                                                             B.mark.left, probabilistic_states_iter[u_key]);
+                B.mark.middle_temp.push_back(u_key);
               }
             }
 
-            // construct the middle set based on the grouped probabilities
-            B.mark.middle.resize(grouped_probabilities_in_block.size());
-            size_t middle_key = 0;
-            for (typename std::unordered_map<probability_label_type, std::list<state_type> >::iterator i = grouped_probabilities_in_block.begin();
-                    i != grouped_probabilities_in_block.end(); i++)
+            if (B.mark.middle_temp.size() > 0)
             {
-              B.mark.middle[middle_key].swap(i->second);
-              middle_key++;
+              // For all states in middle_temp determine the bigger and smaller proability
+              B.smaller_middle_probability = probability_label_type().one();
+              B.bigger_middle_probability = probability_label_type().zero();
+              for (state_key_type& u_key : B.mark.middle_temp)
+              {
+                state_type& u = *probabilistic_states_iter[u_key];
+                if (B.smaller_middle_probability > u.comulative_probability)
+                {
+                  B.smaller_middle_probability = u.comulative_probability;
+                }
+                if (B.bigger_middle_probability < u.comulative_probability)
+                {
+                  B.bigger_middle_probability = u.comulative_probability;
+                }
+              }
+
+              if (B.bigger_middle_probability == B.smaller_middle_probability)
+              {
+                // if bigger and smaller probability are equal, then  there is just one set in middle
+                B.mark.middle.resize(1);
+
+                //add all the states of middle_temp to middle
+                for (state_key_type& u_key : B.mark.middle_temp)
+                {
+                  state_type& u = *probabilistic_states_iter[u_key];
+                  std::list<state_type>& middle_back = B.mark.middle.back();
+                  middle_back.splice(middle_back.begin(), B.mark.left, probabilistic_states_iter[u.key]);
+                }
+              }
+              else
+              {
+                // if  bigger and smaller probability are not equal, then add them in different sets
+                // of middle and sort the remaining probabilities in between
+                B.mark.middle.resize(2);
+                std::list<state_type>& middle_big = B.mark.middle[0];
+                std::list<state_type>& middle_small = B.mark.middle[1];
+
+                //add all the states of middle_temp to middle
+                for (state_key_type& u_key : B.mark.middle_temp)
+                {
+                  state_type& u = *probabilistic_states_iter[u_key];
+                  if (u.comulative_probability == B.bigger_middle_probability)
+                  {
+                    middle_big.splice(middle_big.begin(), B.mark.left, probabilistic_states_iter[u.key]);
+                  }
+                  else if (u.comulative_probability == B.smaller_middle_probability)
+                  {
+                    middle_small.splice(middle_small.begin(), B.mark.left, probabilistic_states_iter[u.key]);
+                  }
+                  else
+                  {
+                    std::pair<probability_label_type, state_key_type> comulative_prob_state_pair;
+                    comulative_prob_state_pair.first = u.comulative_probability;
+                    comulative_prob_state_pair.second = u.key;
+                    grouped_states_per_probability_in_block.push_back(comulative_prob_state_pair);
+                  }
+                }
+
+                // sort the probabilities of middle, not including the biggest and smallest probability
+                std::sort(grouped_states_per_probability_in_block.begin(), grouped_states_per_probability_in_block.end());
+
+                // construct the rest of the middle set based on the grouped probabilities
+                probability_label_type current_probability = probability_label_type().zero();
+                for (std::pair<probability_label_type, state_key_type>& comulative_prob_state_pair : grouped_states_per_probability_in_block)
+                {
+                  if (current_probability != comulative_prob_state_pair.first)
+                  {
+                    current_probability = comulative_prob_state_pair.first;
+                    B.mark.middle.resize(B.mark.middle.size() + 1);
+                  }
+                  std::list<state_type>& middle_temp = B.mark.middle.back();
+
+                  middle_temp.splice(middle_temp.begin(), B.mark.left, probabilistic_states_iter[comulative_prob_state_pair.second]);
+                }
+
+              }
+
             }
 
             // find the large set
@@ -829,14 +904,15 @@ namespace mcrl2
           {
             probabilistic_block_type& B = *probabilistic_blocks_iter[B_key];
             B.mark.left_temp.erase(B.mark.left_temp.begin(), B.mark.left_temp.end());
-            B.max_commulative_probability = probability_label_type().zero();
+            B.mark.middle_temp.erase(B.mark.middle_temp.begin(), B.mark.middle_temp.end());
+            B.max_comulative_probability = probability_label_type().zero();
           }
 
           //clean temporal variable of states marked
           for (state_key_type u_key : marked_states)
           {
             state_type& u = *probabilistic_states_iter[u_key];
-            u.commulative_probability = probability_label_type().zero();
+            u.comulative_probability = probability_label_type().zero();
             u.mark_state = 0;
           }
 
@@ -860,7 +936,7 @@ namespace mcrl2
               B.mark.large_block_ptr = &B.mark.right;
             }
 
-            // if u is not yet in left, then init commulative probability and move u from right to left
+            // if u is not yet in left, then init comulative probability and move u from right to left
             if (u.mark_state == 0)
             {
               u.mark_state = 1;
