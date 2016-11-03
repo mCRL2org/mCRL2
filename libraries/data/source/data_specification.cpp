@@ -343,7 +343,7 @@ void sort_specification::reconstruct_m_normalised_aliases() const
     {
       check_for_alias_loop(a.name(),sorts_already_seen,true);
     }
-    catch (mcrl2::runtime_error &e)
+    catch (mcrl2::runtime_error &)
     {
       mCRL2log(log::debug) << "Encountered an alias loop in the alias for " << a.name() <<". The normalised aliases are not constructed\n"; 
       return;

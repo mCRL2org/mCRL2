@@ -151,7 +151,8 @@ class big_natural_number
       return result;
     }
 
-    void divide_by2()
+    /* Divide the current number by 2 */
+    /* void divide_by_two()
     {
       size_t carry=0;
       for(std::vector<size_t>::reverse_iterator i=m_number.rbegin(); i!=m_number.rend(); ++i)
@@ -166,7 +167,7 @@ class big_natural_number
       }
       remove_significant_digits_that_are_zero();
       is_well_defined();
-    }
+    } */
 
     // Remove zero's at the end of m_number vector that are
     // leading and irrelevant zero's in the number representation.
@@ -222,10 +223,9 @@ class big_natural_number
         {
           throw mcrl2::runtime_error("Number " + s + " contains symbol '" + c + "' which is not a digit.");
         }
-        *this=(*this)*big_natural_number(10);
-        if (c>'0')
+        if (c>='0')
         {
-          (*this)=(*this)+big_natural_number(c-'0');
+          multiply_by(10,size_t(c-'0'));
         }
       }
       is_well_defined();
@@ -276,7 +276,6 @@ class big_natural_number
     */
     bool operator<(const big_natural_number& other) const
     {
-
       is_well_defined();
       other.is_well_defined(); 
       if (m_number.size()<other.m_number.size())
@@ -326,6 +325,93 @@ class big_natural_number
       return other.operator<=(*this);
     }
 
+    /* Divide the current number by n. If there is a remainder return it. */
+    size_t divide_by(size_t n)
+    {
+      static_assert(2*std::numeric_limits<size_t>::digits==std::numeric_limits<__uint128_t>::digits,
+                       "An unsigned long int must have twice the size of a size_t");
+      size_t remainder=0;
+      for(std::vector<size_t>::reverse_iterator i=m_number.rbegin(); i!=m_number.rend(); ++i)
+      {
+        __uint128_t large_number= *i + (__uint128_t(remainder) << std::numeric_limits<size_t>::digits);
+        remainder = large_number % n;
+        *i = large_number / n;
+      }
+      remove_significant_digits_that_are_zero();
+      is_well_defined();
+      return remainder;
+    }
+
+    /* Multiply the current number by 2 and add the carry */
+    /* void multiply_by_two(size_t carry)
+    {
+      for(size_t& i: m_number)
+      {
+        size_t new_carry=i >> (std::numeric_limits<size_t>::digits-1);
+        i = (i << 1) + carry;  / * (i=i*2 + carry); * /
+        carry=new_carry;
+      }
+      if (carry)
+      {
+        / * Add an extra digit with the carry * /
+        m_number.push_back(1);
+      }
+      is_well_defined();
+    } */
+
+    /* Multiply the current number by n and add the carry */
+    void multiply_by(size_t n, size_t carry)
+    {
+      static_assert(2*std::numeric_limits<size_t>::digits==std::numeric_limits<__uint128_t>::digits,
+                       "An unsigned long int must have twice the size of a size_t");
+      for(size_t& i: m_number)
+      {
+        __uint128_t large_number= __uint128_t(i) * __uint128_t(n) + __uint128_t(carry);
+
+        carry = large_number % n;
+        i = size_t(large_number);
+        carry = size_t(large_number >> std::numeric_limits<size_t>::digits);
+      }
+      if (carry)
+      {
+        /* Add an extra digit with the carry */
+        m_number.push_back(carry);
+      }
+      is_well_defined();
+    }
+
+    // Add the argument to this big natural number 
+    void add(const big_natural_number& other)
+    {
+      is_well_defined();
+      other.is_well_defined();
+
+      // big_natural_number result;
+      // result.m_number.reserve((std::max)(m_number.size(),other.m_number.size()));
+      size_t carry=0;
+      for(size_t i=0; i < (std::max)(m_number.size(),other.m_number.size()); ++i)
+      {
+        if (i>=m_number.size())
+        {
+          m_number.push_back(detail::add_single_number(0,other.m_number[i],carry));
+        }
+        else if (i>=other.m_number.size())
+        {
+          m_number[i]=detail::add_single_number(m_number[i],0,carry);
+        }
+        else
+        {
+          m_number[i]=detail::add_single_number(m_number[i],other.m_number[i],carry);
+        }
+      }
+      if (carry>0)
+      {
+        m_number.push_back(carry);
+      }
+      is_well_defined();
+    }
+
+
     /* \brief Standard addition operator.
      */
     big_natural_number operator+(const big_natural_number& other) const
@@ -333,8 +419,11 @@ class big_natural_number
       is_well_defined();
       other.is_well_defined();
 
-      big_natural_number result;
-      result.m_number.reserve((std::max)(m_number.size(),other.m_number.size()));
+      big_natural_number result=*this;
+      result.add(other);
+      return result;
+      
+      /* result.m_number.reserve((std::max)(m_number.size(),other.m_number.size()));
       size_t carry=0;
       for(size_t i=0; i < (std::max)(m_number.size(),other.m_number.size()); ++i)
       {
@@ -356,13 +445,14 @@ class big_natural_number
         result.m_number.push_back(carry);
       }
       result.is_well_defined();
-      return result;
+      return result; */
     }
 
-    /* \brief Standard subtraction operator. Throws an exception if the result
-     *        is negative and cannot be represented.
-     */
-    big_natural_number operator-(const big_natural_number& other) const
+    /* \brief Standard subtraction. 
+       \detail Subtract other from this number. Throws an exception if 
+               the result is negative and cannot be represented. 
+    */
+    void subtract(const big_natural_number& other)
     {
       is_well_defined();
       other.is_well_defined();
@@ -373,7 +463,45 @@ class big_natural_number
       {
         throw mcrl2::runtime_error("Subtracting numbers " + pp(*this) + " and " + pp(other) + " yields a non representable negative result (1).");
       }
-      big_natural_number result;
+      // big_natural_number result;
+      // result.m_number.reserve(m_number.size());
+      size_t carry=0;
+      for(size_t i=0; i<m_number.size(); ++i)
+      {
+        if (i>=other.m_number.size())
+        {
+          m_number[i]=detail::subtract_single_number(m_number[i],0,carry);
+        }
+        else
+        {
+          m_number[i]=detail::subtract_single_number(m_number[i],other.m_number[i],carry);
+        }
+      }
+      if (carry>0)
+      {
+        throw mcrl2::runtime_error("Subtracting numbers " + pp(*this) + " and " + pp(other) + " yields a non representable negative result (2).");
+      }
+      remove_significant_digits_that_are_zero();
+      is_well_defined();
+    } 
+
+    /* \brief Standard subtraction operator. Throws an exception if the result
+     *        is negative and cannot be represented.
+     */
+    big_natural_number operator-(const big_natural_number& other) const
+    {
+      is_well_defined();
+      other.is_well_defined();
+      big_natural_number result=*this;
+      result.subtract(other);
+      return result;
+
+      /* assert(m_number.size()==0 || m_number.back()!=0);
+      assert(other.m_number.size()==0 || other.m_number.back()!=0);
+      if (m_number.size()<other.m_number.size())
+      {
+        throw mcrl2::runtime_error("Subtracting numbers " + pp(*this) + " and " + pp(other) + " yields a non representable negative result (1).");
+      }
       result.m_number.reserve(m_number.size());
       size_t carry=0;
       for(size_t i=0; i<m_number.size(); ++i)
@@ -393,8 +521,8 @@ class big_natural_number
       }
       result.remove_significant_digits_that_are_zero();
       result.is_well_defined();
-      return result;
-    } 
+      return result; */
+    }  
 
     /* \brief Standard multiplication operator.
      */
@@ -407,7 +535,7 @@ class big_natural_number
       size_t offset=0;  
       for(size_t digit: other.m_number)
       {
-        result=result+multiply_with_single_number(digit,offset);
+        result.add(multiply_with_single_number(digit,offset));
         offset++;
       }
       result.is_well_defined();
@@ -442,15 +570,15 @@ class big_natural_number
         if (remainder<divisor)
         {
           // We cannot subtract the divisor from the remainder.
-          result=result*big_natural_number(2); // TODO optimize.
+          result.multiply_by(2,0); // result=result*2
         }
         else
         {
           // We subtract the divisor from the remainder.
-          result=result*big_natural_number(2)+big_natural_number(1); // TODO optimize.
+          result.multiply_by(2,1); // result=result*2 + 1
           remainder=remainder-divisor;
         }
-        divisor.divide_by2(); // Shift the divisor one bit to the left.
+        divisor.divide_by(2); // Shift the divisor one bit to the left.
       }
       
       result.remove_significant_digits_that_are_zero();
@@ -487,7 +615,7 @@ class big_natural_number
           // We subtract the divisor from the remainder.
           remainder=remainder-divisor;
         }
-        divisor.divide_by2(); // Shift the divisor one bit to the left.
+        divisor.divide_by(2); // Shift the divisor one bit to the left.
       }
       
       remainder.is_well_defined();
@@ -499,12 +627,10 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
 {
   big_natural_number n=l;
   std::string s; // This string contains the number in reverse ordering.
-  const big_natural_number ten(10);
   for( ; !n.is_zero() ; )
   {
-    const big_natural_number m=n % ten; 
-    n=n/ten; 
-    s.push_back(static_cast<char>(static_cast<size_t>(m)+'0'));
+    size_t remainder = n.divide_by(10); /* This divides n by 10. */
+    s.push_back(static_cast<char>('0'+remainder));
   }
   if (s.empty())
   {
