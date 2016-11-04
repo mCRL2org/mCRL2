@@ -32,6 +32,7 @@ namespace utilities
 {
 namespace detail
 {
+
   // Calculate <carry,result>:=n1+n2+carry. The carry can be either 0 or 1, both
   // at the input and the output.
   inline size_t add_single_number(const size_t n1, const size_t n2, size_t& carry)
@@ -82,6 +83,7 @@ namespace detail
   // are stored in the result, and the higher bits are stored in carry.
   inline size_t multiply_single_number(const size_t n1, const size_t n2, size_t& multiplication_carry)
   {
+    // TODO: It is more concise and efficient to use 128bit machine calculation when available.
     const int no_of_bits_per_digit=std::numeric_limits<size_t>::digits;
 
     // split input numbers into no_of_bits_per_digit/2 digits
@@ -89,7 +91,6 @@ namespace detail
     size_t n1ms = n1 >> (no_of_bits_per_digit/2);
     size_t n2ls = n2 & ((1LL<<(no_of_bits_per_digit/2))-1);
     size_t n2ms = n2 >> (no_of_bits_per_digit/2);
-
     
     // First calculate the result of the least significant no_of_bits_per_digit.
     size_t local_carry=0;
@@ -104,17 +105,39 @@ namespace detail
 
     // Now calculate the result of the most significant no_of_bits_per_digit.
     multiplication_carry=cumulative_carry;
-    local_carry=0;
-    multiplication_carry=add_single_number(multiplication_carry,((n1ms*n2ls)>>(no_of_bits_per_digit/2)),local_carry);
-    assert(local_carry==0);
-    multiplication_carry=add_single_number(multiplication_carry,((n1ls*n2ms)>>(no_of_bits_per_digit/2)),local_carry);
-    assert(local_carry==0);
-    multiplication_carry=add_single_number(multiplication_carry,n1ms*n2ms,local_carry);
-    assert(local_carry==0);
+    multiplication_carry=multiplication_carry+((n1ms*n2ls)>>(no_of_bits_per_digit/2));
+    multiplication_carry=multiplication_carry+((n1ls*n2ms)>>(no_of_bits_per_digit/2));
+    multiplication_carry=multiplication_carry+n1ms*n2ms;
 
     return result;
   }
   
+  // Calculate <result,remainder>:=(remainder * 2^64 + p) / q assuming the result
+  // fits in 64 bits. More concretely, q>remainder. 
+  inline size_t divide_single_number(const size_t p, const size_t q, size_t& remainder)
+  {
+    assert(q>remainder);
+    const int no_of_bits_per_digit=std::numeric_limits<size_t>::digits;
+
+    // Split input numbers into no_of_bits_per_digit/2 digits.
+    // First get the least significant part.
+    size_t pms = (p >> (no_of_bits_per_digit/2)) + (remainder << (no_of_bits_per_digit/2));
+    
+    // First divide the most significant part by q.
+    size_t resultms = pms/q;
+    assert((resultms >> (no_of_bits_per_digit/2)) == 0);
+    size_t remainderms = pms%q;
+
+    // Now obtain the least significant part.
+    size_t pls = (p & ((1LL<<(no_of_bits_per_digit/2))-1)) + (remainderms << (no_of_bits_per_digit/2));
+    
+    // Second divide the least significant part by q.
+    size_t resultls = pls/q;
+    remainder = pls%q;
+    assert((resultls >> (no_of_bits_per_digit/2)) == 0);
+
+    return resultls + (resultms << (no_of_bits_per_digit/2));
+  }
 }
 
 class big_natural_number;
@@ -328,49 +351,22 @@ class big_natural_number
     /* Divide the current number by n. If there is a remainder return it. */
     size_t divide_by(size_t n)
     {
-      static_assert(2*std::numeric_limits<size_t>::digits==std::numeric_limits<__uint128_t>::digits,
-                       "An unsigned long int must have twice the size of a size_t");
       size_t remainder=0;
       for(std::vector<size_t>::reverse_iterator i=m_number.rbegin(); i!=m_number.rend(); ++i)
       {
-        __uint128_t large_number= *i + (__uint128_t(remainder) << std::numeric_limits<size_t>::digits);
-        remainder = large_number % n;
-        *i = large_number / n;
+        *i=detail::divide_single_number(*i,n,remainder);
       }
       remove_significant_digits_that_are_zero();
       is_well_defined();
       return remainder;
     }
 
-    /* Multiply the current number by 2 and add the carry */
-    /* void multiply_by_two(size_t carry)
-    {
-      for(size_t& i: m_number)
-      {
-        size_t new_carry=i >> (std::numeric_limits<size_t>::digits-1);
-        i = (i << 1) + carry;  / * (i=i*2 + carry); * /
-        carry=new_carry;
-      }
-      if (carry)
-      {
-        / * Add an extra digit with the carry * /
-        m_number.push_back(1);
-      }
-      is_well_defined();
-    } */
-
     /* Multiply the current number by n and add the carry */
     void multiply_by(size_t n, size_t carry)
     {
-      static_assert(2*std::numeric_limits<size_t>::digits==std::numeric_limits<__uint128_t>::digits,
-                       "An unsigned long int must have twice the size of a size_t");
       for(size_t& i: m_number)
       {
-        __uint128_t large_number= __uint128_t(i) * __uint128_t(n) + __uint128_t(carry);
-
-        carry = large_number % n;
-        i = size_t(large_number);
-        carry = size_t(large_number >> std::numeric_limits<size_t>::digits);
+        i=detail::multiply_single_number(i,n,carry);
       }
       if (carry)
       {
