@@ -93,7 +93,7 @@ inline bool check_sort(const sort_expression& s, const SortContainer& sorts)
   using utilities::detail::remove_if;
 
   std::set<sort_expression> s_sorts = data::find_sort_expressions(s);
-  remove_if(s_sorts, [](const atermpp::aterm_appl& t) { return is_sort_expression(t) && !is_function_sort(t); });
+  remove_if(s_sorts, [](const sort_expression& x) { return !is_function_sort(x); });
   for (const sort_expression& sort: s_sorts)
   {
     if (std::find(sorts.begin(), sorts.end(), sort) == sorts.end())

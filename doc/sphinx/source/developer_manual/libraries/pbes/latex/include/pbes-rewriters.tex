@@ -134,14 +134,14 @@ where
 \begin{array}{lll}
 p(\varphi ) & = & \mathsf{Q}_{1}^{\varphi }\cdots \mathsf{Q}_{n^{\varphi
 }}^{\varphi }.~h^{\varphi }\wedge \bigwedge\limits_{i\in I^{\varphi }}\left(
-g_{i}\implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)  \\ 
+g_{i}\implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right) \\ 
 p(\psi ) & = & \mathsf{Q}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi
 }.~h^{\psi }\wedge \bigwedge\limits_{i\in I^{\psi }}\left( g_{i}\implies
 \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right) ,%
 \end{array}%
 \end{equation*}%
 under the assumption that $I^{\varphi }$ and $I^{\psi }$ are disjoint, and $%
-v_{i}^{\varphi }\neq v_{j}^{\psi }$ for all $i,j$.\newpage 
+v_{i}^{\varphi }\neq v_{j}^{\psi }$ for all $i,j$.\newpage
 
 \subsection{OnePointRule Quantifier Elimination}
 
@@ -210,8 +210,8 @@ delete\left( x,\left( V,W\right) \right)  & = &
 \left( V_{1},W_{1}\right) \text{ where} \\ 
 \left\{ 
 \begin{array}{c}
-V_{1}=\left\{ d=e\in V\mid d\neq x\right\}  \\ 
-W_{1}=\left\{ d\neq e\in W\mid d\neq x\right\} 
+V_{1}=\left\{ d=e\in V\mid d\neq x\wedge x\notin FV(e)\right\}  \\ 
+W_{1}=\left\{ d\neq e\in W\mid d\neq x\wedge x\notin FV(e)\right\} 
 \end{array}%
 \right. 
 \end{array}%
@@ -224,29 +224,117 @@ We define the OnePointRule rewriter $R$ inductively as follows:
 
 \begin{equation*}
 \begin{array}{lll}
-R\left( \lnot \varphi \right)  & = & \lnot R\left( \varphi \right)  \\ 
-R\left( \varphi \wedge \psi \right)  & = & R\left( \varphi \right) \wedge
-R\left( \psi \right)  \\ 
-R\left( \varphi \vee \psi \right)  & = & R\left( \varphi \right) \vee
-R\left( \psi \right)  \\ 
-R\left( \varphi \Rightarrow \psi \right)  & = & R\left( \varphi \right)
-\Rightarrow R\left( \psi \right)  \\ 
-R\left( \forall x.\varphi \right)  & = & \left\{ 
+R\left( \lnot \varphi \right) & = & \lnot R\left( \varphi \right) \\ 
+R\left( \varphi \wedge \psi \right) & = & R\left( \varphi \right) \wedge
+R\left( \psi \right) \\ 
+R\left( \varphi \vee \psi \right) & = & R\left( \varphi \right) \vee R\left(
+\psi \right) \\ 
+R\left( \varphi \Rightarrow \psi \right) & = & R\left( \varphi \right)
+\Rightarrow R\left( \psi \right) \\ 
+R\left( \forall x.\varphi \right) & = & \left\{ 
 \begin{array}{cc}
-R\left( \varphi \right) \left[ x:=e\right]  & \text{if }x\neq e\in W\text{,
-where }\left( V,W\right) =Eq\left( \varphi \right)  \\ 
-\forall x.R\left( \varphi \right)  & \text{otherwise}%
+R\left( \varphi \right) \left[ x:=e\right] & \text{if }x\neq e\in W\text{,
+where }\left( V,W\right) =Eq\left( \varphi \right) \\ 
+\forall x.R\left( \varphi \right) & \text{otherwise}%
 \end{array}%
-\right.  \\ 
-R\left( \exists x.\varphi \right)  & = & \left\{ 
+\right. \\ 
+R\left( \exists x.\varphi \right) & = & \left\{ 
 \begin{array}{cc}
-R\left( \varphi \right) \left[ x:=e\right]  & \text{if }x=e\in V\text{,
-where }\left( V,W\right) =Eq\left( \varphi \right)  \\ 
-\exists x.R\left( \varphi \right)  & \text{otherwise}%
+R\left( \varphi \right) \left[ x:=e\right] & \text{if }x=e\in V\text{, where 
+}\left( V,W\right) =Eq\left( \varphi \right) \\ 
+\exists x.R\left( \varphi \right) & \text{otherwise}%
 \end{array}%
-\right.  \\ 
-R\left( \varphi \right)  & = & \varphi \text{ otherwise}%
+\right. \\ 
+R\left( \varphi \right) & = & \varphi \text{ otherwise}%
 \end{array}%
 \end{equation*}
 
-\newpage 
+\newpage
+
+\subsection{Quantifier Expansion}
+
+\subsubsection{Conjunctions / disjunctions}
+
+The function $CD$ computes a sequence of conjunctions and disjunctions for
+an expression $\varphi $, such that the following holds:%
+\begin{eqnarray*}
+CD\left( \varphi \right) &=&\left( \left[ \varphi _{1},\cdots ,\varphi _{n}%
+\right] ,W\right) \Rightarrow \varphi =\bigwedge\limits_{i=1}^{n}\varphi _{i}
+\\
+CD\left( \varphi \right) &=&\left( V,\left[ \varphi _{1},\cdots ,\varphi _{n}%
+\right] \right) \Rightarrow \varphi =\bigvee\limits_{i=1}^{n}\varphi _{i}.
+\end{eqnarray*}
+
+The function $S$ is inductively defined as follows:
+
+\begin{equation*}
+\begin{array}{lll}
+CD\left( \lnot \varphi \right) & = & negate\left( CD\left( \varphi \right)
+\right) \\ 
+CD\left( \varphi \wedge \psi \right) & = & \left( conjunctions\left(
+CD\left( \varphi \right) \right) \concat conjunctions\left( CD\left( \psi
+\right) \right) ,\emptyset \right) \\ 
+CD\left( \varphi \vee \psi \right) & = & \left( \emptyset
+,disjunctions\left( CD\left( \varphi \right) \right) \concat %
+disjunctions\left( CD\left( \psi \right) \right) \right) \\ 
+CD\left( \varphi \Rightarrow \psi \right) & = & \left( \emptyset
+,disjunctions\left( negate(CD\left( \varphi \right) )\right) \concat %
+disjunctions\left( CD\left( \psi \right) \right) \right) \\ 
+CD\left( \varphi \right) & = & \left( \varphi ,\varphi \right) \text{
+otherwise}%
+\end{array}%
+\end{equation*}%
+with%
+\begin{equation*}
+\begin{array}{lll}
+negate\left( \left( \left[ \varphi _{1},\cdots ,\varphi _{m}\right] ,\left[
+\psi _{1},\cdots ,\psi _{n}\right] \right) \right) & = & \left( \left[ \lnot
+\psi _{1},\cdots ,\lnot \psi _{n}\right] ,\left[ \lnot \varphi _{1},\cdots
+,\lnot \varphi _{m}\right] \right) \\ 
+conjunctions\left( \left( V,W\right) \right) & = & \left\{ 
+\begin{array}{ll}
+V & \text{if }V\neq \emptyset \\ 
+\bigvee\limits_{w\in W}w & \text{otherwise}%
+\end{array}%
+\right. \\ 
+disjunctions\left( \left( V,W\right) \right) & = & \left\{ 
+\begin{array}{ll}
+W & \text{if }W\neq \emptyset \\ 
+\bigwedge\limits_{v\in V}v & \text{otherwise}%
+\end{array}%
+\right.%
+\end{array}%
+\end{equation*}
+
+\subsubsection{QuantifierExpand rewriter}
+
+We define the OnePointRule rewriter $R$ inductively as follows:
+
+\begin{equation*}
+\begin{array}{lll}
+R\left( \lnot \varphi \right) & = & \lnot R\left( \varphi \right) \\ 
+R\left( \varphi \wedge \psi \right) & = & R\left( \varphi \right) \wedge
+R\left( \psi \right) \\ 
+R\left( \varphi \vee \psi \right) & = & R\left( \varphi \right) \vee R\left(
+\psi \right) \\ 
+R\left( \varphi \Rightarrow \psi \right) & = & R\left( \varphi \right)
+\Rightarrow R\left( \psi \right) \\ 
+R\left( \forall x.\varphi \right) & = & \left\{ 
+\begin{array}{cc}
+R\left( \varphi \right) \left[ x:=e\right] & \text{if }x\neq e\in W\text{,
+where }\left( V,W\right) =Eq\left( \varphi \right) \\ 
+\forall x.R\left( \varphi \right) & \text{otherwise}%
+\end{array}%
+\right. \\ 
+R\left( \exists x.\varphi \right) & = & \left\{ 
+\begin{array}{cc}
+R\left( \varphi \right) \left[ x:=e\right] & \text{if }x=e\in V\text{, where 
+}\left( V,W\right) =Eq\left( \varphi \right) \\ 
+\exists x.R\left( \varphi \right) & \text{otherwise}%
+\end{array}%
+\right. \\ 
+R\left( \varphi \right) & = & \varphi \text{ otherwise}%
+\end{array}%
+\end{equation*}
+
+\newpage

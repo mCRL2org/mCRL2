@@ -149,28 +149,9 @@ struct find_equalities_expression
 
   void delete_(const data::variable_list& variables)
   {
-    for (auto i = equalities.begin(); i != equalities.end(); )
-    {
-      if (must_delete(variables, i->first, i->second))
-      {
-        equalities.erase(i++);
-      }
-      else
-      {
-        ++i;
-      }
-    }
-    for (auto i = inequalities.begin(); i != inequalities.end(); )
-    {
-      if (must_delete(variables, i->first, i->second))
-      {
-        inequalities.erase(i++);
-      }
-      else
-      {
-        ++i;
-      }
-    }
+    using utilities::detail::remove_if;
+    remove_if(equalities,   [&](std::pair<const variable, std::set<data_expression> >& p) { return must_delete(variables, p.first, p.second); });
+    remove_if(inequalities, [&](std::pair<const variable, std::set<data_expression> >& p) { return must_delete(variables, p.first, p.second); });
   }
 
   // for each entry b = b', b' = b is added too
