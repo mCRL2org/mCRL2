@@ -365,8 +365,8 @@ bool lps2lts_algorithm::generate_lts()
     // the seed of a previous run and not get the same results, we wait until time gets
     // a fresh value. It is better to replace this by c++11 random generators, as this
     // is an awkward solution.
-    unsigned t=time(nullptr);
-    for( ; t==time(nullptr) ; ); // Wait until time changes.
+    for(time_t t = time(nullptr); time(nullptr) == t; )
+      ; // Wait until time changes.
     srand((unsigned)time(nullptr));
 
     generate_lts_random(m_initial_states);
