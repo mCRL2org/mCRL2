@@ -67,7 +67,7 @@ class t_tool_options
     void set_target(std::string const& filename)
     {
       outfilename = filename;
-	 
+   
       if (outtype == lts_none)
       {
         mCRL2log(verbose) << "Trying to detect output format by extension..." << std::endl;
@@ -88,7 +88,7 @@ class t_tool_options
           }
         }
       }  
-	}
+  }
 
 };
 
@@ -130,7 +130,7 @@ class ltsconvert_tool : public input_output_tool
 
       if (tool_options.check_reach)
       {
-		// The reachibility check algorithm has to be adjusted for probabilistci transition systems
+    // The reachibility check algorithm has to be adjusted for probabilistci transition systems
         //reachability_check(l, true); // Remove unreachable states from the input transition system.
       }
 
@@ -139,25 +139,25 @@ class ltsconvert_tool : public input_output_tool
         mCRL2log(verbose) << "reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
         mCRL2log(verbose) << "before reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions " << std::endl;
 
-		switch (tool_options.equivalence)
-		{
-		  case lts_probabilistic_eq_pbisim:
-		  {
-			  mcrl2::lts::detail::probabilistic_bisimulation_reduce(l);
-			  break;
-		  }
-		  case lts_probabilistic_eq_pbisim_fast:
-		  {
+    switch (tool_options.equivalence)
+    {
+      case lts_probabilistic_eq_pbisim:
+      {
+        mcrl2::lts::detail::probabilistic_bisimulation_reduce(l);
+        break;
+      }
+      case lts_probabilistic_eq_pbisim_fast:
+      {
         mcrl2::lts::detail::probabilistic_bisimulation_reduce_fast(l);
-			  break;
-		  }
-		  default:
-			break;
-		}
+        break;
+      }
+      default:
+      break;
+    }
 
         mCRL2log(verbose) << "after reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
       }
-	  /*
+    /*
       if (tool_options.determinise)
       {
         mCRL2log(verbose) << "determinising LTS..." << std::endl;
@@ -165,7 +165,7 @@ class ltsconvert_tool : public input_output_tool
         determinise(l);
         mCRL2log(verbose) << "after determinisation: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
       }
-	  */	 
+    */   
       mcrl2::lps::specification spec;
 
       if (!tool_options.lpsfile.empty())
@@ -178,17 +178,35 @@ class ltsconvert_tool : public input_output_tool
       switch (tool_options.outtype)
       {
         case lts_none:
+        {
           mCRL2log(warning) << "Cannot determine type of output. Assuming .aut.\n";
+        }
         case lts_aut:
         {
-		  LTS_TYPE l_out;
+          LTS_TYPE l_out;
           lts_convert(l,l_out,spec.data(),spec.action_labels(),spec.process().process_parameters(),!tool_options.lpsfile.empty());
           l_out.save(tool_options.outfilename);
           return true;
         }
+        case lts_lts:
+        {
+          mCRL2log(warning) << "Conversion on an .lts file has not yet been implemented.";
+          break;
+        }
+        case lts_fsm:
+        {
+          mCRL2log(warning) << "Conversion on an .fsm file has not yet been implemented.";
+          break;
+        }
+        case lts_dot:
+        {
+          mCRL2log(warning) << "Conversion on an .dot file has not yet been implemented.";
+          break;
+        }
+
       }
    
-	  return true;
+    return true;
     }
 
 
@@ -207,6 +225,22 @@ class ltsconvert_tool : public input_output_tool
         {
           return load_convert_and_save<probabilistic_lts_aut_t>();
         }
+        case lts_lts:
+        {
+          mCRL2log(warning) << "Conversion on an .lts file has not yet been implemented.";
+          break;
+        }
+        case lts_fsm:
+        {
+          mCRL2log(warning) << "Conversion on an .fsm file has not yet been implemented.";
+          break;
+        }
+        case lts_dot:
+        {
+          mCRL2log(warning) << "Conversion on an .dot file has not yet been implemented.";
+          break;
+        }
+
       }
       return true;
     }
@@ -215,127 +249,127 @@ class ltsconvert_tool : public input_output_tool
     void add_options(interface_description& desc)
     {
       input_output_tool::add_options(desc);
-	  
+    
       desc.add_option("equivalence",make_enum_argument<lts_probabilistic_equivalence>("NAME")
                       .add_value(lts_probabilistic_eq_none, true)
                       .add_value(lts_probabilistic_eq_pbisim)
-	                    .add_value(lts_probabilistic_eq_pbisim_fast),
+                      .add_value(lts_probabilistic_eq_pbisim_fast),
                       "generate an equivalent LTS, preserving equivalence NAME:"
                       , 'e');
     }
 
-	void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
-	{
-		std::string::size_type lastpos = 0, pos;
-		while ((pos = act_names.find(',', lastpos)) != std::string::npos)
-		{
-			tau_actions.push_back(act_names.substr(lastpos, pos - lastpos));
-			lastpos = pos + 1;
-		}
-		tau_actions.push_back(act_names.substr(lastpos));
-	}
+  void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
+  {
+    std::string::size_type lastpos = 0, pos;
+    while ((pos = act_names.find(',', lastpos)) != std::string::npos)
+    {
+      tau_actions.push_back(act_names.substr(lastpos, pos - lastpos));
+      lastpos = pos + 1;
+    }
+    tau_actions.push_back(act_names.substr(lastpos));
+  }
 
 
-	void parse_options(const command_line_parser& parser)
-	{
-		input_output_tool::parse_options(parser);
+  void parse_options(const command_line_parser& parser)
+  {
+    input_output_tool::parse_options(parser);
 
-		if (parser.options.count("lps"))
-		{
-			if (1 < parser.options.count("lps"))
-			{
-				mCRL2log(warning) << "multiple LPS files specified; can only use one\n";
-			}
+    if (parser.options.count("lps"))
+    {
+      if (1 < parser.options.count("lps"))
+      {
+        mCRL2log(warning) << "multiple LPS files specified; can only use one\n";
+      }
 
-			tool_options.lpsfile = parser.option_argument("lps");
-		}
-		if (parser.options.count("in"))
-		{
-			if (1 < parser.options.count("in"))
-			{
-				mCRL2log(warning) << "multiple input formats specified; can only use one\n";
-			}
+      tool_options.lpsfile = parser.option_argument("lps");
+    }
+    if (parser.options.count("in"))
+    {
+      if (1 < parser.options.count("in"))
+      {
+        mCRL2log(warning) << "multiple input formats specified; can only use one\n";
+      }
 
-			tool_options.intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
+      tool_options.intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
 
-			if (tool_options.intype == lts_none)
-			{
-				mCRL2log(warning) << "format '" << parser.option_argument("in") <<
-					"' is not recognised; option ignored" << std::endl;
-			}
-		}
-		if (parser.options.count("out"))
-		{
-			if (1 < parser.options.count("out"))
-			{
-				mCRL2log(warning) << "multiple output formats specified; can only use one\n";
-			}
+      if (tool_options.intype == lts_none)
+      {
+        mCRL2log(warning) << "format '" << parser.option_argument("in") <<
+          "' is not recognised; option ignored" << std::endl;
+      }
+    }
+    if (parser.options.count("out"))
+    {
+      if (1 < parser.options.count("out"))
+      {
+        mCRL2log(warning) << "multiple output formats specified; can only use one\n";
+      }
 
-			tool_options.outtype = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
+      tool_options.outtype = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
-			if (tool_options.outtype == lts_none)
-			{
-				mCRL2log(warning) << "format '" << parser.option_argument("out") <<
-					"' is not recognised; option ignored" << std::endl;
-			}
-		}
+      if (tool_options.outtype == lts_none)
+      {
+        mCRL2log(warning) << "format '" << parser.option_argument("out") <<
+          "' is not recognised; option ignored" << std::endl;
+      }
+    }
 
-		tool_options.equivalence = parser.option_argument_as<lts_probabilistic_equivalence>("equivalence");
+    tool_options.equivalence = parser.option_argument_as<lts_probabilistic_equivalence>("equivalence");
 
-		if (parser.options.count("tau"))
-		{
-			set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
-		}
+    if (parser.options.count("tau"))
+    {
+      set_tau_actions(tool_options.tau_actions, parser.option_argument("tau"));
+    }
 
-		tool_options.determinise = 0 < parser.options.count("determinise");
-		tool_options.check_reach = parser.options.count("no-reach") == 0;
-		tool_options.print_dot_state = parser.options.count("no-state") == 0;
+    tool_options.determinise = 0 < parser.options.count("determinise");
+    tool_options.check_reach = parser.options.count("no-reach") == 0;
+    tool_options.print_dot_state = parser.options.count("no-state") == 0;
 
-		if (tool_options.determinise && (tool_options.equivalence != lts_probabilistic_eq_none))
-		{
-			throw parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
-		}
+    if (tool_options.determinise && (tool_options.equivalence != lts_probabilistic_eq_none))
+    {
+      throw parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
+    }
 
-		if (2 < parser.arguments.size())
-		{
-			throw parser.error("too many file arguments");
-		}
-		else
-		{
-			if (0 < parser.arguments.size())
-			{
-				tool_options.set_source(parser.arguments[0]);
-			}
-			else
-			{
-				if (tool_options.intype == lts_none)
-				{
-					mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
-					tool_options.intype = lts_aut;
-				}
-			}
-			if (1 < parser.arguments.size())
-			{
-				tool_options.set_target(parser.arguments[1]);
-			}
-			else
-			{
-				if (tool_options.outtype == lts_none)
-				{
-					if (!tool_options.lpsfile.empty())
-					{
-						mCRL2log(warning) << "no output format set; using fsm because --lps was used" << std::endl;
-						tool_options.outtype = lts_fsm;
-					}
-					else
-					{
-						mCRL2log(warning) << "no output format set or detected; using default (aut)" << std::endl;
-						tool_options.outtype = lts_aut;
-					}
-				}
-			}
-		}
-	}
+    if (2 < parser.arguments.size())
+    {
+      throw parser.error("too many file arguments");
+    }
+    else
+    {
+      if (0 < parser.arguments.size())
+      {
+        tool_options.set_source(parser.arguments[0]);
+      }
+      else
+      {
+        if (tool_options.intype == lts_none)
+        {
+          mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
+          tool_options.intype = lts_aut;
+        }
+      }
+      if (1 < parser.arguments.size())
+      {
+        tool_options.set_target(parser.arguments[1]);
+      }
+      else
+      {
+        if (tool_options.outtype == lts_none)
+        {
+          if (!tool_options.lpsfile.empty())
+          {
+            mCRL2log(warning) << "no output format set; using fsm because --lps was used" << std::endl;
+            tool_options.outtype = lts_fsm;
+          }
+          else
+          {
+            mCRL2log(warning) << "no output format set or detected; using default (aut)" << std::endl;
+            tool_options.outtype = lts_aut;
+          }
+        }
+      }
+    }
+  }
 };
 
 int main(int argc, char** argv)

@@ -733,8 +733,6 @@ namespace mcrl2
             s.block_key = new_block.key;
             for (transition_key_type t_key : s.incomming_transitions)
             {
-              probabilistic_transition_type& pt = *probabilistic_transitions_iter[t_key];
-
               //move transition from previous block to new block
               new_block.incomming_probabilistic_transitions.splice(new_block.incomming_probabilistic_transitions.begin(),
                                                                        B.incomming_probabilistic_transitions,

@@ -25,6 +25,18 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/hash_utility.h"
 
+// Prototype.
+namespace mcrl2
+{
+namespace utilities
+{
+class big_natural_number;
+
+inline std::string pp(const big_natural_number& l);
+
+} // namespace utilities
+} // namespace mcrl2
+
 
 namespace mcrl2
 {
@@ -154,43 +166,21 @@ class big_natural_number
     // zero's, i.e., this->back()!=0 (if this->size()>0). Therefore their representation is unique.
     std::vector<size_t> m_number;
 
-    /* Multiply this number with the indicated digit, and multiply the result with 
-     * size_t^offset. The result is (*this)* digit * |size_t|^offset.
-     */
-    big_natural_number multiply_with_single_number(const size_t digit, const size_t offset) const
+    /* Multiply the current number by n and add the carry */
+    void multiply_by(size_t n, size_t carry)
     {
-      big_natural_number result;
-      result.m_number.resize(offset,0);
-      size_t carry=0;
-      for(size_t d:m_number)
+      for(size_t& i: m_number)
       {
-        result.m_number.push_back(detail::multiply_single_number(digit,d,carry));
+        i=detail::multiply_single_number(i,n,carry);
       }
-      if (carry!=0)
+      if (carry)
       {
-        result.m_number.push_back(carry);
-      }
-      result.remove_significant_digits_that_are_zero();
-      return result;
-    }
-
-    /* Divide the current number by 2 */
-    /* void divide_by_two()
-    {
-      size_t carry=0;
-      for(std::vector<size_t>::reverse_iterator i=m_number.rbegin(); i!=m_number.rend(); ++i)
-      {
-        size_t new_carry=(*i) & 1;
-        *i = *i/2;
-        if (carry==1)
-        {
-          *i=(*i)+(static_cast<size_t>(1)<<(std::numeric_limits<size_t>::digits-1));
-        }
-        carry=new_carry;
+        /* Add an extra digit with the carry */
+        m_number.push_back(carry);
       }
       remove_significant_digits_that_are_zero();
       is_well_defined();
-    } */
+    }
 
     // Remove zero's at the end of m_number vector that are
     // leading and irrelevant zero's in the number representation.
@@ -259,6 +249,7 @@ class big_natural_number
     */
     bool is_zero() const
     {
+      is_well_defined();
       return m_number.size()==0;
     }
 
@@ -361,21 +352,6 @@ class big_natural_number
       return remainder;
     }
 
-    /* Multiply the current number by n and add the carry */
-    void multiply_by(size_t n, size_t carry)
-    {
-      for(size_t& i: m_number)
-      {
-        i=detail::multiply_single_number(i,n,carry);
-      }
-      if (carry)
-      {
-        /* Add an extra digit with the carry */
-        m_number.push_back(carry);
-      }
-      is_well_defined();
-    }
-
     // Add the argument to this big natural number 
     void add(const big_natural_number& other)
     {
@@ -418,30 +394,6 @@ class big_natural_number
       big_natural_number result=*this;
       result.add(other);
       return result;
-      
-      /* result.m_number.reserve((std::max)(m_number.size(),other.m_number.size()));
-      size_t carry=0;
-      for(size_t i=0; i < (std::max)(m_number.size(),other.m_number.size()); ++i)
-      {
-        if (i>=m_number.size())
-        {
-          result.m_number.push_back(detail::add_single_number(0,other.m_number[i],carry));
-        }
-        else if (i>=other.m_number.size())
-        {
-          result.m_number.push_back(detail::add_single_number(m_number[i],0,carry));
-        }
-        else
-        {
-          result.m_number.push_back(detail::add_single_number(m_number[i],other.m_number[i],carry));
-        }
-      }
-      if (carry>0)
-      {
-        result.m_number.push_back(carry);
-      }
-      result.is_well_defined();
-      return result; */
     }
 
     /* \brief Standard subtraction. 
@@ -459,8 +411,6 @@ class big_natural_number
       {
         throw mcrl2::runtime_error("Subtracting numbers " + pp(*this) + " and " + pp(other) + " yields a non representable negative result (1).");
       }
-      // big_natural_number result;
-      // result.m_number.reserve(m_number.size());
       size_t carry=0;
       for(size_t i=0; i<m_number.size(); ++i)
       {
@@ -491,34 +441,7 @@ class big_natural_number
       big_natural_number result=*this;
       result.subtract(other);
       return result;
-
-      /* assert(m_number.size()==0 || m_number.back()!=0);
-      assert(other.m_number.size()==0 || other.m_number.back()!=0);
-      if (m_number.size()<other.m_number.size())
-      {
-        throw mcrl2::runtime_error("Subtracting numbers " + pp(*this) + " and " + pp(other) + " yields a non representable negative result (1).");
-      }
-      result.m_number.reserve(m_number.size());
-      size_t carry=0;
-      for(size_t i=0; i<m_number.size(); ++i)
-      {
-        if (i>=other.m_number.size())
-        {
-          result.m_number.push_back(detail::subtract_single_number(m_number[i],0,carry));
-        }
-        else
-        {
-          result.m_number.push_back(detail::subtract_single_number(m_number[i],other.m_number[i],carry));
-        }
-      }
-      if (carry>0)
-      {
-        throw mcrl2::runtime_error("Subtracting numbers " + pp(*this) + " and " + pp(other) + " yields a non representable negative result (2).");
-      }
-      result.remove_significant_digits_that_are_zero();
-      result.is_well_defined();
-      return result; */
-    }  
+    }
 
     /* \brief Standard multiplication operator.
      */
@@ -526,12 +449,21 @@ class big_natural_number
     {
       is_well_defined();
       other.is_well_defined();
-
-      big_natural_number result;
-      size_t offset=0;  
+      big_natural_number result=0, multiplicand;
+      size_t offset=0; 
       for(size_t digit: other.m_number)
       {
-        result.add(multiply_with_single_number(digit,offset));
+        // Move other to the multiplicand and multiply it with base^offset.
+        multiplicand.m_number=std::vector<size_t>(offset,0);
+        for(size_t n: m_number)
+        { 
+          multiplicand.m_number.push_back(n);
+        }
+
+        // Multiply the multiplicand with digit.
+        multiplicand.multiply_by(digit,0);
+        // Add the multiplicand to the result.
+        result.add(multiplicand);
         offset++;
       }
       result.is_well_defined();
@@ -572,7 +504,7 @@ class big_natural_number
         {
           // We subtract the divisor from the remainder.
           result.multiply_by(2,1); // result=result*2 + 1
-          remainder=remainder-divisor;
+          remainder.subtract(divisor);
         }
         divisor.divide_by(2); // Shift the divisor one bit to the left.
       }
@@ -609,7 +541,7 @@ class big_natural_number
         if (remainder>=divisor)
         {
           // We subtract the divisor from the remainder.
-          remainder=remainder-divisor;
+          remainder.subtract(divisor);
         }
         divisor.divide_by(2); // Shift the divisor one bit to the left.
       }
@@ -643,15 +575,6 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
 }
 
 
-/* \brief A pretty print operator on action labels, returning it as a string.
-*/
-inline std::string pp(const big_natural_number& l)
-{
-  std::stringstream s;
-  s << l;
-  return s.str();
-}
-
 /** \brief Standard overload of swap.
  **/
 inline void swap(big_natural_number& x, big_natural_number& y)
@@ -677,6 +600,21 @@ struct hash< mcrl2::utilities::big_natural_number >
 
   
 } // namespace std
+
+namespace mcrl2
+{
+namespace utilities
+{
+/* \brief A pretty print operator on action labels, returning it as a string.
+*/
+inline std::string pp(const big_natural_number& l)
+{
+  std::stringstream s;
+  s << l;
+  return s.str();
+}
+}  // namespace utilities
+}  // namespace mcrl2
 
 
 #endif // MCRL2_UTILITIES_BIG_NUMBERS_H

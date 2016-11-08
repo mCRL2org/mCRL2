@@ -209,13 +209,10 @@ class probabilistic_arbitrary_precision_fraction
 
     static void remove_common_factors(utilities::big_natural_number& enumerator, utilities::big_natural_number& denominator)
     {
-      for(utilities::big_natural_number gcd=greatest_common_divisor(enumerator,denominator);
-          gcd!=1;
-          gcd=greatest_common_divisor(enumerator,denominator))
-      {
-        enumerator=enumerator/gcd;
-        denominator=denominator/gcd;
-      }
+      const utilities::big_natural_number gcd=greatest_common_divisor(enumerator,denominator);
+      enumerator=enumerator/gcd;
+      denominator=denominator/gcd;
+      assert(greatest_common_divisor(enumerator,denominator)==1);
     }
     
 };
@@ -234,7 +231,6 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_arbitrary_precis
 {
   return out << pp(x);
 }
-
 
 } // namespace lts
 } // namespace mcrl2
