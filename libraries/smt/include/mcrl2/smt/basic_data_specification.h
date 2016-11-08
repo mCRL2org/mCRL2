@@ -61,7 +61,7 @@ class basic_data_specification: public data_specification
 
     virtual data::data_expression representative(data::sort_expression sort)
     {
-      return m_representative_generator(sort, 10);
+      return m_representative_generator(sort);
     }
 
     bool is_constructed_sort(data::sort_expression sort) const
