@@ -162,10 +162,10 @@ namespace detail
     {
       state_key_type key;
       block_key_type block_key;
-      std::vector<transition_key_type> incomming_transitions;
+      std::vector<transition_key_type> incoming_transitions;
       size_t mark_state;
 
-      probability_label_type comulative_probability; 
+      probability_label_type cumulative_probability; 
       size_t residual_transition_cnt;
     };
 
@@ -202,8 +202,8 @@ namespace detail
       block_key_type key;
       std::list<state_type> states;
       constellation_key_type constellation_key;
-      std::vector< std::list <action_transition_type> > incomming_action_transitions;  // a probabilistic block has incomming action transitions ordered by label
-      std::vector<label_type> incomming_labels;
+      std::vector< std::list <action_transition_type> > incoming_action_transitions;  // a probabilistic block has incoming action transitions ordered by label
+      std::vector<label_type> incoming_labels;
       mark_type mark;
       probability_label_type max_comulative_probability;
       probability_label_type bigger_middle_probability;
@@ -215,7 +215,7 @@ namespace detail
       block_key_type key;
       std::list<state_type> states;
       constellation_key_type constellation_key;
-      std::list<probabilistic_transition_type> incomming_probabilistic_transitions;
+      std::list<probabilistic_transition_type> incoming_probabilistic_transitions;
       mark_type mark;
     };
 
@@ -280,7 +280,7 @@ namespace detail
       std::list<state_type> p_states;
       std::vector< std::list<action_transition_type> > a_transitions_per_label;
       std::list<probabilistic_transition_type> p_transitions;
-      std::vector<label_type> incomming_labels;
+      std::vector<label_type> incoming_labels;
 
       // Preprocessing initialization:
       //  - Initialize list of states and transitions with its keys and its iterators
@@ -321,15 +321,15 @@ namespace detail
 
         if (a_transitions_per_label[at.label].size() == 0)
         {
-          incomming_labels.push_back(at.label);  // keep track of labels
+          incoming_labels.push_back(at.label);  // keep track of labels
         }
 
         a_transitions_per_label[at.label].push_back(at);
         action_transitions_iter.push_back(--a_transitions_per_label[at.label].end());
 
-        // init incomming action transitions in states
+        // init incoming action transitions in states
         state_type& s = *probabilistic_states_iter[at.to];
-        s.incomming_transitions.push_back(at.key);
+        s.incoming_transitions.push_back(at.key);
 
         key++;
       }
@@ -350,9 +350,9 @@ namespace detail
           p_transitions.push_back(pt);
           probabilistic_transitions_iter.push_back(--p_transitions.end());
 
-          // init incomming action transitions in states
+          // init incoming action transitions in states
           state_type& s = *action_states_iter[pt.to];
-          s.incomming_transitions.push_back(pt.key);
+          s.incoming_transitions.push_back(pt.key);
 
           key++;
         }
@@ -370,9 +370,9 @@ namespace detail
         p_transitions.push_back(pt);
         probabilistic_transitions_iter.push_back(--p_transitions.end());
 
-        // init incomming action transitions in states
+        // init incoming action transitions in states
         state_type& s = *action_states_iter[pt.to];
-        s.incomming_transitions.push_back(pt.key);
+        s.incoming_transitions.push_back(pt.key);
 
         key++;
       }
@@ -399,10 +399,10 @@ namespace detail
       a_block.key = 0;
       a_block.states.swap(a_states);
       a_block.constellation_key = 0;
-      //a_block.incomming_probabilistic_transitions.swap(p_transitions);
+      //a_block.incoming_probabilistic_transitions.swap(p_transitions);
 
       // split action partition based on outgoing transitions
-      for (label_type l : incomming_labels)
+      for (label_type l : incoming_labels)
       {
         std::vector <action_block_type> new_blocks;
         for (action_block_type& block_to_split : action_pi_partition) // Access all the blocks of action_partition to start splitting
@@ -450,7 +450,7 @@ namespace detail
         action_pi_partition.erase(empty_i);
       }
 
-      // Adjust the block key of all states and init incomming probabilistic transitions per block
+      // Adjust the block key of all states and init incoming probabilistic transitions per block
       key = 0;
       for (typename std::list<action_block_type>::iterator i = action_pi_partition.begin(); i != action_pi_partition.end(); ++i)
       {
@@ -469,7 +469,7 @@ namespace detail
         probabilistic_transition_type& pt = *pt_iter;
         state_type& s = *action_states_iter[pt.to];
         action_block_type& ab = *action_blocks_iter[s.block_key];
-        ab.incomming_probabilistic_transitions.splice(ab.incomming_probabilistic_transitions.begin(), 
+        ab.incoming_probabilistic_transitions.splice(ab.incoming_probabilistic_transitions.begin(), 
                                                       p_transitions, pt_iter);
       }
 
@@ -480,8 +480,8 @@ namespace detail
       p_block.key = 0;
       p_block.states.swap(p_states);
       p_block.constellation_key = 0;
-      p_block.incomming_action_transitions.swap(a_transitions_per_label);
-      p_block.incomming_labels.swap(incomming_labels);
+      p_block.incoming_action_transitions.swap(a_transitions_per_label);
+      p_block.incoming_labels.swap(incoming_labels);
 
       //1.4: Initialise the block to constellation count for each tranition.
       // Initially there is only one constellation, so we only need to count 
@@ -490,7 +490,7 @@ namespace detail
       block_to_const_count_temp.resize(num_action_states);
 
       // Iterate over all transition of each label
-      for (std::list <action_transition_type>& at_list_per_label : p_block.incomming_action_transitions)
+      for (std::list <action_transition_type>& at_list_per_label : p_block.incoming_action_transitions)
       {
         for (action_transition_type& at : at_list_per_label)
         {
@@ -609,7 +609,7 @@ namespace detail
           }
 
           // for all incoming actions a for each state in BC call the mark function and split the blocks
-          for (label_type a :Bc.incomming_labels)
+          for (label_type a :Bc.incoming_labels)
           {
             //derive the left, right and middle sets from mark function
             std::vector<block_key_type> marked_blocks_keys;
@@ -679,38 +679,38 @@ namespace detail
       new_block.key = probabilistic_blocks_iter.size()-1;//p_const_of_B.blocks.size() - 1;
       new_block.constellation_key = B.constellation_key;
       new_block.states.swap(states_of_new_block);
-      new_block.incomming_action_transitions.resize(B.incomming_action_transitions.size());
+      new_block.incoming_action_transitions.resize(B.incoming_action_transitions.size());
 
-      // iterate over all incomming transitions of each state of the new block
+      // iterate over all incoming transitions of each state of the new block
       for (state_type& s : new_block.states)
       {
         s.block_key = new_block.key;
-        for (transition_key_type t_key : s.incomming_transitions)
+        for (transition_key_type t_key : s.incoming_transitions)
         {
           action_transition_type& at = *action_transitions_iter[t_key];
           
-          if (new_block.incomming_action_transitions[at.label].size() == 0)
+          if (new_block.incoming_action_transitions[at.label].size() == 0)
           {
-            new_block.incomming_labels.push_back(at.label);
+            new_block.incoming_labels.push_back(at.label);
           }
           
           //move transition from previous block to new block
-          new_block.incomming_action_transitions[at.label].splice(new_block.incomming_action_transitions[at.label].begin(),
-                                                                 B.incomming_action_transitions[at.label],
+          new_block.incoming_action_transitions[at.label].splice(new_block.incoming_action_transitions[at.label].begin(),
+                                                                 B.incoming_action_transitions[at.label],
                                                                  action_transitions_iter[t_key]);
           
         }
       }
 
-      // Update the incomming labels of B
-      std::vector<label_type> old_incomming_labels;
-      B.incomming_labels.swap(old_incomming_labels);
+      // Update the incoming labels of B
+      std::vector<label_type> old_incoming_labels;
+      B.incoming_labels.swap(old_incoming_labels);
 
-      for (label_type l : old_incomming_labels)
+      for (label_type l : old_incoming_labels)
       {
-        if (B.incomming_action_transitions[l].size() != 0)
+        if (B.incoming_action_transitions[l].size() != 0)
         {
-          B.incomming_labels.push_back(l);
+          B.incoming_labels.push_back(l);
         }
       }
 
@@ -726,15 +726,15 @@ namespace detail
       new_block.constellation_key = B.constellation_key;
       new_block.states.swap(states_of_new_block);
 
-      // iterate over all incomming transitions of each state of the new block
+      // iterate over all incoming transitions of each state of the new block
       for (state_type& s : new_block.states)
       {
         s.block_key = new_block.key;
-        for (transition_key_type t_key : s.incomming_transitions)
+        for (transition_key_type t_key : s.incoming_transitions)
         {
           //move transition from previous block to new block
-          new_block.incomming_probabilistic_transitions.splice(new_block.incomming_probabilistic_transitions.begin(),
-                                                                   B.incomming_probabilistic_transitions,
+          new_block.incoming_probabilistic_transitions.splice(new_block.incoming_probabilistic_transitions.begin(),
+                                                                   B.incoming_probabilistic_transitions,
                                                                    probabilistic_transitions_iter[t_key]);
 
         }
@@ -746,8 +746,8 @@ namespace detail
     {
       std::vector<state_key_type> marked_states;
      
-      // for all incomming probabilistic transitions of block BC calculate left, middle and right
-      for (probabilistic_transition_type& pt : Bc.incomming_probabilistic_transitions)
+      // for all incoming probabilistic transitions of block BC calculate left, middle and right
+      for (probabilistic_transition_type& pt : Bc.incoming_probabilistic_transitions)
       {
         state_type& u = *probabilistic_states_iter[pt.from];
         probability_label_type p = pt.label;
@@ -766,19 +766,19 @@ namespace detail
         {
           u.mark_state = 1;
           marked_states.push_back(u.key);
-          u.comulative_probability = p;
+          u.cumulative_probability = p;
 
           B.mark.left.splice(B.mark.left.begin(), B.mark.right, probabilistic_states_iter[u.key]);
           B.mark.left_temp.push_back(u.key);
         }
         else {
           // u was already added to left, then just add its comulative probability
-          u.comulative_probability = u.comulative_probability + p;
+          u.cumulative_probability = u.cumulative_probability + p;
         }
 
-        if (B.max_comulative_probability < u.comulative_probability)
+        if (B.max_comulative_probability < u.cumulative_probability)
         {
-          B.max_comulative_probability = u.comulative_probability;
+          B.max_comulative_probability = u.cumulative_probability;
         }
 
       }
@@ -794,7 +794,7 @@ namespace detail
         for (state_key_type& u_key : B.mark.left_temp)
         {
           state_type& u = *probabilistic_states_iter[u_key];
-          if (u.comulative_probability < B.max_comulative_probability)
+          if (u.cumulative_probability < B.max_comulative_probability)
           {
             B.mark.middle_temp.push_back(u_key);
           }
@@ -808,13 +808,13 @@ namespace detail
           for (state_key_type& u_key : B.mark.middle_temp)
           {
             state_type& u = *probabilistic_states_iter[u_key];
-            if (B.smaller_middle_probability > u.comulative_probability)
+            if (B.smaller_middle_probability > u.cumulative_probability)
             {
-              B.smaller_middle_probability = u.comulative_probability;
+              B.smaller_middle_probability = u.cumulative_probability;
             }
-            if (B.bigger_middle_probability < u.comulative_probability)
+            if (B.bigger_middle_probability < u.cumulative_probability)
             {
-              B.bigger_middle_probability = u.comulative_probability;
+              B.bigger_middle_probability = u.cumulative_probability;
             }
           }
 
@@ -843,18 +843,18 @@ namespace detail
             for (state_key_type& u_key : B.mark.middle_temp)
             {
               state_type& u = *probabilistic_states_iter[u_key];
-              if (u.comulative_probability == B.bigger_middle_probability)
+              if (u.cumulative_probability == B.bigger_middle_probability)
               {
                 middle_big.splice(middle_big.begin(), B.mark.left, probabilistic_states_iter[u.key]);
               }
-              else if (u.comulative_probability == B.smaller_middle_probability)
+              else if (u.cumulative_probability == B.smaller_middle_probability)
               {
                 middle_small.splice(middle_small.begin(), B.mark.left, probabilistic_states_iter[u.key]);
               }
               else
               {
                 std::pair<probability_label_type, state_key_type> comulative_prob_state_pair;
-                comulative_prob_state_pair.first = u.comulative_probability;
+                comulative_prob_state_pair.first = u.cumulative_probability;
                 comulative_prob_state_pair.second = u.key;
                 grouped_states_per_probability_in_block.push_back(comulative_prob_state_pair);
               }
@@ -909,7 +909,7 @@ namespace detail
       for (state_key_type u_key : marked_states)
       {
         state_type& u = *probabilistic_states_iter[u_key];
-        u.comulative_probability = probability_label_type().zero();
+        u.cumulative_probability = probability_label_type().zero();
         u.mark_state = 0;
       }
 
@@ -919,8 +919,8 @@ namespace detail
     {
       std::vector<state_key_type> marked_states;
 
-      // for all incomming a transitions of block Bc calculate left, middle and right
-      for (action_transition_type& at : Bc.incomming_action_transitions[a])
+      // for all incoming a transitions of block Bc calculate left, middle and right
+      for (action_transition_type& at : Bc.incoming_action_transitions[a])
       {
         state_type& u = *action_states_iter[at.from];
         action_block_type& B = *action_blocks_iter[u.block_key];  //get the block B where state u is located
