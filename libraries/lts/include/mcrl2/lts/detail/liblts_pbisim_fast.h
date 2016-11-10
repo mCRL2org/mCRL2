@@ -504,12 +504,6 @@ class prob_bisim_partitioner_fast
           block_to_const_count_temp[at.from] = 0;
         }
       }
-
-      // Add action block to not trivial constellation
-      //if (action_pi_partition.size() > 1)
-      //{
-      //  non_trivial_constellations.action.push_back(0); // add initial constellation to non trivials
-      //}
     }
 
     /* */
@@ -547,7 +541,7 @@ class prob_bisim_partitioner_fast
             size_t unstable_const = 0;
 
             // First return the largest of left, middle or right to the states of the block B
-            B.states.swap(*B.mark.large_block_ptr);
+            B.states.splice(B.states.end(), *B.mark.large_block_ptr);
             
             // Split left block
             if (B.mark.left.size() != 0 &&
@@ -576,6 +570,9 @@ class prob_bisim_partitioner_fast
                 unstable_const = 1;
               }
             }
+
+            // reset middle vector
+            B.mark.middle.clear();
 
             B.mark.marked_block = 0;
             // add the constellation where the splitted block is located to the set of non-trivial constellations
@@ -621,7 +618,7 @@ class prob_bisim_partitioner_fast
               size_t unstable_const = 0;
 
               // First return the largest of left, middle or right to the states of the block B
-              B.states.swap(*B.mark.large_block_ptr);
+              B.states.splice(B.states.end(), *B.mark.large_block_ptr);
 
               // Split left block
               if (B.mark.left.size() != 0 &&
@@ -650,6 +647,9 @@ class prob_bisim_partitioner_fast
                   unstable_const = 1;
                 }
               }
+
+              // reset middle vector
+              B.mark.middle.clear();
 
               B.mark.marked_block = 0;
               // add the constellation where the splitted block is located to the set of non-trivial constellations
