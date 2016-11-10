@@ -685,7 +685,7 @@ struct push_allow_traverser: public process_expression_traverser<Derived>
       }
       else
       {
-        push_allow_node node({}, delta());
+        push_allow_node node(multi_action_name_set{}, delta());
         push(node);
       }
       return;
