@@ -73,8 +73,6 @@ class prob_bisim_partitioner_fast
     ~prob_bisim_partitioner_fast()
     {}
 
-  protected:
-
     /** \brief Replaces the transition relation of the current lts by the transitions
     *         of the bisimulation reduced transition system.
     * \pre The bisimulation equivalence classes have been computed. */
