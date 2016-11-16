@@ -110,17 +110,11 @@ class prob_bisim_partitioner
       std::vector<lts_aut_base::probabilistic_state> new_probabilistic_states;
 
       // get the equivalent probabilistic state of each probabilistic block and add it to aut
-      for (step_class_type& sc : step_classes)
+      for (step_class_type& sc : equivalent_step_classes)
       {
         lts_aut_base::probabilistic_state equivalent_ps;
-        if (sc.distributions.size() > 0)
-        {
-          equivalent_ps = calculate_equivalent_probabilistic_state(sc);
-        }
-        else
-        {
-          equivalent_ps.add(0, probability_fraction_type().one()); //dummy
-        }
+
+        equivalent_ps = calculate_equivalent_probabilistic_state(sc);
         new_probabilistic_states.push_back(equivalent_ps);
       }
 
@@ -173,6 +167,7 @@ class prob_bisim_partitioner
   std::list<step_class_type*> step_partition;
   std::vector<distribution_type> distributions;
   std::deque<step_class_type> step_classes;
+  std::deque<step_class_type> equivalent_step_classes;
   std::deque<block_type> blocks;
   std::vector<block_key_type> block_index_of_a_state;
   std::vector<step_class_key_type> step_class_index_of_a_distribution;
@@ -186,7 +181,7 @@ class prob_bisim_partitioner
     tree_type* left;
     tree_type* right;
 
-    void init_node(size_t depth_node)
+    void init_node()
     {
       count = 0;
       left = NULL;
@@ -250,7 +245,7 @@ class prob_bisim_partitioner
     std::deque<tree_type> tree_nodes;
     std::vector<tree_type*> leaves;
     tree_type v0;
-    v0.init_node(0);
+    v0.init_node();
     tree_nodes.push_back(v0);
 
     // For all s in S do
@@ -281,7 +276,7 @@ class prob_bisim_partitioner
           {
             // create left node
             tree_type w;
-            w.init_node(i+1);
+            w.init_node();
             tree_nodes.push_back(w);
             v->left = &tree_nodes.back();
 
@@ -300,7 +295,7 @@ class prob_bisim_partitioner
           {
             // create left node
             tree_type w;
-            w.init_node(i + 1);
+            w.init_node();
             tree_nodes.push_back(w);
             v->right = &tree_nodes.back();
 
@@ -700,31 +695,37 @@ class prob_bisim_partitioner
       }
     }
 
-    // some distributions may be repeated among different step classes.
-    // To avoid this, we assign a common step class (the one with higher key)
-    // for all step classes sharing distributions.
+    // Merge equivalent step classes in step partition. The algorithm initially separates classes by actions,
+    // but it is possible that a probabilistic sate has multiple incoming actions, hence it will be repeated
+    // among multiple step classes
+    lts_aut_base::probabilistic_state new_prob_state;
+    std::unordered_map<lts_aut_base::probabilistic_state, std::vector<step_class_type*> > reduced_step_partition;
 
-    // iterate over all step classes in reverese
-    for (typename std::deque<step_class_type>::reverse_iterator i = step_classes.rbegin();
-      i != step_classes.rend(); ++i)
+    /* Iterate over all step classes of Step_partition*/
+    for (step_class_type& sc : step_classes)
     {
-      step_class_type& sc = *i;
-
-      // first check which distribution has the higher step_class parent key
-      for (const distribution_type* d : sc.distributions)
+      if (sc.distributions.size() > 0)
       {
-        if (step_classes[step_class_index_of_a_distribution[d->key]].equivalent_step_class > sc.equivalent_step_class)
-        {
-          sc.equivalent_step_class = step_classes[step_class_index_of_a_distribution[d->key]].equivalent_step_class;
-        }
-      }
+        lts_aut_base::probabilistic_state new_prob_state = calculate_equivalent_probabilistic_state(sc);
 
-      // update all the distributions in this stape class with the equivalent max step class key
-      for (const distribution_type* d : sc.distributions)
+        /* Add the step class index to the new probability state*/
+        reduced_step_partition[new_prob_state].push_back(&sc);
+      }
+    }
+
+    step_class_key_type equivalent_class_key = 0;
+    for (typename std::unordered_map<lts_aut_base::probabilistic_state,
+          std::vector<step_class_type*> >::iterator i = reduced_step_partition.begin();
+          i != reduced_step_partition.end(); ++i)
+    {
+      std::vector<step_class_type*>& sc_vector = i->second;
+
+      equivalent_step_classes.push_back(*sc_vector[0]);
+      for (step_class_type* sc :sc_vector)
       {
-        step_classes[step_class_index_of_a_distribution[d->key]].equivalent_step_class = sc.equivalent_step_class;
+        sc->equivalent_step_class = equivalent_class_key;
       }
-
+      equivalent_class_key++;
     }
 
   }
