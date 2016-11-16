@@ -48,6 +48,7 @@ set(MCRL2_TOOLS
   complps2pbes
   lpsbisim2pbes
   lpsrealelm
+  lpsrealzone
   pbesabstract
   pbesabsinthe
   pbesinst
