@@ -13,6 +13,7 @@
 #include <cmath>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts_aut.h"
 
