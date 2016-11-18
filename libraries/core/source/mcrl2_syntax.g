@@ -277,8 +277,9 @@ PbesInit: 'init' PropVarInst ';' ;                               // Initial PBES
 DataValExpr: 'val' '(' DataExpr ')' $left 20 ;                   // Marked data expression
 
 PbesExpr
-  : DataExpr                                                     // Boolean data expression
-  | DataValExpr                                                  // Boolean data expression
+  :
+  DataValExpr                                                  // Boolean data expression
+//| DataExpr                                                     // Boolean data expression
   | '(' PbesExpr ')'                           $left        30   // Brackets
   | 'true'                                     $left        30   // True
   | 'false'                                    $left        30   // False
@@ -294,8 +295,8 @@ PbesExpr
 //--- Action formulas
 
 ActFrm
-  : DataExpr                                                     // Boolean data expression
-  | DataValExpr                                                  // Boolean data expression
+  : DataValExpr                                                  // Boolean data expression
+//| DataExpr                                                     // Boolean data expression
   | MultAct                                                      // Multi-action
   | '(' ActFrm ')'                             $left        30   // Brackets
   | 'true'                                     $left        30   // True
@@ -323,8 +324,8 @@ RegFrm
 //--- State formulas
 
 StateFrm
-  : DataExpr                                                     // Boolean data expression
-  | DataValExpr                                                  // Boolean data expression
+  : DataValExpr                                                  // Boolean data expression
+//| DataExpr                                                     // Boolean data expression
   | '(' StateFrm ')'                           $left        50   // Brackets
   | 'true'                                     $left        50   // True
   | 'false'                                    $left        50   // False
