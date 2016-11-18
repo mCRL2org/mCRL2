@@ -30,6 +30,75 @@ namespace state_formulas
 namespace detail
 {
 
+struct count_modal_operator_nesting_traverser: public state_formula_traverser<count_modal_operator_nesting_traverser>
+{
+  typedef state_formula_traverser<count_modal_operator_nesting_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  std::size_t result;
+  std::vector<std::size_t> nesting_depth;
+
+  count_modal_operator_nesting_traverser()
+    : result(0)
+  {
+    nesting_depth.push_back(0);
+  }
+
+  void push()
+  {
+    nesting_depth.back()++;
+    if (nesting_depth.back() > result)
+    {
+      result = nesting_depth.back();
+    }
+  }
+
+  void pop()
+  {
+    nesting_depth.pop_back();
+  }
+
+  void enter(const must& x)
+  {
+    push();
+  }
+
+  void enter(const may&)
+  {
+    push();
+  }
+
+  void enter(const mu&)
+  {
+    nesting_depth.push_back(0);
+  }
+
+  void leave(const mu&)
+  {
+    nesting_depth.pop_back();
+  }
+
+  void enter(const nu&)
+  {
+    nesting_depth.push_back(0);
+  }
+
+  void leave(const nu&)
+  {
+    nesting_depth.pop_back();
+  }
+};
+
+inline
+std::size_t count_modal_operator_nesting(const state_formula& x)
+{
+  count_modal_operator_nesting_traverser f;
+  f.apply(x);
+  return f.result;
+}
+
 struct has_unscoped_modal_formula_traverser: public state_formula_traverser<has_unscoped_modal_formula_traverser>
 {
   typedef state_formula_traverser<has_unscoped_modal_formula_traverser> super;

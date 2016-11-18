@@ -75,6 +75,14 @@ class lps2pbes_algorithm
         throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
 
+      if (!preprocess_modal_operators && state_formulas::detail::count_modal_operator_nesting(formula) >= 2)
+      {
+        mCRL2log(log::info) <<
+          "Warning: detected nested modal operators. This may result in a long execution time.\n"
+          "Use the option -m or insert dummy fix point operators in between manually to speed\n"
+          "up the transformation." << std::endl;
+      }
+
       // resolve name conflicts and wrap the formula in a mu or nu if needed
       mCRL2log(log::debug) << "formula before preprocessing: " << state_formulas::pp(formula) << std::endl;
       state_formulas::state_formula f = state_formulas::algorithms::preprocess_state_formula(formula, spec);
