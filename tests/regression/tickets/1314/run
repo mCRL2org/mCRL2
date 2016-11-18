@@ -1,3 +1,3 @@
 mcrl22lps 1.mcrl2 1.lps
 lps2lts 1.lps 1.lts
-lts2pbes -f 1.mcf 1.lts | pbespp
+lts2pbes -f 1.mcf 1.lts | pbespp > 1.txt
