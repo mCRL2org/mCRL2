@@ -361,16 +361,15 @@ def pick_elements(s, n):
         result.append(x)
     return result
 
-# with a 50% probability wrap s inside val
+# with a 100% probability wrap s inside val
 def make_val(s):
-    # TODO: remove this line
-    # return 'val({})'.format(s)
+    return 'val({})'.format(s)
 
-    n = random.randint(0, 1)
-    if n == 0:
-        return 'val({})'.format(s)
-    else:
-        return s
+    #n = random.randint(0, 1)
+    #if n == 0:
+    #    return 'val({})'.format(s)
+    #else:
+    #    return s
 
 def make_predvar(n, size = random.randint(0, 2)):
     name = 'X%d' % n
