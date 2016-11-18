@@ -54,6 +54,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
   {
     try
     {
+      data::detail::check_duplicate_variable_names(x.variables(), "quantifier variable");
       auto m_variable_context_copy = m_variable_context;
       m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
       pbes_expression body = (*this).apply(x.body());
@@ -70,6 +71,7 @@ struct typecheck_builder: public pbes_expression_builder<typecheck_builder>
   {
     try
     {
+      data::detail::check_duplicate_variable_names(x.variables(), "quantifier variable");
       auto m_variable_context_copy = m_variable_context;
       m_variable_context.add_context_variables(x.variables(), m_data_type_checker);
       pbes_expression body = (*this).apply(x.body());
@@ -209,6 +211,14 @@ class pbes_type_checker
       for (pbes_equation& eqn: pbesspec.equations())
       {
         data::detail::variable_context variable_context = m_variable_context;
+        try
+        {
+          data::detail::check_duplicate_variable_names(eqn.variable().parameters(), "propositional variable parameter");
+        }
+        catch (mcrl2::runtime_error& e)
+        {
+          throw mcrl2::runtime_error(std::string(e.what()) + " while typechecking " + pbes_system::pp(eqn.variable()));
+        }
         variable_context.add_context_variables(eqn.variable().parameters(), m_data_type_checker);
         eqn.formula() = detail::make_typecheck_builder(m_data_type_checker, variable_context, m_pbes_context).apply(eqn.formula());
       }
@@ -255,7 +265,7 @@ void type_check_pbes(pbes& pbesspec)
   }
   catch (mcrl2::runtime_error &e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check " + pbes_system::pp(pbesspec));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\nCould not type check " + pbes_system::pp(pbesspec));
   }
 }
 

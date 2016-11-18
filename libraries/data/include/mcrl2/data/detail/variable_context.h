@@ -22,6 +22,21 @@ namespace data {
 
 namespace detail {
 
+// Throws an exception if the names of the variables are not unique
+inline
+void check_duplicate_variable_names(const data::variable_list& x, const std::string& msg)
+{
+  std::set<core::identifier_string> names;
+  for (const data::variable& v: x)
+  {
+    auto p = names.insert(v.name());
+    if (!p.second)
+    {
+      throw mcrl2::runtime_error("Duplicate " + msg + " " + std::string(v.name()) + " encountered");
+    }
+  }
+}
+
 class variable_context
 {
   private:
