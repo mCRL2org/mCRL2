@@ -23,10 +23,9 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
-#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/detail/lts_convert.h"
+#include "mcrl2/lts/lts2lps.h"
 
 
 
@@ -34,7 +33,6 @@
 using namespace mcrl2;
 using mcrl2::utilities::tools::input_output_tool;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::data;
@@ -147,28 +145,11 @@ class lts2lps_tool : public input_output_tool
 
   protected:
 
-    void local_transform(lts_lts_t& l1, lts_lts_t& l2)
+    void retrieve_extra_lts_data(data_specification& data,
+                                 process::action_label_list& action_labels,
+                                 variable_list& process_parameters)
     {
-      if (data_file_type!=none_e)
-      {
-        mCRL2log(warning) << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
-      }
-      l1.swap(l2);
-    }
-
-
-    template <class LTS_TYPE>
-    void local_transform(LTS_TYPE& l1, lts_lts_t& l2)
-    {
-      /* All other LTS_TYPEs than lts_lts_t require an external
-         datatype.
-      */
-      data_specification data;
-      process::action_label_list action_labels;
-      variable_list process_parameters;
-      bool extra_data_is_defined=false;
-
-      /* Read data specification (if any) */
+      /* Read the data specification (if any) */
       if (data_file_type == none_e)
       {
         mCRL2log(warning) << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
@@ -181,7 +162,6 @@ class lts2lps_tool : public input_output_tool
         data = spec.data();
         action_labels = spec.action_labels();
         process_parameters = spec.process().process_parameters();
-        extra_data_is_defined = true;
       }
       else
       {
@@ -217,57 +197,9 @@ class lts2lps_tool : public input_output_tool
           process_specification process_spec = parse_process_specification(lps.str(),false);
           data = process_spec.data();
           action_labels = process_spec.action_labels();
-          extra_data_is_defined = true;
         }
       }
 
-      mcrl2::lts::detail::lts_convert(l1,l2,data,action_labels,process_parameters,extra_data_is_defined);
-    }
-
-    template <class LTS_TYPE>
-    bool transform_lps2lts()
-    {
-      /* Read LTS */
-      LTS_TYPE l1;
-      l1.load(infilename);
-      lts_lts_t l;
-      local_transform(l1,l);
-
-      mCRL2log(verbose) << "Start generating linear process\n";
-
-      action_summand_vector action_summands;
-      const variable process_parameter("x",mcrl2::data::sort_pos::pos());
-      const variable_list process_parameters = { process_parameter };
-      const std::set< data::variable> global_variables;
-      // Add a single delta.
-      const deadlock_summand_vector deadlock_summands(1,deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
-      const process_initializer initial_process(assignment_list({ assignment(process_parameter,sort_pos::pos(l.initial_state()+1)) }));
-
-      const std::vector<transition>& trans=l.get_transitions();
-      for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
-      {
-        const lps::multi_action actions=l.action_label(r->label());
-
-        assignment_list assignments;
-        if (r->from()!=r->to())
-        {
-          assignments=push_back(assignments,assignment(process_parameter,sort_pos::pos(r->to()+1)));
-        }
-
-        const action_summand summand(
-          variable_list(),
-          equal_to(process_parameter,sort_pos::pos(r->from()+1)),
-          actions,
-          assignments);
-        action_summands.push_back(summand);
-      }
-
-      const linear_process lps1(process_parameters,deadlock_summands,action_summands);
-      const specification spec(l.data(),l.action_labels(),global_variables,lps1,initial_process);
-
-      mCRL2log(verbose) << "Start saving the linear process\n";
-      save_lps(spec, output_filename());
-      return true;
     }
 
   public:
@@ -282,17 +214,40 @@ class lts2lps_tool : public input_output_tool
       {
         case lts_lts:
         {
-          return transform_lps2lts<lts_lts_t>();
+          lts_lts_t l;
+          if (data_file_type!=none_e)
+          {
+            mCRL2log(warning) << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
+          }
+          l.load(infilename);
+          save_lps(mcrl2::lts::transform_lts2lps(l),output_filename());
+          return true;
         }
         case lts_none:
           mCRL2log(warning) << "Cannot determine type of input. Assuming .aut.\n";
         case lts_aut:
         {
-          return transform_lps2lts<lts_aut_t>();
+          data_specification data_spec;
+          process::action_label_list action_labels;
+          variable_list process_parameters;
+          retrieve_extra_lts_data(data_spec, action_labels, process_parameters);
+          
+          lts_aut_t l;
+          l.load(infilename);
+          save_lps(mcrl2::lts::transform_lts2lps(l,data_spec, action_labels, process_parameters),output_filename());
+          return true;
         }
         case lts_fsm:
         {
-          return transform_lps2lts<lts_fsm_t>();
+          data_specification data_spec;
+          process::action_label_list action_labels;
+          variable_list process_parameters;
+          retrieve_extra_lts_data(data_spec, action_labels, process_parameters);
+          
+          lts_fsm_t l;
+          l.load(infilename);
+          save_lps(mcrl2::lts::transform_lts2lps(l,data_spec, action_labels, process_parameters),output_filename());
+          return true;
         }
         case lts_dot:
         {
