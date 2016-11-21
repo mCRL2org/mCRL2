@@ -417,16 +417,34 @@ void part_state_t::assert_stability() const
         mCRL2log(log::debug, "bisim_gjkw") << B->debug_id()
                           << " can reach " << R.size() << " constellations.\n";
 
-        // every nonbottom state has an inert transition
-        // (This test is incomplete, but it is what I can think of just now
-        // without programming a graph algorithm. A better test would be: every
-        // nonbottom state has a path, through one or more inert transitions,
-        // to a bottom state.)
         permutation_const_iter_t s_iter = B->nonbottom_begin();
         for (; B->nonbottom_end() != s_iter; ++s_iter)
         {
             state_info_const_ptr s = *s_iter;
+            // the nonbottom state has an inert transition
+            // (This test is incomplete, but it is what I can think of just now
+            // without programming a graph algorithm. A better test would be:
+            // The nonbottom state has a path, through one or more inert
+            // transitions, to a bottom state.)
             assert(s->inert_succ_begin() < s->inert_succ_end());
+
+            // The nonbottom state can reach at most the constellations
+            // declared officially. We do not test every transition, but only
+            // the first and last transition of each constln_slice.
+            succ_const_iter_t succ_iter = s->succ_begin();
+            for (R_const_map_t::const_iterator R_iter = R.begin();
+                                          s->succ_end() != succ_iter; ++R_iter)
+            {
+                do
+                {
+                    assert(R.end() != R_iter);
+                }
+                while (**R_iter < *succ_iter->target->constln() &&
+                                                             (++R_iter, true));
+                assert(succ_iter->target->constln() == *R_iter);
+                succ_iter = succ_iter->constln_slice->end();
+                assert(succ_iter[-1].target->constln() == *R_iter);
+            }
         }
         // walk through all bottom states of block B
         assert(B->bottom_begin() == s_iter);
@@ -441,6 +459,8 @@ void part_state_t::assert_stability() const
             for (R_const_map_t::const_iterator R_iter = R.begin();
                                                    R.end() != R_iter; ++R_iter)
             {
+                // It is understood that each state can reach its own
+                // constellation, even without an explicit transition.
                 if (s->constln() == *R_iter &&
                                  (s->succ_end() == succ_iter
                                   || **R_iter < *succ_iter->target->constln()))
@@ -450,6 +470,7 @@ void part_state_t::assert_stability() const
                 assert(s->succ_end() != succ_iter);
                 assert(succ_iter->target->constln() == *R_iter);
                 succ_iter = succ_iter->constln_slice->end();
+                assert(succ_iter[-1].target->constln() == *R_iter);
             }
             assert(s->succ_end() == succ_iter);
         }
