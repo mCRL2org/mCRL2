@@ -392,10 +392,6 @@ class block_t
     /// block can be found; and if this block has transitions to the current
     /// splitter SpC\SpB, then the first element of the list points to these
     /// transitions.
-    ///
-    /// During postprocess_new_bottom, this list may be incomplete because some
-    /// of its elements are temporarily moved to the list of B_to_C_descriptors
-    /// that need postprocessing.
     B_to_C_desc_list to_constln;
   private:
     /// constellation to which the block belongs
@@ -1043,6 +1039,11 @@ class part_state_t
     /// print the partition as a tree (per constellation and block)
     void print_part(const part_trans_t& part_tr) const;
     void print_trans() const;
+
+    /// verify that the partition is stable. i.e. every bottom state in a block
+    /// can reach all constellations in the list of constellations reachable
+    /// from it.
+    void assert_stability() const;
 #endif
 };
 

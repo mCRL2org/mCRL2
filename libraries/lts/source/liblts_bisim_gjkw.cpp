@@ -228,6 +228,23 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
 }
 
 
+/// \brief function object to compare two constln_t pointers based on their
+/// contents
+class constln_ptr_less
+{
+  public:
+    bool operator() (const bisim_gjkw::constln_t* a,
+                                          const bisim_gjkw::constln_t* b) const
+    {
+        return *a < *b;
+    }
+};
+
+
+typedef std::set<constln_t*, constln_ptr_less> R_map_t;
+typedef std::set<const constln_t*, constln_ptr_less> R_const_map_t;
+
+
 #ifndef NDEBUG
 
 void part_state_t::print_block(const char*const message, const block_t*const B,
@@ -376,6 +393,72 @@ void part_state_t::print_trans() const
             }
         }
     }
+}
+
+
+/// verify that the partition is stable. i.e. every bottom state in every block
+/// can reach exactly the constellations in the list of constellations that
+/// should be reachable from it.
+void part_state_t::assert_stability() const
+{
+    const block_t* B = (*permutation.begin())->block;
+    for (;;)
+    {
+        // create an ordered list of constellations reachable from this
+        // block, based on the list of B_to_C_slices
+        R_const_map_t R;
+        for (B_to_C_desc_const_iter_t iter = B->to_constln.begin();
+                                          B->to_constln.end() != iter ; ++iter)
+        {
+            assert(iter->from_block() == B);
+            R.insert(iter->to_constln());
+        }
+
+        mCRL2log(log::debug, "bisim_gjkw") << B->debug_id()
+                          << " can reach " << R.size() << " constellations.\n";
+
+        // every nonbottom state has an inert transition
+        // (This test is incomplete, but it is what I can think of just now
+        // without programming a graph algorithm. A better test would be: every
+        // nonbottom state has a path, through one or more inert transitions,
+        // to a bottom state.)
+        permutation_const_iter_t s_iter = B->nonbottom_begin();
+        for (; B->nonbottom_end() != s_iter; ++s_iter)
+        {
+            state_info_const_ptr s = *s_iter;
+            assert(s->inert_succ_begin() < s->inert_succ_end());
+        }
+        // walk through all bottom states of block B
+        assert(B->bottom_begin() == s_iter);
+        assert(B->bottom_end() != s_iter);
+        do
+        {
+            state_info_const_ptr const s = *s_iter;
+            mCRL2log(log::debug, "bisim_gjkw") << s->debug_id() << ' ';
+            // verify the state can reach each of the constellations, and
+            // no others
+            succ_const_iter_t succ_iter = s->succ_begin();
+            for (R_const_map_t::const_iterator R_iter = R.begin();
+                                                   R.end() != R_iter; ++R_iter)
+            {
+                if (s->constln() == *R_iter &&
+                                 (s->succ_end() == succ_iter
+                                  || **R_iter < *succ_iter->target->constln()))
+                {
+                    continue;
+                }
+                assert(s->succ_end() != succ_iter);
+                assert(succ_iter->target->constln() == *R_iter);
+                succ_iter = succ_iter->constln_slice->end();
+            }
+            assert(s->succ_end() == succ_iter);
+        }
+        while (B->bottom_end() != ++s_iter);
+        // go to next block
+        if (permutation.end() == B->end())  break;
+        B = (*B->end())->block;
+    }
+    return;
 }
 
 #endif // ifndef NDEBUG
@@ -1252,7 +1335,7 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
     states_per_block(1, l.num_states()),
     nr_of_nonbottom_states(0)
 {
-//    log::mcrl2_logger::set_reporting_level(log::debug);
+    log::mcrl2_logger::set_reporting_level(log::debug);
 
     mCRL2log(log::verbose) << "O(m log n) "
                 << (preserve_divergence ? "Divergence preserving b" : "B")
@@ -1709,6 +1792,12 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
 {
     std::vector<bisim_gjkw::state_info_ptr> new_bottom_states;
 
+    #ifndef NDEBUG
+        part_tr.print_part(part_tr);
+        part_tr.print_trans();
+
+        part_tr.assert_stability();
+    #endif
     // 2.4: while C contains a nontrivial constellation SpC do
     while (nullptr != bisim_gjkw::constln_t::get_some_nontrivial())
     {
@@ -1903,6 +1992,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         #ifndef NDEBUG
             part_tr.print_part(part_tr);
             part_tr.print_trans();
+
+            part_tr.assert_stability();
         #endif
     // 2.30: end while
     }
@@ -1911,10 +2002,6 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // data)
     mCRL2log(log::verbose) << "number of blocks in the quotient: "
                                   << bisim_gjkw::block_t::nr_of_blocks << "\n";
-    #ifndef NDEBUG
-        part_tr.print_part(part_tr);
-        part_tr.print_trans();
-    #endif
 }
 
 
@@ -2616,21 +2703,6 @@ END_COROUTINE
 
 
 
-/// \brief function object to compare two constln_t pointers based on their
-/// contents
-class constln_ptr_less
-{
-  public:
-    bool operator() (const bisim_gjkw::constln_t* a,
-                                          const bisim_gjkw::constln_t* b) const
-    {
-        return *a < *b;
-    }
-};
-
-
-typedef std::set<bisim_gjkw::constln_t*, constln_ptr_less> R_map_t;
-
 /// \brief Split a block with new bottom states as needed
 /// \details The function splits SplitB by checking whether all new bottom
 /// states can reach the constellations that SplitB can reach.
@@ -2647,7 +2719,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_block(
     /*------- collect constellations reachable from new bottom states -------*/
 
     // 4.3: Create an empty search tree R
-    R_map_t R;
+    bisim_gjkw::R_map_t R;
 Line_4_4:
     // 4.4: Red := {old bottom states and new bottom states handled earlier in
     //              SplitB}
