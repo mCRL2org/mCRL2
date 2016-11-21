@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
@@ -382,10 +383,10 @@ class bisimulation_algorithm
       const lps::linear_process& s = S.process();
 
       // TODO: the data of the two specification needs to be merged!
-      const data::data_specification& data = M.data();
+      data::data_specification dataspec = data::merge_data_specifications(M.data(), S.data());
       propositional_variable_instantiation init(X(m, s), M.initial_process().state(M.process().process_parameters()) + S.initial_process().state(S.process().process_parameters()));
 
-      pbes result(data, equations, init);
+      pbes result(dataspec, equations, init);
       assert(result.is_closed());
       return result;
     }
