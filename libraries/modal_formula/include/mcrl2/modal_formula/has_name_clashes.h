@@ -75,16 +75,138 @@ class state_formula_name_clash_checker: public state_formulas::state_formula_tra
     }
 };
 
+/// \brief Traverser that checks for name clashes in parameters of nested mu's/nu's and forall/exists.
+class state_formula_parameter_name_clash_checker: public state_formulas::state_formula_traverser<state_formula_parameter_name_clash_checker>
+{
+  public:
+    typedef state_formulas::state_formula_traverser<state_formula_parameter_name_clash_checker> super;
+
+    using super::apply;
+    using super::enter;
+    using super::leave;
+
+    std::set<core::identifier_string> m_names;
+
+    // throws an exception if name was already present in m_names
+    void insert(const core::identifier_string& name, const state_formula& x)
+    {
+      auto p = m_names.insert(name);
+      if (!p.second)
+      {
+        throw mcrl2::runtime_error("Data parameter " + data::pp(name) + " in subformula " + state_formulas::pp(x) + " clashes with a data parameter in an enclosing formula.");
+      }
+    }
+
+    void erase(const core::identifier_string& name)
+    {
+      m_names.erase(name);
+    }
+
+    void enter(const mu& x)
+    {
+      for (const data::assignment& a: x.assignments())
+      {
+        insert(a.lhs().name(), x);
+      }
+    }
+
+    void leave(const mu& x)
+    {
+      for (const data::assignment& a: x.assignments())
+      {
+        erase(a.lhs().name());
+      }
+    }
+
+    void enter(const nu& x)
+    {
+      for (const data::assignment& a: x.assignments())
+      {
+        insert(a.lhs().name(), x);
+      }
+    }
+
+    void leave(const nu& x)
+    {
+      for (const data::assignment& a: x.assignments())
+      {
+        erase(a.lhs().name());
+      }
+    }
+
+    void enter(const forall& x)
+    {
+      for (const data::variable& v: x.variables())
+      {
+        insert(v.name(), x);
+      }
+    }
+
+    void leave(const forall& x)
+    {
+      for (const data::variable& v: x.variables())
+      {
+        erase(v.name());
+      }
+    }
+
+    void enter(const exists& x)
+    {
+      for (const data::variable& v: x.variables())
+      {
+        insert(v.name(), x);
+      }
+    }
+
+    void leave(const exists& x)
+    {
+      for (const data::variable& v: x.variables())
+      {
+        erase(v.name());
+      }
+    }
+};
+
 } // namespace detail
 
-/// \brief Throws a mcrl2::runtime_exception if the formula contains name clashes
+/// \brief Throws an exception if the formula contains name clashes
 inline
-bool has_name_clashes(const state_formula& f)
+void check_name_clashes(const state_formula& x)
+{
+  detail::state_formula_name_clash_checker checker;
+  checker.apply(x);
+}
+
+/// \brief Returns true if the formula contains name clashes
+inline
+bool has_name_clashes(const state_formula& x)
 {
   try
   {
-    detail::state_formula_name_clash_checker checker;
-    checker.apply(f);
+    check_name_clashes(x);
+  }
+  catch (mcrl2::runtime_error)
+  {
+    return true;
+  }
+  return false;
+}
+
+/// \brief Throws an exception if the formula contains name clashes in the parameters of mu/nu/exists/forall
+inline
+void check_parameter_name_clashes(const state_formula& x)
+{
+  detail::state_formula_parameter_name_clash_checker checker;
+  checker.apply(x);
+}
+
+/// \brief Returns true if the formula contains parameter name clashes
+inline
+bool has_parameter_name_clashes(const state_formula& x)
+{
+  try
+  {
+    check_parameter_name_clashes(x);
   }
   catch (mcrl2::runtime_error)
   {

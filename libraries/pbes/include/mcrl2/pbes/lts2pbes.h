@@ -12,18 +12,14 @@
 #ifndef MCRL2_PBES_LTS2PBES_H
 #define MCRL2_PBES_LTS2PBES_H
 
-//#define MCRL2_LTS2PBES_DEBUG
-#ifdef MCRL2_LTS2PBES_DEBUG
-#define MCRL2_PBES_TRANSLATE_DEBUG
-#endif
-
 #include <map>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/algorithms.h"
-#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
+#include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/normalize.h"
+#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/lts2pbes_lts.h"
 #include "mcrl2/pbes/detail/lts2pbes_e.h"
@@ -67,6 +63,9 @@ class lts2pbes_algorithm
       lps::specification spec;
       state_formulas::state_formula f = state_formulas::algorithms::preprocess_state_formula(formula, spec);
       mCRL2log(log::debug) << "formula after preprocessing:  " << state_formulas::pp(f) << std::endl;
+
+      // check for parameter name clashes like these mu X(n: Nat). forall n: Nat
+      state_formulas::check_parameter_name_clashes(f);
 
       // remove occurrences of ! and =>
       if (!state_formulas::algorithms::is_normalized(f))

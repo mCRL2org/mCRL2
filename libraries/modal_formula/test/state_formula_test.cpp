@@ -389,3 +389,18 @@ BOOST_AUTO_TEST_CASE(parse_modal_formula_test)
   BOOST_CHECK_EQUAL(s, formula_text);
 }
 
+BOOST_AUTO_TEST_CASE(check_parameter_name_clashes_test)
+{
+  const std::string text =
+    "act a, b, c;                  \n"
+    "                              \n"
+    "proc P = delta;               \n"
+    "                              \n"
+    "init P;                       \n"
+    ;
+  lps::specification lpsspec = lps::parse_linear_process_specification(text);
+
+  BOOST_CHECK(has_parameter_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(n: Nat = 1). val(n == 0)", lpsspec)));
+  BOOST_CHECK(!has_parameter_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(m: Nat = 1). val(n == 0)", lpsspec)));
+}
+

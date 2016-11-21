@@ -9,8 +9,6 @@
 /// \file mcrl22lps.cpp
 /// \brief Add your file description here.
 
-// #define MCRL2_PBES_TRANSLATE_DEBUG
-
 #include <iostream>
 #include <string>
 #include "mcrl2/lps/specification.h"

@@ -16,15 +16,14 @@
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/modal_formula/algorithms.h"
-#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
+#include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/is_monotonous.h"
-#include "mcrl2/pbes/detail/lps2pbes_indenter.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/lps2pbes_rhs.h"
 #include "mcrl2/pbes/detail/lps2pbes_e.h"
@@ -101,6 +100,9 @@ class lps2pbes_algorithm
       }
       mCRL2log(log::debug) << "formula after normalization:  " << state_formulas::pp(f) << std::endl;
       assert(state_formulas::algorithms::is_normalized(f));
+
+      // check for parameter name clashes like these mu X(n: Nat). forall n: Nat
+      state_formulas::check_parameter_name_clashes(f);
 
       data::set_identifier_generator id_generator;
       std::set<core::identifier_string> ids = lps::find_identifiers(spec);
