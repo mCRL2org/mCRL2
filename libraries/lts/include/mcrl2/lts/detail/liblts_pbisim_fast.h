@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/detail/liblts_plts_merge.h"
 
 namespace mcrl2
 {
@@ -63,7 +64,7 @@ class prob_bisim_partitioner_fast
     /** \brief Gives the bisimulation equivalence step class number of a probabilistic state.
     *  \param[in] s A probabilistic state number.
     *  \return The number of the step class to which d belongs. */
-    size_t get_eq_step_class(const size_t s)
+    size_t get_eq_probabilistic_class(const size_t s) const
     {
       assert(s<probabilistic_states_iter.size());
       return probabilistic_states_iter[s]->block_key; // The block index is the state number of the block.
@@ -80,28 +81,14 @@ class prob_bisim_partitioner_fast
     {
       std::set<transition> resulting_transitions;
 
-      block_key_type block_key_of_initial_state = probabilistic_states_iter[aut.num_probabilistic_labels()]->block_key;
-      probabilistic_block_type& block_of_initial_state = *probabilistic_blocks_iter[block_key_of_initial_state];
-      ignore_block = probabilistic_blocks_iter.size(); //it will not ignore any in this case
-      if (block_of_initial_state.states.size() == 1)
-      {
-        // only th einitial state is in the block, then we should ignor it
-        ignore_block = block_key_of_initial_state;
-      }
-
       const std::vector<transition>& trans = aut.get_transitions();
       for (const transition& t: trans)
       {
-        size_t prob_equivalent_class = get_eq_step_class(t.to());
-        if (prob_equivalent_class > ignore_block)
-        {
-          prob_equivalent_class--;
-        }
         resulting_transitions.insert(
           transition(
             get_eq_class(t.from()),
             t.label(),
-            prob_equivalent_class));
+            get_eq_probabilistic_class(t.to())));
       }
       // Remove the old transitions
       aut.clear_transitions();
@@ -145,6 +132,16 @@ class prob_bisim_partitioner_fast
       aut.set_initial_probabilistic_state(new_initial_prob_state);
     }
 
+    /** \brief Returns whether two states are in the same probabilistic bisimulation equivalence class.
+    *  \param[in] s A state number.
+    *  \param[in] t A state number.
+    *  \retval true if \e s and \e t are in the same bisimulation equivalence class;
+    *  \retval false otherwise. */
+    bool in_same_probabilistic_class(const size_t s, const size_t t) const
+    {
+      return get_eq_probabilistic_class(s) == get_eq_probabilistic_class(t);
+    }
+
   protected:
 
     typedef size_t block_key_type;
@@ -165,6 +162,7 @@ class prob_bisim_partitioner_fast
       // Temporary.
       probability_label_type cumulative_probability; 
       size_t residual_transition_cnt;
+      size_t* new_transition_count_ptr;
     };
 
     struct mark_type
@@ -184,7 +182,8 @@ class prob_bisim_partitioner_fast
       state_key_type from;
       label_type label;
       state_key_type to;
-      size_t block_to_constellation_count;
+      //size_t block_to_constellation_count;
+      size_t* block_to_constellation_count_ptr;
     };
 
     struct probabilistic_transition_type
@@ -250,8 +249,6 @@ class prob_bisim_partitioner_fast
       std::vector<constellation_key_type> probabilistic;
     };
 
-
-
     global_type global;
     std::list<action_constellation_type>& a_constellations = global.action_constellations;
     std::list<probabilistic_constellation_type>& p_constellations = global.probabilistic_constellations;
@@ -264,6 +261,7 @@ class prob_bisim_partitioner_fast
     std::vector<typename std::list<probabilistic_constellation_type>::iterator> probabilistic_constellations_iter;
     std::vector<typename std::list<action_transition_type>::iterator > action_transitions_iter;
     std::vector<typename std::list<probabilistic_transition_type>::iterator > probabilistic_transitions_iter;
+    std::deque<size_t> block_to_constellation_count;
     //non_trivial_constellations_type non_trivial_constellations;
     block_key_type ignore_block;
 
@@ -274,7 +272,7 @@ class prob_bisim_partitioner_fast
     *         The step classes are partitioned based on the action that leads to the probabilistic state */
     void create_initial_partition(void)
     {
-      const size_t num_prob_states = aut.num_probabilistic_labels()+1; // plus one for the initial state.
+      const size_t num_prob_states = aut.num_probabilistic_labels();
       std::list<state_type> a_states;
       std::list<state_type> p_states;
       std::vector< std::list<action_transition_type> > a_transitions_per_label;
@@ -291,6 +289,7 @@ class prob_bisim_partitioner_fast
       {
         state_type& state = *i;
         state.key = key;
+        state.new_transition_count_ptr = NULL;
         action_states_iter.push_back(i);
         key++;
       }
@@ -316,7 +315,7 @@ class prob_bisim_partitioner_fast
         at.from = t.from();
         at.label =  t.label();
         at.to = t.to();
-        at.block_to_constellation_count = 0;
+        at.block_to_constellation_count_ptr = NULL;
 
         if (a_transitions_per_label[at.label].size() == 0)
         {
@@ -335,7 +334,7 @@ class prob_bisim_partitioner_fast
 
       // Initialize the probabilistic transitions.
       key = 0;
-      for (size_t i = 0; i < num_prob_states - 1; i++)
+      for (size_t i = 0; i < num_prob_states; i++)
       {
         const lts_aut_base::probabilistic_state& ps = aut.probabilistic_state(i);
 
@@ -355,25 +354,6 @@ class prob_bisim_partitioner_fast
 
           key++;
         }
-      }
-
-      // Add transitions of the initial probabilistic state
-      const lts_aut_base::probabilistic_state& initial_ps = aut.initial_probabilistic_state();
-      for (const lts_aut_base::state_probability_pair& sp_pair: initial_ps)
-      {
-        probabilistic_transition_type pt;
-        pt.key = key;
-        pt.from = num_prob_states - 1;
-        pt.label = sp_pair.probability();
-        pt.to = sp_pair.state();
-        p_transitions.push_back(pt);
-        probabilistic_transitions_iter.push_back(--p_transitions.end());
-
-        // init incoming action transitions in states
-        state_type& s = *action_states_iter[pt.to];
-        s.incoming_transitions.push_back(pt.key);
-
-        key++;
       }
 
       // 1.3: Initialize pi partition and constellations
@@ -497,11 +477,20 @@ class prob_bisim_partitioner_fast
         }
         for (action_transition_type& at: at_list_per_label)
         {
-          at.block_to_constellation_count = block_to_const_count_temp[at.from];
+          state_type& s = *action_states_iter[at.from];
+          if (s.new_transition_count_ptr == NULL)
+          {
+            block_to_constellation_count.emplace_back(block_to_const_count_temp[at.from]);
+            s.new_transition_count_ptr = &block_to_constellation_count.back();
+          }
+          
+          at.block_to_constellation_count_ptr = s.new_transition_count_ptr;
         }
         for (const action_transition_type& at: at_list_per_label)
         {
+          state_type& s = *action_states_iter[at.from];
           block_to_const_count_temp[at.from] = 0;
+          s.new_transition_count_ptr = NULL;
         }
       }
     }
@@ -937,7 +926,7 @@ class prob_bisim_partitioner_fast
         {
           u.mark_state = true;
           marked_states.push_back(u.key);
-          u.residual_transition_cnt = at.block_to_constellation_count;
+          u.residual_transition_cnt = *at.block_to_constellation_count_ptr;
           B.mark.left.splice(B.mark.left.begin(), B.mark.right, action_states_iter[u.key]);
           B.mark.left_temp.push_back(u.key);
         }
@@ -980,20 +969,49 @@ class prob_bisim_partitioner_fast
         }
       }
 
+      // update the block_to_constellation_count for each transition
+      for (action_transition_type& at : Bc.incoming_action_transitions[a])
+      {
+        state_type& u = *action_states_iter[at.from];
+
+        // if the residual_transition_cnt is greater than zero, it means that the state
+        // is in the middle set; hence, the block_to_constellation_count has to be updated.
+        if (u.residual_transition_cnt > 0)
+        {
+          size_t block_to_constellation_count_temp = *at.block_to_constellation_count_ptr;
+
+          if (block_to_constellation_count_temp != u.residual_transition_cnt)
+          {
+            size_t* count_in_C_block = at.block_to_constellation_count_ptr;
+
+            // first update the block_to_constellation_count in constellation C, with
+            // the residual_transition_cnt
+            *count_in_C_block = u.residual_transition_cnt;
+
+            // now create another block_to_constellation_count for the Bc block
+            block_to_constellation_count.emplace_back(block_to_constellation_count_temp - u.residual_transition_cnt);
+            u.new_transition_count_ptr = &block_to_constellation_count.back();
+          }
+
+          at.block_to_constellation_count_ptr = u.new_transition_count_ptr;
+        }
+      }
+
       //clean left_t of all marked blocks
-      for (const block_key_type B_key: marked_blocks)
+      for (const block_key_type B_key : marked_blocks)
       {
         action_block_type& B = *action_blocks_iter[B_key];
         B.mark.left_temp.erase(B.mark.left_temp.begin(), B.mark.left_temp.end());
       }
 
       //clean temporal variable of states marked
-      for (const state_key_type& u_key: marked_states)
+      for (const state_key_type& u_key : marked_states)
       {
         state_type& u = *action_states_iter[u_key];
         u.mark_state = false;
         u.residual_transition_cnt = 0;
       }
+
     }
 
     action_block_type* choose_action_splitter(constellation_key_type constellation_key)
@@ -1094,7 +1112,7 @@ class prob_bisim_partitioner_fast
       typename std::list<state_type>::iterator i = pb.states.begin();
       state_type& s = *i;
 
-      lts_aut_base::probabilistic_state old_prob_state = aut.probabilistic_state(s.key);
+      const lts_aut_base::probabilistic_state& old_prob_state = aut.probabilistic_state(s.key);
 
       equivalent_prob_state = calculate_new_probabilistic_state(old_prob_state);
 
@@ -1108,7 +1126,26 @@ class prob_bisim_partitioner_fast
 * \param[in/out] l The transition system that is reduced.
 */
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce(LTS_TYPE& l);
+void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l);
+
+/** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
+* \details This lts and the lts l2 are not usable anymore after this call.
+* \param[in/out] l1 A first probabilistic transition system.
+* \param[in/out] l2 A second probabilistic transition system.
+* \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
+template < class LTS_TYPE>
+bool destructive_probabilistic_bisimulation_compare(LTS_TYPE& l1, LTS_TYPE& l2);
+
+
+/** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
+*  \details The current transitions system and the lts l2 are first duplicated and subsequently
+*           reduced modulo bisimulation. If memory space is a concern, one could consider to
+*           use destructive_bisimulation_compare. 
+* \param[in/out] l1 A first transition system.
+* \param[in/out] l2 A second transistion system.
+* \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
+template < class LTS_TYPE>
+bool probabilistic_bisimulation_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
 
 
 template < class LTS_TYPE>
@@ -1125,6 +1162,40 @@ void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l)
   prob_bisim_part.replace_transitions();
   prob_bisim_part.replace_probabilistic_states();
 }
+
+template < class LTS_TYPE>
+bool probabilistic_bisimulation_compare(
+  const LTS_TYPE& l1,
+  const LTS_TYPE& l2)
+{
+  LTS_TYPE l1_copy(l1);
+  LTS_TYPE l2_copy(l2);
+  return destructive_probabilistic_bisimulation_compare(l1_copy, l2_copy);
+}
+
+template < class LTS_TYPE>
+bool destructive_probabilistic_bisimulation_compare(
+  LTS_TYPE& l1,
+  LTS_TYPE& l2)
+{
+  size_t initial_probabilistic_state_key_l1;
+  size_t initial_probabilistic_state_key_l2;
+
+  // Merge states
+  mcrl2::lts::detail::plts_merge(l1, l2);
+  l2.clear(); // No use for l2 anymore.
+
+  // The last two probabilistic states are the initial states of l2 and l1
+  // in the merged plts
+  initial_probabilistic_state_key_l2 = l1.num_probabilistic_labels()-1;
+  initial_probabilistic_state_key_l1 = l1.num_probabilistic_labels()-2;
+
+  detail::prob_bisim_partitioner_fast<LTS_TYPE> prob_bisim_part(l1);
+
+  return prob_bisim_part.in_same_probabilistic_class(initial_probabilistic_state_key_l2,
+                                                initial_probabilistic_state_key_l1);
+}
+
 
 } // end namespace detail
 } // end namespace lts
