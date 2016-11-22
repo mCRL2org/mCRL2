@@ -17,7 +17,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
-#include "mcrl2/lts/detail/liblts_pbisim_fast.h"
 
 namespace mcrl2
 {
@@ -814,13 +813,11 @@ bool destructive_probabilistic_bisimulation_compare(
   initial_probabilistic_state_key_l2 = l1.num_probabilistic_labels() - 1;
   initial_probabilistic_state_key_l1 = l1.num_probabilistic_labels() - 2;
 
-  detail::prob_bisim_partitioner_fast<LTS_TYPE> prob_bisim_part(l1);
+  detail::prob_bisim_partitioner<LTS_TYPE> prob_bisim_part(l1);
 
   return prob_bisim_part.in_same_probabilistic_class(initial_probabilistic_state_key_l2,
     initial_probabilistic_state_key_l1);
 }
-
-
 
 }
 }
