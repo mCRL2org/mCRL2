@@ -1560,7 +1560,8 @@ init_transitions(part_trans_t& part_tr,
             state_type const extra_state = extra_kripke_states[k];
             if (0 != noninert_out_per_state[extra_state])
             {
-                state_type const extra_block = action_block_map[aut.apply_hidden_label_map(t.label())];
+                state_type const extra_block = 
+                       action_block_map[aut.apply_hidden_label_map(t.label())];
                 // now initialise extra_state correctly
                 part_tr.state_info[extra_state].block = blocks[extra_block];
                 assert(0 < states_per_block[extra_block]);
@@ -2732,10 +2733,10 @@ END_COROUTINE
 /// are marked.
 template <class LTS_TYPE>
 void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_block(
-                                                   bisim_gjkw::block_t* SplitB)
+                                                     bisim_gjkw::block_t* RfnB)
 {
     //mCRL2log(log::debug, "bisim_gjkw") << "Postprocessing "
-    //                                           << SplitB->debug_id() << "\n";
+    //                                             << RfnB->debug_id() << "\n";
 
     /*------- collect constellations reachable from new bottom states -------*/
 
@@ -2743,22 +2744,22 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_block(
     bisim_gjkw::R_map_t R;
 Line_4_4:
     // 4.4: Red := {old bottom states and new bottom states handled earlier in
-    //              SplitB}
+    //              RfnB}
     bisim_gjkw::permutation_iter_t const orig_new_bottom_end =
-                                                 SplitB->unmarked_bottom_end();
-    assert(0 < SplitB->unmarked_bottom_size());
+                                                   RfnB->unmarked_bottom_end();
+    assert(0 < RfnB->unmarked_bottom_size());
     // 4.5: repeat
     do
     {
         bisim_gjkw::check_complexity::count("repeat until no more new bottom "
                        "states are found", 1, bisim_gjkw::check_complexity::n);
-        // 4.6: for all new bottom states b in SplitB not handled earlier do
+        // 4.6: for all new bottom states b in RfnB not handled earlier do
         for (bisim_gjkw::permutation_iter_t
-                        b_iter = SplitB->unmarked_bottom_begin();
-                             SplitB->unmarked_bottom_end() != b_iter; ++b_iter)
+                        b_iter = RfnB->unmarked_bottom_begin();
+                               RfnB->unmarked_bottom_end() != b_iter; ++b_iter)
         {
             bisim_gjkw::check_complexity::count("for all new bottom states in "
-                                 "SplitB", 1, bisim_gjkw::check_complexity::n);
+                                 "RfnB", 1, bisim_gjkw::check_complexity::n);
             bisim_gjkw::state_info_ptr const b = *b_iter;
             // 4.7: for all constellations C reachable from b do
             for (bisim_gjkw::succ_iter_t C_iter = b->succ_begin();
@@ -2773,7 +2774,7 @@ Line_4_4:
                                                   C_iter->B_to_C->B_to_C_slice;
                 // 4.8: Add C to R
                 // and
-                // 4.9: if the transitions SplitB --> C do not need
+                // 4.9: if the transitions RfnB --> C do not need
                 //         postprocessing then
                 if (R.insert(C).second) //< complexity log(n)
                 {
@@ -2782,19 +2783,19 @@ Line_4_4:
                     // the constellation was not yet in R: no transitions to C
                     // are registered as needing postprocessing.
                     assert(C->postprocess_begin == C->postprocess_end);
-                    // 4.10: Register that the transitions from SplitB to C
-                    //       need postprocessing
+                    // 4.10: Register that the transitions from RfnB to C need
+                    //       postprocessing
                         // set pointer to the end of the slice
                     C->postprocess_end = new_slice->end;
                 }
                 else if (C->postprocess_begin <= new_slice->begin)
                 {
                     // the constellation already was in R and the transitions
-                    // from SplitB to C are already registered.  (Strict <
+                    // from RfnB to C are already registered.  (Strict <
                     // instead of == is possible after backtracking.)
                     assert(new_slice->end <= C->postprocess_end);
                     assert(new_slice->new_bottom_end >= orig_new_bottom_end);
-                    assert(new_slice->new_bottom_end <= SplitB->bottom_end());
+                    assert(new_slice->new_bottom_end <= RfnB->bottom_end());
                     continue;
                 }
                 else
@@ -2803,22 +2804,22 @@ Line_4_4:
                     // still need to be registered.  This only happens after
                     // backtracking (see Line 5.25 below).
 
-                    // 4.10: Register that the transitions from SplitB to C
-                    //       need postprocessing
+                    // 4.10: Register that the transitions from RfnB to C need
+                    //       postprocessing
                         // make sure the pointer to the end of the slice is
                         // already set to the correct value
                     assert(C->postprocess_begin == new_slice->end);
                 }
-                // 4.10: Register that the transitions from SplitB to C need
+                // 4.10: Register that the transitions from RfnB to C need
                 //      postprocessing
                     // set pointer to the beginning of the slice
                 C->postprocess_begin = new_slice->begin;
                 assert(C->postprocess_begin < C->postprocess_end);
                 // 4.11: Store Red with this postprocessing step
                 new_slice->new_bottom_end = orig_new_bottom_end;
-                assert(new_slice->from_block() == SplitB);
-                SplitB->to_constln.splice(SplitB->to_constln.end(),
-                                                SplitB->to_constln, new_slice);
+                assert(new_slice->from_block() == RfnB);
+                RfnB->to_constln.splice(RfnB->to_constln.end(),
+                                                  RfnB->to_constln, new_slice);
                 // 4.12: end if
                     // is implicit in the `continue` statement above
             // 4.13: end for
@@ -2828,37 +2829,54 @@ Line_4_4:
             b->set_current_constln(b->succ_begin());
         // 4.15: end for
         }
-        // 4.16: if SplitB can reach some constellation C not in R then
-        assert(SplitB->to_constln.begin() != SplitB->to_constln.end());
-        if (!SplitB->to_constln.begin()->needs_postprocessing())
+        // 4.16: if RfnB can reach some constellation C not in R then
+        assert(RfnB->to_constln.begin() != RfnB->to_constln.end());
+        if (!RfnB->to_constln.begin()->needs_postprocessing())
         {
             assert(part_tr.permutation.begin() ==
-                                   SplitB->to_constln.begin()->new_bottom_end);
+                                     RfnB->to_constln.begin()->new_bottom_end);
             bisim_gjkw::constln_t* const C =
-                                      SplitB->to_constln.begin()->to_constln();
+                                        RfnB->to_constln.begin()->to_constln();
             //mCRL2log(log::debug, "bisim_gjkw") << "\tcanNOT reach "
             //                                        << C->debug_id() << "\n";
-            // 4.17: SplitB := Refine(SplitB, C, Red := {old bottom states and
-            //                        new bottom states handled earlier in
-            //                        SplitB}, FromRed := {transitions to C},
-            //                        allOtherBottomBlue := true)
-            SplitB = refine(SplitB, C, SplitB->FromRed(C), true, true);
-            assert(SplitB->marked_bottom_begin() <= orig_new_bottom_end &&
-                           orig_new_bottom_end <= SplitB->marked_bottom_end());
+            #ifndef NDEBUG
+               bisim_gjkw::permutation_const_iter_t const blue_begin =
+                                                                 RfnB->begin();
+            #endif
+            // 4.17: RfnB := Refine(RfnB, C, Red := {old bottom states and new
+            //                      bottom states handled earlier in RfnB},
+            //                      FromRed := {transitions to C},
+            //                      allOtherBottomBlue := true)
+            RfnB = refine(RfnB, C, RfnB->FromRed(C), true, true);
+            assert(RfnB->marked_bottom_begin() <= orig_new_bottom_end &&
+                             orig_new_bottom_end <= RfnB->marked_bottom_end());
+            #ifndef NDEBUG
+                // make sure the blue subblock is not empty and only can reach
+                // constellations that are in R:
+                const bisim_gjkw::block_t* const BlueB = (*blue_begin)->block;
+                assert(BlueB != RfnB);
+                for (bisim_gjkw::B_to_C_desc_const_iter_t
+                                iter = BlueB->to_constln.begin();
+                                       BlueB->to_constln.end() != iter; ++iter)
+
+                {
+                    assert(iter->needs_postprocessing());
+                }
+            #endif
         // 4.18: end if
         }
     // 4.19: until Line 4.17 was skipped or ...
         else
         {
-            assert(SplitB->bottom_begin() <=
-                                   SplitB->to_constln.begin()->new_bottom_end);
-            assert(SplitB->to_constln.begin()->new_bottom_end <=
-                                                         SplitB->bottom_end());
+            assert(RfnB->bottom_begin() <=
+                                     RfnB->to_constln.begin()->new_bottom_end);
+            assert(RfnB->to_constln.begin()->new_bottom_end <=
+                                                           RfnB->bottom_end());
             break;
         }
     // 4.19 (continued): ... or Line 4.17 did not find more new bottom states
     }
-    while (0 < SplitB->unmarked_bottom_size());
+    while (0 < RfnB->unmarked_bottom_size());
 
     /*---------------- stabilise w.r.t. found constellations ----------------*/
 
@@ -2944,8 +2962,8 @@ Line_4_4:
             // 4.27: if Line 4.23 has found more new bottom states then
             if (0 < RedB->unmarked_bottom_size())
             {
-                // 4.28: SplitB := RedB
-                SplitB = RedB;
+                // 4.28: RfnB := RedB
+                RfnB = RedB;
                 // 4.29: Restart the procedure (but keep R),
                 //       i. e. go to Line 4.4
                 goto Line_4_4;
