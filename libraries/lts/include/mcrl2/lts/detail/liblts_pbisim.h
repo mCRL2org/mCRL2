@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/detail/liblts_plts_merge.h"
+#include "mcrl2/lts/detail/liblts_pbisim_fast.h"
 
 namespace mcrl2
 {

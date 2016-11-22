@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg, Jan Friso Groote, Hector Joao Rivera Verduzco
+// Author(s): Hector Joao Rivera Verduzco
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -28,6 +28,7 @@
 #ifndef MCRL2_LTS_LIBLTS_MERGE_H
 #define MCRL2_LTS_LIBLTS_MERGE_H
 
+#include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts.h"
 
 namespace mcrl2
