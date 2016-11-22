@@ -133,6 +133,16 @@ class prob_bisim_partitioner
       aut.set_initial_probabilistic_state(new_initial_prob_state);
     }
 
+    /** \brief Returns whether two states are in the same probabilistic bisimulation equivalence class.
+    *  \param[in] s A state number.
+    *  \param[in] t A state number.
+    *  \retval true if \e s and \e t are in the same bisimulation equivalence class;
+    *  \retval false otherwise. */
+    bool in_same_probabilistic_class(const size_t s, const size_t t) const
+    {
+      return get_eq_step_class(s) == get_eq_step_class(t);
+    }
+
   private:
 
 	typedef size_t block_key_type;
@@ -739,6 +749,25 @@ class prob_bisim_partitioner
 template < class LTS_TYPE>
 void probabilistic_bisimulation_reduce(LTS_TYPE& l);
 
+/** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
+* \details This lts and the lts l2 are not usable anymore after this call.
+* \param[in/out] l1 A first probabilistic transition system.
+* \param[in/out] l2 A second probabilistic transition system.
+* \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
+template < class LTS_TYPE>
+bool destructive_probabilistic_bisimulation_compare(LTS_TYPE& l1, LTS_TYPE& l2);
+
+
+/** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
+*  \details The current transitions system and the lts l2 are first duplicated and subsequently
+*           reduced modulo bisimulation. If memory space is a concern, one could consider to
+*           use destructive_bisimulation_compare.
+* \param[in/out] l1 A first transition system.
+* \param[in/out] l2 A second transistion system.
+* \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
+template < class LTS_TYPE>
+bool probabilistic_bisimulation_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
+
 
 template < class LTS_TYPE>
 void probabilistic_bisimulation_reduce(LTS_TYPE& l)
@@ -755,6 +784,41 @@ void probabilistic_bisimulation_reduce(LTS_TYPE& l)
   prob_bisim_part.replace_transitions();
   prob_bisim_part.replace_probabilistic_states();
 }
+
+template < class LTS_TYPE>
+bool probabilistic_bisimulation_compare(
+  const LTS_TYPE& l1,
+  const LTS_TYPE& l2)
+{
+  LTS_TYPE l1_copy(l1);
+  LTS_TYPE l2_copy(l2);
+  return destructive_probabilistic_bisimulation_compare(l1_copy, l2_copy);
+}
+
+template < class LTS_TYPE>
+bool destructive_probabilistic_bisimulation_compare(
+  LTS_TYPE& l1,
+  LTS_TYPE& l2)
+{
+  size_t initial_probabilistic_state_key_l1;
+  size_t initial_probabilistic_state_key_l2;
+
+  // Merge states
+  mcrl2::lts::detail::plts_merge(l1, l2);
+  l2.clear(); // No use for l2 anymore.
+
+              // The last two probabilistic states are the initial states of l2 and l1
+              // in the merged plts
+  initial_probabilistic_state_key_l2 = l1.num_probabilistic_labels() - 1;
+  initial_probabilistic_state_key_l1 = l1.num_probabilistic_labels() - 2;
+
+  detail::prob_bisim_partitioner_fast<LTS_TYPE> prob_bisim_part(l1);
+
+  return prob_bisim_part.in_same_probabilistic_class(initial_probabilistic_state_key_l2,
+    initial_probabilistic_state_key_l1);
+}
+
+
 
 }
 }

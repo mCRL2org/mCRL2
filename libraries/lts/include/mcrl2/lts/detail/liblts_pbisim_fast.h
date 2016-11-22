@@ -1,4 +1,4 @@
-// Author(s): Joao Rivera
+// Author(s): Hector Joao Rivera Verduzco
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -1121,7 +1121,6 @@ class prob_bisim_partitioner_fast
 
 };
 
-
 /** \brief Reduce transition system l with respect to probabilistic bisimulation.
 * \param[in/out] l The transition system that is reduced.
 */
@@ -1134,8 +1133,7 @@ void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l);
 * \param[in/out] l2 A second probabilistic transition system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_compare(LTS_TYPE& l1, LTS_TYPE& l2);
-
+bool destructive_probabilistic_bisimulation_fast_compare(LTS_TYPE& l1, LTS_TYPE& l2);
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
 *  \details The current transitions system and the lts l2 are first duplicated and subsequently
@@ -1145,8 +1143,7 @@ bool destructive_probabilistic_bisimulation_compare(LTS_TYPE& l1, LTS_TYPE& l2);
 * \param[in/out] l2 A second transistion system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
-
+bool probabilistic_bisimulation_fast_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
 
 template < class LTS_TYPE>
 void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l)
@@ -1164,7 +1161,7 @@ void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l)
 }
 
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_compare(
+bool probabilistic_bisimulation_fast_compare(
   const LTS_TYPE& l1,
   const LTS_TYPE& l2)
 {
@@ -1174,7 +1171,7 @@ bool probabilistic_bisimulation_compare(
 }
 
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_compare(
+bool destructive_probabilistic_bisimulation_fast_compare(
   LTS_TYPE& l1,
   LTS_TYPE& l2)
 {
