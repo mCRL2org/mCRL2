@@ -971,7 +971,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
       mCRL2log(log::debug, "stategraph") << "--- belongs relation for extra graph\n" << print_belongs(B);
     }
 
-    void compute_local_control_flow_graph(const std::set<local_control_flow_graph_vertex>& U, const std::map<core::identifier_string, std::size_t>& component_index)
+    void compute_local_control_flow_graph(const std::set<local_control_flow_graph_vertex>& U, const std::map<core::identifier_string, std::size_t>& C)
     {
       using utilities::detail::pick_element;
 
@@ -1001,13 +1001,13 @@ class stategraph_local_algorithm: public stategraph_algorithm
         {
           std::size_t edge_label = i - predvars.begin();
           auto const& Y = i->name();
-          auto q = component_index.find(Y);
+          auto q = C.find(Y);
 
           if (d == data::undefined_variable())
           {
             // case 1: (X, ?, ?=?) -> (Y, k', d'=e')
             mCRL2log(log::debug1, "stategraph") << "case 1" << std::endl;
-            if (q != component_index.end()) // (Y, k1) in C
+            if (q != C.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
               auto e1 = i->target(k1);
@@ -1031,7 +1031,7 @@ class stategraph_local_algorithm: public stategraph_algorithm
           else
           {
             // case 3: (X, d, e) -> (Y, d', e')
-            if (q != component_index.end()) // (Y, k') in C
+            if (q != C.end()) // (Y, k') in C
             {
               std::size_t k1 = q->second;
               if (is_mapped_to(i->source(), k, e))
@@ -1081,11 +1081,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
       m_local_control_flow_graphs.back().compute_index();
     }
 
-    void compute_local_control_flow_graph(const local_control_flow_graph_vertex& u, const std::map<core::identifier_string, std::size_t>& component_index)
+    void compute_local_control_flow_graph(const local_control_flow_graph_vertex& u, const std::map<core::identifier_string, std::size_t>& C)
     {
       std::set<local_control_flow_graph_vertex> U;
       U.insert(u);
-      compute_local_control_flow_graph(U, component_index);
+      compute_local_control_flow_graph(U, C);
     }
 
     // Computes a local control flow graph that corresponds to the given component in m_GCFP_graph.
@@ -1094,11 +1094,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
       mCRL2log(log::debug, "stategraph") << "Compute local control flow graphs for component " << print_connected_component(component) << std::endl;
 
       // preprocessing
-      std::map<core::identifier_string, std::size_t> component_index;
+      std::map<core::identifier_string, std::size_t> C;
       for (std::size_t p: component)
       {
         const GCFP_vertex& w = m_GCFP_graph.vertex(p);
-        component_index[w.name()] = w.index();
+        C[w.name()] = w.index();
       }
 
       std::set<local_control_flow_graph_vertex> U;
@@ -1110,7 +1110,15 @@ class stategraph_local_algorithm: public stategraph_algorithm
           U.insert(local_control_flow_graph_vertex(u.name(), u.index(), u.variable(), value));
         }
       }
-      compute_local_control_flow_graph(U, component_index);
+
+      // add a node (Xinit, ?, ?=?)
+      const core::identifier_string& Xinit = m_pbes.initial_state().name();
+      if (C.find(Xinit) == C.end())
+      {
+        U.insert(local_control_flow_graph_vertex(Xinit, data::undefined_index(), data::undefined_variable(), data::undefined_data_expression()));
+      }
+
+      compute_local_control_flow_graph(U, C);
     }
 
     void print_local_control_flow_graphs() const
