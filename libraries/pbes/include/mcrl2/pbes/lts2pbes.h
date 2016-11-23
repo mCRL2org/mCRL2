@@ -17,8 +17,7 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/count_fixpoints.h"
-#include "mcrl2/modal_formula/has_name_clashes.h"
-#include "mcrl2/modal_formula/normalize.h"
+#include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/lts2pbes_lts.h"
@@ -51,29 +50,11 @@ class lts2pbes_algorithm
     /// \brief Runs the translation algorithm
     /// \param formula A modal formula
     /// \return The result of the translation
-    pbes run(const state_formulas::state_formula& formula)
+    pbes run(const state_formulas::state_formula& formula, bool preprocess_modal_operators = false)
     {
-      if (!state_formulas::algorithms::is_monotonous(formula))
-      {
-        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
-      }
-
-      // resolve name conflicts and wrap the formula in a mu or nu if needed
-      mCRL2log(log::debug) << "formula before preprocessing: " << state_formulas::pp(formula) << std::endl;
-      lps::specification spec;
-      state_formulas::state_formula f = state_formulas::algorithms::preprocess_state_formula(formula, spec);
-      mCRL2log(log::debug) << "formula after preprocessing:  " << state_formulas::pp(f) << std::endl;
-
-      // check for parameter name clashes like these mu X(n: Nat). forall n: Nat
-      state_formulas::check_parameter_name_clashes(f);
-
-      // remove occurrences of ! and =>
-      if (!state_formulas::algorithms::is_normalized(f))
-      {
-        f = state_formulas::algorithms::normalize(f);
-      }
-      mCRL2log(log::debug) << "formula after normalization:  " << state_formulas::pp(f) << std::endl;
-      assert(state_formulas::algorithms::is_normalized(f));
+      std::set<core::identifier_string> lts_ids;
+      std::set<core::identifier_string> lts_variable_names;
+      state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, lts_ids, lts_variable_names, preprocess_modal_operators);
 
       // initialize progress meter
       std::size_t num_fixpoints = state_formulas::count_fixpoints(f);

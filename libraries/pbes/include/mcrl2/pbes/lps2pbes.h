@@ -17,7 +17,6 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
-#include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
@@ -59,57 +58,27 @@ class lps2pbes_algorithm
   public:
     /// \brief Runs the translation algorithm
     /// \param formula A modal formula that represents a property about the system modeled by the given specification
-    /// \param spec A linear process specification
+    /// \param lpsspec A linear process specification
     /// \param structured use the 'structured' approach of generating equations
     /// \param unoptimized do not optimize the resulting PBES.
     /// \param preprocess_modal_operators insert dummy fixpoints in modal operators, which may lead to smaller PBESs
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \return A PBES that encodes the property applied to the given specification
-    pbes run(const state_formulas::state_formula& formula, const lps::specification& spec, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false, const data::variable& T = data::undefined_real_variable())
+    pbes run(const state_formulas::state_formula& formula, const lps::specification& lpsspec, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false, const data::variable& T = data::undefined_real_variable())
     {
       using atermpp::detail::operator+;
+      state_formulas::state_formula f = formula;
 
-      if (!state_formulas::algorithms::is_monotonous(formula))
-      {
-        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
-      }
-
-      if (!preprocess_modal_operators && state_formulas::detail::count_modal_operator_nesting(formula) >= 2)
-      {
-        mCRL2log(log::info) <<
-          "Warning: detected nested modal operators. This may result in a long execution time.\n"
-          "Use the option -m or insert dummy fix point operators in between manually to speed\n"
-          "up the transformation." << std::endl;
-      }
-
-      // resolve name conflicts and wrap the formula in a mu or nu if needed
-      mCRL2log(log::debug) << "formula before preprocessing: " << state_formulas::pp(formula) << std::endl;
-      state_formulas::state_formula f = state_formulas::algorithms::preprocess_state_formula(formula, spec);
-      mCRL2log(log::debug) << "formula after preprocessing:  " << state_formulas::pp(f) << std::endl;
-
-      if (preprocess_modal_operators)
-      {
-        f = state_formulas::preprocess_nested_modal_operators(f);
-        mCRL2log(log::debug) << "formula after preprocessing modal operators:  " << state_formulas::pp(f) << std::endl;
-      }
-
-      // remove occurrences of ! and =>
-      if (!state_formulas::algorithms::is_normalized(f))
-      {
-        f = state_formulas::algorithms::normalize(f);
-      }
-      mCRL2log(log::debug) << "formula after normalization:  " << state_formulas::pp(f) << std::endl;
-      assert(state_formulas::algorithms::is_normalized(f));
-
-      // check for parameter name clashes like these mu X(n: Nat). forall n: Nat
-      state_formulas::check_parameter_name_clashes(f);
+      std::set<core::identifier_string> lps_ids = lps::find_identifiers(lpsspec);
+      std::set<core::identifier_string> lps_variable_names = data::detail::variable_names(lps::find_all_variables(lpsspec));
+      f = state_formulas::preprocess_state_formula(f, lps_ids, lps_variable_names, preprocess_modal_operators);
 
       data::set_identifier_generator id_generator;
-      std::set<core::identifier_string> ids = lps::find_identifiers(spec);
+      std::set<core::identifier_string> ids = lps::find_identifiers(lpsspec);
       id_generator.add_identifiers(ids);
-      ids = data::find_identifiers(spec.data().constructors());
+      ids = data::find_identifiers(lpsspec.data().constructors());
       id_generator.add_identifiers(ids);
-      ids = data::find_identifiers(spec.data().mappings());
+      ids = data::find_identifiers(lpsspec.data().mappings());
       id_generator.add_identifiers(ids);
       ids = state_formulas::find_identifiers(f);
       id_generator.add_identifiers(ids);
@@ -123,22 +92,22 @@ class lps2pbes_algorithm
         propvar_generator.add_identifiers(names);
         if (unoptimized)
         {
-          detail::E_structured(f, f, spec.process(), id_generator, propvar_generator, T, eqn, core::term_traits<pbes_expression>());
+          detail::E_structured(f, f, lpsspec.process(), id_generator, propvar_generator, T, eqn, core::term_traits<pbes_expression>());
         }
         else
         {
-          detail::E_structured(f, f, spec.process(), id_generator, propvar_generator, T, eqn, core::term_traits_optimized<pbes_expression>());
+          detail::E_structured(f, f, lpsspec.process(), id_generator, propvar_generator, T, eqn, core::term_traits_optimized<pbes_expression>());
         }
       }
       else
       {
         if (unoptimized)
         {
-          detail::E(f, f, spec.process(), id_generator, T, eqn, core::term_traits<pbes_expression>());
+          detail::E(f, f, lpsspec.process(), id_generator, T, eqn, core::term_traits<pbes_expression>());
         }
         else
         {
-          detail::E(f, f, spec.process(), id_generator, T, eqn, core::term_traits_optimized<pbes_expression>());
+          detail::E(f, f, lpsspec.process(), id_generator, T, eqn, core::term_traits_optimized<pbes_expression>());
         }
       }
 
@@ -149,7 +118,7 @@ class lps2pbes_algorithm
       assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
       const core::identifier_string& Xf = detail::mu_name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
-      data::data_expression_list pi = spec.initial_process().state(spec.process().process_parameters());
+      data::data_expression_list pi = lpsspec.initial_process().state(lpsspec.process().process_parameters());
       data::data_expression_list e = fi + pi + detail::Par(Xf, data::variable_list(), f);
       if (T != data::undefined_real_variable())
       {
@@ -157,7 +126,7 @@ class lps2pbes_algorithm
       }
       propositional_variable_instantiation init(Xe, e);
 
-      pbes result(spec.data(), eqn, spec.global_variables(), init);
+      pbes result(lpsspec.data(), eqn, lpsspec.global_variables(), init);
       assert(is_monotonous(result));
       pbes_system::algorithms::normalize(result);
       assert(pbes_system::algorithms::is_normalized(result));
@@ -170,24 +139,24 @@ class lps2pbes_algorithm
 /// \brief Translates a linear process specification and a state formulas to a PBES. If the solution of the PBES
 /// is true, the formula holds for the specification.
 /// \param formula A modal formula
-/// \param spec A linear process specification
+/// \param lpsspec A linear process specification
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen
 /// \param structured use the 'structured' approach of generating equations
 /// \param unoptimized if true, the resulting PBES is not simplified, if false (default),
 ///        the PBES is simplified.
 /// \return The resulting pbes
-inline pbes lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false)
+inline pbes lps2pbes(const lps::specification& lpsspec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false)
 {
-  if ((formula.has_time() || spec.process().has_time()) && !timed)
+  if ((formula.has_time() || lpsspec.process().has_time()) && !timed)
   {
-    mCRL2log(log::warning) << "Switch to timed translation because formula has " << (formula.has_time()?"":"no ") << "time, and process has " << (spec.process().has_time()?"":"no ") << "time" << std::endl;
+    mCRL2log(log::warning) << "Switch to timed translation because formula has " << (formula.has_time()?"":"no ") << "time, and process has " << (lpsspec.process().has_time()?"":"no ") << "time" << std::endl;
     timed = true;
   }
 
   if (timed)
   {
-    lps::specification spec_timed = spec;
-    std::set<core::identifier_string> ids = lps::find_identifiers(spec);
+    lps::specification spec_timed = lpsspec;
+    std::set<core::identifier_string> ids = lps::find_identifiers(lpsspec);
     std::set<core::identifier_string> fcontext = state_formulas::find_identifiers(formula);
     ids.insert(fcontext.begin(), fcontext.end());
     data::variable T = detail::fresh_variable(ids, data::sort_real::real_(), "T");
@@ -197,7 +166,7 @@ inline pbes lps2pbes(const lps::specification& spec, const state_formulas::state
   }
   else
   {
-    return lps2pbes_algorithm().run(formula, spec, structured, unoptimized, preprocess_modal_operators);
+    return lps2pbes_algorithm().run(formula, lpsspec, structured, unoptimized, preprocess_modal_operators);
   }
 }
 
@@ -210,10 +179,10 @@ inline
 pbes lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed = false, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false)
 {
   pbes result;
-  lps::specification spec = remove_stochastic_operators(lps::linearise(spec_text));
+  lps::specification lpsspec = remove_stochastic_operators(lps::linearise(spec_text));
 
-  state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, spec);
-  return lps2pbes(spec, f, timed, structured, unoptimized, preprocess_modal_operators);
+  state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, lpsspec);
+  return lps2pbes(lpsspec, f, timed, structured, unoptimized, preprocess_modal_operators);
 }
 
 } // namespace pbes_system

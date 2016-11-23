@@ -38,8 +38,6 @@ void lps2pbes(const std::string& input_filename,
   {
     throw mcrl2::runtime_error("option -f is not specified");
   }
-
-  //load LPS
   if (input_filename.empty())
   {
     mCRL2log(log::verbose) << "reading LPS from stdin..." << std::endl;
@@ -50,7 +48,6 @@ void lps2pbes(const std::string& input_filename,
   }
   lps::specification spec;
   load_lps(spec, input_filename);
-  //load formula file
   mCRL2log(log::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
   std::ifstream instream(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
   if (!instream)
@@ -59,10 +56,8 @@ void lps2pbes(const std::string& input_filename,
   }
   state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(instream, spec);
   instream.close();
-  //convert formula and LPS to a PBES
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
   pbes_system::pbes result = pbes_system::lps2pbes(spec, formula, timed, structured, unoptimized, preprocess_modal_operators);
-  //save the result
   if (output_filename.empty())
   {
     mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;

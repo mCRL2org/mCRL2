@@ -38,14 +38,6 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec);
 /// \return The converted modal formula
 state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec);
 
-/// \brief Renames data variables and predicate variables in the formula \p f, and
-/// wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
-/// step for the algorithm.
-/// \param formula A modal formula
-/// \param spec A linear process specification
-/// \return The preprocessed formula
-state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec);
-
 /// \brief Returns true if the state formula is monotonous.
 /// \param f A modal formula
 /// \return True if the state formula is monotonous.

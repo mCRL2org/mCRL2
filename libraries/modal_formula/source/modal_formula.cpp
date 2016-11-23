@@ -99,11 +99,6 @@ state_formula parse_state_formula(const std::string& formula_text, lps::specific
   return state_formulas::parse_state_formula(formula_text, spec);
 }
 
-state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
-{
-  return state_formulas::preprocess_state_formula(formula, spec);
-}
-
 bool is_monotonous(const state_formula& f)
 {
   return state_formulas::is_monotonous(f);
