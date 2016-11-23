@@ -65,7 +65,6 @@ class lts2lps_tool : public input_output_tool
 
     void parse_options(const command_line_parser& parser)
     {
-      using namespace mcrl2::lts;
       super::parse_options(parser);
 
       if (parser.options.count("data"))
@@ -117,7 +116,7 @@ class lts2lps_tool : public input_output_tool
     bool run()
     {
       lts_lts_t l;
-      const lts_type intype=lts::detail::guess_format(infilename);
+      const lts_type intype=mcrl2::lts::detail::guess_format(input_filename());
       load_lts(l, input_filename(), intype, data_file_type, data_file);
       save_lps(mcrl2::lts::transform_lts2lps(l),output_filename());
       return true;
