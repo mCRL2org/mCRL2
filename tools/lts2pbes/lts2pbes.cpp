@@ -16,15 +16,11 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/bes/pbes_output_tool.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/lps/io.h"
-#include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/lts2pbes.h"
-#include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/logger.h"
@@ -40,18 +36,13 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
     typedef pbes_output_tool<input_output_tool> super;
 
   protected:
-    typedef enum { none_e, data_e, lps_e, mcrl2_e } data_file_type_t;
 
     std::string infilename;
     std::string outfilename;
     std::string formfilename;
     lts::lts_type input_type;
-    data_file_type_t data_file_type;
+    mcrl2::lts::data_file_type_t data_file_type;
     std::string data_file;
-    data::data_specification data;
-    process::action_label_list action_labels;
-    data::variable_list process_parameters;
-    bool extra_data_is_defined;
 
     void add_options(interface_description& desc)
     {
@@ -83,45 +74,30 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
         {
           mCRL2log(log::warning) << "multiple data specification files are specified; can only use one.\n";
         }
-        data_file_type = data_e;
+        data_file_type = mcrl2::lts::data_file_type_t::data_e;
         data_file = parser.option_argument("data");
       }
 
       if (parser.options.count("lps"))
       {
-        if (1 < parser.options.count("lps") || data_file_type != none_e)
+        if (1 < parser.options.count("lps") || data_file_type != mcrl2::lts::data_file_type_t::none_e)
         {
           mCRL2log(log::warning) << "multiple data specification files are specified; can only use one.\n";
         }
 
-        data_file_type = lps_e;
+        data_file_type = mcrl2::lts::data_file_type_t::lps_e;
         data_file = parser.option_argument("lps");
       }
 
       if (parser.options.count("mcrl2"))
       {
-        if (1 < parser.options.count("mcrl2") || data_file_type != none_e)
+        if (1 < parser.options.count("mcrl2") || data_file_type != mcrl2::lts::data_file_type_t::none_e)
         {
           mCRL2log(log::warning) << "multiple data specification files are specified; can only use one.\n";
         }
 
-        data_file_type = mcrl2_e;
+        data_file_type = mcrl2::lts::data_file_type_t::mcrl2_e;
         data_file = parser.option_argument("mcrl2");
-      }
-
-      if (parser.options.count("in"))
-      {
-        if (1 < parser.options.count("in"))
-        {
-          throw parser.error("multiple input formats specified; can only use one");
-        }
-
-        input_type = lts::detail::parse_format(parser.option_argument("in"));
-        if (input_type == lts::lts_none || input_type == lts::lts_dot)
-        {
-          throw parser.error("option -i/--in has illegal argument '" +
-                       parser.option_argument("in") + "'");
-        }
       }
 
       if (parser.options.count("formula"))
@@ -142,89 +118,10 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
         "Translates an LTS in INFILE and writes the resulting PBES to "
         "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
         "present, standard input is used."),
-      input_type(lts::lts_none), data_file_type(none_e)
+      input_type(lts::lts_none), data_file_type(mcrl2::lts::data_file_type_t::none_e)
     {}
 
   protected:
-
-    void read_lps_context()
-    {
-      lps::specification spec;
-      load_lps(spec, data_file);
-      data = spec.data();
-      action_labels = spec.action_labels();
-      process_parameters = spec.process().process_parameters();
-      extra_data_is_defined = true;
-    }
-
-    void read_data_context()
-    {
-      data = data::parse_data_specification(utilities::read_text(data_file));
-      extra_data_is_defined = true;
-    }
-
-    void read_mcrl2_context()
-    {
-      process::process_specification procspec = process::parse_process_specification(utilities::read_text(data_file), false);
-      data = procspec.data();
-      action_labels = procspec.action_labels();
-      extra_data_is_defined = true;
-    }
-
-    // converts an arbitrary lts to lts_lts_t
-    template <class LTS_TYPE>
-    void convert_to_lts_lts(LTS_TYPE& src, lts::lts_lts_t& dest)
-    {
-      switch (data_file_type)
-      {
-        case data_e:  read_data_context(); break;
-        case lps_e:   read_lps_context(); break;
-        case mcrl2_e: read_mcrl2_context(); break;
-        default:
-        {
-          extra_data_is_defined = false;
-          mCRL2log(log::info) << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl; break;
-        }
-      }
-      lts::detail::lts_convert(src, dest, data, action_labels, process_parameters, extra_data_is_defined);
-    }
-
-    // loads an lts of type lts_lts_t
-    void load_lts(lts::lts_lts_t& result, lts::lts_type type)
-    {
-      switch (type)
-      {
-        case lts::lts_lts:
-        {
-          if (data_file_type != none_e)
-          {
-            mCRL2log(log::warning) << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
-          }
-          result.load(infilename);
-          break;
-        }
-        case lts::lts_none:
-          mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
-        case lts::lts_aut:
-        {
-          lts::lts_aut_t l;
-          l.load(infilename);
-          convert_to_lts_lts(l, result);
-          break;
-        }
-        case lts::lts_fsm:
-        {
-          lts::lts_fsm_t l;
-          l.load(infilename);
-          convert_to_lts_lts(l, result);
-          break;
-        }
-        case lts::lts_dot:
-        {
-          throw mcrl2::runtime_error("Reading of .dot files is not supported anymore.");
-        }
-      }
-    }
 
     // extracts a specification from an LTS
     lps::specification extract_specification(const lts::lts_lts_t& l)
@@ -249,7 +146,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       }
 
       lts::lts_lts_t l;
-      load_lts(l, input_type);
+      load_lts(l, infilename, input_type, data_file_type, data_file);
 
       //load formula file
       lps::specification spec = extract_specification(l);
