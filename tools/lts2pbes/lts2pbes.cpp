@@ -40,7 +40,6 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
     std::string infilename;
     std::string outfilename;
     std::string formfilename;
-    lts::lts_type input_type;
     mcrl2::lts::data_file_type_t data_file_type;
     std::string data_file;
 
@@ -118,7 +117,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
         "Translates an LTS in INFILE and writes the resulting PBES to "
         "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
         "present, standard input is used."),
-      input_type(lts::lts_none), data_file_type(mcrl2::lts::data_file_type_t::none_e)
+      data_file_type(mcrl2::lts::data_file_type_t::none_e)
     {}
 
   protected:
@@ -140,11 +139,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
   public:
     bool run()
     {
-      if (input_type == lts::lts_none)
-      {
-        input_type = lts::detail::guess_format(infilename);
-      }
-
+      const lts::lts_type input_type = lts::detail::guess_format(infilename);
       lts::lts_lts_t l;
       load_lts(l, infilename, input_type, data_file_type, data_file);
 

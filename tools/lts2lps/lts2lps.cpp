@@ -42,7 +42,6 @@ class lts2lps_tool : public input_output_tool
     typedef input_output_tool super;
 
   protected:
-    lts_type intype;
     data_file_type_t data_file_type;
     std::string data_file;
 
@@ -111,13 +110,14 @@ class lts2lps_tool : public input_output_tool
         "Translates an LTS in INFILE and writes the resulting LPS to "
         "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
         "present, standard input is used."),
-      intype(mcrl2::lts::lts_none),data_file_type(mcrl2::lts::data_file_type_t::none_e)
+      data_file_type(mcrl2::lts::data_file_type_t::none_e)
     {}
 
 
     bool run()
     {
       lts_lts_t l;
+      const lts_type intype=lts::detail::guess_format(infilename);
       load_lts(l, input_filename(), intype, data_file_type, data_file);
       save_lps(mcrl2::lts::transform_lts2lps(l),output_filename());
       return true;
