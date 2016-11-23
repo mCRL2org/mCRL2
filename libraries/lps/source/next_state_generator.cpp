@@ -67,7 +67,7 @@ next_state_generator::next_state_generator(
 {
   m_process_parameters = data::variable_vector(m_specification.process().process_parameters().begin(), m_specification.process().process_parameters().end());
 
-  if(m_specification.process().has_time())
+  if (m_specification.process().has_time())
   {
     mCRL2log(log::warning) << "specification uses time, which is (currently) not supported; ignoring timing" << std::endl;
   }
@@ -82,6 +82,10 @@ next_state_generator::next_state_generator(
     const data_expression_list& l=i->next_state(m_specification.process().process_parameters());
     summand.distribution = i->distribution();
     summand.result_state = data_expression_vector(l.begin(),l.end());
+    if (i->multi_action().has_time())
+    {
+      summand.time_tag=i->multi_action().time();
+    }
 
     for (process::action_list::const_iterator j = i->multi_action().actions().begin(); j != i->multi_action().actions().end(); j++)
     {
@@ -604,7 +608,16 @@ void next_state_generator::iterator::increment()
     }
     actions[i] = process::action(m_summand->action_label[i].label, data_expression_list(arguments.begin(), arguments.end()));
   }
-  m_transition.set_action(multi_action(process::action_list(actions.begin(), actions.end())));
+  if (m_summand->time_tag==data_expression())  // Check whether the time_tag is valid.
+  {
+    m_transition.set_action(multi_action(process::action_list(actions.begin(), actions.end())));
+  }
+  else
+  {
+    m_transition.set_action(
+              multi_action(process::action_list(actions.begin(), actions.end()),
+                           m_generator->m_rewriter(m_summand->time_tag, *m_substitution)));
+  }
 
   m_transition.set_summand_index(m_summand - &m_generator->m_summands[0]);
 

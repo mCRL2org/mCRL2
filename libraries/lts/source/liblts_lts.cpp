@@ -30,7 +30,7 @@ using namespace atermpp;
 
 static atermpp::function_symbol transition_header()
 {
-  static atermpp::function_symbol tr("transition ",3);
+  static atermpp::function_symbol tr("transition",3);
   return tr;
 }
 
@@ -42,13 +42,19 @@ static atermpp::function_symbol num_of_states_labels_and_initial_state()
 
 static atermpp::function_symbol lts_header()
 {
-  static atermpp::function_symbol lts("labelled_transition_system ",4);
+  static atermpp::function_symbol lts("labelled_transition_system",4);
   return lts;
 }
 
 static atermpp::function_symbol meta_data_header()
 {
-  static atermpp::function_symbol mdh("meta_data_header ",4);
+  static atermpp::function_symbol mdh("meta_data_header",4);
+  return mdh;
+}
+
+static atermpp::function_symbol temporary_multi_action_header()
+{
+  static atermpp::function_symbol mdh("multi_action",2);
   return mdh;
 }
 
@@ -105,7 +111,8 @@ class aterm_probabilistic_transition: public atermpp::aterm_appl
 
 typedef term_list<aterm_probabilistic_transition> aterm_transition_list;
 typedef term_list<lps::state> state_labels_t; // The state labels have the shape STATE(a1,...,an).
-typedef term_list<process::action_list> action_labels_t;         // An action label is a lists of actions.
+// typedef term_list<lps::multi_action> action_labels_t;         // An action label is a lists of actions.
+typedef term_list<atermpp::aterm_appl> action_labels_t;         // A multiaction has the shape "multi_action(action_list,data_expression)
 typedef term_list<data::data_expression> probabilistic_labels_t; // This contains a list of probabilities.
 typedef term_list<data::function_symbol> boolean_list_t;         // A list with constants true or false, indicating
                                                                  // whether a state is probabilistic.
@@ -328,11 +335,14 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
   else
   {
     assert(input_lts.num_action_labels()==input_lts.get_action_labels().size());
-    for (const process::action_list& action_label: input_lts.get_action_labels())
+    // for (const lps::multi_action& action: input_lts.get_action_labels())
+    for (const atermpp::aterm_appl& t: input_lts.get_action_labels())
     {
-      if (!action_label.empty()) // The empty label is tau, which is present by default.
+      assert(t.function()==temporary_multi_action_header());
+      const lps::multi_action action=lps::multi_action(process::action_list(t[0]), data::data_expression(t[1]));
+      if (!action.actions().empty() || action.has_time()) // The empty label is tau, which is present by default.
       {
-        l.add_action(action_label_lts(lps::multi_action(action_label))); 
+        l.add_action(action_label_lts(action)); 
       }
     }
   }
@@ -368,7 +378,7 @@ static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& fi
     for(size_t i=l.num_action_labels(); i>0;)
     {
       --i;
-      action_label_list.push_front(l.action_label(i).actions());
+      action_label_list.push_front(atermpp::aterm_appl(temporary_multi_action_header(),l.action_label(i).actions(),l.action_label(i).time()));
     }
   }
 

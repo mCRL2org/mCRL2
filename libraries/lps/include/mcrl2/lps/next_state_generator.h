@@ -58,6 +58,7 @@ class next_state_generator
       stochastic_distribution distribution;
       data::data_expression_vector result_state;
       std::vector<action_internal_t> action_label;
+      data::data_expression time_tag;
 
       std::vector<size_t> condition_parameters;
       atermpp::function_symbol condition_arguments_function;
@@ -122,9 +123,14 @@ class next_state_generator
         state_probability_list m_other_target_states;
 
       public:
-        const lps::multi_action& action() const { return m_action; }
+        const lps::multi_action& action() const 
+        { 
+          return m_action; 
+        }
+
         void set_action(const lps::multi_action& action)
         {
+std::cerr << "SET ACTION " << action << "   " << action.time() << "\n";
           m_action=action;
         }
 

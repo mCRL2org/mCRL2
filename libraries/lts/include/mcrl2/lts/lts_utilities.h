@@ -213,7 +213,9 @@ LABEL_TYPE make_divergence_label(const std::string& s)
 template <>
 inline mcrl2::lts::action_label_lts make_divergence_label<mcrl2::lts::action_label_lts>(const std::string& s)
 {
-  return action_label_lts(process::action(process::action_label(core::identifier_string(s),data::sort_expression_list()),data::data_expression_list()));
+  return action_label_lts(lps::multi_action(process::action(process::action_label(core::identifier_string(s),
+                                                                                  data::sort_expression_list()),
+                                                            data::data_expression_list())));
 }
 
 // Make a new divergent_transition_label and replace each self loop with it.

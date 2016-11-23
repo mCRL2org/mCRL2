@@ -118,7 +118,7 @@ inline std::string pp(const state_label_lts& l)
     }
   }
   s += ")";
-  return s;
+  return s; 
 }
 
 /** \brief A class containing the values for action labels for the .lts format.
@@ -136,11 +136,6 @@ class action_label_lts: public mcrl2::lps::multi_action
 
     /** \brief Copy assignment. */
     action_label_lts& operator=(const action_label_lts& other)=default;
-
-    /** \brief Constructor. Transforms action label a to form a multi_action a. */
-    explicit action_label_lts(const process::action& a):mcrl2::lps::multi_action(a)
-    {
-    }
 
     /** \brief Constructor. */
     explicit action_label_lts(const mcrl2::lps::multi_action& a):mcrl2::lps::multi_action(a)
