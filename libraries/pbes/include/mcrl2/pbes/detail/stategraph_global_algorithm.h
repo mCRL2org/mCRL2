@@ -70,9 +70,9 @@ class stategraph_global_algorithm: public stategraph_algorithm
       size_t j = 0;
       for(auto ai = PV.parameters().begin(); ai != PV.parameters().end(); ++ai)
       {
-        const std::map<std::size_t, data::data_expression>& target = eqn.predicate_variables()[i].target();
-        auto dij = target.find(j);
-        if(dij != target.end())
+        const std::map<std::size_t, data::data_expression>& dest = eqn.predicate_variables()[i].dest();
+        auto dij = dest.find(j);
+        if(dij != dest.end())
         {
           PV_args.push_back(dij->second);
         }
@@ -217,12 +217,14 @@ class stategraph_global_algorithm: public stategraph_algorithm
       auto const& cfp_Y = eq_Y.control_flow_parameter_indices();
 
       mCRL2log(log::debug1, "stategraph") << "compute_vertex X = " << X << ", e = " << core::detail::print_list(e) << ", Yf = " << Yf << std::endl;
+      mCRL2log(log::debug1, "stategraph") << "eq_X = " << eq_X << std::endl;
+      mCRL2log(log::debug1, "stategraph") << "eq_Y = " << eq_Y << std::endl;
       mCRL2log(log::debug1, "stategraph") << "cfp_X = " << core::detail::print_list(cfp_X) << std::endl;
       mCRL2log(log::debug1, "stategraph") << "cfp_Y = " << core::detail::print_list(cfp_Y) << std::endl;
 
       for (std::size_t l = 0; l < cfp_Y.size(); l++)
       {
-        auto q = Yf.target(cfp_Y[l]);
+        auto q = Yf.dest(cfp_Y[l]);
         if (q != data::undefined_data_expression())
         {
           f.push_back(q);

@@ -73,13 +73,13 @@ class stategraph_algorithm
     // Keuze uit twee alternatieven voor de berekening van lokale CFPs.
     // <default>
     //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-    //          a. source(X,i,n) and target(X,i,n) zijn beide defined, of
+    //          a. source(X,i,n) and dest(X,i,n) zijn beide defined, of
     //          b. copy(X,i,n) is defined en gelijk aan n.
     //
     // <alternative>
     //  * Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-    //          a. copy(X,i,n) is undefined en source(X,i,n) and target(X,i,n) zijn beide defined, of
-    //          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en target(X,i,n) zijn beide undefined.
+    //          a. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
+    //          b. copy(X,i,n) is defined (en gelijk aan n) en source(X,i,n) en dest(X,i,n) zijn beide undefined.
     //
     // De tweede definieert in feite een exclusive or, terwijl de eerste een standaard or is.
     bool m_use_alternative_lcfp_criterion;
@@ -94,10 +94,10 @@ class stategraph_algorithm
     //
     // <alternative>
     //  * Parameters d^X[n] and d^Y[m] zijn gerelateerd als danwel:
-    //         a. er is een i z.d.d. copy(X, i, n) = m, en target(X, i, m) is ongedefinieerd, of
-    //         b. er is een i z.d.d. copy(Y, i, m) = n en target(Y, i, n) is ongedefinieerd.
+    //         a. er is een i z.d.d. copy(X, i, n) = m, en dest(X, i, m) is ongedefinieerd, of
+    //         b. er is een i z.d.d. copy(Y, i, m) = n en dest(Y, i, n) is ongedefinieerd.
     // Hier zit het verschil er dus in dat we, in het tweede geval, parameters alleen relateren als er een copy is
-    // van de een naar de ander EN de target in dat geval ongedefinieerd is.
+    // van de een naar de ander EN de dest in dat geval ongedefinieerd is.
     bool m_use_alternative_gcfp_relation;
 
     // determines how global control flow parameters are selected
@@ -105,7 +105,7 @@ class stategraph_algorithm
     // Keuze voor de selectie van globale CFPs (of globale consistentie eisen).
     // <default>
     //  * Een set van CFPs is consistent als voor elke d^X[n], en voor alle Y in bnd(E)\{X} (dus in alle andere vergelijkingen), voor alle i waarvoor geldt pred(phi_Y, i) = X, danwel:
-    //         a. target(Y, i, n) is gedefinieerd, of
+    //         a. dest(Y, i, n) is gedefinieerd, of
     //         b. copy(Y, i, m) = n voor een of andere globale CFP d^Y[m]
     // Deze eis is in principe voldoende om globale CFPs te identificeren. Als we echter een strikte scheiding tussen control flow parameters en data parameters willen bewerkstelligen, dan moet hier optioneel de volgende eis aan toegevoegd worden:
     //
@@ -264,32 +264,32 @@ class stategraph_algorithm
               if (m_use_alternative_lcfp_criterion)
               {
                 // Een parameter d^X[n] is een LCFP indien voor alle i waarvoor geldt pred(phi_X,i) = X, danwel:
-                // 1. copy(X,i,n) is undefined en source(X,i,n) and target(X,i,n) zijn beide defined, of
-                // 2. copy(X,i,n) is defined en source(X,i,n) en target(X,i,n) zijn beide undefined.
+                // 1. copy(X,i,n) is undefined en source(X,i,n) and dest(X,i,n) zijn beide defined, of
+                // 2. copy(X,i,n) is defined en source(X,i,n) en dest(X,i,n) zijn beide undefined.
                 if (Ye.copy().find(n) == Ye.copy().end())
                 {
                   // copy(X,i,n) is undefined
-                  if (is_undefined(Ye.source(), n) || is_undefined(Ye.target(), n))
+                  if (is_undefined(Ye.source(), n) || is_undefined(Ye.dest(), n))
                   {
-                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy and source/target undefined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy and source/dest undefined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
                 else
                 {
                   // copy(X,i,n) is defined
-                  if (!is_undefined(Ye.source(), n) || !is_undefined(Ye.target(), n))
+                  if (!is_undefined(Ye.source(), n) || !is_undefined(Ye.dest(), n))
                   {
-                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy defined and source/target defined)" << std::endl;
+                    mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP because of predicate variable " << Ye << " in equation " << X << " (copy defined and source/dest defined)" << std::endl;
                     m_is_LCFP[X][n] = false;
                   }
                 }
               }
               else
               {
-                if ((is_undefined(Ye.source(), n) || is_undefined(Ye.target(), n)) && !is_mapped_to(Ye.copy(), n, n))
+                if ((is_undefined(Ye.source(), n) || is_undefined(Ye.dest(), n)) && !is_mapped_to(Ye.copy(), n, n))
                 {
-                  mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP due to " << Ye << "(source and target undefined, and no copy to self)" << std::endl;
+                  mCRL2log(log::debug, "stategraph") << "parameter " << print_cfp(X, n) << " is not an LCFP due to " << Ye << "(source and dest undefined, and no copy to self)" << std::endl;
                   m_is_LCFP[X][n] = false;
                 }
               }
@@ -328,7 +328,7 @@ class stategraph_algorithm
               auto const& d_Y = eq_Y.parameters();
               for (std::size_t n = 0; n < d_Y.size(); n++)
               {
-                if (is_undefined(Ye.target(), n) && (!maps_to_and_is_GFCP(Ye.copy(), n, X)))
+                if (is_undefined(Ye.dest(), n) && (!maps_to_and_is_GFCP(Ye.copy(), n, X)))
                 {
                   if (m_is_GCFP[Y][n])
                   {
@@ -483,9 +483,9 @@ class stategraph_algorithm
               if (m_use_alternative_gcfp_relation)
               {
                 // Twee parameters zijn alleen gerelateerd als er een copy is van de een naar de ander,
-                // EN dat de target in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
+                // EN dat de dest in dat geval ongedefinieerd is (dus we weten echt geen concrete waarde
                 // voor de parameter op dat punt).
-                if (is_undefined(Ye.target(), m))
+                if (is_undefined(Ye.dest(), m))
                 {
                   mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye) << std::endl;
                   relate_GCFP_vertices(X, n, Y, m);
@@ -493,7 +493,7 @@ class stategraph_algorithm
               }
               else
               {
-                mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye, " (target is undefined)") << std::endl;
+                mCRL2log(log::debug, "stategraph") << log_related_parameters(X, n, Y, m, Ye, " (dest is undefined)") << std::endl;
                 relate_GCFP_vertices(X, n, Y, m);
               }
             }
@@ -607,7 +607,7 @@ class stategraph_algorithm
     //
     // A CFP d_X[m] is not only copied if
     //    (1) for some i    : source(X, i, m) is defined
-    // or (2) for some Y, i : pred(phi_Y , i) = X and target(Y, i, m) is defined
+    // or (2) for some Y, i : pred(phi_Y , i) = X and dest(Y, i, m) is defined
     bool is_not_only_copied(const core::identifier_string& X, std::size_t m) const
     {
       // check (1)
@@ -627,7 +627,7 @@ class stategraph_algorithm
         auto const& predvars = equation.predicate_variables();
         for (const auto & predvar : predvars)
         {
-          if (predvar.name() == X && !is_undefined(predvar.target(), m))
+          if (predvar.name() == X && !is_undefined(predvar.dest(), m))
           {
             return true;
           }
@@ -859,7 +859,7 @@ class stategraph_algorithm
         }
       }
 
-      // target(X, i, k) = v
+      // dest(X, i, k) = v
       for (std::size_t p: component)
       {
         const GCFP_vertex& u = m_GCFP_graph.vertex(p);
@@ -872,8 +872,8 @@ class stategraph_algorithm
           {
             continue;
           }
-          auto q = predvar.target().find(k);
-          if (q != predvar.target().end())
+          auto q = predvar.dest().find(k);
+          if (q != predvar.dest().end())
           {
             const data::data_expression& v = q->second;
             result.insert(v);
@@ -916,7 +916,7 @@ class stategraph_algorithm
     {
       simplify(m_pbes);
       m_pbes.compute_source_dest_copy();
-      mCRL2log(log::debug, "stategraph") << "--- source, target, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
+      mCRL2log(log::debug, "stategraph") << "--- source, dest, copy ---\n" << m_pbes.print_source_dest_copy() << std::endl;
       compute_control_flow_parameters();
       remove_invalid_connected_components();
       remove_only_copy_components();

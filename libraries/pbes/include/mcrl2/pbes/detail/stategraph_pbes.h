@@ -40,7 +40,7 @@ class predicate_variable
     pbes_expression m_guard;
     data::rewriter::substitution_type m_sigma;
     std::map<std::size_t, data::data_expression> m_source; // source[j] = e <=> source(X, i, j) = e
-    std::map<std::size_t, data::data_expression> m_target; // target[j] = c   <=> target(X, i, j) = c
+    std::map<std::size_t, data::data_expression> m_dest;   // dest[j] = c   <=> dest(X, i, j) = c
     std::map<std::size_t, std::size_t> m_copy;             // copy[j] = k   <=> copy(X, i, j) = k
     std::set<std::size_t> m_used;                          // j \in used    <=> used(X, i, j)
     std::set<std::size_t> m_changed;                       // j \in changed <=> changed(X, i, j)
@@ -88,16 +88,16 @@ class predicate_variable
       return mapped_value(m_source, k, data::undefined_data_expression());
     }
 
-    const std::map<std::size_t, data::data_expression>& target() const
+    const std::map<std::size_t, data::data_expression>& dest() const
     {
-      return m_target;
+      return m_dest;
     }
 
-    // Returns target(k), or data::undefined_data_expression() if target(k) does not exist.
-    data::data_expression target(std::size_t k) const
+    // Returns dest(k), or data::undefined_data_expression() if dest(k) does not exist.
+    data::data_expression dest(std::size_t k) const
     {
       using utilities::detail::mapped_value;
-      return mapped_value(m_target, k, data::undefined_data_expression());
+      return mapped_value(m_dest, k, data::undefined_data_expression());
     }
 
     const std::map<std::size_t, std::size_t>& copy() const
@@ -136,7 +136,7 @@ class predicate_variable
       out << "guard = " << m_guard << std::endl;
       out << "sigma = " << m_sigma << std::endl;
       out << "source = " << core::detail::print_map(m_source) << std::endl;
-      out << "target = " << core::detail::print_map(m_target) << std::endl;
+      out << "dest = " << core::detail::print_map(m_dest) << std::endl;
       out << "copy = " << core::detail::print_map(m_copy) << std::endl;
       out << "used = " << core::detail::print_set(m_used) << std::endl;
       out << "changed = " << core::detail::print_set(m_changed) << std::endl;
@@ -249,7 +249,7 @@ class stategraph_equation: public pbes_equation
           data::data_expression c = R(*j, Ye.sigma());
           if (data::is_constant(c))
           {
-            Ye.m_target[j_index] = c;
+            Ye.m_dest[j_index] = c;
           }
         }
       }
@@ -457,11 +457,11 @@ class stategraph_equation: public pbes_equation
         // sigma
         out << "        sigma = " << m_predvars[i].sigma() << std::endl;
 
-        // target
-        const std::map<std::size_t, data::data_expression>& target = m_predvars[i].target();
-        for (const auto& j: target)
+        // dest
+        const std::map<std::size_t, data::data_expression>& dest = m_predvars[i].dest();
+        for (const auto& j: dest)
         {
-          out << "        target(" << X << ", " << i << ", " << j.first << ") = " << j.second << std::endl;
+          out << "        dest(" << X << ", " << i << ", " << j.first << ") = " << j.second << std::endl;
         }
 
         // copy
