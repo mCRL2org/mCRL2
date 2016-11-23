@@ -540,6 +540,57 @@ static void counterexample_jk_1(size_t k)
     test_lts("counterexample JK 1 (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
 }
 
+
+// The following LTS is a counterexample to the algorithm to postprocess new
+// bottom states.  Found the error in November 2016.
+// The central part of the model consists of states 0--4.
+// The algorithm will split w.r.t. the constellation for "a"-labelled
+// transitions. This makes state 1 blue and the other states red. Also, state 2
+// will become a new bottom state. After that, it should split for "b"-labelled
+// transitions, so that state 3 will get into a separate block; however, it
+// will not find this label.
+
+// If the algorithm later splits w. r. t. "b", then the final result would
+// still be correct. The model is therefore sensitive to the order in which
+// transitions appear: only if label "a" is the first in the LTS definition,
+// it will produce the error. Modifications of the algorithm to translate a
+// description in .aut format to the internal data structure may affect whether
+// the error is exposed.
+static void counterexample_postprocessing()
+{
+  std::string POSTPROCESS_AUT =
+    "des(0,10,4)\n"
+    "(0,\"a\",0)\n"
+    "(0,\"b\",0)\n"
+    "(0,\"c\",0)\n"
+    "(1,\"b\",0)\n"
+    "(1,\"c\",0)\n"
+    "(2,\"tau\",1)\n"
+    "(2,\"a\",0)\n"
+    "(3,\"tau\",2)\n"
+    "(3,\"a\",0)\n"
+    "(3,\"b\",0)\n"
+    ;
+
+  size_t expected_label_count = 4;
+  size_t expected_state_count = 4;
+  size_t expected_transition_count = 10;
+
+  std::istringstream is(POSTPROCESS_AUT);
+  lts::lts_aut_t l_gw;
+  l_gw.load(is);
+  lts::lts_aut_t l=l_gw;
+  reduce(l,lts::lts_eq_branching_bisim);
+  test_lts("postprocessing problem (branching bisimulation [Groote/Jansen/Keiren/Wijs 2017])",l,expected_label_count, expected_state_count, expected_transition_count);
+  l=l_gw;
+  reduce(l,lts::lts_eq_branching_bisim_gv);
+  test_lts("postprocessing problem (branching bisimulation [Groote/Vaandrager 1990])",l,expected_label_count, expected_state_count, expected_transition_count);
+  l=l_gw;
+  reduce(l,lts::lts_eq_branching_bisim_sigref);
+  test_lts("postprocessing problem (branching bisimulation signature [Blom/Orzan 2003])",l,expected_label_count, expected_state_count, expected_transition_count);
+}
+
+
 int test_main(int /* argc*/, char** /* argv */)
 {
   reduce_simple_loop();
@@ -550,6 +601,7 @@ int test_main(int /* argc*/, char** /* argv */)
   test_reachability();
   failing_test_groote_wijs_algorithm();
   counterexample_jk_1(3);
+  counterexample_postprocessing();
   // TODO: Add groote wijs branching bisimulation and add weak bisimulation tests. For the last Peterson is a good candidate. 
   return 0;
 }
