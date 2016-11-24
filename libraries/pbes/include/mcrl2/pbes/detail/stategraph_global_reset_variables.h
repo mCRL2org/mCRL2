@@ -59,14 +59,11 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       using utilities::detail::pick_element;
 
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;
+
       // initialization
       for (auto i = G.begin(); i != G.end(); ++i)
       {
-#ifdef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
         auto const& v = *i;
-#else
-        auto const& v = i->second;
-#endif
         std::set<data::variable> dx = propvar_parameters(v.name());
         v.set_marking(utilities::detail::set_intersection(v.sig(), dx));
         mCRL2log(log::debug, "stategraph") << "vertex " << v << " sig = " << core::detail::print_set(v.sig()) << " dx = " << core::detail::print_set(dx) << "\n";
@@ -77,11 +74,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       std::set<const typename Graph::vertex_type*> todo;
       for (auto i = G.begin(); i != G.end(); ++i)
       {
-#ifdef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
         auto const& v = *i;
-#else
-        auto const& v = i->second;
-#endif
         todo.insert(&v);
       }
       mCRL2log(log::debug, "stategraph") << "--- update marking ---" << std::endl;
@@ -91,7 +84,6 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         mCRL2log(log::debug, "stategraph") << "selected marking todo element " << v << std::endl;
         std::set<std::size_t> I = v.marking_variable_indices(m_pbes);
 
-#ifdef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
         auto const& incoming_edges = v.incoming_edges();
         for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
         {
@@ -119,42 +111,12 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             }
           }
         }
-#else
-        for (std::set<stategraph_edge>::iterator ei = v.incoming_edges.begin(); ei != v.incoming_edges.end(); ++ei)
-        {
-          stategraph_vertex& u = *(ei->source);
-          std::size_t i = ei->label;
-          std::size_t last_size = u.marking().size();
-          const stategraph_equation& eq_X = *find_equation(m_pbes, u.name());
-          const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].variable();
-          std::set<data::variable> dx = propvar_parameters(u.name());
-          mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking()) << std::endl;
-          for (auto j = I.begin(); j != I.end(); ++j)
-          {
-            std::size_t m = *j;
-            data::data_expression_list e = Y.parameters();
-            data::data_expression e_m = nth_element(e, m);
-            std::set<data::variable> fv = data::find_free_variables(e_m);
-            u.set_marking(utilities::detail::set_union(utilities::detail::set_intersection(fv, dx), u.marking()));
-            mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << core::detail::print_set(fv) << " dx = " << core::detail::print_set(dx) << "\n";
-          }
-          if (u.marking().size() > last_size)
-          {
-            todo.insert(&u);
-            mCRL2log(log::debug, "stategraph") << "updated marking " << u.print_marking() << " using edge " << pbes_system::pp(Y) << "\n";
-          }
-        }
-#endif
       }
 
       // set the marking_parameters attributes
       for (auto i = G.begin(); i != G.end(); ++i)
       {
-#ifdef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
         auto const& v = *i;
-#else
-        auto const& v = i->second;
-#endif
         const stategraph_equation& eqn = *find_equation(m_pbes, v.name());
         for (const data::variable& w: eqn.parameters())
         {
