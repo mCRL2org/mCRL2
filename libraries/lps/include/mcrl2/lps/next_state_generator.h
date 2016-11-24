@@ -130,7 +130,6 @@ class next_state_generator
 
         void set_action(const lps::multi_action& action)
         {
-std::cerr << "SET ACTION " << action << "   " << action.time() << "\n";
           m_action=action;
         }
 
