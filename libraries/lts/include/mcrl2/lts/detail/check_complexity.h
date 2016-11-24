@@ -37,6 +37,8 @@ namespace detail
 
 /// type used to store state (numbers and) counts
 typedef size_t state_type;
+#define STATE_TYPE_MIN ((state_type) 0)
+#define STATE_TYPE_MAX SIZE_MAX
 
 /// type used to store transition (numbers and) counts
 typedef size_t trans_type;

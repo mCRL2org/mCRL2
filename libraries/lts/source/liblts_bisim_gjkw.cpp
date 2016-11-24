@@ -76,10 +76,9 @@ static const char set_pointer_to_new_block[] = "set pointer to new block";
 /// \returns pointer to the new (blue) block
 block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
 {
-    assert(nonbottom_end() >= blue_nonbottom_end);
-    assert(nonbottom_begin() <= blue_nonbottom_end);
-    assert(blue_nonbottom_end - unmarked_nonbottom_begin() +
-                                                   unmarked_bottom_size() > 0);
+    assert(unmarked_nonbottom_end() >= blue_nonbottom_end);
+    assert(unmarked_nonbottom_begin() <= blue_nonbottom_end);
+    assert(unmarked_bottom_size() > 0);
     assert(blue_nonbottom_end - unmarked_nonbottom_begin() +
                                            unmarked_bottom_size() <= size()/2);
     // It is not necessary to reset the nottoblue counters; these counters are
@@ -160,9 +159,8 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
 /// \returns pointer to the new (red) block
 block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
 {
-    assert(nonbottom_begin() <= red_nonbottom_begin);
-    assert(nonbottom_end() >= red_nonbottom_begin);
     assert(marked_nonbottom_begin() == red_nonbottom_begin);
+    assert(marked_nonbottom_end() >= red_nonbottom_begin);
     assert(marked_size() > 0);
     assert(marked_size() <= size() / 2);
 
@@ -226,23 +224,6 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
 
     return NewB;
 }
-
-
-/// \brief function object to compare two constln_t pointers based on their
-/// contents
-class constln_ptr_less
-{
-  public:
-    bool operator() (const bisim_gjkw::constln_t* a,
-                                          const bisim_gjkw::constln_t* b) const
-    {
-        return *a < *b;
-    }
-};
-
-
-typedef std::set<constln_t*, constln_ptr_less> R_map_t;
-typedef std::set<const constln_t*, constln_ptr_less> R_const_map_t;
 
 
 #ifndef NDEBUG
@@ -395,92 +376,6 @@ void part_state_t::print_trans() const
     }
 }
 
-
-/// verify that the partition is stable. i.e. every bottom state in every block
-/// can reach exactly the constellations in the list of constellations that
-/// should be reachable from it.
-void part_state_t::assert_stability() const
-{
-    const block_t* B = (*permutation.begin())->block;
-    for (;;)
-    {
-        // create an ordered list of constellations reachable from this
-        // block, based on the list of B_to_C_slices
-        R_const_map_t R;
-        for (B_to_C_desc_const_iter_t iter = B->to_constln.begin();
-                                          B->to_constln.end() != iter ; ++iter)
-        {
-            assert(iter->from_block() == B);
-            R.insert(iter->to_constln());
-        }
-
-        mCRL2log(log::debug, "bisim_gjkw") << B->debug_id()
-                          << " can reach " << R.size() << " constellations.\n";
-
-        permutation_const_iter_t s_iter = B->nonbottom_begin();
-        for (; B->nonbottom_end() != s_iter; ++s_iter)
-        {
-            state_info_const_ptr s = *s_iter;
-            // the nonbottom state has an inert transition
-            // (This test is incomplete, but it is what I can think of just now
-            // without programming a graph algorithm. A better test would be:
-            // The nonbottom state has a path, through one or more inert
-            // transitions, to a bottom state.)
-            assert(s->inert_succ_begin() < s->inert_succ_end());
-
-            // The nonbottom state can reach at most the constellations
-            // declared officially. We do not test every transition, but only
-            // the first and last transition of each constln_slice.
-            succ_const_iter_t succ_iter = s->succ_begin();
-            for (R_const_map_t::const_iterator R_iter = R.begin();
-                                          s->succ_end() != succ_iter; ++R_iter)
-            {
-                do
-                {
-                    assert(R.end() != R_iter);
-                }
-                while (**R_iter < *succ_iter->target->constln() &&
-                                                             (++R_iter, true));
-                assert(succ_iter->target->constln() == *R_iter);
-                succ_iter = succ_iter->constln_slice->end();
-                assert(succ_iter[-1].target->constln() == *R_iter);
-            }
-        }
-        // walk through all bottom states of block B
-        assert(B->bottom_begin() == s_iter);
-        assert(B->bottom_end() != s_iter);
-        do
-        {
-            state_info_const_ptr const s = *s_iter;
-            mCRL2log(log::debug, "bisim_gjkw") << s->debug_id() << ' ';
-            // verify the state can reach each of the constellations, and
-            // no others
-            succ_const_iter_t succ_iter = s->succ_begin();
-            for (R_const_map_t::const_iterator R_iter = R.begin();
-                                                   R.end() != R_iter; ++R_iter)
-            {
-                // It is understood that each state can reach its own
-                // constellation, even without an explicit transition.
-                if (s->constln() == *R_iter &&
-                                 (s->succ_end() == succ_iter
-                                  || **R_iter < *succ_iter->target->constln()))
-                {
-                    continue;
-                }
-                assert(s->succ_end() != succ_iter);
-                assert(succ_iter->target->constln() == *R_iter);
-                succ_iter = succ_iter->constln_slice->end();
-                assert(succ_iter[-1].target->constln() == *R_iter);
-            }
-            assert(s->succ_end() == succ_iter);
-        }
-        while (B->bottom_end() != ++s_iter);
-        // go to next block
-        if (permutation.end() == B->end())  break;
-        B = (*B->end())->block;
-    }
-    return;
-}
 
 #endif // ifndef NDEBUG
 
@@ -1319,6 +1214,332 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
 }
 
 
+#ifndef NDEBUG
+
+/// \brief assert that the data structure is consistent and stable
+/// \details The data structure is tested against a large number of assertions
+/// to ensure that everything is consistent, e. g. pointers that should point
+/// to successors of state s actually point to a transition that starts in s.
+///
+/// Additionally, it is asserted that the partition is stable. i. e. every
+/// bottom state in every block can reach exactly the constellations in the
+/// list of constellations that should be reachable from it, and every
+/// nonbottom state can reach a subset of them.
+void part_trans_t::assert_stability() const
+{
+    std::vector<state_info_const_ptr> part_st_predecessors;
+    // count the nontrivial constellations (to check later whether every
+    // nontrivial constellation is reachable from the first nontrivial
+    // constellation)
+    state_type nr_of_nontrivial_constellations = 0;
+    const constln_t* C = constln_t::get_some_nontrivial();
+    if (nullptr != C)
+    {
+        for (;;)
+        {
+            ++nr_of_nontrivial_constellations;
+            if (C->get_nontrivial_next() == C)  break;
+            C = C->get_nontrivial_next();
+        }
+    }
+
+    // for all constellations C do
+    C = (*permutation.begin())->constln();
+    for (;;)
+    {
+        // assert some properties of constellation C
+        assert(C->begin() < C->end());
+        assert(C->postprocess_begin == C->postprocess_end);
+        const block_t* B = (*C->begin())->block;
+        if (C->is_trivial())
+        {
+            // a trivial constellation contains exactly one block
+            assert(B->end() == C->end());
+        }
+        else
+        {
+            // a nontrivial constellation contains at least two blocks
+            assert(B->end() < C->end());
+            --nr_of_nontrivial_constellations;
+        }
+        // for all blocks B in C do
+        for (;;)
+        {
+            // assert some properties of block B
+            assert(B->constln() == C);
+            assert(B->nonbottom_begin() <= B->nonbottom_end());
+            assert(B->marked_nonbottom_begin() == B->marked_nonbottom_end());
+            assert(B->bottom_begin() < B->bottom_end());
+            assert(B->marked_bottom_begin() == B->marked_bottom_end());
+            assert(!B->is_refinable());
+            assert(B->inert_begin() <= B->inert_end());
+            // count inert transitions in block
+            state_type nr_of_inert_successors=B->inert_end()-B->inert_begin(),
+                    nr_of_inert_predecessors = nr_of_inert_successors;
+
+            // make sure that every nonbottom state can reach some bottom state
+            // in the block. This is done using a simple graph algorithm for
+            // reachability.  The algorithm should mark every source of an
+            // inert transition exactly once.  For this, we misuse the field
+            // state_info_entry::notblue:  It is == STATE_TYPE_MAX if and only
+            // if the state has been marked.
+
+            // Because we run through the bottom states and their predecessor
+            // transitions anyway, we also verify a few other properties, in
+            // particular everything we want to verify about inert predecessor
+            // transitions.
+
+            // for all bottom states s in B do
+            assert(part_st_predecessors.empty());
+            part_st_predecessors.reserve(B->nonbottom_end() -
+                                                         B->nonbottom_begin());
+            permutation_const_iter_t s_iter = B->bottom_begin();
+            do
+            {
+                state_info_const_ptr const s = *s_iter;
+                nr_of_inert_predecessors -=
+                                   s->inert_pred_end() - s->inert_pred_begin();
+                // for all inert predecessors pred of s do
+                for (pred_const_iter_t pred_iter = s->inert_pred_begin();
+                                  pred_iter < s->inert_pred_end(); ++pred_iter)
+                {
+                    // assert some properties of the predecessor transition
+                    assert(pred_iter->succ->B_to_C->B_to_C_slice->to_constln()
+                                                                         == C);
+                    assert(pred_iter->succ->target == s);
+
+                    state_info_const_ptr const pred = pred_iter->source;
+                    // assert some properties of the predecessor state
+                    assert(pred->block == B);
+                    assert(pred->pos < B->nonbottom_end());
+                    // if pred is not yet marked as predecessor then
+                    if (STATE_TYPE_MAX != pred->notblue)
+                    {
+                        // mark pred as predecessor
+                        const_cast<state_type&>(pred->notblue)=STATE_TYPE_MAX;
+                        // add pred to the list of predecessors
+                        part_st_predecessors.push_back(pred);
+                    // end if
+                    }
+                // end for
+                }
+            // end for
+            }
+            while(++s_iter < B->bottom_end());
+
+            // Now that we have collected the predecessors of the bottom
+            // states, we have to extend this set to their indirect
+            // predecessors.
+
+            // for all states s in the list of predecessors do
+            for (std::vector<state_info_const_ptr>::iterator s_iter =
+                                  part_st_predecessors.begin();
+                                 s_iter < part_st_predecessors.end(); ++s_iter)
+            {
+                state_info_const_ptr const s = *s_iter;
+                nr_of_inert_predecessors -=
+                                   s->inert_pred_end() - s->inert_pred_begin();
+                // for all inert predecessors pred of s do
+                for (pred_const_iter_t pred_iter = s->inert_pred_begin();
+                                  pred_iter < s->inert_pred_end(); ++pred_iter)
+                {
+                    // assert some properties of the predecessor transition
+                    assert(pred_iter->succ->B_to_C->B_to_C_slice->to_constln()
+                                                                         == C);
+                    assert(pred_iter->succ->target == s);
+
+                    state_info_const_ptr const pred = pred_iter->source;
+                    // assert some properties of the predecessor state
+                    assert(pred->block == B);
+                    assert(pred->pos < B->nonbottom_end());
+                    // if pred is not yet marked as predecessor then
+                    if (STATE_TYPE_MAX != pred->notblue)
+                    {
+                        // mark pred as predecessor
+                        const_cast<state_type&>(pred->notblue)=STATE_TYPE_MAX;
+                        // add pred to the list of predecessors
+                        part_st_predecessors.push_back(pred);
+                    // end if
+                    }
+                // end for
+                }
+            // end for
+            }
+            assert(part_st_predecessors.size() ==
+                                    B->nonbottom_end() - B->nonbottom_begin());
+            part_st_predecessors.clear();
+            assert(0 == nr_of_inert_predecessors);
+            // now all nonbottom states should have s->notblue==STATE_TYPE_MAX.
+
+            // verify to_constln list:
+            bool to_own_constln = false;
+            for (B_to_C_desc_const_iter_t iter = B->to_constln.begin();
+                                           B->to_constln.end() != iter; ++iter)
+            {
+                assert(iter->from_block() == B);
+                if (iter->to_constln() == C)
+                {
+                    assert(!to_own_constln);
+                    to_own_constln = true;
+                    assert(iter->begin <= B->inert_begin());
+                    assert(iter->end == B->inert_end());
+                }
+            }
+            if (!to_own_constln)
+            {
+                // mCRL2log(log::debug, "bisim_gjkw") << B->debug_id()
+                //            << " has transitions to " << B->to_constln.size()
+                //                               << " other constellations.\n";
+                assert(B->nonbottom_begin() == B->nonbottom_end());
+                assert(B->inert_begin() == B_to_C_begin());
+                assert(B->inert_end() == B_to_C_begin());
+            }
+
+            // for all states s in B do
+            s_iter = B->begin();
+            do
+            {
+                state_info_const_ptr const s = *s_iter;
+                // mCRL2log(log::debug, "bisim_gjkw") << s->debug_id() << ' ';
+                // assert some properties of state s
+                assert(s->pos == s_iter);
+                assert(s->block == B);
+                assert(s->pred_begin() <= s->inert_pred_begin());
+                assert(s->inert_pred_begin() <= s->inert_pred_end());
+                assert(s->inert_pred_end() == s->pred_end());
+                assert(s->succ_begin() <= s->inert_succ_begin());
+                assert(s->inert_succ_begin() <= s->inert_succ_end());
+                assert(s->inert_succ_end() <= s->succ_end());
+                assert(s->succ_begin() == s->current_constln() ||
+                         s->succ_end() == s->current_constln() ||
+                                  *s->current_constln()[-1].target->constln() <
+                                     *s->current_constln()->target->constln());
+                // count reachable constellations
+                state_type nr_of_reachable_constlns = B->to_constln.size();
+
+                // for all constln-slices of successors of s do
+                succ_const_iter_t succ_iter = s->succ_begin();
+                if (succ_iter < s->succ_end())
+                {
+                    for (;;)
+                    {
+                        succ_const_iter_t slice_end =
+                                               succ_iter->constln_slice->end();
+                        assert(succ_iter < slice_end);
+                        const constln_t* const targetC =
+                                                  succ_iter->target->constln();
+                        // for all noninert transitions in the constln-slice do
+                        if (targetC == C)
+                        {
+                            assert(s->inert_succ_end() == slice_end);
+                            slice_end = s->inert_succ_begin();
+                        }
+                        for (; succ_iter < slice_end; ++succ_iter)
+                        {
+                            // assert some properties of the successor
+                            // transition
+                            assert(succ_iter->target->block != B);
+                            assert(succ_iter->target->constln() == targetC);
+                            assert(succ_iter->B_to_C < B->inert_begin() ||
+                                          B->inert_end() <= succ_iter->B_to_C);
+                            assert(succ_iter->B_to_C->B_to_C_slice->
+                                                            from_block() == B);
+                            assert(succ_iter->B_to_C->pred->succ == succ_iter);
+                            assert(succ_iter->B_to_C->pred->source == s);
+                        // end for
+                        }
+                        // if we have reached the inert transitions then
+                        if (targetC == C)
+                        {
+                            // for all inert transitions in the constln-slice
+                            // do
+                            for (slice_end = s->inert_succ_end();
+                                            succ_iter < slice_end; ++succ_iter)
+                            {
+                                // assert some properties of inert transitions
+                                assert(succ_iter->target->block == B);
+                                assert(B->inert_begin() <= succ_iter->B_to_C);
+                                assert(succ_iter->B_to_C < B->inert_end());
+                                assert(succ_iter->B_to_C->B_to_C_slice->
+                                                            from_block() == B);
+                                assert(succ_iter->B_to_C->pred->succ ==
+                                                                    succ_iter);
+                                assert(succ_iter->B_to_C->pred->source == s);
+                            // end for
+                            }
+                        // end if
+                        }
+                        else
+                        {
+                            --nr_of_reachable_constlns;
+                        }
+                // end for
+                        if (s->succ_end() <= succ_iter)  break;
+                        assert(0 < nr_of_reachable_constlns);
+                        assert(*targetC < *succ_iter->target->constln());
+                    }
+                }
+                // if s is a nonbottom state then
+                if (s_iter < B->bottom_begin())
+                {
+                    assert(s->inert_succ_begin() < s->inert_succ_end());
+                    nr_of_inert_successors -=
+                                   s->inert_succ_end() - s->inert_succ_begin();
+                    // the following assertion is necessary because s must have
+                    // a transition to its own constellation (namely an inert
+                    // one), but this constln_slice is not counted.
+                    assert(0 < nr_of_reachable_constlns);
+
+                    // assert that s can reach a bottom state
+                    assert(STATE_TYPE_MAX == s->notblue);
+                    const_cast<state_type&>(s->notblue) = 1;
+                }
+                else
+                {
+                    // (s is a bottom state.)
+                    // assert that not too few constellations are reachable.
+                    assert((state_type) to_own_constln ==
+                                                     nr_of_reachable_constlns);
+                    assert(s->inert_succ_begin() == s->inert_succ_end());
+                    // the following assertions are necessary because it could
+                    // be that the state has no transition to its own
+                    // constellation.
+                    assert(s->succ_begin() == s->inert_succ_begin() ||
+                           *s->inert_succ_begin()[-1].target->constln() <= *C);
+                    assert(s->inert_succ_end() == s->succ_end() ||
+                                 *s->inert_succ_end()->target->constln() > *C);
+                }
+
+                // for all noninert predecessors of s do
+                for (pred_const_iter_t pred_iter = s->noninert_pred_begin();
+                               pred_iter < s->noninert_pred_end(); ++pred_iter)
+                {
+                    // assert some properties of the predecessor
+                    assert(pred_iter->succ->B_to_C->B_to_C_slice->to_constln()
+                                                                         == C);
+                    assert(pred_iter->succ->target == s);
+                    assert(pred_iter->source->block != B);
+                // end for
+                }
+            // end for (all states s in B)
+            }
+            while (++s_iter < B->end());
+            assert(0 == nr_of_inert_successors);
+        // end for (all blocks B in C)
+            if (C->end() <= B->end())  break;
+            B = (*B->end())->block;
+        }
+    // end for (all constellations C)
+        if (permutation.end() <= C->end())  break;
+        C = (*C->end())->constln();
+    }
+    assert(0 == nr_of_nontrivial_constellations);
+    return;
+}
+
+#endif
+
+
 
 
 
@@ -1502,21 +1723,34 @@ init_transitions(part_trans_t& part_tr,
         // part_tr.state_info[s+1].set_pred_begin(part_tr.state_info[s].
         //                                                         pred_end());
 
-        out_descriptor* const s_slice = new out_descriptor(
-                                           part_tr.state_info[s].succ_begin());
-        s_slice->set_end(s_slice->end() + noninert_out_per_state[s] +
-                                                       inert_out_per_state[s]);
-        part_tr.state_info[s].set_succ_end(s_slice->end());
-        part_tr.state_info[s].set_inert_succ_begin_and_end(s_slice->begin() +
-                                    noninert_out_per_state[s], s_slice->end());
-        for (succ_iter_t succ_iter = s_slice->begin();
-                                      s_slice->end() != succ_iter; ++succ_iter)
+        if (0 < noninert_out_per_state[s] + inert_out_per_state[s])
         {
-            check_complexity::count("initialise succ-constellation slices", 1,
-                                                          check_complexity::m);
-            succ_iter->constln_slice = s_slice;
+            out_descriptor* const s_slice = new out_descriptor(
+                                           part_tr.state_info[s].succ_begin());
+            s_slice->set_end(s_slice->end() + noninert_out_per_state[s] +
+                                                       inert_out_per_state[s]);
+            part_tr.state_info[s].set_succ_end(s_slice->end());
+            part_tr.state_info[s].set_inert_succ_begin_and_end(s_slice->begin()
+                                  + noninert_out_per_state[s], s_slice->end());
+            for (succ_iter_t succ_iter = s_slice->begin();
+                                      s_slice->end() != succ_iter; ++succ_iter)
+            {
+                check_complexity::count("initialise succ-constellation slices",
+                                                       1, check_complexity::m);
+                succ_iter->constln_slice = s_slice;
+            }
+            part_tr.state_info[s].set_current_constln(s_slice->end());
         }
-        part_tr.state_info[s].set_current_constln(s_slice->end());
+        else
+        {
+            part_tr.state_info[s].set_succ_end(
+                                           part_tr.state_info[s].succ_begin());
+            part_tr.state_info[s].set_inert_succ_begin_and_end(
+                                           part_tr.state_info[s].succ_begin(),
+                                           part_tr.state_info[s].succ_begin());
+                part_tr.state_info[s].set_current_constln(
+                                           part_tr.state_info[s].succ_begin());
+        }
 
         if (s < aut.num_states())
         {
@@ -2725,6 +2959,84 @@ END_COROUTINE
 
 
 
+/// \brief function object to compare two constln_t pointers based on their
+/// contents
+class constln_ptr_less
+{
+  public:
+    bool operator() (const bisim_gjkw::constln_t* a,
+                                          const bisim_gjkw::constln_t* b) const
+    {
+        return *a < *b;
+    }
+};
+
+
+typedef std::set<bisim_gjkw::constln_t*, constln_ptr_less> R_map_t;
+
+
+/// This helper function marks a slice of transitions for postprocessing.  It
+/// also adds the constellation of the slice to those that need postprocessing,
+/// if needed.
+static void add_slice_to_R(R_map_t& R,
+                      bisim_gjkw::B_to_C_desc_iter_t const new_slice,
+                      bisim_gjkw::permutation_iter_t const orig_new_bottom_end)
+{
+    bisim_gjkw::block_t* const RfnB = new_slice->from_block();
+    bisim_gjkw::constln_t* const C = new_slice->to_constln();
+
+    assert(RfnB->marked_bottom_begin() <= orig_new_bottom_end);
+    assert(RfnB->marked_bottom_end() >= orig_new_bottom_end);
+    // 4.8: Add C to R
+    if (!R.insert(C).second) //< complexity log(n)
+    {
+        // The constellation already was in R.
+        assert(new_slice->end <= C->postprocess_end);
+        if (C->postprocess_begin <= new_slice->begin)
+        {
+            // The transitions from RfnB to C are already registered.
+            // (Strict < instead of == in the above test is possible after
+            // backtracking.)
+            assert(new_slice->new_bottom_end >= orig_new_bottom_end);
+            assert(new_slice->new_bottom_end <= RfnB->marked_bottom_end());
+            return;
+        }
+        else
+        {
+            // The transitions still need to be registered.  This only happens
+            // after backtracking (see line 4.33 below).
+    // 4.9: Register that the transitions from RfnB to C need postprocessing
+                // make sure the pointer to the end of the slice is already set
+                // to the correct value (together with the assert() above)
+            assert(C->postprocess_begin == new_slice->end);
+        }
+    }
+    else
+    {
+        //mCRL2log(log::debug, "bisim_gjkw") << "\tcan reach " << C->debug_id()
+        //                                                             << "\n";
+        // the constellation was not yet in R: no transitions to C are
+        // registered as needing postprocessing.
+        assert(C->postprocess_begin == C->postprocess_end);
+    // 4.9, continued: Register that the transitions from RfnB to C need
+    //                 postprocessing
+            // set pointer to the end of the slice
+        C->postprocess_end = new_slice->end;
+    }
+    // 4.9, continued: Register that the transitions from RfnB to C need
+    //                 postprocessing
+        // set pointer to the beginning of the slice
+    C->postprocess_begin = new_slice->begin;
+    assert(C->postprocess_begin < C->postprocess_end);
+    RfnB->to_constln.splice(RfnB->to_constln.end(),RfnB->to_constln,new_slice);
+    // 4.10: if the transitions RfnB --> C were not registered before then
+        // 4.11: Store Red with this postprocessing step
+    // 4.12: end if
+        // the if is implicit in the `return` statement above
+    new_slice->new_bottom_end = orig_new_bottom_end;
+}
+
+
 /// \brief Split a block with new bottom states as needed
 /// \details The function splits SplitB by checking whether all new bottom
 /// states can reach the constellations that SplitB can reach.
@@ -2741,22 +3053,21 @@ void bisim_partitioner_gjkw<LTS_TYPE>::postprocess_block(
     /*------- collect constellations reachable from new bottom states -------*/
 
     // 4.3: Create an empty search tree R
-    bisim_gjkw::R_map_t R;
+    R_map_t R;
 Line_4_4:
     // 4.4: Red := {old bottom states and new bottom states handled earlier in
     //              RfnB}
     bisim_gjkw::permutation_iter_t const orig_new_bottom_end =
                                                    RfnB->unmarked_bottom_end();
-    assert(0 < RfnB->unmarked_bottom_size());
     // 4.5: repeat
+    assert(0 < RfnB->unmarked_bottom_size());
     do
     {
         bisim_gjkw::check_complexity::count("repeat until no more new bottom "
                        "states are found", 1, bisim_gjkw::check_complexity::n);
         // 4.6: for all new bottom states b in RfnB not handled earlier do
-        for (bisim_gjkw::permutation_iter_t
-                        b_iter = RfnB->unmarked_bottom_begin();
-                               RfnB->unmarked_bottom_end() != b_iter; ++b_iter)
+        bisim_gjkw::permutation_iter_t b_iter = RfnB->unmarked_bottom_begin();
+        do
         {
             bisim_gjkw::check_complexity::count("for all new bottom states in "
                                  "RfnB", 1, bisim_gjkw::check_complexity::n);
@@ -2769,59 +3080,15 @@ Line_4_4:
                        "reachable from b", 1, bisim_gjkw::check_complexity::m);
                 assert(part_tr.succ_end() > C_iter &&
                                          C_iter->B_to_C->pred->succ == C_iter);
-                bisim_gjkw::constln_t* const C = C_iter->target->constln();
-                bisim_gjkw::B_to_C_desc_iter_t const new_slice =
-                                                  C_iter->B_to_C->B_to_C_slice;
                 // 4.8: Add C to R
-                // and
-                // 4.9: if the transitions RfnB --> C do not need
-                //         postprocessing then
-                if (R.insert(C).second) //< complexity log(n)
-                {
-                    //mCRL2log(log::debug, "bisim_gjkw") << "\tcan reach "
-                    //                                << C->debug_id() << "\n";
-                    // the constellation was not yet in R: no transitions to C
-                    // are registered as needing postprocessing.
-                    assert(C->postprocess_begin == C->postprocess_end);
-                    // 4.10: Register that the transitions from RfnB to C need
-                    //       postprocessing
-                        // set pointer to the end of the slice
-                    C->postprocess_end = new_slice->end;
-                }
-                else if (C->postprocess_begin <= new_slice->begin)
-                {
-                    // the constellation already was in R and the transitions
-                    // from RfnB to C are already registered.  (Strict <
-                    // instead of == is possible after backtracking.)
-                    assert(new_slice->end <= C->postprocess_end);
-                    assert(new_slice->new_bottom_end >= orig_new_bottom_end);
-                    assert(new_slice->new_bottom_end <= RfnB->bottom_end());
-                    continue;
-                }
-                else
-                {
-                    // the constellation already was in R, but the transitions
-                    // still need to be registered.  This only happens after
-                    // backtracking (see Line 5.25 below).
-
-                    // 4.10: Register that the transitions from RfnB to C need
-                    //       postprocessing
-                        // make sure the pointer to the end of the slice is
-                        // already set to the correct value
-                    assert(C->postprocess_begin == new_slice->end);
-                }
-                // 4.10: Register that the transitions from RfnB to C need
+                // 4.9: Register that the transitions from RfnB to C need
                 //      postprocessing
-                    // set pointer to the beginning of the slice
-                C->postprocess_begin = new_slice->begin;
-                assert(C->postprocess_begin < C->postprocess_end);
-                // 4.11: Store Red with this postprocessing step
-                new_slice->new_bottom_end = orig_new_bottom_end;
-                assert(new_slice->from_block() == RfnB);
-                RfnB->to_constln.splice(RfnB->to_constln.end(),
-                                                  RfnB->to_constln, new_slice);
+                // 4.10: if the transitions RfnB --> C were not registered
+                //          before then
+                    // 4.11: Store Red with this postprocessing step
                 // 4.12: end if
-                    // is implicit in the `continue` statement above
+                add_slice_to_R(R, C_iter->B_to_C->B_to_C_slice,
+                                                          orig_new_bottom_end);
             // 4.13: end for
             }
             // 4.14: Set the current constellation pointer of b to the first
@@ -2829,6 +3096,7 @@ Line_4_4:
             b->set_current_constln(b->succ_begin());
         // 4.15: end for
         }
+        while (RfnB->unmarked_bottom_end() != ++b_iter);
         // 4.16: if RfnB can reach some constellation C not in R then
         assert(RfnB->to_constln.begin() != RfnB->to_constln.end());
         if (!RfnB->to_constln.begin()->needs_postprocessing())
@@ -2839,10 +3107,8 @@ Line_4_4:
                                         RfnB->to_constln.begin()->to_constln();
             //mCRL2log(log::debug, "bisim_gjkw") << "\tcanNOT reach "
             //                                        << C->debug_id() << "\n";
-            #ifndef NDEBUG
-               bisim_gjkw::permutation_const_iter_t const blue_begin =
+            bisim_gjkw::permutation_const_iter_t const blue_begin =
                                                                  RfnB->begin();
-            #endif
             // 4.17: RfnB := Refine(RfnB, C, Red := {old bottom states and new
             //                      bottom states handled earlier in RfnB},
             //                      FromRed := {transitions to C},
@@ -2850,22 +3116,27 @@ Line_4_4:
             RfnB = refine(RfnB, C, RfnB->FromRed(C), true, true);
             assert(RfnB->marked_bottom_begin() <= orig_new_bottom_end &&
                              orig_new_bottom_end <= RfnB->marked_bottom_end());
-            #ifndef NDEBUG
-                // make sure the blue subblock is not empty and only can reach
-                // constellations that are in R:
-                const bisim_gjkw::block_t* const BlueB = (*blue_begin)->block;
-                assert(BlueB != RfnB);
-                for (bisim_gjkw::B_to_C_desc_const_iter_t
-                                iter = BlueB->to_constln.begin();
-                                       BlueB->to_constln.end() != iter; ++iter)
-
-                {
-                    assert(iter->needs_postprocessing());
-                }
-            #endif
-        // 4.18: end if
+            // 4.18: for all constellations C reachable from the blue subblock
+            //               of line 4.17 do
+            bisim_gjkw::block_t* const BlueB = (*blue_begin)->block;
+            assert(BlueB != RfnB);
+            assert(0 == BlueB->marked_bottom_size());
+            while (!BlueB->to_constln.begin()->needs_postprocessing())
+            {
+                bisim_gjkw::check_complexity::count("for all constellations "
+                   "reachable from BlueB", 1, bisim_gjkw::check_complexity::m);
+                // 4.19: Add C to R
+                // 4.20: Register that the transitions from RfnB to C need
+                //       postprocessing
+                    // As there are no old bottom states in the blue block,
+                    // line 4.11 does not need to be copied.  We indicate this
+                    // fact with the parameter `BlueB->end()`.
+                add_slice_to_R(R, BlueB->to_constln.begin(), BlueB->end());
+            // 4.21: end for
+            }
+        // 4.22: end if
         }
-    // 4.19: until Line 4.17 was skipped or ...
+    // 4.23: until Line 4.17 was skipped or ...
         else
         {
             assert(RfnB->bottom_begin() <=
@@ -2874,20 +3145,20 @@ Line_4_4:
                                                            RfnB->bottom_end());
             break;
         }
-    // 4.19 (continued): ... or Line 4.17 did not find more new bottom states
+    // 4.23 (continued): ... or Line 4.17 did not find more new bottom states
     }
     while (0 < RfnB->unmarked_bottom_size());
 
     /*---------------- stabilise w.r.t. found constellations ----------------*/
 
-    // 4.20: for all constellations SpC in R (in order) do
+    // 4.24: for all constellations SpC in R (in order) do
     while (!R.empty())
     {
         bisim_gjkw::check_complexity::count(
                                    "for all constellations in R (in order)", 1,
                                               bisim_gjkw::check_complexity::m);
         bisim_gjkw::constln_t* const SpC = *R.begin();
-        // 4.21: for all blocks B with transitions to SpC that need
+        // 4.25: for all blocks B with transitions to SpC that need
         //               postprocessing do
         while (SpC->postprocess_begin != SpC->postprocess_end)
         {
@@ -2915,7 +3186,7 @@ Line_4_4:
             bisim_gjkw::permutation_iter_t const new_bottom_end =
                                                        FromRed->new_bottom_end;
             assert(FromRed->begin == B_iter);
-            // 4.22: Delete the transitions from B to SpC from those that need
+            // 4.26: Delete the transitions from B to SpC from those that need
             //       postprocessing
             SpC->postprocess_begin = FromRed->end;
             assert(SpC->postprocess_begin <= SpC->postprocess_end);
@@ -2930,14 +3201,16 @@ Line_4_4:
             #ifndef NDEBUG
                 FromRed->new_bottom_end = part_tr.permutation.begin();
             #endif
-            // 4.23: RedB := Refine(B, SpC, Red := B intersect (the set stored
-            //                      in Line 4.11), FromRed := {transitions to
+            // 4.27: RedB := Refine(B, SpC, Red := B intersect (the set stored
+            //                      in line 4.11), FromRed := {transitions to
             //                      SpC}, allOtherBottomBlue := false)
             B->set_marked_bottom_begin(new_bottom_end);
             bisim_gjkw::block_t* const RedB = refine(B, SpC, &*FromRed, false,
                                                                          true);
-            // 4.24: for all new bottom states s in RedB (except those just
-            //                                      found in Line 4.20) do
+            // 4.28: for all bottom states s in RedB \ (the set stored in
+            //               line 4.11) do
+                // (i. e. for all new bottom states except those just found in
+                // line 4.27)
             for (bisim_gjkw::permutation_iter_t
                                 s_iter = RedB->marked_bottom_begin();
                                             s_iter != new_bottom_end; ++s_iter)
@@ -2946,7 +3219,7 @@ Line_4_4:
                                             "for all red new bottom states", 1,
                                               bisim_gjkw::check_complexity::m);
                 bisim_gjkw::state_info_ptr const s = *s_iter;
-                // 4.25: Advance the current constellation pointer of s to the
+                // 4.29: Advance the current constellation pointer of s to the
                 //       next constellation it can reach
                 if (s->current_constln() < s->succ_end() &&
                                 s->current_constln()->target->constln() == SpC)
@@ -2957,28 +3230,28 @@ Line_4_4:
                 else  assert(B == RedB && B->constln() == SpC);
                 assert(s->succ_end() == s->current_constln() ||
                               *SpC < *s->current_constln()->target->constln());
-            // 4.26: end for
+            // 4.30: end for
             }
-            // 4.27: if Line 4.23 has found more new bottom states then
+            // 4.31: if Line 4.27 has found more new bottom states then
             if (0 < RedB->unmarked_bottom_size())
             {
-                // 4.28: RfnB := RedB
+                // 4.32: RfnB := RedB
                 RfnB = RedB;
-                // 4.29: Restart the procedure (but keep R),
+                // 4.33: Restart the procedure (but keep R),
                 //       i. e. go to Line 4.4
                 goto Line_4_4;
-            // 4.30: end if
+            // 4.34: end if
             }
-            // 4.34: Destroy all temporary data
+            // 4.38: Destroy all temporary data
                 // As part of this line, we unmark all states.
             RedB->set_marked_bottom_begin(RedB->bottom_end());
-        // 4.31: end for
+        // 4.35: end for
         }
-        // 4.32: Delete SpC from R
+        // 4.36: Delete SpC from R
         R.erase(R.begin());
-    // 4.33: end for
+    // 4.37: end for
     }
-    // 4.34: Destroy all temporary data
+    // 4.38: Destroy all temporary data
     assert(R.empty());
 
     //mCRL2log(log::debug, "bisim_gjkw") << "Finished postprocessing\n";

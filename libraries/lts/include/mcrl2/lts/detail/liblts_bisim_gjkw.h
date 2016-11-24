@@ -819,6 +819,8 @@ class constln_t
 
     /// provides an arbitrary nontrivial constellation
     static constln_t* get_some_nontrivial()  {  return nontrivial_first;  }
+    const constln_t* get_nontrivial_next() const  {  return nontrivial_next;  }
+    constln_t* get_nontrivial_next()  {  return nontrivial_next;  }
 
     /// \brief makes a constellation trivial (i. e. removes it from the
     /// respective list)
@@ -841,6 +843,12 @@ class constln_t
                                                           : nontrivial_first;
             nontrivial_first = this;
         }
+    }
+
+    /// \brief returns true if the constellation is marked as trivial
+    bool is_trivial() const
+    {
+        return nullptr == nontrivial_next;
     }
 
     /// iterator to the first state in the constellation
@@ -993,6 +1001,8 @@ class part_state_t
             constln_t* const C = permutation_iter[-1]->constln();
             // permutation_iter[-1]->block->set_constln(nullptr);
             assert(C->end() == permutation_iter);
+            // assert that constellation is trivial:
+            assert(permutation_iter[-1]->block->begin() == C->begin());
             permutation_iter = C->begin();
             delete C;
         }
@@ -1006,12 +1016,17 @@ class part_state_t
             bisim_gjkw::check_complexity::count(delete_blocks, 1,
                                               bisim_gjkw::check_complexity::n);
             block_t* const B = permutation_iter[-1]->block;
-            permutation_iter[-1]->block = nullptr;
             assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
-            (*permutation_iter)->block = nullptr;
             #ifndef NDEBUG
-                if (BLOCK_NO_SEQNR != B->seqnr())  ++deleted_blocks;
+                if (BLOCK_NO_SEQNR != B->seqnr())
+                {
+                    ++deleted_blocks;
+                }
+                else
+                {
+                    assert(0 == deleted_blocks);
+                }
             #endif
             delete B;
         }
@@ -1039,11 +1054,6 @@ class part_state_t
     /// print the partition as a tree (per constellation and block)
     void print_part(const part_trans_t& part_tr) const;
     void print_trans() const;
-
-    /// verify that the partition is stable. i.e. every bottom state in a block
-    /// can reach all constellations in the list of constellations reachable
-    /// from it.
-    void assert_stability() const;
 #endif
 };
 
@@ -1507,6 +1517,11 @@ class part_trans_t: public part_state_t
     B_to_C_iter_t       B_to_C_end  ()        {  return B_to_C.end  ();  }
     pred_const_iter_t pred_end() const  {  return pred.end();  }
     succ_const_iter_t succ_end() const  {  return succ.end();  }
+
+#ifndef NDEBUG
+    /// \brief assert that the data structure is consistent and stable
+    void assert_stability() const;
+#endif
 };
 
 ///@} (end of group part_trans)
