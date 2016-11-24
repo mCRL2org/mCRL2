@@ -288,10 +288,10 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
       {
         auto const& v = Vj.find_vertex(Y); // v = (Y, p, q)
         std::size_t p = v.index();
-        auto di = Ye.dest().find(p);
-        if (di != Ye.dest().end())
+        auto di = Ye.target().find(p);
+        if (di != Ye.target().end())
         {
-          auto const& q1 = di->second; // q1 = dest(X, i, p)
+          auto const& q1 = di->second; // q1 = target(X, i, p)
           auto const& u = Vj.find_vertex(local_control_flow_graph_vertex(Y, p, data::undefined_variable(), q1));
           if (contains(Bj[Y], d_Y[k]) && !contains(u.marking(), d_Y[k]))
           {

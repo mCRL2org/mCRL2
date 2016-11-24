@@ -64,15 +64,15 @@ class stategraph_global_algorithm: public stategraph_algorithm
       return propositional_variable(X, data::variable_list(d.begin(), d.end()));
     }
 
-    data::data_expression_list put_dest(const predicate_variable& PV, const stategraph_equation& eqn, std::size_t i) const
+    data::data_expression_list put_target(const predicate_variable& PV, const stategraph_equation& eqn, std::size_t i) const
     {
       data::data_expression_vector PV_args;
       size_t j = 0;
       for(auto ai = PV.parameters().begin(); ai != PV.parameters().end(); ++ai)
       {
-        const std::map<std::size_t, data::data_expression>& dest = eqn.predicate_variables()[i].dest();
-        auto dij = dest.find(j);
-        if(dij != dest.end())
+        const std::map<std::size_t, data::data_expression>& target = eqn.predicate_variables()[i].target();
+        auto dij = target.find(j);
+        if(dij != target.end())
         {
           PV_args.push_back(dij->second);
         }
@@ -129,7 +129,7 @@ class stategraph_global_algorithm: public stategraph_algorithm
             continue;
           }
 
-          data::data_expression_list PV_args = put_dest(PV, eqn, i);
+          data::data_expression_list PV_args = put_target(PV, eqn, i);
           propositional_variable_instantiation Ye = propositional_variable_instantiation(PV.variable().name(), data::data_expression_list(PV_args.begin(), PV_args.end()));
 
           Ye = atermpp::down_cast<propositional_variable_instantiation>(pbesr(Ye, sigma));
@@ -195,12 +195,12 @@ class stategraph_global_algorithm: public stategraph_algorithm
     }
 
     // Returns k such that cfp[k] == l. Throws an exception if no such k exists.
-    std::size_t unproject(const std::vector<std::size_t>& cfp, std::size_t l) const
+    std::size_t unproject(const predicate_variable& Yf, const std::vector<std::size_t>& cfp, std::size_t l) const
     {
       mCRL2log(log::debug1, "stategraph") << "stategraph_global_algorithm::unproject: cfp = " << core::detail::print_list(cfp) << " l = " << l << std::endl;
       for (std::size_t k = 0; k < cfp.size(); k++)
       {
-        if (cfp[k] == l)
+        if (Yf.copy(cfp[k]) == l)
         {
           return k;
         }
@@ -216,26 +216,27 @@ class stategraph_global_algorithm: public stategraph_algorithm
       auto const& cfp_X = eq_X.control_flow_parameter_indices();
       auto const& cfp_Y = eq_Y.control_flow_parameter_indices();
 
-      mCRL2log(log::debug1, "stategraph") << "compute_vertex X = " << X << ", e = " << core::detail::print_list(e) << ", Yf = " << Yf << std::endl;
-      mCRL2log(log::debug1, "stategraph") << "eq_X = " << eq_X << std::endl;
-      mCRL2log(log::debug1, "stategraph") << "eq_Y = " << eq_Y << std::endl;
+      mCRL2log(log::debug1, "stategraph") << "compute_vertex u = (X, e) = (" << X << ", " << core::detail::print_list(e) << "), Y(f) = " << Yf << std::endl;
       mCRL2log(log::debug1, "stategraph") << "cfp_X = " << core::detail::print_list(cfp_X) << std::endl;
       mCRL2log(log::debug1, "stategraph") << "cfp_Y = " << core::detail::print_list(cfp_Y) << std::endl;
 
       for (std::size_t l = 0; l < cfp_Y.size(); l++)
       {
-        auto q = Yf.dest(cfp_Y[l]);
+        auto q = Yf.target(cfp_Y[l]);
         if (q != data::undefined_data_expression())
         {
+          mCRL2log(log::debug1, "stategraph") << "q = " << q << std::endl;
           f.push_back(q);
         }
         else
         {
+          mCRL2log(log::debug1, "stategraph") << "q = undefined" << std::endl;
           // Compute k such that (X, k) and (Y, l) are related. This implies copy(X, i, cfp_X[k]) == cfp_Y[l].
-          auto p = Yf.copy(cfp_Y[l]);
+          //                                                                 Yf.copy[cfp_X[k]] = cfp_Y[l]
+          auto p = cfp_Y[l];
           mCRL2log(log::debug2, "stategraph") << "Yf = " << Yf << "\n" << Yf.print() << " l = " << l << " Yf.copy(" << l << ") = " << p << std::endl;
           assert(p != data::undefined_index());
-          std::size_t k = unproject(cfp_X, p);
+          std::size_t k = unproject(Yf, cfp_X, p);
           assert(k < e.size());
           f.push_back(nth_element(e, k));
         }

@@ -1010,11 +1010,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
             if (q != C.end()) // (Y, k1) in C
             {
               std::size_t k1 = q->second;
-              auto e1 = i->dest(k1);
+              auto e1 = i->target(k1);
               if (e1 != data::undefined_data_expression())
               {
-                // dest(X, i, k') = e'
-                mCRL2log(log::debug1, "stategraph") << "case 1: (X, e) -> (Y, d', e') ; dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                // target(X, i, k') = e'
+                mCRL2log(log::debug1, "stategraph") << "case 1: (X, e) -> (Y, d', e') ; target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                 V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
               }
             }
@@ -1036,9 +1036,9 @@ class stategraph_local_algorithm: public stategraph_algorithm
               std::size_t k1 = q->second;
               if (is_mapped_to(i->source(), k, e))
               {
-                // source(X, i, k) = e && dest(X, i, k') = e'
-                auto e1 = i->dest(k1);
-                mCRL2log(log::debug1, "stategraph") << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                // source(X, i, k) = e && target(X, i, k') = e'
+                auto e1 = i->target(k1);
+                mCRL2log(log::debug1, "stategraph") << "case 3a: (X, d, e) -> (Y, d', e') ; source(X, i, k) = e && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                 if (e1 != data::undefined_data_expression())
                 {
                   V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
@@ -1046,11 +1046,11 @@ class stategraph_local_algorithm: public stategraph_algorithm
               }
               else if (Y != X && is_undefined(i->source(), k))
               {
-                // Y != X && undefined(source(X, i, k)) && dest(X, i, k') = e'
-                auto e1 = i->dest(k1);
+                // Y != X && undefined(source(X, i, k)) && target(X, i, k') = e'
+                auto e1 = i->target(k1);
                 if (e1 != data::undefined_data_expression())
                 {
-                  mCRL2log(log::debug1, "stategraph") << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && dest(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
+                  mCRL2log(log::debug1, "stategraph") << "case 3b: (X, d, e) -> (Y, d', e') ; Y != X && undefined(source(X, i, k)) && target(X, i, k') = e' ; k' = " << print_index(k1) << std::endl;
                   V.insert_edge(todo, m_pbes, u, Y, k1, e1, edge_label);
                 }
 
