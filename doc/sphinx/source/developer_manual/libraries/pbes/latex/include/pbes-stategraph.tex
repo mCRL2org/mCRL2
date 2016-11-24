@@ -118,18 +118,18 @@ We define the function $\mathrm{target}$ as follows:%
 \begin{array}{lll}
 c &  & \text{if }rewrite(\mathrm{sigma}(X,i)(\mathrm{PVI}(\varphi ,i))[j]=c
 \\ 
-\bot  &  & \text{otherwise}%
+\bot &  & \text{otherwise}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}%
 with $c$ a constant. We define the function $\mathrm{copy}$ as follows:%
 \begin{equation*}
 \mathrm{copy}(X,i,j)=\left\{ 
 \begin{array}{lll}
 k &  & \text{if }\mathrm{PVI}(\varphi ,i)[k]=d[j] \\ 
-\bot  &  & \text{otherwise}%
+\bot &  & \text{otherwise}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}%
 We define the function $\mathrm{used}$ as follows:%
 \begin{equation*}
@@ -280,61 +280,10 @@ vertices $(X,i)$ and $(X,j)$ with $i\neq j$. \newpage
 
 \subsubsection{Global control flow graph}
 
-In the following algorithm we use a projection that removes all parameters
-of a predicate variable that do not correspond to a control flow parameter.
-This projection applied to the predicate variable $X_{k}(e_{1},\cdots
-,e_{m}) $ is denoted as $\overline{X_{k}(e_{1},\cdots ,e_{m})}$. The mapping 
-$R$ is a rewriter that takes a substitution to data variables as second
-argument.
-
+The following algorithm is computes the global control flow graph.%
 \begin{equation*}
 \begin{tabular}{l}
 \textsc{ComputeGlobalControlflowGraph(}$\mathcal{E}$, $X_{init}(e_{init})$%
-\textsc{)} \\ 
-$u_{0}:=X_{init}(\widehat{e_{init}})$ \\ 
-$V:=\{u_{0}\}$ \\ 
-$E:=\emptyset $ \\ 
-$todo:=\{u_{0}\}$ \\ 
-$sig(u_{0}):=\emptyset $ \\ 
-\textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
-$\qquad $\textbf{choose} $u=X(d=e)\in todo$ \\ 
-$\qquad todo:=todo\setminus \{u\}$ \\ 
-$\qquad sig(u):=sig(R(\varphi _{X},[d:=e])$ \\ 
-$\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
-do}}$ \\ 
-$\qquad \qquad g:=R(guard^{i}(\varphi _{X}),[d_{X}:=e])$ \\ 
-$\qquad \qquad \text{\textbf{if }}g\neq false$ \\ 
-$\qquad \qquad \qquad Y(f):=\text{\textsc{PutDest}}(\mathrm{PVI}(\varphi
-_{X},i),X,i)$ \\ 
-$\qquad \qquad \qquad Y(f):=Y(f)[d:=e]$ \\ 
-$\qquad \qquad \qquad v:=Y(\widehat{f})$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
-$\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
-$\qquad \qquad \qquad \qquad todo:=todo\cup \{v\}$ \\ 
-$\qquad \qquad \qquad E:=E\cup \{(u,i,v)\}$ \\ 
-$\text{\textbf{return} }(V,E)$%
-\end{tabular}%
-\end{equation*}%
-\begin{equation*}
-\begin{tabular}{l}
-$\text{\textsc{PutDest}}$\textsc{(}$Y(e),X,i$\textsc{)} \\ 
-$e^{\prime }:=e$ \\ 
-\textbf{for }$j=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
-$\qquad \text{\textbf{if }}\mathrm{target}(X,i,p)\neq \bot $ \textbf{then}
-\\ 
-$\qquad \qquad e^{\prime }[j]:=\mathrm{target}(X,i,p)$ \\ 
-$\text{\textbf{return} }Y(e^{\prime })$%
-\end{tabular}%
-\end{equation*}%
-\newpage 
-
-\subsubsection{Global control flow graph (2)}
-
-The following algorithm is an alternative for computing the global control
-flow graph.%
-\begin{equation*}
-\begin{tabular}{l}
-\textsc{ComputeGlobalControlflowGraphNew(}$\mathcal{E}$, $X_{init}(e_{init})$%
 \textsc{)} \\ 
 $V:=\emptyset $ \\ 
 $E:=\emptyset $ \\ 
@@ -543,7 +492,7 @@ V:=V\cup \{v\} \\
 E:=E\cup \{(u,i,v)\}%
 \end{array}%
 \end{equation*}%
-\newpage 
+\newpage
 
 \subsubsection{Local belongs relation}
 
@@ -713,4 +662,4 @@ $\qquad \qquad e^{\prime
 \textbf{return }$Y(e^{\prime })$%
 \end{tabular}%
 \end{equation*}%
-\newpage 
+\newpage

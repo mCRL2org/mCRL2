@@ -14,7 +14,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Friday, June 15, 2012 17:58:29}
-%TCIDATA{LastRevised=Thursday, June 23, 2016 15:51:58}
+%TCIDATA{LastRevised=Monday, October 17, 2016 09:42:49}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -62,28 +62,28 @@ Process expressions in mCRL2 are expressions built according to the
 following syntax:%
 \[
 \begin{array}{ccc}
-\text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\
-a(e) & \text{action(}a\text{,}e\text{)} & \text{Action} \\
-P(e) & \text{process(}P\text{,}e\text{)} & \text{Process} \\
+\text{expression} & \text{C++ equivalent} & \text{ATerm grammar} \\ 
+a(e) & \text{action(}a\text{,}e\text{)} & \text{Action} \\ 
+P(e) & \text{process(}P\text{,}e\text{)} & \text{Process} \\ 
 P(d:=e) & \text{process\_assignment(}P\text{,}d:=e\text{)} & \text{%
-ProcessAssignment} \\
-\delta & \text{delta()} & \text{Delta} \\
-\tau & \text{tau()} & \text{Tau} \\
-\dsum\limits_{d}x & \text{sum(}d\text{,}x\text{)} & \text{Sum} \\
-\partial _{B}(x) & \text{block(}B\text{,}x\text{)} & \text{Block} \\
-\tau _{B}(x) & \text{hide(}B\text{,}x\text{)} & \text{Hide} \\
-\rho _{R}(x) & \text{rename(}R\text{,}x\text{)} & \text{Rename} \\
-\Gamma _{C}(x) & \text{comm(}C\text{,}x\text{)} & \text{Comm} \\
-\bigtriangledown _{V}(x) & \text{allow(}V\text{,}x\text{)} & \text{Allow} \\
-x\mid y & \text{sync(}x\text{,}y\text{)} & \text{Sync} \\
-x\at t & \text{at\_time(}x\text{,}t\text{)} & \text{AtTime} \\
-x\cdot y & \text{seq(}x\text{,}y\text{)} & \text{Seq} \\
-c\rightarrow x & \text{if\_then(}c\text{,}x\text{)} & \text{IfThen} \\
+ProcessAssignment} \\ 
+\delta & \text{delta()} & \text{Delta} \\ 
+\tau & \text{tau()} & \text{Tau} \\ 
+\dsum\limits_{d}x & \text{sum(}d\text{,}x\text{)} & \text{Sum} \\ 
+\partial _{B}(x) & \text{block(}B\text{,}x\text{)} & \text{Block} \\ 
+\tau _{B}(x) & \text{hide(}B\text{,}x\text{)} & \text{Hide} \\ 
+\rho _{R}(x) & \text{rename(}R\text{,}x\text{)} & \text{Rename} \\ 
+\Gamma _{C}(x) & \text{comm(}C\text{,}x\text{)} & \text{Comm} \\ 
+\bigtriangledown _{V}(x) & \text{allow(}V\text{,}x\text{)} & \text{Allow} \\ 
+x\mid y & \text{sync(}x\text{,}y\text{)} & \text{Sync} \\ 
+x\at t & \text{at\_time(}x\text{,}t\text{)} & \text{AtTime} \\ 
+x\cdot y & \text{seq(}x\text{,}y\text{)} & \text{Seq} \\ 
+c\rightarrow x & \text{if\_then(}c\text{,}x\text{)} & \text{IfThen} \\ 
 c\rightarrow x\diamond y & \text{if\_then\_else(}c\text{,}x\text{,}y\text{)}
-& \text{IfThenElse} \\
-x\ll y & \text{binit(}x\text{,}y\text{)} & \text{BInit} \\
-x\ \parallel \ y & \text{merge(}x\text{,}y\text{)} & \text{Merge} \\
-x\ \leftmerge \ y & \text{lmerge(}x\text{,}y\text{)} & \text{LMerge} \\
+& \text{IfThenElse} \\ 
+x\ll y & \text{binit(}x\text{,}y\text{)} & \text{BInit} \\ 
+x\ \parallel \ y & \text{merge(}x\text{,}y\text{)} & \text{Merge} \\ 
+x\ \leftmerge \ y & \text{lmerge(}x\text{,}y\text{)} & \text{LMerge} \\ 
 x+y & \text{choice(}x\text{,}y\text{)} & \text{Choice}%
 \end{array}%
 \]
@@ -91,16 +91,16 @@ x+y & \text{choice(}x\text{,}y\text{)} & \text{Choice}%
 where the types of the symbols are as follows:%
 \[
 \begin{array}{cl}
-a,b & \text{strings (action names)} \\
-P & \text{a process identifier} \\
-e & \text{a sequence of data expressions} \\
-d & \text{a sequence of data variables} \\
-B & \text{a set of strings (action names) } \\
-R & \text{a sequence of rename expressions} \\
-C & \text{a sequence of communication expressions} \\
-V & \text{a sequence of multi actions} \\
-t & \text{a data expression of type real} \\
-x,y & \text{process expressions} \\
+a,b & \text{strings (action names)} \\ 
+P & \text{a process identifier} \\ 
+e & \text{a sequence of data expressions} \\ 
+d & \text{a sequence of data variables} \\ 
+B & \text{a set of strings (action names) } \\ 
+R & \text{a sequence of rename expressions} \\ 
+C & \text{a sequence of communication expressions} \\ 
+V & \text{a sequence of multi actions} \\ 
+t & \text{a data expression of type real} \\ 
+x,y & \text{process expressions} \\ 
 c & \text{ a data expression of type bool}%
 \end{array}%
 \]%
@@ -124,30 +124,30 @@ following grammar:
 \begin{verbatim}
 <linear process expression> ::= choice(<linear process expression>, <linear process expression>)
                               | <summand>
-
+ 
 <summand>                   ::= sum(<variables>, <alternative>)
                               | <conditional action prefix>
                               | <conditional deadlock>
-
+ 
 <conditional action prefix> ::= if_then(<condition>, <action prefix>)
                               | <action prefix>
-
+ 
 <action prefix>             ::= seq(<timed multiaction>, <process reference>)
                               | <timed multiaction>
-
+ 
 <timed multiaction>         ::= at_time(<multiaction>, <time stamp>)
                               | <multiaction>
-
+ 
 <multiaction>               ::= tau()
                               | <action>
                               | sync(<multiaction>, <multiaction>)
-
+ 
 <conditional deadlock>      ::= if_then(<condition>, <timed deadlock>)
                               | <timed deadlock>
-
+ 
 <timed deadlock>            ::= delta()
                               | at_time(delta(), <time stamp>)
-
+ 
 <process reference>         ::= process(<process identifier>, <data expressions>)
                               | process_assignment(<process identifier>, <data assignments>)
 \end{verbatim}
@@ -160,41 +160,41 @@ We define the predicate $is\_guarded$ for process expressions as follows: $%
 is\_guarded(p)=is\_guarded(p,\emptyset )$%
 \[
 \begin{array}{lll}
-is\_guarded(a(e),W) & = & true \\
-is\_guarded(\delta ,W) & = & true \\
-is\_guarded(\tau ,W) & = & true \\
-is\_guarded(P(e),W) & = &
+is\_guarded(a(e),W) & = & true \\ 
+is\_guarded(\delta ,W) & = & true \\ 
+is\_guarded(\tau ,W) & = & true \\ 
+is\_guarded(P(e),W) & = & 
 \begin{array}{l}
-\left\{
+\left\{ 
 \begin{array}{ll}
-false & \text{if }P\in W \\
+false & \text{if }P\in W \\ 
 is\_guarded(p,W\cup \{P\}) & \text{if }P\notin W%
 \end{array}%
-\right. \\
+\right. \\ 
 \text{where }P(d)=p\text{ is the equation corresponding to }P(e)%
 \end{array}
-\\
-is\_guarded(p+q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\
-is\_guarded(p\cdot q,W) & = & is\_guarded(p,W) \\
-is\_guarded(c\rightarrow p,W) & = & is\_guarded(p,W) \\
+\\ 
+is\_guarded(p+q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(p\cdot q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(c\rightarrow p,W) & = & is\_guarded(p,W) \\ 
 is\_guarded(c\rightarrow p\diamond q,W) & = & is\_guarded(p,W)\wedge
-is\_guarded(q,W) \\
-is\_guarded(\Sigma _{d:D}\ p,W) & = & is\_guarded(p,W) \\
-is\_guarded(p\at t,W) & = & is\_guarded(p,W) \\
-is\_guarded(p\ll q,W) & = & is\_guarded(p,W) \\
-is\_guarded(p\parallel q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\
-is\_guarded(p\leftmerge q,W) & = & is\_guarded(p,W) \\
-is\_guarded(p\mid q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\
-is\_guarded(\rho _{R}(p),W) & = & is\_guarded(p,W) \\
-is\_guarded(\partial _{B}(p),W) & = & is\_guarded(p,W) \\
-is\_guarded(\tau _{I}(p),W) & = & is\_guarded(p,W) \\
-is\_guarded(\Gamma _{C}(p),W) & = & is\_guarded(p,W) \\
+is\_guarded(q,W) \\ 
+is\_guarded(\Sigma _{d:D}\ p,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\at t,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\ll q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\parallel q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(p\leftmerge q,W) & = & is\_guarded(p,W) \\ 
+is\_guarded(p\mid q,W) & = & is\_guarded(p,W)\wedge is\_guarded(q,W) \\ 
+is\_guarded(\rho _{R}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\partial _{B}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\tau _{I}(p),W) & = & is\_guarded(p,W) \\ 
+is\_guarded(\Gamma _{C}(p),W) & = & is\_guarded(p,W) \\ 
 is\_guarded(\nabla _{V}(p),W) & = & is\_guarded(p,W)%
 \end{array}%
 \]%
 \newline
 N.B. This specification assumes that process names are unique. In mCRL2
-process names can be overloaded, therefore in the implemenation $W$ contains
+process names can be overloaded, therefore in the implemenation $W$ contains 
 \emph{process identifiers} (i.e. both the process name and the sorts of the
 arguments) instead of process names.
 
@@ -212,13 +212,13 @@ action names using $\alpha ,\beta ,\ldots $ So in general we have $\alpha
 =a_{1}\mid \ldots \mid a_{n}$. In alphabet reduction data parameters play a
 minor role, therefore we choose a notation in which data parameters are
 omitted. We use the abbreviation $\overline{a}=a(e_{1},\ldots ,e_{n})$ to
-denote an action, and $\overline{\alpha }=\overline{a_{1}}\mid \ldots \mid
+denote an action, and $\overline{\alpha }=\overline{a_{1}}\mid \ldots \mid 
 \overline{a_{n}}$ to denote a multi action, where $e_{1},\ldots ,e_{n}$ are
 data expressions.Note that a multi action is a multiset (or bag) of actions
 and a multi action name is a multiset of names. We write $\alpha \beta $ as
 shorthand for $\alpha \cup \beta $ and $a\beta $ for $\{a\}\cup \beta $.
 Sets of multi action names are represented using $A,A_{1},A_{2},\ldots $ A
-communication $C$ maps multi action names to action names, and is denoted as
+communication $C$ maps multi action names to action names, and is denoted as 
 $\{\alpha _{1}\rightarrow a_{1},\ldots ,\alpha _{n}\rightarrow a_{n}\}$. A
 renaming $R$ is a substitution on action names, and is denoted as $%
 R=\{a_{1}\rightarrow b_{1},\ldots ,a_{n}\rightarrow b_{n}\}$. A block set $B$
@@ -229,7 +229,7 @@ is a set of action names. A hide set $I$ is a set of action names.
 We define multi actions $\overline{\alpha }$ using the following grammar:%
 \[
 \overline{\alpha }:=\overline{a}\shortmid \overline{\alpha }\mid \overline{a}%
-,
+, 
 \]%
 where $\overline{a}$ is an action, and where $\shortmid $ is used to
 distinguish alternatives.
@@ -238,13 +238,13 @@ We define pCRL terms $p$ using the following grammar:%
 \[
 p::=\overline{a}\shortmid P\shortmid \delta \shortmid \tau \shortmid
 p+p\shortmid p\cdot p\shortmid c\rightarrow p\shortmid c\rightarrow
-p\diamond p\shortmid \Sigma _{d:D}p\shortmid p\at t\shortmid p\ll p,
+p\diamond p\shortmid \Sigma _{d:D}p\shortmid p\at t\shortmid p\ll p, 
 \]%
 and parallel mCRL terms $q$ using the following grammar:%
 \[
 q::=p\shortmid q\parallel q\shortmid q\leftmerge q\shortmid q\mid q\shortmid
 \rho _{R}(q)\shortmid \partial _{B}(q)\shortmid \tau _{I}(q)\shortmid \Gamma
-_{C}(q)\shortmid \nabla _{V}(q).
+_{C}(q)\shortmid \nabla _{V}(q). 
 \]
 
 \paragraph{Remark 1}
@@ -265,9 +265,9 @@ will ignore it in this text.
 Let $A,A_{1}$ and $A_{2}$ be sets of multi action names. Then we define%
 \[
 \begin{array}{lll}
-A^{\subseteq } & = & \{\alpha \mid \exists \beta .\alpha \beta \in A\} \\
+A^{\subseteq } & = & \{\alpha \mid \exists \beta .\alpha \beta \in A\} \\ 
 A_{1}A_{2} & = & \{\alpha \beta \mid \alpha \in A_{1}\text{ and }\beta \in
-A_{2}\} \\
+A_{2}\} \\ 
 A_{1}\leftarrowtail A_{2} & = & \{\alpha \mid \exists \beta .\alpha \beta
 \in A_{1}\text{ and }\beta \in A_{2}\}%
 \end{array}%
@@ -281,9 +281,9 @@ Let $C$ be a communication set, then we define%
 \[
 \begin{array}{lll}
 C(A) & = & \cup _{\alpha \in A}\text{\textsc{Comm}(}C\text{, }\alpha \text{)}
-\\
+\\ 
 C^{-1}(A) & = & \cup _{\alpha \in A}\text{\textsc{CommInverse}(}C\text{, }%
-\alpha \text{)} \\
+\alpha \text{)} \\ 
 filter_{\nabla }(C,A) & = & \{\gamma \rightarrow c\in C\mid \exists _{\alpha
 \in A}.\gamma \subset \alpha \}%
 \end{array}%
@@ -292,23 +292,23 @@ where \textsc{Comm} and \textsc{CommInverse} are defined using pseudo code
 as follows:%
 \[
 \begin{array}{l}
-\text{\textsc{Comm}(}C\text{, }\alpha \text{)} \\
-R:=\{\alpha \} \\
-\text{\textbf{for }}\gamma \rightarrow c\in C\text{ \textbf{do}} \\
+\text{\textsc{Comm}(}C\text{, }\alpha \text{)} \\ 
+R:=\{\alpha \} \\ 
+\text{\textbf{for }}\gamma \rightarrow c\in C\text{ \textbf{do}} \\ 
 \qquad \text{\textbf{if }}\exists \beta .\alpha =\beta \gamma \text{ \textbf{%
-then} }R:=R\cup \text{\textsc{Comm}(}C\text{, }\beta c\text{)} \\
+then} }R:=R\cup \text{\textsc{Comm}(}C\text{, }\beta c\text{)} \\ 
 \text{\textbf{return }}R%
 \end{array}%
 \]%
 \[
 \begin{array}{l}
 \text{\textsc{CommInverse}(}C\text{, }\alpha _{1}\text{,}\alpha _{2}\text{)}
-\\
-R:=\{\alpha _{1}\alpha _{2}\} \\
-\text{\textbf{for }}\gamma \rightarrow c\in C\text{ \textbf{do}} \\
+\\ 
+R:=\{\alpha _{1}\alpha _{2}\} \\ 
+\text{\textbf{for }}\gamma \rightarrow c\in C\text{ \textbf{do}} \\ 
 \qquad \text{\textbf{if }}\exists \beta .\alpha _{1}=\beta c\text{ \textbf{%
 then} }R:=R\cup \text{\textsc{CommInverse}(}C\text{, }\beta \text{,}\alpha
-_{2}\gamma \text{)} \\
+_{2}\gamma \text{)} \\ 
 \text{\textbf{return }}R%
 \end{array}%
 \]%
@@ -317,9 +317,9 @@ Note that $C^{-1}(\alpha )=$\textsc{CommInverse}($C$, $\alpha $,$\tau $).
 Let $R$ be a rename set, then we define%
 \[
 \begin{array}{lll}
-R(\alpha ) & = & \{R(\alpha _{i})\mid \alpha _{i}\in \alpha \} \\
-R^{-1}(\alpha ) & = & \{\beta \mid R(\beta )=\alpha \} \\
-R(A) & = & \{R(\alpha )\mid \alpha \in A\} \\
+R(\alpha ) & = & \{R(\alpha _{i})\mid \alpha _{i}\in \alpha \} \\ 
+R^{-1}(\alpha ) & = & \{\beta \mid R(\beta )=\alpha \} \\ 
+R(A) & = & \{R(\alpha )\mid \alpha \in A\} \\ 
 R^{-1}(A) & = & \{R^{-1}(\alpha )\mid \alpha \in A\}%
 \end{array}%
 \]%
@@ -327,20 +327,20 @@ Let $I$ be a hide set, then we define%
 \[
 \begin{array}{ccc}
 \tau _{I}(A) & = & \{\beta \mid \exists _{\alpha \in A,\gamma \in I^{\ast
-}}.\alpha =\beta \gamma \wedge \beta \cap I=\emptyset \} \\
+}}.\alpha =\beta \gamma \wedge \beta \cap I=\emptyset \} \\ 
 \tau _{I}^{-1}(A) & = & \partial _{I}(A)I^{\ast }%
 \end{array}%
 \]%
 Let $B$ be a block set, then we define%
 \[
-\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \}
+\partial _{B}(A)=\{\alpha \in A\mid \alpha \cap B=\emptyset \} 
 \]%
 We define a mapping $act$ that extracts the individual action names of a set
 of multi action names:%
 \[
 \begin{array}{lll}
 act\left( a_{1}\mid \ldots \mid a_{n}\right) & = & \left\{ a_{1}\mid \ldots
-\mid a_{n}\right\} \\
+\mid a_{n}\right\} \\ 
 act\left( A\right) & = & \bigcup_{\alpha \in A}act\left( \alpha \right)%
 \end{array}%
 \]
@@ -351,36 +351,36 @@ We define the mapping $\alpha $ as follows. The value $\alpha (p,\emptyset )$
 is an over approximation of the alphabet of process expression $p$.%
 \[
 \begin{array}{lll}
-\alpha (\overline{a},W) & = & \{a\} \\
-\alpha (P,W) & = &
+\alpha (\overline{a},W) & = & \{a\} \\ 
+\alpha (P,W) & = & 
 \begin{array}{l}
-\left\{
+\left\{ 
 \begin{array}{ll}
-\emptyset  & \text{if }P\in W \\
+\emptyset & \text{if }P\in W \\ 
 \alpha (p,W\cup \{P\}) & \text{if }P\notin W,%
 \end{array}%
-\right.  \\
+\right. \\ 
 \text{ where }P=p\text{ is the equation of }P%
 \end{array}
-\\
-\alpha (\delta ,W) & = & \emptyset  \\
-\alpha (\tau ,W) & = & \{\tau \} \\
-\alpha (p+q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\
-\alpha (p\cdot q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\
-\alpha (c\rightarrow p,W) & = & \alpha (p,W) \\
-\alpha (c\rightarrow p\diamond q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\
-\alpha (\Sigma _{d:D}p,W) & = & \alpha (p,W) \\
-\alpha (p\at t,W) & = & \alpha (p,W) \\
-\alpha (p\ll q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\
+\\ 
+\alpha (\delta ,W) & = & \emptyset \\ 
+\alpha (\tau ,W) & = & \{\tau \} \\ 
+\alpha (p+q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (p\cdot q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (c\rightarrow p,W) & = & \alpha (p,W) \\ 
+\alpha (c\rightarrow p\diamond q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
+\alpha (\Sigma _{d:D}p,W) & = & \alpha (p,W) \\ 
+\alpha (p\at t,W) & = & \alpha (p,W) \\ 
+\alpha (p\ll q,W) & = & \alpha (p,W)\cup \alpha (q,W) \\ 
 \alpha (p\parallel q,W) & = & \alpha (p,W)\cup \alpha (q,W)\cup \alpha
-(p,W)\alpha (q,W) \\
+(p,W)\alpha (q,W) \\ 
 \alpha (p\leftmerge q,W) & = & \alpha (p,W)\cup \alpha (q,W)\cup \alpha
-(p,W)\alpha (q,W) \\
-\alpha (p\mid q,W) & = & \alpha (p,W)\alpha (q,W) \\
-\alpha (\rho _{R}(p),W) & = & R(\alpha (p,W)) \\
-\alpha (\partial _{B}(p),W) & = & \partial _{B}(\alpha (p,W)) \\
-\alpha (\tau _{I}(p),W) & = & \tau _{I}(\alpha (p,W)) \\
-\alpha (\Gamma _{C}(p),W) & = & C(\alpha (p,W)) \\
+(p,W)\alpha (q,W) \\ 
+\alpha (p\mid q,W) & = & \alpha (p,W)\alpha (q,W) \\ 
+\alpha (\rho _{R}(p),W) & = & R(\alpha (p,W)) \\ 
+\alpha (\partial _{B}(p),W) & = & \partial _{B}(\alpha (p,W)) \\ 
+\alpha (\tau _{I}(p),W) & = & \tau _{I}(\alpha (p,W)) \\ 
+\alpha (\Gamma _{C}(p),W) & = & C(\alpha (p,W)) \\ 
 \alpha (\nabla _{V}(p),W) & = & \alpha (p,W)\cap (V\cup \{\tau \})%
 \end{array}%
 \]%
@@ -404,35 +404,35 @@ intermediate expressions small. We introduce $\alpha (p,W,A)$ $=A\cap \alpha
 (p,W)$, and define it as follows:%
 \[
 \begin{array}{lll}
-\alpha (\overline{a},W,A) & = & \left\{
+\alpha (\overline{a},W,A) & = & \left\{ 
 \begin{array}{ll}
-\{a\} & \text{if }a\in A \\
-\emptyset  & \text{if }a\notin A%
+\{a\} & \text{if }a\in A \\ 
+\emptyset & \text{if }a\notin A%
 \end{array}%
-\right.  \\
-\alpha (P,W,A) & = &
+\right. \\ 
+\alpha (P,W,A) & = & 
 \begin{array}{l}
-\left\{
+\left\{ 
 \begin{array}{ll}
-\emptyset  & \text{if }P\in W \\
+\emptyset & \text{if }P\in W \\ 
 \alpha (p,W\cup \{P\},A) & \text{if }P\notin W,%
 \end{array}%
-\right.  \\
+\right. \\ 
 \text{ where }P=p\text{ is the equation of }P%
 \end{array}
-\\
-\alpha (p+q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\
-\alpha (p\cdot q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\
-\alpha (c\rightarrow p,W,A) & = & \alpha (p,W,A) \\
+\\ 
+\alpha (p+q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\ 
+\alpha (p\cdot q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\ 
+\alpha (c\rightarrow p,W,A) & = & \alpha (p,W,A) \\ 
 \alpha (c\rightarrow p\diamond q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A)
-\\
-\alpha (\Sigma _{d:D}p,W,A) & = & \alpha (p,W,A) \\
-\alpha (p\at t,W,A) & = & \alpha (p,W,A) \\
-\alpha (p\ll q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\
+\\ 
+\alpha (\Sigma _{d:D}p,W,A) & = & \alpha (p,W,A) \\ 
+\alpha (p\at t,W,A) & = & \alpha (p,W,A) \\ 
+\alpha (p\ll q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A) \\ 
 \alpha (p\parallel q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A)\cup \alpha
-(p,W,A^{\subseteq })\alpha (q,W,A^{\subseteq }) \\
+(p,W,A^{\subseteq })\alpha (q,W,A^{\subseteq }) \\ 
 \alpha (p\leftmerge q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W,A)\cup
-\alpha (p,W,A^{\subseteq })\alpha (q,W,A^{\subseteq }) \\
+\alpha (p,W,A^{\subseteq })\alpha (q,W,A^{\subseteq }) \\ 
 \alpha (p\mid q,W,A) & = & \alpha (p,W,A^{\subseteq })\alpha
 (q,W,A^{\subseteq })%
 \end{array}%
@@ -444,18 +444,18 @@ The computation of $\alpha (p,W,A)$ can be done more efficiently. We define
 the function $proc(p,W)$ as follows:%
 \[
 \begin{array}{lll}
-proc(\overline{a},W) & = & \emptyset  \\
-proc(P,W) & = & \left\{
+proc(\overline{a},W) & = & \emptyset \\ 
+proc(P,W) & = & \left\{ 
 \begin{array}{ll}
-\emptyset  & \text{if }P\in W \\
+\emptyset & \text{if }P\in W \\ 
 \{P\}\cup proc(p,W) & \text{if }P\notin W%
 \end{array}%
-\right.  \\
-proc(p+q,W) & = & proc(p,W)\cup proc(q,W) \\
-proc(p\cdot q,W) & = & proc(p,W)\cup proc(q,W) \\
-proc(c\rightarrow p,W) & = & proc(p,W) \\
-proc(c\rightarrow p\diamond q,W) & = & proc(p,W)\cup proc(q,W) \\
-proc(\Sigma _{d:D}p,W) & = & proc(p,W) \\
+\right. \\ 
+proc(p+q,W) & = & proc(p,W)\cup proc(q,W) \\ 
+proc(p\cdot q,W) & = & proc(p,W)\cup proc(q,W) \\ 
+proc(c\rightarrow p,W) & = & proc(p,W) \\ 
+proc(c\rightarrow p\diamond q,W) & = & proc(p,W)\cup proc(q,W) \\ 
+proc(\Sigma _{d:D}p,W) & = & proc(p,W) \\ 
 proc(p\at t,W) & = & proc(p,W)%
 \end{array}%
 \]%
@@ -463,9 +463,9 @@ Using this function we can change the computation of $\alpha (p,W,A)$ at
 three places:%
 \[
 \begin{array}{lll}
-\alpha (p+q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W\cup proc(p,W),A) \\
+\alpha (p+q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W\cup proc(p,W),A) \\ 
 \alpha (p\cdot q,W,A) & = & \alpha (p,W,A)\cup \alpha (q,W\cup proc(p,W),A)
-\\
+\\ 
 \alpha (c\rightarrow p\diamond q,W,A) & = & \alpha (p,W,A)\cup \alpha
 (q,W\cup proc(p,W),A)%
 \end{array}%
@@ -473,10 +473,46 @@ three places:%
 Note that the value $proc(p,W)$ can be computed on the fly during the
 computation of $\alpha (p,W,A)$.
 
+\subsubsection{Bounded alphabet}
+
+In practice one often wants to compute $\alpha (p,A)=\alpha (\nabla _{A}(p))$%
+. This can be computed more efficiently as follows:
+
+\[
+\begin{array}{lll}
+\alpha (\overline{a},A) & = & \left\{ 
+\begin{array}{ll}
+\{a\} & \text{if }a\in A \\ 
+\emptyset & \text{if }a\notin A%
+\end{array}%
+\right. \\ 
+\alpha (P,A) & = & \alpha (p,A)\text{, where }P=p\text{ is the equation of }P
+\\ 
+\alpha (p+q,A) & = & \alpha (p,A)\cup \alpha (q,A) \\ 
+\alpha (p\cdot q,A) & = & \alpha (p,A)\cup \alpha (q,A) \\ 
+\alpha (c\rightarrow p,A) & = & \alpha (p,A) \\ 
+\alpha (c\rightarrow p\diamond q,A) & = & \alpha (p,A)\cup \alpha (q,A) \\ 
+\alpha (\Sigma _{d:D}p,A) & = & \alpha (p,A) \\ 
+\alpha (p\at t,A) & = & \alpha (p,A) \\ 
+\alpha (p\ll q,A) & = & \alpha (p,A)\cup \alpha (q,A) \\ 
+\alpha (p\parallel q,A) & = & \alpha (p,A)\cup \alpha (q,A)\cup \alpha
+(p,A^{\subseteq })\alpha (q,A\leftarrowtail \alpha (p,A^{\subseteq })) \\ 
+\alpha (p\leftmerge q,A) & = & \alpha (p,A)\cup \alpha (q,A)\cup \alpha
+(p,A^{\subseteq })\alpha (q,A\leftarrowtail \alpha (p,A^{\subseteq })) \\ 
+\alpha (p\mid q,A) & = & \alpha (p,A^{\subseteq })\alpha (q,A\leftarrowtail
+\alpha (p,A^{\subseteq })) \\ 
+\alpha (\rho _{R}(p),A) & = & R(\alpha (p,R^{-1}(A))) \\ 
+\alpha (\partial _{B}(p),A) & = & \alpha (p,\partial _{B}(A)) \\ 
+\alpha (\tau _{I}(p),A) & = & \tau _{I}(\alpha (p,\tau _{I}^{-1}(A))) \\ 
+\alpha (\Gamma _{C}(p),A) & = & C(\alpha (p,C^{-1}(A))) \\ 
+\alpha (\nabla _{V}(p),A) & = & \alpha (p,A\cap V))%
+\end{array}%
+\]
+
 \subsubsection{The mappings $push$, $push_{\protect\nabla }$ and $%
 push_{\partial }$}
 
-We define mappings $push$, $push_{\nabla }$ and $push_{\partial }$ such that
+We define mappings $push$, $push_{\nabla }$ and $push_{\partial }$ such that 
 $push(p)$ is bisimulation equivalent to $p$, $push_{\nabla }(A,p)$ is
 bisimulation equivalent to $\nabla _{A}(p)$, and $push_{\partial }(B,p)$ is
 bisimulation equivalent to $\partial _{B}(p)$. The goal of these mappings is
@@ -487,17 +523,17 @@ implicitly contains the empty multi action $\tau $. Let $\mathcal{E}$ $%
 equations.%
 \[
 \begin{tabular}{lll}
-$push(p)$ & $=$ & $p$ if $p$ is a pCRL expression \\
+$push(p)$ & $=$ & $p$ if $p$ is a pCRL expression \\ 
 $push(p\parallel q)$ & $=$ & $push\left( p\right) \parallel push\left(
-q\right) $ \\
+q\right) $ \\ 
 $push(p\leftmerge q)$ & $=$ & $push\left( p\right) \leftmerge push\left(
-q\right) $ \\
-$push(p\mid q)$ & $=$ & $push\left( p\right) \mid push\left( q\right) $ \\
-$push(\rho _{R}(p))$ & $=$ & $\rho _{R}(push\left( p\right) )$ \\
-$push(\partial _{B}(p))$ & $=$ & $push_{\partial }(B,p)$ \\
-$push(\tau _{I}(p))$ & $=$ & $\tau _{I}(push\left( p\right) )$ \\
+q\right) $ \\ 
+$push(p\mid q)$ & $=$ & $push\left( p\right) \mid push\left( q\right) $ \\ 
+$push(\rho _{R}(p))$ & $=$ & $\rho _{R}(push\left( p\right) )$ \\ 
+$push(\partial _{B}(p))$ & $=$ & $push_{\partial }(B,p)$ \\ 
+$push(\tau _{I}(p))$ & $=$ & $\tau _{I}(push\left( p\right) )$ \\ 
 $push(\Gamma _{C}(p))$ & $=$ & $\Gamma _{C}\left( push\left( p\right)
-\right) $ \\
+\right) $ \\ 
 $push(\nabla _{V}(p))$ & $=$ & $push_{\nabla }(V,p)$%
 \end{tabular}%
 \]%
@@ -506,82 +542,92 @@ We assume that $P_{A,e}^{\nabla }$ is a unique name for every $P\in
 expressions $e$.%
 \[
 \begin{tabular}[t]{lll}
-$push_{\nabla }\left( A,\overline{a}\right) $ & $=$ & $\left\{
+$push_{\nabla }\left( A,\overline{a}\right) $ & $=$ & $\left\{ 
 \begin{array}{ll}
-\overline{a} & \text{if }N(\overline{a})\in A \\
-\delta & \text{otherwise}%
+\overline{a} & \text{if }N(\overline{a})\in A \\ 
+\delta  & \text{otherwise}%
 \end{array}%
-\right. $ \\
+\right. $ \\ 
 $push_{\nabla }\left( A,P\left( e\right) \right) $ & $=$ & $%
 \begin{array}{l}
 P_{A}^{\nabla }(e)\text{, where }P(d)=p\text{ is the equation of }P\text{,
-and} \\
+and} \\ 
 \text{where }P_{A}^{\nabla }(d)=push_{\nabla }\left( A,p\right) \text{ is a
 new equation}%
 \end{array}%
-$ \\
-$push_{\nabla }\left( A,\delta \right) $ & $=$ & $\delta $ \\
-$push_{\nabla }\left( A,\tau \right) $ & $=$ & $\tau $ \\
-$push_{\nabla }\left( A,p+q\right) $ & $=$ & $push_{\nabla }\left(
-A,p\right) +push_{\nabla }\left( A,q\right) $ \\
-$push_{\nabla }\left( A,p\cdot q\right) $ & $=$ & $push_{\nabla }\left(
-A,p\right) \cdot push_{\nabla }\left( A,q\right) $ \\
-$push_{\nabla }\left( A,c\rightarrow p\right) $ & $=$ & $c\rightarrow
-push_{\nabla }\left( A,p\right) $ \\
-$push_{\nabla }\left( A,c\rightarrow p\diamond q\right) $ & $=$ & $%
-c\rightarrow push_{\nabla }\left( A,p\right) \diamond push_{\nabla }\left(
-A,q\right) $ \\
-$push_{\nabla }\left( A,\Sigma _{d:D}p\right) $ & $=$ & $\Sigma
-_{d:D}push_{\nabla }\left( A,p\right) $ \\
-$push_{\nabla }\left( A,p\at t\right) $ & $=$ & $push_{\nabla }\left(
-A,p\right) \at t$ \\
-$push_{\nabla }\left( A,p\ll q\right) $ & $=$ & $push_{\nabla }\left(
-A,p\right) \ll push_{\nabla }\left( A,q\right) $ \\
-$push_{\nabla }(A,p\parallel q)$ & $=$ & $\mathsf{allow}(A,p^{\prime
+$ \\ 
+$push_{\nabla }\left( A,\delta \right) $ & $=$ & $\delta $ \\ 
+$push_{\nabla }\left( A,\tau \right) $ & $=$ & $\tau $ \\ 
+$push_{\nabla }\left( A,p+q\right) $ & $=$ & $\nabla _{A}(p+q)$ \\ 
+$push_{\nabla }\left( A,p\cdot q\right) $ & $=$ & $\nabla _{A}(p\cdot q)$ \\ 
+$push_{\nabla }\left( A,c\rightarrow p\right) $ & $=$ & $\nabla _{A}\left(
+c\rightarrow p\right) $ \\ 
+$push_{\nabla }\left( A,c\rightarrow p\diamond q\right) $ & $=$ & $\nabla
+_{A}\left( c\rightarrow p\diamond q\right) $ \\ 
+$push_{\nabla }\left( A,\Sigma _{d:D}p\right) $ & $=$ & $\nabla _{A}\left(
+\Sigma _{d:D}p\right) $ \\ 
+$push_{\nabla }\left( A,p\at t\right) $ & $=$ & $\nabla _{A}\left( p\at %
+t\right) $ \\ 
+$push_{\nabla }\left( A,p\ll q\right) $ & $=$ & $\nabla _{A}\left( p\ll
+q\right) $ \\ 
+$push_{\nabla }(A,p\parallel q)$ & $=$ & $\mathsf{\nabla _{A}}(A,p^{\prime
 }\parallel q^{\prime })\text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
 q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
-\right. $ \\
-$push_{\nabla }(A,p\leftmerge q)$ & $=$ & $\mathsf{allow}(A,p^{\prime }%
+\right. $ \\ 
+$push_{\nabla }(A,p\leftmerge q)$ & $=$ & $\mathsf{\nabla _{A}}(A,p^{\prime }%
 \leftmerge q^{\prime })\text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
 q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
-\right. $ \\
-$push_{\nabla }(A,p\mid q)$ & $=$ & $\mathsf{allow}(A,p^{\prime }\mid
+\right. $ \\ 
+$push_{\nabla }(A,p\mid q)$ & $=$ & $\mathsf{\nabla _{A}}(A,p^{\prime }\mid
 q^{\prime })$ where$\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\
+p^{\prime } & = & push_{\nabla }(A^{\subseteq },p) \\ 
 q^{\prime } & = & push_{\nabla }(A\leftarrowtail \alpha (p^{\prime }),q)%
 \end{array}%
-\right. $ \\
+\right. $ \\ 
 $push_{\nabla }(A,\rho _{R}(p))$ & $=$ & $\rho _{R}(p^{\prime })$ where $%
-p^{\prime }=$ $push_{\nabla }(R^{-1}(A),p)$ \\
+p^{\prime }=$ $push_{\nabla }(R^{-1}(A),p)$ \\ 
 $push_{\nabla }(A,\partial _{B}(p))$ & $=$ & $push_{\nabla }(\partial
-_{B}(A),p)$ \\
+_{B}(A),p)$ \\ 
 $push_{\nabla }(A,\tau _{I}(p))$ & $=$ & $\tau _{I}(p^{\prime })$ where $%
-p^{\prime }=push_{\nabla }(\tau _{I}^{-1}(A),p)$ \\
+p^{\prime }=push_{\nabla }(\tau _{I}^{-1}(A),p)$ \\ 
 $push_{\nabla }(A,\Gamma _{C}(p))$ & $=$ & $\mathsf{allow}(A,\Gamma
-_{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(C^{-1}(A),p)$ \\
+_{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(C^{-1}(A),p)$ \\ 
 $push_{\nabla }(A,\nabla _{V}(p))$ & $=$ & $push_{\nabla }(A\cap V,p),$%
 \end{tabular}%
-\]%
-where%
+\]
+
+\paragraph{Optimizations}
+
+During the computation of $push_{\nabla }$ the following optimizations are
+applied in the right hand side of each equation:%
 \[
 \begin{array}{lll}
-\mathsf{allow}(A,p) & = & \left\{
+\nabla _{A}(p) & = & \left\{ 
 \begin{array}{ll}
-p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\
+p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\ 
 \nabla _{A\cap \alpha (p)}(p) & \text{otherwise}%
 \end{array}%
-\right.%
+\right.  \\ 
+\nabla _{\emptyset }(p) & = & \left\{ 
+\begin{array}{ll}
+\tau  & \text{if }p=\tau  \\ 
+\delta  & \text{otherwise}%
+\end{array}%
+\right.  \\ 
+\Gamma _{C}(p) & = & \Gamma _{filter_{\nabla }(C,\alpha (p))}(p) \\ 
+\delta \mid \delta  & = & \delta  \\ 
+\delta \parallel \delta  & = & \delta 
 \end{array}%
 \]%
-Note that the alphabet $\alpha (p)$ is computed on the fly during the
-computation of $push_{\nabla }\left( A,p\right) $.
+For non pCRL expression the alphabet $\alpha (p)$ is computed on the fly
+during the computation of $push_{\nabla }\left( A,p\right) $.
 
 \paragraph{Example 1}
 
@@ -607,49 +653,49 @@ expressions $e$.%
 \begin{tabular}{lll}
 $push_{\partial }(B,\overline{a})$ & $=$ & $\left\{ \text{ }%
 \begin{array}{lll}
-\overline{a} &  & \text{if }N(\overline{a})\cap B=\emptyset  \\
-\delta  &  & \text{otherwise}%
+\overline{a} &  & \text{if }N(\overline{a})\cap B=\emptyset \\ 
+\delta &  & \text{otherwise}%
 \end{array}%
-\right. $ \\
+\right. $ \\ 
 $push_{\partial }(B,P(e))$ & $=$ & $%
 \begin{array}{l}
-P_{B,e}^{\partial }(e) \\
-\text{where }P(d)=p\text{ is the equation of }P\text{, and} \\
+P_{B,e}^{\partial }(e) \\ 
+\text{where }P(d)=p\text{ is the equation of }P\text{, and} \\ 
 \text{where }P_{B,e}^{\partial }(d)=push_{\partial }\left( B,p\right) \text{
 is a new equation}%
 \end{array}%
-$ \\
-$push_{\partial }(B,\delta )$ & $=$ & $\delta $ \\
-$push_{\partial }(B,\tau )$ & $=$ & $\tau $ \\
+$ \\ 
+$push_{\partial }(B,\delta )$ & $=$ & $\delta $ \\ 
+$push_{\partial }(B,\tau )$ & $=$ & $\tau $ \\ 
 $push_{\partial }(B,p+q)$ & $=$ & $push_{\partial }(B,p)+push_{\partial
-}(B,q)$ \\
+}(B,q)$ \\ 
 $push_{\partial }(B,p\cdot q)$ & $=$ & $push_{\partial }(B,p)\cdot
-push_{\partial }(B,q)$ \\
+push_{\partial }(B,q)$ \\ 
 $push_{\partial }(B,c\rightarrow p)$ & $=$ & $c\rightarrow push_{\partial
-}(B,p)$ \\
+}(B,p)$ \\ 
 $push_{\partial }(B,c\rightarrow p\diamond q)$ & $=$ & $c\rightarrow
-push_{\partial }(B,p)\diamond push_{\partial }(B,q)$ \\
+push_{\partial }(B,p)\diamond push_{\partial }(B,q)$ \\ 
 $push_{\partial }(B,\Sigma _{d:D}p)$ & $=$ & $\Sigma _{d:D}push_{\partial
-}(B,p)$ \\
-$push_{\partial }(B,p\at t)$ & $=$ & $push_{\partial }(B,p)\at t$ \\
+}(B,p)$ \\ 
+$push_{\partial }(B,p\at t)$ & $=$ & $push_{\partial }(B,p)\at t$ \\ 
 $push_{\partial }(B,p\ll q)$ & $=$ & $push_{\partial }(B,p)\ll
-push_{\partial }(B,q)$ \\
+push_{\partial }(B,q)$ \\ 
 $push_{\partial }(B,p\parallel q)$ & $=$ & $push_{\partial }\left(
-B,p\right) \parallel push_{\partial }\left( B,q\right) $ \\
+B,p\right) \parallel push_{\partial }\left( B,q\right) $ \\ 
 $push_{\partial }(B,p\leftmerge q)$ & $=$ & $push_{\partial }\left(
-B,p\right) \leftmerge push_{\partial }\left( B,q\right) $ \\
+B,p\right) \leftmerge push_{\partial }\left( B,q\right) $ \\ 
 $push_{\partial }(B,p\mid q)$ & $=$ & $push_{\partial }\left( B,p\right)
-\mid push_{\partial }\left( B,q\right) $ \\
+\mid push_{\partial }\left( B,q\right) $ \\ 
 $push_{\partial }(B,\rho _{R}(p))$ & $=$ & $\rho _{R}\left( R^{-1}\left(
-B\right) ,p\right) $ \\
+B\right) ,p\right) $ \\ 
 $push_{\partial }(B,\partial _{B_{1}}(p))$ & $=$ & $push_{\partial }(B\cup
-B_{1},p)$ \\
+B_{1},p)$ \\ 
 $push_{\partial }(B,\tau _{I}(p))$ & $=$ & $\tau _{I}\left( push_{\partial
-}\left( B\setminus I,p\right) \right) $ \\
+}\left( B\setminus I,p\right) \right) $ \\ 
 $push_{\partial }(B,\Gamma _{C}(p))$ & $=$ & $\mathsf{block}(B,\Gamma
 _{C}\left( push_{\partial }\left( B^{\prime },p\right) \right) $ where $%
 B^{\prime }=B\setminus \left\{ b\in B\mid \exists _{\gamma \rightarrow c\in
-C}.b\in \gamma \wedge c\notin B\right\} $ \\
+C}.b\in \gamma \wedge c\notin B\right\} $ \\ 
 $push_{\partial }(B,\nabla _{V}(p))$ & $=$ & $push_{\nabla }(\partial
 _{B}(A),p,\emptyset ),$%
 \end{tabular}%
@@ -657,12 +703,12 @@ _{B}(A),p,\emptyset ),$%
 where%
 \[
 \begin{array}{lll}
-\mathsf{block}(B,p) & = & \left\{
+\mathsf{block}(B,p) & = & \left\{ 
 \begin{array}{ll}
-p & \text{if }B=\emptyset  \\
+p & \text{if }B=\emptyset \\ 
 \partial _{B}(p) & \text{otherwise}%
 \end{array}%
-\right.
+\right.%
 \end{array}%
 \]
 
@@ -675,30 +721,6 @@ _{\{b\rightarrow c\}}push_{\nabla }(R^{-1}(A),p)=\rho _{\{b\rightarrow
 c\}}push_{\nabla }(\{b\},b)=\rho _{\{b\rightarrow c\}}b=c$, which is clearly
 the wrong answer.
 
-\paragraph{Optimizations}
-
-During the computation of $push_{\bigtriangledown }$ the following
-optimizations are applied in the right hand side of each equation:%
-\[
-\begin{array}{lll}
-\nabla _{A}(p) & = & \left\{
-\begin{array}{ll}
-p & \text{if }(A\cup \{\tau \})\cap \alpha (p)=\alpha (p) \\
-\nabla _{A\cap \alpha (p)}(p) & \text{otherwise}%
-\end{array}%
-\right. \\
-\nabla _{\emptyset }(p) & = & \left\{
-\begin{array}{ll}
-\tau & \text{if }p=\tau \\
-\delta & \text{otherwise}%
-\end{array}%
-\right. \\
-\Gamma _{C}(p) & = & \Gamma _{filter_{\nabla }(C,\alpha (p))}(p) \\
-\delta \mid \delta & = & \delta \\
-\delta \parallel \delta & = & \delta%
-\end{array}%
-\]
-
 \subsubsection{Allow sets}
 
 There are two rules in the definition of $push_{\nabla }$ where the allow
@@ -706,7 +728,7 @@ set can/should not be computed explicitly. The computation of $push_{\nabla
 }(A,p\parallel q)$ involves computation of $push_{\nabla }(p,A^{\subseteq }%
 \dot{)}$. We want to avoid the computation of $A^{\subseteq }$, since it can
 become very large. The computation of $push_{\nabla }(A,\tau _{I}(p))$
-involves computation of $push_{\nabla }(p,\tau _{I}^{-1}(A)\dot{)}$. The set
+involves computation of $push_{\nabla }(p,\tau _{I}^{-1}(A)\dot{)}$. The set 
 $\tau _{I}^{-1}(A)=AI^{\ast }$ is infinite.
 
 In the implementation we use allow sets of the form $A^{\subseteq }I^{\ast
@@ -718,28 +740,28 @@ under the operations in $push_{\nabla }$.%
 \[
 \begin{array}{lll}
 \partial _{B}(A^{\subseteq }I^{\ast }) & = & \tau _{B}(A)^{\subseteq }\tau
-_{B}(I)^{\ast } \\
+_{B}(I)^{\ast } \\ 
 \tau _{I_{1}}^{-1}\left( A^{\subseteq }I^{\ast }\right) & = & \partial
-_{I_{1}}(A^{\subseteq })\left( I\cup I_{1}\right) ^{\ast } \\
+_{I_{1}}(A^{\subseteq })\left( I\cup I_{1}\right) ^{\ast } \\ 
 \left( A^{\subseteq }I^{\ast }\right) \cap V & = & \{\beta \in V\mid \exists
-_{\alpha \in A}.\tau _{I}(\beta )\sqsubseteq \alpha \} \\
+_{\alpha \in A}.\tau _{I}(\beta )\sqsubseteq \alpha \} \\ 
 R^{-1}\left( A^{\subseteq }I^{\ast }\right) & = & R^{-1}\left( A^{\subseteq
-}\right) R^{-1}\left( I\right) ^{\ast } \\
+}\right) R^{-1}\left( I\right) ^{\ast } \\ 
 C^{-1}\left( A^{\subseteq }I^{\ast }\right) & \subseteq & C^{-1}\left(
-A\right) ^{\subseteq }act\left( C^{-1}\left( I\right) \right) ^{\ast } \\
-\left( A^{\subseteq }I^{\ast }\right) \leftarrowtail A_{1} & = &
-A^{\subseteq }I^{\ast } \\
+A\right) ^{\subseteq }act\left( C^{-1}\left( I\right) \right) ^{\ast } \\ 
+\left( A^{\subseteq }I^{\ast }\right) \leftarrowtail A_{1} & = & 
+A^{\subseteq }I^{\ast } \\ 
 \left( A^{\subseteq }I^{\ast }\right) ^{\subseteq } & = & A^{\subseteq
-}I^{\ast } \\
-\partial _{B}(AI^{\ast }) & = & \partial _{B}(A)\tau _{B}(I)^{\ast } \\
+}I^{\ast } \\ 
+\partial _{B}(AI^{\ast }) & = & \partial _{B}(A)\tau _{B}(I)^{\ast } \\ 
 \tau _{I_{1}}^{-1}\left( AI^{\ast }\right) & = & \partial _{I_{1}}(A)\left(
-I\cup I_{1}\right) ^{\ast } \\
+I\cup I_{1}\right) ^{\ast } \\ 
 \left( AI^{\ast }\right) \cap V & = & \{\beta \in V\mid \exists _{\alpha \in
-A}.\tau _{I}(\beta )=\alpha \} \\
+A}.\tau _{I}(\beta )=\alpha \} \\ 
 R^{-1}\left( AI^{\ast }\right) & = & R^{-1}\left( A\right) R^{-1}\left(
-I\right) ^{\ast } \\
+I\right) ^{\ast } \\ 
 C^{-1}\left( AI^{\ast }\right) & \subseteq & C^{-1}\left( A\right) act\left(
-C^{-1}\left( I\right) \right) ^{\ast } \\
+C^{-1}\left( I\right) \right) ^{\ast } \\ 
 \left( AI^{\ast }\right) ^{\subseteq } & = & A^{\subseteq }I^{\ast }%
 \end{array}%
 \]%
@@ -747,16 +769,16 @@ where we used the following properties:%
 \[
 \begin{array}{lll}
 \partial _{B}\left( A_{1}A_{2}\right) & = & \partial _{B}\left( A_{1}\right)
-\partial _{B}\left( A_{1}\right) \\
-\partial _{B}\left( A^{\subseteq }\right) & = & \tau _{B}(A)^{\subseteq } \\
+\partial _{B}\left( A_{1}\right) \\ 
+\partial _{B}\left( A^{\subseteq }\right) & = & \tau _{B}(A)^{\subseteq } \\ 
 R^{-1}\left( A_{1}A_{2}\right) & = & R^{-1}\left( A_{1}\right) R^{-1}\left(
-A_{2}\right) \\
-R^{-1}\left( A^{\ast }\right) & = & R^{-1}\left( A\right) ^{\ast } \\
+A_{2}\right) \\ 
+R^{-1}\left( A^{\ast }\right) & = & R^{-1}\left( A\right) ^{\ast } \\ 
 C^{-1}\left( A^{\subseteq }\right) & \subseteq & C^{-1}\left( A\right)
-^{\subseteq } \\
+^{\subseteq } \\ 
 C^{-1}\left( A_{1}A_{2}\right) & = & C^{-1}\left( A_{1}\right) C^{-1}\left(
-A_{2}\right) \\
-C^{-1}\left( A^{\ast }\right) & = & C^{-1}\left( A\right) ^{\ast } \\
+A_{2}\right) \\ 
+C^{-1}\left( A^{\ast }\right) & = & C^{-1}\left( A\right) ^{\ast } \\ 
 A^{\subseteq }\leftarrowtail A_{1} & = & A^{\subseteq }%
 \end{array}%
 \]%
@@ -784,10 +806,10 @@ practical cases.
 
 \[
 \begin{tabular}[t]{lll}
-$push_{\nabla }(A,\Gamma _{C}(p))$ & $=$ & $\left\{
+$push_{\nabla }(A,\Gamma _{C}(p))$ & $=$ & $\left\{ 
 \begin{array}{ll}
 \mathsf{allow}(A,\Gamma _{C\setminus C^{\prime }}(push_{\nabla \Gamma
-}(A^{\prime },C^{\prime },p))) & \text{if }C\neq C^{\prime } \\
+}(A^{\prime },C^{\prime },p))) & \text{if }C\neq C^{\prime } \\ 
 push_{\nabla \Gamma }(A,C,p)) & \text{otherwise,}%
 \end{array}%
 \right. $%
@@ -802,42 +824,42 @@ $push_{\nabla \Gamma }(A,C,p\parallel q)$ & $=$ & $\mathsf{allow}\left(
 A,\Gamma _{C}\left( \mathsf{allow}\left( C^{-1}(A),p^{\prime }\parallel
 q^{\prime }\right) \right) \right) \text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\
-q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\
+p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
+q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
 A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
-A\right) \\
+A\right) \\ 
 A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
 })\right) \setminus \left( C^{-1}(A)\setminus A\right)%
 \end{array}%
-\right. $ \\
+\right. $ \\ 
 $push_{\nabla \Gamma }(A,C,p\leftmerge q)$ & $=$ & $\mathsf{allow}\left(
 A,\Gamma _{C}\left( \mathsf{allow}\left( C^{-1}(A),p^{\prime }\leftmerge %
 q^{\prime }\right) \right) \right) \text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\
-q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\
+p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
+q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
 A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
-A\right) \\
+A\right) \\ 
 A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
 })\right) \setminus \left( C^{-1}(A)\setminus A\right)%
 \end{array}%
-\right. $ \\
+\right. $ \\ 
 $push_{\nabla \Gamma }(A,C,p\mid q)$ & $=$ & $\mathsf{allow}\left( A,\Gamma
 _{C}\left( \mathsf{allow}\left( C^{-1}(A),p^{\prime }\mid q^{\prime }\right)
 \right) \right) \text{ where}\left\{ \text{ }%
 \begin{array}{lll}
-p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\
-q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\
+p^{\prime } & = & push_{\nabla \Gamma }(A^{\prime },C,p) \\ 
+q^{\prime } & = & push_{\nabla \Gamma }(A^{\prime \prime },C,q) \\ 
 A^{\prime } & = & C^{-1}(A)^{\subseteq }\setminus \left( C^{-1}(A)\setminus
-A\right) \\
+A\right) \\ 
 A^{\prime \prime } & = & \left( C^{-1}(A)\leftarrowtail \alpha (p^{\prime
 })\right) \setminus \left( C^{-1}(A)\setminus A\right)%
 \end{array}%
-\right. $ \\
+\right. $ \\ 
 $push_{\nabla \Gamma }(A,C,\partial _{B}(p))$ & $=$ & $push_{\nabla \Gamma
-}(\partial _{B}(A),C,p)$ \\
+}(\partial _{B}(A),C,p)$ \\ 
 $push_{\nabla \Gamma }(A,C,\nabla _{V}(p))$ & $=$ & $push_{\nabla \Gamma
-}(A\cap V,C,p)$ \\
+}(A\cap V,C,p)$ \\ 
 $push_{\nabla \Gamma }(A,C,p)$ & $=$ & $\mathsf{allow}(A,\Gamma
 _{C}(p^{\prime }))$ where $p^{\prime }=push_{\nabla }(C^{-1}(A),p)$ for all
 other cases of $p$%
