@@ -87,7 +87,7 @@ sig(\lnot \varphi ) & = & sig(\varphi )%
 \end{array}%
 \end{equation*}
 
-\subsubsection{The functions source, dest and copy}
+\subsubsection{The functions source, target and copy}
 
 Let $X(d:D)=\varphi $ be a PBES equation. Let $\mathrm{source}$ be a
 function with the property that 
@@ -112,24 +112,24 @@ v &  & \text{otherwise}%
 \end{array}%
 \end{equation*}
 
-We define the function $\mathrm{dest}$ as follows:%
+We define the function $\mathrm{target}$ as follows:%
 \begin{equation*}
-\mathrm{dest}(X,i,j)=\left\{ 
+\mathrm{target}(X,i,j)=\left\{ 
 \begin{array}{lll}
 c &  & \text{if }rewrite(\mathrm{sigma}(X,i)(\mathrm{PVI}(\varphi ,i))[j]=c
 \\ 
-\bot &  & \text{otherwise}%
+\bot  &  & \text{otherwise}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}%
 with $c$ a constant. We define the function $\mathrm{copy}$ as follows:%
 \begin{equation*}
 \mathrm{copy}(X,i,j)=\left\{ 
 \begin{array}{lll}
 k &  & \text{if }\mathrm{PVI}(\varphi ,i)[k]=d[j] \\ 
-\bot &  & \text{otherwise}%
+\bot  &  & \text{otherwise}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}%
 We define the function $\mathrm{used}$ as follows:%
 \begin{equation*}
@@ -170,7 +170,8 @@ $ \\
 $\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
 par(X)\right\vert \text{ \textbf{do}}$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{if }}source(X,i,n)=\bot \text{ }%
-\wedge dest(X,i,n)=\bot \wedge copy(X,i,n)\neq n\text{ \textbf{then}}$ \\ 
+\wedge \mathrm{target}(X,i,n)=\bot \wedge \mathrm{copy}(X,i,n)\neq n\text{ 
+\textbf{then}}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad LCFP(X,n):=false$ \\ 
 $\text{\textbf{return} }LCFP$%
 \end{tabular}%
@@ -191,10 +192,12 @@ $\qquad \qquad \text{\textbf{if }}pred(\varphi _{X},i)=X\text{ \textbf{then}}
 $ \\ 
 $\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
 par(X)\right\vert \text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{if }}(source(X,i,n)=\bot \text{ }%
-\wedge dest(X,i,n)=\bot \wedge copy(X,i,n)\neq \bot )$ \\ 
-$\qquad \qquad \qquad \qquad $\textbf{or} $(source(X,i,n)\neq \bot \text{ }%
-\wedge dest(X,i,n)\neq \bot \wedge copy(X,i,n)=\bot )$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}(\mathrm{source}(X,i,n)=\bot 
+\text{ }\wedge \mathrm{target}(X,i,n)=\bot \wedge \mathrm{copy}(X,i,n)\neq
+\bot )$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{or} $(\mathrm{source}(X,i,n)\neq \bot 
+\text{ }\wedge \mathrm{target}(X,i,n)\neq \bot \wedge \mathrm{copy}%
+(X,i,n)=\bot )$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{then}}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad LCFP(X,n):=false$ \\ 
 $\text{\textbf{return} }LCFP$%
@@ -217,8 +220,8 @@ $\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\
 $\qquad \qquad \text{\textbf{if }}Y\neq X\text{ \textbf{then}}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert
 par(X)\right\vert \text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{if }}dest(X,i,n)=\bot \wedge
-\forall m:copy(X,i,m)\neq n\text{ \textbf{then}}$ \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}\mathrm{target}(X,i,n)=\bot
+\wedge \forall m:\mathrm{copy}(X,i,m)\neq n\text{ \textbf{then}}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad GCFP(X,n):=false$ \\ 
 $\text{\textbf{return} }GCFP$%
 \end{tabular}%
@@ -239,8 +242,8 @@ $\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
 $\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\ 
 $\qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert 
 \text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}copy(X,i,n)=m\neq \bot \text{ 
-\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{copy}(X,i,n)=m\neq \bot 
+\text{ \textbf{then}}$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{if }}GCFP(X,n)\wedge GCFP(Y,m)%
 \text{ \textbf{then }}(X,n)\sim (Y,m)$%
 \end{tabular}%
@@ -255,10 +258,11 @@ $\qquad \text{\textbf{for }}i=1,\cdots ,npred(\varphi _{X})\text{ \textbf{do}%
 $\qquad \qquad \text{\textbf{let }}Y=pred(\varphi _{X},i)$ \\ 
 $\qquad \qquad \text{\textbf{for }}n=1,\cdots ,\left\vert par(X)\right\vert 
 \text{ \textbf{do}}$ \\ 
-$\qquad \qquad \qquad \text{\textbf{if }}copy(X,i,n)=m\neq \bot \text{ 
-\textbf{then}}$ \\ 
+$\qquad \qquad \qquad \text{\textbf{if }}\mathrm{copy}(X,i,n)=m\neq \bot 
+\text{ \textbf{then}}$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{if }}GCFP(X,n)\wedge GCFP(Y,m)%
-\text{ }\wedge dest(X,i,m)=\bot \text{ \textbf{then }}(X,n)\sim (Y,m)$%
+\text{ }\wedge \mathrm{target}(X,i,m)=\bot \text{ \textbf{then }}(X,n)\sim
+(Y,m)$%
 \end{tabular}%
 \end{equation*}
 
@@ -270,7 +274,7 @@ V=\{(X,i)\mid X\in bnd(\mathcal{E})\wedge 1\leq i\leq \left\vert
 d_{X}\right\vert \}$. This graph is called the global control flow graph.
 The connected components in this graph are the local control flow graphs. A
 local control flow graph is called \emph{invalid} if it contains two
-vertices $(X,i)$ and $(X,j)$ with $i\neq j$. \newpage 
+vertices $(X,i)$ and $(X,j)$ with $i\neq j$. \newpage
 
 \subsection{Global algorithm}
 
@@ -316,12 +320,13 @@ $\text{\textbf{return} }(V,E)$%
 $\text{\textsc{PutDest}}$\textsc{(}$Y(e),X,i$\textsc{)} \\ 
 $e^{\prime }:=e$ \\ 
 \textbf{for }$j=1\cdots \left\vert e\right\vert $ \textbf{do} \\ 
-$\qquad \text{\textbf{if }}\mathrm{dest}(X,i,p)\neq \bot $ \textbf{then} \\ 
-$\qquad \qquad e^{\prime }[j]:=\mathrm{dest}(X,i,p)$ \\ 
+$\qquad \text{\textbf{if }}\mathrm{target}(X,i,p)\neq \bot $ \textbf{then}
+\\ 
+$\qquad \qquad e^{\prime }[j]:=\mathrm{target}(X,i,p)$ \\ 
 $\text{\textbf{return} }Y(e^{\prime })$%
 \end{tabular}%
 \end{equation*}%
-\newpage
+\newpage 
 
 \subsubsection{Global control flow graph (2)}
 
@@ -338,12 +343,11 @@ $todo:=\{(X_{init},e)\mid \forall k\leq \left\vert c_{X}\right\vert
 \textbf{while} $todo\neq \emptyset $ \textbf{do} \\ 
 $\qquad $\textbf{choose} $u\in todo$ \\ 
 $\qquad todo:=todo\setminus \{u\}$ \\ 
-$\qquad done:=done\cup \{u\}$ \\ 
 $\qquad V:=V\cup \{u\}$ \\ 
 $\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi )\text{ \textbf{%
 do}}$ \\ 
 $\qquad \qquad \text{\textbf{if }\textsc{EnabledEdge}}(u,i)$ \\ 
-$\qquad \qquad \qquad v:=\text{\textsc{ComputeVertex}}(u,\mathrm{PVI}%
+$\qquad \qquad \qquad v:=\text{\textsc{ComputeVertex}}(u,i,\mathrm{PVI}%
 (\varphi _{X},i))$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}v\notin V$ \\ 
 $\qquad \qquad \qquad \qquad V:=V\cup \{v\}$ \\ 
@@ -372,7 +376,7 @@ $\text{\textsc{ComputeVertex}}$\textsc{(}$u,i,Y(f)$\textsc{)} \\
 $\qquad q:=$ $\mathrm{target}(X,i,\downarrow _{Y}l)$ \\ 
 $\qquad \text{\textbf{if }}q=\bot $ \textbf{then} \\ 
 $\qquad \qquad \text{\textbf{choose }}k$ \textbf{such that }$\mathrm{copy}%
-(X,i,\downarrow _{Y}l)=\downarrow _{X}k$ \\ 
+(X,i,\downarrow _{X}k)=\downarrow _{Y}l$ \\ 
 $\qquad \qquad v_{l}:=e_{k}$ \\ 
 $\qquad \text{\textbf{else}}$ \\ 
 $\qquad \qquad v_{l}:=q$ \\ 
@@ -382,6 +386,15 @@ $\text{\textbf{return} }(Y,v)$%
 Note that $\mathrm{copy}(X,i,\downarrow _{Y}l)=\downarrow _{X}k$ implies
 that parameters $(X,\downarrow _{X}k)$ and $(Y,\downarrow _{Y}l)$ are
 related.
+
+\begin{remark}
+In the code $\downarrow _{X}k$ is represented by $\mathtt{cfp\_X[k]}$
+\end{remark}
+
+\begin{remark}
+In the code $\mathrm{copy}(X,i,\downarrow _{X}k)$ is represented by $\mathtt{%
+Yf.copy(k)}$, where $Yf=\mathrm{PVI}(\varphi _{X},i)$
+\end{remark}
 
 \newpage
 
@@ -425,7 +438,7 @@ $\qquad $\textbf{for} $j=1\cdots \left\vert par(Y)\right\vert $ \textbf{do}
 \\ 
 $\qquad \qquad r:=[]$ \\ 
 $\qquad \qquad $\textbf{if} $CFP(Y,j)$ \textbf{then} \\ 
-$\qquad \qquad \qquad $\textbf{if} $dest(X,i,j)=\bot $ \\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{target}(X,i,j)=\bot $ \\ 
 $\qquad \qquad \qquad \qquad c:=c\wedge (e[j]=f[k])$ \\ 
 $\qquad \qquad \qquad r:=r\vartriangleleft f[k]$ \\ 
 $\qquad \qquad $\textbf{else if} $e[j]\in marking(u)$ \textbf{then} \\ 
@@ -460,7 +473,7 @@ result:=result\cup \{v\}$ \\
 $\qquad \text{\textbf{for }}i=1\cdots \mathrm{npred}(\varphi _{Y})\text{ 
 \textbf{do}}$ \\ 
 $\qquad \qquad \text{\textbf{if }}\mathrm{pred}(\varphi _{Y},i)=Y\wedge 
-\mathrm{dest}(Y,i,k)=v$\textbf{\ then} $result:=result\cup \{v\}$ \\ 
+\mathrm{target}(Y,i,k)=v$\textbf{\ then} $result:=result\cup \{v\}$ \\ 
 \textbf{return} $result$%
 \end{tabular}%
 \end{equation*}
@@ -491,8 +504,8 @@ $\qquad \qquad \text{\textbf{let }}Y=$ $\mathrm{pred}(\varphi _{X},i)$ \\
 $\qquad \qquad \text{\textbf{if }}d=?$ $\text{\textbf{then}}$ \\ 
 $\qquad \qquad \qquad \text{\textbf{if }}(Y,k^{\prime })\in C$ for some $%
 k^{\prime }$ \textbf{then} \\ 
-$\qquad \qquad \qquad \qquad \text{\textbf{if }}\mathrm{dest}(X,i,k^{\prime
-})=e^{\prime }$ \textbf{then} \\ 
+$\qquad \qquad \qquad \qquad \text{\textbf{if }}\mathrm{target}%
+(X,i,k^{\prime })=e^{\prime }$ \textbf{then} \\ 
 $\qquad \qquad \qquad \qquad \qquad v:=(Y,k^{\prime },d_{Y}[k^{\prime
 }]=e^{\prime })$ \\ 
 $\qquad \qquad \qquad \qquad \qquad insert(V,E,todo,u,i,v)$ \\ 
@@ -504,11 +517,11 @@ $\qquad \qquad \text{\textbf{else}}$ \\
 $\qquad \qquad \qquad \text{\textbf{if }}(Y,k^{\prime })\in C$ for some $%
 k^{\prime }$ \textbf{then} \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{if }}\left( \mathrm{source}%
-(X,i,k)=e\mathbf{\ }\wedge \mathrm{dest}(X,i,k^{\prime })=e^{\prime }\right) 
-$ \textbf{then }$insert(V,E,todo,u,i,(Y,k^{\prime },d_{Y}[k^{\prime
+(X,i,k)=e\mathbf{\ }\wedge \mathrm{target}(X,i,k^{\prime })=e^{\prime
+}\right) $ \textbf{then }$insert(V,E,todo,u,i,(Y,k^{\prime },d_{Y}[k^{\prime
 }]=e^{\prime }))$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{else if} }\left( Y\neq X\wedge 
-\mathrm{source}(X,i,k)=\bot \mathbf{\ }\wedge \mathrm{dest}(X,i,k^{\prime
+\mathrm{source}(X,i,k)=\bot \mathbf{\ }\wedge \mathrm{target}(X,i,k^{\prime
 })=e^{\prime }\right) $ \textbf{then }$insert(V,E,todo,u,i,(Y,k^{\prime
 },d_{Y}[k^{\prime }]=e^{\prime }))$ \\ 
 $\qquad \qquad \qquad \qquad \text{\textbf{else if} }\left( Y\neq X\wedge 
@@ -678,10 +691,10 @@ $\qquad condition:=\{\}$ \\
 $\qquad $\textbf{for} $j=1\cdots J$ \textbf{do} \\ 
 $\qquad \qquad $\textbf{if} $\mathrm{rules}(V_{j},X,i)$ \textbf{then} \\ 
 $\qquad \qquad \qquad $\textbf{let }$p,q$ be such that $(Y,p,q)\in V_{j}$ \\ 
-$\qquad \qquad \qquad $\textbf{if} $\mathrm{dest}(X,i,p)\neq \bot $ \textbf{%
-then} \\ 
-$\qquad \qquad \qquad \qquad $\textbf{let} $q^{\prime }=\mathrm{dest}(X,i,p)$
-\\ 
+$\qquad \qquad \qquad $\textbf{if} $\mathrm{target}(X,i,p)\neq \bot $ 
+\textbf{then} \\ 
+$\qquad \qquad \qquad \qquad $\textbf{let} $q^{\prime }=\mathrm{target}%
+(X,i,p)$ \\ 
 $\qquad \qquad \qquad \qquad relevant:=relevant\wedge \left( \left(
 Y,d_{Y}[k]\right) \in B_{j}\Rightarrow d_{Y}[k]\in marking(Y,p,q^{\prime
 })\right) $ \\ 
@@ -700,4 +713,4 @@ $\qquad \qquad e^{\prime
 \textbf{return }$Y(e^{\prime })$%
 \end{tabular}%
 \end{equation*}%
-\newpage
+\newpage 
