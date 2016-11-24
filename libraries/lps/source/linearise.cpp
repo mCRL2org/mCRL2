@@ -343,11 +343,11 @@ class specification_basic_type:public boost::noncopyable
       {
         if (is_process_identifier(o))
         {
-          throw mcrl2::runtime_error("Fail to recognize " + process::pp(process_identifier(o)) + ". Most likely due to unguarded recursion in a process equation.\n");
+          throw mcrl2::runtime_error("Fail to recognize " + process::pp(process_identifier(o)) + ". Most likely due to unguarded recursion in a process equation. ");
         }
         else
         {
-          throw mcrl2::runtime_error("Fail to recognize " + process::pp(o) + ". This is an internal error in the lineariser.\n");
+          throw mcrl2::runtime_error("Fail to recognize " + process::pp(o) + ". This is an internal error in the lineariser. ");
         }
       }
       return result;
@@ -520,7 +520,7 @@ class specification_basic_type:public boost::noncopyable
 
       if ((!isnew) && mustbenew)
       {
-        throw mcrl2::runtime_error("variable " + data::pp(var) + " already exists");
+        throw mcrl2::runtime_error("Variable " + data::pp(var) + " already exists. ");
       }
 
       objectdata[n].objectname=var.name();
@@ -686,8 +686,8 @@ class specification_basic_type:public boost::noncopyable
         return RewriteMultAct(t);
       }
 
-      throw mcrl2::runtime_error("Expected a term in pCRL format, using only basic process operators: " + process::pp(t));
-      return process_expression();
+      assert(0); // Expected a term in pCRL format, using only basic process operators.
+      return t;
     }
 
     /************ storeact ****************************************************/
@@ -699,7 +699,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (isnew==0)
       {
-        throw mcrl2::runtime_error("Action " + process::pp(actionId) + " is added twice\n");
+        throw mcrl2::runtime_error("Action " + process::pp(actionId) + " is added twice. This is an internal error in the lineariser. Please report. ");
       }
 
       const identifier_string& str=actionId.name();
@@ -737,7 +737,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (isnew==0)
       {
-        throw mcrl2::runtime_error("Process " + process::pp(procId) + " is added twice\n");
+        throw mcrl2::runtime_error("Process " + process::pp(procId) + " is added twice. This is an internal error in the lineariser. Please report. ");
       }
 
       objectdata[n].objectname=procId.name();
@@ -887,13 +887,14 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("Choice operator occurs in a multi-action in " + process::pp(body) + ".");
+          throw mcrl2::runtime_error("Choice operator occurs in a multi-action in " + process::pp(body) + ". The lineariser cannot handle such a pattern. ");
         }
         const processstatustype s1=determine_process_statusterm(choice(body).left(),pCRL);
         const processstatustype s2=determine_process_statusterm(choice(body).right(),pCRL);
         if ((s1==mCRL)||(s2==mCRL))
         {
-          throw mcrl2::runtime_error("mCRL operators occur within the scope of a choice operator in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs within the scope of a choice operator in " + process::pp(body) +
+                                      ". The lineariser cannot handle such processes. ");
         }
         return pCRL;
       }
@@ -902,13 +903,14 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("Sequential operator occurs in a multi-action in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("Sequential operator occurs in a multi-action in " + process::pp(body) +". The lineariser cannot handle such a pattern. ");
         }
         const processstatustype s1=determine_process_statusterm(seq(body).left(),pCRL);
         const processstatustype s2=determine_process_statusterm(seq(body).right(),pCRL);
         if ((s1==mCRL)||(s2==mCRL))
         {
-          throw mcrl2::runtime_error("mCRL operators occur within the scope of a sequential operator in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs in the scope of a sequential operator in " + process::pp(body) +". "
+                                       + "The lineariser cannot handle such processes. ");
         }
         return pCRL;
       }
@@ -917,7 +919,8 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Parallel operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("The parallel operator occurs in the scope of recursion, or the condition, sequential or choice operatar in " + 
+                                      process::pp(body) + ". The lineariser cannot handle such processes. ");
         }
         determine_process_statusterm(process::merge(body).left(),mCRL);
         determine_process_statusterm(process::merge(body).right(),mCRL);
@@ -926,19 +929,20 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_left_merge(body))
       {
-        throw mcrl2::runtime_error("Cannot linearize because the specification contains a leftmerge.");
+        throw mcrl2::runtime_error("Cannot linearise because the specification contains a leftmerge. ");
       }
 
       if (is_if_then(body))
       {
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("If-then occurs in a multi-action in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("If-then occurs in a multi-action in " + process::pp(body) + ". The lineariser cannot linearise this. ");
         }
         const processstatustype s1=determine_process_statusterm(if_then(body).then_case(),pCRL);
         if (s1==mCRL)
         {
-          throw mcrl2::runtime_error("mCRL operators occur in the scope of the if-then operator in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs in the scope of the if-then operator in " + process::pp(body) + ". "
+                                     + "The lineariser cannot handle such processes. ");
         }
         return pCRL;
       }
@@ -953,7 +957,8 @@ class specification_basic_type:public boost::noncopyable
         const processstatustype s2=determine_process_statusterm(if_then_else(body).else_case(),pCRL);
         if ((s1==mCRL)||(s2==mCRL))
         {
-          throw mcrl2::runtime_error("mCRL operators occur in the scope of the if-then-else operator in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs in the scope of the if-then-else operator in " + process::pp(body) +
+                                     ". " + "The lineariser cannot handle such processes. ");
         }
         return pCRL;
       }
@@ -965,12 +970,14 @@ class specification_basic_type:public boost::noncopyable
         insertvariables(sum(body).variables(),false);
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("Sum operator occurs within a multi-action in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("The sum operator occurs within a multi-action in " + process::pp(body) + ". " 
+                                      + "The lineariser cannot handle such processes. ");
         }
         const processstatustype s1=determine_process_statusterm(sum(body).operand(),pCRL);
         if (s1==mCRL)
         {
-          throw mcrl2::runtime_error("mCRL operators occur in the scope of the sum operator in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs in the scope of the sum operator in " + process::pp(body) + ". "
+                                     "The lineariser cannot handle such processes. ");
         }
         return pCRL;
       }
@@ -989,7 +996,8 @@ class specification_basic_type:public boost::noncopyable
         const processstatustype s1=determine_process_statusterm(sto.operand(),pCRL);
         if (s1==mCRL)
         {
-          throw mcrl2::runtime_error("mCRL operators occur in the scope of the stochastic operator in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs in the scope of the stochastic operator in " + process::pp(body) + ". "
+                                     + "The lineariser cannot handle such processes. ");
         }
         return pCRL;
       }
@@ -998,7 +1006,8 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Communication operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("The communication operator occurs in the scope of recursion, the condition, the sequential operation or the choice in " 
+                                      + process::pp(body) + ". The lineariser cannot linearise such processes. ");
         }
         determine_process_statusterm(comm(body).operand(),mCRL);
         return mCRL;
@@ -1006,7 +1015,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_bounded_init(body))
       {
-        throw mcrl2::runtime_error("Cannot linearize a specification with the bounded initialization operator.");
+        throw mcrl2::runtime_error("Cannot linearise a specification with the bounded initialization operator.");
       }
 
       if (is_at(body))
@@ -1019,7 +1028,8 @@ class specification_basic_type:public boost::noncopyable
         const processstatustype s1=determine_process_statusterm(at(body).operand(),pCRL);
         if (s1==mCRL)
         {
-          throw mcrl2::runtime_error("mCRL operator occurs in the scope of a time operator in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("An operator ||, allow, hide, rename, or comm occurs in the scope of a time operator in " + process::pp(body) + "."
+                                     + "The lineariser cannot handle such processes. ");
         }
         return pCRL;
       }
@@ -1067,7 +1077,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Hide operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("A hide operator occurs in the scope of recursion, or a condition, choice or sequential operator in " + process::pp(body) +".");
         }
         determine_process_statusterm(hide(body).operand(),mCRL);
         return mCRL;
@@ -1077,7 +1087,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Rename operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("A rename operator occurs in the scope of recursion, or a condition, choice or sequential operator in " + process::pp(body) +".");
         }
         determine_process_statusterm(process::rename(body).operand(),mCRL);
         return mCRL;
@@ -1087,7 +1097,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Allow operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("An allow operator occurs in the scope of recursion, or a condition, choice or sequential operator in " + process::pp(body) +".");
         }
         determine_process_statusterm(allow(body).operand(),mCRL);
         return mCRL;
@@ -1097,7 +1107,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Block operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
+          throw mcrl2::runtime_error("A block operator occurs in the scope of recursion, or a condition, choice or sequential operator in " + process::pp(body) +".");
         }
         determine_process_statusterm(block(body).operand(),mCRL);
         return mCRL;
@@ -1765,7 +1775,7 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      throw mcrl2::runtime_error("expected a pCRL process (1) " + process::pp(p));
+      throw mcrl2::runtime_error("Internal error: expect a pCRL process (1) " + process::pp(p));
     }
 
     std::set< variable > find_free_variables_process(const process_expression& p)
@@ -2111,7 +2121,7 @@ class specification_basic_type:public boost::noncopyable
                  substitute_pCRLproc(process::sync(p).right(),sigma,rhs_variables_in_sigma));
       }
 
-      throw mcrl2::runtime_error("expected a pCRL process (2) " + process::pp(p));
+      throw mcrl2::runtime_error("Internal error: expect a pCRL process (2) " + process::pp(p));
       return process_expression();
     }
 
@@ -2314,7 +2324,7 @@ class specification_basic_type:public boost::noncopyable
         return at(body,time);
       }
 
-      throw mcrl2::runtime_error("expected pCRL process in wraptime " + process::pp(body));
+      throw mcrl2::runtime_error("Internal error: expect a pCRL process in wraptime " + process::pp(body));
       return process_expression();
     }
 
@@ -3522,7 +3532,7 @@ class specification_basic_type:public boost::noncopyable
         return at(body,time);
       }
 
-      throw mcrl2::runtime_error("expected pCRL process in distributeTime " + process::pp(body) +".");
+      throw mcrl2::runtime_error("Internal error: expect a pCRL process in distributeTime " + process::pp(body) +".");
       return process_expression();
     }
 
@@ -3789,7 +3799,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (objectdata[n].processstatus==mCRLbusy)
       {
-        throw mcrl2::runtime_error("unguarded recursion without pCRL operators");
+        throw mcrl2::runtime_error("Unguarded recursion in process " + process::pp(procIdDecl) +".");
       }
 
       throw mcrl2::runtime_error("strange process type: " + str(boost::format("%d") % objectdata[n].processstatus));
@@ -9359,7 +9369,7 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      throw mcrl2::runtime_error("Internal error. Expect mCRL term " + process::pp(t) +".");
+      throw mcrl2::runtime_error("Internal error. Expect an mCRL term " + process::pp(t) +".");
     }
 
     /**************** GENERaTE LPEmCRL **********************************/
@@ -11078,7 +11088,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (pcrlprocesslist.size()==0)
       {
-        throw mcrl2::runtime_error("There are no pCRL processes to be linearized. This is most likely due to the use of unguarded recursion in process equations");
+        throw mcrl2::runtime_error("There are no processes to be linearised. This is most likely due to the use of unguarded recursion in process equations");
         // Note that this can occur with a specification
         // proc P(x:Int) = P(x); init P(1);
       }
