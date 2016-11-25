@@ -185,12 +185,6 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     data::variable_list xf = detail::mu_variables(x);
     data::variable_list xp = lps.process_parameters();
     const state_formulas::state_formula& phi = x.operand();
-std::cout << "x = " << x << std::endl;
-std::cout << "xf = " << xf << std::endl;
-std::cout << "xp = " << xp << std::endl;
-std::cout << "phi0 = " << phi0 << std::endl;
-std::cout << "X = " << X << std::endl;
-std::cout << "par(X, phi0) = " << Par(X, data::variable_list(), phi0) << std::endl;
     data::variable_list e = xf + xp + Par(X, data::variable_list(), phi0);
     e = is_timed() ? T + e : e;
     propositional_variable v(X, e);
