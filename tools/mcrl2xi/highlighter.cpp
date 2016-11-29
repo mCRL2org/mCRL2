@@ -30,7 +30,8 @@ Highlighter::Highlighter(QTextDocument *parent)
   SpecKeywordPatterns << "\\bsort\\b" << "\\bcons\\b" << "\\bmap\\b"
                       << "\\bvar\\b" << "\\beqn\\b" << "\\bact\\b"
                       << "\\bproc\\b" << "\\binit\\b" << "\\bstruct\\b";
-  foreach (const QString &pattern, SpecKeywordPatterns) {
+  foreach (const QString& pattern, SpecKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -41,7 +42,8 @@ Highlighter::Highlighter(QTextDocument *parent)
   keywordFormat.setFontWeight(QFont::Light);
   QStringList ProcCKeywordPatterns;
   ProcCKeywordPatterns << "\\bdelta\\b" << "\\btau\\b";
-  foreach (const QString &pattern, ProcCKeywordPatterns) {
+  foreach (const QString& pattern, ProcCKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -52,7 +54,8 @@ Highlighter::Highlighter(QTextDocument *parent)
   QStringList ProcKeywordPatterns;
   ProcKeywordPatterns << "\\bsum\\b" << "\\bblock\\b" << "\\ballow\\b"
                       << "\\bhide\\b" << "\\brename\\b" << "\\bcomm\\b";
-  foreach (const QString &pattern, ProcKeywordPatterns) {
+  foreach (const QString& pattern, ProcKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -63,7 +66,8 @@ Highlighter::Highlighter(QTextDocument *parent)
   QStringList SortCKeywordPatterns;
   SortCKeywordPatterns << "\\bBool\\b" << "\\bPos\\b" << "\\bNat\\b"
                        << "\\bInt\\b" << "\\bReal\\b";
-  foreach (const QString &pattern, SortCKeywordPatterns) {
+  foreach (const QString& pattern, SortCKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -73,7 +77,8 @@ Highlighter::Highlighter(QTextDocument *parent)
   keywordFormat.setFontWeight(QFont::Bold);
   QStringList SortKeywordPatterns;
   SortKeywordPatterns << "\\bList\\b" << "\\bSet\\b" << "\\bBag\\b" << "\\bFSet\\b" << "\\bFBag\\b";
-  foreach (const QString &pattern, SortKeywordPatterns) {
+  foreach (const QString& pattern, SortKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -83,7 +88,8 @@ Highlighter::Highlighter(QTextDocument *parent)
   keywordFormat.setFontWeight(QFont::Bold);
   QStringList DataCKeywordPatterns;
   DataCKeywordPatterns << "\\btrue\\b" << "\\bfalse\\b";
-  foreach (const QString &pattern, DataCKeywordPatterns) {
+  foreach (const QString& pattern, DataCKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -95,7 +101,8 @@ Highlighter::Highlighter(QTextDocument *parent)
   DataKeywordPatterns << "\\bwhr\\b" << "\\bend\\b" << "\\blambda\\b"
                       << "\\bforall\\b" << "\\bexists\\b" << "\\bdiv\\b"
                       << "\\bmod\\b" << "\\bin\\b";
-  foreach (const QString &pattern, DataKeywordPatterns) {
+  foreach (const QString& pattern, DataKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -106,7 +113,8 @@ Highlighter::Highlighter(QTextDocument *parent)
   QStringList TodoKeywordPatterns;
   TodoKeywordPatterns << "\\bcontained\\b" << "\\bTODO\\b" << "\\bFIXME\\b"
                       << "\\bXXX\\b";
-  foreach (const QString &pattern, TodoKeywordPatterns) {
+  foreach (const QString& pattern, TodoKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -121,7 +129,8 @@ Highlighter::Highlighter(QTextDocument *parent)
                           << "\\bA2B\\b" << "\\bhead\\b" << "\\btail\\b"
                           << "\\brhead\\b" << "\\brtail\\b" << "\\bcount\\b"
                           << "\\bSet2Bag\\b" << "\\bBag2Set\\b";
-  foreach (const QString &pattern, OperatorKeywordPatterns) {
+  foreach (const QString& pattern, OperatorKeywordPatterns) 
+  {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
@@ -161,9 +170,9 @@ Highlighter::Highlighter(QTextDocument *parent)
 
 }
 
-void Highlighter::highlightBlock(const QString &text)
+void Highlighter::highlightBlock(const QString& text)
 {
-  foreach (const HighlightingRule &rule, highlightingRules) {
+  foreach (const HighlightingRule& rule, highlightingRules) {
     QRegExp expression(rule.pattern);
     int index = expression.indexIn(text);
     while (index >= 0) {
