@@ -18,38 +18,44 @@ using namespace mcrl2::log;
 
 namespace mcrl2xi_qt
 {
+namespace detail
+{
 
-  inline
-  void parseMcrl2Specification(const std::string input, mcrl2::data::data_specification& data_spec, std::set<mcrl2::data::variable>& vars)
+inline bool contains_keyword_init(const std::string& input)
+{
+  size_t search_start=0;
+  do 
+  { 
+    // Find an occurrence of the keyword init not surrounded by alphanumeric characters.
+    size_t location_of_init=input.find("init", search_start);
+    if (location_of_init==std::string::npos)  // not found
+    {
+      return false;
+    }
+    if ((location_of_init==0 || !isalnum(input[location_of_init-1])) &&
+        (input.size()<=location_of_init+4 || !isalnum(input[location_of_init+4])))
+    {
+      // Keyword has been found.
+      return true;
+    }
+    search_start=location_of_init+1;  
+  } while (true);
+  return false;
+}
+
+} // end namespace detail
+
+inline
+void parseMcrl2Specification(const std::string& input, mcrl2::data::data_specification& data_spec, std::set<mcrl2::data::variable>& vars)
+{
+  mCRL2log(info) << "Parsing and type checking specification" << std::endl;
+
+  try
   {
-    mCRL2log(info) << "Parsing and type checking specification" << std::endl;
-
-    log_level_t old_level = mcrl2_logger::get_reporting_level();
-    std::streambuf *old = std::cerr.rdbuf();
-
-    try
-    {
-      // Dirty hack: redirect cerr such that is becomes silent and parse errors are ignored.
-      mcrl2_logger::set_reporting_level(quiet);
-      std::stringstream ss;
-      std::cerr.rdbuf (ss.rdbuf());
-
-      data_spec = mcrl2::data::parse_data_specification(input);
-
-      //Restore cerr such that parse errors become visible.
-      std::cerr.rdbuf (old);
-      mcrl2_logger::set_reporting_level(old_level);
-
-      mCRL2log(info) << "Specification is a valid data specification" << std::endl;
-      return;
-    }
-    catch (mcrl2::runtime_error e)
-    {
-      std::cerr.rdbuf (old);
-      mcrl2_logger::set_reporting_level(old_level);
-    }
-
-    try
+    // First check whether the keyword "init" occurs in the string. If yes, it is an mCRL2 specification.
+    // If no, it is a data specification. 
+  
+    if (detail::contains_keyword_init(input))
     {
       mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(input);
       data_spec = spec.data();
@@ -58,19 +64,27 @@ namespace mcrl2xi_qt
       mCRL2log(info) << "Specification is a valid mCRL2 specification" << std::endl;
       return;
     }
-    catch (mcrl2::runtime_error e)
+    else
     {
-      throw(mcrl2::runtime_error(QString("Specification contains no valid data or mCRL2 specification: ").append(e.what()).toStdString()));
+      data_spec = mcrl2::data::parse_data_specification(input);
+
+      mCRL2log(info) << "Specification is a valid data specification" << std::endl;
+      return;
     }
   }
-
-  inline
-  void parseMcrl2Specification(const std::string input)
+  catch (mcrl2::runtime_error e)
   {
-    mcrl2::data::data_specification data_spec;
-    std::set<mcrl2::data::variable> vars;
-    parseMcrl2Specification(input, data_spec, vars);
+    throw(mcrl2::runtime_error(QString("Specification does not contain a valid data or mCRL2 specification.\n").append(e.what()).toStdString()));
   }
+}
+
+inline
+void parseMcrl2Specification(const std::string input)
+{
+  mcrl2::data::data_specification data_spec;
+  std::set<mcrl2::data::variable> vars;
+  parseMcrl2Specification(input, data_spec, vars);
+}
 
 }
 #endif // PARSING_H

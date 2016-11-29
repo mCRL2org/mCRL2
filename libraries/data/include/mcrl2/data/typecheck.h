@@ -296,7 +296,7 @@ void type_check_sort_expression(const sort_expression& sort_expr, const data_spe
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check sort " + pp(sort_expr));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\nCould not type check sort " + pp(sort_expr));
   }
 }
 
@@ -323,7 +323,7 @@ data_expression type_check_data_expression(const data_expression& x,
   }
   catch (mcrl2::runtime_error& e)
   {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check data expression " + data::pp(x));
+    throw mcrl2::runtime_error(std::string(e.what()) + "\nCould not type check data expression " + data::pp(x));
   }
 }
 
@@ -347,15 +347,8 @@ data_expression type_check_data_expression(const data_expression& x, const data_
 inline
 void type_check_data_specification(data_specification& data_spec)
 {
-  try
-  {
-    data_type_checker type_checker(data_spec);
-    data_spec=type_checker();
-  }
-  catch (mcrl2::runtime_error& e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check data specification " + pp(data_spec));
-  }
+  data_type_checker type_checker(data_spec);
+  data_spec=type_checker();
 }
 
 inline
