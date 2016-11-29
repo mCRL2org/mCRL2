@@ -31,11 +31,15 @@ FindReplaceDialog::FindReplaceDialog(QWidget *parent) :
 void FindReplaceDialog::setTextEdit(QTextEdit *textEdit)
 {
   if (m_textEdit)
+  {
     disconnect(m_textEdit, 0, m_ui.replaceButton, 0);
+  }
 
   m_textEdit = textEdit;
   if (m_textEdit)
+  {
     connect(m_textEdit, SIGNAL(copyAvailable(bool)), m_ui.replaceButton, SLOT(setEnabled(bool)));
+  }
 }
 
 void FindReplaceDialog::textToFindChanged()
@@ -48,7 +52,9 @@ void FindReplaceDialog::showError(const QString &error)
   if (error == "")
   {
     m_ui.errorLabel->setText("");
-  } else {
+  } 
+  else 
+  {
     m_ui.errorLabel->setText("<span style=\" font-weight:600; color:#ff0000;\">" +
                              error +
                              "</spn>");
@@ -60,7 +66,9 @@ void FindReplaceDialog::showMessage(const QString &message)
   if (message == "")
   {
     m_ui.errorLabel->setText("");
-  } else {
+  } 
+  else 
+  {
     m_ui.errorLabel->setText("<span style=\" font-weight:600; color:green;\">" +
                              message +
                              "</span>");
@@ -75,7 +83,9 @@ void FindReplaceDialog::find()
 void FindReplaceDialog::find(bool next)
 {
   if (!m_textEdit)
+  {
     return;
+  }
 
   bool back = !next;
   const QString &toSearch = m_ui.textToFind->text();
@@ -95,7 +105,9 @@ void FindReplaceDialog::find(bool next)
   if (result)
   {
     showError("");
-  } else {
+  } 
+  else 
+  {
     showError(tr("No match found"));
     m_textCursor.setPosition(0);
     m_textEdit->setTextCursor(m_textCursor);
@@ -105,11 +117,15 @@ void FindReplaceDialog::find(bool next)
 void FindReplaceDialog::replace()
 {
   if (!m_textEdit)
+  {
     return;
+  }
   if (!m_textEdit->textCursor().hasSelection())
   {
     find();
-  } else {
+  } 
+  else 
+  {
     m_textEdit->textCursor().insertText(m_ui.textToReplace->text());
     find();
   }
@@ -118,14 +134,17 @@ void FindReplaceDialog::replace()
 void FindReplaceDialog::replaceAll()
 {
   if (!m_textEdit)
+  { 
     return;
+  }
 
   m_textCursor.setPosition(0);
   m_textEdit->setTextCursor(m_textCursor);
   find(true);
 
   int i=0;
-  while (m_textEdit->textCursor().hasSelection()){
+  while (m_textEdit->textCursor().hasSelection())
+  {
     m_textEdit->textCursor().insertText(m_ui.textToReplace->text());
     find();
     i++;

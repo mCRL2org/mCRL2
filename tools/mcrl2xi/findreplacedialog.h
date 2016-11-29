@@ -25,7 +25,8 @@
 
 #include "ui_findreplacedialog.h"
 
-class FindReplaceDialog : public QDialog {
+class FindReplaceDialog : public QDialog 
+{
     Q_OBJECT
   public:
     /**

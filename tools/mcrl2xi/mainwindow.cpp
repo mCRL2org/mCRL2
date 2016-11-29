@@ -154,16 +154,21 @@ void MainWindow::formatDocument(DocumentWidget *document)
 void MainWindow::changeDocument(DocumentWidget *document)
 {
   if (document)
+  {
     m_findReplaceDialog->setTextEdit(document);
+  }
   else
+  {  
     m_findReplaceDialog->setTextEdit(0);
+  }
 }
 
 bool MainWindow::onCloseRequest(int index)
 {
   DocumentWidget *document = m_ui.documentManager->getDocument(index);
 
-  if (!document->isModified()) {
+  if (!document->isModified()) 
+  {
     m_findReplaceDialog->setTextEdit(0);
     m_ui.documentManager->closeDocument(index);
     return true;
@@ -274,6 +279,10 @@ void MainWindow::onSelectAll()
 void MainWindow::onFind()
 {
   m_findReplaceDialog->setTextEdit(m_ui.documentManager->currentDocument());
+  // The two lines below guarantee that if the window was already open,
+  // it will become the active window. 
+  m_findReplaceDialog->raise();
+  m_findReplaceDialog->activateWindow();
   m_findReplaceDialog->show();
 }
 
