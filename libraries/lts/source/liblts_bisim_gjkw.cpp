@@ -648,9 +648,14 @@ Its time complexity is O(1 + min { |out_\nottau(s)|, |out_\tau(s)| }). */
 succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
 {
     constln_t* NewC = s->constln();
+    assert(*NewC < *OldC || OldC->end() == NewC->begin());
+    assert(*OldC < *NewC || NewC->end() == OldC->begin());
     succ_iter_t split = s->inert_succ_begin(), to_C_end = s->inert_succ_end();
     succ_iter_t to_C_begin = s->succ_begin() == to_C_end ? s->succ_begin()
                                          : to_C_end[-1].constln_slice->begin();
+        //< If s has no transitions to OldC at all, then to_C_begin may be the
+        // beginning of the constln_slice for transitions to another
+        // constellation.  We will check that later.
     assert(to_C_begin <= split);
     assert(split <= to_C_end);
     assert(succ.end() == split || split->B_to_C->pred->succ == split);
@@ -754,6 +759,9 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
             }
             else
             {
+                // s has no transitions to OldC, but transitions to some
+                // constellation < min(*OldC, *NewC).  to_C_begin is actually
+                // the beginning of another constln_slice.
                 assert(*to_C_begin->target->constln() < *NewC);
             }
         }
@@ -785,6 +793,13 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
             }
         }
         assert(s->succ_end()[-1].constln_slice->end() == s->succ_end());
+        assert(s->succ_begin() == s->inert_succ_begin() ||
+                         *s->inert_succ_begin()[-1].target->constln() < *NewC);
+        assert(s->inert_succ_begin() == s->inert_succ_end() ||
+                          (s->inert_succ_begin()->target->block == s->block &&
+                           s->inert_succ_end()[-1].target->block == s->block));
+        assert(s->inert_succ_end() == s->succ_end() ||
+                              *NewC < *s->inert_succ_end()->target->constln());
     }
 #endif // ifndef NDEBUG
     return split;
@@ -1366,7 +1381,7 @@ void part_trans_t::assert_stability() const
             // end for
             }
             assert(part_st_predecessors.size() ==
-                                    B->nonbottom_end() - B->nonbottom_begin());
+                         (size_t) (B->nonbottom_end() - B->nonbottom_begin()));
             part_st_predecessors.clear();
             assert(0 == nr_of_inert_predecessors);
             // now all nonbottom states should have s->notblue==STATE_TYPE_MAX.
@@ -2179,9 +2194,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             // check consistency of s->inert_succ_begin() and
             // s->inert_succ_end()
             assert(s->succ_begin() == s->inert_succ_begin() ||
-                  *s->inert_succ_begin()[-1].target->constln()<=*s->constln());
-            assert(s->succ_begin() == s->inert_succ_begin() ||
-                          s->inert_succ_begin()[-1].target->block != s->block);
+                   *s->inert_succ_begin()[-1].target->constln()<*s->constln());
             assert(s->inert_succ_begin() == s->inert_succ_end() ||
                           (s->inert_succ_begin()->target->block == s->block &&
                            s->inert_succ_end()[-1].target->block == s->block));
