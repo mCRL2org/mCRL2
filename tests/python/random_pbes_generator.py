@@ -502,8 +502,8 @@ class CounterExampleMinimizer:
         # run_txt2pbes(txtfile, pbesfile)
         # text = run_pbespp(pbesfile)
         # write_text(txtfile, text)
-        print '--- %s counter example ---' % self.name
-        print text
+        print('--- %s counter example ---' % self.name)
+        print(text)
         self.counter = self.counter + 1
 
     def callback(self):
@@ -516,7 +516,7 @@ class CounterExampleMinimizer:
         while not stop:
             stop = True
             for level in range(1, 7):
-                print '--- LEVEL %d ---' % level
+                print('--- LEVEL %d ---' % level)
                 try:
                     self.pbes.minimize(self.callback, level)
                 except Exception:

@@ -282,9 +282,9 @@ available_tests = {
 }
 
 def print_names(tests):
-    print '--- available tests ---'
+    print('--- available tests ---')
     for name in sorted(tests):
-        print name
+        print(name)
 
 def main(tests):
     import argparse
@@ -317,7 +317,7 @@ def main(tests):
                     test = tests[name]('{}_{}'.format(name, i), settings)
                     test.execute_in_sandbox()
             except Exception as e:
-                print e
+                print(e)
 
 if __name__ == '__main__':
     main(available_tests)

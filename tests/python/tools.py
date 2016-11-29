@@ -72,7 +72,7 @@ class Tool(object):
         if process.max_virtual_memory > memlimit:
             raise popen.MemoryExceededError(process.max_virtual_memory)
         if returncode != 0:
-            print 'warning: tool {} ended with return code {}'.format(self.name, returncode)
+            print('warning: tool {} ended with return code {}'.format(self.name, returncode))
         if platform.system() == 'Windows' and returncode == -1073741571:
             raise popen.StackOverflowError(self.name)
         if platform.system() == 'Linux' and returncode == -11:
@@ -172,13 +172,15 @@ class Tool(object):
         args = self.arguments()
         name = os.path.join(self.toolpath, self.name)
         if verbose:
-            print 'Executing ' + ' '.join([name] + args + self.args)
+            print('Executing ' + ' '.join([name] + args + self.args))
         if not self.check_exists(name):
             raise popen.ToolNotFoundError(name)
         process = popen.Popen([name] + args + self.args, stdout=PIPE, stdin=PIPE, stderr=PIPE, creationflags=self.subprocess_flags, maxVirtLimit=memlimit, usrTimeLimit=timeout)
 
         input = None
-        self.stdout, self.stderr = process.communicate(input)
+        stdout, stderr = process.communicate(input)
+        self.stdout = stdout.decode("utf-8")
+        self.stderr = stderr.decode("utf-8")
         self.executed = True
         self.user_time = process.user_time
         self.max_virtual_memory = process.max_virtual_memory
@@ -188,8 +190,8 @@ class Tool(object):
         return process.returncode
 
     def __str__(self):
-        import StringIO
-        out = StringIO.StringIO()
+        import io
+        out = io.StringIO()
         out.write('label    = ' + str(self.label)    + '\n')
         out.write('name     = ' + str(self.name)     + '\n')
         out.write('input    = [{0}]\n'.format(', '.join([str(x) for x in self.input_nodes])))

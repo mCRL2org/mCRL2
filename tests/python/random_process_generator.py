@@ -191,7 +191,7 @@ def parse_variable(text):
 # example: 'b: Bool, m: Nat'
 def parse_variables(text):
     import string
-    variables = filter(None, map(string.strip, text.split(',')))
+    variables = filter(None, list(map(str.strip, text.split(','))))
     return map(parse_variable, variables)
 
 # example: 'P(m: Nat, b: Bool)'
@@ -569,7 +569,7 @@ def make_process_specification(generator_map, actions, process_identifiers, size
                                init = None, generate_process_parameters = False):
 
     # create process identifiers for the equations
-    process_identifiers = map(ProcessIdentifier, process_identifiers)
+    process_identifiers = list(map(ProcessIdentifier, process_identifiers))
     if generate_process_parameters:
         V = parse_variables('c1: Bool, c2: Bool, c3: Bool, i1: Int, i2: Int, i3: Int')
         for i, P in enumerate(process_identifiers):

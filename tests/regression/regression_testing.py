@@ -114,8 +114,8 @@ def run_tests(tests, settings, pattern = '.'):
                 test = tests[name](name, settings)
                 test.execute_in_sandbox()
             except Exception as e:
-                print 'Test {} failed!'.format(test.name)
-                print e
+                print('Test {} failed!'.format(test.name))
+                print(e)
 
 def test1():
     settings = {'toolpath': MCRL2_INSTALL_DIR, 'verbose': True, 'cleanup_files': True}
@@ -136,9 +136,9 @@ def test2():
     run_tests(slow_regression_tests, settings)
 
 def print_names(tests):
-    print '--- available tests ---'
+    print('--- available tests ---')
     for name in sorted(tests):
-        print name
+        print(name)
 
 # Command line interface to run tests.
 def main(tests):

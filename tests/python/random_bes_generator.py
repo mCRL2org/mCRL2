@@ -121,4 +121,4 @@ def make_bes(equation_count, term_size = 3):
 
 if __name__ == "__main__":
     b = make_bes(4, 5)
-    print '%s' % b
+    print(b)

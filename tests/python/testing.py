@@ -99,8 +99,8 @@ class Test:
         self.input_nodes = self.compute_input_nodes()
 
     def __str__(self):
-        import StringIO
-        out = StringIO.StringIO()
+        import io
+        out = io.StringIO()
         out.write('name        = ' + str(self.name)     + '\n')
         out.write('verbose     = ' + str(self.verbose)  + '\n')
         out.write('result_code = ' + str(self.result_code)      + '\n\n')
@@ -149,13 +149,13 @@ class Test:
             exec(self.result_code, self.globals)
         except Exception as e:
             if isinstance(e, KeyError):
-                print 'A KeyError occurred during evaluation of the test result: {}'.format(e)
-                print 'result_code', self.result_code
-                print self
+                print('A KeyError occurred during evaluation of the test result: {}'.format(e))
+                print('result_code', self.result_code)
+                print(self)
             else:
-                print 'An exception occurred during evaluation of the test result: {}'.format(e)
-                print 'result_code', self.result_code
-                print self
+                print('An exception occurred during evaluation of the test result: {}'.format(e))
+                print('result_code', self.result_code)
+                print(self)
             return False
         return self.globals['result']
 
@@ -171,7 +171,7 @@ class Test:
                     os.remove(filename)
                 except Exception as e:
                     if self.verbose:
-                        print e
+                        print(e)
 
     def run(self):
         import popen
@@ -188,17 +188,17 @@ class Test:
                     raise RuntimeError('The execution of tool {} ended with return code {}'.format(tool.name, returncode))
             except popen.MemoryExceededError as e:
                 if self.verbose:
-                    print 'Memory limit exceeded: ' + str(e)
+                    print('Memory limit exceeded: ' + str(e))
                 self.cleanup()
                 return None
             except popen.TimeExceededError as e:
                 if self.verbose:
-                    print 'Time limit exceeded: ' + str(e)
+                    print('Time limit exceeded: ' + str(e))
                 self.cleanup()
                 return None
             except popen.StackOverflowError as e:
                 if self.verbose:
-                    print 'Stack overflow detected during execution of the tool ' + tool.name
+                    print('Stack overflow detected during execution of the tool ' + tool.name)
                 self.cleanup()
                 return None
             tasks = self.remaining_tasks()
@@ -238,7 +238,7 @@ class Test:
         toolmap = {}
         for tool in self.tools:
             toolmap[tool.label] = tool
-        print '\n'.join([toolmap[label].command(runpath) for label in labels if label in toolmap])
+        print('\n'.join([toolmap[label].command(runpath) for label in labels if label in toolmap]))
 
 def run_yml_test(name, testfile, inputfiles, settings):
     for filename in [testfile] + inputfiles:
@@ -247,14 +247,14 @@ def run_yml_test(name, testfile, inputfiles, settings):
             return
     t = Test(testfile, settings)
     if 'verbose' in settings and settings['verbose']:
-        print 'Running test ' + testfile
+        print('Running test ' + testfile)
     t.setup(inputfiles)
     result = t.run()
-    print name, result
+    print('{} {}'.format(name, result))
     if result == False:
         for filename in inputfiles:
             text = read_text(filename)
-            print '- file {}\n{}\n'.format(filename, text)
+            print('- file {}\n{}\n'.format(filename, text))
     return result
 
 def run_pbes_test(name, testfile, p, settings):
@@ -313,7 +313,7 @@ class TestRunner(testrunner.TestRunner):
     # displays names and numbers of the tests
     def print_names(self):
         for i, test in enumerate(self.tests):
-            print '{} {}'.format(i, test.name)
+            print('{} {}'.format(i, test.name))
 
     def run(self, testnum):
         if testnum < len(self.tests):

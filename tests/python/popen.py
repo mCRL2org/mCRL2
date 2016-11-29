@@ -64,7 +64,7 @@ class Popen(subprocess.Popen):
 
         # workaround for interface changes in psutil
         process = psutil.Process(self.pid)
-	if "get_cpu_times" in dir(process):
+        if "get_cpu_times" in dir(process):
             self.__perfThread = threading.Thread(target=self.__measure_old)
         else:
             self.__perfThread = threading.Thread(target=self.__measure_new)
