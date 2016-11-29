@@ -3889,21 +3889,26 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(greater_equal(data::untyped_sort()));
   add_system_function(greater(data::untyped_sort()));
   //Numbers
-  add_system_function(sort_nat::pos2nat());
+  add_system_constant(sort_pos::c1());
+  add_system_function(sort_pos::cdub());
+  add_system_constant(sort_nat::c0());
   add_system_function(sort_nat::cnat());
-  add_system_function(sort_real::pos2real());
+  add_system_function(sort_nat::pos2nat());
   add_system_function(sort_nat::nat2pos());
-  add_system_function(sort_int::nat2int());
   add_system_function(sort_int::cint());
-  add_system_function(sort_real::nat2real());
+  add_system_function(sort_int::cneg());
   add_system_function(sort_int::int2pos());
   add_system_function(sort_int::int2nat());
-  add_system_function(sort_real::int2real());
+  add_system_function(sort_int::pos2int());
+  add_system_function(sort_int::nat2int());
   add_system_function(sort_real::creal());
+  add_system_function(sort_real::pos2real());
+  add_system_function(sort_real::nat2real());
+  add_system_function(sort_real::int2real());
   add_system_function(sort_real::real2pos());
   add_system_function(sort_real::real2nat());
   add_system_function(sort_real::real2int());
-  add_system_constant(sort_pos::c1());
+  
   //Square root for the natural numbers.
   add_system_function(sort_nat::sqrt());
   //more about numbers
