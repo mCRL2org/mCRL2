@@ -156,8 +156,8 @@
   <widget class="QDockWidget" name="dockRewriter">
    <property name="minimumSize">
     <size>
-     <width>200</width>
-     <height>210</height>
+     <width>252</width>
+     <height>236</height>
     </size>
    </property>
    <property name="features">
@@ -175,11 +175,28 @@
       <widget class="QLineEdit" name="editRewriteExpr"/>
      </item>
      <item>
-      <widget class="QPushButton" name="buttonRewrite">
-       <property name="text">
-        <string>Rewrite</string>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetMinimumSize</enum>
        </property>
-      </widget>
+       <item>
+        <widget class="QPushButton" name="buttonRewrite">
+         <property name="text">
+          <string>Rewrite</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="buttonRewriteAbort">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Cancel</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QPlainTextEdit" name="editRewriteOutput">

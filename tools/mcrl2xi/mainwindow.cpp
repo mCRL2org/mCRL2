@@ -67,6 +67,7 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
 
   connect(m_ui.buttonRewrite, SIGNAL(clicked()), this, SLOT(onRewrite()));
   connect(m_ui.actionRewrite, SIGNAL(triggered()), this, SLOT(onRewrite()));
+  connect(m_ui.buttonRewriteAbort, SIGNAL(clicked()), this, SLOT(onRewriteAbort()));
 
   connect(m_ui.buttonSolve, SIGNAL(clicked()), this, SLOT(onSolve()));
   connect(m_ui.actionSolve, SIGNAL(triggered()), this, SLOT(onSolve()));
@@ -356,10 +357,24 @@ void MainWindow::parserFinished()
 
 void MainWindow::onRewrite()
 {
+  // Save the document first as the rewriter may run out of its stack. 
+  if (m_ui.documentManager->currentDocument()->isModified())
+  { 
+    saveDocument(m_ui.documentManager->currentDocument());
+  }
   m_ui.buttonRewrite->setEnabled(false);
+  m_ui.buttonRewriteAbort->setEnabled(true);
   m_ui.editRewriteOutput->clear();
   DocumentWidget *document = m_ui.documentManager->currentDocument();
   QMetaObject::invokeMethod(document->rewriter(), "rewrite", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()), Q_ARG(QString, m_ui.editRewriteExpr->text()));
+}
+
+void MainWindow::onRewriteAbort()
+{
+  DocumentWidget *document = m_ui.documentManager->currentDocument();
+  QMetaObject::invokeMethod(document->rewriter(), "abort", Qt::QueuedConnection);
+
+  m_ui.buttonRewriteAbort->setEnabled(false);
 }
 
 void MainWindow::rewriteError(QString err)
@@ -375,6 +390,7 @@ void MainWindow::rewritten(QString output)
 
 void MainWindow::rewriterFinished()
 {
+  m_ui.buttonRewriteAbort->setEnabled(false);
   m_ui.buttonRewrite->setEnabled(true);
 }
 

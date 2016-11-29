@@ -123,6 +123,7 @@ class MainWindow : public QMainWindow
 
     // Slots for the rewriter
     void onRewrite();
+    void onRewriteAbort();
 
     void rewritten(QString output);
     void rewriteError(QString err);
