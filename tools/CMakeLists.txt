@@ -58,6 +58,7 @@ set(MCRL2_TOOLS
   txt2bes
   formulacheck
 
+  lpstransform
   mcrl2transform
   mcrl2parse
   
