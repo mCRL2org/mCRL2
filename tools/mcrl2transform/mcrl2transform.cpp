@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
@@ -452,6 +453,20 @@ struct rewrite_pbes_quantifiers_inside_rewriter_command: public pbescommand
     pbes_system::save_pbes(pbesspec, output_filename);
   }
 };
+ 
+struct remove_unused_pbes_equations_command: public pbescommand
+{
+  remove_unused_pbes_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("remove-unused-pbes-equations", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbes_system::remove_unreachable_variables(pbesspec);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
 
 class transform_tool: public utilities::tools::input_output_tool
 {
@@ -524,6 +539,7 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_data_rewriter_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<rewrite_pbes_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<rewrite_pbes_quantifiers_inside_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<remove_unused_pbes_equations_command>(input_filename(), output_filename(), options));
 
       for (auto i = commands.begin(); i != commands.end(); ++i)
       {
