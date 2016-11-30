@@ -17,10 +17,12 @@
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
+#include "mcrl2/utilities/text_utility.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -182,16 +184,45 @@ void test_lps_rewriter(const std::string& src_text, const std::string& dest_text
 void test_lps_rewriter()
 {
   std::string src =
-    "act  c:Pos#Nat;                          \n"
-    "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+1+2); \n"
-    "init P(1+1,2+2);                         \n";
+    "act  c: Bool;                                                       \n"
+    "proc P(b: Bool, c:Bool) = c(true && false).P(b || true, c && true); \n"
+    "init P(true || false, true && false);                               \n";
 
   std::string dest =
-    "act  c:Pos#Nat;                          \n"
-    "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+3);   \n"
-    "init P(2,4);                             \n";
+    "act  c: Bool;                                                       \n"
+    "proc P(b: Bool, c:Bool) = c(false).P(true, c);                      \n"
+    "init P(true, false);                                                \n";
 
   test_lps_rewriter(src, dest, "");
+}
+
+void test_one_point_rule_rewriter()
+{
+  std::string src =
+    "act  a: Bool;\n"
+    "\n"
+    "proc P(b: Bool) =\n"
+    "       (forall n: Nat. n != 1 || b) ->\n"
+    "         a(exists m: Nat. m == 1) .\n"
+    "         P(b = b);\n"
+    "\n"
+    "init P(true);";
+
+  std::string expected_result =
+    "act  a: Bool;\n"
+    "\n"
+    "proc P(b: Bool) =\n"
+    "       (1 != 1 || b) ->\n"
+    "         a(1 == 1) .\n"
+    "         P(b = b);\n"
+    "\n"
+    "init P(true);";
+
+  specification lpsspec = parse_linear_process_specification(src);
+  specification expected_spec = parse_linear_process_specification(expected_result);
+  one_point_rule_rewrite(lpsspec);
+  std::string result = utilities::trim_copy(lps::pp(lpsspec));
+  BOOST_CHECK(result == expected_result);
 }
 
 int test_main(int argc, char* argv[])
@@ -199,7 +230,8 @@ int test_main(int argc, char* argv[])
   test1();
   test2();
   test3();
-  //test_lps_rewriter();
+  test_lps_rewriter();
+  test_one_point_rule_rewriter();
 
   return 0;
 }
