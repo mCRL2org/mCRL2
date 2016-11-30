@@ -61,6 +61,7 @@ set(MCRL2_TOOLS
   lpstransform
   mcrl2transform
   mcrl2parse
+  pbestransform
   
   ltspbisim
 )
