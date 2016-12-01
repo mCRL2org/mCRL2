@@ -16,7 +16,7 @@ tools:
     input: [l2]
     output: [l3]
     args: []
-    name: mcrl2transform
+    name: pbestransform
   t3:
     input: [l2]
     output: []

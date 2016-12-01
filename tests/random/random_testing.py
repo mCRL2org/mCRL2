@@ -101,6 +101,11 @@ class LpsParelmTest(ProcessTest):
         super(LpsParelmTest, self).__init__(name, ymlfile('lpsparelm'), settings)
         self.generate_process_parameters = True
 
+class LpsOnePointRuleRewriteTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(LpsOnePointRuleRewriteTest, self).__init__(name, ymlfile('lpstransform'), settings)
+        self.set_command_line_options('t2', ['-alps-one-point-rule-rewriter'])
+
 class LpsConfcheckTest(ProcessTauTest):
     def __init__(self, name, confluence_type, settings = dict()):
         self.option_map = { 'commutative' : 'C',
@@ -234,6 +239,7 @@ available_tests = {
     'lpssuminst'                                  : lambda name, settings: LpsSuminstTest(name, settings)                                          ,
     'lpssumelm'                                   : lambda name, settings: LpsSumelmTest(name, settings)                                           ,
     'lpsparelm'                                   : lambda name, settings: LpsParelmTest(name, settings)                                           ,
+    'lps-quantifier-one-point'                    : lambda name, settings: LpsOnePointRuleRewriteTest(name, settings)                              ,
     'lpsconfcheck-commutative'                    : lambda name, settings: LpsConfcheckTest(name, 'commutative', settings)                         ,
     'lpsconfcheck-commutative-disjoint'           : lambda name, settings: LpsConfcheckTest(name, 'commutative-disjoint', settings)                ,
     'lpsconfcheck-disjoint'                       : lambda name, settings: LpsConfcheckTest(name, 'disjoint', settings)                            ,
