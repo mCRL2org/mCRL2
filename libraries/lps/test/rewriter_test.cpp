@@ -156,8 +156,6 @@ void test3()
   BOOST_CHECK(spec1.process().summand_count() == 3);
 }
 
-// N.B. This test doesn't work due to the different representations of numbers
-// that are used before and after rewriting :-(
 // Checks if rewriting the specification src with the substitutions sigma
 // results in the specification dest.
 void test_lps_rewriter(const std::string& src_text, const std::string& dest_text, const std::string& sigma_text)

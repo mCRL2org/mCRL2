@@ -57,7 +57,7 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
 
     data_expression apply(const forall& x)
     {
-      data_expression body = derived().apply(forall(x).body());
+      data_expression body = derived().apply(x.body());
       std::vector<variable> variables;
 
       std::map<variable, std::set<data_expression> > inequalities = find_inequalities(body);
@@ -92,7 +92,7 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
 
     data_expression apply(const exists& x)
     {
-      data_expression body = derived().apply(exists(x).body());
+      data_expression body = derived().apply(x.body());
       std::vector<variable> variables;
 
       std::map<variable, std::set<data_expression> > equalities = find_equalities(body);

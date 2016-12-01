@@ -350,10 +350,10 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  data::abstraction apply(const data::abstraction& x)
+  data::data_expression apply(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
+    data::data_expression result;
     if (data::is_forall(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::forall>(x));
@@ -582,10 +582,10 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  data::abstraction apply(const data::abstraction& x)
+  data::data_expression apply(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
+    data::data_expression result;
     if (data::is_forall(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::forall>(x));
@@ -813,10 +813,10 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
-  data::abstraction apply(const data::abstraction& x)
+  data::data_expression apply(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
+    data::data_expression result;
     if (data::is_forall(x))
     {
       result = static_cast<Derived&>(*this).apply(atermpp::down_cast<data::forall>(x));
