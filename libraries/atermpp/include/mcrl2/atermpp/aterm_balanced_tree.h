@@ -118,9 +118,9 @@ class term_balanced_tree: public aterm_appl
 
     /// \brief Creates an term_balanced_tree with a copy of a range, where a transformer is applied to each term
     //         before adding it to the tree..
-    /// \param first The start of a range of elements.
-    /// \param size The size of the range of elements.
-    /// \param transformer. A class with an operator() that is applied to each term before adding it to the tree..
+    /// \param[in] first The start of a range of elements.
+    /// \param[in] size The size of the range of elements.
+    /// \param[in] transformer A class with an operator() that is applied to each term before adding it to the tree.
     template < typename ForwardTraversalIterator, class Transformer >
     term_balanced_tree(ForwardTraversalIterator first, const size_t size, const Transformer& transformer)
       : aterm_appl(make_tree(first,size,transformer))

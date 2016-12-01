@@ -56,13 +56,13 @@ class indexed_set
     /// approximately the same size are being used.
     void clear();
 
-    /// \brief Enter an element into the set.
-    /// This functions enters elem into the set. If elem was already in the set the previously
-    /// assigned index of elem is returned, and the boolean is set to false. If elem did not yet occur in set a
+    /// \brief Enter an element with the indicated key into the set.
+    /// \details This functions enters an element with the indicated key into the set. If elem was already in the set the previously
+    /// assigned index of \a key is returned, and the boolean is set to false. If \a key did not yet occur in set a
     /// new number is assigned, and the boolean is set to true.  This number can either be the number of an
     /// element that has been removed, or, if such a number is not available, the lowest non used number
     /// is assigned to elem and returned. The lowest number that is used is 0.
-    /// \param elem A term.
+    /// \param[in] key An element to be put in the set.
     /// \return A pair denoting the index of the element in the set, and a boolean denoting whether the term
     /// was already contained in the set.
     std::pair<size_t, bool> put(const ELEMENT& key);
@@ -106,10 +106,10 @@ class indexed_set
     /// \return The element in the set with the given index.
     bool defined(size_t index) const;
 
-    /// \brief Remove elem from set. 
-    /// The elem is removed from the indexed set, and if a number was assigned to elem, 
-    /// it is freed to be reassigned to an element, that may be put into the set at some later instance. 
-    /// \param elem An element of the set. 
+    /// \brief Remove an element from set. 
+    /// \details The element with the indicated key is removed from the indexed set, and if a number was assigned to it, 
+    /// this number is freed to be reassigned to another element, that may be put into the set at some later instance. 
+    /// \param key The key of the element that is removed. 
     /// \return whether the element was successfully removed. 
     bool erase(const ELEMENT& key); 
 

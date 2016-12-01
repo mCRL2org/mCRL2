@@ -32,7 +32,7 @@ class function_symbol_generator
 
   public:
     /// \brief Constructor
-    /// \param The prefix of the generated generated strings
+    /// \param[in] prefix The prefix of the generated generated strings.
     /// \pre The prefix may not be empty, and it may not have trailing digits
     function_symbol_generator(const std::string& prefix)
       : m_prefix(prefix),

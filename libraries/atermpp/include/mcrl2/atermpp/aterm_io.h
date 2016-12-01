@@ -76,13 +76,15 @@ private:
 
 public:
   /// \brief Constructor
-  /// \param[in] message the exception message
+  /// \param[in] version_ The actual version.
+  /// \param[in] expected_version_ The expected version.
   baf_version_error(std::size_t version_, std::size_t expected_version_)
     : aterm_io_error("Wrong BAF version"),
       version(version_),
       expected_version(expected_version_)
   { }
 
+  /// \brief A function generating an error message for the baf_version_error exception. 
   const char* what() const NOEXCEPT
   {
     std::stringstream ss;

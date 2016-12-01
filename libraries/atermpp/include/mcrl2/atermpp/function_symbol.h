@@ -62,8 +62,8 @@ class function_symbol
     function_symbol();
 
     /// \brief Constructor.
-    /// \param name A string
-    /// \param arity The arity of the function.
+    /// \param name A string.
+    /// \param arity_ The arity of the function.
     function_symbol(const std::string& name, const size_t arity_);
 
     /// \brief default constructor
