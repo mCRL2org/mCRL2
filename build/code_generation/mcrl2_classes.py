@@ -1076,21 +1076,19 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
         return text
 
-    def builder_return_type(self, all_classes, modifiability_map):
-        classname = self.classname(True)
-        # N.B. the order of the statements below is important!
-        if is_modifiable_type(classname, modifiability_map):
-            return 'void'
-        if 'E' in self.modifiers():
-            result = self.superclass(include_namespace = True)
-            c = all_classes[result]
-            if 'E' in c.modifiers():
-                return c.builder_return_type(all_classes, modifiability_map)
-            else:
-                return result
-        if 'X' in self.modifiers():
-            return classname
-        return classname
+    #def builder_return_type(self, all_classes, modifiability_map):
+    #    classname = self.classname(True)
+    #    # N.B. the order of the statements below is important!
+    #    if is_modifiable_type(classname, modifiability_map):
+    #        result = 'void'
+    #    elif 'E' in self.modifiers():
+    #        result = self.superclass(include_namespace = True)
+    #        c = all_classes[result]
+    #        if 'E' in c.modifiers():
+    #            result = c.builder_return_type(all_classes, modifiability_map)
+    #    else:
+    #        result = classname
+    #    return result
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
         text = r'''<RETURN_TYPE> <METHOD>(<CONST><CLASS_NAME>& x)
@@ -1104,8 +1102,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         dependent = False
 
         method = 'apply'
-        return_type = self.builder_return_type(all_classes, modifiability_map)
-        if return_type == 'void':
+        if is_modifiable_type(classname, modifiability_map):
+            return_type = 'void'
             const = ''
             method = 'update'
         else:
@@ -1114,6 +1112,13 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             # The following statement was not present in previous versions of this
             # file.
             return_type = classname
+
+            # It turns out that the builder_return_type function that computes the return
+            # type has been bypassed. Unfortunately the new solution does not handle the
+            # artificial layer of data abstractions correctly. This is a quick fix to deal
+            # with it.
+            if 'data::abstraction' in return_type:
+                return_type = 'data::data_expression'
 
         if is_modifiable_type(classname, modifiability_map):
             return_statement = ''
