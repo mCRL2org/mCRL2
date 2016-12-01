@@ -211,6 +211,8 @@ bool compare(const LTS_TYPE& l1,
  * \param[in] l2 The second LTS to be compared.
  * \param[in] pre The preorder with respect to which the LTSs will be
  * compared.
+ * \param[in] generate_counter_example Indicates whether a file containing a counter example is 
+ *            generated when the comparison fails. 
  * \retval true if LTS \a l1 is smaller than LTS \a l2 according to
  * preorder \a pre.
  * \retval false otherwise.
@@ -231,8 +233,9 @@ bool destructive_compare(LTS_TYPE& l1,
  * to a preorder.
  * \param[in] l1 The first LTS to be compared.
  * \param[in] l2 The second LTS to be compared.
- * \param[in] pre The preorder with respect to which the LTSs will be
- * compared.
+ * \param[in] pre The preorder with respect to which the LTSs will be compared.
+ * \param[in] generate_counter_example Indicates whether a file containing a counter example is 
+ *            generated when the comparison fails. 
  * \retval true if this LTS is smaller than LTS \a l according to
  * preorder \a pre.
  * \retval false otherwise.

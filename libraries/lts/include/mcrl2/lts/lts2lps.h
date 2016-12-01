@@ -64,7 +64,7 @@ lps::specification transform_lts2lps(const lts_lts_t& l)
 }
 
 /// \brief transform an lts in aut format into a linear process.
-/// \param l A labelled transition system in aut format.
+/// \param l1 A labelled transition system in aut format.
 /// \param data A separate data specification.
 /// \param action_labels A list containing the action labels used in the lts.
 /// \param process_parameters The process parameters of the current process. 
@@ -80,7 +80,7 @@ lps::specification transform_lts2lps(const lts_aut_t& l1,
 }
 
 /// \brief transform an lts in fsm format into a linear process.
-/// \param l A labelled transition system in fsm format.
+/// \param l1 A labelled transition system in fsm format.
 /// \param data A separate data specification.
 /// \param action_labels A list containing the action labels used in the lts.
 /// \param process_parameters The process parameters of the current process. XXXXX Is this needed????

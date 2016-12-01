@@ -43,8 +43,8 @@ namespace detail
 {
 
 /** \brief Determines the LTS format from a filename by its extension.
- * \param[in] s The name of the file of which the format will be
- * determined.
+ * \param[in] s The name of the file of which the format will be determined.
+ * \param[in] be_verbose If true, messages about the detected file format are printed in verbose mode. 
  * \return The LTS format based on the extension of \a s.
  * If no supported format can be determined from the extension then \a
  * lts_none is returned.  */
