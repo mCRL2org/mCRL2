@@ -32,7 +32,7 @@ class TestRunner(object):
     def main(self):
         if self._args.names:
             for name in self.names():
-                print name
+                print(name)
         elif self._args.run is not None:
             try:
                 self.run(self._args.run)
