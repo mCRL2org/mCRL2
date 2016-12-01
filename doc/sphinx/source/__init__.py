@@ -95,10 +95,8 @@ def generate_rst(binpath, temppath, outpath, version):
   developer_manual.generate_rst(temppath, outpath)
   user_manual.generate_rst(temppath, outpath, binpath)
   generate_download_inc_files(temp_dev, temp_usr, version)
-  if '.'.join(version) == version[0]:
-    color='#406756'
-  else:
-    color='#c1272d'
+  # Determine the typical green color for the upper and lower bars on the webpage.
+  color='#406756'
   shared_opts = ['-bhtml',
                '-D', 'version={0}'.format('.'.join(version)),
                '-D', 'release={0}'.format(version[0]),
