@@ -8,14 +8,12 @@
    
 .. _download:
 
-Download mCRL2
-==============
+Download the latest release of mCRL2
+====================================
 
 The mCRL2 toolkit can be run on a number of different platforms. For some 
-platforms, precompiled binaries are available. The table below shows which 
-binaries are available. 
-
-.. ifconfig:: release == version
+platforms, precompiled binaries are available. The table below provides the
+latest release of the toolset.
 
 
    +------------------------+------------------------+
@@ -33,8 +31,21 @@ binaries are available.
    +------------------------+------------------------+
    |Source                  | |src_tgz|_             |
    +------------------------+------------------------+
+
+N.B. The tool lpsxsim fails to load .lps files under Windows. A new version
+of this tool can be downloaded here:  
+http://www.mcrl2.org/download/release/lpsxsim_32bit.zip
+and 
+http://www.mcrl2.org/download/release/lpsxsim_64bit.zip.
+The tool should be run standalone from the directory in which the zip archive is extracted,
+otherwise the Qt libraries may not be found.
+
   
-.. ifconfig:: release != version
+Download a nightly build of mCRL2
+=================================
+
+Directly installable packages of the mCRL2 toolset are constructed every night.
+They are available here. 
 
    +------------------------+-------------------------+
    |Operating system        |Nightly build (|version|)|
@@ -57,19 +68,6 @@ binaries are available.
 If you are using a Linux distribution that is not listed, you may wish to try
 :ref:`compiling mCRL2 yourself <build>`.
 
-.. ifconfig:: release == version
-
-   .. note::
-   
-      A nightly build can be found `here <http://www.mcrl2.org/dev>`_.
-   
-.. ifconfig:: release != version
-
-   .. warning::
-   
-      If you are looking for a release version of mCRL2, check out the
-      `homepage <http://www.mcrl2.org>`_!
-   
 
 Previous releases
 -----------------

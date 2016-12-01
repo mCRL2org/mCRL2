@@ -78,7 +78,7 @@ def generate_library_xml(lib_dir, lib_name):
   if not os.path.exists(xml_path):
     os.makedirs(xml_path)
   doxygen(
-    INPUT='{0}/include {0}/source {0}/doc/Mainpage'.format(lib_path),
+    INPUT='{0}/include {0}/source'.format(lib_path),
     PROJECT_NAME=lib_name,
     PROJECT_NUMBER='unknown',
     STRIP_FROM_PATH=lib_path,

@@ -9,31 +9,6 @@
 .. _release: http://www.mcrl2.org/release/user_manual/download.html
 .. _version: download.html
 
-.. ifconfig:: release == version
-
-   .. admonition:: Release
-
-      Latest mCRL2 as of |today| release: |release|_.
-      
-   .. admonition:: Release
-   
-      Latest `development version documentation <http://www.mcrl2.org/dev>`_ is also available.
-
-.. ifconfig:: release != version
-
-   .. warning::
-   
-      You are looking at the documentation for the development version of mCRL2.
-      If you are looking for the release version, check out the `homepage <http://www.mcrl2.org>`_!
-   
-   .. admonition:: Release
-      
-      Latest SVN version as of |today|: |version|_.
-      
-   .. admonition:: Release
-   
-      For the documentation of the latest release: |release|_ check out `mcrl2.org <http://www.mcrl2.org>`_.
-
 .. note::
 
    mCRL2 received a prize for the distinguished user-assistance tool feature in the 

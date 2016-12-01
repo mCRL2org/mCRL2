@@ -36,8 +36,11 @@ std::string file_source(const std::string& filename)
 } // namespace detail
 
 /// \brief Attempts to read an aterm from a stream.
-/// \param source The source from which the stream originates (the empty string is used for an unknown source).
-/// \param format The format that is being read (for example "LPS" or "PBES").
+/// \param[in] stream The stream from which the term is read.
+/// \param[in] binary A boolean indicating whether the stream is in binary of textual format.
+/// \param[in] format The format that is being read (for example "LPS" or "PBES").
+/// \param[in] source The source from which the stream originates (the empty string is used for an unknown source).
+/// \exception Throws a mcrl2 runtime error when an error occurs when reading the term.
 inline
 atermpp::aterm load_aterm(std::istream& stream, bool binary = true, const std::string& format = "ATerm", const std::string& source = "")
 {

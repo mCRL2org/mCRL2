@@ -55,7 +55,7 @@ inline void swap(identifier_string& t1, identifier_string& t2)
 //--- end generated class identifier_string ---//
 
 /// \brief Tests if a term is an identifier string.
-/// \param t A term
+/// \param[in] t A term
 /// \return Whether t is an identifier string.
 inline
 bool is_identifier_string(const atermpp::aterm& t)
@@ -63,9 +63,8 @@ bool is_identifier_string(const atermpp::aterm& t)
   return t.type_is_appl() && atermpp::aterm_appl(t).size() == 0;
 }
 
-/// \brief Tests if a string is empty.
-/// \param t An identifier string
-/// \return Whether t is the empty string.
+/// \brief Provides the empty identifier string.
+/// \return The empty identifier string. 
 inline
 identifier_string empty_identifier_string()
 {
