@@ -265,14 +265,6 @@ def run_pbes_test(name, testfile, p, settings):
     os.remove(filename)
     return result
 
-def run_pbes_test_with_counter_example_minimization(name, testfile, p, settings):
-    result = run_pbes_test(name, testfile, p, settings)
-    if result == False:
-        m = CounterExampleMinimizer(p, lambda x: run_pbes_test(testfile, x, name + '_minimize', settings), name)
-        m.minimize()
-        raise RuntimeError('Test {0} failed'.format(name))
-    return result
-
 class TestRunner(testrunner.TestRunner):
     def __init__(self):
         super(TestRunner, self).__init__()

@@ -14,7 +14,7 @@ from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes
 from random_process_generator import make_process_specification, generator_map, make_action, make_delta, make_tau, \
     make_process_instance, make_sum, make_if_then, make_if_then_else, make_choice, make_seq
-from testing import run_pbes_test_with_counter_example_minimization
+from testing import run_pbes_test
 from testcommand import YmlTest
 from text_utility import write_text
 
@@ -166,7 +166,7 @@ class PbesTest(RandomTest):
 
     def execute(self, runpath = '.'):
         p = make_pbes(self.equation_count, self.atom_count, self.propvar_count, self.use_quantifiers)
-        run_pbes_test_with_counter_example_minimization(self.name, self.ymlfile, p, self.settings)
+        run_pbes_test(self.name, self.ymlfile, p, self.settings)
 
 # N.B. does not work yet due to unusable abstraction map
 class PbesabsintheTest(PbesTest):
@@ -194,9 +194,9 @@ class PbesrewrTest(PbesTest):
         super(PbesrewrTest, self).__init__(name, ymlfile('pbesrewr'), settings)
         self.set_command_line_options('t2', ['-p' + rewriter])
 
-class Pbesrewr1Test(PbesTest):
+class PbestransformTest(PbesTest):
     def __init__(self, name, rewriter, settings = dict()):
-        super(Pbesrewr1Test, self).__init__(name, ymlfile('pbesrewr1'), settings)
+        super(PbestransformTest, self).__init__(name, ymlfile('pbestransform'), settings)
         self.set_command_line_options('t2', ['-a' + rewriter])
 
 class PbesinstTest(PbesTest):
@@ -274,11 +274,11 @@ available_tests = {
     'pbesrewr-quantifier-finite'                  : lambda name, settings: PbesrewrTest(name, 'quantifier-finite', settings)                       ,
     'pbesrewr-quantifier-inside'                  : lambda name, settings: PbesrewrTest(name, 'quantifier-inside', settings)                       ,
     'pbesrewr-quantifier-one-point'               : lambda name, settings: PbesrewrTest(name, 'quantifier-one-point', settings)                    ,
-    'pbesrewr-data-rewriter'                      : lambda name, settings: Pbesrewr1Test(name, 'pbes-data-rewriter', settings)                     ,
-    'pbesrewr-simplify-rewriter'                  : lambda name, settings: Pbesrewr1Test(name, 'pbes-simplify-rewriter', settings)                 ,
-    'pbesrewr-simplify-data-rewriter'             : lambda name, settings: Pbesrewr1Test(name, 'pbes-simplify-data-rewriter', settings)            ,
-    'pbesrewr-simplify-quantifiers-rewriter'      : lambda name, settings: Pbesrewr1Test(name, 'pbes-simplify-quantifiers-rewriter', settings)     ,
-    'pbesrewr-simplify-quantifiers-data-rewriter' : lambda name, settings: Pbesrewr1Test(name, 'pbes-simplify-quantifiers-data-rewriter', settings),
+    'pbesrewr-data-rewriter'                      : lambda name, settings: PbestransformTest(name, 'pbes-data-rewriter', settings)                     ,
+    'pbesrewr-simplify-rewriter'                  : lambda name, settings: PbestransformTest(name, 'pbes-simplify-rewriter', settings)                 ,
+    'pbesrewr-simplify-data-rewriter'             : lambda name, settings: PbestransformTest(name, 'pbes-simplify-data-rewriter', settings)            ,
+    'pbesrewr-simplify-quantifiers-rewriter'      : lambda name, settings: PbestransformTest(name, 'pbes-simplify-quantifiers-rewriter', settings)     ,
+    'pbesrewr-simplify-quantifiers-data-rewriter' : lambda name, settings: PbestransformTest(name, 'pbes-simplify-quantifiers-data-rewriter', settings),
     'pbesinst-lazy'                               : lambda name, settings: PbesinstTest(name, ['-slazy'], settings)                                ,
     'pbesinst-alternative_lazy'                   : lambda name, settings: PbesinstTest(name, ['-salternative-lazy'], settings)                    ,
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)               ,
