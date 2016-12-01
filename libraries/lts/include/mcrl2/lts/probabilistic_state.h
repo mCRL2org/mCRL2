@@ -58,28 +58,34 @@ class probabilistic_state
   public:
 
     /** \brief Default constructor 
-     */
+     **/
     probabilistic_state()
     {
       m_probabilistic_state.reserve(1);
     }
 
-    /** \brief Creates an empty LTS.
-     */
+    /** \brief Constructor of a probabilistic state from a non probabilistic state.
+     *  \param[in] s A state. 
+     *  \return The generated probabilistic state. 
+     **/
     explicit probabilistic_state(const STATE& s)
       : m_probabilistic_state(1,state_probability_pair(s,PROBABILITY::one()))
     {
       shrink_to_fit();
     }
 
+    /** \brief Copy constructor
+     **/
     probabilistic_state(const probabilistic_state& s)
       : m_probabilistic_state(s.m_probabilistic_state)
     {
       shrink_to_fit();
     }
 
-    /** \brief Creates a copy of the supplied LTS.
-     * \param[in] l The LTS to copy. */
+    /** \brief Creates a probabilistic state on the basis of state_probability_pairs.
+     * \param[in] begin Iterator to the first state_probability_pair.
+     * \param[in] end Iterator to the last state_probability_pair.
+     * \return Resulting probabilistic state.  **/
     template <class STATE_PROBABILITY_PAIR_ITERATOR>
     probabilistic_state(const STATE_PROBABILITY_PAIR_ITERATOR begin, const STATE_PROBABILITY_PAIR_ITERATOR end)
       : m_probabilistic_state(begin,end)
@@ -96,15 +102,15 @@ class probabilistic_state
       return m_probabilistic_state==other.m_probabilistic_state;
     }
 
-    /** \brief Swap this lts with the supplied supplied LTS.
-     * \param[in] l The LTS to swap. */
+    /** \brief Swap this probabilistic state.
+     * \param[in] s A probabilistic state. */
     void swap(probabilistic_state& s)
     {
       m_probabilistic_state.swap(s.m_probabilistic_state);
     };
 
-    /** \brief Set the vector to a single state with probability zero.
-     * \detail It is assumed that the given state probability pair does not have
+    /** \brief Set this probabilistic state to a single state with probability one.
+     * \details It is assumed that the given state probability pair does not have
                any element. 
      * \param[in] s The state. */
     void set(const STATE& s)

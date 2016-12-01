@@ -141,17 +141,8 @@ class lts_dot_t : public lts< state_label_dot, action_label_string, detail::lts_
 
   public:
 
-    /** \brief Save the labelled transition system to file.
-     *  \details If the filename is empty, the result is read from stdin.
-     *  \param[in] filename Name of the file from which this lts is read.
-     */
-    /* void load(const std::string&)
-    {
-      throw mcrl2::runtime_error("The DOT file format is no longer supported as input file format.");
-    } */
-
     /** \brief Save the labelled transition system to a stream.
-     *  \param[in] stream Stream which to write the lts to.
+     *  \param[in] os Stream which to write the lts to.
      */
     void save(std::ostream& os) const;
 
@@ -176,17 +167,8 @@ class probabilistic_lts_dot_t :
 
   public:
 
-    /** \brief Save the labelled transition system to file.
-     *  \details If the filename is empty, the result is read from stdin.
-     *  \param[in] filename Name of the file from which this lts is read.
-     */
-    /* void load(const std::string&)
-    {
-      throw mcrl2::runtime_error("The probabilistic DOT file format is not supported as input file format.");
-    } */
-
     /** \brief Save the labelled transition system to a stream.
-     *  \param[in] stream Stream which to write the lts to.
+     *  \param[in] os Stream which to write the lts to.
      */
     void save(std::ostream& os) const;
 

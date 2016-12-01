@@ -235,7 +235,6 @@ class lts: public LTS_BASE
     /** \brief Adds an action with a label to this LTS.
      * \details It is not checked whether this action label already exists.
      * \param[in] label The label of the label.
-     * \param[in] is_tau Indicates whether the label is a tau action.
      * \return The number of the added label. */
     labels_size_type add_action(const ACTION_LABEL_T& label)
     {
@@ -269,8 +268,8 @@ class lts: public LTS_BASE
 
     /** \brief Sets the label of an action.
      * \param[in] action The number of the action.
-     * \param[in] label The label that will be assigned to the action.
-     * \param[in] is_tau Indicates whether the label is a tau action. */
+     * \param[in] label The label that will be assigned to the action. */
+     
     void set_action_label(const labels_size_type action, const ACTION_LABEL_T& label)
     {
       assert(action<m_action_labels.size());
@@ -328,10 +327,10 @@ class lts: public LTS_BASE
     }
 
     /** \brief Clear the transitions of an lts.
-     *  \param[n] An optional parameter that indicates how
-     *            many transitions are to be expected. This is
-     *            used to set the reserved size of a vector, to
-     *            prevent unnecessary resizing.
+     *  \param[in] n An optional parameter that indicates how
+     *             many transitions are to be expected. This is
+     *             used to set the reserved size of a vector, to
+     *             prevent unnecessary resizing.
      *  \details This resets the transition vector in an lts, but
      *          leaves other related items, such as state or
      *          action labels untouched. */

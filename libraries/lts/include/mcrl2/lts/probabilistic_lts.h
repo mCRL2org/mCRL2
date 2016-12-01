@@ -132,9 +132,9 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
      * \details It is not checked whether this probabilistic state already exists.
      * \param[in] s The probabilistic state.
      * \return The index of the added probabilistic. */
-    labels_size_type add_probabilistic_state(const PROBABILISTIC_STATE_T& s)
+    states_size_type add_probabilistic_state(const PROBABILISTIC_STATE_T& s)
     {
-      const labels_size_type label_index=m_probabilistic_states.size();
+      const states_size_type label_index=m_probabilistic_states.size();
       m_probabilistic_states.push_back(s);
       return label_index;
     }
@@ -144,27 +144,27 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
      *          does not copy the probabilistic state. It is not checked whether this probabilistic state already exists.
      * \param[in] s The probabilistic state.
      * \return The index of the added probabilistic state. */
-    labels_size_type add_and_reset_probabilistic_state(PROBABILISTIC_STATE_T& s)
+    states_size_type add_and_reset_probabilistic_state(PROBABILISTIC_STATE_T& s)
     {
-      const labels_size_type label_index=m_probabilistic_states.size();
+      const states_size_type label_index=m_probabilistic_states.size();
       m_probabilistic_states.emplace_back();
       m_probabilistic_states.back().swap(s);
       return label_index;
     }
 
     /** \brief Sets the probabilistic label corresponding to some index.
-     * \param[in] action The number of the label.
-     * \param[in] label The label that will be assigned to the action.  */
-    void set_probabilistic_state(const labels_size_type index, const PROBABILISTIC_STATE_T& s)
+     * \param[in] index The index of the state.
+     * \param[in] s The new probabilistic state belonging to this index. */
+    void set_probabilistic_state(const states_size_type index, const PROBABILISTIC_STATE_T& s)
     {
       assert(index<m_probabilistic_states.size());
       m_probabilistic_states[index] = s;
     }
 
     /** \brief Gets the probabilistic label of an index.
-     *  \param[in] action The number of the index.
-     *  \return The probabilistic label of the index. */
-    const PROBABILISTIC_STATE_T& probabilistic_state(const labels_size_type index) const
+     *  \param[in] index The index of an action.
+     *  \return The probabilistic state belonging to the index. */
+    const PROBABILISTIC_STATE_T& probabilistic_state(const states_size_type index) const
     {
       assert(index < m_probabilistic_states.size());
       return m_probabilistic_states[index];
