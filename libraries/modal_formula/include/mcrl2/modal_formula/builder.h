@@ -15,6 +15,7 @@
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/state_formula_specification.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/lps/builder.h"
 
@@ -1284,6 +1285,14 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
+  void update(state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.action_labels() = static_cast<Derived&>(*this).apply(x.action_labels());
+    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   state_formulas::state_formula apply(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1526,6 +1535,13 @@ struct add_data_expressions: public Builder<Derived>
     state_formulas::mu result = state_formulas::mu(x.name(), static_cast<Derived&>(*this).apply(x.assignments()), static_cast<Derived&>(*this).apply(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
+  }
+
+  void update(state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
   }
 
   state_formulas::state_formula apply(const state_formulas::state_formula& x)
@@ -1772,6 +1788,13 @@ struct add_variables: public Builder<Derived>
     return result;
   }
 
+  void update(state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   state_formulas::state_formula apply(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2014,6 +2037,13 @@ struct add_state_formula_expressions: public Builder<Derived>
     state_formulas::mu result = state_formulas::mu(x.name(), x.assignments(), static_cast<Derived&>(*this).apply(x.operand()));
     static_cast<Derived&>(*this).leave(x);
     return result;
+  }
+
+  void update(state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.formula() = static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
   }
 
   state_formulas::state_formula apply(const state_formulas::state_formula& x)

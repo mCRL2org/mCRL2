@@ -75,6 +75,7 @@ std::string pp(const state_formulas::not_& x) { return state_formulas::pp< state
 std::string pp(const state_formulas::nu& x) { return state_formulas::pp< state_formulas::nu >(x); }
 std::string pp(const state_formulas::or_& x) { return state_formulas::pp< state_formulas::or_ >(x); }
 std::string pp(const state_formulas::state_formula& x) { return state_formulas::pp< state_formulas::state_formula >(x); }
+std::string pp(const state_formulas::state_formula_specification& x) { return state_formulas::pp< state_formulas::state_formula_specification >(x); }
 std::string pp(const state_formulas::true_& x) { return state_formulas::pp< state_formulas::true_ >(x); }
 std::string pp(const state_formulas::variable& x) { return state_formulas::pp< state_formulas::variable >(x); }
 std::string pp(const state_formulas::yaled& x) { return state_formulas::pp< state_formulas::yaled >(x); }

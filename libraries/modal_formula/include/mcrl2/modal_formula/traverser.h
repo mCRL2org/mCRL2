@@ -18,6 +18,7 @@
 
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/modal_formula/regular_formula.h"
+#include "mcrl2/modal_formula/state_formula_specification.h"
 #include "mcrl2/lps/traverser.h"
 
 namespace mcrl2
@@ -1477,6 +1478,14 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1707,6 +1716,13 @@ struct add_traverser_data_expressions: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -1930,6 +1946,13 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.formula());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -2165,6 +2188,13 @@ struct add_traverser_variables: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2388,6 +2418,13 @@ struct add_traverser_state_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.formula());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -2626,6 +2663,14 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
     static_cast<Derived&>(*this).leave(x);
   }
 
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.formula());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
   void apply(const state_formulas::state_formula& x)
   {
     static_cast<Derived&>(*this).enter(x);
@@ -2851,6 +2896,13 @@ struct add_traverser_regular_formula_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).apply(x.operand());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.formula());
     static_cast<Derived&>(*this).leave(x);
   }
 

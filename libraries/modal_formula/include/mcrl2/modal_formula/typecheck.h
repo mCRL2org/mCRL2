@@ -27,6 +27,7 @@
 #include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/state_formula_specification.h"
 #include "mcrl2/modal_formula/detail/state_variable_context.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -534,8 +535,7 @@ class state_formula_type_checker
       m_action_context.add_context_action_labels(action_labels, m_data_type_checker);
     }
 
-    //check correctness of the state formula in state_formula using
-    //the process specification or LPS in spec as follows:
+    //check correctness of the state formula as follows:
     //1) determine the types of actions according to the definitions
     //   in spec
     //2) determine the types of data expressions according to the
@@ -543,7 +543,7 @@ class state_formula_type_checker
     //3) check for name conflicts of data variable declarations in
     //   forall, exists, mu and nu quantifiers
     //4) check for monotonicity of fixpoint variables
-    state_formula operator()(const state_formula& x, bool check_monotonicity)
+    state_formula typecheck_state_formula(const state_formula& x, bool check_monotonicity)
     {
       mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
 
@@ -553,6 +553,29 @@ class state_formula_type_checker
         throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));
       }
       return result;
+    }
+
+    /// \brief Typecheck the state formula specification statespec
+    void typecheck_state_formula_specification(state_formula_specification& statespec, bool check_monotonicity)
+    {
+      mCRL2log(log::verbose) << "type checking state formula specification..." << std::endl;
+
+      // reset the context
+      m_data_type_checker = data::data_type_checker(statespec.data());
+
+      state_formulas::normalize_sorts(statespec, m_data_type_checker.typechecked_data_specification());
+
+      m_action_context.clear();
+      m_variable_context.clear();
+      m_action_context.add_context_action_labels(statespec.action_labels(), m_data_type_checker);
+
+      // typecheck the formula
+      statespec.formula() = typecheck_state_formula(statespec.formula(), check_monotonicity);
+
+      // typecheck the data specification
+      statespec.data() = m_data_type_checker.typechecked_data_specification();
+
+      mCRL2log(log::debug) << "type checking state formula specification finished" << std::endl;
     }
 };
 
@@ -567,7 +590,7 @@ state_formula type_check_state_formula(const state_formula& x, const lps::specif
   try
   {
     state_formula_type_checker type_checker(lpsspec.data(), lpsspec.action_labels(), lpsspec.global_variables());
-    return type_checker(x, check_monotonicity);
+    return type_checker.typecheck_state_formula(x, check_monotonicity);
   }
   catch (mcrl2::runtime_error& e)
   {

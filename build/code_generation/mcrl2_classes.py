@@ -142,6 +142,10 @@ at(const action_formula& operand, const data::data_expression& time_stamp)  : pu
 multi_action(const process::action_list& actions)                           : public action_formulas::action_formula | EI   | ActMultAct        | The multi action for action formulas
 '''
 
+MODAL_FORMULA_CLASSES = r'''
+state_formula_specification(const data::data_specification& data, const process::action_label_list& action_labels, const state_formula& formula) | SMW | StateFrmSpec    | A state formula specification
+'''
+
 # N.B. This one is problematic due to the optional time in deadlock/multi_action.
 LPS_CLASSES = r'''
 deadlock(const data::data_expression& time)                                                                                                                                                                                                                   | CMS  | None              | A deadlock
@@ -1399,7 +1403,7 @@ def mcrl2_class_map():
     return {
           'core'             : CORE_CLASSES,
           'data'             : DATA_EXPRESSION_CLASSES + ASSIGNMENT_EXPRESSION_CLASSES + SORT_EXPRESSION_CLASSES + CONTAINER_TYPES + BINDER_TYPES + ABSTRACTION_EXPRESSION_CLASSES + STRUCTURED_SORT_ELEMENTS + DATA_CLASSES,
-          'state_formulas'   : STATE_FORMULA_CLASSES,
+          'state_formulas'   : STATE_FORMULA_CLASSES + MODAL_FORMULA_CLASSES,
           'regular_formulas' : REGULAR_FORMULA_CLASSES,
           'action_formulas'  : ACTION_FORMULA_CLASSES,
           'lps'              : LPS_CLASSES,
