@@ -17,6 +17,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/state_formula_specification.h"
 #include "mcrl2/modal_formula/translate_user_notation.h"
 #include "mcrl2/modal_formula/translate_regular_formulas.h"
 #include "mcrl2/modal_formula/has_name_clashes.h"
@@ -57,7 +58,7 @@ struct action_formula_actions: public lps::detail::multi_action_actions
 };
 
 inline
-action_formula parse_action_formula_new(const std::string& text)
+action_formula parse_action_formula(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("ActFrm");
@@ -78,7 +79,7 @@ action_formula parse_action_formula(const std::string& text,
                                     const ActionLabelContainer& actions
                                    )
 {
-  action_formula x = detail::parse_action_formula_new(text);
+  action_formula x = detail::parse_action_formula(text);
   x = action_formulas::typecheck(x, dataspec, variables, actions);
   x = action_formulas::translate_user_notation(x);
   return x;
@@ -117,7 +118,7 @@ struct regular_formula_actions: public action_formulas::detail::action_formula_a
 };
 
 inline
-regular_formula parse_regular_formula_new(const std::string& text)
+regular_formula parse_regular_formula(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("RegFrm");
@@ -137,7 +138,7 @@ regular_formula parse_regular_formula(const std::string& text,
                                       const ActionLabelContainer& actions
                                      )
 {
-  regular_formula x = detail::parse_regular_formula_new(text);
+  regular_formula x = detail::parse_regular_formula(text);
   x = regular_formulas::typecheck(x, dataspec, variables, actions);
   x = regular_formulas::translate_user_notation(x);
   return x;
@@ -156,6 +157,21 @@ namespace state_formulas
 
 namespace detail
 {
+
+struct untyped_state_formula_specification: public data::untyped_data_specification
+{
+  process::action_label_list action_labels;
+  state_formula formula;
+
+  state_formula_specification construct_state_formula_specification()
+  {
+    state_formula_specification result;
+    result.data() = construct_data_specification();
+    result.action_labels() = action_labels;
+    result.formula() = formula;
+    return result;
+  }
+};
 
 struct state_formula_actions: public regular_formulas::detail::regular_formula_actions
 {
@@ -219,10 +235,57 @@ struct state_formula_actions: public regular_formulas::detail::regular_formula_a
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "StateFrm") && (symbol_name(node.child(2)) == ")")) { return parse_StateFrm(node.child(1)); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
+
+  state_formula parse_FormSpec(const core::parse_node& node) const
+  {
+    return parse_StateFrm(node.child(1));
+  }
+
+  bool callback_StateFrmSpec(const core::parse_node& node, untyped_state_formula_specification& result) const
+  {
+    if (symbol_name(node) == "SortSpec")
+    {
+      return callback_DataSpecElement(node, result);
+    }
+    else if (symbol_name(node) == "ConsSpec")
+    {
+      return callback_DataSpecElement(node, result);
+    }
+    else if (symbol_name(node) == "MapSpec")
+    {
+      return callback_DataSpecElement(node, result);
+    }
+    else if (symbol_name(node) == "EqnSpec")
+    {
+      return callback_DataSpecElement(node, result);
+    }
+    else if (symbol_name(node) == "ActSpec")
+    {
+      result.action_labels = result.action_labels + parse_ActSpec(node);
+      return true;
+    }
+    else if (symbol_name(node) == "FormSpec")
+    {
+      result.formula = parse_FormSpec(node);
+      return true;
+    }
+    else if (symbol_name(node) == "StateFrm")
+    {
+      result.formula = parse_StateFrm(node);
+    }
+    return false;
+  }
+
+  untyped_state_formula_specification parse_StateFrmSpec(const core::parse_node& node) const
+  {
+    untyped_state_formula_specification result;
+    traverse(node, [&](const core::parse_node& node) { return callback_StateFrmSpec(node, result); });
+    return result;
+  }
 };
 
 inline
-state_formula parse_state_formula_new(const std::string& text)
+state_formula parse_state_formula(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("StateFrm");
@@ -230,6 +293,22 @@ state_formula parse_state_formula_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   core::warn_and_or(node);
   state_formula result = state_formula_actions(p).parse_StateFrm(node);
+  p.destroy_parse_node(node);
+  return result;
+}
+
+inline
+state_formula_specification parse_state_formula_specification(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
+  unsigned int start_symbol_index = p.start_symbol_index("StateFrmSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  core::warn_and_or(node);
+  core::warn_left_merge_merge(node);
+
+  untyped_state_formula_specification untyped_statespec = state_formula_actions(p).parse_StateFrmSpec(node);
+  state_formula_specification result = untyped_statespec.construct_state_formula_specification();
   p.destroy_parse_node(node);
   return result;
 }
@@ -248,8 +327,7 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
                                   bool type_check = true, bool translate_user_notation = true)
 {
   std::string text = utilities::read_text(in);
-  state_formula x = detail::parse_state_formula_new(text);
-//mCRL2log(log::verbose) << "Parsed state formula " << x << "   " << atermpp::aterm(x) << std::endl;
+  state_formula x = detail::parse_state_formula(text);
   if (type_check)
   {
     x = state_formulas::type_check_state_formula(x, spec, check_monotonicity);
@@ -286,6 +364,26 @@ state_formula parse_state_formula(const std::string& formula_text, lps::specific
 {
   std::stringstream formula_stream(formula_text);
   return parse_state_formula(formula_stream, spec, check_monotonicity, translate_regular, type_check, translate_user_notation);
+}
+
+/// \brief Parses a state formula specification from an input stream
+/// \param in An input stream
+/// \return The parse result
+inline
+state_formula_specification parse_state_formula_specification(std::istream& in)
+{
+  std::string text = utilities::read_text(in);
+  return detail::parse_state_formula_specification(text);
+}
+
+/// \brief Parses a state formula specification from a string
+/// \param text A string
+/// \return The parse result
+inline
+state_formula_specification parse_state_formula_specification(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_state_formula_specification(in);
 }
 
 } // namespace state_formulas

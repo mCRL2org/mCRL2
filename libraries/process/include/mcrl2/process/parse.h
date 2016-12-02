@@ -297,7 +297,7 @@ process_specification parse_process_specification(std::istream& in, bool alpha_r
 /// \param alpha_reduce Indicates whether alphabet reductions needdto be performed
 /// \return The parse result
 inline
-process_specification parse_process_specification(const std::string& spec_string, const bool alpha_reduce=false)
+process_specification parse_process_specification(const std::string& spec_string, bool alpha_reduce = false)
 {
   std::istringstream in(spec_string);
   return parse_process_specification(in, alpha_reduce);

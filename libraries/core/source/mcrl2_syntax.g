@@ -321,7 +321,23 @@ RegFrm
   | RegFrm '+'                                 $unary_right 33   // Nonempty iteration
   ;
 
-//--- State formulas
+//--- State formula specification
+
+StateFrmSpec
+  : StateFrm                                                     // Single state formula
+  | (StateFrmSpecElt*)                                           // State formula specification
+  ;
+
+FormSpec : 'form' StateFrm ;
+
+StateFrmSpecElt
+  : SortSpec                                                     // Sort specification
+  | ConsSpec                                                     // Constructor specification
+  | MapSpec                                                      // Map specification
+  | EqnSpec                                                      // Equation specification
+  | ActSpec                                                      // Action specification
+  | FormSpec                                                     // Formula specification
+  ;
 
 StateFrm
   : DataValExpr                                                  // Boolean data expression
