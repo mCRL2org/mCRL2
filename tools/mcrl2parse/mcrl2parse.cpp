@@ -488,7 +488,7 @@ class mcrl2parse_tool : public input_tool
             case actfrm_e   :
             {
               separate_action_specification(text, "actfrm", lpsspec, text);
-              action_formulas::action_formula x = action_formulas::detail::parse_action_formula_new(text);
+              action_formulas::action_formula x = action_formulas::detail::parse_action_formula(text);
               const atermpp::aterm_appl& a = x;
               if (aterm_format)
               {
@@ -631,7 +631,7 @@ class mcrl2parse_tool : public input_tool
             case regfrm_e   :
             {
               separate_action_specification(text, "regfrm", lpsspec, text);
-              regular_formulas::regular_formula x = regular_formulas::detail::parse_regular_formula_new(text);
+              regular_formulas::regular_formula x = regular_formulas::detail::parse_regular_formula(text);
               if (aterm_format)
               {
                 std::cout << x << std::endl;
@@ -684,7 +684,7 @@ class mcrl2parse_tool : public input_tool
             case actfrm_e   :
             {
               separate_action_specification(text, "actfrm", lpsspec, text);
-              action_formulas::action_formula x = action_formulas::detail::parse_action_formula_new(text);
+              action_formulas::action_formula x = action_formulas::detail::parse_action_formula(text);
               std::cout << action_formulas::pp(x) << std::endl;
               break;
             }
@@ -752,7 +752,7 @@ class mcrl2parse_tool : public input_tool
             case regfrm_e   :
             {
               separate_action_specification(text, "regfrm", lpsspec, text);
-              regular_formulas::regular_formula x = regular_formulas::detail::parse_regular_formula_new(text);
+              regular_formulas::regular_formula x = regular_formulas::detail::parse_regular_formula(text);
               std::cout << regular_formulas::pp(x) << std::endl;
               break;
             }
