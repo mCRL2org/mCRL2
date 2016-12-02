@@ -38,8 +38,9 @@ typedef std::vector<identifier_string>    identifier_string_vector;
 // prototype declaration
 std::string pp(const identifier_string& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
+/// \brief Outputs an identifier string to a stream.
+/// \param[in]  out An output stream.
+/// \param[in] x Identifier string to be printed.
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const identifier_string& x)

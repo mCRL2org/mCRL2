@@ -389,7 +389,8 @@ bool is_linear(const process_equation& eqn)
 }
 
 /// \brief Returns true if the process expression is linear.
-/// \param The linear equation of the corresponding process
+/// \param x A process expression.
+/// \param eqn The linear equation belonging to the indicated process.
 inline
 bool is_linear(const process_expression& x, const process_equation& eqn)
 {

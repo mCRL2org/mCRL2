@@ -11,7 +11,7 @@
 
 .. admonition:: Release 
    
-   This website is last updated on: |today|_.
+   This website is last updated on: |today|.
 
 .. list-table::
    :class: frontpage-table

@@ -270,14 +270,14 @@ inline
 term_list<Term> reverse(const term_list<Term>& l);
 
 
-/// \brief Returns the list l with one occurrence of the element x removed, or l if x is not present.
+/// \brief Returns the list \a l with one occurrence of the element \a t removed, or \a l if \a t is not present.
 /// \param l A list.
 /// \param t A list element.
-/// \details This operator is linear in the length of the list.
-/// \return The original list where the first occurrence of t has been removed, assuming it is in t.
+/// \details This operation is linear in the length of the list.
+/// \return The original list where the first occurrence of \a t has been removed, assuming it is in \a t.
 template <typename Term>
 inline
-term_list<Term> remove_one_element(const term_list<Term>& list, const Term& t);
+term_list<Term> remove_one_element(const term_list<Term>& l, const Term& t);
 
 
 /// \brief Returns the concatenation of two lists.

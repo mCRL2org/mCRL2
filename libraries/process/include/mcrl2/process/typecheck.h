@@ -562,7 +562,7 @@ class process_type_checker
 
     /** \brief     Type check a process expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-     *  \param[in] d A process expression that has not been type checked.
+     *  \param[in] x A process expression that has not been type checked.
      *  \return    a process expression where all untyped identifiers have been replace by typed ones.
      **/    /// \brief Typecheck the pbes pbesspec
     process_expression operator()(const process_expression& x)

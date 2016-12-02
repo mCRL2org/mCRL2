@@ -46,9 +46,9 @@ typedef atermpp::term_list<nil> nil_list;
 /// \brief vector of nils
 typedef std::vector<nil>    nil_vector;
 
-/// \brief Test for a nil expression
-/// \param x A term
-/// \return True if \a x is a nil expression
+/// \brief Test for a nil expression.
+/// \param x A term.
+/// \return True if \a x is a nil expression.
 inline
 bool is_nil(const atermpp::aterm_appl& x)
 {
@@ -58,9 +58,10 @@ bool is_nil(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const nil& x);
 
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
+/// \brief Outputs an object of sort nil to a stream.
+/// \param out An output stream.
+/// \param x An object of type nil.
+/// \return The output stream.
 inline
 std::ostream& operator<<(std::ostream& out, const nil& x)
 {
