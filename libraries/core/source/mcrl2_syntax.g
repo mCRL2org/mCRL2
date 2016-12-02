@@ -325,7 +325,7 @@ RegFrm
 
 StateFrmSpec
   : StateFrm                                                     // Single state formula
-  | (StateFrmSpecElt*)                                           // State formula specification
+  | (StateFrmSpecElt*) FormSpec (StateFrmSpecElt*)               // State formula specification
   ;
 
 FormSpec : 'form' StateFrm ;
@@ -336,7 +336,6 @@ StateFrmSpecElt
   | MapSpec                                                      // Map specification
   | EqnSpec                                                      // Equation specification
   | ActSpec                                                      // Action specification
-  | FormSpec                                                     // Formula specification
   ;
 
 StateFrm
