@@ -22,7 +22,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 
-#include "simplify.h"
+#include "realzone.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -62,7 +62,7 @@ class lpsrealzone_tool: public rewriter_tool<input_output_tool>
 
       // Untime lps_specification and save the output to a binary file
       // rewriter r=create_rewriter(lps_specification.data());
-      stochastic_specification new_spec = simplify(spec, m_rewrite_strategy);
+      stochastic_specification new_spec = realzone(spec, m_rewrite_strategy);
 
       mCRL2log(verbose) << "Real time abstraction completed, saving to " << m_output_filename << "\n";
       save_lps(new_spec, output_filename());

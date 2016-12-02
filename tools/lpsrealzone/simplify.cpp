@@ -10,7 +10,7 @@
 /// \brief
 
 
-#include "simplify.h"
+#include "realzone.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 
@@ -33,7 +33,7 @@ namespace data
         r.push_front(*i);
       }
     }
-    return r;
+    return reverse(r);
   }
 
   /// \brief Returns a list of all nonreal variables in l
@@ -50,10 +50,10 @@ namespace data
         r.push_front(*i);
       }
     }
-    return r;
+    return reverse(r);
   }
 
-  data_expression negate_inequality(const data_expression& e)
+  static data_expression negate_inequality(const data_expression& e)
   {
     if (is_equal_to_application(e))
     {
@@ -97,7 +97,7 @@ namespace data
   }
 
   // Functions below should have been defined in the data library.
-  const data_expression& condition_part(const data_expression& e)
+  static const data_expression& condition_part(const data_expression& e)
   {
     assert(is_if_application(e));
     const data::application& a = down_cast<application>(e);
@@ -105,7 +105,7 @@ namespace data
     return *i;
   }
 
-  const data_expression& then_part(const data_expression& e)
+  static const data_expression& then_part(const data_expression& e)
   {
     assert(is_if_application(e));
     const data::application& a = down_cast<application>(e);
@@ -113,7 +113,7 @@ namespace data
     return *(++i);
   }
 
-  const data_expression& else_part(const data_expression& e)
+  static const data_expression& else_part(const data_expression& e)
   {
     assert(is_if_application(e));
     const data::application& a = down_cast<application>(e);
@@ -197,7 +197,7 @@ namespace data
   /// \detail This routine throws an exception if there is a real parameter in an
   ///         action that it fails to remove.
 
-  static void move_real_parameters_out_of_actions(stochastic_specification& s,
+  void move_real_parameters_out_of_actions(stochastic_specification& s,
                                                   const variable_list& real_parameters,
                                                   const rewriter& r)
   {
@@ -272,7 +272,7 @@ namespace data
   /// \param non_real_condition Those parts of e with only variables not of sort Real.
   /// \param negate A boolean variable that indicates whether the result must be negated.
   /// \pre The parameter e must be of sort Bool.
-  void split_condition_aux(
+  static void split_condition_aux(
           const data_expression& e,
           std::vector < data_expression_list >& real_conditions,
           std::vector < data_expression_list >& non_real_conditions,
@@ -379,7 +379,7 @@ namespace data
   //          calculations take place with the non-real conditions, but if the non-real conditions
   //          lead to unnecessary copying, this may lead to a huge overhead in removing the
   //          real conditions.
-  void split_condition(
+  static void split_condition(
           const data_expression& e,
           std::vector < data_expression_list >& real_conditions,
           std::vector < data_expression >& non_real_conditions)
@@ -420,7 +420,7 @@ namespace data
           const stochastic_specification& s,
           const variable_list& real_parameters,
           const rewriter& r,
-          std::vector < summand_information1 >& summand_info)
+          std::vector < summand_information >& summand_info)
   {
     const lps::stochastic_action_summand_vector action_smds = s.process().action_summands();
     for (const stochastic_action_summand& i: action_smds)
@@ -499,7 +499,7 @@ namespace data
             // exists. If so, merge the two.
 
             bool found=false;
-            for(summand_information1& s: summand_info)
+            for(summand_information& s: summand_info)
             {
               if (s.get_summand().summation_variables()==i.summation_variables() &&
                   s.get_multi_action()==i.multi_action() &&
@@ -526,7 +526,7 @@ namespace data
               }
 
               const summand_base t(i.summation_variables(),non_real_condition);
-              const summand_information1 s(t,
+              const summand_information s(t,
                                           false, // This is not a delta summand.
                                           i.assignments(),
                                           i.distribution(),
@@ -606,7 +606,7 @@ namespace data
 
             // Construct replacements to contain the nextstate values for real variables in a map
 
-            const summand_information1 s(t,
+            const summand_information s(t,
                                         true, // This is a deadlock summand.
                                         assignment_list(),
                                         lps::stochastic_distribution(),
@@ -646,21 +646,21 @@ namespace data
                                              const rewrite_strategy strat)
   {
     rewriter r(s.data(),strat);
-    std::vector < summand_information1 > summand_info;
+    std::vector < summand_information > summand_info;
 
     const variable_list real_parameters = get_real_variables(s.process().process_parameters());
     move_real_parameters_out_of_actions(s, real_parameters, r);
     normalize_specification(s, get_real_variables(s.process().process_parameters()), r, summand_info);
     stochastic_action_summand_vector action_summands;
     deadlock_summand_vector deadlock_summands;
-    for(std::vector<summand_information1>::iterator i = summand_info.begin(); i != summand_info.end(); i++) {
+    for(std::vector<summand_information>::iterator i = summand_info.begin(); i != summand_info.end(); i++) {
       if (i->is_delta_summand())
       {
-        deadlock_summands.push_back(i->get_represented_deadlock_summand());
+        deadlock_summands.push_back(i->get_represented_deadlock_summand(s.data()));
       }
       else
       {
-        action_summands.push_back(i->get_represented_action_summand());
+        action_summands.push_back(i->get_represented_action_summand(s.data()));
       }
     }
     stochastic_linear_process lps(s.process().process_parameters(),
