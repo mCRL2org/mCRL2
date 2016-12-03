@@ -134,8 +134,8 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
 bool is_numeric_string(const std::string& s);
 
 /// \brief Convert a number to a string in the buffer.
-/// \param A number.
-/// \param A buffer that is sufficiently large.
+/// \param number The number to be converted.
+/// \param buffer A buffer in which the string will be stored that is sufficiently large.
 /// \return A pointer to the end of the buffer, where the character '\0' is located.
 inline
 char* number2string(std::size_t number, char* buffer)
@@ -165,14 +165,14 @@ char* number2string(std::size_t number, char* buffer)
 }
 
 /// \brief Convert a number to string.
-/// \param A number.
+/// \param number A number to be transformed.
 inline
 std::string number2string(std::size_t number)
 {
   char _buffer[std::numeric_limits<std::size_t>::digits10 + 1];
   number2string(number, _buffer);
   return std::string(_buffer);
-}
+} 
 
 } // namespace utilities
 

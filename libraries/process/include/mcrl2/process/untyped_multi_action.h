@@ -68,6 +68,7 @@ std::string pp(const untyped_multi_action& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x An untyped multi action.
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_multi_action& x)

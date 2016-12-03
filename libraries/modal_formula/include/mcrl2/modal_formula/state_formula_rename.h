@@ -65,10 +65,8 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
     replacements.pop_front();
   }
 
-  /// \brief Visit var node
-  /// \param e A modal formula
-  /// \param n A
-  /// \param l A sequence of data expressions
+  /// \brief Visit var node.
+  /// \param x A variable.
   /// \return The result of visiting the node
   state_formula apply(const variable& x)
   {
@@ -84,11 +82,8 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
     return variable(new_name, x.arguments());
   }
 
-  /// \brief Visit mu node
-  /// \param e A modal formula
-  /// \param n A
-  /// \param a A sequence of assignments to data variables
-  /// \param f A modal formula
+  /// \brief Visit mu node.
+  /// \param x The mu state variable.
   /// \return The result of visiting the node
   state_formula apply(const mu& x)
   {
@@ -98,11 +93,8 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
     return mu(new_name, x.assignments(), new_formula);
   }
 
-  /// \brief Visit nu node
-  /// \param e A modal formula
-  /// \param n A
-  /// \param a A sequence of assignments to data variables
-  /// \param f A modal formula
+  /// \brief Visit nu node.
+  /// \param x The visited nu node.
   /// \return The result of visiting the node
   state_formula apply(const nu& x)
   {

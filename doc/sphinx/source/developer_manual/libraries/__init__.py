@@ -17,10 +17,11 @@ _DOXYTAG = None
 _RSTTAG = None
 _PDFTAG = None
 _LIBRARIES = {
-  'atermpp':   'ATerm++',    'core':      'Core',     'bes':       'BES',
-  'data':      'Data',       'lps':       'LPS',      'lts':       'LTS',
-  'pbes':      'PBES',       'process':   'Process',  'trace':     'Trace',
-  'utilities': 'Utilities'
+  'atermpp':   'ATerm++',    'bes':       'BES',      'core':      'Core',
+  'data':      'Data',       'gui':       'GUI',      'lps':       'LPS',      
+  'lts':       'LTS',        'modal_formula': 'Modal Formula',
+  'pbes':      'PBES',       'process':   'Process',  'smt':       'SMT',
+  'trace':     'Trace',      'utilities': 'Utilities'
 }
 _DOXYTEMPLATE = string.Template(
   open(os.path.join(_PWD, 'doxy.template')).read())
