@@ -832,9 +832,13 @@ variable parse_variable(std::istream& text,
 ///     exception. It is assumed that the input contains exactly one expression, and nothing
 ///     else.
 /// \param[in] in The input stream containing a data expression.
-/// \param[in] first The start of a variables that can occur in the data expression.
-/// \param[in] last  The end of the potentially free variables in the expression.
+/// \param[in] variables The variables that can occur in the data expression.
 /// \param[in] data_spec The data specification that is used for type checking.
+/// \param[in] type_chec Indication whether the expression is expected to be type checked.
+/// \param[in] translate_user_notation Indication whether user notation such a numbers
+///                                     must be translated to internal format.
+/// \param[in] normalize_sorts Indication whether the sorts must be rewritten to normal form.
+/// \returns The parsed data expression. 
 
 template <typename VariableContainer>
 data_expression parse_data_expression(std::istream& in,
