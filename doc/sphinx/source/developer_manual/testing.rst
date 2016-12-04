@@ -58,7 +58,7 @@ First install the following packages:
 The command to install these packages is the following::
 
   sudo apt-get install subversion build-essential clang \
-    libboost1.48-all-dev java7-jdk libqt4-dev cmake python-software-properties \
+    libboost1.48-all-dev java7-jdk libqt5-dev cmake python-software-properties \
     doxygen git graphviz poppler-utils python python-sphinx swig \
     texlive-math-extra texlive-science texlive-latex3 xsltproc
 
@@ -229,7 +229,7 @@ The following then must be installed through macports:
 - Wget
 This can be done using the following command::
 
-  sudo port install boost qt4-mac cmake wget
+  sudo port install boost qt5-mac cmake wget
   
 Finally, create a directory in which Jenkins is run::
 
