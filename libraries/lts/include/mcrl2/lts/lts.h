@@ -63,6 +63,10 @@ class lts: public LTS_BASE
     */
     typedef ACTION_LABEL_T action_label_t;
 
+    /** \brief The type of the used lts base.
+    */
+    typedef LTS_BASE base_t;
+
     /** \brief The sort that contains the indices of states.
     */
     typedef typename std::vector < STATE_LABEL_T >::size_type states_size_type;

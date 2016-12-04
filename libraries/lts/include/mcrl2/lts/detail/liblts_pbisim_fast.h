@@ -272,7 +272,7 @@ class prob_bisim_partitioner_fast
     *         The step classes are partitioned based on the action that leads to the probabilistic state */
     void create_initial_partition(void)
     {
-      const size_t num_prob_states = aut.num_probabilistic_labels();
+      const size_t num_prob_states = aut.num_probabilistic_states();
       std::list<state_type> a_states;
       std::list<state_type> p_states;
       std::vector< std::list<action_transition_type> > a_transitions_per_label;
@@ -1184,8 +1184,8 @@ bool destructive_probabilistic_bisimulation_fast_compare(
 
   // The last two probabilistic states are the initial states of l2 and l1
   // in the merged plts
-  initial_probabilistic_state_key_l2 = l1.num_probabilistic_labels()-1;
-  initial_probabilistic_state_key_l1 = l1.num_probabilistic_labels()-2;
+  initial_probabilistic_state_key_l2 = l1.num_probabilistic_states()-1;
+  initial_probabilistic_state_key_l1 = l1.num_probabilistic_states()-2;
 
   detail::prob_bisim_partitioner_fast<LTS_TYPE> prob_bisim_part(l1);
 

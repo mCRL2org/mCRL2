@@ -213,13 +213,13 @@ class prob_bisim_partitioner
     distribution_per_step_class.resize(aut.num_action_labels());
     for (std::vector<bool>& i : distribution_per_step_class)
     {
-      i.resize(aut.num_probabilistic_labels());
+      i.resize(aut.num_probabilistic_states());
     }
 
     //---- Preprocessing stage to transform the PLTS to the data structures suggested by Baier ---- //
 
     // Construct vector of distributions
-    distributions.resize(aut.num_probabilistic_labels());
+    distributions.resize(aut.num_probabilistic_states());
     size_t key = 0;
     for (distribution_type& distribution : distributions)
     {
@@ -696,7 +696,7 @@ class prob_bisim_partitioner
       }
     }
 
-    step_class_index_of_a_distribution.resize(aut.num_probabilistic_labels());
+    step_class_index_of_a_distribution.resize(aut.num_probabilistic_states());
     for (step_class_type& sc : step_classes)
     {
       sc.equivalent_step_class = sc.key;
@@ -810,8 +810,8 @@ bool destructive_probabilistic_bisimulation_compare(
 
               // The last two probabilistic states are the initial states of l2 and l1
               // in the merged plts
-  initial_probabilistic_state_key_l2 = l1.num_probabilistic_labels() - 1;
-  initial_probabilistic_state_key_l1 = l1.num_probabilistic_labels() - 2;
+  initial_probabilistic_state_key_l2 = l1.num_probabilistic_states() - 1;
+  initial_probabilistic_state_key_l1 = l1.num_probabilistic_states() - 2;
 
   detail::prob_bisim_partitioner<LTS_TYPE> prob_bisim_part(l1);
 

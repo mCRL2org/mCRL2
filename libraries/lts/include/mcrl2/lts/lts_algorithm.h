@@ -250,6 +250,7 @@ bool compare(const LTS_TYPE&  l1,
 template <class LTS_TYPE>
 void determinise(LTS_TYPE& l);
 
+
 /** \brief Checks whether all states in this LTS are reachable
  * from the initial state and remove unreachable states if required.
  * \details Runs in O(num_states * num_transitions) time.
@@ -260,15 +261,16 @@ void determinise(LTS_TYPE& l);
  *            respect to the original LTS.
  * \retval true if all states are reachable from the initial state;
  * \retval false otherwise. */
-template < class LTS_TYPE >
-bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
+template <class SL, class AL, class BASE>
+bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
 {
   // First calculate which states can be reached, and store this in the array visited.
   const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
 
   std::vector < bool > visited(l.num_states(),false);
-  visited[l.initial_state()]=true;
   std::stack<size_t> todo;
+  
+  visited[l.initial_state()]=true;
   todo.push(l.initial_state());
 
   while (!todo.empty())
@@ -278,8 +280,8 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     for (outgoing_transitions_per_state_t::const_iterator i=out_trans.lower_bound(state_to_consider);
          i!=out_trans.upper_bound(state_to_consider); ++i)
     {
-      assert(from(i)<l.num_states() && to(i)<l.num_states());
-      if (visited[from(i)] && !visited[to(i)])
+      assert(visited[from(i)] && from(i)<l.num_states() && to(i)<l.num_states());
+      if (!visited[to(i)])
       {
         visited[to(i)]=true;
         todo.push(to(i));
@@ -301,7 +303,7 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
     std::map < size_t , size_t > state_map;
     std::map < size_t , size_t > label_map;
 
-    LTS_TYPE new_lts=l; // In this way set data specification and action declarations in the new lts.
+    lts < SL, AL, BASE> new_lts=l; // In this way set data specification and action declarations in the new lts.
     new_lts.clear();
 
     size_t new_nstates = 0;
@@ -350,7 +352,127 @@ bool reachability_check(LTS_TYPE&  l, bool remove_unreachable = false)
       }
     }
 
-    new_lts.set_initial_state(state_map[l.initial_state()]);
+    new_lts.set_initial_state(state_map.at(l.initial_state()));
+    l.swap(new_lts);
+  }
+
+  return all_reachable;
+}
+
+/** \brief Checks whether all states in a probabilistic LTS are reachable
+ * from the initial state and remove unreachable states if required.
+ * \details Runs in O(num_states * num_transitions) time.
+ * \param[in] l The LTS on which reachability is checked.
+ * \param[in] remove_unreachable Indicates whether all unreachable states
+ *            should be removed from the LTS. This option does not
+ *            influence the return value; the return value is with
+ *            respect to the original LTS.
+ * \retval true if all states are reachable from the initial state;
+ * \retval false otherwise. */
+template <class SL, class AL, class PROBABILISTIC_STATE, class BASE>
+bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>&  l, bool remove_unreachable = false)
+{
+  // First calculate which states can be reached, and store this in the array visited.
+  const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
+
+  std::vector < bool > visited(l.num_states(),false);
+  std::stack<size_t> todo;
+  
+  for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
+  {
+    visited[s.state()]=true;
+    todo.push(s.state());
+  } 
+
+  while (!todo.empty())
+  {
+    size_t state_to_consider=todo.top();
+    todo.pop();
+    for (outgoing_transitions_per_state_t::const_iterator i=out_trans.lower_bound(state_to_consider);
+         i!=out_trans.upper_bound(state_to_consider); ++i)
+    {
+      assert(visited[from(i)] && from(i)<l.num_states() && to(i)<l.num_probabilistic_states());
+      // Walk through the the states in this probabilistic state.
+      for(const typename PROBABILISTIC_STATE::state_probability_pair& p: l.probabilistic_state(to(i)))
+      {
+        if (!visited[p.state()])
+        {
+          visited[p.state()]=true;
+          todo.push(p.state());
+        }
+      }
+    }
+  }
+
+  // Property: in_visited(s) == true: state s is reachable from the initial state
+
+  // check to see if all states are reachable from the initial state, i.e.
+  // whether all bits are set.
+  bool all_reachable = find(visited.begin(),visited.end(),false)==visited.end();
+
+  if (!all_reachable && remove_unreachable)
+  {
+    // Remove all unreachable states, transitions from such states and labels
+    // that are only used in these transitions.
+
+    std::map < size_t , size_t > state_map;
+    std::map < size_t , size_t > label_map;
+
+    probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE> new_lts=l; // In this way set data specification and action declarations in the new lts.
+    new_lts.clear();
+
+    size_t new_nstates = 0;
+    for (size_t i=0; i<l.num_states(); i++)
+    {
+      if (visited[i])
+      {
+        state_map[i] = new_nstates;
+        if (l.has_state_info())
+        {
+          new_lts.add_state(l.state_label(i));
+        }
+        else
+        {
+          new_lts.add_state();
+        }
+        new_nstates++;
+      }
+    }
+
+    for (const transition& t: l.get_transitions())
+    {
+      if (visited[t.from()])
+      {
+        label_map[t.label()] = 1;
+      }
+    }
+
+    label_map[0]=1; // Declare the tau action explicitly present.
+    size_t new_nlabels = 0;
+    for (size_t i=0; i<l.num_action_labels(); i++)
+    {
+      if (label_map.count(i)>0)   // Label i is used.
+      {
+        label_map[i] = new_nlabels;
+        new_lts.add_action(l.action_label(i));
+        new_nlabels++;
+      }
+    }
+
+    for (const transition& t: l.get_transitions())
+    {
+      if (visited[t.from()])
+      {
+        new_lts.add_transition(transition(state_map[t.from()],label_map[t.label()],t.to()));
+      }
+    }
+
+    PROBABILISTIC_STATE new_initial_state;
+    for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
+    {
+      new_initial_state.add(state_map[s.state()], s.probability());
+    }
+    new_lts.set_initial_probabilistic_state(new_initial_state);
     l.swap(new_lts);
   }
 

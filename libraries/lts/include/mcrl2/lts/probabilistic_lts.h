@@ -59,6 +59,7 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
 
     typedef typename super::state_label_t         state_label_t        ;
     typedef typename super::action_label_t        action_label_t       ;
+    typedef typename super::base_t                base_t               ;
     typedef typename super::states_size_type      states_size_type     ;
     typedef typename super::labels_size_type      labels_size_type     ;
     typedef typename super::transitions_size_type transitions_size_type;
@@ -121,9 +122,9 @@ class probabilistic_lts: public lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE>
     }
 
 
-    /** \brief Gets the number of probabilistic labels of this LTS.
+    /** \brief Gets the number of probabilistic states of this LTS.
      * \return The number of action labels of this LTS. */
-    labels_size_type num_probabilistic_labels() const
+    labels_size_type num_probabilistic_states() const
     {
       return m_probabilistic_states.size();
     }

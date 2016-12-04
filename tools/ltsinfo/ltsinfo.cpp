@@ -13,8 +13,6 @@
 
 #include <string>
 
-#include <boost/lexical_cast.hpp>
-
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/input_tool.h"
@@ -83,23 +81,60 @@ class ltsinfo_tool : public ltsinfo_base
       }
       if (1 < parser.arguments.size())
       {
-        throw parser.error("too many file arguments");
+        throw parser.error("Too many file arguments.");
       }
 
       if (parser.options.count("in"))
       {
         if (1 < parser.options.count("in"))
         {
-          throw parser.error("multiple input formats specified; can only use one");
+          throw parser.error("Multiple input formats specified; can only use one.");
         }
 
         intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
         if (intype == lts_none || intype == lts_dot)
         {
-          throw parser.error("option -i/--in has illegal argument '" +
-                       parser.option_argument("in") + "'");
+          throw parser.error("Option -i/--in has illegal argument '" +
+                       parser.option_argument("in") + "'.");
         }
       }
+    }
+
+    template <class SL, class AL, class BASE>
+    static void provide_probabilistic_information(const mcrl2::lts::lts<SL,AL,BASE>& )
+    {
+      // No probabilistic information is provided for a plain lts.
+    }
+
+
+    template <class SL, class AL, class PROBABILISTIC_STATE, class BASE>
+    static void provide_probabilistic_information(mcrl2::lts::probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>&  l)
+    {
+      size_t count_non_trivial_probabilistic_states=0;
+      if (l.initial_probabilistic_state().size()>1)
+      {
+        count_non_trivial_probabilistic_states++;
+      }
+      for(size_t i=0; i<l.num_probabilistic_states(); ++i)
+      {
+        if (l.probabilistic_state(i).size()>1)
+        {
+          count_non_trivial_probabilistic_states++;
+        }
+      }
+      if (count_non_trivial_probabilistic_states>0)
+      { 
+        // The initial state can be probabilistic, so it is added separately. 
+        mCRL2log(info) << "This lts has " << l.num_probabilistic_states()+1 << " probabilistic states.\n";
+        mCRL2log(info) << "Out of these " << count_non_trivial_probabilistic_states << " contain" << ((count_non_trivial_probabilistic_states<2)?"s":"") 
+                       << " a non trivial probability distribution.\n";
+        mCRL2log(info) << "The initial state is " << ((l.initial_probabilistic_state().size()>1)?"":"not ") << "probabilistic.\n";
+      }
+      else
+      {
+        mCRL2log(info) << "This lts has no probabilistic states.\n";
+      }
+
     }
 
     template < class LTS_TYPE >
@@ -108,44 +143,35 @@ class ltsinfo_tool : public ltsinfo_base
       LTS_TYPE l;
       l.load(infilename);
 
-      std::cout
-          << "Number of states: " << l.num_states() << std::endl
-          << "Number of state labels: " << l.num_state_labels() << std::endl
-          << "Number of action labels: " << l.num_action_labels() << std::endl
-          << "Number of transitions: " << l.num_transitions() << std::endl;
+      mCRL2log(info) 
+          << "Number of states: " << l.num_states() << ".\n"
+          << "Number of action labels: " << l.num_action_labels() << ".\n"
+          << "Number of transitions: " << l.num_transitions() << ".\n";
 
       if (l.has_state_info())
       {
-        std::cout << "Has state labels." << std::endl;
+        mCRL2log(info) << "Number of state labels: " << l.num_state_labels() << ".\n";
       }
       else
       {
-        std::cout << "Does not have state labels." << std::endl;
+        mCRL2log(info) << "There are no state labels." << std::endl;
       }
 
-      if (l.has_action_info())
-      {
-        std::cout << "Has action labels." << std::endl;
-      }
-      else
-      {
-        std::cout << "Does not have action labels." << std::endl;
-      }
-
-
-      mCRL2log(verbose) << "checking reachability..." << std::endl;
+      mCRL2log(verbose) << "Checking reachability..." << std::endl;
       if (!reachability_check(l))
       {
-        std::cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
+        mCRL2log(info) << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
       }
 
-      mCRL2log(verbose) << "check whether lts is deterministic..." << std::endl;
-      std::cout << "LTS is ";
+      mCRL2log(verbose) << "Checking whether lts is deterministic..." << std::endl;
+      mCRL2log(info) << "LTS is ";
       if (!is_deterministic(l))
       {
-        std::cout << "not ";
+        mCRL2log(info) << "not ";
       }
-      std::cout << "deterministic." << std::endl;
+      mCRL2log(info) << "deterministic." << std::endl;
+
+      provide_probabilistic_information(l);
 
       return true;
     }
@@ -170,17 +196,17 @@ class ltsinfo_tool : public ltsinfo_base
         {
           lts_lts_t l;
           l.load(infilename);
-          return provide_information<lts_lts_t>();
+          return provide_information<probabilistic_lts_lts_t>();
         }
         case lts_none:
           mCRL2log(warning) << "No input format is specified. Assuming .aut format.\n";
         case lts_aut:
         {
-          return provide_information<lts_aut_t>();
+          return provide_information<probabilistic_lts_aut_t>();
         }
         case lts_fsm:
         {
-          return provide_information<lts_fsm_t>();
+          return provide_information<probabilistic_lts_fsm_t>();
         }
         case lts_dot:
         {

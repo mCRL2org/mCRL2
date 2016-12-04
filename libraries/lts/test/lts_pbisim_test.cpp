@@ -337,32 +337,32 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   std::cerr << "Test1\n";
   probabilistic_lts_aut_t t1 = parse_aut(test1);
   detail::probabilistic_bisimulation_reduce(t1); //probabilistic bisimulation reduction
-  BOOST_CHECK(t1.num_states() == 3 && t1.num_transitions() == 2 && t1.num_probabilistic_labels() == 1);
+  BOOST_CHECK(t1.num_states() == 3 && t1.num_transitions() == 2 && t1.num_probabilistic_states() == 1);
 
   std::cerr << "Test2\n";
   probabilistic_lts_aut_t t2 = parse_aut(test2);
   detail::probabilistic_bisimulation_reduce(t2); //probabilistic bisimulation reduction
-  BOOST_CHECK(t2.num_states() == 3 && t2.num_transitions() == 2 && t2.num_probabilistic_labels() == 2);
+  BOOST_CHECK(t2.num_states() == 3 && t2.num_transitions() == 2 && t2.num_probabilistic_states() == 2);
 
   std::cerr << "Test3\n";
   probabilistic_lts_aut_t t3 = parse_aut(test3);
   detail::probabilistic_bisimulation_reduce(t3); //probabilistic bisimulation reduction
-  BOOST_CHECK(t3.num_states() == 3 && t3.num_transitions() == 2 && t3.num_probabilistic_labels() == 2);
+  BOOST_CHECK(t3.num_states() == 3 && t3.num_transitions() == 2 && t3.num_probabilistic_states() == 2);
 
   std::cerr << "Test4\n";
   probabilistic_lts_aut_t t4 = parse_aut(test4);
   detail::probabilistic_bisimulation_reduce(t4); //probabilistic bisimulation reduction
-  BOOST_CHECK(t4.num_states() == 6 && t4.num_transitions() == 6 && t4.num_probabilistic_labels() == 4);
+  BOOST_CHECK(t4.num_states() == 6 && t4.num_transitions() == 6 && t4.num_probabilistic_states() == 4);
 
   std::cerr << "Test5\n";
   probabilistic_lts_aut_t t5 = parse_aut(test5);
   detail::probabilistic_bisimulation_reduce(t5); //probabilistic bisimulation reduction
-  BOOST_CHECK(t5.num_states() == 11 && t5.num_transitions() == 10 && t5.num_probabilistic_labels() == 9);
+  BOOST_CHECK(t5.num_states() == 11 && t5.num_transitions() == 10 && t5.num_probabilistic_states() == 9);
 
   std::cerr << "Test6\n";
   probabilistic_lts_aut_t t6 = parse_aut(test6);
   detail::probabilistic_bisimulation_reduce(t6); //probabilistic bisimulation reduction
-  BOOST_CHECK(t6.num_states() == 13 && t6.num_transitions() == 13 && t6.num_probabilistic_labels() == 11);
+  BOOST_CHECK(t6.num_states() == 13 && t6.num_transitions() == 13 && t6.num_probabilistic_states() == 11);
 
   std::cerr << "Test end\n";
 }

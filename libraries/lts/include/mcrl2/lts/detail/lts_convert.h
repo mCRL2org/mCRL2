@@ -955,7 +955,7 @@ inline void translate_probability_labels(const probabilistic_lts<STATE_LABEL1, A
   lts_out.set_initial_probabilistic_state(lts_convert_probabilistic_state<PROBABILISTIC_STATE1,PROBABILISTIC_STATE2>(lts_in.initial_probabilistic_state()));
 
   lts_out.clear_probabilistic_states();
-  for(size_t i=0; i< lts_in.num_probabilistic_labels(); ++i)
+  for(size_t i=0; i< lts_in.num_probabilistic_states(); ++i)
   {
     lts_out.add_probabilistic_state(lts_convert_probabilistic_state<PROBABILISTIC_STATE1,PROBABILISTIC_STATE2>(lts_in.probabilistic_state(i)));
   }
