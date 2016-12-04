@@ -13,6 +13,7 @@
 #define MCRL2_MODAL_FORMULA_COUNT_FIXPOINTS_H
 
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/traverser.h"
 
 namespace mcrl2 {
 
