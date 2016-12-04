@@ -1171,68 +1171,8 @@ inline const state_formula& binary_right(const or_& x)   { return x.right(); }
 inline const state_formula& binary_left(const imp& x)    { return x.left(); }
 inline const state_formula& binary_right(const imp& x)   { return x.right(); }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
-
-#ifndef MCRL2_MODAL_FORMULA_TRAVERSER_H
-#include "mcrl2/modal_formula/traverser.h"
-#endif
-
-namespace mcrl2
-{
-
-namespace state_formulas
-{
-
-/// \cond INTERNAL_DOCS
-//
-/// \brief Function that determines if a state formula is time dependent
-// \brief Visitor for checking if a state formula is timed.
-struct is_timed_traverser: public state_formula_traverser<is_timed_traverser>
-{
-  typedef state_formula_traverser<is_timed_traverser> super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-
-  bool result;
-
-  is_timed_traverser()
-    : result(false)
-  {}
-
-  void enter(const delay_timed& /* x */)
-  {
-    result = true;
-  }
-
-  void enter(const yaled_timed& /* x */)
-  {
-    result = true;
-  }
-
-  void enter(const action_formulas::at& /* x */)
-  {
-    result = true;
-  }
-};//
-//
-//
-//
-//
-
-/// \endcond
-
-/// \brief Checks if a state formula is timed
-/// \param x A state formula
-/// \return True if a state formula is timed
-inline
-bool is_timed(const state_formula& x)
-{
-  is_timed_traverser f;
-  f.apply(x);
-  return f.result;
+namespace algorithms {
+    bool is_timed(const state_formula& x);
 }
 
 /// \brief Returns true if the formula is timed.
@@ -1240,7 +1180,7 @@ bool is_timed(const state_formula& x)
 inline
 bool state_formula::has_time() const
 {
-  return is_timed(*this);
+  return algorithms::is_timed(*this);
 }
 
 // template function overloads

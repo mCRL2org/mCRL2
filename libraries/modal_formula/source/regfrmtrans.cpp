@@ -44,7 +44,7 @@ state_formula translate_reg_frms(const state_formula &state_frm)
   return translate_reg_frms_appl(state_frm, xyz_generator);
 }
 
-static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_generator &xyz_generator)
+static state_formula translate_reg_frms_appl(state_formula part, xyz_identifier_generator& xyz_generator)
 {
   if (data::is_data_expression(part) ||
       lps::is_multi_action(part) ||

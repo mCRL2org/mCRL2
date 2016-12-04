@@ -9,10 +9,6 @@
 /// \file mcrl2/modal_formula/traverser.h
 /// \brief add your file description here.
 
-// TODO: remove cyclic dependency between state_formula.h and traverser.h, so this include can
-//       be moved inside the include guard.
-#include "mcrl2/modal_formula/state_formula.h"
-
 #ifndef MCRL2_MODAL_FORMULA_TRAVERSER_H
 #define MCRL2_MODAL_FORMULA_TRAVERSER_H
 

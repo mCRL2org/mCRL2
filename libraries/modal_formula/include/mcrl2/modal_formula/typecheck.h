@@ -555,25 +555,25 @@ class state_formula_type_checker
       return result;
     }
 
-    /// \brief Typecheck the state formula specification statespec
-    void typecheck_state_formula_specification(state_formula_specification& statespec, bool check_monotonicity)
+    /// \brief Typecheck the state formula specification formspec
+    void typecheck_state_formula_specification(state_formula_specification& formspec, bool check_monotonicity)
     {
       mCRL2log(log::verbose) << "type checking state formula specification..." << std::endl;
 
       // reset the context
-      m_data_type_checker = data::data_type_checker(statespec.data());
+      m_data_type_checker = data::data_type_checker(formspec.data());
 
-      state_formulas::normalize_sorts(statespec, m_data_type_checker.typechecked_data_specification());
+      state_formulas::normalize_sorts(formspec, m_data_type_checker.typechecked_data_specification());
 
       m_action_context.clear();
       m_variable_context.clear();
-      m_action_context.add_context_action_labels(statespec.action_labels(), m_data_type_checker);
+      m_action_context.add_context_action_labels(formspec.action_labels(), m_data_type_checker);
 
       // typecheck the formula
-      statespec.formula() = typecheck_state_formula(statespec.formula(), check_monotonicity);
+      formspec.formula() = typecheck_state_formula(formspec.formula(), check_monotonicity);
 
       // typecheck the data specification
-      statespec.data() = m_data_type_checker.typechecked_data_specification();
+      formspec.data() = m_data_type_checker.typechecked_data_specification();
 
       mCRL2log(log::debug) << "type checking state formula specification finished" << std::endl;
     }

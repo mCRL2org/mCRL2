@@ -12,6 +12,7 @@
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/is_monotonous.h"
+#include "mcrl2/modal_formula/is_timed.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
@@ -113,6 +114,11 @@ state_formula normalize(const state_formula& x)
 bool is_normalized(const state_formula& x)
 {
   return state_formulas::is_normalized(x);
+}
+
+bool is_timed(const state_formula& x)
+{
+  return state_formulas::is_timed(x);
 }
 
 std::set<core::identifier_string> find_state_variable_names(const state_formula& x)
