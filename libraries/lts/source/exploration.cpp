@@ -226,7 +226,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
     }
   }
 
-  bool compute_actions = m_options.outformat != lts_none || m_options.detect_action || 
+  bool compute_actions = m_options.outformat != lts_none || m_options.detect_action || !m_options.trace_multiactions.empty() ||
                          m_maintain_traces || m_value_prioritize || !m_options.actions_internal_for_divergencies.empty();
   if (!compute_actions)
   {
