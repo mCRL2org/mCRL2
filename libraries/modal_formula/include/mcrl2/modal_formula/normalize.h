@@ -13,6 +13,7 @@
 #define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/negate_variables.h"
 #include "mcrl2/data/bool.h"
 
