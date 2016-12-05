@@ -61,37 +61,6 @@ namespace data
     return reverse(r);
   }
 
-  static data_expression negate_inequality(const data_expression& e)
-  {
-    if (is_equal_to_application(e))
-    {
-      return not_equal_to(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
-    }
-    if (is_not_equal_to_application(e))
-    {
-      return equal_to(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
-    }
-    else if (is_less_application(e))
-    {
-      return greater_equal(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
-    }
-    else if (is_less_equal_application(e))
-    {
-      return data::greater(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
-    }
-    else if (is_greater_application(e))
-    {
-      return less_equal(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
-    }
-    else if (is_greater_equal_application(e))
-    {
-      return data::less(data::binary_left(atermpp::down_cast<application>(e)),data::binary_right(atermpp::down_cast<application>(e)));
-    }
-    else
-    {
-      throw mcrl2::runtime_error("Expression " + data::pp(e) + " is expected to be an inequality over sort Real");
-    }
-  }
   /// \brief Determine whether a data expression is an inequality
   /// \param e A data expression
   /// \return true iff e is a data application of ==, <, <=, > or >= to
@@ -127,7 +96,7 @@ namespace data
         return i;
       }
     }
-    assert(false);
+    throw mcrl2::runtime_error("Variable " + pp(var) + " not found.");
     return -1;
   }
 
@@ -143,6 +112,30 @@ namespace data
     return sort_inequality::le(); //suppress compiler warning
   }
 
+  template< class InputIt >
+  static std::pair< data_expression, data_expression > dbm_index_pair(std::vector< detail::variable_with_a_rational_factor > pars,
+    InputIt begin, InputIt end, bool invert)
+  {
+    int neg_index = 0;
+    int pos_index = 0;
+    for(detail::variable_with_a_rational_factor p: pars)
+    {
+      if(p.factor() == real_one())
+      {
+        pos_index = get_dbm_index(p.variable_name(), begin, end);
+      }
+      else
+      {
+        neg_index = get_dbm_index(p.variable_name(), begin, end);
+      }
+    }
+    std::pair< data_expression, data_expression > result(sort_nat::nat(pos_index), sort_nat::nat(neg_index));
+    if(invert) {
+      std::swap(result.first, result.second);
+    }
+    return result;
+  }
+
   static void dbm_add_inequalities(data_expression dbm, data_expression& new_dbm, data_expression& conditions, 
     std::vector< linear_inequality > inequalities, variable_list real_parameters, std::vector< variable > update_variables,
     std::set < variable > global_variables, rewriter r)
@@ -154,60 +147,41 @@ namespace data
     std::set< variable > restricted_vars;
     for(linear_inequality &li: inequalities)
     {
-      int global_var_count = 0;
-      int par_count = 0;
-      int primed_par_count = 0;
+      std::vector< detail::variable_with_a_rational_factor > pars;
+      std::vector< detail::variable_with_a_rational_factor > primed_pars;
       for(detail::lhs_t::const_iterator var = li.lhs_begin(); var != li.lhs_end(); var++)
       {
-        if(global_variables.find(var->variable_name()) != global_variables.end())
+        if(std::find(real_parameters.begin(), real_parameters.end(), var->variable_name()) != real_parameters.end())
         {
-          global_var_count++;
+          pars.push_back(*var);
         }
-        else if(std::find(real_parameters.begin(), real_parameters.end(), var->variable_name()) != real_parameters.end())
+        else if(std::find(update_variables.begin(), update_variables.end(), var->variable_name()) != update_variables.end())
         {
-          par_count++;
+          primed_pars.push_back(*var);
         }
         else
         {
-          primed_par_count++;
+          assert(global_variables.find(var->variable_name()) != global_variables.end());
         }
       }
-      std::cerr << pp(li) << " par count " << par_count << " primed par count " << primed_par_count << std::endl;
+      std::cerr << pp(li) << " par count " << pars.size() << " primed par count " << primed_pars.size() << std::endl;
 
-      if(par_count == 0 && primed_par_count > 1)
+      if(pars.size() > 2 || primed_pars.size() > 2)
       {
-        assert(primed_par_count <= 2);
-        postponed_inequalities.push_back(li);
+        throw mcrl2::runtime_error("Comparisons between more than two variables are not supported by DBMs: " + pp(li));
       }
-      else if(primed_par_count == 0)
+      if(primed_pars.size() == 0)
       {
-        // Comparisons between more than two variables are not supported by DBMs
-        assert(par_count <= 2);
-        detail::variable_with_a_rational_factor first = li.lhs().front();
-        int neg_index, pos_index;
-        if(first.factor() == real_minus_one())
-        {
-          assert(li.lhs().tail().empty() || li.lhs().front().factor() == real_one());
-          neg_index = get_dbm_index(first.variable_name(), real_parameters.begin(), real_parameters.end());
-          pos_index = li.lhs().tail().empty() ? 0 : get_dbm_index(li.lhs().tail().front().variable_name(), real_parameters.begin(), real_parameters.end());
-        }
-        else
-        {
-          assert(first.factor() == real_one());
-          assert(li.lhs().tail().empty() || li.lhs().front().factor() == real_minus_one());
-          pos_index = get_dbm_index(first.variable_name(), real_parameters.begin(), real_parameters.end());
-          neg_index = li.lhs().tail().empty() ? 0 : get_dbm_index(li.lhs().tail().front().variable_name(), real_parameters.begin(), real_parameters.end());
-        }
-        
+        std::pair< data_expression, data_expression > dbm_indices = dbm_index_pair(pars, real_parameters.begin(), real_parameters.end(), false);
         data_expression condition = sort_dbm::and_d(dbm, 
-                    sort_nat::nat(pos_index), 
-                    sort_nat::nat(neg_index), 
+                    dbm_indices.first,
+                    dbm_indices.second,
                     sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())));
         if(li.comparison() == detail::equal)
         {
           condition = sort_dbm::and_d(condition,
-                    sort_nat::nat(neg_index),
-                    sort_nat::nat(pos_index),
+                    dbm_indices.second,
+                    dbm_indices.first,
                     sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())));
         }
         std::cerr << "translation " << sort_bool::not_(sort_dbm::inconsistent(condition)) << std::endl;
@@ -215,126 +189,29 @@ namespace data
       }
       else
       {
-        assert(par_count <= 2);
-        detail::lhs_t lhs = li.lhs();
-        detail::variable_with_a_rational_factor v = *std::find_first_of(lhs.begin(), lhs.end(), update_variables.begin(), update_variables.end(),
-                      [&](detail::variable_with_a_rational_factor a, variable b) { return a.variable_name() == b; });
-        restricted_vars.insert(v.variable_name());
-        detail::lhs_t lhs_norm = lhs.erase(v.variable_name());
-        // std::cerr << "lhs " << pp(lhs_norm) << " variable name " << v.variable_name() << std::endl;
-        lhs_norm = detail::multiply(lhs_norm, li.comparison() == detail::equal ? sort_real::times(v.factor(), real_minus_one()) : real_minus_one(), r);
-
-        int lhs_size = lhs_norm.size();
-        data_expression bound = sort_bound::cbound(li.rhs(), comp_to_function(li.comparison()));
-        if(lhs_size > 0)
-        {
-          detail::variable_with_a_rational_factor first = lhs_norm.front();
-          int neg_index, pos_index;
-          if(first.factor() == real_minus_one())
-          {
-            assert(lhs_size == 1 || lhs_norm.tail().front().factor() == real_one());
-            neg_index = get_dbm_index(first.variable_name(), real_parameters.begin(), real_parameters.end());
-            pos_index = lhs_size == 1 ? 0 : get_dbm_index(lhs_norm.tail().front().variable_name(), real_parameters.begin(), real_parameters.end());
-          }
-          else
-          {
-            assert(first.factor() == real_one());
-            assert(lhs_size == 1 || lhs_norm.tail().front().factor() == real_minus_one());
-            pos_index = get_dbm_index(first.variable_name(), real_parameters.begin(), real_parameters.end());
-            neg_index = lhs_size == 1 ? 0 : get_dbm_index(lhs_norm.tail().front().variable_name(), real_parameters.begin(), real_parameters.end());
-          }
-          bound = sort_bound::add(bound, sort_dbm::get(dbm, sort_nat::nat(pos_index), sort_nat::nat(neg_index)));
-        }
-
-
-        if(v.factor() == real_one() || li.comparison() == detail::equal)
-        {
-          // This linear inequality defines an upper bound for v
-          next_zone = sort_dbm::and_d(next_zone, sort_nat::nat(get_dbm_index(v.variable_name(), update_variables.begin(), update_variables.end())), sort_nat::nat(0), bound);
-          std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), sort_nat::nat(get_dbm_index(v.variable_name(), update_variables.begin(), update_variables.end())), sort_nat::nat(0), bound) << std::endl;
-        }
-        if(v.factor() == real_minus_one() || li.comparison() == detail::equal)
-        {
-          // This linear inequality defines a lower bound for v
-          next_zone = sort_dbm::and_d(next_zone, sort_nat::nat(0), sort_nat::nat(get_dbm_index(v.variable_name(), update_variables.begin(), update_variables.end())), bound);
-          std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), sort_nat::nat(0), sort_nat::nat(get_dbm_index(v.variable_name(), update_variables.begin(), update_variables.end())), bound) << std::endl;
-        }
-      }
-    }
-
-    if(!postponed_inequalities.empty())
-    {
-      for(variable v: restricted_vars)
-      {
-        std::cerr << "Restricted var " << v << std::endl;
-      }
-    }
-    for(linear_inequality li: postponed_inequalities)
-    {
-      std::cerr << "Postponed inequality " << pp(li) << std::endl;
-      detail::variable_with_a_rational_factor var = li.lhs().front();
-      int restricted_var_count = 0;
-      for(detail::variable_with_a_rational_factor v: li.lhs())
-      {
-        if(restricted_vars.find(v.variable_name()) == restricted_vars.end() && global_variables.find(v.variable_name()) == global_variables.end())
-        {
-          std::cerr << v << std::endl;
-          var = v;
-        }
-      }
-      std::cerr << "found variable " << var << std::endl;
-      detail::lhs_t lhs_norm = li.lhs().erase(var.variable_name());
-      lhs_norm = detail::multiply(lhs_norm, li.comparison() == detail::equal ? sort_real::times(var.factor(), real_minus_one()) : real_minus_one(), r);
-      assert(lhs_norm.size() <= 1);
-      if(li.comparison() == detail::equal)
-      {
-        if(lhs_norm.size() == 1)
-        {
-          if(global_variables.find(lhs_norm.front().variable_name()) != global_variables.end())
-          {
-            next_zone = sort_dbm::reset(next_zone, sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), lhs_norm.front().variable_name());
-            std::cerr << "translation " << sort_dbm::reset(sort_dbm::dbm_empty(), sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), lhs_norm.front().variable_name()) << std::endl;
-          }
-          else
-          {
-            next_zone = sort_dbm::copy(next_zone, sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), sort_nat::nat(get_dbm_index(lhs_norm.front().variable_name(), update_variables.begin(), update_variables.end())));
-            std::cerr << "variable " << var.variable_name() << " lhs front " << lhs_norm.front().variable_name() << std::endl;
-            std::cerr << "translation " << sort_dbm::copy(sort_dbm::dbm_empty(), sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), sort_nat::nat(get_dbm_index(lhs_norm.front().variable_name(), update_variables.begin(), update_variables.end()))) << std::endl;
-          }
-        }
-        else
-        {
-          next_zone = sort_dbm::reset(next_zone, sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), li.rhs());
-          std::cerr << "translation " << sort_dbm::reset(sort_dbm::dbm_empty(), sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), li.rhs()) << std::endl;
-        }
-      }
-      else
-      {
+        std::pair< data_expression, data_expression > dbm_primed_indices = dbm_index_pair(primed_pars, update_variables.begin(), update_variables.end(), false);
         data_expression bound;
-        if(lhs_norm.size() == 1)
-        {
-          if(global_variables.find(lhs_norm.front().variable_name()) != global_variables.end())
-          {
-            bound = sort_bound::cbound(lhs_norm.front().variable_name(), comp_to_function(li.comparison()));
-          }
-          else
-          {
-            assert(false);
-          }
-        }
-        else
+        std::pair< data_expression, data_expression > dbm_indices = dbm_index_pair(pars, real_parameters.begin(), real_parameters.end(), true);
+        if(pars.size() == 0)
         {
           bound = sort_bound::cbound(li.rhs(), comp_to_function(li.comparison()));
         }
-        if(var.factor() == real_one())
-        {
-          next_zone = sort_dbm::and_d(next_zone, sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), sort_nat::nat(0), bound);
-          std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), sort_nat::nat(0), bound) << std::endl;
-        }
         else
         {
-          next_zone = sort_dbm::and_d(next_zone, sort_nat::nat(0), sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), bound);
-          std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), sort_nat::nat(0), sort_nat::nat(get_dbm_index(var.variable_name(), update_variables.begin(), update_variables.end())), bound) << std::endl;
+          bound = sort_bound::add(sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())),
+                                        sort_dbm::get(dbm, dbm_indices.first, dbm_indices.second));
+        }
+        next_zone = sort_dbm::and_d(next_zone, dbm_primed_indices.first, dbm_primed_indices.second, bound);
+        std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), dbm_primed_indices.first, dbm_primed_indices.second, bound) << std::endl;
+        if(li.comparison() == detail::equal)
+        {
+          if(pars.size() != 0)
+          {
+            bound = sort_bound::add(sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())),
+                                          sort_dbm::get(dbm, dbm_indices.second, dbm_indices.first));
+          }
+          next_zone = sort_dbm::and_d(next_zone, dbm_primed_indices.second, dbm_primed_indices.first, bound);
+          std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), dbm_primed_indices.second, dbm_primed_indices.first, bound) << std::endl;
         }
       }
     }
