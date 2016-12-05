@@ -207,6 +207,7 @@ std::string pp(const structured_sort_constructor& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const structured_sort_constructor& x)

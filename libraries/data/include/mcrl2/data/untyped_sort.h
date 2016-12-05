@@ -43,6 +43,7 @@ std::string pp(const untyped_sort& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_sort& x)

@@ -52,6 +52,7 @@ std::string pp(const container_type& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const container_type& x)
@@ -98,6 +99,7 @@ std::string pp(const list_container& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const list_container& x)
@@ -144,6 +146,7 @@ std::string pp(const set_container& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const set_container& x)
@@ -190,6 +193,7 @@ std::string pp(const bag_container& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const bag_container& x)
@@ -236,6 +240,7 @@ std::string pp(const fset_container& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const fset_container& x)
@@ -282,6 +287,7 @@ std::string pp(const fbag_container& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const fbag_container& x)

@@ -99,6 +99,7 @@ std::string pp(const process_identifier& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_identifier& x)

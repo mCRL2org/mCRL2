@@ -91,6 +91,7 @@ std::string pp(const regular_formula& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const regular_formula& x)
@@ -152,6 +153,7 @@ std::string pp(const seq& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const seq& x)
@@ -213,6 +215,7 @@ std::string pp(const alt& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const alt& x)
@@ -269,6 +272,7 @@ std::string pp(const trans& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const trans& x)
@@ -325,6 +329,7 @@ std::string pp(const trans_or_nil& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const trans_or_nil& x)
@@ -396,6 +401,7 @@ std::string pp(const untyped_regular_formula& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_regular_formula& x)

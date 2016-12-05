@@ -26,7 +26,7 @@ namespace process
 {
 
 //--- start generated class action_name_multiset ---//
-/// \brief A multiset of action names.
+/// \brief A multiset of action names
 class action_name_multiset: public atermpp::aterm_appl
 {
   public:
@@ -54,15 +54,15 @@ class action_name_multiset: public atermpp::aterm_appl
     }
 };
 
-/// \brief list of action_name_multisets.
+/// \brief list of action_name_multisets
 typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
 
 /// \brief vector of action_name_multisets
 typedef std::vector<action_name_multiset>    action_name_multiset_vector;
 
-/// \brief Test for a action_name_multiset expression.
-/// \param x A term.
-/// \return True if \a x is a action_name_multiset expression.
+/// \brief Test for a action_name_multiset expression
+/// \param x A term
+/// \return True if \a x is a action_name_multiset expression
 inline
 bool is_action_name_multiset(const atermpp::aterm_appl& x)
 {
@@ -72,10 +72,10 @@ bool is_action_name_multiset(const atermpp::aterm_appl& x)
 // prototype declaration
 std::string pp(const action_name_multiset& x);
 
-/// \brief Outputs the object to a stream.
-/// \param out An output stream.
-/// \param x An action name multiset.
-/// \return The output stream.
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \param x Object x
+/// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const action_name_multiset& x)
 {

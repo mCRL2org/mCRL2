@@ -65,6 +65,7 @@ std::string pp(const basic_sort& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const basic_sort& x)

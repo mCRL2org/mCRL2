@@ -59,6 +59,7 @@ std::string pp(const set_comprehension& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const set_comprehension& x)

@@ -85,6 +85,7 @@ std::string pp(const fixpoint_symbol& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const fixpoint_symbol& x)

@@ -72,6 +72,7 @@ std::string pp(const assignment_expression& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const assignment_expression& x)
@@ -157,6 +158,7 @@ std::string pp(const assignment& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const assignment& x)
@@ -238,6 +240,7 @@ std::string pp(const untyped_identifier_assignment& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_identifier_assignment& x)
