@@ -62,12 +62,14 @@ def makepdf(src):
   if '{' in title or '\\' in title:
     title = os.path.basename(src)
   call('pdflatex', ['pdflatex', src])
-  try:
-    call('bibtex', ['bibtex', src])
-    call('pdflatex', ['pdflatex', src])
-    call('pdflatex', ['pdflatex', src])
-  except RuntimeError:
-    pass
+# Only apply bibtex if a "source.bib" file exists in the directory.
+  if os.path.isfile(src + '.bib'): 
+    try:
+      call('bibtex', ['bibtex', src])
+      call('pdflatex', ['pdflatex', src])
+    except RuntimeError:
+      pass
+  call('pdflatex', ['pdflatex', src])
   return title
 
 def generate_library_xml(lib_dir, lib_name):
