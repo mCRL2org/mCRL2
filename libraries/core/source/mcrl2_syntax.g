@@ -328,7 +328,7 @@ StateFrmSpec
   | (StateFrmSpecElt*) FormSpec (StateFrmSpecElt*)               // State formula specification
   ;
 
-FormSpec : 'form' StateFrm ;
+FormSpec : 'form' StateFrm ';' ;
 
 StateFrmSpecElt
   : SortSpec                                                     // Sort specification
