@@ -18,6 +18,7 @@ elseif(UNIX)
 
   # Platform is Mac OSX or *nix
   option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" ON)
+  option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" ON)
 
   if(APPLE)
 
@@ -45,8 +46,6 @@ elseif(UNIX)
     set(MCRL2_ARCHIVE_PATH share/mcrl2/lib)
     set(MCRL2_INCLUDE_PATH include)
     set(MCRL2_RESOURCE_PATH share/mcrl2)
-
-    option(MCRL2_MAN_PAGES "Enable/disable creation of UNIX man pages" ON)
 
     set(CMAKE_EXECUTABLE_FORMAT "ELF")
     set(CMAKE_INSTALL_RPATH "\$ORIGIN/../lib")
