@@ -65,7 +65,7 @@ namespace data
   /// \param e A data expression
   /// \return true iff e is a data application of ==, <, <=, > or >= to
   ///      two arguments.
-  inline
+  static inline
   bool is_inequality(data_expression e)
   {
     return is_equal_to_application(e) || is_less_application(e) ||
@@ -143,8 +143,6 @@ namespace data
     data_expression next_zone = sort_dbm::dbm_empty();
     std::vector< data_expression > new_conditions;
 
-    std::vector< linear_inequality > postponed_inequalities;
-    std::set< variable > restricted_vars;
     for(linear_inequality &li: inequalities)
     {
       std::vector< detail::variable_with_a_rational_factor > pars;
@@ -326,38 +324,21 @@ namespace data
     s.initial_process() = stochastic_process_initializer(al, s.initial_process().distribution());
   }
 
-  /// \brief Returns a list of all nonreal assignments in l
-  /// \param l a list of data assignments
-  /// \return The list of all x := e in l such that x.sort() == e.sort() != real()
-  static inline
-  assignment_list get_nonreal_assignments(const assignment_list& l)
-  {
-    assignment_list r;
-    for (assignment_list::const_iterator i = l.begin(); i != l.end(); ++i)
-    {
-      if (i->lhs().sort() != sort_real::real_())
-      {
-        r.push_front(*i);
-      }
-    }
-    return r;
-  }
-
-  void add_constructors(data_specification& d, function_symbol_vector cons) {
+  static void add_constructors(data_specification& d, function_symbol_vector cons) {
     for(function_symbol_vector::const_iterator con = cons.begin(); con != cons.end(); con++)
     {
       d.add_constructor(*con);
     }
   }
 
-  void add_mappings(data_specification& d, function_symbol_vector maps) {
+  static void add_mappings(data_specification& d, function_symbol_vector maps) {
     for(function_symbol_vector::const_iterator map = maps.begin(); map != maps.end(); map++)
     {
       d.add_mapping(*map);
     }
   }
 
-  void add_equations(data_specification& d, data_equation_vector eqns) {
+  static void add_equations(data_specification& d, data_equation_vector eqns) {
     for(data_equation_vector::const_iterator eqn = eqns.begin(); eqn != eqns.end(); eqn++)
     {
       d.add_equation(*eqn);
@@ -386,48 +367,7 @@ namespace data
     add_mappings(s.data(), sort_dbm::dbm_generate_functions_code());
     add_equations(s.data(), sort_dbm::dbm_generate_equations_code());
 
-    // data_specification my_data;
-    // my_data.add_system_defined_sort(sort_real::real_());
-    // my_data.add_system_defined_sort(sort_nat::nat());
-    // my_data.add_sort(sort_inequality::inequality());
-    // add_constructors(my_data, sort_inequality::inequality_generate_constructors_code());
-    // add_equations(my_data, sort_inequality::inequality_generate_equations_code());
-    // my_data.add_sort(sort_bound::bound());
-    // add_constructors(my_data, sort_bound::bound_generate_constructors_code());
-    // add_mappings(my_data, sort_bound::bound_generate_functions_code());
-    // add_equations(my_data, sort_bound::bound_generate_equations_code());
-    // my_data.add_alias(alias(sort_dbm::dbm(),sort_list::list(sort_list::list(sort_bound::bound()))));
-    // add_mappings(my_data, sort_dbm::dbm_generate_functions_code());
-    // add_equations(my_data, sort_dbm::dbm_generate_equations_code());
-    // std::cerr << (atermpp::aterm_appl) sort_nat::c0() << std::endl;
-    // std::cerr << (atermpp::aterm_appl) sort_dbm::dbm_generate_equations_code()[1] << std::endl;
-    // data_type_checker checker(my_data);
-    // checker.print_context();
-    // std::cerr << "All constructors" << std::endl;
-    // for(function_symbol s: my_data.constructors())
-    // {
-    //   std::cerr << (atermpp::aterm_appl) s << std::endl;
-    // }
-    // std::cerr << checker.typechecked_data_specification() << std::endl;
-
     abstract_reals(s, r, summand_info);
-
-    // data_expression term = parse_data_expression("and_d(dbm, 0, 0, bound(0,less))", std::set<variable>(), s.data());
-    // rewriter r2(s.data());
-    // std::cerr << "term " << term << " rewritten " << r2(term) << std::endl;
-    // std::cerr << "term " << (atermpp::aterm_appl) term << " rewritten " << (atermpp::aterm_appl) r2(term) << std::endl;
-    // term = normalize_sorts(sort_dbm::and_d(sort_dbm::dbm_empty(), sort_nat::c0(), sort_nat::c0(), sort_bound::cbound(real_zero(), sort_inequality::lt())),s.data());
-    // std::cerr << "term " << term << " rewritten " << r2(term) << std::endl;
-    // std::cerr << "term " << (atermpp::aterm_appl) term << " rewritten " << (atermpp::aterm_appl) r2(term) << std::endl;
-    // for(data_equation d: find_equations(s.data(), parse_data_expression("dbm", std::set<variable>(), s.data())))
-    // {
-    //   std::cerr << "Equation " << d << " aterm " << (atermpp::aterm_appl) d << std::endl;
-    // }
-    // std::cerr << "Real definition " << (atermpp::aterm_appl) sort_dbm::dbm_generate_equations_code()[39] << std::endl;
-    // std::cerr << r2(sort_dbm::dbm_empty()) << std::endl;
-    // std::cerr << r2(sort_dbm::get(sort_dbm::dbm_empty(), sort_nat::nat(0), sort_nat::nat(0)), sort_bound::inf()) << std::endl;
-
-    // std::cerr << (atermpp::aterm_appl) rewriter(s.data(),strat)(sort_dbm::dbm_empty()) << std::endl;
 
     stochastic_action_summand_vector action_summands;
     deadlock_summand_vector deadlock_summands;
