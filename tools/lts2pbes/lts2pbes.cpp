@@ -18,6 +18,7 @@
 #include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/modal_formula/algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/lts2pbes.h"
@@ -144,16 +145,18 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       load_lts(l, infilename, input_type, data_file_type, data_file);
 
       //load formula file
-      lps::specification spec = extract_specification(l);
+      lps::specification lpsspec = extract_specification(l);
       std::ifstream from(formfilename.c_str());
       if (!from)
       {
         throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
       }
-      state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(from, spec);
+      state_formulas::state_formula_specification formspec = state_formulas::parse_state_formula_specification(from, lpsspec);
       from.close();
+      lpsspec.data() = data::merge_data_specifications(lpsspec.data(), formspec.data());
+      lpsspec.action_labels() = lpsspec.action_labels() + formspec.action_labels();
 
-      pbes_system::pbes result = pbes_system::lts2pbes(l, formula);
+      pbes_system::pbes result = pbes_system::lts2pbes(l, formspec);
       //save the result
       if (output_filename().empty())
       {

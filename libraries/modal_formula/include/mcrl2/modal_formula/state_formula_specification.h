@@ -40,7 +40,7 @@ class state_formula_specification
     {}
 
     /// \brief Constructor of a state formula specification.
-    state_formula_specification(const data::data_specification& data, const process::action_label_list& action_labels, const state_formula& formula)
+    state_formula_specification(const state_formula& formula, const data::data_specification& data = data::data_specification(), const process::action_label_list& action_labels = {})
       : m_data(data),
         m_action_labels(action_labels),
         m_formula(formula)

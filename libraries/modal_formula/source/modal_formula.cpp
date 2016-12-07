@@ -91,14 +91,34 @@ std::set<core::identifier_string> find_identifiers(const state_formulas::state_f
 
 namespace algorithms {
 
-state_formula parse_state_formula(std::istream& in, lps::specification& spec)
+state_formula parse_state_formula(std::istream& in, lps::specification& lpsspec)
 {
-  return state_formulas::parse_state_formula(in, spec, true);
+  return state_formulas::parse_state_formula(in, lpsspec);
 }
 
-state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec)
+state_formula parse_state_formula(const std::string& text, lps::specification& lpsspec)
 {
-  return state_formulas::parse_state_formula(formula_text, spec);
+  return state_formulas::parse_state_formula(text, lpsspec);
+}
+
+state_formula_specification parse_state_formula_specification(std::istream& in)
+{
+  return state_formulas::parse_state_formula_specification(in);
+}
+
+state_formula_specification parse_state_formula_specification(const std::string& text)
+{
+  return state_formulas::parse_state_formula_specification(text);
+}
+
+state_formula_specification parse_state_formula_specification(std::istream& in, lps::specification& lpsspec)
+{
+  return state_formulas::parse_state_formula_specification(in, lpsspec);
+}
+
+state_formula_specification parse_state_formula_specification(const std::string& text, lps::specification& lpsspec)
+{
+  return state_formulas::parse_state_formula_specification(text, lpsspec);
 }
 
 bool is_monotonous(const state_formula& f)

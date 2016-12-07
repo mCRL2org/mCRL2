@@ -25,12 +25,14 @@ using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::state_formulas;
 
-void run_test_case(const std::string& formula, const std::string& lps_spec)
+void run_test_case(const std::string& formula, const std::string& lpstext)
 {
-  specification spec=remove_stochastic_operators(linearise(lps_spec));
-  bool check_monotonicity = false;
-  bool translate_regular = false;
-  state_formula f = parse_state_formula(formula, spec, check_monotonicity, translate_regular);
+  specification lpsspec = remove_stochastic_operators(linearise(lpstext));
+  parse_state_formula_options options;
+  options.check_monotonicity = false;
+  options.translate_regular_formulas = false;
+  options.resolve_name_clashes = false;
+  state_formula f = parse_state_formula(formula, lpsspec, options);
   std::string pp_formula = state_formulas::pp(f);
   if (formula != pp_formula)
   {
@@ -41,30 +43,30 @@ void run_test_case(const std::string& formula, const std::string& lps_spec)
 
 BOOST_AUTO_TEST_CASE(test_abp)
 {
-  std::string lps_spec = lps::detail::ABP_SPECIFICATION();
+  std::string lpstext = lps::detail::ABP_SPECIFICATION();
 
-  run_test_case("delay @ 1", lps_spec);
-  run_test_case("true", lps_spec);
-  run_test_case("[true*]<true*>true", lps_spec);
-  run_test_case("mu X. !!X", lps_spec);
-  run_test_case("nu X. [true]X && <true>true", lps_spec);
-  run_test_case("nu X. [true]X && forall d: D. [r1(d)]mu Y. <true>Y || <s4(d)>true", lps_spec);
-  run_test_case("forall d: D. nu X. [!r1(d)]X && [s4(d)]false", lps_spec);
-  run_test_case("nu X. [true]X && forall d: D. [r1(d)]nu Y. [!r1(d) && !s4(d)]Y && [r1(d)]false", lps_spec);
-  run_test_case("mu X. !X", lps_spec);
-  run_test_case("mu X. nu Y. X => Y", lps_spec);
-  run_test_case("mu X. X || mu X. X", lps_spec);
-  run_test_case("mu X. X || mu X. X", lps_spec);
-  run_test_case("(mu X. X) || mu Y. Y", lps_spec);
-  run_test_case("!(mu X. X || mu X. X)", lps_spec);
-  run_test_case("(forall d: D. nu X. X) && false", lps_spec);
-  run_test_case("val(true)", lps_spec);
-  run_test_case("delay @ 4", lps_spec);
-  run_test_case("nu Z(i: Nat = 0). Z(2)", lps_spec);
-  run_test_case("[true]true", lps_spec);
-  run_test_case("[true]val(true)", lps_spec);
-  run_test_case("exists d: Nat. val(d < 0)", lps_spec);
-  run_test_case("exists d: Nat. val(d < 0) || val(d + 1 == 5)", lps_spec);
+  run_test_case("delay @ 1", lpstext);
+  run_test_case("true", lpstext);
+  run_test_case("[true*]<true*>true", lpstext);
+  run_test_case("mu X. !!X", lpstext);
+  run_test_case("nu X. [true]X && <true>true", lpstext);
+  run_test_case("nu X. [true]X && forall d: D. [r1(d)]mu Y. <true>Y || <s4(d)>true", lpstext);
+  run_test_case("forall d: D. nu X. [!r1(d)]X && [s4(d)]false", lpstext);
+  run_test_case("nu X. [true]X && forall d: D. [r1(d)]nu Y. [!r1(d) && !s4(d)]Y && [r1(d)]false", lpstext);
+  run_test_case("mu X. !X", lpstext);
+  run_test_case("mu X. nu Y. X => Y", lpstext);
+  run_test_case("mu X. X || mu X. X", lpstext);
+  run_test_case("mu X. X || mu X. X", lpstext);
+  run_test_case("(mu X. X) || mu Y. Y", lpstext);
+  run_test_case("!(mu X. X || mu X. X)", lpstext);
+  run_test_case("(forall d: D. nu X. X) && false", lpstext);
+  run_test_case("val(true)", lpstext);
+  run_test_case("delay @ 4", lpstext);
+  run_test_case("nu Z(i: Nat = 0). Z(2)", lpstext);
+  run_test_case("[true]true", lpstext);
+  run_test_case("[true]val(true)", lpstext);
+  run_test_case("exists d: Nat. val(d < 0)", lpstext);
+  run_test_case("exists d: Nat. val(d < 0) || val(d + 1 == 5)", lpstext);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

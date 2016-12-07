@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include "mcrl2/core/parser_utility.h"
+#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -22,6 +23,7 @@
 #include "mcrl2/modal_formula/translate_regular_formulas.h"
 #include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/resolve_name_clashes.h"
+#include "mcrl2/process/merge_action_specifications.h"
 
 namespace mcrl2
 {
@@ -315,43 +317,36 @@ state_formula_specification parse_state_formula_specification(const std::string&
 
 } // namespace detail
 
-/// \brief Parses a state formula from an input stream
-// spec may be updated as the data implementation of the state formula
-// may cause internal names to change.
-/// \param in A stream from which can be read.
-/// \param spec A linear process specification.
-/// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous. Furthermore, name clashes are resolved.
-/// \param translate_regular True if the regular expressions must be replaced by modal mu formulas.
-/// \param type_check True to indicate that typechecking must take place.
-/// \param translate_user_notation True to indicate that user constants like number and lists must be translated to internal format.
-/// \return The converted modal formula
-inline
-state_formula parse_state_formula(
-              std::istream& in, 
-              lps::specification& spec, 
-              bool check_monotonicity = true, 
-              bool translate_regular = true,
-              bool type_check = true, 
-              bool translate_user_notation = true)
+struct parse_state_formula_options
 {
-  std::string text = utilities::read_text(in);
-  state_formula x = detail::parse_state_formula(text);
-  if (type_check)
-  {
-    x = state_formulas::type_check_state_formula(x, spec, check_monotonicity);
-  }
-  if (translate_regular)
+  bool check_monotonicity = true;
+  bool translate_regular_formulas = true;
+  bool type_check = true;
+  bool translate_user_notation = true;
+  bool resolve_name_clashes = true;
+};
+
+inline
+state_formula post_process_state_formula(const state_formula& formula,
+                                         parse_state_formula_options options = parse_state_formula_options()
+                                        )
+{
+  state_formula x = formula;
+  if (options.translate_regular_formulas)
   {
     mCRL2log(log::debug) << "formula before translating regular formulas: " << x << std::endl;
     x = translate_regular_formulas(x);
     mCRL2log(log::debug) << "formula after translating regular formulas: " << x << std::endl;
   }
-  spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
-  if (translate_user_notation)
+  if (options.translate_user_notation)
   {
     x = state_formulas::translate_user_notation(x);
   }
-  if (check_monotonicity && state_formulas::has_name_clashes(x))
+  if (options.check_monotonicity && !is_monotonous(x))
+  {
+    throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(x));
+  }
+  if (options.resolve_name_clashes && has_name_clashes(x))
   {
     mCRL2log(log::debug) << "formula before resolving name clashes: " << x << std::endl;
     x = state_formulas::resolve_name_clashes(x);
@@ -360,38 +355,99 @@ state_formula parse_state_formula(
   return x;
 }
 
-/// \brief Parses a state formula from text
-// spec may be updated as the data implementation of the state formula
-// may cause internal names to change.
-/// \param formula_text A string
-/// \param spec A linear process specification
+/// \brief Parses a state formula from an input stream
+/// \param formula_stream A stream from which can be read
+/// \param lpsspec A linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
 /// \return The converted modal formula
 inline
-state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true,
-                                  bool type_check = true, bool translate_user_notation = true)
-{
-  std::stringstream formula_stream(formula_text);
-  return parse_state_formula(formula_stream, spec, check_monotonicity, translate_regular, type_check, translate_user_notation);
-}
-
-/// \brief Parses a state formula specification from an input stream
-/// \param in An input stream
-/// \return The parse result
-inline
-state_formula_specification parse_state_formula_specification(std::istream& in)
+state_formula parse_state_formula(std::istream& in,
+                                  lps::specification& lpsspec,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
 {
   std::string text = utilities::read_text(in);
-  return detail::parse_state_formula_specification(text);
+  state_formula x = detail::parse_state_formula(text);
+  if (options.type_check)
+  {
+    x = state_formulas::type_check_state_formula(x, lpsspec);
+  }
+  lpsspec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
+  return post_process_state_formula(x, options);
+}
+
+inline
+state_formula parse_state_formula(const std::string& text,
+                                  lps::specification& lpsspec,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
+{
+  std::istringstream in(text);
+  return parse_state_formula(in, lpsspec, options);
 }
 
 /// \brief Parses a state formula specification from a string
 /// \param text A string
 /// \return The parse result
 inline
-state_formula_specification parse_state_formula_specification(const std::string& text)
+state_formula_specification parse_state_formula_specification(const std::string& text,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
 {
-  std::istringstream in(text);
-  return parse_state_formula_specification(in);
+  state_formula_specification result = detail::parse_state_formula_specification(text);
+  if (options.type_check)
+  {
+    result.formula() = state_formulas::type_check_state_formula(result.formula(), result.data(), result.action_labels(), data::variable_list());
+  }
+  result.formula() = post_process_state_formula(result.formula(), options);
+  return result;
+}
+
+/// \brief Parses a state formula specification from an input stream
+/// \param in An input stream
+/// \return The parse result
+inline
+state_formula_specification parse_state_formula_specification(std::istream& in,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
+{
+  std::string text = utilities::read_text(in);
+  return parse_state_formula_specification(text, options);
+}
+
+/// \brief Parses a state formula specification from a string
+/// \param text A string
+/// \return The parse result
+inline
+state_formula_specification parse_state_formula_specification(const std::string& text,
+                                  lps::specification& lpsspec,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
+{
+  state_formula_specification result = detail::parse_state_formula_specification(text);
+  data::data_specification dataspec = data::merge_data_specifications(lpsspec.data(), result.data());
+  process::action_label_list actspec = process::merge_action_specifications(lpsspec.action_labels(), result.action_labels());
+  if (options.type_check)
+  {
+    result.formula() = state_formulas::type_check_state_formula(result.formula(), dataspec, actspec, lpsspec.global_variables());
+  }
+  result.formula() = post_process_state_formula(result.formula(), options);
+  result.data() = dataspec;
+  result.action_labels() = actspec;
+  lpsspec.data() = dataspec;
+  lpsspec.action_labels() = actspec;
+  return result;
+}
+
+/// \brief Parses a state formula specification from an input stream
+/// \param in An input stream
+/// \return The parse result
+inline
+state_formula_specification parse_state_formula_specification(std::istream& in,
+                                  lps::specification& lpsspec,
+                                  parse_state_formula_options options = parse_state_formula_options()
+                                 )
+{
+  return parse_state_formula_specification(utilities::read_text(in), lpsspec, options);
 }
 
 } // namespace state_formulas

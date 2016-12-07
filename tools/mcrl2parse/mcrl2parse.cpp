@@ -659,11 +659,10 @@ class mcrl2parse_tool : public input_tool
             case statefrm_e :
             {
               separate_action_specification(text, "statefrm", lpsspec, text);
-              bool check_monotonicity = false;
-              bool translate_regular = true;
-              bool type_check = true;
-              bool translate_user_notation = true;
-              state_formulas::state_formula x = state_formulas::parse_state_formula(text, lpsspec, check_monotonicity, translate_regular, type_check, translate_user_notation);
+              state_formulas::parse_state_formula_options options;
+              options.check_monotonicity = false;
+              options.resolve_name_clashes = false;
+              state_formulas::state_formula x = state_formulas::parse_state_formula(text, lpsspec, options);
               if (aterm_format)
               {
                 std::cout << x << std::endl;
@@ -766,7 +765,10 @@ class mcrl2parse_tool : public input_tool
             case statefrm_e :
             {
               separate_action_specification(text, "statefrm", lpsspec, text);
-              state_formulas::state_formula x = state_formulas::parse_state_formula(text, lpsspec, false);
+              state_formulas::parse_state_formula_options options;
+              options.check_monotonicity = false;
+              options.resolve_name_clashes = false;
+              state_formulas::state_formula x = state_formulas::parse_state_formula(text, lpsspec, options);
               std::cout << state_formulas::pp(x) << std::endl;
               break;
             }

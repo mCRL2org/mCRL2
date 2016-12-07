@@ -517,13 +517,12 @@ class state_formula_type_checker
     detail::state_variable_context m_state_variable_context;
 
   public:
-    /** \brief     Contructor for a typechecker for a state formula. 
-     *  \param[in] dataspec A data specification.
-     *  \param[in] action_labels A container with declared action labels.
-     *  \param[in] variables A container with declared variables.
+    /** \brief     Type check a state formula.
+     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+     *  \param[in] d A state formula that has not been type checked.
+     *  \return    a state formula where all untyped identifiers have been replace by typed ones.
      **/
-    template <typename ActionLabelContainer = std::vector<state_formulas::variable>, 
-              typename VariableContainer = std::vector<data::variable> >
+    template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
     state_formula_type_checker(const data::data_specification& dataspec,
                                const ActionLabelContainer& action_labels = ActionLabelContainer(),
                                const VariableContainer& variables = VariableContainer()
@@ -542,39 +541,10 @@ class state_formula_type_checker
     //3) check for name conflicts of data variable declarations in
     //   forall, exists, mu and nu quantifiers
     //4) check for monotonicity of fixpoint variables
-    state_formula typecheck_state_formula(const state_formula& x, bool check_monotonicity)
+    state_formula typecheck_state_formula(const state_formula& x)
     {
       mCRL2log(log::verbose) << "type checking state formula..." << std::endl;
-
-      state_formula result = detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context, m_state_variable_context).apply(state_formulas::normalize_sorts(x, m_data_type_checker.typechecked_data_specification()));
-      if (check_monotonicity && !is_monotonous(result))
-      {
-        throw mcrl2::runtime_error("state formula is not monotonic: " + state_formulas::pp(result));
-      }
-      return result;
-    }
-
-    /// \brief Typecheck the state formula specification formspec
-    void typecheck_state_formula_specification(state_formula_specification& formspec, bool check_monotonicity)
-    {
-      mCRL2log(log::verbose) << "type checking state formula specification..." << std::endl;
-
-      // reset the context
-      m_data_type_checker = data::data_type_checker(formspec.data());
-
-      state_formulas::normalize_sorts(formspec, m_data_type_checker.typechecked_data_specification());
-
-      m_action_context.clear();
-      m_variable_context.clear();
-      m_action_context.add_context_action_labels(formspec.action_labels(), m_data_type_checker);
-
-      // typecheck the formula
-      formspec.formula() = typecheck_state_formula(formspec.formula(), check_monotonicity);
-
-      // typecheck the data specification
-      formspec.data() = m_data_type_checker.typechecked_data_specification();
-
-      mCRL2log(log::debug) << "type checking state formula specification finished" << std::endl;
+      return detail::make_typecheck_builder(m_data_type_checker, m_variable_context, m_action_context, m_state_variable_context).apply(state_formulas::normalize_sorts(x, m_data_type_checker.typechecked_data_specification()));
     }
 };
 
@@ -583,17 +553,74 @@ class state_formula_type_checker
  *  \param[in] formula A state formula that has not been type checked.
  *  \post      formula is type checked.
  **/
-inline
-state_formula type_check_state_formula(const state_formula& x, const lps::specification& lpsspec, bool check_monotonicity = true)
+template <typename VariableContainer, typename ActionLabelContainer>
+state_formula type_check_state_formula(const state_formula& x,
+                                       const data::data_specification& dataspec = data::data_specification(),
+                                       const ActionLabelContainer& action_labels = ActionLabelContainer(),
+                                       const VariableContainer& variables = VariableContainer()
+                                      )
 {
   try
   {
-    state_formula_type_checker type_checker(lpsspec.data(), lpsspec.action_labels(), lpsspec.global_variables());
-    return type_checker.typecheck_state_formula(x, check_monotonicity);
+    state_formula_type_checker type_checker(dataspec, action_labels, variables);
+    return type_checker.typecheck_state_formula(x);
   }
   catch (mcrl2::runtime_error& e)
   {
     throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula " + state_formulas::pp(x));
+  }
+}
+
+/** \brief     Type check a state formula.
+ *  Throws an exception if something went wrong.
+ *  \param[in] formula A state formula that has not been type checked.
+ *  \post      formula is type checked.
+ **/
+inline
+state_formula type_check_state_formula(const state_formula& x,
+                                       const lps::specification& lpsspec
+                                      )
+{
+  return type_check_state_formula(x, lpsspec.data(), lpsspec.action_labels(), lpsspec.global_variables());
+}
+
+/// \brief Typecheck the state formula specification formspec. It is assumed that the formula is self contained,
+/// i.e. all actions and sorts must be declared.
+inline
+void typecheck_state_formula_specification(state_formula_specification& formspec)
+{
+  try
+  {
+    data::data_type_checker checker(formspec.data());
+    data::data_specification dataspec = checker.typechecked_data_specification();
+    state_formulas::normalize_sorts(formspec, dataspec);
+    state_formula_type_checker type_checker(dataspec, formspec.action_labels(), {});
+    formspec.formula() = type_checker.typecheck_state_formula(formspec.formula());
+    formspec.data() = checker.typechecked_data_specification();
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula specification " + state_formulas::pp(formspec));
+  }
+}
+
+/// \brief Typecheck the state formula specification formspec. It is assumed that the formula is not self contained,
+/// i.e. some of the actions and sorts may be declared in lpsspec.
+inline
+void typecheck_state_formula_specification(state_formula_specification& formspec, const lps::specification& lpsspec)
+{
+  try
+  {
+    data::data_type_checker checker(formspec.data());
+    data::data_specification dataspec = checker.typechecked_data_specification();
+    state_formulas::normalize_sorts(formspec, dataspec);
+    state_formula_type_checker type_checker(dataspec, lpsspec.action_labels() + formspec.action_labels(), lpsspec.global_variables());
+    formspec.formula() = type_checker.typecheck_state_formula(formspec.formula());
+    formspec.data() = checker.typechecked_data_specification();
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check modal formula specification " + state_formulas::pp(formspec));
   }
 }
 

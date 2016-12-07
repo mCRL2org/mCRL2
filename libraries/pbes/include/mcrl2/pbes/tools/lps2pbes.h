@@ -13,8 +13,10 @@
 #define MCRL2_PBES_TOOLS_LPS2PBES_H
 
 #include <fstream>
+#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/modal_formula/algorithms.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/io.h"
@@ -46,18 +48,19 @@ void lps2pbes(const std::string& input_filename,
   {
     mCRL2log(log::verbose) << "reading LPS from file '" <<  input_filename << "'..." << std::endl;
   }
-  lps::specification spec;
-  load_lps(spec, input_filename);
+  lps::specification lpsspec;
+  load_lps(lpsspec, input_filename);
   mCRL2log(log::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
   std::ifstream instream(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
   if (!instream)
   {
     throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
-  state_formulas::state_formula formula = state_formulas::algorithms::parse_state_formula(instream, spec);
+  // state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(instream, lpsspec);
+  state_formulas::state_formula formspec = state_formulas::algorithms::parse_state_formula(instream, lpsspec);
   instream.close();
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
-  pbes_system::pbes result = pbes_system::lps2pbes(spec, formula, timed, structured, unoptimized, preprocess_modal_operators);
+  pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators);
   if (output_filename.empty())
   {
     mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;

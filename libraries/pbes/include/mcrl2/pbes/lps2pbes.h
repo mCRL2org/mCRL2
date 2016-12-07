@@ -14,12 +14,14 @@
 
 #include <string>
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
+#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
+#include "mcrl2/process/merge_action_specifications.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/is_monotonous.h"
@@ -136,7 +138,7 @@ class lps2pbes_algorithm
     }
 };
 
-/// \brief Translates a linear process specification and a state formulas to a PBES. If the solution of the PBES
+/// \brief Translates a linear process specification and a state formula to a PBES. If the solution of the PBES
 /// is true, the formula holds for the specification.
 /// \param formula A modal formula
 /// \param lpsspec A linear process specification
@@ -145,7 +147,8 @@ class lps2pbes_algorithm
 /// \param unoptimized if true, the resulting PBES is not simplified, if false (default),
 ///        the PBES is simplified.
 /// \return The resulting pbes
-inline pbes lps2pbes(const lps::specification& lpsspec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false)
+inline
+pbes lps2pbes(const lps::specification& lpsspec, const state_formulas::state_formula& formula, bool timed = false, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false)
 {
   if ((formula.has_time() || lpsspec.process().has_time()) && !timed)
   {
@@ -168,6 +171,24 @@ inline pbes lps2pbes(const lps::specification& lpsspec, const state_formulas::st
   {
     return lps2pbes_algorithm().run(formula, lpsspec, structured, unoptimized, preprocess_modal_operators);
   }
+}
+
+/// \brief Translates a linear process specification and a state formula to a PBES. If the solution of the PBES
+/// is true, the formula holds for the specification.
+/// \param formspec A modal formula specification
+/// \param lpsspec A linear process specification
+/// \param timed determines whether the timed or untimed variant of the algorithm is chosen
+/// \param structured use the 'structured' approach of generating equations
+/// \param unoptimized if true, the resulting PBES is not simplified, if false (default),
+///        the PBES is simplified.
+/// \return The resulting pbes
+inline
+pbes lps2pbes(const lps::specification& lpsspec, const state_formulas::state_formula_specification& formspec, bool timed = false, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false)
+{
+  lps::specification lpsspec1 = lpsspec;
+  lpsspec1.data() = data::merge_data_specifications(lpsspec1.data(), formspec.data());
+  lpsspec1.action_labels() = process::merge_action_specifications(lpsspec1.action_labels(), formspec.action_labels());
+  return lps2pbes(lpsspec1, formspec.formula(), timed, structured, unoptimized, preprocess_modal_operators);
 }
 
 /// \brief Applies the lps2pbes algorithm

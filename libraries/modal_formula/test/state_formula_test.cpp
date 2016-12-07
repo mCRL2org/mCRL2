@@ -53,20 +53,23 @@ BOOST_AUTO_TEST_CASE(test_rename)
     ;
 
   using mcrl2::state_formulas::pp;
-  specification spec = remove_stochastic_operators(linearise(SPECIFICATION));
+  specification lpsspec = remove_stochastic_operators(linearise(SPECIFICATION));
 
-  state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
+  state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec);
 
   data::set_identifier_generator generator;
-  generator.add_identifiers(lps::find_identifiers(spec));
+  generator.add_identifiers(lps::find_identifiers(lpsspec));
   formula = rename_predicate_variables(formula, generator);
 
   std::cout << "pp(formula) == " << pp(formula) << std::endl;
   BOOST_CHECK(pp(formula) == "(mu X1. X1) && mu X. X" || pp(formula) == "(mu X. X) && mu X1. X1");
 
   generator = data::set_identifier_generator();
-  generator.add_identifiers(lps::find_identifiers(spec));
-  formula = parse_state_formula("mu X. mu X. X", spec, false);
+  generator.add_identifiers(lps::find_identifiers(lpsspec));
+  parse_state_formula_options options;
+  options.check_monotonicity = false;
+  options.resolve_name_clashes = false;
+  formula = parse_state_formula("mu X. mu X. X", lpsspec, options);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
@@ -100,23 +103,23 @@ BOOST_AUTO_TEST_CASE(test_normalize)
 
 BOOST_AUTO_TEST_CASE(test_type_checking)
 {
-  specification context=remove_stochastic_operators(linearise(
+  specification lpsspec = remove_stochastic_operators(linearise(
                             "sort CPU = struct p1;"
                             "sort CPUs = Set(CPU);"
                             "init delta;"));
 
-  state_formula formula = parse_state_formula("nu X (P : CPUs = {p1}) . val(P != {})", context);
+  state_formula formula = parse_state_formula("nu X (P : CPUs = {p1}) . val(P != {})", lpsspec);
 }
 
 BOOST_AUTO_TEST_CASE(test_type_checking_conversion_of_arguments)
 {
-  specification context=remove_stochastic_operators(linearise(
+  specification lpsspec = remove_stochastic_operators(linearise(
                             "sort B = struct d;"
                             "act a: List(B);"
                             "init a([d]);"
                           ));
 
-  state_formula formula = parse_state_formula("<a([d])>true", context);
+  state_formula formula = parse_state_formula("<a([d])>true", lpsspec);
 
   BOOST_CHECK(is_may(formula));
   const state_formulas::may& f = atermpp::down_cast<state_formulas::may>(formula);
@@ -155,8 +158,8 @@ BOOST_AUTO_TEST_CASE(test_parse)
 
   std::string formula_text = "<a(1)>true";
 
-  lps::specification spec=remove_stochastic_operators(lps::linearise(spec_text));
-  state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
+  lps::specification lpsspec = remove_stochastic_operators(lps::linearise(spec_text));
+  state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, lpsspec);
 
   std::cerr << "--- f ---\n" << state_formulas::pp(f) << "\n\n" << f << std::endl;
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
@@ -167,12 +170,12 @@ BOOST_AUTO_TEST_CASE(test_parse)
 BOOST_AUTO_TEST_CASE(test_count_fixpoints)
 {
   state_formula formula;
-  specification spec;
+  specification lpsspec;
 
-  formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
+  formula = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec);
   BOOST_CHECK_EQUAL(count_fixpoints(formula), 2u);
 
-  formula = parse_state_formula("exists b:Bool. (mu X. X) || forall b:Bool. (nu X. mu Y. (X || Y))", spec);
+  formula = parse_state_formula("exists b:Bool. (mu X. X) || forall b:Bool. (nu X. mu Y. (X || Y))", lpsspec);
   BOOST_CHECK_EQUAL(count_fixpoints(formula), 3u);
 }
 
@@ -223,10 +226,10 @@ state_formula sigma(const state_formula& x)
 
 BOOST_AUTO_TEST_CASE(test_replace_state_formulas)
 {
-  specification spec;
-  state_formula f = parse_state_formula("(mu X. X) && (mu X. X)", spec);
+  specification lpsspec;
+  state_formula f = parse_state_formula("(mu X. X) && (mu X. X)", lpsspec);
   state_formula result = replace_state_formulas(f, sigma);
-  state_formula expected_result = parse_state_formula("(mu X. false) && (mu X. false)", spec);
+  state_formula expected_result = parse_state_formula("(mu X. false) && (mu X. false)", lpsspec);
   if (!(result == expected_result))
   {
     std::cout << "error: " << state_formulas::pp(result) << " != " << state_formulas::pp(expected_result) << std::endl;
@@ -236,13 +239,13 @@ BOOST_AUTO_TEST_CASE(test_replace_state_formulas)
 
 BOOST_AUTO_TEST_CASE(test_find_state_variables)
 {
-  specification spec;
+  specification lpsspec;
 
-  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", spec);
+  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", lpsspec);
   std::set<state_formulas::variable> v = state_formulas::find_state_variables(f);
   BOOST_CHECK(v.size() == 2);
 
-  f = parse_state_formula("mu X. nu Y. (true && mu Z. (X && Y || Z))", spec);
+  f = parse_state_formula("mu X. nu Y. (true && mu Z. (X && Y || Z))", lpsspec);
   v = find_state_variables(f);
   BOOST_CHECK(v.size() == 3);
 
@@ -278,12 +281,12 @@ BOOST_AUTO_TEST_CASE(test_maximal_closed_subformulas)
 {
   mcrl2::log::mcrl2_logger::set_reporting_level(mcrl2::log::debug, "state_formulas");
 
-  specification spec;
-  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", spec);
+  specification lpsspec;
+  state_formula f = parse_state_formula("(mu X. nu Y. true && mu Z. X && Z)", lpsspec);
   std::set<state_formulas::state_formula> v = maximal_closed_subformulas(f);
   BOOST_CHECK(v.size() == 1);
 
-  f = parse_state_formula("exists b: Bool. forall c: Bool. val(b) && (val(c) || true) && false", spec);
+  f = parse_state_formula("exists b: Bool. forall c: Bool. val(b) && (val(c) || true) && false", lpsspec);
   v = maximal_closed_subformulas(f);
   BOOST_CHECK(v.size() == 1);
 

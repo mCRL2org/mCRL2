@@ -13,7 +13,7 @@
 #define MCRL2_MODAL_FORMULA_ALGORITHMS_H
 
 #include <iostream>
-#include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/state_formula_specification.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
@@ -37,6 +37,18 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec);
 /// \param spec A linear process specification
 /// \return The converted modal formula
 state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec);
+
+/// \brief Parses a state formula specification from an input stream
+state_formula_specification parse_state_formula_specification(std::istream& in);
+
+/// \brief Parses a state formula specification from text
+state_formula_specification parse_state_formula_specification(const std::string& text);
+
+/// \brief Parses a state formula specification from an input stream
+state_formula_specification parse_state_formula_specification(std::istream& in, lps::specification& lpsspec);
+
+/// \brief Parses a state formula specification from text
+state_formula_specification parse_state_formula_specification(const std::string& text, lps::specification& lpsspec);
 
 /// \brief Returns true if the state formula is monotonous.
 /// \param f A modal formula

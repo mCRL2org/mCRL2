@@ -50,11 +50,11 @@ class lts2pbes_algorithm
     /// \brief Runs the translation algorithm
     /// \param formula A modal formula
     /// \return The result of the translation
-    pbes run(const state_formulas::state_formula& formula, bool preprocess_modal_operators = false)
+    pbes run(const state_formulas::state_formula_specification& formspec, bool preprocess_modal_operators = false)
     {
       std::set<core::identifier_string> lts_ids;
       std::set<core::identifier_string> lts_variable_names;
-      state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, lts_ids, lts_variable_names, preprocess_modal_operators);
+      state_formulas::state_formula f = state_formulas::preprocess_state_formula(formspec.formula(), lts_ids, lts_variable_names, preprocess_modal_operators);
 
       // initialize progress meter
       std::size_t num_fixpoints = state_formulas::count_fixpoints(f);
@@ -78,12 +78,12 @@ class lts2pbes_algorithm
 /// \brief Translates an LTS and a modal formula into a PBES that represents the corresponding
 /// model checking problem.
 /// \param l A labelled transition system
-/// \param f A modal formula
+/// \param formspec A modal formula specification
 inline
-pbes lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula& f)
+pbes lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula_specification& formspec)
 {
   lts2pbes_algorithm algorithm(l);
-  return algorithm.run(f);
+  return algorithm.run(formspec);
 }
 
 } // namespace pbes_system
