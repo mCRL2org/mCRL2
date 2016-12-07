@@ -158,7 +158,7 @@ std::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool s
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
 /// function symbol.
 /// \param expr A PBES expression
-/// \param split_simple_expressions if true, pbes conjuncts are split, even if
+/// \param split_simple_expr If true, pbes conjuncts are split, even if
 ///        no proposition variables occur. If false, pbes conjuncts are only split
 ///        if a proposition variable occurs somewhere in \a expr.
 /// \note This never splits data conjuncts.

@@ -24,10 +24,12 @@ namespace state_formulas
 {
 
 /// \brief Returns true if the state formula is monotonous.
-/// \param f A modal formula
+/// \param f A modal formula.
+/// \param negated_variables Names of state variable.
 /// \return True if the state formula is monotonous.
 inline
-bool is_monotonous(state_formula f, const std::set<core::identifier_string>& negated_variables)
+bool is_monotonous(state_formula f, 
+                   const std::set<core::identifier_string>& negated_variables)
 {
   using utilities::detail::contains;
 

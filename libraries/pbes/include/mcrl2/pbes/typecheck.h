@@ -232,7 +232,7 @@ class pbes_type_checker
 
      /** \brief     Type check a process expression.
       * Throws a mcrl2::runtime_error exception if the expression is not well typed.
-      *  \param[in] d A process expression that has not been type checked.
+      *  \param[in] x A process expression that has not been type checked.
       *  \return    a process expression where all untyped identifiers have been replace by typed ones.
       **/
     pbes_expression operator()(const pbes_expression& x)
@@ -271,8 +271,9 @@ void type_check_pbes(pbes& pbesspec)
 
 /** \brief     Type check a parsed mCRL2 propositional variable.
  *  Throws an exception if something went wrong.
- *  \param[in] dataspec A data specification.
+ *  \param[in] x A propositional variable.
  *  \param[in] variables A sequence of data variables that may appear in x.
+ *  \param[in] dataspec A data specification.
  *  \return    the type checked expression
  **/
 template <typename VariableContainer>
@@ -301,9 +302,10 @@ propositional_variable type_check_propositional_variable(const propositional_var
 
 /** \brief     Type check a parsed mCRL2 pbes expression.
  *  Throws an exception if something went wrong.
- *  \param[in] dataspec A data specification.
+ *  \param[in] x A pbes expression.
  *  \param[in] variables A sequence of data variables that may appear in x.
  *  \param[in] propositional_variables A sequence of propositional variables that may appear in x.
+ *  \param[in] dataspec A data specification.
  *  \return    the type checked expression
  **/
 template <typename VariableContainer, typename PropositionalVariableContainer>

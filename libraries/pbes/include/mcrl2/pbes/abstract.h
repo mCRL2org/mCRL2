@@ -116,11 +116,12 @@ class pbes_abstract_algorithm
 {
   public:
     /// \brief Runs the algorithm.
-    /// \param p A PBES
+    /// \param p A PBES.
     /// \param parameter_map A map containing the parameters that should be expanded by the algorithm.
+    /// \param value_true An indication whether the abstraction is towards true or towards false.
     void run(pbes& p,
              const detail::pbes_parameter_map& parameter_map,
-             bool value_true
+             bool value_true 
             )
     {
       for (pbes_equation& eqn: p.equations())

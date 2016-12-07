@@ -495,7 +495,7 @@ public:
     explorer(const std::string& filename, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
 
     /// \brief Constructor.
-    /// \param p a PBES.
+    /// \param p_ a PBES.
     /// \param rewrite_strategy String representing the rewrite strategy to use for the data rewriter.
     /// \param reset_flag if set, irrelevant parts of the state vector will be reset to a default value
     /// \param always_split_flag if set, equations will always be split into conjuncts or disjuncts to form transition groups,
@@ -523,9 +523,9 @@ public:
     /// with number <tt>type_no</tt>. Type 0 is reserved for the string representations
     /// of variable names.
     /// The value is added to the store if it is not already present.
-    /// \param type_no the number of the value type.
-    /// \param value a string representation of the data value.
-    /// \return the index of <tt>value</tt> in local store <tt>type_no</tt>.
+    /// \param type_no The number of the value type.
+    /// \param s A string representation of the data value.
+    /// \return The index of <tt>value</tt> in local store <tt>type_no</tt>.
     int get_index(int type_no, const std::string& s);
 
     /// \brief Returns the index of <tt>s</tt> in the local store for string values.

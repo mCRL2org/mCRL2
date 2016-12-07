@@ -834,7 +834,7 @@ variable parse_variable(std::istream& text,
 /// \param[in] in The input stream containing a data expression.
 /// \param[in] variables The variables that can occur in the data expression.
 /// \param[in] data_spec The data specification that is used for type checking.
-/// \param[in] type_chec Indication whether the expression is expected to be type checked.
+/// \param[in] type_check Indication whether the expression is expected to be type checked.
 /// \param[in] translate_user_notation Indication whether user notation such a numbers
 ///                                     must be translated to internal format.
 /// \param[in] normalize_sorts Indication whether the sorts must be rewritten to normal form.
@@ -873,6 +873,10 @@ data_expression parse_data_expression(std::istream& in,
 /// \param[in]  begin The start of a variables that can occur in the data expression.
 /// \param[in]  end   The end of the potentially free variables in the expression.
 /// \param[in] data_spec The data specification that is used for type checking.
+/// \param[in] type_check Indication whether the expression is expected to be type checked.
+/// \param[in] translate_user_notation Indication whether user notation such a numbers
+///                                     must be translated to internal format.
+/// \param[in] normalize_sorts Indication whether the sorts must be rewritten to normal form.
 
 template <typename VariableContainer>
 data_expression parse_data_expression(const std::string& text,
@@ -892,6 +896,10 @@ data_expression parse_data_expression(const std::string& text,
 ///     See parsing a data expression from a string for details.
 /// \param[in] text The input text containing a data expression.
 /// \param[in] data_spec The data specification that is used for type checking.
+/// \param[in] type_check Indication whether the expression is expected to be type checked.
+/// \param[in] translate_user_notation Indication whether user notation such a numbers
+///                                     must be translated to internal format.
+/// \param[in] normalize_sorts Indication whether the sorts must be rewritten to normal form.
 inline
 data_expression parse_data_expression(std::istream& text,
                                       const data_specification& data_spec = detail::default_specification(),
@@ -908,6 +916,10 @@ data_expression parse_data_expression(std::istream& text,
 ///     See parsing a data expression from a string for details.
 /// \param[in] text The input text containing a data expression.
 /// \param[in] data_spec The data specification that is used for type checking.
+/// \param[in] type_check Indication whether the expression is expected to be type checked.
+/// \param[in] translate_user_notation Indication whether user notation such a numbers
+///                                     must be translated to internal format.
+/// \param[in] normalize_sorts Indication whether the sorts must be rewritten to normal form.
 inline
 data_expression parse_data_expression(const std::string& text,
                                       const data_specification& data_spec = detail::default_specification(),

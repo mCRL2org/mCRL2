@@ -318,13 +318,21 @@ state_formula_specification parse_state_formula_specification(const std::string&
 /// \brief Parses a state formula from an input stream
 // spec may be updated as the data implementation of the state formula
 // may cause internal names to change.
-/// \param formula_stream A stream from which can be read
-/// \param spec A linear process specification
+/// \param in A stream from which can be read.
+/// \param spec A linear process specification.
 /// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous. Furthermore, name clashes are resolved.
+/// \param translate_regular True if the regular expressions must be replaced by modal mu formulas.
+/// \param type_check True to indicate that typechecking must take place.
+/// \param translate_user_notation True to indicate that user constants like number and lists must be translated to internal format.
 /// \return The converted modal formula
 inline
-state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity = true, bool translate_regular = true,
-                                  bool type_check = true, bool translate_user_notation = true)
+state_formula parse_state_formula(
+              std::istream& in, 
+              lps::specification& spec, 
+              bool check_monotonicity = true, 
+              bool translate_regular = true,
+              bool type_check = true, 
+              bool translate_user_notation = true)
 {
   std::string text = utilities::read_text(in);
   state_formula x = detail::parse_state_formula(text);

@@ -246,9 +246,9 @@ struct normalize_builder: public state_formula_builder<normalize_builder>
 };
 /// \endcond
 
-/// \brief Checks if a state formula is normalized
-/// \param t A PBES expression
-/// \return True if the state formula is normalized
+/// \brief Checks if a state formula is normalized.
+/// \param x A PBES expression.
+/// \return True if the state formula is normalized.
 template <typename T>
 bool is_normalized(const T& x)
 {
@@ -259,7 +259,8 @@ bool is_normalized(const T& x)
 
 /// \brief The function normalize brings (embedded) state formulas into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
-/// \param x an object containing state formulas
+/// \param x an object containing state formulas.
+/// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
 void normalize(T& x, bool negated, typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type*)
 {
@@ -270,6 +271,7 @@ void normalize(T& x, bool negated, typename std::enable_if< !std::is_base_of< at
 /// \brief The function normalize brings (embedded) state formulas into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
 /// \param x an object containing state formulas
+/// \param negated Indication whether the formula must be interpreted as being negated.
 template <typename T>
 T normalize(const T& x, bool negated, typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type*)
 {

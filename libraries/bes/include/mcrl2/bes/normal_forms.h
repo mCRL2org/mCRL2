@@ -127,7 +127,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     }
 
     /// \brief Constructor.
-    /// \param Determines whether or not the result will be in standard recursive normal form.
+    /// \param recursive_form Determines whether or not the result will be in standard recursive normal form.
     standard_form_traverser(bool recursive_form = false)
       : m_recursive_form(recursive_form),
         m_has_true(false),
@@ -157,8 +157,8 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       return m_equations;
     }
 
-    /// \brief Enter true node
-    /// \param e A term
+    /// \brief Enter true node.
+    /// \param x A term.
     void enter(const true_& /* x */)
     {
       m_has_true = true;
@@ -173,15 +173,14 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       push(m_false, standard_form_both);
     }
 
-    /// \brief Enter propositional_variable node
-    /// \param e A term
-    /// \param X A propositional variable
+    /// \brief Enter boolean_variable node.
+    /// \param x A boolean variable.
     void enter(const boolean_variable& x)
     {
       push(x, standard_form_both);
     }
 
-    /// \brief Leave not node
+    /// \brief Leave not node.
     void leave(const not_& /* x */)
     {
       throw mcrl2::runtime_error("negation is not supported in standard recursive form algorithm");

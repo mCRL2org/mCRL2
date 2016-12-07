@@ -38,9 +38,9 @@ struct state_variable_negator: public state_formulas::state_formula_builder<Deri
     : m_name(name)
   {}
 
-  /// \brief Visit variable node
-  /// \param x A term
-  /// \return The result of visiting the node
+  /// \brief Visit variable node.
+  /// \param x A term.
+  /// \return The result of visiting the node.
   state_formula apply(const variable& x)
   {
     if (x.name() == m_name)
@@ -55,7 +55,8 @@ struct state_variable_negator: public state_formulas::state_formula_builder<Deri
 
 inline
 /// \brief Negates variable instantiations in a state formula with a given name.
-/// \param name The name of the variables that should be negated
+/// \param name The name of the variables that should be negated.
+/// \param x The state formula. 
 state_formula negate_variables(const core::identifier_string& name, const state_formula& x)
 {
   return core::make_apply_builder_arg1<detail::state_variable_negator>(name).apply(x);

@@ -124,6 +124,7 @@ class boolean_equation_system
 
     /// \brief Reads the boolean equation system from a stream.
     /// \param stream The stream to read from.
+    /// \param binary An indicaton whether the stream is in binary format.
     /// \param source The source from which the stream originates. Used for error messages.
     void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {

@@ -250,6 +250,7 @@ class pbes
 
     /// \brief Reads the parameterized boolean equation system from a stream.
     /// \param stream The stream to read from.
+    /// \param binary An indicator whether the stream is binary or textual.
     /// \param source The source from which the stream originates. Used for error messages.
     void load(std::istream& stream, bool binary=true, const std::string& source = "")
     {
@@ -271,12 +272,11 @@ class pbes
       assert(is_well_typed());
     }
 
-    /// \brief Writes the pbes to file.
+    /// \brief Writes the pbes to a stream.
+    /// \param stream The stream to which the pbes is written.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    /// \param filename A string
-    /// \param no_well_typedness_check If true the well typedness check is skipped.
     void save(std::ostream& stream, bool binary = true) const
     {
       atermpp::aterm term = pbes_system::detail::remove_index(pbes_to_aterm(*this));

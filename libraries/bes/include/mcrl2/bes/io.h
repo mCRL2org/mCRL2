@@ -86,10 +86,9 @@ void save_bes_cwi(const pbes_system::pbes& bes, std::ostream& stream);
 /// \param bes The bes to be stored
 /// \param stream The name of the file to which the output is stored.
 /// \param format Determines the format in which the result is written.
-/// \param aterm_ascii Determines, if output_format is bes, whether the file
-///        is written is ascii format.
 inline
-void save_bes(const boolean_equation_system& bes, std::ostream& stream,
+void save_bes(const boolean_equation_system& bes, 
+              std::ostream& stream,
               const utilities::file_format* format)
 {
   if (format == utilities::file_format::unknown())
@@ -207,8 +206,8 @@ void save_bes(const boolean_equation_system &bes, const std::string &filename,
 /// \brief Loads a BES from a file.
 /// \param bes The object in which the result is stored.
 /// \param filename The file from which to load the BES.
-///
-/// The format of the file in infilename is guessed.
+/// \param format An indication of the file format. If this is file_format::unknown() the 
+///        format of the file in infilename is guessed.
 inline
 void load_bes(boolean_equation_system& bes, const std::string& filename, const utilities::file_format* format=utilities::file_format::unknown())
 {
@@ -223,8 +222,8 @@ void load_bes(boolean_equation_system& bes, const std::string& filename, const u
 /// \brief Loads a PBES from a file. If the file stores a BES, then it is converted to a PBES.
 /// \param pbes The object in which the result is stored.
 /// \param filename The file from which to load the PBES.
-///
-/// The format of the file in infilename is guessed.
+/// \param format An indication of the file format. If this is file_format::unknown() the 
+///        format of the file in infilename is guessed.
 inline
 void load_pbes(pbes_system::pbes& pbes, const std::string& filename,
                const utilities::file_format* format=utilities::file_format::unknown())

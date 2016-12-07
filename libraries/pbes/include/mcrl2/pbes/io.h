@@ -78,12 +78,13 @@ const utilities::file_format* guess_format(const std::string& filename)
 ///
 /// \brief Save a PBES in the format specified.
 /// \param pbes The PBES to be stored
-/// \param filename The name of the file to which the output is stored.
+/// \param stream The stream to which the output is saved.
 /// \param format Determines the format in which the result is written. If unspecified, or
 ///        pbes_file_unknown is specified, then a default format is chosen.
 ///
 inline
-void save_pbes(const pbes& pbes, std::ostream& stream,
+void save_pbes(const pbes& pbes, 
+               std::ostream& stream,
                const utilities::file_format* format=utilities::file_format::unknown())
 {
   if (format == utilities::file_format::unknown())

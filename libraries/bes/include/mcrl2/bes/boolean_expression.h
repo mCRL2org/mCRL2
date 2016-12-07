@@ -619,8 +619,8 @@ struct term_traits<bes::boolean_expression>
   }
 
   /// \brief Operator not
-  /// \param p A term
-  /// \return Operator not applied to p
+  /// \param x A term
+  /// \return Operator not applied to 
   static inline
   bes::boolean_expression not_(const bes::boolean_expression& x)
   {
