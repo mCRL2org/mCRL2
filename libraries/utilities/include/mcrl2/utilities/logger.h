@@ -310,11 +310,14 @@ public:
   /// \param[in] timestamp The timestamp of the log message
   /// \param[in] msg The message to be formatted
   /// \return The formatted message (\a msg)
-  static std::string format(const log_level_t /*level*/, const std::string& /*hint*/, const time_t /*timestamp*/, const std::string& msg)
+  static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
   {
+    /// suppress non used variable warnings.
+    (void)level; (void)hint; (void)timestamp;
+
     return msg;
   }
-};
+}; 
 
 /// \brief Mixin that takes care of formatting of a message.
 ///

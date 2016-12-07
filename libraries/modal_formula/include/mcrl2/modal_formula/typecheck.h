@@ -517,14 +517,13 @@ class state_formula_type_checker
     detail::state_variable_context m_state_variable_context;
 
   public:
-    /** \brief     Type check a state formula.
-     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-     *  \param[in] d A state formula that has not been type checked.
-     *  \param[in] check_monotonicity Check whether the formula is monotonic, in the sense that no fixed point
-     *             variable occurs in the scope of an odd number of negations.
-     *  \return    a state formula where all untyped identifiers have been replace by typed ones.
+    /** \brief     Contructor for a typechecker for a state formula. 
+     *  \param[in] dataspec A data specification.
+     *  \param[in] action_labels A container with declared action labels.
+     *  \param[in] variables A container with declared variables.
      **/
-    template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
+    template <typename ActionLabelContainer = std::vector<state_formulas::variable>, 
+              typename VariableContainer = std::vector<data::variable> >
     state_formula_type_checker(const data::data_specification& dataspec,
                                const ActionLabelContainer& action_labels = ActionLabelContainer(),
                                const VariableContainer& variables = VariableContainer()

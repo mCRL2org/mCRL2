@@ -193,10 +193,11 @@ T replace_free_variables(const T& x,
 }
 '''
 
-REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT = '''/// \\\\brief Applies sigma as a capture avoiding substitution to x
-/// \\\\param sigma A mutable substitution
-/// \\\\param sigma_variables a container of variables
-/// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
+REPLACE_CAPTURE_AVOIDING_FUNCTION_TEXT = '''/// \\\\brief Applies sigma as a capture avoiding substitution to x.
+/// \\\\param x The object to which the subsitution is applied.
+/// \\\\param sigma A mutable substitution.
+/// \\\\param sigma_variables a container of variables.
+/// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
 template <typename T, typename Substitution, typename VariableContainer>
 void replace_variables_capture_avoiding(T& x,
                        Substitution& sigma,
@@ -210,10 +211,11 @@ void replace_variables_capture_avoiding(T& x,
   data::detail::apply_replace_capture_avoiding_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::detail::add_capture_avoiding_replacement>(sigma, V).update(x);
 }
 
-/// \\\\brief Applies sigma as a capture avoiding substitution to x
-/// \\\\param sigma A mutable substitution
-/// \\\\param sigma_variables a container of variables
-/// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }
+/// \\\\brief Applies sigma as a capture avoiding substitution to x.
+/// \\\\brief x The object to which the substiution is applied.
+/// \\\\param sigma A mutable substitution.
+/// \\\\param sigma_variables a container of variables.
+/// \\\\pre { sigma_variables must contain the free variables appearing in the right hand side of sigma }.
 template <typename T, typename Substitution, typename VariableContainer>
 T replace_variables_capture_avoiding(const T& x,
                     Substitution& sigma,
