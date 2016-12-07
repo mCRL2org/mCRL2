@@ -21,6 +21,28 @@ class untime_tool: public input_output_tool
 
     typedef input_output_tool super;
 
+    bool add_invariants;
+
+    /// Parse the non-default options.
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+
+      if (parser.options.count("invariant")>0)
+      {
+        add_invariants = true;
+      }
+    }
+
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.
+      add_option("invariant",
+                 "add invariants for parameters of type real to the output",
+                 'i');
+    }
+
   public:
 
     untime_tool()
@@ -30,12 +52,13 @@ class untime_tool: public input_output_tool
         "remove time from an LPS",
         "Remove time from the linear process specification (LPS) in INFILE and write the "
         "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not "
-        "present, stdout is used.")
+        "present, stdout is used."),
+      add_invariants(false)
     {}
 
     bool run()
     {
-      mcrl2::lps::lpsuntime(m_input_filename, m_output_filename);
+      mcrl2::lps::lpsuntime(m_input_filename, m_output_filename, add_invariants);
       return true;
     }
 

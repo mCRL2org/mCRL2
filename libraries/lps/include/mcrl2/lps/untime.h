@@ -49,6 +49,8 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
   typedef typename process_type::action_summand_type action_summand_type;
   using super::m_spec;
 
+  bool m_add_invariants;
+
   protected:
     /// \brief Variable denoting the time at which the last action occurred
     data::variable m_last_action_time;
@@ -165,8 +167,9 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
 
 
   public:
-    untime_algorithm(Specification& spec)
-      : detail::lps_algorithm<Specification>(spec)
+    untime_algorithm(Specification& spec, bool add_invariants)
+      : detail::lps_algorithm<Specification>(spec),
+      m_add_invariants(add_invariants)
     {
       m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
     }
@@ -187,7 +190,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         mCRL2log(log::verbose) << "Introduced variable " << data::pp(m_last_action_time) << " to denote time of last action" << std::endl;
 
         // Should happen before updating the process
-        m_time_invariant = calculate_time_invariant();
+        m_time_invariant = m_add_invariants ? calculate_time_invariant() : (data::data_expression) data::sort_bool::true_();
 
         m_spec.process().process_parameters()=push_back(m_spec.process().process_parameters(),m_last_action_time);
         data::assignment_list init = m_spec.initial_process().assignments();

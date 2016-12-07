@@ -80,7 +80,8 @@ void lpssuminst(const std::string& input_filename,
                 const bool tau_summands_only);
 
 void lpsuntime(const std::string& input_filename,
-               const std::string& output_filename);
+               const std::string& output_filename,
+               const bool add_invariants);
 
 void txt2lps(const std::string& input_filename,
              const std::string& output_filename

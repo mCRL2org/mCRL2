@@ -280,11 +280,12 @@ void lpssuminst(const std::string& input_filename,
 }
 
 void lpsuntime(const std::string& input_filename,
-               const std::string& output_filename)
+               const std::string& output_filename,
+               const bool add_invariants)
 {
   stochastic_specification spec;
   load_lps(spec, input_filename);
-  untime_algorithm<stochastic_specification>(spec).run();
+  untime_algorithm<stochastic_specification>(spec, add_invariants).run();
   save_lps(spec, output_filename);
 }
 
