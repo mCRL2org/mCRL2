@@ -259,11 +259,13 @@ requirements:
       
      Save the key to the default location (``$HOME/.ssh/id_rsa``) and do
      **not** enter a passphrase (simply hit enter when prompted, twice).
+
   #. Upload the **public** key of the account's SSH key pair to the webserver::
   
        scp ~/.ssh/id_rsa.pub mcrl2@www.win.tue.nl:~/
             
      You will need to enter the password for the ``mcrl2`` web account here.
+
   #. Login to the webserver, append the uploaded key to the list of authorized
      keys and remove the key file::
      

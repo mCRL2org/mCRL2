@@ -303,10 +303,9 @@ void type_check_sort_expression(const sort_expression& sort_expr, const data_spe
 
 /** \brief     Type check a data expression.
  *  Throws an exception if something went wrong.
- *  \param[in] data_expr A data expression that has not been type checked.
- *  \param[in] first The start of a variables that can occur in the data expression.
- *  \param[in] last  The end of the potentially free variables in the expression.
- *  \param[in] data_spec The data specification that is used for type checking.
+ *  \param[in] x A data expression that has not been type checked.
+ *  \param[in] variables A container with variables that can occur in the data expression.
+ *  \param[in] dataspec The data specification that is used for type checking.
  *  \post      data_expr is type checked.
  **/
 template <typename VariableContainer>
@@ -330,8 +329,8 @@ data_expression type_check_data_expression(const data_expression& x,
 
 /** \brief     Type check a data expression.
  *  Throws an exception if something went wrong.
- *  \param[in] data_expr A data expression that has not been type checked.
- *  \param[in] data_spec Data specification to be used as context.
+ *  \param[in] x A data expression that has not been type checked.
+ *  \param[in] dataspec Data specification to be used as context.
  *  \post      data_expr is type checked.
  **/
 inline

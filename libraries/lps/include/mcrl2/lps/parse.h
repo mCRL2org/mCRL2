@@ -291,15 +291,16 @@ void parse_lps<specification>(std::istream& from, specification& result)
   result = parse_linear_process_specification(from);
 }
 
-/// \brief Parses a stochastic linear process specification from an input stream
-/// \param spec_stream An input stream containing a linear process specification
-/// \return The parsed specification
+/// \brief Parses a stochastic linear process specification from an input stream.
+/// \param from An input stream containing a linear process specification.
+/// \param result An output parameter in which the parsed stochastic process is put. 
+/// \return The parsed specification.
 /// \exception non_linear_process if a non-linear sub-expression is encountered.
 /// \exception mcrl2::runtime_error in the following cases:
-/// \li The number of equations is not equal to one
-/// \li The initial process is not a process instance, or it does not match with the equation
+/// \li The number of equations is not equal to one.
+/// \li The initial process is not a process instance, or it does not match with the equation.
 /// \li A sequential process is found with a right hand side that is not a process instance,
-/// or it doesn't match the equation
+/// or it doesn't match the equation.
 template <>
 inline
 void parse_lps<stochastic_specification>(std::istream& from, stochastic_specification& result)

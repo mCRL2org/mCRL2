@@ -242,11 +242,14 @@ class next_state_generator
 
   public:
     /// \brief Constructor
-    /// \param specification The process specification
+    /// \param spec The process specification
     /// \param rewriter The rewriter used
     /// \param use_enumeration_caching Cache intermediate enumeration results
     /// \param use_summand_pruning Preprocess summands using pruning strategy.
-    next_state_generator(const stochastic_specification& spec, const data::rewriter& rewriter, bool use_enumeration_caching = false, bool use_summand_pruning = false);
+    next_state_generator(const stochastic_specification& spec, 
+                         const data::rewriter& rewriter, 
+                         bool use_enumeration_caching = false, 
+                         bool use_summand_pruning = false);
 
     ~next_state_generator();
 

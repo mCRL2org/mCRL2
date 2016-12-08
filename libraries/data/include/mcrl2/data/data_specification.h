@@ -863,7 +863,7 @@ data_equation_vector find_equations(data_specification const& specification, con
 //          Subsequently, the other data types with a finite number of elements are listed, in arbitrary sequence. At the
 //          end all other variables are put in an arbitrary sequence.
 /// \param[in] l A list of variables that are to be sorted.
-/// \param[in] d A data specification containing the constructors that are used to determine efficiency.
+/// \param[in] data_spec A data specification containing the constructors that are used to determine efficiency.
 /// \return The same list of variables but ordered in such a way that
 
 

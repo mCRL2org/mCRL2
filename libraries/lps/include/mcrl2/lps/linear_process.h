@@ -105,7 +105,8 @@ class linear_process_base
     { }
 
     /// \brief Constructor.
-    /// \param lps A term
+    /// \param lps A term.
+    /// \param stochastic_distributions_allowed True when stochastic processes are allowed
     linear_process_base(const atermpp::aterm_appl& lps, bool stochastic_distributions_allowed = true)
     {
       using atermpp::down_cast;

@@ -934,15 +934,21 @@ class pins
     /// - edge_labels is an array of edge labels
     /// - group is the number of the summand from which the next state was generated, or -1 if it is unknown which summand
     ///
-    /// \param src An LTSMin state
-    /// \param group the number of the summand, which
+    /// \param src An LTSMin state.
+    /// \param group the number of the summand.
+    /// \param f A state function.
     /// \param dest A destination state, which is modified and passed to the callback.
     ///        Must provide space for at least process_parameter_count() items.
     /// \param labels An array of labels, which is modified and passed to the callback.
     ///        Must provide space for at least edge_label_count() items.
     /// \param generator The next state generator to use.
     template <typename StateFunction>
-    void _long(ltsmin_state_type const& src, std::size_t group, StateFunction& f, ltsmin_state_type const& dest, int* const& labels, lps::next_state_generator* generator)
+    void _long(ltsmin_state_type const& src, 
+               std::size_t group, 
+               StateFunction& f, 
+               const ltsmin_state_type& dest, 
+               int* const& labels, 
+               lps::next_state_generator* generator)
     {
       std::size_t nparams = process_parameter_count();
       data::data_expression_vector state_arguments(nparams);

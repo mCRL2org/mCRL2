@@ -38,7 +38,9 @@ class state_probability_pair
     PROBABILITY m_probability;
   public:
 
-    /// \Brief constructor
+    /// \brief constructor.
+    /// \param state The state.
+    /// \param probability The probability of the occurrence of this state. 
     state_probability_pair(const STATE& state, const PROBABILITY& probability)
      : m_state(state), 
        m_probability(probability)

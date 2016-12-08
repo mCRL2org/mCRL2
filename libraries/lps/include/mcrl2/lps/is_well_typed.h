@@ -98,24 +98,27 @@ struct lps_well_typed_checker
     return true;
   }
 
-  /// \brief Checks well typedness of a sort expression
-  /// \param d A sort expression
-  bool is_well_typed(const data::sort_expression&) const
+  /// \brief Checks well typedness of a sort expression.
+  /// \param d A sort expression.
+  bool is_well_typed(const data::sort_expression& d) const
   {
+    (void)d; // Suppress an unused variable warning.
     return true;
   }
 
-  /// \brief Checks well typedness of a variable
-  /// \param d A variable
-  bool is_well_typed(const data::variable&) const
+  /// \brief Checks well typedness of a variable.
+  /// \param d A variable.
+  bool is_well_typed(const data::variable& d) const
   {
+    (void)d; // Suppress an unused variable warning.
     return true;
   }
 
   /// \brief Checks well typedness of a data expression
   /// \param d A data expression
-  bool is_well_typed(const data::data_expression&) const
+  bool is_well_typed(const data::data_expression& d) const
   {
+    (void)d; // Suppress an unused variable warning.
     return true;
   }
 
@@ -132,16 +135,19 @@ struct lps_well_typed_checker
     return true;
   }
 
-  /// \brief Traverses an action label
-  bool is_well_typed(const process::action_label&) const
+  /// \brief Traverses an action label.
+  /// \param d An action label.
+  bool is_well_typed(const process::action_label& d) const
   {
+    (void)d; // Suppress an unused variable warning.
     return true;
   }
 
-  /// \brief Traverses an action
-  /// \param a An action
-  bool is_well_typed(const process::action&) const
+  /// \brief Traverses an action.
+  /// \param a An action.
+  bool is_well_typed(const process::action& a) const
   {
+    (void)a; // Suppress an unused variable warning.
     return true;
   }
 
@@ -215,7 +221,7 @@ struct lps_well_typed_checker
   }
 
   /// \brief Checks well typedness of a process_initializer
-  /// \param s A process_initializer
+  /// \param i A process_initializer
   /// <ul>
   /// <li>the left hand sides of the data assignments are unique</li>
   /// </ul>
@@ -280,8 +286,9 @@ struct lps_well_typed_checker
     return true;
   }
 
-  /// \brief Checks well typedness of a linear process specification
-  /// \param spec A linear process specification
+  /// \brief Checks well typedness of a linear process specification.
+  /// \param spec A linear process specification.
+  /// \param free_variables Free variables that can be used.
   /// \return True if
   /// <ul>
   /// <li>the sorts occurring in the summation variables are declared in the data specification</li>
@@ -297,7 +304,8 @@ struct lps_well_typed_checker
   /// <li>the global variables have unique names</li>
   /// </ul>
   template <typename LinearProcess, typename InitialProcessExpression>
-  bool is_well_typed(const specification_base<LinearProcess, InitialProcessExpression>& spec, const std::set<data::variable>& free_variables) const
+  bool is_well_typed(const specification_base<LinearProcess, InitialProcessExpression>& spec, 
+                     const std::set<data::variable>& free_variables) const
   {
     std::set<data::sort_expression> declared_sorts = data::detail::make_set(spec.data().sorts());
     std::set<process::action_label> declared_labels = data::detail::make_set(spec.action_labels());

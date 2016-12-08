@@ -1228,8 +1228,7 @@ void fourier_motzkin(const std::vector < linear_inequality >& inequalities_in,
 ///          The vector inequalities might be changed within the procedure, but
 ///          will be restored to its original value when this function terminates.
 /// \param inequalities A list of inequalities
-/// \param resulting_inequalities A list of inequalities to which the result is stored.
-///                               Initially this list must be empty.
+/// \param i An iterator pointing into \a inequalities. 
 /// \param r A rewriter
 /// \return An indication whether the inequality referred to by i is inconsistent
 ///      in the context of inequalities.
@@ -1764,7 +1763,7 @@ namespace detail
 }
 
 
-/// \brief Determine whether a list of data expressions is inconsistent
+/// \brief Determine whether a list of data expressions is inconsistent.
 /// \details First it is checked whether false is among the input. If
 ///          not, Fourier-Motzkin is applied to all variables in the
 ///          inequalities. If the empty vector of equalities is the result,
@@ -1773,12 +1772,11 @@ namespace detail
 ///          The implementation uses a feasible point detection algorithm as described by
 ///          Bruno Dutertre and Leonardo de Moura. Integrating Simplex with DPLL(T).
 ///          CSL Technical Report SRI-CSL-06-01, 2006.
-/// \param inequalities A list of inequalities
-/// \param r A rewriter
+/// \param inequalities_in A list of inequalities.
+/// \param r A rewriter.
+/// \param use_cache A boolean indicating whether results can be cahced. 
 /// \return true if the system of inequalities can be determined to be
 ///      inconsistent, false otherwise.
-
-
 inline bool is_inconsistent(
   const std::vector < linear_inequality >& inequalities_in,
   const rewriter& r,

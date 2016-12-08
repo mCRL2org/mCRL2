@@ -152,7 +152,7 @@ class lpsparunfold
     /** \brief  Creates the needed equations for the unfolded process parameter. The equations are added to m_data_specification.
       * \param  pi set of projection functions.
       * \param  case_function the case function.
-      * \param  set_of_new_sorts set of fresh sorts.
+      * \param  elements_of_new_sorts set of fresh sorts.
       * \param  k vector of affected constructors.
       * \param  determine_function the determine function.
       * \return A set of equations for the unfolded process parameter.
@@ -213,7 +213,7 @@ class lpsparunfold
 
     /** \brief substitute unfold process parameter in the linear process
       * \param  case_function the case function
-      * \param  k vector of affected constructors
+      * \param  affected_constructors vector of affected constructors
       * \param  determine_function the determine function
       * \param  parameter_at_index the parameter index
       * \param  pi the projection functions

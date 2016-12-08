@@ -833,13 +833,12 @@ variable parse_variable(std::istream& text,
 ///     else.
 /// \param[in] in The input stream containing a data expression.
 /// \param[in] variables The variables that can occur in the data expression.
-/// \param[in] data_spec The data specification that is used for type checking.
+/// \param[in] dataspec The data specification that is used for type checking.
 /// \param[in] type_check Indication whether the expression is expected to be type checked.
 /// \param[in] translate_user_notation Indication whether user notation such a numbers
 ///                                     must be translated to internal format.
 /// \param[in] normalize_sorts Indication whether the sorts must be rewritten to normal form.
 /// \returns The parsed data expression. 
-
 template <typename VariableContainer>
 data_expression parse_data_expression(std::istream& in,
                                       const VariableContainer& variables,
@@ -870,14 +869,12 @@ data_expression parse_data_expression(std::istream& in,
 /// \details
 ///     See parsing a data expression from a string for details.
 /// \param[in] text The input text containing a data expression.
-/// \param[in]  begin The start of a variables that can occur in the data expression.
-/// \param[in]  end   The end of the potentially free variables in the expression.
+/// \param[in] variables A container with variables that can occur in the data expression.
 /// \param[in] data_spec The data specification that is used for type checking.
 /// \param[in] type_check Indication whether the expression is expected to be type checked.
 /// \param[in] translate_user_notation Indication whether user notation such a numbers
 ///                                     must be translated to internal format.
 /// \param[in] normalize_sorts Indication whether the sorts must be rewritten to normal form.
-
 template <typename VariableContainer>
 data_expression parse_data_expression(const std::string& text,
                                       const VariableContainer& variables,

@@ -88,17 +88,15 @@ class action_rename_type_checker
     }
 
   public:
-    /** \brief Constructs an action type checker.
-    *  \param[in] dataspec A data specification that does not need to have been type checked.
-    *  \param[in] action_labels A container of action declarations
-    *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+    /** \brief Default constructor for an action rename type checker.
     **/
     action_rename_type_checker()
       : m_data_type_checker(data::data_specification())
     {}
 
-    /** \brief    Type check an action_rename_specification;
+    /** \brief    Type check an action_rename_specification.
     *  \param[in] arspec An action rename specification that has not been type checked.
+    *  \param[in] lpsspec A linear specification with data, action and global variable declarations.
     *  \return    a action rename specification where all untyped identifiers have been replace by typed ones.
     **/
     action_rename_specification operator()(const action_rename_specification& arspec, const stochastic_specification& lpsspec)
