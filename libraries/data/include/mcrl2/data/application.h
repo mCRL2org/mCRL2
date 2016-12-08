@@ -33,20 +33,20 @@ namespace data
 namespace detail
 {
 
-/// \brief Iterator for term_appl which prepends a data_expression to a list convertible to data_expressions.
+// Iterator for term_appl which prepends a data_expression to a list convertible to data_expressions.
 template <class ForwardIterator >
 class term_appl_prepend_iterator
 {
   public:
-    /// \brief The value_type.
+    // The value_type.
     typedef data_expression value_type;
-    /// \brief The reference type.
+    // The reference type.
     typedef const data_expression& reference;
-    /// \brief The pointer type.
+    // The pointer type.
     typedef const data_expression* pointer;
-    /// \brief Difference type
+    // Difference type
     typedef ptrdiff_t difference_type;
-    /// \brief The iterator category.
+    // The iterator category.
     typedef std::forward_iterator_tag iterator_category;
 
   protected:
@@ -69,25 +69,23 @@ class term_appl_prepend_iterator
 
   public:
 
-    /// \brief Constructor.
-    /// \param t A term
+    // Constructor.
     term_appl_prepend_iterator(ForwardIterator it,
                                pointer prepend=nullptr)
       : m_it(it), m_prepend(prepend)
     {}
 
 
-    /// \brief The copy constructor.
-    /// \param other The iterator that is copy constructed.
+    // The copy constructor.
     term_appl_prepend_iterator(const term_appl_prepend_iterator& other)
       : m_it(other.m_it),
         m_prepend(other.m_prepend)
     {
     }
 
-    /// \brief The assignment operator.
-    /// \param other The term to be assigned.
-    /// \return A reference to the assigned iterator.
+    // The assignment operator.
+    // other The term to be assigned.
+    // Returns a reference to the assigned iterator.
     term_appl_prepend_iterator& operator=(const term_appl_prepend_iterator& other)
     {
       m_it=other.m_it;
@@ -95,8 +93,8 @@ class term_appl_prepend_iterator
       return *this;
     }
 
-    /// \brief The dereference operator.
-    /// \return The dereferenced term.
+    // The dereference operator.
+    // Return the dereferenced term.
     reference operator*() const
     {
       if (m_prepend)
@@ -106,8 +104,7 @@ class term_appl_prepend_iterator
       return *(this->m_it);
     }
 
-    /// \brief Dereference the current iterator.
-    /// \return The dereference term.
+    // Dereference the current iterator.
     pointer operator->() const
     {
       if (m_prepend)
@@ -117,8 +114,8 @@ class term_appl_prepend_iterator
       return &*(this->m_it);
     }
 
-    /// \brief Prefix increment.
-    /// \return The iterator after it is incremented.
+    // Prefix increment.
+    // Returns the iterator after it is incremented.
     term_appl_prepend_iterator& operator++()
     {
       if (m_prepend)
@@ -132,49 +129,37 @@ class term_appl_prepend_iterator
       return *this;
     }
 
-    /// \brief Equality of iterators.
-    /// \param other The iterator with which this iterator is compared.
-    /// \return true if the iterators point to the same term_list.
+    // Equality of iterators.
     bool operator ==(const term_appl_prepend_iterator& other) const
     {
       return m_prepend==other.m_prepend && this->m_it==other.m_it;
     }
 
-    /// \brief Inequality of iterators.
-    /// \param other The iterator with which this iterator is compared.
-    /// \return true if the iterators do not point to the same term_appl.
+    // Inequality of iterators.
     bool operator !=(const term_appl_prepend_iterator& other) const
     {
       return !(*this==other);
     }
 
-    /// \brief Comparison of iterators.
-    /// \param other The iterator with which this iterator is compared.
-    /// \return true if the pointer to this termterm is smaller than the other pointer.
+    // Comparison of iterators.
     bool operator <(const term_appl_prepend_iterator& other) const
     {
       return m_prepend < other.m_prepend || (m_prepend==other.m_prepend && this->m_it<other.m_it);
     }
 
-    /// \brief Comparison of iterators.
-    /// \param other The iterator with which this iterator is compared.
-    /// \return true if the iterators point to the same term_appl.
+    // Comparison of iterators.
     bool operator <=(const term_appl_prepend_iterator& other) const
     {
       return m_prepend < other.m_prepend || (m_prepend==other.m_prepend && this->m_it<=other.m_it);
     }
 
-    /// \brief Comparison of iterators.
-    /// \param other The iterator with which this iterator is compared.
-    /// \return true if the iterators point to the same term_appl.
+    // Comparison of iterators.
     bool operator >(const term_appl_prepend_iterator& other) const
     {
       return other<*this;
     }
 
-    /// \brief Comparison of iterators.
-    /// \param other The iterator with which this iterator is compared.
-    /// \return true if the iterators point to the same term_appl.
+    // Comparison of iterators.
     bool operator >=(const term_appl_prepend_iterator& other) const
     {
       return other<=*this;
@@ -194,7 +179,9 @@ class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator
   public:
 
     /// \brief Constructor.
-    /// \param t A term
+    /// \param it Iterator pointing to the argument list.
+    /// \param prepend Pointer to a term to be prepended to the argument list.
+    /// \param arg_convert A function that is applied to the terms in the argument list.
     transforming_term_appl_prepend_iterator(ForwardIterator it,
                                             const data_expression* prepend,
                                             const ArgumentConverter arg_convert)

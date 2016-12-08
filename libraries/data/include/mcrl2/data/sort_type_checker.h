@@ -47,7 +47,7 @@ class sort_type_checker
 
     /** \brief     Type check a sort expression.
     *  Throws an exception if the expression is not well typed.
-    *  \param[in] s A sort expression that has not been type checked.
+    *  \param[in] x A sort expression that has not been type checked.
     **/
     void operator()(const sort_expression& x) const
     {

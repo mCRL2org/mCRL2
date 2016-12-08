@@ -319,7 +319,7 @@ class enumerator_identifier_generator
 
   public:
     /// \brief Constructor
-    /// \param The prefix of the generated generated strings
+    /// \param prefix The prefix of the generated generated strings
     /// \pre The prefix may not be empty, and it may not have trailing digits
     enumerator_identifier_generator(const std::string& prefix = "@x")
       : f(prefix)
@@ -627,6 +627,7 @@ class enumerator_algorithm
     /// \brief Enumerates the front elements of the todo list P until a solution
     /// has been found, or until P is empty.
     /// \param P The todo list of the algorithm.
+    /// \param sigma A substitution. 
     /// \param accept Elements p for which accept(p) is false are discarded.
     /// \return The number of elements that have been processed
     /// \post Either P.empty() or P.front().is_solution()
@@ -756,9 +757,8 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
     }
 
     /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition
-    /// \param E An enumerator
     /// \param sigma A mutable substitution that is applied by the rewriter contained in E
-    /// \param p The condition that is solved, together with the list of variables
+    /// \param P The condition that is solved, together with the list of variables
     /// \param accept Enumerator elements p for which accept(p) is false are discarded.
     /// Otherwise an invalidated enumerator element is returned when it is dereferenced.
     iterator begin(MutableSubstitution& sigma, std::deque<EnumeratorListElement>& P, Filter accept = Filter()) const
@@ -784,7 +784,10 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
 };
 
 /// \brief Returns a vector with all expressions of sort s.
-/// \detail It is assumed that the sort s has only a finite number of elements.
+/// \param s A sort expression.
+/// \param dataspec The data specification defining the terms of sort \a s.
+/// \param rewr A rewriter to be used to simplify terms and conditions. 
+/// \details It is assumed that the sort s has only a finite number of elements.
 template <class Rewriter>
 data_expression_vector enumerate_expressions(const sort_expression& s, const data_specification& dataspec, const Rewriter& rewr)
 {

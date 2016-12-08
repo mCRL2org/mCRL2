@@ -36,7 +36,7 @@ mcrl2::state_formulas::state_formula translate_reg_frms(const mcrl2::state_formu
 namespace state_formulas {
 
 /// \brief Translates regular formulas appearing in f into action formulas.
-/// \param f A state formula
+/// \param x A state formula
 inline
 state_formula translate_regular_formulas(const state_formula& x)
 {

@@ -356,9 +356,11 @@ state_formula post_process_state_formula(const state_formula& formula,
 }
 
 /// \brief Parses a state formula from an input stream
-/// \param formula_stream A stream from which can be read
-/// \param lpsspec A linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
-/// \return The converted modal formula
+/// \param in A stream from which can be read
+/// \param lpsspec A linear process specification used as context. 
+//                 The data specification of lpsspec is extended with sorts appearing in the formula.
+/// \param options A set of options guiding parsing.
+/// \return The parsed and possibly converted modal formula.
 inline
 state_formula parse_state_formula(std::istream& in,
                                   lps::specification& lpsspec,
@@ -385,9 +387,10 @@ state_formula parse_state_formula(const std::string& text,
   return parse_state_formula(in, lpsspec, options);
 }
 
-/// \brief Parses a state formula specification from a string
-/// \param text A string
-/// \return The parse result
+/// \brief Parses a state formula specification from a string.
+/// \param text A string.
+/// \param options A set of options guiding parsing.
+/// \return The parse result.
 inline
 state_formula_specification parse_state_formula_specification(const std::string& text,
                                   parse_state_formula_options options = parse_state_formula_options()
@@ -402,9 +405,10 @@ state_formula_specification parse_state_formula_specification(const std::string&
   return result;
 }
 
-/// \brief Parses a state formula specification from an input stream
-/// \param in An input stream
-/// \return The parse result
+/// \brief Parses a state formula specification from an input stream.
+/// \param in An input stream.
+/// \param options A set of options guiding parsing.
+/// \return The parse result.
 inline
 state_formula_specification parse_state_formula_specification(std::istream& in,
                                   parse_state_formula_options options = parse_state_formula_options()
@@ -416,6 +420,8 @@ state_formula_specification parse_state_formula_specification(std::istream& in,
 
 /// \brief Parses a state formula specification from a string
 /// \param text A string
+/// \param lpsspec A linear process containing data and action declarations necessary to type check the state formula.
+/// \param options A set of options guiding parsing.
 /// \return The parse result
 inline
 state_formula_specification parse_state_formula_specification(const std::string& text,
@@ -438,9 +444,11 @@ state_formula_specification parse_state_formula_specification(const std::string&
   return result;
 }
 
-/// \brief Parses a state formula specification from an input stream
-/// \param in An input stream
-/// \return The parse result
+/// \brief Parses a state formula specification from an input stream.
+/// \param in An input stream.
+/// \param lpsspec A linear process containing data and action declarations necessary to type check the state formula.
+/// \param options A set of options guiding parsing.
+/// \return The parse result.
 inline
 state_formula_specification parse_state_formula_specification(std::istream& in,
                                   lps::specification& lpsspec,

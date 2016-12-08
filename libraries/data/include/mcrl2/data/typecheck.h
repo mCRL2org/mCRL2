@@ -57,11 +57,12 @@ class data_type_checker: public sort_type_checker
   protected:
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-     *  \param[in] d A data expression that has not been type checked.
-     *  \param[in] Vars a mapping of variable names to their types.
+     *  \param[in] data_expr A data expression that has not been type checked.
+     *  \param[in] vars a mapping of variable names to their types.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
-    data_expression operator()(const data_expression& data_expr,const std::map<core::identifier_string,sort_expression>& Vars);
+    data_expression operator()(const data_expression& data_expr,
+                               const std::map<core::identifier_string,sort_expression>& vars);
 
     void read_sort(const sort_expression& SortExpr);
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors);

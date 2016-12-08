@@ -517,10 +517,10 @@ class state_formula_type_checker
     detail::state_variable_context m_state_variable_context;
 
   public:
-    /** \brief     Type check a state formula.
-     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-     *  \param[in] d A state formula that has not been type checked.
-     *  \return    a state formula where all untyped identifiers have been replace by typed ones.
+    /** \brief     Constructor for a state_formula type checker.
+     *  \param[in] dataspec The data specification against which state formulas are checked.
+     *  \param[in] action_labels The data labels that can occur in a state formula.
+     *  \param[in] variables A container containing variables that can occur in state formulas. 
      **/
     template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
     state_formula_type_checker(const data::data_specification& dataspec,
@@ -550,7 +550,10 @@ class state_formula_type_checker
 
 /** \brief     Type check a state formula.
  *  Throws an exception if something went wrong.
- *  \param[in] formula A state formula that has not been type checked.
+ *  \param[in] x A state formula that has not been type checked.
+ *  \param[in] dataspec The data specification against which the formulas is checked.
+ *  \param[in] action_labels A declaration of action labels that can be used in the state formulas.
+ *  \param[in] variables A container with global data variables. 
  *  \post      formula is type checked.
  **/
 template <typename VariableContainer, typename ActionLabelContainer>
@@ -573,7 +576,9 @@ state_formula type_check_state_formula(const state_formula& x,
 
 /** \brief     Type check a state formula.
  *  Throws an exception if something went wrong.
- *  \param[in] formula A state formula that has not been type checked.
+ *  \param[in] x A state formula that has not been type checked.
+ *  \param[in] lpsspec A linear process specifications containing data, action and global variable declarations
+ *                     to be used when typechecking the formula.
  *  \post      formula is type checked.
  **/
 inline

@@ -691,6 +691,7 @@ class linear_inequality: public atermpp::aterm_appl
     /// satisfy the syntax t ::=  x | c*t | t*c | t+t | t-t | -t where x is
     /// a variable and c is a real constant.
     /// \param e Contains the expression to become a linear inequality.
+    /// \param r A rewriter used to evaluate the expression.
 
     linear_inequality(const data_expression& e,
                       const rewriter& r)
@@ -1047,11 +1048,13 @@ std::set < variable >  gauss_elimination(
 //           returned. Furthermore, the list of resulting inequalities is minimal in
 //           the sense that no individual inequality can be removed, without altering the
 //           set of solutions of the inequalities.
-/// \param inequalities A list of linear inequalities; the input can also contain linear equations.
-/// \param variables The list of variables to be eliminated
-/// \param r A rewriter
-/// \pre inequalities has been normalized
-/// \post All variables in variables have been eliminated, inequalities contains
+/// \param inequalities_in A list of linear inequalities; the input can also contain linear equations.
+/// \param variables_begin The start of a list of variables to be eliminated.
+/// \param variables_end The end of a list of variables to be eliminated.
+/// \param resulting_inequalities The set of resulting inequalities.
+/// \param r A rewriter.
+/// \pre inequalities has been normalized.
+/// \post All variables in variables have been eliminated, inequalities contains.
 ///       the resulting system of normalized inequalities.
 
 template < class Data_variable_iterator >
@@ -2141,7 +2144,7 @@ inline bool is_inconsistent(
 ///          is also empty. The resulting equalities and inequalities do not contain linear inequalites
 ///          equivalent to true.
 /// \param inequalities A list of inequalities over real numbers
-/// \param resulting_inequalities A list with the resulting equalities.
+/// \param resulting_equalities A list with the resulting equalities.
 /// \param resulting_inequalities A list of the resulting inequalities
 /// \param variables_begin An iterator indicating the beginning of the eliminatable variables.
 /// \param variables_end An iterator indicating the end of the eliminatable variables.

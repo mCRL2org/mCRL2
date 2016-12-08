@@ -181,9 +181,10 @@ struct state_formula_variable_rename_builder: public state_formulas::sort_expres
   }
 };
 
-/// \brief Renames all data variables in the formula f such that the forbidden identifiers are not used
-/// \param f A modal formula
-/// \return The rename result
+/// \brief Renames all data variables in the formula f such that the forbidden identifiers are not used.
+/// \param f A modal formula.
+/// \param forbidden_identifiers Set of identifiers strings, which are renamed. 
+/// \return The rename result.
 inline
 state_formula rename_variables(const state_formula& f, const std::set<core::identifier_string>& forbidden_identifiers)
 {

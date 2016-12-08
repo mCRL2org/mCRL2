@@ -110,7 +110,6 @@ class representative_generator
 
     /// \brief Finds a representative element for an arbitrary sort expression
     /// \param[in] sort the sort for which to find the representative
-    /// \param[in] maximum_depth the maximum depth for recursive exploration of the sort
     /// \param[in] visited_sorts A set of sorts for which no representative can be constructed. This is used to prevent 
     //                           an infinite circular search through the sorts.
     /// \param[out] result The representative of the shape f(t1,...,tn). This is only set if this function yields true.
@@ -227,7 +226,6 @@ class representative_generator
 
     /// \brief Returns a representative of a sort
     /// \param[in] sort sort of which to find a representatitive
-    /// \param[in] maximum_depth unfold generate terms recursively up to this depth
     data_expression operator()(const sort_expression& sort)
     {
       // First see whether a term of this sort has already been constructed and resides in the representatives_cache. If yes return it. 

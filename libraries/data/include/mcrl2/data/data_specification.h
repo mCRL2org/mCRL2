@@ -434,7 +434,7 @@ class data_specification: public sort_specification
 
     ///\brief Puts the constructors, functions and equations in normalised form in
     ///       de data type.
-    ///\details See \ref normalise_sorts on arbitrary objects for a more detailed description.
+    ///\details See the function normalise_sorts on arbitrary objects for a more detailed description.
     /// All sorts in the constructors, mappings and equations are normalised.
     void add_data_types_for_sorts() const
     {

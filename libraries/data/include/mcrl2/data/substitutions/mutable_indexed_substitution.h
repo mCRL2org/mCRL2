@@ -73,11 +73,12 @@ public:
 
 
     /// \brief Constructor.
-    ///
     /// \param[in] v a variable.
     /// \param[in] c a container of expressions.
-    /// \param[in] table a table of indices
-    /// \param[in] fp a stack of free positions in \a table
+    /// \param[in] table a table of indices.
+    /// \param[in] fp a stack of free positions in \a table.
+    /// \param[in] b Indication that the variables in \a vars are defined.
+    /// \param[in] vars Variables in the rhs of the assignments. 
     assignment(const variable_type& v, ExpressionSequence& c, std::vector <size_t>& table, std::stack<size_t>& fp,
                const bool b, std::set<variable>& vars) :
       m_variable(v),

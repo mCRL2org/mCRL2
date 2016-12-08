@@ -289,10 +289,15 @@ state_formula preprocess_nested_modal_operators(const state_formula& x)
 }
 
 /// \brief Renames data variables and predicate variables in the formula \p f, and
-/// wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
-/// step for the algorithm.
-/// \param formula A modal formula
-/// \return The preprocessed formula
+///        wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
+///        step for the algorithm.
+/// \param formula A modal formula.
+/// \param context_ids A set of identifier strings.
+/// \param context_variable_names A set of identifier strings.
+/// \param preprocess_modal_operators A boolean indicating that dummy fixed point symbols can be 
+///                                   inserted which makes subsequent handling easier.
+/// \param warn_for_modal_operator_nesting A boolean enabling warnings for modal operator nesting.
+/// \return The preprocessed formula.
 inline
 state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula,
                                                        const std::set<core::identifier_string>& context_ids,

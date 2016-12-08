@@ -25,7 +25,7 @@ namespace algorithms {
 /// \brief Parses a state formula from an input stream
 // spec may be updated as the data implementation of the state formula
 // may cause internal names to change.
-/// \param formula_stream A stream from which can be read
+/// \param in A stream from which can be read
 /// \param spec A linear process specification
 /// \return The converted modal formula
 state_formula parse_state_formula(std::istream& in, lps::specification& spec);
