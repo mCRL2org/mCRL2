@@ -85,7 +85,7 @@ struct typecheck_builder: public action_formula_builder<typecheck_builder>
       {
         return data::typecheck_untyped_data_parameter(m_data_type_checker, y.name(), y.arguments(), data::sort_bool::bool_(), m_variable_context);
       }
-      catch (mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& )
       {
         // skip
       }
