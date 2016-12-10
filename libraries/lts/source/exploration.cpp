@@ -13,6 +13,7 @@
 #include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"
+#include "mcrl2/lps/one_point_rule_rewrite.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/detail/counter_example.h"
 #include "mcrl2/lts/lts_io.h"
@@ -161,6 +162,12 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
   {
     rewriter = data::rewriter(specification.data(), m_options.strat);
   }
+
+  // Apply the one point rewriter to the linear process specification. 
+  // This simplifies expressions of the shape exists x:X . (x == e) && phi to phi[x:=e], enabling
+  // more lps's to generate lts's. The overhead of this rewriter is limited.
+  // It is not yet possible to use this, as the one point rewriter works on a specification, not on a stochastic specification. 
+  // one_point_rule_rewrite(specification);
 
   stochastic_action_summand_vector prioritised_summands;
   stochastic_action_summand_vector nonprioritised_summands;
