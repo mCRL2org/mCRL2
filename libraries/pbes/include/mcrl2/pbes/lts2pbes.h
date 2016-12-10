@@ -48,7 +48,9 @@ class lts2pbes_algorithm
     {}
 
     /// \brief Runs the translation algorithm
-    /// \param formula A modal formula
+    /// \param formspec A state formula specification.
+    /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed 
+    //                                    for a more compact translation.
     /// \return The result of the translation
     pbes run(const state_formulas::state_formula_specification& formspec, bool preprocess_modal_operators = false)
     {

@@ -159,16 +159,18 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
 
     /// \brief Enter true node.
     /// \param x A term.
-    void enter(const true_& /* x */)
+    void enter(const true_& x)
     {
+      (void)x; // Suppress a non used variable warning.
       m_has_true = true;
       push(m_true, standard_form_both);
     }
 
     /// \brief Enter false node
-    /// \param e A term
-    void enter(const false_& /* x */)
+    /// \param x A term
+    void enter(const false_& x)
     {
+      (void)x; // Suppress a non used variable warning.
       m_has_false = true;
       push(m_false, standard_form_both);
     }

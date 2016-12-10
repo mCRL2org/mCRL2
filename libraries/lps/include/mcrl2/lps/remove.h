@@ -110,7 +110,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   }
 
   /// \brief Removes parameters from a linear_process
-  /// \param s A linear_process
+  /// \param x A linear_process
   void update(linear_process& x)
   {
     super::update(x);
@@ -118,7 +118,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   }
 
   /// \brief Removes parameters from a linear_process
-  /// \param s A linear_process
+  /// \param x A linear_process
   void update(stochastic_linear_process& x)
   {
     super::update(x);
@@ -126,7 +126,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   }
 
   /// \brief Removes parameters from a linear process specification
-  /// \param spec A linear process specification
+  /// \param x A linear process specification
   void update(specification& x)
   {
     super::update(x);
@@ -134,7 +134,7 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   }
 
   /// \brief Removes parameters from a linear process specification
-  /// \param spec A linear process specification
+  /// \param x A linear process specification
   void update(stochastic_specification& x)
   {
     super::update(x);
@@ -201,7 +201,7 @@ data::assignment_list remove_redundant_assignments(const data::assignment_list& 
 }
 
 /// \brief Removes redundant assignments of the form x = x from an LPS specification
-/// \param spec A linear process specification
+/// \param lpsspec A linear process specification
 template <typename Specification>
 void remove_redundant_assignments(Specification& lpsspec)
 {

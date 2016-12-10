@@ -60,7 +60,7 @@ struct t_lin_options
 };
 
 /// \brief Linearises a process specification
-/// \param[in] spec A process specification
+/// \param[in] type_checked_spec A process specification
 /// \param[in] lin_options options that should be used during linearisation
 /// \return An LPS equivalent to spec, which is linearised using lin_options
 /// \exception mcrl2::runtime_error Linearisation failed

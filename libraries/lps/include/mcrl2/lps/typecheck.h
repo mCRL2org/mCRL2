@@ -136,8 +136,8 @@ multi_action type_check_multi_action(process::untyped_multi_action& mult_act,
 }
 
 /// \brief Type checks an action rename specification.
-/// \param ar_spec An action rename specifition.
-/// \param spec A linear process specification, used for the datatypes and action declarations.
+/// \param arspec An action rename specifition.
+/// \param lpsspec A linear process specification, used for the datatypes and action declarations.
 /// \return A type checked rename specification.
 
 inline

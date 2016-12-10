@@ -251,9 +251,16 @@ class pbesinst_alternative_lazy_algorithm
   public:
 
     /// \brief Constructor.
-    /// \param data_spec A data specification
-    /// \param rewriter_strategy A strategy for the data rewriter
-    /// \param print_equations If true, the generated equations are printed
+    /// \param data_spec A data specification.
+    /// \param datar A data rewriter.
+    /// \param search_strategy A search strategy (e.g. breadth_first).
+    /// \param transformation_strategy A strategy to transform the PBES into a BES.
+    /// \param erase_unused_bes_variables An indicator how often unreachable variables must be garbage collected.
+    /// \param maximum_todo_size An indication of the maximal size of the stack with explorable
+    ///                          BES variables. If the stack exceeds this size, the ignored variable is set to 
+    ///                          true or false, depending on the parameter \p approximate_true.
+    /// \param approximate_true If true BES variables that are not investigated are set to false. If false
+    ///                         these variables are set to true.
     pbesinst_alternative_lazy_algorithm(
         const data::data_specification& data_spec,
         const data::rewriter& datar,

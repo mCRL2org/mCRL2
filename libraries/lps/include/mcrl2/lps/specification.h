@@ -81,7 +81,8 @@ class specification_base
     }
 
     /// \brief Initializes the specification with an aterm.
-    /// \param t A term
+    /// \param t An aterm.
+    /// \param stochastic_distributions_allowed A boolean indicating that the specification can contain stochastic operators.
     void construct_from_aterm(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
     {
       using atermpp::down_cast;
@@ -114,6 +115,7 @@ class specification_base
 
     /// \brief Constructor.
     /// \param t A term
+    /// \param stochastic_distributions_allowed A boolean indicating that the specification can contain stochastic operators.
     specification_base(const atermpp::aterm_appl& t, bool stochastic_distributions_allowed = true)
     {
       assert(core::detail::check_rule_LinProcSpec(t));
@@ -140,10 +142,10 @@ class specification_base
     {
     }
 
-    /// \brief Reads the specification from file.
-    /// \param filename A string
-    /// If filename is nonempty, input is read from the file named filename.
-    /// If filename is empty, input is read from standard input.
+    /// \brief Reads the specification from a stream.
+    /// \param stream An input stream.
+    /// \param binary An boolean that if true means the stream contains a term in binary encoding. 
+    //                Otherwise the encoding is textual. 
     /// \param source The source from which the stream originates. Used for error messages.
     void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {
@@ -158,10 +160,8 @@ class specification_base
       // time
     }
 
-    /// \brief Writes the specification to file.
-    /// \param filename A string
-    /// If filename is nonempty, output is written to the file named filename.
-    /// If filename is empty, output is written to stdout.
+    /// \brief Writes the specification to a stream.
+    /// \param stream The output stream.
     /// \param binary
     /// If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is

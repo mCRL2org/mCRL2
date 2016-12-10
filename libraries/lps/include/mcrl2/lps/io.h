@@ -102,7 +102,7 @@ void save_lps(const Specification& spec, std::ostream& stream,
 /// \param spec The LPS to which the result is loaded.
 /// \param stream The stream from which to load the LPS (it is assumed to have been opened in the
 ///               right mode).
-/// \param f The format that should be assumed for the file in infilename.
+/// \param format The format that should be assumed for the file in infilename.
 /// \param source The source from which the stream originates. Used for error messages.
 template <typename Specification>
 void load_lps(Specification& spec, std::istream& stream, const utilities::file_format* format, const std::string& source = "")
@@ -153,7 +153,6 @@ void save_lps(const Specification &spec, const std::string &filename,
 /// \param spec The LPS to which the result is loaded.
 /// \param filename The file from which to load the LPS.
 /// \param format The format in which the LPS is stored in the file.
-/// \param source The source from which the stream originates. Used for error messages.
 ///
 /// The format of the file in filename is guessed if format is not given, or if it is equal to
 /// utilities::file_format::unknown().

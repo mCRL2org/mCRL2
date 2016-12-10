@@ -55,7 +55,7 @@ class pbes_parelm_algorithm
     }
 
     /// \brief Finds the index of a variable in a sequence
-    /// \param v A sequence of data variables
+    /// \param variables A sequence of data variables
     /// \param d A data variable
     /// \return The index of \p d in \p v, or -1 if the variable wasn't found
     int variable_index(const data::variable_list& variables, const data::variable& d) const

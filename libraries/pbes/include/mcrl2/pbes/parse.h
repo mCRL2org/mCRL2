@@ -206,13 +206,14 @@ propositional_variable parse_propositional_variable(const std::string& text,
   return type_check_propositional_variable(result, variables, dataspec);
 }
 
-/** \brief     Type check a pbes expression.
+/** \brief     Parse a pbes expression.
  *  Throws an exception if something went wrong.
  *  \param[in] text A string containing a pbes expression.
- *  \param[in] dataspec A data specification.
  *  \param[in] variables A sequence of data variables that may appear in x.
  *  \param[in] propositional_variables A sequence of propositional variables that may appear in x.
- *  \return    the type checked expression
+ *  \param[in] dataspec A data specification.
+ *  \param[in] type_check If true the parsed input is also typechecked.
+ *  \return    The parsed PBES expression.
  **/
 template <typename VariableContainer, typename PropositionalVariableContainer>
 pbes_expression parse_pbes_expression(const std::string& text,

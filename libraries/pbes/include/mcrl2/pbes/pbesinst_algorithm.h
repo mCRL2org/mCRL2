@@ -148,9 +148,9 @@ class pbesinst_algorithm
   public:
 
     /// \brief Constructor.
-    /// \param data_spec A data specification
-    /// \param rewriter_strategy A strategy for the data rewriter
-    /// \param print_equations If true, the generated equations are printed
+    /// \param data_spec A data specification.
+    /// \param rewrite_strategy A strategy for the data rewriter.
+    /// \param print_equations If true, the generated equations are printed.
     pbesinst_algorithm(data::data_specification const& data_spec,
                        data::rewriter::strategy rewrite_strategy = data::jitty,
                        bool print_equations = false
@@ -163,7 +163,7 @@ class pbesinst_algorithm
     {}
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    /// \param p A PBES
+    /// \param p A PBES.
     void run(pbes& p)
     {
       using utilities::detail::pick_element;

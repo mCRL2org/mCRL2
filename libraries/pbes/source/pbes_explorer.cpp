@@ -1193,7 +1193,7 @@ std::string lts_info::get_param_signature(const std::string& paramname,
 
 
 
-/// ltsmin_state
+// ltsmin_state
 
 ltsmin_state::ltsmin_state(const std::string& varname)
 {

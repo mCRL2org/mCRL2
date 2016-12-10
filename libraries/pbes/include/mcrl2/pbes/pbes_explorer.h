@@ -151,7 +151,6 @@ protected:
 public:
     /// \brief Constructor.
     /// \param varname the name of the propositional variable of the state.
-    /// \param e a propositional variable instantiation.
     ltsmin_state(const std::string& varname);
 
     /// \brief Compares two PBES_State objects. Uses lexicographical ordering on priority, type, variable and parameter values.
@@ -390,7 +389,7 @@ public:
 
     /// \brief Returns the index for a parameter signature in the list of parameter signatures
     /// for the system.
-    /// \param signaturePBES_State the parameter signature.
+    /// \param signature The parameter signature.
     int get_index(const std::string& signature);
 
     /// \brief Determines if <tt>group</tt> is read dependent on the propositional variable.
