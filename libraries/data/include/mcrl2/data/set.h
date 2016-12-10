@@ -250,11 +250,7 @@ namespace mcrl2 {
         return in_name;
       }
 
-      ///\brief Constructor for function symbol in
-      /// \param s A sort expression
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol in
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol in(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
@@ -367,11 +363,7 @@ namespace mcrl2 {
         return union_name;
       }
 
-      ///\brief Constructor for function symbol +
-      /// \param s A sort expression
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol union_
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol union_(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
@@ -441,11 +433,7 @@ namespace mcrl2 {
         return intersection_name;
       }
 
-      ///\brief Constructor for function symbol *
-      /// \param s A sort expression
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol intersection
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol intersection(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
@@ -515,11 +503,7 @@ namespace mcrl2 {
         return difference_name;
       }
 
-      ///\brief Constructor for function symbol -
-      /// \param s A sort expression
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol difference
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol difference(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {

@@ -407,9 +407,7 @@ class function_declaration_list():
 
       def polymorphic_function_constructor(self, fullname, name, sortparams):
         CODE_TEMPLATE = Template('''
-      ///\\brief Constructor for function symbol ${namestring}
-      ${sortparameterstring}
-      ///\\return Function symbol ${functionname}
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol ${functionname}(${parameters})
       {
