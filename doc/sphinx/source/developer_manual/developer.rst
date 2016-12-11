@@ -16,6 +16,7 @@ mCRL2 library documentation
 
           libraries/atermpp/aterm_library
           libraries/atermpp/reference
+
      - **BES**
 
        .. toctree::
@@ -24,6 +25,7 @@ mCRL2 library documentation
           libraries/bes/reference
 
        .. include:: libraries/bes/articles.txt
+
    * - **Core**
 
        .. toctree::
@@ -32,6 +34,7 @@ mCRL2 library documentation
           libraries/core/core_library
           libraries/core/common_functionality
           libraries/core/reference
+
      - **Data**
 
        .. toctree::
@@ -41,6 +44,7 @@ mCRL2 library documentation
           libraries/data/reference
 
        .. include:: libraries/data/articles.txt
+
    * - **LPS**
 
        .. toctree::
@@ -50,6 +54,7 @@ mCRL2 library documentation
           libraries/lps/reference
 
        .. include:: libraries/lps/articles.txt
+
      - **LTS**
 
        .. toctree::
@@ -59,6 +64,7 @@ mCRL2 library documentation
           libraries/lts/reference
 
        .. include:: libraries/lts/articles.txt
+
    * - **PBES**
 
        .. toctree::
@@ -78,6 +84,7 @@ mCRL2 library documentation
           libraries/process/reference
 
        .. include:: libraries/process/articles.txt
+
    * - **Trace**
 
        .. toctree::
@@ -85,6 +92,7 @@ mCRL2 library documentation
 
           libraries/trace/trace_library
           libraries/trace/reference
+
      - **Utilities**
 
        .. toctree::
