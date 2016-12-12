@@ -218,7 +218,7 @@ void test_one_point_rule_rewriter()
 
   specification lpsspec = parse_linear_process_specification(src);
   specification expected_spec = parse_linear_process_specification(expected_result);
-  one_point_rule_rewrite(lpsspec);
+  lps::one_point_rule_rewrite(lpsspec);
   std::string result = utilities::trim_copy(lps::pp(lpsspec));
   BOOST_CHECK(result == expected_result);
 }
