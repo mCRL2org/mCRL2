@@ -30,7 +30,7 @@ namespace data
   /// \brief Returns a list of all real variables in l
   /// \param l a list of data variables
   /// \return The list of all v in l such that v.sort() == real()
-  inline
+  static inline
   variable_list get_real_variables(const variable_list& l)
   {
     variable_list r;
@@ -42,35 +42,6 @@ namespace data
       }
     }
     return reverse(r);
-  }
-
-  /// \brief Returns a list of all nonreal variables in l
-  /// \param l a list of data variables
-  /// \return The list of all v in l such that v.sort() != real()
-  inline
-  variable_list get_nonreal_variables(const variable_list& l)
-  {
-    variable_list r;
-    for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
-    {
-      if (i->sort() != sort_real::real_())
-      {
-        r.push_front(*i);
-      }
-    }
-    return reverse(r);
-  }
-
-  /// \brief Determine whether a data expression is an inequality
-  /// \param e A data expression
-  /// \return true iff e is a data application of ==, <, <=, > or >= to
-  ///      two arguments.
-  static inline
-  bool is_inequality(data_expression e)
-  {
-    return is_equal_to_application(e) || is_less_application(e) ||
-           is_less_equal_application(e) || is_greater_application(e) ||
-           is_greater_equal_application(e);
   }
 
   static const assignment* assignment_list_get_var(assignment_list al, variable v)
@@ -136,7 +107,26 @@ namespace data
     return result;
   }
 
-  static void dbm_add_inequalities(data_expression dbm, data_expression& new_dbm, data_expression& conditions, 
+  static void add_to_split_bounds(std::pair< data_expression, data_expression > dbm_indices, data_expression bound, 
+    std::set< std::tuple< data_expression, data_expression, data_expression >>& split_bounds, rewriter r)
+  {
+    // ignore bounds with a zero
+    if(sort_bound::left(bound) == real_zero())
+    {
+      return;
+    }
+    // to lower the amount of split bounds, we formulate them positively
+    if(r(less(dbm_indices.first, dbm_indices.second)) == sort_bool::true_())
+    {
+      split_bounds.insert(std::make_tuple(dbm_indices.second, dbm_indices.first, r(sort_bound::not_b(bound))));
+    }
+    else
+    {
+      split_bounds.insert(std::make_tuple(dbm_indices.first, dbm_indices.second, bound));
+    }
+  }
+
+  static void dbm_add_translated_inequalities(data_expression dbm, data_expression& new_dbm, data_expression& conditions, 
     std::vector< linear_inequality > inequalities, variable_list real_parameters, std::vector< variable > update_variables,
     std::set < variable > global_variables, rewriter r)
   {
@@ -157,9 +147,9 @@ namespace data
         {
           primed_pars.push_back(*var);
         }
-        else
+        else if(global_variables.find(var->variable_name()) == global_variables.end())
         {
-          assert(global_variables.find(var->variable_name()) != global_variables.end());
+          throw mcrl2::runtime_error("Variable " + pp(var->variable_name()) + " not found.");
         }
       }
       std::cerr << pp(li) << " par count " << pars.size() << " primed par count " << primed_pars.size() << std::endl;
@@ -171,16 +161,18 @@ namespace data
       if(primed_pars.size() == 0)
       {
         std::pair< data_expression, data_expression > dbm_indices = dbm_index_pair(pars, real_parameters.begin(), real_parameters.end(), false);
+        data_expression bound = sort_bound::cbound(li.rhs(), comp_to_function(li.comparison()));
         data_expression condition = sort_dbm::and_d(dbm, 
                     dbm_indices.first,
                     dbm_indices.second,
-                    sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())));
+                    bound);
         if(li.comparison() == detail::equal)
         {
+          data_expression bound = sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison()));
           condition = sort_dbm::and_d(condition,
                     dbm_indices.second,
                     dbm_indices.first,
-                    sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())));
+                    bound);
         }
         std::cerr << "translation " << sort_bool::not_(sort_dbm::inconsistent(condition)) << std::endl;
         new_conditions.push_back(sort_bool::not_(sort_dbm::inconsistent(condition)));
@@ -203,9 +195,13 @@ namespace data
         std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), dbm_primed_indices.first, dbm_primed_indices.second, bound) << std::endl;
         if(li.comparison() == detail::equal)
         {
-          if(pars.size() != 0)
+          if(pars.size() == 0)
           {
-            bound = sort_bound::add(sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())),
+            bound = sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison()));
+          }
+          else
+          {
+            bound = sort_bound::add(sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison())),
                                           sort_dbm::get(dbm, dbm_indices.second, dbm_indices.first));
           }
           next_zone = sort_dbm::and_d(next_zone, dbm_primed_indices.second, dbm_primed_indices.first, bound);
@@ -216,6 +212,21 @@ namespace data
 
     conditions = lazy::join_and(new_conditions.begin(), new_conditions.end());
     new_dbm = next_zone;
+  }
+
+  static data_expression dbm_add_splits(
+          std::set< std::tuple< data_expression, data_expression, data_expression >> split_bounds,
+          std::vector< variable > sum_bools,
+          const data_expression post_z)
+  {
+    std::vector< variable >::const_iterator bool_var = sum_bools.begin();
+    data_expression result = post_z;
+    for(std::tuple< data_expression, data_expression, data_expression > sb: split_bounds)
+    {
+      result = sort_dbm::split(result, std::get<0>(sb), std::get<1>(sb), std::get<2>(sb), *bool_var);
+      bool_var++;
+    }
+    return result;
   }
 
   static void abstract_reals(
@@ -238,6 +249,8 @@ namespace data
 
     std::vector< summand_information > si = summand_info;
     summand_info.clear();
+    std::vector< data_expression > dbm_exprs, new_conditions;
+    std::set< std::tuple< data_expression, data_expression, data_expression >> split_bounds;
     for(summand_information &summand: si)
     {
       std::vector< linear_inequality > inequalities;
@@ -261,8 +274,10 @@ namespace data
         inequalities.push_back(linear_inequality(equal_to(v, real_zero()), r));
         eliminate_variables.push_front(v);
       }
+      std::vector< linear_inequality > elim_inequalities;
       std::vector< linear_inequality > new_inequalities;
-      fourier_motzkin(inequalities, eliminate_variables.begin(), eliminate_variables.end(), new_inequalities, r);
+      fourier_motzkin(inequalities, eliminate_variables.begin(), eliminate_variables.end(), elim_inequalities, r);
+      remove_redundant_inequalities(elim_inequalities, new_inequalities,r);
 
       // std::cerr << &summand << std::endl;
       for(linear_inequality &li: new_inequalities)
@@ -270,15 +285,54 @@ namespace data
         std::cerr << "reduced system " << pp(li) << std::endl;
       }
 
-      data_expression next_zone, new_conditions;
-      dbm_add_inequalities(dbm_var, next_zone, new_conditions, new_inequalities, real_parameters, update_variables, s.global_variables(), r);
+      data_expression next_zone, new_condition;
+      dbm_add_translated_inequalities(dbm_var, next_zone, new_condition, new_inequalities, real_parameters, update_variables, s.global_variables(), r);
+      dbm_exprs.push_back(next_zone);
+      new_conditions.push_back(new_condition);
 
-      data_expression cond = sort_bool::and_(summand.get_summand().condition(), sort_bool::not_(sort_dbm::inconsistent(next_zone)));
-      if(new_conditions != sort_bool::true_())
+      // Now also eliminate next state variables to obtain splitting bounds
+      elim_inequalities.clear();
+      new_inequalities.clear();
+      eliminate_variables = summand.get_real_summation_variables();
+      for(variable v: update_variables)
       {
-        cond = sort_bool::and_(cond, new_conditions);
+        eliminate_variables.push_front(v);
       }
-      summand_base t(summand.get_non_real_summation_variables(), cond);
+      fourier_motzkin(real_conditions, eliminate_variables.begin(), eliminate_variables.end(), elim_inequalities, r);
+      remove_redundant_inequalities(elim_inequalities, new_inequalities,r);
+      for(linear_inequality i: new_inequalities)
+      {
+        std::vector< detail::variable_with_a_rational_factor > lhs_vars;
+        for(detail::variable_with_a_rational_factor v: i.lhs())
+        {
+          lhs_vars.push_back(v);
+        }
+        std::cerr << "bounds system " << pp(i) << std::endl;
+        add_to_split_bounds(dbm_index_pair(lhs_vars, real_parameters.begin(), real_parameters.end(), false), sort_bound::cbound(i.rhs(), comp_to_function(i.comparison())), split_bounds, r);
+      }
+    }
+
+    std::vector< variable > sum_bools;
+    std::cerr << "List of split bounds" << std::endl;
+    for(std::tuple< data_expression, data_expression, data_expression > sb: split_bounds)
+    {
+      std::cerr << pp(std::get<0>(sb)) << " - " << pp(std::get<1>(sb)) << " " << pp(sort_bound::right(std::get<2>(sb))) << " " << pp(sort_bound::left(std::get<2>(sb))) << std::endl;
+      sum_bools.push_back(variable(var_gen("split"), sort_bool::bool_()));
+    }
+
+    std::vector< data_expression>::const_iterator next_zone = dbm_exprs.begin();
+    std::vector< data_expression>::const_iterator new_condition = new_conditions.begin();
+    for(summand_information &summand: si)
+    {
+      data_expression split_zone = dbm_add_splits(split_bounds, sum_bools, *next_zone);
+      data_expression cond = sort_bool::and_(summand.get_summand().condition(), sort_bool::not_(sort_dbm::inconsistent(split_zone)));
+      cond = lazy::and_(cond, *new_condition);
+      variable_list nonreal_summation_variables = summand.get_non_real_summation_variables();
+      for(variable v: sum_bools)
+      {
+        nonreal_summation_variables.push_front(v);
+      }
+      summand_base t(nonreal_summation_variables, cond);
       assignment_list al;
       for(assignment_list::const_iterator i = summand.get_assignments().begin(); i != summand.get_assignments().end(); i++)
       {
@@ -287,7 +341,7 @@ namespace data
           al.push_front(*i);
         }
       }
-      al.push_front(assignment(dbm_var, next_zone));
+      al.push_front(assignment(dbm_var, split_zone));
       summand_info.push_back(summand_information(t,
                                     summand.is_delta_summand(),
                                     al,
@@ -295,10 +349,13 @@ namespace data
                                     summand.get_multi_action(),
                                     summand.get_deadlock(),
                                     variable_list(),
-                                    summand.get_non_real_summation_variables(),
+                                    nonreal_summation_variables,
                                     std::vector< linear_inequality >(),
                                     std::map< variable, data_expression >()
                                     ));
+
+      next_zone++;
+      new_condition++;
     }
     variable_list proc_par = s.process().process_parameters();
     s.process().process_parameters() = variable_list();
@@ -367,6 +424,7 @@ namespace data
     add_mappings(s.data(), sort_dbm::dbm_generate_functions_code());
     add_equations(s.data(), sort_dbm::dbm_generate_equations_code());
 
+    r = rewriter(s.data(), strat);
     abstract_reals(s, r, summand_info);
 
     stochastic_action_summand_vector action_summands;

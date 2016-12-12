@@ -22,7 +22,7 @@ namespace data
   /// \brief Returns a list of all real variables in l
   /// \param l a list of data variables
   /// \return The list of all v in l such that v.sort() == real()
-  inline
+  static inline
   variable_list get_real_variables(const variable_list& l)
   {
     variable_list r;
@@ -39,7 +39,7 @@ namespace data
   /// \brief Returns a list of all nonreal variables in l
   /// \param l a list of data variables
   /// \return The list of all v in l such that v.sort() != real()
-  inline
+  static inline
   variable_list get_nonreal_variables(const variable_list& l)
   {
     variable_list r;
@@ -88,7 +88,7 @@ namespace data
   /// \param e A data expression
   /// \return true iff e is a data application of ==, <, <=, > or >= to
   ///      two arguments.
-  inline
+  static inline
   bool is_inequality(data_expression e)
   {
     return is_equal_to_application(e) || is_less_application(e) ||
@@ -622,23 +622,6 @@ namespace data
       }
     } // Finished dealing with delta summands
 
-  }
-
-  /// \brief Returns a list of all nonreal assignments in l
-  /// \param l a list of data assignments
-  /// \return The list of all x := e in l such that x.sort() == e.sort() != real()
-  static inline
-  assignment_list get_nonreal_assignments(const assignment_list& l)
-  {
-    assignment_list r;
-    for (assignment_list::const_iterator i = l.begin(); i != l.end(); ++i)
-    {
-      if (i->lhs().sort() != sort_real::real_())
-      {
-        r.push_front(*i);
-      }
-    }
-    return r;
   }
 
 
