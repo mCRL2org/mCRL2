@@ -38,6 +38,7 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
   using super::print_abstraction;
   using super::print_expression;
   using super::print_list;
+  using super::print_action_declarations;
 
   Derived& derived()
   {
@@ -163,6 +164,7 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
   using super::print_unary_operation;
   using super::print_binary_operation;
   using super::print_expression;
+  using super::print_action_declarations;
 
   Derived& derived()
   {
@@ -251,6 +253,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   using super::print_variables;
   using super::print_expression;
   using super::print_list;
+  using super::print_action_declarations;
 
   // Determines whether or not data expressions should be wrapped inside 'val'.
   std::vector<bool> val;
@@ -459,6 +462,17 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     print_assignments(x.assignments());
     derived().print(". ");
     derived().apply(x.operand());
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    derived().enter(x);
+    derived().apply(x.data());
+    print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
+    derived().print("form ");
+    derived().apply(x.formula());
+    derived().print(";\n");
     derived().leave(x);
   }
 };

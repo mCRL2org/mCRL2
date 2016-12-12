@@ -28,6 +28,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/utilities/text_utility.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -407,3 +408,16 @@ BOOST_AUTO_TEST_CASE(check_parameter_name_clashes_test)
   BOOST_CHECK(!has_parameter_name_clashes(parse_state_formula("nu X(n: Nat = 0). mu Y(m: Nat = 1). val(n == 0)", lpsspec)));
 }
 
+BOOST_AUTO_TEST_CASE(parse_state_formula_specification_test)
+{
+  const std::string text =
+    "sort S;                       \n"
+    "cons s0: S;                   \n"
+    "act a: S;                     \n"
+    "form forall s: S. [a(s)]true; \n"
+    ;
+  state_formula_specification x = parse_state_formula_specification(text);
+  std::string text1 = state_formulas::pp(x);
+  std::cout << text1 << std::endl;
+  BOOST_CHECK_EQUAL(utilities::remove_whitespace(text), utilities::remove_whitespace(text1));
+}
