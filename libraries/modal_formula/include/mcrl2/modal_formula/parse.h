@@ -274,6 +274,7 @@ struct state_formula_actions: public regular_formulas::detail::regular_formula_a
     else if (symbol_name(node) == "StateFrm")
     {
       result.formula = parse_StateFrm(node);
+      return true;
     }
     return false;
   }
@@ -362,12 +363,11 @@ state_formula post_process_state_formula(const state_formula& formula,
 /// \param options A set of options guiding parsing.
 /// \return The parsed and possibly converted modal formula.
 inline
-state_formula parse_state_formula(std::istream& in,
+state_formula parse_state_formula(const std::string& text,
                                   lps::specification& lpsspec,
                                   parse_state_formula_options options = parse_state_formula_options()
                                  )
 {
-  std::string text = utilities::read_text(in);
   state_formula x = detail::parse_state_formula(text);
   if (options.type_check)
   {
@@ -377,14 +377,18 @@ state_formula parse_state_formula(std::istream& in,
   return post_process_state_formula(x, options);
 }
 
+/// \brief Parses a state formula from an input stream
+/// \param formula_stream A stream from which can be read
+/// \param lpsspec A linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
+/// \return The converted modal formula
 inline
-state_formula parse_state_formula(const std::string& text,
+state_formula parse_state_formula(std::istream& in,
                                   lps::specification& lpsspec,
                                   parse_state_formula_options options = parse_state_formula_options()
                                  )
 {
-  std::istringstream in(text);
-  return parse_state_formula(in, lpsspec, options);
+  std::string text = utilities::read_text(in);
+  return parse_state_formula(text, lpsspec, options);
 }
 
 /// \brief Parses a state formula specification from a string.

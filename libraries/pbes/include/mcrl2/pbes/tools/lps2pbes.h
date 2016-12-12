@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 
@@ -51,14 +52,13 @@ void lps2pbes(const std::string& input_filename,
   lps::specification lpsspec;
   load_lps(lpsspec, input_filename);
   mCRL2log(log::verbose) << "reading input from file '" <<  formula_filename << "'..." << std::endl;
-  std::ifstream instream(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
-  if (!instream)
+  std::ifstream from(formula_filename.c_str(), std::ifstream::in | std::ifstream::binary);
+  if (!from)
   {
     throw mcrl2::runtime_error("cannot open state formula file: " + formula_filename);
   }
-  // state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(instream, lpsspec);
-  state_formulas::state_formula formspec = state_formulas::algorithms::parse_state_formula(instream, lpsspec);
-  instream.close();
+  std::string text = utilities::read_text(from);
+  state_formulas::state_formula_specification formspec = state_formulas::algorithms::parse_state_formula_specification(text, lpsspec);
   mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
   pbes_system::pbes result = pbes_system::lps2pbes(lpsspec, formspec, timed, structured, unoptimized, preprocess_modal_operators);
   if (output_filename.empty())
