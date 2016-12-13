@@ -31,6 +31,18 @@ namespace mcrl2
 namespace utilities
 {
 
+/// \brief Returns true if the given filename has the extension ext
+inline
+bool has_extension(const std::string& filename, const std::string& ext)
+{
+  auto pos = filename.rfind('.');
+  if (pos != std::string::npos)
+  {
+    return ext == filename.substr(pos + 1);
+  }
+  return false;
+}
+
 #ifdef WIN32
 inline
 void set_binary_mode(std::ios& stream)
