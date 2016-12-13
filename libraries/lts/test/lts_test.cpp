@@ -525,7 +525,7 @@ static void counterexample_jk_1(size_t k)
             "(" + std::to_string(k) + ",tau," + std::to_string(2*k+1) + ")\n"
             "(0,tau," + std::to_string(2*k+2) + ")\n";
 
-    size_t expected_label_count = 5;
+    size_t expected_label_count = k+2;
     size_t expected_state_count = 4;
     size_t expected_transition_count = 10;
 
@@ -543,26 +543,28 @@ static void counterexample_jk_1(size_t k)
 
 // The following LTS is a counterexample to the algorithm to postprocess new
 // bottom states.  Found the error in November 2016.
-// The central part of the model consists of states 0--4.
-// The algorithm will split w.r.t. the constellation for "a"-labelled
-// transitions. This makes state 1 blue and the other states red. Also, state 2
-// will become a new bottom state. After that, it should split for "b"-labelled
-// transitions, so that state 3 will get into a separate block; however, it
-// will not find this label.
+// The central part of the model consists of states 0--3.  The algorithm will
+// split w. r. t. the constellation for "a"-labelled transitions.  This makes
+// state 1 blue and the other states red.  Also, state 2 will become a new
+// bottom state.  After that, it should split for "b"-labelled transitions, so
+// that state 3 will get into a separate block;  however, it will not find this
+// label.
 
 // If the algorithm later splits w. r. t. "b", then the final result would
-// still be correct. The model is therefore sensitive to the order in which
-// transitions appear: only if label "a" is the first in the LTS definition,
-// it will produce the error. Modifications of the algorithm to translate a
-// description in .aut format to the internal data structure may affect whether
-// the error is exposed.
+// still be correct.  The model is therefore sensitive to the order in which
+// transitions appear.  To remove this sensitivity, I added copies of the
+// states for other permutations.
+
+// In the meantime, the bug is corrected:  this is why the first part of the
+// algorithm now follows a much simpler line than previously.
 static void counterexample_postprocessing()
 {
   std::string POSTPROCESS_AUT =
-    "des(0,10,4)\n"
+    "des(0,33,13)\n"
     "(0,\"a\",0)\n"
     "(0,\"b\",0)\n"
     "(0,\"c\",0)\n"
+
     "(1,\"b\",0)\n"
     "(1,\"c\",0)\n"
     "(2,\"tau\",1)\n"
@@ -570,11 +572,36 @@ static void counterexample_postprocessing()
     "(3,\"tau\",2)\n"
     "(3,\"a\",0)\n"
     "(3,\"b\",0)\n"
+    "(4,\"tau\",2)\n" // state 3 copied, with b and c swapped
+    "(4,\"a\",0)\n"
+    "(4,\"c\",0)\n"
+
+    "(5,\"a\",0)\n" // states 1-4 copied, with a and b swapped
+    "(5,\"c\",0)\n"
+    "(6,\"tau\",5)\n"
+    "(6,\"b\",0)\n"
+    "(7,\"tau\",6)\n"
+    "(7,\"a\",0)\n"
+    "(7,\"b\",0)\n"
+    "(8,\"tau\",6)\n"
+    "(8,\"b\",0)\n"
+    "(8,\"c\",0)\n"
+
+    "(9,\"a\",0)\n" // states 1-4 copied, with a and c swapped
+    "(9,\"b\",0)\n"
+    "(10,\"tau\",9)\n"
+    "(10,\"c\",0)\n"
+    "(11,\"tau\",10)\n"
+    "(11,\"b\",0)\n"
+    "(11,\"c\",0)\n"
+    "(12,\"tau\",10)\n"
+    "(12,\"a\",0)\n"
+    "(12,\"c\",0)\n"
     ;
 
   size_t expected_label_count = 4;
-  size_t expected_state_count = 4;
-  size_t expected_transition_count = 10;
+  size_t expected_state_count = 13;
+  size_t expected_transition_count = 33;
 
   std::istringstream is(POSTPROCESS_AUT);
   lts::lts_aut_t l_gw;

@@ -1202,7 +1202,6 @@ class B_to_C_descriptor
 {
   public:
     B_to_C_iter_t end, begin;
-    permutation_iter_t new_bottom_end; // used in postprocess_new_bottom
 
     B_to_C_descriptor(B_to_C_iter_t begin_, B_to_C_iter_t end_)
       : end(end_),
@@ -1239,13 +1238,7 @@ class B_to_C_descriptor
 
     /// \brief returns true iff the slice is marked for postprocessing
     /// \details The function uses the data registered with the goal
-    /// constellation.  If the slice is not marked for postprocessing,
-    /// `this->new_bottom_end` is invalid.  In debug mode, it is normally set
-    /// to part_tr.permutation.begin(), because that almost never is a valid
-    /// value (but it is a value that is allowed by the compiler, in particular
-    /// also by Microsoft Visual C, which does check for out-of-range errors).
-    /// The caller is encouraged to check whether `this->new_bottom_end` lies
-    /// in the block as an additional consistency check.
+    /// constellation.
     bool needs_postprocessing() const
     {
         assert(to_constln()->postprocess_end <= begin ||
@@ -1703,18 +1696,16 @@ class bisim_partitioner_gjkw
                                                      bool preserve_divergence);
     void refine_partition_until_it_becomes_stable_gjkw();
 
-    /*------------- Refine -- Algorithms 3 and 4 of [GJKW 2017] -------------*/
+    /*---------------- Refine -- Algorithms 3 of [GJKW 2017] ----------------*/
 
     bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RfnB,
                         const bisim_gjkw::constln_t* SpC,
                         const bisim_gjkw::B_to_C_descriptor* FromRed,
-                        bool all_other_bottom_blue,
                         bool postprocessing);
 
     DECLARE_COROUTINE(refine_blue,
     /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
                             ((const bisim_gjkw::constln_t* const, SpC))
-                            ((bool const, all_other_bottom_blue))
                             ((bool const, postprocessing)),
     /* local variables:  */ ((bisim_gjkw::permutation_iter_t, visited_end))
                             ((bisim_gjkw::state_info_ptr, s))
@@ -1745,12 +1736,9 @@ class bisim_partitioner_gjkw
                             (REFINE_RED_PREDECESSOR_HANDLED)
                             (REFINE_RED_STATE_HANDLED));
 
-    /*--------- PostprocessNewBottom -- Algorithm 5 of [GJKW 2017] ----------*/
+    /*--------- PostprocessNewBottom -- Algorithm 4 of [GJKW 2017] ----------*/
 
-    void postprocess_block(bisim_gjkw::block_t* SplitB);
-
-    void postprocess_new_bottom(const std::vector<bisim_gjkw::state_info_ptr>
-                                  &new_bottom_states, bisim_gjkw::block_t* B1);
+    bisim_gjkw::block_t* postprocess_new_bottom(bisim_gjkw::block_t* RedB);
 };
 
 ///@} (end of group part_refine)
