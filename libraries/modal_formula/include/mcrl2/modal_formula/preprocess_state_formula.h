@@ -45,10 +45,20 @@ struct count_modal_operator_nesting_traverser: public state_formula_traverser<co
   count_modal_operator_nesting_traverser()
     : result(0)
   {
+    enter_scope();
+  }
+
+  void enter_scope()
+  {
     nesting_depth.push_back(0);
   }
 
-  void push()
+  void leave_scope()
+  {
+    nesting_depth.pop_back();
+  }
+
+  void increase_nesting_depth()
   {
     nesting_depth.back()++;
     if (nesting_depth.back() > result)
@@ -57,39 +67,69 @@ struct count_modal_operator_nesting_traverser: public state_formula_traverser<co
     }
   }
 
-  void pop()
+  void decrease_nesting_depth()
   {
-    nesting_depth.pop_back();
+    nesting_depth.back()--;
   }
 
   void enter(const must&)
   {
-    push();
+    increase_nesting_depth();
+  }
+
+  void leave(const must&)
+  {
+    decrease_nesting_depth();
   }
 
   void enter(const may&)
   {
-    push();
+    increase_nesting_depth();
+  }
+
+  void leave(const may&)
+  {
+    decrease_nesting_depth();
   }
 
   void enter(const mu&)
   {
-    nesting_depth.push_back(0);
+    enter_scope();
   }
 
   void leave(const mu&)
   {
-    nesting_depth.pop_back();
+    leave_scope();
   }
 
   void enter(const nu&)
   {
-    nesting_depth.push_back(0);
+    enter_scope();
   }
 
   void leave(const nu&)
   {
-    nesting_depth.pop_back();
+    leave_scope();
+  }
+
+  void enter(const forall&)
+  {
+    enter_scope();
+  }
+
+  void leave(const forall&)
+  {
+    leave_scope();
+  }
+
+  void enter(const exists&)
+  {
+    enter_scope();
+  }
+
+  void leave(const exists&)
+  {
+    leave_scope();
   }
 };
 
@@ -294,7 +334,7 @@ state_formula preprocess_nested_modal_operators(const state_formula& x)
 /// \param formula A modal formula.
 /// \param context_ids A set of identifier strings.
 /// \param context_variable_names A set of identifier strings.
-/// \param preprocess_modal_operators A boolean indicating that dummy fixed point symbols can be 
+/// \param preprocess_modal_operators A boolean indicating that dummy fixed point symbols can be
 ///                                   inserted which makes subsequent handling easier.
 /// \param warn_for_modal_operator_nesting A boolean enabling warnings for modal operator nesting.
 /// \return The preprocessed formula.
@@ -313,7 +353,7 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
     throw mcrl2::runtime_error("The formula " + state_formulas::pp(f) + " is not monotonous!");
   }
 
-  if (!preprocess_modal_operators && warn_for_modal_operator_nesting && state_formulas::detail::count_modal_operator_nesting(formula) >= 2)
+  if (!preprocess_modal_operators && warn_for_modal_operator_nesting && state_formulas::detail::count_modal_operator_nesting(formula) >= 3)
   {
     mCRL2log(log::info) <<
       "Warning: detected nested modal operators. This may result in a long execution time.\n"
