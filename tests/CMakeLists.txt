@@ -25,7 +25,7 @@ if(MCRL2_EXTRA_TOOL_TESTS)
   generate_tool_tests(${MCRL2_DIR}/delta.mcrl2 "lpsparunfold")
   generate_tool_tests(${MCRL2_DIR}/time.mcrl2 "lpsparunfold;lpsrealelm")
   # LPS and PBES instantiation time out on most platforms. All tests
-  # that depend on the LTS or BES are also disabled.
+  # that depend on the LTS or BES formats are also disabled.
   generate_tool_tests(${MCRL2_DIR}/sets_bags.mcrl2 "lpsbinary;lts2lps;lts2pbes;lps2lts;ltsinfo;ltsconvert;ltscompare;pbes2bool;pbes2bes;pbesinst;besconvert;bespp;besinfo;txt2bes;bessolve;pbespgsolve") 
   generate_tool_tests(${MCRL2_DIR}/rational.mcrl2 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm;lps2lts;ltsinfo;ltsconvert;ltscompare")
 endif()

@@ -166,8 +166,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options *option
   // Apply the one point rewriter to the linear process specification. 
   // This simplifies expressions of the shape exists x:X . (x == e) && phi to phi[x:=e], enabling
   // more lps's to generate lts's. The overhead of this rewriter is limited.
-  // It is not yet possible to use this, as the one point rewriter works on a specification, not on a stochastic specification. 
-  // one_point_rule_rewrite(specification);
+  one_point_rule_rewrite(specification);
 
   stochastic_action_summand_vector prioritised_summands;
   stochastic_action_summand_vector nonprioritised_summands;
