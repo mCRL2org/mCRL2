@@ -282,20 +282,26 @@ class state_info_entry
     bool surely_has_no_transition_to(const constln_t* SpC) const;
 
 #ifndef NDEBUG
-    std::string debug_id() const
+    /// \brief print a short state identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
+    std::string debug_id_short() const
     {
-        assert(state_info_begin() <= this);
-        return "state " + std::to_string(this - state_info_begin());
+        assert(s_i_begin <= this);
+        return std::to_string(this - s_i_begin);
     }
 
-    static state_info_const_ptr state_info_begin()  {  return s_i_begin;  }
-    static permutation_const_iter_t permutation_begin()  { return perm_begin; }
+    /// \brief print a state identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
+    std::string debug_id() const
+    {
+        return "state " + debug_id_short();
+    }
+
   private:
     static state_info_const_ptr s_i_begin;
-    static permutation_const_iter_t perm_begin;
-#endif
 
     friend class part_state_t;
+#endif
 };
 
 
@@ -340,16 +346,10 @@ static inline void swap3_permutation(permutation_iter_t s1,
 /// 2. marked non-bottom states (initially empty)
 /// 3. unmarked bottom states
 /// 4. marked bottom states (initially empty)
-/// 5. old bottom states (only nonempty during PostprocessNewBottom)
 ///
 /// A state should be marked iff it is a predecessor of the current splitter
 /// (through a strong transition).  The marking is later extended to the red
 /// states;  that are the states with a weak transition to the splitter.
-///
-/// In PostprocessNewBottom, all bottom states that already existed before the
-/// refinement have a strong transition to the splitter;  therefore, there is
-/// no need to separate them further, and this fact is recorded by moving them
-/// to the slice of _old_ bottom states.
 ///
 /// (During the execution of some functions, more slices are subdivided
 /// further;  however, as these subdivisions are local to a single function,
@@ -748,13 +748,23 @@ class block_t
     block_t* split_off_red(permutation_iter_t red_nonbottom_begin);
 
 #ifndef NDEBUG
+    /// \brief print a block identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
     std::string debug_id() const
     {
-        return "block [" + std::to_string(begin() - state_info_entry::permutation_begin()) +
-                     "," + std::to_string(end() - state_info_entry::permutation_begin()) +
-                     ")" +
-                     (BLOCK_NO_SEQNR != seqnr()?" (#" + std::to_string(seqnr()) + ")":"");
+        return "block [" + std::to_string(begin() - perm_begin) + "," +
+            std::to_string(end() - perm_begin) + ")" +
+            (BLOCK_NO_SEQNR != seqnr() ?" (#"+std::to_string(seqnr())+")" :"");
     }
+
+    /// \brief provide an iterator to the beginning of the permutation array
+    /// \details This iterator is required to be able to print identifications
+    /// for debugging.  It is only available if compiled in Debug mode.
+    static permutation_const_iter_t permutation_begin()  { return perm_begin; }
+  private:
+    static permutation_const_iter_t perm_begin;
+
+    friend class part_state_t;
 #endif
 };
 
@@ -773,19 +783,19 @@ class constln_t
     /// iterator to the first state in the constellation
     permutation_iter_t int_begin;
 
-    /// \brief next constellation in the list of nontrivial constellations
+    /// \brief next constellation in the list of non-trivial constellations
     /// \details If this is the last constellation in the list,
     /// `nontrivial_next` points to this very constellation.  Consequently, it
     /// is possible to check whether some constellation is trivial without an
     /// additional variable.
     constln_t* nontrivial_next;
 
-    /// first constellation in the list of nontrivial constellations
+    /// first constellation in the list of non-trivial constellations
     static constln_t* nontrivial_first;
   public:
     /// \brief iterator to the first transition into this constellation that
     /// needs postprocessing
-    /// \details In `PostprocessNewBottom()`, all transitions from a refined
+    /// \details In `postprocess_new_bottom()`, all transitions from a refined
     /// block to the present constellation have to be gone through.  Because
     /// during this process the refined block may be refined even further, we
     /// need `postprocess_begin` and `postprocess_end` to store which
@@ -814,13 +824,21 @@ class constln_t
         assert(int_begin < int_end);
     }
 
-    /// destructor
+    /// \brief destructor
     ~constln_t()  {  }
 
-    /// provides an arbitrary nontrivial constellation
+    /// \brief provides an arbitrary non-trivial constellation
+    /// \details The static function is implemented in a way to provide the
+    /// first constellation in the list of non-trivial constellations.
     static constln_t* get_some_nontrivial()  {  return nontrivial_first;  }
+
+    /// \brief provides the next non-trivial constellation
+    /// \details This (non-static!) function just returns the next non-trivial
+    /// constellation in the list.  Note: If this constellation is the last in
+    /// the list of non-trivial constellations, the convention is that the next
+    /// pointer points to this constellation self (to distinguish it from
+    /// nullptr).
     const constln_t* get_nontrivial_next() const  {  return nontrivial_next;  }
-    constln_t* get_nontrivial_next()  {  return nontrivial_next;  }
 
     /// \brief makes a constellation trivial (i. e. removes it from the
     /// respective list)
@@ -833,7 +851,7 @@ class constln_t
         nontrivial_next = nullptr;
     }
 
-    /// \brief makes a constellation nontrivial (i. e. inserts it into the
+    /// \brief makes a constellation non-trivial (i. e. inserts it into the
     /// respective list)
     void make_nontrivial()
     {
@@ -845,24 +863,31 @@ class constln_t
         }
     }
 
-    /// \brief returns true if the constellation is marked as trivial
+    /// \brief returns true iff the constellation is trivial
+    /// \details If this constellation is the last in the list of non-trivial
+    /// constellations, the convention is that the next pointer points to this
+    /// constellation itself (to distinguish it from nullptr).
     bool is_trivial() const
     {
         return nullptr == nontrivial_next;
     }
 
-    /// iterator to the first state in the constellation
+    /// \brief constant iterator to the first state in the constellation
     permutation_const_iter_t begin() const  {  return int_begin;  }
+    /// \brief iterator to the first state in the constellation
     permutation_iter_t begin()  {  return int_begin;  }
+    /// \brief set the iterator to the first state in the constellation
     void set_begin(permutation_iter_t new_begin)
     {
         int_begin = new_begin;
         assert(int_begin < int_end);
     }
 
-    /// iterator past the last state in the constellation
+    /// \brief constant iterator past the last state in the constellation
     permutation_const_iter_t end() const  {  return int_end;  }
+    /// \brief iterator past the last state in the constellation
     permutation_iter_t end()  {  return int_end;  }
+    /// \brief set the iterator past the last state in the constellation
     void set_end(permutation_iter_t new_end)
     {
         int_end = new_end;
@@ -896,8 +921,8 @@ class constln_t
         assert(FirstB != LastB);
         if (FirstB->end() == LastB->begin())  make_trivial();
 
-        assert(this == FirstB->constln());
-        assert(this == LastB->constln());
+        assert(FirstB->constln() == this);
+        assert(LastB->constln() == this);
         assert(postprocess_begin == postprocess_end);
         // 2.6: Create a new constellation NewC and ...
         constln_t* const NewC = new constln_t(begin(), end(), postprocess_end);
@@ -927,10 +952,12 @@ class constln_t
     }
 
 #ifndef NDEBUG
+    /// \brief print a constellation identification for debugging
     std::string debug_id() const
     {
-        return "constellation [" + std::to_string(begin() - state_info_entry::permutation_begin()) +
-                             "," + std::to_string(end() - state_info_entry::permutation_begin()) + ")";
+        return "constellation [" +
+            std::to_string(begin() - block_t::permutation_begin()) + "," +
+            std::to_string(end() - block_t::permutation_begin()) + ")";
     }
 #endif
 };
@@ -949,11 +976,15 @@ class part_trans_t;
 class part_state_t
 {
   public:
-    /// permutation array
+    /// \brief permutation array
+    /// \details This is the central element of the data structure:  In this
+    /// array, states that belong to the same block are stored in adjacent
+    /// elements, and blocks that belong to the same constellation are stored
+    /// in adjacent slices.
     permutation_t permutation;
 
   private:
-    /// \brief pointer to array with all other information about states
+    /// \brief array with all other information about states
     /// \details We allocate 1 additional ``state'' to allow for the iterators
     /// past the last transition, as described in the documentation of
     /// `state_info_entry`.
@@ -964,7 +995,9 @@ class part_state_t
   public:
     /// \brief constructor
     /// \details The constructor allocates memory, but does not actually
-    /// initialise the partition.
+    /// initialise the partition.  Immediately afterwards, the initialisation
+    /// helper `bisim_partitioner_gjkw_initialise_helper::init_transitions()`
+    /// should be called.
     /// \param n number of states in the Kripke structure
     part_state_t(state_type n)
       : permutation(n),
@@ -973,12 +1006,14 @@ class part_state_t
     {
         assert(0 == block_t::nr_of_blocks);
         #ifndef NDEBUG
-            state_info_entry::perm_begin = permutation.begin();
+            block_t::perm_begin = permutation.begin();
             state_info_entry::s_i_begin = state_info.data();
         #endif
     }
 
-    /// destructor
+    /// \brief destructor
+    /// \details The destructor assumes that the caller has already executed
+    /// `clear()` to deallocate the memory for the partition.
     ~part_state_t()
     {
         assert(state_info.empty());
@@ -988,7 +1023,11 @@ class part_state_t
     static const char delete_constellations[];
     static const char delete_blocks[];
   public:
-    /// deallocates constellations and blocks
+    /// \brief deallocates constellations and blocks
+    /// \details This function can be called shortly before destructing the
+    /// partition.  Afterwards, the data structure is in a unusable state,
+    /// as all information on states, blocks and constellations is deleted and
+    /// deallocated.
     void clear()
     {
         // We have to deallocate constellations first because deallocating
@@ -1038,21 +1077,41 @@ class part_state_t
         permutation.clear();
     }
 
-    /// provide stored number of states
+    /// \brief provide size of state space
+    /// \returns the stored size of the state space
     state_type state_size() const  {  return permutation.size();  }
 
-    /// find constellation of a state (identified by number)
+    /// \brief find block of a state
+    /// \param s number of the state
+    /// \returns a pointer to the block where state s resides in
     const block_t* block(state_type s) const
     {
         return state_info[s].block;
     }
 #ifndef NDEBUG
   private:
+    /// \brief print a slice of the partition (typically a block)
+    /// \details If the slice indicated by the parameters is not empty, the
+    /// states in this slice will be printed.
+    /// \param message text printed as a title if the slice is not empty
+    /// \param B       block that is being printed (it is checked whether
+    ///                states belong to this block)
+    /// \param begin   iterator to the beginning of the slice
+    /// \param end     iterator past the end of the slice
     void print_block(const char* message, const block_t* B,
         permutation_const_iter_t begin, permutation_const_iter_t end) const;
   public:
-    /// print the partition as a tree (per constellation and block)
+    /// \brief print the partition as a tree (per constellation and block)
+    /// \details The function prints all constellations (in order); for each
+    /// constellation it prints the blocks it consists of; and for each block,
+    /// it lists its states, separated into nonbottom and bottom states.
+    /// \param part_tr partition for the transitions
     void print_part(const part_trans_t& part_tr) const;
+
+    /// \brief print all transitions
+    /// \details For each state (in order), its outgoing transitions are
+    /// listed, sorted by goal constellation.  The function also indicates
+    /// where the current constellation pointer of the state points at.
     void print_trans() const;
 #endif
 };
@@ -1122,15 +1181,19 @@ class pred_entry
     state_info_ptr source;
 
 #ifndef NDEBUG
-    std::string debug_id() const
-    {
-        return "transition from " + std::to_string(source - state_info_entry::state_info_begin()) +
-               " to " + std::to_string(succ->target-state_info_entry::state_info_begin());
-    }
+    /// \brief print a short transition identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
     std::string debug_id_short() const
     {
-        return "from " + std::to_string(source - state_info_entry::state_info_begin()) +
-               " to " + std::to_string(succ->target-state_info_entry::state_info_begin());
+        return "from " + source->debug_id_short() + " to " +
+                                                succ->target->debug_id_short();
+    }
+
+    /// \brief print a transition identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
+    std::string debug_id() const
+    {
+        return "transition " + debug_id_short();
     }
 #endif
 };
@@ -1146,11 +1209,6 @@ class B_to_C_entry
 
 /* out_descriptor and B_to_C_descriptor are data types that indicate which
 slice of states belongs together. */
-/// The class out_descriptor is prepared to be pooled, i. e. to be used in
-/// class pool<out_descriptor>.  It is assumed that the begin pointer is never
-/// a null pointer when the out_descriptor is actually used;  this allows to
-/// check whether the out_descriptor is part of the free list in the pool or
-/// not, because we set it to NULL as soon as it is freed.
 class out_descriptor
 {
   private:
@@ -1250,7 +1308,8 @@ class B_to_C_descriptor
     }
 
 #ifndef NDEBUG
-    /// convert to a string (for debugging)
+    /// \brief print a B_to_C slice identification for debugging
+    /// \details This function is only available if compiled in Debug mode.
     std::string debug_id() const
     {
         assert(begin < end);
@@ -1283,7 +1342,7 @@ class B_to_C_descriptor
 
 
 /* part_trans_t collects and organises all data for the transitions. */
-class part_trans_t: public part_state_t
+class part_trans_t
 {
   private:
     fixed_vector<pred_entry> pred;
@@ -1397,21 +1456,11 @@ class part_trans_t: public part_state_t
         assert(succ.end() > pos3 && pos3->B_to_C->pred->succ == pos3);
     }
   public:
-    part_trans_t(state_type n, trans_type m)
-      : part_state_t(n),
-        pred(m),
+    part_trans_t(trans_type m)
+      : pred(m),
         succ(m),
         B_to_C(m)
-    {
-#ifndef NDEBUG
-        if (succ.empty())
-        {
-            succ.reserve(1); //< make sure that the succ array is not nullptr;
-                         // otherwise, an assertion in the out_descriptor pool
-                         // may fail because &*succ.begin() == nullptr.
-        }
-#endif
-    }
+    {  }
     ~part_trans_t()
     {
         assert(B_to_C.empty());
@@ -1430,7 +1479,6 @@ class part_trans_t: public part_state_t
         B_to_C.clear();
         succ.clear();
         pred.clear();
-        part_state_t::clear();
     }
 
     trans_type trans_size() const  {  return pred.size();  }
@@ -1513,7 +1561,7 @@ class part_trans_t: public part_state_t
 
 #ifndef NDEBUG
     /// \brief assert that the data structure is consistent and stable
-    void assert_stability() const;
+    void assert_stability(const part_state_t& part_st) const;
 #endif
 };
 
@@ -1610,7 +1658,7 @@ class bisim_partitioner_gjkw_initialise_helper
                                                      bool preserve_divergence);
 
     /// initialise the state in part_st and the transitions in part_tr
-    void init_transitions(part_trans_t& part_tr,
+    void init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                                      bool branching, bool preserve_divergence);
 
     // replace_transitions() replaces the transitions of the LTS stored here by
@@ -1646,6 +1694,7 @@ class bisim_partitioner_gjkw
 {
   private:
     bisim_gjkw::bisim_partitioner_gjkw_initialise_helper<LTS_TYPE> init_helper;
+    bisim_gjkw::part_state_t part_st;
     bisim_gjkw::part_trans_t part_tr;
   public:
     // The constructor constructs the data structures and immediately
@@ -1654,8 +1703,8 @@ class bisim_partitioner_gjkw
     bisim_partitioner_gjkw(LTS_TYPE& l, bool branching = false,
                                         bool preserve_divergence = false)
       : init_helper(l, branching, preserve_divergence),
-        part_tr(init_helper.get_nr_of_states(),
-                init_helper.get_nr_of_transitions())
+        part_st(init_helper.get_nr_of_states()),
+        part_tr(init_helper.get_nr_of_transitions())
     {
         assert(branching || !preserve_divergence);
         create_initial_partition_gjkw(branching, preserve_divergence);
@@ -1664,6 +1713,7 @@ class bisim_partitioner_gjkw
     ~bisim_partitioner_gjkw()
     {
         part_tr.clear();
+        part_st.clear();
         bisim_gjkw::check_complexity::stats();
     }
 
@@ -1673,7 +1723,7 @@ class bisim_partitioner_gjkw
     // the LTS.
     void replace_transitions(bool branching, bool preserve_divergence)
     {
-        init_helper.replace_transitions(part_tr,branching,preserve_divergence);
+        init_helper.replace_transitions(part_st,branching,preserve_divergence);
     }
 
     static state_type num_eq_classes()
@@ -1682,11 +1732,11 @@ class bisim_partitioner_gjkw
     }
     state_type get_eq_class(state_type s) const
     {
-        return part_tr.block(s)->seqnr();
+        return part_st.block(s)->seqnr();
     }
     bool in_same_class(state_type s, state_type t) const
     {
-        return part_tr.block(s) == part_tr.block(t);
+        return part_st.block(s) == part_st.block(t);
     }
   private:
 
@@ -1723,7 +1773,6 @@ class bisim_partitioner_gjkw
 
     DECLARE_COROUTINE(refine_red,
     /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
-                            ((const bisim_gjkw::constln_t* const, SpC))
                             ((const bisim_gjkw::B_to_C_descriptor* const,
                                                                       FromRed))
                             ((bool const, postprocessing)),

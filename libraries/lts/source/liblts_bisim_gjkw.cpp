@@ -58,7 +58,7 @@ constln_t* constln_t::nontrivial_first = nullptr;
     // accessing them would lead to a linker error.
     const char block_t::mark_all_states_in_SpB[] = "mark all states in SpB";
     state_info_const_ptr state_info_entry::s_i_begin;
-    permutation_const_iter_t state_info_entry::perm_begin;
+    permutation_const_iter_t block_t::perm_begin;
     const char part_state_t::delete_constellations[] = "delete constellations";
     const char part_state_t::delete_blocks[] = "delete blocks";
 #endif
@@ -78,14 +78,14 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
 {
     assert(unmarked_nonbottom_end() >= blue_nonbottom_end);
     assert(unmarked_nonbottom_begin() <= blue_nonbottom_end);
-    assert(unmarked_bottom_size() > 0);
+    assert(0 != unmarked_bottom_size());
     assert(blue_nonbottom_end - unmarked_nonbottom_begin() +
                                            unmarked_bottom_size() <= size()/2);
     // It is not necessary to reset the nottoblue counters; these counters are
     // anyway only valid for the maybe-blue states.
     state_type swapcount = std::min(unmarked_bottom_size(),
                    (state_type) (marked_nonbottom_end() - blue_nonbottom_end));
-    if (0 < swapcount)
+    if (0 != swapcount)
     {
         // vector swap the states:
         permutation_iter_t pos1=blue_nonbottom_end, pos2=unmarked_bottom_end();
@@ -97,7 +97,7 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
             *pos1 = *--pos2;
             (*pos1)->pos = pos1;
             ++pos1;
-            if (--swapcount == 0)  break;
+            if (0 == --swapcount)  break;
             *pos2 = *pos1;
             (*pos2)-> pos = pos2;
         }
@@ -161,14 +161,14 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
 {
     assert(marked_nonbottom_begin() == red_nonbottom_begin);
     assert(marked_nonbottom_end() >= red_nonbottom_begin);
-    assert(marked_size() > 0);
+    assert(0 != marked_size());
     assert(marked_size() <= size() / 2);
 
     // It is not necessary to reset the nottoblue counters; these counters are
     // anyway only valid for the maybe-blue states.
     state_type swapcount = std::min(unmarked_bottom_size(),
                   (state_type) (marked_nonbottom_end() - red_nonbottom_begin));
-    if (0 < swapcount)
+    if (0 != swapcount)
     {
         // vector swap the states:
         permutation_iter_t pos1=red_nonbottom_begin,pos2=unmarked_bottom_end();
@@ -180,7 +180,7 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
             *pos1 = *--pos2;
             (*pos1)->pos = pos1;
             ++pos1;
-            if (--swapcount == 0)  break;
+            if (0 == --swapcount)  break;
             *pos2 = *pos1;
             (*pos2)->pos = pos2;
         }
@@ -228,14 +228,22 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
 
 #ifndef NDEBUG
 
+/// \brief print a slice of the partition (typically a block)
+/// \details If the slice indicated by the parameters is not empty, the states
+/// in this slice will be printed.
+/// \param message text printed as a title if the slice is not empty
+/// \param B       block that is being printed (it is checked whether states
+///                belong to this block)
+/// \param begin   iterator to the beginning of the slice
+/// \param end     iterator past the end of the slice
 void part_state_t::print_block(const char*const message, const block_t*const B,
                                       permutation_const_iter_t begin,
                                       permutation_const_iter_t const end) const
 {
-    if (end - begin != 0)
+    if (0 != end - begin)
     {
         mCRL2log(log::debug, "bisim_gjkw") << "\t\t" << message
-                                           << (end-begin > 1 ? "s:\n" : ":\n");
+                                           << (1 < end-begin ? "s:\n" : ":\n");
         do
         {
             mCRL2log(log::debug, "bisim_gjkw")<<"\t\t\t"<<(*begin)->debug_id();
@@ -256,7 +264,11 @@ void part_state_t::print_block(const char*const message, const block_t*const B,
 }
 
 
-/// print the partition as a tree (per constellation and block)
+/// \brief print the partition as a tree (per constellation and block)
+/// \details The function prints all constellations (in order); for each
+/// constellation it prints the blocks it consists of; and for each block, it
+/// lists its states, separated into nonbottom and bottom states.
+/// \param part_tr partition for the transitions
 void part_state_t::print_part(const part_trans_t& part_tr) const
 {
     assert(permutation.begin() < permutation.end());
@@ -308,6 +320,10 @@ void part_state_t::print_part(const part_trans_t& part_tr) const
 }
 
 
+/// \brief print all transitions
+/// \details For each state (in order), its outgoing transitions are listed,
+/// sorted by goal constellation.  The function also indicates where the
+/// current constellation pointer of the state points at.
 void part_state_t::print_trans() const
 {
     fixed_vector<state_info_entry>::const_iterator const state_info_end =
@@ -577,7 +593,7 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
                                *SpC < *s->inert_succ_end()->target->constln());
                 // the old constln_slice cannot become empty because it
                 // contains an inert transition.
-                assert(0 < old_out_pos->constln_slice->size());
+                assert(0 != old_out_pos->constln_slice->size());
                 new_out_pos->constln_slice = new_constln_slice;
                 return new_out_pos;
             }
@@ -662,9 +678,9 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
             // the out-transitions of s also have to be swapped.
             // Actually only B_to_C and the target need to be swapped, as the
             // constln_slices are (still) identical.
-            trans_type swapnr = std::min(to_C_end-split, split-to_C_begin);
+            trans_type swapcount = std::min(to_C_end-split, split-to_C_begin);
             split = to_C_end - split + to_C_begin;
-            assert(0 < swapnr);
+            assert(0 != swapcount);
 
             succ_iter_t pos1 = to_C_begin, pos2 = to_C_end;
             state_info_ptr temp_target = pos1->target;
@@ -678,7 +694,7 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
                 pos1->B_to_C = pos2->B_to_C;
                 pos1->B_to_C->pred->succ = pos1;
                 ++pos1;
-                if (0 >= --swapnr)  break;
+                if (0 == --swapcount)  break;
                 pos2->target = pos1->target;
                 pos2->B_to_C = pos1->B_to_C;
                 pos2->B_to_C->pred->succ = pos2;
@@ -761,7 +777,7 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
     if (s->succ_begin() != s->succ_end())
     {
         assert(s->succ_begin()->constln_slice->begin() == s->succ_begin());
-        for (succ_iter_t succ_iter=s->succ_begin(); ; ++succ_iter)
+        for (succ_iter_t succ_iter = s->succ_begin(); ; ++succ_iter)
         {
             assert(succ_iter->constln_slice->begin() <= succ_iter);
             assert(succ_iter->constln_slice->end() > succ_iter);
@@ -1201,7 +1217,7 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
 /// bottom state in every block can reach exactly the constellations in the
 /// list of constellations that should be reachable from it, and every
 /// nonbottom state can reach a subset of them.
-void part_trans_t::assert_stability() const
+void part_trans_t::assert_stability(const part_state_t& part_st) const
 {
     std::vector<state_info_const_ptr> part_st_predecessors;
     // count the nontrivial constellations (to check later whether every
@@ -1216,11 +1232,12 @@ void part_trans_t::assert_stability() const
             ++nr_of_nontrivial_constellations;
             if (C->get_nontrivial_next() == C)  break;
             C = C->get_nontrivial_next();
+            assert(nullptr != C);
         }
     }
 
     // for all constellations C do
-    C = (*permutation.begin())->constln();
+    C = (*part_st.permutation.begin())->constln();
     for (;;)
     {
         // assert some properties of constellation C
@@ -1451,7 +1468,7 @@ void part_trans_t::assert_stability() const
                         }
                 // end for
                         if (s->succ_end() <= succ_iter)  break;
-                        assert(0 < nr_of_reachable_constlns);
+                        assert(0 != nr_of_reachable_constlns);
                         assert(*targetC < *succ_iter->target->constln());
                     }
                 }
@@ -1464,7 +1481,7 @@ void part_trans_t::assert_stability() const
                     // the following assertion is necessary because s must have
                     // a transition to its own constellation (namely an inert
                     // one), but this constln_slice is not counted.
-                    assert(0 < nr_of_reachable_constlns);
+                    assert(0 != nr_of_reachable_constlns);
 
                     // assert that s can reach a bottom state
                     assert(STATE_TYPE_MAX == s->notblue);
@@ -1506,7 +1523,7 @@ void part_trans_t::assert_stability() const
             B = (*B->end())->block;
         }
     // end for (all constellations C)
-        if (permutation.end() <= C->end())  break;
+        if (part_st.permutation.end() <= C->end())  break;
         C = (*C->end())->constln();
     }
     assert(0 == nr_of_nontrivial_constellations);
@@ -1586,8 +1603,8 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
 
                 // (possibly) create new block
                 std::pair<std::unordered_map<label_type, state_type>::iterator,
-                            bool> const action_block =
-                              action_block_map.insert(std::make_pair(aut.apply_hidden_label_map(t.label()),
+                    bool> const action_block = action_block_map.insert(
+                          std::make_pair(aut.apply_hidden_label_map(t.label()),
                                                      states_per_block.size()));
                 if (action_block.second)
                 {
@@ -1628,17 +1645,17 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
 /// initialise the state in part_st and the transitions in part_tr
 template<class LTS_TYPE>
 inline void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
-init_transitions(part_trans_t& part_tr,
+init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                           bool const branching, bool const preserve_divergence)
 {
-    assert(part_tr.state_size() == get_nr_of_states());
+    assert(part_st.state_size() == get_nr_of_states());
     assert(part_tr.trans_size() == get_nr_of_transitions());
 
     // initialise blocks and B_to_C slices
-    permutation_iter_t begin = part_tr.permutation.begin();
-    constln_t* const constln = new constln_t(begin, part_tr.permutation.end(),
+    permutation_iter_t begin = part_st.permutation.begin();
+    constln_t* const constln = new constln_t(begin, part_st.permutation.end(),
                                                          part_tr.B_to_C_end());
-    if (states_per_block.size() > 1)
+    if (1 < states_per_block.size())
     {
         constln->make_nontrivial();
     }
@@ -1675,7 +1692,7 @@ init_transitions(part_trans_t& part_tr,
         }
         begin = end;
     }
-    assert(part_tr.permutation.end() == begin);
+    assert(part_st.permutation.end() == begin);
     assert(part_tr.B_to_C.end() == B_to_C_begin);
     // only block 0 has a sequence number and non-bottom states:
     blocks[0]->assign_seqnr();
@@ -1683,26 +1700,26 @@ init_transitions(part_trans_t& part_tr,
     blocks[0]->set_marked_nonbottom_begin(blocks[0]->bottom_begin());
 
     // initialise states and succ slices
-    part_tr.state_info.begin()->set_pred_begin(part_tr.pred.begin());
-    part_tr.state_info.begin()->set_succ_begin(part_tr.succ.begin());
-    for (state_type s = 0; s < get_nr_of_states(); ++s)
+    part_st.state_info.begin()->set_pred_begin(part_tr.pred.begin());
+    part_st.state_info.begin()->set_succ_begin(part_tr.succ.begin());
+    for (state_type s = 0; get_nr_of_states() != s; ++s)
     {
         check_complexity::count("initialise states", 1, check_complexity::n);
-        part_tr.state_info[s].set_pred_end(part_tr.state_info[s].pred_begin() +
+        part_st.state_info[s].set_pred_end(part_st.state_info[s].pred_begin() +
                              noninert_in_per_state[s] + inert_in_per_state[s]);
-        part_tr.state_info[s].set_inert_pred_begin(part_tr.state_info[s].
+        part_st.state_info[s].set_inert_pred_begin(part_st.state_info[s].
                                       pred_begin() + noninert_in_per_state[s]);
-        // part_tr.state_info[s+1].set_pred_begin(part_tr.state_info[s].
+        // part_st.state_info[s+1].set_pred_begin(part_st.state_info[s].
         //                                                         pred_end());
 
-        if (0 < noninert_out_per_state[s] + inert_out_per_state[s])
+        if (0 != noninert_out_per_state[s] + inert_out_per_state[s])
         {
             out_descriptor* const s_slice = new out_descriptor(
-                                           part_tr.state_info[s].succ_begin());
+                                           part_st.state_info[s].succ_begin());
             s_slice->set_end(s_slice->end() + noninert_out_per_state[s] +
                                                        inert_out_per_state[s]);
-            part_tr.state_info[s].set_succ_end(s_slice->end());
-            part_tr.state_info[s].set_inert_succ_begin_and_end(s_slice->begin()
+            part_st.state_info[s].set_succ_end(s_slice->end());
+            part_st.state_info[s].set_inert_succ_begin_and_end(s_slice->begin()
                                   + noninert_out_per_state[s], s_slice->end());
             for (succ_iter_t succ_iter = s_slice->begin();
                                       s_slice->end() != succ_iter; ++succ_iter)
@@ -1711,29 +1728,29 @@ init_transitions(part_trans_t& part_tr,
                                                        1, check_complexity::m);
                 succ_iter->constln_slice = s_slice;
             }
-            part_tr.state_info[s].set_current_constln(s_slice->end());
+            part_st.state_info[s].set_current_constln(s_slice->end());
         }
         else
         {
-            part_tr.state_info[s].set_succ_end(
-                                           part_tr.state_info[s].succ_begin());
-            part_tr.state_info[s].set_inert_succ_begin_and_end(
-                                           part_tr.state_info[s].succ_begin(),
-                                           part_tr.state_info[s].succ_begin());
-                part_tr.state_info[s].set_current_constln(
-                                           part_tr.state_info[s].succ_begin());
+            part_st.state_info[s].set_succ_end(
+                                           part_st.state_info[s].succ_begin());
+            part_st.state_info[s].set_inert_succ_begin_and_end(
+                                           part_st.state_info[s].succ_begin(),
+                                           part_st.state_info[s].succ_begin());
+                part_st.state_info[s].set_current_constln(
+                                           part_st.state_info[s].succ_begin());
         }
 
         if (s < aut.num_states())
         {
             // s is not an extra Kripke state.  It is in block 0.
-            part_tr.state_info[s].block = blocks[0];
-            if (0 < inert_out_per_state[s])
+            part_st.state_info[s].block = blocks[0];
+            if (0 != inert_out_per_state[s])
             {
                 // non-bottom state:
-                assert(0 < nr_of_nonbottom_states);
+                assert(0 != nr_of_nonbottom_states);
                 --nr_of_nonbottom_states;
-                part_tr.state_info[s].pos = blocks[0]->begin() +
+                part_st.state_info[s].pos = blocks[0]->begin() +
                                                         nr_of_nonbottom_states;
             }
             else
@@ -1742,14 +1759,14 @@ init_transitions(part_trans_t& part_tr,
                 // The following assertion is incomplete; only the second
                 // assertion (after the assignment) makes sure that not too
                 // many states become part of this slice.
-                assert(0 < states_per_block[0]);
+                assert(0 != states_per_block[0]);
                 --states_per_block[0];
-                part_tr.state_info[s].pos = blocks[0]->begin() +
+                part_st.state_info[s].pos = blocks[0]->begin() +
                                                            states_per_block[0];
-                assert(part_tr.state_info[s].pos >= blocks[0]->bottom_begin());
+                assert(part_st.state_info[s].pos >= blocks[0]->bottom_begin());
             }
-            *part_tr.state_info[s].pos = &part_tr.state_info[s];
-            // part_tr.state_info[s].notblue = 0;
+            *part_st.state_info[s].pos = &part_st.state_info[s];
+            // part_st.state_info[s].notblue = 0;
         }
     }
 
@@ -1769,55 +1786,55 @@ init_transitions(part_trans_t& part_tr,
                 state_type const extra_block = 
                        action_block_map[aut.apply_hidden_label_map(t.label())];
                 // now initialise extra_state correctly
-                part_tr.state_info[extra_state].block = blocks[extra_block];
-                assert(0 < states_per_block[extra_block]);
+                part_st.state_info[extra_state].block = blocks[extra_block];
+                assert(0 != states_per_block[extra_block]);
                 --states_per_block[extra_block];
-                part_tr.state_info[extra_state].pos = blocks[extra_block]->
+                part_st.state_info[extra_state].pos = blocks[extra_block]->
                                        begin() + states_per_block[extra_block];
-                *part_tr.state_info[extra_state].pos =
-                                              &part_tr.state_info[extra_state];
-                // part_tr.state_info[extra_state].notblue = 0;
+                *part_st.state_info[extra_state].pos =
+                                              &part_st.state_info[extra_state];
+                // part_st.state_info[extra_state].notblue = 0;
 
                 // state extra_state has exactly one outgoing transition,
                 // namely a noninert transition to to t.to().  It has to be
                 // initialised now.
-                assert(0 < noninert_in_per_state[t.to()]);
+                assert(0 != noninert_in_per_state[t.to()]);
                 --noninert_in_per_state[t.to()];
                 pred_iter_t const t_pred =
-                             part_tr.state_info[t.to()].noninert_pred_begin() +
+                             part_st.state_info[t.to()].noninert_pred_begin() +
                                                  noninert_in_per_state[t.to()];
                 --noninert_out_per_state[extra_state];
                 assert(0 == noninert_out_per_state[extra_state]);
                 succ_iter_t const t_succ =
-                                  part_tr.state_info[extra_state].succ_begin();
-                assert(0 < noninert_out_per_block[extra_block]);
+                                  part_st.state_info[extra_state].succ_begin();
+                assert(0 != noninert_out_per_block[extra_block]);
                 B_to_C_iter_t const t_B_to_C =
                                          blocks[extra_block]->inert_begin() -
                                          noninert_out_per_block[extra_block]--;
-                t_pred->source = &part_tr.state_info.begin()[extra_state];
+                t_pred->source = &part_st.state_info.begin()[extra_state];
                 t_pred->succ = t_succ;
-                t_succ->target = &part_tr.state_info.begin()[t.to()];
+                t_succ->target = &part_st.state_info.begin()[t.to()];
                 t_succ->B_to_C = t_B_to_C;
                 // t_B_to_C->B_to_C_slice = (already initialised);
                 t_B_to_C->pred = t_pred;
             }
             // noninert transition from t.from() to extra_state
-            assert(0 < noninert_in_per_state[extra_state]);
+            assert(0 != noninert_in_per_state[extra_state]);
             --noninert_in_per_state[extra_state];
             pred_iter_t const t_pred =
-                        part_tr.state_info[extra_state].noninert_pred_begin() +
+                        part_st.state_info[extra_state].noninert_pred_begin() +
                                             noninert_in_per_state[extra_state];
-            assert(0 < noninert_out_per_state[t.from()]);
+            assert(0 != noninert_out_per_state[t.from()]);
             --noninert_out_per_state[t.from()];
-            succ_iter_t const t_succ=part_tr.state_info[t.from()].succ_begin()+
+            succ_iter_t const t_succ=part_st.state_info[t.from()].succ_begin()+
                                               noninert_out_per_state[t.from()];
-            assert(0 < noninert_out_per_block[0]);
+            assert(0 != noninert_out_per_block[0]);
             B_to_C_iter_t const t_B_to_C = blocks[0]->inert_begin() -
                                                    noninert_out_per_block[0]--;
 
-            t_pred->source = &part_tr.state_info.begin()[t.from()];
+            t_pred->source = &part_st.state_info.begin()[t.from()];
             t_pred->succ = t_succ;
-            t_succ->target = &part_tr.state_info.begin()[extra_state];
+            t_succ->target = &part_st.state_info.begin()[extra_state];
             t_succ->B_to_C = t_B_to_C;
             // t_B_to_C->B_to_C_slice = (already initialised);
             t_B_to_C->pred = t_pred;
@@ -1825,24 +1842,24 @@ init_transitions(part_trans_t& part_tr,
         else
         {
             // inert transition from t.from() to t.to()
-            assert(0 < inert_in_per_state[t.to()]);
+            assert(0 != inert_in_per_state[t.to()]);
             --inert_in_per_state[t.to()];
             pred_iter_t const t_pred =
-                                part_tr.state_info[t.to()].inert_pred_begin() +
+                                part_st.state_info[t.to()].inert_pred_begin() +
                                                     inert_in_per_state[t.to()];
-            assert(0 < inert_out_per_state[t.from()]);
+            assert(0 != inert_out_per_state[t.from()]);
             --inert_out_per_state[t.from()];
             succ_iter_t const t_succ =
-                              part_tr.state_info[t.from()].inert_succ_begin() +
+                              part_st.state_info[t.from()].inert_succ_begin() +
                                                  inert_out_per_state[t.from()];
-            assert(0 < inert_out_per_block[0]);
+            assert(0 != inert_out_per_block[0]);
             --inert_out_per_block[0];
             B_to_C_iter_t const t_B_to_C = blocks[0]->inert_begin() +
                                                         inert_out_per_block[0];
 
-            t_pred->source = &part_tr.state_info.begin()[t.from()];
+            t_pred->source = &part_st.state_info.begin()[t.from()];
             t_pred->succ = t_succ;
-            t_succ->target = &part_tr.state_info.begin()[t.to()];
+            t_succ->target = &part_st.state_info.begin()[t.to()];
             t_succ->B_to_C = t_B_to_C;
             // t_B_to_C->B_to_C_slice = (already initialised);
             t_B_to_C->pred = t_pred;
@@ -1859,8 +1876,8 @@ init_transitions(part_trans_t& part_tr,
                                << get_nr_of_states() << " states and "
                                << get_nr_of_transitions() << " transitions.\n";
     #ifndef NDEBUG
-        part_tr.print_part(part_tr);
-        part_tr.print_trans();
+        part_st.print_part(part_tr);
+        part_st.print_trans();
     #endif
 }
 
@@ -1983,8 +2000,8 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
                 // in the refinable partition):
                 assert(&part_st.state_info.begin()[k.second] ==
                                       succ_iter->target->succ_begin()->target);
-                assert(succ_iter->target->succ_end() -
-                                         succ_iter->target->succ_begin() == 1);
+                assert(1 == succ_iter->target->succ_end() -
+                                              succ_iter->target->succ_begin());
             }
             // Skip over other transitions from the same state to the same
             // constellation -- they would be mapped to the same resulting
@@ -2011,7 +2028,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::create_initial_partition_gjkw(
     // 2.2: P := P_0, i. e. the initial, cycle-free partition; C = {S}
     // and
     // 2.3: Initialise all temporary data
-    init_helper.init_transitions(part_tr, branching, preserve_divergence);
+    init_helper.init_transitions(part_st, part_tr, branching,
+                                                          preserve_divergence);
 }
 
 template <class LTS_TYPE>
@@ -2021,10 +2039,10 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
     std::vector<bisim_gjkw::state_info_ptr> new_bottom_states;
 
     #ifndef NDEBUG
-        part_tr.print_part(part_tr);
-        part_tr.print_trans();
+        part_st.print_part(part_tr);
+        part_st.print_trans();
 
-        part_tr.assert_stability();
+        part_tr.assert_stability(part_st);
     #endif
     // 2.4: while C contains a nontrivial constellation SpC do
     while (nullptr != bisim_gjkw::constln_t::get_some_nontrivial())
@@ -2187,7 +2205,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             bisim_gjkw::block_t* RedB = refine(RfnB, SpB->constln(), nullptr,
                                                                         false);
             // 2.23: if RedB contains new bottom states then
-            if (0 < RedB->unmarked_bottom_size())
+            if (0 != RedB->unmarked_bottom_size())
             {
                 // 2.24: RedB := PostprocessNewBottom(RedB, BlueB)
                 RedB = postprocess_new_bottom(RedB);
@@ -2215,7 +2233,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             //                                           from RedB to SpC\SpB})
             RedB = refine(RedB, SpC, RedB->FromRed(SpC), false);
             // 2.27: if RedB contains new bottom states then
-            if (0 < RedB->unmarked_bottom_size())
+            if (0 != RedB->unmarked_bottom_size())
             {
                 // 2.28: PostprocessNewBottom(RedB, BlueB)
                 postprocess_new_bottom(RedB);
@@ -2232,10 +2250,10 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.31: end for
         }
         #ifndef NDEBUG
-            part_tr.print_part(part_tr);
-            part_tr.print_trans();
+            part_st.print_part(part_tr);
+            part_st.print_trans();
 
-            part_tr.assert_stability();
+            part_tr.assert_stability(part_st);
         #endif
     // 2.32: end while
     }
@@ -2272,16 +2290,17 @@ struct bisim_gjkw::refine_shared_t {
 /// The procedure will partition the block into two parts, called ``blue'' and
 /// ``red''.  The red part can reach the splitter constellation `SpC`, the blue
 /// part cannot.  Upon calling `refine()`, it is known that all marked states
-/// are red;  sometimes, it is also known that all unmarked bottom states are
-/// blue.
+/// are red.
 ///
-/// If not all states with a strong transition to `SpC` have been found yet,
-/// the parameter `FromRed` indicates all such transitions, so `refine()` can
-/// easily find their sources.  Also in that case, the _current constellation_
-/// pointer of all unmarked bottom states is set in a way that it makes easy to
-/// check whether the state has a transition to `SpC`.  (Some non-bottom states
-/// may have their _current constellation_ pointer set similarly; while this is
-/// not required, it still speeds up `refine()`.)
+/// If states with a strong transition to `SpC` have not yet been found, the
+/// parameter `FromRed` indicates all such transitions, so `refine()` can
+/// easily find their sources.  It is required that either some states are
+/// marked or a non-nullptr `FromRed` is supplied.  In the latter case, also
+/// the _current constellation_ pointer of all unmarked bottom states is set in
+/// a way that it makes easy to check whether the state has a transition to
+/// `SpC`.  (Some non-bottom states may have their _current constellation_
+/// pointer set similarly; while this is not required, it still speeds up
+/// `refine()`.)
 ///
 /// `refine()` works by starting two coroutines to find states in the parts;
 /// as soon as the first coroutine finishes, the refinement can be completed.
@@ -2323,7 +2342,7 @@ struct bisim_gjkw::refine_shared_t {
 /// \param FromRed          the set of transitions from `RfnB` to `SpC`
 /// \param postprocessing   true iff `refine()` is called during postprocessing
 ///                         new bottom states
-/// \result a pointer to the block that contains the red part of `RfnB`
+/// \result a pointer to the block that contains the red part of `RfnB`.
 
 template <class LTS_TYPE>
 bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
@@ -2336,8 +2355,19 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
     //      << (nullptr != SpC ? SpC->debug_id() : std::string("NULL")) << ","
     //      << (nullptr != FromRed ? FromRed->debug_id() : std::string("NULL"))
     //      << (postprocessing ? ",true)\n" : ",false)\n");
-    assert(nullptr == FromRed || FromRed->from_block() == RfnB);
-    assert(nullptr == FromRed || FromRed->to_constln() == SpC);
+    #ifndef NDEBUG
+        if (nullptr != FromRed)
+        {
+            assert(FromRed->from_block() == RfnB);
+            assert(FromRed->to_constln() == SpC);
+            assert(nullptr != SpC);
+            assert(0 == RfnB->marked_size());
+        }
+        else
+        {
+            assert(0 != RfnB->marked_size());
+        }
+    #endif
 
     // 3.2: if RfnB subseteq SpC then return RfnB
     if (RfnB->constln() == SpC)
@@ -2351,15 +2381,18 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
     // 3.4: Spend the same amount of work on either coroutine:
     // and
     // 3.39: RedB := RfnB  or  RedB := NewB , respectively
-    bisim_gjkw::permutation_iter_t const red_end = RfnB->end();
+    #ifndef NDEBUG
+        bisim_gjkw::permutation_iter_t const red_end = RfnB->end();
+    #endif
     bisim_gjkw::block_t* RedB;
     RUN_COROUTINES(refine_blue, (RfnB)(SpC)(postprocessing),
-                     RedB = RfnB /* and BlueB = ... */,
-                   refine_red, (RfnB)(SpC)(FromRed)(postprocessing),
-                     RedB=(red_end[-1]->block==RfnB?nullptr:red_end[-1]->block)
-                                                        /* and BlueB = RfnB */,
+                                              RedB = RfnB,
+                   refine_red, (RfnB)(FromRed)(postprocessing),
+                                             (assert(RfnB->end() < red_end),
+                                              RedB = (*RfnB->end())->block   ),
                /* shared data: */ struct bisim_gjkw::refine_shared_t,
                                 (RfnB->nonbottom_begin())(nullptr == FromRed));
+    assert(RedB->end() == red_end);
     // 3.41 P := partition P where NewB is added and the states in NewB are
     //                             removed from RfnB
         // done through adapting the data structures in the coroutines.
@@ -2694,7 +2727,6 @@ END_COROUTINE
 template <class LTS_TYPE>
 DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
     /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
-                            ((const bisim_gjkw::constln_t* const, SpC))
                             ((const bisim_gjkw::B_to_C_descriptor* const,
                                                                       FromRed))
                             ((bool const, postprocessing)),
@@ -2721,14 +2753,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
     if (nullptr != FromRed)
     {
         assert(FromRed->from_block() == RfnB);
-        assert(FromRed->to_constln() == SpC);
-        (void) SpC; //< avoid warning about unused variable
         fromred_visited_begin = FromRed->end;
         assert(RfnB->inert_end() <= FromRed->begin ||
                                (RfnB->inert_begin() >= fromred_visited_begin &&
                                    RfnB->inert_end() > fromred_visited_begin));
-        assert(RfnB->constln() != SpC); //< so there is no need to skip inert
-                                        //  transitions
 
         COROUTINE_WHILE (REFINE_RED_COLLECT_FROMRED,
                                        FromRed->begin != fromred_visited_begin)
@@ -2776,11 +2804,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
         shared_data.FromRed_is_empty = true;
     }
     assert(shared_data.FromRed_is_empty);
-    if (0 == RfnB->marked_size())
-    {
-        // RfnB->unmark_all_states(); // not needed: there are no marked states
-        TERMINATE_COROUTINE_SUCCESSFULLY();
-    }
+    assert(0 != RfnB->marked_size());
 
     /*  -  -  -  -  -  -  -  - visit red states -  -  -  -  -  -  -  -  */
 
@@ -2939,7 +2963,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom(
 {
     //mCRL2log(log::debug, "bisim_gjkw") << "Postprocessing "
     //                                             << RedB->debug_id() << "\n";
-    assert(0 < RedB->unmarked_bottom_size());
+    assert(0 != RedB->unmarked_bottom_size());
+    assert(RedB->marked_nonbottom_begin() == RedB->marked_nonbottom_end());
 
     /*------- collect constellations reachable from new bottom states -------*/
 
@@ -2947,17 +2972,29 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom(
     R_map_t R;
     // 4.3: <ResultB, RfnB> := Refine(RedB, cosplit(RedB, BlueB), {old bottom
     //                                                     states in RedB}, {})
-    bisim_gjkw::permutation_iter_t blue_begin = RedB->begin();
-    bisim_gjkw::block_t* const ResultB = refine(RedB, nullptr, nullptr, true);
-    if (nullptr != ResultB)
+    bisim_gjkw::block_t* ResultB;
+    bisim_gjkw::block_t* RfnB;
+    #ifndef NDEBUG
+        bisim_gjkw::permutation_const_iter_t blue_begin = RedB->begin();
+    #endif
+    if (0 != RedB->marked_bottom_size())
     {
+        ResultB = refine(RedB, nullptr, nullptr, true);
+        assert(nullptr != ResultB);
+        assert(0 == ResultB->unmarked_bottom_size());
         // 4.26: Destroy all temporary data
             // As part of this line, we unmark all states.
-        assert(0 == ResultB->unmarked_bottom_size());
         ResultB->set_marked_bottom_begin(ResultB->bottom_end());
+        assert(ResultB->begin() > blue_begin);
+        RfnB = ResultB->begin()[-1]->block;
     }
-    bisim_gjkw::block_t* RfnB = (*blue_begin)->block;
+    else
+    {
+        RfnB = RedB;
+        ResultB = nullptr;
+    }
     assert(ResultB != RfnB);
+    assert(RfnB->begin() == blue_begin);
 Line_4_4:
     // 4.4: for all constellations C not in R reachable from RfnB do
     assert(0 == RfnB->marked_bottom_size());
@@ -3063,21 +3100,35 @@ Line_4_4:
             // 4.17: end for
             }
             // 4.18: if RedB contains new bottom states then
-            if (0 < RedB->unmarked_bottom_size())
+            assert(RedB->marked_nonbottom_begin() ==
+                                                 RedB->marked_nonbottom_end());
+            if (0 != RedB->unmarked_bottom_size())
             {
                 // 4.19: <_, RfnB> := Refine(RedB, cosplit(RedB, BlueB), {old
                 //                           bottom states in RedB}, {})
-                blue_begin = RedB->begin();
-                RedB = refine(RedB, nullptr, nullptr, true);
-                if (nullptr != RedB)
+                #ifndef NDEBUG
+                    blue_begin = RedB->begin();
+                #endif
+                if (0 != RedB->marked_bottom_size())
                 {
+                    RedB = refine(RedB, nullptr, nullptr, true);
+                    assert(nullptr != RedB);
+                    assert(0 == RedB->unmarked_bottom_size());
                     // 4.26: Destroy all temporary data
                         // As part of this line, we unmark all states.
-                    assert(0 == RedB->unmarked_bottom_size());
                     RedB->set_marked_bottom_begin(RedB->bottom_end());
+                    assert(RedB->begin() > blue_begin);
+                    RfnB = RedB->begin()[-1]->block;
                 }
-                RfnB = (*blue_begin)->block;
+                else
+                {
+                    RfnB = RedB;
+                    #ifndef NDEBUG
+                        RedB = nullptr;
+                    #endif
+                }
                 assert(RedB != RfnB);
+                assert(RfnB->begin() == blue_begin);
                 // 4.20: Register that the transitions from RfnB to SpC need
                 //       postprocessing
                 bisim_gjkw::B_to_C_desc_iter_t new_slice =

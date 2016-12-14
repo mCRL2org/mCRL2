@@ -60,24 +60,6 @@ public:
     // operator[] calls std::vector<T>::at because the latter checks bounds.
     T& operator[](size_type n)  {  return std::vector<T>::at(n);  }
     const T& operator[](size_type n) const  {  return std::vector<T>::at(n);  }
-
-
-    // Reserve for a vector is usable in a fixed vector if it is empty.
-    // (The function is required in Maintainer mode to make sure that even for
-    // an empty fixed_vector, iterators are not null pointers.)
-    void reserve(size_type n)
-    {
-        if (empty())
-        {
-            std::vector<T>::reserve(n);
-        }
-        else
-        {
-            // This might invalidate some iterators.
-            assert(0 &&
-                  "fixed_vector::reserve() is only allowed for empty vectors");
-        }
-    }
 #endif
 };
 

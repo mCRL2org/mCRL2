@@ -155,6 +155,9 @@ class check_complexity
             return *this;
         }
     };
+    // the constants are declared but cannot be defined because there is no
+    // accessible constructor.  The source code can refer to them, but the
+    // compiled binary cannot.
     static const iteration_type n;
     static const iteration_type m;
     static const iteration_type n_log_n;
