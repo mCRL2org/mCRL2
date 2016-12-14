@@ -42,7 +42,7 @@ template <class LTS_TYPE>
 void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
 {
   const size_t old_nstates=l1.num_states();
-  const size_t old_n_prob_states = l1.num_probabilistic_labels();
+  const size_t old_n_prob_states = l1.num_probabilistic_states();
   l1.set_num_states(l1.num_states() + l2.num_states());
 
   // The resulting LTS will have state information only if BOTH LTSs
@@ -152,7 +152,7 @@ void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   
   // Now update the state number for each probability pairs of all
   // probabilistic states
-  const size_t n_prob_states_l2 = l2.num_probabilistic_labels();
+  const size_t n_prob_states_l2 = l2.num_probabilistic_states();
   for (size_t i = 0; i < n_prob_states_l2; ++i)
   {
     lts_aut_base::probabilistic_state new_prob_states;
