@@ -357,11 +357,10 @@ state_formula post_process_state_formula(const state_formula& formula,
 }
 
 /// \brief Parses a state formula from an input stream
-/// \param in A stream from which can be read
-/// \param lpsspec A linear process specification used as context. 
-//                 The data specification of lpsspec is extended with sorts appearing in the formula.
+/// \param text A string.
+/// \param lpsspec A linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
 /// \param options A set of options guiding parsing.
-/// \return The parsed and possibly converted modal formula.
+/// \return The parse result.
 inline
 state_formula parse_state_formula(const std::string& text,
                                   lps::specification& lpsspec,
@@ -378,9 +377,10 @@ state_formula parse_state_formula(const std::string& text,
 }
 
 /// \brief Parses a state formula from an input stream
-/// \param formula_stream A stream from which can be read
+/// \param in A stream.
 /// \param lpsspec A linear process specification used as context. The data specification of lpsspec is extended with sorts appearing in the formula.
-/// \return The converted modal formula
+/// \param options A set of options guiding parsing.
+/// \return The parse result.
 inline
 state_formula parse_state_formula(std::istream& in,
                                   lps::specification& lpsspec,
