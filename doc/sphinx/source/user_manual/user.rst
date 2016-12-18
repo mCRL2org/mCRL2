@@ -19,11 +19,12 @@ the use of the mCRL2 libraries or for source code documentation, please consult
 the `developers' documentation <../developer_manual/index.html>`_. 
 
 .. list-table::
+   :class: libdoc
 
    * - **Manuals**
    
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
    
           introduction
           tutorial/tutorial

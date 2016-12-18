@@ -39,6 +39,8 @@ def generate_rst(temppath, outpath, binpath):
     for tool in os.listdir(os.path.join(_TRUNK, 'tools')):
       if tool.startswith('.'):
         continue
+      if tool=='CMakeLists.txt':
+        continue
       _LOG.warning(tool)
       usr_rst = os.path.join(_TOOLS, tool + '.rst')
       man_rst = os.path.join(_TOOLS, 'man', tool + '.txt')

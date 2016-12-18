@@ -959,6 +959,7 @@ static bool compare(const data_expression& t1,
     case ct::less_eq: return  r(less_equal(t1,t2))==sort_bool::true_();
     case ct::equal: return  r(equal_to(t1,t2))==sort_bool::true_();
   }
+  return false; 
 }
 
 /// \brief Compute process initialisation given a variable context and a process
