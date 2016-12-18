@@ -53,7 +53,7 @@ template<class OutputIterator>
 void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                                              OutputIterator result )
 {
-    const StaticGraph &graph = game_.graph();
+    const StaticGraph& graph = game_.graph();
     const verti V = graph.V();
 
     if (player == p_)
@@ -155,6 +155,6 @@ void SmallProgressMeasures::set_top(verti v)
 {
     assert(!is_top(v));
     set_vec_to_top(v);
-    int prio = game_.priority(v);
+    size_t prio = game_.priority(v);
     if (prio%2 != p_) decr_M(prio/2);
 }

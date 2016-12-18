@@ -32,7 +32,7 @@ namespace mcrl2 { namespace pbes_system { class pbes; } }
 */
 
 /*! Type of priorities in the game */
-typedef uint16_t priority_t;
+typedef size_t priority_t;
 
 /*! The two players in a parity game (Even and Odd) */
 enum player_t { PLAYER_EVEN =  0,  //!< Even (0)

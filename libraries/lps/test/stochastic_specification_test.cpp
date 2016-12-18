@@ -103,12 +103,12 @@ BOOST_AUTO_TEST_CASE(test_linearisation)
   std::string result =
     "act  a: Bool;\n"
     "\n"
-    "proc P(b_X: Bool) =\n"
-    "       a(b_X) .\n"
-    "         dist b1_X: Bool[1 / 2] .\n"
-    "         P(b_X = b1_X);\n"
+    "proc P(b1_X: Bool) =\n"
+    "       a(b1_X) .\n"
+    "         dist b1_X1: Bool[1 / 2] .\n"
+    "         P(b1_X = b1_X1);\n"
     "\n"
-    "init dist b: Bool[1 / 2] . P(b);\n"
+    "init dist b1: Bool[1 / 2] . P(b1);\n"
     ;
 
   stochastic_specification spec=linearise(text);
@@ -128,12 +128,12 @@ BOOST_AUTO_TEST_CASE(test_multiple_stochastic_parameters)
   std::string result =
     "act  a: Bool # Bool;\n"
     "\n"
-    "proc P(b1_X,b2_X: Bool) =\n"
-    "       a(b1_X, b2_X) .\n"
-    "         dist b3_X,b4_X: Bool[if(b3_X, 1 / 8, 3 / 8)] .\n"
-    "         P(b1_X = b3_X, b2_X = b4_X);\n"
+    "proc P(b3_X,b4_X: Bool) =\n"
+    "       a(b3_X, b4_X) .\n"
+    "         dist b3_X1,b4_X1: Bool[if(b3_X1, 1 / 8, 3 / 8)] .\n"
+    "         P(b3_X = b3_X1, b4_X = b4_X1);\n"
     "\n"
-    "init dist b1,b2: Bool[if(b1, 1 / 8, 3 / 8)] . P(b1, b2);\n"
+    "init dist b3,b4: Bool[if(b3, 1 / 8, 3 / 8)] . P(b3, b4);\n"
     ;
 
   stochastic_specification spec=linearise(text);
@@ -192,20 +192,20 @@ BOOST_AUTO_TEST_CASE(test_push_dist_outward)
     "act  throw: Coin;\n"
     "     success;\n"
     "\n"
-    "glob dc5: Bool;\n"
-    "     dc4,dc3,dc2,dc1,dc: Coin;\n"
+    "glob dc7: Bool;\n"
+    "     dc6,dc5,dc4,dc2,dc1,dc: Coin;\n"
     "\n"
-    "proc P(s1_X: Pos, c1_X,c2_X,c_X: Coin, head_seen_X: Bool) =\n"
+    "proc P(c3: Coin, s1_X: Pos, c4_X,c5_X,c_X: Coin, head_seen_X: Bool) =\n"
     "       (s1_X == 1 && c_X == head_ && head_seen_X) ->\n"
     "         success .\n"
-    "         P(s1_X = 3, c1_X = dc2, c2_X = dc3, c_X = dc4, head_seen_X = dc5)\n"
+    "         P(s1_X = 3, c4_X = dc4, c5_X = dc5, c_X = dc6, head_seen_X = dc7)\n"
     "     + sum e_X: Enum3.\n"
     "         C3_2(e_X, s1_X == 2, s1_X == 1 && c_X == tail_, s1_X == 1 && c_X == head_ && !head_seen_X) ->\n"
-    "         throw(C3_(e_X, c_X, c2_X, c1_X)) .\n"
-    "         dist c4_X,c5_X: Coin[1 / 4] .\n"
-    "         P(s1_X = 1, c1_X = c4_X, c2_X = c5_X, c_X = C3_(e_X, c_X, c2_X, c1_X), head_seen_X = C3_2(e_X, head_seen_X, false, true));\n"
+    "         throw(C3_(e_X, c3, c5_X, c4_X)) .\n"
+    "         dist c7_X,c6_X: Coin[1 / 4] .\n"
+    "         P(s1_X = 1, c4_X = c7_X, c5_X = c6_X, c_X = C3_(e_X, c3, c6_X, c7_X), head_seen_X = C3_2(e_X, head_seen_X, false, true));\n"
     "\n"
-    "init dist c: Coin[1 / 2] . P(2, dc1, dc, c, false);\n"
+    "init dist c3: Coin[1 / 2] . P(2, dc2, dc1, dc, false);\n"
     ;
 
 std::string result2 =

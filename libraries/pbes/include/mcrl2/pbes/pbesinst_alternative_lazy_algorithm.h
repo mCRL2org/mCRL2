@@ -282,7 +282,7 @@ class pbesinst_alternative_lazy_algorithm
         m_transformation_strategy(transformation_strategy)
     {
       // Initialize the random generator, with an arbitrary seed, depending on a new time.
-      unsigned t=time(nullptr);
+      time_t t=time(nullptr);
       for( ; t==time(nullptr) ; ); // Wait until time changes.
       srand((unsigned)time(nullptr));
 

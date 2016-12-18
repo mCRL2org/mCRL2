@@ -9,7 +9,7 @@ mCRL2 library documentation
 .. list-table:: 
    :class: libdoc
 
-   * - **ATerm++**
+   * - **Atermpp (ATerm++)**
 
        .. toctree::
           :maxdepth: 2
@@ -45,7 +45,17 @@ mCRL2 library documentation
 
        .. include:: libraries/data/articles.txt
 
-   * - **LPS**
+   * - **GUI**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/gui/lps_library
+          libraries/gui/reference
+
+       .. include:: libraries/gui/articles.txt
+
+     - **LPS**
 
        .. toctree::
           :maxdepth: 2
@@ -55,7 +65,7 @@ mCRL2 library documentation
 
        .. include:: libraries/lps/articles.txt
 
-     - **LTS**
+   * - **LTS**
 
        .. toctree::
           :maxdepth: 2
@@ -64,6 +74,15 @@ mCRL2 library documentation
           libraries/lts/reference
 
        .. include:: libraries/lts/articles.txt
+
+     - **Modal formulas**
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/modal_formulas/modal_formulas_library
+          libraries/modal_formulas/reference
+
+       .. include:: libraries/modal_formulas/articles.txt
 
    * - **PBES**
 
@@ -85,7 +104,15 @@ mCRL2 library documentation
 
        .. include:: libraries/process/articles.txt
 
-   * - **Trace**
+   * - **SMT**
+
+       .. toctree::
+          :maxdepth: 2
+
+          libraries/smt/smt_library
+          libraries/smt/reference
+
+     - **Trace**
 
        .. toctree::
           :maxdepth: 2
@@ -93,7 +120,7 @@ mCRL2 library documentation
           libraries/trace/trace_library
           libraries/trace/reference
 
-     - **Utilities**
+   * - **Utilities**
 
        .. toctree::
           :maxdepth: 2

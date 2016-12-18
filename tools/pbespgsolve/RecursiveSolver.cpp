@@ -88,7 +88,7 @@ bool RecursiveSolver::solve(ParityGame &game, Substrategy &strat)
 {
     if (aborted()) return false;
 
-    int prio;
+    size_t prio;
     while ((prio = first_inversion(game)) < game.d())
     {
         mCRL2log(mcrl2::log::debug) <<"prio=" << prio << std::endl;

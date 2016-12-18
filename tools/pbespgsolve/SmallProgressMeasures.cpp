@@ -40,7 +40,7 @@ void LiftingStatistics::record_lift(verti v, bool success)
 SmallProgressMeasures::SmallProgressMeasures(
         const ParityGame &game, ParityGame::Player player,
         LiftingStatistics *stats, const verti *vmap, verti vmap_size )
-    : game_(game), p_((int)player), stats_(stats),
+    : game_(game), p_(player), stats_(stats),
       vmap_(vmap), vmap_size_(vmap_size),
       strategy_(game.graph().V(), NO_VERTEX), dirty_(0)
 {
@@ -50,9 +50,9 @@ SmallProgressMeasures::SmallProgressMeasures(
     len_ = (game_.d() + p_)/2;
     if (len_ < 1) len_ = 1;  // ensure Top is representable
     M_ = new verti[len_];
-    for (int n = 0; n < len_; ++n)
+    for (size_t n = 0; n < len_; ++n)
     {
-        int prio = 2*n + 1 - p_;
+        size_t prio = 2*n + 1 - p_;
         M_[n] = (prio < game.d()) ? game_.cardinality(prio) + 1 : 0;
     }
 }

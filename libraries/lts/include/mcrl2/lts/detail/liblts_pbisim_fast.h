@@ -14,6 +14,7 @@
 #include <vector>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/detail/liblts_plts_merge.h"
 
 namespace mcrl2
 {

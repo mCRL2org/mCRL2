@@ -265,11 +265,11 @@ private:
 
 protected:
     const ParityGame       &game_;     //!< the game being solved
-    const int              p_;         //!< the player to solve for
+    const size_t           p_;         //!< the player to solve for
     LiftingStatistics      *stats_;    //!< statistics object to record lifts
     const verti            *vmap_;     //!< active vertex map (if any)
     verti                  vmap_size_; //!< size of vertex map
-    int                    len_;       //!< length of SPM vectors
+    size_t                 len_;       //!< length of SPM vectors
     verti                  *M_;        //!< bounds on the SPM vector components
     ParityGame::Strategy   strategy_;  //!< current strategy
     bool                   *dirty_;    //!< marks unstable vertices
