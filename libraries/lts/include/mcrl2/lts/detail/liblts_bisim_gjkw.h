@@ -1746,7 +1746,7 @@ class bisim_partitioner_gjkw
                                                      bool preserve_divergence);
     void refine_partition_until_it_becomes_stable_gjkw();
 
-    /*---------------- Refine -- Algorithms 3 of [GJKW 2017] ----------------*/
+    /*----------------- Refine -- Algorithm 3 of [GJKW 2017] ----------------*/
 
     bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RfnB,
                         const bisim_gjkw::constln_t* SpC,
