@@ -4180,8 +4180,10 @@ class specification_basic_type:public boost::noncopyable
           alphaconvert(vars,local_sigma, vars,data_expression_list(),variables_occurring_in_rhs_of_sigma);
 
           const process_identifier newproc=newprocess(
-                                           proc.variables() + objectdata[n].parameters,
-                                           proc.operand(),
+                                           vars + objectdata[n].parameters,
+                                           process::replace_variables_capture_avoiding(proc.operand(),
+                                                                                       local_sigma,
+                                                                                       variables_occurring_in_rhs_of_sigma),
                                            pCRL,
                                            canterminatebody(proc.operand()),
                                            containstimebody(proc.operand()));
@@ -4200,8 +4202,17 @@ class specification_basic_type:public boost::noncopyable
           result.insert(newproc);
         }
       }
-      const size_t n = objectIndex(procId);
-      process_expression initial_distribution=obtain_initial_distribution_term(objectdata[n].processbody);
+
+      for(const process_identifier& p: reachable_process_identifiers)
+      {
+        const size_t n=objectIndex(processes_with_stochastic_distribution_first.at(p).process_id());
+        assert(!is_stochastic_operator(objectdata[n].processbody));
+        objectdata[n].processbody=transform_initial_distribution_term(objectdata[n].processbody,processes_with_stochastic_distribution_first);
+        assert(!is_stochastic_operator(objectdata[n].processbody));
+      }
+
+      // Adapt the initial process
+      process_expression initial_distribution=processes_with_stochastic_distribution_first.at(procId).process_body();
       if (is_stochastic_operator(initial_distribution))
       { 
         const stochastic_operator sto=atermpp::down_cast<stochastic_operator>(initial_distribution);
@@ -4213,13 +4224,6 @@ class specification_basic_type:public boost::noncopyable
         initial_stochastic_distribution = stochastic_distribution(variable_list(), real_one());
       }
 
-      for(const process_identifier& p: reachable_process_identifiers)
-      {
-        const size_t n=objectIndex(processes_with_stochastic_distribution_first.at(p).process_id());
-        assert(!is_stochastic_operator(objectdata[n].processbody));
-        objectdata[n].processbody=transform_initial_distribution_term(objectdata[n].processbody,processes_with_stochastic_distribution_first);
-        assert(!is_stochastic_operator(objectdata[n].processbody));
-      }
       return result;
     } 
 

@@ -102,6 +102,31 @@ BOOST_AUTO_TEST_CASE(Check_distribution_of_dist_over_sum)
   run_linearisation_test_case(spec,true);
 }
 
+// The test below represents a problem as the variables that were moved
+// to the front were not properly renamed. Problem reported by Olav Bunte.
+BOOST_AUTO_TEST_CASE(renaming_of_initial_stochastic_variables)
+{
+  const std::string spec =
+    "act\n"
+    "        flip: Bool;\n"
+    "        dice: Nat;\n"
+    "\n"
+    "proc\n"
+    "        COIN(s: Nat, d: Nat) =\n"
+    "                (s == 0) -> dist b1:Bool[1/2].(b1 -> flip(b1).COIN(1,0) <> flip(b1).COIN(2,0))\n"
+    "                <> (s == 1) -> dist b1:Bool[1/2].(b1 -> flip(b1).COIN(3,0) <> flip(b1).COIN(4,0))\n"
+    "                <> (s == 2) -> dist b1:Bool[1/2].(b1 -> flip(b1).COIN(5,0) <> flip(b1).COIN(6,0))\n"
+    "                <> (s == 3) -> dist b1:Bool[1/2].(b1 -> flip(b1).COIN(1,0) <> flip(b1).COIN(7,1))\n"
+    "                <> (s == 4) -> dist b1:Bool[1/2].(b1 -> flip(b1).COIN(7,2) <> flip(b1).COIN(7,3))\n"
+    "                <> (s == 5) -> dist b1:Bool[1/2].(b1 -> flip(b1).COIN(7,4) <> flip(b1).COIN(7,5))\n"
+    "                <> (s == 6) -> dist b1:Bool[1/2].(b1 -> flip(b1).COIN(2,0) <> flip(b1).COIN(7,6))\n"
+    "                <> (s == 7) -> dice(d).COIN(s,d);\n"
+    "\n"
+    "init COIN(0, 0);\n";
+
+  run_linearisation_test_case(spec,true);
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int, char*[])
 {

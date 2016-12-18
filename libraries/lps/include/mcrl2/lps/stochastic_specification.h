@@ -50,13 +50,13 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     { }
 
     /// \brief Constructor.
-    stochastic_specification(const stochastic_specification &other)
+    stochastic_specification(const stochastic_specification& other)
       : super(other)
     { }
 
     /// \brief Constructor.
     /// \param t A term
-    stochastic_specification(const atermpp::aterm_appl &t)
+    stochastic_specification(const atermpp::aterm_appl& t)
       : super(t)
     {
       complete_data_specification(*this);
@@ -79,8 +79,12 @@ class stochastic_specification: public specification_base<stochastic_linear_proc
     }
 
     /// \brief Constructor. This constructor is explicit as implicit conversions of this kind is a source of bugs.
-    explicit stochastic_specification(const specification &other)
-      : super(other.data(), other.action_labels(), other.global_variables(), other.process(), stochastic_process_initializer(other.initial_process().assignments(),stochastic_distribution()))
+    explicit stochastic_specification(const specification& other)
+      : super(other.data(), 
+        other.action_labels(), 
+        other.global_variables(), 
+        other.process(), 
+        stochastic_process_initializer(other.initial_process().assignments(),stochastic_distribution()))
     { } 
 
     void save(std::ostream& stream, bool binary=true) const
