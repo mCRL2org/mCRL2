@@ -31,7 +31,7 @@ using utilities::tools::input_tool;
 void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::string& input_filename)
 {
   std::vector<std::size_t> counts = detail::position_counts(p);
-  if (depth < 0 || depth >= counts.size())
+  if (depth >= counts.size())
   {
     return;
   }
