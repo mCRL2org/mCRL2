@@ -142,6 +142,8 @@ ATerms can be pretty printed. The second case show normal printing of ATerms.
 The output of the first case looks similar to the specification provided.
 The second case shows output which looks like:
 
+.. code-block:: none
+
    SpecV1(
     DataSpec(SortSpec([]),
       ConsSpec([]),

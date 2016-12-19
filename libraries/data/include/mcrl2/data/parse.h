@@ -613,7 +613,7 @@ std::pair<basic_sort_vector, alias_vector> parse_sort_specification(const std::s
 ///    a single data specification, and nothing else.
 ///    If a parse or type check error is detected
 ///    an mcrl2::runtime_error exception is raised with a string that
-///    indicates the problem. <br>
+///    indicates the problem. 
 ///    A typical example of a specification is:
 ///    \code
 ///     sort D=struct d1 | d2;
@@ -824,13 +824,13 @@ variable parse_variable(std::istream& text,
 
 /// \brief Parses and type checks a data expression.
 /// \details
-///     A data expression is read from the input where it is assumed that
-///     it can contain variables from the range from begin to end. The data
-///     expression is type checked using the given data specification data_spec.
-///     The default data specification contains all standard sorts and functions.
-///     If a parse or type check error occurs this is reported using a mcrl2::runtime_error
-///     exception. It is assumed that the input contains exactly one expression, and nothing
-///     else.
+///    A data expression is read from the input where it is assumed that
+///    it can contain variables from the range from begin to end. The data
+///    expression is type checked using the given data specification data_spec.
+///    The default data specification contains all standard sorts and functions.
+///    If a parse or type check error occurs this is reported using a mcrl2::runtime_error
+///    exception. It is assumed that the input contains exactly one expression, and nothing
+///    else.
 /// \param[in] in The input stream containing a data expression.
 /// \param[in] variables The variables that can occur in the data expression.
 /// \param[in] dataspec The data specification that is used for type checking.
