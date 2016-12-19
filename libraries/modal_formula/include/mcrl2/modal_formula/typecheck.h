@@ -599,7 +599,7 @@ void typecheck_state_formula_specification(state_formula_specification& formspec
     data::data_type_checker checker(formspec.data());
     data::data_specification dataspec = checker.typechecked_data_specification();
     state_formulas::normalize_sorts(formspec, dataspec);
-    state_formula_type_checker type_checker(dataspec, formspec.action_labels(), {});
+    state_formula_type_checker type_checker(dataspec, formspec.action_labels(), std::vector<data::variable>());
     formspec.formula() = type_checker.typecheck_state_formula(formspec.formula());
     formspec.data() = checker.typechecked_data_specification();
   }
