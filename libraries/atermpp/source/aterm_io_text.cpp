@@ -139,7 +139,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
   }
 }
 
-/**
+/*
  * Write a term into its text representation.
  */
 
@@ -156,7 +156,7 @@ void write_term_to_text_stream(const aterm &t, std::ostream &os)
   writeToStream(t,os);
 }
 
-/**
+/*
  * Read the next character from file.
  */
 
@@ -193,7 +193,7 @@ static std::string print_parse_error_position()
   return s.str();
 }
 
-/**
+/*
  * Skip layout from file.
  */
 
@@ -205,7 +205,7 @@ static void fskip_layout(int* c, istream &is)
   }
 }
 
-/**
+/*
  * Skip layout from file.
  */
 
@@ -218,7 +218,7 @@ static void fnext_skip_layout(int* c, istream &is)
   while (isspace(*c));
 }
 
-/**
+/*
  * Parse a list of arguments.
  */
 
@@ -242,7 +242,7 @@ static aterm_list fparse_terms(int* c, istream &is)
   return reverse(list);
 }
 
-/**
+/*
  * Parse a quoted application.
  */
 
@@ -292,7 +292,7 @@ static string fparse_quoted_string(int* c, istream &is)
   return function_string;
 }
 
-/** Parse an unquoted string. */
+/* Parse an unquoted string. */
 
 static string fparse_unquoted_string(int* c, istream &is)
 {
@@ -337,7 +337,7 @@ static aterm_appl parse_arguments(const string &f, int *c, istream &is)
 
 
 
-/**
+/*
  * Parse a number.
  */
 
@@ -363,7 +363,7 @@ static aterm fparse_num(int* c, istream &is)
   }
 }
 
-/**
+/*
  * Parse a term from a stream.
  */
 
@@ -407,7 +407,7 @@ static aterm fparse_term(int* c, istream &is)
   }
 }
 
-/**
+/*
  * Read from a string.
  */
 
@@ -449,7 +449,7 @@ bool is_binary_aterm_stream(std::istream& is)
   return (c == 0);
 }
 
-/**
+/*
  * Read an aterm from a file that could be binary or text.
  */
 bool is_binary_aterm_file(const std::string& filename)

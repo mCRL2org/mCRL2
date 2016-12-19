@@ -109,11 +109,11 @@ the -include flag on the command line.
 /*
 Workaround for compilers that do not support C++11 noexcept.
 */
-#ifdef MCRL2_HAVE_NOEXCEPT
+/* #ifdef MCRL2_HAVE_NOEXCEPT
 #define NOEXCEPT noexcept
 #else
 #define NOEXCEPT throw()
-#endif // defined(HAVE_NOEXCEPT)
+#endif // defined(HAVE_NOEXCEPT) */
 
 // Code used for all platforms
 //#include <limits.h>

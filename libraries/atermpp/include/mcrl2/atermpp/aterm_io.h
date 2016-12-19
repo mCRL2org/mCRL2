@@ -52,7 +52,7 @@ aterm read_term_from_text_stream(std::istream &is);
 /// \return The term corresponding to the string.
 aterm read_term_from_string(const std::string& s);
 
-///
+
 /// \brief Exception class for reporting an I/O error in the ATerm Library.
 ///
 class aterm_io_error : public mcrl2::runtime_error
@@ -85,7 +85,7 @@ public:
   { }
 
   /// \brief A function generating an error message for the baf_version_error exception. 
-  const char* what() const NOEXCEPT
+  const char* what() const noexcept
   {
     std::stringstream ss;
     ss << std::internal << std::showbase << std::hex << std::setfill('0') << std::setw(4)

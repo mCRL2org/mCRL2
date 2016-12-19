@@ -20,7 +20,7 @@ namespace mcrl2 {
 namespace data {
 
 /// \brief Merges two data specifications.  Throws an exception if conflicts are detected.
-/// \detail If the data specifications have equal aliases, types, constructors or functions these are merged.
+/// \details If the data specifications have equal aliases, types, constructors or functions these are merged.
 /// \param[in] dataspec1 The first data specification to be merged.
 /// \param[out] dataspec2 The second data specification to be merged.
 /// \return The merged data specification.

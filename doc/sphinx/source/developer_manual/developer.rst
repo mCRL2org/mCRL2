@@ -50,10 +50,8 @@ mCRL2 library documentation
        .. toctree::
           :maxdepth: 2
 
-          libraries/gui/lps_library
+          libraries/gui/gui_library
           libraries/gui/reference
-
-       .. include:: libraries/gui/articles.txt
 
      - **LPS**
 
@@ -76,13 +74,12 @@ mCRL2 library documentation
        .. include:: libraries/lts/articles.txt
 
      - **Modal formulas**
+
        .. toctree::
           :maxdepth: 2
 
           libraries/modal_formulas/modal_formulas_library
           libraries/modal_formulas/reference
-
-       .. include:: libraries/modal_formulas/articles.txt
 
    * - **PBES**
 
@@ -128,3 +125,5 @@ mCRL2 library documentation
           libraries/utilities/utilities_library
           libraries/utilities/reference
 
+     - **---**
+    
