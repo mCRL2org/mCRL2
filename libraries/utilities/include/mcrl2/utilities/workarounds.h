@@ -107,13 +107,14 @@ the -include flag on the command line.
 #endif // defined(HAVE_NULLPTR)
 
 /*
-Workaround for compilers that do not support C++11 noexcept.
+Workaround for compilers that do not support C++11 noexcept. This cannot be removed as the 
+Visual studio 2013 does not yet know the keyword noexcept. 
 */
-/* #ifdef MCRL2_HAVE_NOEXCEPT
+#ifdef MCRL2_HAVE_NOEXCEPT
 #define NOEXCEPT noexcept
 #else
 #define NOEXCEPT throw()
-#endif // defined(HAVE_NOEXCEPT) */
+#endif // defined(HAVE_NOEXCEPT) 
 
 // Code used for all platforms
 //#include <limits.h>

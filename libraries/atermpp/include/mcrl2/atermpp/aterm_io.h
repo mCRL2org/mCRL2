@@ -85,7 +85,7 @@ public:
   { }
 
   /// \brief A function generating an error message for the baf_version_error exception. 
-  const char* what() const noexcept
+  const char* what() const NOEXCEPT
   {
     std::stringstream ss;
     ss << std::internal << std::showbase << std::hex << std::setfill('0') << std::setw(4)
