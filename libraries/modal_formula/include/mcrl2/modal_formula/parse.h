@@ -439,12 +439,9 @@ state_formula_specification parse_state_formula_specification(const std::string&
   if (options.type_check)
   {
     result.formula() = state_formulas::type_check_state_formula(result.formula(), dataspec, actspec, lpsspec.global_variables());
+    // TODO: de dataspec and actspec must also be typechecked here. 
   }
   result.formula() = post_process_state_formula(result.formula(), options);
-  result.data() = dataspec;
-  result.action_labels() = actspec;
-  lpsspec.data() = dataspec;
-  lpsspec.action_labels() = actspec;
   return result;
 }
 

@@ -66,13 +66,13 @@ class sort_specification
 
     /// \brief This boolean indicates whether the variables
     /// m_normalised_constructors, m_mappings, m_equations, m_normalised_sorts,
-    /// m_normalised_aliases.
+    /// m_normalised_aliases are up to date with respect to changes of this sort specification.
     mutable bool m_normalised_sorts_are_up_to_date;
 
     /// \brief The variable below indicates whether a surrounding 
     ///        data specification is up to data with respect to
     ///        sort normalisation and available sorts. This is set to false if 
-    ///        and alias or a new sort is added.
+    ///        an alias or a new sort is added.
     mutable bool m_normalised_data_is_up_to_date;
 
     /// \brief The basic sorts and structured sorts in the specification.

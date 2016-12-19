@@ -4320,17 +4320,15 @@ sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const te
 }
 
 mcrl2::data::data_type_checker::data_type_checker(const data_specification& data_spec)
-//    : sort_type_checker(data_spec.user_defined_sorts(), data_spec.user_defined_aliases()),
       : sort_type_checker(data_spec),
         was_warning_upcasting(false),
         was_ambiguous(false)
-
 {
   initialise_system_defined_functions();
 
   try
   {
-    for (const alias& a: get_sort_specification().user_defined_aliases()) // auto i = m_aliases.begin(); i != m_aliases.end(); ++i)
+    for (const alias& a: get_sort_specification().user_defined_aliases()) 
     {
       read_sort(a.reference());
     }

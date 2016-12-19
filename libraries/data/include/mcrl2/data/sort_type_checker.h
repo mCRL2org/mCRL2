@@ -113,7 +113,7 @@ class sort_type_checker
       {
         if (!defined_sorts.insert(a.name()).second) // Sort did already exist.
         {
-           throw mcrl2::runtime_error("Attempt to redeclare sort in alias " + data::pp(a));
+          throw mcrl2::runtime_error("Attempt to redeclare sort in alias " + data::pp(a));
         }
       }
     }

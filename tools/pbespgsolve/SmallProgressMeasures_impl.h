@@ -80,7 +80,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
             dirty.pop_front();
             assert(queued[v] && !marked[v]);
             queued[v] = false;
-            if ((int)game_.player(v) == p_)
+            if (game_.player(v) == p_)
             {
                 // Look for an unmarked successor with a progress value
                 // less than (or equal to, if priority is even) that of v:
