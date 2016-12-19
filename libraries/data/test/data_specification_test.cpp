@@ -25,6 +25,7 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/merge_data_specifications.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -939,6 +940,17 @@ void test_abuse_of_tail()
   }
 }
 
+void test_merge_data_specifications()
+{
+  std::string DATASPEC =
+    "sort D;\n"
+    "cons s: D;"
+  ;
+  data_specification dataspec1 = parse_data_specification(DATASPEC);
+  data_specification dataspec2 = parse_data_specification(DATASPEC);
+  data_specification dataspec3 = merge_data_specifications(dataspec1, dataspec2);
+  BOOST_CHECK(dataspec1 == dataspec3);
+}
 
 int test_main(int argc, char** argv)
 {
@@ -967,6 +979,8 @@ int test_main(int argc, char** argv)
   test_specification();
 
   test_abuse_of_tail();
+
+  test_merge_data_specifications();
 
   return EXIT_SUCCESS;
 }
