@@ -824,8 +824,8 @@ static const char for_all_transitions_of_a_new_block[] =
 void part_trans_t::new_blue_block_created(block_t* const RfnB,
                                 block_t* const NewB, bool const postprocessing)
 {
-    mCRL2log(log::debug, "bisim_gjkw") << "new_blue_block_created("
-                     << RfnB->debug_id() << "," << NewB->debug_id() << ")\n";
+    //mCRL2log(log::debug, "bisim_gjkw") << "new_blue_block_created("
+    //                 << RfnB->debug_id() << "," << NewB->debug_id() << ")\n";
     assert(RfnB->constln() == NewB->constln());
     assert(NewB->end() == RfnB->begin());
     NewB->set_inert_begin_and_end(B_to_C.begin(), B_to_C.begin());
@@ -1014,9 +1014,9 @@ Its time complexity is O(1 + |out(NewB)|). */
 void part_trans_t::new_red_block_created(block_t* const RfnB,
                                 block_t* const NewB, bool const postprocessing)
 {
-    mCRL2log(log::debug, "bisim_gjkw") << "new_red_block_created("
-                              << RfnB->debug_id() << "," << NewB->debug_id()
-                              << (postprocessing ? ",true)\n" : ",false)\n");
+    //mCRL2log(log::debug, "bisim_gjkw") << "new_red_block_created("
+    //                          << RfnB->debug_id() << "," << NewB->debug_id()
+    //                          << (postprocessing ? ",true)\n" : ",false)\n");
     assert(RfnB->constln() == NewB->constln());
     assert(NewB->begin() == RfnB->end());
     NewB->set_inert_begin_and_end(B_to_C.begin(), B_to_C.begin());
@@ -1393,7 +1393,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
             do
             {
                 state_info_const_ptr const s = *s_iter;
-                mCRL2log(log::debug, "bisim_gjkw") << s->debug_id_short() << ' ';
+                //mCRL2log(log::debug, "bisim_gjkw")<<s->debug_id_short()<<' ';
                 // assert some properties of state s
                 assert(s->pos == s_iter);
                 assert(s->block == B);
@@ -1570,7 +1570,7 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
     states_per_block(1, l.num_states()),
     nr_of_nonbottom_states(0)
 {
-    log::mcrl2_logger::set_reporting_level(log::debug);
+    // log::mcrl2_logger::set_reporting_level(log::debug);
 
     mCRL2log(log::verbose) << "O(m log n) "
                     << (preserve_divergence ? "Divergence preserving b" : "B")
@@ -2059,8 +2059,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.7: C := partition C where SpB is removed from SpC and NewC is
         //      added
         bisim_gjkw::block_t* const SpB = SpC->split_off_small_block();
-        mCRL2log(log::debug, "bisim_gjkw") << "Splitting off "
-                                                 << SpB->debug_id() << ".\n";
+        //mCRL2log(log::debug, "bisim_gjkw") << "Splitting off "
+        //                                         << SpB->debug_id() << ".\n";
 
         /*-------------------- find predecessors of SpB ---------------------*/
 
@@ -2188,8 +2188,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                                               bisim_gjkw::check_complexity::n);
             bisim_gjkw::block_t* const RfnB =
                                     bisim_gjkw::block_t::get_some_refinable();
-            mCRL2log(log::debug, "bisim_gjkw") << "Refining "
-                                                << RfnB->debug_id() << ".\n";
+            //mCRL2log(log::debug, "bisim_gjkw") << "Refining "
+            //                                    << RfnB->debug_id() << ".\n";
             // 2.21: Mark block RfnB as non-refinable
             RfnB->make_nonrefinable();
             if (1 == RfnB->size())
@@ -2350,11 +2350,11 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
      const bisim_gjkw::B_to_C_descriptor* const FromRed,
      bool const postprocessing)
 {
-    mCRL2log(log::debug, "bisim_gjkw") << "refine("
-          << RfnB->debug_id() << ","
-          << (nullptr != SpC ? SpC->debug_id() : std::string("NULL")) << ","
-          << (nullptr != FromRed ? FromRed->debug_id() : std::string("NULL"))
-          << (postprocessing ? ",true)\n" : ",false)\n");
+    //mCRL2log(log::debug, "bisim_gjkw") << "refine("
+    //      << RfnB->debug_id() << ","
+    //      << (nullptr != SpC ? SpC->debug_id() : std::string("NULL")) << ","
+    //      << (nullptr != FromRed ? FromRed->debug_id() : std::string("NULL"))
+    //      << (postprocessing ? ",true)\n" : ",false)\n");
     #ifndef NDEBUG
         if (nullptr != FromRed)
         {
@@ -2961,8 +2961,8 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom(
                                             bisim_gjkw::block_t* RedB
                                             /* , bisim_gjkw::block_t* BlueB */)
 {
-    mCRL2log(log::debug, "bisim_gjkw") << "Postprocessing "
-                                                 << RedB->debug_id() << "\n";
+    //mCRL2log(log::debug, "bisim_gjkw") << "Postprocessing "
+    //                                             << RedB->debug_id() << "\n";
     assert(0 != RedB->unmarked_bottom_size());
     assert(RedB->marked_nonbottom_begin() == RedB->marked_nonbottom_end());
 
