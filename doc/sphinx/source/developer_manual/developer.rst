@@ -125,5 +125,5 @@ mCRL2 library documentation
           libraries/utilities/utilities_library
           libraries/utilities/reference
 
-     - **---**
+     - \  
     
