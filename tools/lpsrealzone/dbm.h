@@ -1361,6 +1361,66 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier split_list
+      /// \return Identifier split_list
+      inline
+      core::identifier_string const& split_list_name()
+      {
+        static core::identifier_string split_list_name = core::identifier_string("split_list");
+        return split_list_name;
+      }
+
+      /// \brief Constructor for function symbol split_list
+      
+      /// \return Function symbol split_list
+      inline
+      function_symbol const& split_list()
+      {
+        static function_symbol split_list(split_list_name(), function_sort({ dbm(), sort_nat::nat(), sort_nat::nat(), sort_list::list(sort_bound::bound()), sort_nat::nat() }, dbm()));
+        return split_list;
+      }
+
+      /// \brief Recogniser for function split_list
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching split_list
+      inline
+      bool is_split_list_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e) == split_list();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol split_list
+      
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \param arg3 A data expression
+      /// \param arg4 A data expression
+      /// \return Application of split_list to a number of arguments
+      inline
+      application split_list(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3, const data_expression& arg4)
+      {
+        return application(sort_dbm::split_list(),arg0, arg1, arg2, arg3, arg4);
+      }
+
+      /// \brief Recogniser for application of split_list
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol split_list to a
+      ///     number of arguments
+      inline
+      bool is_split_list_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_split_list_function_symbol(application(e).head());
+        }
+        return false;
+      }
+
       /// \brief Generate identifier inconsistent
       /// \return Identifier inconsistent
       inline
@@ -1798,6 +1858,7 @@ namespace mcrl2 {
         result.push_back(sort_dbm::copy());
         result.push_back(sort_dbm::copy1());
         result.push_back(sort_dbm::split());
+        result.push_back(sort_dbm::split_list());
         result.push_back(sort_dbm::inconsistent());
         result.push_back(sort_dbm::N());
         result.push_back(sort_dbm::dbm_inconsistent());
@@ -1853,7 +1914,7 @@ namespace mcrl2 {
       inline
       data_expression dbm(const data_expression& e)
       {
-        assert(is_get_application(e) || is_set_application(e) || is_close_application(e) || is_close1_application(e) || is_close2_application(e) || is_close3_application(e) || is_consistent_application(e) || is_and_d_application(e) || is_and_d1_application(e) || is_and_d2_application(e) || is_and_not_application(e) || is_free_application(e) || is_free1_application(e) || is_reset_application(e) || is_reset1_application(e) || is_shift_application(e) || is_shift_range_application(e) || is_shift1_application(e) || is_copy_application(e) || is_copy1_application(e) || is_split_application(e) || is_inconsistent_application(e));
+        assert(is_get_application(e) || is_set_application(e) || is_close_application(e) || is_close1_application(e) || is_close2_application(e) || is_close3_application(e) || is_consistent_application(e) || is_and_d_application(e) || is_and_d1_application(e) || is_and_d2_application(e) || is_and_not_application(e) || is_free_application(e) || is_free1_application(e) || is_reset_application(e) || is_reset1_application(e) || is_shift_application(e) || is_shift_range_application(e) || is_shift1_application(e) || is_copy_application(e) || is_copy1_application(e) || is_split_application(e) || is_split_list_application(e) || is_inconsistent_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
@@ -1865,7 +1926,7 @@ namespace mcrl2 {
       inline
       data_expression i(const data_expression& e)
       {
-        assert(is_get_application(e) || is_set_application(e) || is_set1_application(e) || is_close1_application(e) || is_close2_application(e) || is_close3_application(e) || is_and_d_application(e) || is_and_d1_application(e) || is_and_d2_application(e) || is_and_not_application(e) || is_free_application(e) || is_free1_application(e) || is_reset_application(e) || is_reset1_application(e) || is_shift_application(e) || is_shift_range_application(e) || is_shift1_application(e) || is_copy_application(e) || is_copy1_application(e) || is_split_application(e));
+        assert(is_get_application(e) || is_set_application(e) || is_set1_application(e) || is_close1_application(e) || is_close2_application(e) || is_close3_application(e) || is_and_d_application(e) || is_and_d1_application(e) || is_and_d2_application(e) || is_and_not_application(e) || is_free_application(e) || is_free1_application(e) || is_reset_application(e) || is_reset1_application(e) || is_shift_application(e) || is_shift_range_application(e) || is_shift1_application(e) || is_copy_application(e) || is_copy1_application(e) || is_split_application(e) || is_split_list_application(e));
         return atermpp::down_cast<const application >(e)[1];
       }
 
@@ -1877,7 +1938,7 @@ namespace mcrl2 {
       inline
       data_expression k(const data_expression& e)
       {
-        assert(is_close2_application(e) || is_close3_application(e) || is_and_d1_application(e) || is_and_d2_application(e) || is_free1_application(e) || is_reset1_application(e) || is_shift1_application(e) || is_copy1_application(e) || is_dbm_zero1_application(e) || is_dbm_size_application(e) || is_dbm_zero2_application(e) || is_dbm_size1_application(e));
+        assert(is_close2_application(e) || is_close3_application(e) || is_and_d1_application(e) || is_and_d2_application(e) || is_free1_application(e) || is_reset1_application(e) || is_shift1_application(e) || is_copy1_application(e) || is_split_list_application(e) || is_dbm_zero1_application(e) || is_dbm_size_application(e) || is_dbm_zero2_application(e) || is_dbm_size1_application(e));
         if (is_dbm_zero1_application(e) || is_dbm_size_application(e) || is_dbm_zero2_application(e) || is_dbm_size1_application(e))
         {
           return atermpp::down_cast<const application >(e)[0];
@@ -1890,7 +1951,7 @@ namespace mcrl2 {
         {
           return atermpp::down_cast<const application >(e)[3];
         }
-        if (is_shift1_application(e))
+        if (is_shift1_application(e) || is_split_list_application(e))
         {
           return atermpp::down_cast<const application >(e)[4];
         }
@@ -1905,7 +1966,7 @@ namespace mcrl2 {
       inline
       data_expression j(const data_expression& e)
       {
-        assert(is_get_application(e) || is_set_application(e) || is_and_d_application(e) || is_and_d1_application(e) || is_and_d2_application(e) || is_and_not_application(e) || is_copy_application(e) || is_copy1_application(e) || is_split_application(e));
+        assert(is_get_application(e) || is_set_application(e) || is_and_d_application(e) || is_and_d1_application(e) || is_and_d2_application(e) || is_and_not_application(e) || is_copy_application(e) || is_copy1_application(e) || is_split_application(e) || is_split_list_application(e));
         return atermpp::down_cast<const application >(e)[2];
       }
 
@@ -1917,12 +1978,12 @@ namespace mcrl2 {
       inline
       data_expression bound(const data_expression& e)
       {
-        assert(is_set_application(e) || is_set1_application(e) || is_and_d_application(e) || is_and_not_application(e) || is_split_application(e));
+        assert(is_set_application(e) || is_set1_application(e) || is_and_d_application(e) || is_and_not_application(e) || is_split_application(e) || is_split_list_application(e));
         if (is_set1_application(e))
         {
           return atermpp::down_cast<const application >(e)[2];
         }
-        if (is_set_application(e) || is_and_d_application(e) || is_and_not_application(e) || is_split_application(e))
+        if (is_set_application(e) || is_and_d_application(e) || is_and_not_application(e) || is_split_application(e) || is_split_list_application(e))
         {
           return atermpp::down_cast<const application >(e)[3];
         }
@@ -1988,9 +2049,9 @@ namespace mcrl2 {
         data_equation_vector result;
         result.push_back(data_equation(atermpp::make_vector(vd, vi, vj), get(vd, vi, vj), sort_list::element_at(sort_bound::bound())(sort_list::element_at(sort_list::list(sort_bound::bound()))(vd, vi), vj)));
         result.push_back(data_equation(atermpp::make_vector(vb1, vb2, vl1), set1(sort_list::cons_(sort_bound::bound())(vb2, vl1), sort_nat::c0(), vb1), sort_list::cons_(sort_bound::bound())(vb1, vl1)));
-        result.push_back(data_equation(atermpp::make_vector(vb1, vb2, vj, vl1), not_equal_to(vj, sort_nat::c0()), set1(sort_list::cons_(sort_bound::bound())(vb2, vl1), vj, vb1), sort_list::cons_(sort_bound::bound())(vb2, set1(vl1, sort_int::int2nat(sort_real::minus(vj, sort_nat::cnat(sort_pos::c1()))), vb1))));
+        result.push_back(data_equation(atermpp::make_vector(vb1, vb2, vj, vl1), not_equal_to(vj, sort_nat::c0()), set1(sort_list::cons_(sort_bound::bound())(vb2, vl1), vj, vb1), sort_list::cons_(sort_bound::bound())(vb2, set1(vl1, sort_int::int2nat(sort_int::minus(vj, sort_nat::cnat(sort_pos::c1()))), vb1))));
         result.push_back(data_equation(atermpp::make_vector(vb1, vd, vj, vl1), set(sort_list::cons_(sort_list::list(sort_bound::bound()))(vl1, vd), sort_nat::c0(), vj, vb1), sort_list::cons_(sort_list::list(sort_bound::bound()))(set1(vl1, vj, vb1), vd)));
-        result.push_back(data_equation(atermpp::make_vector(vb1, vd, vi, vj, vl1), not_equal_to(vi, sort_nat::c0()), set(sort_list::cons_(sort_list::list(sort_bound::bound()))(vl1, vd), vi, vj, vb1), sort_list::cons_(sort_list::list(sort_bound::bound()))(vl1, set(vd, sort_int::int2nat(sort_real::minus(vi, sort_nat::cnat(sort_pos::c1()))), vj, vb1))));
+        result.push_back(data_equation(atermpp::make_vector(vb1, vd, vi, vj, vl1), not_equal_to(vi, sort_nat::c0()), set(sort_list::cons_(sort_list::list(sort_bound::bound()))(vl1, vd), vi, vj, vb1), sort_list::cons_(sort_list::list(sort_bound::bound()))(vl1, set(vd, sort_int::int2nat(sort_int::minus(vi, sort_nat::cnat(sort_pos::c1()))), vj, vb1))));
         result.push_back(data_equation(atermpp::make_vector(vd), close(vd), close1(vd, sort_nat::c0())));
         result.push_back(data_equation(atermpp::make_vector(vd, vk), equal_to(vk, N()), close1(vd, vk), vd));
         result.push_back(data_equation(atermpp::make_vector(vd, vk), less(vk, N()), close1(vd, vk), close1(close2(vd, vk, sort_nat::c0()), sort_real::plus(vk, sort_nat::cnat(sort_pos::c1())))));
@@ -2023,20 +2084,23 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vd, vi, vk, vl), sort_bool::and_(less(vi, N()), not_equal_to(vi, vk)), copy1(vd, vk, vl, vi), copy1(set(set(vd, vk, vi, get(vd, vl, vi)), vi, vk, get(vd, vi, vl)), vk, vl, sort_real::plus(vi, sort_nat::cnat(sort_pos::c1())))));
         result.push_back(data_equation(atermpp::make_vector(vb1, vd, vi, vj), split(vd, vi, vj, vb1, sort_bool::true_()), and_d(vd, vi, vj, vb1)));
         result.push_back(data_equation(atermpp::make_vector(vb1, vd, vi, vj), split(vd, vi, vj, vb1, sort_bool::false_()), and_d(vd, vj, vi, sort_bound::not_b(vb1))));
+        result.push_back(data_equation(atermpp::make_vector(vb1, vd, vi, vj, vl1), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(sort_bound::inf(), sort_list::cons_(sort_bound::bound())(vb1, vl1)), sort_nat::c0()), and_d(vd, vi, vj, vb1)));
+        result.push_back(data_equation(atermpp::make_vector(vb1, vd, vi, vj), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(vb1, sort_list::empty(sort_bound::bound())), sort_nat::c0()), and_d(vd, vj, vi, sort_bound::not_b(vb1))));
+        result.push_back(data_equation(atermpp::make_vector(vb1, vb2, vd, vi, vj, vl1), not_equal_to(vb1, sort_bound::inf()), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(vb1, sort_list::cons_(sort_bound::bound())(vb2, vl1)), sort_nat::c0()), and_d(and_d(vd, vi, vj, vb2), vj, vi, sort_bound::not_b(vb1))));
+        result.push_back(data_equation(atermpp::make_vector(vb1, vd, vi, vj, vk, vl1), not_equal_to(vk, sort_nat::c0()), split_list(vd, vi, vj, sort_list::cons_(sort_bound::bound())(vb1, vl1), vk), split_list(vd, vi, vj, vl1, sort_int::int2nat(sort_int::minus(vk, sort_nat::cnat(sort_pos::c1()))))));
         result.push_back(data_equation(atermpp::make_vector(vd), inconsistent(vd), equal_to(get(vd, sort_nat::c0(), sort_nat::c0()), sort_bound::cbound(sort_real::creal(sort_int::cneg(sort_pos::c1()),sort_pos::c1()), sort_inequality::lt()))));
         result.push_back(data_equation(variable_list(), dbm_inconsistent(), set(dbm_zero(), sort_nat::c0(), sort_nat::c0(), sort_bound::cbound(sort_real::creal(sort_int::cneg(sort_pos::c1()),sort_pos::c1()), sort_inequality::lt()))));
         result.push_back(data_equation(variable_list(), dbm_empty(), dbm_size(N())));
         result.push_back(data_equation(variable_list(), dbm_size(sort_nat::c0()), sort_list::empty(sort_list::list(sort_bound::bound()))));
-        result.push_back(data_equation(atermpp::make_vector(vi), not_equal_to(vi, sort_nat::c0()), dbm_size(vi), sort_list::cons_(sort_list::list(sort_bound::bound()))(dbm_size1(vi, N()), dbm_size(sort_int::int2nat(sort_real::minus(vi, sort_nat::cnat(sort_pos::c1())))))));
+        result.push_back(data_equation(atermpp::make_vector(vi), not_equal_to(vi, sort_nat::c0()), dbm_size(vi), sort_list::cons_(sort_list::list(sort_bound::bound()))(dbm_size1(vi, N()), dbm_size(sort_int::int2nat(sort_int::minus(vi, sort_nat::cnat(sort_pos::c1())))))));
         result.push_back(data_equation(atermpp::make_vector(vi), dbm_size1(vi, sort_nat::c0()), sort_list::empty(sort_bound::bound())));
-        result.push_back(data_equation(atermpp::make_vector(vi, vj), sort_bool::and_(equal_to(vi, vj), not_equal_to(vj, sort_nat::c0())), dbm_size1(vi, vj), sort_list::cons_(sort_bound::bound())(sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1()), sort_inequality::le()), dbm_size1(vi, sort_int::int2nat(sort_real::minus(vj, sort_nat::cnat(sort_pos::c1())))))));
-        result.push_back(data_equation(atermpp::make_vector(vi, vj), sort_bool::and_(not_equal_to(vi, vj), not_equal_to(vj, sort_nat::c0())), dbm_size1(vi, vj), sort_list::cons_(sort_bound::bound())(sort_bound::inf(), dbm_size1(vi, sort_int::int2nat(sort_real::minus(vj, sort_nat::cnat(sort_pos::c1())))))));
+        result.push_back(data_equation(atermpp::make_vector(vi, vj), sort_bool::and_(equal_to(vi, vj), not_equal_to(vj, sort_nat::c0())), dbm_size1(vi, vj), sort_list::cons_(sort_bound::bound())(sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1()), sort_inequality::le()), dbm_size1(vi, sort_int::int2nat(sort_int::minus(vj, sort_nat::cnat(sort_pos::c1())))))));
+        result.push_back(data_equation(atermpp::make_vector(vi, vj), sort_bool::and_(not_equal_to(vi, vj), not_equal_to(vj, sort_nat::c0())), dbm_size1(vi, vj), sort_list::cons_(sort_bound::bound())(sort_bound::inf(), dbm_size1(vi, sort_int::int2nat(sort_int::minus(vj, sort_nat::cnat(sort_pos::c1())))))));
         result.push_back(data_equation(variable_list(), dbm_zero(), dbm_zero1(N())));
         result.push_back(data_equation(variable_list(), dbm_zero1(sort_nat::c0()), sort_list::empty(sort_list::list(sort_bound::bound()))));
-        result.push_back(data_equation(atermpp::make_vector(vi), not_equal_to(vi, sort_nat::c0()), dbm_zero1(vi), sort_list::cons_(sort_list::list(sort_bound::bound()))(dbm_zero2(vi, N()), dbm_zero1(sort_int::int2nat(sort_real::minus(vi, sort_nat::cnat(sort_pos::c1())))))));
+        result.push_back(data_equation(atermpp::make_vector(vi), not_equal_to(vi, sort_nat::c0()), dbm_zero1(vi), sort_list::cons_(sort_list::list(sort_bound::bound()))(dbm_zero2(vi, N()), dbm_zero1(sort_int::int2nat(sort_int::minus(vi, sort_nat::cnat(sort_pos::c1())))))));
         result.push_back(data_equation(atermpp::make_vector(vi), dbm_zero2(vi, sort_nat::c0()), sort_list::empty(sort_bound::bound())));
-        result.push_back(data_equation(atermpp::make_vector(vi, vj), sort_bool::and_(not_equal_to(vj, sort_nat::c0()), sort_bool::or_(equal_to(vi, vj), sort_bool::or_(equal_to(vi, N()), equal_to(vj, N())))), dbm_zero2(vi, vj), sort_list::cons_(sort_bound::bound())(sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1()), sort_inequality::le()), dbm_zero2(vi, sort_int::int2nat(sort_real::minus(vj, sort_nat::cnat(sort_pos::c1())))))));
-        result.push_back(data_equation(atermpp::make_vector(vi, vj), sort_bool::and_(not_equal_to(vj, sort_nat::c0()), sort_bool::and_(not_equal_to(vi, vj), sort_bool::and_(not_equal_to(vi, N()), not_equal_to(vj, N())))), dbm_zero2(vi, vj), sort_list::cons_(sort_bound::bound())(sort_bound::inf(), dbm_zero2(vi, sort_int::int2nat(sort_real::minus(vj, sort_nat::cnat(sort_pos::c1())))))));
+        result.push_back(data_equation(atermpp::make_vector(vi, vj), not_equal_to(vj, sort_nat::c0()), dbm_zero2(vi, vj), sort_list::cons_(sort_bound::bound())(sort_bound::cbound(sort_real::creal(sort_int::cint(sort_nat::c0()),sort_pos::c1()), sort_inequality::le()), dbm_zero2(vi, sort_int::int2nat(sort_int::minus(vj, sort_nat::cnat(sort_pos::c1())))))));
         return result;
       }
 
