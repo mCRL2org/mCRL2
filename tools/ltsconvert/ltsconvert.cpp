@@ -136,17 +136,17 @@ class ltsconvert_tool : public input_output_tool
       if (tool_options.equivalence != lts_eq_none)
       {
         mCRL2log(verbose) << "reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
-        mCRL2log(verbose) << "before reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions " << std::endl;
+        mCRL2log(verbose) << "before reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions " << std::endl;
         reduce(l,tool_options.equivalence);
-        mCRL2log(verbose) << "after reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
+        mCRL2log(verbose) << "after reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
       }
 
       if (tool_options.determinise)
       {
         mCRL2log(verbose) << "determinising LTS..." << std::endl;
-        mCRL2log(verbose) << "before determinisation: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
+        mCRL2log(verbose) << "before determinisation: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
         determinise(l);
-        mCRL2log(verbose) << "after determinisation: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
+        mCRL2log(verbose) << "after determinisation: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
       }
 
       mcrl2::lps::specification spec;
