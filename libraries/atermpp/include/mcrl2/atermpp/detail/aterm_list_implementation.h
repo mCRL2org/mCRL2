@@ -148,6 +148,26 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
 
 namespace detail
 {
+  // The functions make_list_backward and make_list_forward with three and four arguments are almost the same.
+  // The reason for this is that there is a 5% loss of speed of the toolset when merging these two functions.
+  // This is caused by storing and protecting the intermediate value of the converted aterm. See Term t=convert_to_aterm(...).
+  template <class Term, class Iter, class ATermConverter, class ATermFilter>
+  inline const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter)
+  {
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
+    const _aterm* result=aterm::empty_aterm_list();
+    while (first != last)
+    {
+      const Term t=convert_to_aterm(*(--last));
+      if (aterm_filter(t))
+      {
+        result=term_appl2<aterm>(detail::function_adm.AS_LIST,t,down_cast<term_list<Term> >(aterm(result)));
+      }
+    }
+    return result;
+  }
+
   template <class Term, class Iter, class ATermConverter>
   inline const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm)
   {
@@ -158,9 +178,40 @@ namespace detail
     {
       result=term_appl2<aterm>(detail::function_adm.AS_LIST,convert_to_aterm(*(--last)),down_cast<term_list<Term> >(aterm(result)));
     }
-    return result;
-  }
+    return result; 
+  } 
 
+  // See the note at make_list_backwards for why there are two almost similar version of make_list_forward.
+  template <class Term, class Iter, class ATermConverter, class ATermFilter>
+  inline const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter)
+  {
+    static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
+    static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
+
+    const size_t len=std::distance(first,last);
+    Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
+    Term *const buffer_begin=buffer;
+    Term* i=buffer_begin;
+    for(; first != last; ++first)
+    {
+      const Term t=convert_to_aterm(*first);
+      if (aterm_filter(t))
+      {
+        // Placement new; The buffer is not properly initialised.
+        new (i) Term(t);
+        ++i;
+      }
+    }
+
+    const _aterm* result=aterm::empty_aterm_list();
+    for( ; i!=buffer_begin ; )
+    {
+      --i;
+      result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,down_cast<term_list<Term> >(aterm(result)));
+      (*i).~Term(); // Destroy the elements in the buffer explicitly.
+    }
+    return result; 
+  }
 
   template <class Term, class Iter, class ATermConverter>
   inline const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm)

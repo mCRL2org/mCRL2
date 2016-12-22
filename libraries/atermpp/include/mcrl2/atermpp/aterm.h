@@ -46,8 +46,14 @@ class aterm
     template <class Term, class Iter, class ATermConverter>
     friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
+    template <class Term, class Iter, class ATermConverter, class ATermFilter>
+    friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter);
+
     template <class Term, class Iter, class ATermConverter>
     friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
+
+    template <class Term, class Iter, class ATermConverter, class ATermFilter>
+    friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const  ATermFilter& aterm_filter);
 
     friend const detail::_aterm* detail::address(const aterm& t);
   protected:

@@ -25,22 +25,22 @@ namespace detail
   template <class Term>
   struct do_not_convert_term
   {
-    const Term & operator()(const Term & t) const
+    const Term& operator()(const Term& t) const
     {
       return t;
     }
 
-    Term & operator()(Term & t) const
+    Term& operator()(Term& t) const
     {
       return t;
     }
   };
 
   template <class Term, class Iter, class ATermConverter>
-  const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+  const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
   template <class Term, class Iter, class ATermConverter>
-  const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+  const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
 } // namespace detail 
 

@@ -24,12 +24,12 @@ class _aterm
     mutable const _aterm* m_next;
 
   public:
-    function_symbol &function() 
+    function_symbol& function() 
     {
       return m_function_symbol;
     }
 
-    const function_symbol &function() const
+    const function_symbol& function() const
     {
       return m_function_symbol;
     }
@@ -95,12 +95,16 @@ void initialise_aterm_administration();
 inline HashNumber hash_number(const _aterm *t);
 
 template <class Term, class Iter, class ATermConverter>
-const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
+template <class Term, class Iter, class ATermConverter, class ATermFilter>
+const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter);
 template <class Term, class Iter, class ATermConverter>
-const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
+template <class Term, class Iter, class ATermConverter, class ATermFilter>
+const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter);
 
 // Provides the address where the data belonging to this aterm is stored.
-inline const _aterm* address(const aterm &t); 
+inline const _aterm* address(const aterm& t); 
 
 } // namespace detail
 } // namespace atermpp
