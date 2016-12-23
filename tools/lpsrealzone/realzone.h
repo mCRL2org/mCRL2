@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote and Jeroen Keiren
+// Author(s): Thomas Neele
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,25 +7,25 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file realzone.h
-/// \brief Implements simplification of real conditions
+/// \brief Implements translation of real parameters to difference bound matrices
 
 #ifndef MCRL2_LPSREALZONE_REALZONE_H
 #define MCRL2_LPSREALZONE_REALZONE_H
 
 
+#include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/stochastic_specification.h"
 
-#include "mcrl2/data/linear_inequalities.h"
 #include "dbm.h"
+#include "summand_information.h"
 
 namespace mcrl2
 {
 namespace data
 {
 
-class summand_information;
 
 mcrl2::lps::stochastic_specification simplify(mcrl2::lps::stochastic_specification s,
                                              const rewrite_strategy strat=jitty);
@@ -37,296 +37,510 @@ void normalize_specification(
 void move_real_parameters_out_of_actions(mcrl2::lps::stochastic_specification& s,
                                                   const variable_list& real_parameters,
                                                   const rewriter& r);
-mcrl2::lps::stochastic_specification realzone(mcrl2::lps::stochastic_specification s,
-                                             const rewrite_strategy strat=jitty);
 
-using namespace mcrl2::lps;
-using namespace atermpp;
-using namespace mcrl2::core;
-
-class real_representing_variable
+template <typename Specification>
+class realzone_algorithm: public mcrl2::lps::detail::lps_algorithm<Specification>
 {
-protected:
-  mcrl2::data::variable m_variable;
-  mcrl2::data::data_expression m_lowerbound;
-  mcrl2::data::data_expression m_upperbound;
-  detail::comparison_t m_comparison_operator;
-
-public:
-  real_representing_variable
-          (const mcrl2::data::variable& v,
-           const mcrl2::data::data_expression& lb,
-           const mcrl2::data::data_expression& ub,
-           const detail::comparison_t co)
-  {
-    m_variable=v;
-    m_lowerbound=lb;
-    m_upperbound=ub;
-    m_comparison_operator=co;
-  }
-
-  real_representing_variable(const real_representing_variable& other)
-  {
-    m_variable=other.m_variable;
-    m_lowerbound=other.m_lowerbound;
-    m_upperbound=other.m_upperbound;
-    m_comparison_operator=other.m_comparison_operator;
-  }
-
-  real_representing_variable& operator =(const real_representing_variable& other)
-  {
-    m_variable=other.m_variable;
-    m_lowerbound=other.m_lowerbound;
-    m_upperbound=other.m_upperbound;
-    m_comparison_operator=other.m_comparison_operator;
-    return *this;
-  }
-
-  const mcrl2::data::variable& get_variable() const
-  {
-    return m_variable;
-  }
-
-  const mcrl2::data::data_expression& get_lowerbound() const
-  {
-    return m_lowerbound;
-  }
-
-  const mcrl2::data::data_expression& get_upperbound() const
-  {
-    return m_upperbound;
-  }
-
-  const mcrl2::data::detail::comparison_t& comparison_operator() const
-  {
-    return m_comparison_operator;
-  }
-};
-
-typedef std::vector< real_representing_variable > context_type;
-
-class summand_information
-{
+  typedef typename mcrl2::lps::detail::lps_algorithm<Specification> super;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  using super::m_spec;
 
 protected:
-  mcrl2::lps::summand_base m_smd;
-  bool m_is_delta_summand;
-  assignment_list m_assignments;
-  lps::stochastic_distribution m_distribution;
-  lps::multi_action m_multi_action;
-  lps::deadlock m_deadlock;
+  struct bound_comp_s;
 
-  variable_list real_summation_variables;
-  variable_list non_real_summation_variables;
-  std::vector < linear_inequality > summand_real_conditions;
-  mutable_map_substitution< std::map<variable, data_expression> > summand_real_nextstate_map;
+  const rewrite_strategy strat;
+  rewriter r;
+  std::vector<summand_information> summand_info;
+  variable_list real_parameters;
+  std::vector< variable > update_variables;
+  std::set < variable > global_variables;
 
+  std::map< std::pair< data_expression, data_expression >, std::set< data_expression, bound_comp_s >> split_bounds;
+  std::vector< variable > sum_split_nats;
 
-  function_symbol comparison_to_function(linear_inequality l)
+  /// \brief Returns a list of all real variables in l
+  /// \param l a list of data variables
+  /// \return The list of all v in l such that v.sort() == real()
+  inline
+  variable_list get_real_variables(const variable_list& l)
   {
-    detail::comparison_t comp = l.comparison();
-    switch(comp)
+    variable_list r;
+    for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
     {
-      case detail::less: return less(sort_real::real_());
-      case detail::less_eq:return less_equal(sort_real::real_());
-      case detail::equal:return equal_to(sort_real::real_());
-    }
-    assert(0);
-    return equal_to(sort_real::real_()); //supress compiler warning
-  }
-
-  data_expression var_factor_to_data_expression(detail::variable_with_a_rational_factor v)
-  {
-    if(v.factor() == real_one())
-    {
-      return v.variable_name();
-    }
-    else if(v.factor() == real_minus_one())
-    {
-      return sort_real::negate(v.variable_name());
-    }
-    else
-    {
-      return sort_real::times(v.variable_name(),v.factor());
-    }
-  }
-
-  data_expression linear_inequality_to_data_expression(linear_inequality l)
-  {
-    if(l.lhs_begin() == l.lhs_end())
-    {
-      return sort_bool::true_();
-    }
-    data_expression lhs = var_factor_to_data_expression(*(l.lhs_begin()));
-    detail::lhs_t::const_iterator i = l.lhs_begin();
-    for(i++; i != l.lhs_end(); i++)
-    {
-      lhs = sort_real::plus(lhs, var_factor_to_data_expression(*i));
-    }
-    data_expression result = comparison_to_function(l)(lhs,l.rhs());
-    return result;
-  }
-
-  data_expression merge_conditions(data_expression nrc, std::vector< linear_inequality > rc)
-  {
-    data_expression merged = nrc;//equal_to(sort_bound::cbound(sort_real::creal(sort_int::cneg(sort_pos::c1()), sort_pos::c1()), sort_inequality::lt()), sort_bound::cbound(real_minus_one(), sort_inequality::lt()));//nrc;
-    for(linear_inequality& k: rc) {
-      merged = lazy::and_(merged,linear_inequality_to_data_expression(k));
-    }
-    return merged;
-  }
-
-  // The list of real assignments is updated according to summand_real_nextstate_map
-  assignment_list update_assignments(assignment_list assign, sort_specification s)
-  {
-    assignment_list result;
-    for(assignment_list::const_iterator i = assign.begin(); i != assign.end(); i++)
-    {
-      if(summand_real_nextstate_map.find(i->lhs()) == summand_real_nextstate_map.end())
+      if (i->sort() == sort_real::real_())
       {
-        result.push_front(assignment(i->lhs(), normalize_sorts(i->rhs(), s)));
+        r.push_front(*i);
+      }
+    }
+    return reverse(r);
+  }
+
+  const assignment* assignment_list_get_var(assignment_list al, variable v)
+  {
+    for(assignment_list::iterator i = al.begin(); i != al.end(); i++)
+    {
+      if(i->lhs() == v)
+      {
+        return &(*i);
+      }
+    }
+    return nullptr;
+  }
+
+  template< class InputIt >
+  int get_dbm_index(variable var, InputIt first, InputIt last)
+  {
+    // First element in DBM is 0
+    for(int i = 1; first != last; first++, i++)
+    {
+      if(var == *first)
+      {
+        return i;
+      }
+    }
+    throw mcrl2::runtime_error("Variable " + pp(var) + " not found.");
+    return -1;
+  }
+
+  function_symbol comp_to_function(detail::comparison_t comp)
+  {
+    switch (comp)
+    {
+      case detail::less:  return sort_inequality::lt();
+      case detail::less_eq: return sort_inequality::le();
+      case detail::equal: return sort_inequality::le();
+    };
+    assert(false);
+    return sort_inequality::le(); //suppress compiler warning
+  }
+
+  template< class InputIt >
+  std::pair< data_expression, data_expression > dbm_index_pair(std::vector< detail::variable_with_a_rational_factor > pars,
+    InputIt begin, InputIt end, bool invert)
+  {
+    int neg_index = 0;
+    int pos_index = 0;
+    for(detail::variable_with_a_rational_factor p: pars)
+    {
+      if(p.factor() == real_one())
+      {
+        pos_index = get_dbm_index(p.variable_name(), begin, end);
       }
       else
       {
-        result.push_front(assignment(i->lhs(), normalize_sorts(summand_real_nextstate_map(i->lhs()), s)));
+        neg_index = get_dbm_index(p.variable_name(), begin, end);
       }
     }
-    return reverse(result);
+    std::pair< data_expression, data_expression > result(sort_nat::nat(pos_index), sort_nat::nat(neg_index));
+    if(invert) {
+      std::swap(result.first, result.second);
+    }
+    return result;
+  }
+
+  struct bound_comp_s
+  {
+    rewriter r;
+    bool operator()(const data_expression b1, const data_expression b2) const
+    {
+      return r(sort_bound::lt(b1,b2)) == sort_bool::true_();
+    }
+    explicit bound_comp_s(rewriter rewr) : r(rewr) {}
+  };
+
+  void add_to_split_bounds(std::pair< data_expression, data_expression > dbm_indices, data_expression bound)
+  {
+    // ignore bounds with a zero
+    if(sort_bound::left(bound) == real_zero())
+    {
+      return;
+    }
+    // to lower the amount of split bounds, we formulate them positively
+    std::pair< data_expression, data_expression > key;
+    data_expression value;
+    if(r(less(dbm_indices.first, dbm_indices.second)) == sort_bool::true_())
+    {
+      key = std::make_pair(dbm_indices.second, dbm_indices.first);
+      value = r(sort_bound::not_b(bound));
+    }
+    else
+    {
+      key = std::make_pair(dbm_indices.first, dbm_indices.second);
+      value = bound;
+    }
+    struct bound_comp_s comparator(r);
+    std::set< data_expression, bound_comp_s > empty_set(comparator);
+    std::set< data_expression, bound_comp_s >& bounds_set = split_bounds.insert(std::make_pair(key, empty_set)).first->second;
+    bounds_set.insert(value);
+  }
+
+  void categorise_variables(const linear_inequality li, std::vector< detail::variable_with_a_rational_factor >& pars,
+    std::vector< detail::variable_with_a_rational_factor >& primed_pars)
+  {
+    for(detail::lhs_t::const_iterator var = li.lhs_begin(); var != li.lhs_end(); var++)
+    {
+      if(std::find(real_parameters.begin(), real_parameters.end(), var->variable_name()) != real_parameters.end())
+      {
+        pars.push_back(*var);
+      }
+      else if(std::find(update_variables.begin(), update_variables.end(), var->variable_name()) != update_variables.end())
+      {
+        primed_pars.push_back(*var);
+      }
+      else if(global_variables.find(var->variable_name()) == global_variables.end())
+      {
+        throw mcrl2::runtime_error("Variable " + pp(var->variable_name()) + " not found.");
+      }
+    }
+  }
+
+  void dbm_add_translated_inequalities(data_expression dbm, data_expression& new_dbm, data_expression& conditions, 
+    std::vector< linear_inequality > inequalities)
+  {
+    data_expression next_zone = sort_dbm::dbm_empty();
+    std::vector< data_expression > new_conditions;
+
+    std::map< std::pair< data_expression, data_expression >, data_expression > current_state_conditions;
+    std::vector< linear_inequality > next_state_conditions;
+    for(linear_inequality &li: inequalities)
+    {
+      std::vector< detail::variable_with_a_rational_factor > pars;
+      std::vector< detail::variable_with_a_rational_factor > primed_pars;
+      categorise_variables(li, pars, primed_pars);
+
+      if(pars.size() > 2 || primed_pars.size() > 2)
+      {
+        throw mcrl2::runtime_error("Comparisons between more than two variables are not supported by DBMs: " + pp(li));
+      }
+      if(primed_pars.size() == 0)
+      {
+        std::cerr << pp(li) << " par count " << pars.size() << " primed par count " << primed_pars.size() << std::endl;
+        std::pair< data_expression, data_expression > dbm_indices = dbm_index_pair(pars, real_parameters.begin(), real_parameters.end(), false);
+        data_expression bound = sort_bound::cbound(li.rhs(), comp_to_function(li.comparison()));
+        data_expression condition = sort_dbm::and_d(dbm, 
+                    dbm_indices.first,
+                    dbm_indices.second,
+                    bound);
+        current_state_conditions.insert(std::make_pair(dbm_indices, bound));
+        if(li.comparison() == detail::equal)
+        {
+          data_expression bound = sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison()));
+          condition = sort_dbm::and_d(condition,
+                    dbm_indices.second,
+                    dbm_indices.first,
+                    bound);
+          current_state_conditions.insert(std::make_pair(std::make_pair(dbm_indices.second, dbm_indices.first), bound));
+        }
+        std::cerr << "translation " << sort_bool::not_(sort_dbm::inconsistent(condition)) << std::endl;
+        new_conditions.push_back(sort_bool::not_(sort_dbm::inconsistent(condition)));
+      }
+      else
+      {
+        next_state_conditions.push_back(li);
+      }
+    }
+    for(linear_inequality li: next_state_conditions)
+    {
+      std::vector< detail::variable_with_a_rational_factor > pars;
+      std::vector< detail::variable_with_a_rational_factor > primed_pars;
+      categorise_variables(li, pars, primed_pars);
+
+      std::cerr << pp(li) << " par count " << pars.size() << " primed par count " << primed_pars.size() << std::endl;
+      std::pair< data_expression, data_expression > dbm_primed_indices = dbm_index_pair(primed_pars, update_variables.begin(), update_variables.end(), false);
+      data_expression bound;
+      std::pair< data_expression, data_expression > dbm_indices = dbm_index_pair(pars, real_parameters.begin(), real_parameters.end(), true);
+      if(pars.size() == 0)
+      {
+        bound = sort_bound::cbound(li.rhs(), comp_to_function(li.comparison()));
+      }
+      else
+      {
+        bound = sort_bound::add(sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())),
+                                      sort_dbm::get(dbm, dbm_indices.first, dbm_indices.second));
+        std::map< std::pair< data_expression, data_expression >, data_expression >::const_iterator extra_cond = current_state_conditions.find(dbm_indices);
+        if(extra_cond != current_state_conditions.end())
+        {
+          bound = sort_bound::min_b(bound, extra_cond->second);
+        }
+      }
+      next_zone = sort_dbm::and_d(next_zone, dbm_primed_indices.first, dbm_primed_indices.second, bound);
+      std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), dbm_primed_indices.first, dbm_primed_indices.second, bound) << std::endl;
+      if(li.comparison() == detail::equal)
+      {
+        if(pars.size() == 0)
+        {
+          bound = sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison()));
+        }
+        else
+        {
+          bound = sort_bound::add(sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison())),
+                                        sort_dbm::get(dbm, dbm_indices.second, dbm_indices.first));
+          std::map< std::pair< data_expression, data_expression >, data_expression >::const_iterator extra_cond = 
+                  current_state_conditions.find(std::make_pair(dbm_indices.second, dbm_indices.first));
+          if(extra_cond != current_state_conditions.end())
+          {
+            bound = sort_bound::min_b(bound, extra_cond->second);
+          }
+        }
+        next_zone = sort_dbm::and_d(next_zone, dbm_primed_indices.second, dbm_primed_indices.first, bound);
+        std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), dbm_primed_indices.second, dbm_primed_indices.first, bound) << std::endl;
+      }
+    }
+
+    conditions = lazy::join_and(new_conditions.begin(), new_conditions.end());
+    new_dbm = next_zone;
+  }
+
+  data_expression dbm_add_splits(const data_expression post_z, data_expression& condition)
+  {
+    std::vector< variable >::const_iterator bool_var = sum_split_nats.begin();
+    data_expression result = post_z;
+    for(std::pair< std::pair< data_expression, data_expression >, std::set< data_expression, bound_comp_s >> sb: split_bounds)
+    {
+      std::pair< data_expression, data_expression > key = std::get<0>(sb);
+      std::set< data_expression, bound_comp_s > value = std::get<1>(sb);
+      data_expression bounds_list = sort_list::empty(sort_bound::bound());
+      for(std::set< data_expression >::reverse_iterator bound = value.rbegin(); bound != value.rend(); bound++)
+      {
+        bounds_list = sort_list::cons_(sort_bound::bound())(*bound, bounds_list);
+      }
+      bounds_list = sort_list::cons_(sort_bound::bound())(sort_bound::inf(), bounds_list);
+      result = sort_dbm::split_list(result, std::get<0>(key), std::get<1>(key), bounds_list, *bool_var);
+      condition = lazy::and_(condition, less_equal(*bool_var, sort_nat::nat(value.size())));
+      bool_var++;
+    }
+    return result;
+  }
+
+  void abstract_reals()
+  {
+    set_identifier_generator var_gen;
+    var_gen.add_identifiers(lps::find_identifiers(m_spec));
+
+    real_parameters = get_real_variables(m_spec.process().process_parameters());
+    global_variables = m_spec.global_variables();
+    m_spec.data().add_equation(data_equation(variable_list(),sort_dbm::N(),sort_nat::nat(real_parameters.size() + 1)));
+    variable dbm_var(var_gen("z"), normalize_sorts(sort_dbm::dbm(), m_spec.data()));
+    for(variable_list::iterator real_par = real_parameters.begin(); real_par != real_parameters.end(); real_par++)
+    {
+      variable par_prime(var_gen(static_cast<std::string>(real_par->name()) + "'"), sort_real::real_());
+      update_variables.push_back(par_prime);
+    }
+
+    std::vector< summand_information > si = summand_info;
+    summand_info.clear();
+    std::vector< data_expression > dbm_exprs, new_conditions;
+    for(summand_information &summand: si)
+    {
+      std::vector< linear_inequality > inequalities;
+      std::vector< linear_inequality > real_conditions = summand.get_summand_real_conditions();
+      inequalities.insert(inequalities.begin(), real_conditions.begin(), real_conditions.end());
+
+      std::vector< variable >::iterator par_prime = update_variables.begin();
+      for(variable_list::iterator real_par = real_parameters.begin(); real_par != real_parameters.end(); real_par++, par_prime++)
+      {
+        const assignment* a = assignment_list_get_var(summand.get_assignments(), *real_par);
+        inequalities.push_back(linear_inequality(equal_to(*par_prime, a != nullptr ? a->rhs() : *real_par), r));
+      }
+
+      for(linear_inequality &li: inequalities)
+      {
+        std::cerr << "orginal system " << pp(li) << std::endl;
+      }
+      variable_list eliminate_variables = summand.get_real_summation_variables();
+      for(variable v: global_variables)
+      {
+        inequalities.push_back(linear_inequality(equal_to(v, real_zero()), r));
+        eliminate_variables.push_front(v);
+      }
+      std::vector< linear_inequality > elim_inequalities;
+      std::vector< linear_inequality > new_inequalities;
+      fourier_motzkin(inequalities, eliminate_variables.begin(), eliminate_variables.end(), elim_inequalities, r);
+      remove_redundant_inequalities(elim_inequalities, new_inequalities,r);
+
+      for(linear_inequality &li: new_inequalities)
+      {
+        std::cerr << "reduced system " << pp(li) << std::endl;
+      }
+
+      data_expression next_zone, new_condition;
+      dbm_add_translated_inequalities(dbm_var, next_zone, new_condition, new_inequalities);
+      dbm_exprs.push_back(next_zone);
+      new_conditions.push_back(new_condition);
+
+      // Now also eliminate next state variables to obtain splitting bounds
+      elim_inequalities.clear();
+      new_inequalities.clear();
+      eliminate_variables = summand.get_real_summation_variables();
+      for(variable v: update_variables)
+      {
+        eliminate_variables.push_front(v);
+      }
+      fourier_motzkin(real_conditions, eliminate_variables.begin(), eliminate_variables.end(), elim_inequalities, r);
+      remove_redundant_inequalities(elim_inequalities, new_inequalities,r);
+      for(linear_inequality i: new_inequalities)
+      {
+        std::vector< detail::variable_with_a_rational_factor > lhs_vars;
+        for(detail::variable_with_a_rational_factor v: i.lhs())
+        {
+          lhs_vars.push_back(v);
+        }
+        std::cerr << "bounds system " << pp(i) << std::endl;
+        add_to_split_bounds(dbm_index_pair(lhs_vars, real_parameters.begin(), real_parameters.end(), false),
+           sort_bound::cbound(i.rhs(), comp_to_function(i.comparison())));
+      }
+    }
+
+    std::cerr << "List of split bounds" << std::endl;
+    for(std::pair< std::pair< data_expression, data_expression >, std::set< data_expression, bound_comp_s >> sb: split_bounds)
+    {
+      std::pair< data_expression, data_expression > key = std::get<0>(sb);
+      std::set< data_expression, bound_comp_s > value = std::get<1>(sb);
+      data_expression bounds_list = sort_list::empty(sort_bound::bound());
+      for(std::set< data_expression >::reverse_iterator bound = value.rbegin(); bound != value.rend(); bound++)
+      {
+        std::cerr << pp(std::get<0>(key)) << " - " << pp(std::get<1>(key)) << " " 
+            << pp(sort_bound::right(*bound)) << " " << pp(sort_bound::left(*bound)) << std::endl;
+      }
+      sum_split_nats.push_back(variable(var_gen("split"), sort_nat::nat()));
+    }
+
+    std::vector< data_expression>::const_iterator next_zone = dbm_exprs.begin();
+    std::vector< data_expression>::const_iterator new_condition = new_conditions.begin();
+    for(summand_information &summand: si)
+    {
+      data_expression cond = summand.get_summand().condition();
+      data_expression split_zone = dbm_add_splits(*next_zone, cond);
+      cond = lazy::and_(cond, sort_bool::not_(sort_dbm::inconsistent(split_zone)));
+      cond = lazy::and_(cond, *new_condition);
+      variable_list nonreal_summation_variables = summand.get_non_real_summation_variables();
+      for(variable v: sum_split_nats)
+      {
+        nonreal_summation_variables.push_front(v);
+      }
+      summand_base t(nonreal_summation_variables, cond);
+      assignment_list al;
+      for(assignment_list::const_iterator i = summand.get_assignments().begin(); i != summand.get_assignments().end(); i++)
+      {
+        if(i->lhs().sort() != sort_real::real_())
+        {
+          al.push_front(*i);
+        }
+      }
+      al.push_front(assignment(dbm_var, split_zone));
+      summand_info.push_back(summand_information(t,
+                                    summand.is_delta_summand(),
+                                    al,
+                                    summand.get_distribution(),
+                                    summand.get_multi_action(),
+                                    summand.get_deadlock(),
+                                    variable_list(),
+                                    nonreal_summation_variables,
+                                    std::vector< linear_inequality >(),
+                                    std::map< variable, data_expression >()
+                                    ));
+
+      next_zone++;
+      new_condition++;
+    }
+    variable_list proc_par = m_spec.process().process_parameters();
+    m_spec.process().process_parameters() = variable_list();
+    for(variable_list::const_iterator i = proc_par.begin(); i != proc_par.end(); i++)
+    {
+      if(i->sort() != sort_real::real_())
+      {
+        m_spec.process().process_parameters().push_front(*i);
+      }
+    }
+    m_spec.process().process_parameters().push_front(dbm_var);
+
+    assignment_list al;
+    for(assignment_list::const_iterator i = m_spec.initial_process().assignments().begin();
+          i != m_spec.initial_process().assignments().end(); i++)
+    {
+      if(i->lhs().sort() != sort_real::real_())
+      {
+        al.push_front(*i);
+      }
+    }
+    al.push_front(assignment(dbm_var, normalize_sorts(sort_dbm::dbm_zero(), m_spec.data())));
+    m_spec.initial_process() = stochastic_process_initializer(al, m_spec.initial_process().distribution());
+  }
+
+  void add_constructors(data_specification& d, function_symbol_vector cons) {
+    for(function_symbol_vector::const_iterator con = cons.begin(); con != cons.end(); con++)
+    {
+      d.add_constructor(*con);
+    }
+  }
+
+  void add_mappings(data_specification& d, function_symbol_vector maps) {
+    for(function_symbol_vector::const_iterator map = maps.begin(); map != maps.end(); map++)
+    {
+      d.add_mapping(*map);
+    }
+  }
+
+  void add_equations(data_specification& d, data_equation_vector eqns) {
+    for(data_equation_vector::const_iterator eqn = eqns.begin(); eqn != eqns.end(); eqn++)
+    {
+      d.add_equation(*eqn);
+    }
   }
 
 public:
-  summand_information(
-          const mcrl2::lps::summand_base& s,
-          bool  is_delta_summand,
-          const assignment_list& assignments,
-          const lps::stochastic_distribution& distribution,
-          const lps::multi_action& multi_action,
-          const lps::deadlock& deadlock,
-          const variable_list& rsv, // real summantion variables
-          const variable_list& nrsv,// non real summation variables
-          const std::vector < linear_inequality >& src, // summand real condition
-          const mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> >& srnm //summand real next state map
-  ):
-          m_smd(s),
-          m_is_delta_summand(is_delta_summand),
-          m_assignments(assignments),
-          m_distribution(distribution),
-          m_multi_action(multi_action),
-          m_deadlock(deadlock),
-          real_summation_variables(rsv),
-          non_real_summation_variables(nrsv),
-          summand_real_conditions(src),
-          summand_real_nextstate_map(srnm)
+  realzone_algorithm(Specification& spec, const rewrite_strategy st = jitty)
+    : mcrl2::lps::detail::lps_algorithm<Specification>(spec),
+    strat(st),
+    r(spec.data(),strat)
   {
+    
   }
 
-  summand_information(const summand_information& s)
+  void run()
   {
-    m_smd=s.m_smd;
-    m_is_delta_summand=s.m_is_delta_summand;
-    m_assignments=s.m_assignments;
-    m_distribution=s.m_distribution;
-    m_multi_action=s.m_multi_action;
-    m_deadlock=s.m_deadlock;
-    real_summation_variables=s.real_summation_variables;
-    non_real_summation_variables=s.non_real_summation_variables;
-    summand_real_conditions=s.summand_real_conditions;
-    summand_real_nextstate_map=s.summand_real_nextstate_map;
-  }
+    const variable_list real_parameters = get_real_variables(m_spec.process().process_parameters());
+    move_real_parameters_out_of_actions(m_spec, real_parameters, r);
+    normalize_specification(m_spec, get_real_variables(m_spec.process().process_parameters()), r, summand_info);
 
-  ~summand_information()
-  {
-  }
+    m_spec.data().add_system_defined_sort(sort_nat::nat());
+    m_spec.data().add_sort(sort_inequality::inequality());
+    add_constructors(m_spec.data(), sort_inequality::inequality_generate_constructors_code());
+    add_equations(m_spec.data(), sort_inequality::inequality_generate_equations_code());
+    m_spec.data().add_sort(sort_bound::bound());
+    add_constructors(m_spec.data(), sort_bound::bound_generate_constructors_code());
+    add_mappings(m_spec.data(), sort_bound::bound_generate_functions_code());
+    add_equations(m_spec.data(), sort_bound::bound_generate_equations_code());
+    m_spec.data().add_alias(alias(sort_dbm::dbm(),sort_list::list(sort_list::list(sort_bound::bound()))));
+    add_mappings(m_spec.data(), sort_dbm::dbm_generate_functions_code());
+    add_equations(m_spec.data(), sort_dbm::dbm_generate_equations_code());
 
-  const mcrl2::lps::summand_base& get_summand() const
-  {
-    return m_smd;
-  }
+    for(std::map< sort_expression, sort_expression >::value_type s: m_spec.data().sort_alias_map())
+    {
+      std::cerr << "sort " << pp(s.first) << " -> " << pp(s.second) << std::endl;
+    }
+    std::cerr << pp(normalize_sorts(sort_dbm::dbm(), m_spec.data())) << std::endl;
 
-  mcrl2::lps::summand_base& get_summand()
-  {
-    return m_smd;
-  }
+    r = rewriter(m_spec.data(), strat);
+    abstract_reals();
 
-  mcrl2::lps::deadlock_summand get_represented_deadlock_summand(sort_specification s)
-  {
-    assert(m_is_delta_summand);
-    variable_list sumvars = non_real_summation_variables + real_summation_variables;
-    return deadlock_summand(sumvars,
-                               normalize_sorts(merge_conditions(m_smd.condition(),summand_real_conditions), s),
-                               deadlock(get_deadlock().time()));
-  }
-
-  mcrl2::lps::action_summand get_represented_action_summand(sort_specification s)
-  {
-    assert(!m_is_delta_summand);
-    variable_list sumvars = non_real_summation_variables + real_summation_variables;
-    return stochastic_action_summand(sumvars,
-                                      normalize_sorts(merge_conditions(m_smd.condition(),summand_real_conditions), s),
-                                      get_multi_action(),
-                                      update_assignments(m_assignments, s),
-                                      get_distribution());
-  }
-
-  // void update_assignments()
-  // {
-  //   m_assignments = update_assignments(m_assignments);
-  //   summand_real_nextstate_map.clear();
-  // }
-
-  const bool& is_delta_summand() const
-  {
-    return m_is_delta_summand;
-  }
-
-  const mcrl2::data::assignment_list& get_assignments() const
-  {
-    return m_assignments;
-  }
-
-  const mcrl2::lps::stochastic_distribution& get_distribution() const
-  {
-    return m_distribution;
-  }
-
-  const mcrl2::lps::multi_action& get_multi_action() const
-  {
-    return m_multi_action;
-  }
-
-  const mcrl2::lps::deadlock& get_deadlock() const
-  {
-    return m_deadlock;
-  }
-
-  variable_list get_real_summation_variables() const
-  {
-    return real_summation_variables;
-  }
-
-  variable_list get_non_real_summation_variables() const
-  {
-    return non_real_summation_variables;
-  }
-
-  const std::vector < linear_inequality >& get_summand_real_conditions() const
-  {
-    return summand_real_conditions;
-  }
-
-  std::vector < linear_inequality >::const_iterator get_summand_real_conditions_begin() const
-  {
-    return summand_real_conditions.begin();
-  }
-
-  std::vector < linear_inequality >::const_iterator get_summand_real_conditions_end() const
-  {
-    return summand_real_conditions.end();
-  }
-
-  mutable_map_substitution< std::map<mcrl2::data::variable, mcrl2::data::data_expression> >& get_summand_real_nextstate_map()
-  {
-    return summand_real_nextstate_map;
+    stochastic_action_summand_vector action_summands;
+    deadlock_summand_vector deadlock_summands;
+    for(std::vector<summand_information>::iterator i = summand_info.begin(); i != summand_info.end(); i++) {
+      if (i->is_delta_summand())
+      {
+        deadlock_summands.push_back(i->get_represented_deadlock_summand(m_spec.data()));
+      }
+      else
+      {
+        action_summands.push_back(i->get_represented_action_summand(m_spec.data()));
+      }
+    }
+    stochastic_linear_process lps(m_spec.process().process_parameters(),
+                                  deadlock_summands,
+                                  action_summands);
+    m_spec.process() = lps;
   }
 };
 

@@ -44,12 +44,15 @@ class lpsrealzone_tool: public rewriter_tool<input_output_tool>
         AUTHORS,
         "remove real numbers from an LPS",
         "Remove Real numbers from the linear process specification (LPS) in "
-        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. ")
+        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
+        "In the output, the real numbers are replaced by a difference bound matrix. "
+        "Therefore, there are certain restrictions on the linear inequalities present in the input. "
+        "This tool is highly experimental. ")
     {}
 
     /// Runs the algorithm.
     /// Reads a specification from input_file,
-    ///i applies real time abstraction to it and writes the result to output_file.
+    /// applies real time abstraction to it and writes the result to output_file.
     bool run()
     {
       mCRL2log(verbose) << "Parameters of lpsrealzone:" << std::endl;
@@ -60,12 +63,11 @@ class lpsrealzone_tool: public rewriter_tool<input_output_tool>
       stochastic_specification spec;
       load_lps(spec, input_filename());
 
-      // Untime lps_specification and save the output to a binary file
-      // rewriter r=create_rewriter(lps_specification.data());
-      stochastic_specification new_spec = realzone(spec, m_rewrite_strategy);
+      // Translate spec and save the output to a binary file
+      mcrl2::data::realzone_algorithm<stochastic_specification>(spec, m_rewrite_strategy).run();
 
       mCRL2log(verbose) << "Real time abstraction completed, saving to " << m_output_filename << "\n";
-      save_lps(new_spec, output_filename());
+      save_lps(spec, output_filename());
 
       return true;
     }
