@@ -61,5 +61,5 @@ Technical details
 Publications
 ------------
 
-[Plo09]_
+.. [Ploeger09] B. Ploeger. Analysis of ACS using mCRL2. Computer Science Report `technical report 09-11 <http://alexandria.tue.nl/extra1/wskrap/publichtml/200911.pdf>`__. Eindhoven University of Technology, 2009.
 

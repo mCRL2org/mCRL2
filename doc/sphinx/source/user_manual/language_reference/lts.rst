@@ -209,7 +209,7 @@ Example
 
 The following example shows a simple labelled transition system of the dining
 philosophers problem for two philosophers, visualised using
-:ref:`tools-ltsgraph`:
+:ref:`tool-ltsgraph`:
 
 .. image:: img/Dining2_ns_seq.*
    :width: 600px

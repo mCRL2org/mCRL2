@@ -70,6 +70,7 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
 
 
 .. _example1:
+   
 .. admonition:: Example
 
    Consider a simple coffee machine that accepts a single coin and then
@@ -98,7 +99,7 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
 Sequences and choices
 ---------------------
 
-The coffee machine in :ref:`example1` is not very exciting. It performs
+The coffee machine in the :ref:`example <example1>` above is not very exciting. It performs
 only two actions, and it performs them *sequentially*. More interesting
 behaviour usually involves some form of *choice*. Choices in mCRL2 are
 *nondeterministic*, that is to say, if a system can choose between two

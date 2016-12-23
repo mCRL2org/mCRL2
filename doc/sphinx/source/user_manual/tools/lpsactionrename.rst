@@ -45,8 +45,7 @@ Variables in different rename rules with the same variable names are independent
 when being matched.
 
 After the LPS has been renamed, sum elimination and rewriting will be applied to
-simplify the result. This can be skipped using :ref:`appropriate switches
-<manpage-lpsactionrename>`.
+simplify the result. This can be skipped using appropriate switches.
 
 Rename rule conditions
 ----------------------

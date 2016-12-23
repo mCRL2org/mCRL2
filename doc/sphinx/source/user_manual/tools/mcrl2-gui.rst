@@ -1,6 +1,6 @@
 .. index:: mcrl2-gui
 
-.. _tool-mcrl2-gui
+.. _tool-mcrl2-gui:
 
 mcrl2-gui
 =========

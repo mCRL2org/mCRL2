@@ -53,7 +53,7 @@ Command Arguments
 
 Commands consist of a part that identifies a tool and optional arguments that affect the behaviour of that tool. We distinguish two types of arguments options and non-option arguments.
 
-An option is a special command argument that is used to trigger optional behaviour in a tool. Every option has a long identifier and optionally a single-character short identifier. Additional structure is imposed on options, for one they need to be distinguishable from the arguments. To disambiguate between arguments and option identifiers (to specify options) the short and long option identifiers are prefixed with `-' and `--' respectively. An extension taken from the getopt library (a well-known C-style library command line parsing) is the chaining of short option identifiers. For example -bc2 is treated the same as -b -c2 (under context conditions stated below).
+An option is a special command argument that is used to trigger optional behaviour in a tool. Every option has a long identifier and optionally a single-character short identifier. Additional structure is imposed on options, for one they need to be distinguishable from the arguments. To disambiguate between arguments and option identifiers (to specify options) the short and long option identifiers are prefixed with '-' and '--' respectively. An extension taken from the getopt library (a well-known C-style library command line parsing) is the chaining of short option identifiers. For example -bc2 is treated the same as -b -c2 (under context conditions stated below).
 
 For the sake of completeness, the following is a full EBNF(-like) grammar for commands::
 
@@ -72,7 +72,7 @@ For the sake of completeness, the following is a full EBNF(-like) grammar for co
 Context conditions
 ^^^^^^^^^^^^^^^^^^
 
-An option argument is called optional (otherwise mandatory) if a default value is available that is assumed present as argument if the option was found without argument. The option identified by a short or long identifier is associated with the information that it either expects no arguments, an optional argument or a mandatory argument. A default value must be associated with every optional argument. Finally no white-space is allowed between a short option identifier and the optional argument. For example `-oA' (and not `-o A') for option o with argument A and `-o ' specifies the the default value for option o.
+An option argument is called optional (otherwise mandatory) if a default value is available that is assumed present as argument if the option was found without argument. The option identified by a short or long identifier is associated with the information that it either expects no arguments, an optional argument or a mandatory argument. A default value must be associated with every optional argument. Finally no white-space is allowed between a short option identifier and the optional argument. For example '-oA' (and not '-o A') for option o with argument A and '-o ' specifies the the default value for option o.
 
 For the chaining of short options it is required that all options except the last in the chain take no arguments (so not even an optional argument). The reason is that there is no reliable way to disambiguate between option argument and option identifiers. All that follows the first option in the chain that takes an optional or mandatory argument is taken as argument.
 
@@ -177,7 +177,7 @@ optional command line arguments, in the following way:
 
 * the first argument is treated as the input file, the second argument is
   treated as the output file (if present);
-* when the input file is not supplied, input is read from ``stdin`;
+* when the input file is not supplied, input is read from ``stdin``;
 * when the output file is not supplied, output is written to ``stdout``.
 
 It is only allowed to deviate from these rules if it is technically

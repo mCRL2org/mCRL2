@@ -39,7 +39,7 @@ Technical details
   machine.
 
 *Models*
-  The model is available as an appendix to [PS06]_.
+  The model is available as an appendix to the technical report mentioned in reference [PS07]_.
 
 *Organizational context*
   :Contact person: Bas Ploeger, Technische Universiteit Eindhoven, The 
