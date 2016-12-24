@@ -285,7 +285,7 @@ Below an example is given for the pbesparelm tool. Since this is a tool that
 takes a file as input and also writes output to a file, it derives from the
 class :cpp:class:`mcrl2:utilities:input_output_tool`.
 
-.. literalinclude:: ../../../../../../../tools/pbesparelm/pbesparelm.cpp
+.. literalinclude:: ../../../../../../../tools/release/pbesparelm/pbesparelm.cpp
    :language: c++
 
 using the :cpp:member:`execute` member function, that accepts the command line

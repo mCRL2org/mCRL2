@@ -62,7 +62,7 @@ Technical details
   space). For example, the requirement to the model of the second approach was
   verified by modeling the stub and driver processes such that a deadlock state
   was reached when the requirement was violated. By commanding
-  :ref:`tool-lps2lts' to detect deadlock states, the formal model was verified.
+  :ref:`tool-lps2lts` to detect deadlock states, the formal model was verified.
   This verification led to the detection of the flaw that is known at Vitatron.
   After the detection of this flaw, the possible consequences of the flaw have
   been discovered through adapting the model of the first approach such that the

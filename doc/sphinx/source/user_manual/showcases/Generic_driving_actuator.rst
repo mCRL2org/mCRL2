@@ -39,7 +39,7 @@ The requirements on the software of the Generic Driving Actuator were checked.
   Verification took 8 hours on a 32bits linux machine with 4GByte of memory.
 
 *Models*
-  The model is available as an appendix to [MDC07]_.
+  The model is available as an appendix to [MDC07a]_.
 
 *Organizational context*
   :Contact person: Leon Merkx
@@ -53,5 +53,5 @@ The requirements on the software of the Generic Driving Actuator were checked.
 Publications
 ------------
 
-.. [MDC07] Algebraic Software Analysis and Embedded Simulation of a Driving Robot. Leon Merkx, Hans-Martin Duringhof, Pieter Cuijpers. 2007 Summer Computer Simulation Conference (SCSC) in San Diego, CA. Also appeared as `technical report <http://alexandria.tue.nl/repository/books/627278.pdf>`__. See also :ref:`showcase:generic-driving-actuator` and `(DOI) <http://doi.acm.org/10.1145/1357910.1357985>`
+.. [MDC07a] Algebraic Software Analysis and Embedded Simulation of a Driving Robot. Leon Merkx, Hans-Martin Duringhof, Pieter Cuijpers. 2007 Summer Computer Simulation Conference (SCSC) in San Diego, CA. Also appeared as `technical report <http://alexandria.tue.nl/repository/books/627278.pdf>`__. See also :ref:`showcase:generic-driving-actuator` and `(DOI) <http://doi.acm.org/10.1145/1357910.1357985>`
 

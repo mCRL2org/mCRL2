@@ -572,17 +572,17 @@ class besconvert_tool: public super
 
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
                       "generate an equivalent BES, preserving equivalence NAME:"
-                      "  'none'  for no reduction (default),\n"
-                      "  'bisim' for strong bisimulation,\n"
-                      "  'stuttering' for stuttering equivalence", 'e');
+                      "'none'  for no reduction (default),"
+                      "'bisim' for strong bisimulation,"
+                      "'stuttering' for stuttering equivalence", 'e');
       desc.add_option("intermediate", make_file_argument("FILE"),
                       "save the intermediate LTS to FILE", 'l');
       desc.add_option("translation", make_mandatory_argument("TRANSLATION"),
-                      "translate to intermediate LTS using TRANSLATION:\n"
-                      "  'deadlock' for an additional deadlock state recording labels,\n"
-                      "  'selfloop' for a self-loop recording the information in each state,\n"
-                      "  'successor' for an edge with the label of the current state to each successor state"
-                      "              (may only be used with --equivalence=bisim)", 't');
+                      "translate to intermediate LTS using TRANSLATION:"
+                      "'deadlock' for an additional deadlock state recording labels, "
+                      "'selfloop' for a self-loop recording the information in each state, "
+                      "'successor' for an edge with the label of the current state to each successor state "
+                      "(may only be used with --equivalence=bisim)", 't');
       desc.add_option("noreduction",
                       "do not perform the reduction, only store the intermediate LTS", 'n');
     }

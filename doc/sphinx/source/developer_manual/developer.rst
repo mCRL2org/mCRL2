@@ -78,7 +78,7 @@ mCRL2 library documentation
        .. toctree::
           :maxdepth: 2
 
-          libraries/modal_formula/modal_formula_library
+          libraries/modal_formula/modal_formulas_library
           libraries/modal_formula/reference
 
    * - **PBES**
