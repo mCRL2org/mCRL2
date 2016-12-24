@@ -31,12 +31,8 @@ def generate_manpage(tool, rstfile, binpath):
   except Exception as inst:
     _LOG.error('Could not generate man page for {0} in reStructuredText. Caught exception {1} with arguments {2}'.format(exe, type(inst), inst))
 
-def generate_rst(temppath, outpath, binpath):
-  setvars(temppath, outpath)
-
-  if not os.path.exists(_RSTTAG):
-    open(_RSTTAG, 'w+').close()
-    for tool in os.listdir(os.path.join(_TRUNK, 'tools')):
+def generate_tool_documentation(temppath, outpath, binpath,tool_directory_path):
+    for tool in os.listdir(os.path.join(_TRUNK, tool_directory_path)):
       if tool.startswith('.'):
         continue
       if tool=='CMakeLists.txt':
@@ -55,3 +51,12 @@ def generate_rst(temppath, outpath, binpath):
         open(usr_rst, 'w+').write('.. index:: {0}\n\n.. _tool-{0}:\n\n{0}\n{1}\n\n.. include:: man/{0}.txt'.format(tool, '='*len(tool)))
       else:
         _LOG.warning('No documentation generated for {0}'.format(tool))
+
+def generate_rst(temppath, outpath, binpath):
+  setvars(temppath, outpath)
+
+  if not os.path.exists(_RSTTAG):
+    open(_RSTTAG, 'w+').close()
+    generate_tool_documentation(temppath, outpath, binpath,'tools/release')
+    generate_tool_documentation(temppath, outpath, binpath,'tools/experimental')
+

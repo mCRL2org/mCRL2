@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_PBESPGSOLVE_H
 #define MCRL2_PBES_PBESPGSOLVE_H
 
-#include "../../../../../tools/pbespgsolve/pbespgsolve.h"
+#include "../../../../../tools/release/pbespgsolve/pbespgsolve.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/pbes/algorithms.h"
 

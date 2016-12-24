@@ -1,72 +1,10 @@
-set(MCRL2_TOOLS
-  besinfo
-  bespp
-  diagraphica
-  lps2lts
-  lps2pbes
-  lps2torx
-  lpsactionrename
-  lpsbinary
-  lpsconfcheck
-  lpsconstelm
-  lpsinfo
-  lpsinvelm
-  lpsparelm
-  lpsparunfold
-  lpspp
-  lpsrewr
-  lpssumelm
-  lpssuminst
-  lpsuntime
-  lpssim
-  lpsxsim
-  lts2lps
-  lts2pbes
-  ltsconvert
-  ltscompare
-  ltsgraph
-  ltsinfo
-  ltsview
-  mcrl2-gui
-  mcrl22lps
-  mcrl2i
-  mcrl2xi
-  pbes2bool
-  pbes2bes
-  pbesconstelm
-  pbesinfo
-  pbesparelm
-  pbespgsolve
-  pbespp
-  pbesrewr
-  tracepp
-  txt2pbes
-  txt2lps
-
-  besconvert
-  bessolve
-  complps2pbes
-  lpsbisim2pbes
-  lpsrealelm
-  lpsrealzone
-  pbesabstract
-  pbesabsinthe
-  pbesinst
-  pbespareqelm
-  pbesstategraph
-  symbolic_exploration
-  txt2bes
-  formulacheck
-
-  lpstransform
-  mcrl2transform
-  mcrl2parse
-  pbestransform
-  reduce_pbes
-  
-  ltspbisim
+set(MCRL2_TOOL_CLASSES
+  release                  # These tools are production tools in the toolset.
+  experimental             # These tools are experiments with the intention to become production tools.
+  deprecated               # These are outphased tools, to be deleted.
+  developer                # This directory contains tools useful for local experiments by developers.
 )
 
-foreach(TOOL ${MCRL2_TOOLS})
+foreach(TOOL ${MCRL2_TOOL_CLASSES})
   add_subdirectory(${TOOL})
 endforeach()
