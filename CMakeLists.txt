@@ -20,7 +20,7 @@ enable_testing()
 include_directories(build/workarounds)
 
 set(MCRL2_MIN_QT_VERSION 5.2.0)
-set(MCRL2_MIN_BOOST_VERSION 1.44.0)
+set(MCRL2_MIN_BOOST_VERSION 1.48.0)
 
 option(MCRL2_ENABLE_STABLE          "Enable compilation of stable tools." ON)
 option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphical user interface." ON)
