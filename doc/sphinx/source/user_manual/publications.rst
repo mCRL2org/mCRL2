@@ -15,7 +15,7 @@ Publications
 General
 -------
 
-.. [GM14] J.F. Groote, M.R. Mousavi. Modeling and analysis of communicating systems. The MIT press. 2014. `(Book) <http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__
+.. [GM14] J.F. Groote, M.R. Mousavi. `Modeling and analysis of communicating systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT press. 2014. 
 .. [CGK+13] S\. Cranen, J.F. Groote, J.J.A. Keiren, F.P.M. Stappers, E.P. de Vink, J. W. Wesselink, T.A.C. Willemse. An Overview of the mCRL2 Toolset and Its Recent Advances. TACAS 2013, pages 199-213. `(DOI) <http://dx.doi.org/10.1007/978-3-642-36742-7_15>`__
 .. [GKS+11] J.F. Groote, J.J.A. Keiren, F.P.M. Stappers, J.W. Wesselink and T.A.C. Willemse. Experiences in developing the mCRL2 toolset. In Software: Practice and Experience, 41(2): 143-153, 2011. `(DOI) <http://dx.doi.org/10.1002/spe.1021>`__
 .. [GMR+08] J.F. Groote, A. Mathijssen, M.A. Reniers, Y.S. Usenko, M.J. van Weerdenburg. Analysis of distributed systems with mCRL2. In M. Alexander, W. Gardner (Eds.), Process Algebra for Parallel and Distributed Processing, pages 99-128. Chapman and Hall, 2008

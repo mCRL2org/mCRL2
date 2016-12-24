@@ -73,13 +73,13 @@ mCRL2 library documentation
 
        .. include:: libraries/lts/articles.txt
 
-     - **Modal formulas**
+     - **Modal formula**
 
        .. toctree::
           :maxdepth: 2
 
-          libraries/modal_formulas/modal_formulas_library
-          libraries/modal_formulas/reference
+          libraries/modal_formula/modal_formula_library
+          libraries/modal_formula/reference
 
    * - **PBES**
 

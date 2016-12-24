@@ -18,7 +18,7 @@ called the "Configuration panel".
 
 In this tutorial the analysis and transformations are performed on the
 alternating bit protocol. The corresponding mCRL2 specification can be
-downloaded `here <https://svn.win.tue.nl/trac/MCRL2/export/8044/branches/release/examples/academic/abp/abp.mcrl2>`_
+downloaded `(abp.mcrl2) <https://svn.win.tue.nl/trac/MCRL2/export/8044/branches/release/examples/academic/abp/abp.mcrl2>`_.
 or be found in the ``examples/academic/abp/`` directory of your mCRL2 
 installation.
 
@@ -152,7 +152,7 @@ the leftmost picture above.
 
 Another option of *diagraphica* is to graphically simulate the process. A
 graphical view of the process can be edited in *edit mode*. The file
-``abp.dgd``, which can be downloaded `here <https://svn.win.tue.nl/trac/MCRL2/export/8044/branches/release/examples/project/abp/abp.dgd>`_,
+``abp.dgd``, which can be downloaded `(abp.dgd) <https://svn.win.tue.nl/trac/MCRL2/export/8044/branches/release/examples/project/abp/abp.dgd>`_,
 contains an initial layout, but in edit mode any layout can be made. Using the
 :guilabel:`edit DOF` option, that shows up when clicking an object in edit mode,
 a pop up window appears showing which colours, shape, position and even

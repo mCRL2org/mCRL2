@@ -1,5 +1,7 @@
-Introduction
-============
+.. _atermpp_library:
+
+Introduction to the atermpp library
+===================================
 
 The `atermpp` library is a C++ implementation of the ATerm Library 
 [M.G.T. van den Brand , H.A. de Jong, P. Klint, P.A. Olivier. Efficient annotated terms, Software—Practice & Experience, 30(3):259-291, 2000]. 

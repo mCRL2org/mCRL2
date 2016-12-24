@@ -9,7 +9,7 @@ This translates an mCRL2 process specification to a linear process specification
 (LPS).
 
 The input process specification should adhere to its syntax description (see
-also :ref:`language-mcrl2`for more information).
+also :ref:`language-mcrl2` for more information).
 
 The process in the input must be in parallel pCRL format. This means that it
 must consist of the parallel composition of a set of processes that are

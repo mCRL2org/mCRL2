@@ -106,9 +106,8 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
                  "optimize the BES using strategy NAME:", 'O').
       add_option("select",
                  make_optional_argument("PARAMS", ""),
-                 "select finite parameters that need to be expanded\n"
-                 "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
-                 "            *(*:Bool)\n",
+                 "select finite parameters that need to be expanded. "
+                 "Examples: --select=X1(b:Bool,c:Bool);X2(b:Bool) or --select=*(*:Bool)",
                  'f');
       desc.add_hidden_option("equation_limit",
                              make_optional_argument("NAME", "-1"),

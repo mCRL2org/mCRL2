@@ -135,6 +135,7 @@ static const std::string help_text=
   "unassigned variables. Note that there are no bounds on the number of steps to evaluate "
   "or solve an expression, nor is the number of solutions bounded. Hence, the assign, eval "
   "solve commands can give rise to infinite loops.\n"
+  "\n"
   "  h[elp]                         print this help message.\n"
   "  q[uit]                         quit.\n"
   "  t[ype] EXPRESSION              print type of EXPRESSION.\n"
@@ -142,8 +143,8 @@ static const std::string help_text=
   "  e[val] EXPRESSION              rewrite EXPRESSION and print result.\n"
   "  v[ar] VARLIST                  declare variables in VARLIST.\n"
   "  r[ewriter] STRATEGY            use STRATEGY for rewriting.\n"
-  "  s[solve] VARLIST. EXPRESSION   give all valuations of the variables in\n"
-  "                                      VARLIST that satisfy EXPRESSION.\n"
+  "  s[solve] VARLIST. EXPRESSION   give all valuations of the variables in VARLIST that satisfy EXPRESSION.\n"
+  "\n"
   "VARLIST is of the form x,y,...: S; ... v,w,...: T.\n";
 
 

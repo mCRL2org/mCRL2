@@ -48,8 +48,7 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
       desc
       // boolean flag (default off)
       .add_option("instantiate-free-variables",
-                  "allow free variables to be instantiated as a side effect of the algorithm"
-                  "\nNOTE: this functionality is untested!",
+                  "allow free variables to be instantiated as a side effect of the algorithm. This functionality is untested!",
                   'f')
       .add_option("ignore-conditions",
                   "ignore conditions by assuming they evaluate to true",

@@ -36,8 +36,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
       desc.add_option("tau", "only instantiate variables in tau summands", 't');
       desc.add_option("sorts",
                        make_optional_argument("NAME", ""),
-                       "select sorts that need to be expanded (comma separated list)\n"
-                       "  Examples: Bool; Bool, List(Nat)",
+                       "select sorts that need to be expanded (comma separated list). Examples: Bool; Bool, List(Nat)",
                        's');
     }
 
