@@ -1,5 +1,4 @@
 add_mcrl2_tool(txt2bes
-  COMPONENT Experimental
   SOURCES
     txt2bes.cpp
   DEPENDS
