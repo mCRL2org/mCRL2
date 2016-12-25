@@ -4,7 +4,6 @@ set(MCRL2_TOOLS
   diagraphica
   lps2lts
   lps2pbes
-  lps2torx
   lpsactionrename
   lpsbinary
   lpsconfcheck

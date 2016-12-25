@@ -6,6 +6,7 @@ set(MCRL2_TOOLS
   lpsrealelm
   lpsrealzone
   lpstransform
+  lps2torx
   mcrl2transform
   pbesabsinthe
   pbesabstract
