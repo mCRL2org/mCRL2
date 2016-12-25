@@ -32,7 +32,7 @@ the `developers' documentation <../developer_manual/index.html>`_.
      - **Tools**
    
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
    
           tools
 
