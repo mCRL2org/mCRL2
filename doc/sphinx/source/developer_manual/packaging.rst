@@ -374,7 +374,7 @@ If you are creating a package for ubuntu (say Ubuntu Oneiric)::
   $ dch -v 201107.1.10245-0ubuntu0 -D oneiric
   
 If you are creating a package that should be uploaded to the Ubuntu mCRL2 
-development ppa (`https://launchpad.net/~mcrl2/+archive/devel-ppa`_), and you
+development ppa (https://launchpad.net/~mcrl2/+archive/devel-ppa), and you
 are building for Ubuntu Oneiric. This allows you to generate the pacage for
 multiple Ubuntu versions in the same PPA::
 

@@ -140,6 +140,7 @@ Options can be provided in the following two forms:
 * a short form (strongly recommended): ``-o``, where ``o`` is a
   character of the form ``[a-zA-Z0-9]``. Furthermore, the options should
   adhere to the following:
+
   * Options may take arguments, either mandatory or optionally;
     the mandatory argument of an option must be accepted as ``--option=ARG``
     for long forms and as ``-oARG`` or ``-o␣ARG`` for short forms, where
@@ -154,19 +155,19 @@ Options can be provided in the following two forms:
 * Users should not be allowed to specify an option more than once.
 * Every tool should provide the following standard options::
 
-  -q, --quiet              do not display warning messages
-  -v, --verbose            display short intermediate messages
-  -d, --debug              display detailed intermediate messages
-  -h, --help               display help information
-      --version            display version information
+    |  -q, --quiet              do not display warning messages
+    |  -v, --verbose            display short intermediate messages
+    |  -d, --debug              display detailed intermediate messages
+    |  -h, --help               display help information
+    |      --version            display version information
 
 * Every tool that utilises ''rewriting'' should additionally provide the
   following option::
 
-  -rNAME, --rewriter=NAME  use rewrite strategy NAME:
-                           'jitty' for jitty rewriting (default),
-                           'jittyp' for jitty rewriting with prover,
-                           'jittyc' for compiled jitty rewriting.
+    | -rNAME, --rewriter=NAME  use rewrite strategy NAME:
+    |                         'jitty' for jitty rewriting (default),
+    |                         'jittyp' for jitty rewriting with prover,
+    |                         'jittyc' for compiled jitty rewriting.
 
 Input and output files
 """"""""""""""""""""""
@@ -186,9 +187,12 @@ infeasible to read from ``stdin`` or write to ``stdout``.
 Furthermore, the following features are not allowed:
 
 * designate the input file without its extension, e.g.
+
   * wrong: ``mcrl22lps abp``
   * right: ``mcrl22lps abp.mcrl2``
+
 * option ``-`` to indicate input should be read from ``stdin``, e.g.
+
   * wrong: ``... | lpsrewr - abp.rewr.lps``
   * right: ``... | lpsrewr > abp.rewr.lps``
 
@@ -281,15 +285,10 @@ to the user.
 Example
 -------
 
-Below an example is given for the pbesparelm tool. Since this is a tool that
+A good example to look at is the pbesparelm tool. Since this is a tool that
 takes a file as input and also writes output to a file, it derives from the
-class :cpp:class:`mcrl2:utilities:input_output_tool`.
-
-.. literalinclude:: ../../../../../../../tools/release/pbesparelm/pbesparelm.cpp
-   :language: c++
-
-using the :cpp:member:`execute` member function, that accepts the command line
-arguments specified by the user.
+class :cpp:class:`mcrl2:utilities:input_output_tool`. It can be found in 
+the directory ``tools/release/pbesparelm/pbesparelm.cpp``. 
 
 In the constructor a few settings are provided.
 
@@ -560,7 +559,7 @@ Let's take a look at an implementation of =my_algorithm()=.
 Note that, with the settings so far, only the first debug statement in
 :cpp:func:`my_algorithm` will be printed, the other log messages are compiled away due
 to the setting of :c:macro:`MCRL2_MAX_LOG_LEVEL`. To overcome this, the define before
-the include of `logger.h' must allow for more debug levels, e.g. by setting
+the include of ``logger.h`` must allow for more debug levels, e.g. by setting
 it as follows
 
 .. code-block:: c++

@@ -440,7 +440,7 @@ operate the machine forever.
 In the specification, we see that the ``proc`` operator accepts equations that
 associate processes with process names. In this case, the process ``P`` is
 defined. By using it in the right-hand side of its own definition, we introduced
-infinitely repeating behaviour. To illustrate this, we could `unfold' this
+infinitely repeating behaviour. To illustrate this, we could *unfold* this
 repetition once and obtain a bisimilar system, as shown in figure
 \ref{lst:coffee-inf2}.
 
@@ -514,7 +514,7 @@ regular HML formulas to infinitary HML formulas:
 
 .. math::
 
-   \mccan{\alpha \cdot \beta}\varphi &= \mccan{\alpha}\mccan{\beta}\varphi & 
+   \mccan{\alpha \cdot \beta}\varphi &= \mccan{\alpha}\mccan{\beta}\varphi \\
    \mccan{\alpha + \beta}\varphi &= (\mccan{\alpha}\varphi) \lor (\mccan{\beta}\varphi) \\
    \mccan{\alpha^*}\varphi &= \varphi \lor (\mccan{\alpha}\varphi) \lor (\mccan{\alpha\cdot\alpha}\varphi) \lor \ldots
 
@@ -527,14 +527,14 @@ The modal µ-calculus
 
 Although regular HML is a powerful tool to specify properties over infinite
 systems, it is still not expressive enough to formulate so-called 
-fairness properties*. These are properties that say things like `if the system is offered
+fairness properties*. These are properties that say things like *if the system is offered
 the possibility to perform an action infinitely often, then it will eventually
-perform this action'.
+perform this action*.
 
 Another way of extending HML to deal with infinite behaviour is to add a
 *least fixpoint operator*. This extension is called the *modal µ-calculus*, named
 after the least fixpoint operator `\mu`. The µ-calculus (we often leave out the
-`modal', as no confusion can arise) is famous for its expressivity, and infamous
+*modal*, as no confusion can arise) is famous for its expressivity, and infamous
 for its unintelligability. We will therefore first give the definition and the
 formal semantics, and then elaborate more informally on its use.
 
