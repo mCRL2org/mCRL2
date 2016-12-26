@@ -251,7 +251,8 @@ bool SmallProgressMeasures::less_than(verti v, const verti vec2[], bool carry)
 {
     if (is_top(v)) return false;
     if (is_top(vec2)) return true;
-    return vector_cmp(vec(v), vec2, len(v)) < carry;
+    int comparison = vector_cmp(vec(v), vec2, len(v));
+    return comparison < 0 || (comparison <= 0 && carry);
 }
 
 bool SmallProgressMeasures::lift_to(verti v, const verti vec2[], bool carry)
@@ -264,7 +265,8 @@ bool SmallProgressMeasures::lift_to(verti v, const verti vec2[], bool carry)
     }
     else
     {
-        if (vector_cmp(vec(v), vec2, len(v)) >= carry) return false;
+        int comparison = vector_cmp(vec(v), vec2, len(v));
+        if (comparison > 0 || (comparison >= 0 && !carry))  return false;
         set_vec(v, vec2, carry);
     }
     return true;

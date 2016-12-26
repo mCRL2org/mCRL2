@@ -49,12 +49,12 @@ public:
         \param max_lifts    maximum number of lifts per second phase.
     */
     FocusListLiftingStrategy( const ParityGame &game, bool alternate,
-                              verti max_size, long long max_lifts );
+                              verti max_size, size_t max_lifts );
 
     void lifted(verti vertex);
     verti next();
 
-    bool max_size() const { return focus_list_.capacity(); }
+    bool max_size() const { return 0 != focus_list_.capacity(); }
 
 protected:
     verti phase1();

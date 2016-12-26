@@ -138,12 +138,12 @@ void ParityGame::compress_priorities( const verti cardinality[],
         while (cardinality[first_prio] == 0) ++first_prio;
         assert(first_prio < d_);  // fails only if cardinality count is invalid!
     }
-    bool swap_players = first_prio%2 != 0;
+    priority_t swap_players = first_prio%2;
     prio_map[first_prio] = last_prio;
     for (int p = first_prio + 1; p < d_; ++p)
     {
         if (cardinality[p] == 0) continue;  // remove priority p
-        if ((last_prio%2 ^ p%2) != swap_players) ++last_prio;
+        if ((last_prio ^ p)%2 != swap_players) ++last_prio;
         prio_map[p] = last_prio;
     }
 
@@ -167,7 +167,7 @@ void ParityGame::compress_priorities( const verti cardinality[],
     {
         assert(prio_map[vertex_[v].priority] >= 0);
         vertex_[v].priority = prio_map[vertex_[v].priority];
-        if (swap_players) vertex_[v].player = Player(1 - vertex_[v].player);
+        if (0 != swap_players) vertex_[v].player = Player(1 - vertex_[v].player);
     }
 
     return;
@@ -220,7 +220,7 @@ long long ParityGame::propagate_priorities()
     while (!todo.empty())
     {
         verti w = todo.front();
-        int p = priority(w);
+        priority_t p = priority(w);
         todo.pop_front();
 
         // Perform backwards propagation on predecessors:

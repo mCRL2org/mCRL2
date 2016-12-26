@@ -89,7 +89,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                       it != graph.succ_end(v); ++it )
                 {
                     if ( !marked[*it] && vector_cmp(v, *it, len(v))
-                            >= (game_.priority(v)%2 != p_) )
+                            >= (int) (game_.priority(v)%2 ^ p_) )
                     {
                         mark = false;
                         break;
@@ -107,7 +107,7 @@ void SmallProgressMeasures::get_winning_set( ParityGame::Player player,
                 {
                     const verti w = *it;
                     if ( marked[*it] || vector_cmp(v, w, len(v))
-                            < (game_.priority(v)%2 != p_) )
+                            < (int) (game_.priority(v)%2 ^ p_) )
                     {
                         marked[v] = true;
                         break;

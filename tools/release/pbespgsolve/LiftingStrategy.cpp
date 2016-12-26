@@ -96,17 +96,17 @@ LiftingStrategyFactory *
     std::string case_ = tolower(parts[0]);
     if ( case_ == "linear" || case_ == "lin" )
     {
-        bool alternate = (parts.size() > 1 ? atoi(parts[1].c_str()) : 0);
+        bool alternate = parts.size() > 1 && 0 != atoi(parts[1].c_str());
         return new LinearLiftingStrategyFactory(alternate);
     }
     else if ( case_ == "predecessor" || case_ == "pred" )
     {
-        bool stack    = (parts.size() > 1 ? atoi(parts[1].c_str()) : 0);
+        bool stack    = parts.size() > 1 && 0 != atoi(parts[1].c_str());
         return new PredecessorLiftingStrategyFactory(stack);
     }
     else if ( case_ == "focuslist" || case_ == "focus" )
     {
-        bool alternate    = (parts.size() > 1 ? atoi(parts[1].c_str()) : 0);
+        bool alternate    = parts.size() > 1 && 0 != atoi(parts[1].c_str());
         double max_size   = (parts.size() > 2 ? atof(parts[2].c_str()) : 0);
         double lift_ratio = (parts.size() > 3 ? atof(parts[3].c_str()) : 0);
         return new FocusListLiftingStrategyFactory(
