@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg, Jan Friso Groote
+// Author(s): Hector Joao Rivera Verduzco
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file ltsconvert.cpp
+/// \file ltspbisim.cpp
 #define NAME "ltspbisim"
 #define AUTHOR "Hector Joao Rivera Verduzco"
 
@@ -22,10 +22,8 @@
 #include "mcrl2/lts/detail/liblts_pbisim_fast.h"
 
 using namespace mcrl2::lts;
-using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 using namespace mcrl2::log;
 
 class t_tool_options

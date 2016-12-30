@@ -22,6 +22,251 @@ namespace lts
 {
 namespace detail
 {
+
+// The list type below embeds a list in existing data structures. 
+// For instance if elements are stored in a vector, and should also
+// be linked in a particular order in a list this data structure can be 
+// used.
+//
+// For this purpose to each data structure that must be put in an embedded
+// list the embedded_list_node must be added to the data structure. 
+//
+// From that point on the embedded_list data type can be used to construct
+// an embedded list. The data structure, once created will not require
+// extra memory. 
+
+// prototype.
+template < class TYPE > class embedded_list;
+
+template <class TYPE>
+class embedded_list_node
+{
+ 
+  template < class T > friend class embedded_list;
+
+  protected:
+     TYPE* m_next;  // Points to the next element in the list. The nullptr if it does not exist.
+     TYPE* m_prev;  // Points to the current element in the list. The nullptr if it does not exist.
+};
+
+
+template < class TYPE >
+class embedded_list
+{
+  protected:
+    TYPE* m_first;   // Points to the last element of the list. nulllptr if not valid.
+    TYPE* m_last;    // Points to the first element of the list
+    size_t m_size;   // The number of elements in the list.
+
+  protected:
+
+    bool check_this_embedded_list() const
+    {
+      size_t count_up=0;
+      for(TYPE* walker=m_first; walker!=nullptr && count_up<=m_size ; walker=walker->m_next)
+      {
+        count_up++;
+      }
+
+      size_t count_down=0;
+      for(TYPE* walker=m_last; walker!=nullptr && count_down<=m_size ; walker=walker->m_prev)
+      {
+        count_down++;
+      }
+
+      return m_size==count_up && m_size==count_down;
+    }
+
+    bool check_presence(const TYPE& e) const
+    {
+      for(TYPE* walker=m_first; walker!=nullptr; walker=walker->m_next)
+      {
+        if (walker==&e)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+
+
+
+  public:
+    
+    // Constructor.
+    embedded_list()
+      : m_first(nullptr), m_last(nullptr), m_size(0)
+    {}
+
+    // Copy constructor.
+    embedded_list(const embedded_list& other) = default;
+
+    // get the size
+    size_t size() const
+    {
+      return m_size;
+    }
+
+    // Get the first element of the list.
+    TYPE& front() 
+    {
+      assert(m_size>0);
+      return *m_first;
+    }
+
+    // Get the last element of the list.
+    TYPE& back() 
+    {
+      assert(m_size>0);
+      return *m_last;
+    }
+
+    // Insert an element at the end of the list. Note that the element e is changed.
+    void push_back(TYPE& e)
+    {
+      if (m_first==nullptr)
+      {
+        assert(m_last==nullptr && m_size==0);
+        m_first= &e;
+        e.m_prev= nullptr;
+      }
+      else 
+      {
+        assert(m_last!=nullptr && m_size>0);
+        e.m_prev=m_last;
+        m_last->m_next=&e;
+      }
+      e.m_next=nullptr;
+      m_last= &e;
+      m_size++;
+      assert(check_this_embedded_list());
+    }
+
+    // Insert an element at the begining of the list. Note that the element e is changed.
+    void push_front(TYPE& e)
+    {
+      if (m_last==nullptr)
+      {
+        assert(m_first==nullptr && m_size==0);
+        m_last= &e;
+        e.m_next= nullptr;
+      }
+      else 
+      {
+        assert(m_first!=nullptr && m_size>0);
+        e.m_next=m_first;
+        m_first->m_prev=&e;
+      }
+      e.m_prev=nullptr;
+      m_first= &e;
+      m_size++;
+      assert(check_this_embedded_list());
+    }
+
+    // Erase this element from the list. The list is adapted such that it does not contain
+    // element e anymore. Postcondition: The previous and next pointer in e are invalid. 
+    void erase(TYPE& e)
+    {
+      assert(check_presence(e));
+      if (e.m_next==nullptr)
+      {
+        assert(&e==m_last);
+        m_last=e.m_prev;
+      }
+      else
+      {
+        assert(e.m_next->m_prev!=nullptr);
+        e.m_next->m_prev = e.m_prev;
+      }
+
+      if (e.m_prev==nullptr)
+      {
+        assert(&e==m_first);
+        m_first=e.m_next;
+      }
+      else
+      {
+        assert(e.m_prev->m_next!=nullptr);
+        e.m_prev->m_next = e.m_next;
+      }
+
+      e.m_next= nullptr;
+      e.m_prev= nullptr;
+
+      m_size--;
+
+      assert(check_this_embedded_list());
+    }
+
+    
+    
+
+    void clear() 
+    {
+      m_first=nullptr;
+      m_last=nullptr;
+      m_size=0;
+    }
+
+    class iterator 
+    {
+      protected:
+        TYPE* m_ptr;
+
+      public:
+        
+        iterator(TYPE* p)
+         : m_ptr(p)
+        {}
+
+        // Prefix increment
+        iterator operator++() 
+        {
+          iterator old=*this;
+          m_ptr=m_ptr->m_next;
+          return old;
+        }
+        
+        // Postfix increment
+        iterator operator++(int) 
+        {
+          m_ptr=m_ptr->m_next;
+          return *this;
+        }
+
+        // Dereference of the iterator. 
+        TYPE& operator*() 
+        {
+          return *m_ptr;
+        }
+
+       // Equality operator on iterators.
+       bool operator ==(const iterator& other) const
+       {
+         return m_ptr==other.m_ptr;
+       }
+       // Inequality operator on iterators.
+       bool operator !=(const iterator& other) const
+       {
+         return !(*this==other);
+       }
+        
+    };
+
+    iterator begin() const
+    {
+      assert(check_this_embedded_list());
+      return m_first;
+    }
+
+    iterator end() const
+    {
+      return nullptr;
+    }
+    
+};
+
+
 template < class LTS_TYPE>
 class prob_bisim_partitioner_fast
 {
@@ -145,50 +390,22 @@ class prob_bisim_partitioner_fast
     typedef probabilistic_arbitrary_precision_fraction probability_label_type;
     typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
 
-    template <typename T>
-    struct list_type
-    {
-      T* first;
-      T* last;
-      size_t size;
-
-      list_type<T>(T* l_first, T* l_last, size_t l_size) : first(l_first), last(l_last), size(l_size) { }
-
-      list_type<T>() : first(NULL), last(NULL), size(0) { }
-
-      void init(T* l_first, T* l_last, const size_t l_size) 
-      { 
-        first = l_first;
-        last = l_last;
-        size = l_size;
-      }
-
-    };
-
-    struct action_transition_type
+    struct action_transition_type : public embedded_list_node <action_transition_type>
     {
       state_key_type from;
       label_type label;
       state_key_type to;
       size_t* block_to_constellation_count_ptr;
-
-      //  double linked list
-      action_transition_type* next_ptr;
-      action_transition_type* prev_ptr;
     };
 
-    struct probabilistic_transition_type
+    struct probabilistic_transition_type : public embedded_list_node < probabilistic_transition_type >
     {
       state_key_type from;
       probability_label_type label;
       state_key_type to;
-
-      //  linked list support
-      probabilistic_transition_type* next_ptr;
-      probabilistic_transition_type* prev_ptr;
     };
 
-    struct action_state_type
+    struct action_state_type : public embedded_list_node < action_state_type >
     {
       block_key_type parent_block;
       std::vector<probabilistic_transition_type*> incoming_transitions;
@@ -197,21 +414,13 @@ class prob_bisim_partitioner_fast
       // Temporary
       size_t residual_transition_cnt;
       size_t* transition_count_ptr;
-
-      //  linked list
-      action_state_type* next_ptr;
-      action_state_type* prev_ptr;
     };
 
-    struct probabilistic_state_type
+    struct probabilistic_state_type : public embedded_list_node < probabilistic_state_type >
     {
       block_key_type parent_block;
       std::vector<action_transition_type*> incoming_transitions;
       bool mark_state;
-
-      //  linked list
-      probabilistic_state_type* next_ptr;
-      probabilistic_state_type* prev_ptr;
 
       // Temporary.
       probability_label_type cumulative_probability;
@@ -220,10 +429,10 @@ class prob_bisim_partitioner_fast
     struct action_mark_type
     {
       bool block_is_marked;
-      list_type<action_state_type> left;
-      list_type<action_state_type> middle;
-      list_type<action_state_type> right;
-      list_type<action_state_type>* large_block_ptr;
+      embedded_list<action_state_type> left;
+      embedded_list<action_state_type> middle;
+      embedded_list<action_state_type> right;
+      embedded_list<action_state_type>* large_block_ptr;
 
       action_mark_type() : block_is_marked(false), large_block_ptr(NULL){}
     };
@@ -231,10 +440,10 @@ class prob_bisim_partitioner_fast
     struct probabilistic_mark_type
     {
       bool block_is_marked;
-      list_type<probabilistic_state_type> left;
-      std::vector< list_type<probabilistic_state_type> > middle;
-      list_type<probabilistic_state_type> right;
-      list_type<probabilistic_state_type>* large_block_ptr;
+      embedded_list<probabilistic_state_type> left;
+      std::vector< embedded_list<probabilistic_state_type> > middle;
+      embedded_list<probabilistic_state_type> right;
+      embedded_list<probabilistic_state_type>* large_block_ptr;
 
       // temporary variables used to create middle sets
       probability_label_type max_cumulative_probability;
@@ -244,61 +453,45 @@ class prob_bisim_partitioner_fast
       probabilistic_mark_type() : block_is_marked(false), large_block_ptr(NULL) {}
     };
 
-    struct action_block_type
+    struct action_block_type : public embedded_list_node <action_block_type>
     {
       block_key_type key;
       constellation_key_type parent_constellation;
-      list_type<action_state_type> states;
-      list_type<probabilistic_transition_type> incoming_probabilistic_transitions;
+      embedded_list<action_state_type> states;
+      embedded_list<probabilistic_transition_type> incoming_probabilistic_transitions;
       action_mark_type mark;
-
-      //  linked list
-      action_block_type* next_ptr;
-      action_block_type* prev_ptr;
     };
 
-    struct probabilistic_block_type
+    struct probabilistic_block_type : public embedded_list_node <probabilistic_block_type>
     {
       block_key_type key;
       constellation_key_type parent_constellation;
-      list_type<probabilistic_state_type> states;
+      embedded_list<probabilistic_state_type> states;
       probabilistic_mark_type mark;
 
       // a probabilistic block has incoming action transitions ordered by label
-      std::vector< list_type<action_transition_type> > incoming_action_transitions;
+      std::vector< embedded_list<action_transition_type> > incoming_action_transitions;
       std::vector<label_type> incoming_labels;
-
-      //  linked list
-      probabilistic_block_type* next_ptr;
-      probabilistic_block_type* prev_ptr;
     };
 
-    struct action_constellation_type
+    struct action_constellation_type : public embedded_list_node < action_constellation_type > 
     {
       constellation_key_type key;
-      list_type<action_block_type> blocks;
+      embedded_list<action_block_type> blocks;
       size_t number_of_states;    // number of states in constellation
-
-      // linke list
-      action_constellation_type* next_ptr;
-      action_constellation_type* prev_ptr;
     }; 
     
-    struct probabilistic_constellation_type 
+    struct probabilistic_constellation_type : public embedded_list_node < probabilistic_constellation_type > 
     {
       constellation_key_type key;
-      list_type<probabilistic_block_type> blocks;
+      embedded_list<probabilistic_block_type> blocks;
       size_t number_of_states;
-
-      // linke list
-      probabilistic_constellation_type* next_ptr;
-      probabilistic_constellation_type* prev_ptr;
     };
 
     struct global_type
     {
-      list_type<probabilistic_constellation_type> probabilistic_constellations;
-      list_type<action_constellation_type> action_constellations;
+      embedded_list<probabilistic_constellation_type> probabilistic_constellations;
+      embedded_list<action_constellation_type> action_constellations;
     };
 
     std::vector<action_transition_type> action_transitions;
@@ -325,52 +518,31 @@ class prob_bisim_partitioner_fast
 
       // Action blocks have to be initialized based on the outgoing transitions.
       // First order the transitions per label.
-      std::vector< list_type<action_transition_type> > transitions_per_label;
+      std::vector< embedded_list<action_transition_type> > transitions_per_label;
       transitions_per_label.resize(aut.num_action_labels());
 
       // Add action transitions to its respective list ordered by label
       for (action_transition_type& t : action_transitions)
       {
-        if (NULL == transitions_per_label[t.label].first)
-        {
-          // if the list is empty, add to first and last pointes
-          transitions_per_label[t.label].first = &t;
-          transitions_per_label[t.label].last = &t;
-        }
-        else
-        {
-          // if the list is not empty, connect element to the end of the list
-          t.prev_ptr = transitions_per_label[t.label].last;
-          transitions_per_label[t.label].last->next_ptr = &t;
-        }
-
-        transitions_per_label[t.label].last = &t;
-        transitions_per_label[t.label].size++;
-      }
+        transitions_per_label[t.label].push_back(t);
+      } 
 
       // We start with all the action states in one block and then we refine this block
       // according to the outgoing transitions.
       action_block_type initial_action_block;
       initial_action_block.key = 0;
-      initial_action_block.prev_ptr = NULL;
-      initial_action_block.next_ptr = NULL;
 
       // Link all the action states together to the initial block
-      action_state_type* prev_action_state_ptr = NULL;
-      for (action_state_type& s : action_states)
+      // action_state_type* prev_action_state_ptr = NULL;
+      for (action_state_type& s: action_states)
       {
         s.parent_block = initial_action_block.key;
-        if (prev_action_state_ptr != NULL)
-        {
-          // link previous state with current state
-          prev_action_state_ptr->next_ptr = &s;
-          s.prev_ptr = prev_action_state_ptr;
-        }
-        prev_action_state_ptr = &s;
+        initial_action_block.states.push_back(s);
       }
+      assert(aut.num_states()==initial_action_block.states.size());
 
       // Add the linked states to the list of states in the initial block
-      initial_action_block.states.init(&action_states.front(), &action_states.back(), aut.num_states());
+      // initial_action_block.states.init(&action_states.front(), &action_states.back(), aut.num_states());
       action_blocks.push_back(initial_action_block);
 
       // Refine the intial action block based on the outgoing transitions.
@@ -380,38 +552,26 @@ class prob_bisim_partitioner_fast
       probabilistic_block_type initial_probabilistic_block;
       initial_probabilistic_block.key = 0;
       initial_probabilistic_block.parent_constellation = 0;
-      initial_probabilistic_block.prev_ptr = NULL;
-      initial_probabilistic_block.next_ptr = NULL;
 
       // Link all the probabilistic states together to the initial block
-      probabilistic_state_type* prev_state_ptr = NULL;
       for (probabilistic_state_type& s : probabilistic_states)
       {
         s.parent_block = initial_probabilistic_block.key;
-        if (prev_state_ptr != NULL)
-        {
-          // link previous state with current state
-          prev_state_ptr->next_ptr = &s;
-          s.prev_ptr = prev_state_ptr;
-        }
-        prev_state_ptr = &s;
+        initial_probabilistic_block.states.push_back(s);
       }
-
-      // Add the states to the list of states in the initial block
-      initial_probabilistic_block.states.init(&probabilistic_states.front(), 
-        &probabilistic_states.back(), aut.num_probabilistic_states());
+      assert(aut.num_probabilistic_states()==initial_probabilistic_block.states.size());
 
       // Since the transitions are already grouped by label, add them to the
       // initial probabilistic block as incoming transitions.
       initial_probabilistic_block.incoming_action_transitions.swap(transitions_per_label);
 
       // add all labels that are being used to the initial probabilistic block.
-      for (list_type<action_transition_type>& t_list : initial_probabilistic_block.incoming_action_transitions)
+      for (embedded_list<action_transition_type>& t_list : initial_probabilistic_block.incoming_action_transitions)
       {
-        if (NULL != t_list.first)
+        if (t_list.size()!=0)
         {
           // The list is not empty, add the label to the incomming labels vector of the block.
-          initial_probabilistic_block.incoming_labels.push_back(t_list.first->label);
+          initial_probabilistic_block.incoming_labels.push_back(t_list.front().label);
         }
       }
 
@@ -422,36 +582,27 @@ class prob_bisim_partitioner_fast
       probabilistic_constellation_type initial_probabilistic_const;
       initial_probabilistic_const.key = 0;
       initial_probabilistic_const.number_of_states = aut.num_probabilistic_states();
-      initial_probabilistic_const.prev_ptr = NULL;
-      initial_probabilistic_const.next_ptr = NULL;
 
       // Initially there is only one block in the probabilistic constellation.
-      initial_probabilistic_const.blocks.init(&probabilistic_blocks.front(), &probabilistic_blocks.front(), 1);
+      // initial_probabilistic_const.blocks.init(&probabilistic_blocks.front(), &probabilistic_blocks.front(), 1);
+      initial_probabilistic_const.blocks.push_back(probabilistic_blocks.front());
       probabilistic_constellations.push_back(initial_probabilistic_const);
 
       // Initialise the initial action constellation.
       action_constellation_type initial_action_const;
       initial_action_const.key = 0;
       initial_action_const.number_of_states = aut.num_states();
-      initial_action_const.next_ptr = NULL;
-      initial_action_const.prev_ptr = NULL;
 
       // Construct the list of action blocks by linking them together.
-      action_block_type* prev_block_ptr = NULL;
+      // action_block_type* prev_block_ptr = NULL;
       for (action_block_type& b : action_blocks)
       {
         b.parent_constellation = initial_action_const.key;
-        if (prev_block_ptr != NULL)
-        {
-          // link previous state with current state
-          prev_block_ptr->next_ptr = &b;
-          b.prev_ptr = prev_block_ptr;
-        }
-        prev_block_ptr = &b;
+        initial_action_const.blocks.push_back(b);
       }
 
       // Add the blocks to the list of blocks in the initial constellation.
-      initial_action_const.blocks.init(&action_blocks.front(), &action_blocks.back(), action_blocks.size());
+      /* initial_action_const.blocks.init(&action_blocks.front(), &action_blocks.back(), action_blocks.size()); */
       action_constellations.push_back(initial_action_const);
 
       // Initialise the incoming probabilistic transitions for all action blocks. To that end,
@@ -460,26 +611,13 @@ class prob_bisim_partitioner_fast
       {
         action_state_type& s = action_states[t.to];
         action_block_type& block = action_blocks[s.parent_block];
-
-        if (NULL == block.incoming_probabilistic_transitions.first)
-        {
-          // The list is empty. Add transition to the first an last element.
-          block.incoming_probabilistic_transitions.init(&t, &t, 1);
-        }
-        else
-        {
-          // add to the back of the list
-          block.incoming_probabilistic_transitions.last->next_ptr = &t;
-          t.prev_ptr = block.incoming_probabilistic_transitions.last;
-          block.incoming_probabilistic_transitions.last = &t;
-          block.incoming_probabilistic_transitions.size++;
-        }
+        block.incoming_probabilistic_transitions.push_back(t);
       }
 
       // Initialise the block to constellation count for each action transition.
       // Initially there is only one constellation, so we only need to count 
       // the number of outgoing transitions per label of each state.
-      std::vector< list_type<action_transition_type> >& transitions_per_label_temp = initial_probabilistic_block.incoming_action_transitions;
+      std::vector< embedded_list<action_transition_type> >& transitions_per_label_temp = initial_probabilistic_block.incoming_action_transitions;
 
       // block_to_const_count_temp is used to keep track of the block to constellation count per label of
       // each state.
@@ -488,56 +626,46 @@ class prob_bisim_partitioner_fast
       block_to_const_count_temp.resize(aut.num_states());
       new_count_ptr.resize(aut.num_states());
 
-      for (list_type<action_transition_type>& at_list_per_label : transitions_per_label_temp)
+      for (embedded_list<action_transition_type>& at_list_per_label : transitions_per_label_temp)
       {
-        action_transition_type* transition_ptr = at_list_per_label.first;
-
-        // First, iterate over all transition of the current particular label to count
-        // the number of times the source state occurs. This is the block to constellation count.
-        while (NULL != transition_ptr)
+        for(const action_transition_type& t: at_list_per_label)
         {
-          block_to_const_count_temp[transition_ptr->from]++;
-          transition_ptr = transition_ptr->next_ptr;
+          block_to_const_count_temp[t.from]++;
         }
+       
 
         // Now iterate again over all transitions of the current label to assign to each
         // transition the pointer where the value of its current block to constellation count is 
         // located. Furtheremore, allocate space in block_to_constellation_count if we register a new
         // count.
-        transition_ptr = at_list_per_label.first;
-        while (NULL != transition_ptr)
+        for(action_transition_type& t: at_list_per_label)
         {
-          if (NULL == new_count_ptr[transition_ptr->from])
+          if (NULL == new_count_ptr[t.from])
           {
             // The count is not yet allocated. Push back in block_to_constellation_count and register
             // in new_count_ptr.
-            block_to_constellation_count.push_back(block_to_const_count_temp[transition_ptr->from]);
-            new_count_ptr[transition_ptr->from] = &block_to_constellation_count.back();
+            block_to_constellation_count.push_back(block_to_const_count_temp[t.from]);
+            new_count_ptr[t.from] = &block_to_constellation_count.back();
           }
 
           // Assign the location of the block to contellation count to the current transition.
-          transition_ptr->block_to_constellation_count_ptr = new_count_ptr[transition_ptr->from];
-          
-          transition_ptr = transition_ptr->next_ptr;
+          t.block_to_constellation_count_ptr = new_count_ptr[t.from];
         }
 
         // Reset all the variables used to prepare to next iteration.
-        transition_ptr = at_list_per_label.first;
-        while (NULL != transition_ptr)
+        for(const action_transition_type& t: at_list_per_label)
         {
-          block_to_const_count_temp[transition_ptr->from] = 0;
-          new_count_ptr[transition_ptr->from] = NULL;
-          transition_ptr = transition_ptr->next_ptr;
+          block_to_const_count_temp[t.from] = 0;
+          new_count_ptr[t.from] = NULL;
         }
 
       }
 
-      // Add the initial constellations to global
-      global.probabilistic_constellations.init(&probabilistic_constellations.front(),
-                                             &probabilistic_constellations.front(), 1);
+      global.probabilistic_constellations.push_back(probabilistic_constellations.front());
+      assert(global.probabilistic_constellations.size()==1);
 
-      global.action_constellations.init(&action_constellations.front(),
-                                       &action_constellations.front(), 1);
+      global.action_constellations.push_back(action_constellations.front());
+      assert(global.action_constellations.size()==1);
 
     }
 
@@ -560,10 +688,8 @@ class prob_bisim_partitioner_fast
         at.label = t.label();
         at.to = t.to();
         at.block_to_constellation_count_ptr = NULL;
-        at.next_ptr = NULL;
-        at.prev_ptr = NULL;
 
-        // save incomming transition in state
+        // save incoming transition in state
         probabilistic_states[at.to].incoming_transitions.push_back(&at);
 
         t_key++;
@@ -581,8 +707,6 @@ class prob_bisim_partitioner_fast
           pt.from = i;
           pt.label = sp_pair.probability();
           pt.to = sp_pair.state();
-          pt.next_ptr = NULL;
-          pt.prev_ptr = NULL;
           probabilistic_transitions.push_back(pt);
 
           // save incomming transition in state
@@ -596,24 +720,25 @@ class prob_bisim_partitioner_fast
     /** \brief Refine the initial block according to its outgoing transitions.
     *  \details
     */
-    void refine_initial_action_block(std::vector< list_type<action_transition_type> >& transitions_per_label)
+    void refine_initial_action_block(std::vector< embedded_list<action_transition_type> >& transitions_per_label)
     {
       // Iterate over all transitions ordered by label, and refine the block.
-      for (list_type<action_transition_type>& t_list : transitions_per_label)
+      for (embedded_list<action_transition_type>& t_list : transitions_per_label)
       {
-        action_transition_type* at = t_list.first;
         std::vector<action_block_type*> marked_blocks;
 
-        while (NULL != at) {
-          action_state_type& s = action_states[at->from];
+        for(const action_transition_type& t: t_list)
+        {
+          action_state_type& s = action_states[t.from];
+          assert(s.parent_block<action_blocks.size());
           action_block_type& parent_block = action_blocks[s.parent_block];
-          list_type<action_state_type>& marked_states = parent_block.mark.left;
+          embedded_list<action_state_type>& marked_states = parent_block.mark.left;
 
           // Move state s to marked states if not already added.
           if (false == s.mark_state)
           {
             // Add parent block to the list of marked blocks if not yet added
-            if (0 == marked_states.size)
+            if (0 == marked_states.size())
             {
               marked_blocks.push_back(&parent_block);
             }
@@ -621,14 +746,12 @@ class prob_bisim_partitioner_fast
             move_list_element_back<action_state_type>(s, parent_block.states, marked_states);
             s.mark_state = true;
           }
-
-          at = at->next_ptr;
         }
         
         // Split the marked blocks.
         for (action_block_type* block_ptr : marked_blocks)
         {
-          if (0 == block_ptr->states.size)
+          if (0 == block_ptr->states.size())
           {
             // If all states in the block are marked, then return all marked states to the block.
             block_ptr->states = block_ptr->mark.left;
@@ -639,151 +762,48 @@ class prob_bisim_partitioner_fast
             action_block_type new_block;
             new_block.key = action_blocks.size();
             new_block.states = block_ptr->mark.left;
-            new_block.next_ptr = NULL;
-            new_block.prev_ptr = NULL;
-            new_block.mark.left = { NULL, NULL, 0 };
-            new_block.incoming_probabilistic_transitions = { NULL, NULL, 0 };
 
             // Init parent block of each state in new block.
-            action_state_type* s = new_block.states.first;
-            while (NULL != s)
+            for(action_state_type& s: new_block.states)
             {
-              s->parent_block = new_block.key;
-              s = s->next_ptr;
+              s.parent_block = new_block.key;
             }
 
             action_blocks.push_back(new_block);
           }
           
           // clean mark list
-          block_ptr->mark.left = { NULL, NULL, 0 };
+          block_ptr->mark.left.clear();
 
         }
 
         // Clean the marked states.
-        at = t_list.first;
-        while (NULL != at) {
-          action_state_type& s = action_states[at->from];
+        for(const action_transition_type& t: t_list)
+        {
+          action_state_type& s = action_states[t.from];
           s.mark_state = false;
-
-          at = at->next_ptr;
         }
       }
 
     }
 
-    /** \brief Move an element of a list to the back of another list.
-    *  \details 
+    /* Move an element of a list to the back of another list.
     */
-    template<typename list_element_type>
-    void move_list_element_back(list_element_type& s, list_type<list_element_type>& source_list, list_type<list_element_type>& dest_list)
+    template <typename LIST_ELEMENT>
+    void move_list_element_back(LIST_ELEMENT& s, embedded_list<LIST_ELEMENT>& source_list, embedded_list<LIST_ELEMENT>& dest_list)
     {
-      // first remove s from source list
-      if (NULL != s.prev_ptr)
-      {
-        s.prev_ptr->next_ptr = s.next_ptr;
-
-        // update last if necessary
-        if (source_list.last == &s)
-        {
-          source_list.last = s.prev_ptr;
-        }
-      }
-      if (NULL != s.next_ptr)
-      {
-        s.next_ptr->prev_ptr = s.prev_ptr;
-
-        // update first if necessary
-        if (source_list.first == &s)
-        {
-          source_list.first = s.next_ptr;
-        }
-      }
-      source_list.size--;
-
-      // Set first and last to NULL if no more states in the list
-      if (0 == source_list.size)
-      {
-        source_list.first = NULL;
-        source_list.last = NULL;
-      }
-
-      // Add state s to destination list
-      if (dest_list.size == 0)
-      {
-        // the list is empty, add to first element of list
-        s.prev_ptr = NULL;
-        s.next_ptr = NULL;
-        dest_list.first = &s;
-        dest_list.last = &s;
-        dest_list.size = 1;
-      }
-      else
-      {
-        // add the state at the end of the list
-        s.next_ptr = NULL;
-        s.prev_ptr = dest_list.last;
-        dest_list.last->next_ptr = &s;
-        dest_list.last = &s;
-        dest_list.size++;
-      }
+      source_list.erase(s);
+      dest_list.push_back(s);
     }
 
     /** \brief Move an element of a list to the front of another the list.
     *  \details
     */
-    template<typename list_element_type>
-    void move_list_element_front(list_element_type& s, list_type<list_element_type>& source_list, list_type<list_element_type>& dest_list)
+    template<typename LIST_ELEMENT>
+    void move_list_element_front(LIST_ELEMENT& s, embedded_list<LIST_ELEMENT>& source_list, embedded_list<LIST_ELEMENT>& dest_list)
     {
-      // first remove s from source list
-      if (NULL != s.prev_ptr)
-      {
-        s.prev_ptr->next_ptr = s.next_ptr;
-
-        // update last if necessary
-        if (source_list.last == &s)
-        {
-          source_list.last = s.prev_ptr;
-        }
-      }
-      if (NULL != s.next_ptr)
-      {
-        s.next_ptr->prev_ptr = s.prev_ptr;
-
-        // update first if necessary
-        if (source_list.first == &s)
-        {
-          source_list.first = s.next_ptr;
-        }
-      }
-      source_list.size--;
-
-      // Set first and last to NULL if no more states in the list
-      if (0 == source_list.size)
-      {
-        source_list.first = NULL;
-        source_list.last = NULL;
-      }
-
-      // Add state s to destination list
-      if (dest_list.size == 0)
-      {
-        // the list is empty, add to first element of list
-        s.prev_ptr = NULL;
-        s.next_ptr = NULL;
-        dest_list.first = &s;
-        dest_list.last = &s;
-        dest_list.size = 1;
-      }
-      else
-      {
-        // add the state at the front of the list
-        s.next_ptr = dest_list.first; 
-        s.prev_ptr =  NULL;
-        dest_list.first->prev_ptr = &s;
-        dest_list.first = &s;
-        dest_list.size++;
-      }
+      source_list.erase(s);
+      dest_list.push_front(s);
     }
 
     /** \brief Refine partition until it becomes stable.
@@ -792,14 +812,14 @@ class prob_bisim_partitioner_fast
     void refine_partition_until_it_becomes_stable(void)
     {
       // Non-trivial contellations are always at the front of the list.
-      probabilistic_constellation_type* non_trivial_probabilistic_const = global.probabilistic_constellations.first;
-      action_constellation_type* non_trivial_action_const = global.action_constellations.first;
+      probabilistic_constellation_type* non_trivial_probabilistic_const = &global.probabilistic_constellations.front();
+      action_constellation_type* non_trivial_action_const = &global.action_constellations.front();
 
       // Refine until all the constellations are trivial.
-      while (non_trivial_probabilistic_const->blocks.size > 1 || non_trivial_action_const->blocks.size > 1)
+      while (non_trivial_probabilistic_const->blocks.size() > 1 || non_trivial_action_const->blocks.size() > 1)
       {
         // Refine probabilistic blocks if a non-trivial action constellation exists.
-        if (non_trivial_action_const->blocks.size > 1)
+        if (non_trivial_action_const->blocks.size() > 1)
         {
           // Choose splitter block Bc of a non-trivial constellation C, such that |Bc| <= 1/2|C|.
           // And also split constellation C into BC and C\BC in the set of constellations.
@@ -818,11 +838,11 @@ class prob_bisim_partitioner_fast
 
             // First return the largest of left, middle or right to the states of current processed block.
             B->states = *B->mark.large_block_ptr;
-            B->mark.large_block_ptr->init(NULL, NULL, 0);
+            B->mark.large_block_ptr->clear();
 
             // Split left set of the block to another block if left has states and it is not
             // the largest block.
-            if (B->mark.left.size > 0)
+            if (B->mark.left.size() > 0)
             {
               split_probabilistic_block(*B, B->mark.left);
               unstable_const = true;
@@ -830,7 +850,7 @@ class prob_bisim_partitioner_fast
 
             // Split right set of the block to another block if right has states and it is not
             // the largest block.
-            if (B->mark.right.size > 0)
+            if (B->mark.right.size() > 0)
             {
               split_probabilistic_block(*B, B->mark.right);
               unstable_const = true;
@@ -838,9 +858,9 @@ class prob_bisim_partitioner_fast
 
             // Iterate over all middle sets. Split middle sets of the current block to another block if 
             //  the middle set has states and it is not the largest block.
-            for (list_type<probabilistic_state_type>& middle : B->mark.middle)
+            for (embedded_list<probabilistic_state_type>& middle : B->mark.middle)
             {
-              if (middle.size > 0)
+              if (middle.size() > 0)
               {
                 split_probabilistic_block(*B, middle);
                 unstable_const = true;
@@ -862,7 +882,7 @@ class prob_bisim_partitioner_fast
         }
 
         // Refine action blocks if a non-trivial probabilistic constellation exists.
-        if (non_trivial_probabilistic_const->blocks.size > 1)
+        if (non_trivial_probabilistic_const->blocks.size() > 1)
         {
           // Choose splitter block Bc of a non-trivial constellation C, such that |Bc| <= 1/2|C|.
           // And also split constellation C into BC and C\BC in the set of constellations.
@@ -885,11 +905,11 @@ class prob_bisim_partitioner_fast
 
               // First return the largest of left, middle or right to the states of current processed block.
               B->states = *B->mark.large_block_ptr;
-              B->mark.large_block_ptr->init(NULL, NULL, 0);
+              B->mark.large_block_ptr->clear();
 
               // Split left set of the block to another block if left has states and it is not
               // the largest block.
-              if (B->mark.left.size > 0)
+              if (B->mark.left.size() > 0)
               {
                 split_action_block(*B, B->mark.left);
                 unstable_const = true;
@@ -897,7 +917,7 @@ class prob_bisim_partitioner_fast
 
               // Split right set of the block to another block if right has states and it is not
               // the largest block.
-              if (B->mark.right.size > 0)
+              if (B->mark.right.size() > 0)
               {
                 split_action_block(*B, B->mark.right);
                 unstable_const = true;
@@ -905,7 +925,7 @@ class prob_bisim_partitioner_fast
 
               // Split middle set of the block to another block if middle has states and it is not
               // the largest block.
-              if (B->mark.middle.size > 0)
+              if (B->mark.middle.size() > 0)
               {
                 split_action_block(*B, B->mark.middle);
                 unstable_const = true;
@@ -925,8 +945,8 @@ class prob_bisim_partitioner_fast
         }
 
         // Select another non-trivial constellation.
-        non_trivial_probabilistic_const = global.probabilistic_constellations.first;
-        non_trivial_action_const = global.action_constellations.first;
+        non_trivial_probabilistic_const = &global.probabilistic_constellations.front();
+        non_trivial_action_const = &global.action_constellations.front();
       }
     }
 
@@ -934,41 +954,38 @@ class prob_bisim_partitioner_fast
     *  \details Creates another block containing the states specified in states_of_new_block. It adds the new block
     *           to the same constellation as the current block to split.
     */
-    void split_probabilistic_block(probabilistic_block_type& block_to_split, list_type<probabilistic_state_type>& states_of_new_block)
+    void split_probabilistic_block(probabilistic_block_type& block_to_split, embedded_list<probabilistic_state_type>& states_of_new_block)
     {
       // First create the new block to be allocated, and initialise its parameters
       probabilistic_block_type new_block;
       new_block.key = probabilistic_blocks.size();
       new_block.parent_constellation = block_to_split.parent_constellation; // The new block is in the same constellation as B
       new_block.states = states_of_new_block;
-      states_of_new_block.init(NULL, NULL, 0);
+      states_of_new_block.clear();
       new_block.incoming_action_transitions.resize(aut.num_action_labels());
 
       // Add the incoming action transition of the new block. To this end, iterate over all
       // states in the new block and add the incoming transitions of each state to the
       // incoming transitions of the new block. Also keep track of the labels of the incoming
       // transitions.
-      probabilistic_state_type* s = new_block.states.first;
-      while (NULL != s)
+      for(probabilistic_state_type& s: new_block.states)
       {
         // Update the parent block of the state
-        s->parent_block = new_block.key;
+        s.parent_block = new_block.key;
 
         // Iterate over all incoming transitions of the state, to add them to the new block
-        for (action_transition_type* t : s->incoming_transitions)
+        for (action_transition_type* t : s.incoming_transitions)
         {
           // If it is a transition with a new label, add the label to the incoming labels of the block
-          if (new_block.incoming_action_transitions[t->label].size == 0)
+          if (new_block.incoming_action_transitions[t->label].size() == 0)
           {
             new_block.incoming_labels.push_back(t->label);
           }
 
           // Move transition from list of transitions of previous block to new block
           move_list_element_back((*t), block_to_split.incoming_action_transitions[t->label], 
-            new_block.incoming_action_transitions[t->label]);
+                                                      new_block.incoming_action_transitions[t->label]);
         }
-
-        s = s->next_ptr;
       }
 
       // Update the incoming labels of the block_to_split. To this end iterate over the old incoming labels
@@ -979,7 +996,7 @@ class prob_bisim_partitioner_fast
       for (const label_type& l : old_incoming_labels)
       {
         // If there are transitions with label l, add them to the incoming labels of block to split
-        if (block_to_split.incoming_action_transitions[l].size > 0)
+        if (block_to_split.incoming_action_transitions[l].size() > 0)
         {
           block_to_split.incoming_labels.push_back(l);
         }
@@ -990,44 +1007,38 @@ class prob_bisim_partitioner_fast
 
       // Add the new block to the back of the list of blocks in the parent constellation.
       probabilistic_constellation_type& parent_const = probabilistic_constellations[new_block.parent_constellation];
-      probabilistic_blocks.back().prev_ptr = parent_const.blocks.last;
-      probabilistic_blocks.back().next_ptr = NULL;
-      parent_const.blocks.last->next_ptr = &probabilistic_blocks.back();
-      parent_const.blocks.last = &probabilistic_blocks.back();
-      parent_const.blocks.size++;
+
+      parent_const.blocks.push_back(probabilistic_blocks.back());
     }
 
     /** \brief Split an action block.
     *  \details Creates another block containing the states specified in states_of_new_block. It adds the new block
     *           to the same constellation as the current block to split.
     */
-    void split_action_block(action_block_type& block_to_split, list_type<action_state_type>& states_of_new_block)
+    void split_action_block(action_block_type& block_to_split, embedded_list<action_state_type>& states_of_new_block)
     {
       // First create the new block to be allocated, and initialise its parameters
       action_block_type new_block;
       new_block.key = action_blocks.size();
       new_block.parent_constellation = block_to_split.parent_constellation; // The new block is in the same constellation as block to split
       new_block.states = states_of_new_block;
-      states_of_new_block.init(NULL, NULL, 0);
+      states_of_new_block.clear();
 
       // Add the incoming action transition of the new block. To this end, iterate over all
       // states in the new block and add the incoming transitions of each state to the
       // incoming transitions of the new block.
-      action_state_type* s = new_block.states.first;
-      while (NULL != s)
+      for(action_state_type& s: new_block.states)
       {
         // Update the parent block of the state
-        s->parent_block = new_block.key;
+        s.parent_block = new_block.key;
 
         // Iterate over all incoming transitions of the state, to add them to the new block
-        for (probabilistic_transition_type* t : s->incoming_transitions)
+        for (probabilistic_transition_type* t : s.incoming_transitions)
         {
           // Move transition from list of transitions of previous block to new block
           move_list_element_back((*t), block_to_split.incoming_probabilistic_transitions,
             new_block.incoming_probabilistic_transitions);
         }
-
-        s = s->next_ptr;
       }
 
       // Add the new block to the vector of action blocks
@@ -1035,11 +1046,8 @@ class prob_bisim_partitioner_fast
 
       // Add the new block to the back of the list of blocks in the parent constellation.
       action_constellation_type& parent_const = action_constellations[new_block.parent_constellation];
-      action_blocks.back().prev_ptr = parent_const.blocks.last;
-      action_blocks.back().next_ptr = NULL;
-      parent_const.blocks.last->next_ptr = &action_blocks.back();
-      parent_const.blocks.last = &action_blocks.back();
-      parent_const.blocks.size++;
+
+      parent_const.blocks.push_back(action_blocks.back());
     }
 
     /** \brief Gives the probabilistic blocks that are marked by block Bc.
@@ -1050,14 +1058,13 @@ class prob_bisim_partitioner_fast
     {
       action_block_type& Bc = *Bc_ptr;
 
-      // First, iterate over all incomming transitions of block Bc. Mark the blocks that are reached
+      // First, iterate over all incoming transitions of block Bc. Mark the blocks that are reached
       // and calculate the cumulative probability of the reached state. This is the probability of
       // a state to reach block Bc.
-      probabilistic_transition_type* pt = Bc.incoming_probabilistic_transitions.first;
-      while (NULL != pt)
+      for( probabilistic_transition_type& pt: Bc.incoming_probabilistic_transitions)
       {
-        probabilistic_state_type& s = probabilistic_states[pt->from];
-        probability_label_type p = pt->label;
+        probabilistic_state_type& s = probabilistic_states[pt.from];
+        probability_label_type p = pt.label;
         probabilistic_block_type& B = probabilistic_blocks[s.parent_block];
 
         // If the block was not previously marked, then mark the block and add all states to right
@@ -1066,7 +1073,7 @@ class prob_bisim_partitioner_fast
           B.mark.block_is_marked = true;
           marked_blocks.push_back(&B);
           B.mark.right = B.states;
-          B.states = {NULL, NULL, 0};
+          B.states.clear(); 
 
           // Also initialise the larger block pointer to the right set and the maximum cumulative
           // probability of the block to p
@@ -1093,8 +1100,6 @@ class prob_bisim_partitioner_fast
         {
           B.mark.max_cumulative_probability = s.cumulative_probability;
         }
-
-        pt = pt->next_ptr;
       }
 
       // Group all states with the same cumulative probability to construct the middle sets.
@@ -1103,48 +1108,44 @@ class prob_bisim_partitioner_fast
       for (probabilistic_block_type* B : marked_blocks)
       {
         std::vector< std::pair<probability_label_type, probabilistic_state_type*> > grouped_states_per_probability_in_block;
-        list_type<probabilistic_state_type> middle_temp = {NULL,NULL,0};
+        embedded_list<probabilistic_state_type> middle_temp;
 
         // First, add all states lower than max_cumulative_probability to the middle set.
-        probabilistic_state_type* s = B->mark.left.first;
-        while (NULL != s)
+        for(typename embedded_list<probabilistic_state_type>::iterator i=B->mark.left.begin(); i!=B->mark.left.end(); )
         {
-          probabilistic_state_type* next_state_ptr = s->next_ptr;
+          probabilistic_state_type& s= *i;
+          i++; // Increment the iterator here, such that we can change the list. 
 
-          if (s->cumulative_probability < B->mark.max_cumulative_probability)
+          if (s.cumulative_probability < B->mark.max_cumulative_probability)
           {
-            // State s has probability lower than max_cumulative_probability. Add to middle set.
-            move_list_element_back<probabilistic_state_type>((*s), B->mark.left, middle_temp);
+            // State s has probability lower than max_cumulative_probability. Add to the middle set.
+            move_list_element_back<probabilistic_state_type>((s), B->mark.left, middle_temp);
           }
 
           // Also reset the marked_state variable in the state here, taiking advantage that we
           // are iterating over all marked states
-          s->mark_state = false;
-
-          s = next_state_ptr;
+          s.mark_state = false;
         }
 
         // Now, for all the states in the middle set, we have to identify the ones with the higher
         // and lower probabilities and add them to a new sub set in middle.
-        if (middle_temp.size > 0)
+        if (middle_temp.size() > 0)
         {
           // There are states in middle; hence, calculate the higher and lower probabilities. To this end,
           // iterate over all states in middle and keep track of the bigger and smaller probability.
           B->mark.smaller_middle_probability = probability_label_type().one();
           B->mark.bigger_middle_probability = probability_label_type().zero();
 
-          s = middle_temp.first;
-          while (NULL != s)
+          for(probabilistic_state_type& s: middle_temp)
           {
-            if (B->mark.smaller_middle_probability > s->cumulative_probability)
+            if (B->mark.smaller_middle_probability > s.cumulative_probability)
             {
-              B->mark.smaller_middle_probability = s->cumulative_probability;
+              B->mark.smaller_middle_probability = s.cumulative_probability;
             }
-            if (B->mark.bigger_middle_probability < s->cumulative_probability)
+            if (B->mark.bigger_middle_probability < s.cumulative_probability)
             {
-              B->mark.bigger_middle_probability = s->cumulative_probability;
+              B->mark.bigger_middle_probability = s.cumulative_probability;
             }
-            s = s->next_ptr;
           }
           
           // If the bigger and smaller probabilities happen to be the same, then all the states
@@ -1161,34 +1162,34 @@ class prob_bisim_partitioner_fast
           {
             // If  bigger and smaller probability are not equal, then add them in different sets
             // of middle and sort the remaining probabilities in between.
-            list_type<probabilistic_state_type> middle_big = {NULL, NULL, 0};
-            list_type<probabilistic_state_type> middle_small = {NULL, NULL, 0};
+            embedded_list<probabilistic_state_type> middle_big; 
+            embedded_list<probabilistic_state_type> middle_small;  
 
             // Add all the states corresponding to the bigger and smaller probability to middle.
             // Save the remaining states in a vector to sort them later.
-            s = middle_temp.first;
-            while (NULL != s)
+            for(typename embedded_list<probabilistic_state_type>::iterator i=middle_temp.begin(); i!=middle_temp.end(); )
             {
-              probabilistic_state_type* next_state_ptr = s->next_ptr;
+              probabilistic_state_type& s= *i;
+              i++; // Increment the iterator here, such that we can change the list. 
 
-              if (s->cumulative_probability == B->mark.bigger_middle_probability)
+              // probabilistic_state_type* next_state_ptr = s->next_ptr;
+
+              if (s.cumulative_probability == B->mark.bigger_middle_probability)
               {
                 // State s has the highest probabilty in the middle temp. Add to middle set.
-                move_list_element_back<probabilistic_state_type>((*s), middle_temp, middle_big);
+                move_list_element_back<probabilistic_state_type>((s), middle_temp, middle_big);
               }
-              else if (s->cumulative_probability == B->mark.smaller_middle_probability)
+              else if (s.cumulative_probability == B->mark.smaller_middle_probability)
               {
                 // State s the lowest probabilty in the middle temp. Add to middle set.
-                move_list_element_back<probabilistic_state_type>((*s), middle_temp, middle_small);
+                move_list_element_back<probabilistic_state_type>((s), middle_temp, middle_small);
               }
               else
               {
-                // The cumulative probability of state s is netiher the highest or lowest. Add the
+                // The cumulative probability of state s is neither the highest or lowest. Add the
                 // state to a vector to sort them later.
-                grouped_states_per_probability_in_block.emplace_back(s->cumulative_probability, s);
+                grouped_states_per_probability_in_block.emplace_back(s.cumulative_probability, &s);
               }
-
-              s = next_state_ptr;
             }
 
             // Add the the sets with the biggest and smallest probability to middle.
@@ -1205,13 +1206,13 @@ class prob_bisim_partitioner_fast
             probability_label_type current_probability = probability_label_type().zero();
             for (const std::pair<probability_label_type, probabilistic_state_type*>& cumulative_prob_state_pair : grouped_states_per_probability_in_block)
             {
-              s = cumulative_prob_state_pair.second;
+              probabilistic_state_type* s = cumulative_prob_state_pair.second;
               if (current_probability != cumulative_prob_state_pair.first)
               {
-                // The current state has different probability as the current probability. Allocate
-                // another space in middle to store this state and change the current probability.
+                // The current state has a different probability as the current probability. Allocate
+                // another space in the middle to store this state and change the current probability.
                 current_probability = cumulative_prob_state_pair.first;
-                B->mark.middle.emplace_back(list_type<probabilistic_state_type>{NULL, NULL, 0});
+                B->mark.middle.emplace_back(); //put empty list at end of B->mark.middle.
               }
 
               move_list_element_back<probabilistic_state_type>((*s), middle_temp, B->mark.middle.back());
@@ -1224,15 +1225,15 @@ class prob_bisim_partitioner_fast
         // Now that we have all the states in left, middle and right; we have to find the largest
         // set. The large block is initialised to be the right set; hence, we only compare if
         // left and middle are larger.
-        if (B->mark.left.size > B->mark.large_block_ptr->size)
+        if (B->mark.left.size() > B->mark.large_block_ptr->size())
         {
           B->mark.large_block_ptr = &B->mark.left;
         }
 
         // Iterate over all subsets of middle set to see if there is a one that is the largest.
-        for (list_type<probabilistic_state_type>& middle_set : B->mark.middle)
+        for (embedded_list<probabilistic_state_type>& middle_set : B->mark.middle)
         {
-          if (middle_set.size > B->mark.large_block_ptr->size)
+          if (middle_set.size() > B->mark.large_block_ptr->size())
           {
             B->mark.large_block_ptr = &middle_set;
           }
@@ -1257,10 +1258,9 @@ class prob_bisim_partitioner_fast
       // To this end, first move all the states of the block that was reached by traversing the
       // transition backwards to its right set, then move all the states that can reach block Bc with 
       // an "a" action to left and decrement the residual transition count of the state.
-      action_transition_type* t = Bc.incoming_action_transitions[a].first;
-      while (NULL != t)
+      for(action_transition_type& t: Bc.incoming_action_transitions[a])
       {
-        action_state_type& s = action_states[t->from];
+        action_state_type& s = action_states[t.from];
         action_block_type& B = action_blocks[s.parent_block];  
         
         // If the block was not previously marked, then mark the block and add all states to right.
@@ -1269,7 +1269,7 @@ class prob_bisim_partitioner_fast
           B.mark.block_is_marked = true;
           marked_blocks.push_back(&B);
           B.mark.right = B.states;
-          B.states = { NULL, NULL, 0 };
+          B.states.clear();
           // Also initialise the larger block pointer to the right set.
           B.mark.large_block_ptr = &B.mark.right;
         }
@@ -1280,13 +1280,11 @@ class prob_bisim_partitioner_fast
           // State s is not yet marked. Mark the state and move it to left set. In addition, initialise
           // its residual transition count.
           s.mark_state = true;
-          s.residual_transition_cnt = *t->block_to_constellation_count_ptr;
+          s.residual_transition_cnt = *t.block_to_constellation_count_ptr;
           move_list_element_back<action_state_type>(s, B.mark.right, B.mark.left);
         }
 
         s.residual_transition_cnt--;
-
-        t = t->next_ptr;
       }
 
       // Now, for all marked blocks, check the residual transition count of all the states in left. If the transition 
@@ -1296,29 +1294,27 @@ class prob_bisim_partitioner_fast
       for (action_block_type* B : marked_blocks)
       {
         // Iterate over all left states in B and check whether the state has to be moved to middle.
-        action_state_type* s = B->mark.left.first;
-        while (NULL != s)
+        for(typename embedded_list<action_state_type>::iterator i=B->mark.left.begin(); i!=B->mark.left.end(); )
         {
-          action_state_type* next_state = s->next_ptr;
-          if (s->residual_transition_cnt > 0)
+          action_state_type& s= *i; 
+          i++;  // This iterator is incremented here as s will be removed from the list over which iteration takes place.
+          if (s.residual_transition_cnt > 0)
           {
             // The transition count is greater than zero. Move state to middle set.
-            move_list_element_back<action_state_type>((*s), B->mark.left, B->mark.middle);
+            move_list_element_back<action_state_type>(s, B->mark.left, B->mark.middle);
           }
 
           // Also reset the marked_state variable in the state here, taiking advantage that we
           // are iterating over all marked states
-          s->mark_state = false;
-
-          s = next_state;
+          s.mark_state = false;
         }
 
         // Find the largest set.
-        if (B->mark.left.size > B->mark.large_block_ptr->size)
+        if (B->mark.left.size() > B->mark.large_block_ptr->size())
         {
           B->mark.large_block_ptr = &B->mark.left;
         }
-        if (B->mark.middle.size > B->mark.large_block_ptr->size)
+        if (B->mark.middle.size() > B->mark.large_block_ptr->size())
         {
           B->mark.large_block_ptr = &B->mark.middle;
         }
@@ -1328,31 +1324,28 @@ class prob_bisim_partitioner_fast
       }
 
       // Update the block_to_constellation_count of each transition
-      t = Bc.incoming_action_transitions[a].first;
-      while (NULL != t)
+      for(action_transition_type& t: Bc.incoming_action_transitions[a])
       {
-        action_state_type& s = action_states[t->from];
+        action_state_type& s = action_states[t.from];
 
         // If the residual_transition_cnt is greater than zero, it means that the state
         // is in the middle set; hence, the block_to_constellation_count has to be updated.
         if (s.residual_transition_cnt > 0)
         {
-          size_t block_to_constellation_count_old = *t->block_to_constellation_count_ptr;
+          size_t block_to_constellation_count_old = *t.block_to_constellation_count_ptr;
 
           if (block_to_constellation_count_old != s.residual_transition_cnt)
           {
             // First update the block_to_constellation_count in with the residual_transition_cnt.
-            *t->block_to_constellation_count_ptr = s.residual_transition_cnt;
+            *t.block_to_constellation_count_ptr = s.residual_transition_cnt;
 
             // Now allocate another block_to_constellation_count for the Bc block
             block_to_constellation_count.emplace_back(block_to_constellation_count_old - s.residual_transition_cnt);
             s.transition_count_ptr = &block_to_constellation_count.back();
           }
 
-          t->block_to_constellation_count_ptr = s.transition_count_ptr;
+          t.block_to_constellation_count_ptr = s.transition_count_ptr;
         }
-
-        t = t->next_ptr;
       }
 
     }
@@ -1367,73 +1360,45 @@ class prob_bisim_partitioner_fast
       action_block_type* Bc;
 
       // First try with the first block in the list.
-      Bc = non_trivial_action_const->blocks.first;
-      if (Bc->states.size > (non_trivial_action_const->number_of_states / 2))
+      Bc = &non_trivial_action_const->blocks.front();
+      if (Bc->states.size() > (non_trivial_action_const->number_of_states / 2))
       {
+        assert(non_trivial_action_const->blocks.size()>=2);
         // The block is bigger than 1/2|C|. Choose another one.
-        Bc = non_trivial_action_const->blocks.last;
+        Bc = &non_trivial_action_const->blocks.back();
       }
 
       // Now split the block of the constellation.
       // First unlink Bc from the list of blocks of the non trivial constellation.
-      if (Bc == non_trivial_action_const->blocks.first)
-      {
-        non_trivial_action_const->blocks.first = Bc->next_ptr;
-        non_trivial_action_const->blocks.first->prev_ptr = NULL;
-      }
-      if (Bc == non_trivial_action_const->blocks.last)
-      {
-        non_trivial_action_const->blocks.last = Bc->prev_ptr;
-        non_trivial_action_const->blocks.last->next_ptr = NULL;
-      }
-      Bc->next_ptr = NULL;
-      Bc->prev_ptr = NULL;
+      non_trivial_action_const->blocks.erase(*Bc);
+      // non_trivial_action_const->blocks.size--;
 
       // Update the number of states and blocks of the non trivial block
-      non_trivial_action_const->number_of_states -= Bc->states.size;
-      non_trivial_action_const->blocks.size--;
+      non_trivial_action_const->number_of_states -= Bc->states.size();
 
       // Check if the constellation is still non-trivial; if not, move it to the end 
-      // of the constellations list if it is not already at the end
-      if (non_trivial_action_const->blocks.size < 2 &&
-           global.action_constellations.last != non_trivial_action_const)
+      // of the constellation list if it is not already at the end
+      if (non_trivial_action_const->blocks.size() < 2 &&
+           (&global.action_constellations.back()) != non_trivial_action_const)
       {
         //The constellation is trivial, send to the back of the constellation list.
         // First remove it from its current position and update first pointer of the list 
         // if necessary.
-        if (global.action_constellations.first == non_trivial_action_const)
-        {
-          global.action_constellations.first = non_trivial_action_const->next_ptr;
-          global.action_constellations.first->prev_ptr = NULL;
-        }
-        else
-        {
-          non_trivial_action_const->prev_ptr->next_ptr = non_trivial_action_const->next_ptr;
-          non_trivial_action_const->next_ptr->prev_ptr = non_trivial_action_const->prev_ptr;
-        }
-
-        // Now place the trivial constellation to the back of the list
-        non_trivial_action_const->prev_ptr = global.action_constellations.last;
-        non_trivial_action_const->next_ptr = NULL;
-        global.action_constellations.last->next_ptr = non_trivial_action_const;
-        global.action_constellations.last = non_trivial_action_const;
+        global.action_constellations.erase(*non_trivial_action_const);
+        global.action_constellations.push_back(*non_trivial_action_const);
       }
 
       // Add Bc to a new constellation
       action_constellation_type new_action_const;
       new_action_const.key = action_constellations.size();
       Bc->parent_constellation = new_action_const.key;
-      new_action_const.blocks = {Bc, Bc, 1};
-      new_action_const.number_of_states = Bc->states.size;
+      new_action_const.blocks.push_back(*Bc);
+      new_action_const.number_of_states = Bc->states.size();
       action_constellations.push_back(new_action_const);
 
       // Finally add the new constellation (with Bc) to the list of constellations in global
-      action_constellation_type* new_action_const_ptr = &action_constellations.back();
-      global.action_constellations.last->next_ptr = new_action_const_ptr;
-      new_action_const_ptr->prev_ptr = global.action_constellations.last;
-      new_action_const_ptr->next_ptr = NULL;
-      global.action_constellations.last = new_action_const_ptr;
-      global.action_constellations.size++;
+      // action_constellation_type* new_action_const_ptr = &action_constellations.back();
+      global.action_constellations.push_back(action_constellations.back());
 
       return Bc;
     }
@@ -1445,76 +1410,42 @@ class prob_bisim_partitioner_fast
     probabilistic_block_type* choose_probabilistic_splitter(probabilistic_constellation_type* non_trivial_probabilistic_const)
     {
       // First, determine the block to split from constellation. It is the block |Bc| < 1/2|C|
-      probabilistic_block_type* Bc;
-
       // First try with the first block in the list.
-      Bc = non_trivial_probabilistic_const->blocks.first;
-      if (Bc->states.size > (non_trivial_probabilistic_const->number_of_states / 2))
+      probabilistic_block_type* Bc = &non_trivial_probabilistic_const->blocks.front();
+      if (Bc->states.size() > (non_trivial_probabilistic_const->number_of_states / 2))
       {
         // The block is bigger than 1/2|C|. Choose another one.
-        Bc = non_trivial_probabilistic_const->blocks.last;
+        Bc = &non_trivial_probabilistic_const->blocks.back();
       }
 
       // Now split the block of the constellation.
       // First unlink Bc from the list of blocks of the non trivial constellation.
-      if (Bc == non_trivial_probabilistic_const->blocks.first)
-      {
-        non_trivial_probabilistic_const->blocks.first = Bc->next_ptr;
-        non_trivial_probabilistic_const->blocks.first->prev_ptr = NULL;
-      }
-      if (Bc == non_trivial_probabilistic_const->blocks.last)
-      {
-        non_trivial_probabilistic_const->blocks.last = Bc->prev_ptr;
-        non_trivial_probabilistic_const->blocks.last->next_ptr = NULL;
-      }
-      Bc->next_ptr = NULL;
-      Bc->prev_ptr = NULL;
+      non_trivial_probabilistic_const->blocks.erase(*Bc);
 
       // Update the number of states and blocks of the non trivial block
-      non_trivial_probabilistic_const->number_of_states -= Bc->states.size;
-      non_trivial_probabilistic_const->blocks.size--;
+      non_trivial_probabilistic_const->number_of_states -= Bc->states.size();
 
       // Check if the constellation is still non-trivial; if not, move it to the end 
       // of the constellations list if it is not already at the end
-      if (non_trivial_probabilistic_const->blocks.size < 2 &&
-        global.probabilistic_constellations.last != non_trivial_probabilistic_const)
+      if (non_trivial_probabilistic_const->blocks.size() < 2 &&
+         (&global.probabilistic_constellations.back()) != non_trivial_probabilistic_const)
       {
         //The constellation is trivial, send to the back of the constellation list.
         // First remove it from its current position and update first pointer of the list 
         // if necessary.
-        if (global.probabilistic_constellations.first == non_trivial_probabilistic_const)
-        {
-          global.probabilistic_constellations.first = non_trivial_probabilistic_const->next_ptr;
-          global.probabilistic_constellations.first->prev_ptr = NULL;
-        }
-        else
-        {
-          non_trivial_probabilistic_const->prev_ptr->next_ptr = non_trivial_probabilistic_const->next_ptr;
-          non_trivial_probabilistic_const->next_ptr->prev_ptr = non_trivial_probabilistic_const->prev_ptr;
-        }
-
-        // Now place the trivial constellation to the back of the list
-        non_trivial_probabilistic_const->prev_ptr = global.probabilistic_constellations.last;
-        non_trivial_probabilistic_const->next_ptr = NULL;
-        global.probabilistic_constellations.last->next_ptr = non_trivial_probabilistic_const;
-        global.probabilistic_constellations.last = non_trivial_probabilistic_const;
+        global.probabilistic_constellations.erase(*non_trivial_probabilistic_const);
+        global.probabilistic_constellations.push_back(*non_trivial_probabilistic_const);
       }
 
       // Add Bc to a new constellation
       probabilistic_constellation_type new_probabilistic_const;
       new_probabilistic_const.key = probabilistic_constellations.size();
       Bc->parent_constellation = new_probabilistic_const.key;
-      new_probabilistic_const.blocks = { Bc, Bc, 1 };
-      new_probabilistic_const.number_of_states = Bc->states.size;
+      new_probabilistic_const.blocks.push_back(*Bc); 
+      new_probabilistic_const.number_of_states = Bc->states.size();
       probabilistic_constellations.push_back(new_probabilistic_const);
 
-      // Finally add the new constellation (with Bc) to the list of constellations in global
-      probabilistic_constellation_type* new_probabilistic_const_ptr = &probabilistic_constellations.back();
-      global.probabilistic_constellations.last->next_ptr = new_probabilistic_const_ptr;
-      new_probabilistic_const_ptr->prev_ptr = global.probabilistic_constellations.last;
-      new_probabilistic_const_ptr->next_ptr = NULL;
-      global.probabilistic_constellations.last = new_probabilistic_const_ptr;
-      global.probabilistic_constellations.size++;
+      global.probabilistic_constellations.push_back(probabilistic_constellations.back());
 
       return Bc;
     }
@@ -1556,10 +1487,10 @@ class prob_bisim_partitioner_fast
       lts_aut_base::probabilistic_state equivalent_prob_state;
 
       // Select the first probabilistic state of the probabilistic block.
-      probabilistic_state_type* s = pb.states.first;
+      const probabilistic_state_type& s = pb.states.front();
 
       // Take the an incoming transition to know the key of the state
-      state_key_type s_key = s->incoming_transitions.back()->to;
+      state_key_type s_key = s.incoming_transitions.back()->to;
 
       const lts_aut_base::probabilistic_state& old_prob_state = aut.probabilistic_state(s_key);
 
