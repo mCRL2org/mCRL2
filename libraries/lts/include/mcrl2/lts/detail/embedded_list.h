@@ -52,19 +52,19 @@ class embedded_list
   protected:
     TYPE* m_first;   // Points to the last element of the list. nulllptr if not valid.
     TYPE* m_last;    // Points to the first element of the list
-    size_t m_size;   // The number of elements in the list.
+    std::size_t m_size;   // The number of elements in the list.
 
   protected:
 
     bool check_this_embedded_list() const
     {
-      size_t count_up=0;
+      std::size_t count_up=0;
       for(TYPE* walker=m_first; walker!=nullptr && count_up<=m_size ; walker=walker->m_next)
       {
         count_up++;
       }
 
-      size_t count_down=0;
+      std::size_t count_down=0;
       for(TYPE* walker=m_last; walker!=nullptr && count_down<=m_size ; walker=walker->m_prev)
       {
         count_down++;
@@ -98,7 +98,7 @@ class embedded_list
     embedded_list(const embedded_list& other) = default;
 
     // get the size
-    size_t size() const
+    std::size_t size() const
     {
       return m_size;
     }
