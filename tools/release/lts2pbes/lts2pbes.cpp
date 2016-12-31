@@ -149,7 +149,7 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       std::ifstream from(formfilename.c_str());
       if (!from)
       {
-        throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
+        throw mcrl2::runtime_error("Cannot open state formula file: " + formfilename + ".");
       }
       state_formulas::state_formula_specification formspec = state_formulas::parse_state_formula_specification(from, lpsspec);
       from.close();
@@ -160,11 +160,11 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       //save the result
       if (output_filename().empty())
       {
-        mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
+        mCRL2log(log::verbose) << "Writing PBES to stdout..." << std::endl;
       }
       else
       {
-        mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
+        mCRL2log(log::verbose) << "Writing PBES to file '" <<  output_filename() << "'..." << std::endl;
       }
       save_pbes(result, output_filename(), pbes_output_format());
       return true;

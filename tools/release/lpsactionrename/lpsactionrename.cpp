@@ -126,21 +126,21 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       //load LPS
       if (input_filename().empty())
       {
-        mCRL2log(verbose) << "reading LPS from stdin..." << std::endl;
+        mCRL2log(verbose) << "Reading LPS from stdin..." << std::endl;
       }
       else
       {
-        mCRL2log(verbose) << "reading LPS from file '" <<  input_filename() << "'..." << std::endl;
+        mCRL2log(verbose) << "Reading LPS from file '" <<  input_filename() << "'..." << std::endl;
       }
       stochastic_specification old_spec;
       load_lps(old_spec, input_filename());
 
       //load action rename file
-      mCRL2log(verbose) << "reading input from file '" <<  m_action_rename_filename << "'..." << std::endl;
+      mCRL2log(verbose) << "Reading input from file '" <<  m_action_rename_filename << "'..." << std::endl;
       std::ifstream rename_stream(m_action_rename_filename.c_str());
       if (!rename_stream.is_open())
       {
-        throw mcrl2::runtime_error("cannot open rename file \"" + m_action_rename_filename + "\"");
+        throw mcrl2::runtime_error("Cannot open rename file \"" + m_action_rename_filename + "\".");
       }
 
       // Parse the rename spec in rename_stream.
@@ -151,23 +151,23 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       rename_stream.close();
 
       //rename all assigned actions
-      mCRL2log(verbose) << "renaming actions in LPS..." << std::endl;
+      mCRL2log(verbose) << "Renaming actions in LPS..." << std::endl;
       stochastic_specification new_spec = action_rename(action_rename_spec, old_spec);
       data::rewriter datar;
       if (m_rewrite)
       {
-        mCRL2log(verbose) << "rewriting data expressions in LPS..." << std::endl;
+        mCRL2log(verbose) << "Rewriting data expressions in LPS..." << std::endl;
         datar = create_rewriter(new_spec.data());
         lps::rewrite(new_spec, datar);
         lps::remove_trivial_summands(new_spec);
       }
       if (m_sumelm)
       {
-        mCRL2log(verbose) << "applying sum elimination..." << std::endl;
+        mCRL2log(verbose) << "Applying sum elimination..." << std::endl;
         sumelm_algorithm<lps::stochastic_specification>(new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
         if (m_rewrite)
         {
-          mCRL2log(verbose) << "rewriting data expressions in LPS again..." << std::endl;
+          mCRL2log(verbose) << "Rewriting data expressions in LPS again..." << std::endl;
           lps::rewrite(new_spec, datar);
           lps::remove_trivial_summands(new_spec);
         }
@@ -175,11 +175,11 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       //save the result
       if (output_filename().empty())
       {
-        mCRL2log(verbose) << "writing LPS to stdout..." << std::endl;
+        mCRL2log(verbose) << "Writing LPS to stdout..." << std::endl;
       }
       else
       {
-        mCRL2log(verbose) << "writing LPS to file '" <<  output_filename() << "'..." << std::endl;
+        mCRL2log(verbose) << "Writing LPS to file '" <<  output_filename() << "'..." << std::endl;
       }
       save_lps(new_spec, output_filename());
 

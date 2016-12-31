@@ -179,18 +179,18 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       if (input_filename().empty())
       {
         //parse specification from stdin
-        mCRL2log(mcrl2::log::verbose) << "reading input from stdin..." << std::endl;
+        mCRL2log(mcrl2::log::verbose) << "Reading input from stdin..." << std::endl;
         spec = mcrl2::process::parse_process_specification(std::cin, !noalpha);
       }
       else
       {
         //parse specification from infilename
-        mCRL2log(mcrl2::log::verbose) << "reading input from file '"
+        mCRL2log(mcrl2::log::verbose) << "Reading input from file '"
                                       <<  input_filename() << "'..." << std::endl;
         std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
         if (!instream.is_open())
         {
-          throw mcrl2::runtime_error("cannot open input file: " + input_filename());
+          throw mcrl2::runtime_error("Cannot open input file: " + input_filename() + ".");
         }
         spec = mcrl2::process::parse_process_specification(instream, !noalpha);
         instream.close();
@@ -212,7 +212,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       }
       //store the result
       mcrl2::lps::stochastic_specification linear_spec(mcrl2::lps::linearise(spec, m_linearisation_options));
-      mCRL2log(mcrl2::log::verbose) << "writing LPS to "
+      mCRL2log(mcrl2::log::verbose) << "Writing LPS to "
                                     << (output_filename().empty() ? "stdout"
                                                                   : "file " + output_filename())
                                     << "..." << std::endl;

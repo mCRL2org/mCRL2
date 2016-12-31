@@ -228,10 +228,10 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
         if (!instream.is_open())
         {
-          throw mcrl2::runtime_error("cannot open input file '" + m_invariant_filename + "'");
+          throw mcrl2::runtime_error("Cannot open input file '" + m_invariant_filename + "'.");
         }
 
-        mCRL2log(verbose) << "parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
+        mCRL2log(verbose) << "Parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
 
         m_invariant = parse_data_expression(instream, spec.data());
 

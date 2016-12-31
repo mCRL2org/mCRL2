@@ -139,7 +139,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
         std::ifstream instream(infilename.c_str());
         if (!instream.is_open())
         {
-          throw mcrl2::runtime_error("cannot open input file '" + m_input_filename + "'");
+          throw mcrl2::runtime_error("Cannot open input file '" + m_input_filename + "'");
         }
 
         data_expression formula = parse_data_expression(instream, specification);
@@ -160,7 +160,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
       if (!infilename.empty())
       {
         //load data specification from file infilename
-        mCRL2log(verbose) << "reading LPS or PBES from '" <<  infilename << "'" << std::endl;
+        mCRL2log(verbose) << "Reading LPS or PBES from '" <<  infilename << "'" << std::endl;
         try
         {
           lps::specification s;
@@ -179,7 +179,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
         catch (mcrl2::runtime_error&)
           {}
 
-        throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS, PBES or data specification");
+        throw mcrl2::runtime_error("The file '" + infilename + "' does not contain an LPS, PBES or data specification");
       }
       return data_specification();
     }
@@ -211,7 +211,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
 
       if (formula == data_expression())
       {
-        throw mcrl2::runtime_error("no formula in input");
+        throw mcrl2::runtime_error("No formula in input.");
       }
 
       std::set<data::sort_expression> s;
