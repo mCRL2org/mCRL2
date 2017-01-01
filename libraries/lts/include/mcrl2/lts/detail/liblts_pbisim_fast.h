@@ -231,14 +231,12 @@ class prob_bisim_partitioner_fast
 
     struct action_constellation_type : public embedded_list_node < action_constellation_type > 
     {
-      constellation_key_type key;
       embedded_list<action_block_type> blocks;
       size_t number_of_states;    // number of states in constellation
     }; 
     
     struct probabilistic_constellation_type : public embedded_list_node < probabilistic_constellation_type > 
     {
-      constellation_key_type key;
       embedded_list<probabilistic_block_type> blocks;
       size_t number_of_states;
     };
@@ -328,7 +326,6 @@ class prob_bisim_partitioner_fast
       // Initialise the probabilistic and action constellations; they will contain
       // all the blocks.
       probabilistic_constellation_type initial_probabilistic_const;
-      initial_probabilistic_const.key = 0;
       initial_probabilistic_const.number_of_states = aut.num_probabilistic_states();
 
       // Initially there is only one block in the probabilistic constellation.
@@ -338,13 +335,12 @@ class prob_bisim_partitioner_fast
 
       // Initialise the initial action constellation.
       action_constellation_type initial_action_const;
-      initial_action_const.key = 0;
       initial_action_const.number_of_states = aut.num_states();
 
       // Construct the list of action blocks by linking them together.
       for (action_block_type& b : action_blocks)
       {
-        b.parent_constellation = initial_action_const.key;
+        b.parent_constellation = 0; // The initial constellation has number 0;
         initial_action_const.blocks.push_back(b);
       }
 
@@ -1126,12 +1122,12 @@ class prob_bisim_partitioner_fast
       }
 
       // Add Bc to a new constellation
-      action_constellation_type new_action_const;
-      new_action_const.key = action_constellations.size();
-      Bc->parent_constellation = new_action_const.key;
+      action_constellations.emplace_back();
+      action_constellation_type& new_action_const=action_constellations.back();
+
+      Bc->parent_constellation = action_constellations.size()-1;
       new_action_const.blocks.push_back(*Bc);
       new_action_const.number_of_states = Bc->states.size();
-      action_constellations.push_back(new_action_const);
 
       // Finally add the new constellation (with Bc) to the list of constellations in 
       // action_constellation_type* new_action_const_ptr = &action_constellations.back();
@@ -1175,12 +1171,11 @@ class prob_bisim_partitioner_fast
       }
 
       // Add Bc to a new constellation
-      probabilistic_constellation_type new_probabilistic_const;
-      new_probabilistic_const.key = probabilistic_constellations.size();
-      Bc->parent_constellation = new_probabilistic_const.key;
+      probabilistic_constellations.emplace_back();
+      probabilistic_constellation_type& new_probabilistic_const=probabilistic_constellations.back();
+      Bc->parent_constellation = probabilistic_constellations.size()-1;
       new_probabilistic_const.blocks.push_back(*Bc); 
       new_probabilistic_const.number_of_states = Bc->states.size();
-      probabilistic_constellations.push_back(new_probabilistic_const);
 
       probabilistic_constellations_list.push_back(probabilistic_constellations.back());
 
