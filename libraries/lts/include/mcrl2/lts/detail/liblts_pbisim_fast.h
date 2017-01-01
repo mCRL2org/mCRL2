@@ -212,7 +212,6 @@ class prob_bisim_partitioner_fast
 
     struct action_block_type : public embedded_list_node <action_block_type>
     {
-      block_key_type key;
       constellation_key_type parent_constellation;
       embedded_list<action_state_type> states;
       embedded_list<probabilistic_transition_type> incoming_probabilistic_transitions;
@@ -221,7 +220,6 @@ class prob_bisim_partitioner_fast
 
     struct probabilistic_block_type : public embedded_list_node <probabilistic_block_type>
     {
-      block_key_type key;
       constellation_key_type parent_constellation;
       embedded_list<probabilistic_state_type> states;
       probabilistic_mark_type mark;
@@ -284,12 +282,11 @@ class prob_bisim_partitioner_fast
       // We start with all the action states in one block and then we refine this block
       // according to the outgoing transitions.
       action_block_type initial_action_block;
-      initial_action_block.key = 0;
 
       // Link all the action states together to the initial block
       for (action_state_type& s: action_states)
       {
-        s.parent_block = initial_action_block.key;
+        s.parent_block = 0; // Initial block has number 0. 
         initial_action_block.states.push_back(s);
       }
       assert(aut.num_states()==initial_action_block.states.size());
@@ -302,13 +299,12 @@ class prob_bisim_partitioner_fast
 
       // Initialise the probabilistic block. Initally, there is only one block of probabilistic states.
       probabilistic_block_type initial_probabilistic_block;
-      initial_probabilistic_block.key = 0;
       initial_probabilistic_block.parent_constellation = 0;
 
       // Link all the probabilistic states together to the initial block
       for (probabilistic_state_type& s : probabilistic_states)
       {
-        s.parent_block = initial_probabilistic_block.key;
+        s.parent_block = 0; // The initial block has number zero.
         initial_probabilistic_block.states.push_back(s);
       }
       assert(aut.num_probabilistic_states()==initial_probabilistic_block.states.size());
@@ -507,17 +503,16 @@ class prob_bisim_partitioner_fast
           else
           {
             // Split the block if not all states are marked.
-            action_block_type new_block;
-            new_block.key = action_blocks.size();
+            action_blocks.emplace_back();
+            action_block_type& new_block=action_blocks.back();
             new_block.states = block_ptr->mark.left;
 
             // Init parent block of each state in new block.
             for(action_state_type& s: new_block.states)
             {
-              s.parent_block = new_block.key;
+              s.parent_block = action_blocks.size()-1; 
             }
 
-            action_blocks.push_back(new_block);
           }
           
           // clean mark list
@@ -703,8 +698,9 @@ class prob_bisim_partitioner_fast
     void split_probabilistic_block(probabilistic_block_type& block_to_split, embedded_list<probabilistic_state_type>& states_of_new_block)
     {
       // First create the new block to be allocated, and initialise its parameters
-      probabilistic_block_type new_block;
-      new_block.key = probabilistic_blocks.size();
+      probabilistic_blocks.emplace_back();
+      probabilistic_block_type& new_block=probabilistic_blocks.back();
+      
       new_block.parent_constellation = block_to_split.parent_constellation; // The new block is in the same constellation as B
       new_block.states = states_of_new_block;
       states_of_new_block.clear();
@@ -717,7 +713,7 @@ class prob_bisim_partitioner_fast
       for(probabilistic_state_type& s: new_block.states)
       {
         // Update the parent block of the state
-        s.parent_block = new_block.key;
+        s.parent_block = probabilistic_blocks.size()-1; 
 
         // Iterate over all incoming transitions of the state, to add them to the new block
         for (action_transition_type* t : s.incoming_transitions)
@@ -748,9 +744,6 @@ class prob_bisim_partitioner_fast
         }
       }
 
-      // Add the new block to the vector of probabilistic blocks
-      probabilistic_blocks.push_back(new_block);
-
       // Add the new block to the back of the list of blocks in the parent constellation.
       probabilistic_constellation_type& parent_const = probabilistic_constellations[new_block.parent_constellation];
 
@@ -764,8 +757,9 @@ class prob_bisim_partitioner_fast
     void split_action_block(action_block_type& block_to_split, embedded_list<action_state_type>& states_of_new_block)
     {
       // First create the new block to be allocated, and initialise its parameters
-      action_block_type new_block;
-      new_block.key = action_blocks.size();
+      action_blocks.emplace_back();
+      action_block_type& new_block=action_blocks.back();
+
       new_block.parent_constellation = block_to_split.parent_constellation; // The new block is in the same constellation as block to split
       new_block.states = states_of_new_block;
       states_of_new_block.clear();
@@ -776,7 +770,7 @@ class prob_bisim_partitioner_fast
       for(action_state_type& s: new_block.states)
       {
         // Update the parent block of the state
-        s.parent_block = new_block.key;
+        s.parent_block = action_blocks.size()-1;   
 
         // Iterate over all incoming transitions of the state, to add them to the new block
         for (probabilistic_transition_type* t : s.incoming_transitions)
@@ -786,9 +780,6 @@ class prob_bisim_partitioner_fast
             new_block.incoming_probabilistic_transitions);
         }
       }
-
-      // Add the new block to the vector of action blocks
-      action_blocks.push_back(new_block);
 
       // Add the new block to the back of the list of blocks in the parent constellation.
       action_constellation_type& parent_const = action_constellations[new_block.parent_constellation];
