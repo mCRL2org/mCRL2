@@ -810,7 +810,7 @@ class prob_bisim_partitioner_fast
       for( probabilistic_transition_type& pt: Bc.incoming_probabilistic_transitions)
       {
         probabilistic_state_type& s = probabilistic_states[pt.from];
-        probability_label_type p = pt.label;
+        const probability_label_type& p = pt.label;
         probabilistic_block_type& B = probabilistic_blocks[s.parent_block];
 
         // If the block was not previously marked, then mark the block and add all states to right
