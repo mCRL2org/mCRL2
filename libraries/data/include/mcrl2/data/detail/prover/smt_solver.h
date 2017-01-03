@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsbinary.cpp
+/// \file smt_solver.h
 /// \brief Abstract interface for SMT solvers
 
 #ifndef SMT_SOLVER_H
