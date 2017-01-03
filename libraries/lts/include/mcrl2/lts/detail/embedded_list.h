@@ -201,6 +201,36 @@ class embedded_list
       m_size=0;
     }
 
+    /* Append the list l to the current list.  
+       After this operation the list l is replaced by the empty list
+       to prevent unwanted sharing of lists.  */
+       
+    void append(embedded_list& l)
+    {
+      if (l.size()==0)
+      {
+        return;
+      }
+
+      if (m_size==0)
+      {
+        *this=l;
+      }
+      else
+      {
+        m_last->m_next=l.m_first;
+        l.m_first->m_prev=m_last;
+        m_last=l.m_last;
+        m_size=m_size+l.m_size;
+      }
+      // Explicitly invalidate l.
+      l.m_first=nullptr;
+      l.m_last=nullptr;
+      l.m_size=0;
+      
+      assert(check_this_embedded_list());
+    }
+
     class iterator 
     {
       protected:
@@ -231,6 +261,12 @@ class embedded_list
         TYPE& operator*() 
         {
           return *m_ptr;
+        }
+
+        // Dereference of the iterator. 
+        TYPE* operator->() 
+        {
+          return m_ptr;
         }
 
        // Equality operator on iterators.
