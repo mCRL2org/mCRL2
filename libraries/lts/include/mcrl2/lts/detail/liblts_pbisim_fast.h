@@ -183,15 +183,31 @@ class prob_bisim_partitioner_fast
       probability_label_type cumulative_probability;
     };
 
+    // Prototype.
+    struct action_mark_type;
+
+    struct action_block_type : public embedded_list_node <action_block_type>
+    {
+      constellation_key_type parent_constellation;
+      embedded_list<action_state_type> states;
+      embedded_list<probabilistic_transition_type> incoming_probabilistic_transitions;
+      action_mark_type* marking;  // This value is nullptr if the block is not marked.
+
+      action_block_type() : marking(nullptr){}
+    };
+
     struct action_mark_type
     {
-      bool block_is_marked;
+      action_block_type* action_block;
       embedded_list<action_state_type> left;
       embedded_list<action_state_type> middle;
       embedded_list<action_state_type> right;
       embedded_list<action_state_type>* large_block_ptr;
 
-      action_mark_type() : block_is_marked(false), large_block_ptr(nullptr){}
+      action_mark_type(action_block_type& B) 
+       : action_block(&B), 
+         large_block_ptr(nullptr)
+      {}
     };
 
     struct probabilistic_mark_type
@@ -208,14 +224,6 @@ class prob_bisim_partitioner_fast
       probability_label_type smaller_middle_probability;
 
       probabilistic_mark_type() : block_is_marked(false), large_block_ptr(nullptr) {}
-    };
-
-    struct action_block_type : public embedded_list_node <action_block_type>
-    {
-      constellation_key_type parent_constellation;
-      embedded_list<action_state_type> states;
-      embedded_list<probabilistic_transition_type> incoming_probabilistic_transitions;
-      action_mark_type mark;
     };
 
     struct probabilistic_block_type : public embedded_list_node <probabilistic_block_type>
@@ -323,8 +331,8 @@ class prob_bisim_partitioner_fast
     std::deque<probabilistic_constellation_type> probabilistic_constellations;
     std::deque<size_t> state_to_constellation_count;
     // temporary data structures, to prevent redeclaring these too often.
-    std::vector<action_block_type*> marked_action_blocks;
-    std::vector<probabilistic_block_type*> marked_probabilistic_blocks;
+    std::deque<action_mark_type> marked_action_blocks;
+    std::deque<probabilistic_block_type*> marked_probabilistic_blocks;
 
     // The lists below contains all constellations, where the non trivial are put at the front. 
     embedded_list<probabilistic_constellation_type> probabilistic_constellations_list;
@@ -355,6 +363,15 @@ class prob_bisim_partitioner_fast
                                 *t.state_to_constellation_count_ptr << ". Should be " << count_state_to_constellation << ".\n";
           return false;
                                   
+        }
+      }
+
+      for(const action_block_type& b: action_blocks)
+      {
+        if (b.marking!=nullptr)
+        {
+          std::cerr << "Block's marking is not a null ptr: " << b.marking << "\n";
+          return false;
         }
       }
       return true;
@@ -388,6 +405,7 @@ class prob_bisim_partitioner_fast
           std::cerr << "INCOMING TRANS " << t.from << " --" << t.label << "-> " << t.to << "\n";
         }
       }
+
     }
 
     /** Creates the initial partition.
@@ -561,46 +579,52 @@ class prob_bisim_partitioner_fast
     */
     void refine_initial_action_block(const std::vector< embedded_list<action_transition_type> >& transitions_per_label)
     {
+// std::cerr << "HIER0\n";
       // Iterate over all transitions ordered by label, and refine the block.
       for (const embedded_list<action_transition_type>& t_list : transitions_per_label)
       {
+// std::cerr << "HIER1\n";
         marked_action_blocks.clear();
+        // The line below garbage collects marked_action_blocks to avoid covering too much memory continuously;
+        static size_t count=0; if (count++ == 1000) { marked_action_blocks.shrink_to_fit(); count=0; }
 
         for(const action_transition_type& t: t_list)
         {
+// std::cerr << "ACTION " << t.label << "\n";
           action_state_type& s = action_states[t.from];
           assert(s.parent_block<action_blocks.size());
           action_block_type& parent_block = action_blocks[s.parent_block];
-          embedded_list<action_state_type>& marked_states = parent_block.mark.left;
 
           // Move state s to marked states if not already added.
           if (false == s.mark_state)
           {
             // Add parent block to the list of marked blocks if not yet added
-            if (0 == marked_states.size())
+            if (parent_block.marking==nullptr) 
             {
-              marked_action_blocks.push_back(&parent_block);
+              marked_action_blocks.emplace_back(parent_block);
+              parent_block.marking=&marked_action_blocks.back();
             }
 
-            move_list_element_back<action_state_type>(s, parent_block.states, marked_states);
+            move_list_element_back<action_state_type>(s, parent_block.states, parent_block.marking->left);
             s.mark_state = true;
           }
         }
         
+// std::cerr << "HIER2\n";
         // Split the marked blocks.
-        for (action_block_type* block_ptr : marked_action_blocks)
+        for (action_mark_type& block_marking: marked_action_blocks)
         {
-          if (0 == block_ptr->states.size())
+          if (0 == block_marking.action_block->states.size())
           {
             // If all states in the block are marked, then return all marked states to the block.
-            block_ptr->states = block_ptr->mark.left;
+            block_marking.action_block->states = block_marking.left;
           }
           else
           {
             // Split the block if not all states are marked.
             action_blocks.emplace_back();
             action_block_type& new_block=action_blocks.back();
-            new_block.states = block_ptr->mark.left;
+            new_block.states = block_marking.left;
 
             // Init parent block of each state in new block.
             for(action_state_type& s: new_block.states)
@@ -611,15 +635,15 @@ class prob_bisim_partitioner_fast
           }
           
           // clean mark list
-          block_ptr->mark.left.clear();
+          block_marking.left.clear();
+          block_marking.action_block->marking=nullptr;
 
         }
 
         // Clean the marked states.
         for(const action_transition_type& t: t_list)
         {
-          action_state_type& s = action_states[t.from];
-          s.mark_state = false;
+          action_states[t.from].mark_state = false;
         }
       }
 
@@ -667,6 +691,9 @@ class prob_bisim_partitioner_fast
 
           // Derive the left, right and middle sets from mark function.
           marked_probabilistic_blocks.clear();
+          // The line below garbage collects marked_action_blocks to avoid covering too much memory continuously;
+          static size_t count=0; if (count++ == 1000) { marked_probabilistic_blocks.shrink_to_fit(); count=0; }
+
           mark_probabilistic(Bc_ptr, marked_probabilistic_blocks);
 
           // Split every marked probabilistic block based on left, middle and right.
@@ -740,37 +767,37 @@ class prob_bisim_partitioner_fast
                                                                                           // to the position in the list with the next action.
 
             // Split every marked probabilistic block based on left, middle and right.
-            for (action_block_type* B : marked_action_blocks)
+            for (action_mark_type& B : marked_action_blocks)
             {
               // Variable unstable_const is used to determine whether the parent constellation holding
               // the current block becomes unstable; this happends when the block is splitted.
               bool unstable_const = false;
 
               // First return the largest of left, middle or right to the states of current processed block.
-              B->states = *B->mark.large_block_ptr;
-              B->mark.large_block_ptr->clear();
+              B.action_block->states = *B.large_block_ptr;
+              B.large_block_ptr->clear();
 
               // Split left set of the block to another block if left has states and it is not
               // the largest block.
-              if (B->mark.left.size() > 0)
+              if (B.left.size() > 0)
               {
-                split_action_block(*B, B->mark.left);
+                split_action_block(*B.action_block, B.left);
                 unstable_const = true;
               }
 
               // Split right set of the block to another block if right has states and it is not
               // the largest block.
-              if (B->mark.right.size() > 0)
+              if (B.right.size() > 0)
               {
-                split_action_block(*B, B->mark.right);
+                split_action_block(*B.action_block, B.right);
                 unstable_const = true;
               }
 
               // Split middle set of the block to another block if middle has states and it is not
               // the largest block.
-              if (B->mark.middle.size() > 0)
+              if (B.middle.size() > 0)
               {
-                split_action_block(*B, B->mark.middle);
+                split_action_block(*B.action_block, B.middle);
                 unstable_const = true;
               }
 
@@ -778,7 +805,7 @@ class prob_bisim_partitioner_fast
               // constellation list if it became unstable.
               if (true == unstable_const)
               {
-                action_constellation_type& parent_const = action_constellations[B->parent_constellation];
+                action_constellation_type& parent_const = action_constellations[B.action_block->parent_constellation];
                 move_list_element_front<action_constellation_type>(parent_const, action_constellations_list, action_constellations_list);
               }
 
@@ -870,7 +897,7 @@ class prob_bisim_partitioner_fast
     *  \details Derives the left, middle and rigth sets of the marked probabilistic blocks, based on the
     *           incoming probabilistic transitions in block Bc.
     */
-    void mark_probabilistic(action_block_type* Bc_ptr, std::vector<probabilistic_block_type*>& marked_probabilistic_blocks)
+    void mark_probabilistic(action_block_type* Bc_ptr, std::deque<probabilistic_block_type*>& marked_probabilistic_blocks)
     {
       action_block_type& Bc = *Bc_ptr;
 
@@ -1065,7 +1092,7 @@ class prob_bisim_partitioner_fast
     *  \details Derives the left, middle and rigth sets of the marked action blocks, based on the
     *           incoming action transitions labeled with "a" in block Bc.
     */
-    void mark_action(std::vector<action_block_type*>& marked_action_blocks, 
+    void mark_action(std::deque<action_mark_type>& marked_action_blocks, 
                      const label_type& a, 
                      typename embedded_list<action_transition_type>::iterator& action_walker_begin,
                      const typename embedded_list<action_transition_type>::iterator action_walker_end)
@@ -1085,14 +1112,14 @@ class prob_bisim_partitioner_fast
         action_block_type& B = action_blocks[s.parent_block];  
         
         // If the block was not previously marked, then mark the block and add all states to right.
-        if (false == B.mark.block_is_marked)
+        if (nullptr == B.marking)
         {
-          B.mark.block_is_marked = true;
-          marked_action_blocks.push_back(&B);
-          B.mark.right = B.states;
+          marked_action_blocks.emplace_back(B);
+          B.marking = &marked_action_blocks.back();
+          B.marking->right=B.states;
           B.states.clear();
           // Also initialise the larger block pointer to the right set.
-          B.mark.large_block_ptr = &B.mark.right;
+          B.marking->large_block_ptr = &B.marking->right;
         }
 
         // Since state s can reach block Bc, move state s to the left set if not yet added, and mark the state
@@ -1102,7 +1129,7 @@ class prob_bisim_partitioner_fast
           // its residual transition count.
           s.mark_state = true;
           s.residual_transition_cnt = *t.state_to_constellation_count_ptr;
-          move_list_element_back<action_state_type>(s, B.mark.right, B.mark.left);
+          move_list_element_back<action_state_type>(s, B.marking->right, B.marking->left);
         }
 
         s.residual_transition_cnt--;
@@ -1112,17 +1139,17 @@ class prob_bisim_partitioner_fast
       // count is zero, it means that the state only can reach block BC. If the transition count is greater than 
       // zero, the state has transitions to the other part of the constellation; hence, those states have to be
       // moved to middle.
-      for (action_block_type* B : marked_action_blocks)
+      for (action_mark_type& B : marked_action_blocks)
       {
         // Iterate over all left states in B and check whether the state has to be moved to middle.
-        for(typename embedded_list<action_state_type>::iterator i=B->mark.left.begin(); i!=B->mark.left.end(); )
+        for(typename embedded_list<action_state_type>::iterator i=B.left.begin(); i!=B.left.end(); )
         {
           action_state_type& s= *i; 
           i++;  // This iterator is incremented here as s will be removed from the list over which iteration takes place.
           if (s.residual_transition_cnt > 0)
           {
             // The transition count is greater than zero. Move state to middle set.
-            move_list_element_back<action_state_type>(s, B->mark.left, B->mark.middle);
+            move_list_element_back<action_state_type>(s, B.left, B.middle);
           }
 
           // Also reset the marked_state variable in the state here, taking advantage that we
@@ -1131,17 +1158,17 @@ class prob_bisim_partitioner_fast
         }
 
         // Find the largest set.
-        if (B->mark.left.size() > B->mark.large_block_ptr->size())
+        if (B.left.size() > B.large_block_ptr->size())
         {
-          B->mark.large_block_ptr = &B->mark.left;
+          B.large_block_ptr = &B.left;
         }
-        if (B->mark.middle.size() > B->mark.large_block_ptr->size())
+        if (B.middle.size() > B.large_block_ptr->size())
         {
-          B->mark.large_block_ptr = &B->mark.middle;
+          B.large_block_ptr = &B.middle;
         }
 
         // Finally, reset the block_is_marked variable of the current block.
-        B->mark.block_is_marked = false;
+        B.action_block->marking = nullptr;
       }
 
       // Update the state_to_constellation_count of each transition. Increment action_walker_begin
