@@ -322,6 +322,9 @@ class prob_bisim_partitioner_fast
     std::deque<action_constellation_type> action_constellations;
     std::deque<probabilistic_constellation_type> probabilistic_constellations;
     std::deque<size_t> state_to_constellation_count;
+    // temporary data structures, to prevent redeclaring these too often.
+    std::vector<action_block_type*> marked_action_blocks;
+    std::vector<probabilistic_block_type*> marked_probabilistic_blocks;
 
     // The lists below contains all constellations, where the non trivial are put at the front. 
     embedded_list<probabilistic_constellation_type> probabilistic_constellations_list;
@@ -458,10 +461,7 @@ class prob_bisim_partitioner_fast
 
 //-----------------------------------------------------------------------------
       // state_to_const_count_temp is used to keep track of the block to constellation count per label of each state.
-      // std::vector<size_t> state_to_const_count_temp(action_blocks.size(),0);
       std::vector<size_t*> new_count_ptr(aut.num_states(),nullptr);
-      // state_to_const_count_temp.resize(action_constellations.size(),0);
-      // new_count_ptr.resize(aut.num_states());
       
       for (const embedded_list<action_transition_type>& at_list_per_label : transitions_per_label.transitions())
       {
@@ -564,7 +564,7 @@ class prob_bisim_partitioner_fast
       // Iterate over all transitions ordered by label, and refine the block.
       for (const embedded_list<action_transition_type>& t_list : transitions_per_label)
       {
-        std::vector<action_block_type*> marked_blocks;
+        marked_action_blocks.clear();
 
         for(const action_transition_type& t: t_list)
         {
@@ -579,7 +579,7 @@ class prob_bisim_partitioner_fast
             // Add parent block to the list of marked blocks if not yet added
             if (0 == marked_states.size())
             {
-              marked_blocks.push_back(&parent_block);
+              marked_action_blocks.push_back(&parent_block);
             }
 
             move_list_element_back<action_state_type>(s, parent_block.states, marked_states);
@@ -588,7 +588,7 @@ class prob_bisim_partitioner_fast
         }
         
         // Split the marked blocks.
-        for (action_block_type* block_ptr : marked_blocks)
+        for (action_block_type* block_ptr : marked_action_blocks)
         {
           if (0 == block_ptr->states.size())
           {
@@ -666,11 +666,11 @@ class prob_bisim_partitioner_fast
           action_block_type* Bc_ptr = choose_action_splitter(non_trivial_action_const);
 
           // Derive the left, right and middle sets from mark function.
-          std::vector<probabilistic_block_type*> marked_blocks;
-          mark_probabilistic(Bc_ptr, marked_blocks);
+          marked_probabilistic_blocks.clear();
+          mark_probabilistic(Bc_ptr, marked_probabilistic_blocks);
 
           // Split every marked probabilistic block based on left, middle and right.
-          for (probabilistic_block_type* B : marked_blocks)
+          for (probabilistic_block_type* B : marked_probabilistic_blocks)
           {
             // Variable unstable_const is used to determine whether the parent constellation holding
             // the current block becomes unstable; this happends when the block is splitted.
@@ -728,22 +728,19 @@ class prob_bisim_partitioner_fast
           // Choose splitter block Bc of a non-trivial constellation C, such that |Bc| <= 1/2|C|.
           // And also split constellation C into BC and C\BC in the set of constellations.
           probabilistic_block_type* Bc_ptr = choose_probabilistic_splitter(non_trivial_probabilistic_const);
-// for(action_transition_type t: Bc_ptr->incoming_action_transitions)
-// {
-// std::cerr << "INCOMING TRANSITION " << t.from << "--" << t.label << "->" << t.to << "\n";
-// }
+          
           // For all incoming labeled "a" transitions of each state in BC call the mark function and split the blocks.
           for (typename embedded_list<action_transition_type>::iterator i=Bc_ptr->incoming_action_transitions.begin(); 
                         i!=Bc_ptr->incoming_action_transitions.end() ;  )
           {
             // Derive the left, right and middle sets from mark function based on the incoming labeled "a" transitions.
             const label_type a = i->label;
-            std::vector<action_block_type*> marked_blocks;
-            mark_action(marked_blocks, a, i, Bc_ptr->incoming_action_transitions.end());  // The iterator i is implicitly increased 
+            marked_action_blocks.clear();
+            mark_action(marked_action_blocks, a, i, Bc_ptr->incoming_action_transitions.end());  // The iterator i is implicitly increased 
                                                                                           // to the position in the list with the next action.
 
             // Split every marked probabilistic block based on left, middle and right.
-            for (action_block_type* B : marked_blocks)
+            for (action_block_type* B : marked_action_blocks)
             {
               // Variable unstable_const is used to determine whether the parent constellation holding
               // the current block becomes unstable; this happends when the block is splitted.
@@ -873,7 +870,7 @@ class prob_bisim_partitioner_fast
     *  \details Derives the left, middle and rigth sets of the marked probabilistic blocks, based on the
     *           incoming probabilistic transitions in block Bc.
     */
-    void mark_probabilistic(action_block_type* Bc_ptr, std::vector<probabilistic_block_type*>& marked_blocks)
+    void mark_probabilistic(action_block_type* Bc_ptr, std::vector<probabilistic_block_type*>& marked_probabilistic_blocks)
     {
       action_block_type& Bc = *Bc_ptr;
 
@@ -890,7 +887,7 @@ class prob_bisim_partitioner_fast
         if (false == B.mark.block_is_marked)
         {
           B.mark.block_is_marked = true;
-          marked_blocks.push_back(&B);
+          marked_probabilistic_blocks.push_back(&B);
           B.mark.right = B.states;
           B.states.clear(); 
 
@@ -925,7 +922,7 @@ class prob_bisim_partitioner_fast
       // Group all states with the same cumulative probability to construct the middle sets.
       // To this end, iterate over all marked blocks. For each block, first add all the states
       // with probability lower than the max_cumulative_probability of the block to the middle set.
-      for (probabilistic_block_type* B : marked_blocks)
+      for (probabilistic_block_type* B : marked_probabilistic_blocks)
       {
         std::vector< std::pair<probability_label_type, probabilistic_state_type*> > grouped_states_per_probability_in_block;
         embedded_list<probabilistic_state_type> middle_temp;
@@ -1068,7 +1065,7 @@ class prob_bisim_partitioner_fast
     *  \details Derives the left, middle and rigth sets of the marked action blocks, based on the
     *           incoming action transitions labeled with "a" in block Bc.
     */
-    void mark_action(std::vector<action_block_type*>& marked_blocks, 
+    void mark_action(std::vector<action_block_type*>& marked_action_blocks, 
                      const label_type& a, 
                      typename embedded_list<action_transition_type>::iterator& action_walker_begin,
                      const typename embedded_list<action_transition_type>::iterator action_walker_end)
@@ -1091,7 +1088,7 @@ class prob_bisim_partitioner_fast
         if (false == B.mark.block_is_marked)
         {
           B.mark.block_is_marked = true;
-          marked_blocks.push_back(&B);
+          marked_action_blocks.push_back(&B);
           B.mark.right = B.states;
           B.states.clear();
           // Also initialise the larger block pointer to the right set.
@@ -1115,7 +1112,7 @@ class prob_bisim_partitioner_fast
       // count is zero, it means that the state only can reach block BC. If the transition count is greater than 
       // zero, the state has transitions to the other part of the constellation; hence, those states have to be
       // moved to middle.
-      for (action_block_type* B : marked_blocks)
+      for (action_block_type* B : marked_action_blocks)
       {
         // Iterate over all left states in B and check whether the state has to be moved to middle.
         for(typename embedded_list<action_state_type>::iterator i=B->mark.left.begin(); i!=B->mark.left.end(); )
@@ -1164,7 +1161,10 @@ class prob_bisim_partitioner_fast
 
           if (state_to_constellation_count_old != s.residual_transition_cnt)
           {
-            // First update the state_to_constellation_count in with the residual_transition_cnt.
+            // This is the first transition from this state to a new block. 
+            // First update the state_to_constellation_count with the residual_transition_cnt 
+            // which is used by the transitions that we do not visit. Also the not yet 
+            // visited transitions are set to this value.
             *t.state_to_constellation_count_ptr = s.residual_transition_cnt;
 
             // Now allocate another state_to_constellation_count for the Bc block
@@ -1174,7 +1174,6 @@ class prob_bisim_partitioner_fast
           t.state_to_constellation_count_ptr = s.transition_count_ptr; 
         }
       }
-
     }
 
     /** \brief Choose an splitter block from a non trivial constellation.
