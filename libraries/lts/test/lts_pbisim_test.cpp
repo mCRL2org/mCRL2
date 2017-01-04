@@ -331,6 +331,16 @@ const std::string test6 =
 "(239,\"dead\",237 1/4 238 1/4 239 1/4 236)\n"
 ;
 
+/* The example below turned out to be a tricky example on which
+ * an intermediate version of the Groote/Verduzco/Vink algorithm failed. */
+std::string test7 =
+"des(0,5,3)\n"
+"(0,\"a\", 2)\n"
+"(1,\"a\", 2 2/4 2)\n"
+"(0,\"tau\",0 1/4 1 2/4 1)\n"
+"(1,\"tau\",1 3/4 1)\n"
+"(0,\"tau\",2 3/4 2)\n"
+;
 
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 {
@@ -364,8 +374,15 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   detail::probabilistic_bisimulation_reduce(t6); //probabilistic bisimulation reduction
   BOOST_CHECK(t6.num_states() == 13 && t6.num_transitions() == 13 && t6.num_probabilistic_states() == 11);
 
+  std::cerr << "Testr76\n";
+  probabilistic_lts_aut_t t7 = parse_aut(test7);
+  detail::probabilistic_bisimulation_reduce(t7); //probabilistic bisimulation reduction
+  BOOST_CHECK(t7.num_states() == 3 && t7.num_transitions() == 5 && t7.num_probabilistic_states() == 3);
+
   std::cerr << "Test end\n";
 }
+
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

@@ -1068,14 +1068,12 @@ class prob_bisim_partitioner_fast
     *  \details Derives the left, middle and rigth sets of the marked action blocks, based on the
     *           incoming action transitions labeled with "a" in block Bc.
     */
-    void mark_action(// probabilistic_block_type* Bc_ptr, 
-                     std::vector<action_block_type*>& marked_blocks, 
+    void mark_action(std::vector<action_block_type*>& marked_blocks, 
                      const label_type& a, 
                      typename embedded_list<action_transition_type>::iterator& action_walker_begin,
                      const typename embedded_list<action_transition_type>::iterator action_walker_end)
     {
       assert(action_walker_begin!=action_walker_end && action_walker_begin->label==a);
-      // probabilistic_block_type& Bc = *Bc_ptr;
 
       // For all incoming transitions with label "a" of block Bc calculate left, middle and right.
       // To this end, first move all the states of the block that was reached by traversing the
@@ -1173,7 +1171,7 @@ class prob_bisim_partitioner_fast
             state_to_constellation_count.emplace_back(state_to_constellation_count_old - s.residual_transition_cnt);
             s.transition_count_ptr = &state_to_constellation_count.back();
           }
-          t.state_to_constellation_count_ptr = s.transition_count_ptr;
+          t.state_to_constellation_count_ptr = s.transition_count_ptr; 
         }
       }
 
@@ -1200,7 +1198,6 @@ class prob_bisim_partitioner_fast
       // Now split the block of the constellation.
       // First unlink Bc from the list of blocks of the non trivial constellation.
       non_trivial_action_const->blocks.erase(*Bc);
-      // non_trivial_action_const->blocks.size--;
 
       // Update the number of states and blocks of the non trivial block
       non_trivial_action_const->number_of_states -= Bc->states.size();
@@ -1226,7 +1223,6 @@ class prob_bisim_partitioner_fast
       new_action_const.number_of_states = Bc->states.size();
 
       // Finally add the new constellation (with Bc) to the list of constellations in 
-      // action_constellation_type* new_action_const_ptr = &action_constellations.back();
       action_constellations_list.push_back(action_constellations.back());
 
       return Bc;
