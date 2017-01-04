@@ -210,9 +210,24 @@ class prob_bisim_partitioner_fast
       {}
     };
 
+    // Prototype
+    struct probabilistic_mark_type;
+
+    struct probabilistic_block_type : public embedded_list_node <probabilistic_block_type>
+    {
+      constellation_key_type parent_constellation;
+      embedded_list<probabilistic_state_type> states;
+      probabilistic_mark_type* marking;
+
+      // a probabilistic block has incoming action transitions ordered by label
+      embedded_list<action_transition_type> incoming_action_transitions;
+
+      probabilistic_block_type() : marking(nullptr){}
+    };
+
     struct probabilistic_mark_type
     {
-      bool block_is_marked;
+      probabilistic_block_type* probabilistic_block;
       embedded_list<probabilistic_state_type> left;
       std::vector< embedded_list<probabilistic_state_type> > middle;
       embedded_list<probabilistic_state_type> right;
@@ -223,17 +238,7 @@ class prob_bisim_partitioner_fast
       probability_label_type bigger_middle_probability;  
       probability_label_type smaller_middle_probability;
 
-      probabilistic_mark_type() : block_is_marked(false), large_block_ptr(nullptr) {}
-    };
-
-    struct probabilistic_block_type : public embedded_list_node <probabilistic_block_type>
-    {
-      constellation_key_type parent_constellation;
-      embedded_list<probabilistic_state_type> states;
-      probabilistic_mark_type mark;
-
-      // a probabilistic block has incoming action transitions ordered by label
-      embedded_list<action_transition_type> incoming_action_transitions;
+      probabilistic_mark_type(probabilistic_block_type& B) : probabilistic_block(&B), large_block_ptr(nullptr) {}
     };
 
     struct action_constellation_type : public embedded_list_node < action_constellation_type > 
@@ -330,9 +335,9 @@ class prob_bisim_partitioner_fast
     std::deque<action_constellation_type> action_constellations;
     std::deque<probabilistic_constellation_type> probabilistic_constellations;
     std::deque<size_t> state_to_constellation_count;
-    // temporary data structures, to prevent redeclaring these too often.
+    // temporary data structures. declared here to prevent redeclaring these too often.
     std::deque<action_mark_type> marked_action_blocks;
-    std::deque<probabilistic_block_type*> marked_probabilistic_blocks;
+    std::deque<probabilistic_mark_type> marked_probabilistic_blocks;
 
     // The lists below contains all constellations, where the non trivial are put at the front. 
     embedded_list<probabilistic_constellation_type> probabilistic_constellations_list;
@@ -370,7 +375,16 @@ class prob_bisim_partitioner_fast
       {
         if (b.marking!=nullptr)
         {
-          std::cerr << "Block's marking is not a null ptr: " << b.marking << "\n";
+          std::cerr << "Action block's marking is not a null ptr: " << b.marking << "\n";
+          return false;
+        }
+      }
+
+      for(const probabilistic_block_type& b: probabilistic_blocks)
+      {
+        if (b.marking!=nullptr)
+        {
+          std::cerr << "Probabilistic block's marking is not a null ptr: " << b.marking << "\n";
           return false;
         }
       }
@@ -697,39 +711,39 @@ class prob_bisim_partitioner_fast
           mark_probabilistic(Bc_ptr, marked_probabilistic_blocks);
 
           // Split every marked probabilistic block based on left, middle and right.
-          for (probabilistic_block_type* B : marked_probabilistic_blocks)
+          for (probabilistic_mark_type& B : marked_probabilistic_blocks)
           {
             // Variable unstable_const is used to determine whether the parent constellation holding
             // the current block becomes unstable; this happends when the block is splitted.
             bool unstable_const = false;
 
             // First return the largest of left, middle or right to the states of current processed block.
-            B->states = *B->mark.large_block_ptr;
-            B->mark.large_block_ptr->clear();
+            B.probabilistic_block->states = *B.large_block_ptr;
+            B.large_block_ptr->clear();
 
             // Split left set of the block to another block if left has states and it is not
             // the largest block.
-            if (B->mark.left.size() > 0)
+            if (B.left.size() > 0)
             {
-              split_probabilistic_block(*B, B->mark.left);
+              split_probabilistic_block(*B.probabilistic_block, B.left);
               unstable_const = true;
             }
 
             // Split right set of the block to another block if right has states and it is not
             // the largest block.
-            if (B->mark.right.size() > 0)
+            if (B.right.size() > 0)
             {
-              split_probabilistic_block(*B, B->mark.right);
+              split_probabilistic_block(*B.probabilistic_block, B.right);
               unstable_const = true;
             }
 
             // Iterate over all middle sets. Split middle sets of the current block to another block if 
             //  the middle set has states and it is not the largest block.
-            for (embedded_list<probabilistic_state_type>& middle : B->mark.middle)
+            for (embedded_list<probabilistic_state_type>& middle : B.middle)
             {
               if (middle.size() > 0)
               {
-                split_probabilistic_block(*B, middle);
+                split_probabilistic_block(*B.probabilistic_block, middle);
                 unstable_const = true;
               }
             }
@@ -738,12 +752,12 @@ class prob_bisim_partitioner_fast
             // constellation list if it became unstable.
             if (true == unstable_const)
             {
-              probabilistic_constellation_type& parent_const = probabilistic_constellations[B->parent_constellation];
+              probabilistic_constellation_type& parent_const = probabilistic_constellations[B.probabilistic_block->parent_constellation];
               move_list_element_front<probabilistic_constellation_type>(parent_const, probabilistic_constellations_list, probabilistic_constellations_list);
             }
 
             // Reset middle vector to prepare for the next mark process
-            B->mark.middle.clear();
+            B.middle.clear();
           }
         }
 
@@ -897,7 +911,7 @@ class prob_bisim_partitioner_fast
     *  \details Derives the left, middle and rigth sets of the marked probabilistic blocks, based on the
     *           incoming probabilistic transitions in block Bc.
     */
-    void mark_probabilistic(action_block_type* Bc_ptr, std::deque<probabilistic_block_type*>& marked_probabilistic_blocks)
+    void mark_probabilistic(action_block_type* Bc_ptr, std::deque<probabilistic_mark_type>& marked_probabilistic_blocks)
     {
       action_block_type& Bc = *Bc_ptr;
 
@@ -911,17 +925,17 @@ class prob_bisim_partitioner_fast
         probabilistic_block_type& B = probabilistic_blocks[s.parent_block];
 
         // If the block was not previously marked, then mark the block and add all states to right
-        if (false == B.mark.block_is_marked)
+        if (nullptr == B.marking)
         {
-          B.mark.block_is_marked = true;
-          marked_probabilistic_blocks.push_back(&B);
-          B.mark.right = B.states;
+          marked_probabilistic_blocks.emplace_back(B);
+          B.marking = &marked_probabilistic_blocks.back();
+          B.marking->right = B.states;
           B.states.clear(); 
 
           // Also initialise the larger block pointer to the right set and the maximum cumulative
           // probability of the block to p
-          B.mark.large_block_ptr = &B.mark.right;
-          B.mark.max_cumulative_probability = p;
+          B.marking->large_block_ptr = &B.marking->right;
+          B.marking->max_cumulative_probability = p;
         }
 
         // Since state s can reach block Bc, move state s to left set if not yet added, and mark the state
@@ -931,7 +945,7 @@ class prob_bisim_partitioner_fast
           // its cumulative probability.
           s.mark_state = true;
           s.cumulative_probability = p;
-          move_list_element_back<probabilistic_state_type>(s, B.mark.right, B.mark.left);
+          move_list_element_back<probabilistic_state_type>(s, B.marking->right, B.marking->left);
         }
         else 
         {
@@ -940,30 +954,30 @@ class prob_bisim_partitioner_fast
         }
 
         // Keep track of the maximum cumulative probability of the block
-        if (B.mark.max_cumulative_probability < s.cumulative_probability)
+        if (B.marking->max_cumulative_probability < s.cumulative_probability)
         {
-          B.mark.max_cumulative_probability = s.cumulative_probability;
+          B.marking->max_cumulative_probability = s.cumulative_probability;
         }
       }
 
       // Group all states with the same cumulative probability to construct the middle sets.
       // To this end, iterate over all marked blocks. For each block, first add all the states
       // with probability lower than the max_cumulative_probability of the block to the middle set.
-      for (probabilistic_block_type* B : marked_probabilistic_blocks)
+      for (probabilistic_mark_type& B : marked_probabilistic_blocks)
       {
         std::vector< std::pair<probability_label_type, probabilistic_state_type*> > grouped_states_per_probability_in_block;
         embedded_list<probabilistic_state_type> middle_temp;
 
         // First, add all states lower than max_cumulative_probability to the middle set.
-        for(typename embedded_list<probabilistic_state_type>::iterator i=B->mark.left.begin(); i!=B->mark.left.end(); )
+        for(typename embedded_list<probabilistic_state_type>::iterator i=B.left.begin(); i!=B.left.end(); )
         {
           probabilistic_state_type& s= *i;
           i++; // Increment the iterator here, such that we can change the list. 
 
-          if (s.cumulative_probability < B->mark.max_cumulative_probability)
+          if (s.cumulative_probability < B.max_cumulative_probability)
           {
             // State s has probability lower than max_cumulative_probability. Add to the middle set.
-            move_list_element_back<probabilistic_state_type>((s), B->mark.left, middle_temp);
+            move_list_element_back<probabilistic_state_type>((s), B.left, middle_temp);
           }
 
           // Also reset the marked_state variable in the state here, taiking advantage that we
@@ -977,18 +991,18 @@ class prob_bisim_partitioner_fast
         {
           // There are states in middle; hence, calculate the higher and lower probabilities. To this end,
           // iterate over all states in middle and keep track of the bigger and smaller probability.
-          B->mark.smaller_middle_probability = probability_label_type().one();
-          B->mark.bigger_middle_probability = probability_label_type().zero();
+          B.smaller_middle_probability = probability_label_type().one();
+          B.bigger_middle_probability = probability_label_type().zero();
 
           for(probabilistic_state_type& s: middle_temp)
           {
-            if (B->mark.smaller_middle_probability > s.cumulative_probability)
+            if (B.smaller_middle_probability > s.cumulative_probability)
             {
-              B->mark.smaller_middle_probability = s.cumulative_probability;
+              B.smaller_middle_probability = s.cumulative_probability;
             }
-            if (B->mark.bigger_middle_probability < s.cumulative_probability)
+            if (B.bigger_middle_probability < s.cumulative_probability)
             {
-              B->mark.bigger_middle_probability = s.cumulative_probability;
+              B.bigger_middle_probability = s.cumulative_probability;
             }
           }
           
@@ -997,10 +1011,10 @@ class prob_bisim_partitioner_fast
           // On the other hand, if the bigger and smaller probability are not equal, then we have to 
           // add its respective states to different sub-sets in middle. Furtheremore, the states with
           // probabilities in between are placed in a vector to be ordered later.
-          if (B->mark.bigger_middle_probability == B->mark.smaller_middle_probability)
+          if (B.bigger_middle_probability == B.smaller_middle_probability)
           {
             // Add all the states from middle_temp to the middle set
-            B->mark.middle.push_back(middle_temp);
+            B.middle.push_back(middle_temp);
           }
           else
           {
@@ -1016,12 +1030,12 @@ class prob_bisim_partitioner_fast
               probabilistic_state_type& s= *i;
               i++; // Increment the iterator here, such that we can change the list. 
 
-              if (s.cumulative_probability == B->mark.bigger_middle_probability)
+              if (s.cumulative_probability == B.bigger_middle_probability)
               {
                 // State s has the highest probabilty in the middle temp. Add to middle set.
                 move_list_element_back<probabilistic_state_type>((s), middle_temp, middle_big);
               }
-              else if (s.cumulative_probability == B->mark.smaller_middle_probability)
+              else if (s.cumulative_probability == B.smaller_middle_probability)
               {
                 // State s the lowest probabilty in the middle temp. Add to middle set.
                 move_list_element_back<probabilistic_state_type>((s), middle_temp, middle_small);
@@ -1035,8 +1049,8 @@ class prob_bisim_partitioner_fast
             }
 
             // Add the the sets with the biggest and smallest probability to middle.
-            B->mark.middle.push_back(middle_big);
-            B->mark.middle.push_back(middle_small);
+            B.middle.push_back(middle_big);
+            B.middle.push_back(middle_small);
 
             // Sort the probabilities of middle, not including the biggest and smallest probability
             std::sort(grouped_states_per_probability_in_block.begin(), grouped_states_per_probability_in_block.end());
@@ -1054,10 +1068,10 @@ class prob_bisim_partitioner_fast
                 // The current state has a different probability as the current probability. Allocate
                 // another space in the middle to store this state and change the current probability.
                 current_probability = cumulative_prob_state_pair.first;
-                B->mark.middle.emplace_back(); //put empty list at end of B->mark.middle.
+                B.middle.emplace_back(); //put empty list at end of B.middle.
               }
 
-              move_list_element_back<probabilistic_state_type>((*s), middle_temp, B->mark.middle.back());
+              move_list_element_back<probabilistic_state_type>((*s), middle_temp, B.middle.back());
             }
             
           }
@@ -1067,25 +1081,23 @@ class prob_bisim_partitioner_fast
         // Now that we have all the states in left, middle and right; we have to find the largest
         // set. The large block is initialised to be the right set; hence, we only compare if
         // left and middle are larger.
-        if (B->mark.left.size() > B->mark.large_block_ptr->size())
+        if (B.left.size() > B.large_block_ptr->size())
         {
-          B->mark.large_block_ptr = &B->mark.left;
+          B.large_block_ptr = &B.left;
         }
 
         // Iterate over all subsets of middle set to see if there is a one that is the largest.
-        for (embedded_list<probabilistic_state_type>& middle_set : B->mark.middle)
+        for (embedded_list<probabilistic_state_type>& middle_set : B.middle)
         {
-          if (middle_set.size() > B->mark.large_block_ptr->size())
+          if (middle_set.size() > B.large_block_ptr->size())
           {
-            B->mark.large_block_ptr = &middle_set;
+            B.large_block_ptr = &middle_set;
           }
         }
 
         // Finally, reset the block_is_marked variable of the current block.
-        B->mark.block_is_marked = false;
-
+        B.probabilistic_block->marking = nullptr; 
       }
-
     }
 
     /** \brief Gives the action blocks that are marked by probabilistic block Bc.
