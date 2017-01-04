@@ -233,11 +233,6 @@ class prob_bisim_partitioner_fast
       embedded_list<probabilistic_state_type> right;
       embedded_list<probabilistic_state_type>* large_block_ptr;
 
-      // temporary variables used to create middle sets
-      probability_label_type max_cumulative_probability;
-      probability_label_type bigger_middle_probability;  
-      probability_label_type smaller_middle_probability;
-
       probabilistic_mark_type(probabilistic_block_type& B) : probabilistic_block(&B), large_block_ptr(nullptr) {}
     };
 
@@ -342,6 +337,7 @@ class prob_bisim_partitioner_fast
     // The lists below contains all constellations, where the non trivial are put at the front. 
     embedded_list<probabilistic_constellation_type> probabilistic_constellations_list;
     embedded_list<action_constellation_type> action_constellations_list;
+    std::vector< std::pair<probability_label_type, probabilistic_state_type*> > grouped_states_per_probability_in_block;
 
     LTS_TYPE& aut;
 
@@ -373,21 +369,18 @@ class prob_bisim_partitioner_fast
 
       for(const action_block_type& b: action_blocks)
       {
-        if (b.marking!=nullptr)
-        {
-          std::cerr << "Action block's marking is not a null ptr: " << b.marking << "\n";
-          return false;
-        }
+        assert(b.states.size()>0); // Action block contains no states.
+
+        assert(b.marking==nullptr); // Action block's marking must be a null ptr.
       }
 
       for(const probabilistic_block_type& b: probabilistic_blocks)
       {
-        if (b.marking!=nullptr)
-        {
-          std::cerr << "Probabilistic block's marking is not a null ptr: " << b.marking << "\n";
-          return false;
-        }
+        assert(b.states.size()>0); // Probabilistic block contains no states.
+
+        assert(b.marking==nullptr); // Probabilistic block's marking must be a null ptr.
       }
+
       return true;
     }
 
@@ -593,18 +586,15 @@ class prob_bisim_partitioner_fast
     */
     void refine_initial_action_block(const std::vector< embedded_list<action_transition_type> >& transitions_per_label)
     {
-// std::cerr << "HIER0\n";
       // Iterate over all transitions ordered by label, and refine the block.
       for (const embedded_list<action_transition_type>& t_list : transitions_per_label)
       {
-// std::cerr << "HIER1\n";
         marked_action_blocks.clear();
         // The line below garbage collects marked_action_blocks to avoid covering too much memory continuously;
         static size_t count=0; if (count++ == 1000) { marked_action_blocks.shrink_to_fit(); count=0; }
 
         for(const action_transition_type& t: t_list)
         {
-// std::cerr << "ACTION " << t.label << "\n";
           action_state_type& s = action_states[t.from];
           assert(s.parent_block<action_blocks.size());
           action_block_type& parent_block = action_blocks[s.parent_block];
@@ -624,7 +614,6 @@ class prob_bisim_partitioner_fast
           }
         }
         
-// std::cerr << "HIER2\n";
         // Split the marked blocks.
         for (action_mark_type& block_marking: marked_action_blocks)
         {
@@ -708,7 +697,7 @@ class prob_bisim_partitioner_fast
           // The line below garbage collects marked_action_blocks to avoid covering too much memory continuously;
           static size_t count=0; if (count++ == 1000) { marked_probabilistic_blocks.shrink_to_fit(); count=0; }
 
-          mark_probabilistic(Bc_ptr, marked_probabilistic_blocks);
+          mark_probabilistic(*Bc_ptr, marked_probabilistic_blocks);
 
           // Split every marked probabilistic block based on left, middle and right.
           for (probabilistic_mark_type& B : marked_probabilistic_blocks)
@@ -911,10 +900,8 @@ class prob_bisim_partitioner_fast
     *  \details Derives the left, middle and rigth sets of the marked probabilistic blocks, based on the
     *           incoming probabilistic transitions in block Bc.
     */
-    void mark_probabilistic(action_block_type* Bc_ptr, std::deque<probabilistic_mark_type>& marked_probabilistic_blocks)
+    void mark_probabilistic(const action_block_type& Bc, std::deque<probabilistic_mark_type>& marked_probabilistic_blocks)
     {
-      action_block_type& Bc = *Bc_ptr;
-
       // First, iterate over all incoming transitions of block Bc. Mark the blocks that are reached
       // and calculate the cumulative probability of the reached state. This is the probability of
       // a state to reach block Bc.
@@ -924,7 +911,7 @@ class prob_bisim_partitioner_fast
         const probability_label_type& p = pt.label;
         probabilistic_block_type& B = probabilistic_blocks[s.parent_block];
 
-        // If the block was not previously marked, then mark the block and add all states to right
+        // If the block was not previously marked, then mark the block and move all states to right
         if (nullptr == B.marking)
         {
           marked_probabilistic_blocks.emplace_back(B);
@@ -933,12 +920,11 @@ class prob_bisim_partitioner_fast
           B.states.clear(); 
 
           // Also initialise the larger block pointer to the right set and the maximum cumulative
-          // probability of the block to p
+          // probability of the block to p.
           B.marking->large_block_ptr = &B.marking->right;
-          B.marking->max_cumulative_probability = p;
         }
 
-        // Since state s can reach block Bc, move state s to left set if not yet added, and mark the state
+        // Since state s can reach block Bc, move state s to the left set if not yet added, and mark the state
         if (false == s.mark_state)
         {
           // State s is not yet marked. Mark the state and move it to left set. In addition, initialise
@@ -949,14 +935,8 @@ class prob_bisim_partitioner_fast
         }
         else 
         {
-          // State s was already added to left, then just update its cumulative probability
+          // State s was already added to left. Just update its cumulative probability.
           s.cumulative_probability = s.cumulative_probability + p;
-        }
-
-        // Keep track of the maximum cumulative probability of the block
-        if (B.marking->max_cumulative_probability < s.cumulative_probability)
-        {
-          B.marking->max_cumulative_probability = s.cumulative_probability;
         }
       }
 
@@ -965,19 +945,24 @@ class prob_bisim_partitioner_fast
       // with probability lower than the max_cumulative_probability of the block to the middle set.
       for (probabilistic_mark_type& B : marked_probabilistic_blocks)
       {
-        std::vector< std::pair<probability_label_type, probabilistic_state_type*> > grouped_states_per_probability_in_block;
-        embedded_list<probabilistic_state_type> middle_temp;
+        // Clear this locally used data structure and reset it so now and then to avoid that it requires
+        // too much data. 
+        grouped_states_per_probability_in_block.clear();
+        static size_t count=0; if (count++ == 1000) { marked_action_blocks.shrink_to_fit(); count=0; }
+
+        embedded_list<probabilistic_state_type> middle_temp=B.left;
+        B.left.clear();
 
         // First, add all states lower than max_cumulative_probability to the middle set.
-        for(typename embedded_list<probabilistic_state_type>::iterator i=B.left.begin(); i!=B.left.end(); )
+        for(typename embedded_list<probabilistic_state_type>::iterator i=middle_temp.begin(); i!=middle_temp.end(); )
         {
           probabilistic_state_type& s= *i;
           i++; // Increment the iterator here, such that we can change the list. 
 
-          if (s.cumulative_probability < B.max_cumulative_probability)
+          if (s.cumulative_probability == probability_label_type().one()) 
           {
             // State s has probability lower than max_cumulative_probability. Add to the middle set.
-            move_list_element_back<probabilistic_state_type>((s), B.left, middle_temp);
+            move_list_element_back<probabilistic_state_type>((s), middle_temp, B.left);
           }
 
           // Also reset the marked_state variable in the state here, taiking advantage that we
@@ -985,97 +970,38 @@ class prob_bisim_partitioner_fast
           s.mark_state = false;
         }
 
-        // Now, for all the states in the middle set, we have to identify the ones with the higher
-        // and lower probabilities and add them to a new sub set in middle.
-        if (middle_temp.size() > 0)
+        // Add all the states corresponding to the bigger and smaller probability to middle.
+        // Save the remaining states in a vector to sort them later.
+        for(probabilistic_state_type& s: middle_temp)
         {
-          // There are states in middle; hence, calculate the higher and lower probabilities. To this end,
-          // iterate over all states in middle and keep track of the bigger and smaller probability.
-          B.smaller_middle_probability = probability_label_type().one();
-          B.bigger_middle_probability = probability_label_type().zero();
+          grouped_states_per_probability_in_block.emplace_back(s.cumulative_probability, &s);
+        }
 
-          for(probabilistic_state_type& s: middle_temp)
+        // Sort the probabilities of middle, not including the biggest and smallest probability
+        std::sort(grouped_states_per_probability_in_block.begin(), grouped_states_per_probability_in_block.end());
+        
+        // Construct the rest of the middle set based on the grouped probabilities. To this end, 
+        // traverse all the vector with the grouped states by probability. Store the states with
+        // the same probability to a new sub-set in middle set. current_probability is used to
+        // keep track of the probability that is currently being processed.
+        probability_label_type current_probability = probability_label_type().zero();
+
+        if (grouped_states_per_probability_in_block.size()>0)
+        { 
+          B.middle.emplace_back();
+          for (const std::pair<probability_label_type, probabilistic_state_type*>& cumulative_prob_state_pair : grouped_states_per_probability_in_block)
           {
-            if (B.smaller_middle_probability > s.cumulative_probability)
+            probabilistic_state_type* s = cumulative_prob_state_pair.second;
+            if (current_probability != cumulative_prob_state_pair.first)
             {
-              B.smaller_middle_probability = s.cumulative_probability;
+              // The current state has a different probability as the current probability. Allocate
+              // another space in the middle to store this state and change the current probability.
+              current_probability = cumulative_prob_state_pair.first;
+              B.middle.emplace_back(); //put empty list at end of B.middle.
             }
-            if (B.bigger_middle_probability < s.cumulative_probability)
-            {
-              B.bigger_middle_probability = s.cumulative_probability;
-            }
+
+            move_list_element_back<probabilistic_state_type>((*s), middle_temp, B.middle.back());
           }
-          
-          // If the bigger and smaller probabilities happen to be the same, then all the states
-          // have the same probability to go to block Bc; hence, only one set in middle is needed.
-          // On the other hand, if the bigger and smaller probability are not equal, then we have to 
-          // add its respective states to different sub-sets in middle. Furtheremore, the states with
-          // probabilities in between are placed in a vector to be ordered later.
-          if (B.bigger_middle_probability == B.smaller_middle_probability)
-          {
-            // Add all the states from middle_temp to the middle set
-            B.middle.push_back(middle_temp);
-          }
-          else
-          {
-            // If  bigger and smaller probability are not equal, then add them in different sets
-            // of middle and sort the remaining probabilities in between.
-            embedded_list<probabilistic_state_type> middle_big; 
-            embedded_list<probabilistic_state_type> middle_small;  
-
-            // Add all the states corresponding to the bigger and smaller probability to middle.
-            // Save the remaining states in a vector to sort them later.
-            for(typename embedded_list<probabilistic_state_type>::iterator i=middle_temp.begin(); i!=middle_temp.end(); )
-            {
-              probabilistic_state_type& s= *i;
-              i++; // Increment the iterator here, such that we can change the list. 
-
-              if (s.cumulative_probability == B.bigger_middle_probability)
-              {
-                // State s has the highest probabilty in the middle temp. Add to middle set.
-                move_list_element_back<probabilistic_state_type>((s), middle_temp, middle_big);
-              }
-              else if (s.cumulative_probability == B.smaller_middle_probability)
-              {
-                // State s the lowest probabilty in the middle temp. Add to middle set.
-                move_list_element_back<probabilistic_state_type>((s), middle_temp, middle_small);
-              }
-              else
-              {
-                // The cumulative probability of state s is neither the highest or lowest. Add the
-                // state to a vector to sort them later.
-                grouped_states_per_probability_in_block.emplace_back(s.cumulative_probability, &s);
-              }
-            }
-
-            // Add the the sets with the biggest and smallest probability to middle.
-            B.middle.push_back(middle_big);
-            B.middle.push_back(middle_small);
-
-            // Sort the probabilities of middle, not including the biggest and smallest probability
-            std::sort(grouped_states_per_probability_in_block.begin(), grouped_states_per_probability_in_block.end());
-            
-            // Construct the rest of the middle set based on the grouped probabilities. To this end, 
-            // traverse all the vector with the grouped states by probability. Store the states with
-            // the same probability to a new sub-set in middle set. current_probability is used to
-            // keep track of the probability that is currently being processed.
-            probability_label_type current_probability = probability_label_type().zero();
-            for (const std::pair<probability_label_type, probabilistic_state_type*>& cumulative_prob_state_pair : grouped_states_per_probability_in_block)
-            {
-              probabilistic_state_type* s = cumulative_prob_state_pair.second;
-              if (current_probability != cumulative_prob_state_pair.first)
-              {
-                // The current state has a different probability as the current probability. Allocate
-                // another space in the middle to store this state and change the current probability.
-                current_probability = cumulative_prob_state_pair.first;
-                B.middle.emplace_back(); //put empty list at end of B.middle.
-              }
-
-              move_list_element_back<probabilistic_state_type>((*s), middle_temp, B.middle.back());
-            }
-            
-          }
-          
         }
 
         // Now that we have all the states in left, middle and right; we have to find the largest
