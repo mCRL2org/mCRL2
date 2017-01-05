@@ -32,8 +32,8 @@ namespace lts
 enum lts_probabilistic_equivalence
 {
   lts_probabilistic_eq_none,             /**< Unknown or no equivalence */
-  lts_probabilistic_eq_pbisim,           /**< Probabilistic bisimulation equivalence using the O(mn (log n + log m)) algorithm [Bier] */
-  lts_probabilistic_eq_pbisim_fast       /**< Probabilistic bisimulation equivalence using the O(m(log n)) algorithm */
+  lts_probabilistic_eq_pbisim_bem,       /**< Probabilistic bisimulation equivalence using the O(mn (log n + log m)) algorithm [Bier] */
+  lts_probabilistic_eq_pbisim_grv        /**< Probabilistic bisimulation equivalence using the O(m(log n)) algorithm by Groote, Rivera Verduzco and de Vink */
 };
 
 /** \brief Determines the equivalence from a string.
@@ -51,13 +51,13 @@ lts_probabilistic_equivalence parse_probabilistic_equivalence(std::string const&
   {
     return lts_probabilistic_eq_none;
   }
+  else if (s == "pbisim_bem")
+  {
+    return lts_probabilistic_eq_pbisim_bem;
+  }
   else if (s == "pbisim")
   {
-    return lts_probabilistic_eq_pbisim;
-  }
-  else if (s == "pbisim_fast")
-  {
-	  return lts_probabilistic_eq_pbisim_fast;
+	  return lts_probabilistic_eq_pbisim_grv;
   }
   else
   {
@@ -93,10 +93,10 @@ inline std::string print_probabilistic_equivalence(const lts_probabilistic_equiv
   {
     case lts_probabilistic_eq_none:
       return "none";
-    case lts_probabilistic_eq_pbisim:
+    case lts_probabilistic_eq_pbisim_bem:
+      return "pbisim-bem";
+    case lts_probabilistic_eq_pbisim_grv:
       return "pbisim";
-    case lts_probabilistic_eq_pbisim_fast:
-      return "pbisim_fast";
     default:
       throw mcrl2::runtime_error("Unknown equivalence.");
   }
@@ -120,10 +120,10 @@ inline std::string description(const lts_probabilistic_equivalence eq)
   {
     case lts_probabilistic_eq_none:
       return "identity equivalence";
-    case lts_probabilistic_eq_pbisim:
-      return "probabilistic bisimulation equivalence using the O(mn (log n + log m)) algorithm [Bier]";
-	case lts_probabilistic_eq_pbisim_fast:
-		return "probabilistic bisimulation equivalence using the O(m(log n)) algorithm ";
+    case lts_probabilistic_eq_pbisim_bem:
+      return "probabilistic bisimulation equivalence using the O(mn (log n + log m)) algorithm by Baier, Engelen and Majster-Cederbaum, 2000";
+	case lts_probabilistic_eq_pbisim_grv:
+		return "probabilistic bisimulation equivalence using the O(m(log n)) algorithm by Groote, Rivera-Verduzco and de Vink, 2017";
     default:
       throw mcrl2::runtime_error("Unknown equivalence.");
   }

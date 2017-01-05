@@ -6,10 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lts/detail/liblts_pbisim.h
+/// \file lts/detail/liblts_pbisim_bem.h
 
-#ifndef _LIBLTS_PBISIM_H
-#define _LIBLTS_PBISIM_H
+#ifndef _LIBLTS_PBISIM_BEM_H
+#define _LIBLTS_PBISIM_BEM_H
 #include <cmath>
 #include <vector>
 #include <map>
@@ -748,7 +748,7 @@ class prob_bisim_partitioner
  * \param[in/out] l The transition system that is reduced.
  */
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce(LTS_TYPE& l);
+void probabilistic_bisimulation_reduce_bem(LTS_TYPE& l);
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
 * \details This lts and the lts l2 are not usable anymore after this call.
@@ -756,7 +756,7 @@ void probabilistic_bisimulation_reduce(LTS_TYPE& l);
 * \param[in/out] l2 A second probabilistic transition system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_compare(LTS_TYPE& l1, LTS_TYPE& l2);
+bool destructive_probabilistic_bisimulation_compare_bem(LTS_TYPE& l1, LTS_TYPE& l2);
 
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
@@ -771,7 +771,7 @@ bool probabilistic_bisimulation_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
 
 
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce(LTS_TYPE& l)
+void probabilistic_bisimulation_reduce_bem(LTS_TYPE& l)
 {
 
   // Apply the probabilistic bisimulation reduction algorithm.
@@ -787,17 +787,17 @@ void probabilistic_bisimulation_reduce(LTS_TYPE& l)
 }
 
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_compare(
+bool probabilistic_bisimulation_compare_bem(
   const LTS_TYPE& l1,
   const LTS_TYPE& l2)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_probabilistic_bisimulation_compare(l1_copy, l2_copy);
+  return destructive_probabilistic_bisimulation_compare_bem(l1_copy, l2_copy);
 }
 
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_compare(
+bool destructive_probabilistic_bisimulation_compare_bem(
   LTS_TYPE& l1,
   LTS_TYPE& l2)
 {
@@ -822,4 +822,4 @@ bool destructive_probabilistic_bisimulation_compare(
 }
 }
 }
-#endif
+#endif // _LIBLTS_PBISIM_BEM_H

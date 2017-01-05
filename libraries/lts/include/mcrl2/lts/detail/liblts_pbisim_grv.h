@@ -8,8 +8,8 @@
 //
 /// \file lts/detail/liblts_pbisim.h
 
-#ifndef _LIBLTS_PBISIM_FAST_H
-#define _LIBLTS_PBISIM_FAST_H
+#ifndef _LIBLTS_PBISIM_GRV_H
+#define _LIBLTS_PBISIM_GRV_H
 #include <vector>
 #include <cassert>
 #include "mcrl2/utilities/logger.h"
@@ -25,14 +25,14 @@ namespace detail
 {
 
 template < class LTS_TYPE>
-class prob_bisim_partitioner_fast
+class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de Vink
 {
   public:
     /** \brief Creates a probabilistic bisimulation partitioner for an PLTS.
     *  \details This bisimulation partitioner applies the algorithm described in "J.F. Groote, H.J. Rivera, E.P. de Vink, 
 	  *	 An O(mlogn) algorithm for probabilistic bisimulation".
     */
-    prob_bisim_partitioner_fast(LTS_TYPE& l)
+    prob_bisim_partitioner_grv(LTS_TYPE& l)
       : aut(l)
     {
       mCRL2log(log::verbose) << "Probabilistic bisimulation partitioner created for " <<
@@ -69,7 +69,7 @@ class prob_bisim_partitioner_fast
     }
 
     /** \brief Destroys this partitioner. */
-    ~prob_bisim_partitioner_fast()
+    ~prob_bisim_partitioner_grv()
     {}
 
     /** \brief Replaces the transition relation of the current lts by the transitions
@@ -131,7 +131,7 @@ class prob_bisim_partitioner_fast
     *  \param[in] t A state number.
     *  \retval true if \e s and \e t are in the same bisimulation equivalence class;
     *  \retval false otherwise. */
-    bool in_same_probabilistic_class_fast(const size_t s, const size_t t)
+    bool in_same_probabilistic_class_grv(const size_t s, const size_t t)
     {
       return get_eq_probabilistic_class(s) == get_eq_probabilistic_class(t);
     }
@@ -168,9 +168,9 @@ class prob_bisim_partitioner_fast
     {
       block_key_type parent_block;
       std::vector<probabilistic_transition_type*> incoming_transitions;
-      bool mark_state;
 
       // Temporary
+      bool mark_state;
       size_t residual_transition_cnt;
       size_t* transition_count_ptr;
     };
@@ -179,9 +179,9 @@ class prob_bisim_partitioner_fast
     {
       block_key_type parent_block;
       std::vector<action_transition_type*> incoming_transitions;
-      bool mark_state;
 
       // Temporary.
+      bool mark_state;
       probability_label_type cumulative_probability;
     };
 
@@ -317,8 +317,8 @@ class prob_bisim_partitioner_fast
         }
     };
 
-    // The basic stores for all elementary data structures. 
-    
+    // The basic stores for all elementary data structures. The deque's are used intentionally
+    // as there are pointers to their content. 
     std::vector<action_transition_type> action_transitions;
     std::deque<probabilistic_transition_type> probabilistic_transitions;
     std::vector<action_state_type> action_states;
@@ -327,9 +327,6 @@ class prob_bisim_partitioner_fast
     std::deque<probabilistic_block_type> probabilistic_blocks;
     std::deque<action_constellation_type> action_constellations;
     std::deque<probabilistic_constellation_type> probabilistic_constellations;
-
-    // The following is an auxiliary data structure used to group incoming transitions on labels.
-    transitions_per_label_t transitions_per_label;
 
     // The storage to store the state_to_constellation counts for each transition. Transition refer with
     // a pointer to the elements in this deque. 
@@ -343,6 +340,11 @@ class prob_bisim_partitioner_fast
     std::deque<action_mark_type> marked_action_blocks;
     std::deque<probabilistic_mark_type> marked_probabilistic_blocks;
     std::vector< std::pair<probability_label_type, probabilistic_state_type*> > grouped_states_per_probability_in_block;
+    
+    // The following is a temporary data structure used to group incoming transitions on labels, which is declared
+    // globally to avoid declaring it repeatedly which is time consuming.
+    transitions_per_label_t transitions_per_label;
+
 
     LTS_TYPE& aut;
 
@@ -1298,7 +1300,7 @@ class prob_bisim_partitioner_fast
 * \param[in/out] l The transition system that is reduced.
 */
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l);
+void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l);
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
 * \details This lts and the lts l2 are not usable anymore after this call.
@@ -1306,7 +1308,7 @@ void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l);
 * \param[in/out] l2 A second probabilistic transition system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_fast_compare(LTS_TYPE& l1, LTS_TYPE& l2);
+bool destructive_probabilistic_bisimulation_grv_compare(LTS_TYPE& l1, LTS_TYPE& l2);
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
 *  \details The current transitions system and the lts l2 are first duplicated and subsequently
@@ -1316,13 +1318,13 @@ bool destructive_probabilistic_bisimulation_fast_compare(LTS_TYPE& l1, LTS_TYPE&
 * \param[in/out] l2 A second transistion system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_fast_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
+bool probabilistic_bisimulation_grv_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
 
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l)
+void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l)
 {
   // Apply the probabilistic bisimulation reduction algorithm.
-  detail::prob_bisim_partitioner_fast<LTS_TYPE> prob_bisim_part(l);
+  detail::prob_bisim_partitioner_grv<LTS_TYPE> prob_bisim_part(l);
 
   // Clear the state labels of the LTS l
   l.clear_state_labels();
@@ -1334,17 +1336,17 @@ void probabilistic_bisimulation_reduce_fast(LTS_TYPE& l)
 }
 
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_fast_compare(
+bool probabilistic_bisimulation_grv_compare(
   const LTS_TYPE& l1,
   const LTS_TYPE& l2)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_probabilistic_bisimulation_fast_compare(l1_copy, l2_copy);
+  return destructive_probabilistic_bisimulation_grv_compare(l1_copy, l2_copy);
 }
 
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_fast_compare(
+bool destructive_probabilistic_bisimulation_grv_compare(
   LTS_TYPE& l1,
   LTS_TYPE& l2)
 {
@@ -1360,13 +1362,13 @@ bool destructive_probabilistic_bisimulation_fast_compare(
   initial_probabilistic_state_key_l2 = l1.num_probabilistic_states() - 1;
   initial_probabilistic_state_key_l1 = l1.num_probabilistic_states() - 2;
 
-  detail::prob_bisim_partitioner_fast<LTS_TYPE> prob_bisim_part(l1);
+  detail::prob_bisim_partitioner_grv<LTS_TYPE> prob_bisim_part(l1);
 
-  return prob_bisim_part.in_same_probabilistic_class_fast(initial_probabilistic_state_key_l2,
+  return prob_bisim_part.in_same_probabilistic_class_grv(initial_probabilistic_state_key_l2,
     initial_probabilistic_state_key_l1);
 }
 
 } // end namespace detail
 } // end namespace lts
 } // end namespace mcrl2
-#endif //_LIBLTS_PBISIM_FAST_H
+#endif //_LIBLTS_PBISIM_GRV_H
