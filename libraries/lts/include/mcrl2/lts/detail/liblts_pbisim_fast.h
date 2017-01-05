@@ -244,7 +244,7 @@ class prob_bisim_partitioner_fast
       size_t number_of_states;    // number of states in this constellation.
     }; 
     
-    struct probabilistic_constellation_type : public embedded_list_node < probabilistic_constellation_type > 
+    struct probabilistic_constellation_type 
     {
       embedded_list<probabilistic_block_type> blocks;
       size_t number_of_states;    // number of states in this constellation.
@@ -317,9 +317,8 @@ class prob_bisim_partitioner_fast
         }
     };
 
-    /* The following is an auxiliary data structure used to group incoming transitions on labels */
-    transitions_per_label_t transitions_per_label;
-
+    // The basic stores for all elementary data structures. 
+    
     std::vector<action_transition_type> action_transitions;
     std::deque<probabilistic_transition_type> probabilistic_transitions;
     std::vector<action_state_type> action_states;
@@ -328,14 +327,21 @@ class prob_bisim_partitioner_fast
     std::deque<probabilistic_block_type> probabilistic_blocks;
     std::deque<action_constellation_type> action_constellations;
     std::deque<probabilistic_constellation_type> probabilistic_constellations;
+
+    // The following is an auxiliary data structure used to group incoming transitions on labels.
+    transitions_per_label_t transitions_per_label;
+
+    // The storage to store the state_to_constellation counts for each transition. Transition refer with
+    // a pointer to the elements in this deque. 
     std::deque<size_t> state_to_constellation_count;
+
+    // The lists below contains all the non trivial constellations.
+    std::stack<action_constellation_type*> non_trivial_action_constellations;
+    std::stack<probabilistic_constellation_type*> non_trivial_probabilistic_constellations;
+    
     // temporary data structures. declared here to prevent redeclaring these too often.
     std::deque<action_mark_type> marked_action_blocks;
     std::deque<probabilistic_mark_type> marked_probabilistic_blocks;
-
-    // The lists below contains all constellations, where the non trivial are put at the front. 
-    embedded_list<probabilistic_constellation_type> probabilistic_constellations_list;
-    std::stack<action_constellation_type*> non_trivial_action_constellations;
     std::vector< std::pair<probability_label_type, probabilistic_state_type*> > grouped_states_per_probability_in_block;
 
     LTS_TYPE& aut;
@@ -547,9 +553,6 @@ class prob_bisim_partitioner_fast
         block.incoming_probabilistic_transitions.push_back(t);
       }
 
-      probabilistic_constellations_list.push_back(probabilistic_constellations.front());
-      assert(probabilistic_constellations_list.size()==1);
-
       if (initial_action_const.blocks.size()>1) 
       {
         non_trivial_action_constellations.push(&initial_action_const);
@@ -700,13 +703,12 @@ class prob_bisim_partitioner_fast
     */
     void refine_partition_until_it_becomes_stable(void)
     {
-      // Non-trivial contellations are always at the front of the list.
-      probabilistic_constellation_type* non_trivial_probabilistic_const = &probabilistic_constellations_list.front();
 
       // Refine until all the constellations are trivial.
-      // while (non_trivial_probabilistic_const->blocks.size() > 1 || non_trivial_action_const->blocks.size() > 1)
-      while (non_trivial_probabilistic_const->blocks.size() > 1 || !non_trivial_action_constellations.empty())
+      while (!non_trivial_probabilistic_constellations.empty() || !non_trivial_action_constellations.empty())
       {
+        assert(check_data_structure());
+
         // Refine probabilistic blocks if a non-trivial action constellation exists.
         if (!non_trivial_action_constellations.empty())
         {
@@ -715,7 +717,6 @@ class prob_bisim_partitioner_fast
           assert(non_trivial_action_const->blocks.size()>=2);
 
 // print_structure("REFINE I");
-          assert(check_data_structure());
           // Choose splitter block Bc of a non-trivial constellation C, such that |Bc| <= 1/2|C|.
           // And also split constellation C into BC and C\BC in the set of constellations.
           action_block_type* Bc_ptr = choose_action_splitter(non_trivial_action_const);
@@ -730,9 +731,8 @@ class prob_bisim_partitioner_fast
           // Split every marked probabilistic block based on left, middle and right.
           for (probabilistic_mark_type& B : marked_probabilistic_blocks)
           {
-            // Variable unstable_const is used to determine whether the parent constellation holding
-            // the current block becomes unstable; this happends when the block is splitted.
-            bool unstable_const = false;
+            // We must know whether the current constellation is already on the stack.
+            bool already_on_non_trivial_constellations_stack = probabilistic_constellations[B.probabilistic_block->parent_constellation].blocks.size()>1; 
 
             // First return the largest of left, middle or right to the states of current processed block.
             B.probabilistic_block->states = *B.large_block_ptr;
@@ -743,7 +743,6 @@ class prob_bisim_partitioner_fast
             if (B.left.size() > 0)
             {
               split_probabilistic_block(*B.probabilistic_block, B.left);
-              unstable_const = true;
             }
 
             // Split right set of the block to another block if right has states and it is not
@@ -751,7 +750,6 @@ class prob_bisim_partitioner_fast
             if (B.right.size() > 0)
             {
               split_probabilistic_block(*B.probabilistic_block, B.right);
-              unstable_const = true;
             }
 
             // Iterate over all middle sets. Split middle sets of the current block to another block if 
@@ -761,16 +759,16 @@ class prob_bisim_partitioner_fast
               if (middle.size() > 0)
               {
                 split_probabilistic_block(*B.probabilistic_block, middle);
-                unstable_const = true;
               }
             }
 
             // Move the parent constellation of the current block to the front of the
             // constellation list if it became unstable.
-            if (true == unstable_const)
+            if (!already_on_non_trivial_constellations_stack &&  probabilistic_constellations[B.probabilistic_block->parent_constellation].blocks.size()>1)
             {
               probabilistic_constellation_type& parent_const = probabilistic_constellations[B.probabilistic_block->parent_constellation];
-              move_list_element_front<probabilistic_constellation_type>(parent_const, probabilistic_constellations_list, probabilistic_constellations_list);
+              assert(parent_const.blocks.size()>1);
+              non_trivial_probabilistic_constellations.push(&parent_const);
             }
 
             // Reset middle vector to prepare for the next mark process
@@ -779,10 +777,13 @@ class prob_bisim_partitioner_fast
         }
 
         // Refine action blocks if a non-trivial probabilistic constellation exists.
-        if (non_trivial_probabilistic_const->blocks.size() > 1)
+        if (!non_trivial_probabilistic_constellations.empty())
         {
 // print_structure("REFINE II");
-          assert(check_data_structure());
+
+          probabilistic_constellation_type* non_trivial_probabilistic_const = non_trivial_probabilistic_constellations.top();
+          non_trivial_probabilistic_constellations.pop();
+          assert(non_trivial_probabilistic_const->blocks.size()>=2);
           // Choose splitter block Bc of a non-trivial constellation C, such that |Bc| <= 1/2|C|.
           // And also split constellation C into BC and C\BC in the set of constellations.
           probabilistic_block_type* Bc_ptr = choose_probabilistic_splitter(non_trivial_probabilistic_const);
@@ -800,23 +801,20 @@ class prob_bisim_partitioner_fast
             // Split every marked probabilistic block based on left, middle and right.
             for (action_mark_type& B : marked_action_blocks)
             {
-              // Variable unstable_const is used to determine whether the parent constellation holding
-              // the current block becomes unstable; this happens when the block is split.
+              // We must know whether the current constellation is already on the stack.
               bool already_on_non_trivial_constellations_stack = action_constellations[B.action_block->parent_constellation].blocks.size()>1; 
 
               // First return the largest of left, middle or right to the states of current processed block.
               B.action_block->states = *B.large_block_ptr;
               B.large_block_ptr->clear();
 
-              // Split left set of the block to another block if left has states and it is not
-              // the largest block.
+              // Split left set of the block to another block if left has states and it is not the largest block.
               if (B.left.size() > 0)
               {
                 split_action_block(*B.action_block, B.left);
               }
 
-              // Split right set of the block to another block if right has states and it is not
-              // the largest block.
+              // Split right set of the block to another block if right has states and it is not the largest block.
               if (B.right.size() > 0)
               {
                 split_action_block(*B.action_block, B.right);
@@ -841,12 +839,9 @@ class prob_bisim_partitioner_fast
             }
           }
         }
-// print_structure("END REFINE");
-        assert(check_data_structure());
-
-        // Select another non-trivial constellation.
-        non_trivial_probabilistic_const = &probabilistic_constellations_list.front();
       }
+      // print_structure("END REFINE");
+      assert(check_data_structure());
     }
 
     /** \brief Split a probabilistic block.
@@ -1192,7 +1187,6 @@ class prob_bisim_partitioner_fast
       non_trivial_action_const->number_of_states -= Bc->states.size();
 
       // Check if the constellation is still non-trivial; if not, move it to the non trivial constellation stack.
-      // of the constellation list if it is not already at the end
       if (non_trivial_action_const->blocks.size() > 1)  
       {
         //The constellation is non trivial, put it in the stack of non_trivial_constellations.
@@ -1232,16 +1226,11 @@ class prob_bisim_partitioner_fast
       // Update the number of states and blocks of the non trivial block
       non_trivial_probabilistic_const->number_of_states -= Bc->states.size();
 
-      // Check if the constellation is still non-trivial; if not, move it to the end 
-      // of the constellations list if it is not already at the end
-      if (non_trivial_probabilistic_const->blocks.size() < 2 &&
-         (&probabilistic_constellations_list.back()) != non_trivial_probabilistic_const)
+      // Check if the constellation is still non-trivial; if not, move it to the trivial constellation stack.
+      if (non_trivial_probabilistic_const->blocks.size() > 1)
       {
-        //The constellation is trivial, send to the back of the constellation list.
-        // First remove it from its current position and update first pointer of the list 
-        // if necessary.
-        probabilistic_constellations_list.erase(*non_trivial_probabilistic_const);
-        probabilistic_constellations_list.push_back(*non_trivial_probabilistic_const);
+        //The constellation is non trivial, put it in the stack of non_trivial_constellations.
+        non_trivial_probabilistic_constellations.push(non_trivial_probabilistic_const);
       }
 
       // Add Bc to a new constellation
@@ -1250,8 +1239,6 @@ class prob_bisim_partitioner_fast
       Bc->parent_constellation = probabilistic_constellations.size()-1;
       new_probabilistic_const.blocks.push_back(*Bc); 
       new_probabilistic_const.number_of_states = Bc->states.size();
-
-      probabilistic_constellations_list.push_back(probabilistic_constellations.back());
 
       return Bc;
     }
