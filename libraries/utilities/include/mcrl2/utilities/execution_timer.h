@@ -77,7 +77,7 @@ class execution_timer
       {
         if (i->second.start > i->second.finish)
         {
-          throw mcrl2::runtime_error("Start of " + i->first + " occurred after finish");
+          throw mcrl2::runtime_error("Start of " + i->first + " occurred after finish.");
         }
 
         s << "    " << i->first << ": "
@@ -91,7 +91,7 @@ class execution_timer
     /// \brief Constructor of a simple execution timer
     /// \param[in] tool_name Name of the tool that does the measurements
     /// \param[in] filename Name of the file to which the measurements are written
-    execution_timer(std::string const& tool_name = "", std::string const& filename = "") :
+    execution_timer(const std::string& tool_name = "", std::string const& filename = "") :
       m_tool_name(tool_name),
       m_filename(filename)
     {}
@@ -104,11 +104,11 @@ class execution_timer
     /// \param[in] timing_name Name of the measurement being started
     /// \pre No start(timing_name) has occurred before
     /// \post The current time has been recorded as starting time of timing_name
-    void start(std::string const& timing_name)
+    void start(const std::string& timing_name)
     {
       if (m_timings.find(timing_name) != m_timings.end())
       {
-        throw mcrl2::runtime_error("Starting already known timing; causes unreliable results");
+        throw mcrl2::runtime_error("Starting already known timing: " + timing_name + ". This causes unreliable results.");
       }
       timing t;
       t.start = clock();
@@ -119,11 +119,11 @@ class execution_timer
     /// \param[in] timing_name Name of the measurment being finished
     /// \pre A start(timing_name) was executed before
     /// \post The current time has been recorded as end time of timing_name
-    void finish(std::string const& timing_name)
+    void finish(const std::string& timing_name)
     {
       if (m_timings.find(timing_name) == m_timings.end())
       {
-        throw mcrl2::runtime_error("Finishing timing that was not started");
+        throw mcrl2::runtime_error("Finishing timing '" + timing_name + "' that was not started.");
       }
       m_timings[timing_name].finish = clock();
     }

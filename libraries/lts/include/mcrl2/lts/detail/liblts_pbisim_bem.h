@@ -14,6 +14,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
@@ -37,12 +38,15 @@ class prob_bisim_partitioner
     prob_bisim_partitioner(
       LTS_TYPE& l):aut(l)
     {
+      utilities::execution_timer timer;
       mCRL2log(log::verbose) << "Probabilistic bisimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
+      timer.start("bisimulation_reduce (bem)");
       create_initial_partition();
       refine_partition_until_it_becomes_stable();
       postprocessing_stage();
+      timer.finish("bisimulation_reduce (bem)");
     }
 
 

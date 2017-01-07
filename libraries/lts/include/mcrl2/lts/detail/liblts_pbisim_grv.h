@@ -12,6 +12,7 @@
 #define _LIBLTS_PBISIM_GRV_H
 #include <vector>
 #include <cassert>
+#include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/embedded_list.h"
 #include "mcrl2/lts/detail/liblts_plts_merge.h"
@@ -35,11 +36,14 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     prob_bisim_partitioner_grv(LTS_TYPE& l)
       : aut(l)
     {
+      utilities::execution_timer timer;
       mCRL2log(log::verbose) << "Probabilistic bisimulation partitioner created for " <<
                                 l.num_states() << " states and " <<
                                 l.num_transitions() << " transitions\n";
+      timer.start("bisimulation_reduce (grv)");
       create_initial_partition();
       refine_partition_until_it_becomes_stable();
+      timer.finish("bisimulation_reduce (grv)");
     }
 
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.

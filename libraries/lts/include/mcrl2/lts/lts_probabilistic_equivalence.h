@@ -51,7 +51,7 @@ lts_probabilistic_equivalence parse_probabilistic_equivalence(std::string const&
   {
     return lts_probabilistic_eq_none;
   }
-  else if (s == "pbisim_bem")
+  else if (s == "pbisim-bem")
   {
     return lts_probabilistic_eq_pbisim_bem;
   }
