@@ -190,7 +190,6 @@ class big_natural_number
       {
         m_number.pop_back();
       }
-      m_number.shrink_to_fit();
     }
 
     // Check that the number is well defined, in the sense
@@ -213,12 +212,12 @@ class big_natural_number
 
   public:
     // Default constructor. The value is 0 by default.
-    big_natural_number()
+    explicit big_natural_number()
     {
     }
 
     // Constructor based on a size_t. The value of the number will be n.
-    big_natural_number(const size_t n)
+    explicit big_natural_number(const size_t n)
     {
       if (n>0)
       {
@@ -251,6 +250,28 @@ class big_natural_number
     {
       is_well_defined();
       return m_number.size()==0;
+    }
+
+    /** \brief Returns whether this number equals a number of size_t.
+        \details This is more efficient than checking x==big_natural_number(1).
+    */
+    bool is_number(size_t n) const
+    {
+      is_well_defined();
+      if (n==0) 
+      {
+        return m_number.size()==0;
+      }
+      return m_number.size()==1 && m_number.front()==n;
+    }
+
+    /** \brief Sets the number to zero.
+        \details This is more efficient than using an assignment x=0.
+    */
+    void clear()
+    {
+      is_well_defined();
+      m_number.clear();
     }
 
     /** \brief Transforms this number to a size_t, provided it is sufficiently small.
@@ -443,32 +464,45 @@ class big_natural_number
       return result;
     }
 
-    /* \brief Standard multiplication operator.
+    
+
+    /* \brief Efficient multiplication operator that does not declare vector space.
+       \detail Initially result must be zero. At the end: result equals (*this)*other+result.
+               The calculation_buffer does not need to be initialised. 
      */
-    big_natural_number operator*(const big_natural_number& other) const
+    void multiply(const big_natural_number& other,
+                  big_natural_number& result,
+                  big_natural_number& calculation_buffer_for_multiplicand) const
     {
       is_well_defined();
       other.is_well_defined();
-      big_natural_number result=0, multiplicand;
       size_t offset=0; 
       for(size_t digit: other.m_number)
       {
-        // Move other to the multiplicand and multiply it with base^offset.
-        multiplicand.m_number=std::vector<size_t>(offset,0);
+        // Move n2 to the multiplicand and multiply it with base^offset.
+        calculation_buffer_for_multiplicand.m_number=std::vector<size_t>(offset,0);
         for(size_t n: m_number)
         { 
-          multiplicand.m_number.push_back(n);
+          calculation_buffer_for_multiplicand.m_number.push_back(n);
         }
 
         // Multiply the multiplicand with digit.
-        multiplicand.multiply_by(digit,0);
+        calculation_buffer_for_multiplicand.multiply_by(digit,0);
         // Add the multiplicand to the result.
-        result.add(multiplicand);
+        result.add(calculation_buffer_for_multiplicand);
         offset++;
       }
       result.is_well_defined();
-      return result;
     }
+
+    /* \brief Standard multiplication operator. This is not very efficient as it declares two temporary vectors.
+     */
+    big_natural_number operator*(const big_natural_number& other) const
+    {
+      big_natural_number result, buffer;
+      multiply(other,result,buffer);
+      return result;
+    } 
 
     /* \brief Standard division operator. This is currently implemented by a bit wise subtraction. Can be optimized by a 64 bit calculation.
      */
@@ -553,7 +587,8 @@ class big_natural_number
 
 inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
 {
-  big_natural_number n=l;
+  static big_natural_number n; // This code is not re-entrant, but it avoids declaring a vector continuously. 
+  n=l;  
   std::string s; // This string contains the number in reverse ordering.
   for( ; !n.is_zero() ; )
   {

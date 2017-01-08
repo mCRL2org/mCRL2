@@ -27,7 +27,7 @@ namespace detail
 {
 
 template < class LTS_TYPE>
-class prob_bisim_partitioner
+class prob_bisim_partitioner_bem
 {
 
   public:
@@ -35,10 +35,8 @@ class prob_bisim_partitioner
      *  \details This bisimulation partitioner applies the algorithm defined in C. Baier, B. Engelen and M. Majster-Cederbaum. 
 	   *	 Deciding Bisimilarity and Similarity for Probabilistic Processes. In Journal of Computer and System Sciences 60, 187-237 (2000)
 	   */
-    prob_bisim_partitioner(
-      LTS_TYPE& l):aut(l)
+    prob_bisim_partitioner_bem(LTS_TYPE& l, utilities::execution_timer& timer):aut(l)
     {
-      utilities::execution_timer timer;
       mCRL2log(log::verbose) << "Probabilistic bisimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
@@ -48,11 +46,6 @@ class prob_bisim_partitioner
       postprocessing_stage();
       timer.finish("bisimulation_reduce (bem)");
     }
-
-
-    /** \brief Destroys this partitioner. */
-    ~prob_bisim_partitioner()
-    {}
 
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
     *  \return The number of bisimulation equivalence classes of the LTS.
@@ -750,9 +743,10 @@ class prob_bisim_partitioner
 
 /** \brief Reduce transition system l with respect to probabilistic bisimulation.
  * \param[in/out] l The transition system that is reduced.
+ * \param[in/out] timer A timer that can be used to report benchmarking results.
  */
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce_bem(LTS_TYPE& l);
+void probabilistic_bisimulation_reduce_bem(LTS_TYPE& l, utilities::execution_timer& timer);
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
 * \details This lts and the lts l2 are not usable anymore after this call.
@@ -775,11 +769,11 @@ bool probabilistic_bisimulation_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
 
 
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce_bem(LTS_TYPE& l)
+void probabilistic_bisimulation_reduce_bem(LTS_TYPE& l, utilities::execution_timer& timer)
 {
 
   // Apply the probabilistic bisimulation reduction algorithm.
-  detail::prob_bisim_partitioner<LTS_TYPE> prob_bisim_part(l);
+  detail::prob_bisim_partitioner_bem<LTS_TYPE> prob_bisim_part(l,timer);
 
   // Clear the state labels of the LTS l
   l.clear_state_labels();
@@ -803,7 +797,8 @@ bool probabilistic_bisimulation_compare_bem(
 template < class LTS_TYPE>
 bool destructive_probabilistic_bisimulation_compare_bem(
   LTS_TYPE& l1,
-  LTS_TYPE& l2)
+  LTS_TYPE& l2,
+  utilities::execution_timer& timer)
 {
   size_t initial_probabilistic_state_key_l1;
   size_t initial_probabilistic_state_key_l2;
@@ -817,7 +812,7 @@ bool destructive_probabilistic_bisimulation_compare_bem(
   initial_probabilistic_state_key_l2 = l1.num_probabilistic_states() - 1;
   initial_probabilistic_state_key_l1 = l1.num_probabilistic_states() - 2;
 
-  detail::prob_bisim_partitioner<LTS_TYPE> prob_bisim_part(l1);
+  detail::prob_bisim_partitioner_bem<LTS_TYPE> prob_bisim_part(l1, timer);
 
   return prob_bisim_part.in_same_probabilistic_class(initial_probabilistic_state_key_l2,
     initial_probabilistic_state_key_l1);

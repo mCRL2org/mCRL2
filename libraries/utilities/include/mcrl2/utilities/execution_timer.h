@@ -75,14 +75,20 @@ class execution_timer
 
       for (std::map<std::string, timing>::const_iterator i = m_timings.begin(); i != m_timings.end(); ++i)
       {
-        if (i->second.start > i->second.finish)
+        if (i->second.finish==0)
+        {
+          s << "    " << i->first << ": did not finish. " << std::endl;
+        }
+        else if (i->second.start > i->second.finish)
         {
           throw mcrl2::runtime_error("Start of " + i->first + " occurred after finish.");
         }
-
-        s << "    " << i->first << ": "
-          << (static_cast<float>(i->second.finish - i->second.start))/CLOCKS_PER_SEC
-          << std::endl;
+        else
+        {
+          s << "    " << i->first << ": "
+            << (static_cast<float>(i->second.finish - i->second.start))/CLOCKS_PER_SEC 
+            << std::endl;
+        }
       }
     }
 

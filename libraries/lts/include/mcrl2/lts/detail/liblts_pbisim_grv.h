@@ -33,10 +33,9 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     *  \details This bisimulation partitioner applies the algorithm described in "J.F. Groote, H.J. Rivera, E.P. de Vink, 
 	  *	 An O(mlogn) algorithm for probabilistic bisimulation".
     */
-    prob_bisim_partitioner_grv(LTS_TYPE& l)
+    prob_bisim_partitioner_grv(LTS_TYPE& l, utilities::execution_timer& timer)
       : aut(l)
     {
-      utilities::execution_timer timer;
       mCRL2log(log::verbose) << "Probabilistic bisimulation partitioner created for " <<
                                 l.num_states() << " states and " <<
                                 l.num_transitions() << " transitions\n";
@@ -71,10 +70,6 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       assert(s<probabilistic_states.size());
       return probabilistic_states[s].parent_block; // The block index is the state number of the block.
     }
-
-    /** \brief Destroys this partitioner. */
-    ~prob_bisim_partitioner_grv()
-    {}
 
     /** \brief Replaces the transition relation of the current lts by the transitions
     *         of the bisimulation reduced transition system.
@@ -1304,7 +1299,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 * \param[in/out] l The transition system that is reduced.
 */
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l);
+void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l, utilities::execution_timer& timer);
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
 * \details This lts and the lts l2 are not usable anymore after this call.
@@ -1312,7 +1307,7 @@ void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l);
 * \param[in/out] l2 A second probabilistic transition system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_grv_compare(LTS_TYPE& l1, LTS_TYPE& l2);
+bool destructive_probabilistic_bisimulation_grv_compare(LTS_TYPE& l1, LTS_TYPE& l2, utilities::execution_timer& timer);
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
 *  \details The current transitions system and the lts l2 are first duplicated and subsequently
@@ -1322,13 +1317,13 @@ bool destructive_probabilistic_bisimulation_grv_compare(LTS_TYPE& l1, LTS_TYPE& 
 * \param[in/out] l2 A second transistion system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_grv_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
+bool probabilistic_bisimulation_grv_compare(const LTS_TYPE& l1, const LTS_TYPE& l2, utilities::execution_timer& timer);
 
 template < class LTS_TYPE>
-void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l)
+void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l, utilities::execution_timer& timer)
 {
   // Apply the probabilistic bisimulation reduction algorithm.
-  detail::prob_bisim_partitioner_grv<LTS_TYPE> prob_bisim_part(l);
+  detail::prob_bisim_partitioner_grv<LTS_TYPE> prob_bisim_part(l, timer);
 
   // Clear the state labels of the LTS l
   l.clear_state_labels();
@@ -1342,17 +1337,19 @@ void probabilistic_bisimulation_reduce_grv(LTS_TYPE& l)
 template < class LTS_TYPE>
 bool probabilistic_bisimulation_grv_compare(
   const LTS_TYPE& l1,
-  const LTS_TYPE& l2)
+  const LTS_TYPE& l2,
+  utilities::execution_timer& timer)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_probabilistic_bisimulation_grv_compare(l1_copy, l2_copy);
+  return destructive_probabilistic_bisimulation_grv_compare(l1_copy, l2_copy, timer);
 }
 
 template < class LTS_TYPE>
 bool destructive_probabilistic_bisimulation_grv_compare(
   LTS_TYPE& l1,
-  LTS_TYPE& l2)
+  LTS_TYPE& l2,
+   utilities::execution_timer& timer)
 {
   size_t initial_probabilistic_state_key_l1;
   size_t initial_probabilistic_state_key_l2;
@@ -1366,7 +1363,7 @@ bool destructive_probabilistic_bisimulation_grv_compare(
   initial_probabilistic_state_key_l2 = l1.num_probabilistic_states() - 1;
   initial_probabilistic_state_key_l1 = l1.num_probabilistic_states() - 2;
 
-  detail::prob_bisim_partitioner_grv<LTS_TYPE> prob_bisim_part(l1);
+  detail::prob_bisim_partitioner_grv<LTS_TYPE> prob_bisim_part(l1,timer);
 
   return prob_bisim_part.in_same_probabilistic_class_grv(initial_probabilistic_state_key_l2,
     initial_probabilistic_state_key_l1);

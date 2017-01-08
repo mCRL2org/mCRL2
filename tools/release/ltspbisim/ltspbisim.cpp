@@ -139,14 +139,14 @@ class ltsconvert_tool : public input_output_tool
 
     switch (tool_options.equivalence)
     {
-      case lts_probabilistic_eq_pbisim_bem:
-      {
-        mcrl2::lts::detail::probabilistic_bisimulation_reduce_bem(l);
-        break;
-      }
       case lts_probabilistic_eq_pbisim_grv:
       {
-        mcrl2::lts::detail::probabilistic_bisimulation_reduce_grv(l);
+        mcrl2::lts::detail::probabilistic_bisimulation_reduce_grv(l,timer());
+        break;
+      }
+      case lts_probabilistic_eq_pbisim_bem:
+      {
+        mcrl2::lts::detail::probabilistic_bisimulation_reduce_bem(l,timer());
         break;
       }
       default:
@@ -250,8 +250,8 @@ class ltsconvert_tool : public input_output_tool
     
       desc.add_option("equivalence",make_enum_argument<lts_probabilistic_equivalence>("NAME")
                       .add_value(lts_probabilistic_eq_none, true)
-                      .add_value(lts_probabilistic_eq_pbisim_bem)
-                      .add_value(lts_probabilistic_eq_pbisim_grv),
+                      .add_value(lts_probabilistic_eq_pbisim_grv)
+                      .add_value(lts_probabilistic_eq_pbisim_bem),
                       "generate an equivalent LTS, preserving equivalence NAME:"
                       , 'e');
     }
