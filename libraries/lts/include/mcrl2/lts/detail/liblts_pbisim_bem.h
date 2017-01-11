@@ -33,8 +33,8 @@ class prob_bisim_partitioner_bem
   public:
     /** \brief Creates a probabilistic bisimulation partitioner for an PLTS.
      *  \details This bisimulation partitioner applies the algorithm defined in C. Baier, B. Engelen and M. Majster-Cederbaum. 
-	   *	 Deciding Bisimilarity and Similarity for Probabilistic Processes. In Journal of Computer and System Sciences 60, 187-237 (2000)
-	   */
+     *   Deciding Bisimilarity and Similarity for Probabilistic Processes. In Journal of Computer and System Sciences 60, 187-237 (2000)
+     */
     prob_bisim_partitioner_bem(LTS_TYPE& l, utilities::execution_timer& timer):aut(l)
     {
       mCRL2log(log::verbose) << "Probabilistic bisimulation partitioner created for "
@@ -55,7 +55,7 @@ class prob_bisim_partitioner_bem
       return state_partition.size();
     }
 
-	  /** \brief Gives the bisimulation equivalence class number of a state.
+    /** \brief Gives the bisimulation equivalence class number of a state.
      *  \param[in] s A state number.
      *  \return The number of the bisimulation equivalence class to which \e s belongs. */
     size_t get_eq_class(const size_t s) const
@@ -64,16 +64,16 @@ class prob_bisim_partitioner_bem
       return block_index_of_a_state[s]; // The block index is the state number of the block.
     }
 
-	  /** \brief Gives the bisimulation equivalence step class number of a probabilistic state.
-	  *  \param[in] s A probabilistic state number.
-	  *  \return The number of the step class to which s belongs. */
-	  size_t get_eq_step_class(const size_t d) const
-	  {
-		  assert(d < step_class_index_of_a_distribution.size());
+    /** \brief Gives the bisimulation equivalence step class number of a probabilistic state.
+    *  \param[in] s A probabilistic state number.
+    *  \return The number of the step class to which s belongs. */
+    size_t get_eq_step_class(const size_t d) const
+    {
+      assert(d < step_class_index_of_a_distribution.size());
       assert(step_class_index_of_a_distribution[d] < step_classes.size());
       assert(step_classes[step_class_index_of_a_distribution[d]].equivalent_step_class < step_classes.size());
-		  return step_classes[step_class_index_of_a_distribution[d]].equivalent_step_class;
-	  }
+      return step_classes[step_class_index_of_a_distribution[d]].equivalent_step_class;
+    }
 
     /** \brief Replaces the transition relation of the current lts by the transitions
     *         of the bisimulation reduced transition system.
@@ -143,12 +143,12 @@ class prob_bisim_partitioner_bem
 
   private:
 
-	typedef size_t block_key_type;
+  typedef size_t block_key_type;
   typedef size_t step_class_key_type;
   typedef size_t state_type;
   typedef size_t label_type;
-	typedef size_t distribution_key_type;
-	typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
+  typedef size_t distribution_key_type;
+  typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
 
   struct distribution_type
   {
@@ -156,21 +156,21 @@ class prob_bisim_partitioner_bem
     std::vector< std::list<transition*> > incoming_transitions_per_label; // Incoming transitions organized per label
   };
   
-	struct block_type
+  struct block_type
   {
     block_key_type key;
-    std::list<state_type> states;			  // The states in the block
+    std::list<state_type> states;        // The states in the block
     bool is_in_new_blocks;
   };
 
-	struct step_class_type {
+  struct step_class_type {
     step_class_key_type key;
-	  label_type action;								                // action label of the pair <a,M>.
-	  std::list<distribution_type*> distributions;	    // The distributions in the step class <a,M>.
-    std::vector< bool > prev_states;				          // Previous states that can reach step_class <a,M>
+    label_type action;                                // action label of the pair <a,M>.
+    std::list<distribution_type*> distributions;      // The distributions in the step class <a,M>.
+    std::vector< bool > prev_states;                  // Previous states that can reach step_class <a,M>
     bool is_in_new_step_classes;
     size_t equivalent_step_class;
-	};
+  };
 
   std::list<block_type*> state_partition;
   std::list<step_class_type*> step_partition;
@@ -181,7 +181,7 @@ class prob_bisim_partitioner_bem
   std::vector<block_key_type> block_index_of_a_state;
   std::vector<step_class_key_type> step_class_index_of_a_distribution;
 
-	LTS_TYPE& aut;
+  LTS_TYPE& aut;
 
   struct tree_type
   {
@@ -378,7 +378,7 @@ class prob_bisim_partitioner_bem
       }
     }
 
-	}
+  }
 
   /** \brief Calculates the probability to reach block b from ditribution d.
   *   \param[in] d is a probabilistic state (distribution).
@@ -459,7 +459,7 @@ class prob_bisim_partitioner_bem
   *   \detail Refinement of state partition and step partition until no new blocks/step classes
   *           are in front of the partition lists
   */
-	void refine_partition_until_it_becomes_stable (void) 
+  void refine_partition_until_it_becomes_stable (void) 
   {
     std::list<step_class_type*> step_partition_old;
     std::list<block_type*> state_partition_old;
@@ -679,7 +679,7 @@ class prob_bisim_partitioner_bem
 
       }
     }
-	}
+  }
 
   void postprocessing_stage(void)
   {
