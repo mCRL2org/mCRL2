@@ -19,6 +19,7 @@
 #include "SmallProgressMeasures.h"
 #include "PredecessorLiftingStrategy.h"
 #include "RecursiveSolver.h"
+#include "PriorityPromotionSolver.h"
 #include "ComponentSolver.h"
 #include "DecycleSolver.h"
 #include "DeloopSolver.h"
@@ -33,7 +34,8 @@ enum pbespg_solver_type
 {
   spm_solver,
   alternative_spm_solver,
-  recursive_solver
+  recursive_solver,
+  priority_promotion
 };
 
 inline
@@ -51,6 +53,10 @@ pbespg_solver_type parse_solver_type(const std::string& s)
   {
     return recursive_solver;
   }
+  else if (s == "prioprom")
+  {
+    return priority_promotion;
+  }
   throw mcrl2::runtime_error("unknown solver " + s);
 }
 
@@ -63,6 +69,7 @@ std::string print(const pbespg_solver_type solver_type)
     case spm_solver: return "spm";
     case alternative_spm_solver: return "altspm";
     case recursive_solver: return "recursive";
+    case priority_promotion: return "prioprom";
   }
   throw mcrl2::runtime_error("unknown solver");
 }
@@ -76,6 +83,7 @@ std::string description(const pbespg_solver_type solver_type)
     case spm_solver: return "Small progress measures";
     case alternative_spm_solver: return "Alternative implementation of small progress measures";
     case recursive_solver: return "Recursive algorithm";
+    case priority_promotion: return "Priority promotion (experimental)";
   }
   throw mcrl2::runtime_error("unknown solver");
 }
@@ -172,6 +180,10 @@ class pbespgsolve_algorithm
       {
         // Create a recursive solver factory:
         solver_factory.reset(new RecursiveSolverFactory);
+      }
+      else if (options.solver_type == priority_promotion) 
+      {
+        solver_factory.reset(new PriorityPromotionSolverFactory);
       }
       else
       {

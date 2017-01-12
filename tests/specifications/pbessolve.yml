@@ -18,13 +18,27 @@ tools:
   t3:
     input: [l2]
     output: []
-    args: []
+    args: [-c]
     name: pbespgsolve
   t4:
     input: [l2]
     output: []
-    args: [-c]
+    args: [-sspm]
+    name: pbespgsolve
+  t5:
+    input: [l2]
+    output: []
+    args: [-saltspm]
+    name: pbespgsolve
+  t6:
+    input: [l2]
+    output: []
+    args: [-srecursive]
+    name: pbespgsolve
+  t7:
+    input: [l2]
+    output: []
+    args: [-sprioprom]
     name: pbespgsolve
 result: |
-  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution']
-
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution'] == t5.value['solution']== t6.value['solution'] == t7.value['solution']

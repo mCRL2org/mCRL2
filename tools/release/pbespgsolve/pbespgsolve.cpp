@@ -61,7 +61,8 @@ class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
                       make_enum_argument<pbespg_solver_type>("NAME")
                       .add_value(spm_solver, true)
                       .add_value(alternative_spm_solver)
-                      .add_value(recursive_solver),
+                      .add_value(recursive_solver)
+                      .add_value(priority_promotion),
                       "Use the solver type NAME:", 's');
       desc.add_option("scc", "Use scc decomposition", 'c');
       desc.add_option("loop", "Eliminate self-loops", 'L');

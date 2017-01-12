@@ -16,6 +16,7 @@ add_mcrl2_tool(pbespgsolve
     ParityGameSolver.cpp
     pbespgsolve.cpp
     PredecessorLiftingStrategy.cpp
+    PriorityPromotionSolver.cpp
     RecursiveSolver.cpp
     SmallProgressMeasures.cpp
   DEPENDS
