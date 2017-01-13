@@ -40,7 +40,6 @@ set(MCRL2_TOOLS
   pbespp
   pbesrewr
   pbesstategraph
-  reduce_pbes
   tracepp
   txt2lps
   txt2pbes

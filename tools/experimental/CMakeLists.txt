@@ -5,14 +5,11 @@ set(MCRL2_TOOLS
   lpsbisim2pbes
   lpsrealelm
   lpsrealzone
-  lpstransform
   lps2torx
-  mcrl2transform
   pbesabsinthe
   pbesabstract
   pbesinst
   pbespareqelm
-  pbestransform
   txt2bes
   symbolic_exploration
 )
