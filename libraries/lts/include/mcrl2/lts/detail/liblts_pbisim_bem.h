@@ -380,24 +380,24 @@ class prob_bisim_partitioner_bem
 
   }
 
-  /** \brief Calculates the probability to reach block b from ditribution d.
+  /** \brief Calculates the probability to reach block b from distribution d.
   *   \param[in] d is a probabilistic state (distribution).
   *              b is a block of states.
   *   \return The probability to reach block b. */
   probability_fraction_type probability_to_block(distribution_type& d, block_type& b)
   {
-    // iterating over all states in block b and in all probability pair of d is inneficient;
+    // iterating over all states in block b and in all probability pair of d is inefficient;
     // however, this achives the time complexity described by Baier of O(m|C|) to calculate all the
     // probabilities to block C. See page 208, proof of Lemma 4.8 for more details.
 
     probability_fraction_type prob_to_block;
     const lts_aut_base::probabilistic_state& prob_state = aut.probabilistic_state(d.key);
 
-    /* Iterate over all states of block b. Check wether the state is in the
+    /* Iterate over all states of block b. Check whether the state is in the
     distribution d and add up the probability*/
     for (const state_type &s : b.states)
     {
-      for (const lts_aut_base::state_probability_pair &prob_pair : prob_state)
+      for (const lts_aut_base::state_probability_pair& prob_pair : prob_state)
       {
         if (prob_pair.state() == s)
         {
@@ -412,7 +412,8 @@ class prob_bisim_partitioner_bem
   lts_aut_base::probabilistic_state calculate_new_probabilistic_state(lts_aut_base::probabilistic_state ps)
   {
     lts_aut_base::probabilistic_state new_prob_state;
-    std::map<state_type, probability_fraction_type> prob_state_map;
+    static std::map<state_type, probability_fraction_type> prob_state_map;
+    prob_state_map.clear();
 
     /* Iterate over all state probability pairs in the selected probabilistic state*/
     for (const lts_aut_base::state_probability_pair &sp_pair : ps)
@@ -480,7 +481,8 @@ class prob_bisim_partitioner_bem
         step_partition_old.swap(step_partition);
 
         // vector to add the new step classes
-        std::vector<typename std::list<step_class_type*>::iterator> pending_new_step_classes;
+        static std::vector<typename std::list<step_class_type*>::iterator> pending_new_step_classes;
+        pending_new_step_classes.clear();
 
         // iterate over all step classes
         for (typename std::list<step_class_type*>::iterator sc_iter = step_partition_old.begin(); 
@@ -490,7 +492,8 @@ class prob_bisim_partitioner_bem
 
           // Mapping to sort the distributions based on its probability to reach a block, instead of using
           // an unordered balanced tree as suggsted in Baier
-          std::map< probability_fraction_type, std::list<distribution_type*> > distributions_ordered_by_prob;
+          static std::map< probability_fraction_type, std::list<distribution_type*> > distributions_ordered_by_prob;
+          distributions_ordered_by_prob.clear();
 
           // Iterate over all distributions d of the step class and add probability to block to vector
           for (distribution_type* d : sc_ptr->distributions)
@@ -592,8 +595,10 @@ class prob_bisim_partitioner_bem
         // swap elements of state_partition (X) to state_partition_old (X_old)
         state_partition_old.swap(state_partition);
 
-        std::vector<typename std::list<block_type*>::iterator > blocks_to_move_to_front;
-        std::vector<block_type*> new_blocks_to_move_to_front;
+        static std::vector<typename std::list<block_type*>::iterator > blocks_to_move_to_front;
+        static std::vector<block_type*> new_blocks_to_move_to_front;
+        blocks_to_move_to_front.clear();
+        new_blocks_to_move_to_front.clear();
         // for all blocks B in X_old
         //for (block_type* b_to_split : state_partition_old)
         for (typename std::list<block_type*>::iterator block_iter = state_partition_old.begin(); 
