@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
@@ -31,6 +32,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
+using namespace mcrl2::pbes_system;
 
 /// \brief Saves text to the file filename, or to stdout if filename equals "-".
 inline
@@ -226,6 +228,62 @@ struct remove_unused_pbes_equations_command: public pbescommand
   }
 };
 
+struct pbesinst_lazy_command: public pbescommand
+{
+  pbesinst_lazy_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbesinst-lazy", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbesspec = pbesinst_lazy(pbesspec, data::jitty, false, breadth_first, lazy);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct pbesinst_optimize_command: public pbescommand
+{
+  pbesinst_optimize_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbesinst-optimize", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbesspec = pbesinst_lazy(pbesspec, data::jitty, false, breadth_first, optimize);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct pbesinst_on_the_fly_command: public pbescommand
+{
+  pbesinst_on_the_fly_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbesinst-on-the-fly", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbesspec = pbesinst_lazy(pbesspec, data::jitty, false, breadth_first, on_the_fly);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct pbesinst_on_the_fly_with_fixed_points_command: public pbescommand
+{
+  pbesinst_on_the_fly_with_fixed_points_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbescommand("pbesinst-on-the-fly-with-fixed-points", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbescommand::execute();
+    pbesspec = pbesinst_lazy(pbesspec, data::jitty, false, breadth_first, on_the_fly_with_fixed_points);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
 class transform_tool: public utilities::tools::input_output_tool
 {
   protected:
@@ -284,6 +342,10 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<rewrite_pbes_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<rewrite_pbes_quantifiers_inside_rewriter_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<remove_unused_pbes_equations_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<pbesinst_lazy_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<pbesinst_optimize_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<pbesinst_on_the_fly_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<pbesinst_on_the_fly_with_fixed_points_command>(input_filename(), output_filename(), options));
 
       for (auto i = commands.begin(); i != commands.end(); ++i)
       {
