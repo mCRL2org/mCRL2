@@ -137,21 +137,21 @@ class ltsconvert_tool : public input_output_tool
         mCRL2log(verbose) << "reducing LTS (modulo " <<  description(tool_options.equivalence) << ")..." << std::endl;
         mCRL2log(verbose) << "before reduction: " << l.num_states() << "u states and " << l.num_transitions() << " transitions " << std::endl;
 
-    switch (tool_options.equivalence)
-    {
-      case lts_probabilistic_eq_pbisim_grv:
-      {
-        mcrl2::lts::detail::probabilistic_bisimulation_reduce_grv(l,timer());
-        break;
-      }
-      case lts_probabilistic_eq_pbisim_bem:
-      {
-        mcrl2::lts::detail::probabilistic_bisimulation_reduce_bem(l,timer());
-        break;
-      }
-      default:
-      break;
-    }
+        switch (tool_options.equivalence)
+        {
+          case lts_probabilistic_eq_pbisim_grv:
+          {
+            mcrl2::lts::detail::probabilistic_bisimulation_reduce_grv(l,timer());
+            break;
+          }
+          case lts_probabilistic_eq_pbisim_bem:
+          {
+            mcrl2::lts::detail::probabilistic_bisimulation_reduce_bem(l,timer());
+            break;
+          }
+          default:
+          break;
+        }
 
         mCRL2log(verbose) << "after reduction: " << l.num_states() << " states and " << l.num_transitions() << " transitions" << std::endl;
       }
@@ -172,7 +172,13 @@ class ltsconvert_tool : public input_output_tool
         load_lps(spec, tool_options.lpsfile);
       }
 
+      if (tool_options.outfilename.empty())
+      {
+        // do not save.
+        return true;
+      }
 
+      // Else start saving.
       switch (tool_options.outtype)
       {
         case lts_none:

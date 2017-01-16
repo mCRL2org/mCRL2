@@ -40,13 +40,16 @@ void test_div_mod(const std::string& xs, const std::string& ys)
   const big_natural_number x(xs);
   const big_natural_number y(ys);
   
-  std::cerr << "Check div mod for " << xs << " and " << ys << "\n";
-  // std::cerr << "x/y " << (x/y) << "\n";
-  // std::cerr << "y*(x/y) " << (y*(x/y)) << "\n";
-  // std::cerr << "x%y " << (x%y) << "\n";
-  std::cerr << "LHS: " << x << "\n";
-  std::cerr << "RHS: " << y*(x/y)+(x % y) << "\n";
-  BOOST_CHECK(x==y*(x/y)+(x % y));
+  if (!y.is_zero())
+  { 
+    std::cerr << "Check div mod for " << xs << " and " << ys << "\n";
+    // std::cerr << "x/y " << (x/y) << "\n";
+    // std::cerr << "y*(x/y) " << (y*(x/y)) << "\n";
+    // std::cerr << "x%y " << (x%y) << "\n";
+    std::cerr << "LHS: " << x << "\n";
+    std::cerr << "RHS: " << y*(x/y)+(x % y) << "\n";
+    BOOST_CHECK(x==y*(x/y)+(x % y));
+  }
 }
 
 void test_multiply(const std::string& xs, const std::string& ys)

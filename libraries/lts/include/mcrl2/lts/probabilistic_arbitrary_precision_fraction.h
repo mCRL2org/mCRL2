@@ -249,31 +249,56 @@ class probabilistic_arbitrary_precision_fraction
       return probabilistic_arbitrary_precision_fraction(buffer1(),buffer2()); 
     }
 
-    // An algorithm to calculate the greatest common divisor
-    // The arguments are intentionally passed by value.
-    static utilities::big_natural_number greatest_common_divisor(utilities::big_natural_number x, utilities::big_natural_number y)
+    // An algorithm to calculate the greatest common divisor, which destroys its arguments.
+    // The result is passed back in x. y has no sensible value at the end. 
+    static void greatest_common_divisor_destructive(
+                                               utilities::big_natural_number& x, 
+                                               utilities::big_natural_number& y,
+                                               utilities::big_natural_number& buffer_divide,
+                                               utilities::big_natural_number& buffer_remainder,
+                                               utilities::big_natural_number& buffer)
     {
-      if (x.is_zero()) return y;
-      if (y.is_zero()) return x;
+      if (x.is_zero()) { x=y; return; }
+      if (y.is_zero()) { return; } // The answer is x. 
       if (x>y)
       {
         utilities::swap(x,y);
       }
-      utilities::big_natural_number remainder=y % x;
-      while (!remainder.is_zero())
+      // utilities::big_natural_number remainder=y % x;
+      y.div_mod(x,buffer_divide,buffer_remainder,buffer);  // buffer_remainder contains remainder.
+      while (!buffer_remainder.is_zero())
       {
         y=x;
-        x=remainder;
-        remainder=y % x;
+        x=buffer_remainder;
+        // remainder=y % x;
+        y.div_mod(x,buffer_divide,buffer_remainder,buffer);
       }
-      return x;
+      return;  // the value x is now the result.
     }
+
+    // \detail An algorithm to calculate the greatest common divisor.
+    // The arguments are intentionally passed by value. That means this routine is not very efficient as it copies two vectors.
+    static utilities::big_natural_number greatest_common_divisor(utilities::big_natural_number x, utilities::big_natural_number y)
+    {
+      static utilities::big_natural_number buffer1, buffer2, buffer3;
+      greatest_common_divisor_destructive(x,y,buffer1,buffer2,buffer3);
+      return x;
+    } 
 
     static void remove_common_factors(utilities::big_natural_number& enumerator, utilities::big_natural_number& denominator)
     {
-      const utilities::big_natural_number gcd=greatest_common_divisor(enumerator,denominator);
+      /* const utilities::big_natural_number gcd=greatest_common_divisor(enumerator,denominator);
       enumerator=enumerator/gcd;
       denominator=denominator/gcd;
+      assert(greatest_common_divisor(enumerator,denominator).is_number(1)); */
+
+      static utilities::big_natural_number enumerator_copy, denominator_copy, gcd, buffer1, buffer2,buffer3;
+      gcd=enumerator;
+      enumerator_copy=enumerator;
+      denominator_copy=denominator;
+      greatest_common_divisor_destructive(gcd,denominator,buffer1,buffer2,buffer3);
+      enumerator_copy.div_mod(gcd,enumerator,buffer1,buffer2);   // enumerator=enumerator/gcd
+      denominator_copy.div_mod(gcd,denominator,buffer1,buffer2); // denominator=denominator/gcd;
       assert(greatest_common_divisor(enumerator,denominator).is_number(1));
     }
     

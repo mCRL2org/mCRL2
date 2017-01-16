@@ -466,7 +466,7 @@ class big_natural_number
 
     
 
-    /* \brief Efficient multiplication operator that does not declare vector space.
+    /* \brief Efficient multiplication operator that does not declare auxiliary vectors.
        \detail Initially result must be zero. At the end: result equals (*this)*other+result.
                The calculation_buffer does not need to be initialised. 
      */
@@ -480,7 +480,8 @@ class big_natural_number
       for(size_t digit: other.m_number)
       {
         // Move n2 to the multiplicand and multiply it with base^offset.
-        calculation_buffer_for_multiplicand.m_number=std::vector<size_t>(offset,0);
+        calculation_buffer_for_multiplicand.clear();
+        for(size_t i=0; i< offset; ++i) { calculation_buffer_for_multiplicand.m_number.push_back(0); }
         for(size_t n: m_number)
         { 
           calculation_buffer_for_multiplicand.m_number.push_back(n);
@@ -504,85 +505,241 @@ class big_natural_number
       return result;
     } 
 
-    /* \brief Standard division operator. This is currently implemented by a bit wise subtraction. Can be optimized by a 64 bit calculation.
+    // This is an auxiliary function getting the n-th digit,
+    // where digit 0 is the least significant one.
+    // It is not necessary that n is in range.
+    /* size_t getdigit(const size_t n) const
+    {
+      if (n>=m_number.size()) 
+      {
+        return 0;
+      }
+      return m_number[n];
+    } */
+
+    /* \brief Efficient divide operator that does not declare auxiliary vectors.
+       \detail Initially result must be zero. At the end: result equals (*this)*other+result.
+               The calculation_buffer does not need to be initialised. 
+               The algorithm uses standard "primary school" division, except that
+               the digits in this case are 64 bits numbers. The calculation is tricky
+               as the most significant digit of this may be a remaining digit from
+               the previous calculation.
      */
-    big_natural_number operator/(const big_natural_number& other) const
+    void div_mod(const big_natural_number& other,
+                 big_natural_number& result,
+                 big_natural_number& remainder,
+                 big_natural_number& calculation_buffer_divisor) const
     {
       is_well_defined();
       other.is_well_defined();
+      assert(!other.is_zero());
+
+      if (m_number.size()==1 && other.m_number.size()==1)
+      {
+        size_t n=m_number.front()/other.m_number.front();      // Calculate div.
+        if (n==0)
+        {
+          result.clear();
+        }
+        else 
+        {
+          result.m_number.resize(1);
+          result.m_number[0]=n;
+        }
+        n=m_number.front() % other.m_number.front(); // Calculate mod. 
+        if (n==0)
+        {
+          remainder.clear();
+        }
+        else
+        {
+          remainder.m_number.resize(1);
+          remainder.m_number[0]=n;
+        }
+        result.is_well_defined();
+        remainder.is_well_defined();
+        return;
+      }
+
+      // TODO: The procedure below works bitwise, as no efficient division algorithm has yet
+      // been implemented. A natural candidate is the algorithm in "Per Brinch Hansen, Multiple
+      // length division revisited: A tour of the minefield. Software practice and experience 24,
+      // 579-601, 1994.
+      result.clear();
+      remainder=*this;
 
       if (m_number.size()<other.m_number.size())
       {
-         return big_natural_number(0);
+        result.is_well_defined();
+        remainder.is_well_defined();
+        return; 
       }
       const int no_of_bits_per_digit=std::numeric_limits<size_t>::digits;
-      big_natural_number remainder=(*this);
-      big_natural_number result; // Most significant bit first.
+
       big_natural_number divisor;
-      divisor.m_number=std::vector<size_t>((m_number.size()-other.m_number.size())+1,0);
-      // Place 0 digits at least significant position of the divisor to make it of comparable length as the remainder.
+      // calculation_buffer_divisor.m_number=std::vector<size_t>((m_number.size()-other.m_number.size())+1,0); Inefficient.
+      calculation_buffer_divisor.clear();
+      for(size_t i=0; i< (1+m_number.size())-other.m_number.size(); ++i) { calculation_buffer_divisor.m_number.push_back(0); }
+
+      // Place 0 digits at least significant position of the calculation_buffer_divisor to make it of comparable length as the remainder.
       for(size_t i: other.m_number)
       {
-        divisor.m_number.push_back(i);
+        calculation_buffer_divisor.m_number.push_back(i);
       }
-      divisor.remove_significant_digits_that_are_zero();
+      calculation_buffer_divisor.remove_significant_digits_that_are_zero();
       
       for(size_t i=0; i<=no_of_bits_per_digit*(m_number.size()-other.m_number.size()+1); ++i)
       {
-        if (remainder<divisor)
+        if (remainder<calculation_buffer_divisor)
         {
-          // We cannot subtract the divisor from the remainder.
+          // We cannot subtract the calculation_buffer_divisor from the remainder.
           result.multiply_by(2,0); // result=result*2
         }
         else
         {
-          // We subtract the divisor from the remainder.
+          // We subtract the calculation_buffer_divisor from the remainder.
           result.multiply_by(2,1); // result=result*2 + 1
-          remainder.subtract(divisor);
+          remainder.subtract(calculation_buffer_divisor);
         }
-        divisor.divide_by(2); // Shift the divisor one bit to the left.
+        calculation_buffer_divisor.divide_by(2); // Shift the calculation_buffer_divisor one bit to the left.
       }
       
       result.remove_significant_digits_that_are_zero();
       result.is_well_defined();
-      return result;
+      remainder.is_well_defined();
     }
 
-    /* \brief Standard modulo operator. This is currently implemented by a bit wise subtraction. Can be optimized by a 64 bit calculation.
-     */
-    big_natural_number operator%(const big_natural_number& other) const
+    /* void div_mod(const big_natural_number& other,
+                 big_natural_number& result,
+                 big_natural_number& remainder,
+                 big_natural_number& calculation_buffer_subtractor) const
     {
       is_well_defined();
       other.is_well_defined();
+      assert(!other.is_zero());
+
+      result.clear();
+      remainder=*this;
 
       if (m_number.size()<other.m_number.size())
       {
-         return (*this); 
+        return;
       }
-      const int no_of_bits_per_digit=std::numeric_limits<size_t>::digits;
-      big_natural_number remainder=(*this);
-      big_natural_number divisor;
-      divisor.m_number=std::vector<size_t>((m_number.size()-other.m_number.size()+1),0);
-      // Place 0 digits at the least significant position of the divisor to make it of comparable length as the remainder.
-      for(size_t i: other.m_number)
+this->print_number("div_mod: this: ");
+other.print_number("div_mod: other: ");
+      size_t remaining_digit=0;
+      for(size_t n=remainder.m_number.size()-1; n>=other.m_number.size(); n--)
       {
-        divisor.m_number.push_back(i);
-      }
-      divisor.remove_significant_digits_that_are_zero();
-      
-      for(size_t i=0; i<=no_of_bits_per_digit*(m_number.size()-other.m_number.size()+1); ++i)
-      {
-        if (remainder>=divisor)
+std::cerr << "Wat is n " << n << "\n";
+        size_t r=remainder.getdigit(n+1);
+        size_t divisor=detail::divide_single_number(
+                                            remainder.getdigit(n),
+                                            other.m_number.back(),
+                                            r);
+
+result.print_number("div_mod: result: ");
+remainder.print_number("div_mod: remainder: ");
+std::cerr << "dmwhile: divisor: " << divisor <<"\n";
+calculation_buffer_subtractor.is_well_defined();
+        calculation_buffer_subtractor.m_number=std::vector<size_t>(n-other.m_number.size(),0); Inefficient, want constructie
+        for(size_t i: other.m_number)
         {
-          // We subtract the divisor from the remainder.
-          remainder.subtract(divisor);
+          calculation_buffer_subtractor.m_number.push_back(i);
         }
-        divisor.divide_by(2); // Shift the divisor one bit to the left.
+        calculation_buffer_subtractor.multiply_by(divisor,0);
+calculation_buffer_subtractor.print_number("div_mod: subtractor: ");
+        if (remainder<calculation_buffer_subtractor)
+        {
+          divisor=divisor-1;
+std::cerr << "dmwhile: divisor adapted: " << divisor <<"\n";
+          calculation_buffer_subtractor.m_number=std::vector<size_t>(n-other.m_number.size(),0);
+          for(size_t i: other.m_number)
+          {
+            calculation_buffer_subtractor.m_number.push_back(i);
+          }
+          calculation_buffer_subtractor.multiply_by(divisor,0);
+        }
+        result.m_number.push_back(divisor);
+remainder.print_number("remainder before assert");         
+calculation_buffer_subtractor.print_number("subtractor before assert");         
+        assert(remainder>=calculation_buffer_subtractor);
+        size_t old_remainder_size=remainder.m_number.size();
+        remainder.subtract(calculation_buffer_subtractor);
+        remaining_digit=(remaining_digit?
+                            remainder.m_number.size()+1==old_remainder_size:
+                            remainder.m_number.size()==old_remainder_size);
+      }
+result.print_number("div_mod: result voor swap: ");
+      if (result.m_number.size()==0)
+      {
+        return;
+      }
+      // Result must be reverted.
+      size_t begin = 0; 
+      size_t end = result.m_number.size()-1;
+      while (begin<end)
+      {
+        std::swap(result.m_number[begin],result.m_number[end]);
+        begin++; 
+        end--;
+      }
+      result.remove_significant_digits_that_are_zero();
+result.print_number("div_mod: result na swap: ");
+      result.is_well_defined();
+      remainder.is_well_defined();
+    } */
+
+    /* \brief Standard division operator. This is currently implemented by a bit wise subtraction. Can be optimized by a 64 bit calculation.
+       \detail. This routine is not particularly efficient as it declares three temporary vectors.
+     */
+    big_natural_number operator/(const big_natural_number& other) const
+    {
+      // Division by zero is not allowed.
+      if (other.is_zero())
+      {
+        throw mcrl2::runtime_error("Division by zero.");
+      }
+      // Zero divided by something is zero.
+      if (is_zero())
+      {
+        return *this;
       }
       
-      remainder.is_well_defined();
+      // Often numbers only consist of one digit. Deal with this using machine division.
+      if (m_number.size()==1 && other.m_number.size()==1)
+      {
+        return big_natural_number(m_number.front()/other.m_number.front());
+      }
+      
+      // Otherwise do a multiple digit division. 
+      big_natural_number result, remainder, buffer;
+      div_mod(other,result,remainder,buffer);
+      return result;
+    } 
+
+    /* \brief Standard modulo operator. This is currently implemented by a bit wise subtraction. Can be optimized by a 64 bit calculation.
+       \detail. This routine is not particularly efficient as it declares three temporary vectors.
+     */
+    big_natural_number operator%(const big_natural_number& other) const
+    {
+      // Modulo zero is yields the value itself. 
+      // Zero modulo  something is zero.
+      if (other.is_zero() || is_zero())
+      {
+        return *this;
+      }
+      
+      // Often numbers only consist of one digit. Deal with this using machine division.
+      if (m_number.size()==1 && other.m_number.size()==1)
+      {
+        return big_natural_number(m_number.front()%other.m_number.front());
+      }
+      
+      big_natural_number result, remainder, buffer;
+      div_mod(other,result,remainder,buffer);
       return remainder;
-    }
+
+    } 
 };
 
 inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
