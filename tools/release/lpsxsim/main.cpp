@@ -37,7 +37,7 @@ class lpsxsim_tool : public lpsxsim_base
         "graphical simulation of an LPS",
         "Simulates linear process descriptions in a graphical environment. If INFILE is supplied it will be loaded into the simulator.",
         "Simulator for linear process specifications.",
-        "http://mcrl2.org/release/user_manual/tools/lpsxsim.html")
+        "http://www.mcrl2.org/web/user_manual/tools/release/lpsxsim.html")
     {}
 
     bool run()

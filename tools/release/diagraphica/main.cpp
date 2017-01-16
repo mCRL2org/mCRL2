@@ -20,7 +20,7 @@ class diagraphica_tool : public diagraphica_base
         "In this case, image credits would be much appreciated.\n"
         "\n"
         "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
-        "http://mcrl2.org/release/user_manual/tools/diagraphica.html")
+        "http://www.mcrl2.org/web/user_manual/tools/release/diagraphica.html")
     {}
 
     bool run()

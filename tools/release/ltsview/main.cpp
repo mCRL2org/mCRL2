@@ -32,7 +32,7 @@ class ltsview_tool : public ltsview_base
         "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
         "\n"
         "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
-        "http://mcrl2.org/release/user_manual/tools/ltsview.html")
+        "http://www.mcrl2.org/release/user_manual/tools/release/ltsview.html")
     {}
 
     bool run()
