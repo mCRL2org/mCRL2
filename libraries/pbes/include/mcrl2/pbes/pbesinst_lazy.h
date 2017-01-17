@@ -53,10 +53,33 @@ namespace mcrl2
 namespace pbes_system
 {
 
+struct pbes_equation_index
+{
+  std::unordered_map<core::identifier_string, std::size_t> equation_index;
+
+  pbes_equation_index()
+  { }
+
+  pbes_equation_index(const pbes& p)
+  {
+    auto const& equations = p.equations();
+    for (auto i = equations.begin(); i != equations.end(); ++i)
+    {
+      equation_index[i->variable().name()] = i - equations.begin();
+    }
+  }
+
+  std::size_t operator[](const core::identifier_string& x) const
+  {
+    auto i = equation_index.find(x);
+    return i->second;
+  }
+};
+
 struct find_loop_simplifier
 {
   /// \brief A lookup map for PBES equations.
-  std::unordered_map<core::identifier_string, std::size_t>& equation_index;
+  const pbes_equation_index& equation_index;
 
   /// \brief Map a variable instantiation to its right hand side.
   std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation;
@@ -143,28 +166,27 @@ struct find_loop_simplifier
     return find_loop_rec<is_mu>(expr, X, get_rank(X), visited);
   }
 
-  find_loop_simplifier(std::unordered_map<core::identifier_string, std::size_t>& equation_index_,
-                       std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation_,
-                       const std::vector<std::size_t>& ranks_
+  find_loop_simplifier(const std::vector<pbes_equation>& equations,
+                       const pbes_equation_index& equation_index_,
+                       std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation_
                       )
     : equation_index(equation_index_),
-      equation(equation_),
-      ranks(ranks_)
+      equation(equation_)
   {
-    // // initialize ranks
-    // std::size_t rank = 0;
-    // ranks.push_back(rank);
-    // for (std::size_t i = 1; i < equations.size(); i++)
-    // {
-    //   if (equations[i - 1].symbol() == equations[i].symbol())
-    //   {
-    //     ranks.push_back(rank);
-    //   }
-    //   else
-    //   {
-    //     ranks.push_back(++rank);
-    //   }
-    // }
+    // initialize ranks
+    std::size_t rank = 0;
+    ranks.push_back(rank);
+    for (std::size_t i = 1; i < equations.size(); i++)
+    {
+      if (equations[i - 1].symbol() == equations[i].symbol())
+      {
+        ranks.push_back(rank);
+      }
+      else
+      {
+        ranks.push_back(++rank);
+      }
+    }
   }
 
   pbes_expression simplify(const fixpoint_symbol& symbol, const pbes_expression& psi_e, const propositional_variable_instantiation& X_e)
@@ -257,13 +279,15 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_vari
 ///         bes_deprecated.h.
 class pbesinst_lazy_algorithm
 {
-  typedef core::term_traits<pbes_expression> tr;
-
   protected:
-    const data::data_specification& m_data_spec;
-
     /// \brief Data rewriter.
     data::rewriter datar;
+
+    /// \brief A PBES.
+    pbes m_pbes;
+
+    /// \brief A lookup map for PBES equations.
+    pbes_equation_index equation_index;
 
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;
@@ -322,21 +346,8 @@ class pbesinst_lazy_algorithm
     ///        of the i-th equation in the PBES.
     std::vector<std::vector<propositional_variable_instantiation> > instantiations;
 
-    /// \brief symbols[i] contains the fixedpoint symbol of the i-th equation
-    ///        in the PBES.
-    std::vector<fixpoint_symbol> symbols;
-
-    /// \brief ranks[i] contains the rank of the i-th equation in the PBES.
-    std::vector<std::size_t> ranks;
-
     /// \brief The initial value.
     propositional_variable_instantiation init;
-
-    /// \brief A lookup map for PBES equations.
-    std::unordered_map<core::identifier_string, std::size_t> equation_index;
-
-    /// \brief Print the equations to standard out.
-    bool m_print_equations;
 
     /// \brief The search strategy to use when exploring the state space.
     search_strategy m_search_strategy;
@@ -362,27 +373,48 @@ class pbesinst_lazy_algorithm
       return replace_propositional_variables(x, pbesinst_rename());
     }
 
+    // instantiates global variables
+    // simplifies the pbes
+    pbes preprocess(const pbes& x) const
+    {
+      pbes p = x;
+      pbes_system::detail::instantiate_global_variables(p);
+
+      // simplify all right hand sides of p
+      //
+      // NOTE: This is not just an optimization. There are certain PBES
+      // equations for which applying enumerate_quantifiers_rewriter directly
+      // won't terminate, like:
+      //
+      // forall m: Nat . exists k: Nat . val(m == k)
+      pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
+      pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
+      for (pbes_equation& eq: p.equations())
+      {
+        eq.formula() = pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), m_pbes.data());
+      }
+      return p;
+    }
+
   public:
 
     /// \brief Constructor.
-    /// \param data_spec A data specification
     /// \param rewriter_strategy A strategy for the data rewriter
     /// \param print_equations If true, the generated equations are printed
     pbesinst_lazy_algorithm(
-         data::data_specification const& data_spec,
+         const pbes& p,
          data::rewriter::strategy rewrite_strategy = data::jitty,
-         bool print_equations = false,
          search_strategy search_strategy = breadth_first,
          transformation_strategy transformation_strategy = lazy
         )
       :
-        m_data_spec(data_spec),
-        datar(data_spec, rewrite_strategy),
-        R(datar, data_spec),
+        datar(p.data(), rewrite_strategy),
+        m_pbes(preprocess(p)),
+        equation_index(p),
+        R(datar, p.data()),
         m_equation_count(0),
         regeneration_count(0),
         regeneration_period(regeneration_period_init),
-        m_print_equations(print_equations),
         m_search_strategy(search_strategy),
         m_transformation_strategy(transformation_strategy)
     {
@@ -464,49 +496,22 @@ class pbesinst_lazy_algorithm
       }
     }
 
+    const fixpoint_symbol& symbol(std::size_t i) const
+    {
+      return m_pbes.equations()[i].symbol();
+    }
+
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
     /// \param p A PBES
-    void run(pbes& p)
+    void run()
     {
-      using utilities::detail::pick_element;
-      using utilities::detail::contains;
+      auto& pbes_equations = m_pbes.equations();
 
-      pbes_system::detail::instantiate_global_variables(p);
+      instantiations.resize(m_pbes.equations().size());
 
-      auto& pbes_equations = p.equations();
+      find_loop_simplifier simplify_loop(pbes_equations, equation_index, equation);
 
-      // simplify all right hand sides of p
-      //
-      // NOTE: This is not just an optimization. There are certain PBES
-      // equations for which applying enumerate_quantifiers_rewriter directly
-      // won't terminate, like:
-      //
-      // forall m: Nat . exists k: Nat . val(m == k)
-      pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
-      pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
-      for (auto eqi = pbes_equations.begin(); eqi != pbes_equations.end(); eqi++)
-      {
-        eqi->formula() = pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eqi->formula())), m_data_spec);
-      }
-
-      // initialize equation_index, instantiations, symbols and ranks
-      std::size_t eqn_index = 0;
-      ranks.resize(pbes_equations.size());
-      instantiations.resize(pbes_equations.size());
-      for (auto i = pbes_equations.begin(); i != pbes_equations.end(); ++i, ++eqn_index)
-      {
-        auto const& eqn = *i;
-        equation_index[eqn.variable().name()] = eqn_index;
-        symbols.push_back(eqn.symbol());
-        if (eqn_index > 0)
-        {
-          ranks[eqn_index] = ranks[eqn_index-1] + (symbols[eqn_index] == symbols[eqn_index-1] ? 0 : 1);
-        }
-      }
-
-      find_loop_simplifier simplify_loop(equation_index, equation, ranks);
-
-      init = atermpp::down_cast<propositional_variable_instantiation>(R(p.initial_state()));
+      init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       add_todo(init);
       while (!todo.empty())
       {
@@ -593,11 +598,6 @@ class pbesinst_lazy_algorithm
           }
         }
 
-        if (m_print_equations)
-        {
-          mCRL2log(log::info) << eqn.symbol() << " " << X_e << " = " << psi_e << std::endl;
-        }
-
         mCRL2log(log::verbose) << print_equation_count(++m_equation_count);
         detail::check_bes_equation_limit(m_equation_count);
       }
@@ -612,7 +612,7 @@ class pbesinst_lazy_algorithm
       std::size_t index = 0;
       for (auto i = instantiations.begin(); i != instantiations.end(); i++)
       {
-        auto symbol = symbols[index++];
+        auto symbol = this->symbol(index++);
         for (auto j = i->begin(); j != i->end(); j++)
         {
           auto X_e = *j;
@@ -632,13 +632,6 @@ class pbesinst_lazy_algorithm
       return result;
     }
 
-    /// \brief Returns the flag for printing the generated bes equations
-    /// \return The flag for printing the generated bes equations
-    bool& print_equations()
-    {
-      return m_print_equations;
-    }
-
     enumerate_quantifiers_rewriter& rewriter()
     {
       return R;
@@ -646,26 +639,14 @@ class pbesinst_lazy_algorithm
 };
 
 inline
-pbes pbesinst_preprocess(const pbes& p)
-{
-  return p;
-}
-
-inline
 pbes pbesinst_lazy(const pbes& p,
                    data::rewriter::strategy rewrite_strategy = data::jitty,
-                   bool print_equations = false,
                    search_strategy search_strategy = breadth_first,
                    transformation_strategy transformation_strategy = lazy
                   )
 {
-  pbes q = pbesinst_preprocess(p);
-//  data::rewriter datar(q.data(),
-//                       data::used_data_equation_selector(q.data(), pbes_system::find_function_symbols(q), q.global_variables()),
-//                       rewrite_strategy
-//                      );
-  pbesinst_lazy_algorithm algorithm(q.data(), rewrite_strategy, print_equations, search_strategy, transformation_strategy);
-  algorithm.run(q);
+  pbesinst_lazy_algorithm algorithm(p, rewrite_strategy, search_strategy, transformation_strategy);
+  algorithm.run();
   return algorithm.get_result();
 }
 
