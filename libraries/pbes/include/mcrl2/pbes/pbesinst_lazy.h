@@ -53,6 +53,141 @@ namespace mcrl2
 namespace pbes_system
 {
 
+struct find_loop_simplifier
+{
+  /// \brief A lookup map for PBES equations.
+  std::unordered_map<core::identifier_string, std::size_t>& equation_index;
+
+  /// \brief Map a variable instantiation to its right hand side.
+  std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation;
+
+  /// \brief ranks[i] contains the rank of the i-th equation in the PBES.
+  std::vector<std::size_t> ranks;
+
+  std::size_t get_rank(propositional_variable_instantiation X)
+  {
+    return ranks[equation_index[X.name()]];
+  }
+
+  template <bool is_mu>
+  bool find_loop_rec(
+      const pbes_expression& expr,
+      propositional_variable_instantiation X,
+      std::size_t rank,
+      std::unordered_map<propositional_variable_instantiation, bool>& visited)
+  {
+    if (is_false(expr) || is_true(expr))
+    {
+      return false;
+    }
+    if (is_propositional_variable_instantiation(expr))
+    {
+      auto const& Y = atermpp::down_cast<propositional_variable_instantiation>(expr);
+      if (Y == X)
+      {
+        return true;
+      }
+      else if (get_rank(Y) != rank)
+      {
+        return false;
+      }
+      if (visited.count(Y))
+      {
+        return visited[Y];
+      }
+      if (equation.count(Y) == 0)
+      {
+        return false;
+      }
+      visited[Y] = false;
+      return visited[Y] = find_loop_rec<is_mu>(equation[Y], X, rank, visited);
+    }
+
+    if (is_mu)
+    {
+      if (is_and(expr))
+      {
+        const and_& expra = atermpp::down_cast<and_>(expr);
+        return find_loop_rec<is_mu>(expra.left(), X, rank, visited) ||
+               find_loop_rec<is_mu>(expra.right(), X, rank, visited);
+      }
+      if (is_or(expr))
+      {
+        const or_& expro = atermpp::down_cast<or_>(expr);
+        return find_loop_rec<is_mu>(expro.left(), X, rank, visited) &&
+               find_loop_rec<is_mu>(expro.right(), X, rank, visited);
+      }
+    }
+    else
+    {
+      if (is_and(expr))
+      {
+        const and_& expra = atermpp::down_cast<and_>(expr);
+        return find_loop_rec<is_mu>(expra.left(), X, rank, visited) &&
+               find_loop_rec<is_mu>(expra.right(), X, rank, visited);
+      }
+      if (is_or(expr))
+      {
+        const or_& expro = atermpp::down_cast<or_>(expr);
+        return find_loop_rec<is_mu>(expro.left(), X, rank, visited) ||
+               find_loop_rec<is_mu>(expro.right(), X, rank, visited);
+      }
+    }
+    return false;
+  }
+
+  template <bool is_mu>
+  bool find_loop(pbes_expression expr, propositional_variable_instantiation X)
+  {
+    std::unordered_map<propositional_variable_instantiation, bool> visited;
+    return find_loop_rec<is_mu>(expr, X, get_rank(X), visited);
+  }
+
+  find_loop_simplifier(std::unordered_map<core::identifier_string, std::size_t>& equation_index_,
+                       std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation_,
+                       const std::vector<std::size_t>& ranks_
+                      )
+    : equation_index(equation_index_),
+      equation(equation_),
+      ranks(ranks_)
+  {
+    // // initialize ranks
+    // std::size_t rank = 0;
+    // ranks.push_back(rank);
+    // for (std::size_t i = 1; i < equations.size(); i++)
+    // {
+    //   if (equations[i - 1].symbol() == equations[i].symbol())
+    //   {
+    //     ranks.push_back(rank);
+    //   }
+    //   else
+    //   {
+    //     ranks.push_back(++rank);
+    //   }
+    // }
+  }
+
+  pbes_expression simplify(const fixpoint_symbol& symbol, const pbes_expression& psi_e, const propositional_variable_instantiation& X_e)
+  {
+    // Find mu or nu loop
+    if (symbol == fixpoint_symbol::mu())
+    {
+      if (find_loop<true>(psi_e, X_e))
+      {
+        return false_();
+      }
+    }
+    else
+    {
+      if (find_loop<false>(psi_e, X_e))
+      {
+        return true_();
+      }
+    }
+    return psi_e;
+  }
+};
+
 // Used for printing justifications.
 // Maybe should be moved to a more generic place.
 template <typename T>
@@ -134,15 +269,15 @@ class pbesinst_lazy_algorithm
     enumerate_quantifiers_rewriter R;
 
     /// \brief The number of generated equations.
-    int m_equation_count;
+    std::size_t m_equation_count;
 
     /// \brief The number of equations generated since last state space
     ///        regeneration.
-    int regeneration_count;
+    std::size_t regeneration_count;
 
     /// \brief The number of equations to generate before regenerating the
     ///        state space.
-    int regeneration_period;
+    std::size_t regeneration_period;
 
     /// \brief Initial value for regeneration_period.
     enum { regeneration_period_init = 100 };
@@ -192,13 +327,13 @@ class pbesinst_lazy_algorithm
     std::vector<fixpoint_symbol> symbols;
 
     /// \brief ranks[i] contains the rank of the i-th equation in the PBES.
-    std::vector<int> ranks;
+    std::vector<std::size_t> ranks;
 
     /// \brief The initial value.
     propositional_variable_instantiation init;
 
     /// \brief A lookup map for PBES equations.
-    std::unordered_map<core::identifier_string, int> equation_index;
+    std::unordered_map<core::identifier_string, std::size_t> equation_index;
 
     /// \brief Print the equations to standard out.
     bool m_print_equations;
@@ -284,85 +419,6 @@ class pbesinst_lazy_algorithm
       reachable.insert(X);
     }
 
-    int get_rank(propositional_variable_instantiation X)
-    {
-      return ranks[equation_index[X.name()]];
-    }
-
-    template <bool is_mu>
-    bool find_loop_rec(
-        const pbes_expression& expr,
-        propositional_variable_instantiation X,
-        int rank,
-        std::unordered_map<propositional_variable_instantiation, bool>& visited)
-    {
-      if (is_false(expr) || is_true(expr))
-      {
-        return false;
-      }
-      if (is_propositional_variable_instantiation(expr))
-      {
-        auto const& Y = atermpp::down_cast<propositional_variable_instantiation>(expr);
-        if (Y == X)
-        {
-          return true;
-        }
-        else if (get_rank(Y) != rank)
-        {
-          return false;
-        }
-        if (visited.count(Y))
-        {
-          return visited[Y];
-        }
-        if (equation.count(Y) == 0)
-        {
-          return false;
-        }
-        visited[Y] = false;
-        return visited[Y] = find_loop_rec<is_mu>(equation[Y], X, rank, visited);
-      }
-
-      if (is_mu)
-      {
-        if (is_and(expr))
-        {
-          const and_& expra = atermpp::down_cast<and_>(expr);
-          return find_loop_rec<is_mu>(expra.left(), X, rank, visited) ||
-                 find_loop_rec<is_mu>(expra.right(), X, rank, visited);
-        }
-        if (is_or(expr))
-        {
-          const or_& expro = atermpp::down_cast<or_>(expr);
-          return find_loop_rec<is_mu>(expro.left(), X, rank, visited) &&
-                 find_loop_rec<is_mu>(expro.right(), X, rank, visited);
-        }
-      }
-      else
-      {
-        if (is_and(expr))
-        {
-          const and_& expra = atermpp::down_cast<and_>(expr);
-          return find_loop_rec<is_mu>(expra.left(), X, rank, visited) &&
-                 find_loop_rec<is_mu>(expra.right(), X, rank, visited);
-        }
-        if (is_or(expr))
-        {
-          const or_& expro = atermpp::down_cast<or_>(expr);
-          return find_loop_rec<is_mu>(expro.left(), X, rank, visited) ||
-                 find_loop_rec<is_mu>(expro.right(), X, rank, visited);
-        }
-      }
-      return false;
-    }
-
-    template <bool is_mu>
-    bool find_loop(pbes_expression expr, propositional_variable_instantiation X)
-    {
-      std::unordered_map<propositional_variable_instantiation, bool> visited;
-      return find_loop_rec<is_mu>(expr, X, get_rank(X), visited);
-    }
-
     void regenerate_states()
     {
       todo.clear();
@@ -434,7 +490,7 @@ class pbesinst_lazy_algorithm
       }
 
       // initialize equation_index, instantiations, symbols and ranks
-      int eqn_index = 0;
+      std::size_t eqn_index = 0;
       ranks.resize(pbes_equations.size());
       instantiations.resize(pbes_equations.size());
       for (auto i = pbes_equations.begin(); i != pbes_equations.end(); ++i, ++eqn_index)
@@ -448,12 +504,14 @@ class pbesinst_lazy_algorithm
         }
       }
 
+      find_loop_simplifier simplify_loop(equation_index, equation, ranks);
+
       init = atermpp::down_cast<propositional_variable_instantiation>(R(p.initial_state()));
       add_todo(init);
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
-        int index = equation_index[X_e.name()];
+        std::size_t index = equation_index[X_e.name()];
         done.insert(X_e);
         instantiations[index].push_back(X_e);
 
@@ -471,21 +529,7 @@ class pbesinst_lazy_algorithm
 
         if (m_transformation_strategy >= on_the_fly_with_fixed_points)
         {
-          // Find mu or nu loop
-          if (eqn.symbol() == fixpoint_symbol::mu())
-          {
-            if (find_loop<true>(psi_e, X_e))
-            {
-              psi_e = false_();
-            }
-          }
-          else
-          {
-            if (find_loop<false>(psi_e, X_e))
-            {
-              psi_e = true_();
-            }
-          }
+          psi_e = simplify_loop.simplify(eqn.symbol(), psi_e, X_e);
         }
 
         // Add all variable instantiations in psi_e to todo and generated,
@@ -565,7 +609,7 @@ class pbesinst_lazy_algorithm
     {
       mCRL2log(log::verbose) << "Generated " << m_equation_count << " BES equations in total, outputting BES" << std::endl;
       pbes result;
-      int index = 0;
+      std::size_t index = 0;
       for (auto i = instantiations.begin(); i != instantiations.end(); i++)
       {
         auto symbol = symbols[index++];
