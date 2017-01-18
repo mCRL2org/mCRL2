@@ -261,7 +261,58 @@ struct find_loop_simplifier
   }
 };
 
-// This class is used to periodically reset the todo set of pbesinst_lazy
+struct todo_list
+{
+  /// \brief Propositional variable instantiations that need to be handled.
+  std::deque<propositional_variable_instantiation> todo;
+
+  /// \brief The content of todo as a set.
+  std::unordered_set<propositional_variable_instantiation> todo_set;
+
+  bool empty() const
+  {
+    return todo.empty();
+  }
+
+  const propositional_variable_instantiation& front() const
+  {
+    return todo.front();
+  }
+
+  const propositional_variable_instantiation& back() const
+  {
+    return todo.back();
+  }
+
+  void pop_front()
+  {
+    todo.pop_front();
+  }
+
+  void pop_back()
+  {
+    todo.pop_back();
+  }
+
+  void push_back(const propositional_variable_instantiation& x)
+  {
+    todo.push_back(x);
+    todo_set.insert(x);
+  }
+
+  bool contains(const propositional_variable_instantiation& x) const
+  {
+    return todo_set.find(x) != todo_set.end();
+  }
+
+  void clear()
+  {
+    todo.clear();
+    todo_set.clear();
+  }
+};
+
+// This class is used to periodically reset the todo list of pbesinst_lazy
 struct todo_resetter
 {
   /// \brief The number of equations generated since last state space
@@ -280,8 +331,7 @@ struct todo_resetter
       regeneration_period(regeneration_period_init)
   {}
 
-  void operator()(std::deque<propositional_variable_instantiation>& todo,
-                  std::unordered_set<propositional_variable_instantiation> todo_set,
+  void operator()(todo_list& todo,
                   const propositional_variable_instantiation& init,
                   std::unordered_set<propositional_variable_instantiation>& done,
                   std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
@@ -297,12 +347,10 @@ struct todo_resetter
       return;
     }
 
-    /// \brief Propositional variable instantiations that are reachable from init.
-    std::unordered_set<propositional_variable_instantiation> reachable;
-
     todo.clear();
-    todo_set.clear();
 
+    // Propositional variable instantiations that are reachable from init.
+    std::unordered_set<propositional_variable_instantiation> reachable;
     std::stack<pbes_expression> stack;
     stack.push(init);
 
@@ -324,7 +372,6 @@ struct todo_resetter
           else
           {
             todo.push_back(X);
-            todo_set.insert(X);
           }
         }
       }
@@ -427,10 +474,7 @@ class pbesinst_lazy_algorithm
     enumerate_quantifiers_rewriter R;
 
     /// \brief Propositional variable instantiations that need to be handled.
-    std::deque<propositional_variable_instantiation> todo;
-
-    /// \brief The content of todo as a set.
-    std::unordered_set<propositional_variable_instantiation> todo_set;
+    todo_list todo;
 
     /// \brief Propositional variable instantiations that have been handled.
     std::unordered_set<propositional_variable_instantiation> done;
@@ -557,12 +601,6 @@ class pbesinst_lazy_algorithm
       }
     }
 
-    inline void add_todo(const propositional_variable_instantiation &X)
-    {
-      todo.push_back(X);
-      todo_set.insert(X);
-    }
-
     const fixpoint_symbol& symbol(std::size_t i) const
     {
       return m_pbes.equations()[i].symbol();
@@ -579,7 +617,7 @@ class pbesinst_lazy_algorithm
       todo_resetter reset_todo;
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
-      add_todo(init);
+      todo.push_back(init);
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
@@ -608,9 +646,9 @@ class pbesinst_lazy_algorithm
         // and augment the occurrence sets
         for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
         {
-          if (todo_set.count(v) == 0 && equation.count(v) == 0)
+          if (!todo.contains(v) && equation.count(v) == 0)
           {
-            add_todo(v);
+            todo.push_back(v);
           }
           occurrence[v].insert(X_e);
         }
@@ -657,7 +695,7 @@ class pbesinst_lazy_algorithm
 
         if (m_transformation_strategy >= on_the_fly)
         {
-          reset_todo(todo, todo_set, init, done, equation);
+          reset_todo(todo, init, done, equation);
         }
 
         mCRL2log(log::verbose) << print_equation_count(++m_iteration_count);
