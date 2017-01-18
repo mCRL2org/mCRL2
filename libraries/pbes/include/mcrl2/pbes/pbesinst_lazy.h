@@ -53,6 +53,57 @@ namespace mcrl2
 namespace pbes_system
 {
 
+namespace detail
+{
+  // The following function is a helper function to allow to create m_pv_renaming outside
+  // the class such that the class becomes a lightweight object.
+
+  std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
+  create_pv_renaming(std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
+                                bool short_renaming_scheme)
+  {
+    size_t index=0;
+    std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
+    for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
+    {
+      for(const propositional_variable_instantiation& inst:vec)
+      {
+        if (short_renaming_scheme)
+        {
+          std::stringstream ss;
+          ss << "X" << index;
+          pv_renaming[inst]=propositional_variable_instantiation(ss.str(),data::data_expression_list());
+        }
+        else
+        {
+          pv_renaming[inst]=pbesinst_rename()(inst);
+        }
+        index++;
+      }
+    }
+    return pv_renaming;
+  }
+
+  class rename_pbesinst_consecutively: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
+  {
+    protected:
+      const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>& m_pv_renaming;
+
+    public:
+      rename_pbesinst_consecutively(const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>& pv_renaming)
+       :  m_pv_renaming(pv_renaming)
+      {}
+
+
+      propositional_variable_instantiation operator()(const propositional_variable_instantiation& v) const
+      {
+        assert(m_pv_renaming.count(v)>0);
+        return m_pv_renaming.at(v);
+      }
+  };
+
+} // end namespace detail
+
 struct pbes_equation_index
 {
   std::unordered_map<core::identifier_string, std::size_t> equation_index;
@@ -315,10 +366,6 @@ class pbesinst_lazy_algorithm
     /// \brief Propositional variable instantiations that have been handled.
     std::unordered_set<propositional_variable_instantiation> done;
 
-    /// \brief Propositional variable instantiations that are reachable from
-    ///        init.
-    std::unordered_set<propositional_variable_instantiation> reachable;
-
     /// \brief Map an instantiation X to a list of other instantiations that
     ///        are found true of false and thus may justify the ultimate
     ///        outcome of the value of X.
@@ -448,14 +495,15 @@ class pbesinst_lazy_algorithm
     {
       todo.push_back(X);
       todo_set.insert(X);
-      reachable.insert(X);
     }
 
     void regenerate_states()
     {
+      /// \brief Propositional variable instantiations that are reachable from init.
+      std::unordered_set<propositional_variable_instantiation> reachable;
+
       todo.clear();
       todo_set.clear();
-      reachable.clear();
 
       std::stack<pbes_expression> stack;
       stack.push(init);
@@ -467,7 +515,7 @@ class pbesinst_lazy_algorithm
 
         if (is_propositional_variable_instantiation(expr))
         {
-          auto X = atermpp::vertical_cast<propositional_variable_instantiation>(expr);
+          auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
           if (reachable.count(X) == 0)
           {
             if (done.count(X))
@@ -605,30 +653,26 @@ class pbesinst_lazy_algorithm
 
     /// \brief Returns the computed bes in pbes format
     /// \return The computed bes in pbes format
-    pbes get_result()
+    pbes get_result(bool short_rename_scheme = true)
     {
-      mCRL2log(log::verbose) << "Generated " << m_equation_count << " BES equations in total, outputting BES" << std::endl;
+      mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, generating BES" << std::endl;
       pbes result;
-      std::size_t index = 0;
-      for (auto i = instantiations.begin(); i != instantiations.end(); i++)
+      size_t index = 0;
+      const std::unordered_map<propositional_variable_instantiation, propositional_variable_instantiation> pv_renaming = detail::create_pv_renaming(instantiations,short_rename_scheme);
+      detail::rename_pbesinst_consecutively renamer(pv_renaming);
+      for (const std::vector<propositional_variable_instantiation>& vec: instantiations)
       {
-        auto symbol = this->symbol(index++);
-        for (auto j = i->begin(); j != i->end(); j++)
+        const fixpoint_symbol symbol = this->symbol(index++);
+        for (const propositional_variable_instantiation& X_e: vec)
         {
-          auto X_e = *j;
-          if (reachable.count(X_e) == 0)
-          {
-            continue;
-          }
-          auto lhs = propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list());
-          auto rhs = rho(equation[X_e]);
+          const propositional_variable lhs = propositional_variable(renamer(X_e).name(), data::variable_list());
+          const pbes_expression rhs = replace_propositional_variables(equation[X_e], renamer);
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
-          mCRL2log(log::debug) << "Equation: " << symbol << " " << X_e << " = " << equation[X_e] << std::endl;
-          mCRL2log(log::debug) << "Obtained justification of " << X_e << ": " << justification[X_e] << std::endl;
+          mCRL2log(log::debug) << "BESEquation: " << atermpp::aterm(symbol) << " " << lhs << " = " << rhs << std::endl;
         }
       }
 
-      result.initial_state() = pbesinst_rename()(init);
+      result.initial_state() = renamer(init);
       return result;
     }
 
