@@ -336,6 +336,9 @@ priority_t PriorityPromotionSolver::promoteSubDominion(std::vector<priority_t>& 
     for (verti v : m_unsolved) {
         // Promote the current region to the promotion priority
         if (region_function[v] == prio) {
+            // Remove the vertex from the old region
+            --m_regions[region_function[v]];
+
             region_function[v] = promotion;
 
             // Add the vertex to the new region.
@@ -353,9 +356,6 @@ priority_t PriorityPromotionSolver::promoteSubDominion(std::vector<priority_t>& 
             ++m_regions[region_function[v]];
         }
     }
-
-    // This was promoted so no longer exists
-    m_regions[prio] = 0;
 
     return promotion;
 }
