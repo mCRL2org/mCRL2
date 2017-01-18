@@ -240,7 +240,7 @@ struct find_loop_simplifier
     }
   }
 
-  pbes_expression simplify(const fixpoint_symbol& symbol, const pbes_expression& psi_e, const propositional_variable_instantiation& X_e)
+  pbes_expression operator()(const fixpoint_symbol& symbol, const pbes_expression& psi_e, const propositional_variable_instantiation& X_e)
   {
     // Find mu or nu loop
     if (symbol == fixpoint_symbol::mu())
@@ -258,6 +258,89 @@ struct find_loop_simplifier
       }
     }
     return psi_e;
+  }
+};
+
+// This class is used to periodically reset the todo set of pbesinst_lazy
+struct todo_resetter
+{
+  /// \brief The number of equations generated since last state space
+  ///        regeneration.
+  std::size_t regeneration_count;
+
+  /// \brief The number of equations to generate before regenerating the
+  ///        state space.
+  std::size_t regeneration_period;
+
+  /// \brief Initial value for regeneration_period.
+  enum { regeneration_period_init = 100 };
+
+  todo_resetter()
+    : regeneration_count(0),
+      regeneration_period(regeneration_period_init)
+  {}
+
+  void operator()(std::deque<propositional_variable_instantiation>& todo,
+                  std::unordered_set<propositional_variable_instantiation> todo_set,
+                  const propositional_variable_instantiation& init,
+                  std::unordered_set<propositional_variable_instantiation>& done,
+                  std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
+                 )
+  {
+    if (++regeneration_count == regeneration_period)
+    {
+      regeneration_count = 0;
+      regeneration_period = equation.size() / 2;
+    }
+    else
+    {
+      return;
+    }
+
+    /// \brief Propositional variable instantiations that are reachable from init.
+    std::unordered_set<propositional_variable_instantiation> reachable;
+
+    todo.clear();
+    todo_set.clear();
+
+    std::stack<pbes_expression> stack;
+    stack.push(init);
+
+    while (!stack.empty())
+    {
+      const pbes_expression expr = stack.top();
+      stack.pop();
+
+      if (is_propositional_variable_instantiation(expr))
+      {
+        auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
+        if (reachable.count(X) == 0)
+        {
+          if (done.count(X))
+          {
+            stack.push(equation[X]);
+            reachable.insert(X);
+          }
+          else
+          {
+            todo.push_back(X);
+            todo_set.insert(X);
+          }
+        }
+      }
+      else if (is_and(expr))
+      {
+        const and_& expra = atermpp::down_cast<and_>(expr);
+        stack.push(expra.left());
+        stack.push(expra.right());
+      }
+      else if (is_or(expr))
+      {
+        const or_& expro = atermpp::down_cast<or_>(expr);
+        stack.push(expro.left());
+        stack.push(expro.right());
+      }
+    }
   }
 };
 
@@ -342,20 +425,6 @@ class pbesinst_lazy_algorithm
 
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;
-
-    /// \brief The number of generated equations.
-    std::size_t m_equation_count;
-
-    /// \brief The number of equations generated since last state space
-    ///        regeneration.
-    std::size_t regeneration_count;
-
-    /// \brief The number of equations to generate before regenerating the
-    ///        state space.
-    std::size_t regeneration_period;
-
-    /// \brief Initial value for regeneration_period.
-    enum { regeneration_period_init = 100 };
 
     /// \brief Propositional variable instantiations that need to be handled.
     std::deque<propositional_variable_instantiation> todo;
@@ -459,9 +528,6 @@ class pbesinst_lazy_algorithm
         m_pbes(preprocess(p)),
         equation_index(p),
         R(datar, p.data()),
-        m_equation_count(0),
-        regeneration_count(0),
-        regeneration_period(regeneration_period_init),
         m_search_strategy(search_strategy),
         m_transformation_strategy(transformation_strategy)
     {
@@ -497,53 +563,6 @@ class pbesinst_lazy_algorithm
       todo_set.insert(X);
     }
 
-    void regenerate_states()
-    {
-      /// \brief Propositional variable instantiations that are reachable from init.
-      std::unordered_set<propositional_variable_instantiation> reachable;
-
-      todo.clear();
-      todo_set.clear();
-
-      std::stack<pbes_expression> stack;
-      stack.push(init);
-
-      while (!stack.empty())
-      {
-        const pbes_expression expr = stack.top();
-        stack.pop();
-
-        if (is_propositional_variable_instantiation(expr))
-        {
-          auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
-          if (reachable.count(X) == 0)
-          {
-            if (done.count(X))
-            {
-              stack.push(equation[X]);
-              reachable.insert(X);
-            }
-            else
-            {
-              add_todo(X);
-            }
-          }
-        }
-        else if (is_and(expr))
-        {
-          const and_& expra = atermpp::down_cast<and_>(expr);
-          stack.push(expra.left());
-          stack.push(expra.right());
-        }
-        else if (is_or(expr))
-        {
-          const or_& expro = atermpp::down_cast<or_>(expr);
-          stack.push(expro.left());
-          stack.push(expro.right());
-        }
-      }
-    }
-
     const fixpoint_symbol& symbol(std::size_t i) const
     {
       return m_pbes.equations()[i].symbol();
@@ -554,10 +573,10 @@ class pbesinst_lazy_algorithm
     void run()
     {
       auto& pbes_equations = m_pbes.equations();
-
+      std::size_t m_iteration_count = 0;
       instantiations.resize(m_pbes.equations().size());
-
       find_loop_simplifier simplify_loop(pbes_equations, equation_index, equation);
+      todo_resetter reset_todo;
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       add_todo(init);
@@ -582,7 +601,7 @@ class pbesinst_lazy_algorithm
 
         if (m_transformation_strategy >= on_the_fly_with_fixed_points)
         {
-          psi_e = simplify_loop.simplify(eqn.symbol(), psi_e, X_e);
+          psi_e = simplify_loop(eqn.symbol(), psi_e, X_e);
         }
 
         // Add all variable instantiations in psi_e to todo and generated,
@@ -623,7 +642,7 @@ class pbesinst_lazy_algorithm
               for (auto i = oc.begin(); i != oc.end(); i++)
               {
                 auto Y = *i;
-                pbes_expression &f = equation[Y];
+                pbes_expression& f = equation[Y];
                 f = make_propositional_variable_rewriter(trivial_X, justification[Y])(f);
                 if (is_true(f) || is_false(f))
                 {
@@ -638,16 +657,11 @@ class pbesinst_lazy_algorithm
 
         if (m_transformation_strategy >= on_the_fly)
         {
-          if (++regeneration_count == regeneration_period)
-          {
-            regeneration_count = 0;
-            regeneration_period = equation.size() / 2;
-            regenerate_states();
-          }
+          reset_todo(todo, todo_set, init, done, equation);
         }
 
-        mCRL2log(log::verbose) << print_equation_count(++m_equation_count);
-        detail::check_bes_equation_limit(m_equation_count);
+        mCRL2log(log::verbose) << print_equation_count(++m_iteration_count);
+        detail::check_bes_equation_limit(m_iteration_count);
       }
     }
 
