@@ -237,7 +237,7 @@ struct pbesinst_lazy_command: public pbescommand
   void execute()
   {
     pbescommand::execute();
-    pbesspec = pbesinst_lazy(pbesspec, data::jitty, false, breadth_first, lazy);
+    pbesspec = pbesinst_lazy(pbesspec, data::jitty, breadth_first, lazy);
     pbes_system::save_pbes(pbesspec, output_filename);
   }
 };
@@ -251,7 +251,7 @@ struct pbesinst_optimize_command: public pbescommand
   void execute()
   {
     pbescommand::execute();
-    pbesspec = pbesinst_lazy(pbesspec, data::jitty, false, breadth_first, optimize);
+    pbesspec = pbesinst_lazy(pbesspec, data::jitty, breadth_first, optimize);
     pbes_system::save_pbes(pbesspec, output_filename);
   }
 };
@@ -265,7 +265,7 @@ struct pbesinst_on_the_fly_command: public pbescommand
   void execute()
   {
     pbescommand::execute();
-    pbesspec = pbesinst_lazy(pbesspec, data::jitty, false, breadth_first, on_the_fly);
+    pbesspec = pbesinst_lazy(pbesspec, data::jitty, breadth_first, on_the_fly);
     pbes_system::save_pbes(pbesspec, output_filename);
   }
 };
@@ -279,7 +279,7 @@ struct pbesinst_on_the_fly_with_fixed_points_command: public pbescommand
   void execute()
   {
     pbescommand::execute();
-    pbesspec = pbesinst_lazy(pbesspec, data::jitty, false, breadth_first, on_the_fly_with_fixed_points);
+    pbesspec = pbesinst_lazy(pbesspec, data::jitty, breadth_first, on_the_fly_with_fixed_points);
     pbes_system::save_pbes(pbesspec, output_filename);
   }
 };
