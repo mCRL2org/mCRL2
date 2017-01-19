@@ -43,8 +43,8 @@ class prob_bisim_partitioner_bem
       timer.start("bisimulation_reduce (bem)");
       create_initial_partition();
       refine_partition_until_it_becomes_stable();
-      postprocessing_stage();
       timer.finish("bisimulation_reduce (bem)");
+      postprocessing_stage();
     }
 
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
@@ -378,6 +378,15 @@ class prob_bisim_partitioner_bem
       }
     }
 
+    block_index_of_a_state.resize(aut.num_states());
+    for (const block_type& b : blocks)
+    {
+      for (const state_type s : b.states)
+      {
+        block_index_of_a_state[s] = b.key;
+      }
+    }
+
   }
 
   /** \brief Calculates the probability to reach block b from distribution d.
@@ -386,23 +395,16 @@ class prob_bisim_partitioner_bem
   *   \return The probability to reach block b. */
   probability_fraction_type probability_to_block(distribution_type& d, block_type& b)
   {
-    // iterating over all states in block b and in all probability pair of d is inefficient;
-    // however, this achives the time complexity described by Baier of O(m|C|) to calculate all the
-    // probabilities to block C. See page 208, proof of Lemma 4.8 for more details.
-
     probability_fraction_type prob_to_block;
     const lts_aut_base::probabilistic_state& prob_state = aut.probabilistic_state(d.key);
 
-    /* Iterate over all states of block b. Check whether the state is in the
-    distribution d and add up the probability*/
-    for (const state_type &s : b.states)
+    /* Check whether the state is in the distribution d and add up the probability*/
+    for (const lts_aut_base::state_probability_pair& prob_pair : prob_state)
     {
-      for (const lts_aut_base::state_probability_pair& prob_pair : prob_state)
+      const state_type& s = prob_pair.state();
+      if (block_index_of_a_state[s] == b.key)
       {
-        if (prob_pair.state() == s)
-        {
-          prob_to_block = prob_to_block + prob_pair.probability();
-        }
+        prob_to_block = prob_to_block + prob_pair.probability();
       }
     }
 
@@ -491,7 +493,7 @@ class prob_bisim_partitioner_bem
           step_class_type* sc_ptr = *sc_iter;
 
           // Mapping to sort the distributions based on its probability to reach a block, instead of using
-          // an unordered balanced tree as suggsted in Baier
+          // an ordered balanced tree as suggsted in Baier
           static std::map< probability_fraction_type, std::list<distribution_type*> > distributions_ordered_by_prob;
           distributions_ordered_by_prob.clear();
 
@@ -517,7 +519,7 @@ class prob_bisim_partitioner_bem
               
               if (new_class_count == 0)
               {
-                // it it is the first element of the mapping then we do not creat a new step class; instead, we 
+                // if it is the first element of the mapping then we do not create a new step class; instead, we 
                 // add its elements into the current step class that is being splitted
                 sc_ptr->distributions.swap(distribution_list);
 
@@ -527,7 +529,7 @@ class prob_bisim_partitioner_bem
                   sc_ptr->prev_states[i] = false;
                 }
 
-                // recalculate prev states based ont incomming transitions of each distribution
+                // recalculate prev states based on incomming transitions of each distribution
                 for (distribution_type* d : sc_ptr->distributions)
                 {
                   for (transition* t_ptr : d->incoming_transitions_per_label[sc_ptr->action])
@@ -579,7 +581,7 @@ class prob_bisim_partitioner_bem
           step_partition.splice(step_partition.begin(), step_partition_old, sc_iter);
         }
 
-        // more remaining step classes to the end of step partition
+        // move remaining step classes to the end of step partition
         step_partition.splice(step_partition.end(), step_partition_old);
       }
 
@@ -628,6 +630,13 @@ class prob_bisim_partitioner_bem
           // if both, the new block and temp block has elements, then we add a new block into the state partition
           if (new_block.states.size() > 0 && temp_block.states.size() > 0)
           {
+
+            // First update the block_index_of_a_state by iterating over all states of the new block
+            for (state_type s : new_block.states)
+            {
+              block_index_of_a_state[s] = new_block.key;
+            }
+
             blocks.push_back(new_block);
             new_block_ptr = &blocks.back();
 
@@ -689,7 +698,7 @@ class prob_bisim_partitioner_bem
   void postprocessing_stage(void)
   {
     //---- Post processing to keep track of the parent block of each state ----//
-    block_index_of_a_state.resize(aut.num_states());
+    //block_index_of_a_state.resize(aut.num_states());
     for (const block_type& b : blocks)
     {
       for (const state_type s : b.states)
@@ -759,7 +768,7 @@ void probabilistic_bisimulation_reduce_bem(LTS_TYPE& l, utilities::execution_tim
 * \param[in/out] l2 A second probabilistic transition system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool destructive_probabilistic_bisimulation_compare_bem(LTS_TYPE& l1, LTS_TYPE& l2);
+bool destructive_probabilistic_bisimulation_compare_bem(LTS_TYPE& l1, LTS_TYPE& l2, utilities::execution_timer& timer);
 
 
 /** \brief Checks whether the two initial states of two plts's are probabilistic bisimilar.
@@ -770,7 +779,7 @@ bool destructive_probabilistic_bisimulation_compare_bem(LTS_TYPE& l1, LTS_TYPE& 
 * \param[in/out] l2 A second transistion system.
 * \retval True iff the initial states of the current transition system and l2 are probabilistic bisimilar */
 template < class LTS_TYPE>
-bool probabilistic_bisimulation_compare(const LTS_TYPE& l1, const LTS_TYPE& l2);
+bool probabilistic_bisimulation_compare_bem(const LTS_TYPE& l1, const LTS_TYPE& l2, utilities::execution_timer& timer);
 
 
 template < class LTS_TYPE>
@@ -792,11 +801,12 @@ void probabilistic_bisimulation_reduce_bem(LTS_TYPE& l, utilities::execution_tim
 template < class LTS_TYPE>
 bool probabilistic_bisimulation_compare_bem(
   const LTS_TYPE& l1,
-  const LTS_TYPE& l2)
+  const LTS_TYPE& l2,
+  utilities::execution_timer& timer)
 {
   LTS_TYPE l1_copy(l1);
   LTS_TYPE l2_copy(l2);
-  return destructive_probabilistic_bisimulation_compare_bem(l1_copy, l2_copy);
+  return destructive_probabilistic_bisimulation_compare_bem(l1_copy, l2_copy, timer);
 }
 
 template < class LTS_TYPE>
