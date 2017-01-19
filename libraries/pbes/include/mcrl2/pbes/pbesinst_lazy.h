@@ -333,8 +333,11 @@ struct todo_resetter
 
   void operator()(todo_list& todo,
                   const propositional_variable_instantiation& init,
+                  const pbes_equation_index& equation_index,
                   std::unordered_set<propositional_variable_instantiation>& done,
-                  std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
+                  std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation,
+                  std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
+                  std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> >& occurrence
                  )
   {
     if (++regeneration_count == regeneration_period)
@@ -347,10 +350,17 @@ struct todo_resetter
       return;
     }
 
-    todo.clear();
-
-    // Propositional variable instantiations that are reachable from init.
+    // Create a set of reachable propositional_variable_instantiations
+    // and use that to clean up the set of equations.
     std::unordered_set<propositional_variable_instantiation> reachable;
+
+    todo.clear();
+    occurrence.clear();
+    for(std::vector<propositional_variable_instantiation> vec: instantiations)
+    {
+      vec.clear();
+    }
+
     std::stack<pbes_expression> stack;
     stack.push(init);
 
@@ -361,10 +371,10 @@ struct todo_resetter
 
       if (is_propositional_variable_instantiation(expr))
       {
-        auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
+        const propositional_variable_instantiation& X = atermpp::down_cast<propositional_variable_instantiation>(expr);
         if (reachable.count(X) == 0)
         {
-          if (done.count(X))
+          if (equation.count(X)>0)
           {
             stack.push(equation[X]);
             reachable.insert(X);
@@ -388,6 +398,23 @@ struct todo_resetter
         stack.push(expro.right());
       }
     }
+    // erase non reachable equations.
+    std::unordered_map<propositional_variable_instantiation, pbes_expression> new_equations;
+    for (auto i = equation.begin(); i != equation.end(); ++i)
+    {
+      // Insert the new equation if it is reachable, or if it equal to true or false and m_erase_unused_bes_variables is set to some.
+      if (reachable.count(i->first) > 0 || (is_true(i->second) || is_false(i->second)))
+      {
+        new_equations.insert(*i);
+        size_t index = equation_index[i->first.name()];
+        instantiations[index].push_back(i->first);
+        for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(i->second))
+        {
+          occurrence[v].insert(i->first);
+        }
+      }
+    }
+    equation.swap(new_equations);
   }
 };
 
@@ -695,7 +722,7 @@ class pbesinst_lazy_algorithm
 
         if (m_transformation_strategy >= on_the_fly)
         {
-          reset_todo(todo, init, done, equation);
+          reset_todo(todo, init, equation_index, done, equation, instantiations, occurrence);
         }
 
         mCRL2log(log::verbose) << print_equation_count(++m_iteration_count);
@@ -710,7 +737,7 @@ class pbesinst_lazy_algorithm
       mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, generating BES" << std::endl;
       pbes result;
       size_t index = 0;
-      const std::unordered_map<propositional_variable_instantiation, propositional_variable_instantiation> pv_renaming = detail::create_pv_renaming(instantiations,short_rename_scheme);
+      const std::unordered_map<propositional_variable_instantiation, propositional_variable_instantiation> pv_renaming = detail::create_pv_renaming(instantiations, short_rename_scheme);
       detail::rename_pbesinst_consecutively renamer(pv_renaming);
       for (const std::vector<propositional_variable_instantiation>& vec: instantiations)
       {
