@@ -36,17 +36,22 @@ struct add_propositional_variable_rewriter: public Builder<Derived>
     : map(m), justification(j)
   {}
 
+  bool is_true_or_false(const pbes_expression& x) const
+  {
+    return is_true(x) || is_false(x);
+  }
+
   pbes_expression apply(const propositional_variable_instantiation& x)
   {
-    auto expr = map.find(x);
-    if (expr == map.end())
+    auto p = map.find(x);
+    if (p == map.end() || !is_true_or_false(p->second))
     {
       return x;
     }
     else
     {
       justification.push_back(x);
-      return expr->second;
+      return p->second;
     }
   }
 };

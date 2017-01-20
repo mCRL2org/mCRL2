@@ -420,13 +420,11 @@ struct true_false_simplifier
                   const propositional_variable_instantiation& X_e,
                   std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification,
                   std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> >& occurrence,
-                  std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation,
-                  std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial
+                  std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                  )
   {
     if (strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
     {
-      trivial[X_e] = psi_e;
       if (strategy >= on_the_fly)
       {
         // Substitute X_e to its value in all its occurrences, and
@@ -440,19 +438,13 @@ struct true_false_simplifier
           new_trivials.erase(new_trivials.begin());
 
           auto oc = occurrence[X];
-          // TODO Instead using a map of a single element, we should
-          // probably generalize propositional_variable_rewriter to take a
-          // function instead of a set
-          std::unordered_map<propositional_variable_instantiation, pbes_expression> trivial_X;
-          trivial_X[X] = psi_e;
           for (auto i = oc.begin(); i != oc.end(); i++)
           {
             auto Y = *i;
             pbes_expression& f = equation[Y];
-            f = make_propositional_variable_rewriter(trivial_X, justification[Y])(f);
+            f = make_propositional_variable_rewriter(equation, justification[Y])(f);
             if (is_true(f) || is_false(f))
             {
-              trivial[Y] = f;
               new_trivials.insert(Y);
             }
           }
@@ -508,10 +500,6 @@ class pbesinst_lazy_algorithm
 
     /// \brief Map a variable instantiation to its right hand side.
     std::unordered_map<propositional_variable_instantiation, pbes_expression> equation;
-
-    /// \brief Map a variable instantiations to its right hand side
-    ///        when the latter is trivial (either true or false).
-    std::unordered_map<propositional_variable_instantiation, pbes_expression> trivial;
 
     /// \brief instantiations[i] contains all instantiations of the variable
     ///        of the i-th equation in the PBES.
@@ -578,14 +566,14 @@ class pbesinst_lazy_algorithm
 
     pbes_expression substitute_trivial_values(const pbes_expression& psi_e,
                                               const propositional_variable_instantiation& X_e,
-                                              const std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial,
+                                              const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation,
                                               std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification
                                              )
     {
       if (m_transformation_strategy >= optimize)
       {
         // Substitute all trivial variable instantiations by their values
-        return make_propositional_variable_rewriter(trivial, justification[X_e])(psi_e);
+        return make_propositional_variable_rewriter(equation, justification[X_e])(psi_e);
       }
       else
       {
@@ -609,13 +597,12 @@ class pbesinst_lazy_algorithm
                              const propositional_variable_instantiation& X_e,
                              std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification,
                              std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> >& occurrence,
-                             std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation,
-                             std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial
+                             std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                             )
     {
       if (m_transformation_strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
       {
-        m_true_false_simplifier(m_transformation_strategy, psi_e, X_e, justification, occurrence, equation, trivial);
+        m_true_false_simplifier(m_transformation_strategy, psi_e, X_e, justification, occurrence, equation);
       }
     }
 
@@ -699,7 +686,7 @@ class pbesinst_lazy_algorithm
         pbes_expression psi_e = R(phi, sigma);
 
         // optional step
-        psi_e = substitute_trivial_values(psi_e, X_e, trivial, justification); // N.B. modifies justification
+        psi_e = substitute_trivial_values(psi_e, X_e, equation, justification); // N.B. modifies justification
 
         // optional step
         psi_e = simplify_loop(psi_e, eqn.symbol(), X_e);
@@ -720,7 +707,7 @@ class pbesinst_lazy_algorithm
         equation[X_e] = psi_e;
 
         // optional step
-        true_false_simplify(psi_e, X_e, justification, occurrence, equation, trivial); // N.B. modifies equation, justification, occurrence and trivial
+        true_false_simplify(psi_e, X_e, justification, occurrence, equation); // N.B. modifies equation, justification, occurrence
 
         // optional step
         reset(init, todo, done, reachable, equation); // N.B. modifies todo and reachable
