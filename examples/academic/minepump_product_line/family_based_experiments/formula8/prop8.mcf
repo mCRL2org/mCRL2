@@ -1,0 +1,84 @@
+%% Invariantly the pump is not started when the low water level signal fires
+%%
+%% Holds for all product families. Requires no decomposition to prove this.
+
+
+(forall Pz:FExpr.
+( val(Pz in
+[
+tt
+]
+)
+ =>
+(nu X(Px:FExpr = normalise(and(Pz,FD))).
+  (
+    (
+      [skip](val(normalise(and(Px,tt)) != ff) =>  
+                 X(normalise(and(Px,tt)))
+            )
+    )
+  &&
+    (forall e:FExpr. 
+       [skip(e)](val(normalise(and(Px,and(tt,e))) != ff) => 
+                     X(normalise(and(Px,and(tt,e))) )
+                )
+    )
+  &&
+    (forall e:FExpr. 
+       [lowLevel(e)](val(normalise(and(Px,and(tt,e))) != ff) => 
+                         X(normalise(and(Px,and(tt,e))) )
+                    )
+    )
+  &&
+    (forall e:FExpr. 
+       [normalLevel(e)](val(normalise(and(Px,and(tt,e))) != ff) => 
+                        X(normalise(and(Px,and(tt,e))) )
+                   )
+    )
+  &&
+    (forall e:FExpr. 
+       [highLevel(e)](val(normalise(and(Px,and(tt,e))) != ff) => 
+                          X(normalise(and(Px,and(tt,e))) )
+                     )
+    )
+  &&
+    (forall e:FExpr. 
+       [pumpStart(e)](val(normalise(and(Px,and(tt,e))) != ff) => 
+                          X(normalise(and(Px,and(tt,e))) )
+                     )
+    )
+  &&
+    (forall e':FExpr. 
+       [lowLevel(e')](val(normalise(and(Px,and(tt,e'))) != ff) => 
+                         nu Y(Py : FExpr = normalise(and(Px,and(tt,e')))).
+                           ( 
+                             ( (forall e:FExpr. 
+                                  [skip(e)](val(normalise(and(Py,and(tt,e))) != ff) => 
+                                                Y(normalise(and(Py,and(tt,e))) )
+                                           )
+                               )
+                             &&
+                               (forall e:FExpr. 
+                                  [lowLevel(e)](val(normalise(and(Py,and(tt,e))) != ff) => 
+                                                    Y(normalise(and(Py,and(tt,e))) )
+                                               )
+                               )
+                             &&
+                               (
+                                 [skip](val(normalise(and(Py,tt)) != ff) => 
+                                                    Y(normalise(and(Py,tt)))
+                                       )
+                               )
+                             &&
+                               (forall e:FExpr. 
+                                  [pumpStart(e)](val(normalise(and(Py,and(tt,e))) == ff))
+                               )
+                           
+                           )
+                         )
+                    )
+    )
+  ) 
+)
+)
+)

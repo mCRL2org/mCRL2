@@ -1,0 +1,224 @@
+%% Assuming fairness (prop3), the system cannot be in a situation in which the pump runs 
+%% indefinitely in the presence of methane
+%%
+%% Holds for 112 products and fails for 16 products. Proving the property for the
+%% 112 products requires no decomposition in subfamilies. Proving the complement
+%% of the product for the remaining 16 products requires decomposing these products
+%% into 2 distinct subfamilies
+
+nu A.
+(
+( 
+forall Px':FExpr.
+(val(Px' in
+[
+neg(and(atom(Ct),and(neg(atom(Ma)),atom(Lh))))
+] 
+ ) => 
+nu X(Px:FExpr = normalise(and( FD, Px')),b : Bool = false). 
+(
+( val(!b) =>
+( 
+ ( nu Y0(Py0:FExpr = Px). 
+(
+   (val(normalise(and(Py0,tt)) != ff) => (forall e0:FExpr. [pumpStart(e0)](val(normalise(and(Py0,e0)) != ff) => Y0(normalise(and(Py0,e0)))) ))
+&& (val(normalise(and(Py0,tt)) != ff) => (forall e1:FExpr. [pumpStop(e1)](val(normalise(and(Py0,e1)) != ff) => Y0(normalise(and(Py0,e1)))) ))
+&& (val(normalise(and(Py0,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Py0,and(e,tt) )) != ff) => Y0(normalise(and(Py0,e)))) ))
+&& (val(normalise(and(Py0,tt)) != ff) => [skip]Y0(Py0) )   
+&& (val(normalise(and(Py0,tt)) != ff) => [palarmMsg]Y0(Py0) )
+&& (val(normalise(and(Py0,tt)) != ff) => [levelMsg]Y0(Py0) )
+&& (val(normalise(and(Py0,tt)) != ff) => [methaneRise]Y0(Py0) )
+&& (val(normalise(and(Py0,tt)) != ff) => [methaneLower]Y0(Py0) )
+&& (val(normalise(and(Py0,tt)) != ff) => [commandMsg]Y0(Py0) )
+&& (val(normalise(and(Py0,tt)) != ff) => (forall e':FExpr.  
+      [pumpStart(e')](val(normalise(and(Py0,and(e',tt) )) != ff) => 
+         nu Y1(Py1:FExpr = normalise(and(Py0,e'))).
+         (
+            (val(normalise(and(Py1,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Py1,and(e,tt) )) != ff) => Y1(normalise(and(Py1,e)))) ))
+         && (val(normalise(and(Py1,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Py1,and(e,tt) )) != ff) => Y1(normalise(and(Py1,e)))) ))
+         && (val(normalise(and(Py1,tt)) != ff) => [skip]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [palarmMsg]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [levelMsg]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [methaneRise]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [methaneLower]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [commandMsg]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [methaneRise]( X(Py1,true) ) )  
+         )
+       )
+     )
+   )
+&& (val(normalise(and(Py0,tt)) != ff) => (                
+      [methaneRise](
+         nu Y1(Py1:FExpr = Py0).
+         (
+            (val(normalise(and(Py1,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Py1,and(e,tt) )) != ff) => Y1(normalise(and(Py1,e)))) ))
+         && (val(normalise(and(Py1,tt)) != ff) => (forall e:FExpr. [pumpStop(e)](val(normalise(and(Py1,and(e,tt) )) != ff) => Y1(normalise(and(Py1,e)))) ))
+         && (val(normalise(and(Py1,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Py1,and(e,tt) )) != ff) => Y1(normalise(and(Py1,e)))) ))
+         && (val(normalise(and(Py1,tt)) != ff) => [skip]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [palarmMsg]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [levelMsg]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [methaneRise]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => [commandMsg]Y1(Py1) )
+         && (val(normalise(and(Py1,tt)) != ff) => (forall e:FExpr.  [pumpStart(e)](val(normalise(and(Py1,and(e,tt) )) != ff) => X(normalise(and(Py1,e)),true) ) ) ) 
+         )
+       )
+     )
+  )
+) 
+)
+)
+)
+&&
+(val(b) =>
+         ( mu V(Pv:FExpr = Px). 
+           (
+            (nu X0(Px0:FExpr = Pv).
+             ( (val(normalise(and(Px0,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px0,and(e,tt) )) != ff) => X0(normalise(and(Px0,e)))) ))
+             && (val(normalise(and(Px0,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Px0,and(e,tt) )) != ff) => X0(normalise(and(Px0,e)))) ))
+             && (val(normalise(and(Px0,tt)) != ff) => [skip]X0(Px0) )
+             && (val(normalise(and(Px0,tt)) != ff) => [palarmMsg]X0(Px0) )
+             && (val(normalise(and(Px0,tt)) != ff) => [levelMsg]X0(Px0) )
+             && (val(normalise(and(Px0,tt)) != ff) => [methaneRise]X0(Px0) )
+             && (val(normalise(and(Px0,tt)) != ff) => [commandMsg]X0(Px0) )
+             && (val(normalise(and(Px0,tt)) != ff) => [commandMsg]V(Px0))
+             )
+            )
+           ||
+            (nu X1(Px1:FExpr = Pv).
+             (  (val(normalise(and(Px1,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px1,and(e,tt) )) != ff) => X1(normalise(and(Px1,e)))) ))
+             && (val(normalise(and(Px1,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Px1,and(e,tt) )) != ff) => X1(normalise(and(Px1,e)))) ))
+             && (val(normalise(and(Px1,tt)) != ff) => [skip]X1(Px1) )
+             && (val(normalise(and(Px1,tt)) != ff) => [palarmMsg]X1(Px1) )
+             && (val(normalise(and(Px1,tt)) != ff) => [levelMsg]X1(Px1) )
+             && (val(normalise(and(Px1,tt)) != ff) => [methaneRise]X1(Px1) )
+             && (val(normalise(and(Px1,tt)) != ff) => [commandMsg]X1(Px1) )
+             && (val(normalise(and(Px1,tt)) != ff) => [palarmMsg]V(Px1) )
+             )
+            )
+           ||
+            (nu X2(Px2:FExpr = Pv).
+              (  (val(normalise(and(Px2,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px2,and(e,tt) )) != ff) => X2(normalise(and(Px2,e)))) ))
+              && (val(normalise(and(Px2,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Px2,and(e,tt) )) != ff) => X2(normalise(and(Px2,e)))) ))
+              && (val(normalise(and(Px2,tt)) != ff) => [skip]X2(Px2) )
+              && (val(normalise(and(Px2,tt)) != ff) => [palarmMsg]X2(Px2) )
+              && (val(normalise(and(Px2,tt)) != ff) => [levelMsg]X2(Px2) )
+              && (val(normalise(and(Px2,tt)) != ff) => [methaneRise]X2(Px2) )
+              && (val(normalise(and(Px2,tt)) != ff) => [commandMsg]X2(Px2) )
+              && (val(normalise(and(Px2,tt)) != ff) => [levelMsg]V(Px2) )
+              )
+             )
+           )
+        )
+)
+)
+)
+)
+&&
+( 
+forall Px':FExpr.
+(
+val(Px' in
+[
+and(neg(atom(Ma)),and(neg(atom(Mq)),and(atom(Ct),atom(Lh)))),
+     and(neg(atom(Ma)),and(atom(Mq),and(atom(Ct),atom(Lh))))
+]
+ ) => 
+mu X(Px:FExpr = normalise(and(Px',FD)),b : Bool = false). 
+(
+( val(!b) =>
+( 
+ ( mu Y0(Py0:FExpr = Px). 
+(
+   (val(normalise(or(neg(Py0),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Py0),e)) == tt) && Y0(Py0)) ))
+|| (val(normalise(or(neg(Py0),tt)) == tt) && (exists e:FExpr. <pumpStop(e)>(val(normalise(or(neg(Py0),e)) == tt) && Y0(Py0)) ))
+|| (val(normalise(or(neg(Py0),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py0),e)) == tt) && Y0(Py0)) ))
+|| (val(normalise(or(neg(Py0),tt)) == tt) && <skip>Y0(Py0) )   
+|| (val(normalise(or(neg(Py0),tt)) == tt) && <palarmMsg>Y0(Py0) )
+|| (val(normalise(or(neg(Py0),tt)) == tt) && <levelMsg>Y0(Py0) )
+|| (val(normalise(or(neg(Py0),tt)) == tt) && <methaneRise>Y0(Py0) )
+|| (val(normalise(or(neg(Py0),tt)) == tt) && <methaneLower>Y0(Py0) )
+|| (val(normalise(or(neg(Py0),tt)) == tt) && <commandMsg>Y0(Py0) )
+|| (val(normalise(or(neg(Py0),tt)) == tt) && (exists e':FExpr.  
+      <pumpStart(e')>(val(normalise(or(neg(Py0),e')) == tt) && 
+         mu Y1(Py1:FExpr = Py0).
+         (
+            (val(normalise(or(neg(Py1),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Py1),e)) == tt) && Y1(Py1)) ))
+         || (val(normalise(or(neg(Py1),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py1),e)) == tt) && Y1(Py1)) ))
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <skip>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <palarmMsg>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <levelMsg>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <methaneRise>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <methaneLower>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <commandMsg>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <methaneRise>( X(Py1,true) ) )  
+         )
+       )
+     )
+   )
+|| (val(normalise(or(neg(Py0),tt)) == tt) && (                
+      <methaneRise>(
+         mu Y1(Py1:FExpr = Py0).
+         (
+            (val(normalise(or(neg(Py1),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Py1),e)) == tt) && Y1(Py1)) ))
+         || (val(normalise(or(neg(Py1),tt)) == tt) && (exists e:FExpr. <pumpStop(e)>(val(normalise(or(neg(Py1),e)) == tt) && Y1(Py1)) ))
+         || (val(normalise(or(neg(Py1),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py1),e)) == tt) && Y1(Py1)) ))
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <skip>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <palarmMsg>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <levelMsg>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <methaneRise>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && <commandMsg>Y1(Py1) )
+         || (val(normalise(or(neg(Py1),tt)) == tt) && (exists e:FExpr.  <pumpStart(e)>(val(normalise(or(neg(Py1),e)) == tt) && X(Py1,true) ) ) ) 
+         )
+       )
+     )
+  )
+) 
+)
+)
+)
+&&
+(val(b) =>
+         ( nu V(Pv:FExpr = Px). 
+           (
+            (mu X0(Px0:FExpr = Pv).
+             ( (val(normalise(or(neg(Px0),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px0),e)) == tt) && X0(Px0)) ))
+             || (val(normalise(or(neg(Px0),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px0),e)) == tt) && X0(Px0)) ))
+             || (val(normalise(or(neg(Px0),tt)) == tt) && <skip>X0(Px0) )
+             || (val(normalise(or(neg(Px0),tt)) == tt) && <palarmMsg>X0(Px0) )
+             || (val(normalise(or(neg(Px0),tt)) == tt) && <levelMsg>X0(Px0) )
+             || (val(normalise(or(neg(Px0),tt)) == tt) && <methaneRise>X0(Px0) )
+             || (val(normalise(or(neg(Px0),tt)) == tt) && <commandMsg>X0(Px0) )
+             || (val(normalise(or(neg(Px0),tt)) == tt) && <commandMsg>V(Px0))
+             )
+            )
+           &&
+            (mu X1(Px1:FExpr = Pv).
+             (  (val(normalise(or(neg(Px1),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px1),e)) == tt) && X1(Px1)) ))
+             || (val(normalise(or(neg(Px1),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px1),e)) == tt) && X1(Px1)) ))
+             || (val(normalise(or(neg(Px1),tt)) == tt) && <skip>X1(Px1) )
+             || (val(normalise(or(neg(Px1),tt)) == tt) && <palarmMsg>X1(Px1) )
+             || (val(normalise(or(neg(Px1),tt)) == tt) && <levelMsg>X1(Px1) )
+             || (val(normalise(or(neg(Px1),tt)) == tt) && <methaneRise>X1(Px1) )
+             || (val(normalise(or(neg(Px1),tt)) == tt) && <commandMsg>X1(Px1) )
+             || (val(normalise(or(neg(Px1),tt)) == tt) && <palarmMsg>V(Px1) )
+             )
+            )
+           &&
+            (mu X2(Px2:FExpr = Pv).
+              (  (val(normalise(or(neg(Px2),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px2),e)) == tt) && X2(Px2)) ))
+              || (val(normalise(or(neg(Px2),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px2),e)) == tt) && X2(Px2)) ))
+              || (val(normalise(or(neg(Px2),tt)) == tt) && <skip>X2(Px2) )
+              || (val(normalise(or(neg(Px2),tt)) == tt) && <palarmMsg>X2(Px2) )
+              || (val(normalise(or(neg(Px2),tt)) == tt) && <levelMsg>X2(Px2) )
+              || (val(normalise(or(neg(Px2),tt)) == tt) && <methaneRise>X2(Px2) )
+              || (val(normalise(or(neg(Px2),tt)) == tt) && <commandMsg>X2(Px2) )
+              || (val(normalise(or(neg(Px2),tt)) == tt) && <levelMsg>V(Px2) )
+              )
+             )
+           )
+        )
+)
+)
+)
+)
+)

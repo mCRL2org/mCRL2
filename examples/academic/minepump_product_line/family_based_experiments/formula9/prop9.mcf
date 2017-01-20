@@ -1,0 +1,83 @@
+%% Invariantly, when the level of methane rises, it inevitably decreases
+%%
+%% Holds for no products. Requires no decomposition to disprove this.
+%% We prove that the property holds for the empty set of product families
+%% (just for illustration purposes)
+
+
+(forall Pz:FExpr.
+( val(Pz in
+[ 
+]
+)
+ =>
+( nu X(Px:FExpr = normalise(and(Pz,FD))).
+ (
+ (val(normalise(and(Px,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px,e)) != ff) => X(normalise(and(Px,e)))) ))
+ &&
+ (val(Px != ff) => [skip]X(Px))
+ &&
+ (val(Px != ff) => [methaneLower]X(Px))
+ &&
+ (val(Px != ff) => [methaneRise]X(Px))
+ &&
+ (val(Px != ff) => 
+    ([methaneRise](
+        mu Y(Py:FExpr = normalise(Px) ).
+           (
+             (val(normalise(and(Py,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Py,e)) != ff) => Y(normalise(and(Py,e)))) ))
+             &&
+             ([methaneRise]Y(Py))
+             &&
+             ([skip]Y(Py))
+             &&
+             ( 
+                 (val(normalise(or(neg(Py),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py),e)) == tt) && Y(Py))))
+               ||(val(normalise(or(neg(Py),tt)) == tt) && <skip>(Y(Py)))
+               ||(val(normalise(or(neg(Py),tt)) == tt) && <methaneLower>(Y(Py)))
+               ||(val(normalise(or(neg(Py),tt)) == tt) && <methaneRise>(Y(Py)))
+             )
+           )
+      ) 
+    )
+  )
+ )
+)
+)
+)
+&&
+(forall Pz:FExpr.
+( val(Pz in
+[
+tt
+]
+)
+ =>
+( mu X(Px:FExpr = normalise(and(Pz,FD))).
+ (
+ ( (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px),e)) == tt) && X(normalise(and(Px,e)))) ))
+ ||
+ (<methaneLower>X(Px))
+ ||
+ (<methaneRise>X(Px))
+ ||
+ (<skip>X(Px))
+ ||
+ (
+    (<methaneRise>(
+        nu Y(Py:FExpr = Px ).
+           (
+             ( (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py),e)) == tt) && Y(normalise(and(Py,e)))) ))
+             ||
+             (<methaneRise>Y(Py))
+             ||
+             (<skip>Y(Py))
+             
+           )
+      ) 
+    )
+  )
+ )
+)
+)
+)

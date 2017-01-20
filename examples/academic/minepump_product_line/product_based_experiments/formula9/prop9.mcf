@@ -1,0 +1,24 @@
+
+
+nu A(b:Bool = false,c:Bool=false).
+( 
+  (val(!b) =>
+    (
+      (
+        [ tau || setC ] [ tau || setCt || setCp || setCtCp  ] 
+        mu Z1 . [ tau || setM ] [  tau || setMa || setMq || setMaMq ] 
+        mu Z2 . [ setL || tau ] [  tau || setLh || setLn || setLl || setLnLh || setLlLn || setLlLh || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,false)
+      )
+    )
+  )
+&&
+  (val(b && c) =>
+    ( [true*.methaneRise]mu Y. [!methaneLower]Y &&  <true>true )
+  )
+&&
+  (val(b && !c) =>
+    !( [true*.methaneRise]mu Y. [!methaneLower]Y &&  <true>true )
+  )
+)
+

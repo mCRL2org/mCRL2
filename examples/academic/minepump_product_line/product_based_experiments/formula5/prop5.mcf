@@ -1,0 +1,46 @@
+
+nu A(b:Bool = false,c:Bool=false).
+( 
+  (val(!b) =>
+    (
+      (
+        [ tau || setC ] [ setCp || tau ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL ] [ tau || setLl || setLn || setLh || setLlLn || setLlLh || setLnLh || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,true)
+      )
+    &&
+      (
+        [ tau || setC ] [ setCt || setCp || setCtCp || tau ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL ] [ tau || setLl || setLn || setLlLn ] 
+        mu Z3 . [ true ] [ receiveMsg ]A(true,true)
+      )
+    &&
+      (
+        [ setC ] [ setCt || setCtCp ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL ] [ setLh || setLnLh || setLlLh || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ]A(true,false)
+      )
+    )
+  )
+&&
+  (val(b && c) =>
+    (
+     [ true*] ( ( [pumpStart.(!pumpStop)*.methaneRise ] mu X.[ !(pumpStop||methaneLower) ]X ) && 
+                 ( [ methaneRise.(!methaneLower)*.pumpStart] mu X.[ !(pumpStop||methaneLower) ]X )
+               )
+    )
+  )
+&&
+  (val(b && !c) =>
+    !(
+     [ true*] ( ( [pumpStart.(!pumpStop)*.methaneRise ] mu X.[ !(pumpStop||methaneLower) ]X ) && 
+                 ( [ methaneRise.(!methaneLower)*.pumpStart] mu X.[ !(pumpStop||methaneLower) ]X )
+               )
+
+        )
+  )
+)
+

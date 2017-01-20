@@ -1,0 +1,378 @@
+%% The FTS model we use is the one that closely follows the Promela code distributed with SNIP, i.e. the 
+%% one used in the IEEE TSE paper, which is slightly different from the one described (also graphically)
+%% in both the TR and in Classen's PhD thesis: the difference is the distinction of the two sub-features 
+%% MethaneAlarm and MethaneQuery (put in an or-relation) of the (optional) Methane (detection or sensor) 
+%% feature, leading to 128 rather than 64 products. The state space is: 21783 states, 46350 transitions.
+%% There are some more subtle differences, like the skip's from states 8, 13, and 20, and a methane test
+%% in the highlevel path... and a setStopped loop in s1. Furthermore, the three loops have been removed: 
+%% methaneRise - methaneLower in METHANELEVEL, pumpRunning between PUMP and WATERLEVEL and pumpRunning - 
+%% waterRise in WATERLEVEL.
+
+
+sort
+  Feature = struct B | C | Ct | Cp | M | Ma | Mq | L | Ll | Ln | Lh ;
+  FeatSet = List( Feature );
+
+act
+  setC, setCt, setCp, setM, setMa, setMq, setL, setLl, setLn, setLh,
+  setCtCp, setMaMq, setLlLn, setLlLh, setLnLh, setLlLnLh,
+  receiveMsg, commandMsg, 
+  palarmMsg_C, palarmMsg_M, palarmMsg, levelMsg,
+  stopCmd, startCmd, 
+  isRunning_B, isRunning_C, isRunning,
+  isNotRunning_B, isNotRunning_C, isNotRunning,
+  setRunning_B, setRunning_C, setRunning,
+  pumpStart_C, pumpStart_P, pumpStart,
+  pumpStop_C, pumpStop_P, pumpStop,
+  setStop_B, setStop_C, setStop, endStop,
+  isReady_B, isReady_C, isReady,
+  isNotReady_B, isNotReady_C, isNotReady,
+  setReady_B, setReady_C, setReady,
+  endStart, endAlarm, endHigh, endLow,
+  isMethaneStop_B, isMethaneStop_C, isMethaneStop,
+  noMethaneStop_C, noMethaneStop_M, noMethaneStop,
+  setMethaneStop_B, setMethaneStop_C, setMethaneStop_M, setMethaneStop,
+  normalLevel_C, normalLevel_L, normalLevel,
+  highLevel_C, highLevel_L, highLevel,
+  lowLevel_C, lowLevel_L, lowLevel,
+  isLowStop_B, isLowStop_C, isLowStop,
+  isStopped_B, isStopped_C, isStopped,
+  setLowStop_B, setLowStop_C, setLowStop,
+  methaneRise, methaneLower,
+  pumpRunning_P, pumpRunning_L, pumpRunning, waterRise ;  
+  
+act
+  put_config, get_config, set_config : FeatSet ;
+
+map 
+  ins: Feature # FeatSet -> FeatSet;
+var 
+  ft, ft': Feature;
+  featset: FeatSet;
+eqn 
+  ins(ft, []) = [ft];
+  (ft < ft')  -> ins(ft, ft' |> featset) = ft |> ft' |> featset;
+  (ft == ft') -> ins(ft, ft' |> featset) = ft' |> featset;
+  (ft > ft')  -> ins(ft, ft' |> featset) = ft' |> ins(ft, featset);
+
+map 
+  union: FeatSet # FeatSet -> FeatSet;
+var 
+  ft, ft': Feature;
+  featset, featset': FeatSet;
+eqn 
+  union([], featset) = featset;
+  union(featset, []) = featset;
+  (ft < ft')  -> union(ft |> featset, ft' |> featset') = 
+    ft |> union(featset, ft' |> featset');
+  (ft == ft') -> union(ft |> featset, ft' |> featset') = 
+    ft' |> union(featset, featset');
+  (ft > ft')  -> union(ft |> featset, ft' |> featset') = 
+    ft' |> union(ft |> featset, featset');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FEATURE SELECTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc Sel( st:Int, fs:FeatSet ) =
+  ( st == 0 ) -> (
+    ( B in fs ) -> ( 
+      tau . Sel(1, fs ) +
+      setC . Sel(1, ins(C,fs) )
+  ) ) +
+  ( st == 1 ) -> (
+    ( C in fs ) -> ( 
+      setCt . Sel(2, ins(Ct,fs) ) +
+      setCp . Sel(2, ins(Cp,fs) ) +
+      setCtCp . Sel(2, union([Ct,Cp],fs) ) ) <>
+    tau . Sel(2, fs )
+  ) +
+  ( st == 2 ) -> (
+    ( B in fs ) -> ( 
+      tau  . Sel(3, fs ) +
+      setM . Sel(3, ins(M,fs) ) 
+  ) ) +
+  ( st == 3 ) -> (
+    ( M in fs ) -> ( 
+      setMa . Sel(4, ins(Ma,fs) ) +
+      setMq . Sel(4, ins(Mq,fs) ) +
+      setMaMq . Sel(4, union([Ma,Mq],fs) ) ) <>
+    tau . Sel(4, fs )
+  ) +
+  ( st == 4 ) -> (
+    ( B in fs ) -> ( 
+      setL . Sel(5, ins(L,fs) )
+  ) ) +
+  ( st == 5 ) -> (
+    ( L in fs ) -> (     
+      tau . Sel(6, fs ) +
+      setLl . Sel(6, ins(Ll,fs) ) +
+      setLn . Sel(6, ins(Ln,fs) ) +
+      setLh . Sel(6, ins(Lh,fs) ) +
+      setLlLn . Sel(6, union([Ll,Ln],fs) ) + 
+      setLlLh . Sel(6, union([Ll,Lh],fs) ) +
+      setLnLh . Sel(6, union([Ln,Lh],fs) ) +
+      setLlLnLh . Sel(6, union([Ll,Ln,Lh],fs) ) 
+  ) ) +
+  ( st == 6 ) -> 
+      put_config(fs) . delta
+  ;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% MINE PUMP (state FTS)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc MINEPUMP( st:Int, fs:FeatSet) = 
+  ( st == 1 ) -> (
+    isStopped_B . MINEPUMP(1,fs) +
+    setStop_B . MINEPUMP(1,fs) +
+    isNotRunning_B . MINEPUMP(1,fs) +
+    isNotReady_B . MINEPUMP(1,fs) +
+    setMethaneStop_B . MINEPUMP(2,fs) +
+    setReady_B . MINEPUMP(4,fs) 
+  ) +
+  ( st == 2 ) -> (
+    setStop_B. MINEPUMP(1,fs) +
+    isMethaneStop_B . MINEPUMP(2,fs) +
+    setMethaneStop_B . MINEPUMP(2,fs) +
+    isNotRunning_B . MINEPUMP(2,fs) +
+    isNotReady_B . MINEPUMP(2,fs) + 
+    setReady_B . MINEPUMP(4,fs) 
+  ) +
+  ( st == 3 ) -> (
+    setStop_B. MINEPUMP(1,fs) +
+    setMethaneStop_B . MINEPUMP(2,fs) +
+    isLowStop_B . MINEPUMP(3,fs) +
+    isNotRunning_B . MINEPUMP(3,fs) +
+    isNotReady_B . MINEPUMP(3,fs) + 
+    setReady_B . MINEPUMP(4,fs) 
+  ) +
+  ( st == 4 ) -> (
+    setStop_B. MINEPUMP(1,fs) +
+    setMethaneStop_B . MINEPUMP(2,fs) +
+    isReady_B . MINEPUMP(4,fs) +
+    isNotRunning_B . MINEPUMP(4,fs) +
+    setReady_B . MINEPUMP(4,fs) + 
+    setRunning_B . MINEPUMP(5,fs) 
+  ) +
+  ( st == 5 ) -> (
+    setStop_B . MINEPUMP(1,fs) +
+    setMethaneStop_B . MINEPUMP(2,fs) +
+    setLowStop_B . MINEPUMP(3,fs) +
+    isRunning_B. MINEPUMP(5,fs) +
+    isNotReady_B . MINEPUMP(5,fs) 
+  ) ;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% MINE PUMP (refined system FTS)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc CONTROLLER( st:Int, fs:FeatSet) = 
+  ( st == 6 ) -> (
+    receiveMsg . CONTROLLER(7,fs) 
+  ) +
+  ( st == 7 ) -> (
+    commandMsg . CONTROLLER(8,fs) +
+    palarmMsg_C . CONTROLLER(16,fs) +
+    levelMsg . CONTROLLER(20,fs)  
+  ) +  
+  ( st == 8 ) -> (
+    stopCmd . (
+      ( Cp in fs ) -> CONTROLLER(9,fs) <> 
+      tau . CONTROLLER(6,fs) ) +
+    startCmd . ( 
+      ( Ct in fs ) -> CONTROLLER(13,fs) <> 
+      tau . CONTROLLER(6,fs) ) 
+  ) + 
+  ( st == 9 ) -> (
+    ( Cp in fs ) -> ( 
+    isRunning_C . CONTROLLER(10,fs) +
+    isNotRunning_C . CONTROLLER(11,fs) ) 
+  ) + 
+  ( st == 10 ) -> (
+    ( Cp in fs ) -> ( pumpStop_C . CONTROLLER(11,fs) )
+  ) +
+  ( st == 11 ) -> (
+    ( Cp in fs ) -> ( setStop_C . CONTROLLER(12,fs) )
+  ) +
+  ( st == 12 ) -> (
+    ( Cp in fs ) -> ( endStop . CONTROLLER(6,fs) )
+  ) +
+  ( st == 13 ) -> (
+    ( Ct in fs ) -> ( 
+      isNotRunning_C . CONTROLLER(14,fs) +
+      isRunning_C . CONTROLLER(15,fs) +
+      isReady_C . CONTROLLER(15,fs) ) 
+  ) + 
+  ( st == 14 ) -> (
+    ( Ct in fs ) -> ( setReady_C . CONTROLLER(15,fs) )
+  ) + 
+  ( st == 15 ) -> (
+    ( Ct in fs ) -> ( endStart . CONTROLLER(6,fs) )
+  ) +
+  ( st == 16 ) -> (
+    ( Ma in fs ) -> ( 
+      isRunning_C . CONTROLLER(17,fs) +
+      isNotRunning_C . CONTROLLER(18,fs) ) <>
+    tau . CONTROLLER(6,fs) 
+  ) +  
+  ( st == 17 ) -> (
+    ( Ma in fs ) -> ( pumpStop_C . CONTROLLER(18,fs) )
+  ) + 
+  ( st == 18 ) -> (
+    ( Ma in fs ) -> ( setMethaneStop_C . CONTROLLER(19,fs) )
+  ) + 
+  ( st == 19 ) -> (
+    ( Ma in fs ) -> ( endAlarm . CONTROLLER(6,fs) )
+  ) + 
+  ( st == 20 ) -> (
+    normalLevel_C . CONTROLLER(6,fs) +
+    ( Lh in fs ) -> ( highLevel_C . CONTROLLER(21,fs) ) <>
+      highLevel_C . CONTROLLER(6,fs) +
+    ( Ll in fs ) -> ( lowLevel_C . CONTROLLER(27,fs) ) <> 
+      lowLevel_C . CONTROLLER(6,fs)  
+  ) + 
+  ( st == 21 ) -> (
+    ( Ll in fs ) -> ( isLowStop_C . CONTROLLER(22,fs) ) +
+    ( Lh in fs ) -> ( 
+      isReady_C . CONTROLLER(23,fs) +
+      isRunning_C . CONTROLLER(26,fs) +
+      isStopped_C . CONTROLLER(26,fs) ) +
+    ( M in fs ) -> ( isMethaneStop_C . CONTROLLER(26,fs) ) 
+  ) +
+  ( st == 22 ) -> (
+    ( Ll in fs ) -> ( setReady_C . CONTROLLER(23,fs) ) 
+  ) +
+  ( st == 23 ) -> (
+    ( Mq in fs ) -> (
+       noMethaneStop_C . CONTROLLER(24,fs) +
+       setMethaneStop_C . CONTROLLER(26,fs) ) <>
+    tau . CONTROLLER(24,fs) 
+  ) +
+  ( st == 24 ) -> (
+    ( Lh in fs ) -> ( pumpStart_C . CONTROLLER(25,fs) )
+  ) + 
+  ( st == 25 ) -> (
+    ( Lh in fs ) -> ( setRunning_C . CONTROLLER(26,fs) ) 
+  ) + 
+  ( st == 26 ) -> (
+    ( Lh in fs ) -> ( endHigh . CONTROLLER(6,fs) )
+  ) + 
+  ( st == 27 ) -> (
+    ( Ll in fs ) -> ( 
+      isRunning_C . CONTROLLER(28,fs) +
+      isNotRunning_C . CONTROLLER(30,fs) ) 
+  ) +
+  ( st == 28 ) -> (
+    ( Ll in fs ) -> ( pumpStop_C . CONTROLLER(29,fs) )
+  ) + 
+  ( st == 29 ) -> (
+    ( Ll in fs ) -> ( setLowStop_C . CONTROLLER(30,fs) )
+  ) + 
+  ( st == 30 ) -> (
+    ( Ll in fs ) -> ( endLow . CONTROLLER(6,fs) )
+  ) ;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% METHANE LEVEL (Methane detection feature)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc METHANELEVEL( st:Int, fs:FeatSet) = 
+  ( st == 1 ) -> (
+    noMethaneStop_M . METHANELEVEL(1,fs) + 
+    methaneRise . METHANELEVEL(2,fs) 
+  ) +
+  ( st == 2 ) -> (
+    palarmMsg_M . METHANELEVEL(3,fs) +
+    setMethaneStop_M . METHANELEVEL(3,fs) 
+  ) +
+  ( st == 3 ) -> ( 
+    methaneLower . METHANELEVEL(1,fs) +
+    palarmMsg_M . METHANELEVEL(3,fs) +
+    setMethaneStop_M . METHANELEVEL(3,fs) 
+  ) ;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% PUMP (Command feature)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc PUMP( st:Int, fs:FeatSet) = 
+  ( st == 1 ) -> (
+    pumpStart_P . PUMP(2,fs) 
+  ) +
+  ( st == 2 ) -> (
+    pumpRunning_P . PUMP(2,fs) +
+    pumpStop_P . PUMP(1,fs) 
+  ) ;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% WATER LEVEL (Water regulation feature)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc WATERLEVEL( st:Int, fs:FeatSet) = 
+  ( st == 1 ) -> (
+    pumpRunning_L . WATERLEVEL(2,fs) +
+    normalLevel_L . WATERLEVEL(1,fs) +
+    highLevel_L . WATERLEVEL(3,fs)
+  ) + 
+  ( st == 2 ) -> (
+    lowLevel_L . WATERLEVEL(2,fs) +
+    normalLevel_L . WATERLEVEL(1,fs) 
+  ) +
+  ( st == 3 ) -> (
+    pumpRunning_L . WATERLEVEL(1,fs) +
+    highLevel_L . WATERLEVEL(3,fs) 
+  ) ;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% PARALLEL COMPOSITION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+init
+  allow( { 
+    setC, setCt, setCp, setM, setMa, setMq, setL, setLl, setLn, setLh,
+    setCtCp, setMaMq, setLlLn, setLlLh, setLnLh, setLlLnLh,
+    receiveMsg, commandMsg, palarmMsg, levelMsg,
+    stopCmd, startCmd, 
+    isRunning, isNotRunning, setRunning,
+    pumpStart, pumpStop, setStop, endStop,
+    isReady, isNotReady, setReady, 
+    endStart, endAlarm, endHigh, endLow,
+    isMethaneStop, noMethaneStop, setMethaneStop,
+    normalLevel, highLevel, lowLevel,
+    isLowStop, isStopped, setLowStop,
+    methaneRise, methaneLower,
+    pumpRunning, waterRise,
+    set_config },
+  comm( { 
+    setStop_B | setStop_C -> setStop,
+    isStopped_B | isStopped_C -> isStopped,
+    setMethaneStop_B | setMethaneStop_C | setMethaneStop_M -> setMethaneStop,
+    noMethaneStop_C | noMethaneStop_M -> noMethaneStop,
+    isMethaneStop_B | isMethaneStop_C -> isMethaneStop,
+    setLowStop_B | setLowStop_C -> setLowStop,
+    isLowStop_B | isLowStop_C -> isLowStop,
+    setReady_B | setReady_C -> setReady,
+    isReady_B | isReady_C -> isReady,
+    isNotReady_B | isNotReady_C -> isNotReady,
+    setRunning_B | setRunning_C -> setRunning,
+    isRunning_B | isRunning_C -> isRunning,
+    isNotRunning_B | isNotRunning_C -> isNotRunning,
+    palarmMsg_C | palarmMsg_M -> palarmMsg,
+    pumpStart_C | pumpStart_P -> pumpStart,
+    pumpStop_C | pumpStop_P -> pumpStop,
+    lowLevel_C | lowLevel_L -> lowLevel,
+    normalLevel_C | normalLevel_L -> normalLevel,
+    highLevel_C | highLevel_L -> highLevel,
+    pumpRunning_P | pumpRunning_L -> pumpRunning,
+    put_config | get_config | get_config | get_config | get_config | get_config -> set_config },  
+  Sel(0,[B]) || 
+  ( sum fs:FeatSet . get_config(fs) . MINEPUMP(1,fs) ) || 
+  ( sum fs:FeatSet . get_config(fs) . CONTROLLER(6,fs) ) || 
+  ( sum fs:FeatSet . get_config(fs) . METHANELEVEL(1,fs) ) || 
+  ( sum fs:FeatSet . get_config(fs) . PUMP(1,fs) ) || 
+  ( sum fs:FeatSet . get_config(fs) . WATERLEVEL(1,fs) )
+  ) ) ;
+
+
+

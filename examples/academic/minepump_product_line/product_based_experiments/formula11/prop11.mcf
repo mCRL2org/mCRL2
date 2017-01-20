@@ -1,0 +1,63 @@
+
+
+nu A(b:Bool = false,c:Nat=0).
+( 
+  (val(!b) =>
+    (
+      (
+        [ tau || setC ] [ setCtCp   ] 
+        mu Z1 . [ tau || setM ] [  tau || setMa || setMq || setMaMq ] 
+        mu Z2 . [ setL || tau ] [  setLh || setLnLh || setLlLh || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,0)
+      )
+    &&
+      (
+        [ tau || setC ] [ setCt || setCtCp  ] 
+        mu Z1 . [ tau || setM ] [  tau || setMa || setMq || setMaMq ] 
+        mu Z2 . [ setL || tau ] [  setLlLh || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,0)
+      )
+    &&
+      (
+        [ tau || setC ] [ setCt || setCtCp ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMaMq  ] 
+        mu Z2 . [ setL || tau ] [ setLh || setLnLh || setLlLh || setLlLnLh  ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,0) 
+      )
+    &&
+      (
+        [ tau || setC ] [ setCt ] 
+        mu Z1 . [ tau || setM ] [  setMq ||  tau ] 
+        mu Z2 . [ setL || tau ] [ tau || setLn || setLh ||  setLnLh  ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,1)  
+      )
+    &&
+      (
+        [ tau || setC ] [ setCp  || tau ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL || tau ] [ tau || setLl || setLn || setLh || setLlLh || setLnLh || setLlLn || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,2)
+      )
+    &&
+      (
+        [ tau || setC ] [ setCt || setCtCp  ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL || tau ] [ tau || setLl || setLn || setLlLn  ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,1) 
+      )
+    )
+  )
+&&
+  (val(b && c == 0) =>   
+    ( [true*]<true*.pumpStart>true )
+  )
+&&
+  (val(b && c == 1) =>  
+    !( [true*]<true*.pumpStart>true )
+  )
+&&
+  (val(b && c == 2) =>  
+    !false
+  )
+)
+

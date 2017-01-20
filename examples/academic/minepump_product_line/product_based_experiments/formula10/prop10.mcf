@@ -1,0 +1,42 @@
+
+
+nu A(b:Bool = false,c:Nat=0).
+( 
+  (val(!b) =>
+    (
+      (
+        [ tau || setC ] [ setCt || setCtCp   ] 
+        mu Z1 . [ tau || setM ] [  tau || setMa || setMq || setMaMq ] 
+        mu Z2 . [ setL || tau ] [   setLh || setLnLh || setLlLh || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,0)
+      )
+    &&
+      (
+        [ tau || setC ] [ tau || setCp ]
+        mu Z1 . [ tau || setM ] [  tau || setMa || setMq || setMaMq ] 
+        mu Z2 . [ setL || tau ]  [ tau || setLl || setLn ||  setLh || setLnLh || setLlLh || setLlLn || setLlLnLh ]
+        mu Z3 . [ true ] [ receiveMsg ] A(true,1)
+      )
+    &&
+      (
+        [ tau || setC ] [  setCt  || setCtCp ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMaMq  ] 
+        mu Z2 . [ setL || tau ]  [ tau || setLl || setLn ||  setLlLn ]
+        mu Z3 . [ true ] [ receiveMsg ] A(true,2)
+      )
+    )
+  )
+&&
+  (val(b && c==0) =>
+    ( <true*.pumpStart>true )
+  )
+&&
+  (val(b && c==1) =>
+    !false
+  )
+&&
+  (val(b && c==2) =>
+    !( <true*.pumpStart>true )
+  )
+)
+

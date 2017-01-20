@@ -1,0 +1,45 @@
+
+
+nu A(b:Bool = false,c:Bool=false).
+( 
+  (val(!b) =>
+    (
+      (
+        [ tau || setC ] [ setCp || tau ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL ] [ tau || setLl || setLn || setLlLn ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,true)
+      )
+    &&
+      (
+        [ tau || setC ] [ setCp || tau ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL ] [ setLh || setLlLh || setLnLh || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ] A(true,true)
+      )
+    &&
+      (
+        [ tau || setC ] [ setCt || setCtCp ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL ] [ tau || setLl || setLn || setLlLn ] 
+        mu Z3 . [ true ] [ receiveMsg ]A(true,true)
+      )
+    &&
+      (
+        [ setC ] [ setCt || setCtCp ] 
+        mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ] 
+        mu Z2 . [ setL ] [ setLh || setLnLh || setLlLh || setLlLnLh ] 
+        mu Z3 . [ true ] [ receiveMsg ]A(true,false)
+      )
+    )
+  )
+&&
+  (val(b && c) =>
+    ( (mu X. nu Y. (([pumpStart. (!pumpStop)*. pumpStop]X) && [!pumpStart]Y) && ([true*.pumpStart]mu Z. [!pumpStop]Z) ) )
+  )
+&&
+  (val(b && !c) =>
+    !( (mu X. nu Y. (([pumpStart. (!pumpStop)*. pumpStop]X) && [!pumpStart]Y) && ([true*.pumpStart]mu Z. [!pumpStop]Z) ) )
+  )
+)
+

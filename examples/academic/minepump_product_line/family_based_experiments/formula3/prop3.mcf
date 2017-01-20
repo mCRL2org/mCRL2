@@ -1,0 +1,60 @@
+%% The controller cannot fairly receive each of the three message types
+%%
+%% Holds for no product. Proving that it does not hold requires proving
+%% that the complement of the formula holds for all products. Proving that
+%% the complement holds requires a decomposition into 4 distinct subfamilies.
+
+forall Px':FExpr. %% verify for all product families Px' taken from the list below
+(val(Px' in
+[
+and(atom(Cp),atom(Ma)),
+and(atom(Cp),neg(atom(Ma))),
+and(neg(atom(Cp)),atom(Ma)),
+and(neg(atom(Cp)),neg(atom(Ma)))
+]
+ ) =>
+nu X(Px:FExpr = normalise(and( FD, Px'))). 
+(
+ ( mu Y0(Py0:FExpr = Px).
+(
+(val(normalise(or(neg(Py0),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py0),e)) == tt) && Y0(Py0)) ))
+||
+(val(normalise(or(neg(Py0),tt)) == tt) && <skip>Y0(Py0) )
+||
+(val(normalise(or(neg(Py0),tt)) == tt) && <palarmMsg>Y0(Py0) )
+||
+(val(normalise(or(neg(Py0),tt)) == tt) && <levelMsg>Y0(Py0) )
+||
+(val(normalise(or(neg(Py0),tt)) == tt) && <commandMsg>X(Py0) )
+)
+)
+&&
+( mu Y1(Py1:FExpr = Px).
+(
+(val(normalise(or(neg(Py1),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py1),e)) == tt) && Y1(Py1)) ))
+||
+(val(normalise(or(neg(Py1),tt)) == tt) && <skip>Y1(Py1) )
+||
+(val(normalise(or(neg(Py1),tt)) == tt) && <palarmMsg>X(Py1) )
+||
+(val(normalise(or(neg(Py1),tt)) == tt) && <levelMsg>Y1(Py1) )
+||
+(val(normalise(or(neg(Py1),tt)) == tt) && <commandMsg>Y1(Py1) )
+)
+)
+&&
+( mu Y2(Py2:FExpr = Px).
+(
+(val(normalise(or(neg(Py2),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py2),e)) == tt) && Y2(Py2)) ))
+||
+(val(normalise(or(neg(Py2),tt)) == tt) && <skip>Y2(Py2) )
+||
+(val(normalise(or(neg(Py2),tt)) == tt) && <palarmMsg>Y2(Py2) )
+||
+(val(normalise(or(neg(Py2),tt)) == tt) && <levelMsg>X(Py2) )
+||
+(val(normalise(or(neg(Py2),tt)) == tt) && <commandMsg>Y2(Py2) )
+)
+)
+)
+)
