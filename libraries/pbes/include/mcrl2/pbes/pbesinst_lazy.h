@@ -53,6 +53,13 @@ namespace mcrl2
 namespace pbes_system
 {
 
+/// \brief Returns true if map/set m has x as a key
+template <typename Map>
+bool has_key(const Map& m, const typename Map::key_type& x)
+{
+  return m.find(x) != m.end();
+}
+
 struct pbes_equation_index
 {
   std::unordered_map<core::identifier_string, std::size_t> equation_index;
@@ -82,7 +89,7 @@ struct find_loop_simplifier
   const pbes_equation_index& equation_index;
 
   /// \brief Map a variable instantiation to its right hand side.
-  std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation;
+  const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation;
 
   /// \brief ranks[i] contains the rank of the i-th equation in the PBES.
   std::vector<std::size_t> ranks;
@@ -114,16 +121,16 @@ struct find_loop_simplifier
       {
         return false;
       }
-      if (visited.count(Y))
+      if (has_key(visited, Y))
       {
         return visited[Y];
       }
-      if (equation.count(Y) == 0)
+      if (!has_key(equation, Y))
       {
         return false;
       }
       visited[Y] = false;
-      return visited[Y] = find_loop_rec<is_mu>(equation[Y], X, rank, visited);
+      return visited[Y] = find_loop_rec<is_mu>(equation.at(Y), X, rank, visited);
     }
 
     if (is_mu)
@@ -168,7 +175,7 @@ struct find_loop_simplifier
 
   find_loop_simplifier(const std::vector<pbes_equation>& equations,
                        const pbes_equation_index& equation_index_,
-                       std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation_
+                       const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation_
                       )
     : equation_index(equation_index_),
       equation(equation_)
@@ -261,8 +268,8 @@ struct todo_list
   }
 };
 
-// This class is used to periodically reset the todo list of pbesinst_lazy
-struct todo_resetter
+// This class is used to periodically reset some attributes of the pbesinst algorithm, using a reachability analysis.
+struct pbesinst_resetter
 {
   /// \brief The number of equations generated since last state space
   ///        regeneration.
@@ -275,16 +282,16 @@ struct todo_resetter
   /// \brief Initial value for regeneration_period.
   enum { regeneration_period_init = 100 };
 
-  todo_resetter()
+  pbesinst_resetter()
     : regeneration_count(0),
       regeneration_period(regeneration_period_init)
   {}
 
   void operator()(const propositional_variable_instantiation& init,
                   todo_list& todo,
-                  std::unordered_set<propositional_variable_instantiation>& done,
+                  const std::unordered_set<propositional_variable_instantiation>& done,
                   std::unordered_set<propositional_variable_instantiation>& reachable,
-                  std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
+                  const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                  )
   {
     if (++regeneration_count == regeneration_period)
@@ -311,11 +318,11 @@ struct todo_resetter
       if (is_propositional_variable_instantiation(expr))
       {
         auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
-        if (reachable.count(X) == 0)
+        if (!has_key(reachable, X))
         {
-          if (done.count(X))
+          if (has_key(done, X))
           {
-            stack.push(equation[X]);
+            stack.push(equation.at(X));
             reachable.insert(X);
           }
           else
@@ -619,7 +626,7 @@ class pbesinst_lazy_algorithm
       instantiations.resize(m_pbes.equations().size());
       find_loop_simplifier simplify_loop(pbes_equations, equation_index, equation);
       true_false_simplifier true_false_simplify;
-      todo_resetter reset_todo;
+      pbesinst_resetter pbesinst_reset;
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);
@@ -652,7 +659,7 @@ class pbesinst_lazy_algorithm
         // and augment the occurrence sets
         for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
         {
-          if (!todo.contains(v) && equation.count(v) == 0)
+          if (!todo.contains(v) && !has_key(equation, v))
           {
             todo.push_back(v);
             reachable.insert(v);
@@ -665,12 +672,14 @@ class pbesinst_lazy_algorithm
 
         if (m_transformation_strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
         {
+          // N.B. modifies equation, justification, occurrence and trivial
           true_false_simplify(m_transformation_strategy, psi_e, X_e, justification, occurrence, equation, trivial);
         }
 
         if (m_transformation_strategy >= on_the_fly)
         {
-          reset_todo(init, todo, done, reachable, equation);
+          // N.B. modifies todo and reachable
+          pbesinst_reset(init, todo, done, reachable, equation);
         }
 
         mCRL2log(log::verbose) << print_equation_count(++m_iteration_count);
@@ -691,7 +700,7 @@ class pbesinst_lazy_algorithm
         for (auto j = i->begin(); j != i->end(); j++)
         {
           auto X_e = *j;
-          if (reachable.count(X_e) == 0)
+          if (!has_key(reachable, X_e))
           {
             continue;
           }
