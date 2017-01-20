@@ -94,17 +94,17 @@ struct find_loop_simplifier
   /// \brief ranks[i] contains the rank of the i-th equation in the PBES.
   std::vector<std::size_t> ranks;
 
-  std::size_t get_rank(propositional_variable_instantiation X)
+  std::size_t get_rank(const propositional_variable_instantiation& X) const
   {
     return ranks[equation_index[X.name()]];
   }
 
   template <bool is_mu>
-  bool find_loop_rec(
-      const pbes_expression& expr,
-      propositional_variable_instantiation X,
-      std::size_t rank,
-      std::unordered_map<propositional_variable_instantiation, bool>& visited)
+  bool find_loop_rec(const pbes_expression& expr,
+                     propositional_variable_instantiation X,
+                     std::size_t rank,
+                     std::unordered_map<propositional_variable_instantiation, bool>& visited
+                    ) const
   {
     if (is_false(expr) || is_true(expr))
     {
@@ -167,7 +167,7 @@ struct find_loop_simplifier
   }
 
   template <bool is_mu>
-  bool find_loop(pbes_expression expr, propositional_variable_instantiation X)
+  bool find_loop(pbes_expression expr, propositional_variable_instantiation X) const
   {
     std::unordered_map<propositional_variable_instantiation, bool> visited;
     return find_loop_rec<is_mu>(expr, X, get_rank(X), visited);
@@ -196,7 +196,7 @@ struct find_loop_simplifier
     }
   }
 
-  pbes_expression operator()(const fixpoint_symbol& symbol, const pbes_expression& psi_e, const propositional_variable_instantiation& X_e)
+  pbes_expression operator()(const pbes_expression& psi_e, const fixpoint_symbol& symbol, const propositional_variable_instantiation& X_e) const
   {
     // Find mu or nu loop
     if (symbol == fixpoint_symbol::mu())
@@ -526,6 +526,15 @@ class pbesinst_lazy_algorithm
     /// \brief Transformation strategy.
     transformation_strategy m_transformation_strategy;
 
+    /// \brief Simplifies expressions based on a loop analysis.
+    find_loop_simplifier m_find_loop_simplifier;
+
+    /// \brief Simplifies some attributes based on variables that have the value true or false.
+    true_false_simplifier m_true_false_simplifier;
+
+    /// \brief Simplifies some attributes based on variables that have the value true or false.
+    pbesinst_resetter m_pbesinst_resetter;
+
     /// \brief Prints a log message for every 1000-th equation
     std::string print_equation_count(size_t size) const
     {
@@ -567,6 +576,62 @@ class pbesinst_lazy_algorithm
       return p;
     }
 
+    pbes_expression substitute_trivial_values(const pbes_expression& psi_e,
+                                              const propositional_variable_instantiation& X_e,
+                                              const std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial,
+                                              std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification
+                                             )
+    {
+      if (m_transformation_strategy >= optimize)
+      {
+        // Substitute all trivial variable instantiations by their values
+        return make_propositional_variable_rewriter(trivial, justification[X_e])(psi_e);
+      }
+      else
+      {
+        return psi_e;
+      }
+    }
+
+    pbes_expression simplify_loop(const pbes_expression& psi_e, const fixpoint_symbol& symbol, const propositional_variable_instantiation& X_e) const
+    {
+      if (m_transformation_strategy >= on_the_fly_with_fixed_points)
+      {
+        return m_find_loop_simplifier(psi_e, symbol, X_e);
+      }
+      else
+      {
+        return psi_e;
+      }
+    }
+
+    void true_false_simplify(const pbes_expression& psi_e,
+                             const propositional_variable_instantiation& X_e,
+                             std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification,
+                             std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> >& occurrence,
+                             std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation,
+                             std::unordered_map<propositional_variable_instantiation, pbes_expression>& trivial
+                            )
+    {
+      if (m_transformation_strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
+      {
+        m_true_false_simplifier(m_transformation_strategy, psi_e, X_e, justification, occurrence, equation, trivial);
+      }
+    }
+
+    void reset(const propositional_variable_instantiation& init,
+               todo_list& todo,
+               const std::unordered_set<propositional_variable_instantiation>& done,
+               std::unordered_set<propositional_variable_instantiation>& reachable,
+               const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
+              )
+    {
+      if (m_transformation_strategy >= on_the_fly)
+      {
+        m_pbesinst_resetter(init, todo, done, reachable, equation);
+      }
+    }
+
   public:
 
     /// \brief Constructor.
@@ -584,7 +649,8 @@ class pbesinst_lazy_algorithm
         equation_index(p),
         R(datar, p.data()),
         m_search_strategy(search_strategy),
-        m_transformation_strategy(transformation_strategy)
+        m_transformation_strategy(transformation_strategy),
+        m_find_loop_simplifier(p.equations(), equation_index, equation)
     {}
 
     inline propositional_variable_instantiation next_todo()
@@ -615,9 +681,6 @@ class pbesinst_lazy_algorithm
       auto& pbes_equations = m_pbes.equations();
       std::size_t m_iteration_count = 0;
       instantiations.resize(m_pbes.equations().size());
-      find_loop_simplifier simplify_loop(pbes_equations, equation_index, equation);
-      true_false_simplifier true_false_simplify;
-      pbesinst_resetter pbesinst_reset;
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);
@@ -635,16 +698,11 @@ class pbesinst_lazy_algorithm
         auto const& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
 
-        if (m_transformation_strategy >= optimize)
-        {
-          // Substitute all trivial variable instantiations by their values
-          psi_e = make_propositional_variable_rewriter(trivial, justification[X_e])(psi_e);
-        }
+        // optional step
+        psi_e = substitute_trivial_values(psi_e, X_e, trivial, justification); // N.B. modifies justification
 
-        if (m_transformation_strategy >= on_the_fly_with_fixed_points)
-        {
-          psi_e = simplify_loop(eqn.symbol(), psi_e, X_e);
-        }
+        // optional step
+        psi_e = simplify_loop(psi_e, eqn.symbol(), X_e);
 
         // Add all variable instantiations in psi_e to todo and generated,
         // and augment the occurrence sets
@@ -661,17 +719,11 @@ class pbesinst_lazy_algorithm
         // Store the result
         equation[X_e] = psi_e;
 
-        if (m_transformation_strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
-        {
-          // N.B. modifies equation, justification, occurrence and trivial
-          true_false_simplify(m_transformation_strategy, psi_e, X_e, justification, occurrence, equation, trivial);
-        }
+        // optional step
+        true_false_simplify(psi_e, X_e, justification, occurrence, equation, trivial); // N.B. modifies equation, justification, occurrence and trivial
 
-        if (m_transformation_strategy >= on_the_fly)
-        {
-          // N.B. modifies todo and reachable
-          pbesinst_reset(init, todo, done, reachable, equation);
-        }
+        // optional step
+        reset(init, todo, done, reachable, equation); // N.B. modifies todo and reachable
 
         mCRL2log(log::verbose) << print_equation_count(++m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
