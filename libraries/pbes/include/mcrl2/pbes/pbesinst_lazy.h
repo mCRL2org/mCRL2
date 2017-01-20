@@ -585,16 +585,7 @@ class pbesinst_lazy_algorithm
         R(datar, p.data()),
         m_search_strategy(search_strategy),
         m_transformation_strategy(transformation_strategy)
-    {
-      if (m_search_strategy == breadth_first_short)
-      {
-        m_search_strategy = breadth_first;
-      }
-      else if (m_search_strategy == depth_first_short)
-      {
-        m_search_strategy = depth_first;
-      }
-    }
+    {}
 
     inline propositional_variable_instantiation next_todo()
     {
@@ -729,6 +720,14 @@ pbes pbesinst_lazy(const pbes& p,
                    transformation_strategy transformation_strategy = lazy
                   )
 {
+  if (search_strategy == breadth_first_short)
+  {
+    throw mcrl2::runtime_error("The breadth_first_short option is not supported!");
+  }
+  if (search_strategy == depth_first_short)
+  {
+    throw mcrl2::runtime_error("The depth_first_short option is not supported!");
+  }
   pbesinst_lazy_algorithm algorithm(p, rewrite_strategy, search_strategy, transformation_strategy);
   algorithm.run();
   return algorithm.get_result();
