@@ -417,7 +417,7 @@ struct true_false_simplifier
   /// \brief Map a variable instantiation to a set of other variable instantiations on whose right hand sides it appears.
   std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> > occurrence;
 
-  void insert(const propositional_variable_instantiation& v, const propositional_variable_instantiation& X_e)
+  void add_dependency(const propositional_variable_instantiation& v, const propositional_variable_instantiation& X_e)
   {
     occurrence[v].insert(X_e);
   }
@@ -495,10 +495,6 @@ class pbesinst_lazy_algorithm
 
     /// \brief Map a variable instantiation to its right hand side.
     std::unordered_map<propositional_variable_instantiation, pbes_expression> equation;
-
-    /// \brief instantiations[i] contains all instantiations of the variable
-    ///        of the i-th equation in the PBES.
-    std::vector<std::vector<propositional_variable_instantiation> > instantiations;
 
     /// \brief The initial value.
     propositional_variable_instantiation init;
@@ -657,9 +653,7 @@ class pbesinst_lazy_algorithm
     /// \param p A PBES
     void run()
     {
-      auto& pbes_equations = m_pbes.equations();
       std::size_t m_iteration_count = 0;
-      instantiations.resize(m_pbes.equations().size());
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);
@@ -667,9 +661,8 @@ class pbesinst_lazy_algorithm
       {
         auto const& X_e = next_todo();
         std::size_t index = equation_index[X_e.name()];
-        instantiations[index].push_back(X_e);
 
-        const pbes_equation& eqn = pbes_equations[index];
+        const pbes_equation& eqn = m_pbes.equations()[index];
         data::rewriter::substitution_type sigma;
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         auto const& phi = eqn.formula();
@@ -687,7 +680,7 @@ class pbesinst_lazy_algorithm
           {
             todo.push_back(v);
           }
-          m_true_false_simplifier.insert(v, X_e);
+          m_true_false_simplifier.add_dependency(v, X_e);
         }
 
         // Store the result
@@ -711,6 +704,17 @@ class pbesinst_lazy_algorithm
       mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, outputting BES" << std::endl;
       pbes result;
       std::size_t index = 0;
+
+      /// \brief instantiations[i] contains all instantiations of the variable of the i-th equation in the PBES.
+      std::vector<std::vector<propositional_variable_instantiation> > instantiations;
+      instantiations.resize(m_pbes.equations().size());
+      for (auto const& p: equation)
+      {
+        auto const& X_e = p.first;
+        std::size_t index = equation_index[X_e.name()];
+        instantiations[index].push_back(X_e);
+      }
+
       for (auto i = instantiations.begin(); i != instantiations.end(); i++)
       {
         auto symbol = this->symbol(index++);
