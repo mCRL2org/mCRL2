@@ -414,11 +414,18 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_vari
 
 struct true_false_simplifier
 {
+  /// \brief Map a variable instantiation to a set of other variable instantiations on whose right hand sides it appears.
+  std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> > occurrence;
+
+  void insert(const propositional_variable_instantiation& v, const propositional_variable_instantiation& X_e)
+  {
+    occurrence[v].insert(X_e);
+  }
+
   void operator()(transformation_strategy strategy,
                   const pbes_expression& psi_e,
                   const propositional_variable_instantiation& X_e,
                   std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification,
-                  std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> >& occurrence,
                   std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                  )
   {
@@ -485,10 +492,6 @@ class pbesinst_lazy_algorithm
     ///        ouputted as debug logs in result(). Later the PBES and BES
     ///        equations should be able to store justification maps.
     std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> > justification;
-
-    /// \brief Map a variable instantiation to a set of other variable
-    ///        instantiations on whose right hand sides it appears.
-    std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> > occurrence;
 
     /// \brief Map a variable instantiation to its right hand side.
     std::unordered_map<propositional_variable_instantiation, pbes_expression> equation;
@@ -588,13 +591,12 @@ class pbesinst_lazy_algorithm
     void true_false_simplify(const pbes_expression& psi_e,
                              const propositional_variable_instantiation& X_e,
                              std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification,
-                             std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> >& occurrence,
                              std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                             )
     {
       if (m_transformation_strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
       {
-        m_true_false_simplifier(m_transformation_strategy, psi_e, X_e, justification, occurrence, equation);
+        m_true_false_simplifier(m_transformation_strategy, psi_e, X_e, justification, equation);
       }
     }
 
@@ -679,22 +681,20 @@ class pbesinst_lazy_algorithm
         // optional step
         psi_e = simplify_loop(psi_e, eqn.symbol(), X_e);
 
-        // Add all variable instantiations in psi_e to todo and generated,
-        // and augment the occurrence sets
         for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
         {
           if (!todo.contains(v) && !has_key(equation, v))
           {
             todo.push_back(v);
           }
-          occurrence[v].insert(X_e);
+          m_true_false_simplifier.insert(v, X_e);
         }
 
         // Store the result
         equation[X_e] = psi_e;
 
         // optional step
-        true_false_simplify(psi_e, X_e, justification, occurrence, equation); // N.B. modifies equation, justification, occurrence
+        true_false_simplify(psi_e, X_e, justification, equation); // N.B. modifies equation, justification
 
         // optional step
         reset(init, todo, equation); // N.B. modifies todo
