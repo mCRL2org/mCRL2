@@ -290,6 +290,7 @@ struct pbesinst_resetter
   void operator()(const propositional_variable_instantiation& init,
                   todo_list& todo,
                   const std::unordered_set<propositional_variable_instantiation>& done,
+                  std::unordered_set<propositional_variable_instantiation>& reachable,
                   const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                  )
   {
@@ -304,7 +305,7 @@ struct pbesinst_resetter
     }
 
     todo.clear();
-    std::unordered_set<propositional_variable_instantiation> reachable;
+    reachable.clear();
 
     std::stack<pbes_expression> stack;
     stack.push(init);
@@ -477,6 +478,10 @@ class pbesinst_lazy_algorithm
     /// \brief Propositional variable instantiations that have been handled.
     std::unordered_set<propositional_variable_instantiation> done;
 
+    /// \brief Propositional variable instantiations that are reachable from
+    ///        init.
+    std::unordered_set<propositional_variable_instantiation> reachable;
+
     /// \brief Map an instantiation X to a list of other instantiations that
     ///        are found true of false and thus may justify the ultimate
     ///        outcome of the value of X.
@@ -604,57 +609,14 @@ class pbesinst_lazy_algorithm
     void reset(const propositional_variable_instantiation& init,
                todo_list& todo,
                const std::unordered_set<propositional_variable_instantiation>& done,
+               std::unordered_set<propositional_variable_instantiation>& reachable,
                const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
               )
     {
       if (m_transformation_strategy >= on_the_fly)
       {
-        m_pbesinst_resetter(init, todo, done, equation);
+        m_pbesinst_resetter(init, todo, done, reachable, equation);
       }
-    }
-
-    /// \brief Returns propositional variable instantiations that are reachable from init.
-    std::unordered_set<propositional_variable_instantiation> compute_reachable() const
-    {
-      std::unordered_set<propositional_variable_instantiation> reachable;
-      std::stack<pbes_expression> stack;
-      stack.push(init);
-
-      while (!stack.empty())
-      {
-        pbes_expression expr = stack.top();
-        stack.pop();
-
-        if (is_propositional_variable_instantiation(expr))
-        {
-          auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
-          if (!has_key(reachable, X))
-          {
-            if (has_key(done, X))
-            {
-              stack.push(equation.at(X));
-              reachable.insert(X);
-            }
-            else
-            {
-              reachable.insert(X);
-            }
-          }
-        }
-        else if (is_and(expr))
-        {
-          const and_& expra = atermpp::down_cast<and_>(expr);
-          stack.push(expra.left());
-          stack.push(expra.right());
-        }
-        else if (is_or(expr))
-        {
-          const or_& expro = atermpp::down_cast<or_>(expr);
-          stack.push(expro.left());
-          stack.push(expro.right());
-        }
-      }
-      return reachable;
     }
 
   public:
@@ -709,6 +671,7 @@ class pbesinst_lazy_algorithm
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);
+      reachable.insert(init);
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
@@ -735,6 +698,7 @@ class pbesinst_lazy_algorithm
           if (!todo.contains(v) && !has_key(equation, v))
           {
             todo.push_back(v);
+            reachable.insert(v);
           }
           occurrence[v].insert(X_e);
         }
@@ -746,7 +710,7 @@ class pbesinst_lazy_algorithm
         true_false_simplify(psi_e, X_e, justification, occurrence, equation); // N.B. modifies equation, justification, occurrence
 
         // optional step
-        reset(init, todo, done, equation); // N.B. modifies todo
+        reset(init, todo, done, reachable, equation); // N.B. modifies todo and reachable
 
         mCRL2log(log::verbose) << print_equation_count(++m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
@@ -759,7 +723,6 @@ class pbesinst_lazy_algorithm
     {
       mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, outputting BES" << std::endl;
       pbes result;
-      auto reachable = compute_reachable();
       std::size_t index = 0;
       for (auto i = instantiations.begin(); i != instantiations.end(); i++)
       {
@@ -767,10 +730,6 @@ class pbesinst_lazy_algorithm
         for (auto j = i->begin(); j != i->end(); j++)
         {
           auto X_e = *j;
-          if (!has_key(reachable, X_e))
-          {
-            continue;
-          }
           auto lhs = propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list());
           auto rhs = rho(equation[X_e]);
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
