@@ -289,8 +289,6 @@ struct pbesinst_resetter
 
   void operator()(const propositional_variable_instantiation& init,
                   todo_list& todo,
-                  const std::unordered_set<propositional_variable_instantiation>& done,
-                  std::unordered_set<propositional_variable_instantiation>& reachable,
                   const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
                  )
   {
@@ -304,8 +302,9 @@ struct pbesinst_resetter
       return;
     }
 
+    // Propositional variable instantiations that are reachable from init.
+    std::unordered_set<propositional_variable_instantiation> reachable;
     todo.clear();
-    reachable.clear();
 
     std::stack<pbes_expression> stack;
     stack.push(init);
@@ -320,7 +319,7 @@ struct pbesinst_resetter
         auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
         if (!has_key(reachable, X))
         {
-          if (has_key(done, X))
+          if (has_key(equation, X))
           {
             stack.push(equation.at(X));
             reachable.insert(X);
@@ -475,13 +474,6 @@ class pbesinst_lazy_algorithm
     /// \brief Propositional variable instantiations that need to be handled.
     todo_list todo;
 
-    /// \brief Propositional variable instantiations that have been handled.
-    std::unordered_set<propositional_variable_instantiation> done;
-
-    /// \brief Propositional variable instantiations that are reachable from
-    ///        init.
-    std::unordered_set<propositional_variable_instantiation> reachable;
-
     /// \brief Map an instantiation X to a list of other instantiations that
     ///        are found true of false and thus may justify the ultimate
     ///        outcome of the value of X.
@@ -608,14 +600,12 @@ class pbesinst_lazy_algorithm
 
     void reset(const propositional_variable_instantiation& init,
                todo_list& todo,
-               const std::unordered_set<propositional_variable_instantiation>& done,
-               std::unordered_set<propositional_variable_instantiation>& reachable,
                const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
               )
     {
       if (m_transformation_strategy >= on_the_fly)
       {
-        m_pbesinst_resetter(init, todo, done, reachable, equation);
+        m_pbesinst_resetter(init, todo, equation);
       }
     }
 
@@ -671,12 +661,10 @@ class pbesinst_lazy_algorithm
 
       init = atermpp::down_cast<propositional_variable_instantiation>(R(m_pbes.initial_state()));
       todo.push_back(init);
-      reachable.insert(init);
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
         std::size_t index = equation_index[X_e.name()];
-        done.insert(X_e);
         instantiations[index].push_back(X_e);
 
         const pbes_equation& eqn = pbes_equations[index];
@@ -698,7 +686,6 @@ class pbesinst_lazy_algorithm
           if (!todo.contains(v) && !has_key(equation, v))
           {
             todo.push_back(v);
-            reachable.insert(v);
           }
           occurrence[v].insert(X_e);
         }
@@ -710,7 +697,7 @@ class pbesinst_lazy_algorithm
         true_false_simplify(psi_e, X_e, justification, occurrence, equation); // N.B. modifies equation, justification, occurrence
 
         // optional step
-        reset(init, todo, done, reachable, equation); // N.B. modifies todo and reachable
+        reset(init, todo, equation); // N.B. modifies todo
 
         mCRL2log(log::verbose) << print_equation_count(++m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
