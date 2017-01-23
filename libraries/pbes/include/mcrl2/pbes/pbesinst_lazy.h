@@ -19,6 +19,7 @@
 #include <sstream>
 #include <unordered_set>
 #include <unordered_map>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
@@ -26,8 +27,8 @@
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/propositional_variable_rewriter.h"
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -52,6 +53,76 @@ namespace mcrl2
 
 namespace pbes_system
 {
+
+namespace detail
+{
+
+template <template <class> class Builder, class Derived, class Map, class Justification>
+struct add_forward_substitute_rewriter: public Builder<Derived>
+{
+  typedef Builder<Derived> super;
+  using super::apply;
+
+  typedef core::term_traits<pbes_expression> tr;
+
+  const Map &map;
+  Justification &justification;
+
+  add_forward_substitute_rewriter(const Map& m, Justification &j)
+    : map(m), justification(j)
+  {}
+
+  bool is_true_or_false(const pbes_expression& x) const
+  {
+    return is_true(x) || is_false(x);
+  }
+
+  pbes_expression apply(const propositional_variable_instantiation& x)
+  {
+    auto p = map.find(x);
+    if (p == map.end() || !is_true_or_false(p->second))
+    {
+      return x;
+    }
+    else
+    {
+      justification.push_back(x);
+      return p->second;
+    }
+  }
+};
+
+template <typename Map, typename Justification>
+struct forward_substitute_rewriter_builder: public add_forward_substitute_rewriter<pbes_system::detail::simplify_builder, forward_substitute_rewriter_builder<Map, Justification>, Map, Justification>
+{
+  typedef add_forward_substitute_rewriter<pbes_system::detail::simplify_builder, forward_substitute_rewriter_builder<Map, Justification>, Map, Justification> super;
+  forward_substitute_rewriter_builder(const Map& m, Justification &j)
+    : super(m, j)
+  {}
+};
+
+template <typename Map, typename Justification>
+struct forward_substitute_rewriter
+{
+  const Map& map;
+  Justification &justification;
+
+  forward_substitute_rewriter(const Map& m, Justification &j)
+    : map(m), justification(j)
+  {}
+
+  pbes_expression operator()(const pbes_expression& x) const
+  {
+    return forward_substitute_rewriter_builder<Map, Justification>(map, justification).apply(x);
+  }
+};
+
+template <typename Map, typename Justification>
+forward_substitute_rewriter<Map, Justification>
+make_forward_substitute_rewriter(const Map &m, Justification &j)
+{
+  return forward_substitute_rewriter<Map, Justification>(m, j);
+}
 
 /// \brief Returns true if map/set m has x as a key
 template <typename Map>
@@ -347,31 +418,9 @@ struct pbesinst_resetter
   }
 };
 
-// Used for printing justifications.
-// Maybe should be moved to a more generic place.
-template <typename T>
 inline
-std::ostream& operator<<(std::ostream& os, const std::vector<T>& v)
+pbes_expression pbes_expression_order_quantified_variables(const mcrl2::pbes_system::pbes_expression& p, const mcrl2::data::data_specification& data_spec)
 {
-  os << "[";
-  for (auto i = v.begin(); i != v.end(); i++)
-  {
-    if (i != v.begin())
-    {
-      os << " ";
-    }
-    os << *i;
-  }
-  os << "]";
-  return os;
-}
-
-inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_variables(
-              const mcrl2::pbes_system::pbes_expression& p, const mcrl2::data::data_specification& data_spec)
-{
-  using namespace mcrl2;
-  using namespace mcrl2::pbes_system;
-
   if (is_pbes_and(p))
   {
     const and_& pa=atermpp::down_cast<and_>(p);
@@ -412,7 +461,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_order_quantified_vari
   }
 }
 
-struct true_false_simplifier
+struct pbesinst_backward_substitute
 {
   /// \brief Map a variable instantiation to a set of other variable instantiations on whose right hand sides it appears.
   std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> > occurrence;
@@ -448,7 +497,7 @@ struct true_false_simplifier
           {
             auto Y = *i;
             pbes_expression& f = equation[Y];
-            f = make_propositional_variable_rewriter(equation, justification[Y])(f);
+            f = make_forward_substitute_rewriter(equation, justification[Y])(f);
             if (is_true(f) || is_false(f))
             {
               new_trivials.insert(Y);
@@ -460,6 +509,8 @@ struct true_false_simplifier
     }
   }
 };
+
+} // namespace detail
 
 /// \brief An alternative lazy algorithm for instantiating a PBES, ported from
 ///         bes_deprecated.h.
@@ -473,13 +524,13 @@ class pbesinst_lazy_algorithm
     pbes m_pbes;
 
     /// \brief A lookup map for PBES equations.
-    pbes_equation_index equation_index;
+    detail::pbes_equation_index equation_index;
 
     /// \brief The rewriter.
     enumerate_quantifiers_rewriter R;
 
     /// \brief Propositional variable instantiations that need to be handled.
-    todo_list todo;
+    detail::todo_list todo;
 
     /// \brief Map an instantiation X to a list of other instantiations that
     ///        are found true of false and thus may justify the ultimate
@@ -496,7 +547,7 @@ class pbesinst_lazy_algorithm
     /// \brief Map a variable instantiation to its right hand side.
     std::unordered_map<propositional_variable_instantiation, pbes_expression> equation;
 
-    /// \brief The initial value.
+    /// \brief The initial value (after rewriting).
     propositional_variable_instantiation init;
 
     /// \brief The search strategy to use when exploring the state space.
@@ -506,13 +557,13 @@ class pbesinst_lazy_algorithm
     transformation_strategy m_transformation_strategy;
 
     /// \brief Simplifies expressions based on a loop analysis.
-    find_loop_simplifier m_find_loop_simplifier;
+    detail::find_loop_simplifier m_find_loop_simplifier;
 
     /// \brief Simplifies some attributes based on variables that have the value true or false.
-    true_false_simplifier m_true_false_simplifier;
+    detail::pbesinst_backward_substitute m_pbesinst_backward_substitute;
 
     /// \brief Simplifies some attributes based on variables that have the value true or false.
-    pbesinst_resetter m_pbesinst_resetter;
+    detail::pbesinst_resetter m_pbesinst_resetter;
 
     /// \brief Prints a log message for every 1000-th equation
     std::string print_equation_count(size_t size) const
@@ -550,21 +601,21 @@ class pbesinst_lazy_algorithm
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
       for (pbes_equation& eq: p.equations())
       {
-        eq.formula() = pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), m_pbes.data());
+        eq.formula() = detail::pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), m_pbes.data());
       }
       return p;
     }
 
-    pbes_expression substitute_trivial_values(const pbes_expression& psi_e,
-                                              const propositional_variable_instantiation& X_e,
-                                              const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation,
-                                              std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification
-                                             )
+    pbes_expression forward_substitute(const pbes_expression& psi_e,
+                                       const propositional_variable_instantiation& X_e,
+                                       const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation,
+                                       std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification
+                                      )
     {
       if (m_transformation_strategy >= optimize)
       {
         // Substitute all trivial variable instantiations by their values
-        return make_propositional_variable_rewriter(equation, justification[X_e])(psi_e);
+        return detail::make_forward_substitute_rewriter(equation, justification[X_e])(psi_e);
       }
       else
       {
@@ -584,7 +635,7 @@ class pbesinst_lazy_algorithm
       }
     }
 
-    void true_false_simplify(const pbes_expression& psi_e,
+    void backward_substitute(const pbes_expression& psi_e,
                              const propositional_variable_instantiation& X_e,
                              std::unordered_map<propositional_variable_instantiation, std::vector<propositional_variable_instantiation> >& justification,
                              std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
@@ -592,12 +643,12 @@ class pbesinst_lazy_algorithm
     {
       if (m_transformation_strategy >= optimize && (is_true(psi_e) || is_false(psi_e)))
       {
-        m_true_false_simplifier(m_transformation_strategy, psi_e, X_e, justification, equation);
+        m_pbesinst_backward_substitute(m_transformation_strategy, psi_e, X_e, justification, equation);
       }
     }
 
     void reset(const propositional_variable_instantiation& init,
-               todo_list& todo,
+               detail::todo_list& todo,
                const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
               )
     {
@@ -669,25 +720,25 @@ class pbesinst_lazy_algorithm
         pbes_expression psi_e = R(phi, sigma);
 
         // optional step
-        psi_e = substitute_trivial_values(psi_e, X_e, equation, justification); // N.B. modifies justification
+        psi_e = forward_substitute(psi_e, X_e, equation, justification); // N.B. modifies justification
 
         // optional step
         psi_e = simplify_loop(psi_e, eqn.symbol(), X_e);
 
         for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
         {
-          if (!todo.contains(v) && !has_key(equation, v))
+          if (!todo.contains(v) && !detail::has_key(equation, v))
           {
             todo.push_back(v);
           }
-          m_true_false_simplifier.add_dependency(v, X_e);
+          m_pbesinst_backward_substitute.add_dependency(v, X_e);
         }
 
         // Store the result
         equation[X_e] = psi_e;
 
-        // optional step
-        true_false_simplify(psi_e, X_e, justification, equation); // N.B. modifies equation, justification
+        // optional step (backward substitution)
+        backward_substitute(psi_e, X_e, justification, equation); // N.B. modifies equation, justification
 
         // optional step
         reset(init, todo, equation); // N.B. modifies todo
@@ -725,7 +776,7 @@ class pbesinst_lazy_algorithm
           auto rhs = rho(equation[X_e]);
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
           mCRL2log(log::debug) << "Equation: " << symbol << " " << X_e << " = " << equation[X_e] << std::endl;
-          mCRL2log(log::debug) << "Obtained justification of " << X_e << ": " << justification[X_e] << std::endl;
+          mCRL2log(log::debug) << "Obtained justification of " << X_e << ": " << core::detail::print_container(justification[X_e]) << std::endl;
         }
       }
 
