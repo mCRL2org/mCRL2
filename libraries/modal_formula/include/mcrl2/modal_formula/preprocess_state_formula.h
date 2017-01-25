@@ -340,8 +340,8 @@ state_formula preprocess_nested_modal_operators(const state_formula& x)
 /// \return The preprocessed formula.
 inline
 state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula,
-                                                       const std::set<core::identifier_string>& context_ids,
-                                                       const std::set<core::identifier_string>& context_variable_names,
+                                                       const std::set<core::identifier_string>& /* context_ids */,
+                                                       const std::set<core::identifier_string>& /* context_variable_names */,
                                                        bool preprocess_modal_operators,
                                                        bool warn_for_modal_operator_nesting = true
                                                       )
@@ -361,31 +361,17 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
       "up the transformation." << std::endl;
   }
 
-  std::set<core::identifier_string> formula_variable_names = data::detail::variable_names(state_formulas::find_all_variables(f));
-  std::set<core::identifier_string> formula_ids = state_formulas::find_identifiers(f);
-
   mCRL2log(log::debug) << "formula before preprocessing: " << f << std::endl;
 
   // rename data variables in f, to prevent name clashes with data variables in the context
-  f = state_formulas::rename_variables(f, context_variable_names);
+  f = state_formulas::rename_variables(f, state_formulas::find_identifiers(f));
 
   // rename predicate variables in f, to prevent name clashes
   data::xyz_identifier_generator xyz_generator;
-  xyz_generator.add_identifiers(context_ids);
-  xyz_generator.add_identifiers(formula_variable_names);
+  xyz_generator.add_identifiers(state_formulas::find_identifiers(f));
   f = rename_predicate_variables(f, xyz_generator);
 
   mCRL2log(log::debug) << "formula after renaming variables: " << f << std::endl;
-
-  // wrap the formula inside a 'nu' if needed
-  if (!state_formulas::is_mu(f) && !state_formulas::is_nu(f))
-  {
-    data::set_identifier_generator generator;
-    generator.add_identifiers(formula_ids);
-    generator.add_identifiers(context_ids);
-    core::identifier_string X = generator("X");
-    f = state_formulas::nu(X, data::assignment_list(), f);
-  }
 
   // add dummy fixpoints between nested modal operators
   if (preprocess_modal_operators)
@@ -404,6 +390,16 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
     f = state_formulas::normalize(f);
     mCRL2log(log::debug) << "formula after normalization:  " << f << std::endl;
     assert(state_formulas::is_normalized(f));
+  }
+
+  // wrap the formula inside a 'nu' if needed
+  if (!state_formulas::is_mu(f) && !state_formulas::is_nu(f))
+  {
+    data::set_identifier_generator generator;
+    generator.add_identifiers(state_formulas::find_identifiers(f));
+    core::identifier_string X = generator("X");
+    f = state_formulas::nu(X, data::assignment_list(), f);
+    mCRL2log(log::debug) << "formula after wrapping the formula inside a 'nu':  " << f << std::endl;
   }
 
   mCRL2log(log::debug) << "formula after preprocessing:  " << f << std::endl;
