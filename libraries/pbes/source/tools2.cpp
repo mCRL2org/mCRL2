@@ -13,3 +13,4 @@
 
 #include "mcrl2/pbes/tools/lps2pbes.h"
 #include "mcrl2/pbes/tools/pbesparelm.h"
+#include "mcrl2/pbes/tools/pbesstategraph.h"
