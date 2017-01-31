@@ -58,25 +58,19 @@ bool pbesinst_is_constant(const pbes_expression& x)
 /// propositional variable instantiation must be closed.
 /// Originally implemented by Alexander van Dam.
 /// \return A name that uniquely corresponds to the propositional variable.
-struct pbesinst_rename: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
+struct pbesinst_renamer
 {
-  propositional_variable_instantiation operator()(const propositional_variable_instantiation& Ye) const
+  core::identifier_string operator()(const propositional_variable_instantiation& Ye) const
   {
-    if (!pbesinst_is_constant(Ye))
-    {
-      return Ye;
-    }
-    const data::data_expression_list& e = Ye.parameters();
+    assert(pbesinst_is_constant(Ye));
     std::string name = Ye.name();
-
-    for (const data::data_expression& exp: e)
+    for (const data::data_expression& exp: Ye.parameters())
     {
-      if (is_function_symbol(exp) && exp.sort()!=data::sort_pos::pos() &&
-                                     exp.sort()!=data::sort_nat::nat())
+      if (is_function_symbol(exp) && exp.sort() != data::sort_pos::pos() && exp.sort() != data::sort_nat::nat())
       {
         // This case is dealt with separately, as it occurs often.
         // The use of pp as in the next case is correct for this case also, but very time consuming.
-        // The exception to this rule is constants @c1 of sort Pos, @c0 of sort Nat. 
+        // The exception to this rule is constants @c1 of sort Pos, @c0 of sort Nat.
         name += "@";
         name += atermpp::down_cast<data::function_symbol>(exp).name();
       }
@@ -87,11 +81,27 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
       }
       else
       {
-        throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(exp));
+        throw mcrl2::runtime_error(std::string("pbesinst_renamer: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(exp));
       }
     }
 
-    return propositional_variable_instantiation(name, data::data_expression_list());
+    return name;
+  }
+};
+
+/// \brief Creates a unique name for a propositional variable instantiation. The
+/// propositional variable instantiation must be closed.
+/// Originally implemented by Alexander van Dam.
+/// \return A name that uniquely corresponds to the propositional variable.
+struct pbesinst_rename: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
+{
+  propositional_variable_instantiation operator()(const propositional_variable_instantiation& Ye) const
+  {
+    if (!pbesinst_is_constant(Ye))
+    {
+      return Ye;
+    }
+    return propositional_variable_instantiation(pbesinst_renamer()(Ye), data::data_expression_list());
   }
 };
 

@@ -23,12 +23,12 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
-#include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -466,6 +466,10 @@ struct pbesinst_backward_substitute
   /// \brief Map a variable instantiation to a set of other variable instantiations on whose right hand sides it appears.
   std::unordered_map<propositional_variable_instantiation, std::unordered_set<propositional_variable_instantiation> > occurrence;
 
+  // Substitute X_e to its value in all its occurrences, and substitute all other variables to their values that are found
+  // to be either true or false in all their occurrences.
+  std::unordered_set<propositional_variable_instantiation> trivials;
+
   void add_dependency(const propositional_variable_instantiation& v, const propositional_variable_instantiation& X_e)
   {
     occurrence[v].insert(X_e);
@@ -482,15 +486,12 @@ struct pbesinst_backward_substitute
     {
       if (strategy >= on_the_fly)
       {
-        // Substitute X_e to its value in all its occurrences, and
-        // substitute all other variables to their values that are found
-        // to be either true or false in all their occurrences.
-        std::unordered_set<propositional_variable_instantiation> new_trivials;
-        new_trivials.insert(X_e);
-        while (!new_trivials.empty())
+        trivials.clear();
+        trivials.insert(X_e);
+        while (!trivials.empty())
         {
-          auto X = *new_trivials.begin();
-          new_trivials.erase(new_trivials.begin());
+          auto X = *trivials.begin();
+          trivials.erase(trivials.begin());
 
           auto oc = occurrence[X];
           for (auto i = oc.begin(); i != oc.end(); i++)
@@ -500,7 +501,7 @@ struct pbesinst_backward_substitute
             f = make_forward_substitute_rewriter(equation, justification[Y])(f);
             if (is_true(f) || is_false(f))
             {
-              new_trivials.insert(Y);
+              trivials.insert(Y);
             }
           }
           occurrence.erase(X);
@@ -601,7 +602,7 @@ class pbesinst_lazy_algorithm
       pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
       for (pbes_equation& eq: p.equations())
       {
-        eq.formula() = detail::pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), m_pbes.data());
+        eq.formula() = detail::pbes_expression_order_quantified_variables(one_point_rule_rewriter(simplify_rewriter(eq.formula())), p.data());
       }
       return p;
     }
