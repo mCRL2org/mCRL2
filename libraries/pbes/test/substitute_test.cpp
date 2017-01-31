@@ -10,7 +10,7 @@
 /// \brief Test for the pbes rewriters.
 
 #include <iostream>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/variable_assignment.h"
@@ -22,7 +22,7 @@
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
-void test_substitution()
+BOOST_AUTO_TEST_CASE(test_substitution)
 {
   std::string text1 =
     "pbes nu X(n: Nat) = X(n + 1);\n"
@@ -56,7 +56,7 @@ void test_substitution()
   BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));
 }
 
-void test_propositional_variable_substitution()
+BOOST_AUTO_TEST_CASE(test_propositional_variable_substitution)
 {
   std::string text1 =
     "pbes                     \n"
@@ -84,7 +84,31 @@ void test_propositional_variable_substitution()
 
   // compare textual representations, to avoid conflicts between types
   BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));
+}
 
+BOOST_AUTO_TEST_CASE(test_replace_propositional_variables)
+{
+  std::string text1 =
+    "pbes                     \n"
+    "nu X(m: Nat) = Y(m + 1); \n"
+    "nu Y(n: Nat) = X(n + 2); \n"
+    "init X(0);               \n"
+    ;
+  pbes p1 = txt2pbes(text1);
+
+  std::string text2 =
+    "pbes                     \n"
+    "nu X(m: Nat) = Y(m + 1); \n"
+    "nu Y(n: Nat) = Y(n + 2); \n"
+    "init X(0);               \n"
+    ;
+  pbes p2 = txt2pbes(text2);
+
+  pbes p = p1;
+  replace_propositional_variables(p, [](const propositional_variable_instantiation& x) { return propositional_variable_instantiation(core::identifier_string("Y"), x.parameters()); });
+  std::cout << pbes_system::pp(p) << std::endl;
+  std::cout << pbes_system::pp(p2) << std::endl;
+  BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));
 }
 
 inline
@@ -96,7 +120,7 @@ pbes_expression sigma(const pbes_expression& x)
   return x == x1 ? x2 : x;
 }
 
-void test_replace_pbes_expressions()
+BOOST_AUTO_TEST_CASE(test_replace_pbes_expressions)
 {
   std::string var_decl = "datavar b: Bool; \npredvar X: Bool;";
   pbes_expression x = parse_pbes_expression("X(b) || X(false)", var_decl);
@@ -109,7 +133,7 @@ void test_replace_pbes_expressions()
   BOOST_CHECK(result == expected_result);
 }
 
-void test_replace_variables()
+BOOST_AUTO_TEST_CASE(test_replace_variables)
 {
   pbes_expression x = parse_pbes_expression("forall n: Nat. exists m: Nat. val(m > n)");
   pbes_expression expected_result = parse_pbes_expression("forall n: Nat. exists m: Nat. val(n > n)");
@@ -125,7 +149,7 @@ void test_replace_variables()
   BOOST_CHECK(result == expected_result);
 }
 
-void test_variable_assignment()
+BOOST_AUTO_TEST_CASE(test_variable_assignment)
 {
   pbes_expression x = parse_pbes_expression("forall n: Nat. exists m: Nat. val(m > n)");
   pbes_expression expected_result = parse_pbes_expression("forall n: Nat. exists m: Nat. val(n > n)");
@@ -140,13 +164,7 @@ void test_variable_assignment()
   BOOST_CHECK(result == expected_result);
 }
 
-int test_main(int argc, char* argv[])
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  test_substitution();
-  test_propositional_variable_substitution();
-  test_replace_pbes_expressions();
-  test_replace_variables();
-  test_variable_assignment();
-
-  return 0;
+  return nullptr;
 }

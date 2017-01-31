@@ -104,6 +104,32 @@ make_replace_pbes_expressions_builder(Substitution sigma, bool innermost)
 {
   return substitute_pbes_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
+
+template <template <class> class Builder, class Substitution>
+struct replace_propositional_variables_builder: public Builder<replace_propositional_variables_builder<Builder, Substitution> >
+{
+  typedef Builder<replace_propositional_variables_builder<Builder, Substitution> > super;
+  using super::apply;
+
+  const Substitution& sigma;
+  bool innermost;
+
+  replace_propositional_variables_builder(const Substitution& sigma_)
+    : sigma(sigma_)
+  {}
+
+  pbes_expression apply(const propositional_variable_instantiation& x)
+  {
+    return sigma(x);
+  }
+};
+
+template <template <class> class Builder, class Substitution>
+replace_propositional_variables_builder<Builder, Substitution>
+make_replace_propositional_variables_builder(const Substitution& sigma)
+{
+  return replace_propositional_variables_builder<Builder, Substitution>(sigma);
+}
 /// \endcond
 
 } // namespace detail
@@ -281,7 +307,7 @@ void replace_propositional_variables(T& x,
                                      typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                                     )
 {
-  core::make_update_apply_builder<pbes_expression_builder>(sigma).update(x);
+  pbes_system::detail::make_replace_propositional_variables_builder<pbes_system::pbes_expression_builder>(sigma).update(x);
 }
 
 /// \brief Applies a propositional variable substitution.
@@ -291,7 +317,7 @@ T replace_propositional_variables(const T& x,
                                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                                  )
 {
-  return core::make_update_apply_builder<pbes_expression_builder>(sigma).apply(x);
+  return pbes_system::detail::make_replace_propositional_variables_builder<pbes_system::pbes_expression_builder>(sigma).apply(x);
 }
 
 template <typename T, typename Substitution>
