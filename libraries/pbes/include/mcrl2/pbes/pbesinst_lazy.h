@@ -57,6 +57,34 @@ namespace pbes_system
 namespace detail
 {
 
+// The following function is a helper function to allow to create m_pv_renaming outside
+// the class such that the class becomes a lightweight object. std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
+inline
+std::unordered_map<propositional_variable_instantiation, core::identifier_string>
+create_pbesinst_rename_map(const std::vector<std::vector<propositional_variable_instantiation> >& instantiations, bool short_renaming_scheme)
+{
+  std::size_t index = 0;
+  std::unordered_map<propositional_variable_instantiation, core::identifier_string> result;
+  for (const std::vector<propositional_variable_instantiation>& vec: instantiations)
+  {
+    for (const propositional_variable_instantiation& inst: vec)
+    {
+      if (short_renaming_scheme)
+      {
+        std::stringstream ss;
+        ss << "X" << index;
+        result[inst] = core::identifier_string(ss.str());
+      }
+      else
+      {
+        result[inst] = pbesinst_renamer()(inst);
+      }
+      index++;
+    }
+  }
+  return result;
+}
+
 template <template <class> class Builder, class Derived, class Map, class Justification>
 struct add_forward_substitute_rewriter: public Builder<Derived>
 {
@@ -578,12 +606,6 @@ class pbesinst_lazy_algorithm
       return "";
     }
 
-    // renames propositional variables in x
-    pbes_expression rho(const pbes_expression& x) const
-    {
-      return replace_propositional_variables(x, pbesinst_rename());
-    }
-
     // instantiates global variables
     // simplifies the pbes
     pbes preprocess(const pbes& x) const
@@ -751,13 +773,12 @@ class pbesinst_lazy_algorithm
 
     /// \brief Returns the computed bes in pbes format
     /// \return The computed bes in pbes format
-    pbes get_result()
+    pbes get_result(bool short_rename_scheme = true)
     {
       mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, outputting BES" << std::endl;
       pbes result;
-      std::size_t index = 0;
 
-      /// \brief instantiations[i] contains all instantiations of the variable of the i-th equation in the PBES.
+      // instantiations[i] contains all instantiations of the variable of the i-th equation in the PBES.
       std::vector<std::vector<propositional_variable_instantiation> > instantiations;
       instantiations.resize(m_pbes.equations().size());
       for (auto const& p: equation)
@@ -767,14 +788,20 @@ class pbesinst_lazy_algorithm
         instantiations[index].push_back(X_e);
       }
 
+      auto rename_map = detail::create_pbesinst_rename_map(instantiations, short_rename_scheme);
+      std::size_t index = 0;
       for (auto i = instantiations.begin(); i != instantiations.end(); i++)
       {
         auto symbol = this->symbol(index++);
         for (auto j = i->begin(); j != i->end(); j++)
         {
           auto X_e = *j;
-          auto lhs = propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list());
-          auto rhs = rho(equation[X_e]);
+          auto lhs = propositional_variable(rename_map.at(X_e), data::variable_list());
+          auto rhs = replace_propositional_variables(equation[X_e], [&](const propositional_variable_instantiation& x)
+            {
+              return propositional_variable_instantiation(rename_map.at(x), data::data_expression_list());
+            }
+          );
           result.equations().push_back(pbes_equation(symbol, lhs, rhs));
           mCRL2log(log::debug) << "Equation: " << symbol << " " << X_e << " = " << equation[X_e] << std::endl;
           mCRL2log(log::debug) << "Obtained justification of " << X_e << ": " << core::detail::print_container(justification[X_e]) << std::endl;
