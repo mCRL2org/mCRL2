@@ -32,6 +32,7 @@
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 #ifndef MCRL2_PBES_PBESINST_LAZY_H
 #define MCRL2_PBES_PBESINST_LAZY_H
@@ -57,33 +58,27 @@ namespace pbes_system
 namespace detail
 {
 
-// The following function is a helper function to allow to create m_pv_renaming outside
-// the class such that the class becomes a lightweight object. std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
-inline
-std::unordered_map<propositional_variable_instantiation, core::identifier_string>
-create_pbesinst_rename_map(const std::vector<std::vector<propositional_variable_instantiation> >& instantiations, bool short_renaming_scheme)
+struct pbesinst_rename_short
 {
+  std::unordered_map<propositional_variable_instantiation, core::identifier_string>& name_map;
   std::size_t index = 0;
-  std::unordered_map<propositional_variable_instantiation, core::identifier_string> result;
-  for (const std::vector<propositional_variable_instantiation>& vec: instantiations)
+
+  pbesinst_rename_short(std::unordered_map<propositional_variable_instantiation, core::identifier_string>& name_map_)
+    : name_map(name_map_)
+  {}
+
+  core::identifier_string operator()(const propositional_variable_instantiation& Ye)
   {
-    for (const propositional_variable_instantiation& inst: vec)
+    auto i = name_map.find(Ye);
+    if (i != name_map.end())
     {
-      if (short_renaming_scheme)
-      {
-        std::stringstream ss;
-        ss << "X" << index;
-        result[inst] = core::identifier_string(ss.str());
-      }
-      else
-      {
-        result[inst] = pbesinst_renamer()(inst);
-      }
-      index++;
+      return i->second;
     }
+    core::identifier_string name("X" + utilities::number2string(++index));
+    name_map[Ye] = name;
+    return name;
   }
-  return result;
-}
+};
 
 template <template <class> class Builder, class Derived, class Map, class Justification>
 struct add_forward_substitute_rewriter: public Builder<Derived>
@@ -771,45 +766,58 @@ class pbesinst_lazy_algorithm
       }
     }
 
-    /// \brief Returns the computed bes in pbes format
-    /// \return The computed bes in pbes format
-    pbes get_result(bool short_rename_scheme = true)
+    template <typename Rename>
+    pbes compose_result(Rename& rename)
     {
       mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, outputting BES" << std::endl;
       pbes result;
 
-      // instantiations[i] contains all instantiations of the variable of the i-th equation in the PBES.
-      std::vector<std::vector<propositional_variable_instantiation> > instantiations;
-      instantiations.resize(m_pbes.equations().size());
+      // collect the equations in blocks, since they need to be put in the right order
+      std::vector<std::vector<pbes_equation> > blocks(m_pbes.equations().size());
       for (auto const& p: equation)
       {
         auto const& X_e = p.first;
         std::size_t index = equation_index[X_e.name()];
-        instantiations[index].push_back(X_e);
+        auto const& symbol = this->symbol(index);
+        auto lhs = propositional_variable(rename(X_e), data::variable_list());
+        auto rhs = replace_propositional_variables(equation[X_e], [&](const propositional_variable_instantiation& x)
+          {
+            return propositional_variable_instantiation(rename(x), data::data_expression_list());
+          }
+        );
+        blocks[index].push_back(pbes_equation(symbol, lhs, rhs));
+        mCRL2log(log::debug) << "Equation: " << symbol << " " << X_e << " = " << equation[X_e] << std::endl;
+        mCRL2log(log::debug) << "Obtained justification of " << X_e << ": " << core::detail::print_container(justification[X_e]) << std::endl;
       }
 
-      auto rename_map = detail::create_pbesinst_rename_map(instantiations, short_rename_scheme);
-      std::size_t index = 0;
-      for (auto i = instantiations.begin(); i != instantiations.end(); i++)
+      // concatenate the blocks
+      for (const std::vector<pbes_equation>& block: blocks)
       {
-        auto symbol = this->symbol(index++);
-        for (auto j = i->begin(); j != i->end(); j++)
+        for (const pbes_equation& eqn: block)
         {
-          auto X_e = *j;
-          auto lhs = propositional_variable(rename_map.at(X_e), data::variable_list());
-          auto rhs = replace_propositional_variables(equation[X_e], [&](const propositional_variable_instantiation& x)
-            {
-              return propositional_variable_instantiation(rename_map.at(x), data::data_expression_list());
-            }
-          );
-          result.equations().push_back(pbes_equation(symbol, lhs, rhs));
-          mCRL2log(log::debug) << "Equation: " << symbol << " " << X_e << " = " << equation[X_e] << std::endl;
-          mCRL2log(log::debug) << "Obtained justification of " << X_e << ": " << core::detail::print_container(justification[X_e]) << std::endl;
+          result.equations().push_back(eqn);
         }
       }
 
-      result.initial_state() = pbesinst_rename()(init);
+      result.initial_state() = propositional_variable_instantiation(rename(init), data::data_expression_list());
       return result;
+    }
+
+    /// \brief Returns the computed bes in pbes format
+    /// \return The computed bes in pbes format
+    pbes get_result(bool short_rename_scheme = true)
+    {
+      if (short_rename_scheme)
+      {
+        std::unordered_map<propositional_variable_instantiation, core::identifier_string> rename_map;
+        detail::pbesinst_rename_short rename(rename_map);
+        return compose_result(rename);
+      }
+      else
+      {
+        pbesinst_rename_long rename;
+        return compose_result(rename);
+      }
     }
 
     enumerate_quantifiers_rewriter& rewriter()

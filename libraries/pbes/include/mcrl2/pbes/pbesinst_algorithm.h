@@ -58,7 +58,7 @@ bool pbesinst_is_constant(const pbes_expression& x)
 /// propositional variable instantiation must be closed.
 /// Originally implemented by Alexander van Dam.
 /// \return A name that uniquely corresponds to the propositional variable.
-struct pbesinst_renamer
+struct pbesinst_rename_long
 {
   core::identifier_string operator()(const propositional_variable_instantiation& Ye) const
   {
@@ -81,10 +81,9 @@ struct pbesinst_renamer
       }
       else
       {
-        throw mcrl2::runtime_error(std::string("pbesinst_renamer: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(exp));
+        throw mcrl2::runtime_error(std::string("pbesinst_rename_long: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(exp));
       }
     }
-
     return name;
   }
 };
@@ -101,7 +100,7 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
     {
       return Ye;
     }
-    return propositional_variable_instantiation(pbesinst_renamer()(Ye), data::data_expression_list());
+    return propositional_variable_instantiation(pbesinst_rename_long()(Ye), data::data_expression_list());
   }
 };
 
