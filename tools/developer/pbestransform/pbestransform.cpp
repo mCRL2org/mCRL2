@@ -14,8 +14,7 @@
 #include <memory>
 #include <string>
 
-#include <boost/lexical_cast.hpp>
-
+#include "mcrl2/bes/io.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/io.h"
@@ -28,7 +27,6 @@
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -50,9 +48,36 @@ void write_text(const std::string& filename, const std::string& text)
 }
 
 inline
-void save(const pbes& p, const std::string& filename)
+std::string file_extension(const std::string& filename)
 {
-  pbes_system::save_pbes(p, filename, guess_format(filename));
+  auto pos = filename.find_last_of('.');
+  if (pos == std::string::npos)
+  {
+    return "";
+  }
+  return filename.substr(pos + 1);
+}
+
+inline
+void my_save_pbes(const pbes& p, const std::string& filename)
+{
+  auto ext = file_extension(filename);
+  if (ext == "pbes")
+  {
+    save_pbes(p, filename, pbes_format_internal());
+  }
+  else if (ext == "bes")
+  {
+    bes::save_pbes(p, filename, bes::bes_format_internal());
+  }
+  else if (ext == "pg")
+  {
+    bes::save_pbes(p, filename, bes::bes_format_pgsolver());
+  }
+  else
+  {
+    pbes_system::save_pbes(p, filename);
+  }
 }
 
 /// \brief
@@ -108,7 +133,7 @@ struct rewrite_pbes_data_rewriter_command: public pbescommand
     data::rewriter r(pbesspec.data());
     pbes_system::data_rewriter<data::rewriter> R(r);
     pbes_rewrite(pbesspec, R);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -124,7 +149,7 @@ struct rewrite_pbes_enumerate_quantifiers_rewriter_command: public pbescommand
     data::rewriter r(pbesspec.data());
     pbes_system::enumerate_quantifiers_rewriter R(r, pbesspec.data());
     pbes_rewrite(pbesspec, R);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -139,7 +164,7 @@ struct rewrite_pbes_simplify_rewriter_command: public pbescommand
     pbescommand::execute();
     pbes_system::simplify_rewriter R;
     pbes_rewrite(pbesspec, R);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -155,7 +180,7 @@ struct rewrite_pbes_simplify_data_rewriter_command: public pbescommand
     data::rewriter r(pbesspec.data());
     pbes_system::simplify_data_rewriter<data::rewriter> R(r);
     pbes_rewrite(pbesspec, R);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -170,7 +195,7 @@ struct rewrite_pbes_simplify_quantifiers_rewriter_command: public pbescommand
     pbescommand::execute();
     pbes_system::simplify_quantifiers_rewriter R;
     pbes_rewrite(pbesspec, R);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -186,7 +211,7 @@ struct rewrite_pbes_simplify_quantifiers_data_rewriter_command: public pbescomma
     data::rewriter r(pbesspec.data());
     pbes_system::simplify_data_rewriter<data::rewriter> R(r);
     pbes_rewrite(pbesspec, R);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -201,7 +226,7 @@ struct rewrite_pbes_one_point_rule_rewriter_command: public pbescommand
     pbescommand::execute();
     pbes_system::one_point_rule_rewriter R;
     pbes_rewrite(pbesspec, R);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -216,7 +241,7 @@ struct rewrite_pbes_quantifiers_inside_rewriter_command: public pbescommand
     pbescommand::execute();
     pbes_system::quantifiers_inside_rewriter R;
     pbes_rewrite(pbesspec, R);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -230,7 +255,7 @@ struct remove_unused_pbes_equations_command: public pbescommand
   {
     pbescommand::execute();
     pbes_system::remove_unreachable_variables(pbesspec);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -244,7 +269,7 @@ struct pbesinst_lazy_command: public pbescommand
   {
     pbescommand::execute();
     pbesspec = pbesinst_lazy(pbesspec, data::jitty, breadth_first, lazy);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -258,7 +283,7 @@ struct pbesinst_optimize_command: public pbescommand
   {
     pbescommand::execute();
     pbesspec = pbesinst_lazy(pbesspec, data::jitty, breadth_first, optimize);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -272,7 +297,7 @@ struct pbesinst_on_the_fly_command: public pbescommand
   {
     pbescommand::execute();
     pbesspec = pbesinst_lazy(pbesspec, data::jitty, breadth_first, on_the_fly);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
@@ -286,7 +311,7 @@ struct pbesinst_on_the_fly_with_fixed_points_command: public pbescommand
   {
     pbescommand::execute();
     pbesspec = pbesinst_lazy(pbesspec, data::jitty, breadth_first, on_the_fly_with_fixed_points);
-    save(pbesspec, output_filename);
+    my_save_pbes(pbesspec, output_filename);
   }
 };
 
