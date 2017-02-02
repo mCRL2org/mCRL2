@@ -58,6 +58,35 @@ namespace pbes_system
 namespace detail
 {
 
+// attempts to move the equation with the initial variable to the top
+inline
+bool move_initial_variable_equation_up(pbes& p)
+{
+  auto& equations = p.equations();
+
+  const core::identifier_string& X = p.initial_state().name();
+  if (equations.front().variable().name() == X)
+  {
+    return true;
+  }
+
+  const fixpoint_symbol& first_symbol = equations.front().symbol();
+  for (auto i = ++equations.begin(); i != equations.end(); ++i)
+  {
+    const pbes_equation& eqn = *i;
+    if (eqn.symbol() != first_symbol)
+    {
+      return false;
+    }
+    if (eqn.variable().name() == X)
+    {
+      std::swap(*equations.begin(), *i);
+      return true;
+    }
+  }
+  throw mcrl2::runtime_error("move_initial_variable_equation_up: could not find an equation corresponding to the initial state");
+}
+
 struct pbesinst_rename_short
 {
   std::unordered_map<propositional_variable_instantiation, core::identifier_string>& name_map;
@@ -801,6 +830,7 @@ class pbesinst_lazy_algorithm
 
       result.initial_state() = propositional_variable_instantiation(rename(init), data::data_expression_list());
       remove_unreachable_variables(result);
+      detail::move_initial_variable_equation_up(result);
       return result;
     }
 
