@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
@@ -800,6 +800,7 @@ class pbesinst_lazy_algorithm
       }
 
       result.initial_state() = propositional_variable_instantiation(rename(init), data::data_expression_list());
+      remove_unreachable_variables(result);
       return result;
     }
 
