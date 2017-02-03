@@ -85,7 +85,6 @@ class pbesinfo_tool: public pbes_input_tool<input_tool>
     bool run()
     {
       bes::boolean_expression b;
-      std::cout << "b = " << b << std::endl;
       pbesinfo(input_filename(),
                input_file_message(),
                pbes_input_format(),
