@@ -2,30 +2,30 @@ mu X . [true]X || (
   nu Y(togo: List(Sender) = tail(CORRECT_NODES), 
        s: Symbol = FRAME_HEADER(head(CORRECT_NODES))) . 
     mu Z .
-    ((togo != [])
+    (val(togo != [])
      && (forall i: Sender . 
-          ((i in CORRECT_NODES) && 
+          (val(i in CORRECT_NODES) && 
             (([Decode(i, s)]
               ( 
                 Y(remove(togo, i), s) && 
-                (i in togo)
+                val(i in togo)
               )
              ) && 
              forall s': Symbol . 
-              ((finite(s') && s != s') =>
+              (val(finite(s') && s != s') =>
                [Decode(i, s')]false
               )
             )
           )
-       || (!(i in CORRECT_NODES) &&
+       || (!val(i in CORRECT_NODES) &&
             (forall s': Symbol . 
-              ((finite(s')) => [Decode(i, s')]Z))
+              (val(finite(s')) => [Decode(i, s')]Z))
         ))
      && ([!exists i: Sender, s': Symbol . 
-            ((i <= NODES && finite(s')) && Decode(i, s')) ||
-            ((i <= NODES) && is_integrating(i))]Z)
+            (val(i <= NODES && finite(s')) && Decode(i, s')) ||
+            (val(i <= NODES) && is_integrating(i))]Z)
     )
-  ||((togo == [])
+  ||(val(togo == [])
      && Y(remove(CORRECT_NODES, s(nextsym(s, CORRECT_NODES))), 
           nextsym(s, CORRECT_NODES))
     )
