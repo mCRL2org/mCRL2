@@ -1,4 +1,4 @@
 [true*]<true*> nu X .
-  <!(exists id: SessionId .(id <= maxSessionId)
+  <!(exists id: SessionId .val(id <= maxSessionId)
         && communicate(agent_out(0), AssocReq(id)))*>
   <exists d: Data . communicate(manager_in(1), data(d))>X
