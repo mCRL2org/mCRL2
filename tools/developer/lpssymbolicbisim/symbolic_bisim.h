@@ -17,6 +17,7 @@
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/set.h"
 
@@ -60,7 +61,7 @@ protected:
       std::cout << "  block " << i << "  " << pp(*it) << std::endl;
       i++;
     }
-    std::cout << "Specify phi_k, phi_l, and summand index: ";
+    std::cout << "Specify phi_k, phi_l, and summand index (separate with spaces): ";
     std::string s;
     std::getline(std::cin, s);
 
@@ -77,31 +78,39 @@ protected:
     lps::action_summand as = m_spec.process().action_summands()[summ_i];
     const lps::multi_action& action = as.multi_action();
     data_expression_list args = action.arguments();
-    data_expression_vector updates;
+    i = 0;
+    data_expression match_concrete_args = sort_bool::true_();
+    for(data_expression_list::const_iterator it = args.begin(); it != args.end(); it++)
+    {
+      std::cout << "Specify action parameter " << i << ": ";
+      std::getline(std::cin, s);
+      match_concrete_args = lazy::and_(match_concrete_args, equal_to(*it , parse_data_expression(s, variable_list(), m_spec.data())));
+    }
+
+    data_expression_list updates;
     for(assignment_list::const_iterator it = as.assignments().begin(); it != as.assignments().end(); it++)
     {
-      updates.push_back(it->rhs());
+      updates.push_front(it->rhs());
     }
     data_expression split1, split2;
-    if(args.size() == 0)
+    data_expression exist = lazy::and_(
+            match_concrete_args,
+            lazy::and_(
+              as.condition(),
+              application(partition[l],updates)
+        ));
+    if(!as.summation_variables().empty())
     {
-      split1 = lambda(process_parameters, 
-        lazy::and_(
-          application(partition[k],process_parameters),
-          exists(as.summation_variables(),
-            lazy::and_(
-              as.condition(),
-              application(partition[l],updates)
-          ))));
-      split2 = lambda(process_parameters, 
-        lazy::and_(
-          application(partition[k],process_parameters),
-          lazy::not_(exists(as.summation_variables(),
-            lazy::and_(
-              as.condition(),
-              application(partition[l],updates)
-          )))));
+      exist = exists(as.summation_variables(), exist);
     }
+    split1 = lambda(process_parameters, 
+      lazy::and_(
+        application(partition[k],process_parameters),
+        exist));
+    split2 = lambda(process_parameters, 
+      lazy::and_(
+        application(partition[k],process_parameters),
+        lazy::not_(exist)));
 
     partition.erase(partition.begin() + k);
     partition.push_back(r(split2));
