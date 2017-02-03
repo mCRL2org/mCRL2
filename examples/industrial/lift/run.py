@@ -15,6 +15,6 @@ os.system('pbes2bool -vrjittyc lift3-init.nodeadlock.pbes')
 os.system('lps2lts -vrjittyc lift3-init.lps lift3-init.aut')
 
 os.system('ltscompare -vebisim lift3-init.aut lift3-final.aut')
-os.system('lpsbisim2pbes -v lift3-init.lps lift3-final.lps lift3-bisim.pbes')
+os.system('lpsbisim2pbes -v -bstrong-bisim lift3-init.lps lift3-final.lps lift3-bisim.pbes')
 os.system('pbes2bool -vrjittyc lift3-bisim.pbes')
 
