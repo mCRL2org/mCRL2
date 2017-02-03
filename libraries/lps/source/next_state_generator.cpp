@@ -69,7 +69,7 @@ next_state_generator::next_state_generator(
 
   if (m_specification.process().has_time())
   {
-    mCRL2log(log::warning) << "specification uses time, which is (currently) not supported; ignoring timing" << std::endl;
+    mCRL2log(log::warning) << "Specification uses time, which is (currently) only partly supported." << std::endl;
   }
 
   for (stochastic_action_summand_vector::iterator i = m_specification.process().action_summands().begin(); 

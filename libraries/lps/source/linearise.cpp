@@ -172,7 +172,7 @@ class objectdatatype
 };
 
 
-class specification_basic_type:public boost::noncopyable
+class specification_basic_type: public boost::noncopyable
 {
   public:
     process::action_label_list acts;     /* storage place for actions */
@@ -5457,7 +5457,8 @@ class specification_basic_type:public boost::noncopyable
         {
           throw mcrl2::runtime_error("terminating processes should not exist when using the regular flag");
         }
-        insert_summand(action_summands,deadlock_summands,
+        insert_summand(action_summands,
+                       deadlock_summands,
                        sumvars,
                        condition1,
                        multiAction,
@@ -5473,7 +5474,8 @@ class specification_basic_type:public boost::noncopyable
       assignment_list procargs ({ assignment(stack.stackvar,application(stack.opns->pop,stack.stackvar)) });
 
       insert_summand(
-                action_summands,deadlock_summands,
+                action_summands,
+                deadlock_summands,
                 sumvars,
                 condition1,
                 multiAction,
@@ -7113,16 +7115,13 @@ class specification_basic_type:public boost::noncopyable
       deadlock_summand_vector result;
       deadlock_summand_vector reducible_sumlist=deadlock_summands;
 
-      for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin() ; i!=deadlock_summands.end() ; ++i)
+      for (const deadlock_summand& summand1: deadlock_summands)
       {
-        const deadlock_summand summand1=*i;
-
         deadlock_summand_vector w1;
         deadlock_summand_vector w2;
-        for (deadlock_summand_vector::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
+        for (const deadlock_summand& summand2: reducible_sumlist)
         {
-          const deadlock_summand summand2=*w3;
-          if (summand1.deadlock().has_time()!=summand2.deadlock().has_time())
+          if (summand1.deadlock().has_time()==summand2.deadlock().has_time())
           {
             w1.push_back(summand2);
           }
@@ -7134,9 +7133,9 @@ class specification_basic_type:public boost::noncopyable
         reducible_sumlist.swap(w2);
 
         /* In w1 we now find all the summands labelled with
-           similar multiactions, actiontime and terminationstatus.
+           either no or an action time.
            We must now construct its clustered form. */
-        size_t n=w1.size();
+        const size_t n=w1.size();
 
         if (n>0)
         {
@@ -7150,14 +7149,12 @@ class specification_basic_type:public boost::noncopyable
           }
           else
           {
-            // result=w1 + result;
-            for(deadlock_summand_vector::const_iterator i=w1.begin(); i!=w1.end(); ++i)
-            {
-              result.push_back(*i);
-            }
+            assert(w1.size()==1);
+            result.push_back(w1.front());
           }
         }
       }
+      assert(reducible_sumlist.empty());
       deadlock_summands.swap(result);
     }
 
@@ -8517,7 +8514,7 @@ class specification_basic_type:public boost::noncopyable
       const stochastic_action_summand_vector& action_summands,
       const deadlock_summand_vector& deadlock_summands,
       const variable_list& freevars,
-      const data_expression& timevariable,
+      const variable& time_variable,
       variable_list& existentially_quantified_variables)
     {
       assert(existentially_quantified_variables.empty());
@@ -8553,7 +8550,6 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list condition_list;
       std::vector < variable_list> renamings_pars;
       std::vector < data_expression_list> renamings_args;
-      const variable& t = atermpp::down_cast<variable>(timevariable); // why has timevariable the wrong type?
       for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
            i!=deadlock_summands.end(); ++i)
       {
@@ -8564,7 +8560,7 @@ class specification_basic_type:public boost::noncopyable
                              freevars,
                              i->condition(),
                              i->deadlock().has_time(),
-                             t,
+                             time_variable,
                              i->deadlock().time(),
                              new_existentially_quantified_variables);
         existentially_quantified_variables=merge_var(
@@ -8587,7 +8583,7 @@ class specification_basic_type:public boost::noncopyable
                              freevars,
                              i->condition(),
                              i->multi_action().has_time(),
-                             t,
+                             time_variable,
                              i->multi_action().time(),
                              new_existentially_quantified_variables);
         existentially_quantified_variables=merge_var(
