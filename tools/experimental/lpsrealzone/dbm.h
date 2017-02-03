@@ -1848,6 +1848,7 @@ namespace mcrl2 {
         {
           return atermpp::down_cast<const application >(e)[4];
         }
+        return data_expression();
       }
 
       ///\brief Function for projecting out argument
@@ -1907,6 +1908,7 @@ namespace mcrl2 {
         {
           return atermpp::down_cast<const application >(e)[4];
         }
+        return data_expression();
       }
 
       ///\brief Function for projecting out argument
@@ -1938,6 +1940,7 @@ namespace mcrl2 {
         {
           return atermpp::down_cast<const application >(e)[3];
         }
+        return data_expression();
       }
 
       ///\brief Function for projecting out argument
@@ -1969,6 +1972,7 @@ namespace mcrl2 {
         {
           return atermpp::down_cast<const application >(e)[4];
         }
+        return data_expression();
       }
 
       /// \brief Give all system defined equations for dbm
