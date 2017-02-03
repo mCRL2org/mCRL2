@@ -20,6 +20,7 @@
 
 #include "dbm.h"
 #include "summand_information.h"
+#include "matrix_struct.h"
 
 namespace mcrl2
 {
@@ -195,14 +196,60 @@ protected:
     }
   }
 
-  void dbm_add_translated_inequalities(data_expression dbm, data_expression& new_dbm, data_expression& conditions, 
+  data_expression li_to_bound(linear_inequality li, bool negate)
+  {
+    return sort_bound::cbound(negate ? r(sort_real::negate(li.rhs())) : li.rhs(), comp_to_function(li.comparison()));
+  }
+
+  data_expression li_vector_to_bound(std::vector< linear_inequality >& lis, const data_expression dbm,
+    const std::map< std::pair< data_expression, data_expression >, data_expression > current_state_conditions)
+  {
+    data_expression bound;
+    for(linear_inequality li: lis)
+    {
+      std::vector< detail::variable_with_a_rational_factor > pars;
+      std::vector< detail::variable_with_a_rational_factor > primed_pars;
+      categorise_variables(li, pars, primed_pars);
+
+      std::cerr << pp(li) << " par count " << pars.size() << " primed par count " << primed_pars.size() << std::endl;
+      std::pair< data_expression, data_expression > dbm_primed_indices = dbm_index_pair(primed_pars, update_variables.begin(), update_variables.end(), false);
+      std::pair< data_expression, data_expression > dbm_indices = dbm_index_pair(pars, real_parameters.begin(), real_parameters.end(), true);
+
+      data_expression bound2;
+      if(pars.size() == 0)
+      {
+        bound2 = li_to_bound(li,false);
+      }
+      else
+      {
+        std::map< std::pair< data_expression, data_expression >, data_expression >::const_iterator extra_cond = current_state_conditions.find(dbm_indices);
+        bound2 = sort_dbm::get(dbm, dbm_indices.first, dbm_indices.second);
+        if(extra_cond != current_state_conditions.end())
+        {
+          bound2 = sort_bound::min_b(bound2, extra_cond->second);
+        }
+        bound2 = sort_bound::add(li_to_bound(li,false),bound2);
+      }
+      if(bound == data_expression())
+      {
+        bound = bound2;
+      }
+      else
+      {
+        bound = sort_bound::min_b(bound, bound2);
+      }
+    }
+    return r(bound);
+  }
+
+  void dbm_add_translated_inequalities(const data_expression dbm, data_expression& new_dbm, data_expression& conditions, 
     std::vector< linear_inequality > inequalities)
   {
     data_expression next_zone = sort_dbm::dbm_empty();
     std::vector< data_expression > new_conditions;
 
     std::map< std::pair< data_expression, data_expression >, data_expression > current_state_conditions;
-    std::vector< linear_inequality > next_state_conditions;
+    std::map< std::pair< data_expression, data_expression > , std::vector< linear_inequality >> next_state_conditions;
     for(linear_inequality &li: inequalities)
     {
       std::vector< detail::variable_with_a_rational_factor > pars;
@@ -217,7 +264,7 @@ protected:
       {
         std::cerr << pp(li) << " par count " << pars.size() << " primed par count " << primed_pars.size() << std::endl;
         std::pair< data_expression, data_expression > dbm_indices = dbm_index_pair(pars, real_parameters.begin(), real_parameters.end(), false);
-        data_expression bound = sort_bound::cbound(li.rhs(), comp_to_function(li.comparison()));
+        data_expression bound = li_to_bound(li,false);
         data_expression condition = sort_dbm::and_d(dbm, 
                     dbm_indices.first,
                     dbm_indices.second,
@@ -225,7 +272,7 @@ protected:
         current_state_conditions.insert(std::make_pair(dbm_indices, bound));
         if(li.comparison() == detail::equal)
         {
-          data_expression bound = sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison()));
+          data_expression bound = li_to_bound(li,true);
           condition = sort_dbm::and_d(condition,
                     dbm_indices.second,
                     dbm_indices.first,
@@ -237,54 +284,44 @@ protected:
       }
       else
       {
-        next_state_conditions.push_back(li);
-      }
-    }
-    for(linear_inequality li: next_state_conditions)
-    {
-      std::vector< detail::variable_with_a_rational_factor > pars;
-      std::vector< detail::variable_with_a_rational_factor > primed_pars;
-      categorise_variables(li, pars, primed_pars);
-
-      std::cerr << pp(li) << " par count " << pars.size() << " primed par count " << primed_pars.size() << std::endl;
-      std::pair< data_expression, data_expression > dbm_primed_indices = dbm_index_pair(primed_pars, update_variables.begin(), update_variables.end(), false);
-      data_expression bound;
-      std::pair< data_expression, data_expression > dbm_indices = dbm_index_pair(pars, real_parameters.begin(), real_parameters.end(), true);
-      if(pars.size() == 0)
-      {
-        bound = sort_bound::cbound(li.rhs(), comp_to_function(li.comparison()));
-      }
-      else
-      {
-        bound = sort_bound::add(sort_bound::cbound(li.rhs(), comp_to_function(li.comparison())),
-                                      sort_dbm::get(dbm, dbm_indices.first, dbm_indices.second));
-        std::map< std::pair< data_expression, data_expression >, data_expression >::const_iterator extra_cond = current_state_conditions.find(dbm_indices);
-        if(extra_cond != current_state_conditions.end())
+        std::pair< data_expression, data_expression > dbm_primed_indices = dbm_index_pair(primed_pars, update_variables.begin(), update_variables.end(), false);
+        std::pair< std::map< std::pair< data_expression, data_expression > , std::vector< linear_inequality >>::iterator, bool >
+          ins_result = next_state_conditions.insert(std::make_pair(dbm_primed_indices, std::vector< linear_inequality >()));
+        ins_result.first->second.push_back(li);
+        if(li.comparison() == detail::equal)
         {
-          bound = sort_bound::min_b(bound, extra_cond->second);
+          std::pair< std::map< std::pair< data_expression, data_expression > , std::vector< linear_inequality >>::iterator, bool >
+            ins_result = next_state_conditions.insert(std::make_pair(std::make_pair(dbm_primed_indices.second, dbm_primed_indices.first), std::vector< linear_inequality >()));
+          ins_result.first->second.push_back(linear_inequality(multiply(li.lhs(), real_minus_one(), r), r(sort_real::times(li.rhs(), real_minus_one())), detail::equal));
         }
       }
-      next_zone = sort_dbm::and_d(next_zone, dbm_primed_indices.first, dbm_primed_indices.second, bound);
-      std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), dbm_primed_indices.first, dbm_primed_indices.second, bound) << std::endl;
-      if(li.comparison() == detail::equal)
+    }
+    for(std::map< std::pair< data_expression, data_expression > , std::vector< linear_inequality >>::iterator ind_pair = next_state_conditions.begin();
+      ind_pair != next_state_conditions.end(); ind_pair++)
+    {
+      if(!ind_pair->second.empty())
       {
-        if(pars.size() == 0)
+        data_expression bound = li_vector_to_bound(ind_pair->second, dbm, current_state_conditions);
+        std::map< std::pair< data_expression, data_expression > , std::vector< linear_inequality >>::iterator neg_conditions =
+          next_state_conditions.find(std::make_pair(ind_pair->first.second, ind_pair->first.first));
+        if(neg_conditions != next_state_conditions.end())
         {
-          bound = sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison()));
+          if(neg_conditions->second.empty())
+          {
+            throw mcrl2::runtime_error("Unexpected empty list of conditions for variables " + pp(ind_pair->first.second) + " and " + pp(ind_pair->first.first));
+          }
+          // There is also an opposite bound, so we can combine the expressions in one double_and_d
+          data_expression bound2 = li_vector_to_bound(neg_conditions->second, dbm, current_state_conditions);
+          next_zone = sort_dbm::double_and_d(next_zone, ind_pair->first.first, ind_pair->first.second, bound, bound2);
+          std::cerr << "translation " << sort_dbm::double_and_d(sort_dbm::dbm_empty(), ind_pair->first.first, ind_pair->first.second, bound, bound2) << std::endl;
+          // Empty the other list, so it will not get translated again
+          neg_conditions->second.clear();
         }
         else
         {
-          bound = sort_bound::add(sort_bound::cbound(r(sort_real::negate(li.rhs())), comp_to_function(li.comparison())),
-                                        sort_dbm::get(dbm, dbm_indices.second, dbm_indices.first));
-          std::map< std::pair< data_expression, data_expression >, data_expression >::const_iterator extra_cond = 
-                  current_state_conditions.find(std::make_pair(dbm_indices.second, dbm_indices.first));
-          if(extra_cond != current_state_conditions.end())
-          {
-            bound = sort_bound::min_b(bound, extra_cond->second);
-          }
+          next_zone = sort_dbm::and_d(next_zone, ind_pair->first.first, ind_pair->first.second, bound);
+          std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), ind_pair->first.first, ind_pair->first.second, bound) << std::endl;
         }
-        next_zone = sort_dbm::and_d(next_zone, dbm_primed_indices.second, dbm_primed_indices.first, bound);
-        std::cerr << "translation " << sort_dbm::and_d(sort_dbm::dbm_empty(), dbm_primed_indices.second, dbm_primed_indices.first, bound) << std::endl;
       }
     }
 
@@ -344,10 +381,10 @@ protected:
         inequalities.push_back(linear_inequality(equal_to(*par_prime, a != nullptr ? a->rhs() : *real_par), r));
       }
 
-      for(linear_inequality &li: inequalities)
-      {
-        std::cerr << "orginal system " << pp(li) << std::endl;
-      }
+      // for(linear_inequality &li: inequalities)
+      // {
+      //   std::cerr << "original system " << pp(li) << std::endl;
+      // }
       variable_list eliminate_variables = summand.get_real_summation_variables();
       for(variable v: global_variables)
       {
@@ -359,10 +396,10 @@ protected:
       fourier_motzkin(inequalities, eliminate_variables.begin(), eliminate_variables.end(), elim_inequalities, r);
       remove_redundant_inequalities(elim_inequalities, new_inequalities,r);
 
-      for(linear_inequality &li: new_inequalities)
-      {
-        std::cerr << "reduced system " << pp(li) << std::endl;
-      }
+      // for(linear_inequality &li: new_inequalities)
+      // {
+      //   std::cerr << "reduced system " << pp(li) << std::endl;
+      // }
 
       data_expression next_zone, new_condition;
       dbm_add_translated_inequalities(dbm_var, next_zone, new_condition, new_inequalities);
@@ -386,13 +423,14 @@ protected:
         {
           lhs_vars.push_back(v);
         }
-        std::cerr << "bounds system " << pp(i) << std::endl;
+        // std::cerr << "bounds system " << pp(i) << std::endl;
         add_to_split_bounds(dbm_index_pair(lhs_vars, real_parameters.begin(), real_parameters.end(), false),
            sort_bound::cbound(i.rhs(), comp_to_function(i.comparison())));
       }
     }
 
     std::cerr << "List of split bounds" << std::endl;
+    data_expression max_bound = real_zero();
     for(std::pair< std::pair< data_expression, data_expression >, std::set< data_expression, bound_comp_s >> sb: split_bounds)
     {
       std::pair< data_expression, data_expression > key = std::get<0>(sb);
@@ -402,9 +440,12 @@ protected:
       {
         std::cerr << pp(std::get<0>(key)) << " - " << pp(std::get<1>(key)) << " " 
             << pp(sort_bound::right(*bound)) << " " << pp(sort_bound::left(*bound)) << std::endl;
+        max_bound = sort_real::maximum(max_bound, sort_real::abs(sort_bound::left(*bound)));
       }
       sum_split_nats.push_back(variable(var_gen("split"), sort_nat::nat()));
     }
+    max_bound = r(max_bound);
+    std::cerr << "max bound " << pp(max_bound) << std::endl;
 
     std::vector< data_expression>::const_iterator next_zone = dbm_exprs.begin();
     std::vector< data_expression>::const_iterator new_condition = new_conditions.begin();
@@ -428,7 +469,7 @@ protected:
           al.push_front(*i);
         }
       }
-      al.push_front(assignment(dbm_var, split_zone));
+      al.push_front(assignment(dbm_var, sort_dbm::norm(split_zone, max_bound)));
       summand_info.push_back(summand_information(t,
                                     summand.is_delta_summand(),
                                     al,
@@ -489,20 +530,28 @@ protected:
     }
   }
 
-public:
-  realzone_algorithm(Specification& spec, const rewrite_strategy st = jitty)
-    : mcrl2::lps::detail::lps_algorithm<Specification>(spec),
-    strat(st),
-    r(spec.data(),strat)
+  data_expression_vector make_dbm_elems_vector(int size, bool is_zero)
   {
-    
+    data_expression_vector elems;
+    for(int i = 0; i < size; i++)
+    {
+      for(int j = 0; j < size; j++)
+      {
+        if(i == j || is_zero)
+        {
+          elems.push_back(sort_bound::cbound(real_zero(), sort_inequality::le()));
+        }
+        else
+        {
+          elems.push_back(sort_bound::inf());
+        }
+      }
+    }
+    return elems;
   }
 
-  void run()
+  void add_dbm_definitions(int size)
   {
-    const variable_list real_parameters = get_real_variables(m_spec.process().process_parameters());
-    move_real_parameters_out_of_actions(m_spec, real_parameters, r);
-    normalize_specification(m_spec, get_real_variables(m_spec.process().process_parameters()), r, summand_info);
 
     m_spec.data().add_system_defined_sort(sort_nat::nat());
     m_spec.data().add_sort(sort_inequality::inequality());
@@ -512,15 +561,68 @@ public:
     add_constructors(m_spec.data(), sort_bound::bound_generate_constructors_code());
     add_mappings(m_spec.data(), sort_bound::bound_generate_functions_code());
     add_equations(m_spec.data(), sort_bound::bound_generate_equations_code());
-    m_spec.data().add_alias(alias(sort_dbm::dbm(),sort_list::list(sort_list::list(sort_bound::bound()))));
+    // m_spec.data().add_alias(alias(sort_dbm::dbm(),sort_list::list(sort_list::list(sort_bound::bound()))));
+    matrix_struct ms(size, sort_bound::bound());
+    // add_constructors(m_spec.data(),ms.get_definition().constructor_functions());
+    // add_mappings(m_spec.data(),ms.get_definition().projection_functions());
+    // add_equations(m_spec.data(),ms.get_definition().projection_equations());
+    m_spec.data().add_alias(alias(sort_dbm::dbm(), ms.get_definition()));
     add_mappings(m_spec.data(), sort_dbm::dbm_generate_functions_code());
     add_equations(m_spec.data(), sort_dbm::dbm_generate_equations_code());
 
-    for(std::map< sort_expression, sort_expression >::value_type s: m_spec.data().sort_alias_map())
+    m_spec.data().add_equation(data_equation(variable_list(), sort_dbm::dbm_empty(), application(ms.get_constructor(), make_dbm_elems_vector(size,false))));
+    m_spec.data().add_equation(data_equation(variable_list(), sort_dbm::dbm_zero(), application(ms.get_constructor(), make_dbm_elems_vector(size,true))));
+
+    variable vd("d",sort_dbm::dbm());
+    for(int i = 0; i < size; i++)
     {
-      std::cerr << "sort " << pp(s.first) << " -> " << pp(s.second) << std::endl;
+      for(int j = 0; j < size; j++)
+      {
+        m_spec.data().add_equation(data_equation(atermpp::make_vector(vd), sort_dbm::get(vd, sort_nat::nat(i), sort_nat::nat(j)), ms.get_projection_function(i,j)(vd)));
+      }
     }
-    std::cerr << pp(normalize_sorts(sort_dbm::dbm(), m_spec.data())) << std::endl;
+
+    variable vb("b", sort_bound::bound());
+    variable_vector vv, vv_prime;
+    for(int i = 0; i < size*size; i++)
+    {
+      variable var("b"+ std::to_string(i), sort_bound::bound());
+      vv.push_back(var);
+      vv_prime.push_back(var);
+    }
+    variable_vector vvb = vv;
+    vvb.push_back(vb);
+    std::cerr << "match dbm " << pp(ms.get_constructor()) << std::endl << std::flush;
+    std::cerr << "match dbm " << pp(ms.get_constructor()(vv[0],vv[1])) << std::endl << std::flush;
+    std::cerr << "match dbm " << pp(vv) << " " << pp(vvb) << " " << pp(vv_prime) << std::endl << std::flush;
+    for(int i = 0; i < size; i++)
+    {
+      for(int j = 0; j < size; j++)
+      {
+        variable temp = vb;
+        swap(vv_prime[i*size+j], temp);
+        m_spec.data().add_equation(data_equation(vvb, 
+          sort_dbm::set(application(ms.get_constructor(), vv), sort_nat::nat(i), sort_nat::nat(j), vb),
+          application(ms.get_constructor(), vv_prime)));
+        swap(vv_prime[i*size+j], temp);
+      }
+    }
+  }
+
+public:
+  realzone_algorithm(Specification& spec, const rewrite_strategy st = jitty)
+    : mcrl2::lps::detail::lps_algorithm<Specification>(spec),
+    strat(st),
+    r(spec.data(),strat)
+  {
+  }
+
+  void run()
+  {
+    const variable_list real_parameters = get_real_variables(m_spec.process().process_parameters());
+    move_real_parameters_out_of_actions(m_spec, real_parameters, r);
+    normalize_specification(m_spec, get_real_variables(m_spec.process().process_parameters()), r, summand_info);
+    add_dbm_definitions(real_parameters.size() + 1);
 
     r = rewriter(m_spec.data(), strat);
     abstract_reals();
