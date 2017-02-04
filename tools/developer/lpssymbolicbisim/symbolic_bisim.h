@@ -14,12 +14,13 @@
 
 #include <string>
 
-#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/set.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
 
 
 namespace mcrl2
@@ -127,7 +128,7 @@ public:
 
   void run()
   {
-    mCRL2log(verbose) << "Running symbolic bisimulation.." << std::endl;
+    mCRL2log(mcrl2::log::verbose) << "Running symbolic bisimulation..." << std::endl;
     process_parameters = m_spec.process().process_parameters();
     partition.push_back( lambda(process_parameters, sort_bool::true_()));
     while(true)
