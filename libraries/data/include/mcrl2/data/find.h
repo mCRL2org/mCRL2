@@ -98,7 +98,8 @@ struct find_sort_expressions_traverser: public Traverser<find_sort_expressions_t
 
   find_sort_expressions_traverser(OutputIterator out_)
     : out(out_)
-  {}
+  {
+  }
 
   void apply(const data::sort_expression& v)
   {

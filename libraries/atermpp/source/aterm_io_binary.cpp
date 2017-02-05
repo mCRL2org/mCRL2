@@ -1,3 +1,17 @@
+// Author(s): Jan Friso Groote
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/source/aterm_io_binary.cpp
+/// \brief This file allows to read and write terms in compact binary aterm`
+///        format. This code stems largely from the ATerm library designed by
+///        Paul Klint cs. 
+
+
 /* includes */
 
 #include <cstring>

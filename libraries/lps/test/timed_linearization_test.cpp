@@ -97,6 +97,16 @@ BOOST_AUTO_TEST_CASE(Check_parallel_timed_processes)
   run_linearisation_test_case(spec,true);
 }
 
+BOOST_AUTO_TEST_CASE(Check_parallel_timed_processes_with_the_same_time)
+{
+  const std::string spec =
+    "act a;\n"
+    "init a@2.delta || a@2.delta;\n"
+    ;
+
+  run_linearisation_test_case(spec,true);
+}
+
 BOOST_AUTO_TEST_CASE(Check_parallel_timed_processes_reversed)
 {
   const std::string spec =
@@ -111,6 +121,15 @@ BOOST_AUTO_TEST_CASE(Check_parallel_deltas)
 {
   const std::string spec =
     "init delta@2 || delta@4;\n"
+    ;
+
+  run_linearisation_test_case(spec,true);
+}
+
+BOOST_AUTO_TEST_CASE(Check_parallel_deltas_with_the_same_time)
+{
+  const std::string spec =
+    "init delta@2 || delta@2;\n"
     ;
 
   run_linearisation_test_case(spec,true);

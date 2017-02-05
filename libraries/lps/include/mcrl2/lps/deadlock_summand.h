@@ -30,13 +30,6 @@ class deadlock_summand: public summand_base
     /// \brief The deadlock of the summand
     lps::deadlock m_deadlock;
 
-    /// \brief Returns true if time is available.
-    /// \return True if time is available.
-    bool has_time() const
-    {
-      return m_deadlock.has_time();
-    }
-
   public:
     /// \brief Constructor.
     // TODO: check if the default constructor results in a deadlock summand
@@ -59,6 +52,13 @@ class deadlock_summand: public summand_base
     lps::deadlock& deadlock()
     {
       return m_deadlock;
+    }
+
+    /// \brief Returns true if time is available.
+    /// \return True if time is available.
+    bool has_time() const
+    {
+      return m_deadlock.has_time();
     }
 
     /// \brief Swaps the contents

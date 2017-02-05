@@ -25,12 +25,12 @@ namespace atermpp
 {
 
 template <class Term>
-class term_appl:public aterm
+class term_appl: public aterm
 {
 
   protected:
     /// \brief Constructor.
-    term_appl (const detail::_aterm_appl<Term> *t):aterm(reinterpret_cast<const detail::_aterm*>(t))
+    term_appl (const detail::_aterm_appl<Term> *t): aterm(reinterpret_cast<const detail::_aterm*>(t))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
@@ -275,11 +275,14 @@ class term_appl:public aterm
     }
 
     /// \brief Returns the i-th argument.
-    /// \param i A positive integer
+    /// \param i A positive integer.
     /// \return The argument with the given index.
     const Term& operator[](const size_type i) const
     {
+#if !defined(__APPLE__) // For unclear reasons the Apple compiler selects the wrong m_term, leading to invalid assert failures. 
+                        // This only happens rarely, and seems to be a problem starting at Apple LLVM 7.3.1. Also occurs in Apple LLVM 8.0.0.
       assert(i<m_term->function().arity());
+#endif
       return reinterpret_cast<const detail::_aterm_appl<Term>*>(m_term)->arg[i];
     }
 };
@@ -293,8 +296,8 @@ namespace std
 /// \brief Swaps two term_applss.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
-/// \param t1 The first term
-/// \param t2 The second term
+/// \param t1 The first term.
+/// \param t2 The second term.
 template <class T>
 inline void swap(atermpp::term_appl<T>& t1, atermpp::term_appl<T>& t2)
 {

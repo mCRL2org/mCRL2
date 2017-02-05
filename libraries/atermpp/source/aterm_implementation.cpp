@@ -1,3 +1,16 @@
+// Author(s): Jan Friso Groote, Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/source/aterm_implementation.cpp
+/// \brief This file provides basic routines for garbage collection of aterms.
+///        Furthermore, it contains a hooking mechanism that is used to call 
+///        auxiliary functions when a term is created or destroyed. 
+
 #include <cctype>
 #include <cstdlib>
 #include <cstdarg>

@@ -1,4 +1,16 @@
-/*{{{  includes */
+// Author(s): Jan Friso Groote
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/source/aterm_io_text.cpp
+/// \brief This file contains code to read and write aterms
+///        in human readable format. 
+
+
 
 #include <cstdio>
 #include <cstdlib>
