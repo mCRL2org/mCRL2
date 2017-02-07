@@ -47,15 +47,6 @@ struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
     return hash<atermpp::aterm>()(x);
   }
 };
-
-template <>
-struct hash<mcrl2::pbes_system::pbes_expression>
-{
-  std::size_t operator()(const mcrl2::pbes_system::pbes_expression& x) const
-  {
-    return hash<atermpp::aterm>()(x);
-  }
-};
 }
 
 namespace mcrl2
@@ -398,24 +389,6 @@ struct todo_list
     todo.clear();
     todo_set.clear();
   }
-
-  void print() const
-  {
-    std::cout << "--------------------------------------" << std::endl;
-    std::cout << "-   todo" << std::endl;
-    std::cout << "--------------------------------------" << std::endl;
-    for (auto const& x: todo)
-    {
-      std::cout << x << std::endl;
-    }
-    std::cout << "--------------------------------------" << std::endl;
-    std::cout << "-   todo_set" << std::endl;
-    std::cout << "--------------------------------------" << std::endl;
-    for (auto const& x: todo_set)
-    {
-      std::cout << x << std::endl;
-    }
-  }
 };
 
 // This class is used to periodically reset some attributes of the pbesinst algorithm, using a reachability analysis.
@@ -437,40 +410,6 @@ struct pbesinst_resetter
       regeneration_period(regeneration_period_init)
   {}
 
-  // Returns the propositional variable instantiations reachable from init.
-  std::unordered_set<propositional_variable_instantiation> compute_todo(const pbes_expression& init, const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation) const
-  {
-    using utilities::detail::contains;
-
-    std::unordered_set<propositional_variable_instantiation> result;
-    std::unordered_set<pbes_expression> todo;
-    std::unordered_set<propositional_variable_instantiation> done;
-    todo.insert(init);
-    while (!todo.empty())
-    {
-      const pbes_expression expr = *todo.begin();
-      todo.erase(todo.begin());
-
-      for (const propositional_variable_instantiation& X: find_propositional_variable_instantiations(expr))
-      {
-        if (contains(done, X))
-        {
-          continue;
-        }
-        if (has_key(equation, X))
-        {
-          todo.insert(equation.at(X));
-        }
-        else
-        {
-          result.insert(X);
-        }
-        done.insert(X);
-      }
-    }
-    return result;
-  }
-
   void operator()(const propositional_variable_instantiation& init,
                   todo_list& todo,
                   const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation
@@ -486,10 +425,58 @@ struct pbesinst_resetter
       return;
     }
 
+    // Propositional variable instantiations that are reachable from init.
+    std::unordered_set<propositional_variable_instantiation> reachable;
     todo.clear();
-    for (auto const& X: compute_todo(init, equation))
+
+    std::stack<pbes_expression> stack;
+    stack.push(init);
+
+    while (!stack.empty())
     {
-      todo.push_back(X);
+      const pbes_expression expr = stack.top();
+      stack.pop();
+
+      if (is_propositional_variable_instantiation(expr))
+      {
+        auto X = atermpp::down_cast<propositional_variable_instantiation>(expr);
+        if (!has_key(reachable, X))
+        {
+          if (has_key(equation, X))
+          {
+            stack.push(equation.at(X));
+            reachable.insert(X);
+          }
+          else
+          {
+            todo.push_back(X);
+            reachable.insert(X);
+          }
+        }
+      }
+      else if (is_and(expr))
+      {
+        const and_& expra = atermpp::down_cast<and_>(expr);
+        stack.push(expra.left());
+        stack.push(expra.right());
+      }
+      else if (is_or(expr))
+      {
+        const or_& expro = atermpp::down_cast<or_>(expr);
+        stack.push(expro.left());
+        stack.push(expro.right());
+      }
+      else if (is_imp(expr))
+      {
+        const or_& expro = atermpp::down_cast<or_>(expr);
+        stack.push(expro.left());
+        stack.push(expro.right());
+      }
+      else if (is_not(expr))
+      {
+        const not_& y = atermpp::down_cast<not_>(expr);
+        stack.push(y.operand());
+      }
     }
   }
 };
@@ -726,17 +713,6 @@ class pbesinst_lazy_algorithm
       if (m_transformation_strategy >= on_the_fly)
       {
         m_pbesinst_resetter(init, todo, equation);
-      }
-    }
-
-    void print_equation() const
-    {
-      std::cout << "--------------------------------------" << std::endl;
-      std::cout << "-   equation" << std::endl;
-      std::cout << "--------------------------------------" << std::endl;
-      for (auto const& p: equation)
-      {
-        std::cout << p.first << " -> " << p.second << std::endl;
       }
     }
 
