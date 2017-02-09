@@ -279,7 +279,7 @@ class term_appl: public aterm
     /// \return The argument with the given index.
     const Term& operator[](const size_type i) const
     {
-#if !defined(__APPLE__) // For unclear reasons the Apple compiler selects the wrong m_term, leading to invalid assert failures. 
+#if !defined(__APPLE__) // For unclear reasons the Apple compiler sometimes selects the wrong m_term, leading to invalid assert failures. 
                         // This only happens rarely, and seems to be a problem starting at Apple LLVM 7.3.1. Also occurs in Apple LLVM 8.0.0.
       assert(i<m_term->function().arity());
 #endif
