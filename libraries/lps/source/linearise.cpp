@@ -8761,67 +8761,16 @@ class specification_basic_type: public boost::noncopyable
 
     /**************** parallel composition ******************************/
 
-    void calculate_left_merge(
+    void calculate_left_merge_action(
       const variable& timevar,
-      // data_expression& ultimatedelaycondition,
+      data_expression& ultimatedelaycondition,
+      const variable_list& ultimate_delay_sumvars1,
       const stochastic_action_summand_vector& action_summands1,
-      const deadlock_summand_vector& deadlock_summands1,
-      const stochastic_action_summand_vector& action_summands2,
-      const deadlock_summand_vector& deadlock_summands2,
-      const variable_list& parametersOfsumlist2,
       const action_name_multiset_list& allowlist,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
-      stochastic_action_summand_vector& action_summands,
-      deadlock_summand_vector& deadlock_summands)
+      stochastic_action_summand_vector& action_summands)
     {
-      bool inline_allow = is_allow || is_block;
-
-      variable_list ultimate_delay_sumvars1;
-      data_expression ultimatedelaycondition=
-        (options.add_delta?data_expression(sort_bool::true_()):
-           getUltimateDelayCondition(action_summands2,deadlock_summands2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
-
-      if (!inline_allow)
-      {
-        for (const deadlock_summand& summand1: deadlock_summands1)
-        {
-          variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
-          data_expression actiontime1=summand1.deadlock().time();
-          data_expression condition1=summand1.condition();
-          bool has_time=summand1.deadlock().has_time();
-
-          if (!has_time)
-          {
-            if (ultimatedelaycondition!=sort_bool::true_())
-            {
-              actiontime1=timevar;
-              sumvars1.push_front(timevar);
-              condition1=lazy::and_(ultimatedelaycondition,condition1);
-              has_time=true;
-            }
-          }
-          else
-          {
-            /* Summand1 has time. Substitute the time expression for
-               timevar in ultimatedelaycondition, and extend the condition */
-            mutable_map_substitution<> sigma;
-            const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime1);
-            sigma[timevar]=actiontime1;
-            const data_expression intermediateultimatedelaycondition=
-                        data::replace_variables_capture_avoiding(ultimatedelaycondition, sigma, variables_in_rhs_sigma);
-            condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
-          }
-
-          condition1=RewriteTerm(condition1);
-          if (condition1!=sort_bool::false_())
-          {
-            deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
-          }
-
-        }
-      }
-
       for (const stochastic_action_summand& summand1: action_summands1)
       {
         variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
@@ -8879,16 +8828,92 @@ class specification_basic_type: public boost::noncopyable
       }
     }
 
-    void calculate_communication_merge(
+    void calculate_left_merge_deadlock(
+      const variable& timevar,
+      data_expression& ultimatedelaycondition,
+      const variable_list& ultimate_delay_sumvars1,
+      const deadlock_summand_vector& deadlock_summands1,
+      const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
+      const bool is_block,
+      deadlock_summand_vector& deadlock_summands)
+    {
+      bool inline_allow = is_allow || is_block;
+
+      if (!inline_allow)
+      {
+        for (const deadlock_summand& summand1: deadlock_summands1)
+        {
+          variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
+          data_expression actiontime1=summand1.deadlock().time();
+          data_expression condition1=summand1.condition();
+          bool has_time=summand1.deadlock().has_time();
+
+          if (!has_time)
+          {
+            if (ultimatedelaycondition!=sort_bool::true_())
+            {
+              actiontime1=timevar;
+              sumvars1.push_front(timevar);
+              condition1=lazy::and_(ultimatedelaycondition,condition1);
+              has_time=true;
+            }
+          }
+          else
+          {
+            /* Summand1 has time. Substitute the time expression for
+               timevar in ultimatedelaycondition, and extend the condition */
+            mutable_map_substitution<> sigma;
+            const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime1);
+            sigma[timevar]=actiontime1;
+            const data_expression intermediateultimatedelaycondition=
+                        data::replace_variables_capture_avoiding(ultimatedelaycondition, sigma, variables_in_rhs_sigma);
+            condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
+          }
+
+          condition1=RewriteTerm(condition1);
+          if (condition1!=sort_bool::false_())
+          {
+            deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
+          }
+
+        }
+      }
+    }
+
+    void calculate_left_merge(
+      const variable& timevar,
+      // data_expression& ultimatedelaycondition,
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
       const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
+      const variable_list& parametersOfsumlist2,
       const action_name_multiset_list& allowlist,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
+    {
+      variable_list ultimate_delay_sumvars1;
+      data_expression ultimatedelaycondition=
+        (options.add_delta?data_expression(sort_bool::true_()):
+           getUltimateDelayCondition(action_summands2,deadlock_summands2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
+
+      calculate_left_merge_deadlock(timevar, ultimatedelaycondition, ultimate_delay_sumvars1, deadlock_summands1, 
+                                    is_allow, is_block, deadlock_summands);
+      calculate_left_merge_action(timevar, ultimatedelaycondition, ultimate_delay_sumvars1, action_summands1, 
+                                    allowlist, is_allow, is_block, action_summands);
+    }
+
+
+
+    void calculate_communication_merge_action_summands(
+          const stochastic_action_summand_vector& action_summands1,
+          const stochastic_action_summand_vector& action_summands2,
+          const action_name_multiset_list& allowlist,   // This is a list of list of identifierstring.
+          const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
+          const bool is_block,
+          stochastic_action_summand_vector& action_summands)
     {
       // First combine the action summands.
       for (const stochastic_action_summand& summand1: action_summands1)
@@ -8978,8 +9003,69 @@ class specification_basic_type: public boost::noncopyable
           }
         }
       }
+    }
 
-      // Subsequently combine the deadlock summands. 
+    void calculate_communication_merge_action_deadlock_summands(
+          const stochastic_action_summand_vector& action_summands1,
+          const deadlock_summand_vector& deadlock_summands1,
+          deadlock_summand_vector& deadlock_summands)
+    {
+      for (const stochastic_action_summand& summand1: action_summands1)
+      {
+        const variable_list& sumvars1=summand1.summation_variables();
+        const data_expression actiontime1=summand1.multi_action().time();
+        const data_expression& condition1=summand1.condition();
+
+        for (const deadlock_summand& summand2: deadlock_summands1)
+        {
+          const variable_list& sumvars2=summand2.summation_variables();
+          const data_expression actiontime2=summand2.deadlock().time();
+          const data_expression& condition2=summand2.condition();
+
+          const variable_list allsums=sumvars1+sumvars2;
+          const data_expression condition3= lazy::and_(condition1,condition2);
+          data_expression action_time3;
+          bool has_time3=summand1.has_time()||summand2.has_time();
+
+          if (!summand1.has_time())
+          {
+            if (summand2.has_time())
+            {
+              /* summand 2 has time*/
+              action_time3=actiontime2;
+            }
+          }
+          else
+          {
+            /* summand 1 has time */
+            if (!summand2.has_time())
+            {
+              action_time3=actiontime1;
+            }
+            else
+            {
+              /* both summand 1 and 2 have time */
+              action_time3=RewriteTerm(sort_real::minimum(actiontime1,actiontime2));
+            }
+          }
+
+          if (condition3!=sort_bool::false_())
+          {
+            deadlock_summands.push_back(deadlock_summand(
+                                        allsums,
+                                        condition3,
+                                        has_time3?deadlock(action_time3):deadlock()));
+          }
+          
+        }
+      }
+    }
+
+    void calculate_communication_merge_deadlock_summands(
+          const deadlock_summand_vector& deadlock_summands1,
+          const deadlock_summand_vector& deadlock_summands2,
+          deadlock_summand_vector& deadlock_summands)
+    {
       for (const deadlock_summand& summand1: deadlock_summands1)
       {
         const variable_list& sumvars1=summand1.summation_variables();
@@ -9031,6 +9117,23 @@ class specification_basic_type: public boost::noncopyable
       }
     }
 
+    void calculate_communication_merge(
+          const stochastic_action_summand_vector& action_summands1,
+          const deadlock_summand_vector& deadlock_summands1,
+          const stochastic_action_summand_vector& action_summands2,
+          const deadlock_summand_vector& deadlock_summands2,
+          const action_name_multiset_list& allowlist,   // This is a list of list of identifierstring.
+          const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
+          const bool is_block,
+          stochastic_action_summand_vector& action_summands,
+          deadlock_summand_vector& deadlock_summands)
+    {
+      calculate_communication_merge_action_summands(action_summands1, action_summands2, allowlist, is_allow, is_block, action_summands);
+      calculate_communication_merge_action_deadlock_summands(action_summands1, deadlock_summands2, deadlock_summands);
+      calculate_communication_merge_action_deadlock_summands(action_summands2, deadlock_summands1, deadlock_summands);
+      calculate_communication_merge_deadlock_summands(deadlock_summands1, deadlock_summands2, deadlock_summands);
+    }
+
 
     void combine_summand_lists(
       const stochastic_action_summand_vector& action_summands1,
@@ -9050,7 +9153,6 @@ class specification_basic_type: public boost::noncopyable
       assert(deadlock_summands.size()==0);
 
       variable_list allpars;
-
       allpars=par1 + par3;
 
       bool inline_allow = is_allow || is_block;

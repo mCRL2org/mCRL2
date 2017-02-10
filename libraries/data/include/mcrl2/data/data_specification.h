@@ -105,7 +105,7 @@ class data_specification: public sort_specification
         _outdated = true;
       }
 
-      std::map<sort_expression, std::vector<function_symbol> >& mapping()
+      std::map<sort_expression, std::vector<function_symbol> >&mapping()
       {
         assert(!_outdated);
         return _mapping;
