@@ -220,7 +220,6 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         need_to_rebuild_rewriter=false;
       }
       cout << data::pp(rewr(term,assignments)) << "\n";
-      cout << data::pp(rewr(term,assignments)) << "\n";
     }
 
     void handle_solve(std::string s)
@@ -374,10 +373,16 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
+            handle_solve(s);
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))
           {
             handle_assign(s);
+          }
+          else if (cin.eof())
+          {
+            cout << endl;
+            done = true;
           }
           else
           {
