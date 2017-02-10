@@ -15,12 +15,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-// #include <cctype>
-
-// #include <cstdio>
-// #include <cerrno>
-// #include <cstdlib>
-// #include <cstring>
 #include <cassert>
 
 #include "mcrl2/data/rewriter.h"
@@ -43,8 +37,8 @@ using mcrl2::data::tools::rewriter_tool;
 
 
 static bool check_whether_variable_string_is_in_use(
-  const std::string& s,
-  const std::set < variable >& varset)
+                  const std::string& s,
+                  const std::set < variable >& varset)
 {
   for (const variable& v: varset)
   {
@@ -88,9 +82,9 @@ static data_expression parse_term(const string& term_string,
 }
 
 static void declare_variables(
-  const string& vars,
-  std::set <variable>& context_variables,
-  data_specification& spec)
+                  const string& vars,
+                  std::set <variable>& context_variables,
+                  data_specification& spec)
 {
   parse_variables(vars + ";",std::inserter(context_variables,context_variables.begin()),
                   context_variables.begin(), context_variables.end(),spec);
@@ -109,9 +103,13 @@ static bool match_and_remove(string& s, const string& match)
   return false;
 }
 
-static bool add_context_sorts(const std::set<sort_expression>& new_sorts,
-                                    std::set<sort_expression>& context_sorts,
-                                    data_specification& spec)
+// Add the context sorts to the set context sorts and the data specification.
+// Set need_to_rebuild_rewriter to true if the data specification is changed. 
+// Note that need_to_rebuild_rewriter could already be true. 
+void add_context_sorts(const std::set<sort_expression>& new_sorts,
+                       std::set<sort_expression>& context_sorts,
+                       data_specification& spec,
+                       bool& need_to_rebuild_rewriter)
 {
   // Check whether new rewrite rules are required, and if so, reinitialise the rewriter with them.
   for(const sort_expression& s: new_sorts)
@@ -119,10 +117,10 @@ static bool add_context_sorts(const std::set<sort_expression>& new_sorts,
      if (context_sorts.insert(s).second)
      {
        // The sort was not yet present in the context sorts
+       need_to_rebuild_rewriter=true;
        spec.add_context_sort(s);
      }
   }
-  return !new_sorts.empty(); 
 }
 
 static const std::string help_text=
@@ -199,7 +197,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       variable var(varname,term.sort());
 
       std::set<sort_expression> all_sorts=find_sort_expressions(term);
-      need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+      add_context_sorts(all_sorts,context_sorts,spec,need_to_rebuild_rewriter);
       if (need_to_rebuild_rewriter)
       {
         rewr=rewriter(spec,m_rewrite_strategy);
@@ -215,16 +213,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     {
       data_expression term = parse_term(s,spec,context_variables);
       std::set<sort_expression> all_sorts=find_sort_expressions(term);
-      need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+      add_context_sorts(all_sorts,context_sorts,spec,need_to_rebuild_rewriter);
       if (need_to_rebuild_rewriter)
       {
-// std::cerr << "Rebuild rewriter\n";
         rewr=rewriter(spec,m_rewrite_strategy);
         need_to_rebuild_rewriter=false;
       }
-// std::cerr << "INPUT TERM " << term << "\n";
       cout << data::pp(rewr(term,assignments)) << "\n";
-//      cout << data::pp(rewr(term,assignments)) << "\n";
+      cout << data::pp(rewr(term,assignments)) << "\n";
     }
 
     void handle_solve(std::string s)
@@ -244,7 +240,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       }
       find_sort_expressions(term,std::inserter(all_sorts,all_sorts.end()));
 
-      need_to_rebuild_rewriter=need_to_rebuild_rewriter||add_context_sorts(all_sorts,context_sorts,spec);
+      add_context_sorts(all_sorts,context_sorts,spec,need_to_rebuild_rewriter);
       if (need_to_rebuild_rewriter)
       {
         rewr=rewriter(spec,m_rewrite_strategy);
@@ -302,7 +298,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         cout << endl;
         done = true;
       }
-      return s;
+      return trim_spaces(s);
     }
 
     mcrl2::data::data_specification read_data_specification()
