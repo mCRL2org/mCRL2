@@ -34,7 +34,6 @@
 #include <algorithm>
 
 // Boost utilities
-#include "boost/format.hpp"
 #include "boost/utility.hpp"
 
 // ATermpp libraries
@@ -90,6 +89,8 @@ typedef enum { unknown,
                GNFbusy,
                error
              } processstatustype;
+
+
 
 /**************** Definitions of object class  ***********************/
 
@@ -3802,7 +3803,7 @@ class specification_basic_type: public boost::noncopyable
         throw mcrl2::runtime_error("Unguarded recursion in process " + process::pp(procIdDecl) +".");
       }
 
-      throw mcrl2::runtime_error("strange process type: " + str(boost::format("%d") % objectdata[n].processstatus));
+      throw mcrl2::runtime_error("strange process type: " + to_string(objectdata[n].processstatus));
     }
 
     void procstorealGNF(const process_identifier& procsIdDecl,
@@ -5575,7 +5576,7 @@ class specification_basic_type: public boost::noncopyable
           else
           {
             //create new sort identifier
-            basic_sort sort_id(spec.fresh_identifier_generator(str(boost::format("Enum%d") % n)));
+            basic_sort sort_id(spec.fresh_identifier_generator("Enum" + to_string(n)));
             sortId=sort_id;
             //create structured sort
             //  Enumi = struct en_i | ... | e0_i;
@@ -5583,7 +5584,7 @@ class specification_basic_type: public boost::noncopyable
             for (size_t j=0 ; (j<n) ; j++)
             {
               //create constructor declaration of the structured sort
-              const identifier_string s=spec.fresh_identifier_generator(str(boost::format("e%d_%d") % j % n));
+              const identifier_string s=spec.fresh_identifier_generator("e" + to_string(j) + "_" + to_string(n));
               const structured_sort_constructor struct_cons(s,"");
 
               struct_conss.push_front(struct_cons);
@@ -5749,9 +5750,8 @@ class specification_basic_type: public boost::noncopyable
 
       const function_sort newsort(newsortlist,sort);
       const data::function_symbol casefunction(
-        fresh_identifier_generator(str(boost::format("C%d_%s") % n % (
-                         !is_basic_sort(newsort)?"":std::string(basic_sort(sort).name())))),
-        newsort);
+        fresh_identifier_generator("C" + to_string(n) + "_" + 
+                         (!is_basic_sort(newsort)?"":std::string(basic_sort(sort).name()))), newsort);
       // insertmapping(casefunction,true);
       data.add_mapping(casefunction);
       function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
@@ -8898,6 +8898,8 @@ class specification_basic_type: public boost::noncopyable
       data_expression ultimatedelaycondition=
         (options.add_delta?data_expression(sort_bool::true_()):
            getUltimateDelayCondition(action_summands2,deadlock_summands2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
+// std::cerr << "sumvars " << ultimate_delay_sumvars1 << "\n";
+// std::cerr << "ultimate delay condition " << ultimatedelaycondition << "\n";
 
       calculate_left_merge_deadlock(timevar, ultimatedelaycondition, ultimate_delay_sumvars1, deadlock_summands1, 
                                     is_allow, is_block, deadlock_summands);
@@ -9473,7 +9475,7 @@ class specification_basic_type: public boost::noncopyable
                                    regular,false,pars,init,initial_stochastic_distribution);
       }
 
-      throw mcrl2::runtime_error("laststatus: " + str(boost::format("%d") % objectdata[n].processstatus));
+      throw mcrl2::runtime_error("laststatus: " + to_string(objectdata[n].processstatus));
     }
 
     /**************** alphaconversion ********************************/
@@ -9647,8 +9649,8 @@ class specification_basic_type: public boost::noncopyable
       }
       else
       {
-        throw mcrl2::runtime_error("unknown type " + str(boost::format("%d") % objectdata[n].processstatus) +
-                                   " in alphaconversion of " + process::pp(procId) +".");
+        throw mcrl2::runtime_error("unknown type " + to_string(objectdata[n].processstatus) +
+                                                " in alphaconversion of " + process::pp(procId) +".");
       }
       return;
     }

@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
 
-#include "boost/format.hpp"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
@@ -54,7 +53,7 @@ class xyz_identifier_generator: public multiset_identifier_generator
           break;
         }
       }
-      return m_index < 0 ? std::string(1, m_char) : str(boost::format("%1%%2%") % m_char % m_index);
+      return m_index < 0 ? std::string(1, m_char) : m_char + std::to_string(m_index);
     }
 
   public:
