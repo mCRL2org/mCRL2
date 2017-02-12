@@ -56,6 +56,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/fourier_motzkin.h"
 
 //mCRL2 processes
 #include "mcrl2/process/find.h"
@@ -8478,7 +8479,7 @@ class specification_basic_type: public boost::noncopyable
         result=RewriteTerm(
                  lazy::and_(
                    condition,
-                   less(timevariable,actiontime)));
+                   data::less(timevariable,actiontime)));
         variables.push_front(timevariable);
       }
       for (variable_list::const_iterator i=freevars.begin(); i!=freevars.end(); ++i)
@@ -8882,7 +8883,6 @@ class specification_basic_type: public boost::noncopyable
 
     void calculate_left_merge(
       const variable& timevar,
-      // data_expression& ultimatedelaycondition,
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
       const stochastic_action_summand_vector& action_summands2,
@@ -8895,15 +8895,23 @@ class specification_basic_type: public boost::noncopyable
       deadlock_summand_vector& deadlock_summands)
     {
       variable_list ultimate_delay_sumvars1;
-      data_expression ultimatedelaycondition=
+      data_expression ultimate_delay_condition=
         (options.add_delta?data_expression(sort_bool::true_()):
            getUltimateDelayCondition(action_summands2,deadlock_summands2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
-// std::cerr << "sumvars " << ultimate_delay_sumvars1 << "\n";
-// std::cerr << "ultimate delay condition " << ultimatedelaycondition << "\n";
 
-      calculate_left_merge_deadlock(timevar, ultimatedelaycondition, ultimate_delay_sumvars1, deadlock_summands1, 
+      // The ultimate_delay_condition can be complex. Try to simplify it with a fourier_motzkin reduction.
+      if (!options.add_delta)
+      { 
+        data_expression simplified_ultimate_delay_condition;
+        variable_list reduced_sumvars;
+        fourier_motzkin(ultimate_delay_condition, ultimate_delay_sumvars1, simplified_ultimate_delay_condition, reduced_sumvars, rewr);
+        swap(simplified_ultimate_delay_condition, ultimate_delay_condition);
+        swap(ultimate_delay_sumvars1, reduced_sumvars);
+      }
+
+      calculate_left_merge_deadlock(timevar, ultimate_delay_condition, ultimate_delay_sumvars1, deadlock_summands1, 
                                     is_allow, is_block, deadlock_summands);
-      calculate_left_merge_action(timevar, ultimatedelaycondition, ultimate_delay_sumvars1, action_summands1, 
+      calculate_left_merge_action(timevar, ultimate_delay_condition, ultimate_delay_sumvars1, action_summands1, 
                                     allowlist, is_allow, is_block, action_summands);
     }
 

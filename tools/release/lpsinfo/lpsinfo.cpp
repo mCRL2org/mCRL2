@@ -8,8 +8,6 @@
 //
 /// \file ./lpsinfo.cpp
 
-/*include "boost.hpp" // precompiled headers*/
-
 #define TOOLNAME "lpsinfo"
 #define AUTHOR "Wieger Wesselink and Frank Stappers"
 

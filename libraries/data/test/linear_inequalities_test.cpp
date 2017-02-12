@@ -6,12 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file find_test.cpp
-/// \brief Test the linear_inequality functionality
+/// \file linear_inequalities_test.cpp
+/// \brief Test the linear_inequality functionality. 
 
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/linear_inequalities.h"
+#include "mcrl2/data/fourier_motzkin.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;

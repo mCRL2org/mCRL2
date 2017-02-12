@@ -198,7 +198,7 @@ inline data_expression join_and(ForwardTraversalIterator first, ForwardTraversal
 {
   return utilities::detail::join(first, last, lazy::and_, static_cast< data_expression const& >(sort_bool::true_()));
 }
-}
+} // namespace lazy
 
 
 } // namespace data

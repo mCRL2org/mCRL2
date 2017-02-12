@@ -13,9 +13,10 @@
 #define MCRL2_LPSREALZONE_REALZONE_H
 
 
-#include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/fourier_motzkin.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/stochastic_specification.h"
 
 #include "dbm.h"

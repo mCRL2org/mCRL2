@@ -13,11 +13,12 @@
 ///        inequalities, such as Fourier-Motzkin elimination.
 
 
-#ifndef MCRL2_LPSREALELM_LINEAR_INEQUALITY_H
-#define MCRL2_LPSREALELM_LINEAR_INEQUALITY_H
+#ifndef MCRL2_DATA_LINEAR_INEQUALITY_H
+#define MCRL2_DATA_LINEAR_INEQUALITY_H
 
 #include <algorithm>
 
+#include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/function_symbol.h"
@@ -151,6 +152,12 @@ namespace detail
      {
        return function()==f_variable_with_a_rational_factor();
      }
+
+     // \brief Transform the variable with factor to a data_expression.
+     data_expression transform_to_data_expression() const
+     {
+       return sort_real::times(factor(),variable_name());
+     }
   };
 
   // typedef atermpp::term_list<variable_with_a_rational_factor> lhs_t;
@@ -178,7 +185,8 @@ namespace detail
 
       /// \brief Give an iterator of the factor/variable pair for v, or end() if v does not occur.
       lhs_t::const_iterator find(const variable& v) const
-      { return std::find_if(begin(), 
+      { 
+        return std::find_if(begin(), 
                             end(), 
                             [&](const detail::variable_with_a_rational_factor& p)
                                                     {return p.variable_name()==v;});
@@ -242,6 +250,28 @@ namespace detail
         return result;
       }
 
+     // \brief Transform this lhs to a data_expression.
+     data_expression transform_to_data_expression() const
+     {
+       if (size()==0)
+       {
+         return real_zero();
+       }
+       data_expression result=real_zero();
+       
+       for(const variable_with_a_rational_factor& p: *this)
+       {
+         if (result==real_zero())
+         {
+           result=p.transform_to_data_expression();
+         }
+         else 
+         {
+           result=sort_real::plus(result,p.transform_to_data_expression());
+         }
+       }
+       return result;
+     }
   };
 
   inline void set_factor_for_a_variable(detail::map_based_lhs_t& new_lhs, const variable& x, const data_expression& e)
@@ -771,6 +801,21 @@ class linear_inequality: public atermpp::aterm_appl
       return detail::equal;
     }
 
+    data_expression transform_to_data_expression() const
+    {
+      const detail::comparison_t c=comparison();
+      if (c==detail::less_eq)
+      {
+        return data::less_equal(lhs().transform_to_data_expression(),rhs());
+      }
+      if (c==detail::less)
+      {
+        return data::less(lhs().transform_to_data_expression(),rhs());
+      }
+      assert(c==detail::equal);
+      return data::equal_to(lhs().transform_to_data_expression(),rhs());
+    }
+
     bool is_false(const rewriter& r) const
     {
       return lhs().empty() &&
@@ -934,10 +979,8 @@ inline data_expression max(const data_expression& e1,const data_expression& e2,c
   throw mcrl2::runtime_error("Fail to determine the maximum of: " + pp(e1) + " and " + pp(e2) + "\n");
 }
 
-
 inline bool is_closed_real_number(const data_expression& e)
 {
-  // TODO: Check that the number is closed.
   if (e.sort()!=sort_real::real_())
   {
     return false;
@@ -1040,185 +1083,6 @@ std::set < variable >  gauss_elimination(
   Variable_iterator variables_begin,
   Variable_iterator variables_end,
   const rewriter& r);
-
-/// \brief Eliminate variables from inequalities using Gauss elimination and
-///        Fourier-Motzkin elimination.
-/// \details Deliver a set of inequalities equivalent to exists variables.inequalities.
-//           If the resulting list of inequalities is inconsistent, then [false] is
-//           returned. Furthermore, the list of resulting inequalities is minimal in
-//           the sense that no individual inequality can be removed, without altering the
-//           set of solutions of the inequalities.
-/// \param inequalities_in A list of linear inequalities; the input can also contain linear equations.
-/// \param variables_begin The start of a list of variables to be eliminated.
-/// \param variables_end The end of a list of variables to be eliminated.
-/// \param resulting_inequalities The set of resulting inequalities.
-/// \param r A rewriter.
-/// \pre inequalities has been normalized.
-/// \post All variables in variables have been eliminated, inequalities contains.
-///       the resulting system of normalized inequalities.
-
-template < class Data_variable_iterator >
-void fourier_motzkin(const std::vector < linear_inequality >& inequalities_in,
-                     Data_variable_iterator variables_begin,
-                     Data_variable_iterator variables_end,
-                     std::vector < linear_inequality >& resulting_inequalities,
-                     const rewriter& r)
-{
-  assert(resulting_inequalities.empty());
-  if (mCRL2logEnabled(log::debug2))
-  {
-    mCRL2log(log::debug2) << "Starting Fourier-Motzkin elimination on " + pp_vector(inequalities_in) + " on variables ";
-    for (Data_variable_iterator i=variables_begin;
-         i!=variables_end; ++i)
-    {
-      mCRL2log(log::debug2) << " " << pp(*i) ;
-    }
-    mCRL2log(log::debug2) << std::endl;
-  }
-
-  std::vector < linear_inequality > inequalities;
-  std::vector < linear_inequality > equalities;
-  std::set < variable > vars=
-  gauss_elimination(inequalities_in,
-                    equalities,      // Store all resulting equalities here.
-                    inequalities,    // Store all resulting non equalities here.
-                    variables_begin,
-                    variables_end,
-                    r);
-
-  // At this stage, the variables that should be eliminated only occur in
-  // inequalities. Group the inequalities into positive, 0, and negative
-  // occurrences of each variable, and create a new system.
-  for (std::set < variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
-  {
-    std::map < variable, size_t> nr_positive_occurrences;
-    std::map < variable, size_t> nr_negative_occurrences;
-    count_occurrences(inequalities,nr_positive_occurrences,nr_negative_occurrences,r);
-
-    bool found=false;
-    size_t best_choice=0;
-    variable best_variable;
-    for (std::set < variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
-    {
-      const size_t p=nr_positive_occurrences[*k];
-      const size_t n=nr_negative_occurrences[*k];
-      if ((p!=0) || (n!=0))
-      {
-        if (found)
-        {
-          if (n*p<best_choice)
-          {
-            best_choice=n*p;
-            best_variable=*k;
-          }
-        }
-        else
-        {
-          // found is false
-          best_choice=n*p;
-          best_variable=*k;
-          found=true;
-        }
-      }
-      if (found && (best_choice==0))
-      {
-        // Stop searching, we cannot find a better candidate.
-        break;
-      }
-    }
-
-    mCRL2log(log::debug2) << "Best variable " << pp(best_variable) << "\n";
-
-    if (!found)
-    {
-      // There are no variables anymore that can be removed from inequalities
-      break;
-    }
-    std::vector < linear_inequality > new_inequalities;
-    std::vector < linear_inequality> inequalities_with_positive_variable;
-    std::vector < linear_inequality> inequalities_with_negative_variable;   // Idem.
-
-    for (const linear_inequality& e: inequalities)
-    {
-      const detail::lhs_t::const_iterator factor_it=e.lhs().find(best_variable); 
-      if (factor_it==e.lhs().end()) // variable best_variable does not occur in inequality e.
-      {
-        new_inequalities.push_back(e);
-      }
-      else
-      {
-        data_expression f=factor_it->factor();
-        if (is_positive(f,r))
-        {
-          inequalities_with_positive_variable.push_back(e);
-        }
-        else if (is_negative(f,r))
-        {
-          inequalities_with_negative_variable.push_back(e);
-        }
-        else
-        {
-          assert(0);
-        }
-      }
-    }
-
-    mCRL2log(log::debug2) << "Positive :" << pp_vector(inequalities_with_positive_variable) << "\n";
-    mCRL2log(log::debug2) << "Negative :" << pp_vector(inequalities_with_negative_variable) << "\n";
-    mCRL2log(log::debug2) << "Equalities :" << pp_vector(equalities) << "\n";
-    mCRL2log(log::debug2) << "Rest :" << pp_vector(new_inequalities) << "\n";
-
-    // Variables are grouped, now construct new inequalities as follows:
-    // Keep the zero occurrences
-    // Combine each positive and negative equation as follows with x the best variable:
-    // Given inequalities N + bi * x <= ci
-    //                    M - bj * x <= cj
-    // This is equivalent to N/bi + M/bj <= ci/bi + cj/bj
-    for (const linear_inequality& e1: inequalities_with_positive_variable)
-    {
-      for (const linear_inequality& e2: inequalities_with_negative_variable)
-      {
-        const detail::lhs_t::const_iterator e1_best_variable_it=e1.lhs().find(best_variable);
-        const data_expression& e1_factor=e1_best_variable_it->factor();
-        const data_expression& e1_reduced_rhs=real_divides(e1.rhs(),e1_factor);  
-        const detail::lhs_t e1_reduced_lhs=detail::remove_variable_and_divide(e1.lhs(),best_variable,e1_factor,r);
-
-        const detail::lhs_t::const_iterator e2_best_variable_it=e2.lhs().find(best_variable);
-        const data_expression& e2_factor=e2_best_variable_it->factor();
-        const data_expression& e2_reduced_rhs=real_divides(e2.rhs(),e2_factor);  
-        const detail::lhs_t e2_reduced_lhs=detail::remove_variable_and_divide(e2.lhs(),best_variable,e2_factor,r);
-        const linear_inequality new_inequality(subtract(e1_reduced_lhs,e2_reduced_lhs,r),
-                                               r(real_minus(e1_reduced_rhs,e2_reduced_rhs)),
-                                               (e1.comparison()==detail::less_eq) && (e2.comparison()==detail::less_eq)?
-                                                   detail::less_eq:
-                                                   detail::less,r);
-        if (new_inequality.is_false(r))
-        {
-          resulting_inequalities.push_back(linear_inequality()); // This is a single contraditory inequality;
-          return;
-        }
-        if (!new_inequality.is_true(r))
-        {
-          new_inequalities.push_back(new_inequality);
-        }
-      }
-    }
-    inequalities.swap(new_inequalities);
-  }
-
-  resulting_inequalities.swap(inequalities);
-  // Add the equalities to the inequalities and return the result
-  for (std::vector < linear_inequality > :: const_iterator i=equalities.begin();
-       i!=equalities.end(); ++i)
-  {
-    assert(!i->is_false(r));
-    if (!i->is_true(r))
-    {
-      resulting_inequalities.push_back(*i);
-    }
-  }
-  mCRL2log(log::debug2) << "Fourier-Motzkin elimination yields " << pp_vector(resulting_inequalities) << std::endl;
-}
 
 
 
@@ -2335,9 +2199,8 @@ inline data_expression rewrite_with_memory(
   return i->second;
 }
 
-
 } // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPSREALELM_LINEAR_INEQUALITY_H
+#endif // MCRL2_DATA_LINEAR_INEQUALITY_H
