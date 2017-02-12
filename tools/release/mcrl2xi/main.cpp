@@ -27,7 +27,7 @@ class mcrl2xi_tool : public mcrl2xi_base
                    "graphical mCRL2 data specification editor",
                    "A graphical mCRL2 data specification editor.",
                    "A graphical mCRL2 data specification editor.",
-                   "http://www.mcrl2.org/release/user_manual/tools/release/mcrl2xi.html")
+                   "http://www.mcrl2.org/web/user_manual/tools/release/mcrl2xi.html")
     {}
 
     bool run()

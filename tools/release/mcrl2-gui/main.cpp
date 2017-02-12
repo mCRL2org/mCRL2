@@ -28,7 +28,7 @@ class mcrl2_gui_tool : public mcrl2_gui_base
                    "graphical front-end for mCRL2 tools",
                    "A graphical front-end for mCRL2 tools.",
                    "A graphical front-end for mCRL2 tools",
-                   "http://www.mcrl2.org/release/user_manual/tools/release/mcrl2-gui.html")
+                   "http://www.mcrl2.org/web/user_manual/tools/release/mcrl2-gui.html")
     {}
 
     bool run()

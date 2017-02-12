@@ -24,7 +24,7 @@ class ltsgraph_tool : public ltsgraph_base
                    "visualise an LTS as a graph and manipulate its layout in 2D and 3D",
                    "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.",
                    "Draws a labelled transition system (LTS). A convential graph drawing is provided either in 2D or 3D.",
-                   "http://www.mcrl2.org/release/user_manual/tools/release/ltsgraph.html")
+                   "http://www.mcrl2.org/web/user_manual/tools/release/ltsgraph.html")
     {}
 
     bool run()

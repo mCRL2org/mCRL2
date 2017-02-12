@@ -106,7 +106,7 @@ inline std::string copyright_period()
 
     Report bugs at <http://www.mcrl2.org/issuetracker>.
 
-    See also the manual at <http://www.mcrl2.org/release/user_manual/tools/demo-tool.html>.
+    See also the manual at <http://www.mcrl2.org/web/user_manual/tools/release/demo-tool.html>.
    \endverbatim
  * Printing version information.
  *
