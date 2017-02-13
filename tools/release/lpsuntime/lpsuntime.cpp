@@ -8,18 +8,20 @@
 //
 /// \file lpsuntime.cpp
 
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/lps/tools.h"
 
-#include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::data::tools;
 
-class untime_tool: public input_output_tool
+class untime_tool: public rewriter_tool< input_output_tool >
 {
   protected:
 
-    typedef input_output_tool super;
+    typedef rewriter_tool < input_output_tool > super;
 
     bool add_invariants;
 
@@ -58,7 +60,7 @@ class untime_tool: public input_output_tool
 
     bool run()
     {
-      mcrl2::lps::lpsuntime(m_input_filename, m_output_filename, add_invariants);
+      mcrl2::lps::lpsuntime(m_input_filename, m_output_filename, add_invariants, m_rewrite_strategy);
       return true;
     }
 

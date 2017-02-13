@@ -97,7 +97,7 @@ class rewriter_tool: public Tool
     /// \brief Creates a data rewriter as specified on the command line.
     /// \param data_spec A data specification
     /// \return A data rewriter
-    data::rewriter create_rewriter(data::data_specification const& data_spec = data::data_specification())
+    data::rewriter create_rewriter(const data::data_specification& data_spec = data::data_specification())
     {
       return data::rewriter(data_spec, rewrite_strategy());
     }
