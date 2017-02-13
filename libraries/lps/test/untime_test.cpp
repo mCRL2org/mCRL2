@@ -12,7 +12,6 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-// #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/untime.h>
 #include <mcrl2/lps/linearise.h>
 #include <mcrl2/lps/find.h>
@@ -34,7 +33,8 @@ void test_case_1()
 
   specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
-  lps::untime_algorithm<specification>(s1, false).run();
+  rewriter r;
+  lps::untime_algorithm<specification>(s1, false,r).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -66,7 +66,8 @@ void test_case_2()
 
   specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
-  lps::untime_algorithm<specification>(s1, true).run();
+  rewriter r;
+  lps::untime_algorithm<specification>(s1, true,r).run();
   const action_summand_vector& summands0 = s0.process().action_summands();
   const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
@@ -95,7 +96,8 @@ void test_case_3()
 
   specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
-  lps::untime_algorithm<specification>(s1, true).run();
+  rewriter r;
+  lps::untime_algorithm<specification>(s1, true,r).run();
   const action_summand_vector& summands0 = s0.process().action_summands();
   const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
@@ -127,7 +129,8 @@ void test_case_4()
 
   specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
-  lps::untime_algorithm<specification>(s1, true).run();
+  rewriter r;
+  lps::untime_algorithm<specification>(s1, true,r).run();
   const action_summand_vector& summands0 = s0.process().action_summands();
   const action_summand_vector& summands1 = s1.process().action_summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
