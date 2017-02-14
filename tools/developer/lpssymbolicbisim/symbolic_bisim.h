@@ -19,12 +19,8 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/lambda.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/set_comprehension.h"
-// #include "mcrl2/data/substitutions/data_expression_assignment.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -262,32 +258,9 @@ protected:
     enumerate(application(original_block,primed_process_parameters), free_vars, split_block);
   }
 
-  void simplify()
-  {
-    int i = 0;
-    std::cout << "Simplified partition:" << std::endl;
-    for(const data_expression& block: partition)
-    {
-      data_expression result = block;
-      std::set< data_expression > subexpr = find_data_expressions(block);
-      for(const data_expression d: subexpr)
-      {
-        if(is_exists(d))
-        {
-          variable_list variables = static_cast<exists>(d).variables();
-          data_expression body = static_cast<exists>(d).body();
-
-          variable_list new_variables;
-          data_expression new_body;
-          fourier_motzkin(body, variables, new_body, new_variables, rewr);
-
-          result = rewr(result, eliminate_existential_quantifier_sigma(d, exists(new_variables, new_body)));
-        }
-      }
-      std::cout << "  block " << i << ": " << pp(result) << std::endl;
-      i++;
-    }
-  }
+  // void simplify()
+  // {
+  // }
 
   // data_expression find_initial_block()
   // {
