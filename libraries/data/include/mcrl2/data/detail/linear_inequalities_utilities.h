@@ -153,6 +153,39 @@ static void split_condition_aux(
       non_real_conditions.push_back(*i_n);
     }
   }
+  else if (!negate && sort_bool::is_implies_application(e))
+  {
+    split_condition_aux(data::binary_left(atermpp::down_cast<application>(e)),real_conditions,non_real_conditions,!negate);
+    std::vector < data_expression_list > real_conditions_aux, non_real_conditions_aux;
+    split_condition_aux(data::binary_right(atermpp::down_cast<application>(e)),real_conditions_aux,non_real_conditions_aux,negate);
+    for (std::vector < data_expression_list >::const_iterator
+         i_r=real_conditions_aux.begin(), i_n=non_real_conditions_aux.begin() ;
+         i_r!=real_conditions_aux.end(); ++i_r, ++i_n)
+    {
+      real_conditions.push_back(*i_r);
+      non_real_conditions.push_back(*i_n);
+    }
+  }
+  else if (negate && sort_bool::is_implies_application(e))
+  {
+    std::vector < data_expression_list > real_conditions_aux1, non_real_conditions_aux1;
+    split_condition_aux(data::binary_left(atermpp::down_cast<application>(e)),real_conditions_aux1,non_real_conditions_aux1,negate);
+    std::vector < data_expression_list > real_conditions_aux2, non_real_conditions_aux2;
+    split_condition_aux(data::binary_right(atermpp::down_cast<application>(e)),real_conditions_aux2,non_real_conditions_aux2,!negate);
+
+    for (std::vector < data_expression_list >::const_iterator
+         i1r=real_conditions_aux1.begin(), i1n=non_real_conditions_aux1.begin() ;
+         i1r!=real_conditions_aux1.end(); ++i1r, ++i1n)
+    {
+      for (std::vector < data_expression_list >::const_iterator
+           i2r=real_conditions_aux2.begin(), i2n=non_real_conditions_aux2.begin() ;
+           i2r!=real_conditions_aux2.end(); ++i2r, ++i2n)
+      {
+        real_conditions.push_back(*i1r + *i2r);
+        non_real_conditions.push_back(*i1n + *i2n);
+      }
+    }
+  }
   else if (is_if_application(e))
   {
     split_condition_aux(sort_bool::or_(sort_bool::and_(condition_part(e),then_part(e)),
