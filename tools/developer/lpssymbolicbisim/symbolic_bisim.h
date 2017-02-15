@@ -19,8 +19,10 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/data_expression_assignment.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -51,7 +53,8 @@ struct eliminate_existential_quantifier_sigma: public std::unary_function<data_e
       variable_list new_variables;
       data_expression new_body;
       fourier_motzkin(body, variables, new_body, new_variables, rewr);
-      std::cout << "Simplified " << pp(d) << " to " << exists(new_variables, new_body) << std::endl;
+
+      std::cout << "Replacing " << d << " with " << exists(new_variables, new_body) << std::endl;
       return rewr(exists(new_variables, new_body));
     }
     return d;
@@ -78,6 +81,24 @@ protected:
   // structured_sort                singleton_sort;
   data_specification             ad_hoc_data;
 
+  template <typename Container>
+  std::string pp_container(Container& expressions, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
+  {
+
+    std::ostringstream out;
+    out << "[";
+    for(typename Container::const_iterator it = expressions.begin(); it != expressions.end(); it++)
+    {
+      if(it != expressions.begin())
+      {
+        out << ", ";
+      }
+      out << pp(*it);
+    }
+    out << "]";
+    return out.str();
+  }
+
   void add_ad_hoc_rules()
   {
     ad_hoc_data = m_spec.data();
@@ -91,11 +112,13 @@ protected:
     //  a && a = a;
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::and_(vb1, vb1), vb1));
     //  a && (a && b) = a && b;
-    // ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::and_(vb1, vb2)), sort_bool::and_(vb1, vb2)));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::and_(vb1, vb2)), sort_bool::and_(vb1, vb2)));
     //  a || a = a;
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::or_(vb1, vb1), vb1));
     //  a => b = !a || b;
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::implies(vb1, vb2), sort_bool::or_(sort_bool::not_(vb1), vb2)));
+    // a && (!a || b) = a && b
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::or_(sort_bool::not_(vb1), vb2)), sort_bool::and_(vb1, vb2)));
     // Pushing not inside
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::and_(vb1, vb2)), sort_bool::or_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
@@ -115,6 +138,43 @@ protected:
     rewr = rewriter(ad_hoc_data, strat);
   }
 
+  void replace_free_reals(data_expression& split_block, std::set< variable > free_vars)
+  {
+    std::cout << "There are still free variables of sort Real, which expressions should be replaced? (just press enter when finished)" << std::endl;
+    std::string s;
+    data_expression_vector to_replace;
+    do
+    {
+      std::getline(std::cin, s);
+      if(s != "")
+      {
+        to_replace.push_back(parse_data_expression(s, free_vars, ad_hoc_data));
+      }
+    } while(s != "");
+
+    set_identifier_generator var_gen;
+    var_gen.add_identifiers(find_identifiers(split_block));
+    variable_vector replacements;
+    for(data_expression d: to_replace)
+    {
+      variable rep_bool(var_gen("b"), sort_bool::bool_());
+      replacements.push_back(rep_bool);
+      std::cout << rep_bool << " will replace " << d << std::endl;
+    }
+    std::cout << "Type one expression that defines the relationship between the replaced expressions in terms of the replacing variables. This will be added to final expression:" << std::endl;
+    std::getline(std::cin, s);
+    data_expression replaced_relation = parse_data_expression(s, replacements);
+
+    for(uint32_t i = 0; i < to_replace.size(); i++)
+    {
+      split_block = replace_data_expressions(split_block, data_expression_assignment(to_replace[i], replacements[i]), true);
+    }
+    split_block = lazy::and_(split_block, replaced_relation);
+  }
+
+  // For all evaluations of variables in vars for which block holds,
+  // add split_block to the partition
+  // vars is the set of free variables in split_block
   void enumerate(data_expression block, std::set<variable> vars, data_expression split_block)
   {
     typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
@@ -127,6 +187,17 @@ protected:
     {
       i->add_assignments(vars,sigma,rewr);
 
+      std::cout << "enum: [";
+      for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
+      {
+        if (v!=vars.begin())
+        {
+          std::cout << ", ";
+        }
+     
+        std::cout << data::pp(*v) << " := " << data::pp(sigma(*v));
+      }
+      std::cout << "] leads to " << rewr(split_block, sigma) << std::endl;
       partition.insert(rewr(split_block,sigma));
     }
   }
@@ -185,13 +256,21 @@ protected:
       sub_primed[v] = var;
     }
     primed_process_parameters = reverse(primed_process_parameters);
-    variable_list primed_variables = primed_process_parameters + primed_summation_variables;
 
     data_expression_list updates;
-    for(assignment_list::const_iterator it = as.assignments().begin(); it != as.assignments().end(); it++)
+    for(variable_list::const_iterator it = process_parameters.begin(); it != process_parameters.end(); it++)
     {
-      updates.push_front(it->rhs());
+      assignment_list::const_iterator assign = std::find_if(as.assignments().begin(), as.assignments().end(), [&it](const assignment& arg) {return arg.lhs() == *it;});
+      if(assign != as.assignments().end())
+      {
+        updates.push_front(assign->rhs());
+      }
+      else
+      {
+        updates.push_front(*it);
+      }
     }
+    updates = reverse(updates);
 
     data_expression arguments_equal = sort_bool::true_();
     for(const data_expression& expr: action.arguments())
@@ -206,14 +285,15 @@ protected:
           lazy::and_(
             sort_bool::not_(exists(primed_summation_variables,
               sort_bool::not_(lazy::implies(
-                rewr(lazy::and_(
-                  as.condition(),
-                  application(phi_l, updates)), sub_primed),
+                lazy::and_(
+                  replace_variables(as.condition(), sub_primed),
+                  rewr(application(phi_l, replace_variables(updates, sub_primed)))
+                ),
                 exists(as.summation_variables(),
                   lazy::and_(
                     lazy::and_(
                       as.condition(),
-                      application(phi_l, updates)),
+                      rewr(application(phi_l, updates))),
                     arguments_equal
                   )
                 )
@@ -223,12 +303,13 @@ protected:
               sort_bool::not_(lazy::implies(
                 lazy::and_(
                   as.condition(),
-                  application(phi_l, updates)),
+                  rewr(application(phi_l, updates))),
                 exists(primed_summation_variables,
                   lazy::and_(
-                    rewr(lazy::and_(
-                      as.condition(),
-                      application(phi_l, updates)), sub_primed),
+                    lazy::and_(
+                      replace_variables(as.condition(), sub_primed),
+                      rewr(application(phi_l, replace_variables(updates, sub_primed)))
+                    ),
                     arguments_equal
                   )
                 )
@@ -241,39 +322,42 @@ protected:
     std::cout << "Starting simplification of " << std::endl << pp(split_block) << std::endl;
     
     data_expression result = replace_data_expressions(split_block, eliminate_existential_quantifier_sigma(rewr), true);
-    std::cout << "Simplified block: " << std::endl << pp(result) << std::endl;
-
+    std::cout << "Block after replacements:" << std::endl << result << std::endl;
     split_block = rewr(result);
-    std::cout << "New block before enumeration: " << split_block << std::endl;
+    std::cout << "Simplified block: " << std::endl << split_block << std::endl;
     std::set<variable> free_vars = find_free_variables(split_block);
     std::cout << "Free variables: {";
+    bool has_reals;
     for(const variable& v: free_vars)
     {
       std::cout << v << ", ";
+      has_reals = has_reals || v.sort() == sort_real::real_();
     }
     std::cout << "}" << std::endl;
+    if(has_reals)
+    {
+      replace_free_reals(split_block, free_vars);
+      free_vars = find_free_variables(split_block);
+    }
 
     data_expression original_block = phi_k;
     partition.erase(partition.find(phi_k));
+    std::cout << "Starting enumeration..." << std::endl;
     enumerate(application(original_block,primed_process_parameters), free_vars, split_block);
   }
 
-  // void simplify()
-  // {
-  // }
-
-  // data_expression find_initial_block()
-  // {
-  //   for(std::set< data_expression >::const_iterator it = partition.begin(); it != partition.end(); it++)
-  //   {
-  //     if(rewr((*it)(m_spec.initial_process().state(process_parameters))) == sort_bool::true_())
-  //     {
-  //       std::cout << "Found initial block " << *it << std::endl;
-  //       return *it;
-  //     }
-  //   }
-  //   throw mcrl2::runtime_error("Initial block not found");
-  // }
+  data_expression find_initial_block()
+  {
+    for(std::set< data_expression >::const_iterator it = partition.begin(); it != partition.end(); it++)
+    {
+      if(rewr(application(*it, m_spec.initial_process().state(process_parameters))) == sort_bool::true_())
+      {
+        std::cout << "Found initial block " << *it << std::endl;
+        return *it;
+      }
+    }
+    throw mcrl2::runtime_error("Initial block not found");
+  }
 
   // void reach()
   // {
@@ -300,6 +384,7 @@ public:
     while(true)
     {
       refine();
+      find_initial_block();
     }
   }
 };
