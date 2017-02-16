@@ -15,6 +15,7 @@
 #include <string>
 
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/detail/linear_inequalities_utilities.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fourier_motzkin.h"
@@ -279,45 +280,46 @@ protected:
     }
     std::cout << "Constructing block expression ..." << std::endl;
     data_expression split_block =
-      rewr(lambda(process_parameters,
+      lambda(process_parameters,
         lazy::and_(
           application(phi_k,process_parameters),
           lazy::and_(
             sort_bool::not_(exists(primed_summation_variables,
               sort_bool::not_(lazy::implies(
-                lazy::and_(
+                rewr(lazy::and_(
                   replace_variables(as.condition(), sub_primed),
-                  rewr(application(phi_l, replace_variables(updates, sub_primed)))
-                ),
+                  application(phi_l, replace_variables(updates, sub_primed))
+                )),
                 exists(as.summation_variables(),
-                  lazy::and_(
+                  rewr(lazy::and_(
                     lazy::and_(
                       as.condition(),
                       rewr(application(phi_l, updates))),
                     arguments_equal
-                  )
+                  ))
                 )
               ))
             )),
             sort_bool::not_(exists(as.summation_variables(),
               sort_bool::not_(lazy::implies(
-                lazy::and_(
+                rewr(lazy::and_(
                   as.condition(),
-                  rewr(application(phi_l, updates))),
+                  rewr(application(phi_l, updates))
+                )),
                 exists(primed_summation_variables,
-                  lazy::and_(
+                  rewr(lazy::and_(
                     lazy::and_(
                       replace_variables(as.condition(), sub_primed),
-                      rewr(application(phi_l, replace_variables(updates, sub_primed)))
+                      application(phi_l, replace_variables(updates, sub_primed))
                     ),
                     arguments_equal
-                  )
+                  ))
                 )
               ))
             ))
           )
         )
-      ));
+      );
 
     std::cout << "Starting simplification of " << std::endl << pp(split_block) << std::endl;
     
