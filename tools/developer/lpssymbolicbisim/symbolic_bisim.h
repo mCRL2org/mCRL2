@@ -35,6 +35,80 @@ namespace data
 
 using namespace mcrl2::log;
 
+template <template <class> class Traverser, class OutputIterator>
+struct find_linear_inequality_traverser: public Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> >
+{
+  typedef Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> > super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  OutputIterator out;
+  std::set< variable > real_free_vars;
+  bool search_free_var;
+  bool found_free_var;
+
+  find_linear_inequality_traverser(OutputIterator out_, std::set< variable > real_free_vars_)
+    : out(out_)
+    , real_free_vars(real_free_vars_)
+  {}
+
+  void apply(const data::variable& v)
+  {
+    if(search_free_var && !found_free_var && real_free_vars.find(v) != real_free_vars.end())
+    {
+      found_free_var = true;
+    }
+  }
+
+  void apply(const data::application& x)
+  {
+    if (is_equal_to_application(x) || 
+        is_not_equal_to_application(x) || 
+        is_less_application(x) || 
+        is_less_equal_application(x) || 
+        is_greater_application(x) || 
+        is_greater_equal_application(x))
+    {
+      // Switch to 'searching for free variables of type Real' mode
+      search_free_var = true;
+      found_free_var = false;
+      super::apply(x);
+      if(found_free_var)
+      {
+        // This expression contains a free variable of type Real, so add it to output
+        *out = x;
+      }
+    }
+    else if(!search_free_var || !found_free_var)
+    {
+      // traverse sub-expressions
+      super::apply(x);
+    }
+  }
+};
+
+template <template <class> class Traverser, class OutputIterator>
+find_linear_inequality_traverser<Traverser, OutputIterator>
+make_find_linear_inequality_traverser(OutputIterator out, std::set< variable > real_free_vars)
+{
+  return find_linear_inequality_traverser<Traverser, OutputIterator>(out, real_free_vars);
+}
+
+template <typename T, typename OutputIterator>
+void find_linear_inequalities(const T& x, OutputIterator o, std::set< variable > real_free_vars)
+{
+  make_find_linear_inequality_traverser<data::data_expression_traverser>(o, real_free_vars).apply(x);
+}
+
+template <typename T>
+std::set<data::data_expression> find_linear_inequalities(const T& x, std::set< variable > real_free_vars)
+{
+  std::set<data::data_expression> result;
+  find_linear_inequalities(x, std::inserter(result, result.end()), real_free_vars);
+  return result;
+}
+
 struct eliminate_existential_quantifier_sigma: public std::unary_function<data_expression, data_expression>
 {
 
@@ -114,12 +188,15 @@ protected:
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::and_(vb1, vb1), vb1));
     //  a && (a && b) = a && b;
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::and_(vb1, vb2)), sort_bool::and_(vb1, vb2)));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::and_(vb2, vb1)), sort_bool::and_(vb1, vb2)));
     //  a || a = a;
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::or_(vb1, vb1), vb1));
     //  a => b = !a || b;
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::implies(vb1, vb2), sort_bool::or_(sort_bool::not_(vb1), vb2)));
     // a && (!a || b) = a && b
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::or_(sort_bool::not_(vb1), vb2)), sort_bool::and_(vb1, vb2)));
+    // !a && (a || b) == !a && b
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(sort_bool::not_(vb1), sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), vb2)));
     // Pushing not inside
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::and_(vb1, vb2)), sort_bool::or_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
@@ -139,38 +216,37 @@ protected:
     rewr = rewriter(ad_hoc_data, strat);
   }
 
-  void replace_free_reals(data_expression& split_block, std::set< variable > free_vars)
+  void replace_free_reals(data_expression& split_block, std::set< variable > free_vars, 
+    std::set< data_expression > linear_inequalities, data_expression& enumeration_condition)
   {
     std::cout << "There are still free variables of sort Real, which expressions should be replaced? (just press enter when finished)" << std::endl;
-    std::string s;
-    data_expression_vector to_replace;
-    do
-    {
-      std::getline(std::cin, s);
-      if(s != "")
-      {
-        to_replace.push_back(parse_data_expression(s, free_vars, ad_hoc_data));
-      }
-    } while(s != "");
 
     set_identifier_generator var_gen;
     var_gen.add_identifiers(find_identifiers(split_block));
     variable_vector replacements;
-    for(data_expression d: to_replace)
+    for(data_expression d: linear_inequalities)
     {
       variable rep_bool(var_gen("b"), sort_bool::bool_());
       replacements.push_back(rep_bool);
       std::cout << rep_bool << " will replace " << d << std::endl;
     }
-    std::cout << "Type one expression that defines the relationship between the replaced expressions in terms of the replacing variables. This will be added to final expression:" << std::endl;
-    std::getline(std::cin, s);
-    data_expression replaced_relation = parse_data_expression(s, replacements);
-
-    for(uint32_t i = 0; i < to_replace.size(); i++)
+    data_expression replaced_relation = sort_bool::true_();
+    if(linear_inequalities.size() > 1)
     {
-      split_block = replace_data_expressions(split_block, data_expression_assignment(to_replace[i], replacements[i]), true);
+      std::string s;
+      std::cout << "Type one expression that defines the relationship between the replaced expressions in terms of the replacing variables. This will be added to final expression:" << std::endl;
+      std::getline(std::cin, s);
+      data_expression replaced_relation = parse_data_expression(s, replacements);
     }
-    split_block = lazy::and_(split_block, replaced_relation);
+
+    uint32_t i = 0;
+    for(data_expression d: linear_inequalities)
+    {
+      split_block = replace_data_expressions(split_block, data_expression_assignment(d, replacements[i]), true);
+      enumeration_condition = replace_data_expressions(enumeration_condition, data_expression_assignment(d, replacements[i]), true);
+      i++;
+    }
+    enumeration_condition = lazy::and_(enumeration_condition, replaced_relation);
   }
 
   // For all evaluations of variables in vars for which block holds,
@@ -180,6 +256,8 @@ protected:
   {
     typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
     enumerator_type enumerator(rewr, m_spec.data(), rewr, 10000);
+
+    std::cout << "Enumerating variables " << pp_container(vars) << " for which " << pp(block) << " holds in expression " << split_block << "." << std::endl;
 
     data::mutable_indexed_substitution<> sigma;
     std::deque<enumerator_list_element_with_substitution<> >
@@ -329,23 +407,29 @@ protected:
     std::cout << "Simplified block: " << std::endl << split_block << std::endl;
     std::set<variable> free_vars = find_free_variables(split_block);
     std::cout << "Free variables: {";
-    bool has_reals;
+    std::set< variable > real_free_vars;
     for(const variable& v: free_vars)
     {
       std::cout << v << ", ";
-      has_reals = has_reals || v.sort() == sort_real::real_();
+      if(v.sort() == sort_real::real_())
+      {
+        real_free_vars.insert(v);
+      }
     }
     std::cout << "}" << std::endl;
-    if(has_reals)
+
+    data_expression enumeration_condition(rewr(application(phi_k,primed_process_parameters)));
+    if(real_free_vars.size() > 0)
     {
-      replace_free_reals(split_block, free_vars);
+      std::set< data_expression > li = find_linear_inequalities(split_block, real_free_vars);
+      std::cout << "Linear inequalities with free variables: " << pp_container(li) << std::endl;
+      replace_free_reals(split_block, free_vars, li, enumeration_condition);
       free_vars = find_free_variables(split_block);
     }
 
-    data_expression original_block = phi_k;
     partition.erase(partition.find(phi_k));
     std::cout << "Starting enumeration..." << std::endl;
-    enumerate(application(original_block,primed_process_parameters), free_vars, split_block);
+    enumerate(enumeration_condition, free_vars, split_block);
   }
 
   data_expression find_initial_block()
