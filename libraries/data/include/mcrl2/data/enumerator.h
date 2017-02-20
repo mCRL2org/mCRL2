@@ -730,7 +730,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
             }
           }
           P->pop_front();
-          count += E->next(*P, *sigma, Filter());
+          count += E->next(*P, *sigma, accept);
         }
 
         bool equal(iterator const& other) const
