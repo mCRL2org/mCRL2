@@ -20,6 +20,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
@@ -79,6 +80,7 @@ struct find_linear_inequality_traverser: public Traverser<find_linear_inequality
         // This expression contains a free variable of type Real, so add it to output
         *out = x;
       }
+      search_free_var = false;
     }
     else if(!search_free_var || !found_free_var)
     {
@@ -148,6 +150,7 @@ class symbolic_bisim_algorithm: public mcrl2::lps::detail::lps_algorithm<Specifi
 protected:
   const rewrite_strategy strat;
   rewriter rewr;
+  rewriter proving_rewr;
 
   variable_list                  process_parameters;
   std::set<data_expression>      partition;
@@ -174,15 +177,56 @@ protected:
     return out.str();
   }
 
+  core::identifier_string iff_name()
+  {
+    static core::identifier_string iff_name = core::identifier_string("<=>");
+    return iff_name;
+  }
+
+  function_symbol iff()
+  {
+    static function_symbol iff(iff_name(), make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_bool::bool_()));
+    return iff;
+  }
+
+  inline application iff(const data_expression& d1, const data_expression& d2)
+  {
+    return iff()(d1, d2);
+  }
+
   void add_ad_hoc_rules()
   {
-    ad_hoc_data = m_spec.data();
+    ad_hoc_data = merge_data_specifications(m_spec.data(),parse_data_specification(
+      "var "
+        "a,b,c:Bool;"
+        "r1,r2,r3:Real;"
+      "eqn "
+        // "a && a = a;"
+        // "a && (a && b) = a && b;"
+        // "a && (b && a) = a && b;"
+        // "a || a = a;"
+        // "a => b = !a || b;"
+        // "a && (!a || b) = a && b;"
+        // "!a && (a || b) = !a && b;"
+        // "!(a && b) = !a || !b;"
+        // "!(a || b) = !a && !b;"
+        // "if(a,b,c) = (a && b) || (!a && c);"
+        // "(a && b) || !a = b || !a;"
+
+        "r2 > r3 -> !(r1 < r2) && r1 < r3 = false;"
+        "r2 > r3 -> r1 < r3 && !(r1 < r2) = false;"
+        "r2 < r3 -> !(r1 < r2) || r1 < r3 = true;"
+        "r2 < r3 -> r1 < r3 || !(r1 < r2) = true;"
+      ));
+
     variable vb1("b1", sort_bool::bool_());
     variable vb2("b2", sort_bool::bool_());
+    variable vb3("b3", sort_bool::bool_());
     variable vp1("p1", sort_pos::pos());
     variable vp2("p2", sort_pos::pos());
     variable vr1("r1", sort_real::real_());
     variable vr2("r2", sort_real::real_());
+    variable vr3("r3", sort_real::real_());
 
     //  a && a = a;
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::and_(vb1, vb1), vb1));
@@ -209,18 +253,36 @@ protected:
       sort_bool::not_(less_equal(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
     // Eliminate nested -1 * -1
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_minus_one(), sort_real::times(real_minus_one(), vr1)), vr1));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2,vr3), 
+      sort_real::times(vr1, sort_real::plus(vr2,vr3)), sort_real::plus(sort_real::times(vr1,vr2), sort_real::times(vr1,vr3))));
     // Eliminate 1 * r
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_one(), vr1), vr1));
 
+    // Rules for bidirectional implication (iff)
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(sort_bool::true_(), vb1), vb1));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::true_()), vb1));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(sort_bool::false_(), vb1), sort_bool::not_(vb1)));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::false_()), sort_bool::not_(vb1)));
+
+    // if(a,b,c) = (a && b) || (!a && c);
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), if_(vb1, vb2, vb3), 
+      sort_bool::or_(sort_bool::and_(vb1, vb2), sort_bool::and_(sort_bool::not_(vb1), vb3))));
+    // (a && b) || !a = b || !a
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
+      sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::not_(vb1)), sort_bool::or_(vb2,sort_bool::not_(vb1))));
+    // !a || (a && b) = !a || b
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
+      sort_bool::or_(sort_bool::not_(vb1), sort_bool::and_(vb1,vb2)), sort_bool::or_(sort_bool::not_(vb1), vb2)));
+    // a || (!a && b) = a || b
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
+      sort_bool::or_(vb1, sort_bool::and_(sort_bool::not_(vb1), vb2)), sort_bool::or_(vb1,vb2)));
 
     rewr = rewriter(ad_hoc_data, strat);
   }
 
-  void replace_free_reals(data_expression& split_block, std::set< variable > free_vars, 
-    std::set< data_expression > linear_inequalities, data_expression& enumeration_condition)
+  variable_list replace_free_reals(data_expression& split_block, 
+    std::set< data_expression > linear_inequalities, data_expression& enumeration_condition, data_expression& lli)
   {
-    std::cout << "There are still free variables of sort Real, which expressions should be replaced? (just press enter when finished)" << std::endl;
-
     set_identifier_generator var_gen;
     var_gen.add_identifiers(find_identifiers(split_block));
     variable_vector replacements;
@@ -231,43 +293,133 @@ protected:
       std::cout << rep_bool << " will replace " << d << std::endl;
     }
     data_expression replaced_relation = sort_bool::true_();
-    if(linear_inequalities.size() > 1)
-    {
-      std::string s;
-      std::cout << "Type one expression that defines the relationship between the replaced expressions in terms of the replacing variables. This will be added to final expression:" << std::endl;
-      std::getline(std::cin, s);
-      data_expression replaced_relation = parse_data_expression(s, replacements);
-    }
 
     uint32_t i = 0;
     for(data_expression d: linear_inequalities)
     {
       split_block = replace_data_expressions(split_block, data_expression_assignment(d, replacements[i]), true);
       enumeration_condition = replace_data_expressions(enumeration_condition, data_expression_assignment(d, replacements[i]), true);
+      if(linear_inequalities.size() > 1)
+      {
+        replaced_relation = lazy::and_(replaced_relation, iff(replacements[i], d));
+        if(i == linear_inequalities.size() - 1)
+        {
+          lli = d;
+        }
+      }
       i++;
     }
     enumeration_condition = lazy::and_(enumeration_condition, replaced_relation);
+    return variable_list(replacements.begin(), replacements.end());
+  }
+
+  struct enumerate_filter_print
+  {
+    data_expression last_linear_inequality;
+    rewriter rewr;
+
+    explicit enumerate_filter_print(const data_expression& lli, const rewriter& rewr_)
+      : last_linear_inequality(lli)
+      , rewr(rewr_)
+    {}
+
+    bool operator()(const data_expression& d)
+    {
+      data_expression conjunct = rewr(d);
+      if(sort_bool::is_false_function_symbol(conjunct))
+      {
+        return false;
+      }
+      else if(sort_bool::right(conjunct) == last_linear_inequality || sort_bool::right(conjunct) == sort_bool::not_(last_linear_inequality))
+      {
+        // We assume now all variables have been filled in so we can
+        // just walk over a conjuction to gather all the linear
+        // inequalities
+        std::vector< linear_inequality > lis;
+        while(sort_bool::is_and_application(conjunct))
+        {
+          data_expression li_expr = sort_bool::right(conjunct);
+          bool invert = false;
+          if(sort_bool::is_not_application(li_expr))
+          {
+            li_expr = sort_bool::arg(li_expr);
+            invert = true;
+          }
+          linear_inequality li = invert ? linear_inequality(li_expr, rewr).invert(rewr) : linear_inequality(li_expr, rewr);
+          lis.push_back(li);
+          conjunct = sort_bool::left(conjunct);
+        }
+        data_expression li_expr = conjunct;
+        bool invert = false;
+        if(sort_bool::is_not_application(li_expr))
+        {
+          li_expr = sort_bool::arg(li_expr);
+          invert = true;
+        }
+        linear_inequality li = invert ? linear_inequality(li_expr, rewr).invert(rewr) : linear_inequality(li_expr, rewr);
+        lis.push_back(li);
+        return !is_inconsistent(lis, rewr, true);
+      }
+      return true;
+    }
+  };
+
+  data_expression simplify_expression_in_lambda(const lambda& expr, const mutable_indexed_substitution<> sigma)
+  {
+    data_expression result = rewr(proving_rewr(expr.body(),sigma));
+
+    std::vector < data_expression_list > real_conditions;
+    std::vector < data_expression > non_real_conditions;
+    detail::split_condition(result, real_conditions, non_real_conditions);
+    result = sort_bool::false_();
+    for(uint32_t i = 0; i < real_conditions.size(); i++)
+    {
+      std::vector< linear_inequality > linear_inequalities;
+      for(data_expression_list::const_iterator it = real_conditions[i].begin(); it != real_conditions[i].end(); it++)
+      {
+        linear_inequalities.push_back(linear_inequality(*it, rewr));
+      }
+      std::vector< linear_inequality > resulting_inequalities;
+      remove_redundant_inequalities(linear_inequalities, resulting_inequalities, rewr);
+      if(!(resulting_inequalities.size() == 1 && resulting_inequalities[0].is_false(rewr)))
+      {
+        data_expression real_con = sort_bool::true_();
+        for(uint32_t j = 0; j < resulting_inequalities.size(); j++)
+        {
+          real_con = lazy::and_(real_con, resulting_inequalities[j].transform_to_data_expression());
+        }
+        result = lazy::or_(result, lazy::and_(non_real_conditions[i], real_con));
+      }
+    }
+
+    std::cout << "simplify: before rewriting " << result << std::endl;
+    result = rewr(proving_rewr(result));
+    std::cout << "simplify: after rewriting  " << result << std::endl;
+
+    return lambda(expr.variables(), result);
   }
 
   // For all evaluations of variables in vars for which block holds,
   // add split_block to the partition
   // vars is the set of free variables in split_block
-  void enumerate(data_expression block, std::set<variable> vars, data_expression split_block)
+  void enumerate(data_expression block, variable_list vars, data_expression split_block, const data_expression& lli)
   {
-    typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
+
+    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, enumerate_filter_print> enumerator_type;
     enumerator_type enumerator(rewr, m_spec.data(), rewr, 10000);
 
     std::cout << "Enumerating variables " << pp_container(vars) << " for which " << pp(block) << " holds in expression " << split_block << "." << std::endl;
 
     data::mutable_indexed_substitution<> sigma;
     std::deque<enumerator_list_element_with_substitution<> >
-         enumerator_deque(1, enumerator_list_element_with_substitution<>(variable_list(vars.begin(), vars.end()), block));
-    for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end(); ++i)
+         enumerator_deque(1, enumerator_list_element_with_substitution<>(vars, block));
+    enumerate_filter_print filter(lli, rewr);
+    for (typename enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque, filter); i != enumerator.end(filter); ++i)
     {
       i->add_assignments(vars,sigma,rewr);
 
       std::cout << "enum: [";
-      for (std::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
+      for (variable_list::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
       {
         if (v!=vars.begin())
         {
@@ -276,8 +428,8 @@ protected:
      
         std::cout << data::pp(*v) << " := " << data::pp(sigma(*v));
       }
-      std::cout << "] leads to " << rewr(split_block, sigma) << std::endl;
-      partition.insert(rewr(split_block,sigma));
+      std::cout << "] leads to " << std::endl;
+      partition.insert(simplify_expression_in_lambda(split_block, sigma));
     }
   }
 
@@ -406,6 +558,7 @@ protected:
     split_block = rewr(result);
     std::cout << "Simplified block: " << std::endl << split_block << std::endl;
     std::set<variable> free_vars = find_free_variables(split_block);
+    variable_list free_vars_list;
     std::cout << "Free variables: {";
     std::set< variable > real_free_vars;
     for(const variable& v: free_vars)
@@ -415,21 +568,25 @@ protected:
       {
         real_free_vars.insert(v);
       }
+      else
+      {
+        free_vars_list.push_front(v);
+      }
     }
     std::cout << "}" << std::endl;
 
     data_expression enumeration_condition(rewr(application(phi_k,primed_process_parameters)));
+    data_expression lli(sort_bool::true_());
     if(real_free_vars.size() > 0)
     {
       std::set< data_expression > li = find_linear_inequalities(split_block, real_free_vars);
       std::cout << "Linear inequalities with free variables: " << pp_container(li) << std::endl;
-      replace_free_reals(split_block, free_vars, li, enumeration_condition);
-      free_vars = find_free_variables(split_block);
+      free_vars_list = free_vars_list + replace_free_reals(split_block, li, enumeration_condition, lli);
     }
 
     partition.erase(partition.find(phi_k));
     std::cout << "Starting enumeration..." << std::endl;
-    enumerate(enumeration_condition, free_vars, split_block);
+    enumerate(enumeration_condition, free_vars_list, split_block, lli);
   }
 
   data_expression find_initial_block()
@@ -445,18 +602,12 @@ protected:
     throw mcrl2::runtime_error("Initial block not found");
   }
 
-  // void reach()
-  // {
-  //   std::set<data_expression> reachable;
-  //   data_expression init = find_initial_block();
-  //   reachable.insert(init);
-  // }
-
 public:
   symbolic_bisim_algorithm(Specification& spec, const rewrite_strategy st = jitty)
-    : mcrl2::lps::detail::lps_algorithm<Specification>(spec),
-    strat(st),
-    rewr(spec.data(),strat)
+    : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
+    , strat(st)
+    , rewr(spec.data(),strat)
+    , proving_rewr(spec.data(), jitty_prover)
   {
   }
 
