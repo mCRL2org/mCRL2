@@ -85,6 +85,8 @@ class lps2pbes_algorithm
       ids = state_formulas::find_identifiers(f);
       id_generator.add_identifiers(ids);
 
+      detail::lps2pbes_parameters params(f, lpsspec.process(), id_generator, T);
+
       // compute the equations
       std::vector<pbes_equation> eqn;
       if (structured)
@@ -94,22 +96,22 @@ class lps2pbes_algorithm
         propvar_generator.add_identifiers(names);
         if (unoptimized)
         {
-          detail::E_structured(f, f, lpsspec.process(), id_generator, propvar_generator, T, eqn, core::term_traits<pbes_expression>());
+          detail::E_structured(f, params, propvar_generator, eqn, core::term_traits<pbes_expression>());
         }
         else
         {
-          detail::E_structured(f, f, lpsspec.process(), id_generator, propvar_generator, T, eqn, core::term_traits_optimized<pbes_expression>());
+          detail::E_structured(f, params, propvar_generator, eqn, core::term_traits_optimized<pbes_expression>());
         }
       }
       else
       {
         if (unoptimized)
         {
-          detail::E(f, f, lpsspec.process(), id_generator, T, eqn, core::term_traits<pbes_expression>());
+          detail::E(f, params, eqn, core::term_traits<pbes_expression>());
         }
         else
         {
-          detail::E(f, f, lpsspec.process(), id_generator, T, eqn, core::term_traits_optimized<pbes_expression>());
+          detail::E(f, params, eqn, core::term_traits_optimized<pbes_expression>());
         }
       }
 
@@ -151,17 +153,17 @@ class lps2pbes_algorithm
 ///                                   obtain a more compact PBES.
 /// \return The resulting pbes.
 inline
-pbes lps2pbes(const lps::specification& lpsspec, 
-              const state_formulas::state_formula& formula, 
-              bool timed = false, 
-              bool structured = false, 
-              bool unoptimized = false, 
+pbes lps2pbes(const lps::specification& lpsspec,
+              const state_formulas::state_formula& formula,
+              bool timed = false,
+              bool structured = false,
+              bool unoptimized = false,
               bool preprocess_modal_operators = false)
 {
   if ((formula.has_time() || lpsspec.process().has_time()) && !timed)
   {
-    mCRL2log(log::warning) << "Switch to timed translation because formula has " 
-                           << (formula.has_time()?"":"no ") << "time, and process has " 
+    mCRL2log(log::warning) << "Switch to timed translation because formula has "
+                           << (formula.has_time()?"":"no ") << "time, and process has "
                            << (lpsspec.process().has_time()?"":"no ") << "time" << std::endl;
     timed = true;
   }
@@ -195,11 +197,11 @@ pbes lps2pbes(const lps::specification& lpsspec,
 ///                                   obtain a more compact PBES.
 /// \return The resulting pbes.
 inline
-pbes lps2pbes(const lps::specification& lpsspec, 
-              const state_formulas::state_formula_specification& formspec, 
-              bool timed = false, 
-              bool structured = false, 
-              bool unoptimized = false, 
+pbes lps2pbes(const lps::specification& lpsspec,
+              const state_formulas::state_formula_specification& formspec,
+              bool timed = false,
+              bool structured = false,
+              bool unoptimized = false,
               bool preprocess_modal_operators = false)
 {
   lps::specification lpsspec1 = lpsspec;
@@ -219,11 +221,11 @@ pbes lps2pbes(const lps::specification& lpsspec,
 ///                                   obtain a more compact PBES.
 /// \return The result of the algorithm
 inline
-pbes lps2pbes(const std::string& spec_text, 
-              const std::string& formula_text, 
-              bool timed = false, 
-              bool structured = false, 
-              bool unoptimized = false, 
+pbes lps2pbes(const std::string& spec_text,
+              const std::string& formula_text,
+              bool timed = false,
+              bool structured = false,
+              bool unoptimized = false,
               bool preprocess_modal_operators = false)
 {
   pbes result;
