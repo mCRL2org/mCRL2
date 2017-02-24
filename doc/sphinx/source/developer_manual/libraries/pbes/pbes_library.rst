@@ -1,3 +1,8 @@
+.. math::
+   :nowrap: 
+ 
+    \[\renewcommand{\implies}{\mathop{\Rightarrow}}\]
+
 Parameterised Boolean Equation Systems
 ======================================
 
@@ -25,7 +30,7 @@ The following C++ classes are defined for PBESs:
    ===================================  ====================================================================================================================
    Expression                           C++ class
    ===================================  ====================================================================================================================
-   :math:`\cal{E}`                      :cpp:class:`template \<typename Container> class pbes <template <typename Container> class pbes>`
+   :math:`\cal{E}`                      :cpp:class:`template \<typename Container\> \class pbes <mcrl2::pbes_system::pbes>`
    :math:`\sigma X(d:D)=\varphi`        :cpp:class:`pbes_equation                             <mcrl2::pbes_system::pbes_equation>`
    :math:`\sigma`                       :cpp:class:`fixpoint_symbol                           <mcrl2::pbes_system::fixpoint_symbol>`
    :math:`X(d:D)`                       :cpp:class:`propositional_variable                    <mcrl2::pbes_system::propositional_variable>`

@@ -1,6 +1,9 @@
 .. index:: lpsinvelm
 
-.. _tool-lpsinvelm:
+.. math::
+   :nowrap: 
+ 
+    \[\renewcommand{\implies}{\mathop{\Rightarrow}}\]
 
 lpsinvelm
 =========
