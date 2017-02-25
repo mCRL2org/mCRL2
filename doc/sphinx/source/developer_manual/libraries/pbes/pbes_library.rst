@@ -1,7 +1,7 @@
 .. math::
    :nowrap: 
  
-    \[\renewcommand{\implies}{\mathop{\Rightarrow}}\]
+    \renewcommand{\implies}{\mathop{\Rightarrow}}
 
 Parameterised Boolean Equation Systems
 ======================================

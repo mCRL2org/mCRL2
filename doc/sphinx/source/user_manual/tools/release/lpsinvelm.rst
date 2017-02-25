@@ -3,7 +3,7 @@
 .. math::
    :nowrap: 
  
-    \[\renewcommand{\implies}{\mathop{\Rightarrow}}\]
+    \renewcommand{\implies}{\mathop{\Rightarrow}}
 
 lpsinvelm
 =========
