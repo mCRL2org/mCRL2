@@ -121,7 +121,7 @@ class SMT_LIB_Solver: public SMT_Solver
             }
             else
             {
-              v_sort_domain_list = sort_expression_list(v_sort);
+              v_sort_domain_list = sort_expression_list({v_sort});
               v_sort = sort_expression();
             }
             for (sort_expression_list::const_iterator l = v_sort_domain_list.begin();
@@ -417,7 +417,7 @@ class SMT_LIB_Solver: public SMT_Solver
       }
       else if (data::is_function_symbol(a_clause))
       {
-        translate_constant(a_clause);
+        translate_function_symbol(a_clause);
       }
       else
       {
@@ -732,10 +732,9 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + "false";
     }
 
-    void translate_constant(const data_expression &a_clause)
+    void translate_function_symbol(const data_expression &a_clause)
     {
-      data_expression h = application(a_clause).head();
-      const function_symbol& v_operator = atermpp::down_cast<function_symbol>(h);
+      const function_symbol& v_operator = atermpp::down_cast<function_symbol>(a_clause);
       std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
 
       size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
@@ -885,7 +884,45 @@ class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_
 
     inline static void exec()
     {
-      ::execlp("cvc3", "cvc3", "-lang", "smt-lib", (char*)nullptr);
+      ::execlp("cvc3", "cvc3", "-lang", "smt", (char*)nullptr);
+    }
+
+  public:
+
+    /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
+    /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
+    /// clauses
+    bool is_satisfiable(const data_expression_list &a_formula)
+    {
+      translate(a_formula);
+
+      return execute(f_benchmark);
+    }
+};
+
+/// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
+/// Z3 / (https://github.com/Z3Prover/z3) to determine the satisfiability
+/// of propositional formulas. To use the solver Z3 / the directory containing
+/// the corresponding executable must be in the path.
+///
+/// The static method usable can be used to check checks if Z3's executable is indeed available.
+///
+/// The method z3_smt_solver::is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
+/// indicates whether or not this formula is satisfiable.
+class z3_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< z3_smt_solver >
+{
+    friend class binary_smt_solver< z3_smt_solver >;
+
+  private:
+
+    inline static char const* name()
+    {
+      return "Z3";
+    }
+
+    inline static void exec()
+    {
+      ::execlp("z3", "z3", "-smt", "-in", (char*)nullptr);
     }
 
   public:

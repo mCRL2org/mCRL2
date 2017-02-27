@@ -202,6 +202,15 @@ class BDD_Path_Eliminator: public BDD_Simplifier
           return;
         }
       }
+      else if (a_solver_type == solver_type_z3)
+      {
+        if (mcrl2::data::detail::prover::z3_smt_solver::usable())
+        {
+          f_smt_solver = new mcrl2::data::detail::prover::z3_smt_solver();
+
+          return;
+        }
+      }
       else
       {
         throw mcrl2::runtime_error("An unknown SMT solver type was passed as argument.");

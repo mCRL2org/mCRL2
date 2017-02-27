@@ -153,6 +153,9 @@ bool binary_smt_solver< T >::usable()
 // instantiate for cvc prover
 template class binary_smt_solver< cvc_smt_solver >;
 
+// instantiate for z3 prover
+template class binary_smt_solver< z3_smt_solver >;
+
 // instantiate for ario prover
 template class binary_smt_solver< ario_smt_solver >;
 }
