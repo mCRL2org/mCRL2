@@ -21,6 +21,9 @@
 //Tool framework
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/bool.h"
 
 #include "symbolic_bisim.h"
 
@@ -37,6 +40,29 @@ class lpssymbolicbisim_tool: public rewriter_tool<input_tool>
   protected:
     typedef rewriter_tool<input_tool> super;
 
+    std::string invariant;
+
+    /// Parse the non-default options.
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+
+      if (parser.options.count("invariant")>0)
+      {
+        invariant = parser.option_argument("invariant");
+      }
+    }
+
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.
+      add_option("invariant",
+                 make_mandatory_argument("expr"),
+                 "add invariant that makes up the only block in the initial partition",
+                 'i');
+    }
+
   public:
     lpssymbolicbisim_tool()
       : super(
@@ -45,7 +71,8 @@ class lpssymbolicbisim_tool: public rewriter_tool<input_tool>
         "Output expressions for partition refinement",
         "Perform the first N steps of partition refinement on "
         "INFILE and output the resulting expressions. "
-        "This tool is highly experimental. ")
+        "This tool is highly experimental. "),
+        invariant("true")
     {}
 
     /// Runs the algorithm.
@@ -60,7 +87,9 @@ class lpssymbolicbisim_tool: public rewriter_tool<input_tool>
       stochastic_specification spec;
       load_lps(spec, input_filename());
 
-      mcrl2::data::symbolic_bisim_algorithm<stochastic_specification>(spec, m_rewrite_strategy).run();
+      mcrl2::data::data_expression inv = parse_data_expression(invariant, spec.process().process_parameters(), spec.data());
+
+      mcrl2::data::symbolic_bisim_algorithm<stochastic_specification>(spec, inv, m_rewrite_strategy).run();
 
       return true;
     }

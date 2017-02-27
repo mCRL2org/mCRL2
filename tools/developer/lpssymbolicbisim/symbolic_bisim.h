@@ -153,10 +153,8 @@ protected:
   rewriter proving_rewr;
 
   variable_list                  process_parameters;
+  data_expression                invariant;
   std::set<data_expression>      partition;
-  // data_expression                part_union;
-  // sort_expression                union_sort;
-  // structured_sort                singleton_sort;
   data_specification             ad_hoc_data;
 
   template <typename Container>
@@ -201,17 +199,10 @@ protected:
         "a,b,c:Bool;"
         "r1,r2,r3:Real;"
       "eqn "
-        // "a && a = a;"
-        // "a && (a && b) = a && b;"
-        // "a && (b && a) = a && b;"
-        // "a || a = a;"
-        // "a => b = !a || b;"
-        // "a && (!a || b) = a && b;"
-        // "!a && (a || b) = !a && b;"
-        // "!(a && b) = !a || !b;"
-        // "!(a || b) = !a && !b;"
-        // "if(a,b,c) = (a && b) || (!a && c);"
-        // "(a && b) || !a = b || !a;"
+        "!a || a = true;"
+        "a || !a = true;"
+        "!a && a = false;"
+        "a && !a = false;"
 
         "r2 > r3 -> !(r1 < r2) && r1 < r3 = false;"
         "r2 > r3 -> r1 < r3 && !(r1 < r2) = false;"
@@ -603,11 +594,12 @@ protected:
   }
 
 public:
-  symbolic_bisim_algorithm(Specification& spec, const rewrite_strategy st = jitty)
+  symbolic_bisim_algorithm(Specification& spec, data_expression inv, const rewrite_strategy st = jitty)
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
     , strat(st)
     , rewr(spec.data(),strat)
     , proving_rewr(spec.data(), jitty_prover)
+    , invariant(inv)
   {
   }
 
@@ -615,7 +607,7 @@ public:
   {
     mCRL2log(mcrl2::log::verbose) << "Running symbolic bisimulation..." << std::endl;
     process_parameters = m_spec.process().process_parameters();
-    partition.insert( lambda(process_parameters, sort_bool::true_()));
+    partition.insert( lambda(process_parameters, invariant));
     add_ad_hoc_rules();
 
     while(true)
