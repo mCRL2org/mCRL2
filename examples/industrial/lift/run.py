@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 
 os.system('mcrl22lps -vn lift3-final.mcrl2 lift3-final.lps')

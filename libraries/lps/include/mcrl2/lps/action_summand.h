@@ -67,7 +67,7 @@ class action_summand: public summand_base
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    data::assignment_list &assignments()
+    data::assignment_list& assignments()
     {
       return m_assignments;
     }

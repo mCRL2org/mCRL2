@@ -31,6 +31,7 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
     bool structured;
     bool unoptimized;
     bool preprocess_modal_operators;
+    bool generate_counter_example;
 
     std::string synopsis() const
     {
@@ -50,6 +51,8 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
                       "generate equations such that no mixed conjunctions and disjunctions occur", 's');
       desc.add_option("unoptimized",
                       "do not simplify boolean expressions", 'u');
+      desc.add_hidden_option("counter-example",
+                             "add counter example equations to the generated PBES", 'c');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -63,6 +66,7 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
       structured  = parser.options.count("structured") > 0;
       timed       = parser.options.count("timed") > 0;
       unoptimized = parser.options.count("unoptimized") > 0;
+      generate_counter_example = parser.options.count("counter-example") > 0;
     }
 
   public:
@@ -85,7 +89,8 @@ class lps2pbes_tool : public pbes_output_tool<input_output_tool>
                timed,
                structured,
                unoptimized,
-               preprocess_modal_operators
+               preprocess_modal_operators,
+               generate_counter_example
              );
       return true;
     }

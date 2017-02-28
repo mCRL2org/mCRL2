@@ -24,6 +24,7 @@
 #include "mcrl2/pbes/detail/lps2pbes_par.h"
 #include "mcrl2/pbes/detail/lps2pbes_sat.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 
@@ -59,7 +60,7 @@ struct lps2pbes_parameters
                                const lps::multi_action& /* ai */,
                                const data::assignment_list& /* gi */,
                                TermTraits
-                              ) const
+                              )
   {
     typedef TermTraits tr;
     if (is_must)
@@ -119,6 +120,16 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     return result;
   }
 
+  std::string multi_action_name(const lps::multi_action& a) const
+  {
+    std::vector<std::string> v;
+    for (const process::action& ai: a.actions())
+    {
+      v.push_back(std::string(a.name()));
+    }
+    return utilities::string_join(v, "_");
+  }
+
   lps2pbes_counter_example_parameters(const state_formulas::state_formula& phi0,
                                       const lps::linear_process& lps,
                                       data::set_identifier_generator& id_generator,
@@ -134,7 +145,7 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     for (const lps::action_summand& summand: lps.action_summands())
     {
       const lps::multi_action& ai = summand.multi_action();
-      core::identifier_string Z = id_generator("Z");
+      core::identifier_string Z = id_generator("CE_" + multi_action_name(ai));
       Za[ai] = propositional_variable(Z, d + action_variables(ai.actions()) + d1);
     }
   }
@@ -159,23 +170,23 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
                                const lps::multi_action& ai,
                                const data::assignment_list& gi,
                                TermTraits
-                              ) const
+                              )
   {
     typedef TermTraits tr;
     const data::variable_list& d = lps.process_parameters();
-    pbes_expression right1 = data::replace_variables_capture_avoiding(right, sigma, sigma_variables);
     data::data_expression_list e1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
     data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai.actions()) + atermpp::container_cast<data::data_expression_list>(d1);
-    propositional_variable_instantiation Zai(Za.at(ai), da);
-    pbes_expression left1 = tr::and_(Zai, tr::and_(left, equal_to(d1, e1)));
+    propositional_variable_instantiation Zai(Za.at(ai).name(), da);
+    pbes_expression left1 = tr::and_(left, equal_to(d1, e1));
+    pbes_expression right1 = tr::and_(pbes_system::replace_variables_capture_avoiding(right, sigma, sigma_variables), Zai);
 
     if (is_must)
     {
-      return tr::forall(y + d1, tr::imp(left, right1));
+      return tr::forall(y + d1, tr::imp(left1, right1));
     }
     else
     {
-      return tr::exists(y + d1, tr::and_(left, right1));
+      return tr::exists(y + d1, tr::and_(left1, right1));
     }
   }
 };

@@ -57,6 +57,37 @@ namespace detail
 /// \brief Algorithm for translating a state formula and a timed specification to a pbes.
 class lps2pbes_algorithm
 {
+  protected:
+    template <typename Parameters>
+    void run(const state_formulas::state_formula& f, bool structured, bool unoptimized, std::vector<pbes_equation>& equations, Parameters& parameters)
+    {
+      if (structured)
+      {
+        data::set_identifier_generator propvar_generator;
+        std::set<core::identifier_string> names = state_formulas::algorithms::find_state_variable_names(f);
+        propvar_generator.add_identifiers(names);
+        if (unoptimized)
+        {
+          detail::E_structured(f, parameters, propvar_generator, equations, core::term_traits<pbes_expression>());
+        }
+        else
+        {
+          detail::E_structured(f, parameters, propvar_generator, equations, core::term_traits_optimized<pbes_expression>());
+        }
+      }
+      else
+      {
+        if (unoptimized)
+        {
+          detail::E(f, parameters, equations, core::term_traits<pbes_expression>());
+        }
+        else
+        {
+          detail::E(f, parameters, equations, core::term_traits_optimized<pbes_expression>());
+        }
+      }
+    }
+
   public:
     /// \brief Runs the translation algorithm
     /// \param formula A modal formula that represents a property about the system modeled by the given specification
@@ -64,9 +95,17 @@ class lps2pbes_algorithm
     /// \param structured use the 'structured' approach of generating equations
     /// \param unoptimized do not optimize the resulting PBES.
     /// \param preprocess_modal_operators insert dummy fixpoints in modal operators, which may lead to smaller PBESs
+    /// \param generate_counter_example If true, then the PBES is enhanced with additional equations that are used to extract a counter example.
     /// \param T The time parameter. If T == data::variable() the untimed version of lps2pbes is applied.
     /// \return A PBES that encodes the property applied to the given specification
-    pbes run(const state_formulas::state_formula& formula, const lps::specification& lpsspec, bool structured = false, bool unoptimized = false, bool preprocess_modal_operators = false, const data::variable& T = data::undefined_real_variable())
+    pbes run(const state_formulas::state_formula& formula,
+             const lps::specification& lpsspec,
+             bool structured = false,
+             bool unoptimized = false,
+             bool preprocess_modal_operators = false,
+             bool generate_counter_example = false,
+             const data::variable& T = data::undefined_real_variable()
+            )
     {
       using atermpp::detail::operator+;
       state_formulas::state_formula f = formula;
@@ -85,39 +124,22 @@ class lps2pbes_algorithm
       ids = state_formulas::find_identifiers(f);
       id_generator.add_identifiers(ids);
 
-      detail::lps2pbes_parameters params(f, lpsspec.process(), id_generator, T);
-
-      // compute the equations
-      std::vector<pbes_equation> eqn;
-      if (structured)
+      std::vector<pbes_equation> equations;
+      if (generate_counter_example)
       {
-        data::set_identifier_generator propvar_generator;
-        std::set<core::identifier_string> names = state_formulas::algorithms::find_state_variable_names(f);
-        propvar_generator.add_identifiers(names);
-        if (unoptimized)
-        {
-          detail::E_structured(f, params, propvar_generator, eqn, core::term_traits<pbes_expression>());
-        }
-        else
-        {
-          detail::E_structured(f, params, propvar_generator, eqn, core::term_traits_optimized<pbes_expression>());
-        }
+        detail::lps2pbes_counter_example_parameters parameters(f, lpsspec.process(), id_generator, T);
+        run(f, structured, unoptimized, equations, parameters);
+        equations = equations + parameters.equations();
       }
       else
       {
-        if (unoptimized)
-        {
-          detail::E(f, params, eqn, core::term_traits<pbes_expression>());
-        }
-        else
-        {
-          detail::E(f, params, eqn, core::term_traits_optimized<pbes_expression>());
-        }
+        detail::lps2pbes_parameters parameters(f, lpsspec.process(), id_generator, T);
+        run(f, structured, unoptimized, equations, parameters);
       }
 
       // compute the initial state
-      assert(eqn.size() > 0);
-      pbes_equation e1 = eqn.front();
+      assert(equations.size() > 0);
+      pbes_equation e1 = equations.front();
       core::identifier_string Xe(e1.variable().name());
       assert(state_formulas::is_mu(f) || state_formulas::is_nu(f));
       const core::identifier_string& Xf = detail::mu_name(f);
@@ -130,7 +152,7 @@ class lps2pbes_algorithm
       }
       propositional_variable_instantiation init(Xe, e);
 
-      pbes result(lpsspec.data(), eqn, lpsspec.global_variables(), init);
+      pbes result(lpsspec.data(), equations, lpsspec.global_variables(), init);
       assert(is_monotonous(result));
       pbes_system::algorithms::normalize(result);
       assert(pbes_system::algorithms::is_normalized(result));
@@ -158,7 +180,9 @@ pbes lps2pbes(const lps::specification& lpsspec,
               bool timed = false,
               bool structured = false,
               bool unoptimized = false,
-              bool preprocess_modal_operators = false)
+              bool preprocess_modal_operators = false,
+              bool generate_counter_example = false
+             )
 {
   if ((formula.has_time() || lpsspec.process().has_time()) && !timed)
   {
@@ -177,11 +201,11 @@ pbes lps2pbes(const lps::specification& lpsspec,
     data::variable T = detail::fresh_variable(ids, data::sort_real::real_(), "T");
     ids.insert(T.name());
     lps::detail::make_timed_lps(spec_timed.process(), ids);
-    return lps2pbes_algorithm().run(formula, spec_timed, structured, unoptimized, preprocess_modal_operators, T);
+    return lps2pbes_algorithm().run(formula, spec_timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, T);
   }
   else
   {
-    return lps2pbes_algorithm().run(formula, lpsspec, structured, unoptimized, preprocess_modal_operators);
+    return lps2pbes_algorithm().run(formula, lpsspec, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
   }
 }
 
@@ -202,12 +226,14 @@ pbes lps2pbes(const lps::specification& lpsspec,
               bool timed = false,
               bool structured = false,
               bool unoptimized = false,
-              bool preprocess_modal_operators = false)
+              bool preprocess_modal_operators = false,
+              bool generate_counter_example = false
+             )
 {
   lps::specification lpsspec1 = lpsspec;
   lpsspec1.data() = data::merge_data_specifications(lpsspec1.data(), formspec.data());
   lpsspec1.action_labels() = process::merge_action_specifications(lpsspec1.action_labels(), formspec.action_labels());
-  return lps2pbes(lpsspec1, formspec.formula(), timed, structured, unoptimized, preprocess_modal_operators);
+  return lps2pbes(lpsspec1, formspec.formula(), timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
 }
 
 /// \brief Applies the lps2pbes algorithm.
@@ -226,13 +252,15 @@ pbes lps2pbes(const std::string& spec_text,
               bool timed = false,
               bool structured = false,
               bool unoptimized = false,
-              bool preprocess_modal_operators = false)
+              bool preprocess_modal_operators = false,
+              bool generate_counter_example = false
+             )
 {
   pbes result;
   lps::specification lpsspec = remove_stochastic_operators(lps::linearise(spec_text));
 
   state_formulas::state_formula f = state_formulas::algorithms::parse_state_formula(formula_text, lpsspec);
-  return lps2pbes(lpsspec, f, timed, structured, unoptimized, preprocess_modal_operators);
+  return lps2pbes(lpsspec, f, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
 }
 
 } // namespace pbes_system
