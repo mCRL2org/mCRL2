@@ -145,7 +145,7 @@ std::string myprint(const std::vector<pbes_equation>& v)
 /// Caveat: the implementation is very inefficient.
 /// \param update_context If true, then generated names are added to the context
 inline
-data::mutable_map_substitution<> make_fresh_variables(const data::variable_list& variables, data::set_identifier_generator& id_generator, bool add_to_context = true)
+data::mutable_map_substitution<> make_fresh_variable_substitution(const data::variable_list& variables, data::set_identifier_generator& id_generator, bool add_to_context = true)
 {
   data::mutable_map_substitution<> result;
   for (const data::variable& v: variables)

@@ -13,6 +13,8 @@
 #define MCRL2_PBES_DETAIL_LPS2PBES_RHS_H
 
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/modal_formula/find.h"
@@ -43,6 +45,139 @@ struct lps2pbes_parameters
                      )
     : phi0(phi0_), lps(lps_), id_generator(id_generator_), T(T_)
   {}
+
+  bool is_timed() const
+  {
+    return T != data::undefined_real_variable();
+  }
+
+  template <typename TermTraits>
+  pbes_expression rhs_may_must(bool is_must,
+                               const data::variable_list& y,
+                               const pbes_expression& left,  // Sat(ai(fi(x,y)) && ci(x,y) && (ti(x,y) > T)
+                               const pbes_expression& right, // RHS(phi)[T, x := ti(x,y), gi(x,y)]
+                               const lps::multi_action& /* ai */,
+                               const data::assignment_list& /* gi */,
+                               TermTraits
+                              ) const
+  {
+    typedef TermTraits tr;
+    if (is_must)
+    {
+      return tr::forall(y, tr::imp(left, right));
+    }
+    else
+    {
+      return tr::exists(y, tr::and_(left, right));
+    }
+  }
+};
+
+struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
+{
+  data::variable_list d1;                                 // d'
+  data::mutable_map_substitution<> sigma;                 // the substitution [d := d'], where d is the sequence of process parameters of lps
+  std::set<data::variable> sigma_variables;
+  std::map<lps::multi_action, propositional_variable> Za; // represents the additional equations { nu Zai(d, fi(x,y), d') = true }
+
+  // creates variables corresponding to the action label sorts in actions
+  data::variable_list action_variables(const process::action_list& actions) const
+  {
+    std::vector<data::variable> result;
+    for (const process::action& a: actions)
+    {
+      for (const data::sort_expression& s: a.label().sorts())
+      {
+        data::variable v(id_generator("var"), s);
+        result.push_back(v);
+      }
+    }
+    return data::variable_list(result.begin(), result.end());
+  }
+
+  // returns the concatenation of the arguments of the list of actions
+  data::data_expression_list action_expressions(const process::action_list& actions) const
+  {
+    std::vector<data::data_expression> result;
+    for (const process::action& a: actions)
+    {
+      auto const& args = a.arguments();
+      result.insert(result.end(), args.begin(), args.end());
+    }
+    return data::data_expression_list(result.begin(), result.end());
+  }
+
+  // returns the equations needed for counter example generation
+  std::vector<pbes_equation> equations() const
+  {
+    std::vector<pbes_equation> result;
+    for (auto const& p: Za)
+    {
+      pbes_equation eqn(fixpoint_symbol::nu(), p.second, true_());
+      result.push_back(eqn);
+    }
+    return result;
+  }
+
+  lps2pbes_counter_example_parameters(const state_formulas::state_formula& phi0,
+                                      const lps::linear_process& lps,
+                                      data::set_identifier_generator& id_generator,
+                                      const data::variable& T
+                                     )
+    : lps2pbes_parameters(phi0, lps, id_generator, T)
+  {
+    const data::variable_list& d = lps.process_parameters();
+    sigma = detail::make_fresh_variable_substitution(d, id_generator);
+    sigma_variables = data::substitution_variables(sigma);
+    d1 = data::replace_variables(d, sigma);
+
+    for (const lps::action_summand& summand: lps.action_summands())
+    {
+      const lps::multi_action& ai = summand.multi_action();
+      core::identifier_string Z = id_generator("Z");
+      Za[ai] = propositional_variable(Z, d + action_variables(ai.actions()) + d1);
+    }
+  }
+
+  data::data_expression equal_to(const data::variable_list& d, const data::data_expression_list& e) const
+  {
+    std::vector<data::data_expression> v;
+    auto i = d.begin();
+    auto j = e.begin();
+    for (; i != d.end(); ++i, ++j)
+    {
+      v.push_back(data::equal_to(*i, *j));
+    }
+    return data::lazy::join_and(v.begin(), v.end());
+  }
+
+  template <typename TermTraits>
+  pbes_expression rhs_may_must(bool is_must,
+                               const data::variable_list& y,
+                               const pbes_expression& left,  // Sat(ai(fi(x,y)) && ci(x,y) && (ti(x,y) > T)
+                               const pbes_expression& right, // RHS(phi)[T, x := ti(x,y), gi(x,y)]
+                               const lps::multi_action& ai,
+                               const data::assignment_list& gi,
+                               TermTraits
+                              ) const
+  {
+    typedef TermTraits tr;
+    const data::variable_list& d = lps.process_parameters();
+    pbes_expression right1 = data::replace_variables_capture_avoiding(right, sigma, sigma_variables);
+    data::data_expression_list e1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
+    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai.actions()) + atermpp::container_cast<data::data_expression_list>(d1);
+    propositional_variable_instantiation Zai(Za.at(ai), da);
+    pbes_expression left1 = tr::and_(Zai, tr::and_(left, equal_to(d1, e1)));
+
+    if (is_must)
+    {
+      return tr::forall(y + d1, tr::imp(left, right1));
+    }
+    else
+    {
+      return tr::exists(y + d1, tr::and_(left, right1));
+    }
+  }
 };
 
 //--- RHS default variant ---//
@@ -177,60 +312,59 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   // This function is overridden in the structured variant of the algorithm
   template <typename MustMayExpression>
-  pbes_expression apply_must_may_rhs(const MustMayExpression& x)
+  pbes_expression apply_may_must_rhs(const MustMayExpression& x)
   {
     return RHS(x.operand(), parameters, TermTraits());
   }
 
   // This function is overridden in the structured variant of the algorithm
-  pbes_expression apply_must_may_result(const pbes_expression& p)
+  pbes_expression apply_may_must_result(const pbes_expression& p)
   {
     return p;
   }
 
   // share code between must and may
   template <typename MustMayExpression>
-  void apply_must_may(const MustMayExpression& x, bool is_must)
+  void apply_may_must(const MustMayExpression& x, bool is_must)
   {
     bool timed = is_timed();
     std::vector<pbes_expression> v;
-    pbes_expression rhs0 = derived().apply_must_may_rhs(x);
+    pbes_expression rhs0 = derived().apply_may_must_rhs(x);
     assert(action_formulas::is_action_formula(x.formula()));
     const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
 
     for (const lps::action_summand& summand: parameters.lps.action_summands())
     {
-      data::data_expression ci = summand.condition();
-      lps::multi_action ai     = summand.multi_action();
-      data::assignment_list gi = summand.assignments();
-      const data::variable_list& yi   = summand.summation_variables();
+      data::data_expression ci      = summand.condition();
+      lps::multi_action ai          = summand.multi_action();
+      data::assignment_list gi      = summand.assignments();
+      const data::variable_list& yi = summand.summation_variables();
 
-      pbes_expression rhs = rhs0;
-      data::mutable_map_substitution<> sigma_yi = pbes_system::detail::make_fresh_variables(yi, parameters.id_generator);
+      pbes_expression right = rhs0;
+      data::mutable_map_substitution<> sigma_yi = pbes_system::detail::make_fresh_variable_substitution(yi, parameters.id_generator);
       std::set<data::variable> sigma_yi_variables = data::substitution_variables(sigma_yi);
       ci = data::replace_variables_capture_avoiding(ci, sigma_yi, sigma_yi_variables);
       lps::replace_variables_capture_avoiding(ai, sigma_yi, sigma_yi_variables);
       gi = data::replace_variables_capture_avoiding(gi, sigma_yi, sigma_yi_variables);
       const data::data_expression& ti = ai.time();
-      pbes_expression p1 = Sat(ai, alpha, parameters.id_generator, TermTraits());
-      pbes_expression p2 = ci;
+      pbes_expression sat = Sat(ai, alpha, parameters.id_generator, TermTraits());
       data::mutable_map_substitution<> sigma_gi;
       for (const data::assignment& a: gi)
       {
         sigma_gi[a.lhs()] = a.rhs();
       }
-      rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_gi, data::substitution_variables(sigma_gi));
-      pbes_expression p = tr::and_(p1, p2);
+      right = pbes_system::replace_variables_capture_avoiding(right, sigma_gi, data::substitution_variables(sigma_gi));
+      pbes_expression left = tr::and_(sat, ci);
       if (timed)
       {
         data::mutable_map_substitution<> sigma_ti;
         sigma_ti[parameters.T] = ti;
-        rhs = pbes_system::replace_variables_capture_avoiding(rhs, sigma_ti, data::substitution_variables(sigma_ti));
-        p = tr::and_(p, data::greater(ti, parameters.T));
+        right = pbes_system::replace_variables_capture_avoiding(right, sigma_ti, data::substitution_variables(sigma_ti));
+        left = tr::and_(left, data::greater(ti, parameters.T));
       }
       data::variable_list y = data::replace_variables(yi, sigma_yi);
-      p = is_must ? tr::forall(y, tr::imp(p, rhs)) : tr::exists(y, tr::and_(p, rhs));
-      v.push_back(derived().apply_must_may_result(p));
+      pbes_expression p = parameters.rhs_may_must(is_must, y, left, right, summand.multi_action(), gi, TermTraits());
+      v.push_back(derived().apply_may_must_result(p));
     }
 
     pbes_expression result = is_must ? tr::join_and(v.begin(), v.end()) : tr::join_or(v.begin(), v.end());
@@ -239,12 +373,12 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
   void apply(const state_formulas::must& x)
   {
-    apply_must_may(x, true);
+    apply_may_must(x, true);
   }
 
   void apply(const state_formulas::may& x)
   {
-    apply_must_may(x, false);
+    apply_may_must(x, false);
   }
 
   void leave(const state_formulas::yaled&)
@@ -395,7 +529,7 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
   using super::pop;
   using super::is_timed;
   using super::parameters;
-  using super::apply_must_may;
+  using super::apply_may_must;
   using super::derived;
 
   std::multiset<data::variable> variables;
@@ -454,13 +588,13 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
 
   // override
   template <typename MustMayExpression>
-  pbes_expression apply_must_may_rhs(const MustMayExpression& x)
+  pbes_expression apply_may_must_rhs(const MustMayExpression& x)
   {
     return RHS_structured(x.operand(), parameters, propvar_generator, rhs_structured_compute_variables(x.operand(), variables), sigma, Z, TermTraits());
   }
 
   // override
-  pbes_expression apply_must_may_result(const pbes_expression& p)
+  pbes_expression apply_may_must_result(const pbes_expression& p)
   {
     // generate a new equation 'Y(d) = p', and add Y(d) to v
     core::identifier_string Y = propvar_generator("Y");
@@ -473,12 +607,12 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
 
   void apply(const state_formulas::must& x)
   {
-    apply_must_may(x, true);
+    apply_may_must(x, true);
   }
 
   void apply(const state_formulas::may& x)
   {
-    apply_must_may(x, false);
+    apply_may_must(x, false);
   }
 };
 
