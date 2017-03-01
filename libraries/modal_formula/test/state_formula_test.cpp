@@ -18,12 +18,13 @@
 #include <iterator>
 #include <set>
 #include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/modal_formula/count_fixpoints.h"
 #include "mcrl2/modal_formula/find.h"
-#include "mcrl2/modal_formula/state_formula_rename.h"
+#include "mcrl2/modal_formula/maximal_closed_subformula.h"
 #include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/modal_formula/count_fixpoints.h"
-#include "mcrl2/modal_formula/maximal_closed_subformula.h"
+#include "mcrl2/modal_formula/preprocess_state_formula.h"
+#include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/lps/linearise.h"
