@@ -42,6 +42,32 @@ data::data_expression one_point_rule_select_element(const std::set<data::data_ex
   return *V.begin();
 }
 
+// creates a substitution from a set of (in-)equalities for a given list of quantifier variables
+// returns the substitution, and the subset of quantifier variables that are not used in the substitution
+std::pair<data::mutable_map_substitution<>, std::vector<data::variable> > make_one_point_rule_substitution(const std::map<data::variable, std::set<data::data_expression> >& equalities, const data::variable_list& quantifier_variables)
+{
+  using utilities::detail::contains;
+
+  data::mutable_map_substitution<> sigma;
+  std::vector<data::variable> remaining_variables;    // the quantifier variables that are not
+  std::set<data::variable> forbidden_variables;       // variables that may not be used in the substitution
+  for (const data::variable& v: quantifier_variables)
+  {
+    auto i = equalities.find(v);
+    if (i != equalities.end() && !contains(forbidden_variables, v))
+    {
+      data::data_expression rhs = data::detail::one_point_rule_select_element(i->second);
+      data::find_free_variables(rhs, std::inserter(forbidden_variables, forbidden_variables.end())); // N.B. free variables in rhs can no longer be used
+      sigma[v] = rhs;
+    }
+    else
+    {
+      remaining_variables.push_back(v);
+    }
+  }
+  return std::make_pair(sigma, remaining_variables);
+}
+
 template <typename Derived>
 class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
 {
@@ -63,27 +89,21 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
       std::map<variable, std::set<data_expression> > inequalities = find_inequalities(body);
       if (!inequalities.empty())
       {
-        mutable_map_substitution<> sigma;
-        for (const variable& v: x.variables())
+        auto p = make_one_point_rule_substitution(inequalities, x.variables());
+        data::mutable_map_substitution<>& sigma = p.first;
+        const std::vector<data::variable>& remaining_variables = p.second;
+        if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
         {
-          auto i = inequalities.find(v);
-          if (i != inequalities.end())
-          {
-            sigma[v] = one_point_rule_select_element(i->second);
-          }
-          else
-          {
-            variables.push_back(v);
-          }
-        }
-        if (variables.size() != x.variables().size()) // one or more substitutions were found
-        {
+          mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
           body = data::replace_variables_capture_avoiding(body, sigma, substitution_variables(sigma));
-          if (variables.empty())
+          mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
+          if (remaining_variables.empty())
           {
+            mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
             return body;
           }
-          variable_list v(variables.begin(), variables.end());
+          data::variable_list v(remaining_variables.begin(), remaining_variables.end());
+          mCRL2log(log::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
           return forall(v, body);
         }
       }
@@ -98,27 +118,21 @@ class one_point_rule_rewrite_builder: public data_expression_builder<Derived>
       std::map<variable, std::set<data_expression> > equalities = find_equalities(body);
       if (!equalities.empty())
       {
-        mutable_map_substitution<> sigma;
-        for (const variable& v: x.variables())
+        auto p = make_one_point_rule_substitution(equalities, x.variables());
+        data::mutable_map_substitution<>& sigma = p.first;
+        const std::vector<data::variable>& remaining_variables = p.second;
+        if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
         {
-          auto i = equalities.find(v);
-          if (i != equalities.end())
-          {
-            sigma[v] = one_point_rule_select_element(i->second);
-          }
-          else
-          {
-            variables.push_back(v);
-          }
-        }
-        if (variables.size() != x.variables().size()) // one or more substitutions were found
-        {
+          mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
           body = data::replace_variables_capture_avoiding(body, sigma, substitution_variables(sigma));
-          if (variables.empty())
+          mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
+          if (remaining_variables.empty())
           {
+            mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
             return body;
           }
-          variable_list v(variables.begin(), variables.end());
+          data::variable_list v(remaining_variables.begin(), remaining_variables.end());
+          mCRL2log(log::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
           return exists(v, body);
         }
       }

@@ -48,37 +48,26 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
   pbes_expression apply(const forall& x)
   {
     pbes_expression body = derived().apply(forall(x).body());
-    std::vector<data::variable> variables;
 
     std::map<data::variable, std::set<data::data_expression> > inequalities = find_inequalities(body);
     mCRL2log(log::debug) << "x = " << x << std::endl;
     mCRL2log(log::debug) << "\ninequalities(body) = " << data::print_inequalities(inequalities) << std::endl;
     if (!inequalities.empty())
     {
-      data::mutable_map_substitution<> sigma;
-      for (const data::variable& v: x.variables())
-      {
-        auto i = inequalities.find(v);
-        if (i != inequalities.end())
-        {
-          sigma[v] = data::detail::one_point_rule_select_element(i->second);
-        }
-        else
-        {
-          variables.push_back(v);
-        }
-      }
-      if (variables.size() != x.variables().size()) // one or more substitutions were found
+      auto p = data::detail::make_one_point_rule_substitution(inequalities, x.variables());
+      data::mutable_map_substitution<>& sigma = p.first;
+      const std::vector<data::variable>& remaining_variables = p.second;
+      if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
       {
         mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
         body = pbes_system::replace_variables_capture_avoiding(body, sigma, substitution_variables(sigma));
         mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
-        if (variables.empty())
+        if (remaining_variables.empty())
         {
           mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
           return body;
         }
-        data::variable_list v(variables.begin(), variables.end());
+        data::variable_list v(remaining_variables.begin(), remaining_variables.end());
         mCRL2log(log::debug) << "Replaced " << x << "\nwith " << forall(v, body) << std::endl;
         return forall(v, body);
       }
@@ -89,36 +78,25 @@ struct one_point_rule_rewrite_builder: public pbes_system::pbes_expression_build
   pbes_expression apply(const exists& x)
   {
     pbes_expression body = derived().apply(exists(x).body());
-    std::vector<data::variable> variables;
 
     std::map<data::variable, std::set<data::data_expression> > equalities = find_equalities(body);
     mCRL2log(log::debug) << "x = " << body << "\nequalities(x) = " << data::print_inequalities(equalities) << std::endl;
     if (!equalities.empty())
     {
-      data::mutable_map_substitution<> sigma;
-      for (const data::variable& v: x.variables())
-      {
-        auto i = equalities.find(v);
-        if (i != equalities.end())
-        {
-          sigma[v] = data::detail::one_point_rule_select_element(i->second);
-        }
-        else
-        {
-          variables.push_back(v);
-        }
-      }
-      if (variables.size() != x.variables().size()) // one or more substitutions were found
+      auto p = data::detail::make_one_point_rule_substitution(equalities, x.variables());
+      data::mutable_map_substitution<>& sigma = p.first;
+      const std::vector<data::variable>& remaining_variables = p.second;
+      if (remaining_variables.size() != x.variables().size()) // one or more substitutions were found
       {
         mCRL2log(log::debug) << "Apply substitution sigma = " << sigma << " to x = " << body << std::endl;
         body = pbes_system::replace_variables_capture_avoiding(body, sigma, substitution_variables(sigma));
         mCRL2log(log::debug) << "sigma(x) = " << body << std::endl;
-        if (variables.empty())
+        if (remaining_variables.empty())
         {
           mCRL2log(log::debug) << "Replaced " << x << "\nwith " << body << std::endl;
           return body;
         }
-        data::variable_list v(variables.begin(), variables.end());
+        data::variable_list v(remaining_variables.begin(), remaining_variables.end());
         mCRL2log(log::debug) << "Replaced " << x << "\nwith " << exists(v, body) << std::endl;
         return exists(v, body);
       }
