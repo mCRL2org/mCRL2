@@ -111,8 +111,9 @@ class lps2pbes_algorithm
       state_formulas::state_formula f = formula;
 
       std::set<core::identifier_string> lps_ids = lps::find_identifiers(lpsspec);
-      std::set<core::identifier_string> lps_variable_names = data::detail::variable_names(lps::find_all_variables(lpsspec));
-      f = state_formulas::preprocess_state_formula(f, lps_ids, lps_variable_names, preprocess_modal_operators);
+      std::set<core::identifier_string> dataspec_ids = data::function_and_mapping_identifiers(lpsspec.data());
+      lps_ids.insert(dataspec_ids.begin(), dataspec_ids.end());
+      f = state_formulas::preprocess_state_formula(f, lps_ids, preprocess_modal_operators);
 
       data::set_identifier_generator id_generator;
       std::set<core::identifier_string> ids = lps::find_identifiers(lpsspec);

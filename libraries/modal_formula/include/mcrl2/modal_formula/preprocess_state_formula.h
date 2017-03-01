@@ -340,8 +340,7 @@ state_formula preprocess_nested_modal_operators(const state_formula& x)
 /// \return The preprocessed formula.
 inline
 state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula,
-                                                       const std::set<core::identifier_string>& /* context_ids */,
-                                                       const std::set<core::identifier_string>& /* context_variable_names */,
+                                                       const std::set<core::identifier_string>& context_ids,
                                                        bool preprocess_modal_operators,
                                                        bool warn_for_modal_operator_nesting = true
                                                       )
@@ -364,7 +363,9 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   mCRL2log(log::debug) << "formula before preprocessing: " << f << std::endl;
 
   // rename data variables in f, to prevent name clashes with data variables in the context
-  f = state_formulas::rename_variables(f, state_formulas::find_identifiers(f));
+  std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
+  ids.insert(context_ids.begin(), context_ids.end());
+  f = state_formulas::rename_variables(f, ids);
 
   // rename predicate variables in f, to prevent name clashes
   data::xyz_identifier_generator xyz_generator;

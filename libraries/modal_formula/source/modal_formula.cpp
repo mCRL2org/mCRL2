@@ -15,7 +15,6 @@
 #include "mcrl2/modal_formula/is_timed.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/normalize.h"

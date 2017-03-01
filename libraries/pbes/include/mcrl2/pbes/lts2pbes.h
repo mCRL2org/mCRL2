@@ -49,14 +49,13 @@ class lts2pbes_algorithm
 
     /// \brief Runs the translation algorithm
     /// \param formspec A state formula specification.
-    /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed 
+    /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed
     //                                    for a more compact translation.
     /// \return The result of the translation
     pbes run(const state_formulas::state_formula_specification& formspec, bool preprocess_modal_operators = false)
     {
       std::set<core::identifier_string> lts_ids;
-      std::set<core::identifier_string> lts_variable_names;
-      state_formulas::state_formula f = state_formulas::preprocess_state_formula(formspec.formula(), lts_ids, lts_variable_names, preprocess_modal_operators);
+      state_formulas::state_formula f = state_formulas::preprocess_state_formula(formspec.formula(), lts_ids, preprocess_modal_operators);
 
       // initialize progress meter
       std::size_t num_fixpoints = state_formulas::count_fixpoints(f);

@@ -913,6 +913,23 @@ inline variable_list order_variables_to_optimise_enumeration(const variable_list
   return rest_vars;
 }
 
+/// \brief Returns the names of functions and mappings that occur in a data specification.
+/// \param[in] dataspec A data specification
+inline
+std::set<core::identifier_string> function_and_mapping_identifiers(const data_specification& dataspec)
+{
+  std::set<core::identifier_string> result;
+  for (auto const& f: dataspec.constructors())
+  {
+    result.insert(f.name());
+  }
+  for (auto const& f: dataspec.mappings())
+  {
+    result.insert(f.name());
+  }
+  return result;
+}
+
 } // namespace data
 
 } // namespace mcrl2
