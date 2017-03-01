@@ -14,17 +14,13 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/parse.h"
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/pbes/detail/normalize_and_or.h"
-#include "mcrl2/pbes/detail/data2pbes_rewriter.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
@@ -99,7 +95,7 @@ void test_one_point_rule_rewriter(const std::string& expr1, const std::string& e
   ));
 }
 
-void test_one_point_rule_rewriter()
+BOOST_AUTO_TEST_CASE(one_point_rule_rewriter_test)
 {
   std::cout << "<test_one_point_rule_rewriter>" << std::endl;
   test_one_point_rule_rewriter("forall n: Nat. val(n != 3) || val(n == 5)", "val(false)");
@@ -113,10 +109,21 @@ void test_one_point_rule_rewriter()
   test_one_point_rule_rewriter("forall p: Bool, q: Bool. val(!(p == q)) || val(!q) || val(!(p == true))", "val(false)");
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(ticket_1388)
+{
+  std::string text =
+    "pbes mu X = exists e: Bool. exists b: Bool, d: Bool. val(b == e) && val(d == b);\n"
+    "init X;\n"
+    ;
+  bool normalize = false;
+  pbes p = txt2pbes(text, normalize);
+  one_point_rule_rewriter R;
+  pbes_rewrite(p, R);
+  BOOST_CHECK(p.is_closed());
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   log::mcrl2_logger::set_reporting_level(log::debug, "one_point_rewriter");
-  test_one_point_rule_rewriter();
-
-  return 0;
+  return nullptr;
 }
