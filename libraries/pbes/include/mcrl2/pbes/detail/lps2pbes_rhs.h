@@ -58,6 +58,7 @@ struct lps2pbes_parameters
                                const pbes_expression& left,  // Sat(ai(fi(x,y)) && ci(x,y) && (ti(x,y) > T)
                                const pbes_expression& right, // RHS(phi)[T, x := ti(x,y), gi(x,y)]
                                const lps::multi_action& /* ai */,
+                               const lps::multi_action& /* ai1 */,
                                const data::assignment_list& /* gi */,
                                TermTraits
                               )
@@ -76,10 +77,11 @@ struct lps2pbes_parameters
 
 struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
 {
-  data::variable_list d1;                                 // d'
-  data::mutable_map_substitution<> sigma;                 // the substitution [d := d'], where d is the sequence of process parameters of lps
+  data::variable_list d1;                                   // d'
+  data::mutable_map_substitution<> sigma;                   // the substitution [d := d'], where d is the sequence of process parameters of lps
   std::set<data::variable> sigma_variables;
-  std::map<lps::multi_action, propositional_variable> Za; // represents the additional equations { nu Zai(d, fi(x,y), d') = true }
+  std::map<lps::multi_action, propositional_variable> Zpos; // represents the additional equations { nu Zpos_ai(d, fi(x,y), d') = true }
+  std::map<lps::multi_action, propositional_variable> Zneg; // represents the additional equations { nu Zneg_ai(d, fi(x,y), d') = false }
 
   // creates variables corresponding to the action label sorts in actions
   data::variable_list action_variables(const process::action_list& actions) const
@@ -112,7 +114,12 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
   std::vector<pbes_equation> equations() const
   {
     std::vector<pbes_equation> result;
-    for (auto const& p: Za)
+    for (auto const& p: Zneg)
+    {
+      pbes_equation eqn(fixpoint_symbol::nu(), p.second, false_());
+      result.push_back(eqn);
+    }
+    for (auto const& p: Zpos)
     {
       pbes_equation eqn(fixpoint_symbol::nu(), p.second, true_());
       result.push_back(eqn);
@@ -125,7 +132,7 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     std::vector<std::string> v;
     for (const process::action& ai: a.actions())
     {
-      v.push_back(std::string(a.name()));
+      v.push_back(std::string(ai.label().name()));
     }
     return utilities::string_join(v, "_");
   }
@@ -145,8 +152,10 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     for (const lps::action_summand& summand: lps.action_summands())
     {
       const lps::multi_action& ai = summand.multi_action();
-      core::identifier_string Z = id_generator("CE_" + multi_action_name(ai));
-      Za[ai] = propositional_variable(Z, d + action_variables(ai.actions()) + d1);
+      core::identifier_string pos = id_generator("Zpos_" + multi_action_name(ai));
+      core::identifier_string neg = id_generator("Zneg_" + multi_action_name(ai));
+      Zpos[ai] = propositional_variable(pos, d + action_variables(ai.actions()) + d1);
+      Zneg[ai] = propositional_variable(neg, d + action_variables(ai.actions()) + d1);
     }
   }
 
@@ -168,6 +177,7 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
                                const pbes_expression& left,  // Sat(ai(fi(x,y)) && ci(x,y) && (ti(x,y) > T)
                                const pbes_expression& right, // RHS(phi)[T, x := ti(x,y), gi(x,y)]
                                const lps::multi_action& ai,
+                               const lps::multi_action& ai1,
                                const data::assignment_list& gi,
                                TermTraits
                               )
@@ -175,18 +185,23 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     typedef TermTraits tr;
     const data::variable_list& d = lps.process_parameters();
     data::data_expression_list e1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
-    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai.actions()) + atermpp::container_cast<data::data_expression_list>(d1);
-    propositional_variable_instantiation Zai(Za.at(ai).name(), da);
+    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai1.actions()) + atermpp::container_cast<data::data_expression_list>(d1);
     pbes_expression left1 = tr::and_(left, equal_to(d1, e1));
-    pbes_expression right1 = tr::and_(pbes_system::replace_variables_capture_avoiding(right, sigma, sigma_variables), Zai);
+    propositional_variable_instantiation Pos(Zpos.at(ai).name(), da);
+    propositional_variable_instantiation Neg(Zneg.at(ai).name(), da);
+    pbes_expression right1 = pbes_system::replace_variables_capture_avoiding(right, sigma, sigma_variables);
+    data::variable_list y_d1 = y + d1;
+    y_d1 = data::replace_variables(y_d1, sigma);
 
     if (is_must)
     {
-      return tr::forall(y + d1, tr::imp(left1, right1));
+      right1 = tr::or_(tr::and_(right1, Pos), Neg);
+      return tr::forall(y_d1, tr::imp(left1, right1));
     }
     else
     {
-      return tr::exists(y + d1, tr::and_(left1, right1));
+      right1 = tr::and_(tr::or_(right1, Neg), Pos);
+      return tr::exists(y_d1, tr::and_(left1, right1));
     }
   }
 };
@@ -374,7 +389,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
         left = tr::and_(left, data::greater(ti, parameters.T));
       }
       data::variable_list y = data::replace_variables(yi, sigma_yi);
-      pbes_expression p = parameters.rhs_may_must(is_must, y, left, right, summand.multi_action(), gi, TermTraits());
+      pbes_expression p = parameters.rhs_may_must(is_must, y, left, right, summand.multi_action(), ai, gi, TermTraits());
       v.push_back(derived().apply_may_must_result(p));
     }
 
