@@ -58,7 +58,6 @@ struct lps2pbes_parameters
                                const pbes_expression& left,  // Sat(ai(fi(x,y)) && ci(x,y) && (ti(x,y) > T)
                                const pbes_expression& right, // RHS(phi)[T, x := ti(x,y), gi(x,y)]
                                const lps::multi_action& /* ai */,
-                               const lps::multi_action& /* ai1 */,
                                const data::assignment_list& /* gi */,
                                TermTraits
                               )
@@ -177,31 +176,28 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
                                const pbes_expression& left,  // Sat(ai(fi(x,y)) && ci(x,y) && (ti(x,y) > T)
                                const pbes_expression& right, // RHS(phi)[T, x := ti(x,y), gi(x,y)]
                                const lps::multi_action& ai,
-                               const lps::multi_action& ai1,
                                const data::assignment_list& gi,
                                TermTraits
                               )
   {
     typedef TermTraits tr;
     const data::variable_list& d = lps.process_parameters();
-    data::data_expression_list e1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
-    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai1.actions()) + atermpp::container_cast<data::data_expression_list>(d1);
-    pbes_expression left1 = tr::and_(left, equal_to(d1, e1));
+    data::data_expression_list gi1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
+    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai.actions()) + atermpp::container_cast<data::data_expression_list>(d1);
+    pbes_expression left1 = tr::and_(left, equal_to(d1, gi1));
     propositional_variable_instantiation Pos(Zpos.at(ai).name(), da);
     propositional_variable_instantiation Neg(Zneg.at(ai).name(), da);
     pbes_expression right1 = pbes_system::replace_variables_capture_avoiding(right, sigma, sigma_variables);
-    data::variable_list y_d1 = y + d1;
-    y_d1 = data::replace_variables(y_d1, sigma);
 
     if (is_must)
     {
       right1 = tr::or_(tr::and_(right1, Pos), Neg);
-      return tr::forall(y_d1, tr::imp(left1, right1));
+      return tr::forall(y + d1, tr::imp(left1, right1));
     }
     else
     {
       right1 = tr::and_(tr::or_(right1, Neg), Pos);
-      return tr::exists(y_d1, tr::and_(left1, right1));
+      return tr::exists(y + d1, tr::and_(left1, right1));
     }
   }
 };
@@ -361,17 +357,12 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
 
     for (const lps::action_summand& summand: parameters.lps.action_summands())
     {
-      data::data_expression ci      = summand.condition();
-      lps::multi_action ai          = summand.multi_action();
-      data::assignment_list gi      = summand.assignments();
-      const data::variable_list& yi = summand.summation_variables();
+      const data::data_expression& ci = summand.condition();
+      const lps::multi_action& ai     = summand.multi_action();
+      const data::assignment_list& gi = summand.assignments();
+      const data::variable_list& yi   = summand.summation_variables();
 
       pbes_expression right = rhs0;
-      data::mutable_map_substitution<> sigma_yi = pbes_system::detail::make_fresh_variable_substitution(yi, parameters.id_generator);
-      std::set<data::variable> sigma_yi_variables = data::substitution_variables(sigma_yi);
-      ci = data::replace_variables_capture_avoiding(ci, sigma_yi, sigma_yi_variables);
-      lps::replace_variables_capture_avoiding(ai, sigma_yi, sigma_yi_variables);
-      gi = data::replace_variables_capture_avoiding(gi, sigma_yi, sigma_yi_variables);
       const data::data_expression& ti = ai.time();
       pbes_expression sat = Sat(ai, alpha, parameters.id_generator, TermTraits());
       data::mutable_map_substitution<> sigma_gi;
@@ -388,8 +379,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
         right = pbes_system::replace_variables_capture_avoiding(right, sigma_ti, data::substitution_variables(sigma_ti));
         left = tr::and_(left, data::greater(ti, parameters.T));
       }
-      data::variable_list y = data::replace_variables(yi, sigma_yi);
-      pbes_expression p = parameters.rhs_may_must(is_must, y, left, right, summand.multi_action(), ai, gi, TermTraits());
+      pbes_expression p = parameters.rhs_may_must(is_must, yi, left, right, ai, gi, TermTraits());
       v.push_back(derived().apply_may_must_result(p));
     }
 
