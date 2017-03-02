@@ -143,7 +143,7 @@ class BDD_Prover: protected rewriter
 
     /// \brief A hashtable that maps formulas to the smallest guard occuring in those formulas.
     /// \brief If the smallest guard of a formula is unknown, it maps this formula to 0.
-    std::map < data_expression, data_expression > f_smallest;
+    std::map < data_expression, std::pair<data_expression, data_expression> > f_smallest;
 
     /// \brief Class that provides information about the structure of BDDs.
     BDD_Info f_bdd_info;
@@ -213,37 +213,51 @@ class BDD_Prover: protected rewriter
         return a_formula;
       }
 
+      if (is_abstraction(a_formula))
+      {
+        const abstraction a(atermpp::down_cast<abstraction>(a_formula));
+        return abstraction(a.binding_operator(), a.variables(), bdd_down(a.body(), a_indent));
+      }
+
       const std::map < data_expression, data_expression >::const_iterator i = f_formula_to_bdd.find(a_formula);
       if (i!=f_formula_to_bdd.end()) // found
       {
         return i->second;
       }
 
-      data_expression v_guard = smallest(a_formula);
-      if (v_guard==data_expression())
+      std::pair<data_expression, data_expression> v_guard = smallest(a_formula);
+      if (v_guard.first==data_expression() && v_guard.second==data_expression())
       {
         return a_formula;
       }
-      else
+      mCRL2log(log::debug) << a_indent << "Smallest positive guard: " << v_guard.first
+                                     << ", smallest negative guard: " << v_guard.second << std::endl;
+      
+      if(sort_bool::is_or_application(a_formula))
       {
-        mCRL2log(log::debug) << a_indent << "Smallest guard: " << v_guard << std::endl;
+        std::swap(v_guard.first, v_guard.second);
       }
+      if(v_guard.first == data_expression())
+      {
+        std::swap(v_guard.first, v_guard.second);
+      }
+      data_expression& v_smallest = v_guard.first;
 
-      data_expression v_term1 = f_manipulator.set_true(a_formula, v_guard);
+      data_expression v_term1 = f_manipulator.set_true(a_formula, v_smallest);
       v_term1 = m_rewriter->rewrite(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
       mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
       v_term1 = bdd_down(v_term1, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << v_term1 << std::endl;
 
-      data_expression v_term2 = f_manipulator.set_false(a_formula, v_guard);
+      data_expression v_term2 = f_manipulator.set_false(a_formula, v_smallest);
       v_term2 = m_rewriter->rewrite(v_term2,bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
       mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << v_term2 << std::endl;
 
-      data_expression v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
+      data_expression v_bdd = f_manipulator.make_reduced_if_then_else(v_smallest, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
 
       a_indent.erase(a_indent.size() - 2);
@@ -338,58 +352,76 @@ class BDD_Prover: protected rewriter
       }
     };
 
-    /// \brief Returns the smallest guard in the formula a_formula.
-    data_expression smallest(data_expression a_formula)
+    data_expression min_expr(data_expression a, data_expression b)
+    {
+      if(a == data_expression())
+      {
+        return b;
+      }
+      else if(b == data_expression())
+      {
+        return a;
+      }
+      else if(f_info.lpo1(a,b))
+      {
+        return b;
+      }
+      else
+      {
+        return a;
+      }
+    }
+
+    /// \brief Returns a pair of the smallest non-negated guard and the smallest
+    /// \brief negated guard
+    std::pair<data_expression, data_expression> smallest(data_expression a_formula)
     {
       if (is_variable(a_formula))
       {
         if (a_formula.sort()==sort_bool::bool_())
         {
-          return a_formula;
+          return std::make_pair(a_formula, data_expression());
         }
         else
         {
-          return data_expression();
+          return std::make_pair(data_expression(), data_expression());
         }
       }
       if (a_formula==sort_bool::true_() || a_formula==sort_bool::false_())
       {
-        return data_expression();
+        return std::make_pair(data_expression(), data_expression());
+      }
+      if (is_abstraction(a_formula))
+      {
+        return smallest(atermpp::down_cast<abstraction>(a_formula).body());
       }
 
-      const std::map < data_expression, data_expression >::const_iterator i = f_smallest.find(a_formula);
+      const std::map < data_expression, std::pair<data_expression, data_expression> >::const_iterator i = f_smallest.find(a_formula);
       if (i!=f_smallest.end()) //found
       {
         return i->second;
       }
 
-      data_expression v_result;
+      std::pair<data_expression, data_expression> v_result;
 
       size_t v_length = f_info.get_number_of_arguments(a_formula);
 
       for (size_t s = 0; s < v_length; s++)
       {
-        const data_expression v_small = smallest(f_info.get_argument(a_formula, s));
-        if (v_small!=data_expression())
-        {
-          if (v_result!=data_expression())
-          {
-            if (f_info.lpo1(v_result, v_small))
-            {
-              v_result = v_small;
-            }
-          }
-          else
-          {
-            v_result = v_small;
-          }
-        }
+        const std::pair<data_expression, data_expression> v_small = smallest(f_info.get_argument(a_formula, s));
+        v_result.first = min_expr(v_result.first, v_small.first);
+        v_result.second = min_expr(v_result.second, v_small.second);
       }
-      if (v_result==data_expression() && a_formula.sort()==sort_bool::bool_())
+      if (v_result.first==data_expression() && a_formula.sort()==sort_bool::bool_())
       {
-        v_result = a_formula;
+        v_result.first = a_formula;
       }
-      if (v_result!=data_expression())
+
+      if(sort_bool::is_not_application(a_formula))
+      {
+        std::swap(v_result.first, v_result.second);
+      }
+      if (v_result.first!=data_expression() || v_result.second!=data_expression())
       {
         f_smallest[a_formula]=v_result;
       }

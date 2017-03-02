@@ -157,7 +157,7 @@ class Info
       {
         return 0;
       }
-      if (is_equality(a_guard))
+      if (is_equal_to_application(a_guard))
       {
         data_expression v_term1, v_term2;
 
@@ -189,7 +189,7 @@ class Info
     /// \brief Compares two guards by their arguments.
     Compare_Result compare_guard_equality(const data_expression& a_guard1, const data_expression& a_guard2)
     {
-      if (f_full && is_equality(a_guard1) && is_equality(a_guard2))
+      if (f_full && is_equal_to_application(a_guard1) && is_equal_to_application(a_guard2))
       {
         data_expression v_g1a0, v_g1a1, v_g2a0, v_g2a1;
 
@@ -317,7 +317,7 @@ class Info
     ///         The number of arguments of the main operator, otherwise.
     size_t get_number_of_arguments(const data_expression& a_term)
     {
-      if (!is_variable(a_term) && !is_function_symbol(a_term))
+      if (!is_variable(a_term) && !is_function_symbol(a_term) && !is_abstraction(a_term))
       {
         return a_term.size() - 1;
       }
@@ -332,7 +332,11 @@ class Info
     {
       if (is_function_symbol(a_term))
       {
-         return a_term;
+        return a_term;
+      }
+      if (is_abstraction(a_term))
+      {
+        return get_operator(atermpp::down_cast<abstraction>(a_term).body());
       }
       const application& a = atermpp::down_cast<application>(a_term);
       return get_operator(a.head());
@@ -342,29 +346,6 @@ class Info
     data_expression get_argument(const data_expression& a_term, const size_t a_number)
     {
       return data_expression(a_term[a_number + 1]);
-    }
-
-    /// \brief Indicates whether or not a term is an equality.
-    bool is_equality(const data_expression& a_term)
-    {
-      if (!is_application(a_term))
-      {
-         return false;
-      }
-
-      const application& a = atermpp::down_cast<application>(a_term);
-      if (a.size() != 2)
-      {
-        return false;
-      }
-
-      if (!is_function_symbol(a.head()))
-      {
-        return false;
-      }
-
-      const data::function_symbol& f = atermpp::down_cast<function_symbol>(a.head());
-      return static_cast<const std::string&>(f.name())=="==";
     }
 };
 
