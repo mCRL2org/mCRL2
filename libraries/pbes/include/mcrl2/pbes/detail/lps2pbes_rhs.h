@@ -183,7 +183,7 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     typedef TermTraits tr;
     const data::variable_list& d = lps.process_parameters();
     data::data_expression_list gi1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
-    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai.actions()) + atermpp::container_cast<data::data_expression_list>(d1);
+    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai.actions()) + gi1;
     pbes_expression left1 = tr::and_(left, equal_to(d1, gi1));
     propositional_variable_instantiation Pos(Zpos.at(ai).name(), da);
     propositional_variable_instantiation Neg(Zneg.at(ai).name(), da);
@@ -365,20 +365,21 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       pbes_expression right = rhs0;
       const data::data_expression& ti = ai.time();
       pbes_expression sat = Sat(ai, alpha, parameters.id_generator, TermTraits());
-      data::mutable_map_substitution<> sigma_gi;
+      data::mutable_map_substitution<> sigma;
       for (const data::assignment& a: gi)
       {
-        sigma_gi[a.lhs()] = a.rhs();
+        sigma[a.lhs()] = a.rhs();
       }
-      right = pbes_system::replace_variables_capture_avoiding(right, sigma_gi, data::substitution_variables(sigma_gi));
       pbes_expression left = tr::and_(sat, ci);
+
       if (timed)
       {
-        data::mutable_map_substitution<> sigma_ti;
-        sigma_ti[parameters.T] = ti;
-        right = pbes_system::replace_variables_capture_avoiding(right, sigma_ti, data::substitution_variables(sigma_ti));
+        sigma[parameters.T] = ti;
         left = tr::and_(left, data::greater(ti, parameters.T));
       }
+
+      right = pbes_system::replace_variables_capture_avoiding(right, sigma, data::substitution_variables(sigma));
+
       pbes_expression p = parameters.rhs_may_must(is_must, yi, left, right, ai, gi, TermTraits());
       v.push_back(derived().apply_may_must_result(p));
     }

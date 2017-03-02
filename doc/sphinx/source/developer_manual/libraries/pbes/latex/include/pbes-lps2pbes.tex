@@ -155,7 +155,7 @@ T%
 %-------------------------------------%
 \begin{equation*}
 \begin{array}{lll}
-{\mathbf{E}}(c) & =_{def} & \epsilon  \\ 
+{\mathbf{E}}(c) & =_{def} & \epsilon \\ 
 {\mathbf{E}}(\varphi \wedge \psi ) & =_{def} & {\mathbf{E}}(\varphi ){%
 \mathbf{E}}(\psi ) \\ 
 {\mathbf{E}}(\varphi \vee \psi ) & =_{def} & {\mathbf{E}}(\varphi ){\mathbf{E%
@@ -165,11 +165,11 @@ T%
 {\mathbf{E}}([\alpha ]\varphi ) & =_{def} & {\mathbf{E}}(\varphi ) \\ 
 {\mathbf{E}}(\langle \alpha \rangle \varphi ) & =_{def} & {\mathbf{E}}%
 (\varphi ) \\ 
-{\mathbf{E}}(\nabla ) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\nabla (t)) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\Delta ) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(\Delta (t)) & =_{def} & \epsilon  \\ 
-{\mathbf{E}}(X(e)) & =_{def} & \epsilon  \\ 
+{\mathbf{E}}(\nabla ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\nabla (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\Delta ) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(\Delta (t)) & =_{def} & \epsilon \\ 
+{\mathbf{E}}(X(e)) & =_{def} & \epsilon \\ 
 {\mathbf{E}}(\sigma X(x_{f}{:}D_{f}:=e).~\varphi )~~~ & =_{def}~~~ & (%
 \widetilde{\sigma }X(T:\mathbb{R},x_{f}{:}D_{f},x{:}D_{p},\mathbf{Par}%
 _{X,[]}(\varphi _{0}))={\mathbf{RHS}}(\varphi )~)~{\mathbf{E}}(\varphi )%
@@ -184,29 +184,26 @@ In counter example generation, the function RHS is adapted as follows:%
 \begin{equation*}
 \begin{array}{lll}
 {\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
-{:}E_{i},d^{\prime }{:}D_{p}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y))\mbox{\aap
-,}t_{i}(x,y),\alpha )\ \wedge c_{i}(x,y)\wedge t_{i}(x,y)>T\ \wedge
-d^{\prime }=g_{i}(x,y)\right) \Rightarrow  \\ 
+{:}E_{i}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y))\mbox{\aap
+,}t_{i}(x,y),\alpha )\ \wedge c_{i}(x,y)\right) \Rightarrow  \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}\left( \left( {%
-\mathbf{RHS}}(\varphi )[T,x:=t_{i}(x,y),g_{i}(x,y)][x:=d^{\prime }]\wedge
-Z_{a_{i}}^{+}(x,f_{i}(x,y),d^{\prime })\right) \vee
-Z_{a_{i}}^{-}(x,f_{i}(x,y),d^{\prime })\right)  \\ 
+\mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)]\wedge
+Z_{a_{i}}^{+}(x,f_{i}(x,y),g_{i}(x,y))\right) \vee
+Z_{a_{i}}^{-}(x,f_{i}(x,y),g_{i}(x,y))\right)  \\ 
 {\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
-I}\exists _{y{:}E_{i},d^{\prime }{:}D_{p}}\left( \mathbf{Sat}%
-(a_{i}(f_{i}(x,y))\mbox{\aap
-,}t_{i}(x,y),\alpha )\ \wedge c_{i}(x,y)\wedge t_{i}(x,y)>T\ \wedge
-d^{\prime }=g_{i}(x,y)\right) \wedge  \\ 
+I}\exists _{y{:}E_{i}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y))\mbox{\aap
+,}t_{i}(x,y),\alpha )\ \wedge c_{i}(x,y)\right) \wedge  \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}\left( \left( {%
-\mathbf{RHS}}(\varphi )[T,x:=t_{i}(x,y),g_{i}(x,y)][x:=d^{\prime }]\vee
-Z_{a_{i}}^{-}(x,f_{i}(x,y),d^{\prime })\right) \wedge
-Z_{a_{i}}^{+}(x,f_{i}(x,y),d^{\prime })\right) ,%
+\mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)]\vee
+Z_{a_{i}}^{-}(x,f_{i}(x,y),g_{i}(x,y))\right) \wedge
+Z_{a_{i}}^{+}(x,f_{i}(x,y),g_{i}(x,y))\right) ,%
 \end{array}%
 \end{equation*}%
 where $\nu Z_{a_{i}}^{+}(x,f_{i}(x,y),d^{\prime })=true$ and $\nu
 Z_{a_{i}}^{-}(x,f_{i}(x,y),d^{\prime })=false$ are additional equations for
 every $a_{i}$ that appears in the LPS.
 
-\newpage 
+\newpage
 
 \section{Transforming an LTS to a PBES}
 
