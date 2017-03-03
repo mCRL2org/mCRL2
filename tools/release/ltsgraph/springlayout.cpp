@@ -23,7 +23,11 @@ namespace Graph
 
   inline float frand(float min, float max)
   {
-    return ((float)qrand() / RAND_MAX) * (max - min) + min;
+    //return ((float)qrand() / RAND_MAX) * (max - min) + min;
+    // Fast pseudo rand, source: http://www.musicdsp.org/showone.php?id=273
+    static int32_t seed = 1;
+    seed *= 16807;
+    return ((((float)seed) * 4.6566129e-010f) + 1.0) * (max - min) / 2.0 + min;
   }
 
   inline float cube(float x)
@@ -114,94 +118,118 @@ namespace Graph
 
   void SpringLayout::apply()
   {
-    m_nforces.resize(m_graph.nodeCount());
-    m_hforces.resize(m_graph.edgeCount());
-    m_lforces.resize(m_graph.edgeCount());
-    m_sforces.resize(m_graph.nodeCount());
+    m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
-    for (size_t n = 0; n < m_graph.nodeCount(); ++n)
+    if (!m_graph.stable())
     {
-      m_nforces[n] = Coord3D(0, 0, 0);
-      for (size_t m = 0; m < n; ++m)
+      bool sel = m_graph.hasSelection();
+      size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
+      size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+
+      m_nforces.resize(m_graph.nodeCount()); // Todo: compact this
+      m_hforces.resize(m_graph.edgeCount());
+      m_lforces.resize(m_graph.edgeCount());
+      m_sforces.resize(m_graph.nodeCount());
+
+      for (size_t i = 0; i < nodeCount; ++i)
       {
-        Coord3D diff = repulsionForce(m_graph.node(n).pos(), m_graph.node(m).pos(), m_repulsion, m_natLength);
-        m_nforces[n] += diff;
-        m_nforces[m] -= diff;
-      }
-      m_sforces[n] = (this->*m_forceCalculation)(m_graph.node(n).pos(), m_graph.stateLabel(n).pos(), 0.0);
-    }
+        size_t n = sel ? m_graph.selectionNode(i) : i;
 
-    for (size_t n = 0; n < m_graph.edgeCount(); ++n)
-    {
-      Edge e = m_graph.edge(n);
-      Coord3D f;
-      // Variables for repulsion calculations
+        m_nforces[n] = Coord3D(0, 0, 0);
+        for (size_t j = 0; j < i; ++j)
+        {
+          size_t m = sel ? m_graph.selectionNode(j) : j;
 
-      m_hforces[n] = Coord3D(0, 0, 0);
-      m_lforces[n] = Coord3D(0, 0, 0);
-
-      if (e.from() == e.to())
-      {
-        m_hforces[n] += repulsionForce(m_graph.handle(n).pos(), m_graph.node(e.from()).pos(), m_repulsion, m_natLength);
+          Coord3D diff = repulsionForce(m_graph.node(n).pos(), m_graph.node(m).pos(), m_repulsion, m_natLength);
+          m_nforces[n] += diff;
+          m_nforces[m] -= diff;
+        }
+        m_sforces[n] = (this->*m_forceCalculation)(m_graph.node(n).pos(), m_graph.stateLabel(n).pos(), 0.0);
       }
 
-      f = (this->*m_forceCalculation)(m_graph.node(e.to()).pos(), m_graph.node(e.from()).pos(), m_natLength);
-      m_nforces[e.from()] += f;
-      m_nforces[e.to()] -= f;
-
-      f = (this->*m_forceCalculation)((m_graph.node(e.to()).pos() + m_graph.node(e.from()).pos()) / 2.0, m_graph.handle(n).pos(), 0.0);
-      m_hforces[n] += f;
-
-      f = (this->*m_forceCalculation)(m_graph.handle(n).pos(), m_graph.transitionLabel(n).pos(), 0.0);
-      m_lforces[n] += f;
-
-      for (size_t m = 0; m < n; ++m)
+      for (size_t i = 0; i < edgeCount; ++i)
       {
-        // Handles
-        f = repulsionForce(m_graph.handle(n).pos(), m_graph.handle(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
+        size_t n = sel ? m_graph.selectionEdge(i) : i;
+
+        Edge e = m_graph.edge(n);
+        Coord3D f;
+        // Variables for repulsion calculations
+
+        m_hforces[n] = Coord3D(0, 0, 0);
+        m_lforces[n] = Coord3D(0, 0, 0);
+
+        if (e.from() == e.to())
+        {
+          m_hforces[n] += repulsionForce(m_graph.handle(n).pos(), m_graph.node(e.from()).pos(), m_repulsion, m_natLength);
+        }
+
+        f = (this->*m_forceCalculation)(m_graph.node(e.to()).pos(), m_graph.node(e.from()).pos(), m_natLength);
+        m_nforces[e.from()] += f;
+        m_nforces[e.to()] -= f;
+
+        f = (this->*m_forceCalculation)((m_graph.node(e.to()).pos() + m_graph.node(e.from()).pos()) / 2.0, m_graph.handle(n).pos(), 0.0);
         m_hforces[n] += f;
-        m_hforces[m] -= f;
 
-        // Labels
-        f = repulsionForce(m_graph.transitionLabel(n).pos(), m_graph.transitionLabel(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
+        f = (this->*m_forceCalculation)(m_graph.handle(n).pos(), m_graph.transitionLabel(n).pos(), 0.0);
         m_lforces[n] += f;
-        m_lforces[m] -= f;
-      }
-    }
 
-    for (size_t n = 0; n < m_graph.nodeCount(); ++n)
-    {
-      if (!m_graph.node(n).anchored())
-      {
-        m_graph.node(n).pos() = m_graph.node(n).pos() + m_nforces[n] * m_speed;
-        m_graph.node(n).pos().clip(m_clipMin, m_clipMax);
-      }
-      if (!m_graph.stateLabel(n).anchored())
-      {
-        m_graph.stateLabel(n).pos() = m_graph.stateLabel(n).pos() + m_sforces[n] * m_speed;
-        m_graph.stateLabel(n).pos().clip(m_clipMin, m_clipMax);
-      }
-    }
+        for (size_t j = 0; j < i; ++j)
+        {
+          size_t m = sel ? m_graph.selectionEdge(j) : j;
 
-    for (size_t n = 0; n < m_graph.edgeCount(); ++n)
-    {
-      if (!m_graph.handle(n).anchored())
-      {
-        m_graph.handle(n).pos() = m_graph.handle(n).pos() + m_hforces[n] * m_speed;
-        m_graph.handle(n).pos().clip(m_clipMin, m_clipMax);
+          // Handles
+          f = repulsionForce(m_graph.handle(n).pos(), m_graph.handle(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
+          m_hforces[n] += f;
+          m_hforces[m] -= f;
+
+          // Labels
+          f = repulsionForce(m_graph.transitionLabel(n).pos(), m_graph.transitionLabel(m).pos(), m_repulsion * m_controlPointWeight, m_natLength);
+          m_lforces[n] += f;
+          m_lforces[m] -= f;
+        }
       }
-      if (!m_graph.transitionLabel(n).anchored())
+
+      for (size_t i = 0; i < nodeCount; ++i)
       {
-        m_graph.transitionLabel(n).pos() = m_graph.transitionLabel(n).pos() + m_lforces[n] * m_speed;
-        m_graph.transitionLabel(n).pos().clip(m_clipMin, m_clipMax);
+        size_t n = sel ? m_graph.selectionNode(i) : i;
+
+        if (!m_graph.node(n).anchored())
+        {
+          m_graph.node(n).pos() = m_graph.node(n).pos() + m_nforces[n] * m_speed;
+          m_graph.node(n).pos().clip(m_clipMin, m_clipMax);
+        }
+        if (!m_graph.stateLabel(n).anchored())
+        {
+          m_graph.stateLabel(n).pos() = m_graph.stateLabel(n).pos() + m_sforces[n] * m_speed;
+          m_graph.stateLabel(n).pos().clip(m_clipMin, m_clipMax);
+        }
+      }
+
+      for (size_t i = 0; i < edgeCount; ++i)
+      {
+        size_t n = sel ? m_graph.selectionEdge(i) : i;
+
+        if (!m_graph.handle(n).anchored())
+        {
+          m_graph.handle(n).pos() = m_graph.handle(n).pos() + m_hforces[n] * m_speed;
+          m_graph.handle(n).pos().clip(m_clipMin, m_clipMax);
+        }
+        if (!m_graph.transitionLabel(n).anchored())
+        {
+          m_graph.transitionLabel(n).pos() = m_graph.transitionLabel(n).pos() + m_lforces[n] * m_speed;
+          m_graph.transitionLabel(n).pos().clip(m_clipMin, m_clipMax);
+        }
       }
     }
+    
+    m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
   }
 
   void SpringLayout::setClipRegion(const Coord3D& min, const Coord3D& max)
   {
     if (min.z < m_clipMin.z || max.z > m_clipMax.z) //Depth is increased, add random z values to improve spring movement in z direction
     {
+      m_graph.lock(GRAPH_LOCK_TRACE);
       float change = (std::min)(m_clipMin.z-min.z, max.z-m_clipMax.z)/100.0f; //Add at most 1/100th of the change
       for (size_t n = 0; n < m_graph.nodeCount(); ++n)
       {
@@ -211,6 +239,7 @@ namespace Graph
         }
 
       }
+      m_graph.unlock(GRAPH_LOCK_TRACE);
     }
 
     m_clipMin = min;

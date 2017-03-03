@@ -19,6 +19,8 @@
 #include "glwidget.h"
 #include "dimensionsdialog.h"
 
+#define MAX_NODE_COUNT 400
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   m_fileDialog("", this)
@@ -60,6 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(m_ui.actOutput, SIGNAL(toggled(bool)), m_ui.dockOutput, SLOT(setVisible(bool)));
   connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
   connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
+  connect(m_ui.actExplorationMode, SIGNAL(toggled(bool)), this, SLOT(onExplore(bool)));
   connect(m_ui.actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
   connect(m_ui.actReset, SIGNAL(triggered()), m_glwidget, SLOT(resetViewpoint()));
   connect(m_ui.actOpenFile, SIGNAL(triggered()), this, SLOT(onOpenFile()));
@@ -74,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
   springlayoutui->setSettings(settings.value("settings").toByteArray());
+  m_ui.actExplorationMode->setChecked(settings.value("explore", 0).toInt() != 0);
 
   m_ui.actLayoutControl->setChecked(!springlayoutui->isHidden());
   m_ui.actVisualization->setChecked(!glwidgetui->isHidden());
@@ -87,6 +91,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
   settings.setValue("settings", m_layout->ui()->settings());
+  settings.setValue("explore", m_graph.hasSelection() ? 1 : 0);
   QMainWindow::closeEvent(event);
 }
 
@@ -121,6 +126,17 @@ void MainWindow::on3DChanged(bool enabled)
     m_glwidget->setDepth(0, 80);
 }
 
+void MainWindow::onExplore(bool enabled)
+{
+  if (enabled)
+  {
+    m_graph.makeSelection();
+    m_graph.toggleActive(m_graph.initialState());
+  }
+  else
+    m_graph.discardSelection();
+}
+
 void MainWindow::onTimer()
 {
   m_glwidget->updateGL();
@@ -142,14 +158,33 @@ void MainWindow::openFile(QString fileName)
   {
     try
     {
+      bool hadSelection = m_graph.hasSelection();
       m_ui.actLayout->setChecked(false);
       m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
       m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
+      
+      if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadSelection)
+      {
+        if (QMessageBox::question(this, "Exploration mode",
+          tr("The selected LTS has a large number of states; "
+            "this may cause LTS Graph to perform poorly or become unresponsive. "
+            "Do you want to enable exploration mode?"),
+          QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+        {
+          m_ui.actExplorationMode->setChecked(true);
+        }
+      }
+      else
+      {
+        onExplore(hadSelection);
+      }
+
       m_glwidget->rebuild();
       m_glwidget->resume();
       m_information->update();
       setWindowTitle(QString("LTSGraph - ") + fileName);
+      m_graph.setStable(false);
     }
     catch (mcrl2::runtime_error e)
     {
@@ -211,11 +246,14 @@ void MainWindow::onImportXML()
 
   if (!fileName.isNull())
   {
+    bool hadSelection = m_graph.hasSelection();
     m_layout->ui()->setActive(false);
     m_glwidget->resetViewpoint(0);
     m_graph.loadXML(fileName);
+    onExplore(hadSelection);
     m_glwidget->rebuild();
     m_information->update();
+    m_graph.setStable(false);
   }
 
 }

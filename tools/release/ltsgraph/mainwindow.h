@@ -89,6 +89,12 @@ class MainWindow : public QMainWindow
     void on3DChanged(bool enabled);
 
     /**
+     * @brief Enables or disables the exploration mode.
+     * @param enabled Indicates wether the exploration mode should be enabled.
+     */
+    void onExplore(bool enabled);
+
+    /**
      * @brief Updates the Graph and GLWidget for the current time. Should be called periodically.
      */
     void onTimer();

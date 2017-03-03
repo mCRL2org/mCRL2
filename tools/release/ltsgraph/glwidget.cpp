@@ -15,6 +15,8 @@
 
 #include <map>
 
+#define DRAG_MIN_DIST 20.0f ///< Minimum distance for a drag to be registered (pixels)
+
 struct MoveRecord
 {
     virtual ~MoveRecord() {}
@@ -280,6 +282,7 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
   }
   else
   {
+    m_draglength = QVector2D(0.0, 0.0);
     m_dragstart = e->pos();
     if (e->modifiers() == Qt::ControlModifier)
     {
@@ -340,6 +343,14 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e)
 {
   if (m_dragmode == dm_dragnode)
   {
+    NodeMoveRecord *noderec = dynamic_cast<NodeMoveRecord *>(m_dragnode);
+    if (m_hover.selectionType == GLScene::so_node && e->button() == Qt::LeftButton
+      && noderec && m_draglength.length() < DRAG_MIN_DIST)
+    {
+      // A node has been clicked (not dragged):
+      if (m_graph.isToggleable(m_hover.index))
+        m_graph.toggleActive(m_hover.index);
+    }
     m_dragnode->release(e->button() == Qt::RightButton);
     delete m_dragnode;
     m_dragnode = NULL;
@@ -357,6 +368,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
   if (m_dragmode != dm_none)
   {
     QPoint vec = e->pos() - m_dragstart;
+    m_draglength += (QVector2D) vec;
 
     Graph::Coord3D vec3 = m_scene->eyeToWorld(e->pos().x(), e->pos().y(), 1.0f) - m_scene->eyeToWorld(m_dragstart.x(), m_dragstart.y(), 1.0f);
 

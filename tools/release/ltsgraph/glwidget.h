@@ -21,6 +21,7 @@
 
 #include <QGLWidget>
 #include <QColorDialog>
+#include <QVector2D>
 #include "ui_glwidget.h"
 
 #include "mcrl2/lts/lts.h"
@@ -59,6 +60,7 @@ class GLWidget : public QGLWidget
     DragMode m_dragmode;        ///< The current drag mode.
     MoveRecord* m_dragnode;     ///< The current node (if any) which is being dragged.
     QPoint m_dragstart;         ///< The coordinate at which the dragging started.
+    QVector2D m_draglength;     ///< The accumulated distance reached while dragging.
     QColor m_paintcolor;        ///< The color of the paint operation.
     bool m_painting;            ///< Boolean indicating if painting is enabled.
 	bool m_paused;

@@ -47,7 +47,7 @@ struct GLHitRecord
     GLuint stackSize;
     GLuint minDepth;
     GLuint maxDepth;
-    GLuint stack[0];
+    GLuint stack[1];
 };
 
 struct Color3f
@@ -59,166 +59,194 @@ struct Color3f
     operator const GLfloat*() const { return &r; }
 };
 
+struct Color4f
+{
+  GLfloat r, g, b, a;
+  Color4f() {}
+  Color4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) : r(r), g(g), b(b), a(a) {}
+  Color4f(const Color3f &c, GLfloat a = 1.0) : r(c.r), g(c.g), b(c.b), a(a) {}
+  Color4f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]), a(c[3]) {}
+  operator const GLfloat*() const { return &r; }
+};
+
+struct Texture
+{
+  GLuint name;
+  size_t width;
+  size_t height;
+  Coord3D shape[4];
+  Texture(size_t width, size_t height, float pixelsize) : width(width), height(height)
+  {
+    glGenTextures(1, &name);
+    resize(pixelsize);
+  }
+  ~Texture()
+  {
+    glDeleteTextures(1, &name);
+  }
+  void resize(float pixelsize)
+  {
+    const GLfloat w = width;
+    const GLfloat h = height;
+    shape[0] = Coord3D(-w, -h, 0.0f) * pixelsize / 2.0;
+    shape[1] = Coord3D( w, -h, 0.0f) * pixelsize / 2.0;
+    shape[2] = Coord3D( w,  h, 0.0f) * pixelsize / 2.0;
+    shape[3] = Coord3D(-w,  h, 0.0f) * pixelsize / 2.0;
+  }
+};
+
 struct TextureData 
 {
-    size_t* transition_widths;
-    size_t* transition_heights;
-    GLuint* transition_textures;
-    size_t transition_count;
+  QFont font;
 
-    size_t* state_widths;
-    size_t* state_heights;
-    GLuint* state_textures;
-    size_t state_count;
+  const Graph::Graph* graph;
+  Texture** transitions;
+  Texture** states;
+  Texture** numbers;
+  QHash<QString,Texture*> labels;
 
-    size_t* number_widths;
-    size_t* number_heights;
-    GLuint* number_textures;
-    size_t statenr_count;
+  float device_pixel_ratio;
+  float pixelsize;
 
-    float device_pixel_ratio;
+  TextureData(float device_pixel_ratio, float pixelsize)
+    : font(), graph(nullptr), transitions(nullptr), states(nullptr), numbers(nullptr), labels(),
+      device_pixel_ratio(device_pixel_ratio), pixelsize(pixelsize)
+  { }
 
-    TextureData(float device_pixel_ratio)
-      : transition_widths(NULL), transition_heights(NULL), transition_textures(NULL), transition_count(0),
-        state_widths(NULL), state_heights(NULL), state_textures(NULL), state_count(0),
-        number_widths(NULL), number_heights(NULL), number_textures(NULL), statenr_count(0),
-        device_pixel_ratio(device_pixel_ratio)
-    { }
+  void clear()
+  {
+    delete[] transitions; transitions = nullptr;
+    delete[] states;      states      = nullptr;
+    delete[] numbers;     numbers     = nullptr;
+    for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it)
+      delete it.value();
+    labels.clear();
+  }
 
-    ~TextureData()
+  ~TextureData()
+  {
+    clear();
+  }
+
+  void createTexture(QString labelstring, Texture*& texture)
+  {
+    // Reuse texture when possible
+    if (labels.count(labelstring))
     {
-      glDeleteTextures(transition_count, transition_textures);
-      delete[] transition_widths;
-      delete[] transition_heights;
-      delete[] transition_textures;
-      glDeleteTextures(state_count, state_textures);
-      delete[] state_widths;
-      delete[] state_heights;
-      delete[] state_textures;
-      glDeleteTextures(statenr_count, number_textures);
-      delete[] number_widths;
-      delete[] number_heights;
-      delete[] number_textures;
+      texture = labels[labelstring];
+      return;
     }
 
-    void createTexture(QFont font, QString labelstring, GLuint texture, size_t *widths, size_t *heights)
-    {
-      if (labelstring.isEmpty()) {
-        *widths = 0;
-        *heights = 0;
-        return;
-      }
-      QFontMetrics metrics(font);
-      QPainter p;
-      QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, labelstring);
-      // Save the original width and height for posterity
-      *widths = bounds.width() * device_pixel_ratio;
-      *heights = bounds.height() * device_pixel_ratio;
-      QImage label(*widths, *heights, QImage::Format_ARGB32_Premultiplied);
-      label.setDevicePixelRatio(device_pixel_ratio);
-      label.fill(QColor(1, 1, 1, 0));
-      p.begin(&label);
-      p.setFont(font);
-      p.setCompositionMode(QPainter::CompositionMode_Clear);
-      p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-      p.setPen(QColor(255, 0, 0, 255));
-      p.drawText(bounds, labelstring);
-      p.end();
-      // OpenGL likes its textures to have dimensions that are powers of 2
-      size_t w = 1, h = 1;
-      while (w < *widths) w <<= 1;
-      while (h < *heights) h <<= 1;
-      // ... and also wants the alpha component to be the 4th component
-      label = convertToGLFormat(label.scaled(w, h));
+    QFontMetrics metrics(font);
+    QPainter p;
+    QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, labelstring);
+    // Save the original width and height for posterity
+    size_t width = bounds.width() * device_pixel_ratio;
+    size_t height = bounds.height() * device_pixel_ratio;
+    texture = new Texture(width, height, pixelsize);
+    labels[labelstring] = texture;
 
-      glBindTexture(GL_TEXTURE_2D, texture);
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    QImage label(width, height, QImage::Format_ARGB32_Premultiplied);
+    label.setDevicePixelRatio(device_pixel_ratio);
+    label.fill(QColor(1, 1, 1, 0));
+    p.begin(&label);
+    p.setFont(font);
+    p.setCompositionMode(QPainter::CompositionMode_Clear);
+    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    p.setPen(QColor(255, 0, 0, 255));
+    p.drawText(bounds, labelstring);
+    p.end();
 
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, label.width(), label.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, label.bits());
+    assert(glGetError() == 0);
 
-    }
+    // OpenGL likes its textures to have dimensions that are powers of 2
+    size_t w = 1, h = 1;
+    while (w < width) w <<= 1;
+    while (h < height) h <<= 1;
+    // ... and also wants the alpha component to be the 4th component
+    label = convertToGLFormat(label.scaled(w, h));
 
-    void generate(const Graph::Graph& g)
-    {
-      assert(glGetError() == 0);
-      QFont font;
+    glBindTexture(GL_TEXTURE_2D, texture->name);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-      glDeleteTextures(transition_count, transition_textures);
-      delete[] transition_widths;
-      delete[] transition_heights;
-      delete[] transition_textures;
-      glDeleteTextures(state_count, state_textures);
-      delete[] state_widths;
-      delete[] state_heights;
-      delete[] state_textures;
-      glDeleteTextures(statenr_count, number_textures);
-      delete[] number_widths;
-      delete[] number_heights;
-      delete[] number_textures;
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, label.width(), label.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, label.bits());
 
-      transition_count = g.transitionLabelCount();
-      transition_textures = new GLuint[transition_count];
-      transition_widths = new size_t[transition_count];
-      transition_heights = new size_t[transition_count];
+    assert(glGetError() == 0);
+  }
 
-      glGenTextures(transition_count, transition_textures);
+  const Texture& getTransitionLabel(size_t index)
+  {
+    Texture*& texture = transitions[index];
+    if (texture == nullptr)
+      createTexture(graph->transitionLabelstring(index), texture);
+    return *texture;
+  }
 
-      for (size_t i = 0; i < transition_count; ++i)
-      {
-        createTexture(font, g.transitionLabelstring(i), transition_textures[i], &transition_widths[i], &transition_heights[i]);
-        assert(glGetError() == 0);
-      }
+  const Texture& getStateLabel(size_t index)
+  {
+    Texture*& texture = states[index];
+    if (texture == nullptr)
+      createTexture(graph->stateLabelstring(index), texture);
+    return *texture;
+  }
 
-      state_count = g.stateLabelCount();
-      state_textures = new GLuint[state_count];
-      state_widths = new size_t[state_count];
-      state_heights = new size_t[state_count];
+  const Texture& getNumberLabel(size_t index)
+  {
+    Texture*& texture = numbers[index];
+    if (texture == nullptr)
+      createTexture(QString::number(index), texture);
+    return *texture;
+  }
 
-      glGenTextures(state_count, state_textures);
+  void generate(Graph::Graph& g)
+  {
+    clear();
 
-      for (size_t i = 0; i < state_count; ++i)
-      {
-        createTexture(font, g.stateLabelstring(i), state_textures[i], &state_widths[i], &state_heights[i]);
-        assert(glGetError() == 0);
-      }
+    g.lock(GRAPH_LOCK_TRACE); // enter critical section
 
-      statenr_count = g.nodeCount();
-      number_textures = new GLuint[statenr_count];
-      number_widths = new size_t[statenr_count];
-      number_heights = new size_t[statenr_count];
+    size_t transition_count = g.transitionLabelCount();
+    size_t state_count = g.stateLabelCount();
+    size_t number_count = g.nodeCount();
 
-      glGenTextures(statenr_count, number_textures);
+    g.unlock(GRAPH_LOCK_TRACE); // exit critical section
 
-      for (size_t i = 0; i < statenr_count; ++i)
-      {
-        createTexture(font, QString::number(i), number_textures[i], &number_widths[i], &number_heights[i]);
-        assert(glGetError() == 0);
-      }
+    graph = &g;
+    transitions = new Texture*[transition_count]();
+    states = new Texture*[state_count]();
+    numbers = new Texture*[number_count]();
+  }
 
-    }
+  void resize(float pixelsize)
+  {
+    for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it)
+      it.value()->resize(pixelsize);
+  }
 };
 
 struct VertexData
 {
-    Coord3D *node, *handle, *arrowhead, *transition_labels, *state_labels, *number_labels;
+    Coord3D *node, *hint, *handle, *arrowhead, *transition_labels, *state_labels, *number_labels;
 
     VertexData()
-      : node(NULL), handle(NULL), arrowhead(NULL), transition_labels(NULL), state_labels(NULL), number_labels(NULL)
+      : node(nullptr), hint(nullptr), handle(nullptr), arrowhead(nullptr)
     { }
+
+    void clear()
+    {
+      delete[] node;      node      = nullptr;
+      delete[] hint;      hint      = nullptr;
+      delete[] handle;    handle    = nullptr;
+      delete[] arrowhead; arrowhead = nullptr;
+    }
 
     ~VertexData()
     {
-      delete[] node;
-      delete[] handle;
-      delete[] arrowhead;
-      delete[] transition_labels;
-      delete[] state_labels;
-      delete[] number_labels;
+      clear();
     }
 
     void generate(const TextureData& textures, float pixelsize, float size_node)
@@ -229,16 +257,11 @@ struct VertexData
           arrowheadsize = SIZE_ARROWHEAD * pixelsize * textures.device_pixel_ratio;
 
       // Delete old data
-      delete[] node;
-      delete[] handle;
-      delete[] arrowhead;
-      delete[] transition_labels;
-      delete[] state_labels;
-      delete[] number_labels;
+      clear();
 
       // Generate vertices for node border (a line loop drawing a circle)
-      float slice = 0, sliced = 2.0f * M_PI / (RES_NODE_SLICE - 1),
-          stack = 0, stackd = M_PI_2 / RES_NODE_STACK;
+      float slice = 0, sliced = (float) (2.0 * M_PI / (RES_NODE_SLICE - 1)),
+          stack = 0, stackd = (float) (M_PI_2 / RES_NODE_STACK);
       node = new Coord3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
       for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
         node[i] = Coord3D(sin(slice), cos(slice), 0.1f);
@@ -266,6 +289,13 @@ struct VertexData
       for (size_t i = 0; i < n; ++i)
         node[i] *= 0.5 * nodesize;
 
+      // Generate plus (and minus) hint for exploration mode
+      hint = new Coord3D[4];
+      hint[0] = Coord3D(-nodesize * 0.3, 0.0, 0.0);
+      hint[1] = Coord3D(nodesize * 0.3, 0.0, 0.0);
+      hint[2] = Coord3D(0.0, -nodesize * 0.3, 0.0);
+      hint[3] = Coord3D(0.0, nodesize * 0.3, 0.0);
+
       // Generate vertices for handle (border + fill, both squares)
       handle = new Coord3D[4];
       handle[0] = Coord3D(-handlesize/2.0, -handlesize/2.0, 0.0);
@@ -276,7 +306,7 @@ struct VertexData
       // Generate vertices for arrowhead (a triangle fan drawing a cone)
       arrowhead = new Coord3D[RES_ARROWHEAD + 1];
       arrowhead[0] = Coord3D(-nodesize / 2.0, 0.0, 0.0);
-      float diff = M_PI / 20.0f, t = 0;
+      float diff = (float) (M_PI / 20.0), t = 0;
       for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
         arrowhead[i] = Coord3D(-nodesize / 2.0 - arrowheadsize,
                                0.3 * arrowheadsize * sin(t),
@@ -284,46 +314,6 @@ struct VertexData
       arrowhead[RES_ARROWHEAD] = Coord3D(-nodesize / 2.0 - arrowheadsize,
                                          0.3 * arrowheadsize * sin(0.0f),
                                          0.3 * arrowheadsize * cos(0.0f));
-
-      // Generate quads for transition labels
-      transition_labels = new Coord3D[4 * textures.transition_count];
-      n = 0;
-      for (size_t i = 0; i < textures.transition_count; ++i)
-      {
-        transition_labels[n++] = Coord3D(-int(textures.transition_widths[i]), -int(textures.transition_heights[i]), 0.0f);
-        transition_labels[n++] = Coord3D(     textures.transition_widths[i],  -int(textures.transition_heights[i]), 0.0f);
-        transition_labels[n++] = Coord3D(     textures.transition_widths[i],       textures.transition_heights[i],  0.0f);
-        transition_labels[n++] = Coord3D(-int(textures.transition_widths[i]),      textures.transition_heights[i],  0.0f);
-      }
-      for (size_t i = 0; i < n; ++i)
-        transition_labels[i] *= pixelsize / 2.0;
-
-      // Generate quads for state labels
-      state_labels = new Coord3D[4 * textures.state_count];
-      n = 0;
-      for (size_t i = 0; i < textures.state_count; ++i)
-      {
-        state_labels[n++] = Coord3D(-int(textures.state_widths[i]), -int(textures.state_heights[i]), 0.0f);
-        state_labels[n++] = Coord3D(     textures.state_widths[i],  -int(textures.state_heights[i]), 0.0f);
-        state_labels[n++] = Coord3D(     textures.state_widths[i],       textures.state_heights[i],  0.0f);
-        state_labels[n++] = Coord3D(-int(textures.state_widths[i]),      textures.state_heights[i],  0.0f);
-      }
-      for (size_t i = 0; i < n; ++i)
-        state_labels[i] *= pixelsize / 2.0;
-
-      // Generate quads for number labels
-      number_labels = new Coord3D[4 * textures.statenr_count];
-      n = 0;
-      for (size_t i = 0; i < textures.statenr_count; ++i)
-      {
-        number_labels[n++] = Coord3D(-int(textures.number_widths[i]), -int(textures.number_heights[i]), 0.0f);
-        number_labels[n++] = Coord3D(     textures.number_widths[i],  -int(textures.number_heights[i]), 0.0f);
-        number_labels[n++] = Coord3D(     textures.number_widths[i],       textures.number_heights[i],  0.0f);
-        number_labels[n++] = Coord3D(-int(textures.number_widths[i]),      textures.number_heights[i],  0.0f);
-      }
-      for (size_t i = 0; i < n; ++i)
-        number_labels[i] *= pixelsize / 2.0;
-
     }
 };
 
@@ -590,7 +580,7 @@ void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill
 }
 
 inline
-void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool mark)
+void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool mark, bool translucent)
 {
   glPushAttrib(GL_LINE_BIT);
   if (mark)
@@ -603,13 +593,48 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
     glLineWidth(2.0);
     gl2psLineWidth(0.25);
   }
+  
   glVertexPointer(3, GL_FLOAT, 0, data.node);
-  glColor3fv(fill);   glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
+  if (translucent)
+  {
+    Color4f fill2(fill, .15f);
+    glColor4fv(fill2);
+  }
+  else
+  {
+    glColor3fv(fill);
+  }
+  glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
+  
   glDepthMask(GL_FALSE);
-  glColor3fv(line);   glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
+  
+  if (translucent)
+  {
+    Color4f line2(line, .15f);
+    glColor4fv(line2);
+  }
+  else
+  {
+    glColor3fv(line);
+  }
+  glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
+  
   glDepthMask(GL_TRUE);
   glPopAttrib();
   gl2psLineWidth(0.25);
+}
+
+inline
+void drawHint(const VertexData& data, const Color4f& line, bool active)
+{
+  glPushAttrib(GL_LINE_BIT);
+  glLineWidth(2.5);
+  glVertexPointer(3, GL_FLOAT, 0, data.hint);
+  glDepthMask(GL_FALSE);
+  glColor4fv(line);
+  glDrawArrays(GL_LINES, 0, active ? 2 : 4); // Plus or half a plus (minus)
+  glDepthMask(GL_TRUE);
+  glPopAttrib();
 }
 
 inline
@@ -633,16 +658,19 @@ void drawArc(const Coord3D* controlpoints)
 }
 
 inline
-void drawTransitionLabel(const VertexData& vertices, const TextureData& textures, size_t index)
+void drawTransitionLabel(TextureData& textures, size_t index)
 {
-  static GLfloat texCoords[] = { 0.0, 0.0,
+  static const GLfloat texCoords[] = { 0.0, 0.0,
                                  1.0, 0.0,
                                  1.0, 1.0,
                                  0.0, 1.0 };
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, textures.transition_textures[index]);
+  
+  const Texture& texture = textures.getTransitionLabel(index);
 
-  glVertexPointer(3, GL_FLOAT, 0, &vertices.transition_labels[4 * index]);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, texture.name);
+
+  glVertexPointer(3, GL_FLOAT, 0, texture.shape);
   glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
   glDrawArrays(GL_QUADS, 0, 4);
 
@@ -650,16 +678,19 @@ void drawTransitionLabel(const VertexData& vertices, const TextureData& textures
 }
 
 inline
-void drawStateLabel(const VertexData& vertices, const TextureData& textures, size_t index)
+void drawStateLabel(TextureData& textures, size_t index)
 {
-  static GLfloat texCoords[] = { 0.0, 0.0,
+  static const GLfloat texCoords[] = { 0.0, 0.0,
                                  1.0, 0.0,
                                  1.0, 1.0,
                                  0.0, 1.0 };
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, textures.state_textures[index]);
+  
+  const Texture& texture = textures.getStateLabel(index);
 
-  glVertexPointer(3, GL_FLOAT, 0, &vertices.state_labels[4 * index]);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, texture.name);
+
+  glVertexPointer(3, GL_FLOAT, 0, texture.shape);
   glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
   glDrawArrays(GL_QUADS, 0, 4);
 
@@ -667,16 +698,19 @@ void drawStateLabel(const VertexData& vertices, const TextureData& textures, siz
 }
 
 inline
-void drawNumber(const VertexData& vertices, const TextureData& textures, size_t index)
+void drawNumber(TextureData& textures, size_t index)
 {
-  static GLfloat texCoords[] = { 0.0, 0.0,
+  static const GLfloat texCoords[] = { 0.0, 0.0,
                                  1.0, 0.0,
                                  1.0, 1.0,
                                  0.0, 1.0 };
+  
+  const Texture& texture = textures.getNumberLabel(index);
+  
   glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, textures.number_textures[index]);
+  glBindTexture(GL_TEXTURE_2D, texture.name);
 
-  glVertexPointer(3, GL_FLOAT, 0, &vertices.number_labels[4 * index]);
+  glVertexPointer(3, GL_FLOAT, 0, texture.shape);
   glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
   glDrawArrays(GL_QUADS, 0, 4);
 
@@ -749,29 +783,42 @@ void GLScene::renderNode(GLuint i)
 {
   Graph::NodeNode& node = m_graph.node(i);
   Color3f fill;
-  Color3f line(node.color());
+  Color3f line;
+  Color4f hint;
+
+  // Node stroke color: red when selected, black otherwise
+  line = Color3f(0.6f * node.selected(), 0.0f, 0.0f);
 
   bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
-  if (mark) // Initial node (green or dark green) => selected (red or darker red)
+  if (mark) // Initial node fill color: green or dark green (locked)
   {
     if (node.locked())
-      fill = Color3f(0.1f + 0.9f * node.selected(), 0.7f - 0.4f * node.selected(),  0.1f + 0.2f * node.selected() );
+      fill = Color3f(0.1f, 0.7f, 0.1f);
     else
-      fill = Color3f(0.1f + 0.9f * node.selected(), 1.0f - 0.5f * node.selected(),  0.1f + 0.4f * node.selected() );
+      fill = Color3f(0.1f, 1.0f, 0.1f);
   }
-  else // Normal node (white or gray) => selected (red or darker red)
+  else // Normal node fill color: node color or darkened node color (locked)
   {
     if (node.locked())
-      fill = Color3f(0.7f + 0.3f * node.selected(), 0.7f - 0.2f * node.selected(),  0.7f - 0.2f * node.selected() );
+      fill = Color3f(0.7f * node.color()[0], 0.7f * node.color()[1], 0.7f * node.color()[2]);
     else
-      fill = Color3f(1.0f,                        1.0f - 0.3f * node.selected(),  1.0f - 0.3f * node.selected() );
+      fill = node.color();
   }
 
   glStartName(so_node, i);
   glPushMatrix();
 
   m_camera->billboard_spherical(node.pos());
-  drawNode(*m_vertexdata, line, fill, mark);
+  drawNode(*m_vertexdata, line, fill, mark, m_graph.hasSelection() && !node.active());
+
+  if (m_graph.hasSelection() && node.selected() != 0.0 && !m_graph.isBridge(i))
+  {
+    float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
+    hint = Color4f(fill.r + s, fill.g + s, fill.b + s, node.selected());
+
+    glTranslatef(0, 0, m_size_node * m_camera->pixelsize);
+    drawHint(*m_vertexdata, hint, node.active());
+  }
 
   glPopMatrix();
   glEndName();
@@ -791,8 +838,9 @@ void GLScene::renderTransitionLabel(GLuint i)
     if (gl2ps())
     {
       Coord3D pos = label.pos();
-      pos.x -= m_camera->pixelsize * m_texturedata->transition_widths[label.labelindex()] / 2;
-      pos.y -= m_camera->pixelsize * m_texturedata->transition_heights[label.labelindex()] / 2;
+      const Texture& texture = m_texturedata->getTransitionLabel(label.labelindex());
+      pos.x -= m_camera->pixelsize * texture.width / 2;
+      pos.y -= m_camera->pixelsize * texture.height / 2;
       glRasterPos3fv(pos);
       if (!m_graph.isTau(label.labelindex()))
         gl2psText(m_graph.transitionLabelstring(label.labelindex()).toUtf8(), "", 10);
@@ -804,7 +852,7 @@ void GLScene::renderTransitionLabel(GLuint i)
       glPushMatrix();
 
       m_camera->billboard_cylindrical(label.pos());
-      drawTransitionLabel(*m_vertexdata, *m_texturedata, label.labelindex());
+      drawTransitionLabel(*m_texturedata, label.labelindex());
 
       glPopMatrix();
     }
@@ -822,8 +870,9 @@ void GLScene::renderStateLabel(GLuint i)
     if (gl2ps())
     {
       Coord3D pos = label.pos();
-      pos.x -= m_camera->pixelsize * m_texturedata->state_widths[label.labelindex()] / 2;
-      pos.y -= m_camera->pixelsize * m_texturedata->state_heights[label.labelindex()] / 2;
+      const Texture& texture = m_texturedata->getStateLabel(label.labelindex());
+      pos.x -= m_camera->pixelsize * texture.width / 2;
+      pos.y -= m_camera->pixelsize * texture.height / 2;
       glRasterPos3fv(pos);
       gl2psText(m_graph.stateLabelstring(label.labelindex()).toUtf8(), "", 10);
     }
@@ -833,7 +882,7 @@ void GLScene::renderStateLabel(GLuint i)
 
       m_camera->billboard_cylindrical(label.pos());
       glTranslatef(0, 0, m_size_node * m_camera->pixelsize * 1.01); // Position state label above state number
-      drawStateLabel(*m_vertexdata, *m_texturedata, label.labelindex());
+      drawStateLabel(*m_texturedata, label.labelindex());
 
       glPopMatrix();
     }
@@ -848,8 +897,9 @@ void GLScene::renderStateNumber(GLuint i)
   if (gl2ps())
   {
     Coord3D pos = node.pos();
-    pos.x -= m_camera->pixelsize * m_texturedata->number_widths[i] / 2;
-    pos.y -= m_camera->pixelsize * m_texturedata->number_heights[i] / 2;
+    const Texture& texture = m_texturedata->getNumberLabel(i);
+    pos.x -= m_camera->pixelsize * texture.width / 2;
+    pos.y -= m_camera->pixelsize * texture.height / 2;
     pos.z += m_size_node*m_camera->pixelsize;
     glRasterPos3fv(pos);
     gl2psText(QString::number(i).toUtf8(), "", 10);
@@ -861,7 +911,7 @@ void GLScene::renderStateNumber(GLuint i)
     glColor3f(node.selected(), 0.0, 0.0);
     m_camera->billboard_spherical(node.pos());
     glTranslatef(0, 0, m_size_node * m_camera->pixelsize);
-    drawNumber(*m_vertexdata, *m_texturedata, i);
+    drawNumber(*m_texturedata, i);
 
     glPopMatrix();
   }
@@ -901,7 +951,7 @@ GLScene::GLScene(Graph::Graph& g, float device_pixel_ratio)
     m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
 {
   m_camera = new CameraAnimation();
-  m_texturedata = new TextureData(device_pixel_ratio);
+  m_texturedata = new TextureData(device_pixel_ratio, m_camera->pixelsize);
   m_vertexdata = new VertexData;
 }
 
@@ -976,32 +1026,36 @@ void GLScene::render()
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  for (size_t i = 0; i < m_graph.nodeCount(); ++i)
-  {
-    renderNode(i);
-  }
-  for (size_t i = 0; i < m_graph.edgeCount(); ++i)
-  {
-    renderEdge(i);
-  }
+  m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
+
+  bool sel = m_graph.hasSelection();
+  size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
+  size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+
+  for (size_t i = 0; i < nodeCount; ++i)
+    renderNode(sel ? m_graph.selectionNode(i) : i);
+  for (size_t i = 0; i < edgeCount; ++i)
+    renderEdge(sel ? m_graph.selectionEdge(i) : i);
 
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glDepthMask(GL_FALSE);
-  for (size_t i = 0; i < m_graph.nodeCount(); ++i)
+  for (size_t i = 0; i < nodeCount; ++i)
   {
     if (m_drawstatenumbers)
-      renderStateNumber(i);
+      renderStateNumber(sel ? m_graph.selectionNode(i) : i);
     if (m_drawstatelabels)
-      renderStateLabel(i);
+      renderStateLabel(sel ? m_graph.selectionNode(i) : i);
   }
-  for (size_t i = 0; i < m_graph.edgeCount(); ++i)
+  for (size_t i = 0; i < edgeCount; ++i)
   {
     if (m_drawtransitionlabels)
-      renderTransitionLabel(i);
-    renderHandle(i);
+      renderTransitionLabel(sel ? m_graph.selectionEdge(i) : i);
+    renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
   glDepthMask(GL_TRUE);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+  m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 }
 
 void GLScene::resize(size_t width, size_t height)
@@ -1018,6 +1072,7 @@ void GLScene::updateLabels()
 void GLScene::updateShapes()
 {
   m_vertexdata->generate(*m_texturedata, m_camera->pixelsize, m_size_node);
+  m_texturedata->resize(m_camera->pixelsize);
 }
 
 Coord3D GLScene::eyeToWorld(int x, int y, GLfloat z)
@@ -1202,16 +1257,23 @@ void GLScene::renderLatexGraphics(QString filename, float aspectRatio)
   tikz_code += "   \\tikzstyle{initstate}=[state,fill=green]\n";
   tikz_code += "   \\tikzstyle{transition}=[->,>=stealth']\n";
 
+  m_graph.lock(GRAPH_LOCK_TRACE);
 
-  for (size_t i = 0; i < m_graph.nodeCount(); ++i)
+  bool sel = m_graph.hasSelection();
+  size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
+  size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+
+  for (size_t i = 0; i < nodeCount; ++i)
   {
-    tikz_code += tikzNode(i, aspectRatio);
+    tikz_code += tikzNode(sel ? m_graph.selectionNode(i) : i, aspectRatio);
   }
 
-  for (size_t i = 0; i < m_graph.edgeCount(); ++i)
+  for (size_t i = 0; i < edgeCount; ++i)
   {
-    tikz_code += tikzEdge(i, aspectRatio);
+    tikz_code += tikzEdge(sel ? m_graph.selectionEdge(i) : i, aspectRatio);
   }
+
+  m_graph.unlock(GRAPH_LOCK_TRACE);
 
   tikz_code += "\n\\end{tikzpicture}\n";
   tikz_code += "\\end{document}\n";
@@ -1230,12 +1292,13 @@ QString GLScene::tikzNode(size_t i, float aspectRatio)
   Graph::NodeNode& node = m_graph.node(i);
   Color3f line(node.color());
 
-  QString ret = "\\definecolor{currentcolor}{rgb}{%1,%2,%3}\n\\node at (%4pt, %5pt) [%6state, draw=currentcolor] (state%7) {%7};\n";
+  QString ret = "\\definecolor{currentcolor}{rgb}{%1,%2,%3}\n\\node at (%4pt, %5pt) [fill=currentcolor, %6state%8] (state%7) {%7};\n";
 
   ret = ret.arg(line.r, 0, 'f', 3).arg(line.g, 0, 'f', 3).arg(line.b, 0, 'f', 3);
   ret = ret.arg(node.pos().x / 10.0f * aspectRatio, 6, 'f').arg(node.pos().y / 10.0f, 6, 'f');
   ret = ret.arg(m_graph.initialState() == i ? "init" : "");
   ret = ret.arg(i);
+  ret = ret.arg(node.active() ? "" : ", dashed");
 
   return ret;
 }

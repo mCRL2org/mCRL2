@@ -23,6 +23,8 @@
 
 #include <cmath>
 
+#include <QReadWriteLock>
+
 namespace Graph
 {
 
@@ -386,14 +388,18 @@ namespace Graph
       }
   };
 
+  class Graph;
 
   /**
    * @brief A structure which contains the information of a single graph node.
    */
   class NodeNode : public NodeWithColor
   {
+    friend Graph;
+
     protected:
       bool m_is_probabilistic;  ///< Indicates that this is a probabilistic state.
+      bool m_active;            ///< Indicates that this node was activated (see toggleActive).
 
     public:
       /// \brief Default constructor.
@@ -401,8 +407,15 @@ namespace Graph
 
       /// \brief Constructor.
       NodeNode(const Coord3D& p, const bool is_probabilistic)
-        : NodeWithColor(p), m_is_probabilistic(is_probabilistic)
-      {}
+        : NodeWithColor(p), m_is_probabilistic(is_probabilistic), m_active(false)
+      {
+        if (!m_is_probabilistic) // Color action states white (probabilistic states remain black)
+        {
+          m_color[0]=1.0f;
+          m_color[1]=1.0f;
+          m_color[2]=1.0f;
+        }
+      }
 
       /// \brief Constructor
       NodeNode(const Coord3D& pos, 
@@ -428,6 +441,12 @@ namespace Graph
       {
         return m_is_probabilistic;
       }
+
+      /// \brief Get the value of active.
+      bool active() const
+      {
+        return m_active;
+      }
   };
 
   namespace detail
@@ -435,18 +454,27 @@ namespace Graph
     class GraphImplBase;
   }
 
+  class Selection;
+
   /**
   @brief: This is the internal data structure that LTSGraph operates on.
 
     In its implementation it uses the mCRL2 lts classes to represent the graphs,
     and augments it with further information. In particular, positions of labels
     and edge handles are stored as if they were nodes.
+  @attention When using the graph structure--especially when iterating--the graph should be locked and unlocked afterwards!
+    See header file for details which operations are unguarded.
 */
-  class Graph{
+  // Todo: see if graph is locked as required throughout the application.
+  class Graph
+  {
     private:
       detail::GraphImplBase* m_impl;  ///< The internal implementation of the graph used.
+      Selection* m_sel;               ///< The selection of the current graph (or null).
       mcrl2::lts::lts_type m_type;    ///< The type of the current graph.
       QString m_empty;                ///< Empty string that is returned as label if none present.
+      QReadWriteLock m_lock;          ///< Lock protecting the structure from being changed while rendering and simulating
+      bool m_stable;                  ///< When true, the graph is considered stable, spring forces should not be applied.
 
 
       /**
@@ -465,6 +493,22 @@ namespace Graph
        */
       ~Graph();
 
+      /**
+       * @brief makes the graph structure read-only
+       */
+      void lock();
+      /**
+       * @brief makes the graph structure writable again after a lock
+       */
+      void unlock();
+
+      #ifndef DEBUG_GRAPH_LOCKS
+        #define GRAPH_LOCK_TRACE
+      #else
+        void lock(const char* where);
+        void unlock(const char* where);
+        #define GRAPH_LOCK_TRACE __func__
+      #endif
 
       /**
        * @brief Loads a graph with random positioning for the nodes.
@@ -487,6 +531,35 @@ namespace Graph
       void saveXML(const QString& filename);
 
       /**
+       * @brief Restrains all nodes of the graph between @e min and @e max.
+       * @param min The minimum coordinates for any node.
+       * @param max The maximum coordinates for any node.
+       */
+      void clip(const Coord3D& min, const Coord3D& max);
+
+      void makeSelection(); ///< Creates a new empty selection (overwriting existing).
+      void discardSelection(); ///< Discards the current selection (when present).
+      
+      /**
+       * @brief Toggles the state of a node between active and inactive.
+       *        Active nodes add their related nodes to the current selection.
+       * @param index The index of the node.
+       */
+      void toggleActive(size_t index);
+      /**
+       * @brief Returns whether a given node should be toggled active or inactive.
+       *        A node that leaves unconnected components or the selection empty should not be toggled inactive.
+       * @param index The index of the node.
+       */
+      bool isToggleable(size_t index);
+
+      void setStable(bool stable); ///< @brief Sets whether this graph is stable. (guarded)
+
+      /*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*
+       ! The operations below this note are unguarded, lock before use!  !
+       *!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*!*/
+
+      /**
        * @brief Returns the string representation of the transition label with index @e labelindex.
        *        If the index is not valid, an empty string is returned.
        * @param labelindex The index of the label.
@@ -500,13 +573,6 @@ namespace Graph
        */
       const QString& stateLabelstring(size_t labelindex) const;
 
-      /**
-       * @brief Restrains all nodes of the graph between @e min and @e max.
-       * @param min The minimum coordinates for any node.
-       * @param max The maximum coordinates for any node.
-       */
-      void clip(const Coord3D& min, const Coord3D& max);
-
       // Getters and setters
       Edge edge(size_t index) const;
       NodeNode& node(size_t index) const;
@@ -514,14 +580,29 @@ namespace Graph
       LabelNode& transitionLabel(size_t edge) const;
       LabelNode& stateLabel(size_t edge) const;
       bool isTau(size_t labelindex) const;
+      bool isBridge(size_t index) const; ///< Returns whether a given node forms a bridge in the selection
 
       size_t edgeCount() const;
       size_t nodeCount() const;
       size_t transitionLabelCount() const;
       size_t stateLabelCount() const;
       size_t initialState() const;
-  };
 
+      bool hasSelection() const;                ///< Returns whether a portion of the graph is selected
+      size_t selectionEdge(size_t index) const; ///< Returns the edge index for a certain edge in the selection
+      size_t selectionNode(size_t index) const; ///< Returns the node index for a certain node in the selection
+      size_t selectionEdgeCount() const;        ///< Returns the number of edges in the selection
+      size_t selectionNodeCount() const;        ///< Returns the number of nodes in the selection
+
+      const bool& stable() const ///< @brief Gets whether this graph is stable.
+      {
+        return m_stable;
+      }
+      bool& stable() ///< @brief Sets whether this graph is stable.
+      {
+        return m_stable;
+      }
+  };
 }
 
 #endif // GRAPH_H

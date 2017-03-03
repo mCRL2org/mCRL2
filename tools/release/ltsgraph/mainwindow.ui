@@ -79,6 +79,7 @@
      <string>&amp;View</string>
     </property>
     <addaction name="act3D"/>
+    <addaction name="actExplorationMode"/>
     <addaction name="separator"/>
     <addaction name="actLayoutControl"/>
     <addaction name="actVisualization"/>
@@ -89,6 +90,7 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
+    <addaction name="actExplorationMode"/>
     <addaction name="actLayout"/>
     <addaction name="actReset"/>
    </widget>
@@ -204,6 +206,17 @@
    </property>
    <property name="text">
     <string>mCRL2 Output</string>
+   </property>
+  </action>
+  <action name="actExplorationMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Exploration mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
  </widget>
