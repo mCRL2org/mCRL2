@@ -636,7 +636,8 @@ BOOST_AUTO_TEST_CASE(test_sort_as_variable)
     "sort S;\n\n"
     "map  S: S -> Bool;\n\n"
     "var  S: S;\n"
-    "eqn  S(S)  =  S == S;\n"
+    "eqn  S(S)  =  S == S;\n",
+    false
   );
 }
 
@@ -650,7 +651,7 @@ BOOST_AUTO_TEST_CASE(test_sort_as_variable)
 } */
 
 /* BOOST_AUTO_TEST_CASE(test_conflicting_aliases) // This test case leads to a parse error, due to the use of Nat.
-                                               // This is not a typecheck error. Therefore this case is outcommented.
+                                                  // This is not a typecheck error. Therefore this case is outcommented.
 {
   test_data_specification(
     "sort S = Nat;\n"

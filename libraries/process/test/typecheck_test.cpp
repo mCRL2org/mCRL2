@@ -174,16 +174,16 @@ BOOST_AUTO_TEST_CASE(test_bug_644)
 BOOST_AUTO_TEST_CASE(test_bug_626a)
 {
   test_typechecker_case(
-    "sort S = struct c( x: Int );     \n"
+    "sort S = struct c( proj: Int );     \n"
     "                                 \n"
     "map f :(S -> Bool)#S -> S;       \n"
-    "var pred: S -> Bool;             \n"
+    "var pre: S -> Bool;             \n"
     "    s: S;                        \n"
-    "eqn f (pred, s) = s;             \n"
+    "eqn f (pre, s) = s;             \n"
     "                                 \n"
     "act a: (S);                      \n"
     "                                 \n"
-    "init a( f( lambda x:S. x(x) < 0 , c( 0 ) ) );\n",
+    "init a( f( lambda x:S. proj(x) < 0 , c( 0 ) ) );\n",
     true
   );
 }
@@ -194,9 +194,9 @@ BOOST_AUTO_TEST_CASE(test_bug_626b)
     "sort S = struct c( x: Int );     \n"
     "                                 \n"
     "map f :(S -> Bool)#S -> S;       \n"
-    "var pred: S -> Bool;             \n"
+    "var pre: S -> Bool;             \n"
     "    s: S;                        \n"
-    "eqn f (pred, s) = s;             \n"
+    "eqn f (pre, s) = s;             \n"
     "                                 \n"
     "act a: (S);                      \n"
     "                                 \n"

@@ -41,12 +41,19 @@ class data_type_checker: public sort_type_checker
      **/
     data_type_checker(const data_specification& data_spec);
 
-    /** \brief     Type check a data expression.
-     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-     *  \param[in] l A list of variables that has not been type checked.
-     *  \return    a variable list which has been typechecked.
+    /** \brief     Type checks a variable.
+     *             Throws an mcrl2::runtime_error exception if the variable is not well typed.
+     *  \details   A variable is not well typed if its name clashes with the name of a declared function, or when its sort does not exist.
+     *  \param[in] v A variables that is to be type checked.
      **/
-    variable_list operator()(const variable_list& l);
+    void operator()(const variable& v);
+
+    /** \brief     Type checks a variable list.
+     *             Throws an mcrl2::runtime_error exception if the variables are not well typed.
+     *  \details   A variable is not well typed if its name clashes with the name of a declared function, or when its sort does not exist.
+     *  \param[in] l A list of variables that must be type checked.
+     **/
+    void operator()(const variable_list& l);
 
     /** \brief     Yields a type checked data specification, provided typechecking was successful.
      *  \return    a data specification where all untyped identifiers have been replace by typed ones.
@@ -116,16 +123,6 @@ class data_type_checker: public sort_type_checker
                            const bool warn_upcasting=false,
                            const bool print_cast_error=true);
 
-    void AddVars2Table(std::map<core::identifier_string, sort_expression>& variable_map, const variable_list& declared_variables)
-    {
-      for (const variable& v: declared_variables)
-      {
-        // TODO: this should be checked elsewhere
-        sort_type_checker::check_sort_is_declared(v.sort());
-        variable_map[v.name()] = v.sort();
-      }
-    }
-
     bool InTypesA(const sort_expression& Type, sort_expression_list Types);
     bool EqTypesA(const sort_expression& Type1, const sort_expression& Type2);
     bool InTypesL(const sort_expression_list& Type, atermpp::term_list<sort_expression_list> Types);
@@ -172,7 +169,6 @@ class data_type_checker: public sort_type_checker
                     const bool strictly_ambiguous,
                     bool warn_upcasting=false,
                     const bool print_cast_error=false);
-    bool VarsUnique(const variable_list& VarDecls);
     void TransformVarConsTypeData(data_specification& data_spec);
     sort_expression_list GetNotInferredList(const atermpp::term_list<sort_expression_list>& TypeListList);
     sort_expression_list InsertType(const sort_expression_list& TypeList, const sort_expression& Type);

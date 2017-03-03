@@ -693,7 +693,7 @@ void parse_variables(std::istream& in,
   {
     data_vars = detail::parse_variables_new(text);
     data_type_checker type_checker(data_spec);
-    data_vars = type_checker(data_vars); 
+    type_checker(data_vars); 
 
     // Undo sort renamings for compatibility with type checker
     // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
