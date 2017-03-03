@@ -92,7 +92,7 @@ struct bottom_up_traverser: public Traverser<Derived>
   }
 
   template <typename T>
-  void join(const T& x, node_iterator first, node_iterator last, Node& result)
+  void join(const T& /* x */, node_iterator /* first */, node_iterator /* last */, Node& /* result */)
   {
   }
 
@@ -171,7 +171,7 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
   }
 
   template <typename T>
-  void update_free_variables(const T& x, maximal_closed_subformula_node& result)
+  void update_free_variables(const T& /* x */, maximal_closed_subformula_node& /* result */)
   { }
 
   void update_free_variables(const data::data_expression& x, maximal_closed_subformula_node& result)
