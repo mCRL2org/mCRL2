@@ -95,29 +95,20 @@ class data_type_checker: public sort_type_checker
 
     sort_expression TraverseVarConsTypeD(
                         const std::map<core::identifier_string,sort_expression>& DeclaredVars,
-                        const std::map<core::identifier_string,sort_expression>& AllowedVars,
                         data_expression& DataTerm,
                         const sort_expression& PosType,
-                        std::map<core::identifier_string,sort_expression>& FreeVars,
                         const bool strictly_ambiguous=true,
                         const bool warn_upcasting=false,
                         const bool print_cast_error=true);
 
-    sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression>& DeclaredVars,
-                                         const std::map<core::identifier_string,sort_expression>& AllowedVars,
+    /* sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression>& DeclaredVars,
                                          data_expression& t1,
-                                         const sort_expression& t2)
-    {
-      std::map<core::identifier_string,sort_expression> empty_context;
-      return TraverseVarConsTypeD(DeclaredVars, AllowedVars, t1, t2, empty_context);
-    }
+                                         const sort_expression& t2); */
 
     sort_expression TraverseVarConsTypeDN(
                            const std::map<core::identifier_string,sort_expression>& DeclaredVars,
-                           const std::map<core::identifier_string,sort_expression>& AllowedVars,
                            data_expression& DataTerm,
                            sort_expression PosType,
-                           std::map<core::identifier_string,sort_expression>& FreeVars,
                            const bool strictly_ambiguous=true,
                            const size_t nFactPars=std::string::npos,
                            const bool warn_upcasting=false,
@@ -164,8 +155,6 @@ class data_type_checker: public sort_type_checker
                     sort_expression Type,
                     data_expression& Par,
                     const std::map<core::identifier_string,sort_expression>& DeclaredVars,
-                    const std::map<core::identifier_string,sort_expression>& AllowedVars,
-                    std::map<core::identifier_string,sort_expression>& FreeVars,
                     const bool strictly_ambiguous,
                     bool warn_upcasting=false,
                     const bool print_cast_error=false);
@@ -188,9 +177,8 @@ class data_type_checker: public sort_type_checker
     {
       try
       {
-        std::map<core::identifier_string, sort_expression> empty_free_variable_context;
         data_expression x1 = x;
-        UpCastNumericType(expected_sort, x.sort(), x1, variable_context.context(), variable_context.context(), empty_free_variable_context, false, false, false);
+        UpCastNumericType(expected_sort, x.sort(), x1, variable_context.context(), false, false, false);
         return data::normalize_sorts(x1, get_sort_specification());
       }
       catch (mcrl2::runtime_error& e)
@@ -206,7 +194,7 @@ class data_type_checker: public sort_type_checker
                                              )
     {
       data_expression x1 = x;
-      TraverseVarConsTypeD(variable_context.context(), variable_context.context(), x1, expected_sort);
+      TraverseVarConsTypeD(variable_context.context(), x1, expected_sort);
       x1 = data::normalize_sorts(x1, get_sort_specification());
       if (x1.sort() != expected_sort)
       {

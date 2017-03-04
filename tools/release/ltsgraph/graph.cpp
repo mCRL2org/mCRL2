@@ -573,7 +573,7 @@ namespace Graph
               if (m_edges.count(edgeId) && m_edges[edgeId].count > 1)
                 connected.insert(m_impl->edges[edgeId].to());
             }
-            size_t count = 0;
+            
             for (std::unordered_set<size_t>::iterator
               it = nodeinfo.neighbors.begin(); it != nodeinfo.neighbors.end(); ++it)
             {

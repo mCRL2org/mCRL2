@@ -51,7 +51,20 @@ static void add_variable_to_map(std::map<core::identifier_string, sort_expressio
   }
 }
 
-static std::map<core::identifier_string,sort_expression> RemoveVars(std::map<core::identifier_string,sort_expression>& Vars, variable_list VarDecls);
+// This function checks whether the set s1 is included in s2. If not the variable culprit
+// is the variable occuring in s1 but not in s2.
+static bool includes(const std::set<variable>& s1, const std::set<variable>& s2, variable& culprit)
+{
+  for(const variable& v: s1)
+  {
+    if (s2.count(v)==0)
+    {
+      culprit=v;
+      return false;
+    }
+  }
+  return true;
+}
 
 static inline bool IsPos(const core::identifier_string& Number)
 {
@@ -212,8 +225,6 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
                       sort_expression Type,
                       data_expression& Par,
                       const std::map<core::identifier_string,sort_expression>& DeclaredVars,
-                      const std::map<core::identifier_string,sort_expression>& AllowedVars,
-                      std::map<core::identifier_string,sort_expression>& FreeVars,
                       const bool strictly_ambiguous,
                       bool warn_upcasting,
                       const bool print_cast_error)
@@ -250,7 +261,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
       sort_expression r;
       try
       {
-        r=UpCastNumericType(*i,Type,Par,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+        r=UpCastNumericType(*i,Type,Par,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
       }
       catch (mcrl2::runtime_error&)
       {
@@ -394,8 +405,8 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
     }
     try
     {
-      Type=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Par,
-                   needed_similar_container_type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+      Type=TraverseVarConsTypeD(DeclaredVars,Par,
+                   needed_similar_container_type,strictly_ambiguous,warn_upcasting,print_cast_error);
       assert(UnwindType(Type)==UnwindType(needed_similar_container_type));
 
     }
@@ -2256,10 +2267,8 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
 
 sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
   const std::map<core::identifier_string,sort_expression>& DeclaredVars,
-  const std::map<core::identifier_string,sort_expression>& AllowedVars,
   data_expression& DataTerm,
   sort_expression PosType,
-  std::map<core::identifier_string,sort_expression>& FreeVars,
   const bool strictly_ambiguous,
   const size_t nFactPars,
   const bool warn_upcasting,
@@ -2284,13 +2293,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==nFactPars):(nFactPars==0))
       {
         variable_=true;
-        if (AllowedVars.count(Name)==0)
-        {
-          throw mcrl2::runtime_error("Variable " + core::pp(Name) + " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side.");
-        }
 
         //Add to free variables list
-        FreeVars[Name]=TypeA;
       }
       else
       {
@@ -2590,28 +2594,21 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
   }
   else
   {
-    return TraverseVarConsTypeD(DeclaredVars,AllowedVars,DataTerm,PosType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+    return TraverseVarConsTypeD(DeclaredVars,DataTerm,PosType,strictly_ambiguous,warn_upcasting,print_cast_error);
   }
 }
 
 
 sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
   const std::map<core::identifier_string,sort_expression>& DeclaredVars,
-  const std::map<core::identifier_string,sort_expression>& AllowedVars,
   data_expression& DataTerm,
   const sort_expression& PosType,
-  std::map<core::identifier_string,sort_expression>& FreeVars,
   const bool strictly_ambiguous,
   const bool warn_upcasting,
   const bool print_cast_error)
 {
   //Type checks and transforms DataTerm replacing Unknown datatype with other ones.
-  //Returns the type of the term
-  //which should match the PosType
-  //all the variables should be in AllowedVars
-  //if a variable is in DeclaredVars and not in AllowedVars,
-  //a different error message is generated.
-  //all free variables (if any) are added to FreeVars
+  //Returns the type of the term which should match the PosType.
 
   if (is_abstraction(DataTerm))
   {
@@ -2648,8 +2645,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
       const sort_expression element_sort=comprehension_variables.front().sort();
 
-      std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
-      detail::add_variable_to_map(CopyAllowedVars,comprehension_variables);
       std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
       detail::add_variable_to_map(CopyDeclaredVars,comprehension_variables);
 
@@ -2659,7 +2654,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       sort_expression NewType;
       try
       {
-        ResType=TraverseVarConsTypeD(CopyDeclaredVars,CopyAllowedVars,Data,data::untyped_sort(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+        ResType=TraverseVarConsTypeD(CopyDeclaredVars,Data,data::untyped_sort(),strictly_ambiguous,warn_upcasting,print_cast_error);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -2693,7 +2688,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
                             data::pp(PosType) + " (while typechecking " + data::pp(DataTerm) + ").");
       }
 
-      detail::RemoveVars(FreeVars,comprehension_variables);
       return NewType;
     }
 
@@ -2711,9 +2705,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking the quantification " + data::pp(DataTerm) + ".");
       }
 
-      std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
       std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
-      detail::add_variable_to_map(CopyAllowedVars,bound_variables);
       detail::add_variable_to_map(CopyDeclaredVars,bound_variables);
 
       data_expression Data=abstr.body();
@@ -2722,8 +2714,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       {
         throw mcrl2::runtime_error("The type of an exist/forall for " + data::pp(DataTerm) + " cannot be determined.");
       }
-      sort_expression NewType=TraverseVarConsTypeD(CopyDeclaredVars,CopyAllowedVars,Data,sort_bool::bool_(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
-      detail::RemoveVars(FreeVars,bound_variables);
+      sort_expression NewType=TraverseVarConsTypeD(CopyDeclaredVars,Data,sort_bool::bool_(),strictly_ambiguous,warn_upcasting,print_cast_error);
 
       if (!TypeMatchA(sort_bool::bool_(),NewType,temp))
       {
@@ -2748,8 +2739,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking the lambda expression " + data::pp(DataTerm) + ".");
       }
 
-      std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
-      detail::add_variable_to_map(CopyAllowedVars,bound_variables);
       std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
       detail::add_variable_to_map(CopyDeclaredVars,bound_variables);
 
@@ -2763,12 +2752,10 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
       try
       {
-        NewType=TraverseVarConsTypeD(CopyDeclaredVars,CopyAllowedVars,Data,NewType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
-        detail::RemoveVars(FreeVars,bound_variables);
+        NewType=TraverseVarConsTypeD(CopyDeclaredVars,Data,NewType,strictly_ambiguous,warn_upcasting,print_cast_error);
       }
       catch (mcrl2::runtime_error& e)
       {
-        detail::RemoveVars(FreeVars,bound_variables);
         throw e;
       }
 
@@ -2792,7 +2779,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       {
         const data::untyped_identifier_assignment& t=down_cast<const data::untyped_identifier_assignment>(WhereElem);
         WhereTerm=t.rhs();
-        sort_expression WhereType=TraverseVarConsTypeD(DeclaredVars,AllowedVars,WhereTerm,data::untyped_sort(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+        sort_expression WhereType=TraverseVarConsTypeD(DeclaredVars,WhereTerm,data::untyped_sort(),strictly_ambiguous,warn_upcasting,print_cast_error);
 
         // The variable in WhereElem is just a string and needs to be transformed to a DataVarId.
         NewWhereVar=variable(t.lhs(),WhereType);
@@ -2802,7 +2789,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         const assignment& t=down_cast<const assignment>(WhereElem);
         WhereTerm=t.rhs();
         NewWhereVar=t.lhs();
-        sort_expression WhereType=TraverseVarConsTypeD(DeclaredVars,AllowedVars,WhereTerm,NewWhereVar.sort(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+        sort_expression WhereType=TraverseVarConsTypeD(DeclaredVars,WhereTerm,NewWhereVar.sort(),strictly_ambiguous,warn_upcasting,print_cast_error);
       }
       WhereVarList.push_front(NewWhereVar);
       NewWhereList.push_front(assignment(NewWhereVar,WhereTerm));
@@ -2820,15 +2807,11 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking the where expression " + data::pp(DataTerm) + ".");
     }
 
-    std::map<core::identifier_string,sort_expression> CopyAllowedVars(AllowedVars);
     std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
-    detail::add_variable_to_map(CopyAllowedVars,where_variables);
     detail::add_variable_to_map(CopyDeclaredVars,where_variables);
 
     data_expression Data=where.body();
-    sort_expression NewType=TraverseVarConsTypeD(CopyDeclaredVars,CopyAllowedVars,Data,PosType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
-
-    detail::RemoveVars(FreeVars,where_variables);
+    sort_expression NewType=TraverseVarConsTypeD(CopyDeclaredVars,Data,PosType,strictly_ambiguous,warn_upcasting,print_cast_error);
 
     DataTerm=where_clause(Data,NewWhereList);
     return NewType;
@@ -2863,13 +2846,13 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           sort_expression Type0;
           try
           {
-            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,false);
+            Type0=TraverseVarConsTypeD(DeclaredVars,Argument,Type,strictly_ambiguous,warn_upcasting,false);
           }
           catch (mcrl2::runtime_error&)
           {
             // Try again, but now without Type as the suggestion.
             // If this does not work, it will be caught in the second pass below.
-            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,data::untyped_sort(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type0=TraverseVarConsTypeD(DeclaredVars,Argument,data::untyped_sort(),strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           NewArguments.push_front(Argument);
           Type_is_stable=Type_is_stable && (Type==Type0);
@@ -2884,7 +2867,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
           {
             data_expression Argument= *i;
-            sort_expression Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            sort_expression Type0=TraverseVarConsTypeD(DeclaredVars,Argument,Type,strictly_ambiguous,warn_upcasting,print_cast_error);
             NewArguments.push_front(Argument);
             Type=Type0;
           }
@@ -2911,7 +2894,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           sort_expression Type0;
           try
           {
-            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type0=TraverseVarConsTypeD(DeclaredVars,Argument,Type,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error& e)
           {
@@ -2950,7 +2933,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           sort_expression Type0;
           try
           {
-            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type0=TraverseVarConsTypeD(DeclaredVars,Argument,Type,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error& e)
           {
@@ -2988,7 +2971,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           sort_expression Type0;
           try
           {
-            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument0,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type0=TraverseVarConsTypeD(DeclaredVars,Argument0,Type,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error& e)
           {
@@ -2997,7 +2980,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           sort_expression Type1;
           try
           {
-            Type1=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument1,sort_nat::nat(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type1=TraverseVarConsTypeD(DeclaredVars,Argument1,sort_nat::nat(),strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error& e)
           {
@@ -3043,7 +3026,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           sort_expression Type0;
           try
           {
-            Type0=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument0,Type,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type0=TraverseVarConsTypeD(DeclaredVars,Argument0,Type,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error& e)
           {
@@ -3059,7 +3042,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           sort_expression Type1;
           try
           {
-            Type1=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Argument1,sort_nat::nat(),FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type1=TraverseVarConsTypeD(DeclaredVars,Argument1,sort_nat::nat(),strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error& e)
           {
@@ -3092,7 +3075,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     for (application::const_iterator i=appl.begin(); i!=appl.end(); ++i)
     {
       data_expression Arg= *i;
-      sort_expression Type=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,data::untyped_sort(),FreeVars,false,warn_upcasting,print_cast_error);
+      sort_expression Type=TraverseVarConsTypeD(DeclaredVars,Arg,data::untyped_sort(),false,warn_upcasting,print_cast_error);
       assert(Type.defined());
       NewArguments.push_front(Arg);
       NewArgumentTypes.push_front(Type);
@@ -3105,11 +3088,11 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     sort_expression NewType;
     try
     {
-      NewType=TraverseVarConsTypeDN(DeclaredVars,AllowedVars,
+      NewType=TraverseVarConsTypeDN(DeclaredVars,
                       Data,
                       // data::untyped_sort(), /* function_sort(ArgumentTypes,PosType) */
                       function_sort(ArgumentTypes,PosType),  // XXXXXXXX
-                      FreeVars,false,nArguments,warn_upcasting,print_cast_error);
+                      false,nArguments,warn_upcasting,print_cast_error);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -3154,7 +3137,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           //upcasting
           try
           {
-            Type=UpCastNumericType(NeededType,Type,Arg,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type=UpCastNumericType(NeededType,Type,Arg,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error&)
           {
@@ -3172,7 +3155,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           }
           try
           {
-            NewArgType=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,NewArgType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            NewArgType=TraverseVarConsTypeD(DeclaredVars,Arg,NewArgType,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error& e)
           {
@@ -3191,9 +3174,9 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     //the function again
     try
     {
-      NewType=TraverseVarConsTypeDN(DeclaredVars,AllowedVars,
+      NewType=TraverseVarConsTypeDN(DeclaredVars,
                                         Data,function_sort(ArgumentTypes,PosType),
-                                        FreeVars,strictly_ambiguous,nArguments,warn_upcasting,print_cast_error);
+                                        strictly_ambiguous,nArguments,warn_upcasting,print_cast_error);
     }
     catch (mcrl2::runtime_error& e)
     {
@@ -3223,7 +3206,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           //upcasting
           try
           {
-            Type=UpCastNumericType(NeededType,Type,Arg,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            Type=UpCastNumericType(NeededType,Type,Arg,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error&)
           {
@@ -3241,7 +3224,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           }
           try
           {
-            NewArgType=TraverseVarConsTypeD(DeclaredVars,AllowedVars,Arg,NewArgType,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+            NewArgType=TraverseVarConsTypeD(DeclaredVars,Arg,NewArgType,strictly_ambiguous,warn_upcasting,print_cast_error);
           }
           catch (mcrl2::runtime_error& e)
           {
@@ -3306,7 +3289,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       sort_expression CastedNewType;
       try
       {
-        CastedNewType=UpCastNumericType(PosType,Sort,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+        CastedNewType=UpCastNumericType(PosType,Sort,DataTerm,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -3321,11 +3304,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       sort_expression Type=it->second;
       DataTerm=variable(Name,Type);
 
-      if (AllowedVars.count(Name)==0)
-      {
-        throw mcrl2::runtime_error("Variable " + core::pp(Name) + " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side.");
-      }
-
       sort_expression NewType;
       if (TypeMatchA(Type,PosType,NewType))
       {
@@ -3337,7 +3315,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         sort_expression CastedNewType;
         try
         {
-          CastedNewType=UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          CastedNewType=UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
         }
         catch (mcrl2::runtime_error& e)
         {
@@ -3355,7 +3333,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       }
 
       //Add to free variables list
-      FreeVars[Name]=Type;
       return Type;
     }
 
@@ -3376,7 +3353,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         DataTerm=data::function_symbol(Name,Type);
         try
         {
-          return UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          return UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
         }
         catch (mcrl2::runtime_error& e)
         {
@@ -3411,7 +3388,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
           {
             DataTerm=data::function_symbol(Name,Type);
           }
-          Type=UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          Type=UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
           // if (EqTypesA(Type,PosType))
           sort_expression result;
           if (TypeMatchA(Type,PosType,result))
@@ -3438,7 +3415,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         }
         try
         {
-          sort_expression r= UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+          sort_expression r= UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
           return r;
         }
         catch (mcrl2::runtime_error& e)
@@ -3485,7 +3462,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       DataTerm=data::function_symbol(Name,Type);
       try
       {
-        return UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,AllowedVars,FreeVars,strictly_ambiguous,warn_upcasting,print_cast_error);
+        return UpCastNumericType(PosType,Type,DataTerm,DeclaredVars,strictly_ambiguous,warn_upcasting,print_cast_error);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -3494,7 +3471,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     }
     else
     {
-      return TraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strictly_ambiguous, std::string::npos, warn_upcasting,print_cast_error);
+      return TraverseVarConsTypeDN(DeclaredVars, DataTerm, PosType, strictly_ambiguous, std::string::npos, warn_upcasting,print_cast_error);
     }
   }
 
@@ -4374,7 +4351,7 @@ data_expression mcrl2::data::data_type_checker::operator()(
   sort_expression Type;
   try
   {
-    Type=TraverseVarConsTypeD(Vars,Vars,data,data::untyped_sort());
+    Type=TraverseVarConsTypeD(Vars,data,data::untyped_sort());
   }
   catch (mcrl2::runtime_error& e)
   {
@@ -4428,7 +4405,8 @@ void mcrl2::data::data_type_checker::operator()(const variable& v)
     throw mcrl2::runtime_error(std::string(e.what()) + "\nType error while typechecking the data variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) + ".");
   }
 
-// std::cerr << "Check that variable does not occur with a different type in the context.";
+// TODO: Check that variable does not occur with a different type in its context. 
+//       For this the context must be provided as an argument. 
 }
 
 
@@ -4458,7 +4436,6 @@ void mcrl2::data::data_type_checker::operator()(const variable_list& l)
 // Type check and replace user defined equations.
 void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification& data_spec)
 {
-  std::map<core::identifier_string,sort_expression> FreeVars;
 
   //Create a new specification; admittedly, this is somewhat clumsy.
   data_specification new_specification;
@@ -4495,52 +4472,50 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
     std::map<core::identifier_string,sort_expression> DeclaredVars;
     detail::add_variable_to_map(DeclaredVars,vars);
 
-    data_expression Left=eqn.lhs();
+    data_expression left=eqn.lhs();
 
-    sort_expression LeftType;
+    sort_expression leftType;
     try
     {
-      LeftType=TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Left,data::untyped_sort(),FreeVars,false,true);
+      leftType=TraverseVarConsTypeD(DeclaredVars,left,data::untyped_sort(),false,true);
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking " + data::pp(Left) + " as left hand side of equation " + data::pp(eqn) + ".");
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking " + data::pp(left) + " as left hand side of equation " + data::pp(eqn) + ".");
     }
 
     if (was_warning_upcasting)
     {
       was_warning_upcasting=false;
-      mCRL2log(warning) << "Warning occurred while typechecking " << Left << " as left hand side of equation " << eqn << "." << std::endl;
+      mCRL2log(warning) << "Warning occurred while typechecking " << left << " as left hand side of equation " << eqn << "." << std::endl;
     }
 
-    data_expression Cond=eqn.condition();
-    TraverseVarConsTypeD(DeclaredVars,FreeVars,Cond,sort_bool::bool_());
+    data_expression cond=eqn.condition();
+    TraverseVarConsTypeD(DeclaredVars,cond,sort_bool::bool_());
 
-    data_expression Right=eqn.rhs();
-    std::map<core::identifier_string,sort_expression> dummy_empty_table;
-    sort_expression RightType;
+    data_expression right=eqn.rhs();
+    sort_expression rightType;
     try
     {
-      RightType=TraverseVarConsTypeD(DeclaredVars,FreeVars,Right,LeftType,dummy_empty_table,false);
+      rightType=TraverseVarConsTypeD(DeclaredVars,right,leftType,false);
     }
     catch (mcrl2::runtime_error& e)
     {
-      throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking " + data::pp(Right) + " as right hand side of equation " + data::pp(eqn) + ".");
+      throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking " + data::pp(right) + " as right hand side of equation " + data::pp(eqn) + ".");
     }
 
     //If the types are not uniquely the same now: do once more:
-    if (!EqTypesA(LeftType,RightType))
+    if (!EqTypesA(leftType,rightType))
     {
       sort_expression Type;
-      if (!TypeMatchA(LeftType,RightType,Type))
+      if (!TypeMatchA(leftType,rightType,Type))
       {
-        throw mcrl2::runtime_error("Types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(eqn) + " do not match.");
+        throw mcrl2::runtime_error("Types of the left- (" + data::pp(leftType) + ") and right- (" + data::pp(rightType) + ") hand-sides of the equation " + data::pp(eqn) + " do not match.");
       }
-      Left=eqn.lhs();
-      FreeVars.clear();
+      left=eqn.lhs();
       try
       {
-        LeftType=TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Left,Type,FreeVars,true);
+        leftType=TraverseVarConsTypeD(DeclaredVars,left,Type,true);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -4549,27 +4524,42 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
       if (was_warning_upcasting)
       {
         was_warning_upcasting=false;
-        mCRL2log(warning) << "Warning occurred while typechecking " << Left << " as left hand side of equation " << eqn << "." << std::endl;
+        mCRL2log(warning) << "Warning occurred while typechecking " << left << " as left hand side of equation " << eqn << "." << std::endl;
       }
-      Right=eqn.rhs();
+      right=eqn.rhs();
       try
       {
-        RightType=TraverseVarConsTypeD(DeclaredVars,DeclaredVars,Right,LeftType,FreeVars);
+        rightType=TraverseVarConsTypeD(DeclaredVars,right,leftType);
       }
       catch (mcrl2::runtime_error& e)
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\nTypes of the left- and right-hand-sides of the equation " + data::pp(eqn) + " do not match.");
       }
-      if (!TypeMatchA(LeftType,RightType,Type))
+      if (!TypeMatchA(leftType,rightType,Type))
       {
-        throw mcrl2::runtime_error("Types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(eqn) + " do not match.");
+        throw mcrl2::runtime_error("Types of the left- (" + data::pp(leftType) + ") and right- (" + data::pp(rightType) + ") hand-sides of the equation " + data::pp(eqn) + " do not match.");
       }
       if (detail::HasUnknown(Type))
       {
-        throw mcrl2::runtime_error("Types of the left- (" + data::pp(LeftType) + ") and right- (" + data::pp(RightType) + ") hand-sides of the equation " + data::pp(eqn) + " cannot be uniquely determined.");
+        throw mcrl2::runtime_error("Types of the left- (" + data::pp(leftType) + ") and right- (" + data::pp(rightType) + ") hand-sides of the equation " + data::pp(eqn) + " cannot be uniquely determined.");
+      }
+      // Check that the variable in the condition and the right hand side are a subset of those in the left hand side of the equation.
+      const std::set<variable> vars_in_lhs=find_free_variables(left);
+      const std::set<variable> vars_in_rhs=find_free_variables(right);
+      
+      variable culprit;
+      if (!detail::includes(vars_in_rhs,vars_in_lhs,culprit))
+      {
+        throw mcrl2::runtime_error("The variable " + data::pp(culprit) + " in the right hand side is not included in the left hand side of the equation " + data::pp(eqn) + ".");
+      }
+      
+      const std::set<variable> vars_in_condition=find_free_variables(cond);
+      if (!detail::includes(vars_in_condition,vars_in_lhs,culprit))
+      {
+        throw mcrl2::runtime_error("The variable " + data::pp(culprit) + " in the condition is not included in the left hand side of the equation " + data::pp(eqn) + ".");
       }
     }
-    new_specification.add_equation(data_equation(vars,Cond,Left,Right));
+    new_specification.add_equation(data_equation(vars,cond,left,right));
   }
   data_spec=new_specification;
 }
@@ -4589,21 +4579,6 @@ namespace data
 {
 namespace detail
 {
-
-static std::map<core::identifier_string,sort_expression> RemoveVars(
-                      std::map<core::identifier_string,sort_expression>& Vars,
-                      variable_list VarDecls)
-{
-  for (; !VarDecls.empty(); VarDecls=VarDecls.tail())
-  {
-    const variable& VarDecl=VarDecls.front();
-    const core::identifier_string& VarName=VarDecl.name();
-
-    Vars.erase(VarName);
-  }
-
-  return Vars;
-}
 
 static sort_expression_list GetVarTypes(variable_list VarDecls)
 {
