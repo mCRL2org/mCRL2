@@ -56,7 +56,7 @@ void test_user_defined_sort()
 void test_whr()
 {
   using namespace data;
-  data_expression x = parse_data_expression("exists n: Nat . n == 0 whr n = 1 end");
+  data_expression x = parse_data_expression("exists n: Pos . n == 0 whr n = 1 end");
 }
 
 // returns true if parsing succeeded

@@ -480,27 +480,27 @@ BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_and_vice_versa)
 
 BOOST_AUTO_TEST_CASE(test_where_in_context)
 {
-  test_data_expression("x + y whr x = 3, y = 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
+  test_data_expression("x + y whr x = 3, y = 0 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_in_context)
 {
-  test_data_expression("x + y whr x = 3, y = x + 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
+  test_data_expression("x + y whr x = 3, y = x + 10 end", { var("x", pos()), var("y", pos()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_and_two_occur_in_two_in_context)
 {
-  test_data_expression("x + y whr x = 3, y = x + y + 10 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
+  test_data_expression("x + y whr x = 3, y = x + y + 10 end", { var("x", pos()), var("y", pos()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_two_occurs_in_one_in_context)
 {
-  test_data_expression("x + y whr x = y + 10, y = 3 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
+  test_data_expression("x + y whr x = y + 10, y = 0 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_var_one_occurs_in_two_and_vice_versa_in_context)
 {
-  test_data_expression("x + y whr x = y + 10, y = x + 3 end", { var("x", pos()), var("y", nat()) }, true, "Pos");
+  test_data_expression("x + y whr x = y + 10, y = x + 3 end", { var("x", pos()), var("y", pos()) }, true, "Pos");
 }
 
 BOOST_AUTO_TEST_CASE(test_where_mix_nat_pos_list)
@@ -510,7 +510,7 @@ BOOST_AUTO_TEST_CASE(test_where_mix_nat_pos_list)
 
 BOOST_AUTO_TEST_CASE(test_where_mix_nat_list)
 {
-  test_data_expression("x ++ y whr x = [0, y], y = [x] end", { var("x", nat()), var("y", nat()) }, true, "List(Nat)");
+  test_data_expression("x1 ++ y whr x1 = [0, z], y = [x] end", { var("x", nat()), var("z", nat()) }, true, "List(Nat)");
 }
 
 BOOST_AUTO_TEST_CASE(test_upcast_pos2nat)

@@ -55,6 +55,17 @@ class variable_context
       return m_variables;
     }
 
+    // Adds the elements of variables to variable_map without checking.
+    template <typename VariableContainer>
+    void add_context_variables(const VariableContainer& variables)
+    {
+      for (const data::variable& v: variables)
+      {
+          m_variables[v.name()] = v.sort();
+      }
+    }
+
+
     // Adds the elements of variables to variable_map
     // Throws an exception if a typecheck error is encountered
     template <typename VariableContainer>

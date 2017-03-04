@@ -35,29 +35,33 @@ class data_type_checker: public sort_type_checker
 
   public:
     /** \brief     make a data type checker.
-     *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
+     *             Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
      *  \param[in] data_spec A data specification that does not need to have been type checked.
-     *  \return    a data expression where all untyped identifiers have been replace by typed ones.
+     *  \return    A data expression where all untyped identifiers have been replace by typed ones.
      **/
     data_type_checker(const data_specification& data_spec);
 
     /** \brief     Type checks a variable.
      *             Throws an mcrl2::runtime_error exception if the variable is not well typed.
-     *  \details   A variable is not well typed if its name clashes with the name of a declared function, or when its sort does not exist.
+     *  \details   A variable is not well typed if its name clashes with the name of a declared function, when its sort does not exist, or when
+     *             the variable is used in its context with a different sort.
      *  \param[in] v A variables that is to be type checked.
+     *  \param[in] context Information about the context of the variable.
      **/
-    void operator()(const variable& v);
+    void operator()(const variable& v, const detail::variable_context& context);
 
     /** \brief     Type checks a variable list.
      *             Throws an mcrl2::runtime_error exception if the variables are not well typed.
-     *  \details   A variable is not well typed if its name clashes with the name of a declared function, or when its sort does not exist.
+     *  \details   A variable is not well typed if its name clashes with the name of a declared function, when its sort does not exist, or when
+     *             a variable occurs in the context. Furthermore, variables cannot occur multiple times in a variable list.
      *  \param[in] l A list of variables that must be type checked.
+     *  \param[in] context Information about the context of the variables in the list.
      **/
-    void operator()(const variable_list& l);
+    void operator()(const variable_list& l, const detail::variable_context& context);
 
     /** \brief     Yields a type checked data specification, provided typechecking was successful.
+     *             If not successful an exception is thrown. 
      *  \return    a data specification where all untyped identifiers have been replace by typed ones.
-     *  \post      sort_expr is type checked.
      **/
     const data_specification operator()();
 
@@ -65,11 +69,11 @@ class data_type_checker: public sort_type_checker
     /** \brief     Type check a data expression.
      *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
      *  \param[in] data_expr A data expression that has not been type checked.
-     *  \param[in] vars a mapping of variable names to their types.
+     *  \param[in] context The variable context in which this term must be typechecked.
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
     data_expression operator()(const data_expression& data_expr,
-                               const std::map<core::identifier_string,sort_expression>& vars);
+                               const detail::variable_context& context);
 
     void read_sort(const sort_expression& SortExpr);
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors);
@@ -94,7 +98,7 @@ class data_type_checker: public sort_type_checker
     }
 
     sort_expression TraverseVarConsTypeD(
-                        const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+                        const detail::variable_context& DeclaredVars,
                         data_expression& DataTerm,
                         const sort_expression& PosType,
                         const bool strictly_ambiguous=true,
@@ -106,7 +110,7 @@ class data_type_checker: public sort_type_checker
                                          const sort_expression& t2); */
 
     sort_expression TraverseVarConsTypeDN(
-                           const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+                           const detail::variable_context& DeclaredVars,
                            data_expression& DataTerm,
                            sort_expression PosType,
                            const bool strictly_ambiguous=true,
@@ -154,7 +158,7 @@ class data_type_checker: public sort_type_checker
                     sort_expression NeededType,
                     sort_expression Type,
                     data_expression& Par,
-                    const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+                    const detail::variable_context& DeclaredVars,
                     const bool strictly_ambiguous,
                     bool warn_upcasting=false,
                     const bool print_cast_error=false);

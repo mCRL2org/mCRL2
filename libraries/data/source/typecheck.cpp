@@ -43,14 +43,6 @@ namespace data
 namespace detail
 {
 
-static void add_variable_to_map(std::map<core::identifier_string, sort_expression>& variable_map, const variable_list& l)
-{
-  for (const variable& v: l)
-  {
-    variable_map[v.name()] = v.sort();
-  }
-}
-
 // This function checks whether the set s1 is included in s2. If not the variable culprit
 // is the variable occuring in s1 but not in s2.
 static bool includes(const std::set<variable>& s1, const std::set<variable>& s2, variable& culprit)
@@ -224,7 +216,7 @@ sort_expression mcrl2::data::data_type_checker::UpCastNumericType(
                       sort_expression NeededType,
                       sort_expression Type,
                       data_expression& Par,
-                      const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+                      const detail::variable_context& DeclaredVars,
                       const bool strictly_ambiguous,
                       bool warn_upcasting,
                       const bool print_cast_error)
@@ -2266,7 +2258,7 @@ sort_expression mcrl2::data::data_type_checker::determine_allowed_type(const dat
 
 
 sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
-  const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+  const detail::variable_context& DeclaredVars,
   data_expression& DataTerm,
   sort_expression PosType,
   const bool strictly_ambiguous,
@@ -2283,9 +2275,9 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
     bool variable_=false;
     bool TypeADefined=false;
     sort_expression TypeA;
-    std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.find(Name);
+    std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.context().find(Name);
 
-    if (i!=DeclaredVars.end())
+    if (i!=DeclaredVars.context().end())
     {
       TypeA=i->second;
       TypeADefined=true;
@@ -2305,8 +2297,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
     sort_expression_list ParList;
     if (nFactPars==0)
     {
-      std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.find(Name);
-      if (i!=DeclaredVars.end())
+      std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.context().find(Name);
+      if (i!=DeclaredVars.context().end())
       {
         TypeA=i->second;
         TypeADefined=true;
@@ -2600,7 +2592,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
 
 
 sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
-  const std::map<core::identifier_string,sort_expression>& DeclaredVars,
+  const detail::variable_context& DeclaredVars,
   data_expression& DataTerm,
   const sort_expression& PosType,
   const bool strictly_ambiguous,
@@ -2629,7 +2621,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       // Type check the comprehension_variables.
       try
       {
-        (*this)(comprehension_variables);
+        (*this)(comprehension_variables,DeclaredVars);
       }
       catch (mcrl2::runtime_error& e)
       {
@@ -2645,8 +2637,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
       const sort_expression element_sort=comprehension_variables.front().sort();
 
-      std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
-      detail::add_variable_to_map(CopyDeclaredVars,comprehension_variables);
+      detail::variable_context CopyDeclaredVars(DeclaredVars);
+      CopyDeclaredVars.add_context_variables(comprehension_variables);
 
       data_expression Data=abstr.body();
 
@@ -2698,15 +2690,15 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       // Type check the variables.
       try
       {
-        (*this)(bound_variables);
+        (*this)(bound_variables,DeclaredVars);
       }
       catch (mcrl2::runtime_error& e)
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking the quantification " + data::pp(DataTerm) + ".");
       }
 
-      std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
-      detail::add_variable_to_map(CopyDeclaredVars,bound_variables);
+      detail::variable_context CopyDeclaredVars(DeclaredVars);
+      CopyDeclaredVars.add_context_variables(bound_variables);
 
       data_expression Data=abstr.body();
       sort_expression temp;
@@ -2721,7 +2713,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
         throw mcrl2::runtime_error("The type of an exist/forall for " + data::pp(DataTerm) + " cannot be determined.");
       }
 
-
       DataTerm=abstraction(BindingOperator,bound_variables,Data);
       return sort_bool::bool_();
     }
@@ -2732,15 +2723,15 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       // Typecheck the variables.
       try
       {
-        (*this)(bound_variables);
+        (*this)(bound_variables,DeclaredVars);
       }
       catch (mcrl2::runtime_error& e)
       {
         throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking the lambda expression " + data::pp(DataTerm) + ".");
       }
 
-      std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
-      detail::add_variable_to_map(CopyDeclaredVars,bound_variables);
+      detail::variable_context CopyDeclaredVars(DeclaredVars);
+      CopyDeclaredVars.add_context_variables(bound_variables);
 
       sort_expression_list ArgTypes=detail::GetVarTypes(bound_variables);
       sort_expression NewType;
@@ -2800,15 +2791,15 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     // Typecheck the where_variables
     try
     {
-      (*this)(where_variables);
+      (*this)(where_variables,DeclaredVars);
     }
     catch (mcrl2::runtime_error& e)
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred while typechecking the where expression " + data::pp(DataTerm) + ".");
     }
 
-    std::map<core::identifier_string,sort_expression> CopyDeclaredVars(DeclaredVars);
-    detail::add_variable_to_map(CopyDeclaredVars,where_variables);
+    detail::variable_context CopyDeclaredVars(DeclaredVars);
+    CopyDeclaredVars.add_context_variables(where_variables);
 
     data_expression Data=where.body();
     sort_expression NewType=TraverseVarConsTypeD(CopyDeclaredVars,Data,PosType,strictly_ambiguous,warn_upcasting,print_cast_error);
@@ -3298,8 +3289,8 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
       return CastedNewType;
     }
 
-    const std::map<core::identifier_string,sort_expression>::const_iterator it=DeclaredVars.find(Name);
-    if (it!=DeclaredVars.end())
+    const std::map<core::identifier_string,sort_expression>::const_iterator it=DeclaredVars.context().find(Name);
+    if (it!=DeclaredVars.context().end())
     {
       sort_expression Type=it->second;
       DataTerm=variable(Name,Type);
@@ -4345,13 +4336,13 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification& data
 
 data_expression mcrl2::data::data_type_checker::operator()(
            const data_expression& data_expr,
-           const std::map<core::identifier_string,sort_expression>& Vars)
+           const detail::variable_context& context_variables)
 {
   data_expression data=data_expr;
   sort_expression Type;
   try
   {
-    Type=TraverseVarConsTypeD(Vars,data,data::untyped_sort());
+    Type=TraverseVarConsTypeD(context_variables,data,data::untyped_sort());
   }
   catch (mcrl2::runtime_error& e)
   {
@@ -4359,7 +4350,7 @@ data_expression mcrl2::data::data_type_checker::operator()(
   }
   if (data::is_untyped_sort(Type))
   {
-    throw mcrl2::runtime_error("Type checking of data expression failed. Result is an unknown sort.");
+    throw mcrl2::runtime_error("Type checking of data expression " + data::pp(data_expr) + " failed. Result is an unknown sort.");
   }
 
   assert(strict_type_check(data));
@@ -4367,7 +4358,8 @@ data_expression mcrl2::data::data_type_checker::operator()(
 }
 
 
-void mcrl2::data::data_type_checker::operator()(const variable& v)
+void mcrl2::data::data_type_checker::operator()(const variable& v,
+                                                const detail::variable_context& context_variables)
 {
   // First check whether the variable name clashes with a system or user defined function or constant.
   const std::map<core::identifier_string,sort_expression_list>::const_iterator i1=system_constants.find(v.name());   
@@ -4405,18 +4397,25 @@ void mcrl2::data::data_type_checker::operator()(const variable& v)
     throw mcrl2::runtime_error(std::string(e.what()) + "\nType error while typechecking the data variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) + ".");
   }
 
-// TODO: Check that variable does not occur with a different type in its context. 
-//       For this the context must be provided as an argument. 
+  // Third, check that the variable did not occur in the context with a different type.
+  const std::map<core::identifier_string,sort_expression>::const_iterator i=context_variables.context().find(v.name());
+  sort_expression temp;
+  if (i!=context_variables.context().end() && !TypeMatchA(i->second,v.sort(),temp))
+  {
+    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) +  
+                               " is used in its surrounding context with a different sort " + core::pp(i->second) + ".");
+  }
 }
 
 
 
-void mcrl2::data::data_type_checker::operator()(const variable_list& l)
+void mcrl2::data::data_type_checker::operator()(const variable_list& l,
+                                                const detail::variable_context& context_variables)
 {
   // Type check each variable.
   for (const variable& v: l)
   {
-    (*this)(v);
+    (*this)(v, context_variables);
   }
 
   // Check that all variable names are unique.
@@ -4462,15 +4461,15 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
     try
     {
       // Typecheck the variables in an equation.
-      (*this)(vars);
+      (*this)(vars,detail::variable_context());
     }
     catch (mcrl2::runtime_error& e)
     {
       throw mcrl2::runtime_error(std::string(e.what()) + "\nThis error occurred while typechecking equation " + data::pp(eqn) + ".");
     }
 
-    std::map<core::identifier_string,sort_expression> DeclaredVars;
-    detail::add_variable_to_map(DeclaredVars,vars);
+    detail::variable_context DeclaredVars;
+    DeclaredVars.add_context_variables(vars);
 
     data_expression left=eqn.lhs();
 
