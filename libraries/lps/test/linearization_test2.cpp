@@ -330,7 +330,7 @@ BOOST_AUTO_TEST_CASE(test_aliases_complex)
 BOOST_AUTO_TEST_CASE(test_bug_775a)
 {
   const std::string spec =
-    "sort V = struct v( l: Bool  );\n"
+    "sort V = struct v1( l: Bool  );\n"
     "act  a:  List( Bool );\n"
     "sort B = Bool -> List(Bool);\n"
     "proc X( M: B ) = \n"
@@ -344,7 +344,7 @@ BOOST_AUTO_TEST_CASE(test_bug_775a)
 BOOST_AUTO_TEST_CASE(test_bug_775b)
 {
   const std::string spec =
-    "sort V = struct v( l: Bool  );\n"
+    "sort V = struct v1( l: Bool  );\n"
     "act  a:  List( Bool );\n"
     "sort B = Bool -> List(Bool);\n"
     "proc X( M: B ) = \n"
