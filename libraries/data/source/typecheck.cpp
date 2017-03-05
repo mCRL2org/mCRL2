@@ -30,6 +30,7 @@
 #include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/data/untyped_possible_sorts.h"
 #include "mcrl2/data/function_update.h"
+#include "mcrl2/data/detail/variable_context.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::core::detail;
@@ -40,8 +41,16 @@ namespace mcrl2
 {
 namespace data
 {
+
 namespace detail
 {
+
+void variable_context::typecheck_variable(const data_type_checker& typechecker, const variable& v) const
+{
+  data_type_checker& typechecker1 = const_cast<data_type_checker&>(typechecker);
+  // TODO: this method call should be const in data_type_checker
+  typechecker1(v, *this);
+}
 
 // This function checks whether the set s1 is included in s2. If not the variable culprit
 // is the variable occuring in s1 but not in s2.
@@ -3888,7 +3897,7 @@ void mcrl2::data::data_type_checker::initialise_system_defined_functions(void)
   add_system_function(sort_real::real2pos());
   add_system_function(sort_real::real2nat());
   add_system_function(sort_real::real2int());
-  
+
   //Square root for the natural numbers.
   add_system_function(sort_nat::sqrt());
   //more about numbers
@@ -4308,7 +4317,7 @@ mcrl2::data::data_type_checker::data_type_checker(const data_specification& data
 
   try
   {
-    for (const alias& a: get_sort_specification().user_defined_aliases()) 
+    for (const alias& a: get_sort_specification().user_defined_aliases())
     {
       read_sort(a.reference());
     }
@@ -4362,28 +4371,28 @@ void mcrl2::data::data_type_checker::operator()(const variable& v,
                                                 const detail::variable_context& context_variables)
 {
   // First check whether the variable name clashes with a system or user defined function or constant.
-  const std::map<core::identifier_string,sort_expression_list>::const_iterator i1=system_constants.find(v.name());   
+  const std::map<core::identifier_string,sort_expression_list>::const_iterator i1=system_constants.find(v.name());
   if (i1!=system_constants.end())
   {
-    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) + 
+    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) +
                                " clashes with the system defined constant " + core::pp(i1->first) + ":" + data::pp(i1->second.front()) + ".");
   }
-  const std::map<core::identifier_string,sort_expression_list>::const_iterator i2=system_functions.find(v.name());   
+  const std::map<core::identifier_string,sort_expression_list>::const_iterator i2=system_functions.find(v.name());
   if (i2!=system_functions.end())
   {
-    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) + 
+    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) +
                                " clashes with the system defined function " + core::pp(i2->first) + ":" + data::pp(i2->second.front()) + ".");
   }
-  const std::map<core::identifier_string,sort_expression>::const_iterator i3=user_constants.find(v.name());   
+  const std::map<core::identifier_string,sort_expression>::const_iterator i3=user_constants.find(v.name());
   if (i3!=user_constants.end())
   {
-    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) + 
+    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) +
                                " clashes with the user defined constant " + core::pp(i3->first) + ":" + data::pp(i3->second) + ".");
   }
-  const std::map<core::identifier_string,sort_expression_list>::const_iterator i4=user_functions.find(v.name());   
+  const std::map<core::identifier_string,sort_expression_list>::const_iterator i4=user_functions.find(v.name());
   if (i4!=user_functions.end())
   {
-    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) + 
+    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) +
                                " clashes with the user defined function " + core::pp(i4->first) + ":" + data::pp(i4->second.front()) + ".");
   }
 
@@ -4402,7 +4411,7 @@ void mcrl2::data::data_type_checker::operator()(const variable& v,
   sort_expression temp;
   if (i!=context_variables.context().end() && !TypeMatchA(i->second,v.sort(),temp))
   {
-    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) +  
+    throw mcrl2::runtime_error("The variable " + core::pp(v.name()) + ":" + data::pp(v.sort()) +
                                " is used in its surrounding context with a different sort " + core::pp(i->second) + ".");
   }
 }
@@ -4545,13 +4554,13 @@ void mcrl2::data::data_type_checker::TransformVarConsTypeData(data_specification
       // Check that the variable in the condition and the right hand side are a subset of those in the left hand side of the equation.
       const std::set<variable> vars_in_lhs=find_free_variables(left);
       const std::set<variable> vars_in_rhs=find_free_variables(right);
-      
+
       variable culprit;
       if (!detail::includes(vars_in_rhs,vars_in_lhs,culprit))
       {
         throw mcrl2::runtime_error("The variable " + data::pp(culprit) + " in the right hand side is not included in the left hand side of the equation " + data::pp(eqn) + ".");
       }
-      
+
       const std::set<variable> vars_in_condition=find_free_variables(cond);
       if (!detail::includes(vars_in_condition,vars_in_lhs,culprit))
       {

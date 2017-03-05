@@ -13,12 +13,13 @@
 #define MCRL2_DATA_DETAIL_VARIABLE_CONTEXT_H
 
 #include <map>
-#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
 
 namespace data {
+
+class data_type_checker;
 
 namespace detail {
 
@@ -40,17 +41,20 @@ void check_duplicate_variable_names(const data::variable_list& x, const std::str
 class variable_context
 {
   private:
-    std::map<core::identifier_string, data::sort_expression> m_variables;
+    std::map<core::identifier_string, sort_expression> m_variables;
+
+  protected:
+    void typecheck_variable(const data_type_checker& typechecker, const variable& v) const;
 
   public:
     variable_context()
     { }
 
-    variable_context(const std::map<core::identifier_string, data::sort_expression>& variables)
+    variable_context(const std::map<core::identifier_string, sort_expression>& variables)
       : m_variables(variables)
     { }
 
-    const std::map<core::identifier_string, data::sort_expression>& context() const
+    const std::map<core::identifier_string, sort_expression>& context() const
     {
       return m_variables;
     }
@@ -69,7 +73,7 @@ class variable_context
     // Adds the elements of variables to variable_map
     // Throws an exception if a typecheck error is encountered
     template <typename VariableContainer>
-    void add_context_variables(const VariableContainer& variables, const data::sort_type_checker& sort_typechecker)
+    void add_context_variables(const VariableContainer& variables, const data_type_checker& typechecker)
     {
       // first remove the existing entries
       for (const data::variable& v: variables)
@@ -79,7 +83,7 @@ class variable_context
 
       for (const data::variable& v: variables)
       {
-        sort_typechecker(v.sort());
+        typecheck_variable(typechecker, v);
         auto i = m_variables.find(v.name());
         if (i == m_variables.end())
         {

@@ -60,7 +60,7 @@ class data_type_checker: public sort_type_checker
     void operator()(const variable_list& l, const detail::variable_context& context);
 
     /** \brief     Yields a type checked data specification, provided typechecking was successful.
-     *             If not successful an exception is thrown. 
+     *             If not successful an exception is thrown.
      *  \return    a data specification where all untyped identifiers have been replace by typed ones.
      **/
     const data_specification operator()();
