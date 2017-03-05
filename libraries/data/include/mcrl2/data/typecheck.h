@@ -25,8 +25,8 @@ namespace data
 class data_type_checker: public sort_type_checker
 {
   protected:
-    bool was_warning_upcasting;
-    bool was_ambiguous;
+    mutable bool was_warning_upcasting; // This variable is used to limit the number of upcasting warnings. 
+
     std::map<core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression> user_constants;          //name -> sort expression
@@ -48,7 +48,7 @@ class data_type_checker: public sort_type_checker
      *  \param[in] v A variables that is to be type checked.
      *  \param[in] context Information about the context of the variable.
      **/
-    void operator()(const variable& v, const detail::variable_context& context);
+    void operator()(const variable& v, const detail::variable_context& context) const;
 
     /** \brief     Type checks a variable list.
      *             Throws an mcrl2::runtime_error exception if the variables are not well typed.
@@ -57,13 +57,13 @@ class data_type_checker: public sort_type_checker
      *  \param[in] l A list of variables that must be type checked.
      *  \param[in] context Information about the context of the variables in the list.
      **/
-    void operator()(const variable_list& l, const detail::variable_context& context);
+    void operator()(const variable_list& l, const detail::variable_context& context) const;
 
     /** \brief     Yields a type checked data specification, provided typechecking was successful.
      *             If not successful an exception is thrown.
      *  \return    a data specification where all untyped identifiers have been replace by typed ones.
      **/
-    const data_specification operator()();
+    const data_specification operator()() const;
 
   protected:
     /** \brief     Type check a data expression.
@@ -73,7 +73,7 @@ class data_type_checker: public sort_type_checker
      *  \return    a data expression where all untyped identifiers have been replace by typed ones.
      **/
     data_expression operator()(const data_expression& data_expr,
-                               const detail::variable_context& context);
+                               const detail::variable_context& context) const;
 
     void read_sort(const sort_expression& SortExpr);
     void read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors);
@@ -82,10 +82,10 @@ class data_type_checker: public sort_type_checker
     void initialise_system_defined_functions(void);
     void add_system_constant(const data::function_symbol& f);
     void add_system_function(const data::function_symbol& f);
-    bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result);
-    bool TypeMatchL(const sort_expression_list& TypeList, const sort_expression_list& PosTypeList, sort_expression_list& result);
-    sort_expression UnwindType(const sort_expression& Type);
-    variable UnwindType(const variable& v);
+    bool TypeMatchA(const sort_expression& Type_in, const sort_expression& PosType_in, sort_expression& result) const;
+    bool TypeMatchL(const sort_expression_list& TypeList, const sort_expression_list& PosTypeList, sort_expression_list& result) const;
+    sort_expression UnwindType(const sort_expression& Type) const;
+    variable UnwindType(const variable& v) const;
     template <class T>
     atermpp::term_list<T> UnwindType(const atermpp::term_list<T>& l)
     {
@@ -103,7 +103,7 @@ class data_type_checker: public sort_type_checker
                         const sort_expression& PosType,
                         const bool strictly_ambiguous=true,
                         const bool warn_upcasting=false,
-                        const bool print_cast_error=true);
+                        const bool print_cast_error=true) const;
 
     /* sort_expression TraverseVarConsTypeD(const std::map<core::identifier_string,sort_expression>& DeclaredVars,
                                          data_expression& t1,
@@ -116,44 +116,44 @@ class data_type_checker: public sort_type_checker
                            const bool strictly_ambiguous=true,
                            const size_t nFactPars=std::string::npos,
                            const bool warn_upcasting=false,
-                           const bool print_cast_error=true);
+                           const bool print_cast_error=true) const;
 
-    bool InTypesA(const sort_expression& Type, sort_expression_list Types);
-    bool EqTypesA(const sort_expression& Type1, const sort_expression& Type2);
-    bool InTypesL(const sort_expression_list& Type, atermpp::term_list<sort_expression_list> Types);
-    bool EqTypesL(sort_expression_list Type1, sort_expression_list Type2);
-    bool MaximumType(const sort_expression& Type1, const sort_expression& Type2, sort_expression& result);
-    sort_expression ExpandNumTypesUp(sort_expression Type);
-    sort_expression_list ExpandNumTypesUpL(const sort_expression_list& type_list);
-    sort_expression ExpandNumTypesDown(sort_expression Type);
-    bool UnifyMinType(const sort_expression& Type1, const sort_expression& Type2, sort_expression& result);
-    sort_expression determine_allowed_type(const data_expression& d, const sort_expression& proposed_type);
-    bool MatchIf(const function_sort& type, sort_expression& result);
-    bool MatchEqNeqComparison(const function_sort& type, sort_expression& result);
-    bool MatchSqrt(const function_sort& type, sort_expression& result);
-    bool MatchListOpCons(const function_sort& type, sort_expression& result);
-    bool MatchListOpSnoc(const function_sort& type, sort_expression& result);
-    bool MatchListOpConcat(const function_sort& type, sort_expression& result);
-    bool MatchListOpEltAt(const function_sort& type, sort_expression& result);
-    bool MatchListOpHead(const function_sort& type, sort_expression& result);
-    bool MatchListOpTail(const function_sort& type, sort_expression& result);
-    bool MatchSetOpSet2Bag(const function_sort& type, sort_expression& result);
-    bool MatchFalseFunction(const function_sort& type, sort_expression& result);
-    bool MatchListSetBagOpIn(const function_sort& type, sort_expression& result);
-    bool match_fset_insert(const function_sort& type, sort_expression& result);
-    bool match_fbag_cinsert(const function_sort& type, sort_expression& result);
-    bool MatchSetBagOpUnionDiffIntersect(const function_sort& type, sort_expression& result);
-    bool MatchSetOpSetCompl(const function_sort& type, sort_expression& result);
-    bool MatchBagOpBag2Set(const function_sort& type, sort_expression& result);
-    bool MatchBagOpBagCount(const function_sort& type, sort_expression& result);
-    bool MatchFuncUpdate(const function_sort& type, sort_expression& result);
-    bool MatchSetConstructor(const function_sort& type, sort_expression& result);
-    bool MatchBagConstructor(const function_sort& type, sort_expression& result);
-    bool UnArrowProd(const sort_expression_list& ArgTypes, sort_expression PosType, sort_expression& result);
-    bool UnFSet(sort_expression PosType, sort_expression& result);
-    bool UnFBag(sort_expression PosType, sort_expression& result);
-    bool UnList(sort_expression PosType, sort_expression& result);
-    void ErrorMsgCannotCast(sort_expression CandidateType, data_expression_list Arguments, sort_expression_list ArgumentTypes,std::string previous_reason);
+    bool InTypesA(const sort_expression& Type, sort_expression_list Types) const;
+    bool EqTypesA(const sort_expression& Type1, const sort_expression& Type2) const;
+    bool InTypesL(const sort_expression_list& Type, atermpp::term_list<sort_expression_list> Types) const;
+    bool EqTypesL(sort_expression_list Type1, sort_expression_list Type2) const;
+    bool MaximumType(const sort_expression& Type1, const sort_expression& Type2, sort_expression& result) const;
+    sort_expression ExpandNumTypesUp(sort_expression Type) const;
+    sort_expression_list ExpandNumTypesUpL(const sort_expression_list& type_list) const;
+    sort_expression ExpandNumTypesDown(sort_expression Type) const;
+    bool UnifyMinType(const sort_expression& Type1, const sort_expression& Type2, sort_expression& result) const;
+    sort_expression determine_allowed_type(const data_expression& d, const sort_expression& proposed_type) const;
+    bool MatchIf(const function_sort& type, sort_expression& result) const;
+    bool MatchEqNeqComparison(const function_sort& type, sort_expression& result) const;
+    bool MatchSqrt(const function_sort& type, sort_expression& result) const;
+    bool MatchListOpCons(const function_sort& type, sort_expression& result) const;
+    bool MatchListOpSnoc(const function_sort& type, sort_expression& result) const;
+    bool MatchListOpConcat(const function_sort& type, sort_expression& result) const;
+    bool MatchListOpEltAt(const function_sort& type, sort_expression& result) const;
+    bool MatchListOpHead(const function_sort& type, sort_expression& result) const;
+    bool MatchListOpTail(const function_sort& type, sort_expression& result) const;
+    bool MatchSetOpSet2Bag(const function_sort& type, sort_expression& result) const;
+    bool MatchFalseFunction(const function_sort& type, sort_expression& result) const;
+    bool MatchListSetBagOpIn(const function_sort& type, sort_expression& result) const;
+    bool match_fset_insert(const function_sort& type, sort_expression& result) const;
+    bool match_fbag_cinsert(const function_sort& type, sort_expression& result) const;
+    bool MatchSetBagOpUnionDiffIntersect(const function_sort& type, sort_expression& result) const;
+    bool MatchSetOpSetCompl(const function_sort& type, sort_expression& result) const;
+    bool MatchBagOpBag2Set(const function_sort& type, sort_expression& result) const;
+    bool MatchBagOpBagCount(const function_sort& type, sort_expression& result) const;
+    bool MatchFuncUpdate(const function_sort& type, sort_expression& result) const;
+    bool MatchSetConstructor(const function_sort& type, sort_expression& result) const;
+    bool MatchBagConstructor(const function_sort& type, sort_expression& result) const;
+    bool UnArrowProd(const sort_expression_list& ArgTypes, sort_expression PosType, sort_expression& result) const;
+    bool UnFSet(sort_expression PosType, sort_expression& result) const;
+    bool UnFBag(sort_expression PosType, sort_expression& result) const;
+    bool UnList(sort_expression PosType, sort_expression& result) const;
+    void ErrorMsgCannotCast(sort_expression CandidateType, data_expression_list Arguments, sort_expression_list ArgumentTypes,std::string previous_reason) const;
     sort_expression UpCastNumericType(
                     sort_expression NeededType,
                     sort_expression Type,
@@ -161,17 +161,17 @@ class data_type_checker: public sort_type_checker
                     const detail::variable_context& DeclaredVars,
                     const bool strictly_ambiguous,
                     bool warn_upcasting=false,
-                    const bool print_cast_error=false);
+                    const bool print_cast_error=false) const;
     void TransformVarConsTypeData(data_specification& data_spec);
-    sort_expression_list GetNotInferredList(const atermpp::term_list<sort_expression_list>& TypeListList);
-    sort_expression_list InsertType(const sort_expression_list& TypeList, const sort_expression& Type);
+    sort_expression_list GetNotInferredList(const atermpp::term_list<sort_expression_list>& TypeListList) const;
+    sort_expression_list InsertType(const sort_expression_list& TypeList, const sort_expression& Type) const;
     std::pair<bool,sort_expression_list> AdjustNotInferredList(
             const sort_expression_list& PosTypeList,
-            const atermpp::term_list<sort_expression_list>& TypeListList);
-    bool IsTypeAllowedA(const sort_expression& Type, const sort_expression& PosType);
-    bool IsTypeAllowedL(const sort_expression_list& TypeList, const sort_expression_list& PosTypeList);
-    bool IsNotInferredL(sort_expression_list TypeList);
-    bool strict_type_check(const data_expression& d);
+            const atermpp::term_list<sort_expression_list>& TypeListList) const;
+    bool IsTypeAllowedA(const sort_expression& Type, const sort_expression& PosType) const;
+    bool IsTypeAllowedL(const sort_expression_list& TypeList, const sort_expression_list& PosTypeList) const;
+    bool IsNotInferredL(sort_expression_list TypeList) const;
+    bool strict_type_check(const data_expression& d) const;
 
     // for example Pos -> Nat, or Nat -> Int
     data_expression upcast_numeric_type(const data_expression& x,
