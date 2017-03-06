@@ -47,8 +47,7 @@ namespace detail
 
 void variable_context::typecheck_variable(const data_type_checker& typechecker, const variable& v) const
 {
-  data_type_checker& typechecker1 = const_cast<data_type_checker&>(typechecker);
-  typechecker1(v, *this);
+  typechecker(v, *this);
 }
 
 // This function checks whether the set s1 is included in s2. If not the variable culprit
