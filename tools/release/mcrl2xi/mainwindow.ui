@@ -87,7 +87,6 @@
     <addaction name="actionWrap_mode"/>
     <addaction name="actionReset_perspective"/>
     <addaction name="separator"/>
-    <addaction name="actionParser"/>
     <addaction name="actionRewriter"/>
     <addaction name="actionSolver"/>
     <addaction name="actionOutput"/>
@@ -106,53 +105,6 @@
    <addaction name="menuActions"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QDockWidget" name="dockParse">
-   <property name="minimumSize">
-    <size>
-     <width>200</width>
-     <height>69</height>
-    </size>
-   </property>
-   <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-   </property>
-   <property name="windowTitle">
-    <string>Parse Specification:</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetParseAndTypeCheck">
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <property name="topMargin">
-      <number>9</number>
-     </property>
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="buttonParse">
-       <property name="text">
-        <string>Parse and Typecheck</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </widget>
-  </widget>
   <widget class="QDockWidget" name="dockRewriter">
    <property name="minimumSize">
     <size>
@@ -286,14 +238,38 @@
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string/>
+    <string>Output</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
    </attribute>
    <widget class="mcrl2::gui::qt::LogWidget" name="dockWidgetOutput"/>
   </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+   <addaction name="separator"/>
+   <addaction name="actionParse"/>
+  </widget>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset theme="document-open">
+     <normaloff/>
+    </iconset>
+   </property>
    <property name="text">
     <string>&amp;Open</string>
    </property>
@@ -305,6 +281,11 @@
    </property>
   </action>
   <action name="actionNew">
+   <property name="icon">
+    <iconset theme="document-new">
+     <normaloff/>
+    </iconset>
+   </property>
    <property name="text">
     <string>&amp;New</string>
    </property>
@@ -316,6 +297,11 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset theme="document-save">
+     <normaloff/>
+    </iconset>
+   </property>
    <property name="text">
     <string>&amp;Save</string>
    </property>
@@ -342,7 +328,7 @@
     <string>E&amp;xit</string>
    </property>
    <property name="shortcut">
-    <string>Alt+X</string>
+    <string>Alt+F4</string>
    </property>
   </action>
   <action name="actionUndo">
@@ -508,6 +494,15 @@
     <string>Ctrl+0</string>
    </property>
   </action>
+  <addaction name="actionSave_As"/>
+  <addaction name="actionRedo"/>
+  <addaction name="actionFind"/>
+  <addaction name="actionZoom_in"/>
+  <addaction name="actionZoom_out"/>
+  <addaction name="actionWrap_mode"/>
+  <addaction name="actionParse"/>
+  <addaction name="actionRewrite"/>
+  <addaction name="actionSolve"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

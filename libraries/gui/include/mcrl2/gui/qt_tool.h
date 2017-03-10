@@ -62,6 +62,7 @@ class HelpMenu : public QMenu
 
       setTitle("&Help");
       addAction(actionContents);
+      window->addAction(actionContents);
       addSeparator();
       addAction(actionAbout);
     }

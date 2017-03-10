@@ -54,13 +54,11 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
 
   connect(m_ui.actionWrap_mode, SIGNAL(triggered()), this, SLOT(onWrapMode()));
   connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
-  connect(m_ui.actionParser, SIGNAL(toggled(bool)), m_ui.dockParse, SLOT(setVisible(bool)));
   connect(m_ui.actionRewriter, SIGNAL(toggled(bool)), m_ui.dockRewriter, SLOT(setVisible(bool)));
   connect(m_ui.actionSolver, SIGNAL(toggled(bool)), m_ui.dockSolver, SLOT(setVisible(bool)));
   connect(m_ui.actionOutput, SIGNAL(toggled(bool)), m_ui.dockOutput, SLOT(setVisible(bool)));
 
   //All button functionality
-  connect(m_ui.buttonParse, SIGNAL(clicked()), this, SLOT(onParse()));
   connect(m_ui.actionParse, SIGNAL(triggered()), this, SLOT(onParse()));
   connect(&m_parser, SIGNAL(parseError(QString)), this, SLOT(parseError(QString)));
   connect(&m_parser, SIGNAL(finished()), this, SLOT(parserFinished()));
@@ -85,7 +83,6 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
 
-  m_ui.actionParser->setChecked(!m_ui.dockParse->isHidden());
   m_ui.actionRewriter->setChecked(!m_ui.dockRewriter->isHidden());
   m_ui.actionSolver->setChecked(!m_ui.dockSolver->isHidden());
   m_ui.actionOutput->setChecked(!m_ui.dockOutput->isHidden());
@@ -188,6 +185,8 @@ bool MainWindow::onCloseRequest(int index)
       m_findReplaceDialog->setTextEdit(0);
       m_ui.documentManager->closeDocument(index);
       break;
+    case QMessageBox::Cancel:
+      return false;
     default:
       // Should not occur, but leaving default out triggers
       // -Wswitch warnings.
@@ -317,7 +316,6 @@ void MainWindow::onResetPerspective()
 {
   restoreState(m_state);
 
-  m_ui.actionParser->setChecked(!m_ui.dockParse->isHidden());
   m_ui.actionRewriter->setChecked(!m_ui.dockRewriter->isHidden());
   m_ui.actionSolver->setChecked(!m_ui.dockSolver->isHidden());
   m_ui.actionOutput->setChecked(!m_ui.dockOutput->isHidden());
@@ -326,7 +324,7 @@ void MainWindow::onResetPerspective()
 
 void MainWindow::onParse()
 {
-  m_ui.buttonParse->setEnabled(false);
+  m_ui.actionParse->setEnabled(false);
   DocumentWidget *document = m_ui.documentManager->currentDocument();
   QMetaObject::invokeMethod(&m_parser, "parse", Qt::QueuedConnection, Q_ARG(QString, document->toPlainText()));
 }
@@ -361,7 +359,7 @@ void MainWindow::parseError(QString err)
 
 void MainWindow::parserFinished()
 {
-  m_ui.buttonParse->setEnabled(true);
+  m_ui.actionParse->setEnabled(true);
 }
 
 void MainWindow::onRewrite()
