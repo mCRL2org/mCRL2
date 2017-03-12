@@ -18,17 +18,18 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -266,6 +267,21 @@ struct rewrite_pbes_quantifiers_inside_rewriter_command: public pbes_command
   }
 };
 
+struct rewrite_pbes_data2pbes_rewriter_command: public pbes_command
+{
+  rewrite_pbes_data2pbes_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("data-to-pbes-rewriter", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    pbes_system::data2pbes_rewriter R;
+    pbes_rewrite(pbesspec, R);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
 struct remove_unused_pbes_equations_command: public pbes_command
 {
   remove_unused_pbes_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
@@ -399,20 +415,21 @@ class transform_tool: public rewriter_tool<input_output_tool>
       std::map<std::string, std::shared_ptr<command>> commands;
 
       // PBES algorithms
-      add_command(commands, std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(commands, std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(commands, std::make_shared<rewrite_pbes_simplify_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(commands, std::make_shared<rewrite_pbes_simplify_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(commands, std::make_shared<rewrite_pbes_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(commands, std::make_shared<rewrite_pbes_quantifiers_inside_rewriter_command>(input_filename(), output_filename(), options));
-      add_command(commands, std::make_shared<remove_unused_pbes_equations_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<instantiate_global_variables_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<pbesinst_lazy_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(commands, std::make_shared<pbesinst_optimize_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<pbesinst_on_the_fly_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<pbesinst_on_the_fly_with_fixed_points_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(commands, std::make_shared<instantiate_global_variables_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<pbesinst_optimize_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<remove_unused_pbes_equations_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_data2pbes_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<rewrite_pbes_one_point_rule_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_quantifiers_inside_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_simplify_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_pbes_simplify_rewriter_command>(input_filename(), output_filename(), options));
 
       for (auto i = commands.begin(); i != commands.end(); ++i)
       {

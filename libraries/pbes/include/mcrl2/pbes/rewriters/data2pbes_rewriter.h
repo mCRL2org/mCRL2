@@ -9,8 +9,8 @@
 /// \file mcrl2/pbes/detail/data2pbes_rewriter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_DATA2PBES_REWRITER_H
-#define MCRL2_PBES_DETAIL_DATA2PBES_REWRITER_H
+#ifndef MCRL2_PBES_REWRITERS_DATA2PBES_REWRITER_H
+#define MCRL2_PBES_REWRITERS_DATA2PBES_REWRITER_H
 
 #include "mcrl2/pbes/builder.h"
 
@@ -146,8 +146,27 @@ void data2pbes(T& x,
 
 } // namespace detail
 
+/// \brief A rewriter that applies one point rule quantifier elimination to a PBES.
+class data2pbes_rewriter
+{
+  public:
+    /// \brief The term type
+    typedef pbes_expression term_type;
+
+    /// \brief The variable type
+    typedef data::variable variable_type;
+
+    /// \brief Rewrites a pbes expression.
+    /// \param x A term
+    /// \return The rewrite result.
+    pbes_expression operator()(const pbes_expression& x) const
+    {
+      return detail::data2pbes(x);
+    }
+};
+
 } // namespace pbes_system
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_DATA2PBES_REWRITER_H
+#endif // MCRL2_PBES_REWRITERS_DATA2PBES_REWRITER_H
