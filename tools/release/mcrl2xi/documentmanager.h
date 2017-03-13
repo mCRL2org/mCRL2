@@ -74,6 +74,11 @@ class DocumentManager : public mcrl2::gui::qt::ExtendedTabWidget
      */
     void closeDocument(int index);
 
+    /**
+     * @brief Changes the title of the currect tab to reflect
+     * whether the text of the document has changed
+     */
+    void updateTitle();
 
     /**
      * @brief Returns the DocumentWidget currently visible

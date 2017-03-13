@@ -76,6 +76,16 @@ void DocumentManager::closeDocument(int index)
   }
 }
 
+void DocumentManager::updateTitle()
+{
+  DocumentWidget* document = currentDocument();
+  if(document->getFileName() != NULL)
+  {
+    QFileInfo info(document->getFileName());
+    setTabText(currentIndex(), (document->isModified() ? "*" : "") + info.baseName());
+  }
+}
+
 DocumentWidget* DocumentManager::currentDocument()
 {
   return dynamic_cast<DocumentWidget *>(currentWidget());

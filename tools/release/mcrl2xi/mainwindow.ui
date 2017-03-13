@@ -79,6 +79,7 @@
     <addaction name="actionFind"/>
     <addaction name="actionZoom_in"/>
     <addaction name="actionZoom_out"/>
+    <addaction name="actionReset_zoom"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -433,14 +434,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
-   </property>
-  </action>
-  <action name="actionParser">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Parser</string>
    </property>
   </action>
   <action name="actionRewriter">

@@ -206,6 +206,7 @@ void MainWindow::textChanged()
 {
   QList<QTextEdit::ExtraSelection> extras;
   m_ui.documentManager->currentDocument()->setExtraSelections(extras);
+  m_ui.documentManager->updateTitle();
 }
 
 void MainWindow::onNew()
@@ -223,6 +224,7 @@ void MainWindow::onOpen()
 void MainWindow::onSave()
 {
   saveDocument(m_ui.documentManager->currentDocument());
+  m_ui.documentManager->updateTitle();
 }
 
 void MainWindow::onSaveAs()
@@ -458,7 +460,7 @@ void MainWindow::findErrorPosition(QString err)
   QStringList lines = err.split("\n");
   for (int i = 0; i < lines.size(); i++)
   {
-    QRegExp rxlen("line (\\d+) col (\\d+): syntax error");
+    QRegExp rxlen("Line (\\d+), column (\\d+): syntax error");
     int pos = rxlen.indexIn(lines[i]);
     if (pos > -1) {
       m_lastErrorPosition.setX(rxlen.cap(1).toInt());
