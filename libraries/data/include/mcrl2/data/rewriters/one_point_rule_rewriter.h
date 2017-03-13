@@ -25,47 +25,155 @@ namespace data {
 
 namespace detail {
 
-inline
-data::data_expression one_point_rule_select_element(const std::set<data::data_expression>& V)
+struct one_point_rule_subtitution_algorithm
 {
-  if (V.size() == 1)
+  const data::variable_list& quantifier_variables;
+  std::map<data::variable, std::vector<data::data_expression> > equalities;
+  data::mutable_map_substitution<> sigma;
+  std::set<data::variable> sigma_lhs_variables;
+  std::set<data::variable> sigma_rhs_variables; // variables appearing in the right hand side of the substitution
+
+  // applies the substitution sigma to all right hand sides of equalities
+  void apply_sigma()
   {
-    return *V.begin();
-  }
-  for (const data::data_expression& x: V)
-  {
-    if (data::is_constant(x))
+    for (auto& p: equalities)
     {
-      return x;
+      for (data::data_expression& e: p.second)
+      {
+        e = data::replace_variables_capture_avoiding(e, sigma, sigma_rhs_variables);
+      }
     }
   }
-  return *V.begin();
-}
+
+  // finds all assignments to a constant, and adds them to sigma
+  // returns true if any assignment was found
+  bool find_constant_assignments()
+  {
+    std::vector<data::variable> to_be_removed;
+    for (const auto& p: equalities)
+    {
+      const data::variable& v = p.first;
+      for (const data::data_expression& e: p.second)
+      {
+        if (data::is_constant(e))
+        {
+          sigma[v] = e;
+          sigma_lhs_variables.insert(v);
+          to_be_removed.push_back(v);
+        }
+      }
+    }
+
+    // remove entries for the assignments
+    for (const data::variable& v: to_be_removed)
+    {
+      equalities.erase(v);
+    }
+
+    // apply sigma to the right hand sides
+    apply_sigma();
+
+    return !to_be_removed.empty();
+  }
+
+  // finds an arbitrary assignment and adds it to sigma
+  // returns true if any assignment was found
+  bool find_assignment()
+  {
+    std::set<data::variable> to_be_removed;
+    for (const auto& p: equalities)
+    {
+      const data::variable& v = p.first;
+      for (const data::data_expression& e: p.second)
+      {
+        if (e != v)
+        {
+          sigma[v] = e;
+          sigma_lhs_variables.insert(v);
+          std::set<data::variable> FV = data::find_free_variables(e);
+          sigma_rhs_variables.insert(FV.begin(), FV.end());
+          to_be_removed.insert(v);
+          to_be_removed.insert(FV.begin(), FV.end());
+          break;
+        }
+      }
+      if (!to_be_removed.empty())
+      {
+        break;
+      }
+    }
+
+    // remove entries for the assignments
+    for (const data::variable& v: to_be_removed)
+    {
+      equalities.erase(v);
+    }
+
+    // apply sigma to the right hand sides
+    apply_sigma();
+
+    return !to_be_removed.empty();
+  }
+
+  one_point_rule_subtitution_algorithm(const std::map<data::variable, std::set<data::data_expression> >& equalities_, const data::variable_list& quantifier_variables_)
+    : quantifier_variables(quantifier_variables_)
+  {
+    using utilities::detail::contains;
+    for (const auto& p: equalities_)
+    {
+      const data::variable& v = p.first;
+      if (!contains(quantifier_variables, v))
+      {
+        continue;
+      }
+      std::vector<data::data_expression> E;
+      for (const data::data_expression& e: p.second)
+      {
+        if (!contains(data::find_free_variables(e), v))
+        {
+          E.push_back(e);
+        }
+      }
+      if (!E.empty())
+      {
+        equalities[v] = E;
+      }
+    }
+  }
+
+  // creates a substitution from a set of (in-)equalities for a given list of quantifier variables
+  // returns the substitution, and the subset of quantifier variables that are not used in the substitution
+  std::pair<data::mutable_map_substitution<>, std::vector<data::variable> > run()
+  {
+    using utilities::detail::contains;
+    find_constant_assignments();
+    for (;;)
+    {
+      if (!find_assignment())
+      {
+        break;
+      }
+    }
+
+    std::vector<data::variable> remaining_variables;
+    for (const data::variable& v: quantifier_variables)
+    {
+      if (!contains(sigma_lhs_variables, v))
+      {
+        remaining_variables.push_back(v);
+      }
+    }
+
+    return std::make_pair(sigma, remaining_variables);
+  }
+};
 
 // creates a substitution from a set of (in-)equalities for a given list of quantifier variables
 // returns the substitution, and the subset of quantifier variables that are not used in the substitution
 std::pair<data::mutable_map_substitution<>, std::vector<data::variable> > make_one_point_rule_substitution(const std::map<data::variable, std::set<data::data_expression> >& equalities, const data::variable_list& quantifier_variables)
 {
-  using utilities::detail::contains;
-
-  data::mutable_map_substitution<> sigma;
-  std::vector<data::variable> remaining_variables;    // the quantifier variables that are not
-  std::set<data::variable> forbidden_variables;       // variables that may not be used in the substitution
-  for (const data::variable& v: quantifier_variables)
-  {
-    auto i = equalities.find(v);
-    if (i != equalities.end() && !contains(forbidden_variables, v))
-    {
-      data::data_expression rhs = data::detail::one_point_rule_select_element(i->second);
-      data::find_free_variables(rhs, std::inserter(forbidden_variables, forbidden_variables.end())); // N.B. free variables in rhs can no longer be used
-      sigma[v] = rhs;
-    }
-    else
-    {
-      remaining_variables.push_back(v);
-    }
-  }
-  return std::make_pair(sigma, remaining_variables);
+  one_point_rule_subtitution_algorithm algorithm(equalities, quantifier_variables);
+  return algorithm.run();
 }
 
 template <typename Derived>

@@ -111,15 +111,26 @@ BOOST_AUTO_TEST_CASE(one_point_rule_rewriter_test)
 
 BOOST_AUTO_TEST_CASE(ticket_1388)
 {
-  std::string text =
+  std::string text;
+  bool normalize = false;
+  pbes p;
+  one_point_rule_rewriter R;
+
+  text =
     "pbes mu X = exists e: Bool. exists b: Bool, d: Bool. val(b == e) && val(d == b);\n"
     "init X;\n"
     ;
-  bool normalize = false;
-  pbes p = txt2pbes(text, normalize);
-  one_point_rule_rewriter R;
+  p = txt2pbes(text, normalize);
   pbes_rewrite(p, R);
-  BOOST_CHECK(p.is_closed());
+  BOOST_CHECK(p.is_closed() && p.is_well_typed());
+
+  // text =
+  //   "pbes nu X = forall b,c: Bool. !val(b == false) || !val(c == b);\n"
+  //   "init X;"
+  //   ;
+  // p = txt2pbes(text, normalize);
+  // pbes_rewrite(p, R);
+  // BOOST_CHECK(p.is_closed() && p.is_well_typed());
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
