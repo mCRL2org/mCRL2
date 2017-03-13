@@ -1036,7 +1036,7 @@ class part_state_t
         while (permutation.begin() != permutation_iter)
         {
             bisim_gjkw::check_complexity::count(delete_constellations, 1,
-                                              bisim_gjkw::check_complexity::n);
+                                                bisim_gjkw::check_complexity::n);
             constln_t* const C = permutation_iter[-1]->constln();
             // permutation_iter[-1]->block->set_constln(nullptr);
             assert(C->end() == permutation_iter);
@@ -1053,7 +1053,7 @@ class part_state_t
         while (permutation.begin() != permutation_iter)
         {
             bisim_gjkw::check_complexity::count(delete_blocks, 1,
-                                              bisim_gjkw::check_complexity::n);
+                                                bisim_gjkw::check_complexity::n);
             block_t* const B = permutation_iter[-1]->block;
             assert(B->end() == permutation_iter);
             permutation_iter = B->begin();

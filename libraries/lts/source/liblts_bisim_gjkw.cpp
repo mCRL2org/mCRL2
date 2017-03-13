@@ -53,14 +53,16 @@ namespace bisim_gjkw
 block_t* block_t::refinable_first = nullptr;
 state_type block_t::nr_of_blocks = 0;
 constln_t* constln_t::nontrivial_first = nullptr;
-#ifndef NDEBUG
-    // These variables are only accessed in debug mode.  In release mode,
-    // accessing them would lead to a linker error.
+
+// These variables are only really used in debug mode. In release mode,
+// they are not used with compiler optimisations on. With compiler optimisations
+// off they are actually accessed. 
     const char block_t::mark_all_states_in_SpB[] = "mark all states in SpB";
-    state_info_const_ptr state_info_entry::s_i_begin;
-    permutation_const_iter_t block_t::perm_begin;
     const char part_state_t::delete_constellations[] = "delete constellations";
     const char part_state_t::delete_blocks[] = "delete blocks";
+#ifndef NDEBUG
+    state_info_const_ptr state_info_entry::s_i_begin;
+    permutation_const_iter_t block_t::perm_begin;
 #endif
 
 /// \details `split_off_blue()` and `split_off_red()` use the same complexity

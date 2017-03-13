@@ -139,10 +139,15 @@ class check_complexity
       private:
         // private constructor to disallow user to construct new instances.
         iteration_type()  {  }
+        
+        // private constructor to disallow user to construct new instances.
+        iteration_type(size_t ) {  }
 
         // private assignment operators to disallow user to assign other values
         void operator=(size_t)  {  }
         void operator=(const iteration_type&)  {  }
+
+        friend class check_complexity;
       public:
         // public copy constructor to allow user to copy existing instances.
         iteration_type(const iteration_type&)  {  }
@@ -158,10 +163,10 @@ class check_complexity
     // the constants are declared but cannot be defined because there is no
     // accessible constructor.  The source code can refer to them, but the
     // compiled binary cannot.
-    static const iteration_type n;
-    static const iteration_type m;
-    static const iteration_type n_log_n;
-    static const iteration_type m_log_n;
+    static iteration_type n;
+    static iteration_type m;
+    static iteration_type n_log_n;
+    static iteration_type m_log_n;
 
     static void init(state_type, trans_type)  {  }
 
