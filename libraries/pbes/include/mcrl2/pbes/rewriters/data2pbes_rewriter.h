@@ -115,16 +115,9 @@ struct data2pbes_builder: public pbes_expression_builder<Derived>
     return x;
   }
 
-  pbes_expression apply(const pbes_expression& x)
+  pbes_expression apply(const data::data_expression& x)
   {
-    if (data::is_data_expression(x))
-    {
-      return data2pbes(data::data_expression(x));
-    }
-    else
-    {
-      return super::apply(x);
-    }
+    return data2pbes(x);
   }
 };
 
