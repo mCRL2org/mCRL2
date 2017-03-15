@@ -10,6 +10,8 @@
 
 #ifndef _EMBEDDED_LIST_H
 #define _EMBEDDED_LIST_H
+
+#include <cassert>
 #include <vector>
 
 namespace mcrl2
