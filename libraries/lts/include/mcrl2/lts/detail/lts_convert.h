@@ -346,7 +346,14 @@ inline void lts_convert_translate_state(const state_label_lts& state_label_in, s
 {
   state_label_out.clear();
   size_t i=0;
-  for (const data::data_expression& t: state_label_in)
+  if (state_label_in.size()!=1)
+  {
+    throw mcrl2::runtime_error("The state label " + pp(state_label_in) + " consists of " + std::to_string(state_label_in.size()) +
+                               " state vectors and can therefore not be translated to a single state label in .fsm format.");
+
+
+  }
+  for (const data::data_expression& t: *state_label_in.begin())
   {
     std::map <data::data_expression , size_t >::const_iterator index=c.state_element_values_sets[i].find(t);
     if (index==c.state_element_values_sets[i].end())

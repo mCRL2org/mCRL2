@@ -110,9 +110,8 @@ class aterm_probabilistic_transition: public atermpp::aterm_appl
 };
 
 typedef term_list<aterm_probabilistic_transition> aterm_transition_list;
-typedef term_list<lps::state> state_labels_t; // The state labels have the shape STATE(a1,...,an).
-// typedef term_list<lps::multi_action> action_labels_t;         // An action label is a lists of actions.
-typedef term_list<atermpp::aterm_appl> action_labels_t;         // A multiaction has the shape "multi_action(action_list,data_expression)
+typedef term_list<state_label_lts> state_labels_t;               // The state labels listed consecutively.
+typedef term_list<atermpp::aterm_appl> action_labels_t;          // A multiaction has the shape "multi_action(action_list,data_expression)
 typedef term_list<data::data_expression> probabilistic_labels_t; // This contains a list of probabilities.
 typedef term_list<data::function_symbol> boolean_list_t;         // A list with constants true or false, indicating
                                                                  // whether a state is probabilistic.
@@ -322,7 +321,7 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
   else
   {
     assert(input_lts.num_states()==input_lts.get_state_labels().size());
-    for (const lps::state& state_label:input_lts.get_state_labels())
+    for (const state_label_lts& state_label: input_lts.get_state_labels())
     {
       l.add_state(state_label_lts(state_label));
     }

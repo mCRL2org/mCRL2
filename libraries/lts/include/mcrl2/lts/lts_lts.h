@@ -42,12 +42,16 @@ namespace lts
 {
 
 /** \brief This class contains state labels for an labelled transition system in .lts format.
-    \details A state label in .lts format consists of balanced tree of data expressions.
+    \details A state label in .lts format consists of lists of balanced tree of data expressions.
+             These represent sets of state vectors. The reason for the sets is that states can 
+             be merged by operations on state spaces, and if so, the sets of labels can easily 
+             be joined. 
 */
-class state_label_lts : public atermpp::term_balanced_tree< data::data_expression >
+class state_label_lts : public atermpp::term_list< atermpp::term_balanced_tree< data::data_expression > >
 {
-
   public:
+    typedef atermpp::term_balanced_tree< data::data_expression > single_label;
+    typedef atermpp::term_list< single_label > super;
 
     /** \brief Default constructor. 
     */
@@ -60,64 +64,53 @@ class state_label_lts : public atermpp::term_balanced_tree< data::data_expressio
     /** \brief Copy assignment. */
     state_label_lts& operator=(const state_label_lts& other)=default;
 
-    /** \brief Construct a state label out of a data_expression_list.
+    /** \brief Construct a single state label out of the elements in a container.
     */
-    explicit state_label_lts(const mcrl2::data::data_expression_list& l)
-      : term_balanced_tree<data::data_expression>(l.begin(),l.size())
-    {}
-
-    /** \brief Construct a state label out of a data_expression_vector.
-    */
-    explicit state_label_lts(const std::vector < mcrl2::data::data_expression >& l)
-      : term_balanced_tree<data::data_expression>(l.begin(),l.size())
-    {}
+    template < class CONTAINER >
+    explicit state_label_lts(const CONTAINER& l)
+    {
+      static_assert(std::is_same<typename CONTAINER::value_type, data::data_expression>::value,"Value type must be a data_expression");
+      this->push_front(single_label(l.begin(),l.size()));
+    }
 
     /** \brief Construct a state label out of a balanced tree of data expressions, representing a state label.
     */
-    explicit state_label_lts(const atermpp::term_balanced_tree<mcrl2::data::data_expression>& l)
-      : atermpp::term_balanced_tree<mcrl2::data::data_expression>(l)
-    {}
-
-    /** \brief Get the i-th element of this state label.
-        \param[in] i The index of the state label. Must be smaller than the length of this state label.
-        \return The data expression at position i of this state label.
-    */
-    const mcrl2::data::data_expression& operator [](const size_t i) const
+    explicit state_label_lts(const single_label& l)
     {
-      assert(i<size());
-      return atermpp::term_balanced_tree<mcrl2::data::data_expression>::operator[](i);
-    }
-
-    /** \brief Set the i-th element of this state label to the indicated value.
-        \param[in] e The expression to which the i-th element must be set.
-        \param[in] i Index into this state label. */
-    void set_element(const mcrl2::data::data_expression& e, const size_t i)
-    {
-      assert(i<this->size());
-      std::vector<data::data_expression> v(this->begin(),this->end());
-      v[i]=e;
-      *this=state_label_lts(term_balanced_tree<data::data_expression>(v.begin(),v.size()));
+      this->push_front(single_label(l.begin(),l.size()));
     }
 };
 
 /** \brief Pretty print a state value of this LTS.
-    \details The label l is printed as (t1,...,tn).
+    \details The label l is printed as (t1,...,tn) if it consists of a single label.
+             Otherwise the labels are printed with square brackets surrounding it. 
     \param[in] l  The state value to pretty print.
     \return           The pretty-printed representation of value. */
 
-inline std::string pp(const state_label_lts& l)
+inline std::string pp(const state_label_lts& label)
 {
   std::string s;
-  s = "(";
-  for (size_t i=0; i<l.size(); ++i)
+  if (label.size()!=1)
   {
-    s += data::pp(l[i]);
-    if (i+1<l.size())
-    {
-      s += ",";
-    }
+    s = "[";
   }
-  s += ")";
+  for(const state_label_lts::single_label& l: label) 
+  {
+    s += "(";
+    for (size_t i=0; i<l.size(); ++i)
+    {
+      s += data::pp(l[i]);
+      if (i+1<l.size())
+      {
+        s += ",";
+      }
+    }
+    s += ")";
+  }
+  if (label.size()!=1)
+  {
+    s = "]";
+  }
   return s; 
 }
 
