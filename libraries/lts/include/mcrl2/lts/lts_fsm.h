@@ -56,8 +56,30 @@ class state_label_fsm:  public std::vector < size_t >
       std::vector < size_t >(v)
     {}
 
-    
+    /** \brief An operator to concatenate two state labels. Fsm labels cannot be concatenated. Therefore, only 
+               the first label is returned, unless empty, in which case the second is returned. */
+    state_label_fsm operator+(const state_label_fsm& l) const
+    {
+      if ((*this).empty())
+      {
+        return l;
+      }
+      return (*this); 
+    }
 };
+
+/** \brief Pretty print an fsm state label. */
+
+inline std::string pp(const state_label_fsm& label)
+{
+  std::string s;
+  for(const size_t& l: label)
+  {
+    s += std::to_string(l) + " ";
+  }
+  return s;
+}
+
 namespace detail
 {
 class lts_fsm_base

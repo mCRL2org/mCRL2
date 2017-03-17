@@ -1220,9 +1220,7 @@ bool destructive_bisimulation_compare(
   if (branching)
   {
     detail::scc_partitioner<LTS_TYPE> scc_part(l1);
-    scc_part.replace_transitions(preserve_divergences);
-    l1.set_num_states(scc_part.num_eq_classes());
-    l1.set_initial_state(scc_part.get_eq_class(l1.initial_state()));
+    scc_part.replace_transition_system(preserve_divergences);
     init_l2 = scc_part.get_eq_class(init_l2);
   }
 

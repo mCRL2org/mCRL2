@@ -46,6 +46,12 @@ class state_label_empty
       return !(*this==other);
     }
 
+    /** \brief An operator to concatenate two state labels. */
+    state_label_empty operator+(const state_label_empty& l) const
+    {
+      return state_label_empty();
+    }
+
 };
 
 inline std::string pp(const state_label_empty& )

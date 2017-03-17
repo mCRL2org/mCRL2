@@ -38,14 +38,14 @@ class scc_partitioner
      *  actions are put in the same equivalence class. The function l.is_tau
      *  is used to determine whether an action is internal. Partitioning is
      *  done immediately when an instance of this class is created.
-     *  When applying the function \ref replace_transitions the
+     *  When applying the function \ref replace_transition_system the
      *  automaton l is replaced by (aka shrinked to) the automaton modulo the
      *  calculated partition.
      *  \param[in] l reference to an LTS. */
     scc_partitioner(LTS_TYPE& l);
 
     /** \brief Destroys this partitioner. */
-    ~scc_partitioner();
+    ~scc_partitioner()=default;
 
     /** \brief The lts for which this partioner is created is replaced by the lts modulo
      *        the calculated partition.
@@ -62,7 +62,7 @@ class scc_partitioner
      * \param[in] preserve_divergence_loops If true preserve a tau loop on states that
      *     were part of a larger tau loop in the input transition system. Otherwise idle
      *     tau loops are removed. */
-    void replace_transitions(const bool preserve_divergence_loops);
+    void replace_transition_system(const bool preserve_divergence_loops);
 
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
      *  \return The number of bisimulation equivalence classes of the LTS.
@@ -117,12 +117,11 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
 
   // read and store tau transitions.
   std::map < state_type, std::vector < state_type > > src_tgt;
-  const std::vector <transition>& trans=aut.get_transitions();
-  for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const transition& t: aut.get_transitions())
   {
-    if (aut.is_tau(l.apply_hidden_label_map(r->label())))
+    if (aut.is_tau(l.apply_hidden_label_map(t.label())))
     {
-      src_tgt[r->from()].push_back(r->to());
+      src_tgt[t.from()].push_back(t.to());
     }
   }
   // Initialise the data structures
@@ -136,11 +135,11 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   src_tgt.clear();
 
   std::map < state_type, std::vector < state_type > > tgt_src;
-  for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const transition& t: aut.get_transitions())
   {
-    if (aut.is_tau(l.apply_hidden_label_map(r->label())))
+    if (aut.is_tau(l.apply_hidden_label_map(t.label())))
     {
-      tgt_src[r->to()].push_back(r->from());
+      tgt_src[t.to()].push_back(t.from());
     }
   }
   equivalence_class_index=0;
@@ -159,41 +158,57 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   dfsn2state.clear();
 }
 
-template < class LTS_TYPE>
-scc_partitioner<LTS_TYPE>::~scc_partitioner()
-{
-}
 
 template < class LTS_TYPE>
-void scc_partitioner<LTS_TYPE>::replace_transitions(const bool preserve_divergence_loops)
+void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_divergence_loops)
 {
   // Put all the non inert transitions in a set. Add the transitions that form a self
   // loop. Such transitions only exist in case divergence preserving branching bisimulation is
   // used. A set is used to remove double occurrences of transitions.
   std::set < transition > resulting_transitions;
-  const std::vector <transition>& trans=aut.get_transitions();
-  for (std::vector <transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const transition& t: aut.get_transitions())
   {
-    if (!aut.is_tau(aut.apply_hidden_label_map(r->label())) ||
+    if (!aut.is_tau(aut.apply_hidden_label_map(t.label())) ||
         preserve_divergence_loops ||
-        block_index_of_a_state[r->from()]!=block_index_of_a_state[r->to()])
+        block_index_of_a_state[t.from()]!=block_index_of_a_state[t.to()])
     {
       resulting_transitions.insert(
         transition(
-          block_index_of_a_state[r->from()],
-          r->label(),
-          block_index_of_a_state[r->to()]));
+          block_index_of_a_state[t.from()],
+          t.label(),
+          block_index_of_a_state[t.to()]));
     }
   }
 
   aut.clear_transitions();
   // Copy the transitions from the set into the transition system.
 
-  for (std::set < transition >::const_iterator i=resulting_transitions.begin();
-       i!=resulting_transitions.end(); ++i)
+  for (const transition& t: resulting_transitions)
   {
-    aut.add_transition(transition(i->from(),i->label(),i->to()));
+    aut.add_transition(transition(t.from(),t.label(),t.to()));
   }
+
+  // Merge the states, by setting the state labels of each state to the concatenation of the state labels of its
+  // equivalence class. 
+  if (aut.num_state_labels()>0)   /* If there are no state labels this step can be ignored */
+  {
+    /* Create a vector for the new labels */
+    std::vector<typename LTS_TYPE::state_label_t> new_labels(num_eq_classes());
+
+    for(size_t i=0; i<aut.num_states(); ++i)
+    {
+      const size_t new_index=block_index_of_a_state[i];
+      new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
+    }
+
+    aut.set_num_states(num_eq_classes());
+    for(size_t i=0; i<aut.num_states(); ++i)
+    {
+      aut.set_state_label(i,new_labels[i]);
+    }
+  }
+
+  aut.set_initial_state(get_eq_class(aut.initial_state()));
 }
 
 template < class LTS_TYPE>
@@ -271,9 +286,7 @@ template < class LTS_TYPE>
 void scc_reduce(LTS_TYPE& l,const bool preserve_divergence_loops = false)
 {
   detail::scc_partitioner<LTS_TYPE> scc_part(l);
-  scc_part.replace_transitions(preserve_divergence_loops);
-  l.set_num_states(scc_part.num_eq_classes());
-  l.set_initial_state(scc_part.get_eq_class(l.initial_state()));
+  scc_part.replace_transition_system(preserve_divergence_loops);
 }
 
 }

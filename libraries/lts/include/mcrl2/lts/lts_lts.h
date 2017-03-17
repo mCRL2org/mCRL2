@@ -79,6 +79,19 @@ class state_label_lts : public atermpp::term_list< atermpp::term_balanced_tree< 
     {
       this->push_front(single_label(l.begin(),l.size()));
     }
+
+    /** \brief Construct a state label out of list of balanced trees of data expressions, representing a state label.
+    */
+    explicit state_label_lts(const super& l)
+      : super(l)
+    {
+    }
+
+    /** \brief An operator to concatenate two state labels. */
+    state_label_lts operator+(const state_label_lts& l) const
+    {
+      return state_label_lts(static_cast<super>(*this)+static_cast<super>(l));
+    }
 };
 
 /** \brief Pretty print a state value of this LTS.
@@ -92,10 +105,16 @@ inline std::string pp(const state_label_lts& label)
   std::string s;
   if (label.size()!=1)
   {
-    s = "[";
+    s += "[";
   }
+  bool first=true;
   for(const state_label_lts::single_label& l: label) 
   {
+    if (!first)
+    {
+      s += ", ";
+    }
+    first = false;
     s += "(";
     for (size_t i=0; i<l.size(); ++i)
     {
@@ -109,7 +128,7 @@ inline std::string pp(const state_label_lts& label)
   }
   if (label.size()!=1)
   {
-    s = "]";
+    s += "]";
   }
   return s; 
 }
