@@ -38,6 +38,7 @@ class ltsinfo_tool : public ltsinfo_base
 
     std::string                 infilename;
     mcrl2::lts::lts_type        intype;
+    bool                        print_state_labels;
 
   public:
 
@@ -52,7 +53,8 @@ class ltsinfo_tool : public ltsinfo_base
                    "The supported formats are:\n"
                    +mcrl2::lts::detail::supported_lts_formats_text()
                   ),
-      intype(mcrl2::lts::lts_none)
+      intype(mcrl2::lts::lts_none),
+      print_state_labels(false)
     {
     }
 
@@ -66,7 +68,9 @@ class ltsinfo_tool : public ltsinfo_base
 
       desc.
       add_option("in", make_mandatory_argument("FORMAT"),
-                 "use FORMAT as the input format", 'i');
+                 "use FORMAT as the input format", 'i').
+      add_option("state-label",
+                 "print the labels of states",'l') ;
     }
 
     void parse_options(const command_line_parser& parser)
@@ -98,6 +102,8 @@ class ltsinfo_tool : public ltsinfo_base
                        parser.option_argument("in") + "'.");
         }
       }
+
+      print_state_labels=parser.options.count("state-label")>0;
     }
 
     template <class SL, class AL, class BASE>
@@ -137,6 +143,65 @@ class ltsinfo_tool : public ltsinfo_base
 
     }
 
+    // Code to print the state labels. There is a specialisation for an probabilistic_lts_lts_t.
+    void print_the_state_labels(const mcrl2::lts::probabilistic_lts_fsm_t& l) const
+    {
+      if (print_state_labels)
+      {
+        if (!l.has_state_info())
+        {
+          mCRL2log(info) << "This transition system has no state labels. Therefore they cannot be printed.\n";
+        }
+        else 
+        {
+          mCRL2log(info) << "The state labels of this .fsm format. Note that state labels in .fsm files are only partly preserved by state space reductions.\n";
+          for(size_t i=0; i<l.num_states(); ++i)
+          {
+            mCRL2log(info) << i << ": " << pp(l.state_label(i)) << "\n";
+          }
+        }
+      }
+    }
+
+    // Code to print the state labels. There is a specialisation for an probabilistic_lts_lts_t.
+    void print_the_state_labels(const mcrl2::lts::probabilistic_lts_aut_t& ) const
+    {
+      if (print_state_labels)
+      {
+        mCRL2log(info) << "Transition systems in .aut format have no state labels. Therefore, they cannot be listed.\n"; 
+      }
+    }
+
+    // Print the state labels for a probabilistic lts.
+    void print_the_state_labels(const mcrl2::lts::probabilistic_lts_lts_t& l) const
+    {
+      if (print_state_labels)
+      {
+        if (!l.has_state_info())
+        {
+          mCRL2log(info) << "This transition system has no state labels. Therefore they cannot be printed.\n";
+        }
+        else 
+        {
+          mCRL2log(info) << "The state labels of this labelled transition system:\n";
+          for(size_t i=0; i<l.num_states(); ++i)
+          {
+            if (l.state_label(i).size()==0)
+            {
+              mCRL2log(info) << i << ": no label.\n";
+            }
+            else 
+            { 
+              for(const mcrl2::lts::state_label_lts::single_label& lab: l.state_label(i))
+              { 
+                mCRL2log(info) << i << ": (" << pp(lab) << ").\n";
+              }
+            }
+          }
+        }
+      }
+    }
+
     template < class LTS_TYPE >
     bool provide_information() const
     {
@@ -154,7 +219,10 @@ class ltsinfo_tool : public ltsinfo_base
       }
       else
       {
-        mCRL2log(info) << "There are no state labels." << std::endl;
+        if (!print_state_labels) // This is to prevent the same message being printed twice.
+        {
+          mCRL2log(info) << "There are no state labels." << std::endl;
+        }
       }
 
       mCRL2log(verbose) << "Checking reachability..." << std::endl;
@@ -172,6 +240,8 @@ class ltsinfo_tool : public ltsinfo_base
       mCRL2log(info) << "deterministic." << std::endl;
 
       provide_probabilistic_information(l);
+
+      print_the_state_labels(l);
 
       return true;
     }
@@ -194,8 +264,6 @@ class ltsinfo_tool : public ltsinfo_base
       {
         case lts_lts:
         {
-          lts_lts_t l;
-          l.load(infilename);
           return provide_information<probabilistic_lts_lts_t>();
         }
         case lts_none:

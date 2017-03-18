@@ -47,7 +47,7 @@ class state_label_empty
     }
 
     /** \brief An operator to concatenate two state labels. */
-    state_label_empty operator+(const state_label_empty& l) const
+    state_label_empty operator+(const state_label_empty& ) const
     {
       return state_label_empty();
     }
