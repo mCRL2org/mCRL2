@@ -59,8 +59,8 @@ static void test_lts(const std::string& test_description,
 }
 
 static void reduce_lts_in_various_ways(const std::string& test_description,
-                                const std::string& lts,
-                                const expected_sizes& expected)
+                                       const std::string& lts,
+                                       const expected_sizes& expected)
 {
   std::istringstream is(lts);
   lts::lts_aut_t l_in;
