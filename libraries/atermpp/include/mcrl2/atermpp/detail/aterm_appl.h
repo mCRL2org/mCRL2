@@ -43,34 +43,34 @@ size_t TERM_SIZE_APPL(const size_t arity)
 
 
 template <class Term, class ForwardIterator>
-const _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin, const ForwardIterator end);
+_aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin, const ForwardIterator end);
 
 template <class Term, class InputIterator, class ATermConverter>
-const _aterm* local_term_appl_with_converter(const function_symbol& sym, const InputIterator begin, const InputIterator end, const ATermConverter& convert_to_aterm);
+_aterm* local_term_appl_with_converter(const function_symbol& sym, const InputIterator begin, const InputIterator end, const ATermConverter& convert_to_aterm);
 
 inline
-const _aterm* term_appl0(const function_symbol& sym);
+_aterm* term_appl0(const function_symbol& sym);
 
 template <class Term>
-const _aterm* term_appl1(const function_symbol& sym, const Term& arg0);
+_aterm* term_appl1(const function_symbol& sym, const Term& arg0);
 
 template <class Term>
-const _aterm* term_appl2(const function_symbol& sym, const Term& arg0, const Term& arg1);
+_aterm* term_appl2(const function_symbol& sym, const Term& arg0, const Term& arg1);
 
 template <class Term>
-const _aterm* term_appl3(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2);
+_aterm* term_appl3(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2);
 
 template <class Term>
-const _aterm* term_appl4(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3);
+_aterm* term_appl4(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3);
 
 template <class Term>
-const _aterm* term_appl5(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4);
+_aterm* term_appl5(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4);
 
 template <class Term>
-const _aterm* term_appl6(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4, const Term& arg5);
+_aterm* term_appl6(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4, const Term& arg5);
 
 template <class Term>
-const _aterm* term_appl7(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4, const Term& arg5, const Term& arg6);
+_aterm* term_appl7(const function_symbol& sym, const Term& arg0, const Term& arg1, const Term& arg2, const Term& arg3, const Term& arg4, const Term& arg5, const Term& arg6);
 
 
 } // namespace detail

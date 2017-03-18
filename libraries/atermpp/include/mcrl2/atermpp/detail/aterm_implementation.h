@@ -43,7 +43,7 @@ struct Block
 struct TermInfo
 {
   Block*       at_block;
-  const _aterm*       at_freelist;
+  _aterm*       at_freelist;
 
   TermInfo():at_block(nullptr),at_freelist(nullptr)
   {}
@@ -52,7 +52,7 @@ struct TermInfo
 
 extern size_t aterm_table_mask;
 extern size_t aterm_table_size;
-extern const detail::_aterm* * aterm_hashtable;
+extern detail::_aterm* * aterm_hashtable;
 
 extern aterm static_undefined_aterm;  // detail/aterm_implementation.h
 extern aterm static_empty_aterm_list;
@@ -70,7 +70,7 @@ void resize_aterm_hashtable();
 void allocate_block(const size_t size);
 void collect_terms_with_reference_count_0();
 
-void call_creation_hook(const _aterm*);
+void call_creation_hook(_aterm*);
 
 inline size_t SHIFT(const size_t w)
 {
@@ -101,7 +101,7 @@ t
   assert(!address(t)->reference_count_is_zero());
 }
 
-inline HashNumber hash_number(const detail::_aterm *t)
+inline HashNumber hash_number(detail::_aterm *t)
 {
   const function_symbol& f=t->function();
   HashNumber hnr = SHIFT(addressf(f));
@@ -116,7 +116,7 @@ inline HashNumber hash_number(const detail::_aterm *t)
   return hnr;
 }
 
-inline const _aterm* allocate_term(const size_t size)
+inline _aterm* allocate_term(const size_t size)
 {
   assert(size>=TERM_SIZE);
   if (size >= terminfo_size)
@@ -166,7 +166,7 @@ inline const _aterm* allocate_term(const size_t size)
     assert(ti.at_block != nullptr);
   }
 
-  const _aterm *at = ti.at_freelist;
+  _aterm *at = ti.at_freelist;
   ti.at_freelist = ti.at_freelist->next();
   assert(at->reference_count_indicates_is_in_freelist());
   at->reset_reference_count();
@@ -174,12 +174,12 @@ inline const _aterm* allocate_term(const size_t size)
   return at;
 }
 
-inline void remove_from_hashtable(const _aterm *t)
+inline void remove_from_hashtable(_aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
-  const _aterm *prev=nullptr;
+  _aterm *prev=nullptr;
   const HashNumber hnr = hash_number(t) & aterm_table_mask;
-  const _aterm *cur = aterm_hashtable[hnr];
+  _aterm *cur = aterm_hashtable[hnr];
 
   do
   {
@@ -203,7 +203,7 @@ inline void remove_from_hashtable(const _aterm *t)
   assert(0);
 }
 
-inline void insert_in_hashtable(const _aterm *t, const size_t hnr)
+inline void insert_in_hashtable(_aterm *t, const size_t hnr)
 {
 
   t->set_next(detail::aterm_hashtable[hnr]);
@@ -211,7 +211,7 @@ inline void insert_in_hashtable(const _aterm *t, const size_t hnr)
   total_nodes_in_hashtable++;
 }
 
-inline const _aterm* address(const aterm& t)
+inline _aterm* address(const aterm& t)
 {
   return t.m_term;
 }
@@ -219,7 +219,7 @@ inline const _aterm* address(const aterm& t)
 } //namespace detail
 
 inline
-const detail::_aterm *aterm::undefined_aterm()
+detail::_aterm *aterm::undefined_aterm()
 {
   if (detail::static_undefined_aterm.m_term==nullptr)
   {
@@ -229,7 +229,7 @@ const detail::_aterm *aterm::undefined_aterm()
 }
 
 inline
-const detail::_aterm *aterm::empty_aterm_list()
+detail::_aterm *aterm::empty_aterm_list()
 {
   if (detail::static_empty_aterm_list.m_term==nullptr)
   {

@@ -25,7 +25,7 @@ class _aterm_int:public _aterm
     size_t value;
 };
 
-const _aterm *aterm_int(size_t val);
+_aterm *aterm_int(size_t val);
 
 } // namespace detail 
 

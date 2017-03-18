@@ -95,7 +95,7 @@ static const size_t INITIAL_MAX_TERM_SIZE = 16;
 
 size_t aterm_table_size=INITIAL_TERM_TABLE_SIZE;
 size_t aterm_table_mask=INITIAL_TERM_TABLE_SIZE-1;
-const _aterm* * aterm_hashtable;
+_aterm* * aterm_hashtable;
 
 aterm static_undefined_aterm;
 aterm static_empty_aterm_list(aterm_appl(detail::function_adm.AS_EMPTY_LIST));
@@ -107,7 +107,7 @@ TermInfo *terminfo;
 
 size_t total_nodes_in_hashtable = 0;
 
-void call_creation_hook(const detail::_aterm* term)
+void call_creation_hook(detail::_aterm* term)
 {
   const function_symbol& sym = term->function();
   for (hook_table::const_iterator it = creation_hooks().begin(); it != creation_hooks().end(); ++it)
@@ -119,7 +119,7 @@ void call_creation_hook(const detail::_aterm* term)
   }
 }
 
-static void call_deletion_hook(const detail::_aterm* term)
+static void call_deletion_hook(detail::_aterm* term)
 {
   const function_symbol& sym = term->function();
   for (hook_table::const_iterator it = deletion_hooks().begin(); it != deletion_hooks().end(); ++it)
@@ -131,7 +131,7 @@ static void call_deletion_hook(const detail::_aterm* term)
   }
 }
 
-void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed)
+void free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed)
 {
   assert(t->reference_count()==0);
 
@@ -151,7 +151,7 @@ void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_r
   {
     for(size_t i=0; i<arity; ++i)
     {
-      const aterm& a= reinterpret_cast<const detail::_aterm_appl<aterm> *>(t)->arg[i];
+      aterm& a= reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i];  
       if  (0==a.decrease_reference_count())
       {
         remove_from_hashtable(a.m_term);
@@ -168,14 +168,14 @@ void free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_r
  * the stack is not always sufficiently large, esp. if limit stacksize
  * is not set. On OSX the stack can only be 65Mbyte big, which is not enough
  * to remove a large aterm list. */
-void free_term(const detail::_aterm* t)
+void free_term(detail::_aterm* t)
 {
-  const detail::_aterm* terms_to_be_removed=t;
+  detail::_aterm* terms_to_be_removed=t;
   remove_from_hashtable(t);
   t->set_next(nullptr);
   while (terms_to_be_removed!=nullptr)
   {
-    const detail::_aterm* u=terms_to_be_removed;
+    detail::_aterm* u=terms_to_be_removed;
     terms_to_be_removed=terms_to_be_removed->next();
     free_term_aux(u,terms_to_be_removed);
   }
@@ -197,7 +197,7 @@ void resize_aterm_hashtable()
   // Intentionally do not throw the old hashtable away before allocating the new one.
   // It is better when the extra memory is used for blocks of aterms, than for increasing the
   // hashtable.
-  const _aterm* * new_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
+  _aterm* * new_hashtable=reinterpret_cast<_aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
 
   if (new_hashtable==nullptr)
   {
@@ -211,12 +211,12 @@ void resize_aterm_hashtable()
   /*  Rehash all old elements */
   for (size_t p=0; p<old_size; ++p)
   {
-    const _aterm* aterm_walker=aterm_hashtable[p];
+    _aterm* aterm_walker=aterm_hashtable[p];
 
     while (aterm_walker)
     {
       assert(!aterm_walker->reference_count_indicates_is_in_freelist());
-      const _aterm* next = aterm_walker->next();
+      _aterm* next = aterm_walker->next();
       const HashNumber hnr = hash_number(aterm_walker) & aterm_table_mask;
       aterm_walker->set_next(new_hashtable[hnr]);
       new_hashtable[hnr] = aterm_walker;
@@ -243,7 +243,7 @@ void collect_terms_with_reference_count_0()
     {
       for(size_t *p=b->data; p<b->end; p=p+size)
       {
-        const _aterm* p1=reinterpret_cast<_aterm*>(p);
+        _aterm* p1=reinterpret_cast<_aterm*>(p);
         if (p1->reference_count()==0)
         {
           // Put term in freelist, freeing subterms also.
@@ -264,10 +264,10 @@ void collect_terms_with_reference_count_0()
     {
       Block* next_block=b->next_by_size;
       bool block_is_empty_up_till_now=true;
-      const _aterm* freelist_of_previous_block=ti.at_freelist;
+      _aterm* freelist_of_previous_block=ti.at_freelist;
       for(size_t *p=b->data; p<b->end; p=p+size)
       {
-        const _aterm* p1=reinterpret_cast<_aterm*>(p);
+        _aterm* p1=reinterpret_cast<_aterm*>(p);
         assert(p1->reference_count()!=0);
         if (p1->reference_count_indicates_is_in_freelist())
         {
@@ -318,7 +318,7 @@ static void check_that_all_objects_are_free()
     {
       for(size_t* p=b->data; p<b->end; p=p+size)
       {
-        const _aterm* p1=reinterpret_cast<_aterm*>(p);
+        _aterm* p1=reinterpret_cast<_aterm*>(p);
         if (!p1->reference_count_is_zero() && !p1->reference_count_indicates_is_in_freelist() &&
             ((p1->function()!=function_adm.AS_DEFAULT && p1->function()!=function_adm.AS_EMPTY_LIST) || p1->reference_count()>1))
         {
@@ -373,7 +373,7 @@ void initialise_aterm_administration()
    * the first time, which may be due to the initialisation of a global variable in a .cpp file, or
    * due to the initialisation of a pre-main initialisation of a static variable, which some
    * compilers do. */
-  aterm_hashtable=reinterpret_cast<const _aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
+  aterm_hashtable=reinterpret_cast<_aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
   if (aterm_hashtable==nullptr)
   {
     throw std::runtime_error("Out of memory. Cannot create an aterm symbol hashtable.");

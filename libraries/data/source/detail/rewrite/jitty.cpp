@@ -43,8 +43,8 @@ namespace detail
 {
 
 
-typedef const atermpp::detail::_aterm* unprotected_variable;           // Variable that is not protected (so a copy should exist at some other place)
-typedef const atermpp::detail::_aterm* unprotected_data_expression;    // Idem, but now a data expression.
+typedef atermpp::detail::_aterm* unprotected_variable;           // Variable that is not protected (so a copy should exist at some other place)
+typedef atermpp::detail::_aterm* unprotected_data_expression;    // Idem, but now a data expression.
 
 // The function symbol below is used to administrate that a term is in normal form. It is put around a term.
 // Terms with this auxiliary function symbol cannot be printed using the pretty printer for data expressions.

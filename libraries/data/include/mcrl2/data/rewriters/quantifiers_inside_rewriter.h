@@ -13,6 +13,7 @@
 #define MCRL2_DATA_REWRITERS_QUANTIFIERS_INSIDE_REWRITER_H
 
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/data/builder.h"
 
 namespace mcrl2 {
 

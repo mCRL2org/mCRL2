@@ -2246,7 +2246,7 @@ public:
     else
     {
       stringstream ss;
-      ss << "data_expression((const atermpp::detail::_aterm*)" << (void*)atermpp::detail::address(opid) << ")";
+      ss << "data_expression((atermpp::detail::_aterm*)" << (void*)atermpp::detail::address(opid) << ")";
       size_t used_arguments = 0;
       m_stream << rewr_function_finish_term(arity, ss.str(), down_cast<function_sort>(opid.sort()), used_arguments) << ";\n";
       assert(used_arguments == arity);
@@ -2495,7 +2495,7 @@ static void generate_make_appl_functions(std::ostream& s, size_t max_arity)
         s << ", const data_expression& arg" << j;
       }
       s << ")\n{\n";
-      s << "  const atermpp::detail::_aterm* buffer[" << i << "];\n";
+      s << "  atermpp::detail::_aterm* buffer[" << i << "];\n";
       for (size_t j=0; j<i; ++j)
       {
         s << "  buffer[" << j << "] = atermpp::detail::address(arg" << j + 1 << ");\n";

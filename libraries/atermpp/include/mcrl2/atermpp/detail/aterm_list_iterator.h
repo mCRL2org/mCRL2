@@ -35,12 +35,12 @@ class term_list_iterator
     friend class term_list;
 
   protected:
-    const detail::_aterm_list<Term>* m_list;
+    detail::_aterm_list<Term>* m_list;
 
     /// \brief Constructor from an aterm which must be a list.
     /// \param l A sequence of terms
     term_list_iterator(const aterm& l)
-      : m_list(reinterpret_cast<const detail::_aterm_list<Term>*>(detail::address(l)))
+      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(l)))
     { 
       assert(l.type_is_list());
     } 
@@ -90,7 +90,7 @@ class term_list_iterator
     term_list_iterator& operator++()
     {
       assert(m_list->function()==detail::function_adm.AS_LIST);
-      m_list = reinterpret_cast<const detail::_aterm_list<Term>*>(detail::address(m_list->tail));
+      m_list = reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail));
       return *this;
     }
 
@@ -99,7 +99,7 @@ class term_list_iterator
     {
       assert(m_list->function()==detail::function_adm.AS_LIST);
       const term_list_iterator temp = *this;
-      m_list = reinterpret_cast<const detail::_aterm_list<Term>*>(detail::address(m_list->tail));
+      m_list = reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail));
       return temp;
     }
 

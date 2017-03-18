@@ -37,10 +37,10 @@ namespace detail
   };
 
   template <class Term, class Iter, class ATermConverter>
-  const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
+  _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
   template <class Term, class Iter, class ATermConverter>
-  const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
+  _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
 } // namespace detail 
 

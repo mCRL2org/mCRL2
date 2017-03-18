@@ -57,7 +57,7 @@ class aterm_int:public aterm
     /// \return The value of the term.
     size_t value() const
     {
-      return reinterpret_cast<const detail::_aterm_int*>(m_term)->value;
+      return reinterpret_cast<detail::_aterm_int*>(m_term)->value;
     }
 };
 

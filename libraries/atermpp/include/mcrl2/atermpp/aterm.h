@@ -39,30 +39,30 @@ class aterm
     template < typename T >
     friend class term_list;
 
-    friend void detail::free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed);
+    friend void detail::free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed);
 
     friend void detail::initialise_aterm_administration();
 
     template <class Term, class Iter, class ATermConverter>
-    friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
+    friend detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
     template <class Term, class Iter, class ATermConverter, class ATermFilter>
-    friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter);
+    friend detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter);
 
     template <class Term, class Iter, class ATermConverter>
-    friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
+    friend detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
     template <class Term, class Iter, class ATermConverter, class ATermFilter>
-    friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const  ATermFilter& aterm_filter);
+    friend detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const  ATermFilter& aterm_filter);
 
-    friend const detail::_aterm* detail::address(const aterm& t);
+    friend detail::_aterm* detail::address(const aterm& t);
   protected:
-    const detail::_aterm* m_term;
+    detail::_aterm* m_term;
 
-    static const detail::_aterm *undefined_aterm();
-    static const detail::_aterm *empty_aterm_list();
+    static detail::_aterm *undefined_aterm();
+    static detail::_aterm *empty_aterm_list();
 
-    inline size_t decrease_reference_count() const
+    inline size_t decrease_reference_count()
     {
       assert(m_term!=nullptr);
       assert(m_term->reference_count()>0);
@@ -71,7 +71,7 @@ class aterm
     }
 
     template <bool CHECK>
-    void increase_reference_count() const
+    void increase_reference_count()
     {
       assert(m_term!=nullptr);
       if (CHECK) assert(m_term->reference_count()>0);
@@ -80,9 +80,9 @@ class aterm
 
     void copy_term(const aterm& t)
     {
-      t.increase_reference_count<true>();
       decrease_reference_count();
       m_term=t.m_term;
+      increase_reference_count<true>();
     }
 
     // An aterm has a function symbol, which can also be an AS_EMPTY_LIST,
@@ -94,7 +94,7 @@ class aterm
 
   public: // Should be protected, but this cannot yet be done due to a problem
           // in the compiling rewriter.
-    aterm (const detail::_aterm *t):m_term(t)
+    aterm (detail::_aterm *t):m_term(t)
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.

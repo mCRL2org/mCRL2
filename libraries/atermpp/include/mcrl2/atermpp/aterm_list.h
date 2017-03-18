@@ -218,7 +218,7 @@ class term_list:public aterm
     const term_list<Term>& tail() const
     {
       assert(!empty());
-      return (reinterpret_cast<const detail::_aterm_list<Term>*>(m_term))->tail;
+      return (reinterpret_cast<detail::_aterm_list<Term>*>(m_term))->tail;
     }
 
     /// \brief Removes the first element of the list.
@@ -231,7 +231,7 @@ class term_list:public aterm
     /// \return The term at the head of the list.
     const Term& front() const
     {
-      return reinterpret_cast<const detail::_aterm_list<Term>*>(m_term)->head;
+      return reinterpret_cast<detail::_aterm_list<Term>*>(m_term)->head;
     }
 
     /// \brief Inserts a new element at the beginning of the current list.

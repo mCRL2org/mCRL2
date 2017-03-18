@@ -54,7 +54,7 @@ class bisim_partitioner
      *  loops must first be removed before applying this algorithm.
      *  \warning Note that when compiled with optimisations, bisimulation partitioning
      *  is much faster than compiled without any optimisation. The difference can go up to a factor 10.
-     *  \param[in] l Reference to the LTS. The LTS l is only changed if \ref replace_transitions is called. */
+     *  \param[in] l Reference to the LTS. The LTS l is only changed if \ref replace_transition_system is called. */
     bisim_partitioner(
       LTS_TYPE& l,
       const bool branching=false,
@@ -89,7 +89,7 @@ class bisim_partitioner
      * \pre The bisimulation equivalence classes have been computed.
      * \param[in] branching Causes non internal transitions to be removed.
      * \param[in] preserve_divergences Preserves tau loops on states. */
-    void replace_transitions(const bool branching, const bool preserve_divergences)
+    void replace_transition_system(const bool branching, const bool preserve_divergences)
     {
       // Put all the non inert transitions in a set. Add the transitions that form a self
       // loop. Such transitions only exist in case divergence preserving branching bisimulation is
@@ -121,6 +121,31 @@ class bisim_partitioner
       {
         aut.add_transition(*i);
       }
+     
+      // Merge the states, by setting the state labels of each state to the concatenation of the state labels of its
+      // equivalence class. 
+      if (aut.has_state_info())   /* If there are no state labels this step can be ignored */
+      {
+        /* Create a vector for the new labels */
+        std::vector<typename LTS_TYPE::state_label_t> new_labels(num_eq_classes());
+
+        for(size_t i=0; i<aut.num_states(); ++i)
+        {
+          const size_t new_index=block_index_of_a_state[i];
+          new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
+        }
+
+        for(size_t i=0; i<num_eq_classes(); ++i)
+        {
+          aut.set_state_label(i,new_labels[i]);
+        }
+      }
+      else
+      {
+        aut.set_num_states(num_eq_classes());
+      }
+      
+      aut.set_initial_state(get_eq_class(aut.initial_state()));
     }
 
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
@@ -1184,9 +1209,7 @@ void bisimulation_reduce(LTS_TYPE& l,
   l.clear_state_labels();
 
   // Assign the reduced LTS
-  l.set_num_states(bisim_part.num_eq_classes());
-  l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
-  bisim_part.replace_transitions(branching,preserve_divergences);
+  bisim_part.replace_transition_system(branching,preserve_divergences);
 }
 
 template < class LTS_TYPE>

@@ -152,11 +152,11 @@ namespace detail
   // The reason for this is that there is a 5% loss of speed of the toolset when merging these two functions.
   // This is caused by storing and protecting the intermediate value of the converted aterm. See Term t=convert_to_aterm(...).
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter)
+  inline _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
-    const _aterm* result=aterm::empty_aterm_list();
+    _aterm* result=aterm::empty_aterm_list();
     while (first != last)
     {
       const Term t=convert_to_aterm(*(--last));
@@ -169,11 +169,11 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter>
-  inline const _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm)
+  inline _aterm *make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
-    const _aterm* result=aterm::empty_aterm_list();
+    _aterm* result=aterm::empty_aterm_list();
     while (first != last)
     {
       result=term_appl2<aterm>(detail::function_adm.AS_LIST,convert_to_aterm(*(--last)),down_cast<term_list<Term> >(aterm(result)));
@@ -183,7 +183,7 @@ namespace detail
 
   // See the note at make_list_backwards for why there are two almost similar version of make_list_forward.
   template <class Term, class Iter, class ATermConverter, class ATermFilter>
-  inline const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter)
+  inline _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
@@ -203,7 +203,7 @@ namespace detail
       }
     }
 
-    const _aterm* result=aterm::empty_aterm_list();
+    _aterm* result=aterm::empty_aterm_list();
     for( ; i!=buffer_begin ; )
     {
       --i;
@@ -214,7 +214,7 @@ namespace detail
   }
 
   template <class Term, class Iter, class ATermConverter>
-  inline const _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm)
+  inline _aterm *make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm)
   {
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
@@ -229,7 +229,7 @@ namespace detail
       new (i) Term(convert_to_aterm(*first));
     }
 
-    const _aterm* result=aterm::empty_aterm_list();
+    _aterm* result=aterm::empty_aterm_list();
     for( ; i!=buffer_begin ; )
     {
       --i;

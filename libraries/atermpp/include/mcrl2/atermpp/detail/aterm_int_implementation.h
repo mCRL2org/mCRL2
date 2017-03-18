@@ -14,13 +14,13 @@ namespace atermpp
 namespace detail
 {
 
-inline const _aterm* aterm_int(size_t val)
+inline _aterm* aterm_int(size_t val)
 {
   HashNumber hnr = COMBINE(SHIFT(addressf(function_adm.AS_INT)), val);
 
-  const _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
+  _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
   while (cur)
-  { if  (cur->function()==function_adm.AS_INT && reinterpret_cast<const _aterm_int*>(cur)->value == val)
+  { if  (cur->function()==function_adm.AS_INT && reinterpret_cast<_aterm_int*>(cur)->value == val)
     {
       return cur;
     }
