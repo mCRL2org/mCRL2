@@ -1731,14 +1731,17 @@ class bisim_partitioner_gjkw
     {
         return bisim_gjkw::block_t::nr_of_blocks;
     }
+
     state_type get_eq_class(state_type s) const
     {
         return part_st.block(s)->seqnr();
     }
+
     bool in_same_class(state_type s, state_type t) const
     {
         return part_st.block(s) == part_st.block(t);
     }
+
   private:
 
     /*-------- dbStutteringEquivalence -- Algorithm 2 of [GJKW 2017] --------*/
@@ -1878,9 +1881,6 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool const branching /* = false */,
   // no taus, this will automatically yield strong bisimulation.
   detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l, branching,
                                                           preserve_divergence);
-
-  // Clear the state labels of the LTS l
-  l.clear_state_labels();
 
   // Assign the reduced LTS
   //mCRL2log(log::debug, "bisim_gjkw") << "number of states in the lumped "

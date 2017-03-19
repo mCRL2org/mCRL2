@@ -206,11 +206,8 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
       aut.set_state_label(i,new_labels[i]);
     }
   }
-  else
-  {
-    aut.set_num_states(num_eq_classes()); 
-  }
-
+  
+  aut.set_num_states(num_eq_classes()); 
   aut.set_initial_state(get_eq_class(aut.initial_state()));
 }
 

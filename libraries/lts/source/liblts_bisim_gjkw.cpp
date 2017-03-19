@@ -2012,7 +2012,32 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
             succ_iter = succ_iter->constln_slice->end();
         }
     }
-    aut.set_num_states(block_t::nr_of_blocks);
+    
+    // Merge the states, by setting the state labels of each state to the concatenation of the state labels of its
+    // equivalence class. 
+    
+    if (aut.has_state_info())   /* If there are no state labels this step can be ignored */
+    {
+      /* Create a vector for the new labels */
+      std::vector<typename LTS_TYPE::state_label_t> new_labels(block_t::nr_of_blocks);
+
+      for(size_t i=0; i<aut.num_states(); ++i)
+      {
+        const size_t new_index=part_st.block(i)->seqnr();  /* get_eq_class(i) */
+        new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
+      }
+
+      aut.set_num_states(block_t::nr_of_blocks);
+      for(size_t i=0; i<block_t::nr_of_blocks; ++i)
+      {
+        aut.set_state_label(i,new_labels[i]);
+      }
+    }
+    else
+    {
+      aut.set_num_states(block_t::nr_of_blocks);
+    }
+
     aut.set_initial_state(part_st.block(aut.initial_state())->seqnr());
 }
 
