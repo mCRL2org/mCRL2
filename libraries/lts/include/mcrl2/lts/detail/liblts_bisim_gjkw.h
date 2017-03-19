@@ -1661,12 +1661,13 @@ class bisim_partitioner_gjkw_initialise_helper
     void init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                                      bool branching, bool preserve_divergence);
 
-    // replace_transitions() replaces the transitions of the LTS stored here by
+    // replace_transition_system() replaces the transitions of the LTS stored here by
     // those of its bisimulation quotient.  However, it does not change
     // anything else; in particular, it does not change the number of states of
     // the LTS.
-    void replace_transitions(const part_state_t& part_st, bool branching,
-                                                     bool preserve_divergence);
+    void replace_transition_system(const part_state_t& part_st, 
+                                   bool branching,
+                                   bool preserve_divergence);
 
     /// provides the number of states in the Kripke structure
     state_type get_nr_of_states() const  {  return nr_of_states;  }
@@ -1706,24 +1707,24 @@ class bisim_partitioner_gjkw
         part_st(init_helper.get_nr_of_states()),
         part_tr(init_helper.get_nr_of_transitions())
     {
-        assert(branching || !preserve_divergence);
-        create_initial_partition_gjkw(branching, preserve_divergence);
-        refine_partition_until_it_becomes_stable_gjkw();
+      assert(branching || !preserve_divergence);
+      create_initial_partition_gjkw(branching, preserve_divergence);
+      refine_partition_until_it_becomes_stable_gjkw();
     }
     ~bisim_partitioner_gjkw()
     {
-        part_tr.clear();
-        part_st.clear();
-        bisim_gjkw::check_complexity::stats();
+      part_tr.clear();
+      part_st.clear();
+      bisim_gjkw::check_complexity::stats();
     }
 
-    // replace_transitions() replaces the transitions of the LTS stored here by
+    // replace_transition_system() replaces the transitions of the LTS stored here by
     // those of its bisimulation quotient.  However, it does not change
     // anything else; in particular, it does not change the number of states of
     // the LTS.
-    void replace_transitions(bool branching, bool preserve_divergence)
+    void replace_transition_system(bool branching, bool preserve_divergence)
     {
-        init_helper.replace_transitions(part_st,branching,preserve_divergence);
+      init_helper.replace_transition_system(part_st,branching,preserve_divergence);
     }
 
     static state_type num_eq_classes()
@@ -1882,13 +1883,11 @@ void bisimulation_reduce_gjkw(LTS_TYPE& l, bool const branching /* = false */,
   l.clear_state_labels();
 
   // Assign the reduced LTS
-  l.set_num_states(bisim_part.num_eq_classes());
   //mCRL2log(log::debug, "bisim_gjkw") << "number of states in the lumped "
   //    "chain: " << bisim_part.num_eq_classes()
   //    << "; initial state: originally state " << l.initial_state()
   //    <<" = lumped state "<<bisim_part.get_eq_class(l.initial_state())<<"\n";
-  l.set_initial_state(bisim_part.get_eq_class(l.initial_state()));
-  bisim_part.replace_transitions(branching, preserve_divergence);
+  bisim_part.replace_transition_system(branching, preserve_divergence);
 }
 
 template <class LTS_TYPE>

@@ -73,8 +73,7 @@ class bisim_partitioner
 
 
     /** \brief Destroys this partitioner. */
-    ~bisim_partitioner()
-    {}
+    ~bisim_partitioner()=default;
 
     /** \brief Replaces the transition relation of the current lts by the transitions
      *         of the bisimulation reduced transition system.
@@ -96,10 +95,8 @@ class bisim_partitioner
       // used. A set is used to remove double occurrences of transitions.
       std::set < transition > resulting_transitions;
 
-      const std::vector<transition>& trans=aut.get_transitions();
-      for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
+      for (const transition& i: aut.get_transitions()) 
       {
-        const transition i=*t;
         if (!branching ||
             !aut.is_tau(aut.apply_hidden_label_map(i.label())) ||
             get_eq_class(i.from())!=get_eq_class(i.to()) ||
@@ -116,10 +113,9 @@ class bisim_partitioner
       aut.clear_transitions();
 
       // Copy the transitions from the set into the transition system.
-      for (std::set < transition >::const_iterator i=resulting_transitions.begin();
-           i!=resulting_transitions.end(); ++i)
+      for (const transition& t: resulting_transitions)
       {
-        aut.add_transition(*i);
+        aut.add_transition(t);
       }
      
       // Merge the states, by setting the state labels of each state to the concatenation of the state labels of its
@@ -131,10 +127,11 @@ class bisim_partitioner
 
         for(size_t i=0; i<aut.num_states(); ++i)
         {
-          const size_t new_index=block_index_of_a_state[i];
+          const size_t new_index=get_eq_class(i);
           new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
         }
 
+        aut.set_num_states(num_eq_classes());
         for(size_t i=0; i<num_eq_classes(); ++i)
         {
           aut.set_state_label(i,new_labels[i]);
@@ -1204,9 +1201,6 @@ void bisimulation_reduce(LTS_TYPE& l,
   // Secondly, apply the branching bisimulation reduction algorithm. If there are no tau's,
   // this will automatically yield strong bisimulation.
   detail::bisim_partitioner<LTS_TYPE> bisim_part(l, branching, preserve_divergences);
-
-  // Clear the state labels of the LTS l
-  l.clear_state_labels();
 
   // Assign the reduced LTS
   bisim_part.replace_transition_system(branching,preserve_divergences);

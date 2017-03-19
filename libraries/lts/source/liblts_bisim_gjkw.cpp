@@ -1901,8 +1901,9 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
 /// \param branching Causes non-internal transitions to be removed.
 template <class LTS_TYPE>
 void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
-         replace_transitions(const part_state_t& part_st, bool const branching,
-                                                bool const preserve_divergence)
+         replace_transition_system(const part_state_t& part_st, 
+                                   const bool branching,
+                                   const bool preserve_divergence)
 {
     std::unordered_map <state_type, Key> to_lts_map;
     // obtain a map from state to <action, state> pair from extra_kripke_states
@@ -2011,6 +2012,8 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
             succ_iter = succ_iter->constln_slice->end();
         }
     }
+    aut.set_num_states(block_t::nr_of_blocks);
+    aut.set_initial_state(part_st.block(aut.initial_state())->seqnr());
 }
 
 } // end namespace bisim_gjkw

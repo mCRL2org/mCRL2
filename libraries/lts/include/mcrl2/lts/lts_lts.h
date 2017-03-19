@@ -144,7 +144,7 @@ class action_label_lts: public mcrl2::lps::multi_action
     {}
 
     /** \brief Copy constructor. */
-    action_label_lts(const action_label_lts& other)=default;
+    action_label_lts(const action_label_lts& )=default;
 
     /** \brief Copy assignment. */
     action_label_lts& operator=(const action_label_lts& other)=default;

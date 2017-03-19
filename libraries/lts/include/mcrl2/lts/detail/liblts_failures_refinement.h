@@ -218,14 +218,12 @@ bool destructive_refinement_checker(
   
   if (!generate_counter_example.is_dummy())  // A counter example is requested. Don't use bisimulation preprocessing.
   {
+    l1.clear_state_labels(); 
     detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l1,weak_reduction,weak_reduction && (refinement!=trace));
-    l1.clear_state_labels();
     
     // Assign the reduced LTS, and set init_l2.
-    l1.set_num_states(bisim_part.num_eq_classes());
-    l1.set_initial_state(bisim_part.get_eq_class(l1.initial_state()));
     init_l2=bisim_part.get_eq_class(init_l2);
-    bisim_part.replace_transitions(weak_reduction,weak_reduction && (refinement!=trace));
+    bisim_part.replace_transition_system(weak_reduction,weak_reduction && (refinement!=trace));
   }
 
   const detail::lts_cache<LTS_TYPE> weak_property_cache(l1,weak_reduction);
