@@ -80,9 +80,13 @@ class aterm
 
     void copy_term(const aterm& t)
     {
-      decrease_reference_count();
+      /* It is important that the reference count of m_term is decreased after
+         the reference count of t.m_term is increased, as otherwise if the terms are exactly
+         the same, the reference count can temporarily become 0. */
+      detail::_aterm* t0=m_term;
       m_term=t.m_term;
       increase_reference_count<true>();
+      t0->decrease_reference_count();
     }
 
     // An aterm has a function symbol, which can also be an AS_EMPTY_LIST,
