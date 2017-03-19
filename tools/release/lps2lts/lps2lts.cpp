@@ -218,7 +218,7 @@ class lps2lts_tool : public lps2lts_base
                  , 's').
       add_option("out", make_mandatory_argument("FORMAT"),
                  "save the output in the specified FORMAT", 'o').
-      add_option("no-info", "do not add state information to OUTFILE"
+      add_option("no-info", "do not add state information to OUTFILE. "
                  "Without this option lps2lts adds state vector to the LTS. This "
                  "option causes this information to be discarded and states are only "
                  "indicated by a sequence number. Explicit state information is useful "
