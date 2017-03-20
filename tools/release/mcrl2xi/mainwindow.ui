@@ -25,16 +25,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
+    <property name="margin">
      <number>0</number>
     </property>
     <item>
@@ -267,7 +258,7 @@
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="document-open">
+    <iconset theme=":/document-open">
      <normaloff/>
     </iconset>
    </property>
@@ -283,7 +274,7 @@
   </action>
   <action name="actionNew">
    <property name="icon">
-    <iconset theme="document-new">
+    <iconset theme=":/document-new">
      <normaloff/>
     </iconset>
    </property>
@@ -299,7 +290,7 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme="document-save">
+    <iconset theme=":/document-save">
      <normaloff/>
     </iconset>
    </property>
@@ -513,6 +504,7 @@
  </customwidgets>
  <resources>
   <include location="mcrl2xi.qrc"/>
+  <include location="icons/icons.qrc"/>
  </resources>
  <connections/>
  <slots>

@@ -5,6 +5,8 @@ add_mcrl2_tool(mcrl2xi
   SOURCES
     mainwindow.ui
     findreplacedialog.ui
+    icons/icons.qrc
+    mcrl2xi.qrc
     main.cpp
     mainwindow.cpp
     highlighter.cpp
