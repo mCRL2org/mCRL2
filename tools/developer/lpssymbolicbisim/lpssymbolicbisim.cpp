@@ -19,28 +19,31 @@
 #include "mcrl2/lps/io.h"
 
 //Tool framework
-#include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/prover_tool.h"
+#include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/utilities/input_tool.h"
 
 #include "symbolic_bisim.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
+using mcrl2::data::tools::prover_tool;
 using mcrl2::data::tools::rewriter_tool;
 using mcrl2::utilities::tools::input_tool;
 using namespace mcrl2::log;
 
 
-class lpssymbolicbisim_tool: public rewriter_tool<input_tool>
+class lpssymbolicbisim_tool: public prover_tool< rewriter_tool<input_tool> >
 {
   protected:
-    typedef rewriter_tool<input_tool> super;
+    typedef prover_tool<rewriter_tool<input_tool>> super;
 
-    std::string invariant;
+    std::string m_invariant;
+    bool m_use_path_eliminator;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
@@ -49,7 +52,11 @@ class lpssymbolicbisim_tool: public rewriter_tool<input_tool>
 
       if (parser.options.count("invariant")>0)
       {
-        invariant = parser.option_argument("invariant");
+        m_invariant = parser.option_argument("invariant");
+      }
+      if (parser.options.count("smt-solver")>0)
+      {
+        m_use_path_eliminator = true;
       }
     }
 
@@ -72,7 +79,8 @@ class lpssymbolicbisim_tool: public rewriter_tool<input_tool>
         "Perform the first N steps of partition refinement on "
         "INFILE and output the resulting expressions. "
         "This tool is highly experimental. "),
-        invariant("true")
+        m_invariant("true"),
+        m_use_path_eliminator(false)
     {}
 
     /// Runs the algorithm.
@@ -87,9 +95,9 @@ class lpssymbolicbisim_tool: public rewriter_tool<input_tool>
       stochastic_specification spec;
       load_lps(spec, input_filename());
 
-      mcrl2::data::data_expression inv = parse_data_expression(invariant, spec.process().process_parameters(), spec.data());
+      mcrl2::data::data_expression inv = parse_data_expression(m_invariant, spec.process().process_parameters(), spec.data());
 
-      mcrl2::data::symbolic_bisim_algorithm<stochastic_specification>(spec, inv, m_rewrite_strategy).run();
+      mcrl2::data::symbolic_bisim_algorithm<stochastic_specification>(spec, inv, m_use_path_eliminator, m_solver_type, m_rewrite_strategy).run();
 
       return true;
     }

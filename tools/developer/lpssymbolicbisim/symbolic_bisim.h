@@ -16,6 +16,7 @@
 
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
+#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/fourier_motzkin.h"
@@ -24,10 +25,15 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/data/substitutions/data_expression_assignment.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/utilities/logger.h"
 
+#include "simplifier.h"
+// #include "simplifier_dbm.h"
+#include "simplifier_fourier_motzkin.h"
 
 namespace mcrl2
 {
@@ -127,11 +133,13 @@ struct eliminate_existential_quantifier_sigma: public std::unary_function<data_e
       const variable_list variables = static_cast<exists>(d).variables();
       const data_expression body = static_cast<exists>(d).body();
 
+      std::cout << "Replacing " << d << std::flush;
+
       variable_list new_variables;
       data_expression new_body;
       fourier_motzkin(body, variables, new_body, new_variables, rewr);
 
-      std::cout << "Replacing " << d << " with " << exists(new_variables, new_body) << std::endl;
+      std::cout << " with " << exists(new_variables, new_body) << std::endl;
       return rewr(exists(new_variables, new_body));
     }
     return d;
@@ -156,6 +164,10 @@ protected:
   data_expression                invariant;
   std::set<data_expression>      partition;
   data_specification             ad_hoc_data;
+  bool                           m_use_path_eliminator;
+  detail::BDD_Path_Eliminator    m_path_eliminator;
+  // simplifier_dbm                 simpl;
+  simplifier_fourier_motzkin                 simpl;
 
   template <typename Container>
   std::string pp_container(Container& expressions, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
@@ -355,41 +367,6 @@ protected:
     }
   };
 
-  data_expression simplify_expression_in_lambda(const lambda& expr, const mutable_indexed_substitution<> sigma)
-  {
-    data_expression result = rewr(proving_rewr(expr.body(),sigma));
-
-    std::vector < data_expression_list > real_conditions;
-    std::vector < data_expression > non_real_conditions;
-    detail::split_condition(result, real_conditions, non_real_conditions);
-    result = sort_bool::false_();
-    for(uint32_t i = 0; i < real_conditions.size(); i++)
-    {
-      std::vector< linear_inequality > linear_inequalities;
-      for(data_expression_list::const_iterator it = real_conditions[i].begin(); it != real_conditions[i].end(); it++)
-      {
-        linear_inequalities.push_back(linear_inequality(*it, rewr));
-      }
-      std::vector< linear_inequality > resulting_inequalities;
-      remove_redundant_inequalities(linear_inequalities, resulting_inequalities, rewr);
-      if(!(resulting_inequalities.size() == 1 && resulting_inequalities[0].is_false(rewr)))
-      {
-        data_expression real_con = sort_bool::true_();
-        for(uint32_t j = 0; j < resulting_inequalities.size(); j++)
-        {
-          real_con = lazy::and_(real_con, resulting_inequalities[j].transform_to_data_expression());
-        }
-        result = lazy::or_(result, lazy::and_(non_real_conditions[i], real_con));
-      }
-    }
-
-    std::cout << "simplify: before rewriting " << result << std::endl;
-    result = rewr(proving_rewr(result));
-    std::cout << "simplify: after rewriting  " << result << std::endl;
-
-    return lambda(expr.variables(), result);
-  }
-
   // For all evaluations of variables in vars for which block holds,
   // add split_block to the partition
   // vars is the set of free variables in split_block
@@ -420,7 +397,9 @@ protected:
         std::cout << data::pp(*v) << " := " << data::pp(sigma(*v));
       }
       std::cout << "] leads to " << std::endl;
-      partition.insert(simplify_expression_in_lambda(split_block, sigma));
+      data_expression new_block(simpl.apply(split_block, sigma));
+      std::cout << new_block << std::endl;
+      partition.insert(new_block);
     }
   }
 
@@ -543,6 +522,8 @@ protected:
       );
 
     std::cout << "Starting simplification of " << std::endl << pp(split_block) << std::endl;
+    split_block = one_point_rule_rewrite(quantifiers_inside_rewrite(split_block));
+    std::cout << "Quantifiers pushed inside " << std::endl << pp(split_block) << std::endl;
     
     data_expression result = replace_data_expressions(split_block, eliminate_existential_quantifier_sigma(rewr), true);
     std::cout << "Block after replacements:" << std::endl << result << std::endl;
@@ -594,13 +575,19 @@ protected:
   }
 
 public:
-  symbolic_bisim_algorithm(Specification& spec, data_expression inv, const rewrite_strategy st = jitty)
+  symbolic_bisim_algorithm(Specification& spec, data_expression inv, 
+    bool use_path_eliminator, detail::smt_solver_type solver_type, const rewrite_strategy st = jitty)
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
     , strat(st)
     , rewr(spec.data(),strat)
     , proving_rewr(spec.data(), jitty_prover)
     , invariant(inv)
+    , m_use_path_eliminator(use_path_eliminator)
+    , m_path_eliminator(solver_type)
+    // , simpl(rewr, proving_rewr, process_parameters)
+    , simpl(rewr, proving_rewr)
   {
+    
   }
 
   void run()
@@ -609,6 +596,8 @@ public:
     process_parameters = m_spec.process().process_parameters();
     partition.insert( lambda(process_parameters, invariant));
     add_ad_hoc_rules();
+    // simpl = simplifier_dbm(rewr, proving_rewr, process_parameters);
+    simpl = simplifier_fourier_motzkin(rewr, proving_rewr);
 
     while(true)
     {
