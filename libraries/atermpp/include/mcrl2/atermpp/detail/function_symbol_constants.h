@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/function_symbol.h
-/// \brief Function symbol class.
+/// \file mcrl2/atermpp/detail/function_symbol_constants.h
+/// \brief A class containing some constant function symbols. 
 
 #ifndef ATERMPP_DETAIL_FUNCTION_SYMBOL_CONSTANTS_H
 #define ATERMPP_DETAIL_FUNCTION_SYMBOL_CONSTANTS_H

@@ -1,3 +1,14 @@
+// Author(s): Wieger Wesselink, Jan Friso Groote. Based on the aterm library by Paul Klint and others.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/atermpp/detail/type_traits_impl.h
+/// \brief Some type traits for implementations. 
+
 #ifndef ATERMPP_DETAIL_TYPE_TRAITS_H
 #define ATERMPP_DETAIL_TYPE_TRAITS_H
 

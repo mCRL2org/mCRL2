@@ -1,3 +1,15 @@
+// Author(s): Jan Friso Groote. Based on the aterm library by Paul Klint and others.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/atermpp/detail/aterm_implementation.h
+/// \brief This file contains the code to allocate aterms in tables
+///        with sufficient space for its arguments. 
+
 #ifndef MEMORY_H
 #define MEMORY_H
 

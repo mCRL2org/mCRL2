@@ -1,3 +1,15 @@
+// Author(s): Jan Friso Groote. Based on the aterm library by Paul Klint and others.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/atermpp/detail/aterm_appl_implementation.h 
+/// \brief This file contains functions to generate aterm_appl's
+///        on the basis of a function symbol and a sequence of arguments. 
+
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_APPL_IMPLEMENTATION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_IMPLEMENTATION_H
 

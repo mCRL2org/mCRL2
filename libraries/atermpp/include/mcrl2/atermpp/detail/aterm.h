@@ -1,3 +1,23 @@
+// Author(s): Jan Friso Groote
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/atermpp/detail/aterm.h
+/// \brief This file contains the _aterm class, which is the
+///        class to which an aterm points. Each _aterm consists
+///        of a function symbol, a reference count, used for garbage
+///        collection and a next pointer used in the hash tables to
+///        locate a term on the basis of the function symbol and 
+///        arguments. Each _aterm contains an arbitrary number of
+///        arguments after m_next, as indicated in the function symbol.
+///        These arguments are not listed explicitly in the class 
+///        below, but room is reserved for them when creating this
+///        term. 
+
 #ifndef DETAIL_ATERM_H
 #define DETAIL_ATERM_H
 
