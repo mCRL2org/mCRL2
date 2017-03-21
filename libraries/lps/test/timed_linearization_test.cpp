@@ -107,7 +107,7 @@ void run_linearisation_test_case(const std::string& spec,
     std::clog << spec << "\n";
 
     t_lin_options options;
-    options.add_delta=false;  // Do not add delta summands, required for timed linearisation. 
+    options.ignore_time=false;  // Do not ignore time.
 
     options.rewrite_strategy=*i;
 

@@ -7249,10 +7249,10 @@ class specification_basic_type: public boost::noncopyable
         cluster_actions(action_summands,deadlock_summands,parameters);
       }
 
-      if ((!containstime) || options.add_delta)
+      if ((!containstime) || options.ignore_time)
       {
         /* We add a delta summand to each process, if the flag
-           add_delta is set, or if the process does not contain any
+           ignore_time is set, or if the process does not contain any
            explicit reference to time. This affects the behaviour of each
            process in the sense that each process can idle
            indefinitely. It has the advantage that large numbers
@@ -7363,10 +7363,6 @@ class specification_basic_type: public boost::noncopyable
       deadlock_summand_vector& deadlock_summands,
       const deadlock_summand& s)
     {
-      /* The delta summands are put in front.
-         The sequence of summands is maintained as
-         good as possible, to eliminate summands as
-         quickly as possible */
       deadlock_summand_vector result;
 
       // const variable_list sumvars=s.summation_variables();
@@ -7374,14 +7370,14 @@ class specification_basic_type: public boost::noncopyable
       const data_expression actiontime=s.deadlock().time();
 
       // First check whether the delta summand is subsumed by an action summands.
-      for (stochastic_action_summand_vector::const_iterator i=action_summands.begin(); i!=action_summands.end(); ++i)
+      for (const stochastic_action_summand& as: action_summands)
       {
-        const data_expression cond1=i->condition();
-        if ((!options.add_delta) &&
-            ((actiontime==i->multi_action().time()) || (!i->multi_action().has_time())) &&
+        const data_expression cond1=as.condition();
+        if ((!options.ignore_time) &&
+            ((actiontime==as.multi_action().time()) || (!as.multi_action().has_time())) &&
             (implies_condition(cond,cond1)))
         {
-          /* De delta summand is subsumed by action summand *i. So, it does not
+          /* De delta summand is subsumed by action summand as. So, it does not
              have to be added. */
 
           return;
@@ -7392,7 +7388,7 @@ class specification_basic_type: public boost::noncopyable
       {
         const deadlock_summand smmnd=*i;
         const data_expression cond1=i->condition();
-        if ((!options.add_delta) &&
+        if ((!options.ignore_time) &&
             ((actiontime==i->deadlock().time()) || (!i->deadlock().has_time())) &&
             (implies_condition(cond,cond1)))
         {
@@ -7405,7 +7401,7 @@ class specification_basic_type: public boost::noncopyable
           deadlock_summands.swap(result);
           return;
         }
-        if (((options.add_delta)||
+        if (((options.ignore_time)||
              (((actiontime==smmnd.deadlock().time())|| (!s.deadlock().has_time())) &&
               (implies_condition(cond1,cond)))))
         {
@@ -7581,7 +7577,7 @@ class specification_basic_type: public boost::noncopyable
       }
       else
       {
-        if (!options.add_delta) /* if a delta summand is added, conditional, timed
+        if (!options.ignore_time) /* if a delta summand is added, conditional, timed
                                    delta's are subsumed and do not need to be added */
         {
           for (deadlock_summand_vector::const_iterator j=resultsimpledeltasumlist.begin();
@@ -8287,9 +8283,9 @@ class specification_basic_type: public boost::noncopyable
       bool inline_allow = is_allow || is_block;
       if (inline_allow)
       {
-        // Inline allow is only supported for add_delta,
+        // Inline allow is only supported for ignore_time,
         // for in other cases generation of delta summands cannot be inlined in any simple way.
-        assert(!options.nodeltaelimination && options.add_delta);
+        assert(!options.nodeltaelimination && options.ignore_time);
         deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
       }
       action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
@@ -8872,7 +8868,7 @@ class specification_basic_type: public boost::noncopyable
           }
 
           condition1=RewriteTerm(condition1);
-          if (condition1!=sort_bool::false_())
+          if (condition1!=sort_bool::false_() && !options.ignore_time)
           {
             deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
           }
@@ -8896,11 +8892,11 @@ class specification_basic_type: public boost::noncopyable
     {
       variable_list ultimate_delay_sumvars1;
       data_expression ultimate_delay_condition=
-        (options.add_delta?data_expression(sort_bool::true_()):
+        (options.ignore_time?data_expression(sort_bool::true_()):
            getUltimateDelayCondition(action_summands2,deadlock_summands2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
 
       // The ultimate_delay_condition can be complex. Try to simplify it with a fourier_motzkin reduction.
-      if (!options.add_delta)
+      if (!options.ignore_time)
       { 
         data_expression simplified_ultimate_delay_condition;
         variable_list reduced_sumvars;
@@ -9059,7 +9055,7 @@ class specification_basic_type: public boost::noncopyable
             }
           }
 
-          if (condition3!=sort_bool::false_())
+          if (condition3!=sort_bool::false_() && !options.ignore_time)
           {
             deadlock_summands.push_back(deadlock_summand(
                                         allsums,
@@ -9115,7 +9111,7 @@ class specification_basic_type: public boost::noncopyable
             }
           }
 
-          if (condition3!=sort_bool::false_())
+          if (condition3!=sort_bool::false_() && !options.ignore_time)
           {
             deadlock_summands.push_back(deadlock_summand(
                                         allsums,
@@ -9168,9 +9164,9 @@ class specification_basic_type: public boost::noncopyable
       bool inline_allow = is_allow || is_block;
       if (inline_allow)
       {
-        // Inline allow is only supported for add_delta,
+        // Inline allow is only supported for ignore_time,
         // for in other cases generation of delta summands cannot be inlined in any simple way.
-        assert(!options.nodeltaelimination && options.add_delta);
+        assert(!options.nodeltaelimination && options.ignore_time);
         deadlock_summands.push_back(deadlock_summand(variable_list(),sort_bool::true_(),deadlock()));
       }
 
@@ -9210,9 +9206,9 @@ class specification_basic_type: public boost::noncopyable
       assignment_list& init_result)
     {
       mCRL2log(mcrl2::log::verbose) <<
-            (is_allow ? "- calculating parallel composition modulo the allow operator: " :
-             is_block ? "- calculating parallel composition modulo the block operator: " :
-                        "- calculating parallel composition: ") <<
+            (is_allow ? "- calculating the parallel composition modulo the allow operator: " :
+             is_block ? "- calculating the parallel composition modulo the block operator: " :
+                        "- calculating the parallel composition: ") <<
             action_summands1.size() <<
             " action summands + " << deadlock_summands1.size() <<
             " deadlock summands || " << action_summands2.size() <<
@@ -9366,7 +9362,7 @@ class specification_basic_type: public boost::noncopyable
       if (is_allow(t))
       {
         process_expression par = allow(t).operand();
-        if (!options.nodeltaelimination && options.add_delta && is_merge(par))
+        if (!options.nodeltaelimination && options.ignore_time && is_merge(par))
         {
           // Perform parallel composition with inline allow.
           variable_list pars1,pars2;
@@ -9383,7 +9379,7 @@ class specification_basic_type: public boost::noncopyable
                                 action_summands,deadlock_summands,pars,init);
           return;
         }
-        else if (!options.nodeltaelimination && options.add_delta && is_comm(par))
+        else if (!options.nodeltaelimination && options.ignore_time && is_comm(par))
         {
           generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
                                 regular,rename_variables,pars,init,initial_stochastic_distribution);
@@ -9399,7 +9395,7 @@ class specification_basic_type: public boost::noncopyable
       if (is_block(t))
       {
         process_expression par = block(t).operand();
-        if (!options.nodeltaelimination && options.add_delta && is_merge(par))
+        if (!options.nodeltaelimination && options.ignore_time && is_merge(par))
         {
           // Perform parallel composition with inline block.
           variable_list pars1,pars2;
@@ -9416,7 +9412,7 @@ class specification_basic_type: public boost::noncopyable
                                 action_summands,deadlock_summands,pars,init);
           return;
         }
-        else if (!options.nodeltaelimination && options.add_delta && is_comm(par))
+        else if (!options.nodeltaelimination && options.ignore_time && is_comm(par))
         {
           generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
                                 regular,rename_variables,pars,init,initial_stochastic_distribution);
@@ -9745,7 +9741,7 @@ class specification_basic_type: public boost::noncopyable
         // otherwise into c->p<>delta@0. In this last case the process
         // contains time.
         contains_if_then=true;
-        if (options.add_delta)
+        if (options.ignore_time)
         {
           return containstimebody(if_then(t).then_case(),stable,visited,allowrecursion,contains_if_then);
         }
@@ -9808,7 +9804,7 @@ class specification_basic_type: public boost::noncopyable
         visited.insert(procId);
         const bool ct=containstimebody(objectdata[n].processbody,stable,visited,true,contains_if_then);
         static bool show_only_once=true;
-        if (ct && options.add_delta && show_only_once)
+        if (ct && options.ignore_time && show_only_once)
         {
           mCRL2log(mcrl2::log::warning) << "process " << procId.name() <<
               " contains time, which is now not preserved. \n"  <<

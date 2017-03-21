@@ -146,7 +146,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.noglobalvars            = 0 < parser.options.count("no-globvars");
       m_linearisation_options.nosumelm                = 0 < parser.options.count("no-sumelm");
       m_linearisation_options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
-      m_linearisation_options.add_delta               = 0 == parser.options.count("timed");
+      m_linearisation_options.ignore_time             = 0 == parser.options.count("timed");
       m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm") ||
                                                         0 < parser.options.count("no-rewrite");
 

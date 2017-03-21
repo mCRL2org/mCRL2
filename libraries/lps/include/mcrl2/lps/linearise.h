@@ -38,7 +38,7 @@ struct t_lin_options
   bool noglobalvars;
   bool nosumelm;
   bool nodeltaelimination;
-  bool add_delta;
+  bool ignore_time;
   bool do_not_apply_constelm;
   mcrl2::data::rewriter::strategy rewrite_strategy;
 
@@ -53,7 +53,7 @@ struct t_lin_options
       noglobalvars(false),
       nosumelm(false),
       nodeltaelimination(false),
-      add_delta(false),
+      ignore_time(false),
       do_not_apply_constelm(false),
       rewrite_strategy(mcrl2::data::jitty)
   {}
