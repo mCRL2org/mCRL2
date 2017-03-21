@@ -4,6 +4,7 @@ add_mcrl2_tool(lpsxsim
   ICON "mcrl2-red"
   SOURCES
     mainwindow.ui
+    lpsxsim.qrc
     main.cpp
     mainwindow.cpp
     simulation.cpp

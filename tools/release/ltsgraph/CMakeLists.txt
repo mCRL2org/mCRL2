@@ -12,6 +12,7 @@ add_mcrl2_tool(ltsgraph
     springlayout.ui
     information.ui
     dimensionsdialog.ui
+    ltsgraph.qrc
     main.cpp
     mainwindow.cpp
     glwidget.cpp

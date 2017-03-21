@@ -16,6 +16,7 @@ add_mcrl2_tool(ltsview
     settingsdialog.ui
     settingsdock.ui
     simdock.ui
+    ltsview.qrc
     cluster.cpp
     conedb.cpp
     fsm_state_positioner.cpp
