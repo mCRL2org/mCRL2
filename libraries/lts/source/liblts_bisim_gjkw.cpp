@@ -54,21 +54,13 @@ block_t* block_t::refinable_first = nullptr;
 state_type block_t::nr_of_blocks = 0;
 constln_t* constln_t::nontrivial_first = nullptr;
 
-// These variables are only really used in debug mode. In release mode,
-// they are not used with compiler optimisations on. With compiler optimisations
-// off they are actually accessed. 
-    const char block_t::mark_all_states_in_SpB[] = "mark all states in SpB";
-    const char part_state_t::delete_constellations[] = "delete constellations";
-    const char part_state_t::delete_blocks[] = "delete blocks";
 #ifndef NDEBUG
+    // These variables are only accessed in debug mode.  In release mode,
+    // accessing them would lead to a linker error.
     state_info_const_ptr state_info_entry::s_i_begin;
+    state_info_const_ptr state_info_entry::s_i_end;
     permutation_const_iter_t block_t::perm_begin;
 #endif
-
-/// \details `split_off_blue()` and `split_off_red()` use the same complexity
-/// counters because their operations belong together.
-static const char swap_red_and_blue_states[] = "swap red and blue states";
-static const char set_pointer_to_new_block[] = "set pointer to new block";
 
 /// \brief refine the block (the blue subblock is smaller)
 /// \details This function is called after a refinement function has found
@@ -94,9 +86,11 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
         state_info_ptr const temp = *pos1;
         for (;;)
         {
-            check_complexity::count(swap_red_and_blue_states, 1,
-                                                    check_complexity::n_log_n);
-            *pos1 = *--pos2;
+            --pos2;
+            add_work(*pos2, check_complexity::
+                                Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29,
+                                                      check_complexity::log_n);
+            *pos1 = *pos2;
             (*pos1)->pos = pos1;
             ++pos1;
             if (0 == --swapcount)  break;
@@ -112,6 +106,9 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
                                                         unmarked_bottom_size();
     assert(begin() < splitpoint && splitpoint < end());
     block_t* const NewB = new block_t(constln(), begin(), splitpoint);
+    #ifndef NDEBUG
+        NewB->work_counter = work_counter;
+    #endif
     if (BLOCK_NO_SEQNR != seqnr())
     {
         NewB->assign_seqnr();
@@ -129,8 +126,9 @@ block_t* block_t::split_off_blue(permutation_iter_t const blue_nonbottom_end)
     assert(NewB->to_constln.empty());
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
-        check_complexity::count(set_pointer_to_new_block, 1,
-                                                    check_complexity::n_log_n);
+        add_work(*s_iter, check_complexity::
+                             Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29,
+                                                      check_complexity::log_n);
         (*s_iter)->block = NewB;
     }
 
@@ -177,8 +175,9 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
         state_info_ptr const temp = *pos1;
         for (;;)
         {
-            check_complexity::count(swap_red_and_blue_states, 1,
-                                                    check_complexity::n_log_n);
+            add_work(*pos1, check_complexity::
+                                Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29,
+                                                      check_complexity::log_n);
             *pos1 = *--pos2;
             (*pos1)->pos = pos1;
             ++pos1;
@@ -194,6 +193,9 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
                                                         unmarked_bottom_size();
     assert(begin() < splitpoint && splitpoint < end());
     block_t* const NewB = new block_t(constln(), splitpoint, end());
+    #ifndef NDEBUG
+        NewB->work_counter = work_counter;
+    #endif
     if (BLOCK_NO_SEQNR != seqnr())
     {
         NewB->assign_seqnr();
@@ -210,8 +212,9 @@ block_t* block_t::split_off_red(permutation_iter_t const red_nonbottom_begin)
     assert(NewB->to_constln.empty());
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
-        check_complexity::count(set_pointer_to_new_block, 1,
-                                                    check_complexity::n_log_n);
+        add_work(*s_iter, check_complexity::
+                             Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29,
+                                                      check_complexity::log_n);
         (*s_iter)->block = NewB;
     }
 
@@ -468,11 +471,15 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
         slice->end = SpB->inert_begin();
         SpB->SetFromRed(slice);
     }
+    #ifndef NDEBUG
+        new_slice->work_counter = slice->work_counter;
+    #endif
     // set the slice pointers of the smaller part to the new slice:
     for (B_to_C_iter_t iter = new_slice->begin; new_slice->end != iter; ++iter)
     {
-        check_complexity::count("split transitions in B_to_C", 1,
-                                                    check_complexity::m_log_n);
+        add_work(iter->pred, check_complexity::
+                 Register_that_inert_transitions_from_s_go_to_NewC_B_to_C_2_17,
+                                                      check_complexity::log_n);
         assert(B_to_C.end() > iter && iter->pred->succ->B_to_C == iter);
         iter->B_to_C_slice = new_slice;
     }
@@ -505,6 +512,9 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
         block_t* const RfnB = pred_iter->source->block;
         RfnB->to_constln.emplace_back(new_B_to_C_pos, new_B_to_C_pos);
         new_B_to_C_slice = std::prev(RfnB->to_constln.end());
+        #ifndef NDEBUG
+            new_B_to_C_slice->work_counter = old_B_to_C_slice->work_counter;
+        #endif
         RfnB->SetFromRed(old_B_to_C_slice);
     }
     else
@@ -689,9 +699,10 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
             B_to_C_iter_t temp_B_to_C = pos1->B_to_C;
             for (;;)
             {
-                check_complexity::count("swap succ_entries for inert "
-                                  "transitions", 1, check_complexity::m_log_n);
                 --pos2;
+                add_work(pos2->B_to_C->pred, check_complexity::
+                   Register_that_inert_transitions_from_s_go_to_NewC_swap_2_17,
+                                                      check_complexity::log_n);
                 pos1->target = pos2->target;
                 pos1->B_to_C = pos2->B_to_C;
                 pos1->B_to_C->pred->succ = pos1;
@@ -734,8 +745,9 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
         for (succ_iter_t succ_iter = new_constln_slice->begin();
                             new_constln_slice->end() != succ_iter; ++succ_iter)
         {
-            check_complexity::count("set pointer to new succ-constellation "
-                                        "slice", 1, check_complexity::m_log_n);
+            add_work(succ_iter->B_to_C->pred, check_complexity::
+                   Register_that_inert_transitions_from_s_go_to_NewC_succ_2_17,
+                                                      check_complexity::log_n);
             assert(succ.end() > succ_iter &&
                                    succ_iter->B_to_C->pred->succ == succ_iter);
             succ_iter->constln_slice = new_constln_slice;
@@ -819,10 +831,6 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
 that some transitions now start in the new block NewB.  They can no longer be
 in the same slice as the transitions that start in the old block.
 Its time complexity is O(1 + |out(NewB)|). */
-static const char for_all_states_of_a_new_block[] =
-                                               "for all states of a new block";
-static const char for_all_transitions_of_a_new_block[] =
-                                          "for all transitions of a new block";
 void part_trans_t::new_blue_block_created(block_t* const RfnB,
                                 block_t* const NewB, bool const postprocessing)
 {
@@ -834,13 +842,15 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
     // for all outgoing transitions of NewB
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
-        check_complexity::count(for_all_states_of_a_new_block, 1,
-                                                    check_complexity::n_log_n);
+        add_work(*s_iter,
+                 check_complexity::Move_Blue_or_Red_to_a_new_block_states_3_29,
+                                                      check_complexity::log_n);
         for (succ_iter_t succ_iter = (*s_iter)->succ_begin();
                                (*s_iter)->succ_end() != succ_iter; ++succ_iter)
         {
-            check_complexity::count(for_all_transitions_of_a_new_block, 1,
-                                                    check_complexity::m_log_n);
+            add_work(succ_iter->B_to_C->pred,
+                   check_complexity::Move_Blue_or_Red_to_a_new_block_succ_3_29,
+                                                      check_complexity::log_n);
             assert(succ.end() > succ_iter &&
                                    succ_iter->B_to_C->pred->succ == succ_iter);
             // Move the transition to a new slice:
@@ -894,6 +904,10 @@ void part_trans_t::new_blue_block_created(block_t* const RfnB,
                     NewB->to_constln.emplace_back(after_new_pos,after_new_pos);
                     new_B_to_C_slice = std::prev(NewB->to_constln.end());
                 }
+                #ifndef NDEBUG
+                    new_B_to_C_slice->work_counter =
+                                                old_B_to_C_slice->work_counter;
+                #endif
                 if (RfnB->inert_end() == after_new_pos)
                 {
                     // this is the first transition from NewB to its own
@@ -1026,13 +1040,15 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
     // for all outgoing transitions of NewB
     for(permutation_iter_t s_iter=NewB->begin(); NewB->end()!=s_iter; ++s_iter)
     {
-        check_complexity::count(for_all_states_of_a_new_block, 1,
-                                                    check_complexity::n_log_n);
+        add_work(*s_iter,
+                 check_complexity::Move_Blue_or_Red_to_a_new_block_states_3_29,
+                                                      check_complexity::log_n);
         for (succ_iter_t succ_iter = (*s_iter)->succ_begin();
                                (*s_iter)->succ_end() != succ_iter; ++succ_iter)
         {
-            check_complexity::count(for_all_transitions_of_a_new_block, 1,
-                                                    check_complexity::m_log_n);
+            add_work(succ_iter->B_to_C->pred,
+                   check_complexity::Move_Blue_or_Red_to_a_new_block_succ_3_29,
+                                                      check_complexity::log_n);
             assert(succ.end() > succ_iter &&
                                    succ_iter->B_to_C->pred->succ == succ_iter);
             // Move the transition to a new slice:
@@ -1092,6 +1108,10 @@ void part_trans_t::new_red_block_created(block_t* const RfnB,
                     NewB->to_constln.emplace_back(new_pos, new_pos);
                     new_B_to_C_slice = std::prev(NewB->to_constln.end());
                 }
+                #ifndef NDEBUG
+                    new_B_to_C_slice->work_counter =
+                                                old_B_to_C_slice->work_counter;
+                #endif
                 if (RfnB->inert_end() == old_B_to_C_slice->end)
                 {
                     // this is the first transition from NewB to its own
@@ -1245,6 +1265,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
         // assert some properties of constellation C
         assert(C->begin() < C->end());
         assert(C->postprocess_begin == C->postprocess_end);
+        assert(C->work_counter.no_temporary_work());
         const block_t* B = (*C->begin())->block;
         if (C->is_trivial())
         {
@@ -1268,6 +1289,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
             assert(B->marked_bottom_begin() == B->marked_bottom_end());
             assert(!B->is_refinable());
             assert(B->inert_begin() <= B->inert_end());
+            assert(B->work_counter.no_temporary_work());
             // count inert transitions in block
             state_type nr_of_inert_successors=B->inert_end()-B->inert_begin(),
                     nr_of_inert_predecessors = nr_of_inert_successors;
@@ -1302,14 +1324,16 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                     assert(pred_iter->succ->B_to_C->B_to_C_slice->to_constln()
                                                                          == C);
                     assert(pred_iter->succ->target == s);
+                    assert(pred_iter->work_counter.no_temporary_work());
+                    assert(pred_iter->work_counter.no_bottom_work());
 
                     state_info_const_ptr const pred = pred_iter->source;
-                    // assert some properties of the predecessor state
-                    assert(pred->block == B);
-                    assert(pred->pos < B->nonbottom_end());
                     // if pred is not yet marked as predecessor then
                     if (STATE_TYPE_MAX != pred->notblue)
                     {
+                        // assert some properties of the predecessor state
+                        assert(pred->block == B);
+                        assert(pred->pos < B->nonbottom_end());
                         // mark pred as predecessor
                         const_cast<state_type&>(pred->notblue)=STATE_TYPE_MAX;
                         // add pred to the list of predecessors
@@ -1342,14 +1366,16 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                     assert(pred_iter->succ->B_to_C->B_to_C_slice->to_constln()
                                                                          == C);
                     assert(pred_iter->succ->target == s);
+                    assert(pred_iter->work_counter.no_temporary_work());
+                    assert(pred_iter->work_counter.no_bottom_work());
 
                     state_info_const_ptr const pred = pred_iter->source;
-                    // assert some properties of the predecessor state
-                    assert(pred->block == B);
-                    assert(pred->pos < B->nonbottom_end());
                     // if pred is not yet marked as predecessor then
                     if (STATE_TYPE_MAX != pred->notblue)
                     {
+                        // assert some properties of the predecessor state
+                        assert(pred->block == B);
+                        assert(pred->pos < B->nonbottom_end());
                         // mark pred as predecessor
                         const_cast<state_type&>(pred->notblue)=STATE_TYPE_MAX;
                         // add pred to the list of predecessors
@@ -1372,6 +1398,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                                            B->to_constln.end() != iter; ++iter)
             {
                 assert(iter->from_block() == B);
+                assert(iter->work_counter.no_temporary_work());
                 if (iter->to_constln() == C)
                 {
                     assert(!to_own_constln);
@@ -1409,6 +1436,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                          s->succ_end() == s->current_constln() ||
                                   *s->current_constln()[-1].target->constln() <
                                      *s->current_constln()->target->constln());
+                assert(s->work_counter.no_temporary_work());
                 // count reachable constellations
                 state_type nr_of_reachable_constlns = B->to_constln.size();
 
@@ -1477,6 +1505,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                 // if s is a nonbottom state then
                 if (s_iter < B->bottom_begin())
                 {
+                    assert(s->work_counter.no_bottom_work());
                     assert(s->inert_succ_begin() < s->inert_succ_end());
                     nr_of_inert_successors -=
                                    s->inert_succ_end() - s->inert_succ_begin();
@@ -1514,6 +1543,13 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                                                                          == C);
                     assert(pred_iter->succ->target == s);
                     assert(pred_iter->source->block != B);
+                    if (pred_iter->source->pos <
+                                     pred_iter->source->block->nonbottom_end())
+                    {
+                        // transition starts in a nonbottom state.
+                        assert(pred_iter->work_counter.no_bottom_work());
+                    }
+                    assert(pred_iter->work_counter.no_temporary_work());
                 // end for
                 }
             // end for (all states s in B)
@@ -1582,12 +1618,14 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
                     << " transitions [GJKW 2017]\n";
     // m is not yet initialised fully, so we have to count transitions
     // in a different way:
-    check_complexity::init(l.num_states(), l.num_transitions());
+    #ifndef NDEBUG
+        check_complexity::init(l.num_states(), l.num_transitions());
+    #endif
     // Iterate over the transitions and collect new states
     for (const transition& t: aut.get_transitions())
     {
-        check_complexity::count("visit transitions to find extra Kripke "
-                                             "states", 1, check_complexity::m);
+        add_work_global(check_complexity::find_extra_Kripke_states_init_helper,
+                                                          check_complexity::m);
         if (!branching || !aut.is_tau(aut.apply_hidden_label_map(t.label())) ||
                                    (preserve_divergence && t.from() == t.to()))
         {
@@ -1639,8 +1677,9 @@ bisim_partitioner_gjkw_initialise_helper(LTS_TYPE& l, bool const branching,
     }
     mCRL2log(log::verbose) << "Number of extra states: "
                                          << extra_kripke_states.size() << "\n";
-    check_complexity::stats();
-    check_complexity::init(nr_of_states, nr_of_transitions);
+    #ifndef NDEBUG
+        check_complexity::init(nr_of_states, nr_of_transitions);
+    #endif
 }
 
 
@@ -1665,7 +1704,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
     B_to_C_iter_t B_to_C_begin = part_tr.B_to_C.begin();
     for (state_type B = 0; B < states_per_block.size(); ++B)
     {
-        check_complexity::count("initialise blocks", 1, check_complexity::n);
+        add_work_global(check_complexity::initialise_blocks_init_helper,
+                                                          check_complexity::n);
         permutation_iter_t const end = begin + states_per_block[B];
         blocks[B] = new block_t(constln, begin, end);
         if (0 == noninert_out_per_block[B] && 0 == inert_out_per_block[B])
@@ -1687,7 +1727,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             assert(B_to_C_begin < slice->end);
             for (; slice->end != B_to_C_begin; ++B_to_C_begin)
             {
-                check_complexity::count("initialise B_to_C", 1,
+                add_work_global(
+                               check_complexity::initialise_B_to_C_init_helper,
                                                           check_complexity::m);
                 B_to_C_begin->B_to_C_slice = slice;
             }
@@ -1706,7 +1747,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
     part_st.state_info.begin()->set_succ_begin(part_tr.succ.begin());
     for (state_type s = 0; get_nr_of_states() != s; ++s)
     {
-        check_complexity::count("initialise states", 1, check_complexity::n);
+        add_work_global(check_complexity::initialise_states_init_helper,
+                                                          check_complexity::n);
         part_st.state_info[s].set_pred_end(part_st.state_info[s].pred_begin() +
                              noninert_in_per_state[s] + inert_in_per_state[s]);
         part_st.state_info[s].set_inert_pred_begin(part_st.state_info[s].
@@ -1726,8 +1768,9 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             for (succ_iter_t succ_iter = s_slice->begin();
                                       s_slice->end() != succ_iter; ++succ_iter)
             {
-                check_complexity::count("initialise succ-constellation slices",
-                                                       1, check_complexity::m);
+                add_work_global(
+                             check_complexity::init_constln_slices_init_helper,
+                                                          check_complexity::m);
                 succ_iter->constln_slice = s_slice;
             }
             part_st.state_info[s].set_current_constln(s_slice->end());
@@ -1766,16 +1809,25 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                 part_st.state_info[s].pos = blocks[0]->begin() +
                                                            states_per_block[0];
                 assert(part_st.state_info[s].pos >= blocks[0]->bottom_begin());
+                #ifndef NDEBUG
+                    part_st.state_info[s].work_counter.is_bottom();
+                #endif
             }
             *part_st.state_info[s].pos = &part_st.state_info[s];
             // part_st.state_info[s].notblue = 0;
+        }
+        else
+        {
+            #ifndef NDEBUG
+                part_st.state_info[s].work_counter.is_bottom();
+            #endif
         }
     }
 
     // initialise transitions (and finalise extra Kripke states)
     for (const transition& t: aut.get_transitions())
     {
-        check_complexity::count("initialise transitions", 1,
+        add_work_global(check_complexity::initialise_transitions_init_helper,
                                                           check_complexity::m);
         if (!branching || !aut.is_tau(aut.apply_hidden_label_map(t.label())) ||
                                    (preserve_divergence && t.from() == t.to()))
@@ -1785,7 +1837,7 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             state_type const extra_state = extra_kripke_states[k];
             if (0 != noninert_out_per_state[extra_state])
             {
-                state_type const extra_block = 
+                state_type const extra_block =
                        action_block_map[aut.apply_hidden_label_map(t.label())];
                 // now initialise extra_state correctly
                 part_st.state_info[extra_state].block = blocks[extra_block];
@@ -1813,9 +1865,12 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
                 B_to_C_iter_t const t_B_to_C =
                                          blocks[extra_block]->inert_begin() -
                                          noninert_out_per_block[extra_block]--;
-                t_pred->source = &part_st.state_info.begin()[extra_state];
+                t_pred->source = &part_st.state_info[extra_state];
                 t_pred->succ = t_succ;
-                t_succ->target = &part_st.state_info.begin()[t.to()];
+                #ifndef NDEBUG
+                    t_pred->work_counter.is_bottom();
+                #endif
+                t_succ->target = &part_st.state_info[t.to()];
                 t_succ->B_to_C = t_B_to_C;
                 // t_B_to_C->B_to_C_slice = (already initialised);
                 t_B_to_C->pred = t_pred;
@@ -1834,9 +1889,18 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             B_to_C_iter_t const t_B_to_C = blocks[0]->inert_begin() -
                                                    noninert_out_per_block[0]--;
 
-            t_pred->source = &part_st.state_info.begin()[t.from()];
+            t_pred->source = &part_st.state_info[t.from()];
             t_pred->succ = t_succ;
-            t_succ->target = &part_st.state_info.begin()[extra_state];
+            #ifndef NDEBUG
+                if (0 == inert_out_per_state[t.from()] &&
+                                          t_pred->source->inert_succ_begin() ==
+                                          t_pred->source->inert_succ_end())
+                {
+                    // the source is already a bottom state.
+                    t_pred->work_counter.is_bottom();
+                }
+            #endif
+            t_succ->target = &part_st.state_info[extra_state];
             t_succ->B_to_C = t_B_to_C;
             // t_B_to_C->B_to_C_slice = (already initialised);
             t_B_to_C->pred = t_pred;
@@ -1859,9 +1923,9 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             B_to_C_iter_t const t_B_to_C = blocks[0]->inert_begin() +
                                                         inert_out_per_block[0];
 
-            t_pred->source = &part_st.state_info.begin()[t.from()];
+            t_pred->source = &part_st.state_info[t.from()];
             t_pred->succ = t_succ;
-            t_succ->target = &part_st.state_info.begin()[t.to()];
+            t_succ->target = &part_st.state_info[t.to()];
             t_succ->B_to_C = t_B_to_C;
             // t_B_to_C->B_to_C_slice = (already initialised);
             t_B_to_C->pred = t_pred;
@@ -1901,7 +1965,7 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
 /// \param branching Causes non-internal transitions to be removed.
 template <class LTS_TYPE>
 void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
-         replace_transition_system(const part_state_t& part_st, 
+         replace_transition_system(const part_state_t& part_st,
                                    const bool branching,
                                    const bool preserve_divergence)
 {
@@ -1910,8 +1974,8 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
     for (typename std::unordered_map<Key, state_type, KeyHasher>::iterator it =
             extra_kripke_states.begin(); it != extra_kripke_states.end(); ++it)
     {
-        bisim_gjkw::check_complexity::count("obtain a map from extra Kripke "
-                                 "states", 1, bisim_gjkw::check_complexity::n);
+        add_work(&part_st.state_info[it->second],
+                  check_complexity::for_all_extra_Kripke_states_repl_trans, 1);
         to_lts_map.insert(std::make_pair(it->second, it->first));
     }
     extra_kripke_states.clear();
@@ -1923,14 +1987,14 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
     for (permutation_const_iter_t s_iter = part_st.permutation.begin();
                                  part_st.permutation.end() != s_iter; ++s_iter)
     {
-        check_complexity::count("traverse states for quotient construction", 1,
-                                                          check_complexity::n);
+        block_t *B = (*s_iter)->block;
+        add_work(B, check_complexity::for_all_blocks_repl_trans, 1);
         // forward to last state of block, i. e. to a bottom state:
-        s_iter = (*s_iter)->block->end() - 1;
-        assert((*s_iter)->block->bottom_end() > s_iter);
-        assert((*s_iter)->block->bottom_begin() <= s_iter);
-        assert((*s_iter)->block->end() == (*s_iter)->constln()->end());
-        state_type const s_eq = (*s_iter)->block->seqnr();
+        s_iter = B->end() - 1;
+        assert(B->bottom_end() > s_iter);
+        assert(B->bottom_begin() <= s_iter);
+        assert(B->end() == B->constln()->end());
+        state_type const s_eq = B->seqnr();
         if (BLOCK_NO_SEQNR == s_eq)
         {
             //mCRL2log(log::debug, "bisim_gjkw") << "Skipping "
@@ -1945,9 +2009,8 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
         for (succ_const_iter_t succ_iter = (*s_iter)->succ_begin();
                                           (*s_iter)->succ_end() != succ_iter; )
         {
-            bisim_gjkw::check_complexity::count(
-                           "traverse transitions for quotient construction", 1,
-                                              bisim_gjkw::check_complexity::m);
+            add_work(succ_iter->B_to_C->pred,
+                check_complexity::for_all_transitions_in_succ_s_repl_trans, 1);
             //mCRL2log(log::debug, "bisim_gjkw") << "\t"
             //                 << (const void*) &*succ_iter << "transition to "
             //                                << succ_iter->target->debug_id();
@@ -2001,7 +2064,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
                 // The target state could also be found through the pointer
                 // structure (but we also need the labels, which are not stored
                 // in the refinable partition):
-                assert(&part_st.state_info.begin()[k.second] ==
+                assert(&part_st.state_info[k.second] ==
                                       succ_iter->target->succ_begin()->target);
                 assert(1 == succ_iter->target->succ_end() -
                                               succ_iter->target->succ_begin());
@@ -2012,10 +2075,10 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
             succ_iter = succ_iter->constln_slice->end();
         }
     }
-    
+
     // Merge the states, by setting the state labels of each state to the concatenation of the state labels of its
-    // equivalence class. 
-    
+    // equivalence class.
+
     if (aut.has_state_info())   /* If there are no state labels this step can be ignored */
     {
       /* Create a vector for the new labels */
@@ -2077,8 +2140,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
     // 2.4: while C contains a nontrivial constellation SpC do
     while (nullptr != bisim_gjkw::constln_t::get_some_nontrivial())
     {
-        bisim_gjkw::check_complexity::count("for each nontrivial "
-                          "constellation", 1, bisim_gjkw::check_complexity::n);
+        // check_complexity::add_work is called below, after SpB has been found
         bisim_gjkw::constln_t* const SpC =
                                   bisim_gjkw::constln_t::get_some_nontrivial();
         // 2.5: Choose a small splitter block SpB subset of SpC from P,
@@ -2089,6 +2151,9 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.7: C := partition C where SpB is removed from SpC and NewC is
         //      added
         bisim_gjkw::block_t* const SpB = SpC->split_off_small_block();
+        add_work(SpB->constln(), bisim_gjkw::check_complexity::
+                               while_C_contains_a_nontrivial_constellation_2_4,
+                                          bisim_gjkw::check_complexity::log_n);
         //mCRL2log(log::debug, "bisim_gjkw") << "Splitting off "
         //                                         << SpB->debug_id() << ".\n";
 
@@ -2108,16 +2173,16 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         for (bisim_gjkw::permutation_iter_t s_iter = SpB->begin();
                                                 SpB->end() != s_iter; ++s_iter)
         {
-            bisim_gjkw::check_complexity::count("for all states in SpB", 1,
-                                        bisim_gjkw::check_complexity::n_log_n);
             bisim_gjkw::state_info_ptr const s = *s_iter;
+            add_work(s, bisim_gjkw::check_complexity::for_all_s_in_SpB_2_10,
+                                          bisim_gjkw::check_complexity::log_n);
             // 2.11: for all s_prime in noninert_in(s) do
             for (bisim_gjkw::pred_iter_t pred_iter = s->noninert_pred_begin();
                             s->noninert_pred_end() != pred_iter; ++pred_iter)
             {
-                bisim_gjkw::check_complexity::count(
-                                "for all incoming non-inert transitions", 1,
-                                        bisim_gjkw::check_complexity::m_log_n);
+                add_work(pred_iter, bisim_gjkw::check_complexity::
+                                          for_all_s_prime_in_pred_s_2_11,
+                                          bisim_gjkw::check_complexity::log_n);
                 assert(part_tr.pred_end() > pred_iter &&
                                 pred_iter->succ->B_to_C->pred == pred_iter);
                 bisim_gjkw::state_info_ptr const s_prime = pred_iter->source;
@@ -2209,19 +2274,57 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.20: for all refinable blocks RfnB do
         while (nullptr != bisim_gjkw::block_t::get_some_refinable())
         {
-            // There are at most m log n blocks that contain predecessors of
-            // splitters, but the splitters themselves are also marked (in
-            // Line 2.8), so there may be an additional n splitters that are
-            // refined.
-            bisim_gjkw::check_complexity::count("for all refinable blocks", 1,
-                                        bisim_gjkw::check_complexity::m_log_n +
-                                              bisim_gjkw::check_complexity::n);
             bisim_gjkw::block_t* const RfnB =
                                     bisim_gjkw::block_t::get_some_refinable();
             //mCRL2log(log::debug, "bisim_gjkw") << "Refining "
             //                                    << RfnB->debug_id() << ".\n";
             // 2.21: Mark block RfnB as non-refinable
             RfnB->make_nonrefinable();
+
+            #ifndef NDEBUG
+                if (RfnB == SpB)
+                {
+                    // The work in this loop iteration is ascribed to the
+                    // splitter itself.
+                    add_work(RfnB, bisim_gjkw::check_complexity::
+                                for_all_refinable_blocks_RfnB_is_splitter_2_20,
+                                          bisim_gjkw::check_complexity::log_n);
+                    assert(nullptr==bisim_gjkw::block_t::get_some_refinable());
+                }
+                else
+                {
+                    // The work in this loop has to be assigned to the B_to_C-
+                    // slice that contains the transitions from RfnB to NewC.
+                    // Note that this is not FromRed, so we have to find it in
+                    // a different way.  First find a marked state:
+                    bisim_gjkw::permutation_iter_t s_mark_iter =
+                                                   RfnB->marked_bottom_begin();
+                    if (s_mark_iter == RfnB->marked_bottom_end())
+                    {
+                        s_mark_iter = RfnB->marked_nonbottom_begin();
+                        assert(s_mark_iter < RfnB->marked_nonbottom_end());
+                    }
+                    // Now, using the current_constln pointer of s, find a
+                    // transition to NewC (== SpB->constln()).
+                    bisim_gjkw::succ_iter_t to_NewC =
+                                             (*s_mark_iter)->current_constln();
+                    if (*SpC < *SpB->constln())
+                    {
+                        assert(to_NewC < (*s_mark_iter)->succ_end());
+                    }
+                    else
+                    {
+                        --to_NewC;
+                        assert((*s_mark_iter)->succ_begin() <= to_NewC);
+                    }
+                    assert(to_NewC->target->block == SpB);
+                    add_work(to_NewC->B_to_C->B_to_C_slice, bisim_gjkw::
+                          check_complexity::for_all_refinable_blocks_RfnB_2_20,
+                                          bisim_gjkw::check_complexity::log_n);
+                    assert(nullptr!=bisim_gjkw::block_t::get_some_refinable());
+                }
+            #endif
+
             if (1 == RfnB->size())
             {
                 // if the block only contains a single state, the refinement
@@ -2232,8 +2335,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             }
             // 2.22: <RedB, BlueB> := Refine(RfnB, NewC, {marked states in
             //                                                       RfnB}, {})
-            bisim_gjkw::block_t* RedB = refine(RfnB, SpB->constln(), nullptr,
-                                                                        false);
+            bisim_gjkw::block_t*RedB=refine(RfnB,SpB->constln(),nullptr,false);
             // 2.23: if RedB contains new bottom states then
             if (0 != RedB->unmarked_bottom_size())
             {
@@ -2302,11 +2404,79 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
 
 
 
+namespace bisim_gjkw
+{
+
 /// \brief structure containing information shared between the coroutines
-struct bisim_gjkw::refine_shared_t {
-    bisim_gjkw::permutation_iter_t notblue_initialised_end;
+struct refine_shared_t {
+    permutation_iter_t notblue_initialised_end;
     bool FromRed_is_empty;
 };
+
+static void blue_is_smaller(permutation_iter_t block_begin,
+                            permutation_iter_t block_end)
+{
+    #ifndef NDEBUG
+        for (; block_begin != block_end; ++block_begin)
+        {
+            state_info_ptr s = *block_begin;
+            mCRL2log(log::debug, "bisim_gjkw") << s->debug_id();
+            s->work_counter.blue_is_smaller(check_complexity::log_n);
+            mCRL2log(log::debug, "bisim_gjkw") << '\n';
+            for (succ_iter_t succ = s->succ_begin() ; succ != s->succ_end() ;
+                                                                        ++succ)
+            {
+                mCRL2log(log::debug, "bisim_gjkw")
+                                             << succ->B_to_C->pred->debug_id();
+                succ->B_to_C->pred->work_counter.blue_is_smaller(
+                                                      check_complexity::log_n);
+                mCRL2log(log::debug, "bisim_gjkw") << '\n';
+            }
+            for (pred_iter_t pred = s->noninert_pred_begin() ;
+                                       pred != s->noninert_pred_end() ; ++pred)
+            {
+                mCRL2log(log::debug, "bisim_gjkw") << pred->debug_id();
+                pred->work_counter.blue_is_smaller(check_complexity::log_n);
+                mCRL2log(log::debug, "bisim_gjkw") << '\n';
+            }
+        }
+        check_complexity::check_temporary_work();
+    #endif
+}
+
+static void red_is_smaller(permutation_iter_t block_begin,
+                           permutation_iter_t block_end)
+{
+    #ifndef NDEBUG
+        for (; block_begin != block_end; ++block_begin)
+        {
+            state_info_ptr s = *block_begin;
+            mCRL2log(log::debug, "bisim_gjkw") << s->debug_id();
+            s->work_counter.red_is_smaller(check_complexity::log_n);
+            mCRL2log(log::debug, "bisim_gjkw") << '\n';
+            for (succ_iter_t succ = s->succ_begin() ; succ != s->succ_end() ;
+                                                                        ++succ)
+            {
+                mCRL2log(log::debug, "bisim_gjkw")
+                                             << succ->B_to_C->pred->debug_id();
+                succ->B_to_C->pred->work_counter.red_is_smaller(
+                                                      check_complexity::log_n);
+                mCRL2log(log::debug, "bisim_gjkw") << '\n';
+            }
+            for (pred_iter_t pred = s->noninert_pred_begin() ;
+                                       pred != s->noninert_pred_end() ; ++pred)
+            {
+                mCRL2log(log::debug, "bisim_gjkw") << pred->debug_id();
+                pred->work_counter.red_is_smaller(check_complexity::log_n);
+                mCRL2log(log::debug, "bisim_gjkw") << '\n';
+            }
+        }
+        check_complexity::check_temporary_work();
+    #endif
+}
+
+} // end namespace bisim_gjkw
+
 
 /// \brief refine a block into the part that can reach `SpC` and the part that
 /// cannot
@@ -2397,6 +2567,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
         {
             assert(0 != RfnB->marked_size());
         }
+        assert(1 < RfnB->size());
     #endif
 
     // 3.2: if RfnB subseteq SpC then return RfnB
@@ -2411,15 +2582,16 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
     // 3.4: Spend the same amount of work on either coroutine:
     // and
     // 3.39: RedB := RfnB  or  RedB := NewB , respectively
-    #ifndef NDEBUG
-        bisim_gjkw::permutation_iter_t const red_end = RfnB->end();
-    #endif
+    bisim_gjkw::permutation_iter_t const blue_begin = RfnB->begin(),
+                                         red_end = RfnB->end();
     bisim_gjkw::block_t* RedB;
     RUN_COROUTINES(refine_blue, (RfnB)(SpC)(postprocessing),
-                                              RedB = RfnB,
+                                   (RedB = RfnB,
+                                    blue_is_smaller(blue_begin, red_end) ),
                    refine_red, (RfnB)(FromRed)(postprocessing),
-                                             (assert(RfnB->end() < red_end),
-                                              RedB = (*RfnB->end())->block   ),
+                                   (assert(RfnB->end() < red_end),
+                                    RedB = (*RfnB->end())->block,
+                                    red_is_smaller(blue_begin, red_end) ),
                /* shared data: */ struct bisim_gjkw::refine_shared_t,
                                 (RfnB->nonbottom_begin())(nullptr == FromRed));
     assert(RedB->end() == red_end);
@@ -2432,17 +2604,6 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
         // RedB.
     return RedB;
 }
-
-/// \details The blue and the red coroutine use the same complexity counters
-/// because their operations belong together.
-static const char* const for_all_states_in_the_new_block =
-                                             "for all states in the new block";
-static const char* const for_all_incoming_transitions_of_the_new_block =
-                               "for all incoming transitions of the new block";
-//static const char* const primary_search =
-//                                 "primary search for states and transitions";
-static const char* const secondary_search =
-                                 "secondary search for states and transitions";
 
 /*--------------------------- handle blue states ----------------------------*/
 
@@ -2483,7 +2644,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
         // [RfnB->unmarked_bottom_begin(), visited_end) ) and Test states
         // (namely those in [visited_end, RfnB->unmarked_bottom_end()) ).
     COROUTINE_WHILE (REFINE_BLUE_COLLECT_BOTTOM,
-                                 RfnB->unmarked_bottom_end() > visited_end)
+                                     RfnB->unmarked_bottom_end() > visited_end)
     {
         if (shared_data.FromRed_is_empty)
         {
@@ -2501,46 +2662,11 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             }
             break;
         }
-        // A detailed calculation of the number of steps needed here:
-        //
-        // If the blue subblock is smaller, we spend the following time:
-        // * to find the blue bottom states:
-        //   + if called from the main loop: the number of marked bottom states
-        //     m_noninert log n (predecessors) + n_bottom log n (splitters)
-        //   + if called from postprocess_new_bottom: the number of blue bottom
-        //     states: n_bottom log n, plus all outgoing non-inert edges of new
-        //     bottom states: m_noninert
-        //   The maximum of these two is m_noninert log n + n_bottom log n.
-        //   (The second case only happens if n >= 2, and then log n >= 1.)
-        // * to find predecessors of blue states: all states and all incoming
-        //   (inert) edges of this subblock:
-        //   n log n + m_inert log n
-        // * for the (slow) test whether some state is really blue:
-        //   + all outgoing edges of this subblock: m log n
-        //   + all outgoing edges of new bottom states: m
-        // * the red coroutine may spend the same amount of time, plus one
-        //   extra step per refinement: m_noninert log n + n
-        // The total is, therefore, 5m log n + 4n log n + 2m + n.
-        // If the red subblock is smaller, we spend the following time:
-        // * to find the FromRed states:
-        //   + all outgoing edges of this subblock: m_noninert log n
-        // * all states and all incoming (inert) edges of this subblock:
-        //   n log n + m_inert log n
-        // * the blue coroutine may spend the same amount of time, plus one
-        //   extra step per refinement: m_noninert log n + n
-        // The total is, therefore, 3m log n + 2n log n + n.
-        // Obviously, the first of the two totals is larger.
-        bisim_gjkw::check_complexity::count(secondary_search, 1,
-                                bisim_gjkw::check_complexity::m_log_n * 5 +
-                                bisim_gjkw::check_complexity::n_log_n * 4 +
-                                      bisim_gjkw::check_complexity::m * 2 +
-                                          bisim_gjkw::check_complexity::n);
         // 3.7l: Choose s in Test
         s = *visited_end;
         // 3.8l: if s --> SpC then
         if (s->surely_has_transition_to(SpC))
         {
-            assert(!s->surely_has_no_transition_to(SpC));
             // 3.9l: Move s from Test to Red
             // The state s is not blue.  Move it to the slice of non-blue
             // bottom states.
@@ -2554,11 +2680,62 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             {
                 ABORT_OTHER_COROUTINE();
             }
-
+            #ifndef NDEBUG
+                // The state is red.  Depending on the context of refinement,
+                // the work done on this state is attributed to one or another
+                // element of the Kripke structure.
+                if (postprocessing)
+                {
+                    // refine() has been called from line 4.14.  During
+                    // postprocessing, the work is ascribed to the transitions
+                    // from s to SpC.
+                    // Using the current_constln pointer of s, find a
+                    // transition to SpC.  The work has to be ascribed to the
+                    // transitions from s to SpC.
+                    bisim_gjkw::succ_iter_t to_SpC = s->current_constln();
+                    if(to_SpC==s->succ_end() || to_SpC->target->constln()!=SpC)
+                    {
+                        assert(s->succ_begin() < to_SpC);
+                        --to_SpC;
+                        assert(to_SpC->target->constln() == SpC);
+                    }
+                    to_SpC->constln_slice->add_work_to_transns(
+                     bisim_gjkw::check_complexity::
+                     while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing,
+                                                                            1);
+                }
+                else if (nullptr == bisim_gjkw::block_t::get_some_refinable())
+                {
+                    // refine() has been called from line 2.26, and RfnB is
+                    // SpB.  The state has been marked because it is in SpB.
+                    add_work(s, bisim_gjkw::check_complexity::
+                         while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l,
+                                                                            1);
+                }
+                else
+                {
+                    // refine() has been called from line 2.26, and RfnB is a
+                    // block with a transition to SpB.  The state has been
+                    // marked because of these transitions (which are not
+                    // transitions to SpC!).
+                    // code similar to the case if (postprocessing).
+                    bisim_gjkw::succ_iter_t to_NewC = s->current_constln();
+                    if(to_NewC==s->succ_end()||to_NewC->target->constln()==SpC)
+                    {
+                        assert(s->succ_begin() < to_NewC);
+                        --to_NewC;
+                        assert(to_NewC->target->constln() != SpC);
+                    }
+                    to_NewC->constln_slice->add_work_to_transns(
+                                bisim_gjkw::check_complexity::
+                                while_Test_is_not_empty_3_6l_s_is_red_3_9l, 1);
+                }
+            #endif
         // 3.10l: else
         }
         else
         {
+            assert(s->surely_has_no_transition_to(SpC));
             // 3.11l: Move s from Test to Blue
             ++visited_end;
             // 3.5l: whenever |Blue| > |RfnB|/2 do  Abort this coroutine
@@ -2567,6 +2744,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             {
                 ABORT_THIS_COROUTINE();
             }
+            add_work(s, bisim_gjkw::check_complexity::
+                              while_Test_is_not_empty_3_6l_s_is_blue_3_11l, 1);
         // 3.12l: end if
         }
     // 3.13l: end while
@@ -2590,11 +2769,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
     COROUTINE_DO_WHILE (REFINE_BLUE_STATE_HANDLED,
                                              visited_end != blue_nonbottom_end)
     {
-        bisim_gjkw::check_complexity::count(secondary_search, 1,
-                                    bisim_gjkw::check_complexity::m_log_n * 5 +
-                                    bisim_gjkw::check_complexity::n_log_n * 4 +
-                                          bisim_gjkw::check_complexity::m * 2 +
-                                              bisim_gjkw::check_complexity::n);
         // 3.16l: Choose an unvisited s in Blue
         s = *visited_end;
         assert(visited_end < blue_nonbottom_end ||
@@ -2611,16 +2785,13 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                             pred_iter = s->inert_pred_begin(),
                                  s->inert_pred_end() != pred_iter, ++pred_iter)
         {
-            bisim_gjkw::check_complexity::count(secondary_search, 1,
-                                    bisim_gjkw::check_complexity::m_log_n * 5 +
-                                    bisim_gjkw::check_complexity::n_log_n * 4 +
-                                          bisim_gjkw::check_complexity::m * 2 +
-                                              bisim_gjkw::check_complexity::n);
             s_prime = pred_iter->source;
             if (s_prime->pos >= RfnB->marked_nonbottom_begin())
             {
                 //mCRL2log(log::debug, "bisim_gjkw") << s_prime->debug_id()
                 //                                     << " is already red.\n";
+                add_work(pred_iter, bisim_gjkw::check_complexity::
+                              for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1);
                 continue;
             }
             // 3.19l: if notblue(s_prime) undefined then
@@ -2640,12 +2811,22 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             // 3.22l: notblue(s_prime) := notblue(s_prime) - 1
             --s_prime->notblue;
             // 3.23l: if notblue(s_prime) == 0 && ...
-            if (0 != s_prime->notblue)  continue;
+            if (0 != s_prime->notblue)
+            {
+                add_work(pred_iter, bisim_gjkw::check_complexity::
+                              for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1);
+                continue;
+            }
             // 3.23l: ... && (FromRed == {} ||
             //                out_noninert(s_prime) intersect SpC == {}) then
             if (!shared_data.FromRed_is_empty)
             {
-                if (s_prime->surely_has_transition_to(SpC))  continue;
+                if (s_prime->surely_has_transition_to(SpC))
+                {
+                    add_work(pred_iter, bisim_gjkw::check_complexity::
+                              for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1);
+                    continue;
+                }
                 if (!s_prime->surely_has_no_transition_to(SpC))
                 {
                     // It is not yet known whether s_prime has a transition to
@@ -2654,11 +2835,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                         (begin=s_prime->succ_begin(), end=s_prime->succ_end()),
                                                          begin < end, (void) 0)
                     {
-                        bisim_gjkw::check_complexity::count(secondary_search,1,
-                                    bisim_gjkw::check_complexity::m_log_n * 5 +
-                                    bisim_gjkw::check_complexity::n_log_n * 4 +
-                                          bisim_gjkw::check_complexity::m * 2 +
-                                              bisim_gjkw::check_complexity::n);
                         // binary search for transitions from
                         // s_prime to constellation SpC.
                         bisim_gjkw::succ_const_iter_t const mid =
@@ -2671,9 +2847,32 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                         {
                             begin = mid->constln_slice->end();
                         }
+                        #ifndef NDEBUG
+                            mid->constln_slice->add_work_to_transns(
+                                  bisim_gjkw::check_complexity::
+                                  if___s_prime_has_transition_to_SpC_3_23l, 1);
+                        #endif
                     }
                     END_COROUTINE_FOR;
-                    if (begin != end)  continue;
+                    if (begin != end)
+                    {
+                        add_work(pred_iter, bisim_gjkw::check_complexity::
+                              for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1);
+                        continue;
+                    }
+                    #ifndef NDEBUG
+                        // The work has been assigned to the wrong counter
+                        // above.  Move the work to the correct counter.
+                        for(bisim_gjkw::succ_iter_t iter=s_prime->succ_begin();
+                                           iter != s_prime->succ_end(); ++iter)
+                        {
+                            iter->B_to_C->pred->work_counter.move_work(
+                                bisim_gjkw::check_complexity::
+                                      if___s_prime_has_transition_to_SpC_3_23l,
+                                bisim_gjkw::check_complexity::
+                                if___s_prime_has_no_transition_to_SpC_3_23l,1);
+                        }
+                    #endif
                 }
             }
             //mCRL2log(log::debug, "bisim_gjkw") << "Non-bottom "
@@ -2690,9 +2889,13 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
             // 3.25l: end if
                 // this is implicit in the `continue` statements above.
         // 3.26l: end for
+            add_work(pred_iter, bisim_gjkw::check_complexity::
+                              for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1);
         }
         END_COROUTINE_FOR;
     // 3.27l: end while
+        add_work(s, bisim_gjkw::check_complexity::
+                                while_Blue_contains_unvisited_states_3_15l, 1);
         if (RfnB->unmarked_bottom_end() == visited_end)
         {
             visited_end = RfnB->unmarked_nonbottom_begin();
@@ -2716,16 +2919,16 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
     for (bisim_gjkw::permutation_iter_t s_iter = NewB->begin();
                                                NewB->end() != s_iter; ++s_iter)
     {
-        bisim_gjkw::check_complexity::count(for_all_states_in_the_new_block, 1,
-                                        bisim_gjkw::check_complexity::n_log_n);
         bisim_gjkw::state_info_ptr const s = *s_iter;
+        add_work(s, bisim_gjkw::check_complexity::for_all_s_in_NewB_3_31,
+                                          bisim_gjkw::check_complexity::log_n);
         // 3.32l: for all s_prime in inert_in(s) \ NewB do
         for (bisim_gjkw::pred_iter_t pred_iter = s->inert_pred_begin();
                                  s->inert_pred_end() != pred_iter; ++pred_iter)
         {
-            bisim_gjkw::check_complexity::count(
-                            for_all_incoming_transitions_of_the_new_block, 1,
-                                        bisim_gjkw::check_complexity::m_log_n);
+            add_work(pred_iter, bisim_gjkw::check_complexity::
+                                          for_all_s_prime_in_pred_s_3_32l,
+                                          bisim_gjkw::check_complexity::log_n);
             assert(part_tr.pred_end() > pred_iter &&
                                 pred_iter->succ->B_to_C->pred == pred_iter);
             bisim_gjkw::state_info_ptr const s_prime = pred_iter->source;
@@ -2791,11 +2994,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
         COROUTINE_WHILE (REFINE_RED_COLLECT_FROMRED,
                                        FromRed->begin != fromred_visited_begin)
         {
-            bisim_gjkw::check_complexity::count(secondary_search, 1,
-                                    bisim_gjkw::check_complexity::m_log_n * 5 +
-                                    bisim_gjkw::check_complexity::n_log_n * 4 +
-                                          bisim_gjkw::check_complexity::m * 2 +
-                                              bisim_gjkw::check_complexity::n);
             // 3.10r (order of lines changed): FromRed := FromRed \ {s --> t}
                 // We can change the order of lines because the coroutine is
                 // not interrupted in between.
@@ -2825,6 +3023,8 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                 ABORT_THIS_COROUTINE();
             }
         // 3.13r: end while
+            add_work(fromred_visited_begin->pred,bisim_gjkw::check_complexity::
+                                           while_FromRed_is_not_empty_3_6r, 1);
         }
         END_COROUTINE_WHILE;
 
@@ -2849,11 +3049,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
     COROUTINE_DO_WHILE(REFINE_RED_STATE_HANDLED,
                                RfnB->marked_nonbottom_begin() != visited_begin)
     {
-        bisim_gjkw::check_complexity::count(secondary_search, 1,
-                                    bisim_gjkw::check_complexity::m_log_n * 5 +
-                                    bisim_gjkw::check_complexity::n_log_n * 4 +
-                                          bisim_gjkw::check_complexity::m * 2 +
-                                              bisim_gjkw::check_complexity::n);
         // 3.17r (order of lines changed): Mark s as visited
         --visited_begin;
         assert(RfnB->marked_bottom_begin() <= visited_begin ||
@@ -2866,11 +3061,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
             pred_iter = s->inert_pred_begin(),s->inert_pred_end() != pred_iter,
                                                                    ++pred_iter)
         {
-            bisim_gjkw::check_complexity::count(secondary_search, 1,
-                                    bisim_gjkw::check_complexity::m_log_n * 5 +
-                                    bisim_gjkw::check_complexity::n_log_n * 4 +
-                                          bisim_gjkw::check_complexity::m * 2 +
-                                              bisim_gjkw::check_complexity::n);
             bisim_gjkw::state_info_ptr const s_prime = pred_iter->source;
             // 3.24r: Red := Red union {s_prime}
             if (s_prime->pos < shared_data.notblue_initialised_end)
@@ -2890,9 +3080,13 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
                 ABORT_THIS_COROUTINE();
             }
         // 3.26r: end for
+            add_work(pred_iter, bisim_gjkw::check_complexity::
+                                           for_all_s_prime_in_pred_s_3_18r, 1);
         }
         END_COROUTINE_FOR;
     // 3.27r: end while
+        add_work(s, bisim_gjkw::check_complexity::
+                                 while_Red_contains_unvisited_states_3_15r, 1);
         if (RfnB->marked_bottom_begin() == visited_begin)
         {
             visited_begin = RfnB->marked_nonbottom_end();
@@ -2919,17 +3113,17 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_red,
     for (bisim_gjkw::permutation_iter_t s_iter = NewB->nonbottom_end();
                                            NewB->nonbottom_begin() != s_iter; )
     {
-        bisim_gjkw::check_complexity::count(for_all_states_in_the_new_block, 1,
-                                        bisim_gjkw::check_complexity::n_log_n);
         --s_iter;
         bisim_gjkw::state_info_ptr const s = *s_iter;
+        add_work(s, bisim_gjkw::check_complexity::for_all_s_in_NewB_3_31,
+                                          bisim_gjkw::check_complexity::log_n);
         // 3.32r: for all s_prime in inert_out(s) \ NewB do
         for (bisim_gjkw::succ_iter_t succ_iter = s->inert_succ_begin();
                                    s->inert_succ_end()!=succ_iter; ++succ_iter)
         {
-            bisim_gjkw::check_complexity::count(
-                            for_all_incoming_transitions_of_the_new_block, 1,
-                                        bisim_gjkw::check_complexity::m_log_n);
+            add_work(succ_iter->B_to_C->pred, bisim_gjkw::check_complexity::
+                                          for_all_s_prime_in_succ_s_3_32r,
+                                          bisim_gjkw::check_complexity::log_n);
             assert(part_tr.succ_end() > succ_iter &&
                                 succ_iter->B_to_C->pred->succ == succ_iter);
             bisim_gjkw::state_info_ptr const s_prime = succ_iter->target;
@@ -3038,11 +3232,21 @@ Line_4_4:
     assert(0 == RfnB->marked_bottom_size());
     while (!RfnB->to_constln.begin()->needs_postprocessing())
     {
-        bisim_gjkw::check_complexity::count("for all constellations "
-                   "reachable from BlueB", 1, bisim_gjkw::check_complexity::m);
-
         bisim_gjkw::B_to_C_desc_iter_t const new_slice =
                                                       RfnB->to_constln.begin();
+        // try to assign the work to the transitions from bottom states in RfnB
+        // to C.
+        #ifndef NDEBUG
+            if (!new_slice->add_work_to_bottom_transns(
+                       bisim_gjkw::check_complexity::
+                       for_all_transitions_from_bottom_states_a_priori_4_4, 1))
+            {
+                // It didn't work out -- now assign it temporarily to the
+                // B_to_C slice itself.
+                add_work(new_slice, bisim_gjkw::check_complexity::
+                           for_all_constellations_C_not_in_R_from_RfnB_4_4, 1);
+            }
+        #endif
         bisim_gjkw::constln_t* const C = new_slice->to_constln();
         // 4.5: Add C to R
         if (!R.insert(C).second) //< complexity log(n)
@@ -3066,9 +3270,9 @@ Line_4_4:
     bisim_gjkw::permutation_iter_t s_iter = RfnB->unmarked_bottom_begin();
     do
     {
-        bisim_gjkw::check_complexity::count("for all new bottom states in "
-                                   "RfnB", 1, bisim_gjkw::check_complexity::n);
         bisim_gjkw::state_info_ptr const s = *s_iter;
+        add_work(s, bisim_gjkw::check_complexity::
+                                       for_all_bottom_states_s_in_RfnB_4_8, 1);
         // 4.9: Set the current constellation pointer of s to the first
         //      constellation it can reach
         s->set_current_constln(s->succ_begin());
@@ -3081,26 +3285,31 @@ Line_4_4:
     // 4.11: for all constellations SpC in R (in order) do
     while (!R.empty())
     {
-        bisim_gjkw::check_complexity::count(
-                               "for all constellations SpC in R (in order)", 1,
-                                              bisim_gjkw::check_complexity::m);
         bisim_gjkw::constln_t* const SpC = *R.begin();
+        // the work has to be assigned to the transitions from (new) bottom
+        // states to constellation SpC.  We do that assignment in the inner
+        // loop.  Ensure that the inner loop is executed:
+        assert(SpC->postprocess_begin != SpC->postprocess_end);
         // 4.12: for all blocks B with transitions to SpC that need
         //               postprocessing do
-        while (SpC->postprocess_begin != SpC->postprocess_end)
+        do
         {
-            bisim_gjkw::check_complexity::count(
-                                 "for all blocks B with transitions to SpC", 1,
-                                              bisim_gjkw::check_complexity::m);
+            // add_work is called indirectly: after refining, work is assigned
+            // to every (new) bottom state in the refined block.
             bisim_gjkw::B_to_C_iter_t const B_iter = SpC->postprocess_begin;
             assert(part_tr.B_to_C_end() > B_iter &&
                                          B_iter->pred->succ->B_to_C == B_iter);
             bisim_gjkw::block_t* const B = B_iter->pred->source->block;
-            bisim_gjkw::B_to_C_desc_iter_t const FromRed=B_iter->B_to_C_slice;
+            bisim_gjkw::B_to_C_desc_iter_t FromRed = B_iter->B_to_C_slice;
             //mCRL2log(log::debug, "bisim_gjkw") << "Now postprocessing "
             //                    << B->debug_id() << " w. r. t. "
             //                    << FromRed->to_constln()->debug_id() << "\n";
             assert(FromRed->begin == B_iter);
+            #ifndef NDEBUG
+                bool postproc_a_posteriori = !FromRed->
+                    add_work_to_bottom_transns(bisim_gjkw::check_complexity::
+                      for_all_transitions_that_need_postproc_a_priori_4_12, 1);
+            #endif
             // 4.13: Delete the transitions from B to SpC from those that need
             //       postprocessing
             SpC->postprocess_begin = FromRed->end;
@@ -3116,29 +3325,82 @@ Line_4_4:
             assert(0 == B->marked_size());
             if (1 == B->size())
             {
-                assert(0 == B->marked_size());
+                #ifndef NDEBUG
+                    assert(!postproc_a_posteriori);
+                    if (0 != FromRed->work_counter.get_work_counter_4_4())
+                    {
+                        if (!FromRed->add_work_to_bottom_transns(
+                        bisim_gjkw::check_complexity::
+                        for_all_transitions_from_bottom_states_a_posteriori_4_4
+                                                                           ,1))
+                        {
+                            assert(0 &&
+                                     "no new bottom states to assign work to");
+                        }
+                        FromRed->work_counter.reset_work_counter_4_4();
+                    }
+                #endif
                 continue;
             }
+            // refine() may destroy FromRed:  if the red subblock is smaller,
+            // the transitions in FromRed are moved to a new B_to_C slice.
+            // Therefore we select some transition from it, to restore the
+            // slice afterwards.  Any transition should do.
+            #ifndef NDEBUG
+                bisim_gjkw::pred_iter_t FromRed_save = FromRed->begin->pred;
+            #endif
             // 4.14: <RedB, BlueB> := Refine(B, SpC, {}, {transitions to SpC})
             RedB = refine(B, SpC, &*FromRed, true);
+            #ifndef NDEBUG
+                FromRed = FromRed_save->succ->B_to_C->B_to_C_slice;
+                if (postproc_a_posteriori &&
+                     !FromRed->add_work_to_bottom_transns(
+                      bisim_gjkw::check_complexity::
+                      for_all_transitions_that_need_postproc_a_posteriori_4_12,
+                                                                            1))
+                {
+                    assert(0 && "no new bottom states to assign work to");
+                }
+                // try to move the work that was not yet moved to the
+                // transitions from (new) bottom states now.
+                if (0 != FromRed->work_counter.get_work_counter_4_4())
+                {
+                    if (!FromRed->add_work_to_bottom_transns(
+                       bisim_gjkw::check_complexity::
+                       for_all_transitions_from_bottom_states_a_posteriori_4_4,
+                                                                            1))
+                    {
+                        assert(0 && "no new bottom states to assign work to");
+                    }
+                    FromRed->work_counter.reset_work_counter_4_4();
+                }
+            #endif
             // 4.15: for all old bottom states s in RedB do
             for (bisim_gjkw::permutation_iter_t
                                  s_iter = RedB->marked_bottom_begin();
                                  RedB->marked_bottom_end() != s_iter; ++s_iter)
             {
-                bisim_gjkw::check_complexity::count(
-                                            "for all red new bottom states", 1,
-                                              bisim_gjkw::check_complexity::m);
                 bisim_gjkw::state_info_ptr const s = *s_iter;
                 // 4.16: Advance the current constellation pointer of s to the
                 //       next constellation it can reach
                 if (s->current_constln() < s->succ_end() &&
                                 s->current_constln()->target->constln() == SpC)
                 {
+                    #ifndef NDEBUG
+                        s->current_constln()->constln_slice->
+                             add_work_to_transns(bisim_gjkw::check_complexity::
+                                  for_all_old_bottom_states_s_in_RedB_4_15, 1);
+                    #endif
                     s->set_current_constln(s->current_constln()->
                                                          constln_slice->end());
                 }
-                else  assert(B == RedB && B->constln() == SpC);
+                else
+                {
+                    add_work(s, bisim_gjkw::check_complexity::
+                         for_all_old_bottom_states_s_in_RedB_selfloop_4_15, 1);
+                    assert(B == RedB /* we should test: BlueB is empty */ &&
+                                                          B->constln() == SpC);
+                }
                 assert(s->succ_end() == s->current_constln() ||
                               *SpC < *s->current_constln()->target->constln());
             // 4.17: end for
@@ -3200,6 +3462,7 @@ Line_4_4:
             RedB->set_marked_bottom_begin(RedB->bottom_end());
         // 4.23: end for
         }
+        while (SpC->postprocess_begin != SpC->postprocess_end);
         // 4.24: Delete SpC from R
         R.erase(R.begin());
     // 4.25: end for

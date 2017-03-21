@@ -107,9 +107,9 @@
 ///     END_COROUTINE_DO_WHILE;                         while (condition);
 ///
 /// These macros hide some code that counts how many iterations have been
-/// executed in a loop at the end of each iteration;  if one coroutine has done
-/// enough work, it is interrupted to let the other catch up.  It is assumed
-/// that a coroutine does at most `SIZE_MAX + 1` units of work.
+/// executed in a loop at the *end* of each iteration;  if one coroutine has
+/// done enough work, it is interrupted to let the other catch up.  It is
+/// assumed that a coroutine does at most `SIZE_MAX + 1` units of work.
 ///
 /// A coroutine may also terminate explicitly by executing the statement
 /// `TERMINATE_COROUTINE_SUCCESSFULLY();`.  If it should no longer execute but

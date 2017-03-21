@@ -202,10 +202,22 @@ class state_info_entry
     }
 
     /// iterator past the last incoming transition
-    pred_const_iter_t pred_end() const  {  return this[1].state_in_begin;  }
-    pred_iter_t pred_end()  {  return this[1].state_in_begin;  }
+    pred_const_iter_t pred_end() const
+    {
+        assert(s_i_begin <= this);
+        assert(this < s_i_end);
+        return this[1].state_in_begin;
+    }
+    pred_iter_t pred_end()
+    {
+        assert(s_i_begin <= this);
+        assert(this < s_i_end);
+        return this[1].state_in_begin;
+    }
     void set_pred_end(pred_iter_t new_in_end)
     {
+        assert(s_i_begin <= this);
+        assert(this < s_i_end);
         this[1].set_pred_begin(new_in_end);
     }
 
@@ -240,10 +252,22 @@ class state_info_entry
     }
 
     /// iterator past the last outgoing transition
-    succ_const_iter_t succ_end() const  {  return this[1].state_out_begin;  }
-    succ_iter_t succ_end()  {  return this[1].state_out_begin;  }
+    succ_const_iter_t succ_end() const
+    {
+        assert(s_i_begin <= this);
+        assert(this < s_i_end);
+        return this[1].state_out_begin;
+    }
+    succ_iter_t succ_end()
+    {
+        assert(s_i_begin <= this);
+        assert(this < s_i_end);
+        return this[1].state_out_begin;
+    }
     void set_succ_end(succ_iter_t new_out_end)
     {
+        assert(s_i_begin <= this);
+        assert(this < s_i_end);
         this[1].set_succ_begin(new_out_end);
         assert(succ_begin() <= succ_end());
     }
@@ -287,6 +311,7 @@ class state_info_entry
     std::string debug_id_short() const
     {
         assert(s_i_begin <= this);
+        assert(this < s_i_end);
         return std::to_string(this - s_i_begin);
     }
 
@@ -298,9 +323,18 @@ class state_info_entry
     }
 
   private:
+    /// \brief pointer at the first entry in the `state_info` array
     static state_info_const_ptr s_i_begin;
+    /// \brief pointer past the last actual entry in the `state_info` array
+    /// \details `state_info` actually contains an additional entry that is
+    /// only used partially, namely to store pointers to the end of the
+    /// transition slices of the last state.  In other words, `s_i_end` points
+    /// at this additional, partially used entry.
+    static state_info_const_ptr s_i_end;
 
     friend class part_state_t;
+  public:
+    mutable check_complexity::state_counter_t work_counter;
 #endif
 };
 
@@ -679,17 +713,15 @@ class block_t
         assert(int_inert_begin <= int_inert_end);
     }
 
-  private:
-    static const char mark_all_states_in_SpB[];
-  public:
     /// \brief mark all states in the block
     /// \details This function is used to mark all states of the splitter.
     void mark_all_states()
     {
         assert(marked_nonbottom_begin() == marked_nonbottom_end() &&
                                 marked_bottom_begin() == marked_bottom_end());
-        check_complexity::count(mark_all_states_in_SpB, size(),
-                                                check_complexity::n_log_n);
+        add_work(this,
+                  check_complexity::Mark_all_states_of_SpB_as_predecessors_2_9,
+                                                      check_complexity::log_n);
         set_marked_nonbottom_begin(nonbottom_begin());
         // set_marked_nonbottom_end(nonbottom_end());
         set_marked_bottom_begin(bottom_begin());
@@ -765,6 +797,8 @@ class block_t
     static permutation_const_iter_t perm_begin;
 
     friend class part_state_t;
+  public:
+    mutable check_complexity::block_counter_t work_counter;
 #endif
 };
 
@@ -926,6 +960,9 @@ class constln_t
         assert(postprocess_begin == postprocess_end);
         // 2.6: Create a new constellation NewC and ...
         constln_t* const NewC = new constln_t(begin(), end(), postprocess_end);
+        #ifndef NDEBUG
+            NewC->work_counter = work_counter;
+        #endif
 
         // 2.5: Choose a small splitter block SpB subset of SpC from P,
         //      i.e. |SpB| <= 1/2*|SpC|
@@ -959,6 +996,8 @@ class constln_t
             std::to_string(begin() - block_t::permutation_begin()) + "," +
             std::to_string(end() - block_t::permutation_begin()) + ")";
     }
+
+    mutable check_complexity::constln_counter_t work_counter;
 #endif
 };
 
@@ -1008,6 +1047,7 @@ class part_state_t
         #ifndef NDEBUG
             block_t::perm_begin = permutation.begin();
             state_info_entry::s_i_begin = state_info.data();
+            state_info_entry::s_i_end = state_info_entry::s_i_begin + n;
         #endif
     }
 
@@ -1019,10 +1059,7 @@ class part_state_t
         assert(state_info.empty());
         assert(permutation.empty());
     }
-  private:
-    static const char delete_constellations[];
-    static const char delete_blocks[];
-  public:
+
     /// \brief deallocates constellations and blocks
     /// \details This function can be called shortly before destructing the
     /// partition.  Afterwards, the data structure is in a unusable state,
@@ -1035,9 +1072,8 @@ class part_state_t
         permutation_iter_t permutation_iter = permutation.end();
         while (permutation.begin() != permutation_iter)
         {
-            bisim_gjkw::check_complexity::count(delete_constellations, 1,
-                                                bisim_gjkw::check_complexity::n);
             constln_t* const C = permutation_iter[-1]->constln();
+            add_work(C, check_complexity::delete_constellations, 1);
             // permutation_iter[-1]->block->set_constln(nullptr);
             assert(C->end() == permutation_iter);
             // assert that constellation is trivial:
@@ -1052,9 +1088,8 @@ class part_state_t
         permutation_iter = permutation.end();
         while (permutation.begin() != permutation_iter)
         {
-            bisim_gjkw::check_complexity::count(delete_blocks, 1,
-                                                bisim_gjkw::check_complexity::n);
             block_t* const B = permutation_iter[-1]->block;
+            add_work(B, check_complexity::delete_blocks, 1);
             assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
             #ifndef NDEBUG
@@ -1195,6 +1230,8 @@ class pred_entry
     {
         return "transition " + debug_id_short();
     }
+
+    mutable check_complexity::trans_counter_t work_counter;
 #endif
 };
 
@@ -1253,6 +1290,24 @@ class out_descriptor
         int_end = new_end;
         assert(int_begin <= int_end);
     }
+
+
+#ifndef NDEBUG
+    /// adds work (for time complexity measurement) to every transition in the
+    /// slice.
+    void add_work_to_transns(enum check_complexity::counter_type ctr,
+                                                       unsigned char max_value)
+    {
+        assert(begin() < end());
+        succ_iter_t iter = begin();
+        add_work(iter->B_to_C->pred, ctr, max_value);
+        while (++iter != end())
+        {
+            // treat temporary counters specially
+            add_work_notemporary(iter->B_to_C->pred, ctr, max_value);
+        }
+    }
+#endif
 };
 
 
@@ -1337,6 +1392,36 @@ class B_to_C_descriptor
         }
         return result;
     }
+
+
+    /// The function is meant to transfer work temporarily assigned to the
+    /// B_to_C slice to the transitions in the slice.  It is used during
+    /// handling of new bottom states, so the work is only assigned to
+    /// transitions that start in a (new) bottom state.
+    /// If at this moment no such (new) bottom state has been found, the work
+    /// is kept with the slice and the function returns false.  The work should
+    /// be transferred later (but if there is no later transfer, it should be
+    /// tested that the function returns true).
+    bool add_work_to_bottom_transns(enum check_complexity::counter_type ctr,
+                                                       unsigned char max_value)
+    {
+        bool added = false;
+
+        for (B_to_C_const_iter_t iter = begin; iter != end; ++iter)
+        {
+            if (iter->pred->source->pos >=
+                                     iter->pred->source->block->bottom_begin())
+            {
+                // source state of the transition is a bottom state
+                add_work(iter->pred, ctr, max_value);
+                added = true;
+            }
+        }
+        return added;
+    }
+
+
+    mutable check_complexity::B_to_C_counter_t work_counter;
 #endif
 };
 
@@ -1715,7 +1800,6 @@ class bisim_partitioner_gjkw
     {
       part_tr.clear();
       part_st.clear();
-      bisim_gjkw::check_complexity::stats();
     }
 
     // replace_transition_system() replaces the transitions of the LTS stored here by
