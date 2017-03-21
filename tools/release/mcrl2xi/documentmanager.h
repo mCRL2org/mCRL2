@@ -51,10 +51,11 @@ class DocumentManager : public mcrl2::gui::qt::ExtendedTabWidget
     void openFile(QString fileName);
 
     /**
-     * @brief Saves the current document to the given @e fileName
+     * @brief Saves the document with @e index to the given @e fileName
+     * @param index The index of the document to be saved
      * @param fileName The location where to save the document
      */
-    void saveFile(QString fileName);
+    void saveFile(int index, QString fileName);
 
     /**
      * @brief Returns the DocumentWidget for the given @e index

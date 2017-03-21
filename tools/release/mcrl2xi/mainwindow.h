@@ -48,9 +48,13 @@ class MainWindow : public QMainWindow
 
 
     /**
-     * @brief Saves the given document
+     * @brief Saves the current document
      */
-    bool saveDocument(DocumentWidget *document);
+    bool saveDocument();
+    /**
+     * @brief Saves the document with the given index
+     */
+    bool saveDocument(int index);
 
     /**
      * @brief Opens the given file in the documentmanager

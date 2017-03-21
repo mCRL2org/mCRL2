@@ -89,16 +89,21 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
 
 }
 
-
-bool MainWindow::saveDocument(DocumentWidget *document)
+bool MainWindow::saveDocument()
 {
+  return saveDocument(m_ui.documentManager->currentIndex());
+}
+
+bool MainWindow::saveDocument(int index)
+{
+  DocumentWidget* document = m_ui.documentManager->getDocument(index);
   QString fileName = document->getFileName();
   if (fileName.isNull()) {
     fileName = m_fileDialog.getSaveFileName(tr("Save file"),
                                             tr("mCRL2 specification (*.mcrl2 *.txt )"));
   }
   if (!fileName.isNull()) {
-    m_ui.documentManager->saveFile(fileName);
+    m_ui.documentManager->saveFile(index, fileName);
     m_ui.statusBar->showMessage(QString("Saved %1.").arg(fileName), 5000);
     return true;
   }
@@ -175,7 +180,7 @@ bool MainWindow::onCloseRequest(int index)
   switch(ret)
   {
     case QMessageBox::Yes:
-      if (saveDocument(document))
+      if (saveDocument(index))
       {
         m_findReplaceDialog->setTextEdit(0);
         m_ui.documentManager->closeDocument(index);
@@ -223,7 +228,7 @@ void MainWindow::onOpen()
 
 void MainWindow::onSave()
 {
-  saveDocument(m_ui.documentManager->currentDocument());
+  saveDocument();
   m_ui.documentManager->updateTitle();
 }
 
@@ -232,7 +237,7 @@ void MainWindow::onSaveAs()
   QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
                                                 tr("mCRL2 specification (*.mcrl2 *.txt )")));
   if (!fileName.isNull()) {
-    m_ui.documentManager->saveFile(fileName);
+    m_ui.documentManager->saveFile(m_ui.documentManager->currentIndex(), fileName);
     m_ui.statusBar->showMessage(QString("Saved %1.").arg(fileName), 5000);
   }
 }
@@ -369,7 +374,10 @@ void MainWindow::onRewrite()
   // Save the document first as the rewriter may run out of its stack. 
   if (m_ui.documentManager->currentDocument()->isModified())
   { 
-    saveDocument(m_ui.documentManager->currentDocument());
+    for(int i = 0; i < m_ui.documentManager->count(); i++)
+    {
+      saveDocument(i);
+    }
   }
   m_ui.buttonRewrite->setEnabled(false);
   m_ui.buttonRewriteAbort->setEnabled(true);

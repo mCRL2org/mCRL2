@@ -134,9 +134,9 @@ void DocumentManager::openFile(QString fileName)
   document->openFile(fileName);
 }
 
-void DocumentManager::saveFile(QString fileName)
+void DocumentManager::saveFile(int index, QString fileName)
 {
   QFileInfo fileInfo(fileName);
-  setTabText(currentIndex(), fileInfo.baseName());
-  currentDocument()->saveFile(fileName);
+  setTabText(index, fileInfo.baseName());
+  getDocument(index)->saveFile(fileName);
 }
