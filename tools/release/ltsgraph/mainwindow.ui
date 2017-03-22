@@ -79,7 +79,6 @@
      <string>&amp;View</string>
     </property>
     <addaction name="act3D"/>
-    <addaction name="actExplorationMode"/>
     <addaction name="separator"/>
     <addaction name="actLayoutControl"/>
     <addaction name="actVisualization"/>

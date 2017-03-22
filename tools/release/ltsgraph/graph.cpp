@@ -833,7 +833,15 @@ namespace Graph
     mcrl2::lts::lts_type guess = mcrl2::lts::detail::guess_format(filename.toUtf8().constData());
     delete m_impl;
     createImpl(guess);
-    m_impl->load(filename, min, max);
+    try
+    {
+      m_impl->load(filename, min, max);
+    }
+    catch(mcrl2::runtime_error e)
+    {
+      unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
+      throw e;
+    }
     if (m_sel != nullptr)
     {
       delete m_sel;
