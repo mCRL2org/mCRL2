@@ -5252,9 +5252,11 @@ class specification_basic_type: public boost::noncopyable
 
       if (is_deadlock_summand)
       {
-        deadlock_summands.push_back(deadlock_summand(sumvars,
-                                                     rewritten_condition,
-                                                     has_time?deadlock(actTime):deadlock()));
+        insert_timed_delta_summand(action_summands,
+                                   deadlock_summands,
+                                   deadlock_summand(sumvars,
+                                                    rewritten_condition,
+                                                    has_time?deadlock(actTime):deadlock()));
       }
       else
       {
@@ -8832,6 +8834,7 @@ class specification_basic_type: public boost::noncopyable
       const deadlock_summand_vector& deadlock_summands1,
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
+      const stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
       bool inline_allow = is_allow || is_block;
@@ -8870,9 +8873,10 @@ class specification_basic_type: public boost::noncopyable
           condition1=RewriteTerm(condition1);
           if (condition1!=sort_bool::false_() && !options.ignore_time)
           {
-            deadlock_summands.push_back(deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
+            insert_timed_delta_summand(action_summands,
+                                       deadlock_summands,
+                                       deadlock_summand(sumvars1,condition1, has_time?deadlock(actiontime1):deadlock()));
           }
-
         }
       }
     }
@@ -8906,7 +8910,7 @@ class specification_basic_type: public boost::noncopyable
       }
 
       calculate_left_merge_deadlock(timevar, ultimate_delay_condition, ultimate_delay_sumvars1, deadlock_summands1, 
-                                    is_allow, is_block, deadlock_summands);
+                                    is_allow, is_block, action_summands, deadlock_summands);
       calculate_left_merge_action(timevar, ultimate_delay_condition, ultimate_delay_sumvars1, action_summands1, 
                                     allowlist, is_allow, is_block, action_summands);
     }
@@ -9014,6 +9018,7 @@ class specification_basic_type: public boost::noncopyable
     void calculate_communication_merge_action_deadlock_summands(
           const stochastic_action_summand_vector& action_summands1,
           const deadlock_summand_vector& deadlock_summands1,
+          const stochastic_action_summand_vector& action_summands,
           deadlock_summand_vector& deadlock_summands)
     {
       for (const stochastic_action_summand& summand1: action_summands1)
@@ -9057,10 +9062,11 @@ class specification_basic_type: public boost::noncopyable
 
           if (condition3!=sort_bool::false_() && !options.ignore_time)
           {
-            deadlock_summands.push_back(deadlock_summand(
-                                        allsums,
-                                        condition3,
-                                        has_time3?deadlock(action_time3):deadlock()));
+            insert_timed_delta_summand(action_summands,
+                                       deadlock_summands,
+                                       deadlock_summand(allsums,
+                                                        condition3,
+                                                        has_time3?deadlock(action_time3):deadlock()));
           }
           
         }
@@ -9070,6 +9076,7 @@ class specification_basic_type: public boost::noncopyable
     void calculate_communication_merge_deadlock_summands(
           const deadlock_summand_vector& deadlock_summands1,
           const deadlock_summand_vector& deadlock_summands2,
+          const stochastic_action_summand_vector& action_summands,
           deadlock_summand_vector& deadlock_summands)
     {
       for (const deadlock_summand& summand1: deadlock_summands1)
@@ -9113,10 +9120,11 @@ class specification_basic_type: public boost::noncopyable
 
           if (condition3!=sort_bool::false_() && !options.ignore_time)
           {
-            deadlock_summands.push_back(deadlock_summand(
-                                        allsums,
-                                        condition3,
-                                        has_time3?deadlock(action_time3):deadlock()));
+            insert_timed_delta_summand(action_summands,
+                                       deadlock_summands,
+                                       deadlock_summand(allsums,
+                                                        condition3,
+                                                        has_time3?deadlock(action_time3):deadlock()));
           }
           
         }
@@ -9135,9 +9143,9 @@ class specification_basic_type: public boost::noncopyable
           deadlock_summand_vector& deadlock_summands)
     {
       calculate_communication_merge_action_summands(action_summands1, action_summands2, allowlist, is_allow, is_block, action_summands);
-      calculate_communication_merge_action_deadlock_summands(action_summands1, deadlock_summands2, deadlock_summands);
-      calculate_communication_merge_action_deadlock_summands(action_summands2, deadlock_summands1, deadlock_summands);
-      calculate_communication_merge_deadlock_summands(deadlock_summands1, deadlock_summands2, deadlock_summands);
+      calculate_communication_merge_action_deadlock_summands(action_summands1, deadlock_summands2, action_summands, deadlock_summands);
+      calculate_communication_merge_action_deadlock_summands(action_summands2, deadlock_summands1, action_summands, deadlock_summands);
+      calculate_communication_merge_deadlock_summands(deadlock_summands1, deadlock_summands2, action_summands, deadlock_summands);
     }
 
 

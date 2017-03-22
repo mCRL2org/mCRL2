@@ -383,7 +383,7 @@ void PriorityPromotionSolver::printRegion(std::vector<priority_t>& region_functi
     }
 }
 
-priority_t PriorityPromotionSolver::nextPriority(std::vector<priority_t>& region_function,
+priority_t PriorityPromotionSolver::nextPriority(std::vector<priority_t>& /* region_function */,
     priority_t prio)
 {
     // Starting from the current priority, find the next region that exists
@@ -398,9 +398,9 @@ priority_t PriorityPromotionSolver::nextPriority(std::vector<priority_t>& region
     return prio;
 }
 
-ParityGameSolver *PriorityPromotionSolverFactory::create(const ParityGame &game,
-    const verti *vertex_map,
-    verti vertex_map_size)
+ParityGameSolver* PriorityPromotionSolverFactory::create(const ParityGame &game,
+    const verti* /* vertex_map */,
+    verti /* vertex_map_size*/)
 {
     return new PriorityPromotionSolver(game);
 }
