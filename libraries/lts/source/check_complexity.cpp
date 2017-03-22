@@ -138,6 +138,9 @@ const char *check_complexity::work_names[TRANS_MAX - GLOBAL_MIN + 1] =
         while (0)
 
 
+#if 0
+// the function is not really used.  See the code of check_complexity::init()
+// below.
 static void test_work_names()
 {
     int i = check_complexity::GLOBAL_MIN;
@@ -242,6 +245,7 @@ static void test_work_names()
     test_work_name(i, for_all_old_bottom_states_s_in_RedB_4_15);
     assert(check_complexity::TRANS_MAX + 1 == i);
 }
+#endif
 
 
 void check_complexity::init(state_type new_n, trans_type new_m)

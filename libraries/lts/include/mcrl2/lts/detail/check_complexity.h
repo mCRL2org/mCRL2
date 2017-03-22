@@ -29,10 +29,10 @@
 #ifndef _COUNT_ITERATIONS_H
 #define _COUNT_ITERATIONS_H
 
-#include <cstddef>       // for size_t
+#include <cstring>       // for size_t and memset()
 #include <cassert>
 #include <cmath>         // for log2()
-#include <climits>       // for UCHAR_MAX
+#include <limits>        // for std::numeric_limits<unsigned char>::max()
 #include "mcrl2/utilities/logger.h"
 
 
@@ -211,7 +211,7 @@ class check_complexity
     // transitions are ascribed DONT_COUNT_TEMPORARY units of work.  The
     // methods finalise_work() and cancel_work() take this special value into
     // account.
-    #define DONT_COUNT_TEMPORARY ((unsigned char) (UCHAR_MAX - 1))
+    #define DONT_COUNT_TEMPORARY (std::numeric_limits<unsigned char>::max()-1)
 
     static state_type n;
     static trans_type m;
