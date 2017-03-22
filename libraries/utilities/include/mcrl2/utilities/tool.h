@@ -87,7 +87,7 @@ class tool
 
     /// \brief Executed only if run would be executed and invoked before run.
     /// \return Whether run should still be executed
-    virtual bool pre_run()
+    virtual bool pre_run(int& argc, char** argv)
     {
       return true;
     }
@@ -211,7 +211,7 @@ class tool
           parse_options(parser);
 
           // If pre_run succeeds, then do the actual running.
-          bool result = pre_run();
+          bool result = pre_run(argc, argv);
           if (result)
           {
             // Create timer, and by default measure running time of run()

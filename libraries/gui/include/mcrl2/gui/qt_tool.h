@@ -118,9 +118,18 @@ class qt_tool: public Tool
 
     int execute(int& argc, char** argv)
     {
+      return Tool::execute(argc, argv);
+    }
+
+    bool pre_run(int& argc, char** argv)
+    {
+      // The instantiation of QApplication has been postponed
+      // to here, since creating it in execute would make it
+      // impossible to view the help text in an environment
+      // without display server
       m_application = new QApplication(argc, argv);
       qsrand(QDateTime::currentDateTime().toTime_t());
-      return Tool::execute(argc, argv);
+      return true;
     }
 
     bool show_main_window(QMainWindow *window)
