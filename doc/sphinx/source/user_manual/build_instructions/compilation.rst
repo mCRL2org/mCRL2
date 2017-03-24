@@ -68,8 +68,8 @@ Flags
 The command ``ccmake .`` executed in the build directory allows to set compilation 
 and installation flags. 
 
-.. admonition:: Linux & Mac OS X
-      :class: platform-specific mac
+.. admonition:: Mac OS X
+   :class: platform-specific mac
 
    The Apple clang compiler versions 7.2 and 8.0 have a problem compiling the toolset
    in MAINTAINER and DEBUG mode. This leads to problems with asserts. A solution is to add the
