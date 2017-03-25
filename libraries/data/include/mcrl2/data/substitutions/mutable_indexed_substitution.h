@@ -230,7 +230,6 @@ protected:
   /// \brief set position i of the wrapped container to e
   void set(const size_t i, const expression_type& e)
   {
-    mCRL2log(log::debug2, "substitutions") << "Setting " << static_cast<atermpp::function_symbol>(i).name() << " := " << e << std::endl;
     m_container[i] = e;
   }
 

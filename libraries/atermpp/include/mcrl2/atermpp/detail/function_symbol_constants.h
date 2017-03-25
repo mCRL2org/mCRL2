@@ -40,10 +40,10 @@ struct constant_function_symbols
        AS_LIST("<list_constructor>",2),
        AS_EMPTY_LIST("<empty_list>",0)
     {
-      assert(AS_DEFAULT.number()==AS_DEFAULT_NUMBER);
+      /* assert(AS_DEFAULT.number()==AS_DEFAULT_NUMBER);
       assert(AS_INT.number()==AS_INT_NUMBER);
       assert(AS_LIST.number()==AS_LIST_NUMBER);
-      assert(AS_EMPTY_LIST.number()==AS_EMPTY_LIST_NUMBER);
+      assert(AS_EMPTY_LIST.number()==AS_EMPTY_LIST_NUMBER); */
     } 
 
 
@@ -63,17 +63,17 @@ struct constant_function_symbols
       // something is most likely wrong. Moreover, some code
       // depends on low numbers to be assigned to the basic 
       // function symbols (e.g. type_is_appl).
-      assert(AS_DEFAULT.number()==AS_DEFAULT_NUMBER);
+      /* assert(AS_DEFAULT.number()==AS_DEFAULT_NUMBER);
       assert(AS_INT.number()==AS_INT_NUMBER);
       assert(AS_LIST.number()==AS_LIST_NUMBER);
-      assert(AS_EMPTY_LIST.number()==AS_EMPTY_LIST_NUMBER);
+      assert(AS_EMPTY_LIST.number()==AS_EMPTY_LIST_NUMBER); */
     }
 };
 
 
 extern constant_function_symbols function_adm;
 
-inline size_t addressf(const function_symbol &t)
+inline size_t addressf(const function_symbol& t)
 {
   return reinterpret_cast<size_t>(t.m_function_symbol);
 }

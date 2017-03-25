@@ -83,7 +83,7 @@ namespace detail
       function_symbol_index_table[function_symbol_index_table_number_of_elements][i].reference_count=0;
       function_symbol_index_table[function_symbol_index_table_number_of_elements][i].next=function_symbol_free_list;
       function_symbol_free_list=&function_symbol_index_table[function_symbol_index_table_number_of_elements][i];
-      function_symbol_index_table[function_symbol_index_table_number_of_elements][i].number=i+FUNCTION_SYMBOL_BLOCK_SIZE*function_symbol_index_table_number_of_elements;
+      // function_symbol_index_table[function_symbol_index_table_number_of_elements][i].number=i+FUNCTION_SYMBOL_BLOCK_SIZE*function_symbol_index_table_number_of_elements;
 
     }
     function_symbol_index_table_number_of_elements++;

@@ -61,6 +61,14 @@ class function_symbol
     /// \brief default constructor
     function_symbol();
 
+    /// \brief Constructor, not for public use.  
+    // TODO: make protected. 
+    function_symbol(const detail::_function_symbol* f)
+     : m_function_symbol(f)
+    {
+      increase_reference_count<true>();
+    }
+
     /// \brief Constructor.
     /// \param name A string.
     /// \param arity_ The arity of the function.
@@ -70,14 +78,14 @@ class function_symbol
     /// \details This function is deprecated and should not be used
     /// \param n The number of an function_symbol
     /// \deprecated
-    explicit function_symbol(const size_t n)
+    /* explicit function_symbol(const size_t n)
        : m_function_symbol(&detail::function_symbol_index_table[n>>FUNCTION_SYMBOL_BLOCK_CLASS]
                                          [n & FUNCTION_SYMBOL_BLOCK_MASK])
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       assert(n==m_function_symbol->number);
       increase_reference_count<false>();
-    }
+    } */
 
     /// \brief Copy constructor
     function_symbol(const function_symbol& f):m_function_symbol(f.m_function_symbol)
@@ -114,11 +122,11 @@ class function_symbol
 
     /// \brief Return the number of the function_symbol.
     /// \return The number of the function symbol.
-    size_t number() const
+    /* size_t number() const
     {
       assert(detail::is_valid_function_symbol(m_function_symbol));
       return m_function_symbol->number;
-    }
+    } */
 
     /// \brief Return the arity (number of arguments) of the function symbol (function_symbol).
     /// \return The arity of the function symbol.

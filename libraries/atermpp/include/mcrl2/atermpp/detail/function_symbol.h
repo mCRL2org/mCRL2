@@ -35,7 +35,6 @@ struct _function_symbol
     _function_symbol* next;
     mutable size_t reference_count;
     std::string name;
-    size_t number;
 }; 
 
 extern detail::_function_symbol** function_symbol_index_table;

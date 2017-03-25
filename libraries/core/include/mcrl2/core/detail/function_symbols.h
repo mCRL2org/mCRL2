@@ -26,12 +26,6 @@ namespace detail {
 // Part 1: functions for creating function symbols.
 //----------------------------------------------------------------------------------------------//
 
-inline
-bool operator==(const size_t x, const atermpp::function_symbol& y)
-{
-  return x == y.number();
-}
-
 // We use a deque here, and not a vector, as a vector is relocated in
 // memory, which means that function_symbol_DataAppl and function_symbol_DataAppl_helper
 // cannot deliver a reference.

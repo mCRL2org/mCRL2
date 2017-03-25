@@ -84,10 +84,11 @@ s
 #endif
 }
 
+
 static size_t calcUniqueAFuns(
                   const aterm& t,
                   std::set<aterm>& visited,
-                  std::vector<size_t>& count)
+                  std::map<function_symbol, size_t>& count)
 {
   size_t nr_unique = 0;
 
@@ -98,7 +99,7 @@ static size_t calcUniqueAFuns(
 
   if (t.type_is_int())
   {
-    if (!count[detail::function_adm.AS_INT.number()]++)
+    if (!count[detail::function_adm.AS_INT]++)
     {
       nr_unique = 1;
     }
@@ -109,7 +110,7 @@ static size_t calcUniqueAFuns(
     while (list!=aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
-      if (!count[detail::function_adm.AS_LIST.number()]++)
+      if (!count[detail::function_adm.AS_LIST]++)
       {
         nr_unique++;
       }
@@ -119,7 +120,7 @@ static size_t calcUniqueAFuns(
     if (list==aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
-      if (!count[detail::function_adm.AS_EMPTY_LIST.number()]++)
+      if (!count[detail::function_adm.AS_EMPTY_LIST]++)
       {
         nr_unique++;
       }
@@ -129,8 +130,8 @@ static size_t calcUniqueAFuns(
   {
     assert(t.type_is_appl());
     function_symbol sym = down_cast<aterm_appl>(t).function();
-    nr_unique = count[sym.number()]>0 ? 0 : 1;
-    count[sym.number()]++;
+    nr_unique = count[sym]>0 ? 0 : 1;
+    count[sym]++;
     size_t arity = sym.arity();
     for (size_t i = 0; i < arity; i++)
     {
@@ -143,7 +144,7 @@ static size_t calcUniqueAFuns(
   return nr_unique;
 }
 
-static size_t AT_calcUniqueAFuns(const aterm& t, std::vector<size_t>& count)
+static size_t AT_calcUniqueAFuns(const aterm& t, std::map<function_symbol, size_t>& count)
 {
   std::set<aterm> visited;
   size_t result = calcUniqueAFuns(t,visited,count);
@@ -391,7 +392,7 @@ static void write_symbol(const function_symbol& sym, ostream& os)
  * (AS_INT, etc) when the term is not an application.
  */
 
-static sym_entry* get_top_symbol(const aterm& t, const std::vector<size_t>& index)
+static sym_entry* get_top_symbol(const aterm& t, const std::map<function_symbol, size_t>& index)
 {
   function_symbol sym;
 
@@ -411,7 +412,7 @@ static sym_entry* get_top_symbol(const aterm& t, const std::vector<size_t>& inde
   {
     throw aterm_io_error("get_top_symbol: illegal term (" + to_string(t) + ")");
   }
-  return &sym_entries[index[sym.number()]];
+  return &sym_entries[(index.count(sym)==0?size_t(-1):index.at(sym))];
 }
 
 
@@ -471,7 +472,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
     ts->code = index;
     ts->s = top_entry->id;
 
-    hnr = ts->s.number() % tss->toptable_size;
+    hnr = detail::addressf(ts->s) % tss->toptable_size;
     ts->next = tss->toptable[hnr];
     tss->toptable[hnr] = ts;
 
@@ -480,7 +481,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
   }
 }
 
-static void build_arg_tables(const std::vector<size_t>& index)
+static void build_arg_tables(const std::map<function_symbol, size_t>& index)
 {
   size_t cur_trm;
   size_t cur_arg;
@@ -577,7 +578,7 @@ static const aterm& subterm(const aterm& t, size_t i)
 
 typedef struct { aterm term; sym_entry* entry; size_t arg; } write_todo;
 
-static void collect_terms(const aterm& t, const std::vector<size_t>& index)
+static void collect_terms(const aterm& t, const std::map<function_symbol, size_t>& index)
 {
   std::stack<write_todo> stack;
   std::set<aterm> visited;
@@ -663,7 +664,7 @@ static size_t find_term(sym_entry* entry, const aterm& t)
 
 static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol& sym)
 {
-  size_t hnr = sym.number() % syms->toptable_size;
+  size_t hnr = detail::addressf(sym) % syms->toptable_size;
   top_symbol* cur = syms->toptable[hnr];
 
   assert(cur);
@@ -680,7 +681,7 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol& s
  * Write a term using a writer.
  */
 
-static bool write_term(const aterm& t, const std::vector<size_t>& index, ostream& os)
+static bool write_term(const aterm& t, const std::map<function_symbol, size_t>& index, ostream& os)
 {
   std::stack<write_todo> stack;
 
@@ -754,8 +755,7 @@ static void free_write_space()
 }
 
 
-static bool
-write_baf(const aterm& t, ostream& os)
+bool write_baf(const aterm& t, ostream& os)
 {
   size_t nr_unique_terms = 0;
   const size_t nr_symbols = detail::function_symbol_index_table_number_of_elements*FUNCTION_SYMBOL_BLOCK_SIZE;
@@ -765,8 +765,8 @@ write_baf(const aterm& t, ostream& os)
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 
-  std::vector<size_t> count(nr_symbols,0);
-  std::vector<size_t> index(nr_symbols,size_t(-1));
+  std::map<function_symbol, size_t> count; /* (nr_symbols,0); */
+  std::map<function_symbol, size_t> index; /* (nr_symbols,size_t(-1)); */
   nr_unique_symbols = AT_calcUniqueAFuns(t,count);
 
   sym_entries = std::vector<sym_entry>(nr_unique_symbols);
@@ -776,29 +776,33 @@ write_baf(const aterm& t, ostream& os)
   size_t cur;
   for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
   {
-    const detail::_function_symbol& entry = detail::function_symbol_index_table[lcv >> FUNCTION_SYMBOL_BLOCK_CLASS][lcv & FUNCTION_SYMBOL_BLOCK_MASK];
-    if (entry.reference_count>0 && count[lcv]>0)
+    const detail::_function_symbol* entry = &detail::function_symbol_index_table[lcv >> FUNCTION_SYMBOL_BLOCK_CLASS][lcv & FUNCTION_SYMBOL_BLOCK_MASK]; 
+    if (entry->reference_count>0)
     {
-      nr_unique_terms += count[lcv];
-
-      sym_entries[cur].term_width = bit_width(count[lcv]);
-      sym_entries[cur].id = function_symbol(lcv);
-      sym_entries[cur].arity = function_symbol(lcv).arity();
-      sym_entries[cur].nr_terms = count[lcv];
-      sym_entries[cur].terms.resize(count[lcv]);
-      sym_entries[cur].termtable_size = (count[lcv]*5)/4;
-      sym_entries[cur].termtable =
-        (trm_bucket**) calloc(sym_entries[cur].termtable_size,
-                                 sizeof(trm_bucket*));
-      if (!sym_entries[cur].termtable)
+      const function_symbol sym(entry);
+      if (count[sym]>0)
       {
-        throw aterm_io_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
+        nr_unique_terms += count[sym];
+
+        sym_entries[cur].term_width = bit_width(count[sym]);
+        sym_entries[cur].id = sym;
+        sym_entries[cur].arity = sym.arity();
+        sym_entries[cur].nr_terms = count[sym];
+        sym_entries[cur].terms.resize(count[sym]);
+        sym_entries[cur].termtable_size = (count[sym]*5)/4;
+        sym_entries[cur].termtable =
+          (trm_bucket**) calloc(sym_entries[cur].termtable_size,
+                                   sizeof(trm_bucket*));
+        if (!sym_entries[cur].termtable)
+        {
+          throw aterm_io_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
+        }
+
+        index[sym] = cur;
+        count[sym] = 0; /* restore invariant that symbolcount is zero */
+
+        cur++;
       }
-
-      index[lcv] = cur;
-      count[lcv] = 0; /* restore invariant that symbolcount is zero */
-
-      cur++;
     }
   }
 
@@ -857,11 +861,7 @@ void write_term_to_binary_stream(const aterm& t, std::ostream& os)
 
 static function_symbol read_symbol(istream& is)
 {
-  std::size_t len;
-  if ((len = readString(is)) == atermpp::npos)
-  {
-    return function_symbol(atermpp::npos);
-  }
+  std::size_t len=readString(is);
 
   text_buffer[len] = '\0';
 
