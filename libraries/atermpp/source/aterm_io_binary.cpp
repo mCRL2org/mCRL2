@@ -193,13 +193,10 @@ class top_symbols_t
     size_t      nr_symbols;
     std::vector<top_symbol> symbols;
 
-    size_t toptable_size;
-    top_symbol** toptable;
+    vector<top_symbol*> toptable;
 
     top_symbols_t():
-      nr_symbols(0),
-      toptable_size(0),
-      toptable(nullptr)
+      nr_symbols(0)
     {}
 
 };
@@ -243,19 +240,16 @@ class sym_read_entry
     function_symbol   sym;
     size_t arity;
     size_t nr_terms;
-    size_t    term_width;
+    size_t term_width;
     std::vector<aterm> terms;
-    size_t*   nr_topsyms;
-    size_t*   sym_width;
-    size_t**  topsyms;
+    std::vector<size_t> nr_topsyms;
+    std::vector<size_t> sym_width;
+    std::vector<vector<size_t> > topsyms;
 
     sym_read_entry():
        arity(0),
        nr_terms(0),
-       term_width(0),
-       nr_topsyms(nullptr),
-       sym_width(nullptr),
-       topsyms(nullptr)
+       term_width(0)
     {
     }
 
@@ -453,13 +447,13 @@ static void gather_top_symbols(sym_entry* cur_entry,
   tss = &cur_entry->top_symbols[cur_arg];
   tss->nr_symbols = total_top_symbols;
   tss->symbols = std::vector<top_symbol>(total_top_symbols);
-  tss->toptable_size = (total_top_symbols*5)/4;
-  tss->toptable = (top_symbol**) calloc(tss->toptable_size,
+  /* tss->toptable_size = (total_top_symbols*5)/4; */
+  tss->toptable = std::vector<top_symbol*>((total_top_symbols*5)/4); /* (top_symbol**) calloc(tss->toptable_size,
                   sizeof(top_symbol*));
   if (!tss->toptable)
   {
     throw aterm_io_error("build_arg_tables: out of memory (table_size: " + to_string(tss->toptable_size) + ")");
-  }
+  } */
 
   index = 0;
   for (top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym)
@@ -472,7 +466,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
     ts->code = index;
     ts->s = top_entry->id;
 
-    hnr = detail::addressf(ts->s) % tss->toptable_size;
+    hnr = detail::addressf(ts->s) % tss->toptable.size();
     ts->next = tss->toptable[hnr];
     tss->toptable[hnr] = ts;
 
@@ -664,7 +658,7 @@ static size_t find_term(sym_entry* entry, const aterm& t)
 
 static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol& sym)
 {
-  size_t hnr = detail::addressf(sym) % syms->toptable_size;
+  size_t hnr = detail::addressf(sym) % syms->toptable.size();
   top_symbol* cur = syms->toptable[hnr];
 
   assert(cur);
@@ -742,11 +736,12 @@ static void free_write_space()
     {
       top_symbols_t* topsyms = &entry->top_symbols[j];
       topsyms->symbols=std::vector<top_symbol>();
-      if (topsyms->toptable)
+      topsyms->toptable.clear();
+      /* if (topsyms->toptable)
       {
         free(topsyms->toptable);
         topsyms->toptable = nullptr;
-      }
+      } */
     }
 
     entry->top_symbols=std::vector<top_symbols_t>();
@@ -910,26 +905,26 @@ static bool read_all_symbols(istream& is)
 
     if (arity == 0)
     {
-      read_symbols[i].nr_topsyms = nullptr;
-      read_symbols[i].sym_width = nullptr;
-      read_symbols[i].topsyms = nullptr;
+      read_symbols[i].nr_topsyms.clear();
+      read_symbols[i].sym_width.clear();
+      read_symbols[i].topsyms.clear();
     }
     else
     {
-      read_symbols[i].nr_topsyms = (size_t*)calloc(arity, sizeof(size_t));
+      read_symbols[i].nr_topsyms = std::vector<size_t>(arity); /* (size_t*)calloc(arity, sizeof(size_t));
       if (!read_symbols[i].nr_topsyms)
         throw aterm_io_error("read_all_symbols: out of memory trying to allocate "
-                           "space for " + to_string(arity) + " arguments.");
+                           "space for " + to_string(arity) + " arguments."); */
 
-      read_symbols[i].sym_width = (size_t*)calloc(arity, sizeof(size_t));
+      read_symbols[i].sym_width = std::vector<size_t>(arity); /* (size_t*)calloc(arity, sizeof(size_t));
       if (!read_symbols[i].sym_width)
         throw aterm_io_error("read_all_symbols: out of memory trying to allocate "
-                           "space for " + to_string(arity) + " arguments.");
+                           "space for " + to_string(arity) + " arguments."); */
 
-      read_symbols[i].topsyms = (size_t**)calloc(arity, sizeof(size_t*));
+      read_symbols[i].topsyms = std::vector< vector <size_t> > (arity ); /* (size_t**)calloc(arity, sizeof(size_t*));
       if (!read_symbols[i].topsyms)
         throw aterm_io_error("read_all_symbols: out of memory trying to allocate "
-                           "space for " + to_string(arity) + " arguments.");
+                           "space for " + to_string(arity) + " arguments."); */
     }
 
     for (j=0; j<read_symbols[i].arity; j++)
@@ -937,11 +932,11 @@ static bool read_all_symbols(istream& is)
       val = readInt(is);
       read_symbols[i].nr_topsyms[j] = val;
       read_symbols[i].sym_width[j] = bit_width(val);
-      read_symbols[i].topsyms[j] = (size_t*)calloc(val, sizeof(size_t));
+      read_symbols[i].topsyms[j] = std::vector<size_t>(val); /* (size_t*)calloc(val, sizeof(size_t));
       if (!read_symbols[i].topsyms[j])
       {
         throw aterm_io_error("read_symbols: could not allocate space for " + to_string(val) + " top symbols.");
-      }
+      } */
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
       {
@@ -1033,31 +1028,31 @@ static aterm read_term(sym_read_entry* sym, istream& is)
 
 static void free_read_space()
 {
-  size_t i, j;
+  /* size_t i, j;
 
   for (i=0; i<nr_unique_symbols; i++)
   {
     sym_read_entry* entry = &read_symbols[i];
 
-    if (entry->nr_topsyms)
+    / * if (entry->nr_topsyms)
     {
       free(entry->nr_topsyms);
-    }
-    if (entry->sym_width)
+    } * /
+    / * if (entry->sym_width)
     {
       free(entry->sym_width);
-    }
+    } * /
 
-    for (j=0; j<entry->arity; j++)
+    / * for (j=0; j<entry->arity; j++)
     {
       free(entry->topsyms[j]);
     }
     if (entry->topsyms)
     {
       free(entry->topsyms);
-    }
+    } * /
 
-  }
+  } */
   read_symbols=std::vector<sym_read_entry>(); // Release memory, and prevent read symbols to be
                                               // destructed after the destruction of function_symbols, which leads
                                               // to decreasing reference counters, after function_lookup_table has
