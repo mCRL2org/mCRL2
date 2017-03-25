@@ -92,7 +92,7 @@ class lts_generation_options
     {}
 
     /// \brief Copy assignment operator.
-    lts_generation_options& operator=(const lts_generation_options& other)=default;
+    lts_generation_options& operator=(const lts_generation_options& )=default;
 
     void validate_actions()
     {

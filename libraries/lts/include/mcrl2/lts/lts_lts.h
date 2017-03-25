@@ -59,10 +59,10 @@ class state_label_lts : public atermpp::term_list< atermpp::term_balanced_tree< 
     {}
 
     /** \brief Copy constructor. */
-    state_label_lts(const state_label_lts& other)=default;
+    state_label_lts(const state_label_lts& )=default;
 
     /** \brief Copy assignment. */
-    state_label_lts& operator=(const state_label_lts& other)=default;
+    state_label_lts& operator=(const state_label_lts& )=default;
 
     /** \brief Construct a single state label out of the elements in a container.
     */
@@ -147,7 +147,7 @@ class action_label_lts: public mcrl2::lps::multi_action
     action_label_lts(const action_label_lts& )=default;
 
     /** \brief Copy assignment. */
-    action_label_lts& operator=(const action_label_lts& other)=default;
+    action_label_lts& operator=(const action_label_lts& )=default;
 
     /** \brief Constructor. */
     explicit action_label_lts(const mcrl2::lps::multi_action& a):mcrl2::lps::multi_action(a)

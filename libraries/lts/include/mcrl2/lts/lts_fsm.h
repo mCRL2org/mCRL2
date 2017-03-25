@@ -48,7 +48,7 @@ class state_label_fsm:  public std::vector < size_t >
     state_label_fsm(const state_label_fsm& )=default;
 
     /** \brief Copy assignment. */
-    state_label_fsm& operator=(const state_label_fsm& other)=default;
+    state_label_fsm& operator=(const state_label_fsm& )=default;
 
     /** \brief Default constructor. The label is set to the vector v.
     */

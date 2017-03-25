@@ -235,11 +235,12 @@ class check_complexity
                                                     typename T = unsigned char>
     class counter_t
     {
-      protected:
+      public:     // Made counters public as otherwise compilation does not work on Ubuntu and Fedora. 
         // make counters[] have a multiple of 4 as size.
         T counters[(LastCounter - FirstCounter + 4) & ~3];
 
-        friend void check_complexity::init(state_type new_n, trans_type new_m);
+      protected:
+        // friend void check_complexity::init(state_type new_n, trans_type new_m);
 
         void cancel_work(enum counter_type first, enum counter_type last)
         {

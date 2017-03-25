@@ -45,10 +45,10 @@ class action_label_string: public std::string
     {}
 
     /** \brief Copy constructor. */
-    action_label_string(const action_label_string& other)=default;
+    action_label_string(const action_label_string& )=default;
 
     /** \brief Copy assignment. */
-    action_label_string& operator=(const action_label_string& other)=default;
+    action_label_string& operator=(const action_label_string& )=default;
 
     /* \brief A constructor, where the string s is taken to become the action label.
      */
