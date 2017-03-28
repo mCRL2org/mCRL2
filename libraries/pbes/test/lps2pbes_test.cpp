@@ -34,10 +34,16 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
-pbes test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, const bool expect_success = true, const bool timed = false)
+pbes test_lps2pbes(const std::string& lps_spec,
+                   const std::string& mcf_formula,
+                   bool expect_success = true,
+                   bool timed = false,
+                   bool structured = false,
+                   bool unoptimized = false,
+                   bool preprocess_modal_operators = false,
+                   bool generate_counter_example = false
+                  )
 {
-  using namespace pbes_system;
-
   std::cerr << "==============================================================="
             << std::endl
             << "Specification: " << std::endl
@@ -52,7 +58,7 @@ pbes test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, 
 
   if(expect_success)
   {
-    pbes p = lps2pbes(spec, formula, timed);
+    pbes p = lps2pbes(spec, formula, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
 
     std::cerr << "Results in the following PBES:" << std::endl
               << "---------------------------------------------------------------"
@@ -72,9 +78,19 @@ pbes test_lps2pbes(const std::string& lps_spec, const std::string& mcf_formula, 
   }
 }
 
-void test_lps2pbes_and_solve(const std::string& lps_spec, const std::string& mcf_formula, const bool expected_solution, const bool timed = false, bool rewrite = false)
+void test_lps2pbes_and_solve(const std::string& lps_spec,
+                             const std::string& mcf_formula,
+                             bool expected_solution,
+                             bool timed = false,
+                             bool rewrite = false,
+                             bool generate_counter_example = false
+                            )
 {
-  pbes p = test_lps2pbes(lps_spec, mcf_formula, true, timed);
+  bool structured = false;
+  bool unoptimized = false;
+  bool preprocess_modal_operators = false;
+  bool expect_success = true;
+  pbes p = test_lps2pbes(lps_spec, mcf_formula, expect_success, timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
 
   // apply one point rule rewriter to p, otherwise some of the PBESs cannot be solved
   if (rewrite)
@@ -748,6 +764,29 @@ BOOST_AUTO_TEST_CASE(test_elementary_formulas)
     }
     solve_pbes(utilities::regex_replace("<INIT>", words[0], procspec_text), words[1], words[2], true);
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_counter_example)
+{
+  std::string lps_spec =
+    "act  a,b;                              \n"
+    "proc P(c: Bool) = c ->  a . P(c = !c)  \n"
+    "                + !c -> b . P(c = true)\n"
+    "                + delta;               \n"
+    "init P(true);                          \n"
+    ;
+
+  std::string mcf_formula = "[true*.b]false";
+  bool expected_solution = false;
+  bool timed = false;
+  bool rewrite = false;
+  bool generate_counter_example;
+
+  generate_counter_example = false;
+  test_lps2pbes_and_solve(lps_spec, mcf_formula, expected_solution, timed, rewrite, generate_counter_example);
+
+  generate_counter_example = true;
+  test_lps2pbes_and_solve(lps_spec, mcf_formula, expected_solution, timed, rewrite, generate_counter_example);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
