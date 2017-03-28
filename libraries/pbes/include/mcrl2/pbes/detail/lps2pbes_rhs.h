@@ -183,21 +183,21 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     typedef TermTraits tr;
     const data::variable_list& d = lps.process_parameters();
     data::data_expression_list gi1 = data::replace_variables(atermpp::container_cast<data::data_expression_list>(d), data::assignment_sequence_substitution(gi));
-    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + action_expressions(ai.actions()) + gi1;
-    pbes_expression left1 = tr::and_(left, equal_to(d1, gi1));
+    auto fi = action_expressions(ai.actions());
+    data::data_expression_list da = atermpp::container_cast<data::data_expression_list>(d) + fi + gi1;
     propositional_variable_instantiation Pos(Zpos.at(ai).name(), da);
     propositional_variable_instantiation Neg(Zneg.at(ai).name(), da);
-    pbes_expression right1 = pbes_system::replace_variables_capture_avoiding(right, sigma, sigma_variables);
+    auto right1 = right;
 
     if (is_must)
     {
-      right1 = tr::or_(tr::and_(right1, Pos), Neg);
-      return tr::forall(y + d1, tr::imp(left1, right1));
+      right1 = tr::or_(tr::and_(right, Pos), Neg);
+      return tr::forall(y, tr::imp(left, right1));
     }
     else
     {
-      right1 = tr::and_(tr::or_(right1, Neg), Pos);
-      return tr::exists(y + d1, tr::and_(left1, right1));
+      right1 = tr::and_(tr::or_(right, Neg), Pos);
+      return tr::exists(y, tr::and_(left, right1));
     }
   }
 };
@@ -351,7 +351,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
   {
     bool timed = is_timed();
     std::vector<pbes_expression> v;
-    pbes_expression rhs0 = derived().apply_may_must_rhs(x);
+    pbes_expression rhs_phi = derived().apply_may_must_rhs(x);
     assert(action_formulas::is_action_formula(x.formula()));
     const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
 
@@ -362,7 +362,7 @@ struct rhs_traverser: public state_formulas::state_formula_traverser<Derived>
       const data::assignment_list& gi = summand.assignments();
       const data::variable_list& yi   = summand.summation_variables();
 
-      pbes_expression right = rhs0;
+      pbes_expression right = rhs_phi;
       const data::data_expression& ti = ai.time();
       pbes_expression sat = Sat(ai, alpha, parameters.id_generator, TermTraits());
       data::mutable_map_substitution<> sigma;
