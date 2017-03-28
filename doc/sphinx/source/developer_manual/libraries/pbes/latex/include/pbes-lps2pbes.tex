@@ -180,19 +180,32 @@ where $\widetilde{\sigma }=\mu $ if $\sigma =\nu $ and $\widetilde{\sigma }%
 
 \subsection{Counter example generation}
 
-In counter example generation, the function RHS is adapted as follows:%
+There is a modified translation that adds information to the PBES from which
+a counter example can be generated. N.B. The counter example generation is
+only available for the untimed case. The function RHS is adapted from%
 \begin{equation*}
 \begin{array}{lll}
 {\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
-{:}E_{i}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y))\mbox{\aap
-,}t_{i}(x,y),\alpha )\ \wedge c_{i}(x,y)\right) \Rightarrow  \\ 
+{:}E_{i}}\left( (\mathbf{Sat}(a_{i}(f_{i}(x,y)),\alpha )\ \wedge
+c_{i}(x,y)\right) \Rightarrow {\mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)]) \\ 
+{\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
+I}\exists _{y{:}E_{i}}\left( (\mathbf{Sat}(a_{i}(f_{i}(x,y)),\alpha )\
+\wedge c_{i}(x,y)\right) \ \wedge {\mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)])%
+\end{array}%
+\end{equation*}%
+into%
+\begin{equation*}
+\begin{array}{lll}
+{\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
+{:}E_{i}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y)),\alpha )\ \wedge
+c_{i}(x,y)\right) \Rightarrow  \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}\left( \left( {%
 \mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)]\wedge
 Z_{a_{i}}^{+}(x,f_{i}(x,y),g_{i}(x,y))\right) \vee
 Z_{a_{i}}^{-}(x,f_{i}(x,y),g_{i}(x,y))\right)  \\ 
 {\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
-I}\exists _{y{:}E_{i}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y))\mbox{\aap
-,}t_{i}(x,y),\alpha )\ \wedge c_{i}(x,y)\right) \wedge  \\ 
+I}\exists _{y{:}E_{i}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y)),\alpha )\ \wedge
+c_{i}(x,y)\right) \wedge  \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}\left( \left( {%
 \mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)]\vee
 Z_{a_{i}}^{-}(x,f_{i}(x,y),g_{i}(x,y))\right) \wedge
