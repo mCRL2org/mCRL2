@@ -42,10 +42,6 @@ typedef size_t HashNumber;
 
 static const size_t npos=(size_t)(-1);
 
-/* Integers in BAF are always exactly 32 or 64 bits.  The size must be fixed so that
- *  * BAF terms can be exchanged between platforms. */
-static const size_t INT_SIZE_IN_BAF = 64;
-
 } // namespace atermpp
 
 #endif /* ATYPES_H */

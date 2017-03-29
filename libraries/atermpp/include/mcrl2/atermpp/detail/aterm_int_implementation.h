@@ -27,11 +27,11 @@ namespace detail
 
 inline _aterm* aterm_int(size_t val)
 {
-  HashNumber hnr = COMBINE(SHIFT(addressf(function_adm.AS_INT)), val);
+  HashNumber hnr = COMBINE(SHIFT(addressf(function_adm.AS_INT())), val);
 
   _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
   while (cur)
-  { if  (cur->function()==function_adm.AS_INT && reinterpret_cast<_aterm_int*>(cur)->value == val)
+  { if  (cur->function()==function_adm.AS_INT() && reinterpret_cast<_aterm_int*>(cur)->value == val)
     {
       return cur;
     }
@@ -41,7 +41,7 @@ inline _aterm* aterm_int(size_t val)
   cur = allocate_term(TERM_SIZE_INT);
   /* Delay masking until after allocate */
   hnr &= aterm_table_mask;
-  new (&const_cast<_aterm *>(cur)->function()) function_symbol(function_adm.AS_INT);
+  new (&const_cast<_aterm *>(cur)->function()) function_symbol(function_adm.AS_INT());
   reinterpret_cast<_aterm_int*>(const_cast<_aterm *>(cur))->value = val;
 
   insert_in_hashtable(cur,hnr);

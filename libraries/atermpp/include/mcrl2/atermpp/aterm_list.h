@@ -255,7 +255,7 @@ class term_list:public aterm
     /// \return True iff the list is empty.
     bool empty() const
     {
-      return m_term->function()==detail::function_adm.AS_EMPTY_LIST;
+      return m_term->function()==detail::function_adm.AS_EMPTY_LIST();
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_list.

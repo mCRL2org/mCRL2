@@ -59,8 +59,18 @@ class aterm
   protected:
     detail::_aterm* m_term;
 
-    static detail::_aterm *undefined_aterm();
-    static detail::_aterm *empty_aterm_list();
+
+    static detail::_aterm* undefined_aterm()
+    {
+      static detail::_aterm* t=detail::term_appl0(function_symbol());
+      return t;
+    }
+
+    static detail::_aterm *empty_aterm_list()
+    {
+      static detail::_aterm* t=detail::term_appl0(detail::function_adm.AS_EMPTY_LIST());
+      return t;
+    }
 
     inline size_t decrease_reference_count()
     {
@@ -155,7 +165,7 @@ class aterm
     /// \return True iff term is an term_int.
     bool type_is_int() const
     {
-      return m_term->function()==detail::function_adm.AS_INT;
+      return m_term->function()==detail::function_adm.AS_INT();
     }
 
     /// \brief Returns whether this term has the structure of an term_list
@@ -164,7 +174,7 @@ class aterm
     bool type_is_list() const
     {
       const function_symbol& f=m_term->function();
-      return f==detail::function_adm.AS_LIST|| f==detail::function_adm.AS_EMPTY_LIST;
+      return f==detail::function_adm.AS_LIST()|| f==detail::function_adm.AS_EMPTY_LIST();
     }
 
     /// \brief Equality function on two aterms.
@@ -248,7 +258,7 @@ class aterm
     bool defined() const
     {
       assert(m_term->reference_count()>0);
-      return this->function()!=detail::function_adm.AS_DEFAULT;
+      return this->function()!=function_symbol();
     }
 
     /// \brief Swaps this term with its argument.

@@ -14,9 +14,10 @@
 #define MCRL2_ATERMPP_DETAIL_ATERM_APPL_IMPLEMENTATION_H
 
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/atermpp/detail/atypes.h"
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/atermpp/detail/atypes.h"
+#include "mcrl2/atermpp/detail/aterm_appl.h"
+#include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {
@@ -148,7 +149,7 @@ _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin,
   return new_term;
 }
 
-inline _aterm* term_appl0(const function_symbol& sym)
+/* inline _aterm* term_appl0(const function_symbol& sym)
 {
   assert(sym.arity()==0);
 
@@ -166,7 +167,7 @@ inline _aterm* term_appl0(const function_symbol& sym)
   }
 
   cur = detail::allocate_term(detail::TERM_SIZE);
-  /* Delay masking until after allocate */
+  / * Delay masking until after allocate * /
   hnr &= detail::aterm_table_mask;
   new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
 
@@ -175,7 +176,7 @@ inline _aterm* term_appl0(const function_symbol& sym)
   call_creation_hook(cur);
 
   return cur;
-}
+} */
 
 template <class Term>
 _aterm* term_appl1(const function_symbol& sym, const Term& arg0)
@@ -213,7 +214,6 @@ template <class Term>
 _aterm* term_appl2(const function_symbol& sym, const Term& arg0, const Term& arg1)
 {
   assert(sym.arity()==2);
-
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
   HashNumber hnr = COMBINE(COMBINE(SHIFT(addressf(sym)), arg0),arg1);

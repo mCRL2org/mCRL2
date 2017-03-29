@@ -75,21 +75,21 @@ class term_list_iterator
     /// \brief Dereference operator on an iterator
     const Term& operator*() const
     {
-      assert(m_list->function()==detail::function_adm.AS_LIST);
+      assert(m_list->function()==detail::function_adm.AS_LIST());
       return m_list->head;
     }
 
     /// Arrow operator on an iterator
     const Term* operator->() const
     {
-      assert(m_list->function()==detail::function_adm.AS_LIST);
+      assert(m_list->function()==detail::function_adm.AS_LIST());
       return &m_list->head;
     }
     
     /// \brief Prefix increment operator on iterator.
     term_list_iterator& operator++()
     {
-      assert(m_list->function()==detail::function_adm.AS_LIST);
+      assert(m_list->function()==detail::function_adm.AS_LIST());
       m_list = reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail));
       return *this;
     }
@@ -97,7 +97,7 @@ class term_list_iterator
     /// \brief Postfix increment operator on iterator.
     term_list_iterator operator++(int)
     {
-      assert(m_list->function()==detail::function_adm.AS_LIST);
+      assert(m_list->function()==detail::function_adm.AS_LIST());
       const term_list_iterator temp = *this;
       m_list = reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(m_list->tail));
       return temp;

@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink, Jan Frsio Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -14,39 +14,94 @@
 
 #include <cassert>
 #include <string>
-#include <cstdio>
+#include <iostream>
+#include <unordered_map>
 #include "mcrl2/atermpp/detail/atypes.h"
 #include "mcrl2/atermpp/detail/function_symbol.h"
 
 namespace atermpp
 {
+class aterm;
+void detail::initialise_aterm_administration();
+void detail::initialise_function_map_administration();
 
 class function_symbol
 {
 
   friend size_t detail::addressf(const function_symbol& t);
   friend class function_symbol_generator;
+  friend size_t detail::get_sufficiently_large_postfix_index(const std::string& prefix_);
+  friend bool write_baf(const atermpp::aterm& t, std::ostream& os);
 
   protected:
-    const detail::_function_symbol* m_function_symbol;
+    
+    typedef std::unordered_map<detail::_function_symbol_primary_data, detail::_function_symbol_auxiliary_data> function_symbol_store_type;
+    typedef std::pair<function_symbol_store_type::iterator, bool> function_symbol_iterator_bool_pair;
 
-    void free_function_symbol() const;
+    detail::_function_symbol* m_function_symbol;
 
-    template <bool CHECK>
-    void increase_reference_count() const
+    /// This is a trick to do initialise_aterm_administration before function symbols are accessed.
+    static function_symbol_store_type function_symbol_store_helper()
     {
-      if (CHECK) assert(m_function_symbol->reference_count>0);
-      m_function_symbol->reference_count++;
+      function_symbol_store_type f_store;
+      detail::initialise_aterm_administration();
+      detail::initialise_function_map_administration();
+      return f_store;
     }
 
-    void decrease_reference_count() const
-    {
-      assert(m_function_symbol->reference_count>0);
 
-      if (--m_function_symbol->reference_count==0)
+    static function_symbol_store_type& function_symbol_store()
+    {
+      static function_symbol_store_type f_store=function_symbol_store_helper();
+      return f_store;
+    }
+
+    static const function_symbol& AS_DEFAULT()
+    {
+      static function_symbol f("<undefined_term>",0);
+      return f;
+    }
+
+    // Constructor for internal use only
+    function_symbol(const std::string& name_, const size_t arity_, const bool check_for_registered_functions);
+
+    // Constructor for internal use only.
+    function_symbol(detail::_function_symbol* f)
+     : m_function_symbol(f)
+    {
+      increase_reference_count<true>();
+    }
+
+    void free_function_symbol()
+    {
+      function_symbol_store().erase(m_function_symbol->first);
+    }
+
+    template <bool CHECK>
+    void increase_reference_count() 
+    {
+      if (CHECK) assert(m_function_symbol->second.reference_count()>0);
+      m_function_symbol->second.reference_count()++;
+    }
+
+    void decrease_reference_count() 
+    {
+      assert(m_function_symbol->second.reference_count()>0);
+
+      if (--m_function_symbol->second.reference_count()==0)
       {
         free_function_symbol();
       }
+    }
+
+    bool is_valid() const
+    {
+      if (function_symbol_store().count(m_function_symbol->first)==0)
+      {
+        /* This function_symbol does not exist in the function_symbol_store. That is incorrect. */
+        return false;
+      }
+      return m_function_symbol->second.reference_count()>0;
     }
 
     /// A special function symbol constructor for use in the function symbol
@@ -54,17 +109,12 @@ class function_symbol
     /// does not exist yet, and that the prefix and number combination is neatly
     /// recoreded in the appropriate number generator as being used. Furthermore,
     /// it takes a pointer to a char* to represent its string.
-    function_symbol(const char* name_begin, const char* name_end, const size_t arity_);
-
+    function_symbol(const char* name_begin, const char* name_end, const size_t arity_); 
 
   public:
     /// \brief default constructor
-    function_symbol();
-
-    /// \brief Constructor, not for public use.  
-    // TODO: make protected. 
-    function_symbol(const detail::_function_symbol* f)
-     : m_function_symbol(f)
+    function_symbol() 
+      : m_function_symbol(AS_DEFAULT().m_function_symbol)
     {
       increase_reference_count<true>();
     }
@@ -72,23 +122,13 @@ class function_symbol
     /// \brief Constructor.
     /// \param name A string.
     /// \param arity_ The arity of the function.
-    function_symbol(const std::string& name, const size_t arity_);
-
-    /// \brief default constructor
-    /// \details This function is deprecated and should not be used
-    /// \param n The number of an function_symbol
-    /// \deprecated
-    /* explicit function_symbol(const size_t n)
-       : m_function_symbol(&detail::function_symbol_index_table[n>>FUNCTION_SYMBOL_BLOCK_CLASS]
-                                         [n & FUNCTION_SYMBOL_BLOCK_MASK])
-    {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      assert(n==m_function_symbol->number);
-      increase_reference_count<false>();
-    } */
+    function_symbol(const std::string& name, const size_t arity_)
+     : function_symbol(name, arity_, true)
+    {}
 
     /// \brief Copy constructor
-    function_symbol(const function_symbol& f):m_function_symbol(f.m_function_symbol)
+    function_symbol(const function_symbol& f)
+      : m_function_symbol(f.m_function_symbol)
     {
       increase_reference_count<true>();
     }
@@ -96,7 +136,7 @@ class function_symbol
     /// \brief Assignment operator.
     function_symbol& operator=(const function_symbol& f)
     {
-      f.increase_reference_count<true>();
+      const_cast<function_symbol&>(f).increase_reference_count<true>();
       decrease_reference_count(); // Decrease the reference count after increasing it,
                                   // as otherwise the reference count can becomes 0 for
                                   // a short moment when x=x is executed and the reference
@@ -116,24 +156,16 @@ class function_symbol
     /// \return The name of the function symbol.
     const std::string& name() const
     {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      return m_function_symbol->name;
+      assert(is_valid());
+      return m_function_symbol->first.name();
     }
-
-    /// \brief Return the number of the function_symbol.
-    /// \return The number of the function symbol.
-    /* size_t number() const
-    {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      return m_function_symbol->number;
-    } */
 
     /// \brief Return the arity (number of arguments) of the function symbol (function_symbol).
     /// \return The arity of the function symbol.
     size_t arity() const
     {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      return m_function_symbol->arity;
+      assert(is_valid());
+      return m_function_symbol->first.arity();
     }
 
 
@@ -143,8 +175,8 @@ class function_symbol
     /// \returns True iff the function symbols are the same.
     bool operator ==(const function_symbol& f) const
     {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      assert(detail::is_valid_function_symbol(f.m_function_symbol));
+      assert(is_valid());
+      assert(f.is_valid());
       return m_function_symbol==f.m_function_symbol;
     }
 
@@ -153,8 +185,8 @@ class function_symbol
     /// \returns True iff the function symbols are not equal.
     bool operator !=(const function_symbol& f) const
     {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      assert(detail::is_valid_function_symbol(f.m_function_symbol));
+      assert(is_valid());
+      assert(f.is_valid());
       return m_function_symbol!=f.m_function_symbol;
     }
 
@@ -163,8 +195,8 @@ class function_symbol
     /// \returns True iff this function has a lower index than the argument.
     bool operator <(const function_symbol& f) const
     {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      assert(detail::is_valid_function_symbol(f.m_function_symbol));
+      assert(is_valid());
+      assert(f.is_valid());
       return m_function_symbol<f.m_function_symbol;
     }
 
@@ -173,8 +205,8 @@ class function_symbol
     /// \returns True iff this function has a higher index than the argument.
     bool operator >(const function_symbol& f) const
     {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      assert(detail::is_valid_function_symbol(f.m_function_symbol));
+      assert(is_valid());
+      assert(f.is_valid());
       return m_function_symbol>f.m_function_symbol;
     }
 
@@ -183,8 +215,8 @@ class function_symbol
     /// \returns True iff this function has a lower or equal index than the argument.
     bool operator <=(const function_symbol& f) const
     {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      assert(detail::is_valid_function_symbol(f.m_function_symbol));
+      assert(is_valid());
+      assert(f.is_valid());
       return m_function_symbol<=f.m_function_symbol;
     }
 
@@ -193,8 +225,8 @@ class function_symbol
     /// \returns True iff this function has a larger or equal index than the argument.
     bool operator >=(const function_symbol& f) const
     {
-      assert(detail::is_valid_function_symbol(m_function_symbol));
-      assert(detail::is_valid_function_symbol(f.m_function_symbol));
+      assert(is_valid());
+      assert(f.is_valid());
       return m_function_symbol>=f.m_function_symbol;
     }
 
@@ -206,6 +238,7 @@ class function_symbol
       using std::swap;
       swap(f.m_function_symbol,m_function_symbol);
     }
+
 };
 
 /// \brief Sends the name of a function symbol to an ostream.

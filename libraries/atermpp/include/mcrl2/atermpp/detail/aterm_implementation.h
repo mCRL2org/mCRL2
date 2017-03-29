@@ -75,8 +75,9 @@ extern TermInfo *terminfo;
 
 extern size_t garbage_collect_count_down;
 
-void initialise_administration();
+// void initialise_administration();
 void initialise_aterm_administration();
+void initialise_function_map_administration();
 
 void resize_aterm_hashtable();
 void allocate_block(const size_t size);
@@ -84,10 +85,10 @@ void collect_terms_with_reference_count_0();
 
 void call_creation_hook(_aterm*);
 
-inline size_t SHIFT(const size_t w)
+/* inline size_t SHIFT(const size_t w)
 {
   return w>>3;
-}
+} */
 
 inline
 size_t COMBINE(const HashNumber hnr, const size_t w)
@@ -215,13 +216,13 @@ inline void remove_from_hashtable(_aterm *t)
   assert(0);
 }
 
-inline void insert_in_hashtable(_aterm *t, const size_t hnr)
+/* inline void insert_in_hashtable(_aterm *t, const size_t hnr)
 {
 
   t->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = t;
   total_nodes_in_hashtable++;
-}
+} */
 
 inline _aterm* address(const aterm& t)
 {
@@ -230,7 +231,7 @@ inline _aterm* address(const aterm& t)
 
 } //namespace detail
 
-inline
+/* inline
 detail::_aterm *aterm::undefined_aterm()
 {
   if (detail::static_undefined_aterm.m_term==nullptr)
@@ -238,7 +239,7 @@ detail::_aterm *aterm::undefined_aterm()
     detail::initialise_administration();
   }
   return detail::static_undefined_aterm.m_term;
-}
+} 
 
 inline
 detail::_aterm *aterm::empty_aterm_list()
@@ -248,7 +249,7 @@ detail::_aterm *aterm::empty_aterm_list()
     detail::initialise_administration();
   }
   return detail::static_empty_aterm_list.m_term;
-}
+} */
 
 } // namespace atermpp
 

@@ -48,8 +48,8 @@ _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin,
 template <class Term, class InputIterator, class ATermConverter>
 _aterm* local_term_appl_with_converter(const function_symbol& sym, const InputIterator begin, const InputIterator end, const ATermConverter& convert_to_aterm);
 
-inline
-_aterm* term_appl0(const function_symbol& sym);
+// inline
+// _aterm* term_appl0(const function_symbol& sym);
 
 template <class Term>
 _aterm* term_appl1(const function_symbol& sym, const Term& arg0);

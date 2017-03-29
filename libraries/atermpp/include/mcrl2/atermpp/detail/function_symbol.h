@@ -14,9 +14,9 @@
 
 #include <string>
 
-const size_t FUNCTION_SYMBOL_BLOCK_CLASS=14;
-const size_t FUNCTION_SYMBOL_BLOCK_SIZE=1<<FUNCTION_SYMBOL_BLOCK_CLASS;
-const size_t FUNCTION_SYMBOL_BLOCK_MASK=FUNCTION_SYMBOL_BLOCK_SIZE-1;
+// const size_t FUNCTION_SYMBOL_BLOCK_CLASS=14;
+// const size_t FUNCTION_SYMBOL_BLOCK_SIZE=1<<FUNCTION_SYMBOL_BLOCK_CLASS;
+// const size_t FUNCTION_SYMBOL_BLOCK_MASK=FUNCTION_SYMBOL_BLOCK_SIZE-1;
 
 
 namespace atermpp
@@ -27,26 +27,64 @@ class function_symbol_generator;
 namespace detail
 {
 size_t addressf(const function_symbol &t);
+void initialise_aterm_administration();
+void initialise_function_map_administration();
 
-/* The type _function_symbol is used to store information about function_symbols. */
-struct _function_symbol
+// A function is determined by its name and its arity. 
+class _function_symbol_primary_data
 {
-    size_t arity;
-    _function_symbol* next;
-    mutable size_t reference_count;
-    std::string name;
-}; 
+  protected:
+    const std::string m_name;  // The primary data cannot be altered after creation. 
+    const size_t m_arity;
 
-extern detail::_function_symbol** function_symbol_index_table;
-extern size_t function_symbol_index_table_number_of_elements;
+  public:
+    _function_symbol_primary_data(const std::string& name, size_t arity)
+     : m_name(name), m_arity(arity)
+    {}
 
-bool check_that_the_function_symbol_points_to_memory_containing_a_function(const detail::_function_symbol* f);
+    const std::string& name() const
+    {
+      return m_name;
+    }
 
-inline
-bool is_valid_function_symbol(const detail::_function_symbol* f)
+    size_t arity() const
+    {
+      return m_arity;
+    }
+
+    bool operator==(const _function_symbol_primary_data& f) const
+    {
+      return m_arity==f.m_arity && m_name==f.m_name;
+    }
+};
+
+// Each function symbol has a reference count, and sometimes a sequence number
+// as special information. 
+class _function_symbol_auxiliary_data
 {
-  return (f->reference_count>0) && check_that_the_function_symbol_points_to_memory_containing_a_function(f);
-}
+  protected:
+    size_t m_reference_count;
+
+  public:
+
+    _function_symbol_auxiliary_data(size_t reference_count)
+     : m_reference_count(reference_count)
+    {}
+
+    size_t reference_count() const
+    {
+      return m_reference_count;
+    }
+
+    size_t& reference_count()
+    {
+      return m_reference_count;
+    }
+};
+
+// A function symbol is a pair of essential and auxiliary information, stored in an unordered set.
+typedef std::pair<const _function_symbol_primary_data, _function_symbol_auxiliary_data> _function_symbol;
+
 
 // set index such that no function symbol exists with the name 'prefix + std::to_string(n)'
 // for all values n >= index
@@ -97,6 +135,22 @@ extern void deregister_function_symbol_prefix_string(const std::string& prefix);
 
 } // namespace detail
 } // namespace atermpp
+
+namespace std
+{
+
+// Specialisation of the standard hash function for 
+template<>
+struct hash<atermpp::detail::_function_symbol_primary_data>
+{
+  std::size_t operator()(const atermpp::detail::_function_symbol_primary_data& f) const
+  {
+    std::hash<std::string> string_hasher;
+    size_t h=string_hasher(f.name());
+    return (h ^ f.arity());
+  }
+};
+}
 
 #endif // DETAIL_FUNCTION_SYMBOL_H
 

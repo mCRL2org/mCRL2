@@ -33,6 +33,12 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 
+
+/* Integers in BAF are always exactly 32 or 64 bits.  The size must be fixed so that
+ *  *  * BAF terms can be exchanged between platforms. */
+static const size_t INT_SIZE_IN_BAF = 64;
+
+
 namespace atermpp
 {
 
@@ -99,7 +105,7 @@ static size_t calcUniqueAFuns(
 
   if (t.type_is_int())
   {
-    if (!count[detail::function_adm.AS_INT]++)
+    if (!count[detail::function_adm.AS_INT()]++)
     {
       nr_unique = 1;
     }
@@ -110,7 +116,7 @@ static size_t calcUniqueAFuns(
     while (list!=aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
-      if (!count[detail::function_adm.AS_LIST]++)
+      if (!count[detail::function_adm.AS_LIST()]++)
       {
         nr_unique++;
       }
@@ -120,7 +126,7 @@ static size_t calcUniqueAFuns(
     if (list==aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
-      if (!count[detail::function_adm.AS_EMPTY_LIST]++)
+      if (!count[detail::function_adm.AS_EMPTY_LIST()]++)
       {
         nr_unique++;
       }
@@ -148,7 +154,6 @@ static size_t AT_calcUniqueAFuns(const aterm& t, std::map<function_symbol, size_
 {
   std::set<aterm> visited;
   size_t result = calcUniqueAFuns(t,visited,count);
-
   return result;
 }
 
@@ -212,8 +217,9 @@ class sym_entry
 
     std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
 
-    size_t termtable_size;
-    trm_bucket** termtable;
+    // size_t termtable_size;
+    // trm_bucket** termtable;
+    std::vector<trm_bucket*> termtable;  
 
     size_t term_width;
 
@@ -226,8 +232,8 @@ class sym_entry
       arity(0),
       nr_terms(0),
       top_symbols(0),
-      termtable_size(0),
-      termtable(nullptr),
+      // termtable_size(0),
+      termtable(),
       term_width(0),
       cur_index(0),
       nr_times_top(0)
@@ -354,7 +360,7 @@ static size_t readString(istream& is)
   /* Assure buffer can hold the string */
   if (text_buffer_size < (len+1))
   {
-    text_buffer_size = (len*3)/2;
+    text_buffer_size = 1+(len*3)/2;
     text_buffer = (char*) realloc(text_buffer, text_buffer_size);
     if (!text_buffer)
     {
@@ -392,11 +398,11 @@ static sym_entry* get_top_symbol(const aterm& t, const std::map<function_symbol,
 
   if (t.type_is_int())
   {
-      sym = detail::function_adm.AS_INT;
+      sym = detail::function_adm.AS_INT();
   }
   else if (t.type_is_list())
   {
-    sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST);
+    sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST() : detail::function_adm.AS_LIST());
   }
   else if (t.type_is_appl())
   {
@@ -451,6 +457,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
   tss->toptable = std::vector<top_symbol*>((total_top_symbols*5)/4); /* (top_symbol**) calloc(tss->toptable_size,
                   sizeof(top_symbol*));
   if (!tss->toptable)
+
   {
     throw aterm_io_error("build_arg_tables: out of memory (table_size: " + to_string(tss->toptable_size) + ")");
   } */
@@ -490,7 +497,7 @@ static void build_arg_tables(const std::map<function_symbol, size_t>& index)
 
     cur_entry->top_symbols = std::vector<top_symbols_t>(arity);
 
-    if (cur_entry->id!=detail::function_adm.AS_INT)
+    if (cur_entry->id!=detail::function_adm.AS_INT())
     {
       for (cur_arg=0; cur_arg<arity; cur_arg++)
       {
@@ -543,7 +550,7 @@ static void build_arg_tables(const std::map<function_symbol, size_t>& index)
   */
 static void add_term(sym_entry* entry, const aterm& t)
 {
-  size_t hnr = hash_number(detail::address(t)) % entry->termtable_size;
+  size_t hnr = hash_number(detail::address(t)) % entry->termtable.size();
   entry->terms[entry->cur_index].t = t;
   entry->terms[entry->cur_index].next = entry->termtable[hnr];
   entry->termtable[hnr] = &entry->terms[entry->cur_index];
@@ -639,7 +646,7 @@ static void write_symbols(ostream& os)
 
 static size_t find_term(sym_entry* entry, const aterm& t)
 {
-  size_t hnr = hash_number(detail::address(t)) % entry->termtable_size;
+  size_t hnr = hash_number(detail::address(t)) % entry->termtable.size();
   trm_bucket* cur = entry->termtable[hnr];
 
   assert(cur);
@@ -719,41 +726,11 @@ static bool write_term(const aterm& t, const std::map<function_symbol, size_t>& 
   return true;
 }
 
-/**
- * Free all space allocated by the bafio write functions.
- */
 
-static void free_write_space()
-{
-  for (size_t i=0; i<nr_unique_symbols; i++)
-  {
-    sym_entry* entry = &sym_entries[i];
-
-    free(entry->termtable);
-    entry->termtable = nullptr;
-
-    for (size_t j=0; j<entry->arity; j++)
-    {
-      top_symbols_t* topsyms = &entry->top_symbols[j];
-      topsyms->symbols=std::vector<top_symbol>();
-      topsyms->toptable.clear();
-      /* if (topsyms->toptable)
-      {
-        free(topsyms->toptable);
-        topsyms->toptable = nullptr;
-      } */
-    }
-
-    entry->top_symbols=std::vector<top_symbols_t>();
-  }
-  sym_entries=std::vector<sym_entry>();
-}
-
-
-static bool write_baf(const aterm& t, ostream& os)
+bool write_baf(const aterm& t, ostream& os)
 {
   size_t nr_unique_terms = 0;
-  const size_t nr_symbols = detail::function_symbol_index_table_number_of_elements*FUNCTION_SYMBOL_BLOCK_SIZE;
+  // const size_t nr_symbols = detail::function_symbol_index_table_number_of_elements*FUNCTION_SYMBOL_BLOCK_SIZE;
 
   /* Initialize bit buffer */
   bit_buffer     = '\0';
@@ -768,41 +745,32 @@ static bool write_baf(const aterm& t, ostream& os)
 
   /* Collect all unique symbols in the input term */
 
-  size_t cur;
-  for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
+  size_t cur=0;
+  // for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
+  for(detail::_function_symbol& entry: function_symbol::function_symbol_store())
   {
-    const detail::_function_symbol* entry = &detail::function_symbol_index_table[lcv >> FUNCTION_SYMBOL_BLOCK_CLASS][lcv & FUNCTION_SYMBOL_BLOCK_MASK]; 
-    if (entry->reference_count>0)
+    // const detail::_function_symbol* entry = &detail::function_symbol_index_table[lcv >> FUNCTION_SYMBOL_BLOCK_CLASS][lcv & FUNCTION_SYMBOL_BLOCK_MASK]; 
+    // if (entry.reference_count>0)
+    // 
+    const function_symbol sym(&entry);
+    if (count[sym]>0)
     {
-      const function_symbol sym(entry);
-      if (count[sym]>0)
-      {
-        nr_unique_terms += count[sym];
+      nr_unique_terms += count[sym];
 
-        sym_entries[cur].term_width = bit_width(count[sym]);
-        sym_entries[cur].id = sym;
-        sym_entries[cur].arity = sym.arity();
-        sym_entries[cur].nr_terms = count[sym];
-        sym_entries[cur].terms.resize(count[sym]);
-        sym_entries[cur].termtable_size = (count[sym]*5)/4;
-        sym_entries[cur].termtable =
-          (trm_bucket**) calloc(sym_entries[cur].termtable_size,
-                                   sizeof(trm_bucket*));
-        if (!sym_entries[cur].termtable)
-        {
-          throw aterm_io_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
-        }
+      sym_entries[cur].term_width = bit_width(count[sym]);
+      sym_entries[cur].id = sym;
+      sym_entries[cur].arity = sym.arity();
+      sym_entries[cur].nr_terms = count[sym];
+      sym_entries[cur].terms.resize(count[sym]);
+      sym_entries[cur].termtable =std::vector<trm_bucket*>((count[sym]*5)/4);
+      index[sym] = cur;
+      count[sym] = 0; /* restore invariant that symbolcount is zero */
 
-        index[sym] = cur;
-        count[sym] = 0; /* restore invariant that symbolcount is zero */
-
-        cur++;
-      }
+      cur++;
     }
   }
 
   assert(cur == nr_unique_symbols);
-
 
   collect_terms(t, index);
 
@@ -836,7 +804,9 @@ static bool write_baf(const aterm& t, ostream& os)
     return false;
   }
 
-  free_write_space();
+  count.clear();
+  index.clear();
+  sym_entries.clear();
 
   return true;
 }
@@ -971,7 +941,7 @@ static aterm read_term(sym_read_entry* sym, istream& is)
       current.callresult = nullptr;
     }
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
-    if (current.sym->sym != detail::function_adm.AS_INT && current.arg < current.sym->arity)
+    if (current.sym->sym != detail::function_adm.AS_INT() && current.arg < current.sym->arity)
     {
       if (readBits(value, current.sym->sym_width[current.arg], is) &&
           value < current.sym->nr_topsyms[current.arg])
@@ -994,18 +964,18 @@ static aterm read_term(sym_read_entry* sym, istream& is)
       throw mcrl2::runtime_error("Could not read valid aterm from stream.");
     }
 
-    if (current.sym->sym == detail::function_adm.AS_INT)
+    if (current.sym->sym == detail::function_adm.AS_INT())
     {
       if (readBits(value, INT_SIZE_IN_BAF, is))
       {
         *current.result = aterm_int(value);
       }
     }
-    else if (current.sym->sym==detail::function_adm.AS_EMPTY_LIST)
+    else if (current.sym->sym==detail::function_adm.AS_EMPTY_LIST())
     {
       *current.result = aterm_list();
     }
-    else if (current.sym->sym == detail::function_adm.AS_LIST)
+    else if (current.sym->sym == detail::function_adm.AS_LIST())
     {
       aterm_list result = atermpp::down_cast<aterm_list>(current.args[1]);
       result.push_front(current.args[0]);
@@ -1020,43 +990,6 @@ static aterm read_term(sym_read_entry* sym, istream& is)
   while (!stack.empty());
 
   return result;
-}
-
-/**
- * Free all temporary space allocated by the baf read functions.
- */
-
-static void free_read_space()
-{
-  /* size_t i, j;
-
-  for (i=0; i<nr_unique_symbols; i++)
-  {
-    sym_read_entry* entry = &read_symbols[i];
-
-    / * if (entry->nr_topsyms)
-    {
-      free(entry->nr_topsyms);
-    } * /
-    / * if (entry->sym_width)
-    {
-      free(entry->sym_width);
-    } * /
-
-    / * for (j=0; j<entry->arity; j++)
-    {
-      free(entry->topsyms[j]);
-    }
-    if (entry->topsyms)
-    {
-      free(entry->topsyms);
-    } * /
-
-  } */
-  read_symbols=std::vector<sym_read_entry>(); // Release memory, and prevent read symbols to be
-                                              // destructed after the destruction of function_symbols, which leads
-                                              // to decreasing reference counters, after function_lookup_table has
-                                              // been destroyed (i.e. core dump).
 }
 
 /**
@@ -1103,7 +1036,10 @@ aterm read_baf(istream& is)
 
   val = readInt(is);
   result = read_term(&read_symbols[val], is);
-  free_read_space();
+  read_symbols=std::vector<sym_read_entry>(); // Release memory, and prevent read symbols to be
+                                              // destructed after the destruction of function_symbols, which leads
+                                              // to decreasing reference counters, after function_lookup_table has
+                                              // been destroyed (i.e. core dump).
   return result;
 }
 
