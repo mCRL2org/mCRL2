@@ -229,18 +229,13 @@ class check_complexity
         superfluous_work = 0;
     }
 
-    static void init(state_type new_n, trans_type new_m);
-
     template <enum counter_type FirstCounter, enum counter_type LastCounter,
                                                     typename T = unsigned char>
     class counter_t
     {
-      public:     // Made counters public as otherwise compilation does not work on Ubuntu and Fedora. 
+      protected:
         // make counters[] have a multiple of 4 as size.
         T counters[(LastCounter - FirstCounter + 4) & ~3];
-
-      protected:
-        // friend void check_complexity::init(state_type new_n, trans_type new_m);
 
         void cancel_work(enum counter_type first, enum counter_type last)
         {
@@ -282,7 +277,8 @@ class check_complexity
         }
 
       public:
-        counter_t()  {  memset(counters, '\0', sizeof(counters));  }
+        counter_t()  {  }
+        void init()  {  memset(counters, '\0', sizeof(counters));  }
 
         bool add_check_work(enum counter_type ctr, T max_value)
         {
@@ -338,6 +334,7 @@ class check_complexity
     class constln_counter_t : public counter_t<CONSTLN_MIN, CONSTLN_MAX>
     {
       public:
+        constln_counter_t()  {  init();  }
         bool no_temporary_work() const
         {
             return 0 == counters[delete_constellations - CONSTLN_MIN];
@@ -346,6 +343,7 @@ class check_complexity
     class block_counter_t : public counter_t<BLOCK_MIN, BLOCK_MAX>
     {
       public:
+        block_counter_t()  {  init();  }
         bool no_temporary_work() const
         {
             return 0 == counters[for_all_blocks_repl_trans - BLOCK_MIN] &&
@@ -355,6 +353,7 @@ class check_complexity
     class B_to_C_counter_t : public counter_t<B_TO_C_MIN, B_TO_C_MAX>
     {
       public:
+        B_to_C_counter_t()  {  init();  }
         bool no_temporary_work() const
         {
             return 0==counters[for_all_constellations_C_not_in_R_from_RfnB_4_4-
@@ -374,6 +373,7 @@ class check_complexity
     class state_counter_t : public counter_t<STATE_MIN, STATE_MAX>
     {
       public:
+        state_counter_t()  {  init();  }
         bool no_temporary_work() const
         {
             return 0 == counters[
@@ -427,6 +427,7 @@ class check_complexity
     class trans_counter_t : public counter_t<TRANS_MIN, TRANS_MAX>
     {
       public:
+        trans_counter_t()  {  init();  }
         bool no_temporary_work() const
         {
             return 0 == counters[while_Test_is_not_empty_3_6l_s_is_red_3_9l -
@@ -539,6 +540,22 @@ class check_complexity
                                      if___s_prime_has_transition_to_SpC_3_23l);
         }
     };
+
+
+    // static void test_work_names(); // is not actually called, see init().
+    static void init(state_type new_n, trans_type new_m)
+    {
+        // as debugging measure:
+        // test_work_names();
+
+        n = new_n;
+        m = new_m;
+        log_n = log2((double) new_n);
+        global_counter.init();
+        assert(0 == sensible_work);     sensible_work = 0;
+        assert(0 == superfluous_work);  superfluous_work = 0;
+    }
+
 
     #define add_work(C,ctr,max_value)                                         \
             do                                                                \

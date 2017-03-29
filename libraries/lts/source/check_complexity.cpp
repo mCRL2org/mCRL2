@@ -140,10 +140,10 @@ const char *check_complexity::work_names[TRANS_MAX - GLOBAL_MIN + 1] =
 
 #if 0
 // the function is not really used.  See the code of check_complexity::init()
-// below.
-static void test_work_names()
+// in check_complexity.h.
+static void check_complexity::test_work_names()
 {
-    int i = check_complexity::GLOBAL_MIN;
+    int i = GLOBAL_MIN;
     // global counters
     test_work_name(i, find_extra_Kripke_states_init_helper);
     test_work_name(i, initialise_blocks_init_helper);
@@ -245,27 +245,9 @@ static void test_work_names()
     test_work_name(i, for_all_old_bottom_states_s_in_RedB_4_15);
     assert(check_complexity::TRANS_MAX + 1 == i);
 }
-#endif
+#endif // #if 0
 
-
-void check_complexity::init(state_type new_n, trans_type new_m)
-{
-    // as debugging measure:
-    // test_work_names();
-
-    n = new_n;
-    m = new_m;
-    log_n = log2((double) new_n);
-    for ( int i = 0 ; i <= GLOBAL_MAX - GLOBAL_MIN ; ++i )
-    {
-        global_counter.counters[i] = 0;
-    }
-    sensible_work = 0;
-    superfluous_work = 0;
-}
-
-
-#endif
+#endif // #ifndef NDEBUG
 
 } // end namespace bisim_gjkw
 } // end namespace detail
