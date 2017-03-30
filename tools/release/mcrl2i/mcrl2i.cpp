@@ -248,7 +248,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
       term=rewr(term);
       typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
-      enumerator_type enumerator(rewr, spec, rewr, 10000);
+      enumerator_type enumerator(rewr, spec, rewr, 10000, true);
 
       data::mutable_indexed_substitution<> sigma;
       std::deque<enumerator_list_element_with_substitution<> >

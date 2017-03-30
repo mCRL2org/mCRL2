@@ -715,6 +715,8 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
         void increment()
         {
           assert(!P->empty());
+          P->pop_front();
+          count += E->next(*P, *sigma, accept);
           if (count >= E->max_count())
           {
             if (E->throw_exceptions())
@@ -725,12 +727,10 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
             }
             else
             {
-              P->front().invalidate();
+              P->clear();
               return;
             }
           }
-          P->pop_front();
-          count += E->next(*P, *sigma, accept);
         }
 
         bool equal(iterator const& other) const
