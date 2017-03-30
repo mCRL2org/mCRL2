@@ -252,27 +252,6 @@ void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicat
 
 //--- replace -------------------------------------------------------------//
 
-template <typename ReplaceFunction>
-aterm replace_impl(const aterm& t, ReplaceFunction f);
-
-template <typename ReplaceFunction>
-struct replace_helper
-{
-  ReplaceFunction m_replace;
-
-  replace_helper(ReplaceFunction replace)
-    : m_replace(replace)
-  {}
-
-  /// \brief Function call operator.
-  /// \param t A term
-  /// \return The function result
-  aterm operator()(const aterm& t) const
-  {
-    return replace_impl(t, m_replace);
-  }
-};
-
 /// \brief Implements the replace algorithm
 /// \param t A term
 /// \param f A replace function on terms
@@ -284,38 +263,17 @@ aterm replace_impl(const aterm& t, ReplaceFunction f)
   {
     const aterm_appl& a = down_cast<aterm_appl>(t);
     const aterm fa = f(a);
-    return (a == fa) ? appl_apply(a, replace_helper<ReplaceFunction>(f)) : fa;
+    return (a == fa) ? appl_apply(a, [&](const aterm& x) { return replace_impl(x, f); }) : fa;
   }
   else if (t.type_is_list())
   {
     const aterm_list& l = down_cast<aterm_list>(t);
-    return aterm_list(l.begin(),l.end(), replace_helper<ReplaceFunction>(f));
+    return aterm_list(l.begin(), l.end(), [&](const aterm& x) { return replace_impl(x, f); } );
   }
   return t;
 }
 
 //--- partial replace -----------------------------------------------------//
-
-template <typename ReplaceFunction>
-aterm partial_replace_impl(const aterm& t, ReplaceFunction f);
-
-template <typename ReplaceFunction>
-struct partial_replace_helper
-{
-  ReplaceFunction m_replace;
-
-  partial_replace_helper(ReplaceFunction replace)
-    : m_replace(replace)
-  {}
-
-  /// \brief Function call operator
-  /// \param t A term
-  /// \return The function result
-  aterm operator()(const aterm& t) const
-  {
-    return partial_replace_impl(t, m_replace);
-  }
-};
 
 /// \brief Implements the partial_replace algorithm
 /// \param t A term
@@ -330,7 +288,7 @@ aterm partial_replace_impl(const aterm& t, ReplaceFunction f)
     std::pair<aterm_appl, bool> fa = f(a);
     if (fa.second) // continue recursion
     {
-      return appl_apply(fa.first, partial_replace_helper<ReplaceFunction>(f));
+      return appl_apply(fa.first, [&](const aterm& x) { return partial_replace_impl(x, f); } );
     }
     else
     {
@@ -340,33 +298,12 @@ aterm partial_replace_impl(const aterm& t, ReplaceFunction f)
   else if (t.type_is_list())
   {
     aterm_list l(t);
-    return aterm_list(l.begin(),l.end(), partial_replace_helper<ReplaceFunction>(f));
+    return aterm_list(l.begin(), l.end(), [&](const aterm& x) { return partial_replace_impl(x, f); } );
   }
   return t;
 }
 
 //--- bottom-up replace ---------------------------------------------------//
-
-template <typename ReplaceFunction>
-aterm bottom_up_replace_impl(const aterm& t, ReplaceFunction f);
-
-template <typename ReplaceFunction>
-struct bottom_up_replace_helper
-{
-  ReplaceFunction m_bottom_up_replace;
-
-  bottom_up_replace_helper(ReplaceFunction bottom_up_replace)
-    : m_bottom_up_replace(bottom_up_replace)
-  {}
-
-  /// \brief Function call operator
-  /// \param t A term
-  /// \return The function result
-  aterm operator()(const aterm& t) const
-  {
-    return bottom_up_replace_impl(t, m_bottom_up_replace);
-  }
-};
 
 /// \brief Implements the bottom_up_replace algorithm
 /// \param t A term
@@ -378,12 +315,12 @@ aterm bottom_up_replace_impl(const aterm& t, ReplaceFunction f)
   if (t.type_is_appl())
   {
     aterm_appl a(t);
-    return f(appl_apply(a, bottom_up_replace_helper<ReplaceFunction>(f)));
+    return f(appl_apply(a, [&](const aterm& x) { return bottom_up_replace_impl(x, f); }) );
   }
   else if (t.type_is_list())
   {
     aterm_list l(t);
-    return aterm_list(l.begin(),l.end(), bottom_up_replace_helper<ReplaceFunction>(f));
+    return aterm_list(l.begin(), l.end(), [&](const aterm& x) { return bottom_up_replace_impl(x, f); } );
   }
   return t;
 }
