@@ -56,8 +56,8 @@ s
   /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
   /* This check might break on perfectly valid architectures */
   /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-  static_assert(sizeof(size_t) == sizeof(aterm*));
-  static_assert(sizeof(size_t) >= 4);
+  static_assert(sizeof(size_t) == sizeof(aterm*), "");
+  static_assert(sizeof(size_t) >= 4, "");
 #ifdef WIN32
   if (s.rdbuf() == std::cout.rdbuf())
   {
