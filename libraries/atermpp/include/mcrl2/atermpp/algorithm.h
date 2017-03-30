@@ -38,7 +38,7 @@ UnaryFunction for_each(Term t, UnaryFunction op)
 /// \param match The predicate that determines if a subterm is a match
 /// \return A subterm that matches the given predicate, or aterm_appl() if none was found.
 template <typename Term, typename MatchPredicate>
-aterm_appl find_if(const Term &t, MatchPredicate match)
+aterm_appl find_if(const Term& t, MatchPredicate match)
 {
   aterm_appl output;
   detail::find_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type >(t, match, output);
@@ -64,7 +64,7 @@ aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
 /// \param match The predicate that determines if a subterm is a match
 /// \param destBegin The iterator range to which output is written.
 template <typename Term, typename MatchPredicate, typename OutputIterator>
-void find_all_if(const Term &t, MatchPredicate match, OutputIterator destBegin)
+void find_all_if(const Term& t, MatchPredicate match, OutputIterator destBegin)
 {
   OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
   detail::find_all_if_impl< typename std::add_lvalue_reference< MatchPredicate >::type >(t, match, i);
@@ -95,7 +95,7 @@ void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, Outpu
 /// \param r The replace function that is applied to subterms.
 /// \return The result of the replacement.
 template <typename Term, typename ReplaceFunction>
-Term replace(const Term &t, ReplaceFunction r)
+Term replace(const Term& t, ReplaceFunction r)
 {
   return vertical_cast<Term>(detail::replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r));
 }
@@ -108,9 +108,9 @@ Term replace(const Term &t, ReplaceFunction r)
 /// \param new_value The value that will be substituted.
 /// \return The result of the replacement.
 template <typename Term>
-Term replace(const Term &t, const aterm &old_value, const aterm &new_value)
+Term replace(const Term& t, const aterm& old_value, const aterm& new_value)
 {
-  return replace(t, detail::default_replace(old_value, new_value));
+  return replace(t, [&](const aterm& t) { return t == old_value ? new_value : t; });
 }
 
 /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
@@ -139,7 +139,7 @@ Term bottom_up_replace(Term t, ReplaceFunction r)
 template <typename Term>
 Term bottom_up_replace(Term t, const aterm_appl& old_value, const aterm_appl& new_value)
 {
-  return bottom_up_replace(t, detail::default_replace(old_value, new_value));
+  return bottom_up_replace(t, [&](const aterm& t) { return t == old_value ? new_value : t; });
 }
 
 /// \brief Replaces subterms x of t by r(x). The replace function r returns an
