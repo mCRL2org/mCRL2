@@ -16,7 +16,6 @@
 #include <type_traits>
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
@@ -67,9 +66,9 @@ struct builder
   void update(T& x, typename atermpp::enable_if_container<T>::type* = nullptr)
   {
     msg("container visit");
-    for (typename T::iterator v = x.begin(); v != x.end(); ++v)
+    for (auto& v: x)
     {
-      static_cast<Derived*>(this)->update(*v);
+      static_cast<Derived*>(this)->update(v);
     }
   }
 
@@ -79,9 +78,8 @@ struct builder
   {
     msg("set visit");
     std::set<T> result;
-    for (typename std::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+    for (T v: x)
     {
-      T v = *i;
       static_cast<Derived*>(this)->update(v);
       result.insert(v);
     }
@@ -93,12 +91,7 @@ struct builder
   atermpp::term_list<T> apply(const atermpp::term_list<T>& x)
   {
     msg("term_list traversal");
-    std::vector<T> result;
-    for (typename atermpp::term_list<T>::const_iterator v = x.begin(); v != x.end(); ++v)
-    {
-      result.push_back(atermpp::vertical_cast<T>(static_cast<Derived*>(this)->apply(*v)));
-    }
-    return atermpp::term_list<T>(result.begin(),result.end());
+    return atermpp::term_list<T>(x.begin(), x.end(), [&](const T& v) { return atermpp::vertical_cast<T>(static_cast<Derived*>(this)->apply(v)); } );
   }
 };
 
