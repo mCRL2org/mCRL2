@@ -22,13 +22,13 @@ namespace data {
 namespace detail {
 
 data_expression quantifiers_inside(const data_expression& x);
-data_expression quantifiers_inside_forall(const std::set<data::variable>& variables, const data_expression& x);
-data_expression quantifiers_inside_exists(const std::set<data::variable>& variables, const data_expression& x);
+data_expression quantifiers_inside_forall(const std::set<variable>& variables, const data_expression& x);
+data_expression quantifiers_inside_exists(const std::set<variable>& variables, const data_expression& x);
 
 inline
-std::set<data::variable> make_variable_set(const data::variable_list& x)
+std::set<variable> make_variable_set(const variable_list& x)
 {
-  return std::set<data::variable>(x.begin(), x.end());
+  return std::set<variable>(x.begin(), x.end());
 }
 
 struct quantifiers_inside_builder: public data_expression_builder<quantifiers_inside_builder>
@@ -56,9 +56,9 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
   typedef data_expression_builder<quantifiers_inside_forall_builder> super;
   using super::apply;
 
-  const std::set<data::variable>& V;
+  const std::set<variable>& V;
 
-  quantifiers_inside_forall_builder(const std::set<data::variable>& V_)
+  quantifiers_inside_forall_builder(const std::set<variable>& V_)
     : V(V_)
   {}
 
@@ -84,7 +84,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
     }
     else
     {
-      return make_forall(data::variable_list(V.begin(), V.end()), exists(x.variables(), phi));
+      return make_forall(variable_list(V.begin(), V.end()), exists(x.variables(), phi));
     }
   }
 
@@ -94,10 +94,10 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
   {
     using utilities::detail::set_intersection;
     std::set<variable> W = set_intersection(V, find_free_variables(x));
-    return make_forall(data::variable_list(W.begin(), W.end()), x);
+    return make_forall(variable_list(W.begin(), W.end()), x);
   }
 
-  data_expression apply(const data::data_expression& x)
+  data_expression apply(const data_expression& x)
   {
     if(sort_bool::is_not_application(x))
     {
@@ -124,7 +124,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
       std::set<variable> vars_phi = find_free_variables(phi);
       std::set<variable> vars_psi = find_free_variables(psi);
       std::set<variable> W = set_intersection(set_intersection(V, vars_phi), vars_psi);
-      return make_forall(data::variable_list(W.begin(), W.end()),
+      return make_forall(variable_list(W.begin(), W.end()),
                          sort_bool::or_(quantifiers_inside_forall(set_difference(set_intersection(V, vars_phi), vars_psi), phi),
                              quantifiers_inside_forall(set_difference(set_intersection(V, vars_psi), vars_phi), psi)
                             )
@@ -139,7 +139,7 @@ struct quantifiers_inside_forall_builder: public data_expression_builder<quantif
       std::set<variable> vars_phi = find_free_variables(phi);
       std::set<variable> vars_psi = find_free_variables(psi);
       std::set<variable> W = set_intersection(set_intersection(V, vars_phi), vars_psi);
-      return make_forall(data::variable_list(W.begin(), W.end()),
+      return make_forall(variable_list(W.begin(), W.end()),
                          sort_bool::implies(quantifiers_inside_exists(set_difference(set_intersection(V, vars_phi), vars_psi), phi),
                              quantifiers_inside_forall(set_difference(set_intersection(V, vars_psi), vars_phi), psi)
                             )
@@ -157,9 +157,9 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
   typedef data_expression_builder<quantifiers_inside_exists_builder> super;
   using super::apply;
 
-  const std::set<data::variable>& V;
+  const std::set<variable>& V;
 
-  quantifiers_inside_exists_builder(const std::set<data::variable>& V_)
+  quantifiers_inside_exists_builder(const std::set<variable>& V_)
     : V(V_)
   {}
 
@@ -185,7 +185,7 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
     }
     else
     {
-      return make_exists(data::variable_list(V.begin(), V.end()), forall(x.variables(), phi));
+      return make_exists(variable_list(V.begin(), V.end()), forall(x.variables(), phi));
     }
   }
 
@@ -195,10 +195,10 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
   {
     using utilities::detail::set_intersection;
     std::set<variable> W = set_intersection(V, find_free_variables(x));
-    return make_exists(data::variable_list(W.begin(), W.end()), x);
+    return make_exists(variable_list(W.begin(), W.end()), x);
   }
 
-  data_expression apply(const data::data_expression& x)
+  data_expression apply(const data_expression& x)
   {
     if(sort_bool::is_not_application(x))
     {
@@ -211,10 +211,10 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
       using utilities::detail::set_intersection;
       data_expression const& phi = sort_bool::left(x);
       data_expression const& psi = sort_bool::right(x);
-      std::set<data::variable> vars_phi = find_free_variables(phi);
-      std::set<data::variable> vars_psi = find_free_variables(psi);
+      std::set<variable> vars_phi = find_free_variables(phi);
+      std::set<variable> vars_psi = find_free_variables(psi);
       std::set<variable> W = set_intersection(set_intersection(V, vars_phi), vars_psi);
-      return make_exists(data::variable_list(W.begin(), W.end()),
+      return make_exists(variable_list(W.begin(), W.end()),
                          sort_bool::and_(quantifiers_inside_exists(set_difference(set_intersection(V, vars_phi), vars_psi), phi),
                               quantifiers_inside_exists(set_difference(set_intersection(V, vars_psi), vars_phi), psi)
                              )
@@ -225,8 +225,8 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
       using utilities::detail::set_intersection;
       data_expression const& phi = sort_bool::left(x);
       data_expression const& psi = sort_bool::right(x);
-      std::set<data::variable> vars_phi = find_free_variables(phi);
-      std::set<data::variable> vars_psi = find_free_variables(psi);
+      std::set<variable> vars_phi = find_free_variables(phi);
+      std::set<variable> vars_psi = find_free_variables(psi);
       return sort_bool::or_(quantifiers_inside_exists(set_intersection(V, vars_phi), phi),
                  quantifiers_inside_exists(set_intersection(V, vars_psi), psi)
                 );
@@ -236,8 +236,8 @@ struct quantifiers_inside_exists_builder: public data_expression_builder<quantif
       using utilities::detail::set_intersection;
       data_expression const& phi = sort_bool::left(x);
       data_expression const& psi = sort_bool::right(x);
-      std::set<data::variable> vars_phi = find_free_variables(phi);
-      std::set<data::variable> vars_psi = find_free_variables(psi);
+      std::set<variable> vars_phi = find_free_variables(phi);
+      std::set<variable> vars_psi = find_free_variables(psi);
       return sort_bool::implies(quantifiers_inside_forall(set_intersection(V, vars_phi), phi),
                  quantifiers_inside_exists(set_intersection(V, vars_psi), psi)
                 );
@@ -254,14 +254,14 @@ data_expression quantifiers_inside(const data_expression& x)
 }
 
 inline
-data_expression quantifiers_inside_forall(const std::set<data::variable>& variables, const data_expression& x)
+data_expression quantifiers_inside_forall(const std::set<variable>& variables, const data_expression& x)
 {
   quantifiers_inside_forall_builder f(variables);
   return f.apply(x);
 }
 
 inline
-data_expression quantifiers_inside_exists(const std::set<data::variable>& variables, const data_expression& x)
+data_expression quantifiers_inside_exists(const std::set<variable>& variables, const data_expression& x)
 {
   quantifiers_inside_exists_builder f(variables);
   return f.apply(x);
