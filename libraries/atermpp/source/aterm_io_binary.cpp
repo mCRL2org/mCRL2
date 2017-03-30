@@ -56,9 +56,12 @@ s
   /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
   /* This check might break on perfectly valid architectures */
   /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-  static_assert(sizeof(size_t) == sizeof(aterm*), "");
-  static_assert(sizeof(size_t) >= 4, "");
+
+  static_assert(sizeof(size_t) == sizeof(aterm*), "The size of an aterm pointer is not equal to the size of type size_t. Cannot compile the MCRL2 toolset for this platform.");
+  static_assert(sizeof(size_t) >= 4,"The size of size_t should at least be four bytes. Cannot compile the toolset for this platform.");
+
 #ifdef WIN32
+static_assert(false,"This code is never executed and can be removed.");
   if (s.rdbuf() == std::cout.rdbuf())
   {
     fflush(stdout);

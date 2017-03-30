@@ -73,6 +73,7 @@ class function_symbol
 
     void free_function_symbol()
     {
+      assert(is_valid());
       function_symbol_store().erase(m_function_symbol->first);
     }
 
@@ -123,7 +124,9 @@ class function_symbol
     /// \param arity_ The arity of the function.
     function_symbol(const std::string& name, const size_t arity_)
      : function_symbol(name, arity_, true)
-    {}
+    {
+      increase_reference_count<false>();
+    }
 
     /// \brief Copy constructor
     function_symbol(const function_symbol& f)
@@ -242,9 +245,9 @@ class function_symbol
 
 /// \brief Sends the name of a function symbol to an ostream.
 inline
-std::ostream& operator<<(std::ostream& out, const function_symbol& t)
+std::ostream& operator<<(std::ostream& out, const function_symbol& f)
 {
-  return out << t.name();
+  return out << f.name();
 }
 
 } // namespace atermpp
@@ -260,9 +263,9 @@ namespace std
 /// \param t2 The second term
 
 template <>
-inline void swap(atermpp::function_symbol& t1, atermpp::function_symbol& t2)
+inline void swap(atermpp::function_symbol& f1, atermpp::function_symbol& f2)
 {
-  t1.swap(t2);
+  f1.swap(f2);
 }
 } // namespace std
 
