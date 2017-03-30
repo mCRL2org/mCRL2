@@ -282,13 +282,13 @@ aterm replace_impl(const aterm& t, ReplaceFunction f)
 {
   if (t.type_is_appl())
   {
-    const aterm_appl& a = deprecated_cast<aterm_appl>(t);
+    const aterm_appl& a = down_cast<aterm_appl>(t);
     const aterm fa = f(a);
     return (a == fa) ? appl_apply(a, replace_helper<ReplaceFunction>(f)) : fa;
   }
   else if (t.type_is_list())
   {
-    const aterm_list& l = deprecated_cast<aterm_list>(t);
+    const aterm_list& l = down_cast<aterm_list>(t);
     return aterm_list(l.begin(),l.end(), replace_helper<ReplaceFunction>(f));
   }
   return t;
