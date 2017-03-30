@@ -31,7 +31,6 @@ class function_symbol
   friend size_t detail::addressf(const function_symbol& t);
   friend class function_symbol_generator;
   friend size_t detail::get_sufficiently_large_postfix_index(const std::string& prefix_);
-  friend bool write_baf(const atermpp::aterm& t, std::ostream& os);
 
   protected:
     
