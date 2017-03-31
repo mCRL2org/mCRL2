@@ -76,6 +76,18 @@ atermpp::aterm remove_index(const atermpp::aterm& x)
   return atermpp::bottom_up_replace(x, detail::index_remover());
 }
 
+inline
+atermpp::aterm add_index(const atermpp::aterm& x, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
+{
+  return atermpp::bottom_up_replace(x, detail::index_adder(), cache);
+}
+
+inline
+atermpp::aterm remove_index(const atermpp::aterm& x, std::unordered_map<atermpp::aterm_appl, atermpp::aterm>& cache)
+{
+  return atermpp::bottom_up_replace(x, detail::index_remover(), cache);
+}
+
 } // namespace detail
 
 } // namespace data

@@ -129,7 +129,8 @@ class boolean_equation_system
     void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {
       atermpp::aterm t = core::load_aterm(stream, binary, "BES", source);
-      t = bes::detail::add_index(t);
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      t = bes::detail::add_index(t, cache);
       if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error("The loaded ATerm is not a BES.");

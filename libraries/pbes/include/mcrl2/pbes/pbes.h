@@ -255,7 +255,8 @@ class pbes
     void load(std::istream& stream, bool binary=true, const std::string& source = "")
     {
       atermpp::aterm t = core::load_aterm(stream, binary, "PBES", source);
-      t = pbes_system::detail::add_index(t);
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      t = pbes_system::detail::add_index(t, cache);
       if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error("The loaded ATerm is not a PBES.");
@@ -279,7 +280,8 @@ class pbes
     /// much more compact than the ascii representation.
     void save(std::ostream& stream, bool binary = true) const
     {
-      atermpp::aterm term = pbes_system::detail::remove_index(pbes_to_aterm(*this));
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      atermpp::aterm term = pbes_system::detail::remove_index(pbes_to_aterm(*this), cache);
       if (binary)
       {
         write_term_to_binary_stream(term, stream);

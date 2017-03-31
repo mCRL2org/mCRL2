@@ -144,13 +144,14 @@ class specification_base
 
     /// \brief Reads the specification from a stream.
     /// \param stream An input stream.
-    /// \param binary An boolean that if true means the stream contains a term in binary encoding. 
-    //                Otherwise the encoding is textual. 
+    /// \param binary An boolean that if true means the stream contains a term in binary encoding.
+    //                Otherwise the encoding is textual.
     /// \param source The source from which the stream originates. Used for error messages.
     void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {
       atermpp::aterm t = core::load_aterm(stream, binary, "LPS", source);
-      t = data::detail::add_index(t);
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      t = data::detail::add_index(t, cache);
       if (!t.type_is_appl() || !is_specification(atermpp::down_cast<const atermpp::aterm_appl>(t)))
       {
         throw mcrl2::runtime_error("Input stream does not contain an LPS");
