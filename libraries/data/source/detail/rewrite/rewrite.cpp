@@ -355,7 +355,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  const bool throw_exceptions = true;
+  const bool throw_exceptions = false;
   const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
@@ -370,7 +370,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::true_() &&
-         sol!=enumerator.end() && sol->is_valid();
+         sol!=enumerator.end();
          ++sol)
   {
     if (partial_result==sort_bool::false_())
@@ -458,7 +458,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  const bool throw_exceptions = true;
+  const bool throw_exceptions = false;
   const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_true, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
@@ -473,7 +473,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
   for( ; loop_upperbound>0 &&
          partial_result!=sort_bool::false_() &&
-         sol!=enumerator.end() && sol->is_valid();
+         sol!=enumerator.end();
          ++sol)
   {
     if (partial_result==sort_bool::true_())

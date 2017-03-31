@@ -69,7 +69,6 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   quantifier_expression_test("forall x: Nat. x == 3", "false", dataspec, r);
   quantifier_expression_test("exists x: Nat. x == 3", "true", dataspec, r);
   quantifier_expression_test("forall x: Pos. exists y: Pos.x == y+1", "false", dataspec, r);
-  quantifier_expression_test("forall x: Pos. exists y: Pos.x == y+1", "false", dataspec, r);
   /* Test 15. Test whether elimination of quantifiers also happens inside a term. */
   quantifier_expression_test("(exists x_0: Bool. false) && (forall x_0: Nat. true)", "false", dataspec, r);
   quantifier_expression_test("(forall x_0: Pos. true) || (exists x_0: Bool. false)", "true", dataspec, r);
