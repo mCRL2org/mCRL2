@@ -22,8 +22,8 @@
 namespace atermpp
 {
 class aterm;
-void detail::initialise_aterm_administration();
-void detail::initialise_function_map_administration();
+// void detail::initialise_aterm_administration();
+// void detail::initialise_function_map_administration();
 
 class function_symbol
 {

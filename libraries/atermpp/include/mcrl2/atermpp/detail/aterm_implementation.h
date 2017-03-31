@@ -76,8 +76,8 @@ extern TermInfo *terminfo;
 extern size_t garbage_collect_count_down;
 
 // void initialise_administration();
-void initialise_aterm_administration();
-void initialise_function_map_administration();
+// void initialise_aterm_administration();
+// void initialise_function_map_administration();
 
 void resize_aterm_hashtable();
 void allocate_block(const size_t size);
