@@ -34,24 +34,24 @@ class function_symbol
 
   protected:
     
-    typedef std::unordered_map<detail::_function_symbol_primary_data, detail::_function_symbol_auxiliary_data> function_symbol_store_type;
-    typedef std::pair<function_symbol_store_type::iterator, bool> function_symbol_iterator_bool_pair;
-
+    typedef std::pair<detail::function_symbol_store_class::iterator, bool> function_symbol_iterator_bool_pair;
+    
     detail::_function_symbol* m_function_symbol;
+    static bool m_function_symbol_store_is_defined; // This variable indicates that the function_symbol_store
+                                                    // is defined. It is maintained in the function_symbol_store_class.
 
     /// This is a trick to do initialise_aterm_administration before function symbols are accessed.
-    static function_symbol_store_type function_symbol_store_helper()
+    /* static detail::function_symbol_store_class function_symbol_store_helper()
     {
-      function_symbol_store_type f_store;
+      detail::function_symbol_store_class f_store(m_function_symbol_store_is_defined);
       detail::initialise_aterm_administration();
       detail::initialise_function_map_administration();
       return f_store;
-    }
+    } */
 
-
-    static function_symbol_store_type& function_symbol_store()
+    static detail::function_symbol_store_class& function_symbol_store()
     {
-      static function_symbol_store_type f_store=function_symbol_store_helper();
+      static detail::function_symbol_store_class f_store(m_function_symbol_store_is_defined);
       return f_store;
     }
 
@@ -80,12 +80,14 @@ class function_symbol
     template <bool CHECK>
     void increase_reference_count() 
     {
+      assert(m_function_symbol_store_is_defined);
       if (CHECK) assert(m_function_symbol->second.reference_count()>0);
       m_function_symbol->second.reference_count()++;
     }
 
     void decrease_reference_count() 
     {
+      assert(m_function_symbol_store_is_defined);
       assert(m_function_symbol->second.reference_count()>0);
 
       if (--m_function_symbol->second.reference_count()==0)
@@ -96,12 +98,13 @@ class function_symbol
 
     bool is_valid() const
     {
-      if (function_symbol_store().count(m_function_symbol->first)==0)
-      {
-        /* This function_symbol does not exist in the function_symbol_store. That is incorrect. */
-        return false;
-      }
-      return m_function_symbol->second.reference_count()>0;
+      assert(m_function_symbol_store_is_defined);
+      /* This function must exist in the store */
+      assert(function_symbol_store().count(m_function_symbol->first)>0);
+      /* The reference count must be larger than 1, which ought to be an invariant
+         for all functions_symbols in function_symbol_store. */
+      assert(m_function_symbol->second.reference_count()>0);
+      return true;
     }
 
     /// A special function symbol constructor for use in the function symbol
@@ -125,6 +128,7 @@ class function_symbol
     function_symbol(const std::string& name, const size_t arity_)
      : function_symbol(name, arity_, true)
     {
+// std::cerr << "CONSTRUCT " << m_function_symbol << "    " << name << ": " << arity_ << "\n";
       increase_reference_count<false>();
     }
 
@@ -151,7 +155,16 @@ class function_symbol
     /// \brief Destructor
     ~function_symbol()
     {
-      decrease_reference_count();
+      // Some compilers destruct function symbols after 
+      // destructing the function symbol store when terminating
+      // the program. The test below avoids decreasing reference
+      // counts in freed memory. 
+      if (m_function_symbol_store_is_defined)
+      {
+// std::cerr << "DESTRUCT " << m_function_symbol << "\n";
+// std::cerr << name() << ": " << arity() << "\n";
+        decrease_reference_count();
+      }
     }
 
     /// \brief Return the name of the function_symbol.

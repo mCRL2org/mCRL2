@@ -32,9 +32,11 @@ namespace atermpp
 {
 
 /*  globals */
+bool function_symbol::m_function_symbol_store_is_defined=false;
 
 namespace detail
 {
+
   // A map that records for each prefix a function that must be called to set the
   // postfix number to a sufficiently high number if a function symbol with the same
   // prefix string is registered.

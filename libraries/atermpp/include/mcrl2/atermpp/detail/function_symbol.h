@@ -13,11 +13,7 @@
 #define DETAIL_FUNCTION_SYMBOL_H
 
 #include <string>
-
-// const size_t FUNCTION_SYMBOL_BLOCK_CLASS=14;
-// const size_t FUNCTION_SYMBOL_BLOCK_SIZE=1<<FUNCTION_SYMBOL_BLOCK_CLASS;
-// const size_t FUNCTION_SYMBOL_BLOCK_MASK=FUNCTION_SYMBOL_BLOCK_SIZE-1;
-
+#include <unordered_map>
 
 namespace atermpp
 {
@@ -81,10 +77,6 @@ class _function_symbol_auxiliary_data
       return m_reference_count;
     }
 };
-
-// A function symbol is a pair of essential and auxiliary information, stored in an unordered set.
-typedef std::pair<const _function_symbol_primary_data, _function_symbol_auxiliary_data> _function_symbol;
-
 
 // set index such that no function symbol exists with the name 'prefix + std::to_string(n)'
 // for all values n >= index
@@ -151,6 +143,47 @@ struct hash<atermpp::detail::_function_symbol_primary_data>
   }
 };
 }
+
+namespace atermpp
+{
+namespace detail
+{
+
+// A function symbol is a pair of essential and auxiliary information, stored in an unordered set.
+typedef std::pair<const _function_symbol_primary_data, _function_symbol_auxiliary_data> _function_symbol;
+
+
+// This is the class to store function symbols. It is just an unordered map.
+class function_symbol_store_class: 
+        public std::unordered_map<detail::_function_symbol_primary_data, 
+                                  detail::_function_symbol_auxiliary_data>
+{
+  protected:
+    bool& m_function_symbol_store_is_defined;
+
+  public:
+  
+    // Constructor. Also initialise other basic aterm data structures.
+    function_symbol_store_class(bool& function_symbol_store_is_defined)
+      : m_function_symbol_store_is_defined(function_symbol_store_is_defined)
+    {
+      m_function_symbol_store_is_defined=true;
+      detail::initialise_aterm_administration();
+      detail::initialise_function_map_administration();
+    }
+
+    // \brief Destructor. Indicate that the function store does not exist anymore.
+    ~function_symbol_store_class()
+    {
+      m_function_symbol_store_is_defined=false;
+    }
+};
+} // namespace detail
+} // namespace atermpp
+
+
+
+
 
 #endif // DETAIL_FUNCTION_SYMBOL_H
 

@@ -348,7 +348,7 @@ static size_t readString(istream& is)
     text_buffer = (char*) realloc(text_buffer, text_buffer_size);
     if (!text_buffer)
     {
-      throw aterm_io_error("out of memory in readString (" + to_string(text_buffer_size) + ")");
+      throw aterm_io_error("Out of memory while reading the input file. Fail to claim a block of memory of size "+ to_string(text_buffer_size) + ".");
     }
   }
 
@@ -368,7 +368,7 @@ static void write_symbol(const function_symbol& sym, ostream& os)
   const char* name = sym.name().c_str();
   writeString(name, strlen(name), os);
   writeInt(sym.arity(), os);
-  writeInt(true, os);
+  writeInt(true, os);  /* This is redundant and can be removed XXXXXXXXXXXXX. See also YYYYYYYYYYY */
 }
 
 /**
@@ -805,7 +805,7 @@ static function_symbol read_symbol(istream& is)
   text_buffer[len] = '\0';
 
   std::size_t arity = readInt(is);
-  /* std::size_t quoted = */ readInt(is);
+  /* std::size_t quoted = */ readInt(is); /* This is redundant and can be removed. See also YYYYYYYYYY. XXXXXXXXXXX */
 
   return function_symbol(text_buffer, arity);
 }
