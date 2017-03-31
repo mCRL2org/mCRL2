@@ -28,7 +28,7 @@ namespace detail
 template <typename Term, typename Function>
 aterm_appl appl_apply(const term_appl<Term>& a, const Function f)
 {
-  return  term_appl<Term>(a.function(), a.begin(),a.end(),f);
+  return term_appl<Term>(a.function(), a.begin(), a.end(), f);
 }
 
 //--- find ----------------------------------------------------------------//
@@ -78,7 +78,7 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
 {
   if (t.type_is_list())
   {
-    const atermpp::aterm_list& l = atermpp::down_cast<aterm_list>(t);
+    const aterm_list& l = down_cast<aterm_list>(t);
     for (const aterm& x: l)
     {
       for_each_impl(x, op);
@@ -86,7 +86,7 @@ UnaryFunction for_each_impl(aterm t, UnaryFunction op)
   }
   else if (t.type_is_appl())
   {
-    const atermpp::aterm_appl& a = atermpp::down_cast<aterm_appl>(t);
+    const aterm_appl& a = down_cast<aterm_appl>(t);
     if (op(t))
     {
       for (const aterm& x: a)
@@ -109,7 +109,7 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
 {
   if (t.type_is_appl())
   {
-    const atermpp::aterm_appl& a = atermpp::down_cast<aterm_appl>(t);
+    const aterm_appl& a = down_cast<aterm_appl>(t);
     if (match(a))
     {
       output = a;
@@ -123,7 +123,7 @@ bool find_if_impl(const aterm& t, MatchPredicate match, aterm_appl& output)
   }
   else if (t.type_is_list())
   {
-    const atermpp::aterm_list& l = atermpp::down_cast<aterm_list>(t);
+    const aterm_list& l = down_cast<aterm_list>(t);
     for (const aterm& x: l)
     {
       if (find_if_impl(x, match, output))
@@ -146,7 +146,7 @@ void find_all_if_impl(const aterm& t, MatchPredicate op, OutputIterator& destBeg
 
   if (t.type_is_list())
   {
-    const atermpp::aterm_list& l = atermpp::down_cast<aterm_list>(t);
+    const aterm_list& l = down_cast<aterm_list>(t);
     for (const aterm& x: l)
     {
       find_all_if_impl<MatchPredicate>(x, op, destBegin);
@@ -154,7 +154,7 @@ void find_all_if_impl(const aterm& t, MatchPredicate op, OutputIterator& destBeg
   }
   else if (t.type_is_appl())
   {
-    const atermpp::aterm_appl& a = atermpp::down_cast<aterm_appl>(t);
+    const aterm_appl& a = down_cast<aterm_appl>(t);
     if (op(a))
     {
       *destBegin++ = vertical_cast<value_type>(a);
@@ -181,7 +181,7 @@ aterm_appl partial_find_if_impl(const aterm& t, MatchPredicate match, StopPredic
 {
   if (t.type_is_appl())
   {
-    const atermpp::aterm_appl& a = atermpp::down_cast<aterm_appl>(t);
+    const aterm_appl& a = down_cast<aterm_appl>(t);
     if (match(a))
     {
       return a; // report the match
@@ -202,7 +202,7 @@ aterm_appl partial_find_if_impl(const aterm& t, MatchPredicate match, StopPredic
 
   if (t.type_is_list())
   {
-    const atermpp::aterm_list& l = atermpp::down_cast<aterm_list>(t);
+    const aterm_list& l = down_cast<aterm_list>(t);
     for (const aterm& x: l)
     {
       aterm_appl result = partial_find_if_impl<MatchPredicate, StopPredicate>(x, match, stop);
@@ -225,7 +225,7 @@ void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicat
 {
   if (t.type_is_appl())
   {
-    const atermpp::aterm_appl& a = atermpp::down_cast<aterm_appl>(t);
+    const aterm_appl& a = down_cast<aterm_appl>(t);
     if (match(a))
     {
       *destBegin++ = aterm_appl(t);
@@ -242,87 +242,12 @@ void partial_find_all_if_impl(const aterm& t, MatchPredicate match, StopPredicat
 
   if (t.type_is_list())
   {
-    const atermpp::aterm_list& l = atermpp::down_cast<aterm_list>(t);
+    const aterm_list& l = down_cast<aterm_list>(t);
     for (const aterm& x: l)
     {
       partial_find_all_if_impl<MatchPredicate, StopPredicate>(x, match, stop, destBegin);
     }
   }
-}
-
-//--- replace -------------------------------------------------------------//
-
-/// \brief Implements the replace algorithm
-/// \param t A term
-/// \param f A replace function on terms
-/// \return The result of the algorithm
-template <typename ReplaceFunction>
-aterm replace_impl(const aterm& t, ReplaceFunction f)
-{
-  if (t.type_is_appl())
-  {
-    const aterm_appl& a = down_cast<aterm_appl>(t);
-    const aterm fa = f(a);
-    return (a == fa) ? appl_apply(a, [&](const aterm& x) { return replace_impl(x, f); }) : fa;
-  }
-  else if (t.type_is_list())
-  {
-    const aterm_list& l = down_cast<aterm_list>(t);
-    return aterm_list(l.begin(), l.end(), [&](const aterm& x) { return replace_impl(x, f); } );
-  }
-  return t;
-}
-
-//--- partial replace -----------------------------------------------------//
-
-/// \brief Implements the partial_replace algorithm
-/// \param t A term
-/// \param f A replace function on terms
-/// \return The result of the algorithm
-template <typename ReplaceFunction>
-aterm partial_replace_impl(const aterm& t, ReplaceFunction f)
-{
-  if (t.type_is_appl())
-  {
-    aterm_appl a(t);
-    std::pair<aterm_appl, bool> fa = f(a);
-    if (fa.second) // continue recursion
-    {
-      return appl_apply(fa.first, [&](const aterm& x) { return partial_replace_impl(x, f); } );
-    }
-    else
-    {
-      return fa.first;
-    }
-  }
-  else if (t.type_is_list())
-  {
-    aterm_list l(t);
-    return aterm_list(l.begin(), l.end(), [&](const aterm& x) { return partial_replace_impl(x, f); } );
-  }
-  return t;
-}
-
-//--- bottom-up replace ---------------------------------------------------//
-
-/// \brief Implements the bottom_up_replace algorithm
-/// \param t A term
-/// \param f A replace function on terms
-/// \return The result of the algorithm
-template <typename ReplaceFunction>
-aterm bottom_up_replace_impl(const aterm& t, ReplaceFunction f)
-{
-  if (t.type_is_appl())
-  {
-    aterm_appl a(t);
-    return f(appl_apply(a, [&](const aterm& x) { return bottom_up_replace_impl(x, f); }) );
-  }
-  else if (t.type_is_list())
-  {
-    aterm_list l(t);
-    return aterm_list(l.begin(), l.end(), [&](const aterm& x) { return bottom_up_replace_impl(x, f); } );
-  }
-  return t;
 }
 
 } // namespace detail

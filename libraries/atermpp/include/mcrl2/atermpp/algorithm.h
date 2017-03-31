@@ -13,14 +13,136 @@
 #define MCRL2_ATERMPP_ALGORITHM_H
 
 #include <type_traits>
+#include <unordered_map>
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/builder.h"
 #include "mcrl2/atermpp/detail/algorithm_impl.h"
 
 namespace atermpp
 {
+
+namespace detail
+{
+
+template <template <class> class Builder, class ReplaceFunction>
+struct replace_aterm_builder: public Builder<replace_aterm_builder<Builder, ReplaceFunction> >
+{
+  typedef Builder<replace_aterm_builder<Builder, ReplaceFunction> > super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::derived;
+
+  ReplaceFunction f;
+
+  replace_aterm_builder(ReplaceFunction f_)
+    : f(f_)
+  {}
+
+  aterm apply(const aterm_appl& x)
+  {
+    const aterm fx = f(x);
+    return (x == fx) ? super::apply(x) : fx;
+  }
+};
+
+template <template <class> class Builder, class ReplaceFunction>
+replace_aterm_builder<Builder, ReplaceFunction>
+make_replace_aterm_builder(ReplaceFunction f)
+{
+  return replace_aterm_builder<Builder, ReplaceFunction>(f);
+}
+
+template <template <class> class Builder, class ReplaceFunction>
+struct partial_replace_aterm_builder: public Builder<partial_replace_aterm_builder<Builder, ReplaceFunction> >
+{
+  typedef Builder<partial_replace_aterm_builder<Builder, ReplaceFunction> > super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::derived;
+
+  ReplaceFunction f;
+
+  partial_replace_aterm_builder(ReplaceFunction f_)
+    : f(f_)
+  {}
+
+  aterm apply(const aterm_appl& x)
+  {
+    std::pair<aterm_appl, bool> p = f(x);
+    return p.second ? super::apply(x) : p.first;
+  }
+};
+
+template <template <class> class Builder, class ReplaceFunction>
+partial_replace_aterm_builder<Builder, ReplaceFunction>
+make_partial_replace_aterm_builder(ReplaceFunction f)
+{
+  return partial_replace_aterm_builder<Builder, ReplaceFunction>(f);
+}
+
+template <template <class> class Builder, class ReplaceFunction>
+struct bottom_up_replace_aterm_builder: public Builder<bottom_up_replace_aterm_builder<Builder, ReplaceFunction> >
+{
+  typedef Builder<bottom_up_replace_aterm_builder<Builder, ReplaceFunction> > super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::derived;
+
+  ReplaceFunction f;
+
+  bottom_up_replace_aterm_builder(ReplaceFunction f_)
+    : f(f_)
+  {}
+
+  aterm apply(const aterm_appl& x)
+  {
+    return f(down_cast<aterm_appl>(super::apply(x)));
+  }
+};
+
+template <template <class> class Builder, class ReplaceFunction>
+bottom_up_replace_aterm_builder<Builder, ReplaceFunction>
+make_bottom_up_replace_aterm_builder(ReplaceFunction f)
+{
+  return bottom_up_replace_aterm_builder<Builder, ReplaceFunction>(f);
+}
+
+template <class ReplaceFunction>
+struct cached_bottom_up_replace_aterm_builder: public bottom_up_replace_aterm_builder<builder, ReplaceFunction>
+{
+  typedef bottom_up_replace_aterm_builder<builder, ReplaceFunction> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::derived;
+
+  std::unordered_map<aterm_appl, aterm>& cache;
+
+  aterm apply(const aterm_appl& x)
+  {
+    auto p = cache.find(x);
+    if (p->second)
+    {
+      return p->first;
+    }
+    aterm result = super::apply(x);
+    cache[x] = result;
+    return result;
+  }
+
+  cached_bottom_up_replace_aterm_builder(ReplaceFunction f, std::unordered_map<aterm_appl, aterm>& cache_)
+    : super(f), cache(cache_)
+  {}
+};
+
+} // namespace detail
+
 /// \brief Calls op(elem) for subterms of the term t.
 /// \param t A term
 /// \param op The operation that is applied to subterms
@@ -97,7 +219,7 @@ void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, Outpu
 template <typename Term, typename ReplaceFunction>
 Term replace(const Term& t, ReplaceFunction r)
 {
-  return vertical_cast<Term>(detail::replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r));
+  return vertical_cast<Term>(detail::make_replace_aterm_builder<builder>(r).apply(t));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -125,8 +247,7 @@ Term replace(const Term& t, const aterm& old_value, const aterm& new_value)
 template <typename Term, typename ReplaceFunction>
 Term bottom_up_replace(Term t, ReplaceFunction r)
 {
-  aterm x = detail::bottom_up_replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r);
-  return Term(down_cast<aterm_appl>(x));
+  return vertical_cast<Term>(detail::make_bottom_up_replace_aterm_builder<builder>(r).apply(t));
 }
 
 /// \brief Replaces each subterm in t that is equal to old_value with new_value.
@@ -156,8 +277,24 @@ Term bottom_up_replace(Term t, const aterm_appl& old_value, const aterm_appl& ne
 template <typename Term, typename ReplaceFunction>
 Term partial_replace(Term t, ReplaceFunction r)
 {
-  aterm x = detail::partial_replace_impl< typename std::add_lvalue_reference< ReplaceFunction >::type >(t, r);
-  return Term(down_cast<aterm_appl>(x));
+  return vertical_cast<Term>(detail::make_partial_replace_aterm_builder<builder>(r).apply(t));
+}
+
+/// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
+/// the following signature:
+/// aterm_appl x;
+/// aterm_appl result = r(x);
+/// The replacements are performed in bottom up order. For example,
+/// replace(f(f(x)), f(x), x) returns x.
+/// \param t A term
+/// \param r The replace function that is applied to subterms.
+/// \param cache A cache for the result of aterm_appl terms.
+/// \return The result of the replacement.
+template <typename Term, typename ReplaceFunction>
+Term bottom_up_replace(Term t, ReplaceFunction r, std::unordered_map<aterm_appl, aterm>& cache)
+{
+  detail::cached_bottom_up_replace_aterm_builder<ReplaceFunction> f(r, cache);
+  return vertical_cast<Term>(f.apply(t));
 }
 
 } // namespace atermpp
