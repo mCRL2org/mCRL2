@@ -42,7 +42,7 @@ private:
 public:
     uncompiled_library(const std::string& script) : m_compile_script(script) {}
 
-    void compile(const std::string& filename) throw(std::runtime_error)
+    void compile(const std::string& filename) 
     {
       std::stringstream commandline;
       commandline << '"' << m_compile_script << "\" " << filename << " " << " 2>&1";
@@ -110,7 +110,7 @@ public:
       m_tempfiles.clear();
     }
 
-    void cleanup() throw(std::runtime_error)
+    void cleanup() 
     {
       for(std::list<std::string>::iterator f = m_tempfiles.begin(); f != m_tempfiles.end(); ++f)
       {
