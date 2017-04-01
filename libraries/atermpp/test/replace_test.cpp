@@ -12,7 +12,7 @@
 #include <vector>
 #include <iostream>
 #include <iterator>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_io.h"
@@ -99,7 +99,7 @@ struct fg_partial_replacer
   }
 };
 
-void test_find()
+BOOST_AUTO_TEST_CASE(find_test)
 {
   aterm_appl a(read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))"));
 
@@ -118,7 +118,7 @@ void test_find()
   BOOST_CHECK(v.back() == read_term_from_string("f(z)"));
 }
 
-void test_replace()
+BOOST_AUTO_TEST_CASE(replace_test1)
 {
   BOOST_CHECK(replace(aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(a)"))) == read_term_from_string("f(a)"));
   BOOST_CHECK(replace(aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("x")), atermpp::aterm_appl(read_term_from_string("f(x)"))) == read_term_from_string("f(x)"));
@@ -237,14 +237,14 @@ struct index_remover
   }
 };
 
-void test1()
+BOOST_AUTO_TEST_CASE(replace_test2)
 {
   atermpp::aterm t = atermpp::read_term_from_string("g(h(x,[f(y,p(q),1)]))");
   t = atermpp::replace(t, replace_f());
   BOOST_CHECK(t == atermpp::read_term_from_string("g(h(x,[f(y,p(q))]))"));
 }
 
-void test2()
+BOOST_AUTO_TEST_CASE(replace_test3)
 {
   atermpp::aterm t  = atermpp::read_term_from_string("g(h(z(x,[f(y,p(q),1)],0)))");
   atermpp::aterm t1 = atermpp::replace(t, replace_f());
@@ -252,7 +252,7 @@ void test2()
   BOOST_CHECK(t1 == t2);
 }
 
-void test3()
+BOOST_AUTO_TEST_CASE(bottom_up_replace_test)
 {
   atermpp::aterm t = atermpp::read_term_from_string("PBES(PBInit(PropVarInst(X,[OpId(@c0,SortId(Nat),131)],0)))");
   atermpp::aterm t1 = atermpp::replace(t, index_remover());
@@ -263,13 +263,17 @@ void test3()
   BOOST_CHECK(t3 == t4);
 }
 
-int test_main(int argc, char** argv)
+BOOST_AUTO_TEST_CASE(cached_bottom_up_replace_test)
 {
-  test_find();
-  test_replace();
-  test1();
-  test2();
-  test3();
+  std::unordered_map<aterm_appl, aterm> cache;
+  atermpp::aterm t  = atermpp::read_term_from_string("h(g(f(x),f(x)),g(f(x),f(x)))");
+  atermpp::aterm t1 = atermpp::bottom_up_replace(t, fg_replacer(), cache);
+  atermpp::aterm t2 = atermpp::read_term_from_string("h(f(g(x),g(x)),f(g(x),g(x)))");
+  BOOST_CHECK(t1 == t2);
+  BOOST_CHECK(cache.size() == 4);
+}
 
-  return 0;
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+{
+  return nullptr;
 }

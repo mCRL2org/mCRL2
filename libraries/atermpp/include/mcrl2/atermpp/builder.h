@@ -38,22 +38,30 @@ struct builder
 
   aterm apply(const aterm_int& x)
   {
+    derived().enter(x);
+    derived().leave(x);
     return x;
   }
 
   aterm apply(const aterm_list& x)
   {
-    return aterm_list(x.begin(), x.end(), [&](const aterm& v) { return derived().apply(v); } ) ;
+    derived().enter(x);
+    aterm_list result(x.begin(), x.end(), [&](const aterm& v) { return derived().apply(v); } ) ;
+    derived().leave(x);
+    return result;
   }
 
   aterm apply(const aterm_appl& x)
   {
-    return aterm_appl(x.function() , x.begin(), x.end(), [&](const aterm& v) { return derived().apply(v); } );
+    derived().enter(x);
+    aterm_appl result(x.function() , x.begin(), x.end(), [&](const aterm& v) { return derived().apply(v); } );
+    derived().leave(x);
+    return result;
   }
 
   aterm apply(const aterm& x)
   {
-    static_cast<Derived&>(*this).enter(x);
+    derived().enter(x);
     aterm result;
     if (x.type_is_appl())
     {
@@ -67,7 +75,7 @@ struct builder
     {
       result = derived().apply(atermpp::down_cast<aterm_int>(x));
     }
-    static_cast<Derived&>(*this).leave(x);
+    derived().leave(x);
     return result;
   }
 };
