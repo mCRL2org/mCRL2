@@ -277,7 +277,8 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
     }
     
   }
-  input=data::detail::add_index(input);
+  std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+  input=data::detail::add_index(input, cache);
   
   if (!input.type_is_appl() || down_cast<aterm_appl>(input).function()!=lts_header())
   {
@@ -385,7 +386,8 @@ static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& fi
                                             transitions,
                                             state_label_list,
                                             action_label_list);
-  const aterm t1 = data::detail::remove_index(t0);
+  std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+  const aterm t1 = data::detail::remove_index(t0,cache);
   
   if (filename=="")
   {
