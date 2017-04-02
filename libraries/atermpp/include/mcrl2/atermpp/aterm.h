@@ -56,21 +56,22 @@ class aterm
     friend detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const  ATermFilter& aterm_filter);
 
     friend detail::_aterm* detail::address(const aterm& t);
+
   protected:
     detail::_aterm* m_term;
 
 
-    static detail::_aterm* undefined_aterm()
-    {
+    static detail::_aterm* static_undefined_aterm;
+    /* {
       static detail::_aterm* t=detail::term_appl0(function_symbol());
       return t;
-    }
+    } */
 
-    static detail::_aterm *empty_aterm_list()
-    {
-      static detail::_aterm* t=detail::term_appl0(detail::function_adm.AS_EMPTY_LIST());
+    static detail::_aterm *static_empty_aterm_list;
+    /* {
+      static detail::_aterm* t=detail::term_appl0(detail::function_adm.AS_EMPTY_LIST);
       return t;
-    }
+    } */
 
     inline size_t decrease_reference_count()
     {
@@ -100,7 +101,7 @@ class aterm
     }
 
     // An aterm has a function symbol, which can also be an AS_EMPTY_LIST,
-    // AS_INT and AS_LIST.
+    // AS_INT and AS_LIST. This is for internal use only. 
     const function_symbol& function() const
     {
       return m_term->function();
@@ -117,13 +118,14 @@ class aterm
 
   public:
 
-    /// \brief Default constructor
-    aterm():m_term(undefined_aterm())
+    /// \brief Default constructor.
+    aterm():m_term(static_undefined_aterm)
     {
       increase_reference_count<false>();
     }
 
-    /// \brief Copy constructor
+    /// \brief Copy constructor.
+    /// \param t Term that is copied.
     aterm(const aterm& t):m_term(t.m_term)
     {
       increase_reference_count<true>();
@@ -165,7 +167,7 @@ class aterm
     /// \return True iff term is an term_int.
     bool type_is_int() const
     {
-      return m_term->function()==detail::function_adm.AS_INT();
+      return m_term->function()==detail::function_adm.AS_INT;
     }
 
     /// \brief Returns whether this term has the structure of an term_list
@@ -174,7 +176,7 @@ class aterm
     bool type_is_list() const
     {
       const function_symbol& f=m_term->function();
-      return f==detail::function_adm.AS_LIST()|| f==detail::function_adm.AS_EMPTY_LIST();
+      return f==detail::function_adm.AS_LIST|| f==detail::function_adm.AS_EMPTY_LIST;
     }
 
     /// \brief Equality function on two aterms.

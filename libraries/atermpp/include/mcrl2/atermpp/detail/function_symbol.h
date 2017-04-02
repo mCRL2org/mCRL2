@@ -22,7 +22,7 @@ class function_symbol_generator;
 
 namespace detail
 {
-size_t addressf(const function_symbol &t);
+struct constant_function_symbols;
 void initialise_aterm_administration();
 void initialise_function_map_administration();
 
@@ -131,7 +131,7 @@ extern void deregister_function_symbol_prefix_string(const std::string& prefix);
 namespace std
 {
 
-// Specialisation of the standard hash function for 
+// Specialisation of the standard hash function for _function_symbol.
 template<>
 struct hash<atermpp::detail::_function_symbol_primary_data>
 {
@@ -167,9 +167,10 @@ class function_symbol_store_class:
     function_symbol_store_class(bool& function_symbol_store_is_defined)
       : m_function_symbol_store_is_defined(function_symbol_store_is_defined)
     {
-      m_function_symbol_store_is_defined=true;
-      detail::initialise_aterm_administration();
-      detail::initialise_function_map_administration();
+      if (!m_function_symbol_store_is_defined)
+      {
+        m_function_symbol_store_is_defined=true;
+      }
     }
 
     // \brief Destructor. Indicate that the function store does not exist anymore.

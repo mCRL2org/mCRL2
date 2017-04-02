@@ -66,18 +66,11 @@ extern size_t aterm_table_mask;
 extern size_t aterm_table_size;
 extern detail::_aterm* * aterm_hashtable;
 
-extern aterm static_undefined_aterm;  // detail/aterm_implementation.h
-extern aterm static_empty_aterm_list;
-
 extern size_t terminfo_size;
 extern size_t total_nodes_in_hashtable;
 extern TermInfo *terminfo;
 
 extern size_t garbage_collect_count_down;
-
-// void initialise_administration();
-// void initialise_aterm_administration();
-// void initialise_function_map_administration();
 
 void resize_aterm_hashtable();
 void allocate_block(const size_t size);
@@ -85,19 +78,15 @@ void collect_terms_with_reference_count_0();
 
 void call_creation_hook(_aterm*);
 
-/* inline size_t SHIFT(const size_t w)
-{
-  return w>>3;
-} */
-
+// Auxiliary function to calculate a hash for _aterm's.
 inline
-size_t COMBINE(const HashNumber hnr, const size_t w)
+size_t COMBINE(const size_t hnr, const size_t w)
 {
   return (w>>3) + (hnr>>1) + (hnr<<1);
 }
 
 inline
-size_t COMBINE(const HashNumber hnr, const aterm& w)
+size_t COMBINE(const size_t hnr, const aterm& w)
 {
   return COMBINE(hnr,reinterpret_cast<size_t>(address(w)));
 }
@@ -114,10 +103,11 @@ t
   assert(!address(t)->reference_count_is_zero());
 }
 
-inline HashNumber hash_number(detail::_aterm *t)
+inline size_t hash_number(detail::_aterm *t)
 {
   const function_symbol& f=t->function();
-  HashNumber hnr = SHIFT(addressf(f));
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = function_symbol_hasher(f);
 
   const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
   const size_t* end=begin+f.arity();
@@ -191,7 +181,7 @@ inline void remove_from_hashtable(_aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
   _aterm *prev=nullptr;
-  const HashNumber hnr = hash_number(t) & aterm_table_mask;
+  const size_t hnr = hash_number(t) & aterm_table_mask;
   _aterm *cur = aterm_hashtable[hnr];
 
   do
@@ -216,40 +206,12 @@ inline void remove_from_hashtable(_aterm *t)
   assert(0);
 }
 
-/* inline void insert_in_hashtable(_aterm *t, const size_t hnr)
-{
-
-  t->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = t;
-  total_nodes_in_hashtable++;
-} */
-
 inline _aterm* address(const aterm& t)
 {
   return t.m_term;
 }
 
 } //namespace detail
-
-/* inline
-detail::_aterm *aterm::undefined_aterm()
-{
-  if (detail::static_undefined_aterm.m_term==nullptr)
-  {
-    detail::initialise_administration();
-  }
-  return detail::static_undefined_aterm.m_term;
-} 
-
-inline
-detail::_aterm *aterm::empty_aterm_list()
-{
-  if (detail::static_empty_aterm_list.m_term==nullptr)
-  {
-    detail::initialise_administration();
-  }
-  return detail::static_empty_aterm_list.m_term;
-} */
 
 } // namespace atermpp
 

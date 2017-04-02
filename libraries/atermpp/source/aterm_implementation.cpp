@@ -37,12 +37,12 @@
 namespace atermpp
 {
 
-std::string to_string(const aterm& t)
+/* std::string to_string(const aterm& t)
 {
   std::stringstream s;
   s << t;
   return s.str();
-} 
+} */
 
 typedef std::vector<std::pair<const function_symbol*,term_callback> > hook_table;
 
@@ -84,6 +84,11 @@ void add_deletion_hook(const function_symbol& sym, term_callback callback)
   deletion_hooks().push_back(std::make_pair(&sym, callback));
 }
 
+
+// The terms below are initialised in initialise_aterm_administration.
+detail::_aterm* aterm::static_undefined_aterm=nullptr;
+detail::_aterm* aterm::static_empty_aterm_list=nullptr; 
+
 namespace detail
 {
 
@@ -96,9 +101,6 @@ static const size_t INITIAL_MAX_TERM_SIZE = 16;
 size_t aterm_table_size=INITIAL_TERM_TABLE_SIZE;
 size_t aterm_table_mask=INITIAL_TERM_TABLE_SIZE-1;
 _aterm* * aterm_hashtable;
-
-aterm static_undefined_aterm;
-aterm static_empty_aterm_list(aterm_appl(detail::function_adm.AS_EMPTY_LIST()));
 
 // The following is not a vector to avoid that it is prematurely destroyed.
 size_t terminfo_size=INITIAL_MAX_TERM_SIZE;
@@ -147,7 +149,7 @@ void free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed)
   t->set_next(ti.at_freelist);
   ti.at_freelist = t;
 
-  if (f!=detail::function_adm.AS_INT())
+  if (f!=detail::function_adm.AS_INT)
   {
     for(size_t i=0; i<arity; ++i)
     {
@@ -217,7 +219,7 @@ void resize_aterm_hashtable()
     {
       assert(!aterm_walker->reference_count_indicates_is_in_freelist());
       _aterm* next = aterm_walker->next();
-      const HashNumber hnr = hash_number(aterm_walker) & aterm_table_mask;
+      const size_t hnr = hash_number(aterm_walker) & aterm_table_mask;
       aterm_walker->set_next(new_hashtable[hnr]);
       new_hashtable[hnr] = aterm_walker;
       assert(aterm_walker->next()!=aterm_walker);
@@ -320,7 +322,7 @@ static void check_that_all_objects_are_free()
       {
         _aterm* p1=reinterpret_cast<_aterm*>(p);
         if (!p1->reference_count_is_zero() && !p1->reference_count_indicates_is_in_freelist() &&
-            ((p1->function()!=function_adm.AS_DEFAULT() && p1->function()!=function_adm.AS_EMPTY_LIST()) || p1->reference_count()>1))
+            ((p1->function()!=function_adm.AS_DEFAULT && p1->function()!=function_adm.AS_EMPTY_LIST) || p1->reference_count()>1))
         {
           mCRL2log(mcrl2::log::error) << "CHECK: Non free term " << p1 << " (size " << size << "). ";
           mCRL2log(mcrl2::log::error) << "Reference count " << p1->reference_count() << " nr. " << p1->function().number() << ". ";
@@ -369,10 +371,17 @@ static void check_that_all_objects_are_free()
 
 void initialise_aterm_administration()
 {
+  /* Check for reasonably sized aterm (at least 32 bits, 4 bytes). This check might break on
+   * perfectly valid architectures that have char == 2 bytes, and sizeof(header_type) == 2 */
+  static_assert(sizeof(size_t) == sizeof(aterm*) && sizeof(size_t) >= 4,"pointers and size_t must be equal and larger than four bytes for the aterm library");
+
+  detail::function_adm.initialise_function_symbols();
+
   /* Explict initialisation on first use. This first use is when a function symbol is created for
    * the first time, which may be due to the initialisation of a global variable in a .cpp file, or
    * due to the initialisation of a pre-main initialisation of a static variable, which some
    * compilers do. */
+
   aterm_hashtable=reinterpret_cast<_aterm**>(calloc(aterm_table_size,sizeof(_aterm*)));
   if (aterm_hashtable==nullptr)
   {
@@ -390,11 +399,6 @@ void initialise_aterm_administration()
     new (&terminfo[i]) TermInfo();
   }
 
-  /* Use placement new (twice) as these (static) objects may not have initialised when this is
-   * called, causing a problem with reference counting. */
-  /* new (&detail::static_undefined_aterm) aterm(detail::term_appl0(detail::function_adm.AS_DEFAULT()));
-  new (&detail::static_empty_aterm_list) aterm(detail::term_appl0(detail::function_adm.AS_EMPTY_LIST())); */
-
   /* Check at exit that all function symbols and terms have been cleaned up properly.
    * TODO: on windows it turns out that the reference counts do not reduce to 0. The reason for it
    *       is unclear. It could either be due to an unforeseen sequence of destroying static and
@@ -405,9 +409,13 @@ void initialise_aterm_administration()
   assert(atexit(check_that_all_objects_are_free) == 0);
 #endif
 
-  /* Check for reasonably sized aterm (at least 32 bits, 4 bytes). This check might break on
-   * perfectly valid architectures that have char == 2 bytes, and sizeof(header_type) == 2 */
-  static_assert(sizeof(size_t) == sizeof(aterm*) && sizeof(size_t) >= 4,"pointers and size_t must be equal and larger than four bytes for the aterm library");
+  detail::initialise_function_map_administration();
+
+  aterm::static_undefined_aterm=detail::term_appl0(detail::function_adm.AS_DEFAULT);
+  aterm::static_undefined_aterm->increase_reference_count();
+  aterm::static_empty_aterm_list=detail::term_appl0(detail::function_adm.AS_EMPTY_LIST);
+  aterm::static_empty_aterm_list->increase_reference_count();
+
 }
 
 /* allocate a block of memory to contain terms consisting of `size' objects

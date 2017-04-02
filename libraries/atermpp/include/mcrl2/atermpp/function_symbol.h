@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jan Frsio Groote
+// Author(s): Wieger Wesselink, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -22,14 +22,12 @@
 namespace atermpp
 {
 class aterm;
-// void detail::initialise_aterm_administration();
-// void detail::initialise_function_map_administration();
 
 class function_symbol
 {
-
-  friend size_t detail::addressf(const function_symbol& t);
   friend class function_symbol_generator;
+  friend struct detail::constant_function_symbols;
+  template<class T> friend struct std::hash;
   friend size_t detail::get_sufficiently_large_postfix_index(const std::string& prefix_);
 
   protected:
@@ -40,25 +38,29 @@ class function_symbol
     static bool m_function_symbol_store_is_defined; // This variable indicates that the function_symbol_store
                                                     // is defined. It is maintained in the function_symbol_store_class.
 
-    /// This is a trick to do initialise_aterm_administration before function symbols are accessed.
-    /* static detail::function_symbol_store_class function_symbol_store_helper()
-    {
-      detail::function_symbol_store_class f_store(m_function_symbol_store_is_defined);
-      detail::initialise_aterm_administration();
-      detail::initialise_function_map_administration();
-      return f_store;
-    } */
-
     static detail::function_symbol_store_class& function_symbol_store()
     {
       static detail::function_symbol_store_class f_store(m_function_symbol_store_is_defined);
       return f_store;
     }
 
-    static const function_symbol& AS_DEFAULT()
-    {
+    static function_symbol AS_DEFAULT;
+    /* {
       static function_symbol f("<undefined_term>",0);
       return f;
+    } */
+
+    // The function and boolean below are needed to guarantee that the aterm
+    // administration, predefined function symbols and predefined aterms exist
+    // when the first function symbol is constructed. 
+    static bool aterm_administration_is_initialised;
+    static void initialise_aterm_administration_if_needed()
+    {
+      if (!aterm_administration_is_initialised)
+      {
+        aterm_administration_is_initialised=true;
+        detail::initialise_aterm_administration();
+      }
     }
 
     // Constructor for internal use only
@@ -117,8 +119,9 @@ class function_symbol
   public:
     /// \brief default constructor
     function_symbol() 
-      : m_function_symbol(AS_DEFAULT().m_function_symbol)
     {
+      initialise_aterm_administration_if_needed();
+      m_function_symbol=AS_DEFAULT.m_function_symbol;
       increase_reference_count<true>();
     }
 
@@ -128,7 +131,6 @@ class function_symbol
     function_symbol(const std::string& name, const size_t arity_)
      : function_symbol(name, arity_, true)
     {
-// std::cerr << "CONSTRUCT " << m_function_symbol << "    " << name << ": " << arity_ << "\n";
       increase_reference_count<false>();
     }
 
@@ -161,8 +163,6 @@ class function_symbol
       // counts in freed memory. 
       if (m_function_symbol_store_is_defined)
       {
-// std::cerr << "DESTRUCT " << m_function_symbol << "\n";
-// std::cerr << name() << ": " << arity() << "\n";
         decrease_reference_count();
       }
     }
@@ -280,6 +280,17 @@ inline void swap(atermpp::function_symbol& f1, atermpp::function_symbol& f2)
 {
   f1.swap(f2);
 }
+
+// Specialisation of the standard hash function for function symbols.
+template<>
+struct hash<atermpp::function_symbol>
+{
+  std::size_t operator()(const atermpp::function_symbol& f) const
+  {
+    return reinterpret_cast<size_t>(f.m_function_symbol) >> 4; 
+  }
+};
+
 } // namespace std
 
 #endif // MCRL2_ATERMPP_FUNCTION_SYMBOL_H

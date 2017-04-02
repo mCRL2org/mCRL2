@@ -111,12 +111,6 @@ detail::_aterm* allocate_term(const size_t size);
 void remove_from_hashtable(_aterm *t);
 void free_term(detail::_aterm* t);
 void free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed);
-// void initialise_aterm_administration();
-// void initialise_function_map_administration();
-
-inline HashNumber hash_number(_aterm *t);
-
-// inline _aterm* term_appl0(const function_symbol& sym);
 
 extern detail::_aterm* * aterm_hashtable;
 extern size_t aterm_table_mask;
@@ -126,24 +120,17 @@ void call_creation_hook(_aterm*);
 
 inline void insert_in_hashtable(_aterm *t, const size_t hnr)
 {
-
   t->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = t;
   total_nodes_in_hashtable++;
-}
-
-
-
-inline size_t SHIFT(const size_t w)
-{
-  return w>>3;
 }
 
 inline _aterm* term_appl0(const function_symbol& sym)
 {
   assert(sym.arity()==0);
 
-  HashNumber hnr = SHIFT(addressf(sym));
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = function_symbol_hasher(sym);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
 

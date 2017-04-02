@@ -31,11 +31,16 @@
 namespace atermpp
 {
 
-/*  globals */
+/* Global variable. */
 bool function_symbol::m_function_symbol_store_is_defined=false;
+bool function_symbol::aterm_administration_is_initialised=false;
+function_symbol function_symbol::AS_DEFAULT;
 
 namespace detail
 {
+  /* More global variables. */
+   constant_function_symbols function_adm;
+
 
   // A map that records for each prefix a function that must be called to set the
   // postfix number to a sufficiently high number if a function symbol with the same
@@ -100,6 +105,7 @@ namespace detail
 
 function_symbol::function_symbol(const std::string& name_, const size_t arity_, const bool check_for_registered_functions)
 {
+  initialise_aterm_administration_if_needed();
   function_symbol_iterator_bool_pair 
        i=function_symbol_store().emplace(detail::_function_symbol_primary_data(name_,arity_),
                                          detail::_function_symbol_auxiliary_data(1));

@@ -2388,7 +2388,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
         {
           if (nFactPars!=std::string::npos)
           {
-            throw mcrl2::runtime_error("Unknown operation " + core::pp(Name) + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s.":"."));
+            throw mcrl2::runtime_error("Unknown operation " + core::pp(Name) + " with " + std::to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s.":"."));
           }
           else
           {
@@ -2524,7 +2524,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       if (nFactPars!=std::string::npos)
       {
         throw mcrl2::runtime_error("Unknown operation/variable " + core::pp(Name)
-                        + " with " + to_string(nFactPars) + " argument" + ((nFactPars != 1)?"s":"")
+                        + " with " + std::to_string(nFactPars) + " argument" + ((nFactPars != 1)?"s":"")
                         + " that matches type " + data::pp(PosType) + ".");
       }
       else
@@ -2585,7 +2585,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       {
         if (nFactPars!=std::string::npos)
         {
-          throw mcrl2::runtime_error("Ambiguous operation " + core::pp(Name) + " with " + to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s.":"."));
+          throw mcrl2::runtime_error("Ambiguous operation " + core::pp(Name) + " with " + std::to_string(nFactPars) + " parameter" + ((nFactPars != 1)?"s.":"."));
         }
         else
         {

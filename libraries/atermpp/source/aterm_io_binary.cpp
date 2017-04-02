@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <stdexcept>
+#include <unordered_set>
 
 #ifdef WIN32
 #include <io.h>
@@ -90,12 +91,12 @@ s
 }
 
 // Count the total number of occurrences of function symbols t where 
-// t is viewed as a shared term. The result is stored in the map count. 
+// t is viewed as a shared term. The result is stored in the unordered_map count. 
 // Visited is used to avoid visiting terms too often. 
 static void count_the_number_of_unique_function_symbols_in_a_term_rec(
                   const aterm& t,
-                  std::set<aterm>& visited,
-                  std::map<function_symbol, size_t>& count)
+                  std::unordered_set<aterm>& visited,
+                  std::unordered_map<function_symbol, size_t>& count)
 {
   if (visited.count(t)>0)
   {
@@ -104,7 +105,7 @@ static void count_the_number_of_unique_function_symbols_in_a_term_rec(
 
   if (t.type_is_int())
   {
-    count[detail::function_adm.AS_INT()]++;
+    count[detail::function_adm.AS_INT]++;
   }
   else if (t.type_is_list())
   {
@@ -112,14 +113,14 @@ static void count_the_number_of_unique_function_symbols_in_a_term_rec(
     while (list!=aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
-      count[detail::function_adm.AS_LIST()]++;
+      count[detail::function_adm.AS_LIST]++;
       count_the_number_of_unique_function_symbols_in_a_term_rec(list.front(),visited,count);
       list = list.tail();
     }
     if (list==aterm_list() && visited.count(list)==0)
     {
       visited.insert(list);
-      count[detail::function_adm.AS_EMPTY_LIST()]++;
+      count[detail::function_adm.AS_EMPTY_LIST]++;
     }
   }
   else
@@ -138,9 +139,9 @@ static void count_the_number_of_unique_function_symbols_in_a_term_rec(
   return;
 }
 
-static void count_the_number_of_unique_function_symbols_in_a_term(const aterm& t, std::map<function_symbol, size_t>& count)
+static void count_the_number_of_unique_function_symbols_in_a_term(const aterm& t, std::unordered_map<function_symbol, size_t>& count)
 {
-  std::set<aterm> visited;
+  std::unordered_set<aterm> visited;
   count_the_number_of_unique_function_symbols_in_a_term_rec(t,visited,count);
 }
 
@@ -348,7 +349,7 @@ static size_t readString(istream& is)
     text_buffer = (char*) realloc(text_buffer, text_buffer_size);
     if (!text_buffer)
     {
-      throw aterm_io_error("Out of memory while reading the input file. Fail to claim a block of memory of size "+ to_string(text_buffer_size) + ".");
+      throw aterm_io_error("Out of memory while reading the input file. Fail to claim a block of memory of size "+ std::to_string(text_buffer_size) + ".");
     }
   }
 
@@ -376,17 +377,17 @@ static void write_symbol(const function_symbol& sym, ostream& os)
  * (AS_INT, etc) when the term is not an application.
  */
 
-static sym_entry* get_top_symbol(const aterm& t, const std::map<function_symbol, size_t>& index)
+static sym_entry* get_top_symbol(const aterm& t, const std::unordered_map<function_symbol, size_t>& index)
 {
   function_symbol sym;
 
   if (t.type_is_int())
   {
-      sym = detail::function_adm.AS_INT();
+      sym = detail::function_adm.AS_INT;
   }
   else if (t.type_is_list())
   {
-    sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST() : detail::function_adm.AS_LIST());
+    sym = (t==aterm_list() ? detail::function_adm.AS_EMPTY_LIST : detail::function_adm.AS_LIST);
   }
   else if (t.type_is_appl())
   {
@@ -430,7 +431,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
                                const size_t total_top_symbols)
 {
   size_t index;
-  size_t hnr;
+  const std::hash<function_symbol> function_symbol_hasher;
   top_symbols_t* tss;
   sym_entry* top_entry;
 
@@ -450,7 +451,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
     ts->code = index;
     ts->s = top_entry->id;
 
-    hnr = detail::addressf(ts->s) % tss->toptable.size();
+    size_t hnr = function_symbol_hasher(ts->s) % tss->toptable.size();
     ts->next = tss->toptable[hnr];
     tss->toptable[hnr] = ts;
 
@@ -459,7 +460,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
   }
 }
 
-static void build_arg_tables(const std::map<function_symbol, size_t>& index)
+static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& index)
 {
   size_t cur_trm;
   size_t cur_arg;
@@ -474,7 +475,7 @@ static void build_arg_tables(const std::map<function_symbol, size_t>& index)
 
     cur_entry->top_symbols = std::vector<top_symbols_t>(arity);
 
-    if (cur_entry->id!=detail::function_adm.AS_INT())
+    if (cur_entry->id!=detail::function_adm.AS_INT)
     {
       for (cur_arg=0; cur_arg<arity; cur_arg++)
       {
@@ -527,7 +528,8 @@ static void build_arg_tables(const std::map<function_symbol, size_t>& index)
   */
 static void add_term(sym_entry* entry, const aterm& t)
 {
-  size_t hnr = hash_number(detail::address(t)) % entry->termtable.size();
+  const std::hash<aterm> aterm_hasher;
+  size_t hnr = aterm_hasher(t) % entry->termtable.size();
   entry->terms[entry->cur_index].t = t;
   entry->terms[entry->cur_index].next = entry->termtable[hnr];
   entry->termtable[hnr] = &entry->terms[entry->cur_index];
@@ -556,10 +558,10 @@ static const aterm& subterm(const aterm& t, size_t i)
 
 typedef struct { aterm term; sym_entry* entry; size_t arg; } write_todo;
 
-static void collect_terms(const aterm& t, const std::map<function_symbol, size_t>& index)
+static void collect_terms(const aterm& t, const std::unordered_map<function_symbol, size_t>& index)
 {
   std::stack<write_todo> stack;
-  std::set<aterm> visited;
+  std::unordered_set<aterm> visited;
   write_todo item = { t, get_top_symbol(t, index), 0 };
   stack.push(item);
 
@@ -623,7 +625,8 @@ static void write_symbols(ostream& os)
 
 static size_t find_term(sym_entry* entry, const aterm& t)
 {
-  size_t hnr = hash_number(detail::address(t)) % entry->termtable.size();
+  const std::hash<aterm> aterm_hasher;
+  size_t hnr = aterm_hasher(t) % entry->termtable.size();
   trm_bucket* cur = entry->termtable[hnr];
 
   assert(cur);
@@ -642,7 +645,8 @@ static size_t find_term(sym_entry* entry, const aterm& t)
 
 static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol& sym)
 {
-  size_t hnr = detail::addressf(sym) % syms->toptable.size();
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = function_symbol_hasher(sym) % syms->toptable.size();
   top_symbol* cur = syms->toptable[hnr];
 
   assert(cur);
@@ -659,7 +663,7 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol& s
  * Write a term using a writer.
  */
 
-static bool write_term(const aterm& t, const std::map<function_symbol, size_t>& index, ostream& os)
+static bool write_term(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, ostream& os)
 {
   std::stack<write_todo> stack;
 
@@ -713,8 +717,8 @@ static bool write_baf(const aterm& t, ostream& os)
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 
-  std::map<function_symbol, size_t> count; /* (nr_symbols,0); */
-  std::map<function_symbol, size_t> index; /* (nr_symbols,size_t(-1)); */
+  std::unordered_map<function_symbol, size_t> count; /* (nr_symbols,0); */
+  std::unordered_map<function_symbol, size_t> index; /* (nr_symbols,size_t(-1)); */
   count_the_number_of_unique_function_symbols_in_a_term(t,count);
   nr_unique_symbols = count.size();
 
@@ -887,7 +891,7 @@ static aterm read_term(sym_read_entry* sym, istream& is)
       current.callresult = nullptr;
     }
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
-    if (current.sym->sym != detail::function_adm.AS_INT() && current.arg < current.sym->arity)
+    if (current.sym->sym != detail::function_adm.AS_INT && current.arg < current.sym->arity)
     {
       if (readBits(value, current.sym->sym_width[current.arg], is) &&
           value < current.sym->nr_topsyms[current.arg])
@@ -910,18 +914,18 @@ static aterm read_term(sym_read_entry* sym, istream& is)
       throw mcrl2::runtime_error("Could not read valid aterm from stream.");
     }
 
-    if (current.sym->sym == detail::function_adm.AS_INT())
+    if (current.sym->sym == detail::function_adm.AS_INT)
     {
       if (readBits(value, INT_SIZE_IN_BAF, is))
       {
         *current.result = aterm_int(value);
       }
     }
-    else if (current.sym->sym==detail::function_adm.AS_EMPTY_LIST())
+    else if (current.sym->sym==detail::function_adm.AS_EMPTY_LIST)
     {
       *current.result = aterm_list();
     }
-    else if (current.sym->sym == detail::function_adm.AS_LIST())
+    else if (current.sym->sym == detail::function_adm.AS_LIST)
     {
       aterm_list result = atermpp::down_cast<aterm_list>(current.args[1]);
       result.push_front(current.args[0]);

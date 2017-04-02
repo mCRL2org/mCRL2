@@ -33,7 +33,8 @@ _aterm* local_term_appl_with_converter(const function_symbol& sym,
 {
   const size_t arity = sym.arity();
 
-  HashNumber hnr = SHIFT(addressf(sym));
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = function_symbol_hasher(sym);
   
   aterm* temporary_args = MCRL2_SPECIFIC_STACK_ALLOCATOR(aterm, arity);
   size_t j=0;
@@ -93,7 +94,8 @@ template <class Term, class ForwardIterator>
 _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin, const ForwardIterator end)
 {
   const size_t arity = sym.arity();
-  HashNumber hnr = SHIFT(addressf(sym)); 
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = function_symbol_hasher(sym); 
   
   aterm* temporary_args=MCRL2_SPECIFIC_STACK_ALLOCATOR(aterm, arity);
   size_t j=0;
@@ -149,42 +151,14 @@ _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin,
   return new_term;
 }
 
-/* inline _aterm* term_appl0(const function_symbol& sym)
-{
-  assert(sym.arity()==0);
-
-  HashNumber hnr = SHIFT(addressf(sym));
-
-  _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
-
-  while (cur)
-  {
-    if (cur->function()==sym)
-    {
-      return cur;
-    }
-    cur = cur->next();
-  }
-
-  cur = detail::allocate_term(detail::TERM_SIZE);
-  / * Delay masking until after allocate * /
-  hnr &= detail::aterm_table_mask;
-  new (&const_cast<detail::_aterm*>(cur)->function()) function_symbol(sym);
-
-  insert_in_hashtable(cur,hnr);
-
-  call_creation_hook(cur);
-
-  return cur;
-} */
-
 template <class Term>
 _aterm* term_appl1(const function_symbol& sym, const Term& arg0)
 {
   assert(sym.arity()==1);
   CHECK_TERM(arg0);
 
-  HashNumber hnr = COMBINE(SHIFT(addressf(sym)), arg0);
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = COMBINE(function_symbol_hasher(sym), arg0);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -216,7 +190,8 @@ _aterm* term_appl2(const function_symbol& sym, const Term& arg0, const Term& arg
   assert(sym.arity()==2);
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
-  HashNumber hnr = COMBINE(COMBINE(SHIFT(addressf(sym)), arg0),arg1);
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = COMBINE(COMBINE(function_symbol_hasher(sym), arg0),arg1);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -253,7 +228,8 @@ _aterm* term_appl3(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
   CHECK_TERM(arg2);
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0),arg1),arg2);
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0),arg1),arg2);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -292,7 +268,8 @@ _aterm *term_appl4(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg3);
   assert(sym.arity()==4);
 
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0), arg1), arg2), arg3);
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3);
 
   _aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -337,8 +314,8 @@ _aterm* term_appl5(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg2);
   CHECK_TERM(arg3);
 
-
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0), arg1), arg2), arg3), arg4);
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -386,7 +363,8 @@ _aterm *term_appl6(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg4);
   CHECK_TERM(arg5);
 
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0), arg1), arg2), arg3), arg4), arg5);
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4), arg5);
 
   _aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -438,7 +416,8 @@ _aterm* term_appl7(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg5);
   CHECK_TERM(arg6);
 
-  HashNumber hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(SHIFT(addressf(sym)), arg0), arg1), arg2), arg3), arg4), arg5), arg6);
+  const std::hash<function_symbol> function_symbol_hasher;
+  size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4), arg5), arg6);
 
   _aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)

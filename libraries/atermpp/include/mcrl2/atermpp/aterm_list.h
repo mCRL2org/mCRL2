@@ -54,7 +54,7 @@ class term_list:public aterm
     typedef term_list_iterator<Term> const_iterator;
 
     /// Default constructor. Creates an empty list.
-    term_list ():aterm(aterm::empty_aterm_list())
+    term_list(): aterm(aterm::static_empty_aterm_list)
     {
     }
 
@@ -255,7 +255,7 @@ class term_list:public aterm
     /// \return True iff the list is empty.
     bool empty() const
     {
-      return m_term->function()==detail::function_adm.AS_EMPTY_LIST();
+      return m_term->function()==detail::function_adm.AS_EMPTY_LIST;
     }
 
     /// \brief Returns a const_iterator pointing to the beginning of the term_list.
@@ -269,7 +269,7 @@ class term_list:public aterm
     /// \return The end of the list.
     const_iterator end() const
     {
-      return const_iterator(detail::static_empty_aterm_list);
+      return const_iterator(aterm::static_empty_aterm_list);
     }
 
     /// \brief Returns the largest possible size of the term_list.
@@ -377,15 +377,7 @@ inline void swap(atermpp::term_list<T>& t1, atermpp::term_list<T>& t2)
 template <class T>
 std::ostream& operator<<(std::ostream& out, const term_list<T>& l)
 {
-  for (auto i = l.begin(); i != l.end(); ++i)
-  {
-    if (i != l.begin())
-    {
-      out << ", ";
-    }
-    out << *i;
-  }
-  return out;
+  return out << static_cast<aterm>(l); 
 }
 
 } // namespace atermpp

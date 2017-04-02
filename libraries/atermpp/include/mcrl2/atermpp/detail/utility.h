@@ -21,15 +21,12 @@
 namespace atermpp
 {
 
-template <typename T>
-std::string to_string(const T& t)
+inline std::string to_string(const aterm& t)
 {
   std::ostringstream oss;
   oss << t;
   return oss.str();
 }
-
-std::string to_string(const aterm& t);
 
 } // namespace atermpp
 

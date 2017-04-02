@@ -35,7 +35,6 @@ typedef _W64 int ssize_t;
 namespace atermpp
 {
 
-typedef size_t HashNumber;
 /* The largest size_t is used as an indicator that an element does not exist.
  *    This is used as a replacement of a negative number as an indicator of non
  *       existence */
