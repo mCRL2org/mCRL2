@@ -52,48 +52,6 @@ aterm read_term_from_text_stream(std::istream &is);
 /// \return The term corresponding to the string.
 aterm read_term_from_string(const std::string& s);
 
-
-/// \brief Exception class for reporting an I/O error in the ATerm Library.
-///
-class aterm_io_error : public mcrl2::runtime_error
-{
-public:
-  /// \brief Constructor
-  /// \param[in] message the exception message
-  aterm_io_error(const std::string& message)
-    : mcrl2::runtime_error(message)
-  { }
-};
-
-///
-/// \brief Exception class for reporting a version error in the BAF file format.
-///
-class baf_version_error : public aterm_io_error
-{
-private:
-  std::size_t version;
-  std::size_t expected_version;
-
-public:
-  /// \brief Constructor
-  /// \param[in] version_ The actual version.
-  /// \param[in] expected_version_ The expected version.
-  baf_version_error(std::size_t version_, std::size_t expected_version_)
-    : aterm_io_error("Wrong BAF version"),
-      version(version_),
-      expected_version(expected_version_)
-  { }
-
-  /// \brief A function generating an error message for the baf_version_error exception. 
-  const char* what() const NOEXCEPT
-  {
-    std::stringstream ss;
-    ss << std::internal << std::showbase << std::hex << std::setfill('0') << std::setw(4)
-       << aterm_io_error::what() << " (got " << version << ", expected " << expected_version << ")";
-    return ss.str().c_str();
-  }
-};
-
 } // namespace atermpp
 
 #endif // MCRL2_ATERMPP_ATERM_IO_H

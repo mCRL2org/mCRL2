@@ -159,8 +159,9 @@ static const size_t BAF_MAGIC = 0xbaf;
 // 29 August 2013    : version changed to 0x0301
 // 23 November 2013  : version changed to 0x0302 (introduction of index for variable types)
 // 24 September 2014 : version changed to 0x0303 (introduction of stochastic distribution)
+//  2 April 2017     : version changed to 0x0304 (removed a few superfluous fields in the format)
 
-static const size_t BAF_VERSION = 0x0303;
+static const size_t BAF_VERSION = 0x0304;
 
 typedef struct _trm_bucket
 {
@@ -183,13 +184,10 @@ typedef struct _top_symbol
 class top_symbols_t
 {
   public:
-    size_t      nr_symbols;
     std::vector<top_symbol> symbols;
-
     vector<top_symbol*> toptable;
 
-    top_symbols_t():
-      nr_symbols(0)
+    top_symbols_t()
     {}
 
 };
@@ -198,9 +196,7 @@ class sym_entry
 {
   public:
     function_symbol id;
-    size_t arity;
 
-    size_t nr_terms;
     std::vector <trm_bucket> terms;
 
     std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
@@ -215,8 +211,6 @@ class sym_entry
     sym_entry* next_topsym;
 
     sym_entry():
-      arity(0),
-      nr_terms(0),
       top_symbols(0),
       termtable(),
       term_width(0),
@@ -228,18 +222,13 @@ class sym_entry
 class sym_read_entry
 {
   public:
-    function_symbol   sym;
-    size_t arity;
-    size_t nr_terms;
+    function_symbol sym;
     size_t term_width;
     std::vector<aterm> terms;
-    std::vector<size_t> nr_topsyms;
     std::vector<size_t> sym_width;
     std::vector<vector<size_t> > topsyms;
 
     sym_read_entry():
-       arity(0),
-       nr_terms(0),
        term_width(0)
     {
     }
@@ -349,7 +338,7 @@ static size_t readString(istream& is)
     text_buffer = (char*) realloc(text_buffer, text_buffer_size);
     if (!text_buffer)
     {
-      throw aterm_io_error("Out of memory while reading the input file. Fail to claim a block of memory of size "+ std::to_string(text_buffer_size) + ".");
+      throw mcrl2::runtime_error("Out of memory while reading the input file. Fail to claim a block of memory of size "+ std::to_string(text_buffer_size) + ".");
     }
   }
 
@@ -369,7 +358,6 @@ static void write_symbol(const function_symbol& sym, ostream& os)
   const char* name = sym.name().c_str();
   writeString(name, strlen(name), os);
   writeInt(sym.arity(), os);
-  writeInt(true, os);  /* This is redundant and can be removed XXXXXXXXXXXXX. See also YYYYYYYYYYY */
 }
 
 /**
@@ -395,7 +383,7 @@ static sym_entry* get_top_symbol(const aterm& t, const std::unordered_map<functi
   }
   else
   {
-    throw aterm_io_error("get_top_symbol: illegal term (" + to_string(t) + ")");
+    throw mcrl2::runtime_error("get_top_symbol: illegal term (" + to_string(t) + ")");
   }
   return &sym_entries[(index.count(sym)==0?size_t(-1):index.at(sym))];
 }
@@ -436,7 +424,6 @@ static void gather_top_symbols(sym_entry* cur_entry,
   sym_entry* top_entry;
 
   tss = &cur_entry->top_symbols[cur_arg];
-  tss->nr_symbols = total_top_symbols;
   tss->symbols = std::vector<top_symbol>(total_top_symbols);
   tss->toptable = std::vector<top_symbol*>((total_top_symbols*5)/4); 
 
@@ -469,9 +456,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
   for (size_t cur_sym=0; cur_sym<nr_unique_symbols; cur_sym++)
   {
     sym_entry* cur_entry = &sym_entries[cur_sym];
-    size_t arity = cur_entry->arity;
-
-    assert(arity == cur_entry->id.arity());
+    size_t arity = cur_entry->id.arity();
 
     cur_entry->top_symbols = std::vector<top_symbols_t>(arity);
 
@@ -481,7 +466,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
       {
         size_t total_top_symbols = 0;
         first_topsym = nullptr;
-        for (cur_trm=0; cur_trm<cur_entry->nr_terms; cur_trm++)
+        for (cur_trm=0; cur_trm<cur_entry->terms.size(); cur_trm++)
         {
           aterm term = cur_entry->terms[cur_trm].t;
           aterm arg;
@@ -505,7 +490,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
           }
           else
           {
-            throw aterm_io_error("build_arg_tables: illegal term");
+            throw mcrl2::runtime_error("build_arg_tables: illegal term");
           }
           topsym = get_top_symbol(arg,index);
           if (!topsym->nr_times_top++)
@@ -574,7 +559,7 @@ static void collect_terms(const aterm& t, const std::unordered_map<function_symb
       visited.insert(current.term);
       stack.pop();
     }
-    else if (current.arg < current.entry->arity)
+    else if (current.arg < current.entry->id.arity())
     {
       item.term = subterm(current.term, current.arg++);
       if (visited.count(item.term) == 0)
@@ -603,11 +588,11 @@ static void write_symbols(ostream& os)
   {
     sym_entry* cur_sym = &sym_entries[sym_idx];
     write_symbol(cur_sym->id, os);
-    writeInt(cur_sym->nr_terms, os);
+    writeInt(cur_sym->terms.size(), os);
 
-    for (size_t arg_idx=0; arg_idx<cur_sym->arity; arg_idx++)
+    for (size_t arg_idx=0; arg_idx<cur_sym->id.arity(); arg_idx++)
     {
-      size_t nr_symbols = cur_sym->top_symbols[arg_idx].nr_symbols;
+      size_t nr_symbols = cur_sym->top_symbols[arg_idx].symbols.size();
       writeInt(nr_symbols, os);
       for (size_t top_idx=0; top_idx<nr_symbols; top_idx++)
       {
@@ -680,7 +665,7 @@ static bool write_term(const aterm& t, const std::unordered_map<function_symbol,
       writeBits(aterm_int(current.term).value(), INT_SIZE_IN_BAF, os);
     }
     else
-    if (current.arg < current.entry->arity)
+    if (current.arg < current.entry->id.arity())
     {
       item.term = subterm(current.term, current.arg);
       item.entry = get_top_symbol(item.term, index);
@@ -710,15 +695,13 @@ static bool write_term(const aterm& t, const std::unordered_map<function_symbol,
 
 static bool write_baf(const aterm& t, ostream& os)
 {
-  size_t nr_unique_terms = 0;
-
   /* Initialize bit buffer */
   bit_buffer     = '\0';
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 
-  std::unordered_map<function_symbol, size_t> count; /* (nr_symbols,0); */
-  std::unordered_map<function_symbol, size_t> index; /* (nr_symbols,size_t(-1)); */
+  std::unordered_map<function_symbol, size_t> count; 
+  std::unordered_map<function_symbol, size_t> index; 
   count_the_number_of_unique_function_symbols_in_a_term(t,count);
   nr_unique_symbols = count.size();
 
@@ -727,27 +710,18 @@ static bool write_baf(const aterm& t, ostream& os)
   /* Collect all unique symbols in the input term */
 
   size_t cur=0;
-  // for (size_t lcv=cur=0; lcv<nr_symbols; lcv++)
-  // for(detail::_function_symbol& entry: function_symbol::function_symbol_store())
   for(const pair<const function_symbol, size_t>& p: count)
   {
     const function_symbol sym=p.first;
     const size_t nr_of_occurrences=p.second;
-    /* if (count[sym]>0)
-    { */
-      nr_unique_terms += nr_of_occurrences;
 
-      sym_entries[cur].term_width = bit_width(nr_of_occurrences);
-      sym_entries[cur].id = sym;
-      sym_entries[cur].arity = sym.arity();
-      sym_entries[cur].nr_terms = nr_of_occurrences;
-      sym_entries[cur].terms.resize(nr_of_occurrences);
-      sym_entries[cur].termtable =std::vector<trm_bucket*>((nr_of_occurrences*5)/4);
-      index[sym] = cur;
-      // count[sym] = 0; /* restore invariant that symbolcount is zero */
+    sym_entries[cur].term_width = bit_width(nr_of_occurrences);
+    sym_entries[cur].id = sym;
+    sym_entries[cur].terms.resize(nr_of_occurrences);
+    sym_entries[cur].termtable =std::vector<trm_bucket*>((nr_of_occurrences*5)/4);
+    index[sym] = cur;
 
-      cur++;
-    // }
+    cur++;
   }
 
   assert(cur == nr_unique_symbols);
@@ -768,7 +742,6 @@ static bool write_baf(const aterm& t, ostream& os)
   writeInt(BAF_MAGIC, os);
   writeInt(BAF_VERSION, os);
   writeInt(nr_unique_symbols, os);
-  writeInt(nr_unique_terms, os);
   write_symbols(os);
 
   /* Write the top symbol */
@@ -794,7 +767,7 @@ void write_term_to_binary_stream(const aterm& t, std::ostream& os)
   aterm_io_init(os);
   if (!write_baf(t, os))
   {
-    throw aterm_io_error("Fail to write term to the output file.");
+    throw mcrl2::runtime_error("Fail to write term to the output file.");
   }
 }
 
@@ -809,7 +782,6 @@ static function_symbol read_symbol(istream& is)
   text_buffer[len] = '\0';
 
   std::size_t arity = readInt(is);
-  /* std::size_t quoted = */ readInt(is); /* This is redundant and can be removed. See also YYYYYYYYYY. XXXXXXXXXXX */
 
   return function_symbol(text_buffer, arity);
 }
@@ -828,38 +800,28 @@ static void read_all_symbols(istream& is)
 
     function_symbol sym = read_symbol(is);
     read_symbols[i].sym = sym;
-    read_symbols[i].arity = sym.arity();
 
     /* Read term count and allocate space */
     val = readInt(is);
     if (val == 0)
     {
-      throw aterm_io_error("Read file: internal file error: failed to read all symbols.");
+      throw mcrl2::runtime_error("Read file: internal file error: failed to read all symbols.");
     }
-    read_symbols[i].nr_terms = val;
     read_symbols[i].term_width = bit_width(val);
-    if (val == 0)
-    {
-      assert(0);
-    }
-    else
-    {
-      read_symbols[i].terms = std::vector<aterm>(val);
-    }
+    assert(val != 0);
+    read_symbols[i].terms = std::vector<aterm>(val);
 
     /*  Allocate space for topsymbol information */
-    read_symbols[i].nr_topsyms = std::vector<size_t>(sym.arity()); 
     read_symbols[i].sym_width = std::vector<size_t>(sym.arity()); 
     read_symbols[i].topsyms = std::vector< vector <size_t> > (sym.arity()); 
 
     for (size_t j=0; j<sym.arity(); j++)
     {
       val = readInt(is);
-      read_symbols[i].nr_topsyms[j] = val;
       read_symbols[i].sym_width[j] = bit_width(val);
       read_symbols[i].topsyms[j] = std::vector<size_t>(val); 
 
-      for (size_t k=0; k<read_symbols[i].nr_topsyms[j]; k++)
+      for (size_t k=0; k<read_symbols[i].topsyms[j].size(); k++)
       {
         read_symbols[i].topsyms[j][k] = readInt(is);
       }
@@ -877,7 +839,7 @@ static aterm read_term(sym_read_entry* sym, istream& is)
   size_t value;
   std::stack<read_todo> stack;
 
-  read_todo item = { sym, 0, std::vector<aterm>(sym->arity), &result, nullptr };
+  read_todo item = { sym, 0, std::vector<aterm>(sym->sym.arity()), &result, nullptr };
   stack.push(item);
 
   do
@@ -891,20 +853,20 @@ static aterm read_term(sym_read_entry* sym, istream& is)
       current.callresult = nullptr;
     }
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
-    if (current.sym->sym != detail::function_adm.AS_INT && current.arg < current.sym->arity)
+    if (current.sym->sym != detail::function_adm.AS_INT && current.arg < current.sym->sym.arity())
     {
       if (readBits(value, current.sym->sym_width[current.arg], is) &&
-          value < current.sym->nr_topsyms[current.arg])
+          value < current.sym->topsyms[current.arg].size())
       {
         arg_sym = &read_symbols[current.sym->topsyms[current.arg][value]];
         if (readBits(value, arg_sym->term_width, is) &&
-            value < arg_sym->nr_terms)
+            value < arg_sym->terms.size())
         {
           current.callresult = &arg_sym->terms[value];
           if (!current.callresult->defined())
           {
             item.sym = arg_sym;
-            item.args = std::vector<aterm>(arg_sym->arity);
+            item.args = std::vector<aterm>(arg_sym->sym.arity());
             item.result = &(*current.callresult);
             stack.push(item);
           }
@@ -964,17 +926,16 @@ aterm read_baf(istream& is)
   }
   if (val != BAF_MAGIC)
   {
-    throw aterm_io_error("Error while reading file: The file is not correct as it does not have the BAF_MAGIC control sequence at the right place.");
+    throw mcrl2::runtime_error("Error while reading file: The file is not correct as it does not have the BAF_MAGIC control sequence at the right place.");
   }
 
   std::size_t version = readInt(is);
   if (version != BAF_VERSION)
   {
-    throw baf_version_error(version, BAF_VERSION);
+    throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) + ") of this tool. The input file must be regenerated. ");
   }
 
   nr_unique_symbols = readInt(is);
-  /* std::size_t nr_unique_terms = */ readInt(is);
 
   // Allocate symbol space
   read_symbols = std::vector<sym_read_entry>(nr_unique_symbols);
@@ -997,7 +958,7 @@ aterm read_term_from_binary_stream(istream& is)
   aterm result=read_baf(is);
   if (!result.defined())
   {
-    throw aterm_io_error("Failed to read a term from the input. The file is not a proper binary file.");
+    throw mcrl2::runtime_error("Failed to read a term from the input. The file is not a proper binary file.");
   }
   return result;
 }

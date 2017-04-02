@@ -42,33 +42,22 @@ std::string file_source(const std::string& filename)
 /// \param[in] source The source from which the stream originates (the empty string is used for an unknown source).
 /// \exception Throws a mcrl2 runtime error when an error occurs when reading the term.
 inline
-atermpp::aterm load_aterm(std::istream& stream, bool binary = true, const std::string& format = "ATerm", const std::string& source = "")
+atermpp::aterm load_aterm(std::istream& stream, bool binary = true, const std::string& format = "aterm", const std::string& source = "")
 {
   atermpp::aterm result;
   try
   {
     result = binary ? atermpp::read_term_from_binary_stream(stream) : atermpp::read_term_from_text_stream(stream);
   }
-  catch (atermpp::baf_version_error&)
+  catch (std::exception &e)
   {
     if (source.empty())
     {
-      throw mcrl2::runtime_error("Version mismatch encountered while reading a " + format + ". This may be caused by attempting to read a file in an outdated format.");
+      throw mcrl2::runtime_error("Failed to read a valid " + format + " from the input.\n" + e.what());
     }
-    else
+    else 
     {
-      throw mcrl2::runtime_error("Version mismatch encountered while reading a " + format + " from " + source + ". This may be caused by attempting to read a file in an outdated format.");
-    }
-  }
-  catch (atermpp::aterm_io_error&)
-  {
-    if (source.empty())
-    {
-      throw mcrl2::runtime_error("Failed to read a valid " + format);
-    }
-    else
-    {
-      throw mcrl2::runtime_error("Failed to read a valid " + format + " from " + source);
+      throw mcrl2::runtime_error("Failed to read a valid " + format + " from the input " + source + ".\n" + e.what());
     }
   }
   return result;

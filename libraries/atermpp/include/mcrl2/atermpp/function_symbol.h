@@ -285,6 +285,10 @@ inline void swap(atermpp::function_symbol& f1, atermpp::function_symbol& f2)
 template<>
 struct hash<atermpp::function_symbol>
 {
+  // Default constructor, required for const qualified hash functions. 
+  hash()
+  {}
+
   std::size_t operator()(const atermpp::function_symbol& f) const
   {
     return reinterpret_cast<size_t>(f.m_function_symbol) >> 4; 

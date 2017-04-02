@@ -381,6 +381,10 @@ inline void swap(atermpp::aterm& t1, atermpp::aterm& t2)
 template<>
 struct hash<atermpp::aterm>
 {
+  // Default constructor, required for const qualified hash functions. 
+  hash()
+  {}
+
   std::size_t operator()(const atermpp::aterm& t) const
   {
     static const size_t a_prime_number = 134217689;
