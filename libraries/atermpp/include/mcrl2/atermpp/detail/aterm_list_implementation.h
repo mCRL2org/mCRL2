@@ -22,6 +22,11 @@
 namespace atermpp
 {
 
+const size_t max_len_of_short_list=10000;  // The length of a short list. If lists
+                                           // are short the stack can be used for temporary data.
+                                           // Otherwise the heap must be used to avoid stack overflow.
+                                           // The chosen value is rather arbitrary. 
+
 template <class Term>
 void term_list<Term>::push_front(const Term& el)
 {
@@ -36,26 +41,51 @@ term_list<Term> push_back(const term_list<Term>& l, const Term& el)
   typedef typename term_list<Term>::const_iterator const_iterator;
   
   const size_t len = l.size();
-  const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
-
-  /* Collect all elements of list in buffer */
-  
-  size_t j=0;
-  for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
+  if (len<max_len_of_short_list)
   {
-    buffer[j]=i;
+    // The list is short, use the stack for temporal storage.
+    const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
+
+    /* Collect all elements of list in buffer */
+    
+    size_t j=0;
+    for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
+    {
+      buffer[j]=i;
+    }
+
+    term_list<Term> result;
+    result.push_front(el);
+
+    /* Insert elements at the front of the list */
+    while (j>0)
+    {
+      j=j-1;
+      result.push_front(*buffer[j]);
+    }
+    return result;
   }
-
-  term_list<Term> result;
-  result.push_front(el);
-
-  /* Insert elements at the front of the list */
-  while (j>0)
+  else 
   {
-    j=j-1;
-    result.push_front(*buffer[j]);
+    // The list is long. Use the heap to store intermediate data.
+    std::vector<Term> buffer;
+    buffer.reserve(len);
+
+    for (const Term& t: l)
+    {
+      buffer.push_back(t); 
+    }
+
+    term_list<Term> result;
+    result.push_front(el);
+
+    /* Insert elements at the front of the list */
+    for (typename std::vector<Term>::reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+    {
+      result.push_front(*i);
+    }
+    return result;
   }
-  return result;
 }
 
 
@@ -136,23 +166,46 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
 
   term_list<Term> result = m;
 
-  const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
-
-  size_t j=0;
-  for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
+  if (len<max_len_of_short_list)
   {
-    buffer[j]=i;
-  }
-  assert(j=len);
+    // The length is short. Use the stack for temporary storage.
+    const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
 
-  // Insert elements at the front of the list
-  while (j>0)
+    size_t j=0;
+    for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
+    {
+      buffer[j]=i;
+    }
+    assert(j=len);
+
+    // Insert elements at the front of the list
+    while (j>0)
+    {
+      j=j-1;
+      result.push_front(*buffer[j]);
+    }
+
+    return result;
+  }
+  else 
   {
-    j=j-1;
-    result.push_front(*buffer[j]);
-  }
+    // The length of l is very long. Use the heap for temporary storage.
+    std::vector<Term> buffer;
+    buffer.reserve(len);
 
-  return result;
+    for (const Term& t: l)
+    {
+      buffer.push_back(t);
+    }
+
+    // Insert elements at the front of the list
+    for(typename std::vector<Term>::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i) 
+    {
+      result.push_front(*i);
+    }
+
+    return result;
+  }
 }
 
 
@@ -200,28 +253,55 @@ namespace detail
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     const size_t len=std::distance(first,last);
-    Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
-    Term *const buffer_begin=buffer;
-    Term* i=buffer_begin;
-    for(; first != last; ++first)
+    if (len<max_len_of_short_list)  // If the list is sufficiently short, use the stack.
     {
-      const Term t=convert_to_aterm(*first);
-      if (aterm_filter(t))
+      Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
+      Term *const buffer_begin=buffer;
+      Term* i=buffer_begin;
+      for(; first != last; ++first)
       {
-        // Placement new; The buffer is not properly initialised.
-        new (i) Term(t);
-        ++i;
+        const Term t=convert_to_aterm(*first);
+        if (aterm_filter(t))
+        {
+          // Placement new; The buffer is not properly initialised.
+          new (i) Term(t);
+          ++i;
+        }
       }
-    }
 
-    _aterm* result=aterm::static_empty_aterm_list;
-    for( ; i!=buffer_begin ; )
-    {
-      --i;
-      result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,down_cast<term_list<Term> >(aterm(result)));
-      (*i).~Term(); // Destroy the elements in the buffer explicitly.
+      _aterm* result=aterm::static_empty_aterm_list;
+      for( ; i!=buffer_begin ; )
+      {
+        --i;
+        result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,down_cast<term_list<Term> >(aterm(result)));
+        (*i).~Term(); // Destroy the elements in the buffer explicitly.
+      }
+      return result; 
     }
-    return result; 
+    else
+    {
+      // The list is long. Therefore use the heap for temporary storage.
+      std::vector<Term> buffer;
+      buffer.reserve(len); 
+      Term *const buffer_begin=buffer;
+      Term* i=buffer_begin;
+      for(; first != last; ++first)
+      {
+        const Term t=convert_to_aterm(*first);
+        if (aterm_filter(t))
+        {
+          // Placement new; The buffer is not properly initialised.
+          buffer.push_back(t); 
+        }
+      }
+
+      _aterm* result=aterm::static_empty_aterm_list;
+      for(typename std::vector<Term>::const_reverse_iterator i=buffer.rbegin();  i!=buffer.rend(); ++i)
+      {
+        result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,down_cast<term_list<Term> >(aterm(result)));
+      }
+      return result; 
+    }
   }
 
   template <class Term, class Iter, class ATermConverter>
@@ -231,25 +311,44 @@ namespace detail
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
     const size_t len=std::distance(first,last);
-    Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
-    Term *const buffer_begin=buffer;
-    Term* i=buffer_begin;
-    for(; first != last; ++first,++i)
+    if (len<max_len_of_short_list) // If the list is sufficiently short, use the stack.
     {
-      // Placement new; The buffer is not properly initialised.
-      new (i) Term(convert_to_aterm(*first));
-    }
+      Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
+      Term *const buffer_begin=buffer;
+      Term* i=buffer_begin;
+      for(; first != last; ++first,++i)
+      {
+        // Placement new; The buffer is not properly initialised.
+        new (i) Term(convert_to_aterm(*first));
+      }
 
-    _aterm* result=aterm::static_empty_aterm_list;
-    for( ; i!=buffer_begin ; )
-    {
-      --i;
-      result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,down_cast<term_list<Term> >(aterm(result)));
-      (*i).~Term(); // Destroy the elements in the buffer explicitly.
+      _aterm* result=aterm::static_empty_aterm_list;
+      for( ; i!=buffer_begin ; )
+      {
+        --i;
+        result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,down_cast<term_list<Term> >(aterm(result)));
+        (*i).~Term(); // Destroy the elements in the buffer explicitly.
+      }
+      return result; 
     }
-    return result; 
+    else
+    {
+      // The list is very long. Reserve memory on the heap.
+      std::vector<Term> buffer;
+      buffer.reserve(len);
+      for(; first != last; ++first)
+      {
+        buffer.push_back(convert_to_aterm(*first));
+      }
+
+      _aterm* result=aterm::static_empty_aterm_list;
+      for(typename std::vector<Term>::const_reverse_iterator i=buffer.rbegin(); i!=buffer.rend(); ++i)
+      {
+        result=term_appl2<aterm>(detail::function_adm.AS_LIST,*i,down_cast<term_list<Term> >(aterm(result)));
+      }
+      return result; 
+    }
   }
-
 }
 
 
