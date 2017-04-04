@@ -168,38 +168,34 @@ static const size_t BAF_VERSION = 0x0304;
 
 struct top_symbol
 {
-  struct top_symbol* next;
-  function_symbol s;
-
   size_t index;
-  size_t count;
-
   size_t code_width;
   size_t code;
+
+  top_symbol(size_t index_, size_t code_width_, size_t code_)
+   : index(index_), code_width(code_width_), code(code_)
+  {}
 };
 
 class top_symbols_t
 {
   public:
-    std::vector<top_symbol> symbols;
-    vector<top_symbol*> toptable;
-
-    top_symbols_t()
-    {}
-
+    std::vector<top_symbol> symbols; /* The set of symbols that occur directly below the top symbol. 
+                                        The order of the symbols in this vector is important. */
+    unordered_map<function_symbol, size_t> index_into_symbols; 
+                                     /* This mapping helps to find the entry in symbols with the given 
+                                        function symbol */
 };
 
 class sym_write_entry
 {
   public:
     function_symbol id;
-
-    map<aterm, size_t> write_terms; /* Collect the terms with this id as top symbol, 
-                                       and maintain a consecutive index for each term */
+    size_t term_width;
+    unordered_map<aterm, size_t> write_terms; /* Collect the terms with this id as top symbol, 
+                                                 and maintain a consecutive index for each term */
 
     std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
-
-    size_t term_width;
 
     size_t cur_index;
     size_t nr_times_top; /* # occurences of this symbol as topsymbol */
@@ -207,8 +203,8 @@ class sym_write_entry
     sym_write_entry* next_topsym;
 
     sym_write_entry():
-      top_symbols(0),
       term_width(0),
+      top_symbols(0),
       cur_index(0),
       nr_times_top(0)
     {}
@@ -220,14 +216,13 @@ class sym_read_entry
     function_symbol sym;
     size_t term_width;
     std::vector<aterm> terms;
-    std::vector<size_t> sym_width;
     std::vector<vector<size_t> > topsyms;
+    std::vector<size_t> sym_width;
 
     sym_read_entry():
        term_width(0)
     {
     }
-
 };
 
 static char* text_buffer = nullptr;
@@ -410,30 +405,15 @@ static void gather_top_symbols(sym_write_entry& cur_entry,
                                std::vector<sym_write_entry>& sym_entries,
                                sym_write_entry* first_topsym)
 {
-  size_t index;
-  const std::hash<function_symbol> function_symbol_hasher;
-  top_symbols_t* tss;
-  sym_write_entry* top_entry;
+  top_symbols_t& tss = cur_entry.top_symbols[cur_arg];
+  tss.symbols.clear(); 
+  tss.index_into_symbols.clear(); 
 
-  tss = &cur_entry.top_symbols[cur_arg];
-  tss->symbols = std::vector<top_symbol>(total_top_symbols);
-  tss->toptable = std::vector<top_symbol*>((total_top_symbols*5)/4); 
-
-  index = 0;
-  for (top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym)
+  size_t index = 0;
+  for (sym_write_entry* top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym)
   {
-    top_symbol* ts;
-    ts = &cur_entry.top_symbols[cur_arg].symbols[index];
-    ts->index = top_entry-&sym_entries[0];
-    ts->count = top_entry->nr_times_top;
-    ts->code_width = bit_width(total_top_symbols);
-    ts->code = index;
-    ts->s = top_entry->id;
-
-    size_t hnr = function_symbol_hasher(ts->s) % tss->toptable.size();
-    ts->next = tss->toptable[hnr];
-    tss->toptable[hnr] = ts;
-
+    tss.symbols.emplace_back(top_entry-&sym_entries[0], bit_width(total_top_symbols), index);
+    tss.index_into_symbols[top_entry->id]=index;
     top_entry->nr_times_top = 0;
     index++;
   }
@@ -443,9 +423,6 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
                              std::vector<sym_write_entry>& sym_entries,
                              sym_write_entry*& first_topsym)
 {
-  size_t cur_arg;
-  sym_write_entry* topsym;
-
   for (sym_write_entry& cur_entry: sym_entries)
   {
     size_t arity = cur_entry.id.arity();
@@ -454,14 +431,12 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
 
     if (cur_entry.id!=detail::function_adm.AS_INT)
     {
-      for (cur_arg=0; cur_arg<arity; cur_arg++)
+      for (size_t cur_arg=0; cur_arg<arity; cur_arg++)
       {
         size_t total_top_symbols = 0;
         first_topsym = nullptr;
-        // for (cur_trm=0; cur_trm<cur_entry.write_terms.size(); cur_trm++)
         for(const pair<aterm, size_t>& p: cur_entry.write_terms)
         {
-          // aterm term = cur_entry.write_terms[cur_trm].t;
           aterm term = p.first;
           aterm arg;
           if (term.type_is_list())
@@ -486,7 +461,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
           {
             throw mcrl2::runtime_error("Internal inconsistency found in internal data structure. Illegal term.");
           }
-          topsym = get_top_symbol(arg,index, sym_entries);
+          sym_write_entry* topsym = get_top_symbol(arg,index, sym_entries);
           if (!topsym->nr_times_top++)
           {
             total_top_symbols++;
@@ -597,20 +572,9 @@ static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& s
  * Find a top symbol in a topsymbol table.
  */
 
-static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol& sym)
+static const top_symbol& find_top_symbol(top_symbols_t* syms, const function_symbol& sym)
 {
-  const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = function_symbol_hasher(sym) % syms->toptable.size();
-  top_symbol* cur = syms->toptable[hnr];
-
-  assert(cur);
-  while (cur->s != sym)
-  {
-    cur = cur->next;
-    assert(cur);
-  }
-
-  return cur;
+  return syms->symbols[syms->index_into_symbols[sym]];
 }
 
 /**
@@ -639,9 +603,9 @@ static void write_term(const aterm& t, const std::unordered_map<function_symbol,
       item.term = subterm(current.term, current.arg);
       item.entry = get_top_symbol(item.term, index, sym_entries);
 
-      top_symbol* ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
-      writeBits(ts->code, ts->code_width, os);
-      sym_write_entry& arg_sym = sym_entries[ts->index];
+      const top_symbol& ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
+      writeBits(ts.code, ts.code_width, os);
+      sym_write_entry& arg_sym = sym_entries[ts.index];
       size_t arg_trm_idx = arg_sym.write_terms.at(item.term); 
       writeBits(arg_trm_idx, arg_sym.term_width, os);
 
