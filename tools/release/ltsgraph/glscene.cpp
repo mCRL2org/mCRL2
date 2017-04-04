@@ -1306,6 +1306,16 @@ QString GLScene::tikzNode(size_t i, float aspectRatio)
   return ret;
 }
 
+static QString escapeLatex(const QString &id)
+{
+    QString str(id);
+    QRegExp rx("[#$%_&{}^]");
+    int pos = 0;
+    while((pos = rx.indexIn(str, pos)) != -1)
+        str.insert(pos, '\\'), pos += 2;
+    return str;
+}
+
 QString GLScene::tikzEdge(size_t i, float aspectRatio)
 {
   Graph::LabelNode& label = m_graph.transitionLabel(i);
@@ -1338,13 +1348,9 @@ QString GLScene::tikzEdge(size_t i, float aspectRatio)
 
   QString ret = "\\draw [transition] (state%1) .. node[auto] {%3} controls (%4pt, %5pt)%6 .. (state%2);\n";
   ret = ret.arg(edge.from()).arg(edge.to());
-  ret = ret.arg(m_graph.transitionLabelstring(label.labelindex()));
+  ret = ret.arg(escapeLatex(m_graph.transitionLabelstring(label.labelindex())));
   ret = ret.arg(ctrl[1].x / 10.0f * aspectRatio, 6, 'f').arg(ctrl[1].y / 10.0f, 6, 'f');
   ret = ret.arg(extraControls);
 
   return ret;
 }
-
-
-
-
