@@ -19,13 +19,14 @@
 \maketitle
 \section{The Binary ATerm Format (BAF)}
 This text is largely literally copied from \cite{BJKO99}.
-As discussed in the introduction, the efficient exchange of ATerms between processes is very important.  
-The simplest form of exchange is based on the concrete syntax.
-This would involve pretty printing the term on one side  and parsing it on the other  
-The concrete syntax is not a very efficient exchange format however  because the sharing of function symbols and 
-subterms cannot be expressed in this way.
+Efficient storing and exchange of ATerms between processes is very important.  
+The simplest form of employs concrete syntax.
+This would involve pretty printing and parsing the term.  
+The concrete syntax is not a very efficient exchange format because sharing of function symbols and 
+subterms cannot be employed.
 
-A better solution would b e to exchange a representation in which sharing(both of function symbols and subterms) can be expressed concisely. 
+A better solution would be to exchange a representation in which sharing (both of function symbols and subterms) 
+can be expressed concisely. 
 A raw memory dump cannot be used  process have no meaning in the address space of another process.
 In order to address these problems we have developed BAF, the Binary Aterm Format. Instead of writing addresses, we assign a unique number
 (index) to each subterm and each symbol occurring in a term that we want to exchange.  
@@ -34,7 +35,7 @@ When writing a term  we first start by writing a table
 (in order of increasing index) of all function symbols used in this term. 
 Each function symbol consists of the string representation of its name followed by its arity.
 
-Aterms are written in prefix order. To write a function application, first the index of the function symbol
+ATerms are written in prefix order. To write a function application, first the index of the function symbol
 is written. Then the indices of the arguments are written. When an argument consists of a term that has not been 
 written yet, the index of the argument is first written itself before continuing with the next argument. In this way,
 every subterm is written exactly once. Every time a parent term wishes to refer to a subterm, it just 
@@ -91,7 +92,7 @@ position&\texttt{mult}&\texttt{s}&\texttt{z}\\
 
 \end{tabular}
 \end{center}
-We start by writing this symbol information to file. To do this, we have to writ the following bytes:
+We start by writing this symbol information to file. To do this, we have to write the following bytes:
 \begin{tabbing}
 \hspace{1.5cm}\=\kill
 \tabline{$4$ \texttt{"mult"}}{The length ($4$) and the ASCII representation of \texttt{mult}.}\\
@@ -100,7 +101,7 @@ We start by writing this symbol information to file. To do this, we have to writ
                               \texttt{mult}. This is symbol \texttt{s} with index ($1$).}\\
 \tabline{$1$ $1$            }{At the second argument position, there is only ($1$) possible top symbol and that is 
                               \texttt{s} with index ($1$).}\\
-\tabline{$1$ \texttt{"s"}   }{The length ($1$) and ASCII representation of $s$.}\\
+\tabline{$1$ \texttt{"s"}   }{The length ($1$) and ASCII representation of \texttt{s}.}\\
 \tabline{$1$                }{The arity ($1$) of \texttt{s}.}\\
 \tabline{$2$ $1$ $2$        }{The single argument of \texttt{s} can be either of two ($2$) different top function
                               symbols: \texttt{s} with index ($1$) or \texttt{z} with index ($2$).}\\
