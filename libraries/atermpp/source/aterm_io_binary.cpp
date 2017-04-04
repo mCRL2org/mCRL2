@@ -139,10 +139,12 @@ static void count_the_number_of_unique_function_symbols_in_a_term_rec(
   return;
 }
 
-static void count_the_number_of_unique_function_symbols_in_a_term(const aterm& t, std::unordered_map<function_symbol, size_t>& count)
+static std::unordered_map<function_symbol, size_t> count_the_number_of_unique_function_symbols_in_a_term(const aterm& t)
 {
   std::unordered_set<aterm> visited;
-  count_the_number_of_unique_function_symbols_in_a_term_rec(t,visited,count);
+  std::unordered_map<function_symbol, size_t> result;
+  count_the_number_of_unique_function_symbols_in_a_term_rec(t, visited, result);
+  return result;
 }
 
 
@@ -163,15 +165,15 @@ static const size_t BAF_MAGIC = 0xbaf;
 
 static const size_t BAF_VERSION = 0x0304;
 
-typedef struct _trm_bucket
+struct trm_bucket
 {
-  struct _trm_bucket* next;
+  struct trm_bucket* next;
   aterm t;
-} trm_bucket;
+};
 
-typedef struct _top_symbol
+struct top_symbol
 {
-  struct _top_symbol* next;
+  struct top_symbol* next;
   function_symbol s;
 
   size_t index;
@@ -179,7 +181,7 @@ typedef struct _top_symbol
 
   size_t code_width;
   size_t code;
-} top_symbol;
+};
 
 class top_symbols_t
 {
@@ -192,12 +194,12 @@ class top_symbols_t
 
 };
 
-class sym_entry
+class sym_write_entry
 {
   public:
     function_symbol id;
 
-    std::vector <trm_bucket> terms;
+    std::vector <trm_bucket> write_terms;
 
     std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
 
@@ -208,11 +210,10 @@ class sym_entry
     size_t cur_index;
     size_t nr_times_top; /* # occurences of this symbol as topsymbol */
 
-    sym_entry* next_topsym;
+    sym_write_entry* next_topsym;
 
-    sym_entry():
+    sym_write_entry():
       top_symbols(0),
-      termtable(),
       term_width(0),
       cur_index(0),
       nr_times_top(0)
@@ -234,9 +235,6 @@ class sym_read_entry
     }
 
 };
-
-
-static sym_entry* first_topsym = nullptr;
 
 static char* text_buffer = nullptr;
 static size_t text_buffer_size = 0;
@@ -263,20 +261,20 @@ static void writeBits(size_t val, const size_t nr_bits, ostream& os)
 }
 
 
-static int flushBitsToWriter(ostream& os)
+static void flushBitsToWriter(ostream& os)
 {
-  int result = 0;
   if (bits_in_buffer > 0)
   {
     size_t left = 8-bits_in_buffer;
     bit_buffer <<= left;
     os.put(bit_buffer);
-    result = os.fail() ? -1 : 0;
+    if (os.fail())
+    {
+      throw mcrl2::runtime_error("Failed to write the last byte to the output file/stream.");
+    }
     bits_in_buffer = 0;
     bit_buffer = '\0';
   }
-
-  return result;
 }
 
 /**
@@ -358,11 +356,11 @@ static void write_symbol(const function_symbol& sym, ostream& os)
 }
 
 /**
- * Retrieve the top symbol of a term. Could be a special symbol
+ * Retrieve the sym_write_entry belonging to the top symbol of a term. Could be a special symbol
  * (AS_INT, etc) when the term is not an application.
  */
 
-static sym_entry* get_top_symbol(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, std::vector<sym_entry>& sym_entries)
+static sym_write_entry* get_top_symbol(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, std::vector<sym_write_entry>& sym_entries)
 {
   function_symbol sym;
 
@@ -382,7 +380,8 @@ static sym_entry* get_top_symbol(const aterm& t, const std::unordered_map<functi
   {
     throw mcrl2::runtime_error("Internal error. Illegal term encountered (" + to_string(t) + ")");
   }
-  return &sym_entries[(index.count(sym)==0?size_t(-1):index.at(sym))];
+  assert(index.count(sym)>0);
+  return &sym_entries[index.at(sym)];
 }
 
 
@@ -411,17 +410,18 @@ static size_t bit_width(size_t val)
   * terms have been sorted by symbol.
   */
 
-static void gather_top_symbols(sym_entry* cur_entry,
+static void gather_top_symbols(sym_write_entry& cur_entry,
                                const size_t cur_arg,
                                const size_t total_top_symbols,
-                               std::vector<sym_entry>& sym_entries)
+                               std::vector<sym_write_entry>& sym_entries,
+                               sym_write_entry* first_topsym)
 {
   size_t index;
   const std::hash<function_symbol> function_symbol_hasher;
   top_symbols_t* tss;
-  sym_entry* top_entry;
+  sym_write_entry* top_entry;
 
-  tss = &cur_entry->top_symbols[cur_arg];
+  tss = &cur_entry.top_symbols[cur_arg];
   tss->symbols = std::vector<top_symbol>(total_top_symbols);
   tss->toptable = std::vector<top_symbol*>((total_top_symbols*5)/4); 
 
@@ -429,7 +429,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
   for (top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym)
   {
     top_symbol* ts;
-    ts = &cur_entry->top_symbols[cur_arg].symbols[index];
+    ts = &cur_entry.top_symbols[cur_arg].symbols[index];
     ts->index = top_entry-&sym_entries[0];
     ts->count = top_entry->nr_times_top;
     ts->code_width = bit_width(total_top_symbols);
@@ -445,28 +445,29 @@ static void gather_top_symbols(sym_entry* cur_entry,
   }
 }
 
-static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& index, size_t nr_unique_symbols, std::vector<sym_entry>& sym_entries)
+static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& index, 
+                             std::vector<sym_write_entry>& sym_entries,
+                             sym_write_entry*& first_topsym)
 {
   size_t cur_trm;
   size_t cur_arg;
-  sym_entry* topsym;
+  sym_write_entry* topsym;
 
-  for (size_t cur_sym=0; cur_sym<nr_unique_symbols; cur_sym++)
+  for (sym_write_entry& cur_entry: sym_entries)
   {
-    sym_entry* cur_entry = &sym_entries[cur_sym];
-    size_t arity = cur_entry->id.arity();
+    size_t arity = cur_entry.id.arity();
 
-    cur_entry->top_symbols = std::vector<top_symbols_t>(arity);
+    cur_entry.top_symbols = std::vector<top_symbols_t>(arity);
 
-    if (cur_entry->id!=detail::function_adm.AS_INT)
+    if (cur_entry.id!=detail::function_adm.AS_INT)
     {
       for (cur_arg=0; cur_arg<arity; cur_arg++)
       {
         size_t total_top_symbols = 0;
         first_topsym = nullptr;
-        for (cur_trm=0; cur_trm<cur_entry->terms.size(); cur_trm++)
+        for (cur_trm=0; cur_trm<cur_entry.write_terms.size(); cur_trm++)
         {
-          aterm term = cur_entry->terms[cur_trm].t;
+          aterm term = cur_entry.write_terms[cur_trm].t;
           aterm arg;
           if (term.type_is_list())
           {
@@ -499,7 +500,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
           }
         }
 
-        gather_top_symbols(cur_entry, cur_arg, total_top_symbols, sym_entries);
+        gather_top_symbols(cur_entry, cur_arg, total_top_symbols, sym_entries, first_topsym);
       }
     }
   }
@@ -509,13 +510,13 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
 /**
   * Add a term to the termtable of a symbol.
   */
-static void add_term(sym_entry* entry, const aterm& t)
+static void add_term(sym_write_entry* entry, const aterm& t)
 {
   const std::hash<aterm> aterm_hasher;
   size_t hnr = aterm_hasher(t) % entry->termtable.size();
-  entry->terms[entry->cur_index].t = t;
-  entry->terms[entry->cur_index].next = entry->termtable[hnr];
-  entry->termtable[hnr] = &entry->terms[entry->cur_index];
+  entry->write_terms[entry->cur_index].t = t;
+  entry->write_terms[entry->cur_index].next = entry->termtable[hnr];
+  entry->termtable[hnr] = &entry->write_terms[entry->cur_index];
   entry->cur_index++;
 }
 
@@ -539,9 +540,9 @@ static const aterm& subterm(const aterm& t, size_t i)
   }
 }
 
-typedef struct { aterm term; sym_entry* entry; size_t arg; } write_todo;
+typedef struct { aterm term; sym_write_entry* entry; size_t arg; } write_todo;
 
-static void collect_terms(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, std::vector<sym_entry>& sym_entries)
+static void collect_terms(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
   std::unordered_set<aterm> visited;
@@ -580,14 +581,12 @@ static void collect_terms(const aterm& t, const std::unordered_map<function_symb
  * Write all symbols in a term to file.
  */
 
-static void write_all_symbols(ostream& os, const std::vector<sym_entry>& sym_entries)
+static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& sym_entries)
 {
-  // for (size_t sym_idx=0; sym_idx<nr_unique_symbols; sym_idx++)
-  for(const sym_entry& cur_sym: sym_entries)
+  for(const sym_write_entry& cur_sym: sym_entries)
   {
-    // sym_entry* cur_sym = &sym_entries[sym_idx];
     write_symbol(cur_sym.id, os);
-    writeInt(cur_sym.terms.size(), os);
+    writeInt(cur_sym.write_terms.size(), os);
 
     for (size_t arg_idx=0; arg_idx<cur_sym.id.arity(); arg_idx++)
     {
@@ -604,10 +603,10 @@ static void write_all_symbols(ostream& os, const std::vector<sym_entry>& sym_ent
 
 
 /**
-  * Find a term in a sym_entry.
+  * Find a term in a sym_write_entry.
   */
 
-static size_t find_term(sym_entry* entry, const aterm& t)
+static size_t find_term(sym_write_entry* entry, const aterm& t)
 {
   const std::hash<aterm> aterm_hasher;
   size_t hnr = aterm_hasher(t) % entry->termtable.size();
@@ -620,7 +619,7 @@ static size_t find_term(sym_entry* entry, const aterm& t)
     assert(cur);
   }
 
-  return cur - &entry->terms[0];
+  return cur - &entry->write_terms[0];
 }
 
 /**
@@ -647,7 +646,7 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, const function_symbol& s
  * Write a term using a writer.
  */
 
-static bool write_term(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, ostream& os, std::vector<sym_entry>& sym_entries)
+static void write_term(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, ostream& os, std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
 
@@ -671,7 +670,7 @@ static bool write_term(const aterm& t, const std::unordered_map<function_symbol,
 
       top_symbol* ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
       writeBits(ts->code, ts->code_width, os);
-      sym_entry* arg_sym = &sym_entries[ts->index];
+      sym_write_entry* arg_sym = &sym_entries[ts->index];
       size_t arg_trm_idx = find_term(arg_sym, item.term);
       writeBits(arg_trm_idx, arg_sym->term_width, os);
 
@@ -688,23 +687,22 @@ static bool write_term(const aterm& t, const std::unordered_map<function_symbol,
     stack.pop();
   }
   while (!stack.empty());
-  return true;
+  flushBitsToWriter(os);
 }
 
 
-static bool write_baf(const aterm& t, ostream& os)
+static void write_baf(const aterm& t, ostream& os)
 {
   /* Initialize bit buffer */
   bit_buffer     = '\0';
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 
-  std::unordered_map<function_symbol, size_t> count; 
   std::unordered_map<function_symbol, size_t> index; 
-  count_the_number_of_unique_function_symbols_in_a_term(t,count);
+  std::unordered_map<function_symbol, size_t> count=count_the_number_of_unique_function_symbols_in_a_term(t);
   size_t nr_unique_symbols = count.size();
 
-  std::vector<sym_entry> sym_entries = std::vector<sym_entry>(nr_unique_symbols);
+  std::vector<sym_write_entry> sym_entries = std::vector<sym_write_entry>(nr_unique_symbols);
 
   /* Collect all unique symbols in the input term */
 
@@ -716,8 +714,8 @@ static bool write_baf(const aterm& t, ostream& os)
 
     sym_entries[cur].term_width = bit_width(nr_of_occurrences);
     sym_entries[cur].id = sym;
-    sym_entries[cur].terms.resize(nr_of_occurrences);
-    sym_entries[cur].termtable =std::vector<trm_bucket*>((nr_of_occurrences*5)/4);
+    sym_entries[cur].write_terms.resize(nr_of_occurrences);
+    sym_entries[cur].termtable =std::vector<trm_bucket*>((nr_of_occurrences));
     index[sym] = cur;
 
     cur++;
@@ -733,7 +731,8 @@ static bool write_baf(const aterm& t, ostream& os)
     sym_entries[lcv].cur_index = 0;
   }
 
-  build_arg_tables(index, nr_unique_symbols, sym_entries);
+  sym_write_entry* first_topsym = nullptr;
+  build_arg_tables(index, sym_entries,first_topsym);
 
   /* write header */
 
@@ -746,26 +745,13 @@ static bool write_baf(const aterm& t, ostream& os)
   /* Write the top symbol */
   writeInt(get_top_symbol(t,index,sym_entries)-&sym_entries[0], os);
 
-  if (!write_term(t, index, os, sym_entries))
-  {
-    return false;
-  }
-
-  if (flushBitsToWriter(os)<0)
-  {
-    return false;
-  }
-
-  return true;
+  write_term(t, index, os, sym_entries);
 }
 
 void write_term_to_binary_stream(const aterm& t, std::ostream& os)
 {
   aterm_io_init(os);
-  if (!write_baf(t, os))
-  {
-    throw mcrl2::runtime_error("Fail to write term to the output file.");
-  }
+  write_baf(t, os);
 }
 
 /**
