@@ -31,6 +31,7 @@
 #include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/detail/aterm_io_implementation.h"
+
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -165,12 +166,6 @@ static const size_t BAF_MAGIC = 0xbaf;
 
 static const size_t BAF_VERSION = 0x0304;
 
-struct trm_bucket
-{
-  struct trm_bucket* next;
-  aterm t;
-};
-
 struct top_symbol
 {
   struct top_symbol* next;
@@ -199,11 +194,10 @@ class sym_write_entry
   public:
     function_symbol id;
 
-    std::vector <trm_bucket> write_terms;
+    map<aterm, size_t> write_terms; /* Collect the terms with this id as top symbol, 
+                                       and maintain a consecutive index for each term */
 
     std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
-
-    std::vector<trm_bucket*> termtable;  
 
     size_t term_width;
 
@@ -449,7 +443,6 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
                              std::vector<sym_write_entry>& sym_entries,
                              sym_write_entry*& first_topsym)
 {
-  size_t cur_trm;
   size_t cur_arg;
   sym_write_entry* topsym;
 
@@ -465,9 +458,11 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
       {
         size_t total_top_symbols = 0;
         first_topsym = nullptr;
-        for (cur_trm=0; cur_trm<cur_entry.write_terms.size(); cur_trm++)
+        // for (cur_trm=0; cur_trm<cur_entry.write_terms.size(); cur_trm++)
+        for(const pair<aterm, size_t>& p: cur_entry.write_terms)
         {
-          aterm term = cur_entry.write_terms[cur_trm].t;
+          // aterm term = cur_entry.write_terms[cur_trm].t;
+          aterm term = p.first;
           aterm arg;
           if (term.type_is_list())
           {
@@ -512,11 +507,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
   */
 static void add_term(sym_write_entry* entry, const aterm& t)
 {
-  const std::hash<aterm> aterm_hasher;
-  size_t hnr = aterm_hasher(t) % entry->termtable.size();
-  entry->write_terms[entry->cur_index].t = t;
-  entry->write_terms[entry->cur_index].next = entry->termtable[hnr];
-  entry->termtable[hnr] = &entry->write_terms[entry->cur_index];
+  entry->write_terms[t]=entry->cur_index;
   entry->cur_index++;
 }
 
@@ -603,26 +594,6 @@ static void write_all_symbols(ostream& os, const std::vector<sym_write_entry>& s
 
 
 /**
-  * Find a term in a sym_write_entry.
-  */
-
-static size_t find_term(sym_write_entry* entry, const aterm& t)
-{
-  const std::hash<aterm> aterm_hasher;
-  size_t hnr = aterm_hasher(t) % entry->termtable.size();
-  trm_bucket* cur = entry->termtable[hnr];
-
-  assert(cur);
-  while (cur->t != t)
-  {
-    cur = cur->next;
-    assert(cur);
-  }
-
-  return cur - &entry->write_terms[0];
-}
-
-/**
  * Find a top symbol in a topsymbol table.
  */
 
@@ -670,13 +641,13 @@ static void write_term(const aterm& t, const std::unordered_map<function_symbol,
 
       top_symbol* ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
       writeBits(ts->code, ts->code_width, os);
-      sym_write_entry* arg_sym = &sym_entries[ts->index];
-      size_t arg_trm_idx = find_term(arg_sym, item.term);
-      writeBits(arg_trm_idx, arg_sym->term_width, os);
+      sym_write_entry& arg_sym = sym_entries[ts->index];
+      size_t arg_trm_idx = arg_sym.write_terms.at(item.term); 
+      writeBits(arg_trm_idx, arg_sym.term_width, os);
 
       ++current.arg;
 
-      if (arg_trm_idx >= arg_sym->cur_index)
+      if (arg_trm_idx >= arg_sym.cur_index)
       {
         stack.push(item);
       }
@@ -714,8 +685,7 @@ static void write_baf(const aterm& t, ostream& os)
 
     sym_entries[cur].term_width = bit_width(nr_of_occurrences);
     sym_entries[cur].id = sym;
-    sym_entries[cur].write_terms.resize(nr_of_occurrences);
-    sym_entries[cur].termtable =std::vector<trm_bucket*>((nr_of_occurrences));
+    sym_entries[cur].write_terms.clear();
     index[sym] = cur;
 
     cur++;
