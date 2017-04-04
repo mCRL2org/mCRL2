@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
   QSettings settings("mCRL2", "mCRL2-gui");
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
+  m_ui.treeFiles->restore(settings);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -55,6 +56,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
   QSettings settings("mCRL2", "mCRL2-gui");
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
+  m_ui.treeFiles->save(settings);
   QMainWindow::closeEvent(event);
 }
 

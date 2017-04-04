@@ -423,5 +423,19 @@ bool FileBrowser::askRemove(QString filename, bool copy)
   return true;
 }
 
+void FileBrowser::save(QSettings& settings)
+{
+  settings.beginGroup("FileBrowser");
+  QString path = m_model.filePath(currentIndex());
+  settings.setValue("selected", path);
+  settings.endGroup();
+}
 
-
+void FileBrowser::restore(QSettings& settings)
+{
+  settings.beginGroup("FileBrowser");
+  QString path = settings.value("selected").toString();
+  QModelIndex index = m_model.index(path);
+  setCurrentIndex(index);
+  settings.endGroup();
+}

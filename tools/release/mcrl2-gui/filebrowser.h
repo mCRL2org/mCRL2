@@ -12,6 +12,7 @@
 #include <QFileSystemModel>
 #include <QContextMenuEvent>
 #include <QFileInfo>
+#include <QSettings>
 
 #include "toolcatalog.h"
 #include "toolaction.h"
@@ -33,6 +34,8 @@ class FileBrowser : public QTreeView
     ~FileBrowser();
     void setCatalog(ToolCatalog catalog);
     QMenu* menu() { return m_menu; }
+    void save(QSettings& settings);
+    void restore(QSettings& settings);
 
   public slots:
     void onToolSelected();
