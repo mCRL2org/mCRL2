@@ -283,8 +283,6 @@ namespace detail
       // The list is long. Therefore use the heap for temporary storage.
       std::vector<Term> buffer;
       buffer.reserve(len); 
-      Term *const buffer_begin=buffer;
-      Term* i=buffer_begin;
       for(; first != last; ++first)
       {
         const Term t=convert_to_aterm(*first);
