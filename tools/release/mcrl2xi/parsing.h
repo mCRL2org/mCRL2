@@ -23,24 +23,9 @@ namespace detail
 
 inline bool contains_keyword_init(const std::string& input)
 {
-  size_t search_start=0;
-  do 
-  { 
-    // Find an occurrence of the keyword init not surrounded by alphanumeric characters.
-    size_t location_of_init=input.find("init", search_start);
-    if (location_of_init==std::string::npos)  // not found
-    {
-      return false;
-    }
-    if ((location_of_init==0 || !isalnum(input[location_of_init-1])) &&
-        (input.size()<=location_of_init+4 || !isalnum(input[location_of_init+4])))
-    {
-      // Keyword has been found.
-      return true;
-    }
-    search_start=location_of_init+1;  
-  } while (true);
-  return false;
+  QString no_alphanumeric = "[^a-ZA-Z0-9]";
+  QRegExp rx(no_alphanumeric + "init" + no_alphanumeric, Qt::CaseInsensitive);
+  return rx.indexIn(QString::fromStdString(input)) != -1;
 }
 
 } // end namespace detail
@@ -79,7 +64,7 @@ void parseMcrl2Specification(const std::string& input, mcrl2::data::data_specifi
 }
 
 inline
-void parseMcrl2Specification(const std::string input)
+void parseMcrl2Specification(const std::string& input)
 {
   mcrl2::data::data_specification data_spec;
   std::set<mcrl2::data::variable> vars;
