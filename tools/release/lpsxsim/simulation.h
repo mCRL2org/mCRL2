@@ -49,7 +49,7 @@ class Simulation : public QObject
     Trace trace() { QMutexLocker locker(&m_traceMutex); return m_trace; }
 
   private slots:
-    void init();
+    void init(const QString& filename, bool do_not_use_dummies);
     void updateTrace(unsigned int firstChangedState);
 
   private:
@@ -66,10 +66,8 @@ class Simulation : public QObject
     void finished();
 
   private:
-    QString m_filename;
     mcrl2::data::rewrite_strategy m_strategy;
     bool m_initialized;
-    bool m_do_not_use_dummies;
 
     mcrl2::lps::simulation *m_simulation;
     QStringList m_parameters;
