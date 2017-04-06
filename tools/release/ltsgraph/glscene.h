@@ -287,7 +287,7 @@ class GLScene
     /**
      * @brief Renders the scene to LaTeX using Tikz.
      */
-    void renderLatexGraphics(QString filename, float aspectRatio = 1.0f);
+    void renderLatexGraphics(const QString& filename, float aspectRatio = 1.0f);
 
     //Getters and setters
     bool drawStateLabels() const { return m_drawstatelabels; }

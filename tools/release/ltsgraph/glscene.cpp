@@ -1247,7 +1247,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
   }
 }
 
-void GLScene::renderLatexGraphics(QString filename, float aspectRatio)
+void GLScene::renderLatexGraphics(const QString& filename, float aspectRatio)
 {
   QString tikz_code  = "\\documentclass[10pt, a4paper]{article}\n\n";
   tikz_code += "\\usepackage{tikz}\n";
@@ -1306,14 +1306,16 @@ QString GLScene::tikzNode(size_t i, float aspectRatio)
   return ret;
 }
 
-static QString escapeLatex(const QString &id)
+static QString escapeLatex(const QString &str)
 {
-    QString str(id);
+    QString escaped;
     QRegExp rx("[#$%_&{}^]");
-    int pos = 0;
-    while((pos = rx.indexIn(str, pos)) != -1)
-        str.insert(pos, '\\'), pos += 2;
-    return str;
+    for(auto x : str) {
+        if(rx.indexIn(x) != -1)
+            escaped.append('\\');
+        escaped.append(x);
+    }
+    return escaped;
 }
 
 QString GLScene::tikzEdge(size_t i, float aspectRatio)
