@@ -114,7 +114,7 @@ class function_symbol
     /// does not exist yet, and that the prefix and number combination is neatly
     /// recoreded in the appropriate number generator as being used. Furthermore,
     /// it takes a pointer to a char* to represent its string.
-    function_symbol(const char* name_begin, const char* name_end, const size_t arity_); 
+    /* function_symbol(const char* name_begin, const char* name_end, const size_t arity_);  */
 
   public:
     /// \brief default constructor
@@ -130,9 +130,7 @@ class function_symbol
     /// \param arity_ The arity of the function.
     function_symbol(const std::string& name, const size_t arity_)
      : function_symbol(name, arity_, true)
-    {
-      increase_reference_count<false>();
-    }
+    {}
 
     /// \brief Copy constructor
     function_symbol(const function_symbol& f)

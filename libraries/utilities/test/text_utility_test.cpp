@@ -56,14 +56,6 @@ void test_word_wrap()
   BOOST_CHECK(text == TEXT4);
 }
 
-void test_number2string()
-{
-  BOOST_CHECK(utilities::number2string(0) == "0");
-  BOOST_CHECK(utilities::number2string(1) == "1");
-  BOOST_CHECK(utilities::number2string(10) == "10");
-  BOOST_CHECK(utilities::number2string(123456789) == "123456789");
-}
-
 int test_main(int, char*[])
 {
   test_remove_comments();

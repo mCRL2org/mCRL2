@@ -56,7 +56,7 @@ class parity_game_output: public parity_game_generator
     /// \return The quoted name of the vertex, for example "X1"
     std::string vertex(size_t i) const
     {
-      return "\"X" + utilities::number2string(i+1) + "\"";
+      return "\"X" + std::to_string(i+1) + "\"";
     }
 
     /// \brief Returns a tuple representing an edge, for example ("X1", "X2")
@@ -72,7 +72,7 @@ class parity_game_output: public parity_game_generator
     /// \return A string representing a priority, for example "X1":0
     std::string priority(std::pair<size_t, size_t> p) const
     {
-      return vertex(p.first) + ":" + utilities::number2string(p.second);
+      return vertex(p.first) + ":" + std::to_string(p.second);
     }
 
     /// \brief Applies a function to the elements of a container
@@ -173,14 +173,14 @@ class parity_game_output: public parity_game_generator
       std::vector<std::string> lines(V.size());
       for (std::size_t k: V)
       {
-        lines[k] = utilities::number2string(k) + " " + utilities::number2string(priorities[k]) + " " + (odd_vertices.find(k) == odd_vertices.end() ? "0 " : "1 ");
+        lines[k] = std::to_string(k) + " " + std::to_string(priorities[k]) + " " + (odd_vertices.find(k) == odd_vertices.end() ? "0 " : "1 ");
       }
       for (const auto& i: E)
       {
         size_t k = i.first;
         size_t m = i.second;
         std::string& line = lines[k];
-        line += ((line[line.size()-1] == ' ' ? "" : ", ") + utilities::number2string(m));
+        line += ((line[line.size()-1] == ' ' ? "" : ", ") + std::to_string(m));
       }
       return join(lines, ";\n") + ";";
     }

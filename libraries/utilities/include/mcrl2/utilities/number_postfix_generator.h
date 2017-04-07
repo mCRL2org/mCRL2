@@ -107,7 +107,7 @@ class number_postfix_generator
         }
         return hint;
       }
-      return hint + utilities::number2string(add_to_context ? ++(j->second) : j->second + 1);
+      return hint + std::to_string(add_to_context ? ++(j->second) : j->second + 1);
     }
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.

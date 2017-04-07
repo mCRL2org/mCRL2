@@ -26,7 +26,7 @@ inline std::string to_string(const aterm& t)
   std::ostringstream oss;
   oss << t;
   return oss.str();
-}
+} 
 
 } // namespace atermpp
 

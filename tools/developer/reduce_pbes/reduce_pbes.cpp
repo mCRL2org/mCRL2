@@ -42,10 +42,10 @@ void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::strin
     pbes q2 = replace_subterm(p, x, depth, pbes_system::false_());
     if (!(p == q1) && !(p == q2))
     {
-      std::string filename1 = input_filename.substr(0, input_filename.size() - 5) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "t.pbes";
+      std::string filename1 = input_filename.substr(0, input_filename.size() - 5) + "_" + std::to_string(depth) + "_" + std::to_string(x) + "t.pbes";
       std::cout << "file = " << filename1 << std::endl;
       save_pbes(q1, filename1, pbes_system::pbes_format_internal());
-      std::string filename2 = input_filename.substr(0, input_filename.size() - 5) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "f.pbes";
+      std::string filename2 = input_filename.substr(0, input_filename.size() - 5) + "_" + std::to_string(depth) + "_" + std::to_string(x) + "f.pbes";
       std::cout << "file = " << filename2 << std::endl;
       save_pbes(q2, filename2, pbes_system::pbes_format_internal());
     }

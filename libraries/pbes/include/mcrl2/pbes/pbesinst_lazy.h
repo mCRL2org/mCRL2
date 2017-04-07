@@ -103,7 +103,7 @@ struct pbesinst_rename_short
     {
       return i->second;
     }
-    core::identifier_string name("X" + utilities::number2string(++index));
+    core::identifier_string name("X" + std::to_string(++index));
     name_map[Ye] = name;
     return name;
   }

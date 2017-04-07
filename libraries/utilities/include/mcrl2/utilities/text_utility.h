@@ -133,12 +133,11 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s);
 
-/// \brief Convert a number to a string in the buffer.
+/// \brief Convert a number to a string in the buffer starting at position start_position.
 /// \param number The number to be converted.
 /// \param buffer A buffer in which the string will be stored that is sufficiently large.
-/// \return A pointer to the end of the buffer, where the character '\0' is located.
-inline
-char* number2string(std::size_t number, char* buffer)
+/// \param start_position The first position where a number is written. 
+inline void number2string(std::size_t number, std::string& buffer, std::size_t start_position)
 {
   // First calculate the number of digital digits of number;
   size_t number_of_digits=0;
@@ -153,26 +152,16 @@ char* number2string(std::size_t number, char* buffer)
   }
 
   // Put the number in the buffer at the right position.
-  size_t position=number_of_digits;
-  buffer[position] = '\0'; // end of string marker.
-  while (position>0)
+  size_t position=start_position+number_of_digits;
+  buffer.resize(position);
+
+  while (position>start_position)
   {
     --position;
     buffer[position] = '0' + number % 10;
     number = number/10;
   }
-  return &buffer[number_of_digits];
 }
-
-/// \brief Convert a number to string.
-/// \param number A number to be transformed.
-inline
-std::string number2string(std::size_t number)
-{
-  char _buffer[std::numeric_limits<std::size_t>::digits10 + 1];
-  number2string(number, _buffer);
-  return std::string(_buffer);
-} 
 
 } // namespace utilities
 
