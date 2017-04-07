@@ -87,8 +87,6 @@ namespace Graph
     class GraphImpl : public GraphImplBase
     {
       private:
-        graph_t m_graph;
-
         // This local function adds a probabilistic state to the data structures of this graph.
         // For each probabilistic node with two or more outgoing transitions a new node is drawn.
         // For each probability/state pair a new transition is generated labelled with the probability.
@@ -149,26 +147,27 @@ namespace Graph
         virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max)
         {
           // Remove old graph (if it wasn't deleted yet) and load new one
-          m_graph.load(filename.toUtf8().constData());
+          graph_t graph;
+          graph.load(filename.toUtf8().constData());
 
           // Reserve all auxiliary data vectors
-          nodes.reserve(m_graph.num_states());
-          edges.reserve(m_graph.num_transitions());
-          handles.reserve(m_graph.num_transitions());
+          nodes.reserve(graph.num_states());
+          edges.reserve(graph.num_transitions());
+          handles.reserve(graph.num_transitions());
 
-          transitionLabels.reserve(m_graph.num_action_labels());
-          transitionLabelnodes.reserve(m_graph.num_transitions());
+          transitionLabels.reserve(graph.num_action_labels());
+          transitionLabelnodes.reserve(graph.num_transitions());
 
-          stateLabels.reserve(m_graph.num_state_labels());
-          stateLabelnodes.reserve(m_graph.num_states());
+          stateLabels.reserve(graph.num_state_labels());
+          stateLabelnodes.reserve(graph.num_states());
 
-          for (size_t i = 0; i < m_graph.num_state_labels(); ++i)
+          for (size_t i = 0; i < graph.num_state_labels(); ++i)
           {
-            stateLabels.push_back(stateLabel(m_graph.state_label(i),m_graph));
+            stateLabels.push_back(stateLabel(graph.state_label(i),graph));
           }
 
           // Position nodes randomly
-          for (size_t i = 0; i < m_graph.num_states(); ++i)
+          for (size_t i = 0; i < graph.num_states(); ++i)
           {
             const bool is_not_probabilistic=false;
             nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_not_probabilistic));
@@ -176,23 +175,23 @@ namespace Graph
           }
 
           // Store string representations of labels
-          for (size_t i = 0; i < m_graph.num_action_labels(); ++i)
+          for (size_t i = 0; i < graph.num_action_labels(); ++i)
           {
-            transitionLabels.push_back(LabelString(m_graph.is_tau(i),transitionLabel(m_graph.action_label(i))));
+            transitionLabels.push_back(LabelString(graph.is_tau(i),transitionLabel(graph.action_label(i))));
           }
 
           // Assign and position edge handles, position edge labels
-          for (size_t i = 0; i < m_graph.num_transitions(); ++i)
+          for (size_t i = 0; i < graph.num_transitions(); ++i)
           {
-            mcrl2::lts::transition& t = m_graph.get_transitions()[i];
-            size_t new_probabilistic_state=add_probabilistic_state(m_graph.probabilistic_state(t.to()),min,max);
+            mcrl2::lts::transition& t = graph.get_transitions()[i];
+            size_t new_probabilistic_state=add_probabilistic_state(graph.probabilistic_state(t.to()),min,max);
             edges.push_back(Edge(t.from(),new_probabilistic_state));
             handles.push_back(Node((nodes[t.from()].pos() + nodes[new_probabilistic_state].pos()) / 2.0));
             transitionLabelnodes.push_back(LabelNode((nodes[t.from()].pos() + nodes[new_probabilistic_state].pos()) / 2.0,t.label()));
           }
 
-          /* initialState = m_graph.initial_state(); */
-          initialState = add_probabilistic_state(m_graph.initial_probabilistic_state(),min,max);
+          /* initialState = graph.initial_state(); */
+          initialState = add_probabilistic_state(graph.initial_probabilistic_state(),min,max);
         }
     };
 
