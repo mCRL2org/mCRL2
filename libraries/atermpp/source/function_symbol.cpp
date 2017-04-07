@@ -140,15 +140,5 @@ function_symbol::function_symbol(const std::string& name_, const size_t arity_, 
 
 }
 
-
-// Create a function symbol from a string and an arity, of which it is guaranteed
-// that such a function does not exist. This is an optimisation of the function_symbol contruction
-// for functions that are constructed using a prefix string and a number.
-/* function_symbol::function_symbol(const char* name_begin, const char* name_end, const size_t arity_)
- : function_symbol(std::string(name_begin,name_end),arity_,false)
-{
-  increase_reference_count<false>();
-} */
-
 } // namespace atermpp
 
