@@ -60,7 +60,6 @@ int test_main(int, char*[])
 {
   test_remove_comments();
   test_word_wrap();
-  test_number2string();
 
   return 0;
 }
