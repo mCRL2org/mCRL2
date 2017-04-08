@@ -719,8 +719,10 @@ class pbesinst_lazy_algorithm
   public:
 
     /// \brief Constructor.
-    /// \param rewriter_strategy A strategy for the data rewriter
-    /// \param print_equations If true, the generated equations are printed
+    /// \param p The pbes used in the exploration algorithm.
+    /// \param rewriter_strategy A strategy for the data rewriter.
+    /// \param search strategy The search strategy used to explore the pbes, typically depth or breadth first.
+    /// \param transformation_strategy The strategy that determines to which extent the generated bes is simplified while being generated.
     pbesinst_lazy_algorithm(
          const pbes& p,
          data::rewriter::strategy rewrite_strategy = data::jitty,

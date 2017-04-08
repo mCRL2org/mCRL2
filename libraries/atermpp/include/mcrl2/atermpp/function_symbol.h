@@ -270,8 +270,8 @@ namespace std
 /// \brief Swaps two function symbols.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
-/// \param t1 The first term
-/// \param t2 The second term
+/// \param f1 The first term
+/// \param f2 The second term
 
 template <>
 inline void swap(atermpp::function_symbol& f1, atermpp::function_symbol& f2)

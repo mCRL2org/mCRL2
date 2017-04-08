@@ -95,9 +95,9 @@ class state_label_lts : public atermpp::term_list< atermpp::term_balanced_tree< 
 };
 
 /** \brief Pretty print a state value of this LTS.
-    \details The label l is printed as (t1,...,tn) if it consists of a single label.
+    \details The label is printed as (t1,...,tn) if it consists of a single label.
              Otherwise the labels are printed with square brackets surrounding it. 
-    \param[in] l  The state value to pretty print.
+    \param[in] label  The state value to pretty print.
     \return           The pretty-printed representation of value. */
 
 inline std::string pp(const state_label_lts& label)

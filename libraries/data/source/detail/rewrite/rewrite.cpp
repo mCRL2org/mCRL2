@@ -106,17 +106,17 @@ data_expression Rewriter::rewrite_where(
   const data_expression& body=term.body();
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
-  for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+  for (const assignment& a: assignments)
   {
-    const variable& v=i->lhs();
+    const variable& v=a.lhs();
     const variable v_fresh(generator("whr_"), v.sort());
     variable_renaming[v]=v_fresh;
-    sigma[v_fresh]=rewrite(i->rhs(),sigma);
+    sigma[v_fresh]=rewrite(a.rhs(),sigma);
   }
   const data_expression result=rewrite(replace_variables(body,variable_renaming),sigma);
 
   // Reset variables in sigma
-  for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
+  for (mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
       it!=variable_renaming.end(); ++it)
   {
     sigma[atermpp::down_cast<variable>(it->second)]=it->second;
@@ -143,9 +143,8 @@ abstraction Rewriter::rewrite_single_lambda(
     const std::set<variable>& variables_in_sigma(sigma.variables_in_rhs());
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
-    for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
+    for(const variable& v: vl)
     {
-      const variable v= *it;
       if (variables_in_sigma.find(v) != variables_in_sigma.end() || sigma(v) != v)
       {
         number_of_renamed_variables++;
@@ -258,12 +257,12 @@ data_expression Rewriter::rewrite_lambda_application(
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
   size_t count=1;
-  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i, ++count)
+  for(const variable& v: vl)
   {
-    const variable v= (*i);
     const variable v_fresh(generator("x_"), v.sort());
     variable_renaming[v]=v_fresh;
     sigma[v_fresh]=rewrite(data_expression(t[count]),sigma);
+    ++count;
   }
 
   const data_expression result=rewrite(replace_variables(lambda_body,variable_renaming),sigma);
@@ -315,9 +314,8 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
   variable_vector vl_new_v;
-  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  for(const variable& v: vl)
   {
-    const variable v= *i;
     if (sigma(v)!=v)
     {
       const variable v_fresh(generator("ex_"), v.sort());
@@ -358,6 +356,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   const bool throw_exceptions = false;
   const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
+  /* TODO XXXX VOEG GEBRUIK van predefined generator toe. Ook bij universele quantificatie. */
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
   enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
 
@@ -418,9 +417,8 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
   variable_vector vl_new_v;
-  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  for(const variable& v: vl)
   {
-    const variable v= *i;
     if (sigma(v)!=v)  // Check whether sigma is defined on v. If not, renaming is not necessary.
     {
       const variable v_fresh(generator("all_"), v.sort());

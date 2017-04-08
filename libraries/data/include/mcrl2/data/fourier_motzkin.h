@@ -199,17 +199,16 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
 ///          returned. 
 /// \param e_in An input data_expression of sort Bool.
 /// \param vars_in A container with variables. Supports iterating over these variables.
-/// \param e_in The output data expression of sort Bool.
+/// \param e_out The output data expression of sort Bool.
 /// \param vars_out A list of variables to store resulting variables. Initially empty.
-/// \param resulting_inequalities The set of resulting inequalities.
 /// \param r A rewriter.
 /// \post exists vars_out.e_out == exists vars_in.e_in.
 
 inline void fourier_motzkin(const data_expression& e_in,
-                     const variable_list& vars_in,
-                     data_expression& e_out,
-                     variable_list& vars_out,
-                     const rewriter& r)
+                            const variable_list& vars_in,
+                            data_expression& e_out,
+                            variable_list& vars_out,
+                            const rewriter& r)
 {
   assert(e_in.sort()==sort_bool::bool_());
   assert(vars_out.empty());

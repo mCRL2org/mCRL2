@@ -17,6 +17,8 @@ mCRL2 library documentation
           libraries/atermpp/aterm_library
           libraries/atermpp/reference
 
+       .. include:: libraries/atermpp/articles.txt
+
      - **BES**
 
        .. toctree::
