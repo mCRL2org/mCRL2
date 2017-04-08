@@ -720,8 +720,8 @@ class pbesinst_lazy_algorithm
 
     /// \brief Constructor.
     /// \param p The pbes used in the exploration algorithm.
-    /// \param rewriter_strategy A strategy for the data rewriter.
-    /// \param search strategy The search strategy used to explore the pbes, typically depth or breadth first.
+    /// \param rewrite_strategy A strategy for the data rewriter.
+    /// \param search_strategy The search strategy used to explore the pbes, typically depth or breadth first.
     /// \param transformation_strategy The strategy that determines to which extent the generated bes is simplified while being generated.
     pbesinst_lazy_algorithm(
          const pbes& p,
@@ -761,7 +761,6 @@ class pbesinst_lazy_algorithm
     }
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    /// \param p A PBES
     void run()
     {
       std::size_t m_iteration_count = 0;

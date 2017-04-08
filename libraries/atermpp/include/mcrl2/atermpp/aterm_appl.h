@@ -108,16 +108,16 @@ class term_appl: public aterm
     /// \param sym A function symbol.
     /// \param begin The start of a range of elements.
     /// \param end The end of a range of elements.
-    /// \param convert_to_aterm An optional translator that is applied to each element in the iterator range,
-    //                              and which must translate these elements to type Term.
-    template <class InputIterator, class ATermConverter>
+    /// \param convertor An class or lambda term containing an operator Term operator()(const Term& t) which is applied to each each element in the iterator range
+    //                              before it becomes an argument of this term. 
+    template <class InputIterator, class TermConverter>
     term_appl(const function_symbol& sym,
               InputIterator begin,
               InputIterator end,
-              const ATermConverter& convert_to_aterm,
+              const TermConverter& convertor,
               typename std::enable_if< !std::is_base_of<atermpp::aterm, InputIterator>::value>::type* = nullptr,
               typename std::enable_if< !std::is_base_of<atermpp::aterm, ATermConverter>::value>::type* = nullptr)
-         :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convert_to_aterm))
+         :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convertor))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");

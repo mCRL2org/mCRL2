@@ -12,7 +12,7 @@ mCRL2 library documentation
    * - **Atermpp (ATerm++)**
 
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
 
           libraries/atermpp/aterm_library
           libraries/atermpp/reference
@@ -31,7 +31,7 @@ mCRL2 library documentation
    * - **Core**
 
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
 
           libraries/core/core_library
           libraries/core/common_functionality
@@ -40,7 +40,7 @@ mCRL2 library documentation
      - **Data**
 
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
 
           libraries/data/data_library
           libraries/data/reference
@@ -58,7 +58,7 @@ mCRL2 library documentation
      - **LPS**
 
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
 
           libraries/lps/lps_library
           libraries/lps/reference
@@ -68,7 +68,7 @@ mCRL2 library documentation
    * - **LTS**
 
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
 
           libraries/lts/lts_library
           libraries/lts/reference
@@ -86,7 +86,7 @@ mCRL2 library documentation
    * - **PBES**
 
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
 
           libraries/pbes/pbes_library
           libraries/pbes/reference
@@ -114,7 +114,7 @@ mCRL2 library documentation
      - **Trace**
 
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
 
           libraries/trace/trace_library
           libraries/trace/reference
@@ -122,7 +122,7 @@ mCRL2 library documentation
    * - **Utilities**
 
        .. toctree::
-          :maxdepth: 2
+          :maxdepth: 1
           
           libraries/utilities/utilities_library
           libraries/utilities/reference
