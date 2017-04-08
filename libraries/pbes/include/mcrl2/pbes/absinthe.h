@@ -32,7 +32,7 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/data/set_identifier_generator.h"
-// #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/utilities/exception.h"
@@ -292,7 +292,7 @@ struct absinthe_algorithm
       std::size_t i = 0;
       for (auto j = x.begin(); j != x.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + std::to_string(i), sigma(j->sort())));
+        result.push_back(data::variable(hint + utilities::number2string(i), sigma(j->sort())));
       }
       return data::variable_list(result.begin(), result.end());
     }
@@ -625,7 +625,7 @@ struct absinthe_algorithm
       std::size_t i = 0;
       for (auto j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + std::to_string(i), sigma(*j)));
+        result.push_back(data::variable(hint + utilities::number2string(i), sigma(*j)));
       }
       return result;
     }
@@ -733,7 +733,7 @@ struct absinthe_algorithm
       std::size_t i = 0;
       for (auto j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + std::to_string(i), sigma(*j)));
+        result.push_back(data::variable(hint + utilities::number2string(i), sigma(*j)));
       }
       return result;
     }

@@ -33,6 +33,8 @@ static inline int highest_bit(size_t x)
 
 namespace atermpp
 {
+namespace detail
+{
 
 /// \brief Stores a subset of a given base set using maximum sharing.
 ///
@@ -399,6 +401,7 @@ class shared_subset
     }
 };
 
+} // namespace detail
 } // namespace atermpp
 
 #endif

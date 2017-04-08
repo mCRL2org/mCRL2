@@ -135,7 +135,7 @@ next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *g
 {
   if (m_use_summand_pruning)
   {
-    m_pruning_tree.summand_subset = atermpp::shared_subset<summand_t>(generator->m_summands);
+    m_pruning_tree.summand_subset = atermpp::detail::shared_subset<summand_t>(generator->m_summands);
     build_pruning_parameters(generator->m_specification.process().action_summands());
   }
   else
@@ -169,8 +169,8 @@ next_state_generator::summand_subset_t::summand_subset_t(
 
   if (m_use_summand_pruning)
   {
-    atermpp::shared_subset<summand_t> full_set(generator->m_summands);
-    m_pruning_tree.summand_subset =  atermpp::shared_subset<summand_t>(full_set, std::bind(next_state_generator::summand_subset_t::summand_set_contains, summand_set, std::placeholders::_1));
+    atermpp::detail::shared_subset<summand_t> full_set(generator->m_summands);
+    m_pruning_tree.summand_subset =  atermpp::detail::shared_subset<summand_t>(full_set, std::bind(next_state_generator::summand_subset_t::summand_set_contains, summand_set, std::placeholders::_1));
     build_pruning_parameters(summands);
   }
   else
@@ -286,7 +286,7 @@ bool next_state_generator::summand_subset_t::is_not_false(const next_state_gener
   return m_generator->m_rewriter(summand.condition, m_pruning_substitution) != data::sort_bool::false_();
 }
 
-atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const state& state)
+atermpp::detail::shared_subset<next_state_generator::summand_t>::iterator next_state_generator::summand_subset_t::begin(const state& state)
 {
   assert(m_use_summand_pruning);
 
@@ -306,7 +306,7 @@ atermpp::shared_subset<next_state_generator::summand_t>::iterator next_state_gen
     if (position == node->children.end())
     {
       pruning_tree_node_t child;
-      child.summand_subset = atermpp::shared_subset<summand_t>(node->summand_subset, std::bind(&next_state_generator::summand_subset_t::is_not_false, this, std::placeholders::_1));
+      child.summand_subset = atermpp::detail::shared_subset<summand_t>(node->summand_subset, std::bind(&next_state_generator::summand_subset_t::is_not_false, this, std::placeholders::_1));
       node->children[argument] = child;
       node = &node->children[argument];
     }

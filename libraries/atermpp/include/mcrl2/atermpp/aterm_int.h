@@ -47,7 +47,7 @@ class aterm_int:public aterm
 
     /// \brief Assignment operator.
     /// \param t A term representing an integer.
-    aterm_int &operator=(const aterm_int &t)
+    aterm_int& operator=(const aterm_int &t)
     {
       copy_term(t);
       return *this;

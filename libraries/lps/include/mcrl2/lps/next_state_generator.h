@@ -17,7 +17,7 @@
 #include <forward_list>
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "mcrl2/atermpp/shared_subset.h"
+#include "mcrl2/atermpp/detail/shared_subset.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/state_probability_pair.h"
@@ -68,7 +68,7 @@ class next_state_generator
 
     struct pruning_tree_node_t
     {
-      atermpp::shared_subset<summand_t> summand_subset;
+      atermpp::detail::shared_subset<summand_t> summand_subset;
       std::map<data::data_expression, pruning_tree_node_t> children;
     };
 
@@ -103,7 +103,7 @@ class next_state_generator
         static bool summand_set_contains(const std::set<stochastic_action_summand>& summand_set, const summand_t& summand);
         void build_pruning_parameters(const stochastic_action_summand_vector& summands);
         bool is_not_false(const summand_t& summand);
-        atermpp::shared_subset<summand_t>::iterator begin(const lps::state& state);
+        atermpp::detail::shared_subset<summand_t>::iterator begin(const lps::state& state);
     };
 
     typedef mcrl2::lps::state_probability_pair<lps::state, lps::probabilistic_data_expression> state_probability_pair;
@@ -165,7 +165,7 @@ class next_state_generator
         bool m_use_summand_pruning;
         std::vector<size_t>::iterator m_summand_iterator;
         std::vector<size_t>::iterator m_summand_iterator_end;
-        atermpp::shared_subset<summand_t>::iterator m_summand_subset_iterator;
+        atermpp::detail::shared_subset<summand_t>::iterator m_summand_subset_iterator;
         summand_t *m_summand;
 
         bool m_cached;

@@ -296,8 +296,8 @@ struct is_convertible : public
 /// \return  A term of type Derived.
 template <class Derived, class Base>
 const Derived& down_cast(const Base& t,
-                          typename std::enable_if<is_convertible<Base, Derived>::value &&
-                                                  !std::is_base_of<Derived, Base>::value>::type* = nullptr)
+                         typename std::enable_if<is_convertible<Base, Derived>::value &&
+                                                 !std::is_base_of<Derived, Base>::value>::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
@@ -342,10 +342,10 @@ const DerivedCont& vertical_cast(const Cont<Base>& t,
 
 template <class Derived, class Base>
 const Derived& deprecated_cast(const Base& t,
-                          typename std::enable_if<
-                             std::is_base_of<aterm, Base>::value &&
-                             std::is_base_of<aterm, Derived>::value
-                          >::type* = nullptr)
+                               typename std::enable_if<
+                                  std::is_base_of<aterm, Base>::value &&
+                                  std::is_base_of<aterm, Derived>::value
+                               >::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");

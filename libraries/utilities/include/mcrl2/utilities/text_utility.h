@@ -163,6 +163,18 @@ inline void number2string(std::size_t number, std::string& buffer, std::size_t s
   }
 }
 
+/// \brief Convert a number to string. 
+/// \details This function is much faster than std::to_string and 
+///          its use is therefore preferred in those cases were performance counts. 
+/// \param number A number to be transformed. 
+inline std::string number2string(std::size_t number) 
+{ 
+  std::string buffer;
+  buffer.reserve(std::numeric_limits<std::size_t>::digits10 + 1); 
+  number2string(number, buffer, 0); 
+  return std::string(buffer); 
+}  
+
 } // namespace utilities
 
 } // namespace mcrl2

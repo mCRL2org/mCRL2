@@ -26,7 +26,7 @@
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
-// #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
@@ -310,7 +310,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
       std::vector<std::string> w = utilities::split(arg, ",");
       for (std::string& k: w)
       {
-        k = unique_prefix + std::to_string(unique_prefix_index++) + ": " + k;
+        k = unique_prefix + utilities::number2string(unique_prefix_index++) + ": " + k;
       }
       arg = boost::algorithm::join(w, ", ");
     }
@@ -343,7 +343,7 @@ std::pair<std::vector<pbes_expression>, data::data_specification> parse_pbes_exp
     pbesspec = pbesspec
                + "\nmu "
                + unique_prefix
-               + std::to_string(unique_prefix_index++)
+               + utilities::number2string(unique_prefix_index++)
                + (datavar_text.empty() ? "" : "(")
                + datavar_text
                + (datavar_text.empty() ? "" : ")")

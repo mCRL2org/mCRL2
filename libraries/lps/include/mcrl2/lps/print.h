@@ -77,7 +77,7 @@ struct printer: public lps::add_traverser_sort_expressions<process::detail::prin
       derived().print("\n");
       derived().print(number_separator);
       derived().print("%");
-      derived().print(std::to_string(index++));
+      derived().print(utilities::number2string(index++));
 
       derived().print("\n");
       if (i == container.begin() && !print_start_separator)
