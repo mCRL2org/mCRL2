@@ -83,7 +83,7 @@ class term_appl: public aterm
 
     /// \brief Constructor.
     /// \details The iterator range is traversed more than once. If only one traversal is required
-    //           use term_appl with a ATermConverter argument. But this function
+    //           use term_appl with a TermConverter argument. But this function
     //           is substantially less efficient.
     ///          The length of the iterator range should must match the arity of the function symbol.
     /// \param sym A function symbol.
@@ -103,7 +103,7 @@ class term_appl: public aterm
 
     /// \brief Constructor.
     /// \details The iterator range is traversed only once, assuming Iter is a forward iterator.
-    ///          This means that the ATermConverter is applied exactly once to each element.
+    ///          This means that the TermConverter is applied exactly once to each element.
     ///          The length of the iterator range must be equal to the arity of the function symbol.
     /// \param sym A function symbol.
     /// \param begin The start of a range of elements.
@@ -116,8 +116,8 @@ class term_appl: public aterm
               InputIterator end,
               const TermConverter& convertor,
               typename std::enable_if< !std::is_base_of<atermpp::aterm, InputIterator>::value>::type* = nullptr,
-              typename std::enable_if< !std::is_base_of<atermpp::aterm, ATermConverter>::value>::type* = nullptr)
-         :aterm(detail::local_term_appl_with_converter<Term,InputIterator,ATermConverter>(sym,begin,end,convertor))
+              typename std::enable_if< !std::is_base_of<atermpp::aterm, TermConverter>::value>::type* = nullptr)
+         :aterm(detail::local_term_appl_with_converter<Term,InputIterator,TermConverter>(sym,begin,end,convertor))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");

@@ -94,9 +94,9 @@ inline
 term_list<Term> reverse(const term_list<Term>& l)
 {
   term_list<Term> result;
-  for(typename term_list<Term>::const_iterator i=l.begin(); i!=l.end(); ++i)
+  for(const Term& t: l)
   {
-    result.push_front(*i);
+    result.push_front(t);
   }
   return result;
 }
