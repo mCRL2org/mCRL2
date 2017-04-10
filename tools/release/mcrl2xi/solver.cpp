@@ -81,7 +81,7 @@ void Solver::solve(QString specification, QString dataExpression)
       typedef enumerator_list_element_with_substitution<> enumerator_element;
 
       // Stop when more than 10000 internal variables are required.
-      data::enumerator_identifier_generator id_generator;
+      mcrl2::data::enumerator_identifier_generator id_generator;
       enumerator_type enumerator(rewr, m_data_spec, rewr, id_generator, 10000);
 
       mutable_indexed_substitution<> sigma;
