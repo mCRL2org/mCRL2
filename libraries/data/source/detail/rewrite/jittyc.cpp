@@ -431,11 +431,11 @@ static std::vector < size_t> treevars_usedcnt;
 
 static void inc_usedcnt(const variable_or_number_list& l)
 {
-  for (variable_or_number_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  for (const variable_or_number& v: l)
   {
-    if (i->type_is_int())
+    if (v.type_is_int())
     {
-      treevars_usedcnt[deprecated_cast<atermpp::aterm_int>(*i).value()]++;
+      treevars_usedcnt[down_cast<aterm_int>(v).value()]++;
     }
   }
 }

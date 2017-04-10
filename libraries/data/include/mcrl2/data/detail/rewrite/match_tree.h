@@ -23,7 +23,7 @@ namespace detail
 {
 
 /// This is a list where variables and aterm ints can be stored.
-class variable_or_number:public atermpp::aterm
+class variable_or_number: public atermpp::aterm
 {
   public:
     /// Default constructor

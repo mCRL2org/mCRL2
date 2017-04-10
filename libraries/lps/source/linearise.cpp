@@ -7836,11 +7836,11 @@ class specification_basic_type
 
     // a tuple_list contains pairs of actions (multi-action) and the condition under which this action
     // can occur.
-    typedef struct
+    struct tuple_list
     {
       std::vector < action_list > actions;
       std::vector < data_expression > conditions;
-    } tuple_list;
+    };
 
     tuple_list addActionCondition(
       const action& firstaction,
@@ -8103,7 +8103,7 @@ class specification_basic_type
       if (n.empty())
       {
         process::action_label c=can_communicate(m,comm_table); /* returns action_label() if no communication
-                                             is possible */
+                                                                  is possible */
         if (c!=action_label())
         {
           const tuple_list T=makeMultiActionConditionList_aux(w,comm_table,r,r_is_null);
@@ -8207,7 +8207,7 @@ class specification_basic_type
       if (multiaction.empty())
       {
         tuple_list t;
-        t.conditions.push_back((r_is_null)?sort_bool::true_():static_cast< data_expression const& >(psi(r,comm_table)));
+        t.conditions.push_back((r_is_null)?static_cast<data_expression>(sort_bool::true_()):psi(r,comm_table));
         t.actions.push_back(action_list());
         return t;
       }

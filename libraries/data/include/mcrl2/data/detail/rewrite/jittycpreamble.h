@@ -141,7 +141,7 @@ const data_expression& pass_on(const data_expression& t)
 static inline
 assignment_expression_list jittyc_local_push_front(assignment_expression_list l, const assignment& e)
 {
-  l.push_front(atermpp::deprecated_cast<assignment_expression>(e));
+  l.push_front(e);
   return l;
 }
 

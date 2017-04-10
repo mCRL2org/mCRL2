@@ -176,7 +176,7 @@ class term_balanced_tree: public aterm_appl
                right_branch().element_at(position-left_size, size - left_size);
       }
 
-      return deprecated_cast<Term>(*this);
+      return vertical_cast<Term>(static_cast<const aterm&>(*this));
     }
 
     /// \brief Returns the size of the term_balanced_tree.
