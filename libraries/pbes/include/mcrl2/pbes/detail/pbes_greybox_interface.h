@@ -135,7 +135,7 @@ namespace detail {
       }
       else
       {
-        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + pbes_system::pp(psi) + "\n" + to_string(psi)));
+        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + pbes_system::pp(psi) + "\n" + pp(psi)));
       }
       mCRL2log(log::debug, "pbes_greybox_interface") << print_successors(result);
       return result;

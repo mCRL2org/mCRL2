@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 #include <boost/iterator/iterator_facade.hpp>
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/core/detail/function_symbols.h"
@@ -72,7 +71,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   for (auto i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() ; ++i)
   {
     i->add_assignments(vl, sigma, rewr);
-    result.push_back(to_string(sigma(vl.front())));
+    result.push_back(pp(sigma(vl.front())));
     if (result.size() >= max_size)
     {
       break;
@@ -259,7 +258,7 @@ class state_data_type: public pins_data_type
     {
       data::data_expression e = index2expression(i);
       atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm>(e));
-      return to_string(t);
+      return pp(t);
     }
 
     std::size_t deserialize(const std::string& s)
@@ -304,7 +303,7 @@ class action_label_data_type: public pins_data_type
 
     std::string serialize(int i) const
     {
-      return to_string(m_indexed_set.get(i));
+      return pp(m_indexed_set.get(i));
     }
 
     std::size_t deserialize(const std::string& s)

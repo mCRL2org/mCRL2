@@ -42,7 +42,7 @@ static deque<char> error_buf;
 static const size_t MAX_ERROR_SIZE = 64;
 
 /* Prototypes */
-static aterm fparse_term(int* c, istream &is);
+static aterm fparse_term(int* c, istream& is);
 
 static void aterm_io_init()
 {
@@ -58,7 +58,7 @@ static void aterm_io_init()
   }
 }
 
-static void write_string_with_escape_symbols(const std::string &s, std::ostream& os)
+static void write_string_with_escape_symbols(const std::string& s, std::ostream& os)
 {
   // Check whether the string starts with a - or a number, or contains the symbols
   // \, ", (, ), [, ], comma, space, \t, \n or \r. If yes, the string will be
@@ -112,7 +112,7 @@ static void write_string_with_escape_symbols(const std::string &s, std::ostream&
   }
 }
 
-static void writeToStream(const aterm &t, std::ostream& os)
+static void writeToStream(const aterm& t, std::ostream& os)
 {
   if (t.type_is_int())
   {
@@ -134,7 +134,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
   }
   else // t.type_is_appl()
   {
-    const aterm_appl &appl = down_cast<aterm_appl>(t);
+    const aterm_appl& appl = down_cast<aterm_appl>(t);
     const function_symbol& sym = appl.function();
     write_string_with_escape_symbols(sym.name(),os);
     if (sym.arity() > 0)
@@ -162,7 +162,7 @@ std::ostream& operator<<(std::ostream& out, const aterm& t)
   return out;
 }
 
-void write_term_to_text_stream(const aterm &t, std::ostream &os)
+void write_term_to_text_stream(const aterm& t, std::ostream& os)
 {
   aterm_io_init();
   writeToStream(t,os);
@@ -172,7 +172,7 @@ void write_term_to_text_stream(const aterm &t, std::ostream &os)
  * Read the next character from file.
  */
 
-static void fnext_char(int* c, istream &is)
+static void fnext_char(int* c, istream& is)
 {
   *c = is.get();
   if (*c != EOF)
@@ -209,7 +209,7 @@ static std::string print_parse_error_position()
  * Skip layout from file.
  */
 
-static void fskip_layout(int* c, istream &is)
+static void fskip_layout(int* c, istream& is)
 {
   while (isspace(*c))
   {
@@ -221,7 +221,7 @@ static void fskip_layout(int* c, istream &is)
  * Skip layout from file.
  */
 
-static void fnext_skip_layout(int* c, istream &is)
+static void fnext_skip_layout(int* c, istream& is)
 {
   do
   {
@@ -234,7 +234,7 @@ static void fnext_skip_layout(int* c, istream &is)
  * Parse a list of arguments.
  */
 
-static aterm_list fparse_terms(int* c, istream &is)
+static aterm_list fparse_terms(int* c, istream& is)
 {
   if (*c==']' || *c==')')  // The termlist must be empty.
   {
@@ -258,7 +258,7 @@ static aterm_list fparse_terms(int* c, istream &is)
  * Parse a quoted application.
  */
 
-static string fparse_quoted_string(int* c, istream &is)
+static string fparse_quoted_string(int* c, istream& is)
 {
   /* We need a buffer for printing and parsing */
   std::string function_string;
@@ -306,7 +306,7 @@ static string fparse_quoted_string(int* c, istream &is)
 
 /* Parse an unquoted string. */
 
-static string fparse_unquoted_string(int* c, istream &is)
+static string fparse_unquoted_string(int* c, istream& is)
 {
   std::string function_string;
   if (*c != '(')
@@ -323,7 +323,7 @@ static string fparse_unquoted_string(int* c, istream &is)
   return function_string;
 }
 
-static aterm_appl parse_arguments(const string &f, int *c, istream &is)
+static aterm_appl parse_arguments(const string& f, int *c, istream& is)
 {
   /* Time to parse the arguments */
   aterm_list args;
@@ -353,7 +353,7 @@ static aterm_appl parse_arguments(const string &f, int *c, istream &is)
  * Parse a number.
  */
 
-static aterm fparse_num(int* c, istream &is)
+static aterm fparse_num(int* c, istream& is)
 {
   char num[32], *ptr = num, *numend = num + 30;
 
@@ -379,7 +379,7 @@ static aterm fparse_num(int* c, istream &is)
  * Parse a term from a stream.
  */
 
-static aterm fparse_term(int* c, istream &is)
+static aterm fparse_term(int* c, istream& is)
 {
   switch (*c)
   {
@@ -429,7 +429,7 @@ aterm read_term_from_string(const std::string& s)
   return  read_term_from_text_stream(ss);
 }
 
-aterm read_term_from_text_stream(istream &is)
+aterm read_term_from_text_stream(istream& is)
 {
   // Initialise global io (esp. for windows)
   aterm_io_init();
@@ -446,7 +446,7 @@ aterm read_term_from_text_stream(istream &is)
   {
     return fparse_term(&c, is);
   }
-  catch (atermpp::runtime_error &e)
+  catch (atermpp::runtime_error& e)
   {
     throw atermpp::runtime_error(e.what() + string("\n") + print_parse_error_position());
   }

@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -46,7 +45,7 @@ struct func
 
   atermpp::aterm operator()(const atermpp::aterm& x) const
   {
-    return read_term_from_string("f(" + to_string(x) + ")");
+    return read_term_from_string("f(" + pp(x) + ")");
   }
 };
 

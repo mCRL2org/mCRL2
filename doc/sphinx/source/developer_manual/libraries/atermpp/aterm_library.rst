@@ -10,7 +10,7 @@ arguments. Terms can also be natural numbers or lists.
 
 Important features of the
 atermpp library, inherited from the ATerm library, are maximal subterm sharing, automatic garbage collection, and easy
-ways to write terms to and from disk. The name ATerm comes from the possibility in the original ATerm library
+ways to write terms to and from disk. The name aterm comes from the possibility in the original ATerm library
 to annotate a term with extra information. This has been dropped, along with some other hardly used features
 such as reals, blobs and placeholders. The description below restricts itself to the atermpp library as it is found as part of the 
 mCRL2 toolset. 
@@ -46,8 +46,7 @@ The class :cpp:class:`aterm <atermpp::aterm>` is a base class for all others.
 
 
 The types :cpp:class:`term_list <atermpp::term_list>` and :cpp:class:`term_appl
-<atermpp::term_appl>` are template classes. Typedefs exist for the most commonly
-used variants:
+<atermpp::term_appl>` are template classes. Typedefs exist for two commonly used variants:
 
 .. code-block:: c++
 
@@ -73,12 +72,12 @@ tree is itself an aterm, and can therefore be used in other terms and lists.
 
 .. table:: additional data types
    
-   =================================================================  ===================================================================================
-   type                                                               description
-   =================================================================  ===================================================================================
-   :cpp:class:`indexed_set\<T\> <atermpp::indexed_set>`               an unordered set to store aterms providing a unique number (index) for each element
-   :cpp:class:`term_balanced_tree\<T\> <aterpp::term_balanced_tree>`  a sort containing balanced trees of terms 
-   =================================================================  ===================================================================================
+   ==================================================================  ===================================================================================
+   type                                                                description
+   ==================================================================  ===================================================================================
+   :cpp:class:`indexed_set\<T\> <atermpp::indexed_set>`                an unordered set to store aterms providing a unique number (index) for each element
+   :cpp:class:`term_balanced_tree\<T\> <atermpp::term_balanced_tree>`  a sort containing balanced trees of terms 
+   ==================================================================  ===================================================================================
 
 Aterm properties
 ----------------
@@ -159,27 +158,40 @@ that terms are well defined and of proper type.
 String representations
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The predefined aterm types have a :cpp:member:`to_string` member function that
-can be used to obtain a string representation of a term:
+Aterms and derived terms can be transformed to strings using the pretty print function 
+:cpp:func:`pp <atermpp::pp>` function. Aterms can also be used in output streams. 
 
 .. code-block:: c++
 
     aterm_int x;
-    std::string s = x.to_string();
+    std::string s = pp(x); 
+    std::out << "This is how a default aterm looks like: " << x << "\n";
 
-In most cases this string can be converted back to an ATerm using the
-:cpp:func:`make_term <atermpp::make_term>` function. However, in some subtle
-cases the result will not be the same.
+In most cases this string can be converted back to an aterm using the
+:cpp:func:`read_term_from_string <atermpp::read_term_from_string>` function. However, when using some
+control characters the resul will not be the same. 
 
 Comparing aterms
 ^^^^^^^^^^^^^^^^
-Comparing aterms can be done with the `==` operator. Due to the maximal sharing property,
-comparing aterms is a cheap operation. It boils down to a pointer comparison.
+For the aterms all standard comparison operators are defined (`==`, `!=`, `<=`, `<`, `>` and `>=`).
+These operations are very efficient which is made possible as aterms are essentially
+pointers. If two terms are equal they both consist of the same pointer. As it is nondeterministic where aterms are stored,
+the comparison operators can yield different outcomes if terms are destructed and constructed again. The comparison operators
+yield consistent outcomes when the reference count of the terms never reaches 0.
 
-Programming with ATerms
+Recognizing basic aterms 
+^^^^^^^^^^^^^^^^^^^^^^^^
+Using the aterm member function :cpp:member:`type_is_list <atermpp::aterm::is_list>`, 
+:cpp:member:`type_is_appl <atermpp::aterm::is_appl>` and :cpp:member:`type_is_int <atermpp::aterm::is_int>`
+to figure out whether an aterm is a list, a function application or an aterm_int. 
+The aterm member function :cpp:member:`defined <atermpp::aterm::defined>` can be used to
+find out whether an aterm is equal to the default constructed aterm. 
+
+
+Programming with aterms
 =======================
 
-ATerm creation
+Aterm creation
 --------------
 
 All aterm types have their own appropriate constructors for creating them:
@@ -253,10 +265,8 @@ Aterm manipulation
      
 All elements of aterm and derived types can be constructed, assigned and destructed. Standard swap and hash functions are 
 defined for aterms. Swapping aterms is more efficient than assigning aterms as it prevents adapting reference counts. 
-All comparision operators are defined. These operations are very efficient which is made possible as aterms are essentially
-pointers. If two terms are equal they both consist of the same pointer. As it is nondeterministic where aterms are stored,
-the comparison operators can yield different outcomes if terms are destructed and constructed again. The comparison operators
-yield consistent outcomes when the reference count of the terms never reaches 0.
+All comparision operators are defined as already mentioned above. 
+
 
 For a function_symbol the function :cpp:func:`name() <atermpp::aterm_int::name>` provides the name of the function 
 as a string and the function :cpp:func:`arity() <atermpp::function_symbol::arity>` gives its arity.
@@ -355,7 +365,6 @@ example:
     #include <algorithm>
     #include <iostream>
     #include "atermpp/atermpp.h"
-    #include "mcrl2/atermpp/aterm_init.h"
 
     using namespace std;
     using namespace atermpp;
@@ -376,9 +385,7 @@ example:
 
     int main(int argc, char* argv[])
     {
-      MCRL2_ATERMPP_INIT()
-
-      term_list<aterm_int> q = make_term("[1,2,3,4]");
+      term_list<aterm_int> q = read_term_from_string("[1,2,3,4]");
       int sum = 0;
       for_each(q.begin(), q.end(), counter(sum));
       assert(sum == 10);
@@ -391,31 +398,95 @@ example:
 
 .. _atermpp_programming_user_defined:
 
-User defined terms 
+User defined terms
 ^^^^^^^^^^^^^^^^^^
 
-Suppose we want to create a class :cpp:class:`MyTerm` that has an aterm as attribute:
+The aterm library provides an excellent basis on top of which user defined terms 
+can be constructed. Suppose one wants to create terms with zero, one and addition 
+where only addition is defined explicitly below.
+This can be done by creating a class :cpp:class:`Expression` inheriting from an aterm_appl.
 
 .. code-block:: c++
 
-   struct MyTerm
+   using namespace atermpp;
+   class Expression: public aterm_appl
    {
-     atermpp::aterm x_;
-
-     MyTerm(std::string x)
-       : x_(atermpp::read_term_from_string(x))
+     Expression(const function_symbol& f)
+       : aterm_appl(f);
      { }
+
+     Expression(const function_symbol& f, const Expression& e1, const Expression& e2)
+       : aterm_appl(f,e1,e2);
+     { }
+
+     // Check whether the expression is zero.
+     bool is_zero(const Expression& e) const
+     {
+       return e.function_symbol() == function_symbol("zero",0);
+     }
+
+     // Check whether the expression is one.
+     bool is_one(const Expression& e) const
+     {
+       return e.function_symbol() == function_symbol("one",0);
+     }
+
+     // Check whether the function is an addition.
+     bool is_addition(const Expression& e) const
+     {
+       return e.function_symbol() == function_symbol("add",2);
+     }
    };
 
-Now that we have defined :cpp:class:`MyTerm`, we can use it in standard containers. 
+   class Zero: public Expression
+   {
+     // Constructor
+     Zero()
+      : Expression(function_symbol("zero"))
+     {}
+   }
+
+   class One: public Expression
+   {
+     // Constructor
+     One()
+      : Expression(function_symbol("one"))
+     {}
+   }
+
+   class Addition: public Expression
+   {
+     // Constructor
+     Addition(const Expression& e1, const Expression e2)
+      : Expression(function_symbol("add",2), e1,e2)
+     {}
+
+     // Get left argument.
+     const Expression& left(const Addition& e) const
+     {
+       return down_cast<Expression>((\*this)[0]); 
+     }
+     
+     // Get right argument.
+     const Expression& right(const Addition& e) const
+     {
+       return down_cast<Expression>((\*this)[1]); 
+     }
+     
+   }
+
+Now that we have defined :cpp:class:`Expression`, we can use it in standard containers. 
 
 .. code-block:: c++
 
    #include "vector"
 
-   std::vector<MyTerm> v;
-   v.push_back(MyTerm("f(x)");
-   v.push_back(MyTerm("g(y)");
+   std::vector<Expression> v;
+   Zero x;
+   One y;
+   v.push_back(Addition(x,y));
+   v.push_back(x);
+   v.push_back(y);
 
 
 Aterm traits
@@ -423,13 +494,12 @@ Aterm traits
 
 TODO: describe aterm traits occurring in type_traits.h.
 
-
 Also the search and replace algorithms of section :ref:`atermpp_programming_algorithms`
-can be applied to `MyTerm`.
+can be applied to `Expression`.
 
 .. _atermpp_programming_algorithms:
 
-ATerm algorithms
+Aterm algorithms
 ----------------
 
 For the `atermpp` library a couple of algorithms are defined. Most
@@ -453,21 +523,21 @@ predicate. The program fragment below illustrates this:
   {
     bool operator()(aterm t) const
     {
-      return (t.type() == AT_APPL) && aterm_appl(t).function().name() == "f";
+      return (t.type_is_appl()) && aterm_appl(t).function().name() == "f";
     }
   };
 
-  aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
+  aterm_appl a = read_term_from_string("h(g(x),f(y),p(a(x,y),q(f(z))))");
   aterm t = find_if(a, is_f());
-  assert(t == make_term("f(y)"));
+  assert(t == read_term_from_string("f(y)"));
 
   find_all_if(a, is_f(), std::back_inserter(v));
   assert(v.size() == 2);
-  assert(v.front() == make_term("f(y)"));
-  assert(v.back() == make_term("f(z)"));
+  assert(v.front() == read_term_from_string("f(y)"));
+  assert(v.back() == read_term_from_string("f(z)"));
 
-The find algorithms also work on user defined types. So if `t` is of type :cpp:class:`MyTerm`
-and :cpp:class:`aterm_traits<MyTerm>` is defined, then it is possible to call :cpp:func:`find_if(t, is_f())`
+The find algorithms also work on user defined types. So if `t` is of type :cpp:class:`Expression`,
+then it is possible to call :cpp:func:`find_if(t, is_f())`
 as well.
 
 Replace algorithms
@@ -491,15 +561,15 @@ order. The algorithm :cpp:func:`~atermpp::replace_if` makes replacements based o
     }
   };
 
-  aterm_appl a = make_term("f(f(x))");
-  aterm_appl b = replace(a, make_term("f(x)"), make_term("x"));
-  assert(b == make_term("f(x)"));
-  aterm_appl c = replace(a, make_term("f(x)"), make_term("x"), true);
-  assert(c == make_term("x"));
+  aterm_appl a = read_term_from_string("f(f(x))");
+  aterm_appl b = replace(a, read_term_from_string("f(x)"), read_term_from_string("x"));
+  assert(b == read_term_from_string("f(x)"));
+  aterm_appl c = replace(a, read_term_from_string("f(x)"), read_term_from_string("x"), true);
+  assert(c == read_term_from_string("x"));
 
-  aterm d = make_term("h(g(b),f(a),p(a(x,y),q(a(a))))");
-  aterm_appl e = replace_if(d, is_a_or_b(), make_term("u"));
-  assert(e == make_term("h(g(u),f(u),p(u,q(u)))"));
+  aterm d = read_term_from_string("h(g(b),f(a),p(a(x,y),q(a(a))))");
+  aterm_appl e = replace_if(d, is_a_or_b(), read_term_from_string("u"));
+  assert(e == read_term_from_string("h(g(u),f(u),p(u,q(u)))"));
 
 Miscellaneous algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -528,9 +598,9 @@ an operation to each subterm of a term.
      return true;
    }
 
-   aterm_appl t = make_term("h(g(x),f(y))");
+   aterm_appl t = read_term_from_string("h(g(x),f(y))");
    atermpp::for_each(t, print);             // prints "h g x f y"
 
-   aterm_list l = make_term("[0,1,2,3]");
+   aterm_list l = read_term_from_string("[0,1,2,3]");
    l = atermpp::apply(l, apply_f());        // results in [f(0),f(1),f(2),f(3)]
 

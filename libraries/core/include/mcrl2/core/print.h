@@ -23,7 +23,6 @@
 #include <vector>
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/core/detail/precedence.h"

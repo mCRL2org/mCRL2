@@ -208,7 +208,7 @@ bool is_monotonous(state_formula f,
     return is_monotonous(g.operand(), negated_variables);
   }
 
-  throw mcrl2::runtime_error(std::string("is_monotonous(state_formula) error: unknown argument ") + to_string(f));
+  throw mcrl2::runtime_error(std::string("is_monotonous(state_formula) error: unknown argument ") + pp(f));
   return false;
 }
 

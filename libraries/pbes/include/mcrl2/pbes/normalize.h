@@ -139,7 +139,7 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
   {
     if (negated)
     {
-      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + to_string(x));
+      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + pp(x));
     }
     return x;
   }

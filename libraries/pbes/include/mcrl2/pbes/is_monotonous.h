@@ -126,7 +126,7 @@ bool is_monotonous(pbes_expression f)
     return true;
   }
 
-  throw mcrl2::runtime_error(std::string("is_monotonous(pbes_expression) error: unknown argument ") + to_string(f));
+  throw mcrl2::runtime_error(std::string("is_monotonous(pbes_expression) error: unknown argument ") + pp(f));
   return false;
 }
 

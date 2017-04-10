@@ -11,7 +11,6 @@
 #include <queue>
 #include <set>
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/io.h"
@@ -1216,14 +1215,14 @@ ltsmin_state::ltsmin_state(const std::string& varname,
             if (*val == novalue)
             {
                 throw(std::runtime_error("Error in ltsmin_state: state expression contains NoValue: "
-                                    + to_string(e)));
+                                    + pp(e)));
             }
             this->add_parameter_value(*val);
             //std::clog << "ltsmin_state: " << *val << std::endl;
         }
         //std::clog << std::endl;
     } else {
-        throw(std::runtime_error("Not a valid state expression! " + to_string(e)));
+        throw(std::runtime_error("Not a valid state expression! " + pp(e)));
     }
 }
 
@@ -1575,7 +1574,7 @@ std::string explorer::get_value(int type_no, int index)
         //std::string s = atermpp::pp(value);
         //return os.str();
         atermpp::aterm t = data::detail::remove_index(static_cast<atermpp::aterm>(value));
-        return to_string(t);
+        return pp(t);
     }
 }
 

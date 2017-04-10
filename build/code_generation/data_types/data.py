@@ -458,7 +458,7 @@ ${cases}
             target_sort_id = target_sort_id.code(spec),
             cases = '\n'.join(cases),
             functionname = self.label,
-            sortmsg = " + \", \" + ".join(['to_string({0})'.format(domain_sort_ids[j].code(spec)) for j in range(len(sort.domain.elements))])
+            sortmsg = " + \", \" + ".join(['pp({0})'.format(domain_sort_ids[j].code(spec)) for j in range(len(sort.domain.elements))])
             )
 
         parameters = []

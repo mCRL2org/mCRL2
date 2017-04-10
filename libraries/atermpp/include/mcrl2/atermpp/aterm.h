@@ -13,6 +13,7 @@
 #define MCRL2_ATERMPP_ATERM_H
 
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <cassert>
 #include <functional>
@@ -318,6 +319,11 @@ const DerivedCont& container_cast(const Cont<Base>& t,
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
+/// \brief A cast form an aterm derived class to a class that inherits in possibly multiple steps from this class.
+/// \detail The derived class is not allowed to contain extra fields. This conversion does not require runtime computation
+//          effort. Also see down_cast. 
+/// \param t The term that is converted. 
+/// \return A term of type Derived. 
 template <class Derived, class Base>
 const Derived& vertical_cast(const Base& t,
                           typename std::enable_if<is_convertible<Base, Derived>::value>::type* = nullptr)
@@ -340,6 +346,8 @@ const DerivedCont& vertical_cast(const Cont<Base>& t,
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
+/// \brief Cast from an aterm derived term to another aterm.
+/// \deprecated.
 template <class Derived, class Base>
 const Derived& deprecated_cast(const Base& t,
                                typename std::enable_if<
@@ -354,6 +362,17 @@ const Derived& deprecated_cast(const Base& t,
 
 /// \brief Send the term in textual form to the ostream.
 std::ostream& operator<<(std::ostream& out, const aterm& t);
+
+/// \brief Transform an aterm into a string representation.
+/// \brief This function also prints terms that are derived from aterms. 
+/// \param t The input aterm.
+/// \return A string.
+inline std::string pp(const aterm& t)
+{
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
+}
 
 } // namespace atermpp
 

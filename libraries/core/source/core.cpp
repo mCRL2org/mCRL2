@@ -8,7 +8,6 @@
 //
 /// \file core.cpp
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/function_symbols.h"

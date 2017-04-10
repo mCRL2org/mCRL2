@@ -12,7 +12,6 @@
 #include <iostream>
 #include <string>
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/confluence_checker.h"
@@ -36,7 +35,7 @@ static size_t count_ctau(specification const& s)
     if (al.size()==1)
     {
       const process::action_label lab=al.front().label();
-      if (to_string(lab.name())=="ctau")
+      if (pp(lab.name())=="ctau")
       {
         ++result;
       }

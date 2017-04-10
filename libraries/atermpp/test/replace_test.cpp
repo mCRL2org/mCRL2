@@ -18,7 +18,6 @@
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/detail/utility.h"
 
 using namespace std;
 using namespace atermpp;

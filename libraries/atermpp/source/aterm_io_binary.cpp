@@ -28,8 +28,8 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/detail/aterm_io_implementation.h"
 
 #include "mcrl2/utilities/exception.h"
@@ -367,7 +367,7 @@ static sym_write_entry* get_top_symbol(const aterm& t, const std::unordered_map<
   }
   else
   {
-    throw mcrl2::runtime_error("Internal error. Illegal term encountered (" + to_string(t) + ")");
+    throw mcrl2::runtime_error("Internal error. Illegal term encountered (" + pp(t) + ")");
   }
   assert(index.count(sym)>0);
   return &sym_entries[index.at(sym)];

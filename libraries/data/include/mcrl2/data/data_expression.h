@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/default_values.h"

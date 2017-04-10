@@ -374,11 +374,11 @@ inline void swap(atermpp::term_list<T>& t1, atermpp::term_list<T>& t2)
   t1.swap(t2);
 }
 
-template <class T>
+/* template <class T>
 std::ostream& operator<<(std::ostream& out, const term_list<T>& l)
 {
   return out << static_cast<aterm>(l); 
-}
+} */
 
 } // namespace atermpp
 
