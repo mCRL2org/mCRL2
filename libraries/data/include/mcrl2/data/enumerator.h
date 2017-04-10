@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
-#define MCRL2_NEW_IDENTIFIER_GENERATOR
-
 #include <deque>
 #include <limits>
 #include <map>
@@ -311,7 +309,6 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
   return out << "{ variables = " << core::detail::print_list(p.variables()) << ", expression = " << p.expression() << " }";
 }
 
-#ifdef MCRL2_NEW_IDENTIFIER_GENERATOR
 class enumerator_identifier_generator
 {
   protected:
@@ -335,24 +332,6 @@ class enumerator_identifier_generator
    {
      f.clear();
    }
-};
-#else
-typedef utilities::number_postfix_generator enumerator_identifier_generator;
-#endif
-
-template <typename IdentifierGenerator>
-struct sort_name_generator
-{
-  IdentifierGenerator& id_generator;
-
-  sort_name_generator(IdentifierGenerator& id_generator_)
-    : id_generator(id_generator_)
-  {}
-
-  data::variable operator()(const data::sort_expression& s) const
-  {
-    return data::variable(id_generator("@x"), s);
-  }
 };
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
@@ -599,7 +578,7 @@ class enumerator_algorithm
             if (data::is_function_sort(constructor.sort()))
             {
               auto const& domain = atermpp::down_cast<data::function_sort>(constructor.sort()).domain();
-              data::variable_list y(domain.begin(), domain.end(), sort_name_generator<IdentifierGenerator>(id_generator));
+              data::variable_list y(domain.begin(), domain.end(), [&](const data::sort_expression& s) { return data::variable(id_generator("@x"), s); });
               // TODO: We want to apply datar without the substitution sigma, but that is currently an inefficient operation of data::rewriter.
               data_expression cy = datar(application(constructor, y.begin(), y.end()), sigma);
               sigma[v1] = cy;
