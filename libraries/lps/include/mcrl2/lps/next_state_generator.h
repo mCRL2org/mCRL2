@@ -123,9 +123,9 @@ class next_state_generator
         state_probability_list m_other_target_states;
 
       public:
-        const lps::multi_action& action() const 
-        { 
-          return m_action; 
+        const lps::multi_action& action() const
+        {
+          return m_action;
         }
 
         void set_action(const lps::multi_action& action)
@@ -230,6 +230,7 @@ class next_state_generator
     stochastic_specification m_specification;
     rewriter_t m_rewriter;
     substitution_t m_substitution;
+    data::enumerator_identifier_generator m_id_generator;
     enumerator_t m_enumerator;
 
     bool m_use_enumeration_caching;
@@ -246,9 +247,9 @@ class next_state_generator
     /// \param rewriter The rewriter used
     /// \param use_enumeration_caching Cache intermediate enumeration results
     /// \param use_summand_pruning Preprocess summands using pruning strategy.
-    next_state_generator(const stochastic_specification& spec, 
-                         const data::rewriter& rewriter, 
-                         bool use_enumeration_caching = false, 
+    next_state_generator(const stochastic_specification& spec,
+                         const data::rewriter& rewriter,
+                         bool use_enumeration_caching = false,
                          bool use_summand_pruning = false);
 
     ~next_state_generator();

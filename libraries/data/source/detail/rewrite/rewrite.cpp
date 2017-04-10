@@ -357,8 +357,9 @@ data_expression Rewriter::existential_quantifier_enumeration(
   const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   /* TODO XXXX VOEG GEBRUIK van predefined generator toe. Ook bij universele quantificatie. */
-  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
-  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
+  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::enumerator_identifier_generator, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
+  data::enumerator_identifier_generator id_generator;
+  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, id_generator, max_count, throw_exceptions);
 
   /* Create a list to store solutions */
   data_expression partial_result=sort_bool::false_();
@@ -459,8 +460,9 @@ data_expression Rewriter::universal_quantifier_enumeration(
   const bool throw_exceptions = false;
   const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
-  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_true, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
-  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
+  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::enumerator_identifier_generator, data::is_not_true, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
+  data::enumerator_identifier_generator id_generator;
+  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, id_generator, max_count, throw_exceptions);
 
   /* Create lists to store solutions */
   data_expression partial_result=sort_bool::true_();

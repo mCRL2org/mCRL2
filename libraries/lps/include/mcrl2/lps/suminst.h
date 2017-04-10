@@ -66,6 +66,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
     /// Rewriter
     DataRewriter m_rewriter;
     enumerator_type m_enumerator;
+    data::enumerator_identifier_generator m_id_generator;
 
     /// Statistiscs for verbose output
     size_t m_processed;
@@ -195,7 +196,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(r, spec.data(), r),
+        m_enumerator(r, spec.data(), r, m_id_generator),
         m_processed(0),
         m_deleted(0),
         m_added(0)

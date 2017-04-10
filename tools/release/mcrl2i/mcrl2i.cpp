@@ -104,8 +104,8 @@ static bool match_and_remove(string& s, const string& match)
 }
 
 // Add the context sorts to the set context sorts and the data specification.
-// Set need_to_rebuild_rewriter to true if the data specification is changed. 
-// Note that need_to_rebuild_rewriter could already be true. 
+// Set need_to_rebuild_rewriter to true if the data specification is changed.
+// Note that need_to_rebuild_rewriter could already be true.
 void add_context_sorts(const std::set<sort_expression>& new_sorts,
                        std::set<sort_expression>& context_sorts,
                        data_specification& spec,
@@ -165,7 +165,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     bool need_to_rebuild_rewriter=true;
 
     data_specification spec;
-    rewriter rewr; 
+    rewriter rewr;
 
     mutable_map_substitution < std::map < variable, data_expression > > assignments;
 
@@ -180,7 +180,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     }
 
     void handle_assign(std::string s)
-    {       
+    {
       string::size_type assign_pos = s.find('=');
       if (assign_pos==string::npos)
       {
@@ -248,7 +248,8 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
       term=rewr(term);
       typedef enumerator_algorithm_with_iterator<rewriter> enumerator_type;
-      enumerator_type enumerator(rewr, spec, rewr, 10000, true);
+      data::enumerator_identifier_generator id_generator;
+      enumerator_type enumerator(rewr, spec, rewr, id_generator, 10000, true);
 
       data::mutable_indexed_substitution<> sigma;
       std::deque<enumerator_list_element_with_substitution<> >
@@ -264,7 +265,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           {
             cout << ", ";
           }
-       
+
           cout << data::pp(*v) << " := " << data::pp(sigma(*v));
         }
         cout << "] evaluates to "<< data::pp(rewr(term,sigma)) << "\n";
@@ -282,7 +283,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     }
 
     string read_input_command(bool& done)
-    { 
+    {
       string s;
       (cout << "? ").flush();
       getline(cin, s);
@@ -333,7 +334,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       }
       return mcrl2::data::data_specification();
     }
-    
+
     /// Runs the algorithm.
     bool run()
     {

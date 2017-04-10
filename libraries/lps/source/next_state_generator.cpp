@@ -62,7 +62,7 @@ next_state_generator::next_state_generator(
   bool use_summand_pruning)
   : m_specification(spec),
     m_rewriter(rewriter),
-    m_enumerator(m_rewriter, m_specification.data(), m_rewriter,(std::numeric_limits<std::size_t>::max)(),true),  // Generate exceptions.
+    m_enumerator(m_rewriter, m_specification.data(), m_rewriter, m_id_generator, (std::numeric_limits<std::size_t>::max)(),true),  // Generate exceptions.
     m_use_enumeration_caching(use_enumeration_caching)
 {
   m_process_parameters = data::variable_vector(m_specification.process().process_parameters().begin(), m_specification.process().process_parameters().end());
@@ -72,7 +72,7 @@ next_state_generator::next_state_generator(
     mCRL2log(log::warning) << "Specification uses time, which is (currently) only partly supported." << std::endl;
   }
 
-  for (stochastic_action_summand_vector::iterator i = m_specification.process().action_summands().begin(); 
+  for (stochastic_action_summand_vector::iterator i = m_specification.process().action_summands().begin();
                  i != m_specification.process().action_summands().end(); i++)
   {
     summand_t summand;
@@ -118,7 +118,7 @@ next_state_generator::next_state_generator(
 
   mutable_indexed_substitution<> sigma;
   rewriter_class r(m_rewriter,m_substitution);
-  data::data_expression_vector initial_symbolic_state(initial_state_raw.begin(),initial_state_raw.end()); 
+  data::data_expression_vector initial_symbolic_state(initial_state_raw.begin(),initial_state_raw.end());
   m_initial_states = calculate_distribution(m_specification.initial_process().distribution(),
                                             initial_symbolic_state,
                                             sigma);
@@ -148,15 +148,15 @@ next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *g
 }
 
 bool next_state_generator::summand_subset_t::summand_set_contains(
-            const std::set<stochastic_action_summand>& summand_set, 
+            const std::set<stochastic_action_summand>& summand_set,
             const next_state_generator::summand_t& summand)
 {
   return summand_set.count(*summand.summand) > 0;
 }
 
 next_state_generator::summand_subset_t::summand_subset_t(
-                next_state_generator *generator, 
-                const stochastic_action_summand_vector& summands, 
+                next_state_generator *generator,
+                const stochastic_action_summand_vector& summands,
                 bool use_summand_pruning)
   : m_generator(generator),
     m_use_summand_pruning(use_summand_pruning)
@@ -371,15 +371,15 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
 }
 
 struct is_not_zero
-{ 
+{
   // The argument intentionally does not have the type probabilistic_data_expression,
   // as this invokes == on probabilistic data expressions, which expects two fractions.
   // The enumerator can also generate open data expressions, which == on probabilistic_data_expressions
-  // cannot handle. 
+  // cannot handle.
   bool operator()(const data_expression& x) const
   {
     assert(x.sort()==sort_real::real_());
-    return x!=probabilistic_data_expression::zero(); 
+    return x!=probabilistic_data_expression::zero();
   }
 };
 
@@ -406,9 +406,10 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
       sigma[v]=v;
     }
 
-    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, is_not_zero> enumerator_type;
+    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, data::enumerator_identifier_generator, is_not_zero> enumerator_type;
     const bool throw_exceptions=true;
-    enumerator_type enumerator(m_rewriter, m_specification.data(), m_rewriter, 
+    data::enumerator_identifier_generator id_generator;
+    enumerator_type enumerator(m_rewriter, m_specification.data(), m_rewriter, id_generator,
                                data::detail::get_enumerator_variable_limit(), throw_exceptions);
     std::deque<enumerator_list_element_with_substitution<> > enumerator_solution_deque(1,enumerator_list_element_with_substitution<>(dist.variables(), dist.distribution()));
     for(enumerator_type::iterator probabilistic_solution = enumerator.begin(sigma, enumerator_solution_deque);
@@ -428,7 +429,7 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
         sigma[v]=v;
       }
     }
-    
+
     // Set the old values of sigma back again.
     std::vector<data_expression>::const_iterator i=old_values_for_variables.begin();
     for(const variable& v: dist.variables())
@@ -569,7 +570,7 @@ void next_state_generator::iterator::increment()
 
   const stochastic_distribution& dist=m_summand->distribution;
   if (dist.variables().empty())
-  { 
+  {
     // There is no distribution, and therefore only one target state is generated
     const data_expression_vector& state_args=m_summand->result_state;
     rewriter_class r(m_generator->m_rewriter,*m_substitution);
@@ -580,13 +581,13 @@ void next_state_generator::iterator::increment()
   {
     // There is a non trivial distribution. We need to generate states and their probabilities.
     // The current implementation is inefficient, but efficiency is of a later concern.
-    
+
     transition_t::state_probability_list resulting_state_probability_list=
                          m_generator->calculate_distribution(dist,m_summand->result_state,*m_substitution);
     if (resulting_state_probability_list.empty())
     {
       // There are no state probability pairs. But this is wrong. The total probabilities should add up to one.
-      // This means there should at least be one probability. 
+      // This means there should at least be one probability.
       rewriter_class r(m_generator->m_rewriter,*m_substitution);
       throw mcrl2::runtime_error("The distribution " + pp(r(dist.distribution())) + " has an empty set of instances.");
     }

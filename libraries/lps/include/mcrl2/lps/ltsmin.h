@@ -61,7 +61,8 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
   typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
 
-  enumerator_type enumerator(rewr, dataspec, rewr, max_internal_variables);
+  data::enumerator_identifier_generator id_generator;
+  enumerator_type enumerator(rewr, dataspec, rewr, id_generator, max_internal_variables);
   data::variable x("x", s);
   data::variable_vector v;
   v.push_back(x);
@@ -943,11 +944,11 @@ class pins
     ///        Must provide space for at least edge_label_count() items.
     /// \param generator The next state generator to use.
     template <typename StateFunction>
-    void _long(ltsmin_state_type const& src, 
-               std::size_t group, 
-               StateFunction& f, 
-               const ltsmin_state_type& dest, 
-               int* const& labels, 
+    void _long(ltsmin_state_type const& src,
+               std::size_t group,
+               StateFunction& f,
+               const ltsmin_state_type& dest,
+               int* const& labels,
                lps::next_state_generator* generator)
     {
       std::size_t nparams = process_parameter_count();

@@ -224,7 +224,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewriter_builde
     }
 
     std::set<pbes_expression> result;
-    data::enumerator_algorithm_with_iterator<> enumerator(super::R, m_data_spec, super::R);
+    data::enumerator_identifier_generator id_generator;
+    data::enumerator_algorithm_with_iterator<> enumerator(super::R, m_data_spec, super::R, id_generator);
     mcrl2::data::mutable_indexed_substitution<> local_sigma;
     const data::variable_list vl(di.begin(), di.end());
     std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
@@ -286,6 +287,9 @@ class pbesinst_finite_algorithm
 
     /// \brief The number of generated equations.
     int m_equation_count;
+
+    /// \brief Identifier generator for the enumerator
+    data::enumerator_identifier_generator m_id_generator;
 
     /// \brief Returns true if the container contains the given element
     template <typename Container>
@@ -368,7 +372,7 @@ class pbesinst_finite_algorithm
         data::variable_list infinite(infinite_parameters.begin(), infinite_parameters.end());
 
         typedef data::enumerator_list_element_with_substitution<> enumerator_element;
-        data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr);
+        data::enumerator_algorithm_with_iterator<> enumerator(rewr, p.data(), rewr, m_id_generator);
         mcrl2::data::mutable_indexed_substitution<> local_sigma;
         const data::variable_list vl(finite_parameters.begin(), finite_parameters.end());
         std::deque <enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));

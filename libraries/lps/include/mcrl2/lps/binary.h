@@ -75,6 +75,9 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
     /// Variables appearing in rhs of m_if_trees
     std::set<data::variable> m_if_trees_variables;
 
+    /// Identifier generator for the enumerator
+    data::enumerator_identifier_generator m_id_generator;
+
     /// \brief Build an if-then-else tree of enumerated elements in terms
     ///        of new parameters.
     /// \pre enumerated_elements.size() <= 2^new_parameters.size()
@@ -133,7 +136,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
       data::set_identifier_generator generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
-      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter);
+      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter, m_id_generator);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (const data::variable& par: process_parameters)

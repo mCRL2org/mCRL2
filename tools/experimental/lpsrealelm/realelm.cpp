@@ -76,7 +76,7 @@ variable_list get_nonreal_variables(const variable_list& l)
   static data::function_symbol f = data::function_symbol("negate",data::make_function_sort(s,s));
   assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
   return f;
-}*/ 
+}*/
 
 /// \brief Returns a list of all real assignments in l
 /// \param l a list of data assignments
@@ -196,7 +196,8 @@ static void move_real_parameters_out_of_actions(stochastic_specification& s,
   global_variable_counter=0;
   const lps::stochastic_action_summand_vector action_smds = s.process().action_summands();
   lps::stochastic_action_summand_vector new_action_summands;
-  enumerator_algorithm_with_iterator<> enumerator(r,s.data(),r);
+  data::enumerator_identifier_generator id_generator;
+  enumerator_algorithm_with_iterator<> enumerator(r,s.data(),r, id_generator);
   for (const lps::stochastic_action_summand& i: action_smds)
   {
      const process::action_list ma=i.multi_action().actions();
@@ -275,7 +276,7 @@ static void normalize_specification(
   const lps::stochastic_action_summand_vector action_smds = s.process().action_summands();
   for (const stochastic_action_summand& i: action_smds)
   {
-    std::vector <data_expression_list> real_conditions; 
+    std::vector <data_expression_list> real_conditions;
     std::vector <data_expression> non_real_conditions;
     detail::split_condition(i.condition(),real_conditions,non_real_conditions);
 
@@ -344,10 +345,10 @@ static void normalize_specification(
             inequalities.push_back(linear_inequality(real_zero(),e,linear_inequality::less,r));
           } */
 
-          // First check whether a similar summand with the same action, sum variables, and assignment already 
-          // exists. 
+          // First check whether a similar summand with the same action, sum variables, and assignment already
+          // exists.
           // exists. If so, merge the two.
-          
+
           bool found=false;
           for(summand_information& s: summand_info)
           {
@@ -356,11 +357,11 @@ static void normalize_specification(
                 s.get_assignments()==i.assignments() &&
                 s.get_distribution()==i.distribution() &&
                 s.get_summand_real_conditions()==inequalities)
-            { // A similar summand has been found. Extend the condition. 
+            { // A similar summand has been found. Extend the condition.
               // Adding the condition could be optimised. Generally it is equal to existing summands.
               s.get_summand().condition()=sort_bool::or_(s.get_summand().condition(),non_real_condition);
               found=true;
-            }               
+            }
           }
 
           if (!found)
@@ -627,7 +628,7 @@ static void add_summand(summand_information& summand_info,
     linear_inequality e(substituted_lowerbound,substituted_upperbound,c_complete->comparison_operator(),r);
     data_expression t,u;
     detail::comparison_t comparison_operator;
-    bool negate=e.typical_pair(t,u,comparison_operator,r);  
+    bool negate=e.typical_pair(t,u,comparison_operator,r);
     bool success=false;
     /* First check whether the pair < t,u >
        already occurs in the context. In this case use the context variable */
@@ -636,7 +637,7 @@ static void add_summand(summand_information& summand_info,
          ((c!=complete_context.rend()) && !success) ; ++c)
     {
       if (t==c->get_lowerbound() && u==c->get_upperbound())
-      {  
+      {
         if (negate)
         {
           nextstate.push_front(assignment(c_complete->get_variable(),
@@ -719,8 +720,8 @@ static void add_summand(summand_information& summand_info,
 }
 
 
-static bool compare(const data_expression& t1, 
-                    const data_expression& t2, 
+static bool compare(const data_expression& t1,
+                    const data_expression& t2,
                     const detail::comparison_t comp,
                     const rewriter& r)
 {
@@ -731,7 +732,7 @@ static bool compare(const data_expression& t1,
     case ct::less_eq: return  r(less_equal(t1,t2))==sort_bool::true_();
     case ct::equal: return  r(equal_to(t1,t2))==sort_bool::true_();
   }
-  return false; 
+  return false;
 }
 
 /// \brief Compute process initialisation given a variable context and a process
@@ -766,7 +767,7 @@ assignment_list determine_process_initialization(
     {
       ass = assignment(i->get_variable(), sort_bool::true_());
     }
-    else 
+    else
     {
       ass = assignment(i->get_variable(), sort_bool::false_());
     }
@@ -852,8 +853,8 @@ stochastic_specification realelm(stochastic_specification s, const size_t max_it
 
         if (!condition3.empty() && !is_inconsistent(condition3,r))
         {
-          mCRL2log(debug) << "Add new conditions " << pp_vector(condition3) << "\nin summand " << i.get_real_summation_variables() << "  " << i.get_multi_action() << "  " << i.get_assignments() << "\n" << 
-                "Linear inequality " << pp_vector(*nextstate_combination) << "\n";; 
+          mCRL2log(debug) << "Add new conditions " << pp_vector(condition3) << "\nin summand " << i.get_real_summation_variables() << "  " << i.get_multi_action() << "  " << i.get_assignments() << "\n" <<
+                "Linear inequality " << pp_vector(*nextstate_combination) << "\n";;
           // condition contains the inequalities over the process parameters
           add_inequalities_to_context_postponed(new_inequalities_sizes,
                                                 new_inequalities_lhss,
@@ -934,7 +935,7 @@ stochastic_specification realelm(stochastic_specification s, const size_t max_it
             {
               new_condition=lazy::and_(new_condition,sort_bool::not_(k->get_variable()));
             }
-            else 
+            else
             {
               new_condition=lazy::and_(new_condition,k->get_variable());
             }

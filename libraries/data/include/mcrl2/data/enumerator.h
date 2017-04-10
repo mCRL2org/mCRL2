@@ -627,7 +627,7 @@ class enumerator_algorithm
     /// \brief Enumerates the front elements of the todo list P until a solution
     /// has been found, or until P is empty.
     /// \param P The todo list of the algorithm.
-    /// \param sigma A substitution. 
+    /// \param sigma A substitution.
     /// \param accept Elements p for which accept(p) is false are discarded.
     /// \return The number of elements that have been processed
     /// \post Either P.empty() or P.front().is_solution()
@@ -668,13 +668,11 @@ class enumerator_algorithm
 };
 
 /// \brief An enumerator algorithm with an iterator interface.
-template <typename Rewriter = data::rewriter, typename EnumeratorListElement = enumerator_list_element_with_substitution<>, typename Filter = data::is_not_false, typename DataRewriter = data::rewriter, typename MutableSubstitution = data::mutable_indexed_substitution<> >
-class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, DataRewriter>
+template <typename Rewriter = data::rewriter, typename EnumeratorListElement = enumerator_list_element_with_substitution<>, typename IdentifierGenerator = data::enumerator_identifier_generator, typename Filter = data::is_not_false, typename DataRewriter = data::rewriter, typename MutableSubstitution = data::mutable_indexed_substitution<> >
+class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, DataRewriter, IdentifierGenerator>
 {
   public:
-    typedef enumerator_algorithm<Rewriter, DataRewriter> super;
-
-    data::enumerator_identifier_generator id_generator;
+    typedef enumerator_algorithm<Rewriter, DataRewriter, IdentifierGenerator> super;
 
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
@@ -682,7 +680,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
     class iterator: public boost::iterator_facade<iterator, const EnumeratorListElement, boost::forward_traversal_tag>
     {
       protected:
-        const enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>* E;
+        enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, IdentifierGenerator, Filter, DataRewriter, MutableSubstitution>* E;
         MutableSubstitution* sigma;
         std::deque<EnumeratorListElement>* P;
         Filter accept;
@@ -695,7 +693,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
         }
 
       public:
-        iterator(const enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>* E_,
+        iterator(enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, IdentifierGenerator, Filter, DataRewriter, MutableSubstitution>* E_,
                  std::deque<EnumeratorListElement>* P_,
                  MutableSubstitution* sigma_,
                  Filter accept_ = Filter()
@@ -749,6 +747,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
                 const Rewriter& R,
                 const data::data_specification& dataspec,
                 const DataRewriter& datar,
+                IdentifierGenerator& id_generator,
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
       : super(R, dataspec, datar, id_generator, max_count, throw_exceptions)
@@ -761,14 +760,14 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
     /// \param P The condition that is solved, together with the list of variables
     /// \param accept Enumerator elements p for which accept(p) is false are discarded.
     /// Otherwise an invalidated enumerator element is returned when it is dereferenced.
-    iterator begin(MutableSubstitution& sigma, std::deque<EnumeratorListElement>& P, Filter accept = Filter()) const
+    iterator begin(MutableSubstitution& sigma, std::deque<EnumeratorListElement>& P, Filter accept = Filter())
     {
       assert(P.size() == 1);
       auto& p = P.front();
       p.expression() = super::R(p.expression(), sigma);
       if (accept(p.expression()))
       {
-        return iterator(this, &P, &sigma, accept);
+        return iterator(const_cast<enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, IdentifierGenerator, Filter, DataRewriter, MutableSubstitution>*>(this), &P, &sigma, accept);
       }
       else
       {
@@ -776,7 +775,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
       }
     }
 
-    const iterator& end(Filter accept = Filter()) const
+    const iterator& end(Filter accept = Filter())
     {
       static iterator result(accept);
       return result;
@@ -786,7 +785,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
 /// \brief Returns a vector with all expressions of sort s.
 /// \param s A sort expression.
 /// \param dataspec The data specification defining the terms of sort \a s.
-/// \param rewr A rewriter to be used to simplify terms and conditions. 
+/// \param rewr A rewriter to be used to simplify terms and conditions.
 /// \details It is assumed that the sort s has only a finite number of elements.
 template <class Rewriter>
 data_expression_vector enumerate_expressions(const sort_expression& s, const data_specification& dataspec, const Rewriter& rewr)
@@ -794,7 +793,8 @@ data_expression_vector enumerate_expressions(const sort_expression& s, const dat
   typedef typename Rewriter::term_type term_type;
   typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
   assert(dataspec.is_certainly_finite(s));
-  enumerator_algorithm_with_iterator<Rewriter, enumerator_element, is_not_false, Rewriter> E(rewr, dataspec, rewr);
+  enumerator_identifier_generator id_generator;
+  enumerator_algorithm_with_iterator<Rewriter, enumerator_element, enumerator_identifier_generator, is_not_false, Rewriter> E(rewr, dataspec, rewr, id_generator);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
