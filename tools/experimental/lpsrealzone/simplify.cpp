@@ -205,7 +205,8 @@ namespace data
     global_variable_counter=0;
     const lps::stochastic_action_summand_vector action_smds = s.process().action_summands();
     lps::stochastic_action_summand_vector new_action_summands;
-    enumerator_algorithm_with_iterator<> enumerator(r,s.data(),r);
+    data::enumerator_identifier_generator id_generator;
+    enumerator_algorithm_with_iterator<> enumerator(r,s.data(),r, id_generator);
     for (const lps::stochastic_action_summand& i: action_smds)
     {
        const process::action_list ma=i.multi_action().actions();
