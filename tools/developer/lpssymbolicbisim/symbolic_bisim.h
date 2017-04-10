@@ -70,11 +70,11 @@ struct find_linear_inequality_traverser: public Traverser<find_linear_inequality
 
   void apply(const data::application& x)
   {
-    if (is_equal_to_application(x) || 
-        is_not_equal_to_application(x) || 
-        is_less_application(x) || 
-        is_less_equal_application(x) || 
-        is_greater_application(x) || 
+    if (is_equal_to_application(x) ||
+        is_not_equal_to_application(x) ||
+        is_less_application(x) ||
+        is_less_equal_application(x) ||
+        is_greater_application(x) ||
         is_greater_equal_application(x))
     {
       // Switch to 'searching for free variables of type Real' mode
@@ -248,15 +248,15 @@ protected:
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::and_(vb1, vb2)), sort_bool::or_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
     // Formulate all linear equalities with positive rhs: -1 * x_P <= -5   !(1 * x_P < 5)
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1, vp1, vp2), 
-      less_equal(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)), 
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1, vp1, vp2),
+      less_equal(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
       sort_bool::not_(less(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1, vp1, vp2), 
-      less(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)), 
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1, vp1, vp2),
+      less(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
       sort_bool::not_(less_equal(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
     // Eliminate nested -1 * -1
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_minus_one(), sort_real::times(real_minus_one(), vr1)), vr1));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2,vr3), 
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2,vr3),
       sort_real::times(vr1, sort_real::plus(vr2,vr3)), sort_real::plus(sort_real::times(vr1,vr2), sort_real::times(vr1,vr3))));
     // Eliminate 1 * r
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_one(), vr1), vr1));
@@ -268,22 +268,22 @@ protected:
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::false_()), sort_bool::not_(vb1)));
 
     // if(a,b,c) = (a && b) || (!a && c);
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), if_(vb1, vb2, vb3), 
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), if_(vb1, vb2, vb3),
       sort_bool::or_(sort_bool::and_(vb1, vb2), sort_bool::and_(sort_bool::not_(vb1), vb3))));
     // (a && b) || !a = b || !a
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::not_(vb1)), sort_bool::or_(vb2,sort_bool::not_(vb1))));
     // !a || (a && b) = !a || b
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
       sort_bool::or_(sort_bool::not_(vb1), sort_bool::and_(vb1,vb2)), sort_bool::or_(sort_bool::not_(vb1), vb2)));
     // a || (!a && b) = a || b
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
       sort_bool::or_(vb1, sort_bool::and_(sort_bool::not_(vb1), vb2)), sort_bool::or_(vb1,vb2)));
 
     rewr = rewriter(ad_hoc_data, strat);
   }
 
-  variable_list replace_free_reals(data_expression& split_block, 
+  variable_list replace_free_reals(data_expression& split_block,
     std::set< data_expression > linear_inequalities, data_expression& enumeration_condition, data_expression& lli)
   {
     set_identifier_generator var_gen;
@@ -373,8 +373,9 @@ protected:
   void enumerate(data_expression block, variable_list vars, data_expression split_block, const data_expression& lli)
   {
 
-    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, enumerate_filter_print> enumerator_type;
-    enumerator_type enumerator(rewr, m_spec.data(), rewr, 10000);
+    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, data::enumerator_identifier_generator, enumerate_filter_print> enumerator_type;
+    data::enumerator_identifier_generator id_generator;
+    enumerator_type enumerator(rewr, m_spec.data(), rewr, id_generator, 10000);
 
     std::cout << "Enumerating variables " << pp_container(vars) << " for which " << pp(block) << " holds in expression " << split_block << "." << std::endl;
 
@@ -393,7 +394,7 @@ protected:
         {
           std::cout << ", ";
         }
-     
+
         std::cout << data::pp(*v) << " := " << data::pp(sigma(*v));
       }
       std::cout << "] leads to " << std::endl;
@@ -524,7 +525,7 @@ protected:
     std::cout << "Starting simplification of " << std::endl << pp(split_block) << std::endl;
     split_block = one_point_rule_rewrite(quantifiers_inside_rewrite(split_block));
     std::cout << "Quantifiers pushed inside " << std::endl << pp(split_block) << std::endl;
-    
+
     data_expression result = replace_data_expressions(split_block, eliminate_existential_quantifier_sigma(rewr), true);
     std::cout << "Block after replacements:" << std::endl << result << std::endl;
     split_block = rewr(result);
@@ -575,7 +576,7 @@ protected:
   }
 
 public:
-  symbolic_bisim_algorithm(Specification& spec, data_expression inv, 
+  symbolic_bisim_algorithm(Specification& spec, data_expression inv,
     bool use_path_eliminator, detail::smt_solver_type solver_type, const rewrite_strategy st = jitty)
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
     , strat(st)
@@ -587,7 +588,7 @@ public:
     // , simpl(rewr, proving_rewr, process_parameters)
     , simpl(rewr, proving_rewr)
   {
-    
+
   }
 
   void run()
