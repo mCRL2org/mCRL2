@@ -33,9 +33,6 @@
 #include <memory>
 #include <algorithm>
 
-// Boost utilities
-#include "boost/utility.hpp"
-
 // ATermpp libraries
 #include "mcrl2/atermpp/indexed_set.h"
 
@@ -174,7 +171,7 @@ class objectdatatype
 };
 
 
-class specification_basic_type: public boost::noncopyable
+class specification_basic_type
 {
   public:
     process::action_label_list acts;     /* storage place for actions */
@@ -183,6 +180,9 @@ class specification_basic_type: public boost::noncopyable
     variable_list initdatavars; /* storage place for free variables in
                                    init clause */
     data_specification data;    /* contains the data specification for the current process.  */
+    
+    specification_basic_type(const specification_basic_type& )=delete;
+    specification_basic_type& operator=(const specification_basic_type&)=delete;
 
   private:
     class stackoperations;
@@ -4298,7 +4298,7 @@ class specification_basic_type: public boost::noncopyable
       create_enumeratedtype(pCRLprocs.size());
     }
 
-    class stackoperations:public boost::noncopyable
+    class stackoperations
     {
       public:
         variable_list parameter_list;
@@ -4311,6 +4311,10 @@ class specification_basic_type: public boost::noncopyable
         data::function_symbol pop;
         data::function_symbol getstate;
         stackoperations* next;
+
+        // Stack operations are not supposed to be copied. 
+        stackoperations(const stackoperations& )=delete;
+        stackoperations& operator=(const stackoperations& )=delete;
 
         stackoperations(const variable_list& pl,
                         specification_basic_type& spec)
@@ -4356,7 +4360,7 @@ class specification_basic_type: public boost::noncopyable
         }
     };
 
-    class stacklisttype:public boost::noncopyable
+    class stacklisttype
     {
       public:
         stackoperations* opns;
@@ -4372,7 +4376,10 @@ class specification_basic_type: public boost::noncopyable
         /* All datatypes for different stacks that are being generated
            are stored in the following list, such that it can be investigated
            whether a suitable stacktype already exist, before generating a new
-        one */
+           one */
+
+        stacklisttype(const stacklisttype& )=delete;
+        stacklisttype& operator=(const stacklisttype& )=delete;
 
 
         stackoperations* find_suitable_stack_operations(
@@ -5765,9 +5772,13 @@ class specification_basic_type: public boost::noncopyable
       return;
     }
 
-    class enumtype : public boost::noncopyable
+    class enumtype 
     {
       public:
+        // enumtypes are not supposed to be copied.
+        enumtype(const enumtype&)=delete;
+        enumtype& operator =(const enumtype& )=delete; 
+
         size_t enumeratedtype_index;
         variable var;
 
@@ -7484,15 +7495,14 @@ class specification_basic_type: public boost::noncopyable
       return false;
     }
 
-    bool encap(const identifier_string_list& encaplist, const action_list& multiaction)
+    bool encap(const action_name_multiset_list& encaplist, const action_list& multiaction)
     {
-      for (action_list::const_iterator walker=multiaction.begin();
-           walker!=multiaction.end(); ++walker)
+      for (const action& a: multiaction)
       {
-        for (identifier_string_list::const_iterator i=encaplist.begin(); i!=encaplist.end(); ++i)
+        assert(encaplist.size()==1);
+        for (const identifier_string& s1: encaplist.front().names())
         {
-          const identifier_string s1= *i;
-          const identifier_string s2=walker->label().name();
+          const identifier_string s2=a.label().name();
           if (s1==s2)
           {
             return true;
@@ -7547,7 +7557,7 @@ class specification_basic_type: public boost::noncopyable
 
         // Explicitly allow the termination action in any allow. 
         if ((is_allow && allow_(allowlist,multiaction)) ||
-            (!is_allow && !encap(deprecated_cast<identifier_string_list>(allowlist),multiaction)))    
+            (!is_allow && !encap(allowlist,multiaction)))    
         {
           action_summands.push_back(smmnd);
         }
@@ -7855,9 +7865,13 @@ class specification_basic_type: public boost::noncopyable
     // Type and variables for a somewhat more efficient storage of the
     // communication function
 
-    class comm_entry:public boost::noncopyable
+    class comm_entry
     {
       public:
+        // comm_entries are not copyable. 
+        comm_entry(const comm_entry& )=delete;
+        comm_entry& operator=(const comm_entry& )=delete;
+
         std::vector <identifier_string_list> lhs;
         std::vector <identifier_string> rhs;
         std::vector <identifier_string_list> tmp;
@@ -7952,10 +7966,9 @@ class specification_basic_type: public boost::noncopyable
       return action_label();
     }
 
-    bool might_communicate(const action_list& m,
-                           comm_entry& comm_table,
-                           const action_list& n,
-                           const bool n_is_null)
+    static bool might_communicate(const action_list& m,
+                                  comm_entry& comm_table,
+                                  const action_list& n)
     {
       /* this function indicates whether the actions in m
          consisting of actions and data occur in C, such that
@@ -7993,24 +8006,11 @@ class specification_basic_type: public boost::noncopyable
           identifier_string commname;
           while (actionname != (commname = comm_table.tmp[i].front()))
           {
-            if (!n_is_null)
-            {
-              // action is not in m, so it should be in n
-              // but all actions in m come before n
-              comm_table.match_failed[i]=true;
-              comm_table.tmp[i]=identifier_string_list();
-              break;
-            }
-            else
-            {
-              // ignore actions that are not in m
-              comm_table.tmp[i].pop_front();
-              if (comm_table.tmp[i].empty())
-              {
-                comm_table.match_failed[i]=true;
-                break;
-              }
-            }
+            // action is not in m, so it should be in n
+            // but all actions in m come before n
+            comm_table.match_failed[i]=true;
+            comm_table.tmp[i]=identifier_string_list();
+            break;
           }
           if (actionname==commname) // actionname found
           {
@@ -8024,67 +8024,58 @@ class specification_basic_type: public boost::noncopyable
         }
       }
 
-      if (n_is_null)
-      {
-        // there is a matching lhs
-        return true;
-      }
-      else
-      {
-        // the rest of actions of lhs that are not in m should be in n
+      // the rest of actions of lhs that are not in m should be in n
+      // rest[i] contains the part of n in which lhs i has to find matching actions
+      // rest_is_null[i] contains indications whether rest[i] is NULL.
+      std::vector < action_list > rest(comm_table.size(),n);
+      std::vector < bool > rest_is_null(comm_table.size(),false);
 
-        // rest[i] contains the part of n in which lhs i has to find matching actions
-        // rest_is_null[i] contains indications whether rest[i] is NULL.
-        std::vector < action_list > rest(comm_table.size(),n);
-        std::vector < bool > rest_is_null(comm_table.size(),n_is_null);
-
-        // check every lhs
-        for (size_t i=0; i<comm_table.size(); ++i)
+      // check every lhs
+      for (size_t i=0; i<comm_table.size(); ++i)
+      {
+        if (comm_table.match_failed[i]) // lhs i did not contain m
         {
-          if (comm_table.match_failed[i]) // lhs i did not contain m
+          continue;
+        }
+        // as long as there are still unmatch actions in lhs i...
+        while (!comm_table.tmp[i].empty())
+        {
+          // .. find them in rest[i]
+          if (rest[i].empty()) // no luck
           {
-            continue;
+            rest_is_null[i] = true;
+            break;
           }
-          // as long as there are still unmatch actions in lhs i...
-          while (!comm_table.tmp[i].empty())
+          // get first action in lhs i
+          const identifier_string commname = comm_table.tmp[i].front();
+          identifier_string restname;
+          // find it in rest[i]
+          while (commname!=(restname = rest[i].front().label().name()))
           {
-            // .. find them in rest[i]
-            if (rest[i].empty()) // no luck
+            rest[i].pop_front();
+            if (rest[i].empty()) // no more
             {
               rest_is_null[i] = true;
               break;
             }
-            // get first action in lhs i
-            const identifier_string commname = comm_table.tmp[i].front();
-            identifier_string restname;
-            // find it in rest[i]
-            while (commname!=(restname = rest[i].front().label().name()))
-            {
-              rest[i].pop_front();
-              if (rest[i].empty()) // no more
-              {
-                rest_is_null[i] = true;
-                break;
-              }
-            }
-            if (commname!=restname) // action was not found
-            {
-              break;
-            }
-            // action found; try next
-            rest[i].pop_front();
-            comm_table.tmp[i].pop_front();
           }
-
-          if (!rest_is_null[i]) // lhs was found in rest[i]
+          if (commname!=restname) // action was not found
           {
-            return true;
+            break;
           }
+          // action found; try next
+          rest[i].pop_front();
+          comm_table.tmp[i].pop_front();
         }
 
-        // no lhs completely matches
-        return false;
+        if (!rest_is_null[i]) // lhs was found in rest[i]
+        {
+          return true;
+        }
       }
+
+      // no lhs completely matches
+      return false;
     }
 
     tuple_list phi(const action_list& m,
@@ -8105,7 +8096,7 @@ class specification_basic_type: public boost::noncopyable
          and C contains a list of multiaction action pairs indicating
          possible communications */
 
-      if (!might_communicate(m,comm_table,n,false))
+      if (!might_communicate(m,comm_table,n))
       {
         return tuple_list();
       }
@@ -8167,7 +8158,7 @@ class specification_basic_type: public boost::noncopyable
         {
           return true;
         }
-        else if (might_communicate(l,comm_table,beta_next,false))
+        else if (might_communicate(l,comm_table,beta_next))
         {
           return xi(l,beta_next,comm_table) || xi(alpha,beta_next,comm_table);
         }
@@ -8190,7 +8181,7 @@ class specification_basic_type: public boost::noncopyable
         while (!beta.empty())
         {
           const action_list actl({ a, beta.front() });
-          if (might_communicate(actl,comm_table,beta.tail(),false) && xi(actl,beta.tail(),comm_table))
+          if (might_communicate(actl,comm_table,beta.tail()) && xi(actl,beta.tail(),comm_table))
           {
             // sort and remove duplicates??
             cond = lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments()));
@@ -8340,6 +8331,7 @@ class specification_basic_type: public boost::noncopyable
            is not empty. If no communications can take place,
            the original multiaction is delivered, with condition
            true. */
+// std::cerr << "CALCULATE COMMUNICATION " << multiaction << "\n";
         const tuple_list multiactionconditionlist=
           makeMultiActionConditionList(
             multiaction,
@@ -8355,7 +8347,7 @@ class specification_basic_type: public boost::noncopyable
           {
             continue;
           }
-          if (is_block && encap(deprecated_cast<identifier_string_list>(allowlist),multiaction))
+          if (is_block && encap(allowlist,multiaction))
           {
             continue;
           }
@@ -8786,7 +8778,7 @@ class specification_basic_type: public boost::noncopyable
           {
             continue;
           }
-          if (is_block && encap(deprecated_cast<identifier_string_list>(allowlist),multiaction1))
+          if (is_block && encap(allowlist,multiaction1))
           {
             continue;
           }
@@ -8960,7 +8952,7 @@ class specification_basic_type: public boost::noncopyable
             {
               continue;
             }
-            if (is_block && encap(deprecated_cast<identifier_string_list>(allowlist),multiaction3))
+            if (is_block && encap(allowlist,multiaction3))
             {
               continue;
             }
@@ -9414,9 +9406,10 @@ class specification_basic_type: public boost::noncopyable
                                 regular,rename_variables,pars1,init1,initial_stochastic_distribution);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
                                 regular,true,pars2,init2,initial_stochastic_distribution);
+          // Encode the actions of the block list in one multi action.
           parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
                                 action_summands2,deadlock_summands2,pars2,init2,
-                                action_name_multiset_list(block(t).block_set()),false,true,
+                                action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,true,
                                 action_summands,deadlock_summands,pars,init);
           return;
         }
@@ -9424,12 +9417,14 @@ class specification_basic_type: public boost::noncopyable
         {
           generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
                                 regular,rename_variables,pars,init,initial_stochastic_distribution);
-          communicationcomposition(comm(par).comm_set(),action_name_multiset_list(block(t).block_set()),false,true,action_summands,deadlock_summands);
+          // Encode the actions of the block list in one multi action.
+          communicationcomposition(comm(par).comm_set(),action_name_multiset_list( { action_name_multiset(block(t).block_set())} ),false,true,action_summands,deadlock_summands);
           return;
         }
 
         generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution);
-        allowblockcomposition(action_name_multiset_list(block(t).block_set()),false,action_summands,deadlock_summands);
+        // Encode the actions of the block list in one multi action.
+        allowblockcomposition(action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,action_summands,deadlock_summands);
         return;
       }
 
@@ -11182,7 +11177,7 @@ class specification_basic_type: public boost::noncopyable
       procstorealGNF(init_,options.lin_method!=lmStack);
 
       generateLPEmCRL(action_summands,deadlock_summands,init_, options.lin_method!=lmStack,parameters,initial_state,initial_stochastic_distribution);
-      allowblockcomposition(action_name_multiset_list(),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
+      allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
       if (options.final_cluster)
       {
         cluster_actions(action_summands,deadlock_summands,parameters);
