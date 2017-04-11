@@ -413,7 +413,7 @@ static data_expression subst_values(
             const bool* variable_is_a_normal_form,
             const size_t assignment_size,
             const data_expression& t,
-            data::set_identifier_generator& generator); // prototype;
+            data::enumerator_identifier_generator& generator); // prototype;
 
 class subst_values_argument
 {
@@ -422,14 +422,14 @@ class subst_values_argument
     const unprotected_data_expression* m_terms;
     const bool* m_variable_is_a_normal_form;
     const size_t m_assignment_size;
-    data::set_identifier_generator& m_generator;
+    data::enumerator_identifier_generator& m_generator;
 
   public:
     subst_values_argument(const unprotected_variable* vars,
                           const unprotected_data_expression* terms,
                           const bool* variable_is_a_normal_form,
                           const size_t assignment_size,
-                          data::set_identifier_generator& generator)
+                          data::enumerator_identifier_generator& generator)
       : m_vars(vars),
         m_terms(terms),
         m_variable_is_a_normal_form(variable_is_a_normal_form),
@@ -449,7 +449,7 @@ static data_expression subst_values(
             const bool* variable_is_a_normal_form,
             const size_t assignment_size,
             const data_expression& t,
-            data::set_identifier_generator& generator) // This generator is used for the generation of fresh variable names.
+            data::enumerator_identifier_generator& generator) // This generator is used for the generation of fresh variable names.
 {
   if (is_function_symbol(t))
   {

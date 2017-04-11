@@ -18,13 +18,13 @@
 #include <sstream>
 #include <utility>
 #include <boost/iterator/iterator_facade.hpp>
-#include "mcrl2/atermpp/function_symbol_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/detail/enumerator_variable_limit.h"
+#include "mcrl2/data/detail/enumerator_identifier_generator.h"
 #include "mcrl2/utilities/math.h"
 
 namespace mcrl2
@@ -308,31 +308,6 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
 {
   return out << "{ variables = " << core::detail::print_list(p.variables()) << ", expression = " << p.expression() << " }";
 }
-
-class enumerator_identifier_generator
-{
-  protected:
-    atermpp::function_symbol_generator f;
-
-  public:
-    /// \brief Constructor
-    /// \param prefix The prefix of the generated generated strings
-    /// \pre The prefix may not be empty, and it may not have trailing digits
-    enumerator_identifier_generator(const std::string& prefix = "@x")
-      : f(prefix)
-    { }
-
-    /// \brief Generates a unique function symbol with the given prefix followed by a number.
-    core::identifier_string operator()(const std::string& = "", bool = false)
-    {
-      return core::identifier_string(f());
-    }
-
-   void clear()
-   {
-     f.clear();
-   }
-};
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
 template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter, typename IdentifierGenerator = data::enumerator_identifier_generator>

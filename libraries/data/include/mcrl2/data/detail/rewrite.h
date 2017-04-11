@@ -11,11 +11,10 @@
 #ifndef __LIBREWRITE_H
 #define __LIBREWRITE_H
 
-#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/rewrite_strategy.h"
-#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/detail/enumerator_identifier_generator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 namespace mcrl2
@@ -43,7 +42,8 @@ namespace detail
 class Rewriter
 {
   public:
-    data::set_identifier_generator generator;  //name for variables.
+    // data::set_identifier_generator generator;  //name for variables.
+    enumerator_identifier_generator generator;  //name for variables.
 
     typedef mutable_indexed_substitution<data::variable, std::vector< data::data_expression > > substitution_type;
 
@@ -57,10 +57,10 @@ class Rewriter
           data_equation_selector(eq_selector),
           m_data_specification_for_enumeration(data_spec)
     {
-      generator.add_identifiers(data::find_identifiers(data_spec.equations()));
+      /* generator.add_identifiers(data::find_identifiers(data_spec.equations()));
       generator.add_identifiers(data::find_identifiers(data_spec.sorts()));
       generator.add_identifiers(data::find_identifiers(data_spec.constructors()));
-      generator.add_identifiers(data::find_identifiers(data_spec.mappings()));
+      generator.add_identifiers(data::find_identifiers(data_spec.mappings())); */
 
     }
 
@@ -70,7 +70,7 @@ class Rewriter
     }
 
     /** \brief The fresh name generator of the rewriter */
-    data::set_identifier_generator& identifier_generator()
+    data::enumerator_identifier_generator& identifier_generator()
     {
       return generator;
     }
