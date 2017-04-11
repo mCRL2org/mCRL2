@@ -18,6 +18,7 @@
 #ifndef MCRL2_DATA_ENUMERATOR_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_ENUMERATOR_IDENTIFIER_GENERATOR_H
 
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/atermpp/function_symbol_generator.h"
 
 namespace mcrl2
