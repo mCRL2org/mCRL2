@@ -12,9 +12,6 @@
 #ifndef MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 #define MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 
-#ifdef MCRL2_USE_BOOST_EXPRESSIVE
-#include <boost/xpressive/xpressive.hpp>
-#endif
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/bool.h"

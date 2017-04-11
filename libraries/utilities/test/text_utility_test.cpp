@@ -9,7 +9,7 @@
 /// \file text_utility_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
@@ -28,7 +28,7 @@ std::string TEXT2 =
   "ddasdfsd\n"
   ;
 
-void test_remove_comments()
+BOOST_AUTO_TEST_CASE(test_remove_comments)
 {
   std::string text = utilities::remove_comments(TEXT1);
   BOOST_CHECK(text == TEXT2);
@@ -50,25 +50,27 @@ std::string TEXT4 =
   "ghi"
   ;
 
-void test_word_wrap()
+BOOST_AUTO_TEST_CASE(test_word_wrap)
 {
   std::string text = utilities::word_wrap_text(TEXT3, 5);
   BOOST_CHECK(text == TEXT4);
 }
 
-void test_number2string() 
-{ 
-  BOOST_CHECK(utilities::number2string(0) == "0"); 
-  BOOST_CHECK(utilities::number2string(1) == "1"); 
-  BOOST_CHECK(utilities::number2string(10) == "10"); 
-  BOOST_CHECK(utilities::number2string(123456789) == "123456789"); 
-} 
-
-int test_main(int, char*[])
+BOOST_AUTO_TEST_CASE(test_number2string)
 {
-  test_remove_comments();
-  test_word_wrap();
-  test_number2string(); 
+  BOOST_CHECK(utilities::number2string(0) == "0");
+  BOOST_CHECK(utilities::number2string(1) == "1");
+  BOOST_CHECK(utilities::number2string(10) == "10");
+  BOOST_CHECK(utilities::number2string(123456789) == "123456789");
+}
 
-  return 0;
+BOOST_AUTO_TEST_CASE(test_regex_split)
+{
+  BOOST_CHECK(utilities::regex_split("a := b; \n", ":=") == std::vector<std::string>({ "a", "b;" }));
+  BOOST_CHECK(utilities::regex_split("a+b*c/d ", "[+*/]") == std::vector<std::string>({ "a", "b", "c", "d" }));
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
+{
+  return nullptr;
 }
