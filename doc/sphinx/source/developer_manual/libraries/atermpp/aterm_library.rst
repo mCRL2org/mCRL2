@@ -286,12 +286,12 @@ The value in an aterm_int can be obtained using the function :cpp:func:`value() 
      aterm_int n(12);       
      size_t x=n.value();    // x gets the value 12.
 
-The function symbol of a term_appl\<T\> can be obtained using :cpp:func:`function() <atermpp::term_appl::function>'. 
+The function symbol of a :cpp:class:`term_appl\<T\> <atermpp::aterm_appl>` can be obtained using :cpp:func:`function() <atermpp::term_appl::function>'. 
 The number of arguments of a term is obtained using :cpp:func:`size() <atermpp::term_appl::size>`. A convenience function
 :cpp:func:`empty() <atermpp::term_appl::empty>` can be used to check whether the term application is a constant, i.e., 
-has no arguments. An argument can be obtained using the subscript operator :cpp:function::`operator[] <atermpp::term_appl::operator[]>`.
+has no arguments. An argument can be obtained using the subscript operator :cpp:function:`operator[] <atermpp::term_appl::operator[]>`.
 The first argument has number 0. Using const iterators it is possible to iteratate over the arguments of a term. 
-For this purpose the functions :cpp:func:`begin() <atermpp::term_appl::begin>` and `end() <atermpp::term_appl::end>` are defined.
+For this purpose the functions :cpp:func:`begin() <atermpp::term_appl::begin>` and :cpp:func:`end() <atermpp::term_appl::end>` are defined.
 
 .. code-block:: c++
      #include <atermpp::aterm_appl.h>
@@ -355,10 +355,11 @@ For example:
 
 Iterator interfaces
 ^^^^^^^^^^^^^^^^^^^
-The classes :cpp:func:`term_list <atermpp::term_list>` and
-:cpp:func:`term_appl <atermpp::term_appl>` have C++ standard conforming iterator interfaces.
-Thus they operate well with the C++ Standard Library, as illustrated by the following
-example:
+The classes :cpp:class:`term_list\<T\> <atermpp::term_list>` and
+:cpp:class:`term_appl\<T\> <atermpp::term_appl>` have C++ standard conforming iterator interfaces.
+The iterator of a :cpp:class:`term_list` iterates over the elements in the list. The iterator
+of a :cpp:class:`term_appl` iterates over the arguments of the term.
+They operate well with the C++ Standard Library, as illustrated by the following example:
 
 .. code-block:: c++
 
