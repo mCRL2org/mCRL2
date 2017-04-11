@@ -54,10 +54,9 @@ LtsCanvas::LtsCanvas(QWidget *parent, Settings *settings, LtsManager *ltsManager
 void LtsCanvas::resetView()
 {
   m_position = Vector3D(0.0f, 0.0f, 0.0f);
-  set_identity(m_rotation);
   // structure will be drawn around the positive z-axis starting from the
   // origin, so we start with a rotation that makes the z-axis point downwards
-  rotate_x(m_rotation, 90.0f);
+  m_rotation = QQuaternion(1.0f, 1.0f, 0.0f, 0.0f).normalized();
   update();
 }
 
@@ -168,11 +167,11 @@ Vector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
 }
 
 void LtsCanvas::applyRotation(bool reverse) {
-  float angle = 180 / M_PI * std::acos(std::min(1.0f, S(m_rotation)));
+  float angle = 180 / M_PI * std::acos(std::min(1.0f, m_rotation.scalar()));
   if(reverse)
       angle = -angle;
   // not sure why angle has to be doubled but it works..
-  glRotatef(2 * angle, X(m_rotation), Y(m_rotation), Z(m_rotation));
+  glRotatef(2 * angle, m_rotation.x(), m_rotation.y(), m_rotation.z());
 }
 
 void LtsCanvas::render(bool light)
@@ -431,7 +430,8 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent *event)
     Vector3D v2 = getArcBallVector(event->x(), event->y());
     Vector3D cross = v1.cross_product(v2);
     float dot = v1.dot_product(v2);
-    boost::qvm::quat<float> rotation{dot, cross.x(), cross.y(), cross.z()};
+    QQuaternion rotation(dot, cross.x(), cross.y(), cross.z());
+    /* boost::qvm::quat<float> rotation{dot, cross.x(), cross.y(), cross.z()}; */
     m_rotation = rotation * m_rotation;
     m_mouseX = event->x(), m_mouseY = event->y();
     event->accept();

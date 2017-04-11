@@ -15,10 +15,7 @@
 #include <QMouseEvent>
 #include <QPoint>
 #include <QWheelEvent>
-
-#include <boost/qvm/quat.hpp>
-#include <boost/qvm/quat_operations.hpp>
-#include <boost/qvm/quat_access.hpp>
+#include <QQuaternion>
 
 #include "ltsmanager.h"
 #include "markmanager.h"
@@ -92,7 +89,7 @@ class LtsCanvas : public QGLWidget
     Vector3D m_position;
     int m_mouseX;
     int m_mouseY;
-    boost::qvm::quat<float> m_rotation;
+    QQuaternion m_rotation;
     Tool m_selectedTool;
     Tool m_activeTool;
     bool m_dragging;
