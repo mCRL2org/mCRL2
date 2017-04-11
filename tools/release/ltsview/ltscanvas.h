@@ -16,6 +16,10 @@
 #include <QPoint>
 #include <QWheelEvent>
 
+#include <boost/qvm/quat.hpp>
+#include <boost/qvm/quat_operations.hpp>
+#include <boost/qvm/quat_access.hpp>
+
 #include "ltsmanager.h"
 #include "markmanager.h"
 #include "settings.h"
@@ -57,6 +61,8 @@ class LtsCanvas : public QGLWidget
     void wheelEvent(QWheelEvent *event);
     Selection selectObject(QPoint position);
     Selection parseSelection(GLuint *selectionBuffer, GLint items);
+    void applyRotation(bool reverse = false);
+    Vector3D getArcBallVector(int screenX, int screenY);
 
   public:
     QImage renderImage(int width, int height);
@@ -84,8 +90,9 @@ class LtsCanvas : public QGLWidget
     float m_nearPlane;
     float m_farPlane;
     Vector3D m_position;
-    float m_rotationAngleX;
-    float m_rotationAngleY;
+    int m_mouseX;
+    int m_mouseY;
+    boost::qvm::quat<float> m_rotation;
     Tool m_selectedTool;
     Tool m_activeTool;
     bool m_dragging;

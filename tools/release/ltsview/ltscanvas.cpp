@@ -10,6 +10,8 @@
 #include "ltscanvas.h"
 #include "tr/tr.h"
 
+#include <math.h>
+
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
 #else
@@ -52,8 +54,10 @@ LtsCanvas::LtsCanvas(QWidget *parent, Settings *settings, LtsManager *ltsManager
 void LtsCanvas::resetView()
 {
   m_position = Vector3D(0.0f, 0.0f, 0.0f);
-  m_rotationAngleX = 0.0f;
-  m_rotationAngleY = 0.0f;
+  set_identity(m_rotation);
+  // structure will be drawn around the positive z-axis starting from the
+  // origin, so we start with a rotation that makes the z-axis point downwards
+  rotate_x(m_rotation, 90.0f);
   update();
 }
 
@@ -137,6 +141,40 @@ void LtsCanvas::paintGL()
   emit renderingFinished();
 }
 
+Vector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
+  float x, y, z;
+  // only works for r = 1.0 for some reason
+  const float r = 1.0;
+  // we assume that the center of the arcball matches the center of the
+  // window, one could change this to gluUnproject of the origin
+  // of the world coordinate system
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  x = (float) mouseX / viewport[2] * 2.0f * r - r;
+  y = (float) mouseY / viewport[3] * 2.0f * r - r;
+  y = -y;
+  float squared = x * x + y * y;
+  if (squared <= r*r) {
+      z = std::sqrt(r*r - squared);
+  } else {
+      float len = std::sqrt(squared);
+      if(std::isnormal(len))
+          x /= len, y /= len;
+      else
+          x = 0.0, y = 0.0;
+      z = 0.0;
+  }
+  return Vector3D(x, y, z);
+}
+
+void LtsCanvas::applyRotation(bool reverse) {
+  float angle = 180 / M_PI * std::acos(std::min(1.0f, S(m_rotation)));
+  if(reverse)
+      angle = -angle;
+  // not sure why angle has to be doubled but it works..
+  glRotatef(2 * angle, X(m_rotation), Y(m_rotation), Z(m_rotation));
+}
+
 void LtsCanvas::render(bool light)
 {
   glEnable(GL_DEPTH_TEST);
@@ -187,12 +225,8 @@ void LtsCanvas::render(bool light)
 
   // apply panning, zooming and rotating transformations
   glTranslatef(m_position.x(), m_position.y(), m_position.z() - m_baseDepth);
-  glRotatef(m_rotationAngleY, 1.0f, 0.0f, 0.0f);
-  glRotatef(m_rotationAngleX, 0.0f, 1.0f, 0.0f);
 
-  // structure will be drawn around the positive z-axis starting from the
-  // origin, so rotate to make the z-axis point downwards
-  glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+  applyRotation();
 
   // translate along the z-axis to make the vertical center of the structure
   // end up in the current origin
@@ -259,9 +293,7 @@ void LtsCanvas::render(bool light)
     glPushMatrix();
     glLoadIdentity();
     glTranslatef(0.0f, 0.0f, halfHeight);
-    glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
-    glRotatef(-m_rotationAngleX, 0.0f, 1.0f, 0.0f);
-    glRotatef(-m_rotationAngleY, 1.0f, 0.0f, 0.0f);
+    applyRotation(/*reverse=*/true);
     glTranslatef(-m_position.x(), -m_position.y(), -m_position.z() + m_baseDepth);
     GLfloat matrix[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
@@ -302,16 +334,14 @@ void LtsCanvas::mousePressEvent(QMouseEvent *event)
   {
     setActiveTool(PanTool);
   }
-  else if (event->modifiers() & Qt::ShiftModifier)
-  {
-    setActiveTool(RotateTool);
-  }
   else if ((event->buttons() & Qt::MidButton) || ((event->buttons() & Qt::LeftButton) && (event->buttons() & Qt::RightButton)))
   {
     setActiveTool(ZoomTool);
   }
-  else if (event->buttons() & Qt::RightButton)
+  else if (event->modifiers() & Qt::ShiftModifier || event->buttons() & Qt::RightButton)
   {
+    m_mouseX = event->x();
+    m_mouseY = event->y();
     setActiveTool(RotateTool);
   }
   else
@@ -396,12 +426,14 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent *event)
   }
   else if (m_activeTool == RotateTool)
   {
-    m_rotationAngleX -= 0.5f * (oldPosition.x() - event->x());
-    m_rotationAngleY -= 0.5f * (oldPosition.y() - event->y());
-    if (m_rotationAngleX < 0.0f) m_rotationAngleX += 360.0f;
-    if (m_rotationAngleY < 0.0f) m_rotationAngleY += 360.0f;
-    if (m_rotationAngleX >= 360.0f) m_rotationAngleX -= 360.0f;
-    if (m_rotationAngleY >= 360.0f) m_rotationAngleY -= 360.0f;
+    // update rotation based on the difference in mouse coordinates
+    Vector3D v1 = getArcBallVector(m_mouseX, m_mouseY);
+    Vector3D v2 = getArcBallVector(event->x(), event->y());
+    Vector3D cross = v1.cross_product(v2);
+    float dot = v1.dot_product(v2);
+    boost::qvm::quat<float> rotation{dot, cross.x(), cross.y(), cross.z()};
+    m_rotation = rotation * m_rotation;
+    m_mouseX = event->x(), m_mouseY = event->y();
     event->accept();
     repaint();
   }
