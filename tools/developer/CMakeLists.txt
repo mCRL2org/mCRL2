@@ -7,6 +7,8 @@ set(MCRL2_TOOLS
   reduce_pbes
 )
 
-foreach(TOOL ${MCRL2_TOOLS})
-  add_subdirectory(${TOOL})
-endforeach()
+if(MCRL2_ENABLE_DEVELOPER)
+  foreach(TOOL ${MCRL2_TOOLS})
+    add_subdirectory(${TOOL})
+  endforeach()
+endif()

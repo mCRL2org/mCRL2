@@ -14,7 +14,8 @@ set(MCRL2_TOOLS
   symbolic_exploration
 )
 
-
-foreach(TOOL ${MCRL2_TOOLS})
-  add_subdirectory(${TOOL})
-endforeach()
+if(MCRL2_ENABLE_EXPERIMENTAL)
+  foreach(TOOL ${MCRL2_TOOLS})
+    add_subdirectory(${TOOL})
+  endforeach()
+endif()
