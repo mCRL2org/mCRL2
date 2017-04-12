@@ -87,8 +87,6 @@ class LtsCanvas : public QGLWidget
     float m_nearPlane;
     float m_farPlane;
     Vector3D m_position;
-    int m_mouseX;
-    int m_mouseY;
     QQuaternion m_rotation;
     Tool m_selectedTool;
     Tool m_activeTool;

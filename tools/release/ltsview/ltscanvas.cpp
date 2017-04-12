@@ -142,26 +142,25 @@ void LtsCanvas::paintGL()
 
 Vector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
   float x, y, z;
-  // only works for r = 1.0 for some reason
-  const float r = 1.0;
+  const float radius = 1.5f;
   // we assume that the center of the arcball matches the center of the
   // window, one could change this to gluUnproject of the origin
   // of the world coordinate system
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
-  x = (float) mouseX / viewport[2] * 2.0f * r - r;
-  y = (float) mouseY / viewport[3] * 2.0f * r - r;
+  x = (float) mouseX / viewport[2] * 2.0f - 1.0f;
+  y = (float) mouseY / viewport[3] * 2.0f - 1.0f;
   y = -y;
   float squared = x * x + y * y;
-  if (squared <= r*r) {
-      z = std::sqrt(r*r - squared);
+  if (squared <= radius*radius) {
+      z = std::sqrt(radius*radius - squared);
   } else {
       float len = std::sqrt(squared);
       if(std::isnormal(len))
           x /= len, y /= len;
       else
-          x = 0.0, y = 0.0;
-      z = 0.0;
+          x = 0.0f, y = 0.0f;
+      z = 0.0f;
   }
   return Vector3D(x, y, z);
 }
@@ -339,8 +338,6 @@ void LtsCanvas::mousePressEvent(QMouseEvent *event)
   }
   else if (event->modifiers() & Qt::ShiftModifier || event->buttons() & Qt::RightButton)
   {
-    m_mouseX = event->x();
-    m_mouseY = event->y();
     setActiveTool(RotateTool);
   }
   else
@@ -426,14 +423,14 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent *event)
   else if (m_activeTool == RotateTool)
   {
     // update rotation based on the difference in mouse coordinates
-    Vector3D v1 = getArcBallVector(m_mouseX, m_mouseY);
-    Vector3D v2 = getArcBallVector(event->x(), event->y());
+    Vector3D v1 = getArcBallVector(oldPosition.x(), oldPosition.y());
+    Vector3D v2 = getArcBallVector(m_lastMousePosition.x(), m_lastMousePosition.y());
+    v1.normalize();
+    v2.normalize();
     Vector3D cross = v1.cross_product(v2);
     float dot = v1.dot_product(v2);
     QQuaternion rotation(dot, cross.x(), cross.y(), cross.z());
-    /* boost::qvm::quat<float> rotation{dot, cross.x(), cross.y(), cross.z()}; */
     m_rotation = rotation * m_rotation;
-    m_mouseX = event->x(), m_mouseY = event->y();
     event->accept();
     repaint();
   }
