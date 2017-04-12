@@ -176,7 +176,7 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
     {
       buffer[j]=i;
     }
-    assert(j=len);
+    assert(j==len);
 
     // Insert elements at the front of the list
     while (j>0)
