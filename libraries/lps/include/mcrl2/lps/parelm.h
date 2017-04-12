@@ -21,7 +21,6 @@
 #include "mcrl2/utilities/reachable_nodes.h"
 #include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
@@ -142,8 +141,8 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
         for (auto i = m_spec.process().action_summands().begin(); i != m_spec.process().action_summands().end(); ++i)
         {
-          data::assignment_list assignments(i->assignments());
-          auto j = std::find_if(assignments.begin(), assignments.end(), data::detail::has_left_hand_side(x));
+          const data::assignment_list& assignments = i->assignments();
+          auto j = std::find_if(assignments.begin(), assignments.end(), [&](const data::assignment& a) { return a.lhs() == x; });
           if (j != assignments.end())
           {
             std::set<data::variable> vars;

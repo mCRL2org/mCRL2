@@ -103,9 +103,9 @@ struct remove_parameters_builder: public data_expression_builder<remove_paramete
   /// Assignments to removed parameters are removed.
   data::assignment_list apply(const data::assignment_list& x)
   {
-    // TODO: make this implementation more efficient
+    using utilities::detail::contains;
     std::vector<data::assignment> a(x.begin(), x.end());
-    a.erase(std::remove_if(a.begin(), a.end(), data::detail::has_left_hand_side_in(to_be_removed)), a.end());
+    a.erase(std::remove_if(a.begin(), a.end(), [&](const data::assignment& y) {	return contains(to_be_removed, y.lhs()); }), a.end());
     return data::assignment_list(a.begin(), a.end());
   }
 

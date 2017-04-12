@@ -72,9 +72,10 @@ struct lps_well_typed_checker
       error << "is_well_typed(" << type << ") failed: the assignments " << l << " are not well typed." << std::endl;
       return false;
     }
+    auto lhs = [](const data::assignment& a) { return a.lhs(); };
     if (data::detail::sequence_contains_duplicates(
-          boost::make_transform_iterator(l.begin(), data::detail::assignment_lhs()),
-          boost::make_transform_iterator(l.end()  , data::detail::assignment_lhs())
+          boost::make_transform_iterator(l.begin(), lhs),
+          boost::make_transform_iterator(l.end()  , lhs)
         )
        )
     {
@@ -304,7 +305,7 @@ struct lps_well_typed_checker
   /// <li>the global variables have unique names</li>
   /// </ul>
   template <typename LinearProcess, typename InitialProcessExpression>
-  bool is_well_typed(const specification_base<LinearProcess, InitialProcessExpression>& spec, 
+  bool is_well_typed(const specification_base<LinearProcess, InitialProcessExpression>& spec,
                      const std::set<data::variable>& free_variables) const
   {
     std::set<data::sort_expression> declared_sorts = data::detail::make_set(spec.data().sorts());

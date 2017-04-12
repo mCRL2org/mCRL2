@@ -15,7 +15,6 @@
 #include <map>
 #include <vector>
 #include <functional>
-#include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -256,8 +255,9 @@ struct set_based_remove_parameters_builder: public pbes_expression_builder<Deriv
 
   data::assignment_list apply(const data::assignment_list& l) const
   {
+    using utilities::detail::contains;
     std::vector<data::assignment> a(l.begin(), l.end());
-    a.erase(std::remove_if(a.begin(), a.end(), data::detail::has_left_hand_side_in(to_be_removed)), a.end());
+    a.erase(std::remove_if(a.begin(), a.end(), [&](const data::assignment& y) {	return contains(to_be_removed, y.lhs()); }), a.end());
     return data::assignment_list(a.begin(), a.end());
   }
 
