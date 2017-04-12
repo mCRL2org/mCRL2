@@ -39,10 +39,22 @@ namespace lts
 namespace detail
 {
 
+#ifndef NDEBUG
+    /// \brief include something in Debug mode
+    /// \details In a few places, we have to include an additional parameter to
+    /// a function in Debug mode.  While it is in principle possible to use
+    /// #ifndef NDEBUG ... #endif, that would lead to distributing the code
+    /// over many code lines.  This macro expands to its arguments in Debug
+    /// mode and to nothing otherwise.
+    #define ONLY_IF_DEBUG(...) __VA_ARGS__
+#else
+    #define ONLY_IF_DEBUG(...)
+#endif
+
 // state_type and trans_type are defined in check_complexity.h.
 
-/// type used to store label numbers and counts
-typedef size_t label_type;
+/// \brief type used to store label numbers and counts
+typedef std::size_t label_type;
 
 
 
@@ -142,7 +154,7 @@ typedef B_to_C_desc_list::const_iterator B_to_C_desc_const_iter_t;
 
 /// \class state_info_entry
 /// \brief stores information about a single state
-/// \details This class storesall other information about a state that the
+/// \details This class stores all other information about a state that the
 /// partition needs.  In particular:  the block where the state belongs and the
 /// position in the permutation array (i. e. the inverse of the permutation).
 ///
@@ -191,7 +203,27 @@ class state_info_entry
 
     succ_const_iter_t current_constln() const {  return int_current_constln;  }
     succ_iter_t current_constln()  {  return int_current_constln;  }
-    void set_current_constln(succ_iter_t new_current_constln);
+    void set_current_constln(succ_iter_t const new_current_constln)
+    {
+        int_current_constln = new_current_constln;
+        // current_constln points to a successor transition of this state:
+        assert(succ_begin() <= int_current_constln);
+        assert(int_current_constln <= succ_end());
+        // it points to a place where a constellation slice starts or ends:
+        // (This assertion cannot be tested because the types are not yet
+        // complete.)
+        // assert(succ_begin() == int_current_constln ||
+        //     succ_end() == int_current_constln ||
+        //     int_current_constln[-1].constln_slice !=
+        //                                 int_current_constln->constln_slice);
+        // it points to the relevant constellation:
+        // The following assertions cannot be executed immediately after each
+        // call.
+        // assert(succ_begin() == current_constln() ||
+        //                   *current_constln()[-1].target->constln() <= *SpC);
+        // assert(succ_end() == current_constln() ||
+        //                      *SpC <= *current_constln()->target->constln());
+    }
 
     /// iterator to first incoming transition
     pred_const_iter_t pred_begin() const  {  return state_in_begin;  }
@@ -275,12 +307,40 @@ class state_info_entry
     /// iterator to first inert outgoing transition
     succ_const_iter_t inert_succ_begin() const  {return state_inert_out_begin;}
     succ_iter_t inert_succ_begin()  {  return state_inert_out_begin;  }
-    void set_inert_succ_begin(succ_iter_t new_inert_out_begin);
+    void set_inert_succ_begin(succ_iter_t const new_inert_out_begin)
+    {
+        // The following assertions cannot be tested because the respective
+        // types are not yet complete.
+        // if (new_inert_out_begin > inert_succ_begin())
+        // {
+        //     assert(*new_inert_out_begin[-1].target->constln()<=*constln());
+        //     assert(new_inert_out_begin[-1].target->block != block);
+        // }
+        // else if (new_inert_out_begin < inert_succ_begin())
+        // {
+        //     assert(new_inert_out_begin->target->block == block);
+        // }
+        state_inert_out_begin = new_inert_out_begin;
+        assert(succ_begin() <= inert_succ_begin());
+        assert(inert_succ_begin() <= inert_succ_end());
+    }
 
     /// iterator past the last inert outgoing transition
     succ_const_iter_t inert_succ_end() const  {  return state_inert_out_end;  }
     succ_iter_t inert_succ_end()  {  return state_inert_out_end;  }
-    void set_inert_succ_end(succ_iter_t new_inert_out_end);
+    void set_inert_succ_end(succ_iter_t const new_inert_out_end)
+    {
+        state_inert_out_end = new_inert_out_end;
+        assert(inert_succ_begin() <= inert_succ_end());
+        assert(inert_succ_end() <= succ_end());
+        // The following assertions cannot be tested because the respective
+        // types are not yet complete.
+        // assert(inert_succ_begin() == inert_succ_end() ||
+        //                        inert_succ_end()[-1].target->block == block);
+        // assert(succ_end() == inert_succ_end() ||
+        //                  *constln() < *inert_succ_end()->target->constln());
+    }
+
     void set_inert_succ_begin_and_end(succ_iter_t new_inert_out_begin,
                                                  succ_iter_t new_inert_out_end)
     {
@@ -458,13 +518,34 @@ class block_t
     /// \brief constructor
     /// \details The constructor initialises the block to: all states are
     /// bottom states, no state is marked, the block is not refinable.
-    /// (The constructor is implemented later because it requires the full
-    /// definition of constln_t.)
     /// \param constln_ constellation to which the block belongs
     /// \param begin_   initial iterator to the first state of the block
     /// \param end_     initial iterator past the last state of the block
-    block_t(constln_t* constln_, permutation_iter_t begin_,
-                                                      permutation_iter_t end_);
+    block_t(constln_t* const constln_, permutation_iter_t const begin_,
+                                                 permutation_iter_t const end_)
+      : int_end(end_),
+        int_begin(begin_),
+        int_marked_nonbottom_begin(begin_), // no non-bottom state is marked
+        int_bottom_begin(begin_), // all states are bottom states
+        int_marked_bottom_begin(end_), // no bottom state is marked
+        // int_inert_begin -- is initialised by part_trans_t::create_new_block
+        // int_inert_end -- is initialised by part_trans_t::create_new_block
+        to_constln(), // empty list
+        int_constln(constln_),
+        refinable_next(nullptr),
+        int_seqnr(BLOCK_NO_SEQNR)
+    {
+        // The following assertions hold trivially.
+        // assert(int_begin <= int_marked_nonbottom_begin);
+        // assert(int_marked_nonbottom_begin <= int_bottom_begin);
+        // assert(int_bottom_begin <= int_marked_bottom_begin);
+        // assert(int_marked_bottom_begin <= int_end);
+        assert(int_bottom_begin < int_end);
+        // The following assertions cannot be tested because constln_t is not
+        // yet complete.
+        // assert(int_constln->begin() <= int_begin &&
+        //                                      int_end <= int_constln->end());
+    }
 
     ~block_t()  {  }
 
@@ -548,7 +629,15 @@ class block_t
     /// constellation where the block belongs to
     const constln_t* constln() const  {  return int_constln;  }
     constln_t* constln()  {  return int_constln;  }
-    void set_constln(constln_t* new_constln);
+    void set_constln(constln_t* new_constln)
+    {
+        int_constln = new_constln;
+        // The following assertion cannot be tested because the type constln_t
+        // is not yet complete.
+        // assert(nullptr == int_constln ||
+        //                             (int_constln->begin() <= int_begin &&
+        //                                     int_end <= int_constln->end()));
+    }
 
     /// read FromRed
     B_to_C_descriptor* FromRed(const constln_t* SpC);
@@ -715,18 +804,7 @@ class block_t
 
     /// \brief mark all states in the block
     /// \details This function is used to mark all states of the splitter.
-    void mark_all_states()
-    {
-        assert(marked_nonbottom_begin() == marked_nonbottom_end() &&
-                                marked_bottom_begin() == marked_bottom_end());
-        add_work(this,
-                  check_complexity::Mark_all_states_of_SpB_as_predecessors_2_9,
-                                                      check_complexity::log_n);
-        set_marked_nonbottom_begin(nonbottom_begin());
-        // set_marked_nonbottom_end(nonbottom_end());
-        set_marked_bottom_begin(bottom_begin());
-        // set_marked_bottom_end(bottom_end());
-    }
+    void mark_all_states();
 
     /// \brief mark a non-bottom state
     /// \details Marking is done by moving the state to the slice of the marked
@@ -793,12 +871,12 @@ class block_t
     /// \details This iterator is required to be able to print identifications
     /// for debugging.  It is only available if compiled in Debug mode.
     static permutation_const_iter_t permutation_begin()  { return perm_begin; }
+
+    mutable check_complexity::block_counter_t work_counter;
   private:
     static permutation_const_iter_t perm_begin;
 
     friend class part_state_t;
-  public:
-    mutable check_complexity::block_counter_t work_counter;
 #endif
 };
 
@@ -928,6 +1006,9 @@ class constln_t
         assert(int_begin < int_end);
     }
 
+    /// \brief returns number of states in the constellation
+    state_type size() const  {  return int_end - int_begin;  }
+
     /// \brief compares two constellations for ordering them
     /// \details The constellations are ordered according to their positions in
     /// the permutation array.  This is a suitable order, as constellations may
@@ -960,9 +1041,6 @@ class constln_t
         assert(postprocess_begin == postprocess_end);
         // 2.6: Create a new constellation NewC and ...
         constln_t* const NewC = new constln_t(begin(), end(), postprocess_end);
-        #ifndef NDEBUG
-            NewC->work_counter = work_counter;
-        #endif
 
         // 2.5: Choose a small splitter block SpB subset of SpC from P,
         //      i.e. |SpB| <= 1/2*|SpC|
@@ -996,11 +1074,24 @@ class constln_t
             std::to_string(begin() - block_t::permutation_begin()) + "," +
             std::to_string(end() - block_t::permutation_begin()) + ")";
     }
-
-    mutable check_complexity::constln_counter_t work_counter;
 #endif
 };
 
+
+/// \brief mark all states in the block
+/// \details This function is used to mark all states of the splitter.
+inline void block_t::mark_all_states()
+{
+    assert(marked_nonbottom_begin() == marked_nonbottom_end() &&
+                                 marked_bottom_begin() == marked_bottom_end());
+    mCRL2complexity(this, add_work(
+                  check_complexity::Mark_all_states_of_SpB_as_predecessors_2_9,
+                   check_complexity::log_n - check_complexity::ilog2(size())));
+    set_marked_nonbottom_begin(nonbottom_begin());
+    // set_marked_nonbottom_end(nonbottom_end());
+    set_marked_bottom_begin(bottom_begin());
+    // set_marked_bottom_end(bottom_end());
+}
 
 
 template <class LTS_TYPE>
@@ -1073,7 +1164,6 @@ class part_state_t
         while (permutation.begin() != permutation_iter)
         {
             constln_t* const C = permutation_iter[-1]->constln();
-            add_work(C, check_complexity::delete_constellations, 1);
             // permutation_iter[-1]->block->set_constln(nullptr);
             assert(C->end() == permutation_iter);
             // assert that constellation is trivial:
@@ -1089,7 +1179,6 @@ class part_state_t
         while (permutation.begin() != permutation_iter)
         {
             block_t* const B = permutation_iter[-1]->block;
-            add_work(B, check_complexity::delete_blocks, 1);
             assert(B->end() == permutation_iter);
             permutation_iter = B->begin();
             #ifndef NDEBUG
@@ -1104,9 +1193,7 @@ class part_state_t
             #endif
             delete B;
         }
-        #ifndef NDEBUG
-            assert(deleted_blocks == block_t::nr_of_blocks);
-        #endif
+        assert(deleted_blocks == block_t::nr_of_blocks);
         block_t::nr_of_blocks = 0;
         state_info.clear();
         permutation.clear();
@@ -1300,11 +1387,12 @@ class out_descriptor
     {
         assert(begin() < end());
         succ_iter_t iter = begin();
-        add_work(iter->B_to_C->pred, ctr, max_value);
+        mCRL2complexity(iter->B_to_C->pred, add_work(ctr, max_value));
         while (++iter != end())
         {
             // treat temporary counters specially
-            add_work_notemporary(iter->B_to_C->pred, ctr, max_value);
+            mCRL2complexity(iter->B_to_C->pred,
+                                         add_work_notemporary(ctr, max_value));
         }
     }
 #endif
@@ -1413,7 +1501,7 @@ class B_to_C_descriptor
                                      iter->pred->source->block->bottom_begin())
             {
                 // source state of the transition is a bottom state
-                add_work(iter->pred, ctr, max_value);
+                mCRL2complexity(iter->pred, add_work(ctr, max_value));
                 added = true;
             }
         }
@@ -1636,8 +1724,8 @@ class part_trans_t
     at least while postprocessing.
 
     Its time complexity is O(1 + |out(NewB)|). */
-    void new_blue_block_created(block_t* OldB, block_t* NewB, bool primary);
-    void new_red_block_created(block_t* OldB, block_t* NewB, bool primary);
+    void new_blue_block_created(block_t* OldB, block_t* NewB);
+    void new_red_block_created(block_t*OldB,block_t*NewB, bool postprocessing);
 
     B_to_C_const_iter_t B_to_C_begin() const  {  return B_to_C.begin();  }
     B_to_C_iter_t       B_to_C_end  ()        {  return B_to_C.end  ();  }
@@ -1837,14 +1925,14 @@ class bisim_partitioner_gjkw
     /*----------------- Refine -- Algorithm 3 of [GJKW 2017] ----------------*/
 
     bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RfnB,
-                        const bisim_gjkw::constln_t* SpC,
-                        const bisim_gjkw::B_to_C_descriptor* FromRed,
-                        bool postprocessing);
+            const bisim_gjkw::constln_t* SpC,
+            const bisim_gjkw::B_to_C_descriptor* FromRed,
+            bool postprocessing ONLY_IF_DEBUG( , state_type size_SpB = 0 ) );
 
     DECLARE_COROUTINE(refine_blue,
     /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
                             ((const bisim_gjkw::constln_t* const, SpC))
-                            ((bool const, postprocessing)),
+                            ONLY_IF_DEBUG( ((bool const, postprocessing)) ),
     /* local variables:  */ ((bisim_gjkw::permutation_iter_t, visited_end))
                             ((bisim_gjkw::state_info_ptr, s))
                             ((bisim_gjkw::pred_iter_t, pred_iter))
@@ -2028,62 +2116,11 @@ bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
 
 
 // This section contains implementations of functions that refer to details of
-// classes defined later, so they could not be defined inline.
+// classes defined later, so they could not be defined at the point of
+// declaration.
 
 namespace bisim_gjkw
 {
-
-inline void state_info_entry::set_current_constln(succ_iter_t const
-                                                           new_current_constln)
-{
-    int_current_constln = new_current_constln;
-    // current_constln points to a successor transition of this state:
-    assert(succ_begin() <= int_current_constln);
-    assert(int_current_constln <= succ_end());
-    // it points to a place where a constellation slice starts or ends:
-    assert(succ_begin() == int_current_constln ||
-        succ_end() == int_current_constln ||
-        int_current_constln[-1].constln_slice !=
-                                           int_current_constln->constln_slice);
-    // it points to the relevant constellation:
-    // The following assertions cannot be executed immediately after each call.
-    // assert(succ_begin() == current_constln() ||
-    //                       *current_constln()[-1].target->constln() <= *SpC);
-    // assert(succ_end() == current_constln() ||
-    //                          *SpC <= *current_constln()->target->constln());
-}
-
-
-inline void state_info_entry::set_inert_succ_begin(succ_iter_t const
-                                                           new_inert_out_begin)
-{
-    if (new_inert_out_begin > inert_succ_begin())
-    {
-        assert(*new_inert_out_begin[-1].target->constln() <= *constln());
-        assert(new_inert_out_begin[-1].target->block != block);
-    }
-    else if (new_inert_out_begin < inert_succ_begin())
-    {
-        assert(new_inert_out_begin->target->block == block);
-    }
-    state_inert_out_begin = new_inert_out_begin;
-    assert(succ_begin() <= inert_succ_begin());
-    assert(inert_succ_begin() <= inert_succ_end());
-}
-
-
-inline void state_info_entry::set_inert_succ_end(succ_iter_t const
-                                                             new_inert_out_end)
-{
-    state_inert_out_end = new_inert_out_end;
-    assert(inert_succ_begin() <= inert_succ_end());
-    assert(inert_succ_end() <= succ_end());
-    assert(inert_succ_begin() == inert_succ_end() ||
-                                  inert_succ_end()[-1].target->block == block);
-    assert(succ_end() == inert_succ_end() ||
-                            *constln() < *inert_succ_end()->target->constln());
-}
-
 
 /// get the constellation of the state
 inline const constln_t* state_info_entry::constln() const
@@ -2095,43 +2132,6 @@ inline constln_t* state_info_entry::constln()
 {
     return block->constln();
 }
-
-/// \brief constructor
-/// \details The constructor initialises the block to: all states are
-/// bottom states, no state is marked, the block is not refinable.
-/// \param constln_ constellation to which the block belongs
-/// \param begin_   initial iterator to the first state of the block
-/// \param end_     initial iterator past the last state of the block
-inline block_t::block_t(constln_t* const constln_,
-                permutation_iter_t const begin_, permutation_iter_t const end_)
-  : int_end(end_),
-    int_begin(begin_),
-    int_marked_nonbottom_begin(begin_), // no non-bottom state is marked
-    int_bottom_begin(begin_), // all states are bottom states
-    int_marked_bottom_begin(end_), // no bottom state is marked
-    // int_inert_begin -- is initialised by part_trans_t::create_new_block
-    // int_inert_end -- is initialised by part_trans_t::create_new_block
-    to_constln(), // empty list
-    int_constln(constln_),
-    refinable_next(nullptr),
-    int_seqnr(BLOCK_NO_SEQNR)
-{
-    assert(int_begin <= int_marked_nonbottom_begin);
-    assert(int_marked_nonbottom_begin <= int_bottom_begin);
-    assert(int_bottom_begin <= int_marked_bottom_begin);
-    assert(int_marked_bottom_begin <= int_end);
-    assert(int_bottom_begin < int_end);
-    assert(int_constln->begin() <= int_begin && int_end <= int_constln->end());
-}
-
-
-inline void block_t::set_constln(constln_t* const new_constln)
-{
-    int_constln = new_constln;
-    assert(nullptr == int_constln ||
-         (int_constln->begin() <= int_begin && int_end <= int_constln->end()));
-}
-
 
 /// read FromRed
 inline B_to_C_descriptor* block_t::FromRed(const constln_t* const SpC)
