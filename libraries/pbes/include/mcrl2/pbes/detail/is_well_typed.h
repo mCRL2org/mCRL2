@@ -18,7 +18,6 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/pbes/detail/pbes_functional.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
@@ -298,9 +297,10 @@ bool is_well_typed_pbes(const std::set<data::sort_expression>& declared_sorts,
   }
 
   // check 4)
+  auto propvar_name = [](const propositional_variable& x) { return x.name(); };
   if (data::detail::sequence_contains_duplicates(
-        boost::make_transform_iterator(declared_variables.begin(), detail::propositional_variable_name()),
-        boost::make_transform_iterator(declared_variables.end()  , detail::propositional_variable_name())
+        boost::make_transform_iterator(declared_variables.begin(), propvar_name),
+        boost::make_transform_iterator(declared_variables.end()  , propvar_name)
       )
      )
   {
