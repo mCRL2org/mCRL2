@@ -20,6 +20,7 @@
 #define GRAPH_H
 
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/state_label_empty.h"
 
 #include <cmath>
 
@@ -27,7 +28,6 @@
 
 namespace Graph
 {
-
   struct Coord3D
   {
       GLfloat x;
@@ -66,8 +66,6 @@ namespace Graph
         z /= f;
         return *this;
       }
-
-
       Coord3D operator+(const Coord3D& a) const
       {
         return Coord3D(a.x + x, a.y + y, a.z + z);
@@ -123,7 +121,6 @@ namespace Graph
         return !operator==(other);
       }
   };
-
 
   /**
    * @brief A class which contains the information of a single edge.
@@ -449,12 +446,8 @@ namespace Graph
       }
   };
 
-  namespace detail
-  {
-    class GraphImplBase;
-  }
-
   class Selection;
+  class Information;
 
   /**
   @brief: This is the internal data structure that LTSGraph operates on.
@@ -468,29 +461,43 @@ namespace Graph
   // Todo: see if graph is locked as required throughout the application.
   class Graph
   {
+    friend class Selection;
+    friend class Information;
+
     private:
-      detail::GraphImplBase* m_impl;  ///< The internal implementation of the graph used.
       Selection* m_sel;               ///< The selection of the current graph (or null).
       mcrl2::lts::lts_type m_type;    ///< The type of the current graph.
       QString m_empty;                ///< Empty string that is returned as label if none present.
       QReadWriteLock m_lock;          ///< Lock protecting the structure from being changed while rendering and simulating
       bool m_stable;                  ///< When true, the graph is considered stable, spring forces should not be applied.
 
+      std::vector<NodeNode> m_nodes;                  ///< Vector containing all graph nodes.
+      std::vector<Node> m_handles;                    ///< Vector containing all handles.
+      std::vector<Edge> m_edges;                      ///< Vector containing all edges.
+      std::vector<LabelString> m_transitionLabels;    ///< Vector containing all transition label strings.
+      std::vector<LabelNode> m_transitionLabelnodes;  ///< Vector containing all transition label nodes.
+      std::vector<QString> m_stateLabels;             ///< Vector containing all state label strings.
+      std::vector<LabelNode> m_stateLabelnodes;       ///< Vector containing all state label nodes.
 
       /**
-       * @brief Initialises a graph implementation of the desired type.
+       * @brief Loads a graph of type ltsclass
        */
-      void createImpl(mcrl2::lts::lts_type itype);
+      template <class ltsclass>
+      void templatedLoad(const QString& filename, const Coord3D& min, const Coord3D& max);
+
+      // For each probability/state pair a new transition is generated labelled with the probability.
+      // The index of the newly generated state is returned.
+      // If there is only one state in the probabilistic state, then the index of this new state
+      // is returned and no new transition is made. 
+      template <class ltsclass>
+      size_t add_probabilistic_state(const typename ltsclass::probabilistic_state_t& probabilistic_state,
+              const Coord3D& min, const Coord3D& max);
+      // Information needs this TODO make friends
+      size_t m_initialState;                          ///< Index of the initial state.
+    protected:
+
     public:
-
-      /**
-       * @brief Constructor which initialises a empty graph.
-       */
       Graph();
-
-      /**
-       * @brief Destructor.
-       */
       ~Graph();
 
       /**
@@ -573,20 +580,21 @@ namespace Graph
        */
       const QString& stateLabelstring(size_t labelindex) const;
 
+
       // Getters and setters
       Edge edge(size_t index) const;
-      NodeNode& node(size_t index) const;
-      Node& handle(size_t edge) const;
-      LabelNode& transitionLabel(size_t edge) const;
-      LabelNode& stateLabel(size_t edge) const;
+      NodeNode& node(size_t index);
+      Node& handle(size_t edge);
+      LabelNode& transitionLabel(size_t edge);
+      LabelNode& stateLabel(size_t edge);
       bool isTau(size_t labelindex) const;
       bool isBridge(size_t index) const; ///< Returns whether a given node forms a bridge in the selection
 
+      size_t initialState() const;
       size_t edgeCount() const;
       size_t nodeCount() const;
       size_t transitionLabelCount() const;
       size_t stateLabelCount() const;
-      size_t initialState() const;
 
       bool hasSelection() const;                ///< Returns whether a portion of the graph is selected
       size_t selectionEdge(size_t index) const; ///< Returns the edge index for a certain edge in the selection

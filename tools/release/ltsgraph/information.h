@@ -28,6 +28,7 @@
 namespace Graph
 {
   class InformationUi;
+  class Graph;
 
   class Information
   {

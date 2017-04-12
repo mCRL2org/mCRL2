@@ -21,216 +21,36 @@
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_fsm.h"
+#include "mcrl2/lts/state_label_empty.h"
+#include "mcrl2/lts/action_label_string.h"
 
 namespace Graph
 {
-
-  namespace detail
-  {
-
     inline float frand(float min, float max)
     {
       return ((float)qrand() / RAND_MAX) * (max - min) + min;
     }
 
-    class GraphImplBase
+    QString stateLabelToQString(const mcrl2::lts::state_label_empty& label)
     {
-      public:
-
-        /**
-         * @brief Constructor.
-         */
-        GraphImplBase() : initialState(0) {}
-
-        /**
-         * @brief Destructor.
-         */
-        virtual ~GraphImplBase() {}
-
-        /**
-         * @brief Loads a graph with random positioning for the nodes.
-         * @param filename The file which contains the graph.
-         * @param min The minimum coordinates for any node.
-         * @param max The maximum coordinates for any node.
-         */
-        virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max) = 0;
-
-        /**
-         * @brief Returns true if the label is tau.
-         * @param labelindex The index of the label.
-         */
-        virtual bool is_tau(size_t labelindex) const = 0;
-
-        std::vector<NodeNode> nodes;                  ///< Vector containing all graph nodes.
-        std::vector<Node> handles;                    ///< Vector containing all handles.
-        std::vector<Edge> edges;                      ///< Vector containing all edges.
-        std::vector<LabelString> transitionLabels;    ///< Vector containing all transition label strings.
-        std::vector<LabelNode> transitionLabelnodes;  ///< Vector containing all transition label nodes.
-        std::vector<QString> stateLabels;             ///< Vector containing all state label strings.
-        std::vector<LabelNode> stateLabelnodes;       ///< Vector containing all state label nodes.
-        size_t initialState;                          ///< Index of the initial state.
-
-        template <typename label_t>
-        QString transitionLabel(const label_t& label)
-        {
-          return QString::fromStdString(label);
-        }
-
-        template <typename label_t, class FSM>
-        QString stateLabel(const label_t& label, const FSM&)
-        {
-          return QString::fromStdString(label);
-        }
-    };
-
-    template <typename graph_t>
-    class GraphImpl : public GraphImplBase
-    {
-      private:
-        // This local function adds a probabilistic state to the data structures of this graph.
-        // For each probabilistic node with two or more outgoing transitions a new node is drawn.
-        // For each probability/state pair a new transition is generated labelled with the probability.
-        // The index of the newly generated state is returned.
-        // If there is only one state in the probabilistic state, then the index of this new state
-        // is returned and no new transition is made. 
-        
-        size_t add_probabilistic_state(const typename graph_t::probabilistic_state_t& probabilistic_state,
-                                       const Coord3D& min, 
-                                       const Coord3D& max)
-        {
-          if (probabilistic_state.size()==1)
-          {
-            return probabilistic_state.begin()->state();
-          }
-          else
-          {
-            // There are multiple probabilistic states. Make a new state
-            // with outgoing probabilistic transitions to all states. 
-            size_t index_of_the_new_probabilistic_state=nodes.size();
-            const bool is_probabilistic=true;
-            nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_probabilistic));
-            stateLabelnodes.push_back(LabelNode(nodes[index_of_the_new_probabilistic_state].pos(),index_of_the_new_probabilistic_state));
-            
-            // The following map recalls where probabilities are stored in transitionLabels.
-            typedef std::map < typename graph_t::probabilistic_state_t::probability_t, size_t> probability_map_t;
-            probability_map_t probability_label_indices;
-            for(const typename graph_t::probabilistic_state_t::state_probability_pair& p: probabilistic_state)
-            {
-              // Find an index for the probabilistic label of the outgoing transition of the probabilistic state.
-              size_t label_index;
-              const typename probability_map_t::const_iterator i=probability_label_indices.find(p.probability());
-              if (i==probability_label_indices.end()) // not found
-              {
-                label_index=transitionLabels.size();
-                probability_label_indices[p.probability()]=label_index;
-                transitionLabels.push_back(LabelString(false,QString::fromStdString(pp(p.probability()))));
-              }
-              else
-              {
-                label_index=i->second;
-              }
-
-              edges.push_back(Edge(index_of_the_new_probabilistic_state,p.state()));
-              handles.push_back(Node((nodes[index_of_the_new_probabilistic_state].pos() + nodes[p.state()].pos()) / 2.0));
-              transitionLabelnodes.push_back(LabelNode((nodes[index_of_the_new_probabilistic_state].pos() + nodes[p.state()].pos()) / 2.0,label_index));
-            } 
-            return index_of_the_new_probabilistic_state;
-          }
-        }
-
-      public:
-        virtual bool is_tau(size_t labelindex) const
-        {
-          return transitionLabels[labelindex].is_tau();
-        }
-
-        virtual void load(const QString& filename, const Coord3D& min, const Coord3D& max)
-        {
-          // Remove old graph (if it wasn't deleted yet) and load new one
-          graph_t graph;
-          graph.load(filename.toUtf8().constData());
-
-          // Reserve all auxiliary data vectors
-          nodes.reserve(graph.num_states());
-          edges.reserve(graph.num_transitions());
-          handles.reserve(graph.num_transitions());
-
-          transitionLabels.reserve(graph.num_action_labels());
-          transitionLabelnodes.reserve(graph.num_transitions());
-
-          stateLabels.reserve(graph.num_state_labels());
-          stateLabelnodes.reserve(graph.num_states());
-
-          for (size_t i = 0; i < graph.num_state_labels(); ++i)
-          {
-            stateLabels.push_back(stateLabel(graph.state_label(i),graph));
-          }
-
-          // Position nodes randomly
-          for (size_t i = 0; i < graph.num_states(); ++i)
-          {
-            const bool is_not_probabilistic=false;
-            nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_not_probabilistic));
-            stateLabelnodes.push_back(LabelNode(nodes[i].pos(),i));
-          }
-
-          // Store string representations of labels
-          for (size_t i = 0; i < graph.num_action_labels(); ++i)
-          {
-            transitionLabels.push_back(LabelString(graph.is_tau(i),transitionLabel(graph.action_label(i))));
-          }
-
-          // Assign and position edge handles, position edge labels
-          for (size_t i = 0; i < graph.num_transitions(); ++i)
-          {
-            mcrl2::lts::transition& t = graph.get_transitions()[i];
-            size_t new_probabilistic_state=add_probabilistic_state(graph.probabilistic_state(t.to()),min,max);
-            edges.push_back(Edge(t.from(),new_probabilistic_state));
-            handles.push_back(Node((nodes[t.from()].pos() + nodes[new_probabilistic_state].pos()) / 2.0));
-            transitionLabelnodes.push_back(LabelNode((nodes[t.from()].pos() + nodes[new_probabilistic_state].pos()) / 2.0,t.label()));
-          }
-
-          /* initialState = graph.initial_state(); */
-          initialState = add_probabilistic_state(graph.initial_probabilistic_state(),min,max);
-        }
-    };
-
-
-    template <>
-    QString GraphImplBase::transitionLabel<mcrl2::lts::action_label_lts>(const mcrl2::lts::action_label_lts& label)
-    {
-      return QString::fromStdString(mcrl2::lts::pp(label));
+        return QString("");
     }
-    template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_lts,mcrl2::lts::probabilistic_lts_lts_t>(
-                         const mcrl2::lts::state_label_lts& label,
-                         const mcrl2::lts::probabilistic_lts_lts_t&)
+    QString stateLabelToQString(const mcrl2::lts::state_label_lts& label)
     {
-      return QString::fromStdString(mcrl2::lts::pp(label));
+        return QString::fromStdString(mcrl2::lts::pp(label));
     }
-    template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_empty,mcrl2::lts::probabilistic_lts_aut_t>(
-                         const mcrl2::lts::state_label_empty& /*label*/,
-                         const mcrl2::lts::probabilistic_lts_aut_t&)
+    QString stateLabelToQString(const mcrl2::lts::state_label_fsm& label)
     {
-      return QString("");
+        return QString::fromStdString(mcrl2::lts::pp(label));
     }
-    template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_dot,mcrl2::lts::probabilistic_lts_dot_t>(
-                         const mcrl2::lts::state_label_dot& label,
-                         const mcrl2::lts::probabilistic_lts_dot_t&)
+    QString transitionLabelToQString(const mcrl2::lts::action_label_lts& label)
     {
-      return QString::fromStdString(mcrl2::lts::pp(label));
+        return QString::fromStdString(mcrl2::lts::pp(label));
     }
-    template <>
-    QString GraphImplBase::stateLabel<mcrl2::lts::state_label_fsm,mcrl2::lts::probabilistic_lts_fsm_t>(
-                         const mcrl2::lts::state_label_fsm& label, 
-                         const mcrl2::lts::probabilistic_lts_fsm_t& lts)
+    QString transitionLabelToQString(const mcrl2::lts::action_label_string& label)
     {
-      return QString::fromStdString(lts.state_label_to_string(label));
+        return QString::fromStdString(label);
     }
-
-  }
 
   class Selection
   {
@@ -247,7 +67,6 @@ namespace Graph
         bool bridge;
         Node()=default;
       };
-
       struct Edge
       {
         size_t id;    // index in the complete edge list
@@ -256,7 +75,7 @@ namespace Graph
         Edge()=default;
       };
 
-      detail::GraphImplBase* m_impl;
+      Graph &m_graph;
 
       // maps node/edge indices to selection Node/Edge objects
       std::unordered_map<size_t,Node> m_nodes;
@@ -270,7 +89,7 @@ namespace Graph
         // Center the first node placed
         if (m_nodeIndices.size() == 1)
         {
-          m_impl->nodes[node.id].pos() = Coord3D(0.0, 0.0, 0.0);
+          m_graph.m_nodes[node.id].pos() = Coord3D(0.0, 0.0, 0.0);
           return;
         }
 
@@ -278,39 +97,39 @@ namespace Graph
         size_t count = 0;
         for (size_t i = 0; i < node.inEdges.size(); ++i)
         {
-          ::Graph::Edge& edge = m_impl->edges[node.inEdges[i]];
+          ::Graph::Edge& edge = m_graph.m_edges[node.inEdges[i]];
           if (m_nodes.count(edge.from()))
           {
-            centroid += m_impl->nodes[edge.from()].pos();
+            centroid += m_graph.m_nodes[edge.from()].pos();
             ++count;
           }
         }
         for (size_t i = 0; i < node.outEdges.size(); ++i)
         {
-          ::Graph::Edge& edge = m_impl->edges[node.outEdges[i]];
+          ::Graph::Edge& edge = m_graph.m_edges[node.outEdges[i]];
           if (m_nodes.count(edge.to()))
           {
-            centroid += m_impl->nodes[edge.to()].pos();
+            centroid += m_graph.m_nodes[edge.to()].pos();
             ++count;
           }
         }
 
         if (count)
         {
-          Coord3D rvec = Coord3D(detail::frand(-1.0, 1.0),
-            detail::frand(-1.0, 1.0), detail::frand(-1.0, 1.0));
+          Coord3D rvec = Coord3D(frand(-1.0, 1.0),
+            frand(-1.0, 1.0), frand(-1.0, 1.0));
           rvec *= 50.0 / rvec.size();
-          m_impl->nodes[node.id].pos() = centroid / ((GLfloat) count) + rvec;
+          m_graph.m_nodes[node.id].pos() = centroid / ((GLfloat) count) + rvec;
         }
       }
 
       void repositionEdge(size_t edgeId)
       {
-        Coord3D pos1 = m_impl->nodes[m_impl->edges[edgeId].from()].pos();
-        Coord3D pos2 = m_impl->nodes[m_impl->edges[edgeId].to()].pos();
+        Coord3D pos1 = m_graph.m_nodes[m_graph.m_edges[edgeId].from()].pos();
+        Coord3D pos2 = m_graph.m_nodes[m_graph.m_edges[edgeId].to()].pos();
         Coord3D center = (pos1 + pos2) / 2.0;
-        m_impl->handles[edgeId].pos() = center;
-        m_impl->transitionLabelnodes[edgeId].pos() = center;
+        m_graph.m_handles[edgeId].pos() = center;
+        m_graph.m_transitionLabelnodes[edgeId].pos() = center;
       }
 
       // creates, and increases count for node
@@ -328,9 +147,9 @@ namespace Graph
         node.index = m_nodeIndices.size();
         m_nodeIndices.push_back(nodeId);
 
-        for (size_t i = 0; i < m_impl->edges.size(); ++i)
+        for (size_t i = 0; i < m_graph.m_edges.size(); ++i)
         {
-          ::Graph::Edge& edge = m_impl->edges[i];
+          ::Graph::Edge& edge = m_graph.m_edges[i];
           if (edge.from() == nodeId)
             node.outEdges.push_back(i);
           if (edge.to() == nodeId)
@@ -458,7 +277,7 @@ namespace Graph
             {
               size_t edgeId = node.outEdges[i];
               if (!m_edges.count(edgeId)) continue;
-              size_t otherId = m_impl->edges[edgeId].to();
+              size_t otherId = m_graph.m_edges[edgeId].to();
               if (nodeId == otherId || !m_nodes.count(otherId)) continue;
               nodeinfo.neighbors.insert(otherId);
               progress.push(otherId);
@@ -467,7 +286,7 @@ namespace Graph
             {
               size_t edgeId = node.inEdges[i];
               if (!m_edges.count(edgeId)) continue;
-              size_t otherId = m_impl->edges[edgeId].from();
+              size_t otherId = m_graph.m_edges[edgeId].from();
               if (nodeId == otherId || !m_nodes.count(otherId)) continue;
               nodeinfo.neighbors.insert(otherId);
               progress.push(otherId);
@@ -535,7 +354,7 @@ namespace Graph
             size_t nodeId = order[i];
             Node& node = m_nodes[nodeId];
             NodeInfo& nodeinfo = nodes[nodeId];
-            if (m_impl->nodes[nodeId].active())
+            if (m_graph.m_nodes[nodeId].active())
             {
               nodeinfo.leaf = false;
               continue;
@@ -564,13 +383,13 @@ namespace Graph
             {
               size_t edgeId = node.inEdges[j];
               if (m_edges.count(edgeId))
-                connected.insert( m_impl->edges[edgeId].from());
+                connected.insert( m_graph.m_edges[edgeId].from());
             }
             for (size_t j = 0; j < node.outEdges.size(); ++j)
             {
               size_t edgeId = node.outEdges[j];
               if (m_edges.count(edgeId) && m_edges[edgeId].count > 1)
-                connected.insert(m_impl->edges[edgeId].to());
+                connected.insert(m_graph.m_edges[edgeId].to());
             }
             
             for (std::unordered_set<size_t>::iterator
@@ -625,7 +444,7 @@ namespace Graph
           size_t edgeId = node.inEdges[i];
           if (m_edges.count(edgeId))
           {
-            size_t otherId = m_impl->edges[edgeId].from();
+            size_t otherId = m_graph.m_edges[edgeId].from();
             if (m_nodes.count(otherId))
               neighbors.insert(otherId);
           }
@@ -637,7 +456,7 @@ namespace Graph
           {
             if (m_edges[edgeId].count <= 1)
               nedges.insert(edgeId);
-            size_t otherId = m_impl->edges[edgeId].to();
+            size_t otherId = m_graph.m_edges[edgeId].to();
             if (m_nodes.count(otherId) && m_nodes[otherId].count > 1)
               neighbors.insert(otherId);
           }
@@ -664,21 +483,21 @@ namespace Graph
           {
             size_t edgeId = node.inEdges[i];
             if (m_edges.count(edgeId) && !nedges.count(edgeId))
-              progress.push(m_impl->edges[edgeId].from());
+              progress.push(m_graph.m_edges[edgeId].from());
           }
           for (size_t i = 0; i < node.outEdges.size(); ++i)
           {
             size_t edgeId = node.outEdges[i];
             if (m_edges.count(edgeId) && !nedges.count(edgeId))
-              progress.push(m_impl->edges[edgeId].to());
+              progress.push(m_graph.m_edges[edgeId].to());
           }
         }
         return false;
       }
 
     public:
-      Selection(detail::GraphImplBase* impl)
-        : nodes(m_nodeIndices), edges(m_edgeIndices), m_impl(impl) {}
+      Selection(Graph& graph)
+        : nodes(m_nodeIndices), edges(m_edgeIndices), m_graph(graph) {}
 
       // expand outgoing transitions and states for specified node
       void expand(size_t nodeId)
@@ -687,7 +506,7 @@ namespace Graph
         for (size_t i = 0; i < node.outEdges.size(); ++i)
         {
           size_t edgeId = node.outEdges[i];
-          increaseNode(m_impl->edges[edgeId].to());
+          increaseNode(m_graph.m_edges[edgeId].to());
           increaseEdge(edgeId);
         }
         updateBridges();
@@ -703,7 +522,7 @@ namespace Graph
           {
             size_t edgeId = node.outEdges[i];
             decreaseEdge(edgeId);
-            decreaseNode(m_impl->edges[edgeId].to());
+            decreaseNode(m_graph.m_edges[edgeId].to());
           }
         }
         decreaseNode(nodeId);
@@ -756,13 +575,11 @@ namespace Graph
   Graph::Graph() : m_sel(nullptr), m_lock(), m_stable(true)
   {
     m_type = mcrl2::lts::lts_lts;
-    m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_lts_t>;
     m_empty = QString("");
   }
 
   Graph::~Graph()
   {
-    delete m_impl;
     if (m_sel != nullptr)
     {
       delete m_sel;
@@ -772,74 +589,63 @@ namespace Graph
 
   size_t Graph::edgeCount() const
   {
-    return m_impl->edges.size();
+    return m_edges.size();
   }
 
   size_t Graph::nodeCount() const
   {
-    return m_impl->nodes.size();
+    return m_nodes.size();
   }
 
   size_t Graph::transitionLabelCount() const
   {
-    return m_impl->transitionLabels.size();
+    return m_transitionLabels.size();
   }
 
   size_t Graph::stateLabelCount() const
   {
-    return m_impl->stateLabels.size();
+    return m_stateLabels.size();
   }
 
   size_t Graph::initialState() const
   {
-    return m_impl->initialState;
+    return m_initialState;
   }
 
   bool Graph::isTau(size_t labelindex) const
   {
-    return m_impl->is_tau(labelindex);
+    return m_transitionLabels[labelindex].is_tau();
   }
 
-  void Graph::createImpl(mcrl2::lts::lts_type itype)
-  {
-    switch (itype)
-    {
-      case mcrl2::lts::lts_aut:
-        m_type = mcrl2::lts::lts_aut;
-        m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_aut_t>;
-        // m_impl = new detail::GraphImpl<mcrl2::lts::lts_aut_t>;
-        break;
-      case mcrl2::lts::lts_dot:
-        throw mcrl2::runtime_error("Cannot read a .dot file anymore.");
-      case mcrl2::lts::lts_fsm:
-        m_type = mcrl2::lts::lts_fsm;
-        m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_fsm_t>;
-        // m_impl = new detail::GraphImpl<mcrl2::lts::lts_fsm_t>;
-        break;
-      case mcrl2::lts::lts_lts:
-      default:
-        m_type = mcrl2::lts::lts_lts;
-        m_impl = new detail::GraphImpl<mcrl2::lts::probabilistic_lts_lts_t>;
-        // m_impl = new detail::GraphImpl<mcrl2::lts::lts_lts_t>;
-        break;
-    }
-  }
-
-  void Graph::load(const QString &filename, const Coord3D& min, const Coord3D& max)
+  void Graph::load(const QString& filename, const Coord3D& min, const Coord3D& max)
   {
     lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
-    mcrl2::lts::lts_type guess = mcrl2::lts::detail::guess_format(filename.toUtf8().constData());
-    delete m_impl;
-    createImpl(guess);
+    m_type = mcrl2::lts::detail::guess_format(filename.toUtf8().constData());
     try
     {
-      m_impl->load(filename, min, max);
+        switch (m_type)
+        {
+            case mcrl2::lts::lts_aut:
+                templatedLoad<mcrl2::lts::probabilistic_lts_aut_t>(filename, min, max);
+                break;
+            case mcrl2::lts::lts_dot:
+                throw mcrl2::runtime_error("Cannot read a .dot file anymore.");
+                break;
+            case mcrl2::lts::lts_fsm:
+                templatedLoad<mcrl2::lts::probabilistic_lts_fsm_t>(filename, min, max);
+                break;
+            case mcrl2::lts::lts_lts:
+            default:
+                m_type = mcrl2::lts::lts_lts;
+                templatedLoad<mcrl2::lts::probabilistic_lts_lts_t>(filename, min, max);
+                break;
+        }
     }
     catch(mcrl2::runtime_error e)
     {
-      unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
-      throw e;
+        unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
+        throw e;
     }
     if (m_sel != nullptr)
     {
@@ -849,6 +655,103 @@ namespace Graph
     m_stable = true;
 
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
+  }
+
+  template <class ltsclass>
+  void Graph::templatedLoad(const QString& filename,
+          const Coord3D& min, const Coord3D& max)
+  {
+      ltsclass lts;
+      lts.load(filename.toUtf8().constData());
+
+      // Reserve all auxiliary data vectors
+      m_nodes.reserve(lts.num_states());
+      m_edges.reserve(lts.num_transitions());
+      m_handles.reserve(lts.num_transitions());
+
+      m_transitionLabels.reserve(lts.num_action_labels());
+      m_transitionLabelnodes.reserve(lts.num_transitions());
+
+      m_stateLabels.reserve(lts.num_state_labels());
+      m_stateLabelnodes.reserve(lts.num_states());
+
+      for (size_t i = 0; i < lts.num_state_labels(); ++i)
+      {
+          m_stateLabels.push_back(stateLabelToQString(lts.state_label(i)));
+      }
+
+      // Position nodes randomly
+      for (size_t i = 0; i < lts.num_states(); ++i)
+      {
+          const bool is_not_probabilistic=false;
+          m_nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_not_probabilistic));
+          m_stateLabelnodes.push_back(LabelNode(m_nodes[i].pos(),i));
+      }
+
+      // Store string representations of labels
+      for (size_t i = 0; i < lts.num_action_labels(); ++i)
+      {
+          /* auto label = lts.action_label(i); */
+          /* QString str = QString::fromStdString(label); */
+          // FIXME
+          m_transitionLabels.push_back(LabelString(lts.is_tau(i), transitionLabelToQString(lts.action_label(i))));
+      }
+
+      // Assign and position edge handles, position edge labels
+      for (size_t i = 0; i < lts.num_transitions(); ++i)
+      {
+          mcrl2::lts::transition& t = lts.get_transitions()[i];
+          size_t new_probabilistic_state = add_probabilistic_state<ltsclass>(lts.probabilistic_state(t.to()),min,max);
+          m_edges.push_back(Edge(t.from(),new_probabilistic_state));
+          m_handles.push_back(Node((m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) / 2.0));
+          m_transitionLabelnodes.push_back(LabelNode((m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) / 2.0,t.label()));
+      }
+
+      m_initialState = add_probabilistic_state<ltsclass>(lts.initial_probabilistic_state(), min, max);
+  }
+
+  template <class ltsclass>
+  size_t Graph::add_probabilistic_state(const typename ltsclass::probabilistic_state_t& probabilistic_state,
+          const Coord3D& min, const Coord3D& max)
+  {
+      if (probabilistic_state.size()==1)
+      {
+          return probabilistic_state.begin()->state();
+      }
+      else
+      {
+          // There are multiple probabilistic states. Make a new state
+          // with outgoing probabilistic transitions to all states. 
+          size_t index_of_the_new_probabilistic_state=m_nodes.size();
+          const bool is_probabilistic=true;
+          m_nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_probabilistic));
+          m_stateLabelnodes.push_back(LabelNode(m_nodes[index_of_the_new_probabilistic_state].pos(),index_of_the_new_probabilistic_state));
+
+          // The following map recalls where probabilities are stored in transitionLabels.
+          typedef std::map<typename ltsclass::probabilistic_state_t::probability_t, size_t> probability_map_t;
+          probability_map_t probability_label_indices;
+          for(const typename ltsclass::probabilistic_state_t::state_probability_pair& p: probabilistic_state)
+          {
+              // Find an index for the probabilistic label of the outgoing transition of the probabilistic state.
+              size_t label_index;
+              const typename probability_map_t::const_iterator i=probability_label_indices.find(p.probability());
+              if (i==probability_label_indices.end()) // not found
+              {
+                  label_index=m_transitionLabels.size();
+                  probability_label_indices[p.probability()]=label_index;
+                  m_transitionLabels.push_back(LabelString(false,QString::fromStdString(pp(p.probability()))));
+              }
+              else
+              {
+                  label_index=i->second;
+              }
+
+              m_edges.push_back(Edge(index_of_the_new_probabilistic_state,p.state()));
+              m_handles.push_back(Node((m_nodes[index_of_the_new_probabilistic_state].pos() + m_nodes[p.state()].pos()) / 2.0));
+              m_transitionLabelnodes.push_back(LabelNode((m_nodes[index_of_the_new_probabilistic_state].pos() + m_nodes[p.state()].pos()) / 2.0,label_index));
+          } 
+          return index_of_the_new_probabilistic_state;
+      }
   }
 
   void Graph::loadXML(const QString& filename)
@@ -878,19 +781,17 @@ namespace Graph
       return;
     }
 
-    delete m_impl;
-    mcrl2::lts::lts_type itype = (mcrl2::lts::lts_type) root.attribute("type").toInt();
-    createImpl(itype);
+    m_type = (mcrl2::lts::lts_type) root.attribute("type").toInt();
 
-    m_impl->nodes.resize(root.attribute("states").toInt());
-    m_impl->edges.resize(root.attribute("transitions").toInt());
-    m_impl->handles.resize(root.attribute("transitions").toInt());
+    m_nodes.resize(root.attribute("states").toInt());
+    m_edges.resize(root.attribute("transitions").toInt());
+    m_handles.resize(root.attribute("transitions").toInt());
 
-    m_impl->transitionLabels.resize(root.attribute("transitionlabels").toInt());
-    m_impl->transitionLabelnodes.resize(root.attribute("transitions").toInt());
+    m_transitionLabels.resize(root.attribute("transitionlabels").toInt());
+    m_transitionLabelnodes.resize(root.attribute("transitions").toInt());
 
-    m_impl->stateLabels.resize(root.attribute("statelabels").toInt());
-    m_impl->stateLabelnodes.resize(root.attribute("states").toInt());
+    m_stateLabels.resize(root.attribute("statelabels").toInt());
+    m_stateLabelnodes.resize(root.attribute("states").toInt());
 
     QDomNode node = root.firstChild();
     while (!node.isNull()) 
@@ -898,11 +799,11 @@ namespace Graph
       QDomElement e = node.toElement();
 
       if (e.tagName() == "StateLabel") {
-        m_impl->stateLabels[e.attribute("value").toInt()] = e.attribute("label");
+        m_stateLabels[e.attribute("value").toInt()] = e.attribute("label");
       }
       if (e.tagName() == "State") 
       {
-        m_impl->nodes[e.attribute("value").toInt()]=
+        m_nodes[e.attribute("value").toInt()]=
            NodeNode(
               Coord3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(), e.attribute("z").toFloat()),
               e.attribute("locked").toInt(),   // anchored is equal to locked.
@@ -915,12 +816,12 @@ namespace Graph
 
         if (e.attribute("isInitial").toInt())
         {  
-          m_impl->initialState = e.attribute("value").toInt();
+          m_initialState = e.attribute("value").toInt();
         }
       }
       if (e.tagName() == "StateLabelNode") 
       {
-        m_impl->stateLabelnodes[e.attribute("value").toInt()]=
+        m_stateLabelnodes[e.attribute("value").toInt()]=
           LabelNode(
               Coord3D(e.attribute("x").toFloat(),e.attribute("y").toFloat(),e.attribute("z").toFloat()),
               e.attribute("locked").toInt(),   // anchored is equal to locked.
@@ -935,12 +836,12 @@ namespace Graph
 
       if (e.tagName() == "TransitionLabel") 
       {
-        m_impl->transitionLabels[e.attribute("value").toInt()]=LabelString(e.attribute("isTau").toInt(),e.attribute("label"));
+        m_transitionLabels[e.attribute("value").toInt()]=LabelString(e.attribute("isTau").toInt(),e.attribute("label"));
       }
       if (e.tagName() == "Transition") 
       {
-        m_impl->edges[e.attribute("value").toInt()]=Edge(e.attribute("from").toInt(),e.attribute("to").toInt());
-        m_impl->handles[e.attribute("value").toInt()]=
+        m_edges[e.attribute("value").toInt()]=Edge(e.attribute("from").toInt(),e.attribute("to").toInt());
+        m_handles[e.attribute("value").toInt()]=
           Node(Coord3D(e.attribute("x").toFloat(),e.attribute("y").toFloat(),e.attribute("z").toFloat()),
                e.attribute("locked").toInt(),  // anchored is equal to locked.
                e.attribute("locked").toInt(),
@@ -948,7 +849,7 @@ namespace Graph
       }
       if (e.tagName() == "TransitionLabelNode") 
       {
-        m_impl->transitionLabelnodes[e.attribute("value").toInt()]=
+        m_transitionLabelnodes[e.attribute("value").toInt()]=
           LabelNode(
               Coord3D(e.attribute("x").toFloat(),e.attribute("y").toFloat(),e.attribute("z").toFloat()),
               e.attribute("locked").toInt(),   // anchored is equal to locked.
@@ -1068,53 +969,53 @@ namespace Graph
 
   Edge Graph::edge(size_t index) const
   {
-    return m_impl->edges[index];
+    return m_edges[index];
   }
 
-  NodeNode& Graph::node(size_t index) const
+  NodeNode& Graph::node(size_t index)
   {
-    return m_impl->nodes[index];
+    return m_nodes[index];
   }
 
-  Node& Graph::handle(size_t edge) const
+  Node& Graph::handle(size_t edge)
   {
-    return m_impl->handles[edge];
+    return m_handles[edge];
   }
 
-  LabelNode& Graph::transitionLabel(size_t edge) const
+  LabelNode& Graph::transitionLabel(size_t edge)
   {
-    return m_impl->transitionLabelnodes[edge];
+    return m_transitionLabelnodes[edge];
   }
 
-  LabelNode& Graph::stateLabel(size_t edge) const
+  LabelNode& Graph::stateLabel(size_t edge)
   {
-    return m_impl->stateLabelnodes[edge];
+    return m_stateLabelnodes[edge];
   }
 
   const QString& Graph::transitionLabelstring(size_t labelindex) const
   {
-    if (labelindex >= m_impl->transitionLabels.size())
+    if (labelindex >= m_transitionLabels.size())
       return m_empty;
-    return m_impl->transitionLabels[labelindex].label();
+    return m_transitionLabels[labelindex].label();
   }
 
   const QString& Graph::stateLabelstring(size_t labelindex) const
   {
-    if (labelindex >= m_impl->stateLabels.size())
+    if (labelindex >= m_stateLabels.size())
       return m_empty;
-    return m_impl->stateLabels[labelindex];
+    return m_stateLabels[labelindex];
   }
 
   void Graph::clip(const Coord3D& min, const Coord3D& max)
   {
     lockForRead(m_lock, GRAPH_LOCK_TRACE); // read lock because indices are not invalidated
 
-    for (std::vector<NodeNode>::iterator it = m_impl->nodes.begin(); it != m_impl->nodes.end(); ++it)
-      it->pos().clip(min, max);
-    for (std::vector<LabelNode>::iterator it = m_impl->transitionLabelnodes.begin(); it != m_impl->transitionLabelnodes.end(); ++it)
-      it->pos().clip(min, max);
-    for (std::vector<Node>::iterator it = m_impl->handles.begin(); it != m_impl->handles.end(); ++it)
-      it->pos().clip(min, max);
+    for (auto& nodeNode : m_nodes)
+        nodeNode.pos().clip(min, max);
+    for (auto& labelNode : m_transitionLabelnodes)
+        labelNode.pos().clip(min, max);
+    for (auto& node : m_handles)
+        node.pos().clip(min, max);
 
     unlockForRead(m_lock, GRAPH_LOCK_TRACE);
   }
@@ -1149,7 +1050,7 @@ namespace Graph
     {
       delete m_sel;
     }
-    m_sel = new Selection(m_impl);
+    m_sel = new Selection(*this);
 
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
   }
@@ -1165,7 +1066,7 @@ namespace Graph
     }
 
     // Deactive all nodes
-    for (std::vector<NodeNode>::iterator it = m_impl->nodes.begin(); it != m_impl->nodes.end(); ++it)
+    for (std::vector<NodeNode>::iterator it = m_nodes.begin(); it != m_nodes.end(); ++it)
       it->m_active = false;
 
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
@@ -1175,9 +1076,9 @@ namespace Graph
   {
     lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
-    if (m_sel != nullptr && index < m_impl->nodes.size())
+    if (m_sel != nullptr && index < m_nodes.size())
     {
-      NodeNode& node = m_impl->nodes[index];
+      NodeNode& node = m_nodes[index];
       bool active = node.m_active;
       node.m_active = !node.m_active;
       if (active)
@@ -1195,7 +1096,7 @@ namespace Graph
 
   bool Graph::isToggleable(size_t index)
   {
-    if (m_sel == nullptr || index >= m_impl->nodes.size())
+    if (m_sel == nullptr || index >= m_nodes.size())
       return false;
 
     lockForRead(m_lock, GRAPH_LOCK_TRACE);
@@ -1204,10 +1105,10 @@ namespace Graph
     // Todo: improve this
     size_t count = 0;
     for (size_t i = 0; i < m_sel->nodes.size(); ++i)
-      if (m_impl->nodes[m_sel->nodes[i]].m_active)
+      if (m_nodes[m_sel->nodes[i]].m_active)
         ++count;
     
-    NodeNode& node = m_impl->nodes[index];
+    NodeNode& node = m_nodes[index];
     bool toggleable = !node.m_active || (m_sel->isContractable(index) && count > 1);
 
     unlockForRead(m_lock, GRAPH_LOCK_TRACE);
@@ -1257,5 +1158,4 @@ namespace Graph
       return 0;
     return m_sel->nodes.size();
   }
-  
 }
