@@ -170,6 +170,7 @@ struct one_point_rule_subtitution_algorithm
 
 // creates a substitution from a set of (in-)equalities for a given list of quantifier variables
 // returns the substitution, and the subset of quantifier variables that are not used in the substitution
+inline
 std::pair<data::mutable_map_substitution<>, std::vector<data::variable> > make_one_point_rule_substitution(const std::map<data::variable, std::set<data::data_expression> >& equalities, const data::variable_list& quantifier_variables)
 {
   one_point_rule_subtitution_algorithm algorithm(equalities, quantifier_variables);
