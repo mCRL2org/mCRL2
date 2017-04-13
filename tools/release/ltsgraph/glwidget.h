@@ -63,11 +63,11 @@ class GLWidget : public QGLWidget
     QVector2D m_draglength;     ///< The accumulated distance reached while dragging.
     QColor m_paintcolor;        ///< The color of the paint operation.
     bool m_painting;            ///< Boolean indicating if painting is enabled.
-	bool m_paused;
+    bool m_paused;
     GLScene* m_scene;           ///< The GLScene which is used to render the contents.
     std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
 
-	
+
     /**
      * @brief Renders a single edge.
      * @param i The index of the edge to render.
@@ -108,7 +108,7 @@ class GLWidget : public QGLWidget
      * @param graph The graph that is to be visualised by this object.
      * @param parent The parent widget for the user interface.
      */
-    explicit GLWidget(Graph::Graph& graph, QWidget *parent = 0);
+    explicit GLWidget(Graph::Graph& graph, QWidget* parent = 0);
 
     /**
      * @brief Destructor.
@@ -126,15 +126,15 @@ class GLWidget : public QGLWidget
      */
     virtual void paintGL();
 
-	/**
-	 * @brief Pauses painting and clears the selection. Used to make the
-	 *        GLWidget wait while a new graph is loaded.
-	 */
+    /**
+     * @brief Pauses painting and clears the selection. Used to make the
+     *        GLWidget wait while a new graph is loaded.
+     */
     void pause();
 
-	/**
-	 * @brief Resumes painting after a call to pause().
-	 */
+    /**
+     * @brief Resumes painting after a call to pause().
+     */
     void resume();
 
     /**
@@ -148,25 +148,25 @@ class GLWidget : public QGLWidget
      * @brief Processes mouse click events.
      * @param e The mouse event.
      */
-    virtual void mousePressEvent(QMouseEvent *e);
+    virtual void mousePressEvent(QMouseEvent* e);
 
     /**
      * @brief Processes mouse click release events.
      * @param e The mouse event.
      */
-    virtual void mouseReleaseEvent(QMouseEvent *e);
+    virtual void mouseReleaseEvent(QMouseEvent* e);
 
     /**
      * @brief Processes mouse move events.
      * @param e The mouse event.
      */
-    virtual void mouseMoveEvent(QMouseEvent *e);
+    virtual void mouseMoveEvent(QMouseEvent* e);
 
     /**
      * @brief Processes mouse scroll/wheel events.
      * @param e The mouse event.
      */
-    virtual void wheelEvent(QWheelEvent *e);
+    virtual void wheelEvent(QWheelEvent* e);
 
 
     /**
@@ -187,19 +187,19 @@ class GLWidget : public QGLWidget
      * @param w The desired width of the image.
      * @param h The desired height of the image.
      */
-    void savePixmap(const QString &filename, const int w = 1024, const int h = 768);
+    void savePixmap(const QString& filename, const int w = 1024, const int h = 768);
 
     /**
          * @brief Renders the current visualisation to a vector graphics file using gl2ps.
          * @param filename The filename for the output (extension determines file type).
          */
-        void saveVector(const QString &filename);
+    void saveVector(const QString& filename);
 
     /**
          * @brief Renders the current visualisation to a LaTeX Tikz image.
          * @param filename The filename for the output.
          */
-        void saveTikz(const QString &filename, float aspectRatio);
+    void saveTikz(const QString& filename, float aspectRatio);
 
     /**
      * @brief Sets the paint color.
@@ -231,8 +231,12 @@ class GLWidget : public QGLWidget
 
 
     //Getters and setters
-    size_t nodeSize() { return m_scene->nodeSize(); }
-    float fogDistance() { return m_scene->fogDistance(); }
+    size_t nodeSize() {
+      return m_scene->nodeSize();
+    }
+    float fogDistance() {
+      return m_scene->fogDistance();
+    }
   signals:
     void widgetResized(const Graph::Coord3D& newsize);
   public slots:
@@ -244,14 +248,31 @@ class GLWidget : public QGLWidget
     void resetViewpoint(size_t animation = 1);
 
     //Getters and setters
-    void toggleTransitionLabels(bool show) { m_scene->setDrawTransitionLabels(show); }
-    void toggleStateLabels(bool show) { m_scene->setDrawStateLabels(show); }
-    void toggleStateNumbers(bool show) { m_scene->setDrawStateNumbers(show); }
-    void toggleSelfLoops(bool show) { m_scene->setDrawSelfLoops(show); }
-    void toggleInitialMarking(bool show) { m_scene->setDrawInitialMarking(show); }
-    void toggleFog(bool show) { m_scene->setDrawFog(show); }
-    void setNodeSize(int size) { m_scene->setNodeSize(size); m_scene->updateShapes(); }
-    void setFogDistance(int dist) { m_scene->setFogDistance(dist); }
+    void toggleTransitionLabels(bool show) {
+      m_scene->setDrawTransitionLabels(show);
+    }
+    void toggleStateLabels(bool show) {
+      m_scene->setDrawStateLabels(show);
+    }
+    void toggleStateNumbers(bool show) {
+      m_scene->setDrawStateNumbers(show);
+    }
+    void toggleSelfLoops(bool show) {
+      m_scene->setDrawSelfLoops(show);
+    }
+    void toggleInitialMarking(bool show) {
+      m_scene->setDrawInitialMarking(show);
+    }
+    void toggleFog(bool show) {
+      m_scene->setDrawFog(show);
+    }
+    void setNodeSize(int size) {
+      m_scene->setNodeSize(size);
+      m_scene->updateShapes();
+    }
+    void setFogDistance(int dist) {
+      m_scene->setFogDistance(dist);
+    }
 };
 
 class GLWidgetUi : public QDockWidget
@@ -268,7 +289,7 @@ class GLWidgetUi : public QDockWidget
      * @param widget The GLWidget object this user interface corresponds to.
      * @param parent The parent widget for this user interface.
      */
-    GLWidgetUi(GLWidget& widget, QWidget *parent = 0);
+    GLWidgetUi(GLWidget& widget, QWidget* parent = 0);
 
     /**
      * @brief Destructor.

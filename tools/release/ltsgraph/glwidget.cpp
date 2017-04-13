@@ -19,118 +19,122 @@
 
 struct MoveRecord
 {
-    virtual ~MoveRecord() {}
+  virtual ~MoveRecord() {}
 
-    Graph::Node* node;
-    virtual void move(const Graph::Coord3D& pos)
-    {
-      node->pos() = pos;
+  Graph::Node* node;
+  virtual void move(const Graph::Coord3D& pos)
+  {
+    node->pos() = pos;
+  }
+  virtual void grab(Graph::Graph& graph, size_t index) = 0;
+  virtual void release(bool toggleLocked)
+  {
+    if (toggleLocked) {
+      node->set_locked(!node->locked());
     }
-    virtual void grab(Graph::Graph& graph, size_t index) = 0;
-    virtual void release(bool toggleLocked)
-    {
-      if (toggleLocked)
-        node->set_locked(!node->locked());
-      node->set_anchored(node->locked());
-    }
-    const Graph::Coord3D& pos()
-    {
-      return node->pos();
-    }
+    node->set_anchored(node->locked());
+  }
+  const Graph::Coord3D& pos()
+  {
+    return node->pos();
+  }
 };
 
 struct LabelMoveRecord : public MoveRecord {
-    void grab(Graph::Graph &graph, size_t index)
-    {
-      node = &graph.transitionLabel(index);
-      node->set_anchored(true);
-    }
+  void grab(Graph::Graph& graph, size_t index)
+  {
+    node = &graph.transitionLabel(index);
+    node->set_anchored(true);
+  }
 };
 
 struct StateLabelMoveRecord : public MoveRecord {
-    void grab(Graph::Graph &graph, size_t index)
-    {
-      node = &graph.stateLabel(index);
-      node->set_anchored(true);
-    }
+  void grab(Graph::Graph& graph, size_t index)
+  {
+    node = &graph.stateLabel(index);
+    node->set_anchored(true);
+  }
 };
 
 struct HandleMoveRecord : public MoveRecord
 {
-    bool movingLabel;
-    LabelMoveRecord label;
-    void grab(Graph::Graph& graph, size_t index)
-    {
-      node = &graph.handle(index);
-      node->set_anchored(true);
-      movingLabel = !graph.transitionLabel(index).anchored();
-      if (movingLabel)
-        label.grab(graph, index);
+  bool movingLabel;
+  LabelMoveRecord label;
+  void grab(Graph::Graph& graph, size_t index)
+  {
+    node = &graph.handle(index);
+    node->set_anchored(true);
+    movingLabel = !graph.transitionLabel(index).anchored();
+    if (movingLabel) {
+      label.grab(graph, index);
     }
-    void release(bool toggleLocked) {
-      MoveRecord::release(toggleLocked);
-      if (movingLabel)
-        label.release(false);
+  }
+  void release(bool toggleLocked) {
+    MoveRecord::release(toggleLocked);
+    if (movingLabel) {
+      label.release(false);
     }
-    void move(const Graph::Coord3D &pos)
-    {
-      MoveRecord::move(pos);
-      if (movingLabel)
-        label.move(pos);
+  }
+  void move(const Graph::Coord3D& pos)
+  {
+    MoveRecord::move(pos);
+    if (movingLabel) {
+      label.move(pos);
     }
+  }
 };
 
 struct NodeMoveRecord : public MoveRecord
 {
-    StateLabelMoveRecord label;
-    std::vector<HandleMoveRecord> edges;
-    std::vector<Graph::Node*> endpoints;
-    void grab(Graph::Graph& graph, size_t index)
+  StateLabelMoveRecord label;
+  std::vector<HandleMoveRecord> edges;
+  std::vector<Graph::Node*> endpoints;
+  void grab(Graph::Graph& graph, size_t index)
+  {
+    node = &graph.node(index);
+    node->set_anchored(true);
+    size_t nlabels = 0;
+    for (size_t i = 0; i < graph.edgeCount(); ++i)
     {
-      node = &graph.node(index);
-      node->set_anchored(true);
-      size_t nlabels = 0;
-      for (size_t i = 0; i < graph.edgeCount(); ++i)
+      Graph::Edge e = graph.edge(i);
+      if (e.from() != index)
       {
-        Graph::Edge e = graph.edge(i);
-        if (e.from() != index)
-        {
-          size_t temp = e.from();
-          e.from() = e.to();
-          e.to() = temp;
-        }
-        if (e.from() == index && !graph.handle(i).anchored())
-        {
-          edges.resize(nlabels + 1);
-          endpoints.resize(nlabels + 1);
-          endpoints[nlabels] = &graph.node(e.to());
-          edges[nlabels++].grab(graph, i);
-        }
+        size_t temp = e.from();
+        e.from() = e.to();
+        e.to() = temp;
       }
-      label.grab(graph, index);
+      if (e.from() == index && !graph.handle(i).anchored())
+      {
+        edges.resize(nlabels + 1);
+        endpoints.resize(nlabels + 1);
+        endpoints[nlabels] = &graph.node(e.to());
+        edges[nlabels++].grab(graph, i);
+      }
     }
-    void release(bool toggleLocked)
+    label.grab(graph, index);
+  }
+  void release(bool toggleLocked)
+  {
+    MoveRecord::release(toggleLocked);
+    for (size_t i = 0; i < edges.size(); ++i)
     {
-      MoveRecord::release(toggleLocked);
-      for (size_t i = 0; i < edges.size(); ++i)
-      {
-        edges[i].release(false); // Do not toggle the edges around this node
-      }
-      label.release(toggleLocked);
+      edges[i].release(false); // Do not toggle the edges around this node
     }
-    void move(const Graph::Coord3D &pos)
+    label.release(toggleLocked);
+  }
+  void move(const Graph::Coord3D& pos)
+  {
+    MoveRecord::move(pos);
+    for (size_t i = 0; i < edges.size(); ++i)
     {
-      MoveRecord::move(pos);
-      for (size_t i = 0; i < edges.size(); ++i)
-      {
-        edges[i].move((pos + endpoints[i]->pos()) / 2.0);
-      }
-      label.move(pos);
+      edges[i].move((pos + endpoints[i]->pos()) / 2.0);
     }
+    label.move(pos);
+  }
 };
 
 
-GLWidget::GLWidget(Graph::Graph& graph, QWidget *parent)
+GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false), m_paused(true)
 {
   m_scene = new GLScene(m_graph, devicePixelRatio());
@@ -202,8 +206,9 @@ void GLWidget::updateSelection()
   selnode = select_object(m_hover, m_graph);
   if (selnode)
   {
-    if (selnode->selected() <= 0)
+    if (selnode->selected() <= 0) {
       m_selections.push_back(m_hover);
+    }
     selnode->selected() = 1.0f;
 
   }
@@ -212,8 +217,9 @@ void GLWidget::updateSelection()
     GLScene::Selection s = m_hover;
     s.selectionType = GLScene::so_handle;
     selnode = select_object(s, m_graph);
-    if (selnode->selected() <= 0)
+    if (selnode->selected() <= 0) {
       m_selections.push_back(s);
+    }
     selnode->selected() = 0.5f;
   }
 }
@@ -249,11 +255,12 @@ void GLWidget::paintGL()
     updateSelection();
     m_scene->render();
   }
-  if (m_scene->resizing())
+  if (m_scene->resizing()) {
     emit widgetResized(m_scene->size());
+  }
 }
 
-void GLWidget::mousePressEvent(QMouseEvent *e)
+void GLWidget::mousePressEvent(QMouseEvent* e)
 {
   if (m_painting)
   {
@@ -286,29 +293,34 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
     m_dragstart = e->pos();
     if (e->modifiers() == Qt::ControlModifier)
     {
-      if (e->button() == Qt::LeftButton)
+      if (e->button() == Qt::LeftButton) {
         m_dragmode = dm_translate;
+      }
     }
     else if (e->modifiers() == Qt::ShiftModifier)
     {
-      if (e->button() == Qt::LeftButton && m_scene->size().z > 1)
+      if (e->button() == Qt::LeftButton && m_scene->size().z > 1) {
         m_dragmode = dm_rotate;
+      }
     }
     else if (e->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
     {
-      if (e->button() == Qt::LeftButton)
+      if (e->button() == Qt::LeftButton) {
         m_dragmode = dm_translate;
+      }
     }
     else
     {
       if (m_hover.selectionType == GLScene::so_none)
       {
-        if (e->button() == Qt::RightButton && m_scene->size().z > 1)
+        if (e->button() == Qt::RightButton && m_scene->size().z > 1) {
           m_dragmode = dm_rotate;
+        }
 //        else if (e->button() == Qt::RightButton)
 //          m_dragmode = dm_rotate_2d;
-        else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton)))
+        else if (e->button() == Qt::MidButton || ((e->buttons() & (Qt::LeftButton | Qt::RightButton)) == (Qt::LeftButton | Qt::RightButton))) {
           m_dragmode = dm_zoom;
+        }
       }
       else
       {
@@ -332,24 +344,26 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
             m_dragmode = dm_none;
             break;
         }
-        if (m_dragnode)
+        if (m_dragnode) {
           m_dragnode->grab(m_graph, m_hover.index);
+        }
       }
     }
   }
 }
 
-void GLWidget::mouseReleaseEvent(QMouseEvent *e)
+void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 {
   if (m_dragmode == dm_dragnode)
   {
-    NodeMoveRecord *noderec = dynamic_cast<NodeMoveRecord *>(m_dragnode);
+    NodeMoveRecord* noderec = dynamic_cast<NodeMoveRecord*>(m_dragnode);
     if (m_hover.selectionType == GLScene::so_node && e->button() == Qt::LeftButton
-      && noderec && m_draglength.length() < DRAG_MIN_DIST)
+        && noderec && m_draglength.length() < DRAG_MIN_DIST)
     {
       // A node has been clicked (not dragged):
-      if (m_graph.isToggleable(m_hover.index))
+      if (m_graph.isToggleable(m_hover.index)) {
         m_graph.toggleActive(m_hover.index);
+      }
     }
     m_dragnode->release(e->button() == Qt::RightButton);
     delete m_dragnode;
@@ -358,12 +372,12 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e)
   m_dragmode = dm_none;
 }
 
-void GLWidget::wheelEvent(QWheelEvent *e)
+void GLWidget::wheelEvent(QWheelEvent* e)
 {
   m_scene->zoom(pow(1.0005f, e->delta()));
 }
 
-void GLWidget::mouseMoveEvent(QMouseEvent *e)
+void GLWidget::mouseMoveEvent(QMouseEvent* e)
 {
   if (m_dragmode != dm_none)
   {
@@ -447,7 +461,7 @@ void GLWidget::resetViewpoint(size_t animation)
   m_scene->setZoom(0.95f, animation);
 }
 
-void GLWidget::setPaint(const QColor &color)
+void GLWidget::setPaint(const QColor& color)
 {
   m_paintcolor = color;
 }
@@ -462,36 +476,32 @@ void GLWidget::endPaint()
   m_painting = false;
 }
 
-void GLWidget::saveVector(const QString &filename)
+void GLWidget::saveVector(const QString& filename)
 {
   QString lcfn = filename.toLower();
   if (lcfn.endsWith(".pdf"))
   {
     m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PDF);
   }
-  else
-  if (lcfn.endsWith(".ps"))
+  else if (lcfn.endsWith(".ps"))
   {
     m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PS);
   }
-  else
-  if (lcfn.endsWith(".eps"))
+  else if (lcfn.endsWith(".eps"))
   {
     m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_EPS);
   }
-  else
-  if (lcfn.endsWith(".svg"))
+  else if (lcfn.endsWith(".svg"))
   {
     m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_SVG);
   }
-  else
-  if (lcfn.endsWith(".tex"))
+  else if (lcfn.endsWith(".tex"))
   {
     m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PGF);
   }
   else
   {
-	mCRL2log(mcrl2::log::error) << "Unable to determine file type from extension." << std::endl;
+    mCRL2log(mcrl2::log::error) << "Unable to determine file type from extension." << std::endl;
   }
 }
 
@@ -500,21 +510,22 @@ void GLWidget::saveTikz(const QString& filename, float aspectRatio)
   m_scene->renderLatexGraphics(filename, aspectRatio);
 }
 
-void GLWidget::savePixmap(const QString &filename, const int w, const int h)
+void GLWidget::savePixmap(const QString& filename, const int w, const int h)
 {
   m_scene->resize(w, h);
   renderPixmap(w, h).save(filename);
   m_scene->resize(width(), height());
 }
 
-GLWidgetUi* GLWidget::ui(QWidget *parent)
+GLWidgetUi* GLWidget::ui(QWidget* parent)
 {
-  if (!m_ui)
+  if (!m_ui) {
     m_ui = new GLWidgetUi(*this, parent);
+  }
   return m_ui;
 }
 
-GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget *parent)
+GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
   : QDockWidget(parent), m_widget(widget)
 {
   QColor initialcolor(255, 0, 0);
@@ -555,8 +566,10 @@ void GLWidgetUi::selectColor(const QColor& color)
 
 void GLWidgetUi::togglePaintMode(bool paint)
 {
-  if (paint)
+  if (paint) {
     m_widget.startPaint();
-  else
+  }
+  else {
     m_widget.endPaint();
+  }
 }

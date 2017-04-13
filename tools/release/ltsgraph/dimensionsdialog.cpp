@@ -9,7 +9,7 @@
 
 #include "dimensionsdialog.h"
 
-DimensionsDialog::DimensionsDialog(QWidget *parent) :
+DimensionsDialog::DimensionsDialog(QWidget* parent) :
   QDialog(parent)
 {
   m_ui.setupUi(this);

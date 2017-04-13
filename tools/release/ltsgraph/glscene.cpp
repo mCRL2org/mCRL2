@@ -44,19 +44,21 @@ typedef Graph::Coord3D Coord3D;
 
 struct GLHitRecord
 {
-    GLuint stackSize;
-    GLuint minDepth;
-    GLuint maxDepth;
-    GLuint stack[1];
+  GLuint stackSize;
+  GLuint minDepth;
+  GLuint maxDepth;
+  GLuint stack[1];
 };
 
 struct Color3f
 {
-    GLfloat r, g, b;
-    Color3f() {}
-    Color3f(GLfloat r, GLfloat g, GLfloat b) : r(r), g(g), b(b) {}
-    Color3f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]) {}
-    operator const GLfloat*() const { return &r; }
+  GLfloat r, g, b;
+  Color3f() {}
+  Color3f(GLfloat r, GLfloat g, GLfloat b) : r(r), g(g), b(b) {}
+  Color3f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]) {}
+  operator const GLfloat* () const {
+    return &r;
+  }
 };
 
 struct Color4f
@@ -64,9 +66,11 @@ struct Color4f
   GLfloat r, g, b, a;
   Color4f() {}
   Color4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) : r(r), g(g), b(b), a(a) {}
-  Color4f(const Color3f &c, GLfloat a = 1.0) : r(c.r), g(c.g), b(c.b), a(a) {}
+  Color4f(const Color3f& c, GLfloat a = 1.0) : r(c.r), g(c.g), b(c.b), a(a) {}
   Color4f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]), a(c[3]) {}
-  operator const GLfloat*() const { return &r; }
+  operator const GLfloat* () const {
+    return &r;
+  }
 };
 
 struct Texture
@@ -89,13 +93,13 @@ struct Texture
     const GLfloat w = width;
     const GLfloat h = height;
     shape[0] = Coord3D(-w, -h, 0.0f) * pixelsize / 2.0;
-    shape[1] = Coord3D( w, -h, 0.0f) * pixelsize / 2.0;
-    shape[2] = Coord3D( w,  h, 0.0f) * pixelsize / 2.0;
+    shape[1] = Coord3D(w, -h, 0.0f) * pixelsize / 2.0;
+    shape[2] = Coord3D(w,  h, 0.0f) * pixelsize / 2.0;
     shape[3] = Coord3D(-w,  h, 0.0f) * pixelsize / 2.0;
   }
 };
 
-struct TextureData 
+struct TextureData
 {
   QFont font;
 
@@ -115,11 +119,15 @@ struct TextureData
 
   void clear()
   {
-    delete[] transitions; transitions = nullptr;
-    delete[] states;      states      = nullptr;
-    delete[] numbers;     numbers     = nullptr;
-    for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it)
+    delete[] transitions;
+    transitions = nullptr;
+    delete[] states;
+    states      = nullptr;
+    delete[] numbers;
+    numbers     = nullptr;
+    for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it) {
       delete it.value();
+    }
     labels.clear();
   }
 
@@ -159,13 +167,17 @@ struct TextureData
 
 #ifndef NDEBUG
     size_t error=glGetError();
-    assert(error == 0 || error == 1286); // TODO: The error 1286 indicates that something is problematic. This ought to be resolved. 
+    assert(error == 0 || error == 1286); // TODO: The error 1286 indicates that something is problematic. This ought to be resolved.
 #endif
 
     // OpenGL likes its textures to have dimensions that are powers of 2
     size_t w = 1, h = 1;
-    while (w < width) w <<= 1;
-    while (h < height) h <<= 1;
+    while (w < width) {
+      w <<= 1;
+    }
+    while (h < height) {
+      h <<= 1;
+    }
     // ... and also wants the alpha component to be the 4th component
     label = convertToGLFormat(label.scaled(w, h));
 
@@ -185,24 +197,27 @@ struct TextureData
   const Texture& getTransitionLabel(size_t index)
   {
     Texture*& texture = transitions[index];
-    if (texture == nullptr)
+    if (texture == nullptr) {
       createTexture(graph->transitionLabelstring(index), texture);
+    }
     return *texture;
   }
 
   const Texture& getStateLabel(size_t index)
   {
     Texture*& texture = states[index];
-    if (texture == nullptr)
+    if (texture == nullptr) {
       createTexture(graph->stateLabelstring(index), texture);
+    }
     return *texture;
   }
 
   const Texture& getNumberLabel(size_t index)
   {
     Texture*& texture = numbers[index];
-    if (texture == nullptr)
+    if (texture == nullptr) {
       createTexture(QString::number(index), texture);
+    }
     return *texture;
   }
 
@@ -226,316 +241,328 @@ struct TextureData
 
   void resize(float pixelsize)
   {
-    for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it)
+    for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it) {
       it.value()->resize(pixelsize);
+    }
   }
 };
 
 struct VertexData
 {
-    Coord3D *node, *hint, *handle, *arrowhead, *transition_labels, *state_labels, *number_labels;
+  Coord3D* node, *hint, *handle, *arrowhead, *transition_labels, *state_labels, *number_labels;
 
-    VertexData()
-      : node(nullptr), hint(nullptr), handle(nullptr), arrowhead(nullptr)
-    { }
+  VertexData()
+    : node(nullptr), hint(nullptr), handle(nullptr), arrowhead(nullptr)
+  { }
 
-    void clear()
-    {
-      delete[] node;      node      = nullptr;
-      delete[] hint;      hint      = nullptr;
-      delete[] handle;    handle    = nullptr;
-      delete[] arrowhead; arrowhead = nullptr;
-    }
+  void clear()
+  {
+    delete[] node;
+    node      = nullptr;
+    delete[] hint;
+    hint      = nullptr;
+    delete[] handle;
+    handle    = nullptr;
+    delete[] arrowhead;
+    arrowhead = nullptr;
+  }
 
-    ~VertexData()
-    {
-      clear();
-    }
+  ~VertexData()
+  {
+    clear();
+  }
 
-    void generate(const TextureData& textures, float pixelsize, float size_node)
-    {
+  void generate(const TextureData& textures, float pixelsize, float size_node)
+  {
 
-      float handlesize = SIZE_HANDLE * pixelsize * textures.device_pixel_ratio,
+    float handlesize = SIZE_HANDLE * pixelsize * textures.device_pixel_ratio,
           nodesize = size_node * pixelsize * textures.device_pixel_ratio,
           arrowheadsize = SIZE_ARROWHEAD * pixelsize * textures.device_pixel_ratio;
 
-      // Delete old data
-      clear();
+    // Delete old data
+    clear();
 
-      // Generate vertices for node border (a line loop drawing a circle)
-      float slice = 0, sliced = (float) (2.0 * M_PI / (RES_NODE_SLICE - 1)),
-          stack = 0, stackd = (float) (M_PI_2 / RES_NODE_STACK);
-      node = new Coord3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
-      for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
-        node[i] = Coord3D(sin(slice), cos(slice), 0.1f);
-      // Generate vertices for node (a quad strip drawing a half sphere)
-      slice = 0;
-      size_t n = RES_NODE_SLICE - 1;
-      for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
-      {
-        for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
-        {
-          node[n++] = Coord3D( sin((float)(stack + stackd)) * sin(slice),
-                               sin((float)(stack + stackd)) * cos(slice),
-                               cos((float)(stack + stackd)));
-          node[n++] = Coord3D( sin(stack) * sin(slice),
-                               sin(stack) * cos(slice),
-                               cos(stack));
-        }
-        node[n++] = Coord3D( sin((float)(stack + stackd)) * sin(0.0f),
-                             sin((float)(stack + stackd)) * cos(0.0f),
-                             cos((float)(stack + stackd)));
-        node[n++] = Coord3D( sin(stack) * sin(0.0f),
-                             sin(stack) * cos(0.0f),
-                             cos(stack));
-      }
-      for (size_t i = 0; i < n; ++i)
-        node[i] *= 0.5 * nodesize;
-
-      // Generate plus (and minus) hint for exploration mode
-      hint = new Coord3D[4];
-      hint[0] = Coord3D(-nodesize * 0.3, 0.0, 0.0);
-      hint[1] = Coord3D(nodesize * 0.3, 0.0, 0.0);
-      hint[2] = Coord3D(0.0, -nodesize * 0.3, 0.0);
-      hint[3] = Coord3D(0.0, nodesize * 0.3, 0.0);
-
-      // Generate vertices for handle (border + fill, both squares)
-      handle = new Coord3D[4];
-      handle[0] = Coord3D(-handlesize/2.0, -handlesize/2.0, 0.0);
-      handle[1] = Coord3D( handlesize/2.0, -handlesize/2.0, 0.0);
-      handle[2] = Coord3D( handlesize/2.0,  handlesize/2.0, 0.0);
-      handle[3] = Coord3D(-handlesize/2.0,  handlesize/2.0, 0.0);
-
-      // Generate vertices for arrowhead (a triangle fan drawing a cone)
-      arrowhead = new Coord3D[RES_ARROWHEAD + 1];
-      arrowhead[0] = Coord3D(-nodesize / 2.0, 0.0, 0.0);
-      float diff = (float) (M_PI / 20.0), t = 0;
-      for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
-        arrowhead[i] = Coord3D(-nodesize / 2.0 - arrowheadsize,
-                               0.3 * arrowheadsize * sin(t),
-                               0.3 * arrowheadsize * cos(t));
-      arrowhead[RES_ARROWHEAD] = Coord3D(-nodesize / 2.0 - arrowheadsize,
-                                         0.3 * arrowheadsize * sin(0.0f),
-                                         0.3 * arrowheadsize * cos(0.0f));
+    // Generate vertices for node border (a line loop drawing a circle)
+    float slice = 0, sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1)),
+          stack = 0, stackd = (float)(M_PI_2 / RES_NODE_STACK);
+    node = new Coord3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
+    for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced) {
+      node[i] = Coord3D(sin(slice), cos(slice), 0.1f);
     }
+    // Generate vertices for node (a quad strip drawing a half sphere)
+    slice = 0;
+    size_t n = RES_NODE_SLICE - 1;
+    for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
+    {
+      for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
+      {
+        node[n++] = Coord3D(sin((float)(stack + stackd)) * sin(slice),
+                            sin((float)(stack + stackd)) * cos(slice),
+                            cos((float)(stack + stackd)));
+        node[n++] = Coord3D(sin(stack) * sin(slice),
+                            sin(stack) * cos(slice),
+                            cos(stack));
+      }
+      node[n++] = Coord3D(sin((float)(stack + stackd)) * sin(0.0f),
+                          sin((float)(stack + stackd)) * cos(0.0f),
+                          cos((float)(stack + stackd)));
+      node[n++] = Coord3D(sin(stack) * sin(0.0f),
+                          sin(stack) * cos(0.0f),
+                          cos(stack));
+    }
+    for (size_t i = 0; i < n; ++i) {
+      node[i] *= 0.5 * nodesize;
+    }
+
+    // Generate plus (and minus) hint for exploration mode
+    hint = new Coord3D[4];
+    hint[0] = Coord3D(-nodesize * 0.3, 0.0, 0.0);
+    hint[1] = Coord3D(nodesize * 0.3, 0.0, 0.0);
+    hint[2] = Coord3D(0.0, -nodesize * 0.3, 0.0);
+    hint[3] = Coord3D(0.0, nodesize * 0.3, 0.0);
+
+    // Generate vertices for handle (border + fill, both squares)
+    handle = new Coord3D[4];
+    handle[0] = Coord3D(-handlesize/2.0, -handlesize/2.0, 0.0);
+    handle[1] = Coord3D(handlesize/2.0, -handlesize/2.0, 0.0);
+    handle[2] = Coord3D(handlesize/2.0,  handlesize/2.0, 0.0);
+    handle[3] = Coord3D(-handlesize/2.0,  handlesize/2.0, 0.0);
+
+    // Generate vertices for arrowhead (a triangle fan drawing a cone)
+    arrowhead = new Coord3D[RES_ARROWHEAD + 1];
+    arrowhead[0] = Coord3D(-nodesize / 2.0, 0.0, 0.0);
+    float diff = (float)(M_PI / 20.0), t = 0;
+    for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
+      arrowhead[i] = Coord3D(-nodesize / 2.0 - arrowheadsize,
+                             0.3 * arrowheadsize * sin(t),
+                             0.3 * arrowheadsize * cos(t));
+    arrowhead[RES_ARROWHEAD] = Coord3D(-nodesize / 2.0 - arrowheadsize,
+                                       0.3 * arrowheadsize * sin(0.0f),
+                                       0.3 * arrowheadsize * cos(0.0f));
+  }
 };
 
 struct CameraView
 {
-    Coord3D rotation;    ///< Rotation of the camera around x, y and z axis (performed in that order)
-    Coord3D translation; ///< Translation of the camera
-    Coord3D world;       ///< The size of the box in which the graph lives
-    float zoom;          ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
-    float pixelsize;
+  Coord3D rotation;    ///< Rotation of the camera around x, y and z axis (performed in that order)
+  Coord3D translation; ///< Translation of the camera
+  Coord3D world;       ///< The size of the box in which the graph lives
+  float zoom;          ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
+  float pixelsize;
 
-    CameraView()
-      : rotation(Coord3D(0, 0, 0)), translation(Coord3D(0, 0, 0)), world(Coord3D(1000.0, 1000.0, 1000.0)),
-        zoom(1.0), pixelsize(1)
-    { }
+  CameraView()
+    : rotation(Coord3D(0, 0, 0)), translation(Coord3D(0, 0, 0)), world(Coord3D(1000.0, 1000.0, 1000.0)),
+      zoom(1.0), pixelsize(1)
+  { }
 
-    void viewport(size_t width, size_t height)
-    {
-      glViewport(0, 0, width, height);
-      pixelsize = 1000.0 / (width < height ? height : width);
-      world.x = width * pixelsize;
-      world.y = height * pixelsize;
-    }
+  void viewport(size_t width, size_t height)
+  {
+    glViewport(0, 0, width, height);
+    pixelsize = 1000.0 / (width < height ? height : width);
+    world.x = width * pixelsize;
+    world.y = height * pixelsize;
+  }
 
-    /**
-     *  Implements "true" billboarding, by moving to @e pos and aligning
-     *  the Z-axis to the vector between @e pos and the camera position.
-     *  The Z-axis will not be facing the camera, but rather looking away
-     *  from it.
-     *
-     *  @param pos The position of the billboard.
-     */
-    void billboard_spherical(const Coord3D& pos)
-    {
-      Coord3D rt, up, lk;
-      GLfloat mm[16];
+  /**
+   *  Implements "true" billboarding, by moving to @e pos and aligning
+   *  the Z-axis to the vector between @e pos and the camera position.
+   *  The Z-axis will not be facing the camera, but rather looking away
+   *  from it.
+   *
+   *  @param pos The position of the billboard.
+   */
+  void billboard_spherical(const Coord3D& pos)
+  {
+    Coord3D rt, up, lk;
+    GLfloat mm[16];
 
-      glGetFloatv(GL_MODELVIEW_MATRIX, mm);
-      lk.x = mm[0] * pos.x + mm[4] * pos.y + mm[8] * pos.z + mm[12];
-      lk.y = mm[1] * pos.x + mm[5] * pos.y + mm[9] * pos.z + mm[13];
-      lk.z = mm[2] * pos.x + mm[6] * pos.y + mm[10] * pos.z + mm[14];
+    glGetFloatv(GL_MODELVIEW_MATRIX, mm);
+    lk.x = mm[0] * pos.x + mm[4] * pos.y + mm[8] * pos.z + mm[12];
+    lk.y = mm[1] * pos.x + mm[5] * pos.y + mm[9] * pos.z + mm[13];
+    lk.z = mm[2] * pos.x + mm[6] * pos.y + mm[10] * pos.z + mm[14];
 
-      lk /= lk.size();
-      rt = lk.cross(Coord3D(0, 1, 0));
-      up = rt.cross(lk);
-      GLfloat matrix[16] = {rt.x,	rt.y,	rt.z,	0,
-                            up.x,	up.y,	up.z,	0,
-                            -lk.x,	-lk.y,	-lk.z,	0,
-                            0,        0,      0,	1};
-      billboard_cylindrical(pos);
-      glMultMatrixf(matrix);
-    }
+    lk /= lk.size();
+    rt = lk.cross(Coord3D(0, 1, 0));
+    up = rt.cross(lk);
+    GLfloat matrix[16] = {rt.x, rt.y, rt.z, 0,
+                          up.x, up.y, up.z, 0,
+                          -lk.x,  -lk.y,  -lk.z,  0,
+                          0,        0,      0,  1
+                         };
+    billboard_cylindrical(pos);
+    glMultMatrixf(matrix);
+  }
 
-    /**
-     *  Implements "fake" billboarding, by moving to @e pos and aligning
-     *  the X, Y and Z axes to those of the projection plane.
-     *
-     *  @param pos The position of the billboard.
-     */
-    void billboard_cylindrical(const Coord3D& pos)
-    {
-      glTranslatef(pos.x, pos.y, pos.z);
-      glRotatef(-rotation.z, 0, 0, 1);
-      glRotatef(-rotation.y, 0, 1, 0);
-      glRotatef(-rotation.x, 1, 0, 0);
-    }
+  /**
+   *  Implements "fake" billboarding, by moving to @e pos and aligning
+   *  the X, Y and Z axes to those of the projection plane.
+   *
+   *  @param pos The position of the billboard.
+   */
+  void billboard_cylindrical(const Coord3D& pos)
+  {
+    glTranslatef(pos.x, pos.y, pos.z);
+    glRotatef(-rotation.z, 0, 0, 1);
+    glRotatef(-rotation.y, 0, 1, 0);
+    glRotatef(-rotation.x, 1, 0, 0);
+  }
 
-    void applyTranslation()
-    {
-      float viewdepth = world.size() + 2 * pixelsize * 10;
-      glTranslatef(0, 0, -5000.0005 - 0.5 * viewdepth);
-      glTranslatef(translation.x, translation.y, translation.z);
-    }
+  void applyTranslation()
+  {
+    float viewdepth = world.size() + 2 * pixelsize * 10;
+    glTranslatef(0, 0, -5000.0005 - 0.5 * viewdepth);
+    glTranslatef(translation.x, translation.y, translation.z);
+  }
 
-    void applyFrustum()
-    {
-      float viewdepth = world.size() + 2 * pixelsize * 10;
-      float f = 2 * zoom * (10000.0 + (viewdepth - world.z)) / 10000.0;
-      glFrustum(-world.x / f, world.x / f, -world.y / f, world.y / f, 5000, viewdepth + 5000.001);
-    }
+  void applyFrustum()
+  {
+    float viewdepth = world.size() + 2 * pixelsize * 10;
+    float f = 2 * zoom * (10000.0 + (viewdepth - world.z)) / 10000.0;
+    glFrustum(-world.x / f, world.x / f, -world.y / f, world.y / f, 5000, viewdepth + 5000.001);
+  }
 
-    void applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
-    {
-      GLint viewport[4];
-      glGetIntegerv(GL_VIEWPORT, viewport);
-      // Viewport is always (0, 0, width, height)
-      gluPickMatrix(x, viewport[3] - y, fuzz * pixelsize, fuzz * pixelsize, viewport);
-    }
+  void applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
+  {
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    // Viewport is always (0, 0, width, height)
+    gluPickMatrix(x, viewport[3] - y, fuzz * pixelsize, fuzz * pixelsize, viewport);
+  }
 
-    void applyRotation()
-    {
-      glRotatef(rotation.x, 1, 0, 0);
-      glRotatef(rotation.y, 0, 1, 0);
-      glRotatef(rotation.z, 0, 0, 1);
-    }
+  void applyRotation()
+  {
+    glRotatef(rotation.x, 1, 0, 0);
+    glRotatef(rotation.y, 0, 1, 0);
+    glRotatef(rotation.z, 0, 0, 1);
+  }
 };
 
 struct CameraAnimation : public CameraView
 {
-    CameraView m_source, m_target;
-    size_t m_animation;
-    size_t m_animation_steps;
-    bool m_resizing;
+  CameraView m_source, m_target;
+  size_t m_animation;
+  size_t m_animation_steps;
+  bool m_resizing;
 
-    CameraAnimation() : m_animation(0), m_animation_steps(0), m_resizing(false) {}
+  CameraAnimation() : m_animation(0), m_animation_steps(0), m_resizing(false) {}
 
-    void start_animation(size_t steps)
-    {
-      m_source = *this;
-      m_animation_steps = steps;
-      m_animation = 0;
-      if (steps == 0)
-        operator=(m_target);
+  void start_animation(size_t steps)
+  {
+    m_source = *this;
+    m_animation_steps = steps;
+    m_animation = 0;
+    if (steps == 0) {
+      operator=(m_target);
     }
+  }
 
-    void operator=(const CameraView& other)
+  void operator=(const CameraView& other)
+  {
+    rotation = other.rotation;
+    translation = other.translation;
+    zoom = other.zoom;
+    world = other.world;
+    pixelsize = other.pixelsize;
+  }
+
+  void interpolate_cam(float pos)
+  {
+    if (pos > 0.999)
     {
-      rotation = other.rotation;
-      translation = other.translation;
-      zoom = other.zoom;
-      world = other.world;
-      pixelsize = other.pixelsize;
+      rotation = m_target.rotation;
+      translation = m_target.translation;
+      zoom = m_target.zoom;
     }
-
-    void interpolate_cam(float pos)
+    else
     {
-      if (pos > 0.999)
-      {
-        rotation = m_target.rotation;
-        translation = m_target.translation;
-        zoom = m_target.zoom;
+      rotation = m_target.rotation * pos + m_source.rotation * (1.0 - pos);
+      translation = m_target.translation * pos + m_source.translation * (1.0 - pos);
+      zoom = m_target.zoom * pos + m_source.zoom * (1.0 - pos);
+    }
+  }
+
+  void interpolate_world(float pos)
+  {
+    m_resizing = true;
+    if (pos > 0.999)
+    {
+      world = m_target.world;
+    }
+    else
+    {
+      world.x = m_target.world.x * pos + m_source.world.x * (1.0 - pos);
+      world.y = m_target.world.y * pos + m_source.world.y * (1.0 - pos);
+      if (m_target.world.z > m_source.world.z) {
+        world.z = m_target.world.z * sin(M_PI_2 * pos) + m_source.world.z * (1.0 - sin(M_PI_2 * pos));
       }
-      else
-      {
-        rotation = m_target.rotation * pos + m_source.rotation * (1.0 - pos);
-        translation = m_target.translation * pos + m_source.translation * (1.0 - pos);
-        zoom = m_target.zoom * pos + m_source.zoom * (1.0 - pos);
+      else {
+        world.z = m_target.world.z * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z * cos(M_PI_2 * pos);
       }
     }
+  }
 
-    void interpolate_world(float pos)
+  void animate()
+  {
+    if ((m_target.rotation != rotation || m_target.translation != translation || m_target.zoom != zoom) &&
+        (m_target.world != world))
     {
-      m_resizing = true;
-      if (pos > 0.999)
-      {
-        world = m_target.world;
+      size_t halfway = m_animation_steps / 2;
+      if (m_animation < halfway) {
+        interpolate_cam((float)(++m_animation) / halfway);
       }
-      else
+      if (m_animation == halfway)
       {
-        world.x = m_target.world.x * pos + m_source.world.x * (1.0 - pos);
-        world.y = m_target.world.y * pos + m_source.world.y * (1.0 - pos);
-        if (m_target.world.z > m_source.world.z)
-          world.z = m_target.world.z * sin(M_PI_2 * pos) + m_source.world.z * (1.0 - sin(M_PI_2 * pos));
-        else
-          world.z = m_target.world.z * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z * cos(M_PI_2 * pos);
+        m_animation_steps -= halfway;
+        m_animation = 0;
       }
     }
-
-    void animate()
+    else if (m_target.world != world)
     {
-      if ((m_target.rotation != rotation || m_target.translation != translation || m_target.zoom != zoom) &&
-          (m_target.world != world))
-      {
-        size_t halfway = m_animation_steps / 2;
-        if (m_animation < halfway)
-          interpolate_cam((float)(++m_animation) / halfway);
-        if (m_animation == halfway)
-        {
-          m_animation_steps -= halfway;
-          m_animation = 0;
-        }
-      }
-      else
-        if (m_target.world != world)
-        {
-          interpolate_world((float)(++m_animation) / m_animation_steps);
-        }
-        else
-          interpolate_cam((float)(++m_animation) / m_animation_steps);
+      interpolate_world((float)(++m_animation) / m_animation_steps);
     }
+    else {
+      interpolate_cam((float)(++m_animation) / m_animation_steps);
+    }
+  }
 
-    void viewport(size_t width, size_t height)
-    {
-      CameraView::viewport(width, height);
-      m_target.world.x = world.x;
-      m_target.world.y = world.y;
-      m_target.pixelsize = pixelsize;
-    }
+  void viewport(size_t width, size_t height)
+  {
+    CameraView::viewport(width, height);
+    m_target.world.x = world.x;
+    m_target.world.y = world.y;
+    m_target.pixelsize = pixelsize;
+  }
 
-    bool resizing()
-    {
-      bool temp = m_resizing;
-      m_resizing = false;
-      return temp;
-    }
+  bool resizing()
+  {
+    bool temp = m_resizing;
+    m_resizing = false;
+    return temp;
+  }
 
-    void setZoom(float factor, size_t animation)
-    {
-      m_target.zoom = factor;
-      start_animation(animation);
-    }
+  void setZoom(float factor, size_t animation)
+  {
+    m_target.zoom = factor;
+    start_animation(animation);
+  }
 
-    void setRotation(const Graph::Coord3D& rotation, size_t animation)
-    {
-      m_target.rotation = rotation;
-      start_animation(animation);
-    }
+  void setRotation(const Graph::Coord3D& rotation, size_t animation)
+  {
+    m_target.rotation = rotation;
+    start_animation(animation);
+  }
 
-    void setTranslation(const Graph::Coord3D& translation, size_t animation)
-    {
-      m_target.translation = translation;
-      start_animation(animation);
-    }
+  void setTranslation(const Graph::Coord3D& translation, size_t animation)
+  {
+    m_target.translation = translation;
+    start_animation(animation);
+  }
 
-    void setSize(const Graph::Coord3D& size, size_t animation)
-    {
-      m_target.world = size;
-      start_animation(animation);
-    }
+  void setSize(const Graph::Coord3D& size, size_t animation)
+  {
+    m_target.world = size;
+    start_animation(animation);
+  }
 };
 
 //
@@ -578,8 +605,10 @@ inline
 void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill)
 {
   glVertexPointer(3, GL_FLOAT, 0, data.handle);
-  glColor3fv(fill);   glDrawArrays(GL_QUADS, 0, 4);
-  glColor3fv(line);   glDrawArrays(GL_LINE_LOOP, 0, 4);
+  glColor3fv(fill);
+  glDrawArrays(GL_QUADS, 0, 4);
+  glColor3fv(line);
+  glDrawArrays(GL_LINE_LOOP, 0, 4);
 }
 
 inline
@@ -596,7 +625,7 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
     glLineWidth(2.0);
     gl2psLineWidth(0.25);
   }
-  
+
   glVertexPointer(3, GL_FLOAT, 0, data.node);
   if (translucent)
   {
@@ -608,9 +637,9 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
     glColor3fv(fill);
   }
   glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
-  
+
   glDepthMask(GL_FALSE);
-  
+
   if (translucent)
   {
     Color4f line2(line, .15f);
@@ -621,7 +650,7 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
     glColor3fv(line);
   }
   glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
-  
+
   glDepthMask(GL_TRUE);
   glPopAttrib();
   gl2psLineWidth(0.25);
@@ -664,10 +693,11 @@ inline
 void drawTransitionLabel(TextureData& textures, size_t index)
 {
   static const GLfloat texCoords[] = { 0.0, 0.0,
-                                 1.0, 0.0,
-                                 1.0, 1.0,
-                                 0.0, 1.0 };
-  
+                                       1.0, 0.0,
+                                       1.0, 1.0,
+                                       0.0, 1.0
+                                     };
+
   const Texture& texture = textures.getTransitionLabel(index);
 
   glEnable(GL_TEXTURE_2D);
@@ -684,10 +714,11 @@ inline
 void drawStateLabel(TextureData& textures, size_t index)
 {
   static const GLfloat texCoords[] = { 0.0, 0.0,
-                                 1.0, 0.0,
-                                 1.0, 1.0,
-                                 0.0, 1.0 };
-  
+                                       1.0, 0.0,
+                                       1.0, 1.0,
+                                       0.0, 1.0
+                                     };
+
   const Texture& texture = textures.getStateLabel(index);
 
   glEnable(GL_TEXTURE_2D);
@@ -704,12 +735,13 @@ inline
 void drawNumber(TextureData& textures, size_t index)
 {
   static const GLfloat texCoords[] = { 0.0, 0.0,
-                                 1.0, 0.0,
-                                 1.0, 1.0,
-                                 0.0, 1.0 };
-  
+                                       1.0, 0.0,
+                                       1.0, 1.0,
+                                       0.0, 1.0
+                                     };
+
   const Texture& texture = textures.getNumberLabel(index);
-  
+
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, texture.name);
 
@@ -742,8 +774,9 @@ void GLScene::renderEdge(size_t i)
   // them in x-y direction.
   if (edge.from() == edge.to())
   {
-    if (!m_drawselfloops)
+    if (!m_drawselfloops) {
       return;
+    }
     Coord3D diff = ctrl[1] - ctrl[0];
     diff = diff.cross(Coord3D(0, 0, 1));
     diff = diff * ((via - from).size() / (diff.size() * 2.0));
@@ -795,17 +828,21 @@ void GLScene::renderNode(GLuint i)
   bool mark = (m_graph.initialState() == i) && m_drawinitialmarking;
   if (mark) // Initial node fill color: green or dark green (locked)
   {
-    if (node.locked())
+    if (node.locked()) {
       fill = Color3f(0.1f, 0.7f, 0.1f);
-    else
+    }
+    else {
       fill = Color3f(0.1f, 1.0f, 0.1f);
+    }
   }
   else // Normal node fill color: node color or darkened node color (locked)
   {
-    if (node.locked())
+    if (node.locked()) {
       fill = Color3f(0.7f * node.color()[0], 0.7f * node.color()[1], 0.7f * node.color()[2]);
-    else
+    }
+    else {
       fill = node.color();
+    }
   }
 
   glStartName(so_node, i);
@@ -830,8 +867,9 @@ void GLScene::renderNode(GLuint i)
 void GLScene::renderTransitionLabel(GLuint i)
 {
   Graph::Edge edge = m_graph.edge(i);
-  if (edge.from() == edge.to() && !m_drawselfloops)
+  if (edge.from() == edge.to() && !m_drawselfloops) {
     return;
+  }
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   if (!m_graph.transitionLabelstring(label.labelindex()).isEmpty()) {
     glStartName(so_label, i);
@@ -845,10 +883,12 @@ void GLScene::renderTransitionLabel(GLuint i)
       pos.x -= m_camera->pixelsize * texture.width / 2;
       pos.y -= m_camera->pixelsize * texture.height / 2;
       glRasterPos3fv(pos);
-      if (!m_graph.isTau(label.labelindex()))
+      if (!m_graph.isTau(label.labelindex())) {
         gl2psText(m_graph.transitionLabelstring(label.labelindex()).toUtf8(), "", 10);
-      else
+      }
+      else {
         gl2psText("t", "Symbol", 10);
+      }
     }
     else
     {
@@ -928,8 +968,9 @@ void GLScene::renderHandle(GLuint i)
   {
     Color3f line(2 * handle.selected() - 1.0f, 0.0f, 0.0f);
     Color3f fill(1.0f, 1.0f, 1.0f);
-    if (handle.locked())
+    if (handle.locked()) {
       fill = Color3f(0.7f, 0.7f, 0.7f);
+    }
 
     glDisable(GL_LINE_SMOOTH);
     glStartName(so_handle, i);
@@ -985,8 +1026,10 @@ void GLScene::init(const QColor& clear)
   glFogfv(GL_FOG_COLOR, fog_color);
   const GLubyte* version = glGetString(GL_VERSION);
   if (version && ((version[0] == '1' && version[2] >= '4') || version[0] > '1'))
-  // if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
+    // if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
+  {
     glFogf(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
+  }
   updateFog();
 
   // Enable depth testing, so that we don't have to care too much about
@@ -1035,24 +1078,29 @@ void GLScene::render()
   size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-  for (size_t i = 0; i < nodeCount; ++i)
+  for (size_t i = 0; i < nodeCount; ++i) {
     renderNode(sel ? m_graph.selectionNode(i) : i);
-  for (size_t i = 0; i < edgeCount; ++i)
+  }
+  for (size_t i = 0; i < edgeCount; ++i) {
     renderEdge(sel ? m_graph.selectionEdge(i) : i);
+  }
 
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glDepthMask(GL_FALSE);
   for (size_t i = 0; i < nodeCount; ++i)
   {
-    if (m_drawstatenumbers)
+    if (m_drawstatenumbers) {
       renderStateNumber(sel ? m_graph.selectionNode(i) : i);
-    if (m_drawstatelabels)
+    }
+    if (m_drawstatelabels) {
       renderStateLabel(sel ? m_graph.selectionNode(i) : i);
+    }
   }
   for (size_t i = 0; i < edgeCount; ++i)
   {
-    if (m_drawtransitionlabels)
+    if (m_drawtransitionlabels) {
       renderTransitionLabel(sel ? m_graph.selectionEdge(i) : i);
+    }
     renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
   glDepthMask(GL_TRUE);
@@ -1089,8 +1137,9 @@ Coord3D GLScene::eyeToWorld(int x, int y, GLfloat z)
   glGetDoublev(GL_PROJECTION_MATRIX, P);
   glGetDoublev(GL_MODELVIEW_MATRIX, M);
   glGetIntegerv(GL_VIEWPORT, V);
-  if (z < 0)
+  if (z < 0) {
     glReadPixels(x, V[3]-y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+  }
   gluUnProject(x, V[3]-y, z, M, P, V, &wx, &wy, &wz);
   return Coord3D(wx, wy, wz);
 }
@@ -1145,7 +1194,7 @@ GLScene::Selection GLScene::select(int x, int y)
     GLHitRecord& rec = *((GLHitRecord*)&selectBuf[index]);
     index += rec.stackSize + 3;
     if ((rec.stack[0] == (GLuint)result.selectionType && rec.minDepth < bestZ) ||
-        (rec.stack[0] >  (GLuint)result.selectionType))
+        (rec.stack[0] > (GLuint)result.selectionType))
     {
       result.selectionType = static_cast<SelectableObject>(rec.stack[0]);
       result.index = rec.stack[1];
@@ -1168,12 +1217,24 @@ void GLScene::zoom(float factor)
 void GLScene::rotate(Graph::Coord3D amount)
 {
   amount += m_camera->rotation;
-  while (amount.x > 180) amount.x -= 360;
-  while (amount.y > 180) amount.y -= 360;
-  while (amount.z > 180) amount.z -= 360;
-  while (amount.x < -180) amount.x += 360;
-  while (amount.y < -180) amount.y += 360;
-  while (amount.z < -180) amount.z += 360;
+  while (amount.x > 180) {
+    amount.x -= 360;
+  }
+  while (amount.y > 180) {
+    amount.y -= 360;
+  }
+  while (amount.z > 180) {
+    amount.z -= 360;
+  }
+  while (amount.x < -180) {
+    amount.x += 360;
+  }
+  while (amount.y < -180) {
+    amount.y += 360;
+  }
+  while (amount.z < -180) {
+    amount.z += 360;
+  }
   setRotation(amount, 0);
 }
 
@@ -1214,7 +1275,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
   GLint viewport[4];
   GLint buffersize = 1024*1024, state = GL2PS_OVERFLOW;
 
-  while( state == GL2PS_OVERFLOW ){
+  while (state == GL2PS_OVERFLOW) {
     buffersize += 1024*1024;
     gl2psBeginPage(filename,
                    "mCRL2 toolset",
@@ -1223,7 +1284,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
                    GL2PS_BSP_SORT,
                    GL2PS_SILENT |
                    GL2PS_USE_CURRENT_VIEWPORT |
-				   GL2PS_OCCLUSION_CULL |
+                   GL2PS_OCCLUSION_CULL |
                    GL2PS_BEST_ROOT |
                    GL2PS_COMPRESS,
                    GL_RGBA,
@@ -1233,13 +1294,13 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
                    buffersize,
                    outfile,
                    filename
-                   );
+                  );
     render();
     state = gl2psEndPage();
   }
   if (state != GL2PS_SUCCESS)
   {
-	mCRL2log(mcrl2::log::error) << "Could not save file (gl2ps error)." << std::endl;
+    mCRL2log(mcrl2::log::error) << "Could not save file (gl2ps error)." << std::endl;
   }
   if (outfile)
   {
@@ -1306,16 +1367,17 @@ QString GLScene::tikzNode(size_t i, float aspectRatio)
   return ret;
 }
 
-static QString escapeLatex(const QString &str)
+static QString escapeLatex(const QString& str)
 {
-    QString escaped;
-    QRegExp rx("[#$%_&{}^]");
-    for(auto x : str) {
-        if(rx.indexIn(x) != -1)
-            escaped.append('\\');
-        escaped.append(x);
+  QString escaped;
+  QRegExp rx("[#$%_&{}^]");
+  for (auto x : str) {
+    if (rx.indexIn(x) != -1) {
+      escaped.append('\\');
     }
-    return escaped;
+    escaped.append(x);
+  }
+  return escaped;
 }
 
 QString GLScene::tikzEdge(size_t i, float aspectRatio)

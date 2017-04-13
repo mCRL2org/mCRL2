@@ -43,9 +43,9 @@ class GLScene
 {
   private:
     Graph::Graph& m_graph;      ///< The graph that is being visualised.
-    VertexData *m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
-    TextureData *m_texturedata; ///< Implementation details storing labels as textures.
-    CameraAnimation *m_camera;  ///< Implementation details of the OpenGL camera handling.
+    VertexData* m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
+    TextureData* m_texturedata; ///< Implementation details storing labels as textures.
+    CameraAnimation* m_camera;  ///< Implementation details of the OpenGL camera handling.
 
     bool m_drawtransitionlabels;   ///< Transition labels are only drawn if this field is true.
     bool m_drawstatelabels;        ///< State labels are only drawn if this field is true.
@@ -56,7 +56,7 @@ class GLScene
 
     bool m_drawfog;                ///< Fog is rendered only if this field is true.
     float m_fogdistance;           ///< The distance at which the fog starts
-    
+
     /**
      * @brief Renders a single edge.
      * @param i The index of the edge to render.
@@ -128,8 +128,8 @@ class GLScene
      */
     struct Selection
     {
-        SelectableObject selectionType; ///< The type of object.
-        size_t index;                   ///< The index of the object in m_graph.
+      SelectableObject selectionType; ///< The type of object.
+      size_t index;                   ///< The index of the object in m_graph.
     };
 
     /**
@@ -290,18 +290,44 @@ class GLScene
     void renderLatexGraphics(const QString& filename, float aspectRatio = 1.0f);
 
     //Getters and setters
-    bool drawStateLabels() const { return m_drawstatelabels; }
-    bool drawTransitionLabels() const { return m_drawtransitionlabels; }
-    size_t  nodeSize() const { return m_size_node; }
-    float  fogDistance() const { return m_fogdistance; }
-    void setDrawTransitionLabels(bool drawLabels) { m_drawtransitionlabels = drawLabels; }
-    void setDrawStateLabels(bool drawLabels) { m_drawstatelabels = drawLabels; }
-    void setDrawStateNumbers(bool drawLabels) { m_drawstatenumbers = drawLabels; }
-    void setDrawSelfLoops(bool drawLoops) { m_drawselfloops = drawLoops; }
-    void setDrawInitialMarking(bool drawMark) { m_drawinitialmarking = drawMark; }
-    void setDrawFog(bool drawFog) { m_drawfog = drawFog; updateFog(); }
-    void setNodeSize(size_t size) { m_size_node = size; }
-    void setFogDistance(float dist) { m_fogdistance = dist; updateFog(); }
+    bool drawStateLabels() const {
+      return m_drawstatelabels;
+    }
+    bool drawTransitionLabels() const {
+      return m_drawtransitionlabels;
+    }
+    size_t  nodeSize() const {
+      return m_size_node;
+    }
+    float  fogDistance() const {
+      return m_fogdistance;
+    }
+    void setDrawTransitionLabels(bool drawLabels) {
+      m_drawtransitionlabels = drawLabels;
+    }
+    void setDrawStateLabels(bool drawLabels) {
+      m_drawstatelabels = drawLabels;
+    }
+    void setDrawStateNumbers(bool drawLabels) {
+      m_drawstatenumbers = drawLabels;
+    }
+    void setDrawSelfLoops(bool drawLoops) {
+      m_drawselfloops = drawLoops;
+    }
+    void setDrawInitialMarking(bool drawMark) {
+      m_drawinitialmarking = drawMark;
+    }
+    void setDrawFog(bool drawFog) {
+      m_drawfog = drawFog;
+      updateFog();
+    }
+    void setNodeSize(size_t size) {
+      m_size_node = size;
+    }
+    void setFogDistance(float dist) {
+      m_fogdistance = dist;
+      updateFog();
+    }
 
 };
 

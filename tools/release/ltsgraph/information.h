@@ -27,66 +27,66 @@
 
 namespace Graph
 {
-  class InformationUi;
+class InformationUi;
 
-  class Information
-  {
-    private:
-      Graph& m_graph;         ///< The graph for the statistics
-      InformationUi* m_ui;    ///< The user interface which displays the information
-    public:
+class Information
+{
+  private:
+    Graph& m_graph;         ///< The graph for the statistics
+    InformationUi* m_ui;    ///< The user interface which displays the information
+  public:
 
-      /**
-       * @brief Constructor.
-       * @param graph The graph for the statistics
-       */
-      Information(Graph& graph);
+    /**
+     * @brief Constructor.
+     * @param graph The graph for the statistics
+     */
+    Information(Graph& graph);
 
-      /**
-       * @brief Destructor.
-       */
-      virtual ~Information();
+    /**
+     * @brief Destructor.
+     */
+    virtual ~Information();
 
-      /**
-       * @brief Returns the user interface object. If no user interface is available,
-       *        one is created using the provided @e parent.
-       * @param The parent of the user inferface in the case none exists yet.
-       */
-      InformationUi* ui(QWidget* parent = 0);
+    /**
+     * @brief Returns the user interface object. If no user interface is available,
+     *        one is created using the provided @e parent.
+     * @param The parent of the user inferface in the case none exists yet.
+     */
+    InformationUi* ui(QWidget* parent = 0);
 
-      /**
-       * @brief Updates the information.
-       */
-      void update();
+    /**
+     * @brief Updates the information.
+     */
+    void update();
 
-      QString m_initial;        ///< The initial node index.
-      QString m_initialstring;  ///< The initial node label.
-      size_t m_nodes;              ///< The total number of nodes.
-      size_t m_edges;              ///< The total number of edges.
-      size_t m_slabels;            ///< The total number of state labels.
-      size_t m_tlabels;            ///< The total number of transition labels.
-  };
+    QString m_initial;        ///< The initial node index.
+    QString m_initialstring;  ///< The initial node label.
+    size_t m_nodes;              ///< The total number of nodes.
+    size_t m_edges;              ///< The total number of edges.
+    size_t m_slabels;            ///< The total number of state labels.
+    size_t m_tlabels;            ///< The total number of transition labels.
+};
 
-  class InformationUi : public QDockWidget
-  {
-      Q_OBJECT
-    private:
-      Information& m_info;      ///< The Information containing all needed information.
-      Ui::DockWidgetInfo m_ui;  ///< The user interface of this objest.
-    public:
+class InformationUi : public QDockWidget
+{
+    Q_OBJECT
+  private:
+    Information& m_info;      ///< The Information containing all needed information.
+    Ui::DockWidgetInfo m_ui;  ///< The user interface of this objest.
+  public:
 
-      /**
-       * @brief Constructor.
-       * @param info The Information object this user interface corresponds to.
-       * @param parent The parent widget for this user interface.
-       */
-      InformationUi(Information& info, QWidget* parent=0);
+    /**
+     * @brief Constructor.
+     * @param info The Information object this user interface corresponds to.
+     * @param parent The parent widget for this user interface.
+     */
+    InformationUi(Information& info, QWidget* parent=0);
 
-      /**
-       * @brief Updates all labels with the information available in the Information object.
-       */
-      void updateLabels();
-  };
+    /**
+     * @brief Updates all labels with the information available in the Information object.
+     */
+    void updateLabels();
+};
 }
 
 #endif // GRAPHINFORMATION_H

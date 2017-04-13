@@ -21,7 +21,7 @@
 
 #define MAX_NODE_COUNT 400
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
   QMainWindow(parent),
   m_fileDialog("", this)
 {
@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
   m_ui.actOutput->setChecked(!m_ui.dockOutput->isHidden());
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
   QSettings settings("mCRL2", "LTSGraph");
   settings.setValue("geometry", saveGeometry());
@@ -120,10 +120,12 @@ void MainWindow::onWidgetResized(const Graph::Coord3D& newsize)
 
 void MainWindow::on3DChanged(bool enabled)
 {
-  if (enabled)
+  if (enabled) {
     m_glwidget->setDepth(1000, 25);
-  else
+  }
+  else {
     m_glwidget->setDepth(0, 80);
+  }
 }
 
 void MainWindow::onExplore(bool enabled)
@@ -133,8 +135,9 @@ void MainWindow::onExplore(bool enabled)
     m_graph.makeSelection();
     m_graph.toggleActive(m_graph.initialState());
   }
-  else
+  else {
     m_graph.discardSelection();
+  }
 }
 
 void MainWindow::onTimer()
@@ -163,14 +166,14 @@ void MainWindow::openFile(QString fileName)
       m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
       m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0);
-      
+
       if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadSelection)
       {
         if (QMessageBox::question(this, "Exploration mode",
-          tr("The selected LTS has a large number of states; "
-            "this may cause LTS Graph to perform poorly or become unresponsive. "
-            "Do you want to enable exploration mode?"),
-          QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+                                  tr("The selected LTS has a large number of states; "
+                                     "this may cause LTS Graph to perform poorly or become unresponsive. "
+                                     "Do you want to enable exploration mode?"),
+                                  QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
         {
           m_ui.actExplorationMode->setChecked(true);
         }
@@ -199,7 +202,7 @@ void MainWindow::onOpenFile()
 {
 
   QString fileName(m_fileDialog.getOpenFileName(tr("Open file"),
-                                                tr("Labelled transition systems (*.lts *.aut *.fsm *.dot)")));
+                   tr("Labelled transition systems (*.lts *.aut *.fsm *.dot)")));
 
   openFile(fileName);
 }
@@ -209,12 +212,12 @@ void MainWindow::onExportImage()
   QString bitmap = tr("Bitmap images (*.png *.jpg *.jpeg *.gif *.bmp *.pbm *.pgm *.ppm *.xbm *.xpm)");
   QString vector = tr("Vector format (*.pdf *.ps *.eps *.svg *.pgf)");
   QString tikz = tr("LaTeX TikZ Image (*.tex)");
-  
+
   QString filter = bitmap + ";;" + vector + ";;" + tikz;
   QString selectedFilter = bitmap;
   QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
-                                                filter,
-                                                &selectedFilter));
+                   filter,
+                   &selectedFilter));
 
   if (!fileName.isNull())
   {
@@ -226,15 +229,14 @@ void MainWindow::onExportImage()
         m_glwidget->savePixmap(fileName, dDialog.resultWidth(), dDialog.resultHeight());
       }
     }
-    else
-	if (selectedFilter == vector)
+    else if (selectedFilter == vector)
     {
       m_glwidget->saveVector(fileName);
     }
-	else
-	{
+    else
+    {
       m_glwidget->saveTikz(fileName, m_glwidget->width() / m_glwidget->height());
-	}
+    }
   }
 
 }
@@ -242,7 +244,7 @@ void MainWindow::onExportImage()
 void MainWindow::onImportXML()
 {
   QString fileName(m_fileDialog.getOpenFileName(tr("Open file"),
-                                                tr("XML Graph (*.xml)")));
+                   tr("XML Graph (*.xml)")));
 
   if (!fileName.isNull())
   {
@@ -261,7 +263,7 @@ void MainWindow::onImportXML()
 void MainWindow::onExportXML()
 {
   QString fileName(m_fileDialog.getSaveFileName(tr("Save file"),
-                                                tr("XML Graph (*.xml)")));
+                   tr("XML Graph (*.xml)")));
 
   if (!fileName.isNull())
   {

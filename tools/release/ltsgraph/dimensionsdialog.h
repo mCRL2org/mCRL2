@@ -25,13 +25,13 @@
 class DimensionsDialog : public QDialog
 {
     Q_OBJECT
-    
+
   public:
 
     /**
      * @brief Constructor which creates the dialog for the given parent.
      */
-    explicit DimensionsDialog(QWidget *parent = 0);
+    explicit DimensionsDialog(QWidget* parent = 0);
 
     /**
      * @brief Returns the supplied width, only valid if exec() returned QDialog::Accepted.
@@ -42,7 +42,7 @@ class DimensionsDialog : public QDialog
      * @brief Returns the supplied height, only valid if exec() returned QDialog::Accepted.
      */
     int resultHeight();
-    
+
   private:
     Ui::DimensionsDialog m_ui;     ///< The user inferface of the class.
 
