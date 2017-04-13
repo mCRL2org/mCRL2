@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
@@ -108,21 +109,33 @@ std::vector<std::string> regex_split(const std::string& text, const std::string&
 {
   std::vector<std::string> result;
 
-  // find multiple line endings
-  std::regex re(sep);
+  // g++ 4.7.2 doesn't support token iterators yet
+  //
+  // std::regex re(sep);
+  // std::sregex_token_iterator i(text.begin(), text.end(), re, -1);
+  // std::sregex_token_iterator end;
+  // while (i != end)
+  // {
+  //   std::string word = i->str();
+  //   boost::trim(word);
+  //   if (word.size() > 0)
+  //   {
+  //     result.push_back(word);
+  //   }
+  //   ++i;
+  // }
 
-  std::sregex_token_iterator i(text.begin(), text.end(), re, -1);
-  std::sregex_token_iterator end;
-
-  while (i != end)
+  boost::xpressive::sregex paragraph_split = boost::xpressive::sregex::compile(sep);
+  boost::xpressive::sregex_token_iterator cur(text.begin(), text.end(), paragraph_split, -1);
+  boost::xpressive::sregex_token_iterator end;
+  for (; cur != end; ++cur)
   {
-    std::string word = i->str();
+    std::string word = *cur;
     boost::trim(word);
     if (word.size() > 0)
     {
       result.push_back(word);
     }
-    ++i;
   }
 
   return result;
