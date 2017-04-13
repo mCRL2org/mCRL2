@@ -26,7 +26,7 @@ class VisObject
     ~VisObject();
     float* getMatrixP() const;
     QColor getColor() const; //TODO This doesn't seem to be used;
-    Vector3D getCoordinates() const;
+    QVector3D getCoordinates() const;
     int getPrimitive() const;
     void setColor(QColor c);
     void setTextureColours(std::vector<QColor>& colours);
@@ -75,9 +75,9 @@ int VisObject::getPrimitive() const
   return primitive;
 }
 
-Vector3D VisObject::getCoordinates() const
+QVector3D VisObject::getCoordinates() const
 {
-  return Vector3D(matrix[12], matrix[13], matrix[14]);
+  return QVector3D(matrix[12], matrix[13], matrix[14]);
 }
 
 void VisObject::setColor(QColor c)
@@ -172,17 +172,17 @@ void VisObject::addIdentifier(int id)
 class Distance
 {
   private:
-    Vector3D viewpoint;
+    QVector3D viewpoint;
   public:
-    explicit Distance(const Vector3D& vp) : viewpoint(vp) {}
+    explicit Distance(const QVector3D& vp) : viewpoint(vp) {}
     bool operator()(const VisObject* o1,const VisObject* o2) const;
 };
 
 bool Distance::operator()(const VisObject* o1, const VisObject* o2) const
 {
-  Vector3D d1 = o1->getCoordinates() - viewpoint;
-  Vector3D d2 = o2->getCoordinates() - viewpoint;
-  return (d1.dot_product(d1) > d2.dot_product(d2));
+  QVector3D d1 = o1->getCoordinates() - viewpoint;
+  QVector3D d2 = o2->getCoordinates() - viewpoint;
+  return d1.lengthSquared() > d2.lengthSquared();
 }
 
 /* -------------------- VisObjectFactory ------------------------------------ */
@@ -195,7 +195,7 @@ VisObjectFactory::~VisObjectFactory()
   clear();
 }
 
-void VisObjectFactory::sortObjects(const Vector3D& viewpoint)
+void VisObjectFactory::sortObjects(const QVector3D& viewpoint)
 {
   stable_sort(objects_sorted.begin(),objects_sorted.end(),Distance(viewpoint));
 }

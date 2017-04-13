@@ -52,9 +52,9 @@ class NodeClusterStatePositioner: public ClusterStatePositioner
     void positionStates();
 
   private:
-    void assignStateToNearestSlot(State* state, const Vector2D& position);
+    void assignStateToNearestSlot(State* state, const QVector2D& position);
     void buildRTree();
-    Vector2D sumSuccessorStateVectors(State* state);
+    QVector2D sumSuccessorStateVectors(State* state);
 
     RTree* slot_rtree;
 };
@@ -113,7 +113,7 @@ void NodeClusterStatePositioner::positionStates()
   for (int s = 0; s < cluster->getNumStates(); ++s)
   {
     State* state = cluster->getState(s);
-    Vector2D position = sumSuccessorStateVectors(state);
+    QVector2D position = sumSuccessorStateVectors(state);
     assignStateToNearestSlot(state, position);
   }
 }
@@ -128,16 +128,16 @@ void NodeClusterStatePositioner::buildRTree()
     float delta_deg = 360.0f / static_cast<float>(num_slots);
     for (int slot = 0; slot < num_slots; ++slot)
     {
-      rtree_builder.addPoint(Vector2D::fromPolar(delta_deg * slot, radius));
+      rtree_builder.addPoint(Vectors::fromPolar(delta_deg * slot, radius));
     }
   }
   rtree_builder.buildRTree();
   slot_rtree = rtree_builder.getRTree();
 }
 
-Vector2D NodeClusterStatePositioner::sumSuccessorStateVectors(State* state)
+QVector2D NodeClusterStatePositioner::sumSuccessorStateVectors(State* state)
 {
-  Vector2D sum_vector = Vector2D(0, 0);
+  QVector2D sum_vector = QVector2D(0, 0);
   for (int t = 0; t < state->getNumOutTransitions(); ++t)
   {
     State* successor = state->getOutTransition(t)->getEndState();
@@ -147,17 +147,17 @@ Vector2D NodeClusterStatePositioner::sumSuccessorStateVectors(State* state)
       {
         if (!successor->isCentered())
         {
-          sum_vector += Vector2D::fromPolar(successor->getPositionAngle(),
+          sum_vector += Vectors::fromPolar(successor->getPositionAngle(),
                                             successor->getPositionRadius());
         }
       }
       else
       {
-        sum_vector += Vector2D::fromPolar(
+        sum_vector += Vectors::fromPolar(
                         successor->getCluster()->getPosition(), cluster->getBaseRadius());
         if (!successor->isCentered())
         {
-          sum_vector += Vector2D::fromPolar(successor->getPositionAngle() +
+          sum_vector += Vectors::fromPolar(successor->getPositionAngle() +
                                             successor->getCluster()->getPosition(),
                                             successor->getPositionRadius());
         }
@@ -168,16 +168,16 @@ Vector2D NodeClusterStatePositioner::sumSuccessorStateVectors(State* state)
 }
 
 void NodeClusterStatePositioner::assignStateToNearestSlot(State* state,
-    const Vector2D& position)
+    const QVector2D& position)
 {
-  Vector2D assigned_position = position;
+  QVector2D assigned_position = position;
   slot_rtree->findNearestNeighbour(position);
   if (slot_rtree->hasFoundNeighbour())
   {
     assigned_position = slot_rtree->foundNeighbour();
   }
   float angle, radius;
-  assigned_position.toPolar(angle, radius);
+  Vectors::toPolar(angle, radius, assigned_position);
   if (radius < 0.5f * delta_ring)
   {
     state->center();

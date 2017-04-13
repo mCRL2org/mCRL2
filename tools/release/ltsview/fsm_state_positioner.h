@@ -33,11 +33,11 @@ class FSMStatePositioner: public StatePositioner
     void bottomUpPass();
     void getPredecessors(State* state, std::vector< State* >& predecessors);
     void getSuccessors(State* state, std::vector< State* >& successors);
-    void requestStatePosition(State* state, Vector2D& position);
+    void requestStatePosition(State* state, QVector2D& position);
     void resolveUnpositioned();
-    Vector2D sumStateVectorsInMultipleClusters(std::vector< State* > &states,
+    QVector2D sumStateVectorsInMultipleClusters(std::vector< State* > &states,
         float rim_radius);
-    Vector2D sumStateVectorsInSingleCluster(std::vector< State* > &states);
+    QVector2D sumStateVectorsInSingleCluster(std::vector< State* > &states);
     void topDownPass();
 };
 
@@ -47,7 +47,7 @@ class ClusterSlotInfo
     ClusterSlotInfo(Cluster* cluster);
     ~ClusterSlotInfo() {}
     void findFarthestFreeSlot(int& ring, int& slot);
-    void findNearestSlot(Vector2D& position, int& ring, int& slot);
+    void findNearestSlot(QVector2D& position, int& ring, int& slot);
     void findNearestFreeSlot(int& ring, int& slot);
     int getNumRings();
     int getNumSlots(int ring);
@@ -78,7 +78,7 @@ class ClusterSlotInfo
     std::vector< int > num_slots;
     SlotSet occupied_slots;
 
-    Vector2D getVector(int ring, int slot);
+    QVector2D getVector(int ring, int slot);
 };
 
 #endif

@@ -59,7 +59,7 @@ class LtsCanvas : public QGLWidget
     Selection selectObject(QPoint position);
     Selection parseSelection(GLuint* selectionBuffer, GLint items);
     void applyRotation(bool reverse = false);
-    Vector3D getArcBallVector(int screenX, int screenY);
+    QVector3D getArcBallVector(int screenX, int screenY);
 
   public:
     QImage renderImage(int width, int height);
@@ -86,7 +86,7 @@ class LtsCanvas : public QGLWidget
     float m_baseDepth;
     float m_nearPlane;
     float m_farPlane;
-    Vector3D m_position;
+    QVector3D m_position;
     QQuaternion m_rotation;
     Tool m_activeTool;
     bool m_dragging;

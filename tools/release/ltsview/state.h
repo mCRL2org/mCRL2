@@ -38,11 +38,11 @@ class State
 
     float getPositionAngle() const;
     float getPositionRadius() const;
-    Vector3D getPositionAbs() const;
-    Vector3D getOutgoingControl() const;
-    Vector3D getIncomingControl() const;
-    Vector3D getLoopControl1() const;
-    Vector3D getLoopControl2() const;
+    QVector3D getPositionAbs() const;
+    QVector3D getOutgoingControl() const;
+    QVector3D getIncomingControl() const;
+    QVector3D getLoopControl1() const;
+    QVector3D getLoopControl2() const;
     int getRank() const;
     bool isSimulated() const { return simulationCount > 0; }
     bool isCentered() const;
@@ -57,11 +57,11 @@ class State
     void setCluster(Cluster* c);
     void setPositionAngle(float a);
     void setPositionRadius(float r);
-    void setPositionAbs(const Vector3D& p);
-    void setOutgoingControl(const Vector3D& p);
-    void setIncomingControl(const Vector3D& p);
-    void setLoopControl1(const Vector3D& p);
-    void setLoopControl2(const Vector3D& p);
+    void setPositionAbs(const QVector3D& p);
+    void setOutgoingControl(const QVector3D& p);
+    void setIncomingControl(const QVector3D& p);
+    void setLoopControl1(const QVector3D& p);
+    void setLoopControl2(const QVector3D& p);
     void setID(int i);
     void setRank(int r);
     void increaseSimulation() { simulationCount++; }
@@ -80,11 +80,11 @@ class State
     std::set< MarkRuleIndex > matchedRules;
     float positionAngle;
     float positionRadius;
-    Vector3D positionAbs;
-    Vector3D outgoingControl;
-    Vector3D incomingControl;
-    Vector3D loopControl1;
-    Vector3D loopControl2;
+    QVector3D positionAbs;
+    QVector3D outgoingControl;
+    QVector3D incomingControl;
+    QVector3D loopControl1;
+    QVector3D loopControl2;
     int rank;
     int simulationCount;
 };

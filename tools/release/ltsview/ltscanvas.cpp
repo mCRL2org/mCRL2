@@ -53,7 +53,7 @@ LtsCanvas::LtsCanvas(QWidget* parent, Settings* settings, LtsManager* ltsManager
 
 void LtsCanvas::resetView()
 {
-  m_position = Vector3D(0.0f, 0.0f, 0.0f);
+  m_position = QVector3D(0.0f, 0.0f, 0.0f);
   // structure will be drawn around the positive z-axis starting from the
   // origin, so we start with a rotation that makes the z-axis point downwards
   m_rotation = QQuaternion(1.0f, 1.0f, 0.0f, 0.0f).normalized();
@@ -164,7 +164,7 @@ void LtsCanvas::paintGL()
   emit renderingFinished();
 }
 
-Vector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
+QVector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
   float x, y, z;
   const float radius = 1.5f;
   // we assume that the center of the arcball matches the center of the
@@ -191,7 +191,7 @@ Vector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
     }
     z = 0.0f;
   }
-  return Vector3D(x, y, z);
+  return QVector3D(x, y, z);
 }
 
 void LtsCanvas::applyRotation(bool reverse) {
@@ -326,7 +326,7 @@ void LtsCanvas::render(bool light)
     glTranslatef(-m_position.x(), -m_position.y(), -m_position.z() + m_baseDepth);
     GLfloat matrix[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
-    Vector3D viewpoint = Vector3D(matrix[12], matrix[13], matrix[14]);
+    QVector3D viewpoint = QVector3D(matrix[12], matrix[13], matrix[14]);
     glPopMatrix();
     // sort clusters on distance to viewpoint
     m_visualizer->sortClusters(viewpoint);
@@ -414,7 +414,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
 
   if (m_activeTool == PanTool)
   {
-    m_position += Vector3D(
+    m_position += QVector3D(
       -0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.x() - event->x()),
        0.0015f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->y()),
        0.0f
@@ -424,7 +424,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
   }
   else if (m_activeTool == ZoomTool)
   {
-    m_position += Vector3D(
+    m_position += QVector3D(
       0.0f,
       0.0f,
       0.01f * (m_baseDepth - m_position.z()) * (oldPosition.y() - event->y())
@@ -435,13 +435,13 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
   else if (m_activeTool == RotateTool)
   {
     // update rotation based on the difference in mouse coordinates
-    Vector3D v1 = getArcBallVector(oldPosition.x(), oldPosition.y());
-    Vector3D v2 = getArcBallVector(m_lastMousePosition.x(), m_lastMousePosition.y());
+    QVector3D v1 = getArcBallVector(oldPosition.x(), oldPosition.y());
+    QVector3D v2 = getArcBallVector(m_lastMousePosition.x(), m_lastMousePosition.y());
     v1.normalize();
     v2.normalize();
-    Vector3D cross = v1.cross_product(v2);
-    float dot = v1.dot_product(v2);
-    QQuaternion rotation(dot, cross.x(), cross.y(), cross.z());
+    QVector3D cross = QVector3D::crossProduct(v1, v2);
+    float dot = QVector3D::dotProduct(v1, v2);
+    QQuaternion rotation(dot, cross);
     m_rotation = rotation * m_rotation;
     event->accept();
     repaint();
@@ -450,7 +450,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
 
 void LtsCanvas::wheelEvent(QWheelEvent* event)
 {
-  m_position += Vector3D(0.0f, 0.0f, 0.001f * (m_baseDepth - m_position.z()) * event->delta());
+  m_position += QVector3D(0.0f, 0.0f, 0.001f * (m_baseDepth - m_position.z()) * event->delta());
   event->accept();
   repaint();
 }

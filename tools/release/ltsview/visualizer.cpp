@@ -652,7 +652,7 @@ void Visualizer::updateColors()
   update_colors = false;
 }
 
-void Visualizer::sortClusters(const Vector3D& viewpoint)
+void Visualizer::sortClusters(const QVector3D& viewpoint)
 {
   visObjectFactory.sortObjects(viewpoint);
 }
@@ -684,7 +684,7 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
 
   float ns = settings->stateSize.value();
   QColor c;
-  Vector3D p;
+  QVector3D p;
 
   set<State*> drawnStates;
 
@@ -707,7 +707,7 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
     }
 
     glColor4ub(c.red(), c.green(), c.blue(), 255);
-    Vector3D p = currState->getPositionAbs();
+    QVector3D p = currState->getPositionAbs();
 
     glPushName(currState->getID());
 
@@ -849,20 +849,20 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
 
         // store the position of this state
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
-        Vector3D p1 = Vector3D(M[12], M[13], M[14]);
+        QVector3D p1 = QVector3D(M[12], M[13], M[14]);
         s->setPositionAbs(p1);
 
         // The outgoing vector of the state lies settings->clusterHeight.value() above the state.
         glPushMatrix();
         glTranslatef(0.0f, 0.0f, -2 * settings->clusterHeight.value());
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
-        Vector3D p2 = Vector3D(M[12], M[13], M[14]);
+        QVector3D p2 = QVector3D(M[12], M[13], M[14]);
         s->setIncomingControl(p2);
 
         // The incoming vector of the state lies settings->clusterHeight.value() beneath the state.
         glTranslatef(0.0f, 0.0f, 4 * settings->clusterHeight.value());
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
-        Vector3D p3 = Vector3D(M[12], M[13], M[14]);
+        QVector3D p3 = QVector3D(M[12], M[13], M[14]);
         s->setOutgoingControl(p3);
 
         glPopMatrix();
@@ -875,7 +875,7 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
 
         glTranslatef(s->getPositionRadius(), 0.0f, 0.0f);
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
-        Vector3D p1 = Vector3D(M[12], M[13], M[14]);
+        QVector3D p1 = QVector3D(M[12], M[13], M[14]);
         s->setPositionAbs(p1);
         glTranslatef(-s->getPositionRadius(), 0.0f, 0.0f);
 
@@ -884,12 +884,12 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
         // settings->clusterHeight.value() up.
         glTranslatef(root->getTopRadius() * 3, 0.0f, -settings->clusterHeight.value());
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
-        Vector3D p2 = Vector3D(M[12], M[13], M[14]);
+        QVector3D p2 = QVector3D(M[12], M[13], M[14]);
         s->setIncomingControl(p2);
 
         glTranslatef(0.0f, 0.0f, 2 * settings->clusterHeight.value());
         glGetFloatv(GL_MODELVIEW_MATRIX, M);
-        Vector3D p3 = Vector3D(M[12], M[13], M[14]);
+        QVector3D p3 = QVector3D(M[12], M[13], M[14]);
         s->setOutgoingControl(p3);
         glPopMatrix();
       }
@@ -903,14 +903,14 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
                    settings->stateSize.value() * 5.0f,
                    0.0f);
       glGetFloatv(GL_MODELVIEW_MATRIX, M);
-      Vector3D p = Vector3D(M[12], M[13], M[14]);
+      QVector3D p = QVector3D(M[12], M[13], M[14]);
       s->setLoopControl1(p);
 
       glTranslatef(0.0f,
                    -settings->stateSize.value() * 10.0f,
                    0.0f);
       glGetFloatv(GL_MODELVIEW_MATRIX, M);
-      p = Vector3D(M[12], M[13], M[14]);
+      p = QVector3D(M[12], M[13], M[14]);
       s->setLoopControl2(p);
 
       glPopMatrix();
@@ -1024,7 +1024,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
         }
 
         glColor4ub(c.red(),c.green(),c.blue(),255);
-        Vector3D p = s->getPositionAbs();
+        QVector3D p = s->getPositionAbs();
 
         glPushMatrix();
         glTranslatef(p.x(), p.y(), p.z());
@@ -1280,8 +1280,8 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
 
 void Visualizer::drawForwardPointer(State* startState, State* endState)
 {
-  Vector3D startPoint = startState->getPositionAbs();
-  Vector3D endPoint = endState->getPositionAbs();
+  QVector3D startPoint = startState->getPositionAbs();
+  QVector3D endPoint = endState->getPositionAbs();
 
   glBegin(GL_LINES);
   glVertex3f(startPoint.x(), startPoint.y(), startPoint.z());
@@ -1291,10 +1291,10 @@ void Visualizer::drawForwardPointer(State* startState, State* endState)
 
 void Visualizer::drawBackPointer(State* startState, const QColor& startColor, State* endState, const QColor& endColor)
 {
-  Vector3D startPoint = startState->getPositionAbs();
-  Vector3D startControl = startState->getOutgoingControl();
-  Vector3D endControl = endState->getIncomingControl();
-  Vector3D endPoint = endState->getPositionAbs();
+  QVector3D startPoint = startState->getPositionAbs();
+  QVector3D startControl = startState->getOutgoingControl();
+  QVector3D endControl = endState->getIncomingControl();
+  QVector3D endPoint = endState->getPositionAbs();
 
   GLfloat ctrlPts [4][3] =
   {
@@ -1363,9 +1363,9 @@ void Visualizer::drawBackPointer(State* startState, const QColor& startColor, St
 
 void Visualizer::drawLoop(State* state)
 {
-  Vector3D statePoint = state->getPositionAbs();
-  Vector3D startControl = state->getLoopControl1();
-  Vector3D endControl = state->getLoopControl2();
+  QVector3D statePoint = state->getPositionAbs();
+  QVector3D startControl = state->getLoopControl1();
+  QVector3D endControl = state->getLoopControl2();
 
   float t,it,b0,b1,b2,b3,x,y,z;
   int N = settings->quality.value();

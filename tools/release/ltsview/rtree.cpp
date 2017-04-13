@@ -19,24 +19,24 @@ class Rectangle
   public:
     Rectangle() {}
 
-    Rectangle(const Vector2D& lowc, const Vector2D& highc):
+    Rectangle(const QVector2D& lowc, const QVector2D& highc):
       low_corner(lowc), high_corner(highc)
     { }
 
-    bool contains(const Vector2D& point) const;
+    bool contains(const QVector2D& point) const;
 
     void ensureMinSideLength(float min_side_length);
 
-    float minDistanceTo(const Vector2D& point) const;
+    float minDistanceTo(const QVector2D& point) const;
 
 
     // We assume the following invariant for any rectangle:
     // low_corner.x() <= high_corner.x() && low_corner.y() <= high_corner.y()
-    Vector2D low_corner;
-    Vector2D high_corner;
+    QVector2D low_corner;
+    QVector2D high_corner;
 };
 
-bool Rectangle::contains(const Vector2D& point) const
+bool Rectangle::contains(const QVector2D& point) const
 {
   return point.x() >= low_corner.x() && high_corner.x() >= point.x() &&
          point.y() >= low_corner.y() && high_corner.y() >= point.y();
@@ -60,8 +60,8 @@ void Rectangle::ensureMinSideLength(float min_side_length)
     hc_y += 0.5f * (min_side_length - diff_y);
     lc_y -= 0.5f * (min_side_length - diff_y);
   }
-  low_corner = Vector2D(lc_x, lc_y);
-  high_corner = Vector2D(hc_x, hc_y);
+  low_corner = QVector2D(lc_x, lc_y);
+  high_corner = QVector2D(hc_x, hc_y);
 }
 
 
@@ -91,7 +91,7 @@ class RNode
     virtual void computeBoundingBox()
     { }
 
-    virtual void deletePoint(const Vector2D&)
+    virtual void deletePoint(const QVector2D&)
     { }
 
     virtual bool hasChildren() const
@@ -139,7 +139,7 @@ class RTreeNode: public RNode
 
     void computeBoundingBox();
 
-    void deletePoint(const Vector2D& point);
+    void deletePoint(const QVector2D& point);
 
     bool hasChildren() const
     {
@@ -164,11 +164,11 @@ void RTreeNode::computeBoundingBox()
     hc_x = std::max(hc_x, child_bb.high_corner.x());
     hc_y = std::max(hc_y, child_bb.high_corner.y());
   }
-  bounding_box = Rectangle(Vector2D(lc_x, lc_y), Vector2D(hc_x, hc_y));
+  bounding_box = Rectangle(QVector2D(lc_x, lc_y), QVector2D(hc_x, hc_y));
   bounding_box.ensureMinSideLength(MIN_BB_SIDE_LENGTH);
 }
 
-void RTreeNode::deletePoint(const Vector2D& point)
+void RTreeNode::deletePoint(const QVector2D& point)
 {
   std::list< RNode* >::iterator ci = children.begin();
   while (ci != children.end())
@@ -196,7 +196,7 @@ void RTreeNode::deletePoint(const Vector2D& point)
 class RTreeLeaf: public RNode
 {
   public:
-    RTreeLeaf(const Vector2D& p):
+    RTreeLeaf(const QVector2D& p):
       point(p)
     { }
 
@@ -210,10 +210,10 @@ class RTreeLeaf: public RNode
       return false;
     }
 
-    void deletePoint(const Vector2D&)
+    void deletePoint(const QVector2D&)
     { }
 
-    Vector2D point;
+    QVector2D point;
 };
 
 void RTreeLeaf::computeBoundingBox()
@@ -222,7 +222,7 @@ void RTreeLeaf::computeBoundingBox()
   float lc_y = point.y();
   float hc_x = point.x();
   float hc_y = point.y();
-  bounding_box = Rectangle(Vector2D(lc_x, lc_y), Vector2D(hc_x, hc_y));
+  bounding_box = Rectangle(QVector2D(lc_x, lc_y), QVector2D(hc_x, hc_y));
   bounding_box.ensureMinSideLength(MIN_BB_SIDE_LENGTH);
 }
 
@@ -254,14 +254,14 @@ class QueueElementGreaterThan
 class MinRectPointDistance
 {
   public:
-    float operator()(const Rectangle& rectangle, const Vector2D& point)
+    float operator()(const Rectangle& rectangle, const QVector2D& point)
     {
       if (rectangle.contains(point))
       {
         return 0.0f;
       }
-      Vector2D diff_low = rectangle.low_corner - point;
-      Vector2D diff_high = rectangle.high_corner - point;
+      QVector2D diff_low = rectangle.low_corner - point;
+      QVector2D diff_high = rectangle.high_corner - point;
       return std::min(diff_low.x() * diff_low.x(), diff_high.x() * diff_high.x()) +
              std::min(diff_low.y() * diff_low.y(), diff_high.y() * diff_high.y());
     }
@@ -270,10 +270,10 @@ class MinRectPointDistance
 class MaxRectPointDistance
 {
   public:
-    float operator()(const Rectangle& rectangle, const Vector2D& point)
+    float operator()(const Rectangle& rectangle, const QVector2D& point)
     {
-      Vector2D diff_low = rectangle.low_corner - point;
-      Vector2D diff_high = rectangle.high_corner - point;
+      QVector2D diff_low = rectangle.low_corner - point;
+      QVector2D diff_high = rectangle.high_corner - point;
       return std::max(diff_low.x() * diff_low.x(), diff_high.x() * diff_high.x()) +
              std::max(diff_low.y() * diff_low.y(), diff_high.y() * diff_high.y());
     }
@@ -286,7 +286,7 @@ class NeighbourFinder
     typedef std::priority_queue< QueueElement, std::vector< QueueElement >,
             Compare > PriorityQueue;
 
-    void startNewSearch(RNode* root, const Vector2D& point)
+    void startNewSearch(RNode* root, const QVector2D& point)
     {
       queue = PriorityQueue();
       has_found_neighbour = false;
@@ -300,14 +300,12 @@ class NeighbourFinder
       while (!queue.empty())
       {
         RNode* top_node = queue.top().node;
-        Rectangle bb =  top_node->boundingBox();
         queue.pop();
         RTreeLeaf* leaf = dynamic_cast< RTreeLeaf* >(top_node);
         if (leaf != NULL)
         {
           has_found_neighbour = true;
           found_neighbour = leaf->point;
-          Vector2D diff = leaf->point - query_point;
           return;
         }
         RTreeNode* node = dynamic_cast< RTreeNode* >(top_node);
@@ -326,15 +324,15 @@ class NeighbourFinder
       return has_found_neighbour;
     }
 
-    Vector2D foundNeighbour() const
+    QVector2D foundNeighbour() const
     {
       return found_neighbour;
     }
 
   private:
-    Vector2D found_neighbour;
+    QVector2D found_neighbour;
     bool has_found_neighbour;
-    Vector2D query_point;
+    QVector2D query_point;
     PriorityQueue queue;
 };
 
@@ -346,7 +344,7 @@ RTree::~RTree()
   }
 }
 
-void RTree::deletePoint(const Vector2D& point)
+void RTree::deletePoint(const QVector2D& point)
 {
   root->deletePoint(point);
   if (!root->hasChildren())
@@ -356,7 +354,7 @@ void RTree::deletePoint(const Vector2D& point)
   }
 }
 
-void RTree::findFarthestNeighbour(const Vector2D& point)
+void RTree::findFarthestNeighbour(const QVector2D& point)
 {
   NeighbourFinder< MaxRectPointDistance, QueueElementLessThan > finder;
   finder.startNewSearch(root, point);
@@ -368,7 +366,7 @@ void RTree::findFarthestNeighbour(const Vector2D& point)
   }
 }
 
-void RTree::findNearestNeighbour(const Vector2D& point)
+void RTree::findNearestNeighbour(const QVector2D& point)
 {
   NeighbourFinder< MinRectPointDistance, QueueElementGreaterThan > finder;
   finder.startNewSearch(root, point);
@@ -393,7 +391,7 @@ void PackedRTreeBuilder::buildRTree()
   // Institute for Computer Applications in Science and Engineering, 1997.
   std::vector< RNode* > roots;
   roots.reserve(points.size());
-  std::vector< Vector2D >::iterator pi;
+  std::vector< QVector2D >::iterator pi;
   for (pi = points.begin(); pi != points.end(); ++pi)
   {
     RTreeLeaf* leaf = new RTreeLeaf(*pi);

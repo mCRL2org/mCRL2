@@ -26,7 +26,6 @@ class VisObjectFactory;
 class State;
 class Cluster;
 class Transition;
-class Vector3D;
 
 class Visualizer: public QObject
 {
@@ -48,7 +47,7 @@ class Visualizer: public QObject
                             posTrans, Transition* chosenTrans);
 
     void drawStructure();
-    void sortClusters(const Vector3D& viewpoint);
+    void sortClusters(const QVector3D& viewpoint);
     void exportToText(std::string filename);
 
   public slots:

@@ -28,16 +28,16 @@ class RTree
     { }
 
     ~RTree();
-    void deletePoint(const Vector2D& point);
-    void findNearestNeighbour(const Vector2D& point);
-    void findFarthestNeighbour(const Vector2D& point);
+    void deletePoint(const QVector2D& point);
+    void findNearestNeighbour(const QVector2D& point);
+    void findFarthestNeighbour(const QVector2D& point);
 
     bool hasFoundNeighbour() const
     {
       return neighbour_found;
     }
 
-    Vector2D foundNeighbour() const
+    QVector2D foundNeighbour() const
     {
       return neighbour;
     }
@@ -45,7 +45,7 @@ class RTree
   private:
     RNode* root;
     bool neighbour_found;
-    Vector2D neighbour;
+    QVector2D neighbour;
 };
 
 
@@ -59,7 +59,7 @@ class PackedRTreeBuilder
     ~PackedRTreeBuilder()
     { }
 
-    void addPoint(const Vector2D& point)
+    void addPoint(const QVector2D& point)
     {
       points.push_back(point);
     }
@@ -72,7 +72,7 @@ class PackedRTreeBuilder
     }
 
   private:
-    std::vector< Vector2D > points;
+    std::vector< QVector2D > points;
     RTree* rtree;
     // The maximum number of children for a node in the RTree
     static const unsigned int MAX_FANOUT;

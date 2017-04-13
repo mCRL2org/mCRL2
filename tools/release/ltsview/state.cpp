@@ -108,27 +108,27 @@ float State::getPositionRadius() const
   return positionRadius;
 }
 
-Vector3D State::getPositionAbs() const
+QVector3D State::getPositionAbs() const
 {
   return positionAbs;
 }
 
-Vector3D State::getOutgoingControl() const
+QVector3D State::getOutgoingControl() const
 {
   return outgoingControl;
 }
 
-Vector3D State::getIncomingControl() const
+QVector3D State::getIncomingControl() const
 {
   return incomingControl;
 }
 
-Vector3D State::getLoopControl1() const
+QVector3D State::getLoopControl1() const
 {
   return loopControl1;
 }
 
-Vector3D State::getLoopControl2() const
+QVector3D State::getLoopControl2() const
 {
   return loopControl2;
 }
@@ -143,27 +143,27 @@ void State::setPositionAngle(float a)
   positionAngle = a;
 }
 
-void State::setPositionAbs(const Vector3D& p)
+void State::setPositionAbs(const QVector3D& p)
 {
   positionAbs = p;
 }
 
-void State::setOutgoingControl(const Vector3D& p)
+void State::setOutgoingControl(const QVector3D& p)
 {
   outgoingControl = p;
 }
 
-void State::setIncomingControl(const Vector3D& p)
+void State::setIncomingControl(const QVector3D& p)
 {
   incomingControl = p;
 }
 
-void State::setLoopControl1(const Vector3D& p)
+void State::setLoopControl1(const QVector3D& p)
 {
   loopControl1 = p;
 }
 
-void State::setLoopControl2(const Vector3D& p)
+void State::setLoopControl2(const QVector3D& p)
 {
   loopControl2 = p;
 }
