@@ -31,23 +31,23 @@ namespace Graph
       return ((float)qrand() / RAND_MAX) * (max - min) + min;
     }
 
-    QString stateLabelToQString(const mcrl2::lts::state_label_empty& label)
+    static QString stateLabelToQString(const mcrl2::lts::state_label_empty& label)
     {
         return QString("");
     }
-    QString stateLabelToQString(const mcrl2::lts::state_label_lts& label)
+    static QString stateLabelToQString(const mcrl2::lts::state_label_lts& label)
     {
         return QString::fromStdString(mcrl2::lts::pp(label));
     }
-    QString stateLabelToQString(const mcrl2::lts::state_label_fsm& label)
+    static QString stateLabelToQString(const mcrl2::lts::state_label_fsm& label)
     {
         return QString::fromStdString(mcrl2::lts::pp(label));
     }
-    QString transitionLabelToQString(const mcrl2::lts::action_label_lts& label)
+    static QString transitionLabelToQString(const mcrl2::lts::action_label_lts& label)
     {
         return QString::fromStdString(mcrl2::lts::pp(label));
     }
-    QString transitionLabelToQString(const mcrl2::lts::action_label_string& label)
+    static QString transitionLabelToQString(const mcrl2::lts::action_label_string& label)
     {
         return QString::fromStdString(label);
     }
@@ -95,18 +95,18 @@ namespace Graph
 
         Coord3D centroid;
         size_t count = 0;
-        for (size_t i = 0; i < node.inEdges.size(); ++i)
+        for (size_t inEdge : node.inEdges)
         {
-          ::Graph::Edge& edge = m_graph.m_edges[node.inEdges[i]];
+          ::Graph::Edge& edge = m_graph.m_edges[inEdge];
           if (m_nodes.count(edge.from()))
           {
             centroid += m_graph.m_nodes[edge.from()].pos();
             ++count;
           }
         }
-        for (size_t i = 0; i < node.outEdges.size(); ++i)
+        for (size_t outEdge : node.outEdges)
         {
-          ::Graph::Edge& edge = m_graph.m_edges[node.outEdges[i]];
+          ::Graph::Edge& edge = m_graph.m_edges[outEdge];
           if (m_nodes.count(edge.to()))
           {
             centroid += m_graph.m_nodes[edge.to()].pos();
@@ -273,20 +273,18 @@ namespace Graph
             nodes[nodeId] = NodeInfo(nodeId);
             NodeInfo& nodeinfo = nodes[nodeId];
             Node& node = m_nodes[nodeId];
-            for (size_t i = 0; i < node.outEdges.size(); ++i)
+            for (size_t outEdge : node.outEdges)
             {
-              size_t edgeId = node.outEdges[i];
-              if (!m_edges.count(edgeId)) continue;
-              size_t otherId = m_graph.m_edges[edgeId].to();
+              if (!m_edges.count(outEdge)) continue;
+              size_t otherId = m_graph.m_edges[outEdge].to();
               if (nodeId == otherId || !m_nodes.count(otherId)) continue;
               nodeinfo.neighbors.insert(otherId);
               progress.push(otherId);
             }
-            for (size_t i = 0; i < node.inEdges.size(); ++i)
+            for (size_t inEdge : node.inEdges)
             {
-              size_t edgeId = node.inEdges[i];
-              if (!m_edges.count(edgeId)) continue;
-              size_t otherId = m_graph.m_edges[edgeId].from();
+              if (!m_edges.count(inEdge)) continue;
+              size_t otherId = m_graph.m_edges[inEdge].from();
               if (nodeId == otherId || !m_nodes.count(otherId)) continue;
               nodeinfo.neighbors.insert(otherId);
               progress.push(otherId);
@@ -308,10 +306,8 @@ namespace Graph
             node.searched = true;
             order.push_back(nodeId);
 
-            for (std::unordered_set<size_t>::iterator
-              it = node.neighbors.begin(); it != node.neighbors.end(); ++it)
+            for (size_t otherId : node.neighbors)
             {
-              size_t otherId = *it;
               if (!nodes[otherId].searched) // node was not yet processed:
               {
                 nodes[otherId].parent = nodeId;
@@ -327,14 +323,11 @@ namespace Graph
 
         // find chains
         {
-          for (size_t i = 0; i < order.size(); ++i)
+          for (size_t nodeId : order)
           {
-            size_t nodeId = order[i];
             NodeInfo& node = nodes[nodeId];
-            for (std::unordered_set<size_t>::iterator
-              it = node.backEdges.begin(); it != node.backEdges.end(); ++it)
+            for (size_t id : node.backEdges)
             {
-              size_t id = *it;
               node.visited = true;
               chains.insert(EdgeInfo(nodeId, id));
               while (!nodes[id].visited)
@@ -349,9 +342,8 @@ namespace Graph
 
         // find leafs
         {
-          for (size_t i = 0; i < order.size(); ++i)
+          for (size_t nodeId : order)
           {
-            size_t nodeId = order[i];
             Node& node = m_nodes[nodeId];
             NodeInfo& nodeinfo = nodes[nodeId];
             if (m_graph.m_nodes[nodeId].active())
@@ -360,42 +352,37 @@ namespace Graph
               continue;
             }
             size_t count = 0;
-            for (size_t j = 0; j < node.inEdges.size(); ++j)
-              count += m_edges.count(node.inEdges[j]) ? 1 : 0;
-            for (size_t j = 0; j < node.outEdges.size(); ++j)
-              count += m_edges.count(node.outEdges[j]) ? 1 : 0;
+            for (size_t inEdge : node.inEdges)
+              count += m_edges.count(inEdge) ? 1 : 0;
+            for (size_t outEdge : node.outEdges)
+              count += m_edges.count(outEdge) ? 1 : 0;
             nodeinfo.leaf = (count <= 1);
           }
         }
 
         // find bridges
         {
-          for (size_t i = 0; i < order.size(); ++i)
+          for (size_t nodeId : order)
           {
-            size_t nodeId = order[i];
             Node& node = m_nodes[nodeId];
             NodeInfo& nodeinfo = nodes[nodeId];
             node.bridge = false;
 
             std::unordered_set<size_t> connected;
             size_t connections = 0;
-            for (size_t j = 0; j < node.inEdges.size(); ++j)
+            for (size_t inEdge : node.inEdges)
             {
-              size_t edgeId = node.inEdges[j];
-              if (m_edges.count(edgeId))
-                connected.insert( m_graph.m_edges[edgeId].from());
+              if (m_edges.count(inEdge))
+                connected.insert( m_graph.m_edges[inEdge].from());
             }
-            for (size_t j = 0; j < node.outEdges.size(); ++j)
+            for (size_t outEdge : node.outEdges)
             {
-              size_t edgeId = node.outEdges[j];
-              if (m_edges.count(edgeId) && m_edges[edgeId].count > 1)
-                connected.insert(m_graph.m_edges[edgeId].to());
+              if (m_edges.count(outEdge) && m_edges[outEdge].count > 1)
+                connected.insert(m_graph.m_edges[outEdge].to());
             }
             
-            for (std::unordered_set<size_t>::iterator
-              it = nodeinfo.neighbors.begin(); it != nodeinfo.neighbors.end(); ++it)
+            for (size_t otherId : nodeinfo.neighbors)
             {
-              size_t otherId = *it;
               bool isLeaf = nodes[otherId].leaf;
               bool isConnected = connected.count(otherId);
               bool isChain = chains.count(EdgeInfo(nodeId,otherId));
@@ -439,9 +426,8 @@ namespace Graph
         Node& node = m_nodes[nodeId];
         std::unordered_set<size_t> nedges; // removed edges
         std::unordered_set<size_t> neighbors;
-        for (size_t i = 0; i < node.inEdges.size(); ++i)
+        for (size_t edgeId : node.inEdges)
         {
-          size_t edgeId = node.inEdges[i];
           if (m_edges.count(edgeId))
           {
             size_t otherId = m_graph.m_edges[edgeId].from();
@@ -449,9 +435,8 @@ namespace Graph
               neighbors.insert(otherId);
           }
         }
-        for (size_t i = 0; i < node.outEdges.size(); ++i)
+        for (size_t edgeId : node.outEdges)
         {
-          size_t edgeId = node.outEdges[i];
           if (m_edges.count(edgeId))
           {
             if (m_edges[edgeId].count <= 1)
@@ -479,15 +464,13 @@ namespace Graph
             return true;
 
           Node& node = m_nodes[nodeId];
-          for (size_t i = 0; i < node.inEdges.size(); ++i)
+          for (size_t edgeId : node.inEdges)
           {
-            size_t edgeId = node.inEdges[i];
             if (m_edges.count(edgeId) && !nedges.count(edgeId))
               progress.push(m_graph.m_edges[edgeId].from());
           }
-          for (size_t i = 0; i < node.outEdges.size(); ++i)
+          for (size_t edgeId : node.outEdges)
           {
-            size_t edgeId = node.outEdges[i];
             if (m_edges.count(edgeId) && !nedges.count(edgeId))
               progress.push(m_graph.m_edges[edgeId].to());
           }
@@ -503,9 +486,8 @@ namespace Graph
       void expand(size_t nodeId)
       {
         Node& node = increaseNode(nodeId);
-        for (size_t i = 0; i < node.outEdges.size(); ++i)
+        for (size_t edgeId : node.outEdges)
         {
-          size_t edgeId = node.outEdges[i];
           increaseNode(m_graph.m_edges[edgeId].to());
           increaseEdge(edgeId);
         }
@@ -518,9 +500,8 @@ namespace Graph
         if (m_nodes.count(nodeId) != 0)
         {
           Node& node = m_nodes[nodeId];
-          for (size_t i = 0; i < node.outEdges.size(); ++i)
+          for (size_t edgeId : node.outEdges)
           {
-            size_t edgeId = node.outEdges[i];
             decreaseEdge(edgeId);
             decreaseNode(m_graph.m_edges[edgeId].to());
           }
@@ -572,10 +553,8 @@ namespace Graph
   #define lockForWrite(lock, where)   GRAPH_LOCK("W lock", where, lock.lockForWrite())
   #define unlockForWrite(lock, where) GRAPH_LOCK("W unlock", where, lock.unlock())
 
-  Graph::Graph() : m_sel(nullptr), m_lock(), m_stable(true)
+  Graph::Graph() : m_sel(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""), m_lock(), m_stable(true)
   {
-    m_type = mcrl2::lts::lts_lts;
-    m_empty = QString("");
   }
 
   Graph::~Graph()
@@ -657,11 +636,11 @@ namespace Graph
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
   }
 
-  template <class ltsclass>
+  template <class lts_t>
   void Graph::templatedLoad(const QString& filename,
           const Coord3D& min, const Coord3D& max)
   {
-      ltsclass lts;
+      lts_t lts;
       lts.load(filename.toUtf8().constData());
 
       // Reserve all auxiliary data vectors
@@ -691,27 +670,25 @@ namespace Graph
       // Store string representations of labels
       for (size_t i = 0; i < lts.num_action_labels(); ++i)
       {
-          /* auto label = lts.action_label(i); */
-          /* QString str = QString::fromStdString(label); */
-          // FIXME
-          m_transitionLabels.push_back(LabelString(lts.is_tau(i), transitionLabelToQString(lts.action_label(i))));
+          QString label = transitionLabelToQString(lts.action_label(i));
+          m_transitionLabels.push_back(LabelString(lts.is_tau(i), label));
       }
 
       // Assign and position edge handles, position edge labels
       for (size_t i = 0; i < lts.num_transitions(); ++i)
       {
           mcrl2::lts::transition& t = lts.get_transitions()[i];
-          size_t new_probabilistic_state = add_probabilistic_state<ltsclass>(lts.probabilistic_state(t.to()),min,max);
+          size_t new_probabilistic_state = add_probabilistic_state<lts_t>(lts.probabilistic_state(t.to()),min,max);
           m_edges.push_back(Edge(t.from(),new_probabilistic_state));
           m_handles.push_back(Node((m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) / 2.0));
           m_transitionLabelnodes.push_back(LabelNode((m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) / 2.0,t.label()));
       }
 
-      m_initialState = add_probabilistic_state<ltsclass>(lts.initial_probabilistic_state(), min, max);
+      m_initialState = add_probabilistic_state<lts_t>(lts.initial_probabilistic_state(), min, max);
   }
 
-  template <class ltsclass>
-  size_t Graph::add_probabilistic_state(const typename ltsclass::probabilistic_state_t& probabilistic_state,
+  template <class lts_t>
+  size_t Graph::add_probabilistic_state(const typename lts_t::probabilistic_state_t& probabilistic_state,
           const Coord3D& min, const Coord3D& max)
   {
       if (probabilistic_state.size()==1)
@@ -728,9 +705,9 @@ namespace Graph
           m_stateLabelnodes.push_back(LabelNode(m_nodes[index_of_the_new_probabilistic_state].pos(),index_of_the_new_probabilistic_state));
 
           // The following map recalls where probabilities are stored in transitionLabels.
-          typedef std::map<typename ltsclass::probabilistic_state_t::probability_t, size_t> probability_map_t;
+          typedef std::map<typename lts_t::probabilistic_state_t::probability_t, size_t> probability_map_t;
           probability_map_t probability_label_indices;
-          for(const typename ltsclass::probabilistic_state_t::state_probability_pair& p: probabilistic_state)
+          for(const typename lts_t::probabilistic_state_t::state_probability_pair& p: probabilistic_state)
           {
               // Find an index for the probabilistic label of the outgoing transition of the probabilistic state.
               size_t label_index;
@@ -1010,11 +987,11 @@ namespace Graph
   {
     lockForRead(m_lock, GRAPH_LOCK_TRACE); // read lock because indices are not invalidated
 
-    for (auto& nodeNode : m_nodes)
-        nodeNode.pos().clip(min, max);
-    for (auto& labelNode : m_transitionLabelnodes)
-        labelNode.pos().clip(min, max);
-    for (auto& node : m_handles)
+    for (NodeNode& node : m_nodes)
+        node.pos().clip(min, max);
+    for (LabelNode& node : m_transitionLabelnodes)
+        node.pos().clip(min, max);
+    for (Node& node : m_handles)
         node.pos().clip(min, max);
 
     unlockForRead(m_lock, GRAPH_LOCK_TRACE);
@@ -1066,8 +1043,8 @@ namespace Graph
     }
 
     // Deactive all nodes
-    for (std::vector<NodeNode>::iterator it = m_nodes.begin(); it != m_nodes.end(); ++it)
-      it->m_active = false;
+    for (NodeNode& node : m_nodes)
+      node.m_active = false;
 
     unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
   }
@@ -1104,8 +1081,8 @@ namespace Graph
     // active node count:
     // Todo: improve this
     size_t count = 0;
-    for (size_t i = 0; i < m_sel->nodes.size(); ++i)
-      if (m_nodes[m_sel->nodes[i]].m_active)
+    for (size_t nodeId : m_sel->nodes)
+      if (m_nodes[nodeId].m_active)
         ++count;
     
     NodeNode& node = m_nodes[index];

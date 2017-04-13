@@ -462,7 +462,6 @@ namespace Graph
   class Graph
   {
     friend class Selection;
-    friend class Information;
 
     private:
       Selection* m_sel;               ///< The selection of the current graph (or null).
@@ -492,7 +491,6 @@ namespace Graph
       template <class ltsclass>
       size_t add_probabilistic_state(const typename ltsclass::probabilistic_state_t& probabilistic_state,
               const Coord3D& min, const Coord3D& max);
-      // Information needs this TODO make friends
       size_t m_initialState;                          ///< Index of the initial state.
     protected:
 
