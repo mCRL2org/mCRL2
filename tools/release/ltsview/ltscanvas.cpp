@@ -23,7 +23,7 @@
 #include "icons/pan_cursor.xpm"
 #include "icons/rotate_cursor.xpm"
 
-LtsCanvas::LtsCanvas(QWidget *parent, Settings *settings, LtsManager *ltsManager, MarkManager *markManager):
+LtsCanvas::LtsCanvas(QWidget* parent, Settings* settings, LtsManager* ltsManager, MarkManager* markManager):
   QGLWidget(parent),
   m_settings(settings),
   m_ltsManager(ltsManager),
@@ -69,6 +69,30 @@ void LtsCanvas::clusterPositionsChanged()
   m_baseDepth = 0.866f * height + width + m_nearPlane;
   m_farPlane = 4 * m_baseDepth;
   update();
+}
+
+void LtsCanvas::determineActiveTool(QMouseEvent* event, bool useModifiers)
+{
+  if (useModifiers && (event->modifiers() & Qt::ControlModifier) && (event->modifiers() & Qt::ShiftModifier))
+  {
+    setActiveTool(ZoomTool);
+  }
+  else if (useModifiers && event->modifiers() & Qt::ControlModifier)
+  {
+    setActiveTool(PanTool);
+  }
+  else if ((event->buttons() & Qt::MidButton) || ((event->buttons() & Qt::LeftButton) && (event->buttons() & Qt::RightButton)))
+  {
+    setActiveTool(ZoomTool);
+  }
+  else if ((useModifiers && event->modifiers() & Qt::ShiftModifier) || event->buttons() & Qt::RightButton)
+  {
+    setActiveTool(RotateTool);
+  }
+  else
+  {
+    setActiveTool(SelectTool);
+  }
 }
 
 void LtsCanvas::setActiveTool(Tool tool)
@@ -329,28 +353,9 @@ void LtsCanvas::render(bool light)
   }
 }
 
-void LtsCanvas::mousePressEvent(QMouseEvent *event)
+void LtsCanvas::mousePressEvent(QMouseEvent* event)
 {
-  if ((event->modifiers() & Qt::ControlModifier) && (event->modifiers() & Qt::ShiftModifier))
-  {
-    setActiveTool(ZoomTool);
-  }
-  else if (event->modifiers() & Qt::ControlModifier)
-  {
-    setActiveTool(PanTool);
-  }
-  else if ((event->buttons() & Qt::MidButton) || ((event->buttons() & Qt::LeftButton) && (event->buttons() & Qt::RightButton)))
-  {
-    setActiveTool(ZoomTool);
-  }
-  else if (event->modifiers() & Qt::ShiftModifier || event->buttons() & Qt::RightButton)
-  {
-    setActiveTool(RotateTool);
-  }
-  else
-  {
-    setActiveTool(m_selectedTool);
-  }
+  determineActiveTool(event, true);
 
   if (m_activeTool == SelectTool)
   {
@@ -379,15 +384,15 @@ void LtsCanvas::mousePressEvent(QMouseEvent *event)
   event->accept();
 }
 
-void LtsCanvas::mouseReleaseEvent(QMouseEvent *event)
+void LtsCanvas::mouseReleaseEvent(QMouseEvent* event)
 {
-  m_dragging = false;
-  setActiveTool(m_selectedTool);
+  determineActiveTool(event, false);
+  m_dragging = m_activeTool != SelectTool;
   event->accept();
   repaint();
 }
 
-void LtsCanvas::mouseDoubleClickEvent(QMouseEvent *event)
+void LtsCanvas::mouseDoubleClickEvent(QMouseEvent* event)
 {
   mousePressEvent(event);
   if (m_activeTool == SelectTool && m_ltsManager->simulationActive() && m_ltsManager->selectedState())
@@ -396,7 +401,7 @@ void LtsCanvas::mouseDoubleClickEvent(QMouseEvent *event)
   }
 }
 
-void LtsCanvas::mouseMoveEvent(QMouseEvent *event)
+void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
 {
   QPoint oldPosition = m_lastMousePosition;
   m_lastMousePosition = event->pos();
@@ -443,7 +448,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent *event)
   }
 }
 
-void LtsCanvas::wheelEvent(QWheelEvent *event)
+void LtsCanvas::wheelEvent(QWheelEvent* event)
 {
   m_position += Vector3D(0.0f, 0.0f, 0.001f * (m_baseDepth - m_position.z()) * event->delta());
   event->accept();
@@ -462,7 +467,7 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
 
   int maxItems = m_ltsManager->lts()->getNumClusters() + m_ltsManager->lts()->getNumStates();
   int bufferSize = maxItems * 6;
-  GLuint *selectionBuffer = new GLuint[bufferSize];
+  GLuint* selectionBuffer = new GLuint[bufferSize];
 
   glSelectBuffer(bufferSize, selectionBuffer);
   glRenderMode(GL_SELECT);
@@ -490,9 +495,9 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
   return output;
 }
 
-LtsCanvas::Selection LtsCanvas::parseSelection(GLuint *selectionBuffer, GLint items)
+LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint items)
 {
-  GLuint *buffer = selectionBuffer;
+  GLuint* buffer = selectionBuffer;
   // This method selects the object clicked.
   //
   // The buffer content per hit is encoded as follows:
@@ -573,11 +578,11 @@ QImage LtsCanvas::renderImage(int width, int height)
   glReadBuffer(GL_BACK);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-  TRcontext *context = trNew();
+  TRcontext* context = trNew();
   trTileSize(context, m_width, m_height, 0);
   trImageSize(context, width, height);
 
-  unsigned char *imageData;
+  unsigned char* imageData;
   try
   {
     imageData = new unsigned char[width * height * 4];

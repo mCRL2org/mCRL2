@@ -30,10 +30,10 @@ class LtsCanvas : public QGLWidget
   private:
     enum Tool { SelectTool, PanTool, ZoomTool, RotateTool };
     enum ObjectType { StateObject, ClusterObject };
-    struct Selection { State *state; Cluster *cluster; };
+    struct Selection { State* state; Cluster* cluster; };
 
   public:
-    LtsCanvas(QWidget *parent, Settings *settings, LtsManager *ltsManager, MarkManager *markManager);
+    LtsCanvas(QWidget* parent, Settings* settings, LtsManager* ltsManager, MarkManager* markManager);
     int viewWidth() const { return m_width; }
     int viewHeight() const { return m_height; }
 
@@ -43,21 +43,21 @@ class LtsCanvas : public QGLWidget
 
   protected slots:
     void clusterPositionsChanged();
-    void setSelectedTool(Tool tool) { m_selectedTool = tool; if (!m_dragging) setActiveTool(tool); }
-    void setActiveTool(Tool tool);
 
   protected:
     void initializeGL();
     void resizeGL(int width, int height);
     void paintGL();
     void render(bool light);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent *event);
+    void determineActiveTool(QMouseEvent* event, bool useModifiers);
+    void setActiveTool(Tool tool);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    void wheelEvent(QWheelEvent* event);
     Selection selectObject(QPoint position);
-    Selection parseSelection(GLuint *selectionBuffer, GLint items);
+    Selection parseSelection(GLuint* selectionBuffer, GLint items);
     void applyRotation(bool reverse = false);
     Vector3D getArcBallVector(int screenX, int screenY);
 
@@ -72,9 +72,9 @@ class LtsCanvas : public QGLWidget
     void renderingFinished();
 
   private:
-    Settings *m_settings;
-    LtsManager *m_ltsManager;
-    Visualizer *m_visualizer;
+    Settings* m_settings;
+    LtsManager* m_ltsManager;
+    Visualizer* m_visualizer;
 
     QCursor m_selectCursor;
     QCursor m_panCursor;
@@ -88,7 +88,6 @@ class LtsCanvas : public QGLWidget
     float m_farPlane;
     Vector3D m_position;
     QQuaternion m_rotation;
-    Tool m_selectedTool;
     Tool m_activeTool;
     bool m_dragging;
     QPoint m_lastMousePosition;
