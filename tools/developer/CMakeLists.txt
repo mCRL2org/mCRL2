@@ -7,8 +7,8 @@ set(MCRL2_TOOLS
   reduce_pbes
 )
 
-if(MCRL2_ENABLE_DEVELOPER)
+# if(MCRL2_ENABLE_DEVELOPER)  Outcommented to figure out whether this is the cause of massively failing tests. 
   foreach(TOOL ${MCRL2_TOOLS})
     add_subdirectory(${TOOL})
   endforeach()
-endif()
+# endif()
