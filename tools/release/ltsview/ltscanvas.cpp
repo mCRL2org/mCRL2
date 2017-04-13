@@ -152,15 +152,20 @@ Vector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
   y = (float) mouseY / viewport[3] * 2.0f - 1.0f;
   y = -y;
   float squared = x * x + y * y;
-  if (squared <= radius*radius) {
-      z = std::sqrt(radius*radius - squared);
+  if (squared <= radius*radius)
+  {
+    z = std::sqrt(radius*radius - squared);
   } else {
-      float len = std::sqrt(squared);
-      if(std::isnormal(len))
-          x /= len, y /= len;
-      else
-          x = 0.0f, y = 0.0f;
-      z = 0.0f;
+    float len = std::sqrt(squared);
+    if(std::isnormal(len))
+    {
+        x /= len, y /= len;
+    }
+    else
+    {
+        x = 0.0f, y = 0.0f;
+    }
+    z = 0.0f;
   }
   return Vector3D(x, y, z);
 }
@@ -168,8 +173,10 @@ Vector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
 void LtsCanvas::applyRotation(bool reverse) {
   float angle = 180 / M_PI * std::acos(std::min(1.0f, m_rotation.scalar()));
   if(reverse)
-      angle = -angle;
-  // not sure why angle has to be doubled but it works..
+  {
+    angle = -angle;
+  }
+  // not sure why the angle has to be doubled
   glRotatef(2 * angle, m_rotation.x(), m_rotation.y(), m_rotation.z());
 }
 
