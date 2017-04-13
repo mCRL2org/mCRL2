@@ -1581,7 +1581,7 @@ bool equal_signatures(const action& a, const action& b)
     return false;
   }
 
-  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), [](const data::data_expression& x, const data::data_expression& y) { return x.sort() == y.sort(); });
 }
 
 } // namespace process

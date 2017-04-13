@@ -74,19 +74,6 @@ struct compare_variable: public compare_term<variable>
   {}
 };
 
-/// Function object that returns true if the expressions x and y have the same sort.
-struct equal_data_expression_sort: public std::binary_function<data_expression, data_expression, bool>
-{
-  /// \brief Function call operator
-  /// \param x A data expression
-  /// \param y A data expression
-  /// \return The function result
-  bool operator()(const data_expression& x, const data_expression& y) const
-  {
-    return x.sort() == y.sort();
-  }
-};
-
 /// \brief Function object that returns the name of a data variable
 struct variable_name: public std::unary_function<variable, core::identifier_string>
 {

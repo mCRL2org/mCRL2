@@ -255,24 +255,6 @@ inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignmen
 }
 //--- end generated classes ---//
 
-/// \brief Selects the right-hand side of an assignment
-struct left_hand_side : public std::unary_function< const assignment, variable >
-{
-  variable operator()(assignment const& a) const
-  {
-    return a.lhs();
-  }
-};
-
-/// \brief Selects the right-hand side of an assignment
-struct right_hand_side : public std::unary_function< const assignment, data_expression >
-{
-  data_expression operator()(assignment const& a) const
-  {
-    return a.rhs();
-  }
-};
-
 /// \brief Constructs an assignment_list by pairwise combining a variable and expression
 /// \param variables A sequence of data variables
 /// \param expressions A sequence of data expressions
