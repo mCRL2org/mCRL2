@@ -202,11 +202,13 @@ class sym_write_entry
 
     sym_write_entry* next_topsym;
 
-    sym_write_entry():
-      term_width(0),
-      top_symbols(0),
-      cur_index(0),
-      nr_times_top(0)
+    sym_write_entry(const function_symbol& id_, 
+                    size_t term_width_)
+     : id(id_), 
+       term_width(term_width_),
+       cur_index(0),
+       nr_times_top(0),
+       next_topsym(nullptr)
     {}
 };
 
@@ -461,7 +463,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
           {
             throw mcrl2::runtime_error("Internal inconsistency found in internal data structure. Illegal term.");
           }
-          sym_write_entry* topsym = get_top_symbol(arg,index, sym_entries);
+          sym_write_entry* topsym = get_top_symbol(arg, index, sym_entries);
           if (!topsym->nr_times_top++)
           {
             total_top_symbols++;
@@ -506,7 +508,12 @@ static const aterm& subterm(const aterm& t, size_t i)
   }
 }
 
-typedef struct { aterm term; sym_write_entry* entry; size_t arg; } write_todo;
+struct write_todo
+{ 
+  aterm term; 
+  sym_write_entry* entry; 
+  size_t arg; 
+};
 
 static void collect_terms(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, std::vector<sym_write_entry>& sym_entries)
 {
@@ -517,7 +524,7 @@ static void collect_terms(const aterm& t, const std::unordered_map<function_symb
 
   do
   {
-    write_todo& current = stack.top();
+    write_todo& current=stack.top();
     if (current.term.type_is_int())
     {
       add_term(current.entry, current.term);
@@ -637,7 +644,8 @@ static void write_baf(const aterm& t, ostream& os)
   std::unordered_map<function_symbol, size_t> count=count_the_number_of_unique_function_symbols_in_a_term(t);
   size_t nr_unique_symbols = count.size();
 
-  std::vector<sym_write_entry> sym_entries = std::vector<sym_write_entry>(nr_unique_symbols);
+  std::vector<sym_write_entry> sym_entries;
+  sym_entries.reserve(nr_unique_symbols);
 
   /* Collect all unique symbols in the input term */
 
@@ -647,9 +655,7 @@ static void write_baf(const aterm& t, ostream& os)
     const function_symbol sym=p.first;
     const size_t nr_of_occurrences=p.second;
 
-    sym_entries[cur].term_width = bit_width(nr_of_occurrences);
-    sym_entries[cur].id = sym;
-    sym_entries[cur].write_terms.clear();
+    sym_entries.emplace_back(sym, bit_width(nr_of_occurrences));
     index[sym] = cur;
 
     cur++;
@@ -847,7 +853,8 @@ aterm read_baf(istream& is)
   std::size_t version = readInt(is);
   if (version != BAF_VERSION)
   {
-    throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) + ") of this tool. The input file must be regenerated. ");
+    throw mcrl2::runtime_error("The BAF version (" + std::to_string(version) + ") of the input file is incompatible with the version (" + std::to_string(BAF_VERSION) + 
+                               ") of this tool. The input file must be regenerated. ");
   }
 
   size_t nr_unique_symbols = readInt(is);
