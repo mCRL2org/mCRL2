@@ -35,8 +35,8 @@ try_add_c_flag(-Wall)
 try_add_c_flag(-Wno-inline)
 try_add_c_flag(-fno-strict-overflow)
 try_add_c_flag(-pipe)
-try_add_c_flag(-g                        MAINTAINER)
-try_add_c_flag(-O0                       MAINTAINER)
+# try_add_c_flag(-g                        MAINTAINER)  Added by default.
+# try_add_c_flag(-O0                       MAINTAINER)  Addition is meaningless. 
 try_add_c_flag(-pedantic                 MAINTAINER)
 try_add_c_flag(-W                        MAINTAINER)
 
@@ -77,8 +77,8 @@ try_add_cxx_flag(-Wno-inline)
 try_add_cxx_flag(-fno-strict-overflow)
 try_add_cxx_flag(-pipe)
 
-try_add_cxx_flag(-g                      MAINTAINER)
-try_add_cxx_flag(-O0                     MAINTAINER)
+# try_add_cxx_flag(-g                      MAINTAINER) Added by default where needed. 
+# try_add_cxx_flag(-O0                     MAINTAINER) Addition has no effect. 
 try_add_cxx_flag(-W                      MAINTAINER)
 try_add_cxx_flag(-Wextra                 MAINTAINER)
 try_add_cxx_flag(-Wunused-variable       MAINTAINER)
