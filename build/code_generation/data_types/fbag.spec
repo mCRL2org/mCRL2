@@ -7,6 +7,15 @@
 % http://www.boost.org/LICENSE_1_0.txt)
 %
 % Specification of the FBag data sort, denoting finite bags.
+% Note that the specification relies on the underlying data type S to have a total ordering.
+%
+% The definition of an FBag originally had the shape 
+%
+% sort FBag(S) <"fbag"> = struct {:} <"empty"> | @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3">;
+%
+% However, this does not work as the automatically generated comparison operators <=, <, > and >= do not act
+% as subset operators. Therefore, the constructors have been made explicit, as have the comparison operators.
+% (April, 2017, Jan Friso Groote).
 
 #using S
 #include bool.spec
@@ -14,7 +23,10 @@
 #include nat.spec
 #include fset.spec
 
-sort FBag(S) <"fbag"> = struct {:} <"empty"> | @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3">;
+sort FBag(S) <"fbag">;
+
+cons {:} <"empty"> : FBag(S);
+     @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
 
 map @fbag_insert <"insert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
     @fbag_cinsert <"cinsert"> : S <"arg1"> # Nat <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
@@ -40,7 +52,16 @@ var d: S;
     s: FSet(S);
     f: S -> Nat;
     g: S -> Nat;
-eqn @fbag_insert(d, p, {:})  =  @fbag_cons(d, p, {:});
+eqn ==(@fbag_cons(d, p, b), {:})  =  false;
+    ==({:}, @fbag_cons(d, p, b))  =  false;
+    ==(@fbag_cons(d, p, b), @fbag_cons(e, q, c))  =  &&(==(p, q), &&(==(d,e),==(b, c)));
+    <=(@fbag_cons(d, p, b), {:})  =  false;
+    <=({:}, @fbag_cons(d, p, b))  =  true;
+    <=(@fbag_cons(d, p, b), @fbag_cons(e, q, c))  =  if(<(d, e), false, if(==(d, e), &&(<=(p, q), <=(b, c)), <=(@fbag_cons(d, p, b), c)));
+    <(@fbag_cons(d, p, b), {:})  =  false;
+    <({:}, @fbag_cons(d, p, b))  =  true;
+    <(@fbag_cons(d, p, b), @fbag_cons(e, q, c))  =  if(<(d, e), false, if(==(d, e), ||(&&(==(p, q), <(b,c)),  &&(<(p, q), <=(b, c))), <=(@fbag_cons(d, p, b), c)));
+    @fbag_insert(d, p, {:})  =  @fbag_cons(d, p, {:});
      @fbag_insert(d, p, @fbag_cons(d, q, b))  =  @fbag_cons(d, @addc(false,p,q), b);
      <(d, e)  ->  @fbag_insert(d, p, @fbag_cons(e, q, b))  =  @fbag_cons(d, p, @fbag_cons(e, q, b));
      <(e, d)  ->  @fbag_insert(d, p, @fbag_cons(e, q, b))  =  @fbag_cons(e, q, @fbag_insert(d, p, b));

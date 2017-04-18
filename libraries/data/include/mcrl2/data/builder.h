@@ -19,6 +19,7 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/set_comprehension.h"
 #include "mcrl2/data/bag_comprehension.h"
+#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/alias.h"

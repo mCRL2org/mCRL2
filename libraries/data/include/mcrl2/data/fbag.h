@@ -24,7 +24,6 @@
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -60,22 +59,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
-      namespace detail {
-
-        /// \brief Declaration for sort fbag as structured sort
-        /// \param s A sort expression
-        /// \return The structured sort representing fbag
-        inline
-        structured_sort fbag_struct(const sort_expression& s)
-        {
-          structured_sort_constructor_vector constructors;
-          constructors.push_back(structured_sort_constructor("{:}", "empty"));
-          constructors.push_back(structured_sort_constructor("@fbag_cons", atermpp::make_vector(structured_sort_constructor_argument("arg1", s), structured_sort_constructor_argument("arg2", sort_pos::pos()), structured_sort_constructor_argument("arg3", fbag(s))), "cons_"));
-          return structured_sort(constructors);
-        }
-
-      } // namespace detail
 
 
       /// \brief Generate identifier {:}
@@ -174,8 +157,8 @@ namespace mcrl2 {
       function_symbol_vector fbag_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        function_symbol_vector fbag_constructors = detail::fbag_struct(s).constructor_functions(fbag(s));
-        result.insert(result.end(), fbag_constructors.begin(), fbag_constructors.end());
+        result.push_back(sort_fbag::empty(s));
+        result.push_back(sort_fbag::cons_(s));
 
         return result;
       }
@@ -946,8 +929,6 @@ namespace mcrl2 {
         result.push_back(sort_fbag::intersection(s));
         result.push_back(sort_fbag::difference(s));
         result.push_back(sort_fbag::count_all(s));
-        function_symbol_vector fbag_mappings = detail::fbag_struct(s).comparison_functions(fbag(s));
-        result.insert(result.end(), fbag_mappings.begin(), fbag_mappings.end());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -1051,10 +1032,15 @@ namespace mcrl2 {
         variable vg("g",make_function_sort(s, sort_nat::nat()));
 
         data_equation_vector result;
-        data_equation_vector fbag_equations = detail::fbag_struct(s).constructor_equations(fbag(s));
-        result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
-        fbag_equations = detail::fbag_struct(s).comparison_equations(fbag(s));
-        result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), equal_to(cons_(s, vd, vp, vb), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), equal_to(empty(s), cons_(s, vd, vp, vb)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), equal_to(cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), sort_bool::and_(equal_to(vp, vq), sort_bool::and_(equal_to(vd, ve), equal_to(vb, vc)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), less_equal(cons_(s, vd, vp, vb), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), less_equal(empty(s), cons_(s, vd, vp, vb)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less_equal(cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), sort_bool::and_(less_equal(vp, vq), less_equal(vb, vc)), less_equal(cons_(s, vd, vp, vb), vc)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), less(cons_(s, vd, vp, vb), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), less(empty(s), cons_(s, vd, vp, vb)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), sort_bool::or_(sort_bool::and_(equal_to(vp, vq), less(vb, vc)), sort_bool::and_(less(vp, vq), less_equal(vb, vc))), less_equal(cons_(s, vd, vp, vb), vc)))));
         result.push_back(data_equation(atermpp::make_vector(vd, vp), insert(s, vd, vp, empty(s)), cons_(s, vd, vp, empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vb, vd, vp, vq), insert(s, vd, vp, cons_(s, vd, vq, vb)), cons_(s, vd, sort_pos::add_with_carry(sort_bool::false_(), vp, vq), vb)));
         result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp, vq), less(vd, ve), insert(s, vd, vp, cons_(s, ve, vq, vb)), cons_(s, vd, vp, cons_(s, ve, vq, vb))));

@@ -31,17 +31,6 @@ void test_data_expression(const std::string& s, const variable_vector& v, Predic
   BOOST_CHECK(p(e));
 }
 
-/* Test case for various set expressions, based
-   on the following specification:
-
-proc P(s: Set(Nat)) = (1 in s) -> tau . P({} + s - {20} * {40})
-                    + ({10} < s) -> tau . P(!s)
-                    + (s <= {20} + Bag2Set({20:4, 30:3, 40:2})) -> tau . P(s)
-                    + (s <= { n:Nat | true }) -> tau . P(s);
-
-init P({20, 30, 40});
-
-*/
 
 void test_expression(const std::string& evaluate, const std::string& expected, data::rewriter r)
 {
@@ -49,7 +38,6 @@ void test_expression(const std::string& evaluate, const std::string& expected, d
   data_expression d2 = parse_data_expression(expected);
   if (r(d1)!=r(d2))
   {
-std:: cerr << "ATERMS " << atermpp::aterm(d1) << "     " << atermpp::aterm(d2) << "\n";
     std::cerr << "Evaluating: " << evaluate << "\n";
     std::cerr << "Result: " << d1 << "\n";
     std::cerr << "Expected result: " << expected << "\n";
@@ -119,6 +107,16 @@ void set_expression_test()
   test_expression("{} == { b: Bool | true } - { true, false }","true",normaliser);
 
   test_expression("{ b: Bool | true } - { true, false } == {}","true", normaliser);
+
+  // Check the operation == on sets.
+  test_expression("{} == ({true} - {true})","true",normaliser);  // {true}-{true} is a trick to type {} == {}. 
+  test_expression("{} == {false}", "false",normaliser);
+  test_expression("{} == {true}", "false",normaliser);
+  test_expression("{true} == {true}", "true",normaliser);
+  test_expression("{false} == {false}", "true",normaliser);
+  test_expression("{true} == {false, true}", "false",normaliser);
+  test_expression("{false, true} == {false}", "false",normaliser);
+  test_expression("{false, true} == {true, false}", "true",normaliser);
 
   // Check the operation < on sets.
   test_expression("{} < ({true} - {true})","false",normaliser);  // {true}-{true} is a trick to type {} == {}. 

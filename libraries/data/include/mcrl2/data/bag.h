@@ -25,7 +25,6 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/fbag.h"
 #include "mcrl2/data/fset.h"
