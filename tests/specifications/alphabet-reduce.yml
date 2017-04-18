@@ -34,7 +34,7 @@ tools:
   t5:
     input: [l4, l5]
     output: []
-    args: [-ebisim]
+    args: [-ebisim-gv]
     name: ltscompare
 
 result: |
