@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/standard_utility.h
+/// \file mcrl2/data/standard_numbers_utility.h
 /// \brief Provides utilities for working with data expressions of standard sorts
 
 #ifndef MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
@@ -182,7 +182,7 @@ namespace sort_pos
 /// \brief Constructs expression of type Bool from an integral type
 /// Type T is an unsigned integral type.
 template < typename T >
-inline typename std::enable_if<std::is_integral< T >::value, data_expression>::type 
+inline typename std::enable_if<std::is_integral< T >::value, data_expression>::type
 pos(const T t)
 {
   assert(t>0);
@@ -285,7 +285,7 @@ template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 nat(T t)
 {
-  if (t == 0) 
+  if (t == 0)
   {
     return sort_nat::c0();
   }

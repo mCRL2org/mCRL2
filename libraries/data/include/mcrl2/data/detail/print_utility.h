@@ -23,6 +23,7 @@
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_numbers_utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/lambda.h"
