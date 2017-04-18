@@ -24,7 +24,6 @@
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/nat.h"
 
@@ -58,22 +57,6 @@ namespace mcrl2 {
         }
         return false;
       }
-
-      namespace detail {
-
-        /// \brief Declaration for sort fset as structured sort
-        /// \param s A sort expression
-        /// \return The structured sort representing fset
-        inline
-        structured_sort fset_struct(const sort_expression& s)
-        {
-          structured_sort_constructor_vector constructors;
-          constructors.push_back(structured_sort_constructor("{}", "empty"));
-          constructors.push_back(structured_sort_constructor("@fset_cons", atermpp::make_vector(structured_sort_constructor_argument("left", s), structured_sort_constructor_argument("right", fset(s))), "cons_"));
-          return structured_sort(constructors);
-        }
-
-      } // namespace detail
 
 
       /// \brief Generate identifier {}
@@ -171,8 +154,8 @@ namespace mcrl2 {
       function_symbol_vector fset_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        function_symbol_vector fset_constructors = detail::fset_struct(s).constructor_functions(fset(s));
-        result.insert(result.end(), fset_constructors.begin(), fset_constructors.end());
+        result.push_back(sort_fset::empty(s));
+        result.push_back(sort_fset::cons_(s));
 
         return result;
       }
@@ -709,8 +692,6 @@ namespace mcrl2 {
         result.push_back(sort_fset::union_(s));
         result.push_back(sort_fset::intersection(s));
         result.push_back(sort_fset::count(s));
-        function_symbol_vector fset_mappings = detail::fset_struct(s).comparison_functions(fset(s));
-        result.insert(result.end(), fset_mappings.begin(), fset_mappings.end());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -811,10 +792,15 @@ namespace mcrl2 {
         variable vt("t",fset(s));
 
         data_equation_vector result;
-        data_equation_vector fset_equations = detail::fset_struct(s).constructor_equations(fset(s));
-        result.insert(result.end(), fset_equations.begin(), fset_equations.end());
-        fset_equations = detail::fset_struct(s).comparison_equations(fset(s));
-        result.insert(result.end(), fset_equations.begin(), fset_equations.end());
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(empty(s), cons_(s, vd, vs)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), equal_to(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less_equal(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less_equal(cons_(s, vd, vs), cons_(s, ve, vt)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), less_equal(vs, vt), less_equal(cons_(s, vd, vs), vt)))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(empty(s), cons_(s, vd, vs)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, vs), less(cons_(s, vd, vs), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vd, ve, vs, vt), less(cons_(s, vd, vs), cons_(s, ve, vt)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), less(vs, vt), less_equal(cons_(s, vd, vs), vt)))));
         result.push_back(data_equation(atermpp::make_vector(vd), insert(s, vd, empty(s)), cons_(s, vd, empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vd, vs), insert(s, vd, cons_(s, vd, vs)), cons_(s, vd, vs)));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), less(vd, ve), insert(s, vd, cons_(s, ve, vs)), cons_(s, vd, cons_(s, ve, vs))));
