@@ -93,76 +93,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@fbag_cons
-      /// \return Identifier \@fbag_cons
-      inline
-      core::identifier_string const& cons_name()
-      {
-        static core::identifier_string cons_name = core::identifier_string("@fbag_cons");
-        return cons_name;
-      }
-
-      /// \brief Constructor for function symbol \@fbag_cons
-      /// \param s A sort expression
-      /// \return Function symbol cons_
-      inline
-      function_symbol cons_(const sort_expression& s)
-      {
-        function_symbol cons_(cons_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
-        return cons_;
-      }
-
-      /// \brief Recogniser for function \@fbag_cons
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fbag_cons
-      inline
-      bool is_cons_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e).name() == cons_name();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@fbag_cons
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@fbag_cons to a number of arguments
-      inline
-      application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return sort_fbag::cons_(s)(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@fbag_cons
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol cons_ to a
-      ///     number of arguments
-      inline
-      bool is_cons_application(const atermpp::aterm_appl& e)
-      {
-        if (is_application(e))
-        {
-          return is_cons_function_symbol(application(e).head());
-        }
-        return false;
-      }
-      /// \brief Give all system defined constructors for fbag
-      /// \param s A sort expression
-      /// \return All system defined constructors for fbag
-      inline
-      function_symbol_vector fbag_generate_constructors_code(const sort_expression& s)
-      {
-        function_symbol_vector result;
-        result.push_back(sort_fbag::empty(s));
-        result.push_back(sort_fbag::cons_(s));
-
-        return result;
-      }
-
       /// \brief Generate identifier \@fbag_insert
       /// \return Identifier \@fbag_insert
       inline
@@ -217,6 +147,76 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_insert_function_symbol(application(e).head());
+        }
+        return false;
+      }
+      /// \brief Give all system defined constructors for fbag
+      /// \param s A sort expression
+      /// \return All system defined constructors for fbag
+      inline
+      function_symbol_vector fbag_generate_constructors_code(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(sort_fbag::empty(s));
+        result.push_back(sort_fbag::insert(s));
+
+        return result;
+      }
+
+      /// \brief Generate identifier \@fbag_cons
+      /// \return Identifier \@fbag_cons
+      inline
+      core::identifier_string const& cons_name()
+      {
+        static core::identifier_string cons_name = core::identifier_string("@fbag_cons");
+        return cons_name;
+      }
+
+      /// \brief Constructor for function symbol \@fbag_cons
+      /// \param s A sort expression
+      /// \return Function symbol cons_
+      inline
+      function_symbol cons_(const sort_expression& s)
+      {
+        function_symbol cons_(cons_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
+        return cons_;
+      }
+
+      /// \brief Recogniser for function \@fbag_cons
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@fbag_cons
+      inline
+      bool is_cons_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e).name() == cons_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@fbag_cons
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \return Application of \@fbag_cons to a number of arguments
+      inline
+      application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        return sort_fbag::cons_(s)(arg0, arg1, arg2);
+      }
+
+      /// \brief Recogniser for application of \@fbag_cons
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol cons_ to a
+      ///     number of arguments
+      inline
+      bool is_cons_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_cons_function_symbol(application(e).head());
         }
         return false;
       }
@@ -916,7 +916,7 @@ namespace mcrl2 {
       function_symbol_vector fbag_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(sort_fbag::insert(s));
+        result.push_back(sort_fbag::cons_(s));
         result.push_back(sort_fbag::cinsert(s));
         result.push_back(sort_fbag::count(s));
         result.push_back(sort_fbag::in(s));
@@ -951,7 +951,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        assert(is_insert_application(e) || is_cons_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
@@ -963,7 +963,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        assert(is_insert_application(e) || is_cons_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
         return atermpp::down_cast<const application >(e)[1];
       }
 
@@ -975,7 +975,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        assert(is_insert_application(e) || is_cons_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
         return atermpp::down_cast<const application >(e)[2];
       }
 

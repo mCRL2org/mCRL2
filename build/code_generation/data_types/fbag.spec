@@ -16,6 +16,12 @@
 % However, this does not work as the automatically generated comparison operators <=, <, > and >= do not act
 % as subset operators. Therefore, the constructors have been made explicit, as have the comparison operators.
 % (April, 2017, Jan Friso Groote).
+%
+% Also changed @fbag_insert to become the constructor and @fbag_cons to become a map. All bags should have
+% their elements in a list with @fbag_cons as head symbol be ordered. This is not the case in lists with @fbag_insert.
+% If the @fbag_cons would be a constructor illegal lists would be constructed when evaluationg quantifications and 
+% sum operators. Now it is the case that too many bags will be generated when evaluating for instance a sum operator, 
+% but they are at least not incorrect. 
 
 #using S
 #include bool.spec
@@ -26,9 +32,9 @@
 sort FBag(S) <"fbag">;
 
 cons {:} <"empty"> : FBag(S);
-     @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
+     @fbag_insert <"insert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
 
-map @fbag_insert <"insert"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
+map @fbag_cons <"cons_"> : S <"arg1"> # Pos <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
     @fbag_cinsert <"cinsert"> : S <"arg1"> # Nat <"arg2"> # FBag(S) <"arg3"> -> FBag(S);
     count <"count"> : S <"left"> # FBag(S) <"right"> -> Nat;
     in <"in"> : S <"left"> # FBag(S) <"right"> -> Bool;

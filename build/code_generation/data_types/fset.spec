@@ -16,6 +16,11 @@
 % But this does not work as the automatically generated relation <= is not the subset relation as 
 % would be expected. The same holds for all other comparison operators. Therefore an explicit definition
 % is put into place (Jan Friso Groote, April 2017; problem reported by Tim Willemse). 
+%
+% Also changed @fset_insert and @fset_cons. @fset_insert generates unordered lists. @fset_cons is used
+% for ordered lists only. This has especially an effect when generating finite sets using quantifiers
+% and sums. When @fset_cons is a constructor unordered lists are generated, for which the rewrite rules
+% below do not work properly.  
 
 #using S
 #include bool.spec
@@ -24,17 +29,17 @@
 sort FSet(S) <"fset">;
 
 cons {} <"empty"> : FSet(S);
-     @fset_cons <"cons_"> : S <"left"> # FSet(S) <"right"> -> FSet(S);
+     @fset_insert <"insert">: S <"left"> # FSet(S) <"right"> -> FSet(S);
 
-map @fset_insert <"insert">: S <"left"> # FSet(S) <"right"> -> FSet(S);
-    @fset_cinsert <"cinsert">: S <"arg1"> # Bool <"arg2"> # FSet(S) <"arg3"> -> FSet(S);
-    in <"in">: S <"left"> # FSet(S) <"right"> -> Bool;
-    @fset_union <"fset_union"> : (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S);
-    @fset_inter <"fset_intersection">: (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S);
-    - <"difference">: FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
-    + <"union_"> : FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
-    * <"intersection"> : FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
-    # <"count"> : FSet(S) <"arg"> -> Nat;
+map  @fset_cons <"cons_"> : S <"left"> # FSet(S) <"right"> -> FSet(S);
+     @fset_cinsert <"cinsert">: S <"arg1"> # Bool <"arg2"> # FSet(S) <"arg3"> -> FSet(S);
+     in <"in">: S <"left"> # FSet(S) <"right"> -> Bool;
+     @fset_union <"fset_union"> : (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S);
+     @fset_inter <"fset_intersection">: (S -> Bool) <"arg1"> # (S -> Bool) <"arg2"> # FSet(S) <"arg3"> # FSet(S) <"arg4"> -> FSet(S);
+     - <"difference">: FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
+     + <"union_"> : FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
+     * <"intersection"> : FSet(S) <"left"> # FSet(S) <"right"> -> FSet(S);
+     # <"count"> : FSet(S) <"arg"> -> Nat;
 
 var d:S;
     e:S;

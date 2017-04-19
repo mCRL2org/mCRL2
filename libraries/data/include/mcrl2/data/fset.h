@@ -91,75 +91,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@fset_cons
-      /// \return Identifier \@fset_cons
-      inline
-      core::identifier_string const& cons_name()
-      {
-        static core::identifier_string cons_name = core::identifier_string("@fset_cons");
-        return cons_name;
-      }
-
-      /// \brief Constructor for function symbol \@fset_cons
-      /// \param s A sort expression
-      /// \return Function symbol cons_
-      inline
-      function_symbol cons_(const sort_expression& s)
-      {
-        function_symbol cons_(cons_name(), make_function_sort(s, fset(s), fset(s)));
-        return cons_;
-      }
-
-      /// \brief Recogniser for function \@fset_cons
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_cons
-      inline
-      bool is_cons_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e).name() == cons_name();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@fset_cons
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \return Application of \@fset_cons to a number of arguments
-      inline
-      application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
-      {
-        return sort_fset::cons_(s)(arg0, arg1);
-      }
-
-      /// \brief Recogniser for application of \@fset_cons
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol cons_ to a
-      ///     number of arguments
-      inline
-      bool is_cons_application(const atermpp::aterm_appl& e)
-      {
-        if (is_application(e))
-        {
-          return is_cons_function_symbol(application(e).head());
-        }
-        return false;
-      }
-      /// \brief Give all system defined constructors for fset
-      /// \param s A sort expression
-      /// \return All system defined constructors for fset
-      inline
-      function_symbol_vector fset_generate_constructors_code(const sort_expression& s)
-      {
-        function_symbol_vector result;
-        result.push_back(sort_fset::empty(s));
-        result.push_back(sort_fset::cons_(s));
-
-        return result;
-      }
-
       /// \brief Generate identifier \@fset_insert
       /// \return Identifier \@fset_insert
       inline
@@ -213,6 +144,75 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_insert_function_symbol(application(e).head());
+        }
+        return false;
+      }
+      /// \brief Give all system defined constructors for fset
+      /// \param s A sort expression
+      /// \return All system defined constructors for fset
+      inline
+      function_symbol_vector fset_generate_constructors_code(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(sort_fset::empty(s));
+        result.push_back(sort_fset::insert(s));
+
+        return result;
+      }
+
+      /// \brief Generate identifier \@fset_cons
+      /// \return Identifier \@fset_cons
+      inline
+      core::identifier_string const& cons_name()
+      {
+        static core::identifier_string cons_name = core::identifier_string("@fset_cons");
+        return cons_name;
+      }
+
+      /// \brief Constructor for function symbol \@fset_cons
+      /// \param s A sort expression
+      /// \return Function symbol cons_
+      inline
+      function_symbol cons_(const sort_expression& s)
+      {
+        function_symbol cons_(cons_name(), make_function_sort(s, fset(s), fset(s)));
+        return cons_;
+      }
+
+      /// \brief Recogniser for function \@fset_cons
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@fset_cons
+      inline
+      bool is_cons_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e).name() == cons_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@fset_cons
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of \@fset_cons to a number of arguments
+      inline
+      application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
+      {
+        return sort_fset::cons_(s)(arg0, arg1);
+      }
+
+      /// \brief Recogniser for application of \@fset_cons
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol cons_ to a
+      ///     number of arguments
+      inline
+      bool is_cons_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_cons_function_symbol(application(e).head());
         }
         return false;
       }
@@ -683,7 +683,7 @@ namespace mcrl2 {
       function_symbol_vector fset_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(sort_fset::insert(s));
+        result.push_back(sort_fset::cons_(s));
         result.push_back(sort_fset::cinsert(s));
         result.push_back(sort_fset::in(s));
         result.push_back(sort_fset::fset_union(s));
@@ -702,7 +702,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
+        assert(is_insert_application(e) || is_cons_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
         return atermpp::down_cast<const application >(e)[1];
       }
 
@@ -774,7 +774,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
+        assert(is_insert_application(e) || is_cons_application(e) || is_in_application(e) || is_difference_application(e) || is_union_application(e) || is_intersection_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 

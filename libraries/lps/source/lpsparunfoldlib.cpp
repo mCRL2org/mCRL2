@@ -243,13 +243,13 @@ void lpsparunfold::create_data_equations(
   std::map< sort_expression, size_t             > sort_index;//type_var_count;  /* Mapping for counting the number of unique Sorts of an equation */
 
   size_t e = 0;
-  for (function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i)
+  for (const function_symbol& f: k)
   {
     sort_index.clear();
 
-    if (is_basic_sort(i -> sort()))
+    if (is_basic_sort(f.sort()))
     {
-      data_expression lhs = application(determine_function, *i);
+      data_expression lhs = application(determine_function, f);
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > svars = find_all_variables(lhs);
       set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
@@ -257,9 +257,9 @@ void lpsparunfold::create_data_equations(
       m_data_specification.add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, elements_of_new_sorts[e]));
     }
 
-    if (is_function_sort(i -> sort()))
+    if (is_function_sort(f.sort()))
     {
-      function_sort fs = function_sort(i -> sort());
+      function_sort fs = function_sort(f.sort());
       const sort_expression_list& sel = fs.domain();
 
       data_expression_vector dal;
@@ -275,7 +275,7 @@ void lpsparunfold::create_data_equations(
         sort_index[*j] = sort_index[*j]+1;
         dal.push_back(y);
       }
-      data_expression lhs = application(determine_function , application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
+      data_expression lhs = application(determine_function , application(f, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > svars = find_all_variables(lhs);
       set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
@@ -283,16 +283,16 @@ void lpsparunfold::create_data_equations(
       m_data_specification.add_equation(data_equation(variable_list(svars.begin(), svars.end()), lhs, elements_of_new_sorts[e]));
 
       /* Equations for projection functions */
-      size_t f = 0;
+      size_t n = 0;
 
-      while (!pi.empty() && f < static_cast<size_t>(std::distance(dal.begin(), dal.end())))
+      while (!pi.empty() && n < static_cast<size_t>(std::distance(dal.begin(), dal.end())))
       {
-        data_expression lhs = application(pi.front(), application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
-        mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, dal[f])) << std::endl;
+        data_expression lhs = application(pi.front(), application(f, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
+        mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, dal[n])) << std::endl;
         set< variable > vars = find_all_variables(lhs);
-        set< variable > tmp_var = find_all_variables(dal[f]);
+        set< variable > tmp_var = find_all_variables(dal[n]);
         vars.insert(tmp_var.begin(), tmp_var.end());
-        m_data_specification.add_equation(data_equation(variable_list(vars.begin(), vars.end()), lhs, dal[f]));
+        m_data_specification.add_equation(data_equation(variable_list(vars.begin(), vars.end()), lhs, dal[n]));
 
         if (m_add_distribution_laws)
         {
@@ -316,15 +316,15 @@ void lpsparunfold::create_data_equations(
           generate_case_functions(elements_of_new_sorts, atermpp::down_cast<function_symbol>(application(e.rhs()).head()));
 
         }
-        ++f;
+        ++n;
         pi.erase(pi.begin());
       }
     }
 
-    if (is_structured_sort(i -> sort())) // This case seems to be identical to the basic sort.
+    if (is_structured_sort(f.sort())) // This case seems to be identical to the basic sort.
     {
 
-      data_expression lhs = application(determine_function , *i);
+      data_expression lhs = application(determine_function , f);
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > vars = find_all_variables(lhs);
       set< variable > tmp_var = find_all_variables(elements_of_new_sorts[e]);
@@ -333,9 +333,9 @@ void lpsparunfold::create_data_equations(
 
     }
 
-    if (is_container_sort(i -> sort()))
+    if (is_container_sort(f.sort()))
     {
-      container_sort cs = container_sort(i -> sort());
+      container_sort cs = container_sort(f.sort());
       const sort_expression& element_sort = cs.element_sort();
 
       if (sort_vars[element_sort].size() == sort_index[ element_sort ])
@@ -347,14 +347,23 @@ void lpsparunfold::create_data_equations(
       //variable y = sort_vars[ element_sort ].at(sort_index[ element_sort ]);
       sort_index[ element_sort ] = sort_index[ element_sort ]+1;
 
-      data_expression lhs, rhs;
+      data_expression lhs;
       if (cs.container_name() == list_container())
       {
         lhs = application(determine_function , sort_list::empty(element_sort));
       }
+      else if (cs.container_name() == fset_container())
+      {
+        lhs = application(determine_function , sort_fset::empty(element_sort));
+      }
+      else if (cs.container_name() == fbag_container())
+      {
+        lhs = application(determine_function , sort_fbag::empty(element_sort));
+      }
       else
       {
-        mCRL2log(mcrl2::log::warning) << "ACCESSING UNIMPLEMENTED CONTAINER SORT" << endl;
+        mCRL2log(mcrl2::log::error) << "ACCESSING AN UNIMPLEMENTED CONTAINER SORT. MOST LIKELY A Set(...) or Bag(...)." << endl;
+        assert(0);
       }
 
       mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
