@@ -140,7 +140,7 @@ struct parser_table
   void print() const;
 };
 
-/// \brief Wrapper for D_Parser and it's corresponding D_ParserTables
+/// \brief Wrapper for D_Parser and its corresponding D_ParserTables
 struct parser
 {
   parser_table m_table;

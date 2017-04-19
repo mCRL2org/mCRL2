@@ -2458,14 +2458,14 @@ struct refine_shared_t {
     {
         assert(block_begin < block_end);
         assert(size_NewB * 2 <= (state_type) (block_end - block_begin));
-        unsigned char max_NewB = check_complexity::log_n -
+        unsigned char max_NewB = 0 == size_NewB ? 0 : check_complexity::log_n -
                                             check_complexity::ilog2(size_NewB);
         unsigned char max_SpB = 0 == size_SpB ? 0 : check_complexity::log_n -
                                              check_complexity::ilog2(size_SpB);
         for (; block_begin != block_end; ++block_begin)
         {
             state_info_ptr s = *block_begin;
-            mCRL2complexity(s, blue_is_smaller(max_NewB));
+            mCRL2complexity(s, blue_is_smaller(max_NewB, max_SpB));
             for (succ_iter_t succ = s->succ_begin() ; succ != s->succ_end() ;
                                                                         ++succ)
             {
@@ -2475,7 +2475,7 @@ struct refine_shared_t {
             for (pred_iter_t pred = s->noninert_pred_begin() ;
                                        pred != s->noninert_pred_end() ; ++pred)
             {
-                mCRL2complexity(pred, blue_is_smaller(max_NewB, max_SpB));
+                mCRL2complexity(pred, blue_is_smaller(max_NewB, 0));
             }
         }
         check_complexity::check_temporary_work();

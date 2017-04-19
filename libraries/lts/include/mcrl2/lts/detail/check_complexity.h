@@ -580,22 +580,29 @@ class check_complexity
         /// out to be smaller, this function moves the corresponding temporary
         /// work to the normal counters and cancels the work on the red state
         /// counters.
-        /// \param max_value  the maximum allowed value of the normal counters
-        ///                   (corresponding to the size of the blue block)
+        /// \param max_NewB  the maximum allowed value of the normal counters
+        ///                  (corresponding to the size of the blue block).
+        ///                  Note that the blue block may be empty; in that
+        ///                  case, this parameter should be 0.
+        /// \param max_SpB   the maximum allowed value of the normal counter
+        ///                  for line 3.6l, if refine() was called from
+        ///                  line 2.26.  In that case, some work is ascribed to
+        ///                  the marking of states instead of the size of the
+        ///                  new block.  Otherwise, 0.
         /// \returns false  iff one of the normal counters was too large.  In
         ///                 that case, also the beginning of an error message
         ///                 is printed.
-        bool blue_is_smaller(unsigned char max_value)
+        bool blue_is_smaller(unsigned char max_NewB, unsigned char max_SpB)
         {
             cancel_work(while_Red_contains_unvisited_states_3_15r,
                                     while_Red_contains_unvisited_states_3_15r);
             return finalise_work(
                      while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l,
-                            refine_bottom_state_3_6l_s_is_in_SpB, max_value) &&
+                              refine_bottom_state_3_6l_s_is_in_SpB, max_SpB) &&
                 finalise_work(while_Test_is_not_empty_3_6l_s_is_blue_3_11l,
-                                        refine_bottom_state_3_6l, max_value) &&
+                                         refine_bottom_state_3_6l, max_NewB) &&
                 finalise_work(while_Blue_contains_unvisited_states_3_15l,
-                                         refine_visited_state_3_15, max_value);
+                                          refine_visited_state_3_15, max_NewB);
         }
 
         /// \brief moves temporary counters to normal ones if the red block is
@@ -710,9 +717,11 @@ class check_complexity
         /// work to the normal counters and cancels the work on the red state
         /// counters.
         /// \param max_NewB  the maximum allowed value of the normal counters
-        ///                  (corresponding to the size of the blue block)
+        ///                  (corresponding to the size of the blue block).
+        ///                  Note that the blue block may be empty; in that
+        ///                  case, this parameter should be 0.
         /// \param max_SpB   the maximum allowed value of the normal counter
-        ///                  for line 3.6, if refine() was called from
+        ///                  for line 3.6l, if refine() was called from
         ///                  line 2.26.  In that case, some work is ascribed to
         ///                  the marking of states instead of the size of the
         ///                  new block.  Otherwise, 0.
