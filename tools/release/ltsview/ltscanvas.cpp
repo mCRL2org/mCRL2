@@ -10,7 +10,7 @@
 #include "ltscanvas.h"
 #include "tr/tr.h"
 
-#include <math.h>
+#include <cmath>
 
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
