@@ -55,37 +55,37 @@ s
 #endif
 )
 {
-  /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
-  /* This check might break on perfectly valid architectures */
-  /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-
-  static_assert(sizeof(size_t) == sizeof(aterm*), "The size of an aterm pointer is not equal to the size of type size_t. Cannot compile the MCRL2 toolset for this platform.");
-  static_assert(sizeof(size_t) >= 4,"The size of size_t should at least be four bytes. Cannot compile the toolset for this platform.");
-
 #ifdef WIN32 
-
-  if (s.rdbuf() == std::cout.rdbuf())
+  std::string name;
+  FILE* handle;
+  if (stream.rdbuf() == std::cin.rdbuf())
   {
-    fflush(stdout);
-    if (_setmode(_fileno(stdout), _O_BINARY) == -1)
-    {
-      mCRL2log(mcrl2::log::warning) << "Cannot set stdout to binary mode.\n";
-    }
-    else
-    {
-      mCRL2log(mcrl2::log::debug) << "Converted stdout to binary mode.\n";
-    }
+    name = "cin";
+    handle = stdin;
   }
-  if (s.rdbuf() == std::cerr.rdbuf())
+  else
+  if (stream.rdbuf() == std::cout.rdbuf())
   {
+    name = "cout";
+    handle = stdout;
+    fflush(stdout);
+  }
+  else
+  if (stream.rdbuf() == std::cerr.rdbuf())
+  {
+    name = "cerr";
+    handle = stderr;
     fflush(stderr);
-    if (_setmode(_fileno(stderr), _O_BINARY) == -1)
+  }
+  if (!name.empty())
+  {
+    if (_setmode(_fileno(handle), _O_BINARY) == -1)
     {
-      mCRL2log(mcrl2::log::warning) << "Cannot set stderr to binary mode.\n";
+      mCRL2log(mcrl2::log::warning) << "Cannot set " << name << " to binary mode.\n";
     }
     else
     {
-      mCRL2log(mcrl2::log::debug) << "Converted stderr to binary mode.\n";
+      mCRL2log(mcrl2::log::debug) << "Converted " << name << " to binary mode.\n";
     }
   }
 #endif

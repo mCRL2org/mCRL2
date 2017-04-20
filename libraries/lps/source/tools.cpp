@@ -296,8 +296,15 @@ void txt2lps(const std::string& input_filename,
              const std::string& output_filename
             )
 {
+std::cerr << "INPUT " << input_filename << "\n";
+std::cerr << "OUTPUT " << output_filename << "\n";
   lps::stochastic_specification spec;
-  load_lps(spec, input_filename, lps_format_text());
+  std::ifstream ifs(input_filename);
+  if (!ifs.good())
+  {
+    throw mcrl2::runtime_error("Could not open file " + input_filename + ".");
+  }
+  parse_lps(ifs, spec);
   save_lps(spec, output_filename);
 }
 

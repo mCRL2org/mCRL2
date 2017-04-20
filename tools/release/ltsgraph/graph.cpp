@@ -31,7 +31,7 @@ inline float frand(float min, float max)
   return ((float)qrand() / RAND_MAX) * (max - min) + min;
 }
 
-static QString stateLabelToQString(const mcrl2::lts::state_label_empty& label)
+static QString stateLabelToQString(const mcrl2::lts::state_label_empty& )
 {
   return QString("");
 }

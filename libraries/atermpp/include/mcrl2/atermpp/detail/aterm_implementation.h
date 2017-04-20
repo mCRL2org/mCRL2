@@ -24,6 +24,13 @@ namespace atermpp
 namespace detail
 {
 
+/* Check for reasonably sized aterm (32 bits, 4 bytes)     */
+/* This check might break on perfectly valid architectures */
+/* that have char == 2 bytes, and sizeof(header_type) == 2 */
+static_assert(sizeof(size_t) == sizeof(_aterm*), "The size of an aterm pointer is not equal to the size of type size_t. Cannot compile the MCRL2 toolset for this platform.");
+static_assert(sizeof(size_t) >= 4,"The size of size_t should at least be four bytes. Cannot compile the toolset for this platform.");
+
+
 static const size_t BLOCK_SIZE = 1<<14;
 
 struct Block
