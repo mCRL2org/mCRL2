@@ -1,7 +1,7 @@
 #ifndef WORKAROUNDS_H__
 #define WORKAROUNDS_H__
 
-void work_around_qtbug_38598();
+// void work_around_qtbug_38598();
 
 // Windows specific workarounds
 #if defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN) || defined(_MSC_VER)
@@ -94,7 +94,7 @@ Workaround for compilers that do not support C++11 nullptr. Especially,
 GCC 4.4 and older do not yet have this keyword. File is included by passing
 the -include flag on the command line.
 */
-#ifndef MCRL2_HAVE_NULLPTR
+/* #ifndef MCRL2_HAVE_NULLPTR
 #ifndef __cplusplus
 #define nullptr ((void*)0)
 #elif defined(__GNUC__)
@@ -105,16 +105,18 @@ the -include flag on the command line.
 #define nullptr 0L
 #endif
 #endif // defined(HAVE_NULLPTR)
+*/
 
 /*
 Workaround for compilers that do not support C++11 noexcept. This cannot be removed as the 
 Visual studio 2013 does not yet know the keyword noexcept. 
 */
-#ifdef MCRL2_HAVE_NOEXCEPT
+/* #ifdef MCRL2_HAVE_NOEXCEPT
 #define NOEXCEPT noexcept
 #else
 #define NOEXCEPT throw()
 #endif // defined(HAVE_NOEXCEPT) 
+*/
 
 // Code used for all platforms
 //#include <limits.h>
