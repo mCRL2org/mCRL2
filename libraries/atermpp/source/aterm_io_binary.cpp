@@ -49,9 +49,9 @@ using detail::writeInt;
 
 using namespace std;
 
-static void aterm_io_init(std::basic_ios<char>&
+static void aterm_io_init(std::ios& 
 #ifdef WIN32 // This suppresses a compiler warning.
-s
+stream
 #endif
 )
 {
