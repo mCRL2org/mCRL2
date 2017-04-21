@@ -209,8 +209,6 @@ void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*ti
 
 void MainWindow::textChanged()
 {
-  QList<QTextEdit::ExtraSelection> extras;
-  m_ui.documentManager->currentDocument()->setExtraSelections(extras);
   m_ui.documentManager->updateTitle();
 }
 

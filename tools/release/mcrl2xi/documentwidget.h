@@ -58,6 +58,12 @@ class DocumentWidget : public mcrl2::gui::qt::NumberedTextEdit
      */
     void saveFile(QString fileName);
 
+    void highlightParenthesis(int pos);
+    void matchParenthesis(int which);
+
+  public slots:
+    void onCursorPositionChanged();
+
   private:
     QString m_filename;         ///< The filename currently loaded, null String if none available
     Rewriter m_rewriter;

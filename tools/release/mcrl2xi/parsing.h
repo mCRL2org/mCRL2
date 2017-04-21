@@ -23,8 +23,7 @@ namespace detail
 
 inline bool contains_keyword_init(const std::string& input)
 {
-  QString no_alphanumeric = "[^a-ZA-Z0-9]";
-  QRegExp rx(no_alphanumeric + "init" + no_alphanumeric, Qt::CaseInsensitive);
+  QRegExp rx("\\binit\\b", Qt::CaseInsensitive);
   return rx.indexIn(QString::fromStdString(input)) != -1;
 }
 

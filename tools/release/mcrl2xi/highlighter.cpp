@@ -181,4 +181,15 @@ void Highlighter::highlightBlock(const QString& text)
       index = expression.indexIn(text, index + length);
     }
   }
+  TextBlockData *data = new TextBlockData;
+  QRegExp rx("[()]");
+  int pos = -1;
+  while ((pos = rx.indexIn(text, pos + 1)) != -1)
+  {
+    ParenthesisInfo info;
+    info.character = text[pos].toLatin1();
+    info.position = pos;
+    data->insert(info);
+  }
+  setCurrentBlockUserData(data);
 }

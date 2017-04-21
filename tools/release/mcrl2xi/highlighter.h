@@ -12,7 +12,7 @@
   @file highlighter.h
   @author R. Boudewijns and F. Stappers
 
-  Highlicher class that implements syntax highlighting for a QTextEdit
+  Highlighter class that implements syntax highlighting for a QTextEdit
 
 */
 
@@ -25,6 +25,27 @@
 #include <QTextCharFormat>
 
 class QTextDocument;
+
+struct ParenthesisInfo
+{
+    char character;
+    int position;
+};
+
+class TextBlockData : public QTextBlockUserData
+{
+  public:
+    TextBlockData() {}
+
+    const QVector<ParenthesisInfo> parentheses() const {
+      return m_parentheses;
+    }
+    void insert(ParenthesisInfo info) {
+      m_parentheses.push_back(info);
+    }
+  private:
+    QVector<ParenthesisInfo> m_parentheses;
+};
 
 class Highlighter : public QSyntaxHighlighter
 {
