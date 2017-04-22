@@ -17,7 +17,6 @@
 #else
 #include <GL/glu.h>
 #endif
-#include "mcrl2/utilities/workarounds.h"
 
 #include "icons/zoom_cursor.xpm"
 #include "icons/pan_cursor.xpm"

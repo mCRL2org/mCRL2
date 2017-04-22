@@ -22,7 +22,6 @@
 #include <QtGlobal>
 #include <string>
 #include "mcrl2/utilities/toolset_version.h"
-#include "mcrl2/utilities/workarounds.h"
 
 namespace mcrl2
 {

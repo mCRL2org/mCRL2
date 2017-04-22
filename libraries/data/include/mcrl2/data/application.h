@@ -22,7 +22,6 @@
 #define MCRL2_DATA_APPLICATION_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/utilities/workarounds.h" // for nullptr on older compilers
 
 namespace mcrl2
 {

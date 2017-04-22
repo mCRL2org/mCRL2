@@ -13,7 +13,6 @@
 #include <utility>
 #include <vector>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/workarounds.h"
 #include "Graph.h"
 #include "SCC.h"
 #include "shuffle.h"

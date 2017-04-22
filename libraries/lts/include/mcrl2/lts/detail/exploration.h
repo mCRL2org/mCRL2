@@ -23,7 +23,6 @@
 #include "mcrl2/lts/detail/lts_generation_options.h"
 #include "mcrl2/lts/detail/exploration_strategy.h"
 
-#include "mcrl2/utilities/workarounds.h"
 
 namespace mcrl2
 {

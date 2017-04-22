@@ -1,4 +1,4 @@
-# Compiler configuration shared on all platforms, on all compilers
+# Compiler confed on all platforms, on all compilers
 set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${CMAKE_EXE_LINKER_FLAGS_MAINTAINER}")
 set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${CMAKE_EXE_LINKER_FLAGS_MAINTAINER}")
 set(CMAKE_C_FLAGS_MAINTAINER "${CMAKE_C_FLAGS_DEBUG} ${CMAKE_C_FLAGS_MAINTAINER}")
@@ -6,8 +6,19 @@ set(CMAKE_CXX_FLAGS_MAINTAINER "${CMAKE_CXX_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_MAINT
 
 # Perform compiler-specific compiler configuration
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14.0")
+    message(FATAL_ERROR "MSVC version 14.0 (aka MSVC 2015) is required.")
+  endif()
   include(ConfigureMSVC)
-elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU") 
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+    message(FATAL_ERROR "GCC version must be at least 4.8.")
+  endif()
+  include(ConfigureGNU)
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.2)
+    message(FATAL_ERROR "Clang version must be at least 3.2.")
+  endif()
   include(ConfigureGNU)
 else()
   message(FATAL_ERROR "Unsupported compiler setup (C: ${CMAKE_C_COMPILER_ID} / C++: ${CMAKE_CXX_COMPILER_ID}).")

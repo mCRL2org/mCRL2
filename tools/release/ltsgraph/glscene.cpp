@@ -27,7 +27,6 @@
 #include <GL/glu.h>
 #endif
 
-#include "mcrl2/utilities/workarounds.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "glscene.h"
