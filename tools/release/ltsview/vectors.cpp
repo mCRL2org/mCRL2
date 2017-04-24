@@ -9,9 +9,9 @@
 /// \file vectors.cpp
 /// \brief Implementation of the Vector classes
 
-#include <math.h>
 #include "mathutils.h"
 #include "vectors.h"
+#include <math.h>
 
 namespace Vectors {
 
@@ -31,4 +31,4 @@ QVector2D fromPolar(float angle, float radius)
   return QVector2D(radius * cos(angle_rad), radius * sin(angle_rad));
 }
 
-}
+}  // namespace Vectors

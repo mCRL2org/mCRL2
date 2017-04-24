@@ -7,9 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "visualizer.h"
-#include <cmath>
-#include <cstdlib>
-#include <fstream>
 #include "cluster.h"
 #include "lts.h"
 #include "mathutils.h"
@@ -17,6 +14,9 @@
 #include "state.h"
 #include "transition.h"
 #include "vectors.h"
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
 
 #include <QtOpenGL>
 
@@ -72,7 +72,7 @@ Visualizer::Visualizer(QObject *parent, Settings* settings_, LtsManager *ltsMana
 
 float Visualizer::getHalfStructureHeight() const
 {
-  if (!ltsManager->lts())
+  if (ltsManager->lts() == nullptr)
   {
     return 0.0f;
   }
@@ -98,7 +98,7 @@ void Visualizer::computeBoundsInfo(float& bcw,float& bch)
 {
   bcw = 0.0f;
   bch = 0.0f;
-  if (ltsManager->lts())
+  if (ltsManager->lts() != nullptr)
   {
     computeSubtreeBounds(ltsManager->lts()->getInitialState()->getCluster(), bcw, bch);
   }
@@ -119,7 +119,7 @@ void Visualizer::computeSubtreeBounds(Cluster* root, float& bw, float& bh)
     for (i = 0; i < root->getNumDescendants(); ++i)
     {
       desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         if (desc->isCentered())
         {
@@ -149,7 +149,7 @@ void Visualizer::computeSubtreeBounds(Cluster* root, float& bw, float& bh)
 
 void Visualizer::drawStructure()
 {
-  if (!ltsManager->lts())
+  if (ltsManager->lts() == nullptr)
   {
     return;
   }
@@ -161,7 +161,7 @@ void Visualizer::drawStructure()
   {
     updateColors();
   }
-  visObjectFactory.drawObjects(&primitiveFactory,(int)((100 - settings->transparency.value()) * 2.55f),
+  visObjectFactory.drawObjects(&primitiveFactory,static_cast<int>((100 - settings->transparency.value()) * 2.55f),
                                 markManager->stateMatchStyle() == MATCH_MULTI);
 }
 
@@ -226,7 +226,7 @@ void Visualizer::traverseTreeC(Cluster* root,bool topClosed,int rot)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         if (desc->isCentered())
         {
@@ -354,7 +354,7 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         if (desc->isCentered())
         {
@@ -512,11 +512,11 @@ void Visualizer::traverseTreeT(Cluster* root, bool topClosed, int rot)
   }
 }
 
-static inline QColor blend(QColor from, QColor to, float factor)
+static inline QColor blend(const QColor& from, const QColor& to, float factor)
 {
-  unsigned char red = (unsigned char)(from.red() * factor + to.red() * (1.0 - factor));
-  unsigned char green = (unsigned char)(from.green() * factor + to.green() * (1.0 - factor));
-  unsigned char blue = (unsigned char)(from.blue() * factor + to.blue() * (1.0 - factor));
+  auto red = static_cast<unsigned char>(from.red() * factor + to.red() * (1.0 - factor));
+  auto green = static_cast<unsigned char>(from.green() * factor + to.green() * (1.0 - factor));
+  auto blue = static_cast<unsigned char>(from.blue() * factor + to.blue() * (1.0 - factor));
   return QColor(red, green, blue);
 }
 
@@ -574,7 +574,7 @@ void Visualizer::updateColors()
       }
       else
       {
-        float t = cl->getRank() / (float)(ranks);
+        float t = cl->getRank() / static_cast<float>(ranks);
         float hue = hueFrom + t * hueDelta;
         if (hue < 0.0f)
         {
@@ -661,7 +661,7 @@ void Visualizer::sortClusters(const QVector3D& viewpoint)
 
 void Visualizer::drawStates(bool simulating)
 {
-  if (!ltsManager->lts())
+  if (ltsManager->lts() == nullptr)
   {
     return;
   }
@@ -674,7 +674,7 @@ void Visualizer::drawStates(bool simulating)
 void Visualizer::drawSimStates(QList<State*> historicStates,
                                State* currState, Transition* chosenTrans)
 {
-  if (!ltsManager->lts())
+  if (ltsManager->lts() == nullptr)
   {
     return;
   }
@@ -776,9 +776,9 @@ void Visualizer::drawSimStates(QList<State*> historicStates,
   // Draw previous states of the simulation, in the colour specified in the
   // settings (default: white)
   State* s;
-  for (int i = 0; i < historicStates.size(); ++i)
+  for (auto & historicState : historicStates)
   {
-    s = historicStates[i];
+    s = historicState;
 
     if (ltsManager->lts()->getZoomLevel() == s->getZoomLevel()
         && drawnStates.find(s) == drawnStates.end())
@@ -927,7 +927,7 @@ void Visualizer::computeStateAbsPos(Cluster* root, int rot)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         if (desc->isCentered())
         {
@@ -985,16 +985,16 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
             {
               n_colours = n_colours << 1;
             }
-            GLubyte* texture = (GLubyte*)malloc(4 * n_colours *
-                                                sizeof(GLubyte));
+            auto* texture = static_cast<GLubyte*>(malloc(4 * n_colours *
+                                                sizeof(GLubyte)));
 
             for (int i = 0; i < n_colours; ++i)
             {
               QColor c1 = colors[i % colors.size()];
-              texture[4*i]   = (GLubyte) c1.red();
-              texture[4*i+1] = (GLubyte) c1.green();
-              texture[4*i+2] = (GLubyte) c1.blue();
-              texture[4*i+3] = (GLubyte) 255;
+              texture[4*i]   = static_cast<GLubyte>( c1.red());
+              texture[4*i+1] = static_cast<GLubyte>( c1.green());
+              texture[4*i+2] = static_cast<GLubyte>( c1.blue());
+              texture[4*i+3] = static_cast<GLubyte>( 255);
             }
             // Bind the texture created above, set textures on. (From Red Book)
 
@@ -1049,7 +1049,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         drawStates(desc, simulating);
       }
@@ -1061,7 +1061,7 @@ void Visualizer::drawStates(Cluster* root, bool simulating)
 
 void Visualizer::drawTransitions(bool draw_fp,bool draw_bp)
 {
-  if (!ltsManager->lts())
+  if (ltsManager->lts() == nullptr)
   {
     return;
   }
@@ -1147,7 +1147,7 @@ void Visualizer::drawTransitions(Cluster* root,bool disp_fp,bool disp_bp)
     for (int i = 0; i < root->getNumDescendants(); ++i)
     {
       Cluster* desc = root->getDescendant(i);
-      if (desc != NULL)
+      if (desc != nullptr)
       {
         drawTransitions(desc,disp_fp,disp_bp);
       }
@@ -1163,9 +1163,8 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
   computeAbsPos();
 
   // Draw the historical transitions.
-  for (int i = 0; i < transHis.size(); ++i)
+  for (auto currTrans : transHis)
   {
-    Transition* currTrans = transHis[i];
     State* beginState = currTrans->getBeginState();
     State* endState = currTrans->getEndState();
 
@@ -1212,9 +1211,8 @@ void Visualizer::drawSimTransitions(bool draw_fp, bool draw_bp,
 
   // Draw the possible transitions from the current state, as well as the state
   // they lead into
-  for (int i = 0; i < posTrans.size(); ++i)
+  for (auto currTrans : posTrans)
   {
-    Transition* currTrans = posTrans[i];
     State* beginState = currTrans->getBeginState();
     State* endState = currTrans->getEndState();
 
@@ -1319,15 +1317,15 @@ void Visualizer::drawBackPointer(State* startState, const QColor& startColor, St
   col[2] = startColor.blue();
   float diff[3];
   int steps = N / 2;
-  diff[0] = (float)(endColor.red() - startColor.red()) / steps;
-  diff[1] = (float)(endColor.green() - startColor.green()) / steps;
-  diff[2] = (float)(endColor.blue() - startColor.blue()) / steps;
+  diff[0] = static_cast<float>(endColor.red() - startColor.red()) / steps;
+  diff[1] = static_cast<float>(endColor.green() - startColor.green()) / steps;
+  diff[2] = static_cast<float>(endColor.blue() - startColor.blue()) / steps;
 
   glBegin(GL_LINE_STRIP);
 
   for (int k = 0; k < N; ++k)
   {
-    t  = (float)k / (N-1);
+    t  = static_cast<float>(k) / (N-1);
     it = 1.0f - t;
     b3 =      t *  t *  t;
     b2 = 3 *  t *  t * it;
@@ -1348,7 +1346,7 @@ void Visualizer::drawBackPointer(State* startState, const QColor& startColor, St
         b1 * ctrlPts[1][2] +
         b2 * ctrlPts[2][2] +
         b3 * ctrlPts[3][2];
-    glColor4ub((GLubyte)col[0], (GLubyte)col[1], (GLubyte)col[2], 255);
+    glColor4ub(static_cast<GLubyte>(col[0]), static_cast<GLubyte>(col[1]), static_cast<GLubyte>(col[2]), 255);
     glVertex3f(x, y, z);
     if (4 * k > N && 4 * k <= 3 * N)
     {
@@ -1372,7 +1370,7 @@ void Visualizer::drawLoop(State* state)
   glBegin(GL_LINE_STRIP);
   for (int k = 0; k < N; ++k)
   {
-    t  = (float)k / (N-1);
+    t  = static_cast<float>(k) / (N-1);
     it = 1.0f - t;
     b0 =      t *  t *  t;
     b1 = 3 *  t *  t * it;
@@ -1398,9 +1396,9 @@ void Visualizer::drawLoop(State* state)
   glEnd();
 }
 
-void Visualizer::exportToText(std::string filename)
+void Visualizer::exportToText(const std::string& filename)
 {
-  if (!ltsManager->lts())
+  if (ltsManager->lts() == nullptr)
   {
     return;
   }
@@ -1442,7 +1440,7 @@ void Visualizer::exportToText(std::string filename)
     {
       file << "at angle(" << (*ci)->getPosition() << ")";
     }
-    if ((*ci)->getAncestor() != NULL)
+    if ((*ci)->getAncestor() != nullptr)
     {
       file << " below parent cluster " << clus_id[(*ci)->getAncestor()];
     }

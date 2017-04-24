@@ -13,13 +13,13 @@
 #include "transition.h"
 #include <QEventLoop>
 
-void LtsManagerHelper::loadLts(QString filename)
+void LtsManagerHelper::loadLts(const QString& filename)
 {
   emit loadingLts();
 
-  m_lts = 0;
+  m_lts = nullptr;
 
-  LTS *lts = new LTS();
+  auto *lts = new LTS();
   try
   {
     if (!lts->readFromFile(filename.toStdString()))
@@ -72,10 +72,10 @@ LtsManager::LtsManager(QObject *parent, Settings *settings, QThread *atermThread
   QObject(parent),
   m_helper(settings),
   m_settings(settings),
-  m_lts(0),
-  m_simulation(0),
-  m_selectedState(0),
-  m_selectedCluster(0)
+  m_lts(nullptr),
+  m_simulation(nullptr),
+  m_selectedState(nullptr),
+  m_selectedCluster(nullptr)
 {
   m_helper.moveToThread(atermThread);
 
@@ -93,41 +93,41 @@ LtsManager::LtsManager(QObject *parent, Settings *settings, QThread *atermThread
 
 State *LtsManager::currentSimulationState() const
 {
-  if (!m_simulation)
+  if (m_simulation == nullptr)
   {
-    return 0;
+    return nullptr;
   }
-  else
-  {
+  
+  
     return m_simulation->currentState();
-  }
+  
 }
 
 Transition *LtsManager::currentSimulationTransition() const
 {
-  if (!m_simulation)
+  if (m_simulation == nullptr)
   {
-    return 0;
+    return nullptr;
   }
-  else
-  {
+  
+  
     return m_simulation->currentTransition();
-  }
+  
 }
 
 QList<Transition *> LtsManager::simulationAvailableTransitions() const
 {
-  if (!m_simulation)
+  if (m_simulation == nullptr)
   {
     return QList<Transition *>();
   }
-  else
-  {
+  
+  
     return m_simulation->availableTransitions();
-  }
+  
 }
 
-bool LtsManager::openLts(QString filename)
+bool LtsManager::openLts(const QString& filename)
 {
   emit startStructuring();
 
@@ -137,7 +137,7 @@ bool LtsManager::openLts(QString filename)
   loop.exec();
 
   LTS *lts = m_helper.lts();
-  if (!lts)
+  if (lts == nullptr)
   {
     emit stopStructuring();
     emit errorLoadingLts();
@@ -146,14 +146,9 @@ bool LtsManager::openLts(QString filename)
 
   emit ltsStructured();
 
-  if (m_simulation)
-  {
-    delete m_simulation;
-  }
-  if (m_lts)
-  {
-    delete m_lts;
-  }
+  delete m_simulation;
+  delete m_lts;
+  
   m_lts = lts;
   m_simulation = new Simulation(this, m_lts);
 
@@ -195,31 +190,31 @@ bool LtsManager::zoomOut()
     emit ltsZoomed(m_lts);
     return true;
   }
-  else
-  {
+  
+  
     return false;
-  }
+  
 }
 
 void LtsManager::unselect()
 {
-  if (m_lts && (m_selectedState || m_selectedCluster))
+  if ((m_lts != nullptr) && ((m_selectedState != nullptr) || (m_selectedCluster != nullptr)))
   {
-    m_selectedState = 0;
-    m_selectedCluster = 0;
+    m_selectedState = nullptr;
+    m_selectedCluster = nullptr;
     emit selectionChanged();
   }
 }
 
 void LtsManager::selectState(State *state)
 {
-  if (m_lts)
+  if (m_lts != nullptr)
   {
     m_selectedState = state;
     if (m_simulation->isStarted())
     {
       Transition *transition = transitionTo(state);
-      if (transition)
+      if (transition != nullptr)
       {
         m_simulation->selectTransition(transition);
       }
@@ -234,7 +229,7 @@ void LtsManager::selectState(State *state)
 
 void LtsManager::selectCluster(Cluster *cluster)
 {
-  if (m_lts)
+  if (m_lts != nullptr)
   {
     m_selectedCluster = cluster;
     emit selectionChanged();
@@ -243,10 +238,10 @@ void LtsManager::selectCluster(Cluster *cluster)
 
 void LtsManager::simulateState(State *state)
 {
-  if (m_simulation)
+  if (m_simulation != nullptr)
   {
     Transition *transition = transitionTo(state);
-    if (transition)
+    if (transition != nullptr)
     {
       m_simulation->followTransition(transition);
     }
@@ -255,7 +250,7 @@ void LtsManager::simulateState(State *state)
 
 void LtsManager::clusterStates()
 {
-  if (m_lts)
+  if (m_lts != nullptr)
   {
     while (zoomOut())
     {
@@ -281,7 +276,7 @@ void LtsManager::clusterStates()
 
 void LtsManager::positionClusters()
 {
-  if (m_lts)
+  if (m_lts != nullptr)
   {
     emit startStructuring();
 
@@ -301,7 +296,7 @@ void LtsManager::positionClusters()
 
 void LtsManager::positionStates()
 {
-  if (m_lts)
+  if (m_lts != nullptr)
   {
     emit startStructuring();
 
@@ -322,16 +317,16 @@ void LtsManager::updateSimulationHistory()
 {
   m_simulationStateHistory.clear();
   m_simulationTransitionHistory.clear();
-  if (m_simulation)
+  if (m_simulation != nullptr)
   {
     QList<Transition *> history = m_simulation->history();
-    for (int i = 0; i < history.size(); i++)
+    for (auto & i : history)
     {
-      // TODO: this should only select states that are part of the current zoomed LTS!
+      // TODO(johannes): this should only select states that are part of the current zoomed LTS!
       //if (history[i]->getBeginState()->
       {
-        m_simulationStateHistory += history[i]->getBeginState();
-        m_simulationTransitionHistory += history[i];
+        m_simulationStateHistory += i->getBeginState();
+        m_simulationTransitionHistory += i;
       }
     }
   }
@@ -339,7 +334,7 @@ void LtsManager::updateSimulationHistory()
 
 void LtsManager::unselectNonsimilated()
 {
-  if (m_simulation->isStarted() == (transitionTo(selectedState()) == 0))
+  if (m_simulation->isStarted() == (transitionTo(selectedState()) == nullptr))
   {
     //unselect();
   }
@@ -348,12 +343,12 @@ void LtsManager::unselectNonsimilated()
 Transition *LtsManager::transitionTo(State *state)
 {
   QList<Transition *> transitions = m_simulation->availableTransitions();
-  for (int i = 0; i < transitions.size(); i++)
+  for (auto & transition : transitions)
   {
-    if (transitions[i]->getEndState() == state)
+    if (transition->getEndState() == state)
     {
-      return transitions[i];
+      return transition;
     }
   }
-  return 0;
+  return nullptr;
 }

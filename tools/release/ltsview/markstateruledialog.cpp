@@ -8,9 +8,10 @@
 
 #include "markstateruledialog.h"
 #include <QColorDialog>
+#include <utility>
 
 
-MarkStateRuleDialog::MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color, int parameter, bool negated, QSet<int> values):
+MarkStateRuleDialog::MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color, int parameter, bool negated, const QSet<int>& values):
   QDialog(parent),
   m_lts(lts)
 {
@@ -19,7 +20,7 @@ MarkStateRuleDialog::MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color
   connect(m_ui.color, SIGNAL(clicked()), this, SLOT(colorClicked()));
   connect(m_ui.parameterList, SIGNAL(itemSelectionChanged()), this, SLOT(parameterSelected()));
 
-  setColor(color);
+  setColor(std::move(color));
 
   for (size_t i = 0; i < m_lts->getNumParameters(); i++)
   {
@@ -68,7 +69,7 @@ void MarkStateRuleDialog::colorClicked()
   }
 }
 
-void MarkStateRuleDialog::setColor(QColor color)
+void MarkStateRuleDialog::setColor(const QColor& color)
 {
   m_color = color;
   m_ui.color->setAutoFillBackground(true);
@@ -79,7 +80,7 @@ void MarkStateRuleDialog::setColor(QColor color)
 void MarkStateRuleDialog::parameterSelected()
 {
   QList<QListWidgetItem *> selection = m_ui.parameterList->selectedItems();
-  if (selection.size() == 0)
+  if (selection.empty())
   {
     return;
   }

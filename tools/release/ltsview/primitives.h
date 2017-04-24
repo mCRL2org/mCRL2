@@ -27,7 +27,7 @@ class Primitive
     /// \param coss
     /// \param sins
     /// \pre N > 0
-    virtual void reshape(int N,float* coss,float* sins) = 0;
+    virtual void reshape(int N,const float* coss,const float* sins) = 0;
 };
 
 /* Concrete derived classes */
@@ -38,7 +38,7 @@ class P_Sphere : public Primitive
     P_Sphere();
     ~P_Sphere();
     void draw();
-    void reshape(int N,float* coss,float* sins);
+    void reshape(int N,const float* coss,const float* sins);
   private:
     GLuint disp_list;
 };
@@ -49,7 +49,7 @@ class P_SimpleSphere : public Primitive
     P_SimpleSphere();
     ~P_SimpleSphere();
     void draw();
-    void reshape(int N,float* coss,float* sins);
+    void reshape(int N,const float* coss,const float* sins);
   private:
     GLuint disp_list;
 };
@@ -60,7 +60,7 @@ class P_Hemisphere : public Primitive
     P_Hemisphere();
     ~P_Hemisphere();
     void draw();
-    void reshape(int N,float* coss,float* sins);
+    void reshape(int N,const float* coss,const float* sins);
   private:
     GLuint disp_list;
 };
@@ -71,7 +71,7 @@ class P_Disc : public Primitive
     P_Disc();
     ~P_Disc();
     void draw();
-    void reshape(int N,float* coss,float* sins);
+    void reshape(int N,const float* coss,const float* sins);
   private:
     GLuint disp_list;
 };
@@ -82,7 +82,7 @@ class P_Ring : public Primitive
     P_Ring(float r);
     ~P_Ring();
     void draw();
-    void reshape(int N,float* coss,float* sins);
+    void reshape(int N,const float* coss,const float* sins);
     float getTopRadius();
   private:
     GLuint disp_list;
@@ -96,7 +96,7 @@ class P_TruncatedCone : public Primitive
     P_TruncatedCone(P_Ring* a_ring,P_Disc* a_disc,bool t,bool b);
     ~P_TruncatedCone();
     void draw();
-    void reshape(int N,float* coss,float* sins);
+    void reshape(int N,const float* coss,const float* sins);
   private:
     P_Ring* ring;
     P_Disc* disc;
@@ -118,8 +118,8 @@ class P_ObliqueCone : public Primitive
     P_ObliqueCone(float a,float r,float s);
     ~P_ObliqueCone();
     void draw();
-    void reshape(int N,float* coss,float* sins);
-    void reshape(int N,float* coss,float* sins,float obt);
+    void reshape(int N,const float* coss,const float* sins);
+    void reshape(int N,const float* coss,const float* sins,float obt);
   private:
     GLuint disp_list;
     float alpha;

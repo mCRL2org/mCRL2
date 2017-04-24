@@ -6,10 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <algorithm>
-#include <limits>
-#include <queue>
-#include <vector>
 #include "cluster.h"
 #include "fsm_state_positioner.h"
 #include "lts.h"
@@ -17,6 +13,10 @@
 #include "state.h"
 #include "transition.h"
 #include "vectors.h"
+#include <algorithm>
+#include <limits>
+#include <queue>
+#include <vector>
 
 using namespace std;
 using namespace MathUtils;
@@ -33,10 +33,9 @@ FSMStatePositioner::FSMStatePositioner(LTS* l)
 
 FSMStatePositioner::~FSMStatePositioner()
 {
-  for (map< Cluster*, ClusterSlotInfo* >::iterator slot_info_it =
-         slot_info.begin(); slot_info_it != slot_info.end(); ++slot_info_it)
+  for (auto & slot_info_it : slot_info)
   {
-    delete slot_info_it->second;
+    delete slot_info_it.second;
   }
 }
 
@@ -100,7 +99,7 @@ void FSMStatePositioner::topDownPass()
 {
   // Assumption: unpositioned_states is sorted bottom-up
   vector< State* > unpositioned_temp;
-  for (vector< State* >::reverse_iterator state_it =
+  for (auto state_it =
          unpositioned_states.rbegin(); state_it != unpositioned_states.rend();
        ++state_it)
   {
@@ -129,10 +128,8 @@ void FSMStatePositioner::topDownPass()
 
 void FSMStatePositioner::resolveUnpositioned()
 {
-  for (vector< State* >::iterator state_it = unpositioned_states.begin();
-       state_it != unpositioned_states.end(); ++state_it)
+  for (auto state : unpositioned_states)
   {
-    State* state = *state_it;
     ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
     int ring, slot;
     cs_info->findFarthestFreeSlot(ring, slot);
@@ -144,10 +141,8 @@ QVector2D FSMStatePositioner::sumStateVectorsInSingleCluster(
   vector< State* > &states)
 {
   QVector2D sum_vector = QVector2D(0, 0);
-  for (vector< State* >::iterator state_it = states.begin(); state_it !=
-       states.end(); ++state_it)
+  for (auto state : states)
   {
-    State* state = *state_it;
     if (! state->isCentered())
     {
       sum_vector += Vectors::fromPolar(state->getPositionAngle(),
@@ -161,10 +156,8 @@ QVector2D FSMStatePositioner::sumStateVectorsInMultipleClusters(
   vector< State* > &states, float rim_radius)
 {
   QVector2D sum_vector = QVector2D(0, 0);
-  for (vector< State* >::iterator state_it = states.begin(); state_it !=
-       states.end(); ++state_it)
+  for (auto state : states)
   {
-    State* state = *state_it;
     if (state->getCluster()->isCentered())
     {
       if (!state->isCentered())
@@ -189,10 +182,9 @@ QVector2D FSMStatePositioner::sumStateVectorsInMultipleClusters(
 
 bool FSMStatePositioner::allStatesCentered(vector< State* > &states)
 {
-  for (vector< State* >::iterator state = states.begin(); state !=
-       states.end(); ++state)
+  for (auto & state : states)
   {
-    if (!(**state).isCentered())
+    if (!(*state).isCentered())
     {
       return false;
     }
@@ -381,11 +373,10 @@ void ClusterSlotInfo::findFarthestFreeSlot(int& ring, int& slot)
     {
       QVector2D slot_vector = getVector(r, s);
       float min_distance = numeric_limits< float >::max();
-      for (SlotSet::iterator occupied_slot = occupied_slots.begin();
-           occupied_slot != occupied_slots.end(); ++occupied_slot)
+      for (auto occupied_slot : occupied_slots)
       {
-        QVector2D delta_vector = slot_vector - getVector(occupied_slot->ring,
-                                occupied_slot->slot);
+        QVector2D delta_vector = slot_vector - getVector(occupied_slot.ring,
+                                occupied_slot.slot);
         min_distance = min(min_distance, delta_vector.length());
       }
       if (min_distance > max_min_distance)

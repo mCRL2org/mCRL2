@@ -26,7 +26,7 @@ class LtsManagerHelper : public QObject
     LTS *lts() { return m_lts; }
 
   public slots:
-    void loadLts(QString filename);
+    void loadLts(const QString& filename);
     void clusterStates(LTS *lts);
     void positionClusters(LTS *lts);
     void positionStates(LTS *lts);
@@ -65,7 +65,7 @@ class LtsManager : public QObject
     QList<Transition *> simulationTransitionHistory() { return m_simulationTransitionHistory; }
 
   public slots:
-    bool openLts(QString filename);
+    bool openLts(const QString& filename);
     void zoomInBelow(Cluster *cluster);
     void zoomInBelow() { if (selectedCluster()) zoomInBelow(selectedCluster()); }
     void zoomInAbove(Cluster *cluster);

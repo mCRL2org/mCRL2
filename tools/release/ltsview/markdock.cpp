@@ -7,10 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "markdock.h"
+#include "lts.h"
 #include "markmanager.h"
 #include "markstateruledialog.h"
-#include "lts.h"
 #include <QList>
+#include <utility>
 
 MarkDock::MarkDock(QWidget *parent, MarkManager *markManager):
   QWidget(parent),
@@ -62,7 +63,7 @@ void MarkDock::loadLts()
   m_actionNumbers.clear();
   m_actionPositions.clear();
   m_ui.markedActionList->clear();
-  if (m_markManager->lts())
+  if (m_markManager->lts() != nullptr)
   {
     for (int i = 0; i < m_markManager->lts()->getNumLabels(); i++)
     {
@@ -143,7 +144,7 @@ void MarkDock::setStateMatchStyle(MatchStyle style)
 
 void MarkDock::addMarkRule()
 {
-  if (m_markManager->lts())
+  if (m_markManager->lts() != nullptr)
   {
     QColor color = m_markRuleColors[m_markRuleNextColorIndex];
     m_markRuleNextColorIndex = (m_markRuleNextColorIndex + 1) % m_markRuleColors.size();
@@ -163,7 +164,7 @@ void MarkDock::addMarkRule()
   }
 }
 
-void MarkDock::markRuleAdded(MarkRuleIndex index)
+void MarkDock::markRuleAdded(const MarkRuleIndex& index)
 {
   MarkListItem *item = new MarkListItem(markRuleDescription(index), index);
   m_markListItems[index] = item;
@@ -174,7 +175,7 @@ void MarkDock::markRuleAdded(MarkRuleIndex index)
 
 void MarkDock::editMarkRule(QListWidgetItem *item)
 {
-  MarkRuleIndex index = static_cast<MarkListItem *>(item)->index;
+  MarkRuleIndex index = dynamic_cast<MarkListItem *>(item)->index;
   MarkRule rule = m_markManager->markRule(index);
   MarkStateRuleDialog dialog(this, m_markManager->lts(), rule.color, rule.parameter, rule.negated, rule.values);
   if (dialog.exec() == QDialog::Accepted)
@@ -190,7 +191,7 @@ void MarkDock::editMarkRule(QListWidgetItem *item)
 
 void MarkDock::enableMarkRule(QListWidgetItem *item)
 {
-  MarkRuleIndex index = static_cast<MarkListItem *>(item)->index;
+  MarkRuleIndex index = dynamic_cast<MarkListItem *>(item)->index;
   MarkRule rule = m_markManager->markRule(index);
   rule.active = item->checkState() == Qt::Checked;
   if (rule.active != m_markManager->markRule(index).active)
@@ -200,7 +201,7 @@ void MarkDock::enableMarkRule(QListWidgetItem *item)
   }
 }
 
-void MarkDock::markRuleChanged(MarkRuleIndex index)
+void MarkDock::markRuleChanged(const MarkRuleIndex& index)
 {
   m_markListItems[index]->setCheckState(m_markManager->markRule(index).active ? Qt::Checked : Qt::Unchecked);
   m_markListItems[index]->setText(markRuleDescription(index));
@@ -211,12 +212,12 @@ void MarkDock::removeMarkRule()
   QList<QListWidgetItem *> selection = m_ui.markRuleList->selectedItems();
   if (!selection.isEmpty())
   {
-    MarkRuleIndex index = static_cast<MarkListItem *>(selection[0])->index;
+    MarkRuleIndex index = dynamic_cast<MarkListItem *>(selection[0])->index;
     m_markManager->removeMarkRule(index);
   }
 }
 
-void MarkDock::markRuleRemoved(MarkRuleIndex index)
+void MarkDock::markRuleRemoved(const MarkRuleIndex& index)
 {
   delete m_ui.markRuleList->takeItem(m_ui.markRuleList->row(m_markListItems[index]));
   m_markListItems.remove(index);
@@ -240,7 +241,7 @@ void MarkDock::setActionMarked(int action, bool marked)
 
 QString MarkDock::markRuleDescription(MarkRuleIndex index) const
 {
-  MarkRule rule = m_markManager->markRule(index);
+  MarkRule rule = m_markManager->markRule(std::move(index));
   QString output;
   output += QString::fromStdString(m_markManager->lts()->getParameterName(rule.parameter));
   output += rule.negated ? " not in { " : " in { ";

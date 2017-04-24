@@ -99,16 +99,16 @@ class MarkManager : public QObject
     void setClusterMatchStyle(MatchStyle style);
     void setStateMatchStyle(MatchStyle style);
     MarkRuleIndex addMarkRule(MarkRule rule);
-    void setMarkRule(MarkRuleIndex index, MarkRule rule);
-    void removeMarkRule(MarkRuleIndex index);
+    void setMarkRule(const MarkRuleIndex& index, const MarkRule& rule);
+    void removeMarkRule(const MarkRuleIndex& index);
     void setActionMarked(int action, bool marked);
     void flushClusters();
 
   protected slots:
     void flushMarkedStateNumbers();
     void cleanLts();
-    void applyRule(MarkRuleIndex index);
-    void unapplyRule(MarkRuleIndex index);
+    void applyRule(const MarkRuleIndex& index);
+    void unapplyRule(const MarkRuleIndex& index);
 
   protected:
     bool matchesRule(State *state, const MarkRule &rule) const;

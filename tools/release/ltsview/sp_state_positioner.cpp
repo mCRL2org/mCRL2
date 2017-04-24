@@ -6,16 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <cmath>
-#include <vector>
 #include "cluster.h"
 #include "lts.h"
-#include "sp_state_positioner.h"
 #include "mathutils.h"
 #include "rtree.h"
+#include "sp_state_positioner.h"
 #include "state.h"
 #include "transition.h"
 #include "vectors.h"
+#include <cmath>
+#include <vector>
 
 
 class ClusterStatePositioner
@@ -24,7 +24,7 @@ class ClusterStatePositioner
     ClusterStatePositioner(Cluster* c);
 
     virtual ~ClusterStatePositioner()
-    { }
+    = default;
 
     virtual void positionStates()
     { }
@@ -45,11 +45,11 @@ class NodeClusterStatePositioner: public ClusterStatePositioner
 {
   public:
     NodeClusterStatePositioner(Cluster* c):
-      ClusterStatePositioner(c), slot_rtree(NULL)
+      ClusterStatePositioner(c), slot_rtree(nullptr)
     { }
 
-    ~NodeClusterStatePositioner();
-    void positionStates();
+    ~NodeClusterStatePositioner() override;
+    void positionStates() override;
 
   private:
     void assignStateToNearestSlot(State* state, const QVector2D& position);
@@ -67,10 +67,10 @@ class LeafClusterStatePositioner: public ClusterStatePositioner
       ClusterStatePositioner(c)
     { }
 
-    ~LeafClusterStatePositioner()
-    { }
+    ~LeafClusterStatePositioner() override
+    = default;
 
-    void positionStates();
+    void positionStates() override;
 
   private:
     void computeNumRingStates();
@@ -81,7 +81,7 @@ class LeafClusterStatePositioner: public ClusterStatePositioner
 ClusterStatePositioner::ClusterStatePositioner(Cluster* c):
   cluster(c)
 {
-  int num_rings = static_cast<int>(1 + std::floor(cluster->getTopRadius() / MIN_DELTA_RING));
+  auto num_rings = static_cast<int>(1 + std::floor(cluster->getTopRadius() / MIN_DELTA_RING));
   if (num_rings > 1)
   {
     delta_ring = cluster->getTopRadius() / static_cast<float>(num_rings - 1);
@@ -93,7 +93,7 @@ ClusterStatePositioner::ClusterStatePositioner(Cluster* c):
   num_ring_slots.assign(num_rings, 0);
   for (int ring = 0; ring < num_rings; ++ring)
   {
-    int num_slots = static_cast<int>(std::floor(2.0f * MathUtils::PI * ring * delta_ring /
+    auto num_slots = static_cast<int>(std::floor(2.0f * MathUtils::PI * ring * delta_ring /
                                      MIN_DELTA_SLOT));
     num_ring_slots[ring] = (num_slots > 1) ? num_slots : 1;
   }
@@ -101,10 +101,10 @@ ClusterStatePositioner::ClusterStatePositioner(Cluster* c):
 
 NodeClusterStatePositioner::~NodeClusterStatePositioner()
 {
-  if (slot_rtree != NULL)
-  {
+  
+  
     delete slot_rtree;
-  }
+  
 }
 
 void NodeClusterStatePositioner::positionStates()
@@ -218,9 +218,9 @@ void LeafClusterStatePositioner::positionStates()
 void LeafClusterStatePositioner::computeNumRingStates()
 {
   int total_slots = 0;
-  for (size_t ring = 0; ring < num_ring_slots.size(); ++ring)
+  for (int num_ring_slot : num_ring_slots)
   {
-    total_slots += num_ring_slots[ring];
+    total_slots += num_ring_slot;
   }
   int todo_states = cluster->getNumStates();
   num_ring_states.assign(num_ring_slots.size(), 0);
@@ -249,8 +249,7 @@ SinglePassStatePositioner::SinglePassStatePositioner(LTS* l)
 }
 
 SinglePassStatePositioner::~SinglePassStatePositioner()
-{
-}
+= default;
 
 void SinglePassStatePositioner::positionStates()
 {

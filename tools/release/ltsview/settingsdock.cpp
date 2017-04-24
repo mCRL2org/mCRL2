@@ -62,7 +62,7 @@ void SettingsDock::stateSizeChanged(int value)
 
 void SettingsDock::setStateSize(float value)
 {
-  m_ui.stateSize->setValue((int)(value * 10.0f));
+  m_ui.stateSize->setValue(static_cast<int>(value * 10.0f));
 }
 
 void SettingsDock::clusterHeightChanged(int value)
@@ -72,7 +72,7 @@ void SettingsDock::clusterHeightChanged(int value)
 
 void SettingsDock::setClusterHeight(float value)
 {
-  m_ui.clusterHeight->setValue((int)(value * 10.0f));
+  m_ui.clusterHeight->setValue(static_cast<int>(value * 10.0f));
 }
 
 void SettingsDock::accuracyChanged(int value)

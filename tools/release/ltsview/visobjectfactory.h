@@ -29,7 +29,7 @@ class VisObjectFactory
     int makeObject(int primitive, std::vector<int> &ids);
     void sortObjects(const QVector3D& viewpoint);
     void updateObjectColor(int obj, QColor color);
-    void updateObjectTexture(int obj, std::vector<QColor> &texColours);
+    void updateObjectTexture(int obj, std::vector<QColor> &colours);
     void updateObjectMatrix(int obj);
   private:
     std::vector<VisObject*> objects;

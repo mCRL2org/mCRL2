@@ -41,7 +41,7 @@ class Simulation : public QObject
     void followTransition(Transition *transition);
     void undo();
     void traceback();
-    bool loadTrace(QString filename);
+    bool loadTrace(const QString& filename);
 
   signals:
     void started();

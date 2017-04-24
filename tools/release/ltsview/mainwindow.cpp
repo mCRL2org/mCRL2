@@ -11,12 +11,12 @@
 #include <QImageWriter>
 #include <QMessageBox>
 #include <QPixmap>
-#include <QString>
 #include <QSettings>
+#include <QString>
 #include <gl2ps.h>
 
-#include "mcrl2/lts/lts_io.h"
 #include "mainwindow.h"
+#include "mcrl2/lts/lts_io.h"
 #include "savepicturedialog.h"
 #include "savevectordialog.h"
 
@@ -117,7 +117,7 @@ void MainWindow::closeEvent(QCloseEvent */*event*/)
   _exit(0);
 }
 
-void MainWindow::open(QString filename)
+void MainWindow::open(const QString& filename)
 {
   loadingLts();
   m_progressDialog->setWindowTitle("Opening file");
@@ -142,7 +142,7 @@ void MainWindow::open()
 
 void MainWindow::openTrace()
 {
-  if (!m_ltsManager->lts())
+  if (m_ltsManager->lts() == nullptr)
   {
     return;
   }
@@ -237,7 +237,7 @@ void MainWindow::exportVector()
   clearStatusBar();
 }
 
-void MainWindow::setProgress(int phase, QString message)
+void MainWindow::setProgress(int phase, const QString& message)
 {
   if (!m_progressDialog->isVisible())
   {
@@ -250,6 +250,6 @@ void MainWindow::setProgress(int phase, QString message)
 
 void MainWindow::selectionChanged()
 {
-  m_ui.zoomIntoAbove->setEnabled(m_ltsManager->selectedCluster() != 0);
-  m_ui.zoomIntoBelow->setEnabled(m_ltsManager->selectedCluster() != 0);
+  m_ui.zoomIntoAbove->setEnabled(m_ltsManager->selectedCluster() != nullptr);
+  m_ui.zoomIntoBelow->setEnabled(m_ltsManager->selectedCluster() != nullptr);
 }

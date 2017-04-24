@@ -11,8 +11,8 @@
 
 #include <cstddef>
 
-#include "transition.h"
 #include "state.h"
+#include "transition.h"
 
 // Constructor and Destructor
 
@@ -22,8 +22,7 @@ Transition::Transition(State* bs,State* es,int lbl)
 }
 
 Transition::~Transition()
-{
-}
+= default;
 
 State* Transition::getBeginState() const
 {
