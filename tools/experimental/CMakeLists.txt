@@ -5,6 +5,7 @@ set(MCRL2_TOOLS
   lpsbisim2pbes
   lpsrealelm
   lpsrealzone
+  lpssymbolicbisim
   lps2torx
   pbesabsinthe
   pbesabstract

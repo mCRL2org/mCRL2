@@ -1,5 +1,4 @@
 set(MCRL2_TOOLS
-  lpssymbolicbisim
   lpstransform
   mcrl2parse
   mcrl2transform
