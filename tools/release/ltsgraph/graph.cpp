@@ -11,27 +11,27 @@
 #include <unordered_set>
 
 #include <QDomDocument>
-#include <QTextStream>
 #include <QFile>
+#include <QTextStream>
 #include <QtOpenGL>
 
 #include "graph.h"
-#include "mcrl2/lts/probabilistic_lts.h"
-#include "mcrl2/lts/lts_io.h"
-#include "mcrl2/lts/lts_aut.h"
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lts/lts_fsm.h"
-#include "mcrl2/lts/state_label_empty.h"
 #include "mcrl2/lts/action_label_string.h"
+#include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_fsm.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/probabilistic_lts.h"
+#include "mcrl2/lts/state_label_empty.h"
 
 namespace Graph
 {
 inline float frand(float min, float max)
 {
-  return ((float)qrand() / RAND_MAX) * (max - min) + min;
+  return (static_cast<float>(qrand()) / RAND_MAX) * (max - min) + min;
 }
 
-static QString stateLabelToQString(const mcrl2::lts::state_label_empty& )
+static QString stateLabelToQString(const mcrl2::lts::state_label_empty&  /*unused*/)
 {
   return QString("");
 }
@@ -98,7 +98,7 @@ class Selection
       for (size_t inEdge : node.inEdges)
       {
         ::Graph::Edge& edge = m_graph.m_edges[inEdge];
-        if (m_nodes.count(edge.from()))
+        if (m_nodes.count(edge.from()) != 0u)
         {
           centroid += m_graph.m_nodes[edge.from()].pos();
           ++count;
@@ -107,19 +107,19 @@ class Selection
       for (size_t outEdge : node.outEdges)
       {
         ::Graph::Edge& edge = m_graph.m_edges[outEdge];
-        if (m_nodes.count(edge.to()))
+        if (m_nodes.count(edge.to()) != 0u)
         {
           centroid += m_graph.m_nodes[edge.to()].pos();
           ++count;
         }
       }
 
-      if (count)
+      if (count != 0u)
       {
         Coord3D rvec = Coord3D(frand(-1.0, 1.0),
                                frand(-1.0, 1.0), frand(-1.0, 1.0));
         rvec *= 50.0 / rvec.size();
-        m_graph.m_nodes[node.id].pos() = centroid / ((GLfloat) count) + rvec;
+        m_graph.m_nodes[node.id].pos() = centroid / (static_cast<GLfloat>( count)) + rvec;
       }
     }
 
@@ -135,7 +135,7 @@ class Selection
     // creates, and increases count for node
     Node& increaseNode(size_t nodeId)
     {
-      if (m_nodes.count(nodeId))
+      if (m_nodes.count(nodeId) != 0u)
       {
         Node& node = m_nodes[nodeId];
         ++node.count;
@@ -167,7 +167,7 @@ class Selection
     // creates, and increases count for edge
     Edge& increaseEdge(size_t edgeId)
     {
-      if (m_edges.count(edgeId))
+      if (m_edges.count(edgeId) != 0u)
       {
         Edge& edge = m_edges[edgeId];
         ++edge.count;
@@ -188,7 +188,7 @@ class Selection
     // decreases selection count for node, and purges
     void decreaseNode(size_t nodeId)
     {
-      if (!m_nodes.count(nodeId)) {
+      if (m_nodes.count(nodeId) == 0u) {
         return;
       }
 
@@ -210,7 +210,7 @@ class Selection
     // decreases selection count for edge, and purges
     void decreaseEdge(size_t edgeId)
     {
-      if (!m_edges.count(edgeId)) {
+      if (m_edges.count(edgeId) == 0u) {
         return;
       }
 
@@ -233,7 +233,7 @@ class Selection
     // algorithm based on http://dx.doi.org/10.1016/j.ipl.2013.01.016
     void updateBridges()
     {
-      if (m_nodeIndices.size() < 1) {
+      if (m_nodeIndices.empty()) {
         return;
       }
 
@@ -241,13 +241,13 @@ class Selection
       {
         size_t id;
         std::unordered_set<size_t> neighbors;
-        bool searched;
+        bool searched{false};
         size_t parent;
         std::unordered_set<size_t> backEdges;
-        bool visited;
-        bool leaf;
+        bool visited{false};
+        bool leaf{false};
         NodeInfo(size_t id = 0)
-          : id(id), searched(false), parent(id), visited(false), leaf(false) {}
+          : id(id),  parent(id) {}
       };
       struct EdgeInfo
       {
@@ -276,7 +276,7 @@ class Selection
         {
           size_t nodeId = progress.top();
           progress.pop();
-          if (nodes.count(nodeId)) {
+          if (nodes.count(nodeId) != 0u) {
             continue;
           }
 
@@ -285,11 +285,11 @@ class Selection
           Node& node = m_nodes[nodeId];
           for (size_t outEdge : node.outEdges)
           {
-            if (!m_edges.count(outEdge)) {
+            if (m_edges.count(outEdge) == 0u) {
               continue;
             }
             size_t otherId = m_graph.m_edges[outEdge].to();
-            if (nodeId == otherId || !m_nodes.count(otherId)) {
+            if (nodeId == otherId || (m_nodes.count(otherId) == 0u)) {
               continue;
             }
             nodeinfo.neighbors.insert(otherId);
@@ -297,11 +297,11 @@ class Selection
           }
           for (size_t inEdge : node.inEdges)
           {
-            if (!m_edges.count(inEdge)) {
+            if (m_edges.count(inEdge) == 0u) {
               continue;
             }
             size_t otherId = m_graph.m_edges[inEdge].from();
-            if (nodeId == otherId || !m_nodes.count(otherId)) {
+            if (nodeId == otherId || (m_nodes.count(otherId) == 0u)) {
               continue;
             }
             nodeinfo.neighbors.insert(otherId);
@@ -373,10 +373,10 @@ class Selection
           }
           size_t count = 0;
           for (size_t inEdge : node.inEdges) {
-            count += m_edges.count(inEdge) ? 1 : 0;
+            count += m_edges.count(inEdge) != 0u ? 1 : 0;
           }
           for (size_t outEdge : node.outEdges) {
-            count += m_edges.count(outEdge) ? 1 : 0;
+            count += m_edges.count(outEdge) != 0u ? 1 : 0;
           }
           nodeinfo.leaf = (count <= 1);
         }
@@ -394,13 +394,13 @@ class Selection
           size_t connections = 0;
           for (size_t inEdge : node.inEdges)
           {
-            if (m_edges.count(inEdge)) {
+            if (m_edges.count(inEdge) != 0u) {
               connected.insert(m_graph.m_edges[inEdge].from());
             }
           }
           for (size_t outEdge : node.outEdges)
           {
-            if (m_edges.count(outEdge) && m_edges[outEdge].count > 1) {
+            if ((m_edges.count(outEdge) != 0u) && m_edges[outEdge].count > 1) {
               connected.insert(m_graph.m_edges[outEdge].to());
             }
           }
@@ -408,8 +408,8 @@ class Selection
           for (size_t otherId : nodeinfo.neighbors)
           {
             bool isLeaf = nodes[otherId].leaf;
-            bool isConnected = connected.count(otherId);
-            bool isChain = chains.count(EdgeInfo(nodeId,otherId));
+            bool isConnected = connected.count(otherId) != 0u;
+            bool isChain = chains.count(EdgeInfo(nodeId,otherId)) != 0u;
             if (!isLeaf) {
               ++connections;
             }
@@ -455,23 +455,23 @@ class Selection
       std::unordered_set<size_t> neighbors;
       for (size_t edgeId : node.inEdges)
       {
-        if (m_edges.count(edgeId))
+        if (m_edges.count(edgeId) != 0u)
         {
           size_t otherId = m_graph.m_edges[edgeId].from();
-          if (m_nodes.count(otherId)) {
+          if (m_nodes.count(otherId) != 0u) {
             neighbors.insert(otherId);
           }
         }
       }
       for (size_t edgeId : node.outEdges)
       {
-        if (m_edges.count(edgeId))
+        if (m_edges.count(edgeId) != 0u)
         {
           if (m_edges[edgeId].count <= 1) {
             nedges.insert(edgeId);
           }
           size_t otherId = m_graph.m_edges[edgeId].to();
-          if (m_nodes.count(otherId) && m_nodes[otherId].count > 1) {
+          if ((m_nodes.count(otherId) != 0u) && m_nodes[otherId].count > 1) {
             neighbors.insert(otherId);
           }
         }
@@ -487,26 +487,26 @@ class Selection
       {
         size_t nodeId = progress.top();
         progress.pop();
-        if (status.count(nodeId)) {
+        if (status.count(nodeId) != 0u) {
           continue;
         }
         status.insert(nodeId);
 
         neighbors.erase(nodeId);
-        if (!neighbors.size()) {
+        if (neighbors.empty()) {
           return true;
         }
 
         Node& node = m_nodes[nodeId];
         for (size_t edgeId : node.inEdges)
         {
-          if (m_edges.count(edgeId) && !nedges.count(edgeId)) {
+          if ((m_edges.count(edgeId) != 0u) && (nedges.count(edgeId) == 0u)) {
             progress.push(m_graph.m_edges[edgeId].from());
           }
         }
         for (size_t edgeId : node.outEdges)
         {
-          if (m_edges.count(edgeId) && !nedges.count(edgeId)) {
+          if ((m_edges.count(edgeId) != 0u) && (nedges.count(edgeId) == 0u)) {
             progress.push(m_graph.m_edges[edgeId].to());
           }
         }
@@ -549,7 +549,7 @@ class Selection
     // return true when contracting given node would leave unconnected parts
     bool isContractable(size_t nodeId)
     {
-      if (!m_nodes.count(nodeId)) {
+      if (m_nodes.count(nodeId) == 0u) {
         return false;
       }
       bool value = contractable(nodeId);
@@ -563,7 +563,7 @@ class Selection
     // slightly more lenient as isContractable but fast (false positives)
     bool isBridge(size_t nodeId)
     {
-      if (!m_nodes.count(nodeId)) {
+      if (m_nodes.count(nodeId) == 0u) {
         return false;
       }
       return m_nodes[nodeId].bridge;
@@ -588,12 +588,12 @@ void debug_lock(const char* type, const char* func)
 }
 #endif
 
-#define lockForRead(lock, where)    GRAPH_LOCK("lock", where, lock.lockForRead())
-#define unlockForRead(lock, where)  GRAPH_LOCK("unlock", where, lock.unlock())
-#define lockForWrite(lock, where)   GRAPH_LOCK("W lock", where, lock.lockForWrite())
-#define unlockForWrite(lock, where) GRAPH_LOCK("W unlock", where, lock.unlock())
+#define lockForRead(lock, where)    GRAPH_LOCK("lock", where, (lock).lockForRead())
+#define unlockForRead(lock, where)  GRAPH_LOCK("unlock", where, (lock).unlock())
+#define lockForWrite(lock, where)   GRAPH_LOCK("W lock", where, (lock).lockForWrite())
+#define unlockForWrite(lock, where) GRAPH_LOCK("W unlock", where, (lock).unlock())
 
-Graph::Graph() : m_sel(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""), m_lock(), m_stable(true)
+Graph::Graph() : m_sel(nullptr), m_type(mcrl2::lts::lts_lts), m_empty(""),  m_stable(true)
 {
 }
 
@@ -703,8 +703,8 @@ void Graph::templatedLoad(const QString& filename,
   for (size_t i = 0; i < lts.num_states(); ++i)
   {
     const bool is_not_probabilistic=false;
-    m_nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_not_probabilistic));
-    m_stateLabelnodes.push_back(LabelNode(m_nodes[i].pos(),i));
+    m_nodes.emplace_back(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_not_probabilistic);
+    m_stateLabelnodes.emplace_back(m_nodes[i].pos(),i);
   }
 
   // Store string representations of labels
@@ -719,9 +719,9 @@ void Graph::templatedLoad(const QString& filename,
   {
     mcrl2::lts::transition& t = lts.get_transitions()[i];
     size_t new_probabilistic_state = add_probabilistic_state<lts_t>(lts.probabilistic_state(t.to()),min,max);
-    m_edges.push_back(Edge(t.from(),new_probabilistic_state));
+    m_edges.emplace_back(t.from(),new_probabilistic_state);
     m_handles.push_back(Node((m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) / 2.0));
-    m_transitionLabelnodes.push_back(LabelNode((m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) / 2.0,t.label()));
+    m_transitionLabelnodes.emplace_back((m_nodes[t.from()].pos() + m_nodes[new_probabilistic_state].pos()) / 2.0,t.label());
   }
 
   m_initialState = add_probabilistic_state<lts_t>(lts.initial_probabilistic_state(), min, max);
@@ -735,14 +735,14 @@ size_t Graph::add_probabilistic_state(const typename lts_t::probabilistic_state_
   {
     return probabilistic_state.begin()->state();
   }
-  else
-  {
+  
+  
     // There are multiple probabilistic states. Make a new state
     // with outgoing probabilistic transitions to all states.
     size_t index_of_the_new_probabilistic_state=m_nodes.size();
     const bool is_probabilistic=true;
-    m_nodes.push_back(NodeNode(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_probabilistic));
-    m_stateLabelnodes.push_back(LabelNode(m_nodes[index_of_the_new_probabilistic_state].pos(),index_of_the_new_probabilistic_state));
+    m_nodes.emplace_back(Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),is_probabilistic);
+    m_stateLabelnodes.emplace_back(m_nodes[index_of_the_new_probabilistic_state].pos(),index_of_the_new_probabilistic_state);
 
     // The following map recalls where probabilities are stored in transitionLabels.
     typedef std::map<typename lts_t::probabilistic_state_t::probability_t, size_t> probability_map_t;
@@ -768,7 +768,7 @@ size_t Graph::add_probabilistic_state(const typename lts_t::probabilistic_state_
       m_transitionLabelnodes.push_back(LabelNode((m_nodes[index_of_the_new_probabilistic_state].pos() + m_nodes[p.state()].pos()) / 2.0,label_index));
     }
     return index_of_the_new_probabilistic_state;
-  }
+  
 }
 
 void Graph::loadXML(const QString& filename)
@@ -798,7 +798,7 @@ void Graph::loadXML(const QString& filename)
     return;
   }
 
-  m_type = (mcrl2::lts::lts_type) root.attribute("type").toInt();
+  m_type = static_cast<mcrl2::lts::lts_type>( root.attribute("type").toInt());
 
   m_nodes.resize(root.attribute("states").toInt());
   m_edges.resize(root.attribute("transitions").toInt());
@@ -823,15 +823,15 @@ void Graph::loadXML(const QString& filename)
       m_nodes[e.attribute("value").toInt()]=
         NodeNode(
           Coord3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(), e.attribute("z").toFloat()),
-          e.attribute("locked").toInt(),   // anchored is equal to locked.
-          e.attribute("locked").toInt(),
+          e.attribute("locked").toInt() != 0,   // anchored is equal to locked.
+          e.attribute("locked").toInt() != 0,
           0.0f,                            // selected
           e.attribute("red").toFloat(),
           e.attribute("green").toFloat(),
           e.attribute("blue").toFloat(),
-          e.attribute("is_probabilistic").toInt());
+          e.attribute("is_probabilistic").toInt() != 0);
 
-      if (e.attribute("isInitial").toInt())
+      if (e.attribute("isInitial").toInt() != 0)
       {
         m_initialState = e.attribute("value").toInt();
       }
@@ -841,8 +841,8 @@ void Graph::loadXML(const QString& filename)
       m_stateLabelnodes[e.attribute("value").toInt()]=
         LabelNode(
           Coord3D(e.attribute("x").toFloat(),e.attribute("y").toFloat(),e.attribute("z").toFloat()),
-          e.attribute("locked").toInt(),   // anchored is equal to locked.
-          e.attribute("locked").toInt(),
+          e.attribute("locked").toInt() != 0,   // anchored is equal to locked.
+          e.attribute("locked").toInt() != 0,
           0.0f,                            // selected
           e.attribute("red").toFloat(),
           e.attribute("green").toFloat(),
@@ -853,15 +853,15 @@ void Graph::loadXML(const QString& filename)
 
     if (e.tagName() == "TransitionLabel")
     {
-      m_transitionLabels[e.attribute("value").toInt()]=LabelString(e.attribute("isTau").toInt(),e.attribute("label"));
+      m_transitionLabels[e.attribute("value").toInt()]=LabelString(e.attribute("isTau").toInt() != 0,e.attribute("label"));
     }
     if (e.tagName() == "Transition")
     {
       m_edges[e.attribute("value").toInt()]=Edge(e.attribute("from").toInt(),e.attribute("to").toInt());
       m_handles[e.attribute("value").toInt()]=
         Node(Coord3D(e.attribute("x").toFloat(),e.attribute("y").toFloat(),e.attribute("z").toFloat()),
-             e.attribute("locked").toInt(),  // anchored is equal to locked.
-             e.attribute("locked").toInt(),
+             e.attribute("locked").toInt() != 0,  // anchored is equal to locked.
+             e.attribute("locked").toInt() != 0,
              0.0f);                          // selected
     }
     if (e.tagName() == "TransitionLabelNode")
@@ -869,8 +869,8 @@ void Graph::loadXML(const QString& filename)
       m_transitionLabelnodes[e.attribute("value").toInt()]=
         LabelNode(
           Coord3D(e.attribute("x").toFloat(),e.attribute("y").toFloat(),e.attribute("z").toFloat()),
-          e.attribute("locked").toInt(),   // anchored is equal to locked.
-          e.attribute("locked").toInt(),
+          e.attribute("locked").toInt() != 0,   // anchored is equal to locked.
+          e.attribute("locked").toInt() != 0,
           0.0f,                            // selected
           e.attribute("red").toFloat(),
           e.attribute("green").toFloat(),
@@ -897,17 +897,17 @@ void Graph::saveXML(const QString& filename)
 
   QDomDocument xml;
   QDomElement root = xml.createElement("Graph");
-  root.setAttribute("type", (int)m_type);
-  root.setAttribute("states", (int)nodeCount());
-  root.setAttribute("transitions", (int)edgeCount());
-  root.setAttribute("statelabels", (int)stateLabelCount());
-  root.setAttribute("transitionlabels", (int)transitionLabelCount());
+  root.setAttribute("type", static_cast<int>(m_type));
+  root.setAttribute("states", static_cast<int>(nodeCount()));
+  root.setAttribute("transitions", static_cast<int>(edgeCount()));
+  root.setAttribute("statelabels", static_cast<int>(stateLabelCount()));
+  root.setAttribute("transitionlabels", static_cast<int>(transitionLabelCount()));
   xml.appendChild(root);
 
   for (size_t i = 0; i < stateLabelCount(); ++i)
   {
     QDomElement stateL = xml.createElement("StateLabel");
-    stateL.setAttribute("value", (int)i);
+    stateL.setAttribute("value", static_cast<int>(i));
     stateL.setAttribute("label", stateLabelstring(i));
     root.appendChild(stateL);
   }
@@ -915,25 +915,25 @@ void Graph::saveXML(const QString& filename)
   for (size_t i = 0; i < nodeCount(); ++i)
   {
     QDomElement state = xml.createElement("State");
-    state.setAttribute("value", (int)i);
+    state.setAttribute("value", static_cast<int>(i));
     state.setAttribute("x", node(i).pos().x);
     state.setAttribute("y", node(i).pos().y);
     state.setAttribute("z", node(i).pos().z);
-    state.setAttribute("locked", node(i).locked());
-    state.setAttribute("isInitial", (int)(i == initialState()));
+    state.setAttribute("locked", static_cast<int>(node(i).locked()));
+    state.setAttribute("isInitial", static_cast<int>(i == initialState()));
     state.setAttribute("red", node(i).color(0));
     state.setAttribute("green", node(i).color(1));
     state.setAttribute("blue", node(i).color(2));
-    state.setAttribute("is_probabilistic", node(i).is_probabilistic());
+    state.setAttribute("is_probabilistic", static_cast<int>(node(i).is_probabilistic()));
     root.appendChild(state);
 
     QDomElement stateL = xml.createElement("StateLabelNode");
-    stateL.setAttribute("value", (int)i);
-    stateL.setAttribute("labelindex", (int)stateLabel(i).labelindex());
+    stateL.setAttribute("value", static_cast<int>(i));
+    stateL.setAttribute("labelindex", static_cast<int>(stateLabel(i).labelindex()));
     stateL.setAttribute("x", stateLabel(i).pos().x);
     stateL.setAttribute("y", stateLabel(i).pos().y);
     stateL.setAttribute("z", stateLabel(i).pos().z);
-    stateL.setAttribute("locked", stateLabel(i).locked());
+    stateL.setAttribute("locked", static_cast<int>(stateLabel(i).locked()));
     stateL.setAttribute("red", stateLabel(i).color(0));
     stateL.setAttribute("green", stateLabel(i).color(1));
     stateL.setAttribute("blue", stateLabel(i).color(2));
@@ -943,7 +943,7 @@ void Graph::saveXML(const QString& filename)
   for (size_t i = 0; i < transitionLabelCount(); ++i)
   {
     QDomElement edgL = xml.createElement("TransitionLabel");
-    edgL.setAttribute("value", (int)i);
+    edgL.setAttribute("value", static_cast<int>(i));
     edgL.setAttribute("label", transitionLabelstring(i));
     root.appendChild(edgL);
   }
@@ -951,22 +951,22 @@ void Graph::saveXML(const QString& filename)
   for (size_t i = 0; i < edgeCount(); ++i)
   {
     QDomElement edg = xml.createElement("Transition");
-    edg.setAttribute("value", (int)i);
-    edg.setAttribute("from", (int)edge(i).from());
-    edg.setAttribute("to", (int)edge(i).to());
+    edg.setAttribute("value", static_cast<int>(i));
+    edg.setAttribute("from", static_cast<int>(edge(i).from()));
+    edg.setAttribute("to", static_cast<int>(edge(i).to()));
     edg.setAttribute("x", handle(i).pos().x);
     edg.setAttribute("y", handle(i).pos().y);
     edg.setAttribute("z", handle(i).pos().z);
-    edg.setAttribute("locked", handle(i).locked());
+    edg.setAttribute("locked", static_cast<int>(handle(i).locked()));
     root.appendChild(edg);
 
     QDomElement edgL = xml.createElement("TransitionLabelNode");
-    edgL.setAttribute("value", (int)i);
-    edgL.setAttribute("labelindex", (int)transitionLabel(i).labelindex());
+    edgL.setAttribute("value", static_cast<int>(i));
+    edgL.setAttribute("labelindex", static_cast<int>(transitionLabel(i).labelindex()));
     edgL.setAttribute("x", transitionLabel(i).pos().x);
     edgL.setAttribute("y", transitionLabel(i).pos().y);
     edgL.setAttribute("z", transitionLabel(i).pos().z);
-    edgL.setAttribute("locked", transitionLabel(i).locked());
+    edgL.setAttribute("locked", static_cast<int>(transitionLabel(i).locked()));
     edgL.setAttribute("red", transitionLabel(i).color(0));
     edgL.setAttribute("green", transitionLabel(i).color(1));
     edgL.setAttribute("blue", transitionLabel(i).color(2));
@@ -1068,10 +1068,10 @@ void Graph::makeSelection()
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
-  if (m_sel != nullptr)
-  {
+  
+  
     delete m_sel;
-  }
+  
   m_sel = new Selection(*this);
 
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
@@ -1128,10 +1128,11 @@ bool Graph::isToggleable(size_t index)
   // active node count:
   // Todo: improve this
   size_t count = 0;
-  for (size_t nodeId : m_sel->nodes)
+  for (size_t nodeId : m_sel->nodes) {
     if (m_nodes[nodeId].m_active) {
       ++count;
     }
+}
 
   NodeNode& node = m_nodes[index];
   bool toggleable = !node.m_active || (m_sel->isContractable(index) && count > 1);
@@ -1185,4 +1186,4 @@ size_t Graph::selectionNodeCount() const
   }
   return m_sel->nodes.size();
 }
-}
+} // namespace Graph

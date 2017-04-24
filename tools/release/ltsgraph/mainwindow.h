@@ -47,7 +47,7 @@ class MainWindow : public QMainWindow
     /**
      * @brief Opens the given file if it is valid.
      */
-    void openFile(QString fileName);
+    void openFile(const QString& fileName);
 
     /**
      * @brief Opens the given file if it is valid.
@@ -102,7 +102,7 @@ class MainWindow : public QMainWindow
     /**
      * @brief Updates the statusbar with the latest log output
      */
-    void onLogOutput(QString level, QString hint, QDateTime timestamp, QString message, QString formattedMessage);
+    void onLogOutput(const QString& level, const QString& hint, const QDateTime& timestamp, const QString& message, const QString& formattedMessage);
 
   protected:
     /**

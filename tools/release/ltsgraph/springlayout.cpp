@@ -10,9 +10,10 @@
 #include "springlayout.h"
 #include "ui_springlayout.h"
 #include <QThread>
+#include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
-#include <algorithm>
 
 namespace Graph
 {
@@ -27,7 +28,7 @@ inline float frand(float min, float max)
   // Fast pseudo rand, source: http://www.musicdsp.org/showone.php?id=273
   static int32_t seed = 1;
   seed *= 16807;
-  return ((((float)seed) * 4.6566129e-010f) + 1.0) * (max - min) / 2.0 + min;
+  return (((static_cast<float>(seed)) * 4.6566129e-010f) + 1.0) * (max - min) / 2.0 + min;
 }
 
 inline float cube(float x)
@@ -52,9 +53,9 @@ inline void clip(float& f, float min, float max)
 SpringLayout::SpringLayout(Graph& graph)
   : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f), m_natLength(50.0f), m_controlPointWeight(0.001f),
     m_clipMin(Coord3D(0.0f, 0.0f, 0.0f)), m_clipMax(Coord3D(1000.0f, 1000.0f, 1000.0f)),
-    m_graph(graph), m_ui(NULL), m_forceCalculation(&SpringLayout::forceLTSGraph)
+    m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph)
 {
-  srand(time(NULL));
+  srand(time(nullptr));
 }
 
 SpringLayout::~SpringLayout()
@@ -64,7 +65,7 @@ SpringLayout::~SpringLayout()
 
 SpringLayoutUi* SpringLayout::ui(QWidget* parent)
 {
-  if (m_ui == NULL) {
+  if (m_ui == nullptr) {
     m_ui = new SpringLayoutUi(*this, parent);
   }
   return m_ui;
@@ -95,7 +96,7 @@ Coord3D SpringLayout::forceLTSGraph(const Coord3D& a, const Coord3D& b, float id
 {
   Coord3D diff = (a - b);
   float dist = (std::max)(diff.size(), 1.0f);
-  float factor = m_attraction * 10000 * log(dist / (ideal + 1.0f)) / dist;
+  float factor = m_attraction * 10000 * std::log(dist / (ideal + 1.0f)) / dist;
   return diff * factor;
 }
 
@@ -264,7 +265,7 @@ class WorkerThread : public QThread
     SpringLayout& m_layout;
     int m_period;
   public:
-    WorkerThread(SpringLayout& layout, int period=50, QObject* parent=0)
+    WorkerThread(SpringLayout& layout, int period=50, QObject* parent=nullptr)
       : QThread(parent), m_stopped(false), m_layout(layout), m_period(period)
     {}
 
@@ -283,7 +284,7 @@ class WorkerThread : public QThread
       return m_period;
     }
 
-    virtual void run()
+    void run() override
     {
       m_time.start();
       int elapsed;
@@ -300,7 +301,7 @@ class WorkerThread : public QThread
 };
 
 SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, QWidget* parent)
-  : QDockWidget(parent), m_layout(layout), m_thread(NULL)
+  : QDockWidget(parent), m_layout(layout), m_thread(nullptr)
 {
   m_ui.setupUi(this);
   m_ui.sldAttraction->setValue(m_layout.attraction());
@@ -313,9 +314,9 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, QWidget* parent)
 
 SpringLayoutUi::~SpringLayoutUi()
 {
-  if (m_thread != NULL)
+  if (m_thread != nullptr)
   {
-    static_cast<WorkerThread*>(m_thread)->stop();
+    dynamic_cast<WorkerThread*>(m_thread)->stop();
     m_thread->wait();
   }
 }
@@ -370,8 +371,8 @@ void SpringLayoutUi::onRepulsionChanged(int value)
 
 void SpringLayoutUi::onSpeedChanged(int value)
 {
-  if (m_thread != NULL) {
-    static_cast<WorkerThread*>(m_thread)->setPeriod(100 - value);
+  if (m_thread != nullptr) {
+    dynamic_cast<WorkerThread*>(m_thread)->setPeriod(100 - value);
   }
 }
 
@@ -414,7 +415,7 @@ void SpringLayoutUi::onStopped()
 void SpringLayoutUi::onStartStop()
 {
   m_ui.btnStartStop->setEnabled(false);
-  if (m_thread == NULL)
+  if (m_thread == nullptr)
   {
     emit runningChanged(true);
     m_thread = new WorkerThread(m_layout, 100 - m_ui.sldSpeed->value(), this);
@@ -424,20 +425,20 @@ void SpringLayoutUi::onStartStop()
   }
   else
   {
-    static_cast<WorkerThread*>(m_thread)->stop();
+    dynamic_cast<WorkerThread*>(m_thread)->stop();
     m_thread->wait();
-    m_thread = NULL;
+    m_thread = nullptr;
   }
 }
 
 void SpringLayoutUi::setActive(bool active)
 {
-  if (active && m_thread == NULL) {
+  if (active && m_thread == nullptr) {
     onStartStop();
   }
-  else if (!active && m_thread != NULL) {
+  else if (!active && m_thread != nullptr) {
     onStartStop();
   }
 }
 
-}
+}  // namespace Graph

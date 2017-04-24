@@ -9,9 +9,9 @@
 #include <QtOpenGL>
 
 #include "glwidget.h"
+#include "mcrl2/utilities/logger.h"
 #include "springlayout.h"
 #include "ui_glwidget.h"
-#include "mcrl2/utilities/logger.h"
 
 #include <map>
 
@@ -19,7 +19,7 @@
 
 struct MoveRecord
 {
-  virtual ~MoveRecord() {}
+  virtual ~MoveRecord() = default;
 
   Graph::Node* node;
   virtual void move(const Graph::Coord3D& pos)
@@ -41,7 +41,7 @@ struct MoveRecord
 };
 
 struct LabelMoveRecord : public MoveRecord {
-  void grab(Graph::Graph& graph, size_t index)
+  void grab(Graph::Graph& graph, size_t index) override
   {
     node = &graph.transitionLabel(index);
     node->set_anchored(true);
@@ -49,7 +49,7 @@ struct LabelMoveRecord : public MoveRecord {
 };
 
 struct StateLabelMoveRecord : public MoveRecord {
-  void grab(Graph::Graph& graph, size_t index)
+  void grab(Graph::Graph& graph, size_t index) override
   {
     node = &graph.stateLabel(index);
     node->set_anchored(true);
@@ -60,7 +60,7 @@ struct HandleMoveRecord : public MoveRecord
 {
   bool movingLabel;
   LabelMoveRecord label;
-  void grab(Graph::Graph& graph, size_t index)
+  void grab(Graph::Graph& graph, size_t index) override
   {
     node = &graph.handle(index);
     node->set_anchored(true);
@@ -69,13 +69,13 @@ struct HandleMoveRecord : public MoveRecord
       label.grab(graph, index);
     }
   }
-  void release(bool toggleLocked) {
+  void release(bool toggleLocked) override {
     MoveRecord::release(toggleLocked);
     if (movingLabel) {
       label.release(false);
     }
   }
-  void move(const Graph::Coord3D& pos)
+  void move(const Graph::Coord3D& pos) override
   {
     MoveRecord::move(pos);
     if (movingLabel) {
@@ -89,7 +89,7 @@ struct NodeMoveRecord : public MoveRecord
   StateLabelMoveRecord label;
   std::vector<HandleMoveRecord> edges;
   std::vector<Graph::Node*> endpoints;
-  void grab(Graph::Graph& graph, size_t index)
+  void grab(Graph::Graph& graph, size_t index) override
   {
     node = &graph.node(index);
     node->set_anchored(true);
@@ -113,16 +113,16 @@ struct NodeMoveRecord : public MoveRecord
     }
     label.grab(graph, index);
   }
-  void release(bool toggleLocked)
+  void release(bool toggleLocked) override
   {
     MoveRecord::release(toggleLocked);
-    for (size_t i = 0; i < edges.size(); ++i)
+    for (auto & edge : edges)
     {
-      edges[i].release(false); // Do not toggle the edges around this node
+      edge.release(false); // Do not toggle the edges around this node
     }
     label.release(toggleLocked);
   }
-  void move(const Graph::Coord3D& pos)
+  void move(const Graph::Coord3D& pos) override
   {
     MoveRecord::move(pos);
     for (size_t i = 0; i < edges.size(); ++i)
@@ -135,7 +135,7 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
-  : QGLWidget(parent), m_ui(NULL), m_graph(graph), m_painting(false), m_paused(true)
+  : QGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true)
 {
   m_scene = new GLScene(m_graph, devicePixelRatio());
   // Set up OpenGL to use alpha channel
@@ -157,7 +157,7 @@ void GLWidget::pause()
   m_paused = true;
   m_selections.clear();
   m_dragmode = dm_none;
-  m_dragnode = NULL;
+  m_dragnode = nullptr;
 }
 
 void GLWidget::resume()
@@ -178,14 +178,14 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
     case GLScene::so_node:
       return &g.node(s.index);
     default:
-      return NULL;
+      return nullptr;
   }
 }
 
 void GLWidget::updateSelection()
 {
   Graph::Node* selnode;
-  for (std::list<GLScene::Selection>::iterator it = m_selections.begin(); it != m_selections.end();)
+  for (auto it = m_selections.begin(); it != m_selections.end();)
   {
     selnode = select_object(*it, m_graph);
     if (selnode->selected() > 0.05f)
@@ -204,7 +204,7 @@ void GLWidget::updateSelection()
 
   m_hover = m_scene->select(pos.x(), pos.y());
   selnode = select_object(m_hover, m_graph);
-  if (selnode)
+  if (selnode != nullptr)
   {
     if (selnode->selected() <= 0) {
       m_selections.push_back(m_hover);
@@ -340,11 +340,11 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
             m_dragnode = new StateLabelMoveRecord;
             break;
           default:
-            m_dragnode = NULL;
+            m_dragnode = nullptr;
             m_dragmode = dm_none;
             break;
         }
-        if (m_dragnode) {
+        if (m_dragnode != nullptr) {
           m_dragnode->grab(m_graph, m_hover.index);
         }
       }
@@ -356,9 +356,9 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 {
   if (m_dragmode == dm_dragnode)
   {
-    NodeMoveRecord* noderec = dynamic_cast<NodeMoveRecord*>(m_dragnode);
+    auto* noderec = dynamic_cast<NodeMoveRecord*>(m_dragnode);
     if (m_hover.selectionType == GLScene::so_node && e->button() == Qt::LeftButton
-        && noderec && m_draglength.length() < DRAG_MIN_DIST)
+        && (noderec != nullptr) && m_draglength.length() < DRAG_MIN_DIST)
     {
       // A node has been clicked (not dragged):
       if (m_graph.isToggleable(m_hover.index)) {
@@ -367,7 +367,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
     }
     m_dragnode->release(e->button() == Qt::RightButton);
     delete m_dragnode;
-    m_dragnode = NULL;
+    m_dragnode = nullptr;
   }
   m_dragmode = dm_none;
 }
@@ -382,7 +382,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
   if (m_dragmode != dm_none)
   {
     QPoint vec = e->pos() - m_dragstart;
-    m_draglength += (QVector2D) vec;
+    m_draglength += QVector2D( vec);
 
     Graph::Coord3D vec3 = m_scene->eyeToWorld(e->pos().x(), e->pos().y(), 1.0f) - m_scene->eyeToWorld(m_dragstart.x(), m_dragstart.y(), 1.0f);
 
@@ -519,7 +519,7 @@ void GLWidget::savePixmap(const QString& filename, const int w, const int h)
 
 GLWidgetUi* GLWidget::ui(QWidget* parent)
 {
-  if (!m_ui) {
+  if (m_ui == nullptr) {
     m_ui = new GLWidgetUi(*this, parent);
   }
   return m_ui;
