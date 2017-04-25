@@ -9,16 +9,16 @@
 /// \file mcrl2/modal_formula/state_formula_rename.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_MODAL_STATE_VARIABLE_RENAME_H
-#define MCRL2_MODAL_STATE_VARIABLE_RENAME_H
+#ifndef MCRL2_MODAL_FORMULA_STATE_FORMULA_RENAME_H
+#define MCRL2_MODAL_FORMULA_STATE_FORMULA_RENAME_H
 
-#include <deque>
 #include "mcrl2/data/replace.h"
-#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/replace.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
+#include <deque>
 
 namespace mcrl2
 {
@@ -195,4 +195,4 @@ state_formula rename_variables(const state_formula& f, const std::set<core::iden
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_STATE_VARIABLE_RENAME_H
+#endif // MCRL2_MODAL_FORMULA_STATE_FORMULA_RENAME_H

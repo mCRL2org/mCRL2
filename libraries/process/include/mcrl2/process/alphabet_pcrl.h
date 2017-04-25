@@ -13,11 +13,11 @@
 #define MCRL2_PROCESS_ALPHABET_PCRL_H
 
 #include "mcrl2/process/alphabet_operations.h"
+#include "mcrl2/process/detail/pcrl_equation_cache.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/utility.h"
 #include "mcrl2/utilities/detail/container_utility.h"
-#include "mcrl2/process/detail/pcrl_equation_cache.h"
 
 namespace mcrl2 {
 

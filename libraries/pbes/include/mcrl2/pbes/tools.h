@@ -12,15 +12,15 @@
 #ifndef MCRL2_PBES_TOOLS_H
 #define MCRL2_PBES_TOOLS_H
 
-#include <string>
-#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/core/print_format.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/pbes/absinthe_strategy.h"
 #include "mcrl2/pbes/bisimulation_type.h"
-#include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
+#include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
+#include "mcrl2/utilities/file_utility.h"
+#include <string>
 
 namespace mcrl2 {
 

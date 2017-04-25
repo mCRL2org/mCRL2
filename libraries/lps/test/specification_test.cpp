@@ -9,18 +9,18 @@
 /// \file specification_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <iterator>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/data/detail/print_utility.h"
-#include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/print.h"
+#include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/test_input.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <iterator>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

@@ -8,12 +8,12 @@
 //
 /// \file logger.cpp
 
+#include "mcrl2/utilities/logger.h"
+#include <cassert>
 #include <cstdio>
 #include <ctime>
-#include <string>
-#include <cassert>
 #include <iostream>
-#include "mcrl2/utilities/logger.h"
+#include <string>
 
 namespace mcrl2 {
   namespace log {
@@ -143,5 +143,5 @@ namespace mcrl2 {
     return result.str();
   }
 
-  }
-}
+  } // namespace log
+} // namespace mcrl2

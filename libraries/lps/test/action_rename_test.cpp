@@ -9,12 +9,12 @@
 /// \file action_rename_test.cpp
 /// \brief Action rename test.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
+#include "mcrl2/lps/rewrite.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using lps::stochastic_specification;

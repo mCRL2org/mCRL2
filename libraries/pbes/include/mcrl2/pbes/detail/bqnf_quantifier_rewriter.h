@@ -11,11 +11,11 @@
 /// rewrite_bqnf_expression(forall x . /\_i phi_i) =
 ///   /\_i forall (x intersection free(phi_i)) . phi_i.
 /// This rewriter is experimental.
-#ifndef BQNF_QUANTIFIER_REWRITER_H_
-#define BQNF_QUANTIFIER_REWRITER_H_
+#ifndef MCRL2_PBES_DETAIL_BQNF_QUANTIFIER_REWRITER_H
+#define MCRL2_PBES_DETAIL_BQNF_QUANTIFIER_REWRITER_H
 
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "bqnf_visitor.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 
 namespace mcrl2 {
 
@@ -406,4 +406,4 @@ struct bqnf_quantifier_rewriter: public bqnf_visitor
 
 } // namespace mcrl2
 
-#endif /* BQNF_QUANTIFIER_REWRITER_H_ */
+#endif // MCRL2_PBES_DETAIL_BQNF_QUANTIFIER_REWRITER_H

@@ -12,10 +12,10 @@
 #ifndef MCRL2_PBES_TOOLS_TXT2PBES_H
 #define MCRL2_PBES_TOOLS_TXT2PBES_H
 
-#include <fstream>
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/logger.h"
+#include <fstream>
 
 namespace mcrl2 {
 

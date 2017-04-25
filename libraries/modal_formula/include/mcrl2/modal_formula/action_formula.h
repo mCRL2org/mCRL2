@@ -9,19 +9,19 @@
 /// \file mcrl2/modal_formula/action_formula.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_MODAL_ACTION_FORMULA_H
-#define MCRL2_MODAL_ACTION_FORMULA_H
+#ifndef MCRL2_MODAL_FORMULA_ACTION_FORMULA_H
+#define MCRL2_MODAL_FORMULA_ACTION_FORMULA_H
 
-#include <iostream> // for debugging
-#include <stdexcept>
-#include <string>
-#include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/untyped_multi_action.h"
+#include <cassert>
+#include <iostream> // for debugging
+#include <stdexcept>
+#include <string>
 
 namespace mcrl2
 {
@@ -751,4 +751,4 @@ std::set<data::variable> find_all_variables(const action_formulas::action_formul
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_ACTION_FORMULA_H
+#endif // MCRL2_MODAL_FORMULA_ACTION_FORMULA_H

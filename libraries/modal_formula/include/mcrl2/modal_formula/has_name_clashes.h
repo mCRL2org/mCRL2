@@ -12,9 +12,9 @@
 #ifndef MCRL2_MODAL_FORMULA_HAS_NAME_CLASHES_H
 #define MCRL2_MODAL_FORMULA_HAS_NAME_CLASHES_H
 
-#include <vector>
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/utilities/exception.h"
+#include <vector>
 
 namespace mcrl2
 {

@@ -11,12 +11,12 @@
 
 #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include <iostream>
-#include <string>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 

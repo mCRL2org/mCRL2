@@ -14,8 +14,8 @@
 /// through the result() function.
 ///
 /// DEPRECATED
-#ifndef BQNF2PPG_REWRITER_H_
-#define BQNF2PPG_REWRITER_H_
+#ifndef MCRL2_PBES_DETAIL_BQNF2PPG_REWRITER_H
+#define MCRL2_PBES_DETAIL_BQNF2PPG_REWRITER_H
 
 #include "bqnf_visitor.h"
 
@@ -43,8 +43,8 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
     /// \param p The PBES of which the equation is part. Used to avoid name clashes when introducing new variables.
     bqnf2ppg_rewriter(const pbes& p)
     {
-      for (std::vector<equation_type>::const_iterator eqn = p.equations().begin(); eqn != p.equations().end(); ++eqn) {
-        equation_type e = (*eqn);
+      for (const auto & eqn : p.equations()) {
+        equation_type e = eqn;
         propositional_variable var = e.variable();
         variable_names.insert(core::pp(var.name()));
       }
@@ -565,4 +565,4 @@ struct bqnf2ppg_rewriter: public bqnf_visitor
 
 } // namespace mcrl2
 
-#endif /* BQNF2PPG_REWRITER_H_ */
+#endif // MCRL2_PBES_DETAIL_BQNF2PPG_REWRITER_H

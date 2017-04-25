@@ -14,9 +14,9 @@
 
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/bisimulation_type.h"
+#include "mcrl2/pbes/io.h"
 
 namespace mcrl2 {
 

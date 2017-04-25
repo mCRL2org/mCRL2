@@ -9,8 +9,8 @@
 /// \file general_utilities.h
 /// \brief Some general mathematical functions not provided by standard libraries.
 
-#ifndef MCRL2_MATH_UTILITIES_H
-#define MCRL2_MATH_UTILITIES_H
+#ifndef MCRL2_UTILITIES_MATH_H
+#define MCRL2_UTILITIES_MATH_H
 
 #include <cassert>
 #include <cmath>
@@ -56,9 +56,9 @@ size_t power_size_t(const size_t n_in, const size_t m_in)
   return result;
 }
 
-} // utilities
-} // mcrl2
+} // namespace utilities
+} // namespace mcrl2
 
 
-#endif // MCRL2_MATH_UTILITIES_H
+#endif // MCRL2_UTILITIES_MATH_H
 

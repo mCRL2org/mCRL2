@@ -12,17 +12,17 @@
 #ifndef MCRL2_LPS_DETAIL_LPS_ALGORITHM_H
 #define MCRL2_LPS_DETAIL_LPS_ALGORITHM_H
 
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lps/remove.h"
+#include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/specification.h"
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <functional>
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/remove.h"
-#include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 namespace mcrl2
 {

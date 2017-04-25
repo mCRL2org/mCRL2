@@ -12,10 +12,10 @@
 #ifndef MCRL2_LPS_DETAIL_ACTION_UTILITY_H
 #define MCRL2_LPS_DETAIL_ACTION_UTILITY_H
 
-#include <set>
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include <set>
 
 namespace mcrl2
 {

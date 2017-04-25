@@ -9,20 +9,20 @@
 /// \file rewriter_test.cpp
 /// \brief Add your file description here.
 
-#include <cstdlib>
-#include <string>
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/parse_substitution.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/lps/detail/specification_property_map.h"
+#include "mcrl2/lps/one_point_rule_rewrite.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/utilities/text_utility.h"
 #include <algorithm>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/parse_substitution.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/one_point_rule_rewrite.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/detail/specification_property_map.h"
-#include "mcrl2/utilities/text_utility.h"
+#include <cstdlib>
+#include <string>
 
 using namespace std;
 using namespace mcrl2;

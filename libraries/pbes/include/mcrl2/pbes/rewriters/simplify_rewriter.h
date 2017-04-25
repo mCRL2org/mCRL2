@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 
-#include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/pbes/rewriters/data_rewriter.h"
 
 namespace mcrl2 {
 

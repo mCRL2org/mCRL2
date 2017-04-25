@@ -12,22 +12,22 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_TRAVERSER_H
 #define MCRL2_PBES_DETAIL_PFNF_TRAVERSER_H
 
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/traverser.h"
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <numeric>
-#include <utility>
-#include <vector>
-#include <stdexcept>
 #include <set>
 #include <sstream>
-#include <functional>
-#include "mcrl2/data/optimized_boolean_operators.h"
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/replace.h"
-#include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/traverser.h"
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
 #ifdef MCRL2_PFNF_VISITOR_DEBUG
 #include "mcrl2/data/print.h"

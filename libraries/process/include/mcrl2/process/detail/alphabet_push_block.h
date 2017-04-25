@@ -12,12 +12,12 @@
 #ifndef MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H
 
-#include <map>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/utility.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include <map>
 
 namespace mcrl2 {
 

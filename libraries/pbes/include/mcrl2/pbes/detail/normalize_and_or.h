@@ -12,12 +12,12 @@
 #ifndef MCRL2_PBES_DETAIL_NORMALIZE_AND_OR_H
 #define MCRL2_PBES_DETAIL_NORMALIZE_AND_OR_H
 
-#include <set>
-#include <utility>
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include <set>
+#include <utility>
 
 namespace mcrl2
 {

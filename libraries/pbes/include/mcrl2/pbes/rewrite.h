@@ -9,8 +9,8 @@
 /// \file pbes/include/mcrl2/pbes/rewrite.h
 /// \brief add your file description here.
 
-#ifndef PBES_INCLUDE_MCRL2_PBES_REWRITE_H
-#define PBES_INCLUDE_MCRL2_PBES_REWRITE_H
+#ifndef MCRL2_PBES_REWRITE_H
+#define MCRL2_PBES_REWRITE_H
 
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/pbes/builder.h"
@@ -191,4 +191,4 @@ T pbes_rewrite(const T& x,
 
 } // namespace mcrl2
 
-#endif // PBES_INCLUDE_MCRL2_PBES_REWRITE_H
+#endif // MCRL2_PBES_REWRITE_H

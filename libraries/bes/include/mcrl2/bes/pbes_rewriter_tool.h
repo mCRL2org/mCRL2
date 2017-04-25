@@ -9,15 +9,15 @@
 /// \file mcrl2/bes/pbes_rewriter_tool.h
 /// \brief Base class for tools that use a pbes rewriter.
 
-#ifndef MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
-#define MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
+#ifndef MCRL2_BES_PBES_REWRITER_TOOL_H
+#define MCRL2_BES_PBES_REWRITER_TOOL_H
 
-#include <set>
-#include <string>
-#include <iostream>
-#include <stdexcept>
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include <iostream>
+#include <set>
+#include <stdexcept>
+#include <string>
 
 namespace mcrl2
 {
@@ -72,9 +72,9 @@ class pbes_rewriter_tool: public Tool
 
       // Compute the available rewriters, and add the approriate arguments
       std::set<pbes_system::pbes_rewriter_type> types = available_rewriters();
-      for (typename std::set<pbes_system::pbes_rewriter_type>::iterator i = types.begin(); i != types.end(); ++i)
+      for (auto type : types)
       {
-        arg.add_value(*i, *i==default_rewriter());
+        arg.add_value(type, type==default_rewriter());
       }
 
       desc.add_option(
@@ -124,4 +124,4 @@ class pbes_rewriter_tool: public Tool
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
+#endif // MCRL2_BES_PBES_REWRITER_TOOL_H

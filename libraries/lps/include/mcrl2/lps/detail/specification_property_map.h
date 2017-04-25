@@ -12,18 +12,18 @@
 #ifndef MCRL2_LPS_DETAIL_SPECIFICATION_PROPERTY_MAP_H
 #define MCRL2_LPS_DETAIL_SPECIFICATION_PROPERTY_MAP_H
 
+#include "mcrl2/data/detail/data_property_map.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/utilities/text_utility.h"
 #include <algorithm>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <functional>
 #include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
 #include <utility>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <functional>
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/data/detail/data_property_map.h"
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2
 {

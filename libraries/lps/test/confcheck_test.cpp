@@ -9,13 +9,13 @@
 /// \file parelm_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/data/bool.h"
+#include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/confluence_checker.h"
-#include "mcrl2/data/bool.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -29,9 +29,9 @@ static size_t count_ctau(specification const& s)
   size_t result = 0;
   auto const& v_summands = s.process().action_summands();
 
-  for (auto i=v_summands.begin(); i!=v_summands.end(); ++i)
+  for (const auto & v_summand : v_summands)
   {
-    const process::action_list al=i->multi_action().actions();
+    const process::action_list al=v_summand.multi_action().actions();
     if (al.size()==1)
     {
       const process::action_label lab=al.front().label();

@@ -12,16 +12,16 @@
 #ifndef MCRL2_PBES_PBES_H
 #define MCRL2_PBES_PBES_H
 
-#include <string>
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/core/load_aterm.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/equal_sorts.h"
+#include "mcrl2/pbes/detail/io.h"
+#include "mcrl2/pbes/pbes_equation.h"
 #include <cassert>
 #include <map>
 #include <set>
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/load_aterm.h"
-#include "mcrl2/data/detail/equal_sorts.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/pbes/detail/io.h"
-#include "mcrl2/pbes/pbes_equation.h"
+#include <string>
 
 namespace mcrl2
 {

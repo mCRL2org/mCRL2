@@ -9,10 +9,10 @@
 /// \file parse_test.cpp
 /// \brief Add your file description here.
 
-#include <string>
-#include <sstream>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/parse.h"
+#include <boost/test/minimal.hpp>
+#include <sstream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

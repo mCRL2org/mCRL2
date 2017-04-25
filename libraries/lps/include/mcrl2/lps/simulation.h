@@ -9,8 +9,8 @@
 #ifndef MCRL2_LPS_SIMULATION_H
 #define MCRL2_LPS_SIMULATION_H
 
-#include <string>
 #include <deque>
+#include <string>
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/multi_action.h"

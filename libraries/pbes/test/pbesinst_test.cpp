@@ -13,26 +13,26 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG2
 
-#include <string>
-#include <iostream>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
+#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbesinst_symbolic.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
-#include "mcrl2/pbes/detail/pbes_parameter_map.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/pbesinst_symbolic.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/utilities/logger.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

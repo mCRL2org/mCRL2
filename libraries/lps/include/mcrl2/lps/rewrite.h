@@ -9,8 +9,8 @@
 /// \file lps/include/mcrl2/lps/rewrite.h
 /// \brief add your file description here.
 
-#ifndef LPS_INCLUDE_MCRL2_LPS_REWRITE_H
-#define LPS_INCLUDE_MCRL2_LPS_REWRITE_H
+#ifndef MCRL2_LPS_REWRITE_H
+#define MCRL2_LPS_REWRITE_H
 
 #include "mcrl2/data/rewrite.h"
 #include "mcrl2/lps/builder.h"
@@ -79,4 +79,4 @@ T rewrite(const T& x,
 
 } // namespace mcrl2
 
-#endif // LPS_INCLUDE_MCRL2_LPS_REWRITE_H
+#endif // MCRL2_LPS_REWRITE_H

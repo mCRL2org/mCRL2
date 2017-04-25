@@ -14,9 +14,9 @@
 
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/detail/pbes_context.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/pbes_context.h"
 
 namespace mcrl2
 {

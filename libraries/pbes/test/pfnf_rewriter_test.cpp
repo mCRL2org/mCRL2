@@ -9,16 +9,16 @@
 /// \file pfnf_rewriter.cpp
 /// \brief Tests for pfnf rewriter.
 
-#include <boost/test/minimal.hpp>
+#include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/pfnf_print.h"
+#include "mcrl2/pbes/detail/pfnf_traverser.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/detail/pbes2bool.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/pfnf_traverser.h"
-#include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/detail/pfnf_print.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

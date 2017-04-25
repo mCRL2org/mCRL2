@@ -9,15 +9,15 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/replace.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

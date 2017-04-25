@@ -12,22 +12,22 @@
 #ifndef MCRL2_PBES_PARITY_GAME_GENERATOR_H
 #define MCRL2_PBES_PARITY_GAME_GENERATOR_H
 
-#include <iostream>
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/selection.h"
+#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/pbes/join.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
 #include <iomanip>
+#include <iostream>
 #include <map>
 #include <set>
 #include <sstream>
 #include <utility>
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/selection.h"
-#include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
 
 namespace mcrl2
 {

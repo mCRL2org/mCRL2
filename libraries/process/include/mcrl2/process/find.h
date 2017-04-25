@@ -14,8 +14,8 @@
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/process/traverser.h"
 #include "mcrl2/process/add_binding.h"
+#include "mcrl2/process/traverser.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2

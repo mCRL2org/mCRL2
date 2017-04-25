@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H
 
-#include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 

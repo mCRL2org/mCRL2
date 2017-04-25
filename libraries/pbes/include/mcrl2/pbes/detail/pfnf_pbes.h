@@ -12,13 +12,13 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_PBES_H
 #define MCRL2_PBES_DETAIL_PFNF_PBES_H
 
+#include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/join.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
+#include "mcrl2/utilities/logger.h"
 #include <cassert>
 #include <iostream>
-#include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 

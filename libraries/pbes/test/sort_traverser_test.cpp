@@ -9,12 +9,12 @@
 /// \file sort_traverser_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

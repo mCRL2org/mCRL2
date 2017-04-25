@@ -14,9 +14,9 @@
 
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/modal_formula/action_formula.h"
+#include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/builder.h"
 
 namespace mcrl2
 {

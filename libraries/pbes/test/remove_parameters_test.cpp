@@ -8,14 +8,14 @@
 /// \file remove_parameters_test.cpp
 /// \brief Tests for removing parameters..
 
-#include <iostream>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/variable.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
-#include "mcrl2/pbes/detail/test_utility.h"
-#include "mcrl2/atermpp/container_utility.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
 
 using namespace mcrl2::core;
 using namespace mcrl2;

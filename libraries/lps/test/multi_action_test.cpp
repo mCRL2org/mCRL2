@@ -11,12 +11,12 @@
 
 //#define MCRL2_LPS_PARELM_DEBUG
 
-#include <iostream>
-#include <string>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/print.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

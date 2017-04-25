@@ -13,9 +13,9 @@
 #define MCRL2_PROCESS_PROCESS_EQUATION_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_identifier.h"

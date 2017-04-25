@@ -24,11 +24,11 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/modal_formula/builder.h"
+#include "mcrl2/modal_formula/detail/state_variable_context.h"
 #include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/state_formula_specification.h"
-#include "mcrl2/modal_formula/detail/state_variable_context.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/utilities/text_utility.h"
 

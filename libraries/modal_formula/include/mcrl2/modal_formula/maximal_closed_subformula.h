@@ -12,10 +12,10 @@
 #ifndef MCRL2_MODAL_FORMULA_MAXIMAL_CLOSED_SUBFORMULA_H
 #define MCRL2_MODAL_FORMULA_MAXIMAL_CLOSED_SUBFORMULA_H
 
-#include <iostream>
 #include "mcrl2/data/find.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/utilities/logger.h"
+#include <iostream>
 
 namespace mcrl2 {
 

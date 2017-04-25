@@ -12,9 +12,9 @@
 #ifndef MCRL2_PROCESS_ALLOW_SET_H
 #define MCRL2_PROCESS_ALLOW_SET_H
 
-#include <algorithm>
 #include "mcrl2/process/alphabet_operations.h"
 #include "mcrl2/process/utility.h"
+#include <algorithm>
 
 namespace mcrl2 {
 

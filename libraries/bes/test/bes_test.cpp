@@ -9,11 +9,11 @@
 /// \file bes_test.cpp
 /// \brief Some tests for BES.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/join.h"
 #include "mcrl2/bes/print.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

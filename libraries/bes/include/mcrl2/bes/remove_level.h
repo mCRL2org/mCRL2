@@ -12,8 +12,8 @@
 #ifndef MCRL2_BES_REMOVE_LEVEL_H
 #define MCRL2_BES_REMOVE_LEVEL_H
 
-#include <string>
 #include "mcrl2/utilities/exception.h"
+#include <string>
 
 namespace mcrl2
 {
@@ -96,4 +96,4 @@ std::string description(const remove_level s)
 
 } // namespace mcrl2
 
-#endif // MCRL2_REMOVE_LEVEL_H
+#endif // MCRL2_BES_REMOVE_LEVEL_H

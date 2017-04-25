@@ -12,13 +12,13 @@
 #ifndef MCRL2_PBES_IO_H
 #define MCRL2_PBES_IO_H
 
-#include <utility>
-#include <iostream>
-#include <string>
-#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/parse.h"
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/logger.h"
+#include <iostream>
+#include <string>
+#include <utility>
 
 namespace mcrl2
 {

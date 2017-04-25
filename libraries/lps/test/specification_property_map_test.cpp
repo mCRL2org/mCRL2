@@ -9,14 +9,14 @@
 /// \file specification_property_map_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <boost/test/minimal.hpp>
-#include <boost/algorithm/string.hpp>
-#include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

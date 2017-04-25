@@ -9,12 +9,12 @@
 /// \file lps_algorithm_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/specification.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <iterator>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/linearise.h"
 
 using namespace std;
 using namespace mcrl2;

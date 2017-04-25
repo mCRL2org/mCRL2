@@ -10,25 +10,25 @@
 #ifndef MCRL2_PBES_CONSTELM_H
 #define MCRL2_PBES_CONSTELM_H
 
-#include <sstream>
-#include <iostream>
-#include <utility>
-#include <deque>
-#include <map>
-#include <set>
-#include <vector>
-#include <algorithm>
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/optimized_boolean_operators.h"
+#include <algorithm>
+#include <deque>
+#include <iostream>
+#include <map>
+#include <set>
+#include <sstream>
+#include <utility>
+#include <vector>
 
 namespace mcrl2
 {
@@ -64,9 +64,9 @@ struct true_false_pair
 
 } // namespace detail
 
-} // namespace mcrl2
-
 } // namespace pbes_system
+
+} // namespace mcrl2
 
 namespace mcrl2
 {
@@ -146,10 +146,10 @@ struct constelm_edge_condition
   pbes_expression compute_condition(const std::vector<true_false_pair >& c) const
   {
     pbes_expression result = true_();
-    for (auto i = c.begin(); i != c.end(); ++i)
+    for (const auto & i : c)
     {
-      result = data::optimized_and(result, data::optimized_not(i->TC));
-      result = data::optimized_and(result, data::optimized_not(i->FC));
+      result = data::optimized_and(result, data::optimized_not(i.TC));
+      result = data::optimized_and(result, data::optimized_not(i.FC));
     }
     return result;
   }
@@ -470,11 +470,11 @@ class pbes_constelm_algorithm
         {
           std::vector<data::variable> result;
           data::variable_list parameters(m_variable.parameters());
-          for (typename data::variable_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
+          for (const auto & parameter : parameters)
           {
-            if (is_constant(*i))
+            if (is_constant(parameter))
             {
-              result.push_back(*i);
+              result.push_back(parameter);
             }
           }
           return result;
@@ -738,9 +738,9 @@ class pbes_constelm_algorithm
           if (!inst.empty())
           {
             std::vector<edge>& edges = m_edges[name];
-            for (typename std::set<propositional_variable_instantiation>::iterator k = inst.begin(); k != inst.end(); ++k)
+            for (const auto & k : inst)
             {
-              edges.push_back(edge(eqn.variable(), *k));
+              edges.push_back(edge(eqn.variable(), k));
             }
           }
         }
@@ -845,11 +845,11 @@ class pbes_constelm_algorithm
       {
         mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
         std::map<propositional_variable, std::vector<data::variable> > v = redundant_parameters();
-        for (typename std::map<propositional_variable, std::vector<data::variable> >::iterator i = v.begin(); i != v.end(); ++i)
+        for (auto & i : v)
         {
-          for (typename std::vector<data::variable>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+          for (typename std::vector<data::variable>::const_iterator j = i.second.begin(); j != i.second.end(); ++j)
           {
-            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i->first.name()) << ", " << data::pp(*j) << ")" << std::endl;
+            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i.first.name()) << ", " << data::pp(*j) << ")" << std::endl;
           }
         }
       }

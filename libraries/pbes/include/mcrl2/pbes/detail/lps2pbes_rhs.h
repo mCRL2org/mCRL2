@@ -19,11 +19,11 @@
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/traverser.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/lps2pbes_par.h"
 #include "mcrl2/pbes/detail/lps2pbes_sat.h"
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {

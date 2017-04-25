@@ -12,9 +12,9 @@
 #ifndef MCRL2_PBES_REMOVE_EQUATIONS_H
 #define MCRL2_PBES_REMOVE_EQUATIONS_H
 
+#include "mcrl2/pbes/pbes.h"
 #include <map>
 #include <set>
-#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
 

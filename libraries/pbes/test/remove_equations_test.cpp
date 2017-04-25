@@ -9,10 +9,10 @@
 /// \file pbes_solve_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

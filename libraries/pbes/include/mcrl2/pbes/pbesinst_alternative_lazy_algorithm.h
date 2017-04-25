@@ -10,28 +10,28 @@
 /// \brief An alternative lazy algorithm for instantiating a PBES, ported from
 ///        bes_deprecated.h.
 
-#include <cassert>
-#include <set>
-#include <deque>
-#include <stack>
-#include <iostream>
-#include <sstream>
-#include <ctime>
-#include <unordered_set>
-#include <unordered_map>
-#include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/bes/remove_level.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbesinst_algorithm.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/pbes/detail/check_well_formed_bes.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
-#include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/search_strategy.h"
 #include "mcrl2/pbes/transformation_strategy.h"
-#include "mcrl2/pbes/detail/check_well_formed_bes.h"
-#include "mcrl2/bes/remove_level.h"
+#include "mcrl2/utilities/detail/container_utility.h"
+#include <cassert>
+#include <ctime>
+#include <deque>
+#include <iostream>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <unordered_map>
+#include <unordered_set>
 
 #ifndef MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
@@ -46,7 +46,7 @@ struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
     return hash<atermpp::aterm>()(x);
   }
 };
-}
+} // namespace std
 
 namespace mcrl2
 {

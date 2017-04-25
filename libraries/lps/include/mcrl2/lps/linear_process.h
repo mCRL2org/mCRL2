@@ -12,16 +12,16 @@
 #ifndef MCRL2_LPS_LINEAR_PROCESS_H
 #define MCRL2_LPS_LINEAR_PROCESS_H
 
-#include <string>
-#include <cassert>
-#include <algorithm>
-#include <functional>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/action_summand.h"
 #include "mcrl2/lps/deadlock_summand.h"
 #include "mcrl2/lps/process_initializer.h"
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <string>
 
 namespace mcrl2
 {

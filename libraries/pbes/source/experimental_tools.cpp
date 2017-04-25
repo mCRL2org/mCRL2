@@ -11,6 +11,6 @@
 
 #include "mcrl2/pbes/tools.h"
 
-#include "mcrl2/pbes/tools/pbesabsinthe.h"
 #include "mcrl2/pbes/tools/lpsbisim2pbes.h"
+#include "mcrl2/pbes/tools/pbesabsinthe.h"
 #include "mcrl2/pbes/tools/pbespareqelm.h"

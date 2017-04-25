@@ -12,9 +12,9 @@
 #ifndef MCRL2_PROCESS_DETAIL_ACTION_CONTEXT_H
 #define MCRL2_PROCESS_DETAIL_ACTION_CONTEXT_H
 
-#include <map>
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/action_label.h"
+#include <map>
 
 namespace mcrl2 {
 

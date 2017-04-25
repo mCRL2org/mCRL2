@@ -12,19 +12,19 @@
 #ifndef MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
 #define MCRL2_PBES_REWRITERS_ENUMERATE_QUANTIFIERS_REWRITER_H
 
-#include <numeric>
-#include <set>
-#include <utility>
-#include <deque>
-#include <sstream>
-#include <vector>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/split_finite_variables.h"
-#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/enumerator.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/pbes/enumerator.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/utilities/detail/join.h"
+#include <deque>
+#include <numeric>
+#include <set>
+#include <sstream>
+#include <utility>
+#include <vector>
 
 namespace mcrl2 {
 

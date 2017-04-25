@@ -12,10 +12,10 @@
 #ifndef MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_CONTEXT_H
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_CONTEXT_H
 
-#include <map>
-#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/modal_formula/state_formula.h"
+#include <map>
 
 namespace mcrl2 {
 

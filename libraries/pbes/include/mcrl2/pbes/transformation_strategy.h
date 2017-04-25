@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_TRANSFORMATION_STRATEGY_H
 #define MCRL2_PBES_TRANSFORMATION_STRATEGY_H
 
-#include <string>
 #include "mcrl2/utilities/exception.h"
+#include <string>
 
 namespace mcrl2
 {

@@ -12,10 +12,10 @@
 #ifndef MCRL2_PBES_SUBSTITUTIONS_H
 #define MCRL2_PBES_SUBSTITUTIONS_H
 
-#include <utility>
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/replace.h"
+#include <utility>
 
 namespace mcrl2 {
 

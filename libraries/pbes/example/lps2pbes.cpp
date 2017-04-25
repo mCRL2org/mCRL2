@@ -9,13 +9,13 @@
 /// \file mcrl22lps.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <iostream>
+#include <string>
 
 using namespace std;
 using namespace mcrl2;

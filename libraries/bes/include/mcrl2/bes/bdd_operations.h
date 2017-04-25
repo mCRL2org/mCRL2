@@ -9,8 +9,8 @@
 /// \file mcrl2/bes/bdd_operations.h
 /// \brief Operations on BDDs.
 
-#ifndef MCRL2_BDD_OPERATIONS_H
-#define MCRL2_BDD_OPERATIONS_H
+#ifndef MCRL2_BES_BDD_OPERATIONS_H
+#define MCRL2_BES_BDD_OPERATIONS_H
 
 #include "mcrl2/bes/bdd_expression.h"
 
@@ -92,4 +92,4 @@ inline bdd_expression ordered_or(const bdd_expression& l, const bdd_expression& 
 
 } // namespace mcrl2
 
-#endif // MCRL2_BDD_OPERATIONS_H
+#endif // MCRL2_BES_BDD_OPERATIONS_H

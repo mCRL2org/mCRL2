@@ -12,16 +12,16 @@
 #ifndef MCRL2_PROCESS_TYPECHECK_H
 #define MCRL2_PROCESS_TYPECHECK_H
 
-#include <algorithm>
-#include <iostream>
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/process/builder.h"
-#include "mcrl2/process/normalize_sorts.h"
-#include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/detail/action_context.h"
 #include "mcrl2/process/detail/match_action_parameters.h"
 #include "mcrl2/process/detail/process_context.h"
+#include "mcrl2/process/normalize_sorts.h"
+#include "mcrl2/process/process_specification.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include <algorithm>
+#include <iostream>
 
 namespace mcrl2
 {

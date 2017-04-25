@@ -15,16 +15,16 @@
 // TODO: Make it possible to undefine this flag
 #define MCRL2_SMALL_PROGRESS_MEASURES_DEBUG
 
-#include <iomanip>
-#include <map>
-#include <sstream>
-#include <vector>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/utilities/logger.h"
+#include <iomanip>
+#include <map>
+#include <sstream>
+#include <vector>
 
 namespace mcrl2
 {

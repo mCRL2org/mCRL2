@@ -9,8 +9,8 @@
 /// \file text_utility_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/text_utility.h"
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 

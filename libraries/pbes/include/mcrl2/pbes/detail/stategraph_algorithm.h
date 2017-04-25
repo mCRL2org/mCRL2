@@ -12,17 +12,17 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_ALGORITHM_H
 
-#include <algorithm>
-#include <sstream>
-#include <functional>
-#include "mcrl2/data/undefined.h"
 #include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/detail/stategraph_graph.h"
 #include "mcrl2/pbes/detail/stategraph_pbes.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
 #include "mcrl2/pbes/tools/pbesstategraph_options.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/sequence.h"
+#include <algorithm>
+#include <functional>
+#include <sstream>
 
 namespace mcrl2 {
 

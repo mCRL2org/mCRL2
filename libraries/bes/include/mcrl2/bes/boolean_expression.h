@@ -19,12 +19,12 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/precedence.h"
-#include "mcrl2/core/index_traits.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/term_traits.h"
+#include "mcrl2/core/index_traits.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/term_traits.h"
 
 namespace mcrl2
 {

@@ -70,7 +70,7 @@ std::set<data::variable> significant_variables(const pbes_expression& x)
   return pbes_system::significant_variables(x);
 }
 
-} // algorithms
+} // namespace algorithms
 
 } // namespace pbes_system
 

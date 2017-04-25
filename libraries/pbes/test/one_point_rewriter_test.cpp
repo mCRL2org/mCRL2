@@ -9,20 +9,20 @@
 /// \file one_point_rewriter_test.cpp
 /// \brief Test for PBES rewriters.
 
-#include <functional>
-#include <iostream>
-#include <set>
-#include <sstream>
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/detail/test_operation.h"
+#include "mcrl2/utilities/text_utility.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <functional>
+#include <iostream>
+#include <set>
+#include <sstream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

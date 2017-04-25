@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_TERM_TRAITS_OPTIMIZED_H
 #define MCRL2_PBES_DETAIL_TERM_TRAITS_OPTIMIZED_H
 
-#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
 

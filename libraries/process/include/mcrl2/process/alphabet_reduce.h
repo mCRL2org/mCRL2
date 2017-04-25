@@ -12,22 +12,22 @@
 #ifndef MCRL2_PROCESS_ALPHABET_REDUCE_H
 #define MCRL2_PROCESS_ALPHABET_REDUCE_H
 
-#include <algorithm>
-#include <iterator>
-#include <iostream>
-#include <limits>
-#include <sstream>
 #include "mcrl2/process/alphabet.h"
-#include "mcrl2/process/expand_process_instance_assignments.h"
-#include "mcrl2/process/builder.h"
-#include "mcrl2/process/remove_equations.h"
-#include "mcrl2/process/traverser.h"
-#include "mcrl2/process/utility.h"
 #include "mcrl2/process/alphabet_efficient.h"
+#include "mcrl2/process/builder.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/detail/alphabet_push_block.h"
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
+#include "mcrl2/process/expand_process_instance_assignments.h"
+#include "mcrl2/process/remove_equations.h"
+#include "mcrl2/process/traverser.h"
+#include "mcrl2/process/utility.h"
 #include "mcrl2/utilities/logger.h"
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <limits>
+#include <sstream>
 
 namespace mcrl2 {
 
@@ -76,7 +76,7 @@ process_expression alphabet_reduce(const process_expression& x, std::vector<proc
   return f.apply(x);
 }
 
-} // detail
+} // namespace detail
 
 /// \brief Applies alphabet reduction to a process specification.
 /// \param procspec A process specification

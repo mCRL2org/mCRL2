@@ -9,13 +9,13 @@
 /// \file absinthe_test.cpp
 /// \brief Test program for absinthe algorithm.
 
-#include <iostream>
-#include <iterator>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include <boost/algorithm/string/join.hpp>
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <iterator>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

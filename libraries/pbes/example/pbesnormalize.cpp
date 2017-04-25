@@ -9,11 +9,11 @@
 /// \file pbesnormalize.cpp
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/bes/pbes_output_tool.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/pbes.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

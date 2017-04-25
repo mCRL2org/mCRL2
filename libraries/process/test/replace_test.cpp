@@ -9,13 +9,13 @@
 /// \file replace_test.cpp
 /// \brief Regression test for replace functions
 
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
 
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/replace.h"
@@ -90,9 +90,9 @@ data::mutable_map_substitution<> parse_substitution(const std::string& text, con
 {
   data::mutable_map_substitution<> sigma;
   std::vector<std::string> substitutions = utilities::split(text, ";");
-  for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+  for (auto & substitution : substitutions)
   {
-    std::vector<std::string> words = utilities::regex_split(*i, ":=");
+    std::vector<std::string> words = utilities::regex_split(substitution, ":=");
     if (words.size() != 2)
     {
       continue;
@@ -108,10 +108,10 @@ data::mutable_map_substitution<> parse_substitution(const std::string& text, con
 std::set<data::variable> sigma_variables(const data::mutable_map_substitution<>& sigma)
 {
   std::set<data::variable> result;
-  for (data::mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+  for (const auto & i : sigma)
   {
-    std::set<data::variable> V = data::find_free_variables(i->second);
-    V.erase(i->first);
+    std::set<data::variable> V = data::find_free_variables(i.second);
+    V.erase(i.first);
     result.insert(V.begin(), V.end());
   }
   return result;

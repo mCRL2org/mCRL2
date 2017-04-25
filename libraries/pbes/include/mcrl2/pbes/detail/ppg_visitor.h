@@ -12,8 +12,8 @@
 ///       | \/_{i: I} f_i || \/_{j: J} exists v: D_j . ( g_j && X_j(e_j) ).
 ///
 /// DEPRECATED
-#ifndef PPG_VISITOR_H_
-#define PPG_VISITOR_H_
+#ifndef MCRL2_PBES_DETAIL_PPG_VISITOR_H
+#define MCRL2_PBES_DETAIL_PPG_VISITOR_H
 
 #include "bqnf_visitor.h"
 
@@ -211,4 +211,4 @@ class ppg_visitor
 
 } // namespace mcrl2
 
-#endif /* PPG_VISITOR_H_ */
+#endif // MCRL2_PBES_DETAIL_PPG_VISITOR_H

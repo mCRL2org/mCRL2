@@ -12,12 +12,12 @@
 #ifndef MCRL2_LPS_LINEARISE_H
 #define MCRL2_LPS_LINEARISE_H
 
-#include <string>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/linearisation_method.h"
 #include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
+#include "mcrl2/process/process_specification.h"
+#include <string>
 
 namespace mcrl2
 {

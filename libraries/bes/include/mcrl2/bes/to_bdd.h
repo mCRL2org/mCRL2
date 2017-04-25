@@ -12,12 +12,12 @@
 #ifndef MCRL2_BES_TO_BDD_H
 #define MCRL2_BES_TO_BDD_H
 
-#include <map>
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/bes/boolean_expression.h"
 #include "mcrl2/bes/bdd_expression.h"
 #include "mcrl2/bes/bdd_operations.h"
+#include "mcrl2/bes/boolean_expression.h"
+#include "mcrl2/core/identifier_string.h"
+#include <map>
 
 namespace mcrl2 {
 

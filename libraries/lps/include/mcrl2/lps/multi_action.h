@@ -12,13 +12,13 @@
 #ifndef MCRL2_LPS_MULTI_ACTION_H
 #define MCRL2_LPS_MULTI_ACTION_H
 
-#include <iterator>
-#include <stdexcept>
-#include <sstream>
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/process/process_expression.h"
-#include "mcrl2/core/print.h"
+#include <iterator>
+#include <sstream>
+#include <stdexcept>
 
 namespace mcrl2
 {

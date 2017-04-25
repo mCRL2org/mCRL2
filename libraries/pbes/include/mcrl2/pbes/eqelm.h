@@ -10,21 +10,21 @@
 #ifndef MCRL2_PBES_EQELM_H
 #define MCRL2_PBES_EQELM_H
 
-#include <sstream>
-#include <utility>
-#include <deque>
-#include <map>
-#include <set>
-#include <sstream>
-#include <vector>
-#include <algorithm>
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/rewriters/data_rewriter.h"
 #include "mcrl2/utilities/logger.h"
+#include <algorithm>
+#include <deque>
+#include <map>
+#include <set>
+#include <sstream>
+#include <sstream>
+#include <utility>
+#include <vector>
 
 namespace mcrl2
 {
@@ -86,16 +86,16 @@ class pbes_eqelm_algorithm
     std::vector<equivalence_class> compute_equivalence_sets(const propositional_variable& X) const
     {
       std::map< data::sort_expression, equivalence_class> m;
-      for (auto i = X.parameters().begin(); i != X.parameters().end(); ++i)
+      for (const auto & i : X.parameters())
       {
-        m[i->sort()].insert(*i);
+        m[i.sort()].insert(i);
       }
       std::vector<equivalence_class> result;
-      for (auto i = m.begin(); i != m.end(); ++i)
+      for (auto & i : m)
       {
-        if (i->second.size() > 1)
+        if (i.second.size() > 1)
         {
-          result.push_back(i->second);
+          result.push_back(i.second);
         }
       }
       return result;
@@ -181,22 +181,21 @@ class pbes_eqelm_algorithm
 
       std::vector<equivalence_class>& cY = m_vertices[Y];
       std::vector<equivalence_class> cY1;
-      for (auto j = cY.begin(); j != cY.end(); ++j)
+      for (auto & equiv : cY)
       {
-        equivalence_class& equiv = *j;
         std::map<data::data_expression, equivalence_class> w;
-        for (auto k = equiv.begin(); k != equiv.end(); ++k)
+        for (const auto & k : equiv)
         {
-          size_t p = index_of(*k, m_parameters[Y]);
+          size_t p = index_of(k, m_parameters[Y]);
           pbes_system::data_rewriter<DataRewriter> rewr(m_data_rewriter);
           pbes_system::pbes_expression e_p = rewr(e[p], vX);
-          w[atermpp::down_cast<const data::data_expression>(e_p)].insert(*k);
+          w[atermpp::down_cast<const data::data_expression>(e_p)].insert(k);
         }
-        for (auto i = w.begin(); i != w.end(); ++i)
+        for (auto & i : w)
         {
-          if (i->second.size() > 1)
+          if (i.second.size() > 1)
           {
-            cY1.push_back(i->second);
+            cY1.push_back(i.second);
           }
         }
       }
@@ -218,9 +217,8 @@ class pbes_eqelm_algorithm
     {
       data::mutable_map_substitution<> result;
       const std::vector<equivalence_class>& cX = m_vertices[X];
-      for (auto i = cX.begin(); i != cX.end(); ++i)
+      for (const auto & s : cX)
       {
-        const equivalence_class& s = *i;
         for (auto j = ++s.begin(); j != s.end(); ++j)
         {
           result[*j] = *s.begin();
@@ -252,9 +250,9 @@ class pbes_eqelm_algorithm
       {
         core::identifier_string X = eqn.variable().name();
         const std::vector<equivalence_class>& eq = m_vertices[X];
-        for (auto j = eq.begin(); j != eq.end(); ++j)
+        for (const auto & j : eq)
         {
-          for (auto k = ++j->begin(); k != j->end(); ++k)
+          for (auto k = ++j.begin(); k != j.end(); ++k)
           {
             to_be_removed[X].push_back(index_of(*k, m_parameters[X]));
           }
@@ -327,10 +325,9 @@ class pbes_eqelm_algorithm
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);
         const std::set<propositional_variable_instantiation>& edges = m_edges[X];
-        for (auto i = edges.begin(); i != edges.end(); ++i)
+        for (const auto & Ye : edges)
         {
           // propagate the equivalence relations in X over the edge Ye
-          const propositional_variable_instantiation& Ye = *i;
           if (evaluate_guard(X, Ye))
           {
             update_equivalence_classes(Ye, vX, todo);

@@ -9,13 +9,13 @@
 /// \file normal_form_test.cpp
 /// \brief Tests for transformations into normal form.
 
-#include <sstream>
-#include <string>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
+#include <boost/test/minimal.hpp>
+#include <sstream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

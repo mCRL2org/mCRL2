@@ -92,7 +92,7 @@ bool is_guarded(const process_expression& x, const std::vector<process_equation>
   return f.result;
 }
 
-} // detail
+} // namespace detail
 
 inline
 bool is_guarded(const process_expression& x, const std::vector<process_equation>& equations)

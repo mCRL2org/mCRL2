@@ -9,13 +9,13 @@
 /// \file mcrl2/modal_formula/normalize.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
-#define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
+#ifndef MCRL2_MODAL_FORMULA_NORMALIZE_H
+#define MCRL2_MODAL_FORMULA_NORMALIZE_H
 
+#include "mcrl2/data/bool.h"
+#include "mcrl2/modal_formula/negate_variables.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/traverser.h"
-#include "mcrl2/modal_formula/negate_variables.h"
-#include "mcrl2/data/bool.h"
 
 namespace mcrl2
 {
@@ -283,4 +283,4 @@ T normalize(const T& x, bool negated, typename std::enable_if< std::is_base_of< 
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
+#endif // MCRL2_MODAL_FORMULA_NORMALIZE_H

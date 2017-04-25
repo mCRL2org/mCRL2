@@ -9,22 +9,22 @@
 /// \file mcrl2/utilities/command_line_interface.h
 /// \brief Components for command line interfaces of mCRL2 tools
 
-#ifndef __MCRL2_UTILITIES_COMMAND_LINE_INTERFACE_HPP_
-#define __MCRL2_UTILITIES_COMMAND_LINE_INTERFACE_HPP_
+#ifndef MCRL2_UTILITIES_COMMAND_LINE_INTERFACE_H
+#define MCRL2_UTILITIES_COMMAND_LINE_INTERFACE_H
 #include <algorithm>
-#include <vector>
-#include <map>
-#include <iostream>
-#include <memory>
-#include <fstream>
 #include <cassert>
 #include <cstdlib>
-#include <sstream>
 #include <cstring>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <vector>
 
-#include "mcrl2/utilities/toolset_version.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/toolset_version.h"
 
 namespace mcrl2
 {
@@ -1553,7 +1553,7 @@ inline command_line_parser::command_line_parser(interface_description& d, const 
 # endif // __CYGWIN__
 #endif
 /// \endcond
-}
-}
+} // namespace utilities
+} // namespace mcrl2
 
 #endif

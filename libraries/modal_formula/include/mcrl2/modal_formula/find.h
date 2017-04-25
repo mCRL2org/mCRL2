@@ -14,8 +14,8 @@
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/add_binding.h"
+#include "mcrl2/modal_formula/traverser.h"
 
 namespace mcrl2
 {

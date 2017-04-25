@@ -10,11 +10,11 @@
 /// \brief
 
 #include "mcrl2/lps/find.h"
+#include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/translate_user_notation.h"
-#include "mcrl2/lps/is_well_typed.h"
 
 namespace mcrl2
 {

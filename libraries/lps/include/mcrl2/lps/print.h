@@ -14,8 +14,8 @@
 
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/process/print.h"
 #include "mcrl2/lps/traverser.h"
+#include "mcrl2/process/print.h"
 
 namespace mcrl2
 {

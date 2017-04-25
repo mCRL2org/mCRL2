@@ -9,19 +9,19 @@
 /// \file lpsparunfold/lpsparunfoldlib.h
 /// \brief Unfold process parameters in mCRL2 process specifications.
 
-#ifndef LPSPARUNFOLDLIB_H
+#ifndef MCRL2_LPS_LPSPARUNFOLDLIB_H
 //Fileinfo
-#define LPSPARUNFOLDLIB_H
+#define MCRL2_LPS_LPSPARUNFOLDLIB_H
 
-#include <string>
-#include <set>
 #include <map>
+#include <set>
+#include <string>
 
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/lps/stochastic_linear_process.h"
 #include "mcrl2/lps/stochastic_specification.h"
 
@@ -38,7 +38,7 @@ namespace lspparunfold
     //mcrl2::data::function_symbol_vector elements_of_new_sorts;
     //mcrl2::data::data_equation_vector data_equations;
   };
-}
+} // namespace lspparunfold
 
 class lpsparunfold
 {

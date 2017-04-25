@@ -9,16 +9,16 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/join.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pbes.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <iterator>
 #include <utility>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/pbes/join.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/parse.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

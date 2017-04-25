@@ -11,22 +11,22 @@
 
 #define MCRL2_GAUSS_ELIMINATION_DEBUG
 
-#include <iostream>
-#include <iterator>
-#include <utility>
-#include <boost/test/minimal.hpp>
-#include <boost/algorithm/string.hpp>
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <iterator>
+#include <utility>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

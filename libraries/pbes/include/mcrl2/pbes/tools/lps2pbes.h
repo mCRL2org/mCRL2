@@ -12,16 +12,16 @@
 #ifndef MCRL2_PBES_TOOLS_LPS2PBES_H
 #define MCRL2_PBES_TOOLS_LPS2PBES_H
 
-#include <fstream>
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <fstream>
 
 namespace mcrl2 {
 

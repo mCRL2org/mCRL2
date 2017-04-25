@@ -12,23 +12,23 @@
 #ifndef MCRL2_PBES_LPS2PBES_H
 #define MCRL2_PBES_LPS2PBES_H
 
-#include <string>
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/modal_formula/algorithms.h"
-#include "mcrl2/modal_formula/preprocess_state_formula.h"
+#include "mcrl2/lps/detail/make_timed_lps.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/make_timed_lps.h"
-#include "mcrl2/process/merge_action_specifications.h"
+#include "mcrl2/modal_formula/algorithms.h"
+#include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/is_monotonous.h"
-#include "mcrl2/pbes/detail/lps2pbes_utility.h"
-#include "mcrl2/pbes/detail/lps2pbes_rhs.h"
 #include "mcrl2/pbes/detail/lps2pbes_e.h"
+#include "mcrl2/pbes/detail/lps2pbes_rhs.h"
+#include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/term_traits_optimized.h"
+#include "mcrl2/pbes/is_monotonous.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/process/merge_action_specifications.h"
+#include <string>
 
 namespace mcrl2
 {

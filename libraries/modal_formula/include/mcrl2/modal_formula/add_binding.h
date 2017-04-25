@@ -12,11 +12,11 @@
 #ifndef MCRL2_MODAL_FORMULA_ADD_BINDING_H
 #define MCRL2_MODAL_FORMULA_ADD_BINDING_H
 
+#include "mcrl2/data/add_binding.h"
+#include "mcrl2/lps/add_binding.h"
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/data/add_binding.h"
-#include "mcrl2/lps/add_binding.h"
 
 namespace mcrl2
 {

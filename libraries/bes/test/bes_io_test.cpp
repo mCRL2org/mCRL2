@@ -9,14 +9,14 @@
 /// \file bes_io_test.cpp
 /// \brief Some io tests for boolean equation systems.
 
-#include <sstream>
-#include <string>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/io.h"
+#include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/pbes/pbes.h"
+#include <boost/test/minimal.hpp>
+#include <sstream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

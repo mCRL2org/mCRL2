@@ -13,8 +13,8 @@
 #define MCRL2_MODAL_FORMULA_PRINT_H
 
 #include "mcrl2/core/print.h"
-#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/lps/print.h"
+#include "mcrl2/modal_formula/traverser.h"
 
 namespace mcrl2 {
 

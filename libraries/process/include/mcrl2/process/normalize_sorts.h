@@ -13,8 +13,8 @@
 #define MCRL2_PROCESS_NORMALIZE_SORTS_H
 
 #include "mcrl2/data/normalize_sorts.h"
-#include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/process_specification.h"
 
 namespace mcrl2
 {

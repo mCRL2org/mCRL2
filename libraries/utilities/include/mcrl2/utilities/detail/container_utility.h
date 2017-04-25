@@ -12,12 +12,12 @@
 #ifndef MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 
+#include "mcrl2/utilities/exception.h"
 #include <algorithm>
 #include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 

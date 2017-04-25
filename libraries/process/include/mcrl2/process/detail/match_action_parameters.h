@@ -12,11 +12,11 @@
 #ifndef MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 #define MCRL2_PROCESS_DETAIL_MATCH_ACTION_PARAMETERS_H
 
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/typecheck.h"
 #include <sstream>
 #include <tuple>
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/typecheck.h"
-#include "mcrl2/data/detail/data_utility.h"
 
 namespace mcrl2 {
 

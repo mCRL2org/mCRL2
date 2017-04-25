@@ -12,10 +12,10 @@
 #ifndef MCRL2_MODAL_FORMULA_IS_MONOTONOUS_H
 #define MCRL2_MODAL_FORMULA_IS_MONOTONOUS_H
 
-#include <set>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include <set>
 
 namespace mcrl2
 {

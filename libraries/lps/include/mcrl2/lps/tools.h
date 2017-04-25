@@ -12,10 +12,10 @@
 #ifndef MCRL2_LPS_TOOLS_H
 #define MCRL2_LPS_TOOLS_H
 
-#include <string>
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
+#include "mcrl2/data/rewriter.h"
+#include <string>
 
 namespace mcrl2 {
 

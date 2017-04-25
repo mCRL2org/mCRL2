@@ -12,17 +12,17 @@
 #ifndef MCRL2_PBES_PBESINST_SYMBOLIC_H
 #define MCRL2_PBES_PBESINST_SYMBOLIC_H
 
-#include <cassert>
-#include <set>
-#include <iostream>
-#include <sstream>
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/utilities/logger.h"
+#include <cassert>
+#include <iostream>
+#include <set>
+#include <sstream>
 
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 

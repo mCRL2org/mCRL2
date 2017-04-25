@@ -9,8 +9,8 @@
 /// \file mcrl2/modal_formula/translate_regular_formulas.h
 /// \brief Translate regular formulas in terms of state and action formulas.
 
-#ifndef MCRL2_TRANSLATE_REGULAR_FORMULAS_H
-#define MCRL2_TRANSLATE_REGULAR_FORMULAS_H
+#ifndef MCRL2_MODAL_FORMULA_TRANSLATE_REGULAR_FORMULAS_H
+#define MCRL2_MODAL_FORMULA_TRANSLATE_REGULAR_FORMULAS_H
 
 #include "mcrl2/modal_formula/state_formula.h"
 
@@ -52,4 +52,4 @@ state_formula translate_regular_formulas(const state_formula& x)
 
 } // namespace mcrl2
 
-#endif // MCRL2_TRANSLATE_REGULAR_FORMULAS_H
+#endif // MCRL2_MODAL_FORMULA_TRANSLATE_REGULAR_FORMULAS_H

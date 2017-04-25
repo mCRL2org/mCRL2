@@ -11,20 +11,20 @@
 // #define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include <iostream>
-#include <string>
 #include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/bes/pbes_rewriter_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/bes/pbes_output_tool.h"
+#include "mcrl2/bes/pbes_rewriter_tool.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

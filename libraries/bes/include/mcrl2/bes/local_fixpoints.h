@@ -13,15 +13,15 @@
 #ifndef MCRL2_BES_LOCAL_FIXPOINTS_H
 #define MCRL2_BES_LOCAL_FIXPOINTS_H
 
-#include <vector>
-#include <unordered_set>
-#include <map>
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
-#include "mcrl2/bes/to_bdd.h"
 #include "mcrl2/bes/justification.h"
+#include "mcrl2/bes/normal_forms.h"
+#include "mcrl2/bes/to_bdd.h"
+#include "mcrl2/utilities/logger.h"
+#include <map>
+#include <unordered_set>
+#include <vector>
 
 namespace mcrl2
 {

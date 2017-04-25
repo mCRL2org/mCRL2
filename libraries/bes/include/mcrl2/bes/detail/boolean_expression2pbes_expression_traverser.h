@@ -12,10 +12,10 @@
 #ifndef MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
 #define MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
 
-#include <cassert>
-#include <vector>
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include <cassert>
+#include <vector>
 
 namespace mcrl2
 {

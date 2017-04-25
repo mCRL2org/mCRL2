@@ -12,11 +12,11 @@
 #ifndef MCRL2_PBES_ABSTRACT_H
 #define MCRL2_PBES_ABSTRACT_H
 
+#include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
+#include "mcrl2/pbes/pbes.h"
 #include <algorithm>
 #include <iostream>
-#include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 
 namespace mcrl2
 {

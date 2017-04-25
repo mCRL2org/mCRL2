@@ -8,16 +8,16 @@
 //
 /// \file mcrl2/pbes/pbes_explorer.h
 /// \brief
-#ifndef PBES_EXPLORER_H
-#define PBES_EXPLORER_H
+#ifndef MCRL2_PBES_PBES_EXPLORER_H
+#define MCRL2_PBES_PBES_EXPLORER_H
 
 #define PBES_EXPLORER_VERSION 1
 
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/ppg_traverser.h"
-#include "mcrl2/pbes/detail/ppg_rewriter.h"
-#include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
+#include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/detail/ppg_traverser.h"
+#include "mcrl2/pbes/parity_game_generator.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 
 using namespace mcrl2;
@@ -36,7 +36,7 @@ namespace detail
 {
     template <typename MapContainer>
     typename MapContainer::mapped_type map_at(const MapContainer& m, typename MapContainer::key_type key);
-}
+} // namespace detail
 
 
 
@@ -591,10 +591,9 @@ public:
         std::vector<ltsmin_state> successors = this->get_successors(state);
         // int dst[state_length]; N.B. This is not portable C++
         int* dst = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
-        for (std::vector<ltsmin_state>::iterator succ = successors.begin(); succ
-                != successors.end(); ++succ) {
+        for (auto & successor : successors) {
 
-            this->to_state_vector(*succ, dst, state, src);
+            this->to_state_vector(successor, dst, state, src);
             cb(dst);
             //std::clog << "  succ: " << (*succ)->to_string() << std::endl;
         }
@@ -631,9 +630,8 @@ public:
             std::vector<ltsmin_state> successors = this->get_successors(state, group);
             // int dst[state_length]; N.B. This is not portable C++
             int* dst = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
-            for (std::vector<ltsmin_state>::iterator succ = successors.begin(); succ
-                    != successors.end(); ++succ) {
-                this->to_state_vector(*succ, dst, state, src);
+            for (auto & successor : successors) {
+                this->to_state_vector(successor, dst, state, src);
                 cb(dst, group);
             }
         }
@@ -645,4 +643,4 @@ public:
 
 } // namespace mcrl2
 
-#endif // PBES_EXPLORER_H
+#endif // MCRL2_PBES_PBES_EXPLORER_H

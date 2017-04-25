@@ -19,9 +19,9 @@
 #ifndef MCRL2_LPS_STATE_PROBABILITY_PAIR_H
 #define MCRL2_LPS_STATE_PROBABILITY_PAIR_H
 
-#include <iostream>
-#include <cassert>
 #include "mcrl2/utilities/hash_utility.h"
+#include <cassert>
+#include <iostream>
 
 namespace mcrl2
 {

@@ -14,16 +14,16 @@
 
 #include <iterator>
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/math.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/math.h"
 
 namespace mcrl2
 {

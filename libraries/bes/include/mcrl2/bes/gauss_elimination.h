@@ -12,10 +12,10 @@
 #ifndef MCRL2_BES_GAUSS_ELIMINATION_H
 #define MCRL2_BES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/bes/simplify_rewriter.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/bes/replace.h"
+#include "mcrl2/bes/simplify_rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 
 namespace mcrl2

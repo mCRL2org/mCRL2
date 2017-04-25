@@ -12,10 +12,10 @@
 #ifndef MCRL2_PBES_DETAIL_PBES_CONTEXT_H
 #define MCRL2_PBES_DETAIL_PBES_CONTEXT_H
 
-#include <map>
-#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/pbes/propositional_variable.h"
+#include <map>
 
 namespace mcrl2 {
 

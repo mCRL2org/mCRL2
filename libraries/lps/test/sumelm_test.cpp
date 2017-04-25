@@ -9,13 +9,13 @@
 /// \file sumelm_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/sumelm.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -166,21 +166,17 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
     // Check that the only data variables in the condition and time
     // are process parameters
     std::set<variable> condition_vars = data::find_all_variables(i->condition());
-    for (std::set<variable>::iterator j = condition_vars.begin()
-                                          ; j != condition_vars.end()
-         ; ++j)
+    for (const auto & condition_var : condition_vars)
     {
-      BOOST_CHECK(parameters.find(*j) != parameters.end());
+      BOOST_CHECK(parameters.find(condition_var) != parameters.end());
     }
 
     if (i->has_time())
     {
       std::set<variable> time_vars = data::find_all_variables(i->multi_action().time());
-      for (std::set<variable>::iterator j = time_vars.begin()
-                                            ; j != time_vars.end()
-           ; ++j)
+      for (const auto & time_var : time_vars)
       {
-        BOOST_CHECK(parameters.find(*j) != parameters.end());
+        BOOST_CHECK(parameters.find(time_var) != parameters.end());
       }
     }
   }
@@ -206,9 +202,9 @@ BOOST_AUTO_TEST_CASE(both_sides_of_equality)
   sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    if (!i->summation_variables().empty())
+    if (!i.summation_variables().empty())
     {
       ++sumvar_count;
     }
@@ -250,9 +246,9 @@ BOOST_AUTO_TEST_CASE(three_sums_remove_two)
   sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    if (!i->summation_variables().empty())
+    if (!i.summation_variables().empty())
     {
       ++sumvar_count;
     }
@@ -313,9 +309,9 @@ BOOST_AUTO_TEST_CASE(no_unconditional_sum_removal_from_delta)
   sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const deadlock_summand_vector& summands1 = s1.process().deadlock_summands();
-  for (deadlock_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    if (!i->summation_variables().empty())
+    if (!i.summation_variables().empty())
     {
       ++sumvar_count;
     }

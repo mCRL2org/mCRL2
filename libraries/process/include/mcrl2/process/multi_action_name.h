@@ -12,10 +12,10 @@
 #ifndef MCRL2_PROCESS_MULTI_ACTION_NAME_H
 #define MCRL2_PROCESS_MULTI_ACTION_NAME_H
 
+#include "mcrl2/core/identifier_string.h"
 #include <algorithm>
 #include <set>
 #include <sstream>
-#include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2 {
 

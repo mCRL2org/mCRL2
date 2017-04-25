@@ -12,9 +12,9 @@
 #ifndef MCRL2_PBES_TOOLS_PBESPP_H
 #define MCRL2_PBES_TOOLS_PBESPP_H
 
-#include <fstream>
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/logger.h"
+#include <fstream>
 
 namespace mcrl2 {
 

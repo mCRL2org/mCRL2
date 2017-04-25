@@ -9,14 +9,14 @@
 /// \file ltsmin_test.cpp
 /// \brief Test for the pins class that connects mCRL2 with LTSMin (http://fmt.cs.utwente.nl/tools/ltsmin/).
 
-#include <iostream>
 #include <cstdio>
+#include <iostream>
 
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/ltsmin.h"
-#include "mcrl2/lps/detail/test_input.h"
 
 using namespace mcrl2;
 
@@ -118,9 +118,9 @@ static void test_ltsmin(const std::string& rewriter_strategy)
   }
 
   std::set<data::sort_expression> params;
-  for (data::variable_list::const_iterator i = spec.process().process_parameters().begin(); i != spec.process().process_parameters().end(); ++i)
+  for (const auto & i : spec.process().process_parameters())
   {
-    params.insert(i->sort());
+    params.insert(i.sort());
   }
   BOOST_CHECK(p.datatype_count() == params.size() + 1);
   BOOST_CHECK(p.group_count() == 10);
@@ -323,9 +323,8 @@ void test_serialisation()
   expressions.push_back(std::make_pair("Red", 2));
   expressions.push_back(std::make_pair("Yellow", 2));
 
-  for(auto ei = expressions.begin(); ei != expressions.end(); ++ei)
+  for(auto e : expressions)
   {
-    auto e = *ei;
     std::string s = e.first;
     size_t type = e.second;
 

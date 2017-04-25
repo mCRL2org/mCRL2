@@ -59,7 +59,7 @@ pbes_expression right(const pbes_expression& t)
   return accessors::data_right(t);
 }
 
-}; // combined_access
+} // namespace combined_access
 
 inline
 void stategraph_split_and(const pbes_expression& expr, std::vector<pbes_expression>& result)

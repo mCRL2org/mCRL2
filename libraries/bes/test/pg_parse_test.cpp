@@ -9,10 +9,10 @@
 /// \file bes_io_test.cpp
 /// \brief Some io tests for boolean equation systems.
 
+#include "mcrl2/bes/pg_parse.h"
+#include <boost/test/minimal.hpp>
 #include <sstream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/bes/pg_parse.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

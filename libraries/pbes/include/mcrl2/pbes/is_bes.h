@@ -9,8 +9,8 @@
 /// \file pbes/include/mcrl2/pbes/is_bes.h
 /// \brief add your file description here.
 
-#ifndef PBES_INCLUDE_MCRL2_PBES_IS_BES_H
-#define PBES_INCLUDE_MCRL2_PBES_IS_BES_H
+#ifndef MCRL2_PBES_IS_BES_H
+#define MCRL2_PBES_IS_BES_H
 
 #include "mcrl2/pbes/traverser.h"
 
@@ -83,4 +83,4 @@ bool is_bes(const T& x)
 
 } // namespace mcrl2
 
-#endif // PBES_INCLUDE_MCRL2_PBES_IS_BES_H
+#endif // MCRL2_PBES_IS_BES_H

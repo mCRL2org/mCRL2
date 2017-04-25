@@ -18,12 +18,12 @@
 #ifndef MCRL2_LPS_SUMELM_H
 #define MCRL2_LPS_SUMELM_H
 
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/join.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/decluster.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/replace.h"
 
 namespace mcrl2
 {

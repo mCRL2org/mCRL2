@@ -13,11 +13,11 @@
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/is_monotonous.h"
 #include "mcrl2/modal_formula/is_timed.h"
+#include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
-#include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/translate_user_notation.h"
 
 namespace mcrl2
@@ -145,7 +145,7 @@ std::set<core::identifier_string> find_state_variable_names(const state_formula&
   return state_formulas::find_state_variable_names(x);
 }
 
-} // algorithms
+} // namespace algorithms
 
 } // namespace state_formulas
 

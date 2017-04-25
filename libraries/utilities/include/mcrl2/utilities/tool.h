@@ -13,8 +13,8 @@
 #define MCRL2_UTILITIES_TOOL_H
 
 #include <cstdlib>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 #include "mcrl2/utilities/logger.h"
 

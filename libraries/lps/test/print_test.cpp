@@ -9,11 +9,11 @@
 /// \file pp_test.cpp
 /// \brief Test for parser + pretty printer
 
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/specification.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

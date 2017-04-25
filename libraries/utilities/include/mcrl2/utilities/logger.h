@@ -13,12 +13,12 @@
 
 #include <cstdio>
 #include <ctime>
+#include <map>
+#include <memory>
+#include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <sstream>
-#include <memory>
-#include <map>
-#include <set>
 
 #include "mcrl2/utilities/text_utility.h"
 
@@ -494,4 +494,4 @@ else mcrl2::log::mcrl2_logger().get(level, ##__VA_ARGS__)
 
   } // namespace log
 } // namespace mcrl2
-#endif /* MCRL_UTILITIES_LOGGER_H */
+#endif // MCRL2_UTILITIES_LOGGER_H

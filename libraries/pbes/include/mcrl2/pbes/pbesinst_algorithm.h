@@ -9,19 +9,19 @@
 /// \file mcrl2/pbes/pbesinst_algorithm.h
 /// \brief Algorithm for instantiating a PBES.
 
-#include <cassert>
-#include <set>
-#include <iostream>
-#include <sstream>
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include <cassert>
+#include <iostream>
+#include <set>
+#include <sstream>
 
 #ifndef MCRL2_PBES_PBESINST_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALGORITHM_H

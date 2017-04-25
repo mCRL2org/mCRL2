@@ -15,8 +15,8 @@
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include <ctime>
-#include <sstream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 
 #ifdef WIN32

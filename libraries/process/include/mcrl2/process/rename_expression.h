@@ -13,10 +13,10 @@
 #define MCRL2_PROCESS_RENAME_EXPRESSION_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2
 {

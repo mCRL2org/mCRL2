@@ -12,12 +12,12 @@
 #ifndef MCRL2_BES_BDD_EXPRESSION_H
 #define MCRL2_BES_BDD_EXPRESSION_H
 
-#include <sstream>
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/exception.h"
+#include <sstream>
 
 namespace mcrl2 {
 

@@ -9,12 +9,12 @@
 /// \file rename_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/lps/linearise.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <iterator>
 #include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/lps/linearise.h"
 
 using namespace std;
 using namespace mcrl2;

@@ -9,9 +9,9 @@
 /// \file bes_test.cpp
 /// \brief Some tests for BES.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/bes/bdd_expression.h"
 #include "mcrl2/bes/print.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::bdd;

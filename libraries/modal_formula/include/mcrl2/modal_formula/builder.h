@@ -12,12 +12,12 @@
 #ifndef MCRL2_MODAL_FORMULA_BUILDER_H
 #define MCRL2_MODAL_FORMULA_BUILDER_H
 
+#include "mcrl2/data/builder.h"
+#include "mcrl2/lps/builder.h"
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/state_formula_specification.h"
-#include "mcrl2/data/builder.h"
-#include "mcrl2/lps/builder.h"
 
 namespace mcrl2
 {

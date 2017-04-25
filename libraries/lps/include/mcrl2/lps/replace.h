@@ -13,11 +13,11 @@
 #define MCRL2_LPS_REPLACE_H
 
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/process/replace.h"
-#include "mcrl2/lps/find.h"
-#include "mcrl2/process/replace.h"
 #include "mcrl2/lps/add_binding.h"
 #include "mcrl2/lps/builder.h"
+#include "mcrl2/lps/find.h"
+#include "mcrl2/process/replace.h"
+#include "mcrl2/process/replace.h"
 
 namespace mcrl2
 {

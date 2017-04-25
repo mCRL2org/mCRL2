@@ -9,13 +9,13 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
+#include "mcrl2/bes/find.h"
+#include "mcrl2/bes/parse.h"
 #include <algorithm>
+#include <boost/test/minimal.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/bes/parse.h"
-#include "mcrl2/bes/find.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

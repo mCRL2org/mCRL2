@@ -12,9 +12,9 @@
 #ifndef MCRL2_BES_PARSE_H
 #define MCRL2_BES_PARSE_H
 
-#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/pbes_expression2boolean_expression_traverser.h"
+#include "mcrl2/core/parser_utility.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/parse.h"
 

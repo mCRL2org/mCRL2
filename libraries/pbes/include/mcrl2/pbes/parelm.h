@@ -10,19 +10,19 @@
 #ifndef MCRL2_PBES_PARELM_H
 #define MCRL2_PBES_PARELM_H
 
-#include <iterator>
-#include <algorithm>
-#include <map>
-#include <set>
-#include <vector>
-#include <functional>
-#include <boost/graph/adjacency_list.hpp>
-#include "mcrl2/utilities/reachable_nodes.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/find_free_variables.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/utilities/detail/iota.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/reachable_nodes.h"
+#include <algorithm>
+#include <boost/graph/adjacency_list.hpp>
+#include <functional>
+#include <iterator>
+#include <map>
+#include <set>
+#include <vector>
 
 namespace mcrl2
 {

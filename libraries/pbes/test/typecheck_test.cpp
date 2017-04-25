@@ -9,13 +9,13 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/core/parse.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/typecheck.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/core/parse.h"
-#include "mcrl2/pbes/typecheck.h"
-#include "mcrl2/pbes/parse.h"
 
 using namespace mcrl2;
 

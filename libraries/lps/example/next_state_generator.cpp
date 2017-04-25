@@ -1,8 +1,8 @@
+#include "mcrl2/lps/next_state_generator.h"
 #include <fstream>
 #include <iostream>
 #include <queue>
 #include <string>
-#include "mcrl2/lps/next_state_generator.h"
 
 using namespace mcrl2;
 

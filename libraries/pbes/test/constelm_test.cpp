@@ -11,14 +11,14 @@
 
 // #define MCRL2_PBES_CONSTELM_DEBUG
 
-#include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/pbes/constelm.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/remove_equations.h"
-#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/remove_equations.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/utilities/logger.h"
+#include <boost/test/minimal.hpp>
+#include <string>
 
 
 using namespace mcrl2;

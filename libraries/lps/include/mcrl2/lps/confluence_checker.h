@@ -12,27 +12,27 @@
 // Interface to class Confluence_Checker
 // file: confluence_checker.h
 
-#ifndef CONFLUENCE_CHECKER_H
-#define CONFLUENCE_CHECKER_H
+#ifndef MCRL2_LPS_CONFLUENCE_CHECKER_H
+#define MCRL2_LPS_CONFLUENCE_CHECKER_H
 
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/bdd2dot.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/lps/disjointness_checker.h"
+#include "mcrl2/lps/invariant_checker.h"
+#include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <string>
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/detail/bdd_prover.h"
-#include "mcrl2/data/detail/prover/bdd2dot.h"
-#include "mcrl2/data/detail/bdd_prover.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/disjointness_checker.h"
-#include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/linear_process.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/data/set_identifier_generator.h"
 
 
 /** \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.
@@ -287,9 +287,9 @@ data::mutable_map_substitution<> get_substitutions_from_assignments(const data::
 {
   data::mutable_map_substitution<> v_substitutions;
 
-  for (auto i=a_assignments.begin(); i!=a_assignments.end(); ++i)
+  for (const auto & a_assignment : a_assignments)
   {
-    v_substitutions[i->lhs()]=i->rhs();
+    v_substitutions[a_assignment.lhs()]=a_assignment.rhs();
   }
   return v_substitutions;
 }
@@ -370,9 +370,8 @@ data::data_expression get_equation_from_assignments(
 {
   data::data_expression v_result = data::sort_bool::true_();
 
-  for (auto i=a_variables.begin(); i!=a_variables.end(); ++i)
+  for (auto v_variable : a_variables)
   {
-    const data::variable v_variable=*i;
     if (!a_assignments_1.empty() && v_variable == a_assignments_1.front().lhs())
     {
       if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs())
@@ -413,13 +412,13 @@ data::data_expression get_subst_equation_from_actions(
 {
   data::data_expression v_result = data::sort_bool::true_();
 
-  for (auto i=a_actions.begin(); i!=a_actions.end(); ++i)
+  for (const auto & a_action : a_actions)
   {
-    const data::data_expression_list v_expressions = i->arguments();
-    for (auto j=v_expressions.begin(); j!=v_expressions.end(); ++j)
+    const data::data_expression_list v_expressions = a_action.arguments();
+    for (const auto & v_expression : v_expressions)
     {
-      const data::data_expression v_subst_expression = data::replace_variables_capture_avoiding(*j, a_substitutions, data::substitution_variables(a_substitutions));
-      v_result = data::sort_bool::and_(data::data_expression(v_result), equal_to(*j, v_subst_expression));
+      const data::data_expression v_subst_expression = data::replace_variables_capture_avoiding(v_expression, a_substitutions, data::substitution_variables(a_substitutions));
+      v_result = data::sort_bool::and_(data::data_expression(v_result), equal_to(v_expression, v_subst_expression));
     }
   }
   return v_result;
@@ -433,9 +432,8 @@ static data::assignment_list get_full_assignment_list(
 {
   data::assignment_list v_new_list;
 
-  for (auto i=a_variables.begin(); i!=a_variables.end(); i++)
+  for (auto v_variable : a_variables)
   {
-    data::variable v_variable = *i;
     bool v_assignment_added = false;
 
     if (!a_assignment_list.empty())
@@ -630,14 +628,14 @@ void Confluence_Checker<Specification>::uniquely_rename_summutation_variables(
   //Simultaneously, create a list of the new summation variables.
   data::variable_list new_summation_variables = data::variable_list();
 
-  for (data::variable_list::const_iterator i=summation_variables.begin(); i!=summation_variables.end(); ++i)
+  for (const auto & summation_variable : summation_variables)
   {
-    core::identifier_string new_name = f_set_identifier_generator(i->name());
+    core::identifier_string new_name = f_set_identifier_generator(summation_variable.name());
     // mCRL2log(log::verbose) << "Renamed " << i->name() << " to " << new_name << std::endl;
 
-    data::variable renamed_variable = data::variable(new_name, i->sort());
+    data::variable renamed_variable = data::variable(new_name, summation_variable.sort());
     new_summation_variables.push_front(renamed_variable);
-    v_substitutions[*i] = renamed_variable;
+    v_substitutions[summation_variable] = renamed_variable;
   }
 
   new_summation_variables = atermpp::reverse(new_summation_variables);
@@ -649,17 +647,17 @@ void Confluence_Checker<Specification>::uniquely_rename_summutation_variables(
   //Create the new (multi-)action.
   process::action_list new_actions = process::action_list();
 
-  for (process::action_list::const_iterator i=actions.begin(); i!=actions.end(); ++i)
+  for (const auto & i : actions)
   {
-    data::data_expression_list arguments = i->arguments();
+    data::data_expression_list arguments = i.arguments();
     data::data_expression_list new_arguments = data::data_expression_list();
 
-    for (data::data_expression_list::const_iterator j=arguments.begin(); j!=arguments.end(); ++j)
+    for (const auto & argument : arguments)
     {
-      new_arguments.push_front(data::replace_variables(*j, v_substitutions));
+      new_arguments.push_front(data::replace_variables(argument, v_substitutions));
     }
 
-    new_actions.push_front(process::action(i->label(), atermpp::reverse(new_arguments)));
+    new_actions.push_front(process::action(i.label(), atermpp::reverse(new_arguments)));
   }
 
   multi_action new_multi_action = multi_action(atermpp::reverse(new_actions));
@@ -667,10 +665,10 @@ void Confluence_Checker<Specification>::uniquely_rename_summutation_variables(
   //Create the new assignments (essentially the summand's next-state function).
   data::assignment_list new_assignments = data::assignment_list();
 
-  for (data::assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+  for (const auto & i : assignments)
   {
-    data::data_expression rhs = data::replace_variables(i->rhs(), v_substitutions);
-    new_assignments.push_front(data::assignment(i->lhs(), rhs));
+    data::data_expression rhs = data::replace_variables(i.rhs(), v_substitutions);
+    new_assignments.push_front(data::assignment(i.lhs(), rhs));
   }
 
   new_assignments = atermpp::reverse(new_assignments);

@@ -13,8 +13,8 @@
 #define MCRL2_PROCESS_TRANSLATE_USER_NOTATION_H
 
 #include "mcrl2/data/translate_user_notation.h"
-#include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/process_specification.h"
 
 namespace mcrl2
 {

@@ -13,10 +13,10 @@
 
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/representative_generator.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/pbes_explorer.h"
 #include "mcrl2/pbes/detail/ppg_visitor.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/pbes_explorer.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -43,7 +43,7 @@ namespace detail
     }
     return i->second;
   }
-}
+} // namespace detail
 
 /// lts_type
 
@@ -194,20 +194,18 @@ void lts_info::compute_lts_type()
     std::map<std::string,std::string> paramtypes;
     data::representative_generator default_expression_generator(p.data());
 
-    for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
-            != p.equations().end(); ++eqn) 
+    for (auto & eqn : p.equations()) 
     {
         //std::clog << core::pp((*eqn).symbol()) << " " << (*eqn).variable().name()
         //        << std::endl;
 
-        propositional_variable var = (*eqn).variable();
+        propositional_variable var = eqn.variable();
         for (const variable& varparam: var.parameters())
         {
             std::string signature = get_param_signature(varparam);
             bool new_param = true;
-            for (std::vector<std::string>::iterator par = params.begin(); par
-                        != params.end(); ++par) {
-               if (signature == (*par)) new_param = false;
+            for (auto & param : params) {
+               if (signature == param) new_param = false;
             }
             if (new_param) {
                 params.push_back(signature);
@@ -224,9 +222,8 @@ void lts_info::compute_lts_type()
     this->type.add_state("var", "string"); // Propositional variable name
 
     int i = 0;
-    for (std::vector<std::string>::iterator param = params.begin(); param
-            != params.end(); ++param) {
-        std::string signature = (*param);
+    for (auto & param : params) {
+        std::string signature = param;
         this->type.add_state(signature, paramtypes[signature]);
         this->param_index[signature] = i;
         i++;
@@ -253,16 +250,16 @@ inline bool lts_info::is_pass_through_state(const propositional_variable_instant
     else
     {
         data::variable_list::const_iterator param_it = params.begin();
-        for(data::data_expression_list::const_iterator value_it = values.begin(); value_it != values.end(); ++value_it)
+        for(const auto & value : values)
         {
-            if (!data::is_variable(*value_it))
+            if (!data::is_variable(value))
             {
                 return false;
             }
             else
             {
                 data::variable param(*param_it);
-                data::variable param_expr(*value_it);
+                data::variable param_expr(value);
                 if (param != param_expr)
                 {
                     return false;
@@ -453,24 +450,23 @@ void lts_info::compute_transition_groups()
 
     symbol = fixpoint_symbol::nu();
 
-    for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
-            != p.equations().end(); ++eqn) {
-        pbes_expression expr = pgg->get_pbes_equation((*eqn).variable().name()).formula();
-        std::string variable_name = (*eqn).variable().name();
-        this->variables[variable_name] = (*eqn).variable();
+    for (auto & eqn : p.equations()) {
+        pbes_expression expr = pgg->get_pbes_equation(eqn.variable().name()).formula();
+        std::string variable_name = eqn.variable().name();
+        this->variables[variable_name] = eqn.variable();
         type = pgg->get_expression_operation(expr);
         this->variable_type[variable_name] = type;
-        this->variable_symbol[variable_name] = (*eqn).symbol();
-        if ((*eqn).symbol() != symbol) {
+        this->variable_symbol[variable_name] = eqn.symbol();
+        if (eqn.symbol() != symbol) {
             priority++;
-            symbol = (*eqn).symbol();
+            symbol = eqn.symbol();
         }
         mCRL2log(log::debug) << "Adding var " << variable_name << ", priority=" << priority << ", symbol=" << symbol << std::endl;
         this->variable_priority[variable_name] = priority;
-        this->variable_parameters[variable_name] = (*eqn).variable().parameters();
-        this->variable_parameter_signatures[variable_name] = get_param_sequence((*eqn).variable().parameters());
-        this->variable_parameter_indices[variable_name] = this->get_param_indices((*eqn).variable().parameters());
-        this->variable_parameter_index_positions[variable_name] = this->get_param_index_positions((*eqn).variable().parameters());
+        this->variable_parameters[variable_name] = eqn.variable().parameters();
+        this->variable_parameter_signatures[variable_name] = get_param_sequence(eqn.variable().parameters());
+        this->variable_parameter_indices[variable_name] = this->get_param_indices(eqn.variable().parameters());
+        this->variable_parameter_index_positions[variable_name] = this->get_param_index_positions(eqn.variable().parameters());
         this->variable_expression[variable_name] = expr;
     }
 
@@ -493,28 +489,27 @@ void lts_info::compute_transition_groups()
             for (std::vector<pbes_expression>::const_iterator e =
                     expression_parts.begin(); e != expression_parts.end(); ++e) {
                  std::set<std::string> occ_vars = lts_info::occ(*e);
-                 for (std::set<std::string>::const_iterator var_str = variable_set.begin(); var_str != variable_set.end(); ++var_str)
+                 for (const auto & var_str : variable_set)
                  {
-                   occ_vars.erase(*var_str);
+                   occ_vars.erase(var_str);
                  }
-                 for(std::set<std::string>::const_iterator occ_var = occ_vars.begin(); occ_var != occ_vars.end(); ++occ_var)
+                 for(const auto & occ_var : occ_vars)
                  {
-                     variable_queue.push(*occ_var);
+                     variable_queue.push(occ_var);
                  }
                  variable_set.insert(occ_vars.begin(), occ_vars.end());
             }
         }
         mCRL2log(log::debug) << "Set of 'used' variables: " << std::endl;
-        for (std::set<std::string>::const_iterator var_str = variable_set.begin(); var_str != variable_set.end(); ++var_str)
+        for (const auto & var_str : variable_set)
         {
-            mCRL2log(log::debug) << "  " << (*var_str) << std::endl;
+            mCRL2log(log::debug) << "  " << var_str << std::endl;
         }
         mCRL2log(log::debug) << std::endl;
     }
 
-    for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
-            != p.equations().end(); ++eqn) {
-        std::string variable_name = (*eqn).variable().name();
+    for (auto & eqn : p.equations()) {
+        std::string variable_name = eqn.variable().name();
         if (variable_set.find(variable_name) != variable_set.end())
         {
             type = this->variable_type[variable_name];
@@ -804,10 +799,8 @@ std::set<std::string> lts_info::changed(const pbes_expression& phi, const std::s
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
         data::variable_list vars = quantifier_variables(phi);
-        for (data::variable_list::const_iterator var =
-                vars.begin(); var != vars.end(); ++var)
+        for (auto variable : vars)
         {
-            variable variable = *var;
             LL.insert(get_param_signature(variable));
         }
         result = changed(pbes_system::accessors::arg(phi), LL);
@@ -872,8 +865,7 @@ std::set<std::string> lts_info::reset(const pbes_expression& phi, const std::set
             std::string signature = *param;
             params.insert(signature);
         }
-        for (std::set<std::string>::const_iterator s = d.begin(); s != d.end(); ++s) {
-            std::string signature = *s;
+        for (auto signature : d) {
             if (params.find(signature) == params.end())
             {
                 result.insert(signature);
@@ -962,9 +954,7 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
         data::data_expression_list values = atermpp::down_cast<propositional_variable_instantiation>(expr).parameters();
         assert(var_params.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
-        for (data::variable_list::const_iterator param =
-                var_params.begin(); param != var_params.end(); ++param) {
-            variable parameter = *param;
+        for (auto parameter : var_params) {
             std::string param_signature = get_param_signature(parameter);
             if (data::is_variable(*val))
             {
@@ -1002,10 +992,8 @@ std::set<std::string> lts_info::used(const pbes_expression& expr, const std::set
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
         data::variable_list vars = quantifier_variables(expr);
-        for (data::variable_list::const_iterator var =
-                vars.begin(); var != vars.end(); ++var)
+        for (auto variable : vars)
         {
-            variable variable = *var;
             LL.insert(get_param_signature(variable));
         }
         result = used(pbes_system::accessors::arg(expr), LL);
@@ -1036,9 +1024,7 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
         data::data_expression_list values = atermpp::down_cast<propositional_variable_instantiation>(expr).parameters();
         assert(var_params.size() == values.size());
         data::data_expression_list::const_iterator val = values.begin();
-        for (data::variable_list::const_iterator param =
-                var_params.begin(); param != var_params.end(); ++param) {
-            variable parameter = *param;
+        for (auto parameter : var_params) {
             std::string param_signature = get_param_signature(parameter);
             if (data::is_variable(*val))
             {
@@ -1070,10 +1056,8 @@ std::set<std::string> lts_info::copied(const pbes_expression& expr, const std::s
         std::set<std::string> LL;
         LL.insert(L.begin(), L.end());
         data::variable_list vars = quantifier_variables(expr);
-        for (data::variable_list::const_iterator var =
-                vars.begin(); var != vars.end(); ++var)
+        for (auto variable : vars)
         {
-            variable variable = *var;
             LL.insert(get_param_signature(variable));
         }
         result = copied(pbes_system::accessors::arg(expr), LL);
@@ -1116,9 +1100,7 @@ std::string lts_info::state_to_string(const ltsmin_state& state)
 std::set<std::string> lts_info::get_param_set(const data::variable_list& params)
 {
     std::set<std::string> result;
-    for (data::variable_list::const_iterator param =
-                params.begin(); param != params.end(); ++param) {
-        variable parameter = *param;
+    for (auto parameter : params) {
         result.insert(get_param_signature(parameter));
     }
     return result;
@@ -1128,9 +1110,7 @@ std::set<std::string> lts_info::get_param_set(const data::variable_list& params)
 std::vector<std::string> lts_info::get_param_sequence(const data::variable_list& params)
 {
     std::vector<std::string> result;
-    for (data::variable_list::const_iterator param =
-                params.begin(); param != params.end(); ++param) {
-        variable parameter = *param;
+    for (auto parameter : params) {
         result.push_back(get_param_signature(parameter));
     }
     return result;
@@ -1140,9 +1120,7 @@ std::vector<std::string> lts_info::get_param_sequence(const data::variable_list&
 std::vector<int> lts_info::get_param_indices(const data::variable_list& params)
 {
     std::vector<int> result;
-    for (data::variable_list::const_iterator param =
-                params.begin(); param != params.end(); ++param) {
-        variable parameter = *param;
+    for (auto parameter : params) {
         int index = this->get_index(get_param_signature(parameter));
         result.push_back(index);
     }
@@ -1154,9 +1132,7 @@ std::map<int,int> lts_info::get_param_index_positions(const data::variable_list&
 {
     std::map<int,int> result;
     int i = 0;
-    for (data::variable_list::const_iterator param =
-                params.begin(); param != params.end(); ++param) {
-        variable parameter = *param;
+    for (auto parameter : params) {
         int index = this->get_index(get_param_signature(parameter));
         result.insert(std::make_pair(index,i));
         i++;
@@ -1210,14 +1186,14 @@ ltsmin_state::ltsmin_state(const std::string& varname,
         assert(std::string(atermpp::down_cast<propositional_variable_instantiation>(e).name()) == varname);
         //std::clog << "ltsmin_state: var = " << atermpp::down_cast<propositional_variable_instantiation>(e).name() << std::endl;
         const data::data_expression_list& values = atermpp::down_cast<propositional_variable_instantiation>(e).parameters();
-        for (data::data_expression_list::iterator val = values.begin(); val != values.end(); ++val)
+        for (const auto & value : values)
         {
-            if (*val == novalue)
+            if (value == novalue)
             {
                 throw(std::runtime_error("Error in ltsmin_state: state expression contains NoValue: "
                                     + pp(e)));
             }
-            this->add_parameter_value(*val);
+            this->add_parameter_value(value);
             //std::clog << "ltsmin_state: " << *val << std::endl;
         }
         //std::clog << std::endl;
@@ -1270,9 +1246,8 @@ void ltsmin_state::add_parameter_value(const data_expression& value)
 pbes_expression ltsmin_state::to_pbes_expression() const
 {
     data_expression_vector parameter_values;
-    for (std::vector<data_expression>::const_iterator param_value =
-            param_values.begin(); param_value != param_values.end(); ++param_value) {
-        parameter_values.push_back(*param_value);
+    for (const auto & param_value : param_values) {
+        parameter_values.push_back(param_value);
     }
     data_expression_list parameter_values_list(parameter_values.begin(), parameter_values.end());
     // Create propositional variable instantiation.
@@ -1308,9 +1283,8 @@ std::string ltsmin_state::state_to_string() const
 explorer::explorer(const std::string& filename, const std::string& rewrite_strategy = "jittyc", bool reset_flag = false, bool always_split_flag = false)
 {
     load_pbes(p, filename);
-    for (std::vector<pbes_equation>::iterator eqn = p.equations().begin(); eqn
-                != p.equations().end(); ++eqn) {
-        std::string variable_name = (*eqn).variable().name();
+    for (auto & eqn : p.equations()) {
+        std::string variable_name = eqn.variable().name();
         //std::clog << "varname = " << variable_name << std::endl;
     }
     pbes_system::algorithms::normalize(p);
@@ -1512,10 +1486,9 @@ void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const lt
                     detail::map_at(info->get_variable_parameter_signatures(), varname);
     std::vector<std::string>::iterator param_signature = parameter_signatures.begin();
     int value_index = 0;
-    for(std::vector<int>::iterator param_index = parameter_indices.begin();
-            param_index != parameter_indices.end(); ++param_index)
+    for(int & parameter_indice : parameter_indices)
     {
-        int i = *param_index + 1;
+        int i = parameter_indice + 1;
         int type_no = info->get_lts_type().get_state_type_no(i);
         values[i] = parameter_values[value_index];
         if (values[i]==novalue)
@@ -1531,7 +1504,7 @@ void explorer::to_state_vector(const ltsmin_state& dst_state, int* dst, const lt
                 // lookup src parameter value
                 // FIXME: this could be computed statically: a map from src_var, dst_var and part to boolean
                 std::map<int,int> src_param_index_positions = detail::map_at(info->get_variable_parameter_index_positions(), src_state.get_variable());
-                std::map<int,int>::iterator src_param_index_position_it = src_param_index_positions.find(*param_index);
+                std::map<int,int>::iterator src_param_index_position_it = src_param_index_positions.find(parameter_indice);
                 if ( src_param_index_position_it != src_param_index_positions.end()
                         && src_state.get_parameter_values()[src_param_index_position_it->second] == values[i])
                 {
@@ -1626,14 +1599,13 @@ ltsmin_state explorer::from_state_vector(int* const& src)
     data_expression_vector parameters;
     std::vector<int> parameter_indices =
             detail::map_at(info->get_variable_parameter_indices(), varname);
-    for (std::vector<int>::iterator param_index = parameter_indices.begin(); param_index
-            != parameter_indices.end(); ++param_index) {
-        if (values[*param_index+1]==novalue)
+    for (int & parameter_indice : parameter_indices) {
+        if (values[parameter_indice+1]==novalue)
         {
             error = true;
             //std::clog << "from_state_vector: varname = " << varname << ", values[" << *param_index+1 << "] = " << values[*param_index+1].to_string() << "(" << src[*param_index+1] << ")" << std::endl;
         }
-        parameters.push_back(values[*param_index+1]);
+        parameters.push_back(values[parameter_indice+1]);
     }
     if (error)
     {
@@ -1670,22 +1642,21 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state)
         std::set<pbes_expression> successors
                 = pgg->get_successors(e);
         operation_type type = detail::map_at(info->get_variable_types(), state.get_variable());
-        for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
-                != successors.end(); ++expr) {
-            if (is_propositional_variable_instantiation(*expr)) {
-                result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
-            } else if (is_true(*expr)) {
+        for (const auto & successor : successors) {
+            if (is_propositional_variable_instantiation(successor)) {
+                result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(successor)));
+            } else if (is_true(successor)) {
                 if (type != parity_game_generator::PGAME_AND)
                 {
                     result.push_back(true_state());
                 }
-            } else if (is_false(*expr)) {
+            } else if (is_false(successor)) {
                 if (type != parity_game_generator::PGAME_OR)
                 {
                     result.push_back(false_state());
                 }
             } else {
-                throw(std::runtime_error("!! Successor is NOT a propvar: " + pbes_system::pp(*expr)));
+                throw(std::runtime_error("!! Successor is NOT a propvar: " + pbes_system::pp(successor)));
             }
         }
     }
@@ -1720,23 +1691,22 @@ std::vector<ltsmin_state> explorer::get_successors(const ltsmin_state& state,
                     = pgg->get_successors(e, group_varname,
                                              info->get_transition_expressions()[group]);
             operation_type type = detail::map_at(info->get_variable_types(), state.get_variable());
-            for (std::set<pbes_expression>::const_iterator expr = successors.begin(); expr
-                    != successors.end(); ++expr) {
+            for (const auto & successor : successors) {
                 //std::clog << " * successor: " << pp(*expr) << std::endl;
-                if (is_propositional_variable_instantiation(*expr)) {
-                    result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(*expr)));
-                } else if (is_true(*expr)) {
+                if (is_propositional_variable_instantiation(successor)) {
+                    result.push_back(get_state(atermpp::down_cast<propositional_variable_instantiation>(successor)));
+                } else if (is_true(successor)) {
                     if (type != parity_game_generator::PGAME_AND)
                     {
                         result.push_back(true_state());
                     }
-                } else if (is_false(*expr)) {
+                } else if (is_false(successor)) {
                     if (type != parity_game_generator::PGAME_OR)
                     {
                         result.push_back(false_state());
                     }
                 } else {
-                    throw(std::runtime_error("!! Successor is NOT a propvar: " + pbes_system::pp(*expr)));
+                    throw(std::runtime_error("!! Successor is NOT a propvar: " + pbes_system::pp(successor)));
                 }
             }
         }

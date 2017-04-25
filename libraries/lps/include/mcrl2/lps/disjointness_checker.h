@@ -12,8 +12,8 @@
 // Interface to class Disjointness_Checker
 // file: disjointness_checker.h
 
-#ifndef DISJOINTNESS_CHECKER_H
-#define DISJOINTNESS_CHECKER_H
+#ifndef MCRL2_LPS_DISJOINTNESS_CHECKER_H
+#define MCRL2_LPS_DISJOINTNESS_CHECKER_H
 
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/utilities/detail/container_utility.h"
@@ -86,9 +86,9 @@ void Disjointness_Checker::process_data_expression(std::size_t n, const data::da
     const data::where_clause& t = atermpp::down_cast<data::where_clause>(x);
     process_data_expression(n, t.body());
     const data::assignment_list& assignments = t.assignments();
-    for (auto i = assignments.begin(); i != assignments.end(); ++i)
+    for (const auto & assignment : assignments)
     {
-      process_data_expression(n, i->rhs());
+      process_data_expression(n, assignment.rhs());
     }
   }
   else if (data::is_function_symbol(x))
@@ -124,13 +124,13 @@ void Disjointness_Checker::process_multi_action(std::size_t n, const multi_actio
   }
 
   const process::action_list& v_actions = a.actions();
-  for (auto i=v_actions.begin(); i != v_actions.end(); ++i)
+  for (const auto & v_action : v_actions)
   {
-    const data::data_expression_list v_expressions=i->arguments();
+    const data::data_expression_list v_expressions=v_action.arguments();
 
-    for (auto j = v_expressions.begin(); j != v_expressions.end(); ++j)
+    for (const auto & v_expression : v_expressions)
     {
-      process_data_expression(n, *j);
+      process_data_expression(n, v_expression);
     }
   }
 }
@@ -146,13 +146,13 @@ void Disjointness_Checker::process_summand(std::size_t n, const action_summand& 
 
   // variables used and changed in assignments
   const data::assignment_list& v_assignments = s.assignments();
-  for (auto i = v_assignments.begin(); i != v_assignments.end(); ++i)
+  for (const auto & v_assignment : v_assignments)
   {
     // variables changed in the assignment
-    f_changed_parameters_per_summand[n].insert(i->lhs());
+    f_changed_parameters_per_summand[n].insert(v_assignment.lhs());
 
     // variables used in assignment
-    process_data_expression(n, i->rhs());
+    process_data_expression(n, v_assignment.rhs());
   }
 }
 
@@ -168,9 +168,9 @@ Disjointness_Checker::Disjointness_Checker(const linear_process& a_process_equat
   f_changed_parameters_per_summand =
     std::vector<std::set<data::variable> >(f_number_of_summands + 1, std::set<data::variable>());
 
-  for (auto i = v_summands.begin(); i != v_summands.end(); ++i)
+  for (const auto & v_summand : v_summands)
   {
-    process_summand(v_summand_number, *i);
+    process_summand(v_summand_number, v_summand);
     v_summand_number++;
   }
 }

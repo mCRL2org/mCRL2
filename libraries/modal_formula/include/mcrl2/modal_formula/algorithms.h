@@ -12,9 +12,9 @@
 #ifndef MCRL2_MODAL_FORMULA_ALGORITHMS_H
 #define MCRL2_MODAL_FORMULA_ALGORITHMS_H
 
-#include <iostream>
-#include "mcrl2/modal_formula/state_formula_specification.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/modal_formula/state_formula_specification.h"
+#include <iostream>
 
 namespace mcrl2 {
 
@@ -65,7 +65,7 @@ bool is_normalized(const state_formula& x);
 /// \brief Returns the names of the state variables that occur in x.
 std::set<core::identifier_string> find_state_variable_names(const state_formula& x);
 
-}
+} // namespace algorithms
 
 } // namespace state_formulas
 

@@ -9,17 +9,17 @@
 /// \file mcrl2/utilities/text_utility.h
 /// \brief String manipulation functions.
 
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/text_utility.h"
+#include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <boost/xpressive/xpressive.hpp>
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 #include <iterator>
 #include <string>
 #include <vector>
-#include <boost/algorithm/string.hpp>
-#include <boost/xpressive/xpressive.hpp>
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -195,15 +195,15 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
 
   // split the lines and remove trailing white space
   std::vector<std::string> lines = split(text, "\n");
-  for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+  for (auto & line : lines)
   {
-    boost::trim_right(*i);
+    boost::trim_right(line);
   }
 
   // word wrap each of the lines
-  for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+  for (auto & line : lines)
   {
-    std::vector<std::string> v = word_wrap_line(*i, max_line_length);
+    std::vector<std::string> v = word_wrap_line(line, max_line_length);
     result.insert(result.end(), v.begin(), v.end());
   }
 

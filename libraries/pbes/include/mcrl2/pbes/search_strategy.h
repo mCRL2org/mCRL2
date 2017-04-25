@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_SEARCH_STRATEGY_H
 #define MCRL2_PBES_SEARCH_STRATEGY_H
 
-#include <string>
 #include "mcrl2/utilities/exception.h"
+#include <string>
 
 namespace mcrl2
 {
@@ -94,7 +94,7 @@ std::string description(const search_strategy s)
   throw mcrl2::runtime_error("unknown search strategy");
 }
 
-} // namespace pbes
+} // namespace pbes_system
 
 } // namespace mcrl2
 

@@ -12,12 +12,12 @@
 #ifndef MCRL2_LPS_FIND_H
 #define MCRL2_LPS_FIND_H
 
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/process/find.h"
-#include "mcrl2/lps/traverser.h"
 #include "mcrl2/lps/add_binding.h"
+#include "mcrl2/lps/traverser.h"
+#include "mcrl2/process/find.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

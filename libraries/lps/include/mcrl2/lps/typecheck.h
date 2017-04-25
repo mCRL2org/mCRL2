@@ -12,8 +12,8 @@
 #ifndef MCRL2_LPS_TYPECHECK_H
 #define MCRL2_LPS_TYPECHECK_H
 
-#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/action_rename.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/untyped_multi_action.h"
 

@@ -12,21 +12,21 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_INFLUENCE_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_INFLUENCE_H
 
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/detail/pfnf_pbes.h"
+#include "mcrl2/pbes/detail/stategraph_pbes.h"
+#include "mcrl2/pbes/detail/stategraph_utility.h"
+#include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/logger.h"
 #include <algorithm>
 #include <iomanip>
 #include <map>
 #include <set>
 #include <sstream>
 #include <vector>
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/pbes/detail/pfnf_pbes.h"
-#include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/detail/stategraph_pbes.h"
-#include "mcrl2/pbes/detail/stategraph_utility.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 

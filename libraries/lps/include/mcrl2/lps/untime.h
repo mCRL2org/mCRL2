@@ -12,9 +12,9 @@
 #ifndef MCRL2_LPS_UNTIME_H
 #define MCRL2_LPS_UNTIME_H
 
-#include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/fourier_motzkin.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2
 {

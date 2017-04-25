@@ -15,8 +15,8 @@
 #include "mcrl2/process/communication_expression.h"
 #include "mcrl2/process/multi_action_name.h"
 #include "mcrl2/process/rename_expression.h"
-#include "mcrl2/utilities/sequence.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
 

@@ -12,23 +12,23 @@
 #ifndef MCRL2_PBES_BISIMULATION_H
 #define MCRL2_PBES_BISIMULATION_H
 
-#include <algorithm>
-#include <set>
-#include <vector>
-#include <sstream>
-#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/number_postfix_generator.h"
+#include <algorithm>
+#include <set>
+#include <sstream>
+#include <vector>
 
 namespace mcrl2
 {

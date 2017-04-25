@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_TOOLS_COMPLPS2PBES_H
 #define MCRL2_PBES_TOOLS_COMPLPS2PBES_H
 
-#include <fstream>
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -21,6 +20,7 @@
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <fstream>
 
 namespace mcrl2 {
 

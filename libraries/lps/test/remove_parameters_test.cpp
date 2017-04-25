@@ -9,15 +9,15 @@
 /// \file remove_parameters_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

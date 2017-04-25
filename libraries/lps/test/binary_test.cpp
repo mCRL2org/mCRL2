@@ -9,14 +9,14 @@
 /// \file binary_test.cpp
 /// \brief Some simple tests for the binary algorithm.
 
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <string>
-#include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/binary.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/specification.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -253,9 +253,9 @@ BOOST_AUTO_TEST_CASE(bug_623)
   specification s1 = s0;
   binary_algorithm<rewriter, specification>(s1, r).run();
   action_summand_vector summands1 = s1.process().action_summands();
-  for (auto i = summands1.begin(); i != summands1.end(); ++i)
+  for (auto & i : summands1)
   {
-    data_expression_list next_state = i->next_state(s1.process().process_parameters());
+    data_expression_list next_state = i.next_state(s1.process().process_parameters());
     BOOST_CHECK_EQUAL(next_state.size(), 2u);
     BOOST_CHECK_NE(*next_state.begin(), *(++next_state.begin()));
     std::clog << "erroneous next state " << data::pp(next_state) << std::endl;

@@ -9,12 +9,12 @@
 /// \file untime_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
 #include <boost/test/minimal.hpp>
-#include <mcrl2/lps/untime.h>
-#include <mcrl2/lps/linearise.h>
+#include <iostream>
 #include <mcrl2/lps/find.h>
+#include <mcrl2/lps/linearise.h>
+#include <mcrl2/lps/untime.h>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

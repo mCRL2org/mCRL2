@@ -12,15 +12,15 @@
 #ifndef MCRL2_PROCESS_UTILITY_H
 #define MCRL2_PROCESS_UTILITY_H
 
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/multi_action_name.h"
 #include "mcrl2/process/print.h"
 #include "mcrl2/process/replace.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/sequence.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 

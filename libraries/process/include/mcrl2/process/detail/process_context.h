@@ -12,12 +12,12 @@
 #ifndef MCRL2_PROCESS_DETAIL_PROCESS_CONTEXT_H
 #define MCRL2_PROCESS_DETAIL_PROCESS_CONTEXT_H
 
+#include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/typecheck.h"
+#include "mcrl2/process/detail/action_context.h"
+#include "mcrl2/process/process_expression.h"
 #include <algorithm>
 #include <map>
-#include "mcrl2/data/typecheck.h"
-#include "mcrl2/data/detail/data_utility.h"
-#include "mcrl2/process/process_expression.h"
-#include "mcrl2/process/detail/action_context.h"
 
 namespace mcrl2 {
 

@@ -11,16 +11,16 @@
 
 //#define MCRL2_LPS_PARELM_DEBUG
 
-#include <iostream>
-#include <string>
-#include <boost/test/minimal.hpp>
+#include "mcrl2/lps/detail/specification_property_map.h"
 #include <boost/algorithm/string.hpp>
-#include <mcrl2/utilities/text_utility.h>
-#include <mcrl2/lps/parse.h>
+#include <boost/test/minimal.hpp>
+#include <iostream>
 #include <mcrl2/lps/parelm.h>
+#include <mcrl2/lps/parse.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/stochastic_specification.h>
-#include "mcrl2/lps/detail/specification_property_map.h"
+#include <mcrl2/utilities/text_utility.h>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

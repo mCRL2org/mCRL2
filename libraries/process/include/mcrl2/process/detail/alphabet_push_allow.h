@@ -12,19 +12,19 @@
 #ifndef MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_ALLOW_H
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_ALLOW_H
 
-#include <sstream>
-#include <tuple>
-#include <utility>
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/process/allow_set.h"
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/alphabet_pcrl.h"
-#include "mcrl2/process/allow_set.h"
+#include "mcrl2/process/detail/pcrl_equation_cache.h"
 #include "mcrl2/process/expand_process_instance_assignments.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/is_multi_action.h"
 #include "mcrl2/process/replace.h"
 #include "mcrl2/process/utility.h"
-#include "mcrl2/process/detail/pcrl_equation_cache.h"
+#include <sstream>
+#include <tuple>
+#include <utility>
 
 namespace mcrl2 {
 

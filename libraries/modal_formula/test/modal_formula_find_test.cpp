@@ -9,15 +9,15 @@
 /// \file modal_formula_find_test.cpp
 /// \brief Test for find functions.
 
-#include <algorithm>
-#include <iterator>
-#include <set>
-#include <vector>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/parse.h"
+#include <algorithm>
+#include <boost/test/minimal.hpp>
+#include <iterator>
+#include <set>
+#include <vector>
 
 using namespace mcrl2;
 using namespace mcrl2::state_formulas;

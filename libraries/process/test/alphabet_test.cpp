@@ -9,19 +9,19 @@
 /// \file alphabet_test.cpp
 /// \brief Test for alphabet reduction.
 
-#include <algorithm>
-#include <set>
-#include <sstream>
-#include <tuple>
-#include <vector>
-#include <boost/test/included/unit_test_framework.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/process/alphabet_reduce.h"
 #include "mcrl2/process/detail/alphabet_intersection.h"
 #include "mcrl2/process/detail/alphabet_parse.h"
 #include "mcrl2/process/detail/pcrl_equation_cache.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <algorithm>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
+#include <set>
+#include <sstream>
+#include <tuple>
+#include <vector>
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -58,9 +58,9 @@ std::string print(const multi_action_name& alpha)
     return "tau";
   }
   std::ostringstream out;
-  for (auto i = alpha.begin(); i != alpha.end(); ++i)
+  for (const auto & i : alpha)
   {
-    out << std::string(*i);
+    out << std::string(i);
   }
   std::string result = out.str();
   std::sort(result.begin(), result.end());
@@ -70,9 +70,9 @@ std::string print(const multi_action_name& alpha)
 std::string print(const multi_action_name_set& A, bool A_includes_subsets = false)
 {
   std::multiset<std::string> V;
-  for (auto i = A.begin(); i != A.end(); ++i)
+  for (const auto & i : A)
   {
-    V.insert(print(*i));
+    V.insert(print(i));
   }
   return core::detail::print_set(V, "", false, false) + (A_includes_subsets ? "@" : "");
 }

@@ -10,8 +10,8 @@
 /// \brief This file contains a function that checks whether a pbes expression is a bes in the sense
 //         that is does not contain quantifiers or boolean expressions not equal to true and false.
 
-#ifndef PBES_INCLUDE_MCRL2_PBES_CHECK_WELL_FORMED_BES_H
-#define PBES_INCLUDE_MCRL2_PBES_CHECK_WELL_FORMED_BES_H
+#ifndef MCRL2_PBES_DETAIL_CHECK_WELL_FORMED_BES_H
+#define MCRL2_PBES_DETAIL_CHECK_WELL_FORMED_BES_H
 
 #include "mcrl2/pbes/traverser.h"
 
@@ -64,4 +64,4 @@ void check_whether_argument_is_a_well_formed_bes(const pbes_expression& x)
 
 } // namespace mcrl2
 
-#endif // PBES_INCLUDE_MCRL2_PBES_CHECK_WELL_FORMED_BES_H
+#endif // MCRL2_PBES_DETAIL_CHECK_WELL_FORMED_BES_H

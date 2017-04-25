@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_PRINT_H
 #define MCRL2_PBES_DETAIL_PFNF_PRINT_H
 
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/print.h"
 
 namespace mcrl2 {
 

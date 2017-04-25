@@ -12,21 +12,21 @@
 #ifndef MCRL2_PBES_PARSE_H
 #define MCRL2_PBES_PARSE_H
 
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/parser_utility.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/parse_substitution.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/typecheck.h"
+#include "mcrl2/utilities/text_utility.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include "mcrl2/core/parse.h"
-#include "mcrl2/core/parser_utility.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/parse_substitution.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/typecheck.h"
-#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {

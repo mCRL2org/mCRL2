@@ -10,15 +10,15 @@
 /// \brief The pbes_greybox_interface class provides a wrapper for the
 /// parity_game_generator classes, for use in the PBES explorer.
 
-#ifndef MCRL2_PBES_DETAIL_PBES_GAME_GREYBOX_INTERFACE_H
-#define MCRL2_PBES_DETAIL_PBES_GAME_GREYBOX_INTERFACE_H
+#ifndef MCRL2_PBES_DETAIL_PBES_GREYBOX_INTERFACE_H
+#define MCRL2_PBES_DETAIL_PBES_GREYBOX_INTERFACE_H
 
+#include "mcrl2/pbes/parity_game_generator.h"
+#include "mcrl2/pbes/pbes.h"
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/parity_game_generator.h"
 
 namespace mcrl2 {
 
@@ -106,17 +106,17 @@ namespace detail {
       else if (is_and(psi))
       {
         std::set<pbes_expression> terms = split_and(psi);
-        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        for (const auto & term : terms)
         {
-          result.insert(*i);
+          result.insert(term);
         }
       }
       else if (is_or(psi))
       {
         std::set<pbes_expression> terms = split_or(psi);
-        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        for (const auto & term : terms)
         {
-          result.insert(*i);
+          result.insert(term);
         }
       }
       else if (is_true(psi))
@@ -177,9 +177,9 @@ namespace detail {
     {
       std::ostringstream out;
       out << "-- print_successors --" << std::endl;
-      for (std::set<pbes_expression>::const_iterator s = successors.begin(); s != successors.end(); ++s)
+      for (const auto & successor : successors)
       {
-        out << " * " << *s << std::endl;
+        out << " * " << successor << std::endl;
       }
       return out.str();
     }
@@ -218,17 +218,17 @@ namespace detail {
         else if (is_and(psi))
         {
           std::set<pbes_expression> terms = split_and(psi);
-          for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+          for (const auto & term : terms)
           {
-            result.insert(*i);
+            result.insert(term);
           }
         }
         else if (is_or(psi))
         {
           std::set<pbes_expression> terms = split_or(psi);
-          for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+          for (const auto & term : terms)
           {
-            result.insert(*i);
+            result.insert(term);
           }
         }
         else if (is_true(psi))

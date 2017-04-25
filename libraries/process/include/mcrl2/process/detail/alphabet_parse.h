@@ -86,9 +86,9 @@ std::vector<std::string> split_characters(const std::string& text)
 {
   std::string s = utilities::trim_copy(text);
   std::vector<std::string> result;
-  for (auto i = s.begin(); i != s.end(); ++i)
+  for (char & i : s)
   {
-    result.push_back(std::string(1, *i));
+    result.push_back(std::string(1, i));
   }
   return result;
 }

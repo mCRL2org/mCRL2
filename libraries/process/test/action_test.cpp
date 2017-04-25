@@ -9,14 +9,14 @@
 /// \file action_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/process/process_expression.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 

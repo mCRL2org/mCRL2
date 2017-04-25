@@ -12,13 +12,13 @@
 #ifndef MCRL2_PBES_COMPLPS2PBES_H
 #define MCRL2_PBES_COMPLPS2PBES_H
 
-#include <string>
 #include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/process/is_communicating_lpe.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/process_specification.h"
-#include "mcrl2/process/is_communicating_lpe.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/exception.h"
+#include <string>
 
 namespace mcrl2 {
 

@@ -21,22 +21,22 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include "mcrl2/data/parse.h"
+#include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/set.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/text_utility.h"
 
 #ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 #include "mcrl2/data/detail/print_parse_check.h"

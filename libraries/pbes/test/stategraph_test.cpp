@@ -11,17 +11,17 @@
 
 // #define MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
 
-#include <iostream>
-#include <utility>
-#include <set>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/detail/guard_traverser.h"
+#include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
+#include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/significant_variables.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/stategraph_local_reset_variables.h"
-#include "mcrl2/pbes/detail/stategraph_global_reset_variables.h"
 #include "mcrl2/utilities/detail/split.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <utility>
 
 using namespace mcrl2;
 using namespace pbes_system;

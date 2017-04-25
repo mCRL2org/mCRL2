@@ -10,16 +10,16 @@
 /// \brief
 
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/detail/has_propositional_variables.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/is_well_typed.h"
+#include "mcrl2/pbes/detail/occurring_variable_visitor.h"
+#include "mcrl2/pbes/index_traits.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/translate_user_notation.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/detail/is_well_typed.h"
-#include "mcrl2/pbes/detail/occurring_variable_visitor.h"
-#include "mcrl2/pbes/index_traits.h"
-#include "mcrl2/pbes/detail/has_propositional_variables.h"
 
 namespace mcrl2
 {
@@ -73,7 +73,7 @@ bool is_bes(const pbes& x)
   return pbes_system::is_bes(x);
 }
 
-} // algorithms
+} // namespace algorithms
 
 bool is_well_typed(const pbes_equation& eqn)
 {

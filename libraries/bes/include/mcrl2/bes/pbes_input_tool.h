@@ -9,16 +9,16 @@
 /// \file mcrl2/bes/pbes_input_tool.h
 /// \brief Base class for tools that produce a (P)BES as output.
 
-#ifndef MCRL2_UTILITIES_PBES_INPUT_TOOL_H
-#define MCRL2_UTILITIES_PBES_INPUT_TOOL_H
+#ifndef MCRL2_BES_PBES_INPUT_TOOL_H
+#define MCRL2_BES_PBES_INPUT_TOOL_H
 
-#include <set>
-#include <string>
-#include <iostream>
-#include <stdexcept>
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/bes/io.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/command_line_interface.h"
+#include <iostream>
+#include <set>
+#include <stdexcept>
+#include <string>
 
 namespace mcrl2
 {
@@ -76,9 +76,9 @@ class pbes_input_tool: public Tool
       Tool::add_options(desc);
       std::set<const utilities::file_format*> types = available_input_formats();
       auto option_argument = utilities::make_enum_argument<std::string>("FORMAT");
-      for (auto it = types.begin(); it != types.end(); ++it)
+      for (auto type : types)
       {
-        option_argument.add_value_desc((*it)->shortname(), (*it)->description());
+        option_argument.add_value_desc(type->shortname(), type->description());
       }
       desc.add_option("in", option_argument, "use input format FORMAT:", 'i');
     }
@@ -93,11 +93,11 @@ class pbes_input_tool: public Tool
       {
         std::set<const utilities::file_format*> types = available_input_formats();
         std::string arg = parser.option_argument_as<std::string>("in");
-        for (auto it = types.begin(); it != types.end(); ++it)
+        for (auto type : types)
         {
-          if ((*it)->shortname() == arg)
+          if (type->shortname() == arg)
           {
-            m_pbes_input_format = *it;
+            m_pbes_input_format = type;
           }
         }
         if (m_pbes_input_format == utilities::file_format::unknown())
@@ -200,4 +200,4 @@ class bes_input_tool: public pbes_input_tool<Tool>
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_PBES_INPUT_TOOL_H
+#endif // MCRL2_BES_PBES_INPUT_TOOL_H

@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_UTILITY_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_UTILITY_H
 
-#include <sstream>
 #include "mcrl2/pbes/pbes_equation.h"
+#include <sstream>
 
 namespace mcrl2 {
 

@@ -14,18 +14,10 @@
 
 #define MCRL2_GUARDS 1
 
-#include <algorithm>
-#include <cassert>
-#include <functional>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <vector>
-#include <boost/iterator/iterator_facade.hpp>
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/join.h"
@@ -34,11 +26,19 @@
 #include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
-#include "mcrl2/data/detail/io.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/utilities/logger.h"
+#include <algorithm>
+#include <boost/iterator/iterator_facade.hpp>
+#include <cassert>
+#include <functional>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 // For backwards compatibility
 //using namespace mcrl2::log;
@@ -460,18 +460,16 @@ class pins
       // iterate over the list of summands
       {
         size_t i = 0;
-        for (auto p = proc.action_summands().begin(); p != proc.action_summands().end(); ++p)
+        for (const auto & summand : proc.action_summands())
         {
-          const auto& summand = *p;
           std::set<data::variable> used_read_variables;
           std::set<data::variable> used_write_variables;
 
           data::find_free_variables(summand.condition(), std::inserter(used_read_variables, used_read_variables.end()));
           lps::find_free_variables(summand.multi_action(), std::inserter(used_read_variables, used_read_variables.end()));
 
-          for (auto q = summand.assignments().begin(); q != summand.assignments().end(); ++q)
+          for (const auto & assignment : summand.assignments())
           {
-            const auto& assignment = *q;
             if (assignment.lhs() != assignment.rhs())
             {
               data::find_all_variables(assignment.lhs(), std::inserter(used_write_variables, used_write_variables.end()));
@@ -497,9 +495,8 @@ class pins
                                               used_write_parameters.begin()));
 
           size_t j = 0;
-          for (auto q = m_parameters_list.begin(); q != m_parameters_list.end(); ++q)
+          for (auto & param : m_parameters_list)
           {
-            const auto& param = *q;
             if (used_read_parameters.find(param) != used_read_parameters.end())
             {
               m_read_group[i].push_back(j);
@@ -519,17 +516,15 @@ class pins
       // iterate over the list of reduced summands
       {
         size_t i = 0;
-        for (auto p = process_reduced().action_summands().begin(); p != process_reduced().action_summands().end(); ++p)
+        for (const auto & reduced_summand : process_reduced().action_summands())
         {
-          const auto& reduced_summand = *p;
           std::set<data::variable> used_update_variables;
 
           data::find_free_variables(reduced_summand.condition(), std::inserter(used_update_variables, used_update_variables.end()));
           lps::find_free_variables(reduced_summand.multi_action(), std::inserter(used_update_variables, used_update_variables.end()));
 
-          for (auto q = reduced_summand.assignments().begin(); q != reduced_summand.assignments().end(); ++q)
+          for (const auto & assignment : reduced_summand.assignments())
           {
-            const auto& assignment = *q;
             if (assignment.lhs() != assignment.rhs())
             {
               data::find_all_variables(assignment.rhs(), std::inserter(used_update_variables, used_update_variables.end()));
@@ -547,9 +542,8 @@ class pins
                                               used_update_parameters.begin()));
 
           size_t j = 0;
-          for (auto q = m_parameters_list.begin(); q != m_parameters_list.end(); ++q)
+          for (auto & param : m_parameters_list)
           {
-            const auto& param = *q;
             if (used_update_parameters.find(param) != used_update_parameters.end())
             {
               m_update_group[i].push_back(j);
@@ -588,10 +582,8 @@ class pins
     lps::specification reduce_specification(const lps::specification& spec) {
       // the list of summands
       std::vector<lps::action_summand> reduced_summands;
-      for (auto p = spec.process().action_summands().begin(); p != spec.process().action_summands().end(); ++p)
+      for (const auto & summand : spec.process().action_summands())
       {
-        const auto& summand = *p;
-
         // contains info about which guards this transition group has.
         std::vector<size_t> guard_info;
 
@@ -603,10 +595,8 @@ class pins
         std::set<data::data_expression> conjuncts = data::split_and(summand.condition());
         std::set<data::variable> summation_variables(summand.summation_variables().begin(), summand.summation_variables().end());
 
-        for (auto q = conjuncts.begin(); q != conjuncts.end(); ++q)
+        for (const auto & conjunct : conjuncts)
         {
-          const auto& conjunct = *q;
-
           // check if the conjunct is new
           size_t at = m_guards.index(conjunct);
           bool is_new = (at == atermpp::indexed_set<atermpp::aterm>::npos);
@@ -653,10 +643,8 @@ class pins
               {
                 // compute indexes of parameters used by the guard
                 size_t p = 0;
-                for (auto r = m_parameters_list.begin(); r != m_parameters_list.end(); ++r)
+                for (auto & param : m_parameters_list)
                 {
-                  const auto& param = *r;
-
                   if (conjunct_variables.find(param) != conjunct_variables.end())
                   {
                     guard_parameters.push_back(p);
@@ -705,9 +693,9 @@ class pins
 
       // store the process parameter names in a vector, to have random access to them
       data::variable_list params = m_specification.process().process_parameters();
-      for (data::variable_list::iterator i = params.begin(); i != params.end(); ++i)
+      for (const auto & param : params)
       {
-        m_process_parameter_names.push_back(i->name());
+        m_process_parameter_names.push_back(param.name());
       }
 
       // Each state parameter type gets it's own pins_data_type. State parameters of the same
@@ -734,9 +722,9 @@ class pins
       m_data_types.push_back(dt);
       m_unique_data_types.push_back(dt);
 
-      for (std::size_t i = 0; i < m_data_types.size(); i++)
+      for (auto m_data_type : m_data_types)
       {
-        std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_types[i]);
+        std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_type);
         assert(j != m_unique_data_types.end());
         m_unique_data_type_index.push_back(j - m_unique_data_types.begin());
       }
@@ -867,9 +855,9 @@ class pins
       std::set<std::string> result;
       auto const l = process().action_summands()[i].multi_action().actions(); // Using a reference in whatever this type
                                                                               // is, leads to a failing lps_ltsmin_test.
-      for (auto i = l.begin(); i != l.end(); ++i)
+      for (const auto & i : l)
       {
-        result.insert(std::string(i->label().name()));
+        result.insert(std::string(i.label().name()));
       }
       return result;
     }

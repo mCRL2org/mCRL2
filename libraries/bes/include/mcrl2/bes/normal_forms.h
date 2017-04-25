@@ -12,12 +12,12 @@
 #ifndef MCRL2_BES_NORMAL_FORMS_H
 #define MCRL2_BES_NORMAL_FORMS_H
 
-#include <iterator>
-#include <map>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/traverser.h"
-#include "mcrl2/utilities/number_postfix_generator.h"
 #include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/number_postfix_generator.h"
+#include <iterator>
+#include <map>
 
 namespace mcrl2
 {

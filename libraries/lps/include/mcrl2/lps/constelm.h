@@ -12,21 +12,21 @@
 #ifndef MCRL2_LPS_CONSTELM_H
 #define MCRL2_LPS_CONSTELM_H
 
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/remove.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/logger.h"
 #include <algorithm>
 #include <list>
 #include <map>
 #include <set>
 #include <vector>
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/remove.h"
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {

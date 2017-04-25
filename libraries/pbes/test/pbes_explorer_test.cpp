@@ -9,16 +9,16 @@
 /// \file pbes_explorer_test.cpp
 /// \brief Test for the PBES_Explorer interface.
 
-#include <iostream>
-#include <cstdio>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
+#include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_explorer.h"
-#include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/test_utilities.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <cstdio>
+#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

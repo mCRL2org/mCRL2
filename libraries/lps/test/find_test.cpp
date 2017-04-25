@@ -9,14 +9,14 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
+#include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/lps/find.h"
+#include "mcrl2/lps/parse.h"
 #include <algorithm>
+#include <boost/test/minimal.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/lps/find.h"
-#include "mcrl2/lps/parse.h"
-#include "mcrl2/data/detail/print_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

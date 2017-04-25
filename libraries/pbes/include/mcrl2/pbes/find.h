@@ -12,16 +12,16 @@
 #ifndef MCRL2_PBES_FIND_H
 #define MCRL2_PBES_FIND_H
 
-#include <set>
-#include <iterator>
-#include <functional>
-#include "mcrl2/data/variable.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/traverser.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/add_binding.h"
+#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/propositional_variable.h"
+#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/exception.h"
+#include <functional>
+#include <iterator>
+#include <set>
 
 namespace mcrl2
 {

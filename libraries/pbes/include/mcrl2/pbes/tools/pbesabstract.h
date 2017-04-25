@@ -14,8 +14,8 @@
 
 #include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
+#include "mcrl2/pbes/normalize.h"
 
 namespace mcrl2 {
 

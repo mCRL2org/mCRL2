@@ -9,18 +9,18 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/pbes/complement.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/parelm.h"
+#include "mcrl2/pbes/pbes.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <iterator>
 #include <utility>
-#include <boost/test/minimal.hpp>
-#include <boost/algorithm/string.hpp>
-#include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/pbes/parelm.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/complement.h"
 
 using namespace std;
 using namespace mcrl2;

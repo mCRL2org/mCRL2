@@ -12,24 +12,24 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_GRAPH_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_GRAPH_H
 
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/detail/stategraph_influence.h"
+#include "mcrl2/pbes/detail/stategraph_pbes.h"
+#include "mcrl2/pbes/detail/stategraph_utility.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/utilities/logger.h"
 #include <algorithm>
 #include <iomanip>
 #include <map>
 #include <set>
 #include <sstream>
 #include <vector>
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/detail/print_utility.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/detail/stategraph_pbes.h"
-#include "mcrl2/pbes/detail/stategraph_influence.h"
-#include "mcrl2/pbes/detail/stategraph_utility.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 

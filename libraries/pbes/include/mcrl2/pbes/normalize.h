@@ -12,11 +12,11 @@
 #ifndef MCRL2_PBES_NORMALIZE_H
 #define MCRL2_PBES_NORMALIZE_H
 
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/traverser.h"
-#include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/pbes_equation.h"
+#include "mcrl2/pbes/traverser.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

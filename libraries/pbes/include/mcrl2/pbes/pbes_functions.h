@@ -9,11 +9,11 @@
 /// \file pbes/include/mcrl2/pbes/pbes_functions.h
 /// \brief add your file description here.
 
-#ifndef PBES_INCLUDE_MCRL2_PBES_FUNCTIONS_H
-#define PBES_INCLUDE_MCRL2_PBES_FUNCTIONS_H
+#ifndef MCRL2_PBES_PBES_FUNCTIONS_H
+#define MCRL2_PBES_PBES_FUNCTIONS_H
 
-#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {
 
@@ -185,4 +185,4 @@ std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool s
 
 } // namespace mcrl2
 
-#endif // PBES_INCLUDE_MCRL2_PBES_FUNCTIONS_H
+#endif // MCRL2_PBES_PBES_FUNCTIONS_H

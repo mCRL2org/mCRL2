@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_TOOLS_PBESINFO_H
 #define MCRL2_PBES_TOOLS_PBESINFO_H
 
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/io.h"
 
 namespace mcrl2 {
 

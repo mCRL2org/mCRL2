@@ -11,9 +11,9 @@
 /// library, but unfortunately the data library contains no parser for
 /// data specifications.
 
-#include <boost/test/minimal.hpp>
-#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

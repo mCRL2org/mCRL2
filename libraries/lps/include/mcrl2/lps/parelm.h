@@ -12,19 +12,19 @@
 #ifndef MCRL2_LPS_PARELM_H
 #define MCRL2_LPS_PARELM_H
 
+#include "mcrl2/data/print.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/detail/iota.h"
+#include "mcrl2/utilities/reachable_nodes.h"
 #include <algorithm>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/integer.hpp>
 #include <map>
 #include <set>
 #include <vector>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/integer.hpp>
-#include "mcrl2/utilities/reachable_nodes.h"
-#include "mcrl2/utilities/detail/iota.h"
-#include "mcrl2/data/print.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
 {

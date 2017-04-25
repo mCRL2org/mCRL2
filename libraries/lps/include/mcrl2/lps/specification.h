@@ -12,22 +12,22 @@
 #ifndef MCRL2_LPS_SPECIFICATION_H
 #define MCRL2_LPS_SPECIFICATION_H
 
-#include <iostream>
-#include <utility>
-#include <cassert>
-#include <iterator>
-#include <algorithm>
-#include <stdexcept>
-#include <cerrno>
-#include <cstring>
-#include <set>
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/load_aterm.h"
-#include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/utilities/exception.h"
+#include <algorithm>
+#include <cassert>
+#include <cerrno>
+#include <cstring>
+#include <iostream>
+#include <iterator>
+#include <set>
+#include <stdexcept>
+#include <utility>
 
 namespace mcrl2
 {

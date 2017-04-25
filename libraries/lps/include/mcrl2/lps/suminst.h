@@ -12,16 +12,16 @@
 #ifndef MCRL2_LPS_SUMINST_H
 #define MCRL2_LPS_SUMINST_H
 
-#include <deque>
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/utilities/logger.h"
+#include <deque>
 
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/rewrite.h"
 
 namespace mcrl2
 {

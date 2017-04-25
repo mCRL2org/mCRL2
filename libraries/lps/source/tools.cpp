@@ -11,21 +11,21 @@
 #include <fstream>
 
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/lps/tools.h"
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/invelm_algorithm.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/parelm.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/suminst.h"
-#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/lps/tools.h"
 #include "mcrl2/lps/untime.h"
-#include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2

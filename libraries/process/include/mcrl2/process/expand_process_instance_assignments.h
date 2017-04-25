@@ -70,7 +70,7 @@ struct expand_process_instance_assignments_builder: public process_expression_bu
   }
 };
 
-} // detail
+} // namespace detail
 
 /// \brief Replaces embedded process instances by the right hand sides of the corresponding equations
 inline

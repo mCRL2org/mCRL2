@@ -9,7 +9,7 @@
 /// \file specification_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/is_stochastic.h"
 #include "mcrl2/lps/linearise.h"
@@ -17,7 +17,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/lps/detail/test_input.h"
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

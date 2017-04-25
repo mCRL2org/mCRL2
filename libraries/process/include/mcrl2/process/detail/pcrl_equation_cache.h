@@ -12,10 +12,10 @@
 #ifndef MCRL2_PROCESS_DETAIL_PCRL_EQUATION_CACHE_H
 #define MCRL2_PROCESS_DETAIL_PCRL_EQUATION_CACHE_H
 
-#include <map>
 #include "mcrl2/process/alphabet_efficient.h"
-#include "mcrl2/process/utility.h"
 #include "mcrl2/process/process_variable_strongly_connected_components.h" // find_process_identifiers
+#include "mcrl2/process/utility.h"
+#include <map>
 
 namespace mcrl2 {
 

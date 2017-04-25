@@ -11,24 +11,24 @@
 
 // Test program for timed lps2pbes.
 
-#include <iostream>
-#include <iterator>
-#include <boost/test/included/unit_test_framework.hpp>
-#include <boost/algorithm/string.hpp>
-#include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/detail/test_utility.h"
-#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/test_utility.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "test_specifications.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <iterator>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -755,9 +755,9 @@ BOOST_AUTO_TEST_CASE(test_elementary_formulas)
     ;
 
   std::vector<std::string> lines = utilities::regex_split(formulas, "\\n");
-  for (auto i = lines.begin(); i != lines.end(); ++i)
+  for (auto & line : lines)
   {
-    std::vector<std::string> words = utilities::split(*i, "#");
+    std::vector<std::string> words = utilities::split(line, "#");
     if (words.size() != 3)
     {
     	continue;

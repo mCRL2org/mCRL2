@@ -13,8 +13,8 @@
 #define MCRL2_LPS_NORMALIZE_SORTS_H
 
 #include "mcrl2/data/normalize_sorts.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/builder.h"
+#include "mcrl2/lps/specification.h"
 
 namespace mcrl2
 {

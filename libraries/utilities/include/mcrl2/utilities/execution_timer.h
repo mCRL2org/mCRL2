@@ -12,12 +12,12 @@
 #ifndef MCRL2_UTILITIES_EXECUTION_TIMER_H
 #define MCRL2_UTILITIES_EXECUTION_TIMER_H
 
+#include "mcrl2/utilities/exception.h"
 #include <ctime>
 #include <fstream>
 #include <map>
 #include <sstream>
 #include <string>
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -161,4 +161,4 @@ class execution_timer
 
 } // namespace mcrl2
 
-#endif //MCRL2_UTILITIES_EXECUTION_TIMER_H
+#endif // MCRL2_UTILITIES_EXECUTION_TIMER_H

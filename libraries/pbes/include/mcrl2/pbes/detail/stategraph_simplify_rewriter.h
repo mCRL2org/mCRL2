@@ -13,8 +13,8 @@
 #define MCRL2_PBES_DETAIL_STATEGRAPH_SIMPLIFY_REWRITER_H
 
 #include "mcrl2/data/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/detail/stategraph_split.h"
+#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 
 namespace mcrl2 {
 

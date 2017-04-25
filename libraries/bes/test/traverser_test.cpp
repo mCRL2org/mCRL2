@@ -9,13 +9,13 @@
 /// \file traverser_test.cpp
 /// \brief Test for traversers.
 
+#include "mcrl2/bes/parse.h"
+#include "mcrl2/bes/traverser.h"
 #include <algorithm>
+#include <boost/test/minimal.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/bes/parse.h"
-#include "mcrl2/bes/traverser.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

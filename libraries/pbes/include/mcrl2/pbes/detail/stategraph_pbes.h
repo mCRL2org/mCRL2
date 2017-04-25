@@ -12,18 +12,18 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_PBES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_PBES_H
 
-#include <cassert>
-#include <iostream>
-#include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/detail/guard_traverser.h"
 #include "mcrl2/pbes/detail/stategraph_simplify_rewriter.h"
 #include "mcrl2/pbes/detail/stategraph_split.h"
 #include "mcrl2/pbes/detail/stategraph_utility.h"
-#include "mcrl2/utilities/logger.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/logger.h"
+#include <cassert>
+#include <iostream>
+#include <sstream>
 
 namespace mcrl2 {
 

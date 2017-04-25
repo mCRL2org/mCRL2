@@ -9,9 +9,9 @@
 /// \file parse_test.cpp
 /// \brief Regression test for parsing process expressions
 
-#include <iostream>
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/process/parse.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

@@ -10,21 +10,21 @@
 /// \brief Add your file description here.
 
 #include <algorithm>
-#include <iterator>
 #include <iostream>
+#include <iterator>
 #include <memory>
-#include <string>
 #include <set>
-#include <vector>
 #include <stack>
+#include <string>
+#include <vector>
 
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/state.h"
-#include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/state.h"
 
 using namespace mcrl2;
 
@@ -88,9 +88,9 @@ class group_information
         std::set_intersection(used_variables.begin(), used_variables.end(), parameter_set.begin(), parameter_set.end(), std::inserter(used_parameters, used_parameters.begin()));
 
         std::size_t j_index = 0;
-        for (data::variable_list::const_iterator j = parameter_list.begin(); j != parameter_list.end(); ++j)
+        for (const auto & j : parameter_list)
         {
-          if (used_parameters.find(*j) != used_parameters.end())
+          if (used_parameters.find(j) != used_parameters.end())
           {
             m_group_indices[summand_index].push_back(j_index);
           }

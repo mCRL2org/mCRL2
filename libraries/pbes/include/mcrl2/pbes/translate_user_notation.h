@@ -13,8 +13,8 @@
 #define MCRL2_PBES_TRANSLATE_USER_NOTATION_H
 
 #include "mcrl2/data/translate_user_notation.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2
 {

@@ -9,11 +9,11 @@
 /// \file suminst_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
 #include <boost/test/minimal.hpp>
-#include <mcrl2/lps/suminst.h>
+#include <iostream>
 #include <mcrl2/lps/linearise.h>
+#include <mcrl2/lps/suminst.h>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -85,9 +85,9 @@ void test_case_3()
   suminst_algorithm<rewriter, specification>(s1, r).run();
   bool sum_occurs = false;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    sum_occurs = sum_occurs || !i->summation_variables().empty();
+    sum_occurs = sum_occurs || !i.summation_variables().empty();
   }
   BOOST_CHECK(sum_occurs);
 }
@@ -113,15 +113,15 @@ void test_case_4()
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    if (i->is_tau())
+    if (i.is_tau())
     {
-      tau_sum_occurs = tau_sum_occurs || !i->summation_variables().empty();
+      tau_sum_occurs = tau_sum_occurs || !i.summation_variables().empty();
     }
     else
     {
-      sum_occurs = sum_occurs || !i->summation_variables().empty();
+      sum_occurs = sum_occurs || !i.summation_variables().empty();
     }
   }
   BOOST_CHECK(!tau_sum_occurs);
@@ -151,15 +151,15 @@ void test_case_5()
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    if (i->is_tau())
+    if (i.is_tau())
     {
-      tau_sum_occurs = tau_sum_occurs || !i->summation_variables().empty();
+      tau_sum_occurs = tau_sum_occurs || !i.summation_variables().empty();
     }
     else
     {
-      sum_occurs = sum_occurs || !i->summation_variables().empty();
+      sum_occurs = sum_occurs || !i.summation_variables().empty();
     }
   }
   BOOST_CHECK(!tau_sum_occurs);
@@ -199,9 +199,9 @@ void test_case_7()
   suminst_algorithm<rewriter, specification>(s1, r, std::set<data::sort_expression>(s1.data().sorts().begin(),s1.data().sorts().end())).run();
   int sum_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    sum_count += i->summation_variables().size();
+    sum_count += i.summation_variables().size();
   }
   BOOST_CHECK(sum_count == 1);
 }

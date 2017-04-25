@@ -16,17 +16,17 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include <fstream>
-#include <string>
-#include <iomanip>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/detail/pbes2bool.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
+#include <fstream>
+#include <iomanip>
+#include <string>
 
 #ifdef MCRL2_PGSOLVER_ENABLED
 #include <cstdlib>

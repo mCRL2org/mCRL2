@@ -13,11 +13,11 @@
 #define MCRL2_UTILITIES_TEST_UTILITIES_H
 
 #include <algorithm>
-#include <string>
-#include <sstream>
-#include <vector>
 #include <cctype>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace mcrl2
 {
@@ -76,8 +76,8 @@ std::string temporary_filename(std::string const& prefix = "")
   return result;
 }
 
-}
+} // namespace utilities
 
-}
+} // namespace mcrl2
 
-#endif //MCRL2_UTILITIES_TEST_UTILITIES_H
+#endif // MCRL2_UTILITIES_TEST_UTILITIES_H

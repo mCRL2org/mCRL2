@@ -9,19 +9,19 @@
 /// \file mcrl2/modal_formula/state_formula.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_MODAL_STATE_FORMULA_H
-#define MCRL2_MODAL_STATE_FORMULA_H
+#ifndef MCRL2_MODAL_FORMULA_STATE_FORMULA_H
+#define MCRL2_MODAL_FORMULA_STATE_FORMULA_H
 
 #include <iostream> // for debugging
 
-#include <string>
-#include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/modal_formula/regular_formula.h"
+#include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/modal_formula/action_formula.h"
+#include "mcrl2/modal_formula/regular_formula.h"
+#include <cassert>
+#include <string>
 
 namespace mcrl2
 {
@@ -1191,7 +1191,7 @@ inline const state_formula& binary_right(const imp& x)   { return x.right(); }
 
 namespace algorithms {
     bool is_timed(const state_formula& x);
-}
+} // namespace algorithms
 
 /// \brief Returns true if the formula is timed.
 /// \return True if the formula is timed.
@@ -1214,4 +1214,4 @@ bool find_nil(const state_formulas::state_formula& x);
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_STATE_FORMULA_H
+#endif // MCRL2_MODAL_FORMULA_STATE_FORMULA_H

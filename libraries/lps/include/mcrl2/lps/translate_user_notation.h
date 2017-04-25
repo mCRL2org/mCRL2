@@ -13,8 +13,8 @@
 #define MCRL2_LPS_TRANSLATE_USER_NOTATION_H
 
 #include "mcrl2/data/translate_user_notation.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/builder.h"
+#include "mcrl2/lps/specification.h"
 
 namespace mcrl2
 {

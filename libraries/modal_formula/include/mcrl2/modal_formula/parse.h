@@ -12,18 +12,18 @@
 #ifndef MCRL2_MODAL_FORMULA_PARSE_H
 #define MCRL2_MODAL_FORMULA_PARSE_H
 
-#include <iostream>
 #include "mcrl2/core/parser_utility.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/modal_formula/typecheck.h"
-#include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/state_formula_specification.h"
-#include "mcrl2/modal_formula/translate_user_notation.h"
-#include "mcrl2/modal_formula/translate_regular_formulas.h"
 #include "mcrl2/modal_formula/has_name_clashes.h"
 #include "mcrl2/modal_formula/resolve_name_clashes.h"
+#include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/state_formula_specification.h"
+#include "mcrl2/modal_formula/translate_regular_formulas.h"
+#include "mcrl2/modal_formula/translate_user_notation.h"
+#include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/process/merge_action_specifications.h"
+#include <iostream>
 
 namespace mcrl2
 {

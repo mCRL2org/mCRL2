@@ -9,10 +9,10 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
 
 using namespace mcrl2;
 

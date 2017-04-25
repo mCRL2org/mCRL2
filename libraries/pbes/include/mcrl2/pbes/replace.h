@@ -12,10 +12,10 @@
 #ifndef MCRL2_PBES_REPLACE_H
 #define MCRL2_PBES_REPLACE_H
 
+#include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/add_binding.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/data/replace.h"
 
 namespace mcrl2
 {

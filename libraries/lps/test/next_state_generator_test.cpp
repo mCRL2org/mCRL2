@@ -9,12 +9,12 @@
 /// \file next_state_generator_test.cpp
 /// \brief Test for next_state_generator class.
 
-#include <queue>
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/state.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <queue>
 
 #include "test_specifications.h"
 

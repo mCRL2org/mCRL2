@@ -12,11 +12,11 @@
 #ifndef MCRL2_BES_IO_H
 #define MCRL2_BES_IO_H
 
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/pbesinst_conversion.h"
 #include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/pg_parse.h"
+#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/parse.h"
+#include "mcrl2/bes/pbesinst_conversion.h"
+#include "mcrl2/bes/pg_parse.h"
 
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/io.h"

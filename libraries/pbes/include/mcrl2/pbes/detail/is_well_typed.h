@@ -12,14 +12,14 @@
 #ifndef MCRL2_PBES_DETAIL_IS_WELL_TYPED_H
 #define MCRL2_PBES_DETAIL_IS_WELL_TYPED_H
 
-#include <boost/iterator/transform_iterator.hpp>
-#include "mcrl2/data/detail/equal_sorts.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/detail/equal_sorts.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include <boost/iterator/transform_iterator.hpp>
 
 namespace mcrl2 {
 

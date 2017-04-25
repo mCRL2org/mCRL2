@@ -12,8 +12,8 @@
 #ifndef MCRL2_PROCESS_MERGE_ACTION_SPECIFICATIONS_H
 #define MCRL2_PROCESS_MERGE_ACTION_SPECIFICATIONS_H
 
-#include <set>
 #include "mcrl2/process/action_label.h"
+#include <set>
 
 namespace mcrl2 {
 

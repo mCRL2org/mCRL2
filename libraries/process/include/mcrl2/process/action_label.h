@@ -12,13 +12,13 @@
 #ifndef MCRL2_PROCESS_ACTION_LABEL_H
 #define MCRL2_PROCESS_ACTION_LABEL_H
 
-#include <cassert>
-#include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_specification.h"
+#include <cassert>
+#include <set>
 
 namespace mcrl2
 {

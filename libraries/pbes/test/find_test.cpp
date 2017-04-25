@@ -9,12 +9,12 @@
 /// \file find_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

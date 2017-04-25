@@ -9,12 +9,12 @@
 /// \file bqnf_quantifier_rewriter_test.cpp
 /// \brief Test for the bqnf_quantifier rewriter.
 
-#include <iostream>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

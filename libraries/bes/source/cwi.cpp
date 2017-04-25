@@ -11,8 +11,8 @@
 
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2
 {
@@ -120,9 +120,9 @@ struct variable_traits<boolean_equation>
   {
     std::set<boolean_variable> occ = find_boolean_variables(equations);
     std::set<core::identifier_string> occ_ids;
-    for(auto it = occ.begin(); it != occ.end(); ++it)
+    for(const auto & it : occ)
     {
-      occ_ids.insert(it->name());
+      occ_ids.insert(it.name());
     }
     return occ_ids;
   }
@@ -142,9 +142,9 @@ struct variable_traits<pbes_system::pbes_equation>
       pbes_system::detail::make_find_propositional_variables_traverser<pbes_system::pbes_expression_traverser>(oit).apply(it->formula());
       occ_ids.insert(it->variable().name());
     }
-    for(auto it = occ.begin(); it != occ.end(); ++it)
+    for(const auto & it : occ)
     {
-      occ_ids.insert(it->name());
+      occ_ids.insert(it.name());
     }
     return occ_ids;
   }
