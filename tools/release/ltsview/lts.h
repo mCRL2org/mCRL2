@@ -97,7 +97,7 @@ class LTS
     size_t getStateParameterValue(State* state,size_t param);
     std::string getStateParameterValueStr(State* state,
                                           size_t param);
-    std::set<std::string> getClusterParameterValues(Cluster* cluster, size_t param);
+    std::set<std::string> getClusterParameterValues(Cluster* c, size_t param);
 
     void positionClusters(bool fsmstyle);
     void positionStates(bool multiPass);

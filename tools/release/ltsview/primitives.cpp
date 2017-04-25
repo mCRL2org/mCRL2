@@ -11,11 +11,11 @@
 
 #include "primitives.h"
 
-#include "mathutils.h"
-#include <cassert>
 #include <cmath>
-#include <cstdlib>
-#include <cstring>
+#include <stdlib.h>
+#include <string.h>
+#include <cassert>
+#include "mathutils.h"
 
 using namespace MathUtils;
 
@@ -36,12 +36,12 @@ void P_Sphere::draw()
   glCallList(disp_list);
 }
 
-void P_Sphere::reshape(int N,const float* coss,const float* sins)
+void P_Sphere::reshape(int N,float* coss,float* sins)
 {
   assert(N>0);
   int i,j,k,l;
-  auto* vertices = static_cast<GLfloat*>(malloc(3*((N-1)*N+2)*sizeof(GLfloat)));
-  auto* texCoords = static_cast<GLfloat*>(malloc(((N-1)*N+2)*sizeof(GLfloat)));
+  GLfloat* vertices = (GLfloat*)malloc(3*((N-1)*N+2)*sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc(((N-1)*N+2)*sizeof(GLfloat));
 
   vertices[0] = 0;
   vertices[1] = 0;
@@ -70,7 +70,7 @@ void P_Sphere::reshape(int N,const float* coss,const float* sins)
 
   int M = N+2;
 
-  auto* is_bot = static_cast<GLuint*>(malloc(M*sizeof(GLuint)));
+  GLuint* is_bot = (GLuint*)malloc(M*sizeof(GLuint));
 
 
   is_bot[0] = 0;
@@ -83,7 +83,7 @@ void P_Sphere::reshape(int N,const float* coss,const float* sins)
 
   }
 
-  auto* is_mid = static_cast<GLuint*>(malloc((N-2)*(2*N+2)*sizeof(GLuint)));
+  GLuint* is_mid = (GLuint*)malloc((N-2)*(2*N+2)*sizeof(GLuint));
   i = 0;
   for (j=N+1; j<=(N-2)*N+1; j+=N)
   {
@@ -98,7 +98,7 @@ void P_Sphere::reshape(int N,const float* coss,const float* sins)
     i += 2;
   }
 
-  auto* is_top = static_cast<GLuint*>(malloc(M*sizeof(GLuint)));
+  GLuint* is_top = (GLuint*)malloc(M*sizeof(GLuint));
   j = (N-2)*N;
   is_top[0] = j + N + 1;
   i = 1;
@@ -140,8 +140,8 @@ void P_Sphere::reshape(int N,const float* coss,const float* sins)
 
 P_SimpleSphere::P_SimpleSphere()
 {
-  auto S = GLfloat(sin(PI/4));
-  auto C = GLfloat(cos(PI/4));
+  GLfloat S = GLfloat(sin(PI/4));
+  GLfloat C = GLfloat(cos(PI/4));
   GLfloat vertices[] = { 0,  0, -1,
                          S,  0, -C,
                          0, -S, -C,
@@ -206,7 +206,7 @@ void P_SimpleSphere::draw()
   glCallList(disp_list);
 }
 
-void P_SimpleSphere::reshape(int /*N*/,const float* /* coss */,const float* /* sins */)
+void P_SimpleSphere::reshape(int /*N*/,float* /* coss */,float* /* sins */)
 {}
 
 /* -------- P_Hemisphere ---------------------------------------------------- */
@@ -226,13 +226,13 @@ void P_Hemisphere::draw()
   glCallList(disp_list);
 }
 
-void P_Hemisphere::reshape(int N,const float* coss,const float* sins)
+void P_Hemisphere::reshape(int N,float* coss,float* sins)
 {
   assert(N>0);
   int Ndiv2 = N / 2;
   int i,j,k,l;
-  auto* vertices = static_cast<GLfloat*>(malloc(3 * (N * Ndiv2 + 1) * sizeof(GLfloat)));
-  auto* texCoords = static_cast<GLfloat*>(malloc((N*Ndiv2 + 2) * sizeof(GLfloat)));
+  GLfloat* vertices = (GLfloat*)malloc(3 * (N * Ndiv2 + 1) * sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc((N*Ndiv2 + 2) * sizeof(GLfloat));
 
   k = 0;
   l = 0;
@@ -253,7 +253,7 @@ void P_Hemisphere::reshape(int N,const float* coss,const float* sins)
   vertices[k+2] = 1;
   texCoords[l] = 0;
 
-  auto* is_mid = static_cast<GLuint*>(malloc((N*N+N)*sizeof(GLuint)));
+  GLuint* is_mid = (GLuint*)malloc((N*N+N)*sizeof(GLuint));
   i = 0;
   for (j = N; j < N*Ndiv2; j += N)
   {
@@ -268,7 +268,7 @@ void P_Hemisphere::reshape(int N,const float* coss,const float* sins)
     i += 2;
   }
 
-  auto* is_top = static_cast<GLuint*>(malloc((N+2)*sizeof(GLuint)));
+  GLuint* is_top = (GLuint*)malloc((N+2)*sizeof(GLuint));
   is_top[0] = N*Ndiv2;
   i = 1;
   j = (Ndiv2-1)*N;
@@ -320,11 +320,11 @@ void P_Disc::draw()
   glCallList(disp_list);
 }
 
-void P_Disc::reshape(int N,const float* coss,const float* sins)
+void P_Disc::reshape(int N,float* coss,float* sins)
 {
   assert(N>0);
-  auto* vertices = static_cast<GLfloat*>(malloc(3*N*sizeof(GLfloat)));
-  auto* texCoords = static_cast<GLfloat*>(malloc(N*sizeof(GLfloat)));
+  GLfloat* vertices = (GLfloat*)malloc(3*N*sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc(N*sizeof(GLfloat));
   int i,j, k;
   j = 0;
   k = 0;
@@ -376,13 +376,13 @@ void P_Ring::draw()
   glCallList(disp_list);
 }
 
-void P_Ring::reshape(int N,const float* coss,const float* sins)
+void P_Ring::reshape(int N,float* coss,float* sins)
 {
   assert(N>0);
   int N3 = 3*N;
   int i,j,k,l,m;
-  auto* vertices = static_cast<GLfloat*>(malloc(2*N3*sizeof(GLfloat)));
-  auto* texCoords = static_cast<GLfloat*>(malloc((2*N+2)*sizeof(GLfloat)));
+  GLfloat* vertices = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc((2*N+2)*sizeof(GLfloat));
 
   k = 0;
   l = 0;
@@ -407,9 +407,9 @@ void P_Ring::reshape(int N,const float* coss,const float* sins)
     ++m;
   }
 
-  auto* normals = static_cast<GLfloat*>(malloc(2*N3*sizeof(GLfloat)));
+  GLfloat* normals = (GLfloat*)malloc(2*N3*sizeof(GLfloat));
   float nz = 1.0f - r_top;
-  float r = std::sqrt(1.0f + nz*nz);
+  float r = sqrt(1.0f + nz*nz);
   float nx = 1.0f / r;
   nz = nz / r;
   k = 0;
@@ -422,7 +422,7 @@ void P_Ring::reshape(int N,const float* coss,const float* sins)
   }
   memcpy(normals+N3,normals,N3*sizeof(float));
 
-  auto* is = static_cast<GLuint*>(malloc((2*N+2)*sizeof(GLuint)));
+  GLuint* is = (GLuint*)malloc((2*N+2)*sizeof(GLuint));
   k = 0;
   for (i=0; i<N; ++i)
   {
@@ -472,7 +472,8 @@ P_TruncatedCone::P_TruncatedCone(P_Ring* a_ring,P_Disc* a_disc,bool t,bool b)
 }
 
 P_TruncatedCone::~P_TruncatedCone()
-= default;
+{
+}
 
 void P_TruncatedCone::draw()
 {
@@ -495,7 +496,7 @@ void P_TruncatedCone::draw()
   ring->draw();
 }
 
-void P_TruncatedCone::reshape(int /*N*/,const float* /*coss*/,const float* /*sins*/)
+void P_TruncatedCone::reshape(int /*N*/,float* /*coss*/,float* /*sins*/)
 {
 }
 
@@ -519,19 +520,19 @@ void P_ObliqueCone::draw()
   glCallList(disp_list);
 }
 
-void P_ObliqueCone::reshape(int /*N*/,const float* /*coss*/,const float* /*sins*/)
+void P_ObliqueCone::reshape(int /*N*/,float* /*coss*/,float* /*sins*/)
 {
 }
 
-void P_ObliqueCone::reshape(int N,const float* coss,const float* sins,float obt)
+void P_ObliqueCone::reshape(int N,float* coss,float* sins,float obt)
 {
   assert(N>0);
   float a = 0.5f*static_cast<float>(PI) - alpha - sign*obt;
-  float sin_a = -sign*std::sin(a);
-  float cos_a = std::cos(a);
+  float sin_a = -sign*sin(a);
+  float cos_a = cos(a);
   int i,j,k;
-  auto* vertices = static_cast<GLfloat*>(malloc(3 * (N+1) * sizeof(GLfloat)));
-  auto* texCoords = static_cast<GLfloat*>(malloc((N + 1) * sizeof(GLfloat)));
+  GLfloat* vertices = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
+  GLfloat* texCoords = (GLfloat*)malloc((N + 1) * sizeof(GLfloat));
 
   vertices[0] = 0.0f;
   vertices[1] = 0.0f;
@@ -550,9 +551,9 @@ void P_ObliqueCone::reshape(int N,const float* coss,const float* sins,float obt)
     ++k;
   }
 
-  auto* normals = static_cast<GLfloat*>(malloc(3 * (N+1) * sizeof(GLfloat)));
+  GLfloat* normals = (GLfloat*)malloc(3 * (N+1) * sizeof(GLfloat));
   float nz = -radius;
-  float r = std::sqrt(1.0f + nz*nz);
+  float r = sqrt(1.0f + nz*nz);
   float nx = 1.0f / r;
   nz = nz / r;
   normals[0] = 0.0f;
@@ -567,7 +568,7 @@ void P_ObliqueCone::reshape(int N,const float* coss,const float* sins,float obt)
     j += 3;
   }
 
-  auto* is = static_cast<GLuint*>(malloc((N+2) * sizeof(GLuint)));
+  GLuint* is = (GLuint*)malloc((N+2) * sizeof(GLuint));
   is[0] = 0;
   for (i = 1; i <= N; ++i)
   {

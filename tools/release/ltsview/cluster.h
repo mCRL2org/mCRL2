@@ -66,8 +66,8 @@ class Cluster
     int getNumDeadlocks() const;
     void addDeadlock();
 
-    void addMatchedRule(const MarkRuleIndex& index);
-    void removeMatchedRule(const MarkRuleIndex& index);
+    void addMatchedRule(MarkRuleIndex index);
+    void removeMatchedRule(MarkRuleIndex index);
     const std::set<MarkRuleIndex> &getMatchedRules() const { return matchedRules; }
     int getNumMarkedStatesAll();
     int getNumMarkedStatesAny();

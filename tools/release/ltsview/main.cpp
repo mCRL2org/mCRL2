@@ -1,6 +1,6 @@
 #include "mcrl2/utilities/input_tool.h"
-#include "mainwindow.h"
 #include "mcrl2/gui/qt_tool.h"
+#include "mainwindow.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -35,14 +35,14 @@ class ltsview_tool : public ltsview_base
         "http://www.mcrl2.org/web/user_manual/tools/release/ltsview.html")
     {}
 
-    bool run() override
+    bool run()
     {
       qRegisterMetaType<LTS *>("LTS *");
 
       QThread atermThread;
       atermThread.start();
 
-      auto *window = new MainWindow(&atermThread);
+      MainWindow *window = new MainWindow(&atermThread);
 
       if (!m_input_filename.empty())
       {

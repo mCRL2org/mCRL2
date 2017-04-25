@@ -13,7 +13,7 @@
 
 static inline QTableWidgetItem *item()
 {
-  auto *item = new QTableWidgetItem();
+  QTableWidgetItem *item = new QTableWidgetItem();
   item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
   return item;
 }
@@ -24,7 +24,7 @@ static void initTable(QTableWidget *table)
   {
     for (int j = 0; j < table->columnCount(); j++)
     {
-      if (table->item(i, j) == nullptr)
+      if (!table->item(i, j))
       {
         table->setItem(i, j, item());
       }
@@ -77,7 +77,7 @@ void InfoDock::selectionChanged()
   State *state = m_ltsManager->selectedState();
 
   QString statesInCluster;
-  if (cluster != nullptr)
+  if (cluster)
   {
     statesInCluster = QString::number(cluster->getNumStates());
   }
@@ -87,12 +87,12 @@ void InfoDock::selectionChanged()
   {
     QString parameterName = QString::fromStdString(lts->getParameterName(i));
     QString values;
-    if (cluster != nullptr)
+    if (cluster)
     {
       std::set<std::string> valueSet = lts->getClusterParameterValues(cluster, i);
       bool first = true;
       values += "{ ";
-      for (const auto & j : valueSet)
+      for (std::set<std::string>::iterator j = valueSet.begin(); j != valueSet.end(); j++)
       {
         if (first)
         {
@@ -102,12 +102,12 @@ void InfoDock::selectionChanged()
         {
           values += ", ";
         }
-        values += QString::fromStdString(j);
+        values += QString::fromStdString(*j);
       }
       values += " }";
     }
     QString value;
-    if (state != nullptr)
+    if (state)
     {
       value = QString::fromStdString(lts->getStateParameterValueStr(state, i));
     }

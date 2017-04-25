@@ -14,7 +14,7 @@
 using namespace std;
 
 State::State(int aid):
-  cluster(nullptr),
+  cluster(NULL),
   id(aid),
   zoomLevel(0),
   positionAngle(-1.0f),
@@ -51,13 +51,13 @@ void State::addLoop(Transition* trans)
   loops.push_back(trans);
 }
 
-bool State::addMatchedRule(const MarkRuleIndex& index)
+bool State::addMatchedRule(MarkRuleIndex index)
 {
   matchedRules.insert(index);
   return matchedRules.size() == 1;
 }
 
-bool State::removeMatchedRule(const MarkRuleIndex& index)
+bool State::removeMatchedRule(MarkRuleIndex index)
 {
   return matchedRules.erase(index) > 0;
 }

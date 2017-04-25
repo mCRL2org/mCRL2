@@ -38,7 +38,7 @@ class MainWindow : public QMainWindow
     ~MainWindow();
 
   public slots:
-    void open(const QString& filename);
+    void open(QString filename);
 
   protected slots:
     void open();
@@ -57,7 +57,7 @@ class MainWindow : public QMainWindow
     void positioningClusters() { setProgress(4, "Positioning clusters"); }
     void positioningStates() { setProgress(5, "Positioning states"); }
     void hideProgressDialog() { setProgress(6, ""); }
-    void setProgress(int phase, const QString& message);
+    void setProgress(int phase, QString message);
     void selectionChanged();
     void zoomChanged() { m_ui.zoomOut->setEnabled(m_ltsManager->lts()->getPreviousLevel() != 0); }
     void startStructuring() { setEnabled(false); m_ltsCanvas->setUpdatesEnabled(false); }

@@ -10,13 +10,12 @@
 /// \brief Source file for VisObjectFactory class
 
 #include "visobjectfactory.h"
-#include "primitivefactory.h"
-#include "vectors.h"
 #include <algorithm>
 #include <cstdlib>
+#include "primitivefactory.h"
+#include "vectors.h"
 
 #include <QtOpenGL>
-#include <utility>
 
 using namespace std;
 
@@ -26,7 +25,7 @@ class VisObject
     VisObject();
     ~VisObject();
     float* getMatrixP() const;
-    QColor getColor() const; // TODO(johannes): This doesn't seem to be used;
+    QColor getColor() const; //TODO This doesn't seem to be used;
     QVector3D getCoordinates() const;
     int getPrimitive() const;
     void setColor(QColor c);
@@ -46,7 +45,7 @@ class VisObject
 
 VisObject::VisObject()
 {
-  matrix = static_cast<float*>(malloc(16*sizeof(float)));
+  matrix = (float*)malloc(16*sizeof(float));
   color = QColor(150, 150, 150);
   numColours = 0;
   primitive = 0;
@@ -83,12 +82,12 @@ QVector3D VisObject::getCoordinates() const
 
 void VisObject::setColor(QColor c)
 {
-  color = std::move(c);
+  color = c;
 }
 
 void VisObject::setTextureColours(vector<QColor>& colours)
 {
-  if (!colours.empty())
+  if (colours.size() > 0)
   {
     numColours = 1;
     // numColours := smallest power of 2 s.t. colours.size <= numColours,
@@ -98,7 +97,7 @@ void VisObject::setTextureColours(vector<QColor>& colours)
       numColours = numColours << 1;
     }
 
-    auto* texture = static_cast<GLubyte*>(malloc(4*numColours*sizeof(GLubyte)));
+    GLubyte* texture = (GLubyte*)malloc(4*numColours*sizeof(GLubyte));
 
     for (int i = 0; i < numColours; ++i)
     {
@@ -135,9 +134,9 @@ void VisObject::draw(PrimitiveFactory* pf,unsigned char alpha)
   glColor4ub(color.red(), color.green(), color.blue(), alpha);
   glPushMatrix();
   glMultMatrixf(matrix);
-  for (int identifier : identifiers)
+  for (size_t i = 0; i < identifiers.size(); ++i)
   {
-    glPushName(identifier);
+    glPushName(identifiers[i]);
   }
   pf->drawPrimitive(primitive);
   for (size_t i = 0; i < identifiers.size(); ++i)
@@ -189,7 +188,7 @@ bool Distance::operator()(const VisObject* o1, const VisObject* o2) const
 /* -------------------- VisObjectFactory ------------------------------------ */
 
 VisObjectFactory::VisObjectFactory()
-= default;
+{ }
 
 VisObjectFactory::~VisObjectFactory()
 {
@@ -210,26 +209,26 @@ void VisObjectFactory::drawObjects(PrimitiveFactory* pf,unsigned char alpha,
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     //glEnable(GL_TEXTURE_1D);
-    for (auto & i : objects_sorted)
+    for (unsigned int i = 0; i < objects_sorted.size(); ++i)
     {
-      i->drawWithTexture(pf,alpha);
+      objects_sorted[i]->drawWithTexture(pf,alpha);
     }
     //glDisable(GL_TEXTURE_1D);
   }
   else
   {
-    for (auto & i : objects_sorted)
+    for (unsigned int i = 0; i < objects_sorted.size(); ++i)
     {
-      i->drawWithTexture(pf, alpha);
+      objects_sorted[i]->drawWithTexture(pf, alpha);
     }
   }
 }
 
 void VisObjectFactory::clear()
 {
-  for (auto & object : objects)
+  for (unsigned int i = 0; i < objects.size(); ++i)
   {
-    delete object;
+    delete objects[i];
   }
   objects.clear();
   objects_sorted.clear();
@@ -237,13 +236,13 @@ void VisObjectFactory::clear()
 
 int VisObjectFactory::makeObject(int primitive, vector<int> &ids)
 {
-  auto* vo = new VisObject();
-  glGetFloatv(GL_MODELVIEW_MATRIX,static_cast<GLfloat*>(vo->getMatrixP()));
+  VisObject* vo = new VisObject();
+  glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)vo->getMatrixP());
   vo->setPrimitive(primitive);
 
-  for (int id : ids)
+  for (size_t i = 0; i < ids.size(); ++i)
   {
-    vo->addIdentifier(id);
+    vo->addIdentifier(ids[i]);
   }
 
   objects.push_back(vo);
@@ -253,12 +252,12 @@ int VisObjectFactory::makeObject(int primitive, vector<int> &ids)
 
 void VisObjectFactory::updateObjectMatrix(int obj)
 {
-  glGetFloatv(GL_MODELVIEW_MATRIX,static_cast<GLfloat*>(objects[obj]->getMatrixP()));
+  glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)objects[obj]->getMatrixP());
 }
 
 void VisObjectFactory::updateObjectColor(int obj,QColor color)
 {
-  objects[obj]->setColor(std::move(color));
+  objects[obj]->setColor(color);
 }
 
 void VisObjectFactory::updateObjectTexture(int obj, vector<QColor> &colours)

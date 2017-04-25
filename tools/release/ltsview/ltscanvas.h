@@ -59,7 +59,7 @@ class LtsCanvas : public QGLWidget
     Selection selectObject(QPoint position);
     Selection parseSelection(GLuint* selectionBuffer, GLint items);
     void applyRotation(bool reverse = false);
-    QVector3D getArcBallVector(int mouseX, int mouseY);
+    QVector3D getArcBallVector(int screenX, int screenY);
 
   public:
     QImage renderImage(int width, int height);

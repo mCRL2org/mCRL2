@@ -39,12 +39,12 @@ class MarkDock : public QWidget
     void stateMatchStyleChanged(int index);
     void setStateMatchStyle(MatchStyle style);
     void addMarkRule();
-    void markRuleAdded(const MarkRuleIndex& index);
+    void markRuleAdded(MarkRuleIndex index);
     void editMarkRule(QListWidgetItem *item);
     void enableMarkRule(QListWidgetItem *item);
-    void markRuleChanged(const MarkRuleIndex& index);
+    void markRuleChanged(MarkRuleIndex index);
     void removeMarkRule();
-    void markRuleRemoved(const MarkRuleIndex& index);
+    void markRuleRemoved(MarkRuleIndex index);
     void actionLabelChanged(QListWidgetItem *item);
     void setActionMarked(int action, bool marked);
 

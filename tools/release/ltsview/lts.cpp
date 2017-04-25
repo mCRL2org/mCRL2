@@ -7,14 +7,14 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mcrl2/trace/trace.h"
+#include "mcrl2/lts/lts_algorithm.h"
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/detail/lts_convert.h"
+#include "mcrl2/utilities/logger.h"
 #include "cluster.h"
 #include "fsm_state_positioner.h"
 #include "lts.h"
 #include "mathutils.h"
-#include "mcrl2/lts/detail/lts_convert.h"
-#include "mcrl2/lts/lts_algorithm.h"
-#include "mcrl2/lts/lts_io.h"
-#include "mcrl2/utilities/logger.h"
 #include "sp_state_positioner.h"
 #include "state.h"
 #include "transition.h"
@@ -57,8 +57,8 @@ Cluster* Cluster_iterator::operator*()
 
 bool Cluster_iterator::is_valid()
 {
-  return (!lts->clustersInRank[rank].empty())
-         && (lts->clustersInRank[rank][cluster] != nullptr);
+  return (lts->clustersInRank[rank].size() > 0)
+         && (lts->clustersInRank[rank][cluster] != NULL);
 }
 
 bool Cluster_iterator::is_end()
@@ -74,7 +74,7 @@ void Cluster_iterator::next()
     cluster = 0;
     ++rank;
     while (rank < lts->getMaxRanks() &&
-           lts->clustersInRank[rank].empty())
+           lts->clustersInRank[rank].size() == 0)
     {
       ++rank;
     }
@@ -99,7 +99,7 @@ void Reverse_cluster_iterator::next()
   {
     cluster = 0;
     --rank;
-    while (rank >= 0 && lts->clustersInRank[rank].empty())
+    while (rank >= 0 && lts->clustersInRank[rank].size() == 0)
     {
       --rank;
     }
@@ -115,7 +115,8 @@ State_iterator::State_iterator(LTS* l)
 }
 
 State_iterator::~State_iterator()
-= default;
+{
+}
 
 void State_iterator::operator++()
 {
@@ -140,12 +141,12 @@ bool State_iterator::is_end()
 LTS::LTS()
 {
   deadlockCount = -1;
-  initialState = nullptr;
-  lastCluster = nullptr;
-  previousLevel = nullptr;
+  initialState = NULL;
+  lastCluster = NULL;
+  previousLevel = NULL;
   lastWasAbove = false;
   zoomLevel = 0;
-  mcrl2_lts = nullptr;
+  mcrl2_lts = 0;
 }
 
 LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
@@ -163,14 +164,14 @@ LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
 
     lastCluster = target;
 
-    Cluster* child = nullptr;
+    Cluster* child = NULL;
     Cluster* parent = target;
 
     do
     {
       for (int i = 0; i < parent->getNumDescendants(); ++i)
       {
-        if (child == nullptr || parent->getDescendant(i) != child)
+        if (child == NULL || parent->getDescendant(i) != child)
         {
           parent->severDescendant(i);
         }
@@ -192,7 +193,7 @@ LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
 
 LTS::~LTS()
 {
-  if (previousLevel == nullptr)
+  if (previousLevel == NULL)
   {
     // This LTS is the top level LTS, so delete all its contents.
     size_t i,r;
@@ -202,7 +203,7 @@ LTS::~LTS()
       delete *li;
     }
     states.clear();
-    initialState = nullptr;
+    initialState = NULL;
 
     for (r = 0; r < clustersInRank.size(); ++r)
     {
@@ -213,7 +214,10 @@ LTS::~LTS()
     }
     clustersInRank.clear();
 
-    delete mcrl2_lts;
+    if (mcrl2_lts)
+    {
+      delete mcrl2_lts;
+    }
   }
   else
   {
@@ -268,8 +272,10 @@ bool LTS::readFromFile(const std::string& filename)
 {
   assert(!previousLevel);
 
-  delete mcrl2_lts;
-
+  if (mcrl2_lts)
+  {
+    delete mcrl2_lts;
+  }
   mcrl2_lts = new mcrl2::lts::lts_fsm_t;
 
   load_lts_as_fsm_file(filename, *mcrl2_lts);
@@ -287,11 +293,11 @@ bool LTS::readFromFile(const std::string& filename)
   initialState = states[mcrl2_lts->initial_state()];
 
   const std::vector<transition> &trans=mcrl2_lts->get_transitions();
-  for (const auto & tran : trans)
+  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
   {
-    State* s1 = states[tran.from()];
-    State* s2 = states[tran.to()];
-    auto* t = new Transition(s1,s2,static_cast<int>(tran.label()));
+    State* s1 = states[r->from()];
+    State* s2 = states[r->to()];
+    Transition* t = new Transition(s1,s2,static_cast<int>(r->label()));
     if (s1 != s2)
     {
       s1->addOutTransition(t);
@@ -354,7 +360,7 @@ void LTS::addCluster(Cluster* cluster)
 
 void LTS::addClusterAndBelow(Cluster* cluster)
 {
-  if (cluster != nullptr)
+  if (cluster != NULL)
   {
     addCluster(cluster);
 
@@ -397,9 +403,9 @@ int LTS::getMaxRanks() const
 int LTS::getNumClusters() const
 {
   int result = 0;
-  for (const auto & i : clustersInRank)
+  for (size_t i = 0; i < clustersInRank.size(); ++i)
   {
-    result += static_cast<int>(i.size());
+    result += static_cast<int>(clustersInRank[i].size());
   }
   return result;
 }
@@ -438,7 +444,7 @@ void LTS::clearRanksAndClusters()
   for (it = states.begin(); it != states.end(); ++it)
   {
     (*it)->setRank(-1);
-    (*it)->setCluster(nullptr);
+    (*it)->setCluster(NULL);
   }
 
   for (Cluster_iterator ci = getClusterIterator(); !ci.is_end(); ++ci)
@@ -462,7 +468,7 @@ void LTS::rankStates(bool cyclic)
   int i;
   vector< State* >::iterator it;
   State* s,*t;
-  while (!currRank.empty())
+  while (currRank.size() > 0)
   {
     nextRank.clear();
     // iterate over the states in this rank
@@ -500,7 +506,7 @@ void LTS::rankStates(bool cyclic)
 
 void LTS::clusterStates(bool cyclic)
 {
-  auto* d = new Cluster(0);
+  Cluster* d = new Cluster(0);
   vector< Cluster* > cs;
   cs.push_back(d);
   d->setPositionInRank(0);
@@ -517,7 +523,7 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
   for (i = 0; i < v->getNumOutTransitions(); ++i)
   {
     w = v->getOutTransition(i)->getEndState();
-    if (w->getCluster() == nullptr && w->getRank() == v->getRank())
+    if (w->getCluster() == NULL && w->getRank() == v->getRank())
     {
       clusterTree(w,c,cyclic);
     }
@@ -525,7 +531,7 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
   for (i = 0; i < v->getNumInTransitions(); ++i)
   {
     w = v->getInTransition(i)->getBeginState();
-    if (w->getCluster() == nullptr && w->getRank() == v->getRank())
+    if (w->getCluster() == NULL && w->getRank() == v->getRank())
     {
       clusterTree(w,c,cyclic);
     }
@@ -536,10 +542,10 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
     {
       w = v->getInTransition(i)->getBeginState();
       r = w->getRank();
-      if (w->getCluster() == nullptr && r == v->getRank()+1)
+      if (w->getCluster() == NULL && r == v->getRank()+1)
       {
-        auto* d = new Cluster(r);
-        if (static_cast<size_t>(r) >= clustersInRank.size())
+        Cluster* d = new Cluster(r);
+        if ((size_t)(r) >= clustersInRank.size())
         {
           vector< Cluster* > cs;
           clustersInRank.push_back(cs);
@@ -556,7 +562,7 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
           for (j = 0; j < y->getNumOutTransitions(); ++j)
           {
             w = y->getOutTransition(j)->getEndState();
-            if (w->getCluster() == nullptr && w->getRank() == v->getRank())
+            if (w->getCluster() == NULL && w->getRank() == v->getRank())
             {
               clusterTree(w,c,cyclic);
             }
@@ -564,7 +570,7 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
           for (j = 0; j < y->getNumInTransitions(); ++j)
           {
             w = y->getInTransition(j)->getBeginState();
-            if (w->getCluster() == nullptr && w->getRank() == v->getRank())
+            if (w->getCluster() == NULL && w->getRank() == v->getRank())
             {
               clusterTree(w,c,cyclic);
             }
@@ -577,10 +583,10 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
   {
     w = v->getOutTransition(i)->getEndState();
     r = w->getRank();
-    if (w->getCluster() == nullptr && r == v->getRank()+1)
+    if (w->getCluster() == NULL && r == v->getRank()+1)
     {
-      auto* d = new Cluster(r);
-      if (static_cast<size_t>(r) >= clustersInRank.size())
+      Cluster* d = new Cluster(r);
+      if ((size_t)(r) >= clustersInRank.size())
       {
         vector< Cluster* > cs;
         clustersInRank.push_back(cs);
@@ -599,7 +605,7 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
           for (j = 0; j < y->getNumOutTransitions(); ++j)
           {
             w = y->getOutTransition(j)->getEndState();
-            if (w->getCluster() == nullptr && w->getRank() == v->getRank())
+            if (w->getCluster() == NULL && w->getRank() == v->getRank())
             {
               clusterTree(w,c,cyclic);
             }
@@ -608,7 +614,7 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
         for (j = 0; j < y->getNumInTransitions(); ++j)
         {
           w = y->getInTransition(j)->getBeginState();
-          if (w->getCluster() == nullptr && w->getRank() == v->getRank())
+          if (w->getCluster() == NULL && w->getRank() == v->getRank())
           {
             clusterTree(w,c,cyclic);
           }
@@ -668,7 +674,7 @@ void LTS::clearStatePositions()
 
 void LTS::positionStates(bool multiPass)
 {
-  StatePositioner* state_positioner = nullptr;
+  StatePositioner* state_positioner = NULL;
   if (multiPass)
   {
     state_positioner = new FSMStatePositioner(this);
@@ -693,11 +699,11 @@ LTS* LTS::zoomIntoBelow(Cluster *target)
 
 LTS* LTS::zoomOut()
 {
-  if (previousLevel != nullptr)
+  if (previousLevel != NULL)
   {
     if (lastWasAbove)
     {
-      Cluster* child = nullptr;
+      Cluster* child = NULL;
       Cluster* parent = lastCluster;
       do
       {
@@ -713,17 +719,17 @@ LTS* LTS::zoomOut()
     vector< State* >::iterator li;
     for (li = states.begin(); li != states.end(); ++li)
     {
-      if (*li != nullptr)
+      if (*li)
       {
         (*li)->setZoomLevel(zoomLevel - 1);
       }
     }
     return previousLevel;
   }
-  
-  
+  else
+  {
     return this;
-  
+  }
 }
 
 void LTS::setLastCluster(Cluster* c)

@@ -6,18 +6,18 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "rtree.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <list>
 #include <queue>
+#include <list>
 #include <vector>
+#include "rtree.h"
 
 class Rectangle
 {
   public:
-    Rectangle() = default;
+    Rectangle() {}
 
     Rectangle(const QVector2D& lowc, const QVector2D& highc):
       low_corner(lowc), high_corner(highc)
@@ -69,7 +69,7 @@ class RNode
 {
   public:
     virtual ~RNode()
-    = default;
+    { }
 
     Rectangle boundingBox() const
     {
@@ -91,7 +91,7 @@ class RNode
     virtual void computeBoundingBox()
     { }
 
-    virtual void deletePoint(const QVector2D& /*unused*/)
+    virtual void deletePoint(const QVector2D&)
     { }
 
     virtual bool hasChildren() const
@@ -126,21 +126,22 @@ class RTreeNode: public RNode
 {
   public:
     RTreeNode()
-    = default;
+    { }
 
-    ~RTreeNode() override
+    ~RTreeNode()
     {
-      for (auto & ci : children)
+      for (std::list< RNode* >::iterator ci = children.begin();
+           ci != children.end(); ++ci)
       {
-        delete ci;
+        delete *ci;
       }
     }
 
-    void computeBoundingBox() override;
+    void computeBoundingBox();
 
-    void deletePoint(const QVector2D& point) override;
+    void deletePoint(const QVector2D& point);
 
-    bool hasChildren() const override
+    bool hasChildren() const
     {
       return !children.empty();
     }
@@ -169,7 +170,7 @@ void RTreeNode::computeBoundingBox()
 
 void RTreeNode::deletePoint(const QVector2D& point)
 {
-  auto ci = children.begin();
+  std::list< RNode* >::iterator ci = children.begin();
   while (ci != children.end())
   {
     RNode* child = *ci;
@@ -199,17 +200,17 @@ class RTreeLeaf: public RNode
       point(p)
     { }
 
-    ~RTreeLeaf() override
-    = default;
+    ~RTreeLeaf()
+    { }
 
-    void computeBoundingBox() override;
+    void computeBoundingBox();
 
-    bool hasChildren() const override
+    bool hasChildren() const
     {
       return false;
     }
 
-    void deletePoint(const QVector2D& /*unused*/) override
+    void deletePoint(const QVector2D&)
     { }
 
     QVector2D point;
@@ -300,14 +301,14 @@ class NeighbourFinder
       {
         RNode* top_node = queue.top().node;
         queue.pop();
-        auto* leaf = dynamic_cast< RTreeLeaf* >(top_node);
-        if (leaf != nullptr)
+        RTreeLeaf* leaf = dynamic_cast< RTreeLeaf* >(top_node);
+        if (leaf != NULL)
         {
           has_found_neighbour = true;
           found_neighbour = leaf->point;
           return;
         }
-        auto* node = dynamic_cast< RTreeNode* >(top_node);
+        RTreeNode* node = dynamic_cast< RTreeNode* >(top_node);
         std::list< RNode* >::iterator ci;
         for (ci = node->children.begin(); ci != node->children.end(); ++ci)
         {
@@ -337,10 +338,10 @@ class NeighbourFinder
 
 RTree::~RTree()
 {
-  
-  
+  if (root != NULL)
+  {
     delete root;
-  
+  }
 }
 
 void RTree::deletePoint(const QVector2D& point)
@@ -349,7 +350,7 @@ void RTree::deletePoint(const QVector2D& point)
   if (!root->hasChildren())
   {
     delete root;
-    root = nullptr;
+    root = NULL;
   }
 }
 
@@ -393,14 +394,14 @@ void PackedRTreeBuilder::buildRTree()
   std::vector< QVector2D >::iterator pi;
   for (pi = points.begin(); pi != points.end(); ++pi)
   {
-    auto* leaf = new RTreeLeaf(*pi);
+    RTreeLeaf* leaf = new RTreeLeaf(*pi);
     leaf->computeBoundingBox();
     roots.push_back(leaf);
   }
   while (roots.size() > 1)
   {
     std::vector< RNode* > new_roots;
-    auto slice_size = static_cast<unsigned int>(MAX_FANOUT * std::ceil(std::sqrt(std::ceil(
+    unsigned int slice_size = static_cast<unsigned int>(MAX_FANOUT * std::ceil(std::sqrt(std::ceil(
                                 static_cast< double >(roots.size()) /
                                 static_cast< double >(MAX_FANOUT)))));
     sort(roots.begin(), roots.end(), lessThanCenterX);
@@ -408,14 +409,14 @@ void PackedRTreeBuilder::buildRTree()
     {
       unsigned int this_slice_size = std::min(slice_size,
                                               static_cast<unsigned int>(roots.size()) - i);
-      auto slice_begin = roots.begin() + i;
-      auto slice_end = slice_begin + this_slice_size;
+      std::vector< RNode* >::iterator slice_begin = roots.begin() + i;
+      std::vector< RNode* >::iterator slice_end = slice_begin + this_slice_size;
       sort(slice_begin, slice_end, lessThanCenterY);
       for (unsigned int j = 0; j < this_slice_size; j += MAX_FANOUT)
       {
         unsigned int num_children = std::min(MAX_FANOUT, this_slice_size - j);
-        auto children_begin = slice_begin + j;
-        auto* node = new RTreeNode();
+        std::vector< RNode* >::iterator children_begin = slice_begin + j;
+        RTreeNode* node = new RTreeNode();
         node->children.assign(children_begin, children_begin + num_children);
         node->computeBoundingBox();
         new_roots.push_back(node);

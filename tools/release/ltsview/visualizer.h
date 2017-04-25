@@ -43,12 +43,12 @@ class Visualizer: public QObject
 
     void drawTransitions(bool draw_fp,bool draw_bp);
     void drawSimTransitions(bool draw_fp, bool draw_bp,
-                            QList<Transition*> transHis, QList<Transition*>
+                            QList<Transition*> historicTrans, QList<Transition*>
                             posTrans, Transition* chosenTrans);
 
     void drawStructure();
     void sortClusters(const QVector3D& viewpoint);
-    void exportToText(const std::string& filename);
+    void exportToText(std::string filename);
 
   public slots:
     void setClusterHeight();

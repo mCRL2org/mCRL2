@@ -8,15 +8,13 @@
 
 #include "savevectordialog.h"
 #include <QMessageBox>
-#include <utility>
-#include <utility>
 #include <gl2ps.h>
-#include <cstdio>
+#include <stdio.h>
 
 SaveVectorDialog::SaveVectorDialog(QWidget *parent, LtsCanvas *canvas, QString filename, GLint format):
   QDialog(parent),
   m_canvas(canvas),
-  m_filename(std::move(std::move(filename))),
+  m_filename(filename),
   m_format(format)
 {
   m_ui.setupUi(this);
@@ -33,7 +31,7 @@ void SaveVectorDialog::save()
   }
 
   FILE *file = fopen(m_filename.toStdString().c_str(), "wb");
-  if (file == nullptr)
+  if (!file)
   {
     QMessageBox::critical(this, "Error writing file", "Could not open file for writing.");
     return;
@@ -73,9 +71,9 @@ void SaveVectorDialog::save()
   while (true)
   {
     buffsize += 1024*1024;
-    if (gl2psBeginPage(m_filename.toStdString().c_str(), "LTSView", nullptr,
+    if (gl2psBeginPage(m_filename.toStdString().c_str(), "LTSView", NULL,
                      m_format, GL2PS_BSP_SORT, options,
-                     GL_RGBA, 0, nullptr, 0, 0, 0, buffsize, file, ""
+                     GL_RGBA, 0, NULL, 0, 0, 0, buffsize, file, ""
                      ) == GL2PS_ERROR)
     {
       success = false;

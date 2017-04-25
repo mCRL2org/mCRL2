@@ -18,9 +18,9 @@
 #include <GL/glu.h>
 #endif
 
+#include "icons/zoom_cursor.xpm"
 #include "icons/pan_cursor.xpm"
 #include "icons/rotate_cursor.xpm"
-#include "icons/zoom_cursor.xpm"
 
 LtsCanvas::LtsCanvas(QWidget* parent, Settings* settings, LtsManager* ltsManager, MarkManager* markManager):
   QGLWidget(parent),
@@ -72,19 +72,19 @@ void LtsCanvas::clusterPositionsChanged()
 
 void LtsCanvas::determineActiveTool(QMouseEvent* event, bool useModifiers)
 {
-  if (useModifiers && ((event->modifiers() & Qt::ControlModifier) != 0u) && ((event->modifiers() & Qt::ShiftModifier) != 0u))
+  if (useModifiers && (event->modifiers() & Qt::ControlModifier) && (event->modifiers() & Qt::ShiftModifier))
   {
     setActiveTool(ZoomTool);
   }
-  else if (useModifiers && ((event->modifiers() & Qt::ControlModifier) != 0u))
+  else if (useModifiers && event->modifiers() & Qt::ControlModifier)
   {
     setActiveTool(PanTool);
   }
-  else if (((event->buttons() & Qt::MidButton) != 0u) || (((event->buttons() & Qt::LeftButton) != 0u) && ((event->buttons() & Qt::RightButton) != 0u)))
+  else if ((event->buttons() & Qt::MidButton) || ((event->buttons() & Qt::LeftButton) && (event->buttons() & Qt::RightButton)))
   {
     setActiveTool(ZoomTool);
   }
-  else if ((useModifiers && ((event->modifiers() & Qt::ShiftModifier) != 0u)) || ((event->buttons() & Qt::RightButton) != 0u))
+  else if ((useModifiers && event->modifiers() & Qt::ShiftModifier) || event->buttons() & Qt::RightButton)
   {
     setActiveTool(RotateTool);
   }
@@ -156,7 +156,7 @@ void LtsCanvas::paintGL()
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(60.0f, static_cast<GLfloat>(m_width) / static_cast<GLfloat>(m_height), m_nearPlane, m_farPlane);
+  gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
 
   emit renderingStarted();
   render(m_dragging);
@@ -171,8 +171,8 @@ QVector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
   // of the world coordinate system
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
-  x = static_cast<float>( mouseX) / viewport[2] * 2.0f - 1.0f;
-  y = static_cast<float>( mouseY) / viewport[3] * 2.0f - 1.0f;
+  x = (float) mouseX / viewport[2] * 2.0f - 1.0f;
+  y = (float) mouseY / viewport[3] * 2.0f - 1.0f;
   y = -y;
   float squared = x * x + y * y;
   if (squared <= radius*radius)
@@ -358,14 +358,14 @@ void LtsCanvas::mousePressEvent(QMouseEvent* event)
 
   if (m_activeTool == SelectTool)
   {
-    if (m_ltsManager->lts() != nullptr)
+    if (m_ltsManager->lts())
     {
       Selection selection = selectObject(event->pos());
-      if (selection.state != nullptr)
+      if (selection.state)
       {
         m_ltsManager->selectState(selection.state);
       }
-      else if (selection.cluster != nullptr)
+      else if (selection.cluster)
       {
         m_ltsManager->selectCluster(selection.cluster);
       }
@@ -394,7 +394,7 @@ void LtsCanvas::mouseReleaseEvent(QMouseEvent* event)
 void LtsCanvas::mouseDoubleClickEvent(QMouseEvent* event)
 {
   mousePressEvent(event);
-  if (m_activeTool == SelectTool && m_ltsManager->simulationActive() && (m_ltsManager->selectedState() != nullptr))
+  if (m_activeTool == SelectTool && m_ltsManager->simulationActive() && m_ltsManager->selectedState())
   {
     m_ltsManager->simulateState(m_ltsManager->selectedState());
   }
@@ -466,7 +466,7 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
 
   int maxItems = m_ltsManager->lts()->getNumClusters() + m_ltsManager->lts()->getNumStates();
   int bufferSize = maxItems * 6;
-  auto* selectionBuffer = new GLuint[bufferSize];
+  GLuint* selectionBuffer = new GLuint[bufferSize];
 
   glSelectBuffer(bufferSize, selectionBuffer);
   glRenderMode(GL_SELECT);
@@ -478,9 +478,9 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
 
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
-  gluPickMatrix(static_cast<GLdouble>(position.x()), static_cast<GLdouble>(viewport[3] - position.y()), 3.0, 3.0, viewport);
+  gluPickMatrix((GLdouble)position.x(), (GLdouble)(viewport[3] - position.y()), 3.0, 3.0, viewport);
 
-  gluPerspective(60.0f, static_cast<GLfloat>(m_width) / static_cast<GLfloat>(m_height), m_nearPlane, m_farPlane);
+  gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
 
   render(false);
 
@@ -511,7 +511,7 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint it
   float minimumStateDepth = -1;
   int stateID = -1;
 
-  float clusterFound = 0.0f;
+  float clusterFound = false;
   float minimumClusterDepth = -1;
   int rank = -1;
   int position = -1;
@@ -521,10 +521,10 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint it
     GLuint size = *buffer++;
     assert (size <= 3);
 
-    float minimalDepth = (static_cast<float>(*buffer++)) / 0x7fffffff;
+    float minimalDepth = ((float)(*buffer++)) / 0x7fffffff;
     buffer++;
 
-    if (size == 0u)
+    if (!size)
     {
       continue;
     }
@@ -541,30 +541,30 @@ LtsCanvas::Selection LtsCanvas::parseSelection(GLuint* selectionBuffer, GLint it
       {
         stateFound = true;
         minimumStateDepth = minimalDepth;
-        stateID = static_cast<int>(itemData[1]);
+        stateID = (int)itemData[1];
       }
     }
     else if (itemData[0] == ClusterObject)
     {
-      if ((clusterFound == 0.0f) || minimalDepth < minimumClusterDepth)
+      if (!clusterFound || minimalDepth < minimumClusterDepth)
       {
-        clusterFound = 1.0f;
+        clusterFound = true;
         minimumClusterDepth = minimalDepth;
-        rank = static_cast<int>(itemData[1]);
-        position = static_cast<int>(itemData[2]);
+        rank = (int)itemData[1];
+        position = (int)itemData[2];
       }
     }
   }
 
   Selection output;
-  output.state = nullptr;
-  output.cluster = nullptr;
+  output.state = 0;
+  output.cluster = 0;
 
   if (stateFound)
   {
     output.state = m_ltsManager->lts()->state(stateID);
   }
-  else if (clusterFound != 0.0f)
+  else if (clusterFound)
   {
     output.cluster = m_ltsManager->lts()->cluster(rank, position);
   }
@@ -594,7 +594,7 @@ QImage LtsCanvas::renderImage(int width, int height)
 
   trImageBuffer(context, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, imageData);
   trRowOrder(context, TR_TOP_TO_BOTTOM);
-  trPerspective(context, 60.0f, static_cast<GLfloat>(m_width) / static_cast<GLfloat>(m_height), m_nearPlane, m_farPlane);
+  trPerspective(context, 60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
 
   emit renderingStarted();
   int more;
@@ -604,7 +604,7 @@ QImage LtsCanvas::renderImage(int width, int height)
     render(false);
     more = trEndTile(context);
   }
-  while (more != 0);
+  while (more);
   trDelete(context);
   emit renderingFinished();
 

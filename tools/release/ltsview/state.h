@@ -49,8 +49,8 @@ class State
     bool isDeadlock() const;
     bool hasTextures() const;
 
-    bool addMatchedRule(const MarkRuleIndex& index);
-    bool removeMatchedRule(const MarkRuleIndex& index);
+    bool addMatchedRule(MarkRuleIndex index);
+    bool removeMatchedRule(MarkRuleIndex index);
     const std::set<MarkRuleIndex> &getMatchedRules() const { return matchedRules; }
     void clearMatchedRules() { matchedRules.clear(); }
 

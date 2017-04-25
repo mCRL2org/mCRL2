@@ -9,13 +9,11 @@
 #include "savepicturedialog.h"
 #include <QImage>
 #include <QImageWriter>
-#include <utility>
-#include <utility>
 
 SavePictureDialog::SavePictureDialog(QWidget *parent, LtsCanvas *canvas, QString filename):
   QDialog(parent),
   m_canvas(canvas),
-  m_filename(std::move(std::move(filename))),
+  m_filename(filename),
   m_inChange(false)
 {
   m_ui.setupUi(this);
@@ -41,7 +39,7 @@ void SavePictureDialog::widthChanged(int value)
   if (m_ui.maintainAspectRatio->isChecked())
   {
     m_inChange = true;
-    m_ui.height->setValue(static_cast<int>(value * m_height / m_width));
+    m_ui.height->setValue((int)(value * m_height / m_width));
     m_inChange = false;
   }
 }
@@ -56,7 +54,7 @@ void SavePictureDialog::heightChanged(int value)
   if (m_ui.maintainAspectRatio->isChecked())
   {
     m_inChange = true;
-    m_ui.height->setValue(static_cast<int>(value * m_width / m_height));
+    m_ui.height->setValue((int)(value * m_width / m_height));
     m_inChange = false;
   }
 }

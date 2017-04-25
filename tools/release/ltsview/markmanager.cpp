@@ -10,18 +10,18 @@
 /// \brief Mark manager source file
 
 #include "markmanager.h"
-#include "cluster.h"
+#include <algorithm>
 #include "lts.h"
 #include "state.h"
+#include "cluster.h"
 #include "transition.h"
-#include <algorithm>
 
 using namespace std;
 
 MarkManager::MarkManager(QObject *parent, LtsManager *ltsManager):
   QObject(parent),
   m_ltsManager(ltsManager),
-  m_lts(nullptr),
+  m_lts(0),
   m_markStyle(NO_MARKS),
   m_clusterMatchStyle(MATCH_ANY),
   m_stateMatchStyle(MATCH_ANY),
@@ -51,16 +51,16 @@ int MarkManager::markedStates() const
   {
     return m_lts->getNumDeadlocks();
   }
-  if (markStyle() == MARK_STATES)
+  else if (markStyle() == MARK_STATES)
   {
     if (stateMatchStyle() == MATCH_ALL)
     {
       return m_markedStatesAll;
     }
-    
-    
+    else
+    {
       return m_markedStatesAny;
-    
+    }
   }
   else
   {
@@ -74,16 +74,16 @@ bool MarkManager::isMarked(State *state)
   {
     return state->isDeadlock();
   }
-  if (markStyle() == MARK_STATES)
+  else if (markStyle() == MARK_STATES)
   {
     if (stateMatchStyle() == MATCH_ALL)
     {
-      return (state->getMatchedRules().size() == static_cast<size_t>(m_activeMarkRules));
+      return (state->getMatchedRules().size() == (size_t)m_activeMarkRules);
     }
-    
-    
+    else
+    {
       return (!state->getMatchedRules().empty());
-    
+    }
   }
   else
   {
@@ -97,7 +97,7 @@ bool MarkManager::isMarked(Cluster *cluster)
   {
     return cluster->getNumDeadlocks() > 0;
   }
-  if (markStyle() == MARK_STATES)
+  else if (markStyle() == MARK_STATES)
   {
     int marked = (stateMatchStyle() == MATCH_ALL) ? cluster->getNumMarkedStatesAll() : cluster->getNumMarkedStatesAny();
     int required = (clusterMatchStyle() == MATCH_ALL) ? cluster->getNumStates() : 1;
@@ -121,9 +121,9 @@ bool MarkManager::isMarked(Transition *transition)
 QList<QColor> MarkManager::markColors(State *state)
 {
   QList<QColor> output;
-  for (const auto & i : state->getMatchedRules())
+  for (std::set<MarkRuleIndex>::iterator i = state->getMatchedRules().begin(); i != state->getMatchedRules().end(); i++)
   {
-    output += i->color;
+    output += (*i)->color;
   }
   return output;
 }
@@ -131,9 +131,9 @@ QList<QColor> MarkManager::markColors(State *state)
 QList<QColor> MarkManager::markColors(Cluster *cluster)
 {
   QList<QColor> output;
-  for (const auto & i : cluster->getMatchedRules())
+  for (std::set<MarkRuleIndex>::iterator i = cluster->getMatchedRules().begin(); i != cluster->getMatchedRules().end(); i++)
   {
-    output += i->color;
+    output += (*i)->color;
   }
   return output;
 }
@@ -234,7 +234,7 @@ MarkRuleIndex MarkManager::addMarkRule(MarkRule rule)
   return index;
 }
 
-void MarkManager::setMarkRule(const MarkRuleIndex& index, const MarkRule& rule)
+void MarkManager::setMarkRule(MarkRuleIndex index, MarkRule rule)
 {
   if (*index != rule)
   {
@@ -262,7 +262,7 @@ void MarkManager::setMarkRule(const MarkRuleIndex& index, const MarkRule& rule)
   }
 }
 
-void MarkManager::removeMarkRule(const MarkRuleIndex& index)
+void MarkManager::removeMarkRule(MarkRuleIndex index)
 {
   bool changed = false;
   if (index->active)
@@ -319,13 +319,13 @@ void MarkManager::flushClusters()
       {
         anyAdded++;
       }
-      if (state->getMatchedRules().size() == static_cast<size_t>(m_activeMarkRules))
+      if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
       {
         allAdded++;
       }
-      for (const auto & k : state->getMatchedRules())
+      for (std::set<MarkRuleIndex>::iterator k = state->getMatchedRules().begin(); k != state->getMatchedRules().end(); k++)
       {
-        cluster->addMatchedRule(k);
+        cluster->addMatchedRule(*k);
       }
     }
     cluster->setNumMarkedStatesAny(anyAdded);
@@ -355,7 +355,7 @@ void MarkManager::flushMarkedStateNumbers()
 
 void MarkManager::cleanLts()
 {
-  if (m_lts != nullptr)
+  if (m_lts)
   {
     for (State_iterator i = m_lts->getStateIterator(); !i.is_end(); i++)
     {
@@ -364,7 +364,7 @@ void MarkManager::cleanLts()
   }
 }
 
-void MarkManager::applyRule(const MarkRuleIndex& index)
+void MarkManager::applyRule(MarkRuleIndex index)
 {
   for (Cluster_iterator i = m_lts->getClusterIterator(); !i.is_end(); i++)
   {
@@ -385,7 +385,7 @@ void MarkManager::applyRule(const MarkRuleIndex& index)
       }
       else
       {
-        if (state->getMatchedRules().size() == static_cast<size_t>(m_activeMarkRules))
+        if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
         {
           allRemoved++;
         }
@@ -403,7 +403,7 @@ void MarkManager::applyRule(const MarkRuleIndex& index)
   m_activeMarkRules++;
 }
 
-void MarkManager::unapplyRule(const MarkRuleIndex& index)
+void MarkManager::unapplyRule(MarkRuleIndex index)
 {
   m_activeMarkRules--;
   for (Cluster_iterator i = m_lts->getClusterIterator(); !i.is_end(); i++)
@@ -425,7 +425,7 @@ void MarkManager::unapplyRule(const MarkRuleIndex& index)
       }
       else
       {
-        if (state->getMatchedRules().size() == static_cast<size_t>(m_activeMarkRules))
+        if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
         {
           allAdded++;
         }
@@ -444,5 +444,5 @@ void MarkManager::unapplyRule(const MarkRuleIndex& index)
 
 bool MarkManager::matchesRule(State *state, const MarkRule &rule) const
 {
-  return ((static_cast<int>(rule.negated) ^ static_cast<int>(rule.values.contains(m_lts->getStateParameterValue(state, rule.parameter)))) != 0);
+  return rule.negated ^ rule.values.contains(m_lts->getStateParameterValue(state, rule.parameter));
 }

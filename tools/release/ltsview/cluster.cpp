@@ -9,11 +9,11 @@
 /// \file cluster.cpp
 /// \brief Implementation of the Cluster class
 
+#include <algorithm>
+#include <math.h>
 #include "cluster.h"
 #include "mathutils.h"
 #include "state.h"
-#include <algorithm>
-#include <math.h>
 
 using namespace std;
 using namespace MathUtils;
@@ -37,7 +37,7 @@ bool Comp_BCVolume::operator()(const Cluster* c1,const Cluster* c2) const
 
 Cluster::Cluster(int r)
 {
-  ancestor = nullptr;
+  ancestor = NULL;
   position = 0.0f;
   baseRadius = 0.0f;
   topRadius = 0.0f;
@@ -123,19 +123,19 @@ int Cluster::getNumDescendants() const
 
 Cluster* Cluster::getDescendant(int i) const
 {
-  if (!severedDescendants[i].empty())
+  if (severedDescendants[i].size() > 0)
   {
-    return nullptr;
+    return NULL;
   }
-  
-  
+  else
+  {
     return descendants[i];
-  
+  }
 }
 
 bool Cluster::hasDescendants() const
 {
-  return !descendants.empty();
+  return descendants.size() != 0;
 }
 
 
@@ -148,7 +148,7 @@ void Cluster::severDescendant(int i)
 
 void Cluster::healSeverance(int i)
 {
-  if (!severedDescendants[i].empty())
+  if (severedDescendants[i].size() > 0)
   {
     severedDescendants[i].pop_back();
     --severedDescendantsC;
@@ -232,9 +232,9 @@ void Cluster::computeSizeAndPositions_FSM()
 {
   // This process is described in Frank van Ham's Master's thesis, p. 24
   // Recurse into the tree (depth first)
-  for (auto & descendant : descendants)
+  for (unsigned int i = 0; i < descendants.size(); ++i)
   {
-    descendant->computeSizeAndPositions_FSM();
+    descendants[i]->computeSizeAndPositions_FSM();
   }
 
   /* Compute the cluster radius r such that all states fit nicely into the
@@ -248,7 +248,7 @@ void Cluster::computeSizeAndPositions_FSM()
    */
   topRadius = states.size()/(2*static_cast<float>(PI));
 
-  if (descendants.empty())
+  if (descendants.size() == 0)
   {
     baseRadius = topRadius;
     bc_radius = topRadius;
@@ -282,7 +282,7 @@ void Cluster::computeSizeAndPositions_FSM()
 
     // invariant: descendants in range [x,y) have not been assigned a position
     int x = 0;
-    auto y = static_cast<int>(descendants.size());
+    int y = static_cast<int>(descendants.size());
     float bcr_center = 0.0f;  // BC radius of largest descendant in center
     float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
     if (uniqueLargest)
@@ -321,7 +321,7 @@ void Cluster::computeSizeAndPositions_FSM()
     float min_radius1 = 0.0f;
     if (y-x > 1)
     {
-      min_radius1 = static_cast<float>(bcr_rim / sin(PI / (y-x)));
+      min_radius1 = (float)(bcr_rim / sin(PI / (y-x)));
     }
     float min_radius2 = bcr_center;
     if (y-x > 0)
@@ -332,11 +332,11 @@ void Cluster::computeSizeAndPositions_FSM()
     bc_radius = max(min_radius1 + bcr_rim,min_radius2);
     bc_radius = max(topRadius,bc_radius);
     bc_height = 0.0f;
-    for (auto & descendant : descendants)
+    for (unsigned int i = 0; i < descendants.size(); ++i)
     {
-      if (descendant->getBCHeight() > bc_height)
+      if (descendants[i]->getBCHeight() > bc_height)
       {
-        bc_height = descendant->getBCHeight();
+        bc_height = descendants[i]->getBCHeight();
       }
     }
     bc_height += 1.0f;
@@ -356,9 +356,9 @@ void Cluster::computeSizeAndPositions()
 {
   // This process is described in Frank van Ham's Master's thesis, p. 24
   // Recurse into the tree (depth first)
-  for (auto & descendant : descendants)
+  for (unsigned int i = 0; i < descendants.size(); ++i)
   {
-    descendant->computeSizeAndPositions();
+    descendants[i]->computeSizeAndPositions();
   }
 
   /* Compute the cluster radius r such that all states fit nicely into the
@@ -372,7 +372,7 @@ void Cluster::computeSizeAndPositions()
    */
   topRadius = sqrt(states.size()*0.04f);
 
-  if (descendants.empty())
+  if (descendants.size() == 0)
   {
     baseRadius = topRadius;
     bc_radius = topRadius;
@@ -407,7 +407,7 @@ void Cluster::computeSizeAndPositions()
 
     // invariant: descendants in range [x,y) have not been assigned a position
     int x = 0;
-    auto y = static_cast<int>(descendants.size());
+    int y = static_cast<int>(descendants.size());
 
     float bcr_center = 0.0f;  // BC radius of largest descendant in center
     float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
@@ -434,17 +434,17 @@ void Cluster::computeSizeAndPositions()
     float minRimRadius = 0.0f;
     if (y-x > 1)
     {
-      minRimRadius = static_cast<float>(bcr_rim / sin(PI / (y-x)));
+      minRimRadius = (float)(bcr_rim / sin(PI / (y-x)));
     }
     baseRadius = max(bcr_center + bcr_rim + 0.01f,minRimRadius);
     bc_radius = max(bcr_center + bcr_rim + 0.01f,minRimRadius +bcr_rim);
     bc_radius = max(topRadius,bc_radius);
     bc_height = 0.0f;
-    for (auto & descendant : descendants)
+    for (unsigned int i = 0; i < descendants.size(); ++i)
     {
-      if (descendant->getBCHeight() > bc_height)
+      if (descendants[i]->getBCHeight() > bc_height)
       {
-        bc_height = descendant->getBCHeight();
+        bc_height = descendants[i]->getBCHeight();
       }
     }
     bc_height += 1.0f;
@@ -502,19 +502,19 @@ bool Cluster::hasMarkedTransition() const
   return (numMarkedTransitions > 0);
 }
 
-void Cluster::addMatchedRule(const MarkRuleIndex& index)
+void Cluster::addMatchedRule(MarkRuleIndex index)
 {
   matchedRules.insert(index);
 }
 
-void Cluster::removeMatchedRule(const MarkRuleIndex& index)
+void Cluster::removeMatchedRule(MarkRuleIndex index)
 {
   matchedRules.erase(index);
 }
 
 int Cluster::setActionMark(int l,bool b)
 {
-  auto li = actionLabelCounts.find(l);
+  map<int,int>::iterator li = actionLabelCounts.find(l);
   if (li != actionLabelCounts.end())
   {
     if (b)

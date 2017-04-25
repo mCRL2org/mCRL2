@@ -31,7 +31,7 @@ SimDock::SimDock(QWidget *parent, LtsManager *ltsManager)
 
 static inline QTableWidgetItem *item()
 {
-  auto *item = new QTableWidgetItem();
+  QTableWidgetItem *item = new QTableWidgetItem();
   item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
   return item;
 }
@@ -39,7 +39,7 @@ static inline QTableWidgetItem *item()
 void SimDock::changed()
 {
   Simulation *simulation = m_ltsManager->simulation();
-  if (simulation == nullptr)
+  if (!simulation)
   {
     m_ui.start->setEnabled(false);
     m_ui.stop->setEnabled(false);
@@ -93,7 +93,7 @@ void SimDock::changed()
 
 void SimDock::selectionChanged()
 {
-  if ((m_ltsManager->simulation() != nullptr) && m_ltsManager->simulation()->isStarted())
+  if (m_ltsManager->simulation() && m_ltsManager->simulation()->isStarted())
   {
     m_ui.trigger->setEnabled(true);
     QList<Transition *> transitions = m_ltsManager->simulation()->availableTransitions();
@@ -135,7 +135,7 @@ void SimDock::reset()
 void SimDock::trigger()
 {
   Transition *transition = m_ltsManager->simulation()->currentTransition();
-  if (transition == nullptr)
+  if (!transition)
   {
     QList<Transition *> transitions = m_ltsManager->simulation()->availableTransitions();
     if (!transitions.isEmpty())
@@ -143,7 +143,7 @@ void SimDock::trigger()
       transition = transitions[0];
     }
   }
-  if (transition != nullptr)
+  if (transition)
   {
     m_ltsManager->simulation()->followTransition(transition);
   }
@@ -157,7 +157,7 @@ void SimDock::undo()
 void SimDock::select()
 {
   QList<QTableWidgetSelectionRange> selection = m_ui.transitionTable->selectedRanges();
-  if (!selection.empty())
+  if (selection.size() > 0)
   {
     m_ltsManager->simulation()->selectTransition(m_ltsManager->simulation()->availableTransitions()[selection[0].topRow()]);
   }
