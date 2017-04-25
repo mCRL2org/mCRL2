@@ -1,9 +1,8 @@
 ---
-# example usage:
-# clang-tidy -fix tools/release/ltsgraph/*.cpp
-#
-# clang tidy revision: ffb2aae1789705a46e53061c8f6da4846d3ac32c
-Checks:          '*,-hicpp-member-init,-cppcoreguidelines-pro-type-member-init,-hicpp-explicit-conversions,-google-explicit-constructor,-modernize-use-using,-modernize-return-braced-init-list'
+# clang tidy revision ffb2aae1789705a46e53061c8f6da4846d3ac32c
+# for src in tools/release/ltsgraph/*.cpp; do clang-tidy -fix $src -header-filter="tools/release/ltsgraph/.*.h"; done
+Checks:          'cert-*,clang-analyzer-*,cppcoreguidelines-*,hicpp-*,google-readability-namespace-comments,llvm-include-order,misc-*,modernize-*,performance-*,readability-*,-cppcoreguidelines-pro-type-member-init,-hicpp-explicit-conversions,-modernize-use-using,-modernize-return-braced-init-list,-modernize-use-auto,-readability-else-after-return,-modernize-loop-convert,-misc-move-constructor-init,-hicpp-member-init'
+
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
