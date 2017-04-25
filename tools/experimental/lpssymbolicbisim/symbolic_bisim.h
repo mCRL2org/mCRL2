@@ -815,7 +815,11 @@ public:
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
     , strat(st)
     , rewr(spec.data(),jitty)
+#ifdef MCRL2_JITTYC_AVAILABLE
     , proving_rewr(spec.data(), st == jitty ? jitty_prover : jitty_compiling_prover)
+#else
+    , proving_rewr(spec.data(), jitty_prover)
+#endif
     , invariant(inv)
     , m_use_path_eliminator(use_path_eliminator)
     , m_path_eliminator(solver_type)
