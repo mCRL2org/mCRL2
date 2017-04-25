@@ -17,6 +17,7 @@
 #else
 #include <GL/glu.h>
 #endif
+#include "mcrl2/gui/openglwrapper.h"
 
 #include "icons/zoom_cursor.xpm"
 #include "icons/pan_cursor.xpm"
@@ -156,7 +157,7 @@ void LtsCanvas::paintGL()
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
+  OpenGLWrapper::gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
 
   emit renderingStarted();
   render(m_dragging);
@@ -348,7 +349,7 @@ void LtsCanvas::render(bool light)
   GLenum error = glGetError();
   if (error != GL_NO_ERROR)
   {
-    mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(error) << std::endl;
+    mCRL2log(mcrl2::log::error) << "OpenGL error: " << error << std::endl;
   }
 }
 
@@ -478,9 +479,9 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
 
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
-  gluPickMatrix((GLdouble)position.x(), (GLdouble)(viewport[3] - position.y()), 3.0, 3.0, viewport);
+  OpenGLWrapper::gluPickMatrix((GLdouble)position.x(), (GLdouble)(viewport[3] - position.y()), 3.0, 3.0, viewport);
 
-  gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
+  OpenGLWrapper::gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
 
   render(false);
 

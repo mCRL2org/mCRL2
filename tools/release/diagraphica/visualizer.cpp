@@ -11,6 +11,7 @@
 #include <iostream> // only temporary for std::clog
 
 #include "visualizer.h"
+#include "mcrl2/gui/openglwrapper.h"
 
 
 Visualizer::Visualizer(
@@ -51,11 +52,11 @@ void Visualizer::paintGL()
   GLdouble aspect = (GLdouble)width() / (GLdouble)height();
   if (aspect > 1)
   {
-    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
+    OpenGLWrapper::gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
   }
   else
   {
-    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
+    OpenGLWrapper::gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
   }
 
   glMatrixMode(GL_MODELVIEW);
@@ -198,12 +199,11 @@ void Visualizer::startSelectMode(
   glPushMatrix();
   glLoadIdentity();
 
-  gluPickMatrix(
-    (GLdouble) m_lastMouseEvent.x(),
-    (GLdouble)(viewport[3]-m_lastMouseEvent.y()),
-    pickWth,    // picking width
-    pickHgt,    // picking height
-    viewport);
+  OpenGLWrapper::gluPickMatrix(m_lastMouseEvent.x(), // center x
+          viewport[3] - m_lastMouseEvent.y(), // center y
+          pickWth,    // picking width
+          pickHgt,    // picking height
+          viewport);
 
   // casting to GLdouble ensures smooth transitions
   GLdouble aspect = (GLdouble)width() / (GLdouble)height();
@@ -212,12 +212,12 @@ void Visualizer::startSelectMode(
   if (aspect > 1)
     // width > height
   {
-    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
+    OpenGLWrapper::gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
   }
   else
     // height >= width
   {
-    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
+    OpenGLWrapper::gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
   }
 
   glMatrixMode(GL_MODELVIEW);
