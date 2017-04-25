@@ -22,8 +22,8 @@
 #include <QColor>
 #include <QImage>
 
-#include "graph.h"
 #include "gl2ps.h"
+#include "graph.h"
 
 struct VertexData;
 struct TextureData;

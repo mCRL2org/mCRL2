@@ -20,8 +20,8 @@
 #define SPRINGLAYOUT_H
 
 #include <QDockWidget>
-#include <QtOpenGL>
 #include "ui_springlayout.h"
+#include <QtOpenGL>
 
 #include "graph.h"
 
@@ -112,7 +112,7 @@ class SpringLayout
      *        one is created using the provided @e parent.
      * @param The parent of the user inferface in the case none exists yet.
      */
-    SpringLayoutUi* ui(QWidget* parent = 0);
+    SpringLayoutUi* ui(QWidget* parent = nullptr);
 
     //Getters and setters
     int speed() const {
@@ -163,12 +163,12 @@ class SpringLayoutUi : public QDockWidget
      * @param layout The layout object this user interface corresponds to.
      * @param parent The parent widget for this user interface.
      */
-    SpringLayoutUi(SpringLayout& layout, QWidget* parent=0);
+    SpringLayoutUi(SpringLayout& layout, QWidget* parent=nullptr);
 
     /**
      * @brief Destructor.
      */
-    virtual ~SpringLayoutUi();
+    ~SpringLayoutUi() override;
 
     /**
      * @brief Get the current state of the settings.
@@ -247,6 +247,6 @@ class SpringLayoutUi : public QDockWidget
      */
     void setActive(bool active);
 };
-}
+}  // namespace Graph
 
 #endif // SPRINGLAYOUT_H

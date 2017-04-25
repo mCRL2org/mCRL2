@@ -8,8 +8,8 @@
 //
 
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/gui/qt_tool.h"
 #include "mainwindow.h"
+#include "mcrl2/gui/qt_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -27,7 +27,7 @@ class ltsgraph_tool : public ltsgraph_base
                     "http://www.mcrl2.org/web/user_manual/tools/release/ltsgraph.html")
     {}
 
-    bool run()
+    bool run() override
     {
       MainWindow* window = new MainWindow();
 

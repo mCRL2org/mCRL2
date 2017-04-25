@@ -20,8 +20,8 @@
 #define GRAPHINFORMATION_H
 
 #include <QDockWidget>
-#include <QtOpenGL>
 #include "ui_information.h"
+#include <QtOpenGL>
 
 #include "graph.h"
 
@@ -52,7 +52,7 @@ class Information
      *        one is created using the provided @e parent.
      * @param The parent of the user inferface in the case none exists yet.
      */
-    InformationUi* ui(QWidget* parent = 0);
+    InformationUi* ui(QWidget* parent = nullptr);
 
     /**
      * @brief Updates the information.
@@ -80,13 +80,13 @@ class InformationUi : public QDockWidget
      * @param info The Information object this user interface corresponds to.
      * @param parent The parent widget for this user interface.
      */
-    InformationUi(Information& info, QWidget* parent=0);
+    InformationUi(Information& info, QWidget* parent=nullptr);
 
     /**
      * @brief Updates all labels with the information available in the Information object.
      */
     void updateLabels();
 };
-}
+}  // namespace Graph
 
 #endif // GRAPHINFORMATION_H

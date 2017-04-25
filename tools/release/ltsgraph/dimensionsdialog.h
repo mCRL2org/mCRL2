@@ -31,7 +31,7 @@ class DimensionsDialog : public QDialog
     /**
      * @brief Constructor which creates the dialog for the given parent.
      */
-    explicit DimensionsDialog(QWidget* parent = 0);
+    explicit DimensionsDialog(QWidget* parent = nullptr);
 
     /**
      * @brief Returns the supplied width, only valid if exec() returned QDialog::Accepted.

@@ -25,6 +25,7 @@
 #include <cmath>
 
 #include <QReadWriteLock>
+#include <utility>
 
 namespace Graph
 {
@@ -197,7 +198,7 @@ class Node
     Node()=default;
 
     /// \brief Constructor
-    Node(const Coord3D& pos)
+    Node(Coord3D  pos)
       : m_pos(pos),
         m_anchored(false),
         m_locked(false),
@@ -205,7 +206,7 @@ class Node
     {}
 
     /// \brief Constructor
-    Node(const Coord3D& pos,
+    Node(Coord3D  pos,
          const bool anchored,
          const bool locked,
          const float& selected)
@@ -623,6 +624,6 @@ class Graph
       return m_stable;
     }
 };
-}
+}  // namespace Graph
 
 #endif // GRAPH_H

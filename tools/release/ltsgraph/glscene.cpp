@@ -7,15 +7,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <assert.h>
-#include <cstdio>
+#include <cassert>
 #include <cmath>
+#include <cmath>
+#include <cstdio>
 
-#include <QScreen>
+#include <QFile>
 #include <QFont>
 #include <QFontMetrics>
 #include <QPainter>
-#include <QFile>
+#include <QScreen>
 
 #ifdef _WINDOWS
 #include <windows.h>
@@ -52,7 +53,7 @@ struct GLHitRecord
 struct Color3f
 {
   GLfloat r, g, b;
-  Color3f() {}
+  Color3f() = default;
   Color3f(GLfloat r, GLfloat g, GLfloat b) : r(r), g(g), b(b) {}
   Color3f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]) {}
   operator const GLfloat* () const {
@@ -63,7 +64,7 @@ struct Color3f
 struct Color4f
 {
   GLfloat r, g, b, a;
-  Color4f() {}
+  Color4f() = default;
   Color4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) : r(r), g(g), b(b), a(a) {}
   Color4f(const Color3f& c, GLfloat a = 1.0) : r(c.r), g(c.g), b(c.b), a(a) {}
   Color4f(GLfloat* c) : r(c[0]), g(c[1]), b(c[2]), a(c[3]) {}
@@ -112,7 +113,7 @@ struct TextureData
   float pixelsize;
 
   TextureData(float device_pixel_ratio, float pixelsize)
-    : font(), graph(nullptr), transitions(nullptr), states(nullptr), numbers(nullptr), labels(),
+    :  graph(nullptr), transitions(nullptr), states(nullptr), numbers(nullptr), 
       device_pixel_ratio(device_pixel_ratio), pixelsize(pixelsize)
   { }
 
@@ -135,10 +136,10 @@ struct TextureData
     clear();
   }
 
-  void createTexture(QString labelstring, Texture*& texture)
+  void createTexture(const QString& labelstring, Texture*& texture)
   {
     // Reuse texture when possible
-    if (labels.count(labelstring))
+    if (labels.count(labelstring) != 0)
     {
       texture = labels[labelstring];
       return;
@@ -248,11 +249,11 @@ struct TextureData
 
 struct VertexData
 {
-  Coord3D* node, *hint, *handle, *arrowhead, *transition_labels, *state_labels, *number_labels;
+  Coord3D* node{nullptr}, *hint{nullptr}, *handle{nullptr}, *arrowhead{nullptr}, *transition_labels, *state_labels, *number_labels;
 
   VertexData()
-    : node(nullptr), hint(nullptr), handle(nullptr), arrowhead(nullptr)
-  { }
+     
+  = default;
 
   void clear()
   {
@@ -286,7 +287,7 @@ struct VertexData
           stack = 0, stackd = (float)(M_PI_2 / RES_NODE_STACK);
     node = new Coord3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
     for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced) {
-      node[i] = Coord3D(sin(slice), cos(slice), 0.1f);
+      node[i] = Coord3D(std::sin(slice), std::cos(slice), 0.1f);
     }
     // Generate vertices for node (a quad strip drawing a half sphere)
     slice = 0;
@@ -295,19 +296,19 @@ struct VertexData
     {
       for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
       {
-        node[n++] = Coord3D(sin((float)(stack + stackd)) * sin(slice),
-                            sin((float)(stack + stackd)) * cos(slice),
-                            cos((float)(stack + stackd)));
-        node[n++] = Coord3D(sin(stack) * sin(slice),
-                            sin(stack) * cos(slice),
-                            cos(stack));
+        node[n++] = Coord3D(std::sin((float)(stack + stackd)) * std::sin(slice),
+                            std::sin((float)(stack + stackd)) * std::cos(slice),
+                            std::cos((float)(stack + stackd)));
+        node[n++] = Coord3D(std::sin(stack) * std::sin(slice),
+                            std::sin(stack) * std::cos(slice),
+                            std::cos(stack));
       }
-      node[n++] = Coord3D(sin((float)(stack + stackd)) * sin(0.0f),
-                          sin((float)(stack + stackd)) * cos(0.0f),
-                          cos((float)(stack + stackd)));
-      node[n++] = Coord3D(sin(stack) * sin(0.0f),
-                          sin(stack) * cos(0.0f),
-                          cos(stack));
+      node[n++] = Coord3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
+                          std::sin((float)(stack + stackd)) * std::cos(0.0f),
+                          std::cos((float)(stack + stackd)));
+      node[n++] = Coord3D(std::sin(stack) * std::sin(0.0f),
+                          std::sin(stack) * std::cos(0.0f),
+                          std::cos(stack));
     }
     for (size_t i = 0; i < n; ++i) {
       node[i] *= 0.5 * nodesize;
@@ -331,13 +332,14 @@ struct VertexData
     arrowhead = new Coord3D[RES_ARROWHEAD + 1];
     arrowhead[0] = Coord3D(-nodesize / 2.0, 0.0, 0.0);
     float diff = (float)(M_PI / 20.0), t = 0;
-    for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff)
+    for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff) {
       arrowhead[i] = Coord3D(-nodesize / 2.0 - arrowheadsize,
-                             0.3 * arrowheadsize * sin(t),
-                             0.3 * arrowheadsize * cos(t));
+                             0.3 * arrowheadsize * std::sin(t),
+                             0.3 * arrowheadsize * std::cos(t));
+}
     arrowhead[RES_ARROWHEAD] = Coord3D(-nodesize / 2.0 - arrowheadsize,
-                                       0.3 * arrowheadsize * sin(0.0f),
-                                       0.3 * arrowheadsize * cos(0.0f));
+                                       0.3 * arrowheadsize * std::sin(0.0f),
+                                       0.3 * arrowheadsize * std::cos(0.0f));
   }
 };
 
@@ -346,12 +348,11 @@ struct CameraView
   Coord3D rotation;    ///< Rotation of the camera around x, y and z axis (performed in that order)
   Coord3D translation; ///< Translation of the camera
   Coord3D world;       ///< The size of the box in which the graph lives
-  float zoom;          ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
-  float pixelsize;
+  float zoom{1.0};          ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
+  float pixelsize{1};
 
   CameraView()
-    : rotation(Coord3D(0, 0, 0)), translation(Coord3D(0, 0, 0)), world(Coord3D(1000.0, 1000.0, 1000.0)),
-      zoom(1.0), pixelsize(1)
+    : rotation(Coord3D(0, 0, 0)), translation(Coord3D(0, 0, 0)), world(Coord3D(1000.0, 1000.0, 1000.0)) 
   { }
 
   void viewport(size_t width, size_t height)
@@ -439,11 +440,11 @@ struct CameraView
 struct CameraAnimation : public CameraView
 {
   CameraView m_source, m_target;
-  size_t m_animation;
-  size_t m_animation_steps;
-  bool m_resizing;
+  size_t m_animation{0};
+  size_t m_animation_steps{0};
+  bool m_resizing{false};
 
-  CameraAnimation() : m_animation(0), m_animation_steps(0), m_resizing(false) {}
+  CameraAnimation()  = default;
 
   void start_animation(size_t steps)
   {
@@ -1024,7 +1025,7 @@ void GLScene::init(const QColor& clear)
   glFogf(GL_FOG_DENSITY, 1);
   glFogfv(GL_FOG_COLOR, fog_color);
   const GLubyte* version = glGetString(GL_VERSION);
-  if (version && ((version[0] == '1' && version[2] >= '4') || version[0] > '1'))
+  if ((version != nullptr) && ((version[0] == '1' && version[2] >= '4') || version[0] > '1'))
     // if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
   {
     glFogf(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
@@ -1288,7 +1289,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
                    GL2PS_COMPRESS,
                    GL_RGBA,
                    0,
-                   NULL,
+                   nullptr,
                    0, 0, 0,
                    buffersize,
                    outfile,
@@ -1301,7 +1302,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
   {
     mCRL2log(mcrl2::log::error) << "Could not save file (gl2ps error)." << std::endl;
   }
-  if (outfile)
+  if (outfile != nullptr)
   {
     fclose(outfile);
   }

@@ -18,7 +18,7 @@ namespace Graph
 //
 
 Information::Information(Graph& graph)
-  : m_graph(graph), m_ui(NULL), m_initial(""), m_initialstring(""), m_nodes(0), m_edges(0), m_slabels(0), m_tlabels(0)
+  : m_graph(graph), m_ui(nullptr), m_initial(""), m_initialstring(""), m_nodes(0), m_edges(0), m_slabels(0), m_tlabels(0)
 {
   update();
 }
@@ -43,14 +43,14 @@ void Information::update()
   m_edges = m_graph.edgeCount();
   m_slabels = m_graph.stateLabelCount();
   m_tlabels = m_graph.transitionLabelCount();
-  if (m_ui != NULL) {
+  if (m_ui != nullptr) {
     m_ui->updateLabels();
   }
 }
 
 InformationUi* Information::ui(QWidget* parent)
 {
-  if (m_ui == NULL) {
+  if (m_ui == nullptr) {
     m_ui = new InformationUi(*this, parent);
   }
   return m_ui;
@@ -73,4 +73,4 @@ void InformationUi::updateLabels()
   m_ui.lblTransitionLabelsValue->setText(QString::number(m_info.m_tlabels));
 }
 
-}
+}  // namespace Graph

@@ -108,23 +108,23 @@ class GLWidget : public QGLWidget
      * @param graph The graph that is to be visualised by this object.
      * @param parent The parent widget for the user interface.
      */
-    explicit GLWidget(Graph::Graph& graph, QWidget* parent = 0);
+    explicit GLWidget(Graph::Graph& graph, QWidget* parent = nullptr);
 
     /**
      * @brief Destructor.
      */
-    virtual ~GLWidget();
+    ~GLWidget() override;
 
 
     /**
      * @brief Initialises the OpenGL context.
      */
-    virtual void initializeGL();
+    void initializeGL() override;
 
     /**
      * @brief Paints the OpenGL context.
      */
-    virtual void paintGL();
+    void paintGL() override;
 
     /**
      * @brief Pauses painting and clears the selection. Used to make the
@@ -142,31 +142,31 @@ class GLWidget : public QGLWidget
      * @param width The new width for the viewport.
      * @param height The new height for the viewport.
      */
-    virtual void resizeGL(int width, int height);
+    void resizeGL(int width, int height) override;
 
     /**
      * @brief Processes mouse click events.
      * @param e The mouse event.
      */
-    virtual void mousePressEvent(QMouseEvent* e);
+    void mousePressEvent(QMouseEvent* e) override;
 
     /**
      * @brief Processes mouse click release events.
      * @param e The mouse event.
      */
-    virtual void mouseReleaseEvent(QMouseEvent* e);
+    void mouseReleaseEvent(QMouseEvent* e) override;
 
     /**
      * @brief Processes mouse move events.
      * @param e The mouse event.
      */
-    virtual void mouseMoveEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent* e) override;
 
     /**
      * @brief Processes mouse scroll/wheel events.
      * @param e The mouse event.
      */
-    virtual void wheelEvent(QWheelEvent* e);
+    void wheelEvent(QWheelEvent* e) override;
 
 
     /**
@@ -187,7 +187,7 @@ class GLWidget : public QGLWidget
      * @param w The desired width of the image.
      * @param h The desired height of the image.
      */
-    void savePixmap(const QString& filename, const int w = 1024, const int h = 768);
+    void savePixmap(const QString& filename, int w = 1024, int h = 768);
 
     /**
          * @brief Renders the current visualisation to a vector graphics file using gl2ps.
@@ -227,7 +227,7 @@ class GLWidget : public QGLWidget
      *        one is created using the provided @e parent.
      * @param The parent of the user inferface in the case none exists yet.
      */
-    GLWidgetUi* ui(QWidget* parent = 0);
+    GLWidgetUi* ui(QWidget* parent = nullptr);
 
 
     //Getters and setters
@@ -289,12 +289,12 @@ class GLWidgetUi : public QDockWidget
      * @param widget The GLWidget object this user interface corresponds to.
      * @param parent The parent widget for this user interface.
      */
-    GLWidgetUi(GLWidget& widget, QWidget* parent = 0);
+    GLWidgetUi(GLWidget& widget, QWidget* parent = nullptr);
 
     /**
      * @brief Destructor.
      */
-    ~GLWidgetUi();
+    ~GLWidgetUi() override;
   public slots:
 
     /**
