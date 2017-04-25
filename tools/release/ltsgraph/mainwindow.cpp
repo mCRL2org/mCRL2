@@ -13,12 +13,11 @@
 #include "mcrl2/utilities/exception.h"
 
 #include <QSettings>
-#include <utility>
 
-#include "dimensionsdialog.h"
-#include "glwidget.h"
-#include "information.h"
 #include "springlayout.h"
+#include "information.h"
+#include "glwidget.h"
+#include "dimensionsdialog.h"
 
 #define MAX_NODE_COUNT 400
 
@@ -96,7 +95,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   QMainWindow::closeEvent(event);
 }
 
-void MainWindow::showEvent(QShowEvent* /*event*/)
+void MainWindow::showEvent(QShowEvent*)
 {
   if (!m_delayedOpen.isEmpty())
   {
@@ -146,17 +145,17 @@ void MainWindow::onTimer()
   m_glwidget->updateGL();
 }
 
-void MainWindow::onLogOutput(const QString& /*level*/, const QString& /*hint*/, const QDateTime& /*timestamp*/, const QString& /*message*/, const QString& formattedMessage)
+void MainWindow::onLogOutput(QString /*level*/, QString /*hint*/, QDateTime /*timestamp*/, QString /*message*/, QString formattedMessage)
 {
   m_ui.statusBar->showMessage(formattedMessage, 5000);
 }
 
 void MainWindow::delayedOpenFile(QString fileName)
 {
-  m_delayedOpen = std::move(fileName);
+  m_delayedOpen = fileName;
 }
 
-void MainWindow::openFile(const QString& fileName)
+void MainWindow::openFile(QString fileName)
 {
   if (!fileName.isNull())
   {
@@ -225,7 +224,7 @@ void MainWindow::onExportImage()
     if (selectedFilter == bitmap)
     {
       DimensionsDialog dDialog(this);
-      if (dDialog.exec() != 0)
+      if (dDialog.exec())
       {
         m_glwidget->savePixmap(fileName, dDialog.resultWidth(), dDialog.resultHeight());
       }
