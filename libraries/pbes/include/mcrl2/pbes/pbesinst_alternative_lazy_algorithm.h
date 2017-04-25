@@ -10,6 +10,9 @@
 /// \brief An alternative lazy algorithm for instantiating a PBES, ported from
 ///        bes_deprecated.h.
 
+#ifndef MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
+#define MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
+
 #include "mcrl2/bes/remove_level.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
@@ -32,9 +35,6 @@
 #include <stack>
 #include <unordered_map>
 #include <unordered_set>
-
-#ifndef MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
-#define MCRL2_PBES_PBESINST_ALTERNATIVE_LAZY_ALGORITHM_H
 
 namespace std
 {
