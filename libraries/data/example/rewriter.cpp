@@ -1,9 +1,9 @@
-#include <iostream>
-#include <string>
-#include <cassert>
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
+#include <cassert>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;

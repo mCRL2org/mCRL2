@@ -9,8 +9,8 @@
 /// \file data/include/mcrl2/data/rewrite.h
 /// \brief add your file description here.
 
-#ifndef DATA_INCLUDE_MCRL2_DATA_REWRITE_H
-#define DATA_INCLUDE_MCRL2_DATA_REWRITE_H
+#ifndef MCRL2_DATA_REWRITE_H
+#define MCRL2_DATA_REWRITE_H
 
 #include "mcrl2/data/builder.h"
 
@@ -142,4 +142,4 @@ T rewrite(const T& x,
 
 } // namespace mcrl2
 
-#endif // DATA_INCLUDE_MCRL2_DATA_REWRITE_H
+#endif // MCRL2_DATA_REWRITE_H

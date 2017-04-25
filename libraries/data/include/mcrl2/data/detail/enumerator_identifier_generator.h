@@ -15,11 +15,11 @@
 ///        internal data structures and searches through all existing
 ///        function symbols in the aterm library. 
 
-#ifndef MCRL2_DATA_ENUMERATOR_IDENTIFIER_GENERATOR_H
-#define MCRL2_DATA_ENUMERATOR_IDENTIFIER_GENERATOR_H
+#ifndef MCRL2_DATA_DETAIL_ENUMERATOR_IDENTIFIER_GENERATOR_H
+#define MCRL2_DATA_DETAIL_ENUMERATOR_IDENTIFIER_GENERATOR_H
 
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/atermpp/function_symbol_generator.h"
+#include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2
 {
@@ -58,4 +58,4 @@ class enumerator_identifier_generator
 } // namespace mcrl2
 
 
-#endif // MCRL2_DATA_ENUMERATOR_IDENTIFIER_GENERATOR_H
+#endif // MCRL2_DATA_DETAIL_ENUMERATOR_IDENTIFIER_GENERATOR_H

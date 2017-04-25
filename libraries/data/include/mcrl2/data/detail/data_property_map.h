@@ -17,16 +17,16 @@
 #include <map>
 #include <set>
 #include <sstream>
-#include <utility>
 #include <type_traits>
+#include <utility>
 
-#include <functional>
 #include <boost/lexical_cast.hpp>
+#include <functional>
 
-#include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
@@ -339,4 +339,4 @@ bool compare_property_maps(const std::string& message, const PropertyMap& map1, 
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_DETAIL_SPECIFICATION_PROPERTY_MAP_H
+#endif // MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H

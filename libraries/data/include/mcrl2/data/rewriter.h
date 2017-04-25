@@ -12,17 +12,17 @@
 #ifndef MCRL2_DATA_REWRITER_H
 #define MCRL2_DATA_REWRITER_H
 
-#include <functional>
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <sstream>
 
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

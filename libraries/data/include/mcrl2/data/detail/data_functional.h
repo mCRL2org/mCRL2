@@ -20,8 +20,8 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {

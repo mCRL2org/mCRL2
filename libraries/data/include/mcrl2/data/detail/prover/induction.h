@@ -9,16 +9,16 @@
 /// \file mcrl2/data/detail/prover/induction.h
 /// \brief Proving with induction on lists
 
-#ifndef INDUCTION_H
-#define INDUCTION_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
+#define MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -298,8 +298,8 @@ class Induction
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

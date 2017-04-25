@@ -11,13 +11,13 @@
 
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/data/fset.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/set.h"
-#include "mcrl2/data/fset.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/detail/rewrite_strategies.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

@@ -9,12 +9,12 @@
 /// \file mcrl2/utilities/bdd_info.h
 /// \brief Interface to class BDD_Info
 
-#ifndef BDD_INFO_H
-#define BDD_INFO_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_BDD_INFO_H
+#define MCRL2_DATA_DETAIL_PROVER_BDD_INFO_H
 
-#include <iterator>
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard.h"
+#include <iterator>
 
 namespace mcrl2
 {
@@ -89,8 +89,8 @@ class BDD_Info
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

@@ -9,14 +9,14 @@
 /// \file mcrl2/core/identifier_string.h
 /// \brief aterm representations of identifier strings.
 
-#ifndef MCRL2_BASIC_IDENTIFIER_STRING_H
-#define MCRL2_BASIC_IDENTIFIER_STRING_H
+#ifndef MCRL2_CORE_IDENTIFIER_STRING_H
+#define MCRL2_CORE_IDENTIFIER_STRING_H
 
-#include <vector>
-#include <iostream>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
+#include <iostream>
+#include <vector>
 
 namespace mcrl2
 {
@@ -91,4 +91,4 @@ struct hash<mcrl2::core::identifier_string>
 
 } // namespace std
 
-#endif // MCRL2_BASIC_IDENTIFIER_STRING_H
+#endif // MCRL2_CORE_IDENTIFIER_STRING_H

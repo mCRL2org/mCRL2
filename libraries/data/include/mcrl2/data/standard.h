@@ -12,11 +12,11 @@
 #ifndef MCRL2_DATA_STANDARD_H
 #define MCRL2_DATA_STANDARD_H
 
-#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/core/detail/construction_utility.h"
+#include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/abstraction.h"
-#include "mcrl2/core/detail/construction_utility.h"
+#include "mcrl2/data/function_symbol.h"
 
 
 namespace mcrl2
@@ -34,7 +34,7 @@ function_symbol const& true_();
 application and_(const data_expression&,const data_expression&);
 application not_(const data_expression&);
 bool is_bool(const sort_expression&);
-}
+} // namespace sort_bool
 
 /// \cond INTERNAL_DOCS
 namespace detail
@@ -114,7 +114,7 @@ struct greater_equal_symbol : public symbol< greater_equal_symbol >
     return ">=";
   }
 };
-}
+} // namespace detail
 /// \endcond
 
 /// \brief Constructor for function symbol ==

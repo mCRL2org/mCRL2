@@ -10,16 +10,16 @@
 /// \brief Regression test for the transformations between new and old data
 ///       format.
 
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <sstream>
-#include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;

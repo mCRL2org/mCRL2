@@ -11,9 +11,9 @@
 
 #define MCRL2_PRINT_DEBUG
 
-#include <sstream>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/core/print.h"
+#include <boost/test/minimal.hpp>
+#include <sstream>
 
 using namespace mcrl2;
 

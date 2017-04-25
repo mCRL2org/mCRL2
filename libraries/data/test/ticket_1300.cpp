@@ -9,12 +9,12 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/io.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 

@@ -12,9 +12,9 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_SEQUENCE_ALGORITHM_H
 #define MCRL2_DATA_DETAIL_DATA_SEQUENCE_ALGORITHM_H
 
+#include "mcrl2/data/variable.h"
 #include <set>
 #include <vector>
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {

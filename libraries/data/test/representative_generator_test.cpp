@@ -9,20 +9,20 @@
 /// \file data_utility_test.cpp
 /// \brief Add your file description here.
 
-#include <iterator>
-#include <iostream>
-#include <string>
-#include <set>
 #include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <set>
+#include <string>
 
 #include "boost/test/minimal.hpp"
 
-#include "mcrl2/data/representative_generator.h"
-#include "mcrl2/data/nat.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/list.h"
-#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/nat.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/structured_sort.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

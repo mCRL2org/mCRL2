@@ -9,12 +9,12 @@
 /// \file builder_test.cpp
 /// \brief Builder tests.
 
-#include <set>
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
 
-#include "mcrl2/data/builder.h"
 #include "mcrl2/data/add_binding.h"
+#include "mcrl2/data/builder.h"
 #include "mcrl2/data/parse.h"
 
 using namespace mcrl2;

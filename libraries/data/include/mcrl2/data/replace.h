@@ -14,8 +14,8 @@
 
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
-#include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2

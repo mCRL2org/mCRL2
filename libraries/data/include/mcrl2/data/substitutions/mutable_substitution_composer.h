@@ -12,16 +12,16 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_MUTABLE_SUBSTITUTION_COMPOSER_H
 #define MCRL2_DATA_SUBSTITUTIONS_MUTABLE_SUBSTITUTION_COMPOSER_H
 
+#include "mcrl2/data/is_simple_substitution.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/undefined.h"
+#include "mcrl2/utilities/exception.h"
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "mcrl2/data/is_simple_substitution.h"
-#include "mcrl2/data/undefined.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 namespace mcrl2 {
 

@@ -9,17 +9,17 @@
 /// \file mcrl2/data/detail/bdd_prover.h
 /// \brief EQ-BDD based prover for mCRL2 boolean data expressions
 
-#ifndef BDD_PROVER_H
-#define BDD_PROVER_H
+#ifndef MCRL2_DATA_DETAIL_BDD_PROVER_H
+#define MCRL2_DATA_DETAIL_BDD_PROVER_H
 
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/detail/prover/manipulator.h"
-#include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/induction.h"
+#include "mcrl2/data/detail/prover/manipulator.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/detail/prover/utilities.h"
+#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
 {
@@ -644,8 +644,8 @@ class BDD_Prover: protected rewriter
   
 
 };
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

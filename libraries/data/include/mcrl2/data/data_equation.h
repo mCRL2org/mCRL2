@@ -14,12 +14,12 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {
@@ -31,7 +31,7 @@ namespace data
 namespace sort_bool
 {
 function_symbol const& true_();
-}
+} // namespace sort_bool
 
 //--- start generated class data_equation ---//
 /// \brief A data equation

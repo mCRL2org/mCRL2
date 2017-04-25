@@ -19,9 +19,9 @@
 
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/pos.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/standard_utility.h"
 
@@ -275,7 +275,7 @@ std::string positive_constant_as_string(const data_expression& n_in)
 
   return detail::vector_number_to_string(result);
 }
-}
+} // namespace sort_pos
 
 namespace sort_nat
 {
@@ -325,7 +325,7 @@ inline std::string natural_constant_as_string(const data_expression& n)
     return sort_pos::positive_constant_as_string(sort_nat::arg(n));
   }
 }
-}
+} // namespace sort_nat
 
 namespace sort_int
 {
@@ -389,7 +389,7 @@ inline std::string integer_constant_as_string(const data_expression& n)
     return "-" + sort_pos::positive_constant_as_string(sort_int::arg(n));
   }
 }
-}
+} // namespace sort_int
 
 namespace sort_real
 {
@@ -419,7 +419,7 @@ inline data_expression real_(const std::string& n)
 {
   return sort_real::creal(sort_int::int_(n), sort_pos::c1());
 }
-}
+} // namespace sort_real
 
 /// \brief Construct numeric expression from a string representing a number in decimal notation
 /// \param s A sort expression

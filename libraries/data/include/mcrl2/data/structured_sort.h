@@ -12,24 +12,24 @@
 #ifndef MCRL2_DATA_STRUCTURED_SORT_H
 #define MCRL2_DATA_STRUCTURED_SORT_H
 
-#include <string>
-#include <iterator>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/pos.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/pos.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_numbers_utility.h"
 #include "mcrl2/data/structured_sort_constructor.h"
 #include "mcrl2/data/variable.h"
+#include <iterator>
+#include <string>
 
 namespace mcrl2
 {
@@ -44,7 +44,7 @@ namespace sort_fset
 function_symbol_vector fset_generate_constructors_code(const sort_expression&);
 function_symbol_vector fset_generate_functions_code(const sort_expression&);
 data_equation_vector fset_generate_equations_code(const sort_expression&);
-}
+} // namespace sort_fset
 
 // declare for friendship
 namespace sort_fbag
@@ -52,7 +52,7 @@ namespace sort_fbag
 function_symbol_vector fbag_generate_constructors_code(const sort_expression&);
 function_symbol_vector fbag_generate_functions_code(const sort_expression&);
 data_equation_vector fbag_generate_equations_code(const sort_expression&);
-}
+} // namespace sort_fbag
 /// \endcond
 
 /// \brief structured sort.
@@ -468,5 +468,5 @@ inline void swap(structured_sort& t1, structured_sort& t2)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_SORT_EXPRESSION_H
+#endif // MCRL2_DATA_STRUCTURED_SORT_H
 

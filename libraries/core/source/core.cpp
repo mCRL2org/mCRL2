@@ -9,9 +9,9 @@
 /// \file core.cpp
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/print.h"
 
 namespace mcrl2 {
 

@@ -12,15 +12,15 @@
 #ifndef MCRL2_DATA_FIND_EQUALITIES_H
 #define MCRL2_DATA_FIND_EQUALITIES_H
 
-#include <iostream>
-#include <map>
-#include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/exception.h"
+#include <iostream>
+#include <map>
+#include <sstream>
 
 namespace mcrl2 {
 

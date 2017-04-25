@@ -14,8 +14,8 @@
 
 #include <iostream>
 
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/container_type.h"
 #include "mcrl2/data/sort_expression.h"
 

@@ -9,24 +9,24 @@
 /// \file mcrl2/core/print.h
 /// \brief Functions for pretty printing ATerms.
 
-#ifndef MCRL2_PRINT_H
-#define MCRL2_PRINT_H
+#ifndef MCRL2_CORE_PRINT_H
+#define MCRL2_CORE_PRINT_H
 
-#include <cstdio>
-#include <cctype>
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/core/print_format.h"
+#include "mcrl2/core/traverser.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 #include <cassert>
+#include <cctype>
+#include <cstdio>
 #include <cstdlib>
 #include <list>
 #include <ostream>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/traverser.h"
-#include "mcrl2/core/detail/precedence.h"
-#include "mcrl2/core/print_format.h"
 
 namespace mcrl2
 {
@@ -254,4 +254,4 @@ std::string pp(const nil& x);
 
 } // namespace mcrl2
 
-#endif // MCRL2_PRINT_H
+#endif // MCRL2_CORE_PRINT_H

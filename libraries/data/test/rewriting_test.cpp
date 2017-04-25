@@ -9,26 +9,26 @@
 /// \file rewriter_test.cpp
 /// \brief Tests whether terms are correctly rewritten using various rewriters.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/list.h"
-#include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/structured_sort.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/utilities/text_utility.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::core;

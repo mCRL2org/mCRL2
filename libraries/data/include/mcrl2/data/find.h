@@ -12,15 +12,15 @@
 #ifndef MCRL2_DATA_FIND_H
 #define MCRL2_DATA_FIND_H
 
+#include "mcrl2/data/add_binding.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/traverser.h"
+#include "mcrl2/data/variable.h"
+#include <functional>
 #include <functional>
 #include <iterator>
-#include <functional>
 #include <set>
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/add_binding.h"
-#include "mcrl2/data/traverser.h"
 
 namespace mcrl2
 {

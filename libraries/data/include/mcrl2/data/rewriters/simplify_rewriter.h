@@ -9,13 +9,13 @@
 /// \file mcrl2/data/rewriters/simplify_rewriter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITE_BUILDER_H
-#define MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITE_BUILDER_H
+#ifndef MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITER_H
+#define MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITER_H
 
 #include "mcrl2/data/builder.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 #include "mcrl2/data/expression_traits.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 
 namespace mcrl2 {
@@ -144,5 +144,5 @@ T simplify(const T& x, typename std::enable_if< std::is_base_of< atermpp::aterm,
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITE_BUILDER_H
+#endif // MCRL2_DATA_REWRITERS_SIMPLIFY_REWRITER_H
 

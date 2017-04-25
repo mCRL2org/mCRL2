@@ -9,14 +9,14 @@
 /// \file mcrl2/utilities/bdd2dot.h
 /// \brief Interface to class BDD2Dot
 
-#ifndef BDD2DOT_H
-#define BDD2DOT_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_BDD2DOT_H
+#define MCRL2_DATA_DETAIL_PROVER_BDD2DOT_H
 
-#include <fstream>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
+#include "mcrl2/utilities/logger.h"
+#include <fstream>
 
 namespace mcrl2
 {
@@ -105,8 +105,8 @@ class BDD2Dot
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

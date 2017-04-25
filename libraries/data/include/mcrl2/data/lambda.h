@@ -13,8 +13,8 @@
 #define MCRL2_DATA_LAMBDA_H
 
 #include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/data/application.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {

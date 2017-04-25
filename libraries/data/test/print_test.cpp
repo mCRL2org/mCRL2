@@ -11,19 +11,19 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/list.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/function_update.h"
-#include "mcrl2/data/print.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/nat.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/print.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

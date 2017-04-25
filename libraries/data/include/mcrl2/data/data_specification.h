@@ -53,7 +53,7 @@ namespace detail
 {
 atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&);
 
-}
+} // namespace detail
 /// \endcond
 
 /// \brief data specification.

@@ -9,8 +9,8 @@
 /// \file mcrl2/data/detail/prover/manipulator.h
 /// \brief Interface to classes Manipulator.
 
-#ifndef MANIPULATOR_H
-#define MANIPULATOR_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_MANIPULATOR_H
+#define MCRL2_DATA_DETAIL_PROVER_MANIPULATOR_H
 
 #include "mcrl2/data/detail/prover/info.h"
 
@@ -245,8 +245,8 @@ class Manipulator
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

@@ -13,10 +13,10 @@
 #define MCRL2_DATA_DETAIL_TEST_REWRITERS_H
 
 #include "mcrl2/data/builder.h"
-#include "mcrl2/data/join.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/data/join.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/utilities/detail/test_operation.h"
 
 namespace mcrl2 {

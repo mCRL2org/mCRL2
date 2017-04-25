@@ -9,12 +9,12 @@
 /// \file mcrl2/data/detail/prover/info.h
 /// \brief Interface to classes Info
 
-#ifndef INFO_H
-#define INFO_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_INFO_H
+#define MCRL2_DATA_DETAIL_PROVER_INFO_H
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/utilities.h"
+#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
 {
@@ -349,8 +349,8 @@ class Info
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

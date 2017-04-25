@@ -13,13 +13,13 @@
 #define MCRL2_DATA_ADD_BINDING_H
 
 #include "mcrl2/core/add_binding.h"
-#include "mcrl2/data/variable.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/where_clause.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/data_equation.h"
 
 namespace mcrl2
 {

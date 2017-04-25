@@ -9,10 +9,10 @@
 /// \file identifier_generator_test.cpp
 /// \brief Test for identifier generators.
 
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/xyz_identifier_generator.h"

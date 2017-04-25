@@ -12,25 +12,25 @@
 #ifndef MCRL2_DATA_PARSE_H
 #define MCRL2_DATA_PARSE_H
 
-#include <sstream>
-#include <climits>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/parser_utility.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/lambda.h"
-#include "mcrl2/data/typecheck.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/standard_container_utility.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/undefined.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <climits>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <sstream>
 
 namespace mcrl2
 {

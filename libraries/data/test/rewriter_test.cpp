@@ -9,23 +9,23 @@
 /// \file rewriter_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <memory>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
 #include "mcrl2/data/detail/parse_substitution.h"
 #include "mcrl2/data/detail/test_rewriters.h"
-#include "mcrl2/data/detail/one_point_rule_preprocessor.h"
-#include "mcrl2/data/rewriters/simplify_rewriter.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/rewriters/simplify_rewriter.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <memory>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::core;

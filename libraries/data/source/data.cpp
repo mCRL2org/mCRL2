@@ -14,8 +14,8 @@
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/translate_user_notation.h"
 
 namespace mcrl2
 {
@@ -143,9 +143,9 @@ sort_expression data_expression::sort() const
     {
       const atermpp::term_list<aterm_appl> &v_variables = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
       sort_expression_vector s;
-      for (atermpp::term_list<aterm_appl>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
+      for (const auto & v_variable : v_variables)
       {
-        s.push_back(down_cast<sort_expression>((*i)[1])); // Push the sort.
+        s.push_back(down_cast<sort_expression>(v_variable[1])); // Push the sort.
       }
       return function_sort(sort_expression_list(s.begin(),s.end()), atermpp::down_cast<data_expression>((*this)[2]).sort());
     }
@@ -189,9 +189,9 @@ sort_expression data_expression::sort() const
 std::set<data::variable> substitution_variables(const mutable_map_substitution<>& sigma)
 {
   std::set<data::variable> result;
-  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  for (const auto & i : sigma)
   {
-    data::find_free_variables(i->second, std::inserter(result, result.end()));
+    data::find_free_variables(i.second, std::inserter(result, result.end()));
   }
   return result;
 }

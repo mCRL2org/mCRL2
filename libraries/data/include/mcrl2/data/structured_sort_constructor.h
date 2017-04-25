@@ -12,12 +12,12 @@
 #ifndef MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_H
 #define MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_H
 
-#include <string>
-#include <iterator>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/structured_sort_constructor_argument.h"
+#include <iterator>
+#include <string>
 
 namespace mcrl2
 {
@@ -230,4 +230,4 @@ std::string pp(const structured_sort_constructor_vector& x);
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_H
+#endif // MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_H

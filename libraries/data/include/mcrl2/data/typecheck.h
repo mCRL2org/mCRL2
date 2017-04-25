@@ -12,9 +12,9 @@
 #ifndef MCRL2_DATA_TYPECHECK_H
 #define MCRL2_DATA_TYPECHECK_H
 
-#include "mcrl2/data/sort_type_checker.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/variable_context.h"
+#include "mcrl2/data/sort_type_checker.h"
 
 namespace mcrl2
 {

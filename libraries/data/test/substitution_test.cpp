@@ -13,13 +13,13 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/detail/concepts.h"
-#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
@@ -144,11 +144,11 @@ struct my_assignment_sequence_substitution: public std::unary_function<variable,
 
   data_expression operator()(const variable& v) const
   {
-    for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
+    for (const auto & assignment : assignments)
     {
-      if (i->lhs() == v)
+      if (assignment.lhs() == v)
       {
-        return i->rhs();
+        return assignment.rhs();
       }
     }
     return v;

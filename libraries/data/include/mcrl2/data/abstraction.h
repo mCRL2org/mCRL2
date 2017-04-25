@@ -13,11 +13,11 @@
 #define MCRL2_DATA_ABSTRACTION_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/binder_type.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/binder_type.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {

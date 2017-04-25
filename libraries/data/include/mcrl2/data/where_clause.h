@@ -13,8 +13,8 @@
 #define MCRL2_DATA_WHERE_CLAUSE_H
 
 #include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2
 {

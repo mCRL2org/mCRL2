@@ -18,8 +18,8 @@
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/nat.h"
-#include "mcrl2/data/set.h"
 #include "mcrl2/data/real.h"
+#include "mcrl2/data/set.h"
 
 namespace mcrl2 {
 

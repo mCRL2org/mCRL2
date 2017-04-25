@@ -12,8 +12,8 @@
 #ifndef MCRL2_DATA_DETAIL_VARIABLE_CONTEXT_H
 #define MCRL2_DATA_DETAIL_VARIABLE_CONTEXT_H
 
-#include <map>
 #include "mcrl2/data/variable.h"
+#include <map>
 
 namespace mcrl2 {
 

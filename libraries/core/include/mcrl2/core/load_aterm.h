@@ -12,10 +12,10 @@
 #ifndef MCRL2_CORE_LOAD_ATERM_H
 #define MCRL2_CORE_LOAD_ATERM_H
 
-#include <istream>
-#include <string>
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/utilities/exception.h"
+#include <istream>
+#include <string>
 
 namespace mcrl2 {
 

@@ -1,5 +1,5 @@
-#ifndef _MCRL2_DATA_CONCEPTS__HPP_
-#define _MCRL2_DATA_CONCEPTS__HPP_
+#ifndef MCRL2_DATA_DETAIL_CONCEPTS_H
+#define MCRL2_DATA_DETAIL_CONCEPTS_H
 
 #include "boost/concept_check.hpp"
 // #include "boost/type_traits/is_convertible.hpp"
@@ -88,9 +88,9 @@ BOOST_concept(Enumerator,(E)) : boost_concepts::ForwardTraversal< E >
     s = *e;
   }
 };
-}
-}
-}
+} // namespace concepts
+} // namespace data
+} // namespace mcrl2
 
 #include "boost/concept/detail/concept_undef.hpp"
 

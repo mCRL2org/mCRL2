@@ -12,13 +12,13 @@
 #ifndef MCRL2_DATA_BASIC_SORT_H
 #define MCRL2_DATA_BASIC_SORT_H
 
-#include <string>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/sort_expression.h"
+#include <string>
 
 namespace mcrl2
 {
@@ -89,5 +89,5 @@ typedef std::vector<basic_sort> basic_sort_vector;
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_SORT_EXPRESSION_H
+#endif // MCRL2_DATA_BASIC_SORT_H
 

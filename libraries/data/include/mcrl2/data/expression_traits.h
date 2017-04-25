@@ -9,18 +9,18 @@
 /// \file mcrl2/data/expression_traits.h
 /// \brief Contains term traits for data_expression.
 
-#ifndef MCRL2_DATA_TERM_TRAITS_H
-#define MCRL2_DATA_TERM_TRAITS_H
+#ifndef MCRL2_DATA_EXPRESSION_TRAITS_H
+#define MCRL2_DATA_EXPRESSION_TRAITS_H
 
-#include <functional>
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/data/application.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/variable.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/utilities/exception.h"
+#include <functional>
 
 namespace mcrl2
 {
@@ -352,8 +352,8 @@ struct expression_traits : public core::term_traits< Expression >
   }
 };
 
-} // namespace core
+} // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_TERM_TRAITS_H
+#endif // MCRL2_DATA_EXPRESSION_TRAITS_H

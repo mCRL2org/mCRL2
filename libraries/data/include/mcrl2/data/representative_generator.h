@@ -9,8 +9,8 @@
 /// \file mcrl2/data/representative_generator.h
 /// \brief Component for generating representatives of sorts
 
-#ifndef MCRL2_DATA_REPRESENTATIVE_GENERATOR_H__
-#define MCRL2_DATA_REPRESENTATIVE_GENERATOR_H__
+#ifndef MCRL2_DATA_REPRESENTATIVE_GENERATOR_H
+#define MCRL2_DATA_REPRESENTATIVE_GENERATOR_H
 
 #include <algorithm>
 #include <functional>

@@ -12,14 +12,14 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_ASSIGNMENT_SEQUENCE_SUBSTITUTION_H
 #define MCRL2_DATA_SUBSTITUTIONS_ASSIGNMENT_SEQUENCE_SUBSTITUTION_H
 
-#include <functional>
-#include <iostream>
-#include <sstream>
-#include <string>
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/utilities/exception.h"
+#include <functional>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 namespace mcrl2 {
 

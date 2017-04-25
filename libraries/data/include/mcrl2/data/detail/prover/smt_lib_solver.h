@@ -9,19 +9,19 @@
 /// \file mcrl2/data/detail/prover/smt_lib_solver.h
 /// \brief Abstract interface for SMT solvers based on the SMT-LIB format
 
-#ifndef SMT_LIB_SOLVER_H
-#define SMT_LIB_SOLVER_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_SMT_LIB_SOLVER_H
+#define MCRL2_DATA_DETAIL_PROVER_SMT_LIB_SOLVER_H
 
-#include <string>
 #include <sstream>
+#include <string>
 
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 #ifdef HAVE_CVC
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
@@ -124,10 +124,8 @@ class SMT_LIB_Solver: public SMT_Solver
               v_sort_domain_list = sort_expression_list({v_sort});
               v_sort = sort_expression();
             }
-            for (sort_expression_list::const_iterator l = v_sort_domain_list.begin();
-                                 l!=v_sort_domain_list.end() ; ++l)
+            for (auto v_sort_domain_elt : v_sort_domain_list)
             {
-              sort_expression v_sort_domain_elt(*l);
               if (is_function_sort(v_sort_domain_elt))
               {
                 throw mcrl2::runtime_error("Function " + data::pp(i->first) +
@@ -182,9 +180,8 @@ class SMT_LIB_Solver: public SMT_Solver
         f_variables_extrafuns = "  :extrafuns (";
       }
 
-      for(std::set < variable > :: const_iterator i=f_variables.begin(); i!=f_variables.end(); ++i)
+      for(auto v_variable : f_variables)
       {
-        const variable v_variable = *i;
         std::string v_variable_string = v_variable.name();
         sort_expression v_sort = data_expression(v_variable).sort();
         if (sort_real::is_real(v_sort))
@@ -754,18 +751,18 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void add_nat_clauses()
     {
-      for(std::set < variable >::const_iterator i=f_nat_variables.begin(); i!=f_nat_variables.end(); ++i)
+      for(const auto & f_nat_variable : f_nat_variables)
       {
-        std::string v_variable_string = i->name();
+        std::string v_variable_string = f_nat_variable.name();
         f_formula = f_formula + " (>= " + v_variable_string + " 0)";
       }
     }
 
     void add_pos_clauses()
     {
-      for(std::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)
+      for(const auto & f_pos_variable : f_pos_variables)
       {
-        std::string v_variable_string = i->name();
+        std::string v_variable_string = f_pos_variable.name();
         f_formula = f_formula + " (>= " + v_variable_string + " 1)";
       }
     }
@@ -975,10 +972,10 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
     }
 };
 #endif
-} // prover
+} // namespace prover
 
-} // detail
-} // data
-} // mcrl2
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

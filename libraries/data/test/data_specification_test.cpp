@@ -9,23 +9,23 @@
 /// \file data_specification_test.cpp
 /// \brief Basic regression test for data specifications.
 
-#include <iostream>
-#include <functional>
 #include <boost/test/minimal.hpp>
+#include <functional>
+#include <iostream>
 // #include <boost/range/iterator_range.hpp>
 
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/list.h"
-#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/merge_data_specifications.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/structured_sort.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

@@ -9,11 +9,11 @@
 /// \file mcrl2/data/detail/prover/bdd_simplifier.h
 /// \brief Abstract interface for BDD simplifiers
 
-#ifndef BDD_SIMPLIFIER_H
-#define BDD_SIMPLIFIER_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_BDD_SIMPLIFIER_H
+#define MCRL2_DATA_DETAIL_PROVER_BDD_SIMPLIFIER_H
 
-#include <ctime>
 #include "mcrl2/data/data_expression.h"
+#include <ctime>
 
 namespace mcrl2
 {
@@ -67,8 +67,8 @@ class BDD_Simplifier
       return a_bdd;
     }
 };
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

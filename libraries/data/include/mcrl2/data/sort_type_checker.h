@@ -12,9 +12,9 @@
 #ifndef MCRL2_DATA_SORT_TYPE_CHECKER_H
 #define MCRL2_DATA_SORT_TYPE_CHECKER_H
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/sort_specification.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/sort_specification.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {

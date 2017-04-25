@@ -12,18 +12,18 @@
 #ifndef MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 #define MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 
-#include <type_traits>
 #include <iterator>
+#include <type_traits>
 
 #include "mcrl2/utilities/detail/join.h"
 
 // Workaround for OS X with Apples patched gcc 4.0.1
 #undef nil
 
+#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
-#include "mcrl2/data/bag.h"
-#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2
 {
@@ -145,7 +145,7 @@ bool is_list_enumeration_application(const atermpp::aterm_appl& e)
   }
   return false;
 }
-}
+} // namespace sort_list
 
 namespace sort_set
 {
@@ -239,7 +239,7 @@ bool is_set_enumeration_application(const atermpp::aterm_appl& e)
   }
   return false;
 }
-}
+} // namespace sort_set
 
 namespace sort_fset
 {
@@ -279,7 +279,7 @@ application fset(const sort_expression& s,
   return fset(s, data_expression_vector(range.begin(),range.end()));
 }
 
-}
+} // namespace sort_fset
 
 namespace sort_bag
 {
@@ -391,7 +391,7 @@ bool is_bag_enumeration_application(const atermpp::aterm_appl& e)
   return false;
 }
 
-}
+} // namespace sort_bag
 
 namespace sort_fbag
 {
@@ -429,7 +429,7 @@ application fbag(const sort_expression& s, const data_expression_list& range)
 {
   return fbag(s, data_expression_vector(range.begin(),range.end()));
 }
-}
+} // namespace sort_fbag
 
 } // namespace data
 

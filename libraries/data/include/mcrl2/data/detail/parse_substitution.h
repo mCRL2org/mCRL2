@@ -12,11 +12,11 @@
 #ifndef MCRL2_DATA_DETAIL_PARSE_SUBSTITUTION_H
 #define MCRL2_DATA_DETAIL_PARSE_SUBSTITUTION_H
 
-#include <string>
-#include <vector>
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <string>
+#include <vector>
 
 namespace mcrl2
 {

@@ -12,16 +12,16 @@
 // Some tests rely on type check failures, so we have to set this flag.
 #define MCRL2_DISABLE_TYPECHECK_ASSERTIONS
 
-#include <iostream>
-#include <sstream>
-#include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/experimental/type_check_tree.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/data/untyped_sort.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/print.h"
-#include "mcrl2/data/experimental/type_check_tree.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <sstream>
 
 using namespace mcrl2;
 

@@ -12,20 +12,20 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/detail/enumerator_identifier_generator.h"
+#include "mcrl2/data/detail/enumerator_variable_limit.h"
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/enumerator_substitution.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/utilities/math.h"
+#include <boost/iterator/iterator_facade.hpp>
 #include <deque>
 #include <limits>
 #include <map>
 #include <sstream>
 #include <utility>
-#include <boost/iterator/iterator_facade.hpp>
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/identifier_generator.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitutions/enumerator_substitution.h"
-#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
-#include "mcrl2/data/detail/enumerator_variable_limit.h"
-#include "mcrl2/data/detail/enumerator_identifier_generator.h"
-#include "mcrl2/utilities/math.h"
 
 namespace mcrl2
 {

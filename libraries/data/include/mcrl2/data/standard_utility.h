@@ -18,11 +18,11 @@
 #undef nil
 
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/real.h"
 #include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/real.h"
 
 namespace mcrl2
 {
@@ -46,7 +46,7 @@ inline bool is_boolean_constant(data_expression const& b)
   return sort_bool::is_true_function_symbol(b) ||
          sort_bool::is_false_function_symbol(b);
 }
-}
+} // namespace sort_bool
 
 /// \brief Returns true iff the expression represents a standard sort.
 /// \param[in] s a sort expression.

@@ -13,20 +13,20 @@
 #define MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/list.h"
-#include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/function_update.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/set.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_numbers_utility.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/function_update.h"
-#include "mcrl2/data/lambda.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2 {
 

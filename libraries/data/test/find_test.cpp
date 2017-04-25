@@ -9,15 +9,15 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/standard_utility.h"
 #include <algorithm>
+#include <boost/test/minimal.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/function_sort.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;

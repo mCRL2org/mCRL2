@@ -12,10 +12,10 @@
 #ifndef MCRL2_CORE_TRAVERSER_H
 #define MCRL2_CORE_TRAVERSER_H
 
-#include <set>
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/nil.h"
+#include <set>
 
 namespace mcrl2
 {

@@ -12,14 +12,14 @@
 #ifndef MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_ARGUMENT_H
 #define MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_ARGUMENT_H
 
-#include <string>
-#include <iterator>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/sort_expression.h"
+#include <iterator>
+#include <string>
 
 namespace mcrl2
 {
@@ -121,5 +121,5 @@ inline void swap(structured_sort_constructor_argument& t1, structured_sort_const
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_ARGUMENT_H
+#endif // MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_ARGUMENT_H
 

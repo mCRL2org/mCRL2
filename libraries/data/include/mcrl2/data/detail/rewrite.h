@@ -8,13 +8,13 @@
 //
 /// \file mcrl2/data/detail/rewrite.h
 
-#ifndef __LIBREWRITE_H
-#define __LIBREWRITE_H
+#ifndef MCRL2_DATA_DETAIL_REWRITE_H
+#define MCRL2_DATA_DETAIL_REWRITE_H
 
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/selection.h"
-#include "mcrl2/data/rewrite_strategy.h"
 #include "mcrl2/data/detail/enumerator_identifier_generator.h"
+#include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 namespace mcrl2
@@ -208,8 +208,8 @@ inline size_t getArity(const data::function_symbol& op)
   return arity;
 }
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

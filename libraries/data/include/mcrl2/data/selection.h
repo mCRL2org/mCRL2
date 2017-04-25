@@ -14,10 +14,10 @@
 
 #include <algorithm>
 
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2
 {
@@ -188,5 +188,5 @@ class used_data_equation_selector
 
 } // namespace mcrl2
 
-#endif //MCRL2_DATA_UTILITY_H
+#endif // MCRL2_DATA_SELECTION_H
 

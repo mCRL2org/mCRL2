@@ -9,17 +9,17 @@
 /// \file mcrl2/data/detail/rewrite_strategies.h
 /// \brief Utility functions for unit testing
 
-#ifndef MCRL2_DATA_DETAIL_REWRITE_STRATEGIES
-#define MCRL2_DATA_DETAIL_REWRITE_STRATEGIES
+#ifndef MCRL2_DATA_DETAIL_REWRITE_STRATEGIES_H
+#define MCRL2_DATA_DETAIL_REWRITE_STRATEGIES_H
 
+#include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/data/rewrite_strategy.h"
 #include <algorithm>
-#include <string>
-#include <sstream>
-#include <vector>
 #include <cctype>
 #include <fstream>
-#include "mcrl2/data/rewrite_strategy.h"
-#include "mcrl2/data/detail/rewrite_strategies.h"
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace mcrl2
 {
@@ -61,10 +61,10 @@ const std::vector<data::rewrite_strategy>& get_test_rewrite_strategies(const boo
   return rewrite_strategies;
 }
 
-}
+} // namespace detail
 
-}
+} // namespace data
 
-}
+} // namespace mcrl2
 
-#endif //MCRL2_DATA_DETAIL_REWRITE_STRATEGIES
+#endif // MCRL2_DATA_DETAIL_REWRITE_STRATEGIES_H

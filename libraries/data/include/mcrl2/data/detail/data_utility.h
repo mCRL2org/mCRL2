@@ -12,19 +12,19 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_UTILITY_H
 #define MCRL2_DATA_DETAIL_DATA_UTILITY_H
 
+#include "functional"
 #include <algorithm>
 #include <iterator>
 #include <set>
 #include <utility>
-#include "functional"
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/alias.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/alias.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2

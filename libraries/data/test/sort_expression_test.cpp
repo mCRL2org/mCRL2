@@ -9,16 +9,16 @@
 /// \file sort_expression_test.cpp
 /// \brief Basic regression test for sort expressions.
 
-#include <iostream>
 #include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/nat.h"
+#include "mcrl2/data/structured_sort.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

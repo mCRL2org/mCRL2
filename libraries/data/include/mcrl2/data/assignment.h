@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_ASSIGNMENT_H
 #define MCRL2_DATA_ASSIGNMENT_H
 
-#include <stdexcept>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/default_values.h"
@@ -21,6 +20,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/data/untyped_identifier.h"
 #include "mcrl2/data/variable.h"
+#include <stdexcept>
 
 namespace mcrl2
 {

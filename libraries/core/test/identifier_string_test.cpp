@@ -9,9 +9,9 @@
 /// \file identifier_string_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/core/identifier_string.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
 
 using namespace mcrl2;
 
