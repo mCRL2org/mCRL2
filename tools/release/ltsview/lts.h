@@ -79,25 +79,25 @@ class LTS
     void computeClusterInfo();
     void getActionLabels(std::vector<std::string> &ls) const;
     State* getInitialState() const;
-    std::string getLabel(int labindex);
+    std::string getLabel(int labindex) const;
     Cluster_iterator getClusterIterator();
     Reverse_cluster_iterator getReverseClusterIterator();
     State_iterator getStateIterator();
     int getNumClusters() const;
     int getNumDeadlocks();
-    int getNumLabels();
+    int getNumLabels() const;
     int getNumRanks() const;
     int getNumStates() const;
     int getNumTransitions() const;
 
     bool hasStateInfo() const { return mcrl2_lts->has_state_info(); }
     size_t getNumParameters() const;
-    const std::vector<std::string>& getParameterDomain(size_t parindex) { return mcrl2_lts->state_element_values(parindex); }
-    std::string getParameterName(size_t parindex) ;
-    size_t getStateParameterValue(State* state,size_t param);
+    const std::vector<std::string>& getParameterDomain(size_t parindex) const { return mcrl2_lts->state_element_values(parindex); }
+    std::string getParameterName(size_t parindex) const;
+    size_t getStateParameterValue(State* state,size_t param) const;
     std::string getStateParameterValueStr(State* state,
-                                          size_t param);
-    std::set<std::string> getClusterParameterValues(Cluster* c, size_t param);
+                                          size_t param) const;
+    std::set<std::string> getClusterParameterValues(Cluster* c, size_t param) const;
 
     void positionClusters(bool fsmstyle);
     void positionStates(bool multiPass);

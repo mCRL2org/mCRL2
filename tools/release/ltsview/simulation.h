@@ -15,16 +15,17 @@
 class LTS;
 class State;
 class Transition;
+class LtsManager;
 
 class Simulation : public QObject
 {
   Q_OBJECT
 
   public:
-    Simulation(QObject *parent, LTS *lts);
+    Simulation(QObject *parent, LTS& lts);
     ~Simulation();
     void operator=(const Simulation &other);
-    LTS *lts() const { return m_lts; }
+    const LTS& lts() const { return m_ltsRef; }
     bool isStarted() const { return m_currentState != 0; }
     State *initialState() const { return m_initialState; }
     State *currentState() const { return m_currentState; }
@@ -50,7 +51,7 @@ class Simulation : public QObject
     void selectionChanged();
 
   private:
-    LTS *m_lts;
+    LTS& m_ltsRef;
     State *m_initialState;
     State *m_currentState;
     Transition *m_currentTransition;

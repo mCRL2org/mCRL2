@@ -38,7 +38,7 @@ static inline QTableWidgetItem *item()
 
 void SimDock::changed()
 {
-  Simulation *simulation = m_ltsManager->simulation();
+  const std::unique_ptr<Simulation>& simulation = m_ltsManager->simulation();
   if (!simulation)
   {
     m_ui.start->setEnabled(false);
@@ -74,15 +74,15 @@ void SimDock::changed()
     {
       m_ui.transitionTable->setItem(i, 0, item());
       m_ui.transitionTable->setItem(i, 1, item());
-      m_ui.transitionTable->item(i, 0)->setText(QString::fromStdString(simulation->lts()->getLabel(transitions[i]->getLabel())));
+      m_ui.transitionTable->item(i, 0)->setText(QString::fromStdString(simulation->lts().getLabel(transitions[i]->getLabel())));
 
       State *destination = transitions[i]->getEndState();
       QStringList assignments;
-      for (size_t j = 0; j < simulation->lts()->getNumParameters(); j++)
+      for (size_t j = 0; j < simulation->lts().getNumParameters(); j++)
       {
-        if (simulation->lts()->getStateParameterValue(currentState, j) != simulation->lts()->getStateParameterValue(destination, j))
+        if (simulation->lts().getStateParameterValue(currentState, j) != simulation->lts().getStateParameterValue(destination, j))
         {
-          assignments += QString::fromStdString(simulation->lts()->getParameterName(j)) + QString(":=") + QString::fromStdString(simulation->lts()->getStateParameterValueStr(destination, j));
+          assignments += QString::fromStdString(simulation->lts().getParameterName(j)) + QString(":=") + QString::fromStdString(simulation->lts().getStateParameterValueStr(destination, j));
         }
       }
       m_ui.transitionTable->item(i, 1)->setText(assignments.join(", "));

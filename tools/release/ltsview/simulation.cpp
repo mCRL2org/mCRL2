@@ -16,9 +16,9 @@
 
 using namespace std;
 
-Simulation::Simulation(QObject *parent, LTS *lts):
+Simulation::Simulation(QObject *parent, LTS& lts):
   QObject(parent),
-  m_lts(lts),
+  m_ltsRef(lts),
   m_initialState(0),
   m_currentState(0),
   m_currentTransition(0)
@@ -38,7 +38,7 @@ void Simulation::operator=(const Simulation &other)
   }
 
   stop();
-  m_lts = other.m_lts;
+  m_ltsRef = other.m_ltsRef;
   m_initialState = other.m_initialState;
   m_currentState = other.m_currentState;
   m_currentTransition = other.m_currentTransition;
@@ -79,7 +79,7 @@ void Simulation::start()
 {
   if (!m_currentState)
   {
-    m_currentState = (m_initialState ? m_initialState : m_lts->getInitialState());
+    m_currentState = (m_initialState ? m_initialState : m_ltsRef.getInitialState());
     m_currentState->increaseSimulation();
     m_currentTransition = 0;
     emit started();
@@ -134,7 +134,7 @@ void Simulation::traceback()
   // TODO: this algorithm only works for iterative state ranking
   if (m_currentState)
   {
-    State *initialState = m_lts->getInitialState();
+    State *initialState = m_ltsRef.getInitialState();
     State *currentState = m_history.isEmpty() ? m_currentState : m_history.first()->getBeginState();
 
     while (currentState != initialState)
@@ -181,15 +181,15 @@ bool Simulation::loadTrace(QString filename)
     return false;
   }
 
-  if (!m_lts->hasStateInfo())
+  if (!m_ltsRef.hasStateInfo())
   {
      mCRL2log(mcrl2::log::error) << "The trace in " << filename.toStdString() << " has state information but the labelled transition system does not have it, which is currently not allowed by ltsview.";
      return false;
   }
 
-  Simulation simulation(0, m_lts);
-  State* initialState = m_lts->getInitialState();
-  if (trace.currentState().size() != m_lts->getNumParameters())
+  Simulation simulation(0, m_ltsRef);
+  State* initialState = m_ltsRef.getInitialState();
+  if (trace.currentState().size() != m_ltsRef.getNumParameters())
   {
     mCRL2log(mcrl2::log::error) << "The trace in " << filename.toStdString() << " and the labelled transition system have state information of unequal lengths.";
     return false;
@@ -212,7 +212,7 @@ bool Simulation::loadTrace(QString filename)
 
     for (int i = 0; i < transitions.size(); i++)
     {
-      if (action == m_lts->getLabel(transitions[i]->getLabel()))
+      if (action == m_ltsRef.getLabel(transitions[i]->getLabel()))
       {
         possibilities++;
         transition = transitions[i];
@@ -240,7 +240,7 @@ bool Simulation::loadTrace(QString filename)
 
         for (size_t j = 0; j < currentState.size(); j++)
         {
-          if (mcrl2::data::pp(currentState[j]) == m_lts->getStateParameterValueStr(state, j))
+          if (mcrl2::data::pp(currentState[j]) == m_ltsRef.getStateParameterValueStr(state, j))
           {
             match++;
           }

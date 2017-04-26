@@ -241,23 +241,23 @@ State_iterator LTS::getStateIterator()
   return State_iterator(this);
 }
 
-string LTS::getParameterName(size_t parindex)
+std::string LTS::getParameterName(size_t parindex) const
 {
   return mcrl2_lts->process_parameter(parindex).first; // in an .fsm file a parameter is a pair of strings.
 }
 
-size_t LTS::getStateParameterValue(State* state,size_t param)
+size_t LTS::getStateParameterValue(State* state,size_t param) const
 {
   return mcrl2_lts->state_label(state->getID())[param];
 }
 
-std::string LTS::getStateParameterValueStr(State* state, size_t param)
+std::string LTS::getStateParameterValueStr(State* state, size_t param) const
 {
   using namespace mcrl2::lts::detail;
   return mcrl2_lts->state_element_value(param,(mcrl2_lts->state_label(state->getID()))[param]);
 }
 
-std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t param)
+std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t param) const
 {
   std::set<std::string> result;
   for (int i = 0; i < cluster->getNumStates(); ++i)
@@ -311,7 +311,7 @@ bool LTS::readFromFile(const std::string& filename)
   return true;
 }
 
-int LTS::getNumLabels()
+int LTS::getNumLabels() const
 {
   return static_cast<int>(mcrl2_lts->num_action_labels());
 }
@@ -321,7 +321,7 @@ size_t LTS::getNumParameters() const
   return mcrl2_lts->process_parameters().size();
 }
 
-string LTS::getLabel(int labindex)
+std::string LTS::getLabel(int labindex) const
 {
   return mcrl2_lts->action_label(labindex);
 }

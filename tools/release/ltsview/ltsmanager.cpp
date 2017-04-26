@@ -73,7 +73,7 @@ LtsManager::LtsManager(QObject *parent, Settings *settings, QThread *atermThread
   m_helper(settings),
   m_settings(settings),
   m_lts(0),
-  m_simulation(0),
+  m_simulation(nullptr),
   m_selectedState(0),
   m_selectedCluster(0)
 {
@@ -146,20 +146,13 @@ bool LtsManager::openLts(QString filename)
 
   emit ltsStructured();
 
-  if (m_simulation)
-  {
-    delete m_simulation;
-  }
-  if (m_lts)
-  {
-    delete m_lts;
-  }
+  delete m_lts;
   m_lts = lts;
-  m_simulation = new Simulation(this, m_lts);
+  m_simulation = std::unique_ptr<Simulation>(new Simulation(this, *lts));
 
-  connect(m_simulation, SIGNAL(changed()), this, SLOT(updateSimulationHistory()));
-  connect(m_simulation, SIGNAL(changed()), this, SLOT(unselectNonsimilated()));
-  connect(m_simulation, SIGNAL(changed()), this, SIGNAL(simulationChanged()));
+  connect(m_simulation.get(), SIGNAL(changed()), this, SLOT(updateSimulationHistory()));
+  connect(m_simulation.get(), SIGNAL(changed()), this, SLOT(unselectNonsimilated()));
+  connect(m_simulation.get(), SIGNAL(changed()), this, SIGNAL(simulationChanged()));
 
   emit ltsChanged(lts);
   emit clustersChanged();

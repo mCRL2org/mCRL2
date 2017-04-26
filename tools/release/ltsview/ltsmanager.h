@@ -12,6 +12,7 @@
 #include <QObject>
 #include <QThread>
 #include <QString>
+#include <memory>
 
 #include "lts.h"
 #include "settings.h"
@@ -56,7 +57,7 @@ class LtsManager : public QObject
     State *selectedState() const { return m_selectedState; }
     Cluster *selectedCluster() const { return m_selectedCluster; }
 
-    Simulation *simulation() const { return m_simulation; }
+    const std::unique_ptr<Simulation>& simulation() const { return m_simulation; }
     bool simulationActive() const { return m_simulation && m_simulation->isStarted(); }
     State *currentSimulationState() const;
     Transition *currentSimulationTransition() const;
@@ -114,7 +115,7 @@ class LtsManager : public QObject
 
     Settings *m_settings;
     LTS *m_lts;
-    Simulation *m_simulation;
+    std::unique_ptr<Simulation> m_simulation;
     State *m_selectedState;
     Cluster *m_selectedCluster;
     QList<State *> m_simulationStateHistory;
