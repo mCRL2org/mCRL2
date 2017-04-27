@@ -125,10 +125,11 @@ class bisim_partitioner
         /* Create a vector for the new labels */
         std::vector<typename LTS_TYPE::state_label_t> new_labels(num_eq_classes());
 
-        for(size_t i=0; i<aut.num_states(); ++i)
+        for(size_t i=aut.num_states(); i>0; )
         {
+          --i;
           const size_t new_index=get_eq_class(i);
-          new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
+          new_labels[new_index]=aut.state_label(i)+new_labels[new_index];
         }
 
         aut.set_num_states(num_eq_classes());
