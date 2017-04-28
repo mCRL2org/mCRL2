@@ -2,8 +2,9 @@
 #define MCRL2_UTILITIES_OPENGLWRAPPER_H
 
 #ifdef WIN32
-#  include <windows.h>
+#include <windows.h>
 #endif
+
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
 #include <GLKit/GLKMatrix4.h>
@@ -13,7 +14,7 @@
   {                                                                            \
     GLMatrix4 mat =                                                            \
         GLKMatrix4MakeOrtho(left, right, bottom, top, -1.0f, 1.0f);            \
-    glLoadMatrix(mat.m);                                                       \
+    glLoadMatrixf(mat.m);                                                      \
   } while (0)
 
 #define gluPerspective(fovy, aspect, zNear, zFar)                              \
