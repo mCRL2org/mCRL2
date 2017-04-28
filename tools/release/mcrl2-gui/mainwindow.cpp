@@ -23,15 +23,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   m_ui.setupUi(this);
 
-  /*
-  connect(m_ui.actionNew_File, SIGNAL(triggered()), m_ui.treeFiles, SLOT(onNewFile()));
-  connect(m_ui.actionNew_Folder, SIGNAL(triggered()), m_ui.treeFiles, SLOT(onNewFile()));
-  connect(m_ui.actionOpen_File, SIGNAL(triggered()), m_ui.treeFiles, SLOT(onOpenFile()));
-  connect(m_ui.actionDelete_File, SIGNAL(triggered()), m_ui.treeFiles, SLOT(onDeleteFile()));
-  */
+  QMenu *fileMenu = m_ui.treeFiles->menu();
+  m_ui.actionExit = fileMenu->addAction("E&xit");
   connect(m_ui.actionExit, SIGNAL(triggered()), this, SLOT(close()));
-  connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
+  m_ui.mnuMain->addMenu(fileMenu);
 
+  QMenu *viewMenu = new QMenu("&View", this);
+  m_ui.actionReset_perspective = viewMenu->addAction("&Reset perspective");
+  connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
+  m_ui.mnuMain->addMenu(viewMenu);
 
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
   connect(m_ui.tabInstances, SIGNAL(tabCloseRequested(int)), this, SLOT(onTabCloseRequest(int)));
@@ -42,7 +42,6 @@ MainWindow::MainWindow(QWidget *parent) :
   m_ui.treeFiles->setCatalog(m_catalog);
 
   createToolMenu();
-  m_ui.mnuMain->addMenu(m_ui.treeFiles->menu());
 
   m_state = saveState();
   QSettings settings("mCRL2", "mCRL2-gui");

@@ -49,26 +49,6 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionNew_File"/>
-    <addaction name="actionNew_Folder"/>
-    <addaction name="separator"/>
-    <addaction name="actionOpen_File"/>
-    <addaction name="actionDelete_File"/>
-    <addaction name="separator"/>
-    <addaction name="actionExit"/>
-   </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-    <addaction name="actionReset_perspective"/>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockOutput">
@@ -138,26 +118,6 @@
     </layout>
    </widget>
   </widget>
-  <action name="actionNew_File">
-   <property name="text">
-    <string>New File</string>
-   </property>
-  </action>
-  <action name="actionNew_Folder">
-   <property name="text">
-    <string>New Folder</string>
-   </property>
-  </action>
-  <action name="actionOpen_File">
-   <property name="text">
-    <string>Open File</string>
-   </property>
-  </action>
-  <action name="actionDelete_File">
-   <property name="text">
-    <string>Delete File</string>
-   </property>
-  </action>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
