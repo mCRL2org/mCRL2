@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_RESET_VARIABLES_H
 
-#include "functional"
+#include <functional>
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/builder.h"
 

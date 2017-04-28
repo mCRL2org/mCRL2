@@ -16,7 +16,7 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
-#include "exception.h"
+#include "mcrl2/utilities/exception.h"
 
 #ifdef __linux
 #include <unistd.h>

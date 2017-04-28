@@ -15,7 +15,7 @@
 
 #include <cstddef>
 #include <cassert>
-#include "../indexed_set.h"
+#include "mcrl2/atermpp/indexed_set.h"
 
 namespace atermpp
 {

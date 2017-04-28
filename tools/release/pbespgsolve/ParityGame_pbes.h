@@ -7,8 +7,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include <mcrl2/pbes/parity_game_generator.h>
-#include <mcrl2/pbes/parity_game_generator_deprecated.h>
+#include "mcrl2/pbes/parity_game_generator.h"
+#include "mcrl2/pbes/parity_game_generator_deprecated.h"
 
 typedef mcrl2::pbes_system::parity_game_generator_deprecated pg_generator;
 

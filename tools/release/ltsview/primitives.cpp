@@ -12,8 +12,8 @@
 #include "primitives.h"
 
 #include <cmath>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <cassert>
 #include "mathutils.h"
 

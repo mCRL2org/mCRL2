@@ -9,7 +9,7 @@
 
 #include "ParityGame.h"
 #include "SCC.h"
-#include <assert.h>
+#include <cassert>
 
 /*! \file ParityGame_verify.cc
 

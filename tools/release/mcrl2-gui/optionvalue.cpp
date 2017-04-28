@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include <assert.h>
+#include <cassert>
 #include "optionvalue.h"
 
 void OptionValue::onValueChange()

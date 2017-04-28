@@ -9,7 +9,7 @@
 
 #include "OldMaxMeasureLiftingStrategy.h"
 
-#include <stdio.h>  /* debug */
+#include <cstdio>  /* debug */
 
 /* NOTE: this code abuses the fact that verti is unsigned, making the top vector
          strictly greater than vectors of other measures. */

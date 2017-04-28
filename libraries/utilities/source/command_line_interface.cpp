@@ -23,8 +23,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "boost/algorithm/string/replace.hpp"
-#include "boost/xpressive/xpressive_static.hpp"
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
 #include "mcrl2/utilities/text_utility.h"
 

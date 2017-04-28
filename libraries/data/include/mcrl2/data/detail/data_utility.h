@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_UTILITY_H
 #define MCRL2_DATA_DETAIL_DATA_UTILITY_H
 
-#include "functional"
+#include <functional>
 #include <algorithm>
 #include <iterator>
 #include <set>

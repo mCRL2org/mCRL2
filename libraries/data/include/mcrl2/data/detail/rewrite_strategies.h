@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_DETAIL_REWRITE_STRATEGIES_H
 #define MCRL2_DATA_DETAIL_REWRITE_STRATEGIES_H
 
-#include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/data/rewrite_strategy.h"
 #include <algorithm>
 #include <cctype>

@@ -58,7 +58,7 @@ information is extracted.
 .. code-block:: c++
 
   #include <string>
-  #include <mcrl2/lts/lts.h>
+  #include "mcrl2/lts/lts.h"
 
   void make_color_lts()
   {

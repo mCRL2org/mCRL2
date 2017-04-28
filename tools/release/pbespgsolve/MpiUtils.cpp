@@ -8,7 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "MpiUtils.h"
-#include <assert.h>
+#include <cassert>
 
 int mpi_rank, mpi_size;
 

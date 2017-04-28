@@ -9,9 +9,9 @@
 
 #include "MaxMeasureLiftingStrategy.h"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 
-#include <stdio.h>  /* debug */
+#include <cstdio>  /* debug */
 
 /* TODO: write short description of how this works! */
 

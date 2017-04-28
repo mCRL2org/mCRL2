@@ -14,7 +14,7 @@
 #ifndef MCRL2_DATA_FOURIER_MOTZKIN_H
 #define MCRL2_DATA_FOURIER_MOTZKIN_H
 
-#include "algorithm"
+#include <algorithm>
 
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/standard_utility.h"

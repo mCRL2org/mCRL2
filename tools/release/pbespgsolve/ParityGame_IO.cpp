@@ -9,9 +9,9 @@
 
 #include <cassert>
 #include "mcrl2/utilities/logger.h"
-#include <mcrl2/data/rewrite_strategy.h>
-#include <mcrl2/pbes/io.h>
-#include <mcrl2/pbes/parity_game_generator.h>
+#include "mcrl2/data/rewrite_strategy.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/parity_game_generator.h"
 #include "ParityGame.h"
 
 

@@ -14,7 +14,7 @@
 #include "ConcurrentRecursiveSolver.h"
 #include "attractor.h"
 #include <set>
-#include <assert.h>
+#include <cassert>
 #include <tbb/concurrent_vector.h>
 #include <tbb/concurrent_queue.h>
 

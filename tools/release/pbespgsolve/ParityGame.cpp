@@ -11,8 +11,8 @@
 #include <algorithm>
 #include <deque>
 #include <map>
-#include <stdlib.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cassert>
 
 ParityGame::ParityGame()
     : d_(0), vertex_(NULL), cardinality_(NULL)

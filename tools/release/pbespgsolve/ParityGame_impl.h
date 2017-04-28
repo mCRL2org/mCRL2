@@ -9,7 +9,7 @@
 
 // Don't include this directly; include ParityGame.h instead!
 
-#include <assert.h>
+#include <cassert>
 #include <iterator>
 
 template<class ForwardIterator>

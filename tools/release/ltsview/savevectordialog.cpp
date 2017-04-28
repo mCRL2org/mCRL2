@@ -9,7 +9,7 @@
 #include "savevectordialog.h"
 #include <QMessageBox>
 #include <gl2ps.h>
-#include <stdio.h>
+#include <cstdio>
 
 SaveVectorDialog::SaveVectorDialog(QWidget *parent, LtsCanvas *canvas, QString filename, GLint format):
   QDialog(parent),

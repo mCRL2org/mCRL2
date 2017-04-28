@@ -19,8 +19,8 @@
 #include <functional>
 
 #include <type_traits>
-#include "detail/aterm.h"
-#include "type_traits.h"
+#include "mcrl2/atermpp/detail/aterm.h"
+#include "mcrl2/atermpp/type_traits.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp

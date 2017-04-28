@@ -17,7 +17,7 @@
 #include "mcrl2/data/detail/rewrite/match_tree.h"
 #include "mcrl2/utilities/uncompiledlibrary.h"
 #include "mcrl2/utilities/toolset_version.h"
-#include "nfs_array.h"
+#include "mcrl2/data/detail/rewrite/nfs_array.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE
 

@@ -29,7 +29,7 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
-#include "dynamiclibrary.h"
+#include "mcrl2/utilities/dynamiclibrary.h"
 #include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/logger.h"
 

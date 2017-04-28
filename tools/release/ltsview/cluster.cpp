@@ -10,7 +10,7 @@
 /// \brief Implementation of the Cluster class
 
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #include "cluster.h"
 #include "mathutils.h"
 #include "state.h"

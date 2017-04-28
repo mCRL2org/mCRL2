@@ -8,7 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "PredecessorLiftingStrategy.h"
-#include "assert.h"
+#include <cassert>
 
 PredecessorLiftingStrategy::PredecessorLiftingStrategy(
     const ParityGame &game, const SmallProgressMeasures &spm,

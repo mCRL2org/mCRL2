@@ -12,7 +12,7 @@
 #ifndef ATERMPP_TYPE_TRAITS_H
 #define ATERMPP_TYPE_TRAITS_H
 
-#include "detail/type_traits_impl.h"
+#include "mcrl2/atermpp/detail/type_traits_impl.h"
 
 namespace atermpp
 {

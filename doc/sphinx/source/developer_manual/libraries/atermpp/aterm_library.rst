@@ -480,7 +480,7 @@ Now that we have defined :cpp:class:`Expression`, we can use it in standard cont
 
 .. code-block:: c++
 
-   #include "vector"
+   #include <vector>
 
    std::vector<Expression> v;
    Zero x;

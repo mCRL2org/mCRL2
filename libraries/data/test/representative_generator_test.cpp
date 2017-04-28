@@ -15,7 +15,7 @@
 #include <set>
 #include <string>
 
-#include "boost/test/minimal.hpp"
+#include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/list.h"

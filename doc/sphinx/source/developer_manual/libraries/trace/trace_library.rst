@@ -38,8 +38,8 @@ position in the trace to the next position.
 .. code-block:: c++
 
   #include <iostream>
-  #include <mcrl2/atermpp/atermpp.h>
-  #include <mcrl2/trace/trace.h>
+  #include "mcrl2/atermpp/atermpp.h"
+  #include "mcrl2/trace/trace.h"
    
   using namespace std;
   using namespace mcrl2::trace;

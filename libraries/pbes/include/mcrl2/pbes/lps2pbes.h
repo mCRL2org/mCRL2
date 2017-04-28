@@ -26,7 +26,6 @@
 #include "mcrl2/pbes/detail/lps2pbes_utility.h"
 #include "mcrl2/pbes/detail/term_traits_optimized.h"
 #include "mcrl2/pbes/is_monotonous.h"
-#include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/process/merge_action_specifications.h"
 #include <string>
 

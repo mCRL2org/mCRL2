@@ -10,7 +10,7 @@
 #include "ComponentSolver.h"
 #include "attractor.h"
 
-#include <assert.h>
+#include <cassert>
 #include <memory>
 
 ComponentSolver::ComponentSolver(

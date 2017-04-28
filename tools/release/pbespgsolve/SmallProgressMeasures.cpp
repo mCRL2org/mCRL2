@@ -12,9 +12,9 @@
 #include "SCC.h"
 #include <algorithm>
 #include <memory>
-#include <assert.h>
-#include <string.h>
-#include <stdio.h>  /* printf() */
+#include <cassert>
+#include <cstring>
+#include <cstdio>  /* printf() */
 
 LiftingStatistics::LiftingStatistics( const ParityGame &game,
                                       long long max_lifts )

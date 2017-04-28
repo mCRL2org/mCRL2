@@ -11,7 +11,7 @@
 
 #include <algorithm>
 #include <vector>
-#include <stdlib.h>
+#include <cstdlib>
 
 /* Randomly shuffle the given vector.  This is similar to std::random_shuffle
    on a vector,  except that this uses rand() while the random source for

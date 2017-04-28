@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <iterator>
-#include <assert.h>
+#include <cassert>
 #include "DenseMap.h"
 
 // Note: code below is not currently used and has not been properly tested.

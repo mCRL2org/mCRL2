@@ -11,8 +11,8 @@
 
 #include <boost/test/minimal.hpp>
 #include <iostream>
-#include <mcrl2/lps/linearise.h>
-#include <mcrl2/lps/suminst.h>
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/suminst.h"
 #include <string>
 
 using namespace mcrl2;

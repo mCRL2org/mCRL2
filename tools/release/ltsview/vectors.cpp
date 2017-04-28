@@ -9,7 +9,7 @@
 /// \file vectors.cpp
 /// \brief Implementation of the Vector classes
 
-#include <math.h>
+#include <cmath>
 #include "mathutils.h"
 #include "vectors.h"
 

@@ -10,7 +10,7 @@
 #include "DeloopSolver.h"
 #include "attractor.h"
 #include <memory>
-#include <assert.h>
+#include <cassert>
 
 DeloopSolver::DeloopSolver(
     const ParityGame &game, ParityGameSolverFactory &pgsf,

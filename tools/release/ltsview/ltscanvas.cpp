@@ -8,7 +8,7 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "ltscanvas.h"
-#include "tr/tr.h"
+#include <tr/tr.h>
 
 #include <cmath>
 

@@ -10,7 +10,7 @@
 #include "DecycleSolver.h"
 #include "attractor.h"
 #include <memory>
-#include <assert.h>
+#include <cassert>
 
 /*! This helper class searches for cycles of a fixed priority in subgames
     controlled entirely by the corresponding player. */

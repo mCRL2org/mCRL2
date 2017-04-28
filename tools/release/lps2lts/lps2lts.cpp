@@ -13,7 +13,7 @@
 
 #include <string>
 #include <cassert>
-#include <signal.h>
+#include <csignal>
 
 #include "mcrl2/utilities/logger.h"
 

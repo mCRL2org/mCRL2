@@ -10,7 +10,7 @@
 /// \brief Source file for PrimitiveFactory class
 
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
 #include "primitivefactory.h"
 #include "conedb.h"
 #include "mathutils.h"

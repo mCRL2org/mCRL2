@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <vector>
 #include <utility>
-#include <assert.h>
+#include <cassert>
 
 /*! Implements Tarjan's algorithm for finding strongly connected components in
     a directed graph.

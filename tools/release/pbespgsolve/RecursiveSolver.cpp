@@ -11,7 +11,7 @@
 #include "RecursiveSolver.h"
 #include "attractor.h"
 #include <set>
-#include <assert.h>
+#include <cassert>
 
 /*! Returns the complement of a vertex set.
 

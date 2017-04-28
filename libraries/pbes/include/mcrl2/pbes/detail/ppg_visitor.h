@@ -15,7 +15,7 @@
 #ifndef MCRL2_PBES_DETAIL_PPG_VISITOR_H
 #define MCRL2_PBES_DETAIL_PPG_VISITOR_H
 
-#include "bqnf_visitor.h"
+#include "mcrl2/pbes/detail/bqnf_visitor.h"
 
 namespace mcrl2 {
 

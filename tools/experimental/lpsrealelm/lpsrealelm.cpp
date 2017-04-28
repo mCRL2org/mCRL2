@@ -18,9 +18,9 @@
 #include <cstdio>
 
 //Aterms
-#include <mcrl2/atermpp/aterm.h>
-#include <mcrl2/atermpp/aterm_list.h>
-#include <mcrl2/atermpp/algorithm.h>
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/algorithm.h"
 
 //LPS
 #include "mcrl2/lps/io.h"

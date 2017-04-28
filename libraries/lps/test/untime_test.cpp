@@ -11,9 +11,9 @@
 
 #include <boost/test/minimal.hpp>
 #include <iostream>
-#include <mcrl2/lps/find.h>
-#include <mcrl2/lps/linearise.h>
-#include <mcrl2/lps/untime.h>
+#include "mcrl2/lps/find.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/untime.h"
 #include <string>
 
 using namespace mcrl2;

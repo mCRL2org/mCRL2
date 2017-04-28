@@ -10,8 +10,8 @@
 #ifndef REFCOUNTED
 #define REFCOUNTED
 
-#include <assert.h>
-#include <stdio.h>
+#include <cassert>
+#include <cstdio>
 
 /*! A simple reference counting base class.
 

@@ -13,7 +13,7 @@
 #include "RecursiveSolver.h"
 #include "ComponentSolver.h"
 #include <memory>
-#include <stdio.h>
+#include <cstdio>
 
 int main(int argc, char *argv[])
 {

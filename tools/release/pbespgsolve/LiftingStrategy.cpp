@@ -15,7 +15,7 @@
 #include "OldMaxMeasureLiftingStrategy.h"
 #include "LinPredLiftingStrategy.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 /// \brief Convert string to lowercase.
 /// \param in An input string

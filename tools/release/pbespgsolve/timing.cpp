@@ -8,7 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #ifndef _WIN32 /* assume POSIX */
-#include <time.h>
+#include <ctime>
 #else
 #include <windows.h>
 #endif

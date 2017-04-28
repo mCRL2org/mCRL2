@@ -8,7 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ParityGameSolver.h"
-#include <assert.h>
+#include <cassert>
 
 void merge_strategies( std::vector<verti> &strategy,
                        const std::vector<verti> &substrat,

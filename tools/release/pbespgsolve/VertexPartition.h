@@ -12,7 +12,7 @@
 
 #include "Graph.h"
 #include "RefCounted.h"
-#include <assert.h>
+#include <cassert>
 
 /*! \ingroup ParityGameData
 

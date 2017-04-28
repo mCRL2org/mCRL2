@@ -10,7 +10,7 @@
 #include "GamePart.h"
 #include <algorithm>
 #include <sstream>  // for debug_str()
-#include <assert.h>
+#include <cassert>
 
 GamePart::GamePart( const ParityGame &old_game,
                     const VertexPartition &vpart, int proc )

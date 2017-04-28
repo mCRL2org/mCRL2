@@ -17,7 +17,7 @@
 #include <stdexcept>
 
 #include <set>
-#include <string.h>
+#include <cstring>
 #include <sstream>
 
 

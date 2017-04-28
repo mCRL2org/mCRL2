@@ -8,7 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "GraphOrdering.h"
-#include "assert.h"
+#include <cassert>
 #include <queue>
 #include <stack>
 

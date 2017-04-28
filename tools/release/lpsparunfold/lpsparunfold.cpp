@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include <limits.h>
+#include <climits>
 
 //mCRL2
 #include "mcrl2/lps/linear_process.h"

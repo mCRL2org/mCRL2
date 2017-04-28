@@ -22,7 +22,7 @@
 #include <QColor>
 #include <QImage>
 
-#include "gl2ps.h"
+#include <gl2ps.h>
 #include "graph.h"
 
 struct VertexData;
