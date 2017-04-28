@@ -157,7 +157,7 @@ void LtsCanvas::paintGL()
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  OpenGLWrapper::gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
+  gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
 
   emit renderingStarted();
   render(m_dragging);
@@ -479,9 +479,9 @@ LtsCanvas::Selection LtsCanvas::selectObject(QPoint position)
 
   GLint viewport[4];
   glGetIntegerv(GL_VIEWPORT, viewport);
-  OpenGLWrapper::gluPickMatrix((GLdouble)position.x(), (GLdouble)(viewport[3] - position.y()), 3.0, 3.0, viewport);
+  gluPickMatrix((GLdouble)position.x(), (GLdouble)(viewport[3] - position.y()), 3.0, 3.0, viewport);
 
-  OpenGLWrapper::gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
+  gluPerspective(60.0f, (GLfloat)m_width / (GLfloat)m_height, m_nearPlane, m_farPlane);
 
   render(false);
 

@@ -1,52 +1,38 @@
 #ifndef MCRL2_UTILITIES_OPENGLWRAPPER_H
 #define MCRL2_UTILITIES_OPENGLWRAPPER_H
 
-namespace OpenGLWrapper {
-
 #ifdef WIN32
 #  include <windows.h>
 #endif
 #ifdef __APPLE__
-#  include <OpenGL/glu.h>
+#include <OpenGL/glu.h>
 #include <GLKit/GLKMatrix4.h>
-#else
-#  include <GL/glu.h>
-#endif
 
-void gluOrtho2D(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
-{
-#ifdef __APPLE__
-  GLKMatrix4 mat = GLKMatrix4MakeOrtho(left, right, bottom, top, -1.0f, 1.0f);
-  glLoadMatrixf(mat.m);
-#else
-  ::gluOrtho2D(left, right, bottom, top);
-#endif
-}
+#define gluOrtho2D(left, right, bottom, top)                                   \
+  do                                                                           \
+  {                                                                            \
+    GLMatrix4 mat =                                                            \
+        GLKMatrix4MakeOrtho(left, right, bottom, top, -1.0f, 1.0f);            \
+    glLoadMatrix(mat.m);                                                       \
+  } while (0)
 
-void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble
-        zFar)
-{
-#ifdef __APPLE__
-  GLKMatrix4 mat = GLKMatrix4MakePerspective(fovy, aspect, zNear, zFar);
-  glLoadMatrixf(mat.m);
-#else
-  ::gluPerspective(fovy, aspect, zNear, zFar);
-#endif
-}
+#define gluPerspective(fovy, aspect, zNear, zFar)                              \
+  do                                                                           \
+  {                                                                            \
+    GLKMatrix4 mat = GLKMatrix4MakePerspective(fovy, aspect, zNear, zFar);     \
+    glLoadMatrixf(mat.m);                                                      \
+  } while (0)
 
-void gluPickMatrix(GLdouble x, GLdouble y, GLdouble delX, GLdouble delY,
-        GLint viewport[4])
-{
-#ifdef __APPLE__
-  glTranslatef((viewport[2] - 2 * (x - viewport[0])) / delX,
-               (viewport[3] - 2 * (y - viewport[1])) / delY,
-               0);
-  glScalef(viewport[2] / delX, viewport[3] / delY, 1.0);
-#else
-  ::gluPickMatrix(x, y, delX, delY, viewport);
-#endif
-}
+#define gluPickMatrix(x, y, delX, delY, viewport)                              \
+  do                                                                           \
+  {                                                                            \
+    glTranslatef((viewport[2] - 2 * (x - viewport[0])) / delX,                 \
+                 (viewport[3] - 2 * (y - viewport[1])) / delY, 0);             \
+    glScalef(viewport[2] / delX, viewport[3] / delY, 1.0);                     \
+  } while (0)
 
-} // namespace OpenGLWrapper
+#else
+#include <GL/glu.h>
+#endif // __APPLE__
 
 #endif // MCRL2_UTILITIES_OPENGLWRAPPER_H

@@ -52,11 +52,11 @@ void Visualizer::paintGL()
   GLdouble aspect = (GLdouble)width() / (GLdouble)height();
   if (aspect > 1)
   {
-    OpenGLWrapper::gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
+    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
   }
   else
   {
-    OpenGLWrapper::gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
+    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
   }
 
   glMatrixMode(GL_MODELVIEW);
@@ -199,7 +199,7 @@ void Visualizer::startSelectMode(
   glPushMatrix();
   glLoadIdentity();
 
-  OpenGLWrapper::gluPickMatrix(m_lastMouseEvent.x(), // center x
+  gluPickMatrix(m_lastMouseEvent.x(), // center x
           viewport[3] - m_lastMouseEvent.y(), // center y
           pickWth,    // picking width
           pickHgt,    // picking height
@@ -212,12 +212,12 @@ void Visualizer::startSelectMode(
   if (aspect > 1)
     // width > height
   {
-    OpenGLWrapper::gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
+    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
   }
   else
     // height >= width
   {
-    OpenGLWrapper::gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
+    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
   }
 
   glMatrixMode(GL_MODELVIEW);

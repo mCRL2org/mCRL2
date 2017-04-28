@@ -46,6 +46,7 @@ add_mcrl2_tool(diagraphica
     QtWidgets
     QtCore
     QtOpenGL
+    QtOpenGLExtensions
     QtXml
     QtGui
     ${OPENGL_LIBRARIES}
