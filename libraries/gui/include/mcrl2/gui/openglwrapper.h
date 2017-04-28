@@ -12,7 +12,7 @@
 #define gluOrtho2D(left, right, bottom, top)                                   \
   do                                                                           \
   {                                                                            \
-    GLMatrix4 mat =                                                            \
+    GLKMatrix4 mat =                                                            \
         GLKMatrix4MakeOrtho(left, right, bottom, top, -1.0f, 1.0f);            \
     glLoadMatrixf(mat.m);                                                      \
   } while (0)
