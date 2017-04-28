@@ -27,6 +27,7 @@
 #else
 #include <GL/glu.h>
 #endif
+#include "mcrl2/gui/openglwrapper.h"
 
 #include "mcrl2/utilities/logger.h"
 
@@ -1129,34 +1130,36 @@ void GLScene::updateShapes()
 Coord3D GLScene::eyeToWorld(int x, int y, GLfloat z)
 {
   GLint V[4];
-  GLdouble P[16];
-  GLdouble M[16];
-  GLdouble wx, wy, wz;
+  GLfloat P[16];
+  GLfloat M[16];
   x *= m_texturedata->device_pixel_ratio;
   y *= m_texturedata->device_pixel_ratio;
-  glGetDoublev(GL_PROJECTION_MATRIX, P);
-  glGetDoublev(GL_MODELVIEW_MATRIX, M);
+  glGetFloatv(GL_PROJECTION_MATRIX, P);
+  glGetFloatv(GL_MODELVIEW_MATRIX, M);
   glGetIntegerv(GL_VIEWPORT, V);
   if (z < 0) {
     glReadPixels(x, V[3]-y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
   }
-  gluUnProject(x, V[3]-y, z, M, P, V, &wx, &wy, &wz);
-  return Coord3D(wx, wy, wz);
+  QVector3D eye{static_cast<float>(x), static_cast<float>(V[3] - y), static_cast<float>(z)};
+  QRect view = QRect(V[0], V[1], V[2], V[3]);
+  QVector3D world = eye.unproject(QMatrix4x4(M), QMatrix4x4(P), view);
+  return Coord3D(world.x(), world.y(), world.z());
 }
 
-Coord3D GLScene::worldToEye(const Coord3D& pos)
+Coord3D GLScene::worldToEye(const Coord3D& world)
 {
   GLint V[4];
-  GLdouble P[16];
-  GLdouble M[16];
-  GLdouble ex, ey, ez;
-  glGetDoublev(GL_PROJECTION_MATRIX, P);
-  glGetDoublev(GL_MODELVIEW_MATRIX, M);
+  GLfloat P[16];
+  GLfloat M[16];
+  glGetFloatv(GL_PROJECTION_MATRIX, P);
+  glGetFloatv(GL_MODELVIEW_MATRIX, M);
   glGetIntegerv(GL_VIEWPORT, V);
-  gluProject(pos.x, pos.y, pos.z, M, P, V, &ex, &ey, &ez);
-  return Coord3D(ex /m_texturedata->device_pixel_ratio,
-                 (V[3] - ey) / m_texturedata->device_pixel_ratio,
-                 ez);
+  QVector3D w{world.x, world.y, world.y};
+  QRect view = QRect(V[0], V[1], V[2], V[3]);
+  QVector3D eye = w.project(QMatrix4x4(M), QMatrix4x4(P), view);
+  return Coord3D(eye.x() /m_texturedata->device_pixel_ratio,
+                 (V[3] - eye.y()) / m_texturedata->device_pixel_ratio,
+                 eye.z());
 }
 
 Coord3D GLScene::size()

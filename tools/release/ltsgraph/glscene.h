@@ -266,11 +266,11 @@ class GLScene
 
     /**
      * @brief Converts world coordinates to viewport coordinates.
-     * @param pos The world coordinates.
+     * @param world The world coordinates.
      * @returns The eye coordinates, where the origin is at the bottom left. The
      *          Z value is the value of the depth buffer at the requested location.
      */
-    Graph::Coord3D worldToEye(const Graph::Coord3D& pos);
+    Graph::Coord3D worldToEye(const Graph::Coord3D& world);
 
     /**
      * @brief Retrieve the object at viewport coordinate (x, y).
