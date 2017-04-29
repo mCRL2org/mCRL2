@@ -28,9 +28,14 @@ namespace detail
 
 using namespace atermpp;
 
-static atermpp::function_symbol transition_header()
+static atermpp::function_symbol transition_empty_header()
 {
-  static atermpp::function_symbol tr("transition",3);
+  static atermpp::function_symbol tr("transition_empty_list",0);
+  return tr;
+}
+static atermpp::function_symbol transition_list_header()
+{
+  static atermpp::function_symbol tr("transition_list",4);
   return tr;
 }
 
@@ -83,15 +88,25 @@ static probabilistic_lts_lts_t::probabilistic_state_t aterm_list_to_probabilisti
   return probabilistic_lts_lts_t::probabilistic_state_t(result.begin(),result.end());
 }
 
-/// Below we introduce aterm representations for a transition,
+/// Below we introduce aterm representations for a list with all transition,
 /// which can subsequently be stored as an aterm.
-class aterm_probabilistic_transition: public atermpp::aterm_appl
+class aterm_probabilistic_transition_list: public aterm_appl
 {
   public:
-    aterm_probabilistic_transition(const size_t source, const size_t label, const probabilistic_lts_lts_t::probabilistic_state_t& target)
-      : aterm_appl(transition_header(), 
-        aterm_int(source),aterm_int(label), state_probability_list(target))
+    aterm_probabilistic_transition_list()
+      : aterm_appl(transition_empty_header())
     {}
+
+    aterm_probabilistic_transition_list(const size_t source, 
+                                        const size_t label, 
+                                        const probabilistic_lts_lts_t::probabilistic_state_t& target,
+                                        const aterm_probabilistic_transition_list& next_transition)
+      : aterm_appl(transition_list_header(), 
+                   aterm_int(source),
+                   aterm_int(label), 
+                   state_probability_list(target),
+                   next_transition)
+    {} 
 
     size_t source() const
     {
@@ -107,9 +122,14 @@ class aterm_probabilistic_transition: public atermpp::aterm_appl
     {
       return aterm_list_to_probabilistic_state(atermpp::down_cast<aterm_list>((*this)[2]));
     }
+
+    const aterm_probabilistic_transition_list& next() const 
+    {
+      return atermpp::down_cast<aterm_probabilistic_transition_list>((*this)[3]);
+    }
 };
 
-typedef term_list<aterm_probabilistic_transition> aterm_transition_list;
+// typedef term_list<aterm_probabilistic_transition> aterm_transition_list;
 typedef term_list<state_label_lts> state_labels_t;               // The state labels listed consecutively.
 typedef term_list<atermpp::aterm_appl> action_labels_t;          // A multiaction has the shape "multi_action(action_list,data_expression)
 typedef term_list<data::data_expression> probabilistic_labels_t; // This contains a list of probabilities.
@@ -125,7 +145,7 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
 
     aterm_labelled_transition_system(
                const probabilistic_lts_lts_t& ts,
-               const aterm_transition_list& transitions,
+               const aterm_probabilistic_transition_list& transitions,
                const state_labels_t& state_label_list,
                const action_labels_t& action_label_list)
       : aterm_appl(lts_header(),
@@ -142,6 +162,71 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
                    action_label_list
                   )
     {}
+
+    // \brief add_index() adds a unique index to some term types, such as variables, to access data about them 
+    //        quickly. When loading a term, these indices must first be added before a term can be used in the toolset.
+    void add_indices()
+    {
+      aterm_appl md=meta_data();
+      aterm_probabilistic_transition_list trans=transitions(); 
+      state_labels_t state_labels=get_state_labels();
+      action_labels_t action_labels=get_action_labels();
+      
+      (*this)=aterm(); // Clear this aterm. It is often huge, and in this way the list of transitions can be garbage collected,
+                       // while being transformed. 
+      //
+      // Add indices to the transitions. This list is often too long to fit on the stack.
+      // Therefore, it is done using this ad_hoc routine. Note that the list is reverted. 
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      aterm_appl new_trans=aterm_appl(transition_empty_header());
+      while (trans.function()!= transition_empty_header())
+      {
+        new_trans=aterm_appl(transition_list_header(),
+                                 trans[0],
+                                 trans[1],
+                                 data::detail::add_index(trans[2],cache),
+                                 new_trans);
+        trans=trans.next();
+      }
+
+      *this = aterm_appl(lts_header(),
+                             data::detail::add_index(md,cache),
+                             new_trans,
+                             data::detail::add_index(state_labels,cache),
+                             data::detail::add_index(action_labels,cache));
+    }
+
+    /// \brief Remove indices from dedicated terms such as variables and process names. 
+    void remove_indices()
+    {
+      aterm_appl md=meta_data();
+      aterm_probabilistic_transition_list trans=transitions(); 
+      state_labels_t state_labels=get_state_labels();
+      action_labels_t action_labels=get_action_labels();
+      
+      (*this)=aterm(); // Clear this aterm. It is often huge, and in this way the list of transitions can be garbage collected,
+                       // while being transformed. 
+      
+      // Remove indices from the transitions. This list is often too long to fit on the stack.
+      // Therefore, it is done using this ad_hoc routine. Note that the list is reverted. 
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      aterm_appl new_trans=aterm_appl(transition_empty_header());
+      while (trans.function()!= transition_empty_header())
+      {
+        new_trans=aterm_appl(transition_list_header(),
+                                 trans[0],
+                                 trans[1],
+                                 data::detail::remove_index(trans[2],cache),
+                                 new_trans);
+        trans=trans.next();
+      }
+
+      *this = aterm_appl(lts_header(),
+                             data::detail::remove_index(md,cache),
+                             new_trans,
+                             data::detail::remove_index(state_labels,cache),
+                             data::detail::remove_index(action_labels,cache));
+    }
 
     bool has_data() const
     {
@@ -198,9 +283,9 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
       return aterm_list_to_probabilistic_state(down_cast<aterm_list>(t[2]));
     }
     
-    aterm_transition_list transitions() const
+    aterm_probabilistic_transition_list transitions() const
     {
-      return down_cast<aterm_transition_list>((*this)[1]);
+      return down_cast<aterm_probabilistic_transition_list>((*this)[1]);
     }
   
     state_labels_t get_state_labels() const
@@ -211,16 +296,6 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
     action_labels_t get_action_labels() const
     {
       return down_cast<action_labels_t>((*this)[3]);
-    }
-  
-    probabilistic_labels_t get_probabilistic_labels() const
-    {
-      return down_cast<probabilistic_labels_t>((*this)[4]);
-    }
-  
-    boolean_list_t get_probabilistic_state_indicators() const
-    {
-      return down_cast<boolean_list_t>((*this)[5]);
     }
   
   protected:
@@ -277,22 +352,23 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
     }
     
   }
-  std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-  input=data::detail::add_index(input, cache);
-  
+
   if (!input.type_is_appl() || down_cast<aterm_appl>(input).function()!=lts_header())
   {
     throw runtime_error("The input file " + filename + " is not in proper .lts format.");
   }
   
+  // First check whether the input is a valid lts.
   const aterm meta_data=atermpp::down_cast<aterm_appl>(input)[0];
-  
   if (!meta_data.type_is_appl() || down_cast<aterm_appl>(meta_data).function()!=meta_data_header())
   {
     throw runtime_error("The input file " + filename + " is not in proper .lts format. There is a problem with the datatypes, process parameters and action declarations.");
   }
   
-  const aterm_labelled_transition_system input_lts(input);
+  aterm_labelled_transition_system input_lts(input);
+  input=aterm(); // The input is a large term. We do not need it anymore. 
+  input_lts.add_indices();  // Add indices to certain term types, such as variables, and process/pbes names. 
+  
   if (input_lts.has_data())
   {
     l.set_data(input_lts.data());
@@ -308,11 +384,13 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
     l.set_action_labels(input_lts.action_labels());
   }
   
-  const aterm_transition_list& input_transitions=input_lts.transitions();
-  for(const aterm_probabilistic_transition& t: input_transitions)
+  aterm_probabilistic_transition_list input_transitions=input_lts.transitions();
+  while (input_transitions.function()!= transition_empty_header()) 
   {
-    const size_t prob_state_index=l.add_probabilistic_state(t.target());
-    l.add_transition(transition(t.source(), t.label(), prob_state_index));
+    assert(input_transitions.function()==transition_list_header());
+    const size_t prob_state_index=l.add_probabilistic_state(input_transitions.target());
+    l.add_transition(transition(input_transitions.source(), input_transitions.label(), prob_state_index));
+    input_transitions=input_transitions.next();
   }
   
   if (input_lts.get_state_labels().size()==0)
@@ -335,7 +413,6 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
   else
   {
     assert(input_lts.num_action_labels()==input_lts.get_action_labels().size());
-    // for (const lps::multi_action& action: input_lts.get_action_labels())
     for (const atermpp::aterm_appl& t: input_lts.get_action_labels())
     {
       assert(t.function()==temporary_multi_action_header());
@@ -351,16 +428,17 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
 
 static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& filename)
 {
-  aterm_transition_list transitions;
+  aterm_probabilistic_transition_list transitions;
   
   for(std::vector<transition>::const_reverse_iterator i=l.get_transitions().rbegin();
                 i!=l.get_transitions().rend(); ++i)
   {
     // The transitions are stored in reverse order.
-    transitions.push_front(aterm_probabilistic_transition(
+    transitions=aterm_probabilistic_transition_list(
                                 i->from(), 
                                 i->label(), 
-                                l.probabilistic_state(i->to())));
+                                l.probabilistic_state(i->to()),
+                                transitions);
   }
 
   state_labels_t state_label_list;
@@ -382,16 +460,15 @@ static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& fi
     }
   }
 
-  const aterm_labelled_transition_system t0(l,
-                                            transitions,
-                                            state_label_list,
-                                            action_label_list);
-  std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
-  const aterm t1 = data::detail::remove_index(t0,cache);
-  
+  aterm_labelled_transition_system t0(l,
+                                      transitions,
+                                      state_label_list,
+                                      action_label_list);
+  t0.remove_indices();
+
   if (filename=="")
   {
-    atermpp::write_term_to_binary_stream(t1, std::cout);
+    atermpp::write_term_to_binary_stream(t0, std::cout);
   }
   else 
   {
@@ -407,7 +484,7 @@ static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& fi
     }
     try
     { 
-      atermpp::write_term_to_binary_stream(t1, stream);
+      atermpp::write_term_to_binary_stream(t0, stream);
       stream.close();
     }
     catch (std::ofstream::failure)

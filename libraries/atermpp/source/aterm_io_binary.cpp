@@ -94,58 +94,62 @@ stream
 // Count the total number of occurrences of function symbols t where 
 // t is viewed as a shared term. The result is stored in the unordered_map count. 
 // Visited is used to avoid visiting terms too often. 
-static void count_the_number_of_unique_function_symbols_in_a_term_rec(
-                  const aterm& t,
-                  std::unordered_set<aterm>& visited,
-                  std::unordered_map<function_symbol, size_t>& count)
+static std::unordered_map<function_symbol, size_t> count_the_number_of_unique_function_symbols_in_a_term(
+                  const aterm& t)
 {
-  if (visited.count(t)>0)
-  {
-    return;
-  }
+  std::stack<aterm> todo_stack({t});
+  std::unordered_set<aterm> visited({t});
+  std::unordered_map<function_symbol, size_t> count;
 
-  if (t.type_is_int())
+  while (!todo_stack.empty())
   {
-    count[detail::function_adm.AS_INT]++;
-  }
-  else if (t.type_is_list())
-  {
-    aterm_list list = down_cast<const aterm_list>(t);
-    while (list!=aterm_list() && visited.count(list)==0)
+    const aterm t=todo_stack.top();
+    todo_stack.pop();
+    assert(visited.count(t)>0);
+    
+    if (t.type_is_int())
     {
-      visited.insert(list);
-      count[detail::function_adm.AS_LIST]++;
-      count_the_number_of_unique_function_symbols_in_a_term_rec(list.front(),visited,count);
-      list = list.tail();
+      count[detail::function_adm.AS_INT]++;
     }
-    if (list==aterm_list() && visited.count(list)==0)
+    else if (t.type_is_list())
     {
-      visited.insert(list);
-      count[detail::function_adm.AS_EMPTY_LIST]++;
+      const aterm_list& list = down_cast<const aterm_list>(t);
+      if (list==aterm_list())
+      {
+        count[detail::function_adm.AS_EMPTY_LIST]++;
+      }
+      else 
+      { 
+        count[detail::function_adm.AS_LIST]++;
+        if (visited.count(list.tail())==0) 
+        {
+          visited.insert(list.tail());
+          todo_stack.push(list.tail());
+        }
+        if (visited.count(list.front())==0)
+        {
+          visited.insert(list.front());
+          todo_stack.push(list.front());
+        }
+      }
+    }
+    else
+    {
+      const aterm_appl& ta=down_cast<aterm_appl>(t);
+      function_symbol sym = ta.function();
+      count[sym]++;
+      for (size_t i=ta.size(); i>0; )
+      {
+        --i;
+        if (visited.count(ta[i])==0)
+        {
+          visited.insert(ta[i]);
+          todo_stack.push(ta[i]);
+        }
+      }
     }
   }
-  else
-  {
-    aterm_appl ta=down_cast<aterm_appl>(t);
-    function_symbol sym = ta.function();
-    count[sym]++;
-    for (const aterm& arg: ta) 
-    {
-      count_the_number_of_unique_function_symbols_in_a_term_rec(arg,visited,count);
-    }
-  }
-
-  visited.insert(t);
-
-  return;
-}
-
-static std::unordered_map<function_symbol, size_t> count_the_number_of_unique_function_symbols_in_a_term(const aterm& t)
-{
-  std::unordered_set<aterm> visited;
-  std::unordered_map<function_symbol, size_t> result;
-  count_the_number_of_unique_function_symbols_in_a_term_rec(t, visited, result);
-  return result;
+  return count;
 }
 
 
@@ -193,7 +197,10 @@ class sym_write_entry
     function_symbol id;
     size_t term_width;
     unordered_map<aterm, size_t> write_terms; /* Collect the terms with this id as top symbol, 
-                                                 and maintain a consecutive index for each term */
+                                                 and maintain a consecutive index for each term. 
+                                                 This set can be restricted to those terms that occur
+                                                 at least twice in the term. This can effectively be
+                                                 seen by inspecting the reference count of terms. */
 
     std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
 
@@ -428,7 +435,6 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
   for (sym_write_entry& cur_entry: sym_entries)
   {
     size_t arity = cur_entry.id.arity();
-
     cur_entry.top_symbols = std::vector<top_symbols_t>(arity);
 
     if (cur_entry.id!=detail::function_adm.AS_INT)
@@ -639,7 +645,6 @@ static void write_baf(const aterm& t, ostream& os)
   bit_buffer     = '\0';
   bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
-
   std::unordered_map<function_symbol, size_t> index; 
   std::unordered_map<function_symbol, size_t> count=count_the_number_of_unique_function_symbols_in_a_term(t);
   size_t nr_unique_symbols = count.size();
@@ -728,7 +733,7 @@ static void read_all_symbols(istream& is, size_t nr_unique_symbols, std::vector<
     val = readInt(is);
     if (val == 0)
     {
-      throw mcrl2::runtime_error("Read file: internal file error: failed to read all symbols.");
+      throw mcrl2::runtime_error("Read file: internal file error: failed to read all function symbols.");
     }
     read_symbols[i].term_width = bit_width(val);
     read_symbols[i].terms = std::vector<aterm>(val);
@@ -753,7 +758,7 @@ static void read_all_symbols(istream& is, size_t nr_unique_symbols, std::vector<
   return;
 }
 
-typedef struct { sym_read_entry* sym; size_t arg; std::vector<aterm> args; aterm* result; aterm* callresult; } read_todo;
+struct read_todo { sym_read_entry* sym; size_t arg; std::vector<aterm> args; aterm* result; aterm* callresult; };
 
 static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_entry>& read_symbols)
 {
@@ -832,15 +837,12 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
 static
 aterm read_baf(istream& is)
 {
-  size_t val;
-  aterm result;
-
   // Initialize bit buffer
   bit_buffer     = '\0';
   bits_in_buffer = 0; // how many bits in bit_buffer are used
 
   // Read header
-  val = readInt(is);
+  size_t val = readInt(is);
   if (val == 0)
   {
     val = readInt(is);
@@ -860,12 +862,12 @@ aterm read_baf(istream& is)
   size_t nr_unique_symbols = readInt(is);
 
   // Allocate symbol space
-  std::vector<sym_read_entry> read_symbols = std::vector<sym_read_entry>(nr_unique_symbols);
+  std::vector<sym_read_entry> read_symbols(nr_unique_symbols);
 
   read_all_symbols(is, nr_unique_symbols, read_symbols);
 
   val = readInt(is);
-  result = read_term(&read_symbols[val], is, read_symbols);
+  aterm result=read_term(&read_symbols[val], is, read_symbols);
   return result;
 }
 

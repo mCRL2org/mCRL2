@@ -57,22 +57,20 @@ class aterm
     friend detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const  ATermFilter& aterm_filter);
 
     friend detail::_aterm* detail::address(const aterm& t);
-
+ 
   protected:
     detail::_aterm* m_term;
 
 
     static detail::_aterm* static_undefined_aterm;
-    /* {
-      static detail::_aterm* t=detail::term_appl0(function_symbol());
-      return t;
-    } */
-
     static detail::_aterm *static_empty_aterm_list;
-    /* {
-      static detail::_aterm* t=detail::term_appl0(detail::function_adm.AS_EMPTY_LIST);
-      return t;
-    } */
+
+    inline size_t reference_count() const
+    {
+      assert(m_term!=nullptr);
+      assert(m_term->reference_count()>0);
+      return m_term->reference_count();
+    }
 
     inline size_t decrease_reference_count()
     {
