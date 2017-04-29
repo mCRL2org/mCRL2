@@ -32,6 +32,7 @@ enum lts_preorder
 {
   lts_pre_none,   /**< Unknown or no preorder */
   lts_pre_sim,    /**< Strong simulation preorder */
+  lts_pre_ready_sim,    /**< Strong ready simulation preorder */  
   lts_pre_trace,  /**< Strong trace preorder */
   lts_pre_weak_trace,   /**< Weak trace preorder */
   lts_pre_trace_anti_chain,  /**< Trace preorder based on anti chains */
@@ -63,6 +64,10 @@ lts_preorder parse_preorder(std::string const& s)
   {
     return lts_pre_sim;
   }
+  else if (s == "ready-sim")
+  {
+    return lts_pre_ready_sim;
+  }  
   else if (s == "trace")
   {
     return lts_pre_trace;
@@ -128,6 +133,8 @@ std::string print_preorder(const lts_preorder pre)
       return "unknown";
     case lts_pre_sim:
       return "sim";
+    case lts_pre_ready_sim:
+      return "ready-sim";      
     case lts_pre_trace:
       return "trace";
     case lts_pre_weak_trace:
@@ -167,6 +174,8 @@ std::string description(const lts_preorder pre)
       return "default void preorder";
     case lts_pre_sim:
       return "strong simulation preorder";
+    case lts_pre_ready_sim:
+      return "strong ready simulation preorder";      
     case lts_pre_trace:
       return "strong trace preorder";
     case lts_pre_weak_trace:

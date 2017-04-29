@@ -38,6 +38,7 @@
 #include "mcrl2/lts/detail/liblts_add_an_action_loop.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
 #include "mcrl2/lts/detail/liblts_sim.h"
+#include "mcrl2/lts/detail/liblts_ready_sim.h"
 #include "mcrl2/lts/detail/liblts_failures_refinement.h"
 #include "mcrl2/lts/detail/liblts_tau_star_reduce.h"
 #include "mcrl2/utilities/exception.h"
@@ -151,6 +152,21 @@ bool destructive_compare(LTS_TYPE& l1,
 
       return sp.in_same_class(l1.initial_state(),init_l2);
     }
+    case lts_eq_ready_sim:
+    {
+      if (generate_counter_examples)
+      {
+        mCRL2log(log::warning) << "Cannot generate counter example traces for ready-simulation equivalence\n";
+      }
+      // Run the partitioning algorithm on this merged LTS
+      size_t init_l2 = l2.initial_state() + l1.num_states();
+      detail::merge(l1,l2);
+      l2.clear(); // l2 is not needed anymore.
+      detail::ready_sim_partitioner<LTS_TYPE> rsp(l1);
+      rsp.partitioning_algorithm();
+
+      return rsp.in_same_class(l1.initial_state(),init_l2);
+    }    
     case lts_eq_trace:
     {
       // Determinise first LTS
@@ -628,6 +644,33 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
 
       return;
     }
+    case lts_eq_ready_sim:
+    {
+      // Run the partitioning algorithm on this LTS
+      detail::ready_sim_partitioner<LTS_TYPE> rsp(l);
+      rsp.partitioning_algorithm();
+
+      // Clear this LTS, but keep the labels
+      // l.clear_type();
+      l.clear_state_labels();
+      l.clear_transitions();
+
+      // Assign the reduced LTS
+      l.set_num_states(rsp.num_eq_classes());
+      l.set_initial_state(rsp.get_eq_class(l.initial_state()));
+
+      const std::vector <transition> trans=rsp.get_transitions();
+      l.clear_transitions();
+      for (std::vector <transition>::const_iterator i=trans.begin(); i!=trans.end(); ++i)
+      {
+        l.add_transition(*i);
+      }
+      // Remove unreachable parts
+
+      reachability_check(l,true);
+
+      return;      
+    }        
     case lts_eq_trace:
       detail::bisimulation_reduce(l,false);
       determinise(l);
@@ -705,6 +748,24 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
 
       return sp.in_preorder(l1.initial_state(),init_l2);
     }
+    case lts_pre_ready_sim:
+    {
+      // Merge this LTS and l and store the result in this LTS.
+      // In the resulting LTS, the initial state i of l will have the
+      // state number i + N where N is the number of states in this
+      // LTS (before the merge).
+      const size_t init_l2 = l2.initial_state() + l1.num_states();
+      detail::merge(l1,l2);
+
+      // We no longer need l, so clear it to save memory
+      l2.clear();
+
+      // Run the partitioning algorithm on this prepropcessed LTS
+      detail::ready_sim_partitioner<LTS_TYPE> rsp(l1);      
+      rsp.partitioning_algorithm();
+
+      return rsp.in_preorder(l1.initial_state(),init_l2);
+    }    
     case lts_pre_trace:
     {
       // Preprocessing: reduce modulo strong bisimulation equivalence.

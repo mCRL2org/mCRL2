@@ -44,6 +44,7 @@ enum lts_equivalence
   lts_eq_weak_bisim,  /**< Weak bisimulation equivalence */
   lts_eq_divergence_preserving_weak_bisim, /**< Divergence-preserving weak bisimulation equivalence */
   lts_eq_sim,              /**< Strong simulation equivalence */
+  lts_eq_ready_sim,       /**< Strong ready-simulation equivalence */  
   lts_eq_trace,            /**< Strong trace equivalence*/
   lts_eq_weak_trace,       /**< Weak trace equivalence */
   lts_red_tau_star,        /**< Tau star reduction */
@@ -136,6 +137,10 @@ lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_sim;
   }
+  else if (s == "ready-sim")
+  {
+    return lts_eq_ready_sim;
+  }  
   else if (s == "trace")
   {
     return lts_eq_trace;
@@ -210,6 +215,8 @@ inline std::string print_equivalence(const lts_equivalence eq)
       return "dpweak-bisim";
     case lts_eq_sim:
       return "sim";
+    case lts_eq_ready_sim:
+      return "ready-sim";      
     case lts_eq_trace:
       return "trace";
     case lts_eq_weak_trace:
@@ -265,6 +272,8 @@ inline std::string description(const lts_equivalence eq)
       return "divergence-preserving weak bisimilarity";
     case lts_eq_sim:
       return "strong simulation equivalence";
+    case lts_eq_ready_sim:
+      return "strong ready simulation equivalence";      
     case lts_eq_trace:
       return "strong trace equivalence";
     case lts_eq_weak_trace:

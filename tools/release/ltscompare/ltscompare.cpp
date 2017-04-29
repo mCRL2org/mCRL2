@@ -135,10 +135,10 @@ class ltscompare_tool : public ltscompare_base
 
         result = compare(l1,l2,tool_options.preorder,tool_options.generate_counter_examples);
 
-        mCRL2log(info) << "LTS in " << tool_options.name_for_first
+        mCRL2log(info) << "The LTS in " << tool_options.name_for_first
                        << " is " << ((result) ? "" : "not ")
                        << "included in"
-                       << " LTS in " << tool_options.name_for_second 
+                       << " the LTS in " << tool_options.name_for_second 
                        << " (using " << description(tool_options.preorder) 
                        << ")." << std::endl;
       }
@@ -236,12 +236,14 @@ class ltscompare_tool : public ltscompare_base
                  .add_value(lts_eq_weak_bisim)
                  .add_value(lts_eq_divergence_preserving_weak_bisim)
                  .add_value(lts_eq_sim)
+                 .add_value(lts_eq_ready_sim)		 
                  .add_value(lts_eq_trace)
                  .add_value(lts_eq_weak_trace),
                  "use equivalence NAME (not allowed in combination with -p/--preorder):", 'e').
       add_option("preorder", make_enum_argument<lts_preorder>("NAME")
                  .add_value(lts_pre_none, true)
                  .add_value(lts_pre_sim)
+                 .add_value(lts_pre_ready_sim)		 
                  .add_value(lts_pre_trace)
                  .add_value(lts_pre_weak_trace)
                  .add_value(lts_pre_trace_anti_chain) 
@@ -281,6 +283,10 @@ class ltscompare_tool : public ltscompare_base
         {
           throw parser.error("counter examples cannot be used with simulation pre-order");
         }
+        if (tool_options.preorder==lts_pre_ready_sim)
+        {
+          throw parser.error("counter examples cannot be used with ready simulation pre-order");
+        }	
         if (tool_options.preorder==lts_pre_trace)
         {
           throw parser.error("counter examples cannot be used with the plain trace pre-order (use trace-ac instead)");
