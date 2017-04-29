@@ -75,8 +75,8 @@
 #include <cstring>       // for std::size_t and std::memset()
 #include <cassert>
 #include <cmath>         // for std::log2()
-#include <limits>        // for std::numeric_limits<unsigned char>::max()
 #include <climits>       // for CHAR_BIT
+
 #include "mcrl2/utilities/logger.h"
 
 
@@ -379,9 +379,9 @@ class check_complexity
             assert(max_value <= log_n);
             if (counters[ctr - FirstCounter] >= max_value)
             {
-                mCRL2log(log::error) << "Error: counter \"" <<work_names[ctr]
-                                         << "\" exceeded maximum value ("
-                                         << (unsigned) max_value << ") for ";
+                mCRL2log(log::error) << "Error: counter \"" << work_names[ctr]
+                                           << "\" exceeded maximum value ("
+                                           << (unsigned) max_value << ") for ";
                 return false;
             }
             counters[ctr - FirstCounter] = max_value;
@@ -409,13 +409,18 @@ class check_complexity
         {
             assert(FirstCounter <= from && from <= LastCounter);
             assert(FirstCounter <= to && to <= LastCounter);
+            if (0 == max_value && 0 == counters[from - FirstCounter])
+            {
+                return true;
+            }
             assert(max_value <= log_n);
-            if (0 == counters[from - FirstCounter])  return true;
-            if (counters[to - FirstCounter] >= max_value)
+            if (counters[to - FirstCounter] > max_value ||
+                                 (counters[to - FirstCounter] == max_value &&
+                                           0 != counters[from - FirstCounter]))
             {
                 mCRL2log(log::error) << "Error: counter \"" << work_names[to]
-                                         << "\" exceeded maximum value ("
-                                         << (unsigned) max_value << ") for ";
+                                           << "\" exceeded maximum value ("
+                                           << (unsigned) max_value << ") for ";
                 return false;
             }
             if (FirstCounter <= TRANS_MIN_TEMPORARY &&
@@ -429,7 +434,7 @@ class check_complexity
             else
             {
                 counters[to - FirstCounter] = max_value;
-                assert(1 == counters[from - FirstCounter]);
+                assert(1 >= counters[from - FirstCounter]);
             }
             //mCRL2log(log::debug, "bisim_gjkw")<<". counters["<<work_names[to]
             //            << "] = " << (trans_type) counters[to - FirstCounter]
@@ -767,6 +772,7 @@ class check_complexity
         }
     };
 
+
     #if 0
         /// \brief prints a message for each counter, for debugging purposes
         /// \details The function can be called, e. g., from
@@ -789,6 +795,7 @@ class check_complexity
         assert(0 == sensible_work);     sensible_work = 0;
         assert(0 == superfluous_work);  superfluous_work = 0;
     }
+
 
     /// \brief Assigns work to a counter and checks for errors
     /// \details Many functions that assign work to a counter actually return

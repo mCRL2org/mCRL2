@@ -115,7 +115,7 @@
 #ifndef _COROUTINE_H
 #define _COROUTINE_H
 
-#include <cstdlib>       // for size_t
+#include <cstdlib>       // for std::size_t
 #include <cassert>
 #include <boost/preprocessor.hpp>
 
@@ -258,7 +258,7 @@ typedef enum { _coroutine_CONTINUE, _coroutine_TERMINATE, _coroutine_ABORT }
     };                                                                        \
                                                                               \
     inline coroutine::_coroutine_result_t _coroutine_ ## routine ## _func(    \
-                          size_t _coroutine_allowance,                        \
+                          std::size_t _coroutine_allowance,                   \
                           _coroutine_ ## routine ## _struct& _coroutine_param,\
                           shared_type& shared_var);
 
@@ -282,7 +282,7 @@ typedef enum { _coroutine_CONTINUE, _coroutine_TERMINATE, _coroutine_ABORT }
 #define DEFINE_COROUTINE(namespace, routine, param, local, shared_type,       \
                                                         shared_var, locations)\
 coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
-       size_t _coroutine_allowance,                                           \
+       std::size_t _coroutine_allowance,                                      \
        typename namespace _coroutine_ ## routine ## _struct& _coroutine_param,\
        shared_type& shared_var)                                               \
 {                                                                             \
@@ -331,7 +331,7 @@ coroutine::_coroutine_result_t namespace _coroutine_ ## routine ## _func(     \
                 _coroutine_ ## routine2 ## _struct(BOOST_PP_SEQ_ENUM(param2));\
             shared_type _coroutine_shared_data =                              \
                                            { BOOST_PP_SEQ_ENUM(shared_init) };\
-            for (size_t _coroutine_allowance = 1;; )                          \
+            for (std::size_t _coroutine_allowance = 1;; )                     \
             {                                                                 \
                 coroutine::_coroutine_result_t _coroutine_result =            \
                         _coroutine_ ## routine1 ## _func(_coroutine_allowance,\
