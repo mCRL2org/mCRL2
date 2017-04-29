@@ -1142,7 +1142,7 @@ Coord3D GLScene::eyeToWorld(int x, int y, GLfloat z)
   }
   QVector3D eye{static_cast<float>(x), static_cast<float>(V[3] - y), static_cast<float>(z)};
   QRect view = QRect(V[0], V[1], V[2], V[3]);
-  QVector3D world = eye.unproject(QMatrix4x4(M), QMatrix4x4(P), view);
+  QVector3D world = eye.unproject(QMatrix4x4(M).transposed(), QMatrix4x4(P).transposed(), view);
   return Coord3D(world.x(), world.y(), world.z());
 }
 
@@ -1156,7 +1156,7 @@ Coord3D GLScene::worldToEye(const Coord3D& world)
   glGetIntegerv(GL_VIEWPORT, V);
   QVector3D w{world.x, world.y, world.y};
   QRect view = QRect(V[0], V[1], V[2], V[3]);
-  QVector3D eye = w.project(QMatrix4x4(M), QMatrix4x4(P), view);
+  QVector3D eye = w.project(QMatrix4x4(M).transposed(), QMatrix4x4(P).transposed(), view);
   return Coord3D(eye.x() /m_texturedata->device_pixel_ratio,
                  (V[3] - eye.y()) / m_texturedata->device_pixel_ratio,
                  eye.z());
