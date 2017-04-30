@@ -458,7 +458,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
             }
             else
             {
-              arg = (aterm)(list.tail());
+              arg = list.tail();
             }
           }
           else if (term.type_is_appl())
@@ -490,8 +490,7 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
   */
 static void add_term(sym_write_entry* entry, const aterm& t)
 {
-  entry->write_terms[t]=entry->cur_index;
-  entry->cur_index++;
+  entry->write_terms[t]=entry->write_terms.size();
 }
 
 /**
@@ -670,12 +669,6 @@ static void write_baf(const aterm& t, ostream& os)
 
   collect_terms(t, index, sym_entries);
 
-  /* reset cur_index */
-  for (size_t lcv=0; lcv < nr_unique_symbols; lcv++)
-  {
-    sym_entries[lcv].cur_index = 0;
-  }
-
   sym_write_entry* first_topsym = nullptr;
   build_arg_tables(index, sym_entries,first_topsym);
 
@@ -758,16 +751,26 @@ static void read_all_symbols(istream& is, size_t nr_unique_symbols, std::vector<
   return;
 }
 
-struct read_todo { sym_read_entry* sym; size_t arg; std::vector<aterm> args; aterm* result; aterm* callresult; };
+struct read_todo 
+{ 
+  sym_read_entry* sym; 
+  std::vector<aterm> args; 
+  aterm* result; 
+  aterm* callresult; 
+
+  read_todo(sym_read_entry* s, aterm* r) 
+   : sym(s), result(r), callresult(nullptr)
+  {
+    args.reserve(sym->sym.arity());
+  }
+};
 
 static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_entry>& read_symbols)
 {
   aterm result;
   size_t value;
   std::stack<read_todo> stack;
-
-  read_todo item = { sym, 0, std::vector<aterm>(sym->sym.arity()), &result, nullptr };
-  stack.push(item);
+  stack.emplace(sym, &result); 
 
   do
   {
@@ -775,26 +778,23 @@ static aterm read_term(sym_read_entry* sym, istream& is, std::vector<sym_read_en
 
     if (current.callresult != nullptr)
     {
-      current.args[current.arg++] = *current.callresult;
+      current.args.push_back(*current.callresult);
       current.callresult = nullptr;
     }
     // AS_INT is registered as having 1 argument, but that needs to be retrieved in a special way.
-    if (current.sym->sym != detail::function_adm.AS_INT && current.arg < current.sym->sym.arity())
+    if (current.sym->sym != detail::function_adm.AS_INT && current.args.size() < current.sym->sym.arity())
     {
-      if (readBits(value, current.sym->sym_width[current.arg], is) &&
-          value < current.sym->topsyms[current.arg].size())
+      if (readBits(value, current.sym->sym_width[current.args.size()], is) &&
+          value < current.sym->topsyms[current.args.size()].size())
       {
-        sym_read_entry* arg_sym = &read_symbols[current.sym->topsyms[current.arg][value]];
+        sym_read_entry* arg_sym = &read_symbols[current.sym->topsyms[current.args.size()][value]];
         if (readBits(value, arg_sym->term_width, is) &&
             value < arg_sym->terms.size())
         {
           current.callresult = &arg_sym->terms[value];
           if (!current.callresult->defined())
           {
-            item.sym = arg_sym;
-            item.args = std::vector<aterm>(arg_sym->sym.arity());
-            item.result = &(*current.callresult);
-            stack.push(item);
+            stack.emplace(arg_sym, current.callresult); 
           }
           continue;
         }
