@@ -133,9 +133,10 @@ class output_policy
     /// \param[in] hint Hint for the stream to which the output is written.
     /// \param[in] timestamp Timestamp to use in the output.
     /// \param[in] level The log level to print the message to.
+    /// \param[in] print_time_information An indication whether the time must be printed.
     ///  \details Any implementation must assure that output is written using an atomic action, to prevent
     /// mixing of different lines into one line in the output.
-    virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg) = 0;
+    virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information) = 0;
 };
 
 std::set<output_policy*> initialise_output_policies();
@@ -166,6 +167,13 @@ class logger
 
     /// \brief The loglevel of the current message
     log_level_t m_level;
+
+    /// \brief An indication whether time information should be printed.
+    static bool& m_print_time_information()
+    {
+      static bool print_timing_info=false;
+      return print_timing_info;
+    }
 
     /// \brief The message hint of the current message
     std::string m_hint;
@@ -220,7 +228,7 @@ class logger
     {
       for(output_policy* policy: output_policies())
       {
-        policy->output(m_level, m_hint, m_timestamp, m_os.str());
+        policy->output(m_level, m_hint, m_timestamp, m_os.str(), m_print_time_information());
       }
     }
 
@@ -289,6 +297,25 @@ class logger
       hint_to_level().erase(hint);
     }
 
+    /// \brief Indicate that timing information should be printed.
+    static void set_report_time_info()
+    {
+      m_print_time_information()=true;
+    }
+
+    /// \brief Indicate that timing information should not be printed.
+    static void clear_report_time_info()
+    {
+      m_print_time_information()=false;
+    }
+
+    /// \brief Get whether timing information is printed.
+    /// \return True if time information is printed, otherwise false.
+    static bool get_report_time_info() 
+    {
+      return m_print_time_information();
+    }
+
     /// Get access to the stream provided by the logger.
     /// \param[in] l Log level for the stream
     /// \param[in] hint The hint for which the stream has to be provided.
@@ -310,7 +337,7 @@ public:
   /// \param[in] timestamp The timestamp of the log message
   /// \param[in] msg The message to be formatted
   /// \return The formatted message (\a msg)
-  static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+  static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information)
   {
     /// suppress non used variable warnings.
     (void)level; (void)hint; (void)timestamp;
@@ -369,7 +396,7 @@ public:
   /// - hint
   /// - log level
   /// - indentation
-  static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg);
+  static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information);
 };
 
 /// \brief File output class.
@@ -432,7 +459,7 @@ class file_output: public output_policy
     ///
     /// \note This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
     /// atomic.
-    virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+    virtual void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information)
     {
       FILE* p_stream = get_stream(hint);
       if (!p_stream)
@@ -440,7 +467,7 @@ class file_output: public output_policy
         return;
       }
 
-      fprintf(p_stream, "%s", formatter::format(level, hint, timestamp, msg).c_str());
+      fprintf(p_stream, "%s", formatter::format(level, hint, timestamp, msg, print_time_information).c_str());
       fflush(p_stream);
     }
 };

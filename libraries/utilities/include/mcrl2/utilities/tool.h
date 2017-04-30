@@ -81,6 +81,7 @@ class tool
       if (parser.options.count("timings") > 0)
       {
         m_timing_enabled = true;
+        log::mcrl2_logger::set_report_time_info();
         m_timing_filename = parser.option_argument("timings");
       }
     }

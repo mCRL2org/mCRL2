@@ -33,14 +33,40 @@ namespace mcrl2 {
     return buffer;
   }
 
-  std::string formatter::format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+  std::string formatter::format(const log_level_t level, 
+                                const std::string& hint, 
+                                const time_t timestamp, 
+                                const std::string& msg,
+                                const bool print_time_information)
   {
-    // Construct the message header
+    // Construct the message header, with or without time and debug level info.
     std::stringstream start_of_line;
-    start_of_line << "[" << format_time(&timestamp) << " " << hint
-                  << (hint == std::string()?"":"::")
-                  << log_level_to_string(level) << "]"
-                  << std::string(8 - log_level_to_string(level).size(), ' ');
+    if (print_time_information || level==error || level > verbose)
+    {
+      start_of_line << "[";
+    }
+    if (print_time_information)
+    {
+      start_of_line << format_time(&timestamp);
+    }
+    if (print_time_information && (level==error || level>verbose))
+    {
+      start_of_line << " ";
+    }
+    if (level==error || level>verbose)
+    {
+      start_of_line << hint
+                    << (hint == std::string()?"":"::")
+                    << log_level_to_string(level);
+    }
+    if (print_time_information || level==error || level>verbose)
+    {
+      start_of_line << "] ";
+    }
+    if (level==error || level > verbose)
+    {
+      start_of_line << std::string(7 - log_level_to_string(level).size(), ' ');
+    }
 
     // Check if message is finished. We
     bool msg_ends_with_newline = false;

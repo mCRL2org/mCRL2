@@ -12,9 +12,16 @@
 using namespace mcrl2::gui;
 using namespace mcrl2::gui::qt;
 
-void LogRelay::output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+void LogRelay::output(const log_level_t level, 
+                      const std::string& hint, 
+                      const time_t timestamp, 
+                      const std::string& msg, 
+                      const bool /* print_time_information */)
 {
-  emit logMessage(QString::fromStdString(log_level_to_string(level)), QString::fromStdString(hint), QDateTime::fromTime_t(timestamp), QString::fromStdString(msg));
+  emit logMessage(QString::fromStdString(log_level_to_string(level)), 
+                  QString::fromStdString(hint), 
+                  QDateTime::fromTime_t(timestamp), 
+                  QString::fromStdString(msg));
 }
 
 LogWidget::LogWidget(QWidget *parent)

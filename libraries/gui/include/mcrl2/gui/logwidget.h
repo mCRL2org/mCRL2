@@ -34,7 +34,7 @@ class LogRelay : public QObject, public output_policy
   Q_OBJECT
 
   public:
-    void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg);
+    void output(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information);
 
   signals:
     void logMessage(QString level, QString hint, QDateTime timestamp, QString message);
