@@ -183,7 +183,7 @@ struct top_symbol
 class top_symbols_t
 {
   public:
-    size_t code_width;
+    size_t code_width;               /* This is the log of the number of symbols both "symbols" and "index_into_symbols". */
     std::vector<top_symbol> symbols; /* The set of symbols that occur directly below the top symbol. 
                                         The order of the symbols in this vector is important. */
     unordered_map<function_symbol, size_t> index_into_symbols; 
@@ -454,7 +454,6 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
             tss.index_into_symbols[topsym->id]=index;
           }
         }
-
         tss.code_width=bit_width(total_top_symbols);
       }
     }
@@ -495,14 +494,19 @@ struct write_todo
   aterm term; 
   sym_write_entry* entry; 
   size_t arg; 
+
+  write_todo(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, std::vector<sym_write_entry>& sym_entries)
+   :  term(t),
+      entry(get_top_symbol(t, index, sym_entries)),
+      arg(0)
+  {}
 };
 
 static void collect_terms(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
   std::unordered_set<aterm> visited;
-  write_todo item = { t, get_top_symbol(t, index, sym_entries), 0 };
-  stack.push(item);
+  stack.emplace(t, index, sym_entries);
 
   do
   {
@@ -515,11 +519,10 @@ static void collect_terms(const aterm& t, const std::unordered_map<function_symb
     }
     else if (current.arg < current.entry->id.arity())
     {
-      item.term = subterm(current.term, current.arg++);
-      if (visited.count(item.term) == 0)
+      const aterm t = subterm(current.term, current.arg++);
+      if (visited.count(t) == 0)
       {
-        item.entry = get_top_symbol(item.term, index, sym_entries);
-        stack.push(item);
+        stack.emplace(t, index, sym_entries);
       }
     }
     else
@@ -573,9 +576,7 @@ static const top_symbol& find_top_symbol(top_symbols_t* syms, const function_sym
 static void write_term(const aterm& t, const std::unordered_map<function_symbol, size_t>& index, ostream& os, std::vector<sym_write_entry>& sym_entries)
 {
   std::stack<write_todo> stack;
-
-  write_todo item = { t, get_top_symbol(t, index, sym_entries), 0 };
-  stack.push(item);
+  stack.emplace(t, index, sym_entries);
 
   do
   {
@@ -589,8 +590,7 @@ static void write_term(const aterm& t, const std::unordered_map<function_symbol,
     else
     if (current.arg < current.entry->id.arity())
     {
-      item.term = subterm(current.term, current.arg);
-      item.entry = get_top_symbol(item.term, index, sym_entries);
+      write_todo item(subterm(current.term, current.arg), index, sym_entries);
 
       const top_symbol& ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
       writeBits(ts.code, current.entry->top_symbols[current.arg].code_width, os);
@@ -645,7 +645,6 @@ static void write_baf(const aterm& t, ostream& os)
   assert(cur == nr_unique_symbols);
 
   collect_terms(t, index, sym_entries);
-
   build_arg_tables(index, sym_entries);
 
   /* write header */
