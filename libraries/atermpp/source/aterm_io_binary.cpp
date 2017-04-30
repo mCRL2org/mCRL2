@@ -173,17 +173,17 @@ static const size_t BAF_VERSION = 0x0304;
 struct top_symbol
 {
   size_t index;
-  size_t code_width;
   size_t code;
 
-  top_symbol(size_t index_, size_t code_width_, size_t code_)
-   : index(index_), code_width(code_width_), code(code_)
+  top_symbol(size_t index_, size_t code_)
+   : index(index_), code(code_)
   {}
 };
 
 class top_symbols_t
 {
   public:
+    size_t code_width;
     std::vector<top_symbol> symbols; /* The set of symbols that occur directly below the top symbol. 
                                         The order of the symbols in this vector is important. */
     unordered_map<function_symbol, size_t> index_into_symbols; 
@@ -205,17 +205,12 @@ class sym_write_entry
     std::vector<top_symbols_t> top_symbols; /* top symbols occuring in this symbol */
 
     size_t cur_index;
-    size_t nr_times_top; /* # occurences of this symbol as topsymbol */
-
-    sym_write_entry* next_topsym;
 
     sym_write_entry(const function_symbol& id_, 
                     size_t term_width_)
      : id(id_), 
        term_width(term_width_),
-       cur_index(0),
-       nr_times_top(0),
-       next_topsym(nullptr)
+       cur_index(0)
     {}
 };
 
@@ -408,29 +403,9 @@ static size_t bit_width(size_t val)
   * terms have been sorted by symbol.
   */
 
-static void gather_top_symbols(sym_write_entry& cur_entry,
-                               const size_t cur_arg,
-                               const size_t total_top_symbols,
-                               std::vector<sym_write_entry>& sym_entries,
-                               sym_write_entry* first_topsym)
-{
-  top_symbols_t& tss = cur_entry.top_symbols[cur_arg];
-  tss.symbols.clear(); 
-  tss.index_into_symbols.clear(); 
-
-  size_t index = 0;
-  for (sym_write_entry* top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym)
-  {
-    tss.symbols.emplace_back(top_entry-&sym_entries[0], bit_width(total_top_symbols), index);
-    tss.index_into_symbols[top_entry->id]=index;
-    top_entry->nr_times_top = 0;
-    index++;
-  }
-}
 
 static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& index, 
-                             std::vector<sym_write_entry>& sym_entries,
-                             sym_write_entry*& first_topsym)
+                             std::vector<sym_write_entry>& sym_entries)
 {
   for (sym_write_entry& cur_entry: sym_entries)
   {
@@ -441,8 +416,8 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
     {
       for (size_t cur_arg=0; cur_arg<arity; cur_arg++)
       {
+        top_symbols_t& tss = cur_entry.top_symbols[cur_arg];
         size_t total_top_symbols = 0;
-        first_topsym = nullptr;
         for(const pair<aterm, size_t>& p: cur_entry.write_terms)
         {
           aterm term = p.first;
@@ -470,15 +445,17 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
             throw mcrl2::runtime_error("Internal inconsistency found in internal data structure. Illegal term.");
           }
           sym_write_entry* topsym = get_top_symbol(arg, index, sym_entries);
-          if (!topsym->nr_times_top++)
+          
+          if (tss.index_into_symbols.count(topsym->id)==0)
           {
             total_top_symbols++;
-            topsym->next_topsym = first_topsym;
-            first_topsym = topsym;
+            size_t index=tss.symbols.size();
+            tss.symbols.emplace_back(topsym-&sym_entries[0], index);
+            tss.index_into_symbols[topsym->id]=index;
           }
         }
 
-        gather_top_symbols(cur_entry, cur_arg, total_top_symbols, sym_entries, first_topsym);
+        tss.code_width=bit_width(total_top_symbols);
       }
     }
   }
@@ -616,7 +593,7 @@ static void write_term(const aterm& t, const std::unordered_map<function_symbol,
       item.entry = get_top_symbol(item.term, index, sym_entries);
 
       const top_symbol& ts = find_top_symbol(&current.entry->top_symbols[current.arg], item.entry->id);
-      writeBits(ts.code, ts.code_width, os);
+      writeBits(ts.code, current.entry->top_symbols[current.arg].code_width, os);
       sym_write_entry& arg_sym = sym_entries[ts.index];
       size_t arg_trm_idx = arg_sym.write_terms.at(item.term); 
       writeBits(arg_trm_idx, arg_sym.term_width, os);
@@ -669,8 +646,7 @@ static void write_baf(const aterm& t, ostream& os)
 
   collect_terms(t, index, sym_entries);
 
-  sym_write_entry* first_topsym = nullptr;
-  build_arg_tables(index, sym_entries,first_topsym);
+  build_arg_tables(index, sym_entries);
 
   /* write header */
 
