@@ -14,7 +14,7 @@
 
 #include <cassert>
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/pbesinst_symbolic.h"
