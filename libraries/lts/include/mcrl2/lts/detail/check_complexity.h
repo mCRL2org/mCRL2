@@ -57,9 +57,10 @@
 /// After all temporary work has been handled, call `check_temporary_work()` to
 /// compare the amount of sensible work with the amount of cancelled work.
 ///
-/// If the work could be assigned to one of several counters, I recommend to
-/// assign it to all of them;  otherwise, it may happen that a later excess of
-/// the time budget goes unnoticed because too few counters were advanced.
+/// If the work could be assigned to one of several counters (in particular, to
+/// any one transition out of a set of transitions), I recommend to assign it
+/// to all of them;  otherwise, it may happen that a later excess of the time
+/// budget goes unnoticed because too few counters were advanced.
 /// This, however, poses some difficulties when using temporary counters: a
 /// single unit of work should be assigned to multiple counters, but added to
 /// the balance between sensible and superfluous work only once.  A variant of
@@ -149,8 +150,8 @@ class check_complexity
         // out to be useful.  After that, there are two groups of counters to
         // store temporary work.
         refine_bottom_state_3_6l,
-        refine_bottom_state_3_6l_s_is_in_SpB,
         refine_visited_state_3_15,
+        refine_bottom_state_3_6l_s_is_in_SpB,
 
         // temporary state counters (blue):
         while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l, 
@@ -190,21 +191,32 @@ class check_complexity
         B_TO_C_MAX = for_all_constellations_C_not_in_R_from_RfnB_4_4,
 
         // transition counters: every transition is visited O(log n) times
+            // counters for transitions into the splitter NewC
         for_all_s_prime_in_pred_s_2_11,
         TRANS_MIN = for_all_s_prime_in_pred_s_2_11,
         Register_that_inert_transitions_from_s_go_to_NewC_succ_2_17,
         Register_that_inert_transitions_from_s_go_to_NewC_swap_2_17,
+        refine_outgoing_transition_to_marked_state_3_6l,
+
+            // counters for outgoing transitions
+        refine_outgoing_transition_3_6_or_23l,
         Move_Blue_or_Red_to_a_new_block_succ_3_29,
-        for_all_s_prime_in_pred_s_3_32l,
         for_all_s_prime_in_succ_s_3_32r,
+
+            // counters for incoming transitions
+        refine_incoming_transition_3_18,
+        for_all_s_prime_in_pred_s_3_32l,
 
         // temporary transition counters for refine: similar to the temporary
         // counters for states, we have a first group to store the work done
         // for the smaller half, and temporary counters to store the work until
         // it becomes clear which half wins.
-        refine_outgoing_transition_3_6_or_23l,
-        refine_outgoing_transition_to_marked_state_3_6l,
-        refine_incoming_transition_3_18,
+            // Because we have to sort the transitions into those to NewC, the
+            // outgoing and the incoming transitions, these counters are
+            // distributed above.  The counters used to store the work done for
+            // the smaller half are: refine_outgoing_transition_3_6_or_23l,
+            // refine_outgoing_transition_to_marked_state_3_6l and
+            // refine_incoming_transition_3_18.
 
         // temporary transition counters (blue):
         while_Test_is_not_empty_3_6l_s_is_red_3_9l,
@@ -300,34 +312,21 @@ class check_complexity
         /// \brief actual space to store the counters
         unsigned char counters[LastCounter - FirstCounter + 1];
 
+      public:
         /// \brief cancel temporary work
         /// \details The function registers that all counters from `first` to
         /// `last` (inclusive) are counting superfluous work.  It adds them to
         /// the pool of superfluous work.
-        void cancel_work(enum counter_type first, enum counter_type last)
+        bool cancel_work(enum counter_type ctr)
         {
-            assert(FirstCounter<=first && first <= last && last<=LastCounter);
-            for (enum counter_type i = first ; i <= last ;
-                                               i = (enum counter_type) (i + 1))
+            assert(FirstCounter <= ctr && ctr <= LastCounter);
+            if (ctr < TRANS_MIN_TEMPORARY || ctr > TRANS_MAX_TEMPORARY ||
+                          DONT_COUNT_TEMPORARY != counters[ctr - FirstCounter])
             {
-                //if (0 != counters[i - FirstCounter])
-                //{
-                //    mCRL2log(log::debug,"bisim_gjkw") << ". cancel counters["
-                //                                     << work_names[i] << "]";
-                //}
-                if (LastCounter < TRANS_MIN_TEMPORARY ||
-                        FirstCounter > TRANS_MIN_TEMPORARY ||
-                        i < TRANS_MIN_TEMPORARY || i > TRANS_MAX_TEMPORARY ||
-                            DONT_COUNT_TEMPORARY != counters[i - FirstCounter])
-                {
-                    superfluous_work += counters[i - FirstCounter];
-                }
-                //else
-                //{
-                //    mCRL2log(log::debug, "bisim_gjkw") << '*';
-                //}
-                counters[i - FirstCounter] = 0;
+                superfluous_work += counters[ctr - FirstCounter];
             }
+            counters[ctr - FirstCounter] = 0;
+            return true;
         }
 
         /// \brief move temporary work to its final counter
@@ -359,7 +358,6 @@ class check_complexity
             return move_work(from, to, max_value);
         }
 
-      public:
         /// \brief constructor, initializes all counters to 0
         counter_t()  {  std::memset(counters, '\0', sizeof(counters));  }
 
@@ -379,14 +377,12 @@ class check_complexity
             assert(max_value <= log_n);
             if (counters[ctr - FirstCounter] >= max_value)
             {
-                mCRL2log(log::error) << "Error: counter \"" << work_names[ctr]
+                mCRL2log(log::error) << "Error 1: counter \"" <<work_names[ctr]
                                            << "\" exceeded maximum value ("
                                            << (unsigned) max_value << ") for ";
                 return false;
             }
             counters[ctr - FirstCounter] = max_value;
-            //mCRL2log(log::debug,"bisim_gjkw") <<"counters[" <<work_names[ctr]
-            //    <<"] = " <<(trans_type) counters[ctr - FirstCounter] <<";\n";
             return true;
         }
 
@@ -409,16 +405,11 @@ class check_complexity
         {
             assert(FirstCounter <= from && from <= LastCounter);
             assert(FirstCounter <= to && to <= LastCounter);
-            if (0 == max_value && 0 == counters[from - FirstCounter])
-            {
-                return true;
-            }
             assert(max_value <= log_n);
-            if (counters[to - FirstCounter] > max_value ||
-                                 (counters[to - FirstCounter] == max_value &&
-                                           0 != counters[from - FirstCounter]))
+            if (0 == counters[from - FirstCounter])  return true;
+            if (counters[to - FirstCounter] >= max_value)
             {
-                mCRL2log(log::error) << "Error: counter \"" << work_names[to]
+                mCRL2log(log::error) << "Error 2: counter \"" << work_names[to]
                                            << "\" exceeded maximum value ("
                                            << (unsigned) max_value << ") for ";
                 return false;
@@ -429,12 +420,15 @@ class check_complexity
                     to  >= TRANS_MIN_TEMPORARY && to  <= TRANS_MAX_TEMPORARY &&
                          DONT_COUNT_TEMPORARY == counters[from - FirstCounter])
             {
+                assert(1 == max_value);
+                // the next assertion is always satisfied if 1 == max_value.
+                // assert(0 == counters[to - FirstCounter]);
                 counters[to - FirstCounter] = DONT_COUNT_TEMPORARY;
             }
             else
             {
                 counters[to - FirstCounter] = max_value;
-                assert(1 >= counters[from - FirstCounter]);
+                assert(1 == counters[from - FirstCounter]);
             }
             //mCRL2log(log::debug, "bisim_gjkw")<<". counters["<<work_names[to]
             //            << "] = " << (trans_type) counters[to - FirstCounter]
@@ -459,6 +453,26 @@ class check_complexity
     /// copied when the block is split.
     class block_counter_t : public counter_t<BLOCK_MIN, BLOCK_MAX>
     {
+      public:
+        bool no_temporary_work(unsigned char max_C, unsigned char max_B)
+        {
+            assert(max_C <= max_B);
+            for (enum counter_type ctr = BLOCK_MIN;
+                       ctr < Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLOCK_MIN] <= max_C);
+                counters[ctr - BLOCK_MIN] = max_C;
+            }
+            for (enum counter_type ctr =
+                         Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29;
+                         ctr <= BLOCK_MAX; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - BLOCK_MIN] <= max_B);
+                counters[ctr - BLOCK_MIN] = max_B;
+            }
+            return true;
+        }
     };
 
     /// \brief counters for a B_to_C slice
@@ -472,19 +486,29 @@ class check_complexity
         /// \details When a refinement has finished, all work registered with
         /// temporary counters should have been moved to normal counters.  This
         /// function verifies this property.
+        /// \param max_targetC  ilog2(n) - ilog2(size of target constellation)
         /// \returns false  iff some temporary counter was nonzero.  In that
         ///                 case, also the beginning of an error message is
         ///                 printed.
-        bool no_temporary_work() const
+        bool no_temporary_work(unsigned char max_targetC)
         {
+            for (enum counter_type ctr = B_TO_C_MIN;
+                         ctr < for_all_constellations_C_not_in_R_from_RfnB_4_4;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - B_TO_C_MIN] <= max_targetC);
+                counters[ctr - B_TO_C_MIN] = max_targetC;
+            }
             if (counters[for_all_constellations_C_not_in_R_from_RfnB_4_4 -
                                                                B_TO_C_MIN] > 0)
             {
-                mCRL2log(log::error) << "Error: counter \"" << work_names[
+                mCRL2log(log::error) << "Error 3: counter \"" << work_names[
                              for_all_constellations_C_not_in_R_from_RfnB_4_4]
                              << "\" exceeded maximum value (" << 0 << ") for ";
                 return false;
             }
+            assert(for_all_constellations_C_not_in_R_from_RfnB_4_4 ==
+                                                                   B_TO_C_MAX);
             return true;
         }
 
@@ -540,23 +564,43 @@ class check_complexity
         /// This function verifies these properties.  It also sets all counters
         /// for bottom states to 1 so that later no more work can be assigned
         /// to them.
+        /// \param max_C   log2(n) - log2(size of the constellation containing
+        ///                this state)
+        /// \param max_B   log2(n) - log2(size of the block containing this
+        ///                state)
         /// \param bottom  `true` iff the state to which these counters belong
         ///                is a bottom state
         /// \returns false  iff some temporary counter or some bottom-state
         ///                 counter of a non-bottom state was nonzero.  In that
         ///                 case, also the beginning of an error message is
         ///                 printed.
-        bool no_temporary_work(bool bottom)
+        bool no_temporary_work(unsigned char max_C, unsigned char max_B,
+                                                                   bool bottom)
         {
-            enum counter_type ctr =
-                         while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l;
+            assert(max_C <= max_B);
+            for (enum counter_type ctr = STATE_MIN;
+                                    ctr < refine_bottom_state_3_6l_s_is_in_SpB;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - STATE_MIN] <= max_B);
+                counters[ctr - STATE_MIN] = max_B;
+            }
+            assert(counters[refine_bottom_state_3_6l_s_is_in_SpB -
+                                                          STATE_MIN] <= max_C);
+            counters[refine_bottom_state_3_6l_s_is_in_SpB - STATE_MIN] = max_C;
+
+            assert(while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l -
+                                    refine_bottom_state_3_6l_s_is_in_SpB == 1);
+
             // temporary state counters must be zero:
-            for (; ctr <= while_Red_contains_unvisited_states_3_15r ;
+            for (enum counter_type ctr =
+                         while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l;
+                                     ctr < for_all_bottom_states_s_in_RfnB_4_8;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 if (counters[ctr - STATE_MIN] > 0)
                 {
-                    mCRL2log(log::error) << "Error: counter \""
+                    mCRL2log(log::error) << "Error 4: counter \""
                             << work_names[ctr] << "\" exceeded maximum value ("
                             << 0 << ") for ";
                     return false;
@@ -565,11 +609,12 @@ class check_complexity
             // bottom state counters must be 0 for non-bottom states and 1 for
             // bottom states:
             unsigned char max_bot = bottom ? 1 : 0;
-            for (; ctr <= STATE_MAX ; ctr = (enum counter_type) (ctr + 1))
+            for (enum counter_type ctr = for_all_bottom_states_s_in_RfnB_4_8;
+                        ctr <= STATE_MAX ; ctr = (enum counter_type) (ctr + 1))
             {
                 if (counters[ctr - STATE_MIN] > max_bot)
                 {
-                    mCRL2log(log::error) << "Error: counter \""
+                    mCRL2log(log::error) << "Error 5: counter \""
                             << work_names[ctr] << "\" exceeded maximum value ("
                             << (unsigned) max_bot << ") for ";
                     return false;
@@ -577,56 +622,6 @@ class check_complexity
                 counters[ctr - STATE_MIN] = max_bot;
             }
             return true;
-        }
-
-        /// \brief moves temporary counters to normal ones if the blue block is
-        /// smaller
-        /// \details When a refinement has finished and the blue block turns
-        /// out to be smaller, this function moves the corresponding temporary
-        /// work to the normal counters and cancels the work on the red state
-        /// counters.
-        /// \param max_NewB  the maximum allowed value of the normal counters
-        ///                  (corresponding to the size of the blue block).
-        ///                  Note that the blue block may be empty; in that
-        ///                  case, this parameter should be 0.
-        /// \param max_SpB   the maximum allowed value of the normal counter
-        ///                  for line 3.6l, if refine() was called from
-        ///                  line 2.26.  In that case, some work is ascribed to
-        ///                  the marking of states instead of the size of the
-        ///                  new block.  Otherwise, 0.
-        /// \returns false  iff one of the normal counters was too large.  In
-        ///                 that case, also the beginning of an error message
-        ///                 is printed.
-        bool blue_is_smaller(unsigned char max_NewB, unsigned char max_SpB)
-        {
-            cancel_work(while_Red_contains_unvisited_states_3_15r,
-                                    while_Red_contains_unvisited_states_3_15r);
-            return finalise_work(
-                     while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l,
-                              refine_bottom_state_3_6l_s_is_in_SpB, max_SpB) &&
-                finalise_work(while_Test_is_not_empty_3_6l_s_is_blue_3_11l,
-                                         refine_bottom_state_3_6l, max_NewB) &&
-                finalise_work(while_Blue_contains_unvisited_states_3_15l,
-                                          refine_visited_state_3_15, max_NewB);
-        }
-
-        /// \brief moves temporary counters to normal ones if the red block is
-        /// smaller
-        /// \details When a refinement has finished and the red block turns
-        /// out to be smaller, this function moves the corresponding temporary
-        /// work to the normal counters and cancels the work on the blue state
-        /// counters.
-        /// \param max_value  the maximum allowed value of the normal counters
-        ///                   (corresponding to the size of the red block)
-        /// \returns false  iff one of the normal counters was too large.  In
-        ///                 that case, also the beginning of an error message
-        ///                 is printed.
-        bool red_is_smaller(unsigned char max_value)
-        {
-            cancel_work(while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l,
-                                   while_Blue_contains_unvisited_states_3_15l);
-            return finalise_work(while_Red_contains_unvisited_states_3_15r,
-                                         refine_visited_state_3_15, max_value);
         }
     };
     class trans_counter_t : public counter_t<TRANS_MIN, TRANS_MAX>
@@ -640,21 +635,50 @@ class check_complexity
         /// transitions from (new) bottom states.  This function verifies these
         /// properties.  It also sets all counters for bottom states to 1 so
         /// that later no more work can be assigned to them.
+        /// \param max_sourceB    the maximum allowed value for work counters
+        ///                       based on the source state of the transition
+        /// \param max_targetC    the maximum allowed value for work counters
+        ///                       based on the target constellation
+        /// \param max_targetB    the maximum allowed value for work counters
+        ///                       based on the target block
         /// \param source_bottom  `true` iff the transition to which these
         ///                       counters belong starts in a bottom state
         /// \returns false  iff some temporary counter or some bottom-state
         ///                 counter of a transition with non-bottom source was
         ///                 nonzero.  In that case, also the beginning of an
         ///                 error message is printed.
-        bool no_temporary_work(bool source_bottom)
+        bool no_temporary_work(unsigned char max_sourceB,
+                          unsigned char max_targetC, unsigned char max_targetB,
+                          bool source_bottom)
         {
-            enum counter_type ctr = TRANS_MIN_TEMPORARY;
+            assert(max_targetC <= max_targetB);
+            for (enum counter_type ctr = TRANS_MIN;
+                                   ctr < refine_outgoing_transition_3_6_or_23l;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - TRANS_MIN] <= max_targetC);
+                counters[ctr - TRANS_MIN] = max_targetC;
+            }
+            for (enum counter_type ctr = refine_outgoing_transition_3_6_or_23l;
+                                         ctr < refine_incoming_transition_3_18;
+                                           ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - TRANS_MIN] <= max_sourceB);
+                counters[ctr - TRANS_MIN] = max_sourceB;
+            }
+            for (enum counter_type ctr = refine_incoming_transition_3_18;
+                ctr < TRANS_MIN_TEMPORARY; ctr = (enum counter_type) (ctr + 1))
+            {
+                assert(counters[ctr - TRANS_MIN] <= max_targetB);
+                counters[ctr - TRANS_MIN] = max_targetB;
+            }
             // temporary transition counters must be zero
-            for (; ctr <= TRANS_MAX_TEMPORARY ; ctr=(enum counter_type)(ctr+1))
+            for (enum counter_type ctr = TRANS_MIN_TEMPORARY;
+                ctr <= TRANS_MAX_TEMPORARY; ctr = (enum counter_type)(ctr + 1))
             {
                 if (counters[ctr - TRANS_MIN] > 0)
                 {
-                    mCRL2log(log::error) << "Error: counter \""
+                    mCRL2log(log::error) << "Error 6: counter \""
                             << work_names[ctr] << "\" exceeded maximum value ("
                             << 0 << ") for ";
                     return false;
@@ -663,11 +687,13 @@ class check_complexity
             // bottom state counters must be 0 for transitions from non-bottom
             // states and 1 for other transitions
             unsigned char max_bot = source_bottom ? 1 : 0;
-            for (; ctr <= TRANS_MAX ; ctr = (enum counter_type) (ctr + 1))
+            for (enum counter_type ctr =
+                        (enum counter_type) (TRANS_MAX_TEMPORARY + 1);
+                        ctr <= TRANS_MAX ; ctr = (enum counter_type) (ctr + 1))
             {
                 if (counters[ctr - TRANS_MIN] > max_bot)
                 {
-                    mCRL2log(log::error) << "Error: counter \""
+                    mCRL2log(log::error) << "Error 7: counter \""
                             << work_names[ctr] << "\" exceeded maximum value ("
                             << (unsigned) max_bot << ") for ";
                     return false;
@@ -709,66 +735,10 @@ class check_complexity
                 return true;
             }
 
-            mCRL2log(log::error) << "Error: counter \"" << work_names[ctr]
+            mCRL2log(log::error) << "Error 8: counter \"" << work_names[ctr]
                                          << "\" exceeded maximum value ("
                                          << (trans_type) max_value << ") for ";
             return false;
-        }
-
-        /// \brief moves temporary counters to normal ones if the blue block is
-        /// smaller
-        /// \details When a refinement has finished and the blue block turns
-        /// out to be smaller, this function moves the corresponding temporary
-        /// work to the normal counters and cancels the work on the red state
-        /// counters.
-        /// \param max_NewB  the maximum allowed value of the normal counters
-        ///                  (corresponding to the size of the blue block).
-        ///                  Note that the blue block may be empty; in that
-        ///                  case, this parameter should be 0.
-        /// \param max_SpB   the maximum allowed value of the normal counter
-        ///                  for line 3.6l, if refine() was called from
-        ///                  line 2.26.  In that case, some work is ascribed to
-        ///                  the marking of states instead of the size of the
-        ///                  new block.  Otherwise, 0.
-        /// \returns false  iff one of the normal counters was too large.  In
-        ///                 that case, also the beginning of an error message
-        ///                 is printed.
-        bool blue_is_smaller(unsigned char max_NewB, unsigned char max_SpB)
-        {
-            cancel_work(while_FromRed_is_not_empty_3_6r,
-                                              for_all_s_prime_in_pred_s_3_18r);
-            return finalise_work(while_Test_is_not_empty_3_6l_s_is_red_3_9l,
-                   refine_outgoing_transition_to_marked_state_3_6l, max_SpB) &&
-                finalise_work(
-                   while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing,
-                   refine_outgoing_transition_postprocess_new_bottom_3_6l,1) &&
-                finalise_work(for_all_s_prime_in_pred_s_setminus_Red_3_18l,
-                                  refine_incoming_transition_3_18, max_NewB) &&
-                finalise_work(if___s_prime_has_no_transition_to_SpC_3_23l,
-                            refine_outgoing_transition_3_6_or_23l, max_NewB) &&
-                finalise_work(if___s_prime_has_transition_to_SpC_3_23l,
-                          refine_outgoing_transition_from_new_bottom_3_23l, 1);
-        }
-
-        /// \brief moves temporary counters to normal ones if the red block is
-        /// smaller
-        /// \details When a refinement has finished and the red block turns
-        /// out to be smaller, this function moves the corresponding temporary
-        /// work to the normal counters and cancels the work on the blue state
-        /// counters.
-        /// \param max_value  the maximum allowed value of the normal counters
-        ///                   (corresponding to the size of the red block)
-        /// \returns false  iff one of the normal counters was too large.  In
-        ///                 that case, also the beginning of an error message
-        ///                 is printed.
-        bool red_is_smaller(unsigned char max_value)
-        {
-            cancel_work(while_Test_is_not_empty_3_6l_s_is_red_3_9l,
-                                     if___s_prime_has_transition_to_SpC_3_23l);
-            return finalise_work(while_FromRed_is_not_empty_3_6r,
-                           refine_outgoing_transition_3_6_or_23l, max_value) &&
-                finalise_work(for_all_s_prime_in_pred_s_3_18r,
-                                   refine_incoming_transition_3_18, max_value);
         }
     };
 

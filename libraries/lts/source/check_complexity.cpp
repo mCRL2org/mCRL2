@@ -114,8 +114,8 @@ const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
     "3.29: Move Blue/Red to a new block NewB (swap states)",
 
     "3.6l: refine bottom state",
-    "3.6l: refine bottom state (s is in SpB)",
     "3.15: refine visited state",
+    "3.6l: refine bottom state (s is in SpB)",
 
     // temporary state counters (blue):
     "3.6l: while Test is not empty (s is in SpB, and 3.9l: s is red)",
@@ -139,13 +139,14 @@ const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
     "2.17: Register that inert transitions from s go to NewC (out)",
     "2.17: Register that inert transitions from s go to NewC (swap "
                                                                 "transitions)",
-    "3.29: Move Blue/Red to a new block NewB (for all transitions in out(s))",
-    "3.32l: for all s_prime in in(s)",
-    "3.32r: for all s_prime in out(s)",
+    "3.6l: refine outgoing transition to marked state",
 
     "3.6/3.23l: refine outgoing transition",
-    "3.6l: refine outgoing transition to marked state",
+    "3.29: Move Blue/Red to a new block NewB (for all transitions in out(s))",
+    "3.32r: for all s_prime in out(s)",
+
     "3.18: refine incoming transition",
+    "3.32l: for all s_prime in in(s)",
 
     // temporary transition counters (blue):
     "3.6l: while Test is not empty (3.9l: s is red)",
@@ -176,11 +177,10 @@ const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
 #define test_work_name(var,ctr)                                               \
         do                                                                    \
         {                                                                     \
-            assert((var) == check_complexity::ctr);                           \
+            assert((var) == ctr);                                             \
             mCRL2log(log::debug, "bisim_gjkw") << "work_names[" #ctr "] = \"" \
-                       << check_complexity::work_names[check_complexity::ctr] \
-                                                                   << "\".\n";\
-            (var) = (enum check_complexity::counter_type) ((var) + 1);        \
+                                                << work_names[ctr] << "\".\n";\
+            (var) = (enum counter_type) ((var) + 1);                          \
         }                                                                     \
         while (0)
 
@@ -213,8 +213,8 @@ void check_complexity::test_work_names()
     assert(check_complexity::STATE_MIN == i);
     test_work_name(i, Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29);
     test_work_name(i, refine_bottom_state_3_6l);
-    test_work_name(i, refine_bottom_state_3_6l_s_is_in_SpB);
     test_work_name(i, refine_visited_state_3_15);
+    test_work_name(i, refine_bottom_state_3_6l_s_is_in_SpB);
 
     // temporary state counters (blue):
     test_work_name(i, while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l); 
@@ -245,13 +245,14 @@ void check_complexity::test_work_names()
                   Register_that_inert_transitions_from_s_go_to_NewC_succ_2_17);
     test_work_name(i,
                   Register_that_inert_transitions_from_s_go_to_NewC_swap_2_17);
-    test_work_name(i, Move_Blue_or_Red_to_a_new_block_succ_3_29);
-    test_work_name(i, for_all_s_prime_in_pred_s_3_32l);
-    test_work_name(i, for_all_s_prime_in_succ_s_3_32r);
+    test_work_name(i, refine_outgoing_transition_to_marked_state_3_6l);
 
     test_work_name(i, refine_outgoing_transition_3_6_or_23l);
-    test_work_name(i, refine_outgoing_transition_to_marked_state_3_6l);
+    test_work_name(i, Move_Blue_or_Red_to_a_new_block_succ_3_29);
+    test_work_name(i, for_all_s_prime_in_succ_s_3_32r);
+
     test_work_name(i, refine_incoming_transition_3_18);
+    test_work_name(i, for_all_s_prime_in_pred_s_3_32l);
 
     // temporary transition counters (blue):
     assert(check_complexity::TRANS_MIN_TEMPORARY == i);
@@ -276,6 +277,8 @@ void check_complexity::test_work_names()
     test_work_name(i,for_all_transitions_that_need_postproc_a_posteriori_4_12);
     test_work_name(i, for_all_old_bottom_states_s_in_RedB_4_15);
     assert(check_complexity::TRANS_MAX + 1 == i);
+
+    exit(EXIT_SUCCESS);
 }
 #endif // #if 0
 

@@ -1925,9 +1925,10 @@ class bisim_partitioner_gjkw
     /*----------------- Refine -- Algorithm 3 of [GJKW 2017] ----------------*/
 
     bisim_gjkw::block_t* refine(bisim_gjkw::block_t* RfnB,
-            const bisim_gjkw::constln_t* SpC,
-            const bisim_gjkw::B_to_C_descriptor* FromRed,
-            bool postprocessing ONLY_IF_DEBUG( , state_type size_SpB = 0 ) );
+              const bisim_gjkw::constln_t* SpC,
+              const bisim_gjkw::B_to_C_descriptor* FromRed,
+              bool postprocessing
+              ONLY_IF_DEBUG( , const bisim_gjkw::constln_t* NewC = nullptr ) );
 
     DECLARE_COROUTINE(refine_blue,
     /* formal parameters:*/ ((bisim_gjkw::block_t* const, RfnB))
