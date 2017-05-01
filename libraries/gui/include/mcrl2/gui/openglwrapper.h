@@ -1,6 +1,8 @@
 #ifndef MCRL2_UTILITIES_OPENGLWRAPPER_H
 #define MCRL2_UTILITIES_OPENGLWRAPPER_H
 
+#include <cmath>
+
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -12,7 +14,7 @@
 #define gluOrtho2D(left, right, bottom, top)                                   \
   do                                                                           \
   {                                                                            \
-    GLKMatrix4 mat =                                                            \
+    GLKMatrix4 mat =                                                           \
         GLKMatrix4MakeOrtho(left, right, bottom, top, -1.0f, 1.0f);            \
     glLoadMatrixf(mat.m);                                                      \
   } while (0)
@@ -20,7 +22,8 @@
 #define gluPerspective(fovy, aspect, zNear, zFar)                              \
   do                                                                           \
   {                                                                            \
-    GLKMatrix4 mat = GLKMatrix4MakePerspective(fovy, aspect, zNear, zFar);     \
+    GLKMatrix4 mat =                                                           \
+        GLKMatrix4MakePerspective(fovy * M_PI / 180, aspect, zNear, zFar);     \
     glLoadMatrixf(mat.m);                                                      \
   } while (0)
 
