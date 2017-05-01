@@ -340,7 +340,7 @@ public:
   static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information)
   {
     /// suppress non used variable warnings.
-    (void)level; (void)hint; (void)timestamp;
+    (void)level; (void)hint; (void)timestamp; (void)print_time_information;
 
     return msg;
   }
