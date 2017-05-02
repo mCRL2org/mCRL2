@@ -339,7 +339,8 @@ struct is_equal_to_constraint: public type_check_constraint
 };
 
 inline
-constraint_ptr make_is_equal_to_constraint(const sort_expression& s1, const sort_expression& s2, int cost)
+constraint_ptr make_is_equal_to_constraint(const sort_expression& s1,
+                                     const sort_expression& s2, int /* cost */)
 {
   if (s1 == s2)
   {
@@ -608,7 +609,7 @@ struct type_check_node
 
   // Adds a value to the 'sort' attribute
   // Sets the constraints that apply to this node to 'constraint'
-  virtual void set_constraint(type_check_context& context)
+  virtual void set_constraint(type_check_context& /* context */)
   {}
 
   virtual void apply_substitution(const sort_substitution& sigma)
@@ -629,7 +630,7 @@ struct type_check_node
   }
 
   // Throws an exception if the node violates a well typedness rule
-  virtual void check_well_typedness(const type_check_context& context)
+  virtual void check_well_typedness(const type_check_context& /* context */)
   {}
 
   virtual std::string print() const = 0;
@@ -692,7 +693,7 @@ struct number_node: public type_check_node
     : type_check_node(context, {}), value(value_)
   {}
 
-  void set_constraint(type_check_context& context)
+  void set_constraint(type_check_context& /* context */)
   {
     if (detail::is_pos(value))
     {
