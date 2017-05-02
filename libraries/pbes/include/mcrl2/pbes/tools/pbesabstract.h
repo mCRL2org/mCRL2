@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_TOOLS_PBESABSTRACT_H
 #define MCRL2_PBES_TOOLS_PBESABSTRACT_H
 
+#include "mcrl2/utilities/file_utility.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
