@@ -10,18 +10,23 @@
 
 #include <QVector4D>
 
-namespace Workarounds
+namespace mcrl2
+{
+
+namespace gui
 {
 
 // copied and adapted from Qt sources
 // http://doc.qt.io/qt-5/qvector3d.html#project
-QVector3D project(const QVector3D &self, const QMatrix4x4 &modelView,
-                  const QMatrix4x4 &projection, const QRect &viewport)
+QVector3D project(const QVector3D& self, const QMatrix4x4& modelView,
+                  const QMatrix4x4& projection, const QRect& viewport)
 {
   QVector4D tmp(self, 1.0f);
   tmp = projection * modelView * tmp;
   if (qFuzzyIsNull(tmp.w()))
+  {
     tmp.setW(1.0f);
+  }
   tmp /= tmp.w();
 
   tmp = tmp * 0.5f + QVector4D(0.5f, 0.5f, 0.5f, 0.5f);
@@ -33,8 +38,8 @@ QVector3D project(const QVector3D &self, const QMatrix4x4 &modelView,
 
 // copied and adapted from Qt sources
 // http://doc.qt.io/qt-5/qvector3d.html#unproject
-QVector3D unproject(const QVector3D &self, const QMatrix4x4 &modelView,
-                    const QMatrix4x4 &projection, const QRect &viewport)
+QVector3D unproject(const QVector3D& self, const QMatrix4x4& modelView,
+                    const QMatrix4x4& projection, const QRect& viewport)
 {
   QMatrix4x4 inverse = QMatrix4x4(projection * modelView).inverted();
 
@@ -45,8 +50,13 @@ QVector3D unproject(const QVector3D &self, const QMatrix4x4 &modelView,
 
   QVector4D obj = inverse * tmp;
   if (qFuzzyIsNull(obj.w()))
+  {
     obj.setW(1.0f);
+  }
   obj /= obj.w();
   return obj.toVector3D();
 }
-}
+
+} // namespace gui
+
+} // namespace mcrl2

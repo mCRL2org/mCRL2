@@ -2,6 +2,7 @@ if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
   add_mcrl2_library(gui
     INSTALL_HEADERS TRUE
     SOURCES
+      arcball.cpp
       logwidget.ui
       logwidget.cpp
       extendedtabwidget.cpp

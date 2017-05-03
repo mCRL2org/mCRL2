@@ -8,8 +8,6 @@
 //
 /// \file ./visutils.cpp
 
-#include <QOpenGLExtensions>
-
 #include "visutils.h"
 #include "character_set.xpm"
 
@@ -1764,16 +1762,6 @@ void VisUtils::genCharTextures(
   GLuint texCharId[CHARSETSIZE],
   GLubyte texChar[CHARSETSIZE][CHARHEIGHT* CHARWIDTH])
 {
-  // maybe this is static initialization is a bad idea since it makes the function
-  // non-reentrant
-  static QOpenGLExtension_ARB_framebuffer_object ARB_framebuffer_object{};
-  static bool init;
-  if (!init)
-  {
-    ARB_framebuffer_object.initializeOpenGLFunctions();
-    init = true;
-  }
-
   // allocate memory
   glGenTextures(CHARSETSIZE, texCharId);
 
@@ -1806,17 +1794,14 @@ void VisUtils::genCharTextures(
       }
     }
 
-    glTexImage2D(GL_TEXTURE_2D,
-        0, // level
+    gluBuild2DMipmaps(GL_TEXTURE_2D, // target
         GL_ALPHA, // internalFormat
         16, // width
         32, // height
-        0, // border
         GL_ALPHA, // format
         GL_UNSIGNED_BYTE, // type
         texChar[i] // data
         );
-    ARB_framebuffer_object.glGenerateMipmap(GL_TEXTURE_2D);
   }
 }
 

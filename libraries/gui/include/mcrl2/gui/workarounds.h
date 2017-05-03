@@ -13,7 +13,6 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
-
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
 #include <GLKit/GLKMatrix4.h>
@@ -21,10 +20,10 @@
 #include <GL/glu.h>
 #endif
 
-#include <cmath>
-#include <QVector3D>
-#include <QRect>
 #include <QMatrix4x4>
+#include <QRect>
+#include <QVector3D>
+#include <cmath>
 
 // these 3 macros replace glu functions deprecated on Mac OS with calls to
 // Apple specific frameworks, so they should be removed once a better,
@@ -56,16 +55,19 @@
 
 #endif // __APPLE__
 
-namespace Workarounds {
+namespace mcrl2
+{
+namespace gui
+{
 
 // implementations of project und unproject copied from Qt source
 // http://doc.qt.io/qt-5/qvector3d.html#project
 // can be replaced once the required Qt version is >= 5.5
-QVector3D project(const QVector3D& self, const QMatrix4x4 &modelView,
-    const QMatrix4x4 &projection, const QRect &viewport);
-QVector3D unproject(const QVector3D& self, const QMatrix4x4 &modelView,
-    const QMatrix4x4 &projection, const QRect &viewport);
-
-}
+QVector3D project(const QVector3D& self, const QMatrix4x4& modelView,
+                  const QMatrix4x4& projection, const QRect& viewport);
+QVector3D unproject(const QVector3D& self, const QMatrix4x4& modelView,
+                    const QMatrix4x4& projection, const QRect& viewport);
+} // namespace gui
+} // namespace mcrl2
 
 #endif // MCRL2_UTILITIES_WORKAROUNDS_H

@@ -17,6 +17,7 @@
 #else
 #include <GL/glu.h>
 #endif
+#include "mcrl2/gui/arcball.h"
 #include "mcrl2/gui/workarounds.h"
 
 #include "icons/zoom_cursor.xpm"
@@ -164,46 +165,6 @@ void LtsCanvas::paintGL()
   emit renderingFinished();
 }
 
-QVector3D LtsCanvas::getArcBallVector(int mouseX, int mouseY) {
-  float x, y, z;
-  const float radius = 1.5f;
-  // we assume that the center of the arcball matches the center of the
-  // window, one could change this to gluUnproject of the origin
-  // of the world coordinate system
-  GLint viewport[4];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  x = (float) mouseX / viewport[2] * 2.0f - 1.0f;
-  y = (float) mouseY / viewport[3] * 2.0f - 1.0f;
-  y = -y;
-  float squared = x * x + y * y;
-  if (squared <= radius*radius)
-  {
-    z = std::sqrt(radius*radius - squared);
-  } else {
-    float len = std::sqrt(squared);
-    if(std::isnormal(len))
-    {
-        x /= len, y /= len;
-    }
-    else
-    {
-        x = 0.0f, y = 0.0f;
-    }
-    z = 0.0f;
-  }
-  return QVector3D(x, y, z);
-}
-
-void LtsCanvas::applyRotation(bool reverse) {
-  float angle = 180 / M_PI * std::acos(std::min(1.0f, m_rotation.scalar()));
-  if(reverse)
-  {
-    angle = -angle;
-  }
-  // not sure why the angle has to be doubled
-  glRotatef(2 * angle, m_rotation.x(), m_rotation.y(), m_rotation.z());
-}
-
 void LtsCanvas::render(bool light)
 {
   glEnable(GL_DEPTH_TEST);
@@ -255,7 +216,7 @@ void LtsCanvas::render(bool light)
   // apply panning, zooming and rotating transformations
   glTranslatef(m_position.x(), m_position.y(), m_position.z() - m_baseDepth);
 
-  applyRotation();
+  mcrl2::gui::applyRotation(m_rotation);
 
   // translate along the z-axis to make the vertical center of the structure
   // end up in the current origin
@@ -322,7 +283,7 @@ void LtsCanvas::render(bool light)
     glPushMatrix();
     glLoadIdentity();
     glTranslatef(0.0f, 0.0f, halfHeight);
-    applyRotation(/*reverse=*/true);
+    mcrl2::gui::applyRotation(m_rotation, /*reverse=*/true);
     glTranslatef(-m_position.x(), -m_position.y(), -m_position.z() + m_baseDepth);
     GLfloat matrix[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, matrix);
@@ -434,15 +395,7 @@ void LtsCanvas::mouseMoveEvent(QMouseEvent* event)
   }
   else if (m_activeTool == RotateTool)
   {
-    // update rotation based on the difference in mouse coordinates
-    QVector3D v1 = getArcBallVector(oldPosition.x(), oldPosition.y());
-    QVector3D v2 = getArcBallVector(m_lastMousePosition.x(), m_lastMousePosition.y());
-    v1.normalize();
-    v2.normalize();
-    QVector3D cross = QVector3D::crossProduct(v1, v2);
-    float dot = QVector3D::dotProduct(v1, v2);
-    QQuaternion rotation(dot, cross);
-    m_rotation = rotation * m_rotation;
+    m_rotation = mcrl2::gui::arcballRotation(oldPosition, m_lastMousePosition) * m_rotation;
     event->accept();
     repaint();
   }
