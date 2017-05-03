@@ -250,7 +250,6 @@ static void writeBits(size_t val, const size_t nr_bits, ostream& os)
       bit_buffer = '\0';
     }
   }
-if (val!=0) std::cerr << "WASDANU " << val << "   oldval " << oldval << "  nr_bits " << nr_bits << "\n";
   assert(val==0);
 }
 
