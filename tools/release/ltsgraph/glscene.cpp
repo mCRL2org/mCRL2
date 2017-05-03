@@ -27,7 +27,7 @@
 #else
 #include <GL/glu.h>
 #endif
-#include "mcrl2/gui/openglwrapper.h"
+#include "mcrl2/gui/workarounds.h"
 
 #include "mcrl2/utilities/logger.h"
 
