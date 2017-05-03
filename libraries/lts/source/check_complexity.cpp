@@ -87,10 +87,7 @@ namespace bisim_gjkw
 unsigned char check_complexity::log_n = '\0';
 
 /// \brief the number of useful steps in the last refinement
-state_type check_complexity::sensible_work = 0;
-
-/// \brief the number of superfluous steps in the last refinement
-state_type check_complexity::superfluous_work = 0;
+signed_state_type check_complexity::sensible_work = 0;
 
 /// \brief names for complexity counters
 /// \details Every complexity counter (defined in check_complexity.h)

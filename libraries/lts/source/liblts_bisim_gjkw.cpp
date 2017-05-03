@@ -788,10 +788,13 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
         for (succ_iter_t succ_iter = new_constln_slice->begin();
                             new_constln_slice->end() != succ_iter; ++succ_iter)
         {
-            mCRL2complexity(work_pointer++->B_to_C->pred,
+            #ifndef NDEBUG
+                mCRL2complexity(work_pointer->B_to_C->pred,
                    add_work(check_complexity::
                    Register_that_inert_transitions_from_s_go_to_NewC_succ_2_17,
                                                                  max_counter));
+                ++work_pointer;
+            #endif
             assert(succ.end() > succ_iter &&
                                    succ_iter->B_to_C->pred->succ == succ_iter);
             succ_iter->constln_slice = new_constln_slice;
