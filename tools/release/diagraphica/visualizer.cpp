@@ -11,7 +11,7 @@
 #include <iostream> // only temporary for std::clog
 
 #include "visualizer.h"
-#include "mcrl2/gui/openglwrapper.h"
+#include "mcrl2/gui/workarounds.h"
 
 
 Visualizer::Visualizer(
