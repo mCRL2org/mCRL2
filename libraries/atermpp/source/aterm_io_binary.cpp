@@ -237,6 +237,7 @@ static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 static void writeBits(size_t val, const size_t nr_bits, ostream& os)
 {
+  size_t oldval=val;
   for (size_t cur_bit=0; cur_bit<nr_bits; cur_bit++)
   {
     bit_buffer <<= 1;
@@ -249,7 +250,7 @@ static void writeBits(size_t val, const size_t nr_bits, ostream& os)
       bit_buffer = '\0';
     }
   }
-
+if (val!=0) std::cerr << "WASDANU " << val << "   oldval " << oldval << "  nr_bits " << nr_bits << "\n";
   assert(val==0);
 }
 
@@ -466,7 +467,10 @@ static void build_arg_tables(const std::unordered_map<function_symbol, size_t>& 
   */
 static void add_term(sym_write_entry* entry, const aterm& t)
 {
-  entry->write_terms[t]=entry->write_terms.size();
+  const size_t oldsize=entry->write_terms.size(); /* Do not combine with the next line,
+                                                     as write_terms.size() may be calculated after 
+                                                     write_terms[t] has been executed */
+  entry->write_terms[t]=oldsize;
 }
 
 /**
