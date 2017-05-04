@@ -14,5 +14,9 @@ if(Qt5Core_FOUND AND Qt5Widgets_FOUND)
       QtCore
       QtGui
       QtWidgets
+      QtOpenGL
+      ${OPENGL_LIBRARIES}
+    INCLUDE
+      ${OPENGL_INCLUDE_DIR}
   )
 endif()
