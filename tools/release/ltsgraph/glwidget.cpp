@@ -10,6 +10,7 @@
 
 #include "glwidget.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/gui/arcball.h"
 #include "springlayout.h"
 #include "ui_glwidget.h"
 
@@ -384,8 +385,6 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
     QPoint vec = e->pos() - m_dragstart;
     m_draglength += (QVector2D) vec;
 
-    Graph::Coord3D vec3 = m_scene->eyeToWorld(e->pos().x(), e->pos().y(), 1.0f) - m_scene->eyeToWorld(m_dragstart.x(), m_dragstart.y(), 1.0f);
-
     switch (m_dragmode)
     {
       case dm_paint:
@@ -413,13 +412,19 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
         break;
       case dm_rotate:
       case dm_rotate_2d:
-        m_scene->rotate(Graph::Coord3D(360.0f * vec.y() / height(),
-                                       360.0f * vec.x() / width(),
-                                       0.0f));
-        break;
+        {
+          QQuaternion rotation = mcrl2::gui::arcballRotation(m_dragstart, e->pos());
+          m_scene->rotate(rotation);
+          break;
+        }
       case dm_translate:
-        m_scene->translate(vec3);
-        break;
+        {
+          int dx = e->pos().x() - m_dragstart.x();
+          int dy = e->pos().y() - m_dragstart.y();
+          Graph::Coord3D vec3(dx, -dy, 0);
+          m_scene->translate(vec3);
+          break;
+        }
       case dm_dragnode:
         m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z));
         break;
@@ -444,7 +449,7 @@ void GLWidget::setDepth(float depth, size_t animation)
 {
   Graph::Coord3D size = m_scene->size();
   size.z = depth;
-  m_scene->setRotation(Graph::Coord3D(0, 0, 0), animation);
+  m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
   m_scene->setTranslation(Graph::Coord3D(0, 0, 0), animation);
   m_scene->setSize(size, animation);
 }
@@ -456,7 +461,7 @@ Graph::Coord3D GLWidget::size3()
 
 void GLWidget::resetViewpoint(size_t animation)
 {
-  m_scene->setRotation(Graph::Coord3D(0, 0, 0), animation);
+  m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
   m_scene->setTranslation(Graph::Coord3D(0, 0, 0), animation);
   m_scene->setZoom(0.95f, animation);
 }

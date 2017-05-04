@@ -27,8 +27,9 @@
 #else
 #include <GL/glu.h>
 #endif
-#include "mcrl2/gui/workarounds.h"
 
+#include "mcrl2/gui/arcball.h"
+#include "mcrl2/gui/workarounds.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "glscene.h"
@@ -346,14 +347,14 @@ struct VertexData
 
 struct CameraView
 {
-  Coord3D rotation;    ///< Rotation of the camera around x, y and z axis (performed in that order)
-  Coord3D translation; ///< Translation of the camera
-  Coord3D world;       ///< The size of the box in which the graph lives
-  float zoom{1.0};          ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
+  QQuaternion rotation; ///< Rotation of the camera
+  Coord3D translation;  ///< Translation of the camera
+  Coord3D world;        ///< The size of the box in which the graph lives
+  float zoom{1.0};      ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
   float pixelsize{1};
 
   CameraView()
-    : rotation(Coord3D(0, 0, 0)), translation(Coord3D(0, 0, 0)), world(Coord3D(1000.0, 1000.0, 1000.0)) 
+    : rotation(QQuaternion(1, 0, 0, 0)), translation(Coord3D(0, 0, 0)), world(Coord3D(1000.0, 1000.0, 1000.0)) 
   { }
 
   void viewport(size_t width, size_t height)
@@ -403,9 +404,7 @@ struct CameraView
   void billboard_cylindrical(const Coord3D& pos)
   {
     glTranslatef(pos.x, pos.y, pos.z);
-    glRotatef(-rotation.z, 0, 0, 1);
-    glRotatef(-rotation.y, 0, 1, 0);
-    glRotatef(-rotation.x, 1, 0, 0);
+    mcrl2::gui::applyRotation(rotation, /*reverse=*/true);
   }
 
   void applyTranslation()
@@ -429,13 +428,6 @@ struct CameraView
     // Viewport is always (0, 0, width, height)
     gluPickMatrix(x, viewport[3] - y, fuzz * pixelsize, fuzz * pixelsize, viewport);
   }
-
-  void applyRotation()
-  {
-    glRotatef(rotation.x, 1, 0, 0);
-    glRotatef(rotation.y, 0, 1, 0);
-    glRotatef(rotation.z, 0, 0, 1);
-  }
 };
 
 struct CameraAnimation : public CameraView
@@ -445,7 +437,7 @@ struct CameraAnimation : public CameraView
   size_t m_animation_steps{0};
   bool m_resizing{false};
 
-  CameraAnimation()  = default;
+  CameraAnimation() = default;
 
   void start_animation(size_t steps)
   {
@@ -476,6 +468,7 @@ struct CameraAnimation : public CameraView
     }
     else
     {
+      // if this is unsatisfactory, use https://en.wikipedia.org/wiki/Slerp
       rotation = m_target.rotation * pos + m_source.rotation * (1.0 - pos);
       translation = m_target.translation * pos + m_source.translation * (1.0 - pos);
       zoom = m_target.zoom * pos + m_source.zoom * (1.0 - pos);
@@ -547,7 +540,7 @@ struct CameraAnimation : public CameraView
     start_animation(animation);
   }
 
-  void setRotation(const Graph::Coord3D& rotation, size_t animation)
+  void setRotation(const QQuaternion& rotation, size_t animation)
   {
     m_target.rotation = rotation;
     start_animation(animation);
@@ -1069,7 +1062,7 @@ void GLScene::render()
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   m_camera->applyTranslation();
-  m_camera->applyRotation();
+  mcrl2::gui::applyRotation(m_camera->rotation);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -1217,28 +1210,9 @@ void GLScene::zoom(float factor)
   setZoom(m_camera->zoom * factor, 0);
 }
 
-void GLScene::rotate(Graph::Coord3D amount)
+void GLScene::rotate(const QQuaternion& delta)
 {
-  amount += m_camera->rotation;
-  while (amount.x > 180) {
-    amount.x -= 360;
-  }
-  while (amount.y > 180) {
-    amount.y -= 360;
-  }
-  while (amount.z > 180) {
-    amount.z -= 360;
-  }
-  while (amount.x < -180) {
-    amount.x += 360;
-  }
-  while (amount.y < -180) {
-    amount.y += 360;
-  }
-  while (amount.z < -180) {
-    amount.z += 360;
-  }
-  setRotation(amount, 0);
+  setRotation(delta * m_camera->rotation, 0);
 }
 
 void GLScene::translate(const Graph::Coord3D& amount)
@@ -1257,7 +1231,7 @@ void GLScene::setZoom(float factor, size_t animation)
   updateShapes();
 }
 
-void GLScene::setRotation(const Graph::Coord3D& rotation, size_t animation)
+void GLScene::setRotation(const QQuaternion& rotation, size_t animation)
 {
   m_camera->setRotation(rotation, animation);
 }

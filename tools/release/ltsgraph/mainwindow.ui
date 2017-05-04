@@ -73,6 +73,7 @@
     <addaction name="separator"/>
     <addaction name="actImport_XML"/>
     <addaction name="actExport_XML"/>
+    <addaction name="actExit"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -116,6 +117,14 @@
    </attribute>
    <widget class="mcrl2::gui::qt::LogWidget" name="dockWidgetOutput"/>
   </widget>
+  <action name="actExit">
+   <property name="text">
+    <string>E&amp;xit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
   <action name="actLayoutControl">
    <property name="checkable">
     <bool>true</bool>

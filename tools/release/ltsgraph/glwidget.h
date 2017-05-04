@@ -25,6 +25,7 @@
 #include "ui_glwidget.h"
 
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/gui/workarounds.h"
 
 #include "graph.h"
 #include "glscene.h"

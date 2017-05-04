@@ -187,11 +187,10 @@ class GLScene
     void zoom(float factor);
 
     /**
-     * @brief Rotate by @e amount.
-     * @param amount The rotations around the X, Y and Z axes to add to the
-     *               current rotations.
+     * @brief Rotate by @e delta.
+     * @param delta The rotation quaternion.
      */
-    void rotate(Graph::Coord3D amount);
+    void rotate(const QQuaternion& delta);
 
     /**
      * @brief Translate by @e amount.
@@ -218,19 +217,19 @@ class GLScene
     void setZoom(float factor, size_t animation = 1);
 
     /**
-     * @brief Set the rotations to @e amount, interpolating to the new value
-     *        for a number of frames if desired.
-     * @param amoount The new rotation.
+     * @brief Set the rotation quaternion to @e rotation, interpolating to the
+     *        new value for a number of frames if desired.
+     * @param rotation The new rotation.
      * @param animation The amount of frames to animate. 0 means apply
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setRotation(const Graph::Coord3D& rotation, size_t animation = 1);
+    void setRotation(const QQuaternion& rotation, size_t animation = 1);
 
     /**
      * @brief Set the translation to @e amount, interpolating to the new value
      *        for a number of frames if desired.
-     * @param amount The new translation.
+     * @param translation The new translation.
      * @param animation The amount of frames to animate. 0 means apply
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
