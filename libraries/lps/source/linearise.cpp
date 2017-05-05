@@ -9193,17 +9193,20 @@ class specification_basic_type
       const deadlock_summand_vector& deadlock_summands1,
       const variable_list& pars1,
       const assignment_list& init1,
+      const stochastic_distribution& initial_stochastic_distribution1,
       const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
       const variable_list& pars2,
       const assignment_list& init2,
+      const stochastic_distribution& initial_stochastic_distribution2,
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars_result,
-      assignment_list& init_result)
+      assignment_list& init_result,
+      stochastic_distribution& initial_stochastic_distribution)
     {
       mCRL2log(mcrl2::log::verbose) <<
             (is_allow ? "- calculating the parallel composition modulo the allow operator: " :
@@ -9235,6 +9238,10 @@ class specification_basic_type
       mCRL2log(mcrl2::log::verbose) << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
       pars_result=pars1+pars3;
       init_result=init1 + init2;
+      initial_stochastic_distribution=stochastic_distribution(
+                                          initial_stochastic_distribution1.variables()+initial_stochastic_distribution2.variables(),
+                                          data::sort_real::times(initial_stochastic_distribution1.distribution(),
+                                                                 initial_stochastic_distribution2.distribution()));
     }
 
     /**************** GENERaTE LPEmCRL **********************************/
@@ -9338,16 +9345,17 @@ class specification_basic_type
       {
         variable_list pars1,pars2;
         assignment_list init1,init2;
+        stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
         stochastic_action_summand_vector action_summands1, action_summands2;
         deadlock_summand_vector deadlock_summands1, deadlock_summands2;
         generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(t).left(),
-                              regular,rename_variables,pars1,init1,initial_stochastic_distribution);
+                              regular,rename_variables,pars1,init1,initial_stochastic_distribution1);
         generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(t).right(),
-                              regular,true,pars2,init2,initial_stochastic_distribution);
-        parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
-                              action_summands2,deadlock_summands2,pars2,init2,
+                              regular,true,pars2,init2,initial_stochastic_distribution2);
+        parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,
+                              action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,
                               action_name_multiset_list(),false,false,
-                              action_summands,deadlock_summands,pars,init);
+                              action_summands,deadlock_summands,pars,init,initial_stochastic_distribution);
         return;
       }
 
@@ -9367,16 +9375,17 @@ class specification_basic_type
           // Perform parallel composition with inline allow.
           variable_list pars1,pars2;
           assignment_list init1,init2;
+          stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
           stochastic_action_summand_vector action_summands1, action_summands2;
           deadlock_summand_vector deadlock_summands1, deadlock_summands2;
           generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
-                                regular,rename_variables,pars1,init1,initial_stochastic_distribution);
+                                regular,rename_variables,pars1,init1,initial_stochastic_distribution1);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
-                                regular,true,pars2,init2,initial_stochastic_distribution);
-          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
-                                action_summands2,deadlock_summands2,pars2,init2,
+                                regular,true,pars2,init2,initial_stochastic_distribution2);
+          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,
+                                action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,
                                 allow(t).allow_set(),true,false,
-                                action_summands,deadlock_summands,pars,init);
+                                action_summands,deadlock_summands,pars,init,initial_stochastic_distribution);
           return;
         }
         else if (!options.nodeltaelimination && options.ignore_time && is_comm(par))
@@ -9400,17 +9409,18 @@ class specification_basic_type
           // Perform parallel composition with inline block.
           variable_list pars1,pars2;
           assignment_list init1,init2;
+          stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
           stochastic_action_summand_vector action_summands1, action_summands2;
           deadlock_summand_vector deadlock_summands1, deadlock_summands2;
           generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
-                                regular,rename_variables,pars1,init1,initial_stochastic_distribution);
+                                regular,rename_variables,pars1,init1,initial_stochastic_distribution1);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
-                                regular,true,pars2,init2,initial_stochastic_distribution);
+                                regular,true,pars2,init2,initial_stochastic_distribution2);
           // Encode the actions of the block list in one multi action.
-          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,
-                                action_summands2,deadlock_summands2,pars2,init2,
+          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,
+                                action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,
                                 action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,true,
-                                action_summands,deadlock_summands,pars,init);
+                                action_summands,deadlock_summands,pars,init,initial_stochastic_distribution);
           return;
         }
         else if (!options.nodeltaelimination && options.ignore_time && is_comm(par))
