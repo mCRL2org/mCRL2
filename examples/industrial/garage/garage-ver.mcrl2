@@ -53,7 +53,7 @@ sort
                    | lsf_rotate | lso_rotate
                    | ls_basement;
   GlobalState =
-    struct glob_state(fs: FloorState, shs: ShuttleState, ls: LiftState);
+    struct glob_state(fs_: FloorState, shs_: ShuttleState, ls_: LiftState);
 
 % FloorRow operations
 map
@@ -1008,7 +1008,7 @@ proc
   % Requirement 1a
   +
     sum i: Instruction, b: R1Belt, ms: MoveSize, bs: R1BeltSet.
-      (!end_free(positions(b), col_inc, ms == full, fs(gs_sl)) &&
+      (!end_free(positions(b), col_inc, ms == full, fs_(gs_sl)) &&
        rhead(bs) == b &&
        i == move_belts(bs, col_inc, ms) &&
        valid(i) &&
@@ -1016,7 +1016,7 @@ proc
       ) -> error(req1a, 1) . delta
   +
     sum i: Instruction, b: R1Belt, ms: MoveSize, bs: R1BeltSet.
-      (!end_free(positions(b), col_dec, ms == full, fs(gs_sl)) &&
+      (!end_free(positions(b), col_dec, ms == full, fs_(gs_sl)) &&
        head(bs) == b &&
        i == move_belts(bs, col_dec, ms) &&
        valid(i) &&
@@ -1024,7 +1024,7 @@ proc
       ) -> error(req1a, 2) . delta
   +
     sum i: Instruction, b: R2Belt, ms: MoveSize, bs: R2BeltSet.
-      (!end_free(positions(b), col_inc, false, fs(gs_sl)) &&
+      (!end_free(positions(b), col_inc, false, fs_(gs_sl)) &&
        rhead(bs) == b &&
        i == move_belts(bs, col_inc, ms) &&
        valid(i) &&
@@ -1032,7 +1032,7 @@ proc
       ) -> error(req1a, 3) . delta
   +
     sum i: Instruction, b: R2Belt, ms: MoveSize, bs: R2BeltSet.
-      (!end_free(positions(b), col_dec, false, fs(gs_sl)) &&
+      (!end_free(positions(b), col_dec, false, fs_(gs_sl)) &&
        head(bs) == b &&
        i == move_belts(bs, col_dec, ms) &&
        valid(i) &&
@@ -1040,7 +1040,7 @@ proc
       ) -> error(req1a, 4) . delta
   +
     sum i: Instruction, b: R3Belt, ms: MoveSize, bs: R3BeltSet.
-      (!end_free(positions(b), col_inc, false, fs(gs_sl)) &&
+      (!end_free(positions(b), col_inc, false, fs_(gs_sl)) &&
        rhead(bs) == b &&
        i == move_belts(bs, col_inc, ms) &&
        valid(i) &&
@@ -1048,7 +1048,7 @@ proc
       ) -> error(req1a, 5) . delta
   +
     sum i: Instruction, b: R3Belt, ms: MoveSize, bs: R3BeltSet.
-      (!end_free(positions(b), col_dec, false, fs(gs_sl)) &&
+      (!end_free(positions(b), col_dec, false, fs_(gs_sl)) &&
        head(bs) == b &&
        i == move_belts(bs, col_dec, ms) &&
        valid(i) &&
@@ -1057,28 +1057,28 @@ proc
   % Requirement 1b
   +
     sum i: Instruction, ms: MoveSize, bs: R1BeltSet.
-      (available(r1a, lowered, shs(gs_sl)) &&
-       !free(positions(r1a), fs(gs_sl)) &&
+      (available(r1a, lowered, shs_(gs_sl)) &&
+       !free(positions(r1a), fs_(gs_sl)) &&
        i == move_belts(bs, col_dec,
-         if(!occupied(positions(r1a), fs(gs_sl)), full, ms)) &&
+         if(!occupied(positions(r1a), fs_(gs_sl)), full, ms)) &&
        contains(b_r1a_sh, bs) &&
        valid(i) &&
        allowed(i, gs_sl)
       ) -> error(req1b, 1) . delta
   +
     sum i: Instruction, ms: MoveSize, bs: R1BeltSet.
-      (available(r1b, lowered, shs(gs_sl)) &&
-       !free(positions(r1b), fs(gs_sl)) &&
+      (available(r1b, lowered, shs_(gs_sl)) &&
+       !free(positions(r1b), fs_(gs_sl)) &&
        i == move_belts(bs, col_inc,
-         if(!occupied(positions(r1b), fs(gs_sl)), full, ms)) &&
+         if(!occupied(positions(r1b), fs_(gs_sl)), full, ms)) &&
        contains(b_r1b_sh, bs) &&
        valid(i) &&
        allowed(i, gs_sl)
       ) -> error(req1b, 2) . delta
   +
     sum i: Instruction, ms: MoveSize, bs: R2BeltSet.
-      (available(r2a, lowered, shs(gs_sl)) &&
-       !free(positions(r2a), fs(gs_sl)) &&
+      (available(r2a, lowered, shs_(gs_sl)) &&
+       !free(positions(r2a), fs_(gs_sl)) &&
        i == move_belts(bs, col_dec, ms) &&
        contains(b_r2a_sh, bs) &&
        valid(i) &&
@@ -1086,8 +1086,8 @@ proc
       ) -> error(req1b, 3) . delta
   +
     sum i: Instruction, ms: MoveSize, bs: R2BeltSet.
-      (available(r2b, lowered, shs(gs_sl)) &&
-       !free(positions(r2b), fs(gs_sl)) &&
+      (available(r2b, lowered, shs_(gs_sl)) &&
+       !free(positions(r2b), fs_(gs_sl)) &&
        i == move_belts(bs, col_inc, ms) &&
        contains(b_r2b_sh, bs) &&
        valid(i) &&
@@ -1095,8 +1095,8 @@ proc
       ) -> error(req1b, 4) . delta
   +
     sum i: Instruction, ms: MoveSize, bs: R3BeltSet.
-      (available(r3a, lowered, shs(gs_sl)) &&
-       !free(positions(r3a), fs(gs_sl)) &&
+      (available(r3a, lowered, shs_(gs_sl)) &&
+       !free(positions(r3a), fs_(gs_sl)) &&
        i == move_belts(bs, col_dec, ms) &&
        contains(b_r3a_sh, bs) &&
        valid(i) &&
@@ -1104,8 +1104,8 @@ proc
       ) -> error(req1b, 5) . delta
   +
     sum i: Instruction, ms: MoveSize, bs: R3BeltSet.
-      (available(r3b, lowered, shs(gs_sl)) &&
-       !free(positions(r3b), fs(gs_sl)) &&
+      (available(r3b, lowered, shs_(gs_sl)) &&
+       !free(positions(r3b), fs_(gs_sl)) &&
        i == move_belts(bs, col_inc, ms) &&
        contains(b_r3b_sh, bs) &&
        valid(i) &&
@@ -1114,21 +1114,21 @@ proc
   % Requirement 1c
   +
     sum i: Instruction, dc: DirCol, ms: MoveSize, bs: R1BeltSet.
-      (!available_b_r1(bs, shs(gs_sl), ls(gs_sl)) &&
+      (!available_b_r1(bs, shs_(gs_sl), ls_(gs_sl)) &&
        i == move_belts(bs, dc, ms) &&
        valid(i) &&
        allowed(i, gs_sl)
       ) -> error(req1c, 1) . delta
   +
     sum i: Instruction, dc: DirCol, ms: MoveSize, bs: R2BeltSet.
-      (!available_b_r2(bs, shs(gs_sl), ls(gs_sl)) &&
+      (!available_b_r2(bs, shs_(gs_sl), ls_(gs_sl)) &&
        i == move_belts(bs, dc, ms) &&
        valid(i) &&
        allowed(i, gs_sl)
       ) -> error(req1c, 2) . delta
   +
     sum i: Instruction, dc: DirCol, ms: MoveSize, bs: R3BeltSet.
-      (!available_b_r3(bs, shs(gs_sl), ls(gs_sl)) &&
+      (!available_b_r3(bs, shs_(gs_sl), ls_(gs_sl)) &&
        i == move_belts(bs, dc, ms) &&
        valid(i) &&
        allowed(i, gs_sl)
@@ -1151,7 +1151,7 @@ proc
   % Requirement 2b
   +
     sum i: Instruction, sp: ShuttlePos, sps: ShuttlePosSet.
-      (available(sp, lowered, shs(gs_sl)) &&
+      (available(sp, lowered, shs_(gs_sl)) &&
        connected(rhead(sps), sp) &&
        i == move_shuttles(sps, lowered, row_inc) &&
        valid(i) &&
@@ -1159,7 +1159,7 @@ proc
       ) -> error(req2b, 1) . delta
   +
     sum i: Instruction, sp: ShuttlePos, sps: ShuttlePosSet.
-      (available(sp, lowered, shs(gs_sl)) &&
+      (available(sp, lowered, shs_(gs_sl)) &&
        connected(sp, head(sps)) &&
        i == move_shuttles(sps, lowered, row_dec) &&
        valid(i) &&
@@ -1168,8 +1168,8 @@ proc
   % Requirement 2c
   +
     sum i: Instruction, sp: ShuttlePos, sps: ShuttlePosSet, dr: DirRow.
-      (!free(positions(sp),fs(gs_sl)) &&
-       !occupied(positions(sp),fs(gs_sl)) &&
+      (!free(positions(sp),fs_(gs_sl)) &&
+       !occupied(positions(sp),fs_(gs_sl)) &&
        contains(sp, sps) &&
        i == move_shuttles(sps, lowered, dr) &&
        valid(i) &&
@@ -1178,7 +1178,7 @@ proc
   % Requirement 2d
   +
     sum i: Instruction, sp: ShuttlePos, so: ShuttleOrientation.
-      (!free(positions(sp),fs(gs_sl)) &&
+      (!free(positions(sp),fs_(gs_sl)) &&
        i == tilt_shuttle(sp, so) &&
        valid(i) &&
        allowed(i, gs_sl)
@@ -1186,8 +1186,8 @@ proc
   % Requirement 2e
   +
     sum i: Instruction, sp: ShuttlePos, so: ShuttleOrientation.
-      (available(sp, so, shs(gs_sl)) &&
-       available(sp, not(so), shs(gs_sl)) &&
+      (available(sp, so, shs_(gs_sl)) &&
+       available(sp, not(so), shs_(gs_sl)) &&
        i == tilt_shuttle(sp, so) &&
        valid(i) &&
        allowed(i, gs_sl)
@@ -1195,10 +1195,10 @@ proc
   % Requirement 3a
   +
     sum i: Instruction, lh: LiftHeight.
-      (ls(gs_sl) == ls_basement &&
-       !free(positions(b_r1lift), fs(gs_sl)) &&
-       !(even_occ(positions_b_r1([b_r1a_sh, b_r1a]), fs(gs_sl)) &&
-         even_occ(positions_b_r1([b_r1b, b_r1b_sh]), fs(gs_sl))) &&
+      (ls_(gs_sl) == ls_basement &&
+       !free(positions(b_r1lift), fs_(gs_sl)) &&
+       !(even_occ(positions_b_r1([b_r1a_sh, b_r1a]), fs_(gs_sl)) &&
+         even_occ(positions_b_r1([b_r1b, b_r1b_sh]), fs_(gs_sl))) &&
        i == move_lift(lh) &&
        valid(i) &&
        allowed(i, gs_sl)
@@ -1206,9 +1206,9 @@ proc
   % Requirement 3b
   +
     sum i: Instruction.
-      ((height(ls(gs_sl)) != rotate ||
+      ((height(ls_(gs_sl)) != rotate ||
         !free([pos_r1(c5, pa), pos_r1(c5, pb), pos_r1(c6, pa),
-               pos_r1(c7, pb), pos_r1(c8, pa), pos_r1(c8, pb)], fs(gs_sl))
+               pos_r1(c7, pb), pos_r1(c8, pa), pos_r1(c8, pb)], fs_(gs_sl))
        ) &&
        i == rotate_lift &&
        valid(i) &&

@@ -17,15 +17,15 @@ eqn if(a, false, true) = !a;
 sort Sender = Nat; 
      Signal = struct NONE?isNone 
                    | NOISE?isNoise 
-                   | DATA_BIT(s: Sender)?isData 
+                   | DATA_BIT(s_: Sender)?isData 
                    | CAS_BIT?isCAS 
-                   | FIRST_HEADER_BIT(s: Sender)?isHeader 
-                   | FIRST_BODY_BIT(s: Sender)?isBody;
+                   | FIRST_HEADER_BIT(s_: Sender)?isHeader 
+                   | FIRST_BODY_BIT(s_: Sender)?isBody;
      Symbol = struct CHIRP  
                    | IDLE_END 
                    | CAS
-                   | FRAME(s: Sender)?isFrame
-                   | FRAME_HEADER(s: Sender)?isHeader 
+                   | FRAME(s_: Sender)?isFrame
+                   | FRAME_HEADER(s_: Sender)?isHeader 
                    | NOTHING;
 
 % Model parameters
@@ -174,16 +174,16 @@ proc CODEC = nested(id: Sender)
       isNone(S) -> Receive(0, if(isNone(sig), 
                            min(CHIRP_length, idle + 1), 1), 0, S)
     + isNoise(S) -> Receive(0, 0, 0, S)
-    + isData(S) -> Announce(s(S), 0, if(lastsender == s(S), data+1, 0), sig)
-    + isCAS(S) -> Announce(s(S), 0, if(isCAS(sig), data + 1, 1), S)
-    + (isHeader(S) || isBody(S)) -> Announce(s(S), 0, 1, S)
+    + isData(S) -> Announce(s_(S), 0, if(lastsender == s_(S), data+1, 0), sig)
+    + isCAS(S) -> Announce(s_(S), 0, if(isCAS(sig), data + 1, 1), S)
+    + (isHeader(S) || isBody(S)) -> Announce(s_(S), 0, 1, S)
     );
   
   state Announce(lastsender: Sender, idle, data: Nat, sig: Signal) =
     is_idle(false) . Announce()
   + (data > 0 && data == length(symbol(sig))) 
       -> decode(id, symbol(sig)) . 
-         Receive(sig=if(isHeader(sig), FIRST_BODY_BIT(s(sig)), sig))
+         Receive(sig=if(isHeader(sig), FIRST_BODY_BIT(s_(sig)), sig))
       <> Receive();
   
   state Send(sig: Signal, sent, len: Nat) = 
@@ -552,7 +552,7 @@ var s, s2: Sender;
 eqn nextin(s, l) = inornext((s + 1) mod (NODES + 1), l);
     l != [] && s in l -> inornext(s, l) = s;
     l != [] && !(s in l) -> inornext(s, l) = nextin(s, l);
-    finite(sym) = (isHeader(sym) || isFrame(sym)) => s(sym) <= NODES;
+    finite(sym) = (isHeader(sym) || isFrame(sym)) => s_(sym) <= NODES;
     nextsym(FRAME_HEADER(s), l) = FRAME(s);
     nextsym(FRAME(s), l) = FRAME_HEADER(nextin(s, l));
     s <= NODES -> correct_nodes(s) = 

@@ -348,10 +348,11 @@ class small_progress_measures_algorithm
 
     bool run(const boolean_variable& first_variable)
     {
-      mCRL2log(log::verbose) << "--- applying small progress measures to ---\n" << bes::pp(m_bes) << "\n\n";
+      mCRL2log(log::verbose) << "Applying small progress measures.\n";
+      mCRL2log(log::debug)  << "BES " << bes::pp(m_bes) << "\n\n";
       initialize_vertices();
-      mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
-      mCRL2log(log::verbose) << "\nbeta = " << core::detail::print_list(m_beta) << "\n";
+      mCRL2log(log::debug) << "--- vertices ---\n" << print_vertices();
+      mCRL2log(log::debug) << "\nbeta = " << core::detail::print_list(m_beta) << "\n";
       for (;;) // forever
       {
         bool changed = false;
@@ -386,7 +387,7 @@ class small_progress_measures_algorithm
           {
             changed = true;
             v.alpha.v = alpha;
-            mCRL2log(log::verbose) << "\nupdate vertex " << print_vertex(v);
+            mCRL2log(log::debug) << "\nupdate vertex " << print_vertex(v);
           }
         }
         if (!changed)
@@ -394,7 +395,7 @@ class small_progress_measures_algorithm
           break;
         }
       }
-      mCRL2log(log::verbose) << "\n--- vertices ---\n" << print_vertices();
+      mCRL2log(log::debug) << "\n--- vertices ---\n" << print_vertices();
       return !m_vertices[first_variable].alpha.is_top();
     }
 };

@@ -26,7 +26,7 @@ mu X . [true]X || (
             (val(i <= NODES) && is_integrating(i))]Z)
     )
   ||(val(togo == [])
-     && Y(remove(CORRECT_NODES, s(nextsym(s, CORRECT_NODES))), 
+     && Y(remove(CORRECT_NODES, s_(nextsym(s, CORRECT_NODES))), 
           nextsym(s, CORRECT_NODES))
     )
 )

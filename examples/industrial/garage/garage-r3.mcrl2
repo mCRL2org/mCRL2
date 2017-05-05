@@ -49,7 +49,7 @@ sort
                    | lsf_rotate | lso_rotate
                    | ls_basement;
   GlobalState =
-    struct glob_state(fs: FloorState, shs: ShuttleState, ls: LiftState);
+    struct glob_state(fs_: FloorState, shs_: ShuttleState, ls_: LiftState);
 
 % FloorRow operations
 map
