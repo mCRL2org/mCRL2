@@ -234,16 +234,16 @@ class pbesinst_alternative_lazy_algorithm
       if (time(&new_log_time) > last_log_time)
       {
         last_log_time = new_log_time;
-        mCRL2log(mcrl2::log::verbose) << "Processed " << nr_of_processed_variables <<
+        mCRL2log(mcrl2::log::status) << "Processed " << nr_of_processed_variables <<
                        " and generated " << nr_of_generated_variables <<
                        " boolean variables";
         if (m_maximum_todo_size!=atermpp::npos)
         {
-          mCRL2log(mcrl2::log::verbose) << " with a todo buffer of size " << todo_size << ".\n";
+          mCRL2log(mcrl2::log::status) << " with a todo buffer of size " << todo_size << ".\n";
         }
         else
         {
-          mCRL2log(mcrl2::log::verbose) << ".\n";
+          mCRL2log(mcrl2::log::status) << ".\n";
         }
       }
     }

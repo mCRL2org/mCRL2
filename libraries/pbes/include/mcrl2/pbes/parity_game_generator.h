@@ -110,7 +110,7 @@ class parity_game_generator
         }
         m_bes.push_back(std::make_pair(t, priority));
         detail::check_bes_equation_limit(m_bes.size());
-        mCRL2log(log::verbose) << print_equation_count(m_bes.size());
+        mCRL2log(log::status) << print_equation_count(m_bes.size());
         result = p;
       }
 

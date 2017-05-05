@@ -6,10 +6,10 @@ os.system('pbes2bool -v onebit.nodeadlock.pbes')
 
 # Solving the following using pbes2bool is slow!
 os.system('lps2pbes -v -f infinitely_often_enabled_then_infinitely_often_taken.mcf onebit.lps onebit.infinitely_often_enabled_then_infinitely_often_taken.pbes')
-os.system('pbes2bool -v -s2 onebit.infinitely_often_enabled_then_infinitely_often_taken.pbes')
+os.system('pbespgsolve -v -s2 onebit.infinitely_often_enabled_then_infinitely_often_taken.pbes')
 
 os.system('lps2pbes -v -f infinitely_often_lost.mcf onebit.lps onebit.infinitely_often_lost.pbes')
-os.system('pbes2bool -v onebit.infinitely_often_lost.pbes')
+os.system('pbespgsolve -v onebit.infinitely_often_lost.pbes')
 
 os.system('lps2pbes -v -f infinitely_often_receive_dat1.mcf onebit.lps onebit.infinitely_often_receive_dat1.pbes')
 os.system('pbes2bool -v onebit.infinitely_often_receive_dat1.pbes')

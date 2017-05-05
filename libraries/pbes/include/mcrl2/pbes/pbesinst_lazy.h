@@ -802,7 +802,7 @@ class pbesinst_lazy_algorithm
         // optional step
         reset(init, todo, equation); // N.B. modifies todo
 
-        mCRL2log(log::verbose) << print_equation_count(++m_iteration_count);
+        mCRL2log(log::status) << print_equation_count(++m_iteration_count);
         detail::check_bes_equation_limit(m_iteration_count);
       }
     }

@@ -237,7 +237,6 @@ static size_t  bits_in_buffer = 0; /* how many bits in bit_buffer are used */
 
 static void writeBits(size_t val, const size_t nr_bits, ostream& os)
 {
-  size_t oldval=val;
   for (size_t cur_bit=0; cur_bit<nr_bits; cur_bit++)
   {
     bit_buffer <<= 1;

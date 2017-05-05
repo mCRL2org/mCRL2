@@ -62,7 +62,7 @@ var player,other,throw1,throw2:Pos;
     throw,n:Int;
     position:Pos->Nat;
     old_position:Nat;
-eqn number_of_players=4;
+eqn number_of_players=2;
     next(player)=if(player==number_of_players,1,player+1);
     previous(player)=if(player>1,max(1,player-1),number_of_players);
     initial_positions(player)=0;
