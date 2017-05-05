@@ -23,6 +23,7 @@
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/state_label_empty.h"
+#include "mcrl2/gui/arcball.h"
 
 namespace Graph
 {
@@ -92,11 +93,11 @@ class Selection
     // Center the first node placed
     if (m_nodeIndices.size() == 1)
     {
-      m_graph.m_nodes[node.id].pos() = Coord3D(0.0, 0.0, 0.0);
+      m_graph.m_nodes[node.id].pos() = QVector3D(0.0, 0.0, 0.0);
       return;
     }
 
-    Coord3D centroid;
+    QVector3D centroid;
     size_t count = 0;
     for (size_t inEdge : node.inEdges)
     {
@@ -119,18 +120,18 @@ class Selection
 
     if (count != 0u)
     {
-      Coord3D rvec =
-          Coord3D(frand(-1.0, 1.0), frand(-1.0, 1.0), frand(-1.0, 1.0));
-      rvec *= 50.0 / rvec.size();
+      QVector3D rvec =
+          QVector3D(frand(-1.0, 1.0), frand(-1.0, 1.0), frand(-1.0, 1.0));
+      rvec *= 50.0 / rvec.length();
       m_graph.m_nodes[node.id].pos() = centroid / ((GLfloat)count) + rvec;
     }
   }
 
   void repositionEdge(size_t edgeId)
   {
-    Coord3D pos1 = m_graph.m_nodes[m_graph.m_edges[edgeId].from()].pos();
-    Coord3D pos2 = m_graph.m_nodes[m_graph.m_edges[edgeId].to()].pos();
-    Coord3D center = (pos1 + pos2) / 2.0;
+    QVector3D pos1 = m_graph.m_nodes[m_graph.m_edges[edgeId].from()].pos();
+    QVector3D pos2 = m_graph.m_nodes[m_graph.m_edges[edgeId].to()].pos();
+    QVector3D center = (pos1 + pos2) / 2.0;
     m_graph.m_handles[edgeId].pos() = center;
     m_graph.m_transitionLabelnodes[edgeId].pos() = center;
   }
@@ -688,8 +689,8 @@ bool Graph::isTau(size_t labelindex) const
   return m_transitionLabels[labelindex].is_tau();
 }
 
-void Graph::load(const QString& filename, const Coord3D& min,
-                 const Coord3D& max)
+void Graph::load(const QString& filename, const QVector3D& min,
+                 const QVector3D& max)
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
@@ -730,8 +731,8 @@ void Graph::load(const QString& filename, const Coord3D& min,
 }
 
 template <class lts_t>
-void Graph::templatedLoad(const QString& filename, const Coord3D& min,
-                          const Coord3D& max)
+void Graph::templatedLoad(const QString& filename, const QVector3D& min,
+                          const QVector3D& max)
 {
   lts_t lts;
   lts.load(filename.toUtf8().constData());
@@ -757,7 +758,7 @@ void Graph::templatedLoad(const QString& filename, const Coord3D& min,
   {
     const bool is_not_probabilistic = false;
     m_nodes.emplace_back(
-        Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),
+        QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z())),
         is_not_probabilistic);
     m_stateLabelnodes.emplace_back(m_nodes[i].pos(), i);
   }
@@ -792,7 +793,7 @@ void Graph::templatedLoad(const QString& filename, const Coord3D& min,
 template <class lts_t>
 size_t Graph::add_probabilistic_state(
     const typename lts_t::probabilistic_state_t& probabilistic_state,
-    const Coord3D& min, const Coord3D& max)
+    const QVector3D& min, const QVector3D& max)
 {
   if (probabilistic_state.size() == 1)
   {
@@ -805,7 +806,7 @@ size_t Graph::add_probabilistic_state(
     size_t index_of_the_new_probabilistic_state = m_nodes.size();
     const bool is_probabilistic = true;
     m_nodes.emplace_back(
-        Coord3D(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z)),
+        QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z())),
         is_probabilistic);
     m_stateLabelnodes.emplace_back(m_nodes[index_of_the_new_probabilistic_state].pos(),
                   index_of_the_new_probabilistic_state);
@@ -904,7 +905,7 @@ void Graph::loadXML(const QString& filename)
     if (e.tagName() == "State")
     {
       m_nodes[e.attribute("value").toInt()] = NodeNode(
-          Coord3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(),
+          QVector3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(),
                   e.attribute("z").toFloat()),
           e.attribute("locked").toInt() != 0, // anchored is equal to locked.
           e.attribute("locked").toInt() != 0,
@@ -921,7 +922,7 @@ void Graph::loadXML(const QString& filename)
     if (e.tagName() == "StateLabelNode")
     {
       m_stateLabelnodes[e.attribute("value").toInt()] = LabelNode(
-          Coord3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(),
+          QVector3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(),
                   e.attribute("z").toFloat()),
           e.attribute("locked").toInt() != 0, // anchored is equal to locked.
           e.attribute("locked").toInt() != 0,
@@ -940,7 +941,7 @@ void Graph::loadXML(const QString& filename)
       m_edges[e.attribute("value").toInt()] =
           Edge(e.attribute("from").toInt(), e.attribute("to").toInt());
       m_handles[e.attribute("value").toInt()] =
-          Node(Coord3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(),
+          Node(QVector3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(),
                        e.attribute("z").toFloat()),
                e.attribute("locked").toInt() != 0, // anchored is equal to locked.
                e.attribute("locked").toInt() != 0,
@@ -949,7 +950,7 @@ void Graph::loadXML(const QString& filename)
     if (e.tagName() == "TransitionLabelNode")
     {
       m_transitionLabelnodes[e.attribute("value").toInt()] = LabelNode(
-          Coord3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(),
+          QVector3D(e.attribute("x").toFloat(), e.attribute("y").toFloat(),
                   e.attribute("z").toFloat()),
           e.attribute("locked").toInt() != 0, // anchored is equal to locked.
           e.attribute("locked").toInt() != 0,
@@ -996,9 +997,9 @@ void Graph::saveXML(const QString& filename)
   {
     QDomElement state = xml.createElement("State");
     state.setAttribute("value", (int)i);
-    state.setAttribute("x", node(i).pos().x);
-    state.setAttribute("y", node(i).pos().y);
-    state.setAttribute("z", node(i).pos().z);
+    state.setAttribute("x", node(i).pos().x());
+    state.setAttribute("y", node(i).pos().y());
+    state.setAttribute("z", node(i).pos().z());
     state.setAttribute("locked", static_cast<int>(node(i).locked()));
     state.setAttribute("isInitial", (int)(i == initialState()));
     state.setAttribute("red", node(i).color(0));
@@ -1010,9 +1011,9 @@ void Graph::saveXML(const QString& filename)
     QDomElement stateL = xml.createElement("StateLabelNode");
     stateL.setAttribute("value", (int)i);
     stateL.setAttribute("labelindex", (int)stateLabel(i).labelindex());
-    stateL.setAttribute("x", stateLabel(i).pos().x);
-    stateL.setAttribute("y", stateLabel(i).pos().y);
-    stateL.setAttribute("z", stateLabel(i).pos().z);
+    stateL.setAttribute("x", stateLabel(i).pos().x());
+    stateL.setAttribute("y", stateLabel(i).pos().y());
+    stateL.setAttribute("z", stateLabel(i).pos().z());
     stateL.setAttribute("locked", static_cast<int>(stateLabel(i).locked()));
     stateL.setAttribute("red", stateLabel(i).color(0));
     stateL.setAttribute("green", stateLabel(i).color(1));
@@ -1034,18 +1035,18 @@ void Graph::saveXML(const QString& filename)
     edg.setAttribute("value", (int)i);
     edg.setAttribute("from", (int)edge(i).from());
     edg.setAttribute("to", (int)edge(i).to());
-    edg.setAttribute("x", handle(i).pos().x);
-    edg.setAttribute("y", handle(i).pos().y);
-    edg.setAttribute("z", handle(i).pos().z);
+    edg.setAttribute("x", handle(i).pos().x());
+    edg.setAttribute("y", handle(i).pos().y());
+    edg.setAttribute("z", handle(i).pos().z());
     edg.setAttribute("locked", static_cast<int>(handle(i).locked()));
     root.appendChild(edg);
 
     QDomElement edgL = xml.createElement("TransitionLabelNode");
     edgL.setAttribute("value", (int)i);
     edgL.setAttribute("labelindex", (int)transitionLabel(i).labelindex());
-    edgL.setAttribute("x", transitionLabel(i).pos().x);
-    edgL.setAttribute("y", transitionLabel(i).pos().y);
-    edgL.setAttribute("z", transitionLabel(i).pos().z);
+    edgL.setAttribute("x", transitionLabel(i).pos().x());
+    edgL.setAttribute("y", transitionLabel(i).pos().y());
+    edgL.setAttribute("z", transitionLabel(i).pos().z());
     edgL.setAttribute("locked", static_cast<int>(transitionLabel(i).locked()));
     edgL.setAttribute("red", transitionLabel(i).color(0));
     edgL.setAttribute("green", transitionLabel(i).color(1));
@@ -1108,7 +1109,7 @@ const QString& Graph::stateLabelstring(size_t labelindex) const
   return m_stateLabels[labelindex];
 }
 
-void Graph::clip(const Coord3D& min, const Coord3D& max)
+void Graph::clip(const QVector3D& min, const QVector3D& max)
 {
   lockForRead(
       m_lock,
@@ -1116,15 +1117,15 @@ void Graph::clip(const Coord3D& min, const Coord3D& max)
 
   for (NodeNode& node : m_nodes)
   {
-    node.pos().clip(min, max);
+    mcrl2::gui::clipVector(node.pos(), min, max);
   }
   for (LabelNode& node : m_transitionLabelnodes)
   {
-    node.pos().clip(min, max);
+    mcrl2::gui::clipVector(node.pos(), min, max);
   }
   for (Node& node : m_handles)
   {
-    node.pos().clip(min, max);
+    mcrl2::gui::clipVector(node.pos(), min, max);
   }
 
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);

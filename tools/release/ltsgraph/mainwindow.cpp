@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget* parent) :
   m_timer = new QTimer(this);
 
   // Connect signals & slots
-  connect(m_glwidget, SIGNAL(widgetResized(const Graph::Coord3D&)), this, SLOT(onWidgetResized(const Graph::Coord3D&)));
+  connect(m_glwidget, SIGNAL(widgetResized(const QVector3D&)), this, SLOT(onWidgetResized(const QVector3D&)));
   connect(m_ui.actExit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
   connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
   connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
@@ -114,7 +114,7 @@ MainWindow::~MainWindow()
   delete m_glwidget;
 }
 
-void MainWindow::onWidgetResized(const Graph::Coord3D& newsize)
+void MainWindow::onWidgetResized(const QVector3D& newsize)
 {
   m_graph.clip(-newsize / 2.0, newsize / 2.0);
   m_layout->setClipRegion(-newsize / 2.0, newsize / 2.0);

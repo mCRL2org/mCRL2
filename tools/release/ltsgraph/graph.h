@@ -26,117 +26,10 @@
 
 #include <QReadWriteLock>
 #include <utility>
+#include <QVector3D>
 
 namespace Graph
 {
-struct Coord3D
-{
-  GLfloat x;
-  GLfloat y;
-  GLfloat z;
-  Coord3D(GLfloat x, GLfloat y, GLfloat z)
-    : x(x), y(y), z(z) {}
-  Coord3D() : x(0), y(0), z(0) {}
-  Coord3D& operator+=(const Coord3D& a)
-  {
-    x += a.x;
-    y += a.y;
-    z += a.z;
-    return *this;
-  }
-  Coord3D& operator-=(const Coord3D& a)
-  {
-    x -= a.x;
-    y -= a.y;
-    z -= a.z;
-    return *this;
-  }
-
-  Coord3D& operator*=(float f)
-  {
-    x *= f;
-    y *= f;
-    z *= f;
-    return *this;
-  }
-
-  Coord3D& operator/=(float f)
-  {
-    x /= f;
-    y /= f;
-    z /= f;
-    return *this;
-  }
-  Coord3D operator+(const Coord3D& a) const
-  {
-    return Coord3D(a.x + x, a.y + y, a.z + z);
-  }
-  Coord3D operator-(const Coord3D& a) const
-  {
-    return Coord3D(x - a.x, y - a.y, z - a.z);
-  }
-  Coord3D operator*(GLfloat c) const
-  {
-    return Coord3D(c * x, c * y, c * z);
-  }
-  Coord3D operator-() const
-  {
-    return Coord3D(-x, -y, -z);
-  }
-  Coord3D operator/(GLfloat c) const
-  {
-    return Coord3D(x / c, y / c, z / c);
-  }
-  float size() const
-  {
-    return sqrt(x * x + y * y + z * z);
-  }
-  float dot(const Coord3D& a) const
-  {
-    return x * a.x + y * a.y + z * a.z;
-  }
-  Coord3D cross(const Coord3D& a) const
-  {
-    return Coord3D(
-             y * a.z - z * a.y,
-             z * a.x - x * a.z,
-             x * a.y - y * a.x
-           );
-  }
-  void clip(const Coord3D& min, const Coord3D& max)
-  {
-    if (x < min.x) {
-      x = min.x;
-    }
-    if (x > max.x) {
-      x = max.x;
-    }
-    if (y < min.y) {
-      y = min.y;
-    }
-    if (y > max.y) {
-      y = max.y;
-    }
-    if (z < min.z) {
-      z = min.z;
-    }
-    if (z > max.z) {
-      z = max.z;
-    }
-  }
-  operator const GLfloat* () const {
-    return &x;
-  }
-  bool operator==(const Coord3D& other) const
-  {
-    return x == other.x && y == other.y && z == other.z;
-  }
-  bool operator!=(const Coord3D& other) const
-  {
-    return !operator==(other);
-  }
-};
-
 /**
  * @brief A class which contains the information of a single edge.
  */
@@ -187,7 +80,7 @@ class Edge
 class Node
 {
   protected:
-    Coord3D m_pos;            ///< The position of the node.
+    QVector3D m_pos;            ///< The position of the node.
     bool m_anchored;          ///< Indicates wether this node cannot be moved.
     bool m_locked;            ///< Indicates if anchored should be left true at all times.
     float m_selected;         ///< Indicates that this node is selected (pointed at). Range 0.0f .. 1.0f.
@@ -198,7 +91,7 @@ class Node
     Node()=default;
 
     /// \brief Constructor
-    Node(Coord3D  pos)
+    Node(QVector3D  pos)
       : m_pos(pos),
         m_anchored(false),
         m_locked(false),
@@ -206,7 +99,7 @@ class Node
     {}
 
     /// \brief Constructor
-    Node(Coord3D  pos,
+    Node(QVector3D  pos,
          const bool anchored,
          const bool locked,
          const float& selected)
@@ -217,13 +110,13 @@ class Node
     {}
 
     /// \brief Get the position of a node.
-    const Coord3D& pos() const
+    const QVector3D& pos() const
     {
       return m_pos;
     }
 
     /// \brief Get a reference to the position of a node.
-    Coord3D& pos()
+    QVector3D& pos()
     {
       return m_pos;
     }
@@ -279,7 +172,7 @@ class NodeWithColor : public Node
     NodeWithColor()=default;
 
     /// \brief Constructor
-    NodeWithColor(const Coord3D& pos)
+    NodeWithColor(const QVector3D& pos)
       : Node(pos)
     {
       m_color[0]=0.0f;
@@ -289,7 +182,7 @@ class NodeWithColor : public Node
 
     /// \brief Constructor
     NodeWithColor(
-      const Coord3D& pos,
+      const QVector3D& pos,
       const bool anchored,
       const bool locked,
       const float& selected,
@@ -370,12 +263,12 @@ class LabelNode : public NodeWithColor
     LabelNode() = default;
 
     /// \brief Constructor
-    LabelNode(const Coord3D& p, const size_t labelindex)
+    LabelNode(const QVector3D& p, const size_t labelindex)
       : NodeWithColor(p), m_labelindex(labelindex)
     {}
 
     /// \brief Constructor
-    LabelNode(const Coord3D& pos,
+    LabelNode(const QVector3D& pos,
               bool anchored,
               bool locked,
               const float& selected,
@@ -418,7 +311,7 @@ class NodeNode : public NodeWithColor
     NodeNode()=default;
 
     /// \brief Constructor.
-    NodeNode(const Coord3D& p, const bool is_probabilistic)
+    NodeNode(const QVector3D& p, const bool is_probabilistic)
       : NodeWithColor(p), m_is_probabilistic(is_probabilistic), m_active(false)
     {
       if (!m_is_probabilistic) // Color action states white (probabilistic states remain black)
@@ -430,7 +323,7 @@ class NodeNode : public NodeWithColor
     }
 
     /// \brief Constructor
-    NodeNode(const Coord3D& pos,
+    NodeNode(const QVector3D& pos,
              bool anchored,
              bool locked,
              const float& selected,
@@ -497,7 +390,7 @@ class Graph
      * @brief Loads a graph of type ltsclass
      */
     template <class ltsclass>
-    void templatedLoad(const QString& filename, const Coord3D& min, const Coord3D& max);
+    void templatedLoad(const QString& filename, const QVector3D& min, const QVector3D& max);
 
     // For each probability/state pair a new transition is generated labelled with the probability.
     // The index of the newly generated state is returned.
@@ -505,7 +398,7 @@ class Graph
     // is returned and no new transition is made.
     template <class ltsclass>
     size_t add_probabilistic_state(const typename ltsclass::probabilistic_state_t& probabilistic_state,
-                                   const Coord3D& min, const Coord3D& max);
+                                   const QVector3D& min, const QVector3D& max);
     size_t m_initialState;                          ///< Index of the initial state.
   protected:
 
@@ -536,7 +429,7 @@ class Graph
      * @param min The minimum coordinates for any node.
      * @param max The maximum coordinates for any node.
      */
-    void load(const QString& filename, const Coord3D& min, const Coord3D& max);
+    void load(const QString& filename, const QVector3D& min, const QVector3D& max);
 
     /**
      * @brief Loads a graph with from a XML file exported using @fn saveXML.
@@ -555,7 +448,7 @@ class Graph
      * @param min The minimum coordinates for any node.
      * @param max The maximum coordinates for any node.
      */
-    void clip(const Coord3D& min, const Coord3D& max);
+    void clip(const QVector3D& min, const QVector3D& max);
 
     void makeSelection(); ///< Creates a new empty selection (overwriting existing).
     void discardSelection(); ///< Discards the current selection (when present).

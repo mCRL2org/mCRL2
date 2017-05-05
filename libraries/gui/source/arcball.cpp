@@ -64,6 +64,7 @@ QQuaternion arcballRotation(const QPoint& p1, const QPoint& p2)
   float dot = QVector3D::dotProduct(v1, v2);
   return QQuaternion(dot, cross);
 }
+
 void applyRotation(const QQuaternion& rotation, bool reverse)
 {
   float angle = 180 / M_PI * std::acos(std::min(1.0f, rotation.scalar()));
@@ -74,5 +75,21 @@ void applyRotation(const QQuaternion& rotation, bool reverse)
   // not sure why the angle has to be doubled
   glRotatef(2 * angle, rotation.x(), rotation.y(), rotation.z());
 }
+
+void clipVector(QVector3D& vec, const QVector3D& min, const QVector3D& max)
+{
+  for (int i = 0; i < 3; i++)
+  {
+    if (vec[i] < min[i])
+    {
+      vec[i] = min[i];
+    }
+    else if (vec[i] > max[i])
+    {
+      vec[i] = max[i];
+    }
+  }
+}
+
 } // namespace gui
 } // namespace mcrl2

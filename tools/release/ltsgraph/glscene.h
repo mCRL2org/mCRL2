@@ -197,7 +197,7 @@ class GLScene
      * @param amount The translation in world coordinates to add to the current
      *               translation.
      */
-    void translate(const Graph::Coord3D& amount);
+    void translate(const QVector3D& amount);
 
     /**
      * @brief Returns true if the world size changed since the last call.
@@ -234,7 +234,7 @@ class GLScene
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setTranslation(const Graph::Coord3D& translation, size_t animation = 1);
+    void setTranslation(const QVector3D& translation, size_t animation = 1);
 
     /**
      * @brief Set the world size to @e size, interpolating to the new value
@@ -244,13 +244,13 @@ class GLScene
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setSize(const Graph::Coord3D& size, size_t animation = 1);
+    void setSize(const QVector3D& size, size_t animation = 1);
 
     /**
      * @brief Returns the current world size.
      * @return The current world size in world coordinates.
      */
-    Graph::Coord3D size();
+    QVector3D size();
 
     /**
      * @brief Converts viewport coordinates to world coordinates.
@@ -261,7 +261,7 @@ class GLScene
      *          value of the depth buffer at (x, y) is used.
      * @return The world coordinates corresponding to the eye coordinates provided.
      */
-    Graph::Coord3D eyeToWorld(int x, int y, GLfloat z = -1);
+    QVector3D eyeToWorld(int x, int y, GLfloat z = -1);
 
     /**
      * @brief Converts world coordinates to viewport coordinates.
@@ -269,7 +269,7 @@ class GLScene
      * @returns The eye coordinates, where the origin is at the bottom left. The
      *          Z value is the value of the depth buffer at the requested location.
      */
-    Graph::Coord3D worldToEye(const Graph::Coord3D& world);
+    QVector3D worldToEye(const QVector3D& world);
 
     /**
      * @brief Retrieve the object at viewport coordinate (x, y).

@@ -23,7 +23,7 @@ struct MoveRecord
   virtual ~MoveRecord() = default;
 
   Graph::Node* node;
-  virtual void move(const Graph::Coord3D& pos)
+  virtual void move(const QVector3D& pos)
   {
     node->pos() = pos;
   }
@@ -35,7 +35,7 @@ struct MoveRecord
     }
     node->set_anchored(node->locked());
   }
-  const Graph::Coord3D& pos()
+  const QVector3D& pos()
   {
     return node->pos();
   }
@@ -76,7 +76,7 @@ struct HandleMoveRecord : public MoveRecord
       label.release(false);
     }
   }
-  void move(const Graph::Coord3D& pos) override
+  void move(const QVector3D& pos) override
   {
     MoveRecord::move(pos);
     if (movingLabel) {
@@ -123,7 +123,7 @@ struct NodeMoveRecord : public MoveRecord
     }
     label.release(toggleLocked);
   }
-  void move(const Graph::Coord3D& pos) override
+  void move(const QVector3D& pos) override
   {
     MoveRecord::move(pos);
     for (size_t i = 0; i < edges.size(); ++i)
@@ -300,7 +300,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     }
     else if (e->modifiers() == Qt::ShiftModifier)
     {
-      if (e->button() == Qt::LeftButton && m_scene->size().z > 1) {
+      if (e->button() == Qt::LeftButton && m_scene->size().z() > 1) {
         m_dragmode = dm_rotate;
       }
     }
@@ -314,7 +314,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
     {
       if (m_hover.selectionType == GLScene::so_none)
       {
-        if (e->button() == Qt::RightButton && m_scene->size().z > 1) {
+        if (e->button() == Qt::RightButton && m_scene->size().z() > 1) {
           m_dragmode = dm_rotate;
         }
 //        else if (e->button() == Qt::RightButton)
@@ -421,12 +421,12 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
         {
           int dx = e->pos().x() - m_dragstart.x();
           int dy = e->pos().y() - m_dragstart.y();
-          Graph::Coord3D vec3(dx, -dy, 0);
+          QVector3D vec3(dx, -dy, 0);
           m_scene->translate(vec3);
           break;
         }
       case dm_dragnode:
-        m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z));
+        m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z()));
         break;
       case dm_zoom:
         m_scene->zoom(pow(1.0005f, vec.y()));
@@ -447,14 +447,14 @@ void GLWidget::rebuild()
 
 void GLWidget::setDepth(float depth, size_t animation)
 {
-  Graph::Coord3D size = m_scene->size();
-  size.z = depth;
+  QVector3D size = m_scene->size();
+  size.setZ(depth);
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
-  m_scene->setTranslation(Graph::Coord3D(0, 0, 0), animation);
+  m_scene->setTranslation(QVector3D(0, 0, 0), animation);
   m_scene->setSize(size, animation);
 }
 
-Graph::Coord3D GLWidget::size3()
+QVector3D GLWidget::size3()
 {
   return m_scene->size();
 }
@@ -462,7 +462,7 @@ Graph::Coord3D GLWidget::size3()
 void GLWidget::resetViewpoint(size_t animation)
 {
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
-  m_scene->setTranslation(Graph::Coord3D(0, 0, 0), animation);
+  m_scene->setTranslation(QVector3D(0, 0, 0), animation);
   m_scene->setZoom(0.95f, animation);
 }
 

@@ -80,7 +80,7 @@ class MainWindow : public QMainWindow
      * @brief Updates the Graph and SpringLayout such that the graph fits in the given @e newsize.
      * @param newsize The new size of the GLWidget.
      */
-    void onWidgetResized(const Graph::Coord3D& newsize);
+    void onWidgetResized(const QVector3D& newsize);
 
     /**
      * @brief Enables or disables the 3D mode of the GLWidget.

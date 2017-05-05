@@ -221,7 +221,7 @@ class GLWidget : public QGLWidget
     /**
      * @brief Returns the world size in 3D coordinates.
      */
-    Graph::Coord3D size3();
+    QVector3D size3();
 
     /**
      * @brief Returns the user interface object. If no user interface is available,
@@ -239,7 +239,7 @@ class GLWidget : public QGLWidget
       return m_scene->fogDistance();
     }
   signals:
-    void widgetResized(const Graph::Coord3D& newsize);
+    void widgetResized(const QVector3D& newsize);
   public slots:
 
     /**

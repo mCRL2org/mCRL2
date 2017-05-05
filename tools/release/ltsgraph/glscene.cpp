@@ -42,8 +42,6 @@
 #define SIZE_HANDLE     8
 #define SIZE_ARROWHEAD 12
 
-typedef Graph::Coord3D Coord3D;
-
 struct GLHitRecord
 {
   GLuint stackSize;
@@ -80,7 +78,7 @@ struct Texture
   GLuint name;
   size_t width;
   size_t height;
-  Coord3D shape[4];
+  QVector3D shape[4];
   Texture(size_t width, size_t height, float pixelsize) : width(width), height(height)
   {
     glGenTextures(1, &name);
@@ -94,10 +92,10 @@ struct Texture
   {
     const GLfloat w = width;
     const GLfloat h = height;
-    shape[0] = Coord3D(-w, -h, 0.0f) * pixelsize / 2.0;
-    shape[1] = Coord3D(w, -h, 0.0f) * pixelsize / 2.0;
-    shape[2] = Coord3D(w,  h, 0.0f) * pixelsize / 2.0;
-    shape[3] = Coord3D(-w,  h, 0.0f) * pixelsize / 2.0;
+    shape[0] = QVector3D(-w, -h, 0.0f) * pixelsize / 2.0;
+    shape[1] = QVector3D(w, -h, 0.0f) * pixelsize / 2.0;
+    shape[2] = QVector3D(w,  h, 0.0f) * pixelsize / 2.0;
+    shape[3] = QVector3D(-w,  h, 0.0f) * pixelsize / 2.0;
   }
 };
 
@@ -251,7 +249,7 @@ struct TextureData
 
 struct VertexData
 {
-  Coord3D* node{nullptr}, *hint{nullptr}, *handle{nullptr}, *arrowhead{nullptr}, *transition_labels, *state_labels, *number_labels;
+  QVector3D* node{nullptr}, *hint{nullptr}, *handle{nullptr}, *arrowhead{nullptr}, *transition_labels, *state_labels, *number_labels;
 
   VertexData()
      
@@ -287,9 +285,9 @@ struct VertexData
     // Generate vertices for node border (a line loop drawing a circle)
     float slice = 0, sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1)),
           stack = 0, stackd = (float)(M_PI_2 / RES_NODE_STACK);
-    node = new Coord3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
+    node = new QVector3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
     for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced) {
-      node[i] = Coord3D(std::sin(slice), std::cos(slice), 0.1f);
+      node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
     }
     // Generate vertices for node (a quad strip drawing a half sphere)
     slice = 0;
@@ -298,17 +296,17 @@ struct VertexData
     {
       for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
       {
-        node[n++] = Coord3D(std::sin((float)(stack + stackd)) * std::sin(slice),
+        node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
                             std::sin((float)(stack + stackd)) * std::cos(slice),
                             std::cos((float)(stack + stackd)));
-        node[n++] = Coord3D(std::sin(stack) * std::sin(slice),
+        node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
                             std::sin(stack) * std::cos(slice),
                             std::cos(stack));
       }
-      node[n++] = Coord3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
+      node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
                           std::sin((float)(stack + stackd)) * std::cos(0.0f),
                           std::cos((float)(stack + stackd)));
-      node[n++] = Coord3D(std::sin(stack) * std::sin(0.0f),
+      node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
                           std::sin(stack) * std::cos(0.0f),
                           std::cos(stack));
     }
@@ -317,29 +315,29 @@ struct VertexData
     }
 
     // Generate plus (and minus) hint for exploration mode
-    hint = new Coord3D[4];
-    hint[0] = Coord3D(-nodesize * 0.3, 0.0, 0.0);
-    hint[1] = Coord3D(nodesize * 0.3, 0.0, 0.0);
-    hint[2] = Coord3D(0.0, -nodesize * 0.3, 0.0);
-    hint[3] = Coord3D(0.0, nodesize * 0.3, 0.0);
+    hint = new QVector3D[4];
+    hint[0] = QVector3D(-nodesize * 0.3, 0.0, 0.0);
+    hint[1] = QVector3D(nodesize * 0.3, 0.0, 0.0);
+    hint[2] = QVector3D(0.0, -nodesize * 0.3, 0.0);
+    hint[3] = QVector3D(0.0, nodesize * 0.3, 0.0);
 
     // Generate vertices for handle (border + fill, both squares)
-    handle = new Coord3D[4];
-    handle[0] = Coord3D(-handlesize/2.0, -handlesize/2.0, 0.0);
-    handle[1] = Coord3D(handlesize/2.0, -handlesize/2.0, 0.0);
-    handle[2] = Coord3D(handlesize/2.0,  handlesize/2.0, 0.0);
-    handle[3] = Coord3D(-handlesize/2.0,  handlesize/2.0, 0.0);
+    handle = new QVector3D[4];
+    handle[0] = QVector3D(-handlesize/2.0, -handlesize/2.0, 0.0);
+    handle[1] = QVector3D(handlesize/2.0, -handlesize/2.0, 0.0);
+    handle[2] = QVector3D(handlesize/2.0,  handlesize/2.0, 0.0);
+    handle[3] = QVector3D(-handlesize/2.0,  handlesize/2.0, 0.0);
 
     // Generate vertices for arrowhead (a triangle fan drawing a cone)
-    arrowhead = new Coord3D[RES_ARROWHEAD + 1];
-    arrowhead[0] = Coord3D(-nodesize / 2.0, 0.0, 0.0);
+    arrowhead = new QVector3D[RES_ARROWHEAD + 1];
+    arrowhead[0] = QVector3D(-nodesize / 2.0, 0.0, 0.0);
     float diff = (float)(M_PI / 20.0), t = 0;
     for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff) {
-      arrowhead[i] = Coord3D(-nodesize / 2.0 - arrowheadsize,
+      arrowhead[i] = QVector3D(-nodesize / 2.0 - arrowheadsize,
                              0.3 * arrowheadsize * std::sin(t),
                              0.3 * arrowheadsize * std::cos(t));
 }
-    arrowhead[RES_ARROWHEAD] = Coord3D(-nodesize / 2.0 - arrowheadsize,
+    arrowhead[RES_ARROWHEAD] = QVector3D(-nodesize / 2.0 - arrowheadsize,
                                        0.3 * arrowheadsize * std::sin(0.0f),
                                        0.3 * arrowheadsize * std::cos(0.0f));
   }
@@ -348,21 +346,21 @@ struct VertexData
 struct CameraView
 {
   QQuaternion rotation; ///< Rotation of the camera
-  Coord3D translation;  ///< Translation of the camera
-  Coord3D world;        ///< The size of the box in which the graph lives
+  QVector3D translation;  ///< Translation of the camera
+  QVector3D world;        ///< The size of the box in which the graph lives
   float zoom{1.0};      ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
   float pixelsize{1};
 
   CameraView()
-    : rotation(QQuaternion(1, 0, 0, 0)), translation(Coord3D(0, 0, 0)), world(Coord3D(1000.0, 1000.0, 1000.0)) 
+    : rotation(QQuaternion(1, 0, 0, 0)), translation(QVector3D(0, 0, 0)), world(QVector3D(1000.0, 1000.0, 1000.0)) 
   { }
 
   void viewport(size_t width, size_t height)
   {
     glViewport(0, 0, width, height);
     pixelsize = 1000.0 / (width < height ? height : width);
-    world.x = width * pixelsize;
-    world.y = height * pixelsize;
+    world.setX(width * pixelsize);
+    world.setY(height * pixelsize);
   }
 
   /**
@@ -373,22 +371,22 @@ struct CameraView
    *
    *  @param pos The position of the billboard.
    */
-  void billboard_spherical(const Coord3D& pos)
+  void billboard_spherical(const QVector3D& pos)
   {
-    Coord3D rt, up, lk;
+    QVector3D rt, up, lk;
     GLfloat mm[16];
 
     glGetFloatv(GL_MODELVIEW_MATRIX, mm);
-    lk.x = mm[0] * pos.x + mm[4] * pos.y + mm[8] * pos.z + mm[12];
-    lk.y = mm[1] * pos.x + mm[5] * pos.y + mm[9] * pos.z + mm[13];
-    lk.z = mm[2] * pos.x + mm[6] * pos.y + mm[10] * pos.z + mm[14];
+    lk.setX(mm[0] * pos.x() + mm[4] * pos.y() + mm[8] * pos.z() + mm[12]);
+    lk.setY(mm[1] * pos.x() + mm[5] * pos.y() + mm[9] * pos.z() + mm[13]);
+    lk.setZ(mm[2] * pos.x() + mm[6] * pos.y() + mm[10] * pos.z() + mm[14]);
 
-    lk /= lk.size();
-    rt = lk.cross(Coord3D(0, 1, 0));
-    up = rt.cross(lk);
-    GLfloat matrix[16] = {rt.x, rt.y, rt.z, 0,
-                          up.x, up.y, up.z, 0,
-                          -lk.x,  -lk.y,  -lk.z,  0,
+    lk /= lk.length();
+    rt = QVector3D::crossProduct(lk, QVector3D(0, 1, 0));
+    up = QVector3D::crossProduct(rt, lk);
+    GLfloat matrix[16] = {rt.x(), rt.y(), rt.z(), 0,
+                          up.x(), up.y(), up.z(), 0,
+                          -lk.x(),  -lk.y(),  -lk.z(),  0,
                           0,        0,      0,  1
                          };
     billboard_cylindrical(pos);
@@ -401,24 +399,24 @@ struct CameraView
    *
    *  @param pos The position of the billboard.
    */
-  void billboard_cylindrical(const Coord3D& pos)
+  void billboard_cylindrical(const QVector3D& pos)
   {
-    glTranslatef(pos.x, pos.y, pos.z);
+    glTranslatef(pos.x(), pos.y(), pos.z());
     mcrl2::gui::applyRotation(rotation, /*reverse=*/true);
   }
 
   void applyTranslation()
   {
-    float viewdepth = world.size() + 2 * pixelsize * 10;
+    float viewdepth = world.length() + 2 * pixelsize * 10;
     glTranslatef(0, 0, -5000.0005 - 0.5 * viewdepth);
-    glTranslatef(translation.x, translation.y, translation.z);
+    glTranslatef(translation.x(), translation.y(), translation.z());
   }
 
   void applyFrustum()
   {
-    float viewdepth = world.size() + 2 * pixelsize * 10;
-    float f = 2 * zoom * (10000.0 + (viewdepth - world.z)) / 10000.0;
-    glFrustum(-world.x / f, world.x / f, -world.y / f, world.y / f, 5000, viewdepth + 5000.001);
+    float viewdepth = world.length() + 2 * pixelsize * 10;
+    float f = 2 * zoom * (10000.0 + (viewdepth - world.z())) / 10000.0;
+    glFrustum(-world.x() / f, world.x() / f, -world.y() / f, world.y() / f, 5000, viewdepth + 5000.001);
   }
 
   void applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
@@ -484,13 +482,13 @@ struct CameraAnimation : public CameraView
     }
     else
     {
-      world.x = m_target.world.x * pos + m_source.world.x * (1.0 - pos);
-      world.y = m_target.world.y * pos + m_source.world.y * (1.0 - pos);
-      if (m_target.world.z > m_source.world.z) {
-        world.z = m_target.world.z * sin(M_PI_2 * pos) + m_source.world.z * (1.0 - sin(M_PI_2 * pos));
+      world.setX(m_target.world.x() * pos + m_source.world.x() * (1.0 - pos));
+      world.setY(m_target.world.y() * pos + m_source.world.y() * (1.0 - pos));
+      if (m_target.world.z() > m_source.world.z()) {
+        world.setZ(m_target.world.z() * sin(M_PI_2 * pos) + m_source.world.z() * (1.0 - sin(M_PI_2 * pos)));
       }
       else {
-        world.z = m_target.world.z * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z * cos(M_PI_2 * pos);
+        world.setZ(m_target.world.z() * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z() * cos(M_PI_2 * pos));
       }
     }
   }
@@ -522,8 +520,8 @@ struct CameraAnimation : public CameraView
   void viewport(size_t width, size_t height)
   {
     CameraView::viewport(width, height);
-    m_target.world.x = world.x;
-    m_target.world.y = world.y;
+    m_target.world.setX(world.x());
+    m_target.world.setY(world.y());
     m_target.pixelsize = pixelsize;
   }
 
@@ -546,13 +544,13 @@ struct CameraAnimation : public CameraView
     start_animation(animation);
   }
 
-  void setTranslation(const Graph::Coord3D& translation, size_t animation)
+  void setTranslation(const QVector3D& translation, size_t animation)
   {
     m_target.translation = translation;
     start_animation(animation);
   }
 
-  void setSize(const Graph::Coord3D& size, size_t animation)
+  void setSize(const QVector3D& size, size_t animation)
   {
     m_target.world = size;
     start_animation(animation);
@@ -671,11 +669,18 @@ void drawArrowHead(const VertexData& data)
 }
 
 inline
-void drawArc(const Coord3D* controlpoints)
+void drawArc(const QVector3D controlpoints[4])
 {
   glDepthMask(GL_FALSE);
 
-  glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &controlpoints[0].x);
+  float cp[3 * 4];
+  for (int i = 0; i < 4; i++)
+  {
+    cp[3 * i + 0] = controlpoints[i].x();
+    cp[3 * i + 1] = controlpoints[i].y();
+    cp[3 * i + 2] = controlpoints[i].z();
+  }
+  glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, cp);
   glEnable(GL_MAP1_VERTEX_3);
   glMapGrid1f(RES_ARC, 0, 1);
   glEvalMesh1(GL_LINE, 0, RES_ARC);
@@ -753,10 +758,10 @@ void drawNumber(TextureData& textures, size_t index)
 void GLScene::renderEdge(size_t i)
 {
   Graph::Edge edge = m_graph.edge(i);
-  Coord3D ctrl[4];
-  Coord3D& from = ctrl[0];
-  Coord3D& to = ctrl[3];
-  Coord3D via = m_graph.handle(i).pos();
+  QVector3D ctrl[4];
+  QVector3D& from = ctrl[0];
+  QVector3D& to = ctrl[3];
+  QVector3D via = m_graph.handle(i).pos();
   from = m_graph.node(edge.from()).pos();
   to = m_graph.node(edge.to()).pos();
 
@@ -771,9 +776,9 @@ void GLScene::renderEdge(size_t i)
     if (!m_drawselfloops) {
       return;
     }
-    Coord3D diff = ctrl[1] - ctrl[0];
-    diff = diff.cross(Coord3D(0, 0, 1));
-    diff = diff * ((via - from).size() / (diff.size() * 2.0));
+    QVector3D diff = ctrl[1] - ctrl[0];
+    diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
+    diff = diff * ((via - from).length() / (diff.length() * 2.0));
     ctrl[1] = ctrl[1] + diff;
     ctrl[2] = ctrl[2] - diff;
   }
@@ -787,19 +792,19 @@ void GLScene::renderEdge(size_t i)
   drawArc(ctrl);
 
   // Go to arrowhead position
-  glTranslatef(to.x, to.y, to.z);
+  glTranslatef(to.x(), to.y(), to.z());
 
   // Rotate to match the orientation of the arc
-  Coord3D vec = to - ctrl[2];
+  QVector3D vec = to - ctrl[2];
   // If ctrl[3] == ctrl[2], then something odd is going on. We'll just
   // make the executive decision not to draw the arrowhead then, as it
   // will just clutter the image.
-  if (vec.size() > 0)
+  if (vec.length() > 0)
   {
-    vec /= vec.size();
-    Coord3D axis = Graph::Coord3D(1, 0, 0).cross(vec);
-    float angle = acos(vec.x);
-    glRotatef(angle * 180.0 / M_PI, axis.x, axis.y, axis.z);
+    vec /= vec.length();
+    QVector3D axis = QVector3D::crossProduct(QVector3D(1, 0, 0), vec);
+    float angle = acos(vec.x());
+    glRotatef(angle * 180.0 / M_PI, axis.x(), axis.y(), axis.z());
 
     // Draw the arrow head
     drawArrowHead(*m_vertexdata);
@@ -872,11 +877,11 @@ void GLScene::renderTransitionLabel(GLuint i)
     glColor3fv(fill);
     if (gl2ps())
     {
-      Coord3D pos = label.pos();
+      QVector3D pos = label.pos();
       const Texture& texture = m_texturedata->getTransitionLabel(label.labelindex());
-      pos.x -= m_camera->pixelsize * texture.width / 2;
-      pos.y -= m_camera->pixelsize * texture.height / 2;
-      glRasterPos3fv(pos);
+      pos.setX(pos.x() - m_camera->pixelsize * texture.width / 2);
+      pos.setY(pos.y() - m_camera->pixelsize * texture.height / 2);
+      glRasterPos3f(pos.x(), pos.y(), pos.z());
       if (!m_graph.isTau(label.labelindex())) {
         gl2psText(m_graph.transitionLabelstring(label.labelindex()).toUtf8(), "", 10);
       }
@@ -906,11 +911,11 @@ void GLScene::renderStateLabel(GLuint i)
     glColor3fv(fill);
     if (gl2ps())
     {
-      Coord3D pos = label.pos();
+      QVector3D pos = label.pos();
       const Texture& texture = m_texturedata->getStateLabel(label.labelindex());
-      pos.x -= m_camera->pixelsize * texture.width / 2;
-      pos.y -= m_camera->pixelsize * texture.height / 2;
-      glRasterPos3fv(pos);
+      pos.setX(pos.x() - m_camera->pixelsize * texture.width / 2);
+      pos.setY(pos.y() - m_camera->pixelsize * texture.height / 2);
+      glRasterPos3f(pos.x(), pos.y(), pos.z());
       gl2psText(m_graph.stateLabelstring(label.labelindex()).toUtf8(), "", 10);
     }
     else
@@ -933,12 +938,12 @@ void GLScene::renderStateNumber(GLuint i)
   glStartName(so_node, i);
   if (gl2ps())
   {
-    Coord3D pos = node.pos();
+    QVector3D pos = node.pos();
     const Texture& texture = m_texturedata->getNumberLabel(i);
-    pos.x -= m_camera->pixelsize * texture.width / 2;
-    pos.y -= m_camera->pixelsize * texture.height / 2;
-    pos.z += m_size_node*m_camera->pixelsize;
-    glRasterPos3fv(pos);
+    pos.setX(pos.x() - m_camera->pixelsize * texture.width / 2);
+    pos.setY(pos.y() - m_camera->pixelsize * texture.height / 2);
+    pos.setZ(pos.z() + m_size_node*m_camera->pixelsize);
+    glRasterPos3f(pos.x(), pos.y(), pos.z());
     gl2psText(QString::number(i).toUtf8(), "", 10);
   }
   else
@@ -1120,7 +1125,7 @@ void GLScene::updateShapes()
   m_texturedata->resize(m_camera->pixelsize);
 }
 
-Coord3D GLScene::eyeToWorld(int x, int y, GLfloat z)
+QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z)
 {
   GLint V[4];
   GLfloat P[16];
@@ -1136,10 +1141,10 @@ Coord3D GLScene::eyeToWorld(int x, int y, GLfloat z)
   QVector3D eye{static_cast<float>(x), static_cast<float>(V[3] - y), static_cast<float>(z)};
   QRect view = QRect(V[0], V[1], V[2], V[3]);
   QVector3D world = mcrl2::gui::unproject(eye, QMatrix4x4(M).transposed(), QMatrix4x4(P).transposed(), view);
-  return Coord3D(world.x(), world.y(), world.z());
+  return QVector3D(world.x(), world.y(), world.z());
 }
 
-Coord3D GLScene::worldToEye(const Coord3D& world)
+QVector3D GLScene::worldToEye(const QVector3D& world)
 {
   GLint V[4];
   GLfloat P[16];
@@ -1147,15 +1152,15 @@ Coord3D GLScene::worldToEye(const Coord3D& world)
   glGetFloatv(GL_PROJECTION_MATRIX, P);
   glGetFloatv(GL_MODELVIEW_MATRIX, M);
   glGetIntegerv(GL_VIEWPORT, V);
-  QVector3D w{world.x, world.y, world.y};
+  QVector3D w{world.x(), world.y(), world.y()};
   QRect view = QRect(V[0], V[1], V[2], V[3]);
   QVector3D eye = mcrl2::gui::project(w, QMatrix4x4(M).transposed(), QMatrix4x4(P).transposed(), view);
-  return Coord3D(eye.x() /m_texturedata->device_pixel_ratio,
+  return QVector3D(eye.x() /m_texturedata->device_pixel_ratio,
                  (V[3] - eye.y()) / m_texturedata->device_pixel_ratio,
                  eye.z());
 }
 
-Coord3D GLScene::size()
+QVector3D GLScene::size()
 {
   return m_camera->world;
 }
@@ -1215,7 +1220,7 @@ void GLScene::rotate(const QQuaternion& delta)
   setRotation(delta * m_camera->rotation, 0);
 }
 
-void GLScene::translate(const Graph::Coord3D& amount)
+void GLScene::translate(const QVector3D& amount)
 {
   setTranslation(m_camera->translation + amount);
 }
@@ -1236,12 +1241,12 @@ void GLScene::setRotation(const QQuaternion& rotation, size_t animation)
   m_camera->setRotation(rotation, animation);
 }
 
-void GLScene::setTranslation(const Graph::Coord3D& translation, size_t animation)
+void GLScene::setTranslation(const QVector3D& translation, size_t animation)
 {
   m_camera->setTranslation(translation, animation);
 }
 
-void GLScene::setSize(const Graph::Coord3D& size, size_t animation)
+void GLScene::setSize(const QVector3D& size, size_t animation)
 {
   m_camera->setSize(size, animation);
 }
@@ -1336,7 +1341,7 @@ QString GLScene::tikzNode(size_t i, float aspectRatio)
   QString ret = "\\definecolor{currentcolor}{rgb}{%1,%2,%3}\n\\node at (%4pt, %5pt) [fill=currentcolor, %6state%8] (state%7) {%7};\n";
 
   ret = ret.arg(line.r, 0, 'f', 3).arg(line.g, 0, 'f', 3).arg(line.b, 0, 'f', 3);
-  ret = ret.arg(node.pos().x / 10.0f * aspectRatio, 6, 'f').arg(node.pos().y / 10.0f, 6, 'f');
+  ret = ret.arg(node.pos().x() / 10.0f * aspectRatio, 6, 'f').arg(node.pos().y() / 10.0f, 6, 'f');
   ret = ret.arg(m_graph.initialState() == i ? "init" : "");
   ret = ret.arg(i);
   ret = ret.arg(node.active() ? "" : ", dashed");
@@ -1361,10 +1366,10 @@ QString GLScene::tikzEdge(size_t i, float aspectRatio)
 {
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   Graph::Edge edge = m_graph.edge(i);
-  Coord3D ctrl[4];
-  Coord3D& from = ctrl[0];
-  Coord3D& to = ctrl[3];
-  Coord3D via = m_graph.handle(i).pos();
+  QVector3D ctrl[4];
+  QVector3D& from = ctrl[0];
+  QVector3D& to = ctrl[3];
+  QVector3D via = m_graph.handle(i).pos();
   from = m_graph.node(edge.from()).pos();
   to = m_graph.node(edge.to()).pos();
 
@@ -1378,19 +1383,19 @@ QString GLScene::tikzEdge(size_t i, float aspectRatio)
   // them in x-y direction.
   if (edge.from() == edge.to())
   {
-    Coord3D diff = ctrl[1] - ctrl[0];
-    diff = diff.cross(Coord3D(0, 0, 1));
-    diff = diff * ((via - from).size() / (diff.size() * 2.0));
+    QVector3D diff = ctrl[1] - ctrl[0];
+    diff = QVector3D::crossProduct(diff, QVector3D(0, 0, 1));
+    diff = diff * ((via - from).length() / (diff.length() * 2.0));
     ctrl[1] = ctrl[1] + diff;
     ctrl[2] = ctrl[2] - diff;
 
-    extraControls = QString(" and (%1pt, %2pt)").arg(ctrl[2].x / 10.0f * aspectRatio, 6, 'f').arg(ctrl[2].y / 10.0f, 6, 'f');
+    extraControls = QString(" and (%1pt, %2pt)").arg(ctrl[2].x() / 10.0f * aspectRatio, 6, 'f').arg(ctrl[2].y() / 10.0f, 6, 'f');
   }
 
   QString ret = "\\draw [transition] (state%1) .. node[auto] {%3} controls (%4pt, %5pt)%6 .. (state%2);\n";
   ret = ret.arg(edge.from()).arg(edge.to());
   ret = ret.arg(escapeLatex(m_graph.transitionLabelstring(label.labelindex())));
-  ret = ret.arg(ctrl[1].x / 10.0f * aspectRatio, 6, 'f').arg(ctrl[1].y / 10.0f, 6, 'f');
+  ret = ret.arg(ctrl[1].x() / 10.0f * aspectRatio, 6, 'f').arg(ctrl[1].y() / 10.0f, 6, 'f');
   ret = ret.arg(extraControls);
 
   return ret;

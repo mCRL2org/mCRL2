@@ -14,6 +14,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include "mcrl2/gui/arcball.h"
 
 namespace Graph
 {
@@ -52,7 +53,7 @@ inline void clip(float& f, float min, float max)
 
 SpringLayout::SpringLayout(Graph& graph)
   : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f), m_natLength(50.0f), m_controlPointWeight(0.001f),
-    m_clipMin(Coord3D(0.0f, 0.0f, 0.0f)), m_clipMax(Coord3D(1000.0f, 1000.0f, 1000.0f)),
+    m_clipMin(QVector3D(0.0f, 0.0f, 0.0f)), m_clipMax(QVector3D(1000.0f, 1000.0f, 1000.0f)),
     m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph)
 {
   srand(time(nullptr));
@@ -92,18 +93,18 @@ SpringLayout::ForceCalculation SpringLayout::forceCalculation()
   return linearsprings;
 }
 
-Coord3D SpringLayout::forceLTSGraph(const Coord3D& a, const Coord3D& b, float ideal)
+QVector3D SpringLayout::forceLTSGraph(const QVector3D& a, const QVector3D& b, float ideal)
 {
-  Coord3D diff = (a - b);
-  float dist = (std::max)(diff.size(), 1.0f);
+  QVector3D diff = (a - b);
+  float dist = (std::max)(diff.length(), 1.0f);
   float factor = m_attraction * 10000 * std::log(dist / (ideal + 1.0f)) / dist;
   return diff * factor;
 }
 
-Coord3D SpringLayout::forceLinearSprings(const Coord3D& a, const Coord3D& b, float ideal)
+QVector3D SpringLayout::forceLinearSprings(const QVector3D& a, const QVector3D& b, float ideal)
 {
-  Coord3D diff = (a - b);
-  float dist = diff.size() - ideal;
+  QVector3D diff = (a - b);
+  float dist = diff.length() - ideal;
   float factor = (std::max)(dist, 0.0f) * m_attraction;
   // Let springs attract really strong near their equilibrium
   if (dist > 0.0f)
@@ -114,12 +115,12 @@ Coord3D SpringLayout::forceLinearSprings(const Coord3D& a, const Coord3D& b, flo
 }
 
 inline
-Coord3D repulsionForce(const Coord3D& a, const Coord3D& b, float repulsion, float natlength)
+QVector3D repulsionForce(const QVector3D& a, const QVector3D& b, float repulsion, float natlength)
 {
-  Coord3D diff = a - b;
+  QVector3D diff = a - b;
   float r = repulsion;
-  r /= cube((std::max)(diff.size() / 2.0f, natlength / 10));
-  diff = diff * r + Coord3D(frand(-0.01f, 0.01f), frand(-0.01f, 0.01f), frand(-0.01f, 0.01f));
+  r /= cube((std::max)(diff.length() / 2.0f, natlength / 10));
+  diff = diff * r + QVector3D(frand(-0.01f, 0.01f), frand(-0.01f, 0.01f), frand(-0.01f, 0.01f));
   return diff;
 }
 
@@ -142,12 +143,12 @@ void SpringLayout::apply()
     {
       size_t n = sel ? m_graph.selectionNode(i) : i;
 
-      m_nforces[n] = Coord3D(0, 0, 0);
+      m_nforces[n] = QVector3D(0, 0, 0);
       for (size_t j = 0; j < i; ++j)
       {
         size_t m = sel ? m_graph.selectionNode(j) : j;
 
-        Coord3D diff = repulsionForce(m_graph.node(n).pos(), m_graph.node(m).pos(), m_repulsion, m_natLength);
+        QVector3D diff = repulsionForce(m_graph.node(n).pos(), m_graph.node(m).pos(), m_repulsion, m_natLength);
         m_nforces[n] += diff;
         m_nforces[m] -= diff;
       }
@@ -159,11 +160,11 @@ void SpringLayout::apply()
       size_t n = sel ? m_graph.selectionEdge(i) : i;
 
       Edge e = m_graph.edge(n);
-      Coord3D f;
+      QVector3D f;
       // Variables for repulsion calculations
 
-      m_hforces[n] = Coord3D(0, 0, 0);
-      m_lforces[n] = Coord3D(0, 0, 0);
+      m_hforces[n] = QVector3D(0, 0, 0);
+      m_lforces[n] = QVector3D(0, 0, 0);
 
       if (e.from() == e.to())
       {
@@ -203,12 +204,12 @@ void SpringLayout::apply()
       if (!m_graph.node(n).anchored())
       {
         m_graph.node(n).pos() = m_graph.node(n).pos() + m_nforces[n] * m_speed;
-        m_graph.node(n).pos().clip(m_clipMin, m_clipMax);
+        mcrl2::gui::clipVector(m_graph.node(n).pos(), m_clipMin, m_clipMax);
       }
       if (!m_graph.stateLabel(n).anchored())
       {
         m_graph.stateLabel(n).pos() = m_graph.stateLabel(n).pos() + m_sforces[n] * m_speed;
-        m_graph.stateLabel(n).pos().clip(m_clipMin, m_clipMax);
+        mcrl2::gui::clipVector(m_graph.stateLabel(n).pos(), m_clipMin, m_clipMax);
       }
     }
 
@@ -219,12 +220,12 @@ void SpringLayout::apply()
       if (!m_graph.handle(n).anchored())
       {
         m_graph.handle(n).pos() = m_graph.handle(n).pos() + m_hforces[n] * m_speed;
-        m_graph.handle(n).pos().clip(m_clipMin, m_clipMax);
+        mcrl2::gui::clipVector(m_graph.handle(n).pos(), m_clipMin, m_clipMax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
         m_graph.transitionLabel(n).pos() = m_graph.transitionLabel(n).pos() + m_lforces[n] * m_speed;
-        m_graph.transitionLabel(n).pos().clip(m_clipMin, m_clipMax);
+        mcrl2::gui::clipVector(m_graph.transitionLabel(n).pos(), m_clipMin, m_clipMax);
       }
     }
   }
@@ -232,17 +233,17 @@ void SpringLayout::apply()
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 }
 
-void SpringLayout::setClipRegion(const Coord3D& min, const Coord3D& max)
+void SpringLayout::setClipRegion(const QVector3D& min, const QVector3D& max)
 {
-  if (min.z < m_clipMin.z || max.z > m_clipMax.z) //Depth is increased, add random z values to improve spring movement in z direction
+  if (min.z() < m_clipMin.z() || max.z() > m_clipMax.z()) //Depth is increased, add random z values to improve spring movement in z direction
   {
     m_graph.lock(GRAPH_LOCK_TRACE);
-    float change = (std::min)(m_clipMin.z-min.z, max.z-m_clipMax.z)/100.0f; //Add at most 1/100th of the change
+    float change = (std::min)(m_clipMin.z()-min.z(), max.z()-m_clipMax.z())/100.0f; //Add at most 1/100th of the change
     for (size_t n = 0; n < m_graph.nodeCount(); ++n)
     {
       if (!m_graph.node(n).anchored())
       {
-        m_graph.node(n).pos().z = m_graph.node(n).pos().z + frand(-change, change);
+        m_graph.node(n).pos().setZ(m_graph.node(n).pos().z() + frand(-change, change));
       }
 
     }
