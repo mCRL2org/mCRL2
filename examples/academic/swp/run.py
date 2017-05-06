@@ -29,11 +29,13 @@ os.system('pbespgsolve -srecursive -v swp_lists.no_generation_of_messages.pbes')
 os.system('lps2pbes -v -f no_duplication_of_messages.mcf swp_lists.lps swp_lists.no_duplication_of_messages.pbes')
 os.system('pbes2bool -srecursive -v swp_lists.no_duplication_of_messages.pbes')
 
-# SWP with Tanenbaum's bug
+# SWP with Tanenbaum's bug (the flag -rjittyc only works on linux and mac, not on windows)
 os.system('mcrl22lps -v swp_with_tanenbaums_bug.mcrl2 swp_with_tanenbaums_bug.lps')
 os.system('lps2pbes -v -f nodeadlock.mcf swp_with_tanenbaums_bug.lps swp_with_tanenbaums_bug.nodeadlock.pbes')
-os.system('pbes2bool -v swp_with_tanenbaums_bug.nodeadlock.pbes')
+# Verifying deadlockfreedom with two data elements and two buffer positions leads to a state space that is too large. 
+# os.system('pbes2bool -v -s2 -rjittyc swp_with_tanenbaums_bug.nodeadlock.pbes')
 
-# Generate state space, and look for occurrence of error action. Store trace,
-# and stop generating after finding a single trace
-os.system('lps2lts -v -aerror -t1 -rjittyc swp_with_tanenbaums_bug.lps swp_with_tanenbaums_bug.aut')
+# But it is possible to generate the state space, while looking for occurrence of error action, because the error action
+# can be found without exploring the whole state space. The command below stores trace, and stops generating after finding 
+# a single trace. Removal of --cached leads to less memory requirements, at the expense of a longer running time. 
+os.system('lps2lts -v --cached -aerror -t1 swp_with_tanenbaums_bug.lps')
