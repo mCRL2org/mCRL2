@@ -6,6 +6,6 @@ os.system('lps2pbes -v -f sustained_delivery.mcf food_package.lpssuminst.lps sus
 os.system('pbesconstelm -ve sustained_delivery.pbes sustained_delivery.pbesconstelm.pbes')
 # We use -rjittyc is used below, which does work on linux and mac, and not on windows.
 # Note that the generated bes is huge.
-os.system('pbes2bool -v -rjittyc sustained_delivery.pbesconstelm.pbes')
+os.system('pbes2bool -v -zd -rjittyc -s3 -eall sustained_delivery.pbesconstelm.pbes')
 
 
