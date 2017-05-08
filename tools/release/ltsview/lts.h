@@ -78,7 +78,7 @@ class LTS
     void clusterStates(bool cyclic);
     void computeClusterInfo();
     State* getInitialState() const;
-    std::string getActionLabel(int labindex) const;
+    const std::string& getActionLabel(int labindex) const;
     Cluster_iterator getClusterIterator();
     Reverse_cluster_iterator getReverseClusterIterator();
     State_iterator getStateIterator();
@@ -89,14 +89,12 @@ class LTS
     int getNumStates() const;
     int getNumTransitions() const;
 
-    bool hasStateInfo() const { return lts_hasStateInfo; }
+    bool hasStateInfo() const { return haveStateInfo; }
     size_t getNumParameters() const;
-    const static std::vector<std::string> v;
-    const std::vector<std::string>& getParameterDomain(size_t parindex) const { return lts_stateElementValues[parindex]; }
-    std::string getParameterName(size_t parindex) const;
+    const std::vector<std::string>& getParameterDomain(size_t parindex) const { return stateElementValues[parindex]; }
+    const std::string& getParameterName(size_t parindex) const;
     size_t getStateParameterValue(State* state,size_t param) const;
-    std::string getStateParameterValueStr(State* state,
-                                          size_t param) const;
+    const std::string& getStateParameterValueStr(State* state, size_t param) const;
     std::set<std::string> getClusterParameterValues(Cluster* c, size_t param) const;
 
     void positionClusters(bool fsmstyle);
@@ -131,16 +129,16 @@ class LTS
     std::vector< std::vector< Cluster* > > clustersInRank;
     State* initialState;
 
-    bool lts_hasStateInfo;
-    size_t lts_numActionLabels;
-    size_t lts_numParameters;
-    size_t lts_numStateLabels;
-    size_t lts_numStates;
-    size_t lts_numTransitions;
-    std::vector< std::vector< std::string > > lts_stateElementValues;
-    std::vector< std::string > lts_parameterNames;
-    std::vector< std::vector< size_t > > lts_stateLabels;
-    std::vector< std::string > lts_actionLabels;
+    bool haveStateInfo;
+    size_t numActionLabels;
+    size_t numParameters;
+    size_t numStateLabels;
+    size_t numStates;
+    size_t numTransitions;
+    std::vector< std::vector< std::string > > stateElementValues;
+    std::vector< std::string > parameterNames;
+    std::vector< std::vector< size_t > > stateLabels;
+    std::vector< std::string > actionLabels;
 
     // Used for translating free variables from a trace to their
     // instantiation in the LTS

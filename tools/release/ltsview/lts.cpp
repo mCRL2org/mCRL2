@@ -155,16 +155,16 @@ LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
   previousLevel  = parent;
   zoomLevel = previousLevel->getZoomLevel() + 1;
 
-  lts_hasStateInfo = previousLevel->lts_hasStateInfo;
-  lts_numActionLabels = previousLevel->lts_numActionLabels;
-  lts_numParameters = previousLevel->lts_numParameters;
-  lts_numStateLabels = previousLevel->lts_numStateLabels;
-  lts_numStates = previousLevel->lts_numStates;
-  lts_numTransitions = previousLevel->lts_numTransitions;
-  lts_stateElementValues = previousLevel->lts_stateElementValues;
-  lts_parameterNames = previousLevel->lts_parameterNames;
-  lts_stateLabels = previousLevel->lts_stateLabels;
-  lts_actionLabels = previousLevel->lts_actionLabels;
+  haveStateInfo = previousLevel->haveStateInfo;
+  numActionLabels = previousLevel->numActionLabels;
+  numParameters = previousLevel->numParameters;
+  numStateLabels = previousLevel->numStateLabels;
+  numStates = previousLevel->numStates;
+  numTransitions = previousLevel->numTransitions;
+  stateElementValues = previousLevel->stateElementValues;
+  parameterNames = previousLevel->parameterNames;
+  stateLabels = previousLevel->stateLabels;
+  actionLabels = previousLevel->actionLabels;
 
   if (lastWasAbove)
   {
@@ -244,20 +244,20 @@ State_iterator LTS::getStateIterator()
   return State_iterator(this);
 }
 
-std::string LTS::getParameterName(size_t parindex) const
+const std::string& LTS::getParameterName(size_t parindex) const
 {
-  return lts_parameterNames[parindex];
+  return parameterNames[parindex];
 }
 
 size_t LTS::getStateParameterValue(State* state,size_t param) const
 {
-  return lts_stateLabels[state->getID()][param];
+  return stateLabels[state->getID()][param];
 }
 
-std::string LTS::getStateParameterValueStr(State* state, size_t param) const
+const std::string& LTS::getStateParameterValueStr(State* state, size_t param) const
 {
   size_t value = getStateParameterValue(state, param);
-  return lts_stateElementValues[param][value];
+  return stateElementValues[param][value];
 }
 
 std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t param) const
@@ -281,40 +281,40 @@ bool LTS::readFromFile(const std::string& filename)
   // remove unreachable states
   reachability_check(mcrl2_lts, true);
 
-  lts_hasStateInfo = mcrl2_lts.has_state_info();
-  lts_numActionLabels = mcrl2_lts.num_action_labels();
-  lts_numParameters = mcrl2_lts.process_parameters().size();
-  lts_numStateLabels = mcrl2_lts.num_state_labels();
-  lts_numStates = mcrl2_lts.num_states();
-  lts_numTransitions = mcrl2_lts.num_transitions();
+  haveStateInfo = mcrl2_lts.has_state_info();
+  numActionLabels = mcrl2_lts.num_action_labels();
+  numParameters = mcrl2_lts.process_parameters().size();
+  numStateLabels = mcrl2_lts.num_state_labels();
+  numStates = mcrl2_lts.num_states();
+  numTransitions = mcrl2_lts.num_transitions();
 
-  lts_stateElementValues.clear();
-  lts_stateElementValues.reserve(lts_numParameters);
-  for (size_t i = 0; i < lts_numParameters; ++i)
+  stateElementValues.clear();
+  stateElementValues.reserve(numParameters);
+  for (size_t i = 0; i < numParameters; ++i)
   {
-    lts_stateElementValues.emplace_back(mcrl2_lts.state_element_values(i));
+    stateElementValues.emplace_back(mcrl2_lts.state_element_values(i));
   }
 
-  lts_parameterNames.clear();
-  lts_parameterNames.reserve(lts_numParameters);
-  for (size_t i = 0; i < lts_numParameters; ++i)
+  parameterNames.clear();
+  parameterNames.reserve(numParameters);
+  for (size_t i = 0; i < numParameters; ++i)
   {
     // in an .fsm file a parameter is a pair of strings.
-    lts_parameterNames.emplace_back(mcrl2_lts.process_parameter(i).first);
+    parameterNames.emplace_back(mcrl2_lts.process_parameter(i).first);
   }
 
-  lts_stateLabels.clear();
-  lts_stateLabels.reserve(lts_numStateLabels);
-  for (size_t i = 0; i < lts_numStateLabels; ++i)
+  stateLabels.clear();
+  stateLabels.reserve(numStateLabels);
+  for (size_t i = 0; i < numStateLabels; ++i)
   {
-    lts_stateLabels.emplace_back(mcrl2_lts.state_label(i));
+    stateLabels.emplace_back(mcrl2_lts.state_label(i));
   }
 
-  lts_actionLabels.clear();
-  lts_actionLabels.reserve(lts_numActionLabels);
-  for (size_t i = 0; i < lts_numActionLabels; ++i)
+  actionLabels.clear();
+  actionLabels.reserve(numActionLabels);
+  for (size_t i = 0; i < numActionLabels; ++i)
   {
-    lts_actionLabels.emplace_back(mcrl2_lts.action_label(i));
+    actionLabels.emplace_back(mcrl2_lts.action_label(i));
   }
 
   states.clear();
@@ -347,17 +347,17 @@ bool LTS::readFromFile(const std::string& filename)
 
 int LTS::getNumActionLabels() const
 {
-  return static_cast<int>(lts_numActionLabels);
+  return static_cast<int>(numActionLabels);
 }
 
 size_t LTS::getNumParameters() const
 {
-  return lts_numParameters;
+  return numParameters;
 }
 
-std::string LTS::getActionLabel(int labindex) const
+const std::string& LTS::getActionLabel(int labindex) const
 {
-  return lts_actionLabels[labindex];
+  return actionLabels[labindex];
 }
 
 void LTS::addCluster(Cluster* cluster)
@@ -455,12 +455,12 @@ int LTS::getNumDeadlocks()
 
 int LTS::getNumStates() const
 {
-  return static_cast<int>(lts_numStates);
+  return static_cast<int>(numStates);
 }
 
 int LTS::getNumTransitions() const
 {
-  return static_cast<int>(lts_numTransitions);
+  return static_cast<int>(numTransitions);
 }
 
 void LTS::clearRanksAndClusters()
