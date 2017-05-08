@@ -310,7 +310,7 @@ void LtsCanvas::render(bool light)
   GLenum error = glGetError();
   if (error != GL_NO_ERROR)
   {
-    mCRL2log(mcrl2::log::error) << "OpenGL error: " << error << std::endl;
+    qWarning("OpenGL error: %d", error);
   }
 }
 
