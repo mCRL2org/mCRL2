@@ -74,7 +74,7 @@ void SimDock::changed()
     {
       m_ui.transitionTable->setItem(i, 0, item());
       m_ui.transitionTable->setItem(i, 1, item());
-      m_ui.transitionTable->item(i, 0)->setText(QString::fromStdString(simulation->lts().getLabel(transitions[i]->getLabel())));
+      m_ui.transitionTable->item(i, 0)->setText(QString::fromStdString(simulation->lts().getActionLabel(transitions[i]->getLabel())));
 
       State *destination = transitions[i]->getEndState();
       QStringList assignments;

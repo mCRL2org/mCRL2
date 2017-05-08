@@ -148,7 +148,7 @@ void MarkManager::setLts(LTS *lts)
   m_lts = lts;
 
   m_markedActions.clear();
-  m_markedActions.resize(m_lts->getNumLabels());
+  m_markedActions.resize(m_lts->getNumActionLabels());
 
   m_markRules.clear();
 

@@ -212,7 +212,7 @@ bool Simulation::loadTrace(QString filename)
 
     for (int i = 0; i < transitions.size(); i++)
     {
-      if (action == m_ltsRef.getLabel(transitions[i]->getLabel()))
+      if (action == m_ltsRef.getActionLabel(transitions[i]->getLabel()))
       {
         possibilities++;
         transition = transitions[i];

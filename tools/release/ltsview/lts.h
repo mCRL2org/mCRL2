@@ -77,22 +77,22 @@ class LTS
     void clearStatePositions();
     void clusterStates(bool cyclic);
     void computeClusterInfo();
-    void getActionLabels(std::vector<std::string> &ls) const;
     State* getInitialState() const;
-    std::string getLabel(int labindex) const;
+    std::string getActionLabel(int labindex) const;
     Cluster_iterator getClusterIterator();
     Reverse_cluster_iterator getReverseClusterIterator();
     State_iterator getStateIterator();
     int getNumClusters() const;
     int getNumDeadlocks();
-    int getNumLabels() const;
+    int getNumActionLabels() const;
     int getNumRanks() const;
     int getNumStates() const;
     int getNumTransitions() const;
 
-    bool hasStateInfo() const { return mcrl2_lts->has_state_info(); }
+    bool hasStateInfo() const { return lts_hasStateInfo; }
     size_t getNumParameters() const;
-    const std::vector<std::string>& getParameterDomain(size_t parindex) const { return mcrl2_lts->state_element_values(parindex); }
+    const static std::vector<std::string> v;
+    const std::vector<std::string>& getParameterDomain(size_t parindex) const { return lts_stateElementValues[parindex]; }
     std::string getParameterName(size_t parindex) const;
     size_t getStateParameterValue(State* state,size_t param) const;
     std::string getStateParameterValueStr(State* state,
@@ -122,16 +122,25 @@ class LTS
     void fromAbove();
 
   private:
-    mcrl2::lts::lts_fsm_t *mcrl2_lts;
-
     bool lastWasAbove;
     int zoomLevel;
     int deadlockCount;
     LTS* previousLevel;
-    State* initialState;
     Cluster* lastCluster;
     std::vector< State* > states;
     std::vector< std::vector< Cluster* > > clustersInRank;
+    State* initialState;
+
+    bool lts_hasStateInfo;
+    size_t lts_numActionLabels;
+    size_t lts_numParameters;
+    size_t lts_numStateLabels;
+    size_t lts_numStates;
+    size_t lts_numTransitions;
+    std::vector< std::vector< std::string > > lts_stateElementValues;
+    std::vector< std::string > lts_parameterNames;
+    std::vector< std::vector< size_t > > lts_stateLabels;
+    std::vector< std::string > lts_actionLabels;
 
     // Used for translating free variables from a trace to their
     // instantiation in the LTS

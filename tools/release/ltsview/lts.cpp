@@ -146,7 +146,6 @@ LTS::LTS()
   previousLevel = NULL;
   lastWasAbove = false;
   zoomLevel = 0;
-  mcrl2_lts = 0;
 }
 
 LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
@@ -156,7 +155,16 @@ LTS::LTS(LTS* parent, Cluster *target, bool fromAbove)
   previousLevel  = parent;
   zoomLevel = previousLevel->getZoomLevel() + 1;
 
-  mcrl2_lts = previousLevel->mcrl2_lts;
+  lts_hasStateInfo = previousLevel->lts_hasStateInfo;
+  lts_numActionLabels = previousLevel->lts_numActionLabels;
+  lts_numParameters = previousLevel->lts_numParameters;
+  lts_numStateLabels = previousLevel->lts_numStateLabels;
+  lts_numStates = previousLevel->lts_numStates;
+  lts_numTransitions = previousLevel->lts_numTransitions;
+  lts_stateElementValues = previousLevel->lts_stateElementValues;
+  lts_parameterNames = previousLevel->lts_parameterNames;
+  lts_stateLabels = previousLevel->lts_stateLabels;
+  lts_actionLabels = previousLevel->lts_actionLabels;
 
   if (lastWasAbove)
   {
@@ -213,11 +221,6 @@ LTS::~LTS()
       }
     }
     clustersInRank.clear();
-
-    if (mcrl2_lts)
-    {
-      delete mcrl2_lts;
-    }
   }
   else
   {
@@ -243,18 +246,18 @@ State_iterator LTS::getStateIterator()
 
 std::string LTS::getParameterName(size_t parindex) const
 {
-  return mcrl2_lts->process_parameter(parindex).first; // in an .fsm file a parameter is a pair of strings.
+  return lts_parameterNames[parindex];
 }
 
 size_t LTS::getStateParameterValue(State* state,size_t param) const
 {
-  return mcrl2_lts->state_label(state->getID())[param];
+  return lts_stateLabels[state->getID()][param];
 }
 
 std::string LTS::getStateParameterValueStr(State* state, size_t param) const
 {
-  using namespace mcrl2::lts::detail;
-  return mcrl2_lts->state_element_value(param,(mcrl2_lts->state_label(state->getID()))[param]);
+  size_t value = getStateParameterValue(state, param);
+  return lts_stateElementValues[param][value];
 }
 
 std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t param) const
@@ -267,37 +270,68 @@ std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t pa
   return result;
 }
 
-
 bool LTS::readFromFile(const std::string& filename)
 {
   assert(!previousLevel);
 
-  if (mcrl2_lts)
-  {
-    delete mcrl2_lts;
-  }
-  mcrl2_lts = new mcrl2::lts::lts_fsm_t;
+  mcrl2::lts::lts_fsm_t mcrl2_lts{};
 
-  load_lts_as_fsm_file(filename, *mcrl2_lts);
+  load_lts_as_fsm_file(filename, mcrl2_lts);
 
   // remove unreachable states
-  reachability_check(*mcrl2_lts, true);
+  reachability_check(mcrl2_lts, true);
 
-  states.clear();
-  states.reserve(mcrl2_lts->num_states());
-  for (size_t i = 0; i < mcrl2_lts->num_states(); ++i)
+  lts_hasStateInfo = mcrl2_lts.has_state_info();
+  lts_numActionLabels = mcrl2_lts.num_action_labels();
+  lts_numParameters = mcrl2_lts.process_parameters().size();
+  lts_numStateLabels = mcrl2_lts.num_state_labels();
+  lts_numStates = mcrl2_lts.num_states();
+  lts_numTransitions = mcrl2_lts.num_transitions();
+
+  lts_stateElementValues.clear();
+  lts_stateElementValues.reserve(lts_numParameters);
+  for (size_t i = 0; i < lts_numParameters; ++i)
   {
-    states.push_back(new State(static_cast<int>(i)));
+    lts_stateElementValues.emplace_back(mcrl2_lts.state_element_values(i));
   }
 
-  initialState = states[mcrl2_lts->initial_state()];
-
-  const std::vector<transition> &trans=mcrl2_lts->get_transitions();
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  lts_parameterNames.clear();
+  lts_parameterNames.reserve(lts_numParameters);
+  for (size_t i = 0; i < lts_numParameters; ++i)
   {
-    State* s1 = states[r->from()];
-    State* s2 = states[r->to()];
-    Transition* t = new Transition(s1,s2,static_cast<int>(r->label()));
+    // in an .fsm file a parameter is a pair of strings.
+    lts_parameterNames.emplace_back(mcrl2_lts.process_parameter(i).first);
+  }
+
+  lts_stateLabels.clear();
+  lts_stateLabels.reserve(lts_numStateLabels);
+  for (size_t i = 0; i < lts_numStateLabels; ++i)
+  {
+    lts_stateLabels.emplace_back(mcrl2_lts.state_label(i));
+  }
+
+  lts_actionLabels.clear();
+  lts_actionLabels.reserve(lts_numActionLabels);
+  for (size_t i = 0; i < lts_numActionLabels; ++i)
+  {
+    lts_actionLabels.emplace_back(mcrl2_lts.action_label(i));
+  }
+
+  states.clear();
+  states.reserve(mcrl2_lts.num_states());
+  for (size_t i = 0; i < mcrl2_lts.num_states(); ++i)
+  {
+    states.emplace_back(new State(static_cast<int>(i)));
+  }
+
+  initialState = states[mcrl2_lts.initial_state()];
+
+  const std::vector<transition> &trans = mcrl2_lts.get_transitions();
+  for (const transition& r : trans)
+  {
+    State* s1 = states[r.from()];
+    State* s2 = states[r.to()];
+    Transition* t = new Transition(s1,s2,static_cast<int>(r.label()));
     if (s1 != s2)
     {
       s1->addOutTransition(t);
@@ -311,19 +345,19 @@ bool LTS::readFromFile(const std::string& filename)
   return true;
 }
 
-int LTS::getNumLabels() const
+int LTS::getNumActionLabels() const
 {
-  return static_cast<int>(mcrl2_lts->num_action_labels());
+  return static_cast<int>(lts_numActionLabels);
 }
 
 size_t LTS::getNumParameters() const
 {
-  return mcrl2_lts->process_parameters().size();
+  return lts_numParameters;
 }
 
-std::string LTS::getLabel(int labindex) const
+std::string LTS::getActionLabel(int labindex) const
 {
-  return mcrl2_lts->action_label(labindex);
+  return lts_actionLabels[labindex];
 }
 
 void LTS::addCluster(Cluster* cluster)
@@ -368,15 +402,6 @@ void LTS::addClusterAndBelow(Cluster* cluster)
     {
       addClusterAndBelow(cluster->getDescendant(i));
     }
-  }
-}
-
-void LTS::getActionLabels(vector< string > &ls) const
-{
-  ls.clear();
-  for (size_t i = 0; i < mcrl2_lts->num_action_labels(); ++i)
-  {
-    ls.push_back(mcrl2_lts->action_label(i));
   }
 }
 
@@ -430,12 +455,12 @@ int LTS::getNumDeadlocks()
 
 int LTS::getNumStates() const
 {
-  return static_cast<int>(mcrl2_lts->num_states());
+  return static_cast<int>(lts_numStates);
 }
 
 int LTS::getNumTransitions() const
 {
-  return static_cast<int>(mcrl2_lts->num_transitions());
+  return static_cast<int>(lts_numTransitions);
 }
 
 void LTS::clearRanksAndClusters()

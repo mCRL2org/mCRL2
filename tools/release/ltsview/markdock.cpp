@@ -64,9 +64,9 @@ void MarkDock::loadLts()
   m_ui.markedActionList->clear();
   if (m_markManager->lts())
   {
-    for (int i = 0; i < m_markManager->lts()->getNumLabels(); i++)
+    for (int i = 0; i < m_markManager->lts()->getNumActionLabels(); i++)
     {
-      QString label = QString::fromStdString(m_markManager->lts()->getLabel(i));
+      QString label = QString::fromStdString(m_markManager->lts()->getActionLabel(i));
       m_actionNumbers[label] = i;
       m_actions += label;
     }
