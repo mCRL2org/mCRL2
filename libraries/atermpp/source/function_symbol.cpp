@@ -108,7 +108,7 @@ function_symbol::function_symbol(const std::string& name_, const size_t arity_, 
   initialise_aterm_administration_if_needed();
   function_symbol_iterator_bool_pair 
        i=function_symbol_store().emplace(detail::_function_symbol_primary_data(name_,arity_),
-                                         detail::_function_symbol_auxiliary_data(1));
+                                         detail::_function_symbol_auxiliary_data(0));
   m_function_symbol=&(*(i.first));
   increase_reference_count<false>();
 

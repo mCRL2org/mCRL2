@@ -45,10 +45,6 @@ class function_symbol
     }
 
     static function_symbol AS_DEFAULT;
-    /* {
-      static function_symbol f("<undefined_term>",0);
-      return f;
-    } */
 
     // The function and boolean below are needed to guarantee that the aterm
     // administration, predefined function symbols and predefined aterms exist
@@ -75,7 +71,6 @@ class function_symbol
 
     void free_function_symbol()
     {
-      assert(is_valid());
       function_symbol_store().erase(m_function_symbol->first);
     }
 
@@ -145,9 +140,8 @@ class function_symbol
       const_cast<function_symbol&>(f).increase_reference_count<true>();
       decrease_reference_count(); // Decrease the reference count after increasing it,
                                   // as otherwise the reference count can becomes 0 for
-                                  // a short moment when x=x is executed and the reference
-                                  // count of x is 1. x can then prematurely be garbage collected,
-                                  // depending on the garbage collection scheme..
+                                  // a short moment when f=f is executed and the reference
+                                  // count of f is 1. In that case f is garbage collected.
       m_function_symbol=f.m_function_symbol;
       return *this;
     }

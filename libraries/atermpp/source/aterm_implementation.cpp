@@ -131,12 +131,12 @@ void free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed)
 
   call_deletion_hook(t);
 
-  const function_symbol &f=t->function();
+  const function_symbol& f=t->function();
   const size_t arity=f.arity();
 
   const size_t size=detail::TERM_SIZE_APPL(arity);
 
-  detail::TermInfo &ti = detail::terminfo[size];
+  detail::TermInfo& ti = detail::terminfo[size];
   t->set_reference_count_indicates_in_freelist();
   t->set_next(ti.at_freelist);
   ti.at_freelist = t;
@@ -231,7 +231,7 @@ void collect_terms_with_reference_count_0()
   // First put all terms with reference count 0 in the freelist.
   for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
-    TermInfo &ti=terminfo[size];
+    TermInfo& ti=terminfo[size];
 
     for(Block* b=ti.at_block; b!=nullptr; b=b->next_by_size)
     {
@@ -251,7 +251,7 @@ void collect_terms_with_reference_count_0()
   size_t number_of_blocks=0;
   for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
-    TermInfo &ti=terminfo[size];
+    TermInfo& ti=terminfo[size];
     Block* previous_block=nullptr;
     ti.at_freelist=nullptr;
     for(Block* b=ti.at_block; b!=nullptr; )
@@ -307,7 +307,7 @@ static void check_that_all_objects_are_free()
 
   for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
-    const TermInfo &ti=terminfo[size];
+    const TermInfo& ti=terminfo[size];
     for(Block* b=ti.at_block; b!=NULL; b=b->next_by_size)
     {
       for(size_t* p=b->data; p<b->end; p=p+size)
@@ -426,7 +426,7 @@ void allocate_block(const size_t size)
 
   assert(size>=TERM_SIZE);
   assert(size < terminfo_size);
-  TermInfo &ti = terminfo[size];
+  TermInfo& ti = terminfo[size];
 
   newblock->end = newblock->data + number_of_terms_in_data_block*size;
 
