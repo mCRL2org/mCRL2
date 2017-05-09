@@ -47,7 +47,9 @@
 % must count back from number 63. 
 % 
 % In J.F. Groote and H. Zantema, Analysing the Game of the Goose a detailed analysis is provided
-% of the game, partly on the basis of the code below. 
+% of the game, partly on the basis of the code below, without probabilities. The extra probability
+% states increase the size of the statespace with approximately a factor 36 due to the probabilistic
+% states. In the directory games/game_of_the_goose a non probabilistic description can be found.
 
 map number_of_players:Pos;
     previous,next:Pos->Pos;
