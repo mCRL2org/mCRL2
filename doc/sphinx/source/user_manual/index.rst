@@ -39,6 +39,19 @@
 
 .. note::
 
+   On Coursera four consecutive courses consisting of approximately 60 lectures provide an introduction into the theory and practical
+   use underlying the mCRL2 toolset. It is based on the book 'Modeling and Analysis of Communicating
+   Systems' shown below. The courses are:
+
+   - `Automata and behavioural equivalences <https://www.coursera.org/learn/automata-system-validation>`_.
+   - `Model process behaviour <https://www.coursera.org/learn/system-validation-behavior>`_.
+   - `Requirements by modal formulas <https://www.coursera.org/learn/system-validation-modal-formulas>_`.
+   - `Modelling software, protocols, and other behaviour <https://www.coursera.org/learn/system-validation-software-protocols>`_.
+
+   The slides used to make these courses are available by contacting J.F.Groote@tue.nl. 
+
+.. note::
+
    mCRL2 received a prize for the distinguished user-assistance tool feature in the
    `VerifyThis verification challenge <http://etaps2015.verifythis.org/>`_
    held at `ETAPS2015 <http://www.etaps.org/>`_, in London. mCRL2 combined a rich specification
