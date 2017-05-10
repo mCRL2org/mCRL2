@@ -170,7 +170,7 @@ inline indexed_set<ELEMENT>::indexed_set(size_t initial_size /* = 100 */, unsign
 template <class ELEMENT>
 inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 {
-  size_t start = std::hash<ELEMENT>()(elem) & sizeMinus1;
+  size_t start = std::hash<aterm>()(elem) & sizeMinus1;
   size_t c = start;
   do
   {
@@ -196,7 +196,7 @@ inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 template <class ELEMENT>
 bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 {
-  size_t start = std::hash<ELEMENT>()(key) & sizeMinus1;
+  size_t start = std::hash<aterm>()(key) & sizeMinus1;
   size_t c = start;
   size_t v;
   while (true)
