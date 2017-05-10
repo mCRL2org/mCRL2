@@ -45,7 +45,7 @@
 
    - `Automata and behavioural equivalences <https://www.coursera.org/learn/automata-system-validation>`_.
    - `Model process behaviour <https://www.coursera.org/learn/system-validation-behavior>`_.
-   - `Requirements by modal formulas <https://www.coursera.org/learn/system-validation-modal-formulas>_`.
+   - `Requirements by modal formulas <https://www.coursera.org/learn/system-validation-modal-formulas>`_.
    - `Modelling software, protocols, and other behaviour <https://www.coursera.org/learn/system-validation-software-protocols>`_.
 
    The slides used to make these courses are available by contacting J.F.Groote@tue.nl. 
