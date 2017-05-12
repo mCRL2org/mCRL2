@@ -12,9 +12,12 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_SYMBOLIC_BISIM_H
 #define MCRL2_LPSSYMBOLICBISIM_SYMBOLIC_BISIM_H
 
+// #define DBM_PACKAGE_AVAILABLE 1
+
 #include <string>
 #include <queue>
 
+#include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/detail/linear_inequalities_utilities.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
@@ -31,11 +34,22 @@
 #include "mcrl2/data/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/data/substitutions/data_expression_assignment.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/utilities/logger.h"
 
 #include "simplifier.h"
-// #include "simplifier_dbm.h"
-#include "simplifier_fourier_motzkin.h"
+#ifdef DBM_PACKAGE_AVAILABLE
+  #include "simplifier_dbm.h"
+#else
+  #include "simplifier_fourier_motzkin.h"
+  #define GREEN(C) ""
+  #define YELLOW(C) ""
+  #define RED(C) ""
+  #define NORMAL ""
+#endif
+#include "find_linear_inequality.h"
+#include "enumerate_block_union.h"
+
 
 namespace mcrl2
 {
@@ -43,111 +57,6 @@ namespace data
 {
 
 using namespace mcrl2::log;
-
-template <template <class> class Traverser, class OutputIterator>
-struct find_linear_inequality_traverser: public Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> >
-{
-  typedef Traverser<find_linear_inequality_traverser<Traverser, OutputIterator> > super;
-  using super::enter;
-  using super::leave;
-  using super::apply;
-
-  OutputIterator out;
-  std::set< variable > real_free_vars;
-  bool search_free_var;
-  bool found_free_var;
-
-  find_linear_inequality_traverser(OutputIterator out_, std::set< variable > real_free_vars_)
-    : out(out_)
-    , real_free_vars(real_free_vars_)
-    , search_free_var(false)
-    , found_free_var(false)
-  {}
-
-  void apply(const data::variable& v)
-  {
-    if(search_free_var && !found_free_var && real_free_vars.find(v) != real_free_vars.end())
-    {
-      found_free_var = true;
-    }
-  }
-
-  void apply(const data::application& x)
-  {
-    if (is_equal_to_application(x) ||
-        is_not_equal_to_application(x) ||
-        is_less_application(x) ||
-        is_less_equal_application(x) ||
-        is_greater_application(x) ||
-        is_greater_equal_application(x))
-    {
-      // Switch to 'searching for free variables of type Real' mode
-      search_free_var = true;
-      found_free_var = false;
-      super::apply(x);
-      if(found_free_var)
-      {
-        // This expression contains a free variable of type Real, so add it to output
-        *out = x;
-      }
-      search_free_var = false;
-    }
-    else if(!search_free_var || !found_free_var)
-    {
-      // traverse sub-expressions
-      super::apply(x);
-    }
-  }
-};
-
-template <template <class> class Traverser, class OutputIterator>
-find_linear_inequality_traverser<Traverser, OutputIterator>
-make_find_linear_inequality_traverser(OutputIterator out, std::set< variable > real_free_vars)
-{
-  return find_linear_inequality_traverser<Traverser, OutputIterator>(out, real_free_vars);
-}
-
-template <typename T, typename OutputIterator>
-void find_linear_inequalities(const T& x, OutputIterator o, std::set< variable > real_free_vars)
-{
-  make_find_linear_inequality_traverser<data::data_expression_traverser>(o, real_free_vars).apply(x);
-}
-
-template <typename T>
-std::set<data::data_expression> find_linear_inequalities(const T& x, std::set< variable > real_free_vars)
-{
-  std::set<data::data_expression> result;
-  find_linear_inequalities(x, std::inserter(result, result.end()), real_free_vars);
-  return result;
-}
-
-struct eliminate_existential_quantifier_sigma: public std::unary_function<data_expression, data_expression>
-{
-
-  rewriter rewr;
-
-  eliminate_existential_quantifier_sigma(rewriter rewr_)
-  :  rewr(rewr_)
-  {}
-
-  const data_expression operator()(const data_expression& d) const
-  {
-    if(is_exists(d))
-    {
-      const variable_list variables = static_cast<exists>(d).variables();
-      const data_expression body = static_cast<exists>(d).body();
-
-      variable_list new_variables;
-      data_expression new_body;
-      fourier_motzkin(body, variables, new_body, new_variables, rewr);
-
-      // std::cout << " with " << exists(new_variables, new_body) << std::endl;
-      data_expression result = exists(new_variables, new_body);
-      return rewr(result);
-    }
-    return d;
-  }
-};
 
 template <typename Specification>
 class symbolic_bisim_algorithm: public mcrl2::lps::detail::lps_algorithm<Specification>
@@ -169,11 +78,16 @@ protected:
   data_specification             ad_hoc_data;
   bool                           m_use_path_eliminator;
   detail::BDD_Path_Eliminator    m_path_eliminator;
-  // simplifier_dbm                 simpl;
-  simplifier_fourier_motzkin                 simpl;
+  simplifier*                    simpl;
+  // simplifier_fourier_motzkin                 simpl;
   std::set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache;
   std::map< std::pair< data_expression, data_expression >, bool > reachability_cache;
+  std::map< std::tuple< data_expression, data_expression, lps::action_summand >, bool > transition_cache;
 
+  int refinement_cache_hits = 0;
+  int refinement_cache_misses = 0;
+  int transition_cache_hits = 0;
+  int transition_cache_misses = 0;
 
   std::map< lps::action_summand, variable_list > m_primed_summation_variables_map;
   std::map< lps::action_summand, data_expression_list > m_updates_map;
@@ -316,7 +230,6 @@ protected:
     {
       variable rep_bool(var_gen("b"), sort_bool::bool_());
       replacements.push_back(rep_bool);
-      // std::cout << rep_bool << " will replace " << d << std::endl;
     }
     data_expression replaced_relation = sort_bool::true_();
 
@@ -339,102 +252,25 @@ protected:
     return variable_list(replacements.begin(), replacements.end());
   }
 
-  struct enumerate_filter_print
-  {
-    data_expression last_linear_inequality;
-    rewriter rewr;
-
-    explicit enumerate_filter_print(const data_expression& lli, const rewriter& rewr_)
-      : last_linear_inequality(lli)
-      , rewr(rewr_)
-    {}
-
-    bool is_consistent_conjunct(data_expression conjunct)
-    {
-      std::vector< linear_inequality > lis;
-      while(sort_bool::is_and_application(conjunct))
-      {
-        data_expression li_expr = sort_bool::right(conjunct);
-        bool invert = false;
-        if(sort_bool::is_not_application(li_expr))
-        {
-          li_expr = sort_bool::arg(li_expr);
-          invert = true;
-        }
-        linear_inequality li = invert ? linear_inequality(li_expr, rewr).invert(rewr) : linear_inequality(li_expr, rewr);
-        lis.push_back(li);
-        conjunct = sort_bool::left(conjunct);
-      }
-      data_expression li_expr = conjunct;
-      bool invert = false;
-      if(sort_bool::is_not_application(li_expr))
-      {
-        li_expr = sort_bool::arg(li_expr);
-        invert = true;
-      }
-      linear_inequality li = invert ? linear_inequality(li_expr, rewr).invert(rewr) : linear_inequality(li_expr, rewr);
-      lis.push_back(li);
-      return !is_inconsistent(lis, rewr, true);
-    }
-
-    bool operator()(const data_expression& d)
-    {
-      data_expression conjunct = rewr(d);
-      if(sort_bool::is_false_function_symbol(conjunct))
-      {
-        return false;
-      }
-      else if(sort_bool::is_and_application(conjunct) &&
-        (sort_bool::right(conjunct) == last_linear_inequality || sort_bool::right(conjunct) == sort_bool::not_(last_linear_inequality)))
-      {
-        // We assume now all variables have been filled in so we can
-        // just walk over a conjuction to gather all the linear
-        // inequalities
-        return is_consistent_conjunct(conjunct);
-      }
-      else if(sort_bool::is_and_application(conjunct) && sort_bool::is_and_application(sort_bool::right(conjunct)) &&
-        (   sort_bool::right(sort_bool::right(conjunct)) == last_linear_inequality 
-         || sort_bool::right(sort_bool::right(conjunct)) == sort_bool::not_(last_linear_inequality)))
-      {
-        return is_consistent_conjunct(sort_bool::right(conjunct));
-      }
-      return true;
-    }
-  };
-
   // For all evaluations of variables in vars for which block holds,
   // add split_block to the partition
   // vars is the set of free variables in split_block
-  void enumerate(data_expression block, variable_list vars, data_expression split_block, const data_expression& lli, std::set< data_expression >& new_part)
+  void enumerate(data_expression parent_block, variable_list vars, data_expression split_block, const data_expression& lli, std::set< data_expression >& new_part)
   {
 
     typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, enumerator_identifier_generator, enumerate_filter_print> enumerator_type;
     enumerator_identifier_generator id_generator;
     enumerator_type enumerator(rewr, m_spec.data(), rewr, id_generator, (std::numeric_limits<std::size_t>::max)(), true);
 
-    // std::cout << "Enumerating variables " << pp_container(vars) << " for which " << pp(block) << " holds in expression " << split_block << "." << std::endl;
-
     data::mutable_indexed_substitution<> sigma;
     std::deque<enumerator_list_element_with_substitution<> >
-         enumerator_deque(1, enumerator_list_element_with_substitution<>(vars, block));
+         enumerator_deque(1, enumerator_list_element_with_substitution<>(vars, parent_block));
     enumerate_filter_print filter(lli, rewr);
     for (typename enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque, filter); i != enumerator.end(filter); ++i)
     {
       i->add_assignments(vars,sigma,rewr);
 
-      // std::cout << "enum: [";
-      // for (variable_list::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
-      // {
-      //   if (v!=vars.begin())
-      //   {
-      //     std::cout << ", ";
-      //   }
-     
-      //   std::cout << data::pp(*v) << " := " << data::pp(sigma(*v));
-      // }
-      // std::cout << "] leads to " << std::endl;
-      data_expression new_block(simpl.apply(split_block, sigma));
-      // std::cout << new_block << std::endl;
+      data_expression new_block(simpl->apply(split_block, sigma));
       if(new_block != lambda(process_parameters, sort_bool::false_()))
       {
         new_part.insert(lambda(process_parameters, proving_rewr(atermpp::down_cast<abstraction>(new_block).body())));
@@ -442,13 +278,18 @@ protected:
     }
   }
 
+  /**
+   * Split block phi_k on phi_l wrt summand as
+   */
   void split_block(const data_expression& phi_k, const data_expression& phi_l, const lps::action_summand& as)
   {
     if(refinement_cache.find(std::make_tuple(phi_k, phi_l, as)) != refinement_cache.end())
     {
+      refinement_cache_hits++;
       // This split has already been tried before.
       return;
     }
+    refinement_cache_misses++;
 
     substitution_t sub_primed = m_primed_substitution_map[as];
     variable_list primed_summation_variables = m_primed_summation_variables_map[as];
@@ -473,8 +314,8 @@ protected:
         lazy::and_(
           application(phi_k,process_parameters),
           lazy::and_(
-            sort_bool::not_(exists(primed_summation_variables,
-              sort_bool::not_(lazy::implies(
+            forall(primed_summation_variables,
+              lazy::implies(
                 rewr(prime_condition),
                 exists(as.summation_variables(),
                   rewr(lazy::and_(
@@ -484,10 +325,10 @@ protected:
                     arguments_equal
                   ))
                 )
-              ))
-            )),
-            sort_bool::not_(exists(as.summation_variables(),
-              sort_bool::not_(lazy::implies(
+              )
+            ),
+            forall(as.summation_variables(),
+              lazy::implies(
                 rewr(lazy::and_(
                   as.condition(),
                   rewr(application(phi_l, updates))
@@ -498,27 +339,23 @@ protected:
                     arguments_equal
                   ))
                 )
-              ))
-            ))
+              )
+            )
           )
         )
       );
 
-    // std::cout << "Starting simplification of " << std::endl << pp(split_block) << std::endl;
     split_block = one_point_rule_rewrite(quantifiers_inside_rewrite(split_block));
-    // std::cout << "Quantifiers pushed inside " << std::endl << pp(split_block) << std::endl;
-
-    data_expression result = replace_data_expressions(split_block, eliminate_existential_quantifier_sigma(rewr), true);
-    // std::cout << "Block after replacements:" << std::endl << result << std::endl;
+    data_expression result = replace_data_expressions(split_block, fourier_motzkin_sigma(rewr), true);
     split_block = rewr(result);
-    // std::cout << "Simplified block: " << std::endl << split_block << std::endl;
+
+    // Find the free variables (the primed variables)
     std::set<variable> free_vars = find_free_variables(split_block);
     variable_list free_vars_list;
-    // std::cout << "Free variables: {";
     std::set< variable > real_free_vars;
+    // Find the free variables of type Real
     for(const variable& v: free_vars)
     {
-      // std::cout << v << ", ";
       if(v.sort() == sort_real::real_())
       {
         real_free_vars.insert(v);
@@ -528,48 +365,96 @@ protected:
         free_vars_list.push_front(v);
       }
     }
-    // std::cout << "}" << std::endl;
 
     data_expression enumeration_condition(arguments_equal == sort_bool::true_() ? data_expression(sort_bool::true_()) : rewr(application(phi_k,m_primed_process_parameters)));
     data_expression lli(sort_bool::true_());
     if(real_free_vars.size() > 0)
     {
-      // std::cout << "Free variables of type Real: " << pp_container(real_free_vars) << std::endl;
       std::set< data_expression > li = find_linear_inequalities(split_block, real_free_vars);
-      // std::cout << "Linear inequalities with free variables: " << pp_container(li) << std::endl;
       free_vars_list = free_vars_list + replace_free_reals(split_block, li, enumeration_condition, lli);
     }
 
-    // std::cout << "Starting enumeration..." << std::endl;
     std::set< data_expression > new_part;
     enumerate(enumeration_condition, free_vars_list, split_block, lli, new_part);
+
+    // Update the caches and the partition
+    refinement_cache.insert(std::make_tuple(phi_k, phi_l, as));
     if(new_part.size() > 1) {
       partition.erase(partition.find(phi_k));
-      for(const data_expression& phi_l1: partition)
-      {
-        for(const lps::action_summand& as1: m_spec.process().action_summands())
-        {
-          if(refinement_cache.find(std::make_tuple(phi_k, phi_l1, as1)) != refinement_cache.end())
-          {
-            for(const data_expression& new_block: new_part)
-            {
-              refinement_cache.insert(std::make_tuple(new_block, phi_l1, as1));
-            }
-          }
-        }
-      }
+      update_caches(phi_k, new_part);
       for(const data_expression& d: new_part)
       {
         partition.insert(d);
       }
     }
 
-    refinement_cache.insert(std::make_tuple(phi_k, phi_l, as));
   }
 
+  /**
+   * Update caches, adding information about the new blocks.
+   * New entries are deduced from existng entries
+   * refering to phi_k. phi_k is the parent of the new blocks.
+   */
+  void update_caches(data_expression phi_k, std::set<data_expression> new_blocks)
+  {
+    for(const data_expression& phi_l1: partition)
+    {
+      for(const lps::action_summand& as1: m_spec.process().action_summands())
+      {
+        std::map<std::tuple<data_expression, data_expression, lps::action_summand>, bool>::iterator find_result =
+          transition_cache.find(std::make_tuple(phi_k, phi_l1, as1));
+        if(find_result != transition_cache.end() && !find_result->second)
+        {
+          // phi_k is stable wrt phi_l1 and as1, so new blocks (which are contained in phi_k)
+          // are also stable wrt phi_l1 and as1.
+          // We add the new blocks to the refinement cache
+          for(const data_expression& new_block: new_blocks)
+          {
+            transition_cache.insert(std::make_pair(std::make_tuple(new_block, phi_l1, as1), false));
+          }
+        }
+        find_result =
+          transition_cache.find(std::make_tuple(phi_l1, phi_k, as1));
+        if(find_result != transition_cache.end() && !find_result->second)
+        {
+          // phi_k is stable wrt phi_l1 and as1, so new blocks (which are contained in phi_k)
+          // are also stable wrt phi_l1 and as1.
+          // We add the new blocks to the refinement cache
+          for(const data_expression& new_block: new_blocks)
+          {
+            transition_cache.insert(std::make_pair(std::make_tuple(phi_l1, new_block, as1), false));
+          }
+        }
+
+        if(refinement_cache.find(std::make_tuple(phi_k, phi_l1, as1)) != refinement_cache.end())
+        {
+          // phi_k is stable wrt phi_l1 and as1, so new blocks (which are contained in phi_k)
+          // are also stable wrt phi_l1 and as1.
+          // We add the new blocks to the refinement cache
+          for(const data_expression& new_block: new_blocks)
+          {
+            refinement_cache.insert(std::make_tuple(new_block, phi_l1, as1));
+          }
+        }
+        // We now check whether phi_l1 has transitions to the new blocks.
+        // If not, phi_l1 is also stable wrt the new block
+        for(const data_expression& new_block: new_blocks)
+        {
+          if(!transition_exists(phi_l1, new_block, as1))
+          {
+            refinement_cache.insert(std::make_tuple(phi_l1, new_block, as1));
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Try every combination of phi_k, phi_l and action summand to
+   * see whether the partition can be refined.
+   */
   bool refine()
   {
-    //TODO: built a cache, so things are not tried more than once.
     std::set< data_expression > old_partition = partition;
     int i = 0;
     for(const data_expression phi_k: old_partition)
@@ -596,45 +481,10 @@ protected:
     return false;
   }
 
-  void refine_manual()
-  {
-    std::cout << "=====================================================" << std::endl;
-    int i = 0;
-    for(typename std::vector< action_summand_type >::const_iterator it = m_spec.process().action_summands().begin();
-        it != m_spec.process().action_summands().end(); it++)
-    {
-      std::cout << "Summand " << i << " " << pp(*it) << std::endl;
-      i++;
-    }
-    std::cout << "Partition:" << std::endl;
-    i = 0;
-    data_expression_vector indexed_blocks;
-    for(const data_expression& block: partition)
-    {
-      std::cout << "  block " << i << "  " << pp(rewr(block)) << std::endl;
-      i++;
-      indexed_blocks.push_back(block);
-    }
-    std::cout << "Specify phi_k, phi_l, and summand index (separate with spaces): ";
-    std::string s;
-    std::getline(std::cin, s);
-
-    int k = std::stoi(s.substr(0,s.find(' ')));
-    s = s.substr(s.find(' ') + 1);
-    int l = std::stoi(s.substr(0,s.find(' ')));
-    s = s.substr(s.find(' ') + 1);
-    int summ_i = std::stoi(s);
-    data_expression phi_k = indexed_blocks[k];
-    data_expression phi_l = indexed_blocks[l];
-    std::cout <<
-      "phi_k   " << phi_k << std::endl <<
-      "phi_l   " << phi_l << std::endl <<
-      "summand " << m_spec.process().action_summands()[summ_i] << std::endl;
-
-    const lps::action_summand as = m_spec.process().action_summands()[summ_i];
-    split_block(phi_k, phi_l, as);
-  }
-
+  /**
+   * Initialise several data structures based on the information
+   * contained in the input LTS.
+   */
   void build_summand_maps()
   {
     substitution_t sub_primed_base;
@@ -679,17 +529,50 @@ protected:
     }
   }
 
-  data_expression find_initial_block()
+  template <typename Container>
+  data_expression find_initial_block(const Container& blocks, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
   {
-    for(const data_expression& block: partition)
+    for(const data_expression& block: blocks)
     {
       if(rewr(application(block, m_spec.initial_process().state(process_parameters))) == sort_bool::true_())
       {
-        std::cout << "Found initial block " << block << std::endl;
+        // std::cout << "Found initial block " << block << std::endl;
         return block;
       }
     }
-    throw mcrl2::runtime_error("Initial block not found");
+    return data_expression();
+  }
+
+  bool transition_exists(const data_expression& src, const data_expression& dest, const lps::action_summand& as)
+  {
+    std::map<std::tuple<data_expression, data_expression, lps::action_summand>, bool>::iterator find_result = transition_cache.find(std::make_tuple(src, dest, as));
+    if(find_result != transition_cache.end())
+    {
+      transition_cache_hits++;
+      return find_result->second;
+    }
+    transition_cache_misses++;
+
+    data_expression is_succ =
+      exists(m_spec.process().process_parameters() + as.summation_variables(),
+        rewr(sort_bool::and_(
+          application(src, m_spec.process().process_parameters()),
+          sort_bool::and_(
+            as.condition(),
+            rewr(application(dest, m_updates_map[as]))
+          )
+        ))
+      );
+
+    is_succ = one_point_rule_rewrite(quantifiers_inside_rewrite(is_succ));
+    data_expression succ_result = rewr(replace_data_expressions(is_succ, fourier_motzkin_sigma(rewr), true));
+    bool result = succ_result == sort_bool::true_();
+    transition_cache.insert(std::make_pair(std::make_tuple(src, dest, as), result));
+    if(!result)
+    {
+      refinement_cache.insert(std::make_tuple(src,dest,as));
+    }
+    return result;
   }
 
   void find_reachable_blocks()
@@ -715,51 +598,31 @@ protected:
     {
       const data_expression& block = open_set.front();
       open_set.pop();
-      // std::cout << "from " << rewr(block) << std::endl;
 
       std::set<data_expression> new_unreachable = unreachable;
       for(const data_expression& potential_succ: unreachable)
       {
-        bool transition_exists = false;
-        // std::cout << "to " << rewr(potential_succ) << std::endl;
+        bool transition_found = false;
 
         std::map< std::pair<data_expression, data_expression>, bool>::iterator previous_result =
           reachability_cache.find(std::make_pair(block, potential_succ));
         if(previous_result != reachability_cache.end())
         {
-          transition_exists = previous_result->second;
-          // std::cout << "cached result " << transition_exists << std::endl;
+          transition_found = previous_result->second;
         }
         else
         {
           for(const lps::action_summand& as: m_spec.process().action_summands())
           {
-            data_expression is_succ =
-              exists(m_spec.process().process_parameters() + as.summation_variables(),
-                rewr(sort_bool::and_(
-                  application(block, m_spec.process().process_parameters()),
-                  sort_bool::and_(
-                    as.condition(),
-                    rewr(application(potential_succ, m_updates_map[as]))
-                  )
-                ))
-              );
-
-            // std::cout << "transition " << as.multi_action() << " expr " << is_succ << std::endl;
-            data_expression succ_result = rewr(replace_data_expressions(is_succ, eliminate_existential_quantifier_sigma(rewr), true));
-            if(succ_result == sort_bool::true_())
+            if(transition_exists(block, potential_succ, as))
             {
-              transition_exists = true;
+              transition_found = true;
               break;
-            }
-            else if(succ_result != sort_bool::false_())
-            {
-              std::cout << "Reachability result from\n" << block << "to\n" << potential_succ << "is\n" << succ_result << std::endl;
             }
           }
         }
 
-        if(transition_exists)
+        if(transition_found)
         {
           reach.insert(potential_succ);
           new_unreachable.erase(new_unreachable.find(potential_succ));
@@ -767,14 +630,13 @@ protected:
         }
         if(previous_result == reachability_cache.end())
         {
-          reachability_cache.insert(std::make_pair(std::make_pair(block, potential_succ), transition_exists));
+          reachability_cache.insert(std::make_pair(std::make_pair(block, potential_succ), transition_found));
         }
       }
       unreachable = new_unreachable;
     }
 
-    // std::cout << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
-    std::cout << "Unreachable blocks:" << std::endl;
+    std::cout << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
     int i = 0;
     for(const data_expression& block: unreachable)
     {
@@ -784,29 +646,79 @@ protected:
     partition = reach;
   }
 
-  void print_partition()
+  template <typename Container>
+  lts::lts_lts_t make_lts(const Container& blocks, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
   {
-    int i = 0;
-    for(const data_expression& block: partition)
+    lts::lts_lts_t result;
+    atermpp::indexed_set<data_expression> indexed_partition;
+    for(const data_expression& block: blocks)
     {
-      // std::cout << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(rewr(block)) << std::endl;
-      std::cout << "  block " << i << "  " << pp(rewr(block)) << std::endl;
-      detail::BDD2Dot bddwriter;
-      bddwriter.output_bdd(atermpp::down_cast<abstraction>(block).body(), ("block" + std::to_string(i) + ".dot").c_str());
-      i++;
+      indexed_partition.put(block);
+      result.add_state(lts::state_label_lts(lts::state_label_lts::single_label{block}));
     }
+    atermpp::indexed_set<process::action_list> indexed_actions;
+    // tau is always action 0
+    indexed_actions.put(lts::action_label_lts::tau_action().actions());
+    for(const lps::action_summand& as: m_spec.process().action_summands())
+    {
+      std::pair<size_t, bool> action_index = indexed_actions.put(as.multi_action().actions());
+      if(action_index.second)
+      {
+        result.add_action(lts::action_label_lts(as.multi_action()));
+      }
+    }
+
+    for(const data_expression& src: blocks)
+    {
+      for(const data_expression& dest: blocks)
+      {
+        // Find out if there are any transitions at all
+        std::map< std::pair<data_expression, data_expression>, bool>::iterator previous_result =
+          reachability_cache.find(std::make_pair(src, dest));
+        if(previous_result != reachability_cache.end() && !previous_result->second)
+        {
+          // No transition exists between src and dest
+          continue;
+        }
+
+        for(const lps::action_summand& as: m_spec.process().action_summands())
+        {
+          if(transition_exists(src, dest, as))
+          {
+            lts::transition trans(indexed_partition[src], indexed_actions[as.multi_action().actions()], indexed_partition[dest]);
+            result.add_transition(trans);
+          }
+        }
+      }
+    }
+
+    // Search for the initial block
+    data_expression initial_block = find_initial_block(blocks);
+    if(initial_block != data_expression())
+    {
+      // The intial block was found, set it as intial state
+      result.set_initial_state(indexed_partition[initial_block]);
+    }
+    return result;
   }
 
-  void test_simplifier()
+  void save_lts()
   {
-    // data_expression expr = parse_data_expression("lambda s1_Gate: GateState, w1,w2: Nat, s_Train: TrainState, x1: Real, s_Train1: TrainState, x2: Real. w1 <= 2 && w2 <= 2 && (x1 < 2 && (x2 - x1 < 8 && -x1 < 0 && x1 < 15 && x1 - x2 < 5 && x2 - x1 <= 5 && Appr == s_Train1 && Start == s_Train || !(x2 - x1 < 8) && (x2 - x1 < 18 && Appr == s_Train1 && Start == s_Train || !(x2 - x1 < 18) && -x1 < 0 && x1 < 15 && x1 - x2 < 5 && x2 - x1 <= 5 && Appr == s_Train1 && Start == s_Train)) || !(x1 < 2) && -x1 < 0 && x1 < 15 && x1 - x2 < 5 && x2 - x1 <= 5 && Appr == s_Train1 && Start == s_Train)",
-    //   process_parameters, ad_hoc_data);
-    // std::cout << "Simplify result\n" << simpl.apply(expr) << std::endl;
+    const lts::lts_lts_t& lts = make_lts(partition);
+    lts.save("out.lts");
+  }
 
-    data_expression expr = parse_data_expression("lambda s1_Gate: GateState, w1,w2: Nat, s_Train: TrainState, x1: Real, s_Train1: TrainState, x2: Real. if(w1 <= 2, if(w2 <= 2, if(2 == w1, if(0 == w2, if(Cross == s_Train1, if(Start == s_Train, if(Occ == s1_Gate, if(2 == x1, if(2 - x2 == 2, if(0 == x2, true, false), false), false), false), false), false), false), false), false), false)",
-      variable_list(), ad_hoc_data);
-    std::cout << "Parsed expresion\n" << expr << std::endl;
-    std::cout << "Rewritten\n" << rewr(expr) << std::endl;
+  template <typename Container>
+  void print_partition(const Container& blocks, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
+  {
+    int i = 0;
+    for(const data_expression& block: blocks)
+    {
+      std::cout << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(rewr(block)) << std::endl;
+      // detail::BDD2Dot bddwriter;
+      // bddwriter.output_bdd(proving_rewr(atermpp::down_cast<abstraction>(block).body()), ("block" + std::to_string(i) + ".dot").c_str());
+      i++;
+    }
   }
 
 public:
@@ -823,8 +735,6 @@ public:
     , invariant(inv)
     , m_use_path_eliminator(use_path_eliminator)
     , m_path_eliminator(solver_type)
-    // , simpl(rewr, proving_rewr, process_parameters, spec.data())
-    , simpl(rewr, proving_rewr)
   {
 
   }
@@ -836,23 +746,29 @@ public:
     partition.insert( lambda(process_parameters, invariant));
     add_ad_hoc_rules();
     build_summand_maps();
-    // simpl = simplifier_dbm(rewr, proving_rewr, process_parameters, m_spec.data());
-    simpl = simplifier_fourier_motzkin(rewr, proving_rewr);
-
-    // test_simplifier();
-    // return;
+#ifdef DBM_PACKAGE_AVAILABLE
+    simpl = new simplifier_dbm(rewr, proving_rewr, process_parameters, m_spec.data());
+#else
+    simpl = new simplifier_fourier_motzkin(rewr, proving_rewr);
+#endif
 
     std::cout << "Initial partition:" << std::endl;
-    print_partition();
+    print_partition(partition);
+    int num_iterations = 0;
     while(refine())
     {
-      // std::cout << GREEN(THIN) << "Partition:" << NORMAL << std::endl;
-      std::cout << "Partition:" << std::endl;
-      print_partition();
+      std::cout << GREEN(THIN) << "Partition:" << NORMAL << std::endl;
+      print_partition(partition);
       find_reachable_blocks();
+      num_iterations++;
+      std::cout << "End of iteration " << num_iterations << 
+      ".\nRefinement cache entries/hits/misses " << refinement_cache.size() << "/" << refinement_cache_hits << "/" << refinement_cache_misses <<
+      ".\nTransition cache entries/hits/misses " << transition_cache.size() << "/" << transition_cache_hits << "/" << transition_cache_misses << std::endl;
     }
     std::cout << "Final partition:" << std::endl;
-    print_partition();
+    print_partition(partition);
+
+    save_lts();
   }
 };
 
