@@ -302,6 +302,49 @@ inline void fourier_motzkin(const data_expression& e_in,
   e_out=lazy::join_or(result_disjunction_set.begin(),result_disjunction_set.end());
 }
 
+/**
+ * A unary function that can be used in combination with
+ * replace_data_expressions to eliminate real numbers from all
+ * quantifiers in an expression.
+ * It is adviced to first push the quantifiers inside and
+ * apply the one point rule, since that reduces the time spent on
+ * the Fourier-Motzkin procedure for large expression.
+ * Apply this function innermost first if the expresion contains
+ * nested quantifiers.
+ */
+struct fourier_motzkin_sigma: public std::unary_function<data_expression, data_expression>
+{
+
+protected:
+  rewriter rewr;
+
+  const data_expression apply(const abstraction& d, bool negate) const
+  {
+    const variable_list variables = d.variables();
+    const data_expression body = negate ? sort_bool::not_(d.body()) : d.body();
+
+    variable_list new_variables;
+    data_expression new_body;
+    fourier_motzkin(body, variables, new_body, new_variables, rewr);
+
+    const data_expression& result = negate ? 
+        static_cast<data_expression>(forall(new_variables, sort_bool::not_(new_body))) :
+        static_cast<data_expression>(exists(new_variables, new_body));
+    return rewr(result);
+  }
+
+public:
+
+  fourier_motzkin_sigma(rewriter rewr_)
+  :  rewr(rewr_)
+  {}
+
+  const data_expression operator()(const data_expression& d) const
+  {
+    return is_forall(d) || is_exists(d) ? apply(static_cast<abstraction>(d), is_forall(d)) : d;
+  }
+};
+
 } // namespace data
 
 } // namespace mcrl2
