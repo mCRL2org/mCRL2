@@ -216,14 +216,21 @@ bool destructive_refinement_checker(
   // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
   // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
   
-  if (!generate_counter_example.is_dummy())  // A counter example is requested. Don't use bisimulation preprocessing.
+  if (generate_counter_example.is_dummy())  // No counter example is requested. Don't use bisimulation preprocessing.
   {
+    const bool preserve_divergence=weak_reduction && (refinement!=trace);
     l1.clear_state_labels(); 
-    detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l1,weak_reduction,weak_reduction && (refinement!=trace));
-    
+    if (weak_reduction)
+    {
+      detail::scc_partitioner<LTS_TYPE> scc_part(l1);
+      init_l2=scc_part.get_eq_class(init_l2);
+      scc_part.replace_transition_system(preserve_divergence);
+    }
+
+    detail::bisim_partitioner_gjkw<LTS_TYPE> bisim_part(l1,weak_reduction,preserve_divergence);
     // Assign the reduced LTS, and set init_l2.
     init_l2=bisim_part.get_eq_class(init_l2);
-    bisim_part.replace_transition_system(weak_reduction,weak_reduction && (refinement!=trace));
+    bisim_part.replace_transition_system(weak_reduction,preserve_divergence);
   }
 
   const detail::lts_cache<LTS_TYPE> weak_property_cache(l1,weak_reduction);

@@ -40,8 +40,8 @@
 .. note::
 
    On Coursera four consecutive courses consisting of approximately 60 lectures provide an introduction into the theory and practical
-   use underlying the mCRL2 toolset. It is based on the book 'Modeling and Analysis of Communicating
-   Systems' shown below. The courses are:
+   use of the mCRL2 toolset. It is based on the book 'Modeling and Analysis of Communicating
+   Systems' shown above. The courses are:
 
    - `Automata and behavioural equivalences <https://www.coursera.org/learn/automata-system-validation>`_.
    - `Model process behaviour <https://www.coursera.org/learn/system-validation-behavior>`_.

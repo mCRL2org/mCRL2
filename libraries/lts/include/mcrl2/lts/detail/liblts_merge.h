@@ -75,11 +75,10 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   }
   // Add the labels for the LTS l2, and put them there with a new index if it was
   // not added yet.
-  // Furthermore, update the hidden_action_map. 
-  // If label a1 is mapped on a2 in l2, then this must be the same
+  // Furthermore, update the hidden_label_map. 
+  // If label a1 is mapped to a2 in l2, then this must be the same
   // in l1. It may be that label a1 did not exist yet in which case it needs
   // to be added too.
-
 
   for (size_t i=0; i<l2.num_action_labels(); ++i)
   {
@@ -130,7 +129,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
 
   // Update the label numbers of all transitions of the LTS l1 to reflect
   // the new indices as given by labs.
-  std::vector<transition> &trans1=l1.get_transitions();
+  std::vector<transition>& trans1=l1.get_transitions();
   for (std::vector<transition>::iterator r=trans1.begin(); r!=trans1.end(); ++r)
   {
     r->set_label(labs[l1.action_label(r->label())]);
@@ -140,7 +139,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   // Now add the source and target states of the transitions of LTS l2.
   // The labels will be added below, depending on whether there is label
   // information in both LTSs.
-  const std::vector<transition> &trans2=l2.get_transitions();
+  const std::vector<transition>& trans2=l2.get_transitions();
   for (std::vector<transition>::const_iterator r=trans2.begin(); r!=trans2.end(); ++r)
   {
     const transition transition_to_add=*r;
@@ -148,6 +147,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
                                  labs[l2.action_label(transition_to_add.label())],
                                  transition_to_add.to()+old_nstates));
   }
+
 }
 } // namespace detail
 } // namespace lts

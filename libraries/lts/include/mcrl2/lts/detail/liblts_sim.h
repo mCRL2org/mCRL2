@@ -214,7 +214,7 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm(
   initialise_datastructures(init_s,initBlock,initP);
   mCRL2log(log::debug) << "--------------------- INITIALISATION ---------------------------" << std::endl;
   
-  mCRL2log(log::verbose) << "  initialisation; number of blocks: " << s_Sigma << std::endl;
+  mCRL2log(log::debug) << "  initialisation; number of blocks: " << s_Sigma << std::endl;
   bool change;
   size_t i;
 
@@ -238,7 +238,7 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm(
 
     mCRL2log(log::debug) << "--------------------- ITERATION " << i << " ----------------------------------" << std::endl;
 
-    mCRL2log(log::verbose) << "  iteration " << i << "; number of blocks: " << s_Sigma << std::endl;
+    mCRL2log(log::debug) << "  iteration " << i << "; number of blocks: " << s_Sigma << std::endl;
 
     refine(change);
     if (change)
