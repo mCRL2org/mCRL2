@@ -14,7 +14,6 @@
 
 #include <fstream>
 #include <string>
-// #include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/logger.h"
 

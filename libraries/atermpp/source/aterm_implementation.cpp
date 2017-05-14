@@ -317,7 +317,7 @@ static void check_that_all_objects_are_free()
             ((p1->function()!=function_adm.AS_DEFAULT && p1->function()!=function_adm.AS_EMPTY_LIST) || p1->reference_count()>1))
         {
           mCRL2log(mcrl2::log::error) << "CHECK: Non free term " << p1 << " (size " << size << "). ";
-          mCRL2log(mcrl2::log::error) << "Reference count " << p1->reference_count() << " nr. " << p1->function().number() << ". ";
+          mCRL2log(mcrl2::log::error) << "Reference count " << p1->reference_count() << ". ";
           mCRL2log(mcrl2::log::error) << "Func: " << p1->function().name() << ". Arity: " << p1->function().arity() << ".\n";
           result=false;
         }
@@ -325,39 +325,6 @@ static void check_that_all_objects_are_free()
       }
     }
   }
-
-  /* Check the function symbols. The first four function symbols can be constructed twice in the
-   * same spot (function_symbol_constants.h) and only destroyed once and therefore their reference
-   * counts can be 1 at termination. The function symbols with number 0 and 3 even can have
-   * reference count 2, because the terms containing may still exist as they are also constructed in
-   * a nonderministic fashion using a placement new. So, they can be constructed without properly
-   * being destroyed, increasing the reference count of the function symbols in it by 1. */
-  for(size_t i=0; i<function_symbol_index_table_number_of_elements; ++i)
-  {
-    for(size_t j=0; j<FUNCTION_SYMBOL_BLOCK_SIZE; ++j)
-    {
-      if (!(function_symbol_index_table[i][j].reference_count==0 ||
-            (i==0 && function_symbol_index_table[i][j].reference_count<=13) || //AS_DEFAULT
-            (i==1 && function_symbol_index_table[i][j].reference_count<=1) || //AS_INT
-            (i==2 && function_symbol_index_table[i][j].reference_count<=1) || //AS_LIST
-            (i==3 && function_symbol_index_table[i][j].reference_count<=2)))  //AS_EMPTY_LIST
-      {
-        mCRL2log(mcrl2::log::error) << "Symbol " << function_symbol_index_table[i][j].name << 
-                                       " has positive reference count (nr. " <<
-                                       function_symbol_index_table[i][j].number << ", ref.count " << 
-                                       function_symbol_index_table[i][j].reference_count << ").\n";
-        result=false;
-      }
-      if (function_symbol_index_table[i][j].number!=j+i*FUNCTION_SYMBOL_BLOCK_SIZE)
-      {
-        mCRL2log(mcrl2::log::error) << "Symbol " << function_symbol_index_table[i][j].name << 
-                                       " has incorrect index " << function_symbol_index_table[i][j].number <<
-                                       ". This should be " << j+i*FUNCTION_SYMBOL_BLOCK_SIZE << ".\n";
-        result=false;
-      }
-    }
-  }
-  assert(result);
 }
 #endif
 
