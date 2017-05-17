@@ -1127,36 +1127,42 @@ void GLScene::updateShapes()
 
 QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z)
 {
-  GLint V[4];
-  GLfloat P[16];
-  GLfloat M[16];
+  GLint viewport[4];
+  GLfloat projection[16];
+  GLfloat modelview[16];
   x *= m_texturedata->device_pixel_ratio;
   y *= m_texturedata->device_pixel_ratio;
-  glGetFloatv(GL_PROJECTION_MATRIX, P);
-  glGetFloatv(GL_MODELVIEW_MATRIX, M);
-  glGetIntegerv(GL_VIEWPORT, V);
-  if (z < 0) {
-    glReadPixels(x, V[3]-y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
+  glGetFloatv(GL_PROJECTION_MATRIX, projection);
+  glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  if (z < 0)
+  {
+    glReadPixels(x, viewport[3]-y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &z);
   }
-  QVector3D eye{static_cast<float>(x), static_cast<float>(V[3] - y), static_cast<float>(z)};
-  QRect view = QRect(V[0], V[1], V[2], V[3]);
-  QVector3D world = mcrl2::gui::unproject(eye, QMatrix4x4(M).transposed(), QMatrix4x4(P).transposed(), view);
-  return QVector3D(world.x(), world.y(), world.z());
+  QVector3D eye{float(x), float(viewport[3] - y), float(z)};
+
+  QMatrix4x4 m(modelview);
+  QMatrix4x4 p(projection);
+  QRect v(viewport[0], viewport[1], viewport[2], viewport[3]);
+  return mcrl2::gui::unproject(eye, m.transposed(), p.transposed(), v);
 }
 
 QVector3D GLScene::worldToEye(const QVector3D& world)
 {
-  GLint V[4];
-  GLfloat P[16];
-  GLfloat M[16];
-  glGetFloatv(GL_PROJECTION_MATRIX, P);
-  glGetFloatv(GL_MODELVIEW_MATRIX, M);
-  glGetIntegerv(GL_VIEWPORT, V);
-  QVector3D w{world.x(), world.y(), world.y()};
-  QRect view = QRect(V[0], V[1], V[2], V[3]);
-  QVector3D eye = mcrl2::gui::project(w, QMatrix4x4(M).transposed(), QMatrix4x4(P).transposed(), view);
-  return QVector3D(eye.x() /m_texturedata->device_pixel_ratio,
-                 (V[3] - eye.y()) / m_texturedata->device_pixel_ratio,
+  GLint viewport[4];
+  GLfloat projection[16];
+  GLfloat modelview[16];
+  glGetFloatv(GL_PROJECTION_MATRIX, projection);
+  glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
+  glGetIntegerv(GL_VIEWPORT, viewport);
+
+  QMatrix4x4 m(modelview);
+  QMatrix4x4 p(projection);
+  QRect v(viewport[0], viewport[1], viewport[2], viewport[3]);
+  QVector3D eye = mcrl2::gui::project(world, m.transposed(), p.transposed(), v);
+
+  return QVector3D(eye.x() / m_texturedata->device_pixel_ratio,
+                 (viewport[3] - eye.y()) / m_texturedata->device_pixel_ratio,
                  eye.z());
 }
 

@@ -60,12 +60,11 @@ namespace mcrl2
 namespace gui
 {
 
-// implementations of project und unproject copied from Qt source
-// http://doc.qt.io/qt-5/qvector3d.html#project
 // can be replaced once the required Qt version is >= 5.5
-QVector3D project(const QVector3D& self, const QMatrix4x4& modelView,
+// see http://doc.qt.io/qt-5/qvector3d.html#project
+QVector3D project(const QVector3D& obj, const QMatrix4x4& modelView,
                   const QMatrix4x4& projection, const QRect& viewport);
-QVector3D unproject(const QVector3D& self, const QMatrix4x4& modelView,
+QVector3D unproject(const QVector3D& win, const QMatrix4x4& modelView,
                     const QMatrix4x4& projection, const QRect& viewport);
 } // namespace gui
 } // namespace mcrl2
