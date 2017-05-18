@@ -25,7 +25,7 @@ struct MoveRecord
   Graph::Node* node;
   virtual void move(const QVector3D& pos)
   {
-    node->pos() = pos;
+    node->pos_mutable() = pos;
   }
   virtual void grab(Graph::Graph& graph, size_t index) = 0;
   virtual void release(bool toggleLocked)

@@ -62,14 +62,14 @@ class Selection
   const std::vector<size_t>& edges;
 
   private:
-  struct Node
+  struct SelectionNode
   {
     size_t id;                             // index in the complete node list
     size_t index;                          // index in the selected node list
     std::vector<size_t> inEdges, outEdges; // by edge id
     size_t count;
     bool bridge;
-    Node() = default;
+    SelectionNode() = default;
   };
   struct Edge
   {
@@ -82,18 +82,18 @@ class Selection
   Graph& m_graph;
 
   // maps node/edge indices to selection Node/Edge objects
-  std::unordered_map<size_t, Node> m_nodes;
+  std::unordered_map<size_t, SelectionNode> m_selectionNodes;
   std::unordered_map<size_t, Edge> m_edges;
   // keeps track of node/edge indices in selection
   std::vector<size_t> m_nodeIndices;
   std::vector<size_t> m_edgeIndices;
 
-  void repositionNode(const Node& node)
+  void repositionNode(const SelectionNode& node)
   {
     // Center the first node placed
     if (m_nodeIndices.size() == 1)
     {
-      m_graph.m_nodes[node.id].pos() = QVector3D(0.0, 0.0, 0.0);
+      m_graph.m_nodes[node.id].pos_mutable() = QVector3D(0.0, 0.0, 0.0);
       return;
     }
 
@@ -102,7 +102,7 @@ class Selection
     for (size_t inEdge : node.inEdges)
     {
       ::Graph::Edge& edge = m_graph.m_edges[inEdge];
-      if (m_nodes.count(edge.from()) != 0u)
+      if (m_selectionNodes.count(edge.from()) != 0u)
       {
         centroid += m_graph.m_nodes[edge.from()].pos();
         ++count;
@@ -111,7 +111,7 @@ class Selection
     for (size_t outEdge : node.outEdges)
     {
       ::Graph::Edge& edge = m_graph.m_edges[outEdge];
-      if (m_nodes.count(edge.to()) != 0u)
+      if (m_selectionNodes.count(edge.to()) != 0u)
       {
         centroid += m_graph.m_nodes[edge.to()].pos();
         ++count;
@@ -123,7 +123,7 @@ class Selection
       QVector3D rvec =
           QVector3D(frand(-1.0, 1.0), frand(-1.0, 1.0), frand(-1.0, 1.0));
       rvec *= 50.0 / rvec.length();
-      m_graph.m_nodes[node.id].pos() = centroid / ((GLfloat)count) + rvec;
+      m_graph.m_nodes[node.id].pos_mutable() = centroid / ((GLfloat)count) + rvec;
     }
   }
 
@@ -132,21 +132,21 @@ class Selection
     QVector3D pos1 = m_graph.m_nodes[m_graph.m_edges[edgeId].from()].pos();
     QVector3D pos2 = m_graph.m_nodes[m_graph.m_edges[edgeId].to()].pos();
     QVector3D center = (pos1 + pos2) / 2.0;
-    m_graph.m_handles[edgeId].pos() = center;
-    m_graph.m_transitionLabelnodes[edgeId].pos() = center;
+    m_graph.m_handles[edgeId].pos_mutable() = center;
+    m_graph.m_transitionLabelnodes[edgeId].pos_mutable() = center;
   }
 
   // creates, and increases count for node
-  Node& increaseNode(size_t nodeId)
+  SelectionNode& increaseNode(size_t nodeId)
   {
-    if (m_nodes.count(nodeId) != 0u)
+    if (m_selectionNodes.count(nodeId) != 0u)
     {
-      Node& node = m_nodes[nodeId];
+      SelectionNode& node = m_selectionNodes[nodeId];
       ++node.count;
       return node;
     }
 
-    Node& node = m_nodes[nodeId];
+    SelectionNode& node = m_selectionNodes[nodeId];
     node.id = nodeId;
     node.index = m_nodeIndices.size();
     m_nodeIndices.push_back(nodeId);
@@ -194,12 +194,12 @@ class Selection
   // decreases selection count for node, and purges
   void decreaseNode(size_t nodeId)
   {
-    if (m_nodes.count(nodeId) == 0u)
+    if (m_selectionNodes.count(nodeId) == 0u)
     {
       return;
     }
 
-    Node& node = m_nodes[nodeId];
+    SelectionNode& node = m_selectionNodes[nodeId];
     if (--node.count < 1)
     {
       size_t last = m_nodeIndices.size() - 1;
@@ -207,10 +207,10 @@ class Selection
       {
         size_t lastId = m_nodeIndices[last];
         m_nodeIndices[node.index] = lastId;
-        m_nodes[lastId].index = node.index;
+        m_selectionNodes[lastId].index = node.index;
       }
       m_nodeIndices.pop_back();
-      m_nodes.erase(nodeId);
+      m_selectionNodes.erase(nodeId);
     }
   }
 
@@ -297,7 +297,7 @@ class Selection
 
         nodes[nodeId] = NodeInfo(nodeId);
         NodeInfo& nodeinfo = nodes[nodeId];
-        Node& node = m_nodes[nodeId];
+        SelectionNode& node = m_selectionNodes[nodeId];
         for (size_t outEdge : node.outEdges)
         {
           if (m_edges.count(outEdge) == 0u)
@@ -305,7 +305,7 @@ class Selection
             continue;
           }
           size_t otherId = m_graph.m_edges[outEdge].to();
-          if (nodeId == otherId || (m_nodes.count(otherId) == 0u))
+          if (nodeId == otherId || (m_selectionNodes.count(otherId) == 0u))
           {
             continue;
           }
@@ -319,7 +319,7 @@ class Selection
             continue;
           }
           size_t otherId = m_graph.m_edges[inEdge].from();
-          if (nodeId == otherId || (m_nodes.count(otherId) == 0u))
+          if (nodeId == otherId || (m_selectionNodes.count(otherId) == 0u))
           {
             continue;
           }
@@ -384,7 +384,7 @@ class Selection
     {
       for (size_t nodeId : order)
       {
-        Node& node = m_nodes[nodeId];
+        SelectionNode& node = m_selectionNodes[nodeId];
         NodeInfo& nodeinfo = nodes[nodeId];
         if (m_graph.m_nodes[nodeId].active())
         {
@@ -408,7 +408,7 @@ class Selection
     {
       for (size_t nodeId : order)
       {
-        Node& node = m_nodes[nodeId];
+        SelectionNode& node = m_selectionNodes[nodeId];
         NodeInfo& nodeinfo = nodes[nodeId];
         node.bridge = false;
 
@@ -481,7 +481,7 @@ class Selection
   // standard depth-first search algorithm
   bool contractable(size_t nodeId)
   {
-    Node& node = m_nodes[nodeId];
+    SelectionNode& node = m_selectionNodes[nodeId];
     std::unordered_set<size_t> nedges; // removed edges
     std::unordered_set<size_t> neighbors;
     for (size_t edgeId : node.inEdges)
@@ -489,7 +489,7 @@ class Selection
       if (m_edges.count(edgeId) != 0u)
       {
         size_t otherId = m_graph.m_edges[edgeId].from();
-        if (m_nodes.count(otherId) != 0u)
+        if (m_selectionNodes.count(otherId) != 0u)
         {
           neighbors.insert(otherId);
         }
@@ -504,7 +504,7 @@ class Selection
           nedges.insert(edgeId);
         }
         size_t otherId = m_graph.m_edges[edgeId].to();
-        if ((m_nodes.count(otherId) != 0u) && m_nodes[otherId].count > 1)
+        if ((m_selectionNodes.count(otherId) != 0u) && m_selectionNodes[otherId].count > 1)
         {
           neighbors.insert(otherId);
         }
@@ -534,7 +534,7 @@ class Selection
         return true;
       }
 
-      Node& node = m_nodes[nodeId];
+      SelectionNode& node = m_selectionNodes[nodeId];
       for (size_t edgeId : node.inEdges)
       {
         if ((m_edges.count(edgeId) != 0u) && (nedges.count(edgeId) == 0u))
@@ -562,7 +562,7 @@ class Selection
   // expand outgoing transitions and states for specified node
   void expand(size_t nodeId)
   {
-    Node& node = increaseNode(nodeId);
+    SelectionNode& node = increaseNode(nodeId);
     for (size_t edgeId : node.outEdges)
     {
       increaseNode(m_graph.m_edges[edgeId].to());
@@ -574,9 +574,9 @@ class Selection
   // contract outgoing transitions and states for specified node
   void contract(size_t nodeId)
   {
-    if (m_nodes.count(nodeId) != 0)
+    if (m_selectionNodes.count(nodeId) != 0)
     {
-      Node& node = m_nodes[nodeId];
+      SelectionNode& node = m_selectionNodes[nodeId];
       for (size_t edgeId : node.outEdges)
       {
         decreaseEdge(edgeId);
@@ -590,14 +590,14 @@ class Selection
   // return true when contracting given node would leave unconnected parts
   bool isContractable(size_t nodeId)
   {
-    if (m_nodes.count(nodeId) == 0u)
+    if (m_selectionNodes.count(nodeId) == 0u)
     {
       return false;
     }
     bool value = contractable(nodeId);
     if (!value)
     {
-      m_nodes[nodeId].bridge = true;
+      m_selectionNodes[nodeId].bridge = true;
     }
     return value;
   }
@@ -606,11 +606,11 @@ class Selection
   // slightly more lenient as isContractable but fast (false positives)
   bool isBridge(size_t nodeId)
   {
-    if (m_nodes.count(nodeId) == 0u)
+    if (m_selectionNodes.count(nodeId) == 0u)
     {
       return false;
     }
-    return m_nodes[nodeId].bridge;
+    return m_selectionNodes[nodeId].bridge;
   }
 };
 
@@ -757,8 +757,17 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
   for (size_t i = 0; i < lts.num_states(); ++i)
   {
     const bool is_not_probabilistic = false;
+    float epsilon = 0.0;
+    for (const auto& ps : lts.initial_probabilistic_state())
+    {
+      if (i == ps.state())
+      {
+        epsilon = 0.5;
+        break;
+      }
+    }
     m_nodes.emplace_back(
-        QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z())),
+        QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()) + epsilon),
         is_not_probabilistic);
     m_stateLabelnodes.emplace_back(m_nodes[i].pos(), i);
   }
@@ -1117,15 +1126,15 @@ void Graph::clip(const QVector3D& min, const QVector3D& max)
 
   for (NodeNode& node : m_nodes)
   {
-    mcrl2::gui::clipVector(node.pos(), min, max);
+    mcrl2::gui::clipVector(node.pos_mutable(), min, max);
   }
   for (LabelNode& node : m_transitionLabelnodes)
   {
-    mcrl2::gui::clipVector(node.pos(), min, max);
+    mcrl2::gui::clipVector(node.pos_mutable(), min, max);
   }
   for (Node& node : m_handles)
   {
-    mcrl2::gui::clipVector(node.pos(), min, max);
+    mcrl2::gui::clipVector(node.pos_mutable(), min, max);
   }
 
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);

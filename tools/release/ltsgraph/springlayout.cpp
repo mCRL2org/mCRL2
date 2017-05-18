@@ -203,13 +203,13 @@ void SpringLayout::apply()
 
       if (!m_graph.node(n).anchored())
       {
-        m_graph.node(n).pos() = m_graph.node(n).pos() + m_nforces[n] * m_speed;
-        mcrl2::gui::clipVector(m_graph.node(n).pos(), m_clipMin, m_clipMax);
+        m_graph.node(n).pos_mutable() = m_graph.node(n).pos() + m_nforces[n] * m_speed;
+        mcrl2::gui::clipVector(m_graph.node(n).pos_mutable(), m_clipMin, m_clipMax);
       }
       if (!m_graph.stateLabel(n).anchored())
       {
-        m_graph.stateLabel(n).pos() = m_graph.stateLabel(n).pos() + m_sforces[n] * m_speed;
-        mcrl2::gui::clipVector(m_graph.stateLabel(n).pos(), m_clipMin, m_clipMax);
+        m_graph.stateLabel(n).pos_mutable() = m_graph.stateLabel(n).pos() + m_sforces[n] * m_speed;
+        mcrl2::gui::clipVector(m_graph.stateLabel(n).pos_mutable(), m_clipMin, m_clipMax);
       }
     }
 
@@ -219,13 +219,13 @@ void SpringLayout::apply()
 
       if (!m_graph.handle(n).anchored())
       {
-        m_graph.handle(n).pos() = m_graph.handle(n).pos() + m_hforces[n] * m_speed;
-        mcrl2::gui::clipVector(m_graph.handle(n).pos(), m_clipMin, m_clipMax);
+        m_graph.handle(n).pos_mutable() = m_graph.handle(n).pos() + m_hforces[n] * m_speed;
+        mcrl2::gui::clipVector(m_graph.handle(n).pos_mutable(), m_clipMin, m_clipMax);
       }
       if (!m_graph.transitionLabel(n).anchored())
       {
-        m_graph.transitionLabel(n).pos() = m_graph.transitionLabel(n).pos() + m_lforces[n] * m_speed;
-        mcrl2::gui::clipVector(m_graph.transitionLabel(n).pos(), m_clipMin, m_clipMax);
+        m_graph.transitionLabel(n).pos_mutable() = m_graph.transitionLabel(n).pos() + m_lforces[n] * m_speed;
+        mcrl2::gui::clipVector(m_graph.transitionLabel(n).pos_mutable(), m_clipMin, m_clipMax);
       }
     }
   }
@@ -243,7 +243,7 @@ void SpringLayout::setClipRegion(const QVector3D& min, const QVector3D& max)
     {
       if (!m_graph.node(n).anchored())
       {
-        m_graph.node(n).pos().setZ(m_graph.node(n).pos().z() + frand(-change, change));
+        m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() + frand(-change, change));
       }
 
     }

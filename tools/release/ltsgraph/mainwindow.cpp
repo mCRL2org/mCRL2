@@ -116,8 +116,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::onWidgetResized(const QVector3D& newsize)
 {
-  m_graph.clip(-newsize / 2.0, newsize / 2.0);
-  m_layout->setClipRegion(-newsize / 2.0, newsize / 2.0);
+  /* m_graph.clip(-newsize / 2.0, newsize / 2.0); */
+  /* m_layout->setClipRegion(-newsize / 2.0, newsize / 2.0); */
 }
 
 void MainWindow::on3DChanged(bool enabled)

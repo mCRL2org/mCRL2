@@ -116,7 +116,7 @@ class Node
     }
 
     /// \brief Get a reference to the position of a node.
-    QVector3D& pos()
+    QVector3D& pos_mutable()
     {
       return m_pos;
     }
