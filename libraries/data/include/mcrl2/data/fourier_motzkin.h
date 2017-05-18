@@ -302,16 +302,16 @@ inline void fourier_motzkin(const data_expression& e_in,
   e_out=lazy::join_or(result_disjunction_set.begin(),result_disjunction_set.end());
 }
 
-/**
- * A unary function that can be used in combination with
- * replace_data_expressions to eliminate real numbers from all
- * quantifiers in an expression.
- * It is adviced to first push the quantifiers inside and
- * apply the one point rule, since that reduces the time spent on
- * the Fourier-Motzkin procedure for large expression.
- * Apply this function innermost first if the expresion contains
- * nested quantifiers.
- */
+
+/// \brief A unary function that can be used in combination with
+/// replace_data_expressions to eliminate real numbers from all
+/// quantifiers in an expression.
+/// It is adviced to first push the quantifiers inside and
+/// apply the one point rule, since that reduces the time spent on
+/// the Fourier-Motzkin procedure for large expression.
+/// Apply this function innermost first if the expresion contains
+/// nested quantifiers.
+/// \author Thomas Neele
 struct fourier_motzkin_sigma: public std::unary_function<data_expression, data_expression>
 {
 
