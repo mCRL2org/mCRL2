@@ -30,6 +30,11 @@ protected:
   rewriter nested_rewr;
   rewriter undo_nesting_rewr;
 
+  /**
+   * \brief Initializes a rewriter that removes all nested applications of '||'
+   * \details This rewriter can be used to rewrite boolean expressions to
+   * disjunctive normal form
+   */
   void make_nested_rewr()
   {
     data_specification ad_hoc_data = dataspec;
@@ -47,6 +52,7 @@ protected:
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
       sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::and_(sort_bool::not_(vb1), vb2)),
       vb2));
+    //  !a && b || a && b = b
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), 
       sort_bool::or_(sort_bool::and_(sort_bool::not_(vb1),vb2), sort_bool::and_(vb1, vb2)),
       vb2));
@@ -54,6 +60,9 @@ protected:
     nested_rewr = rewriter(ad_hoc_data);
   }
 
+  /**
+   * \brief Initializes a rewriter that removes redundancy by nesting '&&'
+   */
   void make_undo_nesting_rewr()
   {
     data_specification ad_hoc_data = dataspec;
@@ -72,6 +81,14 @@ protected:
     undo_nesting_rewr = rewriter(ad_hoc_data);
   }
 
+  /**
+   * \brief This function tries to simplify the expression
+   * by translating to/from DNF/CNF
+   * \details The result is an expression in (almost) DNF.
+   * The only allowed exception is that terms in a conjuction may be
+   * a disjuction over one free variable.
+   * Example: (s == 1 || s == 2) && t == 0 || s == 3
+   */
   data_expression simplify_nested(const data_expression& expr)
   {
     data_expression result = nested_rewr(expr);
@@ -80,30 +97,43 @@ protected:
     {
       if(sort_bool::is_or_application(d) && find_free_variables(d).size() > 1)
       {
-        // std::cout << "Simplify nested rewrote \n\t\t" << expr << "\n\tto\n\t\t" << result << std::endl;
+        // Found a disjunction over more that one free variable, so we have
+        // to return the expression in real DNF.
         return result;
       }
     }
-    // std::cout << "Simplify nested rewrote \n\t\t" << expr << "\n\tto (short version)\n\t\t" << shorter_result << std::endl;
+    // No nested disjuction contains more than one free variable, so we
+    // can return the shortened version
     return shorter_result;
   }
 
+  /**
+   * \brief Try to simplify subexpressions with free variables
+   * with a finite domain
+   * \details This recursive function takes an expression in (almost) DNF,
+   * as returned by simplify_nested, an tries to simplify each
+   * conjunctive clause by enumerating possible values for free variables
+   * with a finite domain.
+   * Example: consider an the sort Enum4 = struct e1 | e2 | e3 | e4;
+   * The expression (e != e1) && (e != e2) && (e != e3) can be simplified
+   * to e == e4.
+   */
   data_expression simplify_with_enumeration(const data_expression& expr)
   {
     data_expression result = expr;
     std::set< variable > free_vars = find_free_variables(result);
     if(sort_bool::is_or_application(result) && free_vars.size() > 1)
     {
+      // Found a disjuction, so recurse
       return sort_bool::or_(simplify_with_enumeration(sort_bool::left(result)), simplify_with_enumeration(sort_bool::right(result)));
     }
-    // std::cout << "variables\t ";
+    // Now we deal with the base case of the recursion: a conjunction
     for(variable v: free_vars)
     {
-      // std::cout << "   " << v.name() << ": " << v.sort() << " ";
       if(dataspec.is_certainly_finite(v.sort()))
       {
-        // std::cout << "Simplifying discrete condition " << result << " for variable " << v << std::endl;
         data_expression_vector valid_exprs = enumerate_expressions(v.sort(), dataspec, rewr);
+        // Accumulate the values for which v occurs positively and negatively
         data_expression positive_values_of_v = sort_bool::false_();
         data_expression negative_values_of_v = sort_bool::true_();
         data_expression next_result = result;
@@ -126,11 +156,10 @@ protected:
             negative_size++;
           }
         }
+        // Update the expression with the smallest amount of occurences of v
         result = lazy::and_(next_result, negative_size < positive_size ? negative_values_of_v : positive_values_of_v);
-        // std::cout << "\t result " << result << std::endl;
       }
     }
-    // std::cout << std::endl;
     return result;
   }
 

@@ -16,6 +16,8 @@
 
 #include <string>
 #include <queue>
+#include <ctime>
+#include <chrono>
 
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/data/bool.h"
@@ -74,12 +76,12 @@ protected:
 
   variable_list                  process_parameters;
   data_expression                invariant;
-  std::set<data_expression>      partition;
+  std::list<data_expression>      partition;
   data_specification             ad_hoc_data;
   bool                           m_use_path_eliminator;
   detail::BDD_Path_Eliminator    m_path_eliminator;
   simplifier*                    simpl;
-  // simplifier_fourier_motzkin                 simpl;
+
   std::set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache;
   std::map< std::pair< data_expression, data_expression >, bool > reachability_cache;
   std::map< std::tuple< data_expression, data_expression, lps::action_summand >, bool > transition_cache;
@@ -252,9 +254,11 @@ protected:
     return variable_list(replacements.begin(), replacements.end());
   }
 
-  // For all evaluations of variables in vars for which block holds,
-  // add split_block to the partition
-  // vars is the set of free variables in split_block
+  /** 
+   * \brief For all evaluations of variables in vars for which parent_block holds,
+   * add split_block to the partition
+   * \param vars The set of free variables in split_block
+   */ 
   void enumerate(data_expression parent_block, variable_list vars, data_expression split_block, const data_expression& lli, std::set< data_expression >& new_part)
   {
 
@@ -279,15 +283,15 @@ protected:
   }
 
   /**
-   * Split block phi_k on phi_l wrt summand as
+   * \brief Split block phi_k on phi_l wrt summand as
    */
-  void split_block(const data_expression& phi_k, const data_expression& phi_l, const lps::action_summand& as)
+  bool split_block(const data_expression& phi_k, const data_expression& phi_l, const lps::action_summand& as)
   {
     if(refinement_cache.find(std::make_tuple(phi_k, phi_l, as)) != refinement_cache.end())
     {
       refinement_cache_hits++;
       // This split has already been tried before.
-      return;
+      return false;
     }
     refinement_cache_misses++;
 
@@ -312,7 +316,7 @@ protected:
     data_expression split_block =
       lambda(process_parameters,
         lazy::and_(
-          application(phi_k,process_parameters),
+          rewr(application(phi_k,process_parameters)),
           lazy::and_(
             forall(primed_summation_variables,
               lazy::implies(
@@ -374,25 +378,26 @@ protected:
       free_vars_list = free_vars_list + replace_free_reals(split_block, li, enumeration_condition, lli);
     }
 
-    std::set< data_expression > new_part;
-    enumerate(enumeration_condition, free_vars_list, split_block, lli, new_part);
+    std::set< data_expression > new_blocks;
+    enumerate(enumeration_condition, free_vars_list, split_block, lli, new_blocks);
 
     // Update the caches and the partition
     refinement_cache.insert(std::make_tuple(phi_k, phi_l, as));
-    if(new_part.size() > 1) {
-      partition.erase(partition.find(phi_k));
-      update_caches(phi_k, new_part);
-      for(const data_expression& d: new_part)
+    if(new_blocks.size() > 1) {
+      partition.remove(phi_k);
+      update_caches(phi_k, new_blocks);
+      for(const data_expression& d: new_blocks)
       {
-        partition.insert(d);
+        partition.push_front(d);
       }
+      return true;
     }
-
+    return false;
   }
 
   /**
-   * Update caches, adding information about the new blocks.
-   * New entries are deduced from existng entries
+   * \brief Update caches, adding information about the new blocks.
+   * \detail New entries are deduced from existng entries
    * refering to phi_k. phi_k is the parent of the new blocks.
    */
   void update_caches(data_expression phi_k, std::set<data_expression> new_blocks)
@@ -413,6 +418,8 @@ protected:
             transition_cache.insert(std::make_pair(std::make_tuple(new_block, phi_l1, as1), false));
           }
         }
+        transition_cache.erase(std::make_tuple(phi_k, phi_l1, as1));
+
         find_result =
           transition_cache.find(std::make_tuple(phi_l1, phi_k, as1));
         if(find_result != transition_cache.end() && !find_result->second)
@@ -425,6 +432,7 @@ protected:
             transition_cache.insert(std::make_pair(std::make_tuple(phi_l1, new_block, as1), false));
           }
         }
+        transition_cache.erase(std::make_tuple(phi_l1, phi_k, as1));
 
         if(refinement_cache.find(std::make_tuple(phi_k, phi_l1, as1)) != refinement_cache.end())
         {
@@ -435,39 +443,40 @@ protected:
           {
             refinement_cache.insert(std::make_tuple(new_block, phi_l1, as1));
           }
+          refinement_cache.erase(std::make_tuple(phi_k, phi_l1, as1));
         }
+        refinement_cache.erase(std::make_tuple(phi_l1, phi_k, as1));
         // We now check whether phi_l1 has transitions to the new blocks.
         // If not, phi_l1 is also stable wrt the new block
-        for(const data_expression& new_block: new_blocks)
-        {
-          if(!transition_exists(phi_l1, new_block, as1))
-          {
-            refinement_cache.insert(std::make_tuple(phi_l1, new_block, as1));
-          }
-        }
+        // for(const data_expression& new_block: new_blocks)
+        // {
+        //   if(refinement_cache.find(std::make_tuple(phi_l1, new_block, as1)) != refinement_cache.end() &&
+        //        !transition_exists(phi_l1, new_block, as1))
+        //   {
+        //     refinement_cache.insert(std::make_tuple(phi_l1, new_block, as1));
+        //   }
+        // }
       }
     }
   }
 
   /**
-   * Try every combination of phi_k, phi_l and action summand to
+   * \brief Try every combination of phi_k, phi_l and action summand to
    * see whether the partition can be refined.
    */
   bool refine()
   {
-    std::set< data_expression > old_partition = partition;
     int i = 0;
-    for(const data_expression phi_k: old_partition)
+    for(const data_expression phi_k: partition)
     {
       int j = 0;
-      for(const data_expression phi_l: old_partition)
+      for(const data_expression phi_l: partition)
       {
         int k = 0;
         for(const lps::action_summand& as: m_spec.process().action_summands())
         {
           // std::cout << "Trying to split " << i << " on " << j << " wrt summand " << k << std::endl;
-          split_block(phi_k, phi_l, as);
-          if(partition.size() > old_partition.size())
+          if(split_block(phi_k, phi_l, as))
           {
             std::cout << "Split " << rewr(phi_k) << " wrt summand\n" << as << "\non block " << rewr(phi_l) << std::endl;
             return true;
@@ -477,12 +486,12 @@ protected:
         j++;
       }
       i++;
-    }
+    } // stop when we have investigated all blocks
     return false;
   }
 
   /**
-   * Initialise several data structures based on the information
+   * \brief Initialise several data structures based on the information
    * contained in the input LTS.
    */
   void build_summand_maps()
@@ -577,26 +586,26 @@ protected:
 
   void find_reachable_blocks()
   {
-    std::set<data_expression> reach;
-    std::set<data_expression> unreachable = partition;
+    std::set<data_expression> unreachable(partition.begin(),partition.end());
     std::queue<data_expression> open_set;
-    for(const data_expression& block: partition)
+    for(const data_expression block: partition)
     {
       if(rewr(application(block, m_spec.initial_process().state(process_parameters))) == sort_bool::true_())
       {
-        reach.insert(block);
         unreachable.erase(unreachable.find(block));
         open_set.push(block);
+        partition.clear();
+        partition.push_back(block);
         break;
       }
     }
-    if(reach.empty())
+    if(open_set.empty())
     {
       throw mcrl2::runtime_error("Initial block not found while computing reachable blocks.");
     }
     while(!open_set.empty())
     {
-      const data_expression& block = open_set.front();
+      const data_expression block = open_set.front();
       open_set.pop();
 
       std::set<data_expression> new_unreachable = unreachable;
@@ -624,9 +633,9 @@ protected:
 
         if(transition_found)
         {
-          reach.insert(potential_succ);
           new_unreachable.erase(new_unreachable.find(potential_succ));
           open_set.push(potential_succ);
+          partition.push_back(potential_succ);
         }
         if(previous_result == reachability_cache.end())
         {
@@ -643,7 +652,6 @@ protected:
       std::cout << "  block " << i << "  " << pp(rewr(block)) << std::endl;
       i++;
     }
-    partition = reach;
   }
 
   template <typename Container>
@@ -654,7 +662,7 @@ protected:
     for(const data_expression& block: blocks)
     {
       indexed_partition.put(block);
-      result.add_state(lts::state_label_lts(lts::state_label_lts::single_label{block}));
+      result.add_state(lts::state_label_lts(lts::state_label_lts::single_label{rewr(block)}));
     }
     atermpp::indexed_set<process::action_list> indexed_actions;
     // tau is always action 0
@@ -742,8 +750,9 @@ public:
   void run()
   {
     mCRL2log(mcrl2::log::verbose) << "Running symbolic bisimulation..." << std::endl;
+
     process_parameters = m_spec.process().process_parameters();
-    partition.insert( lambda(process_parameters, invariant));
+    partition.push_front( lambda(process_parameters, invariant));
     add_ad_hoc_rules();
     build_summand_maps();
 #ifdef DBM_PACKAGE_AVAILABLE
@@ -752,6 +761,7 @@ public:
     simpl = new simplifier_fourier_motzkin(rewr, proving_rewr);
 #endif
 
+    const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = std::chrono::high_resolution_clock::now();
     std::cout << "Initial partition:" << std::endl;
     print_partition(partition);
     int num_iterations = 0;
@@ -767,6 +777,7 @@ public:
     }
     std::cout << "Final partition:" << std::endl;
     print_partition(partition);
+    std::cout << "Partition refinement completed in " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << " seconds" << std::endl;
 
     save_lts();
   }
