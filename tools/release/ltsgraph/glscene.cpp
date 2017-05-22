@@ -179,7 +179,7 @@ struct TextureData
       h <<= 1;
     }
     // ... and also wants the alpha component to be the 4th component
-    label = convertToGLFormat(label.scaled(w, h));
+    label = label.scaled(w, h).convertToFormat(QImage::Format_RGBA8888);
 
     glBindTexture(GL_TEXTURE_2D, texture->name);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

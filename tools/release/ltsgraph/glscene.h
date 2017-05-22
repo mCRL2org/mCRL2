@@ -30,15 +30,6 @@ struct TextureData;
 struct CameraView;
 struct CameraAnimation;
 
-/**
- * @brief Helper function to convert an image to the OpenGL RGBA format. This calls
- *        QGLWidget::convertToGLFormat, but we cannot use this method in glscene.cpp
- *        because in Windows, the Qt5 practice of including the OpenGL ES2.0 headers
- *        then clashes with our inclusion of glu.h.
- * @param img The image to convert.
- */
-QImage convertToGLFormat(const QImage& img);
-
 class GLScene
 {
   private:

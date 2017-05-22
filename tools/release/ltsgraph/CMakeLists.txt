@@ -17,7 +17,6 @@ add_mcrl2_tool(ltsgraph
     mainwindow.cpp
     glwidget.cpp
     glscene.cpp
-    glscene_helper.cpp
     graph.cpp
     springlayout.cpp
     information.cpp
