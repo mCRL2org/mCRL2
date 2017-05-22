@@ -4,6 +4,9 @@
 .. |bin_w64n| replace:: Windows Installer (64-bit)
 .. _bin_w64n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_AMD64.exe
 
+.. |zip_w64n| replace:: Windows ZIP (64-bit)
+.. _zip_w64n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_AMD64.zip
+
 .. |bin_deb32n| replace:: Ubuntu DEB (32-bit)
 .. _bin_deb32n: http://www.mcrl2.org/download/devel/mcrl2-@MCRL2_VERSION@_i686.deb
 
