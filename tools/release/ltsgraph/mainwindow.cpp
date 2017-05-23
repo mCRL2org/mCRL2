@@ -144,7 +144,7 @@ void MainWindow::onExplore(bool enabled)
 
 void MainWindow::onTimer()
 {
-  m_glwidget->updateGL();
+  m_glwidget->update();
 }
 
 void MainWindow::onLogOutput(const QString& /*level*/, const QString& /*hint*/, const QDateTime& /*timestamp*/, const QString& /*message*/, const QString& formattedMessage)
@@ -225,11 +225,7 @@ void MainWindow::onExportImage()
   {
     if (selectedFilter == bitmap)
     {
-      DimensionsDialog dDialog(this);
-      if (dDialog.exec() != 0)
-      {
-        m_glwidget->savePixmap(fileName, dDialog.resultWidth(), dDialog.resultHeight());
-      }
+      m_glwidget->saveBitmap(fileName);
     }
     else if (selectedFilter == vector)
     {

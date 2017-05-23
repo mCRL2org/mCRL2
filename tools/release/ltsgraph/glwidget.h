@@ -19,7 +19,7 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QColorDialog>
 #include <QVector2D>
 #include "ui_glwidget.h"
@@ -36,7 +36,7 @@ class GLWidgetUi;
 
 struct MoveRecord;
 
-class GLWidget : public QGLWidget
+class GLWidget : public QOpenGLWidget
 {
     Q_OBJECT
   public:
@@ -185,10 +185,8 @@ class GLWidget : public QGLWidget
     /**
      * @brief Renders the current visualisation to a bitmap file.
      * @param filename The filename for the output (extension determines file type).
-     * @param w The desired width of the image.
-     * @param h The desired height of the image.
      */
-    void savePixmap(const QString& filename, int w = 1024, int h = 768);
+    void saveBitmap(const QString& filename);
 
     /**
          * @brief Renders the current visualisation to a vector graphics file using gl2ps.

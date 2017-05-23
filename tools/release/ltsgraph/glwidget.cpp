@@ -136,14 +136,16 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
-  : QGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true)
+  : QOpenGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true)
 {
   m_scene = new GLScene(m_graph, devicePixelRatio());
-  // Set up OpenGL to use alpha channel
-  QGLFormat fmt = QGLFormat::defaultFormat();
+  QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
   fmt.setVersion(1, 2);
-  fmt.setDepth(true);
-  fmt.setAlpha(true);
+  fmt.setDepthBufferSize(1);
+  fmt.setAlphaBufferSize(1);
+  fmt.setStencilBufferSize(1);
+  fmt.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+  fmt.setSwapInterval(1);
   setFormat(fmt);
 }
 
@@ -265,6 +267,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
 {
   if (m_painting)
   {
+    makeCurrent();
     if (m_hover.selectionType == GLScene::so_node)
     {
       Graph::NodeNode& node = m_graph.node(m_hover.index);
@@ -357,6 +360,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 {
   if (m_dragmode == dm_dragnode)
   {
+    makeCurrent();
     NodeMoveRecord* noderec = dynamic_cast<NodeMoveRecord*>(m_dragnode);
     if (m_hover.selectionType == GLScene::so_node && e->button() == Qt::LeftButton
         && (noderec != nullptr) && m_draglength.length() < DRAG_MIN_DIST)
@@ -382,6 +386,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
 {
   if (m_dragmode != dm_none)
   {
+    makeCurrent();
     QPoint vec = e->pos() - m_dragstart;
     m_draglength += (QVector2D) vec;
 
@@ -441,12 +446,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
 
 void GLWidget::rebuild()
 {
+  makeCurrent();
   m_scene->updateLabels();
   m_scene->updateShapes();
 }
 
 void GLWidget::setDepth(float depth, size_t animation)
 {
+  makeCurrent();
   QVector3D size = m_scene->size();
   size.setZ(depth);
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
@@ -461,6 +468,7 @@ QVector3D GLWidget::size3()
 
 void GLWidget::resetViewpoint(size_t animation)
 {
+  makeCurrent();
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
   m_scene->setTranslation(QVector3D(0, 0, 0), animation);
   m_scene->setZoom(0.95f, animation);
@@ -483,6 +491,7 @@ void GLWidget::endPaint()
 
 void GLWidget::saveVector(const QString& filename)
 {
+  makeCurrent();
   QString lcfn = filename.toLower();
   if (lcfn.endsWith(".pdf"))
   {
@@ -512,14 +521,14 @@ void GLWidget::saveVector(const QString& filename)
 
 void GLWidget::saveTikz(const QString& filename, float aspectRatio)
 {
+  makeCurrent();
   m_scene->renderLatexGraphics(filename, aspectRatio);
 }
 
-void GLWidget::savePixmap(const QString& filename, const int w, const int h)
+void GLWidget::saveBitmap(const QString& filename)
 {
-  m_scene->resize(w, h);
-  renderPixmap(w, h).save(filename);
-  m_scene->resize(width(), height());
+  makeCurrent();
+  grabFramebuffer().save(filename);
 }
 
 GLWidgetUi* GLWidget::ui(QWidget* parent)

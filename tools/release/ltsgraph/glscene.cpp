@@ -1025,7 +1025,6 @@ void GLScene::init(const QColor& clear)
   glFogfv(GL_FOG_COLOR, fog_color);
   const GLubyte* version = glGetString(GL_VERSION);
   if ((version != nullptr) && ((version[0] == '1' && version[2] >= '4') || version[0] > '1'))
-    // if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4) != 0)
   {
     glFogf(GL_FOG_COORD_SRC, GL_FRAGMENT_DEPTH);
   }
