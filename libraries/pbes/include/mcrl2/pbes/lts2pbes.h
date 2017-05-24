@@ -40,6 +40,14 @@ class lts2pbes_algorithm
     const lts::lts_lts_t& lts0;
     pbes_system::detail::lts2pbes_lts lts1;
     utilities::progress_meter m_progress_meter;
+    data::set_identifier_generator m_id_generator;
+
+    template <typename Parameters>
+    void run(const state_formulas::state_formula& f, std::vector<pbes_equation>& equations, Parameters& parameters)
+    {
+      equations = detail::E(f, f, parameters.lts0, parameters.lts1, parameters.pm, core::term_traits_optimized<pbes_expression>());
+      // detail::E_structured(f, parameters, m_generator, equations, core::term_traits<pbes_expression>());
+    }
 
   public:
     /// \brief Constructor.
@@ -64,7 +72,10 @@ class lts2pbes_algorithm
       mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
 
       // compute the equations
-      std::vector<pbes_equation> eqn = detail::E(f, f, lts0, lts1, m_progress_meter, core::term_traits_optimized<pbes_expression>());
+      std::vector<pbes_equation> eqn;
+      detail::lts2pbes_parameters parameters(f, lts0, lts1, m_id_generator, m_progress_meter);
+      run(f, eqn, parameters);
+      // std::vector<pbes_equation> eqn = detail::E(f, f, lts0, lts1, m_progress_meter, core::term_traits_optimized<pbes_expression>());
 
       // compute the initial state
       state_type s0 = lts0.initial_state();

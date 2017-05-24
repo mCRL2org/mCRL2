@@ -37,6 +37,24 @@ core::identifier_string make_identifier(const core::identifier_string& name, lts
   return core::identifier_string(std::string(name) + "'" + std::to_string(s));
 }
 
+struct lts2pbes_parameters
+{
+  const state_formulas::state_formula& phi0; // the original formula
+  const lts::lts_lts_t& lts0;
+  const lts2pbes_lts& lts1;
+  data::set_identifier_generator& id_generator;
+  utilities::progress_meter& pm;
+
+  lts2pbes_parameters(const state_formulas::state_formula& phi0_,
+                      const lts::lts_lts_t& lts0_,
+                      const lts2pbes_lts& lts1_,
+                      data::set_identifier_generator& id_generator_,
+                      utilities::progress_meter& pm_
+                     )
+    : phi0(phi0_), lts0(lts0_), lts1(lts1_), id_generator(id_generator_), pm(pm_)
+  {}
+};
+
 template <typename TermTraits>
 pbes_expression RHS(const state_formulas::state_formula& x0,
                     const state_formulas::state_formula& x,
