@@ -145,9 +145,9 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         s.assignments()=push_back(s.assignments(),assignment(m_last_action_time,s.multi_action().time()));
 
         // Remove time
-        s.multi_action() = multi_action(s.multi_action().actions()); 
+        s.multi_action() = multi_action(s.multi_action().actions());
 
-        // Try to apply Fourier-Motzkin elimination to simplify 
+        // Try to apply Fourier-Motzkin elimination to simplify
         std::set< variable > variables_in_action = process::find_all_variables(s.multi_action());
         std::set< variable > variables_in_assignments = process::find_all_variables(s.assignments());
         // Split the variables that do/do not occur in actions and assignments.
@@ -162,7 +162,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
           else
           {
             do_not_occur.push_front(v);
-          } 
+          }
         }
 
         variable_list remaining_variables;
@@ -201,6 +201,7 @@ class untime_algorithm: public detail::lps_algorithm<Specification>
         m_rewriter(r)
     {
       m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
+      m_identifier_generator.add_identifiers(data::function_and_mapping_identifiers(spec.data()));
     }
 
     void run()
