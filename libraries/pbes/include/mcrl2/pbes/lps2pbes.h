@@ -35,43 +35,24 @@ namespace mcrl2
 namespace pbes_system
 {
 
-namespace detail
-{
-  /// \brief Returns a variable that doesn't appear in context
-  /// \param ids a set of identifiers to use as context.
-  /// \param s A sort expression
-  /// \param hint A string
-  /// \return A variable that doesn't appear in context
-  /// \warning reorganising the identifier context is expensive, consider using an identifier generator
-  inline
-  data::variable fresh_variable(const std::set<core::identifier_string>& ids, const data::sort_expression& s, const std::string& hint)
-  {
-    data::set_identifier_generator generator;
-    generator.add_identifiers(ids);
-    return data::variable(generator(hint), s);
-  }
-
-} // namespace detail
-
 /// \brief Algorithm for translating a state formula and a timed specification to a pbes.
 class lps2pbes_algorithm
 {
   protected:
+    data::set_identifier_generator m_generator;
+
     template <typename Parameters>
     void run(const state_formulas::state_formula& f, bool structured, bool unoptimized, std::vector<pbes_equation>& equations, Parameters& parameters)
     {
       if (structured)
       {
-        data::set_identifier_generator propvar_generator;
-        std::set<core::identifier_string> names = state_formulas::algorithms::find_state_variable_names(f);
-        propvar_generator.add_identifiers(names);
         if (unoptimized)
         {
-          detail::E_structured(f, parameters, propvar_generator, equations, core::term_traits<pbes_expression>());
+          detail::E_structured(f, parameters, m_generator, equations, core::term_traits<pbes_expression>());
         }
         else
         {
-          detail::E_structured(f, parameters, propvar_generator, equations, core::term_traits_optimized<pbes_expression>());
+          detail::E_structured(f, parameters, m_generator, equations, core::term_traits_optimized<pbes_expression>());
         }
       }
       else
@@ -114,26 +95,21 @@ class lps2pbes_algorithm
       lps_ids.insert(dataspec_ids.begin(), dataspec_ids.end());
       f = state_formulas::preprocess_state_formula(f, lps_ids, preprocess_modal_operators);
 
-      data::set_identifier_generator id_generator;
-      std::set<core::identifier_string> ids = lps::find_identifiers(lpsspec);
-      id_generator.add_identifiers(ids);
-      ids = data::find_identifiers(lpsspec.data().constructors());
-      id_generator.add_identifiers(ids);
-      ids = data::find_identifiers(lpsspec.data().mappings());
-      id_generator.add_identifiers(ids);
-      ids = state_formulas::find_identifiers(f);
-      id_generator.add_identifiers(ids);
+      m_generator.clear_context();
+      m_generator.add_identifiers(lps::find_identifiers(lpsspec));
+      m_generator.add_identifiers(data::function_and_mapping_identifiers(lpsspec.data()));
+      m_generator.add_identifiers(state_formulas::find_identifiers(f));
 
       std::vector<pbes_equation> equations;
       if (generate_counter_example)
       {
-        detail::lps2pbes_counter_example_parameters parameters(f, lpsspec.process(), id_generator, T);
+        detail::lps2pbes_counter_example_parameters parameters(f, lpsspec.process(), m_generator, T);
         run(f, structured, unoptimized, equations, parameters);
         equations = equations + parameters.equations();
       }
       else
       {
-        detail::lps2pbes_parameters parameters(f, lpsspec.process(), id_generator, T);
+        detail::lps2pbes_parameters parameters(f, lpsspec.process(), m_generator, T);
         run(f, structured, unoptimized, equations, parameters);
       }
 
@@ -172,7 +148,7 @@ class lps2pbes_algorithm
 ///        the PBES is simplified.
 /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed to
 ///                                   obtain a more compact PBES.
-/// \param generate_counter_example A boolean indicating that a counter example must be generated. 
+/// \param generate_counter_example A boolean indicating that a counter example must be generated.
 /// \return The resulting pbes.
 inline
 pbes lps2pbes(const lps::specification& lpsspec,
@@ -194,14 +170,14 @@ pbes lps2pbes(const lps::specification& lpsspec,
 
   if (timed)
   {
-    lps::specification spec_timed = lpsspec;
-    std::set<core::identifier_string> ids = lps::find_identifiers(lpsspec);
-    std::set<core::identifier_string> fcontext = state_formulas::find_identifiers(formula);
-    ids.insert(fcontext.begin(), fcontext.end());
-    data::variable T = detail::fresh_variable(ids, data::sort_real::real_(), "T");
-    ids.insert(T.name());
-    lps::detail::make_timed_lps(spec_timed.process(), ids);
-    return lps2pbes_algorithm().run(formula, spec_timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, T);
+    lps::specification lpsspec_timed = lpsspec;
+    data::set_identifier_generator generator;
+    generator.add_identifiers(lps::find_identifiers(lpsspec));
+    generator.add_identifiers(state_formulas::find_identifiers(formula));
+    generator.add_identifiers(data::function_and_mapping_identifiers(lpsspec.data()));
+    data::variable T(generator("T"), data::sort_real::real_());
+    lps::detail::make_timed_lps(lpsspec_timed.process(), generator.context());
+    return lps2pbes_algorithm().run(formula, lpsspec_timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example, T);
   }
   else
   {
@@ -219,7 +195,7 @@ pbes lps2pbes(const lps::specification& lpsspec,
 ///        the PBES is simplified.
 /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed to
 ///                                   obtain a more compact PBES.
-/// \param generate_counter_example A boolean indicating that a counter example must be generated. 
+/// \param generate_counter_example A boolean indicating that a counter example must be generated.
 /// \return The resulting pbes.
 inline
 pbes lps2pbes(const lps::specification& lpsspec,
@@ -246,7 +222,7 @@ pbes lps2pbes(const lps::specification& lpsspec,
 ///        the PBES is simplified.
 /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed to
 ///                                   obtain a more compact PBES.
-/// \param generate_counter_example A boolean indicating that a counter example must be generated. 
+/// \param generate_counter_example A boolean indicating that a counter example must be generated.
 /// \return The result of the algorithm
 inline
 pbes lps2pbes(const std::string& spec_text,
