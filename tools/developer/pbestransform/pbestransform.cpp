@@ -20,6 +20,7 @@
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewrite.h"
@@ -366,6 +367,31 @@ struct instantiate_global_variables_command: public pbes_command
   }
 };
 
+struct gauss_elimination_command: public pbes_command
+{
+  gauss_elimination_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("gauss-elimination", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    int result = gauss_elimination(pbesspec);
+    if (result == 0)
+    {
+      write_text(output_filename, "false\n");
+    }
+    else if (result == 1)
+    {
+      write_text(output_filename, "true\n");
+    }
+    else
+    {
+      write_text(output_filename, "unknown\n");
+    }
+  }
+};
+
 class transform_tool: public rewriter_tool<input_output_tool>
 {
   protected:
@@ -430,6 +456,7 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<rewrite_pbes_simplify_quantifiers_rewriter_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<rewrite_pbes_simplify_rewriter_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<gauss_elimination_command>(input_filename(), output_filename(), options));
 
       for (auto i = commands.begin(); i != commands.end(); ++i)
       {
