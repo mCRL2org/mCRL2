@@ -52,16 +52,13 @@ std::set<core::identifier_string> variable_name_clashes(const VariableContainer&
 
 // resolves name clashes in an action_summand or deadlock_summand
 template <typename Summand>
-void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core::identifier_string>& process_parameter_names)
+void resolve_summand_variable_name_clashes(Summand& summand, const std::set<core::identifier_string>& process_parameter_names, data::set_identifier_generator& generator)
 {
   const data::variable_list& summation_variables = summand.summation_variables();
   std::set<core::identifier_string> v = variable_name_clashes(summation_variables, process_parameter_names);
   if (!v.empty())
   {
     data::mutable_map_substitution<> sigma;
-    std::set<core::identifier_string> context = variable_names(lps::find_all_variables(summand));
-    data::set_identifier_generator generator;
-    generator.add_identifiers(context);
     for (const data::variable& v: summation_variables)
     {
       if (process_parameter_names.find(v.name()) != process_parameter_names.end())
@@ -82,15 +79,18 @@ void resolve_summand_variable_name_clashes(Specification& spec)
   auto& proc = spec.process();
   std::set<core::identifier_string> process_parameter_names = detail::variable_names(proc.process_parameters());
 
-  auto& action_summands = proc.action_summands();
-  for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+  data::set_identifier_generator generator;
+  generator.add_identifiers(lps::find_identifiers(spec));
+  generator.add_identifiers(data::function_and_mapping_identifiers(spec.data()));
+
+  for (action_summand& s: proc.action_summands())
   {
-    detail::resolve_summand_variable_name_clashes(*i, process_parameter_names);
+    detail::resolve_summand_variable_name_clashes(s, process_parameter_names, generator);
   }
 
   for (deadlock_summand& s: proc.deadlock_summands())
   {
-    detail::resolve_summand_variable_name_clashes(s, process_parameter_names);
+    detail::resolve_summand_variable_name_clashes(s, process_parameter_names, generator);
   }
 }
 
