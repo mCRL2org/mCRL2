@@ -141,6 +141,9 @@ struct absinthe_algorithm
   typedef std::map<data::function_symbol, data::function_symbol> function_symbol_substitution_map;
   typedef std::map<data::sort_expression, data::function_symbol> abstraction_map;
 
+  // Used for generating variables of sort comprehensions.
+  data::set_identifier_generator m_generator;
+
   struct absinthe_sort_expression_builder: public sort_expression_builder<absinthe_sort_expression_builder>
   {
     typedef sort_expression_builder<absinthe_sort_expression_builder> super;
@@ -149,13 +152,17 @@ struct absinthe_algorithm
     const abstraction_map& sigmaH;
     const sort_expression_substitution_map& sigmaS;
     const function_symbol_substitution_map& sigmaF;
+    data::set_identifier_generator& generator;
 
     absinthe_sort_expression_builder(const abstraction_map& sigmaA_,
                                      const sort_expression_substitution_map& sigmaS_,
-                                     const function_symbol_substitution_map& sigmaF_)
+                                     const function_symbol_substitution_map& sigmaF_,
+                                     data::set_identifier_generator& generator_
+                                    )
       : sigmaH(sigmaA_),
         sigmaS(sigmaS_),
-        sigmaF(sigmaF_)
+        sigmaF(sigmaF_),
+        generator(generator_)
     {}
 
     data::sort_expression apply(const data::sort_expression& x)
@@ -219,9 +226,7 @@ struct absinthe_algorithm
       data::data_expression body = super::apply(x);
       //pbes_system::detail::absinthe_check_expression(body);
       data::sort_expression s = body.sort();
-      data::set_identifier_generator generator;
-      std::set<core::identifier_string> ids = data::find_identifiers(x);
-      generator.add_identifiers(ids);
+      generator.add_identifiers(data::find_identifiers(x));
       data::variable v(generator("v"), s);
       data::data_expression result = data::detail::create_set_comprehension(v, data::equal_to(v, body));
       //pbes_system::detail::absinthe_check_expression(result);
@@ -266,9 +271,10 @@ struct absinthe_algorithm
 
     sort_function(const abstraction_map& sigmaH,
                   const sort_expression_substitution_map& sigmaS,
-                  const function_symbol_substitution_map& sigmaF
+                  const function_symbol_substitution_map& sigmaF,
+                  data::set_identifier_generator& generator
                  )
-      : f(sigmaH, sigmaS, sigmaF)
+      : f(sigmaH, sigmaS, sigmaF, generator)
     {}
 
     data::sort_expression operator()(const data::sort_expression& x)
@@ -297,35 +303,38 @@ struct absinthe_algorithm
     const abstraction_map& sigmaH;
     const sort_expression_substitution_map& sigmaS;
     const function_symbol_substitution_map& sigmaF;
+    data::set_identifier_generator& generator;
     bool m_is_over_approximation;
 
     data::data_expression lift(const data::data_expression& x)
     {
-      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF).apply(x);
+      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(x);
     }
 
     data::data_expression_list lift(const data::data_expression_list& x)
     {
-      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF).apply(x);
+      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(x);
     }
 
     data::variable_list lift(const data::variable_list& x)
     {
-      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF).apply(x);
+      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(x);
     }
 
     pbes_system::propositional_variable lift(const pbes_system::propositional_variable& x)
     {
-      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF).apply(x);
+      return absinthe_sort_expression_builder(sigmaH, sigmaS, sigmaF, generator).apply(x);
     }
 
     absinthe_data_expression_builder(const abstraction_map& sigmaA_,
                                      const sort_expression_substitution_map& sigmaS_,
                                      const function_symbol_substitution_map& sigmaF_,
+                                     data::set_identifier_generator& generator_,
                                      bool is_over_approximation)
       : sigmaH(sigmaA_),
         sigmaS(sigmaS_),
         sigmaF(sigmaF_),
+        generator(generator_),
         m_is_over_approximation(is_over_approximation)
     {}
 
@@ -348,7 +357,7 @@ struct absinthe_algorithm
     {
       pbes_expression result;
       data::data_expression_list e = lift(x.parameters());
-      data::variable_list variables = make_variables(x.parameters(), "x", sort_function(sigmaH, sigmaS, sigmaF));
+      data::variable_list variables = make_variables(x.parameters(), "x", sort_function(sigmaH, sigmaS, sigmaF, generator));
       data::data_expression_list::iterator i = e.begin();
       data::variable_list::iterator j = variables.begin();
       data::data_expression_vector z;
@@ -863,7 +872,7 @@ struct absinthe_algorithm
     using utilities::detail::has_key;
 
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
-    sort_function sigma(sigmaH, sigmaS, sigmaF);
+    sort_function sigma(sigmaH, sigmaS, sigmaF, m_generator);
 
     // add lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
     std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
@@ -1018,7 +1027,7 @@ struct absinthe_algorithm
 
     // sort expressions replacements (extracted from sigmaH)
     sort_expression_substitution_map sigmaS;
-    for (abstraction_map::const_iterator i = sigmaH.begin(); i != sigmaH.end(); ++i)
+    for (auto i = sigmaH.begin(); i != sigmaH.end(); ++i)
     {
       data::function_symbol f = i->second;
       const data::function_sort& fs = atermpp::down_cast<data::function_sort>(f.sort());
@@ -1029,6 +1038,9 @@ struct absinthe_algorithm
     // function symbol replacements (specified by the user)
     function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, dataspec);
     mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping ---\n" << print_mapping(sigmaF) << std::endl;
+
+    m_generator.add_identifiers(data::function_and_mapping_identifiers(p.data()));
+    m_generator.add_identifiers(data::function_and_mapping_identifiers(dataspec));
 
     // 4) add lifted sorts, mappings and equations to dataspec
     // before: the mapping sigmaF is f1 -> f2
@@ -1046,7 +1058,7 @@ struct absinthe_algorithm
     p.data() = dataspec;
 
     // then transform the data expressions and the propositional variable instantiations
-    absinthe_data_expression_builder(sigmaH, sigmaS, sigmaF, is_over_approximation).update(p);
+    absinthe_data_expression_builder(sigmaH, sigmaS, sigmaF, m_generator, is_over_approximation).update(p);
 
     mCRL2log(log::debug, "absinthe") << "--- pbes after ---\n" << p << std::endl;
   }
