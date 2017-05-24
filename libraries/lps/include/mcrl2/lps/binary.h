@@ -136,6 +136,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
       data::set_identifier_generator generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
+      generator.add_identifiers(data::function_and_mapping_identifiers(m_spec.data()));
       enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter, m_id_generator);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
