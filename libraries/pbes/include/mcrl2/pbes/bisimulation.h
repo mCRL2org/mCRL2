@@ -36,37 +36,6 @@ namespace mcrl2
 namespace pbes_system
 {
 
-namespace detail {
-
-/// \brief Generates fresh variables with names that do not appear in the given context.
-/// Caveat: the implementation is very inefficient.
-/// \param variables a list of variables for which new names need to be generated.
-/// \param context Context of identifiers that cannot be used.
-/// \param update_context If true, the generated variables are added to \a context.
-inline
-data::variable_list fresh_variables(const data::variable_list& variables, std::set<std::string>& context, bool update_context = true)
-{
-  data::variable_vector result;
-  for (const data::variable& v: variables)
-  {
-    utilities::number_postfix_generator generator(std::string(v.name()));
-    std::string name;
-    do
-    {
-      name = generator();
-    }
-    while (context.find(name) != context.end());
-    if (update_context)
-    {
-      context.insert(name);
-    }
-    result.push_back(data::variable(name, v.sort()));
-  }
-  return data::variable_list(result.begin(),result.end());
-}
-
-} // namespace detail
-
 using atermpp::detail::operator+;
 
 /// \brief Base class for bisimulation algorithms.
@@ -629,6 +598,9 @@ pbes strong_bisimulation(const lps::specification& model, const lps::specificati
 /// \brief Algorithm class for weak bisimulation.
 class weak_bisimulation_algorithm : public bisimulation_algorithm
 {
+  protected:
+    mutable data::set_identifier_generator m_generator;
+
   public:
     /// \brief The match function.
     /// \param p A linear process
@@ -740,24 +712,21 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
           gj = data::replace_variables_capture_avoiding(gj, sigma, sigma_variables);
         }
 
-        // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<data::variable> used_variables = lps::find_all_variables(p);
-        std::set<data::variable> tmp = lps::find_all_variables(q);
-        used_variables.insert(tmp.begin(), tmp.end());
-
-        std::set<std::string> used_names;
-        for (const data::variable& w: used_variables)
+        // replace e' (e1) by fresh variables e'' (e11)
+        std::vector<data::variable> tmp;
+        for (const data::variable& v: e1)
         {
-          used_names.insert(std::string(w.name()));
+          tmp.push_back(data::variable(m_generator(std::string(v.name())), v.sort()));
         }
-        data::variable_list e1_new = detail::fresh_variables(e1, used_names);
+        data::variable_list e11(tmp.begin(), tmp.end());
+
         data::mutable_map_substitution<> sigma1;
-        make_substitution(e1, atermpp::container_cast<data::data_expression_list>(e1_new), sigma1);
-        std::set<data::variable> sigma1_variables(e1_new.begin(), e1_new.end());
+        make_substitution(e1, atermpp::container_cast<data::data_expression_list>(e11), sigma1);
+        std::set<data::variable> sigma1_variables(e11.begin(), e11.end());
         data::data_expression cj_new = data::replace_variables_capture_avoiding(cj, sigma1, sigma1_variables);
         data::data_expression_list gj_new = data::replace_variables_capture_avoiding(gj, sigma1, sigma1_variables);
 
-        pbes_expression expr = make_exists(e1_new, optimized_and(cj_new, var(Y2(p, q, i), d + gj_new)));
+        pbes_expression expr = make_exists(e11, optimized_and(cj_new, var(Y2(p, q, i), d + gj_new)));
         v.push_back(expr);
       }
       return optimized_or(var(X(p, q), d + d1), optimized_join_or(v.begin(), v.end()));
@@ -774,6 +743,12 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       const lps::linear_process& m = model.process();
       const lps::linear_process& s = spec1.process();
       init(m, s);
+
+      m_generator.clear_context();
+      m_generator.add_identifiers(data::function_and_mapping_identifiers(model.data()));
+      m_generator.add_identifiers(data::function_and_mapping_identifiers(spec.data()));
+      m_generator.add_identifiers(lps::find_identifiers(model));
+      m_generator.add_identifiers(lps::find_identifiers(spec));
 
       data::variable_list const& d  = m.process_parameters();
       data::variable_list const& d1 = s.process_parameters();

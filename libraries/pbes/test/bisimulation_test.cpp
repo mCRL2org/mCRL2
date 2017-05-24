@@ -21,8 +21,8 @@ void test_bisimulation(const std::string& s1, const std::string& s2,
   specification spec2;
   if (linearize)
   {
-    spec1=remove_stochastic_operators(linearise(s1));
-    spec2=remove_stochastic_operators(linearise(s2));
+    spec1 = remove_stochastic_operators(linearise(s1));
+    spec2 = remove_stochastic_operators(linearise(s2));
   }
   else
   {
@@ -184,30 +184,6 @@ BOOST_AUTO_TEST_CASE(buffers_explicit_lose)
 
   test_bisimulation(buffer, lossy_buffer, false, false, false, false);
   test_bisimulation(lossy_buffer, buffer, false, false, false, false);
-}
-
-BOOST_AUTO_TEST_CASE(test_fresh_variables)
-{
-  data::variable_list w = { data::variable("d", data::basic_sort("D")), data::variable("e", data::basic_sort("E")), data::variable("f", data::basic_sort("F")) };
-  std::set<std::string> context;
-  context.insert("e");
-  context.insert("f_00");
-  data::variable_list w1 = pbes_system::detail::fresh_variables(w, context);
-  std::cout << "w1 = " << data::pp(w1) << std::endl;
-
-  context.clear();
-  context.insert("e3_Sx0");
-  context.insert("e_Sx0");
-  context.insert("n0_Sx0");
-  context.insert("n_S");
-  context.insert("s3_S");
-  std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
-  data::variable_list yi = { data::variable("e3_S", data::basic_sort("A")) };
-  std::cout << "\nyi " << data::pp(yi) << std::endl;
-  data::variable_list y = pbes_system::detail::fresh_variables(yi, context);
-  std::cout << "\ny " << data::pp(y) << std::endl;
-  BOOST_CHECK(y.size() == 1);
-  BOOST_CHECK(std::string(y.front().name()) != " e3_Sx0");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
