@@ -12,14 +12,11 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
-//#define MCRL2_DEBUG_DATA_CONSTRUCTION
 #define MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 
 #include <algorithm>
 #include <sstream>
 #include <utility>
-
-#include <boost/algorithm/string/trim.hpp>
 
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/data/exists.h"
@@ -592,7 +589,7 @@ struct absinthe_algorithm
     {
       using namespace data;
       //mCRL2log(log::debug, "absinthe") << "lift_function_symbol_2_3 f = " << print_symbol(f) << std::endl;
-      std::string name = "Lift" + boost::algorithm::trim_copy(std::string(f.name()));
+      std::string name = "Lift" + utilities::trim_copy(std::string(f.name()));
       const sort_expression &s = f.sort();
       if (is_basic_sort(s))
       {
@@ -868,10 +865,6 @@ struct absinthe_algorithm
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
     sort_function sigma(sigmaH, sigmaS, sigmaF);
 
-#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-  data::detail::set_data_specification(dataspec);
-#endif
-
     // add lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
     std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
 
@@ -894,7 +887,7 @@ struct absinthe_algorithm
         data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
-mCRL2log(log::debug, "absinthe") << "adding list constructor " << f1 << " to sigmaF" << std::endl;
+        mCRL2log(log::debug, "absinthe") << "adding list constructor " << f1 << " to sigmaF" << std::endl;
       }
     }
 
