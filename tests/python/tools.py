@@ -229,6 +229,20 @@ class Lps2PbesTool(Tool):
                 os.path.join(runpath, self.output_nodes[0].filename())
                ]
 
+class Lts2PbesTool(Tool):
+    def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
+        assert len(input_nodes) == 2
+        assert len(output_nodes) == 1
+        super(Lts2PbesTool, self).__init__(label, name, toolpath, input_nodes, output_nodes, args)
+
+    def arguments(self, runpath = None):
+        if not runpath:
+            runpath = os.getcwd()
+        return [os.path.join(runpath, self.input_nodes[0].filename()),
+                '-f' + os.path.join(runpath, self.input_nodes[1].filename()),
+                os.path.join(runpath, self.output_nodes[0].filename())
+               ]
+
 class Lts2LpsTool(Tool):
     def __init__(self, label, name, toolpath, input_nodes, output_nodes, args):
         assert len(input_nodes) == 2
@@ -257,6 +271,8 @@ class ToolFactory(object):
     def create_tool(self, label, name, toolpath, input_nodes, output_nodes, args):
         if name == 'lps2pbes':
             return Lps2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
+        elif name == 'lts2pbes':
+            return Lts2PbesTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lps2lts':
             return Lps2LtsTool(label, name, toolpath, input_nodes, output_nodes, args)
         elif name == 'lts2lps':

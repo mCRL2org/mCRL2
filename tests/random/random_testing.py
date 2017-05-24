@@ -156,6 +156,14 @@ class Lps2pbesTest(ProcessTest):
         super(Lps2pbesTest, self).create_inputfiles(runpath)
         self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
 
+class Lts2pbesTest(ProcessTest):
+    def __init__(self, name, settings = dict()):
+        super(Lts2pbesTest, self).__init__(name, ymlfile('lts2pbes'), settings)
+
+    def create_inputfiles(self, runpath = '.'):
+        super(Lts2pbesTest, self).create_inputfiles(runpath)
+        self.inputfiles.append(mcrl2file('examples/modal-formulas/nodeadlock.mcf'))
+
 class PbesTest(RandomTest):
     def __init__(self, name, ymlfile, settings = dict()):
         super(PbesTest, self).__init__(name, ymlfile, settings)
@@ -248,6 +256,7 @@ available_tests = {
     'lpsconstelm'                                 : lambda name, settings: LpsConstelmTest(name, settings)                                         ,
     'lpsbinary'                                   : lambda name, settings: LpsBinaryTest(name, settings)                                           ,
     'lps2pbes'                                    : lambda name, settings: Lps2pbesTest(name, settings)                                            ,
+    'lts2pbes'                                    : lambda name, settings: Lts2pbesTest(name, settings)                                            ,
     'ltscompare-bisim'                            : lambda name, settings: LtscompareTest(name, 'bisim', settings)                                 ,
     'ltscompare-bisim-gv'                         : lambda name, settings: LtscompareTest(name, 'bisim-gv', settings)                              ,
     'ltscompare-branching-bisim'                  : lambda name, settings: LtscompareTest(name, 'branching-bisim', settings)                       ,
