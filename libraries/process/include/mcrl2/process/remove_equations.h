@@ -84,10 +84,11 @@ struct duplicate_equation_removal
   duplicate_equation_removal(process_specification& procspec_)
     : procspec(procspec_)
   {
+    generator.add_identifiers(process::find_identifiers(procspec));
+    generator.add_identifiers(data::function_and_mapping_identifiers(procspec.data()));
     std::map<data::variable_list, group> s;
     for (auto i = procspec.equations().begin(); i != procspec.equations().end(); ++i)
     {
-      generator.add_identifier(i->identifier().name());
       s[i->formal_parameters()].insert(i);
     }
     for (auto& i: s)

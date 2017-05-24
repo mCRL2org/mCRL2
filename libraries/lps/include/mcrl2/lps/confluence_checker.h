@@ -936,6 +936,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark(const data::da
 
   f_set_identifier_generator.clear_context();
   f_set_identifier_generator.add_identifiers(find_identifiers(f_lps));
+  f_set_identifier_generator.add_identifiers(data::function_and_mapping_identifiers(f_lps.data()));
 
   f_number_of_summands = v_summands.size();
   std::string v_conditions = std::string(f_conditions);

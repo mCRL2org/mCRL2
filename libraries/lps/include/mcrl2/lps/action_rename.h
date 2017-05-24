@@ -391,6 +391,7 @@ lps::stochastic_specification action_rename(
 
   data::set_identifier_generator generator;
   generator.add_identifiers(lps::find_identifiers(lps_old_spec));
+  generator.add_identifiers(data::function_and_mapping_identifiers(lps_old_spec.data()));
 
   //go through the rename rules of the rename file
   mCRL2log(log::debug) << "Rename rules found: " << rename_rules.size() << "\n";
