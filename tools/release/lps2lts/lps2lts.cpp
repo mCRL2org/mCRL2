@@ -30,9 +30,6 @@
 #include "mcrl2/data/detail/rewrite_statistics.h"
 #endif
 
-#define __STRINGIFY(x) #x
-#define STRINGIFY(x) __STRINGIFY(x)
-
 using namespace std;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -158,7 +155,7 @@ class lps2lts_tool : public lps2lts_base
                  "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
       add_option("unused-data",
                  "do not remove unused parts of the data specification", 'u').
-      add_option("bit-hash", make_optional_argument("NUM", STRINGIFY(DEFAULT_BITHASHSIZE)),
+      add_option("bit-hash", make_optional_argument("NUM", "200000000"),
                  "use bit hashing to store states and store at most NUM states. "
                  "This means that instead of keeping a full record of all states "
                  "that have been visited, a bit array is used that indicate whether "
@@ -166,7 +163,7 @@ class lps2lts_tool : public lps2lts_base
                  "that this option may cause states to be mistaken for others (because "
                  "they are mapped to the same hash), it can be useful to explore very "
                  "large LTSs that are otherwise not explorable. The default value for NUM is "
-                 "approximately 2*10^8 (this corresponds to about 25MB of memory)",'b').
+                 "2*10^8 (this corresponds to 25MB of memory)",'b').
       add_option("max", make_mandatory_argument("NUM"),
                  "explore at most NUM states", 'l').
       add_option("todo-max", make_mandatory_argument("NUM"),
