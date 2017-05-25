@@ -55,17 +55,13 @@ struct lts2pbes_parameters
   {}
 };
 
-template <typename TermTraits>
-pbes_expression RHS(const state_formulas::state_formula& x0,
-                    const state_formulas::state_formula& x,
-                    const lts::lts_lts_t& lts0,
-                    const lts2pbes_lts& lts1,
+template <typename TermTraits, typename Parameters>
+pbes_expression RHS(const state_formulas::state_formula& x,
                     lts2pbes_state_type s,
-                    const utilities::progress_meter& pm,
-                    TermTraits tr
-                   );
+                    Parameters& parameters,
+                    TermTraits tr);
 
-template <typename Derived, typename TermTraits>
+template <typename Derived, typename TermTraits, typename Parameters>
 struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<Derived>
 {
   typedef state_formulas::state_formula_traverser<Derived> super;
@@ -75,21 +71,15 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
   using super::leave;
   using super::apply;
 
-  const state_formulas::state_formula& phi0; // the original formula
-  const lts::lts_lts_t& lts0;
-  const lts2pbes_lts& lts1;
   lts2pbes_state_type s;
-  const utilities::progress_meter& m_progress_meter;
+  Parameters& parameters;
   std::vector<pbes_expression> result_stack;
 
-  rhs_lts2pbes_traverser(const state_formulas::state_formula& phi0_,
-                         const lts::lts_lts_t& lts0_,
-                         const lts2pbes_lts& lts1_,
-                         lts2pbes_state_type s_,
-                         const utilities::progress_meter& pm,
+  rhs_lts2pbes_traverser(lts2pbes_state_type s_,
+                         Parameters& parameters_,
                          TermTraits
                         )
-    : phi0(phi0_), lts0(lts0_), lts1(lts1_), s(s_), m_progress_meter(pm)
+    : s(s_), parameters(parameters_)
   {}
 
   Derived& derived()
@@ -172,6 +162,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
 
   void apply(const state_formulas::must& x)
   {
+    const auto& lts1 = parameters.lts1;
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
     const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
@@ -184,13 +175,14 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
       lts2pbes_state_type t = i->second;
       const lps::multi_action& a = lts1.action_labels()[i->first];
       data::set_identifier_generator id_generator;
-      v.push_back(imp(detail::Sat(a, alpha, id_generator, TermTraits()), RHS(phi0, phi, lts0, lts1, t, m_progress_meter, TermTraits())));
+      v.push_back(imp(detail::Sat(a, alpha, id_generator, TermTraits()), RHS(phi, t, parameters, TermTraits())));
     }
     push(tr::join_and(v.begin(), v.end()));
   }
 
   void apply(const state_formulas::may& x)
   {
+    const auto& lts1 = parameters.lts1;
     std::vector<pbes_expression> v;
     assert(action_formulas::is_action_formula(x.formula()));
     const action_formulas::action_formula& alpha = atermpp::down_cast<const action_formulas::action_formula>(x.formula());
@@ -203,7 +195,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
       lts2pbes_state_type t = i->second;
       const lps::multi_action& a = lts1.action_labels()[i->first];
       data::set_identifier_generator id_generator;
-      v.push_back(and_(detail::Sat(a, alpha, id_generator, TermTraits()), RHS(phi0, phi, lts0, lts1, t, m_progress_meter, TermTraits())));
+      v.push_back(and_(detail::Sat(a, alpha, id_generator, TermTraits()), RHS(phi, t, parameters, TermTraits())));
     }
     push(tr::join_or(v.begin(), v.end()));
   }
@@ -234,7 +226,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
     const data::data_expression_list& e = x.arguments();
-    push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), phi0)));
+    push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), parameters.phi0)));
   }
 
   void apply(const state_formulas::nu& x)
@@ -243,7 +235,7 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
     data::data_expression_list e = detail::mu_expressions(x);
-    push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), phi0)));
+    push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), parameters.phi0)));
   }
 
   void apply(const state_formulas::mu& x)
@@ -252,40 +244,30 @@ struct rhs_lts2pbes_traverser: public state_formulas::state_formula_traverser<De
     const core::identifier_string& X = x.name();
     core::identifier_string X_s = make_identifier(X, s);
     data::data_expression_list e = detail::mu_expressions(x);
-    push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), phi0)));
+    push(propositional_variable_instantiation(X_s, e + detail::Par(X, data::variable_list(), parameters.phi0)));
   }
 };
 
-template <template <class, class> class Traverser, typename TermTraits>
-struct apply_rhs_lts2pbes_traverser: public Traverser<apply_rhs_lts2pbes_traverser<Traverser, TermTraits>, TermTraits>
+template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
+struct apply_rhs_lts2pbes_traverser: public Traverser<apply_rhs_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_rhs_lts2pbes_traverser<Traverser, TermTraits>, TermTraits> super;
+  typedef Traverser<apply_rhs_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
   using super::enter;
   using super::leave;
   using super::apply;
 
-  apply_rhs_lts2pbes_traverser(const state_formulas::state_formula& x0,
-                               const lts::lts_lts_t& lts0,
-                               const lts2pbes_lts& lts1,
-                               lts2pbes_state_type s,
-                               const utilities::progress_meter& pm,
-                               TermTraits tr
-                              )
-    : super(x0, lts0, lts1, s, pm, tr)
+  apply_rhs_lts2pbes_traverser(lts2pbes_state_type s, Parameters& parameters, TermTraits tr)
+    : super(s, parameters, tr)
   {}
 };
 
-template <typename TermTraits>
-pbes_expression RHS(const state_formulas::state_formula& x0,
-                    const state_formulas::state_formula& x,
-                    const lts::lts_lts_t& lts0,
-                    const lts2pbes_lts& lts1,
+template <typename TermTraits, typename Parameters>
+pbes_expression RHS(const state_formulas::state_formula& x,
                     lts2pbes_state_type s,
-                    const utilities::progress_meter& pm,
-                    TermTraits tr
-                   )
+                    Parameters& parameters,
+                    TermTraits tr)
 {
-  apply_rhs_lts2pbes_traverser<rhs_lts2pbes_traverser, TermTraits> f(x0, lts0, lts1, s, pm, tr);
+  apply_rhs_lts2pbes_traverser<rhs_lts2pbes_traverser, TermTraits, Parameters> f(s, parameters, tr);
   f.apply(x);
   return f.top();
 }

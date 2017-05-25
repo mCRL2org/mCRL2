@@ -48,11 +48,11 @@ class lps2pbes_algorithm
       {
         if (unoptimized)
         {
-          detail::E_structured(f, parameters, m_generator, equations, core::term_traits<pbes_expression>());
+          detail::E_structured(f, parameters, equations, core::term_traits<pbes_expression>());
         }
         else
         {
-          detail::E_structured(f, parameters, m_generator, equations, core::term_traits_optimized<pbes_expression>());
+          detail::E_structured(f, parameters, equations, core::term_traits_optimized<pbes_expression>());
         }
       }
       else

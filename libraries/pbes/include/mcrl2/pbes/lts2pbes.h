@@ -45,8 +45,7 @@ class lts2pbes_algorithm
     template <typename Parameters>
     void run(const state_formulas::state_formula& f, std::vector<pbes_equation>& equations, Parameters& parameters)
     {
-      equations = detail::E(f, f, parameters.lts0, parameters.lts1, parameters.pm, core::term_traits_optimized<pbes_expression>());
-      // detail::E_structured(f, parameters, m_generator, equations, core::term_traits<pbes_expression>());
+      detail::E_lts2pbes(f, parameters, equations, core::term_traits_optimized<pbes_expression>());
     }
 
   public:
@@ -75,7 +74,6 @@ class lts2pbes_algorithm
       std::vector<pbes_equation> eqn;
       detail::lts2pbes_parameters parameters(f, lts0, lts1, m_id_generator, m_progress_meter);
       run(f, eqn, parameters);
-      // std::vector<pbes_equation> eqn = detail::E(f, f, lts0, lts1, m_progress_meter, core::term_traits_optimized<pbes_expression>());
 
       // compute the initial state
       state_type s0 = lts0.initial_state();

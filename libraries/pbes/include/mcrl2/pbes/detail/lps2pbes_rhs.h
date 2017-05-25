@@ -525,10 +525,9 @@ template <typename TermTraits, typename Parameters>
 inline
 typename TermTraits::term_type RHS_structured(const state_formulas::state_formula& x,
                                               Parameters& parameters,
-                                              data::set_identifier_generator& propvar_generator,
                                               const data::variable_list& variables,
                                               const fixpoint_symbol& sigma,
-                                              std::vector<pbes_equation>& Z,
+                                              std::vector<pbes_equation>& equations,
                                               TermTraits tr
                                              );
 
@@ -551,21 +550,18 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
 
   std::multiset<data::variable> variables;
   const fixpoint_symbol& sigma;
-  data::set_identifier_generator& propvar_generator;
-  std::vector<pbes_equation>& Z; // new equations that are generated on the fly
+  std::vector<pbes_equation>& equations; // new equations that are generated on the fly
 
   rhs_structured_traverser(Parameters& parameters,
-                           data::set_identifier_generator& propvar_generator_,
                            const data::variable_list& variables_,
                            const fixpoint_symbol& sigma_,
-                           std::vector<pbes_equation>& Z_,
+                           std::vector<pbes_equation>& equations_,
                            TermTraits tr
                )
     : super(parameters, tr),
     	variables(variables_.begin(), variables_.end()),
     	sigma(sigma_),
-    	propvar_generator(propvar_generator_),
-    	Z(Z_)
+    	equations(equations_)
   {}
 
   data::variable_list rhs_structured_compute_variables(const state_formulas::state_formula& x, const std::multiset<data::variable>& variables) const
@@ -607,18 +603,18 @@ struct rhs_structured_traverser: public rhs_traverser<Derived, TermTraits, Param
   template <typename MustMayExpression>
   pbes_expression apply_may_must_rhs(const MustMayExpression& x)
   {
-    return RHS_structured(x.operand(), parameters, propvar_generator, rhs_structured_compute_variables(x.operand(), variables), sigma, Z, TermTraits());
+    return RHS_structured(x.operand(), parameters, rhs_structured_compute_variables(x.operand(), variables), sigma, equations, TermTraits());
   }
 
   // override
   pbes_expression apply_may_must_result(const pbes_expression& p)
   {
     // generate a new equation 'Y(d) = p', and add Y(d) to v
-    core::identifier_string Y = propvar_generator("Y");
+    core::identifier_string Y = parameters.id_generator("Y");
     data::variable_list d(variables.begin(), variables.end());
     propositional_variable Yd(Y, d);
     pbes_equation eqn(sigma, Yd, p);
-    Z.push_back(eqn);
+    equations.push_back(eqn);
     return propositional_variable_instantiation(Y, data::make_data_expression_list(d));
   }
 
@@ -642,13 +638,12 @@ struct apply_rhs_structured_traverser: public Traverser<apply_rhs_structured_tra
   using super::apply;
 
   apply_rhs_structured_traverser(Parameters& parameters,
-                                 data::set_identifier_generator& propvar_generator,
                                  const data::variable_list& variables,
                                  const fixpoint_symbol& sigma,
-                                 std::vector<pbes_equation>& Z,
+                                 std::vector<pbes_equation>& equations,
                                  TermTraits tr
                                 )
-    : super(parameters, propvar_generator, variables, sigma, Z, tr)
+    : super(parameters, variables, sigma, equations, tr)
   {}
 };
 
@@ -656,14 +651,13 @@ template <typename TermTraits, typename Parameters>
 inline
 typename TermTraits::term_type RHS_structured(const state_formulas::state_formula& x,
                                               Parameters& parameters,
-                                              data::set_identifier_generator& propvar_generator,
                                               const data::variable_list& variables,
                                               const fixpoint_symbol& sigma,
-                                              std::vector<pbes_equation>& Z,
+                                              std::vector<pbes_equation>& equations,
                                               TermTraits tr
                                              )
 {
-  apply_rhs_structured_traverser<rhs_structured_traverser, TermTraits, Parameters> f(parameters, propvar_generator, variables, sigma, Z, tr);
+  apply_rhs_structured_traverser<rhs_structured_traverser, TermTraits, Parameters> f(parameters, variables, sigma, equations, tr);
   f.apply(x);
   return f.top();
 }

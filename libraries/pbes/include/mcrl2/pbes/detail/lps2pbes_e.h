@@ -222,7 +222,6 @@ void E(const state_formulas::state_formula& x, Parameters& parameters, std::vect
 template <typename TermTraits, typename Parameters>
 void E_structured(const state_formulas::state_formula& x,
                   Parameters& parameters,
-                  data::set_identifier_generator& propvar_generator,
                   std::vector<pbes_equation>& result,
                   TermTraits tr
                  );
@@ -243,14 +242,10 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits, Parameter
 
   // typedef std::vector<pbes_equation> result_type;
 
-  data::set_identifier_generator& propvar_generator;
-
   e_structured_traverser(Parameters& parameters,
-                         data::set_identifier_generator& propvar_generator_,
                          TermTraits tr
                         )
-    : super(parameters, tr),
-    	propvar_generator(propvar_generator_)
+    : super(parameters, tr)
   {}
 
   Derived& derived()
@@ -270,12 +265,12 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits, Parameter
     d = is_timed() ? parameters.T + d : d;
     data::data_expression_list e = data::make_data_expression_list(d);
     propositional_variable v(X, d);
-    std::vector<pbes_equation> Z;
-    pbes_expression expr = detail::RHS_structured(phi, parameters, propvar_generator, d, sigma, Z, TermTraits());
+    std::vector<pbes_equation> equations;
+    pbes_expression expr = detail::RHS_structured(phi, parameters, d, sigma, equations, TermTraits());
     pbes_equation eqn(sigma, v, expr);
     std::vector<pbes_equation> result = { eqn };
-    result.insert(result.end(), Z.begin(), Z.end());
-    E_structured(phi, parameters, propvar_generator, result, TermTraits());
+    result.insert(result.end(), equations.begin(), equations.end());
+    E_structured(phi, parameters, result, TermTraits());
     push(result);
   }
 
@@ -299,22 +294,20 @@ struct apply_e_structured_traverser: public Traverser<apply_e_structured_travers
   using super::apply;
 
   apply_e_structured_traverser(Parameters& parameters,
-                               data::set_identifier_generator& propvar_generator,
                                TermTraits tr
                               )
-    : super(parameters, propvar_generator, tr)
+    : super(parameters, tr)
   {}
 };
 
 template <typename TermTraits, typename Parameters>
 void E_structured(const state_formulas::state_formula& x,
                   Parameters& parameters,
-                  data::set_identifier_generator& propvar_generator,
                   std::vector<pbes_equation>& result,
                   TermTraits tr
                  )
 {
-  apply_e_structured_traverser<e_structured_traverser, TermTraits, Parameters> f(parameters, propvar_generator, tr);
+  apply_e_structured_traverser<e_structured_traverser, TermTraits, Parameters> f(parameters, tr);
   f.apply(x);
   assert(f.result_stack.size() == 1);
   result.insert(result.end(), f.top().begin(), f.top().end());
