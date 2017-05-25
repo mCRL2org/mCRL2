@@ -1172,47 +1172,61 @@ QVector3D GLScene::size()
 
 GLScene::Selection GLScene::select(int x, int y)
 {
-  Selection result;
-  GLuint selectBuf[512];
-  GLint  hits = 0;
-  GLdouble fuzz = 2.0;
+  Selection s {so_none, 0};
+  selectObject(s, x, y, so_node) || selectObject(s, x, y, so_handle);
+  return s;
+}
 
-  x *= m_texturedata->device_pixel_ratio;
-  y *= m_texturedata->device_pixel_ratio;
-
-  glSelectBuffer(512, selectBuf);
-  glRenderMode(GL_SELECT);
-  glInitNames();
-  glPushName(so_none);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  m_camera->applyPickMatrix(x, y, fuzz);
-  m_camera->applyFrustum();
-  render();
-  hits = glRenderMode(GL_RENDER);
-
-  GLuint bestZ = (GLuint)-1;
-  result.selectionType = so_none;
-  result.index = 0;
-
-  for (size_t index = 0; hits > 0; --hits)
+static bool isClose(int x, int y, const QVector3D& pos, float treshold, float& bestZ)
+{
+  float distance = std::sqrt(std::pow(pos.x() - x, 2) + std::pow(pos.y() - y, 2));
+  if (distance < treshold && pos.z() < bestZ)
   {
-    GLHitRecord& rec = *((GLHitRecord*)&selectBuf[index]);
-    index += rec.stackSize + 3;
-    if ((rec.stack[0] == (GLuint)result.selectionType && rec.minDepth < bestZ) ||
-        (rec.stack[0] > (GLuint)result.selectionType))
-    {
-      result.selectionType = static_cast<SelectableObject>(rec.stack[0]);
-      result.index = rec.stack[1];
-      bestZ = rec.minDepth;
-    }
+    bestZ = pos.z();
+    return true;
   }
+  return false;
+}
 
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  m_camera->applyFrustum();
-
-  return result;
+bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
+                           SelectableObject type)
+{
+  float size, bestZ = INFINITY;
+  switch (type)
+  {
+  case so_node:
+  {
+    size = m_size_node * m_camera->pixelsize * m_texturedata->device_pixel_ratio;
+    for (size_t i = 0; i < m_graph.nodeCount(); i++)
+    {
+      if (isClose(x, y, worldToEye(m_graph.node(i).pos()), size, bestZ))
+      {
+        s.selectionType = type;
+        s.index = i;
+      }
+    }
+    break;
+  }
+  case so_handle:
+  {
+    size = SIZE_HANDLE * m_camera->pixelsize * m_texturedata->device_pixel_ratio;
+    for (size_t i = 0; i < m_graph.edgeCount(); i++)
+    {
+      if (isClose(x, y, worldToEye(m_graph.handle(i).pos()), size, bestZ))
+      {
+        s.selectionType = type;
+        s.index = i;
+      }
+    }
+    break;
+  }
+  case so_slabel:
+  case so_label:
+  case so_edge:
+  case so_none:
+  Q_UNREACHABLE();
+  }
+  return s.selectionType != so_none;
 }
 
 void GLScene::zoom(float factor)

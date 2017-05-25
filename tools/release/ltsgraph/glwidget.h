@@ -68,36 +68,6 @@ class GLWidget : public QOpenGLWidget
     GLScene* m_scene;           ///< The GLScene which is used to render the contents.
     std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
 
-
-    /**
-     * @brief Renders a single edge.
-     * @param i The index of the edge to render.
-     */
-    void drawEdge(size_t i);
-
-    /**
-     * @brief Renders a single Node.
-     * @param i The index of the node to render.
-     */
-    void drawNode(size_t i);
-
-    /**
-     * @brief Renders a single label.
-     * @param i The index of the label to render.
-     */
-    void drawLabel(size_t i);
-
-    /**
-     * @brief Renders a single handle.
-     * @param i The index of the handle to render.
-     */
-    void drawHandle(size_t i);
-
-    /**
-     * @brief Renders the scene.
-     */
-    void drawScene();
-
     /**
      * @brief Updates the selected value for all nodes.
      */
