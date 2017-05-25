@@ -38,12 +38,17 @@ class t_tool_options
     lts_type        outtype;
     lts_equivalence equivalence;
     std::vector<std::string> tau_actions;   // Actions with these labels must be considered equal to tau.
-    bool            print_dot_state;
+    bool            remove_state_information;
     bool            determinise;
     bool            check_reach;
 
-    inline t_tool_options() : intype(lts_none), outtype(lts_none), equivalence(lts_eq_none),
-      print_dot_state(true), determinise(false), check_reach(true)
+    inline t_tool_options() 
+     : intype(lts_none), 
+       outtype(lts_none), 
+       equivalence(lts_eq_none),
+       remove_state_information(false), 
+       determinise(false), 
+       check_reach(true)
     {
     }
 
@@ -131,6 +136,11 @@ class ltsconvert_tool : public input_output_tool
       if (tool_options.check_reach)
       {
         reachability_check(l, true); // Remove unreachable states from the input transition system.
+      }
+
+      if (tool_options.remove_state_information)
+      {
+        l.clear_state_labels();
       }
 
       if (tool_options.equivalence != lts_eq_none)
@@ -233,18 +243,18 @@ class ltsconvert_tool : public input_output_tool
       input_output_tool::add_options(desc);
 
       desc.add_option("no-reach",
-                      "do not perform a reachability check on the input LTS");
+                      "do not perform a reachability check on the input LTS.");
       desc.add_option("no-state",
-                      "leave out state information when saving in dot format", 'n');
+                      "remove the state information. This can be useful when state labels are huge.", 'n');
       desc.add_option("determinise", "determinise LTS", 'D');
       desc.add_option("lps", make_file_argument("FILE"),
                       "use FILE as the LPS from which the input LTS was generated; this might "
                       "be needed to store the correct parameter names of states when saving "
-                      "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
+                      "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS.", 'l');
       desc.add_option("in", make_mandatory_argument("FORMAT"),
-                      "use FORMAT as the input format", 'i').
+                      "use FORMAT as the input format.", 'i').
       add_option("out", make_mandatory_argument("FORMAT"),
-                 "use FORMAT as the output format", 'o');
+                 "use FORMAT as the output format.", 'o');
       desc.add_option("equivalence",make_enum_argument<lts_equivalence>("NAME")
                       .add_value(lts_eq_none, true)
                       .add_value(lts_eq_bisim)
@@ -267,7 +277,7 @@ class ltsconvert_tool : public input_output_tool
       desc.add_option("tau", make_mandatory_argument("ACTNAMES"),
                       "consider actions with a name in the comma separated list ACTNAMES to "
                       "be internal (tau) actions in addition to those defined as such by "
-                      "the input");
+                      "the input.");
     }
 
     void set_tau_actions(std::vector <std::string>& tau_actions, std::string const& act_names)
@@ -334,7 +344,7 @@ class ltsconvert_tool : public input_output_tool
 
       tool_options.determinise                       = 0 < parser.options.count("determinise");
       tool_options.check_reach                       = parser.options.count("no-reach") == 0;
-      tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
+      tool_options.remove_state_information          = parser.options.count("no-state") != 0;
 
       if (tool_options.determinise && (tool_options.equivalence != lts_eq_none))
       {
