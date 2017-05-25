@@ -390,7 +390,7 @@ class Graph
      * @brief Loads a graph of type ltsclass
      */
     template <class ltsclass>
-    void templatedLoad(const QString& filename, const QVector3D& min, const QVector3D& max);
+    void templatedLoad(const QString& filename, const QVector3D& min, const QVector3D& max, float nodesize);
 
     // For each probability/state pair a new transition is generated labelled with the probability.
     // The index of the newly generated state is returned.
@@ -428,8 +428,9 @@ class Graph
      * @param filename The file which contains the graph.
      * @param min The minimum coordinates for any node.
      * @param max The maximum coordinates for any node.
+     * @param nodesize The size of one node
      */
-    void load(const QString& filename, const QVector3D& min, const QVector3D& max);
+    void load(const QString& filename, const QVector3D& min, const QVector3D& max, float nodesize);
 
     /**
      * @brief Loads a graph with from a XML file exported using @fn saveXML.

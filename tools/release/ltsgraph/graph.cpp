@@ -690,7 +690,7 @@ bool Graph::isTau(size_t labelindex) const
 }
 
 void Graph::load(const QString& filename, const QVector3D& min,
-                 const QVector3D& max)
+                 const QVector3D& max, float nodesize)
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
@@ -700,18 +700,18 @@ void Graph::load(const QString& filename, const QVector3D& min,
     switch (m_type)
     {
     case mcrl2::lts::lts_aut:
-      templatedLoad<mcrl2::lts::probabilistic_lts_aut_t>(filename, min, max);
+      templatedLoad<mcrl2::lts::probabilistic_lts_aut_t>(filename, min, max, nodesize);
       break;
     case mcrl2::lts::lts_dot:
       throw mcrl2::runtime_error("Cannot read a .dot file anymore.");
       break;
     case mcrl2::lts::lts_fsm:
-      templatedLoad<mcrl2::lts::probabilistic_lts_fsm_t>(filename, min, max);
+      templatedLoad<mcrl2::lts::probabilistic_lts_fsm_t>(filename, min, max, nodesize);
       break;
     case mcrl2::lts::lts_lts:
     default:
       m_type = mcrl2::lts::lts_lts;
-      templatedLoad<mcrl2::lts::probabilistic_lts_lts_t>(filename, min, max);
+      templatedLoad<mcrl2::lts::probabilistic_lts_lts_t>(filename, min, max, nodesize);
       break;
     }
   }
@@ -732,7 +732,7 @@ void Graph::load(const QString& filename, const QVector3D& min,
 
 template <class lts_t>
 void Graph::templatedLoad(const QString& filename, const QVector3D& min,
-                          const QVector3D& max)
+                          const QVector3D& max, float nodesize)
 {
   lts_t lts;
   lts.load(filename.toUtf8().constData());
@@ -762,7 +762,7 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
     {
       if (i == ps.state())
       {
-        epsilon = 0.5;
+        epsilon = nodesize / 2;
         break;
       }
     }

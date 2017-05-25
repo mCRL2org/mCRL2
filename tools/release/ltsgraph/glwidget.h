@@ -200,10 +200,10 @@ class GLWidget : public QOpenGLWidget
 
 
     //Getters and setters
-    size_t nodeSize() {
+    size_t nodeSize() const {
       return m_scene->nodeSize();
     }
-    float fogDistance() {
+    float fogDistance() const {
       return m_scene->fogDistance();
     }
   signals:
