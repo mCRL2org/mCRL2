@@ -42,14 +42,6 @@
 #define SIZE_HANDLE     8
 #define SIZE_ARROWHEAD 12
 
-struct GLHitRecord
-{
-  GLuint stackSize;
-  GLuint minDepth;
-  GLuint maxDepth;
-  GLuint stack[1];
-};
-
 struct Color3f
 {
   GLfloat r, g, b;
