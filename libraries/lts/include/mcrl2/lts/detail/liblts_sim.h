@@ -45,20 +45,8 @@ class sim_partitioner
     ~sim_partitioner();
 
     /** Computes the simulation equivalence classes and preorder
-     * relations of the LTS under restriction of (Sigma0,P0) beeing
-     * - Sigma0 the initial partition of nodes into equivalence classes
-     * - P0 a preorder on previous classes.
-     **/
-    void partitioning_algorithm(
-                        const size_t init_s,
-                        const std::vector< size_t>& initBlock,
-                        const std::vector< std::vector<bool>>& initP );
-    /** Computes the simulation equivalence classes and preorder
-     * relations of the LTS taking (Simga0, P0) as
-     * - Sigma0 : Universal Partition, i.e. {N}
-     * - P0     : Identity Preorder, i.e. {N} <= {N}
-     */
-    virtual void partitioning_algorithm();    
+     * relations of the LTS. */
+    virtual void partitioning_algorithm();
 
     /** Gives the transition relation on the computed equivalence
      * classes of the LTS. The label numbers of the transitions
@@ -106,6 +94,12 @@ class sim_partitioner
     bool in_same_class(size_t s,size_t t) const;
 
   protected:
+
+    /** Computes the simulation equivalence classes and preorder
+     * relations of the LTS.
+     * \pre : initialise_datastructures called */
+    void partitioning_algorithmG();
+    
     struct state_bucket
     {
       ptrdiff_t next;
@@ -137,9 +131,7 @@ class sim_partitioner
     std::vector<size_t> touched_blocks;
     std::vector<size_t> contents;
 
-    void initialise_datastructures(const size_t init_s,
-                           const std::vector< size_t>& initBlock,
-                           const std::vector< std::vector<bool>>& initP );
+    void initialise_datastructures();
     //void read_partition_from_file(char *parfile);
 
     void refine(bool& change);
@@ -167,23 +159,21 @@ class sim_partitioner
     std::string print_relation(size_t s,std::vector< std::vector<bool> >& R);
     std::string print_block(size_t b);
     std::string print_structure(hash_table3* struc);
+    std::string print_reverse_topological_sort(const std::vector<size_t>& Sort);
 };
 
 
 #define LIST_END (-1)
-#define UNIVERSAL_PART (0) 
+#define UNIVERSAL_PART (0)
 
 template <class LTS_TYPE>
 sim_partitioner<LTS_TYPE>::sim_partitioner(LTS_TYPE& l)
   : aut(l)
 {
-  // aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
-  // trans_index = aut.get_transition_pre_table();
-  trans_index=transitions_per_outgoing_state_action_pair_reversed(aut.get_transitions(),aut.hidden_label_map());
   match  = new hash_table3(1000);
   exists = new hash_table3(1000);
   forall = new hash_table3(1000);
- }
+}
 
 template <class LTS_TYPE>
 sim_partitioner<LTS_TYPE>::~sim_partitioner()
@@ -198,23 +188,16 @@ sim_partitioner<LTS_TYPE>::~sim_partitioner()
 template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
 {
-  size_t N = aut.num_states();  
-  const std::vector< size_t> universal(N,UNIVERSAL_PART);
-  const std::vector< std::vector<bool>>  identity = {{true}};
-  partitioning_algorithm(1,universal,identity);
+  initialise_datastructures();
+  partitioning_algorithmG();
 }
 
+/* Pre : initialise_datastructures called */
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::partitioning_algorithm(
-                            const size_t init_s,
-                      const std::vector< size_t>& initBlock,
-                      const std::vector< std::vector<bool>>& initP )
-{  
+void sim_partitioner<LTS_TYPE>::partitioning_algorithmG()
+{
   using namespace mcrl2::core;
-  initialise_datastructures(init_s,initBlock,initP);
-  mCRL2log(log::debug) << "--------------------- INITIALISATION ---------------------------" << std::endl;
-  
-  mCRL2log(log::debug) << "  initialisation; number of blocks: " << s_Sigma << std::endl;
+
   bool change;
   size_t i;
 
@@ -259,38 +242,28 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm(
 
   if (mCRL2logEnabled(log::debug))
   {
-    print_Pi_Q();
+    mCRL2log(log::debug) << print_Pi_Q();
   }
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::initialise_datastructures(
-                         const size_t init_s,
-                         const std::vector< size_t>& initBlock,
-                         const std::vector< std::vector<bool>>& initP )
+void sim_partitioner<LTS_TYPE>::initialise_datastructures()
 {
+  // aut.sort_transitions(mcrl2::lts::lbl_tgt_src);
+  // trans_index = aut.get_transition_pre_table();
+  trans_index=transitions_per_outgoing_state_action_pair_reversed(aut.get_transitions(),aut.hidden_label_map());
 
   size_t N = aut.num_states();
+
   state_bucket sb = { LIST_END, LIST_END };
-  state_buckets.clear();
-  state_touched.clear();
   state_buckets.assign(N,sb);
   state_touched.assign(N,false);
-  block_Pi.clear();
-  block_Pi.assign(N,0);
+  block_Pi.assign(N,UNIVERSAL_PART);
 
-  /* split the set of all states in the given blocks */
-  s_Pi = init_s;
-  std::copy(initBlock.begin(),initBlock.end(),block_Pi.begin());
-
-  contents_u.clear();
-  contents_t.clear();  
-  for (size_t i = 0; i < s_Pi; ++i)
-  {
-    contents_u.push_back(i);
-    contents_t.push_back(LIST_END);
-  };
-
+  /* put all states in one block */
+  s_Pi = 1;
+  contents_u.push_back(UNIVERSAL_PART);
+  contents_t.push_back(LIST_END);
   for (size_t i = 0; i < N; ++i)
   {
     if (i > 0)
@@ -310,23 +283,23 @@ void sim_partitioner<LTS_TYPE>::initialise_datastructures(
       state_buckets[i].next = LIST_END;
     }
   }
-  
-  block_touched.clear();
+
   block_touched.assign(s_Pi,false);
   s_Sigma = s_Pi;
 
   /* initialise P and children */
   std::vector<size_t> vi;
-  children.clear();
   children.assign(s_Sigma,vi);
   std::vector<bool> vb(s_Sigma,false);
-  P.clear();
   P.assign(s_Sigma,vb);
   for (size_t i = 0; i < s_Sigma; ++i)
   {
     children[i].push_back(i);
-    std::copy(initP[i].begin(),initP[i].end(),P[i].begin());
+    P[i][i] = true;
   }
+
+  mCRL2log(log::debug) << "--------------------- INITIALISATION ---------------------------" << std::endl;
+  mCRL2log(log::debug) << "  initialisation; number of blocks: " << s_Sigma << std::endl;
 }
 
 /* ----------------- INITIALISE ------------------------------------- */
@@ -405,7 +378,7 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
   if (mCRL2logEnabled(log::debug))
   {
     mCRL2log(log::debug) << "--------------------- Refine ---------------------------------------" << std::endl;
-    print_Sigma_P();
+    mCRL2log(log::debug) << print_Sigma_P();
   }
 
   /* Compute a reverse topological sorting of Sigma w.r.t. P */
@@ -415,16 +388,7 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
 
   if (mCRL2logEnabled(log::debug))
   {
-    mCRL2log(log::debug) << "reverse topological sort is: [";
-    for (size_t i = 0; i < Sort.size(); ++i)
-    {
-      mCRL2log(log::debug) << Sort[i];
-      if (i+1 < Sort.size())
-      {
-        mCRL2log(log::debug) << ",";
-      }
-    }
-    mCRL2log(log::debug) << "]" << std::endl;
+    mCRL2log(log::debug) << print_reverse_topological_sort(Sort);
   }
 
   /* Some local variables */
@@ -518,7 +482,7 @@ void sim_partitioner<LTS_TYPE>::reverse_topological_sort(std::vector<size_t>& So
 
 template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::dfs_visit(size_t u,std::vector<bool>& visited,
-    std::vector<size_t>& Sort)
+    std::vector<size_t> &Sort)
 {
   visited[u] = true;
   for (size_t v = 0; v < s_Sigma; ++v)
@@ -712,7 +676,7 @@ void sim_partitioner<LTS_TYPE>::induce_P_on_Pi()
 /* ----------------- FILTER ----------------------------------------- */
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::filter(size_t S,std::vector< std::vector<bool> >& R,
+void sim_partitioner<LTS_TYPE>::filter(size_t S,std::vector< std::vector<bool> > &R,
                                        bool B)
 {
   /* Initialise the match function */
@@ -1081,7 +1045,7 @@ std::string sim_partitioner<LTS_TYPE>::print_block(size_t b)
 
 template <class LTS_TYPE>
 std::string sim_partitioner<LTS_TYPE>::print_relation(size_t s,
-    std::vector< std::vector<bool> >& R)
+    std::vector< std::vector<bool> > &R)
 {
   using namespace mcrl2::core;
   std::stringstream result;
@@ -1116,6 +1080,25 @@ std::string sim_partitioner<LTS_TYPE>::print_structure(hash_table3* struc)
   result << "}";
   return result.str();
 }
+
+template <class LTS_TYPE>
+std::string sim_partitioner<LTS_TYPE>::print_reverse_topological_sort(const std::vector<size_t> &Sort)
+{
+  using namespace mcrl2::core;
+  std::stringstream result;
+  result << "reverse topological sort is: [";
+  for (size_t i = 0; i < Sort.size(); ++i)
+    {
+      result << Sort[i];
+      if (i+1 < Sort.size())
+	{
+	  result << ",";
+	}
+    }
+  result << "]" << std::endl;
+  return result.str();
+} 
+
 
 } // namespace detail
 } // namespace lts

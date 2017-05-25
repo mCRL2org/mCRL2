@@ -120,7 +120,7 @@ class LpsConfcheckTest(ProcessTauTest):
 
 class LtscompareTest(ProcessTauTest):
     def __init__(self, name, equivalence_type, settings = dict()):
-        assert equivalence_type in ['bisim', 'bisim-gv', 'branching-bisim', 'branching-bisim-gv', 'dpbranching-bisim', 'dpbranching-bisim-gv', 'weak-bisim', 'dpweak-bisim', 'sim', 'trace', 'weak-trace']
+        assert equivalence_type in ['bisim', 'bisim-gv', 'branching-bisim', 'branching-bisim-gv', 'dpbranching-bisim', 'dpbranching-bisim-gv', 'weak-bisim', 'dpweak-bisim', 'sim', 'ready-sim' , 'trace', 'weak-trace']
         super(LtscompareTest, self).__init__(name, ymlfile('ltscompare'), settings)
         self.set_command_line_options('t3', ['-e' + equivalence_type])
         self.set_command_line_options('t4', ['-e' + equivalence_type])
@@ -266,6 +266,7 @@ available_tests = {
     'ltscompare-weak-bisim'                       : lambda name, settings: LtscompareTest(name, 'weak-bisim', settings)                            ,
     'ltscompare-dpweak-bisim'                     : lambda name, settings: LtscompareTest(name, 'dpweak-bisim', settings)                          ,
     'ltscompare-sim'                              : lambda name, settings: LtscompareTest(name, 'sim', settings)                                   ,
+    'ltscompare-ready-sim'                        : lambda name, settings: LtscompareTest(name, 'ready-sim', settings)                             ,    
     'ltscompare-trace'                            : lambda name, settings: LtscompareTest(name, 'trace', settings)                                 ,
     'ltscompare-weak-trace'                       : lambda name, settings: LtscompareTest(name, 'weak-trace', settings)                            ,
     'bisimulation-bisim'                          : lambda name, settings: BisimulationTest(name, 'bisim', settings)                               ,

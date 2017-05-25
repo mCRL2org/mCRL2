@@ -40,59 +40,108 @@ template <class LTS_TYPE>
   class ready_sim_partitioner : public sim_partitioner<LTS_TYPE>
 {
  public:
-  ready_sim_partitioner(LTS_TYPE& l) : sim_partitioner<LTS_TYPE>(l) {};
+  ready_sim_partitioner(LTS_TYPE& l) : sim_partitioner<LTS_TYPE>(l)
+  {
+    exists2 = new hash_table2(1000);
+    forall2 = new hash_table2(1000);
+  };
 
-    /** Computes the ready-simulation equivalence
+    /**
+     * Computes the ready-simulation equivalence
      * classes and preorder relations of the LTS
      */  
   virtual void partitioning_algorithm();
-
+    /** Destroys this partitioner. */
+  ~ready_sim_partitioner();
  private :
+  // Non inherited data members...
+  hash_table2* exists2;
+  hash_table2* forall2;  
+
+  // Non inherited methods...
+    /**
+     * Drives the partition pair <Universal,Id>
+     * into appropriate ready partition-pair
+     * for furhter input into GCPP.
+     * \pre : true
+     */  	 
+  void ready2sim_reduction();
+
+  /**
+   * Splits Universal partition
+   * into classes alpha where either
+   * { N } A<-l- alpha or
+   * not { N } <-l- alpha
+   * for some L
+   * \pre : initialise_datastructures called.
+   */
+  void refinei() ;
+
+  /*
+   * Induce P on Pi, then
+   * drops those pairs (alpha, beta)
+   * such that
+   *  {N} E<-l- Beta and not {N} A<-l- Alpha
+   * \pre : refinei  called 
+   */
+  void updatei();
+
+
+  // Non inherited auxiliary methods...
+  std::string print_structure(hash_table2* struc);  
+  
   // Inherited data members...
   using sim_partitioner<LTS_TYPE>::aut;
   using sim_partitioner<LTS_TYPE>::s_Pi;
+  using sim_partitioner<LTS_TYPE>::s_Sigma;  
   using sim_partitioner<LTS_TYPE>::block_Pi;
   using sim_partitioner<LTS_TYPE>::children;
   using sim_partitioner<LTS_TYPE>::parent;
   using sim_partitioner<LTS_TYPE>::Q;
+  using sim_partitioner<LTS_TYPE>::P;  
   using sim_partitioner<LTS_TYPE>::contents_t;
   using sim_partitioner<LTS_TYPE>::contents_u;
-  using sim_partitioner<LTS_TYPE>::exists;
-  using sim_partitioner<LTS_TYPE>::forall;
   using sim_partitioner<LTS_TYPE>::touched_blocks;  
   using sim_partitioner<LTS_TYPE>::block_touched;
-  using sim_partitioner<LTS_TYPE>::state_buckets;  
+  using sim_partitioner<LTS_TYPE>::state_buckets;
 
   // Inherited methods
+  using sim_partitioner<LTS_TYPE>::induce_P_on_Pi;
+  using sim_partitioner<LTS_TYPE>::initialise_Sigma;    
   using sim_partitioner<LTS_TYPE>::initialise_datastructures;  
-  using sim_partitioner<LTS_TYPE>::partitioning_algorithm;
+  using sim_partitioner<LTS_TYPE>::partitioning_algorithmG;
+  using sim_partitioner<LTS_TYPE>::touch;
+  using sim_partitioner<LTS_TYPE>::untouch;
 
   // Auxiliary inherited methods
-  using sim_partitioner<LTS_TYPE>::print_structure;
   using sim_partitioner<LTS_TYPE>::print_relation;
   using sim_partitioner<LTS_TYPE>::print_Sigma_P;
-
-
-  void refinei() ;
-  void updatei();
+  using sim_partitioner<LTS_TYPE>::print_Pi_Q;
 
 };
 
-/* ----------------- PARTITIONING ALGORITHM ------------------------- */
 
+/* Pre : true */
+template <class LTS_TYPE>
+void ready_sim_partitioner<LTS_TYPE>::ready2sim_reduction()
+{
+  initialise_datastructures();
+  refinei();
+  updatei();
+  s_Sigma = s_Pi; // <== Key!!
+  P.swap(Q);      // <== Key!!
+  mCRL2log(log::debug) << "--------------------- READY PRE-REDUCTION-------------------------" << std::endl;
+  mCRL2log(log::debug) << "  prereduction; number of blocks: " << s_Sigma << std::endl;
+}
+
+/* ----------------- PARTITIONING ALGORITHM ------------------------- */
+/* Pre : true */
 template <class LTS_TYPE>
 void ready_sim_partitioner<LTS_TYPE>::partitioning_algorithm()
 {
-  using namespace mcrl2::core;
-
-  size_t N = aut.num_states();    
-  const std::vector< size_t> universal(N,UNIVERSAL_PART);
-  const std::vector< std::vector<bool>>  identity = {{true}};  
-  initialise_datastructures(1,universal,identity);
-  refinei();
-  updatei();
-  // Now ready_sim equivalence amounts to ordinary sim equivalence.
-  partitioning_algorithm(s_Pi,block_Pi,Q);
+  // ready_sim problem amounts to GCPP previous reduction
+  ready2sim_reduction();
+  partitioning_algorithmG();
 }
 
 /* ----------------- REFINE ----------------------------------------- */
@@ -123,7 +172,7 @@ void ready_sim_partitioner<LTS_TYPE>::refinei()
 
   /* Some local variables */
   std::vector<size_t>::iterator alphai, last;
-  size_t l;
+  size_t l;  
 
   /* The main loop */  
   for (l = 0; l < aut.num_action_labels(); ++l)
@@ -131,38 +180,37 @@ void ready_sim_partitioner<LTS_TYPE>::refinei()
     mCRL2log(log::debug) << "---------------------------------------------------" << std::endl;
     mCRL2log(log::debug) << "Label = \"" << mcrl2::lts::pp(aut.action_label(l)) << "\"" << std::endl;
 
-    
     touched_blocks.clear();
-    this->initialise_Sigma(UNIVERSAL_PART,l);  // Interested on {N} E<-l- alpha
+    initialise_Sigma(UNIVERSAL_PART,l);  // Interested on {N} E<-l- alpha
     
     /* iterate over all alpha such that {N} E<-l- alpha  */
     last = touched_blocks.end();
     for (alphai = touched_blocks.begin(); alphai != last; ++alphai)
-    {
-      alpha = *alphai;
-      /* if {N} A<-l- alpha then alpha cannot be split */
-      if (contents_u[alpha] != LIST_END)
       {
-        /* split alpha; new block will be s_Pi */
-        children[parent[alpha]].push_back(s_Pi);  
-        parent.push_back(parent[alpha]);
-        block_touched.push_back(false);
-        contents_t.push_back(LIST_END);
-        
-        /* assign the untouched contents of alpha to s_Pi */
-        contents_u.push_back(contents_u[alpha]);
-        contents_u[alpha] = LIST_END;
-        
-        /* update the block information for the moved states */
-        for (ptrdiff_t i = contents_u[s_Pi]; i != LIST_END;
-                        i = state_buckets[i].next)
-        {
-          block_Pi[i] = s_Pi;
-        }
-        ++s_Pi;
+	alpha = *alphai;
+	/* if {N} A<-l- alpha then alpha cannot be split */
+	if (contents_u[alpha] != LIST_END)
+	  {
+	    /* split alpha; new block will be s_Pi */
+	    children[parent[alpha]].push_back(s_Pi);  
+	    parent.push_back(parent[alpha]);
+	    block_touched.push_back(false);
+	    contents_t.push_back(LIST_END);
+	      
+	    /* assign the untouched contents of alpha to s_Pi */
+	    contents_u.push_back(contents_u[alpha]);
+	    contents_u[alpha] = LIST_END;
+	      
+	    /* update the block information for the moved states */
+	    for (ptrdiff_t i = contents_u[s_Pi]; i != LIST_END;
+		 i = state_buckets[i].next)
+	      {
+		block_Pi[i] = s_Pi;
+	      }
+	    ++s_Pi;
+	  }
+	untouch(alpha); 
       }
-      this->untouch(alpha); 
-    }
   }
 }
 
@@ -174,57 +222,91 @@ void ready_sim_partitioner<LTS_TYPE>::updatei()
   using namespace mcrl2::core;
   mCRL2log(log::debug) << "---------------  Updatei ---------------------------------------" << std::endl;
   
-  size_t alpha,beta,l;
+  size_t l,alpha,gamma;
   std::vector<size_t>::iterator alphai, last;
 
-  this->induce_P_on_Pi(); 
+  induce_P_on_Pi(); 
 
-  exists->clear();
-  forall->clear();
+  exists2->clear();
+  forall2->clear();
 
   for (l = 0; l < aut.num_action_labels(); ++l)
   {
+    for (gamma = 0; gamma < s_Sigma; ++gamma) 
     {
       touched_blocks.clear();
-      this->initialise_Sigma(UNIVERSAL_PART,l);
+      initialise_Sigma(gamma,l); 
       last = touched_blocks.end(); 
       for (alphai = touched_blocks.begin(); alphai != last; ++alphai)
       {
         alpha = *alphai;
-        exists->add(alpha,l,UNIVERSAL_PART);
+        exists2->add(alpha,l); 
         if (contents_u[alpha] == LIST_END)
           {
-            forall->add(alpha,l,UNIVERSAL_PART);
+            forall2->add(alpha,l);
           }
-        this->untouch(alpha);
+        untouch(alpha);
       }
     }
   }
 
+  mCRL2log(log::debug) << "------ Before Filter ------\nExists2: ";
+  mCRL2log(log::debug) << print_structure(exists2);
+  mCRL2log(log::debug) << "\nForall2: ";
+  mCRL2log(log::debug) << print_structure(forall2);
+  mCRL2log(log::debug) << "\nReady Preorder: ";
+  mCRL2log(log::debug) << print_relation(s_Pi,Q);  
+
+  size_t beta;
+
   /* Apply the filtering to discard non "ready-init" pairs,
-     in Q[alpha][beta], i.e.,  when
-     {N} E<- Beta and not {N} A<- Alpha*/
+   * in Q[alpha][beta], i.e.,  when
+   * {N} E<-l- Beta and not {N} A<-l- Alpha
+   */
   for (l = 0; l < aut.num_action_labels(); ++l)
   {
-    for (beta = 0; beta < s_Pi; ++beta)
+    for (beta = 0; beta < s_Pi; ++beta) 
     {
-      if (exists->find(beta,l,UNIVERSAL_PART)) 
+      if (exists2->find(beta,l)) 
         {
           for (alpha = 0; alpha < s_Pi; ++alpha)
-          if (Q[alpha][beta] && !forall->find(alpha,l,UNIVERSAL_PART))
+          if (Q[alpha][beta] && !forall2->find(alpha,l))
             Q[alpha][beta] = false ;
         }
     }
   };
 
-  mCRL2log(log::debug) << "------ Filter ------\nExists: ";
-  mCRL2log(log::debug) << print_structure(exists);
-  mCRL2log(log::debug) << "\nForall: ";
-  mCRL2log(log::debug) << print_structure(forall);
+  mCRL2log(log::debug) << "-----  After Filter ------\nExists2: ";
+  mCRL2log(log::debug) << print_structure(exists2);
+  mCRL2log(log::debug) << "\nForall2: ";
+  mCRL2log(log::debug) << print_structure(forall2);
   mCRL2log(log::debug) << "\nReady Preorder: ";
   mCRL2log(log::debug) << print_relation(s_Pi,Q);  
 }
 
+template <class LTS_TYPE>
+std::string ready_sim_partitioner<LTS_TYPE>::print_structure(hash_table2* struc)
+{
+  using namespace mcrl2::core;
+  std::stringstream result;
+  result << "{";
+  hash_table2_iterator i(struc);
+  for (; !i.is_end(); ++i)
+  {
+    result << "(" << i.get_x() << "," << mcrl2::lts::pp(aut.action_label(i.get_y()))<< "),";
+  }
+  result << "}";
+  return result.str();  
+}
+
+template <class LTS_TYPE>
+ready_sim_partitioner<LTS_TYPE>::~ready_sim_partitioner()
+{
+  delete exists2;
+  delete forall2;
+}
+
+ 
 } // namespace detail
 } // namespace lts
 } // namespacemcrl2

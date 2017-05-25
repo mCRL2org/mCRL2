@@ -88,6 +88,85 @@ bool compare(const std::string& s1, const std::string& s2, lts_equivalence eq, b
   return compare(t1, t2, eq, counterexample);
 }
 
+BOOST_AUTO_TEST_CASE(test_reflexive)
+{
+  BOOST_CHECK(preorder_compare(l2a,l2a,lts_pre_sim));
+  BOOST_CHECK(preorder_compare(l2a,l2a,lts_pre_trace));
+  BOOST_CHECK(compare(l2a,l2a,lts_eq_sim));
+  BOOST_CHECK(compare(l2a,l2a,lts_eq_trace));
+  BOOST_CHECK(preorder_compare(l2a,l2a,lts_pre_ready_sim));
+  BOOST_CHECK(compare(l2a,l2a,lts_eq_ready_sim));    
+}
+
+
+BOOST_AUTO_TEST_CASE(test_sim_1_2)
+{
+  BOOST_CHECK(!preorder_compare(l1,l2,lts_pre_sim));  
+  BOOST_CHECK(preorder_compare(l2,l1,lts_pre_sim));
+  BOOST_CHECK(!compare(l2,l1,lts_eq_sim));
+  BOOST_CHECK(!compare(l1,l2,lts_eq_sim));    
+}
+
+BOOST_AUTO_TEST_CASE(test_sim_2_2a)
+{
+  BOOST_CHECK(preorder_compare(l2,l2a,lts_pre_sim));
+  BOOST_CHECK(!preorder_compare(l2a,l2,lts_pre_sim));
+  BOOST_CHECK(!compare(l2a,l2,lts_eq_sim));
+  BOOST_CHECK(!compare(l2,l2a,lts_eq_sim));    
+}
+
+BOOST_AUTO_TEST_CASE(test_sim_1_3)
+{
+  BOOST_CHECK(!preorder_compare(l1,l3,lts_pre_sim));
+  BOOST_CHECK(!preorder_compare(l3,l1,lts_pre_sim));
+  BOOST_CHECK(!compare(l3,l1,lts_eq_sim));
+  BOOST_CHECK(!compare(l1,l3,lts_eq_sim));    
+}
+
+
+BOOST_AUTO_TEST_CASE(test_sim_1_4)
+{
+  BOOST_CHECK(!preorder_compare(l1,l4,lts_pre_sim));
+  BOOST_CHECK(preorder_compare(l4,l1,lts_pre_sim));
+  BOOST_CHECK(!compare(l1,l4,lts_eq_sim));
+  BOOST_CHECK(!compare(l4,l1,lts_eq_sim));
+}
+
+
+BOOST_AUTO_TEST_CASE(test_ready_sim_1_2)
+{
+  BOOST_CHECK(!preorder_compare(l1,l2,lts_pre_ready_sim));
+  BOOST_CHECK(!preorder_compare(l2,l1,lts_pre_ready_sim));
+  BOOST_CHECK(!compare(l2,l1,lts_eq_ready_sim));
+  BOOST_CHECK(!compare(l1,l2,lts_eq_ready_sim));  
+}
+
+BOOST_AUTO_TEST_CASE(test_ready_sim_2_2a)
+{
+  BOOST_CHECK(preorder_compare(l2,l2a,lts_pre_ready_sim));      
+  BOOST_CHECK(!preorder_compare(l2a,l2,lts_pre_ready_sim));
+  BOOST_CHECK(!compare(l2,l2a,lts_eq_ready_sim));      
+  BOOST_CHECK(!compare(l2a,l2,lts_eq_ready_sim));  
+}
+
+BOOST_AUTO_TEST_CASE(test_ready_sim_1_3)
+{
+  BOOST_CHECK(!preorder_compare(l1,l3,lts_pre_ready_sim));
+  BOOST_CHECK(!preorder_compare(l3,l1,lts_pre_ready_sim));
+  BOOST_CHECK(!compare(l3,l1,lts_eq_ready_sim));  
+}
+
+BOOST_AUTO_TEST_CASE(test_ready_sim_1_4)
+{
+  BOOST_CHECK(!preorder_compare(l1,l4,lts_pre_ready_sim));
+  BOOST_CHECK(!preorder_compare(l4,l1,lts_pre_ready_sim));
+  BOOST_CHECK(!compare(l1,l4,lts_eq_ready_sim));  
+}
+
+
+
+
+
 BOOST_AUTO_TEST_CASE(test_symmetric_trace_1_2)
 {
   BOOST_CHECK(compare(l1,l2,lts_eq_trace));

@@ -269,6 +269,7 @@ class ltsconvert_tool : public input_output_tool
                       .add_value(lts_eq_weak_bisim)
                       .add_value(lts_eq_divergence_preserving_weak_bisim)
                       .add_value(lts_eq_sim)
+                      .add_value(lts_eq_ready_sim)		      
                       .add_value(lts_eq_trace)
                       .add_value(lts_eq_weak_trace)
                       .add_value(lts_red_tau_star),
