@@ -20,7 +20,7 @@ using namespace mcrl2::lts;
 using namespace std;
 
 
-static void read_newline(istream& is, const size_t lineno)
+static void read_newline(istream& is, const size_t line_no)
 {
   char ch;
   is.get(ch);
@@ -39,19 +39,19 @@ static void read_newline(istream& is, const size_t lineno)
 
   if (ch != '\n' && !is.eof()) // Last line does not need to be terminated with an eoln.
   {
-    if (lineno==1)
+    if (line_no==1)
     {
       throw mcrl2::runtime_error("Expect a newline after the header des(...,...,...).");
     }
     else
     {
-      throw mcrl2::runtime_error("Expect a newline after the transition at line " + std::to_string(lineno) + ".");
+      throw mcrl2::runtime_error("Expect a newline after the transition at line " + std::to_string(line_no) + ".");
     }
   }
 }
 
 // reads a number, puts it in s, and reads one extra character, which must be either a space or a closing bracket.
-static void read_natural_number_to_string(istream& is, string& s, const size_t lineno)
+static void read_natural_number_to_string(istream& is, string& s, const size_t line_no)
 {
   assert(s.empty());
   char ch;
@@ -63,16 +63,16 @@ static void read_natural_number_to_string(istream& is, string& s, const size_t l
   is.putback(ch);
   if (s.empty())
   {
-    throw mcrl2::runtime_error("Expect a number at line " + std::to_string(lineno) + ".");
+    throw mcrl2::runtime_error("Expect a number at line " + std::to_string(line_no) + ".");
   }
 }
 
-static size_t find_label_index(const string& s, map < string, size_t >& labs, probabilistic_lts_aut_t& l)
+static size_t find_label_index(const string& s, unordered_map < string, size_t >& labs, probabilistic_lts_aut_t& l)
 {
   size_t label;
 
   assert(labs.at(action_label_string::tau_action())==0);
-  const map < string, size_t >::const_iterator i=labs.find(s);
+  const unordered_map < string, size_t >::const_iterator i=labs.find(s);
   if (i==labs.end())
   {
     label=l.add_action(action_label_string(s));
@@ -85,36 +85,23 @@ static size_t find_label_index(const string& s, map < string, size_t >& labs, pr
   return label;
 }
 
-static void add_state(size_t& state,
-               unordered_map <size_t,size_t>& state_number_translator)
+static void check_state(size_t state, size_t number_of_states, size_t line_no)
 {
-  unordered_map <size_t,size_t>::const_iterator j=state_number_translator.find(state);
-  if (j==state_number_translator.end())
+  if (state>=number_of_states)
   {
-    // Not found.
-    const size_t new_state_number=state_number_translator.size(); 
-    state_number_translator[state]=new_state_number;
-    state=new_state_number;
-  }
-  else
-  {
-    // found.
-    state=j->second;
+    throw mcrl2::runtime_error("Number of actual states in .aut file is higher than maximum (" +
+                               std::to_string(number_of_states) + ") given by header (found at line " + std::to_string(line_no) + ").");
   }
 } 
 
-static void add_states(detail::lts_aut_base::probabilistic_state& probability_state,
-                       unordered_map <size_t,size_t>& state_number_translator)
+static void check_states(detail::lts_aut_base::probabilistic_state& probability_state,
+                         size_t number_of_states, size_t line_no)
 {
   for(detail::lts_aut_base::state_probability_pair& p: probability_state)
   {
-    add_state(p.state(),state_number_translator);
-    // size_t new_state_index=p.state();
-    // add_state(new_state_index,state_number_translator);
-    // p.set_state(new_state_index);
+    check_state(p.state(), number_of_states, line_no);
   }
-}
-   
+} 
 
 // This procedure tries to read states, indicated by numbers
 // with in between fractions of the shape number/number. The
@@ -123,7 +110,7 @@ static void add_states(detail::lts_aut_base::probabilistic_state& probability_st
 static void read_probabilistic_state(
   istream& is,
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& result,
-  const size_t lineno)
+  const size_t line_no)
 {
   assert(result.size()==0);
 
@@ -133,7 +120,7 @@ static void read_probabilistic_state(
 
   if (!is.good())
   {
-    throw mcrl2::runtime_error("Expect a state number at line " + std::to_string(lineno) + ".");
+    throw mcrl2::runtime_error("Expect a state number at line " + std::to_string(line_no) + ".");
   }
 
   // Check whether the next character is a digit. If so a probability follows.
@@ -154,16 +141,16 @@ static void read_probabilistic_state(
   {
     // Now read a probabilities followed by the next state.
     string enumerator;
-    read_natural_number_to_string(is,enumerator,lineno);
+    read_natural_number_to_string(is,enumerator,line_no);
     char ch;
     is >> skipws >> ch;
     if (ch != '/')
     {
-      throw mcrl2::runtime_error("Expect a / in a probability at line " + std::to_string(lineno) + ".");
+      throw mcrl2::runtime_error("Expect a / in a probability at line " + std::to_string(line_no) + ".");
     }
 
     string denominator;
-    read_natural_number_to_string(is,denominator,lineno);
+    read_natural_number_to_string(is,denominator,line_no);
     mcrl2::lts::probabilistic_arbitrary_precision_fraction frac(enumerator,denominator);
     remainder=remainder-frac;
     result.add(state, frac);
@@ -172,7 +159,7 @@ static void read_probabilistic_state(
 
     if (!is.good())
     {
-      throw mcrl2::runtime_error("Expect a state number at line " + std::to_string(lineno) + ".");
+      throw mcrl2::runtime_error("Expect a state number at line " + std::to_string(line_no) + ".");
     }
 
     // Check whether the next character is a digit.
@@ -246,7 +233,7 @@ static bool read_aut_transition(
   size_t& from,
   string& label,
   detail::lts_aut_base::probabilistic_state& target_probabilistic_state,
-  const size_t lineno)
+  const size_t line_no)
 {
   char ch;
   is >> skipws >> ch;
@@ -256,7 +243,7 @@ static bool read_aut_transition(
   }
   if (ch != '(')
   {
-    throw mcrl2::runtime_error("Expect opening bracket at line " + std::to_string(lineno) + ".");
+    throw mcrl2::runtime_error("Expect opening bracket at line " + std::to_string(line_no) + ".");
   }
 
   is >> skipws >> from;
@@ -264,7 +251,7 @@ static bool read_aut_transition(
   is >> skipws >> ch;
   if (ch != ',')
   {
-    throw mcrl2::runtime_error("Expect that the first number is followed by a comma at line " + std::to_string(lineno) + ".");
+    throw mcrl2::runtime_error("Expect that the first number is followed by a comma at line " + std::to_string(line_no) + ".");
   }
 
   is >> skipws >> ch;
@@ -280,7 +267,7 @@ static bool read_aut_transition(
 
     if (ch != '"')
     {
-      throw mcrl2::runtime_error("Expect that the second item is a quoted label (using \") at line " + std::to_string(lineno) + ".");
+      throw mcrl2::runtime_error("Expect that the second item is a quoted label (using \") at line " + std::to_string(line_no) + ".");
     }
     is >> skipws >> ch;
   }
@@ -297,18 +284,18 @@ static bool read_aut_transition(
 
   if (ch != ',')
   {
-    throw mcrl2::runtime_error("Expect a comma after the quoted label at line " + std::to_string(lineno) + ".");
+    throw mcrl2::runtime_error("Expect a comma after the quoted label at line " + std::to_string(line_no) + ".");
   }
 
-  read_probabilistic_state(is,target_probabilistic_state,lineno);
+  read_probabilistic_state(is,target_probabilistic_state,line_no);
 
   is >> ch;
   if (ch != ')')
   {
-    throw mcrl2::runtime_error("Expect a closing bracket at the end of the transition at line " + std::to_string(lineno) + ".");
+    throw mcrl2::runtime_error("Expect a closing bracket at the end of the transition at line " + std::to_string(line_no) + ".");
   }
 
-  read_newline(is,lineno);
+  read_newline(is,line_no);
   return true;
 }
 
@@ -320,14 +307,14 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   detail::lts_aut_base::probabilistic_state initial_probabilistic_state;
   read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
 
-  unordered_map <size_t,size_t> state_number_translator;
   // The two unordered maps below are used to determine a unique index for each probabilistic state.
   // Because most states consist of one probabilistic state, the unordered maps are duplicated into
   // indices_of_single_probabilistic_states and indices_of_multiple_probabilistic_states.
   // The map indices_of_single_probabilistic_states requires far less memory.
-  map < size_t, size_t> indices_of_single_probabilistic_states;
+  unordered_map < size_t, size_t> indices_of_single_probabilistic_states;
   unordered_map < detail::lts_aut_base::probabilistic_state, size_t> indices_of_multiple_probabilistic_states;
-  add_states(initial_probabilistic_state,state_number_translator);
+  
+  check_states(initial_probabilistic_state, nstate, line_no);
 
   if (nstate==0)
   {
@@ -337,7 +324,7 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   l.set_num_states(nstate,false);
   l.clear_transitions(ntrans); // Reserve enough space for the transitions.
   
-  map < string, size_t > action_labels;
+  unordered_map < string, size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
   l.set_initial_probabilistic_state(initial_probabilistic_state); 
 
@@ -355,8 +342,8 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
       break; // eof encountered
     }
 
-    add_state(from,state_number_translator); // This can change the number of from.
-    add_states(probabilistic_target_state,state_number_translator);
+    check_state(from, nstate, line_no);
+    check_states(probabilistic_target_state, nstate, line_no);
     // Check whether probabilistic state exists. 
     size_t fresh_index = indices_of_single_probabilistic_states.size()+indices_of_multiple_probabilistic_states.size();
     size_t index;
@@ -382,12 +369,6 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
     }
 
     l.add_transition(transition(from,find_label_index(s,action_labels,l),index));
-    
-    if (state_number_translator.size() > l.num_states())
-    {
-      throw mcrl2::runtime_error("Number of actual states in .aut file is higher than maximum (" +
-                                 std::to_string(l.num_states()) + ") given by header (found at line " + std::to_string(line_no) + ").");
-    }
   }
 
   if (ntrans != l.num_transitions())

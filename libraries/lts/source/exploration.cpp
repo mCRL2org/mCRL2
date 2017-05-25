@@ -1183,12 +1183,10 @@ void lps2lts_algorithm::generate_lts_breadth_bithashing(const next_state_generat
     {
       if (add_transition(state, *i))
       {
-        lps::state removed = state_queue.add_to_queue(i->target_state());
-        if (removed != lps::state())
-        {
-          m_bit_hash_table.remove_state_from_bithash(removed);
-          m_num_states--;
-        }
+        // It can be that a state is dropped in the queue, as the queue reached its todo-limit.
+        // This is ignored in combination with bithashing. So, there might be states with outgoing
+        // transitions of which the outgoing transitions are not investigated. 
+        state_queue.add_to_queue(i->target_state());
       }
     }
     transitions.clear();
