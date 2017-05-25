@@ -40,9 +40,6 @@
 #define RES_NODE_SLICE 64  ///< Number of segments from which a circle representing a node is constructed.
 #define RES_NODE_STACK  4
 
-#define SIZE_HANDLE     8
-#define SIZE_ARROWHEAD 12
-
 struct Color3f
 {
   GLfloat r, g, b;
@@ -165,7 +162,7 @@ const Texture& TextureData::getNumberLabel(size_t index)
   return *texture;
 }
 
-void TextureData::generate(Graph::Graph& g)
+void TextureData::generateTextureData(Graph::Graph& g)
 {
   clear();
 
@@ -202,12 +199,8 @@ void VertexData::clear()
   arrowhead = nullptr;
 }
 
-void VertexData::generate(const TextureData& textures, float pixelsize, float size_node)
+void VertexData::generateVertexData(float handlesize, float nodesize, float arrowheadsize)
 {
-  float handlesize = SIZE_HANDLE * pixelsize * textures.device_pixel_ratio,
-        nodesize = size_node * pixelsize * textures.device_pixel_ratio,
-        arrowheadsize = SIZE_ARROWHEAD * pixelsize * textures.device_pixel_ratio;
-
   // Delete old data
   clear();
 
@@ -997,12 +990,13 @@ void GLScene::resize(size_t width, size_t height)
 
 void GLScene::updateLabels()
 {
-  m_texturedata->generate(m_graph);
+  m_texturedata->generateTextureData(m_graph);
 }
 
 void GLScene::updateShapes()
 {
-  m_vertexdata->generate(*m_texturedata, m_camera->pixelsize, m_size_node);
+  m_vertexdata->generateVertexData(handleSizeOnScreen(), nodeSizeOnScreen(),
+                                   arrowheadSizeOnScreen());
   m_texturedata->resize(m_camera->pixelsize);
 }
 
@@ -1078,7 +1072,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   {
   case so_node:
   {
-    size = m_size_node * m_camera->pixelsize * m_texturedata->device_pixel_ratio;
+    size = nodeSizeOnScreen();
     for (size_t i = 0; i < m_graph.nodeCount(); i++)
     {
       if (isClose(x, y, worldToEye(m_graph.node(i).pos()), size, bestZ))
@@ -1091,7 +1085,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   }
   case so_handle:
   {
-    size = SIZE_HANDLE * m_camera->pixelsize * m_texturedata->device_pixel_ratio;
+    size = handleSizeOnScreen();
     for (size_t i = 0; i < m_graph.edgeCount(); i++)
     {
       if (isClose(x, y, worldToEye(m_graph.handle(i).pos()), size, bestZ))

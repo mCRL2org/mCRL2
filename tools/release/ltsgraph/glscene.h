@@ -75,17 +75,20 @@ struct TextureData
   const Texture& getTransitionLabel(size_t index);
   const Texture& getStateLabel(size_t index);
   const Texture& getNumberLabel(size_t index);
-  void generate(Graph::Graph& g);
+  void generateTextureData(Graph::Graph& g);
   void resize(float pixelsize);
 };
 
 struct VertexData
 {
+  static const int handleSize = 8;
+  static const int arrowheadSize = 12;
+
   QVector3D* node{nullptr}, *hint{nullptr}, *handle{nullptr}, *arrowhead{nullptr}, *transition_labels, *state_labels, *number_labels;
 
   ~VertexData() { clear(); }
   void clear();
-  void generate(const TextureData& textures, float pixelsize, float size_node);
+  void generateVertexData(float handlesize, float nodesize, float arrowheadsize);
 };
 
 struct CameraView
@@ -393,6 +396,17 @@ class GLScene
     }
     size_t  nodeSize() const {
       return m_size_node;
+    }
+    float nodeSizeOnScreen() const {
+      return m_size_node * m_camera->pixelsize * m_texturedata->device_pixel_ratio;
+    }
+    float handleSizeOnScreen() const {
+      return VertexData::handleSize * m_camera->pixelsize *
+        m_texturedata->device_pixel_ratio;
+    }
+    float arrowheadSizeOnScreen() const {
+      return VertexData::arrowheadSize * m_camera->pixelsize *
+        m_texturedata->device_pixel_ratio;
     }
     float  fogDistance() const {
       return m_fogdistance;
