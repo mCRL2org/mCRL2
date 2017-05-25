@@ -1039,10 +1039,6 @@ void GLScene::init(const QColor& clear)
   // Load textures and shapes
   updateLabels();
   updateShapes();
-  // Initialise projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  m_camera->applyFrustum();
 }
 
 void GLScene::updateFog()
@@ -1061,6 +1057,10 @@ void GLScene::updateFog()
 
 void GLScene::render()
 {
+  // Initialise projection matrix
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  m_camera->applyFrustum();
   m_camera->animate();
 
   glMatrixMode(GL_MODELVIEW);
