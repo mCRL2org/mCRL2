@@ -1177,10 +1177,10 @@ GLScene::Selection GLScene::select(int x, int y)
   return s;
 }
 
-static bool isClose(int x, int y, const QVector3D& pos, float treshold, float& bestZ)
+static bool isClose(int x, int y, const QVector3D& pos, float threshold, float& bestZ)
 {
   float distance = std::sqrt(std::pow(pos.x() - x, 2) + std::pow(pos.y() - y, 2));
-  if (distance < treshold && pos.z() < bestZ)
+  if (distance < threshold && pos.z() < bestZ)
   {
     bestZ = pos.z();
     return true;
