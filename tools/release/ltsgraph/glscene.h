@@ -20,15 +20,114 @@
 #define GLSCENE_H
 
 #include <QColor>
-#include <QImage>
 
 #include <gl2ps.h>
+
 #include "graph.h"
 
-struct VertexData;
-struct TextureData;
-struct CameraView;
-struct CameraAnimation;
+struct Texture
+{
+  GLuint name;
+  size_t width;
+  size_t height;
+  QVector3D shape[4];
+  Texture(size_t width, size_t height, float pixelsize) : width(width), height(height)
+  {
+    glGenTextures(1, &name);
+    resize(pixelsize);
+  }
+  ~Texture()
+  {
+    glDeleteTextures(1, &name);
+  }
+  void resize(float pixelsize)
+  {
+    const GLfloat w = width;
+    const GLfloat h = height;
+    shape[0] = QVector3D(-w, -h, 0.0f) * pixelsize / 2.0;
+    shape[1] = QVector3D(w, -h, 0.0f) * pixelsize / 2.0;
+    shape[2] = QVector3D(w,  h, 0.0f) * pixelsize / 2.0;
+    shape[3] = QVector3D(-w,  h, 0.0f) * pixelsize / 2.0;
+  }
+};
+
+struct TextureData
+{
+  QFont font;
+
+  const Graph::Graph* graph;
+  Texture** transitions;
+  Texture** states;
+  Texture** numbers;
+  QHash<QString,Texture*> labels;
+
+  float device_pixel_ratio;
+  float pixelsize;
+
+  TextureData(float device_pixel_ratio, float pixelsize)
+    :  graph(nullptr), transitions(nullptr), states(nullptr), numbers(nullptr), 
+      device_pixel_ratio(device_pixel_ratio), pixelsize(pixelsize) { }
+
+  ~TextureData() { clear(); }
+
+  void clear();
+  void createTexture(const QString& labelstring, Texture*& texture);
+  const Texture& getTransitionLabel(size_t index);
+  const Texture& getStateLabel(size_t index);
+  const Texture& getNumberLabel(size_t index);
+  void generate(Graph::Graph& g);
+  void resize(float pixelsize);
+};
+
+struct VertexData
+{
+  QVector3D* node{nullptr}, *hint{nullptr}, *handle{nullptr}, *arrowhead{nullptr}, *transition_labels, *state_labels, *number_labels;
+
+  ~VertexData() { clear(); }
+  void clear();
+  void generate(const TextureData& textures, float pixelsize, float size_node);
+};
+
+struct CameraView
+{
+  QQuaternion rotation;   ///< Rotation of the camera
+  QVector3D translation;  ///< Translation of the camera
+  QVector3D world;        ///< The size of the box in which the graph lives
+  float zoom{1.0};        ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
+  float pixelsize{1};
+
+  CameraView()
+    : rotation(QQuaternion(1, 0, 0, 0)), translation(QVector3D(0, 0, 0)),
+    world(QVector3D(1000.0, 1000.0, 1000.0))
+  { }
+
+  void viewport(size_t width, size_t height);
+  void billboard_spherical(const QVector3D& pos);
+  void billboard_cylindrical(const QVector3D& pos);
+  void applyTranslation();
+  void applyFrustum();
+  void applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz);
+};
+
+struct CameraAnimation : public CameraView
+{
+  CameraView m_source, m_target;
+  size_t m_animation{0};
+  size_t m_animation_steps{0};
+  bool m_resizing{false};
+
+  void start_animation(size_t steps);
+  void operator=(const CameraView& other);
+  void interpolate_cam(float pos);
+  void interpolate_world(float pos);
+  void animate();
+  void viewport(size_t width, size_t height);
+  bool resizing();
+  void setZoom(float factor, size_t animation);
+  void setRotation(const QQuaternion& rotation, size_t animation);
+  void setTranslation(const QVector3D& translation, size_t animation);
+  void setSize(const QVector3D& size, size_t animation);
+};
 
 class GLScene
 {

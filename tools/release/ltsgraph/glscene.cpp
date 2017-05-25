@@ -15,6 +15,7 @@
 #include <QFile>
 #include <QFont>
 #include <QFontMetrics>
+#include <QImage>
 #include <QPainter>
 #include <QScreen>
 
@@ -65,489 +66,386 @@ struct Color4f
   }
 };
 
-struct Texture
+void TextureData::clear()
 {
-  GLuint name;
-  size_t width;
-  size_t height;
-  QVector3D shape[4];
-  Texture(size_t width, size_t height, float pixelsize) : width(width), height(height)
-  {
-    glGenTextures(1, &name);
-    resize(pixelsize);
+  delete[] transitions;
+  transitions = nullptr;
+  delete[] states;
+  states      = nullptr;
+  delete[] numbers;
+  numbers     = nullptr;
+  for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it) {
+    delete it.value();
   }
-  ~Texture()
-  {
-    glDeleteTextures(1, &name);
-  }
-  void resize(float pixelsize)
-  {
-    const GLfloat w = width;
-    const GLfloat h = height;
-    shape[0] = QVector3D(-w, -h, 0.0f) * pixelsize / 2.0;
-    shape[1] = QVector3D(w, -h, 0.0f) * pixelsize / 2.0;
-    shape[2] = QVector3D(w,  h, 0.0f) * pixelsize / 2.0;
-    shape[3] = QVector3D(-w,  h, 0.0f) * pixelsize / 2.0;
-  }
-};
+  labels.clear();
+}
 
-struct TextureData
+void TextureData::createTexture(const QString& labelstring, Texture*& texture)
 {
-  QFont font;
-
-  const Graph::Graph* graph;
-  Texture** transitions;
-  Texture** states;
-  Texture** numbers;
-  QHash<QString,Texture*> labels;
-
-  float device_pixel_ratio;
-  float pixelsize;
-
-  TextureData(float device_pixel_ratio, float pixelsize)
-    :  graph(nullptr), transitions(nullptr), states(nullptr), numbers(nullptr), 
-      device_pixel_ratio(device_pixel_ratio), pixelsize(pixelsize)
-  { }
-
-  void clear()
+  // Reuse texture when possible
+  if (labels.count(labelstring) != 0)
   {
-    delete[] transitions;
-    transitions = nullptr;
-    delete[] states;
-    states      = nullptr;
-    delete[] numbers;
-    numbers     = nullptr;
-    for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it) {
-      delete it.value();
-    }
-    labels.clear();
+    texture = labels[labelstring];
+    return;
   }
 
-  ~TextureData()
-  {
-    clear();
-  }
+  QFontMetrics metrics(font);
+  QPainter p;
+  QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, labelstring);
+  // Save the original width and height for posterity
+  size_t width = bounds.width() * device_pixel_ratio;
+  size_t height = bounds.height() * device_pixel_ratio;
+  texture = new Texture(width, height, pixelsize);
+  labels[labelstring] = texture;
 
-  void createTexture(const QString& labelstring, Texture*& texture)
-  {
-    // Reuse texture when possible
-    if (labels.count(labelstring) != 0)
-    {
-      texture = labels[labelstring];
-      return;
-    }
-
-    QFontMetrics metrics(font);
-    QPainter p;
-    QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, labelstring);
-    // Save the original width and height for posterity
-    size_t width = bounds.width() * device_pixel_ratio;
-    size_t height = bounds.height() * device_pixel_ratio;
-    texture = new Texture(width, height, pixelsize);
-    labels[labelstring] = texture;
-
-    QImage label(width, height, QImage::Format_ARGB32_Premultiplied);
-    label.setDevicePixelRatio(device_pixel_ratio);
-    label.fill(QColor(1, 1, 1, 0));
-    p.begin(&label);
-    p.setFont(font);
-    p.setCompositionMode(QPainter::CompositionMode_Clear);
-    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    p.setPen(QColor(255, 0, 0, 255));
-    p.drawText(bounds, labelstring);
-    p.end();
+  QImage label(width, height, QImage::Format_ARGB32_Premultiplied);
+  label.setDevicePixelRatio(device_pixel_ratio);
+  label.fill(QColor(1, 1, 1, 0));
+  p.begin(&label);
+  p.setFont(font);
+  p.setCompositionMode(QPainter::CompositionMode_Clear);
+  p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+  p.setPen(QColor(255, 0, 0, 255));
+  p.drawText(bounds, labelstring);
+  p.end();
 
 #ifndef NDEBUG
-    size_t error=glGetError();
-    assert(error == 0 || error == 1286); // TODO: The error 1286 indicates that something is problematic. This ought to be resolved.
+  size_t error=glGetError();
+  assert(error == 0 || error == 1286); // TODO: The error 1286 indicates that something is problematic. This ought to be resolved.
 #endif
 
-    // OpenGL likes its textures to have dimensions that are powers of 2
-    size_t w = 1, h = 1;
-    while (w < width) {
-      w <<= 1;
-    }
-    while (h < height) {
-      h <<= 1;
-    }
-    // ... and also wants the alpha component to be the 4th component
-    label = label.scaled(w, h).convertToFormat(QImage::Format_RGBA8888).mirrored();
-
-    glBindTexture(GL_TEXTURE_2D, texture->name);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, label.width(), label.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, label.bits());
-
-    assert(glGetError() == 0);
+  // OpenGL likes its textures to have dimensions that are powers of 2
+  size_t w = 1, h = 1;
+  while (w < width) {
+    w <<= 1;
   }
-
-  const Texture& getTransitionLabel(size_t index)
-  {
-    Texture*& texture = transitions[index];
-    if (texture == nullptr) {
-      createTexture(graph->transitionLabelstring(index), texture);
-    }
-    return *texture;
+  while (h < height) {
+    h <<= 1;
   }
+  // ... and also wants the alpha component to be the 4th component
+  label = label.scaled(w, h).convertToFormat(QImage::Format_RGBA8888).mirrored();
 
-  const Texture& getStateLabel(size_t index)
-  {
-    Texture*& texture = states[index];
-    if (texture == nullptr) {
-      createTexture(graph->stateLabelstring(index), texture);
-    }
-    return *texture;
-  }
+  glBindTexture(GL_TEXTURE_2D, texture->name);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-  const Texture& getNumberLabel(size_t index)
-  {
-    Texture*& texture = numbers[index];
-    if (texture == nullptr) {
-      createTexture(QString::number(index), texture);
-    }
-    return *texture;
-  }
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, label.width(), label.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, label.bits());
 
-  void generate(Graph::Graph& g)
-  {
-    clear();
-
-    g.lock(GRAPH_LOCK_TRACE); // enter critical section
-
-    size_t transition_count = g.transitionLabelCount();
-    size_t state_count = g.stateLabelCount();
-    size_t number_count = g.nodeCount();
-
-    g.unlock(GRAPH_LOCK_TRACE); // exit critical section
-
-    graph = &g;
-    transitions = new Texture*[transition_count]();
-    states = new Texture*[state_count]();
-    numbers = new Texture*[number_count]();
-  }
-
-  void resize(float pixelsize)
-  {
-    for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it) {
-      it.value()->resize(pixelsize);
-    }
-  }
-};
-
-struct VertexData
-{
-  QVector3D* node{nullptr}, *hint{nullptr}, *handle{nullptr}, *arrowhead{nullptr}, *transition_labels, *state_labels, *number_labels;
-
-  VertexData()
-     
-  = default;
-
-  void clear()
-  {
-    delete[] node;
-    node      = nullptr;
-    delete[] hint;
-    hint      = nullptr;
-    delete[] handle;
-    handle    = nullptr;
-    delete[] arrowhead;
-    arrowhead = nullptr;
-  }
-
-  ~VertexData()
-  {
-    clear();
-  }
-
-  void generate(const TextureData& textures, float pixelsize, float size_node)
-  {
-
-    float handlesize = SIZE_HANDLE * pixelsize * textures.device_pixel_ratio,
-          nodesize = size_node * pixelsize * textures.device_pixel_ratio,
-          arrowheadsize = SIZE_ARROWHEAD * pixelsize * textures.device_pixel_ratio;
-
-    // Delete old data
-    clear();
-
-    // Generate vertices for node border (a line loop drawing a circle)
-    float slice = 0, sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1)),
-          stack = 0, stackd = (float)(M_PI_2 / RES_NODE_STACK);
-    node = new QVector3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
-    for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced) {
-      node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
-    }
-    // Generate vertices for node (a quad strip drawing a half sphere)
-    slice = 0;
-    size_t n = RES_NODE_SLICE - 1;
-    for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
-    {
-      for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
-      {
-        node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
-                            std::sin((float)(stack + stackd)) * std::cos(slice),
-                            std::cos((float)(stack + stackd)));
-        node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
-                            std::sin(stack) * std::cos(slice),
-                            std::cos(stack));
-      }
-      node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
-                          std::sin((float)(stack + stackd)) * std::cos(0.0f),
-                          std::cos((float)(stack + stackd)));
-      node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
-                          std::sin(stack) * std::cos(0.0f),
-                          std::cos(stack));
-    }
-    for (size_t i = 0; i < n; ++i) {
-      node[i] *= 0.5 * nodesize;
-    }
-
-    // Generate plus (and minus) hint for exploration mode
-    hint = new QVector3D[4];
-    hint[0] = QVector3D(-nodesize * 0.3, 0.0, 0.0);
-    hint[1] = QVector3D(nodesize * 0.3, 0.0, 0.0);
-    hint[2] = QVector3D(0.0, -nodesize * 0.3, 0.0);
-    hint[3] = QVector3D(0.0, nodesize * 0.3, 0.0);
-
-    // Generate vertices for handle (border + fill, both squares)
-    handle = new QVector3D[4];
-    handle[0] = QVector3D(-handlesize/2.0, -handlesize/2.0, 0.0);
-    handle[1] = QVector3D(handlesize/2.0, -handlesize/2.0, 0.0);
-    handle[2] = QVector3D(handlesize/2.0,  handlesize/2.0, 0.0);
-    handle[3] = QVector3D(-handlesize/2.0,  handlesize/2.0, 0.0);
-
-    // Generate vertices for arrowhead (a triangle fan drawing a cone)
-    arrowhead = new QVector3D[RES_ARROWHEAD + 1];
-    arrowhead[0] = QVector3D(-nodesize / 2.0, 0.0, 0.0);
-    float diff = (float)(M_PI / 20.0), t = 0;
-    for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff) {
-      arrowhead[i] = QVector3D(-nodesize / 2.0 - arrowheadsize,
-                             0.3 * arrowheadsize * std::sin(t),
-                             0.3 * arrowheadsize * std::cos(t));
+  assert(glGetError() == 0);
 }
-    arrowhead[RES_ARROWHEAD] = QVector3D(-nodesize / 2.0 - arrowheadsize,
-                                       0.3 * arrowheadsize * std::sin(0.0f),
-                                       0.3 * arrowheadsize * std::cos(0.0f));
-  }
-};
 
-struct CameraView
+const Texture& TextureData::getTransitionLabel(size_t index)
 {
-  QQuaternion rotation; ///< Rotation of the camera
-  QVector3D translation;  ///< Translation of the camera
-  QVector3D world;        ///< The size of the box in which the graph lives
-  float zoom{1.0};      ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
-  float pixelsize{1};
-
-  CameraView()
-    : rotation(QQuaternion(1, 0, 0, 0)), translation(QVector3D(0, 0, 0)), world(QVector3D(1000.0, 1000.0, 1000.0)) 
-  { }
-
-  void viewport(size_t width, size_t height)
-  {
-    glViewport(0, 0, width, height);
-    pixelsize = 1000.0 / (width < height ? height : width);
-    world.setX(width * pixelsize);
-    world.setY(height * pixelsize);
+  Texture*& texture = transitions[index];
+  if (texture == nullptr) {
+    createTexture(graph->transitionLabelstring(index), texture);
   }
+  return *texture;
+}
 
-  /**
-   *  Implements "true" billboarding, by moving to @e pos and aligning
-   *  the Z-axis to the vector between @e pos and the camera position.
-   *  The Z-axis will not be facing the camera, but rather looking away
-   *  from it.
-   *
-   *  @param pos The position of the billboard.
-   */
-  void billboard_spherical(const QVector3D& pos)
-  {
-    QVector3D rt, up, lk;
-    GLfloat mm[16];
-
-    glGetFloatv(GL_MODELVIEW_MATRIX, mm);
-    lk.setX(mm[0] * pos.x() + mm[4] * pos.y() + mm[8] * pos.z() + mm[12]);
-    lk.setY(mm[1] * pos.x() + mm[5] * pos.y() + mm[9] * pos.z() + mm[13]);
-    lk.setZ(mm[2] * pos.x() + mm[6] * pos.y() + mm[10] * pos.z() + mm[14]);
-
-    lk /= lk.length();
-    rt = QVector3D::crossProduct(lk, QVector3D(0, 1, 0));
-    up = QVector3D::crossProduct(rt, lk);
-    GLfloat matrix[16] = {rt.x(), rt.y(), rt.z(), 0,
-                          up.x(), up.y(), up.z(), 0,
-                          -lk.x(),  -lk.y(),  -lk.z(),  0,
-                          0,        0,      0,  1
-                         };
-    billboard_cylindrical(pos);
-    glMultMatrixf(matrix);
-  }
-
-  /**
-   *  Implements "fake" billboarding, by moving to @e pos and aligning
-   *  the X, Y and Z axes to those of the projection plane.
-   *
-   *  @param pos The position of the billboard.
-   */
-  void billboard_cylindrical(const QVector3D& pos)
-  {
-    glTranslatef(pos.x(), pos.y(), pos.z());
-    mcrl2::gui::applyRotation(rotation, /*reverse=*/true);
-  }
-
-  void applyTranslation()
-  {
-    float viewdepth = world.length() + 2 * pixelsize * 10;
-    glTranslatef(0, 0, -5000.0005 - 0.5 * viewdepth);
-    glTranslatef(translation.x(), translation.y(), translation.z());
-  }
-
-  void applyFrustum()
-  {
-    float viewdepth = world.length() + 2 * pixelsize * 10;
-    float f = 2 * zoom * (10000.0 + (viewdepth - world.z())) / 10000.0;
-    glFrustum(-world.x() / f, world.x() / f, -world.y() / f, world.y() / f, 5000, viewdepth + 5000.001);
-  }
-
-  void applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
-  {
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    // Viewport is always (0, 0, width, height)
-    gluPickMatrix(x, viewport[3] - y, fuzz * pixelsize, fuzz * pixelsize, viewport);
-  }
-};
-
-struct CameraAnimation : public CameraView
+const Texture& TextureData::getStateLabel(size_t index)
 {
-  CameraView m_source, m_target;
-  size_t m_animation{0};
-  size_t m_animation_steps{0};
-  bool m_resizing{false};
+  Texture*& texture = states[index];
+  if (texture == nullptr) {
+    createTexture(graph->stateLabelstring(index), texture);
+  }
+  return *texture;
+}
 
-  CameraAnimation() = default;
+const Texture& TextureData::getNumberLabel(size_t index)
+{
+  Texture*& texture = numbers[index];
+  if (texture == nullptr) {
+    createTexture(QString::number(index), texture);
+  }
+  return *texture;
+}
 
-  void start_animation(size_t steps)
+void TextureData::generate(Graph::Graph& g)
+{
+  clear();
+
+  g.lock(GRAPH_LOCK_TRACE); // enter critical section
+
+  size_t transition_count = g.transitionLabelCount();
+  size_t state_count = g.stateLabelCount();
+  size_t number_count = g.nodeCount();
+
+  g.unlock(GRAPH_LOCK_TRACE); // exit critical section
+
+  graph = &g;
+  transitions = new Texture*[transition_count]();
+  states = new Texture*[state_count]();
+  numbers = new Texture*[number_count]();
+}
+
+void TextureData::resize(float pixelsize)
+{
+  for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it) {
+    it.value()->resize(pixelsize);
+  }
+}
+
+void VertexData::clear()
+{
+  delete[] node;
+  node      = nullptr;
+  delete[] hint;
+  hint      = nullptr;
+  delete[] handle;
+  handle    = nullptr;
+  delete[] arrowhead;
+  arrowhead = nullptr;
+}
+
+void VertexData::generate(const TextureData& textures, float pixelsize, float size_node)
+{
+  float handlesize = SIZE_HANDLE * pixelsize * textures.device_pixel_ratio,
+        nodesize = size_node * pixelsize * textures.device_pixel_ratio,
+        arrowheadsize = SIZE_ARROWHEAD * pixelsize * textures.device_pixel_ratio;
+
+  // Delete old data
+  clear();
+
+  // Generate vertices for node border (a line loop drawing a circle)
+  float slice = 0, sliced = (float)(2.0 * M_PI / (RES_NODE_SLICE - 1)),
+        stack = 0, stackd = (float)(M_PI_2 / RES_NODE_STACK);
+  node = new QVector3D[RES_NODE_SLICE - 1 + RES_NODE_SLICE * RES_NODE_STACK * 2];
+  for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced) {
+    node[i] = QVector3D(std::sin(slice), std::cos(slice), 0.1f);
+  }
+  // Generate vertices for node (a quad strip drawing a half sphere)
+  slice = 0;
+  size_t n = RES_NODE_SLICE - 1;
+  for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
   {
-    m_source = *this;
-    m_animation_steps = steps;
-    m_animation = 0;
-    if (steps == 0) {
-      operator=(m_target);
+    for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
+    {
+      node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(slice),
+          std::sin((float)(stack + stackd)) * std::cos(slice),
+          std::cos((float)(stack + stackd)));
+      node[n++] = QVector3D(std::sin(stack) * std::sin(slice),
+          std::sin(stack) * std::cos(slice),
+          std::cos(stack));
     }
+    node[n++] = QVector3D(std::sin((float)(stack + stackd)) * std::sin(0.0f),
+        std::sin((float)(stack + stackd)) * std::cos(0.0f),
+        std::cos((float)(stack + stackd)));
+    node[n++] = QVector3D(std::sin(stack) * std::sin(0.0f),
+        std::sin(stack) * std::cos(0.0f),
+        std::cos(stack));
+  }
+  for (size_t i = 0; i < n; ++i) {
+    node[i] *= 0.5 * nodesize;
   }
 
-  void operator=(const CameraView& other)
-  {
-    rotation = other.rotation;
-    translation = other.translation;
-    zoom = other.zoom;
-    world = other.world;
-    pixelsize = other.pixelsize;
-  }
+  // Generate plus (and minus) hint for exploration mode
+  hint = new QVector3D[4];
+  hint[0] = QVector3D(-nodesize * 0.3, 0.0, 0.0);
+  hint[1] = QVector3D(nodesize * 0.3, 0.0, 0.0);
+  hint[2] = QVector3D(0.0, -nodesize * 0.3, 0.0);
+  hint[3] = QVector3D(0.0, nodesize * 0.3, 0.0);
 
-  void interpolate_cam(float pos)
-  {
-    if (pos > 0.999)
-    {
-      rotation = m_target.rotation;
-      translation = m_target.translation;
-      zoom = m_target.zoom;
-    }
-    else
-    {
-      // if this is unsatisfactory, use https://en.wikipedia.org/wiki/Slerp
-      rotation = m_target.rotation * pos + m_source.rotation * (1.0 - pos);
-      translation = m_target.translation * pos + m_source.translation * (1.0 - pos);
-      zoom = m_target.zoom * pos + m_source.zoom * (1.0 - pos);
-    }
-  }
+  // Generate vertices for handle (border + fill, both squares)
+  handle = new QVector3D[4];
+  handle[0] = QVector3D(-handlesize/2.0, -handlesize/2.0, 0.0);
+  handle[1] = QVector3D(handlesize/2.0, -handlesize/2.0, 0.0);
+  handle[2] = QVector3D(handlesize/2.0,  handlesize/2.0, 0.0);
+  handle[3] = QVector3D(-handlesize/2.0,  handlesize/2.0, 0.0);
 
-  void interpolate_world(float pos)
-  {
-    m_resizing = true;
-    if (pos > 0.999)
-    {
-      world = m_target.world;
-    }
-    else
-    {
-      world.setX(m_target.world.x() * pos + m_source.world.x() * (1.0 - pos));
-      world.setY(m_target.world.y() * pos + m_source.world.y() * (1.0 - pos));
-      if (m_target.world.z() > m_source.world.z()) {
-        world.setZ(m_target.world.z() * sin(M_PI_2 * pos) + m_source.world.z() * (1.0 - sin(M_PI_2 * pos)));
-      }
-      else {
-        world.setZ(m_target.world.z() * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z() * cos(M_PI_2 * pos));
-      }
-    }
+  // Generate vertices for arrowhead (a triangle fan drawing a cone)
+  arrowhead = new QVector3D[RES_ARROWHEAD + 1];
+  arrowhead[0] = QVector3D(-nodesize / 2.0, 0.0, 0.0);
+  float diff = (float)(M_PI / 20.0), t = 0;
+  for (int i = 1; i < RES_ARROWHEAD; ++i, t += diff) {
+    arrowhead[i] = QVector3D(-nodesize / 2.0 - arrowheadsize,
+        0.3 * arrowheadsize * std::sin(t),
+        0.3 * arrowheadsize * std::cos(t));
   }
+  arrowhead[RES_ARROWHEAD] = QVector3D(-nodesize / 2.0 - arrowheadsize,
+      0.3 * arrowheadsize * std::sin(0.0f),
+      0.3 * arrowheadsize * std::cos(0.0f));
+}
+void CameraView::viewport(size_t width, size_t height)
+{
+  glViewport(0, 0, width, height);
+  pixelsize = 1000.0 / (width < height ? height : width);
+  world.setX(width * pixelsize);
+  world.setY(height * pixelsize);
+}
 
-  void animate()
+void CameraView::billboard_spherical(const QVector3D& pos)
+{
+  QVector3D rt, up, lk;
+  GLfloat mm[16];
+
+  glGetFloatv(GL_MODELVIEW_MATRIX, mm);
+  lk.setX(mm[0] * pos.x() + mm[4] * pos.y() + mm[8] * pos.z() + mm[12]);
+  lk.setY(mm[1] * pos.x() + mm[5] * pos.y() + mm[9] * pos.z() + mm[13]);
+  lk.setZ(mm[2] * pos.x() + mm[6] * pos.y() + mm[10] * pos.z() + mm[14]);
+
+  lk /= lk.length();
+  rt = QVector3D::crossProduct(lk, QVector3D(0, 1, 0));
+  up = QVector3D::crossProduct(rt, lk);
+  GLfloat matrix[16] = {rt.x(), rt.y(), rt.z(), 0,
+    up.x(), up.y(), up.z(), 0,
+    -lk.x(),  -lk.y(),  -lk.z(),  0,
+    0,        0,      0,  1
+  };
+  billboard_cylindrical(pos);
+  glMultMatrixf(matrix);
+}
+
+void CameraView::billboard_cylindrical(const QVector3D& pos)
+{
+  glTranslatef(pos.x(), pos.y(), pos.z());
+  mcrl2::gui::applyRotation(rotation, /*reverse=*/true);
+}
+
+void CameraView::applyTranslation()
+{
+  float viewdepth = world.length() + 2 * pixelsize * 10;
+  glTranslatef(0, 0, -5000.0005 - 0.5 * viewdepth);
+  glTranslatef(translation.x(), translation.y(), translation.z());
+}
+
+void CameraView::applyFrustum()
+{
+  float viewdepth = world.length() + 2 * pixelsize * 10;
+  float f = 2 * zoom * (10000.0 + (viewdepth - world.z())) / 10000.0;
+  glFrustum(-world.x() / f, world.x() / f, -world.y() / f, world.y() / f, 5000, viewdepth + 5000.001);
+}
+
+void CameraView::applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
+{
+  GLint viewport[4];
+  glGetIntegerv(GL_VIEWPORT, viewport);
+  // Viewport is always (0, 0, width, height)
+  gluPickMatrix(x, viewport[3] - y, fuzz * pixelsize, fuzz * pixelsize, viewport);
+}
+
+void CameraAnimation::start_animation(size_t steps)
+{
+  m_source = *this;
+  m_animation_steps = steps;
+  m_animation = 0;
+  if (steps == 0) {
+    operator=(m_target);
+  }
+}
+
+void CameraAnimation::operator=(const CameraView& other)
+{
+  rotation = other.rotation;
+  translation = other.translation;
+  zoom = other.zoom;
+  world = other.world;
+  pixelsize = other.pixelsize;
+}
+
+void CameraAnimation::interpolate_cam(float pos)
+{
+  if (pos > 0.999)
   {
-    if ((m_target.rotation != rotation || m_target.translation != translation || m_target.zoom != zoom) &&
-        (m_target.world != world))
-    {
-      size_t halfway = m_animation_steps / 2;
-      if (m_animation < halfway) {
-        interpolate_cam((float)(++m_animation) / halfway);
-      }
-      if (m_animation == halfway)
-      {
-        m_animation_steps -= halfway;
-        m_animation = 0;
-      }
-    }
-    else if (m_target.world != world)
-    {
-      interpolate_world((float)(++m_animation) / m_animation_steps);
+    rotation = m_target.rotation;
+    translation = m_target.translation;
+    zoom = m_target.zoom;
+  }
+  else
+  {
+    // if this is unsatisfactory, use https://en.wikipedia.org/wiki/Slerp
+    rotation = m_target.rotation * pos + m_source.rotation * (1.0 - pos);
+    translation = m_target.translation * pos + m_source.translation * (1.0 - pos);
+    zoom = m_target.zoom * pos + m_source.zoom * (1.0 - pos);
+  }
+}
+
+void CameraAnimation::interpolate_world(float pos)
+{
+  m_resizing = true;
+  if (pos > 0.999)
+  {
+    world = m_target.world;
+  }
+  else
+  {
+    world.setX(m_target.world.x() * pos + m_source.world.x() * (1.0 - pos));
+    world.setY(m_target.world.y() * pos + m_source.world.y() * (1.0 - pos));
+    if (m_target.world.z() > m_source.world.z()) {
+      world.setZ(m_target.world.z() * sin(M_PI_2 * pos) + m_source.world.z() * (1.0 - sin(M_PI_2 * pos)));
     }
     else {
-      interpolate_cam((float)(++m_animation) / m_animation_steps);
+      world.setZ(m_target.world.z() * (1.0 - cos(M_PI_2 * pos)) + m_source.world.z() * cos(M_PI_2 * pos));
     }
   }
+}
 
-  void viewport(size_t width, size_t height)
+void CameraAnimation::animate()
+{
+  if ((m_target.rotation != rotation || m_target.translation != translation || m_target.zoom != zoom) &&
+      (m_target.world != world))
   {
-    CameraView::viewport(width, height);
-    m_target.world.setX(world.x());
-    m_target.world.setY(world.y());
-    m_target.pixelsize = pixelsize;
+    size_t halfway = m_animation_steps / 2;
+    if (m_animation < halfway) {
+      interpolate_cam((float)(++m_animation) / halfway);
+    }
+    if (m_animation == halfway)
+    {
+      m_animation_steps -= halfway;
+      m_animation = 0;
+    }
   }
+  else if (m_target.world != world)
+  {
+    interpolate_world((float)(++m_animation) / m_animation_steps);
+  }
+  else {
+    interpolate_cam((float)(++m_animation) / m_animation_steps);
+  }
+}
 
-  bool resizing()
-  {
-    bool temp = m_resizing;
-    m_resizing = false;
-    return temp;
-  }
+void CameraAnimation::viewport(size_t width, size_t height)
+{
+  CameraView::viewport(width, height);
+  m_target.world.setX(world.x());
+  m_target.world.setY(world.y());
+  m_target.pixelsize = pixelsize;
+}
 
-  void setZoom(float factor, size_t animation)
-  {
-    m_target.zoom = factor;
-    start_animation(animation);
-  }
+bool CameraAnimation::resizing()
+{
+  bool temp = m_resizing;
+  m_resizing = false;
+  return temp;
+}
 
-  void setRotation(const QQuaternion& rotation, size_t animation)
-  {
-    m_target.rotation = rotation;
-    start_animation(animation);
-  }
+void CameraAnimation::setZoom(float factor, size_t animation)
+{
+  m_target.zoom = factor;
+  start_animation(animation);
+}
 
-  void setTranslation(const QVector3D& translation, size_t animation)
-  {
-    m_target.translation = translation;
-    start_animation(animation);
-  }
+void CameraAnimation::setRotation(const QQuaternion& rotation, size_t animation)
+{
+  m_target.rotation = rotation;
+  start_animation(animation);
+}
 
-  void setSize(const QVector3D& size, size_t animation)
-  {
-    m_target.world = size;
-    start_animation(animation);
-  }
-};
+void CameraAnimation::setTranslation(const QVector3D& translation, size_t animation)
+{
+  m_target.translation = translation;
+  start_animation(animation);
+}
+
+void CameraAnimation::setSize(const QVector3D& size, size_t animation)
+{
+  m_target.world = size;
+  start_animation(animation);
+}
 
 //
 // Some auxiliary functions that extend OpenGL
@@ -571,14 +469,6 @@ void glEndName()
 {
   glPopName();
   glLoadName(GLScene::so_none);
-}
-
-inline
-GLuint glEyeZ(int eyeX, int eyeY)
-{
-  GLuint result;
-  glReadPixels(eyeX, eyeY, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, &result);
-  return result;
 }
 
 //
