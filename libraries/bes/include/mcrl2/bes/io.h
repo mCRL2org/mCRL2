@@ -36,14 +36,14 @@ const utilities::file_format* bes_file_formats(size_t i)
   if (result.empty())
   {
     result.push_back(utilities::file_format("bes", "BES in internal format", false));
-    result.back().add_extension(".bes");
+    result.back().add_extension("bes");
     result.push_back(utilities::file_format("bes_text", "BES in internal textual format", true));
-    result.back().add_extension(".aterm");
+    result.back().add_extension("aterm");
     result.push_back(utilities::file_format("cwi", "BES in CWI format", true));
-    result.back().add_extension(".cwi");
+    result.back().add_extension("cwi");
     result.push_back(utilities::file_format("pgsolver", "BES in PGSolver format", true));
-    result.back().add_extension(".gm");
-    result.back().add_extension(".pg");
+    result.back().add_extension("gm");
+    result.back().add_extension("pg");
   }
   if (i < result.size())
   {

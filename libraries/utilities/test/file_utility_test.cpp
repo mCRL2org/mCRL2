@@ -22,6 +22,8 @@ BOOST_AUTO_TEST_CASE(test_has_extension)
   BOOST_CHECK(!has_extension("1.pbes.bes", "pbes"));
   BOOST_CHECK(!has_extension("bes", "bes"));
   BOOST_CHECK(!has_extension("1.pbes", "bes"));
+  BOOST_CHECK(!has_extension("a.pbes.bes","pbes"));  // Ticket #1374.
+  BOOST_CHECK(!has_extension("a.besp","bes"));       // Mistake in previous code (until appr. revision 14827).
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

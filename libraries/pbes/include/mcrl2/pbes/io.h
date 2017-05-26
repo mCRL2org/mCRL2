@@ -33,11 +33,11 @@ const std::vector<utilities::file_format>& pbes_file_formats()
   if (result.empty())
   {
     result.push_back(utilities::file_format("pbes", "PBES in internal format", false));
-    result.back().add_extension(".pbes");
+    result.back().add_extension("pbes");
     result.push_back(utilities::file_format("pbes_text", "PBES in internal textual format", true));
-    result.back().add_extension(".aterm");
+    result.back().add_extension("aterm");
     result.push_back(utilities::file_format("text", "PBES in textual (mCRL2) format", true));
-    result.back().add_extension(".txt");
+    result.back().add_extension("txt");
   }
   return result;
 }

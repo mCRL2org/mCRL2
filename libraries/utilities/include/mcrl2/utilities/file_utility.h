@@ -30,16 +30,18 @@ namespace mcrl2
 namespace utilities
 {
 
-/// \brief Returns true if the given filename has the extension ext
+/// \brief Returns true if the given filename has the extension ext. The extension does not start with a dot. 
 inline
-bool has_extension(const std::string& filename, const std::string& ext)
+bool has_extension(const std::string& filename, const std::string& extension)
 {
-  auto pos = filename.rfind('.');
-  if (pos != std::string::npos)
+  assert(extension.size()>=1 && extension[0]!='.');  // The extension should start with a dot and consist out of at least one character.
+  std::string dotted_extension="."+extension;
+  if (filename.size()<dotted_extension.size())
   {
-    return ext == filename.substr(pos + 1);
+    return false;
   }
-  return false;
+  const std::string filename_extension = filename.substr(filename.size()-dotted_extension.size());
+  return filename_extension==dotted_extension;
 }
 
 #ifdef WIN32
@@ -174,7 +176,7 @@ public:
   {
     for (const std::string& ext: m_extensions)
     {
-      if (filename.rfind(ext, filename.size() - ext.size()) != std::string::npos)
+      if (has_extension(filename,ext))
       {
         return true;
       }
