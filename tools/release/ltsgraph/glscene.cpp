@@ -686,7 +686,7 @@ void GLScene::renderEdge(size_t i)
     glRotatef(angle * 180.0 / M_PI, axis.x(), axis.y(), axis.z());
 
     // Draw the arrow head
-    drawArrowHead(*m_vertexdata);
+    drawArrowHead(m_vertexdata);
   }
 
   glPopMatrix();
@@ -726,16 +726,16 @@ void GLScene::renderNode(GLuint i)
   glStartName(so_node, i);
   glPushMatrix();
 
-  m_camera->billboard_spherical(node.pos());
-  drawNode(*m_vertexdata, line, fill, mark, m_graph.hasSelection() && !node.active());
+  m_camera.billboard_spherical(node.pos());
+  drawNode(m_vertexdata, line, fill, mark, m_graph.hasSelection() && !node.active());
 
   if (m_graph.hasSelection() && node.selected() != 0.0 && !m_graph.isBridge(i))
   {
     float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
     hint = Color4f(fill.r + s, fill.g + s, fill.b + s, node.selected());
 
-    glTranslatef(0, 0, m_size_node * m_camera->pixelsize);
-    drawHint(*m_vertexdata, hint, node.active());
+    glTranslatef(0, 0, m_size_node * m_camera.pixelsize);
+    drawHint(m_vertexdata, hint, node.active());
   }
 
   glPopMatrix();
@@ -757,9 +757,9 @@ void GLScene::renderTransitionLabel(GLuint i)
     if (gl2ps())
     {
       QVector3D pos = label.pos();
-      const Texture& texture = m_texturedata->getTransitionLabel(label.labelindex());
-      pos.setX(pos.x() - m_camera->pixelsize * texture.width / 2);
-      pos.setY(pos.y() - m_camera->pixelsize * texture.height / 2);
+      const Texture& texture = m_texturedata.getTransitionLabel(label.labelindex());
+      pos.setX(pos.x() - m_camera.pixelsize * texture.width / 2);
+      pos.setY(pos.y() - m_camera.pixelsize * texture.height / 2);
       glRasterPos3f(pos.x(), pos.y(), pos.z());
       if (!m_graph.isTau(label.labelindex())) {
         gl2psText(m_graph.transitionLabelstring(label.labelindex()).toUtf8(), "", 10);
@@ -772,8 +772,8 @@ void GLScene::renderTransitionLabel(GLuint i)
     {
       glPushMatrix();
 
-      m_camera->billboard_cylindrical(label.pos());
-      drawTransitionLabel(*m_texturedata, label.labelindex());
+      m_camera.billboard_cylindrical(label.pos());
+      drawTransitionLabel(m_texturedata, label.labelindex());
 
       glPopMatrix();
     }
@@ -791,9 +791,9 @@ void GLScene::renderStateLabel(GLuint i)
     if (gl2ps())
     {
       QVector3D pos = label.pos();
-      const Texture& texture = m_texturedata->getStateLabel(label.labelindex());
-      pos.setX(pos.x() - m_camera->pixelsize * texture.width / 2);
-      pos.setY(pos.y() - m_camera->pixelsize * texture.height / 2);
+      const Texture& texture = m_texturedata.getStateLabel(label.labelindex());
+      pos.setX(pos.x() - m_camera.pixelsize * texture.width / 2);
+      pos.setY(pos.y() - m_camera.pixelsize * texture.height / 2);
       glRasterPos3f(pos.x(), pos.y(), pos.z());
       gl2psText(m_graph.stateLabelstring(label.labelindex()).toUtf8(), "", 10);
     }
@@ -801,9 +801,9 @@ void GLScene::renderStateLabel(GLuint i)
     {
       glPushMatrix();
 
-      m_camera->billboard_cylindrical(label.pos());
-      glTranslatef(0, 0, m_size_node * m_camera->pixelsize * 1.01); // Position state label above state number
-      drawStateLabel(*m_texturedata, label.labelindex());
+      m_camera.billboard_cylindrical(label.pos());
+      glTranslatef(0, 0, m_size_node * m_camera.pixelsize * 1.01); // Position state label above state number
+      drawStateLabel(m_texturedata, label.labelindex());
 
       glPopMatrix();
     }
@@ -818,10 +818,10 @@ void GLScene::renderStateNumber(GLuint i)
   if (gl2ps())
   {
     QVector3D pos = node.pos();
-    const Texture& texture = m_texturedata->getNumberLabel(i);
-    pos.setX(pos.x() - m_camera->pixelsize * texture.width / 2);
-    pos.setY(pos.y() - m_camera->pixelsize * texture.height / 2);
-    pos.setZ(pos.z() + m_size_node*m_camera->pixelsize);
+    const Texture& texture = m_texturedata.getNumberLabel(i);
+    pos.setX(pos.x() - m_camera.pixelsize * texture.width / 2);
+    pos.setY(pos.y() - m_camera.pixelsize * texture.height / 2);
+    pos.setZ(pos.z() + m_size_node*m_camera.pixelsize);
     glRasterPos3f(pos.x(), pos.y(), pos.z());
     gl2psText(QString::number(i).toUtf8(), "", 10);
   }
@@ -830,9 +830,9 @@ void GLScene::renderStateNumber(GLuint i)
     glPushMatrix();
 
     glColor3f(node.selected(), 0.0, 0.0);
-    m_camera->billboard_spherical(node.pos());
-    glTranslatef(0, 0, m_size_node * m_camera->pixelsize);
-    drawNumber(*m_texturedata, i);
+    m_camera.billboard_spherical(node.pos());
+    glTranslatef(0, 0, m_size_node * m_camera.pixelsize);
+    drawNumber(m_texturedata, i);
 
     glPopMatrix();
   }
@@ -854,8 +854,8 @@ void GLScene::renderHandle(GLuint i)
     glStartName(so_handle, i);
     glPushMatrix();
 
-    m_camera->billboard_cylindrical(handle.pos());
-    drawHandle(*m_vertexdata, line, fill);
+    m_camera.billboard_cylindrical(handle.pos());
+    drawHandle(m_vertexdata, line, fill);
 
     glPopMatrix();
     glEndName();
@@ -868,21 +868,10 @@ void GLScene::renderHandle(GLuint i)
 //
 
 GLScene::GLScene(Graph::Graph& g, float device_pixel_ratio)
-  : m_graph(g),
+  : m_graph(g), m_camera(), m_vertexdata(), m_texturedata(device_pixel_ratio, m_camera.pixelsize),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
-{
-  m_camera = new CameraAnimation();
-  m_texturedata = new TextureData(device_pixel_ratio, m_camera->pixelsize);
-  m_vertexdata = new VertexData;
-}
-
-GLScene::~GLScene()
-{
-  delete m_vertexdata;
-  delete m_texturedata;
-  delete m_camera;
-}
+{ }
 
 void GLScene::init(const QColor& clear)
 {
@@ -939,13 +928,13 @@ void GLScene::render()
   // Initialise projection matrix
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  m_camera->applyFrustum();
-  m_camera->animate();
+  m_camera.applyFrustum();
+  m_camera.animate();
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  m_camera->applyTranslation();
-  mcrl2::gui::applyRotation(m_camera->rotation);
+  m_camera.applyTranslation();
+  mcrl2::gui::applyRotation(m_camera.rotation);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -988,20 +977,20 @@ void GLScene::render()
 
 void GLScene::resize(size_t width, size_t height)
 {
-  m_camera->viewport(width, height);
+  m_camera.viewport(width, height);
   updateShapes();
 }
 
 void GLScene::updateLabels()
 {
-  m_texturedata->generateTextureData(m_graph);
+  m_texturedata.generateTextureData(m_graph);
 }
 
 void GLScene::updateShapes()
 {
-  m_vertexdata->generateVertexData(handleSizeOnScreen(), nodeSizeOnScreen(),
+  m_vertexdata.generateVertexData(handleSizeOnScreen(), nodeSizeOnScreen(),
                                    arrowheadSizeOnScreen());
-  m_texturedata->resize(m_camera->pixelsize);
+  m_texturedata.resize(m_camera.pixelsize);
 }
 
 QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z)
@@ -1009,8 +998,8 @@ QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z)
   GLint viewport[4];
   GLfloat projection[16];
   GLfloat modelview[16];
-  x *= m_texturedata->device_pixel_ratio;
-  y *= m_texturedata->device_pixel_ratio;
+  x *= m_texturedata.device_pixel_ratio;
+  y *= m_texturedata.device_pixel_ratio;
   glGetFloatv(GL_PROJECTION_MATRIX, projection);
   glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
   glGetIntegerv(GL_VIEWPORT, viewport);
@@ -1040,14 +1029,14 @@ QVector3D GLScene::worldToEye(const QVector3D& world)
   QRect v(viewport[0], viewport[1], viewport[2], viewport[3]);
   QVector3D eye = mcrl2::gui::project(world, m.transposed(), p.transposed(), v);
 
-  return QVector3D(eye.x() / m_texturedata->device_pixel_ratio,
-                 (viewport[3] - eye.y()) / m_texturedata->device_pixel_ratio,
+  return QVector3D(eye.x() / m_texturedata.device_pixel_ratio,
+                 (viewport[3] - eye.y()) / m_texturedata.device_pixel_ratio,
                  eye.z());
 }
 
 QVector3D GLScene::size()
 {
-  return m_camera->world;
+  return m_camera.world;
 }
 
 GLScene::Selection GLScene::select(int x, int y)
@@ -1111,43 +1100,43 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
 
 void GLScene::zoom(float factor)
 {
-  setZoom(m_camera->zoom * factor, 0);
+  setZoom(m_camera.zoom * factor, 0);
 }
 
 void GLScene::rotate(const QQuaternion& delta)
 {
-  setRotation(delta * m_camera->rotation, 0);
+  setRotation(delta * m_camera.rotation, 0);
 }
 
 void GLScene::translate(const QVector3D& amount)
 {
-  setTranslation(m_camera->translation + amount);
+  setTranslation(m_camera.translation + amount);
 }
 
 bool GLScene::resizing()
 {
-  return m_camera->resizing();
+  return m_camera.resizing();
 }
 
 void GLScene::setZoom(float factor, size_t animation)
 {
-  m_camera->setZoom(factor, animation);
+  m_camera.setZoom(factor, animation);
   updateShapes();
 }
 
 void GLScene::setRotation(const QQuaternion& rotation, size_t animation)
 {
-  m_camera->setRotation(rotation, animation);
+  m_camera.setRotation(rotation, animation);
 }
 
 void GLScene::setTranslation(const QVector3D& translation, size_t animation)
 {
-  m_camera->setTranslation(translation, animation);
+  m_camera.setTranslation(translation, animation);
 }
 
 void GLScene::setSize(const QVector3D& size, size_t animation)
 {
-  m_camera->setSize(size, animation);
+  m_camera.setSize(size, animation);
 }
 
 void GLScene::renderVectorGraphics(const char* filename, GLint format)

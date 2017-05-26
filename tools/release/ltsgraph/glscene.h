@@ -136,9 +136,9 @@ class GLScene
 {
   private:
     Graph::Graph& m_graph;      ///< The graph that is being visualised.
-    VertexData* m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
-    TextureData* m_texturedata; ///< Implementation details storing labels as textures.
-    CameraAnimation* m_camera;  ///< Implementation details of the OpenGL camera handling.
+    CameraAnimation m_camera;  ///< Implementation details of the OpenGL camera handling.
+    VertexData m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
+    TextureData m_texturedata; ///< Implementation details storing labels as textures.
 
     bool m_drawtransitionlabels;   ///< Transition labels are only drawn if this field is true.
     bool m_drawstatelabels;        ///< State labels are only drawn if this field is true.
@@ -230,11 +230,6 @@ class GLScene
      * @param g The graph that is to be visualised by this object.
      */
     GLScene(Graph::Graph& g, float device_pixel_ratio);
-
-    /**
-     * @brief Destructor.
-     */
-    ~GLScene();
 
     /**
      * @brief Applies the current fog settings. Call when the
@@ -398,15 +393,15 @@ class GLScene
       return m_size_node;
     }
     float nodeSizeOnScreen() const {
-      return m_size_node * m_camera->pixelsize * m_texturedata->device_pixel_ratio;
+      return m_size_node * m_camera.pixelsize * m_texturedata.device_pixel_ratio;
     }
     float handleSizeOnScreen() const {
-      return VertexData::handleSize * m_camera->pixelsize *
-        m_texturedata->device_pixel_ratio;
+      return VertexData::handleSize * m_camera.pixelsize *
+        m_texturedata.device_pixel_ratio;
     }
     float arrowheadSizeOnScreen() const {
-      return VertexData::arrowheadSize * m_camera->pixelsize *
-        m_texturedata->device_pixel_ratio;
+      return VertexData::arrowheadSize * m_camera.pixelsize *
+        m_texturedata.device_pixel_ratio;
     }
     float  fogDistance() const {
       return m_fogdistance;
