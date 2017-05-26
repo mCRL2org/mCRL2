@@ -242,7 +242,6 @@
  <connections/>
  <slots>
   <slot>onResetClicked()</slot>
-  <slot>onTimer()</slot>
   <slot>onWidgetResized(float,float)</slot>
   <slot>onExit()</slot>
  </slots>

@@ -24,6 +24,7 @@
 #include <QtOpenGL>
 
 #include "graph.h"
+#include "glwidget.h"
 
 namespace Graph
 {
@@ -72,12 +73,13 @@ class SpringLayout
      */
     QVector3D forceLTSGraph(const QVector3D& a, const QVector3D& b, float ideal);
   public:
+    GLWidget& m_glwidget;
 
     /**
      * @brief Constructor of the algorithm for the given @e graph.
      * @param graph The graph on which the algorithm should be applied.
      */
-    SpringLayout(Graph& graph);
+    SpringLayout(Graph& graph, GLWidget& glwidget);
 
     /**
      * @brief Destructor.

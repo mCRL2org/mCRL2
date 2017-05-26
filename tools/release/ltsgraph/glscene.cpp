@@ -1110,7 +1110,7 @@ void GLScene::rotate(const QQuaternion& delta)
 
 void GLScene::translate(const QVector3D& amount)
 {
-  setTranslation(m_camera.translation + amount);
+  setTranslation(m_camera.translation + amount, 0);
 }
 
 bool GLScene::resizing()

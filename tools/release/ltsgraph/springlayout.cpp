@@ -51,10 +51,10 @@ inline void clip(float& f, float min, float max)
 // SpringLayout
 //
 
-SpringLayout::SpringLayout(Graph& graph)
+SpringLayout::SpringLayout(Graph& graph, GLWidget& glwidget)
   : m_speed(0.001f), m_attraction(0.13f), m_repulsion(50.0f), m_natLength(50.0f), m_controlPointWeight(0.001f),
     m_clipMin(QVector3D(0.0f, 0.0f, 0.0f)), m_clipMax(QVector3D(1000.0f, 1000.0f, 1000.0f)),
-    m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph)
+    m_graph(graph), m_ui(nullptr), m_forceCalculation(&SpringLayout::forceLTSGraph), m_glwidget(glwidget)
 {
   srand(time(nullptr));
 }
@@ -294,6 +294,7 @@ class WorkerThread : public QThread
         m_layout.apply();
         elapsed = m_time.elapsed();
         m_time.restart();
+        m_layout.m_glwidget.update();
         if (m_period > elapsed) {
           msleep(m_period - elapsed);
         }

@@ -100,11 +100,6 @@ class MainWindow : public QMainWindow
     void onExplore(bool enabled);
 
     /**
-     * @brief Updates the Graph and GLWidget for the current time. Should be called periodically.
-     */
-    void onTimer();
-
-    /**
      * @brief Updates the statusbar with the latest log output
      */
     void onLogOutput(const QString& level, const QString& hint, const QDateTime& timestamp, const QString& message, const QString& formattedMessage);
@@ -126,7 +121,6 @@ class MainWindow : public QMainWindow
     Graph::Graph m_graph;               ///< The current Graph.
     Graph::SpringLayout* m_layout;      ///< The SpringLayout algorithm which is applied to the graph.
     Graph::Information* m_information;  ///< The Information display which calculates the statistics of the graph.
-    QTimer* m_timer;                    ///< The times used to call onTimer periodically.
     QString m_delayedOpen;              ///< The file that should be opened when the program is ready
 
     mcrl2::gui::qt::PersistentFileDialog m_fileDialog;

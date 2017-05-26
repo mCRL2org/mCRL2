@@ -11,7 +11,6 @@
 #include "glwidget.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/gui/arcball.h"
-#include "springlayout.h"
 #include "ui_glwidget.h"
 
 #include <map>
@@ -166,6 +165,7 @@ void GLWidget::pause()
 void GLWidget::resume()
 {
   m_paused = false;
+  update();
 }
 
 inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
@@ -205,7 +205,9 @@ void GLWidget::updateSelection()
 
   QPoint pos = mapFromGlobal(QCursor::pos());
 
+  GLScene::Selection prev = m_hover;
   m_hover = m_scene->select(pos.x(), pos.y());
+  bool needupdate = prev.selectionType != m_hover.selectionType || prev.index != m_hover.index;
   selnode = select_object(m_hover, m_graph);
   if (selnode != nullptr)
   {
@@ -225,12 +227,17 @@ void GLWidget::updateSelection()
     }
     selnode->selected() = 0.5f;
   }
+  if (needupdate)
+  {
+    update();
+  }
 }
 
 void GLWidget::initializeGL()
 {
   m_scene->init(Qt::white);
   resizeGL(width(), height());
+  setMouseTracking(true);
 }
 
 void GLWidget::resizeGL(int width, int height)
@@ -255,8 +262,11 @@ void GLWidget::paintGL()
   }
   else
   {
-    updateSelection();
     m_scene->render();
+    if (!m_scene->animationFinished())
+    {
+      update();
+    }
   }
   if (m_scene->resizing()) {
     emit widgetResized(m_scene->size());
@@ -354,6 +364,7 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
       }
     }
   }
+  update();
 }
 
 void GLWidget::mouseReleaseEvent(QMouseEvent* e)
@@ -373,6 +384,7 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
     m_dragnode->release(e->button() == Qt::RightButton);
     delete m_dragnode;
     m_dragnode = nullptr;
+    update();
   }
   m_dragmode = dm_none;
 }
@@ -380,13 +392,15 @@ void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 void GLWidget::wheelEvent(QWheelEvent* e)
 {
   m_scene->zoom(pow(1.0005f, e->delta()));
+  update();
 }
 
 void GLWidget::mouseMoveEvent(QMouseEvent* e)
 {
+  makeCurrent();
+  updateSelection();
   if (m_dragmode != dm_none)
   {
-    makeCurrent();
     QPoint vec = e->pos() - m_dragstart;
     m_draglength += (QVector2D) vec;
 
@@ -441,6 +455,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
     }
 
     m_dragstart = e->pos();
+    update();
   }
 }
 
@@ -449,6 +464,7 @@ void GLWidget::rebuild()
   makeCurrent();
   m_scene->updateLabels();
   m_scene->updateShapes();
+  update();
 }
 
 void GLWidget::setDepth(float depth, size_t animation)
@@ -459,6 +475,7 @@ void GLWidget::setDepth(float depth, size_t animation)
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
   m_scene->setTranslation(QVector3D(0, 0, 0), animation);
   m_scene->setSize(size, animation);
+  update();
 }
 
 QVector3D GLWidget::size3()
@@ -472,6 +489,7 @@ void GLWidget::resetViewpoint(size_t animation)
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
   m_scene->setTranslation(QVector3D(0, 0, 0), animation);
   m_scene->setZoom(0.95f, animation);
+  update();
 }
 
 void GLWidget::setPaint(const QColor& color)

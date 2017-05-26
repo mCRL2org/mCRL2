@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget* parent) :
   m_ui.widgetLayout->addWidget(m_glwidget);
 
   // Create springlayout algorithm + UI
-  m_layout = new Graph::SpringLayout(m_graph);
+  m_layout = new Graph::SpringLayout(m_graph, *m_glwidget);
   Graph::SpringLayoutUi* springlayoutui = m_layout->ui(this);
   addDockWidget(Qt::RightDockWidgetArea, springlayoutui);
   springlayoutui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
@@ -52,9 +52,6 @@ MainWindow::MainWindow(QWidget* parent) :
   addDockWidget(Qt::RightDockWidgetArea, informationui);
   informationui->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
-  // Create timer for rendering (at 25fps)
-  m_timer = new QTimer(this);
-
   // Connect signals & slots
   connect(m_glwidget, SIGNAL(widgetResized(const QVector3D&)), this, SLOT(onWidgetResized(const QVector3D&)));
   connect(m_ui.actExit, SIGNAL(triggered()), this, SLOT(onExit()));
@@ -62,7 +59,6 @@ MainWindow::MainWindow(QWidget* parent) :
   connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
   connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
   connect(m_ui.actOutput, SIGNAL(toggled(bool)), m_ui.dockOutput, SLOT(setVisible(bool)));
-  connect(m_timer, SIGNAL(timeout()), this, SLOT(onTimer()));
   connect(m_ui.act3D, SIGNAL(toggled(bool)), this, SLOT(on3DChanged(bool)));
   connect(m_ui.actExplorationMode, SIGNAL(toggled(bool)), this, SLOT(onExplore(bool)));
   connect(m_ui.actLayout, SIGNAL(toggled(bool)), springlayoutui, SLOT(setActive(bool)));
@@ -72,8 +68,6 @@ MainWindow::MainWindow(QWidget* parent) :
   connect(m_ui.actImport_XML, SIGNAL(triggered()), this, SLOT(onImportXML()));
   connect(m_ui.actExport_XML, SIGNAL(triggered()), this, SLOT(onExportXML()));
   connect(m_ui.dockWidgetOutput, SIGNAL(logMessage(QString, QString, QDateTime, QString, QString)), this, SLOT(onLogOutput(QString, QString, QDateTime, QString, QString)));
-
-  m_timer->start(40);
 
   QSettings settings("mCRL2", "LTSGraph");
   restoreGeometry(settings.value("geometry").toByteArray());
@@ -108,7 +102,6 @@ void MainWindow::showEvent(QShowEvent* /*event*/)
 
 MainWindow::~MainWindow()
 {
-  delete m_timer;
   delete m_layout;
   delete m_information;
   delete m_glwidget;
@@ -118,6 +111,7 @@ void MainWindow::onWidgetResized(const QVector3D& newsize)
 {
   m_graph.clip(-newsize / 2.0, newsize / 2.0);
   m_layout->setClipRegion(-newsize / 2.0, newsize / 2.0);
+  m_glwidget->update();
 }
 
 void MainWindow::on3DChanged(bool enabled)
@@ -140,10 +134,6 @@ void MainWindow::onExplore(bool enabled)
   else {
     m_graph.discardSelection();
   }
-}
-
-void MainWindow::onTimer()
-{
   m_glwidget->update();
 }
 

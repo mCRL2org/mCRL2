@@ -130,6 +130,9 @@ struct CameraAnimation : public CameraView
   void setRotation(const QQuaternion& rotation, size_t animation);
   void setTranslation(const QVector3D& translation, size_t animation);
   void setSize(const QVector3D& size, size_t animation);
+  bool animationFinished() {
+    return m_animation_steps == 0 || m_animation >= m_animation_steps;
+  }
 };
 
 class GLScene
@@ -431,6 +434,9 @@ class GLScene
     void setFogDistance(float dist) {
       m_fogdistance = dist;
       updateFog();
+    }
+    bool animationFinished() {
+      return m_camera.animationFinished();
     }
 
 };
