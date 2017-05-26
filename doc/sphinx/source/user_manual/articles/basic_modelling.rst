@@ -141,7 +141,7 @@ We now wish to express that after inserting a single coin, we can either
 retrieve bad coffee, or we can insert another coin and get good coffee. This can
 be expressed as follows:
 
-
+.. _coffee2:
 .. list-table:: Another coffee machine.
 
    * - .. tikz::
@@ -261,13 +261,13 @@ if `i \in \sem{\varphi}_T`.
    The formula `\mccan{\a{coin}}\mccan{\a{good}}\true` can be used to express
    that there is a possibility that a system dispenses good coffee after
    accepting one coin. This formula does not hold for the machine in Figure
-   \ref{lst:coffee2}, because when you insert one coin, the machine will only
+   :ref:`coffee2`, because when you insert one coin, the machine will only
    provide you with bad coffee. 
 
 .. admonition:: Example
 
    The formula `\mcall{\a{coin}}\mccan{\a{bad} \cup \a{coin}}\true` does hold
-   for the machine in Figure \ref{lst:coffee2}; it says that always after
+   for the machine in Figure :ref:`coffee2`; it says that always after
    accepting a coin, the machine might (is able to) dispense bad coffee or
    accept another coin.
 
