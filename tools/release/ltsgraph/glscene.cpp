@@ -505,10 +505,10 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   }
   glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
 
-  // dragging an initial state in 2D mode over other nodes looks less weird
-  // when the depth mask is not disabled for drawing the border
-  // maybe this was here for a good reason, so I keep it commented for now
-  /* glDepthMask(GL_FALSE); */
+  // disable the depth mask temporarily for drawing the border of a node
+  // dragging an initial state in 2D mode over other nodes looks less weird this way
+  // BUT not disabling the depth mask here causes some strange issue on Mac OS
+  glDepthMask(GL_FALSE);
 
   if (translucent)
   {
@@ -522,7 +522,7 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
 
   // see above
-  /* glDepthMask(GL_TRUE); */
+  glDepthMask(GL_TRUE);
   glPopAttrib();
   gl2psLineWidth(0.25);
 }

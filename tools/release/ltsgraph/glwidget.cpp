@@ -275,9 +275,10 @@ void GLWidget::paintGL()
 
 void GLWidget::mousePressEvent(QMouseEvent* e)
 {
+  makeCurrent();
+  updateSelection();
   if (m_painting)
   {
-    makeCurrent();
     if (m_hover.selectionType == GLScene::so_node)
     {
       Graph::NodeNode& node = m_graph.node(m_hover.index);
@@ -369,9 +370,10 @@ void GLWidget::mousePressEvent(QMouseEvent* e)
 
 void GLWidget::mouseReleaseEvent(QMouseEvent* e)
 {
+  makeCurrent();
+  updateSelection();
   if (m_dragmode == dm_dragnode)
   {
-    makeCurrent();
     NodeMoveRecord* noderec = dynamic_cast<NodeMoveRecord*>(m_dragnode);
     if (m_hover.selectionType == GLScene::so_node && e->button() == Qt::LeftButton
         && (noderec != nullptr) && m_draglength.length() < DRAG_MIN_DIST)
