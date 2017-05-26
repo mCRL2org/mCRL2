@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
   // Connect signals & slots
   connect(m_glwidget, SIGNAL(widgetResized(const QVector3D&)), this, SLOT(onWidgetResized(const QVector3D&)));
-  connect(m_ui.actExit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
+  connect(m_ui.actExit, SIGNAL(triggered()), this, SLOT(onExit()));
   connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
   connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
   connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
@@ -268,4 +268,13 @@ void MainWindow::onExportXML()
   {
     m_graph.saveXML(fileName);
   }
+}
+
+void MainWindow::onExit()
+{
+  if (m_layout && m_layout->ui())
+  {
+    m_layout->ui()->setActive(false);
+  }
+  QApplication::instance()->quit();
 }
