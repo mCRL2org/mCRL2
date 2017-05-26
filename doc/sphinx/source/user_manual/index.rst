@@ -48,7 +48,8 @@
    - `Requirements by modal formulas <https://www.coursera.org/learn/system-validation-modal-formulas>`_.
    - `Modelling software, protocols, and other behaviour <https://www.coursera.org/learn/system-validation-software-protocols>`_.
 
-   The slides used to make these courses are available by contacting J.F.Groote@tue.nl. 
+   The slides used to make these courses are available by contacting J.F.Groote@tue.nl. They can also
+   be downloaded from `MIT Press <http://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`_. 
 
 .. note::
 
