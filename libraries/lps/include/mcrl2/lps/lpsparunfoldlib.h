@@ -21,7 +21,8 @@
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/structured_sort.h"
+// #include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/stochastic_linear_process.h"
 #include "mcrl2/lps/stochastic_specification.h"
 
@@ -81,6 +82,9 @@ class lpsparunfold
 
     /// \brief The data_specification used for manipulation
     mcrl2::data::data_specification m_data_specification;
+
+    /// a generator for default data expressions of a give sort;
+    mcrl2::data::representative_generator m_representative_generator;
 
     /// \brief The linear process used for manipulation
     mcrl2::lps::stochastic_linear_process m_lps;
@@ -150,18 +154,18 @@ class lpsparunfold
     mcrl2::data::function_symbol_vector create_projection_functions(mcrl2::data::function_symbol_vector k);
 
     /** \brief  Creates the needed equations for the unfolded process parameter. The equations are added to m_data_specification.
-      * \param  pi set of projection functions.
+      * \param  projection_functions a vector with projection functions.
       * \param  case_function the case function.
       * \param  elements_of_new_sorts set of fresh sorts.
-      * \param  k vector of affected constructors.
+      * \param  affected_constructors vector of affected constructors.
       * \param  determine_function the determine function.
       * \return A set of equations for the unfolded process parameter.
     **/
     void create_data_equations(
-      mcrl2::data::function_symbol_vector pi,
+      const mcrl2::data::function_symbol_vector& projection_functions,
       const mcrl2::data::function_symbol& case_function,
       mcrl2::data::function_symbol_vector elements_of_new_sorts,
-      mcrl2::data::function_symbol_vector k,
+      const mcrl2::data::function_symbol_vector& affected_constructors,
       const mcrl2::data::function_symbol& determine_function);
 
     /** \brief  Determines the constructors that are affected with the unfold
@@ -257,10 +261,19 @@ class lpsparunfold
              || c=='%' || c=='&' || c=='*' || c=='!'
              ;
     }
+    /** \brief Add a new equation to m_data_specification. 
+    **/
+    void add_new_equation(const mcrl2::data::data_expression& lhs, const mcrl2::data::data_expression& rhs);
+
+    /** \brief Create a mapping from function symbols to a list of fresh variables that can act as its arguments 
+    **/
+    std::map<mcrl2::data::function_symbol, mcrl2::data::data_expression_vector> 
+              create_arguments_map(const mcrl2::data::function_symbol_vector& functions);
 
     // Applies 'process unfolding' to a sequence of summands.
     void unfold_summands(mcrl2::lps::stochastic_action_summand_vector& summands, const mcrl2::data::function_symbol& determine_function, const mcrl2::data::function_symbol_vector& pi);
 };
+
 
 
 #endif

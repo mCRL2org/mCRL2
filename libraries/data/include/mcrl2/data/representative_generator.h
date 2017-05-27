@@ -143,7 +143,7 @@ class representative_generator
         // present.
 
         // check if there is a mapping with sort s (constructors with sort s cannot exist).
-        for (const function_symbol& f: m_specification.mappings(sort.target_sort()))
+        for (const function_symbol& f: m_specification.mappings(atermpp::down_cast<function_sort>(sort).codomain()))
         {
           if (f.sort()==sort)
           {
@@ -158,7 +158,7 @@ class representative_generator
         // s is a constant (not a function sort).
         // check if there is a constant constructor for s
 
-        for (const function_symbol& f: m_specification.constructors(sort.target_sort()))
+        for (const function_symbol& f: m_specification.constructors(sort))
         {
           if (f.sort()==sort)
           { 
@@ -176,7 +176,7 @@ class representative_generator
         
         // recursively traverse constructor functions of the form f:s1#...#sn -> sort.
         // operators with f:s1#...#sn->G where G is a complex sort expression are ignored
-        for (const function_symbol& f: m_specification.constructors(sort.target_sort()))
+        for (const function_symbol& f: m_specification.constructors(sort))
         {
           if (find_representative(f, visited_sorts, result))
           {
@@ -187,7 +187,7 @@ class representative_generator
         }
 
         // check if there is a constant mapping for s
-        for (const function_symbol& f: m_specification.mappings(sort.target_sort()))
+        for (const function_symbol& f: m_specification.mappings(sort))
         {
           if (f.sort()==sort)
           {
@@ -199,7 +199,7 @@ class representative_generator
         }
 
         // Try to check whether there is a representative f(t1,...,tn) where f is a mapping. 
-        for (const function_symbol& f: m_specification.mappings(sort.target_sort()))
+        for (const function_symbol& f: m_specification.mappings(sort))
         {
           if (find_representative(f, visited_sorts, result))
           {
