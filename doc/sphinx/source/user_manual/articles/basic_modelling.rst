@@ -260,14 +260,14 @@ if `i \in \sem{\varphi}_T`.
 
    The formula `\mccan{\a{coin}}\mccan{\a{good}}\true` can be used to express
    that there is a possibility that a system dispenses good coffee after
-   accepting one coin. This formula does not hold for the machine in figure
-   :ref:`coffee2`, because when you insert one coin, the machine will only
+   accepting one coin. This formula does not hold for the machine in figure with
+   :ref:`another coffee machine <coffee2>`, because when you insert one coin, the machine will only
    provide you with bad coffee. 
 
 .. admonition:: Example
 
    The formula `\mcall{\a{coin}}\mccan{\a{bad} \cup \a{coin}}\true` does hold
-   for the machine in figure :ref:`coffee2`; it says that always after
+   for the machine in :ref:`another coffee machine <coffee2>`; it says that always after
    accepting a coin, the machine might (is able to) dispense bad coffee or
    accept another coin.
 
@@ -387,7 +387,7 @@ bisimilar to `T`.
  
    `R` is a bisimulation relation, so merging all related states will yield a
    smaller, bisimilar transition system (namely the left transition system of
-   Example :ref:`exercise-bisim`).
+   the :ref:`previous bisimulation example <exercise-bisim>`).
 
 .. admonition:: Exercise
 
@@ -443,8 +443,8 @@ In the specification, we see that the ``proc`` operator accepts equations that
 associate processes with process names. In this case, the process ``P`` is
 defined. By using it in the right-hand side of its own definition, we introduced
 infinitely repeating behaviour. To illustrate this, we could *unfold* this
-repetition once and obtain a bisimilar system, as shown in figure
-:ref:`coffee-inf2`.
+repetition once and obtain a bisimilar system, as shown in 
+:ref:`the figure of the ever-lasting coffee machine <coffee-inf2>`.
 
 .. _coffee-inf2:
 .. list-table:: The ever-lasting coffee machine, unfolded once.
@@ -480,8 +480,8 @@ behaviour stays the same.
 
 .. admonition:: Exercise
   
-   Show that the statespaces from figures :ref:`coffee-inf1` and
-   :ref:`coffee-inf2` are bisimilar.
+   Show that the statespaces from figures :ref:`the ever-lasting coffee machine <coffee-inf1>` and
+   :ref:`the unfolded ever-lasting coffee machine <coffee-inf2>` are bisimilar.
 
 Regular HML
 -----------
@@ -731,8 +731,7 @@ Since each mCRL2 expression is finite, we can no longer give an
 equivalent expression using only the plus operator.
 
 .. _nats:
-.. list-table:: Transitions ``num`` with all possible even natural number
-                parameters. 
+.. list-table:: Transition system with an infinite number of transitions. 
 
    * - .. tikz::
           :libs: automata
@@ -758,8 +757,8 @@ The sum operator is quite powerful, especially when combined with the *if-then*
 construct ``b -> p`` and the *if-then-else* construct ``b -> p <> q``, which
 behaves as process ``p`` if ``b`` evaluates to ``true``, and, in case of the
 if-then-else construct, as process ``q`` otherwise. Using such constructs, and a
-Boolean function ``even``, we can give an alternative description of the system
-in figure :ref:`nats`::
+Boolean function ``even``, we can give an alternative description of the 
+:ref:`infinite transition system above <nats>`::
 
   map even: Nat -> Bool;
   var n: Nat;
@@ -774,9 +773,9 @@ action ``num(v)`` is possible.
 
 .. admonition:: Exercise
 
-   Give, if possible, a µ-calculus  expression that states that the process of 
-   figure :ref:`nats` cannot execute ``num`` actions carrying an odd natural
-   number as its parameter. If impossible, explain why.
+   Give a µ-calculus  expression that states that this 
+   :ref:`process <nats>` cannot execute actions ``num`` with an odd natural
+   number as its parameter. 
 
 Data variables that are bound by the ``sum`` operator can affect
 the entire process that is within the scope of such operators. This way,
@@ -828,7 +827,7 @@ employing such mechanisms is an incrementer::
   proc P(n:Nat) = num(n).P(n+1);
   init P(0);
 
-Or we could have written the process in :ref:`picky` as follows::
+Or we could have written the :ref:`picky coffee machine <picky>` as follows::
 
   proc P(v: Val) = 
     coin(v) . (
@@ -842,15 +841,15 @@ It may be clear that most data-dependent processes describe transition systems
 that can no longer be visualised on a sheet of paper. However, the interaction
 between the data and process language is quite powerful. 
 
+.. _exercise_data:
 .. admonition:: Exercises
 
    #. Is there a labelled transition system with a finite number of states that 
       is bisimilar to the incrementer? If so, give this transition system and
       the witnessing bisimulation relation. If not, explain why such a
-      transition system does not exist not.
+      transition system does not exist.
 
-   .. _exercise_data:
-   #. Consider the mCRL2 specification depicted in figure :ref:`quirky`,
+   #. Consider the mCRL2 specification depicted :ref:`below <quirky>`,
       defining a rather quirky coffee machine. List some odd things about the
       behaviour of this coffee machine and give an alternative specification
       that fixes these.
@@ -891,7 +890,7 @@ The first-order µ-calculus
 With the introduction of data-dependent behaviour and, in particular,
 with the sum operator, we have moved beyond labelled transition
 systems that are finitely branching. As you may have found out in
-exercise :ref:`exercise_data`, the logics defined in the previous sections are
+:ref:`this exercise <exercise_data>`, the logics defined in the previous sections are
 no longer adequate to reason about the systems we can now describe.
 This is due to the fact that our grammar does not permit us to construct
 infinite sized formulae. We mend this by introducing data in the µ-calculus.
@@ -964,6 +963,7 @@ data-dependent behaviour. Consider, for instance, the LTS described by
 the following process::
 
 .. _trees:
+.. list-table:: A transition system with nested trees.
 
   act num: Nat;
   proc P(n: Nat) = sum m: Nat . (m < n) -> num(m) . P(m);
@@ -1027,8 +1027,8 @@ if for all `\varepsilon`, `i \in \sem{\varphi}_T^\varepsilon`.
 The regular first-order Hennessy-Milner logic extends the first-order 
 Hennessy-Milner logic in the same way as regular Hennessy Milner logic
 extends Hennessy-Milner logic. This allows us, for instance, to express that along all
-paths of the LTS described by figure :ref:`trees`, the parameters
-of the ``num`` action are decreasing:
+paths of the LTS described by :ref:`this transition system <trees>`, the parameters
+of the action ``num`` are decreasing:
 
 .. math:: \mcall{\true^*} \forall_{v,v'\oftype\nat} \mcall{\a{num}(v) . \a{num}(v')} v' < v
 
@@ -1278,8 +1278,8 @@ on processes in mCRL2.
   has identical parameters. The set ``C`` specifies multi-action names that
   should be renamed using the following syntax for each renaming:
   ``a1|...|aN->b``, where ``b`` and ``a1`` through ``aN`` are action names. The
-  operation is best understood by looking at the example in figure
-  :ref:`comm-operator`.
+  operation is best understood by looking at the example 
+  :ref:`about the communication operator <comm-operator>`.
 
   .. _comm-operator:
   .. list-table:: Communication operator.
