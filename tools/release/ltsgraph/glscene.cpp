@@ -63,130 +63,6 @@ struct Color4f
   }
 };
 
-void TextureData::clear()
-{
-  delete[] transitions;
-  transitions = nullptr;
-  delete[] states;
-  states      = nullptr;
-  delete[] numbers;
-  numbers     = nullptr;
-  for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it) {
-    delete it.value();
-  }
-  labels.clear();
-}
-
-void TextureData::createTexture(const QString& labelstring, Texture*& texture)
-{
-  // Reuse texture when possible
-  if (labels.count(labelstring) != 0)
-  {
-    texture = labels[labelstring];
-    return;
-  }
-
-  QFontMetrics metrics(font);
-  QPainter p;
-  QRect bounds = metrics.boundingRect(0, 0, 0, 0, Qt::AlignLeft, labelstring);
-  // Save the original width and height for posterity
-  size_t width = bounds.width() * device_pixel_ratio;
-  size_t height = bounds.height() * device_pixel_ratio;
-  texture = new Texture(width, height, pixelsize);
-  labels[labelstring] = texture;
-
-  QImage label(width, height, QImage::Format_ARGB32_Premultiplied);
-  label.setDevicePixelRatio(device_pixel_ratio);
-  label.fill(QColor(1, 1, 1, 0));
-  p.begin(&label);
-  p.setFont(font);
-  p.setCompositionMode(QPainter::CompositionMode_Clear);
-  p.setCompositionMode(QPainter::CompositionMode_SourceOver);
-  p.setPen(QColor(255, 0, 0, 255));
-  p.drawText(bounds, labelstring);
-  p.end();
-
-#ifndef NDEBUG
-  size_t error=glGetError();
-  assert(error == 0 || error == 1286); // TODO: The error 1286 indicates that something is problematic. This ought to be resolved.
-#endif
-
-  // OpenGL likes its textures to have dimensions that are powers of 2
-  size_t w = 1, h = 1;
-  while (w < width) {
-    w <<= 1;
-  }
-  while (h < height) {
-    h <<= 1;
-  }
-  // ... and also wants the alpha component to be the 4th component
-  label = label.scaled(w, h).convertToFormat(QImage::Format_RGBA8888).mirrored();
-
-  glBindTexture(GL_TEXTURE_2D, texture->name);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, label.width(), label.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, label.bits());
-
-  assert(glGetError() == 0);
-}
-
-const Texture& TextureData::getTransitionLabel(size_t index)
-{
-  Texture*& texture = transitions[index];
-  if (texture == nullptr) {
-    createTexture(graph->transitionLabelstring(index), texture);
-  }
-  return *texture;
-}
-
-const Texture& TextureData::getStateLabel(size_t index)
-{
-  Texture*& texture = states[index];
-  if (texture == nullptr) {
-    createTexture(graph->stateLabelstring(index), texture);
-  }
-  return *texture;
-}
-
-const Texture& TextureData::getNumberLabel(size_t index)
-{
-  Texture*& texture = numbers[index];
-  if (texture == nullptr) {
-    createTexture(QString::number(index), texture);
-  }
-  return *texture;
-}
-
-void TextureData::generateTextureData(Graph::Graph& g)
-{
-  clear();
-
-  g.lock(GRAPH_LOCK_TRACE); // enter critical section
-
-  size_t transition_count = g.transitionLabelCount();
-  size_t state_count = g.stateLabelCount();
-  size_t number_count = g.nodeCount();
-
-  g.unlock(GRAPH_LOCK_TRACE); // exit critical section
-
-  graph = &g;
-  transitions = new Texture*[transition_count]();
-  states = new Texture*[state_count]();
-  numbers = new Texture*[number_count]();
-}
-
-void TextureData::resize(float pixelsize)
-{
-  for (QHash<QString,Texture*>::iterator it = labels.begin(); it != labels.end(); ++it) {
-    it.value()->resize(pixelsize);
-  }
-}
-
 void VertexData::clear()
 {
   delete[] node;
@@ -567,69 +443,6 @@ void drawArc(const QVector3D controlpoints[4])
   glDepthMask(GL_TRUE);
 }
 
-inline
-void drawTransitionLabel(TextureData& textures, size_t index)
-{
-  static const GLfloat texCoords[] = { 0.0, 0.0,
-                                       1.0, 0.0,
-                                       1.0, 1.0,
-                                       0.0, 1.0
-                                     };
-
-  const Texture& texture = textures.getTransitionLabel(index);
-
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture.name);
-
-  glVertexPointer(3, GL_FLOAT, 0, texture.shape);
-  glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-  glDrawArrays(GL_QUADS, 0, 4);
-
-  glDisable(GL_TEXTURE_2D);
-}
-
-inline
-void drawStateLabel(TextureData& textures, size_t index)
-{
-  static const GLfloat texCoords[] = { 0.0, 0.0,
-                                       1.0, 0.0,
-                                       1.0, 1.0,
-                                       0.0, 1.0
-                                     };
-
-  const Texture& texture = textures.getStateLabel(index);
-
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture.name);
-
-  glVertexPointer(3, GL_FLOAT, 0, texture.shape);
-  glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-  glDrawArrays(GL_QUADS, 0, 4);
-
-  glDisable(GL_TEXTURE_2D);
-}
-
-inline
-void drawNumber(TextureData& textures, size_t index)
-{
-  static const GLfloat texCoords[] = { 0.0, 0.0,
-                                       1.0, 0.0,
-                                       1.0, 1.0,
-                                       0.0, 1.0
-                                     };
-
-  const Texture& texture = textures.getNumberLabel(index);
-
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture.name);
-
-  glVertexPointer(3, GL_FLOAT, 0, texture.shape);
-  glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
-  glDrawArrays(GL_QUADS, 0, 4);
-
-  glDisable(GL_TEXTURE_2D);
-}
-
 //
 // GLScene private methods
 //
@@ -757,9 +570,6 @@ void GLScene::renderTransitionLabel(GLuint i)
     if (gl2ps())
     {
       QVector3D pos = label.pos();
-      const Texture& texture = m_texturedata.getTransitionLabel(label.labelindex());
-      pos.setX(pos.x() - m_camera.pixelsize * texture.width / 2);
-      pos.setY(pos.y() - m_camera.pixelsize * texture.height / 2);
       glRasterPos3f(pos.x(), pos.y(), pos.z());
       if (!m_graph.isTau(label.labelindex())) {
         gl2psText(m_graph.transitionLabelstring(label.labelindex()).toUtf8(), "", 10);
@@ -770,12 +580,8 @@ void GLScene::renderTransitionLabel(GLuint i)
     }
     else
     {
-      glPushMatrix();
-
-      m_camera.billboard_cylindrical(label.pos());
-      drawTransitionLabel(m_texturedata, label.labelindex());
-
-      glPopMatrix();
+      QVector3D eye = worldToEye(label.pos());
+      m_painter.drawText(eye.x(), eye.y(), m_graph.transitionLabelstring(label.labelindex()));
     }
     glEndName();
   }
@@ -791,21 +597,13 @@ void GLScene::renderStateLabel(GLuint i)
     if (gl2ps())
     {
       QVector3D pos = label.pos();
-      const Texture& texture = m_texturedata.getStateLabel(label.labelindex());
-      pos.setX(pos.x() - m_camera.pixelsize * texture.width / 2);
-      pos.setY(pos.y() - m_camera.pixelsize * texture.height / 2);
       glRasterPos3f(pos.x(), pos.y(), pos.z());
       gl2psText(m_graph.stateLabelstring(label.labelindex()).toUtf8(), "", 10);
     }
     else
     {
-      glPushMatrix();
-
-      m_camera.billboard_cylindrical(label.pos());
-      glTranslatef(0, 0, m_size_node * m_camera.pixelsize * 1.01); // Position state label above state number
-      drawStateLabel(m_texturedata, label.labelindex());
-
-      glPopMatrix();
+      QVector3D eye = worldToEye(label.pos());
+      m_painter.drawText(eye.x(), eye.y(), m_graph.stateLabelstring(label.labelindex()));
     }
     glEndName();
   }
@@ -818,23 +616,14 @@ void GLScene::renderStateNumber(GLuint i)
   if (gl2ps())
   {
     QVector3D pos = node.pos();
-    const Texture& texture = m_texturedata.getNumberLabel(i);
-    pos.setX(pos.x() - m_camera.pixelsize * texture.width / 2);
-    pos.setY(pos.y() - m_camera.pixelsize * texture.height / 2);
-    pos.setZ(pos.z() + m_size_node*m_camera.pixelsize);
     glRasterPos3f(pos.x(), pos.y(), pos.z());
     gl2psText(QString::number(i).toUtf8(), "", 10);
   }
   else
   {
+    QVector3D eye = worldToEye(node.pos());
+    m_painter.drawText(eye.x(), eye.y(), QString::number(i));
     glPushMatrix();
-
-    glColor3f(node.selected(), 0.0, 0.0);
-    m_camera.billboard_spherical(node.pos());
-    glTranslatef(0, 0, m_size_node * m_camera.pixelsize);
-    drawNumber(m_texturedata, i);
-
-    glPopMatrix();
   }
   glEndName();
 }
@@ -867,8 +656,8 @@ void GLScene::renderHandle(GLuint i)
 // GLScene public methods
 //
 
-GLScene::GLScene(Graph::Graph& g, float device_pixel_ratio)
-  : m_graph(g), m_camera(), m_vertexdata(), m_texturedata(device_pixel_ratio, m_camera.pixelsize),
+GLScene::GLScene(Graph::Graph& g, float device_pixel_ratio, QPainter& painter)
+  : m_graph(g), m_camera(), m_vertexdata(), m_device_pixel_ratio(device_pixel_ratio), m_painter(painter),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
 { }
@@ -904,8 +693,7 @@ void GLScene::init(const QColor& clear)
   // We'll be using a lot of glDrawArrays, and all of them use the vertex
   // array. We enable that feature once and leave it untouched.
   glEnableClientState(GL_VERTEX_ARRAY);
-  // Load textures and shapes
-  updateLabels();
+  // Load shapes
   updateShapes();
 }
 
@@ -981,16 +769,9 @@ void GLScene::resize(size_t width, size_t height)
   updateShapes();
 }
 
-void GLScene::updateLabels()
-{
-  m_texturedata.generateTextureData(m_graph);
-}
-
 void GLScene::updateShapes()
 {
-  m_vertexdata.generateVertexData(handleSizeOnScreen(), nodeSizeOnScreen(),
-                                   arrowheadSizeOnScreen());
-  m_texturedata.resize(m_camera.pixelsize);
+  m_vertexdata.generateVertexData(handleSizeOnScreen(), nodeSizeOnScreen(), arrowheadSizeOnScreen());
 }
 
 QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z)
@@ -998,8 +779,8 @@ QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z)
   GLint viewport[4];
   GLfloat projection[16];
   GLfloat modelview[16];
-  x *= m_texturedata.device_pixel_ratio;
-  y *= m_texturedata.device_pixel_ratio;
+  x *= m_device_pixel_ratio;
+  y *= m_device_pixel_ratio;
   glGetFloatv(GL_PROJECTION_MATRIX, projection);
   glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
   glGetIntegerv(GL_VIEWPORT, viewport);
@@ -1029,8 +810,8 @@ QVector3D GLScene::worldToEye(const QVector3D& world)
   QRect v(viewport[0], viewport[1], viewport[2], viewport[3]);
   QVector3D eye = mcrl2::gui::project(world, m.transposed(), p.transposed(), v);
 
-  return QVector3D(eye.x() / m_texturedata.device_pixel_ratio,
-                 (viewport[3] - eye.y()) / m_texturedata.device_pixel_ratio,
+  return QVector3D(eye.x() / m_device_pixel_ratio,
+                 (viewport[3] - eye.y()) / m_device_pixel_ratio,
                  eye.z());
 }
 
@@ -1241,7 +1022,7 @@ static QString escapeLatex(const QString& str)
 {
   QString escaped;
   QRegExp rx("[#$%_&{}^]");
-  for (auto x : str) {
+  for (QChar x : str) {
     if (rx.indexIn(x) != -1) {
       escaped.append('\\');
     }

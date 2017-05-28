@@ -1165,11 +1165,7 @@ void Graph::unlock(const char *where)
 void Graph::makeSelection()
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
-
-  
-  
-    delete m_sel;
-  
+  delete m_sel;
   m_sel = new Selection(*this);
 
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);

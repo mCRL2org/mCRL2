@@ -135,9 +135,9 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
-  : QOpenGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true)
+  : QOpenGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true), m_painter()
 {
-  m_scene = new GLScene(m_graph, devicePixelRatio());
+  m_scene = new GLScene(m_graph, devicePixelRatio(), m_painter);
   QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
   fmt.setVersion(1, 2);
   fmt.setDepthBufferSize(1);
@@ -262,7 +262,14 @@ void GLWidget::paintGL()
   }
   else
   {
+    m_painter.begin(this);
+    m_painter.setPen(Qt::black);
+    QFont font;
+    font.setPixelSize(22);
+    m_painter.setFont(font);
+    m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     m_scene->render();
+    m_painter.end();
     if (!m_scene->animationFinished())
     {
       update();
@@ -464,7 +471,6 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
 void GLWidget::rebuild()
 {
   makeCurrent();
-  m_scene->updateLabels();
   m_scene->updateShapes();
   update();
 }

@@ -20,6 +20,7 @@
 #define GLSCENE_H
 
 #include <QColor>
+#include <QPainter>
 
 #include <gl2ps.h>
 
@@ -49,34 +50,6 @@ struct Texture
     shape[2] = QVector3D(w,  h, 0.0f) * pixelsize / 2.0;
     shape[3] = QVector3D(-w,  h, 0.0f) * pixelsize / 2.0;
   }
-};
-
-struct TextureData
-{
-  QFont font;
-
-  const Graph::Graph* graph;
-  Texture** transitions;
-  Texture** states;
-  Texture** numbers;
-  QHash<QString,Texture*> labels;
-
-  float device_pixel_ratio;
-  float pixelsize;
-
-  TextureData(float device_pixel_ratio, float pixelsize)
-    :  graph(nullptr), transitions(nullptr), states(nullptr), numbers(nullptr), 
-      device_pixel_ratio(device_pixel_ratio), pixelsize(pixelsize) { }
-
-  ~TextureData() { clear(); }
-
-  void clear();
-  void createTexture(const QString& labelstring, Texture*& texture);
-  const Texture& getTransitionLabel(size_t index);
-  const Texture& getStateLabel(size_t index);
-  const Texture& getNumberLabel(size_t index);
-  void generateTextureData(Graph::Graph& g);
-  void resize(float pixelsize);
 };
 
 struct VertexData
@@ -141,7 +114,8 @@ class GLScene
     Graph::Graph& m_graph;      ///< The graph that is being visualised.
     CameraAnimation m_camera;  ///< Implementation details of the OpenGL camera handling.
     VertexData m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
-    TextureData m_texturedata; ///< Implementation details storing labels as textures.
+    float m_device_pixel_ratio;
+    QPainter& m_painter;
 
     bool m_drawtransitionlabels;   ///< Transition labels are only drawn if this field is true.
     bool m_drawstatelabels;        ///< State labels are only drawn if this field is true.
@@ -232,19 +206,13 @@ class GLScene
      * @brief Constructor.
      * @param g The graph that is to be visualised by this object.
      */
-    GLScene(Graph::Graph& g, float device_pixel_ratio);
+    GLScene(Graph::Graph& g, float device_pixel_ratio, QPainter& painter);
 
     /**
      * @brief Applies the current fog settings. Call when the
      *        fog settings have changed.
      */
     void updateFog();
-
-    /**
-     * @brief Rebuilds the textures used to render labels. Call when the
-     *        graph has changed.
-     */
-    void updateLabels();
 
     /**
      * @brief Rebuilds the shapes for nodes, handles, arrowheads and labels.
@@ -396,15 +364,13 @@ class GLScene
       return m_size_node;
     }
     float nodeSizeOnScreen() const {
-      return m_size_node * m_camera.pixelsize * m_texturedata.device_pixel_ratio;
+      return m_size_node * m_camera.pixelsize * m_device_pixel_ratio;
     }
     float handleSizeOnScreen() const {
-      return VertexData::handleSize * m_camera.pixelsize *
-        m_texturedata.device_pixel_ratio;
+      return VertexData::handleSize * m_camera.pixelsize * m_device_pixel_ratio;
     }
     float arrowheadSizeOnScreen() const {
-      return VertexData::arrowheadSize * m_camera.pixelsize *
-        m_texturedata.device_pixel_ratio;
+      return VertexData::arrowheadSize * m_camera.pixelsize * m_device_pixel_ratio;
     }
     float  fogDistance() const {
       return m_fogdistance;
