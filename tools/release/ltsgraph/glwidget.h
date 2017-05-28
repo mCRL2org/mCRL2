@@ -215,7 +215,7 @@ class GLWidget : public QOpenGLWidget
      * @brief Resets the viewpoint of the camera to the original position.
      * @param animation The desired number of animation steps to use.
      */
-    void resetViewpoint(size_t animation = 1);
+    void resetViewpoint(size_t animation = 0);
 
     //Getters and setters
     void toggleTransitionLabels(bool show) {

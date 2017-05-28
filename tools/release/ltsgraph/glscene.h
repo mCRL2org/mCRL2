@@ -164,6 +164,11 @@ class GLScene
     void renderStateNumber(GLuint i);
 
     /**
+     * @brief Renders text, centered around the point at x and y
+     */
+    QRect drawCenteredText(float x, float y, const QString& text);
+
+    /**
      * @brief Generates TikZ code for a single edge.
      * @param i The index of the edge to render.
      * @param aspectRatio The aspect ratio used for placement.

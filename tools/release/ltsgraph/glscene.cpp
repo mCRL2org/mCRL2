@@ -589,7 +589,8 @@ void GLScene::renderTransitionLabel(GLuint i)
     else
     {
       QVector3D eye = worldToEye(label.pos());
-      m_painter.drawText(eye.x(), eye.y(), m_graph.transitionLabelstring(label.labelindex()));
+      const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
+      drawCenteredText(eye.x(), eye.y(), labelstring);
     }
     glEndName();
   }
@@ -611,7 +612,7 @@ void GLScene::renderStateLabel(GLuint i)
     else
     {
       QVector3D eye = worldToEye(label.pos());
-      m_painter.drawText(eye.x(), eye.y(), m_graph.stateLabelstring(label.labelindex()));
+      drawCenteredText(eye.x(), eye.y() + nodeSizeOnScreen(), m_graph.stateLabelstring(label.labelindex()));
     }
     glEndName();
   }
@@ -630,10 +631,20 @@ void GLScene::renderStateNumber(GLuint i)
   else
   {
     QVector3D eye = worldToEye(node.pos());
-    m_painter.drawText(eye.x(), eye.y(), QString::number(i));
+    drawCenteredText(eye.x(), eye.y(), QString::number(i));
     glPushMatrix();
   }
   glEndName();
+}
+
+QRect GLScene::drawCenteredText(float x, float y, const QString& text)
+{
+  QFontMetrics metrics{m_painter.font()};
+  QRect bounds = metrics.boundingRect(text);
+  qreal w = bounds.width();
+  qreal h = bounds.height();
+  m_painter.drawText(x - w / 2, y - h / 2, text);
+  return bounds;
 }
 
 void GLScene::renderHandle(GLuint i)
@@ -830,8 +841,10 @@ QVector3D GLScene::size()
 
 GLScene::Selection GLScene::select(int x, int y)
 {
-  Selection s {so_none, 0};
-  selectObject(s, x, y, so_node) || selectObject(s, x, y, so_handle);
+  Selection s{so_none, 0};
+  selectObject(s, x, y, so_node)
+    || selectObject(s, x, y, so_handle)
+    ;
   return s;
 }
 
@@ -878,8 +891,8 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
     }
     break;
   }
-  case so_slabel:
   case so_label:
+  case so_slabel:
   case so_edge:
   case so_none:
   Q_UNREACHABLE();
