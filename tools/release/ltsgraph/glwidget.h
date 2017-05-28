@@ -220,28 +220,36 @@ class GLWidget : public QOpenGLWidget
     //Getters and setters
     void toggleTransitionLabels(bool show) {
       m_scene->setDrawTransitionLabels(show);
+      update();
     }
     void toggleStateLabels(bool show) {
       m_scene->setDrawStateLabels(show);
+      update();
     }
     void toggleStateNumbers(bool show) {
       m_scene->setDrawStateNumbers(show);
+      update();
     }
     void toggleSelfLoops(bool show) {
       m_scene->setDrawSelfLoops(show);
+      update();
     }
     void toggleInitialMarking(bool show) {
       m_scene->setDrawInitialMarking(show);
+      update();
     }
     void toggleFog(bool show) {
       m_scene->setDrawFog(show);
+      update();
     }
     void setNodeSize(int size) {
       m_scene->setNodeSize(size);
       m_scene->updateShapes();
+      update();
     }
     void setFogDistance(int dist) {
       m_scene->setFogDistance(dist);
+      update();
     }
 };
 
