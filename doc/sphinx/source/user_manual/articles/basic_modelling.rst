@@ -306,7 +306,6 @@ LTSs are strongly bisimilar iff their initial states are bisimilar.
 
 .. _exercise-bisim:
 .. admonition:: Example
-   :class: collapse
 
    In the following diagram, the dotted lines indicate the pairs of nodes that
    are related by a relation `R`.
@@ -355,7 +354,6 @@ an LTS `T` we merge all states that are bisimilar, the resulting LTS `T'` is
 bisimilar to `T`.
 
 .. admonition:: Example
-   :class: collapse
 
    In the following diagram, the dotted lines indicate the pairs of states that
    are related by a relation `R`.
@@ -444,7 +442,7 @@ associate processes with process names. In this case, the process ``P`` is
 defined. By using it in the right-hand side of its own definition, we introduced
 infinitely repeating behaviour. To illustrate this, we could *unfold* this
 repetition once and obtain a bisimilar system, as shown in 
-:ref:`the figure of the ever-lasting coffee machine <coffee-inf2>`.
+:ref:`the figure of the unfolded ever-lasting coffee machine <coffee-inf2>`.
 
 .. _coffee-inf2:
 .. list-table:: The ever-lasting coffee machine, unfolded once.
@@ -960,7 +958,7 @@ The extension of our action formulae with data is sufficiently powerful to
 reason about the infinite branching introduced by the sum operator over
 infinite data sorts. However, it still does not permit us to reason about
 data-dependent behaviour. Consider, for instance, the LTS described by
-the following process::
+the following process:
 
 .. _trees:
 .. list-table:: A transition system with nested trees.
@@ -1500,4 +1498,3 @@ would have had 3 times more states, and 15 times more transitions.
 
 .. [#f1] If a formula is not in positive normal form, then its least
    and greatest fixpoint are not guaranteed to exist, hence the requirement. 
-   See also \cite{?}
