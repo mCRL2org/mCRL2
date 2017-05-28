@@ -355,7 +355,7 @@ void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill
 }
 
 inline
-void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool mark, bool translucent)
+void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool mark, bool translucent, bool probabilistic)
 {
   glPushAttrib(GL_LINE_BIT);
   if (mark)
@@ -380,6 +380,14 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
     glColor3fv(fill);
   }
   glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
+
+  if (probabilistic)
+  {
+    Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
+    glColor3fv(blue);
+    glVertexPointer(3, GL_FLOAT, 4*3, data.node);
+    glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
+  }
 
   // disable the depth mask temporarily for drawing the border of a node
   // dragging an initial state in 2D mode over other nodes looks less weird this way
@@ -540,7 +548,7 @@ void GLScene::renderNode(GLuint i)
   glPushMatrix();
 
   m_camera.billboard_spherical(node.pos());
-  drawNode(m_vertexdata, line, fill, mark, m_graph.hasSelection() && !node.active());
+  drawNode(m_vertexdata, line, fill, mark, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
 
   if (m_graph.hasSelection() && node.selected() != 0.0 && !m_graph.isBridge(i))
   {
