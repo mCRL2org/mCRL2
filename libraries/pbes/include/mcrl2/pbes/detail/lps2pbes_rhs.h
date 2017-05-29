@@ -90,7 +90,7 @@ struct lps2pbes_counter_example_parameters: public lps2pbes_parameters
     {
       for (const data::sort_expression& s: a.label().sorts())
       {
-        data::variable v(id_generator("var"), s);
+        data::variable v(id_generator("v"), s);
         result.push_back(v);
       }
     }
