@@ -59,8 +59,12 @@ class lts2pbes_algorithm
     /// \param preprocess_modal_operators A boolean indicating that the modal operators can be preprocessed
     //                                    for a more compact translation.
     /// \return The result of the translation
-    pbes run(const state_formulas::state_formula_specification& formspec, bool preprocess_modal_operators = false)
+    pbes run(const state_formulas::state_formula_specification& formspec,
+             bool preprocess_modal_operators = false,
+             bool generate_counter_example = false
+            )
     {
+      // TODO: extract identifiers from the LTS(?)
       std::set<core::identifier_string> lts_ids;
       state_formulas::state_formula f = state_formulas::preprocess_state_formula(formspec.formula(), lts_ids, preprocess_modal_operators);
 
@@ -71,9 +75,18 @@ class lts2pbes_algorithm
       mCRL2log(log::verbose) << "Generating " << num_steps << " equations." << std::endl;
 
       // compute the equations
-      std::vector<pbes_equation> eqn;
-      detail::lts2pbes_parameters parameters(f, lts0, lts1, m_id_generator, m_progress_meter);
-      run(f, eqn, parameters);
+      std::vector<pbes_equation> equations;
+      if (generate_counter_example)
+      {
+        detail::lts2pbes_counter_example_parameters parameters(f, lts0, lts1, m_id_generator, m_progress_meter);
+        run(f, equations, parameters);
+        equations = equations + parameters.equations();
+      }
+      else
+      {
+        detail::lts2pbes_parameters parameters(f, lts0, lts1, m_id_generator, m_progress_meter);
+        run(f, equations, parameters);
+      }
 
       // compute the initial state
       state_type s0 = lts0.initial_state();
@@ -81,7 +94,7 @@ class lts2pbes_algorithm
       data::data_expression_list e = detail::mu_expressions(f);
       propositional_variable_instantiation init(Xs0, e);
 
-      return pbes(lts0.data(), eqn, std::set<data::variable>(), init);
+      return pbes(lts0.data(), equations, std::set<data::variable>(), init);
     }
 };
 
@@ -90,10 +103,10 @@ class lts2pbes_algorithm
 /// \param l A labelled transition system
 /// \param formspec A modal formula specification
 inline
-pbes lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula_specification& formspec)
+pbes lts2pbes(const lts::lts_lts_t& l, const state_formulas::state_formula_specification& formspec, bool preprocess_modal_operators = false, bool generate_counter_example = false)
 {
   lts2pbes_algorithm algorithm(l);
-  return algorithm.run(formspec);
+  return algorithm.run(formspec, preprocess_modal_operators, generate_counter_example);
 }
 
 } // namespace pbes_system

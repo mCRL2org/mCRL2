@@ -43,6 +43,8 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
     std::string formfilename;
     mcrl2::lts::data_file_type_t data_file_type;
     std::string data_file;
+    bool preprocess_modal_operators;
+    bool generate_counter_example;
 
     void add_options(interface_description& desc)
     {
@@ -50,6 +52,12 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
 
       desc.add_option("formula", make_file_argument("FILE"),
                       "use the state formula from FILE", 'f');
+
+      desc.add_option("preprocess-modal-operators",
+                      "insert dummy fixpoints in modal operators, which may lead to smaller PBESs", 'p');
+
+      desc.add_hidden_option("counter-example",
+                             "add counter example equations to the generated PBES", 'c');
 
       desc.add_option("data", make_file_argument("FILE"),
                       "use FILE as the data and action specification. "
@@ -105,6 +113,9 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
         formfilename = parser.option_argument("formula");
       }
 
+      preprocess_modal_operators = parser.options.count("preprocess-modal-operators") > 0;
+      generate_counter_example = parser.options.count("counter-example") > 0;
+
       infilename  = input_filename();
       outfilename = output_filename();
     }
@@ -155,8 +166,8 @@ class lts2pbes_tool : public pbes_output_tool<input_output_tool>
       from.close();
       lpsspec.data() = data::merge_data_specifications(lpsspec.data(), formspec.data());
       lpsspec.action_labels() = lpsspec.action_labels() + formspec.action_labels();
+      pbes_system::pbes result = pbes_system::lts2pbes(l, formspec, preprocess_modal_operators, generate_counter_example);
 
-      pbes_system::pbes result = pbes_system::lts2pbes(l, formspec);
       //save the result
       if (output_filename().empty())
       {
