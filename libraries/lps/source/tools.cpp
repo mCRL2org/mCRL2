@@ -296,8 +296,6 @@ void txt2lps(const std::string& input_filename,
              const std::string& output_filename
             )
 {
-std::cerr << "INPUT " << input_filename << "\n";
-std::cerr << "OUTPUT " << output_filename << "\n";
   lps::stochastic_specification spec;
   std::ifstream ifs(input_filename);
   if (!ifs.good())

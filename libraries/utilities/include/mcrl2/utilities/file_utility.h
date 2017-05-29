@@ -34,7 +34,7 @@ namespace utilities
 inline
 bool has_extension(const std::string& filename, const std::string& extension)
 {
-  assert(extension.size()>=1 && extension[0]!='.');  // The extension should start with a dot and consist out of at least one character.
+  assert(extension.size()>=1 && extension[0]!='.');  // The extension should not start with a dot and consist out of at least one character.
   std::string dotted_extension="."+extension;
   if (filename.size()<dotted_extension.size())
   {
