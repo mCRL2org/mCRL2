@@ -64,7 +64,7 @@ process::untyped_multi_action parse_multi_action_new(const std::string& text)
 inline
 multi_action complete_multi_action(process::untyped_multi_action& x, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
-  multi_action result = lps::type_check_multi_action(x, data_spec, action_decls);
+  multi_action result = lps::typecheck_multi_action(x, data_spec, action_decls);
   lps::translate_user_notation(result);
   lps::normalize_sorts(result, data_spec);
   return result;
@@ -175,7 +175,7 @@ inline
 void complete_action_rename_specification(action_rename_specification& x, const lps::stochastic_specification& spec)
 {
   using namespace mcrl2::data;
-  x = lps::type_check_action_rename_specification(x, spec);
+  x = lps::typecheck_action_rename_specification(x, spec);
   x.data().declare_data_specification_to_be_type_checked();
   x = action_rename_specification(x.data() + spec.data(), x.action_labels(), x.rules());
   detail::translate_user_notation(x);

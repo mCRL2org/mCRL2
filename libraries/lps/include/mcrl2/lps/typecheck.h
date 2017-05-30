@@ -83,7 +83,7 @@ class action_rename_type_checker
       variable_context.add_context_variables(x.variables(), m_data_type_checker);
       data::data_expression condition = m_data_type_checker.typecheck_data_expression(x.condition(), data::sort_bool::bool_(), variable_context);
       process::action lhs = process::typecheck_action(x.lhs().label().name(), x.lhs().arguments(), m_data_type_checker, variable_context, m_action_context);
-      process::process_expression rhs = process::type_check_process_expression(x.rhs(), x.variables(), dataspec, action_labels, process::process_identifier_list());
+      process::process_expression rhs = process::typecheck_process_expression(x.rhs(), x.variables(), dataspec, action_labels, process::process_identifier_list());
       return action_rename_rule(x.variables(), condition, lhs, rhs);
     }
 
@@ -126,7 +126,7 @@ class action_rename_type_checker
  *  \post      mult_action is type checked and sorts have been added when necessary.
  **/
 inline
-multi_action type_check_multi_action(process::untyped_multi_action& mult_act,
+multi_action typecheck_multi_action(process::untyped_multi_action& mult_act,
                                      const data::data_specification& data_spec,
                                      const process::action_label_list& action_decls
                                     )
@@ -141,7 +141,7 @@ multi_action type_check_multi_action(process::untyped_multi_action& mult_act,
 /// \return A type checked rename specification.
 
 inline
-action_rename_specification type_check_action_rename_specification(
+action_rename_specification typecheck_action_rename_specification(
                                 const action_rename_specification& arspec,
                                 const lps::stochastic_specification& lpsspec)
 {

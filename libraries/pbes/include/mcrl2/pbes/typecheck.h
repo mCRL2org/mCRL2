@@ -256,7 +256,7 @@ class pbes_type_checker
  **/
 
 inline
-void type_check_pbes(pbes& pbesspec)
+void typecheck_pbes(pbes& pbesspec)
 {
   pbes_type_checker type_checker;
   try
@@ -277,10 +277,10 @@ void type_check_pbes(pbes& pbesspec)
  *  \return    the type checked expression
  **/
 template <typename VariableContainer>
-propositional_variable type_check_propositional_variable(const propositional_variable& x,
-                                                         const VariableContainer& variables,
-                                                         const data::data_specification& dataspec = data::data_specification()
-                                                        )
+propositional_variable typecheck_propositional_variable(const propositional_variable& x,
+                                                        const VariableContainer& variables,
+                                                        const data::data_specification& dataspec = data::data_specification()
+                                                       )
 {
   // This function should be implemented using the PBES type checker, but it is not immediately clear how to do that.
   try
@@ -289,7 +289,7 @@ propositional_variable type_check_propositional_variable(const propositional_var
     std::vector<data::variable> typed_parameters;
     for (const data::variable& parameter: parameters)
     {
-      data::variable d = atermpp::down_cast<data::variable>(data::type_check_data_expression(parameter, variables, dataspec));
+      data::variable d = atermpp::down_cast<data::variable>(data::typecheck_data_expression(parameter, variables, dataspec));
       typed_parameters.push_back(d);
     }
     return propositional_variable(x.name(), data::variable_list(typed_parameters.begin(), typed_parameters.end()));
@@ -309,11 +309,11 @@ propositional_variable type_check_propositional_variable(const propositional_var
  *  \return    the type checked expression
  **/
 template <typename VariableContainer, typename PropositionalVariableContainer>
-pbes_expression type_check_pbes_expression(pbes_expression& x,
-                                           const VariableContainer& variables,
-                                           const PropositionalVariableContainer& propositional_variables,
-                                           const data::data_specification& dataspec = data::data_specification()
-                                          )
+pbes_expression typecheck_pbes_expression(pbes_expression& x,
+                                          const VariableContainer& variables,
+                                          const PropositionalVariableContainer& propositional_variables,
+                                          const data::data_specification& dataspec = data::data_specification()
+                                         )
 {
   try
   {

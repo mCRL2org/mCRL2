@@ -146,11 +146,11 @@ typecheck_builder make_typecheck_builder(
 } // namespace detail
 
 template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
-action_formula typecheck(const action_formula& x,
-                         const data::data_specification& dataspec,
-                         const VariableContainer& variables,
-                         const ActionLabelContainer& actions
-                        )
+action_formula typecheck_action_formula(const action_formula& x,
+                                        const data::data_specification& dataspec,
+                                        const VariableContainer& variables,
+                                        const ActionLabelContainer& actions
+                                       )
 {
   data::data_type_checker data_typechecker(dataspec);
   data::detail::variable_context variable_context;
@@ -161,9 +161,9 @@ action_formula typecheck(const action_formula& x,
 }
 
 inline
-action_formula typecheck(const action_formula& x, const lps::specification& lpsspec)
+action_formula typecheck_action_formula(const action_formula& x, const lps::specification& lpsspec)
 {
-  return typecheck(x, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
+  return typecheck_action_formula(x, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
 }
 
 } // namespace action_formulas
@@ -311,11 +311,11 @@ typecheck_builder make_typecheck_builder(
 } // namespace detail
 
 template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
-regular_formula typecheck(const regular_formula& x,
-                          const data::data_specification& dataspec,
-                          const VariableContainer& variables,
-                          const ActionLabelContainer& actions
-                         )
+regular_formula typecheck_regular_formula(const regular_formula& x,
+                                          const data::data_specification& dataspec,
+                                          const VariableContainer& variables,
+                                          const ActionLabelContainer& actions
+                                         )
 {
   data::data_type_checker data_typechecker(dataspec);
   data::detail::variable_context variable_context;
@@ -326,9 +326,9 @@ regular_formula typecheck(const regular_formula& x,
 }
 
 inline
-regular_formula typecheck(const regular_formula& x, const lps::specification& lpsspec)
+regular_formula typecheck_regular_formula(const regular_formula& x, const lps::specification& lpsspec)
 {
-  return typecheck(x, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
+  return typecheck_regular_formula(x, lpsspec.data(), lpsspec.global_variables(), lpsspec.action_labels());
 }
 
 } // namespace regular_formulas
@@ -520,7 +520,7 @@ class state_formula_type_checker
     /** \brief     Constructor for a state_formula type checker.
      *  \param[in] dataspec The data specification against which state formulas are checked.
      *  \param[in] action_labels The data labels that can occur in a state formula.
-     *  \param[in] variables A container containing variables that can occur in state formulas. 
+     *  \param[in] variables A container containing variables that can occur in state formulas.
      **/
     template <typename ActionLabelContainer = std::vector<state_formulas::variable>, typename VariableContainer = std::vector<data::variable> >
     state_formula_type_checker(const data::data_specification& dataspec,
@@ -553,15 +553,15 @@ class state_formula_type_checker
  *  \param[in] x A state formula that has not been type checked.
  *  \param[in] dataspec The data specification against which the formulas is checked.
  *  \param[in] action_labels A declaration of action labels that can be used in the state formulas.
- *  \param[in] variables A container with global data variables. 
+ *  \param[in] variables A container with global data variables.
  *  \post      formula is type checked.
  **/
 template <typename VariableContainer, typename ActionLabelContainer>
-state_formula type_check_state_formula(const state_formula& x,
-                                       const data::data_specification& dataspec = data::data_specification(),
-                                       const ActionLabelContainer& action_labels = ActionLabelContainer(),
-                                       const VariableContainer& variables = VariableContainer()
-                                      )
+state_formula typecheck_state_formula(const state_formula& x,
+                                      const data::data_specification& dataspec = data::data_specification(),
+                                      const ActionLabelContainer& action_labels = ActionLabelContainer(),
+                                      const VariableContainer& variables = VariableContainer()
+                                     )
 {
   try
   {
@@ -582,11 +582,11 @@ state_formula type_check_state_formula(const state_formula& x,
  *  \post      formula is type checked.
  **/
 inline
-state_formula type_check_state_formula(const state_formula& x,
-                                       const lps::specification& lpsspec
-                                      )
+state_formula typecheck_state_formula(const state_formula& x,
+                                      const lps::specification& lpsspec
+                                     )
 {
-  return type_check_state_formula(x, lpsspec.data(), lpsspec.action_labels(), lpsspec.global_variables());
+  return typecheck_state_formula(x, lpsspec.data(), lpsspec.action_labels(), lpsspec.global_variables());
 }
 
 /// \brief Typecheck the state formula specification formspec. It is assumed that the formula is self contained,

@@ -269,7 +269,7 @@ process_specification parse_process_specification_new(const std::string& text)
 inline
 void complete_process_specification(process_specification& x, bool alpha_reduce = false)
 {
-  type_check_process_specification(x);
+  typecheck_process_specification(x);
   if (alpha_reduce)
   {
     alphabet_reduce(x, 1000ul);
@@ -365,7 +365,7 @@ process_expression parse_process_expression(const std::string& text,
                                            )
 {
   process_expression x = detail::parse_process_expression_new(text);
-  x = type_check_process_expression(x, variables, dataspec, action_labels, process_identifiers);
+  x = typecheck_process_expression(x, variables, dataspec, action_labels, process_identifiers);
   return x;
 }
 

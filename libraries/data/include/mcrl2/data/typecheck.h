@@ -25,7 +25,7 @@ namespace data
 class data_type_checker: public sort_type_checker
 {
   protected:
-    mutable bool was_warning_upcasting; // This variable is used to limit the number of upcasting warnings. 
+    mutable bool was_warning_upcasting; // This variable is used to limit the number of upcasting warnings.
 
     std::map<core::identifier_string,sort_expression_list> system_constants;   //name -> Set(sort expression)
     std::map<core::identifier_string,sort_expression_list> system_functions;   //name -> Set(sort expression)
@@ -275,7 +275,7 @@ class data_type_checker: public sort_type_checker
  *  \post      sort_expr is type checked.
  **/
 inline
-void type_check_sort_expression(const sort_expression& sort_expr, const data_specification& data_spec)
+void typecheck_sort_expression(const sort_expression& sort_expr, const data_specification& data_spec)
 {
   try
   {
@@ -297,10 +297,10 @@ void type_check_sort_expression(const sort_expression& sort_expr, const data_spe
  *  \post      data_expr is type checked.
  **/
 template <typename VariableContainer>
-data_expression type_check_data_expression(const data_expression& x,
-                                           const VariableContainer& variables,
-                                           const data_specification& dataspec = data_specification()
-                                          )
+data_expression typecheck_data_expression(const data_expression& x,
+                                          const VariableContainer& variables,
+                                          const data_specification& dataspec = data_specification()
+                                         )
 {
   try
   {
@@ -322,9 +322,9 @@ data_expression type_check_data_expression(const data_expression& x,
  *  \post      data_expr is type checked.
  **/
 inline
-data_expression type_check_data_expression(const data_expression& x, const data_specification& dataspec = data_specification())
+data_expression typecheck_data_expression(const data_expression& x, const data_specification& dataspec = data_specification())
 {
-  return type_check_data_expression(x, variable_list(), dataspec);
+  return typecheck_data_expression(x, variable_list(), dataspec);
 }
 
 /** \brief     Type check a parsed mCRL2 data specification.
@@ -333,7 +333,7 @@ data_expression type_check_data_expression(const data_expression& x, const data_
  *  \post      data_spec is type checked.
  **/
 inline
-void type_check_data_specification(data_specification& data_spec)
+void typecheck_data_specification(data_specification& data_spec)
 {
   data_type_checker type_checker(data_spec);
   data_spec=type_checker();

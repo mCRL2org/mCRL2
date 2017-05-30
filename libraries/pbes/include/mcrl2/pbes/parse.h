@@ -156,7 +156,7 @@ untyped_pbes parse_pbes_new(const std::string& text)
 inline
 void complete_pbes(pbes& x)
 {
-  type_check_pbes(x);
+  typecheck_pbes(x);
   pbes_system::translate_user_notation(x);
   complete_data_specification(x);
 }
@@ -203,7 +203,7 @@ propositional_variable parse_propositional_variable(const std::string& text,
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   propositional_variable result = detail::pbes_actions(p).parse_PropVarDecl(node);
   p.destroy_parse_node(node);
-  return type_check_propositional_variable(result, variables, dataspec);
+  return typecheck_propositional_variable(result, variables, dataspec);
 }
 
 /** \brief     Parse a pbes expression.
@@ -232,7 +232,7 @@ pbes_expression parse_pbes_expression(const std::string& text,
   p.destroy_parse_node(node);
   if (type_check)
   {
-    x = pbes_system::type_check_pbes_expression(x, variables, propositional_variables, dataspec);
+    x = pbes_system::typecheck_pbes_expression(x, variables, propositional_variables, dataspec);
   }
   return x;
 }

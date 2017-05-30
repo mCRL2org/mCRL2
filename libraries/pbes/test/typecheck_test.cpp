@@ -24,7 +24,7 @@ void test_pbes_specification(const std::string& pbes_in, bool test_type_checker 
   pbes_system::pbes p = pbes_system::detail::parse_pbes_new(pbes_in).construct_pbes();
   if (test_type_checker)
   {
-    pbes_system::type_check_pbes(p);
+    pbes_system::typecheck_pbes(p);
     std::string pbes_out = pbes_system::pp(p);
 
     if (pbes_in!=pbes_out)

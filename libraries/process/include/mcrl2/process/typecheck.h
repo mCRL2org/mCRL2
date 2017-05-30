@@ -618,19 +618,19 @@ class process_type_checker
  **/
 
 inline
-void type_check_process_specification(process_specification& proc_spec)
+void typecheck_process_specification(process_specification& proc_spec)
 {
   process_type_checker type_checker;
   type_checker(proc_spec);
 }
 
 template <typename VariableContainer, typename ActionLabelContainer, typename ProcessIdentifierContainer>
-process_expression type_check_process_expression(const process_expression& x,
-                                                 const VariableContainer& variables = VariableContainer(),
-                                                 const data::data_specification& dataspec = data::data_specification(),
-                                                 const ActionLabelContainer& action_labels = ActionLabelContainer(),
-                                                 const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer()
-                                                )
+process_expression typecheck_process_expression(const process_expression& x,
+                                                const VariableContainer& variables = VariableContainer(),
+                                                const data::data_specification& dataspec = data::data_specification(),
+                                                const ActionLabelContainer& action_labels = ActionLabelContainer(),
+                                                const ProcessIdentifierContainer& process_identifiers = ProcessIdentifierContainer()
+                                               )
 {
   process_type_checker type_checker(dataspec, variables, action_labels, process_identifiers);
   return type_checker(x);

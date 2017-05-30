@@ -39,7 +39,7 @@ void compatibility_test()
     throw mcrl2::runtime_error("Error while parsing data specification");
   }
   data::data_specification data_spec(data_spec_aterm);
-  data::type_check_data_specification(data_spec);
+  data::typecheck_data_specification(data_spec);
 
   atermpp::aterm_appl data_spec_aterm_new =
     mcrl2::data::detail::data_specification_to_aterm_data_spec(

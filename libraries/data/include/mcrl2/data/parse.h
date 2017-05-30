@@ -632,7 +632,7 @@ data_specification parse_data_specification(std::istream& in)
 {
   std::string text = utilities::read_text(in);
   data_specification result = detail::parse_data_specification_new(text);
-  type_check_data_specification(result);
+  typecheck_data_specification(result);
   return result;
 }
 
@@ -853,7 +853,7 @@ data_expression parse_data_expression(std::istream& in,
   data_expression x = detail::parse_data_expression_new(text);
   if (type_check)
   {
-    x = data::type_check_data_expression(x, variables, dataspec);
+    x = data::typecheck_data_expression(x, variables, dataspec);
   }
   if (translate_user_notation)
   {
@@ -950,7 +950,7 @@ sort_expression parse_sort_expression(std::istream& in,
 {
   std::string text = utilities::read_text(in);
   sort_expression x = detail::parse_sort_expression_new(text);
-  type_check_sort_expression(x, data_spec);
+  typecheck_sort_expression(x, data_spec);
   x = normalize_sorts(x, data_spec);
   return x;
 }

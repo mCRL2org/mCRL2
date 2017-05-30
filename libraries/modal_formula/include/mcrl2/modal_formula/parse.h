@@ -82,7 +82,7 @@ action_formula parse_action_formula(const std::string& text,
                                    )
 {
   action_formula x = detail::parse_action_formula(text);
-  x = action_formulas::typecheck(x, dataspec, variables, actions);
+  x = action_formulas::typecheck_action_formula(x, dataspec, variables, actions);
   x = action_formulas::translate_user_notation(x);
   return x;
 }
@@ -141,7 +141,7 @@ regular_formula parse_regular_formula(const std::string& text,
                                      )
 {
   regular_formula x = detail::parse_regular_formula(text);
-  x = regular_formulas::typecheck(x, dataspec, variables, actions);
+  x = regular_formulas::typecheck_regular_formula(x, dataspec, variables, actions);
   x = regular_formulas::translate_user_notation(x);
   return x;
 }
@@ -370,7 +370,7 @@ state_formula parse_state_formula(const std::string& text,
   state_formula x = detail::parse_state_formula(text);
   if (options.type_check)
   {
-    x = state_formulas::type_check_state_formula(x, lpsspec);
+    x = state_formulas::typecheck_state_formula(x, lpsspec);
   }
   lpsspec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
   return post_process_state_formula(x, options);
@@ -403,7 +403,7 @@ state_formula_specification parse_state_formula_specification(const std::string&
   state_formula_specification result = detail::parse_state_formula_specification(text);
   if (options.type_check)
   {
-    result.formula() = state_formulas::type_check_state_formula(result.formula(), result.data(), result.action_labels(), data::variable_list());
+    result.formula() = state_formulas::typecheck_state_formula(result.formula(), result.data(), result.action_labels(), data::variable_list());
   }
   result.formula() = post_process_state_formula(result.formula(), options);
   return result;
@@ -438,8 +438,8 @@ state_formula_specification parse_state_formula_specification(const std::string&
   process::action_label_list actspec = process::merge_action_specifications(lpsspec.action_labels(), result.action_labels());
   if (options.type_check)
   {
-    result.formula() = state_formulas::type_check_state_formula(result.formula(), dataspec, actspec, lpsspec.global_variables());
-    // TODO: de dataspec and actspec must also be typechecked here. 
+    result.formula() = state_formulas::typecheck_state_formula(result.formula(), dataspec, actspec, lpsspec.global_variables());
+    // TODO: de dataspec and actspec must also be typechecked here.
   }
   result.formula() = post_process_state_formula(result.formula(), options);
   return result;
