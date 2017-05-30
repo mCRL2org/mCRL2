@@ -790,10 +790,12 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
       lts.initial_probabilistic_state(), min, max);
 
   // position the initial state slightly in front of others
+  /*
   QVector3D& initial_node = m_nodes[m_initialState].pos_mutable();
   initial_node.setZ(initial_node.z() + nodesize / 2);
   QVector3D& initial_label = m_stateLabelnodes[m_initialState].pos_mutable();
   initial_label.setZ(initial_label.z() + nodesize / 2);
+  */
 }
 
 template <class lts_t>

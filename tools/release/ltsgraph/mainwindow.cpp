@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
   // Add graph area
   m_glwidget = new GLWidget(m_graph, m_ui.frame);
-  m_glwidget->setDepth(0.0, 0);
+  m_glwidget->setDepth(0, 0);
   m_ui.widgetLayout->addWidget(m_glwidget);
 
   // Create springlayout algorithm + UI
