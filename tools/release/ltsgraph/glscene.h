@@ -111,10 +111,11 @@ struct CameraAnimation : public CameraView
 class GLScene
 {
   private:
-    Graph::Graph& m_graph;      ///< The graph that is being visualised.
+    Graph::Graph& m_graph;     ///< The graph that is being visualised.
     CameraAnimation m_camera;  ///< Implementation details of the OpenGL camera handling.
     VertexData m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
     float m_device_pixel_ratio;
+    QFont m_font;
     QPainter& m_painter;
 
     bool m_drawtransitionlabels;   ///< Transition labels are only drawn if this field is true.
@@ -235,7 +236,7 @@ class GLScene
     /**
      * @brief Render the scene.
      */
-    void render();
+    void render(QOpenGLWidget& glwidget);
 
     /**
      * @brief Resize the OpenGL viewport.
@@ -350,7 +351,7 @@ class GLScene
     /**
      * @brief Renders the scene to a file using gl2ps.
      */
-    void renderVectorGraphics(const char* filename, GLint format = GL2PS_PDF);
+    void renderVectorGraphics(QOpenGLWidget& glwidget, const char* filename, GLint format = GL2PS_PDF);
 
 
     /**

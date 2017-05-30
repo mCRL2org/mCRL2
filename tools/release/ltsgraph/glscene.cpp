@@ -671,7 +671,9 @@ GLScene::GLScene(Graph::Graph& g, float device_pixel_ratio, QPainter& painter)
   : m_graph(g), m_camera(), m_vertexdata(), m_device_pixel_ratio(device_pixel_ratio), m_painter(painter),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
-{ }
+{
+  m_font.setPixelSize(22);
+}
 
 void GLScene::init(const QColor& clear)
 {
@@ -720,7 +722,7 @@ void GLScene::updateFog()
   }
 }
 
-void GLScene::render()
+void GLScene::render(QOpenGLWidget& glwidget)
 {
   // Initialise projection matrix
   glMatrixMode(GL_PROJECTION);
@@ -746,10 +748,16 @@ void GLScene::render()
   }
   for (size_t i = 0; i < edgeCount; ++i) {
     renderEdge(sel ? m_graph.selectionEdge(i) : i);
+    renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
 
+  // text drawing follows
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glDepthMask(GL_FALSE);
+  m_painter.begin(&glwidget);
+  m_painter.setPen(Qt::black);
+  m_painter.setFont(m_font);
+  m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
   for (size_t i = 0; i < nodeCount; ++i)
   {
     if (m_drawstatenumbers) {
@@ -764,10 +772,10 @@ void GLScene::render()
     if (m_drawtransitionlabels) {
       renderTransitionLabel(sel ? m_graph.selectionEdge(i) : i);
     }
-    renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
   glDepthMask(GL_TRUE);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+  m_painter.end();
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 }
@@ -931,7 +939,7 @@ void GLScene::setSize(const QVector3D& size, size_t animation)
   m_camera.setSize(size, animation);
 }
 
-void GLScene::renderVectorGraphics(const char* filename, GLint format)
+void GLScene::renderVectorGraphics(QOpenGLWidget& glwidget, const char* filename, GLint format)
 {
   FILE* outfile = fopen(filename, "wb+");
   GLint viewport[4];
@@ -957,7 +965,7 @@ void GLScene::renderVectorGraphics(const char* filename, GLint format)
                    outfile,
                    filename
                   );
-    render();
+    render(glwidget);
     state = gl2psEndPage();
   }
   if (state != GL2PS_SUCCESS)

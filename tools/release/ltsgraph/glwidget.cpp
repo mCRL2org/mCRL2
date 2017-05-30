@@ -263,15 +263,8 @@ void GLWidget::paintGL()
   }
   else
   {
-    m_painter.begin(this);
-    m_painter.setPen(Qt::black);
-    QFont font;
-    font.setPixelSize(22);
-    m_painter.setFont(font);
-    m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
     m_scene->init(Qt::white);
-    m_scene->render();
-    m_painter.end();
+    m_scene->render(*this);
     if (!m_scene->animationFinished())
     {
       update();
@@ -523,23 +516,22 @@ void GLWidget::saveVector(const QString& filename)
   QString lcfn = filename.toLower();
   if (lcfn.endsWith(".pdf"))
   {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PDF);
   }
   else if (lcfn.endsWith(".ps"))
   {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PS);
+    m_scene->renderVectorGraphics(*this, filename.toUtf8(), GL2PS_PS);
   }
   else if (lcfn.endsWith(".eps"))
   {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_EPS);
+    m_scene->renderVectorGraphics(*this, filename.toUtf8(), GL2PS_EPS);
   }
   else if (lcfn.endsWith(".svg"))
   {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_SVG);
+    m_scene->renderVectorGraphics(*this, filename.toUtf8(), GL2PS_SVG);
   }
   else if (lcfn.endsWith(".tex"))
   {
-    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PGF);
+    m_scene->renderVectorGraphics(*this, filename.toUtf8(), GL2PS_PGF);
   }
   else
   {
