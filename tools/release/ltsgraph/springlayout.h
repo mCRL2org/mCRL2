@@ -106,8 +106,9 @@ class SpringLayout
      * @brief Restrains all nodes of the graph between @e min and @e max.
      * @param min The minimum coordinates for any node.
      * @param max The maximum coordinates for any node.
+     * @param zchange The amplitude of changes to the z values when changing to 3D
      */
-    void setClipRegion(const QVector3D& min, const QVector3D& max);
+    void setClipRegion(const QVector3D& min, const QVector3D& max, float zchange);
 
     /**
      * @brief Returns the user interface object. If no user interface is available,

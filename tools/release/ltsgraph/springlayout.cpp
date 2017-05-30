@@ -239,19 +239,17 @@ void SpringLayout::apply()
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 }
 
-void SpringLayout::setClipRegion(const QVector3D& min, const QVector3D& max)
+void SpringLayout::setClipRegion(const QVector3D& min, const QVector3D& max, float zchange)
 {
   if (min.z() < m_clipMin.z() || max.z() > m_clipMax.z()) //Depth is increased, add random z values to improve spring movement in z direction
   {
     m_graph.lock(GRAPH_LOCK_TRACE);
-    float change = (std::min)(m_clipMin.z()-min.z(), max.z()-m_clipMax.z())/100.0f; //Add at most 1/100th of the change
     for (size_t n = 0; n < m_graph.nodeCount(); ++n)
     {
       if (!m_graph.node(n).anchored())
       {
-        m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() + frand(-change, change));
+        m_graph.node(n).pos_mutable().setZ(m_graph.node(n).pos().z() + frand(-zchange, zchange));
       }
-
     }
     m_graph.unlock(GRAPH_LOCK_TRACE);
   }

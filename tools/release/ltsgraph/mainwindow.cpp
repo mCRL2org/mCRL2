@@ -109,10 +109,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::onWidgetResized(const QVector3D& newsize)
 {
-  const double tolerance = 2.0;
-  QVector3D half = newsize / 2.0 * tolerance;
-  m_graph.clip(-half, half);
-  m_layout->setClipRegion(-half, half);
+  QVector3D limit{INFINITY, INFINITY, INFINITY};
+  if (newsize.z() == 0.0)
+  {
+    limit.setZ(0.0);
+  }
+  m_graph.clip(-limit, limit);
+  m_layout->setClipRegion(-limit, limit, newsize.length() / 4);
   m_glwidget->update();
 }
 
@@ -159,7 +162,9 @@ void MainWindow::openFile(const QString& fileName)
       m_ui.actLayout->setChecked(false);
       m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
-      m_graph.load(fileName, -m_glwidget->size3() / 2.0, m_glwidget->size3() / 2.0,
+      const double scaling = 0.5;
+      QVector3D limit = m_glwidget->size3() / 2.0 * scaling;
+      m_graph.load(fileName, -limit, limit,
           m_glwidget->nodeSize());
 
       if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadSelection)
