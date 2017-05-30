@@ -361,18 +361,6 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   glLineWidth(2.0);
   gl2psLineWidth(0.25);
 
-  glVertexPointer(3, GL_FLOAT, 0, data.node);
-  if (translucent)
-  {
-    Color4f fill2(fill, .15f);
-    glColor4fv(fill2);
-  }
-  else
-  {
-    glColor3fv(fill);
-  }
-  glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
-
   if (probabilistic)
   {
     Color3f blue = Color3f(0.1f, 0.1f, 0.7f);
@@ -380,6 +368,18 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
     glVertexPointer(3, GL_FLOAT, 4*3, data.node);
     glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2 / 4);
   }
+
+  glVertexPointer(3, GL_FLOAT, 0, data.node);
+  if (translucent)
+  {
+    glColor4fv(Color4f(fill, 0.15));
+  }
+  else
+  {
+    glColor3fv(fill);
+  }
+
+  glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
 
   // disable the depth mask temporarily for drawing the border of a node
   // dragging an initial state in 2D mode over other nodes looks less weird this way
