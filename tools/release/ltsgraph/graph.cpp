@@ -757,17 +757,8 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
   for (size_t i = 0; i < lts.num_states(); ++i)
   {
     const bool is_not_probabilistic = false;
-    float epsilon = 0.0;
-    for (const auto& ps : lts.initial_probabilistic_state())
-    {
-      if (i == ps.state())
-      {
-        epsilon = nodesize / 2;
-        break;
-      }
-    }
     m_nodes.emplace_back(
-        QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()) + epsilon),
+        QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z())),
         is_not_probabilistic);
     m_stateLabelnodes.emplace_back(m_nodes[i].pos(), i);
   }
@@ -797,6 +788,12 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
 
   m_initialState = add_probabilistic_state<lts_t>(
       lts.initial_probabilistic_state(), min, max);
+
+  // position the initial state slightly in front of others
+  QVector3D& initial_node = m_nodes[m_initialState].pos_mutable();
+  initial_node.setZ(initial_node.z() + nodesize / 2);
+  QVector3D& initial_label = m_stateLabelnodes[m_initialState].pos_mutable();
+  initial_label.setZ(initial_label.z() + nodesize / 2);
 }
 
 template <class lts_t>

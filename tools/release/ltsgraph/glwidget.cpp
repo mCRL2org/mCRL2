@@ -236,6 +236,7 @@ void GLWidget::updateSelection()
 void GLWidget::initializeGL()
 {
   m_scene->init(Qt::white);
+  m_scene->updateShapes();
   resizeGL(width(), height());
   setMouseTracking(true);
 }
@@ -268,6 +269,7 @@ void GLWidget::paintGL()
     font.setPixelSize(22);
     m_painter.setFont(font);
     m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+    m_scene->init(Qt::white);
     m_scene->render();
     m_painter.end();
     if (!m_scene->animationFinished())

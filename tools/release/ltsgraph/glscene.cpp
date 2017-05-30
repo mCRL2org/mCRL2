@@ -358,16 +358,8 @@ inline
 void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool mark, bool translucent, bool probabilistic)
 {
   glPushAttrib(GL_LINE_BIT);
-  if (mark)
-  {
-    glLineWidth(5.0);
-    gl2psLineWidth(1);
-  }
-  else
-  {
-    glLineWidth(2.0);
-    gl2psLineWidth(0.25);
-  }
+  glLineWidth(2.0);
+  gl2psLineWidth(0.25);
 
   glVertexPointer(3, GL_FLOAT, 0, data.node);
   if (translucent)
@@ -712,8 +704,6 @@ void GLScene::init(const QColor& clear)
   // We'll be using a lot of glDrawArrays, and all of them use the vertex
   // array. We enable that feature once and leave it untouched.
   glEnableClientState(GL_VERTEX_ARRAY);
-  // Load shapes
-  updateShapes();
 }
 
 void GLScene::updateFog()
