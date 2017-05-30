@@ -246,7 +246,7 @@ class WorkerThread : public QThread
     SpringLayout& m_layout;
     int m_period;
   public:
-    WorkerThread(SpringLayout& layout, int period=50, QObject* parent=nullptr)
+    WorkerThread(SpringLayout& layout, int period, QObject* parent=nullptr)
       : QThread(parent), m_stopped(false), m_layout(layout), m_period(period)
     {}
 
@@ -277,6 +277,8 @@ class WorkerThread : public QThread
         m_layout.m_glwidget.update();
         if (m_period > elapsed) {
           msleep(m_period - elapsed);
+        } else {
+          msleep(20);
         }
       }
     }
