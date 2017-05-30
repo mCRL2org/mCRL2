@@ -437,10 +437,12 @@ class pbesinst_alternative_lazy_algorithm
       todo.clear();
       todo_set.clear();
       occurrence.clear();
-      for(std::vector<propositional_variable_instantiation> vec: instantiations)
+      for(std::vector<propositional_variable_instantiation>& vec: instantiations)
       {
         vec.clear();
       }
+      assert(instantiations.size()==0 || instantiations[0].size()==0); 
+
 
       std::stack<pbes_expression> stack;
       stack.push(init);
