@@ -161,7 +161,7 @@ void MainWindow::changeDocument(DocumentWidget *document)
   }
   else
   {  
-    m_findReplaceDialog->setTextEdit(0);
+    m_findReplaceDialog->setTextEdit(nullptr);
   }
 }
 
@@ -171,7 +171,7 @@ bool MainWindow::onCloseRequest(int index)
 
   if (!document->isModified()) 
   {
-    m_findReplaceDialog->setTextEdit(0);
+    m_findReplaceDialog->setTextEdit(nullptr);
     m_ui.documentManager->closeDocument(index);
     return true;
   }
@@ -182,12 +182,12 @@ bool MainWindow::onCloseRequest(int index)
     case QMessageBox::Yes:
       if (saveDocument(index))
       {
-        m_findReplaceDialog->setTextEdit(0);
+        m_findReplaceDialog->setTextEdit(nullptr);
         m_ui.documentManager->closeDocument(index);
       }
       break;
     case QMessageBox::No:
-      m_findReplaceDialog->setTextEdit(0);
+      m_findReplaceDialog->setTextEdit(nullptr);
       m_ui.documentManager->closeDocument(index);
       break;
     case QMessageBox::Cancel:

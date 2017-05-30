@@ -13,7 +13,7 @@
 #include "findreplacedialog.h"
 
 FindReplaceDialog::FindReplaceDialog(QWidget *parent) :
-  QDialog(parent), m_textEdit(0)
+  QDialog(parent), m_textEdit(nullptr)
 {
   m_ui.setupUi(this);
 
@@ -105,13 +105,25 @@ void FindReplaceDialog::find(bool next)
   if (result)
   {
     showError("");
+    return;
   } 
-  else 
+  
+  // The string was not found, try to wrap around begin/end of file
+  const QTextCursor originalPosition = m_textEdit->textCursor();
+  m_textEdit->moveCursor(back ? QTextCursor::End : QTextCursor::Start);
+  result = m_textEdit->find(toSearch, flags);
+
+  if(result)
   {
-    showError(tr("No match found"));
-    m_textCursor.setPosition(0);
-    m_textEdit->setTextCursor(m_textCursor);
+    showError("");
+    return;
   }
+
+  // The string was still not found
+  showError(tr("No match found"));
+  // Reset the position of the cursor
+  m_textEdit->setTextCursor(originalPosition);
+  
 }
 
 void FindReplaceDialog::replace()
@@ -138,8 +150,7 @@ void FindReplaceDialog::replaceAll()
     return;
   }
 
-  m_textCursor.setPosition(0);
-  m_textEdit->setTextCursor(m_textCursor);
+  m_textEdit->moveCursor(QTextCursor::Start);
   find(true);
 
   int i=0;
