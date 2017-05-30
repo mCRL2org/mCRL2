@@ -109,6 +109,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::onWidgetResized(const QVector3D& newsize)
 {
+  const double tolerance = 2.0;
+  QVector3D half = newsize / 2.0 * tolerance;
+  m_graph.clip(-half, half);
+  m_layout->setClipRegion(-half, half);
   m_glwidget->update();
 }
 
