@@ -672,7 +672,7 @@ GLScene::GLScene(Graph::Graph& g, float device_pixel_ratio, QPainter& painter)
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
 {
-  m_font.setPixelSize(22);
+  setFontSize(18);
 }
 
 void GLScene::init(const QColor& clear)

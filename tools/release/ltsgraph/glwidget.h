@@ -204,6 +204,9 @@ class GLWidget : public QOpenGLWidget
     size_t nodeSize() const {
       return m_scene->nodeSize();
     }
+    size_t fontSize() const {
+      return m_scene->fontSize();
+    }
     float fogDistance() const {
       return m_scene->fogDistance();
     }
@@ -245,6 +248,10 @@ class GLWidget : public QOpenGLWidget
     void setNodeSize(int size) {
       m_scene->setNodeSize(size);
       m_scene->updateShapes();
+      update();
+    }
+    void setFontSize(int size) {
+      m_scene->setFontSize(size);
       update();
     }
     void setFogDistance(int dist) {

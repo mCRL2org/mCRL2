@@ -568,6 +568,7 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
   selectColor(initialcolor);
   m_ui.spinRadius->setValue(m_widget.nodeSize());
   m_ui.spinFog->setValue(m_widget.fogDistance());
+  m_ui.spinFontSize->setValue(m_widget.fontSize());
 
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
   connect(m_ui.btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
@@ -579,6 +580,7 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
   connect(m_ui.cbInitial, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleInitialMarking(bool)));
   connect(m_ui.cbFog, SIGNAL(toggled(bool)), &m_widget, SLOT(toggleFog(bool)));
   connect(m_ui.spinRadius, SIGNAL(valueChanged(int)), &m_widget, SLOT(setNodeSize(int)));
+  connect(m_ui.spinFontSize, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFontSize(int)));
   connect(m_ui.spinFog, SIGNAL(valueChanged(int)), &m_widget, SLOT(setFogDistance(int)));
 }
 

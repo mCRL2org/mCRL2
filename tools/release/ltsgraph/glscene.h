@@ -123,7 +123,8 @@ class GLScene
     bool m_drawstatenumbers;       ///< State numbers are only drawn if this field is true.
     bool m_drawselfloops;          ///< Self loops are only drawn if this field is true.
     bool m_drawinitialmarking;     ///< The initial state is marked if this field is true.
-    size_t m_size_node;            ///< Variable node size.
+    size_t m_size_node;            ///< Variable node size (radius).
+    size_t m_fontsize;             ///< Variable font size
 
     bool m_drawfog;                ///< Fog is rendered only if this field is true.
     float m_fogdistance;           ///< The distance at which the fog starts
@@ -366,8 +367,11 @@ class GLScene
     bool drawTransitionLabels() const {
       return m_drawtransitionlabels;
     }
-    size_t  nodeSize() const {
+    size_t nodeSize() const {
       return m_size_node;
+    }
+    size_t fontSize() const {
+      return m_fontsize;
     }
     float nodeSizeOnScreen() const {
       return m_size_node * m_camera.pixelsize * m_device_pixel_ratio;
@@ -402,6 +406,9 @@ class GLScene
     }
     void setNodeSize(size_t size) {
       m_size_node = size;
+    }
+    void setFontSize(size_t size) {
+      m_font.setPixelSize(m_fontsize = size);
     }
     void setFogDistance(float dist) {
       m_fogdistance = dist;
