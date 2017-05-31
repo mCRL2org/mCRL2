@@ -12,8 +12,7 @@ sys.path += [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'pyth
 
 from random_bes_generator import make_bes
 from random_pbes_generator import make_pbes
-from random_process_generator import make_process_specification, generator_map, make_action, make_delta, make_tau, \
-    make_process_instance, make_sum, make_if_then, make_if_then_else, make_choice, make_seq
+import random_process_expression
 from testing import run_pbes_test
 from testcommand import YmlTest
 from text_utility import write_text
@@ -49,16 +48,17 @@ class RandomTest(YmlTest):
 class ProcessTest(RandomTest):
     def __init__(self, name, ymlfile, settings = dict()):
         super(ProcessTest, self).__init__(name, ymlfile, settings)
-        self.generator_map = generator_map
         self.actions = ['a', 'b', 'c', 'd']
         self.process_identifiers = ['P', 'Q', 'R']
         self.process_size = 13
+        self.parallel_operator_generators = random_process_expression.default_parallel_operator_generators
+        self.process_expression_generators = random_process_expression.default_process_expression_generators
         self.init = None
         self.generate_process_parameters = False
 
     def create_inputfiles(self, runpath = '.'):
         filename = '{0}.mcrl2'.format(self.name, self.settings)
-        p = make_process_specification(self.generator_map, self.actions, self.process_identifiers, self.process_size, init = self.init, generate_process_parameters = self.generate_process_parameters)
+        p = random_process_expression.make_process_specification(self.parallel_operator_generators, self.process_expression_generators, self.actions, self.process_identifiers, self.process_size, self.init, self.generate_process_parameters)
         write_text(filename, str(p))
         self.inputfiles += [filename]
 
@@ -68,16 +68,16 @@ class ProcessTauTest(ProcessTest):
         super(ProcessTauTest, self).__init__(name, testfile, settings)
         self.actions = ['a', 'b', 'c']
         self.init = 'hide({a}, allow({a, b, c}, P || Q || R))'
-        self.generator_map = {
-                               make_action: 8,
-                               make_delta: 1,
-                               make_tau: 4,
-                               make_process_instance: 1,
-                               make_sum: 0,
-                               make_if_then: 0,
-                               make_if_then_else: 0,
-                               make_choice: 5,
-                               make_seq: 5,
+        self.process_expression_generators = {
+                               random_process_expression.make_action: 8,
+                               random_process_expression.make_delta: 1,
+                               random_process_expression.make_tau: 4,
+                               random_process_expression.make_process_instance: 1,
+                               random_process_expression.make_sum: 0,
+                               random_process_expression.make_if_then: 0,
+                               random_process_expression.make_if_then_else: 0,
+                               random_process_expression.make_choice: 5,
+                               random_process_expression.make_seq: 5,
                              }
 
 class AlphabetReduceTest(ProcessTest):
@@ -266,7 +266,7 @@ available_tests = {
     'ltscompare-weak-bisim'                       : lambda name, settings: LtscompareTest(name, 'weak-bisim', settings)                            ,
     'ltscompare-dpweak-bisim'                     : lambda name, settings: LtscompareTest(name, 'dpweak-bisim', settings)                          ,
     'ltscompare-sim'                              : lambda name, settings: LtscompareTest(name, 'sim', settings)                                   ,
-    'ltscompare-ready-sim'                        : lambda name, settings: LtscompareTest(name, 'ready-sim', settings)                             ,    
+    'ltscompare-ready-sim'                        : lambda name, settings: LtscompareTest(name, 'ready-sim', settings)                             ,
     'ltscompare-trace'                            : lambda name, settings: LtscompareTest(name, 'trace', settings)                                 ,
     'ltscompare-weak-trace'                       : lambda name, settings: LtscompareTest(name, 'weak-trace', settings)                            ,
     'bisimulation-bisim'                          : lambda name, settings: BisimulationTest(name, 'bisim', settings)                               ,
