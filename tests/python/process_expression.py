@@ -35,6 +35,14 @@ import re
 from data_expression import *
 import random_data_expression
 
+def is_list_of(l, types):
+    if not isinstance(l, list):
+        return False
+    for x in l:
+        if not isinstance(x, types):
+            return False
+    return True
+
 # example: 'b: Bool'
 def parse_variable(text):
     text = text.strip()
@@ -61,7 +69,7 @@ class ProcessIdentifier(object):
 
     def __str__(self):
         if self.variables:
-            return '{}({})'.format(self.name, ', '.join(map(str, self.variables)))
+            return '{}({})'.format(self.name, ', '.join(['{}: {}'.format(x, x.type) for x in self.variables]))
         else:
             return self.name
 
@@ -86,12 +94,13 @@ class Tau(ProcessExpression):
 class ProcessInstance(ProcessExpression):
     def __init__(self, identifier, parameters = []):
         assert isinstance(identifier, ProcessIdentifier)
+        assert is_list_of(parameters, DataExpression)
         self.identifier = identifier
         self.parameters = parameters
 
     def __str__(self):
         if self.parameters:
-            return '{}({})'.format(self.identifier.name, ', '.join(self.parameters))
+            return '{}({})'.format(self.identifier.name, ', '.join(map(str, self.parameters)))
         else:
             return self.identifier.name
 

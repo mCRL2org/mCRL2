@@ -26,7 +26,7 @@ class Integer(DataExpression):
 
 class Boolean(DataExpression):
     def __init__(self, value):
-        self.value
+        self.value = value
         self.type = 'Bool'
 
     def __str__(self):

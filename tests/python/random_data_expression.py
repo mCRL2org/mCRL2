@@ -19,30 +19,27 @@ def is_list_of(l, types):
 # Simple generator for boolean data expressions.
 def make_boolean_data_expression(variables):
     assert is_list_of(variables, Variable)
-    integers = set([x.name for x in variables if x.type == 'Int'])
-    booleans = set([x.name for x in variables if x.type == 'Bool'])
-    result = []
+    integers = [x for x in variables if x.type == 'Int']
+    booleans = [x for x in variables if x.type == 'Bool']
+    result = booleans[:]
     for m in integers:
-        result.append('{} > 0'.format(m))
-        result.append('{} > 1'.format(m))
-        result.append('{} < 2'.format(m))
-        result.append('{} < 3'.format(m))
-        for n in integers - set([m]):
-            result.append('{} == {}'.format(m, n))
-    for b in booleans:
-        result.append(b)
-    result.append('true')
-    result.append('false')
+        result.append(Boolean('{} > 0'.format(m)))
+        result.append(Boolean('{} > 1'.format(m)))
+        result.append(Boolean('{} < 2'.format(m)))
+        result.append(Boolean('{} < 3'.format(m)))
+        for n in integers:
+            result.append(Boolean('{} == {}'.format(m, n)))
+    result.append(Boolean('true'))
+    result.append(Boolean('false'))
     return random.choice(result)
 
 # Simple generator for integer data expressions.
 def make_integer_data_expression(variables):
     assert is_list_of(variables, Variable)
-    integers = set([x.name for x in variables if x.type == 'Int'])
-    result = []
+    integers = [x for x in variables if x.type == 'Int']
+    result = integers[:]
     for m in integers:
-        result.append(m)
-        for n in integers - set([m]) | set(['1', '2']):
+        for n in integers + [Integer('1'), Integer('2')]:
             result.append(Integer('{} + {}'.format(m, n)))
             result.append(Integer('{} - {}'.format(m, n)))
     result.append(Integer('0'))

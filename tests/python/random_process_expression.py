@@ -106,9 +106,9 @@ def make_variable(forbidden_variables):
 def default_value(v):
     assert isinstance(v, Variable)
     if v.type == 'Bool':
-        return random.choice(['true', 'false'])
+        return random.choice([Boolean('true'), Boolean('false')])
     elif v.type == 'Int':
-        return random.choice(['0', '1', '2'])
+        return random.choice([Integer('0'), Integer('1'), Integer('2')])
     raise RuntimeError('default_value: only Bool and Int are supported! ' + str(v.type))
 
 def make_multi_action(actions, size):
@@ -205,9 +205,9 @@ def make_process_instance(process_expression_generators, actions, process_identi
     parameters = []
     for v in P.variables:
         if v.type == 'Bool':
-            parameters.append(make_boolean_data_expression(variables))
+            parameters.append(random_data_expression.make_boolean_data_expression(variables))
         elif v.type == 'Int':
-            parameters.append(make_integer_data_expression(variables))
+            parameters.append(random_data_expression.make_integer_data_expression(variables))
         else:
             raise RuntimeError('unknown type {}'.format(v.type))
     return ProcessInstance(P, parameters)
@@ -386,5 +386,5 @@ def make_process_specification(parallel_operator_generators = default_parallel_o
     return ProcessSpecification(list(set(actions)), equations, init)
 
 if __name__ == '__main__':
-    procspec = make_process_specification()
+    procspec = make_process_specification(generate_process_parameters = True)
     print procspec
