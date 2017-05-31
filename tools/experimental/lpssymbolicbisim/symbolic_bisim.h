@@ -51,6 +51,7 @@
 #endif
 #include "find_linear_inequality.h"
 #include "enumerate_block_union.h"
+#include "block_tree.h"
 
 
 namespace mcrl2
@@ -90,12 +91,17 @@ protected:
   int refinement_cache_misses = 0;
   int transition_cache_hits = 0;
   int transition_cache_misses = 0;
+  block_tree* split_logger;
 
   std::map< lps::action_summand, variable_list > m_primed_summation_variables_map;
   std::map< lps::action_summand, data_expression_list > m_updates_map;
   std::map< lps::action_summand, substitution_t > m_primed_substitution_map;
   variable_list m_primed_process_parameters;
 
+  /**
+   * \brief Pretty print all expressions in a container, delimited
+   * with commas and surrounded with square brackets.
+   */
   template <typename Container>
   std::string pp_container(Container& expressions, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
   {
@@ -131,6 +137,16 @@ protected:
     return iff()(d1, d2);
   }
 
+  /**
+   * \brief Adds some rewrite rules that improve 'cannonicalness' of
+   * expressions.
+   * \detail The data specification that is part of the input specification
+   * is expanded with a number of rewrite rules for expressions over booleans
+   * and reals. Some rewrite rules help to simplify expressions. Others try
+   * to rewrite linear inequalities to a normal form. There are also rewrite rules
+   * to eliminate the [if] function symbol. The rewriter [rewr] is recreated with
+   * the expanded data specification.
+   */
   void add_ad_hoc_rules()
   {
     ad_hoc_data = merge_data_specifications(m_spec.data(),parse_data_specification(
@@ -222,6 +238,18 @@ protected:
     rewr = rewriter(ad_hoc_data, strat);
   }
 
+  /**
+   * \brief Finds subexpressions over free variables of sort
+   * Real and replace them with booleans.
+   * \detail This functions searches for linear inequalities over
+   * free real variables. It will replace each of them with a boolean
+   * variable. A list of the new boolean variables is returned.
+   * The parameter [enumeration_condition] contains an expression 
+   * that represents that relation between the replaced linear inequalities
+   * and the booleans. It has the shape (b1 <=> (x1 < r2)) && (b1 <=> (x2 < r2))...
+   * where b1 and b2 are boolean variables, x1 and x2 are real variables and r1 and
+   * r2 are real constants.
+   */
   variable_list replace_free_reals(data_expression& split_block,
     std::set< data_expression > linear_inequalities, data_expression& enumeration_condition, data_expression& lli)
   {
@@ -274,6 +302,7 @@ protected:
     {
       i->add_assignments(vars,sigma,rewr);
 
+      // Simplify the new block and add it to the result if it is not empty (false)
       data_expression new_block(simpl->apply(split_block, sigma));
       if(new_block != lambda(process_parameters, sort_bool::false_()))
       {
@@ -379,6 +408,7 @@ protected:
     }
 
     std::set< data_expression > new_blocks;
+    // Enumerate over all values of primed variables to obtain the new blocks
     enumerate(enumeration_condition, free_vars_list, split_block, lli, new_blocks);
 
     // Update the caches and the partition
@@ -386,9 +416,11 @@ protected:
     if(new_blocks.size() > 1) {
       partition.remove(phi_k);
       update_caches(phi_k, new_blocks);
+      block_tree* logging_node_phi_k = split_logger->find(rewr(phi_k));
       for(const data_expression& d: new_blocks)
       {
         partition.push_front(d);
+        logging_node_phi_k->add_child(rewr(d));
       }
       return true;
     }
@@ -397,7 +429,7 @@ protected:
 
   /**
    * \brief Update caches, adding information about the new blocks.
-   * \detail New entries are deduced from existng entries
+   * \details New entries are deduced from existng entries
    * refering to phi_k. phi_k is the parent of the new blocks.
    */
   void update_caches(data_expression phi_k, std::set<data_expression> new_blocks)
@@ -496,9 +528,11 @@ protected:
    */
   void build_summand_maps()
   {
+    // Later we will use this to build one substitution per action summand
     substitution_t sub_primed_base;
     for(const variable& v: process_parameters)
     {
+      // Create one primed variable per process parameter
       variable var(static_cast<std::string>(v.name()) + std::string("'"), v.sort());
       m_primed_process_parameters.push_front(var);
       sub_primed_base[v] = var;
@@ -507,16 +541,20 @@ protected:
 
     for(const lps::action_summand& as: m_spec.process().action_summands())
     {
+      // Base the substitution for this action summand on the
+      // substitution that was created from the process parameters
       substitution_t sub_primed = sub_primed_base;
       variable_list primed_summation_variables;
       for(const variable& v: as.summation_variables())
       {
+        // Create one primed variable per summation variable
         variable var(static_cast<std::string>(v.name()) + std::string("'"), v.sort());
         primed_summation_variables.push_front(var);
         sub_primed[v] = var;
       }
       primed_summation_variables = reverse(primed_summation_variables);
 
+      // A list of updates for each process parameter
       data_expression_list updates;
       for(variable_list::const_iterator it = process_parameters.begin(); it != process_parameters.end(); it++)
       {
@@ -538,6 +576,9 @@ protected:
     }
   }
 
+  /**
+   * \brief Finds the block in blocks that contains the initial state
+   */
   template <typename Container>
   data_expression find_initial_block(const Container& blocks, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
   {
@@ -552,16 +593,22 @@ protected:
     return data_expression();
   }
 
+  /**
+   * \brief Checks whether a transition between src and dest exists based on as
+   */
   bool transition_exists(const data_expression& src, const data_expression& dest, const lps::action_summand& as)
   {
+    // Search the cache for information on this transition
     std::map<std::tuple<data_expression, data_expression, lps::action_summand>, bool>::iterator find_result = transition_cache.find(std::make_tuple(src, dest, as));
     if(find_result != transition_cache.end())
     {
+      // Cache entry found
       transition_cache_hits++;
       return find_result->second;
     }
     transition_cache_misses++;
 
+    // This expression expresses whether there is a transition between src and dest based on this summand
     data_expression is_succ =
       exists(m_spec.process().process_parameters() + as.summation_variables(),
         rewr(sort_bool::and_(
@@ -573,6 +620,7 @@ protected:
         ))
       );
 
+    // Do some rewriting before using Fourier-Motzkin elimination
     is_succ = one_point_rule_rewrite(quantifiers_inside_rewrite(is_succ));
     data_expression succ_result = rewr(replace_data_expressions(is_succ, fourier_motzkin_sigma(rewr), true));
     bool result = succ_result == sort_bool::true_();
@@ -584,10 +632,17 @@ protected:
     return result;
   }
 
+  /**
+   * \brief Computes the reachable blocks.
+   * \detail The partition is updated, such that it only contains
+   * reachable blocks.
+   */
   void find_reachable_blocks()
   {
     std::set<data_expression> unreachable(partition.begin(),partition.end());
     std::queue<data_expression> open_set;
+
+    // Search for the block that contains the initial state
     for(const data_expression block: partition)
     {
       if(rewr(application(block, m_spec.initial_process().state(process_parameters))) == sort_bool::true_())
@@ -605,10 +660,12 @@ protected:
     }
     while(!open_set.empty())
     {
+      // Take a block from the open set
       const data_expression block = open_set.front();
       open_set.pop();
 
       std::set<data_expression> new_unreachable = unreachable;
+      // Look for possible successors of block in the set of unreachable blocks
       for(const data_expression& potential_succ: unreachable)
       {
         bool transition_found = false;
@@ -617,6 +674,7 @@ protected:
           reachability_cache.find(std::make_pair(block, potential_succ));
         if(previous_result != reachability_cache.end())
         {
+          // Use the information from the cache
           transition_found = previous_result->second;
         }
         else
@@ -633,27 +691,38 @@ protected:
 
         if(transition_found)
         {
+          // A transition was found, so potential_succ is reachable
           new_unreachable.erase(new_unreachable.find(potential_succ));
           open_set.push(potential_succ);
           partition.push_back(potential_succ);
         }
         if(previous_result == reachability_cache.end())
         {
+          // There was no information in the cache yet, so we add it
           reachability_cache.insert(std::make_pair(std::make_pair(block, potential_succ), transition_found));
         }
       }
       unreachable = new_unreachable;
     }
 
+
     std::cout << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
     int i = 0;
     for(const data_expression& block: unreachable)
     {
+      split_logger->mark_deleted(rewr(block));
       std::cout << "  block " << i << "  " << pp(rewr(block)) << std::endl;
       i++;
     }
   }
 
+  /**
+   * \brief Build the LTS that follows from the current
+   * partition.
+   * \detail Build the LTS that contains one state for each
+   * block in the partition. If the partition is stable,
+   * then this LTS is minimal under bisimulation.
+   */
   template <typename Container>
   lts::lts_lts_t make_lts(const Container& blocks, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
   {
@@ -716,6 +785,9 @@ protected:
     lts.save("out.lts");
   }
 
+  /**
+   * \brief Print the current partition to stdout
+   */
   template <typename Container>
   void print_partition(const Container& blocks, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
   {
@@ -753,6 +825,7 @@ public:
 
     process_parameters = m_spec.process().process_parameters();
     partition.push_front( lambda(process_parameters, invariant));
+    split_logger = new block_tree(lambda(process_parameters, invariant));
     add_ad_hoc_rules();
     build_summand_maps();
 #ifdef DBM_PACKAGE_AVAILABLE
@@ -777,6 +850,9 @@ public:
     }
     std::cout << "Final partition:" << std::endl;
     print_partition(partition);
+    std::set< data_expression > final_partition;
+    std::for_each(partition.begin(), partition.end(), [&](const data_expression& block){ final_partition.insert(rewr(block)); });
+    split_logger->output_dot("split_tree.dot", final_partition);
     std::cout << "Partition refinement completed in " << std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << " seconds" << std::endl;
 
     save_lts();

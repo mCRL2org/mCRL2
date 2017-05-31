@@ -28,6 +28,22 @@ protected:
   std::map< data_expression, data_expression > cache;
 
   virtual data_expression simplify_expression(const data_expression& expr) = 0;
+
+  data_expression apply_data_expression(const data_expression& expr, const mutable_indexed_substitution<> sigma)
+  {
+    data_expression rewritten = rewr(proving_rewr(expr,sigma));
+
+    std::map< data_expression, data_expression >::const_iterator res = cache.find(rewritten);
+    if(res != cache.end())
+    {
+      return res->second;
+    }
+    data_expression simpl(simplify_expression(rewritten));
+    cache.insert(std::make_pair(rewritten, simpl));
+
+    return simpl;
+  }
+
   lambda apply_lambda(const lambda& expr, const mutable_indexed_substitution<> sigma)
   {
     data_expression rewritten = rewr(proving_rewr(expr.body(),sigma));
@@ -57,7 +73,7 @@ public:
 
   data_expression apply(const data_expression& expr, const mutable_indexed_substitution<> sigma)
   {
-    return is_lambda(expr) ? apply_lambda(expr, sigma) : simplify_expression(rewr(proving_rewr(expr,sigma)));
+    return is_lambda(expr) ? apply_lambda(expr, sigma) : apply_data_expression(expr,sigma);
   }
 };
 
