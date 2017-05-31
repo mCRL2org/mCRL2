@@ -26,7 +26,6 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
   m_ui.setupUi(this);
 
   m_ui.traceTable->resizeColumnToContents(0);
-  m_ui.traceTable->resizeColumnToContents(1);
 
   connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(openSpecification()));
   connect(m_ui.actionLoadTrace, SIGNAL(triggered()), this, SLOT(loadTrace()));
@@ -305,6 +304,7 @@ void MainWindow::openSpecification(QString filename)
 
     m_ui.stateTable->item(i, 0)->setText(parameters[i]);
   }
+  m_ui.stateTable->resizeColumnToContents(0);
 
   setTauPrioritization();
 
