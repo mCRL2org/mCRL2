@@ -258,8 +258,8 @@
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme=":/document-open">
-     <normaloff/>
+    <iconset theme=":/document-open" resource="icons/icons.qrc">
+     :/document-open.png
     </iconset>
    </property>
    <property name="text">
@@ -274,8 +274,8 @@
   </action>
   <action name="actionNew">
    <property name="icon">
-    <iconset theme=":/document-new">
-     <normaloff/>
+    <iconset theme=":/document-new" resource="icons/icons.qrc">
+     :/document-new.png
     </iconset>
    </property>
    <property name="text">
@@ -290,8 +290,8 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme=":/document-save">
-     <normaloff/>
+    <iconset theme=":/document-save" resource="icons/icons.qrc">
+     :/document-save.png
     </iconset>
    </property>
    <property name="text">
