@@ -4,6 +4,7 @@ set(MCRL2_TOOLS
   mcrl2transform
   pbestransform
   reduce_pbes
+  reduce_process
 )
 
 # if(MCRL2_ENABLE_DEVELOPER)  Outcommented as lpstransform is needed 

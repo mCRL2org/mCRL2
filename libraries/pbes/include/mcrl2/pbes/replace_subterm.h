@@ -31,7 +31,7 @@ struct replace_subterm_builder: public pbes_expression_builder<replace_subterm_b
   std::size_t ypos; // depth
   pbes_expression replacement;
   bool ready = false;
-  detail::position_counter counter;
+  utilities::detail::position_counter counter;
 
   replace_subterm_builder(std::size_t xpos_, std::size_t ypos_, const pbes_expression& replacement_)
     : xpos(xpos_), ypos(ypos_), replacement(replacement_)
