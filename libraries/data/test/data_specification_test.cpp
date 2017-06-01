@@ -12,8 +12,6 @@
 #include <boost/test/minimal.hpp>
 #include <functional>
 #include <iostream>
-// #include <boost/range/iterator_range.hpp>
-
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/data_expression.h"

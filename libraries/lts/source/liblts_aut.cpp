@@ -89,8 +89,8 @@ static void check_state(size_t state, size_t number_of_states, size_t line_no)
 {
   if (state>=number_of_states)
   {
-    throw mcrl2::runtime_error("Number of actual states in .aut file is higher than maximum (" +
-                               std::to_string(number_of_states) + ") given by header (found at line " + std::to_string(line_no) + ").");
+    throw mcrl2::runtime_error("The state number " + std::to_string(state) + " is higher than the number of states (" +
+                               std::to_string(number_of_states) + ").  Found at line " + std::to_string(line_no) + ".");
   }
 } 
 

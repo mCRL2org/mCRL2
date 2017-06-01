@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_TOOLS_LPS2PBES_H
 #define MCRL2_PBES_TOOLS_LPS2PBES_H
 
-#include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/parse.h"
