@@ -162,7 +162,7 @@ void MainWindow::openFile(const QString& fileName)
       m_ui.actLayout->setChecked(false);
       m_glwidget->pause();
       m_glwidget->resetViewpoint(0);
-      const double scaling = 0.5;
+      const double scaling = 0.7;
       QVector3D limit = m_glwidget->size3() / 2.0 * scaling;
       m_graph.load(fileName, -limit, limit,
           m_glwidget->nodeSize());
