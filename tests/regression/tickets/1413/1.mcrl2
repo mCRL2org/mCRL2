@@ -1,0 +1,15 @@
+act vread, vwrite, sync, aread, awrite;
+     internal, renamed_internal, a;
+
+ proc P1 = internal | awrite . delta;
+ proc P2 = vwrite . delta;
+
+ init
+ allow({internal},
+          hide({sync},
+          comm({aread | vread -> sync,
+                awrite | vwrite -> sync},
+          ( allow({internal | awrite }, P1)
+          ||
+            P2
+          ))));

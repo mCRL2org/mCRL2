@@ -82,6 +82,7 @@ regression_tests = {
     'ticket-1321'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1321/1.mcrl2')], settings),
     'ticket-1322'   : lambda name, settings: YmlTest(name, ymlfile('pbesstategraph'),    [abspath('tickets/1322/1.txt')], settings),
     'ticket-1345'   : lambda name, settings: YmlTest(name, ymlfile('ticket_1345'),       [abspath('tickets/1345/1.txt')], settings),
+    'ticket-1413'   : lambda name, settings: YmlTest(name, ymlfile('alphabet-reduce'),   [abspath('tickets/1413/1.mcrl2')], settings),
     'lpsconfcheck1' : lambda name, settings: LpsconfcheckCtauTest(name, [mcrl2file('examples/academic/cabp/cabp.mcrl2')], 'T', (0, 18), settings),
     'onepoint1'     : lambda name, settings: PbesrewrTest(name, [abspath('onepoint/1.txt')], 'quantifier-one-point', settings),
     #'pfnf1'         : lambda name, settings: PbesrewrTest(name, [abspath('pfnf/1.txt')], 'pfnf', settings),

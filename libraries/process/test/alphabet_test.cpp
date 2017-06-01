@@ -297,6 +297,7 @@ BOOST_AUTO_TEST_CASE(test_allow1)
 {
   test_allow("{a|b, a|b|b, c}", "{ab, abbc, c}", "{ab, c}", "allow");
   test_allow("{a, b, c}", "{ab}@", "{a, b}", "allow");
+  // test_allow("{a|b}", "{a}@{b, c}", "{a|b}", "allow");
 }
 
 void test_block(const std::string& block_text, const std::string& Atext, const std::string& expected_result, const std::string& title)

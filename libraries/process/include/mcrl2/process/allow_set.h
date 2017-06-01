@@ -278,7 +278,7 @@ allow_set allow(const action_name_multiset_list& V, const allow_set& x)
   {
     const core::identifier_string_list& names = v.names();
     multi_action_name beta(names.begin(), names.end());
-    bool add = x.A_includes_subsets ? alphabet_operations::includes(x.A, beta) : alphabet_operations::contains(x.A, alphabet_operations::hide(x.I, beta));
+    bool add = x.A_includes_subsets ? alphabet_operations::includes(x.A, alphabet_operations::hide(x.I, beta)) : alphabet_operations::contains(x.A, alphabet_operations::hide(x.I, beta));
     if (add)
     {
       A.insert(beta);
