@@ -65,17 +65,55 @@ void generate_reduced_processes(const process::process_specification& p, std::si
   std::size_t n = counts[depth];
   for (std::size_t x = 0; x < n; x++)
   {
-    process::process_specification q1 = replace_subterm(p, x, depth, process::delta());
-    process::process_specification q2 = replace_subterm(p, x, depth, process::tau());
-    if (!(p == q1) && !(p == q2))
+    process::process_expression expr = find_subterm(p, x, depth);
+    std::set<process::process_expression> replacements;
+
+    if (process::is_sum                (expr)) { replacements.insert(atermpp::down_cast<process::sum                >(expr).operand()); }
+    if (process::is_stochastic_operator(expr)) { replacements.insert(atermpp::down_cast<process::stochastic_operator>(expr).operand()); }
+    if (process::is_block              (expr)) { replacements.insert(atermpp::down_cast<process::block              >(expr).operand()); }
+    if (process::is_hide               (expr)) { replacements.insert(atermpp::down_cast<process::hide               >(expr).operand()); }
+    if (process::is_rename             (expr)) { replacements.insert(atermpp::down_cast<process::rename             >(expr).operand()); }
+    if (process::is_comm               (expr)) { replacements.insert(atermpp::down_cast<process::comm               >(expr).operand()); }
+    if (process::is_allow              (expr)) { replacements.insert(atermpp::down_cast<process::allow              >(expr).operand()); }
+    if (process::is_at                 (expr)) { replacements.insert(atermpp::down_cast<process::at                 >(expr).operand()); }
+    if (process::is_sync               (expr)) { replacements.insert(atermpp::down_cast<process::sync               >(expr).left()); replacements.insert(atermpp::down_cast<process::sync        >(expr).right()); }
+    if (process::is_seq                (expr)) { replacements.insert(atermpp::down_cast<process::seq                >(expr).left()); replacements.insert(atermpp::down_cast<process::seq         >(expr).right()); }
+    if (process::is_bounded_init       (expr)) { replacements.insert(atermpp::down_cast<process::bounded_init       >(expr).left()); replacements.insert(atermpp::down_cast<process::bounded_init>(expr).right()); }
+    if (process::is_choice             (expr)) { replacements.insert(atermpp::down_cast<process::choice             >(expr).left()); replacements.insert(atermpp::down_cast<process::choice      >(expr).right()); }
+    if (process::is_merge              (expr)) { replacements.insert(atermpp::down_cast<process::merge              >(expr).left()); replacements.insert(atermpp::down_cast<process::merge       >(expr).right()); }
+    if (process::is_left_merge         (expr)) { replacements.insert(atermpp::down_cast<process::left_merge         >(expr).left()); replacements.insert(atermpp::down_cast<process::left_merge  >(expr).right()); }
+
+    if (process::is_delta(expr))
     {
-      std::string filename1 = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + std::to_string(x) + "t.mcrl2";
-      std::cout << "file = " << filename1 << std::endl;
-      write_text(filename1, process::pp(q1));
-      std::string filename2 = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + std::to_string(x) + "f.mcrl2";
-      std::cout << "file = " << filename2 << std::endl;
-      write_text(filename2, process::pp(q2));
+      replacements.erase(process::delta());
     }
+    else
+    {
+      replacements.insert(process::delta());
+    }
+
+    std::size_t index = 0;
+    for (const process::process_expression& replacement: replacements)
+    {
+      process::process_specification q = replace_subterm(p, x, depth, replacement);
+      std::string filename = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "_" + utilities::number2string(index) + ".mcrl2";
+      std::string text = process::pp(q);
+      write_text(filename, text);
+      std::cout << "file = " << filename << std::endl;
+      index++;
+    }
+
+    // process::process_specification q1 = replace_subterm(p, x, depth, process::delta());
+    // process::process_specification q2 = replace_subterm(p, x, depth, process::tau());
+    // if (!(p == q1) && !(p == q2))
+    // {
+    //   std::string filename1 = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + std::to_string(x) + "t.mcrl2";
+    //   std::cout << "file = " << filename1 << std::endl;
+    //   write_text(filename1, process::pp(q1));
+    //   std::string filename2 = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + std::to_string(x) + "f.mcrl2";
+    //   std::cout << "file = " << filename2 << std::endl;
+    //   write_text(filename2, process::pp(q2));
+    // }
   }
 }
 
