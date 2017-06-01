@@ -867,7 +867,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   {
   case so_node:
   {
-    float radius = nodeSizeOnScreen() * magnificationFactor();
+    float radius = nodeSizeOnScreen() * magnificationFactor() / 2;
     for (size_t i = 0; i < m_graph.nodeCount(); i++)
     {
       if (isClose(x, y, worldToEye(m_graph.node(i).pos()), radius, bestZ))
