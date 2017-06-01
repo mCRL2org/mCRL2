@@ -860,15 +860,17 @@ static bool isClose(int x, int y, const QVector3D& pos, float threshold, float& 
 bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
                            SelectableObject type)
 {
-  float size, bestZ = INFINITY;
+  float bestZ = INFINITY;
   switch (type)
   {
   case so_node:
   {
-    size = nodeSizeOnScreen();
+    QVector3D center = worldToEye({0, 0, 0});
+    QVector3D edge = worldToEye({nodeSizeOnScreen(), 0, 0});
+    float radius = center.distanceToPoint(edge) / 2;
     for (size_t i = 0; i < m_graph.nodeCount(); i++)
     {
-      if (isClose(x, y, worldToEye(m_graph.node(i).pos()), size, bestZ))
+      if (isClose(x, y, worldToEye(m_graph.node(i).pos()), radius, bestZ))
       {
         s.selectionType = type;
         s.index = i;
@@ -878,10 +880,12 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   }
   case so_handle:
   {
-    size = handleSizeOnScreen();
+    QVector3D center = worldToEye({0, 0, 0});
+    QVector3D edge = worldToEye({handleSizeOnScreen(), 0, 0});
+    float radius = center.distanceToPoint(edge) / 2;
     for (size_t i = 0; i < m_graph.edgeCount(); i++)
     {
-      if (isClose(x, y, worldToEye(m_graph.handle(i).pos()), size, bestZ))
+      if (isClose(x, y, worldToEye(m_graph.handle(i).pos()), radius, bestZ))
       {
         s.selectionType = type;
         s.index = i;
