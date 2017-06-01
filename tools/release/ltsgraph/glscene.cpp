@@ -748,7 +748,6 @@ void GLScene::render(QOpenGLWidget& glwidget)
   }
   for (size_t i = 0; i < edgeCount; ++i) {
     renderEdge(sel ? m_graph.selectionEdge(i) : i);
-    renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
 
   // text drawing follows
@@ -776,6 +775,9 @@ void GLScene::render(QOpenGLWidget& glwidget)
   glDepthMask(GL_TRUE);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   m_painter.end();
+  for (size_t i = 0; i < edgeCount; ++i) {
+    renderHandle(sel ? m_graph.selectionEdge(i) : i);
+  }
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 }
