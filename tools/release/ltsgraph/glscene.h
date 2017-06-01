@@ -253,6 +253,11 @@ class GLScene
     void zoom(float factor);
 
     /**
+     * @brief Retrieve the current magnification factor
+     */
+    float magnificationFactor() const;
+
+    /**
      * @brief Rotate by @e delta.
      * @param delta The rotation quaternion.
      */
@@ -327,7 +332,7 @@ class GLScene
      *          value of the depth buffer at (x, y) is used.
      * @return The world coordinates corresponding to the eye coordinates provided.
      */
-    QVector3D eyeToWorld(int x, int y, GLfloat z = -1);
+    QVector3D eyeToWorld(int x, int y, GLfloat z = -1) const;
 
     /**
      * @brief Converts world coordinates to viewport coordinates.
@@ -335,7 +340,7 @@ class GLScene
      * @returns The eye coordinates, where the origin is at the bottom left. The
      *          Z value is the value of the depth buffer at the requested location.
      */
-    QVector3D worldToEye(const QVector3D& world);
+    QVector3D worldToEye(const QVector3D& world) const;
 
     /**
      * @brief Retrieve the object at viewport coordinate (x, y).

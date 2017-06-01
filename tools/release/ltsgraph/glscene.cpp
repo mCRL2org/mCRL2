@@ -791,7 +791,7 @@ void GLScene::updateShapes()
   m_vertexdata.generateVertexData(handleSizeOnScreen(), nodeSizeOnScreen(), arrowheadSizeOnScreen());
 }
 
-QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z)
+QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z) const
 {
   GLint viewport[4];
   GLfloat projection[16];
@@ -813,7 +813,7 @@ QVector3D GLScene::eyeToWorld(int x, int y, GLfloat z)
   return mcrl2::gui::unproject(eye, m.transposed(), p.transposed(), v);
 }
 
-QVector3D GLScene::worldToEye(const QVector3D& world)
+QVector3D GLScene::worldToEye(const QVector3D& world) const
 {
   GLint viewport[4];
   GLfloat projection[16];
@@ -865,9 +865,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   {
   case so_node:
   {
-    QVector3D center = worldToEye({0, 0, 0});
-    QVector3D edge = worldToEye({nodeSizeOnScreen(), 0, 0});
-    float radius = center.distanceToPoint(edge) / 2;
+    float radius = nodeSizeOnScreen() * magnificationFactor();
     for (size_t i = 0; i < m_graph.nodeCount(); i++)
     {
       if (isClose(x, y, worldToEye(m_graph.node(i).pos()), radius, bestZ))
@@ -880,9 +878,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   }
   case so_handle:
   {
-    QVector3D center = worldToEye({0, 0, 0});
-    QVector3D edge = worldToEye({handleSizeOnScreen(), 0, 0});
-    float radius = center.distanceToPoint(edge) / 2;
+    float radius = handleSizeOnScreen() * magnificationFactor();
     for (size_t i = 0; i < m_graph.edgeCount(); i++)
     {
       if (isClose(x, y, worldToEye(m_graph.handle(i).pos()), radius, bestZ))
@@ -905,6 +901,13 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
 void GLScene::zoom(float factor)
 {
   setZoom(m_camera.zoom * factor, 0);
+}
+
+float GLScene::magnificationFactor() const
+{
+  QVector3D a = worldToEye({0, 0, 0});
+  QVector3D b = worldToEye({1, 0, 0});
+  return a.distanceToPoint(b);
 }
 
 void GLScene::rotate(const QQuaternion& delta)
