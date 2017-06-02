@@ -18,10 +18,12 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/remove_equations.h"
@@ -478,6 +480,34 @@ struct constelm_quantifier_finite_rewriter_command: public pbes_rewriter_command
   }
 };
 
+struct normalize_command: public pbes_command
+{
+  normalize_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("normalize", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    normalize(pbesspec);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct complement_command: public pbes_command
+{
+  complement_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("complement", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    pbes_rewrite(pbesspec, &complement);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
 class transform_tool: public rewriter_tool<input_output_tool>
 {
   protected:
@@ -549,6 +579,8 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<constelm_simplify_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<constelm_quantifier_all_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<constelm_quantifier_finite_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<normalize_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<complement_command>(input_filename(), output_filename(), options));
 
       for (const auto& command: commands)
       {
