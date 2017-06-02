@@ -38,6 +38,7 @@
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -553,6 +554,38 @@ struct is_monotonous_command: public pbes_command
   }
 };
 
+struct stategraph_local_command: public pbes_command
+{
+  stategraph_local_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("stategraph-local", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    pbesstategraph_options options;
+    options.use_global_variant = false;
+    stategraph(pbesspec, options);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct stategraph_global_command: public pbes_command
+{
+  stategraph_global_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("stategraph-global", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    pbesstategraph_options options;
+    options.use_global_variant = false;
+    stategraph(pbesspec, options);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
 class transform_tool: public rewriter_tool<input_output_tool>
 {
   protected:
@@ -629,6 +662,8 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<complement_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<is_bes_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<is_monotonous_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<stategraph_global_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<stategraph_local_command>(input_filename(), output_filename(), options));
 
       for (const auto& command: commands)
       {
