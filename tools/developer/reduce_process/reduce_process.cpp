@@ -65,7 +65,7 @@ void generate_reduced_processes(const process::process_specification& p, std::si
   std::size_t n = counts[depth];
   for (std::size_t x = 0; x < n; x++)
   {
-    process::process_expression expr = find_subterm(p, x, depth);
+    process::process_expression expr = process::find_subterm(p, x, depth);
     std::set<process::process_expression> replacements;
 
     if (process::is_sum                (expr)) { replacements.insert(atermpp::down_cast<process::sum                >(expr).operand()); }
@@ -102,18 +102,6 @@ void generate_reduced_processes(const process::process_specification& p, std::si
       std::cout << "file = " << filename << std::endl;
       index++;
     }
-
-    // process::process_specification q1 = replace_subterm(p, x, depth, process::delta());
-    // process::process_specification q2 = replace_subterm(p, x, depth, process::tau());
-    // if (!(p == q1) && !(p == q2))
-    // {
-    //   std::string filename1 = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + std::to_string(x) + "t.mcrl2";
-    //   std::cout << "file = " << filename1 << std::endl;
-    //   write_text(filename1, process::pp(q1));
-    //   std::string filename2 = input_filename.substr(0, input_filename.size() - 6) + "_" + utilities::number2string(depth) + "_" + std::to_string(x) + "f.mcrl2";
-    //   std::cout << "file = " << filename2 << std::endl;
-    //   write_text(filename2, process::pp(q2));
-    // }
   }
 }
 

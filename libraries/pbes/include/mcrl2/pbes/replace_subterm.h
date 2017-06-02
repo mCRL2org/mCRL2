@@ -21,6 +21,69 @@ namespace pbes_system {
 
 namespace detail {
 
+struct find_subterm_traverser: public pbes_expression_traverser<find_subterm_traverser>
+{
+  typedef pbes_expression_traverser<find_subterm_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  utilities::detail::position_counter counter;
+  std::size_t xpos;
+  std::size_t ypos; // depth
+  pbes_expression result;
+
+  find_subterm_traverser(std::size_t xpos_, std::size_t ypos_)
+    : xpos(xpos_), ypos(ypos_)
+  {}
+
+  template <typename T>
+  void visit(const T& x)
+  {
+    counter.increase();
+    if (counter.at(xpos, ypos))
+    {
+      result = x;
+    }
+    super::apply(x);
+    counter.decrease();
+  }
+  void apply(const and_& x)
+  {
+    visit(x);
+  }
+
+  void apply(const or_& x)
+  {
+    visit(x);
+  }
+
+  void apply(const imp& x)
+  {
+    visit(x);
+  }
+
+  void apply(const exists& x)
+  {
+    visit(x);
+  }
+
+  void apply(const forall& x)
+  {
+    visit(x);
+  }
+
+  void apply(const propositional_variable_instantiation& x)
+  {
+    visit(x);
+  }
+
+  void apply(const data::data_expression& x)
+  {
+    visit(x);
+  }
+};
+
 struct replace_subterm_builder: public pbes_expression_builder<replace_subterm_builder>
 {
   typedef pbes_expression_builder<replace_subterm_builder> super;
@@ -113,6 +176,14 @@ pbes replace_subterm(const pbes& p, std::size_t x, std::size_t y, const pbes_exp
   detail::replace_subterm_builder f(x, y, replacement);
   f.update(result);
   return result;
+}
+
+inline
+pbes_expression find_subterm(const pbes& pbesspec, std::size_t x, std::size_t y)
+{
+  detail::find_subterm_traverser f(x, y);
+  f.apply(pbesspec);
+  return f.result;
 }
 
 } // namespace pbes_system

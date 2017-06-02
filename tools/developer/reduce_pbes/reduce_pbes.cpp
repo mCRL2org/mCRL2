@@ -30,7 +30,7 @@ using utilities::tools::input_tool;
 
 void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::string& input_filename)
 {
-  std::vector<std::size_t> counts = detail::position_counts(p);
+  std::vector<std::size_t> counts = pbes_system::detail::position_counts(p);
   if (depth >= counts.size())
   {
     return;
@@ -38,16 +38,36 @@ void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::strin
   std::size_t n = counts[depth];
   for (std::size_t x = 0; x < n; x++)
   {
-    pbes q1 = replace_subterm(p, x, depth, pbes_system::true_());
-    pbes q2 = replace_subterm(p, x, depth, pbes_system::false_());
-    if (!(p == q1) && !(p == q2))
+    pbes_system::pbes_expression expr = pbes_system::find_subterm(p, x, depth);
+    std::set<pbes_system::pbes_expression> replacements;
+
+    if (pbes_system::is_not   (expr)) { replacements.insert(atermpp::down_cast<pbes_system::not_  >(expr).operand()); }
+    if (pbes_system::is_forall(expr)) { replacements.insert(atermpp::down_cast<pbes_system::forall>(expr).body()); }
+    if (pbes_system::is_exists(expr)) { replacements.insert(atermpp::down_cast<pbes_system::exists>(expr).body()); }
+    if (pbes_system::is_and   (expr)) { replacements.insert(atermpp::down_cast<pbes_system::and_  >(expr).left()); replacements.insert(atermpp::down_cast<pbes_system::and_>(expr).right()); }
+    if (pbes_system::is_or    (expr)) { replacements.insert(atermpp::down_cast<pbes_system::or_   >(expr).left()); replacements.insert(atermpp::down_cast<pbes_system::or_ >(expr).right()); }
+    if (pbes_system::is_imp   (expr)) { replacements.insert(atermpp::down_cast<pbes_system::imp   >(expr).left()); replacements.insert(atermpp::down_cast<pbes_system::imp >(expr).right()); }
+
+    replacements.insert(pbes_system::false_());
+    replacements.insert(pbes_system::true_());
+    if (pbes_system::is_true(expr))
     {
-      std::string filename1 = input_filename.substr(0, input_filename.size() - 5) + "_" + utilities::number2string(depth) + "_" + std::to_string(x) + "t.pbes";
-      std::cout << "file = " << filename1 << std::endl;
-      save_pbes(q1, filename1, pbes_system::pbes_format_internal());
-      std::string filename2 = input_filename.substr(0, input_filename.size() - 5) + "_" + utilities::number2string(depth) + "_" + std::to_string(x) + "f.pbes";
-      std::cout << "file = " << filename2 << std::endl;
-      save_pbes(q2, filename2, pbes_system::pbes_format_internal());
+      replacements.erase(pbes_system::true_());
+    }
+    if (pbes_system::is_false(expr))
+    {
+      replacements.erase(pbes_system::false_());
+    }
+
+    std::size_t index = 0;
+    for (const pbes_system::pbes_expression& replacement: replacements)
+    {
+      pbes_system::pbes q = replace_subterm(p, x, depth, replacement);
+      std::string filename = input_filename.substr(0, input_filename.size() - 5) + "_" + utilities::number2string(depth) + "_" + utilities::number2string(x) + "_" + utilities::number2string(index) + ".pbes";
+      std::string text = pbes_system::pp(q);
+      save_pbes(q, filename, pbes_system::pbes_format_internal());
+      std::cout << "file = " << filename << std::endl;
+      index++;
     }
   }
 }
