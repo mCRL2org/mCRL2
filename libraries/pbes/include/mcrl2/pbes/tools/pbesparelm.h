@@ -29,9 +29,7 @@ void pbesparelm(const std::string& input_filename,
   pbes p;
   load_pbes(p, input_filename, input_format);
 
-  // apply the algorithm
-  pbes_parelm_algorithm algorithm;
-  algorithm.run(p);
+  parelm(p);
 
   // save the result
   save_pbes(p, output_filename, output_format);

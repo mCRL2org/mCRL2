@@ -276,6 +276,15 @@ class pbes_parelm_algorithm
     }
 };
 
+/// \brief Apply the parelm algorithm
+/// \param p A PBES to which the algorithm is applied
+inline
+void parelm(pbes& p)
+{
+  pbes_parelm_algorithm algorithm;
+  algorithm.run(p);
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2
