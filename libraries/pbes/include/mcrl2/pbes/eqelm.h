@@ -344,6 +344,10 @@ class pbes_eqelm_algorithm
 };
 
 /// \brief Apply the eqelm algorithm
+/// \param p A PBES to which the algorithm is applied.
+/// \param rewrite_strategy A data rewrite strategy.
+/// \param rewriter_type A PBES rewriter type.
+/// \param ignore_initial_state If true, the initial state will be ignored.
 inline
 void eqelm(pbes& p,
            data::rewrite_strategy rewrite_strategy,

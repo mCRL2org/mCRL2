@@ -18,9 +18,10 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/eqelm.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/remove_equations.h"
@@ -396,7 +397,7 @@ struct gauss_elimination_command: public pbes_command
 struct eqelm_simplify_rewriter_command: public pbes_rewriter_command
 {
   eqelm_simplify_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
-    : pbes_rewriter_command("eqelm-simplify-rewriter", input_filename, output_filename, options, strategy)
+    : pbes_rewriter_command("eqelm-simplify", input_filename, output_filename, options, strategy)
   {}
 
   void execute()
@@ -410,7 +411,7 @@ struct eqelm_simplify_rewriter_command: public pbes_rewriter_command
 struct eqelm_quantifier_all_rewriter_command: public pbes_rewriter_command
 {
   eqelm_quantifier_all_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
-    : pbes_rewriter_command("eqelm-quantifier-all-rewriter", input_filename, output_filename, options, strategy)
+    : pbes_rewriter_command("eqelm-quantifier-all", input_filename, output_filename, options, strategy)
   {}
 
   void execute()
@@ -424,13 +425,55 @@ struct eqelm_quantifier_all_rewriter_command: public pbes_rewriter_command
 struct eqelm_quantifier_finite_rewriter_command: public pbes_rewriter_command
 {
   eqelm_quantifier_finite_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
-    : pbes_rewriter_command("eqelm-quantifier-finite-rewriter", input_filename, output_filename, options, strategy)
+    : pbes_rewriter_command("eqelm-quantifier-finite", input_filename, output_filename, options, strategy)
   {}
 
   void execute()
   {
     pbes_command::execute();
     eqelm(pbesspec, strategy, quantifier_finite);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct constelm_simplify_rewriter_command: public pbes_rewriter_command
+{
+  constelm_simplify_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
+    : pbes_rewriter_command("constelm-simplify", input_filename, output_filename, options, strategy)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    constelm(pbesspec, strategy, simplify);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct constelm_quantifier_all_rewriter_command: public pbes_rewriter_command
+{
+  constelm_quantifier_all_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
+    : pbes_rewriter_command("constelm-quantifier-all", input_filename, output_filename, options, strategy)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    constelm(pbesspec, strategy, quantifier_all);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct constelm_quantifier_finite_rewriter_command: public pbes_rewriter_command
+{
+  constelm_quantifier_finite_rewriter_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
+    : pbes_rewriter_command("constelm-quantifier-finite", input_filename, output_filename, options, strategy)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    constelm(pbesspec, strategy, quantifier_finite);
     my_save_pbes(pbesspec, output_filename);
   }
 };
@@ -503,10 +546,13 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<eqelm_simplify_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<eqelm_quantifier_all_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<eqelm_quantifier_finite_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<constelm_simplify_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<constelm_quantifier_all_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<constelm_quantifier_finite_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
 
-      for (auto i = commands.begin(); i != commands.end(); ++i)
+      for (const auto& command: commands)
       {
-        algorithms.insert(i->first);
+        algorithms.insert(command.first);
       }
 
       if (algorithm_number >= 0 && !algorithm_and_options.empty())

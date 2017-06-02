@@ -17,8 +17,11 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/logger.h"
 #include <algorithm>
@@ -62,21 +65,7 @@ struct true_false_pair
   {}
 };
 
-} // namespace detail
-
-} // namespace pbes_system
-
-} // namespace mcrl2
-
-namespace mcrl2
-{
-
-namespace pbes_system
-{
-
 /// \cond INTERNAL_DOCS
-namespace detail
-{
 /// \brief Compares two terms
 /// \param v A term
 /// \param w A term
@@ -482,9 +471,9 @@ class pbes_constelm_algorithm
 
         /// \brief Returns the indices of the constant parameters of this vertex.
         /// \return The indices of the constant parameters of this vertex.
-        std::vector<size_t> constant_parameter_indices() const
+        std::vector<std::size_t> constant_parameter_indices() const
         {
-          std::vector<size_t> result;
+          std::vector<std::size_t> result;
           int index = 0;
           data::variable_list parameters(m_variable.parameters());
           for (typename data::variable_list::iterator i = parameters.begin(); i != parameters.end(); ++i, index++)
@@ -595,7 +584,7 @@ class pbes_constelm_algorithm
     edge_map m_edges;
 
     /// \brief The redundant parameters.
-    std::map<core::identifier_string, std::vector<size_t> > m_redundant_parameters;
+    std::map<core::identifier_string, std::vector<std::size_t> > m_redundant_parameters;
 
     /// \brief Logs the vertices of the dependency graph.
     std::string print_vertices() const
@@ -688,7 +677,7 @@ class pbes_constelm_algorithm
           // std::advance doesn't work for aterm lists :-(
           data::variable_list parameters(v.variable().parameters());
           typename data::variable_list::iterator k = parameters.begin();
-          for (size_t i = 0; i < *j; i++)
+          for (std::size_t i = 0; i < *j; i++)
           {
             ++k;
           }
@@ -811,7 +800,7 @@ class pbes_constelm_algorithm
         vertex& v = m_vertices[name];
         if (!v.constraints().empty())
         {
-          std::vector<size_t> r = v.constant_parameter_indices();
+          std::vector<std::size_t> r = v.constant_parameter_indices();
           if (!r.empty())
           {
             m_redundant_parameters[name] = r;
@@ -855,6 +844,58 @@ class pbes_constelm_algorithm
       }
     }
 };
+
+/// \brief Apply the constelm algorithm
+/// \param p A PBES to which the algorithm is applied
+/// \param rewrite_strategy A data rewrite strategy
+/// \param rewriter_type A PBES rewriter type
+/// \param compute_conditions If true, conditions for the edges of the dependency graph are used N.B. Very inefficient!
+/// \param remove_redundant_equations If true, unreachable equations will be removed.
+inline
+void constelm(pbes& p,
+              data::rewrite_strategy rewrite_strategy,
+              pbes_rewriter_type rewriter_type,
+              bool compute_conditions = false,
+              bool remove_redundant_equations = true
+             )
+{
+  // data rewriter
+  data::rewriter datar(p.data(), rewrite_strategy);
+
+  // pbes rewriter
+  switch (rewriter_type)
+  {
+    case simplify:
+    {
+      typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
+      pbes_rewriter pbesr(datar);
+      pbes_constelm_algorithm<data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
+      algorithm.run(p, compute_conditions);
+      if (remove_redundant_equations)
+      {
+        std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
+      }
+      break;
+    }
+    case quantifier_all:
+    case quantifier_finite:
+    {
+      bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
+      pbes_constelm_algorithm<data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
+      algorithm.run(p, compute_conditions);
+      if (remove_redundant_equations)
+      {
+        std::vector<propositional_variable> V = algorithms::remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << algorithms::print_removed_equations(V);
+      }
+      break;
+    }
+    default:
+    { }
+  }
+}
 
 } // namespace pbes_system
 
