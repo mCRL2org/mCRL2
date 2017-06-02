@@ -164,8 +164,7 @@ void MainWindow::openFile(const QString& fileName)
       m_glwidget->resetViewpoint(0);
       const double scaling = 0.5;
       QVector3D limit = m_glwidget->size3() / 2.0 * scaling;
-      m_graph.load(fileName, -limit, limit,
-          m_glwidget->nodeSize());
+      m_graph.load(fileName, -limit, limit);
 
       if (m_graph.nodeCount() > MAX_NODE_COUNT && !hadSelection)
       {

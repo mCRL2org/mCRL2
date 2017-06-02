@@ -355,7 +355,7 @@ void drawHandle(const VertexData& data, const Color3f& line, const Color3f& fill
 }
 
 inline
-void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool mark, bool translucent, bool probabilistic)
+void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, bool translucent, bool probabilistic)
 {
   glPushAttrib(GL_LINE_BIT);
   glLineWidth(2.0);
@@ -540,7 +540,7 @@ void GLScene::renderNode(GLuint i)
   glPushMatrix();
 
   m_camera.billboard_spherical(node.pos());
-  drawNode(m_vertexdata, line, fill, mark, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
+  drawNode(m_vertexdata, line, fill, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
 
   if (m_graph.hasSelection() && node.selected() != 0.0 && !m_graph.isBridge(i))
   {
@@ -880,7 +880,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   }
   case so_handle:
   {
-    float radius = handleSizeOnScreen() * magnificationFactor();
+    float radius = handleSizeOnScreen() * magnificationFactor() * 2;
     for (size_t i = 0; i < m_graph.edgeCount(); i++)
     {
       if (isClose(x, y, worldToEye(m_graph.handle(i).pos()), radius, bestZ))

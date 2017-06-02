@@ -690,7 +690,7 @@ bool Graph::isTau(size_t labelindex) const
 }
 
 void Graph::load(const QString& filename, const QVector3D& min,
-                 const QVector3D& max, float nodesize)
+                 const QVector3D& max)
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
@@ -700,18 +700,18 @@ void Graph::load(const QString& filename, const QVector3D& min,
     switch (m_type)
     {
     case mcrl2::lts::lts_aut:
-      templatedLoad<mcrl2::lts::probabilistic_lts_aut_t>(filename, min, max, nodesize);
+      templatedLoad<mcrl2::lts::probabilistic_lts_aut_t>(filename, min, max);
       break;
     case mcrl2::lts::lts_dot:
       throw mcrl2::runtime_error("Cannot read a .dot file anymore.");
       break;
     case mcrl2::lts::lts_fsm:
-      templatedLoad<mcrl2::lts::probabilistic_lts_fsm_t>(filename, min, max, nodesize);
+      templatedLoad<mcrl2::lts::probabilistic_lts_fsm_t>(filename, min, max);
       break;
     case mcrl2::lts::lts_lts:
     default:
       m_type = mcrl2::lts::lts_lts;
-      templatedLoad<mcrl2::lts::probabilistic_lts_lts_t>(filename, min, max, nodesize);
+      templatedLoad<mcrl2::lts::probabilistic_lts_lts_t>(filename, min, max);
       break;
     }
   }
@@ -732,7 +732,7 @@ void Graph::load(const QString& filename, const QVector3D& min,
 
 template <class lts_t>
 void Graph::templatedLoad(const QString& filename, const QVector3D& min,
-                          const QVector3D& max, float nodesize)
+                          const QVector3D& max)
 {
   lts_t lts;
   lts.load(filename.toUtf8().constData());
@@ -788,14 +788,6 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
 
   m_initialState = add_probabilistic_state<lts_t>(
       lts.initial_probabilistic_state(), min, max);
-
-  // position the initial state slightly in front of others
-  /*
-  QVector3D& initial_node = m_nodes[m_initialState].pos_mutable();
-  initial_node.setZ(initial_node.z() + nodesize / 2);
-  QVector3D& initial_label = m_stateLabelnodes[m_initialState].pos_mutable();
-  initial_label.setZ(initial_label.z() + nodesize / 2);
-  */
 }
 
 template <class lts_t>
