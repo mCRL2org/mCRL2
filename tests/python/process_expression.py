@@ -83,6 +83,26 @@ class Action(ProcessExpression):
     def __str__(self):
         return self.a
 
+class MultiAction(ProcessExpression):
+    def __init__(self, actions):
+        self.actions = actions
+
+    def __eq__(self, other):
+        if type(other) is type(self):
+            return self.__dict__ == other.__dict__
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __str__(self):
+        if len(self.actions) == 0:
+            return 'Tau'
+        return ' | '.join(self.actions)
+
+    def __hash__(self):
+        return hash(str(self))
+
 class Delta(ProcessExpression):
     def __str__(self):
         return 'delta'

@@ -42,26 +42,6 @@ from data_expression import *
 #           process library classes
 #---------------------------------------------------------------------------#
 
-class MultiAction(object):
-    def __init__(self, actions):
-        self.actions = actions
-
-    def __eq__(self, other):
-        if type(other) is type(self):
-            return self.__dict__ == other.__dict__
-        return False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __str__(self):
-        if len(self.actions) == 0:
-            return 'Tau'
-        return ' | '.join(self.actions)
-
-    def __hash__(self):
-        return hash(str(self))
-
 class ProcessEquation:
     def __init__(self, lhs, rhs):
         self.lhs = lhs
@@ -111,7 +91,7 @@ def default_value(v):
         return random.choice([Integer('0'), Integer('1'), Integer('2')])
     raise RuntimeError('default_value: only Bool and Int are supported! ' + str(v.type))
 
-def make_multi_action(actions, size):
+def make_multi_action1(actions, size):
     result = []
     for _ in range(size):
         result.append(random.choice(actions))
@@ -119,6 +99,8 @@ def make_multi_action(actions, size):
 
 # returns the size of a process expression
 def expression_size(x):
+    if isinstance(x, MultiAction):
+        return 1
     result = 0
     if isinstance(x, ProcessExpression):
         result = result + 1
@@ -135,7 +117,7 @@ def select_generators(generators, actions, process_identifiers, variables, is_pc
     if size >= 1:
         result = result + [make_delta, make_tau]
         if len(actions) > 0:
-            result = result + [make_action]
+            result = result + [make_action, make_multi_action]
         if len(process_identifiers) > 0 and not is_guarded:
             result = result + [make_process_instance]
 
@@ -194,6 +176,13 @@ def make_action(process_expression_generators, actions, process_identifiers, var
     a = random.choice(actions)
     return Action(a)
 
+def make_multi_action(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size):
+    n = random.randint(2, 4)
+    result = []
+    for _ in range(n):
+        result.append(random.choice(actions))
+    return MultiAction(sorted(result))
+
 def make_delta(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size):
     return Delta()
 
@@ -236,6 +225,16 @@ def make_seq(process_expression_generators, actions, process_identifiers, variab
     y = make_process_expression(process_expression_generators, actions, process_identifiers, variables, is_pcrl, False, size - expression_size(x) - 1)
     return Seq(x, y)
 
+def make_sync(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size):
+    x = make_process_expression(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size - 2)
+    y = make_process_expression(process_expression_generators, actions, process_identifiers, variables, is_pcrl, False, size - expression_size(x) - 1)
+    return Sync(x, y)
+
+def make_left_merge(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size):
+    x = make_process_expression(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size - 2)
+    y = make_process_expression(process_expression_generators, actions, process_identifiers, variables, is_pcrl, False, size - expression_size(x) - 1)
+    return LeftMerge(x, y)
+
 def make_bounded_init(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size):
     x, y = make_two_process_expressions(process_expression_generators, actions, process_identifiers, variables, is_pcrl, is_guarded, size - 1)
     return BoundedInit(x, y)
@@ -244,7 +243,7 @@ def make_allow_set(actions, size):
     result = set([])
     for _ in range(size):
         n = random.randint(1, 2)
-        alpha = make_multi_action(actions, n)
+        alpha = make_multi_action1(actions, n)
         result.add(alpha)
     return list(result)
 
@@ -313,6 +312,25 @@ def make_parallel_process_expression(actions, process_expressions, size, paralle
     # 1) join the process expressions using merge / left_merge / sync
     V = copy.deepcopy(process_expressions)
     x = None
+    while len(V) > 1 or size > 0:
+        if random.choice([True, False]) and len(V) > 1:
+            p, q = random.sample(V, 2)
+            V.remove(p)
+            V.remove(q)
+            V.append(Merge(p, q))
+        elif size > 0:
+            p = random.choice(V)
+            V.remove(p)
+            f = random.choice(parallel_operator_generators)
+            V.append(f(actions, p))
+            size = size - 1
+    return V[0]
+
+# Generates a random process expression by wrapping parallel operators around elements of process_expressions
+# - size: the number of parallel operators that are used
+def make_parallel_process_expression_old(actions, process_expressions, size, parallel_operator_generators = [make_block, make_hide, make_rename, make_comm, make_allow]):
+    V = copy.deepcopy(process_expressions)
+    x = None
     while len(V) > 0:
         if x == None:
             p, q = random.sample(V, 2)
@@ -342,6 +360,7 @@ default_process_expression_generators = {
     make_if_then_else    : 2,
     make_choice          : 5,
     make_seq             : 5,
+    make_multi_action    : 1,
 }
 
 default_parallel_operator_generators = [make_block, make_hide, make_rename, make_comm, make_allow]
@@ -379,7 +398,7 @@ def make_process_specification(parallel_operator_generators = default_parallel_o
     for P in process_identifiers:
         x = make_process_expression(process_expression_generators, actions, process_identifiers, variables + P.variables, is_pcrl, is_guarded, size)
         equations.append(ProcessEquation(P, x))
-    n = random.randint(0, 3)
+    n = random.randint(0, 5)
     if not init:
         process_instances = [ProcessInstance(x, map(default_value, x.variables)) for x in process_identifiers]
         init = make_parallel_process_expression(actions, process_instances, n, parallel_operator_generators)

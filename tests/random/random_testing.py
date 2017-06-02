@@ -78,11 +78,13 @@ class ProcessTauTest(ProcessTest):
                                random_process_expression.make_if_then_else: 0,
                                random_process_expression.make_choice: 5,
                                random_process_expression.make_seq: 5,
+                               random_process_expression.make_multi_action : 1,
                              }
 
 class AlphabetReduceTest(ProcessTest):
     def __init__(self, name, settings = dict()):
         super(AlphabetReduceTest, self).__init__(name, ymlfile('alphabet-reduce'), settings)
+        self.actions = ['a', 'b', 'c', 'd', 'e']
 
 class AlphabetComputeTest(ProcessTest):
     def __init__(self, name, settings = dict()):
