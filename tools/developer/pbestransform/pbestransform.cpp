@@ -23,7 +23,10 @@
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/is_bes.h"
+#include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/remove_equations.h"
@@ -287,10 +290,10 @@ struct rewrite_pbes_data2pbes_rewriter_command: public pbes_command
   }
 };
 
-struct remove_unused_pbes_equations_command: public pbes_command
+struct remove_unreachable_pbes_equations_command: public pbes_command
 {
-  remove_unused_pbes_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : pbes_command("remove-unused-equations", input_filename, output_filename, options)
+  remove_unreachable_pbes_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("remove-unreachable-equations", input_filename, output_filename, options)
   {}
 
   void execute()
@@ -494,6 +497,20 @@ struct normalize_command: public pbes_command
   }
 };
 
+struct normalize_and_or_command: public pbes_command
+{
+  normalize_and_or_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("normalize-and-or", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    detail::normalize_and_or(pbesspec);
+    my_save_pbes(pbesspec, output_filename);
+  }
+};
+
 struct complement_command: public pbes_command
 {
   complement_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
@@ -505,6 +522,34 @@ struct complement_command: public pbes_command
     pbes_command::execute();
     pbes_rewrite(pbesspec, &complement);
     my_save_pbes(pbesspec, output_filename);
+  }
+};
+
+struct is_bes_command: public pbes_command
+{
+  is_bes_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("is-bes", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    bool result = is_bes(pbesspec);
+    write_text(output_filename, result ? "true\n" : "false\n");
+  }
+};
+
+struct is_monotonous_command: public pbes_command
+{
+  is_monotonous_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("is-monotonous", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    bool result = is_monotonous(pbesspec);
+    write_text(output_filename, result ? "true\n" : "false\n");
   }
 };
 
@@ -562,7 +607,7 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<pbesinst_on_the_fly_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<pbesinst_on_the_fly_with_fixed_points_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<pbesinst_optimize_command>(input_filename(), output_filename(), options, rewrite_strategy()));
-      add_command(commands, std::make_shared<remove_unused_pbes_equations_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<remove_unreachable_pbes_equations_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<rewrite_pbes_data2pbes_rewriter_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<rewrite_pbes_data_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<rewrite_pbes_enumerate_quantifiers_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
@@ -580,7 +625,10 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<constelm_quantifier_all_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<constelm_quantifier_finite_rewriter_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<normalize_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<normalize_and_or_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<complement_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<is_bes_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<is_monotonous_command>(input_filename(), output_filename(), options));
 
       for (const auto& command: commands)
       {
