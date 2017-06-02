@@ -36,32 +36,8 @@ void pbespareqelm(const std::string& input_filename,
   pbes p;
   load_pbes(p, input_filename, input_format);
 
-  // data rewriter
-  data::rewriter datar(p.data(), rewrite_strategy);
-
-  // pbes rewriter
-  switch (rewriter_type)
-  {
-    case simplify:
-    {
-      typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
-      pbes_rewriter pbesr(datar);
-      pbes_eqelm_algorithm<pbes_expression, data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
-      algorithm.run(p, ignore_initial_state);
-      break;
-    }
-    case quantifier_all:
-    case quantifier_finite:
-    {
-      bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
-      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
-      pbes_eqelm_algorithm<pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
-      algorithm.run(p, ignore_initial_state);
-      break;
-    }
-    default:
-    { }
-  }
+  // apply the eqelm algorithm
+  eqelm(p, rewrite_strategy, rewriter_type, ignore_initial_state);
 
   // save the result
   save_pbes(p, output_filename, output_format);

@@ -14,8 +14,11 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/utilities/logger.h"
 #include <algorithm>
 #include <deque>
@@ -339,6 +342,42 @@ class pbes_eqelm_algorithm
       mCRL2log(log::verbose) << "\n--- result ---\n" << print_vertices();
     }
 };
+
+/// \brief Apply the eqelm algorithm
+inline
+void eqelm(pbes& p,
+           data::rewrite_strategy rewrite_strategy,
+           pbes_rewriter_type rewriter_type,
+           bool ignore_initial_state = false
+          )
+{
+  // data rewriter
+  data::rewriter datar(p.data(), rewrite_strategy);
+
+  // pbes rewriter
+  switch (rewriter_type)
+  {
+    case simplify:
+    {
+      typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
+      pbes_rewriter pbesr(datar);
+      pbes_eqelm_algorithm<pbes_expression, data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
+      algorithm.run(p, ignore_initial_state);
+      break;
+    }
+    case quantifier_all:
+    case quantifier_finite:
+    {
+      bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
+      pbes_eqelm_algorithm<pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
+      algorithm.run(p, ignore_initial_state);
+      break;
+    }
+    default:
+    { }
+  }
+}
 
 } // namespace pbes_system
 
