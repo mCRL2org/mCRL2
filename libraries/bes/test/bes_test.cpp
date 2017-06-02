@@ -27,6 +27,7 @@ void test_join()
   const boolean_expression& Z2(X);
   boolean_expression Z3;
   Z3 = X;
+  Z3=Z2;
 
   std::set<boolean_expression> s;
   s.insert(boolean_variable("X1"));

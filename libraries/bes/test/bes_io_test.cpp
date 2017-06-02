@@ -9,14 +9,15 @@
 /// \file bes_io_test.cpp
 /// \brief Some io tests for boolean equation systems.
 
+#include <sstream>
+#include <string>
+#include <boost/test/minimal.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/pbes/pbes.h"
-#include <boost/test/minimal.hpp>
-#include <sstream>
-#include <string>
+#include "mcrl2/bes/pbesinst_conversion.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -51,7 +52,7 @@ void test_bes()
   bes_stream >> b;
 
   std::stringstream out;
-  bes::save_bes_cwi(b, out);
+  bes::save_bes(b, out, bes_format_internal());
 }
 
 void test_pbes()
@@ -61,7 +62,7 @@ void test_pbes()
   bes_stream >> b;
 
   std::stringstream out;
-  bes::save_bes_cwi(b, out);
+  bes::save_pbes(b, out, bes_format_internal());
 }
 
 void test_pgsolver()

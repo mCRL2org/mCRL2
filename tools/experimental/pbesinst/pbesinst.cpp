@@ -130,7 +130,6 @@ class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_
         "by an option). The supported formats are:\n"
         "  'pbes' for the mCRL2 PBES format,\n"
         "  'bes'  for the mCRL2 BES format,\n"
-        "  'cwi'  for the CWI BES format\n"
       ),
       m_strategy(pbesinst_lazy_strategy)
     {}

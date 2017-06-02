@@ -42,12 +42,11 @@ class pbes_output_tool: public Tool
 
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
-    /// \return The set { pbes, bes, cwi, pgsolver }
+    /// \return The set { pbes, bes, pgsolver }
     virtual std::set<const utilities::file_format*> available_output_formats() const
     {
       std::set<const utilities::file_format*> result;
       result.insert(pbes_system::pbes_format_internal());
-      result.insert(pbes_system::pbes_format_internal_text());
       result.insert(pbes_system::pbes_format_text());
       return result;
     }
@@ -155,16 +154,13 @@ class bes_output_tool: public pbes_output_tool<Tool>
 
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
-    /// \return The set { pbes, bes, cwi, pgsolver }
+    /// \return The set { pbes, bes, pgsolver }
     virtual std::set<const utilities::file_format*> available_output_formats() const
     {
       std::set<const utilities::file_format*> result;
       result.insert(pbes_system::pbes_format_internal());
-      result.insert(pbes_system::pbes_format_internal_text());
       result.insert(pbes_system::pbes_format_text());
       result.insert(bes::bes_format_internal());
-      result.insert(bes::bes_format_internal_text());
-      result.insert(bes::bes_format_cwi());
       result.insert(bes::bes_format_pgsolver());
       return result;
     }

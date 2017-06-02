@@ -262,8 +262,6 @@ void test_io()
   pbes p = txt2pbes(PBES_SPEC);
   save_pbes(p, "pbes.pbes",  pbes_format_internal());
   load_pbes(p, "pbes.pbes",  pbes_format_internal());
-  save_pbes(p, "pbes.aterm", pbes_format_internal_text());
-  load_pbes(p, "pbes.aterm", pbes_format_internal_text());
   save_pbes(p, "pbes.txt",   pbes_format_text());
   load_pbes(p, "pbes.txt",   pbes_format_text());
 }

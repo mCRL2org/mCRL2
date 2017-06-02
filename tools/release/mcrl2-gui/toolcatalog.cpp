@@ -22,12 +22,9 @@ void ToolCatalog::generateFileTypes()
   m_filetypes.insert("fsm", "lts");
   m_filetypes.insert("aut", "lts");
   m_filetypes.insert("dot", "lts");
-  m_filetypes.insert("svc", "lts");
   m_filetypes.insert("gm",  "bes");
-  m_filetypes.insert("cwi", "bes");
   m_filetypes.insert("bes", "pbes");
   m_filetypes.insert("gm",  "pbes");
-  m_filetypes.insert("cwi", "pbes");
 }
 
 QStringList ToolCatalog::fileTypes(QString extension)

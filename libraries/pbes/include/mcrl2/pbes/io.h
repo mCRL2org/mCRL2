@@ -34,8 +34,6 @@ const std::vector<utilities::file_format>& pbes_file_formats()
   {
     result.push_back(utilities::file_format("pbes", "PBES in internal format", false));
     result.back().add_extension("pbes");
-    result.push_back(utilities::file_format("pbes_text", "PBES in internal textual format", true));
-    result.back().add_extension("aterm");
     result.push_back(utilities::file_format("text", "PBES in textual (mCRL2) format", true));
     result.back().add_extension("txt");
   }
@@ -45,7 +43,7 @@ const std::vector<utilities::file_format>& pbes_file_formats()
 inline
 bool is_pbes_file_format(const utilities::file_format* format)
 {
-  for (const auto& i : pbes_file_formats())
+  for (const utilities::file_format& i: pbes_file_formats())
   {
     if (&i == format)
     {
@@ -58,9 +56,7 @@ bool is_pbes_file_format(const utilities::file_format* format)
 inline
 const utilities::file_format* pbes_format_internal() { return &pbes_file_formats()[0]; }
 inline
-const utilities::file_format* pbes_format_internal_text() { return &pbes_file_formats()[1]; }
-inline
-const utilities::file_format* pbes_format_text() { return &pbes_file_formats()[2]; }
+const utilities::file_format* pbes_format_text() { return &pbes_file_formats()[1]; }
 
 inline
 const utilities::file_format* guess_format(const std::string& filename)
@@ -97,11 +93,6 @@ void save_pbes(const pbes& pbes,
     pbes.save(stream, true);
   }
   else
-  if (format == pbes_format_internal_text())
-  {
-    pbes.save(stream, false);
-  }
-  else
   if (format == pbes_format_text())
   {
     stream << pp(pbes);
@@ -129,11 +120,6 @@ void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* f
   if (format == pbes_format_internal())
   {
     pbes.load(stream, true, source);
-  }
-  else
-  if (format == pbes_format_internal_text())
-  {
-    pbes.load(stream, false, source);
   }
   else
   if (format == pbes_format_text())

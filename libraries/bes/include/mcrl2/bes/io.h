@@ -37,10 +37,6 @@ const utilities::file_format* bes_file_formats(size_t i)
   {
     result.push_back(utilities::file_format("bes", "BES in internal format", false));
     result.back().add_extension("bes");
-    result.push_back(utilities::file_format("bes_text", "BES in internal textual format", true));
-    result.back().add_extension("aterm");
-    result.push_back(utilities::file_format("cwi", "BES in CWI format", true));
-    result.back().add_extension("cwi");
     result.push_back(utilities::file_format("pgsolver", "BES in PGSolver format", true));
     result.back().add_extension("gm");
     result.back().add_extension("pg");
@@ -55,11 +51,7 @@ const utilities::file_format* bes_file_formats(size_t i)
 inline
 const utilities::file_format* bes_format_internal() { return bes_file_formats(0); }
 inline
-const utilities::file_format* bes_format_internal_text() { return bes_file_formats(1); }
-inline
-const utilities::file_format* bes_format_cwi() { return bes_file_formats(2); }
-inline
-const utilities::file_format* bes_format_pgsolver() { return bes_file_formats(3); }
+const utilities::file_format* bes_format_pgsolver() { return bes_file_formats(1); }
 
 inline
 const utilities::file_format* guess_format(const std::string& filename)
@@ -78,10 +70,6 @@ const utilities::file_format* guess_format(const std::string& filename)
 
 void save_bes_pgsolver(const boolean_equation_system& bes, std::ostream& stream, bool maxpg=true);
 
-void save_bes_cwi(const boolean_equation_system& bes, std::ostream& stream);
-
-void save_bes_cwi(const pbes_system::pbes& bes, std::ostream& stream);
-
 /// \brief Save a BES in the format specified.
 /// \param bes The bes to be stored
 /// \param stream The name of the file to which the output is stored.
@@ -99,16 +87,6 @@ void save_bes(const boolean_equation_system& bes,
   if (format == bes_format_internal())
   {
     bes.save(stream, true);
-  }
-  else
-  if (format == bes_format_internal_text())
-  {
-    bes.save(stream, false);
-  }
-  else
-  if (format == bes_format_cwi())
-  {
-    save_bes_cwi(bes, stream);
   }
   else
   if (format == bes_format_pgsolver())
@@ -147,16 +125,6 @@ void load_bes(boolean_equation_system& bes, std::istream& stream, const utilitie
   if (format == bes_format_internal())
   {
     bes.load(stream, true);
-  }
-  else
-  if (format == bes_format_internal_text())
-  {
-    bes.load(stream, false);
-  }
-  else
-  if (format == bes_format_cwi())
-  {
-    throw mcrl2::runtime_error("Loading a BES from a CWI file is not implemented");
   }
   else
   if (format == bes_format_pgsolver())
@@ -266,14 +234,7 @@ void save_pbes(const pbes_system::pbes& pbes, std::ostream& stream,
   {
     if (pbes_system::algorithms::is_bes(pbes))
     {
-      if (format == bes_format_cwi())
-      {
-        save_bes_cwi(pbes, stream);
-      }
-      else
-      {
-        save_bes(pbesinst_conversion(pbes), stream, format);
-      }
+      save_bes(pbesinst_conversion(pbes), stream, format);
     }
     else
     {
