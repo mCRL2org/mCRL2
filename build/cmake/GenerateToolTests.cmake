@@ -329,7 +329,7 @@ endfunction()
 
 # pbes2bes
 function(gen_pbes2bes_release_tests PBESFILE BESFILE)
-  set(ARGUMENTS "-opbes" "-ocwi" "-obes" "-opgsolver" "-rjitty" "-rjittyp" ${_JITTYC} 
+  set(ARGUMENTS "-opbes" "-otext" "-obes" "-opgsolver" "-rjitty" "-rjittyp" ${_JITTYC} 
                 "-s0" "-s1" "-s2" "-s3" "-u" "-zb" "-zd" "--erase=none" "--erase=some" "--erase=all")
   add_tool_test(pbes2bes ${arglist} ${tagIN} ${PBESFILE} ${tagOUT} ${BESFILE})
   foreach(arglist ${ARGUMENTS})
@@ -368,7 +368,7 @@ endfunction()
 
 # pbesinst
 function(gen_pbesinst_release_tests PBESFILE)
-  set(ARGUMENTS "" "-opbes" "-obes" "-ocwi" "-opgsolver" "-slazy" "-sfinite\;-f\"*(*:Bool)\"" "-rjitty" "-rjittyp" ${_JITTYC})
+  set(ARGUMENTS "" "-opbes" "-obes" "-otext" "-opgsolver" "-slazy" "-sfinite\;-f\"*(*:Bool)\"" "-rjitty" "-rjittyp" ${_JITTYC})
   foreach(arglist ${ARGUMENTS})
     add_tool_test(pbesinst ${arglist} ${tagIN} ${PBESFILE})
   endforeach()
