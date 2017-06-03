@@ -21,7 +21,7 @@ namespace pbes_system {
 
 void pbesinfo(const std::string& input_filename,
               const std::string& input_file_message,
-              const utilities::file_format* file_format,
+              const utilities::file_format& file_format,
               bool opt_full
              )
 {

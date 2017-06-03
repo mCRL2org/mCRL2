@@ -23,8 +23,8 @@ namespace pbes_system {
 
 void pbesabsinthe(const std::string& input_filename,
                   const std::string& output_filename,
-                  const utilities::file_format* input_format,
-                  const utilities::file_format* output_format,
+                  const utilities::file_format& input_format,
+                  const utilities::file_format& output_format,
                   const std::string& abstraction_file,
                   absinthe_strategy strategy,
                   bool print_used_function_symbols,

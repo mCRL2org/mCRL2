@@ -22,7 +22,7 @@ namespace pbes_system {
 
 void pbespp(const std::string& input_filename,
             const std::string& output_filename,
-            const utilities::file_format* input_format,
+            const utilities::file_format& input_format,
             core::print_format_type format
            )
 {

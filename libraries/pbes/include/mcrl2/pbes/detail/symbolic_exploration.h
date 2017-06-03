@@ -401,8 +401,8 @@ class symbolic_exploration_algorithm
 inline
 void symbolic_exploration(const std::string& input_filename,
                           const std::string& output_filename,
-                          const utilities::file_format* input_format,
-                          const utilities::file_format* output_format,
+                          const utilities::file_format& input_format,
+                          const utilities::file_format& output_format,
                           bool optimized = true,
                           bool clustered = false,
                           bool instantiate = false

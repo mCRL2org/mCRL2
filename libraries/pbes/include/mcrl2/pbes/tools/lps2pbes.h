@@ -28,7 +28,7 @@ namespace pbes_system {
 
 void lps2pbes(const std::string& input_filename,
               const std::string& output_filename,
-              const utilities::file_format* output_format,
+              const utilities::file_format& output_format,
               const std::string& formula_filename,
               bool timed,
               bool structured,

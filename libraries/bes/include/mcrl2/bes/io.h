@@ -30,7 +30,7 @@ namespace bes
 {
 
 inline
-const utilities::file_format* bes_file_formats(size_t i)
+const std::vector<utilities::file_format>& bes_file_formats()
 {
   static std::vector<utilities::file_format> result;
   if (result.empty())
@@ -41,31 +41,26 @@ const utilities::file_format* bes_file_formats(size_t i)
     result.back().add_extension("gm");
     result.back().add_extension("pg");
   }
-  if (i < result.size())
-  {
-    return &result[i];
-  }
-  return nullptr;
+  
+  return result;
 }
 
 inline
-const utilities::file_format* bes_format_internal() { return bes_file_formats(0); }
+const utilities::file_format& bes_format_internal() { return bes_file_formats()[0]; }
 inline
-const utilities::file_format* bes_format_pgsolver() { return bes_file_formats(1); }
+const utilities::file_format& bes_format_pgsolver() { return bes_file_formats()[1]; }
 
 inline
-const utilities::file_format* guess_format(const std::string& filename)
+utilities::file_format guess_format(const std::string& filename)
 {
-  const utilities::file_format* fmt;
-  size_t i;
-  for (i = 0, fmt = bes_file_formats(i); fmt != nullptr; fmt = bes_file_formats(++i))
+  for (const utilities::file_format fmt: bes_file_formats())
   {
-    if (fmt->matches(filename))
+    if (fmt.matches(filename))
     {
       return fmt;
     }
   }
-  return utilities::file_format::unknown();
+  return utilities::file_format();
 }
 
 void save_bes_pgsolver(const boolean_equation_system& bes, std::ostream& stream, bool maxpg=true);
@@ -77,13 +72,13 @@ void save_bes_pgsolver(const boolean_equation_system& bes, std::ostream& stream,
 inline
 void save_bes(const boolean_equation_system& bes, 
               std::ostream& stream,
-              const utilities::file_format* format)
+              utilities::file_format format)
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = bes_format_internal();
   }
-  mCRL2log(log::verbose) << "Saving result in " << format->shortname() << " format..." << std::endl;
+  mCRL2log(log::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
   if (format == bes_format_internal())
   {
     bes.save(stream, true);
@@ -105,7 +100,7 @@ void save_bes(const boolean_equation_system& bes,
   }
   else
   {
-    throw mcrl2::runtime_error("Trying to save BES in non-BES format (" + format->shortname() + ")");
+    throw mcrl2::runtime_error("Trying to save BES in non-BES format (" + format.shortname() + ")");
   }
 }
 
@@ -115,13 +110,13 @@ void save_bes(const boolean_equation_system& bes,
 /// \param format The format that should be assumed for the stream.
 /// \param source The source from which the stream originates. Used for error messages.
 inline
-void load_bes(boolean_equation_system& bes, std::istream& stream, const utilities::file_format* format, const std::string& source = "")
+void load_bes(boolean_equation_system& bes, std::istream& stream, utilities::file_format format, const std::string& source = "")
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = bes_format_internal();
   }
-  mCRL2log(log::verbose) << "Loading BES in " << format->shortname() << " format..." << std::endl;
+  mCRL2log(log::verbose) << "Loading BES in " << format.shortname() << " format..." << std::endl;
   if (format == bes_format_internal())
   {
     bes.load(stream, true);
@@ -149,9 +144,9 @@ void load_bes(boolean_equation_system& bes, std::istream& stream, const utilitie
   }
   else
   {
-    throw mcrl2::runtime_error("Trying to load BES from non-BES format (" + format->shortname() + ")");
+    throw mcrl2::runtime_error("Trying to load BES from non-BES format (" + format.shortname() + ")");
   }
-}
+} 
 
 ///
 /// \brief save_bes Saves a BES to a file.
@@ -160,46 +155,71 @@ void load_bes(boolean_equation_system& bes, std::istream& stream, const utilitie
 /// \param format The format in which to save the BES.
 ///
 inline
-void save_bes(const boolean_equation_system &bes, const std::string &filename,
-              const utilities::file_format* format=utilities::file_format::unknown())
+void save_bes(const boolean_equation_system &bes, 
+              const std::string &filename,
+              utilities::file_format format=utilities::file_format())
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = guess_format(filename);
   }
-  utilities::output_file file = format->open_output(filename);
-  save_bes(bes, file.stream(), format);
+ 
+ if (filename.empty())
+  { 
+    save_bes(bes, std::cout, format);
+  }
+  else 
+  {  
+    std::ofstream filestream(filename,(format.text_format()?std::ios_base::out: std::ios_base::binary));
+    if (!filestream.good())
+    {
+      throw mcrl2::runtime_error("Could not open file " + filename);
+    }
+    save_bes(bes, filestream, format);
+  }
 }
 
 /// \brief Loads a BES from a file.
 /// \param bes The object in which the result is stored.
 /// \param filename The file from which to load the BES.
-/// \param format An indication of the file format. If this is file_format::unknown() the 
+/// \param format An indication of the file format. If this is file_format() the 
 ///        format of the file in infilename is guessed.
 inline
-void load_bes(boolean_equation_system& bes, const std::string& filename, const utilities::file_format* format=utilities::file_format::unknown())
+void load_bes(boolean_equation_system& bes, const std::string& filename, utilities::file_format format=utilities::file_format())
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = guess_format(filename);
   }
-  utilities::input_file file = format->open_input(filename);
-  load_bes(bes, file.stream(), format, core::detail::file_source(filename));
+  if (filename.empty())
+  { 
+    load_bes(bes, std::cin, format);
+  }
+  else
+  {  
+    std::ifstream filestream(filename,(format.text_format()?std::ios_base::in: std::ios_base::binary));
+    if (!filestream.good())
+    { 
+      throw mcrl2::runtime_error("Could not open file " + filename);
+    }
+    load_bes(bes, filestream, format, core::detail::file_source(filename));
+  }
 }
 
 /// \brief Loads a PBES from a file. If the file stores a BES, then it is converted to a PBES.
 /// \param pbes The object in which the result is stored.
 /// \param filename The file from which to load the PBES.
-/// \param format An indication of the file format. If this is file_format::unknown() the 
+/// \param format An indication of the file format. If this is file_format() the 
 ///        format of the file in infilename is guessed.
 inline
-void load_pbes(pbes_system::pbes& pbes, const std::string& filename,
-               const utilities::file_format* format=utilities::file_format::unknown())
+void load_pbes(pbes_system::pbes& pbes, 
+               const std::string& filename,
+               utilities::file_format format=utilities::file_format())
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = pbes_system::guess_format(filename);
-    if (format == utilities::file_format::unknown())
+    if (format == utilities::file_format())
     {
       format = guess_format(filename);
     }
@@ -224,9 +244,9 @@ void load_pbes(pbes_system::pbes& pbes, const std::string& filename,
 /// format does not provide a save routine for pbes_system::pbes structures.
 inline
 void save_pbes(const pbes_system::pbes& pbes, std::ostream& stream,
-               const utilities::file_format* format=utilities::file_format::unknown())
+               const utilities::file_format& format=utilities::file_format())
 {
-  if (pbes_system::is_pbes_file_format(format) || format == utilities::file_format::unknown())
+  if (pbes_system::is_pbes_file_format(format) || format == utilities::file_format())
   {
     pbes_system::save_pbes(pbes, stream, format);
   }
@@ -241,7 +261,7 @@ void save_pbes(const pbes_system::pbes& pbes, std::ostream& stream,
       throw mcrl2::runtime_error("Trying to save a PBES with data parameters as a BES.");
     }
   }
-}
+} 
 
 /// \brief Saves a PBES to a file. If the PBES is not a BES and a BES file format is requested, an
 ///        exception is thrown.
@@ -251,16 +271,28 @@ void save_pbes(const pbes_system::pbes& pbes, std::ostream& stream,
 ///
 /// The format of the file in infilename is guessed.
 inline
-void save_pbes(const pbes_system::pbes& pbes, const std::string& filename,
-               const utilities::file_format* format=utilities::file_format::unknown())
+void save_pbes(const pbes_system::pbes& pbes, 
+               const std::string& filename,
+               utilities::file_format format=utilities::file_format())
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = guess_format(filename);
   }
-  utilities::output_file file = format->open_output(filename);
-  bes::save_pbes(pbes, file.stream(), format);
-}
+  if (filename.empty())
+  { 
+    bes::save_pbes(pbes, std::cout, format);
+  }
+  else 
+  {  
+    std::ofstream filestream(filename,(format.text_format()?std::ios_base::out: std::ios_base::binary));
+    if (!filestream.good())
+    {
+      throw mcrl2::runtime_error("Could not open file " + filename);
+    }
+    bes::save_pbes(pbes, filestream, format);
+  }
+} 
 
 } // namespace bes
 
