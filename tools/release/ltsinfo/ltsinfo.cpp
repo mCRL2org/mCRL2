@@ -210,7 +210,7 @@ class ltsinfo_tool : public ltsinfo_base
 
       mCRL2log(info) 
           << "Number of states: " << l.num_states() << ".\n"
-          << "Number of action labels: " << l.num_action_labels() << ".\n"
+          << "Number of action labels: " << l.num_action_labels() << " (including a tau label).\n"
           << "Number of transitions: " << l.num_transitions() << ".\n";
 
       if (l.has_state_info())
