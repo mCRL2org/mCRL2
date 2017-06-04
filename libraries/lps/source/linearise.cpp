@@ -11068,7 +11068,8 @@ class specification_basic_type
         if (multiaction == action_list({ terminationAction }))
         {
           acts.push_front(terminationAction.label());
-          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
+          mCRL2log(mcrl2::log::warning) << "The action " << process::pp(terminationAction) << " followed by a deadlock is added to signal termination of the linear process. \n" << 
+                                           "Note that this has as effect that a terminating process always contains a deadlock. \n";
           return;
         }
       }
