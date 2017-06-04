@@ -2827,9 +2827,9 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::refine(
 /// empty;  in that case, `RfnB` is not split.)
 ///
 /// The coroutine implements the left-hand side of Algorithm 3 in [GJKW 2017].
-/// \param RfnB     the block that is being refined
-/// \param SpC      the splitter constellation
-/// \param postprocessing  true if this coroutine is called during
+// \param RfnB     the block that is being refined
+// \param SpC      the splitter constellation
+// \param postprocessing  true if this coroutine is called during
 ///                        postprocessing.  In that case, time complexity is
 ///                        assigned differently from other refinements;  but as
 ///                        time complexity is only checked in Debug mode, the
@@ -3218,9 +3218,9 @@ END_COROUTINE
 /// unmarked bottom states.
 ///
 /// The coroutine implements the right-hand side of Algorithm 3 in [GJKW 2017].
-/// \param RfnB     the block that is being refined
-/// \param FromRed  a set of transitions from RfnB to the splitter
-/// \param postprocessing  true if this coroutine is called during
+// \param RfnB     the block that is being refined
+// \param FromRed  a set of transitions from RfnB to the splitter
+// \param postprocessing  true if this coroutine is called during
 ///                        postprocessing.  In that case, the list of B_to_C
 ///                        slices of RfnB needs to be sorted in a specific way,
 ///                        to find quickly which constellations are still

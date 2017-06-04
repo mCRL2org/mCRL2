@@ -148,6 +148,8 @@ link to any boost libraries.
 
    You can also :doc:`compile the Boost libraries yourself <boost>`.
 
+.. _build_prerequisites_qt:
+
 QT
 --
 

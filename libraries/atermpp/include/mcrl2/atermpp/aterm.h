@@ -318,7 +318,7 @@ const DerivedCont& container_cast(const Cont<Base>& t,
 }
 
 /// \brief A cast form an aterm derived class to a class that inherits in possibly multiple steps from this class.
-/// \detail The derived class is not allowed to contain extra fields. This conversion does not require runtime computation
+/// \details The derived class is not allowed to contain extra fields. This conversion does not require runtime computation
 //          effort. Also see down_cast. 
 /// \param t The term that is converted. 
 /// \return A term of type Derived. 

@@ -121,8 +121,8 @@ Windows 7
 First install all of the following:
   - Windows SDK 7.1
   - If 64-bit Windows SDK: patch from `KB2280741 <http://support.microsoft.com/kb/2280741>`_
-  - Boost, see instructions (`../user_manual/build_instructions/boost.html`_).
-  - QT, see instructions (`../user_manual/build_instructions/prerequisites.html#qt>`_).
+  - Boost, see instructions (`compiling_boost`_).
+  - QT, see instructions (`build_prerequisites_qt`_).
   - SlikSVN (version 1.6.17)
   - CMake
   - Java

@@ -336,6 +336,8 @@ public:
   /// \param[in] hint The hint provided for the message
   /// \param[in] timestamp The timestamp of the log message
   /// \param[in] msg The message to be formatted
+  /// \param[in] print_time_information A boolean that if true indicates that time usage information must be printed. If false this 
+  ///                                   information is suppressed. 
   /// \return The formatted message (\a msg)
   static std::string format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg, const bool print_time_information)
   {
@@ -456,6 +458,8 @@ class file_output: public output_policy
     /// \param[in] timestamp The timestamp to use for the message
     /// \param[in] msg The message to be printed
     /// \param[in] hint The hint of the stream to which we print.
+    /// \param[in] print_time_information A boolean that if true indicates that time usage information must be printed. If false this 
+    ///                                   information is suppressed. 
     ///
     /// \note This uses fprintf (and not e.g. <<) because fprintf is guaranteed to be
     /// atomic.

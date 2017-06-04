@@ -1,3 +1,5 @@
+.. _compiling_boost:
+
 Compiling Boost
 ===============
 

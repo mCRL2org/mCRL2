@@ -42,9 +42,9 @@ class pbes_input_tool: public Tool
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
     /// \return The set { pbes, bes, pgsolver }
-    virtual std::set<const utilities::file_format> available_input_formats() const
+    virtual std::set<utilities::file_format> available_input_formats() const
     {
-      std::set<const utilities::file_format> result;
+      std::set<utilities::file_format> result;
       result.insert(pbes_system::pbes_format_internal());
       result.insert(pbes_system::pbes_format_text());
       result.insert(bes::bes_format_internal());
@@ -55,7 +55,7 @@ class pbes_input_tool: public Tool
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual const utilities::file_format default_input_format() const
+    virtual utilities::file_format default_input_format() const
     {
       utilities::file_format result = pbes_system::guess_format(Tool::input_filename());
       if (result == utilities::file_format())
@@ -75,7 +75,7 @@ class pbes_input_tool: public Tool
     void add_options(utilities::interface_description& desc)
     {
       Tool::add_options(desc);
-      std::set<const utilities::file_format> types = available_input_formats();
+      std::set<utilities::file_format> types = available_input_formats();
       auto option_argument = utilities::make_enum_argument<std::string>("FORMAT");
       for (const utilities::file_format& type: types)
       {
@@ -92,7 +92,7 @@ class pbes_input_tool: public Tool
       m_pbes_input_format = utilities::file_format();
       if(parser.options.count("in"))
       {
-        std::set<const utilities::file_format> types = available_input_formats();
+        std::set<utilities::file_format> types = available_input_formats();
         std::string arg = parser.option_argument_as<std::string>("in");
         for (const utilities::file_format& type: types)
         {
@@ -133,7 +133,7 @@ class pbes_input_tool: public Tool
 
     /// \brief Returns the input file format
     /// \return The input format
-    const utilities::file_format pbes_input_format() const
+    utilities::file_format pbes_input_format() const
     {
       return m_pbes_input_format;
     }
@@ -165,9 +165,9 @@ class bes_input_tool: public pbes_input_tool<Tool>
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
     /// \return The set { pbes, bes, pgsolver }
-    virtual std::set<const utilities::file_format> available_input_formats() const
+    virtual std::set<utilities::file_format> available_input_formats() const
     {
-      std::set<const utilities::file_format> result;
+      std::set<utilities::file_format> result;
       result.insert(pbes_system::pbes_format_internal());
       result.insert(pbes_system::pbes_format_text());
       result.insert(bes::bes_format_internal());
@@ -178,7 +178,7 @@ class bes_input_tool: public pbes_input_tool<Tool>
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual const utilities::file_format default_input_format() const
+    virtual utilities::file_format default_input_format() const
     {
       return bes::guess_format(Tool::input_filename());
     }
@@ -186,7 +186,7 @@ class bes_input_tool: public pbes_input_tool<Tool>
   public:
     /// \brief Returns the input format
     /// \return The input format
-    const utilities::file_format bes_input_format() const
+    utilities::file_format bes_input_format() const
     {
       return pbes_input_tool<Tool>::pbes_input_format();
     }

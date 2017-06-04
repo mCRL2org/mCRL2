@@ -12,14 +12,14 @@
 #ifndef MCRL2_BES_PBES_OUTPUT_TOOL_H
 #define MCRL2_BES_PBES_OUTPUT_TOOL_H
 
-#include "mcrl2/bes/io.h"
-#include "mcrl2/pbes/io.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/file_utility.h"
 #include <iostream>
 #include <set>
-#include <stdexcept>
+// #include <stdexcept>
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/file_utility.h"
 #include <string>
+#include "mcrl2/bes/io.h"
+#include "mcrl2/pbes/io.h"
 
 namespace mcrl2
 {
@@ -42,10 +42,10 @@ class pbes_output_tool: public Tool
 
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
-    /// \return The set { pbes, bes, pgsolver }
-    virtual std::set<const utilities::file_format> available_output_formats() const
+    /// \return The set { pbes, text }
+    virtual std::set<utilities::file_format> available_output_formats() const
     {
-      std::set<const utilities::file_format> result;
+      std::set<utilities::file_format> result;
       result.insert(pbes_system::pbes_format_internal());
       result.insert(pbes_system::pbes_format_text());
       return result;
@@ -54,7 +54,7 @@ class pbes_output_tool: public Tool
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual const utilities::file_format default_output_format() const
+    virtual utilities::file_format default_output_format() const
     {
       return pbes_system::guess_format(Tool::output_filename());
     }
@@ -65,7 +65,7 @@ class pbes_output_tool: public Tool
     void add_options(utilities::interface_description& desc)
     {
       Tool::add_options(desc);
-      std::set<const utilities::file_format> types = available_output_formats();
+      std::set<utilities::file_format> types = available_output_formats();
       auto option_argument = utilities::make_enum_argument<std::string>("FORMAT");
       for (const utilities::file_format& type: types)
       {
@@ -82,7 +82,7 @@ class pbes_output_tool: public Tool
       m_pbes_output_format = utilities::file_format();
       if(parser.options.count("out"))
       {
-        std::set<const utilities::file_format> types = available_output_formats();
+        std::set<utilities::file_format> types = available_output_formats();
         std::string arg = parser.option_argument_as<std::string>("out");
         for (const utilities::file_format& type: types)
         {
@@ -122,7 +122,7 @@ class pbes_output_tool: public Tool
 
     /// \brief Returns the output format
     /// \return The output format
-    const utilities::file_format pbes_output_format() const
+    utilities::file_format pbes_output_format() const
     {
       return m_pbes_output_format;
     }
@@ -153,9 +153,9 @@ class bes_output_tool: public pbes_output_tool<Tool>
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
     /// \return The set { pbes, bes, pgsolver }
-    virtual std::set<const utilities::file_format> available_output_formats() const
+    virtual std::set<utilities::file_format> available_output_formats() const
     {
-      std::set<const utilities::file_format> result;
+      std::set<utilities::file_format> result;
       result.insert(pbes_system::pbes_format_internal());
       result.insert(pbes_system::pbes_format_text());
       result.insert(bes::bes_format_internal());
@@ -166,7 +166,7 @@ class bes_output_tool: public pbes_output_tool<Tool>
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual const utilities::file_format default_output_format() const
+    virtual utilities::file_format default_output_format() const
     {
       utilities::file_format result = bes::guess_format(Tool::output_filename());
       if (result == utilities::file_format())
@@ -179,7 +179,7 @@ class bes_output_tool: public pbes_output_tool<Tool>
   public:
     /// \brief Returns the output format
     /// \return The output file format
-    const utilities::file_format bes_output_format() const
+    utilities::file_format bes_output_format() const
     {
       return pbes_output_tool<Tool>::pbes_output_format();
     }
