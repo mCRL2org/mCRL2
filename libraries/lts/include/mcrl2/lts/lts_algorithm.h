@@ -46,7 +46,6 @@
 #include "mcrl2/lts/lts_equivalence.h"
 #include "mcrl2/lts/lts_preorder.h"
 #include "mcrl2/lts/sigref.h"
-// #include "mcrl2/lts/detail/counter_example.h"
 
 namespace mcrl2
 {
@@ -99,6 +98,11 @@ bool destructive_compare(LTS_TYPE& l1,
       return false;
     case lts_eq_bisim:
     {
+      if (generate_counter_examples) 
+      {
+        mCRL2log(mcrl2::log::warning) << "The default bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
+        return detail::destructive_bisimulation_compare(l1,l2, false,false,generate_counter_examples);
+      }
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, false,false,generate_counter_examples);
     }
     case lts_eq_bisim_gv:
@@ -107,6 +111,11 @@ bool destructive_compare(LTS_TYPE& l1,
     }
     case lts_eq_branching_bisim:
     {
+      if (generate_counter_examples) 
+      {
+        mCRL2log(mcrl2::log::warning) << "The default branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
+        return detail::destructive_bisimulation_compare(l1,l2, true,false,generate_counter_examples);
+      }
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,false,generate_counter_examples);
     }
     case lts_eq_branching_bisim_gv:
@@ -115,6 +124,11 @@ bool destructive_compare(LTS_TYPE& l1,
     }
     case lts_eq_divergence_preserving_branching_bisim:
     {
+      if (generate_counter_examples) 
+      {
+        mCRL2log(mcrl2::log::warning) << "The default divergence preserving branching bisimulation comparison algorithm cannot generate counter examples. Therefore the slower gv algorithm is used instead.\n";
+        return detail::destructive_bisimulation_compare(l1,l2, true,true,generate_counter_examples);
+      }
       return detail::destructive_bisimulation_compare_gjkw(l1,l2, true,true,generate_counter_examples);
     }
     case lts_eq_divergence_preserving_branching_bisim_gv:
