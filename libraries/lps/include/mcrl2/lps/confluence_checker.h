@@ -590,11 +590,7 @@ void Confluence_Checker<Specification>::save_dot_file(size_t a_summand_number_1,
 {
   if (!f_dot_file_name.empty())
   {
-    std::ostringstream v_file_name(f_dot_file_name);
-
-    v_file_name << "-" << a_summand_number_1 << "-" << a_summand_number_2 << ".dot";
-
-    f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
+    f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), f_dot_file_name + "-" + std::to_string(a_summand_number_1) + "-" + std::to_string(a_summand_number_2) + ".dot");
   }
 }
 

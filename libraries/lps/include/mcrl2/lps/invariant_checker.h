@@ -14,6 +14,10 @@
 #ifndef MCRL2_LPS_INVARIANT_CHECKER_H
 #define MCRL2_LPS_INVARIANT_CHECKER_H
 
+#include <cstring>
+#include <string>
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
@@ -22,11 +26,6 @@
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/stochastic_specification.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-#include <cstring>
-#include <sstream>
-#include <string>
 
 /// The class Invariant_Checker is initialized with an LPS using the constructor Invariant_Checker::Invariant_Checker.
 /// After initialization, the function Invariant_Checker::check_invariant can be called any number of times to check
@@ -140,19 +139,17 @@ void Invariant_Checker<Specification>::save_dot_file(size_t a_summand_number)
 {
   if (!f_dot_file_name.empty())
   {
-    std::ostringstream v_file_name;
-
-    v_file_name << f_dot_file_name;
+    std::string v_file_name=f_dot_file_name;
 
     if (a_summand_number == (size_t)-1) // Dangerous
     {
-      v_file_name << "-init.dot";
+      v_file_name += "-init.dot";
     }
     else
     {
-      v_file_name << "-" << a_summand_number << ".dot";
+      v_file_name +=  "-" + std::to_string(a_summand_number) + ".dot";
     }
-    f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
+    f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name);
   }
 }
 

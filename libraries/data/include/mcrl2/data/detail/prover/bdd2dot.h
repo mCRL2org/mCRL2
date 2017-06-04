@@ -94,7 +94,7 @@ class BDD2Dot
     /// restrictions
     /// \param a_bdd A binary decision diagram.
     /// \param a_file_name A file name.
-    void output_bdd(const data_expression &a_bdd, char const* a_file_name)
+    void output_bdd(const data_expression &a_bdd, const std::string& a_file_name)
     {
       f_node_number = 0;
       f_dot_file.open(a_file_name);
