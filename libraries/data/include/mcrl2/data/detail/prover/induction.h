@@ -140,7 +140,6 @@ class Induction
       const variable v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
       mutable_map_substitution<> v_substitution1;
-std::cerr << "INDUCTION SORT " << v_induction_variable.sort() << "\n";
       assert(sort_list::is_list(v_induction_variable.sort()));
       v_substitution1[v_induction_variable]=sort_list::empty(atermpp::down_cast<container_sort>(v_induction_variable.sort()).element_sort());
       std::set<variable> variables_occurring_in_rhs_sigma;

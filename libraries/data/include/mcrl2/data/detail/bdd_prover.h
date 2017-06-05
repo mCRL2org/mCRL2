@@ -288,8 +288,6 @@ class BDD_Prover: protected rewriter
           {
             mCRL2log(log::debug) << "Applying induction." << std::endl;
             f_formula = f_induction.apply_induction();
-std::cerr << "FORMULA " << m_rewriter->rewrite(f_formula,bdd_sigma) << "\n";
-std::cerr << "FORMULA " << atermpp::aterm(m_rewriter->rewrite(f_formula,bdd_sigma)) << "\n";
             build_bdd();
             eliminate_paths();
           }
