@@ -50,10 +50,10 @@ act  ready:Nat;
 proc X(light_position:Position, location:Person->Position, current_time:Nat)=
           (current_time<=MAXIMAL_CROSSING_TIME && forall p:Person.location(p)==far_side) -> ready(current_time).delta+
           sum p:Person.
-                 (current_time<=20 && location(p)==light_position) -> move(p,other_side(location(p))).
+                 (current_time<=MAXIMAL_CROSSING_TIME && location(p)==light_position) -> move(p,other_side(location(p))).
                  X(other_side(light_position),location[p->other_side(location(p))],current_time+travel_time(p)) +
           sum p,p':Person.
-                 (p!=p' && current_time<=20 && location(p)==light_position && location(p')==light_position) -> 
+                 (p!=p' && current_time<=MAXIMAL_CROSSING_TIME && location(p)==light_position && location(p')==light_position) -> 
                            move(p,p',other_side(location(p))).
                  X(other_side(light_position),location[p->other_side(location(p))][p'->other_side(location(p'))],
                          current_time+max(travel_time(p),travel_time(p')));

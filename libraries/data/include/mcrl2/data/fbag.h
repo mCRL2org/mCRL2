@@ -1083,7 +1083,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(ve, vd), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, ve, vq, difference(s, cons_(s, vd, vp, vb), vc))));
         result.push_back(data_equation(atermpp::make_vector(vb), union_(s, vb, empty(s)), vb));
         result.push_back(data_equation(atermpp::make_vector(vc), union_(s, empty(s), vc), vc));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp, vq), union_(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, union_(s, vp, vq), union_(s, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp, vq), union_(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_pos::add_with_carry(sort_bool::false_(), vp, vq), union_(s, vb, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(vd, ve), union_(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, vd, vp, union_(s, vb, cons_(s, ve, vq, vc)))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(ve, vd), union_(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, ve, vq, union_(s, cons_(s, vd, vp, vb), vc))));
         result.push_back(data_equation(atermpp::make_vector(vb), intersection(s, vb, empty(s)), empty(s)));
@@ -1092,7 +1092,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(vd, ve), intersection(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), intersection(s, vb, cons_(s, ve, vq, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(ve, vd), intersection(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), intersection(s, cons_(s, vd, vp, vb), vc)));
         result.push_back(data_equation(variable_list(), count_all(s, empty(s)), sort_nat::c0()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), count_all(s, cons_(s, vd, vp, vb)), union_(s, vp, count_all(s, vb))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), count_all(s, cons_(s, vd, vp, vb)), sort_pos::add_with_carry(sort_bool::false_(), vp, count_all(s, vb))));
         return result;
       }
 
