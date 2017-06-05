@@ -1092,7 +1092,8 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(vd, ve), intersection(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), intersection(s, vb, cons_(s, ve, vq, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(ve, vd), intersection(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), intersection(s, cons_(s, vd, vp, vb), vc)));
         result.push_back(data_equation(variable_list(), count_all(s, empty(s)), sort_nat::c0()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), count_all(s, cons_(s, vd, vp, vb)), sort_pos::add_with_carry(sort_bool::false_(), vp, count_all(s, vb))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vp), count_all(s, cons_(s, vd, vp, empty(s))), sort_nat::cnat(vp)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp, vq), count_all(s, cons_(s, vd, vp, cons_(s, ve, vq, vb))), sort_nat::cnat(sort_pos::add_with_carry(sort_bool::false_(), vp, sort_nat::nat2pos(count_all(s, cons_(s, ve, vq, vb)))))));
         return result;
       }
 

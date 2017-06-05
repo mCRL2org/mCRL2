@@ -118,4 +118,5 @@ eqn ==(@fbag_cons(d, p, b), {:})  =  false;
     <(d,e) -> *(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = *(b,@fbag_cons(e,q,c));
     <(e,d) -> *(@fbag_cons(d,p,b),@fbag_cons(e,q,c)) = *(@fbag_cons(d,p,b),c);
     #({:}) = @c0;
-    #(@fbag_cons(d,p,b)) = @addc(false,p,#(b));
+    #(@fbag_cons(d,p,{:})) = @cNat(p);
+    #(@fbag_cons(d,p,@fbag_cons(e,q,b))) = @cNat(@addc(false,p,Nat2Pos(#(@fbag_cons(e,q,b)))));
