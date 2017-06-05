@@ -288,6 +288,8 @@ class BDD_Prover: protected rewriter
           {
             mCRL2log(log::debug) << "Applying induction." << std::endl;
             f_formula = f_induction.apply_induction();
+std::cerr << "FORMULA " << m_rewriter->rewrite(f_formula,bdd_sigma) << "\n";
+std::cerr << "FORMULA " << atermpp::aterm(m_rewriter->rewrite(f_formula,bdd_sigma)) << "\n";
             build_bdd();
             eliminate_paths();
           }
@@ -466,7 +468,7 @@ class BDD_Prover: protected rewriter
     /// to 0, no time limit will be enforced
     /// precondition: the argument passed as parameter a_lps is an LPS
     /* BDD_Prover(
-      const data_specification &data_spec,
+      const data_specification& data_spec,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
@@ -541,13 +543,13 @@ class BDD_Prover: protected rewriter
     }
 
     /// \brief Set the substitution to be used to construct the BDD
-    void set_substitution(substitution_type &sigma)
+    void set_substitution(substitution_type& sigma)
     {
       bdd_sigma = sigma;
     }
 
     /// \brief Set the substitution in internal format to be used to construct the BDD
-    void set_substitution_internal(substitution_type &sigma)
+    void set_substitution_internal(substitution_type& sigma)
     {
       bdd_sigma = sigma;
     }

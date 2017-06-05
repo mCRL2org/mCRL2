@@ -140,7 +140,9 @@ class Induction
       const variable v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
       mutable_map_substitution<> v_substitution1;
-      v_substitution1[v_induction_variable]=sort_list::empty(v_induction_variable.sort());
+std::cerr << "INDUCTION SORT " << v_induction_variable.sort() << "\n";
+      assert(sort_list::is_list(v_induction_variable.sort()));
+      v_substitution1[v_induction_variable]=sort_list::empty(atermpp::down_cast<container_sort>(v_induction_variable.sort()).element_sort());
       std::set<variable> variables_occurring_in_rhs_sigma;
       const data_expression v_base_case = data::replace_variables_capture_avoiding(f_formula,v_substitution1,variables_occurring_in_rhs_sigma);
 
@@ -213,7 +215,8 @@ class Induction
       const data_expression v_formula_1 = data::replace_variables_capture_avoiding(a_formula,v_substitution1,variables_occurring_in_rhs_sigma);
 
       mutable_map_substitution<> v_substitution2;
-      v_substitution2[v_variable]=sort_list::empty(v_variable.sort());
+      assert(sort_list::is_list(v_variable.sort()));
+      v_substitution2[v_variable]=sort_list::empty(atermpp::down_cast<container_sort>(v_variable.sort()).element_sort());
       variables_occurring_in_rhs_sigma.clear();
       const data_expression v_formula_2 = data::replace_variables_capture_avoiding(a_formula,v_substitution2,variables_occurring_in_rhs_sigma);
       const data_expression v_hypothesis = data::replace_variables_capture_avoiding(a_hypothesis,v_substitution2,variables_occurring_in_rhs_sigma);
@@ -293,7 +296,6 @@ class Induction
           v_result = sort_bool::and_(v_result, v_clause);
         }
       }
-
       return v_result;
     }
 };
