@@ -124,7 +124,6 @@ QVector3D repulsionForce(const QVector3D& a, const QVector3D& b, float repulsion
   return diff;
 }
 
-/* suppress the force if the node is far away from the center */
 static QVector3D applyForce(const QVector3D& pos, const QVector3D& force, float speed)
 {
   return pos + speed * force;
@@ -299,8 +298,17 @@ class WorkerThread : public QThread
         elapsed = m_time.elapsed();
         m_time.restart();
         m_layout.m_glwidget.update();
-        if (m_period > elapsed) {
+        if (m_period > elapsed)
+        {
           msleep(m_period - elapsed);
+        }
+        else
+        {
+          // Sleep for a short time to prevent a possible freeze of the widget
+          // because of the changes introduced in r14830
+          // This could maybe be solved differently by calling update() (see
+          // above the if statement) differently, however, this way is simpler.
+          msleep(5);
         }
       }
     }
