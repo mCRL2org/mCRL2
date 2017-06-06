@@ -213,7 +213,7 @@ class GLScene
      * @brief Constructor.
      * @param g The graph that is to be visualised by this object.
      */
-    GLScene(Graph::Graph& g, float device_pixel_ratio, QPainter& painter);
+    GLScene(Graph::Graph& g, QPainter& painter);
 
     /**
      * @brief Applies the current fog settings. Call when the
@@ -422,7 +422,9 @@ class GLScene
     bool animationFinished() {
       return m_camera.animationFinished();
     }
-
+    void setDevicePixelRatio(float device_pixel_ratio) {
+      m_device_pixel_ratio = device_pixel_ratio;
+    }
 };
 
 #endif // GLSCENE_H

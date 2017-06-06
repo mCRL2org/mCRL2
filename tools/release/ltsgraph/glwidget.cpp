@@ -137,7 +137,8 @@ struct NodeMoveRecord : public MoveRecord
 GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
   : QOpenGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true), m_painter()
 {
-  m_scene = new GLScene(m_graph, devicePixelRatio(), m_painter);
+  m_scene = new GLScene(m_graph, m_painter);
+  m_scene->setDevicePixelRatio(devicePixelRatio());
   QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
   fmt.setVersion(1, 2);
   fmt.setDepthBufferSize(1);
@@ -187,6 +188,7 @@ inline Graph::Node* select_object(const GLScene::Selection& s, Graph::Graph& g)
 
 void GLWidget::updateSelection()
 {
+  m_scene->setDevicePixelRatio(devicePixelRatio());
   Graph::Node* selnode;
   for (std::list<GLScene::Selection>::iterator it = m_selections.begin(); it != m_selections.end();)
   {
@@ -264,6 +266,7 @@ void GLWidget::paintGL()
   else
   {
     m_scene->init(Qt::white);
+    m_scene->setDevicePixelRatio(devicePixelRatio());
     m_scene->render(*this);
     if (!m_scene->animationFinished())
     {

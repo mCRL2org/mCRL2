@@ -667,8 +667,8 @@ void GLScene::renderHandle(GLuint i)
 // GLScene public methods
 //
 
-GLScene::GLScene(Graph::Graph& g, float device_pixel_ratio, QPainter& painter)
-  : m_graph(g), m_camera(), m_vertexdata(), m_device_pixel_ratio(device_pixel_ratio), m_painter(painter),
+GLScene::GLScene(Graph::Graph& g, QPainter& painter)
+  : m_graph(g), m_camera(), m_vertexdata(), m_painter(painter),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
 {
