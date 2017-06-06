@@ -127,7 +127,7 @@ QVector3D repulsionForce(const QVector3D& a, const QVector3D& b, float repulsion
 /* suppress the force if the node is far away from the center */
 static QVector3D applyForce(const QVector3D& pos, const QVector3D& force, float speed)
 {
-  return pos + speed * force * std::pow(0.99999, pos.lengthSquared());
+  return pos + speed * force;
 }
 
 void SpringLayout::apply()
@@ -301,8 +301,6 @@ class WorkerThread : public QThread
         m_layout.m_glwidget.update();
         if (m_period > elapsed) {
           msleep(m_period - elapsed);
-        } else {
-          msleep(20);
         }
       }
     }
