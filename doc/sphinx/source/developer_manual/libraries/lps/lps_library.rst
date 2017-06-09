@@ -81,7 +81,7 @@ using
 .. code-block:: c++
 
     std::string text = ... ;
-    specification spec = mcrl22lps(text);
+    specification spec = linearise(text);
 
 The class ``lps::specification`` represents a linearized process specification. It consists of
 
@@ -90,27 +90,6 @@ The class ``lps::specification`` represents a linearized process specification. 
 * an action specification, i.e. a sequence of actions that may occur during execution of the process
 * an initial state
 * global variables
-
-Once we have such a specification, it can be stored in and read from a file,
-either in binary or ascii format. This is illustrated by the following example.
-
-.. code-block:: c++
-
-    specification spec;
-    try {
-      spec.load("abp.lps");
-    }
-    catch(mcrl2::runtime_error e)
-    {
-      std::cerr << "load failed!" << std::endl;
-    }
-    try {
-      spec.save("abp.lps");
-    }
-    catch(mcrl2::runtime_error e)
-    {
-      std::cerr << "save failed!" << std::endl;
-    }
 
 Linear processes
 ----------------
@@ -134,7 +113,7 @@ It is necessary to check if the time is available, before using it:
     action_summand s = proc.action_summands().front();
     if (s.has_time())
     {
-      std::cout << "time = " << data::pp(s.time()) << std::endl;
+      std::cout << "time = " << s.time() << std::endl;
     }
 
 Action summands have an associated multi action, which consists of a sequence of actions.
@@ -143,10 +122,8 @@ An illustration of it's usage is
 .. code-block:: c++
 
     action_summand s;
-    action_list al = s.actions();
-    for (action_list::const_iterator i = al.begin(); i != al.end(); ++i)
+    for (const process::action& a: s.actions())
     {
-      action a = *i;
       core::identifier_string name = a.label().name();
       data::data_expression_list arguments = a.arguments();
     }
@@ -158,35 +135,23 @@ the earlier given formulas.
 
    There is a convention that a linear process without any summands represents the process ``delta @ 0``.
 
-.. warning::
-
-   There is still a class ``lps::summand`` in use, but it has been deprecated.
-
 Classes in the LPS library
 ==========================
 Several classes in the LPS library are just thin wrappers around an ATerm pointer (see also the :ref:`atermpp_library`).
 This means that instances of these classes are immutable, and instances with the same
 value are shared in memory. The following table gives an overview of the ATerm based classes:
 
-============================== =
+=============================== =
    ATerm based classes
-============================== =
- ``lps::action_label``
- ``lps::action_label_list``
- ``lps::action``
- ``lps::action_list``
+=============================== =
+ ``process::action_label``
+ ``process::action_label_list``
  ``lps::process_initializer``
-============================== =
+=============================== =
 
 Correctness checks
 ------------------
-The ATerms that are internally used in the classes of the LPS library have to
-adhere to a grammar that can be found in the file ``doc/specs/mcrl2.internal.txt``.
-In debug mode, all constructors of the classes will automatically check if the
-terms are in the correct format. If not, an assertion failure is triggered.
-In release mode, these checks are switched off, for efficiency reasons.
-
-For many classes there are additional restrictions to what terms are considered
+For many classes there are restrictions to what expressions are considered
 valid, the so called well typedness constraints. These constraints are implemented
 in the class ``lps/detail/lps_well_typed_checker.h``. For example, the following
 checks are done for linear processes:
@@ -198,43 +163,3 @@ checks are done for linear processes:
 Such constraints are only checked in debug mode in the `load` and `save` functions of
 ``lps::specification``. The descriptions of the well typedness constraints are found in the
 reference documentation.
-
-Algorithms
-==========
-In the mCRL2 tool set there are many algorithms available for manipulating
-linear process specifications. Some of them are available as an algorithm.
-For example:
-
-.. code-block:: c++
-
-    specification spec;
-    spec.load("abp.lps");
-    spec = parelm(spec);    // elimination of insignificant process parameters
-    spec = constelm(spec);  // elimination of constant process parameters
-    spec = sumelm(spec);    // apply sum elimination theorem
-
-Similar to the Data Library there is a whole range of search and replace functions
-available. An example of their usage is:
-
-.. code-block:: c++
-
-  specification spec = parse_linear_process_specification(
-    "glob m: Nat;                 \n"
-    "act a: Nat;                  \n"
-    "proc P(n:Nat) = a(m).P(n+1); \n"
-    "init P(0);                   \n"
-  );
-
-  data::variable m(core::identifier_string("m"), data::sort_nat::nat());
-  data::variable n(core::identifier_string("n"), data::sort_nat::nat());
-  data::variable p(core::identifier_string("p"), data::sort_nat::nat());
-  data::variable q(core::identifier_string("q"), data::sort_nat::nat());
-
-  std::set<data::variable> v;
-  v = lps::find_variables(spec.process());            // v = { m: Nat, n: Nat }
-  v = lps::find_free_variables(spec.process());       // v = { m: Nat }
-
-  data::mutable_map_substitution<> sigma;
-  sigma[m] = p;
-  sigma[n] = q;
-  lps::replace_free_variables(spec.process(), sigma); // spec.process() =  "P(n: Nat) = a(p).P(n+1)"
