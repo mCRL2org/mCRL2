@@ -370,14 +370,9 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   }
 
   glVertexPointer(3, GL_FLOAT, 0, data.node);
-  if (translucent)
-  {
-    glColor4fv(Color4f(fill, 0.15));
-  }
-  else
-  {
-    glColor3fv(fill);
-  }
+
+  float alpha = translucent ? 0.3 : 1.0;
+  glColor4fv(Color4f(fill, alpha));
 
   glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
 
@@ -386,15 +381,7 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   // BUT not disabling the depth mask here causes some strange issue on Mac OS
   glDepthMask(GL_FALSE);
 
-  if (translucent)
-  {
-    Color4f line2(line, .15f);
-    glColor4fv(line2);
-  }
-  else
-  {
-    glColor3fv(line);
-  }
+  glColor4fv(Color4f(line, alpha));
   glDrawArrays(GL_LINE_LOOP, 0, RES_NODE_SLICE - 1);
 
   // see above
