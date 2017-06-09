@@ -1,6 +1,6 @@
 .. math::
-   :nowrap: 
- 
+   :nowrap:
+
     \renewcommand{\implies}{\mathop{\Rightarrow}}
 
 Parameterised Boolean Equation Systems
@@ -30,7 +30,7 @@ The following C++ classes are defined for PBESs:
    ===================================  ====================================================================================================================
    Expression                           C++ class
    ===================================  ====================================================================================================================
-   :math:`\cal{E}`                      :cpp:class:`template \<typename Container\> \class pbes <mcrl2::pbes_system::pbes>`
+   :math:`\cal{E}`                      :cpp:class:`pbes                                      <mcrl2::pbes_system::pbes>`
    :math:`\sigma X(d:D)=\varphi`        :cpp:class:`pbes_equation                             <mcrl2::pbes_system::pbes_equation>`
    :math:`\sigma`                       :cpp:class:`fixpoint_symbol                           <mcrl2::pbes_system::fixpoint_symbol>`
    :math:`X(d:D)`                       :cpp:class:`propositional_variable                    <mcrl2::pbes_system::propositional_variable>`
@@ -107,7 +107,7 @@ This section gives an overview of the algorithms that are available for PBESs.
 Algorithms on PBESs
 -------------------
 
-.. table:: Algorithms on PBES data types
+.. table:: Selected algorithms on PBES data types
 
    ===========================================================================================   =================================================================================================================
    algorithm                                                                                     description
@@ -137,13 +137,15 @@ Search and Replace functions
    :cpp:func:`find_identifiers                            <mcrl2::pbes_system::find_identifiers>`                            Finds all identifiers occurring in a PBES data type
    :cpp:func:`find_sort_expressions                       <mcrl2::pbes_system::find_sort_expressions>`                       Finds all sort expressions occurring in a PBES  data type
    :cpp:func:`find_function_symbols                       <mcrl2::pbes_system::find_function_symbols>`                       Finds all function symbols occurring in a PBES  data type
-   :cpp:func:`find_variables                              <mcrl2::pbes_system::find_variables>`                              Finds all variables occurring in a PBES  data type
+   :cpp:func:`find_all_variables                          <mcrl2::pbes_system::find_variables>`                              Finds all variables occurring in a PBES  data type
    :cpp:func:`find_free_variables                         <mcrl2::pbes_system::find_free_variables>`                         Finds all free variables occurring in a PBES  data type
    :cpp:func:`find_propositional_variable_instantiations  <mcrl2::pbes_system::find_propositional_variable_instantiations>`  Finds all propositional variable instantiations occurring in a PBES data type
    :cpp:func:`replace_sort_expressions                    <mcrl2::pbes_system::replace_sort_expressions>`                    Replaces sort expressions in a PBES data type
    :cpp:func:`replace_data_expressions                    <mcrl2::pbes_system::replace_data_expressions>`                    Replaces data expressions in a PBES data type
-   :cpp:func:`replace_variables                           <mcrl2::pbes_system::replace_variables>`                           Replaces variables in a PBES data type
+   :cpp:func:`replace_variables                           <mcrl2::pbes_system::replace_variables>`                           Replaces variables in a PBES data
+   :cpp:func:`replace_variables_capture_avoiding          <mcrl2::pbes_system::replace_variables_capture_avoiding>`          Replaces variables in a PBES data type, and avoids unwanted capturing
    :cpp:func:`replace_free_variables                      <mcrl2::pbes_system::replace_free_variables>`                      Replaces free variables in a PBES data type
+   :cpp:func:`replace_all_variables                       <mcrl2::pbes_system::replace_all_variables>`                       Replaces all variables in a PBES data type, even in declarations
    :cpp:func:`replace_propositional_variables             <mcrl2::pbes_system::replace_propositional_variables>`             Replaces propositional variables in a PBES data type
    ========================================================================================================================  =============================================================================
 
@@ -156,47 +158,13 @@ The following rewriters are available
    ==================================================================================================  =========================================================================
    name                                                                                                description
    ==================================================================================================  =========================================================================
-   :cpp:class:`simplifying_rewriter            <mcrl2::pbes_system::simplifying_rewriter>`             Simplifies a PBES expression
-   :cpp:class:`simplifying_quantifier_rewriter <mcrl2::pbes_system::simplifying_quantifier_rewriter>`  Simplifies quantifiers
-   :cpp:class:`enumerate_quantifiers_rewriter  <mcrl2::pbes_system::enumerate_quantifiers_rewriter>`   Eliminates quantifiers by enumerating quantifier variables
+   :cpp:class:`bqnf_rewriter                   <mcrl2::pbes_system::bqnf_rewriter>`                    BQNF rewriter
+   :cpp:class:`data2pbes_rewriter              <mcrl2::pbes_system::data2pbes_rewriter>`               Replaces data library operators to equivalent PBES library operators
    :cpp:class:`data_rewriter                   <mcrl2::pbes_system::data_rewriter>`                    Rewrites data expressions that appear as a subterm of the PBES expression
-   :cpp:class:`pfnf_rewriter                   <mcrl2::pbes_system::pfnf_rewriter>`                    Brings a PBES expression into PFNF normal form
+   :cpp:class:`enumerate_quantifiers_rewriter  <mcrl2::pbes_system::enumerate_quantifiers_rewriter>`   Eliminates quantifiers by enumerating quantifier variables
+   :cpp:class:`one_point_rule_rewriter         <mcrl2::pbes_system::one_point_rule_rewriter>`          Applies one point rule to simplify quantifier expressions
+   :cpp:class:`pfnf_rewriter                   <mcrl2::pbes_system::pfnf_rewriter>`                    Brings PBES expressions into PFNF normal form
+   :cpp:class:`quantifiers_inside_rewriter     <mcrl2::pbes_system::quantifiers_inside_rewriter>`      Pushes quantifiers inside
+   :cpp:class:`simplify_quantifiers_rewriter   <mcrl2::pbes_system::simplify_quantifiers_rewriter>`    Simplifies quantifier expressions
+   :cpp:class:`simplify_rewriter               <mcrl2::pbes_system::simplify_rewriter>`                Simplifies logical boolean operators
    ==================================================================================================  =========================================================================
-
-Examples
-^^^^^^^^
-PBESs can be loaded and saved using the ``load`` and ``save`` member functions:
-
-.. code-block:: c++
-
-  // load a PBES from file
-  pbes<> p;
-  p.load("pbes1.pbes");
-
-  // print the equations
-  for (atermpp::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-  {
-    std::cout << pbes_system::pp(*i) << std::endl;
-  }
-
-  // print the initial state
-  propositional_variable_instantiation init = p.initial_state();
-  std::cout << "initial state: " << pbes_system::pp(init) << std::endl;
-
-  // save a PBES to file
-  p.save("pbes2.pbes");
-
-PBESs can be parsed using the function ``txt2pbes``:
-
-.. code-block:: c++
-
-    std::string text =
-      "pbes                                             \n"
-      "nu X(b:Bool) = val(b) && Y(!b);                  \n"
-      "mu Y(c:Bool) = forall d:Bool. X(d && c) || Y(d); \n"
-      "init X(true);                                    \n"
-      ;
-    pbes<> p = txt2pbes(text);
-
-
-.. todo:: Add more examples
