@@ -1226,6 +1226,8 @@ bool Graph::isToggleable(size_t index)
   bool toggleable =
       !node.m_active || (m_sel->isContractable(index) && count > 1);
 
+  toggleable = toggleable && index != m_initialState;
+
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);
 
   return toggleable;
