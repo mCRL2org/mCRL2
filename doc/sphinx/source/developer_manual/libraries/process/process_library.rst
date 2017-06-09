@@ -56,7 +56,7 @@ The following C++ classes are defined for process expressions:
    ============================================  ===============================================================================
    Expression                                    C++ class
    ============================================  ===============================================================================
-   :math:`a(e_1, \ldots, e_n)`                   :cpp:class:`lps::action                 <mcrl2::lps::action>`
+   :math:`a(e_1, \ldots, e_n)`                   :cpp:class:`action                      <mcrl2::process::action>`
    :math:`P(e_1, \ldots, e_n)`                   :cpp:class:`process_instance            <mcrl2::process::process_instance>`
    :math:`P(d_1 = e_1, \ldots, d_n = e_n)`       :cpp:class:`process_instance_assignment <mcrl2::process::process_instance_assignment>`
    :math:`\delta`                                :cpp:class:`delta                       <mcrl2::process::delta>`
@@ -81,33 +81,40 @@ The following C++ classes are defined for process expressions:
 Algorithms on processes
 -----------------------
 
-.. table:: Algorithms on processes
+.. table:: Selected algorithms on processes
 
-   ====================================================================================   =============================================================
-   algorithm                                                                              description
-   ====================================================================================   =============================================================
-   :cpp:class:`alphabet_reduction     <mcrl2::process::alphabet_reduction>`               Applies alphabet reduction to a process specification
-   :cpp:func:`is_linear               <mcrl2::process::is_linear>`                        Determines if a process specification is linear
-   :cpp:func:`rewrite                 <mcrl2::process::rewrite>`                          Applies a rewriter to a process data type
-   :cpp:func:`normalize_sorts         <mcrl2::process::normalize_sorts>`                  Applies sort normalization to a process data type
-   :cpp:func:`translate_user_notation <mcrl2::process::translate_user_notation>`          Applies translation of user notation to a process data type
-   ====================================================================================   =============================================================
+   ===============================================================================================  =========================================================================================
+   algorithm                                                                                        description
+   ===============================================================================================  =========================================================================================
+   :cpp:func:`alphabet_reduce                  <mcrl2::process::alphabet_reduce>`                   Applies alphabet reduction to a process specification
+   :cpp:func:`eliminate_single_usage_equations <mcrl2::process::eliminate_single_usage_equations>`  Eliminates equations that are used only once, using substitution
+   :cpp:func:`eliminate_trivial_equations      <mcrl2::process::eliminate_trivial_equations>`       Eliminates trivial equations, that have a process instance as the right hand side
+   :cpp:func:`eliminate_trivial_sums           <mcrl2::process::eliminate_trivial_sums>`            Eliminates trivial equations, that have a sum of process instances as the right hand side
+   :cpp:func:`is_guarded                       <mcrl2::process::is_guarded>`                        Checks if a process expression is guarded
+   :cpp:func:`is_linear                        <mcrl2::process::is_linear>`                         Determines if a process specification is linear
+   :cpp:func:`normalize_sorts                  <mcrl2::process::normalize_sorts>`                   Applies sort normalization to a process data type
+   :cpp:func:`remove_duplicate_equations       <mcrl2::process::remove_duplicate_equations>`        Removes duplicate equations from a process specification, using a bisimulation algorithm
+   :cpp:func:`rewrite                          <mcrl2::process::rewrite>`                           Applies a rewriter to a process data type
+   :cpp:func:`translate_user_notation          <mcrl2::process::translate_user_notation>`           Applies translation of user notation to a process data type
+   ===============================================================================================  =========================================================================================
 
 Search and Replace functions
 ----------------------------
 
 .. table:: Search and Replace functions
 
-   ===============================================================================  =============================================================================
+   ===================================================================================================  =============================================================================
    algorithm                                                                                                          description
-   ===============================================================================  =============================================================================
-   :cpp:func:`find_identifiers         <mcrl2::process::find_identifiers>`          Finds all identifiers occurring in a process data type
-   :cpp:func:`find_sort_expressions    <mcrl2::process::find_sort_expressions>`     Finds all sort expressions occurring in a process  data type
-   :cpp:func:`find_function_symbols    <mcrl2::process::find_function_symbols>`     Finds all function symbols occurring in a process  data type
-   :cpp:func:`find_variables           <mcrl2::process::find_variables>`            Finds all variables occurring in a process  data type
-   :cpp:func:`find_free_variables      <mcrl2::process::find_free_variables>`       Finds all free variables occurring in a process  data type
-   :cpp:func:`replace_sort_expressions <mcrl2::process::replace_sort_expressions>`  Replaces sort expressions in a process data type
-   :cpp:func:`replace_data_expressions <mcrl2::process::replace_data_expressions>`  Replaces data expressions in a process data type
-   :cpp:func:`replace_variables        <mcrl2::process::replace_variables>`         Replaces variables in a process data type
-   :cpp:func:`replace_free_variables   <mcrl2::process::replace_free_variables>`    Replaces free variables in a process data type
-   ===============================================================================  =============================================================================
+   ===================================================================================================  =============================================================================
+   :cpp:func:`find_identifiers                   <mcrl2::process::find_identifiers>`                    Finds all identifiers occurring in a process data type
+   :cpp:func:`find_sort_expressions              <mcrl2::process::find_sort_expressions>`               Finds all sort expressions occurring in a process  data type
+   :cpp:func:`find_function_symbols              <mcrl2::process::find_function_symbols>`               Finds all function symbols occurring in a process  data type
+   :cpp:func:`find_all_variables                 <mcrl2::process::find_variables>`                      Finds all variables occurring in a process  data type
+   :cpp:func:`find_free_variables                <mcrl2::process::find_free_variables>`                 Finds all free variables occurring in a process  data type
+   :cpp:func:`replace_sort_expressions           <mcrl2::process::replace_sort_expressions>`            Replaces sort expressions in a process data type
+   :cpp:func:`replace_data_expressions           <mcrl2::process::replace_data_expressions>`            Replaces data expressions in a process data type
+   :cpp:func:`replace_variables                  <mcrl2::process::replace_variables>`                   Replaces variables in a process data
+   :cpp:func:`replace_variables_capture_avoiding <mcrl2::process::replace_variables_capture_avoiding>`  Replaces variables in a process data type, and avoids unwanted capturing
+   :cpp:func:`replace_free_variables             <mcrl2::process::replace_free_variables>`              Replaces free variables in a process data type
+   :cpp:func:`replace_all_variables              <mcrl2::process::replace_all_variables>`               Replaces all variables in a process data type, even in declarations
+   ===================================================================================================  =============================================================================
