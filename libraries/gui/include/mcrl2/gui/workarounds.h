@@ -34,7 +34,7 @@
   {                                                                            \
     GLKMatrix4 mat =                                                           \
         GLKMatrix4MakeOrtho(left, right, bottom, top, -1.0f, 1.0f);            \
-    glLoadMatrixf(mat.m);                                                      \
+    glMultMatrixf(mat.m);                                                      \
   } while (0)
 
 #define gluPerspective(fovy, aspect, zNear, zFar)                              \
@@ -42,7 +42,7 @@
   {                                                                            \
     GLKMatrix4 mat =                                                           \
         GLKMatrix4MakePerspective(fovy * M_PI / 180, aspect, zNear, zFar);     \
-    glLoadMatrixf(mat.m);                                                      \
+    glMultMatrixf(mat.m);                                                      \
   } while (0)
 
 #define gluPickMatrix(x, y, delX, delY, viewport)                              \
