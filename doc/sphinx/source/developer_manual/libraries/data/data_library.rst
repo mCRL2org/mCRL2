@@ -26,7 +26,7 @@ that are added to the specification are not checked.
    #include "mcrl2/data/data_equation.h"
 
    using namespace mcrl2::data;
-   
+
    data_specification spec;
    basic_sort D("D");                                          // sort D
    spec.add_sort(D);
@@ -55,12 +55,12 @@ specification as follows:
    ltr_aliases_mapping a=spec.user_defined_aliases();
 
 If sorts are added to a data specification, automatically certain functions,
-mappings and in some cases even derived sorts are added to the specification. 
-For every sort D, there functions if then else (if:Bool#D#D->D), equality (==:D#D->Bool), 
+mappings and in some cases even derived sorts are added to the specification.
+For every sort D, there functions if then else (if:Bool#D#D->D), equality (==:D#D->Bool),
 inequality (!=:D#D->Bool) and inequalities (<,<=,>=,>:D#D->Bool) are added.
 For structured sorts (e.g. sort Tree=struct leaf(Nat) | node(Nat,Nat)) the constructors,
 projection functions and recognizers are added to the specification. For container sorts
-(List(D), Set(D) and Bag(D) for arbitrary sort D) all standard functions for these 
+(List(D), Set(D) and Bag(D) for arbitrary sort D) all standard functions for these
 sorts are also added automatically to the specification. The same holds for standard
 sorts Bool (booleans),
 Pos (Positive numbers), Nat (Natural numbers), Int (Integers) and Real (Real numbers).
@@ -69,7 +69,7 @@ Standards sorts cannot explicitly
 be added to a specification. In order to indicate that certain sorts must be present
 in a data specification, these must be added explicitly to the context sorts.
 The sort Bool is always present in a specification. Sorts that occur
-in other sorts, constructors and mappings are automatically defined. 
+in other sorts, constructors and mappings are automatically defined.
 For instance, if the sort Real and its operations should be made available in a specification, it
 is sufficient to add Real to the context sorts as follows:
 
@@ -79,8 +79,8 @@ is sufficient to add Real to the context sorts as follows:
 
 The function context_sorts gives a list of sorts added to the context.
 
-In order to retrieve all sorts, constructors, mappings or equations in 
-a specification (including those that are automatically generated), 
+In order to retrieve all sorts, constructors, mappings or equations in
+a specification (including those that are automatically generated),
 there are functions listed below. As generally these functions are of
 interest, instead of their counterparts which only define the user_defined
 elements, they have the shorter and more natural names.
@@ -101,7 +101,7 @@ unique anymore. When declaring in mCRL2
    sort Time=Nat;
         D=list(Nat);
         E=struct f(E)|g;
-  
+
 the sorts Time and Nat, as well as D and list(Nat) and even
 E and struct f(E)|g are pairwise equal. In a specification it is not very
 inefficient to have different names for equal sorts. Therefore the sorts
@@ -141,7 +141,7 @@ There are a few utility functions that help to determine the nature
 of sorts. The function bool is_certainly_finite(const sort_expression) indicates
 that a sort has a finite number of elements. This is in general an undecidable
 property, but in certain cases it can be determined that there are at most
-a finite number of elements in a sort. 
+a finite number of elements in a sort.
 
 The function bool is_constructor_sort(const sort_expression s) indicates
 whether there is a constructor with target sort s. If so, the sort is
@@ -190,7 +190,7 @@ structured sorts.
 The set of container sorts =Sc= is defined as follows.
 
      Sc ::= List(S) | Set(S) | FSet(S) | Bag(S) | FBag(S)
-     
+
 Where =FSet(S)= and =FBag(S)= represent finite sets and finite bags
 respectively.
 
@@ -198,21 +198,21 @@ The syntax of structured sorts Sstruct is defined as follows
 (where p is a string):
 
      Sstruct ::= p(proj*)?p
-     
+
 in which proj has the following syntax:
-   
+
      proj ::= S | p:S
-     
+
 In general, structured sorts have the following form (with =n= a positive number,
 =ki= a natural number with =1 <= i <= n=):
- 
+
 .. code-block:: mcrl2
- 
+
    struct c1(pr1,1:S1,1, ..., pr1,k1:S1,k1)?is_c1 |
           c2(pr2,1:S2,1, ..., pr2,k2:S2,k2)?is_c2 |
           ...
           cn(prn,1:Sn,1, ..., prn,kn:Sn,kn)?is_cn;
- 
+
 We refer to =ci= as the constructors of the structured sort. =Si,j= are the
 sorts of the arguments of the constructors. =pri,j= are names for optional
 projection functions, retrieving the corresponding argument for a constructor.
@@ -223,13 +223,13 @@ As an example of some of the introduced concepts, consider the following code
 snippet that constructs a structured sort
 
 .. code-block:: mcrl2
- 
+
    struct c1(p0:S0, S1)?is_c1 |
           c2(p0:S0);
-         
+
 The construction of this structured sort is as follows, assuming that also all
 of the subexpressions still need to be defined:
-         
+
 .. code-block:: c++
 
    basic_sort s0("S0");                               /* Name for the sort S0 */
@@ -242,10 +242,10 @@ of the subexpressions still need to be defined:
    a1.push_back(p1);
    structured_sort_constructor_argument_vector a2;    /* p0 */
    a2.push_back(p0);
-   
+
    structured_sort_constructor c1("c1", a1, "is_c1"); /* c1(p0:S0, S1)?is_c1 */
    structured_sort_constructor c2("c2", a2);          /* c2(p0:S0) */
-   
+
    structured_sort_constructor_vector cs;             /* c1(p0:S0, S1)?is_c1 | c2(p0:S0) */
    cs.push_back(c1);
    cs.push_back(c2);
@@ -256,7 +256,7 @@ Data expressions
 ----------------
 The class =data_expression= represents expressions like =true=,
 [^x > 3] and [^forall n:Nat. f(n) < 5]. Each data expression =d= has a type or
-sort =d.sort()= of type =sort_expression=. 
+sort =d.sort()= of type =sort_expression=.
 Let's look at a simple example
 that constructs the numbers two and three, and builds the expression 2 + 3:
 
@@ -323,11 +323,11 @@ More formally, data expressions =e=, with sort expression =S= and variable names
   e ::= x | n | e(e, ..., e) | lambda x:S, ..., x:S . e |
         forall x:S, ..., x:S. e | exists x:S, ..., x:S. e |
         e whr x = e, ..., x = e end
-        
+
  Here =e(e,...,e)= denotes application of data expressions, =lambda x:S, ..., x:S . e=
  denotes lambda abstraction, =forall x:S, ..., x:S . e= and =exists x:S, ..., x:S . e=
  denote universal and existential quantification.
-       
+
 Predefined sorts
 ----------------
 
@@ -451,7 +451,7 @@ Let =b= and =c= be Boolean expressions, and =p=, =q=, and =r= be positive
 numbers.
 
 .. table:: Functions for sort Pos
- 
+
    ======================= ============  ===============================
    Expression              Syntax        Meaning
    ======================= ============  ===============================
@@ -510,7 +510,7 @@ and =n=, =m=, =u=, =v= be natural numbers.
    exp(p,n)                  p^n                        exponentiation
    exp(m,n)                  m^n                        exponentiation
    even(n)                   @even(n)                   predicate to indicate =n= is even
-   monus(m,n)                @monus(m,n)                =(m-n) max 0= 
+   monus(m,n)                @monus(m,n)                =(m-n) max 0=
    swap_zero(m,n)            @swap_zero(m,n)            ???
    swap_zero_add(m,n,u,v)    @swap_zero_add(m,n,u,v)    ???
    swap_zero_min(m,n,u,v)    @swap_zero_min(m,n,u,v)    ???
@@ -588,7 +588,7 @@ Let =b= be a Boolean expression, =p=, =q= be positive numbers,
    negate(p)   -p             unary minus
    negate(n)   -n             unary minus
    negate(x)   -x             unary minus
-   succ(x)     succ(x)        successor 
+   succ(x)     succ(x)        successor
    pred(n)     pred(n)        predecessor
    pred(x)     pred(x)        predecessor
    dub(b,x)    @dub(b,x)      ???
@@ -598,8 +598,8 @@ Let =b= be a Boolean expression, =p=, =q= be positive numbers,
    minus(x,y)  x-y            subtraction
    times(x,y)  x*y            multiplication
    div(x,p)    x div p        integer division
-   mod(x,p)    x mod p        modulus 
-   exp(x,n)    x^n            exponentiation 
+   mod(x,p)    x mod p        modulus
+   exp(x,n)    x^n            exponentiation
    ==========  ==========     =======================================
 
 Real numbers
@@ -620,24 +620,24 @@ and =r=, =s= be real numbers.
    Pos2Real(p)        Pos2Real(p)         explicit conversion of =p= to sort Real
    Nat2Real(n)        Nat2Real(n)         explicit conversion of =n= to sort Real
    Int2Real(x)        Int2Real(x)         explicit conversion of =x= to sort Real
-   Real2Pos(r)        Real2Pos(r)         explicit conversion of =r= to sort Pos 
-   Real2Nat(r)        Real2Nat(r)         explicit conversion of =r= to sort Nat 
-   Real2Int(r)        Real2Int(r)         explicit conversion of =r= to sort Int 
-   max(r,s)           max(r,s)            maximum 
-   min(r,s)           min(r,s)            minimum 
+   Real2Pos(r)        Real2Pos(r)         explicit conversion of =r= to sort Pos
+   Real2Nat(r)        Real2Nat(r)         explicit conversion of =r= to sort Nat
+   Real2Int(r)        Real2Int(r)         explicit conversion of =r= to sort Int
+   max(r,s)           max(r,s)            maximum
+   min(r,s)           min(r,s)            minimum
    abs(r)             abs(r)              absolute value
-   negate(r)          -r                  unary minus  
-   succ(r)            succ(r)             successor  
-   pred(r)            pred(r)             predecessor  
-   plus(r,s)          r+s                 addition 
-   minus(r,s)         r-s                 subtraction  
+   negate(r)          -r                  unary minus
+   succ(r)            succ(r)             successor
+   pred(r)            pred(r)             predecessor
+   plus(r,s)          r+s                 addition
+   minus(r,s)         r-s                 subtraction
    times(r,s)         r*s                 multiplication
    divides(p,q)       p / q               division
    divides(m,n)       m / n               division
    divides(x,y)       x / y               division
    divides(r,s)       r / s               division
    floor(r)           floor(r)            floor
-   ceil(r)            ceil(r)             ceil 
+   ceil(r)            ceil(r)             ceil
    round(r)           round(r)            round
    redfrac(x,y)       @redfrac(x,y)       reduce fraction x/y w.r.t. lowest common multiple
    redfracwhr(p,x,n)  @redfracwhr(p,x,n)  ???
@@ -748,7 +748,7 @@ The operations on finite bags are defined as follows.
    =========================  ====================  ===================================================
    fbaginsert(S,x,p,b)        @fbag_insert(x,p,b)   Insert =p= occurrences of =x= into =b=
    fsetcinsert(S,x,n,b)       @fbag_cinsert(x,n,b)  ???
-   fbagcount(S,x,b)           @fbag_count(x,b)      Test count the number of occurrences of =x= in =b= 
+   fbagcount(S,x,b)           @fbag_count(x,b)      Test count the number of occurrences of =x= in =b=
    fbagin(S,x,b)              @fbag_in(x,b)         Test whether =x= is in =b=
    fbaglte(S,f,b,c)           @fbag_lte(f,b,c)      =b= is a subset of =c=
    fbagjoin(S,f,g,b,c)        @fbag_join(f,g,b,c)   Join of =b= and =c=
@@ -783,7 +783,7 @@ sort =S -> Bool=.
    setdifference(S,d,e)     d - e        Difference of =d= and =e=
    false_function(S)        @false_      The constant function returning false
    true_function(S)         @true_       The constant function returning true
-   false_function(S)        @false_      The constant function returning false 
+   false_function(S)        @false_      The constant function returning false
    not_function(S,f)        @not_(f)     The function returning =!f(x)= for all elements =x= in =S=
    and_function(S,f,g)      @and_(f,g)   The function returning =f(x) && g(x)= for all elements =x= in =S=
    or_function(S,f,g)       @or_(f,g)    The function returning =f(x) || g(x)= for all elements =x= in =S=
@@ -803,7 +803,7 @@ For bags the following functions are available. Let =b=, =c= be of sort =FBag(S)
    =======================  =============  ========================================================================
    Expression               Syntax         Meaning
    =======================  =============  ========================================================================
-   bagconstructor(S, f, b)  @bag(f,b)      Construct a bag from a function and a finite bag 
+   bagconstructor(S, f, b)  @bag(f,b)      Construct a bag from a function and a finite bag
    emptybag(S)              {}             Empty bag of sort S
    bagfbag(S, b)            @bagfset(b)    Interpret finite bag =b= as a bag
    bagcomprehension(S, f)   @bagcomp(f)    The bag of all elements of sort =S= given by =f=
@@ -852,18 +852,12 @@ is:
 
 .. code-block:: c++
 
-   #include "mcrl2/new_data/data.h"
-   #include "mcrl2/new_data/parser.h"
-   #include "mcrl2/new_data/pos.h"
-   #include "mcrl2/new_data/nat.h"
-   #include "mcrl2/atermpp/aterm_init.h"
-
-   using namespace mcrl2::new_data;
+   #include "mcrl2/data/parse.h"
+   #include "mcrl2/data/pos.h"
+   #include "mcrl2/data/nat.h"
 
    int main(int argc, char* argv[])
    {
-     MCRL2_ATERMPP_INIT(argc, argv)
-
      // two ways to create the expression m + n
      std::string var_decl = "m, n: Pos;\n";
      data_expression d1 = parse_data_expression("m+n", var_decl);
@@ -907,7 +901,7 @@ An alias is declared as follows:
    {
      basic_sort b("sort_id");
      container_sort c(bag,sort_nat::sort_nat());
-     
+
      alias a(b,c);
 
      std::cout << "Alias name: " << a.name() << " Alias rhs: " << pp(a.reference()) << "\n";
@@ -916,13 +910,13 @@ An alias is declared as follows:
 An important consequence of the use of aliases is that different sort
 expressions can denote the same sort. In the example above, Time and
 Nat denote the same sort. So, the variables x:Time and x:Nat are the
-same object. It is time consuming to continuously calculate whether sorts are 
+same object. It is time consuming to continuously calculate whether sorts are
 the same, which is undesirable if it comes to verification. Therefore, we
 require that all sorts in expressions that are equal modulo sort aliases
 are represented by a unique sort expression. This process is called sort
 normalisation. Note that sort normalisation is dependent on a particular
 specification; the sorts in one expression can be normalised differently
-for two different data specifications.  
+for two different data specifications.
 
 More concretely, for a sort alias
 
@@ -931,7 +925,7 @@ More concretely, for a sort alias
    sort A=B;
 
 sort A and B are equal. Sort normalisation will rewrite each sort B to A, except
-if B is a Bool, Pos, Nat, Int or Real.  
+if B is a Bool, Pos, Nat, Int or Real.
 In case there are more aliases referring to the same sort, as in the
 example below there are more options for the unique sort.
 
@@ -947,7 +941,7 @@ Functions, sorts, equations, etc. that are added using for instance
 add_equation are automatically normalised. Aliases that
 are added are also automatically applied to all elements in the data type.
 If the elements of a data type are requested, e.g. the sorts, constructors,
-mappings and equations of a data type, then these are provided with 
+mappings and equations of a data type, then these are provided with
 normalised sorts. The functions user_defined_aliases, user_defined_sorts, etc.
 are provided to extract the aliases, sorts, mappings, constructors and equations
 in exactly the form they were added to the specification using the add\_.... functions.
@@ -971,14 +965,14 @@ as well as for lists of these types.
      const basic_sort a("A");
      const basic_sort b("B");
      spec.add_alias(alias(a,b));
-   
+
      const function_symbol f("f",b));
 
-     // An example of normalising a function symbol explicitly. 
+     // An example of normalising a function symbol explicitly.
      std::cout << "Not normalised: " << pp(f) << " has sort " << pp(f.sort()) << "\n";
      const function_symbol normalised_f=spec.normalise(f);
      std::cout << "Normalised: " << pp(normalised_f) << " has sort " << pp(normalised_f.sort()) << "\n";
-   
+
      spec.add_mapping(function_symbol);
 
      // Get the mapping and the sorts, which are normalised. So, f:A is replaced by f:B.
@@ -990,11 +984,11 @@ as well as for lists of these types.
 
 Given a particular sort, it is sometimes useful to find the sort it represents. E.g.
 suppose that sort F is defined by F=A->B. Then from sort F alone it cannot be seen
-that F is actually a function sort. The function unalias yields the structure of an 
+that F is actually a function sort. The function unalias yields the structure of an
 alias. So, in this particular case data_spec.unalias(F) yields A->B. As aliases may be
 recursive, as in sort E=struct nil | insert(Nat,E), unalias will only unfold an alias
 until it cannot be unfolded further, or until a type with a type constructing operator
-occurs. 
+occurs.
 
 Data rewriters
 ==============
@@ -1003,12 +997,11 @@ A rewriter is a function that rewrites terms using a number of rewrite rules.
 In the mCRL2 toolset a class =data::rewriter= is available that operates on data expressions,
 and that is initialized using a data specification. The equations of the data specification
 are interpreted as rewrite rules from left to right. An example is given below.
-The function `default_data_rewriter` returns a rewriter containing rewrite rules for all predefined data types.
 
 .. code-block:: c++
 
    // rewrite two data expressions, and check if they are the same
-   rewriter r = default_data_rewriter();
+   rewriter r;
    data_expression d1 = parse_data_expression("2+7");
    data_expression d2 = parse_data_expression("4+5");
    assert(d1 != d2);
@@ -1033,16 +1026,15 @@ Under this condition the following property holds:
 Note that in general the computation of [^r(d,__sigma)] can be done more efficiently than the
 computation of [^r(__sigma(d))]. In the mCRL2 toolset substition functions are used that take constant time.
 
-An example of rewriting with a substitution function is given below. It uses the
-predefined wrapper class =rewriter_map= to create a substitution function based on a =std::map=.
+An example of rewriting with a substitution function is given below.
 
 .. code-block:: c++
 
-   rewriter r = default_data_rewriter();
+   rewriter r;
 
    // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
    std::string var_decl = "m, n: Pos;\n";
-   rewriter_map<atermpp::map<data_variable, data_expression> > sigma;
+   mutable_map_substitution sigma;
    sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
    sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
@@ -1111,106 +1103,6 @@ for the rewriter. An example of this is the constelm algorithm of the LPS librar
 
 The algorithm may only assume that the requirements of the Rewriter Concept hold,
 with proper choices for the nested variable and term types.
-
-PBES rewriters
-==============
-
-There are several rewriters available that operate on PBES expressions. The class
-=simplifying_rewriter= is a rewriter that applies a few straightforward rules to
-simplify expressions, like [^x && true -> x]. Full details about that can be found in the
-document [@http://www.mcrl2.org/wiki/images/6/6c/Pbes_implementation_notes.pdf PBES Implementation Notes].
-An example of applying this rewriter is given below. The interface of PBES rewriters is
-exactly the same as the one for data expression. They must also satisfy the requirements of the
-Rewriter Concept.
-
-.. code-block:: c++
-
-    data::rewriter datar = data::default_data_rewriter();
-    simplifying_rewriter<pbes_expression, data::rewriter> r(datar);
-
-    std::string var_decl =
-      "datavar         \n"
-      "                \n"
-      "predvar         \n"
-      "  X(p: Pos);    \n"
-      ;
-
-    pbes_expression d1 = parse_pbes_expression("X(1) || (false || X(1))", var_decl);
-    pbes_expression d2 = parse_pbes_expression("X(1)", var_decl);
-    assert(r(d1) == r(d2));
-
-Another PBES rewriter is the =enumerate_quantifiers_rewriter= that attempts to
-eliminate quantifier expressions using an enumerator. This is illustrated in the
-following example.
-
-.. code-block:: c++
-
-    data::data_specification data_spec = default_data_specification();
-    data::rewriter datar(data_spec);
-    data::number_postfix_generator generator("UNIQUE_PREFIX");
-    data::data_enumerator<data::rewriter, data::number_postfix_generator> datae(data_spec, datar, generator);
-    enumerate_quantifiers_rewriter<pbes_expression, data::rewriter, data::data_enumerator<> > r(datar, datae);
-
-    pbes_expression d1 = parse_pbes_expression("exists m:Nat.val(m > 3)");
-    pbes_expression d2 = parse_pbes_expression("true");
-    assert(r(d1) == r(d2));
-
-Although the type =Nat= is infinite, the =enumerate_quantifiers_rewriter= is able to
-successfully eliminate the quantification [^exists m:Nat.val(m > 3)].
-
-.. important::
-
-   Currently the =enumerate_quantifiers_rewriter= rewriter is not guaranteed to
-   terminate if the enumerator produces an infinite number of terms for a quantifier
-   expression.
-
-Note that these PBES rewriters have a pbes expression as their first template argument.
-For the =simplifying_rewriter= the type =pbes_expression= is the most likely candidate.
-For the =enumerate_quantifiers_rewriter= the type =pbes_expression_with_variables= is
-more appropiate. This is because the data enumerator that is supplied by the mCRL2 Library
-expects data expressions that maintain their own set of free variables.
-
-.. note::
-
-   In the example above the =enumerate_quantifiers_rewriter= is instantiated with
-   =pbes_expression=. This is possible because a specialization for =pbes_expression= is
-   available that internally computes with the term type =pbes_expression_with_variables=.]
-
-In general the term type for PBES rewriters must supply a specialization of the
-=term_traits= class, containing all of its properties and operations.
-
-.. note::
-
-   Constructing an =enumerate_quantifiers_rewriter= is currently quite cumbersome.
-   Constructors with appropriate default values need to be added to alleviate this.
-
-PBES rewriters also support substitution functions, which is illustrated in the following
-example.
-
-.. code-block:: c++
-
-    data::rewriter datar = data::default_data_rewriter();
-    pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
-
-    data::rewriter_map<atermpp::map<data::data_variable, pbes_system::pbes_expression> > sigma;
-    sigma[data::parse_data_expression("m", "m: Pos;")] = r(data::parse_data_expression("3"));
-    sigma[data::parse_data_expression("n", "n: Pos;")] = r(data::parse_data_expression("4"));
-
-    std::string var_decl =
-      "datavar         \n"
-      "  m, n:  Pos;   \n"
-      "                \n"
-      "predvar         \n"
-      "  X: Pos;       \n"
-      ;
-    pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
-    pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
-    assert(r(d1, sigma) == r(d2));
-
-.. note::
-
-   The =enumerate_quantifiers_rewriter= rewriters only support substitution
-   functions with a map interface (as provided by =data::rewriter_map=).
 
 Data enumerator
 ===============
