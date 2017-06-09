@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
   // Connect signals & slots
   connect(m_glwidget, SIGNAL(widgetResized(const QVector3D&)), this, SLOT(onWidgetResized(const QVector3D&)));
-  connect(m_ui.actExit, SIGNAL(triggered()), this, SLOT(onExit()));
+  connect(m_ui.actExit, SIGNAL(triggered()), this, SLOT(close()));
   connect(m_ui.actLayoutControl, SIGNAL(toggled(bool)), springlayoutui, SLOT(setVisible(bool)));
   connect(m_ui.actVisualization, SIGNAL(toggled(bool)), glwidgetui, SLOT(setVisible(bool)));
   connect(m_ui.actInformation, SIGNAL(toggled(bool)), informationui, SLOT(setVisible(bool)));
@@ -73,6 +73,7 @@ MainWindow::MainWindow(QWidget* parent) :
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
   springlayoutui->setSettings(settings.value("settings").toByteArray());
+  glwidgetui->setSettings(settings.value("visualisation").toByteArray());
   m_ui.actExplorationMode->setChecked(settings.value("explore", 0).toInt() != 0);
 
   m_ui.actLayoutControl->setChecked(!springlayoutui->isHidden());
@@ -83,10 +84,15 @@ MainWindow::MainWindow(QWidget* parent) :
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+  if (m_layout && m_layout->ui())
+  {
+    m_layout->ui()->setActive(false);
+  }
   QSettings settings("mCRL2", "LTSGraph");
   settings.setValue("geometry", saveGeometry());
   settings.setValue("windowState", saveState());
   settings.setValue("settings", m_layout->ui()->settings());
+  settings.setValue("visualisation", m_glwidget->ui()->settings());
   settings.setValue("explore", m_graph.hasSelection() ? 1 : 0);
   QMainWindow::closeEvent(event);
 }
@@ -264,13 +270,4 @@ void MainWindow::onExportXML()
   {
     m_graph.saveXML(fileName);
   }
-}
-
-void MainWindow::onExit()
-{
-  if (m_layout && m_layout->ui())
-  {
-    m_layout->ui()->setActive(false);
-  }
-  QApplication::instance()->quit();
 }

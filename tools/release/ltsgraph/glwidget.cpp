@@ -503,6 +503,11 @@ void GLWidget::setPaint(const QColor& color)
   m_paintcolor = color;
 }
 
+const QColor& GLWidget::getPaint() const
+{
+  return m_paintcolor;
+}
+
 void GLWidget::startPaint()
 {
   m_painting = true;
@@ -569,9 +574,6 @@ GLWidgetUi::GLWidgetUi(GLWidget& widget, QWidget* parent)
   m_ui.setupUi(this);
   m_colordialog = new QColorDialog(initialcolor, this);
   selectColor(initialcolor);
-  m_ui.spinRadius->setValue(m_widget.nodeSize());
-  m_ui.spinFog->setValue(m_widget.fogDistance());
-  m_ui.spinFontSize->setValue(m_widget.fontSize());
 
   connect(m_colordialog, SIGNAL(colorSelected(QColor)), this, SLOT(selectColor(QColor)));
   connect(m_ui.btnPaint, SIGNAL(toggled(bool)), this, SLOT(togglePaintMode(bool)));
@@ -611,4 +613,58 @@ void GLWidgetUi::togglePaintMode(bool paint)
   else {
     m_widget.endPaint();
   }
+}
+
+void GLWidgetUi::setSettings(QByteArray state)
+{
+  if (state.isEmpty())
+  {
+    return;
+  }
+  QDataStream in(&state, QIODevice::ReadOnly);
+
+  quint32 nodeSize, fogDistance, fontSize;
+  bool paint, transitionLabels, stateLabels, stateNumbers, selfLoops, initial, fog;
+  QColor color;
+  in >> nodeSize >> fogDistance >> fontSize
+     >> paint >> transitionLabels >> stateLabels >> stateNumbers >> selfLoops >> initial >> fog
+     >> color
+    ;
+
+  if (in.status() == QDataStream::Ok)
+  {
+    m_ui.spinRadius->setValue(nodeSize);
+    m_ui.spinFog->setValue(fogDistance);
+    m_ui.spinFontSize->setValue(fontSize);
+    m_ui.btnPaint->setChecked(paint);
+    m_ui.cbTransitionLabels->setChecked(transitionLabels);
+    m_ui.cbStateLabels->setChecked(stateLabels);
+    m_ui.cbStateNumbers->setChecked(stateNumbers);
+    m_ui.cbSelfLoops->setChecked(selfLoops);
+    m_ui.cbInitial->setChecked(initial);
+    m_ui.cbFog->setChecked(fog);
+    m_colordialog->setCurrentColor(color);
+    selectColor(color);
+  }
+}
+
+QByteArray GLWidgetUi::settings()
+{
+  QByteArray result;
+  QDataStream out(&result, QIODevice::WriteOnly);
+
+  out << quint32(m_ui.spinRadius->value())
+      << quint32(m_ui.spinFog->value())
+      << quint32(m_ui.spinFontSize->value())
+      << bool(m_ui.btnPaint->isChecked())
+      << bool(m_ui.cbTransitionLabels->isChecked())
+      << bool(m_ui.cbStateLabels->isChecked())
+      << bool(m_ui.cbStateNumbers->isChecked())
+      << bool(m_ui.cbSelfLoops->isChecked())
+      << bool(m_ui.cbInitial->isChecked())
+      << bool(m_ui.cbFog->isChecked())
+      << QColor(m_widget.getPaint())
+      ;
+
+  return result;
 }

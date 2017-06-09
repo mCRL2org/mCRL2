@@ -657,9 +657,10 @@ void GLScene::renderHandle(GLuint i)
 GLScene::GLScene(Graph::Graph& g, QPainter& painter)
   : m_graph(g), m_camera(), m_vertexdata(), m_painter(painter),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
-    m_size_node(20), m_drawfog(true), m_fogdistance(5500.0)
+    m_size_node(20), m_fontsize(16), m_drawfog(true), m_fogdistance(5500.0)
 {
-  setFontSize(18);
+  setFontSize(m_fontsize);
+  setFogDistance(m_fogdistance);
 }
 
 void GLScene::init(const QColor& clear)

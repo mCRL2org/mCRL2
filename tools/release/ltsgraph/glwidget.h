@@ -178,6 +178,11 @@ class GLWidget : public QOpenGLWidget
     void setPaint(const QColor& color);
 
     /**
+     * @brief Gets the paint color.
+     */
+    const QColor& getPaint() const;
+
+    /**
      * @brief Enables painting with the color set by @fn setPaint.
      */
     void startPaint();
@@ -293,6 +298,16 @@ class GLWidgetUi : public QDockWidget
      * @param paint Indicates the painting should be enabled if true, disabled otherwise.
      */
     void togglePaintMode(bool paint);
+
+    /**
+     * @brief Get the current state of the settings.
+     */
+    QByteArray settings();
+
+    /**
+     * @brief Restore the settings of the given state.
+     */
+    void setSettings(QByteArray state);
 };
 
 #endif // GLWIDGET_H

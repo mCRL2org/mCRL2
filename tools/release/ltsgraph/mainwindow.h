@@ -83,11 +83,6 @@ class MainWindow : public QMainWindow
     void onWidgetResized(const QVector3D& newsize);
 
     /**
-     * @brief Exits the application
-     */
-    void onExit();
-
-    /**
      * @brief Enables or disables the 3D mode of the GLWidget.
      * @param enabled Indicates wether the 3D mode should be enabled.
      */
