@@ -863,17 +863,21 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
                            SelectableObject type)
 {
   float bestZ = INFINITY;
+  bool sel = m_graph.hasSelection();
+  size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
+  size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
   switch (type)
   {
   case so_node:
   {
     float radius = nodeSizeOnScreen() * magnificationFactor() / 2;
-    for (size_t i = 0; i < m_graph.nodeCount(); i++)
+    for (size_t i = 0; i < nodeCount; i++)
     {
-      if (isClose(x, y, worldToEye(m_graph.node(i).pos()), radius, bestZ))
+      size_t index = sel ? m_graph.selectionNode(i) : i;
+      if (isClose(x, y, worldToEye(m_graph.node(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
-        s.index = i;
+        s.index = index;
       }
     }
     break;
@@ -881,12 +885,13 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   case so_handle:
   {
     float radius = handleSizeOnScreen() * magnificationFactor() * 2;
-    for (size_t i = 0; i < m_graph.edgeCount(); i++)
+    for (size_t i = 0; i < edgeCount; i++)
     {
-      if (isClose(x, y, worldToEye(m_graph.handle(i).pos()), radius, bestZ))
+      size_t index = sel ? m_graph.selectionNode(i) : i;
+      if (isClose(x, y, worldToEye(m_graph.handle(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
-        s.index = i;
+        s.index = index;
       }
     }
     break;
