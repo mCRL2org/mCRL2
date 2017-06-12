@@ -875,7 +875,7 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
     float radius = handleSizeOnScreen() * magnificationFactor() * 2;
     for (size_t i = 0; i < edgeCount; i++)
     {
-      size_t index = sel ? m_graph.selectionNode(i) : i;
+      size_t index = sel ? m_graph.selectionEdge(i) : i;
       if (isClose(x, y, worldToEye(m_graph.handle(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
