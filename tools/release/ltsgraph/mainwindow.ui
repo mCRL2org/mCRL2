@@ -85,6 +85,8 @@
     <addaction name="actVisualization"/>
     <addaction name="actInformation"/>
     <addaction name="actOutput"/>
+    <addaction name="separator"/>
+    <addaction name="actFullscreen"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -214,6 +216,17 @@
    </property>
    <property name="text">
     <string>mCRL2 Output</string>
+   </property>
+  </action>
+  <action name="actFullscreen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Fullscreen</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
    </property>
   </action>
   <action name="actExplorationMode">

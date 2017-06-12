@@ -99,6 +99,11 @@ class MainWindow : public QMainWindow
      */
     void onLogOutput(const QString& level, const QString& hint, const QDateTime& timestamp, const QString& message, const QString& formattedMessage);
 
+    /**
+     * @brief Toggle fullscreen
+     */
+    void onFullscreen(bool enable);
+
   protected:
     /**
      * @brief Saves window information

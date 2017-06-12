@@ -75,11 +75,24 @@ MainWindow::MainWindow(QWidget* parent) :
   springlayoutui->setSettings(settings.value("settings").toByteArray());
   glwidgetui->setSettings(settings.value("visualisation").toByteArray());
   m_ui.actExplorationMode->setChecked(settings.value("explore", 0).toInt() != 0);
+  m_ui.actFullscreen->setChecked(isFullScreen());
+  connect(m_ui.actFullscreen, SIGNAL(toggled(bool)), this, SLOT(onFullscreen(bool)));
 
   m_ui.actLayoutControl->setChecked(!springlayoutui->isHidden());
   m_ui.actVisualization->setChecked(!glwidgetui->isHidden());
   m_ui.actInformation->setChecked(!informationui->isHidden());
   m_ui.actOutput->setChecked(!m_ui.dockOutput->isHidden());
+}
+
+void MainWindow::onFullscreen(bool enable) {
+  if (enable)
+  {
+    showFullScreen();
+  }
+  else
+  {
+    showNormal();
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
