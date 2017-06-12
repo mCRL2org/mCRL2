@@ -838,6 +838,7 @@ GLScene::Selection GLScene::select(int x, int y)
   selectObject(s, x, y, so_node)
     || selectObject(s, x, y, so_handle)
     || selectObject(s, x, y, so_label)
+    || selectObject(s, x, y, so_slabel)
     ;
   return s;
 }
@@ -853,6 +854,21 @@ static bool isClose(int x, int y, const QVector3D& pos, float threshold, float& 
   return false;
 }
 
+static bool isOnText(int x, int y, const QString& text, const QVector3D& eye,
+    const QFontMetrics& metrics)
+{
+  if (text.isEmpty())
+  {
+    return false;
+  }
+  QRect bounds = metrics.boundingRect(text);
+  int w = bounds.width();
+  int h = bounds.height();
+  // TODO why 4 / 3
+  QRect textbox = {(int)eye.x() - w / 2, (int)eye.y() - 4 * h / 3, w, h};
+  return textbox.contains(x, y);
+}
+
 bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
                            SelectableObject type)
 {
@@ -860,6 +876,8 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   bool sel = m_graph.hasSelection();
   size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
   size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+  startPainter(m_selectpainter);
+  QFontMetrics metrics{m_selectpainter.font()};
   switch (type)
   {
   case so_node:
@@ -892,38 +910,43 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   }
   case so_label:
   {
-    startPainter(m_selectpainter);
     for (size_t i = 0; i < edgeCount; i++)
     {
       size_t index = sel ? m_graph.selectionEdge(i) : i;
       const Graph::LabelNode& label = m_graph.transitionLabel(index);
-      QVector3D eye = worldToEye(label.pos());
+      const QVector3D& eye = worldToEye(label.pos());
       const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
-      if (labelstring.isEmpty()) {
-        continue;
-      }
-      QFontMetrics metrics{m_selectpainter.font()};
-      QRect bounds = metrics.boundingRect(labelstring);
-      int lx = eye.x();
-      int ly = eye.y();
-      int w = bounds.width();
-      int h = bounds.height();
-      // TODO why 4 / 3
-      QRect textbox = {lx - w / 2, ly - 4 * h / 3, w, h};
-      if(textbox.contains(x, y))
+      if (isOnText(x, y, labelstring, eye, metrics))
       {
         s.selectionType = type;
         s.index = index;
+        break;
       }
     }
-    m_selectpainter.end();
     break;
   }
   case so_slabel:
+  {
+    for (size_t i = 0; i < nodeCount; i++)
+    {
+      size_t index = sel ? m_graph.selectionNode(i) : i;
+      const Graph::LabelNode& label = m_graph.stateLabel(index);
+      const QVector3D& eye = worldToEye(label.pos());
+      const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
+      if (isOnText(x, y - nodeSizeOnScreen(), labelstring, eye, metrics))
+      {
+        s.selectionType = type;
+        s.index = index;
+        break;
+      }
+    }
+    break;
+  }
   case so_edge:
   case so_none:
   Q_UNREACHABLE();
   }
+  m_selectpainter.end();
   return s.selectionType != so_none;
 }
 

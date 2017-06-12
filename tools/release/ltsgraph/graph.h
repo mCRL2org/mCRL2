@@ -492,7 +492,7 @@ class Graph
     NodeNode& node(size_t index);
     Node& handle(size_t edge);
     LabelNode& transitionLabel(size_t edge);
-    LabelNode& stateLabel(size_t edge);
+    LabelNode& stateLabel(size_t index);
     bool isTau(size_t labelindex) const;
     bool isBridge(size_t index) const; ///< Returns whether a given node forms a bridge in the selection
 

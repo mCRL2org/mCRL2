@@ -1086,9 +1086,9 @@ LabelNode& Graph::transitionLabel(size_t edge)
   return m_transitionLabelnodes[edge];
 }
 
-LabelNode& Graph::stateLabel(size_t edge)
+LabelNode& Graph::stateLabel(size_t index)
 {
-  return m_stateLabelnodes[edge];
+  return m_stateLabelnodes[index];
 }
 
 const QString& Graph::transitionLabelstring(size_t labelindex) const
