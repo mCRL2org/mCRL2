@@ -94,6 +94,7 @@ bool is_guarded(const process_expression& x, const std::vector<process_equation>
 
 } // namespace detail
 
+/// \brief Checks if a process expression is guarded.
 inline
 bool is_guarded(const process_expression& x, const std::vector<process_equation>& equations)
 {

@@ -274,6 +274,7 @@ struct eliminate_trivial_equations_algorithm
   }
 };
 
+/// \brief Eliminates trivial equations, that have a process instance as the right hand side.
 void eliminate_trivial_equations(process_specification& procspec)
 {
   eliminate_trivial_equations_algorithm algorithm(procspec);

@@ -195,7 +195,7 @@ struct duplicate_equation_removal
 } // namespace detail
 
 inline
-/// \brief Removes duplicate equations from a process specification
+/// \brief Removes duplicate equations from a process specification, using a bisimulation algorithm
 void remove_duplicate_equations(process_specification& procspec)
 {
   detail::duplicate_equation_removal f(procspec);

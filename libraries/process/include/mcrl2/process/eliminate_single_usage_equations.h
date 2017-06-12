@@ -257,6 +257,7 @@ struct eliminate_single_usage_equations_algorithm
   }
 };
 
+/// \brief Eliminates equations that are used only once, using substitution.
 void eliminate_single_usage_equations(process_specification& procspec)
 {
   eliminate_single_usage_equations_algorithm algorithm(procspec);
