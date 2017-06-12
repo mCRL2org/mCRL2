@@ -67,7 +67,6 @@ class GLWidget : public QOpenGLWidget
     bool m_paused;
     GLScene* m_scene;           ///< The GLScene which is used to render the contents.
     std::list<GLScene::Selection> m_selections; ///< A list of the objects under the cursor.
-    QPainter m_painter;
 
     /**
      * @brief Updates the selected value for all nodes.

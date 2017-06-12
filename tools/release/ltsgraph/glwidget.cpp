@@ -135,9 +135,9 @@ struct NodeMoveRecord : public MoveRecord
 
 
 GLWidget::GLWidget(Graph::Graph& graph, QWidget* parent)
-  : QOpenGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true), m_painter()
+  : QOpenGLWidget(parent), m_ui(nullptr), m_graph(graph), m_painting(false), m_paused(true)
 {
-  m_scene = new GLScene(m_graph, m_painter);
+  m_scene = new GLScene(*this, m_graph);
   m_scene->setDevicePixelRatio(devicePixelRatio());
   QSurfaceFormat fmt = QSurfaceFormat::defaultFormat();
   fmt.setVersion(1, 2);
@@ -267,7 +267,7 @@ void GLWidget::paintGL()
   {
     m_scene->init(Qt::white);
     m_scene->setDevicePixelRatio(devicePixelRatio());
-    m_scene->render(*this);
+    m_scene->render();
     if (!m_scene->animationFinished())
     {
       update();
@@ -452,8 +452,14 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
           break;
         }
       case dm_dragnode:
-        m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z()));
-        break;
+        {
+          QVector3D oldEye = m_scene->worldToEye(m_dragnode->pos());
+          int x = oldEye.x() + vec.x();
+          int y = oldEye.y() + vec.y();
+          float z = oldEye.z();
+          m_dragnode->move(m_scene->eyeToWorld(x, y, z));
+          break;
+        }
       case dm_zoom:
         m_scene->zoom(pow(1.0005f, vec.y()));
         break;
@@ -527,19 +533,19 @@ void GLWidget::saveVector(const QString& filename)
   }
   else if (lcfn.endsWith(".ps"))
   {
-    m_scene->renderVectorGraphics(*this, filename.toUtf8(), GL2PS_PS);
+    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PS);
   }
   else if (lcfn.endsWith(".eps"))
   {
-    m_scene->renderVectorGraphics(*this, filename.toUtf8(), GL2PS_EPS);
+    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_EPS);
   }
   else if (lcfn.endsWith(".svg"))
   {
-    m_scene->renderVectorGraphics(*this, filename.toUtf8(), GL2PS_SVG);
+    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_SVG);
   }
   else if (lcfn.endsWith(".tex"))
   {
-    m_scene->renderVectorGraphics(*this, filename.toUtf8(), GL2PS_PGF);
+    m_scene->renderVectorGraphics(filename.toUtf8(), GL2PS_PGF);
   }
   else
   {

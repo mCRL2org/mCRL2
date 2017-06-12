@@ -618,11 +618,11 @@ void GLScene::renderStateNumber(GLuint i)
 
 QRect GLScene::drawCenteredText(float x, float y, const QString& text)
 {
-  QFontMetrics metrics{m_painter.font()};
+  QFontMetrics metrics{m_renderpainter.font()};
   QRect bounds = metrics.boundingRect(text);
   qreal w = bounds.width();
   qreal h = bounds.height();
-  m_painter.drawText(x - w / 2, y - h / 2, text);
+  m_renderpainter.drawText(x - w / 2, y - h / 2, text);
   return bounds;
 }
 
@@ -654,8 +654,8 @@ void GLScene::renderHandle(GLuint i)
 // GLScene public methods
 //
 
-GLScene::GLScene(Graph::Graph& g, QPainter& painter)
-  : m_graph(g), m_camera(), m_vertexdata(), m_painter(painter),
+GLScene::GLScene(QOpenGLWidget& glwidget, Graph::Graph& g)
+  : m_glwidget(glwidget), m_graph(g), m_camera(), m_vertexdata(), m_renderpainter(), m_selectpainter(),
     m_drawtransitionlabels(true), m_drawstatelabels(false), m_drawstatenumbers(false), m_drawselfloops(true), m_drawinitialmarking(true),
     m_size_node(20), m_fontsize(16), m_drawfog(true), m_fogdistance(5500.0)
 {
@@ -710,7 +710,15 @@ void GLScene::updateFog()
   }
 }
 
-void GLScene::render(QOpenGLWidget& glwidget)
+void GLScene::startPainter(QPainter& painter)
+{
+  painter.begin(&m_glwidget);
+  painter.setPen(Qt::black);
+  painter.setFont(m_font);
+  painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+}
+
+void GLScene::render()
 {
   // Initialise projection matrix
   glMatrixMode(GL_PROJECTION);
@@ -741,10 +749,7 @@ void GLScene::render(QOpenGLWidget& glwidget)
   // text drawing follows
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glDepthMask(GL_FALSE);
-  m_painter.begin(&glwidget);
-  m_painter.setPen(Qt::black);
-  m_painter.setFont(m_font);
-  m_painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
+  startPainter(m_renderpainter);
   for (size_t i = 0; i < nodeCount; ++i)
   {
     if (m_drawstatenumbers) {
@@ -762,7 +767,7 @@ void GLScene::render(QOpenGLWidget& glwidget)
   }
   glDepthMask(GL_TRUE);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  m_painter.end();
+  m_renderpainter.end();
   for (size_t i = 0; i < edgeCount; ++i) {
     renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
@@ -832,6 +837,7 @@ GLScene::Selection GLScene::select(int x, int y)
   Selection s{so_none, 0};
   selectObject(s, x, y, so_node)
     || selectObject(s, x, y, so_handle)
+    || selectObject(s, x, y, so_label)
     ;
   return s;
 }
@@ -885,6 +891,34 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
     break;
   }
   case so_label:
+  {
+    startPainter(m_selectpainter);
+    for (size_t i = 0; i < edgeCount; i++)
+    {
+      size_t index = sel ? m_graph.selectionEdge(i) : i;
+      const Graph::LabelNode& label = m_graph.transitionLabel(index);
+      QVector3D eye = worldToEye(label.pos());
+      const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
+      if (labelstring.isEmpty()) {
+        continue;
+      }
+      QFontMetrics metrics{m_selectpainter.font()};
+      QRect bounds = metrics.boundingRect(labelstring);
+      int lx = eye.x();
+      int ly = eye.y();
+      int w = bounds.width();
+      int h = bounds.height();
+      // TODO why 4 / 3
+      QRect textbox = {lx - w / 2, ly - 4 * h / 3, w, h};
+      if(textbox.contains(x, y))
+      {
+        s.selectionType = type;
+        s.index = index;
+      }
+    }
+    m_selectpainter.end();
+    break;
+  }
   case so_slabel:
   case so_edge:
   case so_none:
@@ -941,7 +975,7 @@ void GLScene::setSize(const QVector3D& size, size_t animation)
   m_camera.setSize(size, animation);
 }
 
-void GLScene::renderVectorGraphics(QOpenGLWidget& glwidget, const char* filename, GLint format)
+void GLScene::renderVectorGraphics(const char* filename, GLint format)
 {
   FILE* outfile = fopen(filename, "wb+");
   GLint viewport[4];
@@ -967,7 +1001,7 @@ void GLScene::renderVectorGraphics(QOpenGLWidget& glwidget, const char* filename
                    outfile,
                    filename
                   );
-    render(glwidget);
+    render();
     state = gl2psEndPage();
   }
   if (state != GL2PS_SUCCESS)

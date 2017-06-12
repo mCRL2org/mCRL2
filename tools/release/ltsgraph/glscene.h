@@ -111,12 +111,14 @@ struct CameraAnimation : public CameraView
 class GLScene
 {
   private:
+    QOpenGLWidget& m_glwidget; ///< The widget where this scene is drawn
     Graph::Graph& m_graph;     ///< The graph that is being visualised.
     CameraAnimation m_camera;  ///< Implementation details of the OpenGL camera handling.
     VertexData m_vertexdata;   ///< Implementation details storing pre-calculated vertices.
     float m_device_pixel_ratio;
     QFont m_font;
-    QPainter& m_painter;
+    QPainter m_renderpainter;
+    QPainter m_selectpainter;
 
     bool m_drawtransitionlabels;   ///< Transition labels are only drawn if this field is true.
     bool m_drawstatelabels;        ///< State labels are only drawn if this field is true.
@@ -211,9 +213,10 @@ class GLScene
 
     /**
      * @brief Constructor.
+     * @param glwidget The widget where this scene is drawn
      * @param g The graph that is to be visualised by this object.
      */
-    GLScene(Graph::Graph& g, QPainter& painter);
+    GLScene(QOpenGLWidget& glwidget, Graph::Graph& g);
 
     /**
      * @brief Applies the current fog settings. Call when the
@@ -234,10 +237,15 @@ class GLScene
      */
     void init(const QColor& clear);
 
+    /*
+     * @brief Initiales the painter and calls painter.begin()
+     */
+    void startPainter(QPainter& painter);
+
     /**
      * @brief Render the scene.
      */
-    void render(QOpenGLWidget& glwidget);
+    void render();
 
     /**
      * @brief Resize the OpenGL viewport.
@@ -357,7 +365,7 @@ class GLScene
     /**
      * @brief Renders the scene to a file using gl2ps.
      */
-    void renderVectorGraphics(QOpenGLWidget& glwidget, const char* filename, GLint format = GL2PS_PDF);
+    void renderVectorGraphics(const char* filename, GLint format = GL2PS_PDF);
 
 
     /**
