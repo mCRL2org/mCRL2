@@ -266,5 +266,6 @@
   <slot>onSpeedChanged(int)</slot>
   <slot>onForceCalculationChanged(int)</slot>
   <slot>onStartStop()</slot>
+  <slot>onTimeout()</slot>
  </slots>
 </ui>

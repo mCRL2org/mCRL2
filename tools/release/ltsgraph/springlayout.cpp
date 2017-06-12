@@ -297,20 +297,12 @@ class WorkerThread : public QThread
         m_layout.apply();
         elapsed = m_time.elapsed();
         m_time.restart();
-        m_layout.m_glwidget.update();
         if (m_period > elapsed)
         {
           msleep(m_period - elapsed);
         }
-        else
-        {
-          // Sleep for a short time to prevent a possible freeze of the widget
-          // because of the changes introduced in r14830
-          // This could maybe be solved differently by calling update() (see
-          // above the if statement) differently, however, this way is simpler.
-          msleep(5);
-        }
       }
+      m_layout.m_glwidget.update();
     }
 };
 
@@ -324,6 +316,7 @@ SpringLayoutUi::SpringLayoutUi(SpringLayout& layout, QWidget* parent)
   m_ui.sldHandleWeight->setValue(m_layout.controlPointWeight());
   m_ui.sldNatLength->setValue(m_layout.naturalTransitionLength());
   m_ui.cmbForceCalculation->setCurrentIndex(m_layout.forceCalculation());
+  connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(onTimeout()));
 }
 
 SpringLayoutUi::~SpringLayoutUi()
@@ -432,6 +425,7 @@ void SpringLayoutUi::onStartStop()
   if (m_thread == nullptr)
   {
     emit runningChanged(true);
+    m_updateTimer.start(40);
     m_thread = new WorkerThread(m_layout, 100 - m_ui.sldSpeed->value(), this);
     m_thread->connect(m_thread, SIGNAL(started()), this, SLOT(onStarted()));
     m_thread->connect(m_thread, SIGNAL(finished()), this, SLOT(onStopped()));
@@ -441,8 +435,14 @@ void SpringLayoutUi::onStartStop()
   {
     dynamic_cast<WorkerThread*>(m_thread)->stop();
     m_thread->wait();
+    m_updateTimer.stop();
     m_thread = nullptr;
   }
+}
+
+void SpringLayoutUi::onTimeout()
+{
+  m_layout.m_glwidget.update();
 }
 
 void SpringLayoutUi::setActive(bool active)
