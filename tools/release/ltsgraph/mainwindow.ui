@@ -219,14 +219,8 @@
    </property>
   </action>
   <action name="actFullscreen">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="text">
-    <string>Fullscreen</string>
-   </property>
-   <property name="shortcut">
-    <string>F11</string>
+    <string>Toggle Full Screen</string>
    </property>
   </action>
   <action name="actExplorationMode">

@@ -102,7 +102,7 @@ class MainWindow : public QMainWindow
     /**
      * @brief Toggle fullscreen
      */
-    void onFullscreen(bool enable);
+    void onFullscreen();
 
   protected:
     /**

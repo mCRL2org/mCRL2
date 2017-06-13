@@ -75,23 +75,29 @@ MainWindow::MainWindow(QWidget* parent) :
   springlayoutui->setSettings(settings.value("settings").toByteArray());
   glwidgetui->setSettings(settings.value("visualisation").toByteArray());
   m_ui.actExplorationMode->setChecked(settings.value("explore", 0).toInt() != 0);
-  m_ui.actFullscreen->setChecked(isFullScreen());
-  connect(m_ui.actFullscreen, SIGNAL(toggled(bool)), this, SLOT(onFullscreen(bool)));
+  connect(m_ui.actFullscreen, SIGNAL(triggered()), this, SLOT(onFullscreen()));
 
   m_ui.actLayoutControl->setChecked(!springlayoutui->isHidden());
   m_ui.actVisualization->setChecked(!glwidgetui->isHidden());
   m_ui.actInformation->setChecked(!informationui->isHidden());
   m_ui.actOutput->setChecked(!m_ui.dockOutput->isHidden());
+
+#ifdef __APPLE__
+  m_ui.actFullscreen->setShortcut(QString("Meta+Ctrl+F"));
+#else
+  m_ui.actFullscreen->setShortcut(QString("F11"));
+#endif
 }
 
-void MainWindow::onFullscreen(bool enable) {
-  if (enable)
+void MainWindow::onFullscreen()
+{
+  if (isFullScreen())
   {
-    showFullScreen();
+    showNormal();
   }
   else
   {
-    showNormal();
+    showFullScreen();
   }
 }
 
