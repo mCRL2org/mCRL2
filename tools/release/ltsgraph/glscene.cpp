@@ -186,7 +186,9 @@ void CameraView::applyFrustum()
 {
   float viewdepth = world.length() + 2 * pixelsize * 10;
   float f = 2 * zoom * (10000.0 + (viewdepth - world.z())) / 10000.0;
-  glFrustum(-world.x() / f, world.x() / f, -world.y() / f, world.y() / f, 5000, viewdepth + 5000.001);
+  float nearPlane = 1000;
+  float farPlane = viewdepth + 10000;
+  glFrustum(-world.x() / f, world.x() / f, -world.y() / f, world.y() / f, nearPlane, farPlane);
 }
 
 void CameraView::applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)

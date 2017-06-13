@@ -69,8 +69,8 @@ struct CameraView
   QQuaternion rotation;   ///< Rotation of the camera
   QVector3D translation;  ///< Translation of the camera
   QVector3D world;        ///< The size of the box in which the graph lives
-  float zoom{1.0};        ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
-  float pixelsize{1};
+  float zoom;             ///< Zoom specifies by how much the view angle is narrowed. Larger numbers mean narrower angles.
+  float pixelsize = 1;
 
   CameraView()
     : rotation(QQuaternion(1, 0, 0, 0)), translation(QVector3D(0, 0, 0)),

@@ -134,7 +134,7 @@ void MainWindow::onWidgetResized(const QVector3D& newsize)
     limit.setZ(0.0);
   }
   m_graph.clip(-limit, limit);
-  m_layout->setClipRegion(-limit, limit, newsize.length() / 4);
+  m_layout->setClipRegion(-limit, limit, newsize.z());
   m_glwidget->update();
 }
 

@@ -267,6 +267,17 @@ void GLWidget::paintGL()
   {
     m_scene->init(Qt::white);
     m_scene->setDevicePixelRatio(devicePixelRatio());
+// enable to print fps
+#if 0
+    static int frames;
+    static QTime TIME;
+    if (!frames)
+      TIME.start();
+    printf("fps: %.2f\n", float(frames) / (TIME.elapsed() / 1000.0));
+    if (TIME.elapsed() >= 1000)
+      TIME.restart(), frames = 0;
+    ++frames;
+#endif
     m_scene->render();
     if (!m_scene->animationFinished())
     {
@@ -500,7 +511,7 @@ void GLWidget::resetViewpoint(size_t animation)
   makeCurrent();
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
   m_scene->setTranslation(QVector3D(0, 0, 0), animation);
-  m_scene->setZoom(0.95f, animation);
+  m_scene->setZoom(8.0, animation);
   update();
 }
 

@@ -48,6 +48,7 @@ class SpringLayout
     float m_repulsion;            ///< The repulsion of other nodes.
     float m_natLength;            ///< The natural length of springs.
     float m_controlPointWeight;   ///< The handle repulsion wight factor.
+    float m_z;
     std::vector<QVector3D> m_nforces, m_hforces, m_lforces, m_sforces;  ///< Vector of the calculated forces..
     QVector3D m_clipMin;            ///< The minimum coordinates for any node.
     QVector3D m_clipMax;            ///< The maximum coordinates for any node.
@@ -106,9 +107,8 @@ class SpringLayout
      * @brief Restrains all nodes of the graph between @e min and @e max.
      * @param min The minimum coordinates for any node.
      * @param max The maximum coordinates for any node.
-     * @param zchange The amplitude of changes to the z values when changing to 3D
      */
-    void setClipRegion(const QVector3D& min, const QVector3D& max, float zchange);
+    void setClipRegion(const QVector3D& min, const QVector3D& max, float z);
 
     /**
      * @brief Returns the user interface object. If no user interface is available,
