@@ -531,7 +531,7 @@ void GLScene::renderNode(GLuint i)
   m_camera.billboard_spherical(node.pos());
   drawNode(m_vertexdata, line, fill, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
 
-  if (m_graph.hasSelection() && node.selected() != 0.0 && !m_graph.isBridge(i))
+  if (m_graph.hasSelection() && node.selected() != 0.0 && !m_graph.isBridge(i) && m_graph.initialState() != i)
   {
     float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
     hint = Color4f(fill.r + s, fill.g + s, fill.b + s, node.selected());
