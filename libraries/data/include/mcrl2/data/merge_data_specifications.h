@@ -69,7 +69,7 @@ data_specification merge_data_specifications(const data_specification& dataspec1
   // Merge the data equations.
   for(const data_equation& e: dataspec2.user_defined_equations())
   {
-    if (std::find(dataspec1.user_defined_sorts().begin(),dataspec1.user_defined_sorts().end(),e)==dataspec1.user_defined_sorts().end())
+    if (std::find(dataspec1.user_defined_equations().begin(),dataspec1.user_defined_equations().end(),e)==dataspec1.user_defined_equations().end())
     {
       result.add_equation(e);
     }
