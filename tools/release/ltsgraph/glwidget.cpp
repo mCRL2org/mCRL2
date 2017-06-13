@@ -511,7 +511,7 @@ void GLWidget::resetViewpoint(size_t animation)
   makeCurrent();
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);
   m_scene->setTranslation(QVector3D(0, 0, 0), animation);
-  m_scene->setZoom(8.0, animation);
+  m_scene->setZoom(5.0, animation);
   update();
 }
 
