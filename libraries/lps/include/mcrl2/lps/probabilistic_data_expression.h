@@ -233,6 +233,21 @@ std::ostream& operator<<(std::ostream& out, const probabilistic_data_expression&
 } // namespace lps
 } // namespace mcrl2
 
+namespace std
+{
+
+template <>
+struct hash<mcrl2::lps::probabilistic_data_expression >
+{
+  std::size_t operator()(const mcrl2::lps::probabilistic_data_expression& p) const
+  {
+    hash<atermpp::aterm> aterm_hasher;
+    return aterm_hasher(p);
+  }
+};
+
+} // namespace std
+
 #endif // MCRL2_LPS_PROBABILISTIC_DATA_EXPRESSION_H
 
 

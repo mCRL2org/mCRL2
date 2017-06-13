@@ -25,8 +25,8 @@
 //   States_M = { 0, ..., N_K + N_L - 1 }.
 
 
-#ifndef MCRL2_LTS_LIBLTS_MERGE_H
-#define MCRL2_LTS_LIBLTS_MERGE_H
+#ifndef MCRL2_LTS_LIBLTS_PLTS_MERGE_H
+#define MCRL2_LTS_LIBLTS_PLTS_MERGE_H
 
 #include "mcrl2/lts/lts_aut.h"
 #include "mcrl2/lts/lts.h"
@@ -184,4 +184,4 @@ void plts_merge(LTS_TYPE& l1, const LTS_TYPE& l2)
 } // namespace mcrl2
 
 
-#endif
+#endif  // MCRL2_LTS_LIBLTS_PLTS_MERGE_H

@@ -83,7 +83,7 @@ class prob_bisim_partitioner_bem
       std::set < transition > resulting_transitions;
 
       const std::vector<transition>& trans = aut.get_transitions();
-      for (const transition &t : trans)
+      for (const transition& t : trans)
       {
         resulting_transitions.insert(
           transition(
@@ -95,7 +95,7 @@ class prob_bisim_partitioner_bem
       aut.clear_transitions();
 
       // Copy the transitions from the set into the transition system.
-      for (const transition &t : resulting_transitions)
+      for (const transition& t : resulting_transitions)
       {
         aut.add_transition(t);
       }
@@ -106,12 +106,12 @@ class prob_bisim_partitioner_bem
     * \pre The bisimulation step classes have been computed. */
     void replace_probabilistic_states()
     {
-      std::vector<lts_aut_base::probabilistic_state> new_probabilistic_states;
+      std::vector<typename LTS_TYPE::probabilistic_state_t> new_probabilistic_states;
 
       // get the equivalent probabilistic state of each probabilistic block and add it to aut
       for (step_class_type& sc : equivalent_step_classes)
       {
-        lts_aut_base::probabilistic_state equivalent_ps;
+        typename LTS_TYPE::probabilistic_state_t equivalent_ps;
 
         equivalent_ps = calculate_equivalent_probabilistic_state(sc);
         new_probabilistic_states.push_back(equivalent_ps);
@@ -121,13 +121,13 @@ class prob_bisim_partitioner_bem
       aut.clear_probabilistic_states();
 
       // Add new prob states to aut
-      for (const lts_aut_base::probabilistic_state& new_ps : new_probabilistic_states)
+      for (const typename LTS_TYPE::probabilistic_state_t& new_ps : new_probabilistic_states)
       {
         aut.add_probabilistic_state(new_ps);
       }
 
-      lts_aut_base::probabilistic_state old_initial_prob_state = aut.initial_probabilistic_state();
-      lts_aut_base::probabilistic_state new_initial_prob_state = calculate_new_probabilistic_state(old_initial_prob_state);
+      typename LTS_TYPE::probabilistic_state_t old_initial_prob_state = aut.initial_probabilistic_state();
+      typename LTS_TYPE::probabilistic_state_t new_initial_prob_state = calculate_new_probabilistic_state(old_initial_prob_state);
       aut.set_initial_probabilistic_state(new_initial_prob_state);
     }
 
@@ -148,7 +148,7 @@ class prob_bisim_partitioner_bem
   typedef size_t state_type;
   typedef size_t label_type;
   typedef size_t distribution_key_type;
-  typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
+  typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_fraction_type;
 
   struct distribution_type
   {
@@ -204,7 +204,7 @@ class prob_bisim_partitioner_bem
   void create_initial_partition (void) 
   {
     std::vector< std::vector< std::list<distribution_type*> > > steps; // Representation of transition in 2-d array
-    std::vector<transition> & transitions = aut.get_transitions();
+    std::vector<transition>& transitions = aut.get_transitions();
     std::vector< std::vector<bool> > distribution_per_step_class;
     
     distribution_per_step_class.resize(aut.num_action_labels());
@@ -396,10 +396,10 @@ class prob_bisim_partitioner_bem
   probability_fraction_type probability_to_block(distribution_type& d, block_type& b)
   {
     probability_fraction_type prob_to_block;
-    const lts_aut_base::probabilistic_state& prob_state = aut.probabilistic_state(d.key);
+    const typename LTS_TYPE::probabilistic_state_t& prob_state = aut.probabilistic_state(d.key);
 
     /* Check whether the state is in the distribution d and add up the probability*/
-    for (const lts_aut_base::state_probability_pair& prob_pair : prob_state)
+    for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& prob_pair : prob_state)
     {
       const state_type& s = prob_pair.state();
       if (block_index_of_a_state[s] == b.key)
@@ -411,14 +411,14 @@ class prob_bisim_partitioner_bem
     return prob_to_block;
   }
 
-  lts_aut_base::probabilistic_state calculate_new_probabilistic_state(lts_aut_base::probabilistic_state ps)
+  typename LTS_TYPE::probabilistic_state_t calculate_new_probabilistic_state(typename LTS_TYPE::probabilistic_state_t ps)
   {
-    lts_aut_base::probabilistic_state new_prob_state;
+    typename LTS_TYPE::probabilistic_state_t new_prob_state;
     static std::map<state_type, probability_fraction_type> prob_state_map;
     prob_state_map.clear();
 
     /* Iterate over all state probability pairs in the selected probabilistic state*/
-    for (const lts_aut_base::state_probability_pair &sp_pair : ps)
+    for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
     {
       /* Check the resulting action state in the final State partition */
       state_type new_state = get_eq_class(sp_pair.state());
@@ -444,14 +444,14 @@ class prob_bisim_partitioner_bem
     return new_prob_state;
   }
 
-  lts_aut_base::probabilistic_state calculate_equivalent_probabilistic_state(step_class_type& sc)
+  typename LTS_TYPE::probabilistic_state_t calculate_equivalent_probabilistic_state(step_class_type& sc)
   {
-    lts_aut_base::probabilistic_state equivalent_prob_state;
+    typename LTS_TYPE::probabilistic_state_t equivalent_prob_state;
 
     /* Select the first probabilistic state of the step class */
     distribution_type* d = sc.distributions.front();
 
-    lts_aut_base::probabilistic_state old_prob_state = aut.probabilistic_state(d->key);
+    typename LTS_TYPE::probabilistic_state_t old_prob_state = aut.probabilistic_state(d->key);
 
     equivalent_prob_state = calculate_new_probabilistic_state(old_prob_state);
 
@@ -721,15 +721,15 @@ class prob_bisim_partitioner_bem
     // Merge equivalent step classes in step partition. The algorithm initially separates classes by actions,
     // but it is possible that a probabilistic sate has multiple incoming actions, hence it will be repeated
     // among multiple step classes
-    lts_aut_base::probabilistic_state new_prob_state;
-    std::unordered_map<lts_aut_base::probabilistic_state, std::vector<step_class_type*> > reduced_step_partition;
+    typename LTS_TYPE::probabilistic_state_t new_prob_state;
+    std::unordered_map<typename LTS_TYPE::probabilistic_state_t, std::vector<step_class_type*> > reduced_step_partition;
 
     /* Iterate over all step classes of Step_partition*/
     for (step_class_type& sc : step_classes)
     {
       if (sc.distributions.size() > 0)
       {
-        lts_aut_base::probabilistic_state new_prob_state = calculate_equivalent_probabilistic_state(sc);
+        typename LTS_TYPE::probabilistic_state_t new_prob_state = calculate_equivalent_probabilistic_state(sc);
 
         /* Add the step class index to the new probability state*/
         reduced_step_partition[new_prob_state].push_back(&sc);
@@ -737,7 +737,7 @@ class prob_bisim_partitioner_bem
     }
 
     step_class_key_type equivalent_class_key = 0;
-    for (typename std::unordered_map<lts_aut_base::probabilistic_state,
+    for (typename std::unordered_map<typename LTS_TYPE::probabilistic_state_t,
           std::vector<step_class_type*> >::iterator i = reduced_step_partition.begin();
           i != reduced_step_partition.end(); ++i)
     {

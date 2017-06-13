@@ -102,12 +102,12 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     * \pre The bisimulation classes have been computed. */
     void replace_probabilistic_states()
     {
-      std::vector<lts_aut_base::probabilistic_state> new_probabilistic_states;
+      std::vector<typename LTS_TYPE::probabilistic_state_t> new_probabilistic_states;
 
       // get the equivalent probabilistic state of each probabilistic block and add it to aut
       for (probabilistic_block_type& prob_block : probabilistic_blocks)
       {
-        lts_aut_base::probabilistic_state equivalent_ps = calculate_equivalent_probabilistic_state(prob_block);
+        typename LTS_TYPE::probabilistic_state_t equivalent_ps = calculate_equivalent_probabilistic_state(prob_block);
         new_probabilistic_states.push_back(equivalent_ps);
       }
 
@@ -115,13 +115,13 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       aut.clear_probabilistic_states();
 
       // Add new prob states to aut
-      for (const lts_aut_base::probabilistic_state& new_ps : new_probabilistic_states)
+      for (const typename LTS_TYPE::probabilistic_state_t& new_ps : new_probabilistic_states)
       {
         aut.add_probabilistic_state(new_ps);
       }
 
-      lts_aut_base::probabilistic_state old_initial_prob_state = aut.initial_probabilistic_state();
-      lts_aut_base::probabilistic_state new_initial_prob_state = calculate_new_probabilistic_state(old_initial_prob_state);
+      typename LTS_TYPE::probabilistic_state_t old_initial_prob_state = aut.initial_probabilistic_state();
+      typename LTS_TYPE::probabilistic_state_t new_initial_prob_state = calculate_new_probabilistic_state(old_initial_prob_state);
       aut.set_initial_probabilistic_state(new_initial_prob_state);
     }
 
@@ -145,8 +145,10 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     typedef size_t transition_key_type;
     typedef size_t state_key_type;
     typedef size_t label_type;
-    typedef probabilistic_arbitrary_precision_fraction probability_label_type;
-    typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
+    // typedef probabilistic_arbitrary_precision_fraction probability_label_type;
+    typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_label_type;
+    // typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
+    typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_fraction_type;
 
     struct action_transition_type : public embedded_list_node <action_transition_type>
     {
@@ -592,9 +594,10 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       // all probabilistic states.
       for (size_t i = 0; i < aut.num_probabilistic_states(); i++)
       {
-        const lts_aut_base::probabilistic_state& ps = aut.probabilistic_state(i);
+        const typename LTS_TYPE::probabilistic_state_t& ps = aut.probabilistic_state(i);
 
-        for (const lts_aut_base::state_probability_pair& sp_pair : ps)
+        // for (const lts_aut_base::state_probability_pair& sp_pair : ps)
+        for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
         {
           probabilistic_transition_type pt;
           pt.from = i;
@@ -602,7 +605,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
           pt.to = sp_pair.state();
           probabilistic_transitions.push_back(pt);
 
-          // save incomming transition in state
+          // save incoming transition in state
           action_states[pt.to].incoming_transitions.push_back(&probabilistic_transitions.back());
         }
       }
@@ -1244,13 +1247,13 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       return Bc;
     }
 
-    lts_aut_base::probabilistic_state calculate_new_probabilistic_state(lts_aut_base::probabilistic_state ps)
+    typename LTS_TYPE::probabilistic_state_t calculate_new_probabilistic_state(typename LTS_TYPE::probabilistic_state_t ps)
     {
-      lts_aut_base::probabilistic_state new_prob_state;
+      typename LTS_TYPE::probabilistic_state_t new_prob_state;
       std::map <state_key_type, probability_fraction_type> prob_state_map;
 
       /* Iterate over all state probability pairs in the selected probabilistic state*/
-      for (const lts_aut_base::state_probability_pair& sp_pair : ps)
+      for (const typename LTS_TYPE::probabilistic_state_t::state_probability_pair& sp_pair : ps)
       {
         /* Check the resulting action state in the final State partition */
         state_key_type new_state = get_eq_class(sp_pair.state());
@@ -1268,7 +1271,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       }
 
       /* Add all the state probabilities pairs in the mapping to its actual data type*/
-      for (std::map<state_key_type, probability_fraction_type>::iterator i = prob_state_map.begin(); i != prob_state_map.end(); i++)
+      for (typename std::map<state_key_type, probability_fraction_type>::iterator i = prob_state_map.begin(); i != prob_state_map.end(); i++)
       {
         new_prob_state.add(i->first, i->second);
       }
@@ -1276,9 +1279,9 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       return new_prob_state;
     }
 
-    lts_aut_base::probabilistic_state calculate_equivalent_probabilistic_state(probabilistic_block_type& pb)
+    typename LTS_TYPE::probabilistic_state_t calculate_equivalent_probabilistic_state(probabilistic_block_type& pb)
     {
-      lts_aut_base::probabilistic_state equivalent_prob_state;
+      typename LTS_TYPE::probabilistic_state_t equivalent_prob_state;
 
       // Select the first probabilistic state of the probabilistic block.
       const probabilistic_state_type& s = pb.states.front();
@@ -1286,7 +1289,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       // Take the an incoming transition to know the key of the state
       state_key_type s_key = s.incoming_transitions.back()->to;
 
-      const lts_aut_base::probabilistic_state& old_prob_state = aut.probabilistic_state(s_key);
+      const typename LTS_TYPE::probabilistic_state_t& old_prob_state = aut.probabilistic_state(s_key);
 
       equivalent_prob_state = calculate_new_probabilistic_state(old_prob_state);
 

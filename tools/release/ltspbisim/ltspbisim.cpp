@@ -17,6 +17,7 @@
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lts/lts_probabilistic_equivalence.h"
 #include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/detail/liblts_pbisim_bem.h"
 #include "mcrl2/lts/detail/liblts_pbisim_grv.h"
@@ -125,11 +126,9 @@ class ltsconvert_tool : public input_output_tool
       LTS_TYPE l;
       l.load(tool_options.infilename);
       l.hide_actions(tool_options.tau_actions);
-
       if (tool_options.check_reach)
       {
-    // The reachibility check algorithm has to be adjusted for probabilistci transition systems
-        //reachability_check(l, true); // Remove unreachable states from the input transition system.
+        reachability_check(l, true); // Remove unreachable states from the input transition system.
       }
 
       if (tool_options.equivalence != lts_probabilistic_eq_none)
@@ -231,17 +230,17 @@ class ltsconvert_tool : public input_output_tool
         }
         case lts_lts:
         {
-          mCRL2log(warning) << "Conversion on an .lts file has not yet been implemented.";
+          load_convert_and_save<probabilistic_lts_lts_t>();
           break;
         }
         case lts_fsm:
         {
-          mCRL2log(warning) << "Conversion on an .fsm file has not yet been implemented.";
+          load_convert_and_save<probabilistic_lts_fsm_t>();
           break;
         }
         case lts_dot:
         {
-          mCRL2log(warning) << "Conversion on an .dot file has not yet been implemented.";
+          mCRL2log(warning) << "Ltspbisim does not work on a .dot file. ";
           break;
         }
 

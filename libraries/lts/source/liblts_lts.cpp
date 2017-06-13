@@ -181,11 +181,12 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
       aterm_appl new_trans=aterm_appl(transition_empty_header());
       while (trans.function()!= transition_empty_header())
       {
+        assert(trans.size()>3);
         new_trans=aterm_appl(transition_list_header(),
-                                 trans[0],
-                                 trans[1],
-                                 data::detail::add_index(trans[2],cache),
-                                 new_trans);
+                             trans[0],
+                             trans[1],
+                             data::detail::add_index(trans[2],cache),
+                             new_trans);
         trans=trans.next();
       }
 
