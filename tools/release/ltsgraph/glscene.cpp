@@ -373,7 +373,7 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
 
   glVertexPointer(3, GL_FLOAT, 0, data.node);
 
-  float alpha = translucent ? 0.3 : 1.0;
+  float alpha = translucent ? 0.5 : 1.0;
   glColor4fv(Color4f(fill, alpha));
 
   glDrawArrays(GL_TRIANGLE_STRIP, RES_NODE_SLICE - 1, RES_NODE_SLICE * RES_NODE_STACK * 2);
