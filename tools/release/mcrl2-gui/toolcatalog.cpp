@@ -42,7 +42,7 @@ void ToolCatalog::load()
   if (toolsetDir.dirName().toLower() == "bin")
     toolsetDir.cdUp();
 
-  QString catalogFilename = toolsetDir.filePath("share/mcrl2/tool_catalog.xml");
+  QString catalogFilename = toolsetDir.filePath(MCRL2_RESOURCE_PATH "/tool_catalog.xml");
 
   QFile file(catalogFilename);
   if(!file.open( QFile::ReadOnly ))

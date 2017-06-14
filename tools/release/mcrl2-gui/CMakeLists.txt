@@ -29,6 +29,9 @@ add_mcrl2_tool(mcrl2-gui
     QtWidgets
     QtXml
 )
+target_compile_definitions(mcrl2-gui
+  PRIVATE MCRL2_RESOURCE_PATH="${MCRL2_RESOURCE_PATH}"
+)
 add_custom_target(mcrl2-gui-shared
   SOURCES
     share/mcrl2/tool_catalog.xml
