@@ -33,7 +33,7 @@ class explorer : public mcrl2::pbes_system::explorer {
 private:
     std::set<std::vector<int> > visited;
     std::deque<std::vector<int> > fresh;
-    size_t transition_count;
+    std::size_t transition_count;
 
 public:
 #ifdef MCRL2_JITTYC_AVAILABLE
@@ -50,12 +50,12 @@ public:
       transition_count(0)
     {}
 
-    size_t get_state_count() const
+    std::size_t get_state_count() const
     {
         return visited.size();
     }
 
-    size_t get_transition_count() const
+    std::size_t get_transition_count() const
     {
         return transition_count;
     }
@@ -132,7 +132,7 @@ struct pbes_state_cb
 {
     ltsmin::test::explorer* explorer;
     std::vector<std::vector<int> > successors;
-    size_t count;
+    std::size_t count;
 
     pbes_state_cb (ltsmin::test::explorer* explorer_)
         : explorer(explorer_), count(0)
@@ -151,7 +151,7 @@ struct pbes_state_cb
         return successors;
     }
 
-    size_t get_count() const
+    std::size_t get_count() const
     {
         return count;
     }

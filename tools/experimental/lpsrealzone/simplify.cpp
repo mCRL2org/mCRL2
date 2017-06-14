@@ -122,7 +122,7 @@ namespace data
     return *(++(++i));
   }
 
-  static size_t global_variable_counter=0;
+  static std::size_t global_variable_counter=0;
 
   /// \brief Find each expression of the form x<y, x<=y, x==y, x>=y x>y in t that contain variables occurring in real_parameters
   ///        and replace these by a boolean variable b. This variable is added to vars

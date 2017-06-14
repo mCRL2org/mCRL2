@@ -26,12 +26,12 @@ namespace lts
 class lts_generation_options
 {
   private:
-    static const size_t default_max_states=ULONG_MAX;
-    static const size_t default_bithashsize=209715200ULL; // ~25 MB
-    static const size_t default_init_tsize=10000UL;
+    static const std::size_t default_max_states=ULONG_MAX;
+    static const std::size_t default_bithashsize=209715200ULL; // ~25 MB
+    static const std::size_t default_init_tsize=10000UL;
 
   public:
-    static const size_t default_max_traces=ULONG_MAX;
+    static const std::size_t default_max_traces=ULONG_MAX;
 
     mcrl2::lps::stochastic_specification specification;
     bool usedummies;
@@ -40,20 +40,20 @@ class lts_generation_options
     mcrl2::data::rewriter::strategy strat;
     exploration_strategy expl_strat;
     std::string priority_action;
-    size_t todo_max;
-    size_t max_states;
-    size_t initial_table_size;
+    std::size_t todo_max;
+    std::size_t max_states;
+    std::size_t initial_table_size;
     bool suppress_progress_messages;
 
     bool bithashing;
-    size_t bithashsize;
+    std::size_t bithashsize;
 
     mcrl2::lts::lts_type outformat;
     bool outinfo;
     std::string lts;
 
     bool trace;
-    size_t max_traces;
+    std::size_t max_traces;
     std::string trace_prefix;
     bool save_error_trace;
     bool detect_deadlock;
@@ -73,7 +73,7 @@ class lts_generation_options
       removeunused(true),
       strat(mcrl2::data::jitty),
       expl_strat(es_breadth),
-      todo_max((std::numeric_limits< size_t >::max)()),
+      todo_max((std::numeric_limits< std::size_t >::max)()),
       max_states(default_max_states),
       initial_table_size(default_init_tsize),
       suppress_progress_messages(false),

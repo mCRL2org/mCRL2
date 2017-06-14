@@ -24,7 +24,7 @@ namespace mcrl2 {
     r = localtime(t);
 
     char buffer[11];
-    size_t res = strftime(buffer, sizeof(buffer), "%H:%M:%S", r);
+    std::size_t res = strftime(buffer, sizeof(buffer), "%H:%M:%S", r);
     if(res == 0)
     {
       std::clog << "Could not write time to buffer" << std::endl;
@@ -131,7 +131,7 @@ namespace mcrl2 {
     // Pad message with spaces when overwriting a previous line
     if (msg_ends_with_newline && overwrite && caret_pos() < last_caret_pos())
     {
-      for (size_t i = 0; i < last_caret_pos() - caret_pos(); ++i)
+      for (std::size_t i = 0; i < last_caret_pos() - caret_pos(); ++i)
       {
         result << ' ';
       }

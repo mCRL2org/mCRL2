@@ -216,16 +216,16 @@ class Confluence_Checker
     bool f_generate_invariants;
 
     /// \brief The number of summands of the current LPS.
-    size_t f_number_of_summands;
+    std::size_t f_number_of_summands;
 
     /// \brief An integer array, storing intermediate results per summand.
-    std::vector <size_t> f_intermediate;
+    std::vector <std::size_t> f_intermediate;
 
     /// \brief Identifier generator to allow variables to be uniquely renamed.
     data::set_identifier_generator f_set_identifier_generator;
 
     /// \brief Writes a dot file of the BDD created when checking the confluence of summands a_summand_number_1 and a_summand_number_2.
-    void save_dot_file(size_t a_summand_number_1, size_t a_summand_number_2);
+    void save_dot_file(std::size_t a_summand_number_1, std::size_t a_summand_number_2);
 
     /// \brief Outputs a path in the BDD corresponding to the condition at hand that leads to a node labelled false.
     void print_counter_example();
@@ -234,15 +234,15 @@ class Confluence_Checker
     bool check_summands(
       const data::data_expression& a_invariant,
       const action_summand_type a_summand_1,
-      const size_t a_summand_number_1,
+      const std::size_t a_summand_number_1,
       const action_summand_type a_summand_2,
-      const size_t a_summand_number_2,
+      const std::size_t a_summand_number_2,
       const char a_condition_type);
 
     /// \brief Checks and updates the confluence of summand a_summand concerning all other tau-summands.
     void check_confluence_and_mark_summand(
       action_summand_type& a_summand,
-      const size_t a_summand_number,
+      const std::size_t a_summand_number,
       const data::data_expression& a_invariant,
       const char a_condition_type,
       bool& a_is_marked);
@@ -277,7 +277,7 @@ class Confluence_Checker
     /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
     /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
     /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is checked.
-    void check_confluence_and_mark(const data::data_expression& a_invariant, const size_t a_summand_number);
+    void check_confluence_and_mark(const data::data_expression& a_invariant, const std::size_t a_summand_number);
 };
 
 // Auxiliary functions ----------------------------------------------------------------------------
@@ -586,7 +586,7 @@ bool has_ctau_action(const Specification& a_lps)
 // Class Confluence_Checker - Functions declared private ----------------------------------------
 
 template <typename Specification>
-void Confluence_Checker<Specification>::save_dot_file(size_t a_summand_number_1, size_t a_summand_number_2)
+void Confluence_Checker<Specification>::save_dot_file(std::size_t a_summand_number_1, std::size_t a_summand_number_2)
 {
   if (!f_dot_file_name.empty())
   {
@@ -682,9 +682,9 @@ template <typename Specification>
 bool Confluence_Checker<Specification>::check_summands(
   const data::data_expression& a_invariant,
   const action_summand_type a_summand_1,
-  const size_t a_summand_number_1,
+  const std::size_t a_summand_number_1,
   const action_summand_type a_summand_2,
-  const size_t a_summand_number_2,
+  const std::size_t a_summand_number_2,
   const char a_condition_type)
 {
   assert(a_summand_1.is_tau());
@@ -762,14 +762,14 @@ bool Confluence_Checker<Specification>::check_summands(
 template <typename Specification>
 void Confluence_Checker<Specification>::check_confluence_and_mark_summand(
   action_summand_type& a_summand,
-  const size_t a_summand_number,
+  const std::size_t a_summand_number,
   const data::data_expression& a_invariant,
   const char a_condition_type,
   bool& a_is_marked)
 {
   assert(a_summand.is_tau());
   auto const& v_summands = f_lps.process().action_summands();
-  size_t v_summand_number = 1;
+  std::size_t v_summand_number = 1;
   bool v_is_confluent = true;
   bool v_current_summands_are_confluent;
 
@@ -908,15 +908,15 @@ Confluence_Checker<Specification>::Confluence_Checker(
 // --------------------------------------------------------------------------------------------
 
 template <typename Specification>
-void Confluence_Checker<Specification>::check_confluence_and_mark(const data::data_expression& a_invariant, const size_t a_summand_number)
+void Confluence_Checker<Specification>::check_confluence_and_mark(const data::data_expression& a_invariant, const std::size_t a_summand_number)
 {
   auto& v_process_equation = f_lps.process();
   auto& v_summands = v_process_equation.action_summands();
   bool v_is_marked = false;
 
-  size_t v_summand_number = 1;
-  std::set<size_t> v_unmarked_summands;
-  std::set<size_t> v_marked_summands;
+  std::size_t v_summand_number = 1;
+  std::set<std::size_t> v_unmarked_summands;
+  std::set<std::size_t> v_marked_summands;
 
   for (auto i=v_summands.begin(); i!=v_summands.end(); ++i)
   {
@@ -939,14 +939,14 @@ void Confluence_Checker<Specification>::check_confluence_and_mark(const data::da
 
   while (v_conditions.length() > 0)
   {
-    f_intermediate = std::vector<size_t>(f_number_of_summands + 2, 0);
+    f_intermediate = std::vector<std::size_t>(f_number_of_summands + 2, 0);
     char v_condition_type = v_conditions.at(0);
     v_conditions = v_conditions.substr(1);
     v_summand_number = 1;
 
     for (auto i=v_summands.begin(); i!=v_summands.end(); ++i)
     {
-      std::set<size_t>::iterator it = v_unmarked_summands.find(v_summand_number);
+      std::set<std::size_t>::iterator it = v_unmarked_summands.find(v_summand_number);
 
       if (it != v_unmarked_summands.end())
       {
@@ -974,7 +974,7 @@ void Confluence_Checker<Specification>::check_confluence_and_mark(const data::da
 
   mCRL2log(log::info) << v_marked_summands.size() << " of " << (v_marked_summands.size() + v_unmarked_summands.size()) << " tau summands were found to be confluent" << std::endl;
 
-  f_intermediate = std::vector<size_t>();
+  f_intermediate = std::vector<std::size_t>();
 }
 
 } // namespace detail

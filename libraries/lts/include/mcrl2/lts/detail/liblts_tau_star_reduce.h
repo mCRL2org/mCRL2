@@ -36,7 +36,7 @@ enum t_reach { unknown, reached, explored };
 //          states that can be reached by one or more tau_steps.
 
 template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
-std::map < size_t,
+std::map < std::size_t,
            std::set <typename lts<STATE_LABEL_T,ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type > > 
             calculate_non_reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>& l,
             const bool forward)
@@ -70,9 +70,9 @@ std::map < size_t,
     for(typename map_from_states_to_states::iterator i=resulting_tau_transitions.begin(); 
                        i!=resulting_tau_transitions.end(); ++i)
     {
-      const set<size_t>& outgoing_states= i->second;
-      set<size_t> new_outgoing_states=outgoing_states;
-      for(set<size_t>::const_iterator j=outgoing_states.begin(); j!=outgoing_states.end(); j++)
+      const set<std::size_t>& outgoing_states= i->second;
+      set<std::size_t> new_outgoing_states=outgoing_states;
+      for(set<std::size_t>::const_iterator j=outgoing_states.begin(); j!=outgoing_states.end(); j++)
       {
         new_outgoing_states.insert(resulting_tau_transitions[*j].begin(),
                                    resulting_tau_transitions[*j].end());

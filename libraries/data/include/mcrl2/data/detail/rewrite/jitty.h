@@ -35,11 +35,11 @@ class RewriterJitty: public Rewriter
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
   private:
-    size_t max_vars;
+    std::size_t max_vars;
 
     std::map< function_symbol, data_equation_list > jitty_eqns;
     std::vector<strategy> jitty_strat;
-    size_t MAX_LEN; 
+    std::size_t MAX_LEN; 
     data_expression rewrite_aux(const data_expression& term, substitution_type& sigma);
     void build_strategies();
 
@@ -50,7 +50,7 @@ class RewriterJitty: public Rewriter
 
     /* Auxiliary function to take care that the array jitty_strat is sufficiently large
        to access element i */
-    void make_jitty_strat_sufficiently_larger(const size_t i);
+    void make_jitty_strat_sufficiently_larger(const std::size_t i);
     strategy create_strategy(const data_equation_list& rules1);
     void rebuild_strategy();
 };

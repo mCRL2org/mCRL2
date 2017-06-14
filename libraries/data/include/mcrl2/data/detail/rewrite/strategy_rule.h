@@ -24,7 +24,7 @@ namespace detail
 class strategy_rule:public atermpp::aterm
 {
   public:
-    strategy_rule(const size_t n)
+    strategy_rule(const std::size_t n)
       : aterm(atermpp::aterm_int(n))
     {}
 
@@ -48,7 +48,7 @@ class strategy_rule:public atermpp::aterm
       return atermpp::down_cast<data_equation>(static_cast<atermpp::aterm>(*this));
     }
 
-    size_t rewrite_index() const
+    std::size_t rewrite_index() const
     {
       assert(is_rewrite_index());
       return (atermpp::down_cast<atermpp::aterm_int>(static_cast<atermpp::aterm>(*this))).value();

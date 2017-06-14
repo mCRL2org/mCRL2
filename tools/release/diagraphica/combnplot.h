@@ -33,7 +33,7 @@ class CombnPlot : public Visualizer
     CombnPlot(
       QWidget *parent,
       Graph* g,
-      const std::vector<size_t> &attributeIndices
+      const std::vector<std::size_t> &attributeIndices
       );
     // -- set data functions ----------------------------------------
     void setDiagram(Diagram* dgrm);
@@ -69,7 +69,7 @@ class CombnPlot : public Visualizer
     // ***
     //void clear();
     void setScalingTransf();
-    void displTooltip(const size_t& posIdx);
+    void displTooltip(const std::size_t& posIdx);
 
     void calcPositions();
     void calcPosBC();
@@ -86,10 +86,10 @@ class CombnPlot : public Visualizer
     // data
     std::vector< std::string >        attributeLabels;
     std::vector< Attribute *> attributes;
-    size_t                     maxAttrCard;
-    std::vector< std::vector< size_t > > combinations;
-    std::vector< size_t >           numberPerComb;
-    size_t                     maxNumberPerComb;
+    std::size_t                     maxAttrCard;
+    std::vector< std::vector< std::size_t > > combinations;
+    std::vector< std::size_t >           numberPerComb;
+    std::size_t                     maxNumberPerComb;
 
     // bar chart
     int    minHgtHintPixBC;     // bar height cannot be less
@@ -100,7 +100,7 @@ class CombnPlot : public Visualizer
     // combination plot
     std::vector< std::vector< Position2D > > posLftTop;
     std::vector< std::vector< Position2D > > posRgtBot;
-    size_t    mouseCombnIdx;
+    std::size_t    mouseCombnIdx;
 
     // diagram
     Diagram*      diagram;         // association, user-defined diagram

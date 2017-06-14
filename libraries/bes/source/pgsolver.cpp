@@ -18,7 +18,7 @@ namespace mcrl2
 namespace bes
 {
 
-typedef std::map<core::identifier_string, size_t> variable_map;
+typedef std::map<core::identifier_string, std::size_t> variable_map;
 
 ///
 /// \brief Convert a sequence of Boolean variables to PGSolver format.
@@ -26,7 +26,7 @@ typedef std::map<core::identifier_string, size_t> variable_map;
 template <typename Iter>
 std::string boolean_variables2pgsolver(Iter first, Iter last, const variable_map& variables)
 {
-  std::set<size_t> variables_int;
+  std::set<std::size_t> variables_int;
   for (Iter i = first; i != last; ++i)
   {
     const boolean_variable& b = atermpp::down_cast<boolean_variable>(*i);
@@ -85,7 +85,7 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out, bool maxpg)
   // Also store player to which variables without operand are assigned, per
   // block, in block_to_player.
   variable_map variables;
-  size_t index = 0;
+  std::size_t index = 0;
   std::map<int, int> block_to_player;
 
   bool and_in_block = false;

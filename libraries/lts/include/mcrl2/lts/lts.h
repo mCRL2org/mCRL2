@@ -338,7 +338,7 @@ class lts: public LTS_BASE
      *  \details This resets the transition vector in an lts, but
      *          leaves other related items, such as state or
      *          action labels untouched. */
-    void clear_transitions(const size_t n=0)
+    void clear_transitions(const std::size_t n=0)
     {
       m_transitions = std::vector<transition>();
       m_transitions.reserve(n);

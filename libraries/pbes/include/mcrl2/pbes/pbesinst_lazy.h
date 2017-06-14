@@ -630,7 +630,7 @@ class pbesinst_lazy_algorithm
     detail::pbesinst_resetter m_pbesinst_resetter;
 
     /// \brief Prints a log message for every 1000-th equation
-    std::string print_equation_count(size_t size) const
+    std::string print_equation_count(std::size_t size) const
     {
       if (size > 0 && size % 1000 == 0)
       {

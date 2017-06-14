@@ -238,7 +238,7 @@ bool Simulation::loadTrace(QString filename)
         State *state = transitions[i]->getEndState();
         int match = 0;
 
-        for (size_t j = 0; j < currentState.size(); j++)
+        for (std::size_t j = 0; j < currentState.size(); j++)
         {
           if (mcrl2::data::pp(currentState[j]) == m_ltsRef.getStateParameterValueStr(state, j))
           {

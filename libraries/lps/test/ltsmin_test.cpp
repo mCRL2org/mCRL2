@@ -312,11 +312,11 @@ void test_serialisation()
   lps::pins p1(filename, "jitty");
   lps::pins p2(filename, "jitty");
   std::cout << "datatypes: " << p1.datatype_count() << std::endl;
-  for(size_t i=0; i < p1.datatype_count(); i++)
+  for(std::size_t i=0; i < p1.datatype_count(); i++)
   {
     std::cout << i << ": " << p1.data_type(i).name() << std::endl;
   }
-  std::vector<std::pair<std::string, size_t>> expressions;
+  std::vector<std::pair<std::string, std::size_t>> expressions;
   expressions.push_back(std::make_pair("1", 0));
   expressions.push_back(std::make_pair("0", 1));
   expressions.push_back(std::make_pair("1", 1));
@@ -326,7 +326,7 @@ void test_serialisation()
   for(auto e : expressions)
   {
     std::string s = e.first;
-    size_t type = e.second;
+    std::size_t type = e.second;
 
     data::data_expression d1 = data::parse_data_expression(s, spec.data());
     std::string serialised = p1.data_type(type).serialize(p1.data_type(type)[d1]);

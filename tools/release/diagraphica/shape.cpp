@@ -36,7 +36,7 @@ QColor Shape::colTxt = Qt::black;
 
 
 Shape::Shape(
-    Diagram *parentDiagram, size_t index,
+    Diagram *parentDiagram, std::size_t index,
     double xCenter,         double yCenter,
     double xDistance,       double yDistance,
     double angle,           int    shapeType,
@@ -296,7 +296,7 @@ void Shape::visualize(
   aglH       = 0.0;
   QColor colFill = m_fillColor;
 
-  for (size_t i = 0; i < attrs.size(); ++i)
+  for (std::size_t i = 0; i < attrs.size(); ++i)
   {
     /*
     if ( attrs[i]->getSizeCurValues() == 1 )
@@ -509,7 +509,7 @@ void Shape::clrTransf()
 // -- event handlers --------------------------------------------
 
 
-void Shape::handleHit(const size_t& hdlIdx)
+void Shape::handleHit(const std::size_t& hdlIdx)
 {
   if (m_drawMode == MODE_EDIT_DOF_AGL)
   {
@@ -598,7 +598,7 @@ void Shape::clearDOF()
 }
 
 
-void Shape::handleHitEdtDOFAgl(const size_t& hdlIdx)
+void Shape::handleHitEdtDOFAgl(const std::size_t& hdlIdx)
 {
   if (hdlIdx == ID_HDL_DIR)
   {

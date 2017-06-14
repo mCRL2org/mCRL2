@@ -188,7 +188,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
   double xRgt;
   double yTop;
   double pix;
-  size_t    size;
+  std::size_t    size;
   double hdlDOF;
 
   pix = pixelSize();
@@ -206,7 +206,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
   // selection mode
   if (inSelectMode)
   {
-    for (size_t i = 0; i < size-1; ++i)
+    for (std::size_t i = 0; i < size-1; ++i)
     {
       glPushName((GLuint) i);
       VisUtils::fillRect(
@@ -251,7 +251,7 @@ void ColorChooser::drawPoints(const bool& inSelectMode)
   else
   {
     VisUtils::enableLineAntiAlias();
-    for (size_t i = 0; i < size-1; ++i)
+    for (std::size_t i = 0; i < size-1; ++i)
     {
       VisUtils::setColor(Qt::black);
       VisUtils::drawLine(
@@ -373,7 +373,7 @@ void ColorChooser::handleHits(const vector< int > &ids)
 
 void ColorChooser::handleDrag()
 {
-  if (m_dragIdx != NON_EXISTING && m_dragIdx < (size_t)m_yCoordinates->size())
+  if (m_dragIdx != NON_EXISTING && m_dragIdx < (std::size_t)m_yCoordinates->size())
   {
     QSizeF size = worldSize();
     QPointF pos = worldCoordinate(m_lastMouseEvent.localPos());

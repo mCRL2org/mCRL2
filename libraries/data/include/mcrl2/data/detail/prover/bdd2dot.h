@@ -71,8 +71,8 @@ class BDD2Dot
         const data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         aux_output_bdd(v_true_branch);
         aux_output_bdd(v_false_branch);
-        size_t v_true_number = f_visited[v_true_branch].value();
-        size_t v_false_number = f_visited[v_false_branch].value();
+        std::size_t v_true_number = f_visited[v_true_branch].value();
+        std::size_t v_false_number = f_visited[v_false_branch].value();
         const data_expression v_guard = f_bdd_info.get_guard(a_bdd);
         f_dot_file << "  " << f_node_number << " [label=\"" << mcrl2::data::pp(v_guard) << "\"];" << std::endl;
         f_dot_file << "  " << f_node_number << " -> " << v_true_number << ";" << std::endl;

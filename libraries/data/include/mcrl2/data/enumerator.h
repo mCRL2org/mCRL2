@@ -98,7 +98,7 @@ bool compute_finite_set_elements(const container_sort& sort, const data_specific
   {
     mCRL2log(log::warning) << "Generate 2^" << all_element_expressions.size() << " sets to enumerate sort " << sort << "\n";
   }
-  const size_t number_of_sets = utilities::power_size_t(2, all_element_expressions.size());
+  const std::size_t number_of_sets = utilities::power_size_t(2, all_element_expressions.size());
   for (std::size_t i = 0; i < number_of_sets; ++i)
   {
     result.push_back(datar(make_set_(i, sort.element_sort(), all_element_expressions), sigma));

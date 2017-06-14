@@ -70,7 +70,7 @@ class rewriter_tool: public Tool
       if(parser.options.count("qlimit"))
       {
         //Set enumerator limit for quantifier enumeration
-        data::detail::set_enumerator_variable_limit(parser.option_argument_as< size_t >("qlimit"));
+        data::detail::set_enumerator_variable_limit(parser.option_argument_as< std::size_t >("qlimit"));
       }
     }
 

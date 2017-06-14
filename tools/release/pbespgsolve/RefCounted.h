@@ -29,7 +29,7 @@ class RefCounted
 {
 public:
     //! Construct and initialize the reference count to `init_refcount`.
-    RefCounted(size_t init_refcount = 1)
+    RefCounted(std::size_t init_refcount = 1)
         : refs_(init_refcount) { }
 
     //! Increment reference count.
@@ -43,13 +43,13 @@ public:
     }
 
     //! Return the current reference count. Mostly useful for debugging.
-    size_t refcount() { return refs_; }
+    std::size_t refcount() { return refs_; }
 
 protected:
     virtual ~RefCounted() { assert(refs_ <= 1); }
 
 protected:
-    mutable size_t refs_;  //!< Number of references to this object
+    mutable std::size_t refs_;  //!< Number of references to this object
 };
 
 #endif /* ndef REFCOUNTED */

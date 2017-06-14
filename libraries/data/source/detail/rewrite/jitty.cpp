@@ -144,15 +144,15 @@ class jitty_argument_rewriter
 class dependencies_rewrite_rule_pair
 {
   protected:
-    std::set<size_t> m_dependencies;
+    std::set<std::size_t> m_dependencies;
     data_equation m_equation;
 
   public:
-    dependencies_rewrite_rule_pair(std::set<size_t>& dependencies, const data_equation& eq)
+    dependencies_rewrite_rule_pair(std::set<std::size_t>& dependencies, const data_equation& eq)
      : m_dependencies(dependencies), m_equation(eq)
     {}
 
-    const std::set<size_t>& dependencies() const
+    const std::set<std::size_t>& dependencies() const
     {
       return m_dependencies;
     }
@@ -170,7 +170,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
 
   std::vector <bool> used;
 
-  size_t arity = 0;
+  std::size_t arity = 0;
   while (!rules.empty())
   {
     data_equation_list l;
@@ -189,7 +189,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
 
         std::vector < bool> bs(arity,false);
 
-        for (size_t i = 0; i < arity; i++)
+        for (std::size_t i = 0; i < arity; i++)
         {
           const data_expression this_rule_lhs_iplus1_arg=detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(this_rule_lhs),i);
           if (!is_variable(this_rule_lhs_iplus1_arg))
@@ -241,8 +241,8 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
         lhs_doubles.apply(this_rule.lhs());
         rhs_doubles.apply(this_rule.rhs());
 
-        std::set<size_t> deps;
-        for (size_t i = 0; i < arity; i++)
+        std::set<std::size_t> deps;
+        for (std::size_t i = 0; i < arity; i++)
         {
           if (i>=used.size())
           {
@@ -280,7 +280,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
         {
           const data_equation rule = i->equation();
           strat.push_back(strategy_rule(rule));
-          size_t len = rule.variables().size();
+          std::size_t len = rule.variables().size();
           if (len>MAX_LEN)
           {
             MAX_LEN=len;
@@ -299,11 +299,11 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
       }
 
       int max = -1;
-      size_t maxidx = 0;
+      std::size_t maxidx = 0;
 
-      for (size_t i = 0; i < arity; i++)
+      for (std::size_t i = 0; i < arity; i++)
       {
-        assert(i<((size_t)1)<<(8*sizeof(int)-1));
+        assert(i<((std::size_t)1)<<(8*sizeof(int)-1));
         if (args[i] > max)
         {
           maxidx = i+1;
@@ -320,13 +320,13 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
         }
         used[maxidx-1] = true;
 
-        const size_t k(maxidx-1);
+        const std::size_t k(maxidx-1);
         strat.push_back(strategy_rule(k));
         m2.clear();
         for (std::vector<dependencies_rewrite_rule_pair>::const_iterator i=m.begin(); i!=m.end(); ++i)
         {
           const data_equation eq=i->equation();
-          std::set<size_t> dependencies=i->dependencies();
+          std::set<std::size_t> dependencies=i->dependencies();
           dependencies.erase(k);
           m2.push_back(dependencies_rewrite_rule_pair(dependencies,eq));
         }
@@ -340,7 +340,7 @@ strategy RewriterJitty::create_strategy(const data_equation_list& rules1)
   return strategy(strat.begin(),strat.end());
 }
 
-void RewriterJitty::make_jitty_strat_sufficiently_larger(const size_t i)
+void RewriterJitty::make_jitty_strat_sufficiently_larger(const std::size_t i)
 {
   if (i>=jitty_strat.size())
   {
@@ -353,7 +353,7 @@ void RewriterJitty::rebuild_strategy()
   jitty_strat.clear();
   for(std::map< function_symbol, data_equation_list >::const_iterator l=jitty_eqns.begin(); l!=jitty_eqns.end(); ++l)
   {
-    const size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(l->first);
+    const std::size_t i=core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(l->first);
     make_jitty_strat_sufficiently_larger(i);
     jitty_strat[i] = create_strategy(reverse(l->second));
   }
@@ -411,7 +411,7 @@ static data_expression subst_values(
             const unprotected_variable* vars,
             const unprotected_data_expression* terms,
             const bool* variable_is_a_normal_form,
-            const size_t assignment_size,
+            const std::size_t assignment_size,
             const data_expression& t,
             data::enumerator_identifier_generator& generator); // prototype;
 
@@ -421,14 +421,14 @@ class subst_values_argument
     const unprotected_variable* m_vars;
     const unprotected_data_expression* m_terms;
     const bool* m_variable_is_a_normal_form;
-    const size_t m_assignment_size;
+    const std::size_t m_assignment_size;
     data::enumerator_identifier_generator& m_generator;
 
   public:
     subst_values_argument(const unprotected_variable* vars,
                           const unprotected_data_expression* terms,
                           const bool* variable_is_a_normal_form,
-                          const size_t assignment_size,
+                          const std::size_t assignment_size,
                           data::enumerator_identifier_generator& generator)
       : m_vars(vars),
         m_terms(terms),
@@ -447,7 +447,7 @@ static data_expression subst_values(
             const unprotected_variable* vars,
             const unprotected_data_expression* terms,
             const bool* variable_is_a_normal_form,
-            const size_t assignment_size,
+            const std::size_t assignment_size,
             const data_expression& t,
             data::enumerator_identifier_generator& generator) // This generator is used for the generation of fresh variable names.
 {
@@ -457,7 +457,7 @@ static data_expression subst_values(
   }
   else if (is_variable(t))
   {
-    for (size_t i=0; i<assignment_size; i++)
+    for (std::size_t i=0; i<assignment_size; i++)
     {
       if (t==vars[i])
       {
@@ -477,7 +477,7 @@ static data_expression subst_values(
     const variable_list& bound_variables=t1.variables();
     // Check that variables in the left and right hand sides of equations do not clash with bound variables.
     std::set<variable> variables_in_substitution;
-    for(size_t i=0; i<assignment_size; ++i)
+    for(std::size_t i=0; i<assignment_size; ++i)
     {
       std::set<variable> s=find_free_variables(data_expression(terms[i]));
       variables_in_substitution.insert(s.begin(),s.end());
@@ -521,7 +521,7 @@ static data_expression subst_values(
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
-    for(size_t i=0; i<assignment_size; ++i)
+    for(std::size_t i=0; i<assignment_size; ++i)
     {
       for(assignment_expression_list::const_iterator it=assignments.begin(); it!=assignments.end(); ++it)
       {
@@ -555,7 +555,7 @@ static bool match_jitty(
                     unprotected_variable* vars,
                     unprotected_data_expression* terms,
                     bool* variable_is_in_normal_form,
-                    size_t& assignment_size,
+                    std::size_t& assignment_size,
                     const bool term_context_guarantees_normal_form)
 {
   if (is_function_symbol(p))
@@ -565,7 +565,7 @@ static bool match_jitty(
   else if (is_variable(p))
   {
 
-    for (size_t i=0; i<assignment_size; i++)
+    for (std::size_t i=0; i<assignment_size; i++)
     {
       if (p==vars[i])
       {
@@ -604,8 +604,8 @@ static bool match_jitty(
       return false;
     }
 
-    size_t arity = pa.size();
-    for (size_t i=0; i<arity; i++)
+    std::size_t arity = pa.size();
+    for (std::size_t i=0; i<arity; i++)
     {
       if (!match_jitty(ta[i], pa[i],vars,terms,variable_is_in_normal_form,assignment_size,true))
       {
@@ -718,17 +718,17 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
 
-  const size_t arity=(is_function_symbol(term)?0:detail::recursive_number_of_args(term));
+  const std::size_t arity=(is_function_symbol(term)?0:detail::recursive_number_of_args(term));
 
   data_expression* rewritten = MCRL2_SPECIFIC_STACK_ALLOCATOR(data_expression, arity);
   bool* rewritten_defined = MCRL2_SPECIFIC_STACK_ALLOCATOR(bool, arity);
 
-  for(size_t i=0; i<arity; ++i)
+  for(std::size_t i=0; i<arity; ++i)
   {
     rewritten_defined[i]=false;
   }
 
-  const size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
+  const std::size_t op_value=core::index_traits<data::function_symbol,function_symbol_key_type, 2>::index(op);
   if (op_value>=jitty_strat.size())
   {
     make_jitty_strat_sufficiently_larger(op_value);
@@ -740,12 +740,12 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
     unprotected_variable* vars=MCRL2_SPECIFIC_STACK_ALLOCATOR(unprotected_variable,max_vars);
     unprotected_data_expression* terms = MCRL2_SPECIFIC_STACK_ALLOCATOR(unprotected_data_expression,max_vars);
     bool* variable_is_in_normal_form = MCRL2_SPECIFIC_STACK_ALLOCATOR(bool,max_vars);
-    size_t no_assignments=0;
+    std::size_t no_assignments=0;
     for (const strategy_rule& rule: strat)
     {
       if (rule.is_rewrite_index())
       {
-        const size_t i = rule.rewrite_index();
+        const std::size_t i = rule.rewrite_index();
         if (i < arity)
         {
           assert(!rewritten_defined[i]||i==0);
@@ -765,7 +765,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
       {
         const data_equation rule1=rule.equation();
         const data_expression& lhs=rule1.lhs();
-        size_t rule_arity = (is_function_symbol(lhs)?0:detail::recursive_number_of_args(lhs));
+        std::size_t rule_arity = (is_function_symbol(lhs)?0:detail::recursive_number_of_args(lhs));
 
         if (rule_arity > arity)
         {
@@ -775,7 +775,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
         assert(no_assignments==0);
 
         bool matches = true;
-        for (size_t i=0; i<rule_arity; i++)
+        for (std::size_t i=0; i<rule_arity; i++)
         {
           assert(i<arity);
           if (!match_jitty(rewritten_defined[i]?rewritten[i]:detail::get_argument_of_higher_order_term(atermpp::down_cast<application>(term),i),
@@ -796,7 +796,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
             if (arity == rule_arity)
             {
               const data_expression result=rewrite_aux(subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,generator),sigma);
-              for (size_t i=0; i<arity; i++)
+              for (std::size_t i=0; i<arity; i++)
               {
                 if (rewritten_defined[i])
                 {
@@ -814,7 +814,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
               data_expression result=subst_values(vars,terms,variable_is_in_normal_form,no_assignments,rhs,generator);
 
-              for(size_t i=rule_arity; i<arity; ++i)
+              for(std::size_t i=rule_arity; i<arity; ++i)
               {
                 if (rewritten_defined[i])
                 {
@@ -826,19 +826,19 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
                   rewritten_defined[i]=true;
                 }
               }
-              size_t i = rule_arity;
+              std::size_t i = rule_arity;
               sort_expression sort = detail::residual_sort(op.sort(),i);
               while (is_function_sort(sort) && (i < arity))
               {
                 const function_sort& fsort =  atermpp::down_cast<function_sort>(sort);
-                const size_t end=i+fsort.domain().size();
+                const std::size_t end=i+fsort.domain().size();
                 assert(end-1<arity);
                 result = application(result,&rewritten[0]+i,&rewritten[0]+end);
                 i=end;
                 sort = fsort.codomain();
               }
 
-              for (size_t i=0; i<arity; ++i)
+              for (std::size_t i=0; i<arity; ++i)
               {
                 if (rewritten_defined[i])
                 {
@@ -857,7 +857,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   // No rewrite rule is applicable. Rewrite the not yet rewritten arguments.
   // As we rewrite all, we do not record anymore whether terms are rewritten.
 
-  for (size_t i=0; i<arity; i++)
+  for (std::size_t i=0; i<arity; i++)
   {
     if (!rewritten_defined[i])
     {
@@ -867,19 +867,19 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
 
   //Construct this potential higher order term.
   data_expression result=data_expression(op);
-  size_t i = 0;
+  std::size_t i = 0;
   sort_expression sort = op.sort();
   while (is_function_sort(sort) && (i < arity))
   {
     const function_sort& fsort=atermpp::down_cast<function_sort>(sort);
-    const size_t end=i+fsort.domain().size();
+    const std::size_t end=i+fsort.domain().size();
     assert(end-1<arity);
     result = application(result,&rewritten[0]+i,&rewritten[0]+end);
     i=end;
     sort = fsort.codomain();
   }
 
-  for (size_t i=0; i<arity; i++)
+  for (std::size_t i=0; i<arity; i++)
   {
     rewritten[i].~data_expression();
   }

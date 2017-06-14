@@ -66,7 +66,7 @@ class lpsparunfold
       * \post   The process parameter at index parameter_at_index is unfolded in the mCRL process specification.
       * \return The process specification in which the process parameter at parameter_at_index is unfolded.
     **/
-    mcrl2::lps::stochastic_specification algorithm(size_t parameter_at_index);
+    mcrl2::lps::stochastic_specification algorithm(std::size_t parameter_at_index);
 
   private:
     /// set of identifiers to use during fresh variable generation
@@ -138,7 +138,7 @@ class lpsparunfold
       * \return A function that returns the corresponding constructor given the
       *         case selector and constructors.
     **/
-    mcrl2::data::function_symbol create_case_function(size_t k);
+    mcrl2::data::function_symbol create_case_function(std::size_t k);
 
     /** \brief  Creates the determine function.
       * \return A function that maps a constructor to the fresh basic sort
@@ -194,7 +194,7 @@ class lpsparunfold
       * \param  parameter_at_index The index of the parameter for which the sort must be obtained.
       * \return the sort of the process parameter at given index.
     **/
-    mcrl2::data::sort_expression sort_at_process_parameter_index(size_t parameter_at_index);
+    mcrl2::data::sort_expression sort_at_process_parameter_index(std::size_t parameter_at_index);
 
     /** \brief  substitute function for replacing process parameters with unfolded process parameters functions.
       * \return substitute function for replacing process parameters with unfolded process parameters functions.
@@ -227,7 +227,7 @@ class lpsparunfold
       const mcrl2::data::function_symbol& case_function,
       mcrl2::data::function_symbol_vector affected_constructors,
       const mcrl2::data::function_symbol& determine_function,
-      size_t parameter_at_index,
+      std::size_t parameter_at_index,
       const mcrl2::data::function_symbol_vector& pi);
 
     /** \brief substitute unfold process parameter in the initialization of the linear process
@@ -238,7 +238,7 @@ class lpsparunfold
     **/
     mcrl2::lps::stochastic_process_initializer update_linear_process_initialization(
       const mcrl2::data::function_symbol& determine_function,
-      size_t parameter_at_index,
+      std::size_t parameter_at_index,
       const mcrl2::data::function_symbol_vector& pi);
 
     /** \brief Create distribution rules for distribution_functions over case_functions

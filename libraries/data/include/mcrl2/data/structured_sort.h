@@ -195,7 +195,7 @@ class structured_sort: public sort_expression
       data_equation_vector result;
 
       // give every constructor an index.
-      size_t index = 1;
+      std::size_t index = 1;
       for(structured_sort_constructor_list::const_iterator i = constructors().begin(); i != constructors().end(); ++i, ++index)
       {
         // constructor does not take arguments

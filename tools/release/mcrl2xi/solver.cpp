@@ -48,7 +48,7 @@ void Solver::solve(QString specification, QString dataExpression)
 
       mCRL2log(info) << "Solving: \"" << stdDataExpression << "\"" << std::endl;
 
-      size_t dotpos = stdDataExpression.find('.');
+      std::size_t dotpos = stdDataExpression.find('.');
       if (dotpos  == std::string::npos)
       {
         throw mcrl2::runtime_error("Expected input of the shape 'x1:Type1,...,xn:Typen.b' where b is a boolean expression.");

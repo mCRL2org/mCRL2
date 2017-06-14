@@ -58,35 +58,35 @@ transitionLabelToQString(const mcrl2::lts::action_label_string& label)
 class Selection
 {
   public:
-  const std::vector<size_t>& nodes;
-  const std::vector<size_t>& edges;
+  const std::vector<std::size_t>& nodes;
+  const std::vector<std::size_t>& edges;
 
   private:
   struct SelectionNode
   {
-    size_t id;                             // index in the complete node list
-    size_t index;                          // index in the selected node list
-    std::vector<size_t> inEdges, outEdges; // by edge id
-    size_t count;
+    std::size_t id;                             // index in the complete node list
+    std::size_t index;                          // index in the selected node list
+    std::vector<std::size_t> inEdges, outEdges; // by edge id
+    std::size_t count;
     bool bridge;
     SelectionNode() = default;
   };
   struct Edge
   {
-    size_t id;    // index in the complete edge list
-    size_t index; // index in the selected edge list
-    size_t count;
+    std::size_t id;    // index in the complete edge list
+    std::size_t index; // index in the selected edge list
+    std::size_t count;
     Edge() = default;
   };
 
   Graph& m_graph;
 
   // maps node/edge indices to selection Node/Edge objects
-  std::unordered_map<size_t, SelectionNode> m_selectionNodes;
-  std::unordered_map<size_t, Edge> m_edges;
+  std::unordered_map<std::size_t, SelectionNode> m_selectionNodes;
+  std::unordered_map<std::size_t, Edge> m_edges;
   // keeps track of node/edge indices in selection
-  std::vector<size_t> m_nodeIndices;
-  std::vector<size_t> m_edgeIndices;
+  std::vector<std::size_t> m_nodeIndices;
+  std::vector<std::size_t> m_edgeIndices;
 
   void repositionNode(const SelectionNode& node)
   {
@@ -98,8 +98,8 @@ class Selection
     }
 
     QVector3D centroid;
-    size_t count = 0;
-    for (size_t inEdge : node.inEdges)
+    std::size_t count = 0;
+    for (std::size_t inEdge : node.inEdges)
     {
       ::Graph::Edge& edge = m_graph.m_edges[inEdge];
       if (m_selectionNodes.count(edge.from()) != 0u)
@@ -108,7 +108,7 @@ class Selection
         ++count;
       }
     }
-    for (size_t outEdge : node.outEdges)
+    for (std::size_t outEdge : node.outEdges)
     {
       ::Graph::Edge& edge = m_graph.m_edges[outEdge];
       if (m_selectionNodes.count(edge.to()) != 0u)
@@ -127,7 +127,7 @@ class Selection
     }
   }
 
-  void repositionEdge(size_t edgeId)
+  void repositionEdge(std::size_t edgeId)
   {
     QVector3D pos1 = m_graph.m_nodes[m_graph.m_edges[edgeId].from()].pos();
     QVector3D pos2 = m_graph.m_nodes[m_graph.m_edges[edgeId].to()].pos();
@@ -137,7 +137,7 @@ class Selection
   }
 
   // creates, and increases count for node
-  SelectionNode& increaseNode(size_t nodeId)
+  SelectionNode& increaseNode(std::size_t nodeId)
   {
     if (m_selectionNodes.count(nodeId) != 0u)
     {
@@ -151,7 +151,7 @@ class Selection
     node.index = m_nodeIndices.size();
     m_nodeIndices.push_back(nodeId);
 
-    for (size_t i = 0; i < m_graph.m_edges.size(); ++i)
+    for (std::size_t i = 0; i < m_graph.m_edges.size(); ++i)
     {
       ::Graph::Edge& edge = m_graph.m_edges[i];
       if (edge.from() == nodeId)
@@ -171,7 +171,7 @@ class Selection
   }
 
   // creates, and increases count for edge
-  Edge& increaseEdge(size_t edgeId)
+  Edge& increaseEdge(std::size_t edgeId)
   {
     if (m_edges.count(edgeId) != 0u)
     {
@@ -192,7 +192,7 @@ class Selection
   }
 
   // decreases selection count for node, and purges
-  void decreaseNode(size_t nodeId)
+  void decreaseNode(std::size_t nodeId)
   {
     if (m_selectionNodes.count(nodeId) == 0u)
     {
@@ -202,10 +202,10 @@ class Selection
     SelectionNode& node = m_selectionNodes[nodeId];
     if (--node.count < 1)
     {
-      size_t last = m_nodeIndices.size() - 1;
+      std::size_t last = m_nodeIndices.size() - 1;
       if (node.index < last)
       {
-        size_t lastId = m_nodeIndices[last];
+        std::size_t lastId = m_nodeIndices[last];
         m_nodeIndices[node.index] = lastId;
         m_selectionNodes[lastId].index = node.index;
       }
@@ -215,7 +215,7 @@ class Selection
   }
 
   // decreases selection count for edge, and purges
-  void decreaseEdge(size_t edgeId)
+  void decreaseEdge(std::size_t edgeId)
   {
     if (m_edges.count(edgeId) == 0u)
     {
@@ -225,10 +225,10 @@ class Selection
     Edge& edge = m_edges[edgeId];
     if (--edge.count < 1)
     {
-      size_t last = m_edgeIndices.size() - 1;
+      std::size_t last = m_edgeIndices.size() - 1;
       if (edge.index < last)
       {
-        size_t lastId = m_edgeIndices[last];
+        std::size_t lastId = m_edgeIndices[last];
         m_edgeIndices[edge.index] = lastId;
         m_edges[lastId].index = edge.index;
       }
@@ -248,22 +248,22 @@ class Selection
 
     struct NodeInfo
     {
-      size_t id;
-      std::unordered_set<size_t> neighbors;
+      std::size_t id;
+      std::unordered_set<std::size_t> neighbors;
       bool searched{false};
-      size_t parent;
-      std::unordered_set<size_t> backEdges;
+      std::size_t parent;
+      std::unordered_set<std::size_t> backEdges;
       bool visited{false};
       bool leaf{false};
-      NodeInfo(size_t id = 0)
+      NodeInfo(std::size_t id = 0)
           : id(id),  parent(id) 
       {
       }
     };
     struct EdgeInfo
     {
-      size_t u, v;
-      EdgeInfo(size_t f, size_t t) : u(f < t ? f : t), v(f < t ? t : f)
+      std::size_t u, v;
+      EdgeInfo(std::size_t f, std::size_t t) : u(f < t ? f : t), v(f < t ? t : f)
       {
       }
       bool operator==(const EdgeInfo& e) const
@@ -273,22 +273,22 @@ class Selection
     };
     struct EdgeInfoHash
     {
-      size_t operator()(const EdgeInfo& e) const
+      std::size_t operator()(const EdgeInfo& e) const
       {
-        return std::hash<size_t>()(e.u) ^ (std::hash<size_t>()(e.v) << 1);
+        return std::hash<std::size_t>()(e.u) ^ (std::hash<std::size_t>()(e.v) << 1);
       };
     };
-    std::unordered_map<size_t, NodeInfo> nodes;
-    std::vector<size_t> order;
+    std::unordered_map<std::size_t, NodeInfo> nodes;
+    std::vector<std::size_t> order;
     std::unordered_set<EdgeInfo, EdgeInfoHash> chains;
 
     // generate simplified graph
     {
-      std::stack<size_t> progress;
+      std::stack<std::size_t> progress;
       progress.push(m_nodeIndices[0]);
       while (!progress.empty())
       {
-        size_t nodeId = progress.top();
+        std::size_t nodeId = progress.top();
         progress.pop();
         if (nodes.count(nodeId) != 0u)
         {
@@ -298,13 +298,13 @@ class Selection
         nodes[nodeId] = NodeInfo(nodeId);
         NodeInfo& nodeinfo = nodes[nodeId];
         SelectionNode& node = m_selectionNodes[nodeId];
-        for (size_t outEdge : node.outEdges)
+        for (std::size_t outEdge : node.outEdges)
         {
           if (m_edges.count(outEdge) == 0u)
           {
             continue;
           }
-          size_t otherId = m_graph.m_edges[outEdge].to();
+          std::size_t otherId = m_graph.m_edges[outEdge].to();
           if (nodeId == otherId || (m_selectionNodes.count(otherId) == 0u))
           {
             continue;
@@ -312,13 +312,13 @@ class Selection
           nodeinfo.neighbors.insert(otherId);
           progress.push(otherId);
         }
-        for (size_t inEdge : node.inEdges)
+        for (std::size_t inEdge : node.inEdges)
         {
           if (m_edges.count(inEdge) == 0u)
           {
             continue;
           }
-          size_t otherId = m_graph.m_edges[inEdge].from();
+          std::size_t otherId = m_graph.m_edges[inEdge].from();
           if (nodeId == otherId || (m_selectionNodes.count(otherId) == 0u))
           {
             continue;
@@ -331,11 +331,11 @@ class Selection
 
     // generate depth first search tree, find backedges
     {
-      std::stack<size_t> progress;
+      std::stack<std::size_t> progress;
       progress.push(m_nodeIndices[0]);
       while (!progress.empty())
       {
-        size_t nodeId = progress.top();
+        std::size_t nodeId = progress.top();
         progress.pop();
         NodeInfo& node = nodes[nodeId];
 
@@ -346,7 +346,7 @@ class Selection
         node.searched = true;
         order.push_back(nodeId);
 
-        for (size_t otherId : node.neighbors)
+        for (std::size_t otherId : node.neighbors)
         {
           if (!nodes[otherId].searched) // node was not yet processed:
           {
@@ -363,10 +363,10 @@ class Selection
 
     // find chains
     {
-      for (size_t nodeId : order)
+      for (std::size_t nodeId : order)
       {
         NodeInfo& node = nodes[nodeId];
-        for (size_t id : node.backEdges)
+        for (std::size_t id : node.backEdges)
         {
           node.visited = true;
           chains.insert(EdgeInfo(nodeId, id));
@@ -382,7 +382,7 @@ class Selection
 
     // find leafs
     {
-      for (size_t nodeId : order)
+      for (std::size_t nodeId : order)
       {
         SelectionNode& node = m_selectionNodes[nodeId];
         NodeInfo& nodeinfo = nodes[nodeId];
@@ -391,12 +391,12 @@ class Selection
           nodeinfo.leaf = false;
           continue;
         }
-        size_t count = 0;
-        for (size_t inEdge : node.inEdges)
+        std::size_t count = 0;
+        for (std::size_t inEdge : node.inEdges)
         {
           count += m_edges.count(inEdge) != 0u ? 1 : 0;
         }
-        for (size_t outEdge : node.outEdges)
+        for (std::size_t outEdge : node.outEdges)
         {
           count += m_edges.count(outEdge) != 0u ? 1 : 0;
         }
@@ -406,22 +406,22 @@ class Selection
 
     // find bridges
     {
-      for (size_t nodeId : order)
+      for (std::size_t nodeId : order)
       {
         SelectionNode& node = m_selectionNodes[nodeId];
         NodeInfo& nodeinfo = nodes[nodeId];
         node.bridge = false;
 
-        std::unordered_set<size_t> connected;
-        size_t connections = 0;
-        for (size_t inEdge : node.inEdges)
+        std::unordered_set<std::size_t> connected;
+        std::size_t connections = 0;
+        for (std::size_t inEdge : node.inEdges)
         {
           if (m_edges.count(inEdge) != 0u)
           {
             connected.insert(m_graph.m_edges[inEdge].from());
           }
         }
-        for (size_t outEdge : node.outEdges)
+        for (std::size_t outEdge : node.outEdges)
         {
           if ((m_edges.count(outEdge) != 0u) && m_edges[outEdge].count > 1)
           {
@@ -429,7 +429,7 @@ class Selection
           }
         }
 
-        for (size_t otherId : nodeinfo.neighbors)
+        for (std::size_t otherId : nodeinfo.neighbors)
         {
           bool isLeaf = nodes[otherId].leaf;
           bool isConnected = connected.count(otherId) != 0u;
@@ -454,14 +454,14 @@ class Selection
     /*{
       FILE* fp = fopen("selection.dot", "wt");
       fputs("digraph {\n\tnode [shape=circle];\n", fp);
-      for (size_t i = 0; i < order.size(); ++i)
+      for (std::size_t i = 0; i < order.size(); ++i)
       {
         NodeInfo& node = nodes[order[i]];
         const char *color = chains.count(EdgeInfo(node.id, node.parent)) ? "red"
     : "black";
         fprintf(fp, "\t\"%d\"->\"%d\" [color=%s];\n", node.id, node.parent,
     color);
-        for (std::unordered_set<size_t>::iterator
+        for (std::unordered_set<std::size_t>::iterator
           it = node.backEdges.begin(); it != node.backEdges.end(); ++it)
         {
           const char *color = chains.count(EdgeInfo(node.id, *it)) ? "red" :
@@ -479,23 +479,23 @@ class Selection
 
   // returns whether contracting this node will not leave orphans
   // standard depth-first search algorithm
-  bool contractable(size_t nodeId)
+  bool contractable(std::size_t nodeId)
   {
     SelectionNode& node = m_selectionNodes[nodeId];
-    std::unordered_set<size_t> nedges; // removed edges
-    std::unordered_set<size_t> neighbors;
-    for (size_t edgeId : node.inEdges)
+    std::unordered_set<std::size_t> nedges; // removed edges
+    std::unordered_set<std::size_t> neighbors;
+    for (std::size_t edgeId : node.inEdges)
     {
       if (m_edges.count(edgeId) != 0u)
       {
-        size_t otherId = m_graph.m_edges[edgeId].from();
+        std::size_t otherId = m_graph.m_edges[edgeId].from();
         if (m_selectionNodes.count(otherId) != 0u)
         {
           neighbors.insert(otherId);
         }
       }
     }
-    for (size_t edgeId : node.outEdges)
+    for (std::size_t edgeId : node.outEdges)
     {
       if (m_edges.count(edgeId) != 0u)
       {
@@ -503,7 +503,7 @@ class Selection
         {
           nedges.insert(edgeId);
         }
-        size_t otherId = m_graph.m_edges[edgeId].to();
+        std::size_t otherId = m_graph.m_edges[edgeId].to();
         if ((m_selectionNodes.count(otherId) != 0u) && m_selectionNodes[otherId].count > 1)
         {
           neighbors.insert(otherId);
@@ -515,12 +515,12 @@ class Selection
       return true;
     }
 
-    std::stack<size_t> progress;
-    std::unordered_set<size_t> status;
+    std::stack<std::size_t> progress;
+    std::unordered_set<std::size_t> status;
     progress.push(*neighbors.begin());
     while (!progress.empty())
     {
-      size_t nodeId = progress.top();
+      std::size_t nodeId = progress.top();
       progress.pop();
       if (status.count(nodeId) != 0u)
       {
@@ -535,14 +535,14 @@ class Selection
       }
 
       SelectionNode& node = m_selectionNodes[nodeId];
-      for (size_t edgeId : node.inEdges)
+      for (std::size_t edgeId : node.inEdges)
       {
         if ((m_edges.count(edgeId) != 0u) && (nedges.count(edgeId) == 0u))
         {
           progress.push(m_graph.m_edges[edgeId].from());
         }
       }
-      for (size_t edgeId : node.outEdges)
+      for (std::size_t edgeId : node.outEdges)
       {
         if ((m_edges.count(edgeId) != 0u) && (nedges.count(edgeId) == 0u))
         {
@@ -560,10 +560,10 @@ class Selection
   }
 
   // expand outgoing transitions and states for specified node
-  void expand(size_t nodeId)
+  void expand(std::size_t nodeId)
   {
     SelectionNode& node = increaseNode(nodeId);
-    for (size_t edgeId : node.outEdges)
+    for (std::size_t edgeId : node.outEdges)
     {
       increaseNode(m_graph.m_edges[edgeId].to());
       increaseEdge(edgeId);
@@ -572,12 +572,12 @@ class Selection
   }
 
   // contract outgoing transitions and states for specified node
-  void contract(size_t nodeId)
+  void contract(std::size_t nodeId)
   {
     if (m_selectionNodes.count(nodeId) != 0)
     {
       SelectionNode& node = m_selectionNodes[nodeId];
-      for (size_t edgeId : node.outEdges)
+      for (std::size_t edgeId : node.outEdges)
       {
         decreaseEdge(edgeId);
         decreaseNode(m_graph.m_edges[edgeId].to());
@@ -588,7 +588,7 @@ class Selection
   }
 
   // return true when contracting given node would leave unconnected parts
-  bool isContractable(size_t nodeId)
+  bool isContractable(std::size_t nodeId)
   {
     if (m_selectionNodes.count(nodeId) == 0u)
     {
@@ -604,7 +604,7 @@ class Selection
 
   // tells whether a node is part of a bridge (is a cut edge)
   // slightly more lenient as isContractable but fast (false positives)
-  bool isBridge(size_t nodeId)
+  bool isBridge(std::size_t nodeId)
   {
     if (m_selectionNodes.count(nodeId) == 0u)
     {
@@ -659,32 +659,32 @@ Graph::~Graph()
   }
 }
 
-size_t Graph::edgeCount() const
+std::size_t Graph::edgeCount() const
 {
   return m_edges.size();
 }
 
-size_t Graph::nodeCount() const
+std::size_t Graph::nodeCount() const
 {
   return m_nodes.size();
 }
 
-size_t Graph::transitionLabelCount() const
+std::size_t Graph::transitionLabelCount() const
 {
   return m_transitionLabels.size();
 }
 
-size_t Graph::stateLabelCount() const
+std::size_t Graph::stateLabelCount() const
 {
   return m_stateLabels.size();
 }
 
-size_t Graph::initialState() const
+std::size_t Graph::initialState() const
 {
   return m_initialState;
 }
 
-bool Graph::isTau(size_t labelindex) const
+bool Graph::isTau(std::size_t labelindex) const
 {
   return m_transitionLabels[labelindex].is_tau();
 }
@@ -748,13 +748,13 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
   m_stateLabels.reserve(lts.num_state_labels());
   m_stateLabelnodes.reserve(lts.num_states());
 
-  for (size_t i = 0; i < lts.num_state_labels(); ++i)
+  for (std::size_t i = 0; i < lts.num_state_labels(); ++i)
   {
     m_stateLabels.push_back(stateLabelToQString(lts.state_label(i)));
   }
 
   // Position nodes randomly
-  for (size_t i = 0; i < lts.num_states(); ++i)
+  for (std::size_t i = 0; i < lts.num_states(); ++i)
   {
     const bool is_not_probabilistic = false;
     m_nodes.emplace_back(
@@ -764,17 +764,17 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
   }
 
   // Store string representations of labels
-  for (size_t i = 0; i < lts.num_action_labels(); ++i)
+  for (std::size_t i = 0; i < lts.num_action_labels(); ++i)
   {
     QString label = transitionLabelToQString(lts.action_label(i));
     m_transitionLabels.push_back(LabelString(lts.is_tau(i), label));
   }
 
   // Assign and position edge handles, position edge labels
-  for (size_t i = 0; i < lts.num_transitions(); ++i)
+  for (std::size_t i = 0; i < lts.num_transitions(); ++i)
   {
     mcrl2::lts::transition& t = lts.get_transitions()[i];
-    size_t new_probabilistic_state = add_probabilistic_state<lts_t>(
+    std::size_t new_probabilistic_state = add_probabilistic_state<lts_t>(
         lts.probabilistic_state(t.to()), min, max);
     m_edges.emplace_back(t.from(), new_probabilistic_state);
     m_handles.push_back(Node(
@@ -791,7 +791,7 @@ void Graph::templatedLoad(const QString& filename, const QVector3D& min,
 }
 
 template <class lts_t>
-size_t Graph::add_probabilistic_state(
+std::size_t Graph::add_probabilistic_state(
     const typename lts_t::probabilistic_state_t& probabilistic_state,
     const QVector3D& min, const QVector3D& max)
 {
@@ -803,7 +803,7 @@ size_t Graph::add_probabilistic_state(
   {
     // There are multiple probabilistic states. Make a new state
     // with outgoing probabilistic transitions to all states.
-    size_t index_of_the_new_probabilistic_state = m_nodes.size();
+    std::size_t index_of_the_new_probabilistic_state = m_nodes.size();
     const bool is_probabilistic = true;
     m_nodes.emplace_back(
         QVector3D(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z())),
@@ -814,7 +814,7 @@ size_t Graph::add_probabilistic_state(
     // The following map recalls where probabilities are stored in
     // transitionLabels.
     typedef std::map<typename lts_t::probabilistic_state_t::probability_t,
-                     size_t>
+                     std::size_t>
         probability_map_t;
     probability_map_t probability_label_indices;
     for (const typename lts_t::probabilistic_state_t::state_probability_pair&
@@ -822,7 +822,7 @@ size_t Graph::add_probabilistic_state(
     {
       // Find an index for the probabilistic label of the outgoing transition of
       // the probabilistic state.
-      size_t label_index;
+      std::size_t label_index;
       const typename probability_map_t::const_iterator i =
           probability_label_indices.find(p.probability());
       if (i == probability_label_indices.end()) // not found
@@ -985,7 +985,7 @@ void Graph::saveXML(const QString& filename)
   root.setAttribute("transitionlabels", (int)transitionLabelCount());
   xml.appendChild(root);
 
-  for (size_t i = 0; i < stateLabelCount(); ++i)
+  for (std::size_t i = 0; i < stateLabelCount(); ++i)
   {
     QDomElement stateL = xml.createElement("StateLabel");
     stateL.setAttribute("value", (int)i);
@@ -993,7 +993,7 @@ void Graph::saveXML(const QString& filename)
     root.appendChild(stateL);
   }
 
-  for (size_t i = 0; i < nodeCount(); ++i)
+  for (std::size_t i = 0; i < nodeCount(); ++i)
   {
     QDomElement state = xml.createElement("State");
     state.setAttribute("value", (int)i);
@@ -1021,7 +1021,7 @@ void Graph::saveXML(const QString& filename)
     root.appendChild(stateL);
   }
 
-  for (size_t i = 0; i < transitionLabelCount(); ++i)
+  for (std::size_t i = 0; i < transitionLabelCount(); ++i)
   {
     QDomElement edgL = xml.createElement("TransitionLabel");
     edgL.setAttribute("value", (int)i);
@@ -1029,7 +1029,7 @@ void Graph::saveXML(const QString& filename)
     root.appendChild(edgL);
   }
 
-  for (size_t i = 0; i < edgeCount(); ++i)
+  for (std::size_t i = 0; i < edgeCount(); ++i)
   {
     QDomElement edg = xml.createElement("Transition");
     edg.setAttribute("value", (int)i);
@@ -1066,32 +1066,32 @@ void Graph::saveXML(const QString& filename)
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);
 }
 
-Edge Graph::edge(size_t index) const
+Edge Graph::edge(std::size_t index) const
 {
   return m_edges[index];
 }
 
-NodeNode& Graph::node(size_t index)
+NodeNode& Graph::node(std::size_t index)
 {
   return m_nodes[index];
 }
 
-Node& Graph::handle(size_t edge)
+Node& Graph::handle(std::size_t edge)
 {
   return m_handles[edge];
 }
 
-LabelNode& Graph::transitionLabel(size_t edge)
+LabelNode& Graph::transitionLabel(std::size_t edge)
 {
   return m_transitionLabelnodes[edge];
 }
 
-LabelNode& Graph::stateLabel(size_t index)
+LabelNode& Graph::stateLabel(std::size_t index)
 {
   return m_stateLabelnodes[index];
 }
 
-const QString& Graph::transitionLabelstring(size_t labelindex) const
+const QString& Graph::transitionLabelstring(std::size_t labelindex) const
 {
   if (labelindex >= m_transitionLabels.size())
   {
@@ -1100,7 +1100,7 @@ const QString& Graph::transitionLabelstring(size_t labelindex) const
   return m_transitionLabels[labelindex].label();
 }
 
-const QString& Graph::stateLabelstring(size_t labelindex) const
+const QString& Graph::stateLabelstring(std::size_t labelindex) const
 {
   if (labelindex >= m_stateLabels.size())
   {
@@ -1181,7 +1181,7 @@ void Graph::discardSelection()
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
 }
 
-void Graph::toggleActive(size_t index)
+void Graph::toggleActive(std::size_t index)
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
@@ -1203,7 +1203,7 @@ void Graph::toggleActive(size_t index)
   unlockForWrite(m_lock, GRAPH_LOCK_TRACE);
 }
 
-bool Graph::isToggleable(size_t index)
+bool Graph::isToggleable(std::size_t index)
 {
   if (m_sel == nullptr || index >= m_nodes.size())
   {
@@ -1214,8 +1214,8 @@ bool Graph::isToggleable(size_t index)
 
   // active node count:
   // Todo: improve this
-  size_t count = 0;
-  for (size_t nodeId : m_sel->nodes) {
+  std::size_t count = 0;
+  for (std::size_t nodeId : m_sel->nodes) {
     if (m_nodes[nodeId].m_active)
     {
       ++count;
@@ -1242,7 +1242,7 @@ void Graph::setStable(bool stable)
   unlockForRead(m_lock, GRAPH_LOCK_TRACE);
 }
 
-bool Graph::isBridge(size_t index) const
+bool Graph::isBridge(std::size_t index) const
 {
   return m_sel->isBridge(index);
 }
@@ -1252,17 +1252,17 @@ bool Graph::hasSelection() const
   return m_sel != nullptr;
 }
 
-size_t Graph::selectionEdge(size_t index) const
+std::size_t Graph::selectionEdge(std::size_t index) const
 {
   return m_sel->edges[index];
 }
 
-size_t Graph::selectionNode(size_t index) const
+std::size_t Graph::selectionNode(std::size_t index) const
 {
   return m_sel->nodes[index];
 }
 
-size_t Graph::selectionEdgeCount() const
+std::size_t Graph::selectionEdgeCount() const
 {
   if (m_sel == nullptr)
   {
@@ -1271,7 +1271,7 @@ size_t Graph::selectionEdgeCount() const
   return m_sel->edges.size();
 }
 
-size_t Graph::selectionNodeCount() const
+std::size_t Graph::selectionNodeCount() const
 {
   if (m_sel == nullptr)
   {

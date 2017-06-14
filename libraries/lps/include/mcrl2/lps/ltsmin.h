@@ -209,7 +209,7 @@ class pins_data_type
     }
 
     /// \brief Returns the value at index i
-    atermpp::aterm get(size_t i)
+    atermpp::aterm get(std::size_t i)
     {
       return m_indexed_set.get(i);
     }
@@ -347,19 +347,19 @@ class pins
     typedef data::rewriter::substitution_type substitution_t;
 
   protected:
-    size_t m_group_count;
-    size_t m_state_length; /**< the number of process parameters */
-    std::vector<std::vector<size_t> > m_read_group;
-    std::vector<std::vector<size_t> > m_write_group;
-    std::vector<std::vector<size_t> > m_update_group;
+    std::size_t m_group_count;
+    std::size_t m_state_length; /**< the number of process parameters */
+    std::vector<std::vector<std::size_t> > m_read_group;
+    std::vector<std::vector<std::size_t> > m_write_group;
+    std::vector<std::vector<std::size_t> > m_update_group;
     lps::specification m_specification;
     lps::next_state_generator m_generator;
     std::vector<data::variable> m_parameters_list;
     std::vector<std::string> m_process_parameter_names;
 
     atermpp::indexed_set<atermpp::aterm> m_guards;
-    std::vector<std::vector<size_t> > guard_parameters_list;
-    std::vector<std::vector<size_t> > m_guard_info;
+    std::vector<std::vector<std::size_t> > guard_parameters_list;
+    std::vector<std::vector<std::size_t> > m_guard_info;
     std::vector<std::string> m_guard_names;
 
     // For guard-splitting we use a different generator with a different spec.
@@ -459,7 +459,7 @@ class pins
 
       // iterate over the list of summands
       {
-        size_t i = 0;
+        std::size_t i = 0;
         for (const auto & summand : proc.action_summands())
         {
           std::set<data::variable> used_read_variables;
@@ -494,7 +494,7 @@ class pins
                                 std::inserter(used_write_parameters,
                                               used_write_parameters.begin()));
 
-          size_t j = 0;
+          std::size_t j = 0;
           for (auto & param : m_parameters_list)
           {
             if (used_read_parameters.find(param) != used_read_parameters.end())
@@ -515,7 +515,7 @@ class pins
 
       // iterate over the list of reduced summands
       {
-        size_t i = 0;
+        std::size_t i = 0;
         for (const auto & reduced_summand : process_reduced().action_summands())
         {
           std::set<data::variable> used_update_variables;
@@ -541,7 +541,7 @@ class pins
                                 std::inserter(used_update_parameters,
                                               used_update_parameters.begin()));
 
-          size_t j = 0;
+          std::size_t j = 0;
           for (auto & param : m_parameters_list)
           {
             if (used_update_parameters.find(param) != used_update_parameters.end())
@@ -585,7 +585,7 @@ class pins
       for (const auto & summand : spec.process().action_summands())
       {
         // contains info about which guards this transition group has.
-        std::vector<size_t> guard_info;
+        std::vector<std::size_t> guard_info;
 
         // the initial new condition of a summand is always true.
         // this maybe joined with conjuncts which have local variables.
@@ -598,7 +598,7 @@ class pins
         for (const auto & conjunct : conjuncts)
         {
           // check if the conjunct is new
-          size_t at = m_guards.index(conjunct);
+          std::size_t at = m_guards.index(conjunct);
           bool is_new = (at == atermpp::indexed_set<atermpp::aterm>::npos);
           bool use_conjunct_as_guard = true;
 
@@ -638,11 +638,11 @@ class pins
             }
             if (use_conjunct_as_guard) {
               // add conjunct to guards
-              std::vector<size_t> guard_parameters;
+              std::vector<std::size_t> guard_parameters;
               if (!conjunct_variables.empty())
               {
                 // compute indexes of parameters used by the guard
-                size_t p = 0;
+                std::size_t p = 0;
                 for (auto & param : m_parameters_list)
                 {
                   if (conjunct_variables.find(param) != conjunct_variables.end())
@@ -763,7 +763,7 @@ class pins
     /// \param[in] index the selected summand
     /// \returns reference to a vector of indices of parameters
     /// \pre 0 <= i < group_count()
-    const std::vector<size_t>& read_group(size_t index) const
+    const std::vector<std::size_t>& read_group(std::size_t index) const
     {
       return m_read_group[index];
     }
@@ -772,7 +772,7 @@ class pins
     /// \param[in] index the selected summand
     /// \returns reference to a vector of indices of parameters
     /// \pre 0 <= i < group_count()
-    const std::vector<size_t>& write_group(size_t index) const
+    const std::vector<std::size_t>& write_group(std::size_t index) const
     {
       return m_write_group[index];
     }
@@ -781,27 +781,27 @@ class pins
     /// \param[in] index the selected summand
     /// \returns reference to a vector of indices of parameters
     /// \pre 0 <= i < group_count()
-    const std::vector<size_t>& update_group(size_t index) const
+    const std::vector<std::size_t>& update_group(std::size_t index) const
     {
       return m_update_group[index];
     }
 
-    const std::vector<size_t>& guard_parameters(size_t index) const
+    const std::vector<std::size_t>& guard_parameters(std::size_t index) const
     {
       return guard_parameters_list[index];
     }
 
-    const std::vector<size_t>& guard_info(size_t index) const
+    const std::vector<std::size_t>& guard_info(std::size_t index) const
     {
       return m_guard_info[index];
     }
 
-    size_t guard_count() const
+    std::size_t guard_count() const
     {
       return m_guards.size();
     }
 
-    const std::string& guard_name(size_t index) {
+    const std::string& guard_name(std::size_t index) {
       return m_guard_names[index];
     }
 
@@ -842,7 +842,7 @@ class pins
     void get_initial_state(ltsmin_state_type& s)
     {
       state initial_state = m_generator.initial_states().front().state(); // Only the first state of this state distribution is considered.
-      for (size_t i = 0; i < m_state_length; i++)
+      for (std::size_t i = 0; i < m_state_length; i++)
       {
         s[i] = state_type_map(i)[initial_state[i]];
       }
@@ -880,7 +880,7 @@ class pins
     {
       std::size_t nparams = process_parameter_count();
       data::data_expression_vector state_arguments(nparams);
-      for (size_t i = 0; i < nparams; i++)
+      for (std::size_t i = 0; i < nparams; i++)
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
@@ -891,7 +891,7 @@ class pins
       for (next_state_generator::iterator i = m_generator.begin(source, &enumeration_queue); i; i++)
       {
         state destination = i->target_state();
-        for (size_t j = 0; j < nparams; j++)
+        for (std::size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
         }
@@ -941,7 +941,7 @@ class pins
     {
       std::size_t nparams = process_parameter_count();
       data::data_expression_vector state_arguments(nparams);
-      for (size_t i = 0; i < nparams; i++)
+      for (std::size_t i = 0; i < nparams; i++)
       {
         state_arguments[i] = static_cast<data::data_expression>(state_type_map(i).get(src[i]));
       }
@@ -951,7 +951,7 @@ class pins
       for (next_state_generator::iterator i = (*generator).begin(source, group, &enumeration_queue); i; i++)
       {
         state destination = i->target_state();
-        for (size_t j = 0; j < nparams; j++)
+        for (std::size_t j = 0; j < nparams; j++)
         {
           dest[j] = state_type_map(j)[destination[j]];
         }
@@ -963,7 +963,7 @@ class pins
     guard_evaluation_t eval_guard_long(ltsmin_state_type const& src, std::size_t guard) {
       std::size_t nparams = process_parameter_count();
       substitution_t substitution;
-      for (size_t i = 0; i < nparams; i++)
+      for (std::size_t i = 0; i < nparams; i++)
       {
         data::data_expression value(static_cast<data::data_expression>(state_type_map(i).get(src[i])));
         substitution[m_parameters_list[i]] = value;

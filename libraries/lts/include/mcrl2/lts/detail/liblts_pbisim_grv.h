@@ -48,7 +48,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
     *  \return The number of bisimulation equivalence classes of the LTS.
     */
-    size_t num_eq_classes() const
+    std::size_t num_eq_classes() const
     {
       return action_constellations.size();
     }
@@ -56,7 +56,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     /** \brief Gives the bisimulation equivalence class number of a state.
     *  \param[in] A state number.
     *  \return The number of the bisimulation equivalence class to which the state belongs to. */
-    size_t get_eq_class(const size_t s)
+    std::size_t get_eq_class(const std::size_t s)
     {
       assert(s < action_states.size());
       return action_states[s].parent_block;
@@ -65,7 +65,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     /** \brief Gives the bisimulation equivalence probabilistic class number of a probabilistic state.
     *  \param[in] A probabilistic state number.
     *  \return The number of the probabilistic class to which the state belongs to. */
-    size_t get_eq_probabilistic_class(const size_t s)
+    std::size_t get_eq_probabilistic_class(const std::size_t s)
     {
       assert(s<probabilistic_states.size());
       return probabilistic_states[s].parent_block; // The block index is the state number of the block.
@@ -130,7 +130,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     *  \param[in] t A state number.
     *  \retval true if \e s and \e t are in the same bisimulation equivalence class;
     *  \retval false otherwise. */
-    bool in_same_probabilistic_class_grv(const size_t s, const size_t t)
+    bool in_same_probabilistic_class_grv(const std::size_t s, const std::size_t t)
     {
       return get_eq_probabilistic_class(s) == get_eq_probabilistic_class(t);
     }
@@ -140,11 +140,11 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
     // --------------- BEGIN DECLARATION OF DATA TYPES ---------------------------------------------------------------
     
-    typedef size_t block_key_type;
-    typedef size_t constellation_key_type;
-    typedef size_t transition_key_type;
-    typedef size_t state_key_type;
-    typedef size_t label_type;
+    typedef std::size_t block_key_type;
+    typedef std::size_t constellation_key_type;
+    typedef std::size_t transition_key_type;
+    typedef std::size_t state_key_type;
+    typedef std::size_t label_type;
     // typedef probabilistic_arbitrary_precision_fraction probability_label_type;
     typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_label_type;
     // typedef probabilistic_arbitrary_precision_fraction probability_fraction_type;
@@ -155,7 +155,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       state_key_type from;
       label_type label;
       state_key_type to;
-      size_t* state_to_constellation_count_ptr;
+      std::size_t* state_to_constellation_count_ptr;
     };
 
     struct probabilistic_transition_type : public embedded_list_node < probabilistic_transition_type >
@@ -172,8 +172,8 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
       // Temporary
       bool mark_state;
-      size_t residual_transition_cnt;
-      size_t* transition_count_ptr;
+      std::size_t residual_transition_cnt;
+      std::size_t* transition_count_ptr;
     };
 
     struct probabilistic_state_type : public embedded_list_node < probabilistic_state_type >
@@ -242,13 +242,13 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
     struct action_constellation_type 
     {
       embedded_list<action_block_type> blocks;
-      size_t number_of_states;    // number of states in this constellation.
+      std::size_t number_of_states;    // number of states in this constellation.
     }; 
     
     struct probabilistic_constellation_type 
     {
       embedded_list<probabilistic_block_type> blocks;
-      size_t number_of_states;    // number of states in this constellation.
+      std::size_t number_of_states;    // number of states in this constellation.
     };
 
     // --------------- END DECLARATION OF DATA TYPES ---------------------------------------------------------------
@@ -275,7 +275,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
       public:
         /* set the size of the vector m_transitions_per_label */
-        void initialize(const size_t number_of_labels)
+        void initialize(const std::size_t number_of_labels)
         { 
           m_transitions_per_label=std::vector< embedded_list<action_transition_type> >(number_of_labels);
         }
@@ -331,7 +331,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
     // The storage to store the state_to_constellation counts for each transition. Transition refer with
     // a pointer to the elements in this deque. 
-    std::deque<size_t> state_to_constellation_count;
+    std::deque<std::size_t> state_to_constellation_count;
 
     // The lists below contains all the non trivial constellations.
     std::stack<action_constellation_type*> non_trivial_action_constellations;
@@ -354,8 +354,8 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       // Check whether the constellation count in action transitions is ok. 
       for(const action_transition_type& t: action_transitions)
       {
-        size_t constellation=probabilistic_blocks[probabilistic_states[t.to].parent_block].parent_constellation;
-        size_t count_state_to_constellation=0;
+        std::size_t constellation=probabilistic_blocks[probabilistic_states[t.to].parent_block].parent_constellation;
+        std::size_t count_state_to_constellation=0;
         
         for(const action_transition_type& t1: action_transitions)
         {
@@ -378,7 +378,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       // Check whether the number of states in an action constellation are correct.
       for(const action_constellation_type& c: action_constellations)
       {
-        size_t counted_states=0;
+        std::size_t counted_states=0;
         for(const action_block_type& b: c.blocks)
         {
           counted_states=counted_states+b.states.size();
@@ -389,7 +389,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       // Check whether the number of states in a probabilistic constellation are correct.
       for(const probabilistic_constellation_type& c: probabilistic_constellations)
       {
-        size_t counted_states=0;
+        std::size_t counted_states=0;
         for(const probabilistic_block_type& b: c.blocks)
         {
           counted_states=counted_states+b.states.size();
@@ -516,7 +516,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
 //-----------------------------------------------------------------------------
       // state_to_const_count_temp is used to keep track of the block to constellation count per label of each state.
-      std::vector<size_t*> new_count_ptr(aut.num_states(),nullptr);
+      std::vector<std::size_t*> new_count_ptr(aut.num_states(),nullptr);
       
       for (const embedded_list<action_transition_type>& at_list_per_label : transitions_per_label.transitions())
       {
@@ -592,7 +592,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
 
       // Initialise the probabilistic transitions. To this end, we have to iterate over
       // all probabilistic states.
-      for (size_t i = 0; i < aut.num_probabilistic_states(); i++)
+      for (std::size_t i = 0; i < aut.num_probabilistic_states(); i++)
       {
         const typename LTS_TYPE::probabilistic_state_t& ps = aut.probabilistic_state(i);
 
@@ -622,7 +622,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
       {
         marked_action_blocks.clear();
         // The line below garbage collects marked_action_blocks to avoid covering too much memory continuously;
-        static size_t count=0; if (count++ == 1000) { marked_action_blocks.shrink_to_fit(); count=0; }
+        static std::size_t count=0; if (count++ == 1000) { marked_action_blocks.shrink_to_fit(); count=0; }
 
         for(const action_transition_type& t: t_list)
         {
@@ -728,7 +728,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
           // Derive the left, right and middle sets from mark function.
           marked_probabilistic_blocks.clear();
           // The line below garbage collects marked_action_blocks to avoid covering too much memory continuously;
-          static size_t count=0; if (count++ == 1000) { marked_probabilistic_blocks.shrink_to_fit(); count=0; }
+          static std::size_t count=0; if (count++ == 1000) { marked_probabilistic_blocks.shrink_to_fit(); count=0; }
 
           mark_probabilistic(*Bc_ptr, marked_probabilistic_blocks);
 
@@ -972,7 +972,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
         // Clear this locally used data structure and reset it so now and then to avoid that it requires
         // too much data. 
         grouped_states_per_probability_in_block.clear();
-        static size_t count=0; if (count++ == 1000) { marked_action_blocks.shrink_to_fit(); count=0; }
+        static std::size_t count=0; if (count++ == 1000) { marked_action_blocks.shrink_to_fit(); count=0; }
 
         embedded_list<probabilistic_state_type> middle_temp=B.left;
         B.left.clear();
@@ -1146,7 +1146,7 @@ class prob_bisim_partitioner_grv  // Called after Groote, Rivera Verduzco and de
         // is in the middle set; hence, the state_to_constellation_count has to be updated.
         if (s.residual_transition_cnt > 0)
         {
-          size_t state_to_constellation_count_old = *t.state_to_constellation_count_ptr;
+          std::size_t state_to_constellation_count_old = *t.state_to_constellation_count_ptr;
 
           if (state_to_constellation_count_old != s.residual_transition_cnt)
           {
@@ -1354,8 +1354,8 @@ bool destructive_probabilistic_bisimulation_grv_compare(
   LTS_TYPE& l2,
    utilities::execution_timer& timer)
 {
-  size_t initial_probabilistic_state_key_l1;
-  size_t initial_probabilistic_state_key_l2;
+  std::size_t initial_probabilistic_state_key_l1;
+  std::size_t initial_probabilistic_state_key_l2;
 
   // Merge states
   mcrl2::lts::detail::plts_merge(l1, l2);

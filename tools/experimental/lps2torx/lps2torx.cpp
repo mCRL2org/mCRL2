@@ -181,7 +181,7 @@ class torx_tool : public rewriter_tool< input_tool >
               break;
             }
 
-            size_t index = atoi(s.substr(1, s.size()-1 ).c_str());
+            std::size_t index = atoi(s.substr(1, s.size()-1 ).c_str());
             if (index >= states.size())
             {
               std::cout << "E0 value " << index << " not valid" << std::endl;
@@ -193,7 +193,7 @@ class torx_tool : public rewriter_tool< input_tool >
               std::cout << "EB" << std::endl;
               current = states[index];
 
-              for(size_t summand_index = 0; summand_index < spec.process().action_summands().size(); ++summand_index)
+              for(std::size_t summand_index = 0; summand_index < spec.process().action_summands().size(); ++summand_index)
               {
                 next_state_generator::enumerator_queue_t enumeration_queue;
                 for (next_state_generator::iterator i = generator.begin(current, summand_index, &enumeration_queue); i != generator.end(); i++)

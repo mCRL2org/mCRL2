@@ -21,7 +21,7 @@ MarkStateRuleDialog::MarkStateRuleDialog(QWidget *parent, LTS* lts, QColor color
 
   setColor(color);
 
-  for (size_t i = 0; i < m_lts->getNumParameters(); i++)
+  for (std::size_t i = 0; i < m_lts->getNumParameters(); i++)
   {
     m_ui.parameterList->addItem(QString::fromStdString(m_lts->getParameterName(i)));
   }
@@ -91,7 +91,7 @@ void MarkStateRuleDialog::parameterSelected()
 
     m_ui.valueList->clear();
     std::vector<std::string> domain = m_lts->getParameterDomain(parameter);
-    for (size_t i = 0; i < domain.size(); i++)
+    for (std::size_t i = 0; i < domain.size(); i++)
     {
       m_ui.valueList->addItem(QString::fromStdString(domain[i]));
       m_ui.valueList->item(i)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);

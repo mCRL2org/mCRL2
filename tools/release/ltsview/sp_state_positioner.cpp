@@ -121,7 +121,7 @@ void NodeClusterStatePositioner::positionStates()
 void NodeClusterStatePositioner::buildRTree()
 {
   PackedRTreeBuilder rtree_builder = PackedRTreeBuilder();
-  for (size_t ring = 0; ring < num_ring_slots.size(); ++ring)
+  for (std::size_t ring = 0; ring < num_ring_slots.size(); ++ring)
   {
     float radius = ring * delta_ring;
     int num_slots = num_ring_slots[ring];
@@ -199,7 +199,7 @@ void LeafClusterStatePositioner::positionStates()
     cluster->getState(0)->center();
     ++state_begin;
   }
-  for (size_t ring = 1; ring < num_ring_states.size(); ++ring)
+  for (std::size_t ring = 1; ring < num_ring_states.size(); ++ring)
   {
     float radius = delta_ring * ring;
     int num_states = num_ring_states[ring];
@@ -218,13 +218,13 @@ void LeafClusterStatePositioner::positionStates()
 void LeafClusterStatePositioner::computeNumRingStates()
 {
   int total_slots = 0;
-  for (size_t ring = 0; ring < num_ring_slots.size(); ++ring)
+  for (std::size_t ring = 0; ring < num_ring_slots.size(); ++ring)
   {
     total_slots += num_ring_slots[ring];
   }
   int todo_states = cluster->getNumStates();
   num_ring_states.assign(num_ring_slots.size(), 0);
-  for (size_t ring = 0; ring < num_ring_slots.size(); ++ring)
+  for (std::size_t ring = 0; ring < num_ring_slots.size(); ++ring)
   {
     if (ring == num_ring_slots.size() - 1)
     {

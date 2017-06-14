@@ -10,20 +10,20 @@
 
 #include "node.h"
 
-void Node::swapTupleVal(size_t idx1, size_t idx2)
+void Node::swapTupleVal(std::size_t idx1, std::size_t idx2)
 {
   double temp = tuple[idx1];
   tuple[idx1] = tuple[idx2];
   tuple[idx2] = temp;
 }
 
-void Node::moveTupleVal(size_t idxFr, size_t idxTo)
+void Node::moveTupleVal(std::size_t idxFr, std::size_t idxTo)
 {
   double temp = tuple[idxFr];
 
   if (idxFr < idxTo)
   {
-    for (size_t i = idxFr; i < idxTo; ++i)
+    for (std::size_t i = idxFr; i < idxTo; ++i)
     {
       tuple[i] = tuple[i+1];
     }
@@ -31,7 +31,7 @@ void Node::moveTupleVal(size_t idxFr, size_t idxTo)
   }
   else if (idxTo < idxFr)
   {
-    for (size_t i = idxFr; i > idxTo; --i)
+    for (std::size_t i = idxFr; i > idxTo; --i)
     {
       tuple[i] = tuple[i-1];
     }
@@ -39,11 +39,11 @@ void Node::moveTupleVal(size_t idxFr, size_t idxTo)
   }
 }
 
-void Node::moveTupleVals(std::map<size_t, size_t> &idcsFrTo)
+void Node::moveTupleVals(std::map<std::size_t, std::size_t> &idcsFrTo)
 {
   std::vector<double> tupleNew(idcsFrTo.size(), -1);
 
-  for (size_t i = 0; i < idcsFrTo.size(); ++i)
+  for (std::size_t i = 0; i < idcsFrTo.size(); ++i)
   {
     tupleNew[idcsFrTo[i]] = tuple[i];
   }

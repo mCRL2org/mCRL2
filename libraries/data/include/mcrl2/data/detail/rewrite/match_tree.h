@@ -242,11 +242,11 @@ class match_tree_A:public match_tree
       assert(isA());
     }
 
-    match_tree_A(const size_t n):
+    match_tree_A(const std::size_t n):
           match_tree(atermpp::aterm_appl(afunA(),atermpp::aterm_int(n)))
     {}
 
-    size_t variable_index() const
+    std::size_t variable_index() const
     {
       return atermpp::down_cast<const atermpp::aterm_int>((*this)[0]).value();
     }
@@ -333,9 +333,9 @@ class match_tree_N:public match_tree
     }
     
     /// Constructor. Builds a new term around a match_tree.
-    /// The extra non-used size_t is provided, to distinghuish this
+    /// The extra non-used std::size_t is provided, to distinghuish this
     /// constructor from the default copy constructor.
-    match_tree_N(const match_tree& result_tree, size_t):
+    match_tree_N(const match_tree& result_tree, std::size_t):
           match_tree(atermpp::aterm_appl(afunN(),result_tree))
     {}
 
@@ -359,9 +359,9 @@ class match_tree_D:public match_tree
     }
     
     /// Constructor. Builds a new term around a match_tree.
-    /// The extra non-used size_t is provided, to distinghuish this
+    /// The extra non-used std::size_t is provided, to distinghuish this
     /// constructor from the default copy constructor.
-    match_tree_D(const match_tree& result_tree, size_t):
+    match_tree_D(const match_tree& result_tree, std::size_t):
           match_tree(atermpp::aterm_appl(afunD(),result_tree))
     {}
 
@@ -524,7 +524,7 @@ class match_tree_Me:public match_tree
       assert(isMe());
     }
     
-    match_tree_Me(const variable& match_variable, const size_t variable_index):
+    match_tree_Me(const variable& match_variable, const std::size_t variable_index):
            match_tree(atermpp::aterm_appl(afunMe(),match_variable,atermpp::aterm_int(variable_index)))
     {}
 
@@ -533,7 +533,7 @@ class match_tree_Me:public match_tree
       return atermpp::down_cast<const variable>((*this)[0]);
     }
 
-    size_t variable_index() const
+    std::size_t variable_index() const
     {
       return (atermpp::down_cast<const atermpp::aterm_int>((*this)[1])).value();
     }

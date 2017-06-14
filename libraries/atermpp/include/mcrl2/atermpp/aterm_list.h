@@ -42,7 +42,7 @@ class term_list:public aterm
     typedef const Term& const_reference;
 
     /// An unsigned integral type.
-    typedef size_t size_type;
+    typedef std::size_t size_type;
 
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
@@ -243,7 +243,7 @@ class term_list:public aterm
     /// \return The size of the list.
     size_type size() const
     {
-      size_t size=0;
+      std::size_t size=0;
       for(const_iterator i=begin(); i!=end(); ++i)
       {
         ++size;
@@ -276,7 +276,7 @@ class term_list:public aterm
     /// \return The largest possible size of the list.
     size_type max_size() const
     {
-      return (std::numeric_limits<size_t>::max)();
+      return (std::numeric_limits<std::size_t>::max)();
     }
 };
 
@@ -299,7 +299,7 @@ class _aterm_list:public _aterm
     term_list<Term> tail;
 };
 
-static const size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(size_t);
+static const std::size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(std::size_t);
 } // namespace detail
 /// \endcond
 
@@ -345,7 +345,7 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m);
 /// \return The element at position i in the list l.
 template <typename Term>
 inline
-const Term& element_at(const term_list<Term>& l, size_t m)
+const Term& element_at(const term_list<Term>& l, std::size_t m)
 {
   assert(l.size()>m);
   typename term_list<Term>::const_iterator i=l.begin();

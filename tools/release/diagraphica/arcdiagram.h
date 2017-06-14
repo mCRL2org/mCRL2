@@ -50,18 +50,18 @@ class ArcDiagram : public Visualizer
         Graph* g);
     virtual ~ArcDiagram();
 
-    void getAttrsTree(std::vector< size_t > &idcs);
+    void getAttrsTree(std::vector< std::size_t > &idcs);
 
-    void setAttrsTree(const std::vector< size_t > idcs);
+    void setAttrsTree(const std::vector< std::size_t > idcs);
 
     void setDiagram(Diagram* dgrm);
     void hideAllDiagrams();
 
     void markLeaf(
-        const size_t& leafIdx,
+        const std::size_t& leafIdx,
         QColor col);
     void unmarkLeaves();
-    void markBundle(const size_t& idx);
+    void markBundle(const std::size_t& idx);
     void unmarkBundles();
 
     // -- visualization functions  ----------------------------------
@@ -91,7 +91,7 @@ class ArcDiagram : public Visualizer
   protected:
     // -- utility drawing functions ---------------------------------
     void clear();
-    QColor calcColor(size_t iter, size_t numr);
+    QColor calcColor(std::size_t iter, std::size_t numr);
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
 
@@ -100,7 +100,7 @@ class ArcDiagram : public Visualizer
     void calcSettingsTree();
     void calcPositionsTree(
         Cluster* c,
-        const size_t& maxLvl,
+        const std::size_t& maxLvl,
         const double& itvHgt);
     void calcSettingsBarTree();
     void calcPositionsBarTree(
@@ -126,23 +126,23 @@ class ArcDiagram : public Visualizer
     void handleHits(const std::vector< int > &ids);
 
     void handleHoverCluster(
-        const size_t& i,
-        const size_t& j);
-    void handleHoverBundle(const size_t& bndlIdx);
+        const std::size_t& i,
+        const std::size_t& j);
+    void handleHoverBundle(const std::size_t& bndlIdx);
     void handleHoverBarTree(
         const int& i,
         const int& j);
 
-    void handleShowDiagram(const size_t& dgrmIdx);
+    void handleShowDiagram(const std::size_t& dgrmIdx);
     void handleDragDiagram();
     void handleDragDiagram(const int& dgrmIdx);
-    void handleRwndDiagram(const size_t& dgrmIdx);
-    void handlePrevDiagram(const size_t& dgrmIdx);
-    void handlePlayDiagram(const size_t& dgrmIdx);
-    void handleNextDiagram(const size_t& dgrmIdx);
+    void handleRwndDiagram(const std::size_t& dgrmIdx);
+    void handlePrevDiagram(const std::size_t& dgrmIdx);
+    void handlePlayDiagram(const std::size_t& dgrmIdx);
+    void handleNextDiagram(const std::size_t& dgrmIdx);
 
-    void showDiagram(const size_t& dgrmIdx);
-    void hideDiagram(const size_t& dgrmIdx);
+    void showDiagram(const std::size_t& dgrmIdx);
+    void hideDiagram(const std::size_t& dgrmIdx);
 
     // -- hit detection ---------------------------------------------
     void processHits(
@@ -165,7 +165,7 @@ class ArcDiagram : public Visualizer
     // vis settings leaves
     std::vector< Position2D > posLeaves;
     double               radLeaves;
-    size_t                  idxInitStLeaves;
+    std::size_t                  idxInitStLeaves;
 
     // vis settings hierarchy
     std::vector< Attribute* >           attrsTree;
@@ -182,17 +182,17 @@ class ArcDiagram : public Visualizer
     std::vector< bool >                 showDgrm;        // show/hide diagram for every leaf node
     std::vector< std::vector< Attribute* > > attrsDgrm;       // association, attributes linked to shown diagrams
     std::vector< std::vector< Cluster* > >   framesDgrm;      // composition, clusters of identical states for shown diagrams
-    std::vector< size_t >                  frameIdxDgrm;    // current index into framesDgrm
+    std::vector< std::size_t >                  frameIdxDgrm;    // current index into framesDgrm
     std::vector< Position2D >           posDgrm;         // positions of diagrams
-    size_t                         dragIdxDgrm;     // diagram currently being dragged
-    size_t                         animIdxDgrm;     // diagram currently being animated
-    size_t                         currIdxDgrm;
+    std::size_t                         dragIdxDgrm;     // diagram currently being dragged
+    std::size_t                         animIdxDgrm;     // diagram currently being animated
+    std::size_t                         currIdxDgrm;
 
     // simulator
-    size_t prevFrameIdxClust;
-    size_t currFrameIdxClust;
-    size_t nextFrameIdxClust;
-    std::map< size_t, std::vector< QColor > > markLeaves;
+    std::size_t prevFrameIdxClust;
+    std::size_t currFrameIdxClust;
+    std::size_t nextFrameIdxClust;
+    std::map< std::size_t, std::vector< QColor > > markLeaves;
 
     // animation
     QTimer m_animationTimer;

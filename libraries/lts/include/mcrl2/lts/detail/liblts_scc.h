@@ -67,7 +67,7 @@ class scc_partitioner
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
      *  \return The number of bisimulation equivalence classes of the LTS.
      */
-    size_t num_eq_classes() const;
+    std::size_t num_eq_classes() const;
 
     /** \brief Gives the equivalence class number of a state.
      *  The equivalence class numbers range from 0 upto (and excluding)
@@ -75,7 +75,7 @@ class scc_partitioner
      *  \param[in] s A state number.
      *  \return The number of the equivalence class to which \e s
      *    belongs. */
-    size_t get_eq_class(const size_t s) const;
+    std::size_t get_eq_class(const std::size_t s) const;
 
     /** \brief Returns whether two states are in the same bisimulation
      *     equivalence class.
@@ -84,12 +84,12 @@ class scc_partitioner
      * \retval true if \e s and \e t are in the same bisimulation
      *    equivalence class;
      * \retval false otherwise. */
-    bool in_same_class(const size_t s, const size_t t) const;
+    bool in_same_class(const std::size_t s, const std::size_t t) const;
 
   private:
 
-    typedef size_t state_type;
-    typedef size_t label_type;
+    typedef std::size_t state_type;
+    typedef std::size_t label_type;
 
     LTS_TYPE& aut;
 
@@ -195,14 +195,14 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
     /* Create a vector for the new labels */
     std::vector<typename LTS_TYPE::state_label_t> new_labels(num_eq_classes());
 
-    for(size_t i=aut.num_states(); i>0; )
+    for(std::size_t i=aut.num_states(); i>0; )
     {
       --i;
-      const size_t new_index=block_index_of_a_state[i];
+      const std::size_t new_index=block_index_of_a_state[i];
       new_labels[new_index]=new_labels[new_index]+aut.state_label(i);
     }
 
-    for(size_t i=0; i<num_eq_classes(); ++i)
+    for(std::size_t i=0; i<num_eq_classes(); ++i)
     {
       aut.set_state_label(i,new_labels[i]);
     }
@@ -213,19 +213,19 @@ void scc_partitioner<LTS_TYPE>::replace_transition_system(const bool preserve_di
 }
 
 template < class LTS_TYPE>
-size_t scc_partitioner<LTS_TYPE>::num_eq_classes() const
+std::size_t scc_partitioner<LTS_TYPE>::num_eq_classes() const
 {
   return equivalence_class_index;
 }
 
 template < class LTS_TYPE>
-size_t scc_partitioner<LTS_TYPE>::get_eq_class(const size_t s) const
+std::size_t scc_partitioner<LTS_TYPE>::get_eq_class(const std::size_t s) const
 {
   return block_index_of_a_state[s];
 }
 
 template < class LTS_TYPE>
-bool scc_partitioner<LTS_TYPE>::in_same_class(const size_t s, const size_t t) const
+bool scc_partitioner<LTS_TYPE>::in_same_class(const std::size_t s, const std::size_t t) const
 {
   return get_eq_class(s)==get_eq_class(t);
 }

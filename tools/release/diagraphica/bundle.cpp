@@ -24,7 +24,7 @@ Bundle::Bundle()
 }
 
 
-Bundle::Bundle(const size_t& idx)
+Bundle::Bundle(const std::size_t& idx)
 {
   index      = idx;
   parent     = 0;
@@ -72,7 +72,7 @@ void Bundle::setEdges(const vector< Edge* > &e)
   edges = e;
 
   labels.clear();
-  for (size_t i = 0; i < edges.size(); ++i)
+  for (std::size_t i = 0; i < edges.size(); ++i)
   {
     labels.insert(pair< string, string >(edges[i]->getLabel(), "MAY"));
   }
@@ -82,7 +82,7 @@ void Bundle::setEdges(const vector< Edge* > &e)
 // -- get functions -------------------------------------------------
 
 
-Bundle* Bundle::getChild(const size_t& idx)
+Bundle* Bundle::getChild(const std::size_t& idx)
 {
   if (idx >= children.size())
     return 0;
@@ -90,7 +90,7 @@ Bundle* Bundle::getChild(const size_t& idx)
 }
 
 
-Edge* Bundle::getEdge(const size_t& idx)
+Edge* Bundle::getEdge(const std::size_t& idx)
 {
   if (idx >= edges.size())
     throw mcrl2::runtime_error("Error retrieving bundle edge.");
@@ -133,8 +133,8 @@ void Bundle::getLabels(
 {
   lbls = "";
 
-  size_t size  = labels.size();
-  size_t count = 0;
+  std::size_t size  = labels.size();
+  std::size_t count = 0;
 
   map< string, string >::iterator it;
   for (it = labels.begin(); it != labels.end(); ++it)
@@ -158,7 +158,7 @@ void Bundle::getLabels(
 
 void Bundle::clearChildren()
 {
-  for (size_t i = 0; i < children.size(); ++i)
+  for (std::size_t i = 0; i < children.size(); ++i)
   {
     children[i] = 0;
   }
@@ -168,7 +168,7 @@ void Bundle::clearChildren()
 
 void Bundle::clearEdges()
 {
-  for (size_t i = 0; i < edges.size(); ++i)
+  for (std::size_t i = 0; i < edges.size(); ++i)
   {
     edges[i] = 0;
   }

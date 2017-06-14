@@ -29,7 +29,7 @@ namespace detail
 class nfs_array : public std::vector<bool>
 {
 public:
-  nfs_array(size_t size)
+  nfs_array(std::size_t size)
     : std::vector<bool>(size, false)
   { }
 
@@ -47,7 +47,7 @@ public:
   ///
   bool next()
   {
-    size_t index = 0;
+    std::size_t index = 0;
     while (index < size())
     {
       if (at(index))
@@ -64,12 +64,12 @@ public:
     return false;
   }
 
-  operator size_t() const
+  operator std::size_t() const
   {
-    assert(8 * sizeof(size_t) > size());
-    size_t result = 0;
-    size_t mask = 1;
-    for (size_t i = 0; i < size(); ++i, mask <<= 1)
+    assert(8 * sizeof(std::size_t) > size());
+    std::size_t result = 0;
+    std::size_t mask = 1;
+    for (std::size_t i = 0; i < size(); ++i, mask <<= 1)
     {
       if (at(i))
       {

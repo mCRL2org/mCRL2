@@ -31,12 +31,10 @@ namespace detail
 class Induction
 {
   private:
-    /// \brief The smallest number x for which no variable named "dummyx" exists.
-    // size_t f_fresh_dummy_number;
     set_identifier_generator fresh_identifier_generator;
 
     /// \brief The number of variables used during the last application of induction.
-    size_t f_count;
+    std::size_t f_count;
 
     /// \brief An expression of sort Bool in mCRL2 format.
     data_expression f_formula;
@@ -193,8 +191,8 @@ class Induction
     /// \brief
     data_expression_list create_clauses(const data_expression& a_formula,
                              const data_expression& a_hypothesis,
-                             const size_t a_variable_number,
-                             const size_t a_number_of_variables,
+                             const std::size_t a_variable_number,
+                             const std::size_t a_number_of_variables,
                              const variable_list& a_list_of_variables,
                              const variable_list& a_list_of_dummies)
     {

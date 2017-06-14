@@ -33,7 +33,7 @@ namespace lps
 
 // Compute the number of booleans needed to represent a set of size n.
 inline
-size_t nr_of_booleans_for_elements(size_t n)
+std::size_t nr_of_booleans_for_elements(std::size_t n)
 {
   if(n == 1)
   {
@@ -93,8 +93,8 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
       }
       else
       {
-        size_t n = enumerated_elements.size();
-        size_t m = 1 << (new_parameters.size() - 1);  //m == 2^(new_parameters.size() - 1)
+        std::size_t n = enumerated_elements.size();
+        std::size_t m = 1 << (new_parameters.size() - 1);  //m == 2^(new_parameters.size() - 1)
 
         if (m > n)
         {
@@ -159,7 +159,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
           m_enumerated_elements[par] = enumerated_elements;
 
           //Calculate the number of booleans needed to encode par
-          size_t n = nr_of_booleans_for_elements(enumerated_elements.size());
+          std::size_t n = nr_of_booleans_for_elements(enumerated_elements.size());
 
           //Set hint for fresh variable names
           std::string par_name = par.name();
@@ -167,7 +167,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
           // Temp list for storage
           data::variable_vector new_pars;
           //Create new parameters and add them to the parameter list.
-          for (size_t i = 0; i<n; ++i)
+          for (std::size_t i = 0; i<n; ++i)
           {
             data::variable v(generator(par_name), data::sort_bool::bool_());
             new_parameters.push_back(v);
@@ -218,7 +218,7 @@ class binary_algorithm: public detail::lps_algorithm<Specification>
 
           mCRL2log(log::debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(a.lhs()) << std::endl;
 
-          for (size_t j = 0; j < new_parameters.size(); ++j)
+          for (std::size_t j = 0; j < new_parameters.size(); ++j)
           {
             data::data_expression_vector disjuncts;
 

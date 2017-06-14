@@ -146,7 +146,7 @@ assignment_expression_list jittyc_local_push_front(assignment_expression_list l,
 }
 
 static inline
-size_t get_index(const function_symbol& func)
+std::size_t get_index(const function_symbol& func)
 {
   return mcrl2::core::index_traits<function_symbol, function_symbol_key_type, 2>::index(func);
 }
@@ -167,9 +167,9 @@ uintptr_t uint_address(const atermpp::aterm& t)
 // Rewriting functions
 //
 
-static inline rewriter_function get_precompiled_rewrite_function(const function_symbol& f, const size_t arity, const bool arguments_in_normal_form)
+static inline rewriter_function get_precompiled_rewrite_function(const function_symbol& f, const std::size_t arity, const bool arguments_in_normal_form)
 {
-  const size_t index = get_index(f);
+  const std::size_t index = get_index(f);
   if (index>=INDEX_BOUND || arity>=ARITY_BOUND)
   {
     return NULL;
@@ -211,7 +211,7 @@ data_expression rewrite_appl_aux(const application& t)
   function_symbol thead;
   if (head_is_function_symbol(t, thead))
   {
-    const size_t arity=recursive_number_of_args(t);
+    const std::size_t arity=recursive_number_of_args(t);
     const rewriter_function f = get_precompiled_rewrite_function(thead,arity,false);
     if (f != NULL)
     {
@@ -247,7 +247,7 @@ data_expression rewrite_appl_aux(const application& t)
   else
   {
     assert(is_function_symbol(head1));
-    const size_t arity = recursive_number_of_args(t1);
+    const std::size_t arity = recursive_number_of_args(t1);
     const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(head1),arity,false);
     if (f != NULL)
     {
@@ -264,7 +264,7 @@ data_expression rewrite_aux(const data_expression& t, const bool arguments_in_no
 {
   if (is_function_symbol(t))
   {
-    const size_t arity=0;
+    const std::size_t arity=0;
     const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(t), arity, false);
     if (f != NULL)
     {
@@ -281,7 +281,7 @@ data_expression rewrite_aux(const data_expression& t, const bool arguments_in_no
     const data_expression& head = appl.head();
     if (is_function_symbol(head))
     {
-      const size_t appl_size=appl.size();
+      const std::size_t appl_size=appl.size();
       const rewriter_function f = get_precompiled_rewrite_function(down_cast<function_symbol>(head), appl_size, arguments_in_normal_form);
       if (f != NULL)
       {

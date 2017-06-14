@@ -19,8 +19,8 @@
 template<class T>
 static void shuffle_vector(std::vector<T> &v)
 {
-    size_t n = v.size();
-    for (size_t i = 0; i < n; ++i)
+    std::size_t n = v.size();
+    for (std::size_t i = 0; i < n; ++i)
     {
         std::swap(v[i], v[i + rand()%(n - i)]);
     }

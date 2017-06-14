@@ -87,19 +87,19 @@ namespace detail
 // The hashtables are not vectors to prevent them from being
 // destroyed prematurely.
 
-static const size_t INITIAL_TERM_TABLE_SIZE = 1<<17;  // Must be a power of 2.
-static const size_t INITIAL_MAX_TERM_SIZE = 16;
+static const std::size_t INITIAL_TERM_TABLE_SIZE = 1<<17;  // Must be a power of 2.
+static const std::size_t INITIAL_MAX_TERM_SIZE = 16;
 
-size_t aterm_table_size=INITIAL_TERM_TABLE_SIZE;
-size_t aterm_table_mask=INITIAL_TERM_TABLE_SIZE-1;
+std::size_t aterm_table_size=INITIAL_TERM_TABLE_SIZE;
+std::size_t aterm_table_mask=INITIAL_TERM_TABLE_SIZE-1;
 _aterm* * aterm_hashtable;
 
 // The following is not a vector to avoid that it is prematurely destroyed.
-size_t terminfo_size=INITIAL_MAX_TERM_SIZE;
-size_t garbage_collect_count_down=0;
+std::size_t terminfo_size=INITIAL_MAX_TERM_SIZE;
+std::size_t garbage_collect_count_down=0;
 TermInfo *terminfo;
 
-size_t total_nodes_in_hashtable = 0;
+std::size_t total_nodes_in_hashtable = 0;
 
 void call_creation_hook(detail::_aterm* term)
 {
@@ -132,9 +132,9 @@ void free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed)
   call_deletion_hook(t);
 
   const function_symbol& f=t->function();
-  const size_t arity=f.arity();
+  const std::size_t arity=f.arity();
 
-  const size_t size=detail::TERM_SIZE_APPL(arity);
+  const std::size_t size=detail::TERM_SIZE_APPL(arity);
 
   detail::TermInfo& ti = detail::terminfo[size];
   t->set_reference_count_indicates_in_freelist();
@@ -143,7 +143,7 @@ void free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed)
 
   if (f!=detail::function_adm.AS_INT)
   {
-    for(size_t i=0; i<arity; ++i)
+    for(std::size_t i=0; i<arity; ++i)
     {
       aterm& a= reinterpret_cast<detail::_aterm_appl<aterm> *>(t)->arg[i];  
       if  (0==a.decrease_reference_count())
@@ -186,7 +186,7 @@ void resize_aterm_hashtable()
     // to incorrect behaviour.
     return;
   }
-  const size_t old_size=aterm_table_size;
+  const std::size_t old_size=aterm_table_size;
   aterm_table_size <<=1; // Double the size.
   // Intentionally do not throw the old hashtable away before allocating the new one.
   // It is better when the extra memory is used for blocks of aterms, than for increasing the
@@ -203,7 +203,7 @@ void resize_aterm_hashtable()
   aterm_table_mask = aterm_table_size-1;
 
   /*  Rehash all old elements */
-  for (size_t p=0; p<old_size; ++p)
+  for (std::size_t p=0; p<old_size; ++p)
   {
     _aterm* aterm_walker=aterm_hashtable[p];
 
@@ -211,7 +211,7 @@ void resize_aterm_hashtable()
     {
       assert(!aterm_walker->reference_count_indicates_is_in_freelist());
       _aterm* next = aterm_walker->next();
-      const size_t hnr = hash_number(aterm_walker) & aterm_table_mask;
+      const std::size_t hnr = hash_number(aterm_walker) & aterm_table_mask;
       aterm_walker->set_next(new_hashtable[hnr]);
       new_hashtable[hnr] = aterm_walker;
       assert(aterm_walker->next()!=aterm_walker);
@@ -229,13 +229,13 @@ void collect_terms_with_reference_count_0()
 
 
   // First put all terms with reference count 0 in the freelist.
-  for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
+  for(std::size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
     TermInfo& ti=terminfo[size];
 
     for(Block* b=ti.at_block; b!=nullptr; b=b->next_by_size)
     {
-      for(size_t *p=b->data; p<b->end; p=p+size)
+      for(std::size_t *p=b->data; p<b->end; p=p+size)
       {
         _aterm* p1=reinterpret_cast<_aterm*>(p);
         if (p1->reference_count()==0)
@@ -248,8 +248,8 @@ void collect_terms_with_reference_count_0()
   }
 
   // Reconstruct the freelists for all terms, freeing empty blocks.
-  size_t number_of_blocks=0;
-  for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
+  std::size_t number_of_blocks=0;
+  for(std::size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
     TermInfo& ti=terminfo[size];
     Block* previous_block=nullptr;
@@ -259,7 +259,7 @@ void collect_terms_with_reference_count_0()
       Block* next_block=b->next_by_size;
       bool block_is_empty_up_till_now=true;
       _aterm* freelist_of_previous_block=ti.at_freelist;
-      for(size_t *p=b->data; p<b->end; p=p+size)
+      for(std::size_t *p=b->data; p<b->end; p=p+size)
       {
         _aterm* p1=reinterpret_cast<_aterm*>(p);
         assert(p1->reference_count()!=0);
@@ -295,7 +295,7 @@ void collect_terms_with_reference_count_0()
       b=next_block;
     }
   }
-  garbage_collect_count_down=(1+number_of_blocks)*(BLOCK_SIZE/(sizeof(size_t)*16));
+  garbage_collect_count_down=(1+number_of_blocks)*(BLOCK_SIZE/(sizeof(std::size_t)*16));
 }
 
 #ifdef MCRL2_CHECK_ATERMPP_CLEANUP
@@ -305,12 +305,12 @@ static void check_that_all_objects_are_free()
 
   bool result=true;
 
-  for(size_t size=TERM_SIZE; size<terminfo_size; ++size)
+  for(std::size_t size=TERM_SIZE; size<terminfo_size; ++size)
   {
     const TermInfo& ti=terminfo[size];
     for(Block* b=ti.at_block; b!=NULL; b=b->next_by_size)
     {
-      for(size_t* p=b->data; p<b->end; p=p+size)
+      for(std::size_t* p=b->data; p<b->end; p=p+size)
       {
         _aterm* p1=reinterpret_cast<_aterm*>(p);
         if (!p1->reference_count_is_zero() && !p1->reference_count_indicates_is_in_freelist() &&
@@ -332,7 +332,7 @@ void initialise_aterm_administration()
 {
   /* Check for reasonably sized aterm (at least 32 bits, 4 bytes). This check might break on
    * perfectly valid architectures that have char == 2 bytes, and sizeof(header_type) == 2 */
-  static_assert(sizeof(size_t) == sizeof(aterm*) && sizeof(size_t) >= 4,"pointers and size_t must be equal and larger than four bytes for the aterm library");
+  static_assert(sizeof(std::size_t) == sizeof(aterm*) && sizeof(std::size_t) >= 4,"pointers and std::size_t must be equal and larger than four bytes for the aterm library");
 
   detail::function_adm.initialise_function_symbols();
 
@@ -353,7 +353,7 @@ void initialise_aterm_administration()
     throw std::runtime_error("Out of memory. Failed to allocate the terminfo array.");
   }
 
-  for(size_t i=TERM_SIZE; i<terminfo_size; ++i)
+  for(std::size_t i=TERM_SIZE; i<terminfo_size; ++i)
   {
     new (&terminfo[i]) TermInfo();
   }
@@ -378,14 +378,14 @@ void initialise_aterm_administration()
 }
 
 /* allocate a block of memory to contain terms consisting of `size' objects
- * of type size_t or pointer */
-void allocate_block(const size_t size)
+ * of type std::size_t or pointer */
+void allocate_block(const std::size_t size)
 {
-  const size_t block_header_size=sizeof(struct Block*)+sizeof(size_t*);
-  size_t number_of_terms_in_data_block=(BLOCK_SIZE-block_header_size) / (size*sizeof(size_t));
+  const std::size_t block_header_size=sizeof(struct Block*)+sizeof(std::size_t*);
+  std::size_t number_of_terms_in_data_block=(BLOCK_SIZE-block_header_size) / (size*sizeof(std::size_t));
   if (number_of_terms_in_data_block==0) number_of_terms_in_data_block=1; // Take care that there is room for at least one term.
 
-  Block* newblock = (Block*)malloc(block_header_size+number_of_terms_in_data_block*size*sizeof(size_t));
+  Block* newblock = (Block*)malloc(block_header_size+number_of_terms_in_data_block*size*sizeof(std::size_t));
   if (newblock == nullptr)
   {
     throw std::runtime_error("Out of memory. Could not allocate a block of memory to store terms.");
@@ -399,7 +399,7 @@ void allocate_block(const size_t size)
 
   // Put new terms in the block in the freelist.
 
-  for(size_t *p=newblock->data; p<newblock->end; p=p+size)
+  for(std::size_t *p=newblock->data; p<newblock->end; p=p+size)
   {
     _aterm* p1=reinterpret_cast<_aterm*>(p);
     p1->set_next(ti.at_freelist);

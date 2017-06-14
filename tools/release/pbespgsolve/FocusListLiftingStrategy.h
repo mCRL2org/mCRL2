@@ -49,7 +49,7 @@ public:
         \param max_lifts    maximum number of lifts per second phase.
     */
     FocusListLiftingStrategy( const ParityGame &game, bool alternate,
-                              verti max_size, size_t max_lifts );
+                              verti max_size, std::size_t max_lifts );
 
     void lifted(verti vertex);
     verti next();
@@ -65,9 +65,9 @@ private:
 
     const verti V_;                     //!< game graph vertex count
 
-    size_t max_lift_attempts_;       //!< maximum lift attempts per list
+    std::size_t max_lift_attempts_;       //!< maximum lift attempts per list
     int phase_;                         //!< current phase
-    size_t num_lift_attempts_;       //!< number of consecutive lift attempts
+    std::size_t num_lift_attempts_;       //!< number of consecutive lift attempts
     bool prev_lifted_;                  //!< whether previous vertex was lifted
 
     // For phase 1:

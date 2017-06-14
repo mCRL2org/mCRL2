@@ -89,7 +89,7 @@ void VertexData::generateVertexData(float handlesize, float nodesize, float arro
   }
   // Generate vertices for node (a quad strip drawing a half sphere)
   slice = 0;
-  size_t n = RES_NODE_SLICE - 1;
+  std::size_t n = RES_NODE_SLICE - 1;
   for (int j = 0; j < RES_NODE_STACK; ++j, stack += stackd)
   {
     for (int i = 0; i < RES_NODE_SLICE - 1; ++i, slice += sliced)
@@ -108,7 +108,7 @@ void VertexData::generateVertexData(float handlesize, float nodesize, float arro
         std::sin(stack) * std::cos(0.0f),
         std::cos(stack));
   }
-  for (size_t i = 0; i < n; ++i) {
+  for (std::size_t i = 0; i < n; ++i) {
     node[i] *= 0.5 * nodesize;
   }
 
@@ -139,7 +139,7 @@ void VertexData::generateVertexData(float handlesize, float nodesize, float arro
       0.3 * arrowheadsize * std::sin(0.0f),
       0.3 * arrowheadsize * std::cos(0.0f));
 }
-void CameraView::viewport(size_t width, size_t height)
+void CameraView::viewport(std::size_t width, std::size_t height)
 {
   glViewport(0, 0, width, height);
   pixelsize = 1000.0 / (width < height ? height : width);
@@ -199,7 +199,7 @@ void CameraView::applyPickMatrix(GLdouble x, GLdouble y, GLdouble fuzz)
   gluPickMatrix(x, viewport[3] - y, fuzz * pixelsize, fuzz * pixelsize, viewport);
 }
 
-void CameraAnimation::start_animation(size_t steps)
+void CameraAnimation::start_animation(std::size_t steps)
 {
   m_source = *this;
   m_animation_steps = steps;
@@ -260,7 +260,7 @@ void CameraAnimation::animate()
   if ((m_target.rotation != rotation || m_target.translation != translation || m_target.zoom != zoom) &&
       (m_target.world != world))
   {
-    size_t halfway = m_animation_steps / 2;
+    std::size_t halfway = m_animation_steps / 2;
     if (m_animation < halfway) {
       interpolate_cam((float)(++m_animation) / halfway);
     }
@@ -279,7 +279,7 @@ void CameraAnimation::animate()
   }
 }
 
-void CameraAnimation::viewport(size_t width, size_t height)
+void CameraAnimation::viewport(std::size_t width, std::size_t height)
 {
   CameraView::viewport(width, height);
   m_target.world.setX(world.x());
@@ -294,25 +294,25 @@ bool CameraAnimation::resizing()
   return temp;
 }
 
-void CameraAnimation::setZoom(float factor, size_t animation)
+void CameraAnimation::setZoom(float factor, std::size_t animation)
 {
   m_target.zoom = factor;
   start_animation(animation);
 }
 
-void CameraAnimation::setRotation(const QQuaternion& rotation, size_t animation)
+void CameraAnimation::setRotation(const QQuaternion& rotation, std::size_t animation)
 {
   m_target.rotation = rotation;
   start_animation(animation);
 }
 
-void CameraAnimation::setTranslation(const QVector3D& translation, size_t animation)
+void CameraAnimation::setTranslation(const QVector3D& translation, std::size_t animation)
 {
   m_target.translation = translation;
   start_animation(animation);
 }
 
-void CameraAnimation::setSize(const QVector3D& size, size_t animation)
+void CameraAnimation::setSize(const QVector3D& size, std::size_t animation)
 {
   m_target.world = size;
   start_animation(animation);
@@ -436,7 +436,7 @@ void drawArc(const QVector3D controlpoints[4])
 // GLScene private methods
 //
 
-void GLScene::renderEdge(size_t i)
+void GLScene::renderEdge(std::size_t i)
 {
   Graph::Edge edge = m_graph.edge(i);
   QVector3D ctrl[4];
@@ -738,13 +738,13 @@ void GLScene::render()
   m_graph.lock(GRAPH_LOCK_TRACE); // enter critical section
 
   bool sel = m_graph.hasSelection();
-  size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
-  size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+  std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-  for (size_t i = 0; i < nodeCount; ++i) {
+  for (std::size_t i = 0; i < nodeCount; ++i) {
     renderNode(sel ? m_graph.selectionNode(i) : i);
   }
-  for (size_t i = 0; i < edgeCount; ++i) {
+  for (std::size_t i = 0; i < edgeCount; ++i) {
     renderEdge(sel ? m_graph.selectionEdge(i) : i);
   }
 
@@ -752,7 +752,7 @@ void GLScene::render()
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glDepthMask(GL_FALSE);
   startPainter(m_renderpainter);
-  for (size_t i = 0; i < nodeCount; ++i)
+  for (std::size_t i = 0; i < nodeCount; ++i)
   {
     if (m_drawstatenumbers) {
       renderStateNumber(sel ? m_graph.selectionNode(i) : i);
@@ -761,7 +761,7 @@ void GLScene::render()
       renderStateLabel(sel ? m_graph.selectionNode(i) : i);
     }
   }
-  for (size_t i = 0; i < edgeCount; ++i)
+  for (std::size_t i = 0; i < edgeCount; ++i)
   {
     if (m_drawtransitionlabels) {
       renderTransitionLabel(sel ? m_graph.selectionEdge(i) : i);
@@ -770,14 +770,14 @@ void GLScene::render()
   glDepthMask(GL_TRUE);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   m_renderpainter.end();
-  for (size_t i = 0; i < edgeCount; ++i) {
+  for (std::size_t i = 0; i < edgeCount; ++i) {
     renderHandle(sel ? m_graph.selectionEdge(i) : i);
   }
 
   m_graph.unlock(GRAPH_LOCK_TRACE); // exit critical section
 }
 
-void GLScene::resize(size_t width, size_t height)
+void GLScene::resize(std::size_t width, std::size_t height)
 {
   m_camera.viewport(width, height);
   updateShapes();
@@ -876,8 +876,8 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
 {
   float bestZ = INFINITY;
   bool sel = m_graph.hasSelection();
-  size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
-  size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+  std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
   startPainter(m_selectpainter);
   QFontMetrics metrics{m_selectpainter.font()};
   switch (type)
@@ -885,9 +885,9 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   case so_node:
   {
     float radius = nodeSizeOnScreen() * magnificationFactor() / 2;
-    for (size_t i = 0; i < nodeCount; i++)
+    for (std::size_t i = 0; i < nodeCount; i++)
     {
-      size_t index = sel ? m_graph.selectionNode(i) : i;
+      std::size_t index = sel ? m_graph.selectionNode(i) : i;
       if (isClose(x, y, worldToEye(m_graph.node(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
@@ -899,9 +899,9 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   case so_handle:
   {
     float radius = handleSizeOnScreen() * magnificationFactor() * 2;
-    for (size_t i = 0; i < edgeCount; i++)
+    for (std::size_t i = 0; i < edgeCount; i++)
     {
-      size_t index = sel ? m_graph.selectionEdge(i) : i;
+      std::size_t index = sel ? m_graph.selectionEdge(i) : i;
       if (isClose(x, y, worldToEye(m_graph.handle(index).pos()), radius, bestZ))
       {
         s.selectionType = type;
@@ -912,9 +912,9 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   }
   case so_label:
   {
-    for (size_t i = 0; i < edgeCount; i++)
+    for (std::size_t i = 0; i < edgeCount; i++)
     {
-      size_t index = sel ? m_graph.selectionEdge(i) : i;
+      std::size_t index = sel ? m_graph.selectionEdge(i) : i;
       const Graph::LabelNode& label = m_graph.transitionLabel(index);
       const QVector3D& eye = worldToEye(label.pos());
       const QString& labelstring = m_graph.transitionLabelstring(label.labelindex());
@@ -929,9 +929,9 @@ bool GLScene::selectObject(GLScene::Selection& s, int x, int y,
   }
   case so_slabel:
   {
-    for (size_t i = 0; i < nodeCount; i++)
+    for (std::size_t i = 0; i < nodeCount; i++)
     {
-      size_t index = sel ? m_graph.selectionNode(i) : i;
+      std::size_t index = sel ? m_graph.selectionNode(i) : i;
       const Graph::LabelNode& label = m_graph.stateLabel(index);
       const QVector3D& eye = worldToEye(label.pos());
       const QString& labelstring = m_graph.stateLabelstring(label.labelindex());
@@ -979,23 +979,23 @@ bool GLScene::resizing()
   return m_camera.resizing();
 }
 
-void GLScene::setZoom(float factor, size_t animation)
+void GLScene::setZoom(float factor, std::size_t animation)
 {
   m_camera.setZoom(factor, animation);
   updateShapes();
 }
 
-void GLScene::setRotation(const QQuaternion& rotation, size_t animation)
+void GLScene::setRotation(const QQuaternion& rotation, std::size_t animation)
 {
   m_camera.setRotation(rotation, animation);
 }
 
-void GLScene::setTranslation(const QVector3D& translation, size_t animation)
+void GLScene::setTranslation(const QVector3D& translation, std::size_t animation)
 {
   m_camera.setTranslation(translation, animation);
 }
 
-void GLScene::setSize(const QVector3D& size, size_t animation)
+void GLScene::setSize(const QVector3D& size, std::size_t animation)
 {
   m_camera.setSize(size, animation);
 }
@@ -1055,15 +1055,15 @@ void GLScene::renderLatexGraphics(const QString& filename, float aspectRatio)
   m_graph.lock(GRAPH_LOCK_TRACE);
 
   bool sel = m_graph.hasSelection();
-  size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
-  size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
+  std::size_t nodeCount = sel ? m_graph.selectionNodeCount() : m_graph.nodeCount();
+  std::size_t edgeCount = sel ? m_graph.selectionEdgeCount() : m_graph.edgeCount();
 
-  for (size_t i = 0; i < nodeCount; ++i)
+  for (std::size_t i = 0; i < nodeCount; ++i)
   {
     tikz_code += tikzNode(sel ? m_graph.selectionNode(i) : i, aspectRatio);
   }
 
-  for (size_t i = 0; i < edgeCount; ++i)
+  for (std::size_t i = 0; i < edgeCount; ++i)
   {
     tikz_code += tikzEdge(sel ? m_graph.selectionEdge(i) : i, aspectRatio);
   }
@@ -1082,7 +1082,7 @@ void GLScene::renderLatexGraphics(const QString& filename, float aspectRatio)
   }
 }
 
-QString GLScene::tikzNode(size_t i, float aspectRatio)
+QString GLScene::tikzNode(std::size_t i, float aspectRatio)
 {
   Graph::NodeNode& node = m_graph.node(i);
   Color3f line(node.color());
@@ -1111,7 +1111,7 @@ static QString escapeLatex(const QString& str)
   return escaped;
 }
 
-QString GLScene::tikzEdge(size_t i, float aspectRatio)
+QString GLScene::tikzEdge(std::size_t i, float aspectRatio)
 {
   Graph::LabelNode& label = m_graph.transitionLabel(i);
   Graph::Edge edge = m_graph.edge(i);

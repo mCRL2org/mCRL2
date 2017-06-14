@@ -1952,7 +1952,7 @@ void VisUtils::drawLabel(
     // enable texture mapping
     glEnable(GL_TEXTURE_2D);
 
-    for (size_t i = 0; i < label.length(); ++i)
+    for (std::size_t i = 0; i < label.length(); ++i)
     {
       double xLft = xCoord + i*scaling*CHARWIDTH;
       double xRgt = xCoord + (i+1)*scaling*CHARWIDTH;
@@ -2057,7 +2057,7 @@ void VisUtils::drawLabelVert(
     // enable texture mapping
     glEnable(GL_TEXTURE_2D);
 
-    for (size_t i = 0; i < label.length(); ++i)
+    for (std::size_t i = 0; i < label.length(); ++i)
     {
       double xLft = xCoord - 0.5*scaling*CHARHEIGHT;
       double xRgt = xCoord + 0.5*scaling*CHARHEIGHT;
@@ -2177,7 +2177,7 @@ void VisUtils::drawLabelInBoundBox(
 
   if (numToCrop > 0)
   {
-    size_t eraseSize = cropLbl.size() - numToCrop - 2;
+    std::size_t eraseSize = cropLbl.size() - numToCrop - 2;
     cropLbl.erase(eraseSize);
     cropLbl.append("..");
   }

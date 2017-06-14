@@ -42,7 +42,7 @@ class Simulator : public Visualizer
 
 
     static QColor SelectColor() { return VisUtils::coolGreen; }
-    size_t SelectedClusterIndex();
+    std::size_t SelectedClusterIndex();
 
     void setDiagram(Diagram* dgrm);
 
@@ -106,7 +106,7 @@ class Simulator : public Visualizer
 
     // -- utility drawing functions ---------------------------------
     void clear();
-    QColor calcColor(size_t iter, size_t numr);
+    QColor calcColor(std::size_t iter, std::size_t numr);
 
     void drawFrameCurr(const bool& inSelectMode);
     void drawFramesPrev(const bool& inSelectMode);
@@ -161,8 +161,8 @@ class Simulator : public Visualizer
     int m_lastSelectionIndexPrevious;
     int m_lastSelectionIndexNext;
 
-    size_t m_previousBundleFocusIndex;
-    size_t m_nextBundleFocusIndex;
+    std::size_t m_previousBundleFocusIndex;
+    std::size_t m_nextBundleFocusIndex;
 
     Position2D m_currentFramePosition;
     std::vector< Position2D > m_previousFramePositions;

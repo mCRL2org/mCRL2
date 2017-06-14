@@ -52,7 +52,7 @@ Cluster::Cluster(int r)
   bc_height = 0.0f;
   positionInRank = 0;
 
-  for (size_t i = 0; i < descendants.size(); ++i)
+  for (std::size_t i = 0; i < descendants.size(); ++i)
   {
     std::vector<bool> dummy;
     severedDescendants.push_back(dummy);

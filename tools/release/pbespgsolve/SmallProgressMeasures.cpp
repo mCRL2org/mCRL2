@@ -50,9 +50,9 @@ SmallProgressMeasures::SmallProgressMeasures(
     len_ = (game_.d() + p_)/2;
     if (len_ < 1) len_ = 1;  // ensure Top is representable
     M_ = new verti[len_];
-    for (size_t n = 0; n < len_; ++n)
+    for (std::size_t n = 0; n < len_; ++n)
     {
-        size_t prio = 2*n + 1 - p_;
+        std::size_t prio = 2*n + 1 - p_;
         M_[n] = (prio < game.d()) ? game_.cardinality(prio) + 1 : 0;
     }
 }
@@ -411,7 +411,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver::solve_normal()
         // Create vertex map to use:
         std::vector<verti> submap_data;
         verti *submap = &won_by_odd[0];
-        size_t submap_size = won_by_odd.size();
+        std::size_t submap_size = won_by_odd.size();
         if (vmap_)
         {
             submap_data = won_by_odd;
@@ -575,7 +575,7 @@ ParityGame::Strategy SmallProgressMeasuresSolver2::solve_normal()
         // Create vertex map to use:
         std::vector<verti> submap_data;
         verti *submap = &won_by_odd[0];
-        size_t submap_size = won_by_odd.size();
+        std::size_t submap_size = won_by_odd.size();
         if (vmap_)
         {
             submap_data = won_by_odd;
@@ -696,7 +696,7 @@ DenseSPM::DenseSPM( const ParityGame &game, ParityGame::Player player,
                     LiftingStatistics *stats,
                     const verti *vertex_map, verti vertex_map_size )
     : SmallProgressMeasures(game, player, stats, vertex_map, vertex_map_size),
-      spm_(new verti[(size_t)len_*game.graph().V()]())
+      spm_(new verti[(std::size_t)len_*game.graph().V()]())
 {
     initialize_loops();
 }
@@ -708,7 +708,7 @@ DenseSPM::~DenseSPM()
 
 void DenseSPM::set_vec(verti v, const verti src[], bool carry)
 {
-    verti *dst = &spm_[(size_t)len_*v];
+    verti *dst = &spm_[(std::size_t)len_*v];
     const int l = len(v);                   // l: vector length
     int k = l;                              // k: position of last overflow
     for (int n = l - 1; n >= 0; --n)
@@ -723,5 +723,5 @@ void DenseSPM::set_vec(verti v, const verti src[], bool carry)
 
 void DenseSPM::set_vec_to_top(verti v)
 {
-    spm_[(size_t)len_*v] = NO_VERTEX;
+    spm_[(std::size_t)len_*v] = NO_VERTEX;
 }

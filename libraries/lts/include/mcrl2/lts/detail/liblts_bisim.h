@@ -125,15 +125,15 @@ class bisim_partitioner
         /* Create a vector for the new labels */
         std::vector<typename LTS_TYPE::state_label_t> new_labels(num_eq_classes());
 
-        for(size_t i=aut.num_states(); i>0; )
+        for(std::size_t i=aut.num_states(); i>0; )
         {
           --i;
-          const size_t new_index=get_eq_class(i);
+          const std::size_t new_index=get_eq_class(i);
           new_labels[new_index]=aut.state_label(i)+new_labels[new_index];
         }
 
         aut.set_num_states(num_eq_classes());
-        for(size_t i=0; i<num_eq_classes(); ++i)
+        for(std::size_t i=0; i<num_eq_classes(); ++i)
         {
           aut.set_state_label(i,new_labels[i]);
         }
@@ -149,7 +149,7 @@ class bisim_partitioner
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
      *  \return The number of bisimulation equivalence classes of the LTS.
      */
-    size_t num_eq_classes() const
+    std::size_t num_eq_classes() const
     {
       return max_state_index;
     }
@@ -158,7 +158,7 @@ class bisim_partitioner
     /** \brief Gives the bisimulation equivalence class number of a state.
      *  \param[in] s A state number.
      *  \return The number of the bisimulation equivalence class to which \e s belongs. */
-    size_t get_eq_class(const size_t s) const
+    std::size_t get_eq_class(const std::size_t s) const
     {
       assert(s<block_index_of_a_state.size());
       return blocks[block_index_of_a_state[s]].state_index;
@@ -170,7 +170,7 @@ class bisim_partitioner
      *  \param[in] t A state number.
      *  \retval true if \e s and \e t are in the same bisimulation equivalence class;
      *  \retval false otherwise. */
-    bool in_same_class(const size_t s, const size_t t) const
+    bool in_same_class(const std::size_t s, const std::size_t t) const
     {
       return get_eq_class(s)==get_eq_class(t);
     }
@@ -186,13 +186,13 @@ class bisim_partitioner
      *  \param[in] t A state number.
      *  \param[in] branching_bisimulation A boolean indicating whether the branching bisimulation partitioner has been used.
      *  \return A vector containing counter traces. */
-    std::set < mcrl2::trace::Trace > counter_traces(const size_t s, const size_t t, const bool branching_bisimulation);
+    std::set < mcrl2::trace::Trace > counter_traces(const std::size_t s, const std::size_t t, const bool branching_bisimulation);
 
   private:
 
-    typedef size_t block_index_type;
-    typedef size_t state_type;
-    typedef size_t label_type;
+    typedef std::size_t block_index_type;
+    typedef std::size_t state_type;
+    typedef std::size_t label_type;
 
     state_type max_state_index;
     LTS_TYPE& aut;
@@ -285,8 +285,8 @@ class bisim_partitioner
         // For this purpose, first the number of inert transitions must be counted, to avoid reserving too much
         // space. This for instance leads to a waste of memory (terabytes for reducing 30M states), especially,
         // when calculating ia strong bisimulation reduction.
-        size_t initial_partition_non_inert_counter=0;
-        size_t current_inert_transition_counter=0;
+        std::size_t initial_partition_non_inert_counter=0;
+        std::size_t current_inert_transition_counter=0;
         const std::vector<transition> & trans=aut.get_transitions();
         for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
         {
@@ -396,8 +396,8 @@ class bisim_partitioner
 #endif
     {
 #ifndef NDEBUG
-      size_t consistency_check_counter=1;
-      size_t consistency_check_barrier=1;
+      std::size_t consistency_check_counter=1;
+      std::size_t consistency_check_barrier=1;
 #endif
       bool partition_is_unstable=true; // This boolean indicates that the partition becomes unstable
       // because an inert transition becomes non inert.
@@ -436,7 +436,7 @@ class bisim_partitioner
         // the blocks and the non_inert_transitions can move around in memory. This makes it
         // unsafe to use interators.
 
-        for (size_t i=0; i<blocks[splitter_index].non_inert_transitions.size(); ++i)
+        for (std::size_t i=0; i<blocks[splitter_index].non_inert_transitions.size(); ++i)
         {
           // The flag of the starting state of *i is raised and its block is added to BL;
 
@@ -519,7 +519,7 @@ class bisim_partitioner
 
           if (mCRL2logEnabled(log::debug))
           {
-            const size_t m = static_cast<size_t>(std::pow(10.0, std::floor(std::log10(static_cast<double>((blocks.size()+1)/2)))));
+            const std::size_t m = static_cast<std::size_t>(std::pow(10.0, std::floor(std::log10(static_cast<double>((blocks.size()+1)/2)))));
             if ((blocks.size()+1)/2 % m==0)
             {
               mCRL2log(log::debug) << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << std::endl;
@@ -892,7 +892,7 @@ class bisim_partitioner
                                 mcrl2::data::data_expression_list())));
               mcrl2::trace::Trace old_counter_trace=*j;
               old_counter_trace.resetPosition();
-              for (size_t k=0 ; k< old_counter_trace.number_of_actions(); k++)
+              for (std::size_t k=0 ; k< old_counter_trace.number_of_actions(); k++)
               {
                 new_counter_trace.addAction(old_counter_trace.currentAction());
                 old_counter_trace.increasePosition();
@@ -981,7 +981,7 @@ class bisim_partitioner
       const bool preserve_divergence) const
     {
       state_type total_number_of_states=0;
-      size_t total_number_of_transitions=0;
+      std::size_t total_number_of_transitions=0;
 
       assert(!blocks.empty());
       std::set < block_index_type > block_indices;
@@ -1174,8 +1174,8 @@ bool bisimulation_compare(
 
 template < class LTS_TYPE>
 std::set < mcrl2::trace::Trace > bisim_partitioner<LTS_TYPE>::counter_traces(
-  const size_t s,
-  const size_t t,
+  const std::size_t s,
+  const std::size_t t,
   const bool branching_bisimulation)
 {
   if (get_eq_class(s)==get_eq_class(t))
@@ -1229,7 +1229,7 @@ bool destructive_bisimulation_compare(
   const bool preserve_divergences /*=false*/,
   const bool generate_counter_examples /* = false */)
 {
-  size_t init_l2 = l2.initial_state() + l1.num_states();
+  std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
   l2.clear(); // No use for l2 anymore.
 
@@ -1246,7 +1246,7 @@ bool destructive_bisimulation_compare(
   if (generate_counter_examples && !bisim_part.in_same_class(l1.initial_state(),init_l2))
   {
     std::set < mcrl2::trace::Trace > counter_example_traces=bisim_part.counter_traces(l1.initial_state(),init_l2,branching);
-    size_t count=0;
+    std::size_t count=0;
     for (std::set < mcrl2::trace::Trace >::const_iterator i=counter_example_traces.begin();
          i!=counter_example_traces.end(); ++i,++count)
     {

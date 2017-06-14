@@ -144,7 +144,7 @@ std::string mime_type_for_type(const lts_type type)
 static const std::set<lts_type>& initialise_supported_lts_formats()
 {
   static std::set<lts_type> s;
-  for (size_t i = lts_type_min; i<1+(size_t)lts_type_max; ++i)
+  for (std::size_t i = lts_type_min; i<1+(std::size_t)lts_type_max; ++i)
   {
     if (lts_none != (lts_type) i)
     {

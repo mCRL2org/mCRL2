@@ -196,14 +196,14 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       mCRL2log(debug) << "Tranforming BES to LTS" << std::endl;
 
       // Collect block indices and operands of all equations
-      std::map<boolean_variable, std::pair<size_t, boolean_operand_t> > statistics;
-      std::map<boolean_variable, size_t> indices;
+      std::map<boolean_variable, std::pair<std::size_t, boolean_operand_t> > statistics;
+      std::map<boolean_variable, std::size_t> indices;
       std::map<unsigned int, boolean_operand_t> block_to_operand; // Stores operand assigned to equations without boolean operand.
 
-      size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
+      std::size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
 
-      size_t current_block = 0;
-      size_t index = 0;
+      std::size_t current_block = 0;
+      std::size_t index = 0;
       fixpoint_symbol sigma = fixpoint_symbol::nu();
       bool and_in_block = false;
       for (auto i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
@@ -262,10 +262,10 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           std::stringstream label;
           label << "self:block(" << info.first << "),op(" << info.second << ")";
           process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
-          size_t label_index = labs.index(t);
+          std::size_t label_index = labs.index(t);
           if (label_index == atermpp::npos)
           {
-            std::pair<size_t, bool> put_result = labs.put(t);
+            std::pair<std::size_t, bool> put_result = labs.put(t);
             label_index = put_result.first;
             m_lts.add_action(mcrl2::lts::action_label_string(t.label().name()));
           }
@@ -318,9 +318,9 @@ class bes_reduction_algorithm: public detail::bes_algorithm
           {
             label << "block(" << info_target.first << "),op(" << info_target.second << ")";
           }
-          size_t to = indices[*j];
+          std::size_t to = indices[*j];
           process::action t(process::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
-          size_t label_index = labs.index(t);
+          std::size_t label_index = labs.index(t);
           if (label_index == atermpp::npos)
           {
             assert(label.str()!="tau");
@@ -399,21 +399,21 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       }
 
       // Build formulas
-      size_t cur_state = 0;
+      std::size_t cur_state = 0;
       std::vector<lts::transition>::const_iterator i = transitions.begin();
-      std::map<size_t, std::vector<boolean_equation> > blocks;
+      std::map<std::size_t, std::vector<boolean_equation> > blocks;
 
       while (i != transitions.end())
       {
         std::vector<boolean_variable> variables;
-        size_t block = 0;
+        std::size_t block = 0;
         boolean_operand_t op = BOOL_VAR;
         cur_state = i->from();
 
         while (i != transitions.end() && i->from() == cur_state)
         {
           std::string label = pp(m_lts.action_label(i->label()));
-          size_t index = label.find(':');
+          std::size_t index = label.find(':');
 
           if ((m_translation == to_lts_deadlock && i->to() == deadlock_state)
               ||(m_translation == to_lts_outgoing_transition && index == std::string::npos)
@@ -426,7 +426,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm
               label = label.substr(index+1, label.size());
             }
 
-            size_t comma_pos = label.find(',');
+            std::size_t comma_pos = label.find(',');
             std::string block_str = label.substr(0,comma_pos);
             block_str.replace(0,block_str.find('(')+1,"");
             block_str.replace(block_str.find(')'),1,"");
@@ -489,9 +489,9 @@ class bes_reduction_algorithm: public detail::bes_algorithm
       }
 
       std::vector<boolean_equation> eqns;
-      for (size_t i = 0; i <= blocks.size(); ++i)
+      for (std::size_t i = 0; i <= blocks.size(); ++i)
       {
-        std::map<size_t, std::vector<boolean_equation> >::const_iterator j = blocks.find(i);
+        std::map<std::size_t, std::vector<boolean_equation> >::const_iterator j = blocks.find(i);
         if (j != blocks.end())
         {
           eqns.insert(eqns.end(), j->second.begin(), j->second.end());

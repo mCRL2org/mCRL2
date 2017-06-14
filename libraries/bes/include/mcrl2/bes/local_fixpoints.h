@@ -34,16 +34,16 @@ class local_fixpoints_algorithm
 {
   protected:
     const boolean_equation_system& m_bes;
-    std::vector<size_t> ranks;
-    std::map<boolean_variable, size_t> indices;
-    size_t max_rank;
+    std::vector<std::size_t> ranks;
+    std::map<boolean_variable, std::size_t> indices;
+    std::size_t max_rank;
 
   public:
     local_fixpoints_algorithm(const boolean_equation_system& b)
       : m_bes(b), ranks(b.equations().size())
     {
       const std::vector<boolean_equation>& eqs = b.equations();
-      for (size_t i = 1; i < eqs.size(); i++)
+      for (std::size_t i = 1; i < eqs.size(); i++)
       {
         indices[eqs[i].variable()] = i;
         ranks[i] = ranks[i-1] + (eqs[i].symbol() != eqs[i-1].symbol());
@@ -55,7 +55,7 @@ class local_fixpoints_algorithm
     // evaluate expr by substituting all variables with their approximations.
     // If on_rank is true, only variables on rank r are substituted
     template <bool on_rank_only>
-    boolean_expression evaluate(boolean_expression expr, size_t r, const std::vector<boolean_expression>& approx)
+    boolean_expression evaluate(boolean_expression expr, std::size_t r, const std::vector<boolean_expression>& approx)
     {
       if (is_true(expr) || is_false(expr))
       {
@@ -63,7 +63,7 @@ class local_fixpoints_algorithm
       }
       if (is_boolean_variable(expr))
       {
-        size_t i = indices[atermpp::down_cast<boolean_variable>(expr)];
+        std::size_t i = indices[atermpp::down_cast<boolean_variable>(expr)];
         assert(ranks[i]<=r);
         if (!on_rank_only || ranks[i] == r)
         {
@@ -120,11 +120,11 @@ class local_fixpoints_algorithm
       return expr;
     }
 
-    void add_to_occurrence_set(size_t i, const boolean_expression& expr, vector < set <size_t> >& occurrence_set)
+    void add_to_occurrence_set(std::size_t i, const boolean_expression& expr, vector < set <std::size_t> >& occurrence_set)
     {
       if (is_boolean_variable(expr))
       {
-        size_t j = indices[atermpp::down_cast<boolean_variable>(expr)];
+        std::size_t j = indices[atermpp::down_cast<boolean_variable>(expr)];
         occurrence_set[j].insert(i);
         return;
       }
@@ -145,10 +145,10 @@ class local_fixpoints_algorithm
       assert(is_true(expr)||is_false(expr));
     }
 
-    vector < set < size_t> > create_occurrence_set(const std::vector<boolean_equation>& eqs, const size_t current_rank)
+    vector < set < std::size_t> > create_occurrence_set(const std::vector<boolean_equation>& eqs, const std::size_t current_rank)
     {
-      vector < set <size_t> > result(eqs.size());
-      for(size_t i=0; i<eqs.size(); ++i)
+      vector < set <std::size_t> > result(eqs.size());
+      for(std::size_t i=0; i<eqs.size(); ++i)
       {
         if (ranks[i]==current_rank)
         {
@@ -166,16 +166,16 @@ class local_fixpoints_algorithm
 
       std::vector<boolean_equation> eqs = m_bes.equations();
       std::vector<boolean_expression> approx(eqs.size());
-      for (size_t i = 0; i < eqs.size(); i++)
+      for (std::size_t i = 0; i < eqs.size(); i++)
       {
         approx[i] = eqs[i].variable();
       }
 
-      for (size_t current_rank=max_rank+1; current_rank>0 ; )
+      for (std::size_t current_rank=max_rank+1; current_rank>0 ; )
       {
         current_rank--;
         mCRL2log(mcrl2::log::verbose) << "Solving equations of rank " << current_rank << "." << std::endl;
-        for (size_t i = 0; i < eqs.size(); i++)
+        for (std::size_t i = 0; i < eqs.size(); i++)
         {
           if (ranks[i]==current_rank)
           { 
@@ -190,9 +190,9 @@ class local_fixpoints_algorithm
           }
         }
         // Find the fixpoint of all equations of the current_rank
-        std::stack<size_t> todo;
+        std::stack<std::size_t> todo;
 
-        for (size_t v = 0; v < eqs.size(); v++)
+        for (std::size_t v = 0; v < eqs.size(); v++)
         {
           if (ranks[v] == current_rank)
           {
@@ -207,13 +207,13 @@ class local_fixpoints_algorithm
 
         // For each variable with index i the occurrence_sets[i] contain the set indices of equations where i occurs in 
         // the right hand side.
-        vector < set < size_t> > occurrence_sets=create_occurrence_set(eqs,current_rank);
+        vector < set < std::size_t> > occurrence_sets=create_occurrence_set(eqs,current_rank);
      
         while (!todo.empty())
         {
-          const size_t i=todo.top();
+          const std::size_t i=todo.top();
           todo.pop();
-          for (size_t v: occurrence_sets[i])
+          for (std::size_t v: occurrence_sets[i])
           { 
             assert(ranks[v] == current_rank);
             const boolean_expression t = evaluate<true>(eqs[v].formula(), current_rank, approx);
@@ -228,7 +228,7 @@ class local_fixpoints_algorithm
         /* substitute the stable solution for the current rank in all other
            equations. */
 
-        for (size_t i = 0; i < eqs.size(); i++)
+        for (std::size_t i = 0; i < eqs.size(); i++)
         {
           if (ranks[i] == current_rank)
           {
@@ -244,14 +244,14 @@ class local_fixpoints_algorithm
       if (full_solution)
       {
         full_solution->resize(eqs.size());
-        for (size_t i = 0; i < eqs.size(); i++)
+        for (std::size_t i = 0; i < eqs.size(); i++)
         {
           assert(is_true(eqs[i].formula()) || is_false(eqs[i].formula()));
           (*full_solution)[i] = is_true(eqs[i].formula());
         }
       }
 
-      for (size_t i = 0; i < eqs.size(); i++)
+      for (std::size_t i = 0; i < eqs.size(); i++)
       {
         approx[i]=eqs[i].formula();
       }

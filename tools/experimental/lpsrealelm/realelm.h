@@ -25,7 +25,7 @@ namespace data
 {
 
 mcrl2::lps::stochastic_specification realelm(mcrl2::lps::stochastic_specification s, 
-                                             const size_t max_iterations = 5,
+                                             const std::size_t max_iterations = 5,
                                              const rewrite_strategy strat=jitty);
 
 template <typename Term, typename MapContainer>
@@ -256,9 +256,9 @@ class summand_information
       return nextstate_context_combinations.end();
     }
 
-    static bool power_of_2(const size_t i)
+    static bool power_of_2(const std::size_t i)
     {
-      size_t k=2;
+      std::size_t k=2;
       for (; k<i ; k=k<<1)
         {}
       return k==i;
@@ -335,7 +335,7 @@ class summand_information
       {
         std::vector < linear_inequality > vec_lin_eq;
         vec_lin_eq.swap(*i);
-        size_t old_size=vec_lin_eq.size();
+        std::size_t old_size=vec_lin_eq.size();
 
         // Note that at this point, vec_lin_eq is consistent.
         assert(!is_inconsistent(vec_lin_eq,r));

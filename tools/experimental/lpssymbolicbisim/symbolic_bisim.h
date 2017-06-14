@@ -738,7 +738,7 @@ protected:
     indexed_actions.put(lts::action_label_lts::tau_action().actions());
     for(const lps::action_summand& as: m_spec.process().action_summands())
     {
-      std::pair<size_t, bool> action_index = indexed_actions.put(as.multi_action().actions());
+      std::pair<std::size_t, bool> action_index = indexed_actions.put(as.multi_action().actions());
       if(action_index.second)
       {
         result.add_action(lts::action_label_lts(as.multi_action()));

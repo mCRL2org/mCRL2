@@ -83,13 +83,13 @@ QList<Shape*> DiagramEditor::selectedShapes()
 
 void DiagramEditor::deselectAll()
 {
-  size_t sizeShapes = 0;
+  std::size_t sizeShapes = 0;
   if (m_diagram != 0)
   {
     sizeShapes = m_diagram->shapeCount();
   }
 
-  for (size_t i = 0; i < sizeShapes; ++i)
+  for (std::size_t i = 0; i < sizeShapes; ++i)
   {
     m_diagram->shape(i)->setModeNormal();
   }

@@ -28,7 +28,7 @@ class function_symbol
   friend class function_symbol_generator;
   friend struct detail::constant_function_symbols;
   template<class T> friend struct std::hash;
-  friend size_t detail::get_sufficiently_large_postfix_index(const std::string& prefix_);
+  friend std::size_t detail::get_sufficiently_large_postfix_index(const std::string& prefix_);
 
   protected:
     
@@ -60,7 +60,7 @@ class function_symbol
     }
 
     // Constructor for internal use only
-    function_symbol(const std::string& name_, const size_t arity_, const bool check_for_registered_functions);
+    function_symbol(const std::string& name_, const std::size_t arity_, const bool check_for_registered_functions);
 
     // Constructor for internal use only.
     function_symbol(detail::_function_symbol* f)
@@ -109,7 +109,7 @@ class function_symbol
     /// does not exist yet, and that the prefix and number combination is neatly
     /// recoreded in the appropriate number generator as being used. Furthermore,
     /// it takes a pointer to a char* to represent its string.
-    /* function_symbol(const char* name_begin, const char* name_end, const size_t arity_);  */
+    /* function_symbol(const char* name_begin, const char* name_end, const std::size_t arity_);  */
 
   public:
     /// \brief default constructor
@@ -123,7 +123,7 @@ class function_symbol
     /// \brief Constructor.
     /// \param name A string.
     /// \param arity_ The arity of the function.
-    function_symbol(const std::string& name, const size_t arity_)
+    function_symbol(const std::string& name, const std::size_t arity_)
      : function_symbol(name, arity_, true)
     {}
 
@@ -169,7 +169,7 @@ class function_symbol
 
     /// \brief Return the arity (number of arguments) of the function symbol (function_symbol).
     /// \return The arity of the function symbol.
-    size_t arity() const
+    std::size_t arity() const
     {
       assert(is_valid());
       return m_function_symbol->first.arity();
@@ -294,7 +294,7 @@ struct hash<atermpp::function_symbol>
 
   std::size_t operator()(const atermpp::function_symbol& f) const
   {
-    return reinterpret_cast<size_t>(f.m_function_symbol) >> 4; 
+    return reinterpret_cast<std::size_t>(f.m_function_symbol) >> 4; 
   }
 };
 

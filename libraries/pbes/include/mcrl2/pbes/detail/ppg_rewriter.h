@@ -250,7 +250,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       {
         std::vector<pbes_expression> conjuncts = split_conjuncts(x);
         bool split = false;
-        size_t count = 0;
+        std::size_t count = 0;
         for(const pbes_expression& conjunct: conjuncts)
         {
           if (!is_simple_expression(conjunct))
@@ -339,7 +339,7 @@ struct ppg_rewriter: public pbes_expression_traverser<ppg_rewriter>
       {
         std::vector<pbes_expression> disjuncts = split_disjuncts(x);
         bool split = false;
-        size_t count = 0;
+        std::size_t count = 0;
         for(const pbes_expression& disjunct: disjuncts)
         {
           if (!is_simple_expression(disjunct))

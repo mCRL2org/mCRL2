@@ -67,13 +67,13 @@ Simulator::~Simulator()
 // -- get functions ---------------------------------------------
 
 
-size_t Simulator::SelectedClusterIndex()
+std::size_t Simulator::SelectedClusterIndex()
 {
-  size_t result = NON_EXISTING;
+  std::size_t result = NON_EXISTING;
 
   if (m_currentSelection == ID_FRAME_PREV)
   {
-    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size())
+    if (0 <= m_currentSelectionIndex && static_cast <std::size_t>(m_currentSelectionIndex) < m_previousFrames.size())
     {
       result = m_previousFrames[m_currentSelectionIndex]->getNode(0)->getCluster()->getIndex();
     }
@@ -87,7 +87,7 @@ size_t Simulator::SelectedClusterIndex()
   }
   else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size())
+    if (0 <= m_currentSelectionIndex && static_cast <std::size_t>(m_currentSelectionIndex) < m_nextFrames.size())
     {
       result = m_nextFrames[m_currentSelectionIndex]->getNode(0)->getCluster()->getIndex();
     }
@@ -127,7 +127,7 @@ void Simulator::initFrameCurr(
   {
     // update new data
     m_attributes = attrs;
-    for (size_t i = 0; i < m_attributes.size(); ++i)
+    for (std::size_t i = 0; i < m_attributes.size(); ++i)
     {
       connect(m_attributes[i], SIGNAL(deleted()), this, SLOT(reset()));
     }
@@ -364,13 +364,13 @@ void Simulator::initFramesPrevNext()
   Cluster*     nodesNext;
 
   // get nodes leading to & from current frame
-  for (size_t i = 0; i < m_currentFrame->getSizeNodes(); ++i)
+  for (std::size_t i = 0; i < m_currentFrame->getSizeNodes(); ++i)
   {
     temp = m_currentFrame->getNode(i);
 
     // incoming nodes
     {
-      for (size_t j = 0; j < temp->getSizeInEdges(); ++j)
+      for (std::size_t j = 0; j < temp->getSizeInEdges(); ++j)
       {
         tempPrev.insert(temp->getInEdge(j)->getInNode());
       }
@@ -378,7 +378,7 @@ void Simulator::initFramesPrevNext()
 
     // outgoing nodes
     {
-      for (size_t j = 0; j < temp->getSizeOutEdges(); ++j)
+      for (std::size_t j = 0; j < temp->getSizeOutEdges(); ++j)
       {
         tempNext.insert(temp->getOutEdge(j)->getOutNode());
       }
@@ -436,7 +436,7 @@ void Simulator::initBundles()
 
   // get nodes in current frame
   {
-    for (size_t i = 0; i < m_currentFrame->getSizeNodes(); ++i)
+    for (std::size_t i = 0; i < m_currentFrame->getSizeNodes(); ++i)
     {
       currNodes.insert(m_currentFrame->getNode(i));
     }
@@ -445,15 +445,15 @@ void Simulator::initBundles()
   // get all edges from previous frames to current frame
   lbls.clear();
   {
-    for (size_t i = 0; i < m_previousFrames.size(); ++i)
+    for (std::size_t i = 0; i < m_previousFrames.size(); ++i)
     {
       bdls.clear();
 
       clst = m_previousFrames[i];
-      for (size_t j = 0; j < clst->getSizeNodes(); ++j)
+      for (std::size_t j = 0; j < clst->getSizeNodes(); ++j)
       {
         node = clst->getNode(j);
-        for (size_t k = 0; k < node->getSizeOutEdges(); ++k)
+        for (std::size_t k = 0; k < node->getSizeOutEdges(); ++k)
         {
           edge = node->getOutEdge(k);
 
@@ -513,14 +513,14 @@ void Simulator::initBundles()
   // get all edges from current frame to next frames
   lbls.clear();
   {
-    for (size_t i = 0; i < m_nextFrames.size(); ++i)
+    for (std::size_t i = 0; i < m_nextFrames.size(); ++i)
     {
       bdls.clear();
       clst = m_nextFrames[i];
-      for (size_t j = 0; j < clst->getSizeNodes(); ++j)
+      for (std::size_t j = 0; j < clst->getSizeNodes(); ++j)
       {
         node = clst->getNode(j);
-        for (size_t k = 0; k < node->getSizeInEdges(); ++k)
+        for (std::size_t k = 0; k < node->getSizeInEdges(); ++k)
         {
           edge = node->getInEdge(k);
 
@@ -577,7 +577,7 @@ void Simulator::initBundles()
 
   lbls.clear();
   {
-    for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
+    for (std::size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
     {
       bdl = m_bundlesPreviousByLabel[i];
 
@@ -602,7 +602,7 @@ void Simulator::initBundles()
   }
 
   {
-    for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
+    for (std::size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
     {
       bdl = m_bundlesNextByLabel[i];
 
@@ -651,10 +651,10 @@ void Simulator::sortFramesPrevNext()
 
   // sort previous frames
   {
-    for (size_t i = 0; i < m_previousFrames.size(); ++i)
+    for (std::size_t i = 0; i < m_previousFrames.size(); ++i)
     {
       int key = 0;
-      for (size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
+      for (std::size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
       {
         key += (int)pow(10.0, (int) m_previousFrames[i]->getOutBundle(j)->getParent()->getIndex());
       }
@@ -672,10 +672,10 @@ void Simulator::sortFramesPrevNext()
   sorted.clear();
 
   // sort previous frames
-  for (size_t i = 0; i < m_nextFrames.size(); ++i)
+  for (std::size_t i = 0; i < m_nextFrames.size(); ++i)
   {
     int key = 0;
-    for (size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
+    for (std::size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
     {
       key += (int)pow(10.0, (int) m_nextFrames[i]->getInBundle(j)->getParent()->getIndex());
     }
@@ -735,7 +735,7 @@ void Simulator::calcPosFrames()
   pos.x = -0.5*size.width() + 0.5*itvHori + 4.0*pix;
   pos.y = 0.5*m_previousFrames.size()*itvVert - 0.5*itvVert;
   {
-    for (size_t i = 0; i < m_previousFrames.size(); ++i)
+    for (std::size_t i = 0; i < m_previousFrames.size(); ++i)
     {
       m_previousFramePositions.push_back(pos);
       pos.y -= itvVert;
@@ -745,7 +745,7 @@ void Simulator::calcPosFrames()
   pos.x = 0.5*size.width() - 0.5*itvHori - 4.0*pix;
   pos.y = 0.5*m_nextFrames.size()*itvVert - 0.5*itvVert;
   {
-    for (size_t i = 0; i < m_nextFrames.size(); ++i)
+    for (std::size_t i = 0; i < m_nextFrames.size(); ++i)
     {
       m_nextFramePositions.push_back(pos);
       pos.y -= itvVert;
@@ -792,7 +792,7 @@ void Simulator::calcPosBundles()
     double itvGrid = (1.5*itvHori)/(m_bundlesPreviousByLabel.size()+1);
 
     {
-      for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
+      for (std::size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
       {
         posTopLft.x = -2.0*itvHori + (i+1)*itvGrid;
         posTopLft.y =  0.5*size.height() - labelHeight*pix;
@@ -806,7 +806,7 @@ void Simulator::calcPosBundles()
 
     // bundles prev
     {
-      for (size_t i = 0; i < m_previousFrames.size(); ++i)
+      for (std::size_t i = 0; i < m_previousFrames.size(); ++i)
       {
         vector< Position2D > v;
 
@@ -816,7 +816,7 @@ void Simulator::calcPosBundles()
         // incoming bundles
         double itv = 2.0/m_bundlesPreviousByLabel.size();
         {
-          for (size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
+          for (std::size_t j = 0; j < m_previousFrames[i]->getSizeOutBundles(); ++j)
           {
             ///*
             posTopLft.x = m_previousFramePositions[i].x + 1.0*m_verticalFrameScale + 3.0*pix;
@@ -864,7 +864,7 @@ void Simulator::calcPosBundles()
     double itvGrid = (1.5*itvHori)/(m_bundlesNextByLabel.size()+1);
 
     {
-      for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
+      for (std::size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
       {
         posTopLft.x = 2.0*itvHori - (m_bundlesNextByLabel.size()-i)*itvGrid;
         posTopLft.y =  0.5*size.height() - labelHeight*pix;
@@ -878,7 +878,7 @@ void Simulator::calcPosBundles()
 
     // bundles next
     {
-      for (size_t i = 0; i < m_nextFrames.size(); ++i)
+      for (std::size_t i = 0; i < m_nextFrames.size(); ++i)
       {
         vector< Position2D > v;
 
@@ -888,7 +888,7 @@ void Simulator::calcPosBundles()
         // outgoing bundles
         double itv = 2.0/m_bundlesNextByLabel.size();
         {
-          for (size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
+          for (std::size_t j = 0; j < m_nextFrames[i]->getSizeInBundles(); ++j)
           {
             posTopLft.x = m_nextBundleLabelPositionTL[ m_nextFrames[i]->getInBundle(j)->getParent()->getIndex() ].x + 1.0*pix;
             posTopLft.y = posBotRgt.y = m_nextFramePositions[i].y
@@ -942,7 +942,7 @@ void Simulator::handleKeyRgt()
 
       if (m_currentSelection == ID_FRAME_PREV)
       {
-        if (0 <= m_lastSelectionIndexPrevious && static_cast <size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
+        if (0 <= m_lastSelectionIndexPrevious && static_cast <std::size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
         {
           m_currentSelectionIndex = m_lastSelectionIndexPrevious;
         }
@@ -957,7 +957,7 @@ void Simulator::handleKeyRgt()
       }
       else if (m_currentSelection == ID_FRAME_NEXT)
       {
-        if (0 <= m_lastSelectionIndexNext && static_cast <size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
+        if (0 <= m_lastSelectionIndexNext && static_cast <std::size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
         {
           m_currentSelectionIndex = m_lastSelectionIndexNext;
         }
@@ -984,7 +984,7 @@ void Simulator::handleKeyRgt()
     {
       m_currentSelection = ID_FRAME_NEXT;
 
-      if (0 <= m_lastSelectionIndexNext && static_cast <size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
+      if (0 <= m_lastSelectionIndexNext && static_cast <std::size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
       {
         m_currentSelectionIndex = m_lastSelectionIndexNext;
       }
@@ -1012,7 +1012,7 @@ void Simulator::handleKeyDwn()
 {
   if (m_currentSelection == ID_FRAME_PREV)
   {
-    if (static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size()-1)
+    if (static_cast <std::size_t>(m_currentSelectionIndex) < m_previousFrames.size()-1)
     {
       ++m_currentSelectionIndex;
     }
@@ -1021,7 +1021,7 @@ void Simulator::handleKeyDwn()
   }
   else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    if (static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size()-1)
+    if (static_cast <std::size_t>(m_currentSelectionIndex) < m_nextFrames.size()-1)
     {
       ++m_currentSelectionIndex;
     }
@@ -1041,7 +1041,7 @@ void Simulator::handleKeyLft()
 
       if (m_currentSelection == ID_FRAME_PREV)
       {
-        if (0 <= m_lastSelectionIndexPrevious && static_cast <size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
+        if (0 <= m_lastSelectionIndexPrevious && static_cast <std::size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
         {
           m_currentSelectionIndex = m_lastSelectionIndexPrevious;
         }
@@ -1056,7 +1056,7 @@ void Simulator::handleKeyLft()
       }
       else if (m_currentSelection == ID_FRAME_NEXT)
       {
-        if (0 <= m_lastSelectionIndexNext && static_cast <size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
+        if (0 <= m_lastSelectionIndexNext && static_cast <std::size_t>(m_lastSelectionIndexNext) < m_nextFrames.size())
         {
           m_currentSelectionIndex = m_lastSelectionIndexNext;
         }
@@ -1087,7 +1087,7 @@ void Simulator::handleKeyLft()
     {
       m_currentSelection = ID_FRAME_PREV;
 
-      if (0 <= m_lastSelectionIndexPrevious && static_cast <size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
+      if (0 <= m_lastSelectionIndexPrevious && static_cast <std::size_t>(m_lastSelectionIndexPrevious) < m_previousFrames.size())
       {
         m_currentSelectionIndex = m_lastSelectionIndexPrevious;
       }
@@ -1111,7 +1111,7 @@ void Simulator::markFrameClusts()
 {
   if (m_currentSelection == ID_FRAME_PREV)
   {
-    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_previousFrames.size())
+    if (0 <= m_currentSelectionIndex && static_cast <std::size_t>(m_currentSelectionIndex) < m_previousFrames.size())
     {
       emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
@@ -1125,7 +1125,7 @@ void Simulator::markFrameClusts()
   }
   else if (m_currentSelection == ID_FRAME_NEXT)
   {
-    if (0 <= m_currentSelectionIndex && static_cast <size_t>(m_currentSelectionIndex) < m_nextFrames.size())
+    if (0 <= m_currentSelectionIndex && static_cast <std::size_t>(m_currentSelectionIndex) < m_nextFrames.size())
     {
       emit hoverCluster(m_previousFrames[m_currentSelectionIndex], QVector<Attribute *>::fromStdVector(m_attributes).toList());
     }
@@ -1156,7 +1156,7 @@ void Simulator::clearFrames()
   }
 
   {
-    for (size_t i = 0; i < m_previousFrames.size(); ++i)
+    for (std::size_t i = 0; i < m_previousFrames.size(); ++i)
     {
       delete m_previousFrames[i];
     }
@@ -1164,7 +1164,7 @@ void Simulator::clearFrames()
   m_previousFrames.clear();
 
   {
-    for (size_t i = 0; i < m_nextFrames.size(); ++i)
+    for (std::size_t i = 0; i < m_nextFrames.size(); ++i)
     {
       delete m_nextFrames[i];
     }
@@ -1179,7 +1179,7 @@ void Simulator::clearFrames()
 void Simulator::clearBundles()
 {
   {
-    for (size_t i = 0; i < m_bundles.size(); ++i)
+    for (std::size_t i = 0; i < m_bundles.size(); ++i)
     {
       delete m_bundles[i];
     }
@@ -1187,7 +1187,7 @@ void Simulator::clearBundles()
   }
 
   {
-    for (size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
+    for (std::size_t i = 0; i < m_bundlesPreviousByLabel.size(); ++i)
     {
       delete m_bundlesPreviousByLabel[i];
     }
@@ -1195,7 +1195,7 @@ void Simulator::clearBundles()
   m_bundlesPreviousByLabel.clear();
 
   {
-    for (size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
+    for (std::size_t i = 0; i < m_bundlesNextByLabel.size(); ++i)
     {
       delete m_bundlesNextByLabel[i];
     }
@@ -1203,7 +1203,7 @@ void Simulator::clearBundles()
   m_bundlesNextByLabel.clear();
 
   {
-    for (size_t i = 0; i < m_bundlesByLabel.size(); ++i)
+    for (std::size_t i = 0; i < m_bundlesByLabel.size(); ++i)
     {
       delete m_bundlesByLabel[i];
     }
@@ -1388,7 +1388,7 @@ void Simulator::clear()
 }
 
 
-QColor Simulator::calcColor(size_t iter, size_t numr)
+QColor Simulator::calcColor(std::size_t iter, std::size_t numr)
 {
   return VisUtils::qualPair(iter, numr);
 }
@@ -1444,7 +1444,7 @@ void Simulator::drawFrameCurr(const bool& inSelectMode)
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (std::size_t j = 0; j < m_attributes.size(); ++j)
       {
         attr = m_attributes[j];
         node = m_currentFrame->getNode(0);
@@ -1509,7 +1509,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
   if (inSelectMode)
   {
     glPushName(ID_FRAME_PREV);
-    for (size_t i = 0; i < m_previousFramePositions.size(); ++i)
+    for (std::size_t i = 0; i < m_previousFramePositions.size(); ++i)
     {
       double x = m_previousFramePositions[i].x;
       double y = m_previousFramePositions[i].y;
@@ -1517,7 +1517,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
       glPushMatrix();
       glTranslatef(x, y, 0.0);
 
-      if (m_currentSelection == ID_FRAME_PREV &&  static_cast <size_t>(m_currentSelectionIndex) == i)
+      if (m_currentSelection == ID_FRAME_PREV &&  static_cast <std::size_t>(m_currentSelectionIndex) == i)
       {
         glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
       }
@@ -1531,7 +1531,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
         -1.0,  1.0,
         1.0, -1.0);
 
-      if (m_currentSelection == ID_FRAME_PREV &&  static_cast <size_t>(m_currentSelectionIndex) == i)
+      if (m_currentSelection == ID_FRAME_PREV &&  static_cast <std::size_t>(m_currentSelectionIndex) == i)
       {
         glPushName(ID_DIAGRAM_MORE);
         VisUtils::fillRect(-0.98, -0.8, -0.8, -0.98);
@@ -1576,7 +1576,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
           */
           Attribute* attr;
           Node* node;
-          for (size_t j = 0; j < m_attributes.size(); ++j)
+          for (std::size_t j = 0; j < m_attributes.size(); ++j)
           {
             attr = m_attributes[j];
             node = m_previousFrames[i]->getNode(0);
@@ -1615,7 +1615,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
 
     if (m_currentSelection == ID_FRAME_PREV)
     {
-      if (0 <= m_currentSelectionIndex &&  static_cast <size_t>(m_currentSelectionIndex) < m_previousFramePositions.size())
+      if (0 <= m_currentSelectionIndex &&  static_cast <std::size_t>(m_currentSelectionIndex) < m_previousFramePositions.size())
       {
         /*
         for ( int j = 0; j < attributes.size(); ++j )
@@ -1626,7 +1626,7 @@ void Simulator::drawFramesPrev(const bool& inSelectMode)
         */
         Attribute* attr;
         Node* node;
-        for (size_t j = 0; j < m_attributes.size(); ++j)
+        for (std::size_t j = 0; j < m_attributes.size(); ++j)
         {
           attr = m_attributes[j];
           node = m_previousFrames[m_currentSelectionIndex]->getNode(0);
@@ -1681,7 +1681,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
   if (inSelectMode)
   {
     glPushName(ID_FRAME_NEXT);
-    for (size_t i = 0; i < m_nextFramePositions.size(); ++i)
+    for (std::size_t i = 0; i < m_nextFramePositions.size(); ++i)
     {
       double x = m_nextFramePositions[i].x;
       double y = m_nextFramePositions[i].y;
@@ -1689,7 +1689,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
       glPushMatrix();
       glTranslatef(x, y, 0.0);
 
-      if (m_currentSelection == ID_FRAME_NEXT &&  static_cast <size_t>(m_currentSelectionIndex) == i)
+      if (m_currentSelection == ID_FRAME_NEXT &&  static_cast <std::size_t>(m_currentSelectionIndex) == i)
       {
         glScalef(m_horizontalFrameScale, m_horizontalFrameScale, m_horizontalFrameScale);
       }
@@ -1701,7 +1701,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
       glPushName((GLuint) i);
       VisUtils::fillRect(-1.0, 1.0, 1.0, -1.0);
 
-      if (m_currentSelection == ID_FRAME_NEXT &&  static_cast <size_t>(m_currentSelectionIndex) == i)
+      if (m_currentSelection == ID_FRAME_NEXT &&  static_cast <std::size_t>(m_currentSelectionIndex) == i)
       {
         glPushName(ID_DIAGRAM_MORE);
         VisUtils::fillRect(-0.98, -0.8, -0.8, -0.98);
@@ -1719,9 +1719,9 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
     double pix = pixelSize();
     vector< double > valsFrame;
 
-    for (size_t i = 0; i < m_nextFramePositions.size(); ++i)
+    for (std::size_t i = 0; i < m_nextFramePositions.size(); ++i)
     {
-      if (m_currentSelection != ID_FRAME_NEXT || i !=  static_cast <size_t>(m_currentSelectionIndex))
+      if (m_currentSelection != ID_FRAME_NEXT || i !=  static_cast <std::size_t>(m_currentSelectionIndex))
       {
         double x = m_nextFramePositions[i].x;
         double y = m_nextFramePositions[i].y;
@@ -1746,7 +1746,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
           */
           Attribute* attr;
           Node* node;
-          for (size_t j = 0; j < m_attributes.size(); ++j)
+          for (std::size_t j = 0; j < m_attributes.size(); ++j)
           {
             attr = m_attributes[j];
             node = m_nextFrames[i]->getNode(0);
@@ -1785,7 +1785,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
 
     if (m_currentSelection == ID_FRAME_NEXT)
     {
-      if (0 <= m_currentSelectionIndex &&  static_cast <size_t>(m_currentSelectionIndex) < m_nextFramePositions.size())
+      if (0 <= m_currentSelectionIndex &&  static_cast <std::size_t>(m_currentSelectionIndex) < m_nextFramePositions.size())
       {
         /*
         for ( int j = 0; j < attributes.size(); ++j )
@@ -1796,7 +1796,7 @@ void Simulator::drawFramesNext(const bool& inSelectMode)
         */
         Attribute* attr;
         Node* node;
-        for (size_t j = 0; j < m_attributes.size(); ++j)
+        for (std::size_t j = 0; j < m_attributes.size(); ++j)
         {
           attr = m_attributes[j];
           node = m_nextFrames[m_currentSelectionIndex]->getNode(0);
@@ -1854,7 +1854,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
     string lbl;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
+    for (std::size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
     {
       lbl = m_bundlesPreviousByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
@@ -1899,9 +1899,9 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
   else
   {
     double pix = pixelSize();
-    size_t idxHiLite = NON_EXISTING;
+    std::size_t idxHiLite = NON_EXISTING;
 
-    for (size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
+    for (std::size_t i = 0; i < m_previousBundleLabelPositionTL.size(); ++i)
     {
       if (m_bundlesPreviousByLabel[i]->getParent()->getIndex() == m_previousBundleFocusIndex)
       {
@@ -1956,7 +1956,7 @@ void Simulator::drawBdlLblGridPrev(const bool& inSelectMode)
       }
     }
 
-    if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < m_previousBundleLabelPositionTL.size())
+    if (idxHiLite != NON_EXISTING &&  static_cast <std::size_t>(idxHiLite) < m_previousBundleLabelPositionTL.size())
     {
       string lbl = m_bundlesPreviousByLabel[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
@@ -2039,7 +2039,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
     double pix = pixelSize();;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
+    for (std::size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
     {
       string lbl = m_bundlesNextByLabel[i]->getChild(0)->getEdge(0)->getLabel();
 
@@ -2084,9 +2084,9 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
   else
   {
     double pix = pixelSize();;
-    size_t idxHiLite = NON_EXISTING;
+    std::size_t idxHiLite = NON_EXISTING;
 
-    for (size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
+    for (std::size_t i = 0; i < m_nextBundleLabelPositionTL.size(); ++i)
     {
       if (m_bundlesNextByLabel[i]->getParent()->getIndex() == m_nextBundleFocusIndex)
       {
@@ -2141,7 +2141,7 @@ void Simulator::drawBdlLblGridNext(const bool& inSelectMode)
       }
     }
 
-    if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < m_nextBundleLabelPositionTL.size())
+    if (idxHiLite != NON_EXISTING &&  static_cast <std::size_t>(idxHiLite) < m_nextBundleLabelPositionTL.size())
     {
       string lbl = m_bundlesNextByLabel[idxHiLite]->getChild(0)->getEdge(0)->getLabel();
 
@@ -2224,9 +2224,9 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
     double pix = pixelSize();
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
+    for (std::size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
     {
-      for (size_t j = 0; j < m_previousBundlePositionBR[i].size(); ++j)
+      for (std::size_t j = 0; j < m_previousBundlePositionBR[i].size(); ++j)
       {
         glPushName((GLuint) m_previousFrames[i]->getOutBundle(j)->getParent()->getParent()->getIndex());
         // arrow interval
@@ -2246,15 +2246,15 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
   else
   {
     double pix = pixelSize();
-    size_t idxHiLite = NON_EXISTING;
+    std::size_t idxHiLite = NON_EXISTING;
 
     VisUtils::setColor(VisUtils::lightGray);
     VisUtils::enableLineAntiAlias();
 
-    for (size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
+    for (std::size_t i = 0; i < m_previousBundlePositionTL.size(); ++i)
     {
       idxHiLite = -1;
-      for (size_t j = 0; j < m_previousBundlePositionBR[i].size(); ++j)
+      for (std::size_t j = 0; j < m_previousBundlePositionBR[i].size(); ++j)
       {
         // fade color
         if (m_previousFrames[i]->getOutBundle(j)->getParent()->getParent()->getIndex() == m_previousBundleFocusIndex)
@@ -2281,7 +2281,7 @@ void Simulator::drawBundlesPrev(const bool& inSelectMode)
         }
       }
 
-      if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < m_previousBundlePositionBR[i].size())
+      if (idxHiLite != NON_EXISTING &&  static_cast <std::size_t>(idxHiLite) < m_previousBundlePositionBR[i].size())
       {
         // fill color
         QColor colFill = calcColor(m_previousFrames[i]->getOutBundle(idxHiLite)->getParent()->getParent()->getIndex(), m_bundlesByLabel.size());
@@ -2316,9 +2316,9 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
     double arrowItv;
 
     glPushName(ID_BUNDLE_LBL);
-    for (size_t i = 0; i < m_nextBundlePositionTL.size(); ++i)
+    for (std::size_t i = 0; i < m_nextBundlePositionTL.size(); ++i)
     {
-      for (size_t j = 0; j < m_nextBundlePositionBR[i].size(); ++j)
+      for (std::size_t j = 0; j < m_nextBundlePositionBR[i].size(); ++j)
       {
         glPushName((GLuint) m_nextFrames[i]->getInBundle(j)->getParent()->getParent()->getIndex());
         // arrow interval
@@ -2338,16 +2338,16 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
   else
   {
     double pix = pixelSize();
-    size_t idxHiLite = NON_EXISTING;
+    std::size_t idxHiLite = NON_EXISTING;
 
     VisUtils::setColor(VisUtils::lightGray);
     VisUtils::enableLineAntiAlias();
 
-    for (size_t i = 0; i < m_nextBundlePositionTL.size(); ++i)
+    for (std::size_t i = 0; i < m_nextBundlePositionTL.size(); ++i)
     {
       idxHiLite = -1;
 
-      for (size_t j = 0; j < m_nextBundlePositionBR[i].size(); ++j)
+      for (std::size_t j = 0; j < m_nextBundlePositionBR[i].size(); ++j)
       {
         // fade color
         if (m_nextFrames[i]->getInBundle(j)->getParent()->getParent()->getIndex() == m_nextBundleFocusIndex)
@@ -2380,7 +2380,7 @@ void Simulator::drawBundlesNext(const bool& inSelectMode)
         }
       }
 
-      if (idxHiLite != NON_EXISTING &&  static_cast <size_t>(idxHiLite) < m_nextBundlePositionBR[i].size())
+      if (idxHiLite != NON_EXISTING &&  static_cast <std::size_t>(idxHiLite) < m_nextBundlePositionBR[i].size())
       {
         // fill color
         QColor colFill = calcColor(m_nextFrames[i]->getInBundle(idxHiLite)->getParent()->getParent()->getIndex(), m_bundlesByLabel.size());
@@ -2555,7 +2555,7 @@ void Simulator::animate()
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (std::size_t j = 0; j < m_attributes.size(); ++j)
       {
         attr = m_attributes[j];
         node = m_animationOldFrame->getNode(0);
@@ -2598,7 +2598,7 @@ void Simulator::animate()
                       attributes[j]->getIndex() ) )->getIndex() );
       }
       */
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (std::size_t j = 0; j < m_attributes.size(); ++j)
       {
         attr = m_attributes[j];
         node = m_animationNewFrame->getNode(0);
@@ -2643,7 +2643,7 @@ void Simulator::animate()
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (std::size_t j = 0; j < m_attributes.size(); ++j)
       {
         attr = m_attributes[j];
         node = m_animationOldFrame->getNode(0);
@@ -2686,7 +2686,7 @@ void Simulator::animate()
                       attributes[j]->getIndex() ) )->getIndex() );
       }
       */
-      for (size_t j = 0; j < m_attributes.size(); ++j)
+      for (std::size_t j = 0; j < m_attributes.size(); ++j)
       {
         attr = m_attributes[j];
         node = m_animationNewFrame->getNode(0);

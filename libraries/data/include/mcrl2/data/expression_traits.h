@@ -221,13 +221,13 @@ struct term_traits<data::data_expression>
   /// \return the n-th argument of t.
   /// \details This function is linear in n.
   static inline
-  const term_type& argument(const term_type& t, const size_t n)
+  const term_type& argument(const term_type& t, const std::size_t n)
   {
     assert(data::is_application(t));
     const data::application &a=atermpp::down_cast<data::application>(t);
     assert(a.size()>n);
     data::application::const_iterator i=a.begin();
-    for(size_t j=0; j<n; ++j, ++i)
+    for(std::size_t j=0; j<n; ++j, ++i)
     {
       assert(i!=a.end());
     }

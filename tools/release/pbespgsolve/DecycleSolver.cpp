@@ -18,7 +18,7 @@ struct CycleFinder
 {
     /*! Construct an instance for the subgame of `game` induced by `mapping`,
         looking for cycles of dominant priority `prio`. */
-    CycleFinder( const ParityGame &game, size_t prio,
+    CycleFinder( const ParityGame &game, std::size_t prio,
                  const std::vector<verti> &mapping );
 
     /*! Search for minimum-priority cycles and vertices in their attractor sets,
@@ -28,7 +28,7 @@ struct CycleFinder
               DenseSet<verti> &done_set, std::deque<verti> &done_queue );
 
     // SCC callback
-    int operator()(const verti *scc, size_t scc_size);
+    int operator()(const verti *scc, std::size_t scc_size);
 
 private:
     priority_t                  prio_;          //!< selected priority
@@ -40,7 +40,7 @@ private:
 };
 
 CycleFinder::CycleFinder( const ParityGame &game,
-                          size_t prio, const std::vector<verti> &mapping )
+                          std::size_t prio, const std::vector<verti> &mapping )
     : prio_(prio), mapping_(mapping), winning_set_(0, (verti)mapping.size()),
       winning_queue_(), substrat_(mapping.size(), NO_VERTEX)
 {
@@ -75,17 +75,17 @@ void CycleFinder::run( ParityGame::Strategy &strategy,
     }
 }
 
-int CycleFinder::operator()(const verti *scc, size_t scc_size)
+int CycleFinder::operator()(const verti *scc, std::size_t scc_size)
 {
     // Search for a vertex with minimum priority, with a successor in the SCC:
-    for (size_t i = 0; i < scc_size; ++i)
+    for (std::size_t i = 0; i < scc_size; ++i)
     {
         verti v = scc[i];
         if (subgame_.priority(v) == prio_)
         {
             // Search for an edge inside the component:
             // FIXME: complexity analysis? has_succ is not constant time!
-            for (size_t j = 0; j < scc_size; ++j)
+            for (std::size_t j = 0; j < scc_size; ++j)
             {
                 verti w = scc[j];
                 if (subgame_.graph().has_succ(v, w))

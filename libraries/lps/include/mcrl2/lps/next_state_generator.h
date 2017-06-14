@@ -60,7 +60,7 @@ class next_state_generator
       std::vector<action_internal_t> action_label;
       data::data_expression time_tag;
 
-      std::vector<size_t> condition_parameters;
+      std::vector<std::size_t> condition_parameters;
       atermpp::function_symbol condition_arguments_function;
       atermpp::aterm_appl condition_arguments_function_dummy;
       std::map<condition_arguments_t, summand_enumeration_t> enumeration_cache;
@@ -94,10 +94,10 @@ class next_state_generator
         next_state_generator *m_generator;
         bool m_use_summand_pruning;
 
-        std::vector<size_t> m_summands;
+        std::vector<std::size_t> m_summands;
 
         pruning_tree_node_t m_pruning_tree;
-        std::vector<size_t> m_pruning_parameters;
+        std::vector<std::size_t> m_pruning_parameters;
         substitution_t m_pruning_substitution;
 
         static bool summand_set_contains(const std::set<stochastic_action_summand>& summand_set, const summand_t& summand);
@@ -116,7 +116,7 @@ class next_state_generator
       protected:
         lps::multi_action m_action;
         lps::state m_target_state;
-        size_t m_summand_index;
+        std::size_t m_summand_index;
         // The following list contains all but one target states with their probabity.
         // m_target_state is the other state, with the residual probability, such
         // that all probabilities add up to 1.
@@ -139,8 +139,8 @@ class next_state_generator
           m_target_state=target_state;
         }
 
-        size_t summand_index() const { return m_summand_index; }
-        void set_summand_index(const size_t summand_index)
+        std::size_t summand_index() const { return m_summand_index; }
+        void set_summand_index(const std::size_t summand_index)
         {
           m_summand_index=summand_index;
         }
@@ -161,10 +161,10 @@ class next_state_generator
         substitution_t* m_substitution;
 
         bool m_single_summand;
-        size_t m_single_summand_index;
+        std::size_t m_single_summand_index;
         bool m_use_summand_pruning;
-        std::vector<size_t>::iterator m_summand_iterator;
-        std::vector<size_t>::iterator m_summand_iterator_end;
+        std::vector<std::size_t>::iterator m_summand_iterator;
+        std::vector<std::size_t>::iterator m_summand_iterator_end;
         atermpp::detail::shared_subset<summand_t>::iterator m_summand_subset_iterator;
         summand_t *m_summand;
 
@@ -202,7 +202,7 @@ class next_state_generator
 
         iterator(next_state_generator* generator, const lps::state& state, substitution_t* substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue);
 
-        iterator(next_state_generator* generator, const lps::state& state, substitution_t* substitution, size_t summand_index, enumerator_queue_t* enumeration_queue);
+        iterator(next_state_generator* generator, const lps::state& state, substitution_t* substitution, std::size_t summand_index, enumerator_queue_t* enumeration_queue);
 
         operator bool() const
         {
@@ -268,7 +268,7 @@ class next_state_generator
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(const state& state, size_t summand_index, enumerator_queue_t* enumeration_queue)
+    iterator begin(const state& state, std::size_t summand_index, enumerator_queue_t* enumeration_queue)
     {
       return iterator(this, state, &m_substitution, summand_index, enumeration_queue);
     }

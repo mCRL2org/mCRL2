@@ -67,7 +67,7 @@ class Info
       return compare_result_equal;
     }
 
-    bool alpha1(const data_expression& a_term1, const data_expression& a_term2, size_t a_number)
+    bool alpha1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
     {
       if (get_number_of_arguments(a_term1) == a_number)
       {
@@ -116,7 +116,7 @@ class Info
       return (v_operator_1 == v_operator_2) && lex1(a_term1, a_term2, 0) && majo1(a_term1, a_term2, 0);
     }
 
-    bool majo1(const data_expression& a_term1, const data_expression& a_term2, size_t a_number)
+    bool majo1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
     {
       if (get_number_of_arguments(a_term2) == a_number)
       {
@@ -129,7 +129,7 @@ class Info
       }
     }
 
-    bool lex1(const data_expression& a_term1, const data_expression& a_term2, size_t a_number)
+    bool lex1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
     {
       if (get_number_of_arguments(a_term1) == a_number)
       {
@@ -315,7 +315,7 @@ class Info
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
     /// \return 0, if \c aterm is a constant or a variable.
     ///         The number of arguments of the main operator, otherwise.
-    size_t get_number_of_arguments(const data_expression& a_term)
+    std::size_t get_number_of_arguments(const data_expression& a_term)
     {
       if (!is_variable(a_term) && !is_function_symbol(a_term) && !is_abstraction(a_term))
       {
@@ -343,7 +343,7 @@ class Info
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    data_expression get_argument(const data_expression& a_term, const size_t a_number)
+    data_expression get_argument(const data_expression& a_term, const std::size_t a_number)
     {
       return data_expression(a_term[a_number + 1]);
     }

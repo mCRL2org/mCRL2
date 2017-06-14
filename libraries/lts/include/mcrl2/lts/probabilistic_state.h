@@ -151,7 +151,7 @@ class probabilistic_state
 
     /** \brief Gets the number of probabilistic labels of this LTS.
      * \return The number of action labels of this LTS. */
-    size_t size() const
+    std::size_t size() const
     {
       return m_probabilistic_state.size();
     }

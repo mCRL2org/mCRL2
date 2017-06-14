@@ -37,7 +37,7 @@ class data_specification
     virtual bool is_constructor(data::function_symbol function) const = 0;
     virtual const std::set<data::function_symbol>& constructors(data::sort_expression constructed_sort) const = 0;
     virtual const data::function_symbol& recogniser_function(data::function_symbol constructor) const = 0;
-    virtual const data::function_symbol& projection_function(data::function_symbol constructor, size_t field_index) const = 0;
+    virtual const data::function_symbol& projection_function(data::function_symbol constructor, std::size_t field_index) const = 0;
 
     virtual std::string generate_sort_name(data::sort_expression sort) const = 0;
 

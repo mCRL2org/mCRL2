@@ -31,7 +31,7 @@ class Shape : public QObject
   public:
     // -- constructors and destructor -------------------------------
     Shape(
-        Diagram *parentDiagram, size_t index,
+        Diagram *parentDiagram, std::size_t index,
         double xCenter,         double yCenter,
         double xDistance,       double yDistance,
         double angle,           int    shapeType,
@@ -40,7 +40,7 @@ class Shape : public QObject
     virtual ~Shape();
 
     // -- set functions ---------------------------------------------
-    void setIndex(size_t index) { m_index = index; }
+    void setIndex(std::size_t index) { m_index = index; }
 
     void setCenter(double xCenter, double yCenter)        { m_xCenter = xCenter; m_yCenter = yCenter; }
     void setDistance(double xDistance, double yDistance)  { m_xDistance = xDistance; m_yDistance = yDistance; }
@@ -67,7 +67,7 @@ class Shape : public QObject
     void setModeEditDOFOpa()    { setDrawMode(MODE_EDIT_DOF_OPA); }
     void setModeEditDOFText()   { setDrawMode(MODE_EDIT_DOF_TEXT); }
 
-    void setTextSize(size_t size) { m_textSize = size; m_texturesGenerated = false; }
+    void setTextSize(std::size_t size) { m_textSize = size; m_texturesGenerated = false; }
 
     void setLineWidth(double width) { m_lineWidth = width; }
     void setLineColor(QColor color) { m_lineColor = color; }
@@ -90,7 +90,7 @@ class Shape : public QObject
 
 
     // -- get functions ---------------------------------------------
-    size_t index() { return m_index; }
+    std::size_t index() { return m_index; }
 
     void center(double& x, double& y)   { x = m_xCenter; y = m_yCenter; }
     double xCenter()                    { return m_xCenter; }
@@ -105,7 +105,7 @@ class Shape : public QObject
 
     int shapeType()    { return m_shapeType; }
     int drawMode()     { return m_drawMode; }
-    size_t textSize()  { return m_textSize; }
+    std::size_t textSize()  { return m_textSize; }
 
     double lineWidth() { return m_lineWidth; }
     QColor lineColor() { return m_lineColor; }
@@ -143,7 +143,7 @@ class Shape : public QObject
     void clrTransf();
 
     // -- event handlers --------------------------------------------
-    void handleHit(const size_t& hdlIdx);
+    void handleHit(const std::size_t& hdlIdx);
 
     // -- public constants ------------------------------------------
     enum
@@ -196,7 +196,7 @@ class Shape : public QObject
     void initDOF();
     void clearDOF();
 
-    void handleHitEdtDOFAgl(const size_t& hdlIdx);
+    void handleHitEdtDOFAgl(const std::size_t& hdlIdx);
 
     // -- private visualization functions ---------------------------
     void drawNormal(
@@ -241,7 +241,7 @@ class Shape : public QObject
         double pixelSize);
 
     // -- data members ----------------------------------------------
-    size_t m_index;
+    std::size_t m_index;
 
     // geometry
     double m_xCenter,   m_yCenter;    // center,             [-1,1]
@@ -252,7 +252,7 @@ class Shape : public QObject
     // properties
     int         m_shapeType;      // type of shape
     int         m_drawMode;       // drawing mode
-    size_t      m_textSize;       // font size
+    std::size_t      m_textSize;       // font size
 
     double      m_lineWidth;      // line width in pix
     QColor      m_lineColor;      // line color

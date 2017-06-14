@@ -170,10 +170,10 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
   // selection mode
   if (inSelectMode)
   {
-    for (size_t i = 0; i < positions.size(); ++i)
+    for (std::size_t i = 0; i < positions.size(); ++i)
     {
       glPushName((GLuint) i);
-      for (size_t j = 0; j < positions[i].size(); ++j)
+      for (std::size_t j = 0; j < positions[i].size(); ++j)
       {
         double x   = positions[i][j].x;
         double y   = positions[i][j].y;
@@ -192,9 +192,9 @@ void CorrlPlot::drawPlot(const bool& inSelectMode)
   {
     double pix   = pixelSize();
 
-    for (size_t i = 0; i < positions.size(); ++i)
+    for (std::size_t i = 0; i < positions.size(); ++i)
     {
-      for (size_t j = 0; j < positions[i].size(); ++j)
+      for (std::size_t j = 0; j < positions[i].size(); ++j)
       {
         double x   = positions[i][j].x;
         double y   = positions[i][j].y;
@@ -293,23 +293,23 @@ void CorrlPlot::calcMaxNumber()
   maxNumber  = 0;
 
   // init max row & col numbers
-  size_t sizeX = attribute1->getSizeCurValues();
-  size_t sizeY = attribute2->getSizeCurValues();
-  for (size_t i = 0; i < sizeX; ++i)
+  std::size_t sizeX = attribute1->getSizeCurValues();
+  std::size_t sizeY = attribute2->getSizeCurValues();
+  for (std::size_t i = 0; i < sizeX; ++i)
   {
     maxNumX.push_back(0);
   }
 
-  for (size_t i = 0; i < sizeY; ++i)
+  for (std::size_t i = 0; i < sizeY; ++i)
   {
     maxNumY.push_back(0);
   }
 
   // calc max
   {
-    for (size_t i = 0; i < number.size(); ++i)
+    for (std::size_t i = 0; i < number.size(); ++i)
     {
-      for (size_t j = 0; j < number[i].size(); ++j)
+      for (std::size_t j = 0; j < number[i].size(); ++j)
       {
         if (number[i][j] > maxNumber)
         {
@@ -329,13 +329,13 @@ void CorrlPlot::calcMaxNumber()
 
   // calc totals
   {
-    for (size_t i = 0; i < maxNumX.size(); ++i)
+    for (std::size_t i = 0; i < maxNumX.size(); ++i)
     {
       sumMaxNumX += maxNumX[i];
     }
   }
   {
-    for (size_t i = 0; i < maxNumY.size(); ++i)
+    for (std::size_t i = 0; i < maxNumY.size(); ++i)
     {
       sumMaxNumY += maxNumY[i];
     }
@@ -429,14 +429,14 @@ void CorrlPlot::calcPositions()
     // calc positions
     double maxRadius = Utils::maxx(maxRadHintPx*pix, 0.5*Utils::minn(fracX, fracY));
 
-    for (size_t i = 0; i < mapXToY.size(); ++i)
+    for (std::size_t i = 0; i < mapXToY.size(); ++i)
     {
       vector< Position2D > tempPos;
       positions.push_back(tempPos);
       vector< double > tempRad;
       radii.push_back(tempRad);
 
-      for (size_t j = 0; j < mapXToY[i].size(); ++j)
+      for (std::size_t j = 0; j < mapXToY[i].size(); ++j)
       {
         // fraction of total number
         double frac = (double)number[i][j]/(double)maxNumber;

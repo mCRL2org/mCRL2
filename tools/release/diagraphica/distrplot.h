@@ -38,8 +38,8 @@ class DistrPlot : public Visualizer
 
     // -- set data functions ----------------------------------------
     void setValues(
-      const size_t& idx,
-      const std::vector< size_t > &num);
+      const std::size_t& idx,
+      const std::vector< std::size_t > &num);
     void clearValues();
 
     void setDiagram(Diagram* dgrm);
@@ -64,7 +64,7 @@ class DistrPlot : public Visualizer
     // ***
     //void clear();
     void setScalingTransf();
-    void displTooltip(const size_t& posIdx);
+    void displTooltip(const std::size_t& posIdx);
 
     void calcPositions();
     void clearPositions();
@@ -77,8 +77,8 @@ class DistrPlot : public Visualizer
     // -- data members ----------------------------------------------
     // data
     Attribute *attribute;
-    std::vector< size_t >    number;
-    size_t              maxNumber;
+    std::vector< std::size_t >    number;
+    std::size_t              maxNumber;
     // vis settings
     int    minHgtHintPx; // height cannot be smaller than this
     int    maxWthHintPx; // width cannot be greater than this
@@ -89,7 +89,7 @@ class DistrPlot : public Visualizer
     double     scaleDgrm;      // scale factor for diagram
     Position2D posDgrm;        // positions of diagram
     bool       showDgrm;       // show or hide diagram
-    size_t        attrValIdxDgrm; // value idx of attribute associated with diagram
+    std::size_t        attrValIdxDgrm; // value idx of attribute associated with diagram
     std::string     msgDgrm;        // message to show with diagram
 };
 

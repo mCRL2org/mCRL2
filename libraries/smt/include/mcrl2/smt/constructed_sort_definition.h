@@ -48,12 +48,12 @@ class constructed_sort_definition: public sort_definition
       m_constructors(constructors)
     {}
 
-    void add_constructor_definition(size_t constructor_index, function_definition *definition)
+    void add_constructor_definition(std::size_t constructor_index, function_definition *definition)
     {
       m_auxiliary_function_definitions[m_constructors[constructor_index].constructor] = std::shared_ptr<function_definition>(definition);
     }
 
-    void add_recogniser_definition(size_t constructor_index, function_definition *definition)
+    void add_recogniser_definition(std::size_t constructor_index, function_definition *definition)
     {
       for (data::function_symbol_vector::const_iterator i = m_constructors[constructor_index].recognisers.begin(); i != m_constructors[constructor_index].recognisers.end(); i++)
       {
@@ -61,7 +61,7 @@ class constructed_sort_definition: public sort_definition
       }
     }
 
-    void add_projection_definition(size_t constructor_index, size_t field_index, function_definition *definition)
+    void add_projection_definition(std::size_t constructor_index, std::size_t field_index, function_definition *definition)
     {
       for (data::function_symbol_vector::const_iterator i = m_constructors[constructor_index].fields[field_index].projections.begin();
            i != m_constructors[constructor_index].fields[field_index].projections.end(); i++)

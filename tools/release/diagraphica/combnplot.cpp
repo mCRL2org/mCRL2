@@ -17,7 +17,7 @@ using namespace std;
 CombnPlot::CombnPlot(
   QWidget *parent,
   Graph* g,
-  const std::vector<size_t> &attributeIndices)
+  const std::vector<std::size_t> &attributeIndices)
   : Visualizer(parent, g)
 {
   maxAttrCard      = 0;
@@ -31,7 +31,7 @@ CombnPlot::CombnPlot(
   diagram        = 0;
   showDgrm       = false;
 
-  for (size_t i = 0; i < attributeIndices.size(); ++i)
+  for (std::size_t i = 0; i < attributeIndices.size(); ++i)
   {
     Attribute *attribute = m_graph->getAttribute(attributeIndices[i]);
     attributes.push_back(attribute);
@@ -123,7 +123,7 @@ void CombnPlot::drawAxesBC(const bool& inSelectMode)
   // get size of 1 pixel
   double pix = pixelSize();
   // get num attributes
-  size_t numAttr = attributes.size();
+  std::size_t numAttr = attributes.size();
 
   // calc size of bounding box
   double xLft = -0.5*size.width()+25*pix;
@@ -161,7 +161,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
   // get size of 1 pixel
   double pix = pixelSize();
   // get num attributes
-  size_t numAttr = attributes.size();
+  std::size_t numAttr = attributes.size();
 
   // calc size of bounding box
   double xLft = -0.5*size.width()+25*pix;
@@ -196,7 +196,7 @@ void CombnPlot::drawAxesCP(const bool& inSelectMode)
       VisUtils::setColor(VisUtils::mediumGray);
       xLft += pix;
       xRgt -= pix;
-      for (size_t i = 0; i < posRgtBot[0].size()-1; ++i)
+      for (std::size_t i = 0; i < posRgtBot[0].size()-1; ++i)
       {
         yTop = posRgtBot[0][i].y;
         yBot = yTop;
@@ -224,7 +224,7 @@ void CombnPlot::drawLabelsBC(const bool& /*inSelectMode*/)
   // calc scaling to use
   double scaling = (12*pix)/(double)CHARHEIGHT;
   // number attributes
-  size_t numAttr = attributes.size();
+  std::size_t numAttr = attributes.size();
 
   // color
   VisUtils::setColor(Qt::black);
@@ -290,7 +290,7 @@ void CombnPlot::drawLabelsCP(const bool& /*inSelectMode*/)
     double xLft = -0.51*size.width()+3*pix;
     double xRgt = -0.5*size.width()+12*pix;
 
-    for (size_t i = 0; i < attributeLabels.size(); ++i)
+    for (std::size_t i = 0; i < attributeLabels.size(); ++i)
     {
       double yTop;
       if (i > 0)
@@ -328,8 +328,8 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
 {
   double hCanv = worldSize().height();
   double pix = pixelSize();
-  size_t sizePositions = posBC.size();
-  size_t numAttr = attributes.size();
+  std::size_t sizePositions = posBC.size();
+  std::size_t numAttr = attributes.size();
 
   double yBot;
   if (sizePositions > 0)
@@ -344,7 +344,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
   // selection mode
   if (inSelectMode)
   {
-    for (size_t i = 0; i < sizePositions; ++i)
+    for (std::size_t i = 0; i < sizePositions; ++i)
     {
       double xLft = posBC[i].x - 0.5*widthBC;
       double xRgt = posBC[i].x + 0.5*widthBC;
@@ -358,7 +358,7 @@ void CombnPlot::drawPlotBC(const bool& inSelectMode)
   // rendering mode
   else
   {
-    for (size_t i = 0; i < sizePositions; ++i)
+    for (std::size_t i = 0; i < sizePositions; ++i)
     {
       double xLft = posBC[i].x - 0.5*widthBC;
       double xRgt = posBC[i].x + 0.5*widthBC;
@@ -388,7 +388,7 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
   // selection mode
   if (inSelectMode)
   {
-    for (size_t i = 0; i < posLftTop.size(); ++i)
+    for (std::size_t i = 0; i < posLftTop.size(); ++i)
     {
       // name per collumn
       glPushName((GLuint) i);
@@ -407,9 +407,9 @@ void CombnPlot::drawPlotCP(const bool& inSelectMode)
   // rendering mode
   else
   {
-    for (size_t i = 0; i < posLftTop.size(); ++i)
+    for (std::size_t i = 0; i < posLftTop.size(); ++i)
     {
-      for (size_t j = 0; j < posLftTop[i].size(); ++j)
+      for (std::size_t j = 0; j < posLftTop[i].size(); ++j)
       {
         double xLft = posLftTop[i][j].x;
         double yTop = posLftTop[i][j].y;
@@ -511,7 +511,7 @@ void CombnPlot::handleMouseEvent(QMouseEvent* e)
 void CombnPlot::initLabels()
 {
   attributeLabels.clear();
-  for (size_t i = 0; i < attributes.size(); ++i)
+  for (std::size_t i = 0; i < attributes.size(); ++i)
     attributeLabels.push_back(attributes[i]->name().toStdString());
 }
 
@@ -519,7 +519,7 @@ void CombnPlot::initLabels()
 void CombnPlot::calcMaxAttrCard()
 {
   maxAttrCard = 0;
-  for (size_t i = 0; i < attributes.size(); ++i)
+  for (std::size_t i = 0; i < attributes.size(); ++i)
   {
     if (attributes[i]->getSizeCurValues() > maxAttrCard)
       maxAttrCard = attributes[i]->getSizeCurValues();
@@ -530,7 +530,7 @@ void CombnPlot::calcMaxAttrCard()
 void CombnPlot::calcMaxNumberPerComb()
 {
   maxNumberPerComb = 0;
-  for (size_t i = 0; i < numberPerComb.size(); ++i)
+  for (std::size_t i = 0; i < numberPerComb.size(); ++i)
   {
     if (numberPerComb[i] > maxNumberPerComb)
     {
@@ -557,7 +557,7 @@ void CombnPlot::setScalingTransf()
 }
 
 
-void CombnPlot::displTooltip(const size_t& posIdx)
+void CombnPlot::displTooltip(const std::size_t& posIdx)
 {
   if (posIdx < combinations.size())
   {
@@ -583,7 +583,7 @@ void CombnPlot::displTooltip(const size_t& posIdx)
       showDgrm = true;
 
       attrValIdcsDgrm.clear();
-      for (size_t i = 0; i < attributes.size(); ++i)
+      for (std::size_t i = 0; i < attributes.size(); ++i)
       {
         attrValIdcsDgrm.push_back(combinations[posIdx][i]);
       }
@@ -647,7 +647,7 @@ void CombnPlot::calcPosBC()
 
   // calc positions
   posBC.clear();
-  for (size_t i = 0; i < numberPerComb.size(); ++i)
+  for (std::size_t i = 0; i < numberPerComb.size(); ++i)
   {
     // calc ratio
     double ratio = (double)numberPerComb[i]/(double)maxNumberPerComb;
@@ -672,7 +672,7 @@ void CombnPlot::calcPosCP()
 {
   QSizeF size = worldSize();
   double pix = pixelSize();
-  size_t numAttr = attributes.size();
+  std::size_t numAttr = attributes.size();
 
   double xLft = -0.5*size.width()+25*pix;
   double xRgt =  0.5*size.width()-10*pix;
@@ -707,16 +707,16 @@ void CombnPlot::calcPosCP()
   // calc positions
   posLftTop.clear();
   posRgtBot.clear();
-  for (size_t i = 0; i < combinations.size(); ++i)
+  for (std::size_t i = 0; i < combinations.size(); ++i)
   {
     vector< Position2D > temp;
     posLftTop.push_back(temp);
     posRgtBot.push_back(temp);
 
-    for (size_t j = 0; j < combinations[i].size(); ++j)
+    for (std::size_t j = 0; j < combinations[i].size(); ++j)
     {
       // calc ratio
-      size_t card  = attributes[j]->getSizeCurValues();
+      std::size_t card  = attributes[j]->getSizeCurValues();
       if (card > 0)
       {
         double ratio = 1.0; //(double)(idx+1)/(double)(card+1);

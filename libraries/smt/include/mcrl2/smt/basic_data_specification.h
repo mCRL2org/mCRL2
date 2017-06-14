@@ -42,11 +42,11 @@ class basic_data_specification: public data_specification
 
     std::map<data::sort_expression, std::set<data::function_symbol> > m_constructed_sort_constructors;
     std::map<data::function_symbol, data::function_symbol> m_recognisers;
-    std::map<data::function_symbol, std::map<size_t, data::function_symbol> > m_projections;
+    std::map<data::function_symbol, std::map<std::size_t, data::function_symbol> > m_projections;
 
     std::map<data::function_symbol, data::data_equation_vector> m_rewrite_rules;
     std::map<data::function_symbol, data::function_symbol_vector> m_all_recognisers;
-    std::map<data::function_symbol, std::map<size_t, data::function_symbol_vector> > m_all_projections;
+    std::map<data::function_symbol, std::map<std::size_t, data::function_symbol_vector> > m_all_projections;
 
   public:
     basic_data_specification(data::data_specification &data_specification, std::shared_ptr<data::set_identifier_generator> identifier_generator);
@@ -99,7 +99,7 @@ class basic_data_specification: public data_specification
       return m_recognisers.at(constructor);
     }
 
-    const data::function_symbol& projection_function(data::function_symbol constructor, size_t field_index) const
+    const data::function_symbol& projection_function(data::function_symbol constructor, std::size_t field_index) const
     {
       assert(m_projections.count(constructor));
       assert(m_projections.at(constructor).count(field_index));

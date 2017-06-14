@@ -145,7 +145,7 @@ class GLWidget : public QOpenGLWidget
      * @param depth The new depth.
      * @param animation The number of animation steps to use.
      */
-    void setDepth(float depth, size_t animation = 1);
+    void setDepth(float depth, std::size_t animation = 1);
 
     /**
      * @brief Updates all shapes and labels.
@@ -205,10 +205,10 @@ class GLWidget : public QOpenGLWidget
 
 
     //Getters and setters
-    size_t nodeSize() const {
+    std::size_t nodeSize() const {
       return m_scene->nodeSize();
     }
-    size_t fontSize() const {
+    std::size_t fontSize() const {
       return m_scene->fontSize();
     }
     float fogDistance() const {
@@ -222,7 +222,7 @@ class GLWidget : public QOpenGLWidget
      * @brief Resets the viewpoint of the camera to the original position.
      * @param animation The desired number of animation steps to use.
      */
-    void resetViewpoint(size_t animation = 0);
+    void resetViewpoint(std::size_t animation = 0);
 
     //Getters and setters
     void toggleTransitionLabels(bool show) {

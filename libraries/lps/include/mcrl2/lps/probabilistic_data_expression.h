@@ -50,22 +50,22 @@ class probabilistic_data_expression: public data::data_expression
       return m_r;
     }
 
-    inline static size_t to_number_t(const std::string& s)
+    inline static std::size_t to_number_t(const std::string& s)
     {
       return std::stoul(s);
     }
 
     // An algorithm to calculate the greatest common divisor
-    static size_t greatest_common_divisor(size_t x, size_t y)
+    static std::size_t greatest_common_divisor(std::size_t x, std::size_t y)
     {
       if (x==0) return y;
       if (y==0) return x;
       if (x>y)
       {
-        const size_t temp=x; x=y; y=temp; // swap(x,y)
+        const std::size_t temp=x; x=y; y=temp; // swap(x,y)
       }
 
-      size_t remainder=y % x;
+      std::size_t remainder=y % x;
       while (remainder!=0)
       {
         y=x;
@@ -75,9 +75,9 @@ class probabilistic_data_expression: public data::data_expression
       return x;
     }
 
-    void remove_common_factors(size_t& enumerator, size_t& denominator)
+    void remove_common_factors(std::size_t& enumerator, std::size_t& denominator)
     {
-      size_t gcd=greatest_common_divisor(enumerator,denominator);
+      std::size_t gcd=greatest_common_divisor(enumerator,denominator);
       while (gcd!=1)
       {
         enumerator=enumerator/gcd;
@@ -119,7 +119,7 @@ class probabilistic_data_expression: public data::data_expression
 
     /* \brief Constructor on the basis of two numbers. The denominator must not be 0.
      */
-    probabilistic_data_expression(size_t enumerator, size_t denominator)
+    probabilistic_data_expression(std::size_t enumerator, std::size_t denominator)
     {
       assert(denominator!=0);
       remove_common_factors(enumerator,denominator);

@@ -29,10 +29,10 @@
 struct Texture
 {
   GLuint name;
-  size_t width;
-  size_t height;
+  std::size_t width;
+  std::size_t height;
   QVector3D shape[4];
-  Texture(size_t width, size_t height, float pixelsize) : width(width), height(height)
+  Texture(std::size_t width, std::size_t height, float pixelsize) : width(width), height(height)
   {
     glGenTextures(1, &name);
     resize(pixelsize);
@@ -77,7 +77,7 @@ struct CameraView
     world(QVector3D(1000.0, 1000.0, 1000.0))
   { }
 
-  void viewport(size_t width, size_t height);
+  void viewport(std::size_t width, std::size_t height);
   void billboard_spherical(const QVector3D& pos);
   void billboard_cylindrical(const QVector3D& pos);
   void applyTranslation();
@@ -88,21 +88,21 @@ struct CameraView
 struct CameraAnimation : public CameraView
 {
   CameraView m_source, m_target;
-  size_t m_animation{0};
-  size_t m_animation_steps{0};
+  std::size_t m_animation{0};
+  std::size_t m_animation_steps{0};
   bool m_resizing{false};
 
-  void start_animation(size_t steps);
+  void start_animation(std::size_t steps);
   void operator=(const CameraView& other);
   void interpolate_cam(float pos);
   void interpolate_world(float pos);
   void animate();
-  void viewport(size_t width, size_t height);
+  void viewport(std::size_t width, std::size_t height);
   bool resizing();
-  void setZoom(float factor, size_t animation);
-  void setRotation(const QQuaternion& rotation, size_t animation);
-  void setTranslation(const QVector3D& translation, size_t animation);
-  void setSize(const QVector3D& size, size_t animation);
+  void setZoom(float factor, std::size_t animation);
+  void setRotation(const QQuaternion& rotation, std::size_t animation);
+  void setTranslation(const QVector3D& translation, std::size_t animation);
+  void setSize(const QVector3D& size, std::size_t animation);
   bool animationFinished() {
     return m_animation_steps == 0 || m_animation >= m_animation_steps;
   }
@@ -125,8 +125,8 @@ class GLScene
     bool m_drawstatenumbers;       ///< State numbers are only drawn if this field is true.
     bool m_drawselfloops;          ///< Self loops are only drawn if this field is true.
     bool m_drawinitialmarking;     ///< The initial state is marked if this field is true.
-    size_t m_size_node;            ///< Variable node size (radius).
-    size_t m_fontsize;             ///< Variable font size
+    std::size_t m_size_node;            ///< Variable node size (radius).
+    std::size_t m_fontsize;             ///< Variable font size
 
     bool m_drawfog;                ///< Fog is rendered only if this field is true.
     float m_fogdistance;           ///< The distance at which the fog starts
@@ -135,7 +135,7 @@ class GLScene
      * @brief Renders a single edge.
      * @param i The index of the edge to render.
      */
-    void renderEdge(size_t i);
+    void renderEdge(std::size_t i);
 
     /**
      * @brief Renders a single edge handle.
@@ -177,14 +177,14 @@ class GLScene
      * @param i The index of the edge to render.
      * @param aspectRatio The aspect ratio used for placement.
      */
-    QString tikzEdge(size_t i, float aspectRatio);
+    QString tikzEdge(std::size_t i, float aspectRatio);
 
     /**
      * @brief Generates TikZ code for a single node.
      * @param i The index of the node to render.
      * @param aspectRatio The aspect ratio used for placement.
      */
-    QString tikzNode(size_t i, float aspectRatio);
+    QString tikzNode(std::size_t i, float aspectRatio);
 
   public:
 
@@ -208,7 +208,7 @@ class GLScene
     struct Selection
     {
       SelectableObject selectionType; ///< The type of object.
-      size_t index;                   ///< The index of the object in m_graph.
+      std::size_t index;                   ///< The index of the object in m_graph.
     };
 
     /**
@@ -252,7 +252,7 @@ class GLScene
      * @param width The new width for the viewport.
      * @param height The new height for the viewport.
      */
-    void resize(size_t width, size_t height);
+    void resize(std::size_t width, std::size_t height);
 
     /**
      * @brief Zoom in by @e factor.
@@ -293,7 +293,7 @@ class GLScene
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setZoom(float factor, size_t animation = 1);
+    void setZoom(float factor, std::size_t animation = 1);
 
     /**
      * @brief Set the rotation quaternion to @e rotation, interpolating to the
@@ -303,7 +303,7 @@ class GLScene
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setRotation(const QQuaternion& rotation, size_t animation = 1);
+    void setRotation(const QQuaternion& rotation, std::size_t animation = 1);
 
     /**
      * @brief Set the translation to @e amount, interpolating to the new value
@@ -313,7 +313,7 @@ class GLScene
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setTranslation(const QVector3D& translation, size_t animation = 1);
+    void setTranslation(const QVector3D& translation, std::size_t animation = 1);
 
     /**
      * @brief Set the world size to @e size, interpolating to the new value
@@ -323,7 +323,7 @@ class GLScene
      *        immediately, 1 applies the change in the next frame. Higher
      *        values cause a gradual change.
      */
-    void setSize(const QVector3D& size, size_t animation = 1);
+    void setSize(const QVector3D& size, std::size_t animation = 1);
 
     /**
      * @brief Returns the current world size.
@@ -380,10 +380,10 @@ class GLScene
     bool drawTransitionLabels() const {
       return m_drawtransitionlabels;
     }
-    size_t nodeSize() const {
+    std::size_t nodeSize() const {
       return m_size_node;
     }
-    size_t fontSize() const {
+    std::size_t fontSize() const {
       return m_fontsize;
     }
     float nodeSizeOnScreen() const {
@@ -417,10 +417,10 @@ class GLScene
       m_drawfog = drawFog;
       updateFog();
     }
-    void setNodeSize(size_t size) {
+    void setNodeSize(std::size_t size) {
       m_size_node = size;
     }
-    void setFontSize(size_t size) {
+    void setFontSize(std::size_t size) {
       m_font.setPixelSize(m_fontsize = size);
     }
     void setFogDistance(float dist) {

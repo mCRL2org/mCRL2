@@ -77,7 +77,7 @@ public:
         values_.push_back(value_type(range_end, Used));  // end of data marker
     }
 
-    size_t size() const { return used_; }
+    std::size_t size() const { return used_; }
     bool empty() const { return used_ == 0; }
 
     void clear()
@@ -156,9 +156,9 @@ public:
     const Key range_begin, range_end;
 
 private:
-    const size_t range_size_;
+    const std::size_t range_size_;
     std::vector<value_type> values_;
-    size_t used_;
+    std::size_t used_;
 
 private:
     DenseMap(const DenseMap &);

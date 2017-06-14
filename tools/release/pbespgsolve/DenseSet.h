@@ -86,7 +86,7 @@ public:
         }
     };
 
-    typedef size_t size_type;
+    typedef std::size_t size_type;
     typedef Key value_type;
     typedef Iterator iterator;
     typedef Iterator const_iterator;
@@ -200,7 +200,7 @@ private:
     const size_type range_size_;
     Alloc           alloc_;
     bool            *used_;
-    size_t          num_used_;
+    std::size_t          num_used_;
 
     friend class Iterator;
 

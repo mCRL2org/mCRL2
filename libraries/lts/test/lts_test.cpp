@@ -20,24 +20,24 @@ using namespace mcrl2;
 class expected_sizes
 {
   public:
-    size_t states_plain, transitions_plain, labels_plain;
-    size_t states_bisimulation, transitions_bisimulation, labels_bisimulation;
-    size_t states_branching_bisimulation, transitions_branching_bisimulation, labels_branching_bisimulation;
-    size_t states_divergence_preserving_branching_bisimulation, transitions_divergence_preserving_branching_bisimulation, labels_divergence_preserving_branching_bisimulation;
-    size_t states_weak_bisimulation, transitions_weak_bisimulation, labels_weak_bisimulation;
-    size_t states_divergence_preserving_weak_bisimulation, transitions_divergence_preserving_weak_bisimulation, labels_divergence_preserving_weak_bisimulation;
-    size_t states_simulation, transitions_simulation, labels_simulation;
-    size_t states_trace_equivalence, transitions_trace_equivalence, labels_trace_equivalence;
-    size_t states_weak_trace_equivalence, transitions_weak_trace_equivalence, labels_weak_trace_equivalence;
-    size_t states_determinisation, transitions_determinisation, labels_determinisation;
+    std::size_t states_plain, transitions_plain, labels_plain;
+    std::size_t states_bisimulation, transitions_bisimulation, labels_bisimulation;
+    std::size_t states_branching_bisimulation, transitions_branching_bisimulation, labels_branching_bisimulation;
+    std::size_t states_divergence_preserving_branching_bisimulation, transitions_divergence_preserving_branching_bisimulation, labels_divergence_preserving_branching_bisimulation;
+    std::size_t states_weak_bisimulation, transitions_weak_bisimulation, labels_weak_bisimulation;
+    std::size_t states_divergence_preserving_weak_bisimulation, transitions_divergence_preserving_weak_bisimulation, labels_divergence_preserving_weak_bisimulation;
+    std::size_t states_simulation, transitions_simulation, labels_simulation;
+    std::size_t states_trace_equivalence, transitions_trace_equivalence, labels_trace_equivalence;
+    std::size_t states_weak_trace_equivalence, transitions_weak_trace_equivalence, labels_weak_trace_equivalence;
+    std::size_t states_determinisation, transitions_determinisation, labels_determinisation;
     bool is_deterministic;
 };
 
 static void test_lts(const std::string& test_description,
               const lts::lts_aut_t& l,
-              size_t expected_label_count,
-              size_t expected_state_count,
-              size_t expected_transition_count
+              std::size_t expected_label_count,
+              std::size_t expected_state_count,
+              std::size_t expected_transition_count
              )
 {
   std::cerr << "LPS test: " << test_description << " -----------------------------------------------\n";
@@ -422,9 +422,9 @@ static void test_reachability()
     "(4,\"unreachable\",0)\n"
     ;
 
-  size_t expected_label_count = 5;
-  size_t expected_state_count = 5;
-  size_t expected_transition_count = 4;
+  std::size_t expected_label_count = 5;
+  std::size_t expected_state_count = 5;
+  std::size_t expected_transition_count = 4;
 
   std::istringstream is(REACH);
   lts::lts_aut_t l_reach;
@@ -473,9 +473,9 @@ static void failing_test_groote_wijs_algorithm()
     "(3,\"tau\",7)\n"
     ;
 
-  size_t expected_label_count = 5;
-  size_t expected_state_count = 10;
-  size_t expected_transition_count = 29;
+  std::size_t expected_label_count = 5;
+  std::size_t expected_state_count = 10;
+  std::size_t expected_transition_count = 29;
 
   std::istringstream is(GWLTS);
   lts::lts_aut_t l_gw;
@@ -497,7 +497,7 @@ static void failing_test_groote_wijs_algorithm()
 // It has not been implemented fully. The problem is that it is difficult to
 // prescribe the order in which refinements have to be done.
 
-static void counterexample_jk_1(size_t k)
+static void counterexample_jk_1(std::size_t k)
 {
     // numbering scheme of states:
     // states 0..k-1 are the blue squares
@@ -509,13 +509,13 @@ static void counterexample_jk_1(size_t k)
     assert(1 < k);
     std::string CJK1 = "des(0," + std::to_string(5*k+2) + "," + std::to_string(2*k+3) + ")\n";
 
-    for (size_t i = 0; i < k; ++i)
+    for (std::size_t i = 0; i < k; ++i)
     {
         CJK1 += "(" + std::to_string(k) + ",a" + std::to_string(i) + "," + std::to_string(k) + ")\n"
                 "(" + std::to_string(k) + ",tau," + std::to_string(i) + ")\n"
                 "(0,a" + std::to_string(i) + "," + std::to_string(k) + ")\n";
     }
-    for (size_t i = k-1; i > 0; --i)
+    for (std::size_t i = k-1; i > 0; --i)
     {
         CJK1 += "(" + std::to_string(i) + ",tau," + std::to_string(i-1) + ")\n"
                 "(" + std::to_string(i+k+1) + ",tau," + std::to_string(i+k) + ")\n";
@@ -525,9 +525,9 @@ static void counterexample_jk_1(size_t k)
             "(" + std::to_string(k) + ",tau," + std::to_string(2*k+1) + ")\n"
             "(0,tau," + std::to_string(2*k+2) + ")\n";
 
-    size_t expected_label_count = k+2;
-    size_t expected_state_count = 4;
-    size_t expected_transition_count = 10;
+    std::size_t expected_label_count = k+2;
+    std::size_t expected_state_count = 4;
+    std::size_t expected_transition_count = 10;
 
     std::istringstream is(CJK1);
     lts::lts_aut_t l_cjk1;
@@ -599,9 +599,9 @@ static void counterexample_postprocessing()
     "(12,\"c\",0)\n"
     ;
 
-  size_t expected_label_count = 4;
-  size_t expected_state_count = 13;
-  size_t expected_transition_count = 33;
+  std::size_t expected_label_count = 4;
+  std::size_t expected_state_count = 13;
+  std::size_t expected_transition_count = 33;
 
   std::istringstream is(POSTPROCESS_AUT);
   lts::lts_aut_t l_gw;

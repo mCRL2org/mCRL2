@@ -41,15 +41,15 @@ class state_applier
 {
   protected:
     const state& m_state;
-    const size_t m_size;
+    const std::size_t m_size;
 
   public:
-    state_applier(const state& state, const size_t size)
+    state_applier(const state& state, const std::size_t size)
       :  m_state(state),
          m_size(size)
     {}
 
-    const data_expression& operator()(const size_t n) const
+    const data_expression& operator()(const std::size_t n) const
     {
       return m_state.element_at(n,m_size);
     }
@@ -100,7 +100,7 @@ next_state_generator::next_state_generator(
       summand.action_label.push_back(action_label);
     }
 
-    for (size_t j = 0; j < m_process_parameters.size(); j++)
+    for (std::size_t j = 0; j < m_process_parameters.size(); j++)
     {
       if (data::search_free_variable(i->condition(), m_process_parameters[j]))
       {
@@ -108,7 +108,7 @@ next_state_generator::next_state_generator(
       }
     }
     summand.condition_arguments_function = atermpp::function_symbol("condition_arguments", summand.condition_parameters.size());
-    std::vector<atermpp::aterm_int> dummy(summand.condition_arguments_function.arity(), atermpp::aterm_int(static_cast<size_t>(0)));
+    std::vector<atermpp::aterm_int> dummy(summand.condition_arguments_function.arity(), atermpp::aterm_int(static_cast<std::size_t>(0)));
     summand.condition_arguments_function_dummy = atermpp::aterm_appl(summand.condition_arguments_function, dummy.begin(), dummy.end());
 
     m_summands.push_back(summand);
@@ -140,7 +140,7 @@ next_state_generator::summand_subset_t::summand_subset_t(next_state_generator *g
   }
   else
   {
-    for (size_t i = 0; i < generator->m_summands.size(); i++)
+    for (std::size_t i = 0; i < generator->m_summands.size(); i++)
     {
       m_summands.push_back(i);
     }
@@ -175,7 +175,7 @@ next_state_generator::summand_subset_t::summand_subset_t(
   }
   else
   {
-    for (size_t i = 0; i < generator->m_summands.size(); i++)
+    for (std::size_t i = 0; i < generator->m_summands.size(); i++)
     {
       if (summand_set.count(*generator->m_summands[i].summand) > 0)
       {
@@ -195,7 +195,7 @@ static float condition_selectivity(const data_expression& e, const variable& v)
   else if (sort_bool::is_or_application(e))
   {
     float sum = 0;
-    size_t count = 0;
+    std::size_t count = 0;
     std::list<data_expression> terms;
     terms.push_back(e);
     while (!terms.empty())
@@ -241,12 +241,12 @@ static float condition_selectivity(const data_expression& e, const variable& v)
 
 struct parameter_score
 {
-  size_t parameter_id;
+  std::size_t parameter_id;
   float score;
 
   parameter_score() {}
 
-  parameter_score(size_t id, float score_)
+  parameter_score(std::size_t id, float score_)
     : parameter_id(id), score(score_)
   {}
 };
@@ -260,7 +260,7 @@ void next_state_generator::summand_subset_t::build_pruning_parameters(const stoc
 {
   std::vector < parameter_score> parameters;
 
-  for (size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
+  for (std::size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
   {
     parameters.push_back(parameter_score(i, 0));
     for (stochastic_action_summand_vector::const_iterator j = summands.begin(); j != summands.end(); j++)
@@ -271,7 +271,7 @@ void next_state_generator::summand_subset_t::build_pruning_parameters(const stoc
 
   std::sort(parameters.begin(), parameters.end(), parameter_score_compare);
 
-  for (size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
+  for (std::size_t i = 0; i < m_generator->m_process_parameters.size(); i++)
   {
     if (parameters[i].score > 0)
     {
@@ -290,16 +290,16 @@ atermpp::detail::shared_subset<next_state_generator::summand_t>::iterator next_s
 {
   assert(m_use_summand_pruning);
 
-  for (size_t i = 0; i < m_pruning_parameters.size(); i++)
+  for (std::size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
     const variable& v=m_generator->m_process_parameters[m_pruning_parameters[i]];
     m_pruning_substitution[v] = v;
   }
 
   pruning_tree_node_t *node = &m_pruning_tree;
-  for (size_t i = 0; i < m_pruning_parameters.size(); i++)
+  for (std::size_t i = 0; i < m_pruning_parameters.size(); i++)
   {
-    size_t parameter = m_pruning_parameters[i];
+    std::size_t parameter = m_pruning_parameters[i];
     const data_expression& argument = state.element_at(parameter,m_generator->m_process_parameters.size());
     m_pruning_substitution[m_generator->m_process_parameters[parameter]] = argument;
     std::map<data_expression, pruning_tree_node_t>::iterator position = node->children.find(argument);
@@ -341,7 +341,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_summand_iterator_end = summand_subset.m_summands.end();
   }
 
-  size_t j=0;
+  std::size_t j=0;
   for (state::iterator i = state.begin(); i!=state.end(); ++i, ++j)
   {
     (*m_substitution)[generator->m_process_parameters[j]] = *i;
@@ -350,7 +350,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
   increment();
 }
 
-next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, size_t summand_index, enumerator_queue_t* enumeration_queue)
+next_state_generator::iterator::iterator(next_state_generator *generator, const state& state, next_state_generator::substitution_t *substitution, std::size_t summand_index, enumerator_queue_t* enumeration_queue)
   : m_generator(generator),
     m_state(state),
     m_substitution(substitution),
@@ -361,7 +361,7 @@ next_state_generator::iterator::iterator(next_state_generator *generator, const 
     m_caching(false),
     m_enumeration_queue(enumeration_queue)
 {
-  size_t j=0;
+  std::size_t j=0;
   for (state::iterator i = state.begin(); i!=state.end(); ++i, ++j)
   {
     (*m_substitution)[generator->m_process_parameters[j]] = *i;
@@ -600,10 +600,10 @@ void next_state_generator::iterator::increment()
   std::vector <process::action> actions;
   actions.resize(m_summand->action_label.size());
   std::vector < data_expression> arguments;
-  for (size_t i = 0; i < m_summand->action_label.size(); i++)
+  for (std::size_t i = 0; i < m_summand->action_label.size(); i++)
   {
     arguments.resize(m_summand->action_label[i].arguments.size());
-    for (size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
+    for (std::size_t j = 0; j < m_summand->action_label[i].arguments.size(); j++)
     {
       arguments[j] = m_generator->m_rewriter(m_summand->action_label[i].arguments[j], *m_substitution);
     }

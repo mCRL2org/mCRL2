@@ -51,7 +51,7 @@ public:
         : strategy_(substrat.strategy_)
     {
         global_.resize(vmap.size());
-        for (size_t i = 0; i < global_.size(); ++i)
+        for (std::size_t i = 0; i < global_.size(); ++i)
         {
             global_[i] = substrat.global(vmap[i]);
         }

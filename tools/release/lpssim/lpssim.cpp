@@ -108,7 +108,7 @@ class sim_tool : public rewriter_tool< input_tool >
       }
 
       lps::simulation simulation(spec, rewrite_strategy());
-      size_t state_index = 0;
+      std::size_t state_index = 0;
 
 
       bool notdone = true;
@@ -118,7 +118,7 @@ class sim_tool : public rewriter_tool< input_tool >
         const simulation::state_t &current_state = simulation.trace()[state_index];
         std::cout << std::endl << (state_index == 0 ? "initial" : "current") << " state: " << print_state(current_state.source_state) << std::endl;
 
-        for (size_t i = 0; i < current_state.transitions.size(); i++)
+        for (std::size_t i = 0; i < current_state.transitions.size(); i++)
         {
           std::cout << i << ": " << lps::pp(current_state.transitions[i].action) << "  ->  " << print_state(current_state.transitions[i].destination) << std::endl;
         }
@@ -167,7 +167,7 @@ class sim_tool : public rewriter_tool< input_tool >
           }
           else if (isdigit(s[0]))
           {
-            size_t index;
+            std::size_t index;
             std::stringstream ss(s);
             ss >> index;
             if (index < current_state.transitions.size())
@@ -221,7 +221,7 @@ class sim_tool : public rewriter_tool< input_tool >
           else if ((s.substr(0,2) == "g ") || (s.substr(0,5) == "goto "))
           {
             std::istringstream sin(((s[1] == ' ') ? s.substr(2) : s.substr(5)));
-            size_t index;
+            std::size_t index;
             sin >> index;
             if (index < simulation.trace().size())
             {
@@ -236,7 +236,7 @@ class sim_tool : public rewriter_tool< input_tool >
           else if ((s == "t") || (s == "trace"))
           {
             std::cout << std::endl << "current trace:" << std::endl;
-            for (size_t i = 0; i < simulation.trace().size(); i++)
+            for (std::size_t i = 0; i < simulation.trace().size(); i++)
             {
               if (i == state_index)
               {

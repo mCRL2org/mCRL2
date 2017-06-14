@@ -152,7 +152,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
       case EXISTENTIAL:
       case DISJUNCTIVE:
       {
-        size_t count = 0;
+        std::size_t count = 0;
         std::vector<pbes_expression> conjuncts = split_conjuncts(x);
         for(const pbes_expression& conjunct : conjuncts)
         {
@@ -202,7 +202,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
       case UNIVERSAL:
       case CONJUNCTIVE:
       {
-        size_t count = 0;
+        std::size_t count = 0;
         std::vector<pbes_expression>  disjuncts = split_disjuncts(x);
         for(const pbes_expression& disjunct : disjuncts)
         {

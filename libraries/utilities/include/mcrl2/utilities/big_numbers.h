@@ -47,10 +47,10 @@ namespace detail
 
   // Calculate <carry,result>:=n1+n2+carry. The carry can be either 0 or 1, both
   // at the input and the output.
-  inline size_t add_single_number(const size_t n1, const size_t n2, size_t& carry)
+  inline std::size_t add_single_number(const std::size_t n1, const std::size_t n2, std::size_t& carry)
   {
     assert(carry<=1);
-    size_t result=n1+n2+carry;
+    std::size_t result=n1+n2+carry;
     if (carry==0)
     {
       if (result<n1)
@@ -70,10 +70,10 @@ namespace detail
 
   // Calculate <carry,result>:=n1-n2-carry. The carry can be either 0 or 1, both
   // at the input and the output. If the carry is 1, this indicated that 1 must be subtracted.
-  inline size_t subtract_single_number(const size_t n1, const size_t n2, size_t& carry)
+  inline std::size_t subtract_single_number(const std::size_t n1, const std::size_t n2, std::size_t& carry)
   {
     assert(carry<=1);
-    size_t result=n1-n2-carry;
+    std::size_t result=n1-n2-carry;
     if (carry==0)
     {
       if (result>n1)
@@ -93,21 +93,21 @@ namespace detail
   
   // Calculate <carry,result>:=n1*n2+carry, where the lower bits of the calculation
   // are stored in the result, and the higher bits are stored in carry.
-  inline size_t multiply_single_number(const size_t n1, const size_t n2, size_t& multiplication_carry)
+  inline std::size_t multiply_single_number(const std::size_t n1, const std::size_t n2, std::size_t& multiplication_carry)
   {
     // TODO: It is more concise and efficient to use 128bit machine calculation when available.
-    const int no_of_bits_per_digit=std::numeric_limits<size_t>::digits;
+    const int no_of_bits_per_digit=std::numeric_limits<std::size_t>::digits;
 
     // split input numbers into no_of_bits_per_digit/2 digits
-    size_t n1ls = n1 & ((1LL<<(no_of_bits_per_digit/2))-1);
-    size_t n1ms = n1 >> (no_of_bits_per_digit/2);
-    size_t n2ls = n2 & ((1LL<<(no_of_bits_per_digit/2))-1);
-    size_t n2ms = n2 >> (no_of_bits_per_digit/2);
+    std::size_t n1ls = n1 & ((1LL<<(no_of_bits_per_digit/2))-1);
+    std::size_t n1ms = n1 >> (no_of_bits_per_digit/2);
+    std::size_t n2ls = n2 & ((1LL<<(no_of_bits_per_digit/2))-1);
+    std::size_t n2ms = n2 >> (no_of_bits_per_digit/2);
     
     // First calculate the result of the least significant no_of_bits_per_digit.
-    size_t local_carry=0;
-    size_t result = add_single_number(n1ls*n2ls,multiplication_carry,local_carry);
-    size_t cumulative_carry=local_carry;
+    std::size_t local_carry=0;
+    std::size_t result = add_single_number(n1ls*n2ls,multiplication_carry,local_carry);
+    std::size_t cumulative_carry=local_carry;
     local_carry=0;
     result=add_single_number(result,((n1ms*n2ls)<<(no_of_bits_per_digit/2)),local_carry);
     cumulative_carry=cumulative_carry+local_carry;
@@ -126,25 +126,25 @@ namespace detail
   
   // Calculate <result,remainder>:=(remainder * 2^64 + p) / q assuming the result
   // fits in 64 bits. More concretely, q>remainder. 
-  inline size_t divide_single_number(const size_t p, const size_t q, size_t& remainder)
+  inline std::size_t divide_single_number(const std::size_t p, const std::size_t q, std::size_t& remainder)
   {
     assert(q>remainder);
-    const int no_of_bits_per_digit=std::numeric_limits<size_t>::digits;
+    const int no_of_bits_per_digit=std::numeric_limits<std::size_t>::digits;
 
     // Split input numbers into no_of_bits_per_digit/2 digits.
     // First get the least significant part.
-    size_t pms = (p >> (no_of_bits_per_digit/2)) + (remainder << (no_of_bits_per_digit/2));
+    std::size_t pms = (p >> (no_of_bits_per_digit/2)) + (remainder << (no_of_bits_per_digit/2));
     
     // First divide the most significant part by q.
-    size_t resultms = pms/q;
+    std::size_t resultms = pms/q;
     assert((resultms >> (no_of_bits_per_digit/2)) == 0);
-    size_t remainderms = pms%q;
+    std::size_t remainderms = pms%q;
 
     // Now obtain the least significant part.
-    size_t pls = (p & ((1LL<<(no_of_bits_per_digit/2))-1)) + (remainderms << (no_of_bits_per_digit/2));
+    std::size_t pls = (p & ((1LL<<(no_of_bits_per_digit/2))-1)) + (remainderms << (no_of_bits_per_digit/2));
     
     // Second divide the least significant part by q.
-    size_t resultls = pls/q;
+    std::size_t resultls = pls/q;
     remainder = pls%q;
     assert((resultls >> (no_of_bits_per_digit/2)) == 0);
 
@@ -161,15 +161,15 @@ class big_natural_number
     friend inline void swap(big_natural_number& x, big_natural_number& y);
 
   protected:
-    // Numbers are stored as size_t words, with the most significant number last. 
+    // Numbers are stored as std::size_t words, with the most significant number last. 
     // Note that the number representation is not unique. Numbers have no trailing
     // zero's, i.e., this->back()!=0 (if this->size()>0). Therefore their representation is unique.
-    std::vector<size_t> m_number;
+    std::vector<std::size_t> m_number;
 
     /* Multiply the current number by n and add the carry */
-    void multiply_by(size_t n, size_t carry)
+    void multiply_by(std::size_t n, std::size_t carry)
     {
-      for(size_t& i: m_number)
+      for(std::size_t& i: m_number)
       {
         i=detail::multiply_single_number(i,n,carry);
       }
@@ -203,7 +203,7 @@ class big_natural_number
     void print_number(const std::string& s) const
     {
       std::cerr << s << "  " << m_number.size() << "\n";
-      for(size_t i: m_number)
+      for(std::size_t i: m_number)
       {
         std::cerr << i << " ";
       }
@@ -216,8 +216,8 @@ class big_natural_number
     {
     }
 
-    // Constructor based on a size_t. The value of the number will be n.
-    explicit big_natural_number(const size_t n)
+    // Constructor based on a std::size_t. The value of the number will be n.
+    explicit big_natural_number(const std::size_t n)
     {
       if (n>0)
       {
@@ -237,7 +237,7 @@ class big_natural_number
         }
         if (c>='0')
         {
-          multiply_by(10,size_t(c-'0'));
+          multiply_by(10,std::size_t(c-'0'));
         }
       }
       is_well_defined();
@@ -252,10 +252,10 @@ class big_natural_number
       return m_number.size()==0;
     }
 
-    /** \brief Returns whether this number equals a number of size_t.
+    /** \brief Returns whether this number equals a number of std::size_t.
         \details This is more efficient than checking x==big_natural_number(1).
     */
-    bool is_number(size_t n) const
+    bool is_number(std::size_t n) const
     {
       is_well_defined();
       if (n==0) 
@@ -274,10 +274,10 @@ class big_natural_number
       m_number.clear();
     }
 
-    /** \brief Transforms this number to a size_t, provided it is sufficiently small.
+    /** \brief Transforms this number to a std::size_t, provided it is sufficiently small.
                If not an mcrl2::runtime_error is thrown. 
     */
-    explicit operator size_t() const
+    explicit operator std::size_t() const
     {
       is_well_defined();
       if (m_number.size()>1)
@@ -322,8 +322,8 @@ class big_natural_number
         return false;
       }
       assert(m_number.size()==other.m_number.size());
-      std::vector<size_t>::const_reverse_iterator j=other.m_number.rbegin();
-      for(std::vector<size_t>::const_reverse_iterator i=m_number.rbegin(); i!=m_number.rend(); ++i, ++j)
+      std::vector<std::size_t>::const_reverse_iterator j=other.m_number.rbegin();
+      for(std::vector<std::size_t>::const_reverse_iterator i=m_number.rbegin(); i!=m_number.rend(); ++i, ++j)
       {
         if (*i < *j)
         {
@@ -361,10 +361,10 @@ class big_natural_number
     }
 
     /* Divide the current number by n. If there is a remainder return it. */
-    size_t divide_by(size_t n)
+    std::size_t divide_by(std::size_t n)
     {
-      size_t remainder=0;
-      for(std::vector<size_t>::reverse_iterator i=m_number.rbegin(); i!=m_number.rend(); ++i)
+      std::size_t remainder=0;
+      for(std::vector<std::size_t>::reverse_iterator i=m_number.rbegin(); i!=m_number.rend(); ++i)
       {
         *i=detail::divide_single_number(*i,n,remainder);
       }
@@ -381,8 +381,8 @@ class big_natural_number
 
       // big_natural_number result;
       // result.m_number.reserve((std::max)(m_number.size(),other.m_number.size()));
-      size_t carry=0;
-      for(size_t i=0; i < (std::max)(m_number.size(),other.m_number.size()); ++i)
+      std::size_t carry=0;
+      for(std::size_t i=0; i < (std::max)(m_number.size(),other.m_number.size()); ++i)
       {
         if (i>=m_number.size())
         {
@@ -432,8 +432,8 @@ class big_natural_number
       {
         throw mcrl2::runtime_error("Subtracting numbers " + pp(*this) + " and " + pp(other) + " yields a non representable negative result (1).");
       }
-      size_t carry=0;
-      for(size_t i=0; i<m_number.size(); ++i)
+      std::size_t carry=0;
+      for(std::size_t i=0; i<m_number.size(); ++i)
       {
         if (i>=other.m_number.size())
         {
@@ -476,13 +476,13 @@ class big_natural_number
     {
       is_well_defined();
       other.is_well_defined();
-      size_t offset=0; 
-      for(size_t digit: other.m_number)
+      std::size_t offset=0; 
+      for(std::size_t digit: other.m_number)
       {
         // Move n2 to the multiplicand and multiply it with base^offset.
         calculation_buffer_for_multiplicand.clear();
-        for(size_t i=0; i< offset; ++i) { calculation_buffer_for_multiplicand.m_number.push_back(0); }
-        for(size_t n: m_number)
+        for(std::size_t i=0; i< offset; ++i) { calculation_buffer_for_multiplicand.m_number.push_back(0); }
+        for(std::size_t n: m_number)
         { 
           calculation_buffer_for_multiplicand.m_number.push_back(n);
         }
@@ -508,7 +508,7 @@ class big_natural_number
     // This is an auxiliary function getting the n-th digit,
     // where digit 0 is the least significant one.
     // It is not necessary that n is in range.
-    /* size_t getdigit(const size_t n) const
+    /* std::size_t getdigit(const std::size_t n) const
     {
       if (n>=m_number.size()) 
       {
@@ -536,7 +536,7 @@ class big_natural_number
 
       if (m_number.size()==1 && other.m_number.size()==1)
       {
-        size_t n=m_number.front()/other.m_number.front();      // Calculate div.
+        std::size_t n=m_number.front()/other.m_number.front();      // Calculate div.
         if (n==0)
         {
           result.clear();
@@ -574,21 +574,21 @@ class big_natural_number
         remainder.is_well_defined();
         return; 
       }
-      const int no_of_bits_per_digit=std::numeric_limits<size_t>::digits;
+      const int no_of_bits_per_digit=std::numeric_limits<std::size_t>::digits;
 
       big_natural_number divisor;
-      // calculation_buffer_divisor.m_number=std::vector<size_t>((m_number.size()-other.m_number.size())+1,0); Inefficient.
+      // calculation_buffer_divisor.m_number=std::vector<std::size_t>((m_number.size()-other.m_number.size())+1,0); Inefficient.
       calculation_buffer_divisor.clear();
-      for(size_t i=0; i< (1+m_number.size())-other.m_number.size(); ++i) { calculation_buffer_divisor.m_number.push_back(0); }
+      for(std::size_t i=0; i< (1+m_number.size())-other.m_number.size(); ++i) { calculation_buffer_divisor.m_number.push_back(0); }
 
       // Place 0 digits at least significant position of the calculation_buffer_divisor to make it of comparable length as the remainder.
-      for(size_t i: other.m_number)
+      for(std::size_t i: other.m_number)
       {
         calculation_buffer_divisor.m_number.push_back(i);
       }
       calculation_buffer_divisor.remove_significant_digits_that_are_zero();
       
-      for(size_t i=0; i<=no_of_bits_per_digit*(m_number.size()-other.m_number.size()+1); ++i)
+      for(std::size_t i=0; i<=no_of_bits_per_digit*(m_number.size()-other.m_number.size()+1); ++i)
       {
         if (remainder<calculation_buffer_divisor)
         {
@@ -627,12 +627,12 @@ class big_natural_number
       }
 this->print_number("div_mod: this: ");
 other.print_number("div_mod: other: ");
-      size_t remaining_digit=0;
-      for(size_t n=remainder.m_number.size()-1; n>=other.m_number.size(); n--)
+      std::size_t remaining_digit=0;
+      for(std::size_t n=remainder.m_number.size()-1; n>=other.m_number.size(); n--)
       {
 std::cerr << "Wat is n " << n << "\n";
-        size_t r=remainder.getdigit(n+1);
-        size_t divisor=detail::divide_single_number(
+        std::size_t r=remainder.getdigit(n+1);
+        std::size_t divisor=detail::divide_single_number(
                                             remainder.getdigit(n),
                                             other.m_number.back(),
                                             r);
@@ -641,8 +641,8 @@ result.print_number("div_mod: result: ");
 remainder.print_number("div_mod: remainder: ");
 std::cerr << "dmwhile: divisor: " << divisor <<"\n";
 calculation_buffer_subtractor.is_well_defined();
-        calculation_buffer_subtractor.m_number=std::vector<size_t>(n-other.m_number.size(),0); Inefficient, want constructie
-        for(size_t i: other.m_number)
+        calculation_buffer_subtractor.m_number=std::vector<std::size_t>(n-other.m_number.size(),0); Inefficient, want constructie
+        for(std::size_t i: other.m_number)
         {
           calculation_buffer_subtractor.m_number.push_back(i);
         }
@@ -652,8 +652,8 @@ calculation_buffer_subtractor.print_number("div_mod: subtractor: ");
         {
           divisor=divisor-1;
 std::cerr << "dmwhile: divisor adapted: " << divisor <<"\n";
-          calculation_buffer_subtractor.m_number=std::vector<size_t>(n-other.m_number.size(),0);
-          for(size_t i: other.m_number)
+          calculation_buffer_subtractor.m_number=std::vector<std::size_t>(n-other.m_number.size(),0);
+          for(std::size_t i: other.m_number)
           {
             calculation_buffer_subtractor.m_number.push_back(i);
           }
@@ -663,7 +663,7 @@ std::cerr << "dmwhile: divisor adapted: " << divisor <<"\n";
 remainder.print_number("remainder before assert");         
 calculation_buffer_subtractor.print_number("subtractor before assert");         
         assert(remainder>=calculation_buffer_subtractor);
-        size_t old_remainder_size=remainder.m_number.size();
+        std::size_t old_remainder_size=remainder.m_number.size();
         remainder.subtract(calculation_buffer_subtractor);
         remaining_digit=(remaining_digit?
                             remainder.m_number.size()+1==old_remainder_size:
@@ -675,8 +675,8 @@ result.print_number("div_mod: result voor swap: ");
         return;
       }
       // Result must be reverted.
-      size_t begin = 0; 
-      size_t end = result.m_number.size()-1;
+      std::size_t begin = 0; 
+      std::size_t end = result.m_number.size()-1;
       while (begin<end)
       {
         std::swap(result.m_number[begin],result.m_number[end]);
@@ -749,7 +749,7 @@ inline std::ostream& operator<<(std::ostream& ss, const big_natural_number& l)
   std::string s; // This string contains the number in reverse ordering.
   for( ; !n.is_zero() ; )
   {
-    size_t remainder = n.divide_by(10); /* This divides n by 10. */
+    std::size_t remainder = n.divide_by(10); /* This divides n by 10. */
     s.push_back(static_cast<char>('0'+remainder));
   }
   if (s.empty())
@@ -785,7 +785,7 @@ struct hash< mcrl2::utilities::big_natural_number >
 {
   std::size_t operator()(const mcrl2::utilities::big_natural_number& n) const
   {
-    hash<std::vector<size_t> > hasher;
+    hash<std::vector<std::size_t> > hasher;
     return hasher(n.m_number);
   }
 };

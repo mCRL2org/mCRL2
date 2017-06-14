@@ -54,13 +54,13 @@ class term_balanced_tree: public aterm_appl
     }
 
     template < typename ForwardTraversalIterator, class Transformer >
-    detail::_aterm* make_tree(ForwardTraversalIterator& p, const size_t size, const Transformer& transformer )
+    detail::_aterm* make_tree(ForwardTraversalIterator& p, const std::size_t size, const Transformer& transformer )
     {
       if (size>1)
       {
-        size_t left_size = (size + 1) >> 1; // size/2 rounded up.
+        std::size_t left_size = (size + 1) >> 1; // size/2 rounded up.
         const term_balanced_tree left_tree(make_tree(p, left_size,transformer));
-        size_t right_size = size >> 1; // size/2 rounded down.
+        std::size_t right_size = size >> 1; // size/2 rounded down.
         const term_balanced_tree right_tree(make_tree(p, right_size,transformer));
         return reinterpret_cast<detail::_aterm*>(detail::term_appl2<term_balanced_tree>(tree_node_function(),left_tree,right_tree));
       }
@@ -89,7 +89,7 @@ class term_balanced_tree: public aterm_appl
     typedef const Term const_reference;
 
     /// An unsigned integral type.
-    typedef size_t size_type;
+    typedef std::size_t size_type;
 
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
@@ -109,7 +109,7 @@ class term_balanced_tree: public aterm_appl
     /// \param first The start of a range of elements.
     /// \param size The size of the range of elements.
     template < typename ForwardTraversalIterator >
-    term_balanced_tree(ForwardTraversalIterator first, const size_t size)
+    term_balanced_tree(ForwardTraversalIterator first, const std::size_t size)
       : aterm_appl(make_tree(first,size,idle_transformer<Term>()))
     {
     }
@@ -120,7 +120,7 @@ class term_balanced_tree: public aterm_appl
     /// \param[in] size The size of the range of elements.
     /// \param[in] transformer A class with an operator() that is applied to each term before adding it to the tree.
     template < typename ForwardTraversalIterator, class Transformer >
-    term_balanced_tree(ForwardTraversalIterator first, const size_t size, const Transformer& transformer)
+    term_balanced_tree(ForwardTraversalIterator first, const std::size_t size, const Transformer& transformer)
       : aterm_appl(make_tree(first,size,transformer))
     {
     }
@@ -148,7 +148,7 @@ class term_balanced_tree: public aterm_appl
     /// \details This operation behaves linearly with respect to container size,
     ///          because it must calculate the size of the container. The operator
     ///          element_at behaves logarithmically.
-    const Term& operator[](size_t position) const
+    const Term& operator[](std::size_t position) const
     {
       return element_at(position, size());
     } 
@@ -160,14 +160,14 @@ class term_balanced_tree: public aterm_appl
     /// \details By providing the size this operation is logarithmic. If a wrong
     ///         size is provided the outcome is not determined. See also operator [].
     /// \return The element at the indicated position.
-    const Term& element_at(size_t position, size_t size) const
+    const Term& element_at(std::size_t position, std::size_t size) const
     {
       assert(size == this->size());
       assert(position < size);
 
       if (size>1)
       {
-        size_t left_size = (size + 1) >> 1;
+        std::size_t left_size = (size + 1) >> 1;
 
         return (position < left_size) ?
                left_branch().element_at(position, left_size) :
@@ -214,10 +214,10 @@ class term_balanced_tree: public aterm_appl
     
         friend class boost::iterator_core_access;
     
-        static const size_t maximal_size_of_stack=20;      // We assume here that a tree never has more than 2^20 leaves, o
+        static const std::size_t maximal_size_of_stack=20;      // We assume here that a tree never has more than 2^20 leaves, o
                                                            // equivalently that states consist of not more than 2^20 data_expressions.
         atermpp::detail::_aterm* m_stack[maximal_size_of_stack]; 
-        size_t m_top_of_stack;                             // First element in the stack that is empty.
+        std::size_t m_top_of_stack;                             // First element in the stack that is empty.
     
         /// \brief Dereference operator
         /// \return The value that the iterator references
@@ -235,7 +235,7 @@ class term_balanced_tree: public aterm_appl
             return false; 
           }
           
-          for(size_t i=0; i<m_top_of_stack; ++i)
+          for(std::size_t i=0; i<m_top_of_stack; ++i)
           { 
             if (m_stack[i]!= other.m_stack[i])
             {
@@ -305,7 +305,7 @@ class term_balanced_tree: public aterm_appl
         iterator(const iterator& other) 
            : m_top_of_stack(other.m_top_of_stack)
         { 
-          for(size_t i=0; i<m_top_of_stack; ++i)
+          for(std::size_t i=0; i<m_top_of_stack; ++i)
           {
             m_stack[i]=other.m_stack[i];
           }

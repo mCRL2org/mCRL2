@@ -161,7 +161,7 @@ class probabilistic_lts_dot_t :
            public probabilistic_lts< 
                      state_label_dot, 
                      action_label_string, 
-                     probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+                     probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
                      detail::lts_dot_base >
 {
 

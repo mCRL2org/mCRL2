@@ -142,7 +142,7 @@ class linear_process_base
 
     /// \brief Returns the number of LPS summands.
     /// \return The number of LPS summands.
-    size_t summand_count() const
+    std::size_t summand_count() const
     {
       return m_deadlock_summands.size() + m_action_summands.size();
     }

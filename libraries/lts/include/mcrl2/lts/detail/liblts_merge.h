@@ -40,14 +40,14 @@ namespace detail
 template <class LTS_TYPE>
 void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
 {
-  const size_t old_nstates=l1.num_states();
+  const std::size_t old_nstates=l1.num_states();
   l1.set_num_states(l1.num_states() + l2.num_states());
 
   // The resulting LTS will have state information only if BOTH LTSs
   // currently have state information.
   if (l1.has_state_info() && l2.has_state_info())
   {
-    for (size_t i=0; i<l2.num_states(); ++i)
+    for (std::size_t i=0; i<l2.num_states(); ++i)
     {
       l1.add_state(l2.state_label(i));
     }
@@ -68,7 +68,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   std::map < type1,type2 > labs;
 
   // Put the labels of the LTS l1 in a map.
-  for (size_t i = 0; i < l1.num_action_labels(); ++i)
+  for (std::size_t i = 0; i < l1.num_action_labels(); ++i)
   {
     labs.insert(std::pair <typename LTS_TYPE::action_label_t,typename LTS_TYPE::labels_size_type>
                 (l1.action_label(i),i));
@@ -80,7 +80,7 @@ void merge(LTS_TYPE& l1, const LTS_TYPE& l2)
   // in l1. It may be that label a1 did not exist yet in which case it needs
   // to be added too.
 
-  for (size_t i=0; i<l2.num_action_labels(); ++i)
+  for (std::size_t i=0; i<l2.num_action_labels(); ++i)
   {
     typename LTS_TYPE::labels_size_type new_index;
     const insert_type it= labs.insert(std::pair < type1,type2 >

@@ -113,7 +113,7 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
   return r;
 }
 
-static size_t global_variable_counter=0;
+static std::size_t global_variable_counter=0;
 
 /// \brief Find each expression of the form x<y, x<=y, x==y, x>=y x>y in t that contain variables occurring in real_parameters
 ///        and replace these by a boolean variable b. This variable is added to vars
@@ -481,7 +481,7 @@ static void normalize_specification(
 /// \post All inequalities in l are in the context
 /// \return true iff a variable has been added to the context
 static void add_postponed_inequalities_to_context(
-  const std::vector < size_t >& inequalities_to_add_lhs_size,
+  const std::vector < std::size_t >& inequalities_to_add_lhs_size,
   const std::vector < data_expression >& inequalities_to_add_lhs,
   const std::vector < data_expression >& inequalities_to_add_rhs,
   const std::vector < detail::comparison_t >& inequalities_to_add_comparison_operator,
@@ -495,12 +495,12 @@ static void add_postponed_inequalities_to_context(
          inequalities_to_add_lhs.size() ==inequalities_to_add_comparison_operator.size());
 
   // We add new next state arguments with increasing sizes of their lhs's.
-  std::set <size_t> sorted_lhs_sizes(inequalities_to_add_lhs_size.begin(),inequalities_to_add_lhs_size.end());
+  std::set <std::size_t> sorted_lhs_sizes(inequalities_to_add_lhs_size.begin(),inequalities_to_add_lhs_size.end());
 
-  for (std::set <size_t>::const_iterator current_size=sorted_lhs_sizes.begin();
+  for (std::set <std::size_t>::const_iterator current_size=sorted_lhs_sizes.begin();
        current_size!=sorted_lhs_sizes.end(); ++current_size)
   {
-    for (size_t i=0; i<inequalities_to_add_lhs.size(); ++i)
+    for (std::size_t i=0; i<inequalities_to_add_lhs.size(); ++i)
     {
       if (inequalities_to_add_lhs_size[i]== *current_size)
       {
@@ -526,7 +526,7 @@ static void add_postponed_inequalities_to_context(
 /// \post All inequalities in l are in the context
 /// \return true iff a variable has been added to the context
 static void add_inequalities_to_context_postponed(
-  std::vector < size_t >& inequalities_to_add_lhs_size,
+  std::vector < std::size_t >& inequalities_to_add_lhs_size,
   std::vector < data_expression >& inequalities_to_add_lhs,
   std::vector < data_expression >& inequalities_to_add_rhs,
   std::vector < detail::comparison_t >& inequalities_to_add_comparison_operator,
@@ -557,7 +557,7 @@ static void add_inequalities_to_context_postponed(
       }
       if (pair_is_new)
       {
-        for (size_t j=0; j<inequalities_to_add_lhs.size(); ++j)
+        for (std::size_t j=0; j<inequalities_to_add_lhs.size(); ++j)
         {
           if (inequalities_to_add_lhs[j]==left && inequalities_to_add_rhs[j]==right && inequalities_to_add_comparison_operator[j]==comparison_operator)
           {
@@ -784,7 +784,7 @@ assignment_list determine_process_initialization(
 /// \param max_iterations The maximal number of iterations the algorithm should
 ///        perform
 /// \param strategy The rewrite strategy that should be used.
-stochastic_specification realelm(stochastic_specification s, const size_t max_iterations, const rewrite_strategy strat)
+stochastic_specification realelm(stochastic_specification s, const std::size_t max_iterations, const rewrite_strategy strat)
 {
   if (s.process().has_time())
   {
@@ -804,11 +804,11 @@ stochastic_specification realelm(stochastic_specification s, const size_t max_it
 
   context_type context; // Contains introduced variables
 
-  std::vector < size_t > new_inequalities_sizes;
+  std::vector < std::size_t > new_inequalities_sizes;
   std::vector < data_expression > new_inequalities_lhss;
   std::vector < data_expression > new_inequalities_rhss;
   std::vector < detail::comparison_t > new_comparison_operators;
-  size_t iteration = 0;
+  std::size_t iteration = 0;
   do
   {
     new_inequalities_sizes.clear();

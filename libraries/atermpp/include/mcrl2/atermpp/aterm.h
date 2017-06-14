@@ -65,14 +65,14 @@ class aterm
     static detail::_aterm* static_undefined_aterm;
     static detail::_aterm *static_empty_aterm_list;
 
-    inline size_t reference_count() const
+    inline std::size_t reference_count() const
     {
       assert(m_term!=nullptr);
       assert(m_term->reference_count()>0);
       return m_term->reference_count();
     }
 
-    inline size_t decrease_reference_count()
+    inline std::size_t decrease_reference_count()
     {
       assert(m_term!=nullptr);
       assert(m_term->reference_count()>0);
@@ -404,8 +404,8 @@ struct hash<atermpp::aterm>
 
   std::size_t operator()(const atermpp::aterm& t) const
   {
-    static const size_t a_prime_number = 134217689;
-    return (reinterpret_cast<size_t>(atermpp::detail::address(t))>>3) * a_prime_number;
+    static const std::size_t a_prime_number = 134217689;
+    return (reinterpret_cast<std::size_t>(atermpp::detail::address(t))>>3) * a_prime_number;
   }
 };
 
@@ -416,7 +416,7 @@ struct hash<std::pair<atermpp::aterm,atermpp::aterm> >
   std::size_t operator()(const std::pair<atermpp::aterm, atermpp::aterm>& x) const
   {
     // The hashing function below is taken from boost (http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html).
-    size_t seed=std::hash<atermpp::aterm>()(x.first);
+    std::size_t seed=std::hash<atermpp::aterm>()(x.first);
     return std::hash<atermpp::aterm>()(x.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
   }
 };

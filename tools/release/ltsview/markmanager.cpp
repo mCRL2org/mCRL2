@@ -78,7 +78,7 @@ bool MarkManager::isMarked(State *state)
   {
     if (stateMatchStyle() == MATCH_ALL)
     {
-      return (state->getMatchedRules().size() == (size_t)m_activeMarkRules);
+      return (state->getMatchedRules().size() == (std::size_t)m_activeMarkRules);
     }
     else
     {
@@ -319,7 +319,7 @@ void MarkManager::flushClusters()
       {
         anyAdded++;
       }
-      if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
+      if (state->getMatchedRules().size() == (std::size_t)m_activeMarkRules)
       {
         allAdded++;
       }
@@ -385,7 +385,7 @@ void MarkManager::applyRule(MarkRuleIndex index)
       }
       else
       {
-        if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
+        if (state->getMatchedRules().size() == (std::size_t)m_activeMarkRules)
         {
           allRemoved++;
         }
@@ -425,7 +425,7 @@ void MarkManager::unapplyRule(MarkRuleIndex index)
       }
       else
       {
-        if (state->getMatchedRules().size() == (size_t)m_activeMarkRules)
+        if (state->getMatchedRules().size() == (std::size_t)m_activeMarkRules)
         {
           allAdded++;
         }

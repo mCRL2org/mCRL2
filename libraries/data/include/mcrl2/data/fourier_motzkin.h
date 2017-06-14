@@ -62,17 +62,17 @@ inline void fourier_motzkin(const std::vector < linear_inequality >& inequalitie
   // occurrences of each variable, and create a new system.
   for (std::set < variable >::const_iterator i = vars.begin(); i != vars.end(); ++i)
   {
-    std::map < variable, size_t> nr_positive_occurrences;
-    std::map < variable, size_t> nr_negative_occurrences;
+    std::map < variable, std::size_t> nr_positive_occurrences;
+    std::map < variable, std::size_t> nr_negative_occurrences;
     count_occurrences(inequalities,nr_positive_occurrences,nr_negative_occurrences,r);
 
     bool found=false;
-    size_t best_choice=0;
+    std::size_t best_choice=0;
     variable best_variable;
     for (std::set < variable >::const_iterator k = vars.begin(); k != vars.end(); ++k)
     {
-      const size_t p=nr_positive_occurrences[*k];
-      const size_t n=nr_negative_occurrences[*k];
+      const std::size_t p=nr_positive_occurrences[*k];
+      const std::size_t n=nr_negative_occurrences[*k];
       if ((p!=0) || (n!=0))
       {
         if (found)

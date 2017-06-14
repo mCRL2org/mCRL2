@@ -34,8 +34,8 @@ void AsyncMpiAttractorImpl::solve(bool quick_start)
     {
         // N.B. queue.size() cannot be calculated inside the loop, because
         //      notify_others may push new, non-local vertices in the queue!
-        size_t n = queue.size();
-        for (size_t i = 0; i < n; ++i) notify_others(queue[i]);
+        std::size_t n = queue.size();
+        for (std::size_t i = 0; i < n; ++i) notify_others(queue[i]);
     }
 
     for (;;)

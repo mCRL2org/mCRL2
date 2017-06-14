@@ -34,13 +34,13 @@ class aterm;
 namespace detail
 {
 
-static const size_t IN_FREE_LIST(-1);
+static const std::size_t IN_FREE_LIST(-1);
 
 class _aterm
 {
   protected:
     function_symbol m_function_symbol;
-    size_t  m_reference_count;
+    std::size_t  m_reference_count;
     _aterm* m_next;
 
   public:
@@ -78,7 +78,7 @@ class _aterm
       return m_reference_count==0;
     } 
 
-    size_t reference_count() const 
+    std::size_t reference_count() const 
     {
       return m_reference_count;
     }
@@ -105,20 +105,20 @@ class _aterm
     }
 };
 
-static const size_t TERM_SIZE=sizeof(_aterm)/sizeof(size_t);
+static const std::size_t TERM_SIZE=sizeof(_aterm)/sizeof(std::size_t);
 
-detail::_aterm* allocate_term(const size_t size);
+detail::_aterm* allocate_term(const std::size_t size);
 void remove_from_hashtable(_aterm *t);
 void free_term(detail::_aterm* t);
 void free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed);
 
 extern detail::_aterm* * aterm_hashtable;
-extern size_t aterm_table_mask;
-extern size_t total_nodes_in_hashtable;
+extern std::size_t aterm_table_mask;
+extern std::size_t total_nodes_in_hashtable;
 
 void call_creation_hook(_aterm*);
 
-inline void insert_in_hashtable(_aterm *t, const size_t hnr)
+inline void insert_in_hashtable(_aterm *t, const std::size_t hnr)
 {
   t->set_next(detail::aterm_hashtable[hnr]);
   detail::aterm_hashtable[hnr] = t;
@@ -130,7 +130,7 @@ inline _aterm* term_appl0(const function_symbol& sym)
   assert(sym.arity()==0);
 
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = function_symbol_hasher(sym);
+  std::size_t hnr = function_symbol_hasher(sym);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
 

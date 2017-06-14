@@ -139,7 +139,7 @@ void ParityGame::read_pgsolver( std::istream &is,
 
     // Assign vertex info and recount cardinalities
     reset((verti)vertices.size(), max_prio + 1);
-    for (size_t n = 0; n < vertices.size(); ++n)
+    for (std::size_t n = 0; n < vertices.size(); ++n)
     {
         assert(vertices[n] != invalid);
         vertex_[n].player   = vertices[n].player;
@@ -201,8 +201,8 @@ void ParityGame::assign_pbes(mcrl2::pbes_system::pbes &pbes, verti *goal_vertex,
     verti begin = 0, end = 3;
     for (verti v = begin; v < end; ++v)
     {
-        std::set<size_t> deps = pgg.get_dependencies(v);
-        for ( std::set<size_t>::const_iterator it = deps.begin();
+        std::set<std::size_t> deps = pgg.get_dependencies(v);
+        for ( std::set<std::size_t>::const_iterator it = deps.begin();
                 it != deps.end(); ++it )
         {
             verti w = (verti)*it;

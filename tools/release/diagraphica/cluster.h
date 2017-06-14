@@ -26,13 +26,13 @@ class Cluster
   public:
     // -- constructors and destructors ------------------------------
     Cluster();
-    Cluster(const std::vector< size_t > &crd);
+    Cluster(const std::vector< std::size_t > &crd);
     Cluster(const Cluster& clst);
     virtual ~Cluster();
 
     // -- set functions ---------------------------------------------
-    void setCoord(const std::vector< size_t > &crd) { coord = crd; }
-    void setIndex(const size_t& idx) { index = idx; }
+    void setCoord(const std::vector< std::size_t > &crd) { coord = crd; }
+    void setIndex(const std::size_t& idx) { index = idx; }
     void setParent(Cluster* p) { parent = p; }
     void addChild(Cluster* c) { children.push_back(c); }
     void setChildren(const std::vector< Cluster* > &c) { clearChildren(); children = c; }
@@ -40,7 +40,7 @@ class Cluster
     void setNodes(const std::vector< Node* > &n) { clearNodes(); nodes = n; }
 
     void setAttribute(Attribute* attr) { attribute = attr; }
-    void setAttrValIdx(const size_t& idx) { attrValIdx = idx; }
+    void setAttrValIdx(const std::size_t& idx) { attrValIdx = idx; }
 
     void addInBundle(Bundle* b) { inBundles.push_back(b); }
     void setInBundles(const std::vector< Bundle* > b) { clearInBundles(); inBundles = b; }
@@ -49,24 +49,24 @@ class Cluster
 
 
     // -- get functions ---------------------------------------------
-    size_t getSizeCoord() { return coord.size(); }
-    size_t getCoord(const size_t& idx);
-    void getCoord(std::vector< size_t > &crd) { crd = coord; }
-    size_t getIndex() { return index; }
+    std::size_t getSizeCoord() { return coord.size(); }
+    std::size_t getCoord(const std::size_t& idx);
+    void getCoord(std::vector< std::size_t > &crd) { crd = coord; }
+    std::size_t getIndex() { return index; }
     Cluster* getParent() { return parent; }
-    size_t getSizeChildren() { return children.size(); }
-    Cluster* getChild(const size_t& idx);
-    size_t getSizeNodes() { return nodes.size(); }
-    Node* getNode(const size_t& idx);
-    size_t getSizeDescNodes();
+    std::size_t getSizeChildren() { return children.size(); }
+    Cluster* getChild(const std::size_t& idx);
+    std::size_t getSizeNodes() { return nodes.size(); }
+    Node* getNode(const std::size_t& idx);
+    std::size_t getSizeDescNodes();
 
     Attribute* getAttribute() { return attribute; }
-    size_t getAttrValIdx() { return attrValIdx; }
+    std::size_t getAttrValIdx() { return attrValIdx; }
 
-    size_t getSizeInBundles() { return inBundles.size(); }
-    Bundle* getInBundle(const size_t& idx);
-    size_t getSizeOutBundles() { return outBundles.size(); }
-    Bundle* getOutBundle(const size_t& idx);
+    std::size_t getSizeInBundles() { return inBundles.size(); }
+    Bundle* getInBundle(const std::size_t& idx);
+    std::size_t getSizeOutBundles() { return outBundles.size(); }
+    Bundle* getOutBundle(const std::size_t& idx);
 
     // -- clear functions -------------------------------------------
     void clearParent() { parent = 0; }
@@ -78,16 +78,16 @@ class Cluster
 
   protected:
     // -- utility functions -----------------------------------------
-    void getSizeDescNodes(Cluster* curClst, size_t& sum);
+    void getSizeDescNodes(Cluster* curClst, std::size_t& sum);
 
     // -- data members ----------------------------------------------
-    std::vector< size_t >      coord;
-    size_t                index;
+    std::vector< std::size_t >      coord;
+    std::size_t                index;
     Cluster*           parent;    // association
     std::vector< Cluster* > children;  // association
     std::vector< Node* >    nodes;     // association
     Attribute*         attribute; // association
-    size_t                attrValIdx;
+    std::size_t                attrValIdx;
     std::vector< Bundle* >  inBundles;  // association
     std::vector< Bundle* >  outBundles; // association
 };

@@ -51,7 +51,7 @@ void enumerate(const data_specification& dataspec,
   data::enumerator_identifier_generator id_generator;
   rewriter rewr(dataspec);
   enumerator_type enumerator(rewr, dataspec, rewr, id_generator);
-  size_t number_of_solutions = 0;
+  std::size_t number_of_solutions = 0;
   mutable_indexed_substitution<> sigma;
   std::deque<enumerator_element> enumerator_deque(1, enumerator_element(variables, expression));
   auto i = enumerator.begin(sigma, enumerator_deque);
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(empty_test)
   rewriter rewr(dataspec);
   variable_list variables;
 
-  size_t count = 0;
+  std::size_t count = 0;
   data::enumerator_identifier_generator id_generator;
 
   // explicit with condition rewr and condition

@@ -135,10 +135,10 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
     // compute functions
     //--------------------------------------------//
     /// \brief Computes the number of mu and nu equations and returns them as a pair
-    std::pair<size_t, size_t> compute_equation_counts(const pbes& p) const
+    std::pair<std::size_t, std::size_t> compute_equation_counts(const pbes& p) const
     {
-      size_t mu_count = 0;
-      size_t nu_count = 0;
+      std::size_t mu_count = 0;
+      std::size_t nu_count = 0;
       for (const pbes_equation& eqn: p.equations())
       {
         if (eqn.symbol().is_mu())
@@ -154,9 +154,9 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
     }
 
     // number of changes from mu to nu or vice versa
-    size_t compute_block_nesting_depth(const pbes& p) const
+    std::size_t compute_block_nesting_depth(const pbes& p) const
     {
-      size_t block_nesting_depth = 0;
+      std::size_t block_nesting_depth = 0;
       bool last_symbol_is_mu = false;
 
       for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -184,8 +184,8 @@ class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_pr
     /// Initializes the pbes_property_map with a linear process specification
     pbes_property_map(const pbes& p)
     {
-      std::pair<size_t, size_t>  equation_counts              = compute_equation_counts(p);
-      size_t block_nesting_depth                                    = compute_block_nesting_depth(p);
+      std::pair<std::size_t, std::size_t>  equation_counts              = compute_equation_counts(p);
+      std::size_t block_nesting_depth                                    = compute_block_nesting_depth(p);
       const std::set<data::variable>&           declared_free_variables      = p.global_variables();
       std::set<data::variable>               used_free_variables          = pbes_system::find_free_variables(p);
       std::set<propositional_variable>       binding_variables            = p.binding_variables();

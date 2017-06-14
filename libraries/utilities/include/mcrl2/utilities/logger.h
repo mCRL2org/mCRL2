@@ -378,16 +378,16 @@ protected:
   }
 
   static
-  size_t& caret_pos()
+  std::size_t& caret_pos()
   {
-    static size_t m_caret_pos = 0;
+    static std::size_t m_caret_pos = 0;
     return m_caret_pos;
   }
 
   static
-  size_t& last_caret_pos()
+  std::size_t& last_caret_pos()
   {
-    static size_t m_last_caret_pos = 0;
+    static std::size_t m_last_caret_pos = 0;
     return m_last_caret_pos;
   }
 

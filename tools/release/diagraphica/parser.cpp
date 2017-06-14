@@ -44,10 +44,10 @@ void Parser::parseFile(QString filename, Graph* graph)
 
   const std::vector < std::pair < std::string, std::string > > process_parameters=l.process_parameters();
   std::vector < std::pair < std::string, std::string > >::const_iterator parameter=process_parameters.begin();
-  for (size_t i = 0; parameter != process_parameters.end(); ++i, ++parameter)
+  for (std::size_t i = 0; parameter != process_parameters.end(); ++i, ++parameter)
   {
     std::vector< string > values = l.state_element_values(i);
-    for (size_t j = 0; j < values.size(); ++j)
+    for (std::size_t j = 0; j < values.size(); ++j)
     {
       if (values[j].empty())
         values.assign(j, "-");
@@ -98,12 +98,12 @@ void Parser::writeFSMFile(
 
   QString line = "";
   int lineCnt = 0;
-  size_t lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
+  std::size_t lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
 
   emit started(lineTot);
 
   // write state variable description
-  for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+  for (std::size_t i = 0; i < graph->getSizeAttributes(); ++i)
   {
     QString name = graph->getAttribute(i)->name();
     QString sizeOrigValues = QString::number(int(graph->getAttribute(i)->getSizeOrigValues()));
@@ -111,7 +111,7 @@ void Parser::writeFSMFile(
 
     line = QString("%1(%2) %3 ").arg(name, sizeOrigValues, type);
 
-    for (size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j)
+    for (std::size_t j = 0; j < graph->getAttribute(i)->getSizeCurValues(); ++j)
     {
       QString value = QString::fromStdString(graph->getAttribute(i)->getCurValue(j)->getValue());
       line.append(QString("\"%1\"").arg(value));
@@ -130,11 +130,11 @@ void Parser::writeFSMFile(
   // write state vectors
   file.write("---\n");
 
-  for (size_t i = 0; i < graph->getSizeNodes(); ++i)
+  for (std::size_t i = 0; i < graph->getSizeNodes(); ++i)
   {
     line = "";
 
-    for (size_t j = 0; j < graph->getNode(i)->getSizeTuple(); ++j)
+    for (std::size_t j = 0; j < graph->getNode(i)->getSizeTuple(); ++j)
     {
       line.append(QString::number(int(graph->getNode(i)->getTupleVal(j))));
 
@@ -154,7 +154,7 @@ void Parser::writeFSMFile(
   // write transitions
   file.write("---\n");
 
-  for (size_t i = 0; i < graph->getSizeEdges(); ++i)
+  for (std::size_t i = 0; i < graph->getSizeEdges(); ++i)
   {
     QString inNode = QString::number(int(graph->getEdge(i)->getInNode()->getIndex()+1));
     QString outNode = QString::number(int(graph->getEdge(i)->getOutNode()->getIndex()+1));
@@ -173,9 +173,9 @@ void Parser::writeFSMFile(
 void Parser::parseAttrConfig(
     QString filename,
     Graph* graph,
-    map< size_t, size_t >& attrIdxFrTo,
-    map< size_t, vector< string > >& attrCurDomains,
-    map< size_t, map< size_t, size_t  > >& attrOrigToCurDomains)
+    map< std::size_t, std::size_t >& attrIdxFrTo,
+    map< std::size_t, vector< string > >& attrCurDomains,
+    map< std::size_t, map< std::size_t, std::size_t  > >& attrOrigToCurDomains)
 {
 
   QDomDocument xml;
@@ -237,7 +237,7 @@ void Parser::writeAttrConfig(
   appendValue(xml, root, "File", file);
 
   // attributes
-  for (size_t i = 0; i < graph->getSizeAttributes(); ++i)
+  for (std::size_t i = 0; i < graph->getSizeAttributes(); ++i)
   {
     Attribute* attribute = graph->getAttribute(i);
     QDomElement attributeElement = xml.createElement("Attribute");
@@ -246,14 +246,14 @@ void Parser::writeAttrConfig(
     appendValue(xml, attributeElement, "OriginalCardinality", QString::number(attribute->getSizeOrigValues()));
 
     QDomElement currentDomainElement = xml.createElement("CurrentDomain");
-    for (size_t j = 0; j < attribute->getSizeCurValues(); ++j)
+    for (std::size_t j = 0; j < attribute->getSizeCurValues(); ++j)
     {
       appendValue(xml, currentDomainElement, "Value", QString::fromStdString(attribute->getCurValue(j)->getValue()));
     }
     attributeElement.appendChild(currentDomainElement);
 
     QDomElement originalToCurrentElement = xml.createElement("OriginalToCurrent");
-    for (size_t j = 0; j < attribute->getSizeCurValues(); ++j)
+    for (std::size_t j = 0; j < attribute->getSizeCurValues(); ++j)
     {
       appendValue(xml, originalToCurrentElement, "CurrentPosition", QString::number(int(attribute->mapToValue(j)->getIndex())));
     }
@@ -520,9 +520,9 @@ QDomElement Parser::appendDOF(QDomDocument document, QDomElement root, QString n
 
 void Parser::parseAttribute(
     Graph* graph,
-    map< size_t , size_t >& attrIdxFrTo,
-    map< size_t, vector< string > >& attrCurDomains,
-    map< size_t, map< size_t, size_t  > >& attrOrigToCurDomains,
+    map< std::size_t , std::size_t >& attrIdxFrTo,
+    map< std::size_t, vector< string > >& attrCurDomains,
+    map< std::size_t, map< std::size_t, std::size_t  > >& attrOrigToCurDomains,
     QDomNode AttributeNode)
 {
   try
@@ -556,7 +556,7 @@ void Parser::parseAttribute(
     }
 
     // update attribute mapping
-    attrIdxFrTo.insert(pair< size_t, size_t >(attribute->getIndex(), attrIdxFrTo.size()));
+    attrIdxFrTo.insert(pair< std::size_t, std::size_t >(attribute->getIndex(), attrIdxFrTo.size()));
 
     vector< string > domain;
     QDomElement valueElement = listPropertyElements["CurrentDomain"].firstChildElement("Value");
@@ -571,9 +571,9 @@ void Parser::parseAttribute(
     }
 
     // update domain
-    attrCurDomains.insert(pair< size_t, vector< string > >(attribute->getIndex(), domain));
+    attrCurDomains.insert(pair< std::size_t, vector< string > >(attribute->getIndex(), domain));
 
-    map< size_t, size_t > origToCur;
+    map< std::size_t, std::size_t > origToCur;
     QDomElement positionElement = listPropertyElements["OriginalToCurrent"].firstChildElement("CurrentPosition");
     int i;
     for (i = 0; !positionElement.isNull(); ++i, positionElement = positionElement.nextSiblingElement("CurrentPosition"))
@@ -600,7 +600,7 @@ void Parser::parseAttribute(
     }
 
     // update mapping
-    attrOrigToCurDomains.insert(pair< size_t , map< size_t, size_t > >(attribute->getIndex(), origToCur));
+    attrOrigToCurDomains.insert(pair< std::size_t , map< std::size_t, std::size_t > >(attribute->getIndex(), origToCur));
 
   }
   catch (const mcrl2::runtime_error& e)

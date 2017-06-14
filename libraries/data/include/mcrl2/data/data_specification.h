@@ -872,7 +872,7 @@ inline variable_list order_variables_to_optimise_enumeration(const variable_list
   // Put variables with enumerated types with the largest number of elements in front.
   // Put variables of finite types as second.
   // Finally put the other variables in the list.
-  std::map < size_t,variable_list> vars_of_enumerated_type;
+  std::map < std::size_t,variable_list> vars_of_enumerated_type;
   variable_list vars_of_finite_type;
   variable_list rest_vars;
   for(const variable& v: l)
@@ -906,7 +906,7 @@ inline variable_list order_variables_to_optimise_enumeration(const variable_list
 
   // Accumulate the result in rest_vars
   rest_vars=vars_of_finite_type + rest_vars;
-  for(std::map <size_t,variable_list>::const_reverse_iterator k=vars_of_enumerated_type.rbegin(); k!=vars_of_enumerated_type.rend(); ++k)
+  for(std::map <std::size_t,variable_list>::const_reverse_iterator k=vars_of_enumerated_type.rbegin(); k!=vars_of_enumerated_type.rend(); ++k)
   {
     rest_vars = k->second + rest_vars;
   }

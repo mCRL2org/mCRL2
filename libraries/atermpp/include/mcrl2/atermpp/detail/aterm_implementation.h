@@ -27,20 +27,20 @@ namespace detail
 /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
 /* This check might break on perfectly valid architectures */
 /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-static_assert(sizeof(size_t) == sizeof(_aterm*), "The size of an aterm pointer is not equal to the size of type size_t. Cannot compile the MCRL2 toolset for this platform.");
-static_assert(sizeof(size_t) >= 4,"The size of size_t should at least be four bytes. Cannot compile the toolset for this platform.");
+static_assert(sizeof(std::size_t) == sizeof(_aterm*), "The size of an aterm pointer is not equal to the size of type std::size_t. Cannot compile the MCRL2 toolset for this platform.");
+static_assert(sizeof(std::size_t) >= 4,"The size of std::size_t should at least be four bytes. Cannot compile the toolset for this platform.");
 
 
-static const size_t BLOCK_SIZE = 1<<14;
+static const std::size_t BLOCK_SIZE = 1<<14;
 
 struct Block
 {
   struct Block* next_by_size;
-  size_t* end;
-  size_t data[1000]; // This is a block of arbitrary size. The indication data[]
-                     // is not accepted by the visual C++ compiler. If a lower
-                     // number than 1000 would be selected, the compiler may
-                     // warn that there is an index out of bound error.
+  std::size_t* end;
+  std::size_t data[1000]; // This is a block of arbitrary size. The indication data[]
+                          // is not accepted by the visual C++ compiler. If a lower
+                          // number than 1000 would be selected, the compiler may
+                          // warn that there is an index out of bound error.
 
   private:
     // The copy constructor is made private to indicate that
@@ -69,33 +69,33 @@ struct TermInfo
 
 };
 
-extern size_t aterm_table_mask;
-extern size_t aterm_table_size;
+extern std::size_t aterm_table_mask;
+extern std::size_t aterm_table_size;
 extern detail::_aterm* * aterm_hashtable;
 
-extern size_t terminfo_size;
-extern size_t total_nodes_in_hashtable;
+extern std::size_t terminfo_size;
+extern std::size_t total_nodes_in_hashtable;
 extern TermInfo *terminfo;
 
-extern size_t garbage_collect_count_down;
+extern std::size_t garbage_collect_count_down;
 
 void resize_aterm_hashtable();
-void allocate_block(const size_t size);
+void allocate_block(const std::size_t size);
 void collect_terms_with_reference_count_0();
 
 void call_creation_hook(_aterm*);
 
 // Auxiliary function to calculate a hash for _aterm's.
 inline
-size_t COMBINE(const size_t hnr, const size_t w)
+std::size_t COMBINE(const std::size_t hnr, const std::size_t w)
 {
   return (w>>3) + (hnr>>1) + (hnr<<1);
 }
 
 inline
-size_t COMBINE(const size_t hnr, const aterm& w)
+std::size_t COMBINE(const std::size_t hnr, const aterm& w)
 {
-  return COMBINE(hnr,reinterpret_cast<size_t>(address(w)));
+  return COMBINE(hnr,reinterpret_cast<std::size_t>(address(w)));
 }
 
 inline
@@ -110,15 +110,15 @@ t
   assert(!address(t)->reference_count_is_zero());
 }
 
-inline size_t hash_number(detail::_aterm *t)
+inline std::size_t hash_number(detail::_aterm *t)
 {
   const function_symbol& f=t->function();
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = function_symbol_hasher(f);
+  std::size_t hnr = function_symbol_hasher(f);
 
-  const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
-  const size_t* end=begin+f.arity();
-  for (const size_t* i=begin; i!=end; ++i)
+  const std::size_t* begin=reinterpret_cast<const std::size_t*>(t)+TERM_SIZE;
+  const std::size_t* end=begin+f.arity();
+  for (const std::size_t* i=begin; i!=end; ++i)
   {
     hnr = COMBINE(hnr, *i);
   }
@@ -126,13 +126,13 @@ inline size_t hash_number(detail::_aterm *t)
   return hnr;
 }
 
-inline _aterm* allocate_term(const size_t size)
+inline _aterm* allocate_term(const std::size_t size)
 {
   assert(size>=TERM_SIZE);
   if (size >= terminfo_size)
   {
     // Resize the size of terminfo to the minimum of twice its old size and size+1;
-    const size_t old_term_info_size=terminfo_size;
+    const std::size_t old_term_info_size=terminfo_size;
     terminfo_size <<=1; // Multiply by 2.
     if (size>=terminfo_size)
     {
@@ -143,7 +143,7 @@ inline _aterm* allocate_term(const size_t size)
     {
       throw std::runtime_error("Out of memory. Failed to allocate an extension of terminfo.");
     }
-    for(size_t i=old_term_info_size; i<terminfo_size; ++i)
+    for(std::size_t i=old_term_info_size; i<terminfo_size; ++i)
     {
       new (&terminfo[i]) TermInfo();
     }
@@ -188,7 +188,7 @@ inline void remove_from_hashtable(_aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
   _aterm *prev=nullptr;
-  const size_t hnr = hash_number(t) & aterm_table_mask;
+  const std::size_t hnr = hash_number(t) & aterm_table_mask;
   _aterm *cur = aterm_hashtable[hnr];
 
   do

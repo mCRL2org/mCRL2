@@ -32,7 +32,7 @@ class Utils
     // -- std::string conversion functions -------------------------------
     static std::string dblToStr(const double& d);
     static std::string intToStr(const int& i);
-    static std::string size_tToStr(const size_t& i);
+    static std::string size_tToStr(const std::size_t& i);
     static double strToDbl(const std::string& s);
     static int strToInt(const std::string& s);
 

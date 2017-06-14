@@ -52,73 +52,73 @@ class Graph : public QObject
     void addAttrDiscr(
       QString name,
       QString type,
-      const size_t& idx,
+      const std::size_t& idx,
       const std::vector< std::string > &vals);
 
     void moveAttribute(
-      const size_t& idxFr,
-      const size_t& idxTo);
+      const std::size_t& idxFr,
+      const std::size_t& idxTo);
     void configAttributes(
-      std::map< size_t , size_t > &idcsFrTo,
-      std::map< size_t, std::vector< std::string > > &attrCurDomains,
-      std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains);
-    void duplAttributes(const std::vector< size_t > &idcs);
-    void deleteAttribute(const size_t& idx);
+      std::map< std::size_t , std::size_t > &idcsFrTo,
+      std::map< std::size_t, std::vector< std::string > > &attrCurDomains,
+      std::map< std::size_t, std::map< std::size_t, std::size_t  > > &attrOrigToCurDomains);
+    void duplAttributes(const std::vector< std::size_t > &idcs);
+    void deleteAttribute(const std::size_t& idx);
 
     void addNode(const std::vector< double > &tpl);
     void addEdge(
       const std::string& lbl,
-      const size_t& inNodeIdx,
-      const size_t& outNodeIdx);
+      const std::size_t& inNodeIdx,
+      const std::size_t& outNodeIdx);
 
     void initGraph();
 
     // -- get functions  --------------------------------------------
     QString filename();
-    size_t getSizeAttributes();
-    Attribute* getAttribute(const size_t& idx);
+    std::size_t getSizeAttributes();
+    Attribute* getAttribute(const std::size_t& idx);
     Attribute* getAttribute(QString name);
-    size_t getSizeNodes();
-    Node* getNode(const size_t& idx);
-    size_t getSizeEdges();
-    Edge* getEdge(const size_t& idx);
+    std::size_t getSizeNodes();
+    Node* getNode(const std::size_t& idx);
+    std::size_t getSizeEdges();
+    Edge* getEdge(const std::size_t& idx);
     Cluster* getRoot();
-    Cluster* getCluster(const std::vector< size_t > coord);
-    Cluster* getLeaf(const size_t& idx);
-    size_t getSizeLeaves();
-    Bundle* getBundle(const size_t& idx);
-    size_t getSizeBundles();
+    Cluster* getCluster(const std::vector< std::size_t > coord);
+    Cluster* getLeaf(const std::size_t& idx);
+    std::size_t getSizeLeaves();
+    Bundle* getBundle(const std::size_t& idx);
+    std::size_t getSizeBundles();
 
     // -- calculation functions -------------------------------------
     void calcAttrDistr(
-      const size_t& attrIdx,
-      std::vector< size_t > &distr);
+      const std::size_t& attrIdx,
+      std::vector< std::size_t > &distr);
 
     void calcAttrCorrl(
-      const size_t& attrIdx1,
-      const size_t& attrIdx2,
-      std::vector< std::vector< size_t > > &corrlMap,
+      const std::size_t& attrIdx1,
+      const std::size_t& attrIdx2,
+      std::vector< std::vector< std::size_t > > &corrlMap,
       std::vector< std::vector< int > > &number);
 
     void calcAttrCombn(
-      const std::vector< size_t > &attrIndcs,
-      std::vector< std::vector< size_t > > &combs,
-      std::vector< size_t > &number);
+      const std::vector< std::size_t > &attrIndcs,
+      std::vector< std::vector< std::size_t > > &combs,
+      std::vector< std::size_t > &number);
     void calcAttrCombn(
       Cluster* clust,
-      const std::vector< size_t > &attrIndcs,
-      std::vector< std::vector< size_t > > &combs,
-      std::vector< size_t > &number);
+      const std::vector< std::size_t > &attrIndcs,
+      std::vector< std::vector< std::size_t > > &combs,
+      std::vector< std::size_t > &number);
     void calcAttrCombn(
-      const std::vector< size_t > &attrIndcs,
-      std::vector< std::vector< size_t > > &combs);
-    void calcAttrCombn(
-      Cluster* clust,
-      const std::vector< size_t > &attrIndcs,
-      std::vector< std::vector< size_t > > &combs);
+      const std::vector< std::size_t > &attrIndcs,
+      std::vector< std::vector< std::size_t > > &combs);
     void calcAttrCombn(
       Cluster* clust,
-      const std::vector< size_t > &attrIndcs,
+      const std::vector< std::size_t > &attrIndcs,
+      std::vector< std::vector< std::size_t > > &combs);
+    void calcAttrCombn(
+      Cluster* clust,
+      const std::vector< std::size_t > &attrIndcs,
       std::vector< std::vector< Node* > > &combs);
     void calcAttrCombn(
       Cluster* clust,
@@ -130,20 +130,20 @@ class Graph : public QObject
       const std::vector< int > &attrIndcs);
 
     // -- cluster & bundle functions --------------------------------
-    void clustNodesOnAttr(const std::vector< size_t > &attrIdcs);
-    void clearSubClusters(const std::vector< size_t > &coord);
+    void clustNodesOnAttr(const std::vector< std::size_t > &attrIdcs);
+    void clearSubClusters(const std::vector< std::size_t > &coord);
 
-    size_t sumNodesInCluster(const std::vector< size_t > &coord);
+    std::size_t sumNodesInCluster(const std::vector< std::size_t > &coord);
     void sumNodesInCluster(
       Cluster* clust,
-      size_t& total);
+      std::size_t& total);
     void getDescNodesInCluster(
-      const std::vector< size_t > &coord,
+      const std::vector< std::size_t > &coord,
       std::vector< Node* > &nodes);
     void getDescNodesInCluster(
       Cluster* clust,
       std::vector< Node* > &nodes);
-    size_t calcMaxNumCombns(const std::vector< size_t > &attrIdcs);
+    std::size_t calcMaxNumCombns(const std::vector< std::size_t > &attrIdcs);
 
   protected slots:
     void recluster();
@@ -167,14 +167,14 @@ class Graph : public QObject
 
     void clustNodesOnAttr(
       Cluster* clust,
-      std::vector< size_t > attrIdcs,
-      size_t& progress);
+      std::vector< std::size_t > attrIdcs,
+      std::size_t& progress);
     void clustClusterOnAttr(
-      const std::vector< size_t > coord,
-      const size_t& attrIdx);
+      const std::vector< std::size_t > coord,
+      const std::size_t& attrIdx);
     void clustClusterOnAttr(
       Cluster* clust,
-      const size_t& attrIdx);
+      const std::size_t& attrIdx);
     void clearSubClusters(Cluster* clust);
 
     void updateLeaves();
@@ -183,7 +183,7 @@ class Graph : public QObject
     void clearLeaves();
     void deleteClusters();
 
-    void updateBundles(size_t& progress);
+    void updateBundles(std::size_t& progress);
     void updateBundles();
     void deleteBundles();
 

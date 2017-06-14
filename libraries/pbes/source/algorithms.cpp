@@ -28,7 +28,7 @@ void remove_parameters(pbes& x, const std::set<data::variable>& to_be_removed)
   pbes_system::remove_parameters(x, to_be_removed);
 }
 
-void remove_parameters(pbes& x, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
+void remove_parameters(pbes& x, const std::map<core::identifier_string, std::vector<std::size_t> >& to_be_removed)
 {
   pbes_system::remove_parameters(x, to_be_removed);
 }

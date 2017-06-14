@@ -25,10 +25,10 @@ namespace atermpp
 namespace detail
 {
 
-inline _aterm* aterm_int(size_t val)
+inline _aterm* aterm_int(std::size_t val)
 {
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = COMBINE(function_symbol_hasher(function_adm.AS_INT), val);
+  std::size_t hnr = COMBINE(function_symbol_hasher(function_adm.AS_INT), val);
 
   _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
   while (cur)

@@ -38,7 +38,7 @@ namespace detail
 
 inline string get_rest_of_string_after_at_symbol(const string& s)
 {
-  const size_t i=s.find('@',1);
+  const std::size_t i=s.find('@',1);
   if (i==std::string::npos)
   {
     return "";
@@ -48,7 +48,7 @@ inline string get_rest_of_string_after_at_symbol(const string& s)
 
 inline string get_string_until_at_symbol(const string& s)
 {
-  const size_t i=s.find('@',1);
+  const std::size_t i=s.find('@',1);
   return s.substr(0,i);
 }
 
@@ -58,7 +58,7 @@ inline void print_justification_tree_rec(
              const boolean_equation_system& b, 
              const vector<bool>& solution, 
              const bool init_solution, 
-             const map<boolean_variable, size_t>& index_of, 
+             const map<boolean_variable, std::size_t>& index_of, 
              int indent, 
              const boolean_expression& expr, 
              set<boolean_variable>& visited)
@@ -91,7 +91,7 @@ inline void print_justification_tree_rec(
   {
     const boolean_variable& X = atermpp::down_cast<boolean_variable>(expr);
 
-    const map<boolean_variable, size_t>::const_iterator idx = index_of.find(X);
+    const map<boolean_variable, std::size_t>::const_iterator idx = index_of.find(X);
     if (idx==index_of.end() || idx->second >= b.equations().size())
     {
       // X is out of the range of the solution. There is some error in the
@@ -99,7 +99,7 @@ inline void print_justification_tree_rec(
       throw mcrl2::runtime_error("Encountered undefined propositional variable " + string(X.name()) + " in the boolean equation system. Cannot generate a counter example. ");
     }
 
-    const size_t variable_index=idx->second;
+    const std::size_t variable_index=idx->second;
     if (solution[variable_index] != init_solution)
     {
       // X is not relevant for the justification.
@@ -140,8 +140,8 @@ inline void print_justification_tree(const boolean_equation_system& b, const vec
 {
   assert(b.equations().size()==solution.size());
   set<boolean_variable> visited;
-  map<boolean_variable, size_t> index_of;
-  for (size_t i = 0; i < b.equations().size(); i++)
+  map<boolean_variable, std::size_t> index_of;
+  for (std::size_t i = 0; i < b.equations().size(); i++)
   {
     index_of[b.equations()[i].variable()] = i;
   }

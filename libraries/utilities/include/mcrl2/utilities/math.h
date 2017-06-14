@@ -25,10 +25,10 @@ namespace utilities
 // bit that has been set.
 
 inline
-size_t ceil_log2(size_t n)
+std::size_t ceil_log2(std::size_t n)
 {
   assert(n>0);
-  size_t result = 0;
+  std::size_t result = 0;
   while(n != 0)
   {
     n = n >> 1;
@@ -37,13 +37,13 @@ size_t ceil_log2(size_t n)
   return result;
 }
 
-// Calculate n^m for numbers n,m of type size_t
+// Calculate n^m for numbers n,m of type std::size_t
 inline 
-size_t power_size_t(const size_t n_in, const size_t m_in)
+std::size_t power_size_t(const std::size_t n_in, const std::size_t m_in)
 {
-  size_t result=1;
-  size_t n=n_in;
-  size_t m=m_in;
+  std::size_t result=1;
+  std::size_t n=n_in;
+  std::size_t m=m_in;
   while (m>0)  // Invariant: result*n^m=n_in^m_in;
   {
     if (m % 2==1)

@@ -37,24 +37,24 @@ class parity_game_output: public parity_game_generator
 {
   protected:
     /// The vertices of the parity game graph.
-    std::set<size_t> V;
+    std::set<std::size_t> V;
 
     /// The edges of the parity game graph.
-    std::set<std::pair<size_t, size_t> > E;
+    std::set<std::pair<std::size_t, std::size_t> > E;
 
     /// The vertex priorities of the parity game graph.
-    std::map<size_t, size_t> priorities;
+    std::map<std::size_t, std::size_t> priorities;
 
     /// The even vertices of the parity game graph.
-    std::set<size_t> even_vertices;
+    std::set<std::size_t> even_vertices;
 
     /// The odd vertices of the parity game graph.
-    std::set<size_t> odd_vertices;
+    std::set<std::size_t> odd_vertices;
 
     /// \brief Returns the quoted name of the vertex, for example "X1"
     /// \param i A positive integer
     /// \return The quoted name of the vertex, for example "X1"
-    std::string vertex(size_t i) const
+    std::string vertex(std::size_t i) const
     {
       return "\"X" + utilities::number2string(i+1) + "\"";
     }
@@ -62,7 +62,7 @@ class parity_game_output: public parity_game_generator
     /// \brief Returns a tuple representing an edge, for example ("X1", "X2")
     /// \param e An edge
     /// \return A tuple representing an edge, for example ("X1", "X2")
-    std::string edge(std::pair<size_t, size_t> e) const
+    std::string edge(std::pair<std::size_t, std::size_t> e) const
     {
       return "(" + vertex(e.first) + ", " + vertex(e.second) + ")";
     }
@@ -70,7 +70,7 @@ class parity_game_output: public parity_game_generator
     /// \brief Returns a string representing a priority, for example "X1":0
     /// \param p A pair of integers
     /// \return A string representing a priority, for example "X1":0
-    std::string priority(std::pair<size_t, size_t> p) const
+    std::string priority(std::pair<std::size_t, std::size_t> p) const
     {
       return vertex(p.first) + ":" + utilities::number2string(p.second);
     }
@@ -116,10 +116,10 @@ class parity_game_output: public parity_game_generator
     /// \brief Prints the todo list
     /// \param name A string
     /// \param todo A todo list
-    void print_set(const std::string& name, const std::set<size_t>& todo) const
+    void print_set(const std::string& name, const std::set<std::size_t>& todo) const
     {
       mCRL2log(log::verbose) << name << " = {";
-      for (std::set<size_t>::const_iterator i = todo.begin(); i != todo.end(); ++i)
+      for (std::set<std::size_t>::const_iterator i = todo.begin(); i != todo.end(); ++i)
       {
         mCRL2log(log::verbose) << (i == todo.begin() ? "" : ", ") << *i;
       }
@@ -151,8 +151,8 @@ class parity_game_output: public parity_game_generator
       std::string result;
 #ifdef _MSC_VER
       result = result + python_set(apply(V, [&](std::size_t i) { return vertex(i); })) + "\n";
-      result = result + python_set(apply(E, [&](std::pair<size_t, size_t> e) { return edge(e); })) + "\n";
-      result = result + "{" + join(apply(priorities, [&](std::pair<size_t, size_t> p) { return priority(p); }), ", ") + "}\n";
+      result = result + python_set(apply(E, [&](std::pair<std::size_t, std::size_t> e) { return edge(e); })) + "\n";
+      result = result + "{" + join(apply(priorities, [&](std::pair<std::size_t, std::size_t> p) { return priority(p); }), ", ") + "}\n";
       result = result + python_set(apply(even_vertices, [&](std::size_t i) { return vertex(i); })) + "\n";
       result = result + python_set(apply(odd_vertices, [&](std::size_t i) { return vertex(i); }));
 #else      
@@ -177,8 +177,8 @@ class parity_game_output: public parity_game_generator
       }
       for (const auto& i: E)
       {
-        size_t k = i.first;
-        size_t m = i.second;
+        std::size_t k = i.first;
+        std::size_t m = i.second;
         std::string& line = lines[k];
         line += ((line[line.size()-1] == ' ' ? "" : ", ") + utilities::number2string(m));
       }
@@ -188,18 +188,18 @@ class parity_game_output: public parity_game_generator
     /// \brief Generates the parity game graph
     void run()
     {
-      std::set<size_t> todo = get_initial_values();
-      std::set<size_t> done;
+      std::set<std::size_t> todo = get_initial_values();
+      std::set<std::size_t> done;
       while (!todo.empty())
       {
         // handle vertex i
-        size_t i = *todo.begin();
+        std::size_t i = *todo.begin();
         todo.erase(i);
         done.insert(i);
         V.insert(i);
-        size_t p = get_priority(i);
+        std::size_t p = get_priority(i);
         priorities[i] = p;
-        std::set<size_t> dep_i = get_dependencies(i);
+        std::set<std::size_t> dep_i = get_dependencies(i);
         switch (get_operation(i))
         {
           case PGAME_AND:

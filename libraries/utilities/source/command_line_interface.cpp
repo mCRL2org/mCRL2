@@ -64,7 +64,7 @@ std::string substring(const std::string& s, Iter first, Iter last)
  * \return string with newlines inserted such that the number of characters
  * between any two consecutive newlines is smaller than width
  **/
-static std::string word_wrap(std::string const& input, const size_t width, std::string const& indent = "")
+static std::string word_wrap(std::string const& input, const std::size_t width, std::string const& indent = "")
 {
   std::ostringstream out;
 
@@ -137,7 +137,7 @@ static std::string word_wrap(std::string const& input, const size_t width, std::
  * \return formatted string that represents the option description
  **/
 std::string interface_description::option_descriptor::textual_description(
-  const size_t left_width, const size_t right_width) const
+  const std::size_t left_width, const std::size_t right_width) const
 {
   std::ostringstream s;
   std::string        options;

@@ -60,7 +60,7 @@ private:
     const bool stack_;
     bool *queued_;
     verti *queue_;
-    size_t queue_size_, queue_capacity_, queue_begin_, queue_end_;
+    std::size_t queue_size_, queue_capacity_, queue_begin_, queue_end_;
 };
 
 /*! \ingroup LiftingStrategies

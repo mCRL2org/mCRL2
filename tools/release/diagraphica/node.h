@@ -25,15 +25,15 @@ class Node
 {
   public:
     // -- constructors and destructors ------------------------------
-    Node(size_t idx): index(idx), cluster(0) {}
-    Node(size_t idx, const std::vector<double> &tpl): index(idx), tuple(tpl), cluster(0) {}
+    Node(std::size_t idx): index(idx), cluster(0) {}
+    Node(std::size_t idx, const std::vector<double> &tpl): index(idx), tuple(tpl), cluster(0) {}
 
     // -- set functions ---------------------------------------------
-    void swapTupleVal(size_t idx1, size_t idx2);
-    void moveTupleVal(size_t idxFr, size_t idxTo);
-    void moveTupleVals(std::map<size_t, size_t> &idcsFrTo);
-    void addTupleVal(size_t idx, double val) { tuple.insert(tuple.begin() + idx, val); }
-    void delTupleVal(size_t idx) { tuple.erase(tuple.begin() + idx); }
+    void swapTupleVal(std::size_t idx1, std::size_t idx2);
+    void moveTupleVal(std::size_t idxFr, std::size_t idxTo);
+    void moveTupleVals(std::map<std::size_t, std::size_t> &idcsFrTo);
+    void addTupleVal(std::size_t idx, double val) { tuple.insert(tuple.begin() + idx, val); }
+    void delTupleVal(std::size_t idx) { tuple.erase(tuple.begin() + idx); }
     void addInEdge(Edge* e) { inEdges.push_back(e); }
     void setInEdges(const std::vector<Edge *> &e) { inEdges = e; }
     void addOutEdge(Edge* e) { outEdges.push_back(e); }
@@ -41,18 +41,18 @@ class Node
     void setCluster(Cluster* c) { cluster = c; }
 
     // -- get functions ---------------------------------------------
-    size_t getIndex() const { return index; }
-    size_t getSizeTuple() const { return tuple.size(); }
-    double getTupleVal(const size_t& idx) const { return tuple[idx]; }
-    size_t getSizeInEdges() const { return inEdges.size(); }
-    Edge* getInEdge(const size_t& idx) const { return inEdges[idx]; }
-    size_t getSizeOutEdges() const { return outEdges.size(); }
-    Edge* getOutEdge(const size_t& idx) const { return outEdges[idx]; }
+    std::size_t getIndex() const { return index; }
+    std::size_t getSizeTuple() const { return tuple.size(); }
+    double getTupleVal(const std::size_t& idx) const { return tuple[idx]; }
+    std::size_t getSizeInEdges() const { return inEdges.size(); }
+    Edge* getInEdge(const std::size_t& idx) const { return inEdges[idx]; }
+    std::size_t getSizeOutEdges() const { return outEdges.size(); }
+    Edge* getOutEdge(const std::size_t& idx) const { return outEdges[idx]; }
     Cluster* getCluster() const { return cluster; }
 
   protected:
     // -- data members ----------------------------------------------
-    size_t index; // index in list of graph nodes
+    std::size_t index; // index in list of graph nodes
     std::vector< double >   tuple;
     std::vector< Edge* > inEdges;  // association
     std::vector< Edge* > outEdges; // association

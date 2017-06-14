@@ -65,7 +65,7 @@ public:
   int get_state_length() const;
 
   /// \brief Returns the number of state types.
-  size_t get_number_of_state_types() const;
+  std::size_t get_number_of_state_types() const;
 
   /// \brief Returns the sequence of state part names.
   const std::vector<std::string>& get_state_names() const;
@@ -82,7 +82,7 @@ public:
   std::string get_state_type_name(int type_no) const;
 
   /// \brief Returns the number of state labels.
-  size_t get_number_of_state_labels() const;
+  std::size_t get_number_of_state_labels() const;
 
   /// \brief Returns the sequence of state labels.
   const std::vector<std::string>& get_state_labels() const;
@@ -91,7 +91,7 @@ public:
   const std::vector<std::string>& get_state_label_types() const;
 
   /// \brief Returns the number of edge labels.
-  size_t get_number_of_edge_labels() const;
+  std::size_t get_number_of_edge_labels() const;
 
   /// \brief Returns the sequence of edge labels.
   const std::vector<std::string>& get_edge_labels() const;

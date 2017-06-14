@@ -155,6 +155,6 @@ void SmallProgressMeasures::set_top(verti v)
 {
     assert(!is_top(v));
     set_vec_to_top(v);
-    size_t prio = game_.priority(v);
+    std::size_t prio = game_.priority(v);
     if (prio%2 != p_) decr_M(prio/2);
 }

@@ -93,9 +93,9 @@ class RewriterCompilingJitty: public Rewriter
     // The data structures below are used to store the variable lists2
     // that are used in the compiling rewriter in forall, where and exists.
     std::vector<variable_list> rewriter_binding_variable_lists;
-    std::map <variable_list, size_t> variable_list_indices1;
-    size_t binding_variable_list_index(const variable_list &v);
-    inline variable_list binding_variable_list_get(const size_t i)
+    std::map <variable_list, std::size_t> variable_list_indices1;
+    std::size_t binding_variable_list_index(const variable_list &v);
+    inline variable_list binding_variable_list_get(const std::size_t i)
     {
       return (rewriter_binding_variable_lists[i]);
     }
@@ -106,9 +106,9 @@ class RewriterCompilingJitty: public Rewriter
     // the array rewriter_bound_variables. variable_indices0 is used
     // to prevent double occurrences in the vector.
     std::vector<variable> rewriter_bound_variables;
-    std::map <variable, size_t> variable_indices0;
-    size_t bound_variable_index(const variable &v);
-    variable bound_variable_get(const size_t i)
+    std::map <variable, std::size_t> variable_indices0;
+    std::size_t bound_variable_index(const variable &v);
+    variable bound_variable_get(const std::size_t i)
     {
       return (rewriter_bound_variables[i]);
     }
@@ -130,18 +130,18 @@ class RewriterCompilingJitty: public Rewriter
     void (*so_rewr_cleanup)();
     data_expression(*so_rewr)(const data_expression&);
 
-    void add_base_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
-    void extend_nfs(nfs_array &a, const function_symbol &opid, size_t arity);
-    bool opid_is_nf(const function_symbol &opid, size_t num_args);
+    void add_base_nfs(nfs_array &a, const function_symbol &opid, std::size_t arity);
+    void extend_nfs(nfs_array &a, const function_symbol &opid, std::size_t arity);
+    bool opid_is_nf(const function_symbol &opid, std::size_t num_args);
     void calc_nfs_list(nfs_array &a, const application& args, variable_or_number_list nnfvars);
     bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
     void generate_code(const std::string& filename);
     void generate_rewr_functions(std::ostream& s, const data::function_symbol& func, const data_equation_list& eqs);
-    bool lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity);
-    sort_list_vector get_residual_sorts(const sort_expression& s, const size_t actual_arity, const size_t requested_arity);
-    match_tree_list create_strategy(const data_equation_list& rules, const size_t arity);
+    bool lift_rewrite_rule_to_right_arity(data_equation& e, const std::size_t requested_arity);
+    sort_list_vector get_residual_sorts(const sort_expression& s, const std::size_t actual_arity, const std::size_t requested_arity);
+    match_tree_list create_strategy(const data_equation_list& rules, const std::size_t arity);
 
 };
 

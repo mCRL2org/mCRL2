@@ -36,10 +36,10 @@ using namespace std;
 
 
 /* Parse error description */
-static size_t line = 0;
-static size_t col = 0;
+static std::size_t line = 0;
+static std::size_t col = 0;
 static deque<char> error_buf;
-static const size_t MAX_ERROR_SIZE = 64;
+static const std::size_t MAX_ERROR_SIZE = 64;
 
 /* Prototypes */
 static aterm fparse_term(int* c, istream& is);
@@ -52,8 +52,8 @@ static void aterm_io_init()
     /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
     /* This check might break on perfectly valid architectures */
     /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-    assert(sizeof(size_t) == sizeof(aterm*));
-    assert(sizeof(size_t) >= 4);
+    assert(sizeof(std::size_t) == sizeof(aterm*));
+    assert(sizeof(std::size_t) >= 4);
     initialized = true;
   }
 }
@@ -141,7 +141,7 @@ static void writeToStream(const aterm& t, std::ostream& os)
     {
       os << "(";
       writeToStream(appl[0], os);
-      for (size_t i = 1; i < sym.arity(); i++)
+      for (std::size_t i = 1; i < sym.arity(); i++)
       {
         os << ",";
         writeToStream(appl[i], os);
@@ -371,7 +371,7 @@ static aterm fparse_num(int* c, istream& is)
 
   {
     *ptr = '\0';
-    return aterm_int(static_cast<size_t>(atol(num)));
+    return aterm_int(static_cast<std::size_t>(atol(num)));
   }
 }
 

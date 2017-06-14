@@ -69,15 +69,15 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
     data::enumerator_identifier_generator m_id_generator;
 
     /// Statistiscs for verbose output
-    size_t m_processed;
-    size_t m_deleted;
-    size_t m_added;
+    std::size_t m_processed;
+    std::size_t m_deleted;
+    std::size_t m_added;
 
     template <typename SummandType, typename Container>
-    size_t instantiate_summand(const SummandType& s, Container& result)
+    std::size_t instantiate_summand(const SummandType& s, Container& result)
     {
       using namespace data;
-      size_t nr_summands = 0; // Counter for the number of new summands, used for verbose output
+      std::size_t nr_summands = 0; // Counter for the number of new summands, used for verbose output
       std::deque< variable > variables; // The variables we need to consider in instantiating
 
       // partition such that variables with finite sort precede those that do not
@@ -167,7 +167,7 @@ class suminst_algorithm: public detail::lps_algorithm<Specification>
       {
         if (must_instantiate(*i))
         {
-          size_t newsummands = instantiate_summand(*i, result);
+          std::size_t newsummands = instantiate_summand(*i, result);
           if (newsummands > 0)
           {
             m_added += newsummands - 1;

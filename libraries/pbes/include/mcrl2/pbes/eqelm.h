@@ -167,9 +167,9 @@ class pbes_eqelm_algorithm
 
     /// \brief Returns the index of the element x in the sequence v
     template <typename VariableContainer>
-    size_t index_of(const data::variable& x, const VariableContainer& v)
+    std::size_t index_of(const data::variable& x, const VariableContainer& v)
     {
-      return static_cast<size_t>(std::find(v.begin(), v.end(), x) - v.begin());
+      return static_cast<std::size_t>(std::find(v.begin(), v.end(), x) - v.begin());
     }
 
     /// \brief Propagate the equivalence relations given by the substitution vX over the edge Ye.
@@ -189,7 +189,7 @@ class pbes_eqelm_algorithm
         std::map<data::data_expression, equivalence_class> w;
         for (const auto & k : equiv)
         {
-          size_t p = index_of(k, m_parameters[Y]);
+          std::size_t p = index_of(k, m_parameters[Y]);
           pbes_system::data_rewriter<DataRewriter> rewr(m_data_rewriter);
           pbes_system::pbes_expression e_p = rewr(e[p], vX);
           w[atermpp::down_cast<const data::data_expression>(e_p)].insert(k);
@@ -248,7 +248,7 @@ class pbes_eqelm_algorithm
       }
 
       // then remove parameters
-      std::map<core::identifier_string, std::vector<size_t> > to_be_removed;
+      std::map<core::identifier_string, std::vector<std::size_t> > to_be_removed;
       for (pbes_equation& eqn: p.equations())
       {
         core::identifier_string X = eqn.variable().name();

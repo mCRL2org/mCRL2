@@ -1,6 +1,6 @@
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 #include <cerrno>       // for errno
-#include <cstddef>      // for size_t
+#include <cstddef>      // for std::size_t
 #include <cstdlib>
 #include <cstring>      // for strerror
 #include <sys/types.h>  // for pid_t

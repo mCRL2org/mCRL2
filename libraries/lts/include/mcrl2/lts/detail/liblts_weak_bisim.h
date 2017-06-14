@@ -46,7 +46,7 @@ void weak_bisimulation_reduce(
   bisimulation_reduce_gjkw(l, true, preserve_divergences);
   //< Apply branching bisimulation to l.
 
-  size_t divergence_label;
+  std::size_t divergence_label;
   if (preserve_divergences)
   {
     divergence_label=mark_explicit_divergence_transitions(l);

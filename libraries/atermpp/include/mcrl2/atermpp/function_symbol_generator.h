@@ -26,8 +26,8 @@ class function_symbol_generator
 {
   protected:
     const std::string m_prefix;
-    size_t m_initial_index; // cache the value that is set in the constructor
-    size_t m_index;
+    std::size_t m_initial_index; // cache the value that is set in the constructor
+    std::size_t m_index;
     std::string m_string_buffer;
 
   public:

@@ -226,7 +226,7 @@ void MainWindow::save(QString filename)
 void MainWindow::updateAttributes()
 {
   m_ui.attributes->setRowCount((int)m_graph->getSizeAttributes());
-  for (size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
+  for (std::size_t i = 0; i < m_graph->getSizeAttributes(); ++i)
   {
     for (int j = 0; j < m_ui.attributes->columnCount(); ++j)
     {
@@ -269,12 +269,12 @@ void MainWindow::updateValues()
   {
     assert(attributes[0] < int(m_graph->getSizeAttributes()));
 
-    std::vector<size_t> valueDistribution;
+    std::vector<std::size_t> valueDistribution;
     m_graph->calcAttrDistr(attributes[0], valueDistribution);
 
     Attribute *attribute = m_graph->getAttribute(attributes[0]);
     m_ui.domain->setRowCount((int)attribute->getSizeCurValues());
-    for (size_t i = 0; i < attribute->getSizeCurValues(); ++i)
+    for (std::size_t i = 0; i < attribute->getSizeCurValues(); ++i)
     {
       Value *value = attribute->getCurValue(i);
 
@@ -359,9 +359,9 @@ void MainWindow::openAttributeConfiguration()
 
   try
   {
-    std::map<size_t, size_t > attrIdxFrTo;
-    std::map<size_t, std::vector< std::string > > attrCurDomains;
-    std::map<size_t, std::map< size_t, size_t  > > attrOrigToCurDomains;
+    std::map<std::size_t, std::size_t > attrIdxFrTo;
+    std::map<std::size_t, std::vector< std::string > > attrCurDomains;
+    std::map<std::size_t, std::map< std::size_t, std::size_t  > > attrOrigToCurDomains;
 
     m_parser.parseAttrConfig(filename, m_graph, attrIdxFrTo, attrCurDomains, attrOrigToCurDomains);
 
@@ -471,7 +471,7 @@ void MainWindow::showAttributeContextMenu(const QPoint &position)
 void MainWindow::clusterNodes()
 {
   QList<int> attributes = selectedAttributes();
-  std::vector<size_t> attributeVector;
+  std::vector<std::size_t> attributeVector;
   for (int i = 0; i < attributes.size(); ++i)
   {
     attributeVector.push_back(attributes[i]);
@@ -482,7 +482,7 @@ void MainWindow::clusterNodes()
 void MainWindow::viewTrace()
 {
   QList<int> attributes = selectedAttributes();
-  std::vector<size_t> attributeVector;
+  std::vector<std::size_t> attributeVector;
   for (int i = 0; i < attributes.size(); ++i)
   {
     attributeVector.push_back(attributes[i]);
@@ -527,7 +527,7 @@ void MainWindow::combinationPlot()
   {
     return;
   }
-  std::vector<size_t> attributeVector;
+  std::vector<std::size_t> attributeVector;
   for (int i = 0; i < attributes.size(); ++i)
   {
     attributeVector.push_back(attributes[i]);
@@ -542,7 +542,7 @@ void MainWindow::combinationPlot()
 
 void MainWindow::duplicateAttribute()
 {
-  std::vector<size_t> attributes;
+  std::vector<std::size_t> attributes;
   attributes.push_back(selectedAttributes().first());
   m_graph->duplAttributes(attributes);
   updateAttributes();
@@ -682,11 +682,11 @@ void MainWindow::updateArcDiagramMarks()
   else if (traceMode())
   {
     QColor color;
-    std::set<size_t> indices;
-    size_t index;
+    std::set<std::size_t> indices;
+    std::size_t index;
 
     m_timeSeries->getIdcsClstMarked(indices, color);
-    for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
+    for (std::set<std::size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
     {
       m_arcDiagram->markLeaf(*i, color);
     }
@@ -695,7 +695,7 @@ void MainWindow::updateArcDiagramMarks()
     if (index != NON_EXISTING)
     {
       m_arcDiagram->markLeaf(index, color);
-      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
+      for (std::set<std::size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
       {
         m_arcDiagram->markBundle(*i);
       }
@@ -705,7 +705,7 @@ void MainWindow::updateArcDiagramMarks()
     if (index != NON_EXISTING)
     {
       m_arcDiagram->markLeaf(index, color);
-      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
+      for (std::set<std::size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
       {
         m_arcDiagram->markBundle(*i);
       }
@@ -715,7 +715,7 @@ void MainWindow::updateArcDiagramMarks()
     if (index != NON_EXISTING)
     {
       m_arcDiagram->markLeaf(index, color);
-      for (std::set<size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
+      for (std::set<std::size_t>::iterator i = indices.begin(); i != indices.end(); ++i)
       {
         m_arcDiagram->markBundle(*i);
       }

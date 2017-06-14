@@ -29,8 +29,8 @@ namespace lts
 {
 namespace detail
 {
-  typedef size_t state_type;
-  typedef size_t label_type;
+  typedef std::size_t state_type;
+  typedef std::size_t label_type;
   typedef std::set<state_type> set_of_states;
   typedef std::multimap <detail::state_type,detail::set_of_states> anti_chain_type;
   typedef std::set < label_type > action_label_set;
@@ -208,7 +208,7 @@ bool destructive_refinement_checker(
                         const bool weak_reduction, 
                         COUNTER_EXAMPLE_CONSTRUCTOR generate_counter_example = detail::dummy_counter_example_constructor())
 {
-  size_t init_l2 = l2.initial_state() + l1.num_states();
+  std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1,l2);
   l2.clear(); // No use for l2 anymore.
   // For weak-failures and failures-divergence, the existence of tau loops make a difference.

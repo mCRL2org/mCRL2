@@ -28,13 +28,13 @@ class Bundle
   public:
     // -- constructors and destructors ------------------------------
     Bundle();
-    Bundle(const size_t& idx);
+    Bundle(const std::size_t& idx);
     Bundle(const Bundle& bdl);
     virtual ~Bundle();
 
 
     // -- set functions ---------------------------------------------
-    void setIndex(const size_t& idx) { index = idx; }
+    void setIndex(const std::size_t& idx) { index = idx; }
     void setParent(Bundle* p) { parent = p; }
     void addChild(Bundle* c) { children.push_back(c); }
     void setInCluster(Cluster* in) { inCluster = in; }
@@ -45,14 +45,14 @@ class Bundle
 
 
     // -- get functions ---------------------------------------------
-    size_t getIndex() { return index; }
+    std::size_t getIndex() { return index; }
     Bundle* getParent() { return parent; }
-    size_t getSizeChildren() { return children.size(); }
-    Bundle* getChild(const size_t& idx);
+    std::size_t getSizeChildren() { return children.size(); }
+    Bundle* getChild(const std::size_t& idx);
     Cluster* getInCluster() { return inCluster; }
     Cluster* getOutCluster() { return outCluster; }
-    size_t getSizeEdges() { return edges.size(); }
-    Edge* getEdge(const size_t& idx);
+    std::size_t getSizeEdges() { return edges.size(); }
+    Edge* getEdge(const std::size_t& idx);
     void getLabels(std::vector< std::string > &lbls);
     void getLabels(
       std::vector< std::string > &lbls,
@@ -70,7 +70,7 @@ class Bundle
 
   protected:
     // -- data members ----------------------------------------------
-    size_t index;
+    std::size_t index;
     Bundle* parent;
     std::vector< Bundle* > children; // association
     Cluster* inCluster;         // association

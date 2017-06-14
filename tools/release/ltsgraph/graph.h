@@ -36,38 +36,38 @@ namespace Graph
 class Edge
 {
   protected:
-    size_t m_from;      ///< The originating node.
-    size_t m_to;        ///< The node pointed at.
+    std::size_t m_from;      ///< The originating node.
+    std::size_t m_to;        ///< The node pointed at.
 
   public:
     /// \brief Default constructor
     Edge()=default;
 
     /// \brief Constructor
-    Edge(const size_t from, const size_t to)
+    Edge(const std::size_t from, const std::size_t to)
       : m_from(from), m_to(to)
     {}
 
     /// \brief Obtain the value of from.
-    size_t from() const
+    std::size_t from() const
     {
       return m_from;
     }
 
     /// \brief Obtain a reference to the value of from.
-    size_t& from()
+    std::size_t& from()
     {
       return m_from;
     }
 
     /// \brief Obtain the value of to.
-    size_t to() const
+    std::size_t to() const
     {
       return m_to;
     }
 
     /// \brief Obtain a reference to the value of to.
-    size_t& to()
+    std::size_t& to()
     {
       return m_to;
     }
@@ -203,13 +203,13 @@ class NodeWithColor : public Node
     }
 
     /// \brief Get the color.
-    const GLfloat& color(size_t i) const
+    const GLfloat& color(std::size_t i) const
     {
       return m_color[i];
     }
 
     /// \brief Get a reference to the color.
-    GLfloat& color(size_t i)
+    GLfloat& color(std::size_t i)
     {
       return m_color[i];
     }
@@ -256,14 +256,14 @@ struct LabelString
 class LabelNode : public NodeWithColor
 {
   protected:
-    size_t m_labelindex;      ///< The index of the label (string).
+    std::size_t m_labelindex;      ///< The index of the label (string).
 
   public:
     /// \default constructor
     LabelNode() = default;
 
     /// \brief Constructor
-    LabelNode(const QVector3D& p, const size_t labelindex)
+    LabelNode(const QVector3D& p, const std::size_t labelindex)
       : NodeWithColor(p), m_labelindex(labelindex)
     {}
 
@@ -275,19 +275,19 @@ class LabelNode : public NodeWithColor
               const GLfloat& color0,
               const GLfloat& color1,
               const GLfloat& color2,
-              const size_t labelindex)
+              const std::size_t labelindex)
       : NodeWithColor(pos,anchored,locked,selected,color0,color1,color2), m_labelindex(labelindex)
     {
     }
 
     /// \brief Get the value of labelindex.
-    size_t labelindex() const
+    std::size_t labelindex() const
     {
       return m_labelindex;
     }
 
     /// \brief Get a reference to the value of labelindex.
-    size_t& labelindex()
+    std::size_t& labelindex()
     {
       return m_labelindex;
     }
@@ -397,9 +397,9 @@ class Graph
     // If there is only one state in the probabilistic state, then the index of this new state
     // is returned and no new transition is made.
     template <class ltsclass>
-    size_t add_probabilistic_state(const typename ltsclass::probabilistic_state_t& probabilistic_state,
+    std::size_t add_probabilistic_state(const typename ltsclass::probabilistic_state_t& probabilistic_state,
                                    const QVector3D& min, const QVector3D& max);
-    size_t m_initialState;                          ///< Index of the initial state.
+    std::size_t m_initialState;                          ///< Index of the initial state.
   protected:
 
   public:
@@ -458,13 +458,13 @@ class Graph
      *        Active nodes add their related nodes to the current selection.
      * @param index The index of the node.
      */
-    void toggleActive(size_t index);
+    void toggleActive(std::size_t index);
     /**
      * @brief Returns whether a given node should be toggled active or inactive.
      *        A node that leaves unconnected components or the selection empty should not be toggled inactive.
      * @param index The index of the node.
      */
-    bool isToggleable(size_t index);
+    bool isToggleable(std::size_t index);
 
     void setStable(bool stable); ///< @brief Sets whether this graph is stable. (guarded)
 
@@ -477,36 +477,36 @@ class Graph
      *        If the index is not valid, an empty string is returned.
      * @param labelindex The index of the label.
      */
-    const QString& transitionLabelstring(size_t labelindex) const;
+    const QString& transitionLabelstring(std::size_t labelindex) const;
 
     /**
      * @brief Returns the string representation of the state label with index @e labelindex.
      *        If the index is not valid, an empty string is returned.
      * @param labelindex The index of the label.
      */
-    const QString& stateLabelstring(size_t labelindex) const;
+    const QString& stateLabelstring(std::size_t labelindex) const;
 
 
     // Getters and setters
-    Edge edge(size_t index) const;
-    NodeNode& node(size_t index);
-    Node& handle(size_t edge);
-    LabelNode& transitionLabel(size_t edge);
-    LabelNode& stateLabel(size_t index);
-    bool isTau(size_t labelindex) const;
-    bool isBridge(size_t index) const; ///< Returns whether a given node forms a bridge in the selection
+    Edge edge(std::size_t index) const;
+    NodeNode& node(std::size_t index);
+    Node& handle(std::size_t edge);
+    LabelNode& transitionLabel(std::size_t edge);
+    LabelNode& stateLabel(std::size_t index);
+    bool isTau(std::size_t labelindex) const;
+    bool isBridge(std::size_t index) const; ///< Returns whether a given node forms a bridge in the selection
 
-    size_t initialState() const;
-    size_t edgeCount() const;
-    size_t nodeCount() const;
-    size_t transitionLabelCount() const;
-    size_t stateLabelCount() const;
+    std::size_t initialState() const;
+    std::size_t edgeCount() const;
+    std::size_t nodeCount() const;
+    std::size_t transitionLabelCount() const;
+    std::size_t stateLabelCount() const;
 
     bool hasSelection() const;                ///< Returns whether a portion of the graph is selected
-    size_t selectionEdge(size_t index) const; ///< Returns the edge index for a certain edge in the selection
-    size_t selectionNode(size_t index) const; ///< Returns the node index for a certain node in the selection
-    size_t selectionEdgeCount() const;        ///< Returns the number of edges in the selection
-    size_t selectionNodeCount() const;        ///< Returns the number of nodes in the selection
+    std::size_t selectionEdge(std::size_t index) const; ///< Returns the edge index for a certain edge in the selection
+    std::size_t selectionNode(std::size_t index) const; ///< Returns the node index for a certain node in the selection
+    std::size_t selectionEdgeCount() const;        ///< Returns the number of edges in the selection
+    std::size_t selectionNodeCount() const;        ///< Returns the number of nodes in the selection
 
     const bool& stable() const ///< @brief Gets whether this graph is stable.
     {

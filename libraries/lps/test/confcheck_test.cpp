@@ -24,9 +24,9 @@ using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
 //static bool check_for_ctau(lps::specification const& s) .
-static size_t count_ctau(specification const& s)
+static std::size_t count_ctau(specification const& s)
 {
-  size_t result = 0;
+  std::size_t result = 0;
   auto const& v_summands = s.process().action_summands();
 
   for (const auto & v_summand : v_summands)
@@ -45,7 +45,7 @@ static size_t count_ctau(specification const& s)
 }
 
 static
-void run_confluence_test_case(const std::string& s, const size_t ctau_count)
+void run_confluence_test_case(const std::string& s, const std::size_t ctau_count)
 {
   using namespace mcrl2::lps;
 

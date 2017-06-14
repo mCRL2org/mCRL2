@@ -20,7 +20,7 @@ using namespace mcrl2::lts;
 using namespace std;
 
 
-static void read_newline(istream& is, const size_t line_no)
+static void read_newline(istream& is, const std::size_t line_no)
 {
   char ch;
   is.get(ch);
@@ -51,7 +51,7 @@ static void read_newline(istream& is, const size_t line_no)
 }
 
 // reads a number, puts it in s, and reads one extra character, which must be either a space or a closing bracket.
-static void read_natural_number_to_string(istream& is, string& s, const size_t line_no)
+static void read_natural_number_to_string(istream& is, string& s, const std::size_t line_no)
 {
   assert(s.empty());
   char ch;
@@ -67,12 +67,12 @@ static void read_natural_number_to_string(istream& is, string& s, const size_t l
   }
 }
 
-static size_t find_label_index(const string& s, unordered_map < string, size_t >& labs, probabilistic_lts_aut_t& l)
+static std::size_t find_label_index(const string& s, unordered_map < string, std::size_t >& labs, probabilistic_lts_aut_t& l)
 {
-  size_t label;
+  std::size_t label;
 
   assert(labs.at(action_label_string::tau_action())==0);
-  const unordered_map < string, size_t >::const_iterator i=labs.find(s);
+  const unordered_map < string, std::size_t >::const_iterator i=labs.find(s);
   if (i==labs.end())
   {
     label=l.add_action(action_label_string(s));
@@ -85,7 +85,7 @@ static size_t find_label_index(const string& s, unordered_map < string, size_t >
   return label;
 }
 
-static void check_state(size_t state, size_t number_of_states, size_t line_no)
+static void check_state(std::size_t state, std::size_t number_of_states, std::size_t line_no)
 {
   if (state>=number_of_states)
   {
@@ -95,7 +95,7 @@ static void check_state(size_t state, size_t number_of_states, size_t line_no)
 } 
 
 static void check_states(detail::lts_aut_base::probabilistic_state& probability_state,
-                         size_t number_of_states, size_t line_no)
+                         std::size_t number_of_states, std::size_t line_no)
 {
   for(detail::lts_aut_base::state_probability_pair& p: probability_state)
   {
@@ -110,11 +110,11 @@ static void check_states(detail::lts_aut_base::probabilistic_state& probability_
 static void read_probabilistic_state(
   istream& is,
   mcrl2::lts::probabilistic_lts_aut_t::probabilistic_state_t& result,
-  const size_t line_no)
+  const std::size_t line_no)
 {
   assert(result.size()==0);
 
-  size_t state;
+  std::size_t state;
 
   is >> skipws >> state;
 
@@ -180,8 +180,8 @@ static void read_probabilistic_state(
 static void read_aut_header(
   istream& is,
   detail::lts_aut_base::probabilistic_state& initial_state,
-  size_t& num_transitions,
-  size_t& num_states)
+  std::size_t& num_transitions,
+  std::size_t& num_states)
 {
   string s;
   is.width(3);
@@ -230,10 +230,10 @@ static void read_aut_header(
 
 static bool read_aut_transition(
   istream& is,
-  size_t& from,
+  std::size_t& from,
   string& label,
   detail::lts_aut_base::probabilistic_state& target_probabilistic_state,
-  const size_t line_no)
+  const std::size_t line_no)
 {
   char ch;
   is >> skipws >> ch;
@@ -301,8 +301,8 @@ static bool read_aut_transition(
 
 static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
 {
-  size_t line_no = 1;
-  size_t ntrans=0, nstate=0;
+  std::size_t line_no = 1;
+  std::size_t ntrans=0, nstate=0;
 
   detail::lts_aut_base::probabilistic_state initial_probabilistic_state;
   read_aut_header(is,initial_probabilistic_state,ntrans,nstate);
@@ -311,8 +311,8 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   // Because most states consist of one probabilistic state, the unordered maps are duplicated into
   // indices_of_single_probabilistic_states and indices_of_multiple_probabilistic_states.
   // The map indices_of_single_probabilistic_states requires far less memory.
-  unordered_map < size_t, size_t> indices_of_single_probabilistic_states;
-  unordered_map < detail::lts_aut_base::probabilistic_state, size_t> indices_of_multiple_probabilistic_states;
+  unordered_map < std::size_t, std::size_t> indices_of_single_probabilistic_states;
+  unordered_map < detail::lts_aut_base::probabilistic_state, std::size_t> indices_of_multiple_probabilistic_states;
   
   check_states(initial_probabilistic_state, nstate, line_no);
 
@@ -324,14 +324,14 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
   l.set_num_states(nstate,false);
   l.clear_transitions(ntrans); // Reserve enough space for the transitions.
   
-  unordered_map < string, size_t > action_labels;
+  unordered_map < string, std::size_t > action_labels;
   action_labels[action_label_string::tau_action()]=0; // A tau action is always stored at position 0.
   l.set_initial_probabilistic_state(initial_probabilistic_state); 
 
   detail::lts_aut_base::probabilistic_state probabilistic_target_state;
   while (!is.eof())
   {
-    size_t from;
+    std::size_t from;
     string s;
     probabilistic_target_state.clear();
 
@@ -345,25 +345,25 @@ static void read_from_aut(probabilistic_lts_aut_t& l, istream& is)
     check_state(from, nstate, line_no);
     check_states(probabilistic_target_state, nstate, line_no);
     // Check whether probabilistic state exists. 
-    size_t fresh_index = indices_of_single_probabilistic_states.size()+indices_of_multiple_probabilistic_states.size();
-    size_t index;
+    std::size_t fresh_index = indices_of_single_probabilistic_states.size()+indices_of_multiple_probabilistic_states.size();
+    std::size_t index;
     if (probabilistic_target_state.size()==1)
     {
       index = indices_of_single_probabilistic_states.insert(
-                       std::pair< size_t, size_t>
+                       std::pair< std::size_t, std::size_t>
                        (probabilistic_target_state.begin()->state(),fresh_index)).first->second;
     }
     else
     {
       assert(probabilistic_target_state.size()>1);
       index = indices_of_multiple_probabilistic_states.insert(
-                       std::pair< detail::lts_aut_base::probabilistic_state, size_t>
+                       std::pair< detail::lts_aut_base::probabilistic_state, std::size_t>
                        (probabilistic_target_state,fresh_index)).first->second;
     }
     
     if (index==fresh_index) 
     {
-      size_t probabilistic_state_index=l.add_and_reset_probabilistic_state(probabilistic_target_state);
+      std::size_t probabilistic_state_index=l.add_and_reset_probabilistic_state(probabilistic_target_state);
       assert(probabilistic_state_index==index);
       (void)probabilistic_state_index; // Avoid unused variable warning.
     }

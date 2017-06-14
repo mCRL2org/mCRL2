@@ -43,7 +43,7 @@ using mcrl2::data::tools::rewriter_tool;
 static
 std::list<std::string> split_actions(const std::string& s)
 {
-  size_t pcount = 0;
+  std::size_t pcount = 0;
   std::string a;
   std::list<std::string> result;
   for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)

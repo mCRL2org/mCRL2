@@ -61,10 +61,10 @@ class Information
 
     QString m_initial;        ///< The initial node index.
     QString m_initialstring;  ///< The initial node label.
-    size_t m_nodes;              ///< The total number of nodes.
-    size_t m_edges;              ///< The total number of edges.
-    size_t m_slabels;            ///< The total number of state labels.
-    size_t m_tlabels;            ///< The total number of transition labels.
+    std::size_t m_nodes;              ///< The total number of nodes.
+    std::size_t m_edges;              ///< The total number of edges.
+    std::size_t m_slabels;            ///< The total number of state labels.
+    std::size_t m_tlabels;            ///< The total number of transition labels.
 };
 
 class InformationUi : public QDockWidget

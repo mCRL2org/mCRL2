@@ -49,9 +49,9 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
 
     typedef rewriter_tool<input_output_tool> super;
 
-    std::set< size_t > m_set_index; ///< Options of the algorithm
+    std::set< std::size_t > m_set_index; ///< Options of the algorithm
     std::string m_unfoldsort;
-    size_t m_repeat_unfold;
+    std::size_t m_repeat_unfold;
     bool m_add_distribution_laws;
 
     void add_options(interface_description& desc)
@@ -83,7 +83,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
         std::string indices_str(parser.option_argument_as<std::string>("index"));
         std::stringstream indices(indices_str);
 
-        size_t index;
+        std::size_t index;
         char comma;
         while (indices.good())
         {
@@ -117,7 +117,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
       m_repeat_unfold = 1;
       if (0 < parser.options.count("repeat"))
       {
-        m_repeat_unfold = parser.option_argument_as< size_t  >("repeat");
+        m_repeat_unfold = parser.option_argument_as< std::size_t  >("repeat");
       }
 
       m_add_distribution_laws = false;
@@ -158,7 +158,7 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
       /* lpsparunfold-cache is used to avoid the introduction of equations for already unfolded sorts */
       std::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
 
-      for (size_t i =0; i != m_repeat_unfold; ++i)
+      for (std::size_t i =0; i != m_repeat_unfold; ++i)
       {
         mCRL2log(verbose) << "Pass: " << i+1 << " of " << m_repeat_unfold << std::endl;
 
@@ -196,12 +196,12 @@ class lpsparunfold_tool: public  rewriter_tool<input_output_tool>
         }
 
         //Unfold process parameters for calculated indices
-        std::set< size_t > h_set_index = m_set_index;
+        std::set< std::size_t > h_set_index = m_set_index;
 
         while (!h_set_index.empty())
         {
           lpsparunfold lpsparunfold(spec, &unfold_cache, m_add_distribution_laws);
-          size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
+          std::size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
           spec = lpsparunfold.algorithm(index);
           h_set_index.erase(index);
         }

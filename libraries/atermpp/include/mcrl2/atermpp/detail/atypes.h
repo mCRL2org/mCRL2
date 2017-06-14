@@ -35,11 +35,11 @@ typedef _W64 int ssize_t;
 namespace atermpp
 {
 
-/* The largest size_t is used as an indicator that an element does not exist.
+/* The largest std::size_t is used as an indicator that an element does not exist.
  *    This is used as a replacement of a negative number as an indicator of non
  *       existence */
 
-static const size_t npos=(size_t)(-1);
+static const std::size_t npos=(std::size_t)(-1);
 
 } // namespace atermpp
 

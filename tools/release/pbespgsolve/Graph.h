@@ -21,8 +21,8 @@
 #include <vector>
 
 // Note: these should be unsigned types; some algorithms depend on it!
-typedef size_t verti;    //!< type used to number vertices
-typedef size_t edgei;    //!< type used to number edges
+typedef std::size_t verti;    //!< type used to number vertices
+typedef std::size_t edgei;    //!< type used to number edges
 
 #define NO_VERTEX ((verti)-1)
 

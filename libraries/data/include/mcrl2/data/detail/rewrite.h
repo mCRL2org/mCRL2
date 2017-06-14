@@ -191,12 +191,12 @@ void CheckRewriteRule(const data_equation& data_eqn);
 bool isValidRewriteRule(const data_equation& data_eqn);
 
 
-inline size_t getArity(const data::function_symbol& op)
+inline std::size_t getArity(const data::function_symbol& op)
 {
   // This function calculates the cumulated length of all
   // potential function arguments.
   sort_expression sort = op.sort();
-  size_t arity = 0;
+  std::size_t arity = 0;
 
   while (is_function_sort(sort))
   {

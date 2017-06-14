@@ -140,19 +140,19 @@ bool is_numeric_string(const std::string& s);
 inline void number2string(std::size_t number, std::string& buffer, std::size_t start_position)
 {
   // First calculate the number of digital digits of number;
-  size_t number_of_digits=0;
+  std::size_t number_of_digits=0;
   if (number==0)
   {
     number_of_digits=1;
   }
   else
   {
-    for(size_t copy=number ; copy!=0; ++number_of_digits, copy=copy/10)
+    for(std::size_t copy=number ; copy!=0; ++number_of_digits, copy=copy/10)
     {}
   }
 
   // Put the number in the buffer at the right position.
-  size_t position=start_position+number_of_digits;
+  std::size_t position=start_position+number_of_digits;
   buffer.resize(position);
 
   while (position>start_position)

@@ -76,7 +76,7 @@ class action_label_string: public std::string
         // Skip over parameters of a, if any
         if (c != end() && *c == '(')
         {
-          size_t nd = 0;
+          std::size_t nd = 0;
           do 
           {
             switch (*c++)

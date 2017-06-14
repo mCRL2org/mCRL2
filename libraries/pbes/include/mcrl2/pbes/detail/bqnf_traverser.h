@@ -127,7 +127,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         break;
       case BOUNDED_EXISTS:
       {
-        size_t count = 0;
+        std::size_t count = 0;
         for(const pbes_expression& conjunct: split_conjuncts(x))
         {
           if (!is_simple_expression(conjunct))
@@ -145,7 +145,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
       case DISJUNCTIVE:
       case EXISTENTIAL:
       {
-        size_t count = 0;
+        std::size_t count = 0;
         for(const pbes_expression& conjunct : split_conjuncts(x))
         {
           if (!is_simple_expression(conjunct))
@@ -189,7 +189,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
       case CONJUNCTIVE:
       case UNIVERSAL:
       {
-        size_t count = 0;
+        std::size_t count = 0;
         for(const pbes_expression& disjunct: split_disjuncts(x))
         {
           if (!is_simple_expression(disjunct))

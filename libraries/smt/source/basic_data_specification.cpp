@@ -470,7 +470,7 @@ void basic_data_specification::find_rewrite_rules(const data::data_specification
         {
           data::application constructor_application(argument);
           data::function_symbol constructor(constructor_application.head());
-          size_t index = 0;
+          std::size_t index = 0;
           bool found = false;
           std::set<data::variable> arguments;
           for (data::application::const_iterator j = constructor_application.begin(); j != constructor_application.end(); j++)
@@ -522,7 +522,7 @@ void basic_data_specification::add_constructed_sort(const data::data_specificati
     if (data::is_function_sort(i->sort()))
     {
       data::function_sort constructor_sort(i->sort());
-      size_t index = 0;
+      std::size_t index = 0;
       for (data::sort_expression_list::const_iterator j = constructor_sort.domain().begin(); j != constructor_sort.domain().end(); j++)
       {
         constructor.fields.push_back(constructed_sort_definition::field_t());
@@ -562,7 +562,7 @@ static bool is_constructed_sort(const data::data_specification& data_specificati
   {
     for (data::function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); j++)
     {
-      size_t index = 1;
+      std::size_t index = 1;
 
       data::variable_vector variables_i;
       data::data_expression term_i;
@@ -608,7 +608,7 @@ static bool is_constructed_sort(const data::data_specification& data_specificati
         }
 
         assert(variables_i.size() == variables_j.size());
-        for (size_t k = 0; k < variables_i.size(); k++)
+        for (std::size_t k = 0; k < variables_i.size(); k++)
         {
           bool found = false;
           if (conjuncts.count(data::equal_to(variables_i[k], variables_j[k])))

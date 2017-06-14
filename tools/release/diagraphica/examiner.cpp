@@ -55,7 +55,7 @@ Examiner::~Examiner()
 
   // composition
   {
-    for (size_t i = 0; i < framesHist.size(); ++i)
+    for (std::size_t i = 0; i < framesHist.size(); ++i)
     {
       delete framesHist[i];
     }
@@ -64,7 +64,7 @@ Examiner::~Examiner()
 
   // association
   {
-    for (size_t i = 0; i < attrsHist.size(); ++i)
+    for (std::size_t i = 0; i < attrsHist.size(); ++i)
     {
       attrsHist[i].clear();
     }
@@ -76,9 +76,9 @@ Examiner::~Examiner()
 // -- get functions -------------------------------------------------
 
 
-size_t Examiner::selectedClusterIndex()
+std::size_t Examiner::selectedClusterIndex()
 {
-  size_t result = NON_EXISTING;
+  std::size_t result = NON_EXISTING;
   if (focusFrameIdx < framesHist.size())
   {
     result = framesHist[focusFrameIdx]->getNode(0)->getCluster()->getIndex();
@@ -365,7 +365,7 @@ void Examiner::calcPosFramesHist()
     posFramesHist.clear();
     Position2D pos;
     pos.y = -0.5*worldSize().height() + 0.5*itvHist*pix;
-    for (size_t i = 0; i < framesHist.size(); ++i)
+    for (std::size_t i = 0; i < framesHist.size(); ++i)
     {
       pos.x = -0.5*worldSize().width() + bdr*pix + 0.5*itvHist*pix + i*itvHist*pix + offset*pix;
       posFramesHist.push_back(pos);
@@ -425,7 +425,7 @@ void Examiner::handleHits(const vector< int > &ids)
       }
       else if (ids[0] == ID_FRAME_HIST)
       {
-        if (focusFrameIdx == static_cast <size_t>(ids[1]))
+        if (focusFrameIdx == static_cast <std::size_t>(ids[1]))
         {
           focusFrameIdx = -1;
           clrFrame();
@@ -443,7 +443,7 @@ void Examiner::handleHits(const vector< int > &ids)
         {
           dataChanged = true;
 
-          for (size_t i = 0; i < framesHist.size(); ++i)
+          for (std::size_t i = 0; i < framesHist.size(); ++i)
           {
             delete framesHist[i];
           }
@@ -706,7 +706,7 @@ void Examiner::drawFrame(const bool& inSelectMode)
     */
     Attribute* attr;
     Node* node;
-    for (size_t i = 0; i < attributes.size(); ++i)
+    for (std::size_t i = 0; i < attributes.size(); ++i)
     {
       attr = attributes[i];
       node = frame->getNode(0);
@@ -747,7 +747,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
   {
     glPushName(ID_FRAME_HIST);
     //for ( int i = 0; i < framesHist.size(); ++i )
-    for (size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
+    for (std::size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
     {
       glPushMatrix();
       glTranslatef(posFramesHist[i].x, posFramesHist[i].y, 0.0);
@@ -769,7 +769,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
     vector< double > valsFrame;
 
     //for ( int i = 0; i < framesHist.size(); ++i )
-    for (size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
+    for (std::size_t i = vsblHistIdxLft; i <= vsblHistIdxRgt; ++i)
     {
       valsFrame.clear();
       /*
@@ -781,7 +781,7 @@ void Examiner::drawFramesHist(const bool& inSelectMode)
       */
       Attribute* attr;
       Node* node;
-      for (size_t j = 0; j < attrsHist[i].size(); ++j)
+      for (std::size_t j = 0; j < attrsHist[i].size(); ++j)
       {
         attr = attrsHist[i][j];
         node = framesHist[i]->getNode(0);

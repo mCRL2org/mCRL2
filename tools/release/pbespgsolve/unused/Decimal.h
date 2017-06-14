@@ -31,8 +31,8 @@ public:
     Decimal &operator=(const Decimal &d) { s = d.s; return *this; }
     const std::string &str() const { return s; }
     const char *c_str() const { return s.c_str(); }
-    size_t size() const { return s.size(); }
-    char operator[](size_t i) const { return s[i]; }
+    std::size_t size() const { return s.size(); }
+    char operator[](std::size_t i) const { return s[i]; }
 };
 
 Decimal operator+(const Decimal &s, const Decimal &t);

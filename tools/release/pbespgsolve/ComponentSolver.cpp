@@ -42,7 +42,7 @@ ParityGame::Strategy ComponentSolver::solve()
     return result;
 }
 
-int ComponentSolver::operator()(const verti *vertices, size_t num_vertices)
+int ComponentSolver::operator()(const verti *vertices, std::size_t num_vertices)
 {
     if (aborted()) return -1;
 
@@ -51,7 +51,7 @@ int ComponentSolver::operator()(const verti *vertices, size_t num_vertices)
     // Filter out solved vertices:
     std::vector<verti> unsolved;
     unsolved.reserve(num_vertices);
-    for (size_t n = 0; n < num_vertices; ++n)
+    for (std::size_t n = 0; n < num_vertices; ++n)
     {
         verti v = vertices[n];
         if (!winning_[0]->count(v) && !winning_[1]->count(v))
@@ -79,9 +79,9 @@ int ComponentSolver::operator()(const verti *vertices, size_t num_vertices)
     {
         // Compress vertex priorities
         {
-            size_t old_d = subgame.d();
+            std::size_t old_d = subgame.d();
             subgame.compress_priorities();
-            size_t new_d = subgame.d();
+            std::size_t new_d = subgame.d();
             if (old_d != new_d)
             {
                 mCRL2log(mcrl2::log::verbose, "ComponentSolver") << "Priority compression removed "
@@ -118,7 +118,7 @@ int ComponentSolver::operator()(const verti *vertices, size_t num_vertices)
 
     // Extract winning sets from subgame:
     std::deque<verti> todo[2];
-    for (size_t n = 0; n < unsolved.size(); ++n)
+    for (std::size_t n = 0; n < unsolved.size(); ++n)
     {
         ParityGame::Player pl = subgame.winner(substrat, n);
         verti v = unsolved[n];

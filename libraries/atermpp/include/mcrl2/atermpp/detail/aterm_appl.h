@@ -36,9 +36,9 @@ class _aterm_appl:public _aterm
 };
 
 inline
-size_t TERM_SIZE_APPL(const size_t arity)
+std::size_t TERM_SIZE_APPL(const std::size_t arity)
 {
-  return (sizeof(_aterm)/sizeof(size_t))+arity;
+  return (sizeof(_aterm)/sizeof(std::size_t))+arity;
 }
 
 

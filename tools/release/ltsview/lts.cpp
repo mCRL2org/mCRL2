@@ -204,7 +204,7 @@ LTS::~LTS()
   if (previousLevel == NULL)
   {
     // This LTS is the top level LTS, so delete all its contents.
-    size_t i,r;
+    std::size_t i,r;
     vector< State* >::iterator li;
     for (li = states.begin(); li != states.end(); ++li)
     {
@@ -244,23 +244,23 @@ State_iterator LTS::getStateIterator()
   return State_iterator(this);
 }
 
-const std::string& LTS::getParameterName(size_t parindex) const
+const std::string& LTS::getParameterName(std::size_t parindex) const
 {
   return parameterNames[parindex];
 }
 
-size_t LTS::getStateParameterValue(State* state,size_t param) const
+std::size_t LTS::getStateParameterValue(State* state,std::size_t param) const
 {
   return stateLabels[state->getID()][param];
 }
 
-const std::string& LTS::getStateParameterValueStr(State* state, size_t param) const
+const std::string& LTS::getStateParameterValueStr(State* state, std::size_t param) const
 {
-  size_t value = getStateParameterValue(state, param);
+  std::size_t value = getStateParameterValue(state, param);
   return stateElementValues[param][value];
 }
 
-std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, size_t param) const
+std::set<std::string> LTS::getClusterParameterValues(Cluster* cluster, std::size_t param) const
 {
   std::set<std::string> result;
   for (int i = 0; i < cluster->getNumStates(); ++i)
@@ -290,14 +290,14 @@ bool LTS::readFromFile(const std::string& filename)
 
   stateElementValues.clear();
   stateElementValues.reserve(numParameters);
-  for (size_t i = 0; i < numParameters; ++i)
+  for (std::size_t i = 0; i < numParameters; ++i)
   {
     stateElementValues.emplace_back(mcrl2_lts.state_element_values(i));
   }
 
   parameterNames.clear();
   parameterNames.reserve(numParameters);
-  for (size_t i = 0; i < numParameters; ++i)
+  for (std::size_t i = 0; i < numParameters; ++i)
   {
     // in an .fsm file a parameter is a pair of strings.
     parameterNames.emplace_back(mcrl2_lts.process_parameter(i).first);
@@ -305,21 +305,21 @@ bool LTS::readFromFile(const std::string& filename)
 
   stateLabels.clear();
   stateLabels.reserve(numStateLabels);
-  for (size_t i = 0; i < numStateLabels; ++i)
+  for (std::size_t i = 0; i < numStateLabels; ++i)
   {
     stateLabels.emplace_back(mcrl2_lts.state_label(i));
   }
 
   actionLabels.clear();
   actionLabels.reserve(numActionLabels);
-  for (size_t i = 0; i < numActionLabels; ++i)
+  for (std::size_t i = 0; i < numActionLabels; ++i)
   {
     actionLabels.emplace_back(mcrl2_lts.action_label(i));
   }
 
   states.clear();
   states.reserve(mcrl2_lts.num_states());
-  for (size_t i = 0; i < mcrl2_lts.num_states(); ++i)
+  for (std::size_t i = 0; i < mcrl2_lts.num_states(); ++i)
   {
     states.emplace_back(new State(static_cast<int>(i)));
   }
@@ -350,7 +350,7 @@ int LTS::getNumActionLabels() const
   return static_cast<int>(numActionLabels);
 }
 
-size_t LTS::getNumParameters() const
+std::size_t LTS::getNumParameters() const
 {
   return numParameters;
 }
@@ -362,8 +362,8 @@ const std::string& LTS::getActionLabel(int labindex) const
 
 void LTS::addCluster(Cluster* cluster)
 {
-  size_t rank = cluster->getRank();
-  size_t pos = cluster->getPositionInRank();
+  std::size_t rank = cluster->getRank();
+  std::size_t pos = cluster->getPositionInRank();
 
   // Check to see if there is already a rank for this cluster
   if (clustersInRank.size() <= rank)
@@ -381,7 +381,7 @@ void LTS::addCluster(Cluster* cluster)
   for (int i = 0; i < cluster->getNumStates(); ++i)
   {
     State* state = cluster->getState(i);
-    size_t state_id = state->getID();
+    std::size_t state_id = state->getID();
     if (states.size() <= state_id)
     {
       states.resize(state_id + 1);
@@ -428,7 +428,7 @@ int LTS::getMaxRanks() const
 int LTS::getNumClusters() const
 {
   int result = 0;
-  for (size_t i = 0; i < clustersInRank.size(); ++i)
+  for (std::size_t i = 0; i < clustersInRank.size(); ++i)
   {
     result += static_cast<int>(clustersInRank[i].size());
   }
@@ -570,7 +570,7 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
       if (w->getCluster() == NULL && r == v->getRank()+1)
       {
         Cluster* d = new Cluster(r);
-        if ((size_t)(r) >= clustersInRank.size())
+        if ((std::size_t)(r) >= clustersInRank.size())
         {
           vector< Cluster* > cs;
           clustersInRank.push_back(cs);
@@ -611,7 +611,7 @@ void LTS::clusterTree(State* v,Cluster* c,bool cyclic)
     if (w->getCluster() == NULL && r == v->getRank()+1)
     {
       Cluster* d = new Cluster(r);
-      if ((size_t)(r) >= clustersInRank.size())
+      if ((std::size_t)(r) >= clustersInRank.size())
       {
         vector< Cluster* > cs;
         clustersInRank.push_back(cs);

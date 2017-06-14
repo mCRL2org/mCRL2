@@ -198,7 +198,7 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
         unsigned outdeg, EdgeDirection edge_dir)
 {
     assert(cluster_size > 1);
-    size_t clusters = V/cluster_size;
+    std::size_t clusters = V/cluster_size;
     if (clusters <= 1)
     {
         make_random(V, outdeg, edge_dir, true);
@@ -207,7 +207,7 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
 
     // Build `clusters` initial random graphs of cluster_size each:
     StaticGraph *subgraphs = new StaticGraph[clusters];
-    for (size_t i = 0; i < clusters; ++i)
+    for (std::size_t i = 0; i < clusters; ++i)
     {
         subgraphs[i].make_random( cluster_size + (i < V%cluster_size),
                                   outdeg, edge_dir, true );
@@ -218,27 +218,27 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
     {
         mCRL2log(mcrl2::log::verbose) << "Generating clustered random game level "
                                       << i << "..." << std::endl;
-        size_t next_clusters = (clusters + cluster_size - 1)/cluster_size;
+        std::size_t next_clusters = (clusters + cluster_size - 1)/cluster_size;
         StaticGraph *next_subgraphs = new StaticGraph[next_clusters];
         std::vector<verti> offset(clusters, 0);
-        for (size_t c = 0; c < next_clusters; ++c)
+        for (std::size_t c = 0; c < next_clusters; ++c)
         {
             /* Combine clusters [i:j) into one: */
-            size_t i = c*clusters/next_clusters,
+            std::size_t i = c*clusters/next_clusters,
                    j = (c + 1)*clusters/next_clusters;
             mCRL2log(mcrl2::log::debug) << "combining " << j-i << " subgraphs ("
                                         << i << " through " << j << " of "
                                         << clusters << ")" << std::endl;
 
             /* Calculate offsets to apply to vertex indices: */
-            for (size_t k = i + 1; k < j; ++k)
+            for (std::size_t k = i + 1; k < j; ++k)
             {
                 offset[k] = offset[k - 1] + subgraphs[k - 1].V();
             }
 
             /* Build edge list of combined subgraphs: */
             edge_list edges;
-            for (size_t k = i; k < j; ++k)
+            for (std::size_t k = i; k < j; ++k)
             {
                 edge_list subedges = subgraphs[k].get_edges();
                 for ( edge_list::const_iterator it = subedges.begin();
@@ -253,7 +253,7 @@ void StaticGraph::make_random_clustered( verti cluster_size, verti V,
             StaticGraph parent;
             parent.make_random(j - i, outdeg, edge_dir, true);
             edge_list paredges = parent.get_edges();
-            for (size_t e = 0; e < paredges.size(); ++e)
+            for (std::size_t e = 0; e < paredges.size(); ++e)
             {
                 verti v = paredges[e].first,
                       w = paredges[e].second;

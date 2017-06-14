@@ -26,7 +26,7 @@ struct MoveRecord
   {
     node->pos_mutable() = pos;
   }
-  virtual void grab(Graph::Graph& graph, size_t index) = 0;
+  virtual void grab(Graph::Graph& graph, std::size_t index) = 0;
   virtual void release(bool toggleLocked)
   {
     if (toggleLocked) {
@@ -41,7 +41,7 @@ struct MoveRecord
 };
 
 struct LabelMoveRecord : public MoveRecord {
-  void grab(Graph::Graph& graph, size_t index) override
+  void grab(Graph::Graph& graph, std::size_t index) override
   {
     node = &graph.transitionLabel(index);
     node->set_anchored(true);
@@ -49,7 +49,7 @@ struct LabelMoveRecord : public MoveRecord {
 };
 
 struct StateLabelMoveRecord : public MoveRecord {
-  void grab(Graph::Graph& graph, size_t index) override
+  void grab(Graph::Graph& graph, std::size_t index) override
   {
     node = &graph.stateLabel(index);
     node->set_anchored(true);
@@ -60,7 +60,7 @@ struct HandleMoveRecord : public MoveRecord
 {
   bool movingLabel;
   LabelMoveRecord label;
-  void grab(Graph::Graph& graph, size_t index) override
+  void grab(Graph::Graph& graph, std::size_t index) override
   {
     node = &graph.handle(index);
     node->set_anchored(true);
@@ -89,17 +89,17 @@ struct NodeMoveRecord : public MoveRecord
   StateLabelMoveRecord label;
   std::vector<HandleMoveRecord> edges;
   std::vector<Graph::Node*> endpoints;
-  void grab(Graph::Graph& graph, size_t index) override
+  void grab(Graph::Graph& graph, std::size_t index) override
   {
     node = &graph.node(index);
     node->set_anchored(true);
-    size_t nlabels = 0;
-    for (size_t i = 0; i < graph.edgeCount(); ++i)
+    std::size_t nlabels = 0;
+    for (std::size_t i = 0; i < graph.edgeCount(); ++i)
     {
       Graph::Edge e = graph.edge(i);
       if (e.from() != index)
       {
-        size_t temp = e.from();
+        std::size_t temp = e.from();
         e.from() = e.to();
         e.to() = temp;
       }
@@ -116,7 +116,7 @@ struct NodeMoveRecord : public MoveRecord
   void release(bool toggleLocked) override
   {
     MoveRecord::release(toggleLocked);
-    for (size_t i = 0; i < edges.size(); ++i)
+    for (std::size_t i = 0; i < edges.size(); ++i)
     {
       edges[i].release(false); // Do not toggle the edges around this node
     }
@@ -125,7 +125,7 @@ struct NodeMoveRecord : public MoveRecord
   void move(const QVector3D& pos) override
   {
     MoveRecord::move(pos);
-    for (size_t i = 0; i < edges.size(); ++i)
+    for (std::size_t i = 0; i < edges.size(); ++i)
     {
       edges[i].move((pos + endpoints[i]->pos()) / 2.0);
     }
@@ -490,7 +490,7 @@ void GLWidget::rebuild()
   update();
 }
 
-void GLWidget::setDepth(float depth, size_t animation)
+void GLWidget::setDepth(float depth, std::size_t animation)
 {
   makeCurrent();
   QVector3D size = m_scene->size();
@@ -506,7 +506,7 @@ QVector3D GLWidget::size3()
   return m_scene->size();
 }
 
-void GLWidget::resetViewpoint(size_t animation)
+void GLWidget::resetViewpoint(std::size_t animation)
 {
   makeCurrent();
   m_scene->setRotation(QQuaternion(1, 0, 0, 0), animation);

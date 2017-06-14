@@ -27,7 +27,7 @@ namespace lts {
 struct fsm_writer
 {
   std::ostream& out;
-  size_t number_of_initial_state;
+  std::size_t number_of_initial_state;
   const probabilistic_lts_fsm_t& fsm;
 
   fsm_writer(std::ostream& out_, const probabilistic_lts_fsm_t& fsm_)
@@ -37,7 +37,7 @@ struct fsm_writer
   }
 
   // This functions swaps 0 with the number number_of_initial_state of the initial state.
-  size_t swap_initial_state(const size_t i)
+  std::size_t swap_initial_state(const std::size_t i)
   {
     if (i==number_of_initial_state)
     {
@@ -100,7 +100,7 @@ struct fsm_writer
     {
       out << "[";
       bool first=true;
-      for(const lps::state_probability_pair< size_t, probabilistic_arbitrary_precision_fraction>& p: probabilistic_state)
+      for(const lps::state_probability_pair< std::size_t, probabilistic_arbitrary_precision_fraction>& p: probabilistic_state)
       {
         if (first)
         {

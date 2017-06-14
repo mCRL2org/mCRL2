@@ -85,12 +85,12 @@ class lps2lts_algorithm
     std::vector<bool> m_detected_action_summands;
 
     std::map<lps::state, lps::state> m_backpointers;
-    size_t m_traces_saved;
+    std::size_t m_traces_saved;
 
-    size_t m_num_states;
-    size_t m_num_transitions;
+    std::size_t m_num_states;
+    std::size_t m_num_transitions;
     next_state_generator::transition_t::state_probability_list m_initial_states;
-    size_t m_level;
+    std::size_t m_level;
 
     std::unordered_set<lps::state> non_divergent_states;  // This set is filled with states proven not to be divergent, 
                                                           // when lps2lts_algorithm is requested to search for divergencies.
@@ -145,7 +145,7 @@ class lps2lts_algorithm
     void save_actions(const lps::state& state, const next_state_generator::transition_t& transition);
     void save_deadlock(const lps::state& state);
     void save_error(const lps::state& state);
-    std::pair<size_t, bool> add_target_state(const lps::state& source_state, const lps::state& target_state);
+    std::pair<std::size_t, bool> add_target_state(const lps::state& source_state, const lps::state& target_state);
     bool add_transition(const lps::state& source_state, const next_state_generator::transition_t& transition);
     void get_transitions(const lps::state& state,
                          std::vector<lps2lts_algorithm::next_state_generator::transition_t>& transitions,
@@ -158,15 +158,15 @@ class lps2lts_algorithm
     void generate_lts_random(const next_state_generator::transition_t::state_probability_list& initial_states);
     void print_target_distribution_in_aut_format(
                const lps::next_state_generator::transition_t::state_probability_list& state_probability_list,
-               const size_t last_state_number,
+               const std::size_t last_state_number,
                const lps::state& source_state);
     void print_target_distribution_in_aut_format(
                 const lps::next_state_generator::transition_t::state_probability_list& state_probability_list,
                 const lps::state& source_state);
-    probabilistic_state<size_t, lps::probabilistic_data_expression> transform_initial_probabilistic_state_list
+    probabilistic_state<std::size_t, lps::probabilistic_data_expression> transform_initial_probabilistic_state_list
                  (const next_state_generator::transition_t::state_probability_list& initial_states);
-    probabilistic_state<size_t, lps::probabilistic_data_expression> create_a_probabilistic_state_from_target_distribution(
-               const size_t base_state_number,
+    probabilistic_state<std::size_t, lps::probabilistic_data_expression> create_a_probabilistic_state_from_target_distribution(
+               const std::size_t base_state_number,
                const next_state_generator::transition_t::state_probability_list& other_probabilities,
                const lps::state& source_state);
 

@@ -116,7 +116,7 @@ inline std::string pp(const state_label_lts& label)
     }
     first = false;
     s += "(";
-    for (size_t i=0; i<l.size(); ++i)
+    for (std::size_t i=0; i<l.size(); ++i)
     {
       s += data::pp(l[i]);
       if (i+1<l.size())
@@ -334,12 +334,12 @@ class lts_lts_base
     /** \brief Returns the i-th parameter of the state vectors stored in this LTS.
      * \return The state parameters stored in this LTS.
     */
-    const data::variable& process_parameter(size_t i) const
+    const data::variable& process_parameter(std::size_t i) const
     {
       assert(i<m_parameters.size());
       assert(m_has_valid_parameters);
       data::variable_list::const_iterator j=m_parameters.begin();
-      for(size_t c=0; c!=i; ++j, ++c)
+      for(std::size_t c=0; c!=i; ++j, ++c)
       {}
       return *j;
     }
@@ -407,7 +407,7 @@ class lts_lts_t : public lts< state_label_lts, action_label_lts, detail::lts_lts
 class probabilistic_lts_lts_t : 
          public probabilistic_lts< state_label_lts, 
                                    action_label_lts, 
-                                   probabilistic_state<size_t, lps::probabilistic_data_expression>, 
+                                   probabilistic_state<std::size_t, lps::probabilistic_data_expression>, 
                                    detail::lts_lts_base >
 {
   public:

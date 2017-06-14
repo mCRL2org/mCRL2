@@ -133,7 +133,7 @@ class structured_sort_constructor: public atermpp::aterm_appl
     /// \brief Constructor
     ///
     /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
-    template < typename Container, size_t S, size_t S0 >
+    template < typename Container, std::size_t S, std::size_t S0 >
     structured_sort_constructor(const char(&name)[S],
                                 const Container& arguments,
                                 const char(&recogniser)[S0],

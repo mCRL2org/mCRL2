@@ -39,7 +39,7 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
   {
     if (initial_probabilistic_state().size()==1)
     { 
-      const size_t initial_state=initial_probabilistic_state().begin()->state();
+      const std::size_t initial_state=initial_probabilistic_state().begin()->state();
       if (has_state_info())
       {
         os << state_label(initial_state).name();
@@ -55,7 +55,7 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
     }
 
     os << " [ peripheries=2 ];" << endl;
-    for (size_t i=0; i<num_states(); i++)
+    for (std::size_t i=0; i<num_states(); i++)
     {
       if (has_state_info())
       {
@@ -110,7 +110,7 @@ void lts_dot_t::save(std::ostream& os) const
   detail::translate_to_probabilistic_lts
             <state_label_dot,
              action_label_string,
-             probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+             probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
              detail::lts_dot_base>(*this,l);
   l.save(os);
 }

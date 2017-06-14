@@ -74,7 +74,7 @@ class group_information
 
   private:
     mcrl2::lps::stochastic_specification const& m_model;
-    std::vector< std::vector< size_t > > m_group_indices;
+    std::vector< std::vector< std::size_t > > m_group_indices;
 
   private:
 
@@ -126,12 +126,12 @@ class group_information
      * \brief The number of groups (summands in the LPS)
      * \return lps::specification(l).summands().size()
      **/
-    inline size_t number_of_groups() const
+    inline std::size_t number_of_groups() const
     {
       return m_group_indices.size();
     }
 
-    inline size_t number_of_parameters() const
+    inline std::size_t number_of_parameters() const
     {
       return m_model.process().process_parameters().size();
     }
@@ -141,7 +141,7 @@ class group_information
      * \param[in] index the selected summand
      * \returns reference to a vector of indices of parameters
      **/
-    inline std::vector< size_t > const& operator[](size_t index) const
+    inline std::vector< std::size_t > const& operator[](std::size_t index) const
     {
       return m_group_indices[index];
     }
@@ -155,9 +155,9 @@ void check_info(mcrl2::lps::stochastic_specification const& model)
   BOOST_CHECK(info.number_of_groups() == model.process().summand_count());
 
 #ifdef SHOW_INFO
-  for (size_t i = 0; i < info.number_of_groups(); ++i)
+  for (std::size_t i = 0; i < info.number_of_groups(); ++i)
   {
-    std::vector< size_t > const& group_info(info[i]);
+    std::vector< std::size_t > const& group_info(info[i]);
 
     std::cerr << "group " << i << " : {";
 
@@ -166,7 +166,7 @@ void check_info(mcrl2::lps::stochastic_specification const& model)
       std::cerr << group_info[0];
     }
 
-    for (std::vector< size_t >::const_iterator j = ++group_info.begin(); j < group_info.end(); ++j)
+    for (std::vector< std::size_t >::const_iterator j = ++group_info.begin(); j < group_info.end(); ++j)
     {
 
       std::cerr << "," << *j;
@@ -214,7 +214,7 @@ int test_main(int argc, char** argv)
       state current(stack.top());
       stack.pop();
 
-      for (size_t i = 0; i < model.process().summand_count(); ++i)
+      for (std::size_t i = 0; i < model.process().summand_count(); ++i)
       {
         next_state_generator::enumerator_queue_t enumeration_queue;
         for(next_state_generator::iterator j = explorer.begin(current, i, &enumeration_queue); j != explorer.end(); ++j)

@@ -33,7 +33,7 @@ class Cluster_iterator
     virtual bool is_end();
   protected:
     int rank;
-    size_t cluster;
+    std::size_t cluster;
     LTS* lts;
     bool is_valid();
     virtual void next();
@@ -90,12 +90,12 @@ class LTS
     int getNumTransitions() const;
 
     bool hasStateInfo() const { return haveStateInfo; }
-    size_t getNumParameters() const;
-    const std::vector<std::string>& getParameterDomain(size_t parindex) const { return stateElementValues[parindex]; }
-    const std::string& getParameterName(size_t parindex) const;
-    size_t getStateParameterValue(State* state,size_t param) const;
-    const std::string& getStateParameterValueStr(State* state, size_t param) const;
-    std::set<std::string> getClusterParameterValues(Cluster* c, size_t param) const;
+    std::size_t getNumParameters() const;
+    const std::vector<std::string>& getParameterDomain(std::size_t parindex) const { return stateElementValues[parindex]; }
+    const std::string& getParameterName(std::size_t parindex) const;
+    std::size_t getStateParameterValue(State* state,std::size_t param) const;
+    const std::string& getStateParameterValueStr(State* state, std::size_t param) const;
+    std::set<std::string> getClusterParameterValues(Cluster* c, std::size_t param) const;
 
     void positionClusters(bool fsmstyle);
     void positionStates(bool multiPass);
@@ -130,14 +130,14 @@ class LTS
     State* initialState;
 
     bool haveStateInfo;
-    size_t numActionLabels;
-    size_t numParameters;
-    size_t numStateLabels;
-    size_t numStates;
-    size_t numTransitions;
+    std::size_t numActionLabels;
+    std::size_t numParameters;
+    std::size_t numStateLabels;
+    std::size_t numStates;
+    std::size_t numTransitions;
     std::vector< std::vector< std::string > > stateElementValues;
     std::vector< std::string > parameterNames;
-    std::vector< std::vector< size_t > > stateLabels;
+    std::vector< std::vector< std::size_t > > stateLabels;
     std::vector< std::string > actionLabels;
 
     // Used for translating free variables from a trace to their

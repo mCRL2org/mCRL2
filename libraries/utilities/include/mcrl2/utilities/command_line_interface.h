@@ -292,7 +292,7 @@ class interface_description
       protected:
 
         /// Returns a textual description of the option
-        std::string textual_description(const size_t left_width, const size_t right_width) const;
+        std::string textual_description(const std::size_t left_width, const std::size_t right_width) const;
 
         /// Returns a man page description for the option
         std::string man_page_description() const;

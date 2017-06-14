@@ -246,7 +246,7 @@ static data::data_expression construct_rhs(data_specification *data_specificatio
       assert(data_specification->constructors(matching_target.sort()).count(constructor) != 0);
       rule rule = *i;
       rule.match_criteria.erase(matching_target);
-      for (size_t j = 0; j < parameters.size(); j++)
+      for (std::size_t j = 0; j < parameters.size(); j++)
       {
         data::function_symbol projection_function = data_specification->projection_function(constructor, j);
         data::data_expression lhs_expression = data::application(projection_function, matching_target);
@@ -285,7 +285,7 @@ static data::data_expression construct_rhs(data_specification *data_specificatio
         if (data::is_function_sort(j->sort()))
         {
           data::function_sort sort(j->sort());
-          size_t index = 0;
+          std::size_t index = 0;
           for (data::sort_expression_list::const_iterator k = sort.domain().begin(); k != sort.domain().end(); k++)
           {
             data::variable variable(generator("v"), *k);
@@ -441,7 +441,7 @@ recursive_function_definition::recursive_function_definition(data_specification 
     rule.rhs = i->rhs();
     rule.condition = i->condition();
     rule.variables.insert(i->variables().begin(), i->variables().end());
-    for (size_t j = 0; j < arguments.size(); j++)
+    for (std::size_t j = 0; j < arguments.size(); j++)
     {
       rule.match_criteria[m_parameters[j]] = arguments[j];
     }

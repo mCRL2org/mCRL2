@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_string.h"
 
-static inline int highest_bit(size_t x)
+static inline int highest_bit(std::size_t x)
 {
   int i = -1;
   while (x)
@@ -75,7 +75,7 @@ class shared_subset
           : atermpp::aterm_appl(value ? get_true() : get_false())
         {}
 
-        bdd_node(size_t bit, const bdd_node &true_node, const bdd_node &false_node)
+        bdd_node(std::size_t bit, const bdd_node &true_node, const bdd_node &false_node)
           : atermpp::aterm_appl(get_node(), atermpp::aterm_int(bit), true_node, false_node)
         {}
 
@@ -94,7 +94,7 @@ class shared_subset
           return function() == get_node();
         }
 
-        size_t bit()
+        std::size_t bit()
         {
           return atermpp::aterm_int((*this)[0]).value();
         }
@@ -112,7 +112,7 @@ class shared_subset
 
   protected:
     std::vector<T> *m_set;
-    size_t m_bits;
+    std::size_t m_bits;
     bdd_node m_bdd_root;
 
   public:
@@ -121,7 +121,7 @@ class shared_subset
     {
       protected:
         const shared_subset<T> *m_subset;
-        size_t m_index;
+        std::size_t m_index;
 
       public:
 
@@ -138,14 +138,14 @@ class shared_subset
           find_next_index();
         }
 
-        size_t index() const
+        std::size_t index() const
         {
           return m_index;
         }
 
         operator bool() const
         {
-          return m_index != (size_t)(-1);
+          return m_index != (std::size_t)(-1);
         }
 
       private:
@@ -184,7 +184,7 @@ class shared_subset
             while (node.is_node())
             {
               path_stack.push_back(node);
-              node = (m_index & ((size_t)1 << node.bit())) ? node.true_node() : node.false_node();
+              node = (m_index & ((std::size_t)1 << node.bit())) ? node.true_node() : node.false_node();
             }
 
             if (node.is_true())
@@ -195,7 +195,7 @@ class shared_subset
             while (true)
             {
               bdd_node start;
-              size_t bit;
+              std::size_t bit;
 
               if (path_stack.empty())
               {
@@ -212,12 +212,12 @@ class shared_subset
               {
                 assert(start.is_node());
                 bool found = false;
-                for (size_t i = start.bit() + 1; i < bit; i++)
+                for (std::size_t i = start.bit() + 1; i < bit; i++)
                 {
-                  if (!(m_index & ((size_t)1 << i)))
+                  if (!(m_index & ((std::size_t)1 << i)))
                   {
-                    m_index |= ((size_t)1 << i);
-                    m_index &= ~(((size_t)1 << i) - 1);
+                    m_index |= ((std::size_t)1 << i);
+                    m_index &= ~(((std::size_t)1 << i) - 1);
                     found = true;
                     break;
                   }
@@ -237,10 +237,10 @@ class shared_subset
               {
                 node = path_stack.back();
                 path_stack.pop_back();
-                if (!(m_index & ((size_t)1 << bit)) && !node.true_node().is_false())
+                if (!(m_index & ((std::size_t)1 << bit)) && !node.true_node().is_false())
                 {
-                  m_index |= ((size_t)1 << bit);
-                  m_index &= ~(((size_t)1 << bit) - 1);
+                  m_index |= ((std::size_t)1 << bit);
+                  m_index &= ~(((std::size_t)1 << bit) - 1);
                   break;
                 }
               }
@@ -261,13 +261,13 @@ class shared_subset
         m_bdd_root(true)
     {
       m_bits = 0;
-      while (m_set->size() > ((size_t)1 << m_bits))
+      while (m_set->size() > ((std::size_t)1 << m_bits))
       {
         m_bits++;
       }
 
 #ifndef NDEBUG
-      size_t index = 0;
+      std::size_t index = 0;
       for (iterator i = begin(); i != end(); i++)
       {
         assert(i.index() == index++);
@@ -283,23 +283,23 @@ class shared_subset
     {
       std::vector<bdd_node> trees;
       std::fill_n(std::back_inserter(trees), m_bits + 1, bdd_node());
-      size_t completed = 0;
+      std::size_t completed = 0;
       for (iterator i = set.begin(); i != set.end(); i++)
       {
         if (p(*i))
         {
-          size_t target = i.index();
+          std::size_t target = i.index();
 
           for (int bit = highest_bit(target); bit >= 0; bit--)
           {
-            if ((target & ((size_t)1 << bit)) && !(completed & ((size_t)1 << bit)))
+            if ((target & ((std::size_t)1 << bit)) && !(completed & ((std::size_t)1 << bit)))
             {
               bdd_node tree(false);
               for (int j = 0; j < bit; j++)
               {
                 bdd_node true_node;
                 bdd_node false_node;
-                if (completed & ((size_t)1 << j))
+                if (completed & ((std::size_t)1 << j))
                 {
                   true_node = tree;
                   false_node = trees[j];
@@ -319,14 +319,14 @@ class shared_subset
                 }
               }
               trees[bit] = tree;
-              completed |= ((size_t)1 << bit);
-              completed &= ~(((size_t)1 << bit) - 1);
+              completed |= ((std::size_t)1 << bit);
+              completed &= ~(((std::size_t)1 << bit) - 1);
             }
           }
 
           bdd_node tree(true);
-          size_t bit;
-          for (bit = 0; target & ((size_t)1 << bit); bit++)
+          std::size_t bit;
+          for (bit = 0; target & ((std::size_t)1 << bit); bit++)
           {
             if (tree != trees[bit])
             {
@@ -338,14 +338,14 @@ class shared_subset
         }
       }
 
-      if (completed != ((size_t)1 << m_bits))
+      if (completed != ((std::size_t)1 << m_bits))
       {
         bdd_node tree(false);
-        for (size_t j = 0; j < m_bits; j++)
+        for (std::size_t j = 0; j < m_bits; j++)
         {
           bdd_node true_node;
           bdd_node false_node;
-          if (completed & ((size_t)1 << j))
+          if (completed & ((std::size_t)1 << j))
           {
             true_node = tree;
             false_node = trees[j];

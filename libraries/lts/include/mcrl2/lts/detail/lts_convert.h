@@ -104,38 +104,38 @@ inline PROBABILISTIC_STATE2 lts_convert_probabilistic_state(const PROBABILISTIC_
 }
 
 template <>
-inline probabilistic_state<size_t, lps::probabilistic_data_expression> 
-lts_convert_probabilistic_state<probabilistic_state<size_t, lps::probabilistic_data_expression>,
-                               probabilistic_state<size_t, lps::probabilistic_data_expression> >(
-             const probabilistic_state<size_t, lps::probabilistic_data_expression>& state_in) 
+inline probabilistic_state<std::size_t, lps::probabilistic_data_expression> 
+lts_convert_probabilistic_state<probabilistic_state<std::size_t, lps::probabilistic_data_expression>,
+                               probabilistic_state<std::size_t, lps::probabilistic_data_expression> >(
+             const probabilistic_state<std::size_t, lps::probabilistic_data_expression>& state_in) 
 {
   return state_in;
 }
 
 template <>
-inline probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> 
-lts_convert_probabilistic_state<probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
-                                probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> >(
-            const probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& state_in) 
+inline probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> 
+lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+                                probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> >(
+            const probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& state_in) 
 {
   return state_in;
 }
 
 template <>
-inline probabilistic_state<size_t, lps::probabilistic_data_expression> 
-lts_convert_probabilistic_state<probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
-                                probabilistic_state<size_t, lps::probabilistic_data_expression> >(
-            const probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& state_in) 
+inline probabilistic_state<std::size_t, lps::probabilistic_data_expression> 
+lts_convert_probabilistic_state<probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+                                probabilistic_state<std::size_t, lps::probabilistic_data_expression> >(
+            const probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& state_in) 
 {
-  std::vector<lps::state_probability_pair<size_t, lps::probabilistic_data_expression> > result;
-  for(const lps::state_probability_pair<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& p: state_in)
+  std::vector<lps::state_probability_pair<std::size_t, lps::probabilistic_data_expression> > result;
+  for(const lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>& p: state_in)
   {
-    result.push_back(lps::state_probability_pair<size_t, lps::probabilistic_data_expression>(
+    result.push_back(lps::state_probability_pair<std::size_t, lps::probabilistic_data_expression>(
                           p.state(), 
                           data::sort_real::creal(data::sort_int::int_(pp(p.probability().enumerator())),
                                                  data::sort_pos::pos(pp(p.probability().denominator())))));
   }
-  return probabilistic_state<size_t, lps::probabilistic_data_expression>(result.begin(), result.end());
+  return probabilistic_state<std::size_t, lps::probabilistic_data_expression>(result.begin(), result.end());
 }
 
 inline mcrl2::lts::probabilistic_arbitrary_precision_fraction translate_probability_data_prob(const data::data_expression& d)
@@ -151,19 +151,19 @@ inline mcrl2::lts::probabilistic_arbitrary_precision_fraction translate_probabil
 } 
 
 template <>
-inline probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> 
-lts_convert_probabilistic_state<probabilistic_state<size_t, lps::probabilistic_data_expression>,
-                                probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> >(
-            const probabilistic_state<size_t, lps::probabilistic_data_expression>& state_in) 
+inline probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> 
+lts_convert_probabilistic_state<probabilistic_state<std::size_t, lps::probabilistic_data_expression>,
+                                probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> >(
+            const probabilistic_state<std::size_t, lps::probabilistic_data_expression>& state_in) 
 {
-  std::vector<lps::state_probability_pair<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> > result;
-  for(const lps::state_probability_pair<size_t, mcrl2::lps::probabilistic_data_expression>& p: state_in)
+  std::vector<lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> > result;
+  for(const lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>& p: state_in)
   {
-    result.push_back(lps::state_probability_pair<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>(
+    result.push_back(lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>(
                           p.state(),
                           translate_probability_data_prob(p.probability())));
   }
-  return probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>(result.begin(), result.end());
+  return probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>(result.begin(), result.end());
 }
 
 
@@ -197,7 +197,7 @@ inline void convert_core_lts(CONVERTOR& c,
 {
   if (lts_in.has_state_info())
   {
-    for (size_t i=0; i<lts_in.num_states(); ++i)
+    for (std::size_t i=0; i<lts_in.num_states(); ++i)
     {
       lts_out.add_state(c.translate_state(lts_in.state_label(i)));
     }
@@ -207,7 +207,7 @@ inline void convert_core_lts(CONVERTOR& c,
     lts_out.set_num_states(lts_in.num_states(),false);
   }
 
-  for (size_t i=0; i<lts_in.num_action_labels(); ++i)
+  for (std::size_t i=0; i<lts_in.num_action_labels(); ++i)
   {
     lts_out.add_action(c.translate_label(lts_in.action_label(i)));
     if (lts_in.is_tau(i))
@@ -216,12 +216,12 @@ inline void convert_core_lts(CONVERTOR& c,
     }
   }
 
-  / * for (size_t i=0; i<lts_in.num_probabilistic_labels(); ++i)
+  / * for (std::size_t i=0; i<lts_in.num_probabilistic_labels(); ++i)
   {
     lts_out.add_probabilistic_label(c.translate_probability_label(lts_in.probabilistic_label(i)));
   }
  
-  for (size_t i=0; i<lts_in.num_states(); ++i)
+  for (std::size_t i=0; i<lts_in.num_states(); ++i)
   {
     if (lts_in.is_probabilistic(i))
     {
@@ -301,12 +301,12 @@ template<>
 class convertor<lts_lts_base, lts_fsm_base>
 {
   public:
-    std::vector < std::map <data::data_expression , size_t > > state_element_values_sets;
+    std::vector < std::map <data::data_expression , std::size_t > > state_element_values_sets;
     lts_fsm_base& lts_out;
 
     convertor(const lts_lts_base& lts_base_in, lts_fsm_base& lts_base_out):
-      state_element_values_sets(std::vector < std::map <data::data_expression , size_t > >
-                                (lts_base_in.process_parameters().size(), std::map <data::data_expression , size_t >())),
+      state_element_values_sets(std::vector < std::map <data::data_expression , std::size_t > >
+                                (lts_base_in.process_parameters().size(), std::map <data::data_expression , std::size_t >())),
       lts_out(lts_base_out)
     {
     }
@@ -345,7 +345,7 @@ inline void lts_convert_base_class(const lts_lts_base& base_in,
 inline void lts_convert_translate_state(const state_label_lts& state_label_in, state_label_fsm& state_label_out, convertor<lts_lts_base, lts_fsm_base>& c)
 {
   state_label_out.clear();
-  size_t i=0;
+  std::size_t i=0;
   if (state_label_in.size()!=1)
   {
     throw mcrl2::runtime_error("The state label " + pp(state_label_in) + " consists of " + std::to_string(state_label_in.size()) +
@@ -355,10 +355,10 @@ inline void lts_convert_translate_state(const state_label_lts& state_label_in, s
   }
   for (const data::data_expression& t: *state_label_in.begin())
   {
-    std::map <data::data_expression , size_t >::const_iterator index=c.state_element_values_sets[i].find(t);
+    std::map <data::data_expression , std::size_t >::const_iterator index=c.state_element_values_sets[i].find(t);
     if (index==c.state_element_values_sets[i].end())
     {
-      const size_t element_index=c.state_element_values_sets[i].size();
+      const std::size_t element_index=c.state_element_values_sets[i].size();
       state_label_out.push_back(element_index);
       c.lts_out.add_state_element_value(i,data::pp(t));
       c.state_element_values_sets[i][t]=element_index;
@@ -408,7 +408,7 @@ template<>
 class convertor<lts_lts_base, lts_dot_base>
 {
   public:
-    size_t m_state_count;
+    std::size_t m_state_count;
 
     convertor(const lts_lts_base& /* lts_base_in */, lts_dot_base& /* lts_base_out */):
       m_state_count(0)
@@ -494,7 +494,7 @@ inline void lts_convert_translate_state(const state_label_fsm& state_label_in, s
 {
   // If process_parameters are not empty, we use them to check that the sorts of its variables  match.
   std::vector < data::data_expression > state_label;
-  size_t idx=0;
+  std::size_t idx=0;
   const data::variable_list& parameters=c.m_lts_out.process_parameters();
   data::variable_list::const_iterator parameter_iterator=parameters.begin();
   for (state_label_fsm::const_iterator i=state_label_in.begin(); i!=state_label_in.end(); ++i, ++idx)
@@ -587,7 +587,7 @@ template<>
 class convertor<lts_fsm_base, lts_dot_base>
 {
   public:
-    size_t m_state_count;
+    std::size_t m_state_count;
     const lts_fsm_base& m_lts_in;
 
     convertor(const lts_fsm_base& lts_base_in, const lts_dot_base& /* lts_base_out */)
@@ -625,7 +625,7 @@ inline void lts_convert_translate_state(const state_label_fsm& state_label_in, s
   if (!state_label_in.empty())
   {
     state_label="(";
-    for (size_t i=0; i<state_label_in.size(); ++i)
+    for (std::size_t i=0; i<state_label_in.size(); ++i)
     {
       state_label=state_label + c.m_lts_in.state_element_value(i,state_label_in[i])+(i+1==state_label_in.size()?")":",");
     }
@@ -806,7 +806,7 @@ inline void lts_convert_aux(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& l
 
   if (lts_in.has_state_info())
   {
-    for (size_t i=0; i<lts_in.num_states(); ++i)
+    for (std::size_t i=0; i<lts_in.num_states(); ++i)
     {
       STATE_LABEL2 s;
       lts_convert_translate_state(lts_in.state_label(i), s, c);
@@ -818,7 +818,7 @@ inline void lts_convert_aux(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& l
     lts_out.set_num_states(lts_in.num_states(),false);
   }
 
-  for (size_t i=0; i<lts_in.num_action_labels(); ++i)
+  for (std::size_t i=0; i<lts_in.num_action_labels(); ++i)
   {
     lts_out.add_action(lts_convert_translate_label(lts_in.action_label(i),c));
     /* if (lts_in.is_tau(i))
@@ -875,10 +875,10 @@ void remove_probabilities(const probabilistic_lts<STATE_LABEL1, ACTION_LABEL1, P
   }
 
   // Adapt the probabilistic target states to non probabilistic target states.
-  size_t transition_number=1;
+  std::size_t transition_number=1;
   for(transition& t: lts_out.get_transitions())
   {
-    size_t probabilistic_target_state_number=t.to();
+    std::size_t probabilistic_target_state_number=t.to();
     assert(lts_in.probabilistic_state(probabilistic_target_state_number).size()!=0);
     if (lts_in.probabilistic_state(probabilistic_target_state_number).size()>1)
     {
@@ -924,7 +924,7 @@ inline void add_probabilities(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>&
                               probabilistic_lts<STATE_LABEL2, ACTION_LABEL2, PROBABILISTIC_STATE2, LTS_BASE2>& lts_out)
 { 
   lts_out.set_initial_probabilistic_state(PROBABILISTIC_STATE_T(lts_in.initial_state()));
-  for(size_t i=0; i<lts_out.num_states(); ++i)
+  for(std::size_t i=0; i<lts_out.num_states(); ++i)
   {
     lts_out.add_probabilistic_state(PROBABILISTIC_STATE2::PROBABILISTIC_STATE_T(i));
   }
@@ -962,7 +962,7 @@ inline void translate_probability_labels(const probabilistic_lts<STATE_LABEL1, A
   lts_out.set_initial_probabilistic_state(lts_convert_probabilistic_state<PROBABILISTIC_STATE1,PROBABILISTIC_STATE2>(lts_in.initial_probabilistic_state()));
 
   lts_out.clear_probabilistic_states();
-  for(size_t i=0; i< lts_in.num_probabilistic_states(); ++i)
+  for(std::size_t i=0; i< lts_in.num_probabilistic_states(); ++i)
   {
     lts_out.add_probabilistic_state(lts_convert_probabilistic_state<PROBABILISTIC_STATE1,PROBABILISTIC_STATE2>(lts_in.probabilistic_state(i)));
   }

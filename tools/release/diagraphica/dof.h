@@ -55,7 +55,7 @@ class DOF
 
   protected:
     // -- data members ----------------------------------------------
-    size_t        m_index;    // index in attribute
+    std::size_t        m_index;    // index in attribute
     QString       m_label;
     QList<double> m_values;
     int           m_direction;

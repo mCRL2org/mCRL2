@@ -56,7 +56,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
 
     /// \brief The number of the summand that is checked for confluence.
     /// \brief If this number is 0, all summands are checked.
-    size_t m_summand_number;
+    std::size_t m_summand_number;
 
     /// \brief The flag indicating if the invariance of resulting expressions should be checked in case a confluence
     /// \brief condition is neither a tautology nor a contradiction.
@@ -118,7 +118,7 @@ class lpsconfcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
       }
       if (parser.options.count("summand"))
       {
-        m_summand_number = parser.option_argument_as< size_t >("summand");
+        m_summand_number = parser.option_argument_as< std::size_t >("summand");
 
         if (m_summand_number < 1)
         {

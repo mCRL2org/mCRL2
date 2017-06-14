@@ -36,7 +36,7 @@ namespace lts
              Each integer i at position j in the vector corresponds with the string
              m_state_element_values[j][i].
 */
-class state_label_fsm:  public std::vector < size_t >
+class state_label_fsm:  public std::vector < std::size_t >
 {
   public:
     /** \brief Default constructor. The label becomes an empty vector.
@@ -52,8 +52,8 @@ class state_label_fsm:  public std::vector < size_t >
 
     /** \brief Default constructor. The label is set to the vector v.
     */
-    explicit state_label_fsm(const std::vector < size_t >& v):
-      std::vector < size_t >(v)
+    explicit state_label_fsm(const std::vector < std::size_t >& v):
+      std::vector < std::size_t >(v)
     {}
 
     /** \brief An operator to concatenate two state labels. Fsm labels cannot be concatenated. Therefore, only 
@@ -73,7 +73,7 @@ class state_label_fsm:  public std::vector < size_t >
 inline std::string pp(const state_label_fsm& label)
 {
   std::string s;
-  for(const size_t& l: label)
+  for(const std::size_t& l: label)
   {
     s += std::to_string(l) + " ";
   }
@@ -85,8 +85,8 @@ namespace detail
 class lts_fsm_base
 {
   public:
-    typedef mcrl2::lts::probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
-    typedef mcrl2::lps::state_probability_pair<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> state_probability_pair;
+    typedef mcrl2::lts::probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
+    typedef mcrl2::lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> state_probability_pair;
 
   protected:
 
@@ -133,7 +133,7 @@ class lts_fsm_base
         \return A vector containing strings representing the possible values
                 that this parameter can have.
     */
-    const std::vector < std::string >& state_element_values(size_t idx) const
+    const std::vector < std::string >& state_element_values(std::size_t idx) const
     {
       assert(idx<m_state_element_values.size());
       return m_state_element_values[idx];
@@ -147,7 +147,7 @@ class lts_fsm_base
     {
       std::string s;
       s = "(";
-      for (size_t i=0; i<l.size(); ++i)
+      for (std::size_t i=0; i<l.size(); ++i)
       {
         s += state_element_value(i,l[i]);
         if (i+1<l.size())
@@ -165,7 +165,7 @@ class lts_fsm_base
         \param[in] s   String to be added as value for the indicate parameter.
         \return The index for the added parameter.
     */
-    size_t add_state_element_value(size_t idx, const std::string& s)
+    std::size_t add_state_element_value(std::size_t idx, const std::string& s)
     {
       assert(idx<m_state_element_values.size());
       m_state_element_values[idx].push_back(s);
@@ -180,7 +180,7 @@ class lts_fsm_base
         \param[in] element_index The index to the value string corresponding to this parameter.
         \return The string corresponding to the two given indices.
     */
-    std::string state_element_value(size_t parameter_index, size_t element_index) const
+    std::string state_element_value(std::size_t parameter_index, std::size_t element_index) const
     {
       assert(parameter_index<m_state_element_values.size());
       if (m_state_element_values[parameter_index].size()==0)
@@ -204,7 +204,7 @@ class lts_fsm_base
         \param[in] i The index of the parameter.
         \return The variable/sort of the state parameter at index i.
     */
-    std::pair < std::string, std::string > process_parameter(size_t i) const
+    std::pair < std::string, std::string > process_parameter(std::size_t i) const
     {
       assert(i<m_parameters.size());
       return m_parameters[i];
@@ -267,7 +267,7 @@ class lts_fsm_t : public lts< state_label_fsm, action_label_string, detail::lts_
 class probabilistic_lts_fsm_t : 
         public probabilistic_lts< state_label_fsm, 
                                   action_label_string, 
-                                  probabilistic_state< size_t, probabilistic_arbitrary_precision_fraction >,
+                                  probabilistic_state< std::size_t, probabilistic_arbitrary_precision_fraction >,
                                   detail::lts_fsm_base >
 {
   public:

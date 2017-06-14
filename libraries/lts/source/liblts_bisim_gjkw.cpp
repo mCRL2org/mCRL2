@@ -1459,7 +1459,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
             // end for
             }
             assert(part_st_predecessors.size() ==
-                         (size_t) (B->nonbottom_end() - B->nonbottom_begin()));
+                         (std::size_t) (B->nonbottom_end() - B->nonbottom_begin()));
             part_st_predecessors.clear();
             assert(0 == nr_of_inert_predecessors);
             // now all nonbottom states should have s->notblue==STATE_TYPE_MAX.
@@ -2123,15 +2123,15 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
       /* Create a vector for the new labels */
       std::vector<typename LTS_TYPE::state_label_t> new_labels(block_t::nr_of_blocks);
 
-      for(size_t i=aut.num_states(); i>0; )
+      for(std::size_t i=aut.num_states(); i>0; )
       {
         --i;
-        const size_t new_index=part_st.block(i)->seqnr();  /* get_eq_class(i) */
+        const std::size_t new_index=part_st.block(i)->seqnr();  /* get_eq_class(i) */
         new_labels[new_index]=aut.state_label(i)+new_labels[new_index];
       }
 
       aut.set_num_states(block_t::nr_of_blocks);
-      for(size_t i=0; i<block_t::nr_of_blocks; ++i)
+      for(std::size_t i=0; i<block_t::nr_of_blocks; ++i)
       {
         aut.set_state_label(i,new_labels[i]);
       }

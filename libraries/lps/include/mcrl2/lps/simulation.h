@@ -42,7 +42,7 @@ class simulation
     {
       lps::state source_state;
       std::vector<transition_t> transitions;
-      size_t transition_number; // Undefined for the last state in the trace
+      std::size_t transition_number; // Undefined for the last state in the trace
     };
 
     /// Constructor.
@@ -52,10 +52,10 @@ class simulation
     const std::deque<state_t> &trace() const { return m_tau_prioritization ? m_prioritized_trace : m_full_trace; }
 
     /// Remove states from the end of the simulation, making \a state_number the last state.
-    void truncate(size_t state_number);
+    void truncate(std::size_t state_number);
 
     /// Choose outgoing transition \a transition_number and add its state to the state vector.
-    void select(size_t transition_number);
+    void select(std::size_t transition_number);
 
     /// If enabled, tau prioritization is applied to all outgoing transitions, and in-between states are hidden from the state vector.
     void enable_tau_prioritization(bool enable, const std::string& action = "ctau");
@@ -87,7 +87,7 @@ class simulation
     std::deque<state_t> m_full_trace;
     // The trace with all prioritized in-between states removed.
     std::deque<state_t> m_prioritized_trace;
-    std::deque<size_t> m_prioritized_originals;
+    std::deque<std::size_t> m_prioritized_originals;
 };
 
 } // namespace lps

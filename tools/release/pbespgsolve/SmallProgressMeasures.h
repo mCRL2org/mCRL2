@@ -265,11 +265,11 @@ private:
 
 protected:
     const ParityGame       &game_;     //!< the game being solved
-    const size_t           p_;         //!< the player to solve for
+    const std::size_t           p_;         //!< the player to solve for
     LiftingStatistics      *stats_;    //!< statistics object to record lifts
     const verti            *vmap_;     //!< active vertex map (if any)
     verti                  vmap_size_; //!< size of vertex map
-    size_t                 len_;       //!< length of SPM vectors
+    std::size_t                 len_;       //!< length of SPM vectors
     verti                  *M_;        //!< bounds on the SPM vector components
     ParityGame::Strategy   strategy_;  //!< current strategy
     bool                   *dirty_;    //!< marks unstable vertices
@@ -293,8 +293,8 @@ public:
         const verti *vertex_map = 0, verti vertex_map_size = 0 );
     ~DenseSPM();
 
-    // verti *vec(verti v) { return &spm_[(size_t)len_*v]; }
-    const verti *vec(verti v) const { return &spm_[(size_t)len_*v]; }
+    // verti *vec(verti v) { return &spm_[(std::size_t)len_*v]; }
+    const verti *vec(verti v) const { return &spm_[(std::size_t)len_*v]; }
     void set_vec(verti v, const verti src[], bool carry) ;
     void set_vec_to_top(verti v);
 

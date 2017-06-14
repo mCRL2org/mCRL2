@@ -375,9 +375,9 @@ class BDD_Prover: protected rewriter
 
       data_expression v_result;
 
-      size_t v_length = f_info.get_number_of_arguments(a_formula);
+      std::size_t v_length = f_info.get_number_of_arguments(a_formula);
 
-      for (size_t s = 0; s < v_length; s++)
+      for (std::size_t s = 0; s < v_length; s++)
       {
         const data_expression v_small = smallest(f_info.get_argument(a_formula, s));
         if (v_small!=data_expression())

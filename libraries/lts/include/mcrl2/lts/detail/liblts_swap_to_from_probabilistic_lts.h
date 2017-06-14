@@ -42,10 +42,10 @@ void swap_to_non_probabilistic_lts(
   }
   
   // Adapt the probabilistic target states to non probabilistic target states.
-  size_t transition_number=1;
+  std::size_t transition_number=1;
   for(transition& t: l_plain.get_transitions())
   {
-    size_t probabilistic_target_state_number=t.to();
+    std::size_t probabilistic_target_state_number=t.to();
     assert(l_probabilistic.probabilistic_state(probabilistic_target_state_number).size()!=0);
     if (l_probabilistic.probabilistic_state(probabilistic_target_state_number).size()>1)
     {
@@ -68,7 +68,7 @@ void translate_to_probabilistic_lts(
 {
   static_cast<lts<STATE_LABEL_T,ACTION_LABEL_T, LTS_BASE>& >(l_probabilistic)=l_plain;
   l_probabilistic.set_initial_probabilistic_state(PROBABILISTIC_STATE_T(l_plain.initial_state()));
-  for(size_t i=0; i<l_plain.num_states(); ++i)
+  for(std::size_t i=0; i<l_plain.num_states(); ++i)
   {
     l_probabilistic.add_probabilistic_state(PROBABILISTIC_STATE_T(i));
   }

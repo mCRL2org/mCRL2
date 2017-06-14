@@ -78,7 +78,7 @@ void SimDock::changed()
 
       State *destination = transitions[i]->getEndState();
       QStringList assignments;
-      for (size_t j = 0; j < simulation->lts().getNumParameters(); j++)
+      for (std::size_t j = 0; j < simulation->lts().getNumParameters(); j++)
       {
         if (simulation->lts().getStateParameterValue(currentState, j) != simulation->lts().getStateParameterValue(destination, j))
         {

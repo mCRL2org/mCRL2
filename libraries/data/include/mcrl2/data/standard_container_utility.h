@@ -339,7 +339,7 @@ data_expression bag_enumeration(const sort_expression& s,
 
     sort_expression_vector v;
 
-    for (size_t i = 0; i < range.size() / 2; ++i)
+    for (std::size_t i = 0; i < range.size() / 2; ++i)
     {
       v.push_back(t);
       v.push_back(sort_nat::nat());
@@ -367,7 +367,7 @@ data_expression bag_enumeration(const sort_expression& s,
     sort_expression t(range.begin()->sort());
     sort_expression_vector v;
 
-    for (size_t i = 0; i < range.size() / 2; ++i)
+    for (std::size_t i = 0; i < range.size() / 2; ++i)
     {
       v.push_back(t);
       v.push_back(sort_nat::nat());

@@ -36,21 +36,21 @@ namespace detail
 class action_index_pair
 {
   protected:
-    size_t m_label_index;
-    size_t m_previous_entry_index;
+    std::size_t m_label_index;
+    std::size_t m_previous_entry_index;
 
   public:
-    action_index_pair(size_t label_index, size_t previous_entry_index)
+    action_index_pair(std::size_t label_index, std::size_t previous_entry_index)
      : m_label_index(label_index), 
        m_previous_entry_index(previous_entry_index)
     {}
 
-    size_t label_index() const
+    std::size_t label_index() const
     {
       return m_label_index;
     }
 
-    size_t previous_entry_index() const
+    std::size_t previous_entry_index() const
     {
       return m_previous_entry_index;
     }
@@ -61,11 +61,11 @@ class action_index_pair
 class counter_example_constructor
 {
   public:
-    typedef size_t index_type;
+    typedef std::size_t index_type;
 
   protected:
     // The backward three is stored in a deque. 
-    // The root has entry size_t(-1).
+    // The root has entry std::size_t(-1).
 
     static const index_type m_root_index=-1;
     std::deque< action_index_pair > m_backward_tree;
@@ -87,7 +87,7 @@ class counter_example_constructor
     //  \param previous_entry The index of the counterexample trace to which
     //                        this action label must be attached.
     //  \ret It returns a new index which can be used to extend the counterexample.
-    index_type add_transition(size_t label_index, index_type previous_entry)
+    index_type add_transition(std::size_t label_index, index_type previous_entry)
     {
       m_backward_tree.emplace_back(label_index, previous_entry);
       return m_backward_tree.size()-1;
@@ -139,7 +139,7 @@ class dummy_counter_example_constructor
       return dummy_counter_example_constructor();  // This returns nothing. 
     }
 
-    index_type add_transition(size_t /* label_index*/, index_type /* previous_entry*/)
+    index_type add_transition(std::size_t /* label_index*/, index_type /* previous_entry*/)
     {
       // This dummy counter example generator intentionally does nothing.
       return *this;

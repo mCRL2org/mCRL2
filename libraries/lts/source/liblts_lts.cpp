@@ -66,7 +66,7 @@ static atermpp::function_symbol temporary_multi_action_header()
 static aterm_list state_probability_list(const probabilistic_lts_lts_t::probabilistic_state_t& target)
 {
   aterm_list result;
-  for(const lps::state_probability_pair<size_t, mcrl2::lps::probabilistic_data_expression>& p: target)
+  for(const lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>& p: target)
   {
     result.push_front(p.probability());
     result.push_front(aterm_int(p.state()));
@@ -76,14 +76,14 @@ static aterm_list state_probability_list(const probabilistic_lts_lts_t::probabil
 
 static probabilistic_lts_lts_t::probabilistic_state_t aterm_list_to_probabilistic_state(const atermpp::aterm_list& l)
 {
-  std::vector<lps::state_probability_pair<size_t, mcrl2::lps::probabilistic_data_expression>> result;
+  std::vector<lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>> result;
   for(aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
   {
-    const size_t state_number=down_cast<aterm_int>(*i).value();
+    const std::size_t state_number=down_cast<aterm_int>(*i).value();
     assert(i!=l.end());
     ++i;
     const lps::probabilistic_data_expression& t=down_cast<lps::probabilistic_data_expression>(*i);
-    result.push_back(lps::state_probability_pair<size_t, mcrl2::lps::probabilistic_data_expression>(state_number,t));
+    result.push_back(lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>(state_number,t));
   }
   return probabilistic_lts_lts_t::probabilistic_state_t(result.begin(),result.end());
 }
@@ -97,8 +97,8 @@ class aterm_probabilistic_transition_list: public aterm_appl
       : aterm_appl(transition_empty_header())
     {}
 
-    aterm_probabilistic_transition_list(const size_t source, 
-                                        const size_t label, 
+    aterm_probabilistic_transition_list(const std::size_t source, 
+                                        const std::size_t label, 
                                         const probabilistic_lts_lts_t::probabilistic_state_t& target,
                                         const aterm_probabilistic_transition_list& next_transition)
       : aterm_appl(transition_list_header(), 
@@ -108,12 +108,12 @@ class aterm_probabilistic_transition_list: public aterm_appl
                    next_transition)
     {} 
 
-    size_t source() const
+    std::size_t source() const
     {
       return (atermpp::down_cast<aterm_int>((*this)[0]).value());
     }
 
-    size_t label() const
+    std::size_t label() const
     {
       return (atermpp::down_cast<aterm_int>((*this)[1]).value());
     }
@@ -262,14 +262,14 @@ class aterm_labelled_transition_system: public atermpp::aterm_appl
       return down_cast<process::action_label_list>(meta_data()[2]);
     }
 
-    size_t num_states() const
+    std::size_t num_states() const
     {
       const aterm_appl& t=down_cast<aterm_appl>(meta_data()[3]);
       assert(t.function()==num_of_states_labels_and_initial_state());
       return down_cast<aterm_int>(t[0]).value();
     }
 
-    size_t num_action_labels() const
+    std::size_t num_action_labels() const
     {
       const aterm_appl& t=down_cast<aterm_appl>(meta_data()[3]);
       assert(t.function()==num_of_states_labels_and_initial_state());
@@ -389,7 +389,7 @@ static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filenam
   while (input_transitions.function()!= transition_empty_header()) 
   {
     assert(input_transitions.function()==transition_list_header());
-    const size_t prob_state_index=l.add_probabilistic_state(input_transitions.target());
+    const std::size_t prob_state_index=l.add_probabilistic_state(input_transitions.target());
     l.add_transition(transition(input_transitions.source(), input_transitions.label(), prob_state_index));
     input_transitions=input_transitions.next();
   }
@@ -444,7 +444,7 @@ static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& fi
 
   state_labels_t state_label_list;
   if (l.has_state_info())
-  { for(size_t i=l.num_state_labels(); i>0;)
+  { for(std::size_t i=l.num_state_labels(); i>0;)
     {
       --i;
       state_label_list.push_front(l.state_label(i));
@@ -454,7 +454,7 @@ static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& fi
   action_labels_t action_label_list;
   if (l.has_action_info())
   { 
-    for(size_t i=l.num_action_labels(); i>0;)
+    for(std::size_t i=l.num_action_labels(); i>0;)
     {
       --i;
       action_label_list.push_front(atermpp::aterm_appl(temporary_multi_action_header(),l.action_label(i).actions(),l.action_label(i).time()));
@@ -516,7 +516,7 @@ void lts_lts_t::load(const std::string& filename)
   detail::swap_to_non_probabilistic_lts
              <state_label_lts,
               action_label_lts,
-              probabilistic_state<size_t, lps::probabilistic_data_expression>,
+              probabilistic_state<std::size_t, lps::probabilistic_data_expression>,
               detail::lts_lts_base>(l,*this);
 }
 
@@ -526,7 +526,7 @@ void lts_lts_t::save(std::string const& filename) const
   detail::translate_to_probabilistic_lts
             <state_label_lts,
              action_label_lts,
-             probabilistic_state<size_t, lps::probabilistic_data_expression>,
+             probabilistic_state<std::size_t, lps::probabilistic_data_expression>,
              detail::lts_lts_base >(*this,l);
   l.save(filename);
 }

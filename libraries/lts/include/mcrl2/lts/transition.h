@@ -42,7 +42,7 @@ class transition
 {
   public:
     /// \brief The type of the elements in a transition.
-    typedef size_t size_type;
+    typedef std::size_t size_type;
 
   private:
     size_type m_from;
@@ -54,9 +54,9 @@ class transition
     transition() = delete;
 
     /// \brief Constructor (there is no default constructor).
-    transition(const size_t f,
-               const size_t l,
-               const size_t t):m_from(f),m_label(l),m_to(t)
+    transition(const std::size_t f,
+               const std::size_t l,
+               const std::size_t t):m_from(f),m_label(l),m_to(t)
     {}
 
     /// \brief Copy constructor.

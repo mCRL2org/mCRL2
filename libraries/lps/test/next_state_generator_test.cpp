@@ -37,7 +37,7 @@ void test_initial_state_successors(const stochastic_specification& lps_spec)
   }
 }
 
-void test_next_state_generator(const stochastic_specification& lps_spec, size_t expected_states, size_t expected_transitions, size_t expected_transition_labels, bool enumeration_caching, bool summand_pruning, bool per_summand)
+void test_next_state_generator(const stochastic_specification& lps_spec, std::size_t expected_states, std::size_t expected_transitions, std::size_t expected_transition_labels, bool enumeration_caching, bool summand_pruning, bool per_summand)
 {
   data::rewriter rewriter(lps_spec.data());
   next_state_generator generator(lps_spec, rewriter, enumeration_caching, summand_pruning);
@@ -47,7 +47,7 @@ void test_next_state_generator(const stochastic_specification& lps_spec, size_t 
   std::set<state> visited;
   std::set<state> seen;
   std::set<multi_action> transition_labels;
-  size_t transitions = 0;
+  std::size_t transitions = 0;
 
   std::queue<state, std::deque<state> > q;
   q.push(initial_state);
@@ -60,7 +60,7 @@ void test_next_state_generator(const stochastic_specification& lps_spec, size_t 
     if (per_summand)
     {
       next_state_generator::enumerator_queue_t enumeration_queue;
-      for (size_t i = 0; i < lps_spec.process().action_summands().size(); ++i)
+      for (std::size_t i = 0; i < lps_spec.process().action_summands().size(); ++i)
       {
         for (next_state_generator::iterator it = generator.begin(q.front(), i, &enumeration_queue); it != generator.end(); it++)
         {
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(single_state_test)
   parse_lps(text,spec);
   test_initial_state_successors(spec);
   // Test all 2**3 possible feature flags
-  for (size_t i = 0; i < 8; i++)
+  for (std::size_t i = 0; i < 8; i++)
   {
     test_next_state_generator(spec, 2, 1, 1, i & 1, i & 2, i & 4);
   }
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(test_abp)
 
   test_initial_state_successors(spec);
   // Test all 2**3 possible feature flags
-  for (size_t i = 0; i < 8; i++)
+  for (std::size_t i = 0; i < 8; i++)
   {
     test_next_state_generator(spec, 74, 92, 19, i & 1, i & 2, i & 4);
   }
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(test_non_true_condition)
   );
   stochastic_specification spec;
   parse_lps(text,spec);
-  for (size_t i = 0; i < 8; i++)
+  for (std::size_t i = 0; i < 8; i++)
   {
     // The respective sizes do not matter here, since we should get an exception in the nextstate
     // generator.

@@ -40,26 +40,26 @@ class TimeSeries : public Visualizer
     virtual ~TimeSeries();
 
     // -- get functions ---------------------------------------------
-    void getIdcsClstMarked(std::set< size_t > &idcs);
+    void getIdcsClstMarked(std::set< std::size_t > &idcs);
     void getIdcsClstMarked(
-      std::set< size_t > &idcs ,
+      std::set< std::size_t > &idcs ,
       QColor& col);
     void getIdxMseOver(
-      size_t& idxLeaf,
-      std::set< size_t > &idcsBndl,
+      std::size_t& idxLeaf,
+      std::set< std::size_t > &idcsBndl,
       QColor& colLeaf);
     void getCurrIdxDgrm(
-      size_t& idxLeaf,
-      std::set< size_t > &idcsBndl,
+      std::size_t& idxLeaf,
+      std::set< std::size_t > &idcsBndl,
       QColor& colLeaf);
     void getAnimIdxDgrm(
-      size_t& idxLeaf,
-      std::set< size_t > &idcsBndl,
+      std::size_t& idxLeaf,
+      std::set< std::size_t > &idcsBndl,
       QColor& colLeaf);
-    void getAttrIdcs(std::vector< size_t > &idcs);
+    void getAttrIdcs(std::vector< std::size_t > &idcs);
 
     void setDiagram(Diagram* dgrm);
-    void initAttributes(const std::vector< size_t > attrIdcs);
+    void initAttributes(const std::vector< std::size_t > attrIdcs);
 
   public slots:
     void clearData();
@@ -99,7 +99,7 @@ class TimeSeries : public Visualizer
   protected:
     void handleRwndDiagram(const int& dgrmIdx);
     void handlePrevDiagram(const int& dgrmIdx);
-    void handlePlayDiagram(const size_t& dgrmIdx);
+    void handlePlayDiagram(const std::size_t& dgrmIdx);
     void handleNextDiagram(const int& dgrmIdx);
 
     // -- hit detection ---------------------------------------------
@@ -176,9 +176,9 @@ class TimeSeries : public Visualizer
     double minPixPerNode;      // min number of pixels per item
     double actPixPerNode;      // actual number of pixels per item
 
-    size_t    nodesWdwScale;
+    std::size_t    nodesWdwScale;
     double itvWdwPerNode;
-    size_t    wdwStartIdx;
+    std::size_t    wdwStartIdx;
     int    nodesItvScale;      // number of nodes per marked interval
 
     std::vector< Position2D > posAxesTopLft;
@@ -191,26 +191,26 @@ class TimeSeries : public Visualizer
     double dragDistNodes;
 
     // selection
-    std::set< size_t > itemsMarked;
+    std::set< std::size_t > itemsMarked;
     int  shiftStartIdx;
     int  dragStartIdx;
     int  dragDir;
 
     // mouse overs
-    size_t mouseOverIdx;
+    std::size_t mouseOverIdx;
 
     // diagrams
     double scaleDgrm;
-    std::map< size_t, Position2D > showDgrm;
+    std::map< std::size_t, Position2D > showDgrm;
     int dragIdxDgrm; // diagram currently being dragged
-    size_t currIdxDgrm; // currently selected diagram
-    size_t animIdxDgrm; // diagram being animated
+    std::size_t currIdxDgrm; // currently selected diagram
+    std::size_t animIdxDgrm; // diagram being animated
 
     double ySpacePxl;
 
     // animation
     QTimer m_animationTimer;
-    std::set< size_t >::iterator animFrame;
+    std::set< std::size_t >::iterator animFrame;
 };
 
 #endif

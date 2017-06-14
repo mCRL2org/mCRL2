@@ -37,7 +37,7 @@ namespace pbes_system
 {
 
 /// \brief Data structure for storing the indices of the variables that should be expanded by the finite pbesinst algorithm.
-typedef std::map<core::identifier_string, std::vector<size_t> > pbesinst_index_map;
+typedef std::map<core::identifier_string, std::vector<std::size_t> > pbesinst_index_map;
 
 /// \brief Data structure for storing the variables that should be expanded by the finite pbesinst algorithm.
 typedef std::map<core::identifier_string, std::vector<data::variable> > pbesinst_variable_map;
@@ -113,10 +113,10 @@ void split_parameters(const PropositionalVariable& X,
   typedef typename PropositionalVariable::parameter_type parameter_type;
   pbesinst_index_map::const_iterator pi = index_map.find(X.name());
   assert(pi != index_map.end());
-  const std::vector<size_t>& v = pi->second;
+  const std::vector<std::size_t>& v = pi->second;
   typename atermpp::term_list<parameter_type>::const_iterator i = X.parameters().begin();
-  size_t index = 0;
-  std::vector<size_t>::const_iterator j = v.begin();
+  std::size_t index = 0;
+  std::vector<std::size_t>::const_iterator j = v.begin();
   for (; i != X.parameters().end(); ++i, ++index)
   {
     if (j != v.end() && index == *j)
@@ -309,11 +309,11 @@ class pbesinst_finite_algorithm
         core::identifier_string name = i->variable().name();
         data::variable_list parameters = i->variable().parameters();
 
-        std::vector<size_t> v;
+        std::vector<std::size_t> v;
         pbesinst_variable_map::const_iterator j = variable_map.find(name);
         if (j != variable_map.end())
         {
-          size_t index = 0;
+          std::size_t index = 0;
           for (data::variable_list::const_iterator k = parameters.begin(); k != parameters.end(); ++k, ++index)
           {
             if (has_element(j->second, *k))
@@ -327,7 +327,7 @@ class pbesinst_finite_algorithm
     }
 
     /// \brief Prints a message for every 1000-th equation
-    std::string print_equation_count(size_t size) const
+    std::string print_equation_count(std::size_t size) const
     {
       if (size > 0 && size % 1000 == 0)
       {

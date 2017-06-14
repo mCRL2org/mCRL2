@@ -431,7 +431,7 @@ class type_checker: public sort_type_checker
     {
       mCRL2log(log::debug) << "Start Read-in Func" << std::endl;
 
-      size_t constr_number=constructors.size();
+      std::size_t constr_number=constructors.size();
       function_symbol_vector functions_and_constructors=constructors;
       functions_and_constructors.insert(functions_and_constructors.end(),mappings.begin(),mappings.end());
       for (const function_symbol& f: functions_and_constructors)

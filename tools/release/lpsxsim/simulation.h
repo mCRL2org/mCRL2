@@ -37,7 +37,7 @@ class Simulation : public QObject
     {
       State state;
       QList<Transition> transitions;
-      size_t transitionNumber;
+      std::size_t transitionNumber;
     };
     typedef QList<TracePosition> Trace;
 

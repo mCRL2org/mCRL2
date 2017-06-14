@@ -46,7 +46,7 @@ public:
 
 private:
     // SCC callback
-    int operator()(const verti *vertices, size_t num_vertices);
+    int operator()(const verti *vertices, std::size_t num_vertices);
     friend class SCC<ComponentSolver>;
 
 protected:

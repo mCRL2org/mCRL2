@@ -12,7 +12,7 @@
 
 Decimal operator+(const Decimal &s, const Decimal &t)
 {
-    size_t i = s.size(), j = t.size();
+    std::size_t i = s.size(), j = t.size();
     std::vector<char> sum;
     sum.reserve(std::max(i, j) + 1);
     unsigned carry = 0;
@@ -30,12 +30,12 @@ Decimal operator+(const Decimal &s, const Decimal &t)
 Decimal operator*(const Decimal &s, const Decimal &t)
 {
     std::vector<char> product(s.size() + t.size(), '0');
-    for (size_t i = 0; i < s.size(); ++i)
+    for (std::size_t i = 0; i < s.size(); ++i)
     {
-        for (size_t j = 0; j < t.size(); ++j)
+        for (std::size_t j = 0; j < t.size(); ++j)
         {
             unsigned carry = (unsigned)(s[i] - '0')*(t[j] - '0');
-            for ( size_t k = (s.size() - 1 - i) + (t.size() - 1 - j);
+            for ( std::size_t k = (s.size() - 1 - i) + (t.size() - 1 - j);
                   carry > 0; ++k )
             {
                 carry += (product[k] - '0');

@@ -40,7 +40,7 @@ class Examiner : public Visualizer
     virtual ~Examiner();
 
     QColor selectionColor() { return VisUtils::coolRed; }
-    size_t selectedClusterIndex();
+    std::size_t selectedClusterIndex();
 
     void setDiagram(Diagram* dgrm) { diagram = dgrm; update(); }
     void setFrame(
@@ -137,14 +137,14 @@ class Examiner : public Visualizer
     Position2D posFrame;
     std::vector< Position2D > posFramesHist;
 
-    size_t focusFrameIdx;
+    std::size_t focusFrameIdx;
 
     double scaleFrame;
     double scaleFramesHist;
 
     double offset;
-    size_t vsblHistIdxLft;
-    size_t vsblHistIdxRgt;
+    std::size_t vsblHistIdxLft;
+    std::size_t vsblHistIdxRgt;
 };
 
 #endif

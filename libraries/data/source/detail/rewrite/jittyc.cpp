@@ -66,9 +66,9 @@ namespace detail
 class bracket_level_data
 {
   public:
-    const size_t MCRL2_BRACKET_NESTING_LEVEL=250;  // Some compilers limit the nesting to 256 brackets.
+    const std::size_t MCRL2_BRACKET_NESTING_LEVEL=250;  // Some compilers limit the nesting to 256 brackets.
 
-    size_t bracket_nesting_level;
+    std::size_t bracket_nesting_level;
     std::string current_template_parameters;
     std::stack< std::string > current_data_parameters;
     std::stack< std::string > current_data_arguments;
@@ -84,7 +84,7 @@ typedef atermpp::term_list<variable_list> variable_list_list;
 
 static const match_tree dummy=match_tree();
 
-std::set< size_t > m_required_appl_functions;
+std::set< std::size_t > m_required_appl_functions;
 
 static std::vector<bool> dep_vars(const data_equation& eqn)
 {
@@ -95,7 +95,7 @@ static std::vector<bool> dep_vars(const data_equation& eqn)
   lhs_doubles.apply(eqn.lhs());
   rhs_doubles.apply(eqn.rhs());
 
-  for (size_t i = 0; i < result.size(); ++i)
+  for (std::size_t i = 0; i < result.size(); ++i)
   {
     const data_expression& arg_i = get_argument_of_higher_order_term(atermpp::down_cast<application>(eqn.lhs()), i);
     if (is_variable(arg_i))
@@ -110,12 +110,12 @@ static std::vector<bool> dep_vars(const data_equation& eqn)
   return result;
 }
 
-static size_t calc_max_arity(const function_symbol_vector& symbols)
+static std::size_t calc_max_arity(const function_symbol_vector& symbols)
 {
-  size_t max_arity = 0;
+  std::size_t max_arity = 0;
   for (function_symbol_vector::const_iterator it = symbols.begin(); it != symbols.end(); ++it)
   {
-    size_t arity = getArity(*it);
+    std::size_t arity = getArity(*it);
     max_arity = std::max(max_arity, arity);
   }
 
@@ -132,7 +132,7 @@ static size_t calc_max_arity(const function_symbol_vector& symbols)
 /// \param a The desired number of arguments
 /// \return A boolean indicating whether a term of sort s applied to a arguments is a valid term.
 ///
-static bool arity_is_allowed(const sort_expression& s, const size_t a)
+static bool arity_is_allowed(const sort_expression& s, const std::size_t a)
 {
   if (a == 0)
   {
@@ -141,13 +141,13 @@ static bool arity_is_allowed(const sort_expression& s, const size_t a)
   if (is_function_sort(s))
   {
     const function_sort& fs = atermpp::down_cast<function_sort>(s);
-    size_t n = fs.domain().size();
+    std::size_t n = fs.domain().size();
     return n <= a && arity_is_allowed(fs.codomain(), a - n);
   }
   return false;
 }
 
-static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_cnt, const bool ommit_head)
+static void term2seq(const data_expression& t, match_tree_list& s, std::size_t *var_cnt, const bool ommit_head)
 {
   if (is_function_symbol(t))
   {
@@ -176,7 +176,7 @@ static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_c
 
   assert(is_application(t));
   const application ta(t);
-  size_t arity = ta.size();
+  std::size_t arity = ta.size();
 
   if (is_application(ta.head()))
   {
@@ -190,7 +190,7 @@ static void term2seq(const data_expression& t, match_tree_list& s, size_t *var_c
     }
   }
 
-  size_t j=1;
+  std::size_t j=1;
   for (application::const_iterator i=ta.begin(); i!=ta.end(); ++i,++j)
   {
     term2seq(*i,s,var_cnt,false);
@@ -212,7 +212,7 @@ static variable_or_number_list get_used_vars(const data_expression& t)
   return variable_or_number_list(vars.begin(),vars.end());
 }
 
-static match_tree_list create_sequence(const data_equation& rule, size_t* var_cnt)
+static match_tree_list create_sequence(const data_equation& rule, std::size_t* var_cnt)
 {
   const data_expression lhs_inner = rule.lhs();
   const data_expression cond = rule.condition();
@@ -222,7 +222,7 @@ static match_tree_list create_sequence(const data_equation& rule, size_t* var_cn
   if (!is_function_symbol(lhs_inner))
   {
     const application lhs_innera(lhs_inner);
-    size_t lhs_arity = lhs_innera.size();
+    std::size_t lhs_arity = lhs_innera.size();
 
     if (is_application(lhs_innera.head()))
     {
@@ -230,7 +230,7 @@ static match_tree_list create_sequence(const data_equation& rule, size_t* var_cn
       rseq.push_front(match_tree_N(dummy,0));
     }
 
-    size_t j=1;
+    std::size_t j=1;
     for (application::const_iterator i=lhs_innera.begin(); i!=lhs_innera.end(); ++i,++j)
     {
       term2seq(*i,rseq,var_cnt,false);
@@ -346,7 +346,7 @@ static void add_to_build_pars(build_pars* pars,  const match_tree_list_list& seq
 }
 
 static char tree_var_str[20];
-static variable createFreshVar(const sort_expression& sort, size_t* i)
+static variable createFreshVar(const sort_expression& sort, std::size_t* i)
 {
   sprintf(tree_var_str,"@var_%lu",(*i)++);
   return data::variable(tree_var_str, sort);
@@ -355,7 +355,7 @@ static variable createFreshVar(const sort_expression& sort, size_t* i)
 static match_tree_list subst_var(const match_tree_list& l,
                                  const variable& old,
                                  const variable& new_val,
-                                 const size_t num,
+                                 const std::size_t num,
                                  const mutable_map_substitution<>& substs)
 {
   match_tree_vector result;
@@ -426,7 +426,7 @@ static match_tree_list subst_var(const match_tree_list& l,
   return match_tree_list(result.begin(),result.end());
 }
 
-static std::vector < size_t> treevars_usedcnt;
+static std::vector < std::size_t> treevars_usedcnt;
 
 static void inc_usedcnt(const variable_or_number_list& l)
 {
@@ -439,14 +439,14 @@ static void inc_usedcnt(const variable_or_number_list& l)
   }
 }
 
-static match_tree build_tree(build_pars pars, size_t i)
+static match_tree build_tree(build_pars pars, std::size_t i)
 {
   if (!pars.Slist.empty())
   {
     match_tree_list l;
     match_tree_list_list m;
 
-    size_t k = i;
+    std::size_t k = i;
     const variable v = createFreshVar(match_tree_S(pars.Slist.front().front()).target_variable().sort(),&i);
     treevars_usedcnt[k] = 0;
 
@@ -681,7 +681,7 @@ static match_tree create_tree(const data_equation_list& rules)
   // (The total number of variables in all sequences should be an upper
   // bound for the number of variable in the final tree.)
   match_tree_list_list rule_seqs;
-  size_t total_rule_vars = 0;
+  std::size_t total_rule_vars = 0;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
     rule_seqs.push_front(create_sequence(*it,&total_rule_vars));
@@ -696,7 +696,7 @@ static match_tree create_tree(const data_equation_list& rules)
   match_tree tree;
   if (!r.is_defined())
   {
-    treevars_usedcnt=std::vector < size_t> (total_rule_vars);
+    treevars_usedcnt=std::vector < std::size_t> (total_rule_vars);
     tree = build_tree(init_pars,0);
     for (; !readies.empty(); readies=readies.tail())
     {
@@ -718,13 +718,13 @@ static match_tree create_tree(const data_equation_list& rules)
 // Note that the static variable variable_indices is not cleared
 // during several runs, as generally the variables bound in rewrite
 // rules do not change.
-size_t RewriterCompilingJitty::bound_variable_index(const variable& v)
+std::size_t RewriterCompilingJitty::bound_variable_index(const variable& v)
 {
   if (variable_indices0.count(v)>0)
   {
     return variable_indices0[v];
   }
-  const size_t index_for_v=rewriter_bound_variables.size();
+  const std::size_t index_for_v=rewriter_bound_variables.size();
   variable_indices0[v]=index_for_v;
   rewriter_bound_variables.push_back(v);
   return index_for_v;
@@ -736,20 +736,20 @@ size_t RewriterCompilingJitty::bound_variable_index(const variable& v)
 // Note that the static variable variable_indices is not cleared
 // during several runs, as generally the variables bound in rewrite
 // rules do not change.
-size_t RewriterCompilingJitty::binding_variable_list_index(const variable_list& vl)
+std::size_t RewriterCompilingJitty::binding_variable_list_index(const variable_list& vl)
 {
   if (variable_list_indices1.count(vl)>0)
   {
     return variable_list_indices1[vl];
   }
-  const size_t index_for_vl=rewriter_binding_variable_lists.size();
+  const std::size_t index_for_vl=rewriter_binding_variable_lists.size();
   variable_list_indices1[vl]=index_for_vl;
   rewriter_binding_variable_lists.push_back(vl);
   return index_for_vl;
 }
 
 // Put the sorts with indices between actual arity and requested arity in a vector.
-sort_list_vector RewriterCompilingJitty::get_residual_sorts(const sort_expression& s1, size_t actual_arity, size_t requested_arity)
+sort_list_vector RewriterCompilingJitty::get_residual_sorts(const sort_expression& s1, std::size_t actual_arity, std::size_t requested_arity)
 {
   sort_expression s=s1;
   sort_list_vector result;
@@ -777,7 +777,7 @@ sort_list_vector RewriterCompilingJitty::get_residual_sorts(const sort_expressio
 /// If the rewrite rule has too many arguments, false is returned, otherwise
 /// additional arguments are added.
 
-bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, const size_t requested_arity)
+bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, const std::size_t requested_arity)
 {
   data_expression lhs=e.lhs();
   data_expression rhs=e.rhs();
@@ -789,7 +789,7 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
     throw mcrl2::runtime_error("Equation " + pp(e) + " does not start with a function symbol in its left hand side.");
   }
 
-  size_t actual_arity=recursive_number_of_args(lhs);
+  std::size_t actual_arity=recursive_number_of_args(lhs);
   if (arity_is_allowed(f.sort(),requested_arity) && actual_arity<=requested_arity)
   {
     if (actual_arity<requested_arity)
@@ -819,13 +819,13 @@ bool RewriterCompilingJitty::lift_rewrite_rule_to_right_arity(data_equation& e, 
   return true;
 }
 
-match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list& rules, const size_t arity)
+match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list& rules, const std::size_t arity)
 {
-  typedef std::list<size_t> dep_list_t;
+  typedef std::list<std::size_t> dep_list_t;
   match_tree_list strat;
 
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
-  std::vector<size_t> arg_use_count(arity, 0);
+  std::vector<std::size_t> arg_use_count(arity, 0);
   std::list<std::pair<data_equation, dep_list_t> > rule_deps;
   for (data_equation_list::const_iterator it = rules.begin(); it != rules.end(); ++it)
   {
@@ -835,7 +835,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
       dep_list_t& deps = rule_deps.front().second;
 
       const std::vector<bool> is_dependent_arg = dep_vars(*it);
-      for (size_t i = 0; i < is_dependent_arg.size(); i++)
+      for (std::size_t i = 0; i < is_dependent_arg.size(); i++)
       {
         // Only if needed and not already rewritten
         if (is_dependent_arg[i])
@@ -873,9 +873,9 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
     }
 
     // Figure out which argument is most useful to rewrite
-    size_t max = 0;
-    size_t maxidx = 0;
-    for (size_t i = 0; i < arity; i++)
+    std::size_t max = 0;
+    std::size_t maxidx = 0;
+    for (std::size_t i = 0; i < arity; i++)
     {
       if (arg_use_count[i] > max)
       {
@@ -900,7 +900,7 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
   return reverse(strat);
 }
 
-void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& opid, size_t arity)
+void RewriterCompilingJitty::extend_nfs(nfs_array& nfs, const function_symbol& opid, std::size_t arity)
 {
   data_equation_list eqns = jittyc_eqns[opid];
   if (eqns.empty())
@@ -920,11 +920,11 @@ class rewr_function_spec
 {
   protected:
     const function_symbol m_fs;
-    const size_t m_arity;
+    const std::size_t m_arity;
     const bool m_delayed;
 
   public:
-    rewr_function_spec(function_symbol fs, size_t arity, const bool delayed)
+    rewr_function_spec(function_symbol fs, std::size_t arity, const bool delayed)
       : m_fs(fs), m_arity(arity), m_delayed(delayed)
     { }
 
@@ -940,7 +940,7 @@ class rewr_function_spec
       return m_fs;
     }
 
-    size_t arity() const
+    std::size_t arity() const
     {
       return m_arity;
     }
@@ -974,18 +974,18 @@ class RewriterCompilingJitty::ImplementTree
     class padding
     {
       private:
-        size_t m_indent;
+        std::size_t m_indent;
       public:
-        padding(size_t indent) : m_indent(indent) { }
+        padding(std::size_t indent) : m_indent(indent) { }
         void indent() { m_indent += 2; }
         void unindent() { m_indent -= 2; }
-        size_t reset() { size_t old = m_indent; m_indent = 4; return old; }
-        void restore(const size_t i){ m_indent = i; }
+        std::size_t reset() { std::size_t old = m_indent; m_indent = 4; return old; }
+        void restore(const std::size_t i){ m_indent = i; }
   
         friend
         std::ostream& operator<<(std::ostream& stream, const padding& p)
         {
-          for (size_t i = p.m_indent; i != 0; --i)
+          for (std::size_t i = p.m_indent; i != 0; --i)
           {
             stream << ' ';
           }
@@ -996,7 +996,7 @@ class RewriterCompilingJitty::ImplementTree
   RewriterCompilingJitty& m_rewriter;
   std::stack<rewr_function_spec> m_rewr_functions;
   std::set<rewr_function_spec> m_rewr_functions_implemented;
-  std::set<size_t>m_delayed_application_functions; // Recalls the arities of the required functions 'delayed_application';
+  std::set<std::size_t>m_delayed_application_functions; // Recalls the arities of the required functions 'delayed_application';
   std::vector<bool> m_used;
   std::vector<int> m_stack;
   padding m_padding;
@@ -1009,7 +1009,7 @@ class RewriterCompilingJitty::ImplementTree
   /// \param num_args The arity of the function symbol.
   /// \return true if the function symbol is always in normal form, false otherwise.
   ///
-  bool opid_is_nf(const function_symbol& opid, size_t num_args)
+  bool opid_is_nf(const function_symbol& opid, std::size_t num_args)
   {
     data_equation_list l = m_rewriter.jittyc_eqns[opid];
     for (data_equation_list::const_iterator it = l.begin(); it != l.end(); ++it)
@@ -1061,7 +1061,7 @@ class RewriterCompilingJitty::ImplementTree
       assert(is_application(t));
       // t has the shape application(head,t1,...,tn)
       const application& appl = down_cast<application>(t);
-      const size_t arity = recursive_number_of_args(appl);
+      const std::size_t arity = recursive_number_of_args(appl);
       const data_expression& head = appl.head();
       function_symbol dummy;
       if (!head_is_function_symbol(head, dummy))
@@ -1083,9 +1083,9 @@ class RewriterCompilingJitty::ImplementTree
   ///
   nfs_array calc_nfs_list(const application& appl, variable_or_number_list nnfvars)
   {
-    const size_t arity = recursive_number_of_args(appl);
+    const std::size_t arity = recursive_number_of_args(appl);
     nfs_array result(arity);
-    for(size_t i = 0; i < arity; ++i)
+    for(std::size_t i = 0; i < arity; ++i)
     {
       result.at(i) = calc_nfs(get_argument_of_higher_order_term(appl, i), nnfvars);
     }
@@ -1100,7 +1100,7 @@ class RewriterCompilingJitty::ImplementTree
   ///         'application' or 'make_term_with_many_arguments').
   ///
   static inline
-  const std::string appl_function(size_t arity)
+  const std::string appl_function(std::size_t arity)
   {
     if (arity == 0)
     {
@@ -1117,7 +1117,7 @@ class RewriterCompilingJitty::ImplementTree
   }
 
   inline
-  const std::string rewr_function_name(const function_symbol& f, size_t arity)
+  const std::string rewr_function_name(const function_symbol& f, std::size_t arity)
   {
     rewr_function_spec spec(f, arity, false);
     if (m_rewr_functions_implemented.insert(spec).second)
@@ -1128,7 +1128,7 @@ class RewriterCompilingJitty::ImplementTree
   }
 
   inline
-  const std::string delayed_rewr_function_name(const function_symbol& f, size_t arity)
+  const std::string delayed_rewr_function_name(const function_symbol& f, std::size_t arity)
   {
     rewr_function_spec spec(f, arity, true);
     if (m_rewr_functions_implemented.insert(spec).second)
@@ -1144,7 +1144,7 @@ class RewriterCompilingJitty::ImplementTree
    *
    */
 
-  void calc_inner_term_function(std::ostream& s, const function_symbol& f, const bool rewr, size_t arity, std::ostream& result_type)
+  void calc_inner_term_function(std::ostream& s, const function_symbol& f, const bool rewr, std::size_t arity, std::ostream& result_type)
   {
     const bool nf = opid_is_nf(f, arity);
     if (rewr || nf)
@@ -1180,7 +1180,7 @@ class RewriterCompilingJitty::ImplementTree
     }
   }
 
-  void calc_inner_term_abstraction(std::ostream& s, const abstraction& a, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  void calc_inner_term_abstraction(std::ostream& s, const abstraction& a, const std::size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     std::string binder_constructor;
     std::string rewriter_function;
@@ -1223,7 +1223,7 @@ class RewriterCompilingJitty::ImplementTree
     }
   }
 
-  void calc_inner_term_where_clause(std::ostream& s, const where_clause& w, const size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
+  void calc_inner_term_where_clause(std::ostream& s, const where_clause& w, const std::size_t startarg, const variable_or_number_list nnfvars, const bool rewr, std::ostream& result_type)
   {
     if (rewr)  // TODO Take into account that some arguments are already in normal form.
     {
@@ -1239,7 +1239,7 @@ class RewriterCompilingJitty::ImplementTree
     s << "where_clause(";
     calc_inner_term(s, w.body(), startarg, nnfvars, true, result_type);
     s << ",";
-    for(size_t i = w.assignments().size(); i > 0; --i)
+    for(std::size_t i = w.assignments().size(); i > 0; --i)
     {
       s << "jittyc_local_push_front(";
     }
@@ -1264,12 +1264,12 @@ class RewriterCompilingJitty::ImplementTree
   bool calc_inner_term_appl_function(std::ostream& s,
                                      const application& a,
                                      const function_symbol& head,
-                                     const size_t startarg,
+                                     const std::size_t startarg,
                                      const variable_or_number_list nnfvars,
                                      const bool rewr,
                                      std::ostream& result_type)
   {
-    const size_t arity = recursive_number_of_args(a);
+    const std::size_t arity = recursive_number_of_args(a);
 
     assert(arity > 0);
     nfs_array args_nfs(arity);
@@ -1314,7 +1314,7 @@ class RewriterCompilingJitty::ImplementTree
                             std::ostream& s,
                             const application& a,
                             const abstraction& head,
-                            const size_t startarg,
+                            const std::size_t startarg,
                             const variable_or_number_list nnfvars,
                             const bool rewr,
                             std::ostream& result_type)
@@ -1324,7 +1324,7 @@ class RewriterCompilingJitty::ImplementTree
                              // This should be lifted to a templated function. Furthermore, in the not rewritten variant,
                              // all arguments are also rewritten to normal form, to guarantee that they are of sort dataexpression.
     assert(is_lambda_binder(head.binding_operator()));
-    const size_t arity = a.size();
+    const std::size_t arity = a.size();
 
     if (rewr)
     {
@@ -1371,12 +1371,12 @@ class RewriterCompilingJitty::ImplementTree
   void write_application_to_stream_in_normal_form(
                             std::ostream& s,
                             const application& a,
-                            const size_t startarg,
+                            const std::size_t startarg,
                             const variable_or_number_list nnfvars)
   {
     // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
 
-    const size_t arity = a.size();
+    const std::size_t arity = a.size();
     nfs_array rewr_args(arity);
     rewr_args.fill();
     s << appl_function(arity) << "(";
@@ -1399,7 +1399,7 @@ class RewriterCompilingJitty::ImplementTree
     s << ")";
   }
 
-  string delayed_application(const size_t arity)
+  string delayed_application(const std::size_t arity)
   {
     m_delayed_application_functions.insert(arity);
     stringstream s;
@@ -1410,13 +1410,13 @@ class RewriterCompilingJitty::ImplementTree
   void write_delayed_application_to_stream_in_normal_form(
                             std::ostream& s,
                             const application& a,
-                            const size_t startarg,
+                            const std::size_t startarg,
                             const variable_or_number_list nnfvars,
                             std::ostream& result_type)
   {
     // the application is either application(variable,t1,..,tn) or application(application(...),t1,..,tn).
 
-    const size_t arity = a.size();
+    const std::size_t arity = a.size();
     nfs_array rewr_args(arity);
     rewr_args.fill();
     stringstream code_string;
@@ -1450,7 +1450,7 @@ class RewriterCompilingJitty::ImplementTree
                            (std::ostream& s,
                             const application& a,
                             const variable& ,
-                            const size_t startarg,
+                            const std::size_t startarg,
                             const variable_or_number_list nnfvars,
                             const bool rewr,
                             std::ostream& result_type)
@@ -1472,7 +1472,7 @@ class RewriterCompilingJitty::ImplementTree
 
   bool calc_inner_term_application(std::ostream& s,
                                    const application& a,
-                                   const size_t startarg,
+                                   const std::size_t startarg,
                                    const variable_or_number_list nnfvars,
                                    const bool rewr,
                                    std::ostream& result_type)
@@ -1504,7 +1504,7 @@ class RewriterCompilingJitty::ImplementTree
   ///
   void calc_inner_term(std::ostream& s,
                        const data_expression& t,
-                       const size_t startarg,
+                       const std::size_t startarg,
                        const variable_or_number_list nnfvars,
                        const bool rewr,
                        std::ostream& result_type)
@@ -1549,12 +1549,12 @@ class RewriterCompilingJitty::ImplementTree
   ///
   void calc_inner_terms(std::ostream& s,
                         const application& appl,
-                        const size_t startarg,
+                        const std::size_t startarg,
                         const variable_or_number_list nnfvars,
                         const nfs_array& rewr,
                         std::ostream& argument_types)
   {
-    for(size_t i=0; i<recursive_number_of_args(appl); ++i)
+    for(std::size_t i=0; i<recursive_number_of_args(appl); ++i)
     {
       if (i > 0)
       {
@@ -1577,11 +1577,11 @@ class RewriterCompilingJitty::ImplementTree
 
   void implement_tree(std::ostream& m_stream,
                       const match_tree& tree, 
-                      size_t cur_arg, 
-                      size_t parent, 
-                      size_t level, 
-                      size_t cnt,
-                      const size_t arity,
+                      std::size_t cur_arg, 
+                      std::size_t parent, 
+                      std::size_t level, 
+                      std::size_t cnt,
+                      const std::size_t arity,
                       const function_symbol& opid,
                       bracket_level_data& brackets, 
                       std::stack<std::string>& auxiliary_code_fragments)
@@ -1592,7 +1592,7 @@ class RewriterCompilingJitty::ImplementTree
     */
     if (brackets.bracket_nesting_level>brackets.MCRL2_BRACKET_NESTING_LEVEL)
     {
-      static size_t auxiliary_method_name_index=0;
+      static std::size_t auxiliary_method_name_index=0;
 
       m_stream << m_padding 
                << "const data_expression result" << auxiliary_method_name_index << "= auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index << "("
@@ -1600,7 +1600,7 @@ class RewriterCompilingJitty::ImplementTree
       m_stream << m_padding 
                << "if (result" << auxiliary_method_name_index << " != data_expression()) { return result" << auxiliary_method_name_index << "; }\n";
 
-      const size_t old_indent=m_padding.reset();
+      const std::size_t old_indent=m_padding.reset();
       std::stringstream s;
       s << "  template < " << brackets.current_template_parameters << ">\n"
         << "  static inline data_expression auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index 
@@ -1610,7 +1610,7 @@ class RewriterCompilingJitty::ImplementTree
       
       auxiliary_method_name_index++;
 
-      size_t old_bracket_nesting_level=brackets.bracket_nesting_level;
+      std::size_t old_bracket_nesting_level=brackets.bracket_nesting_level;
       brackets.bracket_nesting_level=0;
       implement_tree(s,tree,cur_arg,parent,level,cnt,arity, opid, brackets,auxiliary_code_fragments);
       brackets.bracket_nesting_level=old_bracket_nesting_level;
@@ -1677,11 +1677,11 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeS(
              std::ostream& m_stream,
              const match_tree_S& tree, 
-             size_t cur_arg, 
-             size_t parent, 
-             size_t level, 
-             size_t cnt,
-             const size_t arity,
+             std::size_t cur_arg, 
+             std::size_t parent, 
+             std::size_t level, 
+             std::size_t cnt,
+             const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
@@ -1727,11 +1727,11 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeM(
              std::ostream& m_stream, 
              const match_tree_M& tree, 
-             size_t cur_arg, 
-             size_t parent, 
-             size_t level, 
-             size_t cnt,
-             const size_t arity,
+             std::size_t cur_arg, 
+             std::size_t parent, 
+             std::size_t level, 
+             std::size_t cnt,
+             const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
@@ -1768,11 +1768,11 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeF(
              std::ostream& m_stream, 
              const match_tree_F& tree, 
-             size_t cur_arg, 
-             size_t parent, 
-             size_t level, 
-             size_t cnt,
-             const size_t arity,
+             std::size_t cur_arg, 
+             std::size_t parent, 
+             std::size_t level, 
+             std::size_t cnt,
+             const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
@@ -1847,9 +1847,9 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeD(
              std::ostream& m_stream, 
              const match_tree_D& tree, 
-             size_t level, 
-             size_t cnt,
-             const size_t arity,
+             std::size_t level, 
+             std::size_t cnt,
+             const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
@@ -1866,11 +1866,11 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeN(
              std::ostream& m_stream, 
              const match_tree_N& tree, 
-             size_t cur_arg, 
-             size_t parent, 
-             size_t level, 
-             size_t cnt,
-             const size_t arity,
+             std::size_t cur_arg, 
+             std::size_t parent, 
+             std::size_t level, 
+             std::size_t cnt,
+             const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
@@ -1881,11 +1881,11 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeC(
              std::ostream& m_stream, 
              const match_tree_C& tree, 
-             size_t cur_arg, 
-             size_t parent, 
-             size_t level, 
-             size_t cnt,
-             const size_t arity,
+             std::size_t cur_arg, 
+             std::size_t parent, 
+             std::size_t level, 
+             std::size_t cnt,
+             const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
@@ -1919,8 +1919,8 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeR(
              std::ostream& m_stream, 
              const match_tree_R& tree, 
-             size_t cur_arg, 
-             size_t level)
+             std::size_t cur_arg, 
+             std::size_t level)
   {
     if (level > 0)
     {
@@ -1960,7 +1960,7 @@ class RewriterCompilingJitty::ImplementTree
   void implement_treeR(
              std::ostream& m_stream, 
              const match_tree_R& tree, 
-             size_t arity)
+             std::size_t arity)
   {
     stringstream result_type_string;
     if (arity == 0)
@@ -1987,8 +1987,8 @@ public:
   {
     for (function_symbol_vector::const_iterator it = function_symbols.begin(); it != function_symbols.end(); ++it)
     {
-      const size_t max_arity = getArity(*it);
-      for (size_t arity = 0; arity <= max_arity; ++arity)
+      const std::size_t max_arity = getArity(*it);
+      for (std::size_t arity = 0; arity <= max_arity; ++arity)
       {
         if (arity_is_allowed(it->sort(), arity))
         {
@@ -2012,12 +2012,12 @@ public:
   void implement_tree(
              std::ostream& m_stream, 
              match_tree tree, 
-             const size_t arity,
+             const std::size_t arity,
              const function_symbol& opid,
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
   {
-    for (size_t i = 0; i < arity; ++i)
+    for (std::size_t i = 0; i < arity; ++i)
     {
       if (!m_used[i])
       {
@@ -2025,7 +2025,7 @@ public:
       }
     }
 
-    size_t l = 0;
+    std::size_t l = 0;
     while (tree.isC())
     {
       tree = implement_treeC(m_stream, down_cast<match_tree_C>(tree),brackets);
@@ -2052,7 +2052,7 @@ public:
   void implement_strategy(
              std::ostream& m_stream, 
              match_tree_list strat, 
-             size_t arity, 
+             std::size_t arity, 
              const function_symbol& opid,
              bracket_level_data& brackets,
              std::stack<std::string>& auxiliary_code_fragments)
@@ -2064,7 +2064,7 @@ public:
       m_stream << m_padding << "// " << strat.front() <<  "\n";
       if (strat.front().isA())
       {
-        size_t arg = match_tree_A(strat.front()).variable_index();
+        std::size_t arg = match_tree_A(strat.front()).variable_index();
         if (!m_used[arg])
         {
           m_stream << m_padding << "const data_expression arg" << arg << " = local_rewrite(arg_not_nf" << arg << ");\n";
@@ -2100,7 +2100,7 @@ public:
     }
   }
 
-  std::string get_heads(const sort_expression& s, const std::string& base_string, const size_t number_of_arguments)
+  std::string get_heads(const sort_expression& s, const std::string& base_string, const std::size_t number_of_arguments)
   {
     std::stringstream ss;
     if (is_function_sort(s) && number_of_arguments>0)
@@ -2123,7 +2123,7 @@ public:
   /// \param number_of_arguments
   /// \return
   ///
-  void get_recursive_argument(std::ostream& m_stream, function_sort s, size_t index, const std::string& base_string, size_t number_of_arguments)
+  void get_recursive_argument(std::ostream& m_stream, function_sort s, std::size_t index, const std::string& base_string, std::size_t number_of_arguments)
   {
     while (index >= s.domain().size())
     {
@@ -2137,11 +2137,11 @@ public:
 
   void generate_delayed_application_functions(ostream& ss)
   {
-    for(size_t arity: m_delayed_application_functions)
+    for(std::size_t arity: m_delayed_application_functions)
     {
       assert(arity>0);
       ss << m_padding << "template < class HEAD";
-      for (size_t i = 0; i < arity; ++i)
+      for (std::size_t i = 0; i < arity; ++i)
       {
         ss << ", class DATA_EXPR" << i;
       }
@@ -2154,7 +2154,7 @@ public:
       m_padding.indent();
 
       ss << m_padding << "const HEAD& m_head;\n";
-      for (size_t i = 0; i < arity; ++i)
+      for (std::size_t i = 0; i < arity; ++i)
       {
         ss  << m_padding << "const DATA_EXPR" << i << "& m_arg" << i << ";\n";
       }
@@ -2164,14 +2164,14 @@ public:
       m_padding.indent();
 
       ss << m_padding << "delayed_application" << arity << "(const HEAD& head";
-      for (size_t i = 0; i < arity; ++i)
+      for (std::size_t i = 0; i < arity; ++i)
       {
         ss << ", const DATA_EXPR" << i << "& arg" << i;
       }
       ss << ")\n";
       ss << m_padding << "  : m_head(head)";
 
-      for (size_t i = 0; i < arity; ++i)
+      for (std::size_t i = 0; i < arity; ++i)
       {
         ss << ", m_arg" << i << "(arg" << i << ")";
       }
@@ -2182,7 +2182,7 @@ public:
       m_padding.indent();
 
       ss << m_padding << "return rewrite_with_arguments_in_normal_form(" << appl_function(arity) << "(local_rewrite(m_head)";
-      for (size_t i = 0; i < arity; ++i)
+      for (std::size_t i = 0; i < arity; ++i)
       {
         ss << ", local_rewrite(m_arg" << i << ")";
       }
@@ -2198,18 +2198,18 @@ public:
 
   }
 
-  std::string rewr_function_finish_term(const size_t arity, const std::string& head, const function_sort& s, size_t& used_arguments)
+  std::string rewr_function_finish_term(const std::size_t arity, const std::string& head, const function_sort& s, std::size_t& used_arguments)
   {
     if (arity == 0)
     {
       return head;
     }
 
-    const size_t domain_size = s.domain().size();
+    const std::size_t domain_size = s.domain().size();
     stringstream ss;
     ss << appl_function(domain_size) << "(" << head;
 
-    for (size_t i = 0; i < domain_size; ++i)
+    for (std::size_t i = 0; i < domain_size; ++i)
     {
       if (m_used[used_arguments + i])
       {
@@ -2234,7 +2234,7 @@ public:
   }
 
 
-  void rewr_function_finish(std::ostream& m_stream, size_t arity, const data::function_symbol& opid)
+  void rewr_function_finish(std::ostream& m_stream, std::size_t arity, const data::function_symbol& opid)
   {
     // Note that arity is the total arity, of all function symbols.
     m_stream << m_padding << "return ";
@@ -2246,20 +2246,20 @@ public:
     {
       stringstream ss;
       ss << "data_expression((atermpp::detail::_aterm*)" << (void*)atermpp::detail::address(opid) << ")";
-      size_t used_arguments = 0;
+      std::size_t used_arguments = 0;
       m_stream << rewr_function_finish_term(arity, ss.str(), down_cast<function_sort>(opid.sort()), used_arguments) << ";\n";
       assert(used_arguments == arity);
     } 
   }
 
-  void rewr_function_signature(std::ostream& m_stream, size_t index, size_t arity, bracket_level_data& brackets)
+  void rewr_function_signature(std::ostream& m_stream, std::size_t index, std::size_t arity, bracket_level_data& brackets)
   {
     // Constant function symbols (a == 0) can be passed by reference
     if (arity>0)
     {
       m_stream << m_padding << "template < ";
       std::stringstream s;
-      for (size_t i = 0; i < arity; ++i)
+      for (std::size_t i = 0; i < arity; ++i)
       {
         
         s << (i == 0 ? "" : ", ")
@@ -2274,7 +2274,7 @@ public:
 
     std::stringstream arguments;
     std::stringstream parameters;
-    for (size_t i = 0; i < arity; ++i)
+    for (std::size_t i = 0; i < arity; ++i)
     {
       parameters << (i == 0 ? "" : ", ")
                  << "const DATA_EXPR" << i << "& arg_not_nf"
@@ -2289,14 +2289,14 @@ public:
   void rewr_function_implementation(
              std::ostream& m_stream, 
              const data::function_symbol& func, 
-             size_t arity, 
+             std::size_t arity, 
              match_tree_list strategy)
 
   {
     bracket_level_data brackets;
     std::stack<std::string> auxiliary_code_fragments;
 
-    size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
+    std::size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     rewr_function_signature(m_stream, index, arity, brackets);
     m_stream << "\n" << m_padding << "{\n";
@@ -2309,7 +2309,7 @@ public:
                   "static inline data_expression rewr_" << index << "_" << arity << "_term"
                   "(const application&" << (arity == 0 ? "" : " t") << ") "
                   "{ return rewr_" << index << "_" << arity << "(";
-    for(size_t i = 0; i < arity; ++i)
+    for(std::size_t i = 0; i < arity; ++i)
     {
       assert(is_function_sort(func.sort()));
       m_stream << (i == 0 ? "" : ", ");
@@ -2323,7 +2323,7 @@ public:
                   "static inline data_expression rewr_" << index << "_" << arity << "_term_arg_in_normal_form"
                   "(const application&" << (arity == 0 ? "" : " t") << ") "
                   "{ return rewr_" << index << "_" << arity << "(";
-    for(size_t i = 0; i < arity; ++i)
+    for(std::size_t i = 0; i < arity; ++i)
     {
       assert(is_function_sort(func.sort()));
       m_stream << (i == 0 ? "" : ", ");
@@ -2339,14 +2339,14 @@ public:
     m_stream << "\n";
   }
 
-  void generate_delayed_normal_form_generating_function(std::ostream& m_stream, const data::function_symbol& func, size_t arity)
+  void generate_delayed_normal_form_generating_function(std::ostream& m_stream, const data::function_symbol& func, std::size_t arity)
   {
-    size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
+    std::size_t index = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::index(func);
     m_stream << m_padding << "// [" << index << "] " << func << ": " << func.sort() << "\n";
     if (arity>0)
     {
       m_stream << m_padding << "template < ";
-      for (size_t i = 0; i < arity; ++i)
+      for (std::size_t i = 0; i < arity; ++i)
       {
         m_stream << (i == 0 ? "" : ", ")
                  << "class DATA_EXPR" << i;
@@ -2358,7 +2358,7 @@ public:
     m_padding.indent();
     m_stream << m_padding << "protected:\n";
     m_padding.indent();
-    for(size_t i = 0; i < arity; ++i)
+    for(std::size_t i = 0; i < arity; ++i)
     {
       m_stream << m_padding << "const DATA_EXPR" << i << "& m_t" << i << ";\n";
     }
@@ -2367,12 +2367,12 @@ public:
     m_stream << m_padding << "public:\n";
     m_padding.indent();
     m_stream << m_padding << "delayed_rewr_" << index << "_" << arity << "(";
-    for(size_t i = 0; i < arity; ++i)
+    for(std::size_t i = 0; i < arity; ++i)
     {
       m_stream << (i==0?"":", ") << "const DATA_EXPR" << i << "& t" << i;
     }
     m_stream << ")\n" << m_padding << (arity==0?"":"  : ");
-    for(size_t i = 0; i < arity; ++i)
+    for(std::size_t i = 0; i < arity; ++i)
     {
       m_stream << (i==0?"":", ") << "m_t" << i << "(t" << i << ")";
     }
@@ -2380,7 +2380,7 @@ public:
     m_stream << m_padding << "data_expression normal_form() const\n";
     m_stream << m_padding << "{\n";
     m_stream << m_padding << "  return rewr_" << index << "_" << arity << "(";
-    for(size_t i = 0; i < arity; ++i)
+    for(std::size_t i = 0; i < arity; ++i)
     {
       m_stream << (i==0?"":", ") << "m_t" << i;
     }
@@ -2434,7 +2434,7 @@ void RewriterCompilingJitty::CleanupRewriteSystem()
 /// \param unique A number that will be incorporated into the filename.
 /// \return A filename that should be used to store the generated C++ code in.
 ///
-static std::string generate_cpp_filename(size_t unique)
+static std::string generate_cpp_filename(std::size_t unique)
 {
   const char* env_dir = std::getenv("MCRL2_COMPILEDIR");
   std::ostringstream filename;
@@ -2480,22 +2480,22 @@ void filter_function_symbols(const function_symbol_vector& source, function_symb
 /// \param s The stream to which the generated C++ code is written.
 /// \param max_arity The maximum arity of the functions that are to be generated.
 ///
-static void generate_make_appl_functions(std::ostream& s, size_t max_arity)
+static void generate_make_appl_functions(std::ostream& s, std::size_t max_arity)
 {
   // The casting magic in these functions is done to avoid triggering the ATerm
   // reference counting mechanism.
-  for (size_t i = 7; i <= max_arity; ++i)
+  for (std::size_t i = 7; i <= max_arity; ++i)
   {
     if (m_required_appl_functions.count(i)>0)
     {
       s << "static application make_term_with_many_arguments(const data_expression& head";
-      for (size_t j = 1; j <= i; ++j)
+      for (std::size_t j = 1; j <= i; ++j)
       {
         s << ", const data_expression& arg" << j;
       }
       s << ")\n{\n";
       s << "  atermpp::detail::_aterm* buffer[" << i << "];\n";
-      for (size_t j=0; j<i; ++j)
+      for (std::size_t j=0; j<i; ++j)
       {
         s << "  buffer[" << j << "] = atermpp::detail::address(arg" << j + 1 << ");\n";
       }
@@ -2510,7 +2510,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
 {
   std::ofstream cpp_file(filename);
   std::stringstream rewr_code;
-  size_t max_arity = std::max(calc_max_arity(m_data_specification_for_enumeration.constructors()),
+  std::size_t max_arity = std::max(calc_max_arity(m_data_specification_for_enumeration.constructors()),
                               calc_max_arity(m_data_specification_for_enumeration.mappings()));
 
   // - Store all used function symbols in a vector
@@ -2525,7 +2525,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   // jittycpreamble.h.
   ImplementTree code_generator(*this, function_symbols);
 
-  const size_t index_bound = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::max_index() + 1;
+  const std::size_t index_bound = core::index_traits<data::function_symbol, function_symbol_key_type, 2>::max_index() + 1;
   cpp_file << "#define INDEX_BOUND " << index_bound << "\n"
               "#define ARITY_BOUND " << max_arity + 1 << "\n";
   cpp_file << "#include \"mcrl2/data/detail/rewrite/jittycpreamble.h\"\n";
@@ -2625,7 +2625,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     jittyc_eqns[get_function_symbol_of_head(it->lhs())].push_front(*it);
   }
 
-  std::string cpp_file = generate_cpp_filename(reinterpret_cast<size_t>(this));
+  std::string cpp_file = generate_cpp_filename(reinterpret_cast<std::size_t>(this));
   generate_code(cpp_file);
 
   mCRL2log(verbose) << "compiling " << cpp_file << "..." << std::endl;

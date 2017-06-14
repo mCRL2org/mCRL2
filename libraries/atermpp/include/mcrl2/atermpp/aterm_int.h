@@ -41,7 +41,7 @@ class aterm_int:public aterm
     
     /// \brief Constructor.
     /// \param value An integer value.
-    explicit aterm_int(size_t value):aterm(detail::aterm_int(value))
+    explicit aterm_int(std::size_t value):aterm(detail::aterm_int(value))
     {
     }
 
@@ -55,7 +55,7 @@ class aterm_int:public aterm
 
     /// \brief Get the integer value of the aterm_int.
     /// \return The value of the term.
-    size_t value() const
+    std::size_t value() const
     {
       return reinterpret_cast<detail::_aterm_int*>(m_term)->value;
     }

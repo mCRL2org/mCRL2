@@ -114,7 +114,7 @@ class data_type_checker: public sort_type_checker
                            data_expression& DataTerm,
                            sort_expression PosType,
                            const bool strictly_ambiguous=true,
-                           const size_t nFactPars=std::string::npos,
+                           const std::size_t nFactPars=std::string::npos,
                            const bool warn_upcasting=false,
                            const bool print_cast_error=true) const;
 

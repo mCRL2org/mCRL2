@@ -25,7 +25,7 @@
 
     For each component found, the callback functor is called with as arguments
     a list of vertex indices (`const verti[]`) and the size of the component
-    (`size_t`).  The callback should return an integer: zero to continue
+    (`std::size_t`).  The callback should return an integer: zero to continue
     enumerating components, or non-zero to abort.
 
     @return the last value returned by a call to callback
@@ -62,19 +62,19 @@ public:
     void clear() { sccs.clear(); }
 
     //! @return the number of collected SCCs.
-    size_t size() const { return sccs.size(); }
+    std::size_t size() const { return sccs.size(); }
 
     //! @return the i-th SCC as vector of vertex indices.
-    std::vector<verti> &operator[](size_t i) { return sccs[i]; }
+    std::vector<verti> &operator[](std::size_t i) { return sccs[i]; }
 
     //! @return the i-th SCC as const vector of vertex indices.
-    const std::vector<verti> &operator[](size_t i) const { return sccs[i]; }
+    const std::vector<verti> &operator[](std::size_t i) const { return sccs[i]; }
 
     /*! Add a strongly connected component to the list.
         @param scc an array of length `size` giving indices of the vertices 
         @param size the size of the component
         @return zero */
-    int operator()(const verti scc[], size_t size)
+    int operator()(const verti scc[], std::size_t size)
     {
         sccs.resize(sccs.size() + 1);
         sccs.back().assign(&scc[0], &scc[size]); 

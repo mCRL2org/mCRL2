@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(function_sort_test)
   BOOST_CHECK(!is_structured_sort(fs));
   BOOST_CHECK(!is_container_sort(fs));
   BOOST_CHECK_EQUAL(fs, fs);
-  BOOST_CHECK_EQUAL(fs.domain().size(), static_cast< size_t >(s01.size()));
+  BOOST_CHECK_EQUAL(fs.domain().size(), static_cast< std::size_t >(s01.size()));
 
   // Element wise check
   sort_expression_list::const_iterator i = s01.begin();

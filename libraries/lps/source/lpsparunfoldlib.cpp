@@ -70,7 +70,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::stochastic_specification spec,
   m_identifier_generator.add_identifiers(sort_names);
 
   {
-    size_t size = mapping_and_constructor_names.size();
+    std::size_t size = mapping_and_constructor_names.size();
     for (const function_symbol& f: m_data_specification.constructors()) 
     {
       mapping_and_constructor_names.insert(f.name());
@@ -79,7 +79,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::stochastic_specification spec,
   }
 
   {
-    size_t size = mapping_and_constructor_names.size();
+    std::size_t size = mapping_and_constructor_names.size();
     for (const function_symbol& f: m_data_specification.mappings())
     {
       mapping_and_constructor_names.insert(f.name());
@@ -149,7 +149,7 @@ function_symbol_vector lpsparunfold::new_constructors(mcrl2::data::function_symb
   return elements_of_new_sorts;
 }
 
-mcrl2::data::function_symbol lpsparunfold::create_case_function(size_t k)
+mcrl2::data::function_symbol lpsparunfold::create_case_function(std::size_t k)
 {
   mcrl2::data::function_symbol fs;
   std::string str = "C_";
@@ -157,7 +157,7 @@ mcrl2::data::function_symbol lpsparunfold::create_case_function(size_t k)
   mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
   mcrl2::data::sort_expression_vector fsl;
   fsl.push_back(fresh_basic_sort);
-  for (size_t i = 0; i < k; ++i)
+  for (std::size_t i = 0; i < k; ++i)
   {
     fsl.push_back(m_unfold_process_parameter);
   }
@@ -228,7 +228,7 @@ std::map<function_symbol, data_expression_vector> lpsparunfold::create_arguments
 
   // The two data structures below are used to allow the reuse of variables names.
   std::map< sort_expression, variable_vector > sort_vars;  /* Mapping for Sort |-> [Variable] */
-  std::map< sort_expression, size_t > sort_index;          /* Mapping for counting the number of unique Sorts of an equation */
+  std::map< sort_expression, std::size_t > sort_index;          /* Mapping for counting the number of unique Sorts of an equation */
 
   for (const function_symbol& f: affected_constructors)
   {
@@ -285,8 +285,8 @@ void lpsparunfold::create_data_equations(
 
   const std::map<function_symbol, data_expression_vector> constructors_argument_map=create_arguments_map(affected_constructors);
 
-  size_t element_of_new_sort_index = 0;
-  size_t projection_function_index = 0;
+  std::size_t element_of_new_sort_index = 0;
+  std::size_t projection_function_index = 0;
   for (const function_symbol& f: affected_constructors)
   {
     /* Creating an equation for the detector function */
@@ -429,7 +429,7 @@ void lpsparunfold::unfold_summands(mcrl2::lps::stochastic_action_summand_vector&
   }
 }
 
-mcrl2::lps::stochastic_linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , function_symbol_vector affected_constructors, const function_symbol& determine_function, size_t parameter_at_index, const function_symbol_vector& projection_functions)
+mcrl2::lps::stochastic_linear_process lpsparunfold::update_linear_process(const function_symbol& case_function , function_symbol_vector affected_constructors, const function_symbol& determine_function, std::size_t parameter_at_index, const function_symbol_vector& projection_functions)
 {
   /* Get process parameters from lps */
   mcrl2::data::variable_list lps_proc_pars =  m_lps.process_parameters();
@@ -448,7 +448,7 @@ mcrl2::lps::stochastic_linear_process lpsparunfold::update_linear_process(const 
        i != lps_proc_pars.end();
        ++i)
   {
-    if (static_cast<size_t>(std::distance(lps_proc_pars.begin(), i)) == parameter_at_index)
+    if (static_cast<std::size_t>(std::distance(lps_proc_pars.begin(), i)) == parameter_at_index)
     {
       mCRL2log(verbose) << "Unfolding parameter " << i->name() << " at index " << std::distance(lps_proc_pars.begin(), i) << "..." << std::endl;
       mcrl2::data::variable_vector process_parameters_injection;
@@ -542,7 +542,7 @@ mcrl2::lps::stochastic_linear_process lpsparunfold::update_linear_process(const 
   return new_lps;
 }
 
-mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_initialization(const data::function_symbol& determine_function, size_t parameter_at_index, const function_symbol_vector& projection_functions)
+mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_initialization(const data::function_symbol& determine_function, std::size_t parameter_at_index, const function_symbol_vector& projection_functions)
 {
   //
   //update inital process
@@ -577,7 +577,7 @@ mcrl2::lps::stochastic_process_initializer lpsparunfold::update_linear_process_i
        ; k != ass.end()
        ; ++k)
   {
-    if (static_cast<size_t>(std::distance(ass.begin(), k)) == parameter_at_index)
+    if (static_cast<std::size_t>(std::distance(ass.begin(), k)) == parameter_at_index)
     {
 
       mcrl2::data::data_expression_vector ins = unfold_constructor(k -> rhs(), determine_function, projection_functions);
@@ -694,7 +694,7 @@ mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor(const data_
   return result;
 }
 
-mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_t parameter_at_index)
+mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(std::size_t parameter_at_index)
 {
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector(lps_proc_pars_list.begin(), lps_proc_pars_list.end());
@@ -809,9 +809,9 @@ void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_ne
     vars.push_back(v);
   }
 
-  size_t e = 1;
+  std::size_t e = 1;
   data_expression_vector sub_args(vars.begin(), vars.end());
-  for (size_t i = 1 ; i < function_sort(case_function.sort()).domain().size() ; ++i)
+  for (std::size_t i = 1 ; i < function_sort(case_function.sort()).domain().size() ; ++i)
   {
     sub_args[0] = data_expression(elements_of_new_sorts[i-1]);
     data_expression lhs = application(case_function , sub_args);
@@ -830,7 +830,7 @@ void lpsparunfold::generate_case_functions(function_symbol_vector elements_of_ne
   }
 }
 
-mcrl2::lps::stochastic_specification lpsparunfold::algorithm(size_t parameter_at_index)
+mcrl2::lps::stochastic_specification lpsparunfold::algorithm(std::size_t parameter_at_index)
 {
   m_unfold_process_parameter = sort_at_process_parameter_index(parameter_at_index);
 

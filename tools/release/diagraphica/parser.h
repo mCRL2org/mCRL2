@@ -46,9 +46,9 @@ class Parser : public QObject
     void parseAttrConfig(
       QString filename,
       Graph* graph,
-      std::map< size_t, size_t > &attrIdxFrTo,
-      std::map< size_t, std::vector< std::string > > &attrCurDomains,
-      std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains);
+      std::map< std::size_t, std::size_t > &attrIdxFrTo,
+      std::map< std::size_t, std::vector< std::string > > &attrCurDomains,
+      std::map< std::size_t, std::map< std::size_t, std::size_t  > > &attrOrigToCurDomains);
     void writeAttrConfig(
       QString filename,
       Graph* graph);
@@ -82,9 +82,9 @@ class Parser : public QObject
     // dgc files
     void parseAttribute(
       Graph* graph,
-      std::map< size_t, size_t > &attrIdxFrTo,
-      std::map< size_t , std::vector< std::string > > &attrCurDomains,
-      std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains,
+      std::map< std::size_t, std::size_t > &attrIdxFrTo,
+      std::map< std::size_t , std::vector< std::string > > &attrCurDomains,
+      std::map< std::size_t, std::map< std::size_t, std::size_t  > > &attrOrigToCurDomains,
       QDomNode AttributeNode);
 
     // dgd files

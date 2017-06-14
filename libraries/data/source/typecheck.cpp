@@ -2277,7 +2277,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
   data_expression& DataTerm,
   sort_expression PosType,
   const bool strictly_ambiguous,
-  const size_t nFactPars,
+  const std::size_t nFactPars,
   const bool warn_upcasting,
   const bool print_cast_error) const
 {
@@ -2826,7 +2826,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
   {
     //arguments
     const application& appl=down_cast<application>(DataTerm);
-    size_t nArguments=appl.size();
+    std::size_t nArguments=appl.size();
 
     //The following is needed to check enumerations
     const data_expression& Arg0 = appl.head();
@@ -3477,7 +3477,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
 
 void mcrl2::data::data_type_checker::read_constructors_and_mappings(const function_symbol_vector& constructors, const function_symbol_vector& mappings, const function_symbol_vector& normalized_constructors)
 {
-  size_t constr_number=constructors.size();
+  std::size_t constr_number=constructors.size();
   function_symbol_vector functions_and_constructors=constructors;
   functions_and_constructors.insert(functions_and_constructors.end(),mappings.begin(),mappings.end());
   for (const function_symbol& Func: functions_and_constructors)
@@ -4272,9 +4272,9 @@ sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const te
   //0..nFormPars-1
 
   sort_expression_list Result;
-  size_t nFormPars=TypeListList.front().size();
+  std::size_t nFormPars=TypeListList.front().size();
   std::vector<sort_expression_list> Pars(nFormPars);
-  for (size_t i=0; i<nFormPars; i++)
+  for (std::size_t i=0; i<nFormPars; i++)
   {
     Pars[i]=sort_expression_list();
   }
@@ -4282,13 +4282,13 @@ sort_expression_list mcrl2::data::data_type_checker::GetNotInferredList(const te
   for (term_list<sort_expression_list>::const_iterator j=TypeListList.begin(); j!=TypeListList.end(); ++j)
   {
     sort_expression_list TypeList=*j;
-    for (size_t i=0; i<nFormPars; TypeList=TypeList.tail(),i++)
+    for (std::size_t i=0; i<nFormPars; TypeList=TypeList.tail(),i++)
     {
       Pars[i]=InsertType(Pars[i],TypeList.front());
     }
   }
 
-  for (size_t i=nFormPars; i>0; i--)
+  for (std::size_t i=nFormPars; i>0; i--)
   {
     sort_expression Sort;
     if (Pars[i-1].size()==1)

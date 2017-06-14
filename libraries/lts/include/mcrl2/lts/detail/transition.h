@@ -22,9 +22,9 @@ namespace lts
 namespace detail
 {
 
-inline size_t apply_map(const size_t n, const std::map<size_t,size_t>& mapping)
+inline std::size_t apply_map(const std::size_t n, const std::map<std::size_t,std::size_t>& mapping)
 {
-  const std::map<size_t,size_t>::const_iterator i=mapping.find(n);
+  const std::map<std::size_t,std::size_t>::const_iterator i=mapping.find(n);
   if (i==mapping.end())
   {
     return n;
@@ -35,10 +35,10 @@ inline size_t apply_map(const size_t n, const std::map<size_t,size_t>& mapping)
 class compare_transitions_slt
 {
   protected:
-    const std::map<size_t,size_t>& m_hide_action_map;
+    const std::map<std::size_t,std::size_t>& m_hide_action_map;
 
   public:
-    compare_transitions_slt(const std::map<size_t,size_t>& hide_action_map)
+    compare_transitions_slt(const std::map<std::size_t,std::size_t>& hide_action_map)
      : m_hide_action_map(hide_action_map)
     {}
 
@@ -50,8 +50,8 @@ class compare_transitions_slt
       }
       else 
       {
-        const size_t n1=apply_map(t1.label(), m_hide_action_map);
-        const size_t n2=apply_map(t2.label(), m_hide_action_map);
+        const std::size_t n1=apply_map(t1.label(), m_hide_action_map);
+        const std::size_t n2=apply_map(t2.label(), m_hide_action_map);
         if (n1 != n2)
         {
           return n1 < n2;
@@ -67,17 +67,17 @@ class compare_transitions_slt
 class compare_transitions_lts
 {
   protected:
-    const std::map<size_t,size_t>& m_hide_action_map;
+    const std::map<std::size_t,std::size_t>& m_hide_action_map;
 
   public:
-    compare_transitions_lts(const std::map<size_t,size_t>& hide_action_map)
+    compare_transitions_lts(const std::map<std::size_t,std::size_t>& hide_action_map)
      : m_hide_action_map(hide_action_map)
     {}
 
     bool operator()(const transition& t1, const transition& t2)
     {
-      const size_t n1=apply_map(t1.label(), m_hide_action_map);
-      const size_t n2=apply_map(t2.label(), m_hide_action_map);
+      const std::size_t n1=apply_map(t1.label(), m_hide_action_map);
+      const std::size_t n2=apply_map(t2.label(), m_hide_action_map);
       if (n1 != n2)
       {
         return n1 < n2;

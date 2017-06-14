@@ -32,7 +32,7 @@ class cvc4_identifier_generator : public data::set_identifier_generator
       if (name == "++") name = "concat";
       if (name == ".") name = "at";
 
-      for (size_t i = 0; i < name.size(); i++)
+      for (std::size_t i = 0; i < name.size(); i++)
       {
         if (!(
           ('0' <= name[i] && name[i] <= '9') ||
@@ -215,7 +215,7 @@ class cvc4_constructed_sort_definition : public constructed_sort_definition
     cvc4_constructed_sort_definition(data_specification *data_specification, data::sort_expression sort, const constructors_t &constructors):
       constructed_sort_definition(data_specification, sort, constructors)
     {
-      for (size_t i = 0; i < m_constructors.size(); i++)
+      for (std::size_t i = 0; i < m_constructors.size(); i++)
       {
         std::string name = data_specification->identifier_generator()(m_constructors[i].constructor.name());
         std::string recogniser_name = "is-" + name;
@@ -225,7 +225,7 @@ class cvc4_constructed_sort_definition : public constructed_sort_definition
         add_constructor_definition(i, new named_function_definition(data_specification, m_constructors[i].constructor.sort(), name));
         add_recogniser_definition(i, new named_function_definition(data_specification, recogniser_name));
 
-        for (size_t j = 0; j < m_constructors[i].fields.size(); j++)
+        for (std::size_t j = 0; j < m_constructors[i].fields.size(); j++)
         {
           std::string field_name = data_specification->identifier_generator()(m_constructors[i].fields[j].projections[0].name());
           m_field_names[m_constructors[i].constructor].push_back(field_name);
@@ -237,10 +237,10 @@ class cvc4_constructed_sort_definition : public constructed_sort_definition
     std::string generate_definition() const
     {
       std::string output = "(declare-datatypes () ( (" + m_name + "\n";
-      for (size_t i = 0; i < m_constructors.size(); i++)
+      for (std::size_t i = 0; i < m_constructors.size(); i++)
       {
         output += "  (" + m_constructor_names.at(m_constructors[i].constructor);
-        for (size_t j = 0; j < m_constructors[i].fields.size(); j++)
+        for (std::size_t j = 0; j < m_constructors[i].fields.size(); j++)
         {
           assert(data::is_function_sort(m_constructors[i].fields[j].projections[0].sort()));
           std::string sort_name = m_data_specification->generate_sort_name(data::function_sort(m_constructors[i].fields[j].projections[0].sort()).codomain());
@@ -280,18 +280,18 @@ class cvc4_recursive_function_definition : public recursive_function_definition
     std::string generate_definition() const
     {
       std::map<data::variable, std::string> parameters;
-      for (size_t i = 0; i < m_parameters.size(); i++)
+      for (std::size_t i = 0; i < m_parameters.size(); i++)
       {
         std::string name = m_data_specification->identifier_generator()(m_parameters[i].name());
         parameters[m_parameters[i]] = name;
       }
-      for (size_t i = 0; i < m_parameters.size(); i++)
+      for (std::size_t i = 0; i < m_parameters.size(); i++)
       {
         m_data_specification->identifier_generator().remove_identifier(parameters[m_parameters[i]]);
       }
 
       std::string output = "(define-fun-rec " + m_name + " (";
-      for (size_t i = 0; i < m_parameters.size(); i++)
+      for (std::size_t i = 0; i < m_parameters.size(); i++)
       {
         output += " (" + parameters[m_parameters[i]] + " " + m_data_specification->generate_sort_name(m_parameters[i].sort()) + ")";
       }

@@ -39,7 +39,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
 
   protected:
     /// Stores the number of summation variables that has been removed.
-    size_t m_removed;
+    std::size_t m_removed;
 
     /// Whether to decluster disjunctive conditions first.
     bool m_decluster;
@@ -216,7 +216,7 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
       // restore the summation variables
       s.summation_variables() = summmation_variables;
 
-      const size_t var_count = s.summation_variables().size();
+      const std::size_t var_count = s.summation_variables().size();
       super::summand_remove_unused_summand_variables(s);
       m_removed += var_count - s.summation_variables().size();
     }
@@ -229,13 +229,13 @@ class sumelm_algorithm: public detail::lps_algorithm<Specification>
       s.condition() = compute_substitutions(s, substitutions);
       lps::replace_variables_capture_avoiding(s, substitutions, data::substitution_variables(substitutions));
 
-      const size_t var_count = s.summation_variables().size();
+      const std::size_t var_count = s.summation_variables().size();
       super::summand_remove_unused_summand_variables(s);
       m_removed += var_count - s.summation_variables().size();
     }
 
     /// \brief Returns the amount of removed summation variables.
-    size_t removed() const
+    std::size_t removed() const
     {
       return m_removed;
     }

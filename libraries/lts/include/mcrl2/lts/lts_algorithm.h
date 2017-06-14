@@ -158,7 +158,7 @@ bool destructive_compare(LTS_TYPE& l1,
         mCRL2log(log::warning) << "Cannot generate counter example traces for simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
-      size_t init_l2 = l2.initial_state() + l1.num_states();
+      std::size_t init_l2 = l2.initial_state() + l1.num_states();
       detail::merge(l1,l2);
       l2.clear(); // l2 is not needed anymore.
       detail::sim_partitioner<LTS_TYPE> sp(l1);
@@ -173,7 +173,7 @@ bool destructive_compare(LTS_TYPE& l1,
         mCRL2log(log::warning) << "Cannot generate counter example traces for ready-simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
-      size_t init_l2 = l2.initial_state() + l1.num_states();
+      std::size_t init_l2 = l2.initial_state() + l1.num_states();
       detail::merge(l1,l2);
       l2.clear(); // l2 is not needed anymore.
       detail::ready_sim_partitioner<LTS_TYPE> rsp(l1);
@@ -298,14 +298,14 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
   const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
 
   std::vector < bool > visited(l.num_states(),false);
-  std::stack<size_t> todo;
+  std::stack<std::size_t> todo;
   
   visited[l.initial_state()]=true;
   todo.push(l.initial_state());
 
   while (!todo.empty())
   {
-    size_t state_to_consider=todo.top();
+    std::size_t state_to_consider=todo.top();
     todo.pop();
     for (outgoing_transitions_per_state_t::const_iterator i=out_trans.lower_bound(state_to_consider);
          i!=out_trans.upper_bound(state_to_consider); ++i)
@@ -330,14 +330,14 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
 
-    std::map < size_t , size_t > state_map;
-    std::map < size_t , size_t > label_map;
+    std::map < std::size_t , std::size_t > state_map;
+    std::map < std::size_t , std::size_t > label_map;
 
     lts < SL, AL, BASE> new_lts=l; // In this way set data specification and action declarations in the new lts.
     new_lts.clear();
 
-    size_t new_nstates = 0;
-    for (size_t i=0; i<l.num_states(); i++)
+    std::size_t new_nstates = 0;
+    for (std::size_t i=0; i<l.num_states(); i++)
     {
       if (visited[i])
       {
@@ -363,8 +363,8 @@ bool reachability_check(lts < SL, AL, BASE>& l, bool remove_unreachable = false)
     }
 
     label_map[0]=1; // Declare the tau action explicitly present.
-    size_t new_nlabels = 0;
-    for (size_t i=0; i<l.num_action_labels(); i++)
+    std::size_t new_nlabels = 0;
+    for (std::size_t i=0; i<l.num_action_labels(); i++)
     {
       if (label_map.count(i)>0)   // Label i is used.
       {
@@ -406,7 +406,7 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
   const outgoing_transitions_per_state_t out_trans=transitions_per_outgoing_state(l.get_transitions());
 
   std::vector < bool > visited(l.num_states(),false);
-  std::stack<size_t> todo;
+  std::stack<std::size_t> todo;
   
   for(const typename PROBABILISTIC_STATE::state_probability_pair& s: l.initial_probabilistic_state())
   {
@@ -416,7 +416,7 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
 
   while (!todo.empty())
   {
-    size_t state_to_consider=todo.top();
+    std::size_t state_to_consider=todo.top();
     todo.pop();
     for (outgoing_transitions_per_state_t::const_iterator i=out_trans.lower_bound(state_to_consider);
          i!=out_trans.upper_bound(state_to_consider); ++i)
@@ -445,14 +445,14 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
     // Remove all unreachable states, transitions from such states and labels
     // that are only used in these transitions.
 
-    std::map < size_t , size_t > state_map;
-    std::map < size_t , size_t > label_map;
+    std::map < std::size_t , std::size_t > state_map;
+    std::map < std::size_t , std::size_t > label_map;
 
     probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE> new_lts=l; // In this way set data specification and action declarations in the new lts.
     new_lts.clear();
 
-    size_t new_nstates = 0;
-    for (size_t i=0; i<l.num_states(); i++)
+    std::size_t new_nstates = 0;
+    for (std::size_t i=0; i<l.num_states(); i++)
     {
       if (visited[i])
       {
@@ -478,8 +478,8 @@ bool reachability_check(probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>& 
     }
 
     label_map[0]=1; // Declare the tau action explicitly present.
-    size_t new_nlabels = 0;
-    for (size_t i=0; i<l.num_action_labels(); i++)
+    std::size_t new_nlabels = 0;
+    for (std::size_t i=0; i<l.num_action_labels(); i++)
     {
       if (label_map.count(i)>0)   // Label i is used.
       {
@@ -620,7 +620,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       sigref<LTS_TYPE, signature_divergence_preserving_branching_bisim<LTS_TYPE> > s1(l);
       s1.run();
      }
-      size_t divergence_label=detail::mark_explicit_divergence_transitions(l);
+      std::size_t divergence_label=detail::mark_explicit_divergence_transitions(l);
       detail::reflexive_transitive_tau_closure(l);
      {
       sigref<LTS_TYPE, signature_bisim<LTS_TYPE> > s2(l);
@@ -750,7 +750,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       // In the resulting LTS, the initial state i of l will have the
       // state number i + N where N is the number of states in this
       // LTS (before the merge).
-      const size_t init_l2 = l2.initial_state() + l1.num_states();
+      const std::size_t init_l2 = l2.initial_state() + l1.num_states();
       detail::merge(l1,l2);
 
       // We no longer need l, so clear it to save memory
@@ -768,7 +768,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre, con
       // In the resulting LTS, the initial state i of l will have the
       // state number i + N where N is the number of states in this
       // LTS (before the merge).
-      const size_t init_l2 = l2.initial_state() + l1.num_states();
+      const std::size_t init_l2 = l2.initial_state() + l1.num_states();
       detail::merge(l1,l2);
 
       // We no longer need l, so clear it to save memory
@@ -890,7 +890,7 @@ namespace detail
 inline
 void get_trans(std::multimap < transition::size_type, std::pair < transition::size_type, transition::size_type > > &begin,
                       tree_set_store* tss,
-                      size_t d,
+                      std::size_t d,
                       std::vector<transition> &d_trans)
 {
   if (!tss->is_set_empty(d))
@@ -931,11 +931,11 @@ void determinise(LTS_TYPE& l)
 
   l.clear_transitions();
   l.clear_state_labels();
-  size_t d_ntransitions = 0;
+  std::size_t d_ntransitions = 0;
   std::vector < transition > d_transitions;
 
-  size_t s;
-  size_t i,to,lbl,n_t;
+  std::size_t s;
+  std::size_t i,to,lbl,n_t;
 
   while (d_id < tss->get_next_tag())
   {

@@ -22,17 +22,17 @@ namespace atermpp
 namespace detail
 {
 
-static const size_t STEP = 1; /* The position on which the next hash entry //searched */
+static const std::size_t STEP = 1; /* The position on which the next hash entry //searched */
 
 
 /* in the hashtable we use the following constants to
    indicate designated positions */
-static const size_t EMPTY(-1);
-static const size_t DELETED(-2);
+static const std::size_t EMPTY(-1);
+static const std::size_t DELETED(-2);
 
-inline size_t approximatepowerof2(size_t n)
+inline std::size_t approximatepowerof2(std::size_t n)
 {
-  size_t mask = n;
+  std::size_t mask = n;
 
   while (mask >>= 1)
   {
@@ -46,7 +46,7 @@ inline size_t approximatepowerof2(size_t n)
   return n;
 }
 
-static inline size_t calculateNewSize(size_t sizeMinus1, size_t nr_entries, size_t max_load)
+static inline std::size_t calculateNewSize(std::size_t sizeMinus1, std::size_t nr_entries, std::size_t max_load)
 {
   if ((nr_entries*200)/max_load < sizeMinus1)
   {
@@ -61,19 +61,19 @@ static inline size_t calculateNewSize(size_t sizeMinus1, size_t nr_entries, size
 
 template <class ELEMENT>
 inline
-size_t indexed_set<ELEMENT>::put_in_hashtable(const ELEMENT& key, size_t n)
+std::size_t indexed_set<ELEMENT>::put_in_hashtable(const ELEMENT& key, std::size_t n)
 {
   /* Find a place to insert key,
      and find whether key already exists */
 
-  size_t deleted_position=detail::EMPTY; // This variable recalls a proper deleted position to insert n. EMPTY means not yet found.
-  size_t start = std::hash<aterm>()(key) & sizeMinus1;
-  size_t c = start;
+  std::size_t deleted_position=detail::EMPTY; // This variable recalls a proper deleted position to insert n. EMPTY means not yet found.
+  std::size_t start = std::hash<aterm>()(key) & sizeMinus1;
+  std::size_t c = start;
 
   while (true)
   {
     assert(c!=detail::EMPTY);
-    size_t v = hashtable[c];
+    std::size_t v = hashtable[c];
     assert(v==detail::EMPTY || v == detail::DELETED || v<m_keys.size());
     if (v == detail::EMPTY)
     {
@@ -116,8 +116,8 @@ template <class ELEMENT>
 inline void indexed_set<ELEMENT>::resize_hashtable()
 {
   /* First determine the largest index in use */
-  size_t largest_used_index=0;
-  for (size_t i=0; i<m_keys.size(); i++)
+  std::size_t largest_used_index=0;
+  for (std::size_t i=0; i<m_keys.size(); i++)
   {
     ELEMENT t = m_keys[i];
     if (t.defined() && i>largest_used_index)
@@ -127,7 +127,7 @@ inline void indexed_set<ELEMENT>::resize_hashtable()
   }
   m_keys.resize(largest_used_index+1);
 
-  size_t newsizeMinus1 = detail::calculateNewSize(sizeMinus1,largest_used_index, max_load);
+  std::size_t newsizeMinus1 = detail::calculateNewSize(sizeMinus1,largest_used_index, max_load);
 
   hashtable.clear();
   hashtable.resize(newsizeMinus1+1,detail::EMPTY); 
@@ -138,11 +138,11 @@ inline void indexed_set<ELEMENT>::resize_hashtable()
 
 
 
-  free_positions=std::stack < size_t >();
+  free_positions=std::stack < std::size_t >();
   /* rebuild the hashtable again, and put free indices in the free_position stack.
      Count down, such that the lowest indices are highest in the stack, to be 
      re-used first. */
-  for (size_t i=m_keys.size(); i>0 ; )
+  for (std::size_t i=m_keys.size(); i>0 ; )
   {
      --i;
     ELEMENT t = m_keys[i];
@@ -158,11 +158,11 @@ inline void indexed_set<ELEMENT>::resize_hashtable()
 }
 
 template <class ELEMENT>
-inline indexed_set<ELEMENT>::indexed_set(size_t initial_size /* = 100 */, unsigned int max_load_pct /* = 75 */)
+inline indexed_set<ELEMENT>::indexed_set(std::size_t initial_size /* = 100 */, unsigned int max_load_pct /* = 75 */)
       : sizeMinus1(detail::approximatepowerof2(initial_size)),
         max_load(max_load_pct),
         nr_of_insertions_until_next_rehash(((sizeMinus1/100)*max_load)),
-        hashtable(std::vector<size_t>(1+sizeMinus1,detail::EMPTY))
+        hashtable(std::vector<std::size_t>(1+sizeMinus1,detail::EMPTY))
 {
 }
 
@@ -170,11 +170,11 @@ inline indexed_set<ELEMENT>::indexed_set(size_t initial_size /* = 100 */, unsign
 template <class ELEMENT>
 inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 {
-  size_t start = std::hash<aterm>()(elem) & sizeMinus1;
-  size_t c = start;
+  std::size_t start = std::hash<aterm>()(elem) & sizeMinus1;
+  std::size_t c = start;
   do
   {
-    size_t v=hashtable[c];
+    std::size_t v=hashtable[c];
     if (v == detail::EMPTY)
     {
       return npos; /* Not found. */
@@ -196,9 +196,9 @@ inline ssize_t indexed_set<ELEMENT>::index(const ELEMENT& elem) const
 template <class ELEMENT>
 bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 {
-  size_t start = std::hash<aterm>()(key) & sizeMinus1;
-  size_t c = start;
-  size_t v;
+  std::size_t start = std::hash<aterm>()(key) & sizeMinus1;
+  std::size_t c = start;
+  std::size_t v;
   while (true)
   {
     v = hashtable[c];
@@ -233,14 +233,14 @@ bool indexed_set<ELEMENT>::erase(const ELEMENT& key)
 
 
 template <class ELEMENT>
-inline const ELEMENT& indexed_set<ELEMENT>::get(size_t index) const
+inline const ELEMENT& indexed_set<ELEMENT>::get(std::size_t index) const
 {
   assert(m_keys.size()>index);
   return m_keys[index];
 }
 
 template <class ELEMENT>
-inline bool indexed_set<ELEMENT>::defined(size_t index) const
+inline bool indexed_set<ELEMENT>::defined(std::size_t index) const
 {
   return index<m_keys.size() && m_keys[index].defined();
 }
@@ -250,15 +250,15 @@ inline void indexed_set<ELEMENT>::clear()
 {
   hashtable.assign(sizeMinus1+1,detail::EMPTY);
   m_keys.clear();
-  free_positions=std::stack<size_t>();
+  free_positions=std::stack<std::size_t>();
 }
 
 
 template <class ELEMENT>
-inline std::pair<size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
+inline std::pair<std::size_t, bool> indexed_set<ELEMENT>::put(const ELEMENT& key)
 {
-  const size_t m=(free_positions.empty()? m_keys.size() : free_positions.top());
-  const size_t n = put_in_hashtable(key,m);
+  const std::size_t m=(free_positions.empty()? m_keys.size() : free_positions.top());
+  const std::size_t n = put_in_hashtable(key,m);
   if (n != m) // Key already exists.
   {
     return std::make_pair(n,false);

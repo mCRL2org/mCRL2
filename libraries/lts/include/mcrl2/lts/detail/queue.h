@@ -25,8 +25,8 @@ class queue
   private:
     std::deque <T> queue_get;
     std::deque <T> queue_put;
-    size_t queue_size_max;        // This is the maximal allowed size of a queue
-    size_t queue_put_count_extra; // This represents the number of elements that
+    std::size_t queue_size_max;        // This is the maximal allowed size of a queue
+    std::size_t queue_put_count_extra; // This represents the number of elements that
     // did not fit in the queue.
     bool queue_size_fixed;
 
@@ -67,7 +67,7 @@ class queue
       queue_put_count_extra++;
       if ((rand() % (queue_put.size() + queue_put_count_extra)) < queue_put.size())
       {
-        size_t pos = rand() % queue_put.size();
+        std::size_t pos = rand() % queue_put.size();
         T old_state = queue_put[pos];
         queue_put[pos] = state;
         return old_state;
@@ -85,12 +85,12 @@ class queue
     {
     }
 
-    size_t max_size() const
+    std::size_t max_size() const
     {
       return queue_size_max;
     }
 
-    void set_max_size(size_t max_size)
+    void set_max_size(std::size_t max_size)
     {
       queue_size_max = max_size;
       queue_size_fixed = true;
@@ -133,7 +133,7 @@ class queue
       }
     }
 
-    size_t remaining()
+    std::size_t remaining()
     {
       return queue_get.size();
     }

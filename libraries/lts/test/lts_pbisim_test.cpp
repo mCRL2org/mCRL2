@@ -28,9 +28,9 @@ static probabilistic_lts_aut_t parse_aut(const std::string& s)
 
 void execute_test(const std::string test_name,   
                   const std::string input_lts,
-                  const size_t expected_number_of_states,
-                  const size_t expected_number_of_transitions,
-                  const size_t expected_number_of_probabilistic_states)
+                  const std::size_t expected_number_of_states,
+                  const std::size_t expected_number_of_transitions,
+                  const std::size_t expected_number_of_probabilistic_states)
 {
   mcrl2::utilities::execution_timer timer;
   probabilistic_lts_aut_t t1 = parse_aut(input_lts);

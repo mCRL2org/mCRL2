@@ -152,12 +152,12 @@ void ready_sim_partitioner<LTS_TYPE>::refinei()
 {
   using namespace mcrl2::core;  
   /* Initialise the parent and children functions */
-  std::vector<size_t> v;
+  std::vector<std::size_t> v;
   children.clear();
   children.assign(s_Pi,v);
   parent.clear();
   parent.assign(s_Pi,UNIVERSAL_PART);
-  size_t alpha;
+  std::size_t alpha;
   for (alpha = 0; alpha < s_Pi; ++alpha)
   {
     children[alpha].push_back(alpha);
@@ -171,8 +171,8 @@ void ready_sim_partitioner<LTS_TYPE>::refinei()
   }
 
   /* Some local variables */
-  std::vector<size_t>::iterator alphai, last;
-  size_t l;  
+  std::vector<std::size_t>::iterator alphai, last;
+  std::size_t l;  
 
   /* The main loop */  
   for (l = 0; l < aut.num_action_labels(); ++l)
@@ -222,8 +222,8 @@ void ready_sim_partitioner<LTS_TYPE>::updatei()
   using namespace mcrl2::core;
   mCRL2log(log::debug) << "---------------  Updatei ---------------------------------------" << std::endl;
   
-  size_t l,alpha,gamma;
-  std::vector<size_t>::iterator alphai, last;
+  std::size_t l,alpha,gamma;
+  std::vector<std::size_t>::iterator alphai, last;
 
   induce_P_on_Pi(); 
 
@@ -257,7 +257,7 @@ void ready_sim_partitioner<LTS_TYPE>::updatei()
   mCRL2log(log::debug) << "\nReady Preorder: ";
   mCRL2log(log::debug) << print_relation(s_Pi,Q);  
 
-  size_t beta;
+  std::size_t beta;
 
   /* Apply the filtering to discard non "ready-init" pairs,
    * in Q[alpha][beta], i.e.,  when

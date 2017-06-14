@@ -41,7 +41,7 @@ string Utils::intToStr(const int& i)
   return result;
 }
 
-string Utils::size_tToStr(const size_t& i)
+string Utils::size_tToStr(const std::size_t& i)
 {
   ostringstream oss;
   string result;
@@ -290,7 +290,7 @@ double Utils::mean(const vector< double > vals)
   double result = 0;
   if (vals.size() > 0)
   {
-    for (size_t i = 0; i < vals.size(); ++i)
+    for (std::size_t i = 0; i < vals.size(); ++i)
     {
       result += vals[i];
     }
@@ -307,7 +307,7 @@ double Utils::variance(const vector< double > vals)
 
   if (vals.size() > 1)
   {
-    for (size_t i = 0; i < vals.size(); ++i)
+    for (std::size_t i = 0; i < vals.size(); ++i)
     {
       result += (vals[i]-mean)*(vals[i]-mean);
     }

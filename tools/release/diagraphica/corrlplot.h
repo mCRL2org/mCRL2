@@ -81,7 +81,7 @@ class CorrlPlot : public Visualizer
     Attribute *attribute2;
     std::string xLabel;
     std::string yLabel;
-    std::vector< std::vector< size_t > > mapXToY; // for each x idx, 1 or more y indices
+    std::vector< std::vector< std::size_t > > mapXToY; // for each x idx, 1 or more y indices
     std::vector< std::vector< int > > number;  // number associated with every entry in mapXToY
     std::vector< int > maxNumX;   // for every column, the largest number
     int sumMaxNumX;          // sum of entries in maxNumX
@@ -100,8 +100,8 @@ class CorrlPlot : public Visualizer
     double     scaleDgrm;       // scale factor for diagram
     Position2D posDgrm;         // positions of diagram
     bool       showDgrm;        // show or hide diagram
-    size_t        attrValIdx1Dgrm; // value idx of 1st attribute associated with diagram
-    size_t        attrValIdx2Dgrm; // value idx of 2nd attribute associated with diagram
+    std::size_t        attrValIdx1Dgrm; // value idx of 1st attribute associated with diagram
+    std::size_t        attrValIdx2Dgrm; // value idx of 2nd attribute associated with diagram
     std::string     msgDgrm;        // message to show with diagram
 };
 

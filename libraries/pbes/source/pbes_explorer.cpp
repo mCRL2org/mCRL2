@@ -63,7 +63,7 @@ int lts_type::get_state_length() const
 }
 
 
-size_t lts_type::get_number_of_state_types() const
+std::size_t lts_type::get_number_of_state_types() const
 {
     return this->state_type_list.size();
 }
@@ -91,7 +91,7 @@ const std::vector<std::string>& lts_type::get_state_types() const
 }
 
 
-size_t lts_type::get_number_of_state_labels() const
+std::size_t lts_type::get_number_of_state_labels() const
 {
     return this->state_label_names.size();
 }
@@ -109,7 +109,7 @@ const std::vector<std::string>& lts_type::get_state_label_types() const
 }
 
 
-size_t lts_type::get_number_of_edge_labels() const
+std::size_t lts_type::get_number_of_edge_labels() const
 {
     return this->edge_label_names.size();
 }
@@ -134,7 +134,7 @@ void lts_type::add_state(const std::string& name, const std::string& type)
     //        << std::endl;
     this->state_names.push_back(name);
     this->state_types.push_back(type);
-    size_t type_index;
+    std::size_t type_index;
     std::map<std::string,int>::iterator type_index_it = this->state_type_index.find(type);
     if (type_index_it != this->state_type_index.end()) {
         type_index = type_index_it->second;
@@ -1297,7 +1297,7 @@ explorer::explorer(const std::string& filename, const std::string& rewrite_strat
     this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
     //std::clog << "explorer" << std::endl;
-    for (size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); ++i) {
+    for (std::size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); ++i) {
         std::map<data_expression,int> data2int_map;
         this->localmaps_data2int.push_back(data2int_map);
         std::vector<data_expression> int2data_map;
@@ -1313,7 +1313,7 @@ explorer::explorer(const pbes& p_, const std::string& rewrite_strategy = "jittyc
     this->pgg = new pbes_greybox_interface(p, true, true, data::parse_rewrite_strategy(rewrite_strategy));
     this->info = new lts_info(p, pgg, reset_flag, always_split_flag);
     //std::clog << "explorer" << std::endl;
-    for (size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
+    for (std::size_t i = 0; i < info->get_lts_type().get_number_of_state_types(); i++) {
         std::map<data_expression,int> data2int_map;
         this->localmaps_data2int.push_back(data2int_map);
         std::vector<data_expression> int2data_map;
@@ -1404,7 +1404,7 @@ int explorer::get_index(int type_no, const std::string& s)
 int explorer::get_string_index(const std::string& s)
 {
     std::map<std::string,int>::iterator it = this->localmap_string2int.find(s);
-    size_t index;
+    std::size_t index;
     if (it != this->localmap_string2int.end()) {
         index = it->second;
     } else {
@@ -1425,7 +1425,7 @@ int explorer::get_value_index(int type_no, const data_expression& value)
     //std::clog << "                value=" << value << std::endl;
     std::map<data_expression,int>& data2int_map = this->localmaps_data2int.at(type_no);
     std::map<data_expression,int>::iterator it = data2int_map.find(value);
-    size_t index;
+    std::size_t index;
     if (it != data2int_map.end()) {
         index = it->second;
     } else {

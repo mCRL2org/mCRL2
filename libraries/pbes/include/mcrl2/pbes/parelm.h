@@ -112,12 +112,12 @@ class pbes_parelm_algorithm
     /// \param p A pbes
     /// \param index A positive number
     /// \return The name of the predicate variable that corresponds with \p index
-    core::identifier_string find_predicate_variable(const pbes& p, size_t index) const
+    core::identifier_string find_predicate_variable(const pbes& p, std::size_t index) const
     {
-      size_t offset = 0;
+      std::size_t offset = 0;
       for (const pbes_equation& eqn: p.equations())
       {
-        size_t size = eqn.variable().parameters().size();
+        std::size_t size = eqn.variable().parameters().size();
         if (offset + size > index)
         {
           return eqn.variable().name();
@@ -137,18 +137,18 @@ class pbes_parelm_algorithm
       std::vector<data::variable> predicate_variables;
 
       // compute a mapping from propositional variable names to offsets
-      size_t offset = 0;
-      std::map<core::identifier_string, size_t> propvar_offsets;
+      std::size_t offset = 0;
+      std::map<core::identifier_string, std::size_t> propvar_offsets;
       for (pbes_equation& eqn: p.equations())
       {
         propvar_offsets[eqn.variable().name()] = offset;
         offset += eqn.variable().parameters().size();
         predicate_variables.insert(predicate_variables.end(), eqn.variable().parameters().begin(), eqn.variable().parameters().end());
       }
-      size_t N = offset; // # variables
+      std::size_t N = offset; // # variables
 
       // compute the initial set v of significant variables
-      std::set<size_t> v;
+      std::set<std::size_t> v;
       offset = 0;
       for (pbes_equation& eqn: p.equations())
       {
@@ -200,25 +200,25 @@ class pbes_parelm_algorithm
       }
 
       // compute the indices s of the parameters that need to be removed
-      std::vector<size_t> r = utilities::reachable_nodes(G, v.begin(), v.end());
+      std::vector<std::size_t> r = utilities::reachable_nodes(G, v.begin(), v.end());
       std::sort(r.begin(), r.end());
-      std::vector<size_t> q(N);
+      std::vector<std::size_t> q(N);
       utilities::detail::iota(q.begin(), q.end(), 0);
-      std::vector<size_t> s;
+      std::vector<std::size_t> s;
       std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
 
       // create a map that specifies the parameters that need to be removed
-      std::map<core::identifier_string, std::vector<size_t> > removals;
-      size_t index = 0;
-      std::vector<size_t>::iterator sfirst = s.begin();
+      std::map<core::identifier_string, std::vector<std::size_t> > removals;
+      std::size_t index = 0;
+      std::vector<std::size_t>::iterator sfirst = s.begin();
       for (pbes_equation& eqn: p.equations())
       {
-        size_t maxindex = index + eqn.variable().parameters().size();
-        std::vector<size_t>::iterator slast = std::find_if(sfirst, s.end(), std::bind(std::greater_equal<size_t>(), std::placeholders::_1, maxindex));
+        std::size_t maxindex = index + eqn.variable().parameters().size();
+        std::vector<std::size_t>::iterator slast = std::find_if(sfirst, s.end(), std::bind(std::greater_equal<std::size_t>(), std::placeholders::_1, maxindex));
         if (slast > sfirst)
         {
-          std::vector<size_t> w(sfirst, slast);
-          std::transform(w.begin(), w.end(), w.begin(), std::bind(std::minus<size_t>(), std::placeholders::_1, index));
+          std::vector<std::size_t> w(sfirst, slast);
+          std::transform(w.begin(), w.end(), w.begin(), std::bind(std::minus<std::size_t>(), std::placeholders::_1, index));
           removals[eqn.variable().name()] = w;
         }
         index = maxindex;
@@ -243,10 +243,10 @@ class pbes_parelm_algorithm
         for (; first != last; ++first)
         {
           edge_descriptor e = *first;
-          size_t i1 = boost::source(e, G);
+          std::size_t i1 = boost::source(e, G);
           core::identifier_string X1 = find_predicate_variable(p, i1);
           data::variable v1 = predicate_variables[i1];
-          size_t i2 = boost::target(e, G);
+          std::size_t i2 = boost::target(e, G);
           core::identifier_string X2 = find_predicate_variable(p, i2);
           data::variable v2 = predicate_variables[i2];
           std::string left  = "(" + core::pp(X1) + ", " + data::pp(v1) + ")";
@@ -259,7 +259,7 @@ class pbes_parelm_algorithm
       if (mCRL2logEnabled(log::verbose))
       {
         mCRL2log(log::verbose) << "\nremoving the following parameters:" << std::endl;
-        for (std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
+        for (std::map<core::identifier_string, std::vector<std::size_t> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
         {
           core::identifier_string X1 = i->first;
 

@@ -20,16 +20,16 @@
 class Value
 {
   public:
-    Value(size_t idx, const std::string& val): index(idx), value(val) {}
+    Value(std::size_t idx, const std::string& val): index(idx), value(val) {}
 
-    void setIndex(size_t idx) { index = idx; }
+    void setIndex(std::size_t idx) { index = idx; }
     void setValue(const std::string& val) { value = val; }
 
-    size_t getIndex() const { return index; }
+    std::size_t getIndex() const { return index; }
     std::string getValue() const { return value; }
 
   protected:
-    size_t    index; // index in attribute
+    std::size_t    index; // index in attribute
     std::string value; // actual value
 };
 

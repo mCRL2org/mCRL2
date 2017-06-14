@@ -2083,7 +2083,7 @@ bool destructive_bisimulation_compare_gjkw(LTS_TYPE& l1, LTS_TYPE& l2,
     mCRL2log(log::warning) << "The GJKW branching bisimulation algorithm does "
                                             "not generate counterexamples.\n";
   }
-  size_t init_l2 = l2.initial_state() + l1.num_states();
+  std::size_t init_l2 = l2.initial_state() + l1.num_states();
   mcrl2::lts::detail::merge(l1, l2);
   l2.clear(); // No use for l2 anymore.
 

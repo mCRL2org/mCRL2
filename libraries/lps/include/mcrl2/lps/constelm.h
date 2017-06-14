@@ -49,7 +49,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
     bool m_ignore_conditions;
 
     /// \brief Maps process parameters to their index.
-    std::map<data::variable, size_t> m_index_of;
+    std::map<data::variable, std::size_t> m_index_of;
 
     /// \brief The rewriter used by the constelm algorithm.
     const DataRewriter& R;
@@ -169,7 +169,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
               {
                 continue;
               }
-              size_t index_j = m_index_of[j];
+              std::size_t index_j = m_index_of[j];
               const data::variable& d_j = j;
               data::data_expression g_ij = super::next_state(s, d_j);
 

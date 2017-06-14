@@ -120,7 +120,7 @@ void test_binding()
   core::apply_builder<my_builder> f;
   f.apply(x);
   BOOST_CHECK(f.unbound.size() == 2);
-  size_t count = f.unbound.erase(bool_("c"));
+  std::size_t count = f.unbound.erase(bool_("c"));
   BOOST_CHECK(count == 2);
 
   std::multiset<variable> bound_variables;

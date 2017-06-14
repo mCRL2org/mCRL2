@@ -218,7 +218,7 @@ namespace detail
       }
 
       /// \brief Give the factor of variable v.
-      size_t count(const variable& v) const
+      std::size_t count(const variable& v) const
       {
         lhs_t::const_iterator i=find(v);
         if (i==end())  // Not found.
@@ -1054,8 +1054,8 @@ bool is_inconsistent(
 inline
 void count_occurrences(
   const std::vector < linear_inequality >& inequalities,
-  std::map < variable, size_t>& nr_positive_occurrences,
-  std::map < variable, size_t>& nr_negative_occurrences,
+  std::map < variable, std::size_t>& nr_positive_occurrences,
+  std::map < variable, std::size_t>& nr_negative_occurrences,
   const rewriter& r)
 {
   for (std::vector < linear_inequality >::const_iterator i=inequalities.begin();
@@ -1183,7 +1183,7 @@ inline void remove_redundant_inequalities(
   }
 
   resulting_inequalities=inequalities;
-  for (size_t i=0; i<resulting_inequalities.size();)
+  for (std::size_t i=0; i<resulting_inequalities.size();)
   {
     // Check whether the inequalities, with the i-th equality with a reversed comparison operator is inconsistent.
     // If yes, the i-th inequality is redundant.
@@ -2053,7 +2053,7 @@ std::set < variable >  gauss_elimination(
   // that we can perform gauss elimination.
   for (Variable_iterator i = variables_begin; i != variables_end; ++i)
   {
-    size_t j;
+    std::size_t j;
     for (j=0; j<resulting_equalities.size(); ++j)
     {
       bool check_equalities_for_redundant_inequalities(false);
@@ -2064,7 +2064,7 @@ std::set < variable >  gauss_elimination(
         // Equality *j contains data variable *i.
         // Perform gauss elimination, and break the loop.
 
-        for (size_t k = 0; k < resulting_inequalities.size();)
+        for (std::size_t k = 0; k < resulting_inequalities.size();)
         {
           resulting_inequalities[k]=subtract(resulting_inequalities[k],
                                              resulting_equalities[j],
@@ -2095,7 +2095,7 @@ std::set < variable >  gauss_elimination(
           }
         }
 
-        for (size_t k = 0; k<resulting_equalities.size();)
+        for (std::size_t k = 0; k<resulting_equalities.size();)
         {
           if (k==j)
           {
@@ -2156,7 +2156,7 @@ std::set < variable >  gauss_elimination(
         // If there are unremoved resulting equalities, remove them now.
         if (check_equalities_for_redundant_inequalities)
         {
-          for (size_t k = 0; k<resulting_equalities.size();)
+          for (std::size_t k = 0; k<resulting_equalities.size();)
           {
             if (resulting_equalities[k].is_true(r))
             {

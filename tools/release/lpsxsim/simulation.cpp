@@ -60,12 +60,12 @@ void Simulation::updateTrace(unsigned int firstChangedState)
 
   m_trace.erase(m_trace.begin() + firstChangedState, m_trace.end());
 
-  for (size_t i = firstChangedState; i < m_simulation->trace().size(); i++)
+  for (std::size_t i = firstChangedState; i < m_simulation->trace().size(); i++)
   {
     TracePosition position;
     position.state = renderState(m_simulation->trace()[i].source_state);
     position.transitionNumber = m_simulation->trace()[i].transition_number;
-    for (size_t j = 0; j < m_simulation->trace()[i].transitions.size(); j++)
+    for (std::size_t j = 0; j < m_simulation->trace()[i].transitions.size(); j++)
     {
       Transition transition;
       transition.destination = renderState(m_simulation->trace()[i].transitions[j].destination);
@@ -79,7 +79,7 @@ void Simulation::updateTrace(unsigned int firstChangedState)
 Simulation::State Simulation::renderState(const mcrl2::lps::state &state)
 {
   State output;
-  for (size_t i = 0; i < state.size(); i++)
+  for (std::size_t i = 0; i < state.size(); i++)
   {
     if (mcrl2::data::is_variable(state[i]))
     {

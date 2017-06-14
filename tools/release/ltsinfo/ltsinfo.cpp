@@ -116,12 +116,12 @@ class ltsinfo_tool : public ltsinfo_base
     template <class SL, class AL, class PROBABILISTIC_STATE, class BASE>
     static void provide_probabilistic_information(mcrl2::lts::probabilistic_lts < SL, AL, PROBABILISTIC_STATE, BASE>&  l)
     {
-      size_t count_non_trivial_probabilistic_states=0;
+      std::size_t count_non_trivial_probabilistic_states=0;
       if (l.initial_probabilistic_state().size()>1)
       {
         count_non_trivial_probabilistic_states++;
       }
-      for(size_t i=0; i<l.num_probabilistic_states(); ++i)
+      for(std::size_t i=0; i<l.num_probabilistic_states(); ++i)
       {
         if (l.probabilistic_state(i).size()>1)
         {
@@ -155,7 +155,7 @@ class ltsinfo_tool : public ltsinfo_base
         else 
         {
           mCRL2log(info) << "The state labels of this .fsm format. Note that state labels in .fsm files are only partly preserved by state space reductions.\n";
-          for(size_t i=0; i<l.num_states(); ++i)
+          for(std::size_t i=0; i<l.num_states(); ++i)
           {
             mCRL2log(info) << i << ": " << pp(l.state_label(i)) << "\n";
           }
@@ -184,7 +184,7 @@ class ltsinfo_tool : public ltsinfo_base
         else 
         {
           mCRL2log(info) << "The state labels of this labelled transition system:\n";
-          for(size_t i=0; i<l.num_states(); ++i)
+          for(std::size_t i=0; i<l.num_states(); ++i)
           {
             if (l.state_label(i).size()==0)
             {

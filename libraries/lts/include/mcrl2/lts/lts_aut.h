@@ -41,8 +41,8 @@ class lts_aut_base
 {
   public:
 
-    typedef mcrl2::lts::probabilistic_state<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
-    typedef mcrl2::lps::state_probability_pair<size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> state_probability_pair;
+    typedef mcrl2::lts::probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
+    typedef mcrl2::lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> state_probability_pair;
 
     /** \brief Provides the type of this lts, in casu lts_aut.  */
     lts_type type()

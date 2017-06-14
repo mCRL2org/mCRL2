@@ -50,7 +50,7 @@ class prob_bisim_partitioner_bem
     /** \brief Gives the number of bisimulation equivalence classes of the LTS.
     *  \return The number of bisimulation equivalence classes of the LTS.
     */
-    size_t num_eq_classes() const
+    std::size_t num_eq_classes() const
     {
       return state_partition.size();
     }
@@ -58,7 +58,7 @@ class prob_bisim_partitioner_bem
     /** \brief Gives the bisimulation equivalence class number of a state.
      *  \param[in] s A state number.
      *  \return The number of the bisimulation equivalence class to which \e s belongs. */
-    size_t get_eq_class(const size_t s) const
+    std::size_t get_eq_class(const std::size_t s) const
     {
       assert(s<block_index_of_a_state.size());
       return block_index_of_a_state[s]; // The block index is the state number of the block.
@@ -67,7 +67,7 @@ class prob_bisim_partitioner_bem
     /** \brief Gives the bisimulation equivalence step class number of a probabilistic state.
     *  \param[in] s A probabilistic state number.
     *  \return The number of the step class to which s belongs. */
-    size_t get_eq_step_class(const size_t d) const
+    std::size_t get_eq_step_class(const std::size_t d) const
     {
       assert(d < step_class_index_of_a_distribution.size());
       assert(step_class_index_of_a_distribution[d] < step_classes.size());
@@ -136,18 +136,18 @@ class prob_bisim_partitioner_bem
     *  \param[in] t A state number.
     *  \retval true if \e s and \e t are in the same bisimulation equivalence class;
     *  \retval false otherwise. */
-    bool in_same_probabilistic_class(const size_t s, const size_t t) const
+    bool in_same_probabilistic_class(const std::size_t s, const std::size_t t) const
     {
       return get_eq_step_class(s) == get_eq_step_class(t);
     }
 
   private:
 
-  typedef size_t block_key_type;
-  typedef size_t step_class_key_type;
-  typedef size_t state_type;
-  typedef size_t label_type;
-  typedef size_t distribution_key_type;
+  typedef std::size_t block_key_type;
+  typedef std::size_t step_class_key_type;
+  typedef std::size_t state_type;
+  typedef std::size_t label_type;
+  typedef std::size_t distribution_key_type;
   typedef typename LTS_TYPE::probabilistic_state_t::probability_t probability_fraction_type;
 
   struct distribution_type
@@ -169,7 +169,7 @@ class prob_bisim_partitioner_bem
     std::list<distribution_type*> distributions;      // The distributions in the step class <a,M>.
     std::vector< bool > prev_states;                  // Previous states that can reach step_class <a,M>
     bool is_in_new_step_classes;
-    size_t equivalent_step_class;
+    std::size_t equivalent_step_class;
   };
 
   std::list<block_type*> state_partition;
@@ -186,7 +186,7 @@ class prob_bisim_partitioner_bem
   struct tree_type
   {
     std::list<state_type> states;
-    size_t count;
+    std::size_t count;
     tree_type* left;
     tree_type* right;
 
@@ -217,7 +217,7 @@ class prob_bisim_partitioner_bem
 
     // Construct vector of distributions
     distributions.resize(aut.num_probabilistic_states());
-    size_t key = 0;
+    std::size_t key = 0;
     for (distribution_type& distribution : distributions)
     {
       distribution.key = key;
@@ -227,7 +227,7 @@ class prob_bisim_partitioner_bem
 
     // Initialize the Steps bi-dimientional array
     steps.resize(aut.num_states());
-    for (size_t i = 0; i < steps.size(); i++)
+    for (std::size_t i = 0; i < steps.size(); i++)
     {
       steps[i].resize(aut.num_action_labels());
     }
@@ -249,7 +249,7 @@ class prob_bisim_partitioner_bem
     }
 
     // create tree structure to group action states based on the outgoing transitions
-    size_t max_block_size = 0;
+    std::size_t max_block_size = 0;
     tree_type* max_block;
     std::deque<tree_type> tree_nodes;
     std::vector<tree_type*> leaves;
@@ -264,7 +264,7 @@ class prob_bisim_partitioner_bem
       tree_type* v = &tree_nodes[0];
 
       // (2) Construct tree
-      for (size_t i = 0; i < aut.num_action_labels(); i++)
+      for (std::size_t i = 0; i < aut.num_action_labels(); i++)
       {
         step_classes[i].key = i;
         step_classes[i].action = i;
@@ -334,7 +334,7 @@ class prob_bisim_partitioner_bem
     blocks.resize(leaves.size());
 
     key = 0;
-    size_t larger_key = 0;
+    std::size_t larger_key = 0;
     for (tree_type* leaf_ptr : leaves)
     {
       block_type& block = blocks[key];
@@ -512,7 +512,7 @@ class prob_bisim_partitioner_bem
 
             step_classes.resize(step_classes.size() + distributions_ordered_by_prob.size() - 1);
             // iterate over mapping
-            size_t new_class_count = 0;
+            std::size_t new_class_count = 0;
             for (std::pair< probability_fraction_type, std::list<distribution_type*> > ordered_dist : distributions_ordered_by_prob)
             {
               std::list<distribution_type*>& distribution_list = ordered_dist.second;
@@ -524,7 +524,7 @@ class prob_bisim_partitioner_bem
                 sc_ptr->distributions.swap(distribution_list);
 
                 // clear the prev states of the current step class
-                for (size_t i = 0; i < sc_ptr->prev_states.size(); i++)
+                for (std::size_t i = 0; i < sc_ptr->prev_states.size(); i++)
                 {
                   sc_ptr->prev_states[i] = false;
                 }
@@ -815,8 +815,8 @@ bool destructive_probabilistic_bisimulation_compare_bem(
   LTS_TYPE& l2,
   utilities::execution_timer& timer)
 {
-  size_t initial_probabilistic_state_key_l1;
-  size_t initial_probabilistic_state_key_l2;
+  std::size_t initial_probabilistic_state_key_l1;
+  std::size_t initial_probabilistic_state_key_l2;
 
   // Merge states
   mcrl2::lts::detail::plts_merge(l1, l2);

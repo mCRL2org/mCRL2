@@ -31,13 +31,13 @@ _aterm* local_term_appl_with_converter(const function_symbol& sym,
                                        const InputIterator end, 
                                        const ATermConverter& convert_to_aterm)
 {
-  const size_t arity = sym.arity();
+  const std::size_t arity = sym.arity();
 
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = function_symbol_hasher(sym);
+  std::size_t hnr = function_symbol_hasher(sym);
   
   aterm* temporary_args = MCRL2_SPECIFIC_STACK_ALLOCATOR(aterm, arity);
-  size_t j=0;
+  std::size_t j=0;
   for (InputIterator i=begin; i!=end; ++i, ++j)
   {
     new (&(temporary_args[j])) Term(convert_to_aterm(*i));
@@ -53,7 +53,7 @@ _aterm* local_term_appl_with_converter(const function_symbol& sym,
     if (cur->function()==sym)
     {
       bool found = true;
-      for (size_t i=0; i<arity; i++)
+      for (std::size_t i=0; i<arity; i++)
       {
         if (reinterpret_cast<_aterm_appl<Term>*>(cur)->arg[i] != temporary_args[i])
         {
@@ -63,7 +63,7 @@ _aterm* local_term_appl_with_converter(const function_symbol& sym,
       }
       if (found)
       {
-        for(size_t i=0; i<arity; ++i)
+        for(std::size_t i=0; i<arity; ++i)
         {
           temporary_args[i].~aterm();
         }
@@ -77,7 +77,7 @@ _aterm* local_term_appl_with_converter(const function_symbol& sym,
   detail::_aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
 
   // We copy the content of the temporary_args, without destruction/construction and adapting the reference counts.
-  for(size_t i=0; i<arity; ++i)
+  for(std::size_t i=0; i<arity; ++i)
   {
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(new_term))->arg[i])) _aterm*(detail::address(temporary_args[i]));
   }
@@ -93,12 +93,12 @@ _aterm* local_term_appl_with_converter(const function_symbol& sym,
 template <class Term, class ForwardIterator>
 _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin, const ForwardIterator end)
 {
-  const size_t arity = sym.arity();
+  const std::size_t arity = sym.arity();
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = function_symbol_hasher(sym); 
+  std::size_t hnr = function_symbol_hasher(sym); 
   
   aterm* temporary_args=MCRL2_SPECIFIC_STACK_ALLOCATOR(aterm, arity);
-  size_t j=0;
+  std::size_t j=0;
   for (ForwardIterator i=begin; i!=end; ++i, ++j)
   {
     new (&(temporary_args[j])) Term(*i);
@@ -113,7 +113,7 @@ _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin,
     if (cur->function()==sym)
     {
       bool found = true;
-      for (size_t i=0; i<arity; ++i)
+      for (std::size_t i=0; i<arity; ++i)
       {
         if (reinterpret_cast<_aterm_appl<Term>*>(cur)->arg[i] != temporary_args[i])
         {
@@ -123,7 +123,7 @@ _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin,
       }
       if (found)
       {
-        for(size_t i=0; i<arity; ++i)
+        for(std::size_t i=0; i<arity; ++i)
         {
           temporary_args[i].~aterm();
         }
@@ -137,7 +137,7 @@ _aterm* local_term_appl(const function_symbol& sym, const ForwardIterator begin,
   _aterm* new_term = (detail::_aterm_appl<Term>*) detail::allocate_term(TERM_SIZE_APPL(arity));
 
   // We copy the content of the temporary_args, without destruction/construction and adapting the reference counts.
-  for(size_t i=0; i<arity; ++i)
+  for(std::size_t i=0; i<arity; ++i)
   {
     new (&(reinterpret_cast<detail::_aterm_appl<Term>*>(const_cast<detail::_aterm*>(new_term))->arg[i])) _aterm*(detail::address(temporary_args[i]));
   }
@@ -158,7 +158,7 @@ _aterm* term_appl1(const function_symbol& sym, const Term& arg0)
   CHECK_TERM(arg0);
 
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = COMBINE(function_symbol_hasher(sym), arg0);
+  std::size_t hnr = COMBINE(function_symbol_hasher(sym), arg0);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -191,7 +191,7 @@ _aterm* term_appl2(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = COMBINE(COMBINE(function_symbol_hasher(sym), arg0),arg1);
+  std::size_t hnr = COMBINE(COMBINE(function_symbol_hasher(sym), arg0),arg1);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -229,7 +229,7 @@ _aterm* term_appl3(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg1);
   CHECK_TERM(arg2);
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0),arg1),arg2);
+  std::size_t hnr = COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0),arg1),arg2);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -269,7 +269,7 @@ _aterm *term_appl4(const function_symbol& sym, const Term& arg0, const Term& arg
   assert(sym.arity()==4);
 
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3);
+  std::size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3);
 
   _aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -315,7 +315,7 @@ _aterm* term_appl5(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg3);
 
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4);
+  std::size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4);
 
   _aterm *cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -364,7 +364,7 @@ _aterm *term_appl6(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg5);
 
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4), arg5);
+  std::size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4), arg5);
 
   _aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)
@@ -417,7 +417,7 @@ _aterm* term_appl7(const function_symbol& sym, const Term& arg0, const Term& arg
   CHECK_TERM(arg6);
 
   const std::hash<function_symbol> function_symbol_hasher;
-  size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4), arg5), arg6);
+  std::size_t hnr = COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(COMBINE(function_symbol_hasher(sym), arg0), arg1), arg2), arg3), arg4), arg5), arg6);
 
   _aterm* cur = detail::aterm_hashtable[hnr & detail::aterm_table_mask];
   while (cur)

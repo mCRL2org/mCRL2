@@ -23,20 +23,20 @@ class Node;
 class Edge
 {
   public:
-    Edge(size_t idx, const std::string& lbl): index(idx), label(lbl), inNode(0), outNode(0), bundle(0) {}
+    Edge(std::size_t idx, const std::string& lbl): index(idx), label(lbl), inNode(0), outNode(0), bundle(0) {}
 
     void setInNode(Node* in) { inNode = in; }
     void setOutNode(Node* out) { outNode = out; }
     void setBundle(Bundle* b) { bundle = b; }
 
-    size_t getIndex() { return index; }
+    std::size_t getIndex() { return index; }
     std::string getLabel() { return label; }
     Node* getInNode() { return inNode; }
     Node* getOutNode() { return outNode; }
     Bundle* getBundle() { return bundle; }
 
   protected:
-    size_t index;   // index in list of graph edges
+    std::size_t index;   // index in list of graph edges
     std::string label;   // "action label"
     Node* inNode;
     Node* outNode;

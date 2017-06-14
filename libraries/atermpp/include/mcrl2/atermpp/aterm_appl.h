@@ -33,7 +33,7 @@ class term_appl: public aterm
     term_appl (detail::_aterm_appl<Term> *t): aterm(reinterpret_cast<detail::_aterm*>(t))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
   public:
@@ -50,7 +50,7 @@ class term_appl: public aterm
     typedef const Term const_reference;
 
     /// An unsigned integral type.
-    typedef size_t size_type;
+    typedef std::size_t size_type;
 
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
@@ -70,7 +70,7 @@ class term_appl: public aterm
     term_appl (const term_appl& t):aterm(t)
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Explicit constructor from an aterm.
@@ -78,7 +78,7 @@ class term_appl: public aterm
     explicit term_appl (const aterm& t):aterm(t)
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor.
@@ -98,7 +98,7 @@ class term_appl: public aterm
         :aterm(detail::local_term_appl<Term,ForwardIterator>(sym,begin,end))
     {
       static_assert((std::is_base_of<aterm, Term>::value),"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor.
@@ -120,7 +120,7 @@ class term_appl: public aterm
          :aterm(detail::local_term_appl_with_converter<Term,InputIterator,TermConverter>(sym,begin,end,convertor))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor.
@@ -129,7 +129,7 @@ class term_appl: public aterm
          :aterm(detail::term_appl0(sym))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor for a unary function application.
@@ -139,7 +139,7 @@ class term_appl: public aterm
          :aterm(detail::term_appl1<Term>(sym,t1))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor for a binary function application.
@@ -150,7 +150,7 @@ class term_appl: public aterm
          :aterm(detail::term_appl2<Term>(sym,t1,t2))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor for a ternary function application.
@@ -162,7 +162,7 @@ class term_appl: public aterm
          :aterm(detail::term_appl3<Term>(sym,t1,t2,t3))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor for a function application to four arguments.
@@ -175,7 +175,7 @@ class term_appl: public aterm
          :aterm(detail::term_appl4<Term>(sym,t1,t2,t3,t4))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor for a function application to five arguments.
@@ -189,7 +189,7 @@ class term_appl: public aterm
          :aterm(detail::term_appl5<Term>(sym,t1,t2,t3,t4,t5))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor for a function application to six arguments.
@@ -204,7 +204,7 @@ class term_appl: public aterm
          :aterm(detail::term_appl6<Term>(sym,t1,t2,t3,t4,t5,t6))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief Constructor for a function application to seven arguments.
@@ -220,7 +220,7 @@ class term_appl: public aterm
          :aterm(detail::term_appl7<Term>(sym,t1,t2,t3,t4,t5,t6,t7))
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(size_t),"Term derived from an aterm must not have extra fields");
+      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
     /// \brief The assignment operator

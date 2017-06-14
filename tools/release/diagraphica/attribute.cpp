@@ -17,7 +17,7 @@ using namespace std;
 Attribute::Attribute(
   QString name,
   QString type,
-  const size_t& idx)
+  const std::size_t& idx)
     : QObject()
 {
   m_name  = name;
@@ -42,7 +42,7 @@ Attribute::~Attribute()
 // -- set functions -------------------------------------------------
 
 
-void Attribute::setIndex(const size_t& idx)
+void Attribute::setIndex(const std::size_t& idx)
 {
   index = idx;
 }
@@ -68,21 +68,21 @@ void Attribute::clusterValues(
 
 
 void Attribute::moveValue(
-  const size_t& /*idxFr*/,
-  const size_t& /*idxTo*/)
+  const std::size_t& /*idxFr*/,
+  const std::size_t& /*idxTo*/)
 {}
 
 
 void Attribute::configValues(
   const vector< string > &/*curDomain*/,
-  map< size_t, size_t  > &/*origToCurDomain*/)
+  map< std::size_t, std::size_t  > &/*origToCurDomain*/)
 {}
 
 
 // -- get functions -------------------------------------------------
 
 
-size_t Attribute::getIndex()
+std::size_t Attribute::getIndex()
 {
   return index;
 }
@@ -100,19 +100,19 @@ QString Attribute::type()
 }
 
 
-size_t Attribute::getSizeOrigValues()
+std::size_t Attribute::getSizeOrigValues()
 {
   return 0;
 }
 
 
-Value* Attribute::getOrigValue(size_t /*idx*/)
+Value* Attribute::getOrigValue(std::size_t /*idx*/)
 {
   return 0;
 }
 
 
-Value* Attribute::getCurValue(size_t /*idx*/)
+Value* Attribute::getCurValue(std::size_t /*idx*/)
 {
   return 0;
 }

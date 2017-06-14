@@ -31,10 +31,10 @@ class _function_symbol_primary_data
 {
   protected:
     const std::string m_name;  // The primary data cannot be altered after creation. 
-    const size_t m_arity;
+    const std::size_t m_arity;
 
   public:
-    _function_symbol_primary_data(const std::string& name, size_t arity)
+    _function_symbol_primary_data(const std::string& name, std::size_t arity)
      : m_name(name), m_arity(arity)
     {}
 
@@ -43,7 +43,7 @@ class _function_symbol_primary_data
       return m_name;
     }
 
-    size_t arity() const
+    std::size_t arity() const
     {
       return m_arity;
     }
@@ -59,20 +59,20 @@ class _function_symbol_primary_data
 class _function_symbol_auxiliary_data
 {
   protected:
-    size_t m_reference_count;
+    std::size_t m_reference_count;
 
   public:
 
-    _function_symbol_auxiliary_data(size_t reference_count)
+    _function_symbol_auxiliary_data(std::size_t reference_count)
      : m_reference_count(reference_count)
     {}
 
-    size_t reference_count() const
+    std::size_t reference_count() const
     {
       return m_reference_count;
     }
 
-    size_t& reference_count()
+    std::size_t& reference_count()
     {
       return m_reference_count;
     }
@@ -80,19 +80,19 @@ class _function_symbol_auxiliary_data
 
 // set index such that no function symbol exists with the name 'prefix + std::to_string(n)'
 // for all values n >= index
-extern size_t get_sufficiently_large_postfix_index(const std::string& prefix_);
+extern std::size_t get_sufficiently_large_postfix_index(const std::string& prefix_);
 
 // Ugly class, to be replaced by a lambda function.
 struct index_increaser
 {
-  size_t* m_initial_index;
-  size_t* m_index;
+  std::size_t* m_initial_index;
+  std::size_t* m_index;
 
   index_increaser()
    : m_index(nullptr)
   {}
 
-  index_increaser(size_t& initial_index, size_t& index)
+  index_increaser(std::size_t& initial_index, std::size_t& index)
    : m_initial_index(&initial_index), m_index(&index)
   {}
 
@@ -108,7 +108,7 @@ struct index_increaser
     return *this;
   }
 
-  void operator ()(size_t new_index)
+  void operator ()(std::size_t new_index)
   {
     *m_initial_index=new_index;
     if (*m_index<new_index)
@@ -138,7 +138,7 @@ struct hash<atermpp::detail::_function_symbol_primary_data>
   std::size_t operator()(const atermpp::detail::_function_symbol_primary_data& f) const
   {
     std::hash<std::string> string_hasher;
-    size_t h=string_hasher(f.name());
+    std::size_t h=string_hasher(f.name());
     return (h ^ f.arity());
   }
 };

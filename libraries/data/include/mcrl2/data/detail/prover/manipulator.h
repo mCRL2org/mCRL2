@@ -201,7 +201,7 @@ class Manipulator
       const application& a = atermpp::down_cast<application>(a_term);
       /*const atermpp::function_symbol& v_symbol = a_term.function();
       const data::function_symbol& v_function = atermpp::down_cast<data::function_symbol>(a_term[0]);
-      size_t v_arity = v_symbol.arity(); */
+      std::size_t v_arity = v_symbol.arity(); */
 
       data_expression_vector v_parts;
       for (auto i = a.begin(); i !=a.end(); ++i)

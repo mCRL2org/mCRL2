@@ -166,14 +166,14 @@ void DistrPlot::drawPlot(const bool& inSelectMode)
 
   double hCanv = worldSize().height();
   double pix = pixelSize();
-  size_t sizePositions = positions.size();
+  std::size_t sizePositions = positions.size();
 
   double yBot = -0.5*hCanv + 20*pix;
   // selection mode
   if (inSelectMode)
   {
 
-    for (size_t i = 0; i < sizePositions; ++i)
+    for (std::size_t i = 0; i < sizePositions; ++i)
     {
       double xLft = positions[i].x - 0.5*width;
       double xRgt = positions[i].x + 0.5*width;
@@ -187,7 +187,7 @@ void DistrPlot::drawPlot(const bool& inSelectMode)
   // rendering mode
   else
   {
-    for (size_t i = 0; i < sizePositions; ++i)
+    for (std::size_t i = 0; i < sizePositions; ++i)
     {
       double xLft = positions[i].x - 0.5*width;
       double xRgt = positions[i].x + 0.5*width;
@@ -268,7 +268,7 @@ void DistrPlot::handleMouseEvent(QMouseEvent* e)
 void DistrPlot::calcMaxNumber()
 {
   maxNumber = 0;
-  for (size_t i = 0; i < number.size(); ++i)
+  for (std::size_t i = 0; i < number.size(); ++i)
   {
     if (number[i] > maxNumber)
     {
@@ -295,13 +295,13 @@ void DistrPlot::setScalingTransf()
 }
 
 
-void DistrPlot::displTooltip(const size_t& posIdx)
+void DistrPlot::displTooltip(const std::size_t& posIdx)
 {
   if (posIdx < number.size())
   {
     string xLabel   = attribute->name().toStdString();
     string value    = "";
-    if (posIdx < static_cast <size_t>(attribute->getSizeCurValues()))
+    if (posIdx < static_cast <std::size_t>(attribute->getSizeCurValues()))
     {
       value = attribute->getCurValue(posIdx)->getValue();
     }
@@ -377,7 +377,7 @@ void DistrPlot::calcPositions()
 
     // calc positions
     positions.clear();
-    for (size_t i = 0; i < number.size(); ++i)
+    for (std::size_t i = 0; i < number.size(); ++i)
     {
       // calc ratio
       double ratio = (double)number[i]/(double)maxNumber;

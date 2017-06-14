@@ -148,8 +148,8 @@ ptrdiff_t tree_set_store::create_set(vector<ptrdiff_t> &elems)
   }
 
   ptrdiff_t* nodes = MCRL2_SPECIFIC_STACK_ALLOCATOR(ptrdiff_t,elems.size());
-  size_t node_size = 0;
-  size_t i,j;
+  std::size_t node_size = 0;
+  std::size_t i,j;
   for (i=0; i < elems.size(); ++i)
   {
     nodes[i]=find_set(elems[i],EMPTY_SET);

@@ -97,10 +97,10 @@ std::ostream& operator<<(std::ostream& os, const output_type t)
 
 static void print_state(ostream& os, const mcrl2::lps::state &s)
 {
-  size_t arity = s.size();
+  std::size_t arity = s.size();
 
   os << "(";
-  for (size_t i=0; i<arity; i++)
+  for (std::size_t i=0; i<arity; i++)
   {
     if (i > 0)
     {
@@ -127,7 +127,7 @@ static void trace2dot(ostream& os, Trace& trace, const std::string& name)
   }
   os << "\",peripheries=2];" << endl;
 
-  for(size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
+  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
   {
     os << i+1 << " [label=\"";
     trace.increasePosition();
@@ -148,7 +148,7 @@ static void trace2statevector(ostream& os, Trace& trace)
 {
   trace.resetPosition();
 
-  for(size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
+  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
   {
     if (trace.current_state_exists())
     {
@@ -170,7 +170,7 @@ static void trace2aut(ostream& os, Trace& trace)
   os << "des (0," << trace.number_of_actions() << "," << trace.number_of_actions()+1 << ")" << endl;
   trace.resetPosition();
 
-  for(size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
+  for(std::size_t i=0; i<trace.number_of_actions(); ++i, trace.increasePosition())
   {
     os << "(" << i << ",\"";
     os << mcrl2::lps::pp(trace.currentAction());

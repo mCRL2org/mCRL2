@@ -362,7 +362,7 @@ class application: public data_expression
 
     /// \brief Constructor.
     template <typename FwdIter>
-    application(const size_t arity,
+    application(const std::size_t arity,
                 const data_expression& head,
                 FwdIter first,
                 FwdIter last,
@@ -398,7 +398,7 @@ class application: public data_expression
     }
 
     /// \brief Get the i-th argument of this expression.
-    const data_expression& operator[](size_t index) const
+    const data_expression& operator[](std::size_t index) const
     {
       assert(index<size());
       return atermpp::down_cast<const data_expression>(atermpp::aterm_appl::operator[](index+1));
@@ -421,7 +421,7 @@ class application: public data_expression
 
     /// \brief Returns an iterator pointing past the last argument of the
     ///        application.
-    size_t size() const
+    std::size_t size() const
     {
       return atermpp::aterm_appl::size() - 1;
     }

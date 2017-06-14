@@ -28,7 +28,7 @@ namespace detail {
 // Read a numeric value before a symbol c1 or c2, and remove it from s, including the symbol.
 inline std::string split_string_until(std::string& s, const std::string& c1, const std::string& c2="")
 {
-  size_t n=s.find(c1);
+  std::size_t n=s.find(c1);
   if (c2!="")
   {
     n=std::min(n,s.find(c2));
@@ -53,7 +53,7 @@ inline lts_fsm_base::probabilistic_state parse_distribution(const std::string& d
 {
   if (distribution.find('[')==std::string::npos) // So the distribution must consist of a state index.
   {
-    size_t state_number=utilities::parse_natural_number(distribution);
+    std::size_t state_number=utilities::parse_natural_number(distribution);
     if (state_number==0)
     {
       throw mcrl2::runtime_error("Transition has a zero as target state number.");
@@ -71,7 +71,7 @@ inline lts_fsm_base::probabilistic_state parse_distribution(const std::string& d
   s=s.substr(1);  // Remove initial "[";
   for(; s.size()>1; s=utilities::trim_copy(s))
   {
-    size_t state_number=utilities::parse_natural_number(split_string_until(s," "));
+    std::size_t state_number=utilities::parse_natural_number(split_string_until(s," "));
     if (state_number==0)
     {
       throw mcrl2::runtime_error("Transition has a zero as target state number.");
@@ -260,7 +260,7 @@ struct fsm_builder
     }
 
 
-    const size_t probabilistic_state_index=fsm.add_probabilistic_state(detail::lts_fsm_base::probabilistic_state(t.target()));
+    const std::size_t probabilistic_state_index=fsm.add_probabilistic_state(detail::lts_fsm_base::probabilistic_state(t.target()));
     fsm.add_transition(transition(t.source(), label_index, probabilistic_state_index));
   }
 

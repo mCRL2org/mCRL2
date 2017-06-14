@@ -42,9 +42,9 @@ namespace data
 namespace detail
 {
 
-static size_t npos()
+static std::size_t npos()
 {
-  return size_t(-1);
+  return std::size_t(-1);
 }
 
 // function object to test if it is an aterm_appl with function symbol "f"
@@ -136,8 +136,8 @@ abstraction Rewriter::rewrite_single_lambda(
 
   // First filter the variables in vl by those occuring as left/right hand sides in sigma.
 
-  size_t number_of_renamed_variables=0;
-  size_t count=0;
+  std::size_t number_of_renamed_variables=0;
+  std::size_t count=0;
   std::vector<variable> new_variables(vl.size());
   {
     const std::set<variable>& variables_in_sigma(sigma.variables_in_rhs());
@@ -192,7 +192,7 @@ abstraction Rewriter::rewrite_single_lambda(
     // ... then we rewrite with the new sigma ...
     result = rewrite(body,sigma);
     // ... and then we restore sigma to its old state.
-    size_t new_variable_count = 0;
+    std::size_t new_variable_count = 0;
     for(v = vl.begin(), count = 0; v != vl.end(); ++v, ++count)
     {
       if (*v != new_variables[count])
@@ -247,7 +247,7 @@ data_expression Rewriter::rewrite_lambda_application(
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
   const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
-  size_t arity=t.size();
+  std::size_t arity=t.size();
   assert(arity>0);
   if (arity==1) // The term has shape application(lambda d..:D...t), i.e. without arguments.
   {
@@ -256,7 +256,7 @@ data_expression Rewriter::rewrite_lambda_application(
   assert(vl.size()<arity);
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
-  size_t count=1;
+  std::size_t count=1;
   for(const variable& v: vl)
   {
     const variable v_fresh(generator("x_"), v.sort());
@@ -280,7 +280,7 @@ data_expression Rewriter::rewrite_lambda_application(
 
   // There are more arguments than bound variables.
   std::vector < data_expression > args;
-  for(size_t i=1; i<arity-vl.size(); ++i)
+  for(std::size_t i=1; i<arity-vl.size(); ++i)
   {
     assert(vl.size()+i<arity);
     args.push_back(atermpp::down_cast<data_expression>(t[vl.size()+i]));
@@ -354,7 +354,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
   const bool throw_exceptions = false;
-  const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
                                              enumerator_list_element<>, 
@@ -369,7 +369,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
     /* Create a list to store solutions */
     data_expression partial_result=sort_bool::false_();
 
-    size_t loop_upperbound=(sorts_are_finite?npos():10);
+    std::size_t loop_upperbound=(sorts_are_finite?npos():10);
     std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
 
     enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
@@ -469,7 +469,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
   const bool throw_exceptions = false;
-  const size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
                                              enumerator_list_element<>, 
@@ -484,7 +484,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
     /* Create lists to store solutions */
     data_expression partial_result=sort_bool::true_();
 
-    size_t loop_upperbound=(sorts_are_finite?npos():10);
+    std::size_t loop_upperbound=(sorts_are_finite?npos():10);
     std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
 
     enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);

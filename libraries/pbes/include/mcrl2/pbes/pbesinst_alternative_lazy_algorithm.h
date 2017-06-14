@@ -41,7 +41,7 @@ namespace std
 template <>
 struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
 {
-  size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
+  std::size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
   {
     return hash<atermpp::aterm>()(x);
   }
@@ -63,7 +63,7 @@ namespace detail
   create_pv_renaming(std::vector<std::vector<propositional_variable_instantiation> >& instantiations,
                                 bool short_renaming_scheme)
   {
-    size_t index=0;
+    std::size_t index=0;
     std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation> pv_renaming;
     for(const std::vector<propositional_variable_instantiation>& vec: instantiations)
     {
@@ -165,10 +165,10 @@ class pbesinst_alternative_lazy_algorithm
     enumerate_quantifiers_rewriter R;
 
     /// \brief Initial value for regeneration_period.
-    static const size_t regeneration_count_init = 100;
+    static const std::size_t regeneration_count_init = 100;
 
     /// The maximum size that the todo buffer is allowed to have.
-    const size_t m_maximum_todo_size;
+    const std::size_t m_maximum_todo_size;
 
     /// The variable m_approximimate_true indicates whether
     /// boolean variables that cannot be dealt with as the todo buffer
@@ -178,7 +178,7 @@ class pbesinst_alternative_lazy_algorithm
 
     /// When the todo buffer is limited, due to m_maximum_todo_size, then the variable below counts how
     /// many elements are dropped out of the todo buffer.
-    size_t m_elements_not_stored_in_todo_buffer;
+    std::size_t m_elements_not_stored_in_todo_buffer;
 
     /// Indicate to which extent explored bes equations that turn out not to reachable can be thrown away.
     /// Values are: none, some or all.
@@ -210,13 +210,13 @@ class pbesinst_alternative_lazy_algorithm
     std::vector<fixpoint_symbol> symbols;
 
     /// \brief ranks[i] contains the rank of the i-th equation in the PBES.
-    std::vector<size_t> ranks;
+    std::vector<std::size_t> ranks;
 
     /// \brief The initial value.
     propositional_variable_instantiation init;
 
     /// \brief A lookup map for PBES equations.
-    std::unordered_map<core::identifier_string, size_t> equation_index;
+    std::unordered_map<core::identifier_string, std::size_t> equation_index;
 
     /// \brief The search strategy to use when exploring the state space.
     search_strategy m_search_strategy;
@@ -225,9 +225,9 @@ class pbesinst_alternative_lazy_algorithm
     transformation_strategy m_transformation_strategy;
 
     /// \brief Prints a log message for every 1000-th equation
-    void print_equation_count(const size_t nr_of_processed_variables,
-                              const size_t nr_of_generated_variables,
-                              const size_t todo_size) const
+    void print_equation_count(const std::size_t nr_of_processed_variables,
+                              const std::size_t nr_of_generated_variables,
+                              const std::size_t todo_size) const
     {
       static time_t last_log_time = time(nullptr) - 1;
       time_t new_log_time=0;
@@ -267,7 +267,7 @@ class pbesinst_alternative_lazy_algorithm
         search_strategy search_strategy = breadth_first,
         transformation_strategy transformation_strategy = lazy,
         const mcrl2::bes::remove_level erase_unused_bes_variables = mcrl2::bes::none,
-        const size_t maximum_todo_size = atermpp::npos,
+        const std::size_t maximum_todo_size = atermpp::npos,
         const bool approximate_true = true
         )
       :
@@ -323,7 +323,7 @@ class pbesinst_alternative_lazy_algorithm
         ++m_elements_not_stored_in_todo_buffer;
         if ((rand() % (todo.size() + m_elements_not_stored_in_todo_buffer)) < todo.size())
         {
-          size_t index = rand() % (todo.size());
+          std::size_t index = rand() % (todo.size());
           const propositional_variable_instantiation Y=todo[index];
           equation[Y]=(m_approximate_true?false_():true_());
           trivial[Y]=equation[Y];
@@ -342,7 +342,7 @@ class pbesinst_alternative_lazy_algorithm
       }
     }
 
-    size_t get_rank(const propositional_variable_instantiation& X)
+    std::size_t get_rank(const propositional_variable_instantiation& X)
     {
       return ranks[equation_index[X.name()]];
     }
@@ -351,7 +351,7 @@ class pbesinst_alternative_lazy_algorithm
     bool find_loop_rec(
         const pbes_expression& expr,
         propositional_variable_instantiation X,
-        size_t rank,
+        std::size_t rank,
         std::unordered_map<propositional_variable_instantiation, bool>& visited)
     {
       if (is_false(expr) || is_true(expr))
@@ -489,7 +489,7 @@ class pbesinst_alternative_lazy_algorithm
         if (reachable.count(i->first)>0 || (m_erase_unused_bes_variables==bes::some && (is_true(i->second) || is_false(i->second))))
         {
           new_equations.insert(*i);
-          size_t index = equation_index[i->first.name()];
+          std::size_t index = equation_index[i->first.name()];
           instantiations[index].push_back(i->first);
           std::set<propositional_variable_instantiation> rhs_variables = find_propositional_variable_instantiations(i->second);
           for (const propositional_variable_instantiation& v: rhs_variables)
@@ -579,7 +579,7 @@ class pbesinst_alternative_lazy_algorithm
       using utilities::detail::pick_element;
       using utilities::detail::contains;
 
-      size_t regeneration_count=regeneration_count_init;
+      std::size_t regeneration_count=regeneration_count_init;
       pbes_system::detail::instantiate_global_variables(p);
 
       std::vector<pbes_equation>& pbes_equations = p.equations();
@@ -599,7 +599,7 @@ class pbesinst_alternative_lazy_algorithm
       }
 
       // initialize equation_index, instantiations, symbols and ranks
-      size_t eqn_index = 0;
+      std::size_t eqn_index = 0;
       ranks.resize(pbes_equations.size());
       instantiations.resize(pbes_equations.size());
       for (const pbes_equation& eqn: pbes_equations)
@@ -618,7 +618,7 @@ class pbesinst_alternative_lazy_algorithm
       while (!todo.empty())
       {
         const propositional_variable_instantiation X_e = next_todo();
-        size_t index = equation_index[X_e.name()];
+        std::size_t index = equation_index[X_e.name()];
         instantiations[index].push_back(X_e);
 
         const pbes_equation& eqn = pbes_equations[index];
@@ -738,7 +738,7 @@ class pbesinst_alternative_lazy_algorithm
     {
       mCRL2log(log::verbose) << "Generated " << equation.size() << " BES equations in total, generating BES" << std::endl;
       pbes result;
-      size_t index = 0;
+      std::size_t index = 0;
       const std::unordered_map<propositional_variable_instantiation,propositional_variable_instantiation>
             pv_renaming = detail::create_pv_renaming(instantiations,short_rename_scheme);
       detail::rename_pbesinst_consecutively renamer(pv_renaming);

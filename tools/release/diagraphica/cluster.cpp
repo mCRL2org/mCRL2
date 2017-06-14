@@ -24,7 +24,7 @@ Cluster::Cluster()
 }
 
 
-Cluster::Cluster(const vector< size_t > &crd)
+Cluster::Cluster(const vector< std::size_t > &crd)
 {
   coord      = crd;
   index      = NON_EXISTING;
@@ -62,10 +62,10 @@ Cluster::~Cluster()
 // -- get functions -------------------------------------------------
 
 
-size_t Cluster::getCoord(const size_t& idx)
+std::size_t Cluster::getCoord(const std::size_t& idx)
 {
-  size_t result = NON_EXISTING;
-  if (idx != NON_EXISTING && static_cast <size_t>(idx) < coord.size())
+  std::size_t result = NON_EXISTING;
+  if (idx != NON_EXISTING && static_cast <std::size_t>(idx) < coord.size())
   {
     result = coord[idx];
   }
@@ -73,9 +73,9 @@ size_t Cluster::getCoord(const size_t& idx)
 }
 
 
-Cluster* Cluster::getChild(const size_t& idx)
+Cluster* Cluster::getChild(const std::size_t& idx)
 {
-  if (idx != NON_EXISTING && static_cast <size_t>(idx) < children.size())
+  if (idx != NON_EXISTING && static_cast <std::size_t>(idx) < children.size())
   {
     return children[idx];
   }
@@ -86,9 +86,9 @@ Cluster* Cluster::getChild(const size_t& idx)
 }
 
 
-Node* Cluster::getNode(const size_t& idx)
+Node* Cluster::getNode(const std::size_t& idx)
 {
-  if (idx != NON_EXISTING && static_cast <size_t>(idx) < nodes.size())
+  if (idx != NON_EXISTING && static_cast <std::size_t>(idx) < nodes.size())
   {
     return nodes[idx];
   }
@@ -99,17 +99,17 @@ Node* Cluster::getNode(const size_t& idx)
 }
 
 
-size_t Cluster::getSizeDescNodes()
+std::size_t Cluster::getSizeDescNodes()
 {
-  size_t sum = 0;
+  std::size_t sum = 0;
   getSizeDescNodes(this, sum);
   return sum;
 }
 
 
-Bundle* Cluster::getInBundle(const size_t& idx)
+Bundle* Cluster::getInBundle(const std::size_t& idx)
 {
-  if (idx != NON_EXISTING && static_cast <size_t>(idx) < inBundles.size())
+  if (idx != NON_EXISTING && static_cast <std::size_t>(idx) < inBundles.size())
   {
     return inBundles[idx];
   }
@@ -120,9 +120,9 @@ Bundle* Cluster::getInBundle(const size_t& idx)
 }
 
 
-Bundle* Cluster::getOutBundle(const size_t& idx)
+Bundle* Cluster::getOutBundle(const std::size_t& idx)
 {
-  if (idx != NON_EXISTING && static_cast <size_t>(idx) < outBundles.size())
+  if (idx != NON_EXISTING && static_cast <std::size_t>(idx) < outBundles.size())
   {
     return outBundles[idx];
   }
@@ -138,7 +138,7 @@ Bundle* Cluster::getOutBundle(const size_t& idx)
 
 void Cluster::clearChildren()
 {
-  for (size_t i = 0; i < children.size(); ++i)
+  for (std::size_t i = 0; i < children.size(); ++i)
   {
     children[i] = 0;
   }
@@ -148,7 +148,7 @@ void Cluster::clearChildren()
 
 void Cluster::clearNodes()
 {
-  for (size_t i = 0; i < nodes.size(); ++i)
+  for (std::size_t i = 0; i < nodes.size(); ++i)
   {
     nodes[i] = 0;
   }
@@ -165,7 +165,7 @@ void Cluster::clearAttribute()
 
 void Cluster::clearInBundles()
 {
-  for (size_t i = 0; i < inBundles.size(); ++i)
+  for (std::size_t i = 0; i < inBundles.size(); ++i)
   {
     inBundles[i] = 0;
   }
@@ -175,7 +175,7 @@ void Cluster::clearInBundles()
 
 void Cluster::clearOutBundles()
 {
-  for (size_t i = 0; i < outBundles.size(); ++i)
+  for (std::size_t i = 0; i < outBundles.size(); ++i)
   {
     outBundles[i] = 0;
   }
@@ -188,7 +188,7 @@ void Cluster::clearOutBundles()
 
 void Cluster::getSizeDescNodes(
   Cluster* curClst,
-  size_t& sum)
+  std::size_t& sum)
 {
   if (curClst->getSizeChildren() == 0)
   {
@@ -196,7 +196,7 @@ void Cluster::getSizeDescNodes(
   }
   else
   {
-    for (size_t i = 0; i < curClst->getSizeChildren(); ++i)
+    for (std::size_t i = 0; i < curClst->getSizeChildren(); ++i)
     {
       getSizeDescNodes(curClst->getChild(i), sum);
     }

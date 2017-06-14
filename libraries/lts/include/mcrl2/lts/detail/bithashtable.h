@@ -23,11 +23,10 @@ namespace lts
 class bit_hash_table
 {
   private:
-    typedef std::vector < bool>::size_type size_t;
     std::vector < bool > m_bit_hash_table;
-    std::unordered_map<size_t, size_t> m_number_translator;
+    std::unordered_map<std::size_t, std::size_t> m_number_translator;
 
-    size_t calc_hash(const lps::state& state)
+    std::size_t calc_hash(const lps::state& state)
     {
       std::hash<atermpp::aterm> hasher;
       return hasher(state) % m_bit_hash_table.size();
@@ -36,7 +35,7 @@ class bit_hash_table
   public:
     bit_hash_table()=default;
 
-    bit_hash_table(const size_t size) :
+    bit_hash_table(const std::size_t size) :
       m_bit_hash_table(size,false)
     {};
 
@@ -49,24 +48,24 @@ class bit_hash_table
       }
     }
 
-    std::pair<size_t, bool> add_state(const lps::state& state)
+    std::pair<std::size_t, bool> add_state(const lps::state& state)
     {
-      size_t i = calc_hash(state);
+      std::size_t i = calc_hash(state);
       bool is_new = !m_bit_hash_table[i];
       if (is_new)
       { 
         m_bit_hash_table[i] = true;
-        size_t new_index=m_number_translator.size();
+        std::size_t new_index=m_number_translator.size();
         m_number_translator[i]=new_index;
-        return std::pair<size_t, bool>(new_index, true);
+        return std::pair<std::size_t, bool>(new_index, true);
       }
       else
       {
-        return std::pair<size_t, bool>(m_number_translator.at(i), false);
+        return std::pair<std::size_t, bool>(m_number_translator.at(i), false);
       }
     }
 
-    size_t state_index(const lps::state& state)
+    std::size_t state_index(const lps::state& state)
     {
       assert(m_bit_hash_table[calc_hash(state)]);
       return m_number_translator.at(calc_hash(state));

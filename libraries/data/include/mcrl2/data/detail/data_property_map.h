@@ -68,7 +68,7 @@ class data_property_map
     //--------------------------------------------//
     // print functions
     //--------------------------------------------//
-    std::string print(size_t n) const
+    std::string print(std::size_t n) const
     {
       std::ostringstream out;
       out << n;
@@ -208,7 +208,7 @@ class data_property_map
       unsigned int result = 0;
       for (auto i = m_data.begin(); i != m_data.end(); ++i)
       {
-        result = (std::max)(static_cast< size_t >(result), i->first.size());
+        result = (std::max)(static_cast< std::size_t >(result), i->first.size());
       }
       return result;
     }

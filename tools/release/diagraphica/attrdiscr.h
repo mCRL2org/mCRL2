@@ -29,7 +29,7 @@ class AttrDiscr : public Attribute
     AttrDiscr(
       QString name,
       QString type,
-      const size_t& idx,
+      const std::size_t& idx,
       const std::vector< std::string > &vals);
     AttrDiscr(const AttrDiscr& attr);
     virtual ~AttrDiscr();
@@ -39,17 +39,17 @@ class AttrDiscr : public Attribute
       const std::vector< int > &indices,
       const std::string& newValue);
     void moveValue(
-      const size_t& idxFr,
-      const size_t& idxTo);
+      const std::size_t& idxFr,
+      const std::size_t& idxTo);
     void configValues(
       const std::vector< std::string > &curDomain,
-      std::map< size_t, size_t  > &origToCurDomain);
+      std::map< std::size_t, std::size_t  > &origToCurDomain);
 
-    size_t getSizeOrigValues();
-    Value* getOrigValue(size_t idx);
-    size_t getSizeCurValues();
-    Value* getCurValue(size_t idx);
-    size_t getSizeMap();
+    std::size_t getSizeOrigValues();
+    Value* getOrigValue(std::size_t idx);
+    std::size_t getSizeCurValues();
+    Value* getCurValue(std::size_t idx);
+    std::size_t getSizeMap();
     Value* mapToValue(double key);
 
     // -- clear functions -------------------------------------------

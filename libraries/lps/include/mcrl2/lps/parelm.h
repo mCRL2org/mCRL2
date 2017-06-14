@@ -178,7 +178,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       std::set<data::variable> process_parameters(pars.begin(),pars.end());
 
       // create a mapping m from process parameters to integers
-      std::map<data::variable, size_t> m;
+      std::map<data::variable, std::size_t> m;
       int index = 0;
       for (const data::variable& process_parameter: process_parameters)
       {
@@ -190,7 +190,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 
       // compute the initial set v of significant variables
       std::set<data::variable> significant_variables = transition_variables();
-      std::vector<size_t> v;
+      std::vector<std::size_t> v;
       for (const data::variable& significant_variable: significant_variables)
       {
         v.push_back(m[significant_variable]);
@@ -203,12 +203,12 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       {
         for (const data::assignment& a: i->assignments())
         {
-          size_t j0 = m[a.lhs()];
+          std::size_t j0 = m[a.lhs()];
           std::set<data::variable> vars;
           data::find_all_variables(a.rhs(), std::inserter(vars, vars.end()));
           for (const data::variable& var: vars)
           {
-            size_t k0 = m[var];
+            std::size_t k0 = m[var];
 #ifdef MCRL2_LPS_PARELM_DEBUG
             std::clog << "edge " << j0 << " -> " << k0 << std::endl;
 #endif
@@ -227,7 +227,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
 #endif
 
       // compute the reachable nodes (i.e. the significant parameters)
-      std::vector<size_t> r1 = mcrl2::utilities::reachable_nodes(G, v.begin(), v.end());
+      std::vector<std::size_t> r1 = mcrl2::utilities::reachable_nodes(G, v.begin(), v.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "reachable nodes: ";
       for (auto k = r1.begin(); k != r1.end(); ++k)
@@ -236,7 +236,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm<Specification>
       }
       std::clog << std::endl;
 #endif
-      std::set<size_t> r2(r1.begin(), r1.end());
+      std::set<std::size_t> r2(r1.begin(), r1.end());
       std::set<data::variable> to_be_removed;
       for (const data::variable& process_parameter: process_parameters)
       {

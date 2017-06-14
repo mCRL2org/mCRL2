@@ -92,9 +92,9 @@ void run_linearisation_instance(const std::string& spec,
 // not looking at the conditions of the actions or deadlocks. 
 void run_linearisation_test_case(const std::string& spec, 
                                  const bool expect_success, 
-                                 const size_t max_expected_action_ultimate_delay_, 
+                                 const std::size_t max_expected_action_ultimate_delay_, 
                                  const bool check_max_expected_deadlock_ultimate_delay,
-                                 const size_t max_expected_deadlock_ultimate_delay_)
+                                 const std::size_t max_expected_deadlock_ultimate_delay_)
 {
   // Set various rewrite strategies
   rewrite_strategy_vector rewrite_strategies = data::detail::get_test_rewrite_strategies(false);

@@ -22,7 +22,7 @@
 #include "value.h"
 
 #ifndef NON_EXISTING
-#define NON_EXISTING (size_t)(-1)
+#define NON_EXISTING (std::size_t)(-1)
 #endif
 
 class Attribute : public QObject
@@ -34,12 +34,12 @@ class Attribute : public QObject
     Attribute(
       QString name,
       QString type,
-      const size_t& idx);
+      const std::size_t& idx);
     Attribute(const Attribute& attr);
     virtual ~Attribute();
 
     // -- set functions ---------------------------------------------
-    void setIndex(const size_t& idx);
+    void setIndex(const std::size_t& idx);
     void setName(QString name);
     void setType(QString type);
 
@@ -47,25 +47,25 @@ class Attribute : public QObject
       const std::vector< int > &indices,
       const std::string& newValue);
     virtual void moveValue(
-      const size_t& idxFr,
-      const size_t& idxTo);
+      const std::size_t& idxFr,
+      const std::size_t& idxTo);
 
     // functions overridden by AttrDiscr
     virtual void configValues(
       const std::vector< std::string > &curDomain,
-      std::map< size_t, size_t  > &origToCurDomain);
+      std::map< std::size_t, std::size_t  > &origToCurDomain);
 
     // -- get functions ---------------------------------------------
-    size_t getIndex();
+    std::size_t getIndex();
     QString name();
     QString type();
 
     // functions overridden by AttrDiscr
-    virtual size_t getSizeOrigValues();
-    virtual Value* getOrigValue(size_t idx);
-    virtual Value* getCurValue(size_t idx);
+    virtual std::size_t getSizeOrigValues();
+    virtual Value* getOrigValue(std::size_t idx);
+    virtual Value* getCurValue(std::size_t idx);
 
-    virtual size_t getSizeCurValues() = 0;
+    virtual std::size_t getSizeCurValues() = 0;
     virtual Value* mapToValue(double key) = 0;
 
     // -- clear functions -------------------------------------------
@@ -89,7 +89,7 @@ class Attribute : public QObject
     virtual void deleteCurMap() = 0;
 
     // -- data members ----------------------------------------------
-    size_t    index;
+    std::size_t    index;
     QString m_name;
     QString m_type;
 };

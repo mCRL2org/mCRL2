@@ -66,16 +66,16 @@ class parity_game_generator
     std::map<core::identifier_string, std::vector<pbes_equation>::const_iterator > m_pbes_equation_index;
 
     /// \brief Maps propositional variables to corresponding priorities.
-    std::map<core::identifier_string, size_t> m_priorities;
+    std::map<core::identifier_string, std::size_t> m_priorities;
 
     /// \brief Maps PBES closed expressions to corresponding BES variables.
-    std::map<pbes_expression, size_t> m_pbes_expression_index;
+    std::map<pbes_expression, std::size_t> m_pbes_expression_index;
 
     /// \brief Contains intermediate results of the BES that is being generated.
     /// m_bes[i] represents a BES equation corresponding to BES variable i.
     /// m_bes[i].first is the right hand side of the BES equation
     /// m_bes[i].second is the block nesting depth of the corresponding PBES variable
-    std::vector<std::pair<pbes_expression, size_t> > m_bes;
+    std::vector<std::pair<pbes_expression, std::size_t> > m_bes;
 
     /// \brief Determines what kind of BES equations are generated for true and false.
     bool m_true_false_dependencies;
@@ -88,21 +88,21 @@ class parity_game_generator
     /// \param priority A positive integer
     /// \return The index of a BES equation corresponding to the given PBES expression.
     /// If no equation exists for the expression, a new one is added.
-    size_t add_bes_equation(pbes_expression t, size_t priority)
+    std::size_t add_bes_equation(pbes_expression t, std::size_t priority)
     {
-      size_t result;
+      std::size_t result;
 
       mCRL2log(log::debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
 
       // TODO: can this insertion be done more efficiently?
-      std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(t);
+      std::map<pbes_expression, std::size_t>::iterator i = m_pbes_expression_index.find(t);
       if (i != m_pbes_expression_index.end())
       {
         result = i->second;
       }
       else
       {
-        size_t p = m_pbes_expression_index.size();
+        std::size_t p = m_pbes_expression_index.size();
         m_pbes_expression_index[t] = p;
         if (is_propositional_variable_instantiation(t))
         {
@@ -165,7 +165,7 @@ class parity_game_generator
     {
 
       fixpoint_symbol sigma = fixpoint_symbol::nu();
-      size_t priority = 0;
+      std::size_t priority = 0;
       for (typename Container::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
         if (pbes_equation(*i).symbol() == sigma)
@@ -183,7 +183,7 @@ class parity_game_generator
       if (!m_is_min_parity)
       {
         // Choose an even upperbound max_priority
-        size_t max_priority = (priority % 2 == 0 ? priority : priority + 1);
+        std::size_t max_priority = (priority % 2 == 0 ? priority : priority + 1);
         if (max_priority == 0)
         {
           max_priority = 2;
@@ -206,14 +206,14 @@ class parity_game_generator
 
     // prints the BES equation with left hand side 'index' and right hand side 'rhs'
     virtual
-    std::string print_bes_equation(size_t index, const std::set<size_t>& rhs)
+    std::string print_bes_equation(std::size_t index, const std::set<std::size_t>& rhs)
     {
       std::ostringstream out;
-      const std::pair<pbes_expression, size_t>& eqn = m_bes[index];
-      const size_t priority = eqn.second;
+      const std::pair<pbes_expression, std::size_t>& eqn = m_bes[index];
+      const std::size_t priority = eqn.second;
       out << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
       std::string op = (get_operation(index) == PGAME_AND ? " && " : " || ");
-      for (std::set<size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
+      for (std::set<std::size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
       {
         out << (i == rhs.begin() ? "" : op) << "Y" << *i;
       }
@@ -223,7 +223,7 @@ class parity_game_generator
 
     /// \brief Prints a log message for every step-th equation
     virtual
-    std::string print_equation_count(size_t size, size_t step = 1000) const
+    std::string print_equation_count(std::size_t size, std::size_t step = 1000) const
     {
       if (size > 0 && (size % step == 0 || (size < 1000 && size % 100 == 0)))
       {
@@ -298,7 +298,7 @@ class parity_game_generator
     /// \return PGAME_AND if the corresponding BES equation is a conjunction,
     /// PGAME_OR if it is a disjunction.
     virtual
-    operation_type get_operation(size_t index)
+    operation_type get_operation(std::size_t index)
     {
       initialize_generation();
 
@@ -355,7 +355,7 @@ class parity_game_generator
     /// \param index A positive integer
     /// \return The block nesting depth of the variable in the BES.
     virtual
-    size_t get_priority(size_t index)
+    std::size_t get_priority(std::size_t index)
     {
       initialize_generation();
 
@@ -368,11 +368,11 @@ class parity_game_generator
     /// to the expressions true, false and the initial state of the PBES.
     /// \return A set of indices corresponding to proposition variables of the generated BES.
     virtual
-    std::set<size_t> get_initial_values()
+    std::set<std::size_t> get_initial_values()
     {
       initialize_generation();
 
-      std::set<size_t> result;
+      std::set<std::size_t> result;
       if (!m_pbes.equations().empty())
       {
         result.insert(0); // equation 0 corresponds with the value true
@@ -387,17 +387,17 @@ class parity_game_generator
     /// \return The indices of the proposition variables that appear in the
     /// right hand side of the BES equation of the given index.
     virtual
-    std::set<size_t> get_dependencies(size_t index)
+    std::set<std::size_t> get_dependencies(std::size_t index)
     {
       initialize_generation();
 
       assert(index < m_bes.size());
 
-      std::set<size_t> result;
+      std::set<std::size_t> result;
 
-      std::pair<pbes_expression, size_t>& eqn = m_bes[index];
+      std::pair<pbes_expression, std::size_t>& eqn = m_bes[index];
       pbes_expression& psi = eqn.first;
-      const size_t priority = eqn.second;
+      const std::size_t priority = eqn.second;
 
       mCRL2log(log::debug, "parity_game_generator") << std::endl << "Generating equation for expression " << psi << std::endl;
 
@@ -427,7 +427,7 @@ class parity_game_generator
       {
         if (m_true_false_dependencies)
         {
-          std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(true_());
+          std::map<pbes_expression, std::size_t>::iterator i = m_pbes_expression_index.find(true_());
           assert(i != m_pbes_expression_index.end());
           result.insert(i->second);
         }
@@ -436,7 +436,7 @@ class parity_game_generator
       {
         if (m_true_false_dependencies)
         {
-          std::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(false_());
+          std::map<pbes_expression, std::size_t>::iterator i = m_pbes_expression_index.find(false_());
           assert(i != m_pbes_expression_index.end());
           result.insert(i->second);
         }
@@ -456,7 +456,7 @@ class parity_game_generator
     void print_variable_mapping()
     {
       mCRL2log(log::info) << "--- variable mapping ---" << std::endl;
-      std::map<size_t, pbes_expression> m;
+      std::map<std::size_t, pbes_expression> m;
       for (auto& i: m_pbes_expression_index)
       {
         m[i.second] = i.first;

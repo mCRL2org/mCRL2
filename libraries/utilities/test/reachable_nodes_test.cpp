@@ -19,11 +19,11 @@ void test_reachable_nodes()
   boost::add_edge(3, 2, g);
   boost::add_edge(3, 5, g);
 
-  std::vector<size_t> v;
+  std::vector<std::size_t> v;
   v.push_back(1);
   v.push_back(5);
 
-  std::vector<size_t> nodes = reachable_nodes(g, v.begin(), v.end());
+  std::vector<std::size_t> nodes = reachable_nodes(g, v.begin(), v.end());
   BOOST_CHECK(nodes.size() == 4);
   BOOST_CHECK(std::find(nodes.begin(), nodes.end(), 1) != nodes.end());
   BOOST_CHECK(std::find(nodes.begin(), nodes.end(), 2) != nodes.end());

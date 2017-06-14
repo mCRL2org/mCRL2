@@ -86,9 +86,9 @@ exploration_strategy_vector exploration_strategies()
 }
 
 static void check_lps2lts_specification(const std::string& specification,
-                                        const size_t expected_states,
-                                        const size_t expected_transitions,
-                                        const size_t expected_labels,
+                                        const std::size_t expected_states,
+                                        const std::size_t expected_transitions,
+                                        const std::size_t expected_labels,
                                         const std::string& priority_action = "")
 {
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";

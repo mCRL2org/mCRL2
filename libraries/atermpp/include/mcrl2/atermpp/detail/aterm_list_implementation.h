@@ -22,10 +22,10 @@
 namespace atermpp
 {
 
-const size_t max_len_of_short_list=10000;  // The length of a short list. If lists
-                                           // are short the stack can be used for temporary data.
-                                           // Otherwise the heap must be used to avoid stack overflow.
-                                           // The chosen value is rather arbitrary. 
+const std::size_t max_len_of_short_list=10000;  // The length of a short list. If lists
+                                                // are short the stack can be used for temporary data.
+                                                // Otherwise the heap must be used to avoid stack overflow.
+                                                // The chosen value is rather arbitrary. 
 
 template <class Term>
 void term_list<Term>::push_front(const Term& el)
@@ -40,7 +40,7 @@ term_list<Term> push_back(const term_list<Term>& l, const Term& el)
 {
   typedef typename term_list<Term>::const_iterator const_iterator;
   
-  const size_t len = l.size();
+  const std::size_t len = l.size();
   if (len<max_len_of_short_list)
   {
     // The list is short, use the stack for temporal storage.
@@ -48,7 +48,7 @@ term_list<Term> push_back(const term_list<Term>& l, const Term& el)
 
     /* Collect all elements of list in buffer */
     
-    size_t j=0;
+    std::size_t j=0;
     for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
     {
       buffer[j]=i;
@@ -108,7 +108,7 @@ term_list<Term> remove_one_element(const term_list<Term>& list, const Term& t)
 {
   typedef typename term_list<Term>::const_iterator const_iterator;
   
-  size_t len=0;
+  std::size_t len=0;
   const_iterator i = list.begin();
   for( ; i!=list.end(); ++i, ++len)
   {
@@ -127,7 +127,7 @@ term_list<Term> remove_one_element(const term_list<Term>& list, const Term& t)
   const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
 
   term_list<Term> result = list; 
-  size_t k=0;
+  std::size_t k=0;
   for(const_iterator j = list.begin(); j != i; ++j, ++k)
   {
     buffer[k]=j;
@@ -157,7 +157,7 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
     return l;
   }
 
-  size_t len = l.size();
+  std::size_t len = l.size();
 
   if (len == 0)
   {
@@ -171,7 +171,7 @@ term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m)
     // The length is short. Use the stack for temporary storage.
     const_iterator* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(const_iterator, len);
 
-    size_t j=0;
+    std::size_t j=0;
     for (const_iterator i = l.begin(); i != l.end(); ++i, ++j)
     {
       buffer[j]=i;
@@ -252,7 +252,7 @@ namespace detail
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
-    const size_t len=std::distance(first,last);
+    const std::size_t len=std::distance(first,last);
     if (len<max_len_of_short_list)  // If the list is sufficiently short, use the stack.
     {
       Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);
@@ -308,7 +308,7 @@ namespace detail
     static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
     static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
 
-    const size_t len=std::distance(first,last);
+    const std::size_t len=std::distance(first,last);
     if (len<max_len_of_short_list) // If the list is sufficiently short, use the stack.
     {
       Term* buffer = MCRL2_SPECIFIC_STACK_ALLOCATOR(Term, len);

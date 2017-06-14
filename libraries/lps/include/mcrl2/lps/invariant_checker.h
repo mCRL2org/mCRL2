@@ -93,9 +93,9 @@ class Invariant_Checker
     bool f_all_violations;
     std::string f_dot_file_name;
     void print_counter_example();
-    void save_dot_file(size_t a_summand_number);
+    void save_dot_file(std::size_t a_summand_number);
     bool check_init(const data::data_expression& a_invariant);
-    bool check_summand(const data::data_expression& a_invariant, const action_summand_type& a_summand, const size_t a_summand_number);
+    bool check_summand(const data::data_expression& a_invariant, const action_summand_type& a_summand, const std::size_t a_summand_number);
     bool check_summands(const data::data_expression& a_invariant);
   public:
 
@@ -135,13 +135,13 @@ void Invariant_Checker<Specification>::print_counter_example()
 // --------------------------------------------------------------------------------------------
 
 template <typename Specification>
-void Invariant_Checker<Specification>::save_dot_file(size_t a_summand_number)
+void Invariant_Checker<Specification>::save_dot_file(std::size_t a_summand_number)
 {
   if (!f_dot_file_name.empty())
   {
     std::string v_file_name=f_dot_file_name;
 
-    if (a_summand_number == (size_t)-1) // Dangerous
+    if (a_summand_number == (std::size_t)-1) // Dangerous
     {
       v_file_name += "-init.dot";
     }
@@ -175,7 +175,7 @@ bool Invariant_Checker<Specification>::check_init(const data::data_expression& a
     if (f_bdd_prover.is_contradiction() != data::detail::answer_yes)
     {
       print_counter_example();
-      save_dot_file((size_t)(-1));
+      save_dot_file((std::size_t)(-1));
     }
     return false;
   }
@@ -187,7 +187,7 @@ template <typename Specification>
 bool Invariant_Checker<Specification>::check_summand(
   const data::data_expression& a_invariant,
   const action_summand_type& a_summand,
-  const size_t a_summand_number)
+  const std::size_t a_summand_number)
 {
   using namespace data::sort_bool;
   const data::data_expression& v_condition = a_summand.condition();
@@ -226,7 +226,7 @@ template <typename Specification>
 bool Invariant_Checker<Specification>::check_summands(const data::data_expression& a_invariant)
 {
   bool v_result = true;
-  size_t v_summand_number = 1;
+  std::size_t v_summand_number = 1;
 
   for (auto i = f_summands.begin(); i != f_summands.end() && (f_all_violations || v_result); ++i)
   {

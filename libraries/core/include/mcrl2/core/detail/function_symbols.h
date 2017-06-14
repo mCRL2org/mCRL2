@@ -32,7 +32,7 @@ namespace detail {
 extern std::deque<atermpp::function_symbol> function_symbols_DataAppl;
 
 inline
-const atermpp::function_symbol& function_symbol_DataAppl_helper(size_t i)
+const atermpp::function_symbol& function_symbol_DataAppl_helper(std::size_t i)
 {
   do
   {
@@ -43,7 +43,7 @@ const atermpp::function_symbol& function_symbol_DataAppl_helper(size_t i)
 }
 
 inline
-const atermpp::function_symbol& function_symbol_DataAppl(size_t i)
+const atermpp::function_symbol& function_symbol_DataAppl(std::size_t i)
 {
   if (i >= function_symbols_DataAppl.size())
   {
