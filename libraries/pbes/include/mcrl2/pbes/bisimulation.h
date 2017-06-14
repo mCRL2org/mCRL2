@@ -327,6 +327,7 @@ class bisimulation_algorithm
     /// \brief Initializes the name lookup table.
     /// \param model A linear process
     /// \param spec A linear process
+    /// \pre model and spec must have the same data specification
     void init(const lps::linear_process& model, const lps::linear_process& spec)
     {
       summand_names.clear();
@@ -351,11 +352,9 @@ class bisimulation_algorithm
       const lps::linear_process& m = M.process();
       const lps::linear_process& s = S.process();
 
-      // TODO: the data of the two specification needs to be merged!
-      data::data_specification dataspec = data::merge_data_specifications(M.data(), S.data());
       propositional_variable_instantiation init(X(m, s), M.initial_process().state(M.process().process_parameters()) + S.initial_process().state(S.process().process_parameters()));
 
-      pbes result(dataspec, equations, init);
+      pbes result(M.data(), equations, init);
       assert(result.is_closed());
       return result;
     }
@@ -465,9 +464,17 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     /// two specifications.
     pbes run(const lps::specification& model, const lps::specification& spec)
     {
+      // resolve name clashes, and merge the data specifications of model and spec
+      data::data_specification dataspec = data::merge_data_specifications(model.data(), spec.data());
       lps::specification spec1 = spec;
-      resolve_name_clashes(model, spec1, true);
-      const lps::linear_process& m = model.process();
+      lps::specification model1 = model;
+      resolve_name_clashes(model1, spec1, true);
+      model1.data() = dataspec;
+      spec1.data() = dataspec;
+      lps::normalize_sorts(model1, model1.data());
+      lps::normalize_sorts(spec1, spec1.data());
+
+      const lps::linear_process& m = model1.process();
       const lps::linear_process& s = spec1.process();
       init(m, s);
 
@@ -494,7 +501,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         equations.push_back(e1);
       }
 
-      return build_pbes(equations, model, spec1);
+      return build_pbes(equations, model1, spec1);
     }
 };
 

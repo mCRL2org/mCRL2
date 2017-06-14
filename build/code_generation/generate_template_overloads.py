@@ -64,6 +64,7 @@ data::data_expression
 data::sort_expression
 data::variable_list
 lps::multi_action
+lps::specification
 process::action
 process::action_label_list
 process::process_equation_vector

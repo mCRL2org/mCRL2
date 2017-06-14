@@ -209,6 +209,7 @@ pbes lps2pbes(const lps::specification& lpsspec,
 {
   lps::specification lpsspec1 = lpsspec;
   lpsspec1.data() = data::merge_data_specifications(lpsspec1.data(), formspec.data());
+  lps::normalize_sorts(lpsspec1, lpsspec1.data());
   lpsspec1.action_labels() = process::merge_action_specifications(lpsspec1.action_labels(), formspec.action_labels());
   return lps2pbes(lpsspec1, formspec.formula(), timed, structured, unoptimized, preprocess_modal_operators, generate_counter_example);
 }

@@ -45,6 +45,7 @@ void complete_data_specification(specification& spec);
 
 // template function overloads
 bool check_well_typedness(const specification& x);
+void normalize_sorts(lps::specification& x, const data::sort_specification& /* sortspec */);
 
 /// \brief Test for a specification expression
 /// \param x A term
