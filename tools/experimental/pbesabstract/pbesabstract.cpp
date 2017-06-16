@@ -67,18 +67,18 @@ class pbes_abstract_tool: public pbes_input_tool<pbes_output_tool<input_output_t
         "pbesabstract",
         "Wieger Wesselink; Tom Haenen and Tim Willemse",
         "Tool for abstracting parameters of a PBES",
-        "Reads a file containing a PBES. For the variables that are indicated to be"
-        "abstracted, the smallest boolean subexpression is found which is then replaced"
-        "by false (default) or true.\n"
+        "Reads a file containing a PBES. For the variables that are indicated to be "
+        "abstracted, the smallest boolean subexpression is found which is then replaced "
+        "by false (default) or true.\n "
         "\n"
-        "If the solution of a PBES after application of pbesabstract with"
-        "the value false is true, then the original PBES has solution true. Similarly"
-        "if the solution of a PBES after application of pbesabstract with the value\n"
-        "true is false, then the original PBES has solution false. After abstracting from certain"
+        "If the solution of a PBES after application of pbesabstract with "
+        "the value false is true, then the original PBES has solution true. Similarly "
+        "if the solution of a PBES after application of pbesabstract with the value "
+        "true is false, then the original PBES has solution false. After abstracting from certain "
         "variables, pbesparelm can be used to remove these variables from the PBES hopefully, "
-        "but not necessarily, reducing the number of BES variables required to solve the PBES.\n\n"
-        "If OUTFILE is not present, standard output is used."
-        "If INFILE is not present, standard input is used."
+        "but not necessarily, reducing the number of BES variables required to solve the PBES.\n\n "
+        "If OUTFILE is not present, standard output is used. "
+        "If INFILE is not present, standard input is used. "
         "\n\n"
       ),
       m_value_true(true)
