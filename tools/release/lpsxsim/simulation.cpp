@@ -40,7 +40,7 @@ void Simulation::init(const QString& filename, bool do_not_use_dummies)
     return;
   }
 
-  if (do_not_use_dummies)
+  if (!do_not_use_dummies)
   {
     mcrl2::lps::detail::instantiate_global_variables(spec);
   }
