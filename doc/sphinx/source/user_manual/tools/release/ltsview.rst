@@ -19,7 +19,26 @@ approach is described in detail in [HWW01]_.
 
    In contrast to :ref:`tool-ltsgraph` this tool is able to handle large state
    spaces.
-   
+
+The graph can be rotated by dragging with the right mouse button or dragging
+with the left mouse button while holding the shift key. Zooming in and out is
+possible by using the mouse wheel or by dragging the mouse up/down while holding
+the middle mouse button. The graph can be moved around by holding the "Control"
+button and dragging with the mouse.
+
+ltsview supports simulation of the system in a way similar to :ref:`tool-lpsxsim`.
+Simulation can be started from the initial state by clicking "Start" in the 
+simulation window (which can be turned on/off in the "View" menu). By double
+clicking one of the next states in the simulation window, the simulation
+progresses to that state.
+
+A useful feature of ltsview is the possibility to find a trace to a state.
+First, make sure that no simulation is currently running. Turn on the 
+"Display states" option from the "View" menu and select a state by clicking
+on it. Now start a simulation and click the button "Backtrace". A trace from
+the initial state to the selected state will now be shown in the graph.
+The "Undo" button allows you to step through that trace backwards.
+
 References
 ----------
 
