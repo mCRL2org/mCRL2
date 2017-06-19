@@ -43,6 +43,10 @@ set(MCRL2_TOOLS
   tracepp
   txt2lps
   txt2pbes
+  bessolve
+  txt2bes
+  pbesinst
+  lpsbisim2pbes
 )
 
 foreach(TOOL ${MCRL2_TOOLS})

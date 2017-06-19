@@ -12,7 +12,7 @@ if(WIN32)
   set(MCRL2_LIBRARY_PATH bin)
   set(MCRL2_ARCHIVE_PATH lib)
   set(MCRL2_INCLUDE_PATH include)
-  set(MCRL2_RESOURCE_PATH .)
+  set(MCRL2_RESOURCE_PATH share/mcrl2)
 
 elseif(UNIX)
 

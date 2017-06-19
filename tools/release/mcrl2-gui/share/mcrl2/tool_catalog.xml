@@ -7,6 +7,7 @@
 
 <tool name="lps2lts"            input_format="lps"   output_format="lts"  category="Transformation"/>
 <tool name="lps2pbes"           input_format="lps"   output_format="pbes" category="Transformation" />
+<tool name="lpsbisim2pbes"	input_format="lps"   output_format="pbes" category="Transformation"/>
 <tool name="lpsactionrename"    input_format="lps"   output_format="lps"  category="Transformation"/>
 <tool name="lpsbinary"          input_format="lps"   output_format="lps"  category="Transformation"/> 
 <tool name="lpsconfcheck"       input_format="lps"   output_format="lps"  category="Transformation"/>
@@ -34,14 +35,17 @@
 
 <tool name="pbes2bool" 		input_format="pbes;bes"                   category="Analysis"/>
 <tool name="pbes2bes" 		input_format="pbes" output_format="bes"   category="Transformation"/>
+<tool name="pbesinst" 		input_format="pbes" output_format="pbes"  category="Transformation"/>
 <tool name="pbesconstelm" 	input_format="pbes" output_format="pbes"  category="Transformation"/> 
 <tool name="pbesinfo" 		input_format="pbes"                       category="Analysis"/>
 <tool name="pbesparelm" 	input_format="pbes" output_format="pbes"  category="Transformation"/>
 <tool name="pbespgsolve" 	input_format="pbes;bes"                   category="Analysis"/>
 <tool name="pbespp" 		input_format="pbes" output_format="txt"   category="Analysis"/>
+<tool name="bessolve" 		input_format="bes"  output_format="txt"   category="Analysis"/>
 <tool name="pbesrewr" 		input_format="pbes" output_format="pbes"  category="Transformation"/>
 
 <tool name="tracepp" 		input_format="trc"  output_format="txt"   category="Analysis"/>
 <tool name="txt2lps" 		input_format="txt"  output_format="lps"   category="Transformation"/>
+<tool name="txt2bes" 		input_format="txt"  output_format="bes"   category="Transformation"/>
 <tool name="txt2pbes" 		input_format="txt"  output_format="pbes"  category="Transformation"/>
 </tool-catalog>
