@@ -8896,9 +8896,17 @@ class specification_basic_type
       { 
         data_expression simplified_ultimate_delay_condition;
         variable_list reduced_sumvars;
-        fourier_motzkin(ultimate_delay_condition, ultimate_delay_sumvars1, simplified_ultimate_delay_condition, reduced_sumvars, rewr);
-        swap(simplified_ultimate_delay_condition, ultimate_delay_condition);
-        swap(ultimate_delay_sumvars1, reduced_sumvars);
+        try 
+        {
+          fourier_motzkin(ultimate_delay_condition, ultimate_delay_sumvars1, simplified_ultimate_delay_condition, reduced_sumvars, rewr);
+          swap(simplified_ultimate_delay_condition, ultimate_delay_condition);
+          swap(ultimate_delay_sumvars1, reduced_sumvars);
+        }
+        catch (mcrl2::runtime_error& e)
+        {
+          // Applying Fourier Motzkin failed. Continue working with the old variables. 
+          mCRL2log(mcrl2::log::debug) << "Simplifying a condition using Fourier-Motzkin reduction failed. \n" << e.what() << std::endl;
+        }
       }
 
       calculate_left_merge_deadlock(timevar, ultimate_delay_condition, ultimate_delay_sumvars1, deadlock_summands1, 
