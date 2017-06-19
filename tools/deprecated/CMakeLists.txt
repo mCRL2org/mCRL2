@@ -1,5 +1,7 @@
 set(MCRL2_TOOLS
   formulacheck
+  lps2torx
+  pbesabstract
 )
 
 if(MCRL2_ENABLE_DEPRECATED)

@@ -6,9 +6,7 @@ set(MCRL2_TOOLS
   lpsrealelm
   lpsrealzone
   lpssymbolicbisim
-  lps2torx
   pbesabsinthe
-  pbesabstract
   pbesinst
   pbespareqelm
   txt2bes
