@@ -353,7 +353,7 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  const bool throw_exceptions = false;
+  const bool throw_exceptions = true;
   const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
@@ -378,18 +378,17 @@ data_expression Rewriter::existential_quantifier_enumeration(
            sol!=enumerator.end();
            ++sol)
     {
-      if (partial_result==sort_bool::false_())
-      {
-        partial_result=sol->expression();
-      }
-      else if (partial_result!=sort_bool::true_())
-      {
-        partial_result=application(sort_bool::or_(), partial_result,sol->expression());
-      }
+      partial_result = lazy::or_(partial_result, sol->expression());
       loop_upperbound--;
+      if(partial_result == sort_bool::true_())
+      {
+        // We found a solution, so prevent the enumerator from doing any unnecessary work
+        // Also prevents any further exceptions from the enumerator
+        return sort_bool::true_();
+      }
     }
 
-    if ((sol==enumerator.end() && loop_upperbound>0) || partial_result==sort_bool::true_())
+    if (sol==enumerator.end() && loop_upperbound>0)
     {
       return partial_result;
     }
@@ -468,7 +467,7 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  const bool throw_exceptions = false;
+  const bool throw_exceptions = true;
   const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
@@ -493,18 +492,17 @@ data_expression Rewriter::universal_quantifier_enumeration(
            sol!=enumerator.end();
            ++sol)
     {
-      if (partial_result==sort_bool::true_())
-      {
-        partial_result=sol->expression();
-      }
-      else if (partial_result!=sort_bool::false_())
-      {
-        partial_result=application(sort_bool::and_(), partial_result, sol->expression());
-      }
+      partial_result = lazy::and_(partial_result, sol->expression());
       loop_upperbound--;
+      if(partial_result == sort_bool::false_())
+      {
+        // We found a solution, so prevent the enumerator from doing any unnecessary work
+        // Also prevents any further exceptions from the enumerator
+        return sort_bool::false_();
+      }
     }
 
-    if ((sol==enumerator.end() && loop_upperbound>0) || partial_result==sort_bool::false_())
+    if (sol==enumerator.end() && loop_upperbound>0)
     {
       return partial_result;
     }
