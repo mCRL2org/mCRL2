@@ -183,6 +183,7 @@ class PbesabsintheTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(PbesabsintheTest, self).__init__(name, ymlfile('pbesabsinthe'), settings)
 
+# N.B. This test has been disabled, since the tool has been deprecated.
 class PbesabstractTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(PbesabstractTest, self).__init__(name, ymlfile('pbesabstract'), settings)
@@ -276,7 +277,6 @@ available_tests = {
     'bisimulation-branching-bisim'                : lambda name, settings: BisimulationTest(name, 'branching-bisim', settings)                     ,
     'bisimulation-branching-bisim-gv'             : lambda name, settings: BisimulationTest(name, 'branching-bisim-gv', settings)                  ,
     'bisimulation-weak-bisim'                     : lambda name, settings: BisimulationTest(name, 'weak-bisim', settings)                          ,
-    'pbesabstract'                                : lambda name, settings: PbesabstractTest(name, settings)                                        ,
     'pbesconstelm'                                : lambda name, settings: PbesconstelmTest(name, settings)                                        ,
     'pbesparelm'                                  : lambda name, settings: PbesparelmTest(name, settings)                                          ,
     'pbespareqelm'                                : lambda name, settings: PbespareqelmTest(name, settings)                                        ,
