@@ -705,9 +705,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
       : super(R, dataspec, datar, id_generator, max_count, throw_exceptions)
-    {
-      id_generator.clear();
-    }
+    {}
 
     /// \brief Returns an iterator that enumerates solutions for variables that satisfy a condition
     /// \param sigma A mutable substitution that is applied by the rewriter contained in E
