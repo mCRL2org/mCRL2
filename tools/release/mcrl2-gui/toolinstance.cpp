@@ -5,7 +5,7 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
+
 
 #include "toolinstance.h"
 #include "ui_toolinstance.h"
@@ -233,6 +233,7 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
           {
             QFormLayout *lytValues = new QFormLayout();
             lytValues->setSpacing(6);
+            lytValues->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
             QButtonGroup *grpValues = new QButtonGroup(this);
 
@@ -245,8 +246,9 @@ ToolInstance::ToolInstance(QString filename, ToolInformation information, mcrl2:
 
               QLabel *lblVal = new QLabel(val.description, this);
               lblVal->setWordWrap(true);
-
+ 
               lytValues->addRow(rbVal, lblVal);
+              lytValues->setLabelAlignment(Qt::AlignLeft);
             }
             m_optionValues.append(new OptionValue(option, cbOpt, grpValues));
 
