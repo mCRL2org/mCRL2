@@ -464,11 +464,7 @@ void GLWidget::mouseMoveEvent(QMouseEvent* e)
         }
       case dm_dragnode:
         {
-          QVector3D oldEye = m_scene->worldToEye(m_dragnode->pos());
-          int x = oldEye.x() + vec.x();
-          int y = oldEye.y() + vec.y();
-          float z = oldEye.z();
-          m_dragnode->move(m_scene->eyeToWorld(x, y, z));
+          m_dragnode->move(m_scene->eyeToWorld(e->pos().x(), e->pos().y(), m_scene->worldToEye(m_dragnode->pos()).z()));
           break;
         }
       case dm_zoom:
