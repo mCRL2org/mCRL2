@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/bes/pbes_input_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/bes/io.h"
@@ -39,10 +39,10 @@ using namespace mcrl2::bes;
 
 //local declarations
 
-class bessolve_tool: public bes_input_tool<input_output_tool>
+class bessolve_tool: public bes_input_tool<input_tool>
 {
   private:
-    typedef bes_input_tool<input_output_tool> super;
+    typedef bes_input_tool<input_tool> super;
 
   public:
     bessolve_tool()
@@ -83,7 +83,7 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
       }
       timer().finish("solving");
 
-      std::cout << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
+      mCRL2log(info) << "The solution for the initial variable of the BES is " << (result?"true":"false") << std::endl;
 
       if (print_justification)
       {
@@ -99,7 +99,7 @@ class bessolve_tool: public bes_input_tool<input_output_tool>
 
     void add_options(interface_description& desc)
     {
-      input_output_tool::add_options(desc);
+      input_tool::add_options(desc);
       desc.add_option("strategy", make_enum_argument<solution_strategy_t>("STRATEGY")
                       .add_value(small_progr_measures, true)
                       .add_value(gauss)
