@@ -79,7 +79,7 @@ class pbes_input_tool: public Tool
       auto option_argument = utilities::make_enum_argument<std::string>("FORMAT");
       for (const utilities::file_format& type: types)
       {
-        option_argument.add_value_desc(type.shortname(), type.description());
+        option_argument.add_value_desc(type.shortname(), type.description(), type == default_input_format());
       }
       desc.add_option("in", option_argument, "use input format FORMAT:", 'i');
     }

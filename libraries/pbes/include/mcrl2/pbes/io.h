@@ -68,7 +68,7 @@ const utilities::file_format guess_format(const std::string& filename)
       return it;
     }
   }
-  return utilities::file_format();
+  return pbes_format_internal();
 }
 
 ///

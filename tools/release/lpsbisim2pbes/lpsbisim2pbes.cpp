@@ -52,7 +52,7 @@ class lpsbisim2pbes_tool: public super
       super::add_options(desc);
       desc.add_option("normalize", "normalize the result", 'n');
       desc.add_option("bisimulation", make_enum_argument<bisimulation_type>("NAME")
-                      .add_value(strong_bisim)
+                      .add_value(strong_bisim, true)  // This is the default
                       .add_value(weak_bisim)
                       .add_value(branching_bisim)
                       .add_value(branching_sim)

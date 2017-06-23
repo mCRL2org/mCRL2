@@ -7,7 +7,9 @@
 
 <tool name="lps2lts"            input_format="lps"   output_format="lts"  category="Transformation"/>
 <tool name="lps2pbes"           input_format="lps"   output_format="pbes" category="Transformation" />
-<tool name="lpsbisim2pbes"	input_format="lps"   output_format="pbes" category="Transformation"/>
+<!-- 
+     This does not work as mcrl2-gui does not know about the tool_class input_input_output file. 
+     <tool name="lpsbisim2pbes"	input_format="lps"   output_format="pbes" category="Transformation"/>  -->
 <tool name="lpsactionrename"    input_format="lps"   output_format="lps"  category="Transformation"/>
 <tool name="lpsbinary"          input_format="lps"   output_format="lps"  category="Transformation"/> 
 <tool name="lpsconfcheck"       input_format="lps"   output_format="lps"  category="Transformation"/>
