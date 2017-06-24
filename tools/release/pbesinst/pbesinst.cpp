@@ -37,8 +37,7 @@ using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
-using bes::tools::pbes_input_tool;
-using bes::tools::bes_output_tool;
+using bes::tools::pbes_input_output_tool;
 using data::tools::rewriter_tool;
 using utilities::tools::input_output_tool;
 using utilities::command_line_parser;
@@ -47,10 +46,10 @@ using utilities::make_optional_argument;
 using utilities::make_enum_argument;
 
 /// The pbesinst tool.
-class pbesinst_tool: public rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > >
+class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_tool> >
 {
   protected:
-    typedef rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > super;
+    typedef rewriter_tool<pbes_input_output_tool<input_output_tool> > super;
 
     pbesinst_strategy m_strategy;
     std::string m_finite_parameter_selection;

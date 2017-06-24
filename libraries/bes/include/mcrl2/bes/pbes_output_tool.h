@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include <set>
-// #include <stdexcept>
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/file_utility.h"
 #include <string>
@@ -48,6 +47,8 @@ class pbes_output_tool: public Tool
       std::set<utilities::file_format> result;
       result.insert(pbes_system::pbes_format_internal());
       result.insert(pbes_system::pbes_format_text());
+      result.insert(bes::bes_format_internal());
+      result.insert(bes::bes_format_pgsolver());
       return result;
     }
 
