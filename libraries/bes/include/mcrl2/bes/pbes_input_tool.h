@@ -54,7 +54,8 @@ class pbes_input_tool: public Tool
 
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
-    /// \return The string "pbes"
+    /// \return The file format based on the extension of the input file, or if it is not possible to
+    //          determine the file format in this way, pbes_format_internal() is returned. 
     virtual utilities::file_format default_input_format() const
     {
       utilities::file_format result = pbes_system::guess_format(Tool::input_filename());
@@ -177,10 +178,20 @@ class bes_input_tool: public pbes_input_tool<Tool>
 
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
-    /// \return The string "pbes"
+    /// \return The preferred input format based on the extension of the input file, or bes_format_internal()
+    //          if the format could not be determined. 
     virtual utilities::file_format default_input_format() const
     {
-      return bes::guess_format(Tool::input_filename());
+      utilities::file_format result = bes::guess_format(Tool::input_filename());
+      if (result == utilities::file_format())
+      {
+        result = pbes_system::guess_format(Tool::input_filename());
+      }
+      if (result == utilities::file_format())
+      {
+        result = bes::bes_format_internal();
+      }
+      return result;
     }
 
   public:

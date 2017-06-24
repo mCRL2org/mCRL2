@@ -53,10 +53,16 @@ class pbes_output_tool: public Tool
 
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
-    /// \return The string "pbes"
+    /// \return The default format is determined based on the extension of the output file. 
+    //          If this fails, pbes_format_internal() is returned. 
     virtual utilities::file_format default_output_format() const
     {
-      return pbes_system::guess_format(Tool::output_filename());
+      utilities::file_format result= pbes_system::guess_format(Tool::output_filename());
+      if (result == utilities::file_format())
+      {
+        result = pbes_system::pbes_format_internal();
+      }
+      return result;
     }
 
     /// \brief Add options to an interface description. Also includes
@@ -165,13 +171,18 @@ class bes_output_tool: public pbes_output_tool<Tool>
 
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
-    /// \return The string "pbes"
+    /// \return The default format is determined based on the extension of the output file. 
+    //          If this fails, bes_format_internal() is returned. 
     virtual utilities::file_format default_output_format() const
     {
       utilities::file_format result = bes::guess_format(Tool::output_filename());
       if (result == utilities::file_format())
       {
         result = pbes_system::guess_format(Tool::output_filename());
+      }
+      if (result == utilities::file_format())
+      {
+        result = bes::bes_format_internal();
       }
       return result;
     }
