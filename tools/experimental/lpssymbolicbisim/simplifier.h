@@ -12,6 +12,9 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
 #define MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
 
+#include "mcrl2/data/linear_inequalities.h"
+#include "mcrl2/data/merge_data_specifications.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
@@ -19,8 +22,128 @@ namespace mcrl2
 namespace data
 {
 
+core::identifier_string iff_name()
+{
+  static core::identifier_string iff_name = core::identifier_string("<=>");
+  return iff_name;
+}
+
+function_symbol iff()
+{
+  static function_symbol iff(iff_name(), make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_bool::bool_()));
+  return iff;
+}
+
+inline application iff(const data_expression& d1, const data_expression& d2)
+{
+  return iff()(d1, d2);
+}
+
 class simplifier
 {
+
+public:
+  /**
+   * \brief Adds some rewrite rules that improve 'cannonicalness' of
+   * expressions.
+   * \detail The data specification that is part of the input specification
+   * is expanded with a number of rewrite rules for expressions over booleans
+   * and reals. Some rewrite rules help to simplify expressions. Others try
+   * to rewrite linear inequalities to a normal form. There are also rewrite rules
+   * to eliminate the [if] function symbol. The rewriter [rewr] is recreated with
+   * the expanded data specification.
+   */
+  static data_specification norm_rules_spec()
+  {
+    data_specification ad_hoc_data = parse_data_specification(
+      "var "
+        "a,b,c:Bool;"
+        "r1,r2,r3:Real;"
+      "eqn "
+        "!a || a = true;"
+        "a || !a = true;"
+        "!a && a = false;"
+        "a && !a = false;"
+
+        "r2 > r3 -> !(r1 < r2) && r1 < r3 = false;"
+        "r2 > r3 -> r1 < r3 && !(r1 < r2) = false;"
+        "r2 < r3 -> !(r1 < r2) || r1 < r3 = true;"
+        "r2 < r3 -> r1 < r3 || !(r1 < r2) = true;"
+      );
+
+    variable vb1("b1", sort_bool::bool_());
+    variable vb2("b2", sort_bool::bool_());
+    variable vb3("b3", sort_bool::bool_());
+    variable vp1("p1", sort_pos::pos());
+    variable vp2("p2", sort_pos::pos());
+    variable vr1("r1", sort_real::real_());
+    variable vr2("r2", sort_real::real_());
+    variable vr3("r3", sort_real::real_());
+
+    ad_hoc_data.add_mapping(iff());
+
+    //  a && a = a;
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::and_(vb1, vb1), vb1));
+    //  a && (a && b) = a && b;
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::and_(vb1, vb2)), sort_bool::and_(vb1, vb2)));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::and_(vb2, vb1)), sort_bool::and_(vb1, vb2)));
+    //  a || a = a;
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::or_(vb1, vb1), vb1));
+    //  a => b = !a || b;
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::implies(vb1, vb2), sort_bool::or_(sort_bool::not_(vb1), vb2)));
+    // a && (!a || b) = a && b
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::or_(sort_bool::not_(vb1), vb2)), sort_bool::and_(vb1, vb2)));
+    // !a && (a || b) == !a && b
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(sort_bool::not_(vb1), sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), vb2)));
+    // Pushing not inside
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::and_(vb1, vb2)), sort_bool::or_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
+    // Formulate all linear equalities with positive rhs: -1 * x_P <= -5   !(1 * x_P < 5)
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1, vp1, vp2),
+      less_equal(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
+      sort_bool::not_(less(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1, vp1, vp2),
+      less(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
+      sort_bool::not_(less_equal(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
+    // -1 * (-1 * r) = r
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_minus_one(), sort_real::times(real_minus_one(), vr1)), vr1));
+    // -1 * -r = r
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_minus_one(), sort_real::negate(vr1)), vr1));
+    // r1 * (r2 + r3) = r1 * r2 + r1 * r3
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2,vr3),
+      sort_real::times(vr1, sort_real::plus(vr2,vr3)), sort_real::plus(sort_real::times(vr1,vr2), sort_real::times(vr1,vr3))));
+    // 1 * r = r
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_one(), vr1), vr1));
+    // -1 * (r1 - r2) = r2 - r1
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2), sort_real::times(real_minus_one(), sort_real::minus(vr1,vr2)), sort_real::minus(vr2,vr1)));
+    // Since there are some problems with !(0 == x1) when feeding it to fourier motzkin, add the following rule
+    // !(r2 == r1) = r1 > r2 || r1 < r2
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2), sort_bool::not_(equal_to(vr2,vr1)), sort_bool::or_(greater(vr1, vr2), less(vr1, vr2))));
+    // r1 < 0 = false
+    // Breaks everything when expressions such as -x < 0 are encountered
+    // ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), less(vr1,real_zero()), sort_bool::false_()));
+
+    // Rules for bidirectional implication (iff)
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(sort_bool::true_(), vb1), vb1));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::true_()), vb1));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(sort_bool::false_(), vb1), sort_bool::not_(vb1)));
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::false_()), sort_bool::not_(vb1)));
+
+    // if(a,b,c) = (a && b) || (!a && c);
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), if_(vb1, vb2, vb3),
+      sort_bool::or_(sort_bool::and_(vb1, vb2), sort_bool::and_(sort_bool::not_(vb1), vb3))));
+    // (a && b) || !a = b || !a
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
+      sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::not_(vb1)), sort_bool::or_(vb2,sort_bool::not_(vb1))));
+    // !a || (a && b) = !a || b
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
+      sort_bool::or_(sort_bool::not_(vb1), sort_bool::and_(vb1,vb2)), sort_bool::or_(sort_bool::not_(vb1), vb2)));
+    // a || (!a && b) = a || b
+    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
+      sort_bool::or_(vb1, sort_bool::and_(sort_bool::not_(vb1), vb2)), sort_bool::or_(vb1,vb2)));
+
+    return ad_hoc_data;
+  }
 
 protected:
   rewriter rewr;

@@ -79,8 +79,6 @@ protected:
   data_expression                invariant;
   std::list<data_expression>      partition;
   data_specification             ad_hoc_data;
-  bool                           m_use_path_eliminator;
-  detail::BDD_Path_Eliminator    m_path_eliminator;
   simplifier*                    simpl;
 
   std::set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache;
@@ -120,121 +118,12 @@ protected:
     return out.str();
   }
 
-  core::identifier_string iff_name()
-  {
-    static core::identifier_string iff_name = core::identifier_string("<=>");
-    return iff_name;
-  }
-
-  function_symbol iff()
-  {
-    static function_symbol iff(iff_name(), make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_bool::bool_()));
-    return iff;
-  }
-
-  inline application iff(const data_expression& d1, const data_expression& d2)
-  {
-    return iff()(d1, d2);
-  }
-
   /**
-   * \brief Adds some rewrite rules that improve 'cannonicalness' of
-   * expressions.
-   * \detail The data specification that is part of the input specification
-   * is expanded with a number of rewrite rules for expressions over booleans
-   * and reals. Some rewrite rules help to simplify expressions. Others try
-   * to rewrite linear inequalities to a normal form. There are also rewrite rules
-   * to eliminate the [if] function symbol. The rewriter [rewr] is recreated with
-   * the expanded data specification.
+   * \brief Reconstructs the rewriter with some useful rules
    */
   void add_ad_hoc_rules()
   {
-    ad_hoc_data = merge_data_specifications(m_spec.data(),parse_data_specification(
-      "var "
-        "a,b,c:Bool;"
-        "r1,r2,r3:Real;"
-      "eqn "
-        "!a || a = true;"
-        "a || !a = true;"
-        "!a && a = false;"
-        "a && !a = false;"
-
-        "r2 > r3 -> !(r1 < r2) && r1 < r3 = false;"
-        "r2 > r3 -> r1 < r3 && !(r1 < r2) = false;"
-        "r2 < r3 -> !(r1 < r2) || r1 < r3 = true;"
-        "r2 < r3 -> r1 < r3 || !(r1 < r2) = true;"
-      ));
-
-    variable vb1("b1", sort_bool::bool_());
-    variable vb2("b2", sort_bool::bool_());
-    variable vb3("b3", sort_bool::bool_());
-    variable vp1("p1", sort_pos::pos());
-    variable vp2("p2", sort_pos::pos());
-    variable vr1("r1", sort_real::real_());
-    variable vr2("r2", sort_real::real_());
-    variable vr3("r3", sort_real::real_());
-
-    ad_hoc_data.add_mapping(iff());
-
-    //  a && a = a;
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::and_(vb1, vb1), vb1));
-    //  a && (a && b) = a && b;
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::and_(vb1, vb2)), sort_bool::and_(vb1, vb2)));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::and_(vb2, vb1)), sort_bool::and_(vb1, vb2)));
-    //  a || a = a;
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::or_(vb1, vb1), vb1));
-    //  a => b = !a || b;
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::implies(vb1, vb2), sort_bool::or_(sort_bool::not_(vb1), vb2)));
-    // a && (!a || b) = a && b
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(vb1, sort_bool::or_(sort_bool::not_(vb1), vb2)), sort_bool::and_(vb1, vb2)));
-    // !a && (a || b) == !a && b
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2), sort_bool::and_(sort_bool::not_(vb1), sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), vb2)));
-    // Pushing not inside
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::and_(vb1, vb2)), sort_bool::or_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1, vb2), sort_bool::not_(sort_bool::or_(vb1, vb2)), sort_bool::and_(sort_bool::not_(vb1), sort_bool::not_(vb2))));
-    // Formulate all linear equalities with positive rhs: -1 * x_P <= -5   !(1 * x_P < 5)
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1, vp1, vp2),
-      less_equal(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
-      sort_bool::not_(less(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1, vp1, vp2),
-      less(vr1, sort_real::creal(sort_int::cneg(vp1), vp2)),
-      sort_bool::not_(less_equal(sort_real::times(real_minus_one(), vr1), sort_real::creal(sort_int::cint(sort_nat::cnat(vp1)), vp2)))));
-    // -1 * (-1 * r) = r
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_minus_one(), sort_real::times(real_minus_one(), vr1)), vr1));
-    // -1 * -r = r
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_minus_one(), sort_real::negate(vr1)), vr1));
-    // r1 * (r2 + r3) = r1 * r2 + r1 * r3
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2,vr3),
-      sort_real::times(vr1, sort_real::plus(vr2,vr3)), sort_real::plus(sort_real::times(vr1,vr2), sort_real::times(vr1,vr3))));
-    // 1 * r = r
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), sort_real::times(real_one(), vr1), vr1));
-    // -1 * (r1 - r2) = r2 - r1
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2), sort_real::times(real_minus_one(), sort_real::minus(vr1,vr2)), sort_real::minus(vr2,vr1)));
-    // Since there are some problems with !(0 == x1) when feeding it to fourier motzkin, add the following rule
-    // !(r2 == r1) = r1 > r2 || r1 < r2
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1,vr2), sort_bool::not_(equal_to(vr2,vr1)), sort_bool::or_(greater(vr1, vr2), less(vr1, vr2))));
-    // r1 < 0 = false
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), equal_to(vr1,real_zero()), sort_bool::false_()));
-
-    // Rules for bidirectional implication (iff)
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(sort_bool::true_(), vb1), vb1));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::true_()), vb1));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(sort_bool::false_(), vb1), sort_bool::not_(vb1)));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::false_()), sort_bool::not_(vb1)));
-
-    // if(a,b,c) = (a && b) || (!a && c);
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), if_(vb1, vb2, vb3),
-      sort_bool::or_(sort_bool::and_(vb1, vb2), sort_bool::and_(sort_bool::not_(vb1), vb3))));
-    // (a && b) || !a = b || !a
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
-      sort_bool::or_(sort_bool::and_(vb1,vb2), sort_bool::not_(vb1)), sort_bool::or_(vb2,sort_bool::not_(vb1))));
-    // !a || (a && b) = !a || b
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
-      sort_bool::or_(sort_bool::not_(vb1), sort_bool::and_(vb1,vb2)), sort_bool::or_(sort_bool::not_(vb1), vb2)));
-    // a || (!a && b) = a || b
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2),
-      sort_bool::or_(vb1, sort_bool::and_(sort_bool::not_(vb1), vb2)), sort_bool::or_(vb1,vb2)));
-
+    ad_hoc_data = merge_data_specifications(m_spec.data(),simplifier::norm_rules_spec());
     rewr = rewriter(ad_hoc_data, strat);
   }
 
@@ -329,9 +218,15 @@ protected:
     data_expression_list updates = m_updates_map[as];
 
     data_expression arguments_equal = sort_bool::true_();
-    for(const data_expression& expr: as.multi_action().arguments())
+    // Check whether there is at least one action, since we cannot request
+    // arguments from an empty list of actions. The empty multi action represents
+    // tau.
+    if(!as.multi_action().actions().empty())
     {
-      arguments_equal = lazy::and_(arguments_equal, equal_to(expr, rewr(expr, sub_primed)));
+      for(const data_expression& expr: as.multi_action().arguments())
+      {
+        arguments_equal = lazy::and_(arguments_equal, equal_to(expr, rewr(expr, sub_primed)));
+      }
     }
     arguments_equal = rewr(arguments_equal);
     // std::cout << "Constructing block expression ..." << std::endl;
@@ -590,7 +485,7 @@ protected:
         return block;
       }
     }
-    return data_expression();
+    throw mcrl2::runtime_error("Initial block not found.");
   }
 
   /**
@@ -643,21 +538,12 @@ protected:
     std::queue<data_expression> open_set;
 
     // Search for the block that contains the initial state
-    for(const data_expression block: partition)
-    {
-      if(rewr(application(block, m_spec.initial_process().state(process_parameters))) == sort_bool::true_())
-      {
-        unreachable.erase(unreachable.find(block));
-        open_set.push(block);
-        partition.clear();
-        partition.push_back(block);
-        break;
-      }
-    }
-    if(open_set.empty())
-    {
-      throw mcrl2::runtime_error("Initial block not found while computing reachable blocks.");
-    }
+    data_expression initial_block = find_initial_block(unreachable);
+    unreachable.erase(unreachable.find(initial_block));
+    open_set.push(initial_block);
+    partition.clear();
+    partition.push_back(initial_block);
+
     while(!open_set.empty())
     {
       // Take a block from the open set
@@ -802,8 +688,7 @@ protected:
   }
 
 public:
-  symbolic_bisim_algorithm(Specification& spec, data_expression inv,
-    bool use_path_eliminator, detail::smt_solver_type solver_type, const rewrite_strategy st = jitty)
+  symbolic_bisim_algorithm(Specification& spec, data_expression inv, const rewrite_strategy st = jitty)
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
     , strat(st)
     , rewr(spec.data(),jitty)
@@ -813,8 +698,6 @@ public:
     , proving_rewr(spec.data(), jitty_prover)
 #endif
     , invariant(inv)
-    , m_use_path_eliminator(use_path_eliminator)
-    , m_path_eliminator(solver_type)
   {
 
   }
@@ -824,8 +707,8 @@ public:
     mCRL2log(mcrl2::log::verbose) << "Running symbolic bisimulation..." << std::endl;
 
     process_parameters = m_spec.process().process_parameters();
-    partition.push_front( lambda(process_parameters, invariant));
-    split_logger = new block_tree(lambda(process_parameters, invariant));
+    partition.push_front(invariant);
+    split_logger = new block_tree(invariant);
     add_ad_hoc_rules();
     build_summand_maps();
 #ifdef DBM_PACKAGE_AVAILABLE

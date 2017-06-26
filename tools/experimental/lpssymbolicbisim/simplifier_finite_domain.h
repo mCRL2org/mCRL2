@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_FINITE_DOMAIN_H
 #define MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_FINITE_DOMAIN_H
 
+#include "mcrl2/data/enumerator.h"
+
 #include "simplifier.h"
 
 namespace mcrl2
