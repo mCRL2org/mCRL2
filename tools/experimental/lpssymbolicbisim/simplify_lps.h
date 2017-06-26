@@ -89,18 +89,18 @@ set_simplifier
   }
 };
 
-void simplify_one_by_one(mcrl2::lps::stochastic_specification& s,
+void simplify_one_by_one(mcrl2::lps::stochastic_specification& spec,
                                                 const rewrite_strategy strat)
 {
-  rewriter r(s.data(), strat);
+  rewriter r(spec.data(), strat);
   set_simplifier set_simplify;
   //iterate through conditions and simplify with a builder and fourier_motzkin
-  for(lps::summand_base& s: s.process().action_summands())
+  for(lps::summand_base& s: spec.process().action_summands())
   {
     s.condition() = r(replace_data_expressions(s.condition(), simplify_real_inequalities(r), true));
     s.condition() = set_simplify(s.condition());
   }
-  for(lps::summand_base& s: s.process().deadlock_summands())
+  for(lps::summand_base& s: spec.process().deadlock_summands())
   {
     s.condition() = replace_data_expressions(s.condition(), simplify_real_inequalities(r), true);
     s.condition() = set_simplify(s.condition());
