@@ -18,6 +18,53 @@ using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 
+void check(bool result, std::string message)
+{
+  if(!result) {
+    std::cout << message << std::endl;
+  }
+  BOOST_CHECK(result);
+}
+
+void test_linear_inequality()
+{
+  data_specification data_spec;
+  data_spec.add_context_sort(sort_real::real_());
+  rewriter rewr(data_spec);
+
+  variable vx("x", sort_real::real_());
+  variable vy("y", sort_real::real_());
+  linear_inequality li;
+  data_expression expr;
+
+  expr = less(real_zero(), real_zero());
+  li = linear_inequality(expr, rewr);
+  check(li.is_false(rewr), "Expected " + pp(expr) + "' to be false");
+  check(li.lhs().empty(), "Expected left hand side of '" + pp(expr) + "' to be empty " + pp(li.lhs()));
+
+  expr = less_equal(real_zero(), real_zero());
+  li = linear_inequality(expr, rewr);
+  check(li.is_true(rewr), "Expected '" + pp(expr) + "' to be true");
+  check(li.lhs().empty(), "Expected left hand side of '" + pp(expr) + "' to be empty");
+
+  expr = less_equal(sort_real::minus(vx, vx), real_one());
+  li = linear_inequality(expr, rewr);
+  check(li.is_true(rewr), "Expected '" + pp(expr) + "' to be true");
+  check(li.lhs().empty(), "Expected left hand side of '" + pp(expr) + "' to be empty");
+
+  expr = less_equal(sort_real::minus(vx, vx), real_one());
+  li = linear_inequality(expr, rewr);
+  check(li.is_true(rewr), "Expected '" + pp(expr) + "' to be true");
+  check(li.lhs().empty(), "Expected left hand side of '" + pp(expr) + "' to be empty");
+
+  expr = less_equal(sort_real::plus(vx, vy), vx);
+  li = linear_inequality(expr, rewr);
+  check(!li.is_true(rewr), "Expected '" + pp(expr) + "' to not be true");
+  check(!li.lhs().empty(), "Expected left hand side of '" + pp(expr) + "' not to be empty");
+  check(li.transform_to_data_expression() == less_equal(sort_real::times(real_one(), vy), real_zero()), 
+    "Expression '" + pp(expr) + "' parsing/output problem " + pp(li.transform_to_data_expression()));
+}
+
 void split_conjunction_of_inequalities_set(const data_expression& e, std::vector < linear_inequality >& v, const rewriter& r)
 {
   if (sort_bool::is_and_application(e))
@@ -105,15 +152,16 @@ bool test_application_of_Fourier_Motzkin(const std::string& vars,
 
 int test_main(int /* argc */, char** /* argv[]*/)
 {
-  // BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=4", false));
-  // BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=2", true));
-  // BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=3", false));
-  // BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<=3  && x>=3", true));
-  // BOOST_CHECK(test_consistency_of_inequalities("u:Real;","0 <= u && -u <= -4 && -u < 0",true));
+  test_linear_inequality();
+  BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=4", false));
+  BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=2", true));
+  BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=3", false));
+  BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<=3  && x>=3", true));
+  BOOST_CHECK(test_consistency_of_inequalities("u:Real;","0 <= u && -u <= -4 && -u < 0",true));
   BOOST_CHECK(test_consistency_of_inequalities("u,t:Real;","u + -t <= 1 && -u <= -4 && t < u && -u < 0 && -t <= 0 ",true));
-  // BOOST_CHECK(test_consistency_of_inequalities("u,t,l:Real;","u + -t <= 1 && -u <= -4 && -u + l < 0 && -u < 0 && -t <= 0 && -l + t <= 0",true));
+  BOOST_CHECK(test_consistency_of_inequalities("u,t,l:Real;","u + -t <= 1 && -u <= -4 && -u + l < 0 && -u < 0 && -t <= 0 && -l + t <= 0",true));
 
-  // BOOST_CHECK(test_application_of_Fourier_Motzkin("x,y:Real;", "y:Real;", "-y + x < 0 &&  y < 2", "x>=2"));
+  BOOST_CHECK(test_application_of_Fourier_Motzkin("x,y:Real;", "y:Real;", "-y + x < 0 &&  y < 2", "x>=2"));
   return 0;
 }
 

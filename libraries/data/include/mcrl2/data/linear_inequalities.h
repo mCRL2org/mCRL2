@@ -687,7 +687,8 @@ class linear_inequality: public atermpp::aterm_appl
       if (new_lhs.empty())
       {
         if ((comparison==detail::equal && new_rhs==real_zero()) ||
-            (comparison!=detail::equal && is_positive(new_rhs,r)))
+            (comparison==detail::less_eq && (new_rhs == real_zero() || is_positive(new_rhs,r))) ||
+            (comparison==detail::less && is_positive(new_rhs,r)))
         {
           // The linear inequality represents true.
           *this=linear_inequality(detail::lhs_t(),real_one(),detail::less);
