@@ -260,7 +260,6 @@ void lpsparunfold::create_data_equations(
                 const function_symbol_vector& affected_constructors,
                 const data::function_symbol& determine_function)
 {
-  assert(projection_functions.size()==affected_constructors.size());
   variable_vector vars;        /* Equation variables  */
   std::set<mcrl2::core::identifier_string> var_names; /* var_names */
 
