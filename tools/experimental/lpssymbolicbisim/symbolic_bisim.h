@@ -12,8 +12,6 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_SYMBOLIC_BISIM_H
 #define MCRL2_LPSSYMBOLICBISIM_SYMBOLIC_BISIM_H
 
-// #define DBM_PACKAGE_AVAILABLE 1
-
 #include <string>
 #include <queue>
 #include <ctime>
@@ -40,10 +38,7 @@
 #include "mcrl2/utilities/logger.h"
 
 #include "simplifier.h"
-#ifdef DBM_PACKAGE_AVAILABLE
-  #include "simplifier_dbm.h"
-#else
-  #include "simplifier_fourier_motzkin.h"
+#ifndef DBM_PACKAGE_AVAILABLE
   #define GREEN(C) ""
   #define YELLOW(C) ""
   #define RED(C) ""
@@ -76,7 +71,7 @@ protected:
   rewriter proving_rewr;
 
   variable_list                  process_parameters;
-  data_expression                invariant;
+  const data_expression                invariant;
   std::list<data_expression>      partition;
   data_specification             ad_hoc_data;
   simplifier*                    simpl;
@@ -89,6 +84,7 @@ protected:
   int refinement_cache_misses = 0;
   int transition_cache_hits = 0;
   int transition_cache_misses = 0;
+  int last_minute_transition_check = 0;
   block_tree* split_logger;
 
   std::map< lps::action_summand, variable_list > m_primed_summation_variables_map;
@@ -101,7 +97,7 @@ protected:
    * with commas and surrounded with square brackets.
    */
   template <typename Container>
-  std::string pp_container(Container& expressions, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
+  std::string pp_container(const Container& expressions, typename atermpp::enable_if_container<Container, data_expression>::type* = nullptr)
   {
 
     std::ostringstream out;
@@ -140,7 +136,7 @@ protected:
    * r2 are real constants.
    */
   variable_list replace_free_reals(data_expression& split_block,
-    std::set< data_expression > linear_inequalities, data_expression& enumeration_condition, data_expression& lli)
+    const std::set< data_expression >& linear_inequalities, data_expression& enumeration_condition, data_expression& lli)
   {
     set_identifier_generator var_gen;
     var_gen.add_identifiers(find_identifiers(split_block));
@@ -176,7 +172,8 @@ protected:
    * add split_block to the partition
    * \param vars The set of free variables in split_block
    */ 
-  void enumerate(data_expression parent_block, variable_list vars, data_expression split_block, const data_expression& lli, std::set< data_expression >& new_part)
+  void enumerate(const data_expression& parent_block, const variable_list& vars, const lambda& split_block, 
+    const data_expression& lli, std::set< data_expression >& new_part)
   {
 
     typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, enumerator_identifier_generator, enumerate_filter_print> enumerator_type;
@@ -212,6 +209,14 @@ protected:
       return false;
     }
     refinement_cache_misses++;
+    // Search the cache for information on this transition
+    
+    if(!transition_exists(phi_k, phi_l, as))
+    {
+      // Cache entry found
+      last_minute_transition_check++;
+      return false;
+    }
 
     substitution_t sub_primed = m_primed_substitution_map[as];
     variable_list primed_summation_variables = m_primed_summation_variables_map[as];
@@ -327,7 +332,7 @@ protected:
    * \details New entries are deduced from existng entries
    * refering to phi_k. phi_k is the parent of the new blocks.
    */
-  void update_caches(data_expression phi_k, std::set<data_expression> new_blocks)
+  void update_caches(const data_expression& phi_k, const std::set<data_expression>& new_blocks)
   {
     for(const data_expression& phi_l1: partition)
     {
@@ -682,13 +687,13 @@ protected:
     {
       std::cout << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(rewr(block)) << std::endl;
       // detail::BDD2Dot bddwriter;
-      // bddwriter.output_bdd(proving_rewr(atermpp::down_cast<abstraction>(block).body()), ("block" + std::to_string(i) + ".dot").c_str());
+      // bddwriter.output_bdd(atermpp::down_cast<abstraction>(block).body(), ("block" + std::to_string(i) + ".dot").c_str());
       i++;
     }
   }
 
 public:
-  symbolic_bisim_algorithm(Specification& spec, data_expression inv, const rewrite_strategy st = jitty)
+  symbolic_bisim_algorithm(Specification& spec, const data_expression& inv, const rewrite_strategy& st = jitty)
     : mcrl2::lps::detail::lps_algorithm<Specification>(spec)
     , strat(st)
     , rewr(spec.data(),jitty)
@@ -711,11 +716,7 @@ public:
     split_logger = new block_tree(invariant);
     add_ad_hoc_rules();
     build_summand_maps();
-#ifdef DBM_PACKAGE_AVAILABLE
-    simpl = new simplifier_dbm(rewr, proving_rewr, process_parameters, m_spec.data());
-#else
-    simpl = new simplifier_fourier_motzkin(rewr, proving_rewr);
-#endif
+    simpl = get_simplifier_instance(rewr, proving_rewr, m_spec.process().process_parameters(), m_spec.data());
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = std::chrono::high_resolution_clock::now();
     std::cout << "Initial partition:" << std::endl;
@@ -729,7 +730,9 @@ public:
       num_iterations++;
       std::cout << "End of iteration " << num_iterations << 
       ".\nRefinement cache entries/hits/misses " << refinement_cache.size() << "/" << refinement_cache_hits << "/" << refinement_cache_misses <<
-      ".\nTransition cache entries/hits/misses " << transition_cache.size() << "/" << transition_cache_hits << "/" << transition_cache_misses << std::endl;
+      ".\nTransition cache entries/hits/misses " << transition_cache.size() << "/" << transition_cache_hits << "/" << transition_cache_misses <<
+      ".\nLast minute transition check successes " << last_minute_transition_check <<
+      ".\nSplits performed " << refinement_cache_misses - last_minute_transition_check << std::endl;
     }
     std::cout << "Final partition:" << std::endl;
     print_partition(partition);

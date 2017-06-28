@@ -31,6 +31,19 @@ protected:
   data_specification dataspec;
   rewriter nested_rewr;
   rewriter undo_nesting_rewr;
+  std::map<sort_expression, data_expression_vector> enumeration_cache;
+
+  data_expression_vector enumerate_sort(const sort_expression& sort)
+  {
+    const std::map<sort_expression, data_expression_vector>::const_iterator res = enumeration_cache.find(sort);
+    if(res != enumeration_cache.end())
+    {
+      return res->second;
+    }
+    const data_expression_vector& valid_exprs = enumerate_expressions(sort, dataspec, rewr);
+    enumeration_cache.insert(std::make_pair(sort, valid_exprs));
+    return valid_exprs;
+  }
 
   /**
    * \brief Initializes a rewriter that removes all nested applications of '||'
@@ -134,7 +147,7 @@ protected:
     {
       if(dataspec.is_certainly_finite(v.sort()))
       {
-        data_expression_vector valid_exprs = enumerate_expressions(v.sort(), dataspec, rewr);
+        const data_expression_vector& valid_exprs = enumerate_sort(v.sort());
         // Accumulate the values for which v occurs positively and negatively
         data_expression positive_values_of_v = sort_bool::false_();
         data_expression negative_values_of_v = sort_bool::true_();

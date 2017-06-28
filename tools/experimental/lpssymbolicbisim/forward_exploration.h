@@ -12,8 +12,6 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_FORWARD_EXPLORATION_H
 #define MCRL2_LPSSYMBOLICBISIM_FORWARD_EXPLORATION_H
 
-// #define DBM_PACKAGE_AVAILABLE 1
-
 #include <chrono>
 
 #include "mcrl2/data/fourier_motzkin.h"
@@ -25,11 +23,6 @@
 #include "mcrl2/utilities/logger.h"
 
 #include "simplifier.h"
-#ifdef DBM_PACKAGE_AVAILABLE
-  #include "simplifier_dbm.h"
-#else
-  #include "simplifier_fourier_motzkin.h"
-#endif
 
 namespace mcrl2
 {
@@ -248,11 +241,7 @@ public:
     rewr = rewriter(merge_data_specifications(m_spec.data(), simplifier::norm_rules_spec()), m_strat);
     determineLUbounds();
 
-#ifdef DBM_PACKAGE_AVAILABLE
-    simpl = new simplifier_dbm(rewr, proving_rewr, m_process_parameters, m_spec.data(), lu_map);
-#else
-    simpl = new simplifier_fourier_motzkin(rewr, proving_rewr);
-#endif
+    simpl = get_simplifier_instance(rewr, proving_rewr, m_spec.process().process_parameters(), m_spec.data(), lu_map);
 
     build_summand_maps();
     const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = std::chrono::high_resolution_clock::now();

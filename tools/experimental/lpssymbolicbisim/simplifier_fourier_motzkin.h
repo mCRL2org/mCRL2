@@ -52,11 +52,8 @@ protected:
         result = lazy::or_(result, lazy::and_(non_real_conditions[i], real_con));
       }
     }
-
-    std::cout << "simplify: before rewriting " << result << std::endl;
     result = proving_rewr(result);
     result = rewr(result);
-    std::cout << "simplify: after rewriting  " << result << std::endl;
 
     return result;
   }

@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
 #define MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
 
+// #define DBM_PACKAGE_AVAILABLE 1
+
 #include "mcrl2/data/linear_inequalities.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/parse.h"
@@ -44,14 +46,12 @@ class simplifier
 
 public:
   /**
-   * \brief Adds some rewrite rules that improve 'cannonicalness' of
+   * \brief Creates a data_specification with rewrite rules that improve 'cannonicalness' of
    * expressions.
-   * \detail The data specification that is part of the input specification
-   * is expanded with a number of rewrite rules for expressions over booleans
-   * and reals. Some rewrite rules help to simplify expressions. Others try
-   * to rewrite linear inequalities to a normal form. There are also rewrite rules
-   * to eliminate the [if] function symbol. The rewriter [rewr] is recreated with
-   * the expanded data specification.
+   * \detail A default data specification is expanded with a number of rewrite rules
+   * for expressions over booleans and reals. Some rewrite rules help to simplify expressions.
+   * Others try to rewrite linear inequalities to a normal form. There are also rewrite rules
+   * to eliminate the [if] function symbol.
    */
   static data_specification norm_rules_spec()
   {
@@ -154,14 +154,18 @@ protected:
 
   data_expression apply_data_expression(const data_expression& expr, const mutable_indexed_substitution<> sigma)
   {
+    // Rewrite the expression to some kind of normal form using BDDs
     data_expression rewritten = rewr(proving_rewr(expr,sigma));
-
+    // Check the cache
     std::map< data_expression, data_expression >::const_iterator res = cache.find(rewritten);
     if(res != cache.end())
     {
       return res->second;
     }
+    // Actually simplify the expression using the implementation in one of the subclasses
     data_expression simpl(simplify_expression(rewritten));
+
+    // Insert the result in the cache, both for the original expression and the expression in normal form
     cache.insert(std::make_pair(rewritten, simpl));
 
     return simpl;
@@ -169,17 +173,7 @@ protected:
 
   lambda apply_lambda(const lambda& expr, const mutable_indexed_substitution<> sigma)
   {
-    data_expression rewritten = rewr(proving_rewr(expr.body(),sigma));
-
-    std::map< data_expression, data_expression >::const_iterator res = cache.find(rewritten);
-    if(res != cache.end())
-    {
-      return lambda(expr.variables(), res->second);
-    }
-    data_expression simpl(simplify_expression(rewritten));
-    cache.insert(std::make_pair(rewritten, simpl));
-
-    return lambda(expr.variables(), simpl);
+    return lambda(expr.variables(), apply_data_expression(expr.body(), sigma));
   }
 
 public:
@@ -200,6 +194,28 @@ public:
   }
 };
 
+
+} // namespace mcrl2
+} // namespace data
+
+#ifdef DBM_PACKAGE_AVAILABLE
+  #include "simplifier_dbm.h"
+#else
+  #include "simplifier_fourier_motzkin.h"
+#endif
+
+namespace mcrl2 {
+namespace data{
+
+simplifier* get_simplifier_instance(const rewriter& rewr, const rewriter& proving_rewr, const variable_list& process_parameters, const data_specification& dataspec,
+  const std::map< variable, std::pair<data_expression, data_expression> >& lu_map = std::map< variable, std::pair<data_expression, data_expression> >())
+{
+#ifdef DBM_PACKAGE_AVAILABLE
+  return new simplifier_dbm(rewr, proving_rewr, process_parameters, dataspec, lu_map);
+#else
+  return new simplifier_fourier_motzkin(rewr, proving_rewr);
+#endif
+}
 
 } // namespace mcrl2
 } // namespace data
