@@ -150,12 +150,12 @@ v_{i}^{\varphi }\neq v_{j}^{\psi }$ for all $i,j$.\newpage
 The function $Eq$ computes a set of equalities and inequalities for an
 expression $\varphi $, such that the following holds:%
 \begin{eqnarray*}
-Eq\left( \varphi \right) &=&\left( \left\{ b_{1}=e_{1},\cdots
+Eq\left( \varphi \right)  &=&\left( \left\{ b_{1}=e_{1},\cdots
 ,b_{n}=e_{n}\right\} ,W\right) \Rightarrow \varphi =\psi \wedge
-\bigwedge\limits_{i=1}^{n}\left( b_{i}=e_{i}\right) \\
-Eq\left( \varphi \right) &=&\left( V,\left\{ b_{1}\neq e_{1},\cdots
-,b_{n}\neq e_{n}\right\} ,W\right) \Rightarrow \varphi =\psi \vee
-\bigvee\limits_{i=1}^{n}\left( b_{i}\neq e_{i}\right)
+\bigwedge\limits_{i=1}^{n}\left( b_{i}=e_{i}\right)  \\
+Eq\left( \varphi \right)  &=&\left( V,\left\{ b_{1}\neq e_{1},\cdots
+,b_{n}\neq e_{n}\right\} \right) \Rightarrow \varphi =\psi \vee
+\bigvee\limits_{i=1}^{n}\left( b_{i}\neq e_{i}\right) 
 \end{eqnarray*}%
 for some expression $\psi $.
 
@@ -163,36 +163,36 @@ The function $Eq$ is inductively defined as follows:
 
 \begin{equation*}
 \begin{array}{lll}
-Eq(b) & = & \left( \left\{ b=true\right\} ,\emptyset \right)  \\ 
+Eq(b) & = & \left( \left\{ b=true\right\} ,\emptyset \right) \\ 
 Eq(d=e) & = & \left\{ 
 \begin{array}{cc}
-\left( \left\{ d=e\right\} ,\emptyset \right)  & \text{if }d\notin FV(e) \\ 
-\left( \emptyset ,\emptyset \right)  & \text{otherwise}%
+\left( \left\{ d=e\right\} ,\emptyset \right) & \text{if }d\notin FV(e) \\ 
+\left( \emptyset ,\emptyset \right) & \text{otherwise}%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 Eq(e=d) & = & Eq(d=e) \\ 
 Eq(d\neq e) & = & \left\{ 
 \begin{array}{cc}
-\left( \emptyset ,\left\{ d\neq e\right\} \right)  & \text{if }d\notin FV(e)
+\left( \emptyset ,\left\{ d\neq e\right\} \right) & \text{if }d\notin FV(e)
 \\ 
-\left( \emptyset ,\emptyset \right)  & \text{otherwise}%
+\left( \emptyset ,\emptyset \right) & \text{otherwise}%
 \end{array}%
-\right.  \\ 
+\right. \\ 
 Eq(e\neq d) & = & Eq(d\neq e) \\ 
-Eq\left( \lnot \varphi \right)  & = & swap\left( Eq\left( \varphi \right)
-\right)  \\ 
-Eq\left( \varphi \wedge \psi \right)  & = & join\_and\left( \left( Eq\left(
-\varphi \right) ,Eq\left( \psi \right) \right) \right)  \\ 
-Eq\left( \varphi \vee \psi \right)  & = & join\_or\left( \left( Eq\left(
-\varphi \right) ,Eq\left( \psi \right) \right) \right)  \\ 
-Eq\left( \varphi \Rightarrow \psi \right)  & = & join\_or\left( \left(
+Eq\left( \lnot \varphi \right) & = & swap\left( Eq\left( \varphi \right)
+\right) \\ 
+Eq\left( \varphi \wedge \psi \right) & = & join\_and\left( \left( Eq\left(
+\varphi \right) ,Eq\left( \psi \right) \right) \right) \\ 
+Eq\left( \varphi \vee \psi \right) & = & join\_or\left( \left( Eq\left(
+\varphi \right) ,Eq\left( \psi \right) \right) \right) \\ 
+Eq\left( \varphi \Rightarrow \psi \right) & = & join\_or\left( \left(
 swap\left( Eq\left( \varphi \right) \right) ,Eq\left( \psi \right) \right)
-\right)  \\ 
-Eq\left( \forall x.\varphi \right)  & = & delete\left( x,Eq\left( \varphi
-\right) \right)  \\ 
-Eq\left( \exists x.\varphi \right)  & = & delete\left( x,Eq\left( \varphi
-\right) \right)  \\ 
-Eq\left( \varphi \right)  & = & \left( \emptyset ,\emptyset \right) \text{
+\right) \\ 
+Eq\left( \forall x.\varphi \right) & = & delete\left( x,Eq\left( \varphi
+\right) \right) \\ 
+Eq\left( \exists x.\varphi \right) & = & delete\left( x,Eq\left( \varphi
+\right) \right) \\ 
+Eq\left( \varphi \right) & = & \left( \emptyset ,\emptyset \right) \text{
 otherwise}%
 \end{array}%
 \end{equation*}%
@@ -200,20 +200,20 @@ where $b$ is a boolean data variable, $d$ is an arbitrary data variable, $e$
 is a boolean data expression, and%
 \begin{equation*}
 \begin{array}{lll}
-swap\left( \left( V,W\right) \right)  & = & \left( W,V\right)  \\ 
-join\_and\left( \left( V_{1},W_{1}\right) ,\left( V_{2},W_{2}\right) \right) 
-& = & \left( V_{1}\cup V_{2},W_{1}\cap W_{2}\right)  \\ 
-join\_or\left( \left( V_{1},W_{1}\right) ,\left( V_{2},W_{2}\right) \right) 
-& = & \left( V_{1}\cap V_{2},W_{1}\cup W_{2}\right)  \\ 
-delete\left( x,\left( V,W\right) \right)  & = & 
+swap\left( \left( V,W\right) \right) & = & \left( W,V\right) \\ 
+join\_and\left( \left( V_{1},W_{1}\right) ,\left( V_{2},W_{2}\right) \right)
+& = & \left( V_{1}\cup V_{2},W_{1}\cap W_{2}\right) \\ 
+join\_or\left( \left( V_{1},W_{1}\right) ,\left( V_{2},W_{2}\right) \right)
+& = & \left( V_{1}\cap V_{2},W_{1}\cup W_{2}\right) \\ 
+delete\left( x,\left( V,W\right) \right) & = & 
 \begin{array}{l}
 \left( V_{1},W_{1}\right) \text{ where} \\ 
 \left\{ 
 \begin{array}{c}
-V_{1}=\left\{ d=e\in V\mid d\neq x\wedge x\notin FV(e)\right\}  \\ 
-W_{1}=\left\{ d\neq e\in W\mid d\neq x\wedge x\notin FV(e)\right\} 
+V_{1}=\left\{ d=e\in V\mid d\neq x\wedge x\notin FV(e)\right\} \\ 
+W_{1}=\left\{ d\neq e\in W\mid d\neq x\wedge x\notin FV(e)\right\}%
 \end{array}%
-\right. 
+\right.%
 \end{array}%
 \end{array}%
 \end{equation*}
@@ -306,35 +306,4 @@ W & \text{if }W\neq \emptyset \\
 \end{array}%
 \end{equation*}
 
-\subsubsection{QuantifierExpand rewriter}
-
-We define the OnePointRule rewriter $R$ inductively as follows:
-
-\begin{equation*}
-\begin{array}{lll}
-R\left( \lnot \varphi \right) & = & \lnot R\left( \varphi \right) \\ 
-R\left( \varphi \wedge \psi \right) & = & R\left( \varphi \right) \wedge
-R\left( \psi \right) \\ 
-R\left( \varphi \vee \psi \right) & = & R\left( \varphi \right) \vee R\left(
-\psi \right) \\ 
-R\left( \varphi \Rightarrow \psi \right) & = & R\left( \varphi \right)
-\Rightarrow R\left( \psi \right) \\ 
-R\left( \forall x.\varphi \right) & = & \left\{ 
-\begin{array}{cc}
-R\left( \varphi \right) \left[ x:=e\right] & \text{if }x\neq e\in W\text{,
-where }\left( V,W\right) =Eq\left( \varphi \right) \\ 
-\forall x.R\left( \varphi \right) & \text{otherwise}%
-\end{array}%
-\right. \\ 
-R\left( \exists x.\varphi \right) & = & \left\{ 
-\begin{array}{cc}
-R\left( \varphi \right) \left[ x:=e\right] & \text{if }x=e\in V\text{, where 
-}\left( V,W\right) =Eq\left( \varphi \right) \\ 
-\exists x.R\left( \varphi \right) & \text{otherwise}%
-\end{array}%
-\right. \\ 
-R\left( \varphi \right) & = & \varphi \text{ otherwise}%
-\end{array}%
-\end{equation*}
-
-\newpage
+N.B. This has not been implemented yet.\newpage 
