@@ -67,6 +67,17 @@
    ``*/libraries/utilities/source/command_line_interface.cpp`` to the ``[DoNotZap]`` section in
    ``bin/zapccs.config``.
 
+.. list-table::
+   :class: teamcity-blurb
+   :widths: 13,87
+
+   * - .. image:: teamcity.png
+          :width: 75
+          :alt: TeamCity
+          :target: https://www.jetbrains.com/teamcity/
+     - The mCRL2 project uses `TeamCity <https://www.jetbrains.com/teamcity/>`_ for regression testing during
+       development and building the daily snapshots.
+
 .. toctree::
    :hidden:
 
