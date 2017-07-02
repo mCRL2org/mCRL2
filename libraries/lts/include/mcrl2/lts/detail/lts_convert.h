@@ -476,13 +476,16 @@ inline void lts_convert_base_class(const lts_fsm_base& base_in,
                             const data::variable_list& process_parameters,
                             const bool extra_data_is_defined=true)
 {
-  if (!extra_data_is_defined)
+  if (extra_data_is_defined)
   {
     base_out.set_data(data);
     base_out.set_action_labels(action_labels);
     base_out.set_process_parameters(process_parameters);
   }
-  lts_convert_base_class(base_in,base_out);
+  else 
+  {
+    lts_convert_base_class(base_in,base_out);
+  }
 }
 
 inline action_label_lts lts_convert_translate_label(const action_label_string& l1, convertor<lts_fsm_base, lts_lts_base>& c) 
