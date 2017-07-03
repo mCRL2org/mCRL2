@@ -24,7 +24,7 @@
 #     not be generated from a clean SVN checkout.
 #
 # Package maintainers may set the variable below to issue a new release.
-set(MCRL2_MAJOR_VERSION "201409.1")
+set(MCRL2_MAJOR_VERSION "201707.0")
 string(SUBSTRING ${MCRL2_MAJOR_VERSION} 0 4 MCRL2_COPYRIGHT_YEAR)
 
 option(MCRL2_PACKAGE_RELEASE "Include release version information. This discards SVN revision information and uses only the MCRL2_MAJOR_VERSION CMake variable." FALSE)
@@ -52,7 +52,7 @@ if(SUBVERSION_FOUND)
       set(MCRL2_MINOR_VERSION "${MCRL2_MINOR_VERSION}M")
       if(MCRL2_PACKAGE_RELEASE)
         # Do not allow maintainers to package a release from a modified build
-        message(FATAL_ERROR "You are trying to package a release from an SVN repository that has local modifications.")
+        message(WARNING "You are trying to package a release from an SVN repository that has local modifications.")
       endif()
     endif()
   else()
