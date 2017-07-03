@@ -214,6 +214,7 @@ simplifier* get_simplifier_instance(const rewriter& rewr, const rewriter& provin
   return new simplifier_dbm(rewr, proving_rewr, process_parameters, dataspec, lu_map);
 #else
   return new simplifier_fourier_motzkin(rewr, proving_rewr);
+  (void) process_parameters;
   (void) dataspec;
   (void) lu_map;
 #endif
