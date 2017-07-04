@@ -27,15 +27,14 @@ option(MCRL2_ENABLE_GUI_TOOLS       "Enable compilation of tools with a graphica
 option(MCRL2_ENABLE_EXPERIMENTAL    "Enable compilation of experimental tools." OFF)
 option(MCRL2_ENABLE_DEPRECATED      "Enable compilation of deprecated tools." OFF)
 option(MCRL2_ENABLE_DEVELOPER       "Enable compilation of developer tools." OFF)
+option(MCRL2_ENABLE_TESTS           "Enable generation of test targets." OFF)
 option(MCRL2_EXTRA_TOOL_TESTS       "Enable testing of tools on more mCRL2 specifications." OFF)
 option(MCRL2_SKIP_LONG_TESTS        "Do not compile test code that takes too long when profiling is on." OFF)
-option(MCRL2_SKIP_ALL_TESTS         "Do not generate any test targets." OFF)
 option(MCRL2_TEST_JITTYC            "Also test the compiling rewriters in the library tests. This can be time consuming." OFF)
 set(MCRL2_QT_APPS "" CACHE INTERNAL "Internally keep track of Qt apps for the packaging procedure")
 
 mark_as_advanced(MCRL2_ENABLE_STABLE)
 mark_as_advanced(MCRL2_SKIP_LONG_TESTS)
-mark_as_advanced(MCRL2_SKIP_ALL_TESTS)
 
 include(ConfigurePlatform)
 include(ConfigureCompiler)
