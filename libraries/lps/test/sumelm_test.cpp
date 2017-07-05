@@ -9,21 +9,17 @@
 /// \file sumelm_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/sumelm.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
-
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void print_specifications(const specification& s0, const specification& s1)
 {
@@ -56,7 +52,7 @@ BOOST_AUTO_TEST_CASE(bug_367)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -81,7 +77,7 @@ BOOST_AUTO_TEST_CASE(no_occurrence_of_variable)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -108,7 +104,7 @@ BOOST_AUTO_TEST_CASE(reverse_equality)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -133,7 +129,7 @@ BOOST_AUTO_TEST_CASE(equality)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -158,9 +154,9 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
 
   // FIXME, this test case requires the parser to allow parsing of free
   // variables.
-  specification s0 = linearise(text);
+  specification s0=remove_stochastic_operators(linearise(text));
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   std::set<variable> parameters = mcrl2::data::find_all_variables(s1.process().process_parameters());
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -170,21 +166,17 @@ BOOST_AUTO_TEST_CASE(actions_and_time)
     // Check that the only data variables in the condition and time
     // are process parameters
     std::set<variable> condition_vars = data::find_all_variables(i->condition());
-    for (std::set<variable>::iterator j = condition_vars.begin()
-                                          ; j != condition_vars.end()
-         ; ++j)
+    for (const auto & condition_var : condition_vars)
     {
-      BOOST_CHECK(parameters.find(*j) != parameters.end());
+      BOOST_CHECK(parameters.find(condition_var) != parameters.end());
     }
 
     if (i->has_time())
     {
       std::set<variable> time_vars = data::find_all_variables(i->multi_action().time());
-      for (std::set<variable>::iterator j = time_vars.begin()
-                                            ; j != time_vars.end()
-           ; ++j)
+      for (const auto & time_var : time_vars)
       {
-        BOOST_CHECK(parameters.find(*j) != parameters.end());
+        BOOST_CHECK(parameters.find(time_var) != parameters.end());
       }
     }
   }
@@ -207,12 +199,12 @@ BOOST_AUTO_TEST_CASE(both_sides_of_equality)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    if (!i->summation_variables().empty())
+    if (!i.summation_variables().empty())
     {
       ++sumvar_count;
     }
@@ -251,12 +243,12 @@ BOOST_AUTO_TEST_CASE(three_sums_remove_two)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
-  for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    if (!i->summation_variables().empty())
+    if (!i.summation_variables().empty())
     {
       ++sumvar_count;
     }
@@ -284,7 +276,7 @@ BOOST_AUTO_TEST_CASE(twice_lhs)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -314,12 +306,12 @@ BOOST_AUTO_TEST_CASE(no_unconditional_sum_removal_from_delta)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const deadlock_summand_vector& summands1 = s1.process().deadlock_summands();
-  for (deadlock_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (const auto & i : summands1)
   {
-    if (!i->summation_variables().empty())
+    if (!i.summation_variables().empty())
     {
       ++sumvar_count;
     }
@@ -341,7 +333,7 @@ BOOST_AUTO_TEST_CASE(bug_380)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
   int sumvar_count = 0;
   const action_summand_vector& summands1 = s1.process().action_summands();
   for (action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -369,12 +361,12 @@ BOOST_AUTO_TEST_CASE(test_boolean_variables)
 
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
-  sumelm_algorithm(s1).run();
+  sumelm_algorithm<>(s1).run();
 
   action_summand_vector v(s1.process().action_summands());
   for(action_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
   {
-    BOOST_CHECK_EQUAL(i->summation_variables().size(), 0);
+    BOOST_CHECK_EQUAL(i->summation_variables().size(), 0u);
   }
 
   print_specifications(s0, s1);
@@ -382,6 +374,6 @@ BOOST_AUTO_TEST_CASE(test_boolean_variables)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }
 

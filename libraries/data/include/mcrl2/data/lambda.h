@@ -13,8 +13,8 @@
 #define MCRL2_DATA_LAMBDA_H
 
 #include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/data/application.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {
@@ -46,7 +46,7 @@ class lambda: public abstraction
     /// \pre variables is not empty.
     lambda(const variable& variable,
            const data_expression& body)
-      : abstraction(lambda_binder(), make_list(variable), body)
+      : abstraction(lambda_binder(), { variable }, body)
     {
     }
 
@@ -58,7 +58,7 @@ class lambda: public abstraction
     template < typename Container >
     lambda(const Container& variables,
            const data_expression& body,
-           typename atermpp::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
       : abstraction(lambda_binder(), variables, body)
     {
       assert(!variables.empty());
@@ -72,6 +72,7 @@ std::string pp(const lambda& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const lambda& x)

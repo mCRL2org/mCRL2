@@ -12,16 +12,16 @@
 #ifndef MCRL2_LPS_PARSE_H
 #define MCRL2_LPS_PARSE_H
 
-#include <sstream>
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/process/action_parse.h"
-#include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/typecheck.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
+#include "mcrl2/utilities/exception.h"
+#include <sstream>
 
 namespace mcrl2
 {
@@ -32,101 +32,108 @@ namespace lps
 namespace detail
 {
 
-struct multi_action_actions: public process::action_actions
+struct multi_action_actions: public process::detail::action_actions
 {
   multi_action_actions(const core::parser& parser_)
-    : process::action_actions(parser_)
+    : process::detail::action_actions(parser_)
   {}
 
-  lps::untyped_multi_action parse_MultAct(const core::parse_node& node)
+  process::untyped_multi_action parse_MultAct(const core::parse_node& node) const
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::untyped_multi_action(); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return process::untyped_multi_action(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList"))
     {
-      return lps::untyped_multi_action(parse_ActionList(node.child(0)));
+      return process::untyped_multi_action(parse_ActionList(node.child(0)));
     }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 };
 
 inline
-lps::untyped_multi_action parse_multi_action_new(const std::string& text)
+process::untyped_multi_action parse_multi_action_new(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn, core::detail::syntax_error_fn);
   unsigned int start_symbol_index = p.start_symbol_index("MultAct");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  lps::untyped_multi_action result = multi_action_actions(p).parse_MultAct(node);
+  process::untyped_multi_action result = multi_action_actions(p).parse_MultAct(node);
   p.destroy_parse_node(node);
   return result;
 }
 
 inline
-multi_action complete_multi_action(untyped_multi_action& x, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+multi_action complete_multi_action(process::untyped_multi_action& x, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
-  multi_action result = lps::type_check(x, data_spec, action_decls);
+  multi_action result = lps::typecheck_multi_action(x, data_spec, action_decls);
   lps::translate_user_notation(result);
   lps::normalize_sorts(result, data_spec);
   return result;
 }
 
-struct action_rename_actions: public process::action_actions
+struct action_rename_actions: public process::detail::action_actions
 {
   action_rename_actions(const core::parser& parser_)
-    : process::action_actions(parser_)
+    : process::detail::action_actions(parser_)
   {}
 
-  lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node)
+  // create an action with an incomplete action label
+  process::action parse_Action_as_action(const core::parse_node& node) const
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return action_rename_rule_rhs(parse_Action(node.child(0))); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Tau())); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return action_rename_rule_rhs(atermpp::aterm_appl(core::detail::function_symbol_Delta())); }
+    process::action_label label(parse_Id(node.child(0)), {});
+    return process::action(label, parse_DataExprList(node.child(1)));
+  }
+
+  process::process_expression parse_ActionRenameRuleRHS(const core::parse_node& node) const
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action_as_action(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return process::tau(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return process::delta(); }
     throw core::parse_node_unexpected_exception(m_parser, node);
   }
 
-  lps::action_rename_rule parse_ActionRenameRule(const core::parse_node& node)
+  lps::action_rename_rule parse_ActionRenameRule(const core::parse_node& node) const
   {
     data::data_expression condition = data::sort_bool::true_();
     if (node.child(0).child(0))
     {
       condition = parse_DataExpr(node.child(0).child(0).child(0));
     }
-    return action_rename_rule(atermpp::aterm_appl(core::detail::function_symbol_ActionRenameRule(), data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
+    return action_rename_rule(data::variable_list(), condition, parse_Action_as_action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3)));
   }
 
-  std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
+  std::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node) const
   {
-    return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", boost::bind(&action_rename_actions::parse_ActionRenameRule, this, _1));
+    return parse_vector<lps::action_rename_rule>(node, "ActionRenameRule", [&](const core::parse_node& node) { return parse_ActionRenameRule(node); });
   }
 
-  std::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node)
+  std::vector<lps::action_rename_rule> parse_ActionRenameRuleSpec(const core::parse_node& node) const
   {
     data::variable_list variables = parse_VarSpec(node.child(0));
     std::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleList(node.child(2));
-    for (std::vector<lps::action_rename_rule>::iterator i = rules.begin(); i != rules.end(); ++i)
+    for (lps::action_rename_rule& rule: rules)
     {
-      i->variables() = variables;
+      rule.variables() = variables;
     }
     return rules;
   }
 
-  bool callback_ActionRenameSpec(const core::parse_node& node, lps::action_rename_specification& result)
+  bool callback_ActionRenameSpec(const core::parse_node& node, data::untyped_data_specification& dataspec_result, lps::action_rename_specification& result) const
   {
     if (symbol_name(node) == "SortSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, dataspec_result);
     }
     else if (symbol_name(node) == "ConsSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, dataspec_result);
     }
     else if (symbol_name(node) == "MapSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, dataspec_result);
     }
     else if (symbol_name(node) == "EqnSpec")
     {
-      return callback_DataSpecElement(node, result.data());
+      return callback_DataSpecElement(node, dataspec_result);
     }
     else if (symbol_name(node) == "ActSpec")
     {
@@ -142,10 +149,12 @@ struct action_rename_actions: public process::action_actions
     return false;
   }
 
-  lps::action_rename_specification parse_ActionRenameSpec(const core::parse_node& node)
+  lps::action_rename_specification parse_ActionRenameSpec(const core::parse_node& node) const
   {
+    data::untyped_data_specification dataspec_result;
     lps::action_rename_specification result;
-    traverse(node, boost::bind(&action_rename_actions::callback_ActionRenameSpec, this, _1, boost::ref(result)));
+    traverse(node, [&](const core::parse_node& node) { return callback_ActionRenameSpec(node, dataspec_result, result); });
+    result.data() = dataspec_result.construct_data_specification();
     return result;
   }
 };
@@ -163,16 +172,13 @@ action_rename_specification parse_action_rename_specification_new(const std::str
 }
 
 inline
-void complete_action_rename_specification(action_rename_specification& x, const lps::specification& spec)
+void complete_action_rename_specification(action_rename_specification& x, const lps::stochastic_specification& spec)
 {
   using namespace mcrl2::data;
-  // atermpp::aterm_appl result = lps::action_rename_specification_to_aterm(x);
-  // atermpp::aterm_appl lps_spec = lps::specification_to_aterm(spec);
-  x = lps::type_check_action_rename_specification(x, spec);
-  // x = action_rename_specification(result);
+  x = lps::typecheck_action_rename_specification(x, spec);
   x.data().declare_data_specification_to_be_type_checked();
-  x = action_rename_specification(x.data()+spec.data(),x.action_labels(),x.rules());
-  x = detail::translate_user_notation_and_normalise_sorts_action_rename_spec(x);
+  x = action_rename_specification(x.data() + spec.data(), x.action_labels(), x.rules());
+  detail::translate_user_notation(x);
 }
 
 } // namespace detail
@@ -187,7 +193,7 @@ inline
 multi_action parse_multi_action(std::stringstream& in, const process::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
   std::string text = utilities::read_text(in);
-  untyped_multi_action u = detail::parse_multi_action_new(text);
+  process::untyped_multi_action u = detail::parse_multi_action_new(text);
   return detail::complete_multi_action(u, action_decls, data_spec);
 }
 
@@ -209,7 +215,7 @@ multi_action parse_multi_action(const std::string& text, const process::action_l
 /// \param spec A linear process specification.
 /// \return The parse result
 inline
-action_rename_specification parse_action_rename_specification(std::istream& in, const lps::specification& spec)
+action_rename_specification parse_action_rename_specification(std::istream& in, const lps::stochastic_specification& spec)
 {
   std::string text = utilities::read_text(in);
   action_rename_specification result = detail::parse_action_rename_specification_new(text);
@@ -225,7 +231,9 @@ action_rename_specification parse_action_rename_specification(std::istream& in, 
 /// \param spec A linear process specification
 /// \return An action rename specification
 inline
-action_rename_specification parse_action_rename_specification(const std::string& spec_string, const lps::specification& spec)
+action_rename_specification parse_action_rename_specification(
+           const std::string& spec_string, 
+           const lps::stochastic_specification& spec)
 {
   std::istringstream in(spec_string);
   return parse_action_rename_specification(in, spec);
@@ -253,6 +261,7 @@ specification parse_linear_process_specification(std::istream& spec_stream)
   complete_data_specification(result);
   return result;
 }
+
 /// \brief Parses a linear process specification from a string
 /// \param text A string containing a linear process specification
 /// \return The parsed specification
@@ -268,6 +277,52 @@ specification parse_linear_process_specification(const std::string& text)
   std::istringstream stream(text);
   return parse_linear_process_specification(stream);
 }
+
+template <typename Specification>
+void parse_lps(std::istream&, Specification&)
+{
+  throw mcrl2::runtime_error("parse_lps not implemented yet!");
+}
+
+template <>
+inline
+void parse_lps<specification>(std::istream& from, specification& result)
+{
+  result = parse_linear_process_specification(from);
+}
+
+/// \brief Parses a stochastic linear process specification from an input stream.
+/// \param from An input stream containing a linear process specification.
+/// \param result An output parameter in which the parsed stochastic process is put. 
+/// \return The parsed specification.
+/// \exception non_linear_process if a non-linear sub-expression is encountered.
+/// \exception mcrl2::runtime_error in the following cases:
+/// \li The number of equations is not equal to one.
+/// \li The initial process is not a process instance, or it does not match with the equation.
+/// \li A sequential process is found with a right hand side that is not a process instance,
+/// or it doesn't match the equation.
+template <>
+inline
+void parse_lps<stochastic_specification>(std::istream& from, stochastic_specification& result)
+{
+  process::process_specification pspec = mcrl2::process::parse_process_specification(from);
+  if (!process::is_linear(pspec, true))
+  {
+    throw mcrl2::runtime_error("the process specification is not linear!");
+  }
+  process::detail::stochastic_linear_process_conversion_traverser visitor;
+  result = visitor.convert(pspec);
+  complete_data_specification(result);
+}
+
+template <typename Specification>
+void parse_lps(const std::string& text, Specification& result)
+{
+  std::istringstream stream(text);
+  parse_lps(stream, result);
+}
+
+
 
 /// \brief Parses an action from a string
 /// \param text A string containing an action

@@ -1,0 +1,27 @@
+sort ProcessStatus = struct started | stopped | crashed;
+
+act
+start;
+stop;
+crash;
+
+proc
+Process2 (status : ProcessStatus) =
+    (status == started) -> (
+        stop.Process2(stopped)
+        +
+        crash.Process2(crashed)
+    )
+    +
+    (status == stopped) -> (
+        start.Process2(started)
+    )
+    +
+    (status == crashed) -> (
+        stop.Process2(stopped)
+        +
+        start.Process2(started)
+    )
+    ;
+
+init Process2(stopped);

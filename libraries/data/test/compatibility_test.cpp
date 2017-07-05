@@ -10,16 +10,16 @@
 /// \brief Regression test for the transformations between new and old data
 ///       format.
 
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <sstream>
-#include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
@@ -33,13 +33,13 @@ void compatibility_test()
   );
 
   std::string text = utilities::read_text(data_stream);
-  atermpp::aterm_appl data_spec_aterm = data::detail::data_specification_to_aterm_data_spec(data::parse_data_specification_new(text));
+  atermpp::aterm_appl data_spec_aterm = data::detail::data_specification_to_aterm_data_spec(data::detail::parse_data_specification_new(text));
   if (data_spec_aterm == atermpp::aterm())
   {
     throw mcrl2::runtime_error("Error while parsing data specification");
   }
   data::data_specification data_spec(data_spec_aterm);
-  data::type_check(data_spec);
+  data::typecheck_data_specification(data_spec);
 
   atermpp::aterm_appl data_spec_aterm_new =
     mcrl2::data::detail::data_specification_to_aterm_data_spec(

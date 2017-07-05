@@ -12,16 +12,16 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_MUTABLE_SUBSTITUTION_COMPOSER_H
 #define MCRL2_DATA_SUBSTITUTIONS_MUTABLE_SUBSTITUTION_COMPOSER_H
 
+#include "mcrl2/data/is_simple_substitution.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/undefined.h"
+#include "mcrl2/utilities/exception.h"
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "mcrl2/data/is_simple_substitution.h"
-#include "mcrl2/data/undefined.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
 
 namespace mcrl2 {
 
@@ -32,23 +32,23 @@ template <typename Substitution>
 class mutable_substitution_composer: public std::unary_function<typename Substitution::variable_type, typename Substitution::expression_type>
 {
   public:
-    /// \brief type used to represent variables
+    /// \brief type used to represent variables.
     typedef typename Substitution::variable_type variable_type;
 
-    /// \brief type used to represent expressions
+    /// \brief type used to represent expressions.
     typedef typename Substitution::expression_type expression_type;
 
-    /// \brief Wrapper class for internal storage and substitution updates using operator()
+    /// \brief Wrapper class for internal storage and substitution updates using operator().
     typedef typename mutable_map_substitution<std::map<variable_type, expression_type> >::assignment assignment;
 
-    /// \brief The type of the wrapped substitution
+    /// \brief The type of the wrapped substitution.
     typedef Substitution substitution_type;
 
   protected:
-    /// \brief The wrapped substitution
+    /// \brief The wrapped substitution.
     const Substitution& f_;
 
-    /// \brief An additional mutable substitution
+    /// \brief An additional mutable substitution.
     mutable_map_substitution<std::map<variable_type, expression_type> > g_;
 
   public:
@@ -57,9 +57,9 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
       : f_(f)
     {}
 
-    /// \brief Apply on single single variable expression
-    /// \param[in] v the variable for which to give the associated expression
-    /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+    /// \brief Apply on single single variable expression.
+    /// \param[in] v the variable for which to give the associated expression.
+    /// \return expression equivalent to s(e), or a reference to such an expression.
     expression_type operator()(variable_type const& v) const
     {
       return data::replace_free_variables(f_(v), g_);
@@ -77,8 +77,8 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
       return g_[v];
     }
 
-    /// \brief Returns the wrapped substitution
-    /// \return The wrapped substitution
+    /// \brief Returns the wrapped substitution.
+    /// \return The wrapped substitution.
     const substitution_type& substitution() const
     {
       return f_;
@@ -90,33 +90,33 @@ template <typename AssociativeContainer>
 class mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >: public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
 {
   public:
-    /// \brief The type of the wrapped substitution
+    /// \brief The type of the wrapped substitution.
     typedef mutable_map_substitution<AssociativeContainer> substitution_type;
 
-    /// \brief type used to represent variables
+    /// \brief type used to represent variables.
     typedef typename substitution_type::variable_type variable_type;
 
-    /// \brief type used to represent expressions
+    /// \brief type used to represent expressions.
     typedef typename substitution_type::expression_type expression_type;
 
-    /// \brief Wrapper class for internal storage and substitution updates using operator()
+    /// \brief Wrapper class for internal storage and substitution updates using operator().
     typedef typename substitution_type::assignment assignment;
 
   protected:
-    /// \brief object on which substitution manipulations are performed
+    /// \brief object on which substitution manipulations are performed.
     substitution_type& g_;
 
   public:
 
-    /// \brief Constructor with mutable substitution object
-    /// \param[in,out] g underlying substitution object
+    /// \brief Constructor with mutable substitution object.
+    /// \param[in,out] g underlying substitution object.
     mutable_substitution_composer(mutable_map_substitution<AssociativeContainer>& g)
       : g_(g)
     {}
 
-    /// \brief Apply on single single variable expression
-    /// \param[in] v the variable for which to give the associated expression
-    /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+    /// \brief Apply on single single variable expression.
+    /// \param[in] v the variable for which to give the associated expression.
+    /// \return expression equivalent to s(e), or a reference to such an expression.
     const expression_type operator()(variable_type const& v) const
     {
       return g_(v);
@@ -147,33 +147,33 @@ template <typename VariableType, typename ExpressionSequence>
 class mutable_substitution_composer<mutable_indexed_substitution<VariableType, ExpressionSequence> >: public std::unary_function<VariableType, typename ExpressionSequence::value_type>
 {
   public:
-    /// \brief The type of the wrapped substitution
+    /// \brief The type of the wrapped substitution.
     typedef mutable_indexed_substitution<VariableType, ExpressionSequence> substitution_type;
 
-    /// \brief type used to represent variables
+    /// \brief type used to represent variables.
     typedef typename substitution_type::variable_type variable_type;
 
-    /// \brief type used to represent expressions
+    /// \brief type used to represent expressions.
     typedef typename substitution_type::expression_type expression_type;
 
-    /// \brief Wrapper class for internal storage and substitution updates using operator()
+    /// \brief Wrapper class for internal storage and substitution updates using operator().
     typedef typename substitution_type::assignment assignment;
 
   protected:
-    /// \brief object on which substitution manipulations are performed
+    /// \brief object on which substitution manipulations are performed.
     substitution_type& g_;
 
   public:
 
-    /// \brief Constructor with mutable substitution object
-    /// \param[in,out] g underlying substitution object
+    /// \brief Constructor with mutable substitution object.
+    /// \param[in,out] g underlying substitution object.
     mutable_substitution_composer(substitution_type& g)
       : g_(g)
     {}
 
-    /// \brief Apply on single single variable expression
-    /// \param[in] v the variable for which to give the associated expression
-    /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+    /// \brief Apply on single single variable expression.
+    /// \param[in] v the variable for which to give the associated expression.
+    /// \return expression equivalent to s(e), or a reference to such an expression.
     const expression_type operator()(variable_type const& v) const
     {
       return g_(v);
@@ -191,8 +191,8 @@ class mutable_substitution_composer<mutable_indexed_substitution<VariableType, E
       return g_[v];
     }
 
-    /// \brief Returns the wrapped substitution
-    /// \return The wrapped substitution
+    /// \brief Returns the wrapped substitution.
+    /// \return The wrapped substitution.
     const substitution_type& substitution() const
     {
       return g_;

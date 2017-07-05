@@ -27,7 +27,7 @@ namespace lts
 {
 
 /** \brief A signature is a pair of an action label and a block */
-typedef std::set<std::pair<size_t, size_t> > signature_t;
+typedef std::set<std::pair<std::size_t, std::size_t> > signature_t;
 
 /** \brief Base class for signature computation */
 template < class LTS_T >
@@ -50,13 +50,13 @@ public:
   /** \brief Compute a new signature based on \a partition.
     * \param[in] partition The current partition
     */
-  virtual void compute_signature(const std::vector<size_t>& partition) = 0;
+  virtual void compute_signature(const std::vector<std::size_t>& partition) = 0;
 
   /** \brief Compute the transitions for the quotient according to \a partition.
     * \param[in] partition The partition that is used to compute the quotient
     * \param[out] transitions A set to which the transitions of the quotient are written
     */
-  virtual void quotient_transitions(std::set<transition>& transitions, const std::vector<size_t>& partition)
+  virtual void quotient_transitions(std::set<transition>& transitions, const std::vector<std::size_t>& partition)
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
@@ -68,7 +68,7 @@ public:
     * \param[in] i The state for which to return the signature.
     * \pre i < m_lts.num_states().
     */
-  virtual const signature_t& get_signature(size_t i) const
+  virtual const signature_t& get_signature(std::size_t i) const
   {
     return m_sig[i];
   }
@@ -92,13 +92,13 @@ public:
 
   /** \overload */
   virtual void
-  compute_signature(const std::vector<size_t>& partition)
+  compute_signature(const std::vector<std::size_t>& partition)
   {
     // compute signatures
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      m_sig[i->from()].insert(std::make_pair(i->label(), partition[i->to()]));
+      m_sig[i->from()].insert(std::make_pair(m_lts.apply_hidden_label_map(i->label()), partition[i->to()]));
     }
   }
 
@@ -128,7 +128,7 @@ protected:
     * Inserts the pair (label_, block) in the signature of t, as well as
     * the signatures of all tau-predecessors of t within the same block.
     */
-  void insert(const std::vector<size_t>& partition, const size_t t, const size_t label_, const size_t block)
+  void insert(const std::vector<std::size_t>& partition, const std::size_t t, const std::size_t label_, const std::size_t block)
   {
     if(m_sig[t].insert(std::make_pair(label_, block)).second)
     {
@@ -150,33 +150,33 @@ public:
   /** \brief Constructor  */
   signature_branching_bisim(const LTS_T& lts_)
     : signature<LTS_T>(lts_),
-      m_prev_transitions(transitions_per_outgoing_state_reversed(lts_.get_transitions()))
+      m_prev_transitions(transitions_per_outgoing_state_reversed(lts_.get_transitions(),lts_.hidden_label_map()))
   {
     mCRL2log(log::verbose, "sigref") << "initialising signature computation for branching bisimulation" << std::endl;
   }
 
   /** \overload */
-  virtual void compute_signature(const std::vector<size_t>& partition)
+  virtual void compute_signature(const std::vector<std::size_t>& partition)
   {
     // compute signatures
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if (!(m_lts.is_tau(i->label()) && (partition[i->from()] == partition[i->to()])))
+      if (!(m_lts.is_tau(m_lts.apply_hidden_label_map(i->label())) && (partition[i->from()] == partition[i->to()])))
       {
-        insert(partition, i->from(), i->label(), partition[i->to()]);
+        insert(partition, i->from(), m_lts.apply_hidden_label_map(i->label()), partition[i->to()]);
       }
     }
   }
 
   /** \overload */
-  virtual void quotient_transitions(std::set<transition>& transitions, const std::vector<size_t>& partition)
+  virtual void quotient_transitions(std::set<transition>& transitions, const std::vector<std::size_t>& partition)
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(partition[i->from()] != partition[i->to()] || !m_lts.is_tau(i->label()))
+      if(partition[i->from()] != partition[i->to()] || !m_lts.is_tau(m_lts.apply_hidden_label_map(i->label())))
       {
-        transitions.insert(transition(partition[i->from()], i->label(), partition[i->to()]));
+        transitions.insert(transition(partition[i->from()], m_lts.apply_hidden_label_map(i->label()), partition[i->to()]));
       }
     }
   }
@@ -203,22 +203,22 @@ protected:
    */
   void compute_tau_sccs()
   {
-    size_t unused = 1, lastscc = 1;
-    std::vector<size_t> scc(m_lts.num_states(), 0);
-	  std::vector<size_t> low(m_lts.num_states(), 0);
-	  std::stack<size_t> stack;
-	  std::stack<size_t> sccstack;
+    std::size_t unused = 1, lastscc = 1;
+    std::vector<std::size_t> scc(m_lts.num_states(), 0);
+	  std::vector<std::size_t> low(m_lts.num_states(), 0);
+	  std::stack<std::size_t> stack;
+	  std::stack<std::size_t> sccstack;
 
     // Record forward transition relation sorted by state.
-	  outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions()));
+	  outgoing_transitions_per_state_t m_lts_succ_transitions(transitions_per_outgoing_state(m_lts.get_transitions(),m_lts.hidden_label_map()));
 
-	  for (size_t i = 0; i < m_lts.num_states(); ++i)
+	  for (std::size_t i = 0; i < m_lts.num_states(); ++i)
 	  {
 		  if (scc[i] == 0)
 			  stack.push(i);
 		  while (!stack.empty())
 		  {
-			  size_t vi = stack.top();
+			  std::size_t vi = stack.top();
 
         // Outgoing transitions of vi.
         std::pair<outgoing_transitions_per_state_t::const_iterator, outgoing_transitions_per_state_t::const_iterator> succ_range
@@ -247,8 +247,8 @@ protected:
 				  }
 				  if (low[vi] == scc[vi])
 				  {
-					  size_t tos, scc_id = lastscc++;
-            std::vector<size_t> this_scc;
+					  std::size_t tos, scc_id = lastscc++;
+            std::vector<std::size_t> this_scc;
 					  do
 					  {
 						  tos = sccstack.top();
@@ -302,29 +302,29 @@ public:
     * Compute the signature as in branching bisimulation. In addition, add the
     * (tau, B) for edges s -tau-> t for which s,t in B and m_divergent[t]
     */
-  virtual void compute_signature(const std::vector<size_t>& partition)
+  virtual void compute_signature(const std::vector<std::size_t>& partition)
   {
     // compute signatures
     m_sig = std::vector<signature_t>(m_lts.num_states(), signature_t());
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(i->label()))
+      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(m_lts.apply_hidden_label_map(i->label())))
          || m_divergent[i->to()])
       {
-        insert(partition, i->from(), i->label(), partition[i->to()]);
+        insert(partition, i->from(), m_lts.apply_hidden_label_map(i->label()), partition[i->to()]);
       }
     }
   }
 
   /** \overload */
-  virtual void quotient_transitions(std::set<transition>& transitions, const std::vector<size_t>& partition)
+  virtual void quotient_transitions(std::set<transition>& transitions, const std::vector<std::size_t>& partition)
   {
     for(std::vector<transition>::const_iterator i = m_lts.get_transitions().begin(); i != m_lts.get_transitions().end(); ++i)
     {
-      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(i->label()))
-         || m_sig[i->from()].find(std::make_pair(i->label(), partition[i->to()])) != m_sig[i->from()].end())
+      if(!(partition[i->from()] == partition[i->to()] && m_lts.is_tau(m_lts.apply_hidden_label_map(i->label())))
+         || m_sig[i->from()].find(std::make_pair(m_lts.apply_hidden_label_map(i->label()), partition[i->to()])) != m_sig[i->from()].end())
       {
-        transitions.insert(transition(partition[i->from()], i->label(), partition[i->to()]));
+        transitions.insert(transition(partition[i->from()], m_lts.apply_hidden_label_map(i->label()), partition[i->to()]));
       }
     }
   }
@@ -344,12 +344,12 @@ class sigref
 {
 
 protected:
-  /** \brief Current partition; for each state (size_t) the block in which
+  /** \brief Current partition; for each state (std::size_t) the block in which
              it resides is recorded. */
-  std::vector<size_t> m_partition;
+  std::vector<std::size_t> m_partition;
 
   /** \brief The number of blocks in the current partition */
-  size_t m_count;
+  std::size_t m_count;
 
   /** \brief The LTS that we are reducing */
   LTS_T& m_lts;
@@ -375,8 +375,8 @@ protected:
              the partition, until the partition stabilises */
   void compute_partition()
   {
-    size_t count_prev = m_count;
-    size_t iterations = 0;
+    std::size_t count_prev = m_count;
+    std::size_t iterations = 0;
 
     m_lts.sort_transitions(mcrl2::lts::lbl_tgt_src);
 
@@ -390,9 +390,9 @@ protected:
       count_prev = m_count;
 
       // Map signatures to block numbers
-      std::map<signature_t, size_t> hashtable;
+      std::map<signature_t, std::size_t> hashtable;
       m_count = 0;
-      for(size_t i = 0; i < m_lts.num_states(); ++i)
+      for(std::size_t i = 0; i < m_lts.num_states(); ++i)
       {
         if(hashtable.find(m_signature.get_signature(i)) == hashtable.end())
         {
@@ -402,7 +402,7 @@ protected:
       }
 
       // Map states to block numbers
-      for(size_t i = 0; i < m_lts.num_states(); ++i)
+      for(std::size_t i = 0; i < m_lts.num_states(); ++i)
       {
         m_partition[i] = hashtable[m_signature.get_signature(i)];
       }
@@ -440,7 +440,7 @@ public:
     * \param[in] lts_ The LTS that is being reduced
     */
   sigref(LTS_T& lts_)
-    : m_partition(std::vector<size_t>(lts_.num_states(), 0)),
+    : m_partition(std::vector<std::size_t>(lts_.num_states(), 0)),
       m_count(0),
       m_lts(lts_),
       m_signature(lts_)

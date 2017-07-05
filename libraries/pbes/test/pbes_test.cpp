@@ -11,29 +11,28 @@
 
 #define MCRL2_DEBUG_ENUMERATE_QUANTIFIERS_BUILDER
 
-#include <sstream>
-#include <iostream>
-#include <iterator>
-#include <utility>
-#include <set>
-#include <cstdio>
-#include <boost/test/minimal.hpp>
-#include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/print_utility.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/is_bes.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/is_bes.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/test/minimal.hpp>
+#include <cstdio>
+#include <iostream>
+#include <iterator>
+#include <set>
+#include <sstream>
+#include <utility>
 
 using namespace mcrl2;
 using atermpp::make_vector;
@@ -127,7 +126,7 @@ const std::string MPSU_FORMULA =
 
 void test_pbes()
 {
-  specification spec = linearise(SPECIFICATION);
+  specification spec=remove_stochastic_operators(linearise(SPECIFICATION));
   state_formula formula = state_formulas::parse_state_formula(FORMULA2, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -205,17 +204,13 @@ void test_complement_method_builder()
 
 void test_pbes_expression()
 {
-  namespace p = pbes_system::pbes_expr;
-
   variable x1("x1", basic_sort("X"));
   pbes_expression e = x1;
-  data_expression x2 = mcrl2::pbes_system::accessors::val(e);
-  BOOST_CHECK(x1 == x2);
 }
 
 void test_trivial()
 {
-  specification spec    = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -231,7 +226,7 @@ void test_instantiate_global_variables()
     "init d.P(1);             \n"
     ;
   std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
-  specification spec = linearise(spec_text);
+  specification spec=remove_stochastic_operators(linearise(spec_text));
   state_formula formula = state_formulas::parse_state_formula(formula_text, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -245,7 +240,7 @@ void test_find_sort_expressions()
 {
   using data::sort_expression;
 
-  specification spec    = linearise(lps::detail::ABP_SPECIFICATION());
+  specification spec=remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
   state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -267,8 +262,6 @@ void test_io()
   pbes p = txt2pbes(PBES_SPEC);
   save_pbes(p, "pbes.pbes",  pbes_format_internal());
   load_pbes(p, "pbes.pbes",  pbes_format_internal());
-  save_pbes(p, "pbes.aterm", pbes_format_internal_text());
-  load_pbes(p, "pbes.aterm", pbes_format_internal_text());
   save_pbes(p, "pbes.txt",   pbes_format_text());
   load_pbes(p, "pbes.txt",   pbes_format_text());
 }

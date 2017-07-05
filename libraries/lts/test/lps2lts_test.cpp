@@ -13,12 +13,12 @@
 #define MCRL2_WITH_GARBAGE_COLLECTION
 #endif
 
-#include <stdio.h>
-#include <time.h>
+#include <ctime>
 #include <iostream>
 #include <sstream>
 #include <cstdio>
 #include <boost/test/included/unit_test_framework.hpp>
+#include "mcrl2/data/detail/rewrite_strategies.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lts/detail/exploration.h"
@@ -26,22 +26,17 @@
 #include "mcrl2/lts/lts_fsm.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts_dot.h"
-#include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/utilities/test_utilities.h"
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
 
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
-
 template <class LTS_TYPE>
-LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
+LTS_TYPE translate_lps_to_lts(lps::stochastic_specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewrite_strategy const rewrite_strategy = mcrl2::data::jitty,
-                              std::string priority_action = "")
+                              const std::string& priority_action = "")
 {
   std::clog << "Translating LPS to LTS with exploration strategy " << strategy << ", rewrite strategy " << rewrite_strategy << "." << std::endl;
   lts::lts_generation_options options;
@@ -90,16 +85,18 @@ exploration_strategy_vector exploration_strategies()
   return exploration_strategies;
 }
 
-static void check_lps2lts_specification(std::string const& specification,
-                                 const size_t expected_states,
-                                 const size_t expected_transitions,
-                                 const size_t expected_labels,
-                                 std::string priority_action = "")
+static void check_lps2lts_specification(const std::string& specification,
+                                        const std::size_t expected_states,
+                                        const std::size_t expected_transitions,
+                                        const std::size_t expected_labels,
+                                        const std::string& priority_action = "")
 {
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
-  lps::specification lps = lps::parse_linear_process_specification(specification);
+  lps::stochastic_specification lps;
+  parse_lps(specification,lps);
 
-  rewrite_strategy_vector rstrategies(utilities::get_test_rewrite_strategies(false));
+
+  rewrite_strategy_vector rstrategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
   {
     exploration_strategy_vector estrategies(exploration_strategies());
@@ -129,36 +126,6 @@ static void check_lps2lts_specification(std::string const& specification,
       BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
       BOOST_CHECK_EQUAL(result3.num_action_labels(), expected_labels);
 
-#ifdef USE_BCG
-      lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, priority_action);
-
-//	bool has_i_label = false;
-//	bool has_tau = false;
-//        for( process::action_label_list::iterator i = lps.action_labels().begin(); i != lps.action_labels().end(); ++i )
-//	{
-//                has_i_label = has_i_label || ( i -> name() == atermpp::aterm_string( "i" ) );
-//	}
-
- //       for( lps::action_summand_vector::iterator i = lps.process().action_summands().begin() ;
- //         i != lps.process().action_summands().end() ;
- //         ++i )
- //       {
- //          has_tau = has_tau || i->is_tau() ;
- //       }
-
-
-      std::cerr << "BCG FORMAT\n";
-      BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
-      BOOST_CHECK_EQUAL(result6.num_transitions(), expected_transitions);
-//        if( has_i_label )
-//        {
-//          BOOST_CHECK_EQUAL(result6.num_action_labels(), expected_labels );
-//        }
-//        else
-//        {
-//            BOOST_CHECK_EQUAL(result6.num_action_labels() , expected_labels + 1 );
-//        }
-#endif
     }
   }
 }
@@ -171,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_a_delta)
     "               + delta;\n"
     "init P(true);\n"
   );
-  check_lps2lts_specification(lps, 2, 1, 1);
+  check_lps2lts_specification(lps, 2, 1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_abp)
@@ -231,8 +198,8 @@ BOOST_AUTO_TEST_CASE(test_abp)
     "\n"
     "init P(1, dc, true, 1, dc1, dc2, 1, dc9, 1, dc13, true);\n"
   );
-  check_lps2lts_specification(abp, 74, 92, 19);
-  check_lps2lts_specification(abp, 74, 92, 19, "tau");
+  check_lps2lts_specification(abp, 74, 92, 20);
+  check_lps2lts_specification(abp, 74, 92, 20, "tau");
 }
 
 BOOST_AUTO_TEST_CASE(test_confluence)
@@ -256,7 +223,7 @@ BOOST_AUTO_TEST_CASE(test_confluence)
     "init P(1, S_FSM_UNINITIALIZED, []);\n"
   );
   check_lps2lts_specification(spec, 4, 3, 3);
-  check_lps2lts_specification(spec, 3, 2, 2, "tau");
+  check_lps2lts_specification(spec, 3, 2, 3, "tau");
 }
 
 BOOST_AUTO_TEST_CASE(test_function_updates)
@@ -280,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_function_updates)
     "\n"
     "init P(f);\n"
   );
-  check_lps2lts_specification(spec, 4, 12, 4);
+  check_lps2lts_specification(spec, 4, 12, 5);
 }
 
 BOOST_AUTO_TEST_CASE(test_timed) // For bug #756
@@ -300,7 +267,7 @@ BOOST_AUTO_TEST_CASE(test_timed) // For bug #756
     "\n"
     "init P(1);\n"
   );
-  check_lps2lts_specification(spec, 3, 2, 2);
+  check_lps2lts_specification(spec, 3, 2, 3);
 }
 
 BOOST_AUTO_TEST_CASE(test_struct)
@@ -319,7 +286,7 @@ BOOST_AUTO_TEST_CASE(test_struct)
     "     + delta;\n"
     "init P(1);\n"
   );
-  check_lps2lts_specification(spec, 2, 1, 1);
+  check_lps2lts_specification(spec, 2, 1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_alias_complex)
@@ -346,7 +313,7 @@ BOOST_AUTO_TEST_CASE(test_alias_complex)
     "\n"
     "init P(1);\n"
   );
-  check_lps2lts_specification(spec, 2, 1, 1);
+  check_lps2lts_specification(spec, 2, 1, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_equality_with_empty_set)
@@ -383,7 +350,7 @@ BOOST_AUTO_TEST_CASE(test_plus)
     "proc P = a.P + a.P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 2, 1);
+  check_lps2lts_specification(spec, 1, 2, 2);
 }
 
 // The example below fails if #[0,1] does not have a decent
@@ -435,7 +402,8 @@ BOOST_AUTO_TEST_CASE(test_max_states)
   "  (s <= 10) -> a . P(s+1);\n"
   "init P(1);\n");
 
-  lps::specification specification = lps::parse_linear_process_specification(spec);
+  lps::stochastic_specification specification;
+  parse_lps(spec,specification);
 
   lts::lts_generation_options options;
   options.trace_prefix = "lps2lts_test";
@@ -452,7 +420,7 @@ BOOST_AUTO_TEST_CASE(test_max_states)
   result.load(options.lts);
   remove(options.lts.c_str()); // Clean up after ourselves
 
-  BOOST_CHECK_LT(result.num_states(), 10);
+  BOOST_CHECK_LT(result.num_states(), 10u);
 }
 
 BOOST_AUTO_TEST_CASE(test_interaction_sum_and_assignment_notation1)
@@ -485,7 +453,7 @@ BOOST_AUTO_TEST_CASE(test_whether_function_update_is_declared)
     "proc P(f: Bool -> T) = int . P(f[true->b]);\n"
     "init P(g) ;\n"
   );
-  check_lps2lts_specification(spec, 2, 2, 1);
+  check_lps2lts_specification(spec, 2, 2, 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_whether_bag_enumeration_with_similar_elements_is_allowed)
@@ -496,9 +464,9 @@ BOOST_AUTO_TEST_CASE(test_whether_bag_enumeration_with_similar_elements_is_allow
     "proc P(b: Bag(S)) = (count(s1, b) < 3) -> int.P();\n"
     "init P({s1: 1, s1: 1});\n"
   );
-  check_lps2lts_specification(spec, 1, 1, 1);
+  check_lps2lts_specification(spec, 1, 1, 2);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
 {
   std::string spec(
@@ -511,9 +479,9 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_to_functions_are_causing_problems)
     "proc P = int(f(1)(2)(3)).P();\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 1, 1);
+  check_lps2lts_specification(spec, 1, 1, 2);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_functions_can_be_enumerated)
 {
   std::string spec(
@@ -521,9 +489,9 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_can_be_enumerated)
     "proc P = sum f:Bool->Bool.int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 4, 4);
+  check_lps2lts_specification(spec, 1, 4, 5);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerated)
 {
   std::string spec(
@@ -531,9 +499,9 @@ BOOST_AUTO_TEST_CASE(test_whether_functions_with_more_arguments_can_be_enumerate
     "proc P = sum f:Bool#Bool#Bool->Bool.f(true,true,true)->int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 128, 128);
+  check_lps2lts_specification(spec, 1, 128, 129);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
 {
   std::string spec(
@@ -541,9 +509,9 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_can_be_enumerated)
     "proc P = sum f:FSet(Bool).int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 4, 4);
+  check_lps2lts_specification(spec, 1, 4, 5);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_sets_can_be_enumerated)
 {
   std::string spec(
@@ -551,9 +519,9 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_can_be_enumerated)
     "proc P = sum f:FSet(Bool).int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 4, 4);
+  check_lps2lts_specification(spec, 1, 4, 5);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_with_conditions_can_be_enumerated)
 {
   std::string spec(
@@ -561,9 +529,9 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_with_conditions_can_be_enumerated)
     "proc P = sum f:FSet(Bool).(true in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 2, 2);
+  check_lps2lts_specification(spec, 1, 2, 3);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_sets_with_conditions_can_be_enumerated)
 {
   std::string spec(
@@ -571,9 +539,9 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_with_conditions_can_be_enumerated)
     "proc P = sum f:Set(Bool).(true in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 2, 2);
+  check_lps2lts_specification(spec, 1, 2, 3);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_finite_sets_of_functions_can_be_enumerated)
 {
   std::string spec(
@@ -581,9 +549,9 @@ BOOST_AUTO_TEST_CASE(test_whether_finite_sets_of_functions_can_be_enumerated)
     "proc P = sum f:FSet(Bool->Bool).((lambda x:Bool.true) in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 8, 8);
+  check_lps2lts_specification(spec, 1, 8, 9);
 }
-  
+
 BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
 {
   std::string spec(
@@ -591,14 +559,13 @@ BOOST_AUTO_TEST_CASE(test_whether_sets_of_functions_can_be_enumerated)
     "proc P = sum f:Set(Bool->Bool).((lambda x:Bool.true) in f) -> int(f).P;\n"
     "init P;\n"
   );
-  check_lps2lts_specification(spec, 1, 8, 8);
+  check_lps2lts_specification(spec, 1, 8, 9);
 }
-  
+
 
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
- // Initialise random seed to allow parallel running with lps2lts_test_old
-  return 0;
+  return nullptr;
 }
 

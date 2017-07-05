@@ -10,11 +10,11 @@
 /// \brief
 
 #include "mcrl2/lps/find.h"
+#include "mcrl2/lps/is_well_typed.h"
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/translate_user_notation.h"
-#include "mcrl2/lps/detail/lps_well_typed_checker.h"
 
 namespace mcrl2
 {
@@ -30,21 +30,34 @@ std::string pp(const lps::linear_process& x) { return lps::pp< lps::linear_proce
 std::string pp(const lps::multi_action& x) { return lps::pp< lps::multi_action >(x); }
 std::string pp(const lps::process_initializer& x) { return lps::pp< lps::process_initializer >(x); }
 std::string pp(const lps::specification& x) { return lps::pp< lps::specification >(x); }
-std::string pp(const lps::untyped_multi_action& x) { return lps::pp< lps::untyped_multi_action >(x); }
-void normalize_sorts(lps::multi_action& x, const data::data_specification& dataspec) { lps::normalize_sorts< lps::multi_action >(x, dataspec); }
+std::string pp(const lps::stochastic_action_summand& x) { return lps::pp< lps::stochastic_action_summand >(x); }
+std::string pp(const lps::stochastic_distribution& x) { return lps::pp< lps::stochastic_distribution >(x); }
+std::string pp(const lps::stochastic_linear_process& x) { return lps::pp< lps::stochastic_linear_process >(x); }
+std::string pp(const lps::stochastic_process_initializer& x) { return lps::pp< lps::stochastic_process_initializer >(x); }
+std::string pp(const lps::stochastic_specification& x) { return lps::pp< lps::stochastic_specification >(x); }
+void normalize_sorts(lps::multi_action& x, const data::sort_specification& sortspec) { lps::normalize_sorts< lps::multi_action >(x, sortspec); }
+void normalize_sorts(lps::specification& x, const data::sort_specification& /* sortspec */) { lps::normalize_sorts< lps::specification >(x, x.data()); }
 void translate_user_notation(lps::multi_action& x) { lps::translate_user_notation< lps::multi_action >(x); }
 std::set<data::sort_expression> find_sort_expressions(const lps::specification& x) { return lps::find_sort_expressions< lps::specification >(x); }
+std::set<data::sort_expression> find_sort_expressions(const lps::stochastic_specification& x) { return lps::find_sort_expressions< lps::stochastic_specification >(x); }
 std::set<data::variable> find_all_variables(const lps::linear_process& x) { return lps::find_all_variables< lps::linear_process >(x); }
+std::set<data::variable> find_all_variables(const lps::stochastic_linear_process& x) { return lps::find_all_variables< lps::stochastic_linear_process >(x); }
 std::set<data::variable> find_all_variables(const lps::specification& x) { return lps::find_all_variables< lps::specification >(x); }
+std::set<data::variable> find_all_variables(const lps::stochastic_specification& x) { return lps::find_all_variables< lps::stochastic_specification >(x); }
 std::set<data::variable> find_all_variables(const lps::deadlock& x) { return lps::find_all_variables< lps::deadlock >(x); }
 std::set<data::variable> find_all_variables(const lps::multi_action& x) { return lps::find_all_variables< lps::multi_action >(x); }
 std::set<data::variable> find_free_variables(const lps::linear_process& x) { return lps::find_free_variables< lps::linear_process >(x); }
+std::set<data::variable> find_free_variables(const lps::stochastic_linear_process& x) { return lps::find_free_variables< lps::stochastic_linear_process >(x); }
 std::set<data::variable> find_free_variables(const lps::specification& x) { return lps::find_free_variables< lps::specification >(x); }
+std::set<data::variable> find_free_variables(const lps::stochastic_specification& x) { return lps::find_free_variables< lps::stochastic_specification >(x); }
 std::set<data::variable> find_free_variables(const lps::deadlock& x) { return lps::find_free_variables< lps::deadlock >(x); }
 std::set<data::variable> find_free_variables(const lps::multi_action& x) { return lps::find_free_variables< lps::multi_action >(x); }
 std::set<data::variable> find_free_variables(const lps::process_initializer& x) { return lps::find_free_variables< lps::process_initializer >(x); }
+std::set<data::variable> find_free_variables(const lps::stochastic_process_initializer& x) { return lps::find_free_variables< lps::stochastic_process_initializer >(x); }
 std::set<data::function_symbol> find_function_symbols(const lps::specification& x) { return lps::find_function_symbols< lps::specification >(x); }
+std::set<data::function_symbol> find_function_symbols(const lps::stochastic_specification& x) { return lps::find_function_symbols< lps::stochastic_specification >(x); }
 std::set<core::identifier_string> find_identifiers(const lps::specification& x) { return lps::find_identifiers< lps::specification >(x); }
+std::set<core::identifier_string> find_identifiers(const lps::stochastic_specification& x) { return lps::find_identifiers< lps::stochastic_specification >(x); }
 //--- end generated lps overloads ---//
 
 data::data_expression_list action_summand::next_state(const data::variable_list& process_parameters) const
@@ -58,18 +71,37 @@ std::string pp_with_summand_numbers(const specification& x)
   std::ostringstream out;
   core::detail::apply_printer<lps::detail::printer> printer(out);
   printer.print_summand_numbers() = true;
-  printer(x);
+  printer.apply(x);
   return out.str();
 }
 
-bool is_well_typed(const linear_process& x)
+std::string pp_with_summand_numbers(const stochastic_specification& x)
 {
-  return lps::detail::is_well_typed(x);
+  std::ostringstream out;
+  core::detail::apply_printer<lps::detail::printer> printer(out);
+  printer.print_summand_numbers() = true;
+  printer.apply(x);
+  return out.str();
 }
 
-bool is_well_typed(const specification& x)
+bool check_well_typedness(const linear_process& x)
 {
-  return lps::detail::is_well_typed(x);
+  return lps::detail::check_well_typedness(x);
+}
+
+bool check_well_typedness(const stochastic_linear_process& x)
+{
+  return lps::detail::check_well_typedness(x);
+}
+
+bool check_well_typedness(const specification& x)
+{
+  return lps::detail::check_well_typedness(x);
+}
+
+bool check_well_typedness(const stochastic_specification& x)
+{
+  return lps::detail::check_well_typedness(x);
 }
 
 } // namespace lps

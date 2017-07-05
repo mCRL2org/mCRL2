@@ -25,7 +25,7 @@ struct has_propositional_variables_traverser: public pbes_expression_traverser<h
   typedef pbes_expression_traverser<has_propositional_variables_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   bool result;
 
@@ -43,7 +43,7 @@ inline
 bool has_propositional_variables(const pbes_expression& x)
 {
   has_propositional_variables_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

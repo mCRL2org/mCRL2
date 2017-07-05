@@ -9,19 +9,14 @@
 /// \file pp_test.cpp
 /// \brief Test for parser + pretty printer
 
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
-
-#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/lps/specification.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
-
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 BOOST_AUTO_TEST_CASE(rational)
 {
@@ -59,8 +54,7 @@ BOOST_AUTO_TEST_CASE(rational)
       "init Test_unary_operations + Test_binary_operations + Test_exponentation;\n"
   );
 
-  specification s;
-  s = linearise(input);
+  specification s=remove_stochastic_operators(linearise(input));
 
   std::string output;
   output = lps::pp(s);
@@ -68,7 +62,7 @@ BOOST_AUTO_TEST_CASE(rational)
   // Check whether the symbol @ occurs in the pretty printed output. If this is
   // the case, still some internal symbol is exposed. As a result, our parsers
   // will not be able to handle the specification as input.
-  BOOST_CHECK(output.find("@") == std::string::npos);
+  BOOST_CHECK(output.find('@') == std::string::npos);
 }
 
 BOOST_AUTO_TEST_CASE(no_summands)
@@ -141,5 +135,5 @@ BOOST_AUTO_TEST_CASE(ticket_1267)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

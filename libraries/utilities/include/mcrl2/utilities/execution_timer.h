@@ -12,12 +12,12 @@
 #ifndef MCRL2_UTILITIES_EXECUTION_TIMER_H
 #define MCRL2_UTILITIES_EXECUTION_TIMER_H
 
+#include "mcrl2/utilities/exception.h"
 #include <ctime>
 #include <fstream>
 #include <map>
 #include <sstream>
 #include <string>
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -75,14 +75,20 @@ class execution_timer
 
       for (std::map<std::string, timing>::const_iterator i = m_timings.begin(); i != m_timings.end(); ++i)
       {
-        if (i->second.start > i->second.finish)
+        if (i->second.finish==0)
         {
-          throw mcrl2::runtime_error("Start of " + i->first + " occurred after finish");
+          s << "    " << i->first << ": did not finish. " << std::endl;
         }
-
-        s << "    " << i->first << ": "
-          << (static_cast<float>(i->second.finish - i->second.start))/CLOCKS_PER_SEC
-          << std::endl;
+        else if (i->second.start > i->second.finish)
+        {
+          throw mcrl2::runtime_error("Start of " + i->first + " occurred after finish.");
+        }
+        else
+        {
+          s << "    " << i->first << ": "
+            << (static_cast<float>(i->second.finish - i->second.start))/CLOCKS_PER_SEC 
+            << std::endl;
+        }
       }
     }
 
@@ -91,7 +97,7 @@ class execution_timer
     /// \brief Constructor of a simple execution timer
     /// \param[in] tool_name Name of the tool that does the measurements
     /// \param[in] filename Name of the file to which the measurements are written
-    execution_timer(std::string const& tool_name = "", std::string const& filename = "") :
+    execution_timer(const std::string& tool_name = "", std::string const& filename = "") :
       m_tool_name(tool_name),
       m_filename(filename)
     {}
@@ -104,11 +110,11 @@ class execution_timer
     /// \param[in] timing_name Name of the measurement being started
     /// \pre No start(timing_name) has occurred before
     /// \post The current time has been recorded as starting time of timing_name
-    void start(std::string const& timing_name)
+    void start(const std::string& timing_name)
     {
       if (m_timings.find(timing_name) != m_timings.end())
       {
-        throw mcrl2::runtime_error("Starting already known timing; causes unreliable results");
+        throw mcrl2::runtime_error("Starting already known timing: " + timing_name + ". This causes unreliable results.");
       }
       timing t;
       t.start = clock();
@@ -119,11 +125,11 @@ class execution_timer
     /// \param[in] timing_name Name of the measurment being finished
     /// \pre A start(timing_name) was executed before
     /// \post The current time has been recorded as end time of timing_name
-    void finish(std::string const& timing_name)
+    void finish(const std::string& timing_name)
     {
       if (m_timings.find(timing_name) == m_timings.end())
       {
-        throw mcrl2::runtime_error("Finishing timing that was not started");
+        throw mcrl2::runtime_error("Finishing timing '" + timing_name + "' that was not started.");
       }
       m_timings[timing_name].finish = clock();
     }
@@ -155,4 +161,4 @@ class execution_timer
 
 } // namespace mcrl2
 
-#endif //MCRL2_UTILITIES_EXECUTION_TIMER_H
+#endif // MCRL2_UTILITIES_EXECUTION_TIMER_H

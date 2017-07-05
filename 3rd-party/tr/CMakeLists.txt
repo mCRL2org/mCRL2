@@ -19,7 +19,7 @@ add_custom_target(${PROJECT_NAME}_headers
 )
 
 # actual target:
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} STATIC
   source/tr.c
 )
 
@@ -27,7 +27,4 @@ target_link_libraries(${PROJECT_NAME}
   ${OPENGL_LIBRARY}
 )
 
-include_directories(BEFORE ${CMAKE_SOURCE_DIR}/3rd-party/tr/include/tr)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
+include_directories(include/tr)

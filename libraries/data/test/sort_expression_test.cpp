@@ -9,18 +9,16 @@
 /// \file sort_expression_test.cpp
 /// \brief Basic regression test for sort expressions.
 
-#include <iostream>
 #include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/nat.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/structured_sort.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -35,14 +33,14 @@ BOOST_AUTO_TEST_CASE(basic_sort_test)
   BOOST_CHECK(!is_structured_sort(s));
   BOOST_CHECK(!is_container_sort(s));
 
-  BOOST_CHECK_EQUAL(to_string(s.name()), "S");
+  BOOST_CHECK_EQUAL(pp(s.name()), "S");
   BOOST_CHECK_EQUAL(s, s);
 
   basic_sort t("T");
   BOOST_CHECK(s != t);
   BOOST_CHECK(s.name() != t.name());
 
-  sort_expression t_e(t);
+  const sort_expression& t_e(t);
   basic_sort t_e_(t_e);
   BOOST_CHECK_EQUAL(t_e_, t);
   BOOST_CHECK_EQUAL(t_e_.name(), t.name());
@@ -54,7 +52,7 @@ BOOST_AUTO_TEST_CASE(function_sort_test)
   basic_sort s1("S1");
   basic_sort s("S");
 
-  sort_expression_list s01 = atermpp::make_list<sort_expression>(s0, s1);
+  sort_expression_list s01 = { s0, s1 };
   function_sort fs(s01, s);
   BOOST_CHECK(!is_basic_sort(fs));
   BOOST_CHECK(is_function_sort(fs));
@@ -62,7 +60,7 @@ BOOST_AUTO_TEST_CASE(function_sort_test)
   BOOST_CHECK(!is_structured_sort(fs));
   BOOST_CHECK(!is_container_sort(fs));
   BOOST_CHECK_EQUAL(fs, fs);
-  BOOST_CHECK_EQUAL(fs.domain().size(), static_cast< size_t >(s01.size()));
+  BOOST_CHECK_EQUAL(fs.domain().size(), static_cast< std::size_t >(s01.size()));
 
   // Element wise check
   sort_expression_list::const_iterator i = s01.begin();
@@ -77,7 +75,7 @@ BOOST_AUTO_TEST_CASE(function_sort_test)
   BOOST_CHECK_EQUAL(fs.domain(), s01);
   BOOST_CHECK_EQUAL(fs.codomain(), s);
 
-  sort_expression fs_e(fs);
+  const sort_expression& fs_e(fs);
   function_sort fs_e_(fs_e);
   BOOST_CHECK_EQUAL(fs_e_, fs);
   BOOST_CHECK_EQUAL(fs_e_.domain(), fs.domain());
@@ -97,7 +95,7 @@ BOOST_AUTO_TEST_CASE(alias_test)
   BOOST_CHECK_EQUAL(s0_.name(), s0_name);
   BOOST_CHECK_EQUAL(s0_.reference(), s0);
 
-  alias s0_e_(s0_);
+  const alias& s0_e_(s0_);
   BOOST_CHECK_EQUAL(s0_e_, s0_);
   BOOST_CHECK_EQUAL(s0_e_.name(), s0_.name());
   BOOST_CHECK_EQUAL(s0_e_.reference(), s0_.reference());
@@ -109,7 +107,7 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
   basic_sort s1("S1");
   structured_sort_constructor_argument p0("p0", s0);
   structured_sort_constructor_argument p1(s1);
-  BOOST_CHECK_EQUAL(to_string(p0.name()), "p0");
+  BOOST_CHECK_EQUAL(pp(p0.name()), "p0");
   BOOST_CHECK_EQUAL(p1.name(), core::empty_identifier_string());
   BOOST_CHECK_EQUAL(p0.sort(), s0);
   BOOST_CHECK_EQUAL(p1.sort(), s1);
@@ -122,14 +120,14 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
 
   structured_sort_constructor c1("c1", a1, "is_c1");
   structured_sort_constructor c2("c2", a2);
-  BOOST_CHECK_EQUAL(to_string(c1.name()), "c1");
+  BOOST_CHECK_EQUAL(pp(c1.name()), "c1");
   BOOST_CHECK(structured_sort_constructor_argument_vector(c1.arguments().begin(),c1.arguments().end()) == a1);
-  BOOST_CHECK_EQUAL(to_string(c1.recogniser()), "is_c1");
-  BOOST_CHECK_EQUAL(to_string(c2.name()), "c2");
+  BOOST_CHECK_EQUAL(pp(c1.recogniser()), "is_c1");
+  BOOST_CHECK_EQUAL(pp(c2.name()), "c2");
   BOOST_CHECK(structured_sort_constructor_argument_vector(c2.arguments().begin(),c2.arguments().end()) == a2);
   BOOST_CHECK_EQUAL(c2.recogniser(), core::empty_identifier_string());
 
-  structured_sort_constructor_list cs = atermpp::make_list(c1, c2);
+  structured_sort_constructor_list cs = { c1, c2 };
 
   structured_sort s(cs);
 
@@ -141,7 +139,7 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
 
   BOOST_CHECK_EQUAL(s.constructors(), cs);
 
-  sort_expression s_e(s);
+  const sort_expression& s_e(s);
   structured_sort s_e_(s_e);
   BOOST_CHECK_EQUAL(s_e_, s);
   BOOST_CHECK_EQUAL(s_e_.constructors(), s.constructors());
@@ -152,7 +150,7 @@ BOOST_AUTO_TEST_CASE(structured_sort_test)
   structured_sort_constructor c("C", bv);
   structured_sort bc(atermpp::make_vector(b,c));
 
-  BOOST_CHECK_EQUAL(bc.constructors(), structured_sort_constructor_list(atermpp::make_list(b,c)));
+  BOOST_CHECK_EQUAL(bc.constructors(), structured_sort_constructor_list({ b, c }));
   structured_sort_constructor_vector bc_constructors(bc.constructors().begin(), bc.constructors().end());
   BOOST_CHECK_EQUAL(bc_constructors[0], b);
   BOOST_CHECK_EQUAL(bc_constructors[1], c);
@@ -177,5 +175,5 @@ BOOST_AUTO_TEST_CASE(container_sort_test)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

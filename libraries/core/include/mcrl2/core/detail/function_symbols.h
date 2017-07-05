@@ -12,9 +12,6 @@
 #ifndef MCRL2_CORE_DETAIL_FUNCTION_SYMBOLS_H
 #define MCRL2_CORE_DETAIL_FUNCTION_SYMBOLS_H
 
-#include <string.h>
-#include <ctype.h>
-#include <assert.h>
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/function_symbol.h"
@@ -29,19 +26,13 @@ namespace detail {
 // Part 1: functions for creating function symbols.
 //----------------------------------------------------------------------------------------------//
 
-inline
-bool operator==(const size_t x, const atermpp::function_symbol& y)
-{
-  return x == y.number();
-}
-
-// We use a deque here, and not a vector, as a vector is relocated in 
+// We use a deque here, and not a vector, as a vector is relocated in
 // memory, which means that function_symbol_DataAppl and function_symbol_DataAppl_helper
-// cannot deliver a reference. 
+// cannot deliver a reference.
 extern std::deque<atermpp::function_symbol> function_symbols_DataAppl;
 
 inline
-const atermpp::function_symbol& function_symbol_DataAppl_helper(size_t i)
+const atermpp::function_symbol& function_symbol_DataAppl_helper(std::size_t i)
 {
   do
   {
@@ -52,7 +43,7 @@ const atermpp::function_symbol& function_symbol_DataAppl_helper(size_t i)
 }
 
 inline
-const atermpp::function_symbol& function_symbol_DataAppl(size_t i)
+const atermpp::function_symbol& function_symbol_DataAppl(std::size_t i)
 {
   if (i >= function_symbols_DataAppl.size())
   {
@@ -284,6 +275,30 @@ const atermpp::function_symbol& function_symbol_BagComp()
   return function_symbol_BagComp;
 }
 
+// BddFalse
+inline
+const atermpp::function_symbol& function_symbol_BddFalse()
+{
+  static const atermpp::function_symbol function_symbol_BddFalse = atermpp::function_symbol("BddFalse", 0);
+  return function_symbol_BddFalse;
+}
+
+// BddIf
+inline
+const atermpp::function_symbol& function_symbol_BddIf()
+{
+  static const atermpp::function_symbol function_symbol_BddIf = atermpp::function_symbol("BddIf", 3);
+  return function_symbol_BddIf;
+}
+
+// BddTrue
+inline
+const atermpp::function_symbol& function_symbol_BddTrue()
+{
+  static const atermpp::function_symbol function_symbol_BddTrue = atermpp::function_symbol("BddTrue", 0);
+  return function_symbol_BddTrue;
+}
+
 // Binder
 inline
 const atermpp::function_symbol& function_symbol_Binder()
@@ -444,6 +459,14 @@ const atermpp::function_symbol& function_symbol_Delta()
   return function_symbol_Delta;
 }
 
+// Distribution
+inline
+const atermpp::function_symbol& function_symbol_Distribution()
+{
+  static const atermpp::function_symbol function_symbol_Distribution = atermpp::function_symbol("Distribution", 2);
+  return function_symbol_Distribution;
+}
+
 // Exists
 inline
 const atermpp::function_symbol& function_symbol_Exists()
@@ -528,7 +551,7 @@ const atermpp::function_symbol& function_symbol_LinearProcess()
 inline
 const atermpp::function_symbol& function_symbol_LinearProcessInit()
 {
-  static const atermpp::function_symbol function_symbol_LinearProcessInit = atermpp::function_symbol("LinearProcessInit", 1);
+  static const atermpp::function_symbol function_symbol_LinearProcessInit = atermpp::function_symbol("LinearProcessInit", 2);
   return function_symbol_LinearProcessInit;
 }
 
@@ -536,7 +559,7 @@ const atermpp::function_symbol& function_symbol_LinearProcessInit()
 inline
 const atermpp::function_symbol& function_symbol_LinearProcessSummand()
 {
-  static const atermpp::function_symbol function_symbol_LinearProcessSummand = atermpp::function_symbol("LinearProcessSummand", 5);
+  static const atermpp::function_symbol function_symbol_LinearProcessSummand = atermpp::function_symbol("LinearProcessSummand", 6);
   return function_symbol_LinearProcessSummand;
 }
 
@@ -1068,6 +1091,14 @@ const atermpp::function_symbol& function_symbol_StateYaledTimed()
   return function_symbol_StateYaledTimed;
 }
 
+// StochasticOperator
+inline
+const atermpp::function_symbol& function_symbol_StochasticOperator()
+{
+  static const atermpp::function_symbol function_symbol_StochasticOperator = atermpp::function_symbol("StochasticOperator", 3);
+  return function_symbol_StochasticOperator;
+}
+
 // StructCons
 inline
 const atermpp::function_symbol& function_symbol_StructCons()
@@ -1108,20 +1139,12 @@ const atermpp::function_symbol& function_symbol_Tau()
   return function_symbol_Tau;
 }
 
-// UntypedActMultAct
+// UntypedDataParameter
 inline
-const atermpp::function_symbol& function_symbol_UntypedActMultAct()
+const atermpp::function_symbol& function_symbol_UntypedDataParameter()
 {
-  static const atermpp::function_symbol function_symbol_UntypedActMultAct = atermpp::function_symbol("UntypedActMultAct", 1);
-  return function_symbol_UntypedActMultAct;
-}
-
-// UntypedAction
-inline
-const atermpp::function_symbol& function_symbol_UntypedAction()
-{
-  static const atermpp::function_symbol function_symbol_UntypedAction = atermpp::function_symbol("UntypedAction", 2);
-  return function_symbol_UntypedAction;
+  static const atermpp::function_symbol function_symbol_UntypedDataParameter = atermpp::function_symbol("UntypedDataParameter", 2);
+  return function_symbol_UntypedDataParameter;
 }
 
 // UntypedIdentifier
@@ -1140,20 +1163,12 @@ const atermpp::function_symbol& function_symbol_UntypedIdentifierAssignment()
   return function_symbol_UntypedIdentifierAssignment;
 }
 
-// UntypedMultAct
+// UntypedMultiAction
 inline
-const atermpp::function_symbol& function_symbol_UntypedMultAct()
+const atermpp::function_symbol& function_symbol_UntypedMultiAction()
 {
-  static const atermpp::function_symbol function_symbol_UntypedMultAct = atermpp::function_symbol("UntypedMultAct", 1);
-  return function_symbol_UntypedMultAct;
-}
-
-// UntypedParamId
-inline
-const atermpp::function_symbol& function_symbol_UntypedParamId()
-{
-  static const atermpp::function_symbol function_symbol_UntypedParamId = atermpp::function_symbol("UntypedParamId", 2);
-  return function_symbol_UntypedParamId;
+  static const atermpp::function_symbol function_symbol_UntypedMultiAction = atermpp::function_symbol("UntypedMultiAction", 1);
+  return function_symbol_UntypedMultiAction;
 }
 
 // UntypedProcessAssignment
@@ -1162,6 +1177,14 @@ const atermpp::function_symbol& function_symbol_UntypedProcessAssignment()
 {
   static const atermpp::function_symbol function_symbol_UntypedProcessAssignment = atermpp::function_symbol("UntypedProcessAssignment", 2);
   return function_symbol_UntypedProcessAssignment;
+}
+
+// UntypedRegFrm
+inline
+const atermpp::function_symbol& function_symbol_UntypedRegFrm()
+{
+  static const atermpp::function_symbol function_symbol_UntypedRegFrm = atermpp::function_symbol("UntypedRegFrm", 3);
+  return function_symbol_UntypedRegFrm;
 }
 
 // UntypedSetBagComp
@@ -1178,6 +1201,14 @@ const atermpp::function_symbol& function_symbol_UntypedSortUnknown()
 {
   static const atermpp::function_symbol function_symbol_UntypedSortUnknown = atermpp::function_symbol("UntypedSortUnknown", 0);
   return function_symbol_UntypedSortUnknown;
+}
+
+// UntypedSortVariable
+inline
+const atermpp::function_symbol& function_symbol_UntypedSortVariable()
+{
+  static const atermpp::function_symbol function_symbol_UntypedSortVariable = atermpp::function_symbol("UntypedSortVariable", 1);
+  return function_symbol_UntypedSortVariable;
 }
 
 // UntypedSortsPossible
@@ -1218,16 +1249,15 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol PBESExists;
   static const atermpp::function_symbol PBESImp;
   static const atermpp::function_symbol Binder;
+  static const atermpp::function_symbol StochasticOperator;
   static const atermpp::function_symbol SortRef;
   static const atermpp::function_symbol ProcEqnSpec;
   static const atermpp::function_symbol StateForall;
   static const atermpp::function_symbol BooleanImp;
   static const atermpp::function_symbol SortId;
-  static const atermpp::function_symbol UntypedAction;
   static const atermpp::function_symbol StateNu;
   static const atermpp::function_symbol RegNil;
   static const atermpp::function_symbol DataSpec;
-  static const atermpp::function_symbol UntypedActMultAct;
   static const atermpp::function_symbol Tau;
   static const atermpp::function_symbol StateYaledTimed;
   static const atermpp::function_symbol SortCons;
@@ -1235,7 +1265,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol LinearProcessSummand;
   static const atermpp::function_symbol SortSpec;
   static const atermpp::function_symbol ActionRenameRules;
-  static const atermpp::function_symbol UntypedParamId;
+  static const atermpp::function_symbol BddFalse;
   static const atermpp::function_symbol BooleanEquation;
   static const atermpp::function_symbol ConsSpec;
   static const atermpp::function_symbol SortList;
@@ -1257,11 +1287,11 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol BagComp;
   static const atermpp::function_symbol StateDelay;
   static const atermpp::function_symbol RegAlt;
-  static const atermpp::function_symbol UntypedMultAct;
   static const atermpp::function_symbol StructCons;
   static const atermpp::function_symbol Mu;
   static const atermpp::function_symbol PBEqnSpec;
-  static const atermpp::function_symbol ActNot;
+  static const atermpp::function_symbol UntypedRegFrm;
+  static const atermpp::function_symbol Distribution;
   static const atermpp::function_symbol BooleanTrue;
   static const atermpp::function_symbol Block;
   static const atermpp::function_symbol Rename;
@@ -1271,6 +1301,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol ProcSpec;
   static const atermpp::function_symbol UntypedSortsPossible;
   static const atermpp::function_symbol StateMu;
+  static const atermpp::function_symbol BddIf;
   static const atermpp::function_symbol StateFalse;
   static const atermpp::function_symbol PBESFalse;
   static const atermpp::function_symbol PBESForall;
@@ -1308,6 +1339,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol StateVar;
   static const atermpp::function_symbol ActionRenameRule;
   static const atermpp::function_symbol RegSeq;
+  static const atermpp::function_symbol ActNot;
   static const atermpp::function_symbol LinearProcess;
   static const atermpp::function_symbol ActAt;
   static const atermpp::function_symbol DataEqn;
@@ -1318,6 +1350,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol MultActName;
   static const atermpp::function_symbol IfThenElse;
   static const atermpp::function_symbol Nil;
+  static const atermpp::function_symbol UntypedSortVariable;
   static const atermpp::function_symbol ProcEqn;
   static const atermpp::function_symbol StructProj;
   static const atermpp::function_symbol PBEqn;
@@ -1328,6 +1361,7 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol ActId;
   static const atermpp::function_symbol StateYaled;
   static const atermpp::function_symbol PBESOr;
+  static const atermpp::function_symbol BddTrue;
   static const atermpp::function_symbol UntypedProcessAssignment;
   static const atermpp::function_symbol SortFBag;
   static const atermpp::function_symbol Allow;
@@ -1337,8 +1371,10 @@ static const atermpp::function_symbol BooleanOr;
   static const atermpp::function_symbol PBInit;
   static const atermpp::function_symbol ActTrue;
   static const atermpp::function_symbol RegTransOrNil;
+  static const atermpp::function_symbol UntypedMultiAction;
   static const atermpp::function_symbol GlobVarSpec;
   static const atermpp::function_symbol UntypedIdentifierAssignment;
+  static const atermpp::function_symbol UntypedDataParameter;
 //--- end generated variables ---//
 };
 

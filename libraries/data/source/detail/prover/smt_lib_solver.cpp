@@ -1,7 +1,8 @@
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 #include <cerrno>       // for errno
-#include <cstddef>      // for size_t
+#include <cstddef>      // for std::size_t
 #include <cstdlib>
+#include <cstring>      // for strerror
 #include <sys/types.h>  // for pid_t
 #include <sys/wait.h>   // for waitpid()
 #include <sys/ioctl.h>  // for ioctl() and FIONREAD
@@ -151,6 +152,9 @@ bool binary_smt_solver< T >::usable()
 
 // instantiate for cvc prover
 template class binary_smt_solver< cvc_smt_solver >;
+
+// instantiate for z3 prover
+template class binary_smt_solver< z3_smt_solver >;
 
 // instantiate for ario prover
 template class binary_smt_solver< ario_smt_solver >;

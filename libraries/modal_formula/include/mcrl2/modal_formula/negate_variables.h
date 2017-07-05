@@ -13,8 +13,8 @@
 #define MCRL2_MODAL_FORMULA_NEGATE_VARIABLES_H
 
 #include "mcrl2/core/builder.h"
-#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
+#include "mcrl2/modal_formula/state_formula.h"
 
 namespace mcrl2
 {
@@ -30,10 +30,7 @@ template <typename Derived>
 struct state_variable_negator: public state_formulas::state_formula_builder<Derived>
 {
   typedef state_formulas::state_formula_builder<Derived> super;
-
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   core::identifier_string m_name;
 
@@ -41,10 +38,10 @@ struct state_variable_negator: public state_formulas::state_formula_builder<Deri
     : m_name(name)
   {}
 
-  /// \brief Visit variable node
-  /// \param x A term
-  /// \return The result of visiting the node
-  state_formula operator()(const variable& x)
+  /// \brief Visit variable node.
+  /// \param x A term.
+  /// \return The result of visiting the node.
+  state_formula apply(const variable& x)
   {
     if (x.name() == m_name)
     {
@@ -58,10 +55,11 @@ struct state_variable_negator: public state_formulas::state_formula_builder<Deri
 
 inline
 /// \brief Negates variable instantiations in a state formula with a given name.
-/// \param name The name of the variables that should be negated
+/// \param name The name of the variables that should be negated.
+/// \param x The state formula. 
 state_formula negate_variables(const core::identifier_string& name, const state_formula& x)
 {
-  return core::make_apply_builder_arg1<detail::state_variable_negator>(name)(x);
+  return core::make_apply_builder_arg1<detail::state_variable_negator>(name).apply(x);
 }
 
 } // namespace state_formulas

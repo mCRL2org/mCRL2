@@ -17,10 +17,11 @@ _DOXYTAG = None
 _RSTTAG = None
 _PDFTAG = None
 _LIBRARIES = {
-  'atermpp':   'ATerm++',    'core':      'Core',     'bes':       'BES',
-  'data':      'Data',       'lps':       'LPS',      'lts':       'LTS',
-  'pbes':      'PBES',       'process':   'Process',  'trace':     'Trace',
-  'utilities': 'Utilities'
+  'atermpp':   'ATerm++',    'bes':       'BES',      'core':      'Core',
+  'data':      'Data',       'gui':       'GUI',      'lps':       'LPS',      
+  'lts':       'LTS',        'modal_formula': 'Modal Formula',
+  'pbes':      'PBES',       'process':   'Process',  'smt':       'SMT',
+  'trace':     'Trace',      'utilities': 'Utilities'
 }
 _DOXYTEMPLATE = string.Template(
   open(os.path.join(_PWD, 'doxy.template')).read())
@@ -61,12 +62,14 @@ def makepdf(src):
   if '{' in title or '\\' in title:
     title = os.path.basename(src)
   call('pdflatex', ['pdflatex', src])
-  try:
-    call('bibtex', ['bibtex', src])
-    call('pdflatex', ['pdflatex', src])
-    call('pdflatex', ['pdflatex', src])
-  except RuntimeError:
-    pass
+# Only apply bibtex if a "source.bib" file exists in the directory.
+  if os.path.isfile(src + '.bib'): 
+    try:
+      call('bibtex', ['bibtex', src])
+      call('pdflatex', ['pdflatex', src])
+    except RuntimeError:
+      pass
+  call('pdflatex', ['pdflatex', src])
   return title
 
 def generate_library_xml(lib_dir, lib_name):
@@ -78,7 +81,7 @@ def generate_library_xml(lib_dir, lib_name):
   if not os.path.exists(xml_path):
     os.makedirs(xml_path)
   doxygen(
-    INPUT='{0}/include {0}/source {0}/doc/Mainpage'.format(lib_path),
+    INPUT='{0}/include {0}/source'.format(lib_path),
     PROJECT_NAME=lib_name,
     PROJECT_NUMBER='unknown',
     STRIP_FROM_PATH=lib_path,

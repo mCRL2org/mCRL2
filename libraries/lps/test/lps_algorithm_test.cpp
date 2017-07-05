@@ -9,12 +9,12 @@
 /// \file lps_algorithm_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/specification.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <iterator>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/linearise.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -63,8 +63,8 @@ std::string SPECIFICATION =
 
 void test_remove_unused_summand_variables()
 {
-  specification spec = linearise(SPECIFICATION);
-  lps::detail::lps_algorithm algorithm(spec);
+  specification spec = remove_stochastic_operators(linearise(SPECIFICATION));
+  lps::detail::lps_algorithm<> algorithm(spec);
   algorithm.remove_unused_summand_variables();
 }
 

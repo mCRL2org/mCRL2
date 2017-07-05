@@ -9,20 +9,22 @@
 /// \file mcrl2/pbes/pbesinst_algorithm.h
 /// \brief Algorithm for instantiating a PBES.
 
-#include <cassert>
-#include <set>
-#include <iostream>
-#include <sstream>
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/utilities/detail/container_utility.h"
-
 #ifndef MCRL2_PBES_PBESINST_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_ALGORITHM_H
+
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+#include "mcrl2/utilities/detail/container_utility.h"
+#include <cassert>
+#include <iostream>
+#include <set>
+#include <sstream>
 
 namespace mcrl2
 {
@@ -56,6 +58,40 @@ bool pbesinst_is_constant(const pbes_expression& x)
 /// propositional variable instantiation must be closed.
 /// Originally implemented by Alexander van Dam.
 /// \return A name that uniquely corresponds to the propositional variable.
+struct pbesinst_rename_long
+{
+  core::identifier_string operator()(const propositional_variable_instantiation& Ye) const
+  {
+    assert(pbesinst_is_constant(Ye));
+    std::string name = Ye.name();
+    for (const data::data_expression& exp: Ye.parameters())
+    {
+      if (is_function_symbol(exp) && exp.sort() != data::sort_pos::pos() && exp.sort() != data::sort_nat::nat())
+      {
+        // This case is dealt with separately, as it occurs often.
+        // The use of pp as in the next case is correct for this case also, but very time consuming.
+        // The exception to this rule is constants @c1 of sort Pos, @c0 of sort Nat.
+        name += "@";
+        name += atermpp::down_cast<data::function_symbol>(exp).name();
+      }
+      else if (is_function_symbol(exp) || is_application(exp) || is_abstraction(exp))
+      {
+        name += "@";
+        name += data::pp(exp);
+      }
+      else
+      {
+        throw mcrl2::runtime_error(std::string("pbesinst_rename_long: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(exp));
+      }
+    }
+    return name;
+  }
+};
+
+/// \brief Creates a unique name for a propositional variable instantiation. The
+/// propositional variable instantiation must be closed.
+/// Originally implemented by Alexander van Dam.
+/// \return A name that uniquely corresponds to the propositional variable.
 struct pbesinst_rename: public std::unary_function<propositional_variable_instantiation, propositional_variable_instantiation>
 {
   propositional_variable_instantiation operator()(const propositional_variable_instantiation& Ye) const
@@ -64,32 +100,13 @@ struct pbesinst_rename: public std::unary_function<propositional_variable_instan
     {
       return Ye;
     }
-    auto const& e = Ye.parameters();
-    std::string name = Ye.name();
-    if (!e.empty())
-    {
-      for (auto i = e.begin(); i != e.end(); i++)
-      {
-        if (is_function_symbol(*i) || is_application(*i) || is_abstraction(*i))
-        {
-          name += "@";
-          name += data::pp(*i);
-        }
-        else
-        {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(Ye) + " " + data::pp(*i));
-        }
-      }
-    }
-    return propositional_variable_instantiation(name, data::data_expression_list());
+    return propositional_variable_instantiation(pbesinst_rename_long()(Ye), data::data_expression_list());
   }
 };
 
 /// \brief Algorithm class for the pbesinst instantiation algorithm.
 class pbesinst_algorithm
 {
-  typedef core::term_traits<pbes_expression> tr;
-
   protected:
     /// \brief Data rewriter.
     data::rewriter datar;
@@ -120,7 +137,7 @@ class pbesinst_algorithm
     bool m_print_equations;
 
     /// \brief Prints a log message for every 1000-th equation
-    std::string print_equation_count(size_t size) const
+    std::string print_equation_count(std::size_t size) const
     {
       if (size > 0 && size % 1000 == 0)
       {
@@ -140,9 +157,9 @@ class pbesinst_algorithm
   public:
 
     /// \brief Constructor.
-    /// \param data_spec A data specification
-    /// \param rewriter_strategy A strategy for the data rewriter
-    /// \param print_equations If true, the generated equations are printed
+    /// \param data_spec A data specification.
+    /// \param rewrite_strategy A strategy for the data rewriter.
+    /// \param print_equations If true, the generated equations are printed.
     pbesinst_algorithm(data::data_specification const& data_spec,
                        data::rewriter::strategy rewrite_strategy = data::jitty,
                        bool print_equations = false
@@ -155,7 +172,7 @@ class pbesinst_algorithm
     {}
 
     /// \brief Runs the algorithm. The result is obtained by calling the function \p get_result.
-    /// \param p A PBES
+    /// \param p A PBES.
     void run(pbes& p)
     {
       using utilities::detail::pick_element;
@@ -163,12 +180,25 @@ class pbesinst_algorithm
 
       pbes_system::detail::instantiate_global_variables(p);
 
+      // simplify all right hand sides of p
+      //
+      // NOTE: This is not just an optimization. There are certain PBES
+      // equations for which applying enumerate_quantifiers_rewriter directly
+      // won't terminate, like:
+      //
+      // forall m: Nat . exists k: Nat . val(m == k)
+      pbes_system::one_point_rule_rewriter one_point_rule_rewriter;
+      pbes_system::simplify_quantifiers_data_rewriter<mcrl2::data::rewriter> simplify_rewriter(datar);
+      for (pbes_equation& eqn: p.equations())
+      {
+        eqn.formula() = one_point_rule_rewriter(simplify_rewriter(eqn.formula()));
+      }
+
       // initialize equation_index and E
       int eqn_index = 0;
       auto const& equations = p.equations();
-      for (auto i = equations.begin(); i != equations.end(); ++i)
+      for (const pbes_equation& eqn : equations)
       {
-        auto const& eqn = *i;
         equation_index[eqn.variable().name()] = eqn_index++;
         E.push_back(std::vector<pbes_equation>());
       }
@@ -184,12 +214,11 @@ class pbesinst_algorithm
         make_pbesinst_substitution(eqn.variable().parameters(), X_e.parameters(), sigma);
         auto const& phi = eqn.formula();
         pbes_expression psi_e = R(phi, sigma);
-        std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi_e);
-        for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)
+        for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi_e))
         {
-          if (!contains(done, *i))
+          if (!contains(done, v))
           {
-            todo.insert(*i);
+            todo.insert(v);
           }
         }
         pbes_equation new_eqn(eqn.symbol(), propositional_variable(pbesinst_rename()(X_e).name(), data::variable_list()), rho(psi_e));
@@ -208,9 +237,9 @@ class pbesinst_algorithm
     pbes get_result()
     {
       pbes result;
-      for (auto i =  E.begin(); i != E.end(); ++i)
+      for (const std::vector<pbes_equation>& equations: E)
       {
-        result.equations().insert(result.equations().end(), i->begin(), i->end());
+        result.equations().insert(result.equations().end(), equations.begin(), equations.end());
       }
       result.initial_state() = pbesinst_rename()(init);
       return result;

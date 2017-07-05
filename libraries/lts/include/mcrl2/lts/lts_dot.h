@@ -23,7 +23,8 @@
 #include <vector>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
+#include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
 
@@ -31,8 +32,7 @@ namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
+
 /** \brief This class contains labels for states in dot format.
    \details A dot state label consists of two strings, the name of a state and a separate label.
 */
@@ -105,15 +105,15 @@ inline std::string pp(const state_label_dot& l)
 {
   return l.label();
 }
-} // namespace detail
 
+/** \brief A base class for the lts_dot labelled transition system.
+*/
 
-/** \brief A class to contain labelled transition systems in graphviz format.
-    \details Action labels are strings, and state labels are pairs with a name field
-             and an action fields. */
-class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_string >
+namespace detail
 {
 
+class lts_dot_base
+{
   public:
     /** \brief The lts_type of state_label_dot. In this case lts_dot.
     */
@@ -122,18 +122,54 @@ class lts_dot_t : public lts< detail::state_label_dot, detail::action_label_stri
       return lts_dot;
     }
 
-    /** \brief Save the labelled transition system to file.
-     *  \details If the filename is empty, the result is read from stdin.
-     *  \param[in] filename Name of the file from which this lts is read.
-     */
-    void load(const std::string&)
+    /** \brief The standard swap function.
+    */
+    void swap(lts_dot_base&)
     {
-      throw mcrl2::runtime_error("The DOT file format is no longer supported as input file format.");
+      // Intentionally empty.
     }
-    
+
+};
+
+} // end namespace detail
+
+/** \brief A class to contain labelled transition systems in graphviz format.
+    \details Action labels are strings, and state labels are pairs with a name field
+             and an action fields. */
+class lts_dot_t : public lts< state_label_dot, action_label_string, detail::lts_dot_base >
+{
+
+  public:
+
     /** \brief Save the labelled transition system to a stream.
-     *  \param[in] stream Stream which to write the lts to.
-     */   
+     *  \param[in] os Stream which to write the lts to.
+     */
+    void save(std::ostream& os) const;
+
+    /** \brief Save the labelled transition system to a file.
+     *  \details Throws an error when the file cannot be opened.
+     *  \param[in] filename Name of the file to which this lts is written.
+     */
+    void save(const std::string& filename) const;
+};
+
+
+/** \brief A class to contain labelled transition systems in graphviz format.
+    \details Action labels are strings, and state labels are pairs with a name field
+             and an action fields. */
+class probabilistic_lts_dot_t : 
+           public probabilistic_lts< 
+                     state_label_dot, 
+                     action_label_string, 
+                     probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction>,
+                     detail::lts_dot_base >
+{
+
+  public:
+
+    /** \brief Save the labelled transition system to a stream.
+     *  \param[in] os Stream which to write the lts to.
+     */
     void save(std::ostream& os) const;
 
     /** \brief Save the labelled transition system to a file.

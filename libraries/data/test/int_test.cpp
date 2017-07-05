@@ -9,8 +9,8 @@
 /// \file data_expression_test.cpp
 /// \brief Basic regression test for data expressions.
 
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
 
 #include "mcrl2/data/standard_numbers_utility.h"
 

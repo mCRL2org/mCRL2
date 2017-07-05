@@ -15,17 +15,16 @@
 // TODO: Make it possible to undefine this flag
 #define MCRL2_SMALL_PROGRESS_MEASURES_DEBUG
 
-#include <iomanip>
-#include <map>
-#include <sstream>
-#include <vector>
-#include <boost/lexical_cast.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/utilities/logger.h"
+#include <iomanip>
+#include <map>
+#include <sstream>
+#include <vector>
 
 namespace mcrl2
 {
@@ -83,13 +82,13 @@ unsigned int mu_block_count(const boolean_equation_system& b)
 {
   unsigned int result = 0;
   fixpoint_symbol last_symbol = fixpoint_symbol::nu();
-  for (std::vector<boolean_equation>::const_iterator i = b.equations().begin(); i != b.equations().end(); ++i)
+  for (const boolean_equation& eqn: b.equations())
   {
-    if (i->symbol().is_mu() && last_symbol.is_nu())
+    if (eqn.symbol().is_mu() && last_symbol.is_nu())
     {
       result++;
     }
-    last_symbol = i->symbol();
+    last_symbol = eqn.symbol();
   }
   return result;
 }
@@ -263,9 +262,9 @@ class small_progress_measures_algorithm
       unsigned int block_size = 0;
       unsigned int last_rank = 0;
       fixpoint_symbol last_symbol = fixpoint_symbol::nu();
-      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (const boolean_equation& eqn: m_bes.equations())
       {
-        if (i->symbol() != last_symbol)
+        if (eqn.symbol() != last_symbol)
         {
           if (is_even(m_beta.size()))
           {
@@ -277,10 +276,10 @@ class small_progress_measures_algorithm
           }
           block_size = 0;
           last_rank++;
-          last_symbol = i->symbol();
+          last_symbol = eqn.symbol();
         }
         block_size++;
-        m_vertices[i->variable()] = vertex(is_disjunctive(i->formula()), last_rank, m_d);
+        m_vertices[eqn.variable()] = vertex(is_disjunctive(eqn.formula()), last_rank, m_d);
       }
       if (is_even(m_beta.size()))
       {
@@ -292,18 +291,18 @@ class small_progress_measures_algorithm
       }
 
       // add successor information
-      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (const boolean_equation& eqn: m_bes.equations())
       {
-        std::set<boolean_variable> succ = bes::find_boolean_variables(i->formula());
-        vertex_map::iterator k = m_vertices.find(i->variable());
+        std::set<boolean_variable> succ = bes::find_boolean_variables(eqn.formula());
+        vertex_map::iterator k = m_vertices.find(eqn.variable());
         std::vector<vertex*>& k_successors = k->second.successors;
-        for (std::set<boolean_variable>::iterator j = succ.begin(); j != succ.end(); ++j)
+        for (const boolean_variable& v: succ)
         {
-          k_successors.push_back(&m_vertices[*j]);
+          k_successors.push_back(&m_vertices[v]);
         }
 
 #ifdef MCRL2_SMALL_PROGRESS_MEASURES_DEBUG
-        k->second.name = std::string(i->variable().name());
+        k->second.name = std::string(eqn.variable().name());
 #endif
       }
     }
@@ -311,9 +310,9 @@ class small_progress_measures_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (std::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      for (const boolean_equation& eqn: m_bes.equations())
       {
-        const vertex& v = m_vertices.find(i->variable())->second;
+        const vertex& v = m_vertices.find(eqn.variable())->second;
         out << v.name << " " << v << std::endl;
       }
       return out.str();
@@ -330,9 +329,9 @@ class small_progress_measures_algorithm
     std::string print_neighbors(const progress_measures_vertex& v) const
     {
       std::ostringstream out;
-      for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
+      for (progress_measures_vertex* successor: v.successors)
       {
-        out << "\n      " << print_vertex(**i);
+        out << "\n      " << print_vertex(*successor);
       }
       return out.str();
     }
@@ -349,16 +348,17 @@ class small_progress_measures_algorithm
 
     bool run(const boolean_variable& first_variable)
     {
-      mCRL2log(log::verbose) << "--- applying small progress measures to ---\n" << bes::pp(m_bes) << "\n\n";
+      mCRL2log(log::verbose) << "Applying small progress measures.\n";
+      mCRL2log(log::debug)  << "BES " << bes::pp(m_bes) << "\n\n";
       initialize_vertices();
-      mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
-      mCRL2log(log::verbose) << "\nbeta = " << core::detail::print_list(m_beta) << "\n";
+      mCRL2log(log::debug) << "--- vertices ---\n" << print_vertices();
+      mCRL2log(log::debug) << "\nbeta = " << core::detail::print_list(m_beta) << "\n";
       for (;;) // forever
       {
         bool changed = false;
-        for (vertex_map::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+        for (auto &i: m_vertices)
         {
-          vertex& v = i->second;
+          vertex& v = i.second;
           mCRL2log(log::debug) << "\nchoose vertex " << print_vertex(v);
           unsigned int m = v.rank;
           std::vector<progress_measures_vertex*>::const_iterator j;
@@ -378,7 +378,7 @@ class small_progress_measures_algorithm
           std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m + 1, alpha.begin());
           if (is_odd(m))
           {
-            mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha) << ", " << boost::lexical_cast<std::string>(m) << ") = ";
+            mCRL2log(log::debug) << "\n    inc(" << core::detail::print_list(alpha) << ", " << std::to_string(m) << ") = ";
             inc(alpha, m, m_beta);
             mCRL2log(log::debug) << (alpha[0] < 0 ? "top" : core::detail::print_list(alpha));
           }
@@ -387,7 +387,7 @@ class small_progress_measures_algorithm
           {
             changed = true;
             v.alpha.v = alpha;
-            mCRL2log(log::verbose) << "\nupdate vertex " << print_vertex(v);
+            mCRL2log(log::debug) << "\nupdate vertex " << print_vertex(v);
           }
         }
         if (!changed)
@@ -395,7 +395,7 @@ class small_progress_measures_algorithm
           break;
         }
       }
-      mCRL2log(log::verbose) << "\n--- vertices ---\n" << print_vertices();
+      mCRL2log(log::debug) << "\n--- vertices ---\n" << print_vertices();
       return !m_vertices[first_variable].alpha.is_top();
     }
 };

@@ -9,11 +9,11 @@
 /// \file pbes/include/mcrl2/pbes/pbes_functions.h
 /// \brief add your file description here.
 
-#ifndef PBES_INCLUDE_MCRL2_PBES_FUNCTIONS_H
-#define PBES_INCLUDE_MCRL2_PBES_FUNCTIONS_H
+#ifndef MCRL2_PBES_PBES_FUNCTIONS_H
+#define MCRL2_PBES_PBES_FUNCTIONS_H
 
-#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {
 
@@ -25,11 +25,7 @@ struct print_brief_traverser: public pbes_expression_traverser<print_brief_trave
   typedef pbes_expression_traverser<print_brief_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   std::string result;
 
@@ -37,32 +33,32 @@ struct print_brief_traverser: public pbes_expression_traverser<print_brief_trave
     : result("")
   {}
 
-  void operator()(const not_& /* x */)
+  void apply(const not_& /* x */)
   {
     result = "not";
   }
 
-  void operator()(const imp& /* x */)
+  void apply(const imp& /* x */)
   {
     result = "imp";
   }
 
-  void operator()(const forall& /* x */)
+  void apply(const forall& /* x */)
   {
     result = "forall";
   }
 
-  void operator()(const exists& /* x */)
+  void apply(const exists& /* x */)
   {
     result = "exists";
   }
 
-  void operator()(const propositional_variable_instantiation& x)
+  void apply(const propositional_variable_instantiation& x)
   {
     result = "propvar " + std::string(x.name());
   }
 
-  void operator()(const pbes_equation& x)
+  void apply(const pbes_equation& x)
   {
     result = "equation " + std::string(x.variable().name());
   }
@@ -74,7 +70,7 @@ template <typename T>
 std::string print_brief(const T& x)
 {
   print_brief_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -86,11 +82,7 @@ struct is_simple_expression_traverser: public pbes_expression_traverser<is_simpl
   typedef pbes_expression_traverser<is_simple_expression_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   bool result;
 
@@ -113,7 +105,7 @@ template <typename T>
 bool is_simple_expression(const T& x)
 {
   is_simple_expression_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -133,18 +125,16 @@ inline bool is_non_simple_conjunct(const pbes_expression& t)
   return is_pbes_and(t) && !is_simple_expression(t);
 }
 
-namespace pbes_expr {
-
-/// \brief Splits a disjunction into a sequence of operands
+/// \brief Splits a disjunction into a sequence of operands.
 /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
 /// function symbol.
-/// \param expr A PBES expression
-/// \param split_simple_expressions if true, pbes disjuncts are split, even if
+/// \param expr A PBES expression.
+/// \param split_simple_expr If true, pbes disjuncts are split, even if
 ///        no proposition variables occur. If false, pbes disjuncts are only split
 ///        if a proposition variable occurs somewhere in \a expr.
 /// \note This never splits data disjuncts.
-/// \return A sequence of operands
+/// \return A sequence of operands.
 inline
 std::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool split_simple_expr = false)
 {
@@ -168,7 +158,7 @@ std::vector<pbes_expression> split_disjuncts(const pbes_expression& expr, bool s
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
 /// function symbol.
 /// \param expr A PBES expression
-/// \param split_simple_expressions if true, pbes conjuncts are split, even if
+/// \param split_simple_expr If true, pbes conjuncts are split, even if
 ///        no proposition variables occur. If false, pbes conjuncts are only split
 ///        if a proposition variable occurs somewhere in \a expr.
 /// \note This never splits data conjuncts.
@@ -191,10 +181,8 @@ std::vector<pbes_expression> split_conjuncts(const pbes_expression& expr, bool s
   return result;
 }
 
-} // namespace pbes_expr
-
 } // namespace pbes_system
 
 } // namespace mcrl2
 
-#endif // PBES_INCLUDE_MCRL2_PBES_FUNCTIONS_H
+#endif // MCRL2_PBES_PBES_FUNCTIONS_H

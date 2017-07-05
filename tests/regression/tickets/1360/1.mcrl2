@@ -1,0 +1,4 @@
+act a,b;
+
+proc P = b. P;
+init allow( { a,b }, b.P || ( sum x:Bool . a.delta  ) ) ;

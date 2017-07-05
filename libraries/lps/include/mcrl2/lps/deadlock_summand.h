@@ -13,6 +13,7 @@
 #define MCRL2_LPS_DEADLOCK_SUMMAND_H
 
 #include "mcrl2/lps/deadlock.h"
+#include "mcrl2/lps/stochastic_distribution.h"
 #include "mcrl2/lps/summand.h"
 
 namespace mcrl2 {
@@ -28,13 +29,6 @@ class deadlock_summand: public summand_base
 
     /// \brief The deadlock of the summand
     lps::deadlock m_deadlock;
-
-    /// \brief Returns true if time is available.
-    /// \return True if time is available.
-    bool has_time() const
-    {
-      return m_deadlock.has_time();
-    }
 
   public:
     /// \brief Constructor.
@@ -60,6 +54,13 @@ class deadlock_summand: public summand_base
       return m_deadlock;
     }
 
+    /// \brief Returns true if time is available.
+    /// \return True if time is available.
+    bool has_time() const
+    {
+      return m_deadlock.has_time();
+    }
+
     /// \brief Swaps the contents
     void swap(deadlock_summand& other)
     {
@@ -81,6 +82,7 @@ std::string pp(const deadlock_summand& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const deadlock_summand& x)
@@ -105,7 +107,8 @@ atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
                        s.condition(),
                        atermpp::aterm_appl(core::detail::function_symbol_Delta()),
                        s.deadlock().time(),
-                       data::assignment_list()
+                       data::assignment_list(),
+                       stochastic_distribution()
                      );
   return result;
 }

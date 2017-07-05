@@ -9,16 +9,12 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
-#include "mcrl2/utilities/test_utilities.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void test_typechecker_case(std::string const& spec, bool const expected_result)
 {
@@ -178,16 +174,16 @@ BOOST_AUTO_TEST_CASE(test_bug_644)
 BOOST_AUTO_TEST_CASE(test_bug_626a)
 {
   test_typechecker_case(
-    "sort S = struct c( x: Int );     \n"
+    "sort S = struct c( proj: Int );     \n"
     "                                 \n"
     "map f :(S -> Bool)#S -> S;       \n"
-    "var pred: S -> Bool;             \n"
+    "var pre: S -> Bool;             \n"
     "    s: S;                        \n"
-    "eqn f (pred, s) = s;             \n"
+    "eqn f (pre, s) = s;             \n"
     "                                 \n"
     "act a: (S);                      \n"
     "                                 \n"
-    "init a( f( lambda x:S. x(x) < 0 , c( 0 ) ) );\n",
+    "init a( f( lambda x:S. proj(x) < 0 , c( 0 ) ) );\n",
     true
   );
 }
@@ -198,9 +194,9 @@ BOOST_AUTO_TEST_CASE(test_bug_626b)
     "sort S = struct c( x: Int );     \n"
     "                                 \n"
     "map f :(S -> Bool)#S -> S;       \n"
-    "var pred: S -> Bool;             \n"
+    "var pre: S -> Bool;             \n"
     "    s: S;                        \n"
-    "eqn f (pred, s) = s;             \n"
+    "eqn f (pre, s) = s;             \n"
     "                                 \n"
     "act a: (S);                      \n"
     "                                 \n"
@@ -353,11 +349,11 @@ BOOST_AUTO_TEST_CASE(test_typecheck)
     "proc P(b,c: Bool) = a . P(c = true);\n"
     "init delta;\n"
     ;
-  process::process_specification procspec = process::parse_process_specification_new(text);
-  process::type_check(procspec);
+  process::process_specification procspec = process::detail::parse_process_specification_new(text);
+  process::typecheck_process_specification(procspec);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

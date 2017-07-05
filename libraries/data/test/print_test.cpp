@@ -11,29 +11,24 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/bool.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/list.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/function_update.h"
-#include "mcrl2/data/print.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/nat.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/data/print.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/standard_utility.h"
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
 using namespace mcrl2::data::sort_nat;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 template <typename T>
 void test_term(const std::string& s, const T& x)
@@ -61,7 +56,7 @@ void test_term(const std::string& s)
   }
   else
   {
-    data_expression x = atermpp::down_cast<data_expression>(a);
+    const data_expression& x = atermpp::down_cast<data_expression>(a);
     test_term(s, x);
   }
 }
@@ -484,7 +479,7 @@ BOOST_AUTO_TEST_CASE(test_set_print2)
 
   data_expression one = parse_data_expression("1");
   data_expression x = sort_fset::insert(sort_nat::nat(), one, sort_fset::empty(sort_nat::nat()));
-  sort_expression s = sort_nat::nat();
+  const sort_expression& s = sort_nat::nat();
 
   data_expression true_  = sort_set::false_function(s);
   data_expression false_ = sort_set::true_function(s);
@@ -506,7 +501,7 @@ BOOST_AUTO_TEST_CASE(test_fset_print)
   data_expression one = parse_data_expression("1");
   data_expression x = parse_data_expression("{1, 2}");
   data_expression y = parse_data_expression("{3}");
-  sort_expression s = sort_pos::pos();
+  const sort_expression& s = sort_pos::pos();
   data_expression f = parse_function_symbol("f: Pos -> Bool");
   data_expression g = parse_function_symbol("g: Pos -> Bool");
   data_expression false_ = sort_set::false_function(s);
@@ -538,9 +533,16 @@ BOOST_AUTO_TEST_CASE(test_precedence)
   data::data_expression x = parse_data_expression("exists b:Bool. true");
   BOOST_CHECK(is_exists(x));
   BOOST_CHECK(left_precedence(x) == 1);
+
+  data::variable a("a", sort_real::real_());
+  data::variable b("b", sort_real::real_());
+  std::vector<data::variable> variables = { a, b };
+  data::data_expression y = parse_data_expression("-(a + b)", variables);
+  std::string py = data::pp(y);
+  BOOST_CHECK(py == "-(a + b)");
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

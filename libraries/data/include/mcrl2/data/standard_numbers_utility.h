@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/standard_utility.h
+/// \file mcrl2/data/standard_numbers_utility.h
 /// \brief Provides utilities for working with data expressions of standard sorts
 
 #ifndef MCRL2_DATA_STANDARD_NUMBERS_UTILITY_H
@@ -19,9 +19,9 @@
 
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/pos.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/standard_utility.h"
 
@@ -36,18 +36,18 @@ namespace detail
 {
 // Convert to number represented as character array where each character
 // represents a decimal digit
-inline std::vector< char > string_to_vector_number(std::string const& s)
+inline std::vector< char > string_to_vector_number(const std::string& s)
 {
   assert(s.size() > 0);
   std::vector< char > result;
 
   result.reserve(s.size());
 
-  for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)
+  for (char i: s)
   {
-    assert('0' <= *i && *i <= '9');
+    assert('0' <= i && i <= '9');
 
-    result.push_back(*i - '0');
+    result.push_back(i - '0');
   }
 
   return result;
@@ -55,16 +55,16 @@ inline std::vector< char > string_to_vector_number(std::string const& s)
 
 // Convert from number represented as character array where each character
 // represents a decimal digit
-inline std::string vector_number_to_string(std::vector< char > const& v)
+inline std::string vector_number_to_string(const std::vector< char >& v)
 {
   assert(v.size() > 0);
   std::string result;
 
   result.reserve(v.size());
 
-  for (std::vector< char >::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (char i: v)
   {
-    result.push_back(*i + '0');
+    result.push_back(i + '0');
   }
 
   return result;
@@ -185,7 +185,7 @@ template < typename T >
 inline typename std::enable_if<std::is_integral< T >::value, data_expression>::type
 pos(const T t)
 {
-  assert(0 < t);
+  assert(t>0);
 
   std::vector< bool > bits;
   bits.reserve(8 * sizeof(T));
@@ -207,7 +207,7 @@ pos(const T t)
 
 /// \brief Constructs expression of type Pos from a string
 /// \param n A string
-inline data_expression pos(std::string const& n)
+inline data_expression pos(const std::string& n)
 {
   std::vector< char > number_as_vector(detail::string_to_vector_number(n));
 
@@ -233,7 +233,7 @@ inline data_expression pos(std::string const& n)
 
 /// \brief Determines whether n is a positive constant
 /// \param n A data expression
-inline bool is_positive_constant(data_expression const& n)
+inline bool is_positive_constant(const data_expression& n)
 {
   return sort_pos::is_c1_function_symbol(n) ||
          (sort_pos::is_cdub_application(n) &&
@@ -249,7 +249,7 @@ inline bool is_positive_constant(data_expression const& n)
 /// Transforms a positive constant n into a character array containing
 /// the decimal representation of n.
 inline
-std::string positive_constant_as_string(const data_expression &n_in)
+std::string positive_constant_as_string(const data_expression& n_in)
 {
   std::vector<bool> bits;
   data_expression n=n_in;
@@ -275,7 +275,7 @@ std::string positive_constant_as_string(const data_expression &n_in)
 
   return detail::vector_number_to_string(result);
 }
-}
+} // namespace sort_pos
 
 namespace sort_nat
 {
@@ -285,20 +285,23 @@ template < typename T >
 inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
 nat(T t)
 {
-  assert(0 <= t);
-  return (t == 0) ? sort_nat::c0() : static_cast< data_expression const& >(sort_nat::cnat(sort_pos::pos(t)));
+  if (t == 0)
+  {
+    return sort_nat::c0();
+  }
+  return sort_nat::cnat(sort_pos::pos(t));
 }
 
 /// \brief Constructs expression of type Nat from a string
 /// \param n A string
-inline data_expression nat(std::string const& n)
+inline data_expression nat(const std::string& n)
 {
   return (n == "0") ? sort_nat::c0() : static_cast< data_expression const& >(sort_nat::cnat(sort_pos::pos(n)));
 }
 
 /// \brief Determines whether n is a natural constant
 /// \param n A data expression
-inline bool is_natural_constant(data_expression const& n)
+inline bool is_natural_constant(const data_expression& n)
 {
   return sort_nat::is_c0_function_symbol(n) ||
          (sort_nat::is_cnat_application(n) &&
@@ -310,7 +313,7 @@ inline bool is_natural_constant(data_expression const& n)
 /// \param n A data expression
 /// \pre is_natural_constant(n)
 /// \return String representation of n
-inline std::string natural_constant_as_string(data_expression const& n)
+inline std::string natural_constant_as_string(const data_expression& n)
 {
   assert(is_natural_constant(n));
   if (sort_nat::is_c0_function_symbol(n))
@@ -322,34 +325,46 @@ inline std::string natural_constant_as_string(data_expression const& n)
     return sort_pos::positive_constant_as_string(sort_nat::arg(n));
   }
 }
-}
+} // namespace sort_nat
 
 namespace sort_int
 {
 
 /// \brief Constructs expression of type pos from an integral type
 template < typename T >
-inline typename std::enable_if< std::is_integral< T >::value, data_expression >::type
+inline typename std::enable_if< std::is_integral< T >::value && std::is_unsigned< T >::value, data_expression >::type
 int_(T t)
 {
-  std::string number(detail::as_decimal_string< typename std::make_unsigned< T >::type >((0 <= t) ? t : -t));
+  return sort_int::cint(sort_nat::nat(t));
+}
 
-  return (t < 0) ? sort_int::cneg(sort_pos::pos(-t)) :
-         static_cast< data_expression const& >(sort_int::cint(sort_nat::nat(t)));
+/// \brief Constructs expression of type pos from an integral type
+template < typename T >
+inline typename std::enable_if< std::is_integral< T >::value && std::is_signed< T >::value, data_expression >::type
+int_(T t)
+{
+  if (t<0)
+  {
+    return sort_int::cneg(sort_pos::pos(typename std::make_unsigned<T>::type(-t)));
+  }
+  return sort_int::cint(sort_nat::nat(typename std::make_unsigned<T>::type(t)));
 }
 
 /// \brief Constructs expression of type Int from a string
 /// \param n A string
 /// \pre n is of the form ([-]?[0...9][0...9]+)([0...9]+)
-inline data_expression int_(std::string const& n)
+inline data_expression int_(const std::string& n)
 {
-  return (n[0] == '-') ? sort_int::cneg(sort_pos::pos(n.substr(1))) :
-         static_cast< data_expression const& >(sort_int::cint(sort_nat::nat(n)));
+  if (n[0] == '-')
+  {
+    return sort_int::cneg(sort_pos::pos(n.substr(1)));
+  }
+  return sort_int::cint(sort_nat::nat(n));
 }
 
 /// \brief Determines whether n is an integer constant
 /// \param n A data expression
-inline bool is_integer_constant(data_expression const& n)
+inline bool is_integer_constant(const data_expression& n)
 {
   return (sort_int::is_cint_application(n) &&
           sort_nat::is_natural_constant(sort_int::arg(n))) ||
@@ -362,7 +377,7 @@ inline bool is_integer_constant(data_expression const& n)
 /// \param n A data expression
 /// \pre is_integer_constant(n)
 /// \return String representation of n
-inline std::string integer_constant_as_string(data_expression const& n)
+inline std::string integer_constant_as_string(const data_expression& n)
 {
   assert(is_integer_constant(n));
   if (sort_int::is_cint_application(n))
@@ -374,7 +389,7 @@ inline std::string integer_constant_as_string(data_expression const& n)
     return "-" + sort_pos::positive_constant_as_string(sort_int::arg(n));
   }
 }
-}
+} // namespace sort_int
 
 namespace sort_real
 {
@@ -400,17 +415,17 @@ real_(T numerator, T denominator)
 /// \brief Constructs expression of type Real from a string
 /// \param n A string
 /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
-inline data_expression real_(std::string const& n)
+inline data_expression real_(const std::string& n)
 {
   return sort_real::creal(sort_int::int_(n), sort_pos::c1());
 }
-}
+} // namespace sort_real
 
 /// \brief Construct numeric expression from a string representing a number in decimal notation
 /// \param s A sort expression
 /// \param n A string
 /// \pre n is of the form [1]?[0...9]+
-inline data_expression number(sort_expression const& s, std::string const& n)
+inline data_expression number(const sort_expression& s, const std::string& n)
 {
   if (s == sort_pos::pos())
   {
@@ -432,7 +447,7 @@ inline data_expression number(sort_expression const& s, std::string const& n)
 ///
 /// \param[in] s1 a sort expression
 /// \param[in] s2 a sort expression
-inline bool is_convertible(sort_expression const& s1, sort_expression const& s2)
+inline bool is_convertible(const sort_expression& s1, const sort_expression& s2)
 {
   if (s1 != s2)
   {

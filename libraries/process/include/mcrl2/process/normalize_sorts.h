@@ -13,8 +13,8 @@
 #define MCRL2_PROCESS_NORMALIZE_SORTS_H
 
 #include "mcrl2/data/normalize_sorts.h"
-#include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/builder.h"
+#include "mcrl2/process/process_specification.h"
 
 namespace mcrl2
 {
@@ -24,20 +24,20 @@ namespace process
 
 template <typename T>
 void normalize_sorts(T& x,
-                     const data::data_specification& data_spec,
-                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
+                     const data::sort_specification& sortspec,
+                     typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = nullptr
                     )
 {
-  core::make_update_apply_builder<process::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+  core::make_update_apply_builder<process::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).update(x);
 }
 
 template <typename T>
 T normalize_sorts(const T& x,
-                  const data::data_specification& data_spec,
-                  typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
+                  const data::sort_specification& sortspec,
+                  typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = nullptr
                  )
 {
-  return core::make_update_apply_builder<process::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+  return core::make_update_apply_builder<process::sort_expression_builder>(data::detail::normalize_sorts_function(sortspec)).apply(x);
 }
 
 } // namespace process

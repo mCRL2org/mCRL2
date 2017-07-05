@@ -11,14 +11,14 @@
 
 // #define MCRL2_PBES_CONSTELM_DEBUG
 
-#include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/logger.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/pbes_property_map.h"
-#include "mcrl2/pbes/pbes_solver_test.h"
+#include "mcrl2/utilities/logger.h"
+#include <boost/test/minimal.hpp>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -45,10 +45,10 @@ std::string t2 =
 std::string x2 = "binding_variables = X(n,m: Nat)";
 
 void test_pbes(const std::string& pbes_spec,
-               std::string expected_result,
+               const std::string& expected_result,
                bool /* compute_conditions */,
                bool /* remove_equations = true */,
-               std::string msg = "")
+               const std::string& msg = "")
 {
   typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
 
@@ -89,7 +89,7 @@ void test_pbes(const std::string& pbes_spec,
 
 }
 
-void test_eqelm(const std::string& pbes_spec)
+void test_eqelm(const std::string& pbes_spec, const bool expected_outcome)
 {
   typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
 
@@ -101,10 +101,10 @@ void test_eqelm(const std::string& pbes_spec)
   pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
   algorithm.run(q);
 
-  bool result1 = pbes2_bool_test(p);
-  bool result2 = pbes2_bool_test(q);
-
-  BOOST_CHECK(result1 == result2);
+  bool solution_p = pbes_system::detail::pbes2bool(p);
+  bool solution_q = pbes_system::detail::pbes2bool(q);
+  BOOST_CHECK(solution_p == expected_outcome);
+  BOOST_CHECK(solution_q == expected_outcome);
 }
 
 std::string random1 =
@@ -124,7 +124,7 @@ int test_main(int argc, char** argv)
   bool remove_equations = true;
   test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");
   test_pbes(t2 , x2, compute_conditions, remove_equations, "test 2");
-  test_eqelm(random1);
+  test_eqelm(random1,false);
 
   return 0;
 }

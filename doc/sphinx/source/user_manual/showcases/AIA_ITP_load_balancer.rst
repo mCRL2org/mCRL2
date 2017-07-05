@@ -60,5 +60,4 @@ layers were modeled in an abstract way.
 Publications
 ------------
 
-[EHSU07]_
-
+.. [EHSU07a] Y.S. Usenko, M. van Eekelen, S. ten Hoedt, R. Schreurs. Testing of inter-process communication and synchronization of ITP LoadBalancer software via model-checking. TUE Computer Science Reports 07-04. 2007.

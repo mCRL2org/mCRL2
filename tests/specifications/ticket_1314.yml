@@ -1,0 +1,31 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: StateFrm
+  l4:
+    type: PBES
+  l5:
+    type: TEXT
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: mcrl22lps
+  t2:
+    input: [l2, l3]
+    output: [l4]
+    args: []
+    name: lps2pbes
+  t3:
+    input: [l4]
+    output: [l5]
+    args: []
+    name: pbespp
+
+result: |
+  result = True

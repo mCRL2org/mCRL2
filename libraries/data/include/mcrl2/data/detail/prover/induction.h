@@ -9,14 +9,16 @@
 /// \file mcrl2/data/detail/prover/induction.h
 /// \brief Proving with induction on lists
 
-#ifndef INDUCTION_H
-#define INDUCTION_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
+#define MCRL2_DATA_DETAIL_PROVER_INDUCTION_H
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -29,12 +31,10 @@ namespace detail
 class Induction
 {
   private:
-    /// \brief The smallest number x for which no variable named "dummyx" exists.
-    // size_t f_fresh_dummy_number;
     set_identifier_generator fresh_identifier_generator;
 
     /// \brief The number of variables used during the last application of induction.
-    size_t f_count;
+    std::size_t f_count;
 
     /// \brief An expression of sort Bool in mCRL2 format.
     data_expression f_formula;
@@ -55,7 +55,7 @@ class Induction
     // BDD_Info f_bdd_info;
 
     /// \brief
-    void recurse_expression_for_lists(const data_expression &a_expression)
+    void recurse_expression_for_lists(const data_expression& a_expression)
     {
       if (is_variable(a_expression))
       {
@@ -70,7 +70,7 @@ class Induction
       }
       else if (is_application(a_expression))
       {
-        const data::application &a = atermpp::down_cast<const data::application>(a_expression);
+        const data::application& a = atermpp::down_cast<const data::application>(a_expression);
         for (application::const_iterator i = a.begin(); i != a.end(); ++i)
         {
           recurse_expression_for_lists(*i);
@@ -90,7 +90,7 @@ class Induction
     }
 
     /// \brief
-    sort_expression get_sort_of_list_elements(const variable &a_list_variable)
+    sort_expression get_sort_of_list_elements(const variable& a_list_variable)
     {
       function_symbol_list v_constructors;
       function_symbol v_constructor;
@@ -101,7 +101,7 @@ class Induction
       sort_expression v_result;
 
       v_constructors = f_constructors;
-      v_list_sort = data_expression(a_list_variable).sort();
+      v_list_sort = a_list_variable.sort();
       while (!v_constructors.empty())
       {
         v_constructor = v_constructors.front();
@@ -123,7 +123,7 @@ class Induction
     }
 
     /// \brief
-    variable get_fresh_dummy(const sort_expression &a_sort)
+    variable get_fresh_dummy(const sort_expression& a_sort)
     {
       return variable(fresh_identifier_generator("dummy$"),a_sort);
     }
@@ -132,30 +132,33 @@ class Induction
     /// \brief
     data_expression apply_induction_one()
     {
-      using namespace atermpp;
-
       const variable v_induction_variable = f_list_variables.front();
-      const sort_expression v_induction_variable_sort = v_induction_variable.sort();
 
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       const variable v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
-      const substitution v_substitution1(v_induction_variable, sort_list::empty(sort_expression(v_induction_variable_sort)));
-      const data_expression v_base_case = atermpp::down_cast<data_expression>(v_substitution1(f_formula));
+      mutable_map_substitution<> v_substitution1;
+      assert(sort_list::is_list(v_induction_variable.sort()));
+      v_substitution1[v_induction_variable]=sort_list::empty(atermpp::down_cast<container_sort>(v_induction_variable.sort()).element_sort());
+      std::set<variable> variables_occurring_in_rhs_sigma;
+      const data_expression v_base_case = data::replace_variables_capture_avoiding(f_formula,v_substitution1,variables_occurring_in_rhs_sigma);
 
-      substitution v_substitution2 = substitution(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
-      const data_expression v_induction_step = sort_bool::implies(data_expression(f_formula), atermpp::down_cast<data_expression>(v_substitution2(f_formula)));
+      mutable_map_substitution<> v_substitution2;
+      v_substitution2[v_induction_variable]=sort_list::cons_(v_dummy_variable.sort(), v_dummy_variable, v_induction_variable);
+      variables_occurring_in_rhs_sigma.clear();
+      variables_occurring_in_rhs_sigma.insert(v_dummy_variable);
+      variables_occurring_in_rhs_sigma.insert(v_induction_variable);
+      const data_expression v_induction_step = sort_bool::implies(f_formula, data::replace_variables_capture_avoiding(f_formula,v_substitution2,variables_occurring_in_rhs_sigma));
 
-      return sort_bool::and_(data_expression(v_base_case), data_expression(v_induction_step));
+      return sort_bool::and_(v_base_case, v_induction_step);
     }
 
     /// \brief
     data_expression create_hypotheses(
-                        const data_expression &a_hypothesis,
+                        const data_expression& a_hypothesis,
                         variable_list a_list_of_variables,
-                        data_expression_list a_list_of_dummies)
+                        variable_list a_list_of_dummies)
     {
-      using namespace atermpp;
       if (a_list_of_variables.empty())
       {
         return sort_bool::true_();
@@ -167,12 +170,17 @@ class Induction
         {
           while (!a_list_of_variables.size())
           {
-            variable v_variable(a_list_of_variables.front());
+            const variable v_variable(a_list_of_variables.front());
             a_list_of_variables.pop_front();
-            data_expression v_dummy(a_list_of_dummies.front());
+            const variable v_dummy(a_list_of_dummies.front());
             a_list_of_dummies.pop_front();
-            const substitution v_substitution(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
-            v_clause = sort_bool::and_(v_clause, atermpp::down_cast<data_expression>(v_substitution(a_hypothesis)));
+            
+            mutable_map_substitution<> v_substitution;
+            v_substitution[v_variable]=sort_list::cons_(v_dummy.sort(), v_dummy, v_variable);
+            std::set<variable> variables_occurring_in_rhs_sigma;
+            variables_occurring_in_rhs_sigma.insert(v_dummy);
+            variables_occurring_in_rhs_sigma.insert(v_variable);
+            v_clause = sort_bool::and_(v_clause, data::replace_variables_capture_avoiding(a_hypothesis,v_substitution,variables_occurring_in_rhs_sigma));
           }
         }
 
@@ -181,27 +189,34 @@ class Induction
     }
 
     /// \brief
-    data_expression_list create_clauses(const atermpp::aterm_appl &a_formula,
-                             const atermpp::aterm_appl &a_hypothesis,
-                             const size_t a_variable_number,
-                             const size_t a_number_of_variables,
-                             const variable_list &a_list_of_variables,
-                             const variable_list &a_list_of_dummies)
+    data_expression_list create_clauses(const data_expression& a_formula,
+                             const data_expression& a_hypothesis,
+                             const std::size_t a_variable_number,
+                             const std::size_t a_number_of_variables,
+                             const variable_list& a_list_of_variables,
+                             const variable_list& a_list_of_dummies)
     {
-      using namespace atermpp;
       const variable v_variable = f_list_variables[a_variable_number];
-      const sort_expression v_variable_sort = data_expression(v_variable).sort();
       variable_list v_list_of_variables = a_list_of_variables;
       v_list_of_variables.push_front(v_variable);
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_variable);
       const variable v_dummy = get_fresh_dummy(v_dummy_sort);
       variable_list v_list_of_dummies = a_list_of_dummies;
       v_list_of_dummies.push_front(v_dummy);
-      const substitution v_substitution1(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
-      const data_expression v_formula_1 = atermpp::down_cast<data_expression>(v_substitution1(a_formula));
-      const substitution v_substitution2(v_variable, sort_list::empty(sort_expression(v_variable_sort)));
-      const data_expression v_formula_2 = atermpp::down_cast<data_expression>(v_substitution2(a_formula));
-      const data_expression v_hypothesis = atermpp::down_cast<data_expression>(v_substitution2(a_hypothesis));
+
+      mutable_map_substitution<> v_substitution1;
+      v_substitution1[v_variable]=sort_list::cons_(v_dummy.sort(), v_dummy, v_variable);
+      std::set<variable> variables_occurring_in_rhs_sigma;
+      variables_occurring_in_rhs_sigma.insert(v_dummy);
+      variables_occurring_in_rhs_sigma.insert(v_variable);
+      const data_expression v_formula_1 = data::replace_variables_capture_avoiding(a_formula,v_substitution1,variables_occurring_in_rhs_sigma);
+
+      mutable_map_substitution<> v_substitution2;
+      assert(sort_list::is_list(v_variable.sort()));
+      v_substitution2[v_variable]=sort_list::empty(atermpp::down_cast<container_sort>(v_variable.sort()).element_sort());
+      variables_occurring_in_rhs_sigma.clear();
+      const data_expression v_formula_2 = data::replace_variables_capture_avoiding(a_formula,v_substitution2,variables_occurring_in_rhs_sigma);
+      const data_expression v_hypothesis = data::replace_variables_capture_avoiding(a_hypothesis,v_substitution2,variables_occurring_in_rhs_sigma);
 
       if (a_variable_number < a_number_of_variables - 1)
       {
@@ -211,8 +226,8 @@ class Induction
       }
       else
       {
-        data_expression v_hypotheses_1 = create_hypotheses(data_expression(a_hypothesis), v_list_of_variables, data_expression_list(v_list_of_dummies));
-        data_expression v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, data_expression_list(a_list_of_dummies));
+        data_expression v_hypotheses_1 = create_hypotheses(a_hypothesis, v_list_of_variables, v_list_of_dummies);
+        data_expression v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, a_list_of_dummies);
         return data_expression_list(sort_bool::implies(v_hypotheses_1, v_formula_1))+
                    data_expression_list(sort_bool::implies(v_hypotheses_2, v_formula_2));
       }
@@ -232,7 +247,7 @@ class Induction
     }
 
     /// \brief
-    void initialize(const data_expression &a_formula)
+    void initialize(const data_expression& a_formula)
     {
       f_formula = a_formula;
       f_list_variables.clear();
@@ -256,11 +271,10 @@ class Induction
     }
 
     /// \brief
-    atermpp::aterm_appl apply_induction()
+    data_expression apply_induction()
     {
-      atermpp::aterm_appl v_result;
+      data_expression v_result;
 
-      // f_fresh_dummy_number = 0;
       if (f_count == 1)
       {
         mCRL2log(log::verbose) << "Induction on one variable." << std::endl;
@@ -276,16 +290,15 @@ class Induction
         {
           data_expression v_clause(v_list_of_clauses.front());
           v_list_of_clauses.pop_front();
-          v_result = sort_bool::and_(data_expression(v_result), v_clause);
+          v_result = sort_bool::and_(v_result, v_clause);
         }
       }
-
       return v_result;
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

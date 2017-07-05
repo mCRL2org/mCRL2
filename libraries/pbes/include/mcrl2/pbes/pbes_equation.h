@@ -12,13 +12,13 @@
 #ifndef MCRL2_PBES_PBES_EQUATION_H
 #define MCRL2_PBES_PBES_EQUATION_H
 
-#include <string>
-#include <sstream>
-#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
+#include <sstream>
+#include <string>
 
 namespace mcrl2
 {
@@ -162,6 +162,7 @@ std::string pp(const pbes_equation& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const pbes_equation& x)
@@ -200,7 +201,7 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 
 // template function overloads
 std::string pp(const pbes_equation_vector& x);
-void normalize_sorts(pbes_equation_vector& x, const data::data_specification& dataspec);
+void normalize_sorts(pbes_equation_vector& x, const data::sort_specification& sortspec);
 std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x);
 
 } // namespace pbes_system

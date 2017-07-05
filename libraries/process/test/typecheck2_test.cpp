@@ -9,30 +9,26 @@
 /// \file typecheck2_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
-#include "mcrl2/utilities/test_utilities.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <sstream>
+#include <string>
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void test_process_specification(const std::string& ps_in, bool const expected_result = true, bool const test_type_checker = true)
 {
-  process::process_specification p = process::parse_process_specification_new(ps_in);
+  process::process_specification p = process::detail::parse_process_specification_new(ps_in);
   std::string ps_out;
   if (test_type_checker)
   {
     process::process_specification ps = p;
     if (expected_result)
     {
-      process::type_check(ps);
+      process::typecheck_process_specification(ps);
       ps_out = process::pp(ps);
       if (ps_in != ps_out)
       {
@@ -42,7 +38,7 @@ void test_process_specification(const std::string& ps_in, bool const expected_re
     }
     else
     {
-      BOOST_CHECK_THROW(process::type_check(ps), mcrl2::runtime_error);
+      BOOST_CHECK_THROW(process::typecheck_process_specification(ps), mcrl2::runtime_error);
     }
   }
 }
@@ -106,5 +102,5 @@ BOOST_AUTO_TEST_CASE(test_function_as_equation_condition)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

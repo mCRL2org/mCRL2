@@ -26,11 +26,11 @@ namespace pbes_system
 template <class T> // note, T is only a dummy
 struct pbes_expression_builder_indenter
 {
-  static size_t depth;
+  static std::size_t depth;
 };
 
 template <class T>
-size_t pbes_expression_builder_indenter<T>::depth = 0;
+std::size_t pbes_expression_builder_indenter<T>::depth = 0;
 
 inline
 std::string pbes_expression_builder_indent()

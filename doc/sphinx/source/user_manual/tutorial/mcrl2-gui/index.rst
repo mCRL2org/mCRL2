@@ -18,8 +18,7 @@ called the "Configuration panel".
 
 In this tutorial the analysis and transformations are performed on the
 alternating bit protocol. The corresponding mCRL2 specification can be
-downloaded `here
-<https://svn.win.tue.nl/trac/MCRL2/export/8044/branches/release/examples/academic/abp/abp.mcrl2>`_
+downloaded `(abp.mcrl2) <https://svn.win.tue.nl/trac/MCRL2/export/8044/branches/release/examples/academic/abp/abp.mcrl2>`_.
 or be found in the ``examples/academic/abp/`` directory of your mCRL2 
 installation.
 
@@ -28,15 +27,15 @@ installation.
 .. _tutorial-img3: ../../_static/img/tutorial/ltsgraph-abpbb.jpg
 .. _tutorial-img4: ../../_static/img/tutorial/ltsview-abp.jpg
 
-+-----------------------------------+------------------------------------+--------------------------------------+-----------------------------------+
-| .. figure:: img/mcrl2gui.png      | .. figure:: img/ltsgraph-abp.jpg   | .. figure:: img/ltsgraph-abpbb.jpg   | .. figure:: img/ltsview-abp.jpg   |
-|    :target: `tutorial-img1`_      |    :target: `tutorial-img2`_       |    :target: `tutorial-img3`_         |    :target: `tutorial-img4`_      |
-|    :align: center                 |    :align: center                  |    :align: center                    |    :align: center                 |
-|                                   |                                    |                                      |                                   |
-|    The :ref:`tool-mcrl2-gui`      |    The :ref:`tool-ltsgraph`        |    The ABP statespace after          |    The :ref:`tool-ltsview`        |
-|    interface.                     |    tool, showing the statespace of |    branching bisimulation reduction. |    tool showing the ABP           |
-|                                   |    the alternating bit protocol.   |                                      |    statespace in 3D.              |
-+-----------------------------------+------------------------------------+--------------------------------------+-----------------------------------+
++-------------------------------+------------------------------------+--------------------------------------+-----------------------------------+
+| .. figure:: img/mcrl2gui.png  | .. figure:: img/ltsgraph-abp.jpg   | .. figure:: img/ltsgraph-abpbb.jpg   | .. figure:: img/ltsview-abp.jpg   |
+|    :target: `tutorial-img1`_  |    :target: `tutorial-img2`_       |    :target: `tutorial-img3`_         |    :target: `tutorial-img4`_      |
+|    :align: center             |    :align: center                  |    :align: center                    |    :align: center                 |
+|                               |                                    |                                      |                                   |
+|    The :ref:`tool-mcrl2-gui`  |    The :ref:`tool-ltsgraph`        |    The ABP statespace after          |    The :ref:`tool-ltsview`        |
+|    interface.                 |    tool, showing the statespace of |    branching bisimulation reduction. |    tool showing the ABP           |
+|                               |    the alternating bit protocol.   |                                      |    statespace in 3D.              |
++-------------------------------+------------------------------------+--------------------------------------+-----------------------------------+
 
 Obtaining a linear process specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -120,10 +119,10 @@ to show the individual states, transitions and backpointers. For larger state
 spaces (with hundreds of thousands of states), showing too much detail slows the
 tool down dramatically.
 
-.. _tutorial-img5: ../_static/img/tutorial/diagraphica-1.jpg
-.. _tutorial-img6: ../_static/img/tutorial/diagraphica-2.jpg
-.. _tutorial-img7: ../_static/img/tutorial/lpsxsim.jpg
-.. _tutorial-img8: ../_static/img/tutorial/preferences.jpg
+.. _tutorial-img5: ../../_static/img/tutorial/diagraphica-1.jpg
+.. _tutorial-img6: ../../_static/img/tutorial/diagraphica-2.jpg
+.. _tutorial-img7: ../../_static/img/tutorial/lpsxsim.jpg
+.. _tutorial-img8: ../../_static/img/tutorial/preferences.jpg
 
 +-----------------------------------+------------------------------------+----------------------------------+-----------------------------------+
 | .. figure:: img/diagraphica-1.jpg | .. figure:: img/diagraphica-2.jpg  | .. figure:: img/lpsxsim.jpg      | .. figure:: img/preferences.jpg   |
@@ -153,8 +152,7 @@ the leftmost picture above.
 
 Another option of *diagraphica* is to graphically simulate the process. A
 graphical view of the process can be edited in *edit mode*. The file
-``abp.dgd``, which can be downloaded `here
-<https://svn.win.tue.nl/trac/MCRL2/export/8044/branches/release/examples/project/abp/abp.dgd>`_,
+``abp.dgd``, which can be downloaded `(abp.dgd) <https://svn.win.tue.nl/trac/MCRL2/export/8044/branches/release/examples/project/abp/abp.dgd>`_,
 contains an initial layout, but in edit mode any layout can be made. Using the
 :guilabel:`edit DOF` option, that shows up when clicking an object in edit mode,
 a pop up window appears showing which colours, shape, position and even

@@ -1,0 +1,7 @@
+act a;
+
+proc
+  P = tau + a . sum b: Bool . P;
+
+init block({a}, P);
+

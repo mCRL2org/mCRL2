@@ -12,25 +12,24 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_GRAPH_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_GRAPH_H
 
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/detail/stategraph_influence.h"
+#include "mcrl2/pbes/detail/stategraph_pbes.h"
+#include "mcrl2/pbes/detail/stategraph_utility.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/utilities/logger.h"
 #include <algorithm>
 #include <iomanip>
 #include <map>
 #include <set>
 #include <sstream>
 #include <vector>
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/detail/print_utility.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/detail/stategraph_pbes.h"
-#include "mcrl2/pbes/detail/stategraph_influence.h"
-#include "mcrl2/pbes/detail/stategraph_utility.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -94,9 +93,9 @@ struct stategraph_vertex
     std::ostringstream out;
     out << pbes_system::pp(X);
     out << " edges:";
-    for (std::set<stategraph_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
+    for (const stategraph_edge& e: outgoing_edges)
     {
-      out << " " << pbes_system::pp(i->target->X);
+      out << " " << pbes_system::pp(e.target->X);
     }
     out << " sig: " << core::detail::print_set(m_sig);
     return out.str();
@@ -111,9 +110,9 @@ struct stategraph_vertex
     out << data::pp(data::make_assignment_list(d_X, X.parameters()));
     out << ")";
     out << " edges:";
-    for (std::set<stategraph_edge>::const_iterator i = outgoing_edges.begin(); i != outgoing_edges.end(); ++i)
+    for (const stategraph_edge& e: outgoing_edges)
     {
-      out << " " << i->print();
+      out << " " << e.print();
     }
     out << " sig: " << core::detail::print_set(m_sig);
     return out.str();
@@ -122,14 +121,14 @@ struct stategraph_vertex
   std::set<std::size_t> marking_variable_indices(const stategraph_pbes& p) const
   {
     std::set<std::size_t> result;
-    for (auto i = m_marking.begin(); i != m_marking.end(); ++i)
+    for (const data::variable& v: m_marking)
     {
       // TODO: make this code more efficient
       const stategraph_equation& eqn = *find_equation(p, X.name());
       const std::vector<data::variable>& d = eqn.parameters();
       for (std::vector<data::variable>::const_iterator j = d.begin(); j != d.end(); ++j)
       {
-        if (*i == *j)
+        if (v == *j)
         {
           result.insert(j - d.begin());
           break;
@@ -222,18 +221,18 @@ struct stategraph_global_graph
   void create_index()
   {
     // create an index for the vertices in the control flow graph with a given name
-    for (std::map<propositional_variable_instantiation, stategraph_vertex>::iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (auto &i: m_control_vertices)
     {
-      stategraph_vertex& v = i->second;
+      stategraph_vertex& v = i.second;
       m_stategraph_index[v.X.name()].insert(&v);
     }
   }
 
   bool has_vertex(const stategraph_vertex* u)
   {
-    for (vertex_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (auto& i: m_control_vertices)
     {
-      stategraph_vertex& v = i->second;
+      stategraph_vertex& v = i.second;
       if (&v == u)
       {
         return true;
@@ -245,27 +244,27 @@ struct stategraph_global_graph
   // check internal state
   void self_check()
   {
-    for (vertex_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (auto& i: m_control_vertices)
     {
-      stategraph_vertex& u = i->second;
-      for (std::set<stategraph_edge>::iterator j = u.incoming_edges.begin(); j != u.incoming_edges.end(); ++j)
+      stategraph_vertex& u = i.second;
+      for (const stategraph_edge& e: u.incoming_edges)
       {
-        if (!has_vertex(j->source))
+        if (!has_vertex(e.source))
         {
           std::cout << "error: source not found!" << std::endl;
         }
-        if (!has_vertex(j->target))
+        if (!has_vertex(e.target))
         {
           std::cout << "error: target not found!" << std::endl;
         }
       }
-      for (std::set<stategraph_edge>::iterator j = u.outgoing_edges.begin(); j != u.outgoing_edges.end(); ++j)
+      for (const stategraph_edge& e: u.outgoing_edges)
       {
-        if (!has_vertex(j->source))
+        if (!has_vertex(e.source))
         {
           std::cout << "error: source not found!" << std::endl;
         }
-        if (!has_vertex(j->target))
+        if (!has_vertex(e.target))
         {
           std::cout << "error: target not found!" << std::endl;
         }
@@ -285,26 +284,26 @@ struct stategraph_global_graph
       stategraph_vertex& u = i->second;
 
       std::vector<stategraph_edge> iedges(u.incoming_edges.begin(), u.incoming_edges.end());
-      for (std::vector<stategraph_edge>::iterator j = iedges.begin(); j != iedges.end(); ++j)
+      for (stategraph_edge& e: iedges)
       {
-        stategraph_vertex& v = *(j->source);
+        stategraph_vertex& v = *(e.source);
         stategraph_vertex& v_new = m_control_vertices.find(v.X)->second;
-        j->source = &v_new;
-        stategraph_vertex& w = *(j->target);
+        e.source = &v_new;
+        stategraph_vertex& w = *(e.target);
         stategraph_vertex& w_new = m_control_vertices.find(w.X)->second;
-        j->target = &w_new;
+        e.target = &w_new;
       }
       u.incoming_edges = std::set<stategraph_edge>(iedges.begin(), iedges.end());
 
       std::vector<stategraph_edge> oedges(u.outgoing_edges.begin(), u.outgoing_edges.end());
-      for (std::vector<stategraph_edge>::iterator j = oedges.begin(); j != oedges.end(); ++j)
+      for (stategraph_edge& e: oedges)
       {
-        stategraph_vertex& v = *(j->source);
+        stategraph_vertex& v = *(e.source);
         stategraph_vertex& v_new = m_control_vertices.find(v.X)->second;
-        j->source = &v_new;
-        stategraph_vertex& w = *(j->target);
+        e.source = &v_new;
+        stategraph_vertex& w = *(e.target);
         stategraph_vertex& w_new = m_control_vertices.find(w.X)->second;
-        j->target = &w_new;
+        e.target = &w_new;
       }
       u.outgoing_edges = std::set<stategraph_edge>(oedges.begin(), oedges.end());
     }
@@ -362,13 +361,13 @@ struct stategraph_global_graph
   bool has_label(const core::identifier_string& X, std::size_t label) const
   {
     const std::set<stategraph_vertex*>& inst = index(X);
-    for (std::set<stategraph_vertex*>::const_iterator i = inst.begin(); i != inst.end(); ++i)
+    for (stategraph_vertex* i: inst)
     {
-      stategraph_vertex& u = **i;
+      stategraph_vertex& u = *i;
       std::set<stategraph_edge>& E = u.outgoing_edges;
-      for (std::set<stategraph_edge>::const_iterator j = E.begin(); j != E.end(); ++j)
+      for (const stategraph_edge& e: E)
       {
-        if (j->label == label)
+        if (e.label == label)
         {
           return true;
         }
@@ -380,9 +379,9 @@ struct stategraph_global_graph
   std::string print() const
   {
     std::ostringstream out;
-    for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (const auto& i: m_control_vertices)
     {
-      out << "vertex " << i->second.print() << std::endl;
+      out << "vertex " << i.second.print() << std::endl;
     }
     return out.str();
   }
@@ -391,10 +390,10 @@ struct stategraph_global_graph
   {
     std::ostringstream out;
     out << "--- control flow graph ---" << std::endl;
-    for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (const auto& i: m_control_vertices)
     {
-      const data::variable_list& v = variable_map.find(i->first.name())->second;
-      out << "vertex " << i->second.print(v) << std::endl;
+      const data::variable_list& v = variable_map.find(i.first.name())->second;
+      out << "vertex " << i.second.print(v) << std::endl;
     }
     return out.str();
   }
@@ -402,9 +401,9 @@ struct stategraph_global_graph
   std::string print_marking() const
   {
     std::ostringstream out;
-    for (std::map<propositional_variable_instantiation, stategraph_vertex>::const_iterator i = m_control_vertices.begin(); i != m_control_vertices.end(); ++i)
+    for (const auto& i: m_control_vertices)
     {
-      const stategraph_vertex& v = i->second;
+      const stategraph_vertex& v = i.second;
       out << v.print_marking() << std::endl;
     }
     return out.str();

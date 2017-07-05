@@ -9,8 +9,8 @@
 /// \file data/include/mcrl2/data/rewrite.h
 /// \brief add your file description here.
 
-#ifndef DATA_INCLUDE_MCRL2_DATA_REWRITE_H
-#define DATA_INCLUDE_MCRL2_DATA_REWRITE_H
+#ifndef MCRL2_DATA_REWRITE_H
+#define MCRL2_DATA_REWRITE_H
 
 #include "mcrl2/data/builder.h"
 
@@ -27,7 +27,8 @@ struct rewrite_data_expressions_builder: public Builder<rewrite_data_expressions
   typedef Builder<rewrite_data_expressions_builder<Builder, Rewriter> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
 
   Rewriter R;
 
@@ -35,14 +36,10 @@ struct rewrite_data_expressions_builder: public Builder<rewrite_data_expressions
     : R(R_)
   {}
 
-  data_expression operator()(const data_expression& x)
+  data_expression apply(const data_expression& x)
   {
     return R(x);
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Builder, class Rewriter>
@@ -58,7 +55,8 @@ struct rewrite_data_expressions_with_substitution_builder: public Builder<rewrit
   typedef Builder<rewrite_data_expressions_with_substitution_builder<Builder, Rewriter, Substitution> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
 
   Rewriter R;
   Substitution sigma;
@@ -68,14 +66,10 @@ struct rewrite_data_expressions_with_substitution_builder: public Builder<rewrit
       sigma(sigma_)
   {}
 
-  data_expression operator()(const data_expression& x)
+  data_expression apply(const data_expression& x)
   {
     return R(x, sigma);
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Builder, class Rewriter, class Substitution>
@@ -95,10 +89,10 @@ make_rewrite_data_expressions_with_substitution_builder(Rewriter R, Substitution
 template <typename T, typename Rewriter>
 void rewrite(T& x,
              Rewriter R,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
             )
 {
-  data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R)(x);
+  data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x
@@ -108,10 +102,10 @@ void rewrite(T& x,
 template <typename T, typename Rewriter>
 T rewrite(const T& x,
           Rewriter R,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R)(x);
+  return data::detail::make_rewrite_data_expressions_builder<data::data_expression_builder>(R).apply(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -122,10 +116,10 @@ template <typename T, typename Rewriter, typename Substitution>
 void rewrite(T& x,
              Rewriter R,
              const Substitution& sigma,
-             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+             typename std::enable_if<!std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
             )
 {
-  data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma)(x);
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma).update(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -137,10 +131,10 @@ template <typename T, typename Rewriter, typename Substitution>
 T rewrite(const T& x,
           Rewriter R,
           const Substitution& sigma,
-          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = 0
+          typename std::enable_if<std::is_base_of<atermpp::aterm, T>::value>::type* = nullptr
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma)(x);
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<data::data_expression_builder>(R, sigma).apply(x);
 }
 //--- end generated data rewrite code ---//
 
@@ -148,4 +142,4 @@ T rewrite(const T& x,
 
 } // namespace mcrl2
 
-#endif // DATA_INCLUDE_MCRL2_DATA_REWRITE_H
+#endif // MCRL2_DATA_REWRITE_H

@@ -9,23 +9,16 @@
 /// \file pfnf_rewriter.cpp
 /// \brief Tests for pfnf rewriter.
 
-#include <boost/test/minimal.hpp>
+#include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/detail/pfnf_print.h"
+#include "mcrl2/pbes/detail/pfnf_traverser.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/pfnf_traverser.h"
-#include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/detail/pfnf_print.h"
-
-#define MCRL2_USE_PBESPGSOLVE
-// N.B. The test fails if this flag is not set, due to a problem in pbes2bool.
-
-#ifdef MCRL2_USE_PBESPGSOLVE
-#include "mcrl2/pbes/pbespgsolve.h"
-#endif
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -65,12 +58,12 @@ pbes_system::pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
-void test_pfnf_expression(std::string s)
+void test_pfnf_expression(const std::string& s)
 {
   pbes_system::detail::pfnf_traverser visitor;
   pbes_system::pbes_expression t1 = expr(s);
 std::cerr << "t1 = " << pbes_system::pp(t1) << " " << t1 << std::endl;
-  visitor(t1);
+  visitor.apply(t1);
   pbes_system::pbes_expression t2 = visitor.evaluate();
 std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
   data::rewriter datar;
@@ -134,18 +127,15 @@ void test_pfnf_rewriter()
   pbes_expression y = R(x);
 }
 
-void test_pfnf_rewriter2(const std::string& text)
+void test_pfnf_rewriter2(const std::string& text, const bool expected_result)
 {
   pbes p = txt2pbes(text);
   std::cout << "\ntest_pfnf_rewriter2\n" << std::endl;
   std::cout << "--- before ---\n";
   std::cout << pbes_system::pp(p) << std::endl;
 
-#ifdef MCRL2_USE_PBESPGSOLVE
-  bool result1 = pbespgsolve(p);
-#else
-  bool result1 = pbes2_bool_test(p);
-#endif
+  bool solution = detail::pbes2bool(p);
+  BOOST_CHECK(solution == expected_result);
 
   pfnf_rewriter R;
   pbes_rewrite(p, R);
@@ -154,12 +144,8 @@ void test_pfnf_rewriter2(const std::string& text)
   std::cout << pbes_system::pp(p) << std::endl;
 
   BOOST_CHECK(p.is_well_typed());
-#ifdef MCRL2_USE_PBESPGSOLVE
-  bool result2 = pbespgsolve(p);
-#else
-  bool result2 = pbes2_bool_test(p);
-#endif
-  BOOST_CHECK(result1 == result2);
+  solution = detail::pbes2bool(p);
+  BOOST_CHECK(solution == expected_result);
 }
 
 void test_pfnf_rewriter2()
@@ -171,7 +157,7 @@ void test_pfnf_rewriter2()
     "                                                             \n"
     "init X;                                                      \n"
     ;
-  test_pfnf_rewriter2(text);
+  test_pfnf_rewriter2(text,false);
 
   text =
     "pbes                                                                                   \n"
@@ -193,7 +179,7 @@ void test_pfnf_rewriter2()
     "                                                                                                                                                                                      \n"
     "init X0(0);                                                                                                                                                                           \n"
     ;
-  test_pfnf_rewriter2(text);
+  test_pfnf_rewriter2(text,true);
 }
 
 void test_is_pfnf()

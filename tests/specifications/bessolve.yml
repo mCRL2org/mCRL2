@@ -1,0 +1,29 @@
+nodes:
+  l1:
+    type: BesSpec
+  l2:
+    type: BES
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2bes
+  t2:
+    input: [l2]
+    output: []
+    args: [-sgauss]
+    name: bessolve
+  t3:
+    input: [l2]
+    output: []
+    args: [-sspm]
+    name: bessolve
+  t4:
+    input: [l2]
+    output: []
+    args: []
+    name: pbes2bool
+result: |
+  result = t2.value['solution'] == t3.value['solution'] == t4.value['solution']

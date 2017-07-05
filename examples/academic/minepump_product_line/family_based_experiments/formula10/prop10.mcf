@@ -1,0 +1,46 @@
+%% Products have the feature Ct and can switch on the pump
+%%
+%% Fails (obviously) for all non-Ct products. Holds for 32 products and fails
+%% for 96 products. Proving that it holds requires two distinct subfamilies
+%% Proving that it fails for the 96 products can be done by showing that it
+%% fails for the entire subfamily at once.
+
+nu A.
+(
+(forall Pz:FExpr.
+( val(Pz in
+[and(atom(Ct), and(atom(Mq),atom(Lh))),
+and(atom(Ct), and(neg(atom(Mq)),atom(Lh)))
+]
+)
+ =>
+ (mu Y(Py:FExpr = normalise(and(Pz,FD))).
+   (
+    (val(normalise(or(neg(Py),atom(Ct))) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py),e)) == tt) && Y(Py))))
+  ||(val(normalise(or(neg(Py),atom(Ct))) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Py),e)) == tt) )))
+  ||(val(normalise(or(neg(Py),atom(Ct))) == tt) && <skip>(Y(Py)))
+   )
+ )
+)
+)
+&&
+(
+forall Pz:FExpr.
+( val(Pz in
+[
+neg(and(atom(Lh),atom(Ct)))
+]
+)
+ =>
+ 
+ (nu Y(Py:FExpr = normalise(and(Pz,FD))).
+   (
+    (val(normalise(and(Py,atom(Ct))) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Py,and(atom(Ct),e))) != ff) => Y(normalise(and(Py,and(atom(Ct),e))) ))))
+   &&
+    (val(normalise(and(Py,atom(Ct))) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Py,and(atom(Ct),e))) != ff) => false)))
+  &&(val(normalise(and(Py,atom(Ct))) != ff) => [skip](Y(and(atom(Ct),Py))))
+   )
+ )
+)
+)
+)

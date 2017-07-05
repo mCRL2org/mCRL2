@@ -1,6 +1,6 @@
 % This file contains a variant of the mCRL2 version of the sliding window protocol
-% as it occurs in the book "Modelling Reactive Systems" by Fokkink, Groote
-% and Reniers. The buffers are modelled using lists instead of functions as is
+% as it occurs in the book "Modeling and analysis of communicating systems" by Groote 
+% and Mousavi, MIT Press 2014. The buffers are modelled using lists instead of functions as is
 % done in swp_func.mcrl2.
 %
 % The `constant' n is the size of the buffers in the protocol, set to 2.

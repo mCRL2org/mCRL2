@@ -11,12 +11,12 @@
 
 #define BOOST_TEST_MODULE index_traits
 
-#include <iostream>
 #include <boost/test/included/unit_test.hpp>
+#include <iostream>
 
-#include "mcrl2/data/index_traits.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/detail/io.h"
+#include "mcrl2/data/index_traits.h"
 
 using namespace mcrl2;
 

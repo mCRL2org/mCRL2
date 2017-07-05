@@ -11,7 +11,7 @@ A Telephone Book
 none.
 
 In this section we describe the model of a telephone book in
-mCRL2. This example is based on the Phone Book example in [CORSS95]_.
+mCRL2. 
 We base our model on the following requirements:
 
 #. A phone book shall store phone numbers.

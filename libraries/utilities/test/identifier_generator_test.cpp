@@ -9,11 +9,11 @@
 /// \file identifier_generator_test.cpp
 /// \brief Test for identifier generators.
 
+#include "mcrl2/utilities/number_postfix_generator.h"
+#include <boost/test/included/unit_test_framework.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/utilities/number_postfix_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -69,5 +69,5 @@ BOOST_AUTO_TEST_CASE(identifier_generator_test)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

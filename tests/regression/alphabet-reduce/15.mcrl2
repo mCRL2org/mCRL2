@@ -1,0 +1,3 @@
+act a;
+
+init allow({a}, tau);

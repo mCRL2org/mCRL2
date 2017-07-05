@@ -6,11 +6,6 @@ Follow these steps to create an FSM file for input to the visualization tools:
    the lineariser:
    $ mcrl22lps foo.mcrl2 foo.lps
 
-3. Now generate a state space in mCRL2 SVC format:
-   $ lps2lts foo.lps foo.svc
+3. Now generate a state space in mCRL2 fsm format:
+   $ lps2lts foo.lps foo.fsm
 
-4. Finally, convert this state space to FSM format as follows:
-   $ ltsconvert -l foo.lps foo.svc foo.fsm
-
-Supplying the LPS to ltsconvert (via the -l option) is required to obtain
-correct state parameter information in the resulting FSM file.

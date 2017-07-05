@@ -25,17 +25,17 @@ template <class ELEMENT>
 class indexed_set
 {
   protected:
-    size_t sizeMinus1;
+    std::size_t sizeMinus1;
     unsigned int max_load;
-    size_t nr_of_insertions_until_next_rehash;
-    std::vector<size_t> hashtable;
+    std::size_t nr_of_insertions_until_next_rehash;
+    std::vector<std::size_t> hashtable;
     std::deque <ELEMENT > m_keys;
-    std::stack < size_t > free_positions; 
+    std::stack < std::size_t > free_positions; 
 
     /* Find whether the key is already inserted in the hashtable.
        If no, insert n as the index for key. If yes return its already
        existing index */
-    size_t put_in_hashtable(const ELEMENT& key, size_t n);
+    std::size_t put_in_hashtable(const ELEMENT& key, std::size_t n);
 
     /* Double the size of the hashtable. */
     void resize_hashtable();
@@ -43,12 +43,12 @@ class indexed_set
   public:
     /// \brief A constant that if returned as an index means that the index does not exist.
     //         In general this means that a requested element is not in the set.
-    static const size_t npos=static_cast<size_t>(-1);
+    static const std::size_t npos=static_cast<std::size_t>(-1);
 
     /// Create a new indexed_set.
     /// \param initial_size The initial capacity of the set.
     /// \param max_load_pct The maximum load percentage.
-    indexed_set(size_t initial_size = 100, unsigned int max_load_pct = 75);
+    indexed_set(std::size_t initial_size = 100, unsigned int max_load_pct = 75);
 
     /// \brief Clear the hash table in the set.
     /// This function clears the hash table in the set, but does not release the memory.
@@ -56,20 +56,20 @@ class indexed_set
     /// approximately the same size are being used.
     void clear();
 
-    /// \brief Enter an element into the set.
-    /// This functions enters elem into the set. If elem was already in the set the previously
-    /// assigned index of elem is returned, and the boolean is set to false. If elem did not yet occur in set a
+    /// \brief Enter an element with the indicated key into the set.
+    /// \details This functions enters an element with the indicated key into the set. If elem was already in the set the previously
+    /// assigned index of \a key is returned, and the boolean is set to false. If \a key did not yet occur in set a
     /// new number is assigned, and the boolean is set to true.  This number can either be the number of an
     /// element that has been removed, or, if such a number is not available, the lowest non used number
     /// is assigned to elem and returned. The lowest number that is used is 0.
-    /// \param elem A term.
+    /// \param[in] key An element to be put in the set.
     /// \return A pair denoting the index of the element in the set, and a boolean denoting whether the term
     /// was already contained in the set.
-    std::pair<size_t, bool> put(const ELEMENT& elem);
+    std::pair<std::size_t, bool> put(const ELEMENT& key);
 
     /// \brief Find the index of elem in set.
     /// The index assigned to elem is returned, except when elem is not in the set, in
-    /// which case the return value is indexed_set::npos, i.e. the largest number in size_t.
+    /// which case the return value is indexed_set::npos, i.e. the largest number in std::size_t.
     /// \param elem An element of the set.
     /// \return The index of the element.
     ssize_t index(const ELEMENT& elem) const;
@@ -79,12 +79,12 @@ class indexed_set
     /// will be added first.
     /// \param elem An element of the set.
     /// \return The index of the element.
-    size_t operator[](const ELEMENT& elem)
+    std::size_t operator[](const ELEMENT& elem)
     {
       std::size_t result = index(elem);
       if (result == npos)
       {
-        std::pair<size_t, bool> p=put(elem);
+        std::pair<std::size_t, bool> p=put(elem);
         if(!p.second)
         {
           throw std::runtime_error("failed to add element to indexed set");
@@ -99,19 +99,19 @@ class indexed_set
     /// to this index. If it is invoked with an invalid index, effects are not predictable.
     /// \param index A positive number.
     /// \return The element in the set with the given index.
-    const ELEMENT& get(size_t index) const;
+    const ELEMENT& get(std::size_t index) const;
 
     /// \brief Indicates whether a certain index is defined.
     /// \param index A positive number.
     /// \return The element in the set with the given index.
-    bool defined(size_t index) const;
+    bool defined(std::size_t index) const;
 
-    /// \brief Remove elem from set. 
-    /// The elem is removed from the indexed set, and if a number was assigned to elem, 
-    /// it is freed to be reassigned to an element, that may be put into the set at some later instance. 
-    /// \param elem An element of the set. 
+    /// \brief Remove an element from set. 
+    /// \details The element with the indicated key is removed from the indexed set, and if a number was assigned to it, 
+    /// this number is freed to be reassigned to another element, that may be put into the set at some later instance. 
+    /// \param key The key of the element that is removed. 
     /// \return whether the element was successfully removed. 
-    bool erase(const ELEMENT& elem); 
+    bool erase(const ELEMENT& key); 
 
     /// \brief Returns the size of the indexed set.
     std::size_t size() const

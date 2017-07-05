@@ -13,9 +13,9 @@
 #define MCRL2_PROCESS_PROCESS_IDENTIFIER_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/hash.h"
@@ -99,6 +99,7 @@ std::string pp(const process_identifier& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_identifier& x)
@@ -116,7 +117,7 @@ inline void swap(process_identifier& t1, process_identifier& t2)
 // template function overloads
 std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
-void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);
+void normalize_sorts(process_identifier_vector& x, const data::sort_specification& sortspec);
 
 } // namespace process
 

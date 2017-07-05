@@ -17,20 +17,16 @@
 #include <map>
 #include <set>
 #include <sstream>
-#include <utility>
 #include <type_traits>
+#include <utility>
 
-// #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+#include <functional>
 
-#include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
@@ -54,7 +50,7 @@ class data_property_map
 
     /// \brief Add start/end separators for non-set container types
     template < typename Container >
-    static std::string add_separators(std::string const& c, typename std::enable_if< atermpp::is_set< Container >::value >::type* = 0)
+    static std::string add_separators(std::string const& c, typename std::enable_if< atermpp::is_set< Container >::value >::type* = nullptr)
     {
       return "[" + c + "]";
     }
@@ -72,7 +68,7 @@ class data_property_map
     //--------------------------------------------//
     // print functions
     //--------------------------------------------//
-    std::string print(size_t n) const
+    std::string print(std::size_t n) const
     {
       std::ostringstream out;
       out << n;
@@ -95,11 +91,11 @@ class data_property_map
     }
 
     template < typename Container >
-    std::string print(const Container& v, typename atermpp::enable_if_container< Container >::type* = 0) const
+    std::string print(const Container& v, typename atermpp::enable_if_container< Container >::type* = nullptr) const
     {
       std::set<std::string> elements;
 
-      for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
         elements.insert(static_cast< Derived const& >(*this).print(*i));
       }
@@ -108,16 +104,10 @@ class data_property_map
     }
 
     template < typename Container >
-    std::string print(const Container& v, bool print_separators, typename atermpp::enable_if_container< Container >::type* = 0) const
+    std::string print(const Container& v, bool print_separators, typename atermpp::enable_if_container< Container >::type* = nullptr) const
     {
       return (print_separators) ? add_separators< Container >(print(v)) : print(v);
     }
-
-    /* template < typename Expression >
-    std::string print(const atermpp::term_list< Expression >& v, bool print_separators = true) const
-    {
-      return print(boost::make_iterator_range(v), print_separators);
-    } */
 
     //--------------------------------------------//
     // parse functions
@@ -129,24 +119,20 @@ class data_property_map
 
     std::set<std::string> parse_set_string(std::string const& text) const
     {
-      std::vector<std::string> v;
-      boost::algorithm::split(v, text, boost::algorithm::is_any_of(","));
-      std::for_each(v.begin(), v.end(), boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
+      std::vector<std::string> v = utilities::split(text, ",");
+      std::for_each(v.begin(), v.end(), utilities::trim);
       return std::set<std::string>(v.begin(), v.end());
     }
 
     std::set<std::multiset<std::string> > parse_set_multiset_string(std::string const& text) const
     {
       std::set<std::multiset<std::string> > result;
-
-      std::set<std::string> multisets;
-      boost::algorithm::split(multisets, text, boost::algorithm::is_any_of(";"));
-      for (std::set<std::string>::iterator i = multisets.begin(); i != multisets.end(); ++i)
+      std::vector<std::string> multisets = utilities::split(text, ";");
+      for (const std::string& ms: multisets)
       {
-        std::string s = utilities::regex_replace("[{}]", "", *i);
-        std::vector<std::string> v;
-        boost::algorithm::split(v, s, boost::algorithm::is_any_of(","));
-        std::for_each(v.begin(), v.end(), boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
+        std::string s = utilities::regex_replace("[{}]", "", ms);
+        std::vector<std::string> v = utilities::split(s, ",");
+        std::for_each(v.begin(), v.end(), utilities::trim);
         result.insert(std::multiset<std::string>(v.begin(), v.end()));
       }
       return result;
@@ -157,7 +143,7 @@ class data_property_map
     //--------------------------------------------//
     /// \brief Compares two integers, and returns a message if they are different.
     /// If if they are equal the empty string is returned.
-    std::string compare(std::string property, unsigned int x, unsigned int y) const
+    std::string compare(const std::string& property, unsigned int x, unsigned int y) const
     {
       if (x != y)
       {
@@ -175,7 +161,7 @@ class data_property_map
     /// operation must be defined.
     /// If no differences are found the empty string is returned.
     template <typename T>
-    std::string compare(std::string property, const std::set<T>& x, const std::set<T>& y) const
+    std::string compare(const std::string& property, const std::set<T>& x, const std::set<T>& y) const
     {
       std::ostringstream out;
 
@@ -190,11 +176,11 @@ class data_property_map
       if (!plus.empty() || !minus.empty())
       {
         out << "Difference in property " << property << " detected:";
-        for (typename std::set<T>::iterator i = plus.begin(); i != plus.end(); ++i)
+        for (auto i = plus.begin(); i != plus.end(); ++i)
         {
           out << " +" << print(*i);
         }
-        for (typename std::set<T>::iterator i = minus.begin(); i != minus.end(); ++i)
+        for (auto i = minus.begin(); i != minus.end(); ++i)
         {
           out << " -" << print(*i);
         }
@@ -208,7 +194,7 @@ class data_property_map
     /// be redefined in derived classes.
     /// \return An empty string if the two values are equal, otherwise a string indicating
     /// the differences between the two.
-    std::string compare_property(std::string property, std::string /* x */, std::string /* y */) const
+    std::string compare_property(const std::string& property, const std::string& /* x */, const std::string& /* y */) const
     {
       return "ERROR: unknown property " + property + " encountered!";
     }
@@ -220,9 +206,9 @@ class data_property_map
     unsigned int max_key_length() const
     {
       unsigned int result = 0;
-      for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
+      for (auto i = m_data.begin(); i != m_data.end(); ++i)
       {
-        result = (std::max)(static_cast< size_t >(result), i->first.size());
+        result = (std::max)(static_cast< std::size_t >(result), i->first.size());
       }
       return result;
     }
@@ -242,7 +228,7 @@ class data_property_map
     std::set<core::identifier_string> names(const Container& v) const
     {
       std::set<core::identifier_string> result;
-      for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
+      for (auto i = v.begin(); i != v.end(); ++i)
       {
         result.insert(i->name());
       }
@@ -258,14 +244,13 @@ class data_property_map
     /// <tt>KEY = VALUE</tt> format.
     void parse_text(const std::string& text)
     {
-      std::vector<std::string> lines = utilities::split(text, "\n");
-      for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+      for (const std::string& line: utilities::split(text, "\n"))
       {
-        std::vector<std::string> words = utilities::split(*i, "=");
+        std::vector<std::string> words = utilities::split(line, "=");
         if (words.size() == 2)
         {
-          boost::trim(words[0]);
-          boost::trim(words[1]);
+          utilities::trim(words[0]);
+          utilities::trim(words[1]);
           m_data[words[0]] = words[1];
         }
       }
@@ -283,7 +268,7 @@ class data_property_map
     {
       unsigned int n = max_key_length();
       std::vector<std::string> lines;
-      for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
+      for (auto i = m_data.begin(); i != m_data.end(); ++i)
       {
         lines.push_back(align(i->first, n) + " = " + i->second);
       }
@@ -354,4 +339,4 @@ bool compare_property_maps(const std::string& message, const PropertyMap& map1, 
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_DETAIL_SPECIFICATION_PROPERTY_MAP_H
+#endif // MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H

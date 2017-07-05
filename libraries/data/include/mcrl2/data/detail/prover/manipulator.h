@@ -9,8 +9,8 @@
 /// \file mcrl2/data/detail/prover/manipulator.h
 /// \brief Interface to classes Manipulator.
 
-#ifndef MANIPULATOR_H
-#define MANIPULATOR_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_MANIPULATOR_H
+#define MCRL2_DATA_DETAIL_PROVER_MANIPULATOR_H
 
 #include "mcrl2/data/detail/prover/info.h"
 
@@ -49,12 +49,18 @@ class Manipulator
         return a_formula;
       }
 
+      if (is_abstraction(a_formula))
+      {
+        const abstraction t(a_formula);
+        return abstraction(t.binding_operator(), t.variables(), set_true_auxiliary(t.body(), a_guard, f_set_true));
+      }
+
       if (a_formula == a_guard)
       {
         return sort_bool::true_();
       }
 
-      if (f_info.is_equality(a_guard))
+      if (is_equal_to_application(a_guard))
       {
         const application& a = atermpp::down_cast<application>(a_guard);
         if (a[1]==a_formula)
@@ -95,6 +101,12 @@ class Manipulator
       if (is_function_symbol(a_formula))
       {
         return a_formula;
+      }
+
+      if (is_abstraction(a_formula))
+      {
+        const abstraction t(a_formula);
+        return abstraction(t.binding_operator(), t.variables(), set_true_auxiliary(t.body(), a_guard, f_set_false));
       }
 
       if (a_formula == a_guard)
@@ -169,9 +181,15 @@ class Manipulator
     /// \brief replaced by t2 == t1 if t1 > t2.
     data_expression orient(const data_expression& a_term)
     {
-      if (is_variable(a_term) || is_function_symbol(a_term) || is_abstraction(a_term) || is_where_clause(a_term))
+      if (is_variable(a_term) || is_function_symbol(a_term) || is_where_clause(a_term))
       {
         return a_term;
+      }
+
+      if (is_abstraction(a_term))
+      {
+        const abstraction a(atermpp::down_cast<abstraction>(a_term));
+        return abstraction(a.binding_operator(), a.variables(), orient(a.body()));
       }
 
       std::map < data_expression, data_expression> :: const_iterator it=f_orient.find(a_term);
@@ -183,7 +201,7 @@ class Manipulator
       const application& a = atermpp::down_cast<application>(a_term);
       /*const atermpp::function_symbol& v_symbol = a_term.function();
       const data::function_symbol& v_function = atermpp::down_cast<data::function_symbol>(a_term[0]);
-      size_t v_arity = v_symbol.arity(); */
+      std::size_t v_arity = v_symbol.arity(); */
 
       data_expression_vector v_parts;
       for (auto i = a.begin(); i !=a.end(); ++i)
@@ -192,7 +210,7 @@ class Manipulator
       }
       application v_result(orient(a.head()), v_parts);
 
-      if (f_info.is_equality(v_result))
+      if (is_equal_to_application(v_result))
       {
         const data_expression& v_term1(v_result[0]);
         const data_expression& v_term2(v_result[1]);
@@ -227,8 +245,8 @@ class Manipulator
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

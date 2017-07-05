@@ -1,0 +1,32 @@
+nodes:
+  l1:
+    type: PbesSpec
+  l2:
+    type: PBES
+  l3:
+    type: PBES
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: pbesconstelm
+  t3:
+    input: [l2]
+    output: []
+    args: []
+    name: pbes2bool
+  t4:
+    input: [l3]
+    output: []
+    args: []
+    name: pbes2bool
+result: |
+  result = t3.value['solution'] == t4.value['solution']
+

@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/detail/lps_parameter_remover.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
@@ -58,22 +57,107 @@ struct is_singleton_sort
   }
 };
 
+/// \brief Traverser for removing parameters from LPS data types.
+/// These parameters can be either process parameters or free variables.
+/// Assignments to these parameters are removed as well.
+struct remove_parameters_builder: public data_expression_builder<remove_parameters_builder>
+{
+  typedef data_expression_builder<remove_parameters_builder> super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+  using super::update;
+
+  const std::set<data::variable>& to_be_removed;
+
+  remove_parameters_builder(const std::set<data::variable>& to_be_removed_)
+    : to_be_removed(to_be_removed_)
+  {}
+
+  /// \brief Removes parameters from a set container.
+  void update(std::set<data::variable>& x)
+  {
+    for (const data::variable& v: to_be_removed)
+    {
+      x.erase(v);
+    }
+  }
+
+  /// \brief Removes parameters from a list of variables.
+  data::variable_list apply(const data::variable_list& x)
+  {
+  	using utilities::detail::contains;
+
+    std::vector<data::variable> result;
+    for (const data::variable& v: x)
+    {
+      if (!contains(to_be_removed, v))
+      {
+        result.push_back(v);
+      }
+    }
+    return data::variable_list(result.begin(), result.end());
+  }
+
+  /// \brief Removes parameters from a list of assignments.
+  /// Assignments to removed parameters are removed.
+  data::assignment_list apply(const data::assignment_list& x)
+  {
+    using utilities::detail::contains;
+    std::vector<data::assignment> a(x.begin(), x.end());
+    a.erase(std::remove_if(a.begin(), a.end(), [&](const data::assignment& y) {	return contains(to_be_removed, y.lhs()); }), a.end());
+    return data::assignment_list(a.begin(), a.end());
+  }
+
+  /// \brief Removes parameters from a linear_process
+  /// \param x A linear_process
+  void update(linear_process& x)
+  {
+    super::update(x);
+    x.process_parameters() = apply(x.process_parameters());
+  }
+
+  /// \brief Removes parameters from a linear_process
+  /// \param x A linear_process
+  void update(stochastic_linear_process& x)
+  {
+    super::update(x);
+    x.process_parameters() = apply(x.process_parameters());
+  }
+
+  /// \brief Removes parameters from a linear process specification
+  /// \param x A linear process specification
+  void update(specification& x)
+  {
+    super::update(x);
+    update(x.global_variables());
+  }
+
+  /// \brief Removes parameters from a linear process specification
+  /// \param x A linear process specification
+  void update(stochastic_specification& x)
+  {
+    super::update(x);
+    update(x.global_variables());
+  }
+};
+
 } // namespace detail
 
 /// \brief Rewrites an LPS data type.
-template <typename Object, typename SetContainer>
-void remove_parameters(Object& o, const SetContainer& to_be_removed)
+template <typename Object>
+void remove_parameters(Object& x, const std::set<data::variable>& to_be_removed)
 {
-  lps::detail::lps_parameter_remover<SetContainer> r(to_be_removed);
-  r(o);
+  detail::remove_parameters_builder f(to_be_removed);
+  f.update(x);
 }
 
 /// \brief Removes summands with condition equal to false from a linear process specification
 /// \param spec A linear process specification
-inline
-void remove_trivial_summands(specification& spec)
+template <typename Specification>
+void remove_trivial_summands(Specification& spec)
 {
-  action_summand_vector& v = spec.process().action_summands();
+  auto& v = spec.process().action_summands();
   v.erase(std::remove_if(v.begin(), v.end(), lps::detail::is_trivial_summand()), v.end());
 
   deadlock_summand_vector& w = spec.process().deadlock_summands();
@@ -82,18 +166,17 @@ void remove_trivial_summands(specification& spec)
 
 /// \brief Removes parameters with a singleton sort from a linear process specification
 /// \param spec A linear process specification
-inline
-void remove_singleton_sorts(specification& spec)
+template <typename Specification>
+void remove_singleton_sorts(Specification& spec)
 {
   data::mutable_map_substitution<> sigma;
   std::set<data::variable> to_be_removed;
-  const data::variable_list& p = spec.process().process_parameters();
-  for (auto i = p.begin(); i != p.end(); ++i)
+  for (const data::variable& v: spec.process().process_parameters())
   {
-    if (lps::detail::is_singleton_sort(spec.data())(i->sort()))
+    if (lps::detail::is_singleton_sort(spec.data())(v.sort()))
     {
-      sigma[*i] = *spec.data().constructors(i->sort()).begin();
-      to_be_removed.insert(*i);
+      sigma[v] = *spec.data().constructors(v.sort()).begin();
+      to_be_removed.insert(v);
     }
   }
   lps::replace_variables(spec, sigma);
@@ -102,25 +185,25 @@ void remove_singleton_sorts(specification& spec)
 
 /// \brief Removes assignments of the form x := x from v for variables x that are not contained in do_not_remove.
 inline
-data::assignment_list remove_redundant_assignments(const data::assignment_list& v, const data::variable_list& do_not_remove)
+data::assignment_list remove_redundant_assignments(const data::assignment_list& assignments, const data::variable_list& do_not_remove)
 {
   using utilities::detail::contains;
 
   std::vector<data::assignment> result;
-  for (auto i = v.begin(); i != v.end(); ++i)
+  for (const data::assignment& a: assignments)
   {
-    if (i->lhs() != i->rhs() || contains(do_not_remove, i->lhs()))
+    if (a.lhs() != a.rhs() || contains(do_not_remove, a.lhs()))
     {
-      result.push_back(*i);
+      result.push_back(a);
     }
   }
   return data::assignment_list(result.begin(), result.end());
 }
 
 /// \brief Removes redundant assignments of the form x = x from an LPS specification
-/// \param spec A linear process specification
-inline
-void remove_redundant_assignments(specification& lpsspec)
+/// \param lpsspec A linear process specification
+template <typename Specification>
+void remove_redundant_assignments(Specification& lpsspec)
 {
   auto& summands = lpsspec.process().action_summands();
   for (auto i = summands.begin(); i != summands.end(); ++i)

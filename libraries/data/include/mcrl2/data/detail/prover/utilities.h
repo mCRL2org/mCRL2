@@ -9,8 +9,8 @@
 /// \file mcrl2/data/detail/prover/utilities.h
 /// \brief Miscellaneous utility functions
 
-#ifndef UTILITIES_H
-#define UTILITIES_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_UTILITIES_H
+#define MCRL2_DATA_DETAIL_PROVER_UTILITIES_H
 
 #include <cmath>
 
@@ -33,8 +33,8 @@ inline const char* bool_to_char_string(bool b)
   return (b) ? "true" : "false";
 }
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

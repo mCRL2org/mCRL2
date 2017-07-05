@@ -26,17 +26,13 @@ struct communicating_lpe_traverser: public process_expression_traverser<communic
   typedef process_expression_traverser<communicating_lpe_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   bool result;
 
   communicating_lpe_traverser()
     : result(true)
   {}
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 
   void enter(const process::process_instance&)
   {
@@ -119,7 +115,7 @@ inline
 bool is_communicating_lpe(const process::process_expression& x)
 {
   detail::communicating_lpe_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

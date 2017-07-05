@@ -1,0 +1,3 @@
+act a: Bool -> Bool;
+proc P = tau.P; 
+init P;

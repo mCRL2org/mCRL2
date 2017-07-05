@@ -14,8 +14,8 @@
 
 #include <sstream>
 
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2

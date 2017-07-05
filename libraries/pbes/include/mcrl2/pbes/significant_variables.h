@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_SIGNIFICANT_VARIABLES_H
 #define MCRL2_PBES_SIGNIFICANT_VARIABLES_H
 
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/traverser.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -26,7 +26,7 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
   typedef pbes_expression_traverser<significant_variables_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<std::set<data::variable> > result_stack;
 
@@ -61,7 +61,7 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
   {
     std::set<data::variable> right = pop();
     std::set<data::variable> left = pop();
-    push(data::detail::set_union(left, right));
+    push(utilities::detail::set_union(left, right));
   }
 
   void leave(const and_& /* x */)
@@ -81,19 +81,17 @@ struct significant_variables_traverser: public pbes_expression_traverser<signifi
 
   void leave(const exists& x)
   {
-    const data::variable_list& v = x.variables();
-    for (auto i = v.begin(); i != v.end(); ++i)
+    for (const data::variable& v: x.variables())
     {
-      top().erase(*i);
+      top().erase(v);
     }
   }
 
   void leave(const forall& x)
   {
-    const data::variable_list& v = x.variables();
-    for (auto i = v.begin(); i != v.end(); ++i)
+    for (const data::variable& v: x.variables())
     {
-      top().erase(*i);
+      top().erase(v);
     }
   }
 
@@ -114,7 +112,7 @@ inline
 std::set<data::variable> significant_variables(const pbes_expression& x)
 {
   detail::significant_variables_traverser f;
-  f(x);
+  f.apply(x);
   return f.result_stack.back();
 }
 

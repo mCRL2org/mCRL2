@@ -1,4 +1,6 @@
 % The Royal Game of Goose (in Dutch: Het oudholands ganzenbord)
+% [This is a non-stochastic variant. For the stochastic variant see the
+%  directory with stochastic examples]
 % 
 % We model the Royal Game of Goose in mCRL2. Using this we can determine
 % what the probability is of the various players to win. Roughly the rules

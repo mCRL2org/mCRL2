@@ -13,7 +13,6 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 
@@ -27,16 +26,16 @@ void test_aterm_function()
   atermpp::aterm x ( read_term_from_string("x"));
 
   aterm_appl a(sym, x);
-  BOOST_CHECK(to_string(a) == "f(x)");
+  BOOST_CHECK(pp(a) == "f(x)");
   BOOST_CHECK(a.function() == sym);
 
-  string s = to_string(a);
+  string s = pp(a);
   aterm_appl b ( read_term_from_string(s));
-  BOOST_CHECK(to_string(a) == "f(x)");
+  BOOST_CHECK(pp(a) == "f(x)");
   BOOST_CHECK(b.function() == sym); 
 
   aterm_appl c (read_term_from_string(s));
-  BOOST_CHECK(to_string(c) == "f(x)");
+  BOOST_CHECK(pp(c) == "f(x)");
   BOOST_CHECK(c.function() == sym); 
 
   aterm_appl f ( read_term_from_string("f(g(a,b),c)"));

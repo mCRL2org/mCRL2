@@ -180,24 +180,24 @@ proc  Lift2(n:Nat,m:Nat,nos:Nat,s:State,c:Bool) =
 	    )
 	  );
 
-proc  Lift3(n:Nat,m:Nat,nos:Nat,s:State,count:Nat) =
+proc  Lift3(n:Nat,m:Nat,nos:Nat,s:State,count_:Nat) =
 	(s != STANDBY ) -> released(n).Lift3(n,m,nos,STANDBY,nos)<>delta
 	+
 	sum msg:Message.
 	  r_btos(msg,n).
-	  %move(n,s).Lift3(n,m,nos,s,count)
+	  %move(n,s).Lift3(n,m,nos,s,count_)
 	  ( (address(msg) == P(m)) ->
 	    ( (s == STANDBY) ->
 	      s_stob(mes(m,STANDBY),n).Lift2(n,m,nos,STANDBY,false)
-	    <> ( (state(msg) == s && count == 2) ->
+	    <> ( (state(msg) == s && count_ == 2) ->
 		s_stob(mes(m,SYNC),n).move(n,s).s_stob(mes(m,s),n).
 		Lift3(n,m,nos,s,nos)
 	      <> s_stob(mes(m,s),n).Lift3(n,m,nos,s,nos)
 	      )
 	    )
 	  <> (  (state(msg) == s)
-	    -> Lift3(n,m,nos,s,P(count))
-	    <> Lift3(n,m,nos,s,count)
+	    -> Lift3(n,m,nos,s,P(count_))
+	    <> Lift3(n,m,nos,s,count_)
 	    )
 	  );
 

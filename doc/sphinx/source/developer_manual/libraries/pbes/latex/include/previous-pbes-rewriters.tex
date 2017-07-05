@@ -1,0 +1,122 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{PBES rewriters}
+
+\subsection{Quantifier Elimination Rewriter}
+
+This section describes a rewriter on predicate formulae that eliminates
+quantifiers. It is based on the following property%
+\begin{equation*}
+\begin{array}{cc}
+\forall _{x:X}.\varphi \equiv \dbigwedge\limits_{y:X}\varphi \lbrack
+x:=y]\quad & \exists _{x:X}.\varphi \equiv \dbigvee\limits_{y:X}\varphi
+\lbrack x:=y],%
+\end{array}%
+\end{equation*}
+
+where the conjunction and disjunction on the right hand sides may be
+infinite. Because of this, the rewriter we describe here is not guaranteed
+to terminate. However, in many practical cases the rewriter can compute a
+finite expression even if the quantifier variables are of infinite sort. An
+example of this is the formula $\forall _{n:\mathbb{N}}.(n>2)\vee X(n)$ that
+can be rewritten into $X(0)\wedge X(1)\wedge X(2)$.
+
+We assume that the sorts of quantifier variables can be enumerated. By this
+we mean the existence of a function $enum$ that maps an arbitrary term $d:D$
+to a finite set of terms $\{d_{1},\cdots ,d_{k}\}$, such that $%
+range(d)=\dbigcup\limits_{i=1\cdots k}range(d_{i})$, where $range(d)$ is the
+set of closed terms obtained from $d$ by substituting values for the free
+variables of $d$. For example, if natural numbers are represented by $%
+S^{n}(0)$, with $S$ a function that expresses the successor of a number,
+then possible enumerations of the term $n$ are $\{0,S(n^{\prime })\}$ and $%
+\{0,S(0),S(S(n^{\prime \prime }))\}$. Let $id$ be the identity function and
+let $\sigma \lbrack d_{1}:=e_{1},\cdots ,d_{n}:=e_{n}]$ be the function $%
+\sigma ^{\prime }$ with $\sigma ^{\prime }(x)=e_{i}$ if $x=d_{i}$ and $%
+\sigma ^{\prime }(x)=\sigma (x)$ otherwise.
+
+A parameter of the \textsc{EliminateQuantifiers }algorithm is a rewriter $R$
+on quantifier free predicate formulae, that is expected to have the
+following properties:%
+\begin{eqnarray*}
+R(\bot ) &=&\bot \\
+(R(t) &=&R(t^{\prime }))\Rightarrow t\simeq t^{\prime }\text{,}
+\end{eqnarray*}%
+where $t\simeq t^{\prime }$ indicates that $t$ and $t^{\prime }$ are
+equivalent. 
+\begin{equation*}
+\begin{tabular}{l}
+\textsc{EliminateQuantifiers(}$Q_{d_{1}:D_{1},\ldots ,d_{n}:D_{n}}.\varphi
+,R $\textsc{)} \\ 
+$\text{\textbf{if }}freevars(R(\varphi ))\cap \{d_{1},\cdots
+,d_{n}\}=\emptyset $ $\text{\textbf{then return }}R(\varphi )$ \\ 
+$V:=\emptyset $ \\ 
+$\text{\textbf{for }}i\in \{1,\ldots ,n\}\text{ \textbf{do }}%
+E_{i}:=\{d_{i}\} $ \\ 
+$\text{\textbf{do}}$ \\ 
+$\qquad \text{\textbf{choose }}e_{k}\in E_{k}$, such that $\mathsf{dvar}%
+(e_{k})\neq \emptyset $ \\ 
+$\qquad E_{k}:=E_{k}\backslash \{e_{k}\}$ \\ 
+$\qquad \text{\textbf{for }}e\in enum(e_{k}):$ \\ 
+$\qquad \qquad W:=\emptyset $ \\ 
+$\qquad \qquad \text{\textbf{for }}\sigma \in \{id[d_{1}:=f_{1},\cdots
+,d_{k-1}:=f_{k-1},d_{k}:=e,d_{k+1}:=f_{k+1},\cdots ,d_{n}:=f_{n}]$ \\ 
+$\qquad \qquad \qquad \wedge f_{i}\in E_{i}\quad (i=1,\cdots ,n)\}:$ \\ 
+$\qquad \qquad \qquad W:=W\cup \{R(\sigma (\varphi )\}$ \\ 
+$\qquad \qquad \text{\textbf{if }}stop_{Q}\in W\text{ \textbf{then return }}%
+stop_{Q}$ \\ 
+$\qquad \qquad V:=V\cup \{w\in W\ |\ \mathsf{dvar}(w)\subset \mathsf{dvar}%
+(\varphi )\}$ \\ 
+$\qquad \qquad \text{\textbf{if }}\{w\in W\ |\ \mathsf{dvar}(w)\varsubsetneq 
+\mathsf{dvar}(\varphi )\}\neq \emptyset $ $\text{\textbf{then }}%
+E_{k}:=E_{k}\cup \{e\}$ \\ 
+$\qquad $\textbf{rof} \\ 
+$\text{\textbf{while }}\forall _{i\in \{1,\ldots ,n\}}.E_{i}\neq \emptyset $
+\\ 
+$\text{\textbf{return} }\dbigoplus\limits_{v\in V}v,$%
+\end{tabular}%
+\end{equation*}%
+where $stop_{Q}=\bot $ and $\dbigoplus =\dbigwedge $ in case $Q=\forall $,
+and where $stop_{Q}=\top $ and $\dbigoplus =\dbigvee $ in case $Q=\exists $
+
+\subsection{OnePointRule Quantifier Elimination}
+
+The OnePointRule Quantifier Elimination rewriter rewrites certain patterns
+of PBES quantifier expressions as follows:%
+\begin{equation*}
+\begin{array}{lll}
+\exists _{x:X}.(x=e)\wedge \varphi & \rightarrow & \varphi \lbrack x:=e] \\ 
+\exists _{x:\mathbb{B}}.x\wedge \varphi & \rightarrow & \varphi \lbrack
+x:=true] \\ 
+\exists _{x:\mathbb{B}}.\lnot x\wedge \varphi & \rightarrow & \varphi
+\lbrack x:=false] \\ 
+\forall _{x:X}.(x\neq e)\vee \varphi & \rightarrow & \varphi \lbrack x:=e]
+\\ 
+\forall _{x:\mathbb{B}}.x\vee \varphi & \rightarrow & \varphi \lbrack
+x:=false] \\ 
+\forall _{x:\mathbb{B}}.\lnot x\vee \varphi & \rightarrow & \varphi \lbrack
+x:=true]%
+\end{array}%
+\end{equation*}%
+Note that it is straightforward to generalize these patterns to quantifier
+expressions as they occur in the mCRL2 toolset ($\exists
+_{x_{1}:X_{1},\cdots ,x_{n}:X_{n}}.\varphi $ and $\forall
+_{x_{1}:X_{1},\cdots ,x_{n}:X_{n}}.\varphi $).
+
+\subsubsection{Preprocessing}
+
+It turns out that the data rewriters in the mCRL2 toolset do not rewrite $%
+\lnot (\varphi =\psi )$ into $\varphi \neq \psi $. Therefore it is useful to
+apply the following as a preprocessing step to data expressions:%
+\begin{equation*}
+\begin{array}{lll}
+\lnot (\varphi _{1}\wedge \cdots \wedge \varphi _{n}) & \rightarrow & \lnot
+\varphi _{1}\vee \cdots \vee \lnot \varphi _{n} \\ 
+\lnot (\varphi _{1}\vee \cdots \vee \varphi _{n}) & \rightarrow & \lnot
+\varphi _{1}\wedge \cdots \wedge \lnot \varphi _{n} \\ 
+\lnot (\varphi =\psi ) & \rightarrow & \varphi \neq \psi \\ 
+\lnot (\varphi \neq \psi ) & \rightarrow & \varphi =\psi \\ 
+\lnot \lnot \varphi & \rightarrow & \varphi%
+\end{array}%
+\end{equation*}

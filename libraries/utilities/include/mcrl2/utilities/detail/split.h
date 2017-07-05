@@ -12,15 +12,15 @@
 #ifndef MCRL2_UTILITIES_DETAIL_SPLIT_H
 #define MCRL2_UTILITIES_DETAIL_SPLIT_H
 
+#include "mcrl2/utilities/detail/separate_keyword_section.h"
+#include "mcrl2/utilities/text_utility.h"
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <map>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/detail/separate_keyword_section.h"
 
 namespace mcrl2 {
 
@@ -34,12 +34,12 @@ namespace detail {
   {
     std::vector<std::string> result;
     std::vector<std::string> sections = utilities::regex_split(text, keyword);
-    for (auto i = sections.begin(); i != sections.end(); ++i)
+    for (std::string& section: sections)
     {
-      boost::trim(*i);
-      if (!i->empty())
+      boost::trim(section);
+      if (!section.empty())
       {
-        result.push_back(*i);
+        result.push_back(section);
       }
     }
     return result;
@@ -67,12 +67,12 @@ namespace detail {
   {
     std::vector<std::string> lines = utilities::regex_split(text, "\\n");
     std::vector<std::string> result;
-    for (auto i = lines.begin(); i != lines.end(); ++i)
+    for (std::string& line: lines)
     {
-      boost::trim(*i);
-      if (!i->empty())
+      boost::trim(line);
+      if (!line.empty())
       {
-        result.push_back(*i);
+        result.push_back(line);
       }
     }
     return result;

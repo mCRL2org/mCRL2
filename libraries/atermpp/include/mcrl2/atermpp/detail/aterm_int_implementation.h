@@ -1,3 +1,14 @@
+// Author(s): Jan Friso Groote. Based on the aterm library by Paul Klint and others.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/atermpp/detail/aterm_int.h
+/// \brief This file contains routines to create an aterm_int.
+
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_INT_IMPLEMENTATION_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_INT_IMPLEMENTATION_H
 
@@ -14,13 +25,14 @@ namespace atermpp
 namespace detail
 {
 
-inline const _aterm* aterm_int(size_t val)
+inline _aterm* aterm_int(std::size_t val)
 {
-  HashNumber hnr = COMBINE(SHIFT(addressf(function_adm.AS_INT)), val);
+  const std::hash<function_symbol> function_symbol_hasher;
+  std::size_t hnr = COMBINE(function_symbol_hasher(function_adm.AS_INT), val);
 
-  const _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
+  _aterm* cur = aterm_hashtable[hnr & aterm_table_mask];
   while (cur)
-  { if  (cur->function()==function_adm.AS_INT && reinterpret_cast<const _aterm_int*>(cur)->value == val)
+  { if  (cur->function()==function_adm.AS_INT && reinterpret_cast<_aterm_int*>(cur)->value == val)
     {
       return cur;
     }

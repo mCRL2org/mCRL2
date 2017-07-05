@@ -16,7 +16,6 @@
 #ifndef MCRL2_PBES_DETAIL_BQNF_VISITOR_H
 #define MCRL2_PBES_DETAIL_BQNF_VISITOR_H
 
-#include "mcrl2/core/term_traits.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_functions.h"
 
@@ -54,34 +53,28 @@ static void indent()
 /// must be overridden in order to add behaviour.
 struct bqnf_visitor
 {
-  /// \brief The equation type.
-  typedef pbes_equation equation_type;
-  /// \brief The expression type of the equation.
-  typedef pbes_expression term_type;
-  typedef core::term_traits<pbes_expression> tr;
-
   /// \brief flag that indicates if debug output should be printed.
   bool debug;
 
   /// \brief Returns a string representation of the type of the root node of the expression.
   /// \param e a PBES expression
   /// \return a string representation of the type of the root node of the expression.
-  static std::string print_brief(const term_type& e)
+  static std::string print_brief(const pbes_expression& e)
   {
-    if (tr::is_prop_var(e)) {
-      return std::string("PropVar ") + std::string(tr::name(e));
+    if (is_propositional_variable_instantiation(e)) {
+      return std::string("PropVar ") + std::string(atermpp::down_cast<propositional_variable_instantiation>(e).name());
     } else if (is_simple_expression(e)) {
       return "SimpleExpr";
-    } else if (tr::is_and(e)) {
+    } else if (is_and(e)) {
       return "And";
-    } else if (tr::is_or(e)) {
+    } else if (is_or(e)) {
       return "Or";
-    } else if (tr::is_imp(e)) {
+    } else if (is_imp(e)) {
       return "Imp";
-    } else if (tr::is_forall(e)) {
-      return std::string("ForAll(")+core::pp(tr::var(e))+std::string(")");
-    } else if (tr::is_exists(e)) {
-      return std::string("Exists(")+core::pp(tr::var(e))+std::string(")");
+    } else if (is_forall(e)) {
+      return std::string("ForAll(")+core::pp(atermpp::down_cast<forall>(e).variables())+std::string(")");
+    } else if (is_exists(e)) {
+      return std::string("Exists(")+core::pp(atermpp::down_cast<exists>(e).variables())+std::string(")");
     } else {
       return "Unknown type";
     }
@@ -92,13 +85,13 @@ struct bqnf_visitor
   /// and psi is an arbitrary expression.
   /// \param e an expression
   /// \return true if e is of the form phi /\ psi.
-  static bool is_inner_and(const term_type& e)
+  static bool is_inner_and(const pbes_expression& e)
   {
     bool result = true;
-    if (!(tr::is_prop_var(e) || is_simple_expression(e))) {
-      if (tr::is_and(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+    if (!(is_propositional_variable_instantiation(e) || is_simple_expression(e))) {
+      if (is_and(e)) {
+        pbes_expression l = pbes_system::accessors::left(e);
+        pbes_expression r = pbes_system::accessors::right(e);
         if (is_simple_expression(l)) {
           result = is_inner_and(r);
         } else {
@@ -116,13 +109,13 @@ struct bqnf_visitor
   /// and psi is an arbitrary expression.
   /// \param e an expression
   /// \return true if e is of the form phi => psi or phi \/ psi.
-  static bool is_inner_implies(const term_type& e)
+  static bool is_inner_implies(const pbes_expression& e)
   {
     bool result = true;
-    if (!(tr::is_prop_var(e) || is_simple_expression(e))) {
-      if (tr::is_or(e) || tr::is_imp(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+    if (!(is_propositional_variable_instantiation(e) || is_simple_expression(e))) {
+      if (is_or(e) || is_imp(e)) {
+        pbes_expression l = pbes_system::accessors::left(e);
+        pbes_expression r = pbes_system::accessors::right(e);
         if (is_simple_expression(l)) {
           result = is_inner_implies(r);
         } else {
@@ -150,23 +143,23 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e is a simple expression.
-  virtual bool visit_simple_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_simple_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     bool result = true;
-    if (tr::is_data(e) || tr::is_true(e) || tr::is_false(e)) {
+    if (is_data(e) || is_true(e) || is_false(e)) {
       result = true;
-    } else if (tr::is_not(e)) {
-      term_type n = tr::arg(e);
+    } else if (is_not(e)) {
+      pbes_expression n = pbes_system::accessors::arg(e);
       result &= visit_simple_expression(sigma, var, n);
-    } else if (tr::is_and(e) || tr::is_or(e) || tr::is_imp(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
+    } else if (is_and(e) || is_or(e) || is_imp(e)) {
+      pbes_expression l = pbes_system::accessors::left(e);
+      pbes_expression r = pbes_system::accessors::right(e);
       result &= visit_simple_expression(sigma, var, l);
       result &= visit_simple_expression(sigma, var, r);
-    } else if (tr::is_forall(e) || tr::is_exists(e)) {
-      term_type a = tr::arg(e);
+    } else if (is_forall(e) || is_exists(e)) {
+      pbes_expression a = pbes_system::accessors::arg(e);
       result &= visit_simple_expression(sigma, var, a);
-    } else if (tr::is_prop_var(e)) {
+    } else if (is_propositional_variable_instantiation(e)) {
       if (debug) {
         indent(); std::clog << "Not a simple expression!" << std::endl;
       } else {
@@ -186,11 +179,11 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e PBES expression
   /// \return true if the expression is a propositional variable or a simple expression.
-  virtual bool visit_propositional_variable(const fixpoint_symbol& /*sigma*/, const propositional_variable& /*var*/, const term_type& e)
+  virtual bool visit_propositional_variable(const fixpoint_symbol& /*sigma*/, const propositional_variable& /*var*/, const pbes_expression& e)
   {
     inc_indent();
     bool result = true;
-    if (tr::is_prop_var(e) || is_simple_expression(e)) {
+    if (is_propositional_variable_instantiation(e) || is_simple_expression(e)) {
       // std::clog << pp(e) << std::endl;
     } else {
       result = false;
@@ -212,13 +205,13 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e conforms to BQNF.
-  virtual bool visit_inner_and(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_inner_and(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
     bool result = true;
-    if (tr::is_and(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
+    if (is_and(e)) {
+      pbes_expression l = pbes_system::accessors::left(e);
+      pbes_expression r = pbes_system::accessors::right(e);
       if (is_simple_expression(l)) {
         result &= visit_simple_expression(sigma, var, l);
         // std::clog << pp(l) << " /\\ " << std::endl;
@@ -241,14 +234,14 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e conforms to BQNF.
-  virtual bool visit_inner_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_inner_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
-    term_type qexpr = e;
+    pbes_expression qexpr = e;
     data::variable_list qvars;
-    while (tr::is_exists(qexpr)) {
-      qvars = qvars + tr::var(qexpr);
-      qexpr = tr::arg(qexpr);
+    while (is_exists(qexpr)) {
+      qvars = qvars + atermpp::down_cast<exists>(qexpr).variables();
+      qexpr = pbes_system::accessors::arg(qexpr);
     }
     bool result = visit_inner_and(sigma, var, qexpr);
     if (debug) {
@@ -263,13 +256,13 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e conforms to BQNF.
-  virtual bool visit_or(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_or(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
     bool result = true;
-    if (tr::is_or(e) || tr::is_imp(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
+    if (is_or(e) || is_imp(e)) {
+      pbes_expression l = pbes_system::accessors::left(e);
+      pbes_expression r = pbes_system::accessors::right(e);
       result &= visit_or(sigma, var, l);
       result &= visit_or(sigma, var, r);
     } else {
@@ -287,22 +280,22 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e conforms to BQNF.
-  virtual bool visit_inner_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_inner_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
-    term_type qexpr = e;
+    pbes_expression qexpr = e;
     data::variable_list qvars;
-    while (tr::is_forall(qexpr)) {
-      qvars = qvars + tr::var(qexpr);
-      qexpr = tr::arg(qexpr);
+    while (is_forall(qexpr)) {
+      qvars = qvars + atermpp::down_cast<forall>(qexpr).variables();
+      qexpr = pbes_system::accessors::arg(qexpr);
     }
     bool result = true;
-    if (tr::is_or(qexpr) || tr::is_imp(qexpr)) {
-      term_type l = tr::left(qexpr);
-      term_type r = tr::right(qexpr);
+    if (is_or(qexpr) || is_imp(qexpr)) {
+      pbes_expression l = pbes_system::accessors::left(qexpr);
+      pbes_expression r = pbes_system::accessors::right(qexpr);
       if (is_simple_expression(l)) {
         result &= visit_simple_expression(sigma, var, l);
-        // std::clog << pp(l) << (tr::is_or(qexpr) ? " \\/ " : " => ") << std::endl;
+        // std::clog << pp(l) << (is_or(qexpr) ? " \\/ " : " => ") << std::endl;
         result &= visit_or(sigma, var, r);
       } else {
         result &= visit_or(sigma, var, qexpr);
@@ -322,13 +315,13 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e conforms to BQNF.
-  virtual bool visit_and(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_and(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
     bool result = true;
-    if (tr::is_and(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
+    if (is_and(e)) {
+      pbes_expression l = pbes_system::accessors::left(e);
+      pbes_expression r = pbes_system::accessors::right(e);
       result &= visit_and(sigma, var, l);
       // std::clog << " /\\ " << std::endl;
       result &= visit_and(sigma, var, r);
@@ -347,24 +340,24 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e conforms to BQNF.
-  virtual bool visit_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_bounded_forall(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
-    assert(tr::is_forall(e));
-    term_type qexpr = e;
+    assert(is_forall(e));
+    pbes_expression qexpr = e;
     data::variable_list qvars;
-    while (tr::is_forall(qexpr)) {
-      qvars = qvars + tr::var(qexpr);
-      qexpr = tr::arg(qexpr);
+    while (is_forall(qexpr)) {
+      qvars = qvars + atermpp::down_cast<forall>(qexpr).variables();
+      qexpr = pbes_system::accessors::arg(qexpr);
     }
     //std::clog << "  Bounded forall: " << pp(qvars) << " . " << std::endl;
     bool result = true;
-    if (tr::is_or(qexpr) || tr::is_imp(qexpr)) {
-      term_type l = tr::left(qexpr);
-      term_type r = tr::right(qexpr);
+    if (is_or(qexpr) || is_imp(qexpr)) {
+      pbes_expression l = pbes_system::accessors::left(qexpr);
+      pbes_expression r = pbes_system::accessors::right(qexpr);
       if (is_simple_expression(l)) {
         result &= visit_simple_expression(sigma, var, l);
-        // std::clog << pp(l) << (tr::is_or(qexpr) ? " \\/ " : " => ") << std::endl;
+        // std::clog << pp(l) << (is_or(qexpr) ? " \\/ " : " => ") << std::endl;
         result &= visit_bqnf_expression(sigma, var, r);
       } else {
         result &= visit_bqnf_expression(sigma, var, qexpr);
@@ -384,20 +377,20 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e conforms to BQNF.
-  virtual bool visit_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_bounded_exists(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
-    assert(tr::is_exists(e));
-    term_type qexpr = e;
+    assert(is_exists(e));
+    pbes_expression qexpr = e;
     data::variable_list qvars;
-    while (tr::is_exists(qexpr)) {
-      qvars = qvars + tr::var(qexpr);
-      qexpr = tr::arg(qexpr);
+    while (is_exists(qexpr)) {
+      qvars = qvars + atermpp::down_cast<exists>(qexpr).variables();
+      qexpr = pbes_system::accessors::arg(qexpr);
     }
     bool result = true;
-    if (tr::is_and(qexpr)) {
-      term_type l = tr::left(qexpr);
-      term_type r = tr::right(qexpr);
+    if (is_and(qexpr)) {
+      pbes_expression l = pbes_system::accessors::left(qexpr);
+      pbes_expression r = pbes_system::accessors::right(qexpr);
       if (is_simple_expression(l)) {
         result &= visit_simple_expression(sigma, var, l);
         result &= visit_bqnf_expression(sigma, var, r);
@@ -419,13 +412,13 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e conforms to BQNF.
-  virtual bool visit_bounded_quantifier(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_bounded_quantifier(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
     bool result = true;
-    if (tr::is_forall(e)) {
+    if (is_forall(e)) {
       result &= visit_bounded_forall(sigma, var, e);
-    } else if (tr::is_exists(e)) {
+    } else if (is_exists(e)) {
       result &= visit_bounded_exists(sigma, var, e);
     } else {
       // should not be possible
@@ -443,13 +436,13 @@ struct bqnf_visitor
   /// \param var propositional variable (unused in this class)
   /// \param e a PBES expression
   /// \return true if the expression e is in BQNF.
-  virtual bool visit_bqnf_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const term_type& e)
+  virtual bool visit_bqnf_expression(const fixpoint_symbol& sigma, const propositional_variable& var, const pbes_expression& e)
   {
     inc_indent();
     bool result = true;
     if (is_simple_expression(e)) {
       result = true;
-    } else if (tr::is_forall(e) || tr::is_exists(e)) {
+    } else if (is_forall(e) || is_exists(e)) {
       result &= visit_bounded_quantifier(sigma, var, e);
     } else {
       result &= visit_and(sigma, var, e);
@@ -466,7 +459,7 @@ struct bqnf_visitor
   /// This functions adds dummy values for sigma and var.
   /// \param e a PBES expression
   /// \return true if the expression e is in BQNF.
-  virtual bool visit_bqnf_expression(const term_type& e)
+  virtual bool visit_bqnf_expression(const pbes_expression& e)
   {
     bool result = visit_bqnf_expression(fixpoint_symbol::nu(), propositional_variable("X"), e);
     return result;
@@ -475,12 +468,12 @@ struct bqnf_visitor
   /// \brief Visits a BQNF equation.
   /// \param eqn a PBES equation
   /// \return true if the right hand side of the equation is in BQNF.
-  virtual bool visit_bqnf_equation(const equation_type& eqn)
+  virtual bool visit_bqnf_equation(const pbes_equation& eqn)
   {
     if (debug) std::clog << "visit_bqnf_equation." << std::endl;
-    fixpoint_symbol sigma = eqn.symbol();
-    propositional_variable var = eqn.variable();
-    term_type e = eqn.formula();
+    const fixpoint_symbol& sigma = eqn.symbol();
+    const propositional_variable& var = eqn.variable();
+    const pbes_expression& e = eqn.formula();
     bool result = visit_bqnf_expression(sigma, var, e);
     if (debug) std::clog << "visit_bqnf_equation: equation " << var.name() << " is " << (result ? "" : "NOT ") << "in BQNF." << std::endl;
     return result;
@@ -489,7 +482,7 @@ struct bqnf_visitor
   /// \brief Visits a BQNF equation in debug mode.
   /// \param eqn a PBES equation
   /// \return true if the right hand side of the equation is in BQNF.
-  virtual bool visit_bqnf_equation_debug(const equation_type& eqn)
+  virtual bool visit_bqnf_equation_debug(const pbes_equation& eqn)
   {
     debug = true;
     return visit_bqnf_equation(eqn);

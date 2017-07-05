@@ -12,7 +12,6 @@
 #ifndef MCRL2_DATA_ASSIGNMENT_H
 #define MCRL2_DATA_ASSIGNMENT_H
 
-#include <stdexcept>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/default_values.h"
@@ -21,6 +20,7 @@
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/data/untyped_identifier.h"
 #include "mcrl2/data/variable.h"
+#include <stdexcept>
 
 namespace mcrl2
 {
@@ -72,6 +72,7 @@ std::string pp(const assignment_expression& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const assignment_expression& x)
@@ -157,6 +158,7 @@ std::string pp(const assignment& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const assignment& x)
@@ -238,6 +240,7 @@ std::string pp(const untyped_identifier_assignment& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_identifier_assignment& x)
@@ -251,24 +254,6 @@ inline void swap(untyped_identifier_assignment& t1, untyped_identifier_assignmen
   t1.swap(t2);
 }
 //--- end generated classes ---//
-
-/// \brief Selects the right-hand side of an assignment
-struct left_hand_side : public std::unary_function< const assignment, variable >
-{
-  variable operator()(assignment const& a) const
-  {
-    return a.lhs();
-  }
-};
-
-/// \brief Selects the right-hand side of an assignment
-struct right_hand_side : public std::unary_function< const assignment, data_expression >
-{
-  data_expression operator()(assignment const& a) const
-  {
-    return a.rhs();
-  }
-};
 
 /// \brief Constructs an assignment_list by pairwise combining a variable and expression
 /// \param variables A sequence of data variables
@@ -307,9 +292,9 @@ inline
 variable_list left_hand_sides(const assignment_list& x)
 {
   std::vector<variable> result;
-  for (assignment_list::const_iterator i = x.begin(); i != x.end(); ++i)
+  for (const assignment& a : x)
   {
-    result.push_back(i->lhs());
+    result.push_back(a.lhs());
   }
   return variable_list(result.begin(), result.end());
 }

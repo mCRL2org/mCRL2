@@ -20,42 +20,28 @@ namespace pbes_system {
 
 namespace detail {
 
-template <typename TermTraits>
-std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
-                             const state_formulas::state_formula& x,
-                             const lts::lts_lts_t& lts0,
-                             const lts2pbes_lts& lts1,
-                             utilities::progress_meter& pm,
-                             TermTraits tr
-                            );
+template <typename TermTraits, typename Parameters>
+void E_lts2pbes(const state_formulas::state_formula& x,
+       Parameters& parameters,
+       std::vector<pbes_equation>& result,
+       TermTraits tr
+      );
 
-template <typename Derived, typename TermTraits>
+template <typename Derived, typename TermTraits, typename Parameters>
 struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Derived>
 {
   typedef state_formulas::state_formula_traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   typedef std::vector<pbes_equation> result_type;
 
-  const state_formulas::state_formula& phi0; // the original formula
-  const lts::lts_lts_t& lts0;
-  const lts2pbes_lts& lts1;
-  utilities::progress_meter& m_progress_meter;
+  Parameters& parameters;
   std::vector<result_type> result_stack;
 
-  e_lts2pbes_traverser(const state_formulas::state_formula& phi0_,
-                       const lts::lts_lts_t& lts0_,
-                       const lts2pbes_lts& lts1_,
-                       utilities::progress_meter& pm,
-                       TermTraits
-                      )
-    : phi0(phi0_), lts0(lts0_), lts1(lts1_), m_progress_meter(pm)
+  e_lts2pbes_traverser(Parameters& parameters_, TermTraits)
+    : parameters(parameters_)
   {}
 
   Derived& derived()
@@ -106,7 +92,7 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
     push(epsilon());
   }
 
-  void operator()(const state_formulas::not_&)
+  void apply(const state_formulas::not_&)
   {
     throw mcrl2::runtime_error("e_lts2pbes_traverser: negation is not supported!");
   }
@@ -125,7 +111,7 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
     push(left + right);
   }
 
-  void operator()(const state_formulas::imp&)
+  void apply(const state_formulas::imp&)
   {
     throw mcrl2::runtime_error("e_lts2pbes_traverser: implication is not supported!");
   }
@@ -179,69 +165,59 @@ struct e_lts2pbes_traverser: public state_formulas::state_formula_traverser<Deri
   void handle_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     data::variable_list d = detail::mu_variables(x);
 
     std::vector<pbes_equation> v;
 
     // traverse all states of the LTS
-    for (lts2pbes_state_type s = 0; s < lts1.state_count(); s++)
+    for (lts2pbes_state_type s = 0; s < parameters.lts1.state_count(); s++)
     {
       core::identifier_string X_s = make_identifier(X, s);
-      propositional_variable Xs(X_s, d + Par(X, data::variable_list(), phi0));
-      v.push_back(pbes_equation(sigma, Xs, RHS(phi0, x.operand(), lts0, lts1, s, m_progress_meter, TermTraits())));
-      m_progress_meter.step();
+      propositional_variable Xs(X_s, d + Par(X, data::variable_list(), parameters.phi0));
+      v.push_back(pbes_equation(sigma, Xs, RHS(x.operand(), s, parameters, TermTraits())));
+      parameters.pm.step();
     }
 
-    push(v + E(phi0, x.operand(), lts0, lts1, m_progress_meter, TermTraits()));
+    E_lts2pbes(x.operand(), parameters, v, TermTraits());
+    push(v);
   }
 
-  void operator()(const state_formulas::nu& x)
+  void apply(const state_formulas::nu& x)
   {
     handle_mu_nu(x, fixpoint_symbol::nu());
   }
 
-  void operator()(const state_formulas::mu& x)
+  void apply(const state_formulas::mu& x)
   {
     handle_mu_nu(x, fixpoint_symbol::mu());
   }
 };
 
-template <template <class, class> class Traverser, typename TermTraits>
-struct apply_e_lts2pbes_traverser: public Traverser<apply_e_lts2pbes_traverser<Traverser, TermTraits>, TermTraits>
+template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
+struct apply_e_lts2pbes_traverser: public Traverser<apply_e_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_e_lts2pbes_traverser<Traverser, TermTraits>, TermTraits> super;
+  typedef Traverser<apply_e_lts2pbes_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  apply_e_lts2pbes_traverser(const state_formulas::state_formula& phi0,
-                             const lts::lts_lts_t& lts0,
-                             const lts2pbes_lts& lts1,
-                             utilities::progress_meter& pm,
-                             TermTraits tr
-                            )
-    : super(phi0, lts0, lts1, pm, tr)
+  apply_e_lts2pbes_traverser(Parameters& parameters, TermTraits tr)
+    : super(parameters, tr)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
-template <typename TermTraits>
-std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
-                             const state_formulas::state_formula& x,
-                             const lts::lts_lts_t& lts0,
-                             const lts2pbes_lts& lts1,
-                             utilities::progress_meter& pm,
-                             TermTraits tr
-                            )
+template <typename TermTraits, typename Parameters>
+void E_lts2pbes(const state_formulas::state_formula& x,
+       Parameters& parameters,
+       std::vector<pbes_equation>& result,
+       TermTraits tr
+      )
 {
-  apply_e_lts2pbes_traverser<e_lts2pbes_traverser, TermTraits> f(x0, lts0, lts1, pm, tr);
-  f(x);
+  apply_e_lts2pbes_traverser<e_lts2pbes_traverser, TermTraits, Parameters> f(parameters, tr);
+  f.apply(x);
   assert(f.result_stack.size() == 1);
-  return f.top();
+  result.insert(result.end(), f.top().begin(), f.top().end());
 }
 
 } // namespace detail

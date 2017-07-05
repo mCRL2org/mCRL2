@@ -1,75 +1,17 @@
-## Authors: Frank Stappers and Aad Mathijssen
-# Copyright: see the accompanying file COPYING or copy at
-# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-#
-# Distributed under the Boost Software License, Version 1.0.
-# (See accompanying file LICENSE_1_0.txt or copy at
-# http://www.boost.org/LICENSE_1_0.txt)
-
-# ########## Project setup ##########
-project(mcrl2_lts)
-cmake_minimum_required(VERSION 2.6)
-
-# Trick to add header files to projects in IDEs like Visual Studio and XCode
-FILE(GLOB_RECURSE HEADERS "include" "*.h")
-add_custom_target(${PROJECT_NAME}_headers
-  SOURCES ${HEADERS})
-
-# ######### General setup ##########
-
-set(mcrl2_lts_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmparser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_aut.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_lts.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/sim_hashtable.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dot.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_bcg.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/tree_set.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsm.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/exploration.cpp
+add_mcrl2_library(lts
+  INSTALL_HEADERS TRUE
+  SOURCES
+    check_complexity.cpp
+    liblts_bisim_gjkw.cpp
+    liblts_fsm.cpp
+    liblts_aut.cpp
+    liblts_lts.cpp
+    liblts_dot.cpp
+    liblts.cpp
+    tree_set.cpp
+    sim_hashtable.cpp
+    exploration.cpp
+  DEPENDS
+    mcrl2_data
+    mcrl2_lps
 )
-set(mcrl2_lts_src ${mcrl2_lts_src} PARENT_SCOPE)
-
-# actual target:
-add_library(${PROJECT_NAME}
-  ${mcrl2_lts_src}
-)
-
-# ##### Start generate parser tables ######
-
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/libraries/lts/source)
-
-add_custom_command(
-  OUTPUT ${CMAKE_BINARY_DIR}/libraries/lts/source/fsm_syntax.c
-  COMMAND make_dparser -A -H0 -ifsm -o${CMAKE_BINARY_DIR}/libraries/lts/source/fsm_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/fsm-syntax.g
-  DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/fsm-syntax.g
-)
-
-add_library(mcrl2_fsm_syntax
-  ${CMAKE_BINARY_DIR}/libraries/lts/source/fsm_syntax.c
-)
-
-install(TARGETS mcrl2_fsm_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)
-
-# ##### End generate parser tables ######
-
-target_link_libraries(${PROJECT_NAME}
-  svc
-  mcrl2_data
-  mcrl2_lps
-  mcrl2_syntax
-  mcrl2_fsm_syntax
-)
-
-if( USE_BCG STREQUAL "" )
-  include_directories( ${MCRL2_CADP_INCLUDE_DIR} )
-  target_link_libraries(${PROJECT_NAME}
-    imp_bcg_io
-    imp_bcg
-  )
-endif( USE_BCG STREQUAL "" )
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} mcrl2_fsm_syntax DESTINATION ${MCRL2_LIB_DIR} COMPONENT Libraries)

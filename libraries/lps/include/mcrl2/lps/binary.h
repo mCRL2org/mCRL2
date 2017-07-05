@@ -14,16 +14,16 @@
 
 #include <iterator>
 
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/math.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/math.h"
 
 namespace mcrl2
 {
@@ -33,7 +33,7 @@ namespace lps
 
 // Compute the number of booleans needed to represent a set of size n.
 inline
-size_t nr_of_booleans_for_elements(size_t n)
+std::size_t nr_of_booleans_for_elements(std::size_t n)
 {
   if(n == 1)
   {
@@ -49,11 +49,15 @@ size_t nr_of_booleans_for_elements(size_t n)
 ///
 /// All parameters of finite data types are replaced with a vector of
 /// booleans.
-template<typename DataRewriter>
-class binary_algorithm: public lps::detail::lps_algorithm
+template<typename DataRewriter, typename Specification>
+class binary_algorithm: public detail::lps_algorithm<Specification>
 {
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
   typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
+  typedef typename detail::lps_algorithm<Specification> super;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  using super::m_spec;
 
   protected:
     /// Rewriter
@@ -67,6 +71,12 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
     /// Mapping of variables to corresponding if-tree
     data::mutable_map_substitution<> m_if_trees;
+
+    /// Variables appearing in rhs of m_if_trees
+    std::set<data::variable> m_if_trees_variables;
+
+    /// Identifier generator for the enumerator
+    data::enumerator_identifier_generator m_id_generator;
 
     /// \brief Build an if-then-else tree of enumerated elements in terms
     ///        of new parameters.
@@ -83,8 +93,8 @@ class binary_algorithm: public lps::detail::lps_algorithm
       }
       else
       {
-        size_t n = enumerated_elements.size();
-        size_t m = 1 << (new_parameters.size() - 1);  //m == 2^(new_parameters.size() - 1)
+        std::size_t n = enumerated_elements.size();
+        std::size_t m = 1 << (new_parameters.size() - 1);  //m == 2^(new_parameters.size() - 1)
 
         if (m > n)
         {
@@ -126,20 +136,19 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       data::set_identifier_generator generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
-      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter);
+      generator.add_identifiers(data::function_and_mapping_identifiers(m_spec.data()));
+      enumerator_type enumerator(m_rewriter, m_spec.data(), m_rewriter, m_id_generator);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
-      for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+      for (const data::variable& par: process_parameters)
       {
-        data::variable par = *i;
-
         if (!data::sort_bool::is_bool(par.sort()) && m_spec.data().is_certainly_finite(par.sort()))
         {
           //Get all constructors for par
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
           data::mutable_indexed_substitution<> local_sigma;
-          const data::variable_list vl=atermpp::make_list<data::variable>(par);
+          const data::variable_list vl = { par };
           std::deque<enumerator_element> enumerator_deque(1, enumerator_element(vl, data::sort_bool::true_()));
           for (auto j = enumerator.begin(local_sigma, enumerator_deque); j != enumerator.end() ; ++j)
           {
@@ -150,7 +159,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           m_enumerated_elements[par] = enumerated_elements;
 
           //Calculate the number of booleans needed to encode par
-          size_t n = nr_of_booleans_for_elements(enumerated_elements.size());
+          std::size_t n = nr_of_booleans_for_elements(enumerated_elements.size());
 
           //Set hint for fresh variable names
           std::string par_name = par.name();
@@ -158,7 +167,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           // Temp list for storage
           data::variable_vector new_pars;
           //Create new parameters and add them to the parameter list.
-          for (size_t i = 0; i<n; ++i)
+          for (std::size_t i = 0; i<n; ++i)
           {
             data::variable v(generator(par_name), data::sort_bool::bool_());
             new_parameters.push_back(v);
@@ -183,6 +192,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
       mCRL2log(log::debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
 
       m_spec.process().process_parameters() = data::variable_list(new_parameters.begin(),new_parameters.end());
+      m_if_trees_variables = data::substitution_variables(m_if_trees);
     }
 
     /// \brief Replace assignments in v that are of a finite sort with a
@@ -195,20 +205,20 @@ class binary_algorithm: public lps::detail::lps_algorithm
       v = data::replace_variables(v, m_if_trees);
 
       data::assignment_vector result;
-      for (data::assignment_list::const_iterator i = v.begin(); i != v.end(); ++i)
+      for (const data::assignment& a: v)
       {
-        if (m_new_parameters.find(i->lhs()) == m_new_parameters.end())
+        if (m_new_parameters.find(a.lhs()) == m_new_parameters.end())
         {
-          result.push_back(*i);
+          result.push_back(a);
         }
         else
         {
-          data::variable_vector new_parameters = m_new_parameters[i->lhs()];
-          data::data_expression_vector elements = m_enumerated_elements[i->lhs()];
+          data::variable_vector new_parameters = m_new_parameters[a.lhs()];
+          data::data_expression_vector elements = m_enumerated_elements[a.lhs()];
 
-          mCRL2log(log::debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(i->lhs()) << std::endl;
+          mCRL2log(log::debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(a.lhs()) << std::endl;
 
-          for (size_t j = 0; j < new_parameters.size(); ++j)
+          for (std::size_t j = 0; j < new_parameters.size(); ++j)
           {
             data::data_expression_vector disjuncts;
 
@@ -229,7 +239,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
               // Elements that get value true
               for (ssize_t l = 0; l < count && k != elements.end(); ++l)
               {
-                disjuncts.push_back(data::equal_to(i->rhs(), *k++));
+                disjuncts.push_back(data::equal_to(a.rhs(), *k++));
               }
             }
             result.push_back(data::assignment(new_parameters[j], data::lazy::join_or(disjuncts.begin(), disjuncts.end())));
@@ -244,34 +254,46 @@ class binary_algorithm: public lps::detail::lps_algorithm
     }
 
     /// \brief Update an action summand with the new Boolean parameters
-    void update_action_summand(action_summand& s, const std::set<data::variable>& if_trees_variables)
+    void update_action_summand(action_summand& s)
     {
-      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, if_trees_variables);
-      s.multi_action().actions() = lps::replace_variables_capture_avoiding(s.multi_action().actions(), m_if_trees, data::substitution_variables(m_if_trees));
-      if (s.multi_action().has_time())
-      {
-        s.multi_action().time() = data::replace_variables_capture_avoiding(s.multi_action().time(), m_if_trees, if_trees_variables);
-      }
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_variables);
+      lps::replace_variables_capture_avoiding(s.multi_action(), m_if_trees, m_if_trees_variables);
       s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
     }
 
-    /// \brief Update a deadlock summand with the new Boolean parameters
-    void update_deadlock_summand(deadlock_summand& s, const std::set<data::variable>& if_trees_variables)
+    /// \brief Update an action summand with the new Boolean parameters
+    void update_action_summand(stochastic_action_summand& s)
     {
-      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, data::substitution_variables(m_if_trees));
-      if (s.deadlock().has_time())
-      {
-        s.deadlock().time() = data::replace_variables_capture_avoiding(s.deadlock().time(), m_if_trees, if_trees_variables);
-      }
+      update_action_summand(static_cast<action_summand&>(s));
+      s.distribution() = lps::replace_variables_capture_avoiding(s.distribution(), m_if_trees, m_if_trees_variables);
+    }
+
+    /// \brief Update a deadlock summand with the new Boolean parameters
+    void update_deadlock_summand(deadlock_summand& s)
+    {
+      s.condition() = data::replace_variables_capture_avoiding(s.condition(), m_if_trees, m_if_trees_variables);
+      lps::replace_variables_capture_avoiding(s.deadlock(), m_if_trees, m_if_trees_variables);
+    }
+
+    process_initializer update_initial_process(const process_initializer& init)
+    {
+      return process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()));
+    }
+
+    stochastic_process_initializer update_initial_process(const stochastic_process_initializer& init)
+    {
+      return stochastic_process_initializer(replace_enumerated_parameters_in_assignments(init.assignments()),
+                                            lps::replace_variables_capture_avoiding(init.distribution(), m_if_trees, m_if_trees_variables)
+                                           );
     }
 
   public:
     /// \brief Constructor for binary algorithm
     /// \param spec Specification to which the algorithm should be applied
     /// \param r a rewriter for data
-    binary_algorithm(specification& spec,
+    binary_algorithm(Specification& spec,
                      DataRewriter& r)
-      : lps_algorithm(spec),
+      : detail::lps_algorithm<Specification>(spec),
         m_rewriter(r)
     {}
 
@@ -283,20 +305,22 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       // Initial process
       mCRL2log(log::debug) << "Updating process initializer" << std::endl;
-
-      m_spec.initial_process() = process_initializer(replace_enumerated_parameters_in_assignments(m_spec.initial_process().assignments()));
+      m_spec.initial_process() = update_initial_process(m_spec.initial_process());
 
       // Summands
       mCRL2log(log::debug) << "Updating summands" << std::endl;
-      std::set<data::variable> if_trees_variables = data::substitution_variables(m_if_trees);
 
-      std::for_each(m_spec.process().action_summands().begin(),
-                    m_spec.process().action_summands().end(),
-                    boost::bind(&binary_algorithm::update_action_summand, this, _1, if_trees_variables));
+      auto& action_summands = m_spec.process().action_summands();
+      for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+      {
+        update_action_summand(*i);
+      }
 
-      std::for_each(m_spec.process().deadlock_summands().begin(),
-                    m_spec.process().deadlock_summands().end(),
-                    boost::bind(&binary_algorithm::update_deadlock_summand, this, _1, if_trees_variables));
+      auto& deadlock_summands = m_spec.process().deadlock_summands();
+      for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
+      {
+        update_deadlock_summand(*i);
+      }
     }
 };
 

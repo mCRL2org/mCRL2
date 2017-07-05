@@ -1,2 +1,0 @@
-act a;
-init allow({a}, hide({a}, allow({a}, a)));

@@ -9,19 +9,19 @@
 /// \file mcrl2/modal_formula/regular_formula.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_MODAL_REGULAR_FORMULA_H
-#define MCRL2_MODAL_REGULAR_FORMULA_H
+#ifndef MCRL2_MODAL_FORMULA_REGULAR_FORMULA_H
+#define MCRL2_MODAL_FORMULA_REGULAR_FORMULA_H
 
 #include <iostream> // for debugging
 
-#include <string>
-#include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/modal_formula/action_formula.h"
+#include <cassert>
+#include <string>
 
 namespace mcrl2
 {
@@ -65,11 +65,11 @@ typedef atermpp::term_list<regular_formula> regular_formula_list;
 typedef std::vector<regular_formula>    regular_formula_vector;
 
 // prototypes
-inline bool is_nil(const atermpp::aterm_appl& x);
 inline bool is_seq(const atermpp::aterm_appl& x);
 inline bool is_alt(const atermpp::aterm_appl& x);
 inline bool is_trans(const atermpp::aterm_appl& x);
 inline bool is_trans_or_nil(const atermpp::aterm_appl& x);
+inline bool is_untyped_regular_formula(const atermpp::aterm_appl& x);
 
 /// \brief Test for a regular_formula expression
 /// \param x A term
@@ -79,11 +79,11 @@ bool is_regular_formula(const atermpp::aterm_appl& x)
 {
   return action_formulas::is_action_formula(x) ||
          data::is_data_expression(x) ||
-         regular_formulas::is_nil(x) ||
          regular_formulas::is_seq(x) ||
          regular_formulas::is_alt(x) ||
          regular_formulas::is_trans(x) ||
-         regular_formulas::is_trans_or_nil(x);
+         regular_formulas::is_trans_or_nil(x) ||
+         regular_formulas::is_untyped_regular_formula(x);
 }
 
 // prototype declaration
@@ -91,6 +91,7 @@ std::string pp(const regular_formula& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const regular_formula& x)
@@ -100,52 +101,6 @@ std::ostream& operator<<(std::ostream& out, const regular_formula& x)
 
 /// \brief swap overload
 inline void swap(regular_formula& t1, regular_formula& t2)
-{
-  t1.swap(t2);
-}
-
-
-/// \brief The value nil for regular formulas
-class nil: public regular_formula
-{
-  public:
-    /// \brief Default constructor.
-    nil()
-      : regular_formula(core::detail::default_values::RegNil)
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit nil(const atermpp::aterm& term)
-      : regular_formula(term)
-    {
-      assert(core::detail::check_term_RegNil(*this));
-    }
-};
-
-/// \brief Test for a nil expression
-/// \param x A term
-/// \return True if \a x is a nil expression
-inline
-bool is_nil(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::RegNil;
-}
-
-// prototype declaration
-std::string pp(const nil& x);
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const nil& x)
-{
-  return out << regular_formulas::pp(x);
-}
-
-/// \brief swap overload
-inline void swap(nil& t1, nil& t2)
 {
   t1.swap(t2);
 }
@@ -198,6 +153,7 @@ std::string pp(const seq& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const seq& x)
@@ -259,6 +215,7 @@ std::string pp(const alt& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const alt& x)
@@ -315,6 +272,7 @@ std::string pp(const trans& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const trans& x)
@@ -371,6 +329,7 @@ std::string pp(const trans_or_nil& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const trans_or_nil& x)
@@ -383,12 +342,84 @@ inline void swap(trans_or_nil& t1, trans_or_nil& t2)
 {
   t1.swap(t2);
 }
+
+
+/// \brief An untyped regular formula or action formula
+class untyped_regular_formula: public regular_formula
+{
+  public:
+    /// \brief Default constructor.
+    untyped_regular_formula()
+      : regular_formula(core::detail::default_values::UntypedRegFrm)
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    explicit untyped_regular_formula(const atermpp::aterm& term)
+      : regular_formula(term)
+    {
+      assert(core::detail::check_term_UntypedRegFrm(*this));
+    }
+
+    /// \brief Constructor.
+    untyped_regular_formula(const core::identifier_string& name, const regular_formula& left, const regular_formula& right)
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), name, left, right))
+    {}
+
+    /// \brief Constructor.
+    untyped_regular_formula(const std::string& name, const regular_formula& left, const regular_formula& right)
+      : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), core::identifier_string(name), left, right))
+    {}
+
+    const core::identifier_string& name() const
+    {
+      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+    }
+
+    const regular_formula& left() const
+    {
+      return atermpp::down_cast<regular_formula>((*this)[1]);
+    }
+
+    const regular_formula& right() const
+    {
+      return atermpp::down_cast<regular_formula>((*this)[2]);
+    }
+};
+
+/// \brief Test for a untyped_regular_formula expression
+/// \param x A term
+/// \return True if \a x is a untyped_regular_formula expression
+inline
+bool is_untyped_regular_formula(const atermpp::aterm_appl& x)
+{
+  return x.function() == core::detail::function_symbols::UntypedRegFrm;
+}
+
+// prototype declaration
+std::string pp(const untyped_regular_formula& x);
+
+/// \brief Outputs the object to a stream
+/// \param out An output stream
+/// \param x Object x
+/// \return The output stream
+inline
+std::ostream& operator<<(std::ostream& out, const untyped_regular_formula& x)
+{
+  return out << regular_formulas::pp(x);
+}
+
+/// \brief swap overload
+inline void swap(untyped_regular_formula& t1, untyped_regular_formula& t2)
+{
+  t1.swap(t2);
+}
 //--- end generated classes ---//
 
-inline int left_precedence(const seq&)            { return 1; }
-inline int left_precedence(const alt&)            { return 2; }
-inline int left_precedence(const trans&)          { return 3; }
-inline int left_precedence(const trans_or_nil&)   { return 3; }
+inline int left_precedence(const seq&)            { return 31; }
+inline int left_precedence(const alt&)            { return 32; }
+inline int left_precedence(const trans&)          { return 33; }
+inline int left_precedence(const trans_or_nil&)   { return 33; }
 inline int left_precedence(const regular_formula& x)
 {
   if      (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }
@@ -414,4 +445,4 @@ inline const regular_formula& binary_right(const alt& x)           { return x.ri
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_REGULAR_FORMULA_H
+#endif // MCRL2_MODAL_FORMULA_REGULAR_FORMULA_H

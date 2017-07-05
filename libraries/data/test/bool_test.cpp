@@ -9,10 +9,9 @@
 /// \file data_expression_test.cpp
 /// \brief Basic regression test for data expressions.
 
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/data/bool.h"
 
 
@@ -22,9 +21,9 @@ using namespace mcrl2::data::sort_bool;
 
 void bool_sort_test()
 {
-  basic_sort b(bool_());
+  const basic_sort& b(bool_());
   BOOST_CHECK(b == bool_());
-  BOOST_CHECK(to_string(b.name()) == "Bool");
+  BOOST_CHECK(pp(b.name()) == "Bool");
 }
 
 int test_main(int argc, char** argv)

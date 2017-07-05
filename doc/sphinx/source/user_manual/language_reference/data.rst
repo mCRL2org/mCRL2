@@ -366,9 +366,8 @@ Predefined sorts
 ----------------
 
 To make modelling more convenient, mCRL2 provides a number of predefined sorts.
-These sorts are listed in the table below. :ref:`Standard operations 
-<predefinedmappings>` are defined on all predefined sorts; these operations are
-discussed in more detail elsewhere in this document.
+These sorts are listed in the table below. In section :ref:`predefinedmappings` standard operations 
+are defined on all predefined sorts.
 
 .. table:: Basic sorts in mCRL2
 
@@ -418,6 +417,9 @@ in any of these domains, and there are no smallest integers and reals.
    triple: logical;and;&&
    triple: logical;or;||
    triple: logical;implication;=>
+
+
+.. _predefinedmappings:
 
 Mappings on predefined sorts
 """"""""""""""""""""""""""""

@@ -12,10 +12,10 @@
 #ifndef MCRL2_LPS_DETAIL_MAKE_TIMED_LPS_H
 #define MCRL2_LPS_DETAIL_MAKE_TIMED_LPS_H
 
-#include <string>
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
+#include <string>
 
 namespace mcrl2 {
 
@@ -74,13 +74,13 @@ void make_timed_lps(linear_process& lps, const std::set<core::identifier_string>
   data::set_identifier_generator generator;
   generator.add_identifiers(context);
   make_timed_lps_summand<data::set_identifier_generator> f(generator);
-  for (action_summand_vector::iterator i = lps.action_summands().begin(); i != lps.action_summands().end(); ++i)
+  for (action_summand& s: lps.action_summands())
   {
-    f(*i);
+    f(s);
   }
-  for (deadlock_summand_vector::iterator i = lps.deadlock_summands().begin(); i != lps.deadlock_summands().end(); ++i)
+  for (deadlock_summand& s: lps.deadlock_summands())
   {
-    f(*i);
+    f(s);
   }
 }
 

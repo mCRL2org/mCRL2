@@ -1,0 +1,30 @@
+act
+ A, A', A'', B, B', B'', C, C', C'', D, D',
+ D'', E, E', E'', F, F', F'', G, G', G'', H, H',
+ H'', I, I', I'', J, J', J'', K, K', K'', L, L',
+ L'', M, M', M'', N, N', N'', O, O', O'', P, P',
+ P'', Q, Q', Q'';
+
+proc
+ Writer1 = A''.A'';
+ Reader2 = B'';
+ Reader3 = C'';
+ LossySync4 = (D'' + (D'' | E'')).LossySync4;
+ LossySync5 = (F'' + (F'' | G'')).LossySync5;
+ Sync6 = (H'' | I'').Sync6;
+ Sync7 = (J'' | K'').Sync7;
+ Sync8 = (L'' | M'').Sync8;
+ Sync9 = (N'' | O'').Sync9;
+ SyncDrain10 = (P'' | Q'').SyncDrain10;
+ Node1 = (A' | D' | F' | P').Node1;
+ Node2 = (E' | H' | L').Node2;
+ Node3 = (G' | J' | N').Node3;
+ Node4 = (I' | B').Node4;
+ Node5 = (K' | C').Node5;
+ Node6 = ((M' | Q') + (O' | Q')).Node6;
+
+init
+ hide({D, J, F, H, K, N, O, P, L, G, E, I, Q, M},
+       block({D', D'', J', J'', F', F'', H', H'', K', K'', A', A'', N', N'', O', O'', P', P'', L', L'', C', C'', B', B'', G', G'', E', E'', I', I'', Q', Q'', M', M''},
+       comm({D' | D'' -> D, J' | J'' -> J, F' | F'' -> F, H' | H'' -> H, K' | K'' -> K, A' | A'' -> A, N' | N'' -> N, O' | O'' -> O, P' | P'' -> P, L' | L'' -> L, C' | C'' -> C, B' | B'' -> B, G' | G'' -> G, E' | E'' -> E, I' | I'' -> I, Q' | Q'' -> Q, M' | M'' -> M},
+       Writer1 || Reader2 || Reader3 || LossySync4 || LossySync5 || Sync6 || Sync7 || Sync8 || Sync9 || SyncDrain10 || Node1 || Node2 || Node3 || Node4 || Node5 || Node6)));

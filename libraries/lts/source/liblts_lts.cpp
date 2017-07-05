@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg; completely rewritten by Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -11,383 +11,526 @@
 #include <string>
 #include <cstring>
 #include <sstream>
-#include "svc/svc.h"
-#include "svc/svcerrno.h"
 #include "mcrl2/core/nil.h"
-#include "mcrl2/data/detail/io.h"
-#include "mcrl2/lts/lts_lts.h"
-#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/detail/io.h"
+#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/detail/liblts_swap_to_from_probabilistic_lts.h"
 
 namespace mcrl2
 {
 namespace lts
 {
-
-/**
- * @brief An aterm_appl that contains a data specification, process parameter
- *        list and action label list. This is the information that is appended
- *        at the end of an LTS file.
- */
-class trailer_data : public atermpp::aterm_appl
+namespace detail
 {
-private:
-  static const atermpp::function_symbol m_function_symbol;
-  trailer_data(const atermpp::aterm& data_spec, 
-               const atermpp::aterm& process_parameters,
-               const atermpp::aterm& action_labels)
-    : atermpp::aterm_appl(m_function_symbol, data_spec, process_parameters, action_labels)
-  { }
 
-  const atermpp::aterm_appl& get_arg(size_t i) const
-  {
-    return atermpp::down_cast<atermpp::aterm_appl>((*this)[i]);
-  }
+using namespace atermpp;
 
-public:
-
-  trailer_data(const atermpp::aterm& term)
-    : atermpp::aterm_appl(term)
-  { }
-
-  trailer_data()
-    : atermpp::aterm_appl(m_function_symbol, core::nil(), core::nil(), core::nil())
-  { }
-
-  static trailer_data create(const lts_lts_t& ts)
-  {
-    atermpp::aterm d = data::detail::remove_index(data::detail::data_specification_to_aterm_data_spec(ts.data()));
-    atermpp::aterm p = ts.has_process_parameters() ? data::detail::remove_index(ts.process_parameters()) : core::nil();
-    atermpp::aterm a = ts.has_action_labels() ? data::detail::remove_index(ts.action_labels()) : core::nil();
-    return trailer_data(d, p, a);
-  }
-
-  bool is_valid() const
-  {
-    return !core::is_nil(get_arg(0));
-  }
-
-  data::data_specification data() const
-  {
-    data::data_specification data_spec(atermpp::down_cast<atermpp::aterm_appl>(data::detail::add_index((*this)[0])));
-    data_spec.declare_data_specification_to_be_type_checked();  // Assume that the data specification in an lts is well typed.
-    return data_spec;
-  }
-
-  bool has_process_parameters() const
-  { 
-    return !core::is_nil(get_arg(1)); 
-  }
-
-  data::variable_list process_parameters() const
-  {
-    assert(has_process_parameters());
-    return data::variable_list(data::detail::add_index(get_arg(1)));
-  }  
-
-  bool has_action_labels() const
-  { 
-    return !core::is_nil(get_arg(2)); 
-  }
-
-  process::action_label_list action_labels() const
-  {
-    assert(has_action_labels());
-    return process::action_label_list(data::detail::add_index(get_arg(2)));
-  }  
-};
-
-const atermpp::function_symbol trailer_data::m_function_symbol = atermpp::function_symbol("mCRL2LTS1", 3);
-
-#define LTS_TRAILER_TAG_LENGTH 12
-
-/**
- * @brief A file stream that can append and retrieve trailer_data objects
- *        to and from a file.
- */
-class trailer : public std::fstream
+static atermpp::function_symbol transition_empty_header()
 {
-private:
-  static const char* LTS_TRAILER_TAG;
-  union
-  {
-    char buf[LTS_TRAILER_TAG_LENGTH + 8];
-    struct
-    {
-      unsigned char info_pos[8];
-      char trailer_tag[LTS_TRAILER_TAG_LENGTH];
-    };
-  } m_data;
-
-  std::string m_filename;
-
-  long stream_length()
-  {
-    /* Determine the position at which the additional information starts.
-     * Due to the way in which file operations are implemented on Windows, 
-     * we need to use the get pointer for determining the length of the 
-     * stream. (seekp gives invalid results, leading to a wrong encoded 
-     * position in the output of the LTS file).
-	   * According to the example at 
-     *   http://www.cplusplus.com/reference/istream/istream/seekg/
-	   * this is the more-or-less standard way to determine the lenght of 
-     * the file. 
-     */
-    long oldpos = tellg();
-    seekg(0, std::ios::end);
-    long position = tellg();
-    seekg(oldpos, std::ios::beg);
-    return position;
-  }
-
-  void write_tag(long extra_info_pos)
-  {
-    for (int i = 0; i < 8; ++i)
-    {
-      m_data.info_pos[i] = extra_info_pos % 0x100;
-      extra_info_pos >>= 8;
-    }
-    std::fstream::write(&m_data.buf[0], sizeof(m_data));
-  }
-
-  bool read_tag(long& extra_info_pos)
-  {
-    seekg(-(std::streamoff)sizeof(m_data), std::ios_base::end);
-    if (good())
-    {
-      std::fstream::read(&m_data.buf[0], sizeof(m_data));
-      if (good())
-      {
-        if (!strncmp(LTS_TRAILER_TAG, m_data.trailer_tag, LTS_TRAILER_TAG_LENGTH))
-        {
-          extra_info_pos = 0;
-          for (int i = 7; i >= 0; --i)
-          {
-            extra_info_pos <<= 8;
-            extra_info_pos |= m_data.info_pos[i];
-          }
-        }
-        return true;
-      }
-    }
-    return false;
-  }
-
-public:
-  trailer(const std::string& filename, std::ios_base::openmode mode)
-    : std::fstream(filename, mode | std::ios_base::binary), m_filename(filename)
-  {
-    if (mode & std::ios_base::out)
-    {
-      strncpy(m_data.trailer_tag, LTS_TRAILER_TAG, LTS_TRAILER_TAG_LENGTH);
-    }
-  }
-
-  trailer_data read()
-  {
-    long position = 0;
-    if (read_tag(position))
-    {
-      if (position == 0)
-      {
-        return trailer_data();
-      }
-      seekg(position, std::ios::beg);
-      if (good())
-      {
-        return trailer_data(data::detail::add_index(atermpp::read_term_from_binary_stream(*this)));  
-      }
-    }
-    throw mcrl2::runtime_error("Could not read trailer tag in '" + m_filename + "'.");
-  }
-
-  void write(const trailer_data& data)
-  {
-    long position = stream_length();
-    if (position == -1)
-    {
-      throw mcrl2::runtime_error("Could not determine file size of '" + m_filename + "'; not adding extra information.");
-    }
-    seekp(0, std::ios::end);
-    atermpp::write_term_to_binary_stream(data, *this);
-    write_tag(position);
-  }
-  
-};
-
-const char* trailer::LTS_TRAILER_TAG = "   1STL2LRCm";
-#undef LTS_TRAILER_TAG_LENGTH
-
-static void read_from_lts(lts_lts_t& l, const std::string& filename)
+  static atermpp::function_symbol tr("transition_empty_list",0);
+  return tr;
+}
+static atermpp::function_symbol transition_list_header()
 {
-  SVCfile f;
-  SVCbool b;
-
-  // Open file
-  if (SVCopen(&f, const_cast<char*>(filename.c_str()), SVCread, &b))
-  {
-    throw mcrl2::runtime_error("cannot open lts file '" + filename + "' for reading (" + SVCerror(SVCerrno) + ").");
-  }
-
-  // Determine file type
-  bool svc_file_has_state_info = false;
-  std::string svc_type = SVCgetType(&f);
-  if (svc_type == "mCRL2+info")
-  {
-    svc_file_has_state_info = true;
-  }
-  else if (svc_type != "mCRL2")
-  {
-    throw mcrl2::runtime_error("lts file '" + filename + "' is not in the mCRL2 format.");
-  }
-
-  // Read transitions
-  SVCstateIndex from, to;
-  SVClabelIndex label;
-  SVCparameterIndex param;
-  while (SVCgetNextTransition(&f, &from, &label, &to, &param))
-  {
-    l.add_transition(transition(from, label, to));
-  }
-
-  // Read state labels
-  SVCint num_states = SVCnumStates(&f);
-  detail::state_label_lts state_label;
-  for (SVCstateIndex i = 0; i < num_states; ++i)
-  {
-    if (svc_file_has_state_info)
-    {
-      state_label = detail::state_label_lts(atermpp::down_cast<atermpp::aterm_appl>(data::detail::add_index(SVCstate2ATerm(&f, i))));
-    }
-    l.add_state(state_label);
-  }
-
-  // Set initial state
-  assert(SVCgetInitialState(&f) == 0);
-  l.set_initial_state((size_t)SVCgetInitialState(&f));
-
-  // Read action labels
-  SVCint num_labels = SVCnumLabels(&f);
-  detail::action_label_lts action_label;
-  const process::action_list tau = process::action_list();
-  for (SVCstateIndex i = 0; i < num_labels; ++i)
-  {
-    action_label = detail::action_label_lts(atermpp::down_cast<atermpp::aterm_appl>(data::detail::add_index(SVClabel2ATerm(&f, i))));
-    l.add_action(action_label, action_label.actions() == tau);
-  }
-
-  SVCclose(&f);
-
-  // Check to see if there is extra data at the end
-  try
-  {
-    trailer t(filename, std::ios::in);
-    trailer_data data = t.read();
-    if (data.is_valid())
-    {
-      l.set_data(data.data());
-      if (data.has_process_parameters())
-      {
-        l.set_process_parameters(data.process_parameters());
-      }
-      if (data.has_action_labels())
-      {
-        l.set_action_labels(data.action_labels());
-      }
-    }
-    t.close();
-  }
-  catch (std::runtime_error& e)
-  {
-    throw mcrl2::runtime_error("Error while reading datatypes, action declarations and "
-                               "process parameters from '" + filename + "' (" + e.what() + ")");
-  }
+  static atermpp::function_symbol tr("transition_list",4);
+  return tr;
 }
 
-static void write_to_lts(const lts_lts_t& l, const std::string& filename)
+static atermpp::function_symbol num_of_states_labels_and_initial_state()
 {
-  SVCfile f;
-  SVCbool b = l.has_state_info() ? SVCfalse : SVCtrue;
-  if (SVCopen(&f, const_cast<char*>(filename.c_str()), SVCwrite, &b))
-  {
-    throw mcrl2::runtime_error("cannot open .lts file '" + filename + "' for writing (" + SVCerror(SVCerrno) + ").");
-  }
+  static atermpp::function_symbol nslais("num_of_states_labels_and_initial_state",3);
+  return nslais;
+}
 
-  if (l.has_state_info())
-  {
-    SVCsetType(&f,const_cast < char* >("mCRL2+info"));
-  }
-  else
-  {
-    SVCsetType(&f,const_cast < char* >("mCRL2"));
-  }
+static atermpp::function_symbol lts_header()
+{
+  static atermpp::function_symbol lts("labelled_transition_system",4);
+  return lts;
+}
 
-  SVCsetCreator(&f,const_cast < char* >("liblts (mCRL2)"));
+static atermpp::function_symbol meta_data_header()
+{
+  static atermpp::function_symbol mdh("meta_data_header",4);
+  return mdh;
+}
 
-  assert(l.initial_state()< ((size_t)1 << (sizeof(int)*8-1)));
-  if (l.has_state_info())
+static atermpp::function_symbol temporary_multi_action_header()
+{
+  static atermpp::function_symbol mdh("multi_action",2);
+  return mdh;
+}
+
+static aterm_list state_probability_list(const probabilistic_lts_lts_t::probabilistic_state_t& target)
+{
+  aterm_list result;
+  for(const lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>& p: target)
   {
-    SVCsetInitialState(&f, SVCnewState(&f, data::detail::remove_index(l.state_label(l.initial_state())), &b));
+    result.push_front(p.probability());
+    result.push_front(aterm_int(p.state()));
+  }
+  return result;
+}
+
+static probabilistic_lts_lts_t::probabilistic_state_t aterm_list_to_probabilistic_state(const atermpp::aterm_list& l)
+{
+  std::vector<lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>> result;
+  for(aterm_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+  {
+    const std::size_t state_number=down_cast<aterm_int>(*i).value();
+    assert(i!=l.end());
+    ++i;
+    const lps::probabilistic_data_expression& t=down_cast<lps::probabilistic_data_expression>(*i);
+    result.push_back(lps::state_probability_pair<std::size_t, mcrl2::lps::probabilistic_data_expression>(state_number,t));
+  }
+  return probabilistic_lts_lts_t::probabilistic_state_t(result.begin(),result.end());
+}
+
+/// Below we introduce aterm representations for a list with all transition,
+/// which can subsequently be stored as an aterm.
+class aterm_probabilistic_transition_list: public aterm_appl
+{
+  public:
+    aterm_probabilistic_transition_list()
+      : aterm_appl(transition_empty_header())
+    {}
+
+    aterm_probabilistic_transition_list(const std::size_t source, 
+                                        const std::size_t label, 
+                                        const probabilistic_lts_lts_t::probabilistic_state_t& target,
+                                        const aterm_probabilistic_transition_list& next_transition)
+      : aterm_appl(transition_list_header(), 
+                   aterm_int(source),
+                   aterm_int(label), 
+                   state_probability_list(target),
+                   next_transition)
+    {} 
+
+    std::size_t source() const
+    {
+      return (atermpp::down_cast<aterm_int>((*this)[0]).value());
+    }
+
+    std::size_t label() const
+    {
+      return (atermpp::down_cast<aterm_int>((*this)[1]).value());
+    }
+
+    probabilistic_lts_lts_t::probabilistic_state_t target() const
+    {
+      return aterm_list_to_probabilistic_state(atermpp::down_cast<aterm_list>((*this)[2]));
+    }
+
+    const aterm_probabilistic_transition_list& next() const 
+    {
+      return atermpp::down_cast<aterm_probabilistic_transition_list>((*this)[3]);
+    }
+};
+
+// typedef term_list<aterm_probabilistic_transition> aterm_transition_list;
+typedef term_list<state_label_lts> state_labels_t;               // The state labels listed consecutively.
+typedef term_list<atermpp::aterm_appl> action_labels_t;          // A multiaction has the shape "multi_action(action_list,data_expression)
+typedef term_list<data::data_expression> probabilistic_labels_t; // This contains a list of probabilities.
+typedef term_list<data::function_symbol> boolean_list_t;         // A list with constants true or false, indicating
+                                                                 // whether a state is probabilistic.
+
+class aterm_labelled_transition_system: public atermpp::aterm_appl
+{
+  public:
+    aterm_labelled_transition_system(const aterm& a)
+      : aterm_appl(a)
+    {}
+
+    aterm_labelled_transition_system(
+               const probabilistic_lts_lts_t& ts,
+               const aterm_probabilistic_transition_list& transitions,
+               const state_labels_t& state_label_list,
+               const action_labels_t& action_label_list)
+      : aterm_appl(lts_header(),
+                   aterm_appl(meta_data_header(),
+                              ts.has_data() ? data::detail::data_specification_to_aterm_data_spec(ts.data()) : core::nil(),
+                              ts.has_process_parameters() ? static_cast<aterm>(ts.process_parameters()) : core::nil(),
+                              ts.has_action_labels() ? static_cast<aterm>(ts.action_labels()) : core::nil(),
+                              aterm_appl(num_of_states_labels_and_initial_state(),
+                                         aterm_int(ts.num_states()),
+                                         aterm_int(ts.num_action_labels()),
+                                         state_probability_list(ts.initial_probabilistic_state()))),
+                   transitions,
+                   state_label_list,
+                   action_label_list
+                  )
+    {}
+
+    // \brief add_index() adds a unique index to some term types, such as variables, to access data about them 
+    //        quickly. When loading a term, these indices must first be added before a term can be used in the toolset.
+    void add_indices()
+    {
+      aterm_appl md=meta_data();
+      aterm_probabilistic_transition_list trans=transitions(); 
+      state_labels_t state_labels=get_state_labels();
+      action_labels_t action_labels=get_action_labels();
+      
+      (*this)=aterm(); // Clear this aterm. It is often huge, and in this way the list of transitions can be garbage collected,
+                       // while being transformed. 
+      //
+      // Add indices to the transitions. This list is often too long to fit on the stack.
+      // Therefore, it is done using this ad_hoc routine. Note that the list is reverted. 
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      aterm_appl new_trans=aterm_appl(transition_empty_header());
+      while (trans.function()!= transition_empty_header())
+      {
+        assert(trans.size()>3);
+        new_trans=aterm_appl(transition_list_header(),
+                             trans[0],
+                             trans[1],
+                             data::detail::add_index(trans[2],cache),
+                             new_trans);
+        trans=trans.next();
+      }
+
+      *this = aterm_appl(lts_header(),
+                             data::detail::add_index(md,cache),
+                             new_trans,
+                             data::detail::add_index(state_labels,cache),
+                             data::detail::add_index(action_labels,cache));
+    }
+
+    /// \brief Remove indices from dedicated terms such as variables and process names. 
+    void remove_indices()
+    {
+      aterm_appl md=meta_data();
+      aterm_probabilistic_transition_list trans=transitions(); 
+      state_labels_t state_labels=get_state_labels();
+      action_labels_t action_labels=get_action_labels();
+      
+      (*this)=aterm(); // Clear this aterm. It is often huge, and in this way the list of transitions can be garbage collected,
+                       // while being transformed. 
+      
+      // Remove indices from the transitions. This list is often too long to fit on the stack.
+      // Therefore, it is done using this ad_hoc routine. Note that the list is reverted. 
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      aterm_appl new_trans=aterm_appl(transition_empty_header());
+      while (trans.function()!= transition_empty_header())
+      {
+        new_trans=aterm_appl(transition_list_header(),
+                                 trans[0],
+                                 trans[1],
+                                 data::detail::remove_index(trans[2],cache),
+                                 new_trans);
+        trans=trans.next();
+      }
+
+      *this = aterm_appl(lts_header(),
+                             data::detail::remove_index(md,cache),
+                             new_trans,
+                             data::detail::remove_index(state_labels,cache),
+                             data::detail::remove_index(action_labels,cache));
+    }
+
+    bool has_data() const
+    {
+      return meta_data()[0]!=core::nil();
+    } 
+
+    const data::data_specification data() const
+    {
+      assert(meta_data()[0]!=core::nil());
+      return data::data_specification(down_cast<aterm_appl>(meta_data()[0]));
+    }
+    
+    bool has_process_parameters() const
+    {
+      return meta_data()[1]!=core::nil();
+    } 
+
+    const data::variable_list process_parameters() const
+    {
+      assert(meta_data()[1]!=core::nil());
+      return down_cast<data::variable_list>(meta_data()[1]);
+    }
+    
+    bool has_action_labels() const
+    {
+      return meta_data()[2]!=core::nil();
+    } 
+
+    const process::action_label_list action_labels() const
+    {
+      assert(meta_data()[2]!=core::nil());
+      return down_cast<process::action_label_list>(meta_data()[2]);
+    }
+
+    std::size_t num_states() const
+    {
+      const aterm_appl& t=down_cast<aterm_appl>(meta_data()[3]);
+      assert(t.function()==num_of_states_labels_and_initial_state());
+      return down_cast<aterm_int>(t[0]).value();
+    }
+
+    std::size_t num_action_labels() const
+    {
+      const aterm_appl& t=down_cast<aterm_appl>(meta_data()[3]);
+      assert(t.function()==num_of_states_labels_and_initial_state());
+      return down_cast<aterm_int>(t[1]).value();
+    }
+
+    probabilistic_lts_lts_t::probabilistic_state_t initial_probabilistic_state() const
+    {
+      const aterm_appl& t=down_cast<aterm_appl>(meta_data()[3]);
+      assert(t.function()==num_of_states_labels_and_initial_state());
+      
+      return aterm_list_to_probabilistic_state(down_cast<aterm_list>(t[2]));
+    }
+    
+    aterm_probabilistic_transition_list transitions() const
+    {
+      return down_cast<aterm_probabilistic_transition_list>((*this)[1]);
+    }
+  
+    state_labels_t get_state_labels() const
+    {
+      return down_cast<state_labels_t>((*this)[2]);
+    }
+  
+    action_labels_t get_action_labels() const
+    {
+      return down_cast<action_labels_t>((*this)[3]);
+    }
+  
+  protected:
+    
+    const aterm_appl& meta_data() const
+    {
+      assert(atermpp::down_cast<aterm_appl>((*this)[0]).function()==meta_data_header());
+      return atermpp::down_cast<aterm_appl>((*this)[0]);
+    }
+};
+
+static void read_from_lts(probabilistic_lts_lts_t& l, const std::string& filename)
+{
+  aterm input;
+  if (filename=="")
+  {
+    input=read_term_from_binary_stream(std::cin);
   }
   else 
   {
-    SVCsetInitialState(&f, SVCnewState(&f, atermpp::aterm_int(l.initial_state()), &b));
+    std::ifstream stream;
+    stream.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
+    try
+    {  
+      stream.open(filename, std::ifstream::in | std::ifstream::binary);
+    }
+    catch (std::ifstream::failure)
+    {
+      if (filename=="")
+      {
+        throw mcrl2::runtime_error("Fail to open standard input to read an lts.");
+      }
+      else 
+      {
+        throw mcrl2::runtime_error("Fail to open file " + filename + " to read an lts.");
+      }
+    }
+
+    try
+    {
+      input=atermpp::read_term_from_binary_stream(stream);
+      stream.close();
+    }
+    catch (std::ifstream::failure)
+    {
+      if (filename=="")
+      {
+        throw mcrl2::runtime_error("Fail to correctly read an lts from standard input.");
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Fail to correctly read an lts from the file " + filename + ".");
+      }
+    }
+    
   }
 
-  SVCparameterIndex param = SVCnewParameter(&f, atermpp::aterm_list(), &b);
-
-  const std::vector<transition> &trans = l.get_transitions();
-  SVCstateIndex from, label, to;
-  for (std::vector<transition>::const_iterator t = trans.begin(); t != trans.end(); ++t)
+  if (!input.type_is_appl() || down_cast<aterm_appl>(input).function()!=lts_header())
   {
-    assert(t->from() < ((size_t)1 << (sizeof(int)*8-1)));
-    assert(t->to() < ((size_t)1 << (sizeof(int)*8-1)));
-    if (l.has_state_info())
-    {
-      from = SVCnewState(&f, data::detail::remove_index(l.state_label(t->from())), &b); 
-      to = SVCnewState(&f, data::detail::remove_index(l.state_label(t->to())), &b);
-    }
-    else
-    {
-      from = SVCnewState(&f, atermpp::aterm_int(t->from()), &b); 
-      to = SVCnewState(&f, atermpp::aterm_int(t->to()), &b);
-    }
-    label = SVCnewLabel(&f, data::detail::remove_index(l.action_label(t->label()).aterm_without_time()), &b);
-    SVCputTransition(&f, from, label, to, param);
+    throw runtime_error("The input file " + filename + " is not in proper .lts format.");
+  }
+  
+  // First check whether the input is a valid lts.
+  const aterm meta_data=atermpp::down_cast<aterm_appl>(input)[0];
+  if (!meta_data.type_is_appl() || down_cast<aterm_appl>(meta_data).function()!=meta_data_header())
+  {
+    throw runtime_error("The input file " + filename + " is not in proper .lts format. There is a problem with the datatypes, process parameters and action declarations.");
+  }
+  
+  aterm_labelled_transition_system input_lts(input);
+  input=aterm(); // The input is a large term. We do not need it anymore. 
+  input_lts.add_indices();  // Add indices to certain term types, such as variables, and process/pbes names. 
+  
+  if (input_lts.has_data())
+  {
+    l.set_data(input_lts.data());
   }
 
-  SVCclose(&f);
-
-  trailer t(filename, std::ios::out | std::ios::app);
-  t.write(trailer_data::create(l));
-  t.close();
-}
-
-void lts_lts_t::save(const std::string& filename) const
-{
-  if (filename=="")
+  if (input_lts.has_process_parameters())
   {
-    throw mcrl2::runtime_error("Cannot write svc/lts file " + filename + " to stdout");
+    l.set_process_parameters(input_lts.process_parameters());
+  }
+
+  if (input_lts.has_action_labels())
+  {
+    l.set_action_labels(input_lts.action_labels());
+  }
+  
+  aterm_probabilistic_transition_list input_transitions=input_lts.transitions();
+  while (input_transitions.function()!= transition_empty_header()) 
+  {
+    assert(input_transitions.function()==transition_list_header());
+    const std::size_t prob_state_index=l.add_probabilistic_state(input_transitions.target());
+    l.add_transition(transition(input_transitions.source(), input_transitions.label(), prob_state_index));
+    input_transitions=input_transitions.next();
+  }
+  
+  if (input_lts.get_state_labels().size()==0)
+  {
+    l.set_num_states(input_lts.num_states());
   }
   else
   {
-    mCRL2log(log::verbose) << "Starting to save file " << filename << "\n";
-    write_to_lts(*this,filename);
+    assert(input_lts.num_states()==input_lts.get_state_labels().size());
+    for (const state_label_lts& state_label: input_lts.get_state_labels())
+    {
+      l.add_state(state_label_lts(state_label));
+    }
   }
+
+  if (input_lts.get_action_labels().size()==0)
+  {
+    l.set_num_action_labels(input_lts.num_action_labels());
+  }
+  else
+  {
+    assert(input_lts.num_action_labels()==input_lts.get_action_labels().size());
+    for (const atermpp::aterm_appl& t: input_lts.get_action_labels())
+    {
+      assert(t.function()==temporary_multi_action_header());
+      const lps::multi_action action=lps::multi_action(process::action_list(t[0]), data::data_expression(t[1]));
+      if (!action.actions().empty() || action.has_time()) // The empty label is tau, which is present by default.
+      {
+        l.add_action(action_label_lts(action)); 
+      }
+    }
+  }
+  l.set_initial_probabilistic_state(input_lts.initial_probabilistic_state());
+}
+
+static void write_to_lts(const probabilistic_lts_lts_t& l, const std::string& filename)
+{
+  aterm_probabilistic_transition_list transitions;
+  
+  for(std::vector<transition>::const_reverse_iterator i=l.get_transitions().rbegin();
+                i!=l.get_transitions().rend(); ++i)
+  {
+    // The transitions are stored in reverse order.
+    transitions=aterm_probabilistic_transition_list(
+                                i->from(), 
+                                i->label(), 
+                                l.probabilistic_state(i->to()),
+                                transitions);
+  }
+
+  state_labels_t state_label_list;
+  if (l.has_state_info())
+  { for(std::size_t i=l.num_state_labels(); i>0;)
+    {
+      --i;
+      state_label_list.push_front(l.state_label(i));
+    }
+  }
+
+  action_labels_t action_label_list;
+  if (l.has_action_info())
+  { 
+    for(std::size_t i=l.num_action_labels(); i>0;)
+    {
+      --i;
+      action_label_list.push_front(atermpp::aterm_appl(temporary_multi_action_header(),l.action_label(i).actions(),l.action_label(i).time()));
+    }
+  }
+
+  aterm_labelled_transition_system t0(l,
+                                      transitions,
+                                      state_label_list,
+                                      action_label_list);
+  t0.remove_indices();
+
+  if (filename=="")
+  {
+    atermpp::write_term_to_binary_stream(t0, std::cout);
+  }
+  else 
+  {
+    std::ofstream stream;
+    stream.exceptions ( std::ofstream::failbit | std::ofstream::badbit );
+    try
+    {
+      stream.open(filename, std::ofstream::out | std::ofstream::binary);
+    }
+    catch (std::ofstream::failure )
+    {
+      throw mcrl2::runtime_error("Fail to open file " + filename + " for writing.");
+    }
+    try
+    { 
+      atermpp::write_term_to_binary_stream(t0, stream);
+      stream.close();
+    }
+    catch (std::ofstream::failure)
+    {
+      throw mcrl2::runtime_error("Fail to write lts correctly to the file " + filename + ".");
+    }
+  }
+}
+
+} // namespace detail
+
+void probabilistic_lts_lts_t::save(const std::string& filename) const
+{
+  mCRL2log(log::verbose) << "Starting to save file " << filename << "\n";
+  detail::write_to_lts(*this,filename);
+}
+
+void probabilistic_lts_lts_t::load(const std::string& filename)
+{
+  mCRL2log(log::verbose) << "Starting to load file " << filename << "\n";
+  detail::read_from_lts(*this,filename);
 }
 
 void lts_lts_t::load(const std::string& filename)
 {
-  if (filename=="")
-  {
-    throw mcrl2::runtime_error("Cannot read svc/lts file " + filename + " from stdin");
-  }
-  else
-  {
-    mCRL2log(log::verbose) << "Starting to load file " << filename << "\n";
-    read_from_lts(*this,filename);
-  }
+  probabilistic_lts_lts_t l;
+  l.load(filename);
+  detail::swap_to_non_probabilistic_lts
+             <state_label_lts,
+              action_label_lts,
+              probabilistic_state<std::size_t, lps::probabilistic_data_expression>,
+              detail::lts_lts_base>(l,*this);
 }
+
+void lts_lts_t::save(std::string const& filename) const
+{
+  probabilistic_lts_lts_t l;
+  detail::translate_to_probabilistic_lts
+            <state_label_lts,
+             action_label_lts,
+             probabilistic_state<std::size_t, lps::probabilistic_data_expression>,
+             detail::lts_lts_base >(*this,l);
+  l.save(filename);
+}
+
 
 }
 }

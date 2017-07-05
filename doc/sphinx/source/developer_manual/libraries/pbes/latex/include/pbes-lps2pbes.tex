@@ -178,6 +178,44 @@ _{X,[]}(\varphi _{0}))={\mathbf{RHS}}(\varphi )~)~{\mathbf{E}}(\varphi )%
 where $\widetilde{\sigma }=\mu $ if $\sigma =\nu $ and $\widetilde{\sigma }%
 =\nu $ if $\sigma =\mu $.
 
+\subsection{Counter example generation}
+
+There is a modified translation that adds information to the PBES from which
+a counter example can be generated. N.B. The counter example generation is
+only available for the untimed case. The function RHS is adapted from%
+\begin{equation*}
+\begin{array}{lll}
+{\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
+{:}E_{i}}\left( (\mathbf{Sat}(a_{i}(f_{i}(x,y)),\alpha )\ \wedge
+c_{i}(x,y)\right) \Rightarrow {\mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)]) \\ 
+{\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
+I}\exists _{y{:}E_{i}}\left( (\mathbf{Sat}(a_{i}(f_{i}(x,y)),\alpha )\
+\wedge c_{i}(x,y)\right) \ \wedge {\mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)])%
+\end{array}%
+\end{equation*}%
+into%
+\begin{equation*}
+\begin{array}{lll}
+{\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
+{:}E_{i}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y)),\alpha )\ \wedge
+c_{i}(x,y)\right) \Rightarrow \\ 
+&  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}\left( \left( {%
+\mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)]\wedge
+Z_{a_{i}}^{+}(x,f_{i}(x,y),g_{i}(x,y))\right) \vee
+Z_{a_{i}}^{-}(x,f_{i}(x,y),g_{i}(x,y))\right) \\ 
+{\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
+I}\exists _{y{:}E_{i}}\left( \mathbf{Sat}(a_{i}(f_{i}(x,y)),\alpha )\ \wedge
+c_{i}(x,y)\right) \wedge \\ 
+&  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}\left( \left( {%
+\mathbf{RHS}}(\varphi )[x:=g_{i}(x,y)]\vee
+Z_{a_{i}}^{-}(x,f_{i}(x,y),g_{i}(x,y))\right) \wedge
+Z_{a_{i}}^{+}(x,f_{i}(x,y),g_{i}(x,y))\right) ,%
+\end{array}%
+\end{equation*}%
+where $\nu Z_{a_{i}}^{+}(x,f_{i}(x,y),d^{\prime })=true$ and $\nu
+Z_{a_{i}}^{-}(x,f_{i}(x,y),d^{\prime })=false$ are additional equations for
+every $a_{i}$ that appears in the LPS.
+
 \newpage
 
 \section{Transforming an LTS to a PBES}
@@ -238,14 +276,45 @@ RHS}}_{\varphi _{0}}(\varphi ,s)\wedge {\mathbf{RHS}}_{\varphi _{0}}(\psi ,s)
 {\mathbf{RHS}}_{\varphi _{0}}(\exists d{{:}D}.\varphi ,s) & =_{def} & 
 \exists d{{:}D}.{\mathbf{RHS}}_{\varphi _{0}}(\varphi ,s) \\ 
 {\mathbf{RHS}}_{\varphi _{0}}([\alpha ]\varphi ,s) & =_{def} & \bigwedge
-\left\{ \mathbf{Sat}(a,\alpha )\Rightarrow {\mathbf{RHS}}_{\varphi
-_{0}}(\varphi ,t)\ |\ s\overset{a}{\rightarrow }t\right\} \\ 
+\left\{ \mathbf{Sat}(a(x),\alpha )\Rightarrow {\mathbf{RHS}}_{\varphi
+_{0}}(\varphi ,t)\ |\ s\overset{a(x)}{\rightarrow }t\right\}  \\ 
 {\mathbf{RHS}}_{\varphi _{0}}(\langle \alpha \rangle \varphi ,s) & =_{def} & 
-\bigvee \left\{ \mathbf{Sat}(a,\alpha )\wedge {\mathbf{RHS}}_{\varphi
-_{0}}(\varphi ,t)\ |\ s\overset{a}{\rightarrow }t\right\} \\ 
+\bigvee \left\{ \mathbf{Sat}(a(x),\alpha )\wedge {\mathbf{RHS}}_{\varphi
+_{0}}(\varphi ,t)\ |\ s\overset{a(x)}{\rightarrow }t\right\}  \\ 
 {\mathbf{RHS}}_{\varphi _{0}}(X(e),s) & =_{def} & X_{s}(e,\mathbf{Par}%
 _{X,[]}(\varphi _{0})) \\ 
 {\mathbf{RHS}}_{\varphi _{0}}(\sigma X(d{:}D:=e).~\varphi ,s) & =_{def}~~~ & 
 X_{s}(e,\mathbf{Par}_{X,[]}(\varphi _{0}))%
 \end{array}%
-$\pagebreak
+$\pagebreak 
+
+\subsection{Counter example generation}
+
+There is a modified translation that adds information to the PBES from which
+a counter example can be generated. The function RHS is adapted from%
+\begin{equation*}
+\begin{array}{lll}
+{\mathbf{RHS}}_{\varphi _{0}}([\alpha ]\varphi ,s) & =_{def} & \bigwedge
+\left\{ \mathbf{Sat}(a(x),\alpha )\Rightarrow {\mathbf{RHS}}_{\varphi
+_{0}}(\varphi ,t)\ |\ s\overset{a(x)}{\rightarrow }t\right\}  \\ 
+{\mathbf{RHS}}_{\varphi _{0}}(\langle \alpha \rangle \varphi ,s) & =_{def} & 
+\bigvee \left\{ \mathbf{Sat}(a(x),\alpha )\wedge {\mathbf{RHS}}_{\varphi
+_{0}}(\varphi ,t)\ |\ s\overset{a(x)}{\rightarrow }t\right\} 
+\end{array}%
+\end{equation*}%
+into%
+\begin{equation*}
+\begin{array}{lll}
+{\mathbf{RHS}}_{\varphi _{0}}([\alpha ]\varphi ,s) & =_{def} & \bigwedge
+\left\{ \mathbf{Sat}(a(x),\alpha )\Rightarrow \left( \left( {\mathbf{RHS}}%
+_{\varphi _{0}}(\varphi ,t)\wedge Z_{a}^{+}(s,x,t)\right) \vee
+Z_{a}^{-}(s,x,t)\right) \ |\ s\overset{a(x)}{\rightarrow }t\right\}  \\ 
+{\mathbf{RHS}}_{\varphi _{0}}(\langle \alpha \rangle \varphi ,s) & =_{def} & 
+\bigvee \left\{ \mathbf{Sat}(a(x),\alpha )\wedge \left( \left( {\mathbf{RHS}}%
+_{\varphi _{0}}(\varphi ,t)\vee Z_{a}^{-}(s,x,t)\right) \wedge
+Z_{a}^{+}(s,x,t)\right) \ |\ s\overset{a(x)}{\rightarrow }t\right\} 
+\end{array}%
+\end{equation*}%
+where $\nu Z_{a_{i}}^{+}(s,d_{x},t)=true$ and $\nu
+Z_{a_{i}}^{-}(s,d_{x},t)=false$ are additional equations for every $a(x)$
+that appears in the LTS.

@@ -12,15 +12,13 @@
 #ifndef MCRL2_LPS_MULTI_ACTION_H
 #define MCRL2_LPS_MULTI_ACTION_H
 
-#include <iterator>
-#include <stdexcept>
-#include <sstream>
-#include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/undefined.h"
-#include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/process/process_expression.h"
-#include "mcrl2/core/print.h"
+#include <iterator>
+#include <sstream>
+#include <stdexcept>
 
 namespace mcrl2
 {
@@ -47,7 +45,7 @@ class multi_action
 
   public:
     /// \brief Constructor
-    multi_action(const process::action_list& actions = process::action_list(), data::data_expression time = data::undefined_real())
+    explicit multi_action(const process::action_list& actions = process::action_list(), data::data_expression time = data::undefined_real())
       : m_actions(actions), m_time(time)
     {
       assert(data::sort_real::is_real(m_time.sort()));
@@ -63,8 +61,8 @@ class multi_action
     }
 
     /// \brief Constructor
-    multi_action(const process::action& l)
-      : m_actions(atermpp::make_list<process::action>(l)),
+    explicit multi_action(const process::action& l)
+      : m_actions({ l }),
         m_time(data::undefined_real())
     {}
 
@@ -164,6 +162,7 @@ std::string pp(const multi_action& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const multi_action& x)
@@ -186,7 +185,7 @@ bool is_multi_action(const atermpp::aterm_appl& x)
 }
 
 // template function overloads
-void normalize_sorts(multi_action& x, const data::data_specification& dataspec);
+void normalize_sorts(multi_action& x, const data::sort_specification& sortspec);
 void translate_user_notation(lps::multi_action& x);
 std::set<data::variable> find_all_variables(const lps::multi_action& x);
 std::set<data::variable> find_free_variables(const lps::multi_action& x);
@@ -310,9 +309,6 @@ struct equal_data_parameters_builder
       }
     }
     data::data_expression expr = data::lazy::join_and(v.begin(), v.end());
-#ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-    mCRL2log(debug) << "  <and-term> " << data::pp(expr) << std::endl;
-#endif
     result.insert(expr);
   }
 };

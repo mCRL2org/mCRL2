@@ -49,7 +49,7 @@ Technical details
    RAM).
 
 *Models*
-   The model is available as an appendix to [MP05]_. It is also distributed with
+   The model is available as an appendix to the technical report mentioned in [MP07]_. It is also distributed with
    the mCRL2 toolset.
 
 *Organizational context*

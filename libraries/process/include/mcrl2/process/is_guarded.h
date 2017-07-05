@@ -29,11 +29,7 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
   typedef process_expression_traverser<is_guarded_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   const std::vector<process_equation>& equations;
   std::set<process_identifier>& W;
@@ -76,15 +72,15 @@ struct is_guarded_traverser: public process_expression_traverser<is_guarded_trav
   }
 
   // p . q
-  void operator()(const process::seq& x)
+  void apply(const process::seq& x)
   {
-    (*this)(x.left()); // only p needs to be guarded
+    apply(x.left()); // only p needs to be guarded
   }
 
   // p << q
   void operator()(const process::bounded_init& x)
   {
-    (*this)(x.left()); // only p needs to be guarded
+    apply(x.left()); // only p needs to be guarded
   }
 };
 
@@ -92,12 +88,13 @@ inline
 bool is_guarded(const process_expression& x, const std::vector<process_equation>& equations, std::set<process_identifier>& W)
 {
   detail::is_guarded_traverser f(equations, W);
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
-} // detail
+} // namespace detail
 
+/// \brief Checks if a process expression is guarded.
 inline
 bool is_guarded(const process_expression& x, const std::vector<process_equation>& equations)
 {

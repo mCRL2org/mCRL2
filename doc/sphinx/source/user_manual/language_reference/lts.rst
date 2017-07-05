@@ -104,9 +104,9 @@ The number of parameter values should be equal to the number of parameters
 defined in the parameters section, including parameters with a domain
 cardinality of 0.
 
-The *i*th value in the list specifies the value of the *i*th parameter of the
+The *i*\ th value in the list specifies the value of the *i*\ th parameter of the
 parameters section in the following way: a value of *n* specifies that in this
-state, that parameter has the *n*th value from its domain. These values are
+state, that parameter has the *n*\ th value from its domain. These values are
 0-based, meaning that a value of 0 corresponds to the first domain value of that
 parameter.
 
@@ -131,7 +131,7 @@ containing the following items:
 * The *label*: a quoted string of characters that does not contain quotes
   (``"``).
 
-A value of *n* for either of the states indicates the *n*th state of the states
+A value of *n* for either of the states indicates the *n*\ th state of the states
 section. Each of these values should be at least 1 and at most the number of
 states specified in the states section.
 
@@ -209,7 +209,7 @@ Example
 
 The following example shows a simple labelled transition system of the dining
 philosophers problem for two philosophers, visualised using
-:ref:`tools-ltsgraph`:
+:ref:`tool-ltsgraph`:
 
 .. image:: img/Dining2_ns_seq.*
    :width: 600px

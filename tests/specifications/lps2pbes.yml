@@ -1,0 +1,61 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: LTS
+  l4:
+    type: PBES
+  l5:
+    type: StateFrm
+  l6:
+    type: PBES
+  l8:
+    type: PBES
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-lstack]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: [-D]
+    name: lps2lts
+  t3:
+    input: [l2, l5]
+    output: [l6]
+    args: []
+    name: lps2pbes
+  t4:
+    input: [l6]
+    output: []
+    args: []
+    name: pbes2bool
+  t5:
+    input: [l2, l5]
+    output: [l8]
+    args: [--structured]
+    name: lps2pbes
+  t6:
+    input: [l8]
+    output: []
+    args: []
+    name: pbes2bool
+  t7:
+    input: [l2, l5]
+    output: [l4]
+    args: [-c]
+    name: lps2pbes
+  t8:
+    input: [l4]
+    output: []
+    args: []
+    name: pbes2bool
+
+result: |
+  result = t4.value['solution'] == t6.value['solution'] == t8.value['solution'] == (not t2.value['has-deadlock'])
+

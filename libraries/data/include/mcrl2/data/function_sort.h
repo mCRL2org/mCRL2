@@ -15,13 +15,12 @@
 #include <iostream>
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2
 {
@@ -54,17 +53,19 @@ class function_sort: public sort_expression
 
     /// \brief Constructor.
     template <typename Container>
-    function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = 0)
+    function_sort(const Container& domain, const sort_expression& codomain, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
     {}
 
     const sort_expression_list& domain() const
     {
+      assert(this->function()==core::detail::function_symbol_SortArrow());
       return atermpp::down_cast<sort_expression_list>((*this)[0]);
     }
 
     const sort_expression& codomain() const
     {
+      assert(this->function()==core::detail::function_symbol_SortArrow());
       return atermpp::down_cast<sort_expression>((*this)[1]);
     }
 };
@@ -74,6 +75,7 @@ std::string pp(const function_sort& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const function_sort& x)
@@ -101,7 +103,7 @@ typedef std::vector<function_sort> function_sort_vector;
 inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& codomain)
 {
-  return function_sort(atermpp::make_list(dom1), codomain);
+  return function_sort({ dom1 }, codomain);
 }
 
 /// \brief Convenience constructor for function sort with domain size 2
@@ -114,7 +116,7 @@ inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& dom2,
                                         const sort_expression& codomain)
 {
-  return function_sort(atermpp::make_list(dom1, dom2), codomain);
+  return function_sort({ dom1, dom2 }, codomain);
 }
 
 /// \brief Convenience constructor for function sort with domain size 3
@@ -129,7 +131,7 @@ inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& dom3,
                                         const sort_expression& codomain)
 {
-  return function_sort(atermpp::make_list(dom1, dom2, dom3), codomain);
+  return function_sort({ dom1, dom2, dom3 }, codomain);
 }
 
 /// \brief Convenience constructor for function sort with domain size 4
@@ -146,7 +148,7 @@ inline function_sort make_function_sort(const sort_expression& dom1,
                                         const sort_expression& dom4,
                                         const sort_expression& codomain)
 {
-  return function_sort(atermpp::make_list(dom1, dom2, dom3, dom4), codomain);
+  return function_sort({ dom1, dom2, dom3, dom4 }, codomain);
 }
 
 } // namespace data

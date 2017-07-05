@@ -79,7 +79,7 @@ if __name__ == '__main__':
   elif args.debug > 1:
     logging.basicConfig(level=logging.DEBUG)
     
-  mathjaxdir = os.path.join(sphinxdir, 'html', 'mathjax')
+  mathjaxdir = os.path.join(outpath, 'mathjax')
   if os.path.exists(mathjaxdir):
     shutil.rmtree(mathjaxdir)
   os.makedirs(mathjaxdir)

@@ -40,20 +40,20 @@ proc K = sum b0:Bit, b1:Bit, b2:Bit, d:D.
 
      L = r5.(a.s6 + a.s9(lost)).L;
 
-     S(b2:Bit,max:Nat) = sum l:List(D). (#l < 4) -> r1(l).S1(l,e1,b2,0,max)<>delta;
+     S(b2:Bit,max_:Nat) = sum l:List(D). (#l < 4) -> r1(l).S1(l,e1,b2,0,max_)<>delta;
 
-     S1(l:List(D), b0:Bit, b2:Bit, rn:Nat, max:Nat) =
-       s7(set).s2(b0,indl(l),b2,head(l)).S2(l,b0,b2,rn,max);
+     S1(l:List(D), b0:Bit, b2:Bit, rn:Nat, max_:Nat) =
+       s7(set).s2(b0,indl(l),b2,head(l)).S2(l,b0,b2,rn,max_);
 
-     S2(l:List(D), b0:Bit, b2:Bit, rn:Nat, max:Nat) =
+     S2(l:List(D), b0:Bit, b2:Bit, rn:Nat, max_:Nat) =
        r6.s7(reset).
-        ( last(l) -> s1(I_ok).S(inv(b2),max)
-                  <> S1(tail(l),e0,inv(b2),rn,max) ) +
-       r7(signal).S3(l,b0,b2,rn,max,C_ind(l));
+        ( last(l) -> s1(I_ok).S(inv(b2),max_)
+                  <> S1(tail(l),e0,inv(b2),rn,max_) ) +
+       r7(signal).S3(l,b0,b2,rn,max_,C_ind(l));
 
-     S3(l:List(D) , b0:Bit, b2:Bit, rn:Nat ,max:Nat , c:Ind) =
-       (rn == max) -> s1(c) . s10(ready) . r10(signal) . S(inv(b2),max)
-                   <> S1(l,b0, b2, rn + 1, max);
+     S3(l:List(D) , b0:Bit, b2:Bit, rn:Nat ,max_:Nat , c:Ind) =
+       (rn == max_) -> s1(c) . s10(ready) . r10(signal) . S(inv(b2),max_)
+                   <> S1(l,b0, b2, rn + 1, max_);
 
      T1 =
        ( r7(set).(r9(lost).(s7(signal) + r7(reset)) + r7(reset)) +

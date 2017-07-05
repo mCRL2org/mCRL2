@@ -34,7 +34,7 @@ int main(int /*argc*/, char** /*argv*/)
 
   FILE* plogfile;
   plogfile = fopen("logger_test_file.txt" , "w");
-  if(plogfile == NULL)
+  if(plogfile == nullptr)
   {
     throw std::runtime_error("Cannot open logfile for writing");
   }

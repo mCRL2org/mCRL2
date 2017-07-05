@@ -12,12 +12,12 @@
 #ifndef MCRL2_LPS_INVELM_ALGORITHM_H
 #define MCRL2_LPS_INVELM_ALGORITHM_H
 
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/detail/bdd_prover.h"
-#include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/invariant_checker.h"
 
 namespace mcrl2
 {
@@ -75,20 +75,27 @@ namespace lps
 /// parameter a_simplify_all is set, the condition of each summand is replaced by the BDD obtained from the prover after
 /// proving that summand's formula.
 
-class invelm_algorithm: public lps::detail::lps_algorithm
+template <class Specification>
+class invelm_algorithm: public detail::lps_algorithm<Specification>
 {
+  typedef typename detail::lps_algorithm<Specification> super;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  using super::m_spec;
+
   private:
-    mcrl2::data::detail::BDD_Prover f_bdd_prover;
-    const mcrl2::lps::specification f_lps;
+    data::detail::BDD_Prover f_bdd_prover;
+    const specification f_lps;
     bool f_simplify_all;
 
     /// \brief Adds an invariant to the condition of the summand s, and optionally applies the prover to it
     /// \param s The summand that needs to be simplified
     /// \param invariant A data expression
     /// \param apply_prover If true, the prover is applied to the condition
-    void simplify_summand(lps::summand_base& s, const data::data_expression& invariant, bool apply_prover)
+    void simplify_summand(summand_base& s, const data::data_expression& invariant, bool apply_prover)
     {
       data::data_expression new_condition = data::lazy::and_(invariant, s.condition());
+
       if (apply_prover)
       {
         f_bdd_prover.set_formula(new_condition);
@@ -103,9 +110,9 @@ class invelm_algorithm: public lps::detail::lps_algorithm
     template <typename SummandSequence>
     void simplify_summands(SummandSequence& summands, const data::data_expression& invariant, bool apply_prover)
     {
-      for (typename SummandSequence::iterator i = summands.begin(); i != summands.end(); ++i)
+      for (summand_base& s: summands)
       {
-        simplify_summand(*i, invariant, apply_prover);
+        simplify_summand(s, invariant, apply_prover);
       }
     }
 
@@ -114,15 +121,15 @@ class invelm_algorithm: public lps::detail::lps_algorithm
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     invelm_algorithm(
-      mcrl2::lps::specification& a_lps,
-      const mcrl2::data::rewriter::strategy a_rewrite_strategy = data::jitty,
+      Specification& a_lps,
+      const data::rewriter::strategy a_rewrite_strategy = data::jitty,
       const int a_time_limit = 0,
       const bool a_path_eliminator = false,
-      const mcrl2::data::detail::smt_solver_type a_solver_type = mcrl2::data::detail::solver_type_cvc,
+      const data::detail::smt_solver_type a_solver_type = data::detail::solver_type_cvc,
       const bool a_apply_induction = false,
       const bool a_simplify_all = false
     )
-      : lps_algorithm(a_lps),
+      : detail::lps_algorithm<Specification>(a_lps),
         f_bdd_prover(a_lps.data(), data::used_data_equation_selector(a_lps.data()),a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
         f_simplify_all(a_simplify_all)
     {}
@@ -131,7 +138,7 @@ class invelm_algorithm: public lps::detail::lps_algorithm
     {
       simplify_summands(m_spec.process().action_summands(), invariant, apply_prover);
       simplify_summands(m_spec.process().deadlock_summands(), invariant, apply_prover);
-      remove_trivial_summands();
+      super::remove_trivial_summands();
     }
 };
 

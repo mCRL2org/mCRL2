@@ -9,19 +9,18 @@
 /// \file mcrl2/data/expression_traits.h
 /// \brief Contains term traits for data_expression.
 
-#ifndef MCRL2_DATA_TERM_TRAITS_H
-#define MCRL2_DATA_TERM_TRAITS_H
+#ifndef MCRL2_DATA_EXPRESSION_TRAITS_H
+#define MCRL2_DATA_EXPRESSION_TRAITS_H
 
-#include <functional>
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/data/application.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/variable.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
-#include "mcrl2/data/detail/data_sequence_algorithm.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/utilities/exception.h"
+#include <functional>
 
 namespace mcrl2
 {
@@ -216,59 +215,19 @@ struct term_traits<data::data_expression>
     return data::is_variable(t);
   }
 
-  /// \brief Returns the free variables of a term
-  /// \param t A term
-  /// \return The free variables of a term
-  static inline
-  variable_sequence_type free_variables(const term_type& t)
-  {
-    std::set<variable_type> v = data::find_free_variables(data::data_expression(t));
-    return variable_sequence_type(v.begin(), v.end());
-  }
-
-  /// \brief Returns the intersection of two unordered sets of variables
-  /// \param v A sequence of data variables
-  /// \param w A sequence of data variables
-  /// \return The difference of two sets.
-  static inline
-  variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
-  {
-    return data::detail::set_intersection(v, w);
-  }
-
-  /// \brief Returns the difference of two unordered sets of variables
-  /// \param v A sequence of data variables
-  /// \param w A sequence of data variables
-  /// \return The difference of two sets.
-  static inline
-  variable_sequence_type set_difference(const variable_sequence_type& v, const variable_sequence_type& w)
-  {
-    return data::detail::set_difference(v, w);
-  }
-
-  /// \brief Test if a term is constant
-  /// \param t A term
-  /// \return True if the term is constant. N.B. It is unknown if the current implementation
-  /// works for quantifier expressions.
-  static inline
-  bool is_constant(const term_type& t)
-  {
-    return data::find_all_variables(t).empty();
-  }
-
   /// \brief Get the n-th argument of a data expression, provided it is an application.
   /// \param t A term which is an application.
   /// \param n The index of the argument. The first index has number 0.
   /// \return the n-th argument of t.
   /// \details This function is linear in n.
   static inline
-  const term_type& argument(const term_type& t, const size_t n)
+  const term_type& argument(const term_type& t, const std::size_t n)
   {
     assert(data::is_application(t));
     const data::application &a=atermpp::down_cast<data::application>(t);
     assert(a.size()>n);
     data::application::const_iterator i=a.begin();
-    for(size_t j=0; j<n; ++j, ++i)
+    for(std::size_t j=0; j<n; ++j, ++i)
     {
       assert(i!=a.end());
     }
@@ -393,8 +352,8 @@ struct expression_traits : public core::term_traits< Expression >
   }
 };
 
-} // namespace core
+} // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_TERM_TRAITS_H
+#endif // MCRL2_DATA_EXPRESSION_TRAITS_H

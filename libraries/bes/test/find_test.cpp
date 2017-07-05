@@ -9,13 +9,13 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
+#include "mcrl2/bes/find.h"
+#include "mcrl2/bes/parse.h"
 #include <algorithm>
+#include <boost/test/minimal.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/bes/parse.h"
-#include "mcrl2/bes/find.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -23,7 +23,7 @@ using namespace mcrl2::bes;
 template <typename Container, typename OutputIterator>
 void my_find_variables(Container const& container, OutputIterator o)
 {
-  bes::detail::make_find_boolean_variables_traverser<bes::boolean_expression_traverser>(o)(container);
+  bes::detail::make_find_boolean_variables_traverser<bes::boolean_expression_traverser>(o).apply(container);
 }
 
 struct my_compare_variable

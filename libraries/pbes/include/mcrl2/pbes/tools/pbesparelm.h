@@ -21,17 +21,15 @@ namespace pbes_system {
 
 void pbesparelm(const std::string& input_filename,
                 const std::string& output_filename,
-                const utilities::file_format* input_format,
-                const utilities::file_format* output_format
+                const utilities::file_format& input_format,
+                const utilities::file_format& output_format
                )
 {
   // load the pbes
   pbes p;
   load_pbes(p, input_filename, input_format);
 
-  // apply the algorithm
-  pbes_parelm_algorithm algorithm;
-  algorithm.run(p);
+  parelm(p);
 
   // save the result
   save_pbes(p, output_filename, output_format);

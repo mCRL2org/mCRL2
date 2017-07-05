@@ -12,20 +12,21 @@
 #ifndef MCRL2_PBES_TOOLS_PBESREWR_H
 #define MCRL2_PBES_TOOLS_PBESREWR_H
 
-#include <cassert>
-#include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/detail/one_point_rule_preprocessor.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/detail/bqnf_traverser.h"
+#include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/detail/ppg_traverser.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
-#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/detail/bqnf_traverser.h"
-#include "mcrl2/pbes/detail/ppg_traverser.h"
-#include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/utilities/logger.h"
+#include <cassert>
 
 namespace mcrl2 {
 
@@ -33,8 +34,8 @@ namespace pbes_system {
 
 void pbesrewr(const std::string& input_filename,
               const std::string& output_filename,
-              const utilities::file_format* input_format,
-              const utilities::file_format* output_format,
+              const utilities::file_format& input_format,
+              const utilities::file_format& output_format,
               const data::rewrite_strategy rewrite_strategy,
               pbes_rewriter_type rewriter_type)
 {
@@ -69,13 +70,14 @@ void pbesrewr(const std::string& input_filename,
       pbes_rewrite(p, pbesr);
       break;
     }
+    case quantifier_inside:
+    {
+      quantifiers_inside_rewriter pbesr;
+      pbes_rewrite(p, pbesr);
+      break;
+    }
     case quantifier_one_point:
     {
-      // first preprocess data expressions
-      data::detail::one_point_rule_preprocessor one_point_processor;
-      data_rewriter<data::detail::one_point_rule_preprocessor> datar_onepoint(one_point_processor);
-      pbes_rewrite(p, datar_onepoint);
-
       // apply the one point rule rewriter
       one_point_rule_rewriter pbesr;
       pbes_rewrite(p, pbesr);

@@ -13,6 +13,7 @@
 #define MCRL2_CORE_DPARSER_H
 
 #include <cstddef>
+#include <sstream>
 #include <string>
 
 // prototypes
@@ -104,7 +105,7 @@ struct parse_node
 
   operator bool() const
   {
-    return node != 0;
+    return node != nullptr;
   }
 };
 
@@ -139,14 +140,14 @@ struct parser_table
   void print() const;
 };
 
-/// \brief Wrapper for D_Parser and it's corresponding D_ParserTables
+/// \brief Wrapper for D_Parser and its corresponding D_ParserTables
 struct parser
 {
   parser_table m_table;
   D_Parser* m_parser;
   std::size_t m_max_error_message_count;
 
-  explicit parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0, D_SyntaxErrorFn syntax_error_fn = 0, std::size_t max_error_message_count = 1);
+  explicit parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = nullptr, D_SyntaxErrorFn syntax_error_fn = nullptr, std::size_t max_error_message_count = 1);
 
   ~parser();
 
@@ -172,6 +173,26 @@ struct parser
 
   /// \brief Callback function for nodes in the parse tree
   void announce(D_ParseNode& node_ref);
+
+  void print_node(std::ostream& out, const parse_node& node) const
+  {
+    out << "symbol      = " << symbol_table().symbol_name(node) << std::endl
+        << "string      = " << node.string() << std::endl
+        << "child_count = " << node.child_count();
+    for (int i = 0; i < node.child_count(); i++)
+    {
+      out << std::endl
+          << "child " << i << " = " << symbol_table().symbol_name(node.child(i))
+          << " " << node.child(i).string();
+    }
+  }
+
+  std::string print_node(const parse_node& node) const
+  {
+    std::ostringstream out;
+    print_node(out, node);
+    return out.str();
+  }
 };
 
 } // namespace core

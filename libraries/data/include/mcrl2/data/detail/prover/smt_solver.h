@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsbinary.cpp
+/// \file smt_solver.h
 /// \brief Abstract interface for SMT solvers
 
-#ifndef SMT_SOLVER_H
-#define SMT_SOLVER_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_SMT_SOLVER_H
+#define MCRL2_DATA_DETAIL_PROVER_SMT_SOLVER_H
 
 #include "mcrl2/data/data_expression.h"
 
@@ -27,8 +27,8 @@ class SMT_Solver
     virtual ~SMT_Solver() {};
     virtual bool is_satisfiable(const data_expression_list &a_formula) = 0;
 };
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

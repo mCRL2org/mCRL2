@@ -1,0 +1,47 @@
+#!/bin/sh
+# Author(s): Sjoerd Cranen
+# Copyright: see the accompanying file COPYING or copy at
+# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+#
+# This script is the default script to compile rewriter
+# libraries. It is generated, so to change compiling
+# behaviour, follow the following steps:
+#
+# - Create a new script (perhaps based on this one)
+# - Let the MCRL2_COMPILEREWRITER environment variable
+#   point to the new script.
+#
+# Requirements for a compile script: the output (both
+# stdout and stderr!) must consist solely of a newline-
+# separated list of files. The last file in the list is
+# treated as the compiler library, and must be a valid
+# executable. All files listed in the output are deleted
+# once the rewriter library is no longer needed.
+
+if [ -z "$CXX" ]; then  # Let user choose via $CXX
+  CXX=`which c++`       # Then test for c++
+  if [ $? -ne 0 ]; then
+    CXX=`which clang++` # Then prefer clang over gcc
+  fi
+  if [ $? -ne 0 ]; then
+    CXX=`which g++`     # Test for gcc
+  fi
+  if [ $? -ne 0 ]; then
+    CXX="@CXX@"         # Last resort: use compiler from build.
+  fi
+fi
+
+(echo $1 &&
+$CXX -c @R_CXXFLAGS@ @R_INCLUDE_DIRS@ -o $1.o $1 > $1.log 2>&1 &&
+echo $1.o &&
+$CXX @R_LDFLAGS@ -o $1.bin $1.o >> $1.log 2>&1 &&
+echo $1.log &&
+echo $1.bin) || (
+echo "Compile script was:" &&
+cat $0 &&
+echo "Compilation log:" &&
+cat $1.log)

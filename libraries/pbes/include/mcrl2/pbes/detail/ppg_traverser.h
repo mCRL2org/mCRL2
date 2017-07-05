@@ -13,9 +13,9 @@
 #ifndef MCRL2_PBES_DETAIL_PPG_TRAVERSER_H
 #define MCRL2_PBES_DETAIL_PPG_TRAVERSER_H
 
-#include <stack>
-#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
+#include "mcrl2/pbes/traverser.h"
+#include <stack>
 
 namespace mcrl2 {
 
@@ -30,11 +30,7 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
   typedef pbes_expression_traverser<ppg_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   enum expression_mode {
     CONJUNCTIVE, UNIVERSAL,
@@ -156,15 +152,15 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
       case EXISTENTIAL:
       case DISJUNCTIVE:
       {
-        size_t count = 0;
-        std::vector<pbes_expression> conjuncts = pbes_expr::split_conjuncts(x);
-        for(std::vector<pbes_expression>::iterator it = conjuncts.begin(); it != conjuncts.end(); ++it)
+        std::size_t count = 0;
+        std::vector<pbes_expression> conjuncts = split_conjuncts(x);
+        for(const pbes_expression& conjunct : conjuncts)
         {
-          if (!is_simple_expression(*it))
+          if (!is_simple_expression(conjunct))
           {
             //std::clog << "and: " << core::pp(*it) << std::endl;
             count++;
-            if (count > 1 || !is_propositional_variable_instantiation(*it))
+            if (count > 1 || !is_propositional_variable_instantiation(conjunct))
             {
               //std::clog << "Invalid: 'and' in mode " << print_mode(mode) << std::endl;
               result = false;
@@ -206,14 +202,14 @@ struct ppg_traverser: public pbes_expression_traverser<ppg_traverser>
       case UNIVERSAL:
       case CONJUNCTIVE:
       {
-        size_t count = 0;
-        std::vector<pbes_expression>  disjuncts = pbes_expr::split_disjuncts(x);
-        for(std::vector<pbes_expression>::iterator it = disjuncts.begin(); it != disjuncts.end(); ++it)
+        std::size_t count = 0;
+        std::vector<pbes_expression>  disjuncts = split_disjuncts(x);
+        for(const pbes_expression& disjunct : disjuncts)
         {
-          if (!is_simple_expression(*it))
+          if (!is_simple_expression(disjunct))
           {
             count++;
-            if (count > 1 || !is_propositional_variable_instantiation(*it))
+            if (count > 1 || !is_propositional_variable_instantiation(disjunct))
             {
               ///std::clog << "Invalid: 'or' in mode " << print_mode(mode) << std::endl;
               result = false;
@@ -256,7 +252,7 @@ template <typename T>
 bool is_ppg(const T& x)
 {
   ppg_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

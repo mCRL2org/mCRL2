@@ -1,0 +1,9 @@
+act a, b;
+
+proc
+  P = a . Q;
+  Q = P;
+
+init
+  allow({a}, P || Q || b);
+

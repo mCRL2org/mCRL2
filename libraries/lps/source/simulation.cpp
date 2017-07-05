@@ -12,19 +12,23 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-simulation::simulation(const specification& specification, data::rewrite_strategy strategy)
+simulation::simulation(const stochastic_specification& specification, data::rewrite_strategy strategy)
   : m_specification(specification),
     m_rewriter(m_specification.data(), strategy),
-    m_generator(m_specification, m_rewriter),
+    m_generator(stochastic_specification(m_specification), m_rewriter),
     m_tau_prioritization(false)
 {
   state_t state;
-  state.source_state = m_generator.initial_state();
+  if (++m_generator.initial_states().begin()!=m_generator.initial_states().end()) // size()>1
+  {
+    mCRL2log(mcrl2::log::warning) << "This simulator does not take the initial distribution into account. It just picks one state.\n";
+  }
+  state.source_state = m_generator.initial_states().front().state();
   state.transitions = transitions(state.source_state);
   m_full_trace.push_back(state);
 }
 
-void simulation::truncate(size_t state_number)
+void simulation::truncate(std::size_t state_number)
 {
   assert(state_number < m_full_trace.size());
   if (m_tau_prioritization)
@@ -39,7 +43,7 @@ void simulation::truncate(size_t state_number)
   }
 }
 
-void simulation::select(size_t transition_number)
+void simulation::select(std::size_t transition_number)
 {
   assert(transition_number < m_full_trace.back().transitions.size());
   if (m_tau_prioritization)
@@ -60,7 +64,7 @@ void simulation::select(size_t transition_number)
     {
       bool found = false;
       std::vector<transition_t> &transitions = m_full_trace.back().transitions;
-      for (size_t index = 0; index < transitions.size(); index++)
+      for (std::size_t index = 0; index < transitions.size(); index++)
       {
         if (is_prioritized(transitions[index].action))
         {
@@ -91,7 +95,7 @@ void simulation::select(size_t transition_number)
   }
 }
 
-void simulation::enable_tau_prioritization(bool enable, std::string action)
+void simulation::enable_tau_prioritization(bool enable, const std::string& action)
 {
   m_tau_prioritization = enable;
   m_prioritized_action = action;
@@ -108,7 +112,7 @@ void simulation::save(const std::string &filename)
 {
   trace::Trace trace;
   trace.setState(m_full_trace[0].source_state);
-  for (size_t i = 0; i + 1 < m_full_trace.size(); i++)
+  for (std::size_t i = 0; i + 1 < m_full_trace.size(); i++)
   {
     trace.addAction(m_full_trace[i].transitions[m_full_trace[i].transition_number].action);
     trace.setState(m_full_trace[i+1].source_state);
@@ -124,7 +128,12 @@ void simulation::load(const std::string &filename)
 
   // Get the first state from the generator
   m_full_trace.clear();
-  push_back(m_generator.initial_state());
+  if (++m_generator.initial_states().begin()!=m_generator.initial_states().end()) // size()>1
+  {
+    mCRL2log(mcrl2::log::warning) << "This simulator does not take distributions into account. It just picks a state.\n";
+  }
+  // push_back(m_generator.initial_state());
+  push_back(m_generator.initial_states().front().state());
 
   // Check that the first state (if given) matches the first state of our generator
   if (trace.current_state_exists() && trace.currentState() != m_full_trace.back().source_state)
@@ -151,7 +160,7 @@ void simulation::load(const std::string &filename)
   }
 }
 
-std::vector<simulation::transition_t> simulation::transitions(state source_state)
+std::vector<simulation::transition_t> simulation::transitions(const state& source_state)
 {
   try
   {
@@ -160,7 +169,7 @@ std::vector<simulation::transition_t> simulation::transitions(state source_state
     for (next_state_generator::iterator i = m_generator.begin(source_state, &enumeration_queue); i != m_generator.end(); i++)
     {
       transition_t transition;
-      transition.destination = i->state();
+      transition.destination = i->target_state();
       transition.action = i->action();
       output.push_back(transition);
     }
@@ -217,7 +226,7 @@ bool simulation::is_prioritized(const multi_action &action)
 void simulation::prioritize_trace()
 {
   m_prioritized_trace.push_back(m_full_trace.front());
-  for (size_t index = 0; index < m_full_trace.size() - 1; index++)
+  for (std::size_t index = 0; index < m_full_trace.size() - 1; index++)
   {
     transition_t transition = m_full_trace[index].transitions[m_full_trace[index].transition_number];
     if (is_prioritized(transition.action))
@@ -252,7 +261,7 @@ bool simulation::match_trace(trace::Trace& trace)
   state_t& current = m_full_trace.back();
   lps::multi_action action = trace.currentAction();
   trace.increasePosition();
-  for (size_t i = 0; i < current.transitions.size(); ++i)
+  for (std::size_t i = 0; i < current.transitions.size(); ++i)
   {
     if (current.transitions[i].action == action &&
         (!trace.current_state_exists() ||
@@ -273,7 +282,7 @@ bool simulation::match_trace(trace::Trace& trace)
 bool simulation::match(const state &left, const state &right)
 {
   assert(left.size() == right.size());
-  for (size_t i = 0; i < left.size(); i++)
+  for (std::size_t i = 0; i < left.size(); i++)
   {
     if (!is_variable(left[i]) && !is_variable(right[i]) && left[i] != right[i])
     {

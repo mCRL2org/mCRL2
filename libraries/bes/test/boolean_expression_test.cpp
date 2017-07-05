@@ -9,14 +9,14 @@
 /// \file boolean_operator.cpp
 /// \brief Test for boolean expressions.
 
+#include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/io.h"
+#include "mcrl2/bes/print.h"
+#include <boost/test/minimal.hpp>
+#include <cstdio>
 #include <iostream>
 #include <string>
-#include <stdio.h>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/print.h"
-#include "mcrl2/bes/io.h"
 
 using namespace mcrl2;
 

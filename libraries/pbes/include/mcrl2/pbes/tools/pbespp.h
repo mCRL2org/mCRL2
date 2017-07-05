@@ -12,9 +12,9 @@
 #ifndef MCRL2_PBES_TOOLS_PBESPP_H
 #define MCRL2_PBES_TOOLS_PBESPP_H
 
-#include <fstream>
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/logger.h"
+#include <fstream>
 
 namespace mcrl2 {
 
@@ -22,7 +22,7 @@ namespace pbes_system {
 
 void pbespp(const std::string& input_filename,
             const std::string& output_filename,
-            const utilities::file_format* input_format,
+            const utilities::file_format& input_format,
             core::print_format_type format
            )
 {

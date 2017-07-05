@@ -1,0 +1,18 @@
+%% The controller cannot infinitely often receive water level readings
+%%
+%% Holds for no product. Proving that it does not hold requires proving
+%% that the complement of the formula holds for all products. Proving that
+%% the complement holds requires no decomposition into subfamilies but can 
+%% be proven for all products (satisfying the Feature Diagram FD) at once.
+
+nu X(Px:FExpr = FD). mu Y(Py:FExpr = Px).  
+(
+(val(normalise(or(neg(Py),tt)) == tt) && (<levelMsg>X(Py)) )
+||
+(val(normalise(or(neg(Py),tt)) == tt) && 
+(
+   (                 <skip>(Y(Py) ) )
+|| ( exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py),e)) == tt) && Y(Py) )) 
+)
+)
+)

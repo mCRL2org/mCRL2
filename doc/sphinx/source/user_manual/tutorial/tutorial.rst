@@ -7,7 +7,7 @@ concepts, guided by an example, and some exercises to gain hands on
 experience with the tools.  Note that in this tutorial we mainly focus
 at the use of the tools, and not on the theory that is underlying the
 tools. For the latter, we refer to [GMRUW09]_ as a brief
-introduction of the main concepts, and to [GM11]_ for an in-depth
+introduction of the main concepts, and to [GM14a]_ for an in-depth
 discussion.
 
 Before starting this tutorial you should first :ref:`download <download>` a copy
@@ -38,8 +38,8 @@ terminal. Commands that should be entered at the prompt are displayed as::
 References
 ----------
 
-.. [GM11] J.F. Groote and M.R. Mousavi. Modelling and Analysis of Communicating
-   systems. Unpublished. `(PDF) <http://www.win.tue.nl/~jfg/educ/2IW26/herfst2011/mcrl2-book.pdf>`_
+.. [GM14a] J.F. Groote and M.R. Mousavi. `Modelling and Analysis of Communicating
+   Systems <https://mitpress.mit.edu/books/modeling-and-analysis-communicating-systems>`__. The MIT Press. 2014.
    
 .. [GMRUW09] J.F. Groote, A.H.J. Mathijssen, M.A. Reniers, Y.S. Usenko and
    M.J. van Weerdenburg. Analysis of distributed systems with mCRL2. In

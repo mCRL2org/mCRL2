@@ -12,9 +12,9 @@
 #ifndef MCRL2_PBES_PBES_REWRITER_TYPE_H
 #define MCRL2_PBES_PBES_REWRITER_TYPE_H
 
+#include "mcrl2/utilities/exception.h"
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -26,6 +26,7 @@ enum pbes_rewriter_type
   simplify,
   quantifier_all,
   quantifier_finite,
+  quantifier_inside,
   quantifier_one_point,
   prover,
   pfnf,
@@ -48,6 +49,10 @@ pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
   if (type == "quantifier-finite")
   {
     return quantifier_finite;
+  }
+  if (type == "quantifier-inside")
+  {
+    return quantifier_inside;
   }
   if (type == "quantifier-one-point")
   {
@@ -84,6 +89,8 @@ std::string print_pbes_rewriter_type(const pbes_rewriter_type type)
       return "quantifier-all";
     case quantifier_finite:
       return "quantifier-finite";
+    case quantifier_inside:
+      return "quantifier-inside";
     case quantifier_one_point:
       return "quantifier-one-point";
     case prover:
@@ -111,6 +118,8 @@ std::string description(const pbes_rewriter_type type)
       return "for eliminating all quantifiers";
     case quantifier_finite :
       return "for eliminating finite quantifier variables";
+    case quantifier_inside :
+      return "for pushing quantifiers inside";
     case quantifier_one_point :
       return "for one point rule quantifier elimination";
     case prover            :

@@ -9,34 +9,34 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/standard_utility.h"
 #include <algorithm>
+#include <boost/test/minimal.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/function_sort.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 
 inline
-variable nat(std::string name)
+variable nat(const std::string& name)
 {
   return variable(identifier_string(name), sort_nat::nat());
 }
 
 inline
-variable pos(std::string name)
+variable pos(const std::string& name)
 {
   return variable(identifier_string(name), sort_pos::pos());
 }
 
 inline
-variable bool_(std::string name)
+variable bool_(const std::string& name)
 {
   return variable(identifier_string(name), sort_bool::bool_());
 }

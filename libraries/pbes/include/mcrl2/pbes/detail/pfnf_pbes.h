@@ -12,12 +12,13 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_PBES_H
 #define MCRL2_PBES_DETAIL_PFNF_PBES_H
 
+#include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/join.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
+#include "mcrl2/utilities/logger.h"
 #include <cassert>
 #include <iostream>
-#include "mcrl2/pbes/detail/is_pfnf.h"
-#include "mcrl2/pbes/rewriters/pfnf_rewriter.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {
 
@@ -47,10 +48,10 @@ void split_pfnf_implication(const pbes_expression& x, pbes_expression& g, std::v
 
     std::vector<pbes_expression> v;
     split_or(y, v);
-    for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
+    for (pbes_expression& expr: v)
     {
-      assert(is_propositional_variable_instantiation(*i));
-      Xij.push_back(atermpp::down_cast<propositional_variable_instantiation>(*i));
+      assert(is_propositional_variable_instantiation(expr));
+      Xij.push_back(atermpp::down_cast<propositional_variable_instantiation>(expr));
     }
   }
 }
@@ -91,14 +92,14 @@ class pfnf_implication
     // convert to pbes_expression
     pbes_expression convert() const
     {
-      return imp(m_g, pbes_expr::join_or(m_v.begin(), m_v.end()));
+      return imp(m_g, join_or(m_v.begin(), m_v.end()));
     }
 };
 
 inline
 std::ostream& operator<<(std::ostream& out, const pfnf_implication& x)
 {
-  return out << pbes_system::pp(imp(x.g(), pbes_expr::join_or(x.variables().begin(), x.variables().end())));
+  return out << pbes_system::pp(imp(x.g(), join_or(x.variables().begin(), x.variables().end())));
 }
 
 // represents forall d:D or exists d:D
@@ -155,12 +156,12 @@ class pfnf_equation
     pfnf_equation(const pbes_equation& eqn)
     {
       m_symbol = eqn.symbol();
-      propositional_variable X = eqn.variable();
-      pbes_expression phi = eqn.formula();
+      const propositional_variable& X = eqn.variable();
+      const pbes_expression& phi = eqn.formula();
 
       // left hand side
       m_X = X;
-      data::variable_list d = X.parameters();
+      const data::variable_list& d = X.parameters();
       m_parameters = std::vector<data::variable>(d.begin(), d.end());
 
       // right hand side
@@ -180,9 +181,9 @@ class pfnf_equation
       }
       std::vector<pbes_expression> g;
       split_pfnf_expression(y, m_h, g);
-      for (std::vector<pbes_expression>::iterator i = g.begin(); i != g.end(); ++i)
+      for (const pbes_expression& expr: g)
       {
-        m_implications.push_back(pfnf_implication(*i));
+        m_implications.push_back(pfnf_implication(expr));
       }
     }
 
@@ -225,11 +226,11 @@ class pfnf_equation
     pbes_equation convert() const
     {
       std::vector<pbes_expression> v;
-      for (std::vector<pfnf_implication>::const_iterator i = m_implications.begin(); i != m_implications.end(); ++i)
+      for (const pfnf_implication& impl: m_implications)
       {
-        v.push_back(i->convert());
+        v.push_back(impl.convert());
       }
-      pbes_expression phi = pbes_expr::join_and(v.begin(), v.end());
+      pbes_expression phi = join_and(v.begin(), v.end());
 
       phi = and_(m_h, phi);
 
@@ -290,10 +291,9 @@ class pfnf_pbes
         pbes_system::pbes_rewrite(q, R);
         assert (is_pfnf(q));
       }
-      const std::vector<pbes_equation>& equations = q.equations();
-      for (std::vector<pbes_equation>::const_iterator i = equations.begin(); i != equations.end(); ++i)
+      for (const pbes_equation& equation: q.equations())
       {
-        m_equations.push_back(pfnf_equation(*i));
+        m_equations.push_back(pfnf_equation(equation));
       }
     }
 

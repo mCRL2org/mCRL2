@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_FIND_FREE_VARIABLES_H
 #define MCRL2_PBES_DETAIL_FIND_FREE_VARIABLES_H
 
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2
@@ -29,7 +29,7 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
   typedef pbes_expression_traverser<find_free_variables_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   data::variable_list bound_variables;
   std::vector<data::variable_list> quantifier_stack;
@@ -53,9 +53,9 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
     {
       return true;
     }
-    for (auto i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+    for (const data::variable_list& vars: quantifier_stack)
     {
-      if (std::find(i->begin(), i->end(), v) != i->end())
+      if (std::find(vars.begin(), vars.end(), v) != vars.end())
       {
         return true;
       }
@@ -100,12 +100,11 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
   {
     if (search_propositional_variables)
     {
-      std::set<data::variable> variables = data::find_free_variables(x.parameters());
-      for (auto i = variables.begin(); i != variables.end(); ++i)
+      for (const data::variable& v: data::find_free_variables(x.parameters()))
       {
-        if (!is_bound(*i))
+        if (!is_bound(v))
         {
-          result.insert(*i);
+          result.insert(v);
         }
       }
     }
@@ -113,12 +112,11 @@ struct find_free_variables_traverser: public pbes_expression_traverser<find_free
 
   void enter(const data::data_expression& x)
   {
-    std::set<data::variable> variables = data::find_free_variables(x);
-    for (auto i = variables.begin(); i != variables.end(); ++i)
+    for (const data::variable& v: data::find_free_variables(x))
     {
-      if (!is_bound(*i))
+      if (!is_bound(v))
       {
-        result.insert(*i);
+        result.insert(v);
       }
     }
   }
@@ -128,7 +126,7 @@ inline
 std::set<data::variable> find_free_variables(const pbes_expression& x, const data::variable_list& bound_variables = data::variable_list(), bool search_propositional_variables = true)
 {
   find_free_variables_traverser f(bound_variables, search_propositional_variables);
-  f(x);
+  f.apply(x);
   return f.result;
 };
 

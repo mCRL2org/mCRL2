@@ -47,7 +47,7 @@ class exists: public abstraction
     template < typename Container >
     exists(const Container& variables,
            const data_expression& body,
-           typename atermpp::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
       : abstraction(exists_binder(), variables, body)
     {
       assert(!variables.empty());
@@ -61,6 +61,7 @@ std::string pp(const exists& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const exists& x)

@@ -13,8 +13,8 @@
 #define MCRL2_CORE_DETAIL_PRINT_UTILITY_H
 
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 
 #include "mcrl2/core/print.h"
 
@@ -32,7 +32,7 @@ namespace detail
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container>
-std::string print_container(const Container& v, std::string begin_marker = "(", std::string end_marker = ")", std::string message = "", bool print_index = false, bool boundary_spaces = true)
+std::string print_container(const Container& v, const std::string& begin_marker = "(", const std::string& end_marker = ")", const std::string& message = "", bool print_index = false, bool boundary_spaces = true)
 {
   std::ostringstream out;
   if (!message.empty())
@@ -75,7 +75,7 @@ std::string print_container(const Container& v, std::string begin_marker = "(", 
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container>
-std::string print_list(const Container& v, std::string message = "", bool print_index = false, bool boundary_spaces = true)
+std::string print_list(const Container& v, const std::string& message = "", bool print_index = false, bool boundary_spaces = true)
 {
   return print_container(v, "[", "]", message, print_index, boundary_spaces);
 }
@@ -85,7 +85,7 @@ std::string print_list(const Container& v, std::string message = "", bool print_
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename Container>
-std::string print_set(const Container& v, std::string message = "", bool print_index = false, bool boundary_spaces = true)
+std::string print_set(const Container& v, const std::string& message = "", bool print_index = false, bool boundary_spaces = true)
 {
   return print_container(v, "{", "}", message, print_index, boundary_spaces);
 }
@@ -95,7 +95,7 @@ std::string print_set(const Container& v, std::string message = "", bool print_i
 /// \param message A string
 /// \param print_index If true, an index is written in front of each term
 template <typename MapContainer>
-std::string print_map(const MapContainer& v, std::string message = "")
+std::string print_map(const MapContainer& v, const std::string& message = "")
 {
   std::ostringstream out;
   if (!message.empty())
@@ -113,6 +113,18 @@ std::string print_map(const MapContainer& v, std::string message = "")
   }
   out << "}";
   return out.str();
+}
+
+/// \brief Prints a comma separated list of the elements of v. If v is empty, the empty string is returned.
+/// \param v A container
+template <typename Container>
+std::string print_arguments(const Container& v)
+{
+  if (v.empty())
+  {
+    return "";
+  }
+  return print_container(v, "(", ")", "", false, false);
 }
 
 } // namespace detail

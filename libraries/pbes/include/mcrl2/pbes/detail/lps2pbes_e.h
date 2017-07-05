@@ -20,42 +20,28 @@ namespace pbes_system {
 
 namespace detail {
 
-template <typename TermTraits>
-std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
-                                 const state_formulas::state_formula& x,
-                                 const lps::linear_process& lps,
-                                 data::set_identifier_generator& id_generator,
-                                 const data::variable& T,
-                                 TermTraits tr
-                                );
+template <typename TermTraits, typename Parameters>
+void E(const state_formulas::state_formula& x,
+       Parameters& parameters,
+       std::vector<pbes_equation>& result,
+       TermTraits tr
+      );
 
-template <typename Derived, typename TermTraits>
+template <typename Derived, typename TermTraits, typename Parameters>
 struct e_traverser: public state_formulas::state_formula_traverser<Derived>
 {
   typedef state_formulas::state_formula_traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   typedef std::vector<pbes_equation> result_type;
 
-  const state_formulas::state_formula& phi0; // the original formula
-  const lps::linear_process& lps;
-  data::set_identifier_generator& id_generator;
-  const data::variable& T;
+  Parameters& parameters;
   std::vector<result_type> result_stack;
 
-  e_traverser(const state_formulas::state_formula& phi0_,
-              const lps::linear_process& lps_,
-              data::set_identifier_generator& id_generator_,
-              const data::variable& T_,
-              TermTraits
-             )
-    : phi0(phi0_), lps(lps_), id_generator(id_generator_), T(T_)
+  e_traverser(Parameters& parameters_, TermTraits)
+    : parameters(parameters_)
   {}
 
   Derived& derived()
@@ -87,7 +73,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
 
   bool is_timed() const
   {
-    return T != data::undefined_real_variable();
+    return parameters.T != data::undefined_real_variable();
   }
 
   // the empty equation list
@@ -111,7 +97,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     push(epsilon());
   }
 
-  void operator()(const state_formulas::not_&)
+  void apply(const state_formulas::not_&)
   {
     throw mcrl2::runtime_error("e_traverser: negation is not supported!");
   }
@@ -130,7 +116,7 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
     push(left + right);
   }
 
-  void operator()(const state_formulas::imp&)
+  void apply(const state_formulas::imp&)
   {
     throw mcrl2::runtime_error("e_traverser: implication is not supported!");
   }
@@ -181,115 +167,85 @@ struct e_traverser: public state_formulas::state_formula_traverser<Derived>
   }
 
   template <typename Expr>
-  void handle_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
+  void apply_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     data::variable_list xf = detail::mu_variables(x);
-    data::variable_list xp = lps.process_parameters();
-    state_formulas::state_formula phi = x.operand();
-    data::variable_list e = xf + xp + Par(X, data::variable_list(), phi0);
-    e = is_timed() ? T + e : e;
+    data::variable_list xp = parameters.lps.process_parameters();
+    const state_formulas::state_formula& phi = x.operand();
+    data::variable_list e = xf + xp + Par(X, data::variable_list(), parameters.phi0);
+    e = is_timed() ? parameters.T + e : e;
     propositional_variable v(X, e);
-    pbes_expression expr = detail::RHS(phi0, phi, lps, id_generator, T, TermTraits());
+    pbes_expression expr = detail::RHS(phi, parameters, TermTraits());
     pbes_equation eqn(sigma, v, expr);
-    push(std::vector<pbes_equation>() + eqn + E(phi0, phi, lps, id_generator, T, TermTraits()));
+    std::vector<pbes_equation> result = { eqn };
+    E(phi, parameters, result, TermTraits());
+    push(result);
   }
 
-  void operator()(const state_formulas::nu& x)
+  void apply(const state_formulas::nu& x)
   {
-    handle_mu_nu(x, fixpoint_symbol::nu());
+    apply_mu_nu(x, fixpoint_symbol::nu());
     mCRL2log(log::debug1, "lps2pbes") << "E(" << x << ") = " << core::detail::print_list(top()) << std::endl;
   }
 
-  void operator()(const state_formulas::mu& x)
+  void apply(const state_formulas::mu& x)
   {
-    handle_mu_nu(x, fixpoint_symbol::mu());
+    apply_mu_nu(x, fixpoint_symbol::mu());
     mCRL2log(log::debug1, "lps2pbes") << "E(" << x << ") = " << core::detail::print_list(top()) << std::endl;
   }
 };
 
-template <template <class, class> class Traverser, typename TermTraits>
-struct apply_e_traverser: public Traverser<apply_e_traverser<Traverser, TermTraits>, TermTraits>
+template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
+struct apply_e_traverser: public Traverser<apply_e_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_e_traverser<Traverser, TermTraits>, TermTraits> super;
+  typedef Traverser<apply_e_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  apply_e_traverser(const state_formulas::state_formula& phi0,
-                    const lps::linear_process& lps,
-                    data::set_identifier_generator& id_generator,
-                    const data::variable& T,
-                    TermTraits tr
-                   )
-    : super(phi0, lps, id_generator, T, tr)
+  apply_e_traverser(Parameters& parameters, TermTraits tr)
+    : super(parameters, tr)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
-template <typename TermTraits>
-std::vector<pbes_equation> E(const state_formulas::state_formula& x0,
-                                 const state_formulas::state_formula& x,
-                                 const lps::linear_process& lps,
-                                 data::set_identifier_generator& id_generator,
-                                 const data::variable& T,
-                                 TermTraits tr
-                                )
+template <typename TermTraits, typename Parameters>
+void E(const state_formulas::state_formula& x, Parameters& parameters, std::vector<pbes_equation>& result, TermTraits tr)
 {
-  apply_e_traverser<e_traverser, TermTraits> f(x0, lps, id_generator, T, tr);
-  f(x);
+  apply_e_traverser<e_traverser, TermTraits, Parameters> f(parameters, tr);
+  f.apply(x);
   assert(f.result_stack.size() == 1);
-  return f.top();
+  result.insert(result.end(), f.top().begin(), f.top().end());
 }
 
-template <typename TermTraits>
-std::vector<pbes_equation> E_structured(const state_formulas::state_formula& x0,
-                                            const state_formulas::state_formula& x,
-                                            const lps::linear_process& lps,
-                                            data::set_identifier_generator& id_generator,
-                                            data::set_identifier_generator& propvar_generator,
-                                            const data::variable& T,
-                                            TermTraits tr
-                                           );
+template <typename TermTraits, typename Parameters>
+void E_structured(const state_formulas::state_formula& x,
+                  Parameters& parameters,
+                  std::vector<pbes_equation>& result,
+                  TermTraits tr
+                 );
 
-template <typename Derived, typename TermTraits>
-struct e_structured_traverser: public e_traverser<Derived, TermTraits>
+template <typename Derived, typename TermTraits, typename Parameters>
+struct e_structured_traverser: public e_traverser<Derived, TermTraits, Parameters>
 {
-  typedef e_traverser<Derived, TermTraits> super;
+  typedef e_traverser<Derived, TermTraits, Parameters> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::push;
   using super::top;
   using super::pop;
   using super::is_timed;
   using super::epsilon;
-  using super::phi0;
-  using super::lps;
-  using super::id_generator;
-  using super::T;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::parameters;
 
   // typedef std::vector<pbes_equation> result_type;
 
-  data::set_identifier_generator& propvar_generator;
-
-  e_structured_traverser(const state_formulas::state_formula& phi0,
-                         const lps::linear_process& lps,
-                         data::set_identifier_generator& id_generator,
-                         data::set_identifier_generator& propvar_generator_,
-                         const data::variable& T,
+  e_structured_traverser(Parameters& parameters,
                          TermTraits tr
                         )
-    : super(phi0, lps, id_generator, T, tr),
-    	propvar_generator(propvar_generator_)
+    : super(parameters, tr)
   {}
 
   Derived& derived()
@@ -298,71 +254,63 @@ struct e_structured_traverser: public e_traverser<Derived, TermTraits>
   }
 
   template <typename Expr>
-  void handle_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
+  void apply_mu_nu(const Expr& x, const fixpoint_symbol& sigma)
   {
     using atermpp::detail::operator+;
-    core::identifier_string X = x.name();
+    const core::identifier_string& X = x.name();
     data::variable_list xf = detail::mu_variables(x);
-    data::variable_list xp = lps.process_parameters();
-    state_formulas::state_formula phi = x.operand();
-    data::variable_list d = xf + xp + Par(X, data::variable_list(), phi0);
-    d = is_timed() ? T + d : d;
+    data::variable_list xp = parameters.lps.process_parameters();
+    const state_formulas::state_formula& phi = x.operand();
+    data::variable_list d = xf + xp + Par(X, data::variable_list(), parameters.phi0);
+    d = is_timed() ? parameters.T + d : d;
     data::data_expression_list e = data::make_data_expression_list(d);
     propositional_variable v(X, d);
-    std::vector<pbes_equation> Z;
-    pbes_expression expr = detail::RHS_structured(phi0, phi, lps, id_generator, propvar_generator, d, sigma, Z, T, TermTraits());
+    std::vector<pbes_equation> equations;
+    pbes_expression expr = detail::RHS_structured(phi, parameters, d, sigma, equations, TermTraits());
     pbes_equation eqn(sigma, v, expr);
-    push(std::vector<pbes_equation>() + eqn + Z + E_structured(phi0, phi, lps, id_generator, propvar_generator, T, TermTraits()));
+    std::vector<pbes_equation> result = { eqn };
+    result.insert(result.end(), equations.begin(), equations.end());
+    E_structured(phi, parameters, result, TermTraits());
+    push(result);
   }
 
-  void operator()(const state_formulas::nu& x)
+  void apply(const state_formulas::nu& x)
   {
-    handle_mu_nu(x, fixpoint_symbol::nu());
+    apply_mu_nu(x, fixpoint_symbol::nu());
   }
 
-  void operator()(const state_formulas::mu& x)
+  void apply(const state_formulas::mu& x)
   {
-    handle_mu_nu(x, fixpoint_symbol::mu());
+    apply_mu_nu(x, fixpoint_symbol::mu());
   }
 };
 
-template <template <class, class> class Traverser, typename TermTraits>
-struct apply_e_structured_traverser: public Traverser<apply_e_structured_traverser<Traverser, TermTraits>, TermTraits>
+template <template <class, class, class> class Traverser, typename TermTraits, typename Parameters>
+struct apply_e_structured_traverser: public Traverser<apply_e_structured_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters>
 {
-  typedef Traverser<apply_e_structured_traverser<Traverser, TermTraits>, TermTraits> super;
+  typedef Traverser<apply_e_structured_traverser<Traverser, TermTraits, Parameters>, TermTraits, Parameters> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  apply_e_structured_traverser(const state_formulas::state_formula& phi0,
-                               const lps::linear_process& lps,
-                               data::set_identifier_generator& id_generator,
-                               data::set_identifier_generator& propvar_generator,
-                               const data::variable& T,
+  apply_e_structured_traverser(Parameters& parameters,
                                TermTraits tr
                               )
-    : super(phi0, lps, id_generator, propvar_generator, T, tr)
+    : super(parameters, tr)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
-template <typename TermTraits>
-std::vector<pbes_equation> E_structured(const state_formulas::state_formula& x0,
-                                            const state_formulas::state_formula& x,
-                                            const lps::linear_process& lps,
-                                            data::set_identifier_generator& id_generator,
-                                            data::set_identifier_generator& propvar_generator,
-                                            const data::variable& T,
-                                            TermTraits tr
-                                           )
+template <typename TermTraits, typename Parameters>
+void E_structured(const state_formulas::state_formula& x,
+                  Parameters& parameters,
+                  std::vector<pbes_equation>& result,
+                  TermTraits tr
+                 )
 {
-  apply_e_structured_traverser<e_structured_traverser, TermTraits> f(x0, lps, id_generator, propvar_generator, T, tr);
-  f(x);
+  apply_e_structured_traverser<e_structured_traverser, TermTraits, Parameters> f(parameters, tr);
+  f.apply(x);
   assert(f.result_stack.size() == 1);
-  return f.top();
+  result.insert(result.end(), f.top().begin(), f.top().end());
 }
 
 } // namespace detail

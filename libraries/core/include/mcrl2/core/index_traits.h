@@ -13,10 +13,10 @@
 #define MCRL2_CORE_INDEX_TRAITS_H
 
 #include <iostream>
-#include <stack>
 #include <sstream>
+#include <stack>
 #include <stdexcept>
-#include <boost/config.hpp>
+// #include <boost/config.hpp>
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/core/identifier_string.h"
 

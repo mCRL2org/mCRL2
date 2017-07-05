@@ -9,14 +9,14 @@
 /// \file process_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/process/is_guarded.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::process;

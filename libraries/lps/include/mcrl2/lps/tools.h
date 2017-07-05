@@ -12,10 +12,10 @@
 #ifndef MCRL2_LPS_TOOLS_H
 #define MCRL2_LPS_TOOLS_H
 
-#include <string>
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
+#include "mcrl2/data/rewriter.h"
+#include <string>
 
 namespace mcrl2 {
 
@@ -37,7 +37,7 @@ void lpsinfo(const std::string& input_filename,
              const std::string& input_file_message
             );
 
-void lpsinvelm(const std::string& input_filename,
+bool lpsinvelm(const std::string& input_filename,
                const std::string& output_filename,
                const std::string& invariant_filename,
                const std::string& dot_file_name,
@@ -65,9 +65,7 @@ void lpspp(const std::string& input_filename,
 
 void lpsrewr(const std::string& input_filename,
              const std::string& output_filename,
-             const data::rewriter::strategy rewrite_strategy,
-             bool benchmark,
-             unsigned long bench_times
+             const data::rewriter::strategy rewrite_strategy
             );
 
 void lpssumelm(const std::string& input_filename,
@@ -82,7 +80,9 @@ void lpssuminst(const std::string& input_filename,
                 const bool tau_summands_only);
 
 void lpsuntime(const std::string& input_filename,
-               const std::string& output_filename);
+               const std::string& output_filename,
+               const bool add_invariants,
+               const data::rewriter::strategy rewrite_strategy);
 
 void txt2lps(const std::string& input_filename,
              const std::string& output_filename

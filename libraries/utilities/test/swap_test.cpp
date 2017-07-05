@@ -44,7 +44,7 @@ public:
   {
     return x.val() < y.val();
   }
-}
+} // namespace nsp
 
 // The following approach does not work on recent versions of Clang using C++11,
 // whereas according to the standard and existing documentation it should.
@@ -66,7 +66,7 @@ namespace nsp
     std::cerr << "nsp::swap overload" << std::endl;
     x.swap(y);
   }
-}
+} // namespace nsp
 
 // This test case check whether, if both std::swap and
 // nsp::swap are visible, the nsp::swap is called.
@@ -149,5 +149,5 @@ BOOST_AUTO_TEST_CASE(template_class_swap)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

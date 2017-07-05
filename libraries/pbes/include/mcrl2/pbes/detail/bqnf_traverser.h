@@ -14,9 +14,9 @@
 #ifndef MCRL2_PBES_DETAIL_BQNF_TRAVERSER_H
 #define MCRL2_PBES_DETAIL_BQNF_TRAVERSER_H
 
-#include <stack>
-#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
+#include "mcrl2/pbes/traverser.h"
+#include <stack>
 
 namespace mcrl2 {
 
@@ -31,11 +31,7 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
   typedef pbes_expression_traverser<bqnf_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   enum expression_mode {
     BOUNDED_FORALL, BOUNDED_EXISTS,
@@ -131,11 +127,10 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
         break;
       case BOUNDED_EXISTS:
       {
-        size_t count = 0;
-        std::vector<pbes_expression> conjuncts = pbes_expr::split_conjuncts(x);
-        for(std::vector<pbes_expression>::iterator it = conjuncts.begin(); it != conjuncts.end(); ++it)
+        std::size_t count = 0;
+        for(const pbes_expression& conjunct: split_conjuncts(x))
         {
-          if (!is_simple_expression(*it))
+          if (!is_simple_expression(conjunct))
           {
             count++;
           }
@@ -150,14 +145,13 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
       case DISJUNCTIVE:
       case EXISTENTIAL:
       {
-        size_t count = 0;
-        std::vector<pbes_expression> conjuncts = pbes_expr::split_conjuncts(x);
-        for(std::vector<pbes_expression>::iterator it = conjuncts.begin(); it != conjuncts.end(); ++it)
+        std::size_t count = 0;
+        for(const pbes_expression& conjunct : split_conjuncts(x))
         {
-          if (!is_simple_expression(*it))
+          if (!is_simple_expression(conjunct))
           {
             count++;
-            if (count > 1 || !is_propositional_variable_instantiation(*it))
+            if (count > 1 || !is_propositional_variable_instantiation(conjunct))
             {
               //std::clog << "and in mode " << mode << std::endl;
               result = false;
@@ -195,11 +189,10 @@ struct bqnf_traverser: public pbes_expression_traverser<bqnf_traverser>
       case CONJUNCTIVE:
       case UNIVERSAL:
       {
-        size_t count = 0;
-        std::vector<pbes_expression> disjuncts = pbes_expr::split_disjuncts(x);
-        for(std::vector<pbes_expression>::iterator it = disjuncts.begin(); it != disjuncts.end(); ++it)
+        std::size_t count = 0;
+        for(const pbes_expression& disjunct: split_disjuncts(x))
         {
-          if (!is_simple_expression(*it))
+          if (!is_simple_expression(disjunct))
           {
             count++;
           }
@@ -246,7 +239,7 @@ template <typename T>
 bool is_bqnf(const T& x)
 {
   bqnf_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

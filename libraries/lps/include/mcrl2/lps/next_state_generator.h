@@ -11,19 +11,18 @@
 #ifndef MCRL2_LPS_NEXT_STATE_GENERATOR_H
 #define MCRL2_LPS_NEXT_STATE_GENERATOR_H
 
+#include <boost/iterator/iterator_facade.hpp>
+#include <forward_list>
 #include <iterator>
 #include <string>
 #include <vector>
-#include <boost/iterator/iterator_facade.hpp>
 
+#include "mcrl2/atermpp/detail/shared_subset.h"
 #include "mcrl2/data/enumerator.h"
-#ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
-#include "mcrl2/data/find_equalities.h"
-#endif
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/probabilistic_data_expression.h"
 #include "mcrl2/lps/state.h"
-#include "mcrl2/atermpp/shared_subset.h"
-#include "mcrl2/atermpp/aterm_balanced_tree.h"
+#include "mcrl2/lps/state_probability_pair.h"
+#include "mcrl2/lps/stochastic_specification.h"
 
 namespace mcrl2
 {
@@ -43,7 +42,6 @@ class next_state_generator
     typedef std::deque<data::enumerator_list_element_with_substitution<> > enumerator_queue_t;
 
     typedef data::rewriter::substitution_type substitution_t;
-    typedef atermpp::term_balanced_tree<data::data_expression> state_t;
 
   protected:
     struct action_internal_t
@@ -54,13 +52,15 @@ class next_state_generator
 
     struct summand_t
     {
-      action_summand *summand;
+      stochastic_action_summand *summand;
       data::variable_list variables;
       data::data_expression condition;
+      stochastic_distribution distribution;
       data::data_expression_vector result_state;
       std::vector<action_internal_t> action_label;
+      data::data_expression time_tag;
 
-      std::vector<size_t> condition_parameters;
+      std::vector<std::size_t> condition_parameters;
       atermpp::function_symbol condition_arguments_function;
       atermpp::aterm_appl condition_arguments_function_dummy;
       std::map<condition_arguments_t, summand_enumeration_t> enumeration_cache;
@@ -68,7 +68,7 @@ class next_state_generator
 
     struct pruning_tree_node_t
     {
-      atermpp::shared_subset<summand_t> summand_subset;
+      atermpp::detail::shared_subset<summand_t> summand_subset;
       std::map<data::data_expression, pruning_tree_node_t> children;
     };
 
@@ -88,44 +88,68 @@ class next_state_generator
         summand_subset_t(next_state_generator *generator, bool use_summand_pruning);
 
         /// \brief Constructs the summand subset containing the given commands.
-        summand_subset_t(next_state_generator *generator, const action_summand_vector& summands, bool use_summand_pruning);
+        summand_subset_t(next_state_generator *generator, const stochastic_action_summand_vector& summands, bool use_summand_pruning);
 
       private:
         next_state_generator *m_generator;
         bool m_use_summand_pruning;
 
-        std::vector<size_t> m_summands;
+        std::vector<std::size_t> m_summands;
 
         pruning_tree_node_t m_pruning_tree;
-        std::vector<size_t> m_pruning_parameters;
+        std::vector<std::size_t> m_pruning_parameters;
         substitution_t m_pruning_substitution;
 
-        static bool summand_set_contains(const std::set<action_summand>& summand_set, const summand_t& summand);
-        void build_pruning_parameters(const action_summand_vector& summands);
+        static bool summand_set_contains(const std::set<stochastic_action_summand>& summand_set, const summand_t& summand);
+        void build_pruning_parameters(const stochastic_action_summand_vector& summands);
         bool is_not_false(const summand_t& summand);
-        atermpp::shared_subset<summand_t>::iterator begin(const state_t& state_t);
+        atermpp::detail::shared_subset<summand_t>::iterator begin(const lps::state& state);
     };
+
+    typedef mcrl2::lps::state_probability_pair<lps::state, lps::probabilistic_data_expression> state_probability_pair;
 
     class transition_t
     {
-      friend class next_state_generator::iterator;
-      private:
-        next_state_generator *m_generator;
-        lps::state m_state;
+      public:
+        typedef std::forward_list<state_probability_pair> state_probability_list;
+
+      protected:
         lps::multi_action m_action;
-        size_t m_summand_index;
+        lps::state m_target_state;
+        std::size_t m_summand_index;
+        // The following list contains all but one target states with their probabity.
+        // m_target_state is the other state, with the residual probability, such
+        // that all probabilities add up to 1.
+        state_probability_list m_other_target_states;
 
       public:
-        state_t state() const
+        const lps::multi_action& action() const
         {
-          return m_state;
+          return m_action;
         }
 
-        lps::state& internal_state() { return m_state; }
-        const lps::state& internal_state() const { return m_state; }
-        lps::multi_action& action() { return m_action; }
-        const lps::multi_action& action() const { return m_action; }
-        size_t summand_index() const { return m_summand_index; }
+        void set_action(const lps::multi_action& action)
+        {
+          m_action=action;
+        }
+
+        const lps::state& target_state() const { return m_target_state; }
+        void set_target_state(const lps::state& target_state)
+        {
+          m_target_state=target_state;
+        }
+
+        std::size_t summand_index() const { return m_summand_index; }
+        void set_summand_index(const std::size_t summand_index)
+        {
+          m_summand_index=summand_index;
+        }
+
+        const state_probability_list& other_target_states() const { return m_other_target_states; }
+        void set_other_target_states(const state_probability_list& other_target_states)
+        {
+          m_other_target_states=other_target_states;
+        }
     };
 
     class iterator: public boost::iterator_facade<iterator, const transition_t, boost::forward_traversal_tag>
@@ -133,15 +157,15 @@ class next_state_generator
       protected:
         transition_t m_transition;
         next_state_generator* m_generator;
-        state_t m_state;
+        lps::state m_state;
         substitution_t* m_substitution;
 
         bool m_single_summand;
-        size_t m_single_summand_index;
+        std::size_t m_single_summand_index;
         bool m_use_summand_pruning;
-        std::vector<size_t>::iterator m_summand_iterator;
-        std::vector<size_t>::iterator m_summand_iterator_end;
-        atermpp::shared_subset<summand_t>::iterator m_summand_subset_iterator;
+        std::vector<std::size_t>::iterator m_summand_iterator;
+        std::vector<std::size_t>::iterator m_summand_iterator_end;
+        atermpp::detail::shared_subset<summand_t>::iterator m_summand_subset_iterator;
         summand_t *m_summand;
 
         bool m_cached;
@@ -157,23 +181,10 @@ class next_state_generator
         /// \brief Enumerate <variables, phi> with substitution sigma.
         void enumerate(const data::variable_list& variables, const data::data_expression& phi, data::mutable_indexed_substitution<>& sigma)
         {
-#ifdef MCRL2_NEXT_STATE_LOG_EQUALITIES
-          data::detail::find_equalities_traverser_inst f;
-          f(phi);
-          auto const& equalities = f.top().equalities;
-          for (auto i = variables.begin(); i != variables.end(); ++i)
-          {
-            auto j = equalities.find(*i);
-            if (j != equalities.end())
-            {
-              std::cout << "EQUALITY: " << j->first << " -> " << core::detail::print_set(j->second) << std::endl;
-            }
-          }
-#endif
           m_enumeration_queue->clear();
           m_enumeration_queue->push_back(data::enumerator_list_element_with_substitution<>(variables, phi));
-          try 
-          { 
+          try
+          {
             m_enumeration_iterator = m_generator->m_enumerator.begin(sigma, *m_enumeration_queue);
           }
           catch (mcrl2::runtime_error &e)
@@ -185,17 +196,17 @@ class next_state_generator
 
       public:
         iterator()
-          : m_generator(0)
+          : m_generator(nullptr)
         {
         }
 
-        iterator(next_state_generator* generator, const state_t& state_t, substitution_t* substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue);
+        iterator(next_state_generator* generator, const lps::state& state, substitution_t* substitution, summand_subset_t& summand_subset, enumerator_queue_t* enumeration_queue);
 
-        iterator(next_state_generator* generator, const state_t& state_t, substitution_t* substitution, size_t summand_index, enumerator_queue_t* enumeration_queue);
+        iterator(next_state_generator* generator, const lps::state& state, substitution_t* substitution, std::size_t summand_index, enumerator_queue_t* enumeration_queue);
 
         operator bool() const
         {
-          return m_generator != 0;
+          return m_generator != nullptr;
         }
 
       private:
@@ -216,26 +227,30 @@ class next_state_generator
     };
 
   protected:
-    specification m_specification;
+    stochastic_specification m_specification;
     rewriter_t m_rewriter;
     substitution_t m_substitution;
+    data::enumerator_identifier_generator m_id_generator;
     enumerator_t m_enumerator;
 
     bool m_use_enumeration_caching;
 
     data::variable_vector m_process_parameters;
     std::vector<summand_t> m_summands;
-    state_t m_initial_state;
+    transition_t::state_probability_list m_initial_states;
 
     summand_subset_t m_all_summands;
 
   public:
     /// \brief Constructor
-    /// \param specification The process specification
+    /// \param spec The process specification
     /// \param rewriter The rewriter used
     /// \param use_enumeration_caching Cache intermediate enumeration results
     /// \param use_summand_pruning Preprocess summands using pruning strategy.
-    next_state_generator(const specification& specification, const data::rewriter& rewriter, bool use_enumeration_caching = false, bool use_summand_pruning = false);
+    next_state_generator(const stochastic_specification& spec,
+                         const data::rewriter& rewriter,
+                         bool use_enumeration_caching = false,
+                         bool use_summand_pruning = false);
 
     ~next_state_generator();
 
@@ -253,7 +268,7 @@ class next_state_generator
 
     /// \brief Returns an iterator for generating the successors of the given state.
     /// Only the successors with respect to the summand with the given index are generated.
-    iterator begin(const state& state, size_t summand_index, enumerator_queue_t* enumeration_queue)
+    iterator begin(const state& state, std::size_t summand_index, enumerator_queue_t* enumeration_queue)
     {
       return iterator(this, state, &m_substitution, summand_index, enumeration_queue);
     }
@@ -265,16 +280,10 @@ class next_state_generator
     }
 
     /// \brief Gets the initial state.
-    state_t initial_state() const
+    const transition_t::state_probability_list& initial_states() const
     {
-      return m_initial_state;
+      return m_initial_states;
     }
-
-    /// \brief Gets the initial state in internal format.
-    /* lps::state internal_initial_state() const
-    {
-      return m_initial_state;
-    } */
 
     /// \brief Returns the rewriter associated with this generator.
     rewriter_t& get_rewriter()
@@ -282,17 +291,19 @@ class next_state_generator
       return m_rewriter;
     }
 
-    /// \brief Converts states to internal states.
-    // data::data_expression_vector get_internal_state(const state& s) const;
-
-    /// \brief Converts internal states to states.
-    // state get_state(const data::data_expression_vector& internal_state) const;
-
     /// \brief Returns a reference to the summand subset containing all summands.
     summand_subset_t& full_subset()
     {
       return m_all_summands;
     }
+
+    // Calculate the set of states with associated probabilities from a symbolic state
+    // and an associated stochastic distribution for the free variables in that state.
+    // The result is a list of closed states with associated probabilities.
+    const transition_t::state_probability_list calculate_distribution(
+                         const stochastic_distribution& dist,
+                         const data::data_expression_vector& state_args,
+                         substitution_t& sigma);
 };
 
 } // namespace lps

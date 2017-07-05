@@ -1,9 +1,9 @@
-#include <iostream>
-#include <string>
-#include <cassert>
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitutions/map_substitution.h"
+#include <cassert>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -30,12 +30,12 @@ void rewrite2()
   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
   std::string var_decl = "m, n: Pos;\n";
   std::map<variable, data_expression> substitutions;
-  substitutions[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
-  substitutions[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
+  substitutions[atermpp::down_cast<variable>(parse_data_expression("m", parse_variables(var_decl)))] = r(parse_data_expression("3"));
+  substitutions[atermpp::down_cast<variable>(parse_data_expression("n", parse_variables(var_decl)))] = r(parse_data_expression("4"));
   map_substitution<std::map<variable, data_expression> > sigma(substitutions);
 
   // Rewrite two data expressions, and check if they are the same
-  data::data_expression d1 = parse_data_expression("m+n", var_decl);
+  data::data_expression d1 = parse_data_expression("m+n", parse_variables(var_decl));
   data::data_expression d2 = parse_data_expression("7");
   assert(r(d1, sigma) == r(d2));
 }

@@ -12,14 +12,15 @@
 #ifndef MCRL2_BES_PG_PARSE_H
 #define MCRL2_BES_PG_PARSE_H
 
-#include <fstream>
-#include <cstdio>
 #include <cctype>
+#include <cstdio>
+#include <fstream>
 #include <map>
 
-#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/join.h"
 #include "mcrl2/core/parser_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 extern "C"
 {
@@ -54,13 +55,13 @@ struct node_t
 // otherwise the result is a conjunction.
 // Prefix is added to each of the identifiers in v.
 inline
-boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, std::string prefix = "X")
+boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, const std::string& prefix = "X")
 {
   std::set<boolean_expression> v_prefixed;
-  for (std::set<identifier_t>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (identifier_t i: v)
   {
     std::stringstream id;
-    id << prefix << *i;
+    id << prefix << i;
     v_prefixed.insert(boolean_variable(id.str()));
   }
 
@@ -171,17 +172,17 @@ struct pg_actions: public core::default_parser_actions
 
   void parse_NodeSpecList(const core::parse_node& node)
   {
-    traverse(node, make_visitor(m_parser.symbol_table(), "NodeSpec", boost::bind(&pg_actions::parse_NodeSpec, this, _1)));
+    traverse(node, make_visitor(m_parser.symbol_table(), "NodeSpec", [&](const core::parse_node& node) { return parse_NodeSpec(node); }));
   }
 
   identifier_t parse_Id(const core::parse_node& node)
   {
-    return parse_Number(node.child(0));
+    return parse_Number<identifier_t>(node.child(0));
   }
 
   priority_t parse_Priority(const core::parse_node& node)
   {
-    return parse_Number(node.child(0));
+    return parse_Number<priority_t>(node.child(0));
   }
 
   bool parse_Owner(const core::parse_node& node)
@@ -192,13 +193,14 @@ struct pg_actions: public core::default_parser_actions
   std::set<identifier_t> parse_Successors(const core::parse_node& node)
   {
     std::set<identifier_t> result;
-    traverse(node, make_set_collector(m_parser.symbol_table(), "Id", result, boost::bind(&pg_actions::parse_Id, this, _1)));
+    traverse(node, make_set_collector(m_parser.symbol_table(), "Id", result, [&](const core::parse_node& node) { return parse_Id(node); }));
     return result;
   }
 
-  identifier_t parse_Number(const core::parse_node& node)
+  template <typename T>
+  T parse_Number(const core::parse_node& node)
   {
-    identifier_t result;
+    T result;
     std::stringstream tmp;
     tmp << node.string();
     tmp >> result;

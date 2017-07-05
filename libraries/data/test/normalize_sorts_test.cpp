@@ -9,14 +9,14 @@
 /// \file normalize_sorts_test.cpp
 /// \brief Test for normalizing sorts.
 
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/normalize_sorts.h"
+#include "mcrl2/data/parse.h"
 #include <algorithm>
+#include <boost/test/minimal.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/normalize_sorts.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

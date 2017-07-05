@@ -9,10 +9,11 @@
 /// \file bes_test.cpp
 /// \brief Some tests for BES.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
+#include "mcrl2/bes/join.h"
 #include "mcrl2/bes/print.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -22,10 +23,11 @@ typedef core::term_traits<boolean_expression> tr;
 void test_join()
 {
   boolean_variable X("X");
-  boolean_expression Z1 = X;
-  boolean_expression Z2(X);
+  const boolean_expression& Z1 = X;
+  const boolean_expression& Z2(X);
   boolean_expression Z3;
   Z3 = X;
+  Z3=Z2;
 
   std::set<boolean_expression> s;
   s.insert(boolean_variable("X1"));
@@ -57,8 +59,8 @@ void test_expressions()
   boolean_variable X("X");
   boolean_variable Y("Y");
 
-  BOOST_CHECK(tr::is_variable(X));
-  BOOST_CHECK(tr::is_variable(Y));
+  BOOST_CHECK(tr::is_prop_var(X));
+  BOOST_CHECK(tr::is_prop_var(Y));
 
   boolean_expression true_(tr::true_());
   boolean_expression false_(tr::false_());

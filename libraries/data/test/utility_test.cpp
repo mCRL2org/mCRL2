@@ -9,13 +9,12 @@
 /// \file sort_expression_test.cpp
 /// \brief Basic regression test for sort expressions.
 
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
 
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2;

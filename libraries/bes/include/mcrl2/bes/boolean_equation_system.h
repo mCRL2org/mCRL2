@@ -12,20 +12,20 @@
 #ifndef MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
 #define MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
 
+#include "mcrl2/bes/boolean_equation.h"
+#include "mcrl2/bes/detail/io.h"
+#include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/load_aterm.h"
+#include "mcrl2/core/term_traits.h"
+#include "mcrl2/utilities/exception.h"
 #include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <iterator>
 #include <sstream>
 #include <string>
-#include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/bes/boolean_equation.h"
-#include "mcrl2/bes/detail/io.h"
-#include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/term_traits.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -37,7 +37,7 @@ namespace bes
 class boolean_equation_system;
 
 template <typename Object, typename OutputIterator>
-void find_boolean_variables(const Object& x, OutputIterator o);
+void find_boolean_variables(const Object& container, OutputIterator o);
 
 atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system& p);
 
@@ -57,15 +57,15 @@ class boolean_equation_system
 
     /// \brief Initialize the boolean_equation_system with an atermpp::aterm_appl.
     /// \param t A term
-    void init_term(atermpp::aterm_appl t)
+    void init_term(const atermpp::aterm_appl& t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      atermpp::term_list<atermpp::aterm_appl> eqn = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);
+      atermpp::term_list<atermpp::aterm_appl> equations = static_cast<atermpp::term_list<atermpp::aterm_appl> >(*i++);
       m_initial_state = boolean_expression(*i);
-      m_equations.reserve(eqn.size());
-      for (atermpp::term_list<atermpp::aterm_appl>::const_iterator j = eqn.begin(); j != eqn.end(); ++j)
+      m_equations.reserve(equations.size());
+      for (const atermpp::aterm& eqn: equations)
       {
-        m_equations.push_back(boolean_equation(*j));
+        m_equations.push_back(boolean_equation(eqn));
       }
     }
 
@@ -124,11 +124,13 @@ class boolean_equation_system
 
     /// \brief Reads the boolean equation system from a stream.
     /// \param stream The stream to read from.
-    void load(std::istream& stream, bool binary = true)
+    /// \param binary An indicaton whether the stream is in binary format.
+    /// \param source The source from which the stream originates. Used for error messages.
+    void load(std::istream& stream, bool binary = true, const std::string& source = "")
     {
-      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
-                                : atermpp::read_term_from_text_stream(stream);
-      t = bes::detail::add_index(t);
+      atermpp::aterm t = core::load_aterm(stream, binary, "BES", source);
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      t = bes::detail::add_index(t, cache);
       if (!t.type_is_appl() || !core::detail::check_rule_BES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error("The loaded ATerm is not a BES.");
@@ -165,9 +167,9 @@ class boolean_equation_system
     std::set<boolean_variable> binding_variables() const
     {
       std::set<boolean_variable> result;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const boolean_equation& eqn: equations())
       {
-        result.insert(i->variable());
+        result.insert(eqn.variable());
       }
       return result;
     }
@@ -179,9 +181,9 @@ class boolean_equation_system
     std::set<boolean_variable> occurring_variables() const
     {
       std::set<boolean_variable> result;
-      for (auto i = m_equations.begin(); i != m_equations.end(); ++i)
+      for (const boolean_equation& eqn: m_equations)
       {
-        find_boolean_variables(i->formula(), std::inserter(result, result.end()));
+        find_boolean_variables(eqn.formula(), std::inserter(result, result.end()));
       }
       find_boolean_variables(m_initial_state, std::inserter(result, result.end()));
       return result;
@@ -203,6 +205,7 @@ std::string pp(const boolean_equation_system& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const boolean_equation_system& x)

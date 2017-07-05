@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/atermpp/function_symbol.h
-/// \brief Function symbol class.
+/// \file mcrl2/atermpp/detail/function_symbol_constants.h
+/// \brief A class containing some constant function symbols. 
 
 #ifndef ATERMPP_DETAIL_FUNCTION_SYMBOL_CONSTANTS_H
 #define ATERMPP_DETAIL_FUNCTION_SYMBOL_CONSTANTS_H
@@ -19,64 +19,47 @@ namespace atermpp
 {
 namespace detail
 {
-  const size_t AS_DEFAULT_NUMBER=0;
-  const size_t AS_INT_NUMBER=1;
-  const size_t AS_LIST_NUMBER=2;
-  const size_t AS_EMPTY_LIST_NUMBER=3;
-
 
 struct constant_function_symbols
 {
-
   public:
-    atermpp::function_symbol AS_DEFAULT;
-    atermpp::function_symbol AS_INT;
-    atermpp::function_symbol AS_LIST;
-    atermpp::function_symbol AS_EMPTY_LIST;
+    function_symbol AS_DEFAULT;
+    function_symbol AS_INT;
+    function_symbol AS_LIST;
+    function_symbol AS_EMPTY_LIST;
 
-    constant_function_symbols():
-       AS_DEFAULT("<undefined_term>",0),
-       AS_INT("<aterm_int>",1),
+    constant_function_symbols()
+     : AS_DEFAULT("<undefined_term>", 0),
+       AS_INT("<aterm_int>", 1),
        AS_LIST("<list_constructor>",2),
-       AS_EMPTY_LIST("<empty_list>",0)
+       AS_EMPTY_LIST("<empty_list>", 0)
     {
-      assert(AS_DEFAULT.number()==AS_DEFAULT_NUMBER);
-      assert(AS_INT.number()==AS_INT_NUMBER);
-      assert(AS_LIST.number()==AS_LIST_NUMBER);
-      assert(AS_EMPTY_LIST.number()==AS_EMPTY_LIST_NUMBER);
-    } 
+      // Also set the default function symbol in the function_symbol class. 
+      new (&function_symbol::AS_DEFAULT) function_symbol(AS_DEFAULT);
+    }
 
-
-    // This function is used to explicitly initialise
-    // the default constant function symbols, in case 
-    // they are being used before being properly initialised.
-    // This happens with initialising global variables and 
-    // global and sometimes even with static variables in
-    // functions, but this is compiler dependent.
+    // We do not know whether the compiler constructs the 
+    // function symbols first, or whether the function initialise
+    // is called before the constructor. Therefore, we use placement
+    // new as we do not know whether the memory where the elements
+    // are constructed is propertly initialised. This means that the
+    // reference count of these terms can be too high, and these terms
+    // will not property be destroyed, but that has no consequence on
+    // the correctness of the program.
     void initialise_function_symbols()
     {
-      new (&AS_DEFAULT) function_symbol("<undefined_term>", 0);
-      new (&AS_INT) function_symbol("<aterm_int>", 1);
-      new (&AS_LIST) function_symbol("<list_constructor>", 2);
-      new (&AS_EMPTY_LIST) function_symbol("<empty_list>", 0);
-      // The following numbers are expected to be used. If not
-      // something is most likely wrong. Moreover, some code
-      // depends on low numbers to be assigned to the basic 
-      // function symbols (e.g. type_is_appl).
-      assert(AS_DEFAULT.number()==AS_DEFAULT_NUMBER);
-      assert(AS_INT.number()==AS_INT_NUMBER);
-      assert(AS_LIST.number()==AS_LIST_NUMBER);
-      assert(AS_EMPTY_LIST.number()==AS_EMPTY_LIST_NUMBER);
-    }
+      new (&AS_DEFAULT) function_symbol("<undefined_term>", 0); 
+      new (&AS_INT) function_symbol("<aterm_int>", 1); 
+      new (&AS_LIST) function_symbol("<list_constructor>", 2); 
+      new (&AS_EMPTY_LIST) function_symbol("<empty_list>", 0); 
+
+      // Separately copy the default function symbol to the function_symbol class.
+      new (&function_symbol::AS_DEFAULT) function_symbol(AS_DEFAULT);
+    } 
 };
 
 
 extern constant_function_symbols function_adm;
-
-inline size_t addressf(const function_symbol &t)
-{
-  return reinterpret_cast<size_t>(t.m_function_symbol);
-}
 
 } // namespace detail
 } // namespace atermpp

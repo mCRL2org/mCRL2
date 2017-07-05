@@ -1,0 +1,2 @@
+mcrl22lps gossip.mcrl2 gossip.lps
+lps2pbes -fgossip3.mcf gossip.lps gossip.pbes

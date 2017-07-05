@@ -39,11 +39,7 @@ template <template <class> class Builder, class Derived, class DataRewriter, cla
 struct add_data_rewriter: public Builder<Derived>
 {
   typedef Builder<Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  typedef core::term_traits<pbes_expression> tr;
+  using super::apply;
 
   const DataRewriter& R;
   SubstitutionFunction& sigma;
@@ -52,18 +48,17 @@ struct add_data_rewriter: public Builder<Derived>
     : R(R_), sigma(sigma_)
   {}
 
-  pbes_expression operator()(const data::data_expression& x)
+  pbes_expression apply(const data::data_expression& x)
   {
     return data_rewrite(x, R, sigma);
   }
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  pbes_expression apply(const propositional_variable_instantiation& x)
   {
     std::vector<data::data_expression> d;
-    auto const& e = x.parameters();
-    for (auto i = e.begin(); i != e.end(); ++i)
+    for (const data::data_expression& e: x.parameters())
     {
-      d.push_back(data_rewrite(*i, R, sigma));
+      d.push_back(data_rewrite(e, R, sigma));
     }
     return propositional_variable_instantiation(x.name(), data::data_expression_list(d.begin(), d.end()));
   }
@@ -75,7 +70,6 @@ struct data_rewriter_builder: public add_data_rewriter<pbes_system::pbes_express
   typedef add_data_rewriter<pbes_system::pbes_expression_builder, Derived, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
-  using super::operator();
 
   data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
@@ -88,15 +82,10 @@ struct apply_rewriter_builder: public Builder<apply_rewriter_builder<Builder, Da
   typedef Builder<apply_rewriter_builder<Builder, DataRewriter, SubstitutionFunction>, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
-  using super::operator();
 
   apply_rewriter_builder(const DataRewriter& datar, SubstitutionFunction& sigma)
     : super(datar, sigma)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class, class, class> class Builder, class DataRewriter, class SubstitutionFunction>
@@ -124,13 +113,13 @@ struct data_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     data::no_substitution sigma;
-    return detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma).apply(x);
   }
 
   template <typename SubstitutionFunction>
   pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
   {
-    return detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<detail::data_rewriter_builder>(R, sigma).apply(x);
   }
 };
 

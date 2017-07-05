@@ -12,8 +12,9 @@
 #ifndef MCRL2_LPS_UNTIME_H
 #define MCRL2_LPS_UNTIME_H
 
-#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/data/fourier_motzkin.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2
 {
@@ -21,8 +22,38 @@ namespace mcrl2
 namespace lps
 {
 
-class untime_algorithm: public lps::detail::lps_algorithm
+namespace detail
 {
+
+template <class INITIALIZER>
+INITIALIZER make_process_initializer(const data::assignment_list& ass, const INITIALIZER& init);
+
+template <>
+process_initializer make_process_initializer(const data::assignment_list& ass, const process_initializer& )
+{
+ return process_initializer(ass);
+}
+
+template <>
+stochastic_process_initializer make_process_initializer(const data::assignment_list& ass, const stochastic_process_initializer& init)
+{
+  return stochastic_process_initializer(ass,init.distribution());
+}
+
+} // namespace detail
+
+template <typename Specification>
+class untime_algorithm: public detail::lps_algorithm<Specification>
+{
+  protected:
+    typedef typename detail::lps_algorithm<Specification> super;
+    typedef typename Specification::process_type process_type;
+    typedef typename process_type::action_summand_type action_summand_type;
+    using super::m_spec;
+
+    bool m_add_invariants;
+    const data::rewriter& m_rewriter;
+
   protected:
     /// \brief Variable denoting the time at which the last action occurred
     data::variable m_last_action_time;
@@ -63,8 +94,8 @@ class untime_algorithm: public lps::detail::lps_algorithm
 
       assert(j == time_variable_candidates.end());
 
-      const lps::action_summand_vector& summands = m_spec.process().action_summands();
-      for (lps::action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); ++i)
+      auto const& summands = m_spec.process().action_summands();
+      for (auto i = summands.begin(); i != summands.end(); ++i)
       {
         const data::data_expression_list summand_arguments = i->next_state(m_spec.process().process_parameters());
         std::vector <bool>::iterator j = time_variable_candidates.begin();
@@ -99,47 +130,78 @@ class untime_algorithm: public lps::detail::lps_algorithm
       return time_invariant;
     }
 
-    /// \brief Apply untime to an action summand
-    void untime(action_summand& s)
+    /// \brief Apply untime to an action summand.
+    void untime(action_summand_type& s)
     {
+      using namespace mcrl2::data;
       if (s.has_time())
       {
         // Extend the original condition with an additional argument t.i(d,e.i)>m_last_action_time && t.i(d,e.i) > 0
-        s.condition() = data::lazy::and_(s.condition(),
-                                         data::lazy::and_(data::greater(s.multi_action().time(),m_last_action_time),
-                                             data::greater(s.multi_action().time(), data::sort_real::real_(0))));
+        s.condition() = lazy::and_(s.condition(),
+                                         lazy::and_(greater(s.multi_action().time(),m_last_action_time),
+                                             greater(s.multi_action().time(), sort_real::real_(0))));
 
         // Extend original assignments to include m_last_action_time := t.i(d,e.i)
-        s.assignments()=push_back(s.assignments(),data::assignment(m_last_action_time,s.multi_action().time()));
+        s.assignments()=push_back(s.assignments(),assignment(m_last_action_time,s.multi_action().time()));
 
         // Remove time
-        s.multi_action() = multi_action(s.multi_action().actions()); // TODO: if Nil is removed, just remove time
+        s.multi_action() = multi_action(s.multi_action().actions());
+
+        // Try to apply Fourier-Motzkin elimination to simplify
+        std::set< variable > variables_in_action = process::find_all_variables(s.multi_action());
+        std::set< variable > variables_in_assignments = process::find_all_variables(s.assignments());
+        // Split the variables that do/do not occur in actions and assignments.
+        variable_list do_occur, do_not_occur;
+
+        for(const variable& v: s.summation_variables())
+        {
+          if (variables_in_action.count(v)>0 || variables_in_assignments.count(v)>0)
+          {
+            do_occur.push_front(v);
+          }
+          else
+          {
+            do_not_occur.push_front(v);
+          }
+        }
+
+        variable_list remaining_variables;
+        data_expression new_condition;
+        fourier_motzkin(s.condition(), do_not_occur, new_condition, remaining_variables, m_rewriter);
+        s.condition()=new_condition;
+        s.summation_variables()=do_occur + remaining_variables;
       }
       else
       {
         // Add a new summation variable (this is allowed because according to an axiom the following equality holds):
         // c -> a . X == sum t:Real . c -> a@t . X
-        data::variable time_var(m_identifier_generator("time_var"), data::sort_real::real_());
+        variable time_var(m_identifier_generator("time_var"), sort_real::real_());
         s.summation_variables().push_front(time_var);
 
         // Extend the original condition with an additional argument time_var > m_last_action_time && time_var > 0
-        s.condition() = data::lazy::and_(s.condition(),
-                                         data::lazy::and_(data::greater(time_var, m_last_action_time),
-                                             data::greater(time_var, data::sort_real::real_(0))));
+        s.condition() = lazy::and_(s.condition(),
+                                         lazy::and_(greater(time_var, m_last_action_time),
+                                             greater(time_var, sort_real::real_(0))));
 
         // Extend original assignments to include m_last_action_time := time_var
-        s.assignments()=push_back(s.assignments(),data::assignment(m_last_action_time, time_var));
-      } // i->has_time()
+        s.assignments()=push_back(s.assignments(),assignment(m_last_action_time, time_var));
+      } // s.has_time()
 
       // Add the condition m_last_action_time>=0, which holds, and which is generally a useful fact for further processing.
-      s.condition() = data::lazy::and_(s.condition(),m_time_invariant);
+      s.condition() = lazy::and_(s.condition(),m_time_invariant);
     }
 
+
+
+
   public:
-    untime_algorithm(specification& spec)
-      : lps::detail::lps_algorithm(spec)
+    untime_algorithm(Specification& spec, bool add_invariants, const data::rewriter& r)
+      : detail::lps_algorithm<Specification>(spec),
+        m_add_invariants(add_invariants),
+        m_rewriter(r)
     {
       m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
+      m_identifier_generator.add_identifiers(data::function_and_mapping_identifiers(spec.data()));
     }
 
     void run()
@@ -158,16 +220,20 @@ class untime_algorithm: public lps::detail::lps_algorithm
         mCRL2log(log::verbose) << "Introduced variable " << data::pp(m_last_action_time) << " to denote time of last action" << std::endl;
 
         // Should happen before updating the process
-        m_time_invariant = calculate_time_invariant();
+        m_time_invariant = m_add_invariants ? calculate_time_invariant() : (data::data_expression) data::sort_bool::true_();
 
         m_spec.process().process_parameters()=push_back(m_spec.process().process_parameters(),m_last_action_time);
         data::assignment_list init = m_spec.initial_process().assignments();
         init=push_back(init,data::assignment(m_last_action_time, data::sort_real::real_(0)));
-        m_spec.initial_process() = process_initializer(init);
+        m_spec.initial_process() = detail::make_process_initializer(init,m_spec.initial_process());
 
-        std::for_each(m_spec.process().action_summands().begin(),
+        for(action_summand_type& s: m_spec.process().action_summands())
+        {
+          untime(s);
+        }
+        /* std::for_each(m_spec.process().action_summands().begin(),
                       m_spec.process().action_summands().end(),
-                      boost::bind(&untime_algorithm::untime, this, _1));
+                      std::bind(&untime_algorithm::untime, this, std::placeholders::_1)); */
       }
     }
 };

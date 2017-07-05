@@ -12,17 +12,17 @@
 #ifndef MCRL2_PBES_PBESINST_SYMBOLIC_H
 #define MCRL2_PBES_PBESINST_SYMBOLIC_H
 
-#include <cassert>
-#include <set>
-#include <iostream>
-#include <sstream>
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
 #include "mcrl2/utilities/logger.h"
+#include <cassert>
+#include <iostream>
+#include <set>
+#include <sstream>
 
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 
@@ -35,7 +35,6 @@ class pbesinst_symbolic_algorithm
 {
   public:
     typedef propositional_variable_instantiation state_type;
-    typedef core::term_traits<pbes_expression> tr;
 
   protected:
     /// \brief The PBES that is being instantiated.
@@ -73,9 +72,9 @@ class pbesinst_symbolic_algorithm
 
       // initialize m_equation_index
       std::size_t eqn_index = 0;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (const pbes_equation& eqn: p.equations())
       {
-        m_equation_index[i->variable().name()] = eqn_index++;
+        m_equation_index[eqn.variable().name()] = eqn_index++;
       }
     }
 
@@ -94,17 +93,16 @@ class pbesinst_symbolic_algorithm
         done.insert(X);
         std::size_t index = m_equation_index[X.name()];
         const pbes_equation& eqn = m_pbes.equations()[index];
-        pbes_expression phi = eqn.formula();
+        const pbes_expression& phi = eqn.formula();
         data::rewriter::substitution_type sigma;
         make_pbesinst_substitution(eqn.variable().parameters(), X.parameters(), sigma);
         pbes_expression psi = R(phi, sigma);
-        std::set<propositional_variable_instantiation> psi_variables = find_propositional_variable_instantiations(psi);
-        for (auto i = psi_variables.begin(); i != psi_variables.end(); ++i)
+        for (const propositional_variable_instantiation& v: find_propositional_variable_instantiations(psi))
         {
-          if (done.find(*i) == done.end())
+          if (done.find(v) == done.end())
           {
-            todo.insert(*i);
-            mCRL2log(log::debug, "symbolic") << "discovered vertex " << *i << std::endl;
+            todo.insert(v);
+            mCRL2log(log::debug, "symbolic") << "discovered vertex " << v << std::endl;
           }
         }
       }

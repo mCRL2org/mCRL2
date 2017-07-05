@@ -12,22 +12,22 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_MUTABLE_INDEXED_SUBSTITUTION_H
 #define MCRL2_DATA_SUBSTITUTIONS_MUTABLE_INDEXED_SUBSTITUTION_H
 
+#include "mcrl2/data/is_simple_substitution.h"
+#include "mcrl2/data/undefined.h"
+#include "mcrl2/utilities/exception.h"
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "mcrl2/data/is_simple_substitution.h"
-#include "mcrl2/data/undefined.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
 namespace data {
 
 /// \brief Generic substitution function.
-/// \details This substitution assumes a function variable -> size_t, that, for
+/// \details This substitution assumes a function variable -> std::size_t, that, for
 ///          each variable gives a unique index. The substitutions are stored
-///          internally as a vector, mapping size_t to expression.
+///          internally as a vector, mapping std::size_t to expression.
 ///          Provided that, given a variable, its index can be computed in O(1)
 ///          time, insertion is O(1) amortized, and lookup is O(1).
 ///          Memory required is O(n) where n is the largest index used.
@@ -38,8 +38,8 @@ protected:
   /// \brief Internal storage for substitutions.
   /// Required to be a container with random access through [] operator.
   ExpressionSequence m_container;
-  std::vector <size_t> m_index_table;
-  std::stack<size_t> m_free_positions;
+  std::vector <std::size_t> m_index_table;
+  std::stack<std::size_t> m_free_positions;
   bool m_variables_in_rhs_set_is_defined;
   std::set<variable> m_variables_in_rhs;
 
@@ -66,19 +66,20 @@ public:
   {
     const variable_type& m_variable;
     ExpressionSequence& m_container;
-    std::vector <size_t>& m_index_table;
-    std::stack<size_t>& m_free_positions;
+    std::vector <std::size_t>& m_index_table;
+    std::stack<std::size_t>& m_free_positions;
     bool m_variables_in_rhs_set_is_defined;
     std::set<variable>& m_variables_in_rhs;
 
 
     /// \brief Constructor.
-    ///
     /// \param[in] v a variable.
     /// \param[in] c a container of expressions.
-    /// \param[in] table a table of indices
-    /// \param[in] fp a stack of free positions in \a table
-    assignment(const variable_type& v, ExpressionSequence& c, std::vector <size_t>& table, std::stack<size_t>& fp,
+    /// \param[in] table a table of indices.
+    /// \param[in] fp a stack of free positions in \a table.
+    /// \param[in] b Indication that the variables in \a vars are defined.
+    /// \param[in] vars Variables in the rhs of the assignments. 
+    assignment(const variable_type& v, ExpressionSequence& c, std::vector <std::size_t>& table, std::stack<std::size_t>& fp,
                const bool b, std::set<variable>& vars) :
       m_variable(v),
       m_container(c),
@@ -95,7 +96,7 @@ public:
       mCRL2log(log::debug2, "substitutions") << "Setting " << m_variable << " := " << e << std::endl;
       assert(e.defined());
 
-      size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(m_variable);
+      std::size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(m_variable);
 
       if (e != m_variable)
       {
@@ -108,12 +109,12 @@ public:
         // Resize container if needed
         if (i >= m_index_table.size())
         {
-          m_index_table.resize(i+1, size_t(-1));
+          m_index_table.resize(i+1, std::size_t(-1));
         }
 
-        size_t j=m_index_table[i];
-        assert(j==size_t(-1) || j<m_container.size());
-        if (j==size_t(-1))
+        std::size_t j=m_index_table[i];
+        assert(j==std::size_t(-1) || j<m_container.size());
+        if (j==std::size_t(-1))
         {
           // The variable was not assigned.
           if (m_free_positions.empty())
@@ -143,11 +144,11 @@ public:
         // Note that we do not remove variables in variables_in_rhs;
         if (i<m_index_table.size())
         {
-          size_t j=m_index_table[i];
-          if (j!=size_t(-1))
+          std::size_t j=m_index_table[i];
+          if (j!=std::size_t(-1))
           {
             m_free_positions.push(j);
-            m_index_table[i]=size_t(-1);
+            m_index_table[i]=std::size_t(-1);
           }
         }
       }
@@ -157,11 +158,11 @@ public:
   /// \brief Application operator; applies substitution to v.
   const expression_type& operator()(const variable_type& v) const
   {
-    const size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(v);
+    const std::size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(v);
     if (i < m_index_table.size())
     {
-      const size_t j = m_index_table[i];
-      if (j!=size_t(-1))
+      const std::size_t j = m_index_table[i];
+      if (j!=std::size_t(-1))
       {
         // the variable has an assigned value.
         assert(j<m_container.size());
@@ -183,7 +184,7 @@ public:
   {
     m_index_table.clear();
     m_container.clear();
-    m_free_positions=std::stack<size_t>();
+    m_free_positions=std::stack<std::size_t>();
     m_variables_in_rhs_set_is_defined=false;
     m_variables_in_rhs.clear();
   }
@@ -200,9 +201,9 @@ public:
   {
     if (!m_variables_in_rhs_set_is_defined)
     {
-      for(std::vector<size_t> ::const_iterator i=m_index_table.begin(); i != m_index_table.end(); ++i)
+      for(std::vector<std::size_t> ::const_iterator i=m_index_table.begin(); i != m_index_table.end(); ++i)
       {
-        if (*i != size_t(-1))
+        if (*i != std::size_t(-1))
         {
           m_variables_in_rhs=find_free_variables(m_container[*i]);
         }
@@ -221,23 +222,22 @@ public:
 
 protected:
   /// \brief size of the wrapped container
-  size_t size() const
+  std::size_t size() const
   {
     return m_container.size();
   }
 
   /// \brief set position i of the wrapped container to e
-  void set(const size_t i, const expression_type& e)
+  void set(const std::size_t i, const expression_type& e)
   {
-    mCRL2log(log::debug2, "substitutions") << "Setting " << static_cast<atermpp::function_symbol>(i).name() << " := " << e << std::endl;
     m_container[i] = e;
   }
 
   /// \brief get the element at position i of the wrapped container
-  const expression_type& get(const size_t i) const
+  const expression_type& get(const std::size_t i) const
   {
     assert(i < m_index_table.size());
-    assert(m_index_table[i]!=size_t(-1));
+    assert(m_index_table[i]!=std::size_t(-1));
     return m_container[m_index_table[i]];
   }
 
@@ -246,11 +246,11 @@ protected:
   const core::identifier_string& variable_name(std::size_t i) const
   {
     auto& m = core::variable_index_map<variable, variable_key_type>();
-    for (auto j = m.begin(); j != m.end(); ++j)
+    for (auto& j : m)
     {
-      if (j->second == i)
+      if (j.second == i)
       {
-        const variable_key_type& v = j->first;
+        const variable_key_type& v = j.first;
         return atermpp::down_cast<core::identifier_string>(v.first);
       }
     }
@@ -264,9 +264,9 @@ public:
     std::stringstream result;
     bool first = true;
     result << "[";
-    for (size_t i = 0; i < m_index_table.size(); ++i)
+    for (std::size_t i = 0; i < m_index_table.size(); ++i)
     {
-      if (m_index_table[i] != size_t(-1))
+      if (m_index_table[i] != std::size_t(-1))
       {
         if (first)
         {

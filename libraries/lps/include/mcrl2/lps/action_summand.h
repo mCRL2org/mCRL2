@@ -12,8 +12,9 @@
 #ifndef MCRL2_LPS_ACTION_SUMMAND_H
 #define MCRL2_LPS_ACTION_SUMMAND_H
 
-#include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/stochastic_distribution.h"
+#include "mcrl2/lps/summand.h"
 #include "mcrl2/process/process_expression.h"
 
 namespace mcrl2 {
@@ -35,7 +36,6 @@ class action_summand: public summand_base
 
   public:
     /// \brief Constructor.
-    // TODO: check if the default constructor results in a deadlock summand
     action_summand()
     {}
 
@@ -67,7 +67,7 @@ class action_summand: public summand_base
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    data::assignment_list &assignments()
+    data::assignment_list& assignments()
     {
       return m_assignments;
     }
@@ -118,6 +118,7 @@ std::string pp(const action_summand& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const action_summand& x)
@@ -144,22 +145,24 @@ bool operator<(const action_summand& x, const action_summand& y)
   {
     return x.condition() < y.condition();
   }
-  if (x.assignments() != y.assignments())
+  if (x.multi_action() != y.multi_action())
   {
-    return x.assignments() < y.assignments();
+    return x.multi_action() < y.multi_action();
   }
-  return x.multi_action() < y.multi_action();
+  return x.assignments() < y.assignments();
 }
 
 /// \brief Equality operator of action summands
 inline
 bool operator==(const action_summand& x, const action_summand& y)
 {
-  return x.condition() == y.condition() && x.multi_action() == y.multi_action() && x.assignments() == y.assignments();
+  return x.summation_variables() == y.summation_variables() && 
+         x.condition() == y.condition() && 
+         x.multi_action() == y.multi_action() && 
+         x.assignments() == y.assignments();
 }
 
-/// \brief Conversion to atermAppl.
-/// \return The action summand converted to aterm format.
+/// \brief Conversion to aterm_appl.
 inline
 atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 {
@@ -168,7 +171,8 @@ atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
                        s.condition(),
                        lps::detail::multi_action_to_aterm(s.multi_action()),
                        s.multi_action().time(),
-                       s.assignments()
+                       s.assignments(),
+                       lps::stochastic_distribution()
                      );
   return result;
 }

@@ -148,6 +148,8 @@ link to any boost libraries.
 
    You can also :doc:`compile the Boost libraries yourself <boost>`.
 
+.. _build_prerequisites_qt:
+
 QT
 --
 
@@ -214,13 +216,13 @@ The mCRL2 toolset requires |qt|_ for compilation of the graphical tools
      Note that ``port`` is usually installed in ``/opt/local/bin``. 
    - To install *QT*, execute::
 
-       sudo port install qt4-mac 
+       sudo port install qt5-mac 
    
 .. admonition:: Linux
    :class: platform-specific linux
    
    Binary development versions are available in the package manager in most 
-   distributions (for instance the ``libqt4-dev`` PPA package in Ubuntu).
+   distributions (for instance the ``libqt5-dev`` PPA package in Ubuntu).
 
    On Linux it is also required to install OpenGL related development packages.
    The exact package to be installed depends on your distribution. For Ubuntu

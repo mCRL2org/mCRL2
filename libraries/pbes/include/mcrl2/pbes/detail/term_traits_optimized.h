@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_TERM_TRAITS_OPTIMIZED_H
 #define MCRL2_PBES_DETAIL_TERM_TRAITS_OPTIMIZED_H
 
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
 
 namespace mcrl2 {
 
@@ -34,37 +34,37 @@ struct term_traits_optimized<pbes_system::pbes_expression>: public core::term_tr
   static inline
   term_type not_(const term_type& x)
   {
-    return utilities::optimized_not(x);
+    return data::optimized_not(x);
   }
 
   static inline
   term_type and_(const term_type& x, const term_type& y)
   {
-    return utilities::optimized_and(x, y);
+    return data::optimized_and(x, y);
   }
 
   static inline
   term_type or_(const term_type& x, const term_type& y)
   {
-    return utilities::optimized_or(x, y);
+    return data::optimized_or(x, y);
   }
 
   static inline
   term_type imp(const term_type& x, const term_type& y)
   {
-    return utilities::optimized_imp(x, y);
+    return data::optimized_imp(x, y);
   }
 
   static inline
   term_type forall(const variable_sequence_type& d, const term_type& x)
   {
-    return utilities::optimized_forall_no_empty_domain(d, x);
+    return data::optimized_forall_no_empty_domain(d, x);
   }
 
   static inline
   term_type exists(const variable_sequence_type& d, const term_type& x)
   {
-    return utilities::optimized_exists_no_empty_domain(d, x);
+    return data::optimized_exists_no_empty_domain(d, x);
   }
 
   template <typename FwdIt>

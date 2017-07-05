@@ -12,8 +12,8 @@
 #ifndef MCRL2_DATA_JOIN_H
 #define MCRL2_DATA_JOIN_H
 
-#include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/data/expression_traits.h"
+#include "mcrl2/utilities/detail/join.h"
 
 namespace mcrl2
 {

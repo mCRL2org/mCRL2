@@ -12,11 +12,11 @@
 #ifndef MCRL2_BES_PBESINST_CONVERSION_H
 #define MCRL2_BES_PBESINST_CONVERSION_H
 
-#include <cassert>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/pbes_expression2boolean_expression_traverser.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
+#include <cassert>
 
 namespace mcrl2
 {
@@ -57,9 +57,9 @@ bes::boolean_equation_system pbesinst_conversion(const pbes_system::pbes& p)
   assert(pbes_system::algorithms::is_bes(p));
 
   std::vector<bes::boolean_equation> equations;
-  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+  for (const pbes_system::pbes_equation& eqn: p.equations())
   {
-    equations.push_back(pbesinst_conversion(*i));
+    equations.push_back(pbesinst_conversion(eqn));
   }
   bes::boolean_expression initial_state = pbesinst_conversion(p.initial_state());
 

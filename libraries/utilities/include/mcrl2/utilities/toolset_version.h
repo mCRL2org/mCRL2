@@ -24,7 +24,7 @@ namespace utilities
 /// \return A string representation of the toolset revision
 std::string get_toolset_version();
 
-}
-}
+} // namespace utilities
+} // namespace mcrl2
 
 #endif // MCRL2_UTILITIES_TOOLSET_VERSION_H

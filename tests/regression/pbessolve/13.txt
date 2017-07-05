@@ -1,0 +1,4 @@
+% Test case to check a more complex exists quantifier elimination.
+pbes mu X=exists x:Nat.val(x<3 => x==1);
+init X;
+

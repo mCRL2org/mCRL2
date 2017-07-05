@@ -1,11 +1,11 @@
-#ifndef _MCRL2_DATA_CONCEPTS__HPP_
-#define _MCRL2_DATA_CONCEPTS__HPP_
+#ifndef MCRL2_DATA_DETAIL_CONCEPTS_H
+#define MCRL2_DATA_DETAIL_CONCEPTS_H
 
-#include "boost/concept_check.hpp"
-#include "boost/type_traits/is_convertible.hpp"
-#include "boost/iterator/iterator_concepts.hpp"
+#include <boost/concept_check.hpp>
+// #include <boost/type_traits/is_convertible.hpp>
+#include <boost/iterator/iterator_concepts.hpp>
 
-#include "boost/concept/detail/concept_def.hpp"
+#include <boost/concept/detail/concept_def.hpp>
 
 namespace mcrl2
 {
@@ -88,10 +88,10 @@ BOOST_concept(Enumerator,(E)) : boost_concepts::ForwardTraversal< E >
     s = *e;
   }
 };
-}
-}
-}
+} // namespace concepts
+} // namespace data
+} // namespace mcrl2
 
-#include "boost/concept/detail/concept_undef.hpp"
+#include <boost/concept/detail/concept_undef.hpp>
 
 #endif

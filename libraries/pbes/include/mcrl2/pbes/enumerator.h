@@ -21,19 +21,17 @@ namespace pbes_system {
 
 struct is_not_false
 {
-  typedef core::term_traits<pbes_expression> tr;
   bool operator()(const pbes_expression& x) const
   {
-    return !tr::is_false(x);
+    return !is_false(x);
   }
 };
 
 struct is_not_true
 {
-  typedef core::term_traits<pbes_expression> tr;
   bool operator()(const pbes_expression& x) const
   {
-    return !tr::is_true(x);
+    return !is_true(x);
   }
 };
 

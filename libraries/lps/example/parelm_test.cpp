@@ -1,13 +1,13 @@
-#include <string>
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parelm.h"
+#include <string>
 
 using namespace mcrl2;
 
-void test_parelm(std::string spec_text)
+void test_parelm(const std::string& spec_text)
 {
-  lps::specification spec1 = lps::linearise(spec_text);
-  lps::specification spec2 = spec1;
+  lps::stochastic_specification spec1 = lps::linearise(spec_text);
+  lps::stochastic_specification spec2 = spec1;
   lps::parelm(spec2);
   std::cout << "<before>\n" << lps::pp(spec1.process()) << std::endl;
   std::cout << "<after>\n"  << lps::pp(spec2.process()) << std::endl;
@@ -154,6 +154,26 @@ std::string SPEC7 =
   "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% \n"
   ;
 
+void test_stochastic_specification()
+{
+  std::string text =
+    "% Test Case 1                            \n"
+    "%                                        \n"
+    "% Process parameter i should be removed. \n"
+    "                                         \n"
+    "act a;                                   \n"
+    "                                         \n"
+    "proc X(i: Nat) = a.X(i);                 \n"
+    "                                         \n"
+    "init X(2);                               \n"
+    ;
+  lps::stochastic_specification spec1 = lps::linearise(text);
+  lps::stochastic_specification spec2 = spec1;
+  lps::parelm(spec2);
+  std::cout << "<before>\n" << lps::pp(spec1.process()) << std::endl;
+  std::cout << "<after>\n"  << lps::pp(spec2.process()) << std::endl;
+}
+
 int main(int argc, char* argv[])
 {
   test_parelm(SPEC1);
@@ -163,6 +183,7 @@ int main(int argc, char* argv[])
   test_parelm(SPEC5);
   test_parelm(SPEC6);
   test_parelm(SPEC7);
+  test_stochastic_specification();
 
   return 0;
 }

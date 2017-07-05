@@ -8,11 +8,10 @@
 //
 /// \file core.cpp
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/print.h"
 
 namespace mcrl2 {
 
@@ -48,16 +47,15 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::PBESExists = core::detail::function_symbol_PBESExists();
   const atermpp::function_symbol core::detail::function_symbols::PBESImp = core::detail::function_symbol_PBESImp();
   const atermpp::function_symbol core::detail::function_symbols::Binder = core::detail::function_symbol_Binder();
+  const atermpp::function_symbol core::detail::function_symbols::StochasticOperator = core::detail::function_symbol_StochasticOperator();
   const atermpp::function_symbol core::detail::function_symbols::SortRef = core::detail::function_symbol_SortRef();
   const atermpp::function_symbol core::detail::function_symbols::ProcEqnSpec = core::detail::function_symbol_ProcEqnSpec();
   const atermpp::function_symbol core::detail::function_symbols::StateForall = core::detail::function_symbol_StateForall();
   const atermpp::function_symbol core::detail::function_symbols::BooleanImp = core::detail::function_symbol_BooleanImp();
   const atermpp::function_symbol core::detail::function_symbols::SortId = core::detail::function_symbol_SortId();
-  const atermpp::function_symbol core::detail::function_symbols::UntypedAction = core::detail::function_symbol_UntypedAction();
   const atermpp::function_symbol core::detail::function_symbols::StateNu = core::detail::function_symbol_StateNu();
   const atermpp::function_symbol core::detail::function_symbols::RegNil = core::detail::function_symbol_RegNil();
   const atermpp::function_symbol core::detail::function_symbols::DataSpec = core::detail::function_symbol_DataSpec();
-  const atermpp::function_symbol core::detail::function_symbols::UntypedActMultAct = core::detail::function_symbol_UntypedActMultAct();
   const atermpp::function_symbol core::detail::function_symbols::Tau = core::detail::function_symbol_Tau();
   const atermpp::function_symbol core::detail::function_symbols::StateYaledTimed = core::detail::function_symbol_StateYaledTimed();
   const atermpp::function_symbol core::detail::function_symbols::SortCons = core::detail::function_symbol_SortCons();
@@ -65,7 +63,7 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::LinearProcessSummand = core::detail::function_symbol_LinearProcessSummand();
   const atermpp::function_symbol core::detail::function_symbols::SortSpec = core::detail::function_symbol_SortSpec();
   const atermpp::function_symbol core::detail::function_symbols::ActionRenameRules = core::detail::function_symbol_ActionRenameRules();
-  const atermpp::function_symbol core::detail::function_symbols::UntypedParamId = core::detail::function_symbol_UntypedParamId();
+  const atermpp::function_symbol core::detail::function_symbols::BddFalse = core::detail::function_symbol_BddFalse();
   const atermpp::function_symbol core::detail::function_symbols::BooleanEquation = core::detail::function_symbol_BooleanEquation();
   const atermpp::function_symbol core::detail::function_symbols::ConsSpec = core::detail::function_symbol_ConsSpec();
   const atermpp::function_symbol core::detail::function_symbols::SortList = core::detail::function_symbol_SortList();
@@ -87,11 +85,11 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::BagComp = core::detail::function_symbol_BagComp();
   const atermpp::function_symbol core::detail::function_symbols::StateDelay = core::detail::function_symbol_StateDelay();
   const atermpp::function_symbol core::detail::function_symbols::RegAlt = core::detail::function_symbol_RegAlt();
-  const atermpp::function_symbol core::detail::function_symbols::UntypedMultAct = core::detail::function_symbol_UntypedMultAct();
   const atermpp::function_symbol core::detail::function_symbols::StructCons = core::detail::function_symbol_StructCons();
   const atermpp::function_symbol core::detail::function_symbols::Mu = core::detail::function_symbol_Mu();
   const atermpp::function_symbol core::detail::function_symbols::PBEqnSpec = core::detail::function_symbol_PBEqnSpec();
-  const atermpp::function_symbol core::detail::function_symbols::ActNot = core::detail::function_symbol_ActNot();
+  const atermpp::function_symbol core::detail::function_symbols::UntypedRegFrm = core::detail::function_symbol_UntypedRegFrm();
+  const atermpp::function_symbol core::detail::function_symbols::Distribution = core::detail::function_symbol_Distribution();
   const atermpp::function_symbol core::detail::function_symbols::BooleanTrue = core::detail::function_symbol_BooleanTrue();
   const atermpp::function_symbol core::detail::function_symbols::Block = core::detail::function_symbol_Block();
   const atermpp::function_symbol core::detail::function_symbols::Rename = core::detail::function_symbol_Rename();
@@ -101,6 +99,7 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::ProcSpec = core::detail::function_symbol_ProcSpec();
   const atermpp::function_symbol core::detail::function_symbols::UntypedSortsPossible = core::detail::function_symbol_UntypedSortsPossible();
   const atermpp::function_symbol core::detail::function_symbols::StateMu = core::detail::function_symbol_StateMu();
+  const atermpp::function_symbol core::detail::function_symbols::BddIf = core::detail::function_symbol_BddIf();
   const atermpp::function_symbol core::detail::function_symbols::StateFalse = core::detail::function_symbol_StateFalse();
   const atermpp::function_symbol core::detail::function_symbols::PBESFalse = core::detail::function_symbol_PBESFalse();
   const atermpp::function_symbol core::detail::function_symbols::PBESForall = core::detail::function_symbol_PBESForall();
@@ -138,6 +137,7 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::StateVar = core::detail::function_symbol_StateVar();
   const atermpp::function_symbol core::detail::function_symbols::ActionRenameRule = core::detail::function_symbol_ActionRenameRule();
   const atermpp::function_symbol core::detail::function_symbols::RegSeq = core::detail::function_symbol_RegSeq();
+  const atermpp::function_symbol core::detail::function_symbols::ActNot = core::detail::function_symbol_ActNot();
   const atermpp::function_symbol core::detail::function_symbols::LinearProcess = core::detail::function_symbol_LinearProcess();
   const atermpp::function_symbol core::detail::function_symbols::ActAt = core::detail::function_symbol_ActAt();
   const atermpp::function_symbol core::detail::function_symbols::DataEqn = core::detail::function_symbol_DataEqn();
@@ -148,6 +148,7 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::MultActName = core::detail::function_symbol_MultActName();
   const atermpp::function_symbol core::detail::function_symbols::IfThenElse = core::detail::function_symbol_IfThenElse();
   const atermpp::function_symbol core::detail::function_symbols::Nil = core::detail::function_symbol_Nil();
+  const atermpp::function_symbol core::detail::function_symbols::UntypedSortVariable = core::detail::function_symbol_UntypedSortVariable();
   const atermpp::function_symbol core::detail::function_symbols::ProcEqn = core::detail::function_symbol_ProcEqn();
   const atermpp::function_symbol core::detail::function_symbols::StructProj = core::detail::function_symbol_StructProj();
   const atermpp::function_symbol core::detail::function_symbols::PBEqn = core::detail::function_symbol_PBEqn();
@@ -158,6 +159,7 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::ActId = core::detail::function_symbol_ActId();
   const atermpp::function_symbol core::detail::function_symbols::StateYaled = core::detail::function_symbol_StateYaled();
   const atermpp::function_symbol core::detail::function_symbols::PBESOr = core::detail::function_symbol_PBESOr();
+  const atermpp::function_symbol core::detail::function_symbols::BddTrue = core::detail::function_symbol_BddTrue();
   const atermpp::function_symbol core::detail::function_symbols::UntypedProcessAssignment = core::detail::function_symbol_UntypedProcessAssignment();
   const atermpp::function_symbol core::detail::function_symbols::SortFBag = core::detail::function_symbol_SortFBag();
   const atermpp::function_symbol core::detail::function_symbols::Allow = core::detail::function_symbol_Allow();
@@ -167,8 +169,10 @@ const atermpp::function_symbol core::detail::function_symbols::BooleanOr = core:
   const atermpp::function_symbol core::detail::function_symbols::PBInit = core::detail::function_symbol_PBInit();
   const atermpp::function_symbol core::detail::function_symbols::ActTrue = core::detail::function_symbol_ActTrue();
   const atermpp::function_symbol core::detail::function_symbols::RegTransOrNil = core::detail::function_symbol_RegTransOrNil();
+  const atermpp::function_symbol core::detail::function_symbols::UntypedMultiAction = core::detail::function_symbol_UntypedMultiAction();
   const atermpp::function_symbol core::detail::function_symbols::GlobVarSpec = core::detail::function_symbol_GlobVarSpec();
   const atermpp::function_symbol core::detail::function_symbols::UntypedIdentifierAssignment = core::detail::function_symbol_UntypedIdentifierAssignment();
+  const atermpp::function_symbol core::detail::function_symbols::UntypedDataParameter = core::detail::function_symbol_UntypedDataParameter();
 //--- end generated function symbol definitions ---//
 
 //--- start generated default value definitions ---//
@@ -186,16 +190,15 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::PBESExists = core::detail::default_value_PBESExists();
   const atermpp::aterm_appl core::detail::default_values::PBESImp = core::detail::default_value_PBESImp();
   const atermpp::aterm_appl core::detail::default_values::Binder = core::detail::default_value_Binder();
+  const atermpp::aterm_appl core::detail::default_values::StochasticOperator = core::detail::default_value_StochasticOperator();
   const atermpp::aterm_appl core::detail::default_values::SortRef = core::detail::default_value_SortRef();
   const atermpp::aterm_appl core::detail::default_values::ProcEqnSpec = core::detail::default_value_ProcEqnSpec();
   const atermpp::aterm_appl core::detail::default_values::StateForall = core::detail::default_value_StateForall();
   const atermpp::aterm_appl core::detail::default_values::BooleanImp = core::detail::default_value_BooleanImp();
   const atermpp::aterm_appl core::detail::default_values::SortId = core::detail::default_value_SortId();
-  const atermpp::aterm_appl core::detail::default_values::UntypedAction = core::detail::default_value_UntypedAction();
   const atermpp::aterm_appl core::detail::default_values::StateNu = core::detail::default_value_StateNu();
   const atermpp::aterm_appl core::detail::default_values::RegNil = core::detail::default_value_RegNil();
   const atermpp::aterm_appl core::detail::default_values::DataSpec = core::detail::default_value_DataSpec();
-  const atermpp::aterm_appl core::detail::default_values::UntypedActMultAct = core::detail::default_value_UntypedActMultAct();
   const atermpp::aterm_appl core::detail::default_values::Tau = core::detail::default_value_Tau();
   const atermpp::aterm_appl core::detail::default_values::StateYaledTimed = core::detail::default_value_StateYaledTimed();
   const atermpp::aterm_appl core::detail::default_values::SortCons = core::detail::default_value_SortCons();
@@ -203,7 +206,7 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::LinearProcessSummand = core::detail::default_value_LinearProcessSummand();
   const atermpp::aterm_appl core::detail::default_values::SortSpec = core::detail::default_value_SortSpec();
   const atermpp::aterm_appl core::detail::default_values::ActionRenameRules = core::detail::default_value_ActionRenameRules();
-  const atermpp::aterm_appl core::detail::default_values::UntypedParamId = core::detail::default_value_UntypedParamId();
+  const atermpp::aterm_appl core::detail::default_values::BddFalse = core::detail::default_value_BddFalse();
   const atermpp::aterm_appl core::detail::default_values::BooleanEquation = core::detail::default_value_BooleanEquation();
   const atermpp::aterm_appl core::detail::default_values::ConsSpec = core::detail::default_value_ConsSpec();
   const atermpp::aterm_appl core::detail::default_values::SortList = core::detail::default_value_SortList();
@@ -225,11 +228,11 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::BagComp = core::detail::default_value_BagComp();
   const atermpp::aterm_appl core::detail::default_values::StateDelay = core::detail::default_value_StateDelay();
   const atermpp::aterm_appl core::detail::default_values::RegAlt = core::detail::default_value_RegAlt();
-  const atermpp::aterm_appl core::detail::default_values::UntypedMultAct = core::detail::default_value_UntypedMultAct();
   const atermpp::aterm_appl core::detail::default_values::StructCons = core::detail::default_value_StructCons();
   const atermpp::aterm_appl core::detail::default_values::Mu = core::detail::default_value_Mu();
   const atermpp::aterm_appl core::detail::default_values::PBEqnSpec = core::detail::default_value_PBEqnSpec();
-  const atermpp::aterm_appl core::detail::default_values::ActNot = core::detail::default_value_ActNot();
+  const atermpp::aterm_appl core::detail::default_values::UntypedRegFrm = core::detail::default_value_UntypedRegFrm();
+  const atermpp::aterm_appl core::detail::default_values::Distribution = core::detail::default_value_Distribution();
   const atermpp::aterm_appl core::detail::default_values::BooleanTrue = core::detail::default_value_BooleanTrue();
   const atermpp::aterm_appl core::detail::default_values::Block = core::detail::default_value_Block();
   const atermpp::aterm_appl core::detail::default_values::Rename = core::detail::default_value_Rename();
@@ -239,6 +242,7 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::ProcSpec = core::detail::default_value_ProcSpec();
   const atermpp::aterm_appl core::detail::default_values::UntypedSortsPossible = core::detail::default_value_UntypedSortsPossible();
   const atermpp::aterm_appl core::detail::default_values::StateMu = core::detail::default_value_StateMu();
+  const atermpp::aterm_appl core::detail::default_values::BddIf = core::detail::default_value_BddIf();
   const atermpp::aterm_appl core::detail::default_values::StateFalse = core::detail::default_value_StateFalse();
   const atermpp::aterm_appl core::detail::default_values::PBESFalse = core::detail::default_value_PBESFalse();
   const atermpp::aterm_appl core::detail::default_values::PBESForall = core::detail::default_value_PBESForall();
@@ -276,6 +280,7 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::StateVar = core::detail::default_value_StateVar();
   const atermpp::aterm_appl core::detail::default_values::ActionRenameRule = core::detail::default_value_ActionRenameRule();
   const atermpp::aterm_appl core::detail::default_values::RegSeq = core::detail::default_value_RegSeq();
+  const atermpp::aterm_appl core::detail::default_values::ActNot = core::detail::default_value_ActNot();
   const atermpp::aterm_appl core::detail::default_values::LinearProcess = core::detail::default_value_LinearProcess();
   const atermpp::aterm_appl core::detail::default_values::ActAt = core::detail::default_value_ActAt();
   const atermpp::aterm_appl core::detail::default_values::DataEqn = core::detail::default_value_DataEqn();
@@ -286,6 +291,7 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::MultActName = core::detail::default_value_MultActName();
   const atermpp::aterm_appl core::detail::default_values::IfThenElse = core::detail::default_value_IfThenElse();
   const atermpp::aterm_appl core::detail::default_values::Nil = core::detail::default_value_Nil();
+  const atermpp::aterm_appl core::detail::default_values::UntypedSortVariable = core::detail::default_value_UntypedSortVariable();
   const atermpp::aterm_appl core::detail::default_values::ProcEqn = core::detail::default_value_ProcEqn();
   const atermpp::aterm_appl core::detail::default_values::StructProj = core::detail::default_value_StructProj();
   const atermpp::aterm_appl core::detail::default_values::PBEqn = core::detail::default_value_PBEqn();
@@ -296,6 +302,7 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::ActId = core::detail::default_value_ActId();
   const atermpp::aterm_appl core::detail::default_values::StateYaled = core::detail::default_value_StateYaled();
   const atermpp::aterm_appl core::detail::default_values::PBESOr = core::detail::default_value_PBESOr();
+  const atermpp::aterm_appl core::detail::default_values::BddTrue = core::detail::default_value_BddTrue();
   const atermpp::aterm_appl core::detail::default_values::UntypedProcessAssignment = core::detail::default_value_UntypedProcessAssignment();
   const atermpp::aterm_appl core::detail::default_values::SortFBag = core::detail::default_value_SortFBag();
   const atermpp::aterm_appl core::detail::default_values::Allow = core::detail::default_value_Allow();
@@ -305,8 +312,10 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::PBInit = core::detail::default_value_PBInit();
   const atermpp::aterm_appl core::detail::default_values::ActTrue = core::detail::default_value_ActTrue();
   const atermpp::aterm_appl core::detail::default_values::RegTransOrNil = core::detail::default_value_RegTransOrNil();
+  const atermpp::aterm_appl core::detail::default_values::UntypedMultiAction = core::detail::default_value_UntypedMultiAction();
   const atermpp::aterm_appl core::detail::default_values::GlobVarSpec = core::detail::default_value_GlobVarSpec();
   const atermpp::aterm_appl core::detail::default_values::UntypedIdentifierAssignment = core::detail::default_value_UntypedIdentifierAssignment();
+  const atermpp::aterm_appl core::detail::default_values::UntypedDataParameter = core::detail::default_value_UntypedDataParameter();
   const atermpp::aterm_appl core::detail::default_values::SortExpr = core::detail::default_value_SortExpr();
   const atermpp::aterm_appl core::detail::default_values::SortConsType = core::detail::default_value_SortConsType();
   const atermpp::aterm_appl core::detail::default_values::DataExpr = core::detail::default_value_DataExpr();
@@ -325,6 +334,7 @@ const atermpp::aterm_appl core::detail::default_values::BooleanOr = core::detail
   const atermpp::aterm_appl core::detail::default_values::FixPoint = core::detail::default_value_FixPoint();
   const atermpp::aterm_appl core::detail::default_values::PBExpr = core::detail::default_value_PBExpr();
   const atermpp::aterm_appl core::detail::default_values::BooleanExpression = core::detail::default_value_BooleanExpression();
+  const atermpp::aterm_appl core::detail::default_values::BddExpression = core::detail::default_value_BddExpression();
 //--- end generated default value definitions ---//
 
 } // namespace core

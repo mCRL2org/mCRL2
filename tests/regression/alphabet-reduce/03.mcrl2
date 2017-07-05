@@ -1,0 +1,11 @@
+act
+  a,c,b,d;
+
+proc
+  P = (((a) + (c)) . (c)) . (d);
+  Q = a;
+  R = a;
+
+init
+  allow({c, d, b | d}, block({b}, rename({d -> b}, ((Q) || (P)) || (R))));
+

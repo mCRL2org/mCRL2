@@ -1,0 +1,43 @@
+%% Products with features Ct, Ma and Lh can start the pump upon a high water level, but products 
+%% without feature Lh cannot
+%%
+%% Holds for all products. Can be shown using two distinct families of products.
+
+forall Pz:FExpr.
+( val(Pz in
+[
+atom(Mq)
+,neg(atom(Mq))
+]
+)
+ =>
+( nu X(Px:FExpr = normalise(and(Pz,FD))).
+ (
+ (val(normalise(and(Px,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(tt,and(Px,e))) != ff) => X(normalise(and(tt,and(Px,e))))) ))
+ &&
+ (val(normalise(and(Px,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(tt,and(Px,e))) != ff) => X(normalise(and(tt,and(Px,e))))) ) )
+ &&
+ (val(normalise(and(Px,tt)) != ff) => (forall e:FExpr. [highLevel(e)](val(normalise(and(tt,and(Px,e))) != ff) => X(normalise(and(tt,and(Px,e))))) ) )
+ &&
+ ([skip]X(Px))
+ &&
+ (val(normalise(and(Px,and(atom(Ct),and(atom(Lh),atom(Ma))))) != ff) => (forall e':FExpr. 
+         [highLevel(e')](val(normalise(and(and(Px,e'),and(atom(Ct),and(atom(Lh),atom(Ma))))) != ff) => 
+                        mu Y(Py:FExpr = normalise(and(and(Px,e'),and(atom(Ct),and(atom(Lh),atom(Ma)))))).
+                           (
+                             (val(normalise(or(neg(Py),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py),e)) == tt) &&  Y(Py)) ))
+                             ||
+                             (val(normalise(or(neg(Py),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Py),e)) == tt) &&  true)) )
+                             ||
+                             (val(normalise(or(neg(Py),tt)) == tt) && (exists e:FExpr. <highLevel(e)>(val(normalise(or(neg(Py),e)) == tt) &&  Y(Py))  ) )
+                             ||
+                             (val(normalise(or(neg(Py),tt)) == tt) && <skip>Y(Py))
+                           )
+                       )
+                 ) 
+ )
+ &&
+ (val(normalise(and(Px,neg(atom(Lh)))) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(neg(atom(Lh)),and(Px,e))) != ff) => false)) )
+ )
+)
+)

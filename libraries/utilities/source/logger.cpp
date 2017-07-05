@@ -8,12 +8,12 @@
 //
 /// \file logger.cpp
 
+#include "mcrl2/utilities/logger.h"
+#include <cassert>
 #include <cstdio>
 #include <ctime>
-#include <string>
-#include <cassert>
 #include <iostream>
-#include "mcrl2/utilities/logger.h"
+#include <string>
 
 namespace mcrl2 {
   namespace log {
@@ -24,7 +24,7 @@ namespace mcrl2 {
     r = localtime(t);
 
     char buffer[11];
-    size_t res = strftime(buffer, sizeof(buffer), "%H:%M:%S", r);
+    std::size_t res = strftime(buffer, sizeof(buffer), "%H:%M:%S", r);
     if(res == 0)
     {
       std::clog << "Could not write time to buffer" << std::endl;
@@ -33,14 +33,42 @@ namespace mcrl2 {
     return buffer;
   }
 
-  std::string formatter::format(const log_level_t level, const std::string& hint, const time_t timestamp, const std::string& msg)
+  std::string formatter::format(const log_level_t level, 
+                                const std::string& hint, 
+                                const time_t timestamp, 
+                                const std::string& msg,
+                                const bool print_time_information)
   {
-    // Construct the message header
+    // Construct the message header, with or without time and debug level info.
+    const log_level_t default_level=logger::get_reporting_level(hint);
+    const bool print_log_level= level==error || level > verbose || default_level>=debug;
     std::stringstream start_of_line;
-    start_of_line << "[" << format_time(&timestamp) << " " << hint
-                  << (hint == std::string()?"":"::")
-                  << log_level_to_string(level) << "]"
-                  << std::string(8 - log_level_to_string(level).size(), ' ');
+    if (print_time_information || print_log_level)
+    {
+      start_of_line << "[";
+    }
+    if (print_time_information)
+    {
+      start_of_line << format_time(&timestamp);
+    }
+    if (print_time_information && print_log_level)
+    {
+      start_of_line << " ";
+    }
+    if (print_log_level)
+    {
+      start_of_line << hint
+                    << (hint == std::string()?"":"::")
+                    << log_level_to_string(level);
+    }
+    if (print_time_information || print_log_level)
+    {
+      start_of_line << "] ";
+    }
+    if (print_log_level)
+    {
+      start_of_line << std::string(7 - log_level_to_string(level).size(), ' ');
+    }
 
     // Check if message is finished. We
     bool msg_ends_with_newline = false;
@@ -105,7 +133,7 @@ namespace mcrl2 {
     // Pad message with spaces when overwriting a previous line
     if (msg_ends_with_newline && overwrite && caret_pos() < last_caret_pos())
     {
-      for (size_t i = 0; i < last_caret_pos() - caret_pos(); ++i)
+      for (std::size_t i = 0; i < last_caret_pos() - caret_pos(); ++i)
       {
         result << ' ';
       }
@@ -143,5 +171,5 @@ namespace mcrl2 {
     return result.str();
   }
 
-  }
-}
+  } // namespace log
+} // namespace mcrl2

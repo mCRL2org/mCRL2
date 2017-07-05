@@ -9,25 +9,24 @@
 /// \file mcrl2/core/print.h
 /// \brief Functions for pretty printing ATerms.
 
-#ifndef MCRL2_PRINT_H
-#define MCRL2_PRINT_H
+#ifndef MCRL2_CORE_PRINT_H
+#define MCRL2_CORE_PRINT_H
 
-#include <cstdio>
-#include <cctype>
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/core/print_format.h"
+#include "mcrl2/core/traverser.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 #include <cassert>
+#include <cctype>
+#include <cstdio>
 #include <cstdlib>
 #include <list>
 #include <ostream>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/atermpp/detail/utility.h"
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/traverser.h"
-#include "mcrl2/core/detail/precedence.h"
-#include "mcrl2/core/print_format.h"
 
 namespace mcrl2
 {
@@ -45,16 +44,16 @@ struct printer: public core::traverser<Derived>
 {
   typedef core::traverser<Derived> super;
 
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  std::ostream* m_out;
+
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
   }
-
-  // using super::enter;
-  // using super::leave;
-  using super::operator();
-
-  std::ostream* m_out;
 
   std::ostream& out()
   {
@@ -74,7 +73,7 @@ struct printer: public core::traverser<Derived>
     {
       derived().print("(");
     }
-    derived()(x);
+    derived().apply(x);
     if (print_parens)
     {
       derived().print(")");
@@ -121,13 +120,13 @@ struct printer: public core::traverser<Derived>
       {
         derived().print(separator);
       }
-      derived()(*i);
+      derived().apply(*i);
     }
     derived().print(closer);
   }
 
   template <typename T>
-  void operator()(const atermpp::term_appl<T>& x)
+  void apply(const atermpp::term_appl<T>& x)
   {
     derived().enter(x);
     derived().print(utilities::to_string(x));
@@ -135,7 +134,7 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void operator()(const std::list<T>& x)
+  void apply(const std::list<T>& x)
   {
     derived().enter(x);
     print_list(x, "", "", ", ");
@@ -143,7 +142,7 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void operator()(const atermpp::term_list<T>& x)
+  void apply(const atermpp::term_list<T>& x)
   {
     derived().enter(x);
     print_list(x, "", "", ", ");
@@ -151,14 +150,14 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
-  void operator()(const std::set<T>& x)
+  void apply(const std::set<T>& x)
   {
     derived().enter(x);
     print_list(x, "", "", ", ");
     derived().leave(x);
   }
 
-  void operator()(const core::identifier_string& x)
+  void apply(const core::identifier_string& x)
   {
     derived().enter(x);
     if (x == core::identifier_string())
@@ -172,28 +171,35 @@ struct printer: public core::traverser<Derived>
     derived().leave(x);
   }
 
-  void operator()(const core::nil& x)
+  void apply(const core::nil& x)
   {
     derived().enter(x);
     derived().print("nil");
     derived().leave(x);
   }
 
-  void operator()(atermpp::aterm x)
+  void apply(const atermpp::aterm& x)
   {
     derived().enter(x);
     derived().print(utilities::to_string(x));
     derived().leave(x);
   }
 
-  void operator()(atermpp::aterm_list x)
+  void apply(const atermpp::aterm_list& x)
   {
     derived().enter(x);
     derived().print(utilities::to_string(x));
     derived().leave(x);
   }
 
-  void operator()(atermpp::aterm_appl x)
+  void apply(const atermpp::aterm_appl& x)
+  {
+    derived().enter(x);
+    derived().print(utilities::to_string(x));
+    derived().leave(x);
+  }
+
+  void apply(const atermpp::aterm_int& x)
   {
     derived().enter(x);
     derived().print(utilities::to_string(x));
@@ -208,7 +214,7 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   apply_printer(std::ostream& out)
   {
@@ -216,9 +222,6 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
     static_cast<Super&>(*this).m_out = &out;
   }
 
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 } // namespace detail
@@ -231,7 +234,7 @@ struct stream_printer
   void operator()(const T& x, std::ostream& out)
   {
     core::detail::apply_printer<core::detail::printer> printer(out);
-    printer(x);
+    printer.apply(x);
   }
 };
 
@@ -251,4 +254,4 @@ std::string pp(const nil& x);
 
 } // namespace mcrl2
 
-#endif // MCRL2_PRINT_H
+#endif // MCRL2_CORE_PRINT_H

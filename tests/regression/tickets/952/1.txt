@@ -1,0 +1,4 @@
+pbes 
+     nu X0(m: Nat) = (forall i: Nat. val(!(i < 2  )) || X0([10,m] . i));
+
+init X0(0);

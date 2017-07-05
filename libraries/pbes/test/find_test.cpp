@@ -9,30 +9,30 @@
 /// \file find_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 inline
-data::variable nat(std::string name)
+data::variable nat(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
 
 inline
-data::variable pos(std::string name)
+data::variable pos(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_pos::pos());
 }
 
 inline
-data::variable bool_(std::string name)
+data::variable bool_(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_bool::bool_());
 }
@@ -67,8 +67,6 @@ void test_find()
 
 void test_free_variables()
 {
-  using atermpp::make_list;
-
   const std::string VARSPEC =
     "datavar         \n"
     "  n: Nat;       \n"

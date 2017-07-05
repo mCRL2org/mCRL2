@@ -14,7 +14,7 @@
 
 #include <cassert>
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/pbes/algorithms.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/pbesinst_symbolic.h"
@@ -107,8 +107,7 @@ class symbolic_exploration_algorithm
     {
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::not_(x);
+        return optimized_not(x);
       }
       else
       {
@@ -118,12 +117,11 @@ class symbolic_exploration_algorithm
 
     pbes_expression and_(const pbes_expression& x, const pbes_expression& y)
     {
-      pbes_expression left = x;
-      pbes_expression right = y;
+      const pbes_expression& left = x;
+      const pbes_expression& right = y;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::and_(left, right);
+        return optimized_and(left, right);
       }
       else
       {
@@ -133,12 +131,11 @@ class symbolic_exploration_algorithm
 
     pbes_expression or_(const pbes_expression& x, const pbes_expression& y)
     {
-      pbes_expression left = x;
-      pbes_expression right = y;
+      const pbes_expression& left = x;
+      const pbes_expression& right = y;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::or_(left, right);
+        return optimized_or(left, right);
       }
       else
       {
@@ -148,12 +145,11 @@ class symbolic_exploration_algorithm
 
     pbes_expression imp(const pbes_expression& x, const pbes_expression& y)
     {
-      pbes_expression left = x;
-      pbes_expression right = y;
+      const pbes_expression& left = x;
+      const pbes_expression& right = y;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::imp(left, right);
+        return optimized_imp(left, right);
       }
       else
       {
@@ -163,11 +159,10 @@ class symbolic_exploration_algorithm
 
     pbes_expression forall(const data::variable_list& d, const pbes_expression& x)
     {
-      pbes_expression body = x;
+      const pbes_expression& body = x;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::forall(d, body);
+        return optimized_forall(d, body);
       }
       else
       {
@@ -177,11 +172,10 @@ class symbolic_exploration_algorithm
 
     pbes_expression exists(const data::variable_list& d, const pbes_expression& x)
     {
-      pbes_expression body = x;
+      const pbes_expression& body = x;
       if (m_optimized)
       {
-        namespace z = pbes_expr_optimized;
-        return z::exists(d, body);
+        return optimized_exists(d, body);
       }
       else
       {
@@ -407,8 +401,8 @@ class symbolic_exploration_algorithm
 inline
 void symbolic_exploration(const std::string& input_filename,
                           const std::string& output_filename,
-                          const utilities::file_format* input_format,
-                          const utilities::file_format* output_format,
+                          const utilities::file_format& input_format,
+                          const utilities::file_format& output_format,
                           bool optimized = true,
                           bool clustered = false,
                           bool instantiate = false

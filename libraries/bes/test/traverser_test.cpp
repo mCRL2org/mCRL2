@@ -9,13 +9,13 @@
 /// \file traverser_test.cpp
 /// \brief Test for traversers.
 
+#include "mcrl2/bes/parse.h"
+#include "mcrl2/bes/traverser.h"
 #include <algorithm>
+#include <boost/test/minimal.hpp>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/bes/parse.h"
-#include "mcrl2/bes/traverser.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -27,7 +27,7 @@ class custom_traverser: public boolean_expression_traverser<custom_traverser>
 
     using super::enter;
     using super::leave;
-    using super::operator();
+    using super::apply;
 };
 
 void test_custom_traverser()
@@ -35,19 +35,19 @@ void test_custom_traverser()
   custom_traverser t;
 
   boolean_variable v;
-  t(v);
+  t.apply(v);
 
   true_ T;
-  t(T);
+  t.apply(T);
 
   boolean_expression e;
-  t(e);
+  t.apply(e);
 
   boolean_equation eq;
-  t(eq);
+  t.apply(eq);
 
   boolean_equation_system eqn;
-  t(eqn);
+  t.apply(eqn);
 
 }
 
@@ -58,7 +58,7 @@ class traverser1: public boolean_variable_traverser<traverser1>
 
     using super::enter;
     using super::leave;
-    using super::operator();
+    using super::apply;
 
     unsigned int variable_count;
     unsigned int equation_count;
@@ -90,7 +90,7 @@ void test_traverser1()
 {
   traverser1 t1;
   boolean_expression x = boolean_variable("X");
-  t1(x);
+  t1.apply(x);
 
   BOOST_CHECK(t1.variable_count == 1);
   BOOST_CHECK(t1.expression_count == 1);
@@ -112,7 +112,7 @@ void test_traverser1()
   std::stringstream from(bes1);
   from >> b;
 
-  t2(b);
+  t2.apply(b);
 
   BOOST_CHECK(t2.variable_count == 7);
   BOOST_CHECK(t2.expression_count == 7);

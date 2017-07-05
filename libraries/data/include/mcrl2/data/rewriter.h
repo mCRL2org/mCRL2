@@ -12,19 +12,17 @@
 #ifndef MCRL2_DATA_REWRITER_H
 #define MCRL2_DATA_REWRITER_H
 
-#include <functional>
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <sstream>
 
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/detail/rewrite.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
-#include "mcrl2/data/detail/data_expression_with_variables_traits.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -160,9 +158,9 @@ class rewriter: public basic_rewriter<data_expression>
 #endif
       substitution_type sigma_with_iterator;
       std::set < variable > free_variables=data::find_free_variables(d);
-      for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
+      for(const variable& free_variable: free_variables)
       {
-        sigma_with_iterator[*it]=sigma(*it);
+        sigma_with_iterator[free_variable]=sigma(free_variable);
       }
 
       data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));
@@ -191,78 +189,6 @@ class rewriter: public basic_rewriter<data_expression>
 #else
       return m_rewriter->rewrite(d,sigma);
 #endif
-    }
-};
-
-/// \brief Rewriter that operates on data expressions.
-class rewriter_with_variables: public basic_rewriter<data_expression>
-{
-    /// \brief The term type of the rewriter.
-    typedef data_expression term_type;
-
-    /// \brief The variable type of the rewriter.
-    typedef core::term_traits< data_expression_with_variables >::variable_type variable_type;
-
-  public:
-
-    /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
-    /// \param[in] r A data rewriter
-    rewriter_with_variables(const basic_rewriter< data_expression >& r) :
-      basic_rewriter<data_expression>(r)
-    {}
-
-    /// \brief Constructor.
-    /// \param[in] d A data specification
-    /// \param[in] s A rewriter strategy.
-    rewriter_with_variables(const data_specification& d = rewriter::default_specification(), const strategy s = jitty) :
-      basic_rewriter<data_expression>(d, s)
-    { }
-
-    /// \brief Constructor.
-    /// \param[in] d A data specification
-    /// \param[in] selector A component that selects the equations that are converted to rewrite rules
-    /// \param[in] s A rewriter strategy.
-    template < typename EquationSelector >
-    rewriter_with_variables(const data_specification& d, const EquationSelector & selector, const strategy s = jitty) :
-      basic_rewriter<data_expression>(d, selector, s)
-    { }
-
-
-    /// \brief Rewrites a data expression.
-    /// \param[in] d The term to be rewritten.
-    /// \return The normal form of d.
-    data_expression_with_variables operator()(const data_expression_with_variables& d) const
-    {
-      substitution_type sigma;
-      data_expression t = m_rewriter->rewrite(d,sigma);
-      data_expression_with_variables result(t, find_free_variables(t));
-#ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(log::debug) << "REWRITE " << d << " ------------> " << result << std::endl;
-#endif
-      return result;
-    }
-
-    /// \brief Rewrites the data expression d, and on the fly applies a substitution function
-    /// to data variables.
-    /// \param[in] d A term.
-    /// \param[in] sigma A substitution function
-    /// \return The normal form of the term.
-    template <typename SubstitutionFunction>
-    data_expression_with_variables operator()(const data_expression_with_variables& d, const SubstitutionFunction& sigma) const
-    {
-      substitution_type sigma_with_iterator;
-      std::set < variable > free_variables=data::find_free_variables(d);
-      for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
-      {
-        sigma_with_iterator[*it]=sigma(*it);
-      }
-
-      data_expression t(m_rewriter->rewrite(static_cast< const data_expression& >(d),sigma_with_iterator));
-      data_expression_with_variables result(t, find_free_variables(t));
-#ifdef MCRL2_PRINT_REWRITE_STEPS
-      mCRL2log(log::debug) << "REWRITE " << d << " ------------> " << result << std::endl;
-#endif
-      return result;
     }
 };
 

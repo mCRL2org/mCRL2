@@ -1,3 +1,15 @@
+// Author(s): Jan Friso Groote. Based on the aterm library by Paul Klint and others.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/atermpp/detail/aterm_implementation.h
+/// \brief This file contains the code to allocate aterms in tables
+///        with sufficient space for its arguments. 
+
 #ifndef MEMORY_H
 #define MEMORY_H
 
@@ -12,16 +24,23 @@ namespace atermpp
 namespace detail
 {
 
-static const size_t BLOCK_SIZE = 1<<14;
+/* Check for reasonably sized aterm (32 bits, 4 bytes)     */
+/* This check might break on perfectly valid architectures */
+/* that have char == 2 bytes, and sizeof(header_type) == 2 */
+static_assert(sizeof(std::size_t) == sizeof(_aterm*), "The size of an aterm pointer is not equal to the size of type std::size_t. Cannot compile the MCRL2 toolset for this platform.");
+static_assert(sizeof(std::size_t) >= 4,"The size of std::size_t should at least be four bytes. Cannot compile the toolset for this platform.");
+
+
+static const std::size_t BLOCK_SIZE = 1<<14;
 
 struct Block
 {
   struct Block* next_by_size;
-  size_t* end;
-  size_t data[1000]; // This is a block of arbitrary size. The indication data[]
-                     // is not accepted by the visual C++ compiler. If a lower
-                     // number than 1000 would be selected, the compiler may
-                     // warn that there is an index out of bound error.
+  std::size_t* end;
+  std::size_t data[1000]; // This is a block of arbitrary size. The indication data[]
+                          // is not accepted by the visual C++ compiler. If a lower
+                          // number than 1000 would be selected, the compiler may
+                          // warn that there is an index out of bound error.
 
   private:
     // The copy constructor is made private to indicate that
@@ -43,50 +62,40 @@ struct Block
 struct TermInfo
 {
   Block*       at_block;
-  const _aterm*       at_freelist;
+  _aterm*       at_freelist;
 
-  TermInfo():at_block(NULL),at_freelist(NULL)
+  TermInfo():at_block(nullptr),at_freelist(nullptr)
   {}
 
 };
 
-extern size_t aterm_table_mask;
-extern size_t aterm_table_size;
-extern const detail::_aterm* * aterm_hashtable;
+extern std::size_t aterm_table_mask;
+extern std::size_t aterm_table_size;
+extern detail::_aterm* * aterm_hashtable;
 
-extern aterm static_undefined_aterm;  // detail/aterm_implementation.h
-extern aterm static_empty_aterm_list;
-
-extern size_t terminfo_size;
-extern size_t total_nodes_in_hashtable;
+extern std::size_t terminfo_size;
+extern std::size_t total_nodes_in_hashtable;
 extern TermInfo *terminfo;
 
-extern size_t garbage_collect_count_down;
-
-void initialise_administration();
-void initialise_aterm_administration();
+extern std::size_t garbage_collect_count_down;
 
 void resize_aterm_hashtable();
-void allocate_block(const size_t size);
+void allocate_block(const std::size_t size);
 void collect_terms_with_reference_count_0();
 
-void call_creation_hook(const _aterm*);
+void call_creation_hook(_aterm*);
 
-inline size_t SHIFT(const size_t w)
-{
-  return w>>3;
-}
-
+// Auxiliary function to calculate a hash for _aterm's.
 inline
-size_t COMBINE(const HashNumber hnr, const size_t w)
+std::size_t COMBINE(const std::size_t hnr, const std::size_t w)
 {
   return (w>>3) + (hnr>>1) + (hnr<<1);
 }
 
 inline
-size_t COMBINE(const HashNumber hnr, const aterm& w)
+std::size_t COMBINE(const std::size_t hnr, const aterm& w)
 {
-  return COMBINE(hnr,reinterpret_cast<size_t>(address(w)));
+  return COMBINE(hnr,reinterpret_cast<std::size_t>(address(w)));
 }
 
 inline
@@ -101,14 +110,15 @@ t
   assert(!address(t)->reference_count_is_zero());
 }
 
-inline HashNumber hash_number(const detail::_aterm *t)
+inline std::size_t hash_number(detail::_aterm *t)
 {
   const function_symbol& f=t->function();
-  HashNumber hnr = SHIFT(addressf(f));
+  const std::hash<function_symbol> function_symbol_hasher;
+  std::size_t hnr = function_symbol_hasher(f);
 
-  const size_t* begin=reinterpret_cast<const size_t*>(t)+TERM_SIZE;
-  const size_t* end=begin+f.arity();
-  for (const size_t* i=begin; i!=end; ++i)
+  const std::size_t* begin=reinterpret_cast<const std::size_t*>(t)+TERM_SIZE;
+  const std::size_t* end=begin+f.arity();
+  for (const std::size_t* i=begin; i!=end; ++i)
   {
     hnr = COMBINE(hnr, *i);
   }
@@ -116,24 +126,24 @@ inline HashNumber hash_number(const detail::_aterm *t)
   return hnr;
 }
 
-inline const _aterm* allocate_term(const size_t size)
+inline _aterm* allocate_term(const std::size_t size)
 {
   assert(size>=TERM_SIZE);
   if (size >= terminfo_size)
   {
     // Resize the size of terminfo to the minimum of twice its old size and size+1;
-    const size_t old_term_info_size=terminfo_size;
+    const std::size_t old_term_info_size=terminfo_size;
     terminfo_size <<=1; // Multiply by 2.
     if (size>=terminfo_size)
     {
       terminfo_size=size+1;
     }
     terminfo=reinterpret_cast<TermInfo*>(realloc(terminfo,terminfo_size*sizeof(TermInfo)));
-    if (terminfo==NULL)
+    if (terminfo==nullptr)
     {
       throw std::runtime_error("Out of memory. Failed to allocate an extension of terminfo.");
     }
-    for(size_t i=old_term_info_size; i<terminfo_size; ++i)
+    for(std::size_t i=old_term_info_size; i<terminfo_size; ++i)
     {
       new (&terminfo[i]) TermInfo();
     }
@@ -154,36 +164,36 @@ inline const _aterm* allocate_term(const size_t size)
     garbage_collect_count_down--;
   }
 
-  if (garbage_collect_count_down==0 && ti.at_freelist==NULL) // It is time to collect free terms, and there are
+  if (garbage_collect_count_down==0 && ti.at_freelist==nullptr) // It is time to collect free terms, and there are
                                                              // no free terms left.
   {
     collect_terms_with_reference_count_0();
   }
-  if (ti.at_freelist==NULL)
+  if (ti.at_freelist==nullptr)
   {
     /* there is no more memory of the current size allocate a block */
     allocate_block(size);
-    assert(ti.at_block != NULL);
+    assert(ti.at_block != nullptr);
   }
 
-  const _aterm *at = ti.at_freelist;
+  _aterm *at = ti.at_freelist;
   ti.at_freelist = ti.at_freelist->next();
   assert(at->reference_count_indicates_is_in_freelist());
   at->reset_reference_count();
-  assert(ti.at_block != NULL);
+  assert(ti.at_block != nullptr);
   return at;
 }
 
-inline void remove_from_hashtable(const _aterm *t)
+inline void remove_from_hashtable(_aterm *t)
 {
   /* Remove the node from the aterm_hashtable */
-  const _aterm *prev=NULL;
-  const HashNumber hnr = hash_number(t) & aterm_table_mask;
-  const _aterm *cur = aterm_hashtable[hnr];
+  _aterm *prev=nullptr;
+  const std::size_t hnr = hash_number(t) & aterm_table_mask;
+  _aterm *cur = aterm_hashtable[hnr];
 
   do
   {
-    assert(cur!=NULL); /* This only occurs if the hashtable is in error. */
+    assert(cur!=nullptr); /* This only occurs if the hashtable is in error. */
     if (cur == t)
     {
       if (prev)
@@ -203,40 +213,12 @@ inline void remove_from_hashtable(const _aterm *t)
   assert(0);
 }
 
-inline void insert_in_hashtable(const _aterm *t, const size_t hnr)
-{
-
-  t->set_next(detail::aterm_hashtable[hnr]);
-  detail::aterm_hashtable[hnr] = t;
-  total_nodes_in_hashtable++;
-}
-
-inline const _aterm* address(const aterm& t)
+inline _aterm* address(const aterm& t)
 {
   return t.m_term;
 }
 
 } //namespace detail
-
-inline
-const detail::_aterm *aterm::undefined_aterm()
-{
-  if (detail::static_undefined_aterm.m_term==NULL)
-  {
-    detail::initialise_administration();
-  }
-  return detail::static_undefined_aterm.m_term;
-}
-
-inline
-const detail::_aterm *aterm::empty_aterm_list()
-{
-  if (detail::static_empty_aterm_list.m_term==NULL)
-  {
-    detail::initialise_administration();
-  }
-  return detail::static_empty_aterm_list.m_term;
-}
 
 } // namespace atermpp
 

@@ -1,0 +1,25 @@
+add_mcrl2_tool(pbespgsolve
+  SOURCES
+    Abortable.cpp
+    ComponentSolver.cpp
+    DecycleSolver.cpp
+    DeloopSolver.cpp
+    FocusListLiftingStrategy.cpp
+    Graph.cpp
+    LiftingStrategy.cpp
+    LinearLiftingStrategy.cpp
+    MaxMeasureLiftingStrategy.cpp
+    OldMaxMeasureLiftingStrategy.cpp
+    ParityGame.cpp
+    ParityGame_IO.cpp
+    ParityGame_verify.cpp
+    ParityGameSolver.cpp
+    pbespgsolve.cpp
+    PredecessorLiftingStrategy.cpp
+    PriorityPromotionSolver.cpp
+    RecursiveSolver.cpp
+    SmallProgressMeasures.cpp
+  DEPENDS
+    mcrl2_pbes
+    mcrl2_bes
+)

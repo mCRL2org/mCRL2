@@ -113,7 +113,7 @@ var  b,b':Board;
      x,y:Pos;
      dx,dy:Int;
      c,othercolorseen:Bool;
-     count:Nat;
+     count_:Nat;
 eqn  y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
      y>1 && y<=M -> Put(p,x,y,r|>b)=r|>Put(p,x,Int2Pos(y-1),b);
      Put(p,x,y,if(c,b,b'))=if(c,Put(p,x,y,b),Put(p,x,y,b'));  % See comments for distribution of At over if.
@@ -133,21 +133,21 @@ eqn  y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
      y<M -> Four_in_a_row_horizontally(p,y,b)=Count_rows_horizontally(p,1,y,b,0) ||
                                               Four_in_a_row_horizontally(p,y+1,b);
      y==M -> Four_in_a_row_horizontally(p,y,b)=Count_rows_horizontally(p,1,M,b,0);
-     x<N -> Count_rows_horizontally(p,x,y,b,count)=
+     x<N -> Count_rows_horizontally(p,x,y,b,count_)=
                                        if(At(x,y,b)==p,
-                                         count>=R-1 || Count_rows_horizontally(p,x+1,y,b,count+1),
+                                         count_>=R-1 || Count_rows_horizontally(p,x+1,y,b,count_+1),
                                          Count_rows_horizontally(p,x+1,y,b,0));
-     x==N -> Count_rows_horizontally(p,x,y,b,count)=if(At(N,y,b)==p,count>=R-1,false);
+     x==N -> Count_rows_horizontally(p,x,y,b,count_)=if(At(N,y,b)==p,count_>=R-1,false);
  
      Four_in_a_row_vertically(p,b)=Four_in_a_row_vertically(p,1,b);
      x<N -> Four_in_a_row_vertically(p,x,b)=Count_rows_vertically(p,x,1,b,0) ||
                                               Four_in_a_row_vertically(p,x+1,b);
      x==N -> Four_in_a_row_vertically(p,x,b)=Count_rows_vertically(p,N,1,b,0);
-     y<M ->  Count_rows_vertically(p,x,y,b,count)=
+     y<M ->  Count_rows_vertically(p,x,y,b,count_)=
                                        if(At(x,y,b)==p,
-                                         count>=R-1 || Count_rows_vertically(p,x,y+1,b,count+1),
+                                         count_>=R-1 || Count_rows_vertically(p,x,y+1,b,count_+1),
                                          Count_rows_vertically(p,x,y+1,b,0));
-     y==M -> Count_rows_vertically(p,x,y,b,count)=if(At(x,M,b)==p,count>=R-1,false);
+     y==M -> Count_rows_vertically(p,x,y,b,count_)=if(At(x,M,b)==p,count_>=R-1,false);
  
      Four_in_a_row_diagonally(p,b)=Four_in_a_row_diagonally_column(p,2,b) || 
                                    Four_in_a_row_diagonally_row(p,1,b);
@@ -159,16 +159,16 @@ eqn  y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
                                                    Count_rows_diagonally'(p,N,y,b,0) ||
                                                    Four_in_a_row_diagonally_column(p,y+1,b);
      y>=M -> Four_in_a_row_diagonally_column(p,y,b)=false;
-     x<N && y<M ->  Count_rows_diagonally(p,x,y,b,count)=
+     x<N && y<M ->  Count_rows_diagonally(p,x,y,b,count_)=
                                        if(At(x,y,b)==p,
-                                         count>=R-1 || Count_rows_diagonally(p,x+1,y+1,b,count+1),
+                                         count_>=R-1 || Count_rows_diagonally(p,x+1,y+1,b,count_+1),
                                          Count_rows_diagonally(p,x+1,y+1,b,0));
-     x==N || y==M -> Count_rows_diagonally(p,x,y,b,count)=if(At(x,y,b)==p,count>=R-1,false);
-     x>1 && y<M ->  Count_rows_diagonally'(p,x,y,b,count)=
+     x==N || y==M -> Count_rows_diagonally(p,x,y,b,count_)=if(At(x,y,b)==p,count_>=R-1,false);
+     x>1 && y<M ->  Count_rows_diagonally'(p,x,y,b,count_)=
                                        if(At(x,y,b)==p,
-                                         count>=R-1 || Count_rows_diagonally'(p,max(1,x-1),y+1,b,count+1),
+                                         count_>=R-1 || Count_rows_diagonally'(p,max(1,x-1),y+1,b,count_+1),
                                          Count_rows_diagonally'(p,max(1,x-1),y+1,b,0));
-     x==1 || y==M -> Count_rows_diagonally'(p,x,y,b,count)=if(At(x,y,b)==p,count>=R-1,false);
+     x==1 || y==M -> Count_rows_diagonally'(p,x,y,b,count_)=if(At(x,y,b)==p,count_>=R-1,false);
 
 
 act  YellowMoves,RedMoves:Pos;

@@ -1,5 +1,5 @@
 --indent=spaces=2
---brackets=break
+--break-closing-brackets
 --indent-classes
 --indent-switches
 --indent-preprocessor

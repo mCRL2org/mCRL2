@@ -166,13 +166,13 @@ after this ``c`` and before this ``b``:
 
 .. code-block:: mcrl2
 
-   [(!c)*.c.((!a && !b)* + a.(!c)*.c)*.b]false
+   [true*.c.!a*.b]false
 
-The same formula but now ``b`` may not occur initially:
+The action ``b`` may not occur initially an action ``a`` did not happen before it:
 
 .. code-block:: mcrl2
 
-   [((!a && !b)* + a.(!c)*.c)*.b]false
+   [!a*.b]false
 
 There exists an infinite sequence of ``a.b.c``'s:
 

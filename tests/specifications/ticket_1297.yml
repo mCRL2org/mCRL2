@@ -1,0 +1,29 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: LPS
+  l4:
+    type: TEXT
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lpsrewr
+  t3:
+    input: [l3]
+    output: [l4]
+    args: []
+    name: lpspp
+
+result: |
+  result = l4.value.find('x = x') == -1

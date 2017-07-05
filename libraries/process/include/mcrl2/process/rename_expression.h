@@ -13,10 +13,10 @@
 #define MCRL2_PROCESS_RENAME_EXPRESSION_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2
 {
@@ -83,6 +83,7 @@ std::string pp(const rename_expression& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const rename_expression& x)

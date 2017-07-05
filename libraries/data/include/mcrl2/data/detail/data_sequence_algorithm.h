@@ -12,9 +12,9 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_SEQUENCE_ALGORITHM_H
 #define MCRL2_DATA_DETAIL_DATA_SEQUENCE_ALGORITHM_H
 
+#include "mcrl2/data/variable.h"
 #include <set>
 #include <vector>
-#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {
@@ -30,7 +30,7 @@ namespace detail
 /// \param y A sequence of data variables
 /// \return The intersection of two sets.
 inline
-variable_list set_intersection(variable_list x, variable_list y)
+variable_list set_intersection(const variable_list& x, const variable_list& y)
 {
   if (x == y)
   {
@@ -38,11 +38,11 @@ variable_list set_intersection(variable_list x, variable_list y)
   }
 
   std::vector<variable> result;
-  for (variable_list::iterator i = x.begin(); i != x.end(); ++i)
+  for (const variable& v: x)
   {
-    if (std::find(y.begin(), y.end(), *i) != y.end())
+    if (std::find(y.begin(), y.end(), v) != y.end())
     {
-      result.push_back(*i);
+      result.push_back(v);
     }
   }
   return variable_list(result.begin(), result.end());
@@ -61,11 +61,11 @@ variable_list set_difference(const variable_list& x, const variable_list& y)
   }
 
   std::vector<variable> result;
-  for (variable_list::iterator i = x.begin(); i != x.end(); ++i)
+  for (const variable& v: x)
   {
-    if (std::find(y.begin(), y.end(), *i) == y.end())
+    if (std::find(y.begin(), y.end(), v) == y.end())
     {
-      result.push_back(*i);
+      result.push_back(v);
     }
   }
   return variable_list(result.begin(), result.end());

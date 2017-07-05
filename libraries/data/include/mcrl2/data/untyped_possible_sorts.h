@@ -45,7 +45,7 @@ class untyped_possible_sorts: public sort_expression
 
     /// \brief Constructor.
     template <typename Container>
-    untyped_possible_sorts(const Container& sorts, typename atermpp::enable_if_container<Container, sort_expression>::type* = 0)
+    untyped_possible_sorts(const Container& sorts, typename atermpp::enable_if_container<Container, sort_expression>::type* = nullptr)
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sort_expression_list(sorts.begin(), sorts.end())))
     {}
 
@@ -60,6 +60,7 @@ std::string pp(const untyped_possible_sorts& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_possible_sorts& x)

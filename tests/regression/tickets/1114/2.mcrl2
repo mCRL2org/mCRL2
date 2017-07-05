@@ -1,0 +1,10 @@
+act
+  a,b,c,d;
+
+proc
+  P = ((true) -> ((true) -> (c) <> (d))) . (Q);
+  Q = sum b1: Bool . ((b) . ((true) -> (R)));
+  R = a;
+
+init
+  block({d}, allow({b, a | c, b | d}, rename({c -> a}, ((Q) || (P)) || (R))));

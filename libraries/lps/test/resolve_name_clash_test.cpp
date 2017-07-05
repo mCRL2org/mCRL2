@@ -9,12 +9,12 @@
 /// \file resolve_name_clash_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/lps/resolve_name_clashes.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/resolve_name_clashes.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 
@@ -24,15 +24,15 @@ std::set<data::variable> find_summand_variables(const lps::specification& spec)
 
   const lps::linear_process& proc = spec.process();
   auto action_summands = proc.action_summands();
-  for (auto i = action_summands.begin(); i != action_summands.end(); ++i)
+  for (auto & action_summand : action_summands)
   {
-    auto variables = i->summation_variables();
+    auto variables = action_summand.summation_variables();
     result.insert(variables.begin(), variables.end());
   }
   auto deadlock_summands = proc.deadlock_summands();
-  for (auto i = deadlock_summands.begin(); i != deadlock_summands.end(); ++i)
+  for (auto & deadlock_summand : deadlock_summands)
   {
-    auto variables = i->summation_variables();
+    auto variables = deadlock_summand.summation_variables();
     result.insert(variables.begin(), variables.end());
   }
 
@@ -60,9 +60,9 @@ void test_resolve_name_clashes()
   lps::resolve_summand_variable_name_clashes(spec);
   std::set<data::variable> summation_variables = find_summand_variables(spec);
   auto process_parameters = spec.process().process_parameters();
-  for (auto i = process_parameters.begin(); i != process_parameters.end(); ++i)
+  for (const auto & process_parameter : process_parameters)
   {
-    BOOST_CHECK(summation_variables.find(*i) == summation_variables.end());
+    BOOST_CHECK(summation_variables.find(process_parameter) == summation_variables.end());
   }
 }
 

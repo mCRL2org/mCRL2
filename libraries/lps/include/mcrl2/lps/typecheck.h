@@ -12,11 +12,10 @@
 #ifndef MCRL2_LPS_TYPECHECK_H
 #define MCRL2_LPS_TYPECHECK_H
 
-#include "mcrl2/data/typecheck.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/untyped_multi_action.h"
-#include "mcrl2/process/untyped_action.h"
+#include "mcrl2/lps/stochastic_specification.h"
+#include "mcrl2/process/typecheck.h"
+#include "mcrl2/process/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -24,41 +23,100 @@ namespace mcrl2
 namespace lps
 {
 
-
-class action_type_checker:public data::data_type_checker
+class multi_action_type_checker
 {
   protected:
-    std::map<core::identifier_string,atermpp::term_list<data::sort_expression_list> > actions;   //name -> Set(List(sort expression)) because of action polymorphism
+    data::data_type_checker m_data_type_checker;
+    process::detail::action_context m_action_context;
+    data::detail::variable_context m_variable_context;
 
   public:
-    /** \brief     make an action type checker.
-    *  Throws a mcrl2::runtime_error exception if the data_specification is not well typed.
-    *  \param[in] data_spec A data specification that does not need to have been type checked.
-    *  \param[in] action_decls A list of action declarations
-    *  \return    a data expression where all untyped identifiers have been replace by typed ones.
-    **/
-    action_type_checker(const data::data_specification &data_spec, const process::action_label_list& action_decls);
+    template <typename VariableContainer, typename ActionLabelContainer>
+    multi_action_type_checker(const data::data_specification& dataspec,
+                              const VariableContainer& variables,
+                              const ActionLabelContainer& action_labels
+                             )
+      : m_data_type_checker(dataspec)
+    {
+      m_action_context.add_context_action_labels(action_labels, m_data_type_checker);
+      m_variable_context.add_context_variables(variables, m_data_type_checker);
+    }
+
+    /// \brief Default constructor
+    multi_action_type_checker(const data::data_specification& dataspec = data::data_specification())
+      : m_data_type_checker(dataspec)
+    {}
 
     /** \brief     Type check a multi action.
-    *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-    *  \param[in] ma A multi action that has not been type checked.
-    *  \return    a multi action where all untyped identifiers have been replace by typed ones.
-    **/
-    multi_action operator()(const untyped_multi_action &ma);
-
-    /** \brief     Type check a action_rename_specification;
-    *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
-    *  \param[in] ars An action rename specification that has not been type checked.
-    *  \return    a action rename specification where all untyped identifiers have been replace by typed ones.
-    **/
-    action_rename_specification operator()(const action_rename_specification &ars);
-
-  protected:
-    void ReadInActs(const process::action_label_list &Acts);
-    process::action TraverseAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::untyped_action &ma);
-    process::action RewrAct(const std::map<core::identifier_string,data::sort_expression> &Vars, const process::untyped_action &ma);
+     *  Throws a mcrl2::runtime_error exception if the expression is not well typed.
+     *  \param[in] x A multi action that has not been type checked.
+     *  \return    a typed multi action.
+     **/
+    multi_action operator()(const process::untyped_multi_action& x)
+    {
+      std::vector<process::action> actions;
+      try
+      {
+        for (const data::untyped_data_parameter& a: x.actions())
+        {
+          actions.push_back(process::typecheck_action(a.name(), a.arguments(), m_data_type_checker, m_variable_context, m_action_context));
+        }
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error(std::string(e.what()) + "\ntype checking of multiaction failed (" + process::pp(x) + ")");
+      }
+      return multi_action(process::action_list(actions.begin(), actions.end()));
+    }
 };
 
+class action_rename_type_checker
+{
+  protected:
+    data::data_type_checker m_data_type_checker;
+    process::detail::action_context m_action_context;
+
+    action_rename_rule typecheck_action_rename_rule(const action_rename_rule& x, const process::action_label_list& action_labels)
+    {
+      const data::data_specification& dataspec = m_data_type_checker.typechecked_data_specification();
+      data::detail::variable_context variable_context;
+      variable_context.add_context_variables(x.variables(), m_data_type_checker);
+      data::data_expression condition = m_data_type_checker.typecheck_data_expression(x.condition(), data::sort_bool::bool_(), variable_context);
+      process::action lhs = process::typecheck_action(x.lhs().label().name(), x.lhs().arguments(), m_data_type_checker, variable_context, m_action_context);
+      process::process_expression rhs = process::typecheck_process_expression(x.rhs(), x.variables(), dataspec, action_labels, process::process_identifier_list());
+      return action_rename_rule(x.variables(), condition, lhs, rhs);
+    }
+
+  public:
+    /** \brief Default constructor for an action rename type checker.
+    **/
+    action_rename_type_checker()
+      : m_data_type_checker(data::data_specification())
+    {}
+
+    /** \brief    Type check an action_rename_specification.
+    *  \param[in] arspec An action rename specification that has not been type checked.
+    *  \param[in] lpsspec A linear specification with data, action and global variable declarations.
+    *  \return    a action rename specification where all untyped identifiers have been replace by typed ones.
+    **/
+    action_rename_specification operator()(const action_rename_specification& arspec, const stochastic_specification& lpsspec)
+    {
+      mCRL2log(log::verbose) << "type checking action rename specification..." << std::endl;
+      m_data_type_checker = data::data_type_checker(lpsspec.data() + arspec.data());
+      action_rename_specification result = arspec;
+      result.data() = m_data_type_checker.typechecked_data_specification();
+      lps::detail::normalize_sorts(result);
+      m_action_context.clear();
+      process::action_label_list action_labels = lpsspec.action_labels() + arspec.action_labels();
+      m_action_context.add_context_action_labels(action_labels, m_data_type_checker);
+      for (action_rename_rule& rule: result.rules())
+      {
+        rule = typecheck_action_rename_rule(rule, action_labels);
+      }
+      mCRL2log(log::debug) << "type checking action rename specification finished" << std::endl;
+      return result;
+    }
+};
 
 /** \brief     Type check a multi action
  *  Throws an exception if something went wrong.
@@ -68,34 +126,27 @@ class action_type_checker:public data::data_type_checker
  *  \post      mult_action is type checked and sorts have been added when necessary.
  **/
 inline
-multi_action type_check(
-  untyped_multi_action& mult_act,
-  const data::data_specification& data_spec,
-  const process::action_label_list& action_decls)
+multi_action typecheck_multi_action(process::untyped_multi_action& mult_act,
+                                     const data::data_specification& data_spec,
+                                     const process::action_label_list& action_decls
+                                    )
 {
-  multi_action result;
-  action_type_checker type_checker(data_spec,action_decls);
-  try
-  {
-   result=type_checker(mult_act);
-  }
-  catch (mcrl2::runtime_error &e)
-  {
-    throw mcrl2::runtime_error(std::string(e.what()) + "\ncould not type check multi action " + pp(mult_act));
-  }
-  return result;
+  multi_action_type_checker typechecker(data_spec, data::variable_list(), action_decls);
+  return typechecker(mult_act);
 }
 
 /// \brief Type checks an action rename specification.
-/// \param ar_spec An action rename specifition.
-/// \param spec A linear process specification, used for the datatypes and action declarations.
+/// \param arspec An action rename specifition.
+/// \param lpsspec A linear process specification, used for the datatypes and action declarations.
 /// \return A type checked rename specification.
 
 inline
-action_rename_specification type_check_action_rename_specification(const action_rename_specification &ar_spec, const lps::specification &spec)
+action_rename_specification typecheck_action_rename_specification(
+                                const action_rename_specification& arspec,
+                                const lps::stochastic_specification& lpsspec)
 {
-  lps::action_type_checker type_checker(spec.data(),spec.action_labels());
-  return type_checker(ar_spec);
+  lps::action_rename_type_checker typechecker;
+  return typechecker(arspec, lpsspec);
 }
 
 

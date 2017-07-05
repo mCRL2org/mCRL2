@@ -1,0 +1,10 @@
+act
+  a,c,b,d;
+
+proc
+  P = a;
+  Q = sum b1: Bool . (((tau) . ((d) + ((true) -> (P)))) + ((true) -> (d) <> (delta)));
+  R = (((d) + (((a) + (tau)) . (a))) . (c)) . ((c) + (a));
+
+init
+  rename({a -> d}, allow({b | b, c, a | d, d, b | d}, allow({a | a, c, b, a | c, a | b}, ((Q) || (P)) || (R))));

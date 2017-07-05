@@ -1,0 +1,133 @@
+% Network based on the Distributed Summing Protocol
+% First create a spanning tree in the network
+% Then send a broadcast message, and observe that it only arrives at every node once.
+%
+% Todo:  - total weg
+%			- Report weg
+% hoe zorg je dat bepaalde processen allen met 
+sort
+	%Data = struct d1;
+	%ID = struct OLC1 | OLC2;
+	MsgDes = struct	DesOLC(getId: Pos)?IsUnicast
+				|	DesSC?IsDesSC
+				|	Broadcast?IsBroadcast;
+
+	% Different types of messages
+	Msg = struct	Message(des: MsgDes, src: Pos)?IsMessage;
+
+map p0: Pos -> Pos;
+	w0: Nat # List(List(Nat)) -> Nat;
+	s0: Pos -> Nat;
+	n0: Pos -> List(Pos);
+	%t0: Pos -> Nat;
+	rem: Nat # List(Nat) -> List(Nat);
+	
+var x:Nat;
+    l:List(Nat);
+	%n2: List(List(Pos));
+eqn rem(x,[]) = [];
+    x == head(l) -> rem(x,l) = rem(x,tail(l));
+    x != head(l) -> rem(x,l) = head(l) |> rem(x,tail(l));
+	
+eqn	
+	p0=lambda i:Pos . 1;
+	w0=lambda i:Nat,n:List(List(Nat)) . #(n.Int2Nat(i-1));
+	s0=lambda i:Pos . if(i==1,1,0);
+act
+	% c_st(i,j) j is the parent of i
+	% c_ans(p,i,t), the subtotal to parent p from child i
+	s_st,r_st,c_st: Pos#Nat;
+	s_ans,r_ans,c_ans: Pos#Nat#Nat;
+	rep: Nat;
+	rR_AL,sR_AL, R_AL: Pos # Msg;
+	rS_AL,sS_AL, S_AL: Pos # Msg;
+	rR_NL,sR_NL, R_NL: Pos # Msg;
+	rS_NL,sS_NL, S_NL: Pos # List(Nat) # Msg;
+	R_DL,S_DL, SR_DL:  List(Nat) # Msg;
+	received: Nat # Nat;
+	send;
+	
+proc 
+
+	AL(id:Pos)
+	% send a message to the Network Layer
+	= send . sS_AL(id, Message(Broadcast,id)) . AL(id)
+	% receive a message from the Network Layer
+	+ sum msg:Msg. rR_AL(id, msg). received(id, getId(des(msg))). AL(id);
+		
+	% i = id
+	% t = total sum computed so far
+	% N = a list of neighbours
+	% p = the index of the initiator/parent
+	% w = the number of st and ans messages that the process is still waiting for
+	% s = the state the process is in (0=initial,1=active,2=done)
+	% A = the list of active links, spanning tree links
+	NL(i:Pos, t:Nat, N:List(Nat),p:Pos,w,s:Nat, A:List(Nat))
+	% state 0, receive start, and set node j as parent go to state 1
+	= (s==0)-> sum j:Pos. r_st(i,j) . NL(i,t,rem(j,N),j,Int2Nat(#(N)-1),1,p|>A)
+	% state 1, receive start, but already started
+	+ sum j:Pos. (s==1)->r_st(i,j) . NL(i,t,N,p,Int2Nat(w-1),s,A)
+	% state 1, send start message to all other neighbours (once)
+	+ sum j:Pos. (j in N && s==1)-> s_st(j,i) . NL(i,t,rem(j,N),p,w,s,A)
+	% state 1, receive answer from neighbours, remove them from the todo list
+	+ sum j:Pos,m:Nat. (s==1)-> r_ans(i,j,m) . NL(i,t+m,N,p,Int2Nat(w-1),s,j|>A)
+	% state 1, send start to all neighbours and received answer from all neighbours
+	% if id=1 then report, else send answer to parent
+	+ (i==1 && N==[] && w==0 && s==1)-> rep(t).NL(i,t,N,p,w,2,A)
+	+ (i!=1 && N==[] && w==0 && s==1)-> s_ans(p,i,t) . NL(i,t,N,p,w,2,A)
+	% state 2 (spanning tree is ready) then we can receive messages from the application layer
+	+ sum msg:Msg. (s==2)->rS_AL(i,msg) . sS_NL(i,A,msg). NL(i,t,N,p,w,s,A)
+	% state 2, receive broadcast/unicast for this node message, send to application layer
+	% if broadcast, send to all active spanning tree links
+	+ sum msg:Msg. (s==2)->rR_NL(i,msg). sR_AL(i,msg). (IsBroadcast(des(msg)) && rem(src(msg),A)!=[])
+															-> sS_NL(i,rem(src(msg),A),msg). NL(i,t,N,p,w,s,A)
+															<> NL(i,t,N,p,w,s,A);
+															
+	DL(id:Pos)
+	% recieve message from Network Layer, send to all nodes in the receiver list
+	= sum msg:Msg, recList:List(Nat). rS_NL(id, recList, msg) . S_DL(recList, msg)
+	% receive message id is in the receivers list, send to Network layer
+	+ sum msg:Msg, recList:List(Nat). (id in recList)-> R_DL(recList,msg). sR_NL(id,msg). DL(id)
+													 <> R_DL(recList,msg). DL(id);
+	
+	
+	% X(i:Pos, t:Nat, N:List(Nat),p:Pos,w,s:Nat, A:List(Nat))
+	% = AL(i) || NL(i,t,N,p,w,s,A) || DL(i);
+	
+proc 
+	UPDATE(n:Pos, t0:List(Nat), n0:List(List(Nat)))=
+	hide({c_st, rep, c_ans},
+	  allow({c_st,c_ans,rep,R_AL,S_AL,R_NL,S_NL,SR_DL,received},
+	    comm({s_st|r_st->c_st,
+			  s_ans|r_ans->c_ans,
+			rR_AL|sR_AL->R_AL,
+			rS_AL|sS_AL->S_AL,			 
+			rR_NL|sR_NL->R_NL,
+			rS_NL|sS_NL->S_NL,
+			S_DL|R_DL|R_DL|R_DL->SR_DL				%EDIT WITH # OF NODES
+			 },
+			%Impl(n, t0, n0)
+				% X(1, t0.0, n0.0, p0(1), w0(1,n0), s0(1), [])
+			% ||  X(2, t0.1, n0.1, p0(2), w0(2,n0), s0(2), [])
+			% ||  X(3, t0.2, n0.2, p0(3), w0(3,n0), s0(3), [])
+			% ||  X(4, t0.3, n0.3, p0(4), w0(4,n0), s0(4), [])
+			
+				AL(1) || NL(1, t0.0, n0.0, p0(1), w0(1,n0), s0(1), []) || DL(1)
+			||  AL(2) || NL(2, t0.1, n0.1, p0(2), w0(2,n0), s0(2), []) || DL(2)
+			%||  AL(3) || NL(3, t0.2, n0.2, p0(3), w0(3,n0), s0(3), []) || DL(3)
+			%||  AL(4) || NL(4, t0.3, n0.3, p0(4), w0(4,n0), s0(4), []) || DL(4)
+		)
+	  )
+	);
+	
+	% n:Pos->Set(Nat)
+	%Impl(n:Pos, t0:List(Nat), n0:List(List(Nat)))
+	%= ((n==1)->  X(1,t0.(0)	,n0.(0)	 ,p0(1),#(n0.0)		,s0(1)) 
+	%		<> (X(n,t0.(Int2Nat(n-1)),n0.(Int2Nat(n-1)),p0(n),#(n0.(Int2Nat(n-1)))	,s0(n)) || Impl(Int2Pos(n-1),t0,n0)));
+
+init 
+	%DSUM(3,[[2,3],[1,3],[1,2]]);
+	%DSUM(4,[1,1,1,1],[[2,3,4],[1,3,4],[1,2,4],[1,2,3]]);
+	%UPDATE(3,[1,1,1],[[2,3],[1,3],[1,2]]);
+	UPDATE(2,[1,1],[[1,2]]);
+	

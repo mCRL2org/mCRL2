@@ -24,9 +24,9 @@ namespace detail
 {
 
 template < class LTS_TYPE>
-void add_an_action_loop_to_each_state(LTS_TYPE& l, size_t action)
+void add_an_action_loop_to_each_state(LTS_TYPE& l, std::size_t action)
 {
-  for(size_t i=0; i<l.num_states(); ++i)
+  for(std::size_t i=0; i<l.num_states(); ++i)
   {
     l.add_transition(transition(i,action,i));
   }

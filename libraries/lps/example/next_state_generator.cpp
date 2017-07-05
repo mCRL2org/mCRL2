@@ -1,61 +1,62 @@
+#include "mcrl2/lps/next_state_generator.h"
+#include <fstream>
 #include <iostream>
 #include <queue>
 #include <string>
-#include "mcrl2/lps/next_state_generator_old.h"
 
 using namespace mcrl2;
 
-void traverse_states(const lps::specification& lps_spec, bool per_summand = false)
+void traverse_states(const lps::stochastic_specification& lps_spec, data::rewriter& r, bool per_summand = false)
 {
   using namespace mcrl2::lps;
 
-  next_state_generator generator(lps_spec, data::jitty_compiling);
+  next_state_generator generator(lps_spec, r);
 
-  atermpp::aterm initial_state = generator.initial_state();
+  const mcrl2::lps::state initial_state = generator.initial_states().front().state();
 
   std::set<atermpp::aterm> visited;
-  std::set<atermpp::aterm> seen;
-  std::set<atermpp::aterm_appl> transition_labels;
-  size_t transitions = 0;
+  std::set<lps::state> seen;
+  std::set<lps::multi_action> transition_labels;
+  std::size_t transitions = 0;
 
-  std::queue<atermpp::aterm, std::deque<atermpp::aterm> > q;
+  std::queue<lps::state, std::deque<lps::state> > q;
   q.push(initial_state);
   seen.insert(initial_state);
 
+  next_state_generator::enumerator_queue_t enumeration_queue;
   while (!q.empty())
   {
     visited.insert(q.front());
 
     if (per_summand)
     {
-      for (size_t i = 0; i < lps_spec.process().summand_count(); ++i)
+      for (std::size_t i = 0; i < lps_spec.process().summand_count(); ++i)
       {
-        next_state_generator::iterator first = generator.begin(q.front(), i);
-        while (++first)
+        enumeration_queue.clear();
+        for(next_state_generator::iterator j = generator.begin(q.front(), i, &enumeration_queue); j; ++j)
         {
-          const next_state_generator::state_type& s = *first;
-          transition_labels.insert(s.transition);
+          const lps::state s=j->target_state();
+          transition_labels.insert(j->action());
           ++transitions;
-          if (seen.find(s.state) == seen.end())
+          if (seen.find(s) == seen.end())
           {
-            q.push(s.state);
-            seen.insert(s.state);
+            q.push(s);
+            seen.insert(s);
           }
         }
       }
     }
     else
     {
-      next_state_generator::iterator first = generator.begin(q.front());
-      while (++first)
+      for(next_state_generator::iterator j = generator.begin(q.front(), &enumeration_queue); j; ++j)
       {
-        const next_state_generator::state_type& s = *first;
-        transition_labels.insert(s.transition);
+        const lps::state s=j->target_state();
+        transition_labels.insert(j->action());
         ++transitions;
-        if (seen.find(s.state) == seen.end())
+        if (seen.find(s) == seen.end())
         {
-          q.push(s.state);
-          seen.insert(s.state);
+          q.push(s);
+          seen.insert(s);
         }
       }
     }
@@ -74,10 +75,12 @@ int main(int argc, char* argv[])
   {
     std::string filename(argv[1]);
     std::cout << "loading LPS from file " << filename << std::endl;
-    lps::specification spec;
-    spec.load(filename);
+    lps::stochastic_specification spec;
+    std::ifstream stream(filename);
+    spec.load(stream);
     std::cout << "traversing states..." << std::endl;
-    traverse_states(spec);
+    data::rewriter r;
+    traverse_states(spec,r);
   }
 
   return 0;

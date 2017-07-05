@@ -21,23 +21,22 @@
 
 #include <string>
 #include <vector>
-#include <sstream>
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/probabilistic_arbitrary_precision_fraction.h"
+#include "mcrl2/lts/probabilistic_lts.h"
 #include "mcrl2/lts/action_label_string.h"
 
 namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
+
 /** \brief This class contains state labels for the fsm format.
     \details An fsm state label is just a vector of integers. There is an array m_state_element
              values that contains strings corresponding to the integers in the vector.
              Each integer i at position j in the vector corresponds with the string
              m_state_element_values[j][i].
 */
-class state_label_fsm:  public std::vector < size_t >
+class state_label_fsm:  public std::vector < std::size_t >
 {
   public:
     /** \brief Default constructor. The label becomes an empty vector.
@@ -45,46 +44,52 @@ class state_label_fsm:  public std::vector < size_t >
     state_label_fsm()
     {}
 
+    /** \brief Copy constructor. */
+    state_label_fsm(const state_label_fsm& )=default;
+
+    /** \brief Copy assignment. */
+    state_label_fsm& operator=(const state_label_fsm& )=default;
+
     /** \brief Default constructor. The label is set to the vector v.
     */
-    state_label_fsm(const std::vector < size_t >& v):
-      std::vector < size_t >(v)
+    explicit state_label_fsm(const std::vector < std::size_t >& v):
+      std::vector < std::size_t >(v)
     {}
-};
-/** \brief Pretty print a state value of this FSM.
-    \details The label l is printed as (t1,...,tn).
-    \param[in] l  The state value to pretty print.
-    \return           The pretty-printed representation of value. */
 
-inline std::string pp(const state_label_fsm l)
+    /** \brief An operator to concatenate two state labels. Fsm labels cannot be concatenated. Therefore, only 
+               the first label is returned, unless empty, in which case the second is returned. */
+    state_label_fsm operator+(const state_label_fsm& l) const
+    {
+      if ((*this).empty())
+      {
+        return l;
+      }
+      return (*this); 
+    }
+};
+
+/** \brief Pretty print an fsm state label. */
+
+inline std::string pp(const state_label_fsm& label)
 {
   std::string s;
-  s = "(";
-  for (size_t i=0; i<l.size(); ++i)
+  for(const std::size_t& l: label)
   {
-    std::stringstream sNr;
-    sNr << l[i];
-    s += sNr.str();
-    if (i+1<l.size())
-    {
-      s += ",";
-    }
+    s += std::to_string(l) + " ";
   }
-  s += ")";
   return s;
 }
-} // namespace detail
 
-
-/** \brief The class lts_fsm_t contains labelled transition systems in .fsm format.
-    \details The .fsm format consists of an labelled transition system where the
-             action labels are strings, and the state labels are vectors of integers.
-             The integers at position i corresponds to a string, which are maintained
-             in a separate vector for memory efficiency.
-*/
-class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_string >
+namespace detail
 {
+class lts_fsm_base
+{
+  public:
+    typedef mcrl2::lts::probabilistic_state<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> probabilistic_state;
+    typedef mcrl2::lps::state_probability_pair<std::size_t, mcrl2::lts::probabilistic_arbitrary_precision_fraction> state_probability_pair;
+
   protected:
+
     /** \brief state_element_values contain the values that can occur at the i-th
        position of a state label */
     std::vector < std::vector < std::string > > m_state_element_values;
@@ -104,16 +109,54 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
       return lts_fsm;
     }
 
+    /** \brief Standard swap function */
+    void swap(lts_fsm_base& other)
+    {
+      m_state_element_values.swap(other.m_state_element_values);
+      m_parameters.swap(other.m_parameters);
+    }
+
+    /** \brief Clear the transitions system.
+     *  \details The state values, action values and transitions are
+     *  reset. The number of states, actions and transitions are set to 0.
+     */
+    void
+    clear()
+    {
+      m_state_element_values.clear();
+      m_parameters.clear();
+    }
+
     /** \brief Provides the vector of strings that correspond to the values
                of the number at position idx in a vector.
         \param[in] idx The index of the parameter.
         \return A vector containing strings representing the possible values
                 that this parameter can have.
     */
-    const std::vector < std::string >& state_element_values(size_t idx) const
+    const std::vector < std::string >& state_element_values(std::size_t idx) const
     {
       assert(idx<m_state_element_values.size());
       return m_state_element_values[idx];
+    }
+
+    /** \brief Pretty print a state value of this FSM.
+        \details The label l is printed as (t1,...,tn). It uses information from the lts.
+        \param[in] l  The state value to pretty print.
+        \return           The pretty-printed representation of value. */
+    inline std::string state_label_to_string(const state_label_fsm& l) const
+    {
+      std::string s;
+      s = "(";
+      for (std::size_t i=0; i<l.size(); ++i)
+      {
+        s += state_element_value(i,l[i]);
+        if (i+1<l.size())
+        {
+          s += ",";
+        }
+      }
+      s += ")";
+      return s;
     }
 
     /** \brief Adds a string to the state element values for the idx-th
@@ -122,7 +165,7 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
         \param[in] s   String to be added as value for the indicate parameter.
         \return The index for the added parameter.
     */
-    size_t add_state_element_value(size_t idx, const std::string& s)
+    std::size_t add_state_element_value(std::size_t idx, const std::string& s)
     {
       assert(idx<m_state_element_values.size());
       m_state_element_values[idx].push_back(s);
@@ -137,15 +180,13 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
         \param[in] element_index The index to the value string corresponding to this parameter.
         \return The string corresponding to the two given indices.
     */
-    std::string state_element_value(size_t parameter_index, size_t element_index) const
+    std::string state_element_value(std::size_t parameter_index, std::size_t element_index) const
     {
       assert(parameter_index<m_state_element_values.size());
       if (m_state_element_values[parameter_index].size()==0)
       {
         // The domain for this parameter has no string; return the string "i"
-        std::stringstream number_stream;
-        number_stream << element_index;
-        return number_stream.str();
+        return std::to_string(element_index); 
       }
       assert(element_index<m_state_element_values[parameter_index].size());
       return m_state_element_values[parameter_index][element_index];
@@ -163,7 +204,7 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
         \param[in] i The index of the parameter.
         \return The variable/sort of the state parameter at index i.
     */
-    std::pair < std::string, std::string > process_parameter(size_t i) const
+    std::pair < std::string, std::string > process_parameter(std::size_t i) const
     {
       assert(i<m_parameters.size());
       return m_parameters[i];
@@ -188,12 +229,56 @@ class lts_fsm_t : public lts< detail::state_label_fsm, detail::action_label_stri
       m_state_element_values.push_back(std::vector < std::string >());
     }
 
+
+};
+
+} // end namespace detail
+
+/** \brief The class lts_fsm_t contains labelled transition systems in .fsm format.
+    \details The .fsm format consists of an labelled transition system where the
+             action labels are strings, and the state labels are vectors of integers.
+             The integers at position i corresponds to a string, which are maintained
+             in a separate vector for memory efficiency.
+*/
+class lts_fsm_t : public lts< state_label_fsm, action_label_string, detail::lts_fsm_base >
+{
+  public:
+    typedef lts< state_label_fsm, action_label_string, detail::lts_fsm_base > super;
+
     /** \brief Save the labelled transition system to file.
      *  \details If the filename is empty, the result is read from stdout.
      *  \param[in] filename Name of the file from which this lts is read.
      */
     void load(const std::string& filename);
-    void loadnew(const std::string& filename);
+
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is written to stdout.
+     *  \param[in] filename Name of the file to which this lts is written.
+     */
+    void save(const std::string& filename) const;
+};
+
+/** \brief The class lts_fsm_t contains labelled transition systems in .fsm format.
+    \details The .fsm format consists of an labelled transition system where the
+             action labels are strings, and the state labels are vectors of integers.
+             The integers at position i corresponds to a string, which are maintained
+             in a separate vector for memory efficiency.
+*/
+class probabilistic_lts_fsm_t : 
+        public probabilistic_lts< state_label_fsm, 
+                                  action_label_string, 
+                                  probabilistic_state< std::size_t, probabilistic_arbitrary_precision_fraction >,
+                                  detail::lts_fsm_base >
+{
+  public:
+
+    typedef probabilistic_lts< state_label_fsm, action_label_string, probabilistic_state_t, detail::lts_fsm_base > super;
+
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is read from stdout.
+     *  \param[in] filename Name of the file from which this lts is read.
+     */
+    void load(const std::string& filename);
 
     /** \brief Save the labelled transition system to file.
      *  \details If the filename is empty, the result is written to stdout.

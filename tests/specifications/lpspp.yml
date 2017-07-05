@@ -1,0 +1,49 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: LTS
+  l4:
+    type: LPS
+  l5:
+    type: LPS
+  l6:
+    type: LTS
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-lstack]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lps2lts
+  t3:
+    input: [l2]
+    output: [l4]
+    args: []
+    name: lpspp
+  t4:
+    input: [l4]
+    output: [l5]
+    args: []
+    name: txt2lps
+  t5:
+    input: [l5]
+    output: [l6]
+    args: []
+    name: lps2lts
+  t6:
+    input: [l3, l6]
+    output: []
+    args: [-ebisim-gv]
+    name: ltscompare
+
+result: |
+  result = t6.value['result']
+

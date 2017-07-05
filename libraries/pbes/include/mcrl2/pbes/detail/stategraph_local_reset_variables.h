@@ -12,13 +12,12 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_LOCAL_RESET_VARIABLES_H
 
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_local_algorithm.h"
-#include "mcrl2/utilities/sequence.h"
+#include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/sequence.h"
 
 namespace mcrl2 {
 
@@ -78,12 +77,11 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       m_occurring_data_parameters.clear();
 
       // first collect all parameters (X, p) that are being used in a local control flow graph
-      for (auto k = m_local_control_flow_graphs.begin(); k != m_local_control_flow_graphs.end(); ++k)
+      for (auto& G: m_local_control_flow_graphs)
       {
-        auto const& V = k->vertices;
-        for (auto j = V.begin(); j != V.end(); ++j)
+        auto const& V = G.vertices;
+        for (const auto& u: V)
         {
-          auto const& u = *j;
           auto const& X = u.name();
           auto p = u.index();
           m_occurring_data_parameters[X].insert(p);
@@ -91,12 +89,12 @@ class local_reset_variables_algorithm: public stategraph_local_algorithm
       }
 
       // then intersect them with the data parameter indices
-      for (auto i = m_occurring_data_parameters.begin(); i != m_occurring_data_parameters.end(); ++i)
+      for (auto& i: m_occurring_data_parameters)
       {
-        auto const& X = i->first;
+        auto const& X = i.first;
         auto const& eq_X = *find_equation(m_pbes, X);
         auto const& dp_X = eq_X.data_parameter_indices();
-        i->second = data::detail::set_intersection(i->second, std::set<std::size_t>(dp_X.begin(), dp_X.end()));
+        i.second = utilities::detail::set_intersection(i.second, std::set<std::size_t>(dp_X.begin(), dp_X.end()));
       }
     }
 
@@ -159,7 +157,7 @@ struct local_reset_traverser: public pbes_expression_traverser<local_reset_trave
   typedef pbes_expression_traverser<local_reset_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   local_reset_variables_algorithm& algorithm;
   const stategraph_equation& eq_X;
@@ -254,7 +252,7 @@ pbes_expression local_reset_variables(local_reset_variables_algorithm& algorithm
 {
   std::size_t i = 0;
   local_reset_traverser f(algorithm, eq_X, i);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 
@@ -277,9 +275,8 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
   const std::size_t J = m_local_control_flow_graphs.size();
 
   auto const& dp_Y = eq_Y.data_parameter_indices();
-  for (auto dpi = dp_Y.begin(); dpi != dp_Y.end(); ++dpi)
+  for (std::size_t k: dp_Y)
   {
-    std::size_t k = *dpi;
     bool relevant = true;
     std::set<data::data_expression> condition;
     for (std::size_t j = 0; j < J; j++)
@@ -316,9 +313,8 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
           if (contains(Bj[Y], d_Y[k]))
           {
             bool found = false;
-            for (auto wi = Vj.vertices.begin(); wi != Vj.vertices.end(); ++wi)
+            for (const auto& w: Vj.vertices)
             {
-              auto const& w = *wi;
               if (w.name() == Y && w.index() == p)  // w = (Y, p, d_Y[p]=r)
               {
                 if (contains(w.marking(), d_Y[k]))
@@ -330,7 +326,7 @@ pbes_expression local_reset_variables_algorithm::reset_variable(const propositio
                   if  (w.has_variable())
                   {
                     auto const& r = w.value();
-                    condition.insert(data::equal_to(d_Y[p], r));
+                    condition.insert(data::equal_to(nth_element(e, p), r));
                   }
                 }
               }

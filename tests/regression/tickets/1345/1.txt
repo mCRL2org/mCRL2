@@ -1,0 +1,6 @@
+sort S;
+cons t: S;
+map  f: S -> S;
+pbes nu X = forall e: S. !val(e == f(t)) || Y;
+         nu Y =  val(false);
+init X;

@@ -12,10 +12,10 @@
 #ifndef MCRL2_MODAL_FORMULA_MAXIMAL_CLOSED_SUBFORMULA_H
 #define MCRL2_MODAL_FORMULA_MAXIMAL_CLOSED_SUBFORMULA_H
 
-#include <iostream>
 #include "mcrl2/data/find.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/utilities/logger.h"
+#include <iostream>
 
 namespace mcrl2 {
 
@@ -53,10 +53,7 @@ struct bottom_up_traverser: public Traverser<Derived>
 {
   typedef Traverser<Derived> super;
   using super::enter;
-#ifndef BOOST_MSVC
-  using super::leave;
-#endif
-  using super::operator();
+  using super::apply;
 
   Derived& derived()
   {
@@ -95,7 +92,7 @@ struct bottom_up_traverser: public Traverser<Derived>
   }
 
   template <typename T>
-  void join(const T& x, node_iterator first, node_iterator last, Node& result)
+  void join(const T& /* x */, node_iterator /* first */, node_iterator /* last */, Node& /* result */)
   {
   }
 
@@ -142,14 +139,14 @@ struct maximal_closed_subformula_node: public free_variables_node
 std::ostream& operator<<(std::ostream& out, const maximal_closed_subformula_node& node)
 {
   out << "<node>variables = ";
-  for (std::set<data::variable>::const_iterator i = node.variables.begin(); i != node.variables.end(); ++i)
+  for (const data::variable& v: node.variables)
   {
-    out << *i << " ";
+    out << v << " ";
   }
   out << " formulas = ";
-  for (auto i = node.formulas.begin(); i != node.formulas.end(); ++i)
+  for (const state_formula& f: node.formulas)
   {
-    out << *i << " ";
+    out << f << " ";
   }
   return out;
 }
@@ -160,7 +157,7 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
   typedef bottom_up_traverser<state_formulas::state_formula_traverser, maximal_closed_subformula_node, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::push;
   using super::pop;
   using super::top;
@@ -168,50 +165,41 @@ struct maximal_closed_subformula_traverser: public bottom_up_traverser<state_for
 
   typedef typename super::node_iterator node_iterator;
 
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
   }
 
   template <typename T>
-  void update_free_variables(const T& x, maximal_closed_subformula_node& result)
+  void update_free_variables(const T& /* x */, maximal_closed_subformula_node& /* result */)
   { }
 
   void update_free_variables(const data::data_expression& x, maximal_closed_subformula_node& result)
   {
-std::cout << "<update_free_variables>" << data::pp(x) << " result = " << result << std::endl;
     data::find_free_variables(x, std::inserter(result.variables, result.variables.end()));
-std::cout << " result' = " << result << std::endl;
   }
 
   void update_free_variables(const state_formulas::forall& x, maximal_closed_subformula_node& result)
   {
-    data::variable_list v = x.variables();
-    for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const data::variable& v: x.variables())
     {
-      result.variables.erase(*i);
+      result.variables.erase(v);
     }
   }
 
   void update_free_variables(const state_formulas::exists& x, maximal_closed_subformula_node& result)
   {
-    data::variable_list v = x.variables();
-    for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const data::variable& v: x.variables())
     {
-      result.variables.erase(*i);
+      result.variables.erase(v);
     }
   }
 
   void update_free_variables(const state_formulas::variable& x, maximal_closed_subformula_node& result)
   {
-    data::data_expression_list v = x.arguments();
-    for (data::data_expression_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const data::data_expression& e: x.arguments())
     {
-      data::find_free_variables(*i, std::inserter(result.variables, result.variables.end()));
+      data::find_free_variables(e, std::inserter(result.variables, result.variables.end()));
     }
   }
 
@@ -252,7 +240,7 @@ struct apply_maximal_closed_subformula_traverser: public maximal_closed_subformu
   typedef maximal_closed_subformula_traverser<apply_maximal_closed_subformula_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::top;
 };
 
@@ -262,7 +250,7 @@ inline
 std::set<state_formulas::state_formula> maximal_closed_subformulas(const state_formula& x)
 {
   detail::apply_maximal_closed_subformula_traverser f;
-  f(x);
+  f.apply(x);
   return f.top().formulas;
 }
 

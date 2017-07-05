@@ -9,8 +9,9 @@
 /// \file identifier_string_test.cpp
 /// \brief Add your file description here.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/core/identifier_string.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
 
 using namespace mcrl2;
 
@@ -18,12 +19,12 @@ using namespace mcrl2;
 void test_identifier_string()
 {
   core::identifier_string a("abc");
-  const core::identifier_string b = a;
+  const core::identifier_string& b = a;
 
   const core::identifier_string_list l;
-  for (core::identifier_string_list::const_iterator i = l.begin(); i != l.end(); ++i)
+  for (const auto& s: l)
   {
-    const core::identifier_string s = *i;
+    std::cout << s;
   }
 }
 

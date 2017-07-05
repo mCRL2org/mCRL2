@@ -30,7 +30,7 @@ struct rewrite_statistics
 };
 
 template <class T>
-size_t rewrite_statistics<T>::rewrite_count = 0;
+std::size_t rewrite_statistics<T>::rewrite_count = 0;
 
 inline
 std::size_t rewrite_count()

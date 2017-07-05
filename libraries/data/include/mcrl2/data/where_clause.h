@@ -13,8 +13,8 @@
 #define MCRL2_DATA_WHERE_CLAUSE_H
 
 #include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2
 {
@@ -47,7 +47,7 @@ class where_clause: public data_expression
 
     /// \brief Constructor.
     template <typename Container>
-    where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = 0)
+    where_clause(const data_expression& body, const Container& declarations, typename atermpp::enable_if_container<Container, assignment_expression>::type* = nullptr)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
     {}
 
@@ -73,6 +73,7 @@ std::string pp(const where_clause& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const where_clause& x)

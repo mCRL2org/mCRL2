@@ -13,19 +13,19 @@
 #define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 #define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
-#include <iostream>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
-#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -47,7 +47,7 @@ void test_pbesrewr1()
 
 void test_pbesrewr2()
 {
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(lps::detail::NO_DEADLOCK(), spec);
   bool timed = false;
   pbes p = lps2pbes(spec, formula, timed);
@@ -60,30 +60,10 @@ void test_pbesrewr2()
   BOOST_CHECK(p.is_well_typed());
 }
 
-// Check that existential quantification over empty domain is not automatically
-// rewritten to false.
-void test_pbesrewr3()
-{
-  // Check that the empty sort D can be enumerated.
-  std::string pbes_text =
-    "sort D;\n"
-    "map f:D -> Bool;\n"
-    "pbes nu X = exists d:D . val(f(d));\n"
-    "init X;\n"
-    ;
-
-  pbes p = txt2pbes(pbes_text);
-  data::rewriter datar(p.data(), data::jitty);
-  bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
-  pbes_rewrite(p, pbesr);
-}
-
 int test_main(int argc, char* argv[])
 {
   test_pbesrewr1();
   test_pbesrewr2();
-  test_pbesrewr3();
 
   return 0;
 }

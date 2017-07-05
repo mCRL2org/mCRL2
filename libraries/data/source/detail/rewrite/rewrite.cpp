@@ -42,9 +42,9 @@ namespace data
 namespace detail
 {
 
-static size_t npos()
+static std::size_t npos()
 {
-  return size_t(-1);
+  return std::size_t(-1);
 }
 
 // function object to test if it is an aterm_appl with function symbol "f"
@@ -106,17 +106,17 @@ data_expression Rewriter::rewrite_where(
   const data_expression& body=term.body();
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
-  for(assignment_list::const_iterator i=assignments.begin(); i!=assignments.end(); ++i)
+  for (const assignment& a: assignments)
   {
-    const variable& v=i->lhs();
+    const variable& v=a.lhs();
     const variable v_fresh(generator("whr_"), v.sort());
     variable_renaming[v]=v_fresh;
-    sigma[v_fresh]=rewrite(i->rhs(),sigma);
+    sigma[v_fresh]=rewrite(a.rhs(),sigma);
   }
   const data_expression result=rewrite(replace_variables(body,variable_renaming),sigma);
 
   // Reset variables in sigma
-  for(mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
+  for (mutable_map_substitution<std::map < variable,data_expression> >::const_iterator it=variable_renaming.begin();
       it!=variable_renaming.end(); ++it)
   {
     sigma[atermpp::down_cast<variable>(it->second)]=it->second;
@@ -136,16 +136,15 @@ abstraction Rewriter::rewrite_single_lambda(
 
   // First filter the variables in vl by those occuring as left/right hand sides in sigma.
 
-  size_t number_of_renamed_variables=0;
-  size_t count=0;
+  std::size_t number_of_renamed_variables=0;
+  std::size_t count=0;
   std::vector<variable> new_variables(vl.size());
   {
     const std::set<variable>& variables_in_sigma(sigma.variables_in_rhs());
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
-    for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
+    for(const variable& v: vl)
     {
-      const variable v= *it;
       if (variables_in_sigma.find(v) != variables_in_sigma.end() || sigma(v) != v)
       {
         number_of_renamed_variables++;
@@ -193,7 +192,7 @@ abstraction Rewriter::rewrite_single_lambda(
     // ... then we rewrite with the new sigma ...
     result = rewrite(body,sigma);
     // ... and then we restore sigma to its old state.
-    size_t new_variable_count = 0;
+    std::size_t new_variable_count = 0;
     for(v = vl.begin(), count = 0; v != vl.end(); ++v, ++count)
     {
       if (*v != new_variables[count])
@@ -248,7 +247,7 @@ data_expression Rewriter::rewrite_lambda_application(
   assert(is_lambda(lambda_term));  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list& vl=lambda_term.variables();
   const data_expression lambda_body=rewrite(lambda_term.body(),sigma);
-  size_t arity=t.size();
+  std::size_t arity=t.size();
   assert(arity>0);
   if (arity==1) // The term has shape application(lambda d..:D...t), i.e. without arguments.
   {
@@ -257,13 +256,13 @@ data_expression Rewriter::rewrite_lambda_application(
   assert(vl.size()<arity);
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
-  size_t count=1;
-  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i, ++count)
+  std::size_t count=1;
+  for(const variable& v: vl)
   {
-    const variable v= (*i);
     const variable v_fresh(generator("x_"), v.sort());
     variable_renaming[v]=v_fresh;
     sigma[v_fresh]=rewrite(data_expression(t[count]),sigma);
+    ++count;
   }
 
   const data_expression result=rewrite(replace_variables(lambda_body,variable_renaming),sigma);
@@ -281,7 +280,7 @@ data_expression Rewriter::rewrite_lambda_application(
 
   // There are more arguments than bound variables.
   std::vector < data_expression > args;
-  for(size_t i=1; i<arity-vl.size(); ++i)
+  for(std::size_t i=1; i<arity-vl.size(); ++i)
   {
     assert(vl.size()+i<arity);
     args.push_back(atermpp::down_cast<data_expression>(t[vl.size()+i]));
@@ -315,9 +314,8 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
   variable_vector vl_new_v;
-  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  for(const variable& v: vl)
   {
-    const variable v= *i;
     if (sigma(v)!=v)
     {
       const variable v_fresh(generator("ex_"), v.sort());
@@ -355,43 +353,55 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  auto const throw_exceptions = true;
-  auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const bool throw_exceptions = true;
+  const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
-  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_false, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
-  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
-
-  /* Create a list to store solutions */
-  data_expression partial_result=sort_bool::false_();
-
-  size_t loop_upperbound=(sorts_are_finite?npos():10);
-  std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
-
-  enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
-  for( ; loop_upperbound>0 &&
-         partial_result!=sort_bool::true_() &&
-         sol!=enumerator.end() && sol->is_valid();
-         ++sol)
+  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
+                                             enumerator_list_element<>, 
+                                             data::enumerator_identifier_generator, 
+                                             data::is_not_false, 
+                                             rewriter_wrapper, 
+                                             rewriter_wrapper::substitution_type> enumerator_type;
+  try
   {
-    if (partial_result==sort_bool::false_())
+    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, generator, max_count, throw_exceptions);
+  
+    /* Create a list to store solutions */
+    data_expression partial_result=sort_bool::false_();
+
+    std::size_t loop_upperbound=(sorts_are_finite?npos():10);
+    std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
+
+    enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
+    for( ; loop_upperbound>0 &&
+           partial_result!=sort_bool::true_() &&
+           sol!=enumerator.end();
+           ++sol)
     {
-      partial_result=sol->expression();
+      partial_result = lazy::or_(partial_result, sol->expression());
+      loop_upperbound--;
+      if(partial_result == sort_bool::true_())
+      {
+        // We found a solution, so prevent the enumerator from doing any unnecessary work
+        // Also prevents any further exceptions from the enumerator
+        return sort_bool::true_();
+      }
     }
-    else if (partial_result!=sort_bool::true_())
+
+    if (sol==enumerator.end() && loop_upperbound>0)
     {
-      partial_result=application(sort_bool::or_(), partial_result,sol->expression());
+      return partial_result;
     }
-    loop_upperbound--;
+    // One can consider to replace the variables by their original, in order to not show
+    // internally generated variables in the output.
+    assert(!sol->is_valid()||loop_upperbound==0);
+  }
+  catch(const mcrl2::runtime_error&)
+  {
+    // It is not possible to enumerate one of the bound variables, so we just return
+    // the simplified expression
   }
 
-  if ((sol==enumerator.end() && loop_upperbound>0) || partial_result==sort_bool::true_())
-  {
-    return partial_result;
-  }
-
-  // One can consider to replace the variables by their original, in order to not show
-  // internally generated variables in the output.
-  assert(!sol->is_valid()||loop_upperbound==0);
   return abstraction(exists_binder(),vl_new_l,rewrite(t3,sigma));
 }
 
@@ -418,9 +428,8 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   mutable_map_substitution<std::map < variable,data_expression> > variable_renaming;
   variable_vector vl_new_v;
-  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i)
+  for(const variable& v: vl)
   {
-    const variable v= *i;
     if (sigma(v)!=v)  // Check whether sigma is defined on v. If not, renaming is not necessary.
     {
       const variable v_fresh(generator("all_"), v.sort());
@@ -458,42 +467,55 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   /* Find A solution*/
   rewriter_wrapper wrapped_rewriter(this);
-  auto const throw_exceptions = true;
-  auto const max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
+  const bool throw_exceptions = true;
+  const std::size_t max_count = sorts_are_finite ? npos() : data::detail::get_enumerator_variable_limit();
 
-  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, enumerator_list_element<>, data::is_not_true, rewriter_wrapper, rewriter_wrapper::substitution_type> enumerator_type;
-  enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, max_count, throw_exceptions);
-
-  /* Create lists to store solutions */
-  data_expression partial_result=sort_bool::true_();
-
-  size_t loop_upperbound=(sorts_are_finite?npos():10);
-  std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
-
-  enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
-  for( ; loop_upperbound>0 &&
-         partial_result!=sort_bool::false_() &&
-         sol!=enumerator.end() && sol->is_valid();
-         ++sol)
+  typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
+                                             enumerator_list_element<>, 
+                                             data::enumerator_identifier_generator, 
+                                             data::is_not_true, 
+                                             rewriter_wrapper, 
+                                             rewriter_wrapper::substitution_type> enumerator_type;
+  try
   {
-    if (partial_result==sort_bool::true_())
+    enumerator_type enumerator(wrapped_rewriter, m_data_specification_for_enumeration, wrapped_rewriter, generator, max_count, throw_exceptions);
+
+    /* Create lists to store solutions */
+    data_expression partial_result=sort_bool::true_();
+
+    std::size_t loop_upperbound=(sorts_are_finite?npos():10);
+    std::deque<enumerator_list_element<> > enumerator_solution_deque(1,enumerator_list_element<>(vl_new_l, t3));
+
+    enumerator_type::iterator sol = enumerator.begin(sigma, enumerator_solution_deque);
+    for( ; loop_upperbound>0 &&
+           partial_result!=sort_bool::false_() &&
+           sol!=enumerator.end();
+           ++sol)
     {
-      partial_result=sol->expression();
+      partial_result = lazy::and_(partial_result, sol->expression());
+      loop_upperbound--;
+      if(partial_result == sort_bool::false_())
+      {
+        // We found a solution, so prevent the enumerator from doing any unnecessary work
+        // Also prevents any further exceptions from the enumerator
+        return sort_bool::false_();
+      }
     }
-    else if (partial_result!=sort_bool::false_())
+
+    if (sol==enumerator.end() && loop_upperbound>0)
     {
-      partial_result=application(sort_bool::and_(), partial_result, sol->expression());
+      return partial_result;
     }
-    loop_upperbound--;
+    // One can consider to replace the variables by their original, in order to not show
+    // internally generated variables in the output.
+    assert(!sol->is_valid()||loop_upperbound==0);
+  }
+  catch(const mcrl2::runtime_error&)
+  {
+    // It is not possible to enumerate one of the bound variables, so we just return
+    // the simplified expression
   }
 
-  if ((sol==enumerator.end() && loop_upperbound>0) || partial_result==sort_bool::false_())
-  {
-    return partial_result;
-  }
-  // One can consider to replace the variables by their original, in order to not show
-  // internally generated variables in the output.
-  assert(!sol->is_valid()||loop_upperbound==0);
   return abstraction(forall_binder(),vl_new_l,rewrite(t3,sigma));
 }
 
@@ -518,7 +540,7 @@ Rewriter* createRewriter(
       return new RewriterProver(DataSpec,jitty_compiling,equations_selector);
 #endif
     default:
-      return NULL;
+      return nullptr;
   }
 }
 
@@ -585,7 +607,7 @@ static void checkPattern(const data_expression& p)
 
 void CheckRewriteRule(const data_equation& data_eqn)
 {
-  const variable_list rule_var_list = data_eqn.variables();
+  const variable_list& rule_var_list = data_eqn.variables();
   const std::set <variable> rule_vars(rule_var_list.begin(),rule_var_list.end());
 
   // collect variables from lhs and check that they are in rule_vars

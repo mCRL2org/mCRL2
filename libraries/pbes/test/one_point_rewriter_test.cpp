@@ -6,32 +6,23 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file rewriter_test.cpp
+/// \file one_point_rewriter_test.cpp
 /// \brief Test for PBES rewriters.
 
-//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-//#define PBES_REWRITE_TEST_DEBUG
-
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/utilities/detail/test_operation.h"
+#include "mcrl2/utilities/text_utility.h"
+#include <boost/test/included/unit_test_framework.hpp>
 #include <functional>
 #include <iostream>
 #include <set>
 #include <sstream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/pbes/detail/normalize_and_or.h"
-#include "mcrl2/pbes/detail/data2pbes_rewriter.h"
-#include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/detail/test_operation.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -88,52 +79,62 @@ class parser
 void test_one_point_rule_rewriter(const std::string& expr1, const std::string& expr2)
 {
   one_point_rule_rewriter R;
+  data::data_specification dataspec;
+  dataspec.add_context_sort(data::sort_nat::nat()); // TODO: is there a more elegant way to achieve this?
+  data::rewriter r(dataspec);
+  simplify_data_rewriter<data::rewriter> S(r);
   BOOST_CHECK(utilities::detail::test_operation(
     expr1,
     expr2,
     parser(),
     std::equal_to<pbes_expression>(),
-    R,
+    [&](const pbes_expression& x) { return S(R(x)); },
     "R1",
-    &utilities::detail::identity<pbes_expression>,
+    S,
     "R2"
   ));
 }
 
-void test_one_point_rule_rewriter()
+BOOST_AUTO_TEST_CASE(one_point_rule_rewriter_test)
 {
   std::cout << "<test_one_point_rule_rewriter>" << std::endl;
-  one_point_rule_rewriter R;
-  pbes_system::pbes_expression x;
-  pbes_system::pbes_expression y;
-
-  x = pbes_system::parse_pbes_expression("forall n: Nat. val(n != 3) || val(n == 5)");
-  y = R(x);
-  std::clog << "x = " << pbes_system::pp(x) << std::endl;
-  std::clog << "y = " << pbes_system::pp(y) << std::endl;
-  BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
-
-  x = pbes_system::parse_pbes_expression("exists n: Nat. val(n == 3) && val(n == 5)");
-  y = R(x);
-  std::clog << "x = " << pbes_system::pp(x) << std::endl;
-  std::clog << "y = " << pbes_system::pp(y) << std::endl;
-  BOOST_CHECK(pbes_system::pp(y) == "3 == 5" || pbes_system::pp(y) == "5 == 3");
-
+  test_one_point_rule_rewriter("forall n: Nat. val(n != 3) || val(n == 5)", "val(false)");
+  test_one_point_rule_rewriter("exists n: Nat. val(n == 3) && val(n == 5)", "val(false)");
   test_one_point_rule_rewriter("forall c: Bool. forall b: Bool. val(b) => val(b || c)", "val(!false)");
   test_one_point_rule_rewriter("forall d:Nat. val(d == 1) => Y(d)", "Y(1)");
   test_one_point_rule_rewriter("forall m:Nat. exists n:Nat. val(m == n) && Y(n)", "forall m: Nat. Y(m)");
   test_one_point_rule_rewriter("forall m:Nat. exists n:Nat. val(n == m) && Y(n)", "forall m: Nat. Y(m)");
   test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(m != n) || Y(n)", "exists m: Nat. Y(m)");
   test_one_point_rule_rewriter("exists m:Nat. forall n:Nat. val(n != m) || Y(n)", "exists m: Nat. Y(m)");
-
-  // N.B. The result of this test depends on the order of the clauses.
-  // test_one_point_rule_rewriter("forall p: Bool, q: Bool. val(!(p == q)) || val(!q) || val(!(p == true))", "val(false)");
+  test_one_point_rule_rewriter("forall p: Bool, q: Bool. val(!(p == q)) || val(!q) || val(!(p == true))", "val(false)");
 }
 
-int test_main(int argc, char* argv[])
+BOOST_AUTO_TEST_CASE(ticket_1388)
+{
+  std::string text;
+  bool normalize = false;
+  pbes p;
+  one_point_rule_rewriter R;
+
+  text =
+    "pbes mu X = exists e: Bool. exists b: Bool, d: Bool. val(b == e) && val(d == b);\n"
+    "init X;\n"
+    ;
+  p = txt2pbes(text, normalize);
+  pbes_rewrite(p, R);
+  BOOST_CHECK(p.is_closed() && p.is_well_typed());
+
+  // text =
+  //   "pbes nu X = forall b,c: Bool. !val(b == false) || !val(c == b);\n"
+  //   "init X;"
+  //   ;
+  // p = txt2pbes(text, normalize);
+  // pbes_rewrite(p, R);
+  // BOOST_CHECK(p.is_closed() && p.is_well_typed());
+}
+
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   log::mcrl2_logger::set_reporting_level(log::debug, "one_point_rewriter");
-  test_one_point_rule_rewriter();
-
-  return 0;
+  return nullptr;
 }

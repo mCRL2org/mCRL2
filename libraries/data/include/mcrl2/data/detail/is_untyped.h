@@ -25,7 +25,7 @@ struct is_untyped_traverser: public sort_expression_traverser<is_untyped_travers
   typedef sort_expression_traverser<is_untyped_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   bool result;
 
@@ -33,51 +33,47 @@ struct is_untyped_traverser: public sort_expression_traverser<is_untyped_travers
     : result(false)
   {}
 
-  void operator()(const data::untyped_identifier& )
+  void apply(const data::untyped_identifier& )
   {
     result = true;
   }
 
-  void operator()(const data::untyped_identifier_assignment& )
+  void apply(const data::untyped_identifier_assignment& )
   {
     result = true;
   }
 
-  void operator()(const data::untyped_sort& )
+  void apply(const data::untyped_sort& )
   {
     result = true;
   }
 
-  void operator()(const data::untyped_possible_sorts& )
+  void apply(const data::untyped_possible_sorts& )
   {
     result = true;
   }
 
-  void operator()(const data::untyped_set_or_bag_comprehension& )
+  void apply(const data::untyped_set_or_bag_comprehension& )
   {
     result = true;
   }
 
-  void operator()(const data::structured_sort_constructor_argument& )
+  void apply(const data::structured_sort_constructor_argument& )
   {
     result = true;
   }
 
-  void operator()(const data::structured_sort_constructor& )
+  void apply(const data::structured_sort_constructor& )
   {
     result = true;
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 inline
 bool is_untyped(const data_expression& x)
 {
   is_untyped_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 

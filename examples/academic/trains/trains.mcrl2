@@ -45,9 +45,9 @@
 % Note the initial tau's that determine which train must enter the critical region
 % first. The commands to generate the state space are (set Variant below to 1):
 % mcrl22lps trains.mcrl2 trains.lps
-% lps2lts trains.lps trains.svc
-% ltsconvert -b trains.svc trainsr.svc
-% ltsgraph trainsr.svc
+% lps2lts trains.lps trains.lts
+% ltsconvert -ebisim trains.lts trainsr.lts
+% ltsgraph trainsr.lts
 %
 % In variant 2 (safe sluice) access to the critical region is regulated through the variables
 % Xp and Xq. Trains indicate their desire to enter the critical region through

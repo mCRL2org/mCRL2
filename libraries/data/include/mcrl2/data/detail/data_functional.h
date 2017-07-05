@@ -20,8 +20,8 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {
@@ -60,7 +60,7 @@ struct compare_sort : public std::unary_function< bool, atermpp::aterm_appl >
     : s(s_)
   {}
 
-  bool operator()(atermpp::aterm_appl t) const
+  bool operator()(const atermpp::aterm_appl& t) const
   {
     return is_sort_expression(t) && s == t;
   }
@@ -72,19 +72,6 @@ struct compare_variable: public compare_term<variable>
   compare_variable(const variable& v)
     : compare_term<variable>(v)
   {}
-};
-
-/// Function object that returns true if the expressions x and y have the same sort.
-struct equal_data_expression_sort: public std::binary_function<data_expression, data_expression, bool>
-{
-  /// \brief Function call operator
-  /// \param x A data expression
-  /// \param y A data expression
-  /// \return The function result
-  bool operator()(const data_expression& x, const data_expression& y) const
-  {
-    return x.sort() == y.sort();
-  }
 };
 
 /// \brief Function object that returns the name of a data variable
@@ -126,7 +113,7 @@ struct sort_has_name
   /// \brief Function call operator
   /// \param s A sort expression
   /// \return The function result
-  bool operator()(sort_expression s) const
+  bool operator()(const sort_expression& s) const
   {
     return is_basic_sort(s) && std::string(basic_sort(s).name()) == m_name;
   }
@@ -143,7 +130,7 @@ struct function_symbol_has_name
   /// \brief Function call operator
   /// \param c A data operation
   /// \return The function result
-  bool operator()(function_symbol c) const
+  bool operator()(const function_symbol& c) const
   {
     return std::string(c.name()) == m_name;
   }

@@ -9,12 +9,12 @@
 /// \file mcrl2/data/detail/prover/info.h
 /// \brief Interface to classes Info
 
-#ifndef INFO_H
-#define INFO_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_INFO_H
+#define MCRL2_DATA_DETAIL_PROVER_INFO_H
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/utilities.h"
+#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
 {
@@ -56,23 +56,18 @@ class Info
               const atermpp::aterm& a_term1,
               const atermpp::aterm& a_term2)
     {
-      // The code below does not seem to need to use explicit adresses. Code can
-      // directly use <, >, == on aterms, which also compares adresses.
-      long v_address1 = reinterpret_cast < long >(atermpp::detail::address(a_term1));
-      long v_address2 = reinterpret_cast < long >(atermpp::detail::address(a_term2));
-
-      if (v_address1 < v_address2)
+      if (a_term1 < a_term2)
       {
         return compare_result_smaller;
       }
-      if (v_address1 > v_address2)
+      if (a_term2 < a_term1)
       {
         return compare_result_bigger;
       }
       return compare_result_equal;
     }
 
-    bool alpha1(const data_expression& a_term1, const data_expression& a_term2, size_t a_number)
+    bool alpha1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
     {
       if (get_number_of_arguments(a_term1) == a_number)
       {
@@ -121,7 +116,7 @@ class Info
       return (v_operator_1 == v_operator_2) && lex1(a_term1, a_term2, 0) && majo1(a_term1, a_term2, 0);
     }
 
-    bool majo1(const data_expression& a_term1, const data_expression& a_term2, size_t a_number)
+    bool majo1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
     {
       if (get_number_of_arguments(a_term2) == a_number)
       {
@@ -134,7 +129,7 @@ class Info
       }
     }
 
-    bool lex1(const data_expression& a_term1, const data_expression& a_term2, size_t a_number)
+    bool lex1(const data_expression& a_term1, const data_expression& a_term2, std::size_t a_number)
     {
       if (get_number_of_arguments(a_term1) == a_number)
       {
@@ -162,7 +157,7 @@ class Info
       {
         return 0;
       }
-      if (is_equality(a_guard))
+      if (is_equal_to_application(a_guard))
       {
         data_expression v_term1, v_term2;
 
@@ -194,7 +189,7 @@ class Info
     /// \brief Compares two guards by their arguments.
     Compare_Result compare_guard_equality(const data_expression& a_guard1, const data_expression& a_guard2)
     {
-      if (f_full && is_equality(a_guard1) && is_equality(a_guard2))
+      if (f_full && is_equal_to_application(a_guard1) && is_equal_to_application(a_guard2))
       {
         data_expression v_g1a0, v_g1a1, v_g2a0, v_g2a1;
 
@@ -320,9 +315,9 @@ class Info
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
     /// \return 0, if \c aterm is a constant or a variable.
     ///         The number of arguments of the main operator, otherwise.
-    size_t get_number_of_arguments(const data_expression& a_term)
+    std::size_t get_number_of_arguments(const data_expression& a_term)
     {
-      if (!is_variable(a_term) && !is_function_symbol(a_term))
+      if (!is_variable(a_term) && !is_function_symbol(a_term) && !is_abstraction(a_term))
       {
         return a_term.size() - 1;
       }
@@ -337,48 +332,25 @@ class Info
     {
       if (is_function_symbol(a_term))
       {
-         return a_term;
+        return a_term;
+      }
+      if (is_abstraction(a_term))
+      {
+        return get_operator(atermpp::down_cast<abstraction>(a_term).body());
       }
       const application& a = atermpp::down_cast<application>(a_term);
       return get_operator(a.head());
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    data_expression get_argument(const data_expression& a_term, const size_t a_number)
+    data_expression get_argument(const data_expression& a_term, const std::size_t a_number)
     {
       return data_expression(a_term[a_number + 1]);
     }
-
-    /// \brief Indicates whether or not a term is an equality.
-    bool is_equality(const data_expression& a_term)
-    {
-      if (!is_application(a_term))
-      {
-         return false;
-      }
-
-      const application& a = atermpp::down_cast<application>(a_term);
-      if (a.size() != 2)
-      {
-        return false;
-      }
-
-      if (!is_function_symbol(a.head()))
-      {
-        return false;
-      }
-
-      const data::function_symbol& f = atermpp::down_cast<function_symbol>(a.head());
-      if (static_cast<const std::string&>(f.name())=="==")
-      {
-        return true;
-      }
-      return false;
-    }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

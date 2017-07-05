@@ -1,0 +1,6 @@
+pbes
+nu X(i,j,k,l: Nat) = (val(i != 1 || j != 1) || X(2,j,k,l+1)) && forall m: Nat . (val(j != 2) || Z(i,j,m+k,k));
+%mu Y(i,j,k,l: Nat) = val(k == 1) || (val(i == 2) && X(1,j,k,l));
+nu Z(i,j,k,l: Nat) = val(k < 10 || j == 2) && (val(j != 2) || X(1,1,k,1)) && X(2,2,1,l);
+
+init X(1,1,1,1);

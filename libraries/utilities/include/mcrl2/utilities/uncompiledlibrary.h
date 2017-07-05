@@ -1,3 +1,15 @@
+// Author(s): Jeroen Keiren, Sjoerd Cranen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/utilities/uncompiled_library.h
+/// \brief Extends the dynamic_library from dynamiclibrary.h to be able to compile a
+///        source file and load the resulting library.
+
 #ifndef __UNCOMPILED_LIBRARY_H
 #define __UNCOMPILED_LIBRARY_H
 
@@ -29,7 +41,7 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
-#include "dynamiclibrary.h"
+#include "mcrl2/utilities/dynamiclibrary.h"
 #include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/logger.h"
 
@@ -42,7 +54,7 @@ private:
 public:
     uncompiled_library(const std::string& script) : m_compile_script(script) {}
 
-    void compile(const std::string& filename) throw(std::runtime_error)
+    void compile(const std::string& filename) 
     {
       std::stringstream commandline;
       commandline << '"' << m_compile_script << "\" " << filename << " " << " 2>&1";
@@ -110,11 +122,11 @@ public:
       m_tempfiles.clear();
     }
 
-    void cleanup() throw(std::runtime_error)
+    void cleanup() 
     {
       for(std::list<std::string>::iterator f = m_tempfiles.begin(); f != m_tempfiles.end(); ++f)
       {
-        if (unlink((*f).c_str()))
+        if (remove((*f).c_str()))
         {
           std::stringstream s;
           s << "Could not remove file: " << *f;

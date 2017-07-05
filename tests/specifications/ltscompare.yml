@@ -1,0 +1,34 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: LTS
+  l4:
+    type: LTS
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-lstack]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lps2lts
+  t3:
+    input: [l3]
+    output: [l4]
+    args: []
+    name: ltsconvert
+  t4:
+    input: [l3, l4]
+    output: []
+    args: []
+    name: ltscompare
+
+result: |
+  result = t4.value['result']

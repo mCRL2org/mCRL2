@@ -12,15 +12,16 @@
 #ifndef MCRL2_PBES_FIND_H
 #define MCRL2_PBES_FIND_H
 
-#include <set>
-#include <iterator>
-#include <functional>
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/add_binding.h"
+#include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/propositional_variable.h"
+#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/exception.h"
+#include <functional>
+#include <iterator>
+#include <set>
 
 namespace mcrl2
 {
@@ -37,7 +38,7 @@ struct find_propositional_variables_traverser: public Traverser<find_proposition
   typedef Traverser<find_propositional_variables_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -46,17 +47,13 @@ struct find_propositional_variables_traverser: public Traverser<find_proposition
   {}
 
   // instead of deriving from a traverser in the data library
-  void operator()(const data::data_expression&)
+  void apply(const data::data_expression&)
   {}
 
-  void operator()(const propositional_variable_instantiation& v)
+  void apply(const propositional_variable_instantiation& v)
   {
     *out = v;
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, class OutputIterator>
@@ -76,7 +73,7 @@ make_find_propositional_variables_traverser(OutputIterator out)
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_all_variables_traverser<pbes_system::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<pbes_system::variable_traverser>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -97,7 +94,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<pbes_system::data_expression_traverser, pbes_system::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<pbes_system::data_expression_traverser, pbes_system::add_data_variable_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -108,7 +105,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<pbes_system::data_expression_traverser, pbes_system::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<pbes_system::data_expression_traverser, pbes_system::add_data_variable_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -141,7 +138,7 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
 {
-  data::detail::make_find_identifiers_traverser<pbes_system::identifier_string_traverser>(o)(x);
+  data::detail::make_find_identifiers_traverser<pbes_system::identifier_string_traverser>(o).apply(x);
 }
 
 /// \brief Returns all identifiers that occur in an object
@@ -162,7 +159,7 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_sort_expressions_traverser<pbes_system::sort_expression_traverser>(o)(x);
+  data::detail::make_find_sort_expressions_traverser<pbes_system::sort_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all sort expressions that occur in an object
@@ -183,7 +180,7 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
 {
-  data::detail::make_find_function_symbols_traverser<pbes_system::data_expression_traverser>(o)(x);
+  data::detail::make_find_function_symbols_traverser<pbes_system::data_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all function symbols that occur in an object
@@ -206,7 +203,7 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 template <typename Container, typename OutputIterator>
 void find_propositional_variable_instantiations(Container const& container, OutputIterator o)
 {
-  pbes_system::detail::make_find_propositional_variables_traverser<pbes_system::pbes_expression_traverser>(o)(container);
+  pbes_system::detail::make_find_propositional_variables_traverser<pbes_system::pbes_expression_traverser>(o).apply(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -228,7 +225,7 @@ template <typename T>
 bool search_variable(const T& x, const data::variable& v)
 {
   data::detail::search_variable_traverser<pbes_system::variable_traverser> f(v);
-  f(x);
+  f.apply(x);
   return f.found;
 }
 

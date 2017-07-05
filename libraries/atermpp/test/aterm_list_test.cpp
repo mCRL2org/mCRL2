@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -44,9 +43,9 @@ struct func
   func(int)
   {}
 
-  atermpp::aterm operator()(atermpp::aterm x) const
+  atermpp::aterm operator()(const atermpp::aterm& x) const
   {
-    return read_term_from_string("f(" + to_string(x) + ")");
+    return read_term_from_string("f(" + pp(x) + ")");
   }
 };
 
@@ -87,10 +86,7 @@ void test_aterm_list()
   // test concatenation
   {
     aterm_list a (read_term_from_string("[1,2,3]"));
-    atermpp::aterm x = read_term_from_string("0");
-    // BOOST_CHECK(x + a == read_term_from_string("[0,1,2,3]"));
     BOOST_CHECK(a + a == read_term_from_string("[1,2,3,1,2,3]"));
-    // BOOST_CHECK(a + x == read_term_from_string("[1,2,3,0]"));
   }  
 }
 
@@ -108,17 +104,55 @@ void test_set_operations()
   m.push_front(z);
   m.push_front(x);
 
-  // aterm_list lm_union = term_list_union(l, m);
-  // BOOST_CHECK(lm_union.size() == 3);
+  aterm_list lm_union = term_list_union(l, m);
+  BOOST_CHECK(lm_union.size() == 3);
 
-  // aterm_list lm_difference = term_list_difference(l, m);
-  // BOOST_CHECK(lm_difference.size() == 1);
+  aterm_list lm_difference = term_list_difference(l, m);
+  BOOST_CHECK(lm_difference.size() == 1);
+}
+
+void test_initializer_list()
+{
+  atermpp::aterm x = read_term_from_string("x");
+  atermpp::aterm y = read_term_from_string("y");
+  aterm_list l = { x, y };
+}
+
+void test_list_with_apply_filter()
+{
+  std::vector<aterm_list> v;
+  aterm_list l1(read_term_from_string("[1,2,3,4]"));
+  v.push_back(l1);
+  aterm_list l2(read_term_from_string("[1,3,7]"));
+  v.push_back(l2);
+  aterm_list l3(read_term_from_string("[1,2,3,7,4]"));
+  v.push_back(l3);
+  aterm_list l4(read_term_from_string("[1,7]"));
+  v.push_back(l4);
+  aterm_list l5(read_term_from_string("[1,7,9,10,12,13,15,15,16]"));
+  v.push_back(l5);
+
+  // Remove the first element of each list. Only add resulting lists with a length larger than 2.
+  // As a vector can be traversed backward, this tests the backward construction. 
+  term_list<aterm_list> result1(v.begin(),
+                                v.end(),
+                                [](aterm_list l)->aterm_list{l.pop_front(); return l;},
+                                [](const aterm_list& l)->bool{return l.size()>2;});
+  BOOST_CHECK(result1.size()==3);
+ 
+  // As a list can be traversed in a forward way, this tests the forward construction. 
+  term_list<aterm_list> result2(result1.begin(),
+                                result1.end(),
+                                [](aterm_list l)->aterm_list{l.pop_front(); return l;},
+                                [](const aterm_list& l)->bool{return l.size()>2;});
+  BOOST_CHECK(result1.size()==2);
 }
 
 int test_main(int argc, char* argv[])
 {
   test_aterm_list();
   test_set_operations();
+  test_initializer_list();
 
   return 0;
 }

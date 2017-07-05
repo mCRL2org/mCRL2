@@ -9,15 +9,15 @@
 /// \file data_equation_test.cpp
 /// \brief Basic regression test for data equations.
 
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/variable.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -28,7 +28,7 @@ void data_equation_test()
   data::function_symbol c("c", s);
   data::function_symbol f("f", s);
   variable x("x", s);
-  variable_list xl(atermpp::make_list(x));
+  variable_list xl = { x };
 
   data_equation e(xl, c, x, f);
   BOOST_CHECK(e.variables() == xl);

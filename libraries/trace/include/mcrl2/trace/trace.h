@@ -24,7 +24,6 @@
 #include <string>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/core/detail/construction_utility.h"
 #include "mcrl2/data/detail/io.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/process/action_parse.h"
@@ -89,7 +88,7 @@ class Trace
 
     std::vector < mcrl2::lps::state > states;
     std::vector < mcrl2::lps::multi_action > actions;
-    size_t pos; // Invariant: pos <= actions.size().
+    std::size_t pos; // Invariant: pos <= actions.size().
 
     mcrl2::data::data_specification m_spec;
     process::action_label_list m_act_decls;
@@ -264,7 +263,7 @@ class Trace
     /// \details The initial position corresponds to pos=0. If pos is larger than
     /// the length of the trace, no new position is set.
     /// \param[in] pos The new position in the trace.
-    void setPosition(size_t pos)
+    void setPosition(std::size_t pos)
     {
       if (pos <= actions.size())
       {
@@ -276,7 +275,7 @@ class Trace
     /// \details The current position of the trace is a non negative number
     /// smaller than the length of the trace.
     /// \return The current position of the trace.
-    size_t getPosition() const
+    std::size_t getPosition() const
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       return pos;
@@ -284,7 +283,7 @@ class Trace
 
     /// \brief Get the number of actions in the current trace.
     /// \return A positive number indicating the number of actions in the trace.
-    size_t number_of_actions() const
+    std::size_t number_of_actions() const
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       return actions.size();
@@ -292,7 +291,7 @@ class Trace
 
     /// \brief Get the number of states in the current trace.
     /// \return A positive number indicating the number of states in the trace.
-    size_t number_of_states() const
+    std::size_t number_of_states() const
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       return states.size();
@@ -388,7 +387,7 @@ class Trace
     /// The old actions in the trace at the current at higher positions are removed.
     /// \param [in] action The multi_action to be stored in the trace.
 
-    void addAction(const mcrl2::lps::multi_action action)
+    void addAction(const mcrl2::lps::multi_action& action)
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       truncate(); // Take care that actions and states have the appropriate size.
@@ -702,7 +701,7 @@ class Trace
       assert(actions.size()+1 >= states.size());
       atermpp::aterm_list trace;
 
-      size_t i=actions.size()+1;
+      std::size_t i=actions.size()+1;
       while (i > 0)
       {
         i--;
@@ -744,7 +743,7 @@ class Trace
 
     void savePlain(std::ostream& os)
     {
-      for (size_t i=0; i<actions.size(); i++)
+      for (std::size_t i=0; i<actions.size(); i++)
       {
         os << pp(actions[i]);
         os << std::endl;

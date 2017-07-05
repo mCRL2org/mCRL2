@@ -1,0 +1,137 @@
+%% The pump cannot be switched on infinitely often
+%%
+%% Holds for 96 products and fails for 32 products. Proving the property for the
+%% 96 products requires no decomposition in subfamilies. Proving the complement
+%% of the product for the remaining 32 products requires decomposing these products
+%% into 2 distinct subfamilies
+
+nu A.
+( 
+( 
+forall Px':FExpr.
+(val(Px' in [neg(and(atom(Ct),atom(Lh)))]) =>
+mu B(Pz:FExpr = normalise(and(FD,Px'))).
+(
+  (mu U(Px:FExpr = Pz). nu Y(Py:FExpr = Px). 
+    (
+      (val(normalise(and(Py,tt)) != ff) => (forall e':FExpr. 
+          [pumpStart(e')](val(normalise(and(Py,e')) != ff) => 
+
+             nu W(Pw:FExpr = normalise(and(Py,e'))).
+                 (val(normalise(and(Pw,tt)) != ff) => 
+                   ( (                  [skip](W(Pw) ) )
+                   && ( forall e:FExpr. [skip(e)](val(normalise(and(Pw,e)) != ff) => W(normalise(and(Pw,e))) ) )
+                   && ( forall e:FExpr. [pumpStart(e)](val(normalise(and(Pw,e)) != ff) => W(normalise(and(Pw,e))) ) )
+                   && ( forall e:FExpr. [pumpStop(e)](val(normalise(and(Pw,e)) != ff) => U(normalise(and(Pw,e))) ) )
+                   )
+                 )
+          ) 
+        )
+      )
+    &&
+      (val(normalise(and(Py,tt)) != ff) => 
+          ( (                  [skip](Y(Py) ) )
+          && ( forall e:FExpr. [skip(e)](val(normalise(and(Py,e)) != ff) => Y(normalise(and(Py,e))) ) )
+          && ( forall e:FExpr. [pumpStop(e)](val(normalise(and(Py,e)) != ff) => Y(normalise(and(Py,e))) ) )
+          )
+      )
+    )
+  )
+&&
+  (nu U0(Px0:FExpr = Pz).
+                 (val(normalise(and(Px0,tt)) != ff) => 
+                   ( (                  [skip](U0(Px0) ) )
+                   && ( forall e:FExpr. [skip(e)](val(normalise(and(Px0,e)) != ff) => U0(normalise(and(Px0,e))) ) )
+                   && ( forall e:FExpr. [pumpStart(e)](val(normalise(and(Px0,e)) != ff) => U0(normalise(and(Px0,e))) ) )
+                   && ( forall e:FExpr. [pumpStop(e)](val(normalise(and(Px0,e)) != ff) => U0(normalise(and(Px0,e))) ) )
+                   && ( forall e':FExpr. [pumpStart(e')](val(normalise(and(Px0,e')) != ff) => 
+                          mu B0(Pz0:FExpr = normalise(and(Px0,e'))). 
+                             (
+                               (val(normalise(and(Pz0,tt)) != ff) => 
+                                     ( (                  [skip](B0(Pz0) ) )
+                                     && ( forall e:FExpr. [skip(e)](val(normalise(and(Pz0,e)) != ff) => B0(normalise(and(Pz0,e))) ) )
+                                     && ( forall e:FExpr. [pumpStart(e)](val(normalise(and(Pz0,e)) != ff) => B0(normalise(and(Pz0,e))) ) )
+                                     )
+                               )
+                             )
+                         ) 
+                      )
+                   )
+                 )
+  )
+)
+)
+) %%% End property 4 (positive formula)
+
+&&
+
+(
+%% Confirm that property 4 does not hold for the following products
+%%
+%% (nu R. mu Y. <pumpStart.(!pumpStop)*.pumpStop>R || <!pumpStart]Y> || <true*.pumpStart>nu Z. <!pumpStop>Z)
+%%
+%% We wish to prove that this formula holds for products satisfying Lh /\ Ct
+%% We cannot directly prove that it holds for Lh /\ Ct 
+%% However, splitting the family of products in Mq /\ Lh /\ Ct and !Mq /\ Lh /\ Ct does work
+
+forall Px':FExpr. 
+val(Px' in 
+   [
+    and(atom(Mq),and(atom(Ct),atom(Lh))),
+    and(neg(atom(Mq)),and(atom(Ct),atom(Lh)))
+   ]) =>
+nu Z(Pz:FExpr = normalise(and(Px',FD))).
+(
+  (nu R(Px:FExpr = Pz). mu Y(Py:FExpr = Px). 
+    (
+      (val(normalise(or(neg(Py),tt)) == tt) && (exists e':FExpr. 
+          <pumpStart(e')>(val(normalise(or(neg(Py),e')) == tt) && 
+
+             mu W(Pw:FExpr = Py).
+                 (val(normalise(or(neg(Pw),tt)) == tt) && 
+                   ( (                  <skip>(W(Pw) ) )
+                   || ( exists e:FExpr. <skip(e)>(val(normalise(or(neg(Pw),e)) == tt) && W(Pw) ) )
+                   || ( exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Pw),e)) == tt) && W(Pw) ) )
+                   || ( exists e:FExpr. <pumpStop(e)>(val(normalise(or(neg(Pw),e)) == tt) && R(Pw) ) )
+                   )
+                 )
+          ) 
+        )
+      )
+    ||
+      (val(normalise(or(neg(Py),tt)) == tt) && 
+          ( (                  <skip>(Y(Py) ) )
+          || ( exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py),e)) == tt) && Y(Py) ) )
+          || ( exists e:FExpr. <pumpStop(e)>(val(normalise(or(neg(Py),e)) == tt) && Y(Py) ) )
+          )
+      )
+    )
+  )
+
+||
+
+  (mu R0(Px0:FExpr = Pz).
+                 (val(normalise(or(neg(Px0),tt)) == tt) && 
+                   ( (                  <skip>(R0(Px0) ) )
+                   || ( exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px0),e)) == tt) && R0(Px0) ) )
+                   || ( exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px0),e)) == tt) && R0(Px0) ) )
+                   || ( exists e:FExpr. <pumpStop(e)>(val(normalise(or(neg(Px0),e)) == tt) && R0(Px0) ) )
+                   || ( exists e':FExpr. <pumpStart(e')>(val(normalise(or(neg(Px0),e')) == tt) && 
+                          nu Z0(Pz0:FExpr = Px0). 
+                             (
+                               (val(normalise(or(neg(Pz0),tt)) == tt) && 
+                                     ( (                  <skip>(Z0(Pz0) ) )
+                                     || ( exists e:FExpr. <skip(e)>(val(normalise(or(neg(Pz0),e)) == tt) && Z0(Pz0) ) )
+                                     || ( exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Pz0),e)) == tt) && Z0(Pz0) ) )
+                                     )
+                               )
+                             )
+                         ) 
+                      )
+                   )
+                 )
+  )
+)
+
+)
+)

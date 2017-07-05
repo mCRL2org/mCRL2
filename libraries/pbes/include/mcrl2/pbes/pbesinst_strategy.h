@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_PBESINST_STRATEGY_H
 #define MCRL2_PBES_PBESINST_STRATEGY_H
 
-#include <string>
 #include "mcrl2/utilities/exception.h"
+#include <string>
 
 namespace mcrl2 {
 
@@ -23,6 +23,7 @@ namespace pbes_system {
 enum pbesinst_strategy
 {
   pbesinst_lazy_strategy,
+  pbesinst_alternative_lazy_strategy,
   pbesinst_finite_strategy
 };
 
@@ -33,6 +34,10 @@ pbesinst_strategy parse_pbesinst_strategy(const std::string& s)
   if (s == "finite")
   {
     return pbesinst_finite_strategy;
+  }
+  else if (s == "alternative-lazy")
+  {
+    return pbesinst_alternative_lazy_strategy;
   }
   else if (s == "lazy")
   {
@@ -68,6 +73,10 @@ std::string print_pbesinst_strategy(const pbesinst_strategy strategy)
   {
     return "finite";
   }
+  else if (strategy == pbesinst_alternative_lazy_strategy)
+  {
+    return "alternative-lazy";
+  }
   else if (strategy == pbesinst_lazy_strategy)
   {
     return "lazy";
@@ -89,6 +98,10 @@ std::string description(const pbesinst_strategy strategy)
   if (strategy == pbesinst_finite_strategy)
   {
     return "for computing all possible boolean equations";
+  }
+  else if (strategy == pbesinst_alternative_lazy_strategy)
+  {
+    return "an alternative version of the lazy strategy that supports more options";
   }
   else if (strategy == pbesinst_lazy_strategy)
   {

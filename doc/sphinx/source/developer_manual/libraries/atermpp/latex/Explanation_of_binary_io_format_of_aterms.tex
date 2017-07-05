@@ -1,0 +1,143 @@
+\documentclass{article}
+\usepackage{a4wide}
+\usepackage{calc}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\tabline}[2]
+{#1\>: 
+\begin{minipage}[t]{\textwidth-1.5cm}
+#2
+\end{minipage}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\title{The binary aterm file/stream format}
+\author{Part of \cite{BJKO99}, written by van den Brand, de Jong, Klint and Olivier}
+\date{}
+
+\begin{document}
+\maketitle
+\section{The Binary ATerm Format (BAF)}
+This text is largely literally copied from \cite{BJKO99}.
+Efficient storing and exchange of ATerms between processes is very important.  
+The simplest form of employs concrete syntax.
+This would involve pretty printing and parsing the term.  
+The concrete syntax is not a very efficient exchange format because sharing of function symbols and 
+subterms cannot be employed.
+
+A better solution would be to exchange a representation in which sharing (both of function symbols and subterms) 
+can be expressed concisely. 
+A raw memory dump cannot be used  process have no meaning in the address space of another process.
+In order to address these problems we have developed BAF, the Binary Aterm Format. Instead of writing addresses, we assign a unique number
+(index) to each subterm and each symbol occurring in a term that we want to exchange.  
+When referring to this term, we could use its index instead of its address.
+When writing a term  we first start by writing a table 
+(in order of increasing index) of all function symbols used in this term. 
+Each function symbol consists of the string representation of its name followed by its arity.
+
+ATerms are written in prefix order. To write a function application, first the index of the function symbol
+is written. Then the indices of the arguments are written. When an argument consists of a term that has not been 
+written yet, the index of the argument is first written itself before continuing with the next argument. In this way,
+every subterm is written exactly once. Every time a parent term wishes to refer to a subterm, it just 
+uses the subterm's index.
+
+\subsection{Exploiting ATerm Regularities}
+When sending a large term containing a lot of subterms, the subterm indices can become quite large. 
+Consequently a lot of bits are needed to represent these indices. 
+We can considerably reduce the size of these indices when we take into account some of the regularities in the 
+structure of terms. Empirical study shows that the set of function symbols that can actually occur at each 
+of the argument positions of a function application with a given function symbol is often very small. 
+A rationale for this is that although ATerm applications themselves are not typed, 
+the data types they represent often are. 
+In this case  function applications represent objects and the type of the object is represented 
+by the function symbol. The type hierarchy determines which types can occur at each position in the object.
+
+We exploit this knowledge by grouping all terms according to their top function symbol.
+Terms that are not function applications are grouped based on dummy function symbols, 
+one for each term type. For each function symbol, we determine which function symbols can occur 
+at each argument position. When writing the table of function symbols at the start of the BAF file, 
+we write this information as well. In most cases this number of function symbol occurrences is very small compared 
+to the number of terms that is to be written. Storing some extra information for every function symbol in order 
+to get better compression is therefore worthwhile.
+
+When writing the argument of a function application, we start by writing the actual symbol of the argument. 
+Because this symbol is taken from a limited set of function symbols (only those symbols that can actually occur at 
+this position) we can use a very small number to represent it. Following this function symbol we write the 
+index of the argument term itself in the table of terms over this function symbol instead of the index of 
+the argument in the total term table.  
+
+\subsection{Example}
+
+As an example, we show how the term \texttt{mult(s(s(z)),s(z))} is represented in BAF. This term contains three function 
+symbols: \texttt{mult} with arity two, \texttt{s} with arity one  and \texttt{z} with arity zero. When grouping the subterms by function symbol we get:
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+$0$: \texttt{mult}&$1$: \texttt{s}&$2$: \texttt{z}\\
+\hline
+\texttt{mult(s(s(z)),s(z))}&\texttt{s(s(z))}&\texttt{z}\\
+                           &\texttt{s(z)}&\\
+\hline
+\end{tabular}
+\end{center}
+When we look at the function symbols that can occur at every argument position ($\geq 0$), we get:
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+position&\texttt{mult}&\texttt{s}&\texttt{z}\\
+\hline
+0&\texttt{s}&\texttt{s},\texttt{z}&\\
+1&\texttt{s}&&\\
+\hline
+
+\end{tabular}
+\end{center}
+We start by writing this symbol information to file. To do this, we have to write the following bytes:
+\begin{tabbing}
+\hspace{1.5cm}\=\kill
+\tabline{$4$ \texttt{"mult"}}{The length ($4$) and the ASCII representation of \texttt{mult}.}\\
+\tabline{$2$                }{The arity ($2$) of \texttt{mult}.}\\
+\tabline{$1$ $1$            }{There is only one symbol ($1$) that can occur at the first argument position of 
+                              \texttt{mult}. This is symbol \texttt{s} with index ($1$).}\\
+\tabline{$1$ $1$            }{At the second argument position, there is only ($1$) possible top symbol and that is 
+                              \texttt{s} with index ($1$).}\\
+\tabline{$1$ \texttt{"s"}   }{The length ($1$) and ASCII representation of \texttt{s}.}\\
+\tabline{$1$                }{The arity ($1$) of \texttt{s}.}\\
+\tabline{$2$ $1$ $2$        }{The single argument of \texttt{s} can be either of two ($2$) different top function
+                              symbols: \texttt{s} with index ($1$) or \texttt{z} with index ($2$).}\\
+\tabline{$1$ \texttt{"z"}   }{The length ($1$) and ASCII representation of \texttt{z}.}\\
+\tabline{$0$                }{The arity ($0$) of \texttt{z}.}
+\end{tabbing}
+
+Following this symbol information, the actual term \texttt{mult(s(s(z)),s(z))} can be encoded using only
+a handful of bits. Note that the first function symbol in the symbol table is always the top function symbol
+of the term (in this case: \texttt{mult}):
+
+\begin{tabbing}
+\hspace{1.5cm}\=\kill
+\tabline{   }{No bits need to be written to identify the function symbol \texttt{s}, because it is the only 
+              possible function symbol at the first argument position of \texttt{mult}}\\
+\tabline{$0$}{One bit indicates which term over the function symbol \texttt{s} is written (\texttt{s(s(z))}). 
+              Because this term has not been written yet, it is done now.}\\
+\tabline{$0$}{The function symbol of the only argument of \texttt{s(s(z))} is \texttt{s}.}\\
+\tabline{$1$}{\texttt{s(z)} has index $1$ in the term table of symbol \texttt{s}.}\\
+\tabline{$1$}{Symbol \texttt{z} has index $1$ in the symbol table of symbol \texttt{s}.}\\
+\tabline{   }{Because there is only one term over symbol \texttt{z}, no bits are needed to 
+              encode this term. Now we only need to encode the second argument of the input term, \texttt{s(z)}.}\\
+\tabline{    }{No bits are needed to encode the function symbol \texttt{s}, because it is the only symbol that 
+               can occur as the second argument of \texttt{mult}.}\\
+\tabline{$1$}{\texttt{s(z)} has index $1$ in the term table of symbol \texttt{s}. Because this term has already been 
+              written, we are done.}
+\end{tabbing}
+
+Only five bits are thus needed to encode the term \texttt{mult(s(s(z)),s(z))}. As mentioned earlier, the amount of data
+needed to write the table of function symbols at the start of the BAF file is in most cases negligible compared to the
+actual term data.
+
+\begin{thebibliography}{1}
+\bibitem{BJKO99}
+M.G.J.\ van den Brand, H.A.\ de Jong, P.\ Klint, and P.A.\ Olivier.
+Efficient Annotated Terms. Software - Practice \& Experience, 30:259-291, 2000.
+\end{thebibliography}
+
+\end{document}

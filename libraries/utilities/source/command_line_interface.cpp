@@ -7,24 +7,24 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <algorithm>
-#include <vector>
-#include <map>
 #include <iosfwd>
+#include <locale>
+#include <map>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
-#include <memory>
-#include <locale>
+#include <vector>
 
 #include <fstream>
+#include <iterator>
 #include <sstream>
 #include <string>
-#include <iterator>
 
 #include <fstream>
 #include <iostream>
 
-#include "boost/xpressive/xpressive_static.hpp"
-#include "boost/algorithm/string/replace.hpp"
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
 #include "mcrl2/utilities/text_utility.h"
 
@@ -64,7 +64,7 @@ std::string substring(const std::string& s, Iter first, Iter last)
  * \return string with newlines inserted such that the number of characters
  * between any two consecutive newlines is smaller than width
  **/
-static std::string word_wrap(std::string const& input, const size_t width, std::string const& indent = "")
+static std::string word_wrap(std::string const& input, const std::size_t width, std::string const& indent = "")
 {
   std::ostringstream out;
 
@@ -137,7 +137,7 @@ static std::string word_wrap(std::string const& input, const size_t width, std::
  * \return formatted string that represents the option description
  **/
 std::string interface_description::option_descriptor::textual_description(
-  const size_t left_width, const size_t right_width) const
+  const std::size_t left_width, const std::size_t right_width) const
 {
   std::ostringstream s;
   std::string        options;
@@ -146,7 +146,7 @@ std::string interface_description::option_descriptor::textual_description(
   {
     options = "  -" + std::string(1, m_short);
 
-    if (m_argument.get() != 0)
+    if (m_argument.get() != nullptr)
     {
       options += (m_argument->is_optional()) ?
                  "[" + m_argument->get_name() + "]" : m_argument->get_name();
@@ -161,7 +161,7 @@ std::string interface_description::option_descriptor::textual_description(
 
   options += "--" + m_long;
 
-  if (m_argument.get() != 0)
+  if (m_argument.get() != nullptr)
   {
     options += ((m_argument->is_optional()) ?
                 "[=" + m_argument->get_name() + "]" : "=" + m_argument->get_name());
@@ -177,7 +177,7 @@ std::string interface_description::option_descriptor::textual_description(
   }
 
   s << word_wrap(m_description, right_width, std::string(left_width, ' ')) << std::endl;
-  if (m_argument.get() != 0 && m_argument->has_description())
+  if (m_argument.get() != nullptr && m_argument->has_description())
   {
     std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
     for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
@@ -212,7 +212,7 @@ std::string interface_description::option_descriptor::man_page_description() con
   {
     s << "\\fB-" << std::string(1, m_short) << "\\fR";
 
-    if (m_argument.get() != 0)
+    if (m_argument.get() != nullptr)
     {
       if (m_argument->is_optional())
       {
@@ -229,7 +229,7 @@ std::string interface_description::option_descriptor::man_page_description() con
 
   s << "\\fB--" << m_long << "\\fR";
 
-  if (m_argument.get() != 0)
+  if (m_argument.get() != nullptr)
   {
     s << ((m_argument->is_optional()) ?
           "[=\\fI" + m_argument->get_name() + "\\fR]" :
@@ -244,7 +244,7 @@ std::string interface_description::option_descriptor::man_page_description() con
        )
     << std::endl;
 
-  if (m_argument.get() != 0 && m_argument->has_description())
+  if (m_argument.get() != nullptr && m_argument->has_description())
   {
     std::vector< basic_argument::argument_description > arg_description(m_argument->get_description());
     for(std::vector< basic_argument::argument_description >::const_iterator i = arg_description.begin(); i != arg_description.end(); ++i)
@@ -294,7 +294,7 @@ std::ostream& interface_description::option_descriptor::xml_page_description(std
   }
   s << std::string(--indentation, ' ') << "</description>" << std::endl;
 
-  if (m_argument.get() != 0)
+  if (m_argument.get() != nullptr)
   {
     s << std::string(indentation++, ' ') << "<option_argument optional=\"" << (m_argument->is_optional()?"yes":"no") <<"\" type=\"" << (m_argument->get_type()) << "\">" << std::endl;
     s << std::string(indentation, ' ') << "<name>" << m_argument->get_name() << "</name>" << std::endl;
@@ -487,26 +487,26 @@ std::string interface_description::textual_description() const
 
   s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
     << std::endl
-    << "See also the manual at <http://www.mcrl2.org/release/user_manual/tools/" << m_name << ".html>.\n";
+    << "See also the manual at <http://www.mcrl2.org/web/user_manual/tools/release/" << m_name << ".html>.\n";
 
   return s.str();
 }
 
-inline static std::string mark_name_in_usage(std::string const& usage, std::string begin, std::string end)
+inline static std::string mark_name_in_usage(std::string const& usage, const std::string& begin, const std::string& end)
 {
   std::string result;
   bool        name_character = false;
 
   result.reserve(2 * usage.size());
 
-  for (std::string::const_iterator i = usage.begin(); i != usage.end(); ++i)
+  for (char i : usage)
   {
-    if (*i == '[')
+    if (i == '[')
     {
       name_character = true;
       result.append("[" + begin);
     }
-    else if ((*i == ' ') || (*i == ']'))
+    else if ((i == ' ') || (i == ']'))
     {
       if (name_character)
       {
@@ -514,11 +514,11 @@ inline static std::string mark_name_in_usage(std::string const& usage, std::stri
 
         name_character = false;
       }
-      result.append(1, *i);
+      result.append(1, i);
     }
     else
     {
-      result.append(1, *i);
+      result.append(1, i);
     }
   }
 
@@ -565,9 +565,9 @@ std::string interface_description::man_page() const
       << ".TP" << std::endl
       << "\\fIOPTION\\fR can be any of the following:" << std::endl;
 
-    for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+    for (const auto & m_option : m_options)
     {
-      option_descriptor const& option(i->second);
+      option_descriptor const& option(m_option.second);
 
       if (option.m_show)
       {
@@ -612,7 +612,7 @@ std::string interface_description::man_page() const
     "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
     "There is NO WARRANTY, to the extent permitted by law.\n";
   s << ".SH \"SEE ALSO\"" << std::endl
-    << "See also the manual at <http://www.mcrl2.org/release/user_manual/tools/" << m_name << ".html>.\n";
+    << "See also the manual at <http://www.mcrl2.org/web/user_manual/tools/release/" << m_name << ".html>.\n";
 
   return s.str();
 }
@@ -650,9 +650,9 @@ std::ostream& interface_description::xml_page(std::ostream& s) const
   {
     s << std::string(indentation++, ' ') << "<options>" << std::endl;
 
-    for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+    for (const auto & m_option : m_options)
     {
-      option_descriptor const& option(i->second);
+      option_descriptor const& option(m_option.second);
 
       if (option.m_show)
       {
@@ -754,7 +754,7 @@ void command_line_parser::collect(interface_description& d, std::vector< std::st
             {
               throw error("expected argument to option `--" + option + "'!");
             }
-            else if (descriptor.m_argument.get() == 0)
+            else if (descriptor.m_argument.get() == nullptr)
             {
               m_options.insert(std::make_pair(long_option, ""));
             }
@@ -961,7 +961,7 @@ std::vector< std::string > command_line_parser::parse_command_line(char const* c
 {
   std::vector< std::string > result;
 
-  if (arguments != 0)
+  if (arguments != nullptr)
   {
     char const* current = arguments;
 
@@ -1092,5 +1092,5 @@ void command_line_parser::process_default_options(interface_description& d)
     }
   }
 }
-}
-}
+} // namespace utilities
+} // namespace mcrl2

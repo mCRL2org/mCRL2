@@ -50,7 +50,7 @@ class lts2pbes_lts
 
       for (lts::lts_lts_t::labels_size_type i = 0; i < lts0.num_action_labels(); i++)
       {
-        lts::detail::action_label_lts a = lts0.action_label(i);
+        lts::action_label_lts a = lts0.action_label(i);
         m_action_labels.push_back(lps::multi_action(a.actions(), a.time()));
       }
       m_state_count = lts0.num_states();

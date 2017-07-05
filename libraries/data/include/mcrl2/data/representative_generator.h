@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote, Jeroen van der Wulp
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -9,8 +9,8 @@
 /// \file mcrl2/data/representative_generator.h
 /// \brief Component for generating representatives of sorts
 
-#ifndef MCRL2_DATA_REPRESENTATIVE_GENERATOR_H__
-#define MCRL2_DATA_REPRESENTATIVE_GENERATOR_H__
+#ifndef MCRL2_DATA_REPRESENTATIVE_GENERATOR_H
+#define MCRL2_DATA_REPRESENTATIVE_GENERATOR_H
 
 #include <algorithm>
 #include <functional>
@@ -23,50 +23,6 @@ namespace mcrl2
 
 namespace data
 {
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-
-struct has_result_sort : public std::unary_function< data_expression const&, bool >
-{
-  sort_expression m_sort;
-
-  has_result_sort(sort_expression const& sort) : m_sort(sort)
-  {
-  }
-
-  bool operator()(data_expression const& e)
-  {
-    return is_function_sort(e.sort()) && function_sort(e.sort()).target_sort() == m_sort;
-  }
-};
-
-struct has_non_function_sort : public std::unary_function< data_expression const&, bool >
-{
-  bool operator()(data_expression const& e)
-  {
-    return !is_function_sort(e.sort());
-  }
-};
-
-struct has_sort : public std::unary_function< data_expression const&, bool >
-{
-  sort_expression m_sort;
-
-  has_sort(sort_expression const& sort) : m_sort(sort)
-  {
-  }
-
-  bool operator()(data_expression const& e)
-  {
-    return e.sort()==m_sort;
-  }
-};
-
-
-}
-/// \endcond
-
 /// \brief Components for generating an arbitrary element of a sort
 ///
 /// A representative is an arbitrary element of a given sort. This
@@ -76,9 +32,7 @@ struct has_sort : public std::unary_function< data_expression const&, bool >
 /// that the context -constructors and mappings for the sort- remain
 /// unchanged.
 ///
-/// The maximum recursion depth -of applying constructors and mappings- is
-/// available as a control mechanism to limit element construction. The
-/// general aim is to keep the representative expression as simple. Use of
+/// The general aim is to keep the representative expression as simple. Use of
 /// constructors is preferred above mappings and constructors or
 /// mappings representing constants are preferred over those that have
 /// non-empty domain.
@@ -92,68 +46,95 @@ struct has_sort : public std::unary_function< data_expression const&, bool >
 ///
 /// This component will evolve through time, in the sense that more
 /// complex expressions will be generated over time to act as
-/// representative a certain sort, for instance containing fucntion symbols
+/// representative a certain sort, for instance containing function symbols
 /// with complex target sorts, containing explicit function constructors
 /// (lambda's). So, no reliance is possible on the particular shape of the
 /// terms that are generated.
+
 class representative_generator
 {
 
   protected:
 
     /// \brief Data specification context
-    data_specification const&                        m_specification;
+    const data_specification& m_specification;
 
     /// \brief Serves as a cache for later find operations
-    std::map< sort_expression, data_expression > m_representatives;
+    std::map< sort_expression, data_expression > m_representatives_cache;
 
   protected:
 
     /// \brief Sets a data expression as representative of the sort
     /// \param[in] sort the sort of which to set the representative
     /// \param[in] representative the data expression that serves as representative
-    data_expression set_representative(sort_expression const& sort, data_expression const& representative)
+    void set_representative(const sort_expression& sort, const data_expression& representative)
     {
       assert(sort==representative.sort());
-      m_representatives[sort] = representative;
-
-      return representative;
+      m_representatives_cache[sort] = representative;
     }
 
-    /// \brief Finds a representative for a function symbol
-    /// \param[in] symbol the function symbol for which to find the representative
-    /// \param[in] maximum_depth the maximum depth for recursive exploration of the sort
-    /// \return an element of sort sort using a constructor or mapping; or the default constructed data_expression object
+    /// \brief Finds a representative of the form f(t1,...,tn) where f is the function symbol.
+    /// \param[in] symbol The function symbol f using which the representative is constructed.
+    /// \param[in] visited_sorts A set of sorts for which no representative can be constructed. This is used to prevent 
+    //                           an infinite circular search through the sorts.
+    /// \param[out] result The representative of the shape f(t1,...,tn). This is only set if this function yields true.
+    /// \return a boolean indicating whether a representative has successfully been found.
     /// \pre symbol.sort() is of type function_sort
-    data_expression find_representative(function_symbol const& symbol, const unsigned int maximum_depth)
+    bool find_representative(
+                       const function_symbol& symbol, 
+                       std::set < sort_expression >& visited_sorts,
+                       data_expression& result) 
     {
       assert(is_function_sort(symbol.sort()));
 
       data_expression_vector arguments;
 
-      sort_expression_list symbol_domain(function_sort(symbol.sort()).domain());
-      for (sort_expression_list::const_iterator i = symbol_domain.begin(); i != symbol_domain.end(); ++i)
+      for (const sort_expression& s: function_sort(symbol.sort()).domain())
       {
-        data_expression representative = find_representative(*i, maximum_depth - 1);
-
-        if (representative==data_expression())
+        data_expression representative;
+        if (find_representative(s, visited_sorts, representative))
         {
-          return data_expression();
+          arguments.push_back(representative);
         }
-
-        arguments.push_back(representative);
+        else
+        {
+          // a representative for this argument could not be found.
+          return false;
+        }
       }
 
       // a suitable set of arguments is found
-      return application(symbol, arguments);
+      result=application(symbol, arguments);
+      return true;
     }
 
     /// \brief Finds a representative element for an arbitrary sort expression
     /// \param[in] sort the sort for which to find the representative
-    /// \param[in] maximum_depth the maximum depth for recursive exploration of the sort
-    /// \return an element of sort sort or the default constructed data_expression object
-    data_expression find_representative(sort_expression const& sort, const unsigned int maximum_depth)
+    /// \param[in] visited_sorts A set of sorts for which no representative can be constructed. This is used to prevent 
+    //                           an infinite circular search through the sorts.
+    /// \param[out] result The representative of the shape f(t1,...,tn). This is only set if this function yields true.
+    /// \return a boolean indicating whether a representative has successfully been found.
+    bool find_representative(
+                    const sort_expression& sort, 
+                    std::set < sort_expression >& visited_sorts, 
+                    data_expression& result)
     {
+      if (visited_sorts.count(sort)>0)
+      {
+        // This sort is already visited. We are looking to find a representative term of this sort
+        // within the scope of finding a term of this sort. If this is to be succesful, a more compact
+        // term can be found. Hence, stop searching further.
+        return false;
+      }
+
+      const std::map< sort_expression, data_expression >::iterator i=m_representatives_cache.find(sort);
+      if (i!=m_representatives_cache.end())
+      {
+        assert(i->second.sort()==sort);
+        result=i->second;
+        return true;
+      }
+      
       if (is_function_sort(sort))
       {
         // s is a function sort. We search for a constructor of mapping of this sort
@@ -162,13 +143,14 @@ class representative_generator
         // present.
 
         // check if there is a mapping with sort s (constructors with sort s cannot exist).
-        const function_symbol_vector local_mappings(m_specification.mappings(sort.target_sort()));
-
-        for (function_symbol_vector::const_iterator i =
-               std::find_if(local_mappings.begin(), local_mappings.end(),
-                            detail::has_sort(sort)); i != local_mappings.end();)
+        for (const function_symbol& f: m_specification.mappings(atermpp::down_cast<function_sort>(sort).codomain()))
         {
-          return set_representative(sort, *i);
+          if (f.sort()==sort)
+          {
+            result=f;
+            set_representative(sort, result);
+            return true;
+          }
         }
       }
       else
@@ -176,85 +158,95 @@ class representative_generator
         // s is a constant (not a function sort).
         // check if there is a constant constructor for s
 
-        function_symbol_vector local_constructors(m_specification.constructors(sort.target_sort()));
-
-        for (function_symbol_vector::const_iterator i =
-               std::find_if(local_constructors.begin(), local_constructors.end(), detail::has_sort(sort));
-             i != local_constructors.end();)
+        for (const function_symbol& f: m_specification.constructors(sort))
         {
-          return set_representative(sort, *i);
+          if (f.sort()==sort)
+          { 
+            result=f;
+            set_representative(sort, result);
+            return true;
+          }
         }
 
-        const function_symbol_vector local_mappings(m_specification.mappings(sort.target_sort()));
+        visited_sorts.insert(sort);
 
         // Check whether there is a representative f(t1,...,tn) for s, where f is a constructor function. 
         // We prefer this over a constant mapping, as a constant mapping generally does not have appropriate
         // rewrite rules.
-        if (maximum_depth != 0)
+        
+        // recursively traverse constructor functions of the form f:s1#...#sn -> sort.
+        // operators with f:s1#...#sn->G where G is a complex sort expression are ignored
+        for (const function_symbol& f: m_specification.constructors(sort))
         {
-          // recursively traverse constructor functions of the form f:s1#...#sn -> sort.
-          // operators with f:s1#...#sn->G where G is a complex sort expression are ignored
-          for (function_symbol_vector::const_iterator i =
-                 std::find_if(local_constructors.begin(), local_constructors.end(), detail::has_result_sort(sort));
-               i != local_constructors.end(); ++i)
+          if (find_representative(f, visited_sorts, result))
           {
-            // attempt to find representative based on constructor *i
-            try
-            {
-              data_expression possible_representative = find_representative(*i, maximum_depth);
-              return set_representative(sort, possible_representative);
-            }
-            catch (mcrl2::runtime_error& /* e */) {}; // continue searching;
-
-          }
-
-          for (function_symbol_vector::const_iterator i =
-                 std::find_if(local_mappings.begin(), local_mappings.end(), detail::has_result_sort(sort));
-               i != local_mappings.end(); ++i)
-          {
-            // attempt to find representative based on constructor *i
-            try
-            {
-              data_expression possible_representative = find_representative(*i, maximum_depth);
-              return set_representative(sort, possible_representative);
-            }
-            catch (mcrl2::runtime_error& /* e */) {}; // continue searching;
-
+            set_representative(sort, result);
+            visited_sorts.erase(sort);
+            return true;
           }
         }
 
         // check if there is a constant mapping for s
-
-        for (function_symbol_vector::const_iterator i =
-               std::find_if(local_mappings.begin(), local_mappings.end(),detail::has_sort(sort));
-             i != local_mappings.end();)
+        for (const function_symbol& f: m_specification.mappings(sort))
         {
-          return set_representative(sort, *i);
+          if (f.sort()==sort)
+          {
+            result=f;
+            set_representative(sort, result);
+            visited_sorts.erase(sort);
+            return true;
+          }
         }
+
+        // Try to check whether there is a representative f(t1,...,tn) where f is a mapping. 
+        for (const function_symbol& f: m_specification.mappings(sort))
+        {
+          if (find_representative(f, visited_sorts, result))
+          {
+            set_representative(sort, result);
+            visited_sorts.erase(sort);
+            return true;
+          }
+        }
+        
+        visited_sorts.erase(sort);
 
       }
 
-      throw mcrl2::runtime_error("Cannot find a term of sort " + data::pp(sort));
+      // No representative has been found.
+      return false;
     }
 
   public:
 
     /// \brief Constructor with data specification as context
-    representative_generator(data_specification const& specification) : m_specification(specification)
+    representative_generator(const data_specification& specification) : m_specification(specification)
     {
     }
 
     /// \brief Returns a representative of a sort
     /// \param[in] sort sort of which to find a representatitive
-    /// \param[in] maximum_depth unfold generate terms recursively up to this depth
-    data_expression operator()(sort_expression const& sort, const unsigned int maximum_depth = 3)
+    data_expression operator()(const sort_expression& sort)
     {
-      for (std::map< sort_expression, data_expression >::iterator i = m_representatives.find(sort); i != m_representatives.end();)
+      // First see whether a term of this sort has already been constructed and resides in the representatives_cache. If yes return it. 
+      const std::map< sort_expression, data_expression >::iterator i=m_representatives_cache.find(sort);
+      if (i!=m_representatives_cache.end())
       {
         return i->second;
       }
-
-      return find_representative(sort, maximum_depth);
+      
+      data_expression result;
+      std::set<sort_expression> visited_sorts;
+      if (find_representative(sort, visited_sorts, result))
+      {
+        // A term of the requested sort is found. Return it. 
+        return result;
+      }
+      else 
+      {
+        throw mcrl2::runtime_error("Cannot find a term of sort " + data::pp(sort));
+      }
+     
     }
 };
 

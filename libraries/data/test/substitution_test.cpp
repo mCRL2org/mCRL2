@@ -13,15 +13,13 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/concepts.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
-#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/enumerator_substitution.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
@@ -146,11 +144,11 @@ struct my_assignment_sequence_substitution: public std::unary_function<variable,
 
   data_expression operator()(const variable& v) const
   {
-    for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
+    for (const auto & assignment : assignments)
     {
-      if (i->lhs() == v)
+      if (assignment.lhs() == v)
       {
-        return i->rhs();
+        return assignment.rhs();
       }
     }
     return v;
@@ -166,7 +164,7 @@ void test_my_assignment_sequence_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l(make_list(xy, uz));
+  assignment_list l({ xy, uz });
 
   my_assignment_sequence_substitution f(l);
 
@@ -176,7 +174,7 @@ void test_my_assignment_sequence_substitution()
   BOOST_CHECK(f(u) == z);
 
   assignment yz(y,z);
-  l = make_list(xy, uz, yz);
+  l = { xy, uz, yz };
   my_assignment_sequence_substitution g(l);
 
   BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
@@ -193,16 +191,15 @@ void test_my_list_substitution()
   variable u("u", sort_nat::nat());
   variable v("v", sort_nat::nat());
 
-  data_expression x1 = x;
-  data_expression y1 = y;
-  data_expression z1 = z;
-  data_expression u1 = u;
-  data_expression v1 = v;
+  const data_expression& y1 = y;
+  // const data_expression& z1 = z;
+  // const data_expression& u1 = u;
+  // const data_expression& v1 = v;
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l(make_list(xy, uz));
-  assignment_list r = make_list(assignment(x, y1));
+  assignment_list l = { xy, uz };
+  assignment_list r = { assignment(x, y1) };
 
 // TODO: This does not longer work, can it be fixed?
 //  BOOST_CHECK(replace_variables(x,  my_assignment_sequence_substitution(r)) == v1);
@@ -221,7 +218,7 @@ void test_assignment_sequence_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l(make_list(xy, uz));
+  assignment_list l = { xy, uz };
 
   assignment_sequence_substitution f(l);
 
@@ -231,7 +228,7 @@ void test_assignment_sequence_substitution()
   BOOST_CHECK(f(u) == z);
 
   assignment yz(y,z);
-  l = make_list(xy, uz, yz);
+  l = { xy, uz, yz };
   assignment_sequence_substitution g(l);
 
   BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
@@ -251,8 +248,8 @@ void test_list_substitution()
 
   assignment xy(x,y);
   assignment uz(u,z);
-  assignment_list l(make_list(xy, uz));
-  assignment_list r = make_list(assignment(x, y1));
+  assignment_list l = { xy, uz };
+  assignment_list r = { assignment(x, y1) };
 
 // TODO: This does not longer work, can it be fixed?
 //  BOOST_CHECK(replace_variables(x, assignment_sequence_substitution(r)) == y1);
@@ -272,25 +269,6 @@ void test_mutable_substitution_composer()
 
   mutable_substitution_composer<mutable_map_substitution< > > g(f);
   BOOST_CHECK(g(x) == y);
-}
-
-void test_mutable_substitution()
-{
-  using namespace mcrl2::data::detail;
-
-  mutable_map_substitution< std::map< variable, data_expression_with_variables > > sigma;
-  variable v("v", sort_nat::nat());
-  data_expression e = v;
-
-  data_expression_with_variables e1;
-  e1 = e;
-
-  sigma[v] = e;
-
-  // Compile test
-  mutable_map_substitution< std::map< variable, variable > > sigmaprime;
-
-  sigma[v] = v;
 }
 
 struct my_sort_substitution: public std::unary_function<data::basic_sort, data::sort_expression>
@@ -428,7 +406,6 @@ int test_main(int /* a */, char**  /* aa */)
   test_basic();
   test_assignment_sequence_substitution();
   test_list_substitution();
-  test_mutable_substitution();
   test_sort_substitution();
   test_indexed_substitution();
   test_enumerator_substitution();
