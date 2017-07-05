@@ -1,4 +1,4 @@
-if (NOT MCRL2_ENABLE_TESTS)
+if (NOT ${MCRL2_ENABLE_TESTS})
   return()
 endif()
 

@@ -8,7 +8,7 @@ set(MCRL2_TOOLS
 )
 
 # N.B. The developer tool lpstransform is needed for the random tests.
-if(MCRL2_ENABLE_DEVELOPER OR MCRL2_ENABLE_TESTS)
+if(${MCRL2_ENABLE_DEVELOPER} OR ${MCRL2_ENABLE_TESTS})
   foreach(TOOL ${MCRL2_TOOLS})
     add_subdirectory(${TOOL})
   endforeach()
