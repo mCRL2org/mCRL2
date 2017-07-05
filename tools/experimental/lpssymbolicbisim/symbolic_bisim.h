@@ -16,6 +16,8 @@
 #include <queue>
 #include <ctime>
 #include <chrono>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/data/bool.h"
@@ -47,7 +49,30 @@
 #include "find_linear_inequality.h"
 #include "enumerate_block_union.h"
 #include "block_tree.h"
+// #include "improved_quantifiers_inside_rewriter.h"
 
+namespace std
+{
+
+/// \brief specialization of the standard std::hash function.
+template<>
+struct hash<std::tuple<mcrl2::data::data_expression, mcrl2::data::data_expression, mcrl2::lps::action_summand> >
+{
+  std::size_t operator()(const std::tuple<mcrl2::data::data_expression, mcrl2::data::data_expression, mcrl2::lps::action_summand>& x) const
+  {
+    // The hashing function below is taken from boost (http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html).
+    std::size_t seed=std::hash<atermpp::aterm>()(get<0>(x));
+    seed = std::hash<atermpp::aterm>()(get<1>(x)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed = std::hash<atermpp::aterm>()(get<2>(x).multi_action().actions()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed = std::hash<atermpp::aterm>()(get<2>(x).multi_action().arguments()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed = std::hash<atermpp::aterm>()(get<2>(x).assignments()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed = std::hash<atermpp::aterm>()(get<2>(x).summation_variables()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    seed = std::hash<atermpp::aterm>()(get<2>(x).condition()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    return seed;
+  }
+};
+
+}
 
 namespace mcrl2
 {
@@ -76,9 +101,12 @@ protected:
   data_specification             ad_hoc_data;
   simplifier*                    simpl;
 
-  std::set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache;
-  std::map< std::pair< data_expression, data_expression >, bool > reachability_cache;
-  std::map< std::tuple< data_expression, data_expression, lps::action_summand >, bool > transition_cache;
+  typedef std::unordered_set< std::tuple< data_expression, data_expression, lps::action_summand > > refinement_cache_t;
+  refinement_cache_t refinement_cache;
+  typedef std::map< std::pair< data_expression, data_expression >, bool > reachability_cache_t;
+  reachability_cache_t reachability_cache;
+  typedef std::unordered_map< std::tuple< data_expression, data_expression, lps::action_summand >, bool> transition_cache_t;
+  transition_cache_t transition_cache;
 
   int refinement_cache_hits = 0;
   int refinement_cache_misses = 0;
@@ -210,7 +238,6 @@ protected:
     }
     refinement_cache_misses++;
     // Search the cache for information on this transition
-    
     if(!transition_exists(phi_k, phi_l, as))
     {
       // Cache entry found
@@ -338,13 +365,12 @@ protected:
     {
       for(const lps::action_summand& as1: m_spec.process().action_summands())
       {
-        std::map<std::tuple<data_expression, data_expression, lps::action_summand>, bool>::iterator find_result =
+        transition_cache_t::iterator find_result =
           transition_cache.find(std::make_tuple(phi_k, phi_l1, as1));
         if(find_result != transition_cache.end() && !find_result->second)
         {
-          // phi_k is stable wrt phi_l1 and as1, so new blocks (which are contained in phi_k)
-          // are also stable wrt phi_l1 and as1.
-          // We add the new blocks to the refinement cache
+          // phi_k has no transition to phi_l1 based on as1.
+          // We add the new blocks to the transition cache
           for(const data_expression& new_block: new_blocks)
           {
             transition_cache.insert(std::make_pair(std::make_tuple(new_block, phi_l1, as1), false));
@@ -356,9 +382,8 @@ protected:
           transition_cache.find(std::make_tuple(phi_l1, phi_k, as1));
         if(find_result != transition_cache.end() && !find_result->second)
         {
-          // phi_k is stable wrt phi_l1 and as1, so new blocks (which are contained in phi_k)
-          // are also stable wrt phi_l1 and as1.
-          // We add the new blocks to the refinement cache
+          // phi_l1 has no transitions to phi_k based on as1.
+          // We add the new blocks to the transition cache
           for(const data_expression& new_block: new_blocks)
           {
             transition_cache.insert(std::make_pair(std::make_tuple(phi_l1, new_block, as1), false));
@@ -499,7 +524,7 @@ protected:
   bool transition_exists(const data_expression& src, const data_expression& dest, const lps::action_summand& as)
   {
     // Search the cache for information on this transition
-    std::map<std::tuple<data_expression, data_expression, lps::action_summand>, bool>::iterator find_result = transition_cache.find(std::make_tuple(src, dest, as));
+    transition_cache_t::iterator find_result = transition_cache.find(std::make_tuple(src, dest, as));
     if(find_result != transition_cache.end())
     {
       // Cache entry found
@@ -521,7 +546,7 @@ protected:
       );
 
     // Do some rewriting before using Fourier-Motzkin elimination
-    is_succ = one_point_rule_rewrite(quantifiers_inside_rewrite(is_succ));
+    is_succ = rewr(one_point_rule_rewrite(quantifiers_inside_rewrite(is_succ)));
     data_expression succ_result = rewr(replace_data_expressions(is_succ, fourier_motzkin_sigma(rewr), true));
     bool result = succ_result == sort_bool::true_();
     transition_cache.insert(std::make_pair(std::make_tuple(src, dest, as), result));
