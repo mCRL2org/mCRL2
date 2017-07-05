@@ -9,8 +9,8 @@
 /// \file mcrl2/utilities/bdd_manipulator.h
 /// \brief Interface to class BDD_Manipulator
 
-#ifndef BDD_MANIPULATOR_H
-#define BDD_MANIPULATOR_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_BDD_MANIPULATOR_H
+#define MCRL2_DATA_DETAIL_PROVER_BDD_MANIPULATOR_H
 
 #include "mcrl2/data/standard.h"
 
@@ -63,8 +63,8 @@ class BDD_Manipulator
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

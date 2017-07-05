@@ -10,21 +10,24 @@
 #ifndef MCRL2_PBES_EQELM_H
 #define MCRL2_PBES_EQELM_H
 
-#include <sstream>
-#include <utility>
-#include <deque>
-#include <map>
-#include <set>
-#include <sstream>
-#include <vector>
-#include <algorithm>
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewriters/data_rewriter.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/rewriters/data_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_rewriter.h"
 #include "mcrl2/utilities/logger.h"
+#include <algorithm>
+#include <deque>
+#include <map>
+#include <set>
+#include <sstream>
+#include <sstream>
+#include <utility>
+#include <vector>
 
 namespace mcrl2
 {
@@ -36,36 +39,8 @@ namespace pbes_system
 template <typename Term, typename DataRewriter, typename PbesRewriter>
 class pbes_eqelm_algorithm
 {
-  public:
-    /// \brief The term type
-    typedef typename core::term_traits<Term>::term_type term_type;
-
-    /// \brief The variable type
-    typedef typename core::term_traits<Term>::variable_type variable_type;
-
-    /// \brief The variable sequence type
-    typedef typename core::term_traits<Term>::variable_sequence_type variable_sequence_type;
-
-    /// \brief The data term type
-    typedef typename core::term_traits<Term>::data_term_type data_term_type;
-
-    /// \brief The data term sequence type
-    typedef typename core::term_traits<Term>::data_term_sequence_type data_term_sequence_type;
-
-    /// \brief The string type
-    typedef typename core::term_traits<Term>::string_type string_type;
-
-    /// \brief The propositional variable declaration type
-    typedef typename core::term_traits<Term>::propositional_variable_decl_type propositional_variable_decl_type;
-
-    /// \brief The propositional variable instantiation type
-    typedef typename core::term_traits<Term>::propositional_variable_type propositional_variable_type;
-
-    /// \brief The term traits
-    typedef typename core::term_traits<Term> tr;
-
   protected:
-    typedef std::set<variable_type> equivalence_class;
+    typedef std::set<data::variable> equivalence_class;
 
     /// \brief Compares data expressions for equality.
     const DataRewriter& m_data_rewriter;
@@ -76,18 +51,18 @@ class pbes_eqelm_algorithm
     /// \brief The vertices of the grapth, i.e. the equivalence relations.
     /// It stores the equivalence sets for each propositional variable, for example
     /// X -> [ {x1, x3}, {x2, x4} ]. Equivalence sets of size 1 are not stored.
-    std::map<string_type, std::vector<equivalence_class> > m_vertices;
+    std::map<core::identifier_string, std::vector<equivalence_class> > m_vertices;
 
     /// \brief The edges of the graph.
     /// It is a mapping from X to iocc(X).
-    std::map<string_type, std::set<propositional_variable_type> > m_edges;
+    std::map<core::identifier_string, std::set<propositional_variable_instantiation> > m_edges;
 
     /// \brief The parameters of the propositional variable declarations.
     /// These are stored inside a vector, for efficiency reasons.
-    std::map<string_type, std::vector<variable_type> > m_parameters;
+    std::map<core::identifier_string, std::vector<data::variable> > m_parameters;
 
     /// \brief Used for determining if a vertex has been visited before.
-    std::map<string_type, bool> m_discovered;
+    std::map<core::identifier_string, bool> m_discovered;
 
     // TODO: design a more generic solution for printing sets
     std::string print(const core::identifier_string& x) const
@@ -99,7 +74,7 @@ class pbes_eqelm_algorithm
     {
       std::ostringstream out;
       out << "{ ";
-      for (typename Set::const_iterator i = s.begin(); i != s.end(); ++i)
+      for (auto i = s.begin(); i != s.end(); ++i)
       {
         if (i != s.begin())
         {
@@ -111,19 +86,19 @@ class pbes_eqelm_algorithm
     }
 
     /// \brief Puts all parameters of the same sort in the same equivalence set.
-    std::vector<equivalence_class> compute_equivalence_sets(const propositional_variable_decl_type& X) const
+    std::vector<equivalence_class> compute_equivalence_sets(const propositional_variable& X) const
     {
       std::map< data::sort_expression, equivalence_class> m;
-      for (typename variable_sequence_type::const_iterator i = X.parameters().begin(); i != X.parameters().end(); ++i)
+      for (const auto & i : X.parameters())
       {
-        m[i->sort()].insert(*i);
+        m[i.sort()].insert(i);
       }
       std::vector<equivalence_class> result;
-      for (typename std::map<data::sort_expression, equivalence_class>::iterator i = m.begin(); i != m.end(); ++i)
+      for (auto & i : m)
       {
-        if (i->second.size() > 1)
+        if (i.second.size() > 1)
         {
-          result.push_back(i->second);
+          result.push_back(i.second);
         }
       }
       return result;
@@ -133,11 +108,11 @@ class pbes_eqelm_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
         out << i->first << " -> [ ";
         const std::vector<equivalence_class>& v = i->second;
-        for (typename std::vector<equivalence_class>::const_iterator j = v.begin(); j != v.end(); ++j)
+        for (auto j = v.begin(); j != v.end(); ++j)
         {
           if (j != v.begin())
           {
@@ -154,7 +129,7 @@ class pbes_eqelm_algorithm
     std::string print_edges() const
     {
       std::ostringstream out;
-      for (typename std::map<string_type, std::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+      for (auto i = m_edges.begin(); i != m_edges.end(); ++i)
       {
         out << i->first << " -> " << print_set(i->second) << std::endl;
       }
@@ -165,10 +140,10 @@ class pbes_eqelm_algorithm
     std::string print_equivalence_classes() const
     {
       std::ostringstream out;
-      for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
+      for (auto i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
         out << "  vertex " << i->first << ": ";
-        for (typename std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+        for (auto j = i->second.begin(); j != i->second.end(); ++j)
         {
           out << print_set(*j) << " ";
         }
@@ -178,53 +153,52 @@ class pbes_eqelm_algorithm
     }
 
     /// \brief Prints the todo list
-    void log_todo_list(const std::set<string_type>& todo, const std::string& msg = "") const
+    void log_todo_list(const std::set<core::identifier_string>& todo, const std::string& msg = "") const
     {
       mCRL2log(log::debug) << msg;
       mCRL2log(log::debug) << print_set(todo) << "\n";
     }
 
     /// \brief Returns true if the vertex X should propagate its values to Y
-    bool evaluate_guard(const string_type& /* X */, const propositional_variable_type& /* Y */)
+    bool evaluate_guard(const core::identifier_string& /* X */, const propositional_variable_instantiation& /* Y */)
     {
       return true;
     }
 
     /// \brief Returns the index of the element x in the sequence v
     template <typename VariableContainer>
-    size_t index_of(const variable_type& x, const VariableContainer& v)
+    std::size_t index_of(const data::variable& x, const VariableContainer& v)
     {
-      return static_cast<size_t>(std::find(v.begin(), v.end(), x) - v.begin());
+      return static_cast<std::size_t>(std::find(v.begin(), v.end(), x) - v.begin());
     }
 
     /// \brief Propagate the equivalence relations given by the substitution vX over the edge Ye.
     template <typename Substitution>
-    void update_equivalence_classes(const propositional_variable_type& Ye,
+    void update_equivalence_classes(const propositional_variable_instantiation& Ye,
                                     const Substitution& vX,
-                                    std::set<string_type>& todo
+                                    std::set<core::identifier_string>& todo
                                    )
     {
-      const string_type& Y = Ye.name();
-      std::vector<data_term_type> e(Ye.parameters().begin(), Ye.parameters().end());
+      const core::identifier_string& Y = Ye.name();
+      std::vector<data::data_expression> e(Ye.parameters().begin(), Ye.parameters().end());
 
       std::vector<equivalence_class>& cY = m_vertices[Y];
       std::vector<equivalence_class> cY1;
-      for (typename std::vector<equivalence_class>::iterator j = cY.begin(); j != cY.end(); ++j)
+      for (auto & equiv : cY)
       {
-        equivalence_class& equiv = *j;
-        std::map<data_term_type, equivalence_class> w;
-        for (typename equivalence_class::iterator k = equiv.begin(); k != equiv.end(); ++k)
+        std::map<data::data_expression, equivalence_class> w;
+        for (const auto & k : equiv)
         {
-          size_t p = index_of(*k, m_parameters[Y]);
+          std::size_t p = index_of(k, m_parameters[Y]);
           pbes_system::data_rewriter<DataRewriter> rewr(m_data_rewriter);
           pbes_system::pbes_expression e_p = rewr(e[p], vX);
-          w[atermpp::down_cast<const data::data_expression>(e_p)].insert(*k);
+          w[atermpp::down_cast<const data::data_expression>(e_p)].insert(k);
         }
-        for (typename std::map<data_term_type, equivalence_class>::iterator i = w.begin(); i != w.end(); ++i)
+        for (auto & i : w)
         {
-          if (i->second.size() > 1)
+          if (i.second.size() > 1)
           {
-            cY1.push_back(i->second);
+            cY1.push_back(i.second);
           }
         }
       }
@@ -242,14 +216,13 @@ class pbes_eqelm_algorithm
     }
 
     /// \brief Computes a substitution that corresponds to the equivalence relations in X
-    data::mutable_map_substitution<> compute_substitution(const string_type& X)
+    data::mutable_map_substitution<> compute_substitution(const core::identifier_string& X)
     {
       data::mutable_map_substitution<> result;
       const std::vector<equivalence_class>& cX = m_vertices[X];
-      for (typename std::vector<equivalence_class>::const_iterator i = cX.begin(); i != cX.end(); ++i)
+      for (const auto & s : cX)
       {
-        const equivalence_class& s = *i;
-        for (typename equivalence_class::const_iterator j = ++s.begin(); j != s.end(); ++j)
+        for (auto j = ++s.begin(); j != s.end(); ++j)
         {
           result[*j] = *s.begin();
         }
@@ -264,25 +237,25 @@ class pbes_eqelm_algorithm
     void apply_equivalence_relations(pbes& p)
     {
       // first apply the substitutions to the equations
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type X = i->variable().name();
+        core::identifier_string X = eqn.variable().name();
         data::mutable_map_substitution<> sigma = compute_substitution(X);
         if (!sigma.empty())
         {
-          i->formula() = pbes_system::replace_variables_capture_avoiding(i->formula(), sigma, data::substitution_variables(sigma));
+          eqn.formula() = pbes_system::replace_variables_capture_avoiding(eqn.formula(), sigma, data::substitution_variables(sigma));
         }
       }
 
       // then remove parameters
-      std::map<string_type, std::vector<size_t> > to_be_removed;
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      std::map<core::identifier_string, std::vector<std::size_t> > to_be_removed;
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type X = i->variable().name();
+        core::identifier_string X = eqn.variable().name();
         const std::vector<equivalence_class>& eq = m_vertices[X];
-        for (typename std::vector<equivalence_class>::const_iterator j = eq.begin(); j != eq.end(); ++j)
+        for (const auto & j : eq)
         {
-          for (typename equivalence_class::const_iterator k = ++j->begin(); k != j->end(); ++k)
+          for (auto k = ++j.begin(); k != j.end(); ++k)
           {
             to_be_removed[X].push_back(index_of(*k, m_parameters[X]));
           }
@@ -307,16 +280,16 @@ class pbes_eqelm_algorithm
     {
       m_vertices.clear();
       m_edges.clear();
-      std::set<string_type> todo;
+      std::set<core::identifier_string> todo;
 
       // compute the vertices and edges of the graph
-      for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        string_type name = i->variable().name();
-        m_edges[name] = find_propositional_variable_instantiations(i->formula());
-        m_vertices[name] = compute_equivalence_sets(i->variable());
-        const variable_sequence_type& param = i->variable().parameters();
-        m_parameters[name] = std::vector<variable_type>(param.begin(), param.end());
+        core::identifier_string name = eqn.variable().name();
+        m_edges[name] = find_propositional_variable_instantiations(eqn.formula());
+        m_vertices[name] = compute_equivalence_sets(eqn.variable());
+        const data::variable_list& param = eqn.variable().parameters();
+        m_parameters[name] = std::vector<data::variable>(param.begin(), param.end());
         todo.insert(name);
         m_discovered[name] = ignore_initial_state;
       }
@@ -324,8 +297,8 @@ class pbes_eqelm_algorithm
       if (!ignore_initial_state)
       {
         todo.clear();
-        propositional_variable_type kappa = p.initial_state();
-        string_type X = kappa.name();
+        propositional_variable_instantiation kappa = p.initial_state();
+        const core::identifier_string& X = kappa.name();
         data::mutable_map_substitution<> vX = compute_substitution(X);
 
         // propagate the equivalence relations in X over the edge kappa
@@ -348,17 +321,16 @@ class pbes_eqelm_algorithm
         mCRL2log(log::debug) << "todo list = " << print_set(todo) << "\n";
         mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
 
-        string_type X = *todo.begin();
+        core::identifier_string X = *todo.begin();
         todo.erase(X);
         mCRL2log(log::debug) << "choose todo element " << X << "\n";
 
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);
-        const std::set<propositional_variable_type>& edges = m_edges[X];
-        for (typename std::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
+        const std::set<propositional_variable_instantiation>& edges = m_edges[X];
+        for (const auto & Ye : edges)
         {
           // propagate the equivalence relations in X over the edge Ye
-          const propositional_variable_type& Ye = *i;
           if (evaluate_guard(X, Ye))
           {
             update_equivalence_classes(Ye, vX, todo);
@@ -370,6 +342,46 @@ class pbes_eqelm_algorithm
       mCRL2log(log::verbose) << "\n--- result ---\n" << print_vertices();
     }
 };
+
+/// \brief Apply the eqelm algorithm
+/// \param p A PBES to which the algorithm is applied.
+/// \param rewrite_strategy A data rewrite strategy.
+/// \param rewriter_type A PBES rewriter type.
+/// \param ignore_initial_state If true, the initial state will be ignored.
+inline
+void eqelm(pbes& p,
+           data::rewrite_strategy rewrite_strategy,
+           pbes_rewriter_type rewriter_type,
+           bool ignore_initial_state = false
+          )
+{
+  // data rewriter
+  data::rewriter datar(p.data(), rewrite_strategy);
+
+  // pbes rewriter
+  switch (rewriter_type)
+  {
+    case simplify:
+    {
+      typedef simplify_data_rewriter<data::rewriter> pbes_rewriter;
+      pbes_rewriter pbesr(datar);
+      pbes_eqelm_algorithm<pbes_expression, data::rewriter, pbes_rewriter> algorithm(datar, pbesr);
+      algorithm.run(p, ignore_initial_state);
+      break;
+    }
+    case quantifier_all:
+    case quantifier_finite:
+    {
+      bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
+      enumerate_quantifiers_rewriter pbesr(datar, p.data(), enumerate_infinite_sorts);
+      pbes_eqelm_algorithm<pbes_expression, data::rewriter, enumerate_quantifiers_rewriter> algorithm(datar, pbesr);
+      algorithm.run(p, ignore_initial_state);
+      break;
+    }
+    default:
+    { }
+  }
+}
 
 } // namespace pbes_system
 

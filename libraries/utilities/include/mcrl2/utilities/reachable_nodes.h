@@ -12,6 +12,7 @@
 #ifndef MCRL2_UTILITIES_REACHABLE_NODES_H
 #define MCRL2_UTILITIES_REACHABLE_NODES_H
 
+#include <boost/graph/adjacency_list.hpp> // to make the header compile standalone
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/tuple/tuple.hpp>
 

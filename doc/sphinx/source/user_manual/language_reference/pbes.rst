@@ -10,7 +10,7 @@ of the first-order modal :math:`\mu`-calculus model checking problem on LPSs is
 documented in the `PBES library manual
 <../../developer_manual/libraries/pbes/pbes_library.html>`_. Furthermore, PBESs
 can be used to code equivalence and preorder relations on processes with data,
-see [CPPW07]_.
+see [CPPW07a]_.
 
 PBES expression
 ---------------
@@ -257,7 +257,7 @@ encoded by the variable :math:`X_{false}`.
 
 References
 ----------
-.. [CPPW07] T. Chen, B. Ploeger, J. van de Pol and T.A.C. Willemse. Equivalence
+.. [CPPW07a] T. Chen, B. Ploeger, J. van de Pol and T.A.C. Willemse. Equivalence
             Checking for Infinite Systems using Parameterized Boolean Equation
             Systems. In L. Caires, V.T. Vasconcelos (eds.), Concurrency Theory,
             18th International Conference, CONCUR 2007, Lisbon, Portugal,

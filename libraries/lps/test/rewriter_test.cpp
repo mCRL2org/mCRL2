@@ -9,18 +9,20 @@
 /// \file rewriter_test.cpp
 /// \brief Add your file description here.
 
-#include <cstdlib>
-#include <string>
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/parse_substitution.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/lps/detail/specification_property_map.h"
+#include "mcrl2/lps/one_point_rule_rewrite.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/utilities/text_utility.h"
 #include <algorithm>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/parse_substitution.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/detail/specification_property_map.h"
+#include <cstdlib>
+#include <string>
 
 using namespace std;
 using namespace mcrl2;
@@ -101,12 +103,12 @@ void test1()
 
   specification spec1 = spec;
   lps::rewrite(spec1, r);
-  lps::detail::specification_property_map info(spec);
-  lps::detail::specification_property_map info1(spec1);
+  lps::detail::specification_property_map<> info(spec);
+  lps::detail::specification_property_map<> info1(spec1);
   BOOST_CHECK(info.to_string() == info1.to_string());
 
   // test destructor
-  rewriter r1 = r;
+  const rewriter& r1 = r;
 }
 
 const std::string SPECIFICATION2=
@@ -125,8 +127,8 @@ void test2()
   specification spec2 = spec1;
   lps::rewrite(spec2, r);
 
-  lps::detail::specification_property_map info1(spec1);
-  lps::detail::specification_property_map info2(spec2);
+  lps::detail::specification_property_map<> info1(spec1);
+  lps::detail::specification_property_map<> info2(spec2);
   BOOST_CHECK(info1.to_string() == info2.to_string());
   BOOST_CHECK(spec1.process().summand_count() == 1);
 }
@@ -148,17 +150,15 @@ void test3()
   specification spec2 = spec1;
   lps::rewrite(spec2, r);
 
-  lps::detail::specification_property_map info1(spec1);
-  lps::detail::specification_property_map info2(spec2);
+  lps::detail::specification_property_map<> info1(spec1);
+  lps::detail::specification_property_map<> info2(spec2);
   BOOST_CHECK(info1.to_string() == info2.to_string());
   BOOST_CHECK(spec1.process().summand_count() == 3);
 }
 
-// N.B. This test doesn't work due to the different representations of numbers
-// that are used before and after rewriting :-(
 // Checks if rewriting the specification src with the substitutions sigma
 // results in the specification dest.
-void test_lps_rewriter(std::string src_text, std::string dest_text, std::string sigma_text)
+void test_lps_rewriter(const std::string& src_text, const std::string& dest_text, const std::string& sigma_text)
 {
   lps::specification src  = parse_linear_process_specification(src_text);
   lps::specification dest = parse_linear_process_specification(dest_text);
@@ -182,16 +182,45 @@ void test_lps_rewriter(std::string src_text, std::string dest_text, std::string 
 void test_lps_rewriter()
 {
   std::string src =
-    "act  c:Pos#Nat;                          \n"
-    "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+1+2); \n"
-    "init P(1+1,2+2);                         \n";
+    "act  c: Bool;                                                       \n"
+    "proc P(b: Bool, c:Bool) = c(true && false).P(b || true, c && true); \n"
+    "init P(true || false, true && false);                               \n";
 
   std::string dest =
-    "act  c:Pos#Nat;                          \n"
-    "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+3);   \n"
-    "init P(2,4);                             \n";
+    "act  c: Bool;                                                       \n"
+    "proc P(b: Bool, c:Bool) = c(false).P(true, c);                      \n"
+    "init P(true, false);                                                \n";
 
   test_lps_rewriter(src, dest, "");
+}
+
+void test_one_point_rule_rewriter()
+{
+  std::string src =
+    "act  a: Bool;\n"
+    "\n"
+    "proc P(b: Bool) =\n"
+    "       (forall n: Nat. n != 1 || b) ->\n"
+    "         a(exists m: Nat. m == 1) .\n"
+    "         P(b = b);\n"
+    "\n"
+    "init P(true);";
+
+  std::string expected_result =
+    "act  a: Bool;\n"
+    "\n"
+    "proc P(b: Bool) =\n"
+    "       (1 != 1 || b) ->\n"
+    "         a(1 == 1) .\n"
+    "         P(b = b);\n"
+    "\n"
+    "init P(true);";
+
+  specification lpsspec = parse_linear_process_specification(src);
+  specification expected_spec = parse_linear_process_specification(expected_result);
+  lps::one_point_rule_rewrite(lpsspec);
+  std::string result = utilities::trim_copy(lps::pp(lpsspec));
+  BOOST_CHECK(result == expected_result);
 }
 
 int test_main(int argc, char* argv[])
@@ -199,7 +228,8 @@ int test_main(int argc, char* argv[])
   test1();
   test2();
   test3();
-  //test_lps_rewriter();
+  test_lps_rewriter();
+  test_one_point_rule_rewriter();
 
   return 0;
 }

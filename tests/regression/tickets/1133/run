@@ -1,0 +1,2 @@
+mcrl22lps 1.mcrl2 1.lps
+lps2pbes 1.lps -f 1.mcf 1.pbes

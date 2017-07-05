@@ -9,19 +9,19 @@
 /// \file mcrl2/data/detail/prover/smt_lib_solver.h
 /// \brief Abstract interface for SMT solvers based on the SMT-LIB format
 
-#ifndef SMT_LIB_SOLVER_H
-#define SMT_LIB_SOLVER_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_SMT_LIB_SOLVER_H
+#define MCRL2_DATA_DETAIL_PROVER_SMT_LIB_SOLVER_H
 
-#include <string>
 #include <sstream>
+#include <string>
 
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/exception.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
 #include "mcrl2/data/detail/prover/smt_solver.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/utilities/exception.h"
+#include "mcrl2/utilities/logger.h"
 
 #ifdef HAVE_CVC
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
@@ -52,8 +52,8 @@ class SMT_LIB_Solver: public SMT_Solver
     std::string f_variables_extrafuns;
     std::string f_extrapreds;
     std::string f_formula;
-    std::map < sort_expression, size_t > f_sorts;
-    std::map < function_symbol, size_t > f_operators;
+    std::map < sort_expression, std::size_t > f_sorts;
+    std::map < function_symbol, std::size_t > f_operators;
     std::set < variable > f_variables;
     std::set < variable > f_nat_variables;
     std::set < variable > f_pos_variables;
@@ -84,7 +84,7 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         f_extrasorts = "  :extrasorts (";
         sort_expression v_sort;
-        for(std::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
+        for(std::map < sort_expression, std::size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
         {
           if (v_sort != sort_expression())
           {
@@ -105,7 +105,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (!f_operators.empty())
       {
         f_operators_extrafuns = "  :extrafuns (";
-        for(std::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
+        for(std::map < function_symbol, std::size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
         {
           std::stringstream v_operator_string;
           v_operator_string << "op" << i->second;
@@ -121,13 +121,11 @@ class SMT_LIB_Solver: public SMT_Solver
             }
             else
             {
-              v_sort_domain_list = sort_expression_list(v_sort);
+              v_sort_domain_list = sort_expression_list({v_sort});
               v_sort = sort_expression();
             }
-            for (sort_expression_list::const_iterator l = v_sort_domain_list.begin();
-                                 l!=v_sort_domain_list.end() ; ++l)
+            for (auto v_sort_domain_elt : v_sort_domain_list)
             {
-              sort_expression v_sort_domain_elt(*l);
               if (is_function_sort(v_sort_domain_elt))
               {
                 throw mcrl2::runtime_error("Function " + data::pp(i->first) +
@@ -151,8 +149,8 @@ class SMT_LIB_Solver: public SMT_Solver
               }
               else
               {
-                std::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort_domain_elt);
-                size_t v_sort_number=f_sorts.size();
+                std::map < sort_expression, std::size_t >::const_iterator j=f_sorts.find(v_sort_domain_elt);
+                std::size_t v_sort_number=f_sorts.size();
                 if (j==f_sorts.end())  // not found
                 {
                   f_sorts[v_sort_domain_elt]=v_sort_number; // Assign a new number to v_sort_domain_elt.
@@ -182,9 +180,8 @@ class SMT_LIB_Solver: public SMT_Solver
         f_variables_extrafuns = "  :extrafuns (";
       }
 
-      for(std::set < variable > :: const_iterator i=f_variables.begin(); i!=f_variables.end(); ++i)
+      for(auto v_variable : f_variables)
       {
-        const variable v_variable = *i;
         std::string v_variable_string = v_variable.name();
         sort_expression v_sort = data_expression(v_variable).sort();
         if (sort_real::is_real(v_sort))
@@ -205,8 +202,8 @@ class SMT_LIB_Solver: public SMT_Solver
         }
         else
         {
-          std::map < sort_expression, size_t >::const_iterator j=f_sorts.find(v_sort);
-          size_t v_sort_number=f_sorts.size();
+          std::map < sort_expression, std::size_t >::const_iterator j=f_sorts.find(v_sort);
+          std::size_t v_sort_number=f_sorts.size();
           if (j==f_sorts.end())  // not found
           {
             f_sorts[v_sort]=v_sort_number; // Assign a new number to v_sort.
@@ -233,7 +230,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (f_bool2pred)
       {
         assert(f_sorts.count(sort_bool::bool_())>0);
-        size_t v_sort_number = f_sorts[sort_bool::bool_()];
+        std::size_t v_sort_number = f_sorts[sort_bool::bool_()];
         std::stringstream v_sort_string;
         v_sort_string << "sort" << v_sort_number;
         f_extrapreds = "  :extrapreds ((bool2pred ";
@@ -248,7 +245,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (!f_sorts.empty())
       {
         f_sorts_notes = "  :notes \"";
-        for(std::map < sort_expression, size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
+        for(std::map < sort_expression, std::size_t >::const_iterator i=f_sorts.begin(); i!=f_sorts.end(); ++i)
         {
           std::stringstream v_sort_string;
           v_sort_string << "sort" << i->second;
@@ -265,7 +262,7 @@ class SMT_LIB_Solver: public SMT_Solver
       if (!f_operators.empty())
       {
         f_operators_notes = "  :notes \"";
-        for(std::map < function_symbol, size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
+        for(std::map < function_symbol, std::size_t >::const_iterator i=f_operators.begin(); i!=f_operators.end(); ++i)
         {
           std::stringstream v_operator_string;
           v_operator_string << "op" << i->second;
@@ -417,7 +414,7 @@ class SMT_LIB_Solver: public SMT_Solver
       }
       else if (data::is_function_symbol(a_clause))
       {
-        translate_constant(a_clause);
+        translate_function_symbol(a_clause);
       }
       else
       {
@@ -643,9 +640,9 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       data_expression h = application(a_clause).head();
       const function_symbol& v_operator = atermpp::down_cast<function_symbol>(h);
-      std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
+      std::map < function_symbol, std::size_t >::const_iterator i=f_operators.find(v_operator);
 
-      size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
+      std::size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
       if (i==f_operators.end()) // not found.
       {
         f_operators[v_operator]=v_operator_number;
@@ -732,13 +729,12 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + "false";
     }
 
-    void translate_constant(const data_expression &a_clause)
+    void translate_function_symbol(const data_expression &a_clause)
     {
-      data_expression h = application(a_clause).head();
-      const function_symbol& v_operator = atermpp::down_cast<function_symbol>(h);
-      std::map < function_symbol, size_t >::const_iterator i=f_operators.find(v_operator);
+      const function_symbol& v_operator = atermpp::down_cast<function_symbol>(a_clause);
+      std::map < function_symbol, std::size_t >::const_iterator i=f_operators.find(v_operator);
 
-      size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
+      std::size_t v_operator_number=f_operators.size(); // This is the value if v_operator does not occur in f_operators.
       if (i==f_operators.end()) // not found.
       {
         f_operators[v_operator]=v_operator_number;
@@ -755,18 +751,18 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void add_nat_clauses()
     {
-      for(std::set < variable >::const_iterator i=f_nat_variables.begin(); i!=f_nat_variables.end(); ++i)
+      for(const auto & f_nat_variable : f_nat_variables)
       {
-        std::string v_variable_string = i->name();
+        std::string v_variable_string = f_nat_variable.name();
         f_formula = f_formula + " (>= " + v_variable_string + " 0)";
       }
     }
 
     void add_pos_clauses()
     {
-      for(std::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)
+      for(const auto & f_pos_variable : f_pos_variables)
       {
-        std::string v_variable_string = i->name();
+        std::string v_variable_string = f_pos_variable.name();
         f_formula = f_formula + " (>= " + v_variable_string + " 1)";
       }
     }
@@ -885,7 +881,45 @@ class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_
 
     inline static void exec()
     {
-      ::execlp("cvc3", "cvc3", "-lang", "smt-lib", (char*)0);
+      ::execlp("cvc3", "cvc3", "-lang", "smt", (char*)nullptr);
+    }
+
+  public:
+
+    /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
+    /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
+    /// clauses
+    bool is_satisfiable(const data_expression_list &a_formula)
+    {
+      translate(a_formula);
+
+      return execute(f_benchmark);
+    }
+};
+
+/// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
+/// Z3 / (https://github.com/Z3Prover/z3) to determine the satisfiability
+/// of propositional formulas. To use the solver Z3 / the directory containing
+/// the corresponding executable must be in the path.
+///
+/// The static method usable can be used to check checks if Z3's executable is indeed available.
+///
+/// The method z3_smt_solver::is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
+/// indicates whether or not this formula is satisfiable.
+class z3_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< z3_smt_solver >
+{
+    friend class binary_smt_solver< z3_smt_solver >;
+
+  private:
+
+    inline static char const* name()
+    {
+      return "Z3";
+    }
+
+    inline static void exec()
+    {
+      ::execlp("z3", "z3", "-smt", "-in", (char*)nullptr);
     }
 
   public:
@@ -922,7 +956,7 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
 
     inline static void exec()
     {
-      ::execlp("ario", "ario", (char*)0);
+      ::execlp("ario", "ario", (char*)nullptr);
     }
 
   public:
@@ -938,10 +972,10 @@ class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_sm
     }
 };
 #endif
-} // prover
+} // namespace prover
 
-} // detail
-} // data
-} // mcrl2
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

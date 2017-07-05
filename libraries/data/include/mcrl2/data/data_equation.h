@@ -14,12 +14,12 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/basic_sort.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {
@@ -31,7 +31,7 @@ namespace data
 namespace sort_bool
 {
 function_symbol const& true_();
-}
+} // namespace sort_bool
 
 //--- start generated class data_equation ---//
 /// \brief A data equation
@@ -58,7 +58,7 @@ class data_equation: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = 0)
+    data_equation(const Container& variables, const data_expression& condition, const data_expression& lhs, const data_expression& rhs, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
     {}
 
@@ -93,7 +93,7 @@ class data_equation: public atermpp::aterm_appl
     data_equation(const Container& variables,
                   const data_expression& lhs,
                   const data_expression& rhs,
-                  typename atermpp::enable_if_container< Container, variable >::type* = 0)
+                  typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(),variables.end()), sort_bool::true_(), lhs, rhs)
     {}
 
@@ -121,6 +121,7 @@ std::string pp(const data_equation& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const data_equation& x)

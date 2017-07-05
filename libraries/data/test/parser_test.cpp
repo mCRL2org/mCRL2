@@ -9,14 +9,14 @@
 /// \file parser_test.cpp
 /// \brief Regression test for parsing a data specification.
 
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
 
-#include "mcrl2/data/pos.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/standard.h"
 #include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2;
 
@@ -31,10 +31,10 @@ void parser_test()
   data::data_specification spec(data::parse_data_specification(text));
 
   std::cerr << "number of sorts " << spec.sorts().size() << "\n";
-  BOOST_CHECK(spec.sorts().size() == 6); // Bool, S, List(S), S->List(S), Nat, @NatPair.
-  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors(data::basic_sort("S"))).size() == 1);
-  std::cerr << "number of functions " << boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() << "\n";
-  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 96);
+  BOOST_CHECK(spec.sorts().size() == 7); // Bool, Pos, S, List(S), S->List(S), Nat, @NatPair.
+  BOOST_CHECK(spec.constructors(data::basic_sort("S")).size() == 1);
+  std::cerr << "number of functions " << spec.mappings().size() << "\n";
+  BOOST_CHECK(spec.mappings().size() == 103);
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));
@@ -56,7 +56,7 @@ void test_user_defined_sort()
 void test_whr()
 {
   using namespace data;
-  data_expression x = parse_data_expression("exists n: Nat . n == 0 whr n = 1 end");
+  data_expression x = parse_data_expression("exists n: Pos . n == 0 whr n = 1 end");
 }
 
 // returns true if parsing succeeded

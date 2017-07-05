@@ -18,9 +18,11 @@
 #ifndef MCRL2_LTS_LTS_UTILITIES_H
 #define MCRL2_LTS_LTS_UTILITIES_H
 
-// #include <string>
 #include <map>
 #include <set>
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/lts/lts.h"
 
 namespace mcrl2
@@ -28,36 +30,51 @@ namespace mcrl2
 
 namespace lts
 {
+
+namespace detail
+{
+inline std::size_t apply_map(const std::size_t n, std::map<transition::size_type,transition::size_type>& mapping)
+{
+  const std::map<transition::size_type,transition::size_type>::const_iterator i=mapping.find(n);
+  if (i==mapping.end())  // not found
+  {
+    return n;
+  }
+  return i->second;
+}
+
+
+} // end namespace detail 
+
 /// \brief Type for exploring transitions per state.
 typedef std::multimap<transition::size_type, std::pair<transition::size_type, transition::size_type> >
 outgoing_transitions_per_state_t;
 
 /// \brief From state of an iterator exploring transitions per outgoing state.
-inline size_t from(const outgoing_transitions_per_state_t::const_iterator& i)
+inline std::size_t from(const outgoing_transitions_per_state_t::const_iterator& i)
 {
   return i->first;
 }
 
 /// \brief Label of an iterator exploring transitions per outgoing state.
-inline size_t label(const outgoing_transitions_per_state_t::const_iterator& i)
+inline std::size_t label(const outgoing_transitions_per_state_t::const_iterator& i)
 {
   return i->second.first;
 }
 
 /// \brief To state of an iterator exploring transitions per outgoing state.
-inline size_t to(const outgoing_transitions_per_state_t::const_iterator& i)
+inline std::size_t to(const outgoing_transitions_per_state_t::const_iterator& i)
 {
   return i->second.second;
 }
 
 /// \brief Provide the transitions as a multimap accessible per outgoing state, useful
 ///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std::vector<transition> &trans)
+inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std::vector<transition>& trans)
 {
   outgoing_transitions_per_state_t result;
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const transition& t: trans)
   {
-    const transition t = *r;
     result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
                     t.from(), std::pair<transition::size_type, transition::size_type>(t.label(), t.to())));
   }
@@ -66,12 +83,26 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state(const std
 
 /// \brief Provide the transitions as a multimap accessible per outgoing state, useful
 ///        for for instance state space exploration.
-inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(const std::vector<transition> &trans)
+inline outgoing_transitions_per_state_t transitions_per_outgoing_state(
+                    const std::vector<transition>& trans, 
+                    const std::map<transition::size_type,transition::size_type>& hide_label_map)
 {
   outgoing_transitions_per_state_t result;
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const transition& t: trans)
   {
-    const transition t =*r;
+    result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
+                    t.from(), std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.to())));
+  }
+  return result;
+} 
+
+/// \brief Provide the transitions as a multimap accessible per outgoing state, useful
+///        for for instance state space exploration.
+inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(const std::vector<transition>& trans)
+{
+  outgoing_transitions_per_state_t result;
+  for (const transition& t: trans)
+  {
     result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
                     t.to(), std::pair<transition::size_type, transition::size_type>(t.label(), t.from())));
   }
@@ -79,100 +110,128 @@ inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(
 }
 
 /// \brief Type for exploring transitions per state and action.
+/// \brief Provide the transitions as a multimap accessible per outgoing state, useful
+///        for for instance state space exploration.
+inline outgoing_transitions_per_state_t transitions_per_outgoing_state_reversed(
+                  const std::vector<transition>& trans, 
+                  const std::map<transition::size_type,transition::size_type>& hide_label_map)
+{
+  outgoing_transitions_per_state_t result;
+  for (const transition& t: trans)
+  {
+    result.insert(std::pair<transition::size_type, std::pair<transition::size_type, transition::size_type> >(
+                    t.to(), std::pair<transition::size_type, transition::size_type>(detail::apply_map(t.label(),hide_label_map), t.from())));
+  }
+  return result;
+} 
+
+/// \brief Type for exploring transitions per state and action.
 typedef std::multimap<std::pair<transition::size_type, transition::size_type>, transition::size_type>
 outgoing_transitions_per_state_action_t;
 
 /// \brief From state of an iterator exploring transitions per outgoing state and action.
-inline size_t from(const outgoing_transitions_per_state_action_t::const_iterator& i)
+inline std::size_t from(const outgoing_transitions_per_state_action_t::const_iterator& i)
 {
   return i->first.first;
 }
 
 /// \brief Label of an iterator exploring transitions per outgoing state and action.
-inline size_t label(const outgoing_transitions_per_state_action_t::const_iterator& i)
+inline std::size_t label(const outgoing_transitions_per_state_action_t::const_iterator& i)
 {
   return i->first.second;
 }
 
 /// \brief To state of an iterator exploring transitions per outgoing state and action.
-inline size_t to(const outgoing_transitions_per_state_action_t::const_iterator& i)
+inline std::size_t to(const outgoing_transitions_per_state_action_t::const_iterator& i)
 {
   return i->second;
 }
 
 /// \brief Provide the transitions as a multimap accessible per from state and label.
-inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair(const std::vector<transition> &trans)
+inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair(const std::vector<transition>& trans)
 {
   outgoing_transitions_per_state_action_t result;
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const transition& t: trans)
   {
-    const transition t = *r;
     result.insert(std::pair<std::pair<transition::size_type, transition::size_type>, transition::size_type>(
                     std::pair<transition::size_type, transition::size_type>(t.from(), t.label()), t.to()));
   }
   return result;
 }
 
-/// \brief Provide the transitions as a multimap accessible per from state and label, ordered backwardly.
-inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair_reversed(
-  const std::vector<transition> &trans)
+/// \brief Provide the transitions as a multimap accessible per from state and label.
+inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair(
+                 const std::vector<transition>& trans, 
+                 const std::map<transition::size_type,transition::size_type>& hide_label_map)
 {
   outgoing_transitions_per_state_action_t result;
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const transition& t: trans)
   {
-    const transition t = *r;
+    result.insert(std::pair<std::pair<transition::size_type, transition::size_type>, transition::size_type>(
+                    std::pair<transition::size_type, transition::size_type>(t.from(), detail::apply_map(t.label(),hide_label_map)), t.to()));
+  }
+  return result;
+} 
+
+/// \brief Provide the transitions as a multimap accessible per from state and label, ordered backwardly.
+inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair_reversed(const std::vector<transition>& trans)
+{
+  outgoing_transitions_per_state_action_t result;
+  for (const transition& t: trans)
+  {
     result.insert(std::pair<std::pair<transition::size_type, transition::size_type>, transition::size_type>(
                     std::pair<transition::size_type, transition::size_type>(t.to(), t.label()), t.from()));
   }
   return result;
 }
 
+/// \brief Provide the transitions as a multimap accessible per from state and label, ordered backwardly.
+inline outgoing_transitions_per_state_action_t transitions_per_outgoing_state_action_pair_reversed(
+                const std::vector<transition>& trans,
+                const std::map<transition::size_type,transition::size_type>& hide_label_map)
+{
+  outgoing_transitions_per_state_action_t result;
+  for (const transition& t: trans)
+  {
+    result.insert(std::pair<std::pair<transition::size_type, transition::size_type>, transition::size_type>(
+                    std::pair<transition::size_type, transition::size_type>(t.to(), detail::apply_map(t.label(),hide_label_map)), t.from()));
+  }
+  return result;
+} 
+
 namespace detail
 {
+// Yields a label with an obscure name referring to divergence.
 
-// Determine an index of the tau label. If it does not exist, and throw exception is true,
-// throw an exception. Otherwise, a non existing index of an action label is returned.
-template < class LTS_TYPE>
-size_t determine_tau_label(LTS_TYPE& l)
+template < class LABEL_TYPE >
+// LABEL_TYPE make_divergence_label(const std::string& s, const LABEL_TYPE& l)
+LABEL_TYPE make_divergence_label(const std::string& s)
 {
-  // Set the tau_label to an existing label, if possible.
-  // If nothing is found the tau label becomes l.num_action_labels,
-  // but there will not be a tau anyhow in this case.
-  size_t tau_label=l.num_action_labels();
+  return LABEL_TYPE(s);
+}
 
-  for (size_t i=0; i<l.num_action_labels(); ++i)
-  {
-    if (l.is_tau(i))
-    {
-      tau_label=i;
-      break;
-    }
-  }
-  if (tau_label==l.num_action_labels())
-  {
-    mCRL2log(mcrl2::log::debug) << "No tau label has been found.\n";
-    const typename LTS_TYPE::action_label_t lab; // nameless action label, representing tau.
-    return l.add_action(lab,true);
-  }
-  else
-  {
-    mCRL2log(mcrl2::log::debug) << "Using <" << pp(l.action_label(tau_label)) << "> as tau label.\n";
-  }
-  return tau_label;
+template <>
+inline mcrl2::lts::action_label_lts make_divergence_label<mcrl2::lts::action_label_lts>(const std::string& s)
+{
+  return action_label_lts(lps::multi_action(process::action(process::action_label(core::identifier_string(s),
+                                                                                  data::sort_expression_list()),
+                                                            data::data_expression_list())));
 }
 
 // Make a new divergent_transition_label and replace each self loop with it.
 // Return the number of the divergent transition label.
 template < class LTS_TYPE >
-size_t mark_explicit_divergence_transitions(LTS_TYPE& l)
+std::size_t mark_explicit_divergence_transitions(LTS_TYPE& l)
 {
-  const typename LTS_TYPE::action_label_t lab; // nameless action label, representing divergence.
-  size_t divergent_transition_label=l.add_action(lab);
-  for(std::vector<transition>::iterator i=l.get_transitions().begin(); i!=l.get_transitions().end(); ++i)
+  // Below we create an odd action label, representing divergence.
+  const typename LTS_TYPE::action_label_t lab=make_divergence_label<typename LTS_TYPE::action_label_t>("!@*&divergence&*@!"); 
+  std::size_t divergent_transition_label=l.add_action(lab);
+  assert(divergent_transition_label+1==l.num_action_labels());
+  for(transition& t: l.get_transitions())
   {
-    if (l.is_tau(i->label()) && i->to()==i->from())
+    if (l.is_tau(l.apply_hidden_label_map(t.label())) && t.to()==t.from())
     {
-      *i = transition(i->to(),divergent_transition_label,i->to());
+      t = transition(t.to(),divergent_transition_label,t.to());
     }
   }
   return divergent_transition_label;
@@ -180,14 +239,13 @@ size_t mark_explicit_divergence_transitions(LTS_TYPE& l)
 
 // Replace each transition in a state that is an outgoing divergent_transition with a tau_loop in that state.
 template < class LTS_TYPE >
-void unmark_explicit_divergence_transitions(LTS_TYPE& l, const size_t divergent_transition_label)
+void unmark_explicit_divergence_transitions(LTS_TYPE& l, const std::size_t divergent_transition_label)
 {
-  size_t tau_label=determine_tau_label(l);
-  for(std::vector<transition>::iterator i=l.get_transitions().begin(); i!=l.get_transitions().end(); ++i)
+  for(transition& t: l.get_transitions())
   {
-    if (i->label()==divergent_transition_label)
+    if (t.label()==divergent_transition_label)
     { 
-      *i = transition(i->from(),tau_label,i->from());
+      t = transition(t.from(),l.tau_label_index(),t.from());
     }
   }
 }

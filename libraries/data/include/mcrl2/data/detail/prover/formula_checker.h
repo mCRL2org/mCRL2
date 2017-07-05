@@ -126,10 +126,7 @@ class Formula_Checker
     {
       if (!f_dot_file_name.empty())
       {
-        std::ostringstream  v_file_name(f_dot_file_name);
-
-        v_file_name << "-" << a_formula_number << ".dot";
-        f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
+        f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), f_dot_file_name + "-" + std::to_string(a_formula_number) + ".dot");
       }
     }
 
@@ -161,7 +158,7 @@ class Formula_Checker
 
     /// \brief Checks the formulas in the list a_formulas.
     /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
-    void check_formulas(const data_expression_list &a_formulas)
+    void check_formulas(const data_expression_list& a_formulas)
     {
       int v_formula_number = 1;
 

@@ -9,38 +9,33 @@
 /// \file parelm_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/atermpp/detail/utility.h"
-#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/confluence_checker.h"
-#include "mcrl2/data/bool.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-using mcrl2::utilities::collect_after_test_case;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 //static bool check_for_ctau(lps::specification const& s) .
-static size_t count_ctau(lps::specification const& s)
+static std::size_t count_ctau(specification const& s)
 {
-  size_t result = 0;
-  const action_summand_vector v_summands = s.process().action_summands();
+  std::size_t result = 0;
+  auto const& v_summands = s.process().action_summands();
 
-  for (action_summand_vector::const_iterator i=v_summands.begin(); i!=v_summands.end(); ++i)
+  for (const auto & v_summand : v_summands)
   {
-    const process::action_list al=i->multi_action().actions();
+    const process::action_list al=v_summand.multi_action().actions();
     if (al.size()==1)
     {
       const process::action_label lab=al.front().label();
-      if (to_string(lab.name())=="ctau")
+      if (pp(lab.name())=="ctau")
       {
         ++result;
       }
@@ -50,17 +45,17 @@ static size_t count_ctau(lps::specification const& s)
 }
 
 static
-void run_confluence_test_case(const std::string& s, const size_t ctau_count)
+void run_confluence_test_case(const std::string& s, const std::size_t ctau_count)
 {
   using namespace mcrl2::lps;
 
   specification s0 = parse_linear_process_specification(s);
-  Confluence_Checker checker1(s0);
+  Confluence_Checker<specification> checker1(s0);
   // Check confluence for all summands and
   // replace confluents tau's by ctau's.
-  specification s1(lps::specification(checker1.check_confluence_and_mark(data::sort_bool::true_(),0)));
+  checker1.check_confluence_and_mark(data::sort_bool::true_(),0);
 
-  BOOST_CHECK_EQUAL(count_ctau(s1), ctau_count);
+  BOOST_CHECK_EQUAL(count_ctau(s0), ctau_count);
 }
 
 BOOST_AUTO_TEST_CASE(case_1)
@@ -209,5 +204,5 @@ BOOST_AUTO_TEST_CASE(case_5)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

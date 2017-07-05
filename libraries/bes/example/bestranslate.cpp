@@ -9,13 +9,14 @@
 /// \file bestranslate.cpp
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
-#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
+#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/bes/pbes_output_tool.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::pbes_system;
+using namespace mcrl2::bes::tools;
 using namespace mcrl2::bes;
 using namespace mcrl2;
 

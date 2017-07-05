@@ -1,0 +1,42 @@
+#ifdef RC_INVOKED
+#include <Winver.h>
+
+IDI_ICON1 ICON DISCARDABLE "@ICOFILE@"
+
+#if DBG
+#define VER_DBG VS_FF_DEBUG
+#else
+#define VER_DBG 0
+#endif
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION @VERSION_HIHI@,@VERSION_HILO@,@VERSION_LOHI@,@VERSION_LOLO@
+PRODUCTVERSION @VERSION_HIHI@,@VERSION_HILO@,@VERSION_LOHI@,@VERSION_LOLO@
+FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+FILEFLAGS @FILEFLAGS@
+FILEOS VOS_UNKNOWN
+FILETYPE VFT_APP
+FILESUBTYPE 0
+BEGIN
+ BLOCK "StringFileInfo"
+ BEGIN
+  BLOCK "040904b0"
+        BEGIN
+  VALUE "Comments", "Part of the mCRL2 toolset."
+  VALUE "CompanyName", "Technische Universiteit Eindhoven"
+  VALUE "FileDescription", "@DESCRIPTION@"
+  VALUE "FileVersion", "@MCRL2_VERSION@"
+  VALUE "InternalName", "@TOOLNAME@"
+  VALUE "LegalCopyright", "(c) @VERSION_HIHI@ Technische Universiteit Eindhoven"
+  VALUE "OriginalFilename", "@ORIGFILENAME@"
+  VALUE "ProductName", "mCRL2"
+  VALUE "ProductVersion", "@MCRL2_VERSION@"
+        END
+ END
+ BLOCK "VarFileInfo"
+ BEGIN
+  VALUE "Translation", 0x0409,1200
+ END
+END
+
+#endif // RC_INVOKED

@@ -12,12 +12,12 @@
 #ifndef MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_H
 #define MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_H
 
-#include <string>
-#include <iterator>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/structured_sort_constructor_argument.h"
+#include <iterator>
+#include <string>
 
 namespace mcrl2
 {
@@ -52,7 +52,7 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
+    structured_sort_constructor(const std::string& name, const Container& arguments, const std::string& recogniser, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}
 
@@ -91,9 +91,9 @@ class structured_sort_constructor: public atermpp::aterm_appl
     template <typename OutIter>
     void argument_sorts(OutIter out) const
     {
-      for(structured_sort_constructor_argument_list::const_iterator i = arguments().begin(); i != arguments().end(); ++i)
+      for(const auto & i : arguments())
       {
-        *out++ = i->sort();
+        *out++ = i.sort();
       }
     }
 
@@ -116,7 +116,7 @@ class structured_sort_constructor: public atermpp::aterm_appl
 
     /// \brief Constructor.
     template <typename Container>
-    structured_sort_constructor(const std::string& name, const Container& arguments, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = 0)
+    structured_sort_constructor(const std::string& name, const Container& arguments, typename atermpp::enable_if_container<Container, structured_sort_constructor_argument>::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::empty_identifier_string())
     {}
 
@@ -133,11 +133,11 @@ class structured_sort_constructor: public atermpp::aterm_appl
     /// \brief Constructor
     ///
     /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
-    template < typename Container, size_t S, size_t S0 >
+    template < typename Container, std::size_t S, std::size_t S0 >
     structured_sort_constructor(const char(&name)[S],
                                 const Container& arguments,
                                 const char(&recogniser)[S0],
-                                typename atermpp::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+                                typename atermpp::enable_if_container< Container, structured_sort_constructor_argument >::type* = nullptr)
       : atermpp::aterm_appl(core::detail::function_symbol_StructCons(), core::identifier_string(name), structured_sort_constructor_argument_list(arguments.begin(), arguments.end()), core::identifier_string(recogniser))
     {}
 
@@ -166,11 +166,11 @@ class structured_sort_constructor: public atermpp::aterm_appl
     function_symbol_vector projection_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (structured_sort_constructor_argument_list::const_iterator i = arguments().begin(); i != arguments().end(); ++i)
+      for (const auto & i : arguments())
       {
-        if (i->name() != core::empty_identifier_string())
+        if (i.name() != core::empty_identifier_string())
         {
-          result.push_back(function_symbol(i->name(), make_function_sort(s, i->sort())));
+          result.push_back(function_symbol(i.name(), make_function_sort(s, i.sort())));
         }
       }
       return result;
@@ -207,6 +207,7 @@ std::string pp(const structured_sort_constructor& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const structured_sort_constructor& x)
@@ -229,4 +230,4 @@ std::string pp(const structured_sort_constructor_vector& x);
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_STRUCTURED_SORT_CONSTUCTOR_H
+#endif // MCRL2_DATA_STRUCTURED_SORT_CONSTRUCTOR_H

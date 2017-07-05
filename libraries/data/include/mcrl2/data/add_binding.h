@@ -13,13 +13,13 @@
 #define MCRL2_DATA_ADD_BINDING_H
 
 #include "mcrl2/core/add_binding.h"
-#include "mcrl2/data/variable.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/where_clause.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/data_equation.h"
 
 namespace mcrl2
 {
@@ -34,24 +34,24 @@ struct add_data_variable_binding: public core::add_binding<Builder, Derived, var
   typedef core::add_binding<Builder, Derived, variable> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::bound_variables;
   using super::increase_bind_count;
   using super::decrease_bind_count;
 
   void increase_bind_count(const assignment_list& assignments)
   {
-    for (auto i = assignments.begin(); i != assignments.end(); ++i)
+    for (const auto& assignment : assignments)
     {
-      increase_bind_count(i->lhs());
+      increase_bind_count(assignment.lhs());
     }
   }
 
   void decrease_bind_count(const assignment_list& assignments)
   {
-    for (auto i = assignments.begin(); i != assignments.end(); ++i)
+    for (const auto& assignment : assignments)
     {
-      decrease_bind_count(i->lhs());
+      decrease_bind_count(assignment.lhs());
     }
   }
 

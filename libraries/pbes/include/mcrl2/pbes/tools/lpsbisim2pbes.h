@@ -14,9 +14,9 @@
 
 #include "mcrl2/lps/io.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/bisimulation_type.h"
+#include "mcrl2/pbes/io.h"
 
 namespace mcrl2 {
 
@@ -25,7 +25,7 @@ namespace pbes_system {
 void lpsbisim2pbes(const std::string& input_filename1,
                    const std::string& input_filename2,
                    const std::string& output_filename,
-                   const utilities::file_format* output_format,
+                   const utilities::file_format& output_format,
                    bisimulation_type type,
                    bool normalize
                   )

@@ -19,11 +19,11 @@ if compiler == 'clang':
   cc = which('clang')
   cpp = which('clang++')
 elif compiler == 'gcc-oldest':
-  cc = which('gcc-4.4')
-  cpp = which('g++-4.4')
+  cc = which('gcc-4.6')
+  cpp = which('g++-4.6')
 elif compiler == 'gcc-latest':
-  cc = which('gcc-4.7')
-  cpp = which('g++-4.7')
+  cc = which('gcc-4.9')
+  cpp = which('g++-4.9')
 if compiler != 'default':
   if cc and cpp:
     compilerflags = ['-DCMAKE_C_COMPILER=' + cc, '-DCMAKE_CXX_COMPILER=' + cpp]
@@ -45,16 +45,21 @@ packageflags = []
 if package.startswith('official-release'):
   packageflags += ['-DMCRL2_PACKAGE_RELEASE=ON']
 
-if label.startswith('windows'):
-  packageflags += ['-DMSVC10_REDIST_DIR:PATH=C:\Program Files\Common Files\VC\Redist']
-  
-if label.startswith('macosx') and package in ['nightly', 'official-release']:
-  packageflags += ['-DMCRL2_OSX_PACKAGE=ON'] # Needed for packaging relevant Boost headers (for compiling rewriter)
+#
+# Parallelize the Windows build using the JOM make program (which is shipped with Qt)
+#
+generator = []
+if label in ['windows-amd64', 'windows-x86']:
+  generator += ['-GNMake Makefiles JOM']
 
 #
-# Enable random tests for all builds.
+# If we are building the mCRL2-release job, run all tests
+# Note that jobname is something like, i.e. including buildtype etc.
+# mCRL2-release/buildtype=Maintainer,compiler=default,label=ubuntu-amd64
 #
-testflags = ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
+testflags = []
+if jobname.split('/')[0].lower().find("release") <> -1:
+  testflags += ['-DMCRL2_EXTRA_TOOL_TESTS=ON']
 
 #
 # Do not run long tests if we're doing the ubuntu-amd64 clang maintainer 
@@ -62,24 +67,6 @@ testflags = ['-DMCRL2_ENABLE_RANDOM_TEST_TARGETS=ON']
 #
 if (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
   testflags += ['-DMCRL2_SKIP_LONG_TESTS=ON']
-
-#
-# For Windows, explicitly tell CMake which generator to use to avoid trouble
-# with x86/x64 incompatibilities
-#
-generator = []
-if label == 'windows-amd64':
-  generator += ['-GNMake Makefiles']
-elif label == 'windows-x86':
-  generator += ['-GNMake Makefiles']
-
-#
-# If we are building the mCRL2-release job, run all tests
-# Note that jobname is something like, i.e. including buildtype etc.
-# mCRL2-release/buildtype=Maintainer,compiler=default,label=ubuntu-amd64
-#
-if jobname.split('/')[0].lower().find("release") <> -1:
-  testflags += ['-DMCRL2_ENABLE_RELEASE_TEST_TARGETS=ON']
 
 #
 # Run CMake, take into account configuration axes.
@@ -118,12 +105,7 @@ if not buildthreads:
 # Build
 #
 
-extraoptions = []
-if label in ["windows-x86", "windows-amd64"]:
-  extraoptions = ['--config', buildtype]
-else:
-  extraoptions =  ['--', '-j{0}'.format(buildthreads)]
-make_command = ['cmake', '--build', builddir] + extraoptions
+make_command = ['cmake', '--build', builddir, '--', '-j{0}'.format(buildthreads)]
 if call('CMake --build', make_command):
   log('Build failed.')
   sys.exit(1)
@@ -143,12 +125,16 @@ ctest_command = ['ctest',
                  '--output-on-failure', 
                  '--no-compress-output', 
                  '-j{0}'.format(buildthreads)]
-if label in ["windows-x86", "windows-amd64"]:
-  ctest_command += ['--build-config', buildtype]
-env = {}
-env.update(os.environ)
-env['MCRL2_COMPILEREWRITER'] = os.path.abspath(os.path.join('.', 'mcrl2compilerewriter_ctest'))
-ctest_result = call('CTest', ctest_command, env=env)
+  
+#
+# Do not run header tests in any build except one, because we don't gain any 
+# information by running them on more than one platform (and on Windows they 
+# take ages).
+#
+if not (label == 'ubuntu-amd64' and buildtype == 'Maintainer' and compiler == 'clang'):
+  ctest_command += ['-LE', 'headertest']
+
+ctest_result = call('CTest', ctest_command)
 if ctest_result:
   log('CTest returned ' + str(ctest_result))
 

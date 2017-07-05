@@ -21,8 +21,6 @@
 
 #include <string>
 #include <vector>
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
@@ -33,130 +31,111 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lps/state.h"
+#include "mcrl2/lps/probabilistic_data_expression.h"
+#include "mcrl2/lts/probabilistic_state.h"
+#include "mcrl2/lts/probabilistic_lts.h"
 
 namespace mcrl2
 {
 namespace lts
 {
-namespace detail
-{
-
-extern std::vector < atermpp::function_symbol > state_function_symbols;
 
 /** \brief This class contains state labels for an labelled transition system in .lts format.
-    \details A state label in .lts format consists of a term of the form
-             STATE(t1,...,tn) where ti are the data expressions.
+    \details A state label in .lts format consists of lists of balanced tree of data expressions.
+             These represent sets of state vectors. The reason for the sets is that states can 
+             be merged by operations on state spaces, and if so, the sets of labels can easily 
+             be joined. 
 */
-class state_label_lts : public atermpp::aterm_appl
+class state_label_lts : public atermpp::term_list< atermpp::term_balanced_tree< data::data_expression > >
 {
-  protected:
-
-    /** \brief We store functions symbols with varying arity and string "STATE"
-        in this atermpp::aterm_appl array, as they are automatically protected.
-    */
-
-    /** \brief A function to get a protected STATE function symbol of the
-               indicated arity.
-    */
-
-    static atermpp::function_symbol get_STATE_function_symbol(const size_t arity)
-    {
-
-      if (arity>=state_function_symbols.size())
-      {
-        state_function_symbols.resize(arity+1);
-      }
-      if (state_function_symbols[arity]==atermpp::function_symbol())
-      {
-        state_function_symbols[arity]=atermpp::function_symbol("STATE",arity);
-      }
-      return state_function_symbols[arity];
-    }
-
   public:
+    typedef atermpp::term_balanced_tree< data::data_expression > single_label;
+    typedef atermpp::term_list< single_label > super;
 
-    /** \brief Default constructor. The state label becomes some default aterm.
+    /** \brief Default constructor. 
     */
     state_label_lts()
-    {
-    }
-
-    /** \brief Constructor. Set the state label to the aterm a.
-        \details The aterm a must have the shape "STATE(t1,...,tn).*/
-    state_label_lts(const atermpp::aterm_appl& a):atermpp::aterm_appl(a)
-    {
-      assert(a.function()== get_STATE_function_symbol(a.function().arity()));
-
-      // Take care that the STATE function symbol with the desired arity exists.
-      /* const size_t arity=a.function().arity();
-      get_STATE_function_symbol(arity); */
-    }
-
-    /** \brief Construct a state label out of a data_expression_list.
-    */
-    state_label_lts(const mcrl2::data::data_expression_list& l):
-      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
     {}
 
-    /** \brief Construct a state label out of a data_expression_vector.
+    /** \brief Copy constructor. */
+    state_label_lts(const state_label_lts& )=default;
+
+    /** \brief Copy assignment. */
+    state_label_lts& operator=(const state_label_lts& )=default;
+
+    /** \brief Construct a single state label out of the elements in a container.
     */
-    state_label_lts(const std::vector < mcrl2::data::data_expression >& l):
-      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
-    {}
+    template < class CONTAINER >
+    explicit state_label_lts(const CONTAINER& l)
+    {
+      static_assert(std::is_same<typename CONTAINER::value_type, data::data_expression>::value,"Value type must be a data_expression");
+      this->push_front(single_label(l.begin(),l.size()));
+    }
 
     /** \brief Construct a state label out of a balanced tree of data expressions, representing a state label.
     */
-    state_label_lts(const atermpp::term_balanced_tree<mcrl2::data::data_expression>& l):
-      atermpp::aterm_appl(get_STATE_function_symbol(l.size()),l.begin(),l.end())
-    {}
-
-    /** \brief Get the i-th element of this state label.
-        \param[in] i The index of the state label. Must be smaller than the length of this state label.
-        \return The data expression at position i of this state label.
-    */
-    const mcrl2::data::data_expression& operator [](const size_t i) const
+    explicit state_label_lts(const single_label& l)
     {
-      assert(i<size());
-      return atermpp::down_cast<mcrl2::data::data_expression>(atermpp::aterm_appl::operator[](i));
+      this->push_front(single_label(l.begin(),l.size()));
     }
 
-    /** \brief Set the i-th element of this state label to the indicated value.
-        \param[in] e The expression to which the i-th element must be set.
-        \param[in] i Index into this state label. */
-    void set_element(const mcrl2::data::data_expression& e, const size_t i)
+    /** \brief Construct a state label out of list of balanced trees of data expressions, representing a state label.
+    */
+    explicit state_label_lts(const super& l)
+      : super(l)
     {
-      assert(i<this->size());
-      std::vector<data::data_expression> v(this->begin(),this->end());
-      v[i]=e;
-      *this=atermpp::aterm_appl(get_STATE_function_symbol(v.size()),v.begin(),v.end());
+    }
+
+    /** \brief An operator to concatenate two state labels. */
+    state_label_lts operator+(const state_label_lts& l) const
+    {
+      return state_label_lts(static_cast<super>(*this)+static_cast<super>(l));
     }
 };
 
 /** \brief Pretty print a state value of this LTS.
-    \details The label l is printed as (t1,...,tn).
-    \param[in] l  The state value to pretty print.
+    \details The label is printed as (t1,...,tn) if it consists of a single label.
+             Otherwise the labels are printed with square brackets surrounding it. 
+    \param[in] label  The state value to pretty print.
     \return           The pretty-printed representation of value. */
 
-inline std::string pp(const state_label_lts l)
+inline std::string pp(const state_label_lts& label)
 {
   std::string s;
-  s = "(";
-  for (size_t i=0; i<l.size(); ++i)
+  if (label.size()!=1)
   {
-    s += data::pp(l[i]);
-    if (i+1<l.size())
-    {
-      s += ",";
-    }
+    s += "[";
   }
-  s += ")";
-  return s;
+  bool first=true;
+  for(const state_label_lts::single_label& l: label) 
+  {
+    if (!first)
+    {
+      s += ", ";
+    }
+    first = false;
+    s += "(";
+    for (std::size_t i=0; i<l.size(); ++i)
+    {
+      s += data::pp(l[i]);
+      if (i+1<l.size())
+      {
+        s += ",";
+      }
+    }
+    s += ")";
+  }
+  if (label.size()!=1)
+  {
+    s += "]";
+  }
+  return s; 
 }
 
 /** \brief A class containing the values for action labels for the .lts format.
     \details An action label is a multi_action. */
-class action_label_lts:public mcrl2::lps::multi_action
+class action_label_lts: public mcrl2::lps::multi_action
 {
   public:
 
@@ -164,41 +143,22 @@ class action_label_lts:public mcrl2::lps::multi_action
     action_label_lts()
     {}
 
-    /** \brief Constructor. Sets action label to the multi_action a. */
-    action_label_lts(const atermpp::aterm a):mcrl2::lps::multi_action(a)
-    {
-    }
+    /** \brief Copy constructor. */
+    action_label_lts(const action_label_lts& )=default;
 
-    /** \brief Constructor. Transforms action label a to form a multi_action a. */
-    action_label_lts(const process::action a):mcrl2::lps::multi_action(a)
-    {
-    }
+    /** \brief Copy assignment. */
+    action_label_lts& operator=(const action_label_lts& )=default;
 
     /** \brief Constructor. */
-    action_label_lts(const mcrl2::lps::multi_action a):mcrl2::lps::multi_action(a)
+    explicit action_label_lts(const mcrl2::lps::multi_action& a):mcrl2::lps::multi_action(a)
     {
-    }
-
-    /** \brief Returns this multi_action as an aterm without the time tag.
-    */
-    atermpp::aterm aterm_without_time() const
-    {
-      if (this->has_time())
-      {
-        throw mcrl2::runtime_error("Cannot transform multi action " +
-                                   lps::pp(*this) + " to an atermpp::aterm as it contains time.");
-      }
-      return atermpp::aterm_appl(core::detail::function_symbol_MultAct(), this->actions());
     }
 
     /** \brief Hide the actions with labels in tau_actions.
         \return Returns whether the hidden action becomes empty, i.e. a tau or hidden action.
     */
-    bool hide_actions(const std::vector<std::string>& tau_actions)
+    void hide_actions(const std::vector<std::string>& tau_actions)
     {
-      using namespace std;
-      using namespace mcrl2::lps;
-
       const process::action_list mas = this->actions();
       process::action_list new_action_list;
       for (process::action_list:: const_iterator i=mas.begin(); i!=mas.end(); ++i)
@@ -206,21 +166,26 @@ class action_label_lts:public mcrl2::lps::multi_action
         const process::action a=*i;
 
         if (std::find(tau_actions.begin(),tau_actions.end(),
-                      string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
+                      std::string(a.label().name()))==tau_actions.end())  // this action must not be hidden.
         {
           new_action_list.push_front(a);
         }
       }
-      const bool is_tau=new_action_list.empty();
-
       m_actions=new_action_list;
-
-      return is_tau;
     }
+
+    /* \brief The action label that represents the internal action.
+    */
+    static const action_label_lts& tau_action()
+    {
+      static action_label_lts tau_action=action_label_lts();
+      return tau_action;
+    }
+
 };
 
 /** \brief Print the action label to string. */
-inline std::string pp(const action_label_lts l)
+inline std::string pp(const action_label_lts& l)
 {
   return lps::pp(mcrl2::lps::multi_action(l));
 }
@@ -238,23 +203,17 @@ inline action_label_lts parse_lts_action(
   const data::data_specification& data_spec,
   const process::action_label_list& act_decls)
 {
-  lps::multi_action ma = lps::parse_multi_action(multi_action_string, act_decls, data_spec);
-  return action_label_lts(atermpp::aterm_appl(core::detail::function_symbol_MultAct(), ma.actions()));
+  return action_label_lts(lps::parse_multi_action(multi_action_string, act_decls, data_spec));
 }
 
-
-} // namespace detail
-
-
-/** \brief This class contains labelled transition systems in .lts format.
-    \details In this .lts format, an action label is a multi action, and a
-           state label is an expression of the form STATE(t1,...,tn) where
-           ti are data expressions.
-*/
-class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts >
+namespace detail
 {
 
-  private:
+/** \brief a base class for lts_lts_t and probabilistic_lts_t.
+ */
+class lts_lts_base
+{
+  protected:
     bool m_has_valid_data_spec;
     data::data_specification m_data_spec;
     bool m_has_valid_parameters;
@@ -263,74 +222,44 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     process::action_label_list m_action_decls;
 
   public:
-
-    /** \brief Creates an object containing no information. */
-    lts_lts_t():
-      // m_type(lts_none),
-      m_has_valid_data_spec(false),
+    /// \brief Default constructor
+    lts_lts_base()
+    : m_has_valid_data_spec(false),
       m_has_valid_parameters(false),
       m_has_valid_action_decls(false)
     {}
 
-    /** \brief Creates an object containing a muCRL specification.
-     * \param[in] t The muCRL specification that will be stored in the object. */
-    lts_lts_t(const atermpp::aterm& t);
-
-    /** \brief Creates an object containing an mCRL2 specification.
-     * \param[in] spec The mCRL2 specification that will be stored in the object. */
-    lts_lts_t(lps::specification const& spec);
-
-    /** \brief Copy constructor */
-    lts_lts_t(const lts_lts_t& l):
-      lts< detail::state_label_lts, detail::action_label_lts >(l),
-      m_has_valid_data_spec(l.m_has_valid_data_spec),
+    /// \brief Copy constructor
+    lts_lts_base(const lts_lts_base& l)
+    : m_has_valid_data_spec(l.m_has_valid_data_spec),
       m_data_spec(l.m_data_spec),
       m_has_valid_parameters(l.m_has_valid_parameters),
       m_parameters(l.m_parameters),
       m_has_valid_action_decls(l.m_has_valid_action_decls),
-      m_action_decls(l.m_action_decls)
+      m_action_decls(l.m_action_decls) 
     {}
 
-    /** \brief Standard destructor for the class lts_lts
-    */
-    ~lts_lts_t()
-    {}
-
-    /** \brief Swap function for this lts. */
-    void swap(lts_lts_t& l)
+    void swap(lts_lts_base& l)
     {
-      lts< detail::state_label_lts, detail::action_label_lts >::swap(l);
-
-      {
-        const bool aux=m_has_valid_data_spec;
-        m_has_valid_data_spec=l.m_has_valid_data_spec;
-        l.m_has_valid_data_spec=aux;
-      }
-      {
-        const data::data_specification aux=m_data_spec;
-        m_data_spec=l.m_data_spec;
-        l.m_data_spec=aux;
-      }
-      {
-        const bool aux=m_has_valid_parameters;
-        m_has_valid_parameters=l.m_has_valid_parameters;
-        l.m_has_valid_parameters=aux;
-      }
-      {
-        const data::variable_list aux=m_parameters;
-        m_parameters=l.m_parameters;
-        l.m_parameters=aux;
-      }
-      {
-        const bool aux=m_has_valid_action_decls;
-        m_has_valid_action_decls=l.m_has_valid_action_decls;
-        l.m_has_valid_action_decls=aux;
-      }
-      {
-        const process::action_label_list aux=m_action_decls;
-        m_action_decls=l.m_action_decls;
-        l.m_action_decls=aux;
-      }
+      bool aux=m_has_valid_data_spec;
+      m_has_valid_data_spec=l.m_has_valid_data_spec;
+      l.m_has_valid_data_spec=aux;
+      
+      const data::data_specification auxd=m_data_spec;
+      m_data_spec=l.m_data_spec;
+      l.m_data_spec=auxd;
+      
+      aux=m_has_valid_parameters;
+      m_has_valid_parameters=l.m_has_valid_parameters;
+      l.m_has_valid_parameters=aux;
+      
+      m_parameters.swap(l.m_parameters);
+      
+      aux=m_has_valid_action_decls;
+      m_has_valid_action_decls=l.m_has_valid_action_decls;
+      l.m_has_valid_action_decls=aux;
+      
+      m_action_decls.swap(l.m_action_decls);
     }
 
     /** \brief Yields the type of this lts, in this case lts_lts. */
@@ -341,7 +270,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Returns the mCRL2 data specification of this LTS.
     */
-    data::data_specification data() const
+    const data::data_specification& data() const
     {
       assert(m_has_valid_data_spec);
       return m_data_spec;
@@ -356,7 +285,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Return action label declarations stored in this LTS.
     */
-    process::action_label_list action_labels() const
+    const process::action_label_list& action_labels() const
     {
       assert(m_has_valid_action_decls);
       return m_action_decls;
@@ -381,7 +310,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     /** \brief Set the mCRL2 data specification of this LTS.
      * \param[in] spec  The mCRL2 data specification for this LTS.
     */
-    void set_data(data::data_specification const& spec)
+    void set_data(const data::data_specification& spec)
     {
       m_has_valid_data_spec=true;
       m_data_spec=spec;
@@ -396,7 +325,7 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
 
     /** \brief Return the process parameters stored in this LTS.
     */
-    data::variable_list process_parameters() const
+    const data::variable_list& process_parameters() const
     {
       assert(m_has_valid_parameters);
       return m_parameters;
@@ -405,14 +334,14 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
     /** \brief Returns the i-th parameter of the state vectors stored in this LTS.
      * \return The state parameters stored in this LTS.
     */
-    data::variable process_parameter(size_t i) const
+    const data::variable& process_parameter(std::size_t i) const
     {
       assert(i<m_parameters.size());
       assert(m_has_valid_parameters);
       data::variable_list::const_iterator j=m_parameters.begin();
-      for(size_t c=0; c!=i; ++j, ++c)
+      for(std::size_t c=0; c!=i; ++j, ++c)
       {}
-      return data::variable(*j);
+      return *j;
     }
 
 
@@ -424,6 +353,85 @@ class lts_lts_t : public lts< detail::state_label_lts, detail::action_label_lts 
       m_has_valid_parameters=true;
       m_parameters=params;
     }
+
+};
+
+} // namespace detail
+
+
+/** \brief This class contains labelled transition systems in .lts format.
+    \details In this .lts format, an action label is a multi action, and a
+           state label is an expression of the form STATE(t1,...,tn) where
+           ti are data expressions.
+*/
+class lts_lts_t : public lts< state_label_lts, action_label_lts, detail::lts_lts_base >
+{
+  public:
+    typedef lts< state_label_lts, action_label_lts, detail::lts_lts_base > super;
+
+    /** \brief Creates an object containing no information. */
+    lts_lts_t()
+    {}
+
+    /** \brief Creates an object containing a muCRL specification.
+     * \param[in] t The muCRL specification that will be stored in the object. */
+    lts_lts_t(const atermpp::aterm& t);
+
+    /** \brief Creates an object containing an mCRL2 specification.
+     * \param[in] spec The mCRL2 specification that will be stored in the object. */
+    lts_lts_t(lps::specification const& spec);
+
+    /** \brief Copy constructor */
+    lts_lts_t(const lts_lts_t& l):
+      super(l)
+    {}
+
+    /** \brief Load the labelled transition system from file.
+     *  \details If the filename is empty, the result is read from stdout.
+     *  \param[in] filename Name of the file to which this lts is written.
+     */
+    void load(const std::string& filename);
+
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is read from stdin.
+     *  \param[in] filename Name of the file from which this lts is read.
+     */
+    void save(const std::string& filename) const;
+};
+
+/** \brief This class contains probabilistic labelled transition systems in .lts format.
+    \details In this .lts format, an action label is a multi action, and a
+           state label is an expression of the form STATE(t1,...,tn) where
+           ti are data expressions.
+*/
+class probabilistic_lts_lts_t : 
+         public probabilistic_lts< state_label_lts, 
+                                   action_label_lts, 
+                                   probabilistic_state<std::size_t, lps::probabilistic_data_expression>, 
+                                   detail::lts_lts_base >
+{
+  public:
+    typedef probabilistic_lts< state_label_lts, 
+                               action_label_lts, 
+                               probabilistic_state_t,
+                               detail::lts_lts_base > super;
+
+    /** \brief Creates an object containing no information. */
+    probabilistic_lts_lts_t()
+    {}
+
+    /** \brief Creates an object containing a muCRL specification.
+     * \param[in] t The muCRL specification that will be stored in the object. */
+    probabilistic_lts_lts_t(const atermpp::aterm& t);
+
+    /** \brief Creates an object containing an mCRL2 specification.
+     * \param[in] spec The mCRL2 specification that will be stored in the object. */
+    probabilistic_lts_lts_t(lps::specification const& spec);
+
+    /** \brief Copy constructor */
+    probabilistic_lts_lts_t(const probabilistic_lts_lts_t& l):
+      super(l)
+    {}
 
     /** \brief Load the labelled transition system from file.
      *  \details If the filename is empty, the result is read from stdout.

@@ -1,0 +1,8 @@
+sort A = struct element(id:Nat);
+
+map f: A -> Int;
+var a:A; id:Nat;
+eqn 
+f(a) = Nat2Int(id(a));
+
+init delta;

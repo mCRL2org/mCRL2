@@ -1,0 +1,4 @@
+% Test case to check a more complex forall quantifier elimination.
+pbes mu X=forall x:Nat.val(x<3 => x==1);
+init X;
+

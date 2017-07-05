@@ -13,16 +13,16 @@
 #ifndef MCRL2_CORE_PARSE_H
 #define MCRL2_CORE_PARSE_H
 
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/core/detail/dparser_functions.h"
+#include "mcrl2/core/dparser.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/utilities/exception.h"
+#include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/bind.hpp>
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/core/dparser.h"
-#include "mcrl2/core/detail/dparser_functions.h"
 
 struct D_ParserTables; // prototype
 
@@ -71,18 +71,10 @@ private:
     std::string inherited = parse_node_exception::get_error_message(node, "unexpected parse node!");
     try
     {
-      std::stringstream s;
-      s << inherited << std::endl
-        << "symbol      = " << p.symbol_table().symbol_name(node) << std::endl
-        << "string      = " << node.string() << std::endl
-        << "child_count = " << node.child_count();
-      for (int i = 0; i < node.child_count(); i++)
-      {
-        s << std::endl
-          << "child " << i << " = " << p.symbol_table().symbol_name(node.child(i))
-          << " " << node.child(i).string();
-      }
-      return s.str();
+      std::ostringstream out;
+      out << inherited << std::endl;
+      p.print_node(out, node);
+      return out.str();
     }
     catch (...)
     {
@@ -105,7 +97,7 @@ struct parser_actions
 
   // starts a traversal in node, and calls the function f to each subnode of the given type
   template <typename Function>
-  void traverse(const parse_node& node, Function f)
+  void traverse(const parse_node& node, const Function& f) const
   {
     if (!node)
     {
@@ -126,9 +118,9 @@ struct parser_actions
   {
     const parser_table& table;
     const std::string& type;
-    Function f;
+    const Function& f;
 
-    visitor(const parser_table& table_, const std::string& type_, Function f_)
+    visitor(const parser_table& table_, const std::string& type_, const Function& f_)
       : table(table_),
         type(type_),
         f(f_)
@@ -146,7 +138,7 @@ struct parser_actions
   };
 
   template <typename Function>
-  visitor<Function> make_visitor(const parser_table& table, const std::string& type, Function f)
+  visitor<Function> make_visitor(const parser_table& table, const std::string& type, const Function& f) const
   {
     return visitor<Function>(table, type, f);
   }
@@ -158,9 +150,9 @@ struct parser_actions
     const parser_table& table;
     const std::string& type;
     Container& container;
-    Function f;
+    const Function& f;
 
-    collector(const parser_table& table_, const std::string& type_, Container& container_, Function f_)
+    collector(const parser_table& table_, const std::string& type_, Container& container_, const Function& f_)
       : table(table_),
         type(type_),
         container(container_),
@@ -179,7 +171,7 @@ struct parser_actions
   };
 
   template <typename Container, typename Function>
-  collector<Container, Function> make_collector(const parser_table& table, const std::string& type, Container& container, Function f)
+  collector<Container, Function> make_collector(const parser_table& table, const std::string& type, Container& container, const Function& f) const
   {
     return collector<Container, Function>(table, type, container, f);
   }
@@ -191,9 +183,9 @@ struct parser_actions
     const parser_table& table;
     const std::string& type;
     SetContainer& container;
-    Function f;
+    const Function& f;
 
-    set_collector(const parser_table& table_, const std::string& type_, SetContainer& container_, Function f_)
+    set_collector(const parser_table& table_, const std::string& type_, SetContainer& container_, const Function& f_)
       : table(table_),
         type(type_),
         container(container_),
@@ -212,7 +204,7 @@ struct parser_actions
   };
 
   template <typename SetContainer, typename Function>
-  set_collector<SetContainer, Function> make_set_collector(const parser_table& table, const std::string& type, SetContainer& container, Function f)
+  set_collector<SetContainer, Function> make_set_collector(const parser_table& table, const std::string& type, SetContainer& container, const Function& f) const
   {
     return set_collector<SetContainer, Function>(table, type, container, f);
   }
@@ -230,7 +222,7 @@ struct default_parser_actions: public parser_actions
   {}
 
   template <typename T, typename Function>
-  atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, Function f)
+  atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, const Function& f) const
   {
     std::vector<T> result;
     traverse(node, make_collector(m_parser.symbol_table(), type, result, f));
@@ -238,26 +230,30 @@ struct default_parser_actions: public parser_actions
   }
 
   template <typename T, typename Function>
-  std::vector<T> parse_vector(const parse_node& node, const std::string& type, Function f)
+  std::vector<T> parse_vector(const parse_node& node, const std::string& type, const Function& f) const
   {
     std::vector<T> result;
     traverse(node, make_collector(m_parser.symbol_table(), type, result, f));
     return result;
   }
 
-  core::identifier_string parse_Id(const parse_node& node)
+  core::identifier_string parse_Id(const parse_node& node) const
   {
     return core::identifier_string(node.string());
   }
 
-  core::identifier_string parse_Number(const parse_node& node)
+  core::identifier_string parse_Number(const parse_node& node) const
   {
     return core::identifier_string(node.string());
   }
 
-  core::identifier_string_list parse_IdList(const parse_node& node)
+  core::identifier_string_list parse_IdList(const parse_node& node) const
   {
-    return parse_list<core::identifier_string>(node, "Id", boost::bind(&default_parser_actions::parse_Id, this, _1));
+#ifdef _MSC_VER
+    return parse_list<core::identifier_string>(node, "Id", [&](const core::parse_node& node) { return parse_Id(node); });
+#else
+    return parse_list<core::identifier_string>(node, "Id", std::bind(&default_parser_actions::parse_Id, this, std::placeholders::_1));
+#endif    
   }
 };
 
@@ -300,7 +296,7 @@ bool is_user_identifier(std::string const& s)
   return true;
 }
 
-}
-}
+} // namespace core
+} // namespace mcrl2
 
 #endif // MCRL2_CORE_PARSE_H

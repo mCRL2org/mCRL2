@@ -12,13 +12,13 @@
 #ifndef MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 #define MCRL2_PBES_DETAIL_GUARD_TRAVERSER_H
 
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
 
 #ifdef MCRL2_PBES_STATEGRAPH_CHECK_GUARDS
 #include "mcrl2/pbes/find.h"
@@ -49,7 +49,7 @@ pbes_expression guard_n(const pbes_expression& x)
 {
   if (is_simple_expression(x))
   {
-    return utilities::optimized_not(x);
+    return data::optimized_not(x);
   }
   else
   {
@@ -86,7 +86,7 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
   else if (pbes_system::is_not(x))
   {
     pbes_expression phi = pbes_system::not_(atermpp::aterm_appl(x)).operand();
-    return utilities::optimized_not(guard_impl(X, phi));
+    return data::optimized_not(guard_impl(X, phi));
   }
   else if (pbes_system::is_and(x))
   {
@@ -94,11 +94,11 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
     pbes_expression psi = pbes_system::and_(atermpp::aterm_appl(x)).right();
     if (has_propositional_variable(psi, X))
     {
-      return utilities::optimized_and(guard_s(phi), guard_impl(X, psi));
+      return data::optimized_and(guard_s(phi), guard_impl(X, psi));
     }
     else
     {
-      return utilities::optimized_and(guard_s(psi), guard_impl(X, phi));
+      return data::optimized_and(guard_s(psi), guard_impl(X, phi));
     }
   }
   else if (pbes_system::is_or(x))
@@ -107,11 +107,11 @@ pbes_expression guard_impl(const propositional_variable_instantiation& X, const 
     pbes_expression psi = pbes_system::or_(atermpp::aterm_appl(x)).right();
     if (has_propositional_variable(psi, X))
     {
-      return utilities::optimized_and(guard_n(phi), guard_impl(X, psi));
+      return data::optimized_and(guard_n(phi), guard_impl(X, psi));
     }
     else
     {
-      return utilities::optimized_and(guard_n(psi), guard_impl(X, phi));
+      return data::optimized_and(guard_n(psi), guard_impl(X, phi));
     }
   }
   else if (pbes_system::is_imp(x))
@@ -162,13 +162,13 @@ struct guard_expression
   {
     if (is_simple())
     {
-      condition = utilities::optimized_and(guard, condition);
+      condition = data::optimized_and(guard, condition);
     }
     else
     {
-      for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::iterator i = guards.begin(); i != guards.end(); ++i)
+      for (auto& g: guards)
       {
-        i->second = utilities::optimized_and(guard, i->second);
+        g.second = data::optimized_and(guard, g.second);
       }
     }
   }
@@ -177,13 +177,13 @@ struct guard_expression
   {
     if (is_simple())
     {
-      condition = utilities::optimized_not(condition);
+      condition = data::optimized_not(condition);
     }
     else
     {
-      for (auto i = guards.begin(); i != guards.end(); ++i)
+      for (auto& g: guards)
       {
-        i->second = utilities::optimized_not(i->second);
+        g.second = data::optimized_not(g.second);
       }
     }
   }
@@ -239,9 +239,9 @@ std::ostream& operator<<(std::ostream& out, const guard_expression& x)
   }
   else
   {
-    for (std::vector<std::pair<propositional_variable_instantiation, pbes_expression> >::const_iterator i = x.guards.begin(); i != x.guards.end(); ++i)
+    for (const auto& g: x.guards)
     {
-      out << pbes_system::pp(i->first) << " guard = " << pbes_system::pp(i->second) << std::endl;
+      out << pbes_system::pp(g.first) << " guard = " << pbes_system::pp(g.second) << std::endl;
     }
   }
   return out;
@@ -253,7 +253,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   typedef pbes_expression_traverser<guard_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   simplify_data_rewriter<data::rewriter> R;
   std::vector<guard_expression> expression_stack;
@@ -309,7 +309,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   {
     guard_expression right = pop();
     guard_expression left = pop();
-    pbes_expression new_condition = utilities::optimized_and(left.condition, right.condition);
+    pbes_expression new_condition = data::optimized_and(left.condition, right.condition);
     if (left.is_simple() && right.is_simple())
     {
       left.condition = new_condition;
@@ -340,7 +340,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
   {
     guard_expression right = pop();
     guard_expression left = pop();
-    pbes_expression new_condition = utilities::optimized_or(left.condition, right.condition);
+    pbes_expression new_condition = data::optimized_or(left.condition, right.condition);
     if (left.is_simple() && right.is_simple())
     {
       left.condition = new_condition;
@@ -348,13 +348,13 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     }
     else if (left.is_simple())
     {
-      right.add_guard(utilities::optimized_not(left.condition));
+      right.add_guard(data::optimized_not(left.condition));
       right.condition = new_condition;
       push(right);
     }
     else if (right.is_simple())
     {
-      left.add_guard(utilities::optimized_not(right.condition));
+      left.add_guard(data::optimized_not(right.condition));
       left.condition = new_condition;
       push(left);
     }
@@ -372,7 +372,7 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     guard_expression right = pop();
     guard_expression left = pop();
     left.negate();
-    pbes_expression new_condition = utilities::optimized_or(left.condition, right.condition);
+    pbes_expression new_condition = data::optimized_or(left.condition, right.condition);
     if (left.is_simple() && right.is_simple())
     {
       left.condition = new_condition;
@@ -380,13 +380,13 @@ struct guard_traverser: public pbes_expression_traverser<guard_traverser>
     }
     else if (left.is_simple())
     {
-      right.add_guard(utilities::optimized_not(left.condition));
+      right.add_guard(data::optimized_not(left.condition));
       right.condition = new_condition;
       push(right);
     }
     else if (right.is_simple())
     {
-      left.add_guard(utilities::optimized_not(right.condition));
+      left.add_guard(data::optimized_not(right.condition));
       left.condition = new_condition;
       push(left);
     }

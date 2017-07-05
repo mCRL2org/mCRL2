@@ -12,15 +12,15 @@
 #ifndef MCRL2_BES_BOOLEAN_EQUATION_H
 #define MCRL2_BES_BOOLEAN_EQUATION_H
 
-#include <cassert>
-#include <string>
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/bes/boolean_expression.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
-#include "mcrl2/bes/boolean_expression.h"
+#include <cassert>
+#include <string>
 
 namespace mcrl2
 {
@@ -154,6 +154,7 @@ std::string pp(const boolean_equation& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const boolean_equation& x)

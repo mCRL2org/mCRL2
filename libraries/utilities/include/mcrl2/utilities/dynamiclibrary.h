@@ -6,8 +6,8 @@
 #include <stdexcept>
 #include "mcrl2/utilities/logger.h"
 
-#ifdef _MSC_VER
-  #include <Windows.h>
+#ifdef _WIN32
+  #include <windows.h>
   typedef HMODULE library_handle;
   typedef FARPROC library_proc;
 
@@ -89,7 +89,7 @@
 class dynamic_library {
 private:
   library_handle m_library;
-  void load() throw(std::runtime_error)
+  void load() 
   {
     if (m_library == NULL)
     {
@@ -102,9 +102,10 @@ private:
       }
     }
   }
+
 protected:
   std::string m_filename;
-  void unload() throw(std::runtime_error)
+  void unload() 
   {
     if (m_library)
     {
@@ -117,6 +118,7 @@ protected:
       m_library = NULL;
     }
   }
+
 public:
   dynamic_library(const std::string &filename = std::string()) : m_library(0), m_filename(filename) {}
   virtual ~dynamic_library() 
@@ -130,7 +132,8 @@ public:
       mCRL2log(mcrl2::log::error) << "Error while unloading dynamic library: " << error.what() << std::endl;
     }
   }
-  library_proc proc_address(const std::string &name) throw(std::runtime_error)
+
+  library_proc proc_address(const std::string &name) 
   {
     if (m_library == 0)
     {

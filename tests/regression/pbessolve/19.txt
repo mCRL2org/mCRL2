@@ -1,0 +1,46 @@
+% Regression test 2 for #1215
+sort Enum5 = struct e4_5 | e3_5 | e2_5 | e1_5 | e0_5;
+     AbsNat = struct nul | meer;
+
+map
+     absplus: AbsNat # AbsNat -> Set(AbsNat);
+     abslt: AbsNat # AbsNat -> Set(Bool);
+     abseqn: AbsNat # AbsNat -> Set(Bool);
+     Generated_and: Bool # Bool -> Set(Bool);
+     Liftabsplus: Set(AbsNat) # Set(AbsNat) -> Set(AbsNat);
+     Liftabslt: Set(AbsNat) # Set(AbsNat) -> Set(Bool);
+     Liftabseqn: Set(AbsNat) # Set(AbsNat) -> Set(Bool);
+     LiftGenerated_and: Set(Bool) # Set(Bool) -> Set(Bool);
+
+var  an,an': AbsNat;
+eqn  absplus(nul, nul)  =  { nul };
+     absplus(meer, meer)  =  { meer };
+     absplus(meer, nul)  =  { meer };
+     absplus(nul, meer)  =  { meer };
+     abslt(nul, meer)  =  { true };
+     abslt(meer, meer)  =  { false, true };
+     abslt(an, nul)  =  { false };
+     abseqn(nul, nul)  =  { true };
+     an != an'  ->  abseqn(an, an')  =  { false };
+     abseqn(meer, meer)  =  { false, true };
+
+var  x0,x1: Bool;
+eqn  Generated_and(x0, x1)  =  {x0 && x1};
+
+var  X0,X1: Set(AbsNat);
+eqn  Liftabsplus(X0, X1)  =  { y: AbsNat | exists a0,a1: AbsNat. a0 in X0 && a1 in X1 && y in absplus(a0, a1) };
+     Liftabslt(X0, X1)  =  { y: Bool | exists b0,b1: AbsNat. b0 in X0 && b1 in X1 && y in abslt(b0, b1) };
+
+var  X0,X1: Set(AbsNat);
+eqn  Liftabseqn(X0, X1)  =  { y: Bool | exists c0,c1: AbsNat. c0 in X0 && c1 in X1 && y in abseqn(c0, c1) };
+
+var  X0,X1: Set(Bool);
+eqn  LiftGenerated_and(X0, X1)  =  { y: Bool | exists d0,d1: Bool. d0 in X0 && d1 in X1 && y in Generated_and(d0, d1) };
+
+pbes nu Z = (
+   val(!(false in LiftGenerated_and({false}, {true})) ||
+   !(false in Liftabslt({nul}, Liftabsplus({nul}, {meer}))))
+ );
+
+init Z;
+

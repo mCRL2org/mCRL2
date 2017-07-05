@@ -30,22 +30,22 @@ namespace detail
 template <class T> // note, T is only a dummy
 struct bes_equation_limit
 {
-  static size_t max_bes_equations;
+  static std::size_t max_bes_equations;
 };
 
 template <class T>
-size_t bes_equation_limit<T>::max_bes_equations = (std::numeric_limits<size_t>::max)();
+std::size_t bes_equation_limit<T>::max_bes_equations = (std::numeric_limits<std::size_t>::max)();
 
 inline
-void set_bes_equation_limit(size_t size)
+void set_bes_equation_limit(std::size_t size)
 {
-  bes_equation_limit<size_t>::max_bes_equations = size;
+  bes_equation_limit<std::size_t>::max_bes_equations = size;
 }
 
 inline
-void check_bes_equation_limit(size_t size)
+void check_bes_equation_limit(std::size_t size)
 {
-  if (size >= bes_equation_limit<size_t>::max_bes_equations)
+  if (size >= bes_equation_limit<std::size_t>::max_bes_equations)
   {
     throw std::out_of_range("Error: number of BES equations has exceeded the limit");
   }

@@ -9,16 +9,15 @@
 /// \file remove_parameters_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/lps/detail/lps_parameter_remover.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -48,27 +47,21 @@ void test_remove_parameters()
   std::set<data::variable> to_be_removed;
   to_be_removed.insert(variable("s", sort_pos::pos()));
   to_be_removed.insert(variable("i", sort_nat::nat()));
-  lps::detail::lps_parameter_remover<std::set<data::variable> > remover(to_be_removed);
-
-  data::variable_list v;
-  remover.remove_list(v);
-  remover(spec);
 
   // check the result
   std::string expected_result = "process_parameter_names =";
-  lps::detail::specification_property_map info(spec);
-  BOOST_CHECK(data::detail::compare_property_maps("test_remove_parameters", info, expected_result));
+  lps::detail::specification_property_map<> info(spec);
 
   specification spec2 = parse_linear_process_specification(SPEC);
   remove_parameters(spec2, to_be_removed);
-  lps::detail::specification_property_map info2(spec);
+  lps::detail::specification_property_map<> info2(spec2);
   BOOST_CHECK(data::detail::compare_property_maps("test_remove_parameters", info2, expected_result));
 }
 
 void test_instantiate_free_variables()
 {
-  specification spec = linearise(lps::detail::ABP_SPECIFICATION());
-  lps::detail::lps_algorithm algorithm(spec);
+  specification spec = remove_stochastic_operators(linearise(lps::detail::ABP_SPECIFICATION()));
+  lps::detail::lps_algorithm<> algorithm(spec);
   algorithm.instantiate_free_variables();
 }
 
@@ -79,7 +72,7 @@ void test_remove_rundant_assignments()
     "proc P(x: Nat) = a.P(x = x);\n"
     "init P(0);"
   ;
-  std::string expected_result_text = 
+  std::string expected_result_text =
     "act  a;\n"
     "proc P(x: Nat) = a.P();\n"
     "init P(0);"
@@ -95,7 +88,7 @@ void test_remove_rundant_assignments()
     "proc P(x: Nat) = sum x: Nat. a.P(x = x);\n"
     "init P(0);"
   ;
-  expected_result_text = 
+  expected_result_text =
     "act  a;\n"
     "proc P(x: Nat) = sum x: Nat. a.P(x = x);\n"
     "init P(0);"

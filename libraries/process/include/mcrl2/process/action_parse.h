@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_ACTION_PARSE_H
 
 #include "mcrl2/data/parse.h"
-#include "mcrl2/process/untyped_action.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/typecheck.h"
 
@@ -21,23 +20,25 @@ namespace mcrl2 {
 
 namespace process {
 
-struct action_actions: public data::data_specification_actions
+namespace detail {
+
+struct action_actions: public data::detail::data_specification_actions
 {
   action_actions(const core::parser& parser_)
-    : data::data_specification_actions(parser_)
+    : data::detail::data_specification_actions(parser_)
   {}
 
-  untyped_action parse_Action(const core::parse_node& node)
+  data::untyped_data_parameter parse_Action(const core::parse_node& node) const
   {
-    return process::untyped_action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+    return data::untyped_data_parameter(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  untyped_action_list parse_ActionList(const core::parse_node& node)
+  data::untyped_data_parameter_list parse_ActionList(const core::parse_node& node) const
   {
-    return parse_list<process::untyped_action>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
+    return parse_list<data::untyped_data_parameter>(node, "Action", [&](const core::parse_node& node) { return parse_Action(node); });
   }
 
-  bool callback_ActDecl(const core::parse_node& node, action_label_vector& result)
+  bool callback_ActDecl(const core::parse_node& node, action_label_vector& result) const
   {
     if (symbol_name(node) == "ActDecl")
     {
@@ -47,27 +48,29 @@ struct action_actions: public data::data_specification_actions
       {
         sorts = parse_SortProduct(node.child(1).child(0).child(1));
       }
-      for (auto i = ids.begin(); i != ids.end(); ++i)
+      for (const core::identifier_string& id: ids)
       {
-        result.push_back(action_label(*i, sorts));
+        result.push_back(action_label(id, sorts));
       }
       return true;
     }
     return false;
   };
 
-  action_label_list parse_ActDeclList(const core::parse_node& node)
+  action_label_list parse_ActDeclList(const core::parse_node& node) const
   {
     action_label_vector result;
-    traverse(node, boost::bind(&action_actions::callback_ActDecl, this, _1, boost::ref(result)));
+    traverse(node, [&](const core::parse_node& node) { return callback_ActDecl(node, result); });
     return process::action_label_list(result.begin(), result.end());
   }
 
-  action_label_list parse_ActSpec(const core::parse_node& node)
+  action_label_list parse_ActSpec(const core::parse_node& node) const
   {
     return parse_ActDeclList(node.child(1));
   }
 };
+
+} // namespace detail
 
 /// \brief Parses an action declaration from a string
 /// \param text A string containing an action declaration
@@ -82,7 +85,7 @@ process::action_label_list parse_action_declaration(const std::string& text, con
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   action_label_vector result;
-  action_actions(p).callback_ActDecl(node, result);
+  detail::action_actions(p).callback_ActDecl(node, result);
   p.destroy_parse_node(node);
   process::action_label_list v(result.begin(), result.end());
   v = process::normalize_sorts(v, data_spec);

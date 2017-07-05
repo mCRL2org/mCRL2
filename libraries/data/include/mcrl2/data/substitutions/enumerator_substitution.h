@@ -12,14 +12,14 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_ENUMERATOR_SUBSTITUTION_H
 #define MCRL2_DATA_SUBSTITUTIONS_ENUMERATOR_SUBSTITUTION_H
 
+#include "mcrl2/data/builder.h"
+#include "mcrl2/data/is_simple_substitution.h"
+#include "mcrl2/data/undefined.h"
+#include "mcrl2/utilities/exception.h"
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "mcrl2/data/is_simple_substitution.h"
-#include "mcrl2/data/undefined.h"
-#include "mcrl2/data/builder.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -36,7 +36,8 @@ struct enumerator_replace_builder: public data_expression_builder<enumerator_rep
   typedef data_expression_builder<enumerator_replace_builder> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
 
   const variable_list& variables;
   const data_expression_list& expressions;
@@ -46,7 +47,7 @@ struct enumerator_replace_builder: public data_expression_builder<enumerator_rep
       expressions(expressions_)
   {}
 
-  data_expression operator()(const variable& x)
+  data_expression apply(const variable& x)
   {
     variable_list vars = variables;
     data_expression_list exprs = expressions;
@@ -64,10 +65,6 @@ struct enumerator_replace_builder: public data_expression_builder<enumerator_rep
       return enumerator_replace(exprs.front(), vars.tail(), exprs.tail());
     }
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <typename T>
@@ -75,7 +72,7 @@ inline
 data_expression enumerator_replace(const T& x, const variable_list& variables, const data_expression_list& expressions)
 {
   enumerator_replace_builder f(variables, expressions);
-  return f(x);
+  return f.apply(x);
 }
 
 } // namespace detail

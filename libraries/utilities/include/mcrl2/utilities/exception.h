@@ -9,13 +9,13 @@
 /// \file mcrl2/utilities/exception.h
 /// \brief Exception classes for use in libraries and tools
 
-#ifndef __MCRL2_EXCEPTION_H__
-#define __MCRL2_EXCEPTION_H__
+#ifndef MCRL2_UTILITIES_EXCEPTION_H
+#define MCRL2_UTILITIES_EXCEPTION_H
 
-#include <stdexcept>
-#include <sstream>
-#include <iostream>
 #include <cassert>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 namespace mcrl2
 {
@@ -61,6 +61,6 @@ public:
   {}
 };
 
-}
+} // namespace mcrl2
 
 #endif

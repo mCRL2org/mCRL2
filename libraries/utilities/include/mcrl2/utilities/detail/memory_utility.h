@@ -9,7 +9,7 @@
 /// \file mcrl2/utilities/detail/memory_utility.h
 /// \brief This file contains a workaround that allows to
 /// assign a small array of elements on the stack. For most
-/// systems this can be done by:
+/// systems this can be done by the function alloca, or by:
 ///
 ///    type var[n];
 ///
@@ -17,22 +17,22 @@
 /// special function _alloca must be used.
 
 
-// Declare a local array NAME of type TYPE and SIZE elements (where SIZE
-// is not a constant value). These will be allocated on the stack, and
-// therefore any aterms put in there will be automatically protected.
+// Reserve a local array of type TYPE and SIZE elements (where SIZE
+// is not necessarily a constant value). These will be allocated on the stack, 
+// but the memory will not be initialised, nor will a destructor be called
+// on these memory positions when the reserved data is freed. 
 
 
 #ifndef MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 
-
-#ifdef _MSC_VER
-#include "malloc.h"
-#define MCRL2_SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
+#ifdef _WIN32
+#include <malloc.h>
+#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE,SIZE)  (TYPE *) _alloca((SIZE)*sizeof(TYPE))
 #else
-#include "alloca.h"
-#define MCRL2_SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) alloca((SIZE)*sizeof(TYPE))
+#include <alloca.h>
+#define MCRL2_SPECIFIC_STACK_ALLOCATOR(TYPE,SIZE)  (TYPE *) alloca((SIZE)*sizeof(TYPE))
 #endif 
 
-#endif
+#endif // MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 

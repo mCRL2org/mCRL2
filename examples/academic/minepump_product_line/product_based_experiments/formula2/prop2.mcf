@@ -1,0 +1,5 @@
+[ tau || setC ] [ true ]
+mu Z1 . [ tau || setM ] [ setMa || setMq || setMaMq || tau ]
+mu Z2 . [ setL ] [ true ]
+mu Z3 . [ true ] [ receiveMsg ]
+nu X . mu Y . ( < levelMsg  > X || < !levelMsg > Y )

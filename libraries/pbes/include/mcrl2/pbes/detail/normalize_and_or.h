@@ -12,11 +12,12 @@
 #ifndef MCRL2_PBES_DETAIL_NORMALIZE_AND_OR_H
 #define MCRL2_PBES_DETAIL_NORMALIZE_AND_OR_H
 
+#include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/join.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include <set>
 #include <utility>
-#include "mcrl2/utilities/optimized_boolean_operators.h"
-#include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2
 {
@@ -34,7 +35,8 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   typedef pbes_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::update;
+  using super::apply;
 
   /// \brief Splits a disjunction into a sequence of operands
   /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a
@@ -66,39 +68,37 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
 
   pbes_expression normalize(const pbes_expression& x)
   {
-    typedef core::term_traits<pbes_expression> tr;
-
     if (is_and(x))
     {
       std::multiset<pbes_expression> s = split_and(x);
-      return pbes_expr::join_and(s.begin(), s.end());
+      return join_and(s.begin(), s.end());
     }
     else if (is_or(x))
     {
       std::multiset<pbes_expression> s = split_or(x);
-      return pbes_expr::join_or(s.begin(), s.end());
+      return join_or(s.begin(), s.end());
     }
     return x;
   }
 
   // to prevent default operator() being called
-  data::data_expression operator()(const data::data_expression& x)
+  data::data_expression apply(const data::data_expression& x)
   {
     return x;
   }
 
-  pbes_expression operator()(const pbes_expression& x)
+  pbes_expression apply(const pbes_expression& x)
   {
-    return normalize(super::operator()(x));
+    return normalize(super::apply(x));
   }
 };
 
 template <typename T>
 T normalize_and_or(const T& x,
-                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+                   typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
                   )
 {
-  return core::make_apply_builder<normalize_and_or_builder>()(x);
+  return core::make_apply_builder<normalize_and_or_builder>().apply(x);
 }
 
 template <typename T>
@@ -106,7 +106,7 @@ void normalize_and_or(T& x,
                       typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
                      )
 {
-  core::make_apply_builder<normalize_and_or_builder>()(x);
+  core::make_apply_builder<normalize_and_or_builder>().update(x);
 }
 
 } // namespace detail

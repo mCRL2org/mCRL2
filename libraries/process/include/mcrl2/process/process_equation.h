@@ -13,9 +13,9 @@
 #define MCRL2_PROCESS_PROCESS_EQUATION_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_identifier.h"
@@ -85,6 +85,7 @@ std::string pp(const process_equation& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_equation& x)
@@ -102,7 +103,7 @@ inline void swap(process_equation& t1, process_equation& t2)
 // template function overloads
 std::string pp(const process_equation_list& x);
 std::string pp(const process_equation_vector& x);
-void normalize_sorts(process_equation_vector& x, const data::data_specification& dataspec);
+void normalize_sorts(process_equation_vector& x, const data::sort_specification& sortspec);
 std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x);
 
 } // namespace process

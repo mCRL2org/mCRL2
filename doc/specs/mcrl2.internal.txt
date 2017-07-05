@@ -29,6 +29,7 @@
                 | SortArrow(<SortExpr>+, <SortExpr>)
                 | UntypedSortUnknown
                 | UntypedSortsPossible(<SortExpr>+)
+                | UntypedSortVariable(<Number>)
 
 //sort identifier
 <SortId>       ::= SortId(<String>)
@@ -62,6 +63,9 @@
 
 //operation identifier
 <OpId>         ::= OpId(<String>, <SortExpr>, <Number>)
+
+//untyped parameter
+<UntypedDataParameter> ::= UntypedDataParameter(<String>, <DataExpr>*)
 
 //binding operator
 <BindingOperator>
@@ -110,7 +114,6 @@
 <DataExprOrNil>::= <DataExpr>
                  | Nil
 
-
 //Multiactions
 //------------
 
@@ -118,13 +121,10 @@
 <MultAct>      ::= MultAct(<Action>*)
 
 //untyped multiaction
-<UntypedMultAct> ::= UntypedMultAct(<UntypedAction>*)
+<UntypedMultiAction> ::= UntypedMultiAction(<UntypedDataParameter>*)
 
 //Action
 <Action>       ::= Action(<ActId>, <DataExpr>*)
-
-//untyped action
-<UntypedAction> ::= UntypedAction(<String>, <DataExpr>*)
 
 //action identifier
 <ActId>        ::= ActId(<String>, <SortExpr>*)
@@ -154,8 +154,9 @@
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)
                  | Choice(<ProcExpr>, <ProcExpr>)
-                 | UntypedParamId(<String>, <DataExpr>*)
+                 | StochasticOperator(<DataVarId>+, <DataExpr>, <ProcExpr>)
                  | UntypedProcessAssignment(<String>, <UntypedIdentifierAssignment>*)
+                 | <UntypedDataParameter>
 
 //process identifier
 <ProcVarId>    ::= ProcVarId(<String>, <DataVarId>*, <Number>)
@@ -174,8 +175,7 @@
 //----------------------
 
 //process specification
-<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
-                     <ProcEqnSpec>, <ProcInit>)
+<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>, <ProcEqnSpec>, <ProcInit>)
 
 //action specification
 <ActSpec>      ::= ActSpec(<ActId>*)
@@ -201,6 +201,9 @@
 //Linear process specifications
 //-----------------------------
 
+//distribution
+<Distribution>  ::= Distribution(<DataVarId>*, <DataExpr>)
+
 //process specification
 <LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
                       <LinearProcess>, <LinearProcessInit>)
@@ -211,11 +214,11 @@
 //Linear process summand
 <LinearProcessSummand>
                 ::= LinearProcessSummand(<DataVarId>*, <DataExpr>,
-                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
+                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*, <Distribution>)
 
 //process initialisation
 <LinearProcessInit>
-                ::= LinearProcessInit(<DataVarIdInit>*)
+                ::= LinearProcessInit(<DataVarIdInit>*, <Distribution>)
 
 
 //Mu-calculus formulas
@@ -240,6 +243,7 @@
                  | StateVar(<String>, <DataExpr>*)
                  | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
                  | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
+                 | <UntypedDataParameter>
 
 //regular formula
 <RegFrm>       ::= <ActFrm>
@@ -248,6 +252,7 @@
                  | RegAlt(<RegFrm>, <RegFrm>)
                  | RegTrans(<RegFrm>)
                  | RegTransOrNil(<RegFrm>)
+                 | UntypedRegFrm(<String>, <RegFrm>, <RegFrm>)
 
 //action formula
 <ActFrm>       ::= <DataExpr>
@@ -261,12 +266,13 @@
                  | ActExists(<DataVarId>+, <ActFrm>)
                  | ActAt(<ActFrm>, <DataExpr>)
                  | ActMultAct(<Action>*)
-                 | UntypedActMultAct(<UntypedAction>*)
+                 | <UntypedDataParameter>
+                 | <UntypedMultiAction>
 
 //LPS action rename specifications
 //--------------------------------
 
-<ParamIdOrAction> ::= <UntypedAction>
+<ParamIdOrAction> ::= <UntypedDataParameter>
                     | <Action>
 
 //Action rename rules
@@ -279,7 +285,7 @@
 
 //Right-hand side of an action rename rule
 <ActionRenameRuleRHS>
-               ::= <UntypedAction>
+               ::= <UntypedDataParameter>
                  | <Action>
                  | Delta
                  | Tau
@@ -322,6 +328,7 @@
                  | PBESForall(<DataVarId>+, <PBExpr>)
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
+                 | <UntypedDataParameter>
 
 //propositional variable instantiation
 <PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*, <Number>)
@@ -346,3 +353,12 @@
                       | BooleanAnd(<BooleanExpression>, <BooleanExpression>)
                       | BooleanOr(<BooleanExpression>, <BooleanExpression>)
                       | BooleanImp(<BooleanExpression>, <BooleanExpression>)
+
+//BDDs
+//-------------------
+
+// bdd expression
+<BddExpression> ::= BddTrue
+                  | BddFalse
+                  | BddIf(<String>, <BddExpression>, <BddExpression>)
+

@@ -1,0 +1,10 @@
+act
+  a,c,b,d;
+
+proc
+  P = b;
+  Q = d;
+  R = (delta) . (c);
+
+init
+  allow({a | a, a | d, d, b | d}, rename({d -> b}, block({a}, ((Q) || (P)) || (R))));

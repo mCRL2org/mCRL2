@@ -1,0 +1,10 @@
+% Test case with global variables
+sort D = struct d1 | d2;
+
+glob d: D;
+
+pbes nu X =
+       forall e: D. val(d == e);
+
+init X;
+

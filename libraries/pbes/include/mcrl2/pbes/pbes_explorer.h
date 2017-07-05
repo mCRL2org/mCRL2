@@ -8,16 +8,16 @@
 //
 /// \file mcrl2/pbes/pbes_explorer.h
 /// \brief
-#ifndef PBES_EXPLORER_H
-#define PBES_EXPLORER_H
+#ifndef MCRL2_PBES_PBES_EXPLORER_H
+#define MCRL2_PBES_PBES_EXPLORER_H
 
 #define PBES_EXPLORER_VERSION 1
 
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/ppg_traverser.h"
-#include "mcrl2/pbes/detail/ppg_rewriter.h"
-#include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
+#include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/detail/ppg_traverser.h"
+#include "mcrl2/pbes/parity_game_generator.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 
 using namespace mcrl2;
@@ -36,7 +36,7 @@ namespace detail
 {
     template <typename MapContainer>
     typename MapContainer::mapped_type map_at(const MapContainer& m, typename MapContainer::key_type key);
-}
+} // namespace detail
 
 
 
@@ -65,7 +65,7 @@ public:
   int get_state_length() const;
 
   /// \brief Returns the number of state types.
-  int get_number_of_state_types() const;
+  std::size_t get_number_of_state_types() const;
 
   /// \brief Returns the sequence of state part names.
   const std::vector<std::string>& get_state_names() const;
@@ -82,7 +82,7 @@ public:
   std::string get_state_type_name(int type_no) const;
 
   /// \brief Returns the number of state labels.
-  size_t get_number_of_state_labels() const;
+  std::size_t get_number_of_state_labels() const;
 
   /// \brief Returns the sequence of state labels.
   const std::vector<std::string>& get_state_labels() const;
@@ -91,7 +91,7 @@ public:
   const std::vector<std::string>& get_state_label_types() const;
 
   /// \brief Returns the number of edge labels.
-  size_t get_number_of_edge_labels() const;
+  std::size_t get_number_of_edge_labels() const;
 
   /// \brief Returns the sequence of edge labels.
   const std::vector<std::string>& get_edge_labels() const;
@@ -124,9 +124,6 @@ class ltsmin_state {
 friend class lts_info;
 friend class explorer;
 
-protected:
-    typedef core::term_traits<pbes_expression> tr;
-
 public:
     typedef parity_game_generator::operation_type operation_type;
 
@@ -154,7 +151,6 @@ protected:
 public:
     /// \brief Constructor.
     /// \param varname the name of the propositional variable of the state.
-    /// \param e a propositional variable instantiation.
     ltsmin_state(const std::string& varname);
 
     /// \brief Compares two PBES_State objects. Uses lexicographical ordering on priority, type, variable and parameter values.
@@ -192,8 +188,6 @@ class lts_info {
 friend class ltsmin_state;
 friend class explorer;
 
-protected:
-    typedef core::term_traits<pbes_expression> tr;
 public:
     /// \brief The variable sequence type
     typedef parity_game_generator::operation_type operation_type;
@@ -228,11 +222,11 @@ private:
     /// \brief Counts the number of propositional variables in an expression.
     /// \returns the number of variable occurences or INT_MAX if a variable
     /// occurs within the scope of a quantifier.
-    int count_variables(pbes_expression e);
+    int count_variables(const pbes_expression& e);
 
     /// \brief Determines if the propositional variable instantiation is one that
     /// only copies parameters from the current state.
-    bool is_pass_through_state(propositional_variable_instantiation propvar);
+    bool is_pass_through_state(const propositional_variable_instantiation& propvar);
 
     /// \brief Splits the expression into parts (disjuncts or conjuncts) and recursively tries to
     /// substitute the propositional variables with the parts of the right hand side of the
@@ -241,7 +235,7 @@ private:
     /// \param current_priority the priority of the current equation for which the parts are computed
     /// \param current_type the operation type (AND/OR) of the current equation for which the parts are computed
     /// \param vars_stack used for detection of infinite recursion. Please, initialise to the empty set.
-    std::vector<pbes_expression> split_expression_and_substitute_variables(pbes_expression e, int current_priority, operation_type current_type, std::set<std::string> vars_stack);
+    std::vector<pbes_expression> split_expression_and_substitute_variables(const pbes_expression& e, int current_priority, operation_type current_type, std::set<std::string> vars_stack);
 
     /// \brief Computes LTS Type from PBES.
     void compute_lts_type();
@@ -287,6 +281,19 @@ protected:
     /// \param expr
     /// \param L
     std::set<std::string> used(const pbes_expression& expr, const std::set<std::string>& L);
+
+    /// \brief Computes the free variables which are copied/passed through (to a recursive variable) in an expression.
+    /// \param expr
+    std::set<std::string> copied(const pbes_expression& expr);
+
+    /// \brief Computes the free variables which are copied/passed through (to a recursive variable) in an expression.
+    /// \param expr
+    /// \param L
+    std::set<std::string> copied(const pbes_expression& expr, const std::set<std::string>& L);
+
+    /// \brief Computes the set of parameters changed in the expression.
+    /// \param phi
+    std::set<std::string> changed(const pbes_expression& phi);
 
     /// \brief Computes the set of parameters changed in the expression.
     /// \param phi
@@ -382,8 +389,8 @@ public:
 
     /// \brief Returns the index for a parameter signature in the list of parameter signatures
     /// for the system.
-    /// \param signaturePBES_State the parameter signature.
-    int get_index(const std::string& signaturePBES_State);
+    /// \param signature The parameter signature.
+    int get_index(const std::string& signature);
 
     /// \brief Determines if <tt>group</tt> is read dependent on the propositional variable.
     /// Returns true, because the propositional variable is needed to determine if the group belongs
@@ -430,9 +437,6 @@ public:
 
 /// \brief
 class explorer {
-
-protected:
-    typedef core::term_traits<pbes_expression> tr;
 
 public:
     /// \brief The expression type of the equation.
@@ -490,12 +494,12 @@ public:
     explorer(const std::string& filename, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
 
     /// \brief Constructor.
-    /// \param p a PBES.
+    /// \param p_ a PBES.
     /// \param rewrite_strategy String representing the rewrite strategy to use for the data rewriter.
     /// \param reset_flag if set, irrelevant parts of the state vector will be reset to a default value
     /// \param always_split_flag if set, equations will always be split into conjuncts or disjuncts to form transition groups,
     ///        if not set (default) the explorer assumes the pbes to be generated with lps2pbes -p and splits accordingly.
-    explorer(const pbes& p, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
+    explorer(const pbes& p_, const std::string& rewrite_strategy, bool reset_flag, bool always_split_flag);
 
     /// \brief Destructor.
     ~explorer();
@@ -518,10 +522,10 @@ public:
     /// with number <tt>type_no</tt>. Type 0 is reserved for the string representations
     /// of variable names.
     /// The value is added to the store if it is not already present.
-    /// \param type_no the number of the value type.
-    /// \param value a string representation of the data value.
-    /// \return the index of <tt>value</tt> in local store <tt>type_no</tt>.
-    int get_index(int type_no, const std::string& value);
+    /// \param type_no The number of the value type.
+    /// \param s A string representation of the data value.
+    /// \return The index of <tt>value</tt> in local store <tt>type_no</tt>.
+    int get_index(int type_no, const std::string& s);
 
     /// \brief Returns the index of <tt>s</tt> in the local store for string values.
     /// This store is reserved for the string representations of variable names.
@@ -586,11 +590,10 @@ public:
         //std::clog << "next_state_all: " << state->to_string() << std::endl;
         std::vector<ltsmin_state> successors = this->get_successors(state);
         // int dst[state_length]; N.B. This is not portable C++
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(dst, int, state_length);
-        for (std::vector<ltsmin_state>::iterator succ = successors.begin(); succ
-                != successors.end(); ++succ) {
+        int* dst = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
+        for (auto & successor : successors) {
 
-            this->to_state_vector(*succ, dst, state, src);
+            this->to_state_vector(successor, dst, state, src);
             cb(dst);
             //std::clog << "  succ: " << (*succ)->to_string() << std::endl;
         }
@@ -626,10 +629,9 @@ public:
             ltsmin_state state = this->from_state_vector(src);
             std::vector<ltsmin_state> successors = this->get_successors(state, group);
             // int dst[state_length]; N.B. This is not portable C++
-            MCRL2_SYSTEM_SPECIFIC_ALLOCA(dst, int, state_length);
-            for (std::vector<ltsmin_state>::iterator succ = successors.begin(); succ
-                    != successors.end(); ++succ) {
-                this->to_state_vector(*succ, dst, state, src);
+            int* dst = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
+            for (auto & successor : successors) {
+                this->to_state_vector(successor, dst, state, src);
                 cb(dst, group);
             }
         }
@@ -641,4 +643,4 @@ public:
 
 } // namespace mcrl2
 
-#endif // PBES_EXPLORER_H
+#endif // MCRL2_PBES_PBES_EXPLORER_H

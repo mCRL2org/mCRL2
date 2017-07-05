@@ -18,8 +18,8 @@
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/nat.h"
-#include "mcrl2/data/set.h"
 #include "mcrl2/data/real.h"
+#include "mcrl2/data/set.h"
 
 namespace mcrl2 {
 
@@ -247,10 +247,19 @@ namespace detail {
 inline
 int left_precedence(const application& x)
 {
-  // TODO: this is unexpected, what to do???
+  // N.B. this code should match printing of a creal
   if (sort_real::is_creal_application(x))
   {
-    return left_precedence(sort_real::left(x));
+    data_expression numerator = sort_real::left(x);
+    data_expression denominator = sort_real::right(x);
+    if (sort_pos::is_c1_function_symbol(denominator))
+    {
+      return left_precedence(numerator);
+    }
+    else
+    {
+      return left_precedence(sort_real::divides(numerator, sort_int::pos2int(denominator)));
+    }
   }
   else if (detail::is_implies(x))
   {

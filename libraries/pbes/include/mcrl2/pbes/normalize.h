@@ -12,11 +12,11 @@
 #ifndef MCRL2_PBES_NORMALIZE_H
 #define MCRL2_PBES_NORMALIZE_H
 
-#include "mcrl2/utilities/exception.h"
-#include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/traverser.h"
-#include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/pbes_equation.h"
+#include "mcrl2/pbes/traverser.h"
+#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -31,11 +31,7 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
   typedef pbes_expression_traverser<is_normalized_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   bool result;
 
@@ -62,15 +58,7 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
 struct normalize_builder: public pbes_expression_builder<normalize_builder>
 {
   typedef pbes_expression_builder<normalize_builder> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  typedef core::term_traits<pbes_expression> tr;
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
+  using super::apply;
 
   bool negated;
 
@@ -78,59 +66,80 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
     : negated(false)
   {}
 
-  pbes_expression operator()(const data::data_expression& x)
+  pbes_expression apply(const data::data_expression& x)
   {
     return negated ? data::sort_bool::not_(x) : x;
   }
 
-  pbes_expression operator()(const not_& x)
+  pbes_expression apply(const not_& x)
   {
     negated = !negated;
-    pbes_expression result = super::operator()(x.operand());
+    pbes_expression result = super::apply(x.operand());
     negated = !negated;
     return result;
   }
 
-  pbes_expression operator()(const and_& x)
+  pbes_expression apply(const and_& x)
   {
-    pbes_expression left = super::operator()(x.left());
-    pbes_expression right = super::operator()(x.right());
-    return negated ? tr::or_(left, right) : tr::and_(left, right);
+    pbes_expression left = super::apply(x.left());
+    pbes_expression right = super::apply(x.right());
+    if (negated)
+    {
+      return or_(left, right);
+    }
+    else
+    {
+      return and_(left, right);
+    }
   }
 
-  pbes_expression operator()(const or_& x)
+  pbes_expression apply(const or_& x)
   {
-    pbes_expression left = super::operator()(x.left());
-    pbes_expression right = super::operator()(x.right());
-    return negated ? tr::and_(left, right) : tr::or_(left, right);
+    pbes_expression left = super::apply(x.left());
+    pbes_expression right = super::apply(x.right());
+    if (negated)
+    {
+      return and_(left, right);
+    }
+    else
+    {
+      return or_(left, right);
+    }
   }
 
-  pbes_expression operator()(const imp& x)
+  pbes_expression apply(const imp& x)
   {
     negated = !negated;
-    pbes_expression left = super::operator()(x.left());
+    pbes_expression left = super::apply(x.left());
     negated = !negated;
-    pbes_expression right = super::operator()(x.right());
-    return negated ? tr::and_(left, right) : tr::or_(left, right);
+    pbes_expression right = super::apply(x.right());
+    if (negated)
+    {
+      return and_(left, right);
+    }
+    else
+    {
+      return or_(left, right);
+    }
   }
 
-  pbes_expression operator()(const forall& x)
+  pbes_expression apply(const forall& x)
   {
-    pbes_expression body = super::operator()(x.body());
-    return negated ? tr::exists(x.variables(), body) : tr::forall(x.variables(), body);
+    pbes_expression body = super::apply(x.body());
+    return negated ? make_exists(x.variables(), body) : make_forall(x.variables(), body);
   }
 
-  pbes_expression operator()(const exists& x)
+  pbes_expression apply(const exists& x)
   {
-    pbes_expression body = super::operator()(x.body());
-    return negated ? tr::forall(x.variables(), body) : tr::exists(x.variables(), body);
+    pbes_expression body = super::apply(x.body());
+    return negated ? make_forall(x.variables(), body) : make_exists(x.variables(), body);
   }
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  pbes_expression apply(const propositional_variable_instantiation& x)
   {
     if (negated)
     {
-      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + to_string(x));
+      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + pp(x));
     }
     return x;
   }
@@ -144,7 +153,7 @@ template <typename T>
 bool is_normalized(const T& x)
 {
   is_normalized_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -153,11 +162,11 @@ bool is_normalized(const T& x)
 /// \param x an object containing pbes expressions
 template <typename T>
 void normalize(T& x,
-               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+               typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
               )
 {
   normalize_builder f;
-  f(x);
+  f.update(x);
 }
 
 /// \brief The function normalize brings (embedded) pbes expressions into positive normal form,
@@ -165,11 +174,11 @@ void normalize(T& x,
 /// \param x an object containing pbes expressions
 template <typename T>
 T normalize(const T& x,
-            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = 0
+            typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value>::type* = nullptr
            )
 {
   normalize_builder f;
-  return f(x);
+  return f.apply(x);
 }
 
 } // namespace pbes_system

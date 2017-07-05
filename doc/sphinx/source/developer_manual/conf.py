@@ -45,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'mCRL2'
-copyright = u'2011, Technische Universiteit Eindhoven'
+copyright = u'2011-2017, Technische Universiteit Eindhoven'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

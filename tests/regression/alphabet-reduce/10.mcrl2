@@ -1,0 +1,10 @@
+act
+  a,c,b,d;
+
+proc
+  P = ((tau) + ((true) -> ((c) + (b)) <> (sum b1: Bool . ((true) -> (c))))) + ((c) . (R));
+  Q = tau;
+  R = ((true) -> (tau)) + (((sum b1: Bool . (sum b2: Bool . (delta))) . (delta)) + (sum b1: Bool . (tau)));
+
+init
+  allow({a, c | c, a | a, b, b | d}, allow({d | d, a | b, a | d, d}, ((Q) || (P)) || (R)));

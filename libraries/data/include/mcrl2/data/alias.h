@@ -13,8 +13,8 @@
 #define MCRL2_DATA_ALIAS_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2
 {
@@ -76,6 +76,7 @@ std::string pp(const alias& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const alias& x)
@@ -94,5 +95,5 @@ inline void swap(alias& t1, alias& t2)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_SORT_EXPRESSION_H
+#endif // MCRL2_DATA_ALIAS_H
 

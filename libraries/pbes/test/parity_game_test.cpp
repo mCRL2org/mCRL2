@@ -16,17 +16,17 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include <fstream>
-#include <string>
-#include <iomanip>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/detail/test_input.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbes_solver_test.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
+#include <fstream>
+#include <iomanip>
+#include <string>
 
 #ifdef MCRL2_PGSOLVER_ENABLED
 #include <cstdlib>
@@ -121,7 +121,7 @@ std::string PBES3 =
   "init X0;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \n"
   ;
 
-void test_pbes(std::string pbes_spec)
+void test_pbes(const std::string& pbes_spec, const bool expected_result)
 {
   pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::detail::parity_game_output pgg(p);
@@ -130,7 +130,7 @@ void test_pbes(std::string pbes_spec)
 // check the result
 #ifdef MCRL2_PGSOLVER_ENABLED
   static int index;
-  bool expected_result = pbes_system::pbes2_bool_test(p);
+  BOOST_CHECK(pbes_system::detail::pbes2bool(p,expected_result));
   std::string name = "parity_game_test" + boost::lexical_cast<std::string>(++index);
   std::string output_file   = name + ".pg";
   std::string solution_file = name + ".solution";
@@ -159,18 +159,17 @@ void test_pbes(std::string pbes_spec)
 }
 
 // mimick the way parity_game_generator is used in parity game solver from Twente
-void test_pbespgsolve(std::string pbes_spec)
+void test_pbespgsolve(const std::string& pbes_spec)
 {
   pbes_system::pbes p = pbes_system::txt2pbes(pbes_spec);
   pbes_system::parity_game_generator pgg(p, true, true);
-  size_t begin = 0;
-  size_t end = 3;
-  for (size_t v = begin; v < end; ++v)
+  std::size_t begin = 0;
+  std::size_t end = 3;
+  for (std::size_t v = begin; v < end; ++v)
   {
-    std::set<size_t> deps = pgg.get_dependencies(v);
-    for (std::set<size_t>::const_iterator it = deps.begin(); it != deps.end(); ++it)
+    std::set<std::size_t> deps = pgg.get_dependencies(v);
+    for (std::size_t w: deps)
     {
-      size_t w = *it;
       assert(w >= begin);
       if (w >= end)
       {
@@ -180,12 +179,12 @@ void test_pbespgsolve(std::string pbes_spec)
     }
 
     int max_prio = 0;
-    for (size_t v = begin; v < end; ++v)
+    for (std::size_t v = begin; v < end; ++v)
     {
       max_prio = (std::max)(max_prio, (int)pgg.get_priority(v));
     }
 
-    for (size_t v = begin; v < end; ++v)
+    for (std::size_t v = begin; v < end; ++v)
     {
       // Variable below is not used; So, I removed it to avoid warnings. JFG.
       // bool and_op = pgg.get_operation(v) == mcrl2::pbes_system::parity_game_generator::PGAME_AND;
@@ -194,38 +193,38 @@ void test_pbespgsolve(std::string pbes_spec)
   }
 }
 
-void test_lps(const std::string& lps_spec, const std::string& formula = lps::detail::NO_DEADLOCK())
+void test_lps(const std::string& lps_spec, const bool expected_result, const std::string& formula = lps::detail::NO_DEADLOCK())
 {
   using namespace pbes_system;
   bool timed = false;
   pbes p = lps2pbes(lps_spec, formula, timed);
   std::string text = pbes_system::pp(p);
-  test_pbes(text);
+  test_pbes(text,expected_result);
 }
 
 int test_main(int argc, char** argv)
 {
-  test_pbes(BES1);
-  test_pbes(BES2);
-  test_pbes(BES3);
-  test_pbes(BES4);
-  test_pbes(BES5);
-  test_pbes(BES6);
-  test_pbes(BES7);
-  test_pbes(BES8);
-  test_pbes(PBES1);
-  test_pbes(PBES2);
-  test_pbes(PBES3);
+  test_pbes(BES1,false);
+  test_pbes(BES2,true);
+  test_pbes(BES3,false);
+  test_pbes(BES4,true);
+  test_pbes(BES5,true);
+  test_pbes(BES6,false);
+  test_pbes(BES7,false);
+  test_pbes(BES8,true);
+  test_pbes(PBES1,false);
+  test_pbes(PBES2,false);
+  test_pbes(PBES3,true);
 
   test_pbespgsolve(PBES1);
   test_pbespgsolve(PBES2);
   test_pbespgsolve(PBES3);
 
-  test_lps(lps::detail::ABP_SPECIFICATION());
+  test_lps(lps::detail::ABP_SPECIFICATION(),true);
 
 #ifdef MCRL2_EXTENDED_TESTS
-  test_lps(lps::detail::DINING3_SPECIFICATION());
-  test_lps(lps::detail::ONE_BIT_SLIDING_WINDOW_SPECIFICATION(), "nu X. <true>true && [true]X");
+  test_lps(lps::detail::DINING3_SPECIFICATION(),false);
+  test_lps(lps::detail::ONE_BIT_SLIDING_WINDOW_SPECIFICATION(), true, "nu X. <true>true && [true]X");
 #endif
 
   return 0;

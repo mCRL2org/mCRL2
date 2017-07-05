@@ -1,0 +1,8 @@
+% Problematic case found by random pbes tests
+pbes nu X0 = X2;
+      nu X1 = X2;
+      mu X2 = X3 && X1;
+      mu X3 = X1;
+
+init X0;
+

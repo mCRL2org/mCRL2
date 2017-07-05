@@ -12,10 +12,11 @@
 #ifndef MCRL2_PBES_DETAIL_IS_PFNF_H
 #define MCRL2_PBES_DETAIL_IS_PFNF_H
 
+#include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_functions.h"
-#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {
 
@@ -108,10 +109,9 @@ inline
 bool is_pfnf_inner_and(const pbes_expression& x)
 {
   bool result = true;
-  std::set<pbes_expression> terms = pbes_expr::split_and(x);
-  for (std::set<pbes_expression>::const_iterator i = terms.begin(); i != terms.end(); ++i)
+  for (const pbes_expression& term: pbes_system::split_and(x))
   {
-    if (!is_pfnf_imp(*i))
+    if (!is_pfnf_imp(term))
     {
       result = false;
     }
@@ -173,7 +173,7 @@ struct is_pfnf_traverser: public pbes_expression_traverser<is_pfnf_traverser>
   typedef pbes_expression_traverser<is_pfnf_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   bool result;
 
@@ -181,7 +181,7 @@ struct is_pfnf_traverser: public pbes_expression_traverser<is_pfnf_traverser>
     : result(true)
   {}
 
-  void operator()(const pbes_expression& x)
+  void apply(const pbes_expression& x)
   {
     result = is_pfnf_expression(x) && result;
   }
@@ -191,7 +191,7 @@ template <typename T>
 bool is_pfnf(const T& x)
 {
   is_pfnf_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -239,15 +239,15 @@ void split_pfnf_expression(const pbes_expression& phi, pbes_expression& h, std::
   std::vector<pbes_expression> v;
   split_and(x, v);
   h = true_();
-  for (std::vector<pbes_expression>::iterator i = v.begin(); i != v.end(); ++i)
+  for (pbes_expression& expr: v)
   {
-    if (is_pfnf_simple_expression(*i))
+    if (is_pfnf_simple_expression(expr))
     {
-      h = utilities::optimized_and(h, *i);
+      h = data::optimized_and(h, expr);
     }
     else
     {
-      g.push_back(*i);
+      g.push_back(expr);
     }
   }
 }

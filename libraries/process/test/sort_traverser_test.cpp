@@ -9,13 +9,13 @@
 /// \file process_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/process/parse.h"
 #include "mcrl2/process/find.h"
+#include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -153,7 +153,7 @@ std::string CASE10 =
   "init P(0);\n"
   ;
 
-void test_process(std::string text)
+void test_process(const std::string& text)
 {
   process_specification spec = parse_process_specification(text);
   std::set<data::sort_expression> sorts;

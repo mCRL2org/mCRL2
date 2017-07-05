@@ -9,21 +9,21 @@
 /// \file mcrl2/core/dparser.cpp
 /// \brief add your file description here.
 
-#include <iostream>
-#include <iomanip>
-#include <locale>
-#include <set>
-#include <stdexcept>
-#include <string>
-#include <sstream>
-#include <vector>
-#include "d.h"
-#include "parse.h"
-#include "dparse.h"
-#include "mcrl2/core/dparser.h"
+#include <d.h>
+#include <dparse.h>
 #include "mcrl2/core/detail/dparser_functions.h"
+#include "mcrl2/core/dparser.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/utilities/logger.h"
+#include <parse.h>
+#include <iomanip>
+#include <iostream>
+#include <locale>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 extern "C"
 {
@@ -180,8 +180,9 @@ parser::parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn, D_SyntaxError
   m_parser = new_D_Parser(&tables, 0);
   m_parser->initial_globals = this;
   m_parser->save_parse_tree = 1;
-  m_parser->initial_scope = NULL;
+  m_parser->initial_scope = nullptr;
   m_parser->dont_use_greediness_for_disambiguation = 1;
+  m_parser->dont_use_height_for_disambiguation = 1;
   if (ambiguity_fn)
   {
     m_parser->ambiguity_fn = ambiguity_fn;
@@ -295,28 +296,133 @@ std::string add_context(const d_loc_t* loc, const std::string& message)
   return s.str();
 }
 
+inline
+bool is_all_of_type(D_ParseNode* nodes[], int n, const char* type, const core::parser_table& table)
+{
+  for (int i = 0; i < n; i++)
+  {
+    core::parse_node node(nodes[i]);
+    if (table.symbol_name(node) != type)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+inline
+void print_ambiguous_nodes(D_ParseNode* nodes[], int n, const char* type, const core::parser_table& table)
+{
+  mCRL2log(log::verbose, "parser") << "--- " << type << " ambiguity" << std::endl;
+  for (int i = 0; i < n; ++i)
+  {
+    core::parse_node vi(nodes[i]);
+    // mCRL2log(log::verbose, "parser") << vi.tree() << " " << table.tree(vi) << std::endl;
+    mCRL2log(log::verbose, "parser") << "ALT " << table.tree(vi) << std::endl;
+  }
+}
+
+inline
+void print_chosen_node(D_ParseNode* node, const core::parser_table& table)
+{
+  core::parse_node vi(node);
+  mCRL2log(log::verbose, "parser") << "CHOOSE " << table.tree(vi) << std::endl;
+}
+
 /// \brief Function for resolving parser ambiguities.
-struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v)
+D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseNode **v)
 {
   core::parser_table table(parser_tables_mcrl2);
-  if (n == 2)
+
+  // resolve PbesExpr ambiguities
+  if (is_all_of_type(v, n, "PbesExpr", table))
   {
-    // "(" ActFrm ")" can be parsed either as a new ActFrm, or as a RegFrm. We
-    // choose to parse it as an ActFrm if this ambiguity occurs, as it is the
-    // most specific. We do this by checking that one of the possible parse
-    // trees is of the form RegFrm("(", x, y), and not choosing that particular
-    // parse tree.
-    core::parse_node vi(v[0]);
-    if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
-        vi.child(0).string() == "(")
+    D_ParseNode* result = nullptr;
+    for (int i = 0; i < n; i++)
     {
-      return v[1];
+      core::parse_node node(v[i]);
+      if (table.symbol_name(node.child(0)) == "Id")
+      {
+        return v[i];
+      }
+      else if (table.symbol_name(node.child(0)) != "DataExpr")
+      {
+        result = v[i];
+      }
     }
-    vi.node = v[1];
-    if (table.symbol_name(vi) == "RegFrm" && vi.child_count() == 3 &&
-        vi.child(0).string() == "(")
+    if (result)
     {
-      return v[0];
+      return result;
+    }
+    return v[0];
+  }
+
+  // resolve ActFrm ambiguities
+  if (is_all_of_type(v, n, "ActFrm", table))
+  {
+//print_ambiguous_nodes(v, n, "ActFrm", table);
+    D_ParseNode* result = nullptr;
+    for (int i = 0; i < n; i++)
+    {
+      core::parse_node node(v[i]);
+      if (table.symbol_name(node.child(0)) == "MultAct")
+      {
+//print_chosen_node(v[i], table);
+        return v[i];
+      }
+      else if (table.symbol_name(node.child(0)) != "DataExpr")
+      {
+        result = v[i];
+      }
+    }
+    if (result)
+    {
+//print_chosen_node(result, table);
+      return result;
+    }
+//print_chosen_node(v[0], table);
+    return v[0];
+  }
+
+  // resolve StateFrm ambiguities
+  if (is_all_of_type(v, n, "StateFrm", table))
+  {
+//print_ambiguous_nodes(v, n, "StateFrm", table);
+    D_ParseNode* result = nullptr;
+    for (int i = 0; i < n; i++)
+    {
+      core::parse_node node(v[i]);
+      if (table.symbol_name(node.child(0)) == "Id")
+      {
+//print_chosen_node(v[i], table);
+        return v[i];
+      }
+      else if (table.symbol_name(node.child(0)) != "DataExpr")
+      {
+        result = v[i];
+      }
+    }
+    if (result)
+    {
+//print_chosen_node(result, table);
+      return result;
+    }
+//print_chosen_node(v[0], table);
+    return v[0];
+  }
+
+  // resolve RegFrm ambiguities
+  if (is_all_of_type(v, n, "RegFrm", table))
+  {
+//print_ambiguous_nodes(v, n, "RegFrm", table);
+    for (int i = 0; i < n; i++)
+    {
+      core::parse_node node(v[i]);
+      if (table.symbol_name(node.child(0)) == "RegFrm" || table.symbol_name(node.child(0)) == "(")
+      {
+//print_chosen_node(v[i], table);
+        return v[i];
+      }
     }
   }
 
@@ -331,16 +437,16 @@ struct D_ParseNode* ambiguity_fn(struct D_Parser * /*p*/, int n, struct D_ParseN
   throw mcrl2::runtime_error("Unresolved ambiguity.");
 }
 
-void log_location(struct D_Parser *ap)
+static void log_location(struct D_Parser *ap)
 {
   // We recover information about the last parsed node by casting D_Parser to Parser, which
   // is the structure that the dparser library internally uses to keep its administration in.
   std::string after;
   SNode *s = ((Parser*)ap)->snode_hash.last_all;
-  ZNode *z = s != NULL ? s->zns.v[0] : NULL;
-  while (z != NULL && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
+  ZNode *z = s != nullptr ? s->zns.v[0] : nullptr;
+  while (z != nullptr && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
   {
-    z = (z->sns.v && z->sns.v[0]->zns.v) ? z->sns.v[0]->zns.v[0] : NULL;
+    z = (z->sns.v && z->sns.v[0]->zns.v) ? z->sns.v[0]->zns.v[0] : nullptr;
   }
   if (z && z->pn->parse_node.start_loc.s != z->pn->parse_node.end)
   {
@@ -363,7 +469,7 @@ void syntax_error_fn(struct D_Parser *ap)
     return;
   }
   log_location(ap);
-  if (ap->loc.s == 0)
+  if (ap->loc.s == nullptr)
   {
     mCRL2log(log::error, "parser") << "Unexpected end of input." << std::endl;
   }

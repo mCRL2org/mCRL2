@@ -1,5 +1,6 @@
-% This file contains the alternating bit protocol, as described in W.J.
-% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.
+% This file contains the alternating bit protocol, as described 
+% J.F. Groote and M.R. Mousavi. Modeling and analysis of communicating
+% systems. The MIT Press, 2014.
 %
 % The only exception is that the domain D consists of two data elements to
 % facilitate simulation.

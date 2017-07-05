@@ -12,18 +12,18 @@
 #ifndef MCRL2_LPS_PROCESS_INITIALIZER_H
 #define MCRL2_LPS_PROCESS_INITIALIZER_H
 
+#include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/print.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
+#include "mcrl2/lps/stochastic_distribution.h"
 #include <algorithm>
 #include <cassert>
 #include <iterator>
 #include <string>
 #include <utility>
-#include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/assignment_functional.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 
 namespace mcrl2
 {
@@ -31,7 +31,6 @@ namespace mcrl2
 namespace lps
 {
 
-//--- start generated class process_initializer ---//
 /// \brief A process initializer
 class process_initializer: public atermpp::aterm_appl
 {
@@ -42,23 +41,29 @@ class process_initializer: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    /// \param term A term
-    explicit process_initializer(const atermpp::aterm& term)
+    /// \param term A term.
+    /// \param check_distribution Check whether the initial state is plain or a state distribution.
+    explicit process_initializer(const atermpp::aterm& term, bool check_distribution = true)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_LinearProcessInit(*this));
+      const lps::stochastic_distribution& dist = atermpp::down_cast<lps::stochastic_distribution>(atermpp::down_cast<atermpp::aterm_appl>(term)[1]);
+      if (check_distribution && dist.is_defined())
+      {
+        throw mcrl2::runtime_error("initial state with non-empty stochastic distribution encountered");
+      }
     }
 
     /// \brief Constructor.
-    process_initializer(const data::assignment_list& assignments)
-      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments)
+    explicit process_initializer(const data::assignment_list& assignments)
+      : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, stochastic_distribution())
     {}
 
     const data::assignment_list& assignments() const
     {
       return atermpp::down_cast<data::assignment_list>((*this)[0]);
     }
-//--- start user section process_initializer ---//
+
     /// \brief Returns the initial state of the LPS.
     /// \param process_parameters The parameters of the correponding linear process
     /// \return The initial state of the LPS.
@@ -66,9 +71,9 @@ class process_initializer: public atermpp::aterm_appl
     {
       return data::replace_variables(atermpp::container_cast<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
-//--- end user section process_initializer ---//
 };
 
+//--- start generated class process_initializer ---//
 /// \brief list of process_initializers
 typedef atermpp::term_list<process_initializer> process_initializer_list;
 
@@ -89,6 +94,7 @@ std::string pp(const process_initializer& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_initializer& x)

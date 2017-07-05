@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_REWRITERS_BQNF_REWRITER_H
 #define MCRL2_PBES_REWRITERS_BQNF_REWRITER_H
 
-#include "mcrl2/pbes/detail/bqnf_visitor.h"
 #include "mcrl2/pbes/detail/bqnf_quantifier_rewriter.h"
+#include "mcrl2/pbes/detail/bqnf_visitor.h"
 
 namespace mcrl2 {
 

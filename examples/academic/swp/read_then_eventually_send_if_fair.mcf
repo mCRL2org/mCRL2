@@ -13,5 +13,5 @@ nu X.
 &&
 
 forall d:D.
-             ([r1(d)]( nu Y. mu Z. ([!(exists m: Nat . val(m < 2*n) && c3(d,m)) && !i]Z && [i]([!(exists m: Nat . val( m < 2*n) && c3(d,m))]false => Y) ) ))
+             ([r1(d)]( nu Y. mu Z. ([!(exists m: Nat . (m < 2*n) && c3(d,m)) && !i]Z && [i]([!(exists m: Nat . ( m < 2*n) && c3(d,m))]false => Y) ) ))
 )

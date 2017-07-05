@@ -10,16 +10,16 @@
 /// \brief
 
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/detail/has_propositional_variables.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/pbes/detail/is_well_typed.h"
+#include "mcrl2/pbes/detail/occurring_variable_visitor.h"
+#include "mcrl2/pbes/index_traits.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/translate_user_notation.h"
-#include "mcrl2/pbes/detail/instantiate_global_variables.h"
-#include "mcrl2/pbes/detail/is_well_typed.h"
-#include "mcrl2/pbes/detail/occurring_variable_visitor.h"
-#include "mcrl2/pbes/index_traits.h"
-#include "mcrl2/pbes/detail/has_propositional_variables.h"
 
 namespace mcrl2
 {
@@ -47,8 +47,8 @@ std::string pp(const pbes_system::pbes_equation& x) { return pbes_system::pp< pb
 std::string pp(const pbes_system::pbes_expression& x) { return pbes_system::pp< pbes_system::pbes_expression >(x); }
 std::string pp(const pbes_system::propositional_variable& x) { return pbes_system::pp< pbes_system::propositional_variable >(x); }
 std::string pp(const pbes_system::propositional_variable_instantiation& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation >(x); }
-void normalize_sorts(pbes_system::pbes_equation_vector& x, const data::data_specification& dataspec) { pbes_system::normalize_sorts< pbes_system::pbes_equation_vector >(x, dataspec); }
-void normalize_sorts(pbes_system::pbes& x, const data::data_specification& /* dataspec */) { pbes_system::normalize_sorts< pbes_system::pbes >(x, x.data()); }
+void normalize_sorts(pbes_system::pbes_equation_vector& x, const data::sort_specification& sortspec) { pbes_system::normalize_sorts< pbes_system::pbes_equation_vector >(x, sortspec); }
+void normalize_sorts(pbes_system::pbes& x, const data::sort_specification& /* sortspec */) { pbes_system::normalize_sorts< pbes_system::pbes >(x, x.data()); }
 void translate_user_notation(pbes_system::pbes& x) { pbes_system::translate_user_notation< pbes_system::pbes >(x); }
 std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes& x) { return pbes_system::find_sort_expressions< pbes_system::pbes >(x); }
 std::set<data::variable> find_all_variables(const pbes_system::pbes& x) { return pbes_system::find_all_variables< pbes_system::pbes >(x); }
@@ -73,7 +73,7 @@ bool is_bes(const pbes& x)
   return pbes_system::is_bes(x);
 }
 
-} // algorithms
+} // namespace algorithms
 
 bool is_well_typed(const pbes_equation& eqn)
 {
@@ -109,10 +109,10 @@ bool pbes_equation::is_solved() const
 std::set<propositional_variable_instantiation> pbes::occurring_variable_instantiations() const
 {
   std::set<propositional_variable_instantiation> result;
-  for (auto i = equations().begin(); i != equations().end(); ++i)
+  for (const pbes_equation& eqn: equations())
   {
     detail::occurring_variable_visitor f;
-    f(i->formula());
+    f.apply(eqn.formula());
     result.insert(f.variables.begin(), f.variables.end());
   }
   return result;

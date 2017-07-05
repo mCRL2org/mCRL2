@@ -8,14 +8,13 @@
 //
 /// \file mcrl2/data/detail/rewrite.h
 
-#ifndef __LIBREWRITE_H
-#define __LIBREWRITE_H
+#ifndef MCRL2_DATA_DETAIL_REWRITE_H
+#define MCRL2_DATA_DETAIL_REWRITE_H
 
-#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/selection.h"
+#include "mcrl2/data/detail/enumerator_identifier_generator.h"
 #include "mcrl2/data/rewrite_strategy.h"
-#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/selection.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
 namespace mcrl2
@@ -43,7 +42,8 @@ namespace detail
 class Rewriter
 {
   public:
-    data::set_identifier_generator generator;  //name for variables.
+    // data::set_identifier_generator generator;  //name for variables.
+    enumerator_identifier_generator generator;  //name for variables.
 
     typedef mutable_indexed_substitution<data::variable, std::vector< data::data_expression > > substitution_type;
 
@@ -57,10 +57,10 @@ class Rewriter
           data_equation_selector(eq_selector),
           m_data_specification_for_enumeration(data_spec)
     {
-      generator.add_identifiers(data::find_identifiers(data_spec.equations()));
+      /* generator.add_identifiers(data::find_identifiers(data_spec.equations()));
       generator.add_identifiers(data::find_identifiers(data_spec.sorts()));
       generator.add_identifiers(data::find_identifiers(data_spec.constructors()));
-      generator.add_identifiers(data::find_identifiers(data_spec.mappings()));
+      generator.add_identifiers(data::find_identifiers(data_spec.mappings())); */
 
     }
 
@@ -70,7 +70,7 @@ class Rewriter
     }
 
     /** \brief The fresh name generator of the rewriter */
-    data::set_identifier_generator& identifier_generator()
+    data::enumerator_identifier_generator& identifier_generator()
     {
       return generator;
     }
@@ -96,7 +96,7 @@ class Rewriter
      * \return The list Terms where each element is replaced by its
      *         normal form.
      **/
-    virtual data_expression_list rewrite_list(const data_expression_list& Terms, substitution_type& sigma);
+    virtual data_expression_list rewrite_list(const data_expression_list& terms, substitution_type& sigma);
 
     /** 
      * \brief Provide the rewriter with a () operator, such that it can also
@@ -111,7 +111,7 @@ class Rewriter
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
     data_expression existential_quantifier_enumeration(
-         const abstraction& termInInnerFormat,
+         const abstraction& t,
          substitution_type& sigma);
     data_expression existential_quantifier_enumeration(
          const variable_list& vl,
@@ -120,7 +120,7 @@ class Rewriter
          substitution_type& sigma);
 
     data_expression universal_quantifier_enumeration(
-         const abstraction& termInInnerFormat,
+         const abstraction& t,
          substitution_type& sigma);
     data_expression universal_quantifier_enumeration(
          const variable_list& vl,
@@ -151,7 +151,7 @@ class Rewriter
 
     data_expression rewrite_lambda_application(
                       const abstraction& lambda_term,
-                      const data_expression& body,
+                      const data_expression& t,
                       substitution_type& sigma);
 
 
@@ -181,35 +181,35 @@ Rewriter* createRewriter(
  * \param DataEqn The mCRL2 data equation to be checked.
  * \throw std::runtime_error containing a reason why DataEqn is not a valid rewrite rule.
  **/
-void CheckRewriteRule(const data_equation& dataeqn);
+void CheckRewriteRule(const data_equation& data_eqn);
 
 /**
  * \brief Check whether or not an mCRL2 data equation is a valid rewrite rule.
  * \param DataEqn The mCRL2 data equation to be checked.
  * \return Whether or not DataEqn is a valid rewrite rule.
  **/
-bool isValidRewriteRule(const data_equation& dataeqn);
+bool isValidRewriteRule(const data_equation& data_eqn);
 
 
-inline size_t getArity(const data::function_symbol& op)
+inline std::size_t getArity(const data::function_symbol& op)
 {
   // This function calculates the cumulated length of all
   // potential function arguments.
   sort_expression sort = op.sort();
-  size_t arity = 0;
+  std::size_t arity = 0;
 
   while (is_function_sort(sort))
   {
     const function_sort fsort(sort);
-    sort_expression_list sort_dom = fsort.domain();
+    const sort_expression_list& sort_dom = fsort.domain();
     arity += sort_dom.size();
     sort = fsort.codomain();
   }
   return arity;
 }
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

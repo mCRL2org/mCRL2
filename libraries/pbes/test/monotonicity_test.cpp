@@ -14,18 +14,14 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/pbes/monotonicity.h"
+#include "mcrl2/pbes/is_monotonous.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2::pbes_system;
 
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
-
-void run_monotonicity_test_case(pbes_expression x, bool expected_result)
+void run_monotonicity_test_case(const pbes_expression& x, bool expected_result)
 {
   bool result = is_monotonous(x);
   if (result != expected_result)
@@ -70,5 +66,5 @@ BOOST_AUTO_TEST_CASE(test_monotonicity)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

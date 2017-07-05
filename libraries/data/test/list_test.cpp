@@ -21,9 +21,9 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::sort_list;
 
 template <typename Predicate>
-void test_data_expression(std::string s, mcrl2::data::variable_vector v, Predicate p)
+void test_data_expression(const std::string& s, const mcrl2::data::variable_vector& v, Predicate p)
 {
-  data_expression e = parse_data_expression(s, v.begin(), v.end());
+  data_expression e = parse_data_expression(s, v);
   BOOST_CHECK(p(e));
 }
 
@@ -51,7 +51,7 @@ void list_expression_test()
   test_data_expression("1 in l", v, is_in_application);
   test_data_expression("10 |> l", v, is_cons_application);
   test_data_expression("l <| 10", v, is_snoc_application);
-  test_data_expression("#l", v, is_count_application); 
+  test_data_expression("#l", v, is_count_application);
   test_data_expression("l ++ [10]", v, is_concat_application);
   test_data_expression("l.1", v, is_element_at_application);
   test_data_expression("head(l)", v, is_head_application);
@@ -59,10 +59,8 @@ void list_expression_test()
   test_data_expression("tail(l)", v, is_tail_application);
   test_data_expression("rtail(l)", v, is_rtail_application);
 
-  data_expression e = parse_data_expression("[10]", v.begin(), v.end());
-  BOOST_CHECK(is_cons_application(normaliser(e))); 
-
-
+  data_expression e = parse_data_expression("[10]", v);
+  BOOST_CHECK(is_cons_application(normaliser(e)));
 }
 
 int test_main(int argc, char** argv)

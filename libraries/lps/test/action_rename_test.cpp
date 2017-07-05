@@ -9,15 +9,15 @@
 /// \file action_rename_test.cpp
 /// \brief Action rename test.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
+#include "mcrl2/lps/rewrite.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
-using lps::specification;
+using lps::stochastic_specification;
 using lps::action_rename_specification;
 // using lps::action_rename;
 
@@ -38,10 +38,10 @@ void test1()
     "  (n>4)  -> a(n) => b(n); \n"
     "  (n<22) -> a(n) => c(n); \n";
 
-  specification spec = lps::linearise(SPEC);
+  stochastic_specification spec=lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
-  specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec);
   BOOST_CHECK(new_spec.process().summand_count()==3);
 }
 
@@ -65,10 +65,10 @@ void test2()
     "  (f(n)>23) -> a(n) => b(n); \n"
     "  b(n) => c(n); \n";
 
-  specification spec = lps::linearise(SPEC);
+  stochastic_specification spec=lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
-  specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec);
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
@@ -85,11 +85,11 @@ void test3()
     "rename \n"
     "  a(1) => delta; \n";
 
-  specification spec = lps::linearise(SPEC);
+  stochastic_specification spec=lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
-  specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(new_spec.process().summand_count()==2);
@@ -113,11 +113,11 @@ void test4()
     "rename\n"
     "(e==d1) -> a(e) => tau;\n";
 
-  specification spec = lps::linearise(SPEC);
+  stochastic_specification spec=lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
-  specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(new_spec.process().summand_count()==2);
@@ -160,11 +160,11 @@ void test5() // Test whether partial renaming to delta is going well. See bug re
     "  rs(1, 0, s) => delta;\n";
 
 
-  specification spec = lps::linearise(SPEC);
+  stochastic_specification spec=lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
-  specification new_spec = action_rename(ar_spec,spec);
+  stochastic_specification new_spec = action_rename(ar_spec,spec);
   lps::rewrite(new_spec, R);
   lps::remove_trivial_summands(new_spec);
   BOOST_CHECK(new_spec.process().summand_count()==8);

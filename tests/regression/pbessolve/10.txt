@@ -1,0 +1,5 @@
+% Test case to check a simple forall quantifier elimination.
+sort E=struct e1 | e2 | e3;
+pbes mu X=forall x:E.val(x==e1);
+init X;
+

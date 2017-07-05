@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_UTILITY_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_UTILITY_H
 
-#include <sstream>
 #include "mcrl2/pbes/pbes_equation.h"
+#include <sstream>
 
 namespace mcrl2 {
 
@@ -54,13 +54,6 @@ const data::data_expression& nth_element(const data::data_expression_list& e, st
     ++i;
   }
   return *i;
-}
-
-inline
-bool is_constant(const data::data_expression& x)
-{
-  typedef core::term_traits<data::data_expression> tr;
-  return tr::is_constant(x);
 }
 
 inline

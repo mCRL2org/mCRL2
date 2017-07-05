@@ -12,9 +12,9 @@
 #ifndef MCRL2_PBES_REMOVE_EQUATIONS_H
 #define MCRL2_PBES_REMOVE_EQUATIONS_H
 
+#include "mcrl2/pbes/pbes.h"
 #include <map>
 #include <set>
-#include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
 
@@ -27,9 +27,9 @@ std::string print_removed_equations(const std::vector<propositional_variable>& r
 {
   std::ostringstream out;
   out << "\nremoved the following equations:" << std::endl;
-  for (std::vector<propositional_variable>::const_iterator i = removed.begin(); i != removed.end(); ++i)
+  for (const propositional_variable& v: removed)
   {
-    out << "  " << pbes_system::pp(*i) << std::endl;
+    out << "  " << pbes_system::pp(v) << std::endl;
   }
   return out.str();
 }
@@ -61,19 +61,19 @@ std::set<propositional_variable> reachable_variables(const pbes& p)
     explored.insert(X);
     pbes_expression phi = index[X]->formula();
     std::set<propositional_variable_instantiation> iocc = pbes_system::find_propositional_variable_instantiations(phi);
-    for (std::set<propositional_variable_instantiation>::iterator i = iocc.begin(); i != iocc.end(); ++i)
+    for (const propositional_variable_instantiation& i: iocc)
     {
-      if (explored.find(i->name()) == explored.end())
+      if (explored.find(i.name()) == explored.end())
       {
-        visited.insert(i->name());
+        visited.insert(i.name());
       }
     }
   }
 
   std::set<propositional_variable> result;
-  for (std::set<core::identifier_string>::iterator i = explored.begin(); i != explored.end(); ++i)
+  for (const core::identifier_string& i: explored)
   {
-    result.insert(index[*i]->variable());
+    result.insert(index[i]->variable());
   }
   return result;
 }
@@ -86,19 +86,19 @@ std::vector<propositional_variable> remove_unreachable_variables(pbes& p)
   std::vector<propositional_variable> result;
 
   std::set<propositional_variable> V = reachable_variables(p);
-  std::vector<pbes_equation> eqn;
-  for (auto i = p.equations().begin(); i != p.equations().end(); ++i)
+  std::vector<pbes_equation> equations;
+  for (pbes_equation& eqn: p.equations())
   {
-    if (V.find(i->variable()) != V.end())
+    if (V.find(eqn.variable()) != V.end())
     {
-      eqn.push_back(*i);
+      equations.push_back(eqn);
     }
     else
     {
-      result.push_back(i->variable());
+      result.push_back(eqn.variable());
     }
   }
-  p.equations() = eqn;
+  p.equations() = equations;
   return result;
 }
 

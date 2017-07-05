@@ -25,7 +25,6 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/fset.h"
 
@@ -250,11 +249,7 @@ namespace mcrl2 {
         return in_name;
       }
 
-      ///\brief Constructor for function symbol in
-      /// \param s A sort expression
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol in
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol in(const sort_expression& , const sort_expression& s0, const sort_expression& s1)
       {
@@ -272,7 +267,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == in_name();
+          return f.name() == in_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -367,11 +362,7 @@ namespace mcrl2 {
         return union_name;
       }
 
-      ///\brief Constructor for function symbol +
-      /// \param s A sort expression
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol union_
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol union_(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
@@ -386,7 +377,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for union_ with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for union_ with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol union_(union_name(), make_function_sort(s0, s1, target_sort));
@@ -402,7 +393,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == union_name();
+          return f.name() == union_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -441,11 +432,7 @@ namespace mcrl2 {
         return intersection_name;
       }
 
-      ///\brief Constructor for function symbol *
-      /// \param s A sort expression
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol intersection
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol intersection(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
@@ -460,7 +447,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for intersection with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for intersection with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol intersection(intersection_name(), make_function_sort(s0, s1, target_sort));
@@ -476,7 +463,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == intersection_name();
+          return f.name() == intersection_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
       }
@@ -515,11 +502,7 @@ namespace mcrl2 {
         return difference_name;
       }
 
-      ///\brief Constructor for function symbol -
-      /// \param s A sort expression
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol difference
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol difference(const sort_expression& s, const sort_expression& s0, const sort_expression& s1)
       {
@@ -534,7 +517,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for difference with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for difference with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol difference(difference_name(), make_function_sort(s0, s1, target_sort));
@@ -550,7 +533,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == difference_name();
+          return f.name() == difference_name() && function_sort(f.sort()).domain().size() == 2;
         }
         return false;
       }

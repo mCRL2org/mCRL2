@@ -12,8 +12,9 @@
 #ifndef MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_QUANTIFIERS_REWRITER_H
 
+#include "mcrl2/data/detail/data_sequence_algorithm.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
-#include "mcrl2/utilities/detail/optimized_logic_operators.h"
 
 namespace mcrl2 {
 
@@ -25,100 +26,96 @@ template <template <class> class Builder, class Derived>
 struct add_simplify_quantifiers: public Builder<Derived>
 {
   typedef Builder<Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
-  typedef core::term_traits<pbes_expression> tr;
-
-  pbes_expression operator()(const forall& x)
+  pbes_expression apply(const forall& x)
   {
     pbes_expression result;
-    pbes_expression body = super::operator()(x.body());
+    pbes_expression body = super::apply(x.body());
     auto const& variables = x.variables();
 
     if (variables.empty())
     {
-      result = tr::true_();
+      result = true_();
     }
-    else if (tr::is_not(body))
+    else if (is_not(body))
     {
-      result = utilities::optimized_not(utilities::optimized_exists(variables, atermpp::down_cast<not_>(body).operand(), true));
+      result = data::optimized_not(data::optimized_exists(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
-    if (tr::is_and(body))
+    if (is_and(body))
     {
       auto const& left = atermpp::down_cast<and_>(body).left();
       auto const& right = atermpp::down_cast<and_>(body).right();
-      result = utilities::optimized_and(utilities::optimized_forall(variables, left, true), utilities::optimized_forall(variables, right, true));
+      result = data::optimized_and(data::optimized_forall(variables, left, true), data::optimized_forall(variables, right, true));
     }
-    else if (tr::is_or(body))
+    else if (is_or(body))
     {
       auto const& left = atermpp::down_cast<or_>(body).left();
       auto const& right = atermpp::down_cast<or_>(body).right();
-      data::variable_list lv = tr::set_intersection(variables, tr::free_variables(left));
-      data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
+      data::variable_list lv = data::detail::set_intersection(variables, free_variables(left));
+      data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
       if (lv.empty())
       {
-        result = utilities::optimized_or(left, utilities::optimized_forall_no_empty_domain(rv, right, true));
+        result = data::optimized_or(left, data::optimized_forall_no_empty_domain(rv, right, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_or(right, utilities::optimized_forall_no_empty_domain(lv, left, true));
+        result = data::optimized_or(right, data::optimized_forall_no_empty_domain(lv, left, true));
       }
       else
       {
-        result = utilities::optimized_forall(variables, body, true);
+        result = data::optimized_forall(variables, body, true);
       }
     }
     else
     {
-      result = utilities::optimized_forall(variables, body, true);
+      result = data::optimized_forall(variables, body, true);
     }
     return result;
   }
 
-  pbes_expression operator()(const exists& x)
+  pbes_expression apply(const exists& x)
   {
     pbes_expression result;
-    pbes_expression body = super::operator()(x.body());
+    pbes_expression body = super::apply(x.body());
     auto const& variables = x.variables();
 
     if (variables.empty())
     {
-      result = tr::false_();
+      result = false_();
     }
-    else if (tr::is_not(body))
+    else if (is_not(body))
     {
-      result = utilities::optimized_not(utilities::optimized_forall(variables, atermpp::down_cast<not_>(body).operand(), true));
+      result = data::optimized_not(data::optimized_forall(variables, atermpp::down_cast<not_>(body).operand(), true));
     }
-    if (tr::is_or(body))
+    if (is_or(body))
     {
       auto const& left = atermpp::down_cast<or_>(body).left();
       auto const& right = atermpp::down_cast<or_>(body).right();
-      result = utilities::optimized_or(utilities::optimized_exists(variables, left, true), utilities::optimized_exists(variables, right, true));
+      result = data::optimized_or(data::optimized_exists(variables, left, true), data::optimized_exists(variables, right, true));
     }
-    else if (tr::is_and(body))
+    else if (is_and(body))
     {
       auto const& left = atermpp::down_cast<and_>(body).left();
       auto const& right = atermpp::down_cast<and_>(body).right();
-      data::variable_list lv = tr::set_intersection(variables, tr::free_variables(left));
-      data::variable_list rv = tr::set_intersection(variables, tr::free_variables(right));
+      data::variable_list lv = data::detail::set_intersection(variables, free_variables(left));
+      data::variable_list rv = data::detail::set_intersection(variables, free_variables(right));
       if (lv.empty())
       {
-        result = utilities::optimized_and(left, utilities::optimized_exists_no_empty_domain(rv, right, true));
+        result = data::optimized_and(left, data::optimized_exists_no_empty_domain(rv, right, true));
       }
       else if (rv.empty())
       {
-        result = utilities::optimized_and(right, utilities::optimized_exists_no_empty_domain(lv, left, true));
+        result = data::optimized_and(right, data::optimized_exists_no_empty_domain(lv, left, true));
       }
       else
       {
-        result = utilities::optimized_exists(variables, body, true);
+        result = data::optimized_exists(variables, body, true);
       }
     }
     else
     {
-      result = utilities::optimized_exists(variables, body, true);
+      result = data::optimized_exists(variables, body, true);
     }
     return result;
   }
@@ -126,12 +123,7 @@ struct add_simplify_quantifiers: public Builder<Derived>
 
 template <typename Derived>
 struct simplify_quantifiers_builder: public add_simplify_quantifiers<pbes_system::detail::simplify_builder, Derived>
-{
-  typedef add_simplify_quantifiers<pbes_system::detail::simplify_builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-};
+{ };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
 struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction>
@@ -139,7 +131,6 @@ struct simplify_quantifiers_data_rewriter_builder: public add_data_rewriter<pbes
   typedef add_data_rewriter<pbes_system::detail::simplify_quantifiers_builder, Derived, DataRewriter, SubstitutionFunction> super;
   using super::enter;
   using super::leave;
-  using super::operator();
 
   simplify_quantifiers_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
@@ -156,7 +147,7 @@ struct simplify_quantifiers_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    return core::make_apply_builder<detail::simplify_quantifiers_builder>()(x);
+    return core::make_apply_builder<detail::simplify_quantifiers_builder>().apply(x);
   }
 };
 
@@ -176,13 +167,13 @@ struct simplify_quantifiers_data_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     data::no_substitution sigma;
-    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma).apply(x);
   }
 
   template <typename SubstitutionFunction>
   pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
   {
-    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<detail::simplify_quantifiers_data_rewriter_builder>(R, sigma).apply(x);
   }
 };
 

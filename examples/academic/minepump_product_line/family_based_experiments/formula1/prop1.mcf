@@ -1,0 +1,39 @@
+%% Absence of deadlock
+%%
+%% Holds for all product families, but requires a decomposition into 12 distinct
+%% product families
+
+forall Pz:FExpr. %% verify for all product families Pz taken from the list below
+( val(Pz in
+[
+and(atom(Mq),and(atom(Ma),and(atom(Cp),atom(Ct))))
+,and(neg(atom(Mq)),and(atom(Ma),and(atom(Cp),atom(Ct))))
+,and(atom(Mq),and(neg(atom(Ma)),and(atom(Cp),atom(Ct))))
+,and(neg(atom(Mq)),and(neg(atom(Ma)),and(atom(Cp),atom(Ct))))
+,and(atom(Mq),and(atom(Ma),and(neg(atom(Cp)),atom(Ct))))
+,and(neg(atom(Mq)),and(atom(Ma),and(neg(atom(Cp)),atom(Ct))))
+,and(atom(Mq),and(neg(atom(Ma)),and(neg(atom(Cp)),atom(Ct))))
+,and(neg(atom(Mq)),and(neg(atom(Ma)),and(neg(atom(Cp)),atom(Ct))))
+,and(atom(Ma),and(atom(Cp),neg(atom(Ct))))
+,and(neg(atom(Ma)),and(atom(Cp),neg(atom(Ct))))
+,and(atom(Ma),and(neg(atom(Cp)),neg(atom(Ct))))
+,and(neg(atom(Ma)),and(neg(atom(Cp)),neg(atom(Ct))))
+]
+)
+ =>
+ nu X(Px:FExpr = normalise(and(Pz,FD))).
+ (
+ (
+ (val(normalise(and(Px,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px,e)) != ff) => X(normalise(and(Px,e)))) ))
+ &&
+ [skip]X(Px)
+ )
+ &&
+ 
+ (
+ (val(normalise(or(neg(Px),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px),e)) == tt)) ))
+ ||
+  <skip>true
+ )
+ )
+)

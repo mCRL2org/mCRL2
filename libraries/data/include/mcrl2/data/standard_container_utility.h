@@ -12,18 +12,18 @@
 #ifndef MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 #define MCRL2_DATA_STANDARD_CONTAINER_UTILITY_H
 
-#include <type_traits>
 #include <iterator>
+#include <type_traits>
 
 #include "mcrl2/utilities/detail/join.h"
 
 // Workaround for OS X with Apples patched gcc 4.0.1
 #undef nil
 
+#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
-#include "mcrl2/data/bag.h"
-#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2
 {
@@ -43,7 +43,7 @@ template < typename Sequence >
 inline
 application list(const sort_expression& s,
                  Sequence const& range,
-                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = nullptr)
 {
   data_expression                list_expression(empty(s));
   std::vector< data_expression > elements(range.begin(), range.end());
@@ -99,7 +99,7 @@ template <typename Sequence>
 inline
 data_expression list_enumeration(const sort_expression& s,
                                  Sequence const& range,
-                                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
+                                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = nullptr)
 {
   if (range.empty())
   {
@@ -145,7 +145,7 @@ bool is_list_enumeration_application(const atermpp::aterm_appl& e)
   }
   return false;
 }
-}
+} // namespace sort_list
 
 namespace sort_set
 {
@@ -239,7 +239,7 @@ bool is_set_enumeration_application(const atermpp::aterm_appl& e)
   }
   return false;
 }
-}
+} // namespace sort_set
 
 namespace sort_fset
 {
@@ -254,7 +254,7 @@ template < typename Sequence >
 inline
 application fset(const sort_expression& s,
                  Sequence const& range,
-                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = nullptr)
 {
   data_expression fset_expression(sort_fset::empty(s));
 
@@ -279,7 +279,7 @@ application fset(const sort_expression& s,
   return fset(s, data_expression_vector(range.begin(),range.end()));
 }
 
-}
+} // namespace sort_fset
 
 namespace sort_bag
 {
@@ -339,7 +339,7 @@ data_expression bag_enumeration(const sort_expression& s,
 
     sort_expression_vector v;
 
-    for (size_t i = 0; i < range.size() / 2; ++i)
+    for (std::size_t i = 0; i < range.size() / 2; ++i)
     {
       v.push_back(t);
       v.push_back(sort_nat::nat());
@@ -367,7 +367,7 @@ data_expression bag_enumeration(const sort_expression& s,
     sort_expression t(range.begin()->sort());
     sort_expression_vector v;
 
-    for (size_t i = 0; i < range.size() / 2; ++i)
+    for (std::size_t i = 0; i < range.size() / 2; ++i)
     {
       v.push_back(t);
       v.push_back(sort_nat::nat());
@@ -391,7 +391,7 @@ bool is_bag_enumeration_application(const atermpp::aterm_appl& e)
   return false;
 }
 
-}
+} // namespace sort_bag
 
 namespace sort_fbag
 {
@@ -404,7 +404,7 @@ namespace sort_fbag
 template < typename Sequence >
 inline
 application fbag(const sort_expression& s, Sequence const& range,
-                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = 0)
+                 typename atermpp::enable_if_container< Sequence, data_expression >::type* = nullptr)
 {
   data_expression fbag_expression(sort_fbag::empty(s));
 
@@ -429,7 +429,7 @@ application fbag(const sort_expression& s, const data_expression_list& range)
 {
   return fbag(s, data_expression_vector(range.begin(),range.end()));
 }
-}
+} // namespace sort_fbag
 
 } // namespace data
 

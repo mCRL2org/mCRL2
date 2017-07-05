@@ -1,0 +1,40 @@
+nodes:
+  l1:
+    type: BesSpec
+  l2:
+    type: BES
+  l3:
+    type: BesSpec
+  l4:
+    type: BES
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: pbespp
+  t3:
+    input: [l3]
+    output: [l4]
+    args: []
+    name: txt2pbes
+  t4:
+    input: [l2]
+    output: []
+    args: []
+    name: pbespgsolve
+  t5:
+    input: [l4]
+    output: []
+    args: []
+    name: pbespgsolve
+
+result: |
+  result = t4.value['solution'] == t5.value['solution']
+

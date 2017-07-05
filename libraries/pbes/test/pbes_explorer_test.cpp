@@ -9,22 +9,19 @@
 /// \file pbes_explorer_test.cpp
 /// \brief Test for the PBES_Explorer interface.
 
-#include <iostream>
-#include <stdio.h>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/utilities/test_utilities.h"
-#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_greybox_interface.h"
+#include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_explorer.h"
-#include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/utilities/test_utilities.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <cstdio>
+#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
-
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 namespace ltsmin
 {
@@ -36,7 +33,7 @@ class explorer : public mcrl2::pbes_system::explorer {
 private:
     std::set<std::vector<int> > visited;
     std::deque<std::vector<int> > fresh;
-    size_t transition_count;
+    std::size_t transition_count;
 
 public:
 #ifdef MCRL2_JITTYC_AVAILABLE
@@ -53,12 +50,12 @@ public:
       transition_count(0)
     {}
 
-    size_t get_state_count() const
+    std::size_t get_state_count() const
     {
         return visited.size();
     }
 
-    size_t get_transition_count() const
+    std::size_t get_transition_count() const
     {
         return transition_count;
     }
@@ -135,7 +132,7 @@ struct pbes_state_cb
 {
     ltsmin::test::explorer* explorer;
     std::vector<std::vector<int> > successors;
-    size_t count;
+    std::size_t count;
 
     pbes_state_cb (ltsmin::test::explorer* explorer_)
         : explorer(explorer_), count(0)
@@ -154,7 +151,7 @@ struct pbes_state_cb
         return successors;
     }
 
-    size_t get_count() const
+    std::size_t get_count() const
     {
         return count;
     }
@@ -165,14 +162,15 @@ void explorer::bfs()
     int state_length = get_info()->get_lts_type().get_state_length();
     int num_rows = get_info()->get_number_of_groups();
     // int initial_state[state_length]; N.B. This is not portable C++
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(initial_state, int, state_length);
+    int* initial_state = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
     this->initial_state(initial_state);
     std::vector<int> initial_state_vector = this->to_int_vector(state_length, initial_state);
     visited.insert(initial_state_vector);
     fresh.push_back(initial_state_vector);
     // int state[state_length]; N.B. This is not portable C++
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(state, int, state_length);
-    while (!fresh.empty()) {
+    int* state = MCRL2_SPECIFIC_STACK_ALLOCATOR(int, state_length);
+    while (!fresh.empty()) 
+    {
         std::vector<int> state_vector = fresh.front();
         fresh.pop_front();
         from_int_vector(state_length, state_vector, state);
@@ -183,9 +181,8 @@ void explorer::bfs()
         std::set<std::vector<int> > succ_set;
         //std::clog << successors.size() << " successors" << std::endl;
         transition_count += successors.size();
-        for(std::vector<std::vector<int> >::iterator succ = successors.begin(); succ != successors.end(); ++succ)
+        for(const std::vector<int>& s: successors)
         {
-          std::vector<int> s = *succ;
           std::pair<std::set<std::vector<int> >::iterator,bool> ret;
           ret = visited.insert(s);
           if (ret.second)
@@ -203,9 +200,8 @@ void explorer::bfs()
             this->next_state_long(state, g, f);
             std::vector<std::vector<int> > successors_groups = f.get_successors();
 
-            for(std::vector<std::vector<int> >::iterator succ = successors_groups.begin(); succ != successors_groups.end(); ++succ)
+            for(const std::vector<int>& s: successors_groups)
             {
-                std::vector<int> s = *succ;
                 succ_set_groups.insert(s);
             }
         }
@@ -218,7 +214,7 @@ void explorer::bfs()
 } // namespace ltsmin
 
 
-void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int num_states, int num_transitions,
+void run_pbes_explorer(const std::string& pbes_text, int num_parts, int num_groups, int num_states, int num_transitions,
     const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer" << std::endl;
@@ -254,7 +250,7 @@ void run_pbes_explorer(std::string pbes_text, int num_parts, int num_groups, int
 
 }
 
-void run_pbes_explorer_file(std::string filename, int num_parts, int num_groups, int num_states, int num_transitions,
+void run_pbes_explorer_file(const std::string& filename, int num_parts, int num_groups, int num_states, int num_transitions,
     const std::string& rewrite_strategy = "jitty")
 {
   std::clog << "run_pbes_explorer_file" << std::endl;
@@ -339,5 +335,5 @@ BOOST_AUTO_TEST_CASE(buffer_2_read_then_eventually_send_pbesparelm_simple)
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   log::mcrl2_logger::set_reporting_level(log::debug);
-  return 0;
+  return nullptr;
 }

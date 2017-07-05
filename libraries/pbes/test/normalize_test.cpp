@@ -9,28 +9,25 @@
 /// \file normalize_test.cpp
 /// \brief Test for normalization functions.
 
-#include <functional>
-#include <iostream>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/detail/test_operation.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/detail/normalize_and_or.h"
+#include "mcrl2/utilities/detail/test_operation.h"
+#include <boost/test/minimal.hpp>
+#include <functional>
+#include <iostream>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 void test_normalize1()
 {
-  using namespace pbes_system;
-  namespace p = pbes_system::pbes_expr;
-
   pbes_expression x = propositional_variable_instantiation("x:X");
   pbes_expression y = propositional_variable_instantiation("y:Y");
   pbes_expression z = propositional_variable_instantiation("z:Z");
@@ -38,7 +35,8 @@ void test_normalize1()
   pbes_expression f1;
   pbes_expression f2;
 
-  f = p::not_(p::not_(x));
+  f = not_(x);
+  f = not_(f); // N.B. not_(not_(x)) does not work!
   f1 = pbes_system::normalize(f);
   f2 = x;
   std::cout << "f  = " << f  << std::endl;
@@ -54,7 +52,7 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  f  = p::not_(p::and_(p::not_(x), p::not_(y)));
+  f  = not_(and_(not_(x), not_(y)));
   f1 = pbes_system::normalize(f);
   f2 = or_(x, y);
   std::cout << "f  = " << f << std::endl;
@@ -62,9 +60,9 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  f  = p::imp(p::and_(p::not_(x), p::not_(y)), z);
+  f  = imp(and_(not_(x), not_(y)), z);
   f1 = pbes_system::normalize(f);
-  f2 = p::or_(p::or_(x, y), z);
+  f2 = or_(or_(x, y), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -86,22 +84,22 @@ void test_normalize1()
 
   f  = imp(and_(x, y), z);
   f1 = pbes_system::normalize(f);
-  f2 = p::or_(p::or_(data::sort_bool::not_(x1), data::sort_bool::not_(y1)), z);
+  f2 = or_(or_(data::sort_bool::not_(x1), data::sort_bool::not_(y1)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  pbes_expression T = p::true_();
-  pbes_expression F = p::false_();
+  pbes_expression T = true_();
+  pbes_expression F = false_();
   x = pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), T, F));
   y = pbes_system::normalize(x);
   std::cout << "x = " << x << std::endl;
   std::cout << "y = " << y << std::endl;
 
-  data::variable_list ab = make_list(data::variable("s", data::basic_sort("S")));
+  data::variable_list ab = { data::variable("s", data::basic_sort("S")) };
   x = propositional_variable_instantiation("x:X");
-  y = and_(x, imp(pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), p::false_(), p::false_())), p::false_()));
+  y = and_(x, imp(pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), false_(), false_())), false_()));
   z = pbes_system::normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
@@ -110,7 +108,7 @@ void test_normalize1()
 void test_normalize2()
 {
   // test case from Aad Mathijssen, 2/11/2008
-  lps::specification spec       = lps::linearise("init tau + tau;");
+  lps::specification spec=remove_stochastic_operators(lps::linearise("init tau + tau;"));
   state_formulas::state_formula formula  = state_formulas::parse_state_formula("nu X. [true]X", spec);
   bool timed = false;
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
@@ -120,10 +118,9 @@ void test_normalize2()
 void test_normalize3()
 {
   // test case from Aad Mathijssen, 1-4-2008
-  lps::specification spec = lps::linearise(
+  lps::specification spec=remove_stochastic_operators(lps::linearise(
                               "proc P = tau.P;\n"
-                              "init P;        \n"
-                            );
+                              "init P;        \n"));
   state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
@@ -183,7 +180,7 @@ pbes_expression norm(const pbes_expression& x)
   return pbes_system::detail::normalize_and_or(x);
 }
 
-void test_normalize_and_or_equality(std::string expr1, std::string expr2)
+void test_normalize_and_or_equality(const std::string& expr1, const std::string& expr2)
 {
   BOOST_CHECK(utilities::detail::test_operation(
     expr1,

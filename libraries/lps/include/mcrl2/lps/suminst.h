@@ -12,16 +12,16 @@
 #ifndef MCRL2_LPS_SUMINST_H
 #define MCRL2_LPS_SUMINST_H
 
-#include <deque>
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/utilities/logger.h"
+#include <deque>
 
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/rewrite.h"
 
 namespace mcrl2
 {
@@ -32,24 +32,29 @@ namespace lps
 inline
 std::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 {
-  data::sort_expression_vector sorts = s.sorts();
+  const std::set<data::sort_expression>& sorts = s.sorts();
   std::set<data::sort_expression> result;
 
-  for(data::sort_expression_vector::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+  for(const data::sort_expression& sort : sorts)
   {
-    if(s.is_certainly_finite(*i))
+    if(s.is_certainly_finite(sort))
     {
-      result.insert(*i);
+      result.insert(sort);
     }
   }
   return result;
 }
 
-template<typename DataRewriter>
-class suminst_algorithm: public lps::detail::lps_algorithm
+template<typename DataRewriter, typename Specification>
+class suminst_algorithm: public detail::lps_algorithm<Specification>
 {
+  typedef detail::lps_algorithm<Specification> super;
   typedef data::enumerator_list_element_with_substitution<> enumerator_element;
   typedef data::enumerator_algorithm_with_iterator<> enumerator_type;
+  typedef typename Specification::process_type process_type;
+  typedef typename process_type::action_summand_type action_summand_type;
+  typedef std::vector<action_summand_type> action_summand_vector_type;
+  using super::m_spec;
 
   protected:
     /// Sorts to be instantiated
@@ -61,17 +66,18 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     /// Rewriter
     DataRewriter m_rewriter;
     enumerator_type m_enumerator;
+    data::enumerator_identifier_generator m_id_generator;
 
     /// Statistiscs for verbose output
-    size_t m_processed;
-    size_t m_deleted;
-    size_t m_added;
+    std::size_t m_processed;
+    std::size_t m_deleted;
+    std::size_t m_added;
 
     template <typename SummandType, typename Container>
-    size_t instantiate_summand(const SummandType& s, Container& result)
+    std::size_t instantiate_summand(const SummandType& s, Container& result)
     {
       using namespace data;
-      size_t nr_summands = 0; // Counter for the number of new summands, used for verbose output
+      std::size_t nr_summands = 0; // Counter for the number of new summands, used for verbose output
       std::deque< variable > variables; // The variables we need to consider in instantiating
 
       // partition such that variables with finite sort precede those that do not
@@ -144,7 +150,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
       return nr_summands;
     }
 
-    bool must_instantiate(const action_summand& summand)
+    bool must_instantiate(const action_summand_type& summand)
     {
       return !m_tau_summands_only || summand.is_tau();
     }
@@ -161,7 +167,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
       {
         if (must_instantiate(*i))
         {
-          size_t newsummands = instantiate_summand(*i, result);
+          std::size_t newsummands = instantiate_summand(*i, result);
           if (newsummands > 0)
           {
             m_added += newsummands - 1;
@@ -182,15 +188,15 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     }
 
   public:
-    suminst_algorithm(specification& spec,
+    suminst_algorithm(Specification& spec,
                       DataRewriter& r,
                       std::set<data::sort_expression> sorts = std::set<data::sort_expression>(),
                       bool tau_summands_only = false)
-      : lps_algorithm(spec),
+      : detail::lps_algorithm<Specification>(spec),
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(r, spec.data(), r),
+        m_enumerator(r, spec.data(), r, m_id_generator),
         m_processed(0),
         m_deleted(0),
         m_added(0)
@@ -204,7 +210,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
     void run()
     {
-      action_summand_vector action_summands;
+      action_summand_vector_type action_summands;
       deadlock_summand_vector deadlock_summands;
       m_added = 0;
       m_deleted = 0;

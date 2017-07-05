@@ -285,7 +285,6 @@ Then configure cmake::
   $ cmake . -DCMAKE_OSX_DEPLOYMENT_TARGET={SDK version (e.g. '10.9')} \
             -DCMAKE_OSX_SYSROOT={/Path/To/SDK} \
             -DCMAKE_INSTALL_PREFIX=/ \
-            -DMCRL2_OSX_PACKAGE=ON \
             -DMCRL2_PACKAGE_RELEASE=ON
 
 As of the 201409.0 release, only the x64 platform is supported (this used to be
@@ -298,9 +297,9 @@ Build the toolset::
 
 Create the DMG-installer::
 
-  $ cpack -G PackageMaker
+  $ cpack -G DragNDrop
 
-Upload the installer that has been generated to
+Upload the disk image that has been generated to
 ``http://www.mcrl2.org/download/release``.
 
 Checking the installers
@@ -375,7 +374,7 @@ If you are creating a package for ubuntu (say Ubuntu Oneiric)::
   $ dch -v 201107.1.10245-0ubuntu0 -D oneiric
   
 If you are creating a package that should be uploaded to the Ubuntu mCRL2 
-development ppa (`https://launchpad.net/~mcrl2/+archive/devel-ppa`_), and you
+development ppa (https://launchpad.net/~mcrl2/+archive/devel-ppa), and you
 are building for Ubuntu Oneiric. This allows you to generate the pacage for
 multiple Ubuntu versions in the same PPA::
 

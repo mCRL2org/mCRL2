@@ -11,22 +11,17 @@
 
 //#define MCRL2_LPS_PARELM_DEBUG
 
-#include <iostream>
-#include <string>
-#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/find.h"
+#include "mcrl2/lps/invariant_checker.h"
+#include "mcrl2/lps/invelm_algorithm.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/specification_property_map.h"
-#include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/lps/invelm_algorithm.h"
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/test_utilities.h"
 #include "test_specifications.h"
-
-using mcrl2::utilities::collect_after_test_case;
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 
@@ -44,7 +39,7 @@ lps::specification invelm(const lps::specification& spec,
   data::detail::smt_solver_type solver_type = mcrl2::data::detail::solver_type_cvc;
   bool apply_induction = false;
 
-  lps::detail::Invariant_Checker v_invariant_checker(specification,
+  lps::detail::Invariant_Checker<lps::specification> v_invariant_checker(specification,
                                                      rewrite_strategy,
                                                      time_limit,
                                                      path_eliminator,
@@ -54,7 +49,7 @@ lps::specification invelm(const lps::specification& spec,
                                                     );
   if (v_invariant_checker.check_invariant(invariant))
   {
-    lps::invelm_algorithm algorithm(specification,
+    lps::invelm_algorithm<lps::specification> algorithm(specification,
                                     rewrite_strategy,
                                     time_limit,
                                     path_eliminator,
@@ -99,7 +94,7 @@ BOOST_AUTO_TEST_CASE(test_invariant)
 
   std::string INVARIANT = "!(b1 && b2)";
 
-  data::data_expression invariant = data::parse_data_expression(INVARIANT, "b1, b2: Bool;");
+  data::data_expression invariant = data::parse_data_expression(INVARIANT, data::parse_variables("b1, b2: Bool;"));
   lps::specification spec = lps::parse_linear_process_specification(SPEC);
   bool simplify_all;
   bool no_elimination;
@@ -139,5 +134,5 @@ BOOST_AUTO_TEST_CASE(test_invariant)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

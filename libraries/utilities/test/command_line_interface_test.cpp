@@ -15,35 +15,45 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/prover_tool.h"
-#include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 
 using namespace ::mcrl2::utilities;
-using namespace ::mcrl2::utilities::tools;
 
-template < typename TypeName, bool b >
-void string_to_type_test(std::string const& value)
+enum streamable_enum {
+    foo,
+    bar
+};
+
+std::istream& operator>>(std::istream& in, streamable_enum& out)
 {
-  std::istringstream is(value);
-  TypeName           s;
-
-  BOOST_CHECK((is >> s).fail() != b);
+  std::string word;
+  in >> word;
+  if (word == "foo")
+  {
+    out = foo;
+  }
+  else
+  if (word == "bar")
+  {
+    out = bar;
+  }
+  else
+  {
+    in.setstate(std::ios_base::failbit);
+  }
+  return in;
 }
 
-template < bool b >
-inline void string_to_strategy_test(std::string const& strategy)
+std::ostream& operator<<(std::ostream& out, const streamable_enum& in)
 {
-  string_to_type_test< mcrl2::data::rewriter::strategy, b >(strategy);
-}
-
-template < bool b >
-inline void string_to_prover_type_test(std::string const& prover_type)
-{
-  string_to_type_test< mcrl2::data::detail::smt_solver_type, b >(prover_type);
+  switch (in)
+  {
+  case foo:
+    return out << "foo";
+  case bar:
+    return out << "bar";
+  }
+  return out << "invalid_streamable_enum";
 }
 
 BOOST_AUTO_TEST_CASE(border_invalid)
@@ -126,87 +136,22 @@ BOOST_AUTO_TEST_CASE(conformance)
   BOOST_CHECK_THROW(command_line_parser(test_interface, 3, arguments), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(rewriting_options)
+BOOST_AUTO_TEST_CASE(custom_types)
 {
+  auto arg = make_enum_argument<streamable_enum>("argument");
+  arg.add_value_desc(foo, "Self-explanatory.");
+  arg.add_value_desc(bar, "Also self-explanatory.", true);
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
-
-  struct tool : public rewriter_tool< input_tool >
-  {
-    void add_options(interface_description& desc)
-    {
-      rewriter_tool< input_tool >::add_options(desc);
-    }
-
-    bool run()
-    {
-      return true;
-    }
-
-    tool() : rewriter_tool< input_tool >("", "", "", "")
-    {
-    }
-  };
-
-  // testing rewriter strategy extraction
-  string_to_strategy_test< true >("jitty");
-  string_to_strategy_test< false >("ijitty");
-  string_to_strategy_test< false >("jitta");
-  string_to_strategy_test< false >("jittya");
-  string_to_strategy_test< true >("jittyp");
-#if defined(MCRL2_JITTYC_AVAILABLE)
-  string_to_strategy_test< true >("jittyc");
-#endif
-
-  // Test rewriting options (-r and --rewrite with a mandatory argument)
-  tool().add_options(test_interface);
+  test_interface.add_option("argument", arg, "either foo or bar.", 'a');
 
   // Missing mandatory argument for option --rewriter
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter"), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --argument"), std::runtime_error);
   // Valid rewriter option with valid argument
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --rewriter=jitty"));
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --argument=foo"));
   // Valid rewriter option with valid argument
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -rjitty"));
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -afoo"));
   // Valid rewriter option with invalid argument
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter=invalid"), std::runtime_error);
-}
-
-BOOST_AUTO_TEST_CASE(prover_options)
-{
-  interface_description test_interface("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]", "whatis", "description");
-
-  struct tool : public prover_tool< input_tool >
-  {
-    void add_options(interface_description& desc)
-    {
-      prover_tool< input_tool >::add_options(desc);
-    }
-
-    bool run()
-    {
-      return true;
-    }
-
-    tool() : prover_tool< input_tool >("", "", "", "")
-    {
-    }
-  };
-
-  // testing smt prover type extraction
-  string_to_prover_type_test< false >("ar");
-  string_to_prover_type_test< false >("cvc-");
-  string_to_prover_type_test< false >("cvca");
-  string_to_prover_type_test< true >("cvc");
-  string_to_prover_type_test< false >("acvc");
-
-  // Test rewriting options (-z and --smt-solver with a mandatory argument)
-  tool().add_options(test_interface);
-
-  // Missing mandatory argument for option --smt-solver
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver"), std::runtime_error);
-  // Valid smt-solver option with valid argument
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -zcvc"));
-  // Valid smt-solver option with invalid argument
-  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver=invalid"), std::runtime_error);
+  BOOST_CHECK_THROW(command_line_parser(test_interface, "test --argument=baz"), std::runtime_error);
 }
 
 inline std::string const& first_of(command_line_parser const& p, std::string const& option)

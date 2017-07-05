@@ -9,35 +9,31 @@
 /// \file rewriter_test.cpp
 /// \brief Tests whether terms are correctly rewritten using various rewriters.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/data/nat.h"
-#include "mcrl2/data/int.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/list.h"
-#include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/structured_sort.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/utilities/test_utilities.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/utilities/text_utility.h"
+#include <boost/test/included/unit_test_framework.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
-using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
@@ -69,7 +65,7 @@ BOOST_AUTO_TEST_CASE(bool_rewrite_test)
 
   specification.add_context_sort(bool_());
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy1: " << *strat << std::endl;
@@ -90,7 +86,7 @@ BOOST_AUTO_TEST_CASE(bool_rewrite_test)
     data::variable_vector v;
     v.push_back(data::variable("b", bool_()));
     v.push_back(data::variable("c", bool_()));
-    data::data_expression e(parse_data_expression("b&&(b&&c)", v.begin(), v.end()));
+    data::data_expression e(parse_data_expression("b&&(b&&c)", v));
     data_rewrite_test(R, e, e);
   }
 
@@ -105,7 +101,7 @@ BOOST_AUTO_TEST_CASE(pos_rewrite_test)
 
   specification.add_context_sort(pos());
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy2: " << *strat << std::endl;
@@ -141,7 +137,7 @@ BOOST_AUTO_TEST_CASE(nat_rewrite_test)
 
   specification.add_context_sort(nat());
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy3: " << *strat << std::endl;
@@ -192,7 +188,7 @@ BOOST_AUTO_TEST_CASE(nat_rewrite_test)
 
     // Added a few additional checks (Wieger)
     data::rewriter datar(specification);
-    data::data_expression x = data::parse_data_expression("n >= 0", "n:Nat;");
+    data::data_expression x = data::parse_data_expression("n >= 0", parse_variables("n:Nat;"));
 
     BOOST_CHECK(datar(x) == sort_bool::true_());
     data_rewrite_test(R, greater_equal(variable("n", nat()), p0), sort_bool::true_());
@@ -208,7 +204,7 @@ BOOST_AUTO_TEST_CASE(int_rewrite_test)
 
   specification.add_context_sort(int_());
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy4: " << *strat << std::endl;
@@ -272,7 +268,7 @@ BOOST_AUTO_TEST_CASE(real_rewrite_test)
   data_specification specification;
   specification.add_context_sort(real_());
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy5: " << *strat << std::endl;
@@ -339,7 +335,7 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
 
   specification.add_context_sort(list(bool_()));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy6: " << *strat << std::endl;
@@ -359,7 +355,7 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
     data_rewrite_test(R, rtail(bool_(), head_true), empty_);
     data_rewrite_test(R, tail(bool_(), head_true), empty_);
   }
-} 
+}
 
 BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
 {
@@ -371,7 +367,7 @@ BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
                                                                                   // are present.
 
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy7: " << *strat << std::endl;
@@ -387,7 +383,7 @@ BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
     data_rewrite_test(R, e3, true_());
     data_rewrite_test(R, e4, false_());
   }
-} 
+}
 
 
 BOOST_AUTO_TEST_CASE(set_rewrite_test)
@@ -401,7 +397,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
   specification.add_context_sort(sort_set::set_(sort_nat::nat()));
   specification.add_context_sort(sort_set::set_(sort_bool::bool_()));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy8: " << *strat << std::endl;
@@ -423,7 +419,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     data_rewrite_test(R, normalize_sorts(equal_to(sort_set::false_function(sort_nat::nat()), sort_set::true_function(sort_nat::nat())),specification), sort_bool::false_());
 
     data_expression s1(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::empty(sort_nat::nat()))),specification)));
-    data_expression s2(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat()))),specification))); 
+    data_expression s2(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat()))),specification)));
     data_expression s(R(normalize_sorts(sort_set::set_fset(sort_nat::nat(), sort_fset::insert(sort_nat::nat(), p1, sort_fset::insert(sort_nat::nat(), p2, sort_fset::empty(sort_nat::nat())))),specification)));
 
     data_expression empty_complement(normalize_sorts(sort_set::complement(sort_nat::nat(),
@@ -438,7 +434,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
 
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p0, s),specification), sort_bool::false_());
     data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p1, s),specification), sort_bool::true_());
-    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p2, s),specification), sort_bool::true_()); 
+    data_rewrite_test(R, normalize_sorts(sort_set::in(sort_nat::nat(), p2, s),specification), sort_bool::true_());
 
     data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s, empty_set),specification), s);
     data_rewrite_test(R, normalize_sorts(sort_set::union_(sort_nat::nat(), s1, s2),specification), s);
@@ -466,7 +462,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     // see also set_bool_rewrite_test()
     x = sort_bool::not_(sort_fset::in(sort_nat::nat(), sort_nat::c0(), sort_fset::insert(sort_nat::nat(), sort_nat::cnat(sort_pos::c1()), sort_fset::cons_(sort_nat::nat(), sort_nat::c0(), sort_fset::empty(sort_nat::nat())))));
     x = normalize_sorts(x,specification);
-    data_rewrite_test(R, x, sort_bool::false_()); 
+    data_rewrite_test(R, x, sort_bool::false_());
   }
 }
 
@@ -484,7 +480,7 @@ BOOST_AUTO_TEST_CASE(bag_rewrite_test)
   specification.add_context_sort(sort_bag::bag(pos()));
 
   std::cerr << "bag rewrite test\n";
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy9: " << *strat << std::endl;
@@ -574,7 +570,7 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
 
   data_specification specification = data::parse_data_specification("sort D = struct c0 | c1?is_one | a(a0: Bool) | b(Bool)?is_b | c(n0: Nat, n1: Nat)?is_c; ");
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy10: " << *strat << std::endl;
@@ -649,7 +645,7 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
   std::cerr << "set bool rewrite test\n";
   data_expression e(not_(sort_fset::in(bool_(), true_(), sort_fset::insert(bool_(), false_(), sort_fset::cons_(bool_(), true_(), sort_fset::empty(bool_()))))));
   e = normalize_sorts(e,specification);
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy11: " << *strat << std::endl;
@@ -706,7 +702,7 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test)
   specification.add_context_sort(set_(nat()));
   specification.add_context_sort(set_(bool_()));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy14: " << *strat << std::endl;
@@ -730,7 +726,7 @@ BOOST_AUTO_TEST_CASE(finite_set_equals_test)
         "map All: Set(R);\n"
         "eqn All = {  r: R | true };\n");
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy14a: " << *strat << std::endl;
@@ -757,7 +753,7 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
 
   specification.add_context_sort(sort_set::set_(nat()));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy15: " << *strat << std::endl;
@@ -809,7 +805,7 @@ BOOST_AUTO_TEST_CASE(regression_test_bug_723)
   std::cerr << "List of booleans test, using initial" << std::endl;
   data_specification specification(parse_data_specification(s));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy16: " << *strat << std::endl;
@@ -868,7 +864,7 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
   data_specification specification(parse_data_specification(s));
 
   std::cerr << "othello test\n";
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy17: " << *strat << std::endl;
@@ -877,7 +873,7 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
     data::data_expression e(parse_data_expression("At(1, 2, [[None, None, None, None], [None, Red, White, None], [None, White, Red, None], [None, None, None, None]]) == None", specification));
     data_rewrite_test(R, e, sort_bool::true_());
   }
-} 
+}
 
 BOOST_AUTO_TEST_CASE(test_lambda_expression)
 {
@@ -911,7 +907,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_expression)
   data_specification specification(parse_data_specification(s));
 
   std::cerr << "lambda rewrite test\n";
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy18: " << *strat << std::endl;
@@ -943,7 +939,7 @@ BOOST_AUTO_TEST_CASE(test_whether_lists_can_be_put_in_sets)
   data_specification specification(parse_data_specification(s));
 
   std::cerr << "list in set teste\n";
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy19: " << *strat << std::endl;
@@ -979,7 +975,7 @@ BOOST_AUTO_TEST_CASE(lambda_predicate_matching)
   data_specification specification(parse_data_specification(s));
 
   std::cerr << "lambda_predicate_matching\n";
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy20: " << *strat << std::endl;
@@ -1038,7 +1034,7 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
   data_specification specification(parse_data_specification(s));
 
   std::cerr << "difficult_empty_list_in_set\n";
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy21: " << *strat << std::endl;
@@ -1049,7 +1045,7 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
     data_rewrite_test(R, e, f);
   }
 
-} 
+}
 
 BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
 {
@@ -1115,7 +1111,7 @@ BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
   data_specification specification(parse_data_specification(s));
 
   std::cerr << "existentially bound variable x0 of different types\n";
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy22: " << *strat << std::endl;
@@ -1125,7 +1121,7 @@ BOOST_AUTO_TEST_CASE(bound_existential_quantifiers_with_same_name)
     data::data_expression f(parse_data_expression("true", specification));
     data_rewrite_test(R, e, f);
   }
-} 
+}
 
 BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form)
 {
@@ -1150,7 +1146,7 @@ BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form)
   data_specification specification(parse_data_specification(s));
 
   std::cerr << "constructors_that_are_not_a_normal_form\n";
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy23: " << *strat << std::endl;
@@ -1171,7 +1167,7 @@ BOOST_AUTO_TEST_CASE(rewrite_using_the_where_construct)
 
   data_specification specification(parse_data_specification(s));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     data::rewriter R(specification, *strat);
@@ -1193,7 +1189,7 @@ BOOST_AUTO_TEST_CASE(rewrite_rule_for_higher_order_functions)
 
   data_specification specification(parse_data_specification(s));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy24: " << *strat << std::endl;
@@ -1203,7 +1199,7 @@ BOOST_AUTO_TEST_CASE(rewrite_rule_for_higher_order_functions)
     data::data_expression f(parse_data_expression("f(0)(0)", specification));
     data_rewrite_test(R, e, f);
   }
-}  
+}
 
 BOOST_AUTO_TEST_CASE(check_whether_counting_of_elements_in_an_FBag_works_properly)
 {
@@ -1214,7 +1210,7 @@ BOOST_AUTO_TEST_CASE(check_whether_counting_of_elements_in_an_FBag_works_properl
 
   data_specification specification(parse_data_specification(s));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy25: " << *strat << std::endl;
@@ -1232,7 +1228,7 @@ BOOST_AUTO_TEST_CASE(check_whether_counting_of_elements_in_an_FBag_works_properl
     f=parse_data_expression("{Pos2Nat(7):4}", specification);
     data_rewrite_test(R, e, R(f));
   }
-}  
+}
 
 
 BOOST_AUTO_TEST_CASE(square_root_test)
@@ -1244,7 +1240,7 @@ BOOST_AUTO_TEST_CASE(square_root_test)
 
   data_specification specification(parse_data_specification(s));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy26: " << *strat << std::endl;
@@ -1356,7 +1352,7 @@ BOOST_AUTO_TEST_CASE(check_whether_higher_order_function_are_dealt_with_appropri
 
   data_specification specification(parse_data_specification(s));
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::cerr << "  Strategy27: " << *strat << std::endl;
@@ -1395,7 +1391,127 @@ BOOST_AUTO_TEST_CASE(check_whether_higher_order_function_are_dealt_with_appropri
     data_rewrite_test(R, e, f);
 
   }
+}
+
+BOOST_AUTO_TEST_CASE(check_whether_higher_order_function_are_dealt_with_appropriately_in_rhs_of_rewrite_rules)
+{
+  std::string s(
+  "map f:Pos->Pos->Pos->Pos->Pos->Bool;\n"
+  "    g:Pos->Pos->Pos->Pos->Pos->Bool;\n"
+  "var x,y,z,u,v:Pos;\n"
+  "eqn f(x)(2)(z)(u)(v)=(u==2);\n"
+  "    g(3)(y)(z)(u)(v)=f(3)(y)(z)(u)(v) || f(2)(y)(z)(u)(u);\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy28: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("g(1)(2)(1)(1)(1)", specification));
+    data::data_expression f(parse_data_expression("g(1)(2)(1)(1)(1)", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("g(3)(2)(1)(1)(1)", specification));
+    f(parse_data_expression("false", specification));
+    data_rewrite_test(R, e, f);
+
+  }
+}
+
+BOOST_AUTO_TEST_CASE(check_higher_order_functions_with_multiple_arguments)
+{
+  std::string s(
+  "map f:Pos->(Pos#Pos)->Pos->Pos->Pos;\n"
+  "    g:Pos->(Pos#Pos)->Pos->Pos->Pos;\n"
+  "var x,y,z,u,v:Pos;\n"
+  "eqn f(x)(2,z)(u)(v)= g(x)(3,z)(u)(v)+g(x)(4,z)(v)(u);\n"
+  "    g(3)(y,z)(u)(v)=1;\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy29: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("g(3)(2,1)(1)(1)", specification));
+    data::data_expression f(parse_data_expression("1", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("g(4)(2,1)(1)(1)", specification));
+    f(parse_data_expression("g(4)(2,1)(1)(1)", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("f(3)(2,1)(1)(1)", specification));
+    f(parse_data_expression("2", specification));
+    data_rewrite_test(R, e, f);
+
+  }
+}
+
+BOOST_AUTO_TEST_CASE(Check_function_equality)
+{
+  std::string s(
+  "map f:Pos#Pos->Pos;\n"
+  "    g:(Pos#Pos)->Pos;\n"
+  "    h:(Pos#Pos)->Pos;\n"
+  "var x,y,z,u,v:Pos;\n"
+  "eqn f(x,y)=x+y;\n"
+  "    g(x,y)=x+y;\n"
+  "    h(x,y)=x+x;\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy30: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("f==g", specification));
+    data::data_expression f(parse_data_expression("true", specification));
+    data_rewrite_test(R, e, f);
+
+    e(parse_data_expression("f==h", specification));
+    f(parse_data_expression("false", specification));
+    data_rewrite_test(R, e, f);
+  }
 } 
+
+BOOST_AUTO_TEST_CASE(Check_normal_forms_in_function_update)   // In the jitty rewriter the internally used annotation Rewritten@@term
+                                                              // was not always properly removed.
+{
+  std::string s(
+  "sort F = Nat->Nat->Nat;\n"
+  "map a:F;\n"
+  "    update:F#Nat#Nat#Nat->F;\n"
+  "var c:F;\n"
+  "    i,j,x:Nat;\n"
+  "eqn update(c,i,j,x)=c[i->c(i)[j->x]];\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  rewrite_strategy_vector strategies(data::detail::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy31: " << *strat << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("update(a,0,0,0)", specification));
+    data::data_expression f(parse_data_expression("a[0 -> a(0)[0 -> 0]]", specification));
+    data_rewrite_test(R, e, f);
+  }
+}
+
+
 
 
 
@@ -1403,5 +1519,5 @@ BOOST_AUTO_TEST_CASE(check_whether_higher_order_function_are_dealt_with_appropri
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   //mcrl2::log::logger::set_reporting_level(log::debug);
-  return 0;
+  return nullptr;
 }

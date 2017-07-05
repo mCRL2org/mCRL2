@@ -12,13 +12,13 @@
 #ifndef MCRL2_PBES_FIXPOINT_SYMBOL_H
 #define MCRL2_PBES_FIXPOINT_SYMBOL_H
 
-#include <cassert>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
+#include <cassert>
 
 namespace mcrl2
 {
@@ -85,6 +85,7 @@ std::string pp(const fixpoint_symbol& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const fixpoint_symbol& x)

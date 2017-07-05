@@ -9,19 +9,19 @@
 /// \file mcrl2/modal_formula/state_formula.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_MODAL_STATE_FORMULA_H
-#define MCRL2_MODAL_STATE_FORMULA_H
+#ifndef MCRL2_MODAL_FORMULA_STATE_FORMULA_H
+#define MCRL2_MODAL_FORMULA_STATE_FORMULA_H
 
 #include <iostream> // for debugging
 
-#include <string>
-#include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/modal_formula/regular_formula.h"
+#include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/modal_formula/action_formula.h"
+#include "mcrl2/modal_formula/regular_formula.h"
+#include <cassert>
+#include <string>
 
 namespace mcrl2
 {
@@ -49,6 +49,11 @@ class state_formula: public atermpp::aterm_appl
 
     /// \brief Constructor.
     state_formula(const data::data_expression& x)
+      : atermpp::aterm_appl(x)
+    {}
+
+    /// \brief Constructor.
+    state_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
 //--- start user section state_formula ---//
@@ -90,6 +95,7 @@ inline
 bool is_state_formula(const atermpp::aterm_appl& x)
 {
   return data::is_data_expression(x) ||
+         data::is_untyped_data_parameter(x) ||
          state_formulas::is_true(x) ||
          state_formulas::is_false(x) ||
          state_formulas::is_not(x) ||
@@ -114,6 +120,7 @@ std::string pp(const state_formula& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const state_formula& x)
@@ -160,6 +167,7 @@ std::string pp(const true_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const true_& x)
@@ -206,6 +214,7 @@ std::string pp(const false_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const false_& x)
@@ -262,6 +271,7 @@ std::string pp(const not_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const not_& x)
@@ -323,6 +333,7 @@ std::string pp(const and_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const and_& x)
@@ -384,6 +395,7 @@ std::string pp(const or_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const or_& x)
@@ -445,6 +457,7 @@ std::string pp(const imp& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const imp& x)
@@ -506,6 +519,7 @@ std::string pp(const forall& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const forall& x)
@@ -567,6 +581,7 @@ std::string pp(const exists& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const exists& x)
@@ -628,6 +643,7 @@ std::string pp(const must& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const must& x)
@@ -689,6 +705,7 @@ std::string pp(const may& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const may& x)
@@ -735,6 +752,7 @@ std::string pp(const yaled& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const yaled& x)
@@ -791,6 +809,7 @@ std::string pp(const yaled_timed& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const yaled_timed& x)
@@ -837,6 +856,7 @@ std::string pp(const delay& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const delay& x)
@@ -893,6 +913,7 @@ std::string pp(const delay_timed& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const delay_timed& x)
@@ -959,6 +980,7 @@ std::string pp(const variable& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const variable& x)
@@ -1030,6 +1052,7 @@ std::string pp(const nu& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const nu& x)
@@ -1101,6 +1124,7 @@ std::string pp(const mu& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const mu& x)
@@ -1115,16 +1139,16 @@ inline void swap(mu& t1, mu& t2)
 }
 //--- end generated classes ---//
 
-inline int left_precedence(const mu&)     { return 1; }
-inline int left_precedence(const nu&)     { return 1; }
-inline int left_precedence(const forall&) { return 2; }
-inline int left_precedence(const exists&) { return 2; }
-inline int left_precedence(const imp&)    { return 3; }
-inline int left_precedence(const or_&)    { return 4; }
-inline int left_precedence(const and_&)   { return 5; }
-inline int left_precedence(const must&)   { return 6; }
-inline int left_precedence(const may&)    { return 6; }
-inline int left_precedence(const not_&)   { return 7; }
+inline int left_precedence(const mu&)     { return 41; }
+inline int left_precedence(const nu&)     { return 41; }
+inline int left_precedence(const forall&) { return 42; }
+inline int left_precedence(const exists&) { return 42; }
+inline int left_precedence(const imp&)    { return 43; }
+inline int left_precedence(const or_&)    { return 44; }
+inline int left_precedence(const and_&)   { return 45; }
+inline int left_precedence(const must&)   { return 46; }
+inline int left_precedence(const may&)    { return 46; }
+inline int left_precedence(const not_&)   { return 47; }
 inline int left_precedence(const state_formula& x)
 {
   if      (is_mu(x))     { return left_precedence(static_cast<const mu&>(x)); }
@@ -1165,84 +1189,20 @@ inline const state_formula& binary_right(const or_& x)   { return x.right(); }
 inline const state_formula& binary_left(const imp& x)    { return x.left(); }
 inline const state_formula& binary_right(const imp& x)   { return x.right(); }
 
-} // namespace state_formulas
-
-} // namespace mcrl2
-
-#ifndef MCRL2_MODAL_FORMULA_TRAVERSER_H
-#include "mcrl2/modal_formula/traverser.h"
-#endif
-
-namespace mcrl2
-{
-
-namespace state_formulas
-{
-
-/// \cond INTERNAL_DOCS
-//
-/// \brief Function that determines if a state formula is time dependent
-// \brief Visitor for checking if a state formula is timed.
-struct is_timed_traverser: public state_formula_traverser<is_timed_traverser>
-{
-  typedef state_formula_traverser<is_timed_traverser> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
-
-  bool result;
-
-  is_timed_traverser()
-    : result(false)
-  {}
-
-  void enter(const delay_timed& /* x */)
-  {
-    result = true;
-  }
-
-  void enter(const yaled_timed& /* x */)
-  {
-    result = true;
-  }
-
-  void enter(const action_formulas::at& /* x */)
-  {
-    result = true;
-  }
-};//
-//
-//
-//
-//
-
-/// \endcond
-
-/// \brief Checks if a state formula is timed
-/// \param x A state formula
-/// \return True if a state formula is timed
-inline
-bool is_timed(const state_formula& x)
-{
-  is_timed_traverser f;
-  f(x);
-  return f.result;
-}
+namespace algorithms {
+    bool is_timed(const state_formula& x);
+} // namespace algorithms
 
 /// \brief Returns true if the formula is timed.
 /// \return True if the formula is timed.
 inline
 bool state_formula::has_time() const
 {
-  return is_timed(*this);
+  return algorithms::is_timed(*this);
 }
 
 // template function overloads
-state_formula normalize_sorts(const state_formula& x, const data::data_specification& dataspec);
+state_formula normalize_sorts(const state_formula& x, const data::sort_specification& sortspec);
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x);
 std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x);
 std::set<data::variable> find_all_variables(const state_formulas::state_formula& x);
@@ -1254,4 +1214,4 @@ bool find_nil(const state_formulas::state_formula& x);
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_STATE_FORMULA_H
+#endif // MCRL2_MODAL_FORMULA_STATE_FORMULA_H

@@ -12,13 +12,13 @@
 #ifndef MCRL2_PBES_IO_H
 #define MCRL2_PBES_IO_H
 
-#include <utility>
-#include <iostream>
-#include <string>
-#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/parse.h"
+#include "mcrl2/utilities/file_utility.h"
 #include "mcrl2/utilities/logger.h"
+#include <iostream>
+#include <string>
+#include <utility>
 
 namespace mcrl2
 {
@@ -33,21 +33,19 @@ const std::vector<utilities::file_format>& pbes_file_formats()
   if (result.empty())
   {
     result.push_back(utilities::file_format("pbes", "PBES in internal format", false));
-    result.back().add_extension(".pbes");
-    result.push_back(utilities::file_format("pbes_text", "PBES in internal textual format", true));
-    result.back().add_extension(".aterm");
+    result.back().add_extension("pbes");
     result.push_back(utilities::file_format("text", "PBES in textual (mCRL2) format", true));
-    result.back().add_extension(".txt");
+    result.back().add_extension("txt");
   }
   return result;
 }
 
 inline
-bool is_pbes_file_format(const utilities::file_format* format)
+bool is_pbes_file_format(const utilities::file_format& format)
 {
-  for (size_t i = 0; i < pbes_file_formats().size(); ++i)
+  for (const utilities::file_format& i: pbes_file_formats())
   {
-    if (&pbes_file_formats()[i] == format)
+    if (i == format)
     {
       return true;
     }
@@ -56,49 +54,43 @@ bool is_pbes_file_format(const utilities::file_format* format)
 }
 
 inline
-const utilities::file_format* pbes_format_internal() { return &pbes_file_formats()[0]; }
+const utilities::file_format& pbes_format_internal() { return pbes_file_formats()[0]; }
 inline
-const utilities::file_format* pbes_format_internal_text() { return &pbes_file_formats()[1]; }
-inline
-const utilities::file_format* pbes_format_text() { return &pbes_file_formats()[2]; }
+const utilities::file_format& pbes_format_text() { return pbes_file_formats()[1]; }
 
 inline
-const utilities::file_format* guess_format(const std::string& filename)
+const utilities::file_format guess_format(const std::string& filename)
 {
-  for (auto it = pbes_file_formats().begin(); it != pbes_file_formats().end(); ++it)
+  for (const utilities::file_format& it : pbes_file_formats())
   {
-    if (it->matches(filename))
+    if (it.matches(filename))
     {
-      return &*it;
+      return it;
     }
   }
-  return utilities::file_format::unknown();
+  return utilities::file_format();
 }
 
 ///
 /// \brief Save a PBES in the format specified.
 /// \param pbes The PBES to be stored
-/// \param filename The name of the file to which the output is stored.
+/// \param stream The stream to which the output is saved.
 /// \param format Determines the format in which the result is written. If unspecified, or
 ///        pbes_file_unknown is specified, then a default format is chosen.
 ///
 inline
-void save_pbes(const pbes& pbes, std::ostream& stream,
-               const utilities::file_format* format=utilities::file_format::unknown())
+void save_pbes(const pbes& pbes, 
+               std::ostream& stream,
+               utilities::file_format format=utilities::file_format())
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = pbes_format_internal();
   }
-  mCRL2log(log::verbose) << "Saving result in " << format->shortname() << " format..." << std::endl;
+  mCRL2log(log::verbose) << "Saving result in " << format.shortname() << " format..." << std::endl;
   if (format == pbes_format_internal())
   {
     pbes.save(stream, true);
-  }
-  else
-  if (format == pbes_format_internal_text())
-  {
-    pbes.save(stream, false);
   }
   else
   if (format == pbes_format_text())
@@ -107,7 +99,7 @@ void save_pbes(const pbes& pbes, std::ostream& stream,
   }
   else
   {
-    throw mcrl2::runtime_error("Trying to save PBES in non-PBES format (" + format->shortname() + ")");
+    throw mcrl2::runtime_error("Trying to save PBES in non-PBES format (" + format.shortname() + ")");
   }
 }
 
@@ -116,22 +108,18 @@ void save_pbes(const pbes& pbes, std::ostream& stream,
 /// \param stream The stream from which to load the PBES.
 /// \param format The format that should be assumed for the file in infilename. If unspecified, or
 ///        pbes_file_unknown is specified, then a default format is chosen.
+/// \param source The source from which the stream originates. Used for error messages.
 inline
-void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* format)
+void load_pbes(pbes& pbes, std::istream& stream, utilities::file_format format, const std::string& source = "")
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = pbes_format_internal();
   }
-  mCRL2log(log::verbose) << "Loading PBES in " << format->shortname() << " format..." << std::endl;
+  mCRL2log(log::verbose) << "Loading PBES in " << format.shortname() << " format..." << std::endl;
   if (format == pbes_format_internal())
   {
-    pbes.load(stream, true);
-  }
-  else
-  if (format == pbes_format_internal_text())
-  {
-    pbes.load(stream, false);
+    pbes.load(stream, true, source);
   }
   else
   if (format == pbes_format_text())
@@ -140,7 +128,7 @@ void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* f
   }
   else
   {
-    throw mcrl2::runtime_error("Trying to load PBES from non-PBES format (" + format->shortname() + ")");
+    throw mcrl2::runtime_error("Trying to load PBES from non-PBES format (" + format.shortname() + ")");
   }
 }
 
@@ -152,22 +140,34 @@ void load_pbes(pbes& pbes, std::istream& stream, const utilities::file_format* f
 ///                            saving it to file.
 ///
 /// The format of the file in infilename is guessed if format is not given or if it is equal to
-/// utilities::file_format::unknown().
+/// utilities::file_format().
 inline
 void save_pbes(const pbes &pbes, const std::string &filename,
-               const utilities::file_format* format=utilities::file_format::unknown(),
+               utilities::file_format format=utilities::file_format(),
                bool welltypedness_check=true)
 {
   if (welltypedness_check)
   {
     assert(pbes.is_well_typed());
   }
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = guess_format(filename);
   }
-  utilities::output_file file = format->open_output(filename);
-  save_pbes(pbes, file.stream(), format);
+  
+  if (filename.empty()) 
+  {
+    save_pbes(pbes, std::cout, format);
+  }
+  else 
+  {
+    std::ofstream filestream(filename,(format.text_format()?std::ios_base::out: std::ios_base::binary));
+    if (!filestream.good())
+    {
+      throw mcrl2::runtime_error("Could not open file " + filename);
+    }
+    save_pbes(pbes, filestream, format);
+  }
 }
 
 /// \brief Load pbes from file.
@@ -176,17 +176,29 @@ void save_pbes(const pbes &pbes, const std::string &filename,
 /// \param format The format in which the PBES is stored in the file.
 ///
 /// The format of the file in infilename is guessed if format is not given or if it is equal to
-/// utilities::file_format::unknown().
+/// utilities::file_format().
 inline
-void load_pbes(pbes& pbes, const std::string& filename,
-               const utilities::file_format* format=utilities::file_format::unknown())
+void load_pbes(pbes& pbes, 
+               const std::string& filename,
+               utilities::file_format format=utilities::file_format())
 {
-  if (format == utilities::file_format::unknown())
+  if (format == utilities::file_format())
   {
     format = guess_format(filename);
   }
-  utilities::input_file file = format->open_input(filename);
-  load_pbes(pbes, file.stream(), format);
+ if (filename.empty())
+  { 
+    load_pbes(pbes, std::cin, format);
+  }
+  else 
+  {  
+    std::ifstream filestream(filename,(format.text_format()?std::ios_base::in: std::ios_base::binary));
+    if (!filestream.good())
+    {
+      throw mcrl2::runtime_error("Could not open file " + filename);
+    }
+    load_pbes(pbes, filestream, format, core::detail::file_source(filename));
+  }
 }
 
 } // namespace pbes_system

@@ -9,13 +9,14 @@
 #ifndef MCRL2_LPS_SIMULATION_H
 #define MCRL2_LPS_SIMULATION_H
 
-#include <string>
 #include <deque>
+#include <string>
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/next_state_generator.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/state.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/trace/trace.h"
 
 namespace mcrl2
@@ -31,34 +32,33 @@ class simulation
 {
   public:
 
-    typedef atermpp::term_balanced_tree<data::data_expression> state;
     struct transition_t
     {
-      state destination;
+      lps::state destination;
       multi_action action;
     };
 
     struct state_t
     {
-      state source_state;
+      lps::state source_state;
       std::vector<transition_t> transitions;
-      size_t transition_number; // Undefined for the last state in the trace
+      std::size_t transition_number; // Undefined for the last state in the trace
     };
 
     /// Constructor.
-    simulation(const specification& specification, data::rewrite_strategy strategy = data::rewrite_strategy());
+    simulation(const stochastic_specification& specification, data::rewrite_strategy strategy = data::rewrite_strategy());
 
     /// Returns the current annotated state vector.
     const std::deque<state_t> &trace() const { return m_tau_prioritization ? m_prioritized_trace : m_full_trace; }
 
     /// Remove states from the end of the simulation, making \a state_number the last state.
-    void truncate(size_t state_number);
+    void truncate(std::size_t state_number);
 
     /// Choose outgoing transition \a transition_number and add its state to the state vector.
-    void select(size_t transition_number);
+    void select(std::size_t transition_number);
 
     /// If enabled, tau prioritization is applied to all outgoing transitions, and in-between states are hidden from the state vector.
-    void enable_tau_prioritization(bool enable, std::string action = "ctau");
+    void enable_tau_prioritization(bool enable, const std::string& action = "ctau");
 
     /// Save the trace to a file.
     void save(const std::string &filename);
@@ -66,17 +66,16 @@ class simulation
     /// Load a trace from a file.
     void load(const std::string &filename);
 
-  private:
-    std::vector<transition_t> transitions(state source_state);
+  protected:
+    std::vector<transition_t> transitions(const lps::state& source_state);
     std::vector<transition_t> prioritize(const std::vector<transition_t> &transitions);
-    void push_back(const lps::state& state);
+    void push_back(const lps::state& lps_state);
     bool is_prioritized(const multi_action &action);
     void prioritize_trace();
     bool match_trace(trace::Trace& trace);
     bool match(const state &left, const state &right);
 
-  private:
-    specification m_specification;
+    stochastic_specification m_specification;
     data::rewriter m_rewriter;
     next_state_generator m_generator;
     next_state_generator::substitution_t m_substitution;
@@ -88,7 +87,7 @@ class simulation
     std::deque<state_t> m_full_trace;
     // The trace with all prioritized in-between states removed.
     std::deque<state_t> m_prioritized_trace;
-    std::deque<size_t> m_prioritized_originals;
+    std::deque<std::size_t> m_prioritized_originals;
 };
 
 } // namespace lps

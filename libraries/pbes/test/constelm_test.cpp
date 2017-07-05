@@ -11,14 +11,14 @@
 
 // #define MCRL2_PBES_CONSTELM_DEBUG
 
-#include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/pbes/constelm.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/remove_equations.h"
-#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/remove_equations.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/utilities/logger.h"
+#include <boost/test/minimal.hpp>
+#include <string>
 
 
 using namespace mcrl2;
@@ -203,7 +203,7 @@ std::string t17 =
 
 std::string x17 = "binding_variables = X1, X(s3_X: Pos)";
 
-void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
+void test_pbes(const std::string& pbes_spec, const std::string& expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplify_data_rewriter<data::rewriter> my_pbes_rewriter;
 
@@ -217,7 +217,7 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+  pbes_constelm_algorithm<data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
   // run the algorithm
   algorithm.run(q, compute_conditions);

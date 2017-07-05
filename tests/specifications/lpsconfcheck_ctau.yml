@@ -1,0 +1,50 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: LPS
+  l4:
+    type: LPS
+  l5:
+    type: LTS
+  l6:
+    type: LTS
+  l6:
+    type: LTS
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-lstack]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lpssuminst
+  t3:
+    input: [l3]
+    output: [l4]
+    args: []
+    name: lpsconfcheck
+  t4:
+    input: [l3]
+    output: [l5]
+    args: []
+    name: lps2lts
+  t5:
+    input: [l4]
+    output: [l6]
+    args: [-cctau]
+    name: lps2lts
+  t6:
+    input: [l5, l6]
+    output: []
+    args: [-ebranching-bisim]
+    name: ltscompare
+
+result: |
+  result = t6.value['result']

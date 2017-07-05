@@ -1,0 +1,22 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: TEXT
+  l3:
+    type: TEXT
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-a alphabet]
+    name: mcrl2transform
+  t2:
+    input: [l1]
+    output: [l3]
+    args: [-a alphabet-efficient]
+    name: mcrl2transform
+
+result: |
+  result = l2.value == l3.value

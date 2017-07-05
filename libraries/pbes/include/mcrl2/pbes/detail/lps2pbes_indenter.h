@@ -27,11 +27,11 @@ template <class T> // note, T is only a dummy
 struct lps2pbes_indenter
 {
   // The amount of indentation
-  static size_t depth;
+  static std::size_t depth;
 };
 
 template <class T>
-size_t lps2pbes_indenter<T>::depth = 0;
+std::size_t lps2pbes_indenter<T>::depth = 0;
 
 inline
 std::string lps2pbes_indent()

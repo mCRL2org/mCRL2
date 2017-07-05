@@ -28,7 +28,7 @@ void remove_parameters(pbes& x, const std::set<data::variable>& to_be_removed)
   pbes_system::remove_parameters(x, to_be_removed);
 }
 
-void remove_parameters(pbes& x, const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed)
+void remove_parameters(pbes& x, const std::map<core::identifier_string, std::vector<std::size_t> >& to_be_removed)
 {
   pbes_system::remove_parameters(x, to_be_removed);
 }
@@ -70,7 +70,7 @@ std::set<data::variable> significant_variables(const pbes_expression& x)
   return pbes_system::significant_variables(x);
 }
 
-} // algorithms
+} // namespace algorithms
 
 } // namespace pbes_system
 

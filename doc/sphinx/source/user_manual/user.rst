@@ -1,43 +1,66 @@
 .. include:: toplevel.inc
 
-mCRL2 user manual
-=================
+mCRL2 user documentation
+========================
+
+.. These hidden entries are shown in the main menu above, and therefore not
+   shown again on this page.
+
+.. toctree::
+   :hidden:
+
+   download
+   historic_releases
+   showcases
+   support
 
 Welcome to the mCRL2 user documentation. If you are looking for information on
 the use of the mCRL2 libraries or for source code documentation, please consult
 the `developers' documentation <../developer_manual/index.html>`_. 
 
-Contents
---------
+.. list-table::
+   :class: libdoc
 
-   .. These hidden entries are shown in the main menu above, and therefore not
-      shown again on this page.
+   * - **Manuals**
+   
+       .. toctree::
+          :maxdepth: 1
+   
+          introduction
+          tutorial/tutorial
 
-   .. toctree::
-      :hidden:
+     - **Tools**
+   
+       .. toctree::
+          :maxdepth: 1
+   
+          tools
 
-      download
-      historic_releases
-      showcases
-      support
+   * - **Build instructions**
 
-   **Manuals**
+       .. toctree::
+          :maxdepth: 2
 
-   .. toctree::
-      :maxdepth: 2
+          build_instructions/index
 
-      introduction
-      build_instructions/index
-      language_reference/index
-      tutorial/tutorial
-      tools
+     - **Reference**
 
-   **Background**
+       .. toctree::
+          :maxdepth: 2
 
-   .. toctree::
-      :maxdepth: 1
-      :glob:
+          language_reference/index
 
-      articles/*
-      publications
+   * - **Background**
+   
+       .. toctree::
+          :maxdepth: 1
+          :glob:
+   
+          articles/*
 
+     - **Publications**
+
+       .. toctree::
+          :maxdepth: 1
+
+          publications

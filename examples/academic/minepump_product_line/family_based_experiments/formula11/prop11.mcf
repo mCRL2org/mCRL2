@@ -1,0 +1,71 @@
+%% Products with feature Ct can always switch on the pump
+%%
+%% holds for 28 products and fails for 100 products. Proving the property for the 28
+%% products requires 8 distinct product families. Proving that the property fails for
+%% the remaining 100 products requires 4 distinct product families
+
+(forall Pz:FExpr.
+( val(Pz in
+[
+ and(atom(Ct),and(atom(Lh),and(atom(Cp),and(atom(Ma),atom(Mq)))))                              
+,and(atom(Ct),and(atom(Lh),and(atom(Cp),and(atom(Ma),neg(atom(Mq))))))                         
+,and(atom(Ct),and(atom(Lh),and(atom(Cp),and(neg(atom(Ma)),atom(Mq)))))                         
+,and(atom(Ct),and(atom(Lh),and(atom(Cp),and(neg(atom(Ma)),neg(atom(Mq))))))                    
+,and(atom(Ct),and(atom(Ll),and(atom(Lh),and(neg(atom(Cp)),and(neg(atom(Ma)),neg(atom(Mq))))))) 
+,and(atom(Ct),and(atom(Ll),and(atom(Lh),and(neg(atom(Cp)),and(neg(atom(Ma)),atom(Mq))))))      
+,and(atom(Ct),and(atom(Lh),and(atom(Ma), and(neg(atom(Cp)),atom(Mq)))))                        
+,and(atom(Ct),and(atom(Lh),and(atom(Ma), and(neg(atom(Cp)),neg(atom(Mq))))))                   
+]
+)
+ =>
+( nu X(Px:FExpr = normalise(and(Pz,FD))).
+ (
+ ( (forall e:FExpr. [skip(e)](val(normalise(and(Px,and(atom(Ct),e))) != ff) => X(normalise(and(Px,and(atom(Ct),e))))) ))
+ &&
+ ([skip](val(normalise(and(atom(Ct),Px)) != ff) => X(normalise(and(Px,atom(Ct))))))
+ &&
+ ( (forall e:FExpr. [pumpStart(e)](val(normalise(and(Px,and(atom(Ct),e))) != ff) => X(normalise(and(Px,and(atom(Ct),e))))) ))
+ &&
+ (mu Y(Py:FExpr = Px).
+   (
+    (val(normalise(or(neg(Py),atom(Ct))) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Py),e)) == tt) && Y(Py))))
+  ||(val(normalise(or(neg(Py),atom(Ct))) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Py),e)) == tt) )))
+  ||(val(normalise(or(neg(Py),atom(Ct))) == tt) && <skip>(Y(Py)))
+   )
+ )
+)
+)
+)
+)
+&&
+(
+forall Pz:FExpr.
+( val(Pz in
+[
+neg( atom(Lh) ),                                          
+neg( atom(Ct) ),                                          
+and( neg(atom(Cp)), and( neg(atom(Ll)), and( neg(atom(Ma)), and(atom(Lh), and(atom(Ct), atom(Mq)))))),       
+and( neg(atom(Cp)), and( neg(atom(Ll)), and( neg(atom(Ma)), and(atom(Lh), and(atom(Ct), neg(atom(Mq)))))))   
+]
+)
+ =>
+( mu X(Px:FExpr = normalise(and(Pz,FD))).
+ (
+ ( val(normalise(or(neg(Px),atom(Ct))) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px),e)) == tt) && X(normalise(and(Px,and(atom(Ct),e))))) ))
+ ||
+ (val(normalise(or(neg(Px),atom(Ct))) == tt) &&<skip>X(normalise(and(atom(Ct),Px))))
+ ||
+ (val(normalise(or(neg(Px),atom(Ct))) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px),e)) == tt) && X(normalise(and(Px,and(atom(Ct),e))))) ))
+ ||
+ (nu Y(Py:FExpr = Px).
+   (
+    ( (forall e:FExpr. [skip(e)](val(normalise(and(Py,and(atom(Ct),e))) != ff) => Y(normalise(and(Py,and(atom(Ct),e))) ))))
+   &&
+    ( (forall e:FExpr. [pumpStart(e)](val(normalise(and(Py,and(atom(Ct),e))) != ff) => false)))
+  &&( [skip](val(normalise(and(Py,atom(Ct))) != ff ) => Y(normalise(and(Py,atom(Ct))))))
+   )
+ )
+)
+)
+)
+)

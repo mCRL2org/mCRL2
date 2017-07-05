@@ -12,10 +12,12 @@
 #ifndef MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 #define MCRL2_UTILITIES_DETAIL_CONTAINER_UTILITY_H
 
+#include "mcrl2/utilities/exception.h"
+#include <algorithm>
+#include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
@@ -32,7 +34,7 @@ typename Map::mapped_type map_element(const Map& m, const typename Map::key_type
   if (i == m.end())
   {
     std::ostringstream out;
-    out << "map_element: key " << key << " not found!";
+    out << "missing key in map!";
     throw mcrl2::runtime_error(out.str());
   }
   return i->second;
@@ -118,19 +120,20 @@ void set_remove(std::set<T>& s, const Container& c)
   }
 }
 
-// Removes elements of the set c that satisfy predicate pred.
-template <typename T, typename Predicate>
-void set_remove_if(std::set<T>& c, Predicate pred)
+// C++11; works for sets and maps
+// Removes elements that satisfy predicate pred.
+template< typename ContainerT, typename PredicateT >
+void remove_if(ContainerT& items, const PredicateT& predicate)
 {
-  for (auto pos = c.begin(); pos != c.end(); ) {
-    if (pred(*pos)) {
-      c.erase(pos++);
-    }
-    else  {
-      ++pos;
-    }
+  for (auto it = items.begin(); it != items.end();)
+  {
+	if (predicate(*it))
+	{
+	  it = items.erase(it);
+	}
+	else ++it;
   }
-}
+};
 
 /// Returns true if the sorted ranges [first1, ..., last1) and [first2, ..., last2) have an empty intersection
 template <typename InputIterator1, typename InputIterator2>
@@ -152,6 +155,48 @@ bool has_empty_intersection(InputIterator1 first1, InputIterator1 last1, InputIt
     }
   }
   return true;
+}
+
+template <typename T>
+bool has_empty_intersection(const std::set<T>& s1, const std::set<T>& s2)
+{
+  return has_empty_intersection(s1.begin(), s1.end(), s2.begin(), s2.end());
+}
+
+/// \brief Returns the union of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The union of two sets.
+template <typename T>
+std::set<T> set_union(const std::set<T>& x, const std::set<T>& y)
+{
+  std::set<T> result;
+  std::set_union(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  return result;
+}
+
+/// \brief Returns the difference of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The difference of two sets.
+template <typename T>
+std::set<T> set_difference(const std::set<T>& x, const std::set<T>& y)
+{
+  std::set<T> result;
+  std::set_difference(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  return result;
+}
+
+/// \brief Returns the intersection of two sets.
+/// \param x A set
+/// \param y A set
+/// \return The intersection of two sets.
+template <typename T>
+std::set<T> set_intersection(const std::set<T>& x, const std::set<T>& y)
+{
+  std::set<T> result;
+  std::set_intersection(x.begin(), x.end(), y.begin(), y.end(), std::inserter(result, result.begin()));
+  return result;
 }
 
 } // namespace detail

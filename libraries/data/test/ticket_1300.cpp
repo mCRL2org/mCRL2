@@ -9,12 +9,12 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
-#include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/io.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/io.h"
+#include <boost/test/minimal.hpp>
 
 using namespace mcrl2;
 
@@ -88,7 +88,7 @@ void test1()
   "     x,y: Pos;\n"
   "     dx,dy: Int;\n"
   "     c,othercolorseen: Bool;\n"
-  "     count: Nat;\n"
+  "     counter: Nat;\n"
   "     y3,y2,d1: List(List(Piece));\n"
   "     y1: S1;\n"
   "     d: List(Piece);\n"
@@ -104,22 +104,22 @@ void test1()
   "     Four_in_a_row_horizontally(p, b)  =  Four_in_a_row_horizontally(p, 1, b);\n"
   "     y < M  ->  Four_in_a_row_horizontally(p, y, b)  =  Count_rows_horizontally(p, 1, y, b, 0) || Four_in_a_row_horizontally(p, y + 1, b);\n"
   "     y == M  ->  Four_in_a_row_horizontally(p, y, b)  =  Count_rows_horizontally(p, 1, M, b, 0);\n"
-  "     x < N  ->  Count_rows_horizontally(p, x, y, b, count)  =  if(At(x, y, b) == p, count >= R - 1 || Count_rows_horizontally(p, x + 1, y, b, count + 1), Count_rows_horizontally(p, x + 1, y, b, 0));\n"
-  "     x == N  ->  Count_rows_horizontally(p, x, y, b, count)  =  if(At(N, y, b) == p, count >= R - 1, false);\n"
+  "     x < N  ->  Count_rows_horizontally(p, x, y, b, counter)  =  if(At(x, y, b) == p, counter >= R - 1 || Count_rows_horizontally(p, x + 1, y, b, counter + 1), Count_rows_horizontally(p, x + 1, y, b, 0));\n"
+  "     x == N  ->  Count_rows_horizontally(p, x, y, b, counter)  =  if(At(N, y, b) == p, counter >= R - 1, false);\n"
   "     Four_in_a_row_vertically(p, b)  =  Four_in_a_row_vertically(p, 1, b);\n"
   "     x < N  ->  Four_in_a_row_vertically(p, x, b)  =  Count_rows_vertically(p, x, 1, b, 0) || Four_in_a_row_vertically(p, x + 1, b);\n"
   "     x == N  ->  Four_in_a_row_vertically(p, x, b)  =  Count_rows_vertically(p, N, 1, b, 0);\n"
-  "     y < M  ->  Count_rows_vertically(p, x, y, b, count)  =  if(At(x, y, b) == p, count >= R - 1 || Count_rows_vertically(p, x, y + 1, b, count + 1), Count_rows_vertically(p, x, y + 1, b, 0));\n"
-  "     y == M  ->  Count_rows_vertically(p, x, y, b, count)  =  if(At(x, M, b) == p, count >= R - 1, false);\n"
+  "     y < M  ->  Count_rows_vertically(p, x, y, b, counter)  =  if(At(x, y, b) == p, counter >= R - 1 || Count_rows_vertically(p, x, y + 1, b, counter + 1), Count_rows_vertically(p, x, y + 1, b, 0));\n"
+  "     y == M  ->  Count_rows_vertically(p, x, y, b, counter)  =  if(At(x, M, b) == p, counter >= R - 1, false);\n"
   "     Four_in_a_row_diagonally(p, b)  =  Four_in_a_row_diagonally_column(p, 2, b) || Four_in_a_row_diagonally_row(p, 1, b);\n"
   "     x < N  ->  Four_in_a_row_diagonally_row(p, x, b)  =  Count_rows_diagonally(p, x, 1, b, 0) || Count_rows_diagonally'(p, x, 1, b, 0) || Four_in_a_row_diagonally_row(p, x + 1, b);\n"
   "     x == N  ->  Four_in_a_row_diagonally_row(p, x, b)  =  Count_rows_diagonally'(p, N, 1, b, 0);\n"
   "     y < M  ->  Four_in_a_row_diagonally_column(p, y, b)  =  Count_rows_diagonally(p, 1, y, b, 0) || Count_rows_diagonally'(p, N, y, b, 0) || Four_in_a_row_diagonally_column(p, y + 1, b);\n"
   "     y == M  ->  Four_in_a_row_diagonally_column(p, y, b)  =  false;\n"
-  "     x < N && y < M  ->  Count_rows_diagonally(p, x, y, b, count)  =  if(At(x, y, b) == p, count >= R - 1 || Count_rows_diagonally(p, x + 1, y + 1, b, count + 1), Count_rows_diagonally(p, x + 1, y + 1, b, 0));\n"
-  "     x == N || y == M  ->  Count_rows_diagonally(p, x, y, b, count)  =  if(At(x, y, b) == p, count >= R - 1, false);\n"
-  "     x > 1 && y < M  ->  Count_rows_diagonally'(p, x, y, b, count)  =  if(At(x, y, b) == p, count >= R - 1 || Count_rows_diagonally'(p, max(1, x - 1), y + 1, b, count + 1), Count_rows_diagonally'(p, max(1, x - 1), y + 1, b, 0));\n"
-  "     x == 1 || y == M  ->  Count_rows_diagonally'(p, x, y, b, count)  =  if(At(x, y, b) == p, count >= R - 1, false);\n"
+  "     x < N && y < M  ->  Count_rows_diagonally(p, x, y, b, counter)  =  if(At(x, y, b) == p, counter >= R - 1 || Count_rows_diagonally(p, x + 1, y + 1, b, counter + 1), Count_rows_diagonally(p, x + 1, y + 1, b, 0));\n"
+  "     x == N || y == M  ->  Count_rows_diagonally(p, x, y, b, counter)  =  if(At(x, y, b) == p, counter >= R - 1, false);\n"
+  "     x > 1 && y < M  ->  Count_rows_diagonally'(p, x, y, b, counter)  =  if(At(x, y, b) == p, counter >= R - 1 || Count_rows_diagonally'(p, max(1, x - 1), y + 1, b, counter + 1), Count_rows_diagonally'(p, max(1, x - 1), y + 1, b, 0));\n"
+  "     x == 1 || y == M  ->  Count_rows_diagonally'(p, x, y, b, counter)  =  if(At(x, y, b) == p, counter >= R - 1, false);\n"
   "     initial_board  =  [[None, None, None, None, None, None, None], [None, None, None, None, None, None, None], [None, None, None, None, None, None, None], [None, None, None, None, None, None, None], [None, None, None, None, None, None, None], [None, None, None, None, None, None, None]];\n"
   "     C_S1_(c_, y2, y3)  =  y2;\n"
   "     C_S1_(c_1, y2, y3)  =  y3;\n"
@@ -195,7 +195,7 @@ void test1()
   atermpp::aterm t = atermpp::read_term_from_string(expression_text);
   t = data::detail::remove_index(t);
   t = data::detail::add_index(t);
-  data::data_expression d = atermpp::down_cast<data::data_expression>(t);
+  const data::data_expression& d = atermpp::down_cast<data::data_expression>(t);
   std::string s = data::pp(d);
   std::cout << s << std::endl;
 }

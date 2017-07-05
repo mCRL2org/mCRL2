@@ -21,14 +21,14 @@ namespace data
 }
 }
 
-#include "abstraction.h"
-#include "application.h"
-#include "data_expression.h"
-#include "exists.h"
-#include "forall.h"
-#include "function_symbol.h"
-#include "lambda.h"
-#include "variable.h"
-#include "where_clause.h"
+#include "mcrl2/data/abstraction.h"
+#include "mcrl2/data/application.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/forall.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/where_clause.h"
 
 #endif // MCRL2_DATA_DATA_H

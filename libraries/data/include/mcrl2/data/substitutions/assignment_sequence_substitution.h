@@ -12,14 +12,14 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_ASSIGNMENT_SEQUENCE_SUBSTITUTION_H
 #define MCRL2_DATA_SUBSTITUTIONS_ASSIGNMENT_SEQUENCE_SUBSTITUTION_H
 
-#include <functional>
-#include <iostream>
-#include <sstream>
-#include <string>
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/is_simple_substitution.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/utilities/exception.h"
+#include <functional>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 namespace mcrl2 {
 
@@ -40,11 +40,11 @@ struct assignment_sequence_substitution: public std::unary_function<variable, da
 
   const data_expression& operator()(const variable& v) const
   {
-    for (auto i = assignments.begin(); i != assignments.end(); ++i)
+    for (const assignment& a: assignments)
     {
-      if (i->lhs() == v)
+      if (a.lhs() == v)
       {
-        return i->rhs();
+        return a.rhs();
       }
     }
     return v;
@@ -55,9 +55,9 @@ template <>
 inline
 bool is_simple_substitution(const assignment_sequence_substitution& sigma)
 {
-  for (auto i = sigma.assignments.begin(); i != sigma.assignments.end(); ++i)
+  for (const assignment& a: sigma.assignments)
   {
-    if (!is_simple_substitution(i->lhs(), i->rhs()))
+    if (!is_simple_substitution(a.lhs(), a.rhs()))
     {
       return false;
     }

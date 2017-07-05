@@ -12,11 +12,11 @@
 #ifndef MCRL2_DATA_STANDARD_H
 #define MCRL2_DATA_STANDARD_H
 
-#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/core/detail/construction_utility.h"
+#include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/abstraction.h"
-#include "mcrl2/core/detail/construction_utility.h"
+#include "mcrl2/data/function_symbol.h"
 
 
 namespace mcrl2
@@ -34,7 +34,7 @@ function_symbol const& true_();
 application and_(const data_expression&,const data_expression&);
 application not_(const data_expression&);
 bool is_bool(const sort_expression&);
-}
+} // namespace sort_bool
 
 /// \cond INTERNAL_DOCS
 namespace detail
@@ -114,7 +114,7 @@ struct greater_equal_symbol : public symbol< greater_equal_symbol >
     return ">=";
   }
 };
-}
+} // namespace detail
 /// \endcond
 
 /// \brief Constructor for function symbol ==
@@ -420,19 +420,18 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
   {
     const function_sort& fs = atermpp::down_cast<function_sort>(s);
     variable_vector xvars,yvars;
-    data_expression rhs=sort_bool::true_();
-    size_t index=0;
-    for(sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
+    std::size_t index=0;
+    for(const sort_expression& sort: fs.domain())
     {
       std::stringstream xs;
       xs << "x" << index;
-      variable x(xs.str(),*i);
+      variable x(xs.str(),sort);
       xvars.push_back(x);
     }
     variable f("f",s);
     variable g("g",s);
     variable_list xvar_list=variable_list(xvars.begin(),xvars.end());
-    result.push_back(data_equation(atermpp::make_list(f,g)+xvar_list,
+    result.push_back(data_equation(variable_list({ f, g }) + xvar_list,
                                    equal_to(f,g),
                                    abstraction(forall_binder(),xvar_list,
                                       equal_to(

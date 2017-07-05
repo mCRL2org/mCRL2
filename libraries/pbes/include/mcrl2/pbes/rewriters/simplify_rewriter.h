@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 #define MCRL2_PBES_REWRITERS_SIMPLIFY_REWRITER_H
 
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/rewriters/data_rewriter.h"
-#include "mcrl2/utilities/detail/optimized_logic_operators.h"
 
 namespace mcrl2 {
 
@@ -25,82 +25,67 @@ template <template <class> class Builder, class Derived>
 struct add_simplify: public Builder<Derived>
 {
   typedef Builder<Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
-  typedef core::term_traits<pbes_expression> tr;
-
-  pbes_expression operator()(const not_& x)
+  pbes_expression apply(const not_& x)
   {
-    return utilities::optimized_not(super::operator()(x.operand()));
+    return data::optimized_not(apply(x.operand()));
   }
 
-  pbes_expression operator()(const and_& x)
+  pbes_expression apply(const and_& x)
   {
-    auto left = super::operator()(x.left());
-    if (tr::is_false(left))
+    auto left = apply(x.left());
+    if (is_false(left))
     {
-      return tr::false_();
+      return false_();
     }
-    auto right = super::operator()(x.right());
-    return utilities::optimized_and(left, right);
+    auto right = apply(x.right());
+    return data::optimized_and(left, right);
   }
 
-  pbes_expression operator()(const or_& x)
+  pbes_expression apply(const or_& x)
   {
-    auto left = super::operator()(x.left());
-    if (tr::is_true(left))
+    auto left = apply(x.left());
+    if (is_true(left))
     {
-      return tr::true_();
+      return true_();
     }
-    auto right = super::operator()(x.right());
-    return utilities::optimized_or(left, right);
+    auto right = apply(x.right());
+    return data::optimized_or(left, right);
   }
 
-  pbes_expression operator()(const imp& x)
+  pbes_expression apply(const imp& x)
   {
-    auto left = super::operator()(x.left());
-    if (tr::is_false(left))
+    auto left = apply(x.left());
+    if (is_false(left))
     {
-      return tr::true_();
+      return true_();
     }
-    auto right = super::operator()(x.right());
-    return utilities::optimized_imp(left, right);
+    auto right = apply(x.right());
+    return data::optimized_imp(left, right);
   }
 
-  pbes_expression operator()(const forall& x)
+  pbes_expression apply(const forall& x)
   {
-    auto body = super::operator()(x.body());
-    return utilities::optimized_forall(x.variables(), body, true);
+    auto body = apply(x.body());
+    return data::optimized_forall(x.variables(), body, true);
   }
 
-  pbes_expression operator()(const exists& x)
+  pbes_expression apply(const exists& x)
   {
-    auto body = super::operator()(x.body());
-    return utilities::optimized_exists(x.variables(), body, true);
+    auto body = apply(x.body());
+    return data::optimized_exists(x.variables(), body, true);
   }
 };
 
 template <typename Derived>
 struct simplify_builder: public add_simplify<pbes_system::pbes_expression_builder, Derived>
-{
-  typedef add_simplify<pbes_system::pbes_expression_builder, Derived> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-};
+{ };
 
 template <typename Derived, typename DataRewriter, typename SubstitutionFunction>
-struct simplify_data_rewriter_builder: public add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction>
+struct simplify_data_rewriter_builder : public add_data_rewriter < pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction >
 {
-  typedef add_data_rewriter<pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-  using super::sigma;
-  using super::R;
-
+  typedef add_data_rewriter < pbes_system::detail::simplify_builder, Derived, DataRewriter, SubstitutionFunction > super;
   simplify_data_rewriter_builder(const DataRewriter& R, SubstitutionFunction& sigma)
     : super(R, sigma)
   {}
@@ -116,7 +101,7 @@ struct simplify_rewriter
 
   pbes_expression operator()(const pbes_expression& x) const
   {
-    return core::make_apply_builder<detail::simplify_builder>()(x);
+    return core::make_apply_builder<detail::simplify_builder>().apply(x);
   }
 };
 
@@ -136,13 +121,13 @@ struct simplify_data_rewriter
   pbes_expression operator()(const pbes_expression& x) const
   {
     data::no_substitution sigma;
-    return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(x);
   }
 
   template <typename SubstitutionFunction>
   pbes_expression operator()(const pbes_expression& x, SubstitutionFunction& sigma) const
   {
-    return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma)(x);
+    return detail::make_apply_rewriter_builder<pbes_system::detail::simplify_data_rewriter_builder>(R, sigma).apply(x);
   }
 };
 

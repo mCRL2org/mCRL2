@@ -9,12 +9,12 @@
 /// \file sort_traverser_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
-#include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <set>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -158,7 +158,7 @@ std::string t14 =
   "init X(0);                   \n"
   ;
 
-void test_pbes(std::string text)
+void test_pbes(const std::string& text)
 {
   pbes p = txt2pbes(text);
   std::set<data::sort_expression> sorts;

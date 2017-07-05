@@ -11,12 +11,12 @@
 
 //#define MCRL2_LPS_PARELM_DEBUG
 
-#include <iostream>
-#include <string>
-#include <boost/test/minimal.hpp>
 #include "mcrl2/data/detail/test_rewriters.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/print.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -25,26 +25,26 @@ using namespace mcrl2::lps;
 /// \brief Returns a data variable of type Nat with a given name
 /// \param name A string
 /// \return A data variable of type Nat with a given name
-data::variable nat(std::string name)
+data::variable nat(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
 
-process::action act(std::string name, data_expression_list parameters)
+process::action act(const std::string& name, data_expression_list parameters)
 {
   std::vector<sort_expression> sorts;
-  for (data_expression_list::iterator i = parameters.begin(); i != parameters.end(); ++i)
+  for (const auto & parameter : parameters)
   {
-    sorts.push_back(i->sort());
+    sorts.push_back(parameter.sort());
   }
   process::action_label label(name, sort_expression_list(sorts.begin(), sorts.end()));
   return process::action(label, parameters);
 }
 
-void test_multi_actions(process::action_list a, process::action_list b, data_expression expected_result = data::undefined_data_expression())
+void test_multi_actions(const process::action_list& a, const process::action_list& b, const data_expression& expected_result = data::undefined_data_expression())
 {
   std::cout << "--- test_multi_actions ---" << std::endl;
-  data_expression result = equal_multi_actions(a, b);
+  data_expression result = equal_multi_actions(multi_action(a), multi_action(b));
   std::cout << "a               = " << lps::pp(a) << std::endl;
   std::cout << "b               = " << lps::pp(b) << std::endl;
   std::cout << "result          = " << lps::pp(result) << std::endl;
@@ -60,17 +60,17 @@ void test_equal_multi_actions()
   data_expression d2 = nat("d2");
   data_expression d3 = nat("d3");
   data_expression d4 = nat("d4");
-  process::action_list a1  = make_list(act("a", make_list(d1)));
-  process::action_list a2  = make_list(act("a", make_list(d2)));
-  process::action_list b1  = make_list(act("b", make_list(d1)));
-  process::action_list b2  = make_list(act("b", make_list(d2)));
-  process::action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
-  process::action_list a12 = make_list(act("a", make_list(d1)), act("a", make_list(d2)));
-  process::action_list a21 = make_list(act("a", make_list(d2)), act("a", make_list(d1)));
-  process::action_list a22 = make_list(act("a", make_list(d2)), act("a", make_list(d2)));
-  process::action_list a34 = make_list(act("a", make_list(d3)), act("a", make_list(d4)));
-  process::action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
-  process::action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
+  process::action_list a1  ( { act("a", data_expression_list({ d1 })) });
+  process::action_list a2  ( { act("a", data_expression_list({ d2 })) });
+  process::action_list b1  ( { act("b", data_expression_list({ d1 })) });
+  process::action_list b2  ( { act("b", data_expression_list({ d2 })) });
+  process::action_list a11 ( { act("a", data_expression_list({ d1 })), act("a", data_expression_list({ d1 })) });
+  process::action_list a12 ( { act("a", data_expression_list({ d1 })), act("a", data_expression_list({ d2 })) });
+  process::action_list a21 ( { act("a", data_expression_list({ d2 })), act("a", data_expression_list({ d1 })) });
+  process::action_list a22 ( { act("a", data_expression_list({ d2 })), act("a", data_expression_list({ d2 })) });
+  process::action_list a34 ( { act("a", data_expression_list({ d3 })), act("a", data_expression_list({ d4 })) });
+  process::action_list a12b1 ( { act("a", data_expression_list({ d1 })), act("a", data_expression_list({ d2 })), act("b", data_expression_list({ d1 })) });
+  process::action_list a34b2 ( { act("a", data_expression_list({ d3 })), act("a", data_expression_list({ d4 })), act("b", data_expression_list({ d2 })) });
   test_multi_actions(a1,  a1, d::sort_bool::true_());
   test_multi_actions(a1,  a2, d::equal_to(d1, d2));
   test_multi_actions(a11, a11, d::sort_bool::true_());
@@ -82,8 +82,8 @@ void test_equal_multi_actions()
   test_multi_actions(a12, a34);
   test_multi_actions(a12b1, a34b2);
 
-  data_expression m1 = equal_multi_actions(a12, a34);
-  data_expression m2 = equal_multi_actions(a34, a12);
+  data_expression m1 = equal_multi_actions(multi_action(a12), multi_action(a34));
+  data_expression m2 = equal_multi_actions(multi_action(a34), multi_action(a12));
   data_expression n1 = data::detail::normalize_equality(m1);
   data_expression n2 = data::detail::normalize_equality(m2);
   data_expression p1 = data::detail::normalize_and_or(n1);
@@ -101,10 +101,10 @@ void test_pp()
 {
   data_expression d1 = nat("d1");
   data_expression d2 = nat("d2");
-  process::action_list a1  = make_list(act("a", make_list(d1)));
-  process::action_list a2  = make_list(act("a", make_list(d2)));
-  process::action_list b1  = make_list(act("b", make_list(d1)));
-  process::action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
+  process::action_list a1  ( { act("a", data_expression_list({ d1 })) });
+  process::action_list a2  ( { act("a", data_expression_list({ d2 })) });
+  process::action_list b1  ( { act("b", data_expression_list({ d1 })) });
+  process::action_list a11 ( { act("a", data_expression_list({ d1 })), act("a", data_expression_list({ d1 })) });
   multi_action m(a11);
   std::string s = lps::pp(m);
   std::cout << "s = " << s << std::endl;

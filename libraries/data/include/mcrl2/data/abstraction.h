@@ -13,11 +13,11 @@
 #define MCRL2_DATA_ABSTRACTION_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/binder_type.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/binder_type.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2
 {
@@ -49,7 +49,7 @@ class abstraction: public data_expression
 
     /// \brief Constructor.
     template <typename Container>
-    abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::enable_if_container<Container, variable>::type* = 0)
+    abstraction(const binder_type& binding_operator, const Container& variables, const data_expression& body, typename atermpp::enable_if_container<Container, variable>::type* = nullptr)
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Binder(), binding_operator, variable_list(variables.begin(), variables.end()), body))
     {}
 
@@ -75,6 +75,7 @@ std::string pp(const abstraction& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const abstraction& x)

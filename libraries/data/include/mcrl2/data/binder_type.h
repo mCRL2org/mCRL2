@@ -52,6 +52,7 @@ std::string pp(const binder_type& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const binder_type& x)
@@ -98,6 +99,7 @@ std::string pp(const untyped_set_or_bag_comprehension_binder& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_set_or_bag_comprehension_binder& x)
@@ -144,6 +146,7 @@ std::string pp(const set_comprehension_binder& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const set_comprehension_binder& x)
@@ -190,6 +193,7 @@ std::string pp(const bag_comprehension_binder& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const bag_comprehension_binder& x)
@@ -236,6 +240,7 @@ std::string pp(const forall_binder& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const forall_binder& x)
@@ -282,6 +287,7 @@ std::string pp(const exists_binder& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const exists_binder& x)
@@ -328,6 +334,7 @@ std::string pp(const lambda_binder& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const lambda_binder& x)

@@ -13,8 +13,8 @@
 #define MCRL2_MODAL_FORMULA_PRINT_H
 
 #include "mcrl2/core/print.h"
-#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/lps/print.h"
+#include "mcrl2/modal_formula/traverser.h"
 
 namespace mcrl2 {
 
@@ -32,84 +32,85 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::print_unary_operation;
   using super::print_binary_operation;
   using super::print_abstraction;
   using super::print_expression;
   using super::print_list;
+  using super::print_action_declarations;
 
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
   }
 
-  void operator()(const action_formulas::true_& x)
+  void apply(const action_formulas::true_& x)
   {
     derived().enter(x);
     derived().print("true");
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::false_& x)
+  void apply(const action_formulas::false_& x)
   {
     derived().enter(x);
     derived().print("false");
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::not_& x)
+  void apply(const action_formulas::not_& x)
   {
     derived().enter(x);
     print_unary_operation(x, "!");
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::and_& x)
+  void apply(const action_formulas::and_& x)
   {
     derived().enter(x);
     print_binary_operation(x, " && ");
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::or_& x)
+  void apply(const action_formulas::or_& x)
   {
     derived().enter(x);
     print_binary_operation(x, " || ");
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::imp& x)
+  void apply(const action_formulas::imp& x)
   {
     derived().enter(x);
     print_binary_operation(x, " => ");
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::forall& x)
+  void apply(const action_formulas::forall& x)
   {
     derived().enter(x);
     print_abstraction(x, "forall");
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::exists& x)
+  void apply(const action_formulas::exists& x)
   {
     derived().enter(x);
     print_abstraction(x, "exists");
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::at& x)
+  void apply(const action_formulas::at& x)
   {
     derived().enter(x);
-    derived()(x.operand());
+    derived().apply(x.operand());
     derived().print(" @ ");
     print_expression(x.time_stamp(), max_precedence);
     derived().leave(x);
   }
 
-  void operator()(const action_formulas::multi_action& x)
+  void apply(const action_formulas::multi_action& x)
   {
     derived().enter(x);
     if (x.actions().empty())
@@ -122,20 +123,6 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
     }
     derived().leave(x);
   }
-
-  void operator()(const action_formulas::untyped_multi_action& x)
-  {
-    derived().enter(x);
-    if (x.arguments().empty())
-    {
-      derived().print("tau");
-    }
-    else
-    {
-      print_list(x.arguments(), "", "", "|");
-    }
-    derived().leave(x);
-  }
 };
 
 } // namespace detail
@@ -145,7 +132,7 @@ template <typename T>
 void pp(const T& t, std::ostream& out)
 {
   core::detail::apply_printer<action_formulas::detail::printer> printer(out);
-  printer(t);
+  printer.apply(t);
 }
 
 /// \brief Returns a string representation of the object t.
@@ -173,37 +160,32 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::print_unary_operation;
   using super::print_binary_operation;
   using super::print_expression;
+  using super::print_action_declarations;
 
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
   }
 
-  void operator()(const regular_formulas::nil& x)
-  {
-    derived().enter(x);
-    derived().leave(x);
-  }
-
-  void operator()(const regular_formulas::seq& x)
+  void apply(const regular_formulas::seq& x)
   {
     derived().enter(x);
     print_binary_operation(x, " . ");
     derived().leave(x);
   }
 
-  void operator()(const regular_formulas::alt& x)
+  void apply(const regular_formulas::alt& x)
   {
     derived().enter(x);
     print_binary_operation(x, " + ");
     derived().leave(x);
   }
 
-  void operator()(const regular_formulas::trans& x)
+  void apply(const regular_formulas::trans& x)
   {
     derived().enter(x);
     print_expression(x.operand(), left_precedence(x));
@@ -211,11 +193,20 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
     derived().leave(x);
   }
 
-  void operator()(const regular_formulas::trans_or_nil& x)
+  void apply(const regular_formulas::trans_or_nil& x)
   {
     derived().enter(x);
     print_expression(x.operand(), left_precedence(x));
     derived().print("*");
+    derived().leave(x);
+  }
+
+  void apply(const regular_formulas::untyped_regular_formula& x)
+  {
+    derived().enter(x);
+    print_expression(x.left());
+    derived().print(" " + std::string(x.name()) + " ");
+    print_expression(x.right());
     derived().leave(x);
   }
 };
@@ -227,7 +218,7 @@ template <typename T>
 void pp(const T& t, std::ostream& out)
 {
   core::detail::apply_printer<regular_formulas::detail::printer> printer(out);
-  printer(t);
+  printer.apply(t);
 }
 
 /// \brief Returns a string representation of the object t.
@@ -255,13 +246,14 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::print_unary_operation;
   using super::print_binary_operation;
   using super::print_abstraction;
   using super::print_variables;
   using super::print_expression;
   using super::print_list;
+  using super::print_action_declarations;
 
   // Determines whether or not data expressions should be wrapped inside 'val'.
   std::vector<bool> val;
@@ -282,7 +274,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     return static_cast<Derived&>(*this);
   }
 
-  void operator()(const data::data_expression& x)
+  void apply(const data::data_expression& x)
   {
     bool print_val = val.empty();
     derived().enter(x);
@@ -291,7 +283,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
       disable_val();
       derived().print("val(");
     }
-    super::operator()(x);
+    super::apply(x);
     if (print_val)
     {
       derived().print(")");
@@ -300,127 +292,127 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::true_& x)
+  void apply(const state_formulas::true_& x)
   {
     derived().enter(x);
     derived().print("true");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::false_& x)
+  void apply(const state_formulas::false_& x)
   {
     derived().enter(x);
     derived().print("false");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::not_& x)
+  void apply(const state_formulas::not_& x)
   {
     derived().enter(x);
     print_unary_operation(x, "!");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::and_& x)
+  void apply(const state_formulas::and_& x)
   {
     derived().enter(x);
     print_binary_operation(x, " && ");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::or_& x)
+  void apply(const state_formulas::or_& x)
   {
     derived().enter(x);
     print_binary_operation(x, " || ");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::imp& x)
+  void apply(const state_formulas::imp& x)
   {
     derived().enter(x);
     print_binary_operation(x, " => ");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::forall& x)
+  void apply(const state_formulas::forall& x)
   {
     derived().enter(x);
     print_abstraction(x, "forall");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::exists& x)
+  void apply(const state_formulas::exists& x)
   {
     derived().enter(x);
     print_abstraction(x, "exists");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::must& x)
+  void apply(const state_formulas::must& x)
   {
     derived().enter(x);
     derived().print("[");
     disable_val();
-    derived()(x.formula());
+    derived().apply(x.formula());
     enable_val();
     derived().print("]");
-    derived()(x.operand());
+    derived().apply(x.operand());
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::may& x)
+  void apply(const state_formulas::may& x)
   {
     derived().enter(x);
     derived().print("<");
     disable_val();
-    derived()(x.formula());
+    derived().apply(x.formula());
     enable_val();
     derived().print(">");
-    derived()(x.operand());
+    derived().apply(x.operand());
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::yaled& x)
+  void apply(const state_formulas::yaled& x)
   {
     derived().enter(x);
     derived().print("yaled");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::yaled_timed& x)
+  void apply(const state_formulas::yaled_timed& x)
   {
     disable_val();
     derived().enter(x);
     derived().print("yaled");
     derived().print(" @ ");
-    derived()(x.time_stamp());
+    derived().apply(x.time_stamp());
     derived().leave(x);
     enable_val();
   }
 
-  void operator()(const state_formulas::delay& x)
+  void apply(const state_formulas::delay& x)
   {
     derived().enter(x);
     derived().print("delay");
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::delay_timed& x)
+  void apply(const state_formulas::delay_timed& x)
   {
     disable_val();
     derived().enter(x);
     derived().print("delay");
     derived().print(" @ ");
-    derived()(x.time_stamp());
+    derived().apply(x.time_stamp());
     derived().leave(x);
     enable_val();
   }
 
-  void operator()(const state_formulas::variable& x)
+  void apply(const state_formulas::variable& x)
   {
     disable_val();
     derived().enter(x);
-    derived()(x.name());
+    derived().apply(x.name());
     print_list(x.arguments(), "(", ")", ", ", false);
     derived().leave(x);
     enable_val();
@@ -441,35 +433,46 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
       {
         derived().print(", ");
       }
-      derived()(i->lhs());
+      derived().apply(i->lhs());
       derived().print(": ");
-      derived()(i->lhs().sort());
+      derived().apply(i->lhs().sort());
       derived().print(" = ");
-      derived()(i->rhs());
+      derived().apply(i->rhs());
     }
     derived().print(")");
     enable_val();
   }
 
-  void operator()(const state_formulas::nu& x)
+  void apply(const state_formulas::nu& x)
   {
     derived().enter(x);
     derived().print("nu ");
-    derived()(x.name());
+    derived().apply(x.name());
     print_assignments(x.assignments());
     derived().print(". ");
-    derived()(x.operand());
+    derived().apply(x.operand());
     derived().leave(x);
   }
 
-  void operator()(const state_formulas::mu& x)
+  void apply(const state_formulas::mu& x)
   {
     derived().enter(x);
     derived().print("mu ");
-    derived()(x.name());
+    derived().apply(x.name());
     print_assignments(x.assignments());
     derived().print(". ");
-    derived()(x.operand());
+    derived().apply(x.operand());
+    derived().leave(x);
+  }
+
+  void apply(const state_formulas::state_formula_specification& x)
+  {
+    derived().enter(x);
+    derived().apply(x.data());
+    print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
+    derived().print("form ");
+    derived().apply(x.formula());
+    derived().print(";\n");
     derived().leave(x);
   }
 };
@@ -481,7 +484,7 @@ template <typename T>
 void pp(const T& t, std::ostream& out)
 {
   core::detail::apply_printer<state_formulas::detail::printer> printer(out);
-  printer(t);
+  printer.apply(t);
 }
 
 /// \brief Returns a string representation of the object t.

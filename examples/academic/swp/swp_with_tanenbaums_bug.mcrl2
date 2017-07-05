@@ -60,7 +60,10 @@ sort CS=struct accept | deliver | error | lost;
 
 % Data packets
 
-sort DP = struct d1 | d2; % restricted to two data packets, for simulation.
+sort DP = struct d1 | d2; % With two data packages and a buffer size of 2 the state space is 
+                          % already huge. One can check for the presence of the error action, showing
+                          % that the protocol is faulty. Generating the full state space requires
+                          % a computer with a large main memory. 
 
 
 % The constants MaxSeq en MaxBuf

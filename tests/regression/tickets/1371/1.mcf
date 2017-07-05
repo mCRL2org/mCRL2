@@ -1,0 +1,1 @@
+nu X(n:Nat = 4). ( forall n:Nat. (val(n <= 2) => nu Y(m:Nat = n). val(n == 4)))

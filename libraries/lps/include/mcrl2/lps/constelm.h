@@ -12,20 +12,21 @@
 #ifndef MCRL2_LPS_CONSTELM_H
 #define MCRL2_LPS_CONSTELM_H
 
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/remove.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/utilities/detail/container_utility.h"
+#include "mcrl2/utilities/logger.h"
 #include <algorithm>
 #include <list>
 #include <map>
 #include <set>
 #include <vector>
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/remove.h"
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -33,39 +34,12 @@ namespace mcrl2
 namespace lps
 {
 
-struct default_global_variable_solver
-{
-  /// \brief Attempts to find a valuation for global variables that makes the condition
-  /// !R(c, sigma) or (R(e, sigma) = R(g, sigma)) true.
-  template <typename DataRewriter, typename Substitution>
-  data::mutable_map_substitution<> solve(
-      const data::variable_list& V,
-      const data::data_expression& /* c */,
-      const data::data_expression& g,
-      const data::variable& /* d */,
-      const data::data_expression& e,
-      const DataRewriter& R,
-      const Substitution& sigma)
-  {
-    data::mutable_map_substitution<> result;
-    data::data_expression r = R(g, sigma);
-    if (is_variable(r))
-    {
-      const data::variable& v = atermpp::down_cast<data::variable>(r);
-      if (std::find(V.begin(), V.end(), v) != V.end())
-      {
-        result[v] = e;
-      }
-    }
-    return result;
-  }
-};
-
 /// \brief Algorithm class for elimination of constant parameters
-// TODO: add default template argument for free variable solver
-template <typename DataRewriter>
-class constelm_algorithm: public lps::detail::lps_algorithm
+template <typename DataRewriter, typename Specification = specification>
+class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
 {
+  typedef typename lps::detail::lps_algorithm<Specification> super;
+
   protected:
     /// \brief If true, then the algorithm is allowed to instantiate free variables
     /// as a side effect.
@@ -75,20 +49,19 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     bool m_ignore_conditions;
 
     /// \brief Maps process parameters to their index.
-    std::map<data::variable, size_t> m_index_of;
+    std::map<data::variable, std::size_t> m_index_of;
 
     /// \brief The rewriter used by the constelm algorithm.
     const DataRewriter& R;
 
-    void LOG_CONSTANT_PARAMETERS(const data::mutable_map_substitution<>& sigma,
-                                 const std::string& msg = "")
+    void LOG_CONSTANT_PARAMETERS(const data::mutable_map_substitution<>& sigma, const std::string& msg = "")
     {
       if (mCRL2logEnabled(log::verbose))
       {
         mCRL2log(log::verbose) << msg;
-        for (data::mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+        for (const auto& i : sigma)
         {
-          mCRL2log(log::verbose) << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
+          mCRL2log(log::verbose) << data::pp(i.first) << " := " << data::pp(i.second) << std::endl;
         }
       }
     }
@@ -130,8 +103,8 @@ class constelm_algorithm: public lps::detail::lps_algorithm
   public:
 
     /// \brief Constructor
-    constelm_algorithm(specification& spec, const DataRewriter& R_)
-      : lps::detail::lps_algorithm(spec),
+    constelm_algorithm(Specification& spec, const DataRewriter& R_)
+      : lps::detail::lps_algorithm<Specification>(spec),
         m_instantiate_global_variables(false),
         m_ignore_conditions(false),
         R(R_)
@@ -143,26 +116,28 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// \param ignore_conditions If true, the algorithm is allowed to ignore the conditions in the LPS.
     void run(bool instantiate_global_variables = false, bool ignore_conditions = false)
     {
+      using utilities::detail::contains;
+
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
-      const data::data_expression_list &vl=m_spec.initial_process().state(m_spec.process().process_parameters());
-      data::data_expression_vector e(vl.begin(),vl.end());
+      data::data_expression_list vl = super::m_spec.initial_process().state(super::m_spec.process().process_parameters());
+      data::data_expression_vector r(vl.begin(), vl.end());
 
-      // essential: rewrite the initial state vector e to normal form. Essential
+      // essential: rewrite the initial state vector r to normal form. Essential
       // because this value is used in W below, and assigned to the right hand side of a substitution, which
       // must be a normal form.
-      lps::rewrite(e, R);
+      lps::rewrite(r, R);
 
-      linear_process& p = m_spec.process();
-      const std::set<data::variable>&global_vars=m_spec.global_variables();
-      data::variable_list V(global_vars.begin(),global_vars.end());
+      auto& p = super::m_spec.process();
+      const std::set<data::variable>& global_variables = super::m_spec.global_variables();
+      data::variable_list V(global_variables.begin(), global_variables.end());
       const data::variable_list& d = p.process_parameters();
 
       // initialize m_index_of
       unsigned index = 0;
-      for (data::variable_list::const_iterator i = d.begin(); i != d.end(); ++i)
+      for (const data::variable& v: d)
       {
-        m_index_of[*i] = index++;
+        m_index_of[v] = index++;
       }
 
       // sigma contains substitutions of free variables and process parameters
@@ -170,12 +145,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
-      const data::assignment_list assignments=m_spec.initial_process().assignments();
-      for (data::assignment_list::const_iterator i = assignments.begin();
-           i!=assignments.end(); ++i)
+      for (const data::assignment& a: super::m_spec.initial_process().assignments())
       {
         // The rewriter requires that the rhs's of a substitution are in normal form.
-        sigma[i->lhs()] = R(i->rhs());
+        sigma[a.lhs()] = R(a.rhs());
       }
 
       // undo contains undo information of instantiations of free variables
@@ -184,42 +157,38 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       do
       {
         dG.clear();
-        for (action_summand_vector::iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
+        for (auto i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
         {
           const action_summand& s = *i;
           const data::data_expression& c_i = s.condition();
           if (m_ignore_conditions || (R(c_i, sigma) != data::sort_bool::false_()))
           {
-            for (std::set<data::variable>::iterator j = G.begin(); j != G.end(); ++j)
+            for (const data::variable& j: G)
             {
-              if (dG.find(*j) != dG.end())
+              if (dG.find(j) != dG.end())
               {
                 continue;
               }
-              size_t index_j = m_index_of[*j];
-              const data::variable& d_j = *j;
-              data::data_expression g_ij = next_state(s, d_j);
+              std::size_t index_j = m_index_of[j];
+              const data::variable& d_j = j;
+              data::data_expression g_ij = super::next_state(s, d_j);
 
               if (R(g_ij, sigma) != R(d_j, sigma))
               {
                 LOG_PARAMETER_CHANGE(d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "POSSIBLE CHANGE FOR PARAMETER ");
-                data::mutable_map_substitution<> W = default_global_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
-                if (!W.empty())
+                data::data_expression z = R(g_ij, sigma);
+                if (is_variable(z) && contains(V, atermpp::down_cast<data::variable>(z)))
                 {
-                  for (data::mutable_map_substitution<>::const_iterator w = W.begin(); w != W.end(); ++w)
-                  {
-                    sigma[w->first] = w->second;
-                    undo[d_j].insert(w->first);
-                  }
+                  sigma[atermpp::down_cast<data::variable>(z)] = r[index_j];
+                  undo[d_j].insert(atermpp::down_cast<data::variable>(z));
                 }
                 else
                 {
                   dG.insert(d_j);
                   sigma[d_j] = d_j; // erase d_j
-                  std::set<data::variable>& var = undo[d_j];
-                  for (std::set<data::variable>::iterator w = var.begin(); w != var.end(); ++w)
+                  for (const data::variable& w: undo[d_j])
                   {
-                    sigma[*w] = *w; // erase *w
+                    sigma[w] = w; // erase *w
                   }
                   undo[d_j].clear();
                 }
@@ -235,9 +204,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
             LOG_CONDITION(i->condition(), R(c_i, sigma), sigma, "CONDITION IS FALSE: ");
           }
         }
-        for (std::set<data::variable>::iterator k = dG.begin(); k != dG.end(); ++k)
+        for (const data::variable& v: dG)
         {
-          G.erase(*k);
+          G.erase(v);
         }
       }
       while (!dG.empty());
@@ -251,14 +220,14 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
       // remove the constant parameters from the specification spec
       std::set<data::variable> constant_parameters;
-      for (data::mutable_map_substitution<>::iterator i = sigma.begin(); i != sigma.end(); ++i)
+      for (const auto& i: sigma)
       {
-        constant_parameters.insert(i->first);
+        constant_parameters.insert(i.first);
       }
-      lps::remove_parameters(m_spec, constant_parameters);
+      lps::remove_parameters(super::m_spec, constant_parameters);
 
       // rewrite the specification with substitution sigma
-      lps::rewrite(m_spec, R, sigma);
+      lps::rewrite(super::m_spec, R, sigma);
     }
 };
 
@@ -266,10 +235,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 /// \param spec A linear process specification
 /// \param R A data rewriter
 /// \param instantiate_global_variables If true, free variables may be instantiated as a side effect of the algorithm
-template <typename DataRewriter>
-void constelm(specification& spec, const DataRewriter& R, bool instantiate_global_variables = false)
+template <typename DataRewriter, typename Specification>
+void constelm(Specification& spec, const DataRewriter& R, bool instantiate_global_variables = false)
 {
-  constelm_algorithm<DataRewriter> algorithm(spec, R);
+  constelm_algorithm<DataRewriter, Specification> algorithm(spec, R);
   algorithm.run(instantiate_global_variables);
 }
 

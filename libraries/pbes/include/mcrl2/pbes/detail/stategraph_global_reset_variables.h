@@ -12,9 +12,10 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_GLOBAL_RESET_VARIABLES_H
 
-#include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/detail/stategraph_global_algorithm.h"
+#include "mcrl2/pbes/detail/stategraph_reset_variables.h"
 #include "mcrl2/pbes/traverser.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -58,16 +59,13 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       using utilities::detail::pick_element;
 
       mCRL2log(log::debug, "stategraph") << "--- compute initial marking ---" << std::endl;
+
       // initialization
       for (auto i = G.begin(); i != G.end(); ++i)
       {
-#ifdef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
         auto const& v = *i;
-#else
-        auto const& v = i->second;
-#endif
         std::set<data::variable> dx = propvar_parameters(v.name());
-        v.set_marking(data::detail::set_intersection(v.sig(), dx));
+        v.set_marking(utilities::detail::set_intersection(v.sig(), dx));
         mCRL2log(log::debug, "stategraph") << "vertex " << v << " sig = " << core::detail::print_set(v.sig()) << " dx = " << core::detail::print_set(dx) << "\n";
       }
       mCRL2log(log::debug, "stategraph") << "--- initial control flow marking ---\n" << G.print_marking();
@@ -76,11 +74,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       std::set<const typename Graph::vertex_type*> todo;
       for (auto i = G.begin(); i != G.end(); ++i)
       {
-#ifdef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
         auto const& v = *i;
-#else
-        auto const& v = i->second;
-#endif
         todo.insert(&v);
       }
       mCRL2log(log::debug, "stategraph") << "--- update marking ---" << std::endl;
@@ -90,27 +84,24 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         mCRL2log(log::debug, "stategraph") << "selected marking todo element " << v << std::endl;
         std::set<std::size_t> I = v.marking_variable_indices(m_pbes);
 
-#ifdef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
         auto const& incoming_edges = v.incoming_edges();
         for (auto ei = incoming_edges.begin(); ei != incoming_edges.end(); ++ei)
         {
           auto const& u = *ei->first;
           const std::set<std::size_t>& labels = ei->second;
-          for (auto li = labels.begin(); li != labels.end(); ++li)
+          for (std::size_t i: labels)
           {
-            std::size_t i = *li;
             std::size_t last_size = u.marking().size();
             const stategraph_equation& eq_X = *find_equation(m_pbes, u.name());
             const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].variable();
             std::set<data::variable> dx = propvar_parameters(u.name());
             mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking()) << std::endl;
-            for (auto j = I.begin(); j != I.end(); ++j)
+            for (std::size_t m: I)
             {
-              std::size_t m = *j;
-              data::data_expression_list e = Y.parameters();
-              data::data_expression e_m = nth_element(e, m);
+              const data::data_expression_list& e = Y.parameters();
+              const data::data_expression& e_m = nth_element(e, m);
               std::set<data::variable> fv = data::find_free_variables(e_m);
-              u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking()));
+              u.set_marking(utilities::detail::set_union(utilities::detail::set_intersection(fv, dx), u.marking()));
               mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << core::detail::print_set(fv) << " dx = " << core::detail::print_set(dx) << "\n";
             }
             if (u.marking().size() > last_size)
@@ -120,47 +111,16 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
             }
           }
         }
-#else
-        for (std::set<stategraph_edge>::iterator ei = v.incoming_edges.begin(); ei != v.incoming_edges.end(); ++ei)
-        {
-          stategraph_vertex& u = *(ei->source);
-          std::size_t i = ei->label;
-          std::size_t last_size = u.marking().size();
-          const stategraph_equation& eq_X = *find_equation(m_pbes, u.name());
-          const propositional_variable_instantiation& Y = eq_X.predicate_variables()[i].variable();
-          std::set<data::variable> dx = propvar_parameters(u.name());
-          mCRL2log(log::debug, "stategraph") << "  vertex u = " << v << " label = " << i << " I = " << print_set(I) << " u.marking = " << core::detail::print_set(u.marking()) << std::endl;
-          for (auto j = I.begin(); j != I.end(); ++j)
-          {
-            std::size_t m = *j;
-            data::data_expression_list e = Y.parameters();
-            data::data_expression e_m = nth_element(e, m);
-            std::set<data::variable> fv = data::find_free_variables(e_m);
-            u.set_marking(data::detail::set_union(data::detail::set_intersection(fv, dx), u.marking()));
-            mCRL2log(log::debug, "stategraph") << "  m = " << m << " freevars = " << core::detail::print_set(fv) << " dx = " << core::detail::print_set(dx) << "\n";
-          }
-          if (u.marking().size() > last_size)
-          {
-            todo.insert(&u);
-            mCRL2log(log::debug, "stategraph") << "updated marking " << u.print_marking() << " using edge " << pbes_system::pp(Y) << "\n";
-          }
-        }
-#endif
       }
 
       // set the marking_parameters attributes
       for (auto i = G.begin(); i != G.end(); ++i)
       {
-#ifdef MCRL2_STATEGRAPH_NEW_GLOBAL_ALGORITHM
         auto const& v = *i;
-#else
-        auto const& v = i->second;
-#endif
         const stategraph_equation& eqn = *find_equation(m_pbes, v.name());
-        const std::vector<data::variable>& d = eqn.parameters();
-        for (auto j = d.begin(); j != d.end(); ++j)
+        for (const data::variable& w: eqn.parameters())
         {
-          v.add_marked_parameter(v.marking().find(*j) != v.marking().end());
+          v.add_marked_parameter(v.marking().find(w) != v.marking().end());
         }
       }
     }
@@ -176,11 +136,11 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
         if (is_global_control_flow_parameter(Y, j))
         {
           const predicate_variable& X_i = eq_X.predicate_variables()[i];
-          std::map<std::size_t, data::data_expression>::const_iterator dest_j = X_i.target().find(j);
-          if (dest_j != X_i.target().end())
+          std::map<std::size_t, data::data_expression>::const_iterator target_j = X_i.target().find(j);
+          if (target_j != X_i.target().end())
           {
             data::data_expression f_k = *k;
-            if(f_k != dest_j->second)
+            if(f_k != target_j->second)
             {
               return false;
             }
@@ -201,8 +161,8 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       assert(eq_X.predicate_variables()[i].variable() == x);
 
       std::vector<pbes_expression> phi;
-      core::identifier_string Y = x.name();
-      std::vector<data::data_expression> e = atermpp::convert<std::vector<data::data_expression> >(x.parameters());
+      const core::identifier_string& Y = x.name();
+      std::vector<data::data_expression> e(x.parameters().begin(),x.parameters().end());
 
       // iterate over the alternatives as defined by the control flow graph
       auto inst = m_control_flow_graph.index(Y);
@@ -210,9 +170,9 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
       {
         mCRL2log(log::verbose) << "Equation " << Y << " is not reachable!" << std::endl;
       }
-      for (auto q = inst.begin(); q != inst.end(); ++q)
+      for (auto q: inst)
       {
-        auto& u = **q;
+        auto& u = *q;
         mCRL2log(log::debug, "stategraph") << "  vertex u = " << u << std::endl;
 
         if(!location_possibly_reachable(Y, u, e, eq_X, i))
@@ -262,7 +222,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
           }
           mCRL2log(log::debug, "stategraph") << std::endl;
         }
-        propositional_variable_instantiation Yr(Y, atermpp::convert<data::data_expression_list>(r));
+        propositional_variable_instantiation Yr(Y, data::data_expression_list(r.begin(),r.end()));
         if (m_simplify)
         {
           condition = m_datar(condition);
@@ -276,7 +236,7 @@ class global_reset_variables_algorithm: public stategraph_global_algorithm
           phi.push_back(imp(condition, Yr));
         }
       }
-      return pbes_expr::join_and(phi.begin(), phi.end());
+      return join_and(phi.begin(), phi.end());
     }
 
     // Applies resetting of variables to the original PBES p.
@@ -332,7 +292,7 @@ struct reset_traverser: public pbes_expression_traverser<reset_traverser>
   typedef pbes_expression_traverser<reset_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   global_reset_variables_algorithm& algorithm;
   const stategraph_equation& eq_X;
@@ -427,7 +387,7 @@ pbes_expression reset_variables(global_reset_variables_algorithm& algorithm, con
 {
   std::size_t i = 0;
   reset_traverser f(algorithm, eq_X, i);
-  f(x);
+  f.apply(x);
   return f.top();
 }
 

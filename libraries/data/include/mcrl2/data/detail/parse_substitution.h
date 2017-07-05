@@ -12,11 +12,11 @@
 #ifndef MCRL2_DATA_DETAIL_PARSE_SUBSTITUTION_H
 #define MCRL2_DATA_DETAIL_PARSE_SUBSTITUTION_H
 
-#include <string>
-#include <vector>
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/utilities/text_utility.h"
+#include <string>
+#include <vector>
 
 namespace mcrl2
 {
@@ -37,9 +37,9 @@ void parse_substitution(std::string text, MutableSubstitution& sigma, const data
   text = utilities::regex_replace("\\]\\s*$", "", text);
   std::cout << "text = " << text << std::endl;
   std::vector<std::string> substitutions = utilities::split(text, ";");
-  for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+  for (const std::string& substitution: substitutions)
   {
-    std::vector<std::string> words = utilities::regex_split(*i, ":=");
+    std::vector<std::string> words = utilities::regex_split(substitution, ":=");
     if (words.size() != 2)
     {
       continue;

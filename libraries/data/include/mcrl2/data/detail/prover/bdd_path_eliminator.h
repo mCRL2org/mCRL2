@@ -9,21 +9,21 @@
 /// \file mcrl2/data/detail/prover/bdd_path_eliminator.h
 /// \brief BDD inconsistent path elimination using external SMT solvers
 
-#ifndef BDD_PATH_ELIMINATOR_H
-#define BDD_PATH_ELIMINATOR_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_BDD_PATH_ELIMINATOR_H
+#define MCRL2_DATA_DETAIL_PROVER_BDD_PATH_ELIMINATOR_H
 
-#include <iostream> // For streaming operators
 #include <algorithm>
-#include <iterator>
 #include <cstring>
+#include <iostream> // For streaming operators
+#include <iterator>
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/data/detail/prover/solver_type.h"
+#include "mcrl2/data/detail/prover/bdd_info.h"
+#include "mcrl2/data/detail/prover/bdd_manipulator.h"
 #include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
-#include "mcrl2/data/detail/prover/bdd_manipulator.h"
-#include "mcrl2/data/detail/prover/bdd_info.h"
+#include "mcrl2/data/detail/prover/solver_type.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -90,7 +90,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
         data_expression v_guard_from_set;
         data_expression v_guard_from_path;
 
-        data_expression_list v_set=make_list(a_guard);
+        data_expression_list v_set = { a_guard };
         while (v_set != v_auxiliary_set)
         {
           v_auxiliary_set = v_set;
@@ -124,7 +124,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
                         const data_expression &a_bdd,
                         const data_expression_list &a_path)
     {
-      if (f_deadline != 0 && (f_deadline - time(0)) < 0)
+      if (f_deadline != 0 && (f_deadline - time(nullptr)) < 0)
       {
         mCRL2log(log::debug) << "The time limit has passed." << std::endl;
         return a_bdd;
@@ -202,6 +202,15 @@ class BDD_Path_Eliminator: public BDD_Simplifier
           return;
         }
       }
+      else if (a_solver_type == solver_type_z3)
+      {
+        if (mcrl2::data::detail::prover::z3_smt_solver::usable())
+        {
+          f_smt_solver = new mcrl2::data::detail::prover::z3_smt_solver();
+
+          return;
+        }
+      }
       else
       {
         throw mcrl2::runtime_error("An unknown SMT solver type was passed as argument.");
@@ -223,8 +232,8 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

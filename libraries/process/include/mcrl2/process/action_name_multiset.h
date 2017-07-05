@@ -13,10 +13,10 @@
 #define MCRL2_PROCESS_ACTION_NAME_MULTISET_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
@@ -74,6 +74,7 @@ std::string pp(const action_name_multiset& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const action_name_multiset& x)

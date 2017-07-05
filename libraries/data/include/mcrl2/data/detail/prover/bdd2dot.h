@@ -9,14 +9,14 @@
 /// \file mcrl2/utilities/bdd2dot.h
 /// \brief Interface to class BDD2Dot
 
-#ifndef BDD2DOT_H
-#define BDD2DOT_H
+#ifndef MCRL2_DATA_DETAIL_PROVER_BDD2DOT_H
+#define MCRL2_DATA_DETAIL_PROVER_BDD2DOT_H
 
-#include <fstream>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
+#include "mcrl2/utilities/logger.h"
+#include <fstream>
 
 namespace mcrl2
 {
@@ -71,8 +71,8 @@ class BDD2Dot
         const data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         aux_output_bdd(v_true_branch);
         aux_output_bdd(v_false_branch);
-        size_t v_true_number = f_visited[v_true_branch].value();
-        size_t v_false_number = f_visited[v_false_branch].value();
+        std::size_t v_true_number = f_visited[v_true_branch].value();
+        std::size_t v_false_number = f_visited[v_false_branch].value();
         const data_expression v_guard = f_bdd_info.get_guard(a_bdd);
         f_dot_file << "  " << f_node_number << " [label=\"" << mcrl2::data::pp(v_guard) << "\"];" << std::endl;
         f_dot_file << "  " << f_node_number << " -> " << v_true_number << ";" << std::endl;
@@ -94,7 +94,7 @@ class BDD2Dot
     /// restrictions
     /// \param a_bdd A binary decision diagram.
     /// \param a_file_name A file name.
-    void output_bdd(const data_expression &a_bdd, char const* a_file_name)
+    void output_bdd(const data_expression &a_bdd, const std::string& a_file_name)
     {
       f_node_number = 0;
       f_dot_file.open(a_file_name);
@@ -105,8 +105,8 @@ class BDD2Dot
     }
 };
 
-}
-}
-}
+} // namespace detail
+} // namespace data
+} // namespace mcrl2
 
 #endif

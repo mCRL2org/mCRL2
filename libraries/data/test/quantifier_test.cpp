@@ -11,14 +11,13 @@
 
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/data/detail/rewrite_strategies.h"
+#include "mcrl2/data/fset.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/set.h"
-#include "mcrl2/data/fset.h"
 #include "mcrl2/data/standard.h"
-
-#include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -29,14 +28,13 @@ void quantifier_expression_test(const std::string& expr1_text, const std::string
   data_expression expr1 = parse_data_expression(expr1_text, dataspec);
   data_expression expr2 = parse_data_expression(expr2_text, dataspec);
   std::cout << "Testing " << expr1_text << " <-> " << expr2_text << std::endl;
-  if (r(expr1) != r(expr2))
+  if (r(expr1) != expr2)
   {
     std::cout << "--- ERROR ---\n";
     std::cout << " expr1    = " << expr1 << std::endl;
-    std::cout << " expr2    = " << expr2 << std::endl;
     std::cout << " r(expr1) = " << r(expr1) << std::endl;
-    std::cout << " r(expr2) = " << r(expr2) << std::endl;
-    BOOST_CHECK(r(expr1) == r(expr2));
+    std::cout << " expr2    = " << expr2 << std::endl;
+    BOOST_CHECK(r(expr1) == expr2);
   }
 }
 
@@ -64,24 +62,34 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   r = rewriter(dataspec, s);
   quantifier_expression_test("exists x: Nat. (  x in {1,2,25,600} && 25 == x )", "true", dataspec, r);
 
-  // This test depends on the naming of variables in the enumerator
-  // quantifier_expression_test("forall x: Nat. exists y: Nat. y == x", "true", dataspec, r);
+  // Rewriter only enumerates up to some bound, check whether it can find small solutions
+  quantifier_expression_test("exists n:Nat . n div 2 == 1", "true", dataspec, r);
+  quantifier_expression_test("forall n:Nat . n div 2 == 1", "false", dataspec, r);
+
 
   quantifier_expression_test("forall x: Nat. x == 3", "false", dataspec, r);
   quantifier_expression_test("exists x: Nat. x == 3", "true", dataspec, r);
   quantifier_expression_test("forall x: Pos. exists y: Pos.x == y+1", "false", dataspec, r);
-  quantifier_expression_test("forall x: Pos. exists y: Pos.x == y+1", "false", dataspec, r);
+  quantifier_expression_test("forall x: Pos. exists y1,y2:Pos.x==y1+y2", "false", dataspec, r);
+  // The rewriter cannot deal with this
+  // quantifier_expression_test("forall x: Nat. exists y1,y2:Nat.x==y1+y2", "true", dataspec, r);
+
   /* Test 15. Test whether elimination of quantifiers also happens inside a term. */
   quantifier_expression_test("(exists x_0: Bool. false) && (forall x_0: Nat. true)", "false", dataspec, r);
   quantifier_expression_test("(forall x_0: Pos. true) || (exists x_0: Bool. false)", "true", dataspec, r);
-  /* The test below is too complex for the enumerator to solve.
-  quantifier_expression_test("forall x: Pos. exists y: Nat.x == y+1", "true", dataspec, r);
-  */
+  
+  // The four tests below may need to be changed when the implementation of the
+  // rewriter/enumerator is improved to deal with them
+  // The test below is too complex for the enumerator to solve.
+  // It is included to verify that at least no wrong result is produced
+  // quantifier_expression_test("forall x: Pos. exists y: Nat.x == y+1", "forall x: Pos. exists y: Nat.x == y+1", dataspec, r);
+  // This test depends on the naming of variables in the enumerator
+  // quantifier_expression_test("forall x: Nat. exists y: Nat. y == x", "true", dataspec, r);
 
-/* These tests do not work with the new enumerator, since it does not handle data equalities.
-  quantifier_expression_test("forall x:Pos.exists y1,y2:Pos.x==y1+y2", "false", dataspec, r);
-  quantifier_expression_test("forall x:Nat.exists y1,y2:Nat.x==y1+y2", "true", dataspec, r);
-*/
+  // Tests with Real numbers, which will in general not be rewritten
+  dataspec.add_context_sort(sort_real::real_());
+  quantifier_expression_test("forall r:Real . r < 5", "forall r:Real . r < 5", dataspec, r);
+  quantifier_expression_test("exists r:Real . r >= 10", "exists r:Real . r >= 10", dataspec, r);
 
   // tests for struct / List
   dataspec = parse_data_specification("sort S = struct s1?is_s1 | s2?is_s2;"
@@ -170,12 +178,12 @@ void quantifier_in_rewrite_rules_test(mcrl2::data::rewrite_strategy s)
 
 int test_main(int argc, char** argv)
 {
-  auto strategies = utilities::get_test_rewrite_strategies(false);
-  for (auto strat = strategies.begin(); strat != strategies.end(); ++strat)
+  auto strategies = data::detail::get_test_rewrite_strategies(false);
+  for (const auto& strategy: strategies)
   {
-    std::clog << "  Strategy: " << *strat << std::endl;
-    quantifier_expression_test(*strat);
-    quantifier_in_rewrite_rules_test(*strat);
+    std::clog << "  Strategy: " << strategy << std::endl;
+    quantifier_expression_test(strategy);
+    quantifier_in_rewrite_rules_test(strategy);
   }
 
   return EXIT_SUCCESS;

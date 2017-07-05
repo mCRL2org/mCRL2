@@ -13,13 +13,14 @@
 #define MCRL2_ATERMPP_ATERM_H
 
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <cassert>
 #include <functional>
 
 #include <type_traits>
-#include "detail/aterm.h"
-#include "type_traits.h"
+#include "mcrl2/atermpp/detail/aterm.h"
+#include "mcrl2/atermpp/type_traits.h"
 
 /// \brief The main namespace for the aterm++ library.
 namespace atermpp
@@ -39,56 +40,75 @@ class aterm
     template < typename T >
     friend class term_list;
 
-    friend void detail::free_term_aux(const detail::_aterm* t, const detail::_aterm*& terms_to_be_removed);
+    friend void detail::free_term_aux(detail::_aterm* t, detail::_aterm*& terms_to_be_removed);
 
     friend void detail::initialise_aterm_administration();
 
     template <class Term, class Iter, class ATermConverter>
-    friend const detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+    friend detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
+
+    template <class Term, class Iter, class ATermConverter, class ATermFilter>
+    friend detail::_aterm *detail::make_list_backward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter);
 
     template <class Term, class Iter, class ATermConverter>
-    friend const detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter &convert_to_aterm);
+    friend detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm);
 
-    friend const detail::_aterm* detail::address(const aterm &t);
+    template <class Term, class Iter, class ATermConverter, class ATermFilter>
+    friend detail::_aterm *detail::make_list_forward(Iter first, Iter last, const ATermConverter& convert_to_aterm, const  ATermFilter& aterm_filter);
+
+    friend detail::_aterm* detail::address(const aterm& t);
+ 
   protected:
-    const detail::_aterm* m_term;
+    detail::_aterm* m_term;
 
-    static const detail::_aterm *undefined_aterm();
-    static const detail::_aterm *empty_aterm_list();
 
-    inline size_t decrease_reference_count() const
+    static detail::_aterm* static_undefined_aterm;
+    static detail::_aterm *static_empty_aterm_list;
+
+    inline std::size_t reference_count() const
     {
-      assert(m_term!=NULL);
+      assert(m_term!=nullptr);
+      assert(m_term->reference_count()>0);
+      return m_term->reference_count();
+    }
+
+    inline std::size_t decrease_reference_count()
+    {
+      assert(m_term!=nullptr);
       assert(m_term->reference_count()>0);
       m_term->decrease_reference_count();
       return m_term->reference_count();
     }
 
     template <bool CHECK>
-    void increase_reference_count() const
+    void increase_reference_count()
     {
-      assert(m_term!=NULL);
+      assert(m_term!=nullptr);
       if (CHECK) assert(m_term->reference_count()>0);
       m_term->increase_reference_count();
     }
 
-    void copy_term(const aterm &t)
+    void copy_term(const aterm& t)
     {
-      t.increase_reference_count<true>();
-      decrease_reference_count();
+      /* It is important that the reference count of m_term is decreased after
+         the reference count of t.m_term is increased, as otherwise if the terms are exactly
+         the same, the reference count can temporarily become 0. */
+      detail::_aterm* t0=m_term;
       m_term=t.m_term;
+      increase_reference_count<true>();
+      t0->decrease_reference_count();
     }
 
     // An aterm has a function symbol, which can also be an AS_EMPTY_LIST,
-    // AS_INT and AS_LIST.
-    const function_symbol &function() const
+    // AS_INT and AS_LIST. This is for internal use only. 
+    const function_symbol& function() const
     {
       return m_term->function();
     }
 
   public: // Should be protected, but this cannot yet be done due to a problem
           // in the compiling rewriter.
-    aterm (const detail::_aterm *t):m_term(t)
+    aterm (detail::_aterm *t):m_term(t)
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
@@ -97,21 +117,22 @@ class aterm
 
   public:
 
-    /// \brief Default constructor
-    aterm():m_term(undefined_aterm())
+    /// \brief Default constructor.
+    aterm():m_term(static_undefined_aterm)
     {
       increase_reference_count<false>();
     }
 
-    /// \brief Copy constructor
-    aterm(const aterm &t):m_term(t.m_term)
+    /// \brief Copy constructor.
+    /// \param t Term that is copied.
+    aterm(const aterm& t):m_term(t.m_term)
     {
       increase_reference_count<true>();
     }
 
     /// \brief Assignment operator.
     /// \param t a term to be assigned.
-    aterm &operator=(const aterm &t)
+    aterm& operator=(const aterm& t)
     {
       copy_term(t);
       return *this;
@@ -119,7 +140,7 @@ class aterm
 
     /// \brief Move assignment operator.
     /// \param t a term to be assigned.
-    aterm& operator=(aterm &&t)
+    aterm& operator=(aterm&& t)
     {
       swap(t);
       return *this;
@@ -153,7 +174,7 @@ class aterm
     /// \return True iff term is an term_list.
     bool type_is_list() const
     {
-      const function_symbol &f=m_term->function();
+      const function_symbol& f=m_term->function();
       return f==detail::function_adm.AS_LIST|| f==detail::function_adm.AS_EMPTY_LIST;
     }
 
@@ -163,7 +184,7 @@ class aterm
     ///         in constant time.
     /// \param t A term to which the current term is compared.
     /// \return true iff t is equal to the current term.
-    bool operator ==(const aterm &t) const
+    bool operator ==(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -174,7 +195,7 @@ class aterm
     /// \details See note at the == operator. This operator requires constant time.
     /// \param t A term to which the current term is compared.
     /// \return false iff t is equal to the current term.
-    bool operator !=(const aterm &t) const
+    bool operator !=(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -188,7 +209,7 @@ class aterm
     ///         as long as aterms are not garbage collected.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is smaller than the argument.
-    bool operator <(const aterm &t) const
+    bool operator <(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -199,7 +220,7 @@ class aterm
     /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is larger than the argument.
-    bool operator >(const aterm &t) const
+    bool operator >(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -210,7 +231,7 @@ class aterm
     /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is smaller or equal than the argument.
-    bool operator <=(const aterm &t) const
+    bool operator <=(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -221,7 +242,7 @@ class aterm
     /// \details This operator requires constant time. See note at the operator <.
     /// \param t A term to which the current term is compared.
     /// \return True iff the current term is larger or equalthan the argument.
-    bool operator >=(const aterm &t) const
+    bool operator >=(const aterm& t) const
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -238,14 +259,14 @@ class aterm
     bool defined() const
     {
       assert(m_term->reference_count()>0);
-      return this->function()!=detail::function_adm.AS_DEFAULT;
+      return this->function()!=function_symbol();
     }
 
     /// \brief Swaps this term with its argument.
     /// \details This operation is more efficient than exchanging terms by an assignment,
     ///          as swapping does not require to change the protection of terms.
     /// \param t The term with which this term is swapped.
-    void swap(aterm &t)
+    void swap(aterm& t)
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -274,8 +295,8 @@ struct is_convertible : public
 /// \return  A term of type Derived.
 template <class Derived, class Base>
 const Derived& down_cast(const Base& t,
-                          typename std::enable_if<is_convertible<Base, Derived>::value &&
-                                                  !std::is_base_of<Derived, Base>::value>::type* = NULL)
+                         typename std::enable_if<is_convertible<Base, Derived>::value &&
+                                                 !std::is_base_of<Derived, Base>::value>::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
@@ -289,16 +310,21 @@ const DerivedCont& container_cast(const Cont<Base>& t,
                                 std::is_same<Cont<typename DerivedCont::value_type>, DerivedCont>::value &&
                                 !std::is_base_of<DerivedCont, Cont<Base> >::value &&
                                 is_convertible<Base, typename DerivedCont::value_type>::value
-                              >::type* = NULL)
+                              >::type* = nullptr)
 {
   static_assert(sizeof(typename DerivedCont::value_type) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
+/// \brief A cast form an aterm derived class to a class that inherits in possibly multiple steps from this class.
+/// \details The derived class is not allowed to contain extra fields. This conversion does not require runtime computation
+//          effort. Also see down_cast. 
+/// \param t The term that is converted. 
+/// \return A term of type Derived. 
 template <class Derived, class Base>
 const Derived& vertical_cast(const Base& t,
-                          typename std::enable_if<is_convertible<Base, Derived>::value>::type* = NULL)
+                          typename std::enable_if<is_convertible<Base, Derived>::value>::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
@@ -318,12 +344,14 @@ const DerivedCont& vertical_cast(const Cont<Base>& t,
   return reinterpret_cast<const DerivedCont&>(t);
 }
 
+/// \brief Cast from an aterm derived term to another aterm.
+/// \deprecated.
 template <class Derived, class Base>
 const Derived& deprecated_cast(const Base& t,
-                          typename std::enable_if<
-                             std::is_base_of<aterm, Base>::value &&
-                             std::is_base_of<aterm, Derived>::value
-                          >::type* = NULL)
+                               typename std::enable_if<
+                                  std::is_base_of<aterm, Base>::value &&
+                                  std::is_base_of<aterm, Derived>::value
+                               >::type* = nullptr)
 {
   static_assert(sizeof(Derived) == sizeof(aterm),
                 "aterm cast cannot be applied types derived from aterms where extra fields are added");
@@ -332,6 +360,17 @@ const Derived& deprecated_cast(const Base& t,
 
 /// \brief Send the term in textual form to the ostream.
 std::ostream& operator<<(std::ostream& out, const aterm& t);
+
+/// \brief Transform an aterm into a string representation.
+/// \brief This function also prints terms that are derived from aterms. 
+/// \param t The input aterm.
+/// \return A string.
+inline std::string pp(const aterm& t)
+{
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
+}
 
 } // namespace atermpp
 
@@ -350,7 +389,7 @@ namespace std
 /// \param t2 The second term
 
 template <>
-inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
+inline void swap(atermpp::aterm& t1, atermpp::aterm& t2)
 {
   t1.swap(t2);
 }
@@ -359,10 +398,14 @@ inline void swap(atermpp::aterm &t1, atermpp::aterm &t2)
 template<>
 struct hash<atermpp::aterm>
 {
+  // Default constructor, required for const qualified hash functions. 
+  hash()
+  {}
+
   std::size_t operator()(const atermpp::aterm& t) const
   {
-    static const size_t a_prime_number = 134217689;
-    return (reinterpret_cast<size_t>(atermpp::detail::address(t))>>3) * a_prime_number;
+    static const std::size_t a_prime_number = 134217689;
+    return (reinterpret_cast<std::size_t>(atermpp::detail::address(t))>>3) * a_prime_number;
   }
 };
 
@@ -373,7 +416,7 @@ struct hash<std::pair<atermpp::aterm,atermpp::aterm> >
   std::size_t operator()(const std::pair<atermpp::aterm, atermpp::aterm>& x) const
   {
     // The hashing function below is taken from boost (http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html).
-    size_t seed=std::hash<atermpp::aterm>()(x.first);
+    std::size_t seed=std::hash<atermpp::aterm>()(x.first);
     return std::hash<atermpp::aterm>()(x.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
   }
 };

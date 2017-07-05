@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_TOOLS_PBESINFO_H
 #define MCRL2_PBES_TOOLS_PBESINFO_H
 
-#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/io.h"
 
 namespace mcrl2 {
 
@@ -21,7 +21,7 @@ namespace pbes_system {
 
 void pbesinfo(const std::string& input_filename,
               const std::string& input_file_message,
-              const utilities::file_format* file_format,
+              const utilities::file_format& file_format,
               bool opt_full
              )
 {

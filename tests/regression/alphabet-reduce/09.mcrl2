@@ -1,0 +1,10 @@
+act
+  a,c,b,d;
+
+proc
+  P = (((true) -> ((true) -> ((b) + (a)) <> ((d) + (delta)))) . ((true) -> (P))) . (d);
+  Q = d;
+  R = delta;
+
+init
+  hide({c}, allow({a | a, b, d, d | d}, rename({d -> c}, ((R) || (Q)) || (P))));

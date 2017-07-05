@@ -13,32 +13,32 @@
 #define MCRL2_DATA_PRINT_H
 
 #include <iostream>
-#include <sstream>
-#include <list>
 #include <iterator>
+#include <list>
+#include <sstream>
 #include <type_traits>
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/precedence.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/standard_container_utility.h"
-#include "mcrl2/data/list.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/untyped_possible_sorts.h"
-#include "mcrl2/data/untyped_sort.h"
-#include "mcrl2/data/standard.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/list.h"
-#include "mcrl2/data/set.h"
-#include "mcrl2/data/real.h"
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/detail/print_utility.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/is_untyped.h"
+#include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/precedence.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_container_utility.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/traverser.h"
+#include "mcrl2/data/untyped_data_parameter.h"
+#include "mcrl2/data/untyped_possible_sorts.h"
+#include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
@@ -57,7 +57,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::print_expression;
   using super::print_unary_operation;
   using super::print_binary_operation;
@@ -94,35 +94,35 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       return false;
     }
     return
-      (name == data::sort_bool::implies_name())          ||
+      (name == data::sort_bool::implies_name())      ||
       (name == data::sort_bool::and_name())          ||
       (name == data::sort_bool::or_name())           ||
-      (name == data::detail::equal_symbol())           ||
-      (name == data::detail::not_equal_symbol())          ||
-      (name == data::detail::less_symbol())           ||
-      (name == data::detail::less_equal_symbol())          ||
-      (name == data::detail::greater_symbol())           ||
-      (name == data::detail::greater_equal_symbol())          ||
-      (name == data::sort_list::in_name())        ||
+      (name == data::detail::equal_symbol())         ||
+      (name == data::detail::not_equal_symbol())     ||
+      (name == data::detail::less_symbol())          ||
+      (name == data::detail::less_equal_symbol())    ||
+      (name == data::detail::greater_symbol())       ||
+      (name == data::detail::greater_equal_symbol()) ||
+      (name == data::sort_list::in_name())           ||
       (name == data::sort_list::cons_name())         ||
       (name == data::sort_list::snoc_name())         ||
       (name == data::sort_list::concat_name())       ||
-      (name == data::sort_real::plus_name())          ||
-      (name == data::sort_real::minus_name())         ||
-      (name == data::sort_set::union_name())     ||
-      (name == data::sort_fset::union_name())     ||
-      (name == data::sort_set::difference_name())      ||
-      (name == data::sort_fset::difference_name())      ||
-      (name == data::sort_bag::union_name())      ||
-      (name == data::sort_fbag::union_name())      ||
-      (name == data::sort_bag::difference_name())      ||
-      (name == data::sort_fbag::difference_name())      ||
-      (name == data::sort_int::div_name())          ||
-      (name == data::sort_int::mod_name())          ||
-      (name == data::sort_real::divides_name())       ||
+      (name == data::sort_real::plus_name())         ||
+      (name == data::sort_real::minus_name())        ||
+      (name == data::sort_set::union_name())         ||
+      (name == data::sort_fset::union_name())        ||
+      (name == data::sort_set::difference_name())    ||
+      (name == data::sort_fset::difference_name())   ||
+      (name == data::sort_bag::union_name())         ||
+      (name == data::sort_fbag::union_name())        ||
+      (name == data::sort_bag::difference_name())    ||
+      (name == data::sort_fbag::difference_name())   ||
+      (name == data::sort_int::div_name())           ||
+      (name == data::sort_int::mod_name())           ||
+      (name == data::sort_real::divides_name())      ||
       (name == data::sort_int::times_name())         ||
-      (name == data::sort_list::element_at_name())        ||
-      (name == data::sort_set::intersection_name()) ||
+      (name == data::sort_list::element_at_name())   ||
+      (name == data::sort_set::intersection_name())  ||
       (name == data::sort_bag::intersection_name());
   }
 
@@ -130,9 +130,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     data::set_identifier_generator generator;
     std::set<variable> variables = data::find_all_variables(context);
-    for (std::set<variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+    for (const variable& v: variables)
     {
-      generator.add_identifier(i->name());
+      generator.add_identifier(v.name());
     }
     return generator(prefix);
   }
@@ -145,7 +145,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                        const std::string& close_bracket = ")"
                       )
   {
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       if (i != container.begin())
       {
@@ -156,7 +156,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().print(open_bracket);
       }
-      derived()(*i);
+      derived().apply(*i);
       if (print_brackets)
       {
         derived().print(close_bracket);
@@ -174,11 +174,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   template <typename Variable>
   void print_variable(const Variable& x, bool print_sort = false)
   {
-    derived()(x);
+    derived().apply(x);
     if (print_sort)
     {
       derived().print(": ");
-      derived()(x.sort());
+      derived().apply(x.sort());
     }
   }
 
@@ -202,10 +202,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                                  SortAccessor get_sort = get_sort_default()
                                 )
   {
-    typedef typename Container::const_iterator iterator;
-
-    iterator first = container.begin();
-    iterator last = container.end();
+    auto first = container.begin();
+    auto last = container.end();
     if (first == last)
     {
       return;
@@ -224,7 +222,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       // in the order they are encountered in container
       std::vector<sort_expression> sorts;
 
-      for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+      for (auto i = container.begin(); i != container.end(); ++i)
       {
         if (sort_map.find(i->sort()) == sort_map.end())
         {
@@ -234,7 +232,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
 
       // do the actual printing
-      for (std::vector<sort_expression>::iterator i = sorts.begin(); i != sorts.end(); ++i)
+      for (auto i = sorts.begin(); i != sorts.end(); ++i)
       {
         if (i != sorts.begin())
         {
@@ -243,7 +241,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         const std::vector<T>& v = sort_map[*i];
         print_list(v, "", "", ",");
         derived().print(": ");
-        derived()(*i);
+        derived().apply(*i);
       }
     }
     else
@@ -258,7 +256,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         if (print_sorts && join_sorts)
         {
           // determine a consecutive interval [first, i) with elements of the same sorts
-          iterator i = first;
+          auto i = first;
           do
           {
             ++i;
@@ -267,20 +265,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
           // print the elements of the interval [first, i)
           while (i != last && i->sort() == first->sort());
 
-          for (iterator j = first; j != i; ++j)
+          for (auto j = first; j != i; ++j)
           {
             if (j != first)
             {
               derived().print(",");
             }
-            derived()(*j);
+            derived().apply(*j);
           }
 
           // print the sort
           if (print_sorts)
           {
             derived().print(": ");
-            derived()(get_sort(*first));
+            derived().apply(get_sort(*first));
           }
 
           // update first
@@ -288,13 +286,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         }
         else
         {
-          derived()(*first);
+          derived().apply(*first);
 
           // print the sort
           if (print_sorts)
           {
             derived().print(": ");
-            derived()(get_sort(*first));
+            derived().apply(get_sort(*first));
           }
 
           // update first
@@ -332,7 +330,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       return;
     }
     derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       if (i != container.begin())
       {
@@ -340,10 +338,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       if (print_lhs)
       {
-        derived()(i->lhs());
+        derived().apply(i->lhs());
         derived().print(assignment_symbol);
       }
-      derived()(i->rhs());
+      derived().apply(i->rhs());
     }
     derived().print(closer);
   }
@@ -370,7 +368,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       return;
     }
     derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    for (auto i = container.begin(); i != container.end(); ++i)
     {
       if (i != container.begin())
       {
@@ -381,7 +379,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().print("(");
       }
-      derived()(*i);
+      derived().apply(*i);
       if (print_brackets)
       {
         derived().print(")");
@@ -414,9 +412,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().print(", ");
       }
-      derived()(*i++);
+      derived().apply(*i++);
       derived().print(": ");
-      derived()(*i++);
+      derived().apply(*i++);
     }
     derived().print(" }");
   }
@@ -426,7 +424,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print("{ ");
     print_variables(x.variables(), true, true, false, "", "", ", ");
     derived().print(" | ");
-    derived()(x.body());
+    derived().apply(x.body());
     derived().print(" }");
   }
 
@@ -489,17 +487,17 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            || sort_real::is_real(x);
   }
 
-  bool is_fset_true(data_expression x)
+  bool is_fset_true(const data_expression& x)
   {
     return sort_set::is_true_function_function_symbol(sort_set::left(x));
   }
 
-  bool is_fset_false(data_expression x)
+  bool is_fset_false(const data_expression& x)
   {
     return sort_set::is_false_function_function_symbol(sort_set::left(x));
   }
 
-  bool is_fset_lambda(data_expression x)
+  bool is_fset_lambda(const data_expression& x)
   {
     return is_lambda(sort_set::left(x)) && sort_fset::is_empty_function_symbol(sort_set::right(x));
   }
@@ -514,7 +512,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return sort_bag::is_one_function_function_symbol(sort_bag::left(x));
   }
 
-  bool is_fbag_lambda(data_expression x)
+  bool is_fbag_lambda(const data_expression& x)
   {
     return is_lambda(sort_bag::left(x)) && sort_fbag::is_empty_function_symbol(sort_bag::right(x));
   }
@@ -569,12 +567,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (data::is_variable(y))
     {
       derived().print("@bagfbag(");
-      derived()(variable(y).name());
+      derived().apply(variable(y).name());
       derived().print(")");
     }
     else
     {
-      derived()(y);
+      derived().apply(y);
     }
   }
 
@@ -591,11 +589,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print("{ ");
     print_variable(var, true);
     derived().print(" | ");
-    derived()(body);
+    derived().apply(body);
     derived().print(" }");
   }
 
-  void print_fbag_lambda(data_expression x)
+  void print_fbag_lambda(const data_expression& x)
   {
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
     core::identifier_string name = generate_identifier("x", x);
@@ -609,7 +607,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print("{ ");
     print_variables(left.variables(), true, true, false, "", "", ", ");
     derived().print(" | ");
-    derived()(body);
+    derived().apply(body);
     derived().print(" }");
   }
 
@@ -626,7 +624,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print("{ ");
     print_variable(var, true);
     derived().print(" | ");
-    derived()(body);
+    derived().apply(body);
     derived().print(" }");
   }
 
@@ -654,13 +652,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_list(arguments, "{", "}");
   }
 
-  void print_fset_true(data_expression x)
+  void print_fset_true(const data_expression& x)
   {
     derived().print("!");
-    derived()(sort_set::right(x));
+    derived().apply(sort_set::right(x));
   }
 
-  void print_fset_false(data_expression x)
+  void print_fset_false(const data_expression& x)
   {
     if (sort_fset::is_empty_function_symbol(sort_set::right(x)))
     {
@@ -668,17 +666,17 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else
     {
-      derived()(sort_set::right(x));
+      derived().apply(sort_set::right(x));
     }
   }
 
-  void print_fset_lambda(data_expression x)
+  void print_fset_lambda(const data_expression& x)
   {
     data::lambda left(sort_set::left(x));
     derived().print("{ ");
     print_variables(left.variables(), true, true, false, "", "", ", ");
     derived().print(" | ");
-    derived()(left.body());
+    derived().apply(left.body());
     derived().print(" }");
   }
 
@@ -690,12 +688,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     // print lhs
     if (sort_set::is_false_function_function_symbol(g))
     {
-      derived()(sort_fset::arg3(x));
+      derived().apply(sort_fset::arg3(x));
     }
     else if (sort_set::is_true_function_function_symbol(g))
     {
       derived().print("!");
-      derived()(sort_fset::arg3(x));
+      derived().apply(sort_fset::arg3(x));
     }
     else
     {
@@ -706,7 +704,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print("{ ");
       print_variable(var, true);
       derived().print(" | ");
-      derived()(body);
+      derived().apply(body);
       derived().print(" }");
     }
 
@@ -716,12 +714,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     // print rhs
     if (sort_set::is_false_function_function_symbol(f))
     {
-      derived()(sort_fset::arg4(x));
+      derived().apply(sort_fset::arg4(x));
     }
     else if (sort_set::is_true_function_function_symbol(f))
     {
       derived().print("!");
-      derived()(sort_fset::arg4(x));
+      derived().apply(sort_fset::arg4(x));
     }
     else
     {
@@ -732,12 +730,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print("{ ");
       print_variable(var, true);
       derived().print(" | ");
-      derived()(body);
+      derived().apply(body);
       derived().print(" }");
     }
   }
 
-  void print_fset_default(data_expression x)
+  void print_fset_default(const data_expression& x)
   {
     data_expression right = sort_set::right(x);
     // TODO: check if this is the correct way to handle this case
@@ -750,7 +748,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived().print("{ ");
         print_variable(var, true);
         derived().print(" | ");
-        derived()(body);
+        derived().apply(body);
         derived().print(" }");
     }
     else
@@ -764,7 +762,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived().print("{ ");
         print_variable(var, true);
         derived().print(" | ");
-        derived()(body);
+        derived().apply(body);
         derived().print(" }");
     }
   }
@@ -776,7 +774,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(op + " ");
     print_variables(x.variables(), true, true, false, "", "", ", ");
     derived().print(". ");
-    derived()(x.body());
+    derived().apply(x.body());
     derived().leave(x);
   }
 
@@ -808,7 +806,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       data_expression right = *i;
       print_expression(left, 0); // always print parentheses
       derived().print(" ");
-      derived()(x.head());
+      derived().apply(x.head());
       derived().print(" ");
       print_expression(right, 0);
       return;
@@ -820,7 +818,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       derived().print("(");
     }
-    derived()(x.head());
+    derived().apply(x.head());
     if (print_parentheses)
     {
       derived().print(")");
@@ -848,234 +846,250 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   }
 
   // N.B. This is interpreted as the bag element 'x.first: x.second'
-  void operator()(const std::pair<data_expression, data_expression>& x)
+  void apply(const std::pair<data_expression, data_expression>& x)
   {
-    derived()(x.first);
+    derived().apply(x.first);
     derived().print(": ");
-    derived()(x.second);
+    derived().apply(x.second);
   }
 
   // TODO: this code should be generated!
-  void operator()(const data::container_type& x)
+  void apply(const data::container_type& x)
   {
     derived().enter(x);
     if (data::is_list_container(x))
     {
-      derived()(data::list_container(atermpp::aterm_appl(x)));
+      derived().apply(data::list_container(atermpp::aterm_appl(x)));
     }
     else if (data::is_set_container(x))
     {
-      derived()(data::set_container(atermpp::aterm_appl(x)));
+      derived().apply(data::set_container(atermpp::aterm_appl(x)));
     }
     else if (data::is_bag_container(x))
     {
-      derived()(data::bag_container(atermpp::aterm_appl(x)));
+      derived().apply(data::bag_container(atermpp::aterm_appl(x)));
     }
     else if (data::is_fset_container(x))
     {
-      derived()(data::fset_container(atermpp::aterm_appl(x)));
+      derived().apply(data::fset_container(atermpp::aterm_appl(x)));
     }
     else if (data::is_fbag_container(x))
     {
-      derived()(data::fbag_container(atermpp::aterm_appl(x)));
+      derived().apply(data::fbag_container(atermpp::aterm_appl(x)));
     }
     derived().leave(x);
   }
 
-  void operator()(const data::assignment& x)
+  void apply(const data::assignment& x)
   {
     derived().enter(x);
-    derived()(x.lhs());
+    derived().apply(x.lhs());
     derived().print(" = ");
-    derived()(x.rhs());
+    derived().apply(x.rhs());
     derived().leave(x);
   }
 
   // variable lists have their own notation
-  void operator()(const data::variable_list& x)
+  void apply(const data::variable_list& x)
   {
     derived().enter(x);
     print_list(x, "", "", ", ", false);
     derived().leave(x);
   }
 
-  void operator()(const data::untyped_identifier_assignment& x)
+  void apply(const data::untyped_data_parameter& x)
   {
     derived().enter(x);
-    derived()(x.lhs());
+    derived().apply(x.name());
+    print_list(x.arguments(), "(", ")", ", ");
+    derived().leave(x);
+  }
+
+  void apply(const data::untyped_identifier_assignment& x)
+  {
+    derived().enter(x);
+    derived().apply(x.lhs());
     derived().print("=");
-    derived()(x.rhs());
+    derived().apply(x.rhs());
     derived().leave(x);
   }
 
-  void operator()(const data::untyped_set_or_bag_comprehension_binder& x)
+  void apply(const data::untyped_set_or_bag_comprehension_binder& x)
   {
     derived().enter(x);
     derived().leave(x);
   }
 
-  void operator()(const data::set_comprehension_binder& x)
+  void apply(const data::set_comprehension_binder& x)
   {
     derived().enter(x);
     derived().leave(x);
   }
 
-  void operator()(const data::bag_comprehension_binder& x)
+  void apply(const data::bag_comprehension_binder& x)
   {
     derived().enter(x);
     derived().leave(x);
   }
 
-  void operator()(const data::forall_binder& x)
+  void apply(const data::forall_binder& x)
   {
     derived().enter(x);
     derived().leave(x);
   }
 
-  void operator()(const data::exists_binder& x)
+  void apply(const data::exists_binder& x)
   {
     derived().enter(x);
     derived().leave(x);
   }
 
-  void operator()(const data::lambda_binder& x)
+  void apply(const data::lambda_binder& x)
   {
     derived().enter(x);
     derived().leave(x);
   }
 
-  void operator()(const data::structured_sort_constructor_argument& x)
+  void apply(const data::structured_sort_constructor_argument& x)
   {
     derived().enter(x);
     if (x.name() != core::empty_identifier_string())
     {
-      derived()(x.name());
+      derived().apply(x.name());
       derived().print(": ");
     }
-    derived()(x.sort());
+    derived().apply(x.sort());
     derived().leave(x);
   }
 
-  void operator()(const data::structured_sort_constructor& x)
+  void apply(const data::structured_sort_constructor& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    derived().apply(x.name());
     print_list(x.arguments(), "(", ")", ", ");
     if (x.recogniser() != core::empty_identifier_string())
     {
       derived().print("?");
-      derived()(x.recogniser());
+      derived().apply(x.recogniser());
     }
     derived().leave(x);
   }
 
-  void operator()(const data::alias& x)
+  void apply(const data::alias& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    derived().apply(x.name());
     derived().print(" = ");
-    derived()(x.reference());
+    derived().apply(x.reference());
     derived().leave(x);
   }
 
-  void operator()(const data::list_container& x)
+  void apply(const data::list_container& x)
   {
     derived().enter(x);
     derived().print("List");
     derived().leave(x);
   }
 
-  void operator()(const data::set_container& x)
+  void apply(const data::set_container& x)
   {
     derived().enter(x);
     derived().print("Set");
     derived().leave(x);
   }
 
-  void operator()(const data::bag_container& x)
+  void apply(const data::bag_container& x)
   {
     derived().enter(x);
     derived().print("Bag");
     derived().leave(x);
   }
 
-  void operator()(const data::fset_container& x)
+  void apply(const data::fset_container& x)
   {
     derived().enter(x);
     derived().print("FSet");
     derived().leave(x);
   }
 
-  void operator()(const data::fbag_container& x)
+  void apply(const data::fbag_container& x)
   {
     derived().enter(x);
     derived().print("FBag");
     derived().leave(x);
   }
 
-  void operator()(const data::basic_sort& x)
+  void apply(const data::basic_sort& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    derived().apply(x.name());
     derived().leave(x);
   }
 
-  void operator()(const data::container_sort& x)
+  void apply(const data::container_sort& x)
   {
     derived().enter(x);
-    derived()(x.container_name());
+    derived().apply(x.container_name());
     derived().print("(");
-    derived()(x.element_sort());
+    derived().apply(x.element_sort());
     derived().print(")");
     derived().leave(x);
   }
 
-  void operator()(const data::structured_sort& x)
+  void apply(const data::structured_sort& x)
   {
     derived().enter(x);
     print_list(x.constructors(), "struct ", "", " | ");
     derived().leave(x);
   }
 
-  void operator()(const data::function_sort& x)
+  void apply(const data::function_sort& x)
   {
     derived().enter(x);
     print_sort_list(x.domain(), "", " -> ", " # ");
-    derived()(x.codomain());
+    derived().apply(x.codomain());
     derived().leave(x);
   }
 
-  void operator()(const data::untyped_sort& x)
+  void apply(const data::untyped_sort& x)
   {
     derived().enter(x);
     derived().print("untyped_sort");
     derived().leave(x);
   }
 
-  void operator()(const data::untyped_possible_sorts& x)
+  void apply(const data::untyped_possible_sorts& x)
   {
     derived().enter(x);
     derived().print("@untyped_possible_sorts[");
-    derived()(x.sorts());
+    derived().apply(x.sorts());
     derived().print("]");
     derived().leave(x);
   }
 
-  void operator()(const data::untyped_identifier& x)
+  void apply(const data::untyped_sort_variable& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    derived().print("@s");
+    derived().apply(x.value());
     derived().leave(x);
   }
 
-  void operator()(const data::variable& x)
+  void apply(const data::untyped_identifier& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    derived().apply(x.name());
     derived().leave(x);
   }
 
-  void operator()(const data::function_symbol& x)
+  void apply(const data::variable& x)
+  {
+    derived().enter(x);
+    derived().apply(x.name());
+    derived().leave(x);
+  }
+
+  void apply(const data::function_symbol& x)
   {
     derived().enter(x);
     if (sort_nat::is_c0_function_symbol(x))
@@ -1101,7 +1115,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void operator()(const data::application& x)
+  void apply(const data::application& x)
   {
     derived().enter(x);
 
@@ -1173,7 +1187,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else
       {
         std::vector<char> number = data::detail::string_to_vector_number("1");
-        derived()(detail::reconstruct_pos_mult(x, number));
+        derived().apply(detail::reconstruct_pos_mult(x, number));
       }
     }
     // TODO: handle @pospred
@@ -1188,15 +1202,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       auto x2 = sort_pos::arg3(x);
       if (b == data::sort_bool::true_())
       {
-        derived()(sort_pos::succ(sort_pos::plus(x1, x2)));
+        derived().apply(sort_pos::succ(sort_pos::plus(x1, x2)));
       }
       else if (b == sort_bool::false_())
       {
-        derived()(sort_pos::plus(x1, x2));
+        derived().apply(sort_pos::plus(x1, x2));
       }
       else
       {
-        derived()(if_(b, x1, x2));
+        derived().apply(if_(b, x1, x2));
       }
     }
     else if (sort_pos::is_times_application(x))
@@ -1246,11 +1260,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     else if (sort_nat::is_cnat_application(x))
     {
-      derived()(sort_nat::arg(x));
+      derived().apply(sort_nat::arg(x));
     }
     else if (sort_nat::is_pos2nat_application(x))
     {
-      derived()(*x.begin());
+      derived().apply(*x.begin());
     }
     // TODO: handle @dub
     else if (sort_nat::is_plus_application(x))
@@ -1286,19 +1300,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     else if (sort_int::is_cint_application(x))
     {
-      derived()(sort_int::arg(x));
+      derived().apply(sort_int::arg(x));
     }
     else if (sort_int::is_cneg_application(x))
     {
-      derived()(sort_int::negate(sort_int::arg(x)));
+      derived().apply(sort_int::negate(sort_int::arg(x)));
     }
     else if (sort_int::is_nat2int_application(x))
     {
-      derived()(*x.begin());
+      derived().apply(*x.begin());
     }
     else if (sort_int::is_pos2int_application(x))
     {
-      derived()(*x.begin());
+      derived().apply(*x.begin());
     }
     else if (sort_int::is_negate_application(x))
     {
@@ -1342,24 +1356,24 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       data_expression denominator = sort_real::right(x);
       if (is_one(denominator))
       {
-        derived()(numerator);
+        derived().apply(numerator);
       }
       else
       {
-        derived()(sort_real::divides(numerator, sort_int::pos2int(denominator)));
+        derived().apply(sort_real::divides(numerator, sort_int::pos2int(denominator)));
       }
     }
     else if (sort_real::is_pos2real_application(x))
     {
-      derived()(*x.begin());
+      derived().apply(*x.begin());
     }
     else if (sort_real::is_nat2real_application(x))
     {
-      derived()(*x.begin());
+      derived().apply(*x.begin());
     }
     else if (sort_real::is_int2real_application(x))
     {
-      derived()(*x.begin());
+      derived().apply(*x.begin());
     }
     else if (sort_real::is_negate_application(x))
     {
@@ -1383,11 +1397,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_real::is_reduce_fraction_application(x))
     {
-      derived()(sort_real::divides(sort_real::left(x),sort_real::right(x)));
+      derived().apply(sort_real::divides(sort_real::left(x),sort_real::right(x)));
     }
     else if (sort_real::is_reduce_fraction_where_application(x))
     {
-      derived()(sort_real::plus(sort_real::int2real(sort_real::arg2(x)), sort_real::divides(sort_real::arg3(x), sort_nat::pos2nat(sort_real::arg1(x)))));
+      derived().apply(sort_real::plus(sort_real::int2real(sort_real::arg2(x)), sort_real::divides(sort_real::arg3(x), sort_nat::pos2nat(sort_real::arg1(x)))));
     }
     // TODO: handle @redfrachlp
 
@@ -1472,12 +1486,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (data::is_variable(y))
       {
         derived().print("@setfset(");
-        derived()(variable(y).name());
+        derived().apply(variable(y).name());
         derived().print(")");
       }
       else
       {
-        derived()(y);
+        derived().apply(y);
       }
     }
     else if (sort_set::is_set_comprehension_application(x))
@@ -1489,7 +1503,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print("{ ");
       print_variable(var, true);
       derived().print(" | ");
-      derived()(body);
+      derived().apply(body);
       derived().print(" }");
     }
     else if (sort_set::is_in_application(x))
@@ -1535,26 +1549,26 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_fset::is_difference_application(x))
     {
-      derived()(sort_fset::left(x));
+      derived().apply(sort_fset::left(x));
       derived().print(" - ");
-      derived()(sort_fset::right(x));
+      derived().apply(sort_fset::right(x));
     }
     else if (sort_fset::is_union_application(x))
     {
-      derived()(sort_fset::left(x));
+      derived().apply(sort_fset::left(x));
       derived().print(" + ");
-      derived()(sort_fset::right(x));
+      derived().apply(sort_fset::right(x));
     }
     else if (sort_fset::is_intersection_application(x))
     {
-      derived()(sort_fset::left(x));
+      derived().apply(sort_fset::left(x));
       derived().print(" * ");
-      derived()(sort_fset::right(x));
+      derived().apply(sort_fset::right(x));
     }
     else if (sort_fset::is_count_application(x))
     {
       derived().print("#");
-      derived()(sort_fset::arg(x));
+      derived().apply(sort_fset::arg(x));
     }
 
     //-------------------------------------------------------------------//
@@ -1590,12 +1604,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (data::is_variable(y))
       {
         derived().print("@bagfbag(");
-        derived()(variable(y).name());
+        derived().apply(variable(y).name());
         derived().print(")");
       }
       else
       {
-        derived()(y);
+        derived().apply(y);
       }
     }
     else if (sort_bag::is_bag_comprehension_application(x))
@@ -1607,7 +1621,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print("{ ");
       print_variable(var, true);
       derived().print(" | ");
-      derived()(body);
+      derived().apply(body);
       derived().print(" }");
     }
     else if (sort_bag::is_in_application(x))
@@ -1656,7 +1670,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (sort_fbag::is_count_all_application(x))
     {
       derived().print("#");
-      derived()(sort_fbag::arg(x));
+      derived().apply(sort_fbag::arg(x));
     }
 
     //-------------------------------------------------------------------//
@@ -1672,15 +1686,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().print("(");
       }
-      derived()(x1);
+      derived().apply(x1);
       if (print_parentheses)
       {
         derived().print(")");
       }
       derived().print("[");
-      derived()(x2);
+      derived().apply(x2);
       derived().print(" -> ");
-      derived()(x3);
+      derived().apply(x3);
       derived().print("]");
     }
 
@@ -1692,7 +1706,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       if (x.size() > 0) {
         derived().print("(");
       }
-      derived()(x.head());
+      derived().apply(x.head());
       if (x.size() > 0)
       {
         derived().print(")(");
@@ -1714,46 +1728,46 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void operator()(const data::where_clause& x)
+  void apply(const data::where_clause& x)
   {
     derived().enter(x);
-    derived()(x.body());
+    derived().apply(x.body());
     derived().print(" whr ");
-    assignment_expression_list declarations = x.declarations();
+    const assignment_expression_list& declarations = x.declarations();
     for (assignment_expression_list::const_iterator i = declarations.begin(); i != declarations.end(); ++i)
     {
       if (i != declarations.begin())
       {
         derived().print(", ");
       }
-      derived()(*i);
+      derived().apply(*i);
     }
     derived().print(" end");
     derived().leave(x);
   }
 
-  void operator()(const data::forall& x)
+  void apply(const data::forall& x)
   {
     print_abstraction(x, "forall");
   }
 
-  void operator()(const data::exists& x)
+  void apply(const data::exists& x)
   {
     print_abstraction(x, "exists");
   }
 
-  void operator()(const data::lambda& x)
+  void apply(const data::lambda& x)
   {
     print_abstraction(x, "lambda");
   }
 
-  void operator()(const data::data_equation& x)
+  void apply(const data::data_equation& x)
   {
     derived().enter(x);
     print_condition(x.condition());
-    derived()(x.lhs());
+    derived().apply(x.lhs());
     derived().print("  =  ");
-    derived()(x.rhs());
+    derived().apply(x.rhs());
     derived().leave(x);
   }
 
@@ -1764,18 +1778,16 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                        std::set<core::identifier_string>& function_symbol_names
                       )
   {
-    std::set<function_symbol> f = data::find_function_symbols(eqn);
-    for (std::set<function_symbol>::iterator i = f.begin(); i != f.end(); ++i)
+    for (const function_symbol& f: data::find_function_symbols(eqn))
     {
-      function_symbol_names.insert(i->name());
+      function_symbol_names.insert(f.name());
     }
-    const variable_list& v = eqn.variables();
-    for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const variable& v: eqn.variables())
     {
-      std::pair<std::map<core::identifier_string, variable>::iterator, bool> k = variable_map.insert(std::make_pair(i->name(), *i));
+      std::pair<std::map<core::identifier_string, variable>::iterator, bool> k = variable_map.insert(std::make_pair(v.name(), v));
       if (k.second) // new variable encountered
       {
-        variables.push_back(*i);
+        variables.push_back(v);
       }
     }
   }
@@ -1784,11 +1796,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                     const std::map<core::identifier_string, variable>& variable_map
                    )
   {
-    const variable_list& v = eqn.variables();
-    for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    for (const variable& v: eqn.variables())
     {
-      std::map<core::identifier_string, variable>::const_iterator j = variable_map.find(i->name());
-      if (j != variable_map.end() && *i != j->second)
+      auto j = variable_map.find(v.name());
+      if (j != variable_map.end() && v != j->second)
       {
         return true;
       }
@@ -1835,25 +1846,25 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     bool first_element = true;
     derived().print(opener);
 
-    // print aliases
-    for (typename AliasContainer::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
+    // print sorts
+    for (auto i = sorts.begin(); i != sorts.end(); ++i)
     {
       if (!first_element)
       {
         derived().print(separator);
       }
-      derived()(*i);
+      derived().apply(*i);
       first_element = false;
     }
 
-    // print sorts
-    for (typename SortContainer::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+    // print aliases
+    for (auto i = aliases.begin(); i != aliases.end(); ++i)
     {
       if (!first_element)
       {
         derived().print(separator);
       }
-      derived()(*i);
+      derived().apply(*i);
       first_element = false;
     }
 
@@ -1868,8 +1879,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                        const std::string& separator = ", "
                       )
   {
-    typename Container::const_iterator first = equations.begin();
-    typename Container::const_iterator last = equations.end();
+    auto first = equations.begin();
+    auto last = equations.end();
 
     Container normalized_equations = equations;
     data::normalize_sorts(normalized_equations, data_spec);
@@ -1877,20 +1888,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     while (first != last)
     {
       std::vector<variable> variables;
-      typename Container::const_iterator i = find_conflicting_equation(first, last, variables);
+      auto i = find_conflicting_equation(first, last, variables);
       print_variables(variables, true, true, true, "var  ", ";\n", ";\n     ");
 
       // N.B. We print normalized equations instead of user defined equations.
       // print_list(std::vector<data_equation>(first, i), opener, closer, separator);
-      typename Container::const_iterator first1 = normalized_equations.begin() + (first - equations.begin());
-      typename Container::const_iterator i1 = normalized_equations.begin() + (i - equations.begin());
+      auto first1 = normalized_equations.begin() + (first - equations.begin());
+      auto i1 = normalized_equations.begin() + (i - equations.begin());
       print_list(std::vector<data_equation>(first1, i1), opener, closer, separator);
 
       first = i;
     }
   }
 
-  void operator()(const data::data_specification& x)
+  void apply(const data::data_specification& x)
   {
     derived().enter(x);
     print_sort_declarations(x.user_defined_aliases(), x.user_defined_sorts(), "sort ", ";\n\n", ";\n     ");
@@ -1900,29 +1911,22 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void operator()(const data::data_expression_with_variables& x)
-  {
-    derived().enter(x);
-    derived()(static_cast<const data::data_expression&>(x));
-    derived().leave(x);
-  }
-
   // Override, because there are set/bag/setbag comprehension classes that exist after parsing and before type checking.
-  void operator()(const data::abstraction& x)
+  void apply(const data::abstraction& x)
   {
     derived().enter(x);
     data::abstraction result;
     if (data::is_forall(x))
     {
-      derived()(atermpp::down_cast<data::forall>(x));
+      derived().apply(atermpp::down_cast<data::forall>(x));
     }
     else if (data::is_exists(x))
     {
-      derived()(atermpp::down_cast<data::exists>(x));
+      derived().apply(atermpp::down_cast<data::exists>(x));
     }
     else if (data::is_lambda(x))
     {
-      derived()(atermpp::down_cast<data::lambda>(x));
+      derived().apply(atermpp::down_cast<data::lambda>(x));
     }
     else if (data::is_set_comprehension(x))
     {
@@ -1949,7 +1953,7 @@ struct stream_printer
   void operator()(const T& x, std::ostream& out)
   {
     core::detail::apply_printer<data::detail::printer> printer(out);
-    printer(x);
+    printer.apply(x);
   }
 };
 

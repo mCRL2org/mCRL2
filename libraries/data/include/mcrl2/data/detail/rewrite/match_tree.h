@@ -23,7 +23,7 @@ namespace detail
 {
 
 /// This is a list where variables and aterm ints can be stored.
-class variable_or_number:public atermpp::aterm
+class variable_or_number: public atermpp::aterm
 {
   public:
     /// Default constructor
@@ -242,11 +242,11 @@ class match_tree_A:public match_tree
       assert(isA());
     }
 
-    match_tree_A(const size_t n):
+    match_tree_A(const std::size_t n):
           match_tree(atermpp::aterm_appl(afunA(),atermpp::aterm_int(n)))
     {}
 
-    size_t variable_index() const
+    std::size_t variable_index() const
     {
       return atermpp::down_cast<const atermpp::aterm_int>((*this)[0]).value();
     }
@@ -333,9 +333,9 @@ class match_tree_N:public match_tree
     }
     
     /// Constructor. Builds a new term around a match_tree.
-    /// The extra non-used size_t is provided, to distinghuish this
+    /// The extra non-used std::size_t is provided, to distinghuish this
     /// constructor from the default copy constructor.
-    match_tree_N(const match_tree& result_tree, size_t):
+    match_tree_N(const match_tree& result_tree, std::size_t):
           match_tree(atermpp::aterm_appl(afunN(),result_tree))
     {}
 
@@ -359,9 +359,9 @@ class match_tree_D:public match_tree
     }
     
     /// Constructor. Builds a new term around a match_tree.
-    /// The extra non-used size_t is provided, to distinghuish this
+    /// The extra non-used std::size_t is provided, to distinghuish this
     /// constructor from the default copy constructor.
-    match_tree_D(const match_tree& result_tree, size_t):
+    match_tree_D(const match_tree& result_tree, std::size_t):
           match_tree(atermpp::aterm_appl(afunD(),result_tree))
     {}
 
@@ -524,7 +524,7 @@ class match_tree_Me:public match_tree
       assert(isMe());
     }
     
-    match_tree_Me(const variable& match_variable, const size_t variable_index):
+    match_tree_Me(const variable& match_variable, const std::size_t variable_index):
            match_tree(atermpp::aterm_appl(afunMe(),match_variable,atermpp::aterm_int(variable_index)))
     {}
 
@@ -533,7 +533,7 @@ class match_tree_Me:public match_tree
       return atermpp::down_cast<const variable>((*this)[0]);
     }
 
-    size_t variable_index() const
+    std::size_t variable_index() const
     {
       return (atermpp::down_cast<const atermpp::aterm_int>((*this)[1])).value();
     }
@@ -544,11 +544,88 @@ typedef std::vector < match_tree > match_tree_vector;
 typedef atermpp::term_list < match_tree_list > match_tree_list_list;
 typedef atermpp::term_list < match_tree_list_list > match_tree_list_list_list;
 
+inline
+std::ostream& operator<<(std::ostream& s, const match_tree& t)
+{
+  using atermpp::down_cast;
+  if (t.isS())
+  {
+    const match_tree_S& tS = down_cast<match_tree_S>(t);
+    s << "@@S(" << tS.target_variable() << ", " << tS.subtree() << ")";
+  }
+  else
+  if (t.isA())
+  {
+    const match_tree_A& tA = down_cast<match_tree_A>(t);
+    s << "@@A(" << tA.variable_index() << ")";
+  }
+  else
+  if (t.isM())
+  {
+    const match_tree_M& tM = down_cast<match_tree_M>(t);
+    s << "@@M(" << tM.match_variable() << ", " << tM.true_tree() << ", " << tM.false_tree() << ")";
+  }
+  else
+  if (t.isF())
+  {
+    const match_tree_F& tF = down_cast<match_tree_F>(t);
+    s << "@@F(" << tF.function() << ", " << tF.true_tree() << ", " << tF.false_tree() << ")";
+  }
+  else
+  if (t.isN())
+  {
+    const match_tree_N& tN = down_cast<match_tree_N>(t);
+    s << "@@N(" << tN.subtree() << ")";
+  }
+  else
+  if (t.isD())
+  {
+    const match_tree_D& tD = down_cast<match_tree_D>(t);
+    s << "@@D(" << tD.subtree() << ")";
+  }
+  else
+  if (t.isR())
+  {
+    const match_tree_R& tR = down_cast<match_tree_R>(t);
+    s << "@@R(" << tR.result() << ")";
+  }
+  else
+  if (t.isC())
+  {
+    const match_tree_C& tC = down_cast<match_tree_C>(t);
+    s << "@@C(" << tC.condition() << ", " << tC.true_tree() << ", " << tC.false_tree() << ")";
+  }
+  else
+  if (t.isX())
+  {
+    s << "@@X";
+  }
+  else
+  if (t.isRe())
+  {
+    const match_tree_Re& tRe = down_cast<match_tree_Re>(t);
+    s << "@@Re(" << tRe.result() << ", " << tRe.variables() << ")";
+  }
+  else
+  if (t.isCRe())
+  {
+    const match_tree_CRe& tCRe = down_cast<match_tree_CRe>(t);
+    s << "@@CRe(" << tCRe.condition() << ", " << tCRe.result() << ", "
+      << tCRe.variables_condition() << ", " << tCRe.variables_result() << ")";
+  }
+  else
+  if (t.isMe())
+  {
+    const match_tree_Me& tMe = down_cast<match_tree_Me>(t);
+    s << "@@Me(" << tMe.match_variable() << ", " << tMe.variable_index() << ")";
+  }
+  return s;
+}
+
 } // namespace detail
 
 } // namespace data
 
 } // namespace mcrl2
-
 
 #endif // __MATCH_TREE_H

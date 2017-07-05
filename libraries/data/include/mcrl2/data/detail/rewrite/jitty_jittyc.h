@@ -21,13 +21,39 @@ namespace data
 namespace detail
 {
 
-inline variable_list get_vars(const data_expression& a)
+template <template <class> class Traverser>
+struct double_variable_traverser : public Traverser<double_variable_traverser<Traverser> >
 {
-  const std::set<variable> s=find_free_variables(a);
-  return variable_list(s.begin(),s.end());
+  typedef Traverser<double_variable_traverser<Traverser> > super;
+  using super::enter;
+  using super::leave;
+  using super::apply;
+
+  std::set<variable> m_seen;
+  std::set<variable> m_doubles;
+
+  void apply(const variable& v)
+  {
+    if (!m_seen.insert(v).second)
+    {
+      m_doubles.insert(v);
+    }
+  }
+
+  const std::set<variable>& result()
+  {
+    return m_doubles;
+  }
+};
+
+
+inline variable_list get_free_vars(const data_expression& a)
+{
+  const std::set<variable> s = find_free_variables(a);
+  return variable_list(s.begin(), s.end());
 }
 
-inline sort_expression residual_sort(const sort_expression& s, size_t no_of_initial_arguments)
+inline sort_expression residual_sort(const sort_expression& s, std::size_t no_of_initial_arguments)
 {
   // Remove no_of_initial_arguments sort from sort s.
 
@@ -44,12 +70,12 @@ inline sort_expression residual_sort(const sort_expression& s, size_t no_of_init
   return result;
 }
 
-inline bool get_argument_of_higher_order_term_helper(const application& t, size_t& i, data_expression& result)
+inline bool get_argument_of_higher_order_term_helper(const application& t, std::size_t& i, data_expression& result)
 {
   // t has the shape t application(....)
   if (!is_application(t.head()))
   {
-    const size_t arity = t.size();
+    const std::size_t arity = t.size();
     if (arity>i)
     {
       result=t[i];
@@ -63,7 +89,7 @@ inline bool get_argument_of_higher_order_term_helper(const application& t, size_
   {
     return true;
   }
-  const size_t arity = t.size();
+  const std::size_t arity = t.size();
   if (arity>i)
   {
     result=t[i];
@@ -74,21 +100,29 @@ inline bool get_argument_of_higher_order_term_helper(const application& t, size_
   return false;
 }
 
-inline data_expression get_argument_of_higher_order_term(const data_expression& t, size_t i)
+inline data_expression get_argument_of_higher_order_term(const application& t, std::size_t i)
 {
   // t is a aterm of the shape application(application(...application(f,t1,...tn),tn+1....),tm...).
   // Return the i-th argument t_i. NOTE: The first argument has index 1.
+  
+  if (!is_application(t.head()) && t.size()>i) // This first case applies to the majority of cases.
+                                                 // Therefore this cheap check is done first, before 
+                                                 // going into a recursive algorithm.
+  {
+    return t[i];
+  }
+
 
   data_expression result;
 #ifndef NDEBUG // avoid a warning.
   bool b=
 #endif
-          get_argument_of_higher_order_term_helper(atermpp::down_cast<application>(t),i,result);
+          get_argument_of_higher_order_term_helper(t,i,result);
   assert(b);
   return result;
 }
 
-inline size_t recursive_number_of_args(const data_expression& t)
+inline std::size_t recursive_number_of_args(const data_expression& t)
 {
   if (is_function_symbol(t))
   {
@@ -111,7 +145,7 @@ inline size_t recursive_number_of_args(const data_expression& t)
   }
 
   const application& ta = atermpp::down_cast<application>(t);
-  const size_t result=ta.size()+recursive_number_of_args(ta.head());
+  const std::size_t result=ta.size()+recursive_number_of_args(ta.head());
   return result;
 }
 

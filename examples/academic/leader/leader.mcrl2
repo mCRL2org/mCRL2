@@ -22,12 +22,12 @@
 % lpsconstelm -v leader.lps temp.lps     // find and eliminate the
 %                                        // constants representing
 %                                        // process id's
-% lpsconfcheck -o temp.lps temp1.lps     // find confluent tau's
+% lpsconfcheck -o -t1 temp.lps temp1.lps // find confluent tau's
 %                                        // and rename these to ctau's.
 %                                        // The flag -o enables induction
 %                                        // on lists, which is necessary
 %                                        // to prove confluence
-% lps2lts -vcctau temp1.lps temp1.svc    // This shows the dramatically
+% lps2lts -vcctau temp1.lps temp1.lts    // This shows the dramatically
 %                                        // reduced statespace, generated
 %                                        // by giving priority to ctau's
 

@@ -12,10 +12,10 @@
 #ifndef MCRL2_PBES_SUBSTITUTIONS_H
 #define MCRL2_PBES_SUBSTITUTIONS_H
 
-#include <utility>
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/pbes/replace.h"
+#include <utility>
 
 namespace mcrl2 {
 
@@ -45,9 +45,9 @@ class propositional_variable_substitution: public std::unary_function<propositio
     /// \brief type used to represent expressions
     typedef pbes_expression expression_type;
 
-    /// \brief Apply on single single variable expression
-    /// \param[in] v the variable for which to give the associated expression
-    /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+    /// \brief Apply this substitution to a single variable expression.
+    /// \param[in] v The variable for which to give the associated expression.
+    /// \return expression equivalent to s(e), or a reference to such an expression.
     pbes_expression operator()(const variable_type& v) const
     {
       map_type::const_iterator i = m_map.find(v.name());

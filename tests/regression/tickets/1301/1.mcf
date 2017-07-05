@@ -1,0 +1,1 @@
+nu X (P : CPUs = {p1}) . val(P != {})

@@ -12,8 +12,8 @@
 #ifndef MCRL2_CORE_PRINT_FORMAT_H
 #define MCRL2_CORE_PRINT_FORMAT_H
 
-#include <string>
 #include "mcrl2/utilities/exception.h"
+#include <string>
 
 namespace mcrl2 {
 

@@ -72,7 +72,7 @@ class bes_property_map : public mcrl2::data::detail::data_property_map< bes_prop
     // super class compare functions
     using super::compare;
 
-    std::string compare_property(std::string property, std::string x, std::string y) const
+    std::string compare_property(const std::string& property, const std::string& x, const std::string& y) const
     {
       if (property == "equation_count")
       {

@@ -12,16 +12,16 @@
 #ifndef MCRL2_PBES_PBES_H
 #define MCRL2_PBES_PBES_H
 
-#include <string>
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/core/load_aterm.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/equal_sorts.h"
+#include "mcrl2/pbes/detail/io.h"
+#include "mcrl2/pbes/pbes_equation.h"
 #include <cassert>
 #include <map>
 #include <set>
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_io.h"
-#include "mcrl2/data/detail/equal_sorts.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/pbes/detail/io.h"
-#include "mcrl2/pbes/pbes_equation.h"
+#include <string>
 
 namespace mcrl2
 {
@@ -35,7 +35,7 @@ void complete_data_specification(pbes&);
 
 // template function overloads
 std::string pp(const pbes& x);
-void normalize_sorts(pbes& x, const data::data_specification& dataspec);
+void normalize_sorts(pbes& x, const data::sort_specification& sortspec);
 void translate_user_notation(pbes_system::pbes& x);
 std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes& x);
 std::set<data::variable> find_all_variables(const pbes_system::pbes& x);
@@ -82,7 +82,7 @@ class pbes
 
     /// \brief Initialize the pbes from an aterm
     /// \param t A term
-    void init_term(atermpp::aterm_appl t)
+    void init_term(const atermpp::aterm_appl& t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data = atermpp::aterm_appl(*i++);
@@ -93,9 +93,9 @@ class pbes
       atermpp::aterm_appl eqn_spec = atermpp::aterm_appl(*i++);
       atermpp::aterm_list eqn = static_cast<atermpp::aterm_list>(eqn_spec[0]);
       m_equations.clear();
-      for (atermpp::aterm_list::iterator j = eqn.begin(); j != eqn.end(); ++j)
+      for (const atermpp::aterm& j: eqn)
       {
-        m_equations.push_back(pbes_equation(*j));
+        m_equations.push_back(pbes_equation(j));
       }
 
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
@@ -107,9 +107,9 @@ class pbes
     std::set<propositional_variable> compute_declared_variables() const
     {
       std::set<propositional_variable> result;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const pbes_equation& eqn: equations())
       {
-        result.insert(i->variable());
+        result.insert(eqn.variable());
       }
       return result;
     }
@@ -248,11 +248,15 @@ class pbes
       return m_initial_state;
     }
 
-    void load(std::istream& stream, bool binary=true)
+    /// \brief Reads the parameterized boolean equation system from a stream.
+    /// \param stream The stream to read from.
+    /// \param binary An indicator whether the stream is binary or textual.
+    /// \param source The source from which the stream originates. Used for error messages.
+    void load(std::istream& stream, bool binary=true, const std::string& source = "")
     {
-      atermpp::aterm t = binary ? atermpp::read_term_from_binary_stream(stream)
-                                : atermpp::read_term_from_text_stream(stream);
-      t = pbes_system::detail::add_index(t);
+      atermpp::aterm t = core::load_aterm(stream, binary, "PBES", source);
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      t = pbes_system::detail::add_index(t, cache);
       if (!t.type_is_appl() || !core::detail::check_rule_PBES(atermpp::aterm_appl(t)))
       {
         throw mcrl2::runtime_error("The loaded ATerm is not a PBES.");
@@ -269,15 +273,15 @@ class pbes
       assert(is_well_typed());
     }
 
-    /// \brief Writes the pbes to file.
+    /// \brief Writes the pbes to a stream.
+    /// \param stream The stream to which the pbes is written.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    /// \param filename A string
-    /// \param no_well_typedness_check If true the well typedness check is skipped.
     void save(std::ostream& stream, bool binary = true) const
     {
-      atermpp::aterm term = pbes_system::detail::remove_index(pbes_to_aterm(*this));
+      std::unordered_map<atermpp::aterm_appl, atermpp::aterm> cache;
+      atermpp::aterm term = pbes_system::detail::remove_index(pbes_to_aterm(*this), cache);
       if (binary)
       {
         write_term_to_binary_stream(term, stream);
@@ -296,9 +300,9 @@ class pbes
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       std::set<propositional_variable> result;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const pbes_equation& eqn: equations())
       {
-        result.insert(i->variable());
+        result.insert(eqn.variable());
       }
       return result;
     }
@@ -316,13 +320,13 @@ class pbes
       std::set<propositional_variable> result;
       std::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
       std::map<core::identifier_string, propositional_variable> declared_variables;
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const pbes_equation& eqn: equations())
       {
-        declared_variables[i->variable().name()] = i->variable();
+        declared_variables[eqn.variable().name()] = eqn.variable();
       }
-      for (std::set<propositional_variable_instantiation>::iterator i = occ.begin(); i != occ.end(); ++i)
+      for (const propositional_variable_instantiation& v: occ)
       {
-        result.insert(declared_variables[i->name()]);
+        result.insert(declared_variables[v.name()]);
       }
       return result;
     }
@@ -366,21 +370,16 @@ class pbes
       }
 
       // check 2), 3) and 7)
-      for (auto i = equations().begin(); i != equations().end(); ++i)
+      for (const pbes_equation& eqn: equations())
       {
-        if (!is_well_typed_equation(*i, declared_sorts, declared_global_variables, data()))
+        if (!is_well_typed_equation(eqn, declared_sorts, declared_global_variables, data()))
         {
           return false;
         }
       }
 
       // check 10)
-      if (!data().is_well_typed())
-      {
-        return false;
-      }
-
-      return true;
+      return data().is_well_typed();
     }
 };
 
@@ -390,6 +389,7 @@ std::string pp(const pbes& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const pbes& x)
@@ -403,7 +403,7 @@ std::ostream& operator<<(std::ostream& out, const pbes& x)
 inline
 atermpp::aterm_appl pbes_to_aterm(const pbes& p)
 {
-  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(), 
+  atermpp::aterm_appl global_variables = atermpp::aterm_appl(core::detail::function_symbol_GlobVarSpec(),
                                                              data::variable_list(p.global_variables().begin(),
                                                                                  p.global_variables().end()));
 

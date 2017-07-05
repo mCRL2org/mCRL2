@@ -9,23 +9,23 @@
 /// \file ppg_rewriter_test.cpp
 /// \brief Test for the ppg rewriter.
 
-#include <iostream>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/detail/ppg_visitor.h"
 #include "mcrl2/pbes/detail/bqnf2ppg_rewriter.h"
 #include "mcrl2/pbes/detail/bqnf_traverser.h"
-#include "mcrl2/pbes/detail/ppg_traverser.h"
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
+#include "mcrl2/pbes/detail/ppg_traverser.h"
+#include "mcrl2/pbes/detail/ppg_visitor.h"
+#include "mcrl2/pbes/normalize.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
+#include <iostream>
 
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 
-void rewrite_ppg(std::string bqnf_text, std::string ppg_text)
+void rewrite_ppg(const std::string& bqnf_text, const std::string& ppg_text)
 {
   std::clog << "rewrite_ppg" << std::endl;
   std::clog << "Parsing text..." << std::endl;

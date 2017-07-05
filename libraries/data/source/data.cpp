@@ -14,8 +14,8 @@
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/data/translate_user_notation.h"
 
 namespace mcrl2
 {
@@ -71,20 +71,22 @@ std::string pp(const data::sort_expression& x) { return data::pp< data::sort_exp
 std::string pp(const data::structured_sort& x) { return data::pp< data::structured_sort >(x); }
 std::string pp(const data::structured_sort_constructor& x) { return data::pp< data::structured_sort_constructor >(x); }
 std::string pp(const data::structured_sort_constructor_argument& x) { return data::pp< data::structured_sort_constructor_argument >(x); }
+std::string pp(const data::untyped_data_parameter& x) { return data::pp< data::untyped_data_parameter >(x); }
 std::string pp(const data::untyped_identifier& x) { return data::pp< data::untyped_identifier >(x); }
 std::string pp(const data::untyped_identifier_assignment& x) { return data::pp< data::untyped_identifier_assignment >(x); }
 std::string pp(const data::untyped_possible_sorts& x) { return data::pp< data::untyped_possible_sorts >(x); }
 std::string pp(const data::untyped_set_or_bag_comprehension& x) { return data::pp< data::untyped_set_or_bag_comprehension >(x); }
 std::string pp(const data::untyped_set_or_bag_comprehension_binder& x) { return data::pp< data::untyped_set_or_bag_comprehension_binder >(x); }
 std::string pp(const data::untyped_sort& x) { return data::pp< data::untyped_sort >(x); }
+std::string pp(const data::untyped_sort_variable& x) { return data::pp< data::untyped_sort_variable >(x); }
 std::string pp(const data::variable& x) { return data::pp< data::variable >(x); }
 std::string pp(const data::where_clause& x) { return data::pp< data::where_clause >(x); }
-data::data_equation normalize_sorts(const data::data_equation& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::data_equation >(x, dataspec); }
-data::data_equation_list normalize_sorts(const data::data_equation_list& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::data_equation_list >(x, dataspec); }
-void normalize_sorts(data::data_equation_vector& x, const data::data_specification& dataspec) { data::normalize_sorts< data::data_equation_vector >(x, dataspec); }
-data::data_expression normalize_sorts(const data::data_expression& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::data_expression >(x, dataspec); }
-data::sort_expression normalize_sorts(const data::sort_expression& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::sort_expression >(x, dataspec); }
-data::variable_list normalize_sorts(const data::variable_list& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::variable_list >(x, dataspec); }
+data::data_equation normalize_sorts(const data::data_equation& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::data_equation >(x, sortspec); }
+data::data_equation_list normalize_sorts(const data::data_equation_list& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::data_equation_list >(x, sortspec); }
+void normalize_sorts(data::data_equation_vector& x, const data::sort_specification& sortspec) { data::normalize_sorts< data::data_equation_vector >(x, sortspec); }
+data::data_expression normalize_sorts(const data::data_expression& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::data_expression >(x, sortspec); }
+data::sort_expression normalize_sorts(const data::sort_expression& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::sort_expression >(x, sortspec); }
+data::variable_list normalize_sorts(const data::variable_list& x, const data::sort_specification& sortspec) { return data::normalize_sorts< data::variable_list >(x, sortspec); }
 data::data_expression translate_user_notation(const data::data_expression& x) { return data::translate_user_notation< data::data_expression >(x); }
 data::data_equation translate_user_notation(const data::data_equation& x) { return data::translate_user_notation< data::data_equation >(x); }
 std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x) { return data::find_sort_expressions< data::data_equation >(x); }
@@ -128,7 +130,7 @@ sort_expression data_expression::sort() const
   }
   else if (is_function_symbol(*this))
   {
-    const function_symbol f = atermpp::down_cast<function_symbol>(*this);
+    const function_symbol& f = atermpp::down_cast<function_symbol>(*this);
     return f.sort();
   }
   else if (is_abstraction(*this))
@@ -141,9 +143,9 @@ sort_expression data_expression::sort() const
     {
       const atermpp::term_list<aterm_appl> &v_variables = atermpp::down_cast<atermpp::term_list<aterm_appl> >((*this)[1]);
       sort_expression_vector s;
-      for (atermpp::term_list<aterm_appl>::const_iterator i = v_variables.begin() ; i != v_variables.end(); ++i)
+      for (const auto & v_variable : v_variables)
       {
-        s.push_back(down_cast<sort_expression>((*i)[1])); // Push the sort.
+        s.push_back(down_cast<sort_expression>(v_variable[1])); // Push the sort.
       }
       return function_sort(sort_expression_list(s.begin(),s.end()), atermpp::down_cast<data_expression>((*this)[2]).sort());
     }
@@ -166,11 +168,12 @@ sort_expression data_expression::sort() const
   }
   else if (is_application(*this))
   {
-    const data_expression &head = atermpp::down_cast<const data_expression>((*this)[0]);
+    const data_expression& head = atermpp::down_cast<const data_expression>((*this)[0]);
     sort_expression s(head.sort());
     if (is_function_sort(s))
     {
       const function_sort& fs = atermpp::down_cast<function_sort>(s);
+      assert(fs.domain().size()+1==this->size());
       return (fs.codomain());
     }
     return s;
@@ -186,11 +189,17 @@ sort_expression data_expression::sort() const
 std::set<data::variable> substitution_variables(const mutable_map_substitution<>& sigma)
 {
   std::set<data::variable> result;
-  for (auto i = sigma.begin(); i != sigma.end(); ++i)
+  for (const auto & i : sigma)
   {
-    data::find_free_variables(i->second, std::inserter(result, result.end()));
+    data::find_free_variables(i.second, std::inserter(result, result.end()));
   }
   return result;
+}
+
+variable_list free_variables(const data_expression& x)
+{
+  std::set<variable> v = find_free_variables(x);
+  return variable_list(v.begin(), v.end());
 }
 
 } // namespace data

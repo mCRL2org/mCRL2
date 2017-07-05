@@ -1,0 +1,10 @@
+act
+  a,c,b,d;
+
+proc
+  P = sum b1: Bool . (((b) . (Q)) . (c));
+  Q = (true) -> (d) <> ((true) -> ((d) + (((d) + (a)) . (R))));
+  R = (true) -> (sum b1: Bool . (b)) <> (c);
+
+init
+  comm({c | a -> b}, rename({b -> c}, allow({a, c | c, b}, ((R) || (Q)) || (P))));

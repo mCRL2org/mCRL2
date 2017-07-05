@@ -70,6 +70,7 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
 
 
 .. _example1:
+   
 .. admonition:: Example
 
    Consider a simple coffee machine that accepts a single coin and then
@@ -98,7 +99,7 @@ is marked by an incoming arrow that has no source state. For `s,s'\in S` and
 Sequences and choices
 ---------------------
 
-The coffee machine in :ref:`example1` is not very exciting. It performs
+The coffee machine in the :ref:`example <example1>` above is not very exciting. It performs
 only two actions, and it performs them *sequentially*. More interesting
 behaviour usually involves some form of *choice*. Choices in mCRL2 are
 *nondeterministic*, that is to say, if a system can choose between two
@@ -140,7 +141,7 @@ We now wish to express that after inserting a single coin, we can either
 retrieve bad coffee, or we can insert another coin and get good coffee. This can
 be expressed as follows:
 
-
+.. _coffee2:
 .. list-table:: Another coffee machine.
 
    * - .. tikz::
@@ -259,14 +260,14 @@ if `i \in \sem{\varphi}_T`.
 
    The formula `\mccan{\a{coin}}\mccan{\a{good}}\true` can be used to express
    that there is a possibility that a system dispenses good coffee after
-   accepting one coin. This formula does not hold for the machine in Figure
-   \ref{lst:coffee2}, because when you insert one coin, the machine will only
+   accepting one coin. This formula does not hold for the machine in figure with
+   :ref:`another coffee machine <coffee2>`, because when you insert one coin, the machine will only
    provide you with bad coffee. 
 
 .. admonition:: Example
 
    The formula `\mcall{\a{coin}}\mccan{\a{bad} \cup \a{coin}}\true` does hold
-   for the machine in Figure \ref{lst:coffee2}; it says that always after
+   for the machine in :ref:`another coffee machine <coffee2>`; it says that always after
    accepting a coin, the machine might (is able to) dispense bad coffee or
    accept another coin.
 
@@ -303,8 +304,8 @@ Two states `s, s'` are said to be *strongly bisimilar*, denoted `s \bisim
 s'`, if there is a strong bisimulation relation `\R` such that `s \R s'`. Two
 LTSs are strongly bisimilar iff their initial states are bisimilar.
 
+.. _exercise-bisim:
 .. admonition:: Example
-   :class: collapse
 
    In the following diagram, the dotted lines indicate the pairs of nodes that
    are related by a relation `R`.
@@ -353,7 +354,6 @@ an LTS `T` we merge all states that are bisimilar, the resulting LTS `T'` is
 bisimilar to `T`.
 
 .. admonition:: Example
-   :class: collapse
 
    In the following diagram, the dotted lines indicate the pairs of states that
    are related by a relation `R`.
@@ -370,12 +370,12 @@ bisimilar to `T`.
       \node[state,right of=r4] (r5) {};
       \node[state,right of=r5] (r6) {};
       \node[state,right of=r6] (r7) {};
-      \path[->] (r1) edge node[left] {`\a{coin}`} (r2) 
-                     edge node[right]{`\a{coin}`} (r3)
-                (r2) edge node[above,rotate=60]{`\a{coffee}`} (r4) 
-                     edge node[above,rotate=-60]{`\a{coffee}`} (r5)
-                (r3) edge node[above,rotate=60]{`\a{coffee}`} (r6) 
-                     edge node[above,rotate=-60]{`\a{coffee}`} (r7);
+      \path[->] (r1) edge node[left] {\a{coin}} (r2) 
+                     edge node[right]{\a{coin}} (r3)
+                (r2) edge node[above,rotate=60]{\a{coffee}} (r4) 
+                     edge node[above,rotate=-60]{\a{coffee}} (r5)
+                (r3) edge node[above,rotate=60]{\a{coffee}} (r6) 
+                     edge node[above,rotate=-60]{\a{coffee}} (r7);
 
       \path[dotted,bend right]
         (r2) edge (r3)
@@ -385,7 +385,7 @@ bisimilar to `T`.
  
    `R` is a bisimulation relation, so merging all related states will yield a
    smaller, bisimilar transition system (namely the left transition system of
-   Example \ref{ex:bisim}).
+   the :ref:`previous bisimulation example <exercise-bisim>`).
 
 .. admonition:: Exercise
 
@@ -415,6 +415,7 @@ that `P` may exhibit some finite behaviour, after which it will once more behave
 like `P`. Let us create an optimistic model of a coffee machine, that lets us
 operate the machine forever.
 
+.. _coffee-inf1:
 .. list-table:: An ever-lasting coffee machine.
 
    * - .. tikz::
@@ -439,10 +440,11 @@ operate the machine forever.
 In the specification, we see that the ``proc`` operator accepts equations that
 associate processes with process names. In this case, the process ``P`` is
 defined. By using it in the right-hand side of its own definition, we introduced
-infinitely repeating behaviour. To illustrate this, we could `unfold' this
-repetition once and obtain a bisimilar system, as shown in figure
-\ref{lst:coffee-inf2}.
+infinitely repeating behaviour. To illustrate this, we could *unfold* this
+repetition once and obtain a bisimilar system, as shown in 
+:ref:`the figure of the unfolded ever-lasting coffee machine <coffee-inf2>`.
 
+.. _coffee-inf2:
 .. list-table:: The ever-lasting coffee machine, unfolded once.
 
    * - .. tikz::
@@ -476,8 +478,8 @@ behaviour stays the same.
 
 .. admonition:: Exercise
   
-   Show that the statespaces from figures \ref{lst:coffee-inf1} and
-   \ref{lst:coffee-inf2} are bisimilar.
+   Show that the statespaces from figures :ref:`the ever-lasting coffee machine <coffee-inf1>` and
+   :ref:`the unfolded ever-lasting coffee machine <coffee-inf2>` are bisimilar.
 
 Regular HML
 -----------
@@ -513,7 +515,7 @@ regular HML formulas to infinitary HML formulas:
 
 .. math::
 
-   \mccan{\alpha \cdot \beta}\varphi &= \mccan{\alpha}\mccan{\beta}\varphi & 
+   \mccan{\alpha \cdot \beta}\varphi &= \mccan{\alpha}\mccan{\beta}\varphi \\
    \mccan{\alpha + \beta}\varphi &= (\mccan{\alpha}\varphi) \lor (\mccan{\beta}\varphi) \\
    \mccan{\alpha^*}\varphi &= \varphi \lor (\mccan{\alpha}\varphi) \lor (\mccan{\alpha\cdot\alpha}\varphi) \lor \ldots
 
@@ -526,14 +528,14 @@ The modal µ-calculus
 
 Although regular HML is a powerful tool to specify properties over infinite
 systems, it is still not expressive enough to formulate so-called 
-fairness properties*. These are properties that say things like `if the system is offered
+fairness properties*. These are properties that say things like *if the system is offered
 the possibility to perform an action infinitely often, then it will eventually
-perform this action'.
+perform this action*.
 
 Another way of extending HML to deal with infinite behaviour is to add a
 *least fixpoint operator*. This extension is called the *modal µ-calculus*, named
 after the least fixpoint operator `\mu`. The µ-calculus (we often leave out the
-`modal', as no confusion can arise) is famous for its expressivity, and infamous
+*modal*, as no confusion can arise) is famous for its expressivity, and infamous
 for its unintelligability. We will therefore first give the definition and the
 formal semantics, and then elaborate more informally on its use.
 
@@ -668,8 +670,6 @@ More complicated properties can be expressed by nesting fixpoint operators.
 Data
 ----
 
-\label{sec:data}
-
 Recursion is one way to introduce infinity in system models. It neatly
 enables us to model systems that continuously interact with their
 environment. The infinity obtained by recursion is an infinity in the
@@ -724,12 +724,12 @@ This suggests that the summation is like the plus.
 
 As soon as the sort that is used in combination with the ``sum``
 operator has infinitely many basic elements, the branching degree of
-a state may become infinite, as illustrated by Figure~\ref{fig:nats}.
+a state may become infinite, as illustrated by figure :ref:`nats`.
 Since each mCRL2 expression is finite, we can no longer give an
 equivalent expression using only the plus operator.
 
-.. list-table:: Transitions ``num`` with all possible even natural number
-                parameters. 
+.. _nats:
+.. list-table:: Transition system with an infinite number of transitions. 
 
    * - .. tikz::
           :libs: automata
@@ -755,8 +755,8 @@ The sum operator is quite powerful, especially when combined with the *if-then*
 construct ``b -> p`` and the *if-then-else* construct ``b -> p <> q``, which
 behaves as process ``p`` if ``b`` evaluates to ``true``, and, in case of the
 if-then-else construct, as process ``q`` otherwise. Using such constructs, and a
-Boolean function ``even``, we can give an alternative description of the system
-in Figure~\ref{fig:nats}::
+Boolean function ``even``, we can give an alternative description of the 
+:ref:`infinite transition system above <nats>`::
 
   map even: Nat -> Bool;
   var n: Nat;
@@ -771,9 +771,9 @@ action ``num(v)`` is possible.
 
 .. admonition:: Exercise
 
-   Give, if possible, a µ-calculus  expression that states that the process of 
-   Figure~\ref{fig:nats} cannot execute ``num`` actions carrying an odd natural
-   number as its parameter. If impossible, explain why.
+   Give a µ-calculus  expression that states that this 
+   :ref:`process <nats>` cannot execute actions ``num`` with an odd natural
+   number as its parameter. 
 
 Data variables that are bound by the ``sum`` operator can affect
 the entire process that is within the scope of such operators. This way,
@@ -783,6 +783,7 @@ rejects the 2 and 5 cent coins. The significant states modelling this behaviour,
 including parts of the mCRL2 description,
 are as follows:
 
+.. _picky:
 .. list-table:: A picky coffee machine.
 
    * - .. tikz::
@@ -824,7 +825,7 @@ employing such mechanisms is an incrementer::
   proc P(n:Nat) = num(n).P(n+1);
   init P(0);
 
-Or we could have written the process from figure \ref{fig:picky} as follows::
+Or we could have written the :ref:`picky coffee machine <picky>` as follows::
 
   proc P(v: Val) = 
     coin(v) . (
@@ -838,18 +839,20 @@ It may be clear that most data-dependent processes describe transition systems
 that can no longer be visualised on a sheet of paper. However, the interaction
 between the data and process language is quite powerful. 
 
+.. _exercise_data:
 .. admonition:: Exercises
 
    #. Is there a labelled transition system with a finite number of states that 
       is bisimilar to the incrementer? If so, give this transition system and
       the witnessing bisimulation relation. If not, explain why such a
-      transition system does not exist not.
+      transition system does not exist.
 
-   #. Consider the mCRL2 specification depicted in Figure~\ref{fig:quirky},
+   #. Consider the mCRL2 specification depicted :ref:`below <quirky>`,
       defining a rather quirky coffee machine. List some odd things about the
       behaviour of this coffee machine and give an alternative specification
-      that fixes these.\label{ex:data}
+      that fixes these.
 
+.. _quirky:
 .. list-table:: An mCRL2 specification of a quirky coffee machine.
 
    * - :: 
@@ -885,7 +888,7 @@ The first-order µ-calculus
 With the introduction of data-dependent behaviour and, in particular,
 with the sum operator, we have moved beyond labelled transition
 systems that are finitely branching. As you may have found out in
-Exercise~\ref{sec:data}.\ref{ex:data}, the logics defined in the previous sections are
+:ref:`this exercise <exercise_data>`, the logics defined in the previous sections are
 no longer adequate to reason about the systems we can now describe.
 This is due to the fact that our grammar does not permit us to construct
 infinite sized formulae. We mend this by introducing data in the µ-calculus.
@@ -955,7 +958,10 @@ The extension of our action formulae with data is sufficiently powerful to
 reason about the infinite branching introduced by the sum operator over
 infinite data sorts. However, it still does not permit us to reason about
 data-dependent behaviour. Consider, for instance, the LTS described by
-the following process::
+the following process:
+
+.. _trees:
+.. list-table:: A transition system with nested trees.
 
   act num: Nat;
   proc P(n: Nat) = sum m: Nat . (m < n) -> num(m) . P(m);
@@ -1019,10 +1025,10 @@ if for all `\varepsilon`, `i \in \sem{\varphi}_T^\varepsilon`.
 The regular first-order Hennessy-Milner logic extends the first-order 
 Hennessy-Milner logic in the same way as regular Hennessy Milner logic
 extends Hennessy-Milner logic. This allows us, for instance, to express that along all
-paths of the LTS described by Figure~\ref{fig:trees}, the parameters
-of the ``num`` action are decreasing:
+paths of the LTS described by :ref:`this transition system <trees>`, the parameters
+of the action ``num`` are decreasing:
 
-.. math:: \mcall{\true^*} \forall_{v,v'\oftype\nat} \mcall{`\a{num}`(v) . `\a{num}`(v')} v' < v
+.. math:: \mcall{\true^*} \forall_{v,v'\oftype\nat} \mcall{\a{num}(v) . \a{num}(v')} v' < v
 
 In a similar vein, the µ-calculus can be extended with first-order constructs,
 allowing for *parameterised recursion*. This allows one to pass on
@@ -1270,9 +1276,10 @@ on processes in mCRL2.
   has identical parameters. The set ``C`` specifies multi-action names that
   should be renamed using the following syntax for each renaming:
   ``a1|...|aN->b``, where ``b`` and ``a1`` through ``aN`` are action names. The
-  operation is best understood by looking at the example in Figure
-  \ref{fig:comm-operator}.
+  operation is best understood by looking at the example 
+  :ref:`about the communication operator <comm-operator>`.
 
+  .. _comm-operator:
   .. list-table:: Communication operator.
 
      * - .. tikz::
@@ -1491,4 +1498,3 @@ would have had 3 times more states, and 15 times more transitions.
 
 .. [#f1] If a formula is not in positive normal form, then its least
    and greatest fixpoint are not guaranteed to exist, hence the requirement. 
-   See also \cite{?}

@@ -11,23 +11,22 @@
 
 #define MCRL2_GAUSS_ELIMINATION_DEBUG
 
-#include <iostream>
-#include <iterator>
-#include <utility>
-#include <boost/test/minimal.hpp>
-#include <boost/algorithm/string.hpp>
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
-#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/test/minimal.hpp>
+#include <iostream>
+#include <iterator>
+#include <utility>
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -106,7 +105,7 @@ std::string BES10 =
   "init X;                                                  \n"
   ;
 
-void test_bes(std::string bes_spec, bool expected_result)
+void test_bes(const std::string& bes_spec, bool expected_result)
 {
   pbes_system::pbes p = pbes_system::txt2pbes(bes_spec);
   int result = pbes_system::gauss_elimination(p);
@@ -122,7 +121,7 @@ void test_bes(std::string bes_spec, bool expected_result)
       std::cout << "UNKNOWN" << std::endl;
       break;
   }
-  BOOST_CHECK((expected_result == false && result == 0) || (expected_result == true && result == 1));
+  BOOST_CHECK((!expected_result && result == 0) || (expected_result && result == 1));
 
   // BOOST_CHECK(pbes2bool(p) == expected_result);
   // this gives assertion failures in pbes2bool
@@ -147,7 +146,7 @@ void test_abp()
 {
   bool timed = false;
   std::string FORMULA = "[true*]<true*>true";
-  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
+  lps::specification spec=remove_stochastic_operators(lps::linearise(lps::detail::ABP_SPECIFICATION()));
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
 
   pbes_system::pbes p = pbes_system::lps2pbes(spec, formula, timed);
@@ -170,8 +169,6 @@ void test_abp()
 void test_bes()
 {
   using namespace bes;
-
-  typedef core::term_traits<boolean_expression> tr;
 
   boolean_variable X("X");
   boolean_variable Y("Y");
@@ -214,11 +211,10 @@ void test_bes()
   bes4.equations().push_back(e4);
   bes4.equations().push_back(e3);
 
-  BOOST_CHECK(gauss_elimination(bes1) == false);
-  BOOST_CHECK(gauss_elimination(bes2) == true);
-  BOOST_CHECK(gauss_elimination(bes3) == false);
-  BOOST_CHECK(gauss_elimination(bes4) == true);
-
+  BOOST_CHECK(!gauss_elimination(bes1));
+  BOOST_CHECK(gauss_elimination(bes2));
+  BOOST_CHECK(!gauss_elimination(bes3));
+  BOOST_CHECK(gauss_elimination(bes4));
 }
 
 inline
@@ -257,7 +253,7 @@ struct fixpoint_equation_solver
 
   void operator()(pbes_equation& e) const
   {
-    pbes_expression phi = e.symbol().is_mu() ? pbes_expr::false_() : pbes_expr::true_();
+    pbes_expression phi = e.symbol().is_mu() ? false_() : true_();
     e.formula() = replace_propositional_variables(e.formula(), propositional_variable_substitution(e.variable(), phi));
   }
 };

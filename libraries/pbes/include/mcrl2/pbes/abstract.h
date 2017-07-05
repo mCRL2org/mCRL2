@@ -12,11 +12,11 @@
 #ifndef MCRL2_PBES_ABSTRACT_H
 #define MCRL2_PBES_ABSTRACT_H
 
+#include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
+#include "mcrl2/pbes/pbes.h"
 #include <algorithm>
 #include <iostream>
-#include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/detail/pbes_parameter_map.h"
 
 namespace mcrl2
 {
@@ -31,9 +31,7 @@ namespace detail
 struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_builder>
 {
   typedef pbes_expression_builder<pbes_abstract_builder> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<data::variable_list> m_quantifier_stack;
   const std::vector<data::variable> m_selected_variables;
@@ -47,11 +45,11 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   /// \brief Returns true if the m_quantifier_stack contains a given data variable
   bool is_bound(const data::variable& v) const
   {
-    for (std::vector<data::variable_list>::const_iterator i = m_quantifier_stack.begin(); i != m_quantifier_stack.end(); ++i)
+    for (const data::variable_list& variables: m_quantifier_stack)
     {
-      for (data::variable_list::iterator j = i->begin(); j != i->end(); ++j)
+      for (const data::variable& w: variables)
       {
-        if (*j == v)
+        if (w == v)
         {
           return true;
         }
@@ -73,16 +71,16 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   }
 
   /// \brief Visit data_expression node
-  pbes_expression operator()(const data::data_expression& d)
+  pbes_expression apply(const data::data_expression& d)
   {
     std::set<data::variable> FV = data::find_free_variables(d);
-    for (std::set<data::variable>::iterator i = FV.begin(); i != FV.end(); ++i)
+    for (const data::variable& v: FV)
     {
-      if (std::find(m_selected_variables.begin(), m_selected_variables.end(), *i) == m_selected_variables.end())
+      if (std::find(m_selected_variables.begin(), m_selected_variables.end(), v) == m_selected_variables.end())
       {
         continue;
       }
-      if (!is_bound(*i))
+      if (!is_bound(v))
       {
         //std::clog << "Reducing data expression " << data::pp(d) << " to " << data::pp(m_value) << "." << std::endl;
         return m_value;
@@ -92,26 +90,22 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
   }
 
   /// \brief Visit forall node
-  pbes_expression operator()(const forall& x)
+  pbes_expression apply(const forall& x)
   {
     push_variables(x.variables());
-    pbes_expression new_expression = (*this)(x.body());
+    pbes_expression new_expression = apply(x.body());
     pop_variables();
-    return pbes_expr::forall(x.variables(), new_expression);
+    return make_forall(x.variables(), new_expression);
   }
 
   /// \brief Visit exists node
-  pbes_expression operator()(const exists& x)
+  pbes_expression apply(const exists& x)
   {
     push_variables(x.variables());
-    pbes_expression new_expression = (*this)(x.body());
+    pbes_expression new_expression = apply(x.body());
     pop_variables();
-    return pbes_expr::exists(x.variables(), new_expression);
+    return make_exists(x.variables(), new_expression);
   }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 } // namespace detail
@@ -122,20 +116,21 @@ class pbes_abstract_algorithm
 {
   public:
     /// \brief Runs the algorithm.
-    /// \param p A PBES
+    /// \param p A PBES.
     /// \param parameter_map A map containing the parameters that should be expanded by the algorithm.
+    /// \param value_true An indication whether the abstraction is towards true or towards false.
     void run(pbes& p,
              const detail::pbes_parameter_map& parameter_map,
-             bool value_true
+             bool value_true 
             )
     {
-      for (std::vector<pbes_equation>::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (pbes_equation& eqn: p.equations())
       {
-        detail::pbes_parameter_map::const_iterator j = parameter_map.find(i->variable().name());
+        detail::pbes_parameter_map::const_iterator j = parameter_map.find(eqn.variable().name());
         if (j != parameter_map.end())
         {
           detail::pbes_abstract_builder builder(j->second, value_true);
-          i->formula() = builder(i->formula());
+          eqn.formula() = builder.apply(eqn.formula());
         }
       }
     }

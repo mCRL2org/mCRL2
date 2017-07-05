@@ -1,14 +1,9 @@
 #ifndef MCRL2_DATA_REWRITE_STRATEGY_H
 #define MCRL2_DATA_REWRITE_STRATEGY_H
 
-#ifndef NO_DYNLOAD
-#define MCRL2_JITTYC_AVAILABLE /** \brief If defined the compiling JITty
-rewriter is available */
-#endif
-
+#include "mcrl2/utilities/exception.h"
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {

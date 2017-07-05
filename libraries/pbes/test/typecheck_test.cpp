@@ -9,22 +9,22 @@
 /// \file typecheck_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/core/parse.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/typecheck.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/core/parse.h"
-#include "mcrl2/pbes/typecheck.h"
-#include "mcrl2/pbes/parse.h"
 
 using namespace mcrl2;
 
 void test_pbes_specification(const std::string& pbes_in, bool test_type_checker = true)
 {
-  pbes_system::pbes p = pbes_system::parse_pbes_new(pbes_in);
+  pbes_system::pbes p = pbes_system::detail::parse_pbes_new(pbes_in).construct_pbes();
   if (test_type_checker)
   {
-    pbes_system::type_check(p);
+    pbes_system::typecheck_pbes(p);
     std::string pbes_out = pbes_system::pp(p);
 
     if (pbes_in!=pbes_out)

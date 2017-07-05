@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/container_utility.h
-/// \brief Provides utilities for working with container.
+/// \file mcrl2/atermpp/detail/aterm_list_utility.h
+/// \brief Provides the + operator on lists.
 
 #ifndef MCRL2_ATERMPP_DETAIL_ATERM_LIST_UTILITY_H
 #define MCRL2_ATERMPP_DETAIL_ATERM_LIST_UTILITY_H

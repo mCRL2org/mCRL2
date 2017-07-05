@@ -10,8 +10,6 @@
 
 #include <string>
 #include <set>
-#include <stack>
-#include <bitset>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -31,9 +29,6 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::log;
 
-#ifdef USE_BCG
-// #include <bcg_user.h>
-#endif
 
 using namespace std;
 
@@ -43,8 +38,6 @@ namespace lts
 {
 namespace detail
 {
-
-std::vector < atermpp::function_symbol > state_function_symbols;
 
 lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
 {
@@ -85,33 +78,23 @@ lts_type guess_format(string const& s, const bool be_verbose/*=true*/)
         mCRL2log(verbose) << "Detected GraphViz extension.\n";
       }
       return lts_dot;
-#ifdef USE_BCG
-    }
-    else if (ext == "bcg")
-    {
-      if (be_verbose)
-      {
-        mCRL2log(verbose) << "Detected Binary Coded Graph extension.\n";
-      }
-      return lts_bcg;
-#endif
     }
   }
 
   return lts_none;
 }
 
-static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot", "bcg" };
+static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot" };
 
-static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot", "bcg" };
+static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot" };
 
-static std::string type_desc_strings[] = { "unknown LTS format",
+static std::string type_desc_strings[] = {
+    "unknown LTS format",
     "mCRL2 LTS format",
     "Aldebaran format (CADP)",
     "Finite State Machine format",
     "GraphViz format (no longer supported as input format)",
-    "SVC format",
-    "Binary Coded Graph format (CADP)"
+    "SVC format"
                                          };
 
 
@@ -119,8 +102,7 @@ static std::string mime_type_strings[] = { "",
     "application/lts",
     "text/aut",
     "text/fsm",
-    "application/bcg",
-    "text/dot",
+    "text/dot"
                                          };
 
 lts_type parse_format(std::string const& s)
@@ -137,12 +119,6 @@ lts_type parse_format(std::string const& s)
   {
     return lts_fsm;
   }
-#ifdef USE_BCG
-  else if (s == "bcg")
-  {
-    return lts_bcg;
-  }
-#endif
   else if (s == "dot")
   {
     return lts_dot;
@@ -165,10 +141,10 @@ std::string mime_type_for_type(const lts_type type)
   return (mime_type_strings[type]);
 }
 
-static const std::set<lts_type> &initialise_supported_lts_formats()
+static const std::set<lts_type>& initialise_supported_lts_formats()
 {
   static std::set<lts_type> s;
-  for (size_t i = lts_type_min; i<1+(size_t)lts_type_max; ++i)
+  for (std::size_t i = lts_type_min; i<1+(std::size_t)lts_type_max; ++i)
   {
     if (lts_none != (lts_type) i)
     {
@@ -177,16 +153,17 @@ static const std::set<lts_type> &initialise_supported_lts_formats()
   }
   return s;
 }
-const std::set<lts_type> &supported_lts_formats()
+const std::set<lts_type>& supported_lts_formats()
 {
-  static const std::set<lts_type> &s = initialise_supported_lts_formats();
+  static const std::set<lts_type>& s = initialise_supported_lts_formats();
   return s;
 }
 
-std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type> &supported)
+std::string supported_lts_formats_text(lts_type default_format, const std::set<lts_type>& supported)
 {
-  vector<lts_type> types(supported.begin(),supported.end());
-  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,type_strings,_1,_2));
+  vector<lts_type> types(supported.begin(), supported.end());
+  std::sort(types.begin(), types.end(),
+            std::bind(lts_named_cmp<lts_type>, type_strings, std::placeholders::_1, std::placeholders::_2));
 
   string r;
   for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); ++i)
@@ -213,15 +190,16 @@ std::string supported_lts_formats_text(lts_type default_format, const std::set<l
   return r;
 }
 
-std::string supported_lts_formats_text(const std::set<lts_type> &supported)
+std::string supported_lts_formats_text(const std::set<lts_type>& supported)
 {
   return supported_lts_formats_text(lts_none,supported);
 }
 
-std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_type> &supported)
+std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_type>& supported)
 {
-  vector<lts_type> types(supported.begin(),supported.end());
-  std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,extension_strings,_1,_2));
+  vector<lts_type> types(supported.begin(), supported.end());
+  std::sort(types.begin(), types.end(),
+            std::bind(lts_named_cmp<lts_type>, extension_strings, std::placeholders::_1, std::placeholders::_2));
 
   string r, prev;
   bool first = true;
@@ -246,7 +224,7 @@ std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_
   return r;
 }
 
-std::string lts_extensions_as_string(const std::set<lts_type> &supported)
+std::string lts_extensions_as_string(const std::set<lts_type>& supported)
 {
   return lts_extensions_as_string(",",supported);
 }

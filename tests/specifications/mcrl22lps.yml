@@ -1,0 +1,15 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-lstack]
+    name: mcrl22lps
+
+result: |
+  result = True

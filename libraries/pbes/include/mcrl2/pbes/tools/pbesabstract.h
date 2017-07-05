@@ -12,10 +12,12 @@
 #ifndef MCRL2_PBES_TOOLS_PBESABSTRACT_H
 #define MCRL2_PBES_TOOLS_PBESABSTRACT_H
 
+#include "mcrl2/utilities/file_utility.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/algorithms.h"
-#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
+#include "mcrl2/pbes/normalize.h"
 
 namespace mcrl2 {
 
@@ -23,8 +25,8 @@ namespace pbes_system {
 
 void pbesabstract(const std::string& input_filename,
                   const std::string& output_filename,
-                  const utilities::file_format* input_format,
-                  const utilities::file_format* output_format,
+                  const utilities::file_format& input_format,
+                  const utilities::file_format& output_format,
                   const std::string& parameter_selection,
                   bool value_true
                  )

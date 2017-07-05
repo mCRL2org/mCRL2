@@ -12,17 +12,17 @@
 #ifndef MCRL2_LPS_DETAIL_LPS_ALGORITHM_H
 #define MCRL2_LPS_DETAIL_LPS_ALGORITHM_H
 
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lps/remove.h"
+#include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/specification.h"
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <set>
 #include <vector>
-#include <boost/bind.hpp>
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/remove.h"
-#include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 namespace mcrl2
 {
@@ -34,11 +34,13 @@ namespace detail
 {
 
 /// \brief Algorithm class for algorithms on linear process specifications.
+/// It can be instantiated with lps::specification and lps::stochastic_specification.
+template <typename Specification = specification>
 class lps_algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm
-    specification& m_spec;
+    Specification& m_spec;
 
     void sumelm_find_variables(const action_summand& s, std::set<data::variable>& result) const
     {
@@ -66,7 +68,7 @@ class lps_algorithm
     }
 
     template <typename SummandType>
-    void remove_unused_summand_variables(SummandType& summand_)
+    void summand_remove_unused_summand_variables(SummandType& summand_)
     {
       data::variable_vector new_summation_variables;
 
@@ -83,7 +85,7 @@ class lps_algorithm
 
   public:
     /// \brief Constructor
-    lps_algorithm(specification& spec)
+    lps_algorithm(Specification& spec)
       : m_spec(spec)
     {}
 
@@ -96,12 +98,11 @@ class lps_algorithm
     /// \brief Applies the next state substitution to the variable v.
     data::data_expression next_state(const action_summand& s, const data::variable& v) const
     {
-      const data::assignment_list& a = s.assignments();
-      for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+      for (const data::assignment& a: s.assignments())
       {
-        if (i->lhs() == v)
+        if (a.lhs() == v)
         {
-          return i->rhs();
+          return a.rhs();
         }
       }
       return v; // no assignment to v found, so return v itself
@@ -136,11 +137,11 @@ class lps_algorithm
     /// \brief Removes unused summand variables.
     void remove_unused_summand_variables()
     {
-      action_summand_vector& v = m_spec.process().action_summands();
-      std::for_each(v.begin(), v.end(), boost::bind(&lps_algorithm::remove_unused_summand_variables<action_summand>, this, _1));
+      auto& v = m_spec.process().action_summands();
+      std::for_each(v.begin(), v.end(), std::bind(&lps_algorithm::summand_remove_unused_summand_variables<typename Specification::process_type::action_summand_type>, this, std::placeholders::_1));
 
-      deadlock_summand_vector& w = m_spec.process().deadlock_summands();
-      std::for_each(w.begin(), w.end(), boost::bind(&lps_algorithm::remove_unused_summand_variables<deadlock_summand>, this, _1));
+      auto& w = m_spec.process().deadlock_summands();
+      std::for_each(w.begin(), w.end(), std::bind(&lps_algorithm::summand_remove_unused_summand_variables<deadlock_summand>, this, std::placeholders::_1));
     }
 };
 

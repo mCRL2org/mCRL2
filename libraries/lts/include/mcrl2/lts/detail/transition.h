@@ -11,6 +11,7 @@
 #ifndef MCRL2_LTS_DETAIL_TRANSITION_H
 #define MCRL2_LTS_DETAIL_TRANSITION_H
 
+#include <map>
 #include "mcrl2/lts/transition.h"
 
 namespace mcrl2
@@ -21,37 +22,76 @@ namespace lts
 namespace detail
 {
 
-inline bool compare_transitions_slt(const transition t1, const transition t2)
+inline std::size_t apply_map(const std::size_t n, const std::map<std::size_t,std::size_t>& mapping)
 {
-  if (t1.from() != t2.from())
+  const std::map<std::size_t,std::size_t>::const_iterator i=mapping.find(n);
+  if (i==mapping.end())
   {
-    return t1.from() < t2.from();
+    return n;
   }
-  else if (t1.label() != t2.label())
-  {
-    return t1.label() < t2.label();
-  }
-  else
-  {
-    return t1.to() < t2.to();
-  }
+  return i->second;
 }
 
-inline bool compare_transitions_lts(const transition t1, const transition t2)
+class compare_transitions_slt
 {
-  if (t1.label() != t2.label())
-  {
-    return t1.label() < t2.label();
-  }
-  else if (t1.to() != t2.to())
-  {
-    return t1.to() < t2.to();
-  }
-  else
-  {
-    return t1.from() < t2.from();
-  }
-}
+  protected:
+    const std::map<std::size_t,std::size_t>& m_hide_action_map;
+
+  public:
+    compare_transitions_slt(const std::map<std::size_t,std::size_t>& hide_action_map)
+     : m_hide_action_map(hide_action_map)
+    {}
+
+    bool operator()(const transition& t1, const transition& t2)
+    {
+      if (t1.from() != t2.from())
+      {
+        return t1.from() < t2.from();
+      }
+      else 
+      {
+        const std::size_t n1=apply_map(t1.label(), m_hide_action_map);
+        const std::size_t n2=apply_map(t2.label(), m_hide_action_map);
+        if (n1 != n2)
+        {
+          return n1 < n2;
+        }
+        else
+        {
+          return t1.to() < t2.to();
+        }
+      }
+    }
+};
+
+class compare_transitions_lts
+{
+  protected:
+    const std::map<std::size_t,std::size_t>& m_hide_action_map;
+
+  public:
+    compare_transitions_lts(const std::map<std::size_t,std::size_t>& hide_action_map)
+     : m_hide_action_map(hide_action_map)
+    {}
+
+    bool operator()(const transition& t1, const transition& t2)
+    {
+      const std::size_t n1=apply_map(t1.label(), m_hide_action_map);
+      const std::size_t n2=apply_map(t2.label(), m_hide_action_map);
+      if (n1 != n2)
+      {
+        return n1 < n2;
+      }
+      else if (t1.to() != t2.to())
+      {
+        return t1.to() < t2.to();
+      }
+      else
+      {
+        return t1.from() < t2.from();
+      }
+    }
+};
 
 } // detail
 } // lts

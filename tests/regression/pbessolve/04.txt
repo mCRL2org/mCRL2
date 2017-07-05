@@ -1,0 +1,5 @@
+pbes nu Y = X;
+     mu X = Y;
+
+init X;
+

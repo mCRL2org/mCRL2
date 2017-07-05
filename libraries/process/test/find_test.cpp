@@ -9,15 +9,14 @@
 /// \file find_test.cpp
 /// \brief Test for find functions.
 
-#include <algorithm>
-#include <iterator>
-#include <set>
-#include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/process/find.h"
 #include "mcrl2/process/parse.h"
+#include <algorithm>
+#include <boost/test/minimal.hpp>
+#include <iterator>
+#include <set>
+#include <vector>
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -35,19 +34,19 @@ std::string PROC_DECL =
   ;
 
 inline
-data::variable nat(std::string name)
+data::variable nat(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_nat::nat());
 }
 
 inline
-data::variable pos(std::string name)
+data::variable pos(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_pos::pos());
 }
 
 inline
-data::variable bool_(std::string name)
+data::variable bool_(const std::string& name)
 {
   return data::variable(core::identifier_string(name), data::sort_bool::bool_());
 }
@@ -70,11 +69,9 @@ void test_find()
 
 void test_free_variables()
 {
-  using atermpp::make_list;
-
   data::variable b = bool_("b");
-  data::data_expression_list d = make_list<data::data_expression>(b);
-  process_identifier P(core::identifier_string("P"), make_list(b));
+  data::data_expression_list d = { b };
+  process_identifier P(core::identifier_string("P"), { b });
   process_instance pi(P, d);
 
   std::set<data::variable> free_variables = process::find_free_variables(pi);

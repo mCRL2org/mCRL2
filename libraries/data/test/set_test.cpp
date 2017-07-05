@@ -11,11 +11,11 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/set.h"
 #include "mcrl2/data/fset.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/standard.h"
 
 
 using namespace mcrl2;
@@ -24,24 +24,28 @@ using namespace mcrl2::data::sort_set;
 using namespace mcrl2::data::sort_fset;
 
 template <typename Predicate>
-void test_data_expression(const std::string& s, variable_vector v, Predicate p)
+void test_data_expression(const std::string& s, const variable_vector& v, Predicate p)
 {
   std::cerr << "testing data expression " << s << std::endl;
-  data_expression e = parse_data_expression(s, v.begin(), v.end());
+  data_expression e = parse_data_expression(s, v);
   BOOST_CHECK(p(e));
 }
 
-/* Test case for various set expressions, based
-   on the following specification:
 
-proc P(s: Set(Nat)) = (1 in s) -> tau . P({} + s - {20} * {40})
-                    + ({10} < s) -> tau . P(!s)
-                    + (s <= {20} + Bag2Set({20:4, 30:3, 40:2})) -> tau . P(s)
-                    + (s <= { n:Nat | true }) -> tau . P(s);
+void test_expression(const std::string& evaluate, const std::string& expected, data::rewriter r)
+{
+  data_expression d1 = parse_data_expression(evaluate);
+  data_expression d2 = parse_data_expression(expected);
+  if (r(d1)!=r(d2))
+  {
+    std::cerr << "Evaluating: " << evaluate << "\n";
+    std::cerr << "Result: " << d1 << "\n";
+    std::cerr << "Expected result: " << expected << "\n";
+    BOOST_CHECK(r(d1) == r(d2));
+    std::cerr << "------------------------------------------------------\n";
+  }
+}
 
-init P({20, 30, 40});
-
-*/
 void set_expression_test()
 {
   data::data_specification specification;
@@ -56,20 +60,18 @@ void set_expression_test()
   v.push_back(parse_variable("s:Set(Nat)"));
 
   test_data_expression("{x : Nat | x < 10}", v, sort_set::is_constructor_application);
-  test_data_expression("!s", v, sort_set::is_complement_application); 
-  test_data_expression("s * {}", v, sort_set::is_intersection_application); 
-  test_data_expression("s * {1,2,3}", v, sort_set::is_intersection_application); 
+  test_data_expression("!s", v, sort_set::is_complement_application);
+  test_data_expression("s * {}", v, sort_set::is_intersection_application);
+  test_data_expression("s * {1,2,3}", v, sort_set::is_intersection_application);
   test_data_expression("s - {3,1,2}", v, sort_set::is_difference_application);
   test_data_expression("1 in s", v, sort_set::is_in_application);
   test_data_expression("{} + s", v, sort_set::is_union_application);
-  test_data_expression("(({} + s) - {20}) * {40}", v, sort_set::is_intersection_application); 
+  test_data_expression("(({} + s) - {20}) * {40}", v, sort_set::is_intersection_application);
   test_data_expression("{10} < s", v, is_less_application<data_expression>);
   test_data_expression("s <= {10}", v, is_less_equal_application<data_expression>);
   test_data_expression("{20} + {30}", v, sort_set::is_union_application);
 
-  data_expression t1d1 = parse_data_expression("{1,2}");
-  data_expression t1d2 = parse_data_expression("{2,1}");
-  BOOST_CHECK(normaliser(t1d1) == normaliser(t1d2));
+  test_expression("{1,2}", "{2,1}", normaliser);
 
   data_expression t1d1a = parse_data_expression("{1,2,3}");
   data_expression t1d2a = parse_data_expression("{2,1}");
@@ -85,10 +87,10 @@ void set_expression_test()
 
   data_expression t3d1 = parse_data_expression("({1,2} != {2,3})");
   data_expression t3d2 = parse_data_expression("true");
-  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d2)); 
+  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d2));
 
   data_expression t4d1 = parse_data_expression("(!{1,2}) == {1,2}");
-  data_expression t4d2 = parse_data_expression("false"); 
+  data_expression t4d2 = parse_data_expression("false");
   BOOST_CHECK(normaliser(t4d1) == normaliser(t4d2));
 
   data_expression t5d1 = parse_data_expression("(!!{1,2}) == {2,1}");
@@ -96,20 +98,67 @@ void set_expression_test()
   BOOST_CHECK(normaliser(t5d1) == normaliser(t5d2));
 
 
-  data_expression e = parse_data_expression("{20}", v.begin(), v.end());
+  data_expression e = parse_data_expression("{20}", v);
   BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));
 
-  e = parse_data_expression("{20, 30, 40}", v.begin(), v.end());
-  BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));   
+  e = parse_data_expression("{20, 30, 40}", v);
+  BOOST_CHECK(sort_fset::is_cons_application(normaliser(e)));
 
-  data_expression t6d1 = parse_data_expression("{} == { b: Bool | true } - { true, false }");
-  data_expression t6d2 = parse_data_expression("true");
+  test_expression("{} == { b: Bool | true } - { true, false }","true",normaliser);
 
-  BOOST_CHECK(normaliser(t6d1) == normaliser(t6d2));
+  test_expression("{ b: Bool | true } - { true, false } == {}","true", normaliser);
 
-  data_expression t7d1 = parse_data_expression("{ b: Bool | true } - { true, false } == {}");
-  data_expression t7d2 = parse_data_expression("true");
-  BOOST_CHECK(normaliser(t7d1) == normaliser(t7d2));
+  // Check the operation == on sets.
+  test_expression("{} == ({true} - {true})","true",normaliser);  // {true}-{true} is a trick to type {} == {}. 
+  test_expression("{} == {false}", "false",normaliser);
+  test_expression("{} == {true}", "false",normaliser);
+  test_expression("{true} == {true}", "true",normaliser);
+  test_expression("{false} == {false}", "true",normaliser);
+  test_expression("{true} == {false, true}", "false",normaliser);
+  test_expression("{false, true} == {false}", "false",normaliser);
+  test_expression("{false, true} == {true, false}", "true",normaliser);
+
+  // Check the operation < on sets.
+  test_expression("{} < ({true} - {true})","false",normaliser);  // {true}-{true} is a trick to type {} == {}. 
+  test_expression("{true} < {false}", "false",normaliser);
+  test_expression("{false} < {true}", "false",normaliser);
+  test_expression("{true} < {true}", "false",normaliser);
+  test_expression("{false} < {false}", "false",normaliser);
+  test_expression("{true} < {false, true}", "true",normaliser);
+  test_expression("{false} < {false, true}", "true",normaliser);
+  test_expression("{true} < {true, false}", "true",normaliser);
+  test_expression("{false} < {true, false}", "true",normaliser);
+  test_expression("{true, false} < {true}", "false",normaliser);
+  test_expression("{true, false} < {false}", "false",normaliser);
+  test_expression("{false, true} < {true}", "false",normaliser);
+  test_expression("{false, true} < {false}", "false",normaliser);
+  test_expression("{true, false} < {false, true}", "false",normaliser);
+  test_expression("{true, false} < {true, false}", "false",normaliser);
+  test_expression("{false, true} < {false, true}", "false",normaliser);
+  test_expression("{false, true} < {true, false}", "false",normaliser);
+  test_expression("{false, false} < {false}", "false",normaliser);
+
+  // Check the operation <= on sets.
+  test_expression("{} <= ({true}-{true})","true",normaliser);  // {true} - {true} is a trick to type {} == {}.
+  test_expression("{true} <= {false}", "false",normaliser);
+  test_expression("{false} <= {true}", "false",normaliser);
+  test_expression("{true} <= {true}", "true",normaliser);
+  test_expression("{false} <= {false}", "true",normaliser);
+  test_expression("{true} <= {false, true}", "true",normaliser);
+  test_expression("{false} <= {false, true}", "true",normaliser);
+  test_expression("{true} <= {true, false}", "true",normaliser);
+  test_expression("{false} <= {true, false}", "true",normaliser);
+  test_expression("{true, false} <= {true}", "false",normaliser);
+  test_expression("{true, false} <= {false}", "false",normaliser);
+  test_expression("{false, true} <= {true}", "false",normaliser);
+  test_expression("{false, true} <= {false}", "false",normaliser);
+  test_expression("{true, false} <= {false, true}", "true",normaliser);
+  test_expression("{true, false} <= {true, false}", "true",normaliser);
+  test_expression("{false, true} <= {false, true}", "true",normaliser);
+  test_expression("{false, true} <= {true, false}", "true",normaliser);
+  test_expression("{false, false} <= {false}", "true",normaliser);
+
+
 
 }
 

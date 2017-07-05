@@ -45,7 +45,7 @@ class untyped_set_or_bag_comprehension: public abstraction
     template < typename Container >
     untyped_set_or_bag_comprehension(const Container& variables,
            const data_expression& body,
-           typename atermpp::enable_if_container< Container, variable >::type* = 0)
+           typename atermpp::enable_if_container< Container, variable >::type* = nullptr)
       : abstraction(untyped_set_or_bag_comprehension_binder(), variables, body)
     {
       assert(!variables.empty());
@@ -59,6 +59,7 @@ std::string pp(const untyped_set_or_bag_comprehension& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_set_or_bag_comprehension& x)

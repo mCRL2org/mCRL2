@@ -9,18 +9,19 @@
 /// \file mcrl2/modal_formula/action_formula.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_MODAL_ACTION_FORMULA_H
-#define MCRL2_MODAL_ACTION_FORMULA_H
+#ifndef MCRL2_MODAL_FORMULA_ACTION_FORMULA_H
+#define MCRL2_MODAL_FORMULA_ACTION_FORMULA_H
 
-#include <iostream> // for debugging
-#include <stdexcept>
-#include <string>
-#include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/process/untyped_action.h"
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/process/process_expression.h"
+#include "mcrl2/process/untyped_multi_action.h"
+#include <cassert>
+#include <iostream> // for debugging
+#include <stdexcept>
+#include <string>
 
 namespace mcrl2
 {
@@ -50,6 +51,16 @@ class action_formula: public atermpp::aterm_appl
     action_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// \brief Constructor.
+    action_formula(const data::untyped_data_parameter& x)
+      : atermpp::aterm_appl(x)
+    {}
+
+    /// \brief Constructor.
+    action_formula(const process::untyped_multi_action& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of action_formulas
@@ -69,7 +80,6 @@ inline bool is_forall(const atermpp::aterm_appl& x);
 inline bool is_exists(const atermpp::aterm_appl& x);
 inline bool is_at(const atermpp::aterm_appl& x);
 inline bool is_multi_action(const atermpp::aterm_appl& x);
-inline bool is_untyped_multi_action(const atermpp::aterm_appl& x);
 
 /// \brief Test for a action_formula expression
 /// \param x A term
@@ -88,7 +98,8 @@ bool is_action_formula(const atermpp::aterm_appl& x)
          action_formulas::is_exists(x) ||
          action_formulas::is_at(x) ||
          action_formulas::is_multi_action(x) ||
-         action_formulas::is_untyped_multi_action(x);
+         process::is_untyped_multi_action(x) ||
+         data::is_untyped_data_parameter(x);
 }
 
 // prototype declaration
@@ -96,6 +107,7 @@ std::string pp(const action_formula& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const action_formula& x)
@@ -142,6 +154,7 @@ std::string pp(const true_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const true_& x)
@@ -188,6 +201,7 @@ std::string pp(const false_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const false_& x)
@@ -244,6 +258,7 @@ std::string pp(const not_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const not_& x)
@@ -305,6 +320,7 @@ std::string pp(const and_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const and_& x)
@@ -366,6 +382,7 @@ std::string pp(const or_& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const or_& x)
@@ -427,6 +444,7 @@ std::string pp(const imp& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const imp& x)
@@ -488,6 +506,7 @@ std::string pp(const forall& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const forall& x)
@@ -549,6 +568,7 @@ std::string pp(const exists& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const exists& x)
@@ -610,6 +630,7 @@ std::string pp(const at& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const at& x)
@@ -666,6 +687,7 @@ std::string pp(const multi_action& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const multi_action& x)
@@ -678,62 +700,6 @@ inline void swap(multi_action& t1, multi_action& t2)
 {
   t1.swap(t2);
 }
-
-
-/// \brief The multi action for action formulas (untyped)
-class untyped_multi_action: public action_formula
-{
-  public:
-    /// \brief Default constructor.
-    untyped_multi_action()
-      : action_formula(core::detail::default_values::UntypedActMultAct)
-    {}
-
-    /// \brief Constructor.
-    /// \param term A term
-    explicit untyped_multi_action(const atermpp::aterm& term)
-      : action_formula(term)
-    {
-      assert(core::detail::check_term_UntypedActMultAct(*this));
-    }
-
-    /// \brief Constructor.
-    untyped_multi_action(const process::untyped_action_list& arguments)
-      : action_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedActMultAct(), arguments))
-    {}
-
-    const process::untyped_action_list& arguments() const
-    {
-      return atermpp::down_cast<process::untyped_action_list>((*this)[0]);
-    }
-};
-
-/// \brief Test for a untyped_multi_action expression
-/// \param x A term
-/// \return True if \a x is a untyped_multi_action expression
-inline
-bool is_untyped_multi_action(const atermpp::aterm_appl& x)
-{
-  return x.function() == core::detail::function_symbols::UntypedActMultAct;
-}
-
-// prototype declaration
-std::string pp(const untyped_multi_action& x);
-
-/// \brief Outputs the object to a stream
-/// \param out An output stream
-/// \return The output stream
-inline
-std::ostream& operator<<(std::ostream& out, const untyped_multi_action& x)
-{
-  return out << action_formulas::pp(x);
-}
-
-/// \brief swap overload
-inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
-{
-  t1.swap(t2);
-}
 //--- end generated classes ---//
 
 //template <typename T>
@@ -741,13 +707,13 @@ inline void swap(untyped_multi_action& t1, untyped_multi_action& t2)
 //{
 //  return core::detail::precedences::max_precedence;
 //}
-inline int left_precedence(const forall&) { return 0; }
-inline int left_precedence(const exists&) { return 0; }
-inline int left_precedence(const imp&)    { return 2; }
-inline int left_precedence(const or_&)    { return 3; }
-inline int left_precedence(const and_&)   { return 4; }
-inline int left_precedence(const at&)     { return 5; }
-inline int left_precedence(const not_&)   { return 6; }
+inline int left_precedence(const forall&) { return 21; }
+inline int left_precedence(const exists&) { return 21; }
+inline int left_precedence(const imp&)    { return 22; }
+inline int left_precedence(const or_&)    { return 23; }
+inline int left_precedence(const and_&)   { return 24; }
+inline int left_precedence(const at&)     { return 25; }
+inline int left_precedence(const not_&)   { return 26; }
 inline int left_precedence(const action_formula& x)
 {
   if      (is_forall(x)) { return left_precedence(static_cast<const forall&>(x)); }
@@ -785,4 +751,4 @@ std::set<data::variable> find_all_variables(const action_formulas::action_formul
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_ACTION_FORMULA_H
+#endif // MCRL2_MODAL_FORMULA_ACTION_FORMULA_H

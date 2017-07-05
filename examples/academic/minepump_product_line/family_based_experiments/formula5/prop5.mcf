@@ -1,0 +1,187 @@
+%% The system cannot be in a situation in which the pump runs indefinitely in the presence of methane
+%%
+%% Holds for 96 products and fails for 32 products. Proving the property for the
+%% 96 products requires no decomposition in subfamilies. Proving the complement
+%% of the product for the remaining 32 products requires decomposing these products
+%% into 2 distinct subfamilies
+
+
+( % prove that the property holds for a single family of products
+
+nu X.
+forall Px':FExpr. 
+(val(Px' in [ neg(and(atom(Ct),atom(Lh)))]) =>
+nu Z(Pz:FExpr = normalise(and(FD,Px')),b:Bool =true).
+(
+(val(b) =>
+ (nu X0(Px0:FExpr = Pz).
+(% translate [true*]; all actions are: skip, skip(e), pumpStart(e), pumpStop(e), methaneRise, methaneLower
+(val(normalise(and(Px0,tt)) != ff) => [skip]X0(Px0))
+&&
+(val(normalise(and(Px0,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px0,e)) != ff) => X0(normalise(and(Px0,e)))) ))
+&&
+(val(normalise(and(Px0,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Px0,e)) != ff) => X0(normalise(and(Px0,e)))) ))
+&&
+(val(normalise(and(Px0,tt)) != ff) => (forall e:FExpr. [pumpStop(e)](val(normalise(and(Px0,e)) != ff) => X0(normalise(and(Px0,e)))) ))
+&&
+(val(normalise(and(Px0,tt)) != ff) => [methaneRise]X0(Px0))
+&&
+(val(normalise(and(Px0,tt)) != ff) => [methaneLower]X0(Px0))
+&&
+(val(normalise(and(Px0,tt)) != ff) => (forall e':FExpr. 
+   [pumpStart(e')](val(normalise(and(Px0,e')) != ff) => 
+        nu X1(Px1:FExpr = normalise(and(Px0,e'))).
+        ( % translation of [!pumpStop]X1
+          (val(normalise(and(Px1,tt)) != ff) => [skip]X1(Px1))
+          &&
+          (val(normalise(and(Px1,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px1,e)) != ff) => X1(normalise(and(Px1,e)))) ))
+          &&
+          (val(normalise(and(Px1,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Px1,e)) != ff) => X1(normalise(and(Px1,e)))) ))
+          &&
+          (val(normalise(and(Px1,tt)) != ff) => [methaneRise]X1(Px1))
+          &&
+          (val(normalise(and(Px1,tt)) != ff) => [methaneLower]X1(Px1))
+          &&
+          (val(normalise(and(Px1,tt)) != ff) =>  
+              [methaneRise]Z(Px1,false)
+
+          )
+        )
+   )
+
+)
+)
+&&
+(val(normalise(and(Px0,tt)) != ff) => (
+   [methaneRise](
+        nu X4(Px4:FExpr = Px0).
+        ( % translation of [!methaneLower]X4
+          (val(normalise(and(Px4,tt)) != ff) => [skip]X4(Px4))
+          &&
+          (val(normalise(and(Px4,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px4,e)) != ff) => X4(normalise(and(Px4,e)))) ))
+          &&
+          (val(normalise(and(Px4,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Px4,e)) != ff) => X4(normalise(and(Px4,e)))) ))
+          &&
+          (val(normalise(and(Px4,tt)) != ff) => (forall e:FExpr. [pumpStop(e)](val(normalise(and(Px4,e)) != ff) => X4(normalise(and(Px4,e)))) ))
+          &&
+          (val(normalise(and(Px4,tt)) != ff) => [methaneRise]X4(Px4))
+          &&
+          (val(normalise(and(Px4,tt)) != ff) =>  forall e:FExpr. [pumpStart(e)](val(normalise(and(Px4,e)) != ff) => Z(normalise(and(Px4,e)),true) ) )
+        )
+     )
+  )  
+)
+)
+)
+)
+&&
+(val(!b) =>
+  ( mu X2(Px2:FExpr = Pz).
+      (  % translation of [!(pumpStop || methaneLower)]X2
+         (val(normalise(and(Px2,tt)) != ff) => [skip]X2(Px2))
+        &&
+         (val(normalise(and(Px2,tt)) != ff) => (forall e:FExpr. [skip(e)](val(normalise(and(Px2,e)) != ff) => X2(normalise(and(Px2,e)))) ))
+        &&
+         (val(normalise(and(Px2,tt)) != ff) => (forall e:FExpr. [pumpStart(e)](val(normalise(and(Px2,e)) != ff) => X2(normalise(and(Px2,e)))) ))
+        &&
+         (val(normalise(and(Px2,tt)) != ff) => [methaneRise]X2(Px2))
+      )
+  )
+)
+
+
+)
+)
+)
+
+&&
+
+( % prove the complement for two subfamilies
+
+mu X.
+forall Px':FExpr. 
+(
+   val(Px' in
+   [ and(neg(atom(Mq)),and(atom(Ct),atom(Lh))),
+     and(atom(Mq),and(atom(Ct),atom(Lh)))
+   ])
+) =>
+(
+nu Z(Pz:FExpr = normalise(and(FD,Px')), b:Bool = true).
+(
+(val(b) =>
+mu X0(Px0:FExpr = Pz).
+(
+(% translate <true*>; all actions are: skip, skip(e), pumpStart(e), pumpStop(e), methaneRise, methaneLower
+(val(normalise(or(neg(Px0),tt)) == tt) && <skip>X0(Px0))
+||
+(val(normalise(or(neg(Px0),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px0),e)) == tt) && X0(Px0)) ))
+||
+(val(normalise(or(neg(Px0),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px0),e)) == tt) && X0(Px0)) ))
+||
+(val(normalise(or(neg(Px0),tt)) == tt) && (exists e:FExpr. <pumpStop(e)>(val(normalise(or(neg(Px0),e)) == tt) && X0(Px0)) ))
+||
+(val(normalise(or(neg(Px0),tt)) == tt) && <methaneRise>X0(Px0))
+||
+(val(normalise(or(neg(Px0),tt)) == tt) && <methaneLower>X0(Px0))
+)
+||
+(val(normalise(or(neg(Px0),tt)) == tt) && (exists e':FExpr. 
+   <pumpStart(e')>(val(normalise(or(neg(Px0),e')) == tt) && 
+        mu X1(Px1:FExpr = Px0).
+        ( % translation of <!pumpStop>X1
+          (val(normalise(or(neg(Px1),tt)) == tt) && <skip>X1(Px1))
+          ||
+          (val(normalise(or(neg(Px1),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px1),e)) == tt) && X1(Px1)) ))
+          ||
+          (val(normalise(or(neg(Px1),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px1),e)) == tt) && X1(Px1)) ))
+          ||
+          (val(normalise(or(neg(Px1),tt)) == tt) && <methaneRise>X1(Px1))
+          ||
+          (val(normalise(or(neg(Px1),tt)) == tt) && <methaneLower>X1(Px1))
+          ||
+          (val(normalise(or(neg(Px1),tt)) == tt) &&  <methaneRise>Z(Px1,false) )
+        )
+   )
+)
+)
+||
+(val(normalise(or(neg(Px0),tt)) == tt) && (
+   <methaneRise>(
+        mu X4(Px4:FExpr = Px0).
+        ( % translation of [!pumpStop]X4
+          (val(normalise(or(neg(Px4),tt)) == tt) && <skip>X4(Px4))
+          ||
+          (val(normalise(or(neg(Px4),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px4),e)) == tt) && X4(Px4)) ))
+          ||
+          (val(normalise(or(neg(Px4),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px4),e)) == tt) && X4(Px4)) ))
+          ||
+          (val(normalise(or(neg(Px4),tt)) == tt) && (exists e:FExpr. <pumpStop(e)>(val(normalise(or(neg(Px4),e)) == tt) && X4(Px4)) ))
+          ||
+          (val(normalise(or(neg(Px4),tt)) == tt) && <methaneRise>X4(Px4))
+          ||
+          (val(normalise(or(neg(Px4),tt)) == tt) &&  exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px4),e)) == tt) && Z(Px4,false) ) )
+          )
+        )
+   )
+
+)
+)
+)
+&&
+(val(!b) =>
+  nu X2(Px2:FExpr = Pz).
+   (  % translation of <!(pumpStop || methaneLower)>X2
+      (val(normalise(or(neg(Px2),tt)) == tt) && <skip>X2(Px2))
+      ||
+      (val(normalise(or(neg(Px2),tt)) == tt) && (exists e:FExpr. <skip(e)>(val(normalise(or(neg(Px2),e)) == tt) && X2(Px2)) ))
+      ||
+      (val(normalise(or(neg(Px2),tt)) == tt) && (exists e:FExpr. <pumpStart(e)>(val(normalise(or(neg(Px2),e)) == tt) && X2(Px2)) ))
+      ||
+      (val(normalise(or(neg(Px2),tt)) == tt) && <methaneRise>X2(Px2))
+   )
+
+)
+)
+)
+)

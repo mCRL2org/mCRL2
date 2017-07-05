@@ -1,0 +1,46 @@
+nodes:
+  l1:
+    type: PbesSpec
+  l2:
+    type: PBES
+  l3:
+    type: PBES
+  l4:
+    type: PBES
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: []
+    name: txt2pbes
+  t2:
+    input: [l2]
+    output: [l3]
+    args: ["--select=*(*:*)", --abstraction-value=0]
+    name: pbesabstract
+  t3:
+    input: [l2]
+    output: [l4]
+    args: ["--select=*(*:*)", --abstraction-value=1]
+    name: pbesabstract
+  t4:
+    input: [l2]
+    output: [l5]
+    args: []
+    name: pbes2bool
+  t5:
+    input: [l3]
+    output: [l6]
+    args: []
+    name: pbes2bool
+  t6:
+    input: [l4]
+    output: [l7]
+    args: []
+    name: pbes2bool
+result: |
+  s = t4.value['solution']
+  s1 = t5.value['solution']
+  s2 = t6.value['solution']
+  result = (not s or not s1 or s == s1) and (not s or not s2 or s == s2)

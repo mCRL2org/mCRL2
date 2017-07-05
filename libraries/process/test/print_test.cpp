@@ -11,8 +11,8 @@
 
 #define MCRL2_DEBUG_EXPRESSION_BUILDER
 
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
 
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/print.h"

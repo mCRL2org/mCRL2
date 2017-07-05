@@ -22,14 +22,14 @@ namespace detail
 class _aterm_int:public _aterm
 {
   public:
-    size_t value;
+    std::size_t value;
 };
 
-const _aterm *aterm_int(size_t val);
+_aterm *aterm_int(std::size_t val);
 
 } // namespace detail 
 
-static const size_t TERM_SIZE_INT = sizeof(detail::_aterm_int)/sizeof(size_t);
+static const std::size_t TERM_SIZE_INT = sizeof(detail::_aterm_int)/sizeof(std::size_t);
 
 } // namespace atermpp
 

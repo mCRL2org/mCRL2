@@ -10,21 +10,21 @@
 /// \brief Add your file description here.
 
 #include <algorithm>
-#include <iterator>
 #include <iostream>
+#include <iterator>
 #include <memory>
-#include <string>
 #include <set>
-#include <vector>
 #include <stack>
+#include <string>
+#include <vector>
 
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/state.h"
-#include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/next_state_generator.h"
+#include "mcrl2/lps/state.h"
 
 using namespace mcrl2;
 
@@ -73,8 +73,8 @@ class group_information
 {
 
   private:
-    mcrl2::lps::specification const&     m_model;
-    std::vector< std::vector< size_t > > m_group_indices;
+    mcrl2::lps::stochastic_specification const& m_model;
+    std::vector< std::vector< std::size_t > > m_group_indices;
 
   private:
 
@@ -88,9 +88,9 @@ class group_information
         std::set_intersection(used_variables.begin(), used_variables.end(), parameter_set.begin(), parameter_set.end(), std::inserter(used_parameters, used_parameters.begin()));
 
         std::size_t j_index = 0;
-        for (data::variable_list::const_iterator j = parameter_list.begin(); j != parameter_list.end(); ++j)
+        for (const auto & j : parameter_list)
         {
-          if (used_parameters.find(*j) != used_parameters.end())
+          if (used_parameters.find(j) != used_parameters.end())
           {
             m_group_indices[summand_index].push_back(j_index);
           }
@@ -100,9 +100,9 @@ class group_information
       }
     }
 
-    void gather(lps::specification const& l)
+    void gather(lps::stochastic_specification const& l)
     {
-      lps::linear_process specification(l.process());
+      lps::stochastic_linear_process specification(l.process());
 
       std::size_t size = specification.action_summands().size() + specification.deadlock_summands().size();
       m_group_indices.resize(size);
@@ -117,7 +117,7 @@ class group_information
     /**
      * \brief constructor from an mCRL2 lps
      **/
-    group_information(mcrl2::lps::specification const& l) : m_model(l)
+    group_information(mcrl2::lps::stochastic_specification const& l) : m_model(l)
     {
       gather(l);
     }
@@ -126,12 +126,12 @@ class group_information
      * \brief The number of groups (summands in the LPS)
      * \return lps::specification(l).summands().size()
      **/
-    inline size_t number_of_groups() const
+    inline std::size_t number_of_groups() const
     {
       return m_group_indices.size();
     }
 
-    inline size_t number_of_parameters() const
+    inline std::size_t number_of_parameters() const
     {
       return m_model.process().process_parameters().size();
     }
@@ -141,23 +141,23 @@ class group_information
      * \param[in] index the selected summand
      * \returns reference to a vector of indices of parameters
      **/
-    inline std::vector< size_t > const& operator[](size_t index) const
+    inline std::vector< std::size_t > const& operator[](std::size_t index) const
     {
       return m_group_indices[index];
     }
 };
 
 
-void check_info(mcrl2::lps::specification const& model)
+void check_info(mcrl2::lps::stochastic_specification const& model)
 {
   group_information info(model);
 
   BOOST_CHECK(info.number_of_groups() == model.process().summand_count());
 
 #ifdef SHOW_INFO
-  for (size_t i = 0; i < info.number_of_groups(); ++i)
+  for (std::size_t i = 0; i < info.number_of_groups(); ++i)
   {
-    std::vector< size_t > const& group_info(info[i]);
+    std::vector< std::size_t > const& group_info(info[i]);
 
     std::cerr << "group " << i << " : {";
 
@@ -166,7 +166,7 @@ void check_info(mcrl2::lps::specification const& model)
       std::cerr << group_info[0];
     }
 
-    for (std::vector< size_t >::const_iterator j = ++group_info.begin(); j < group_info.end(); ++j)
+    for (std::vector< std::size_t >::const_iterator j = ++group_info.begin(); j < group_info.end(); ++j)
     {
 
       std::cerr << "," << *j;
@@ -191,7 +191,7 @@ int test_main(int argc, char** argv)
   check_info(linearise(case_summands));
   check_info(linearise(case_last));
 
-  lps::specification model(linearise(case_no_influenced_parameters));
+  lps::stochastic_specification model=linearise(case_no_influenced_parameters);
 
   if (1 < argc)
   {
@@ -206,7 +206,7 @@ int test_main(int argc, char** argv)
     std::stack< state >     stack;
     std::set< state >   known;
 
-    stack.push(explorer.initial_state());
+    stack.push(explorer.initial_states().front().state());
     known.insert(stack.top());
 
     while (!stack.empty())
@@ -214,16 +214,16 @@ int test_main(int argc, char** argv)
       state current(stack.top());
       stack.pop();
 
-      for (size_t i = 0; i < model.process().summand_count(); ++i)
+      for (std::size_t i = 0; i < model.process().summand_count(); ++i)
       {
         next_state_generator::enumerator_queue_t enumeration_queue;
         for(next_state_generator::iterator j = explorer.begin(current, i, &enumeration_queue); j != explorer.end(); ++j)
         {
-          if (known.find(j->state()) == known.end())
+          if (known.find(j->target_state()) == known.end())
           {
-            std::cerr << atermpp::pp(j->state()) << std::endl;
-            known.insert(j->state());
-            stack.push(j->state());
+            std::cerr << atermpp::pp(j->target_state()) << std::endl;
+            known.insert(j->target_state());
+            stack.push(j->target_state());
           }
         }
       }

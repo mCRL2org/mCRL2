@@ -11,21 +11,21 @@
 #include <fstream>
 
 #include "mcrl2/utilities/exception.h"
-#include "mcrl2/lps/tools.h"
 #include "mcrl2/lps/binary.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/invelm_algorithm.h"
+#include "mcrl2/lps/io.h"
 #include "mcrl2/lps/parelm.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/suminst.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/tools.h"
 #include "mcrl2/lps/untime.h"
-#include "mcrl2/lps/io.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -37,11 +37,11 @@ namespace lps
 void lpsbinary(const std::string& input_filename,
                const std::string& output_filename)
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, input_filename);
   data::rewriter r(spec.data());
 
-  lps::binary_algorithm<data::rewriter>(spec, r).run();
+  lps::binary_algorithm<data::rewriter, stochastic_specification>(spec, r).run();
   save_lps(spec, output_filename);
 }
 
@@ -54,10 +54,10 @@ void lpsconstelm(const std::string& input_filename,
                  bool remove_singleton_sorts
                 )
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, input_filename);
   mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
-  lps::constelm_algorithm<data::rewriter> algorithm(spec, R);
+  lps::constelm_algorithm<data::rewriter, stochastic_specification> algorithm(spec, R);
 
   // preprocess: remove single element sorts
   if (remove_singleton_sorts)
@@ -81,14 +81,14 @@ void lpsinfo(const std::string& input_filename,
              const std::string& input_file_message
             )
 {
-  specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
-  lps::detail::specification_property_map info(spec);
+  lps::detail::specification_property_map<stochastic_specification> info(spec);
   std::cout << input_file_message << "\n\n";
   std::cout << info.info();
 }
 
-void lpsinvelm(const std::string& input_filename,
+bool lpsinvelm(const std::string& input_filename,
                const std::string& output_filename,
                const std::string& invariant_filename,
                const std::string& dot_file_name,
@@ -103,7 +103,7 @@ void lpsinvelm(const std::string& input_filename,
                const bool apply_induction,
                const int time_limit)
 {
-  lps::specification spec;
+  stochastic_specification spec;
   data::data_expression invariant;
 
   load_lps(spec, input_filename);
@@ -120,24 +120,22 @@ void lpsinvelm(const std::string& input_filename,
     mCRL2log(log::verbose) << "parsing input file '" <<  invariant_filename << "'..." << std::endl;
 
     data::variable_list& parameters=spec.process().process_parameters();
-    invariant = data::parse_data_expression(instream, parameters.begin(), parameters.end(), spec.data());
+    invariant = data::parse_data_expression(instream, parameters, spec.data());
 
     instream.close();
   }
   else
   {
-    mCRL2log(log::error) << "A file containing an invariant must be specified using the option --invariant=INVFILE" << std::endl;
-    return;
+    throw mcrl2::runtime_error("A file containing an invariant must be specified using the option --invariant=INVFILE.");
   }
 
-  bool invariance_result = true;
   if (no_check)
   {
     mCRL2log(log::warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
   }
   else
   {
-    detail::Invariant_Checker v_invariant_checker(spec,
+    detail::Invariant_Checker<stochastic_specification> v_invariant_checker(spec,
                                           rewrite_strategy,
                                           time_limit,
                                           path_eliminator,
@@ -147,28 +145,29 @@ void lpsinvelm(const std::string& input_filename,
                                           all_violations,
                                           dot_file_name);
 
-    invariance_result = v_invariant_checker.check_invariant(invariant);
+    if (!v_invariant_checker.check_invariant(invariant))
+    { 
+      return false; // The invariant was checked and found invalid. 
+    }
   }
 
-  if (invariance_result)
-  {
-    invelm_algorithm algorithm(spec,
+  invelm_algorithm<stochastic_specification> algorithm(spec,
                                rewrite_strategy,
                                time_limit,
                                path_eliminator,
                                solver_type,
                                apply_induction,
                                simplify_all);
-    algorithm.run(invariant, !no_elimination);
-    save_lps(spec, output_filename);
-  }
+  algorithm.run(invariant, !no_elimination);
+  save_lps(spec, output_filename);
+  return true;
 }
 
 void lpsparelm(const std::string& input_filename,
                const std::string& output_filename
               )
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, input_filename);
   lps::parelm(spec, true);
   save_lps(spec, output_filename);
@@ -180,7 +179,7 @@ void lpspp(const std::string& input_filename,
            core::print_format_type format
           )
 {
-  lps::specification spec;
+  lps::stochastic_specification spec;
   load_lps(spec, input_filename);
 
   mCRL2log(log::verbose) << "printing LPS from "
@@ -191,7 +190,7 @@ void lpspp(const std::string& input_filename,
   std::string text;
   if (format == core::print_internal)
   {
-    text = to_string(specification_to_aterm(spec));
+    text = pp(specification_to_aterm(spec));
   }
   else
   {
@@ -216,32 +215,14 @@ void lpspp(const std::string& input_filename,
   }
 }
 
-template <typename DataRewriter>
-void lpsrewr_bench_mark(const lps::specification& spec, const DataRewriter& R, unsigned long bench_times)
-{
-  std::clog << "rewriting LPS " << bench_times << " times...\n";
-  for (unsigned long i=0; i < bench_times; i++)
-  {
-    lps::specification spec1 = spec;
-    lps::rewrite(spec1, R);
-  }
-}
-
-// TODO: remove the benchmark option?
 void lpsrewr(const std::string& input_filename,
              const std::string& output_filename,
-             const data::rewriter::strategy rewrite_strategy,
-             bool benchmark,
-             unsigned long bench_times
+             const data::rewriter::strategy rewrite_strategy
             )
 {
-  lps::specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
   mcrl2::data::rewriter R(spec.data(), rewrite_strategy);
-  if (benchmark)
-  {
-    lpsrewr_bench_mark(spec, R, bench_times);
-  }
   lps::rewrite(spec, R);
   lps::remove_trivial_summands(spec);
   lps::remove_redundant_assignments(spec);
@@ -252,10 +233,10 @@ void lpssumelm(const std::string& input_filename,
                const std::string& output_filename,
                const bool decluster)
 {
-  lps::specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
 
-  lps::sumelm_algorithm(spec, decluster).run();
+  sumelm_algorithm<stochastic_specification>(spec, decluster).run();
 
   mCRL2log(log::debug) << "Sum elimination completed, saving to " <<  output_filename << std::endl;
   save_lps(spec, output_filename);
@@ -268,7 +249,7 @@ void lpssuminst(const std::string& input_filename,
                 const bool finite_sorts_only,
                 const bool tau_summands_only)
 {
-  lps::specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
   std::set<data::sort_expression> sorts;
 
@@ -276,9 +257,9 @@ void lpssuminst(const std::string& input_filename,
   if(!sorts_string.empty())
   {
     std::vector<std::string> parts = utilities::split(utilities::remove_whitespace(sorts_string), ",");
-    for(std::vector<std::string>::const_iterator i = parts.begin(); i != parts.end(); ++i)
+    for (auto & part : parts)
     {
-      sorts.insert(data::parse_sort_expression(*i, spec.data()));
+      sorts.insert(data::parse_sort_expression(part, spec.data()));
     }
   }
   else if (finite_sorts_only)
@@ -287,25 +268,27 @@ void lpssuminst(const std::string& input_filename,
   }
   else
   {
-    const data::sort_expression_vector& sort_vector=spec.data().sorts();
-    sorts = std::set<data::sort_expression>(sort_vector.begin(),sort_vector.end());
+    const std::set<data::sort_expression>& sort_set=spec.data().sorts();
+    sorts = std::set<data::sort_expression>(sort_set.begin(),sort_set.end());
   }
 
   mCRL2log(log::verbose, "lpssuminst") << "expanding summation variables of sorts: " << data::pp(sorts) << std::endl;
 
   mcrl2::data::rewriter r(spec.data(), rewrite_strategy);
-  lps::suminst_algorithm<data::rewriter>(spec, r, sorts, tau_summands_only).run();
+  lps::suminst_algorithm<data::rewriter, stochastic_specification>(spec, r, sorts, tau_summands_only).run();
   save_lps(spec, output_filename);
 }
 
 void lpsuntime(const std::string& input_filename,
-               const std::string& output_filename)
+               const std::string& output_filename,
+               const bool add_invariants,
+               const data::rewriter::strategy rewrite_strategy
+              )
 {
-  lps::specification spec;
+  stochastic_specification spec;
   load_lps(spec, input_filename);
-
-  lps::untime_algorithm(spec).run();
-
+  data::rewriter rewr(spec.data(),rewrite_strategy);
+  untime_algorithm<stochastic_specification>(spec, add_invariants, rewr).run();
   save_lps(spec, output_filename);
 }
 
@@ -313,8 +296,13 @@ void txt2lps(const std::string& input_filename,
              const std::string& output_filename
             )
 {
-  lps::specification spec;
-  load_lps(spec, input_filename, lps_format_text());
+  lps::stochastic_specification spec;
+  std::ifstream ifs(input_filename);
+  if (!ifs.good())
+  {
+    throw mcrl2::runtime_error("Could not open file " + input_filename + ".");
+  }
+  parse_lps(ifs, spec);
   save_lps(spec, output_filename);
 }
 

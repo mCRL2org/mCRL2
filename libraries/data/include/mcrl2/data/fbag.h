@@ -24,7 +24,6 @@
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -61,22 +60,6 @@ namespace mcrl2 {
         return false;
       }
 
-      namespace detail {
-
-        /// \brief Declaration for sort fbag as structured sort
-        /// \param s A sort expression
-        /// \return The structured sort representing fbag
-        inline
-        structured_sort fbag_struct(const sort_expression& s)
-        {
-          structured_sort_constructor_vector constructors;
-          constructors.push_back(structured_sort_constructor("{:}", "empty"));
-          constructors.push_back(structured_sort_constructor("@fbag_cons", atermpp::make_vector(structured_sort_constructor_argument("arg1", s), structured_sort_constructor_argument("arg2", sort_pos::pos()), structured_sort_constructor_argument("arg3", fbag(s))), "cons_"));
-          return structured_sort(constructors);
-        }
-
-      } // namespace detail
-
 
       /// \brief Generate identifier {:}
       /// \return Identifier {:}
@@ -108,76 +91,6 @@ namespace mcrl2 {
           return function_symbol(e).name() == empty_name();
         }
         return false;
-      }
-
-      /// \brief Generate identifier \@fbag_cons
-      /// \return Identifier \@fbag_cons
-      inline
-      core::identifier_string const& cons_name()
-      {
-        static core::identifier_string cons_name = core::identifier_string("@fbag_cons");
-        return cons_name;
-      }
-
-      /// \brief Constructor for function symbol \@fbag_cons
-      /// \param s A sort expression
-      /// \return Function symbol cons_
-      inline
-      function_symbol cons_(const sort_expression& s)
-      {
-        function_symbol cons_(cons_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
-        return cons_;
-      }
-
-      /// \brief Recogniser for function \@fbag_cons
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fbag_cons
-      inline
-      bool is_cons_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e).name() == cons_name();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@fbag_cons
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@fbag_cons to a number of arguments
-      inline
-      application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return sort_fbag::cons_(s)(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@fbag_cons
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol cons_ to a
-      ///     number of arguments
-      inline
-      bool is_cons_application(const atermpp::aterm_appl& e)
-      {
-        if (is_application(e))
-        {
-          return is_cons_function_symbol(application(e).head());
-        }
-        return false;
-      }
-      /// \brief Give all system defined constructors for fbag
-      /// \param s A sort expression
-      /// \return All system defined constructors for fbag
-      inline
-      function_symbol_vector fbag_generate_constructors_code(const sort_expression& s)
-      {
-        function_symbol_vector result;
-        function_symbol_vector fbag_constructors = detail::fbag_struct(s).constructor_functions(fbag(s));
-        result.insert(result.end(), fbag_constructors.begin(), fbag_constructors.end());
-
-        return result;
       }
 
       /// \brief Generate identifier \@fbag_insert
@@ -234,6 +147,76 @@ namespace mcrl2 {
         if (is_application(e))
         {
           return is_insert_function_symbol(application(e).head());
+        }
+        return false;
+      }
+      /// \brief Give all system defined constructors for fbag
+      /// \param s A sort expression
+      /// \return All system defined constructors for fbag
+      inline
+      function_symbol_vector fbag_generate_constructors_code(const sort_expression& s)
+      {
+        function_symbol_vector result;
+        result.push_back(sort_fbag::empty(s));
+        result.push_back(sort_fbag::insert(s));
+
+        return result;
+      }
+
+      /// \brief Generate identifier \@fbag_cons
+      /// \return Identifier \@fbag_cons
+      inline
+      core::identifier_string const& cons_name()
+      {
+        static core::identifier_string cons_name = core::identifier_string("@fbag_cons");
+        return cons_name;
+      }
+
+      /// \brief Constructor for function symbol \@fbag_cons
+      /// \param s A sort expression
+      /// \return Function symbol cons_
+      inline
+      function_symbol cons_(const sort_expression& s)
+      {
+        function_symbol cons_(cons_name(), make_function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
+        return cons_;
+      }
+
+      /// \brief Recogniser for function \@fbag_cons
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching \@fbag_cons
+      inline
+      bool is_cons_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e).name() == cons_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol \@fbag_cons
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \return Application of \@fbag_cons to a number of arguments
+      inline
+      application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
+      {
+        return sort_fbag::cons_(s)(arg0, arg1, arg2);
+      }
+
+      /// \brief Recogniser for application of \@fbag_cons
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol cons_ to a
+      ///     number of arguments
+      inline
+      bool is_cons_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_cons_function_symbol(application(e).head());
         }
         return false;
       }
@@ -933,7 +916,7 @@ namespace mcrl2 {
       function_symbol_vector fbag_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
-        result.push_back(sort_fbag::insert(s));
+        result.push_back(sort_fbag::cons_(s));
         result.push_back(sort_fbag::cinsert(s));
         result.push_back(sort_fbag::count(s));
         result.push_back(sort_fbag::in(s));
@@ -946,8 +929,6 @@ namespace mcrl2 {
         result.push_back(sort_fbag::intersection(s));
         result.push_back(sort_fbag::difference(s));
         result.push_back(sort_fbag::count_all(s));
-        function_symbol_vector fbag_mappings = detail::fbag_struct(s).comparison_functions(fbag(s));
-        result.insert(result.end(), fbag_mappings.begin(), fbag_mappings.end());
         return result;
       }
       ///\brief Function for projecting out argument
@@ -970,7 +951,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        assert(is_insert_application(e) || is_cons_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
         return atermpp::down_cast<const application >(e)[0];
       }
 
@@ -982,7 +963,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        assert(is_insert_application(e) || is_cons_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
         return atermpp::down_cast<const application >(e)[1];
       }
 
@@ -994,7 +975,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_cons_application(e) || is_insert_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
+        assert(is_insert_application(e) || is_cons_application(e) || is_cinsert_application(e) || is_join_application(e) || is_fbag_intersect_application(e) || is_fbag_difference_application(e));
         return atermpp::down_cast<const application >(e)[2];
       }
 
@@ -1051,10 +1032,15 @@ namespace mcrl2 {
         variable vg("g",make_function_sort(s, sort_nat::nat()));
 
         data_equation_vector result;
-        data_equation_vector fbag_equations = detail::fbag_struct(s).constructor_equations(fbag(s));
-        result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
-        fbag_equations = detail::fbag_struct(s).comparison_equations(fbag(s));
-        result.insert(result.end(), fbag_equations.begin(), fbag_equations.end());
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), equal_to(cons_(s, vd, vp, vb), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), equal_to(empty(s), cons_(s, vd, vp, vb)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), equal_to(cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), sort_bool::and_(equal_to(vp, vq), sort_bool::and_(equal_to(vd, ve), equal_to(vb, vc)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), less_equal(cons_(s, vd, vp, vb), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), less_equal(empty(s), cons_(s, vd, vp, vb)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less_equal(cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), sort_bool::and_(less_equal(vp, vq), less_equal(vb, vc)), less_equal(cons_(s, vd, vp, vb), vc)))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), less(cons_(s, vd, vp, vb), empty(s)), sort_bool::false_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), less(empty(s), cons_(s, vd, vp, vb)), sort_bool::true_()));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), if_(less(vd, ve), sort_bool::false_(), if_(equal_to(vd, ve), sort_bool::or_(sort_bool::and_(equal_to(vp, vq), less(vb, vc)), sort_bool::and_(less(vp, vq), less_equal(vb, vc))), less_equal(cons_(s, vd, vp, vb), vc)))));
         result.push_back(data_equation(atermpp::make_vector(vd, vp), insert(s, vd, vp, empty(s)), cons_(s, vd, vp, empty(s))));
         result.push_back(data_equation(atermpp::make_vector(vb, vd, vp, vq), insert(s, vd, vp, cons_(s, vd, vq, vb)), cons_(s, vd, sort_pos::add_with_carry(sort_bool::false_(), vp, vq), vb)));
         result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp, vq), less(vd, ve), insert(s, vd, vp, cons_(s, ve, vq, vb)), cons_(s, vd, vp, cons_(s, ve, vq, vb))));
@@ -1097,7 +1083,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(ve, vd), difference(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, ve, vq, difference(s, cons_(s, vd, vp, vb), vc))));
         result.push_back(data_equation(atermpp::make_vector(vb), union_(s, vb, empty(s)), vb));
         result.push_back(data_equation(atermpp::make_vector(vc), union_(s, empty(s), vc), vc));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp, vq), union_(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, union_(s, vp, vq), union_(s, vb, vc))));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, vp, vq), union_(s, cons_(s, vd, vp, vb), cons_(s, vd, vq, vc)), cons_(s, vd, sort_pos::add_with_carry(sort_bool::false_(), vp, vq), union_(s, vb, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(vd, ve), union_(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, vd, vp, union_(s, vb, cons_(s, ve, vq, vc)))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(ve, vd), union_(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), cons_(s, ve, vq, union_(s, cons_(s, vd, vp, vb), vc))));
         result.push_back(data_equation(atermpp::make_vector(vb), intersection(s, vb, empty(s)), empty(s)));
@@ -1106,7 +1092,8 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(vd, ve), intersection(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), intersection(s, vb, cons_(s, ve, vq, vc))));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vd, ve, vp, vq), less(ve, vd), intersection(s, cons_(s, vd, vp, vb), cons_(s, ve, vq, vc)), intersection(s, cons_(s, vd, vp, vb), vc)));
         result.push_back(data_equation(variable_list(), count_all(s, empty(s)), sort_nat::c0()));
-        result.push_back(data_equation(atermpp::make_vector(vb, vd, vp), count_all(s, cons_(s, vd, vp, vb)), union_(s, vp, count_all(s, vb))));
+        result.push_back(data_equation(atermpp::make_vector(vd, vp), count_all(s, cons_(s, vd, vp, empty(s))), sort_nat::cnat(vp)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vd, ve, vp, vq), count_all(s, cons_(s, vd, vp, cons_(s, ve, vq, vb))), sort_nat::cnat(sort_pos::add_with_carry(sort_bool::false_(), vp, sort_nat::nat2pos(count_all(s, cons_(s, ve, vq, vb)))))));
         return result;
       }
 

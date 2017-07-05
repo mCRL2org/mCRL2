@@ -1,0 +1,11 @@
+act
+  a,b,c,d;
+
+proc
+  P = tau;
+  Q = c;
+  R = sum b1: Bool . (d);
+
+init
+  allow({a, d, c | d, b | d}, hide({d}, ((P) || (Q)) || (R)));
+

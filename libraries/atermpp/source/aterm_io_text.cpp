@@ -1,10 +1,22 @@
-/*{{{  includes */
+// Author(s): Jan Friso Groote
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file atermpp/source/aterm_io_text.cpp
+/// \brief This file contains code to read and write aterms
+///        in human readable format. 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <assert.h>
+
+
+#include <cstdio>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <cassert>
 #include <stdexcept>
 #include <deque>
 #include <iostream>
@@ -24,13 +36,13 @@ using namespace std;
 
 
 /* Parse error description */
-static size_t line = 0;
-static size_t col = 0;
+static std::size_t line = 0;
+static std::size_t col = 0;
 static deque<char> error_buf;
-static const size_t MAX_ERROR_SIZE = 64;
+static const std::size_t MAX_ERROR_SIZE = 64;
 
 /* Prototypes */
-static aterm fparse_term(int* c, istream &is);
+static aterm fparse_term(int* c, istream& is);
 
 static void aterm_io_init()
 {
@@ -40,13 +52,13 @@ static void aterm_io_init()
     /* Check for reasonably sized aterm (32 bits, 4 bytes)     */
     /* This check might break on perfectly valid architectures */
     /* that have char == 2 bytes, and sizeof(header_type) == 2 */
-    assert(sizeof(size_t) == sizeof(aterm*));
-    assert(sizeof(size_t) >= 4);
+    assert(sizeof(std::size_t) == sizeof(aterm*));
+    assert(sizeof(std::size_t) >= 4);
     initialized = true;
   }
 }
 
-static void write_string_with_escape_symbols(const std::string &s, std::ostream& os)
+static void write_string_with_escape_symbols(const std::string& s, std::ostream& os)
 {
   // Check whether the string starts with a - or a number, or contains the symbols
   // \, ", (, ), [, ], comma, space, \t, \n or \r. If yes, the string will be
@@ -100,7 +112,7 @@ static void write_string_with_escape_symbols(const std::string &s, std::ostream&
   }
 }
 
-static void writeToStream(const aterm &t, std::ostream& os)
+static void writeToStream(const aterm& t, std::ostream& os)
 {
   if (t.type_is_int())
   {
@@ -122,14 +134,14 @@ static void writeToStream(const aterm &t, std::ostream& os)
   }
   else // t.type_is_appl()
   {
-    const aterm_appl &appl = down_cast<aterm_appl>(t);
-    const function_symbol sym = appl.function();
+    const aterm_appl& appl = down_cast<aterm_appl>(t);
+    const function_symbol& sym = appl.function();
     write_string_with_escape_symbols(sym.name(),os);
     if (sym.arity() > 0)
     {
       os << "(";
       writeToStream(appl[0], os);
-      for (size_t i = 1; i < sym.arity(); i++)
+      for (std::size_t i = 1; i < sym.arity(); i++)
       {
         os << ",";
         writeToStream(appl[i], os);
@@ -139,7 +151,7 @@ static void writeToStream(const aterm &t, std::ostream& os)
   }
 }
 
-/**
+/*
  * Write a term into its text representation.
  */
 
@@ -150,17 +162,17 @@ std::ostream& operator<<(std::ostream& out, const aterm& t)
   return out;
 }
 
-void write_term_to_text_stream(const aterm &t, std::ostream &os)
+void write_term_to_text_stream(const aterm& t, std::ostream& os)
 {
   aterm_io_init();
   writeToStream(t,os);
 }
 
-/**
+/*
  * Read the next character from file.
  */
 
-static void fnext_char(int* c, istream &is)
+static void fnext_char(int* c, istream& is)
 {
   *c = is.get();
   if (*c != EOF)
@@ -193,11 +205,11 @@ static std::string print_parse_error_position()
   return s.str();
 }
 
-/**
+/*
  * Skip layout from file.
  */
 
-static void fskip_layout(int* c, istream &is)
+static void fskip_layout(int* c, istream& is)
 {
   while (isspace(*c))
   {
@@ -205,11 +217,11 @@ static void fskip_layout(int* c, istream &is)
   }
 }
 
-/**
+/*
  * Skip layout from file.
  */
 
-static void fnext_skip_layout(int* c, istream &is)
+static void fnext_skip_layout(int* c, istream& is)
 {
   do
   {
@@ -218,11 +230,11 @@ static void fnext_skip_layout(int* c, istream &is)
   while (isspace(*c));
 }
 
-/**
+/*
  * Parse a list of arguments.
  */
 
-static aterm_list fparse_terms(int* c, istream &is)
+static aterm_list fparse_terms(int* c, istream& is)
 {
   if (*c==']' || *c==')')  // The termlist must be empty.
   {
@@ -242,11 +254,11 @@ static aterm_list fparse_terms(int* c, istream &is)
   return reverse(list);
 }
 
-/**
+/*
  * Parse a quoted application.
  */
 
-static string fparse_quoted_string(int* c, istream &is)
+static string fparse_quoted_string(int* c, istream& is)
 {
   /* We need a buffer for printing and parsing */
   std::string function_string;
@@ -292,9 +304,9 @@ static string fparse_quoted_string(int* c, istream &is)
   return function_string;
 }
 
-/** Parse an unquoted string. */
+/* Parse an unquoted string. */
 
-static string fparse_unquoted_string(int* c, istream &is)
+static string fparse_unquoted_string(int* c, istream& is)
 {
   std::string function_string;
   if (*c != '(')
@@ -311,7 +323,7 @@ static string fparse_unquoted_string(int* c, istream &is)
   return function_string;
 }
 
-static aterm_appl parse_arguments(const string &f, int *c, istream &is)
+static aterm_appl parse_arguments(const string& f, int *c, istream& is)
 {
   /* Time to parse the arguments */
   aterm_list args;
@@ -337,11 +349,11 @@ static aterm_appl parse_arguments(const string &f, int *c, istream &is)
 
 
 
-/**
+/*
  * Parse a number.
  */
 
-static aterm fparse_num(int* c, istream &is)
+static aterm fparse_num(int* c, istream& is)
 {
   char num[32], *ptr = num, *numend = num + 30;
 
@@ -359,15 +371,15 @@ static aterm fparse_num(int* c, istream &is)
 
   {
     *ptr = '\0';
-    return aterm_int(static_cast<size_t>(atol(num)));
+    return aterm_int(static_cast<std::size_t>(atol(num)));
   }
 }
 
-/**
+/*
  * Parse a term from a stream.
  */
 
-static aterm fparse_term(int* c, istream &is)
+static aterm fparse_term(int* c, istream& is)
 {
   switch (*c)
   {
@@ -407,7 +419,7 @@ static aterm fparse_term(int* c, istream &is)
   }
 }
 
-/**
+/*
  * Read from a string.
  */
 
@@ -417,7 +429,7 @@ aterm read_term_from_string(const std::string& s)
   return  read_term_from_text_stream(ss);
 }
 
-aterm read_term_from_text_stream(istream &is)
+aterm read_term_from_text_stream(istream& is)
 {
   // Initialise global io (esp. for windows)
   aterm_io_init();
@@ -434,7 +446,7 @@ aterm read_term_from_text_stream(istream &is)
   {
     return fparse_term(&c, is);
   }
-  catch (atermpp::runtime_error &e)
+  catch (atermpp::runtime_error& e)
   {
     throw atermpp::runtime_error(e.what() + string("\n") + print_parse_error_position());
   }
@@ -449,7 +461,7 @@ bool is_binary_aterm_stream(std::istream& is)
   return (c == 0);
 }
 
-/**
+/*
  * Read an aterm from a file that could be binary or text.
  */
 bool is_binary_aterm_file(const std::string& filename)

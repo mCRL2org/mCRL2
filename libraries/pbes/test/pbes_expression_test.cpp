@@ -9,20 +9,18 @@
 /// \file pbes_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/join.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/pbes.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <iterator>
 #include <utility>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/data_expression.h"
-#include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/parse.h"
 
-using namespace std;
 using namespace mcrl2;
-using namespace mcrl2::data;
-using namespace mcrl2::core;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
@@ -39,24 +37,23 @@ std::string EXPRESSIONS =
 
 void print(std::set<pbes_expression> q)
 {
-  for (std::set<pbes_expression>::iterator i = q.begin(); i != q.end(); ++i)
+  for (const pbes_expression& expr: q)
   {
-    std::cout << pbes_system::pp(*i) << std::endl;
+    std::cout << pbes_system::pp(expr) << std::endl;
   }
 }
 
 void test_accessors()
 {
-  namespace p = mcrl2::pbes_system::pbes_expr;
   using namespace mcrl2::pbes_system::accessors;
 
   std::vector<pbes_expression> expressions = parse_pbes_expressions(EXPRESSIONS).first;
   pbes_expression x = expressions[0];
   pbes_expression y = expressions[1];
-  variable d(identifier_string("d"), sort_nat::nat());
-  variable_list v = make_list(d);
+  data::variable d(core::identifier_string("d"), data::sort_nat::nat());
+  data::variable_list v = { d };
   pbes_expression z = d;
-  propositional_variable_instantiation X(identifier_string("X"), atermpp::make_list<data::data_expression>(d));
+  propositional_variable_instantiation X(core::identifier_string("X"), { d });
 
   std::set<pbes_expression> q;
   q.insert(x);
@@ -67,91 +64,85 @@ void test_accessors()
     using namespace mcrl2::pbes_system::accessors;
 
     pbes_expression a, b, c;
-    variable_list w;
-    identifier_string s;
-    data_expression e;
+    data::variable_list w;
+    core::identifier_string s;
+    data::data_expression e;
     std::set<pbes_expression> q1;
 
-    e = val(z);
-
-    a = p::not_(x);
+    a = not_(x);
     b = arg(a);
     BOOST_CHECK(x == b);
 
-    a = p::and_(x, y);
+    a = and_(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = p::or_(x, y);
+    a = or_(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = p::imp(x, y);
+    a = imp(x, y);
     b = left(a);
     c = right(a);
     BOOST_CHECK(x == b);
     BOOST_CHECK(y == c);
 
-    a = p::forall(v, x);
+    a = forall(v, x);
     w = var(a);
     b = arg(a);
     BOOST_CHECK(v == w);
     BOOST_CHECK(x == b);
 
-    a = p::exists(v, x);
+    a = exists(v, x);
     w = var(a);
     b = arg(a);
     BOOST_CHECK(v == w);
     BOOST_CHECK(x == b);
 
     s = name(X);
-    BOOST_CHECK(s == identifier_string("X"));
+    BOOST_CHECK(s == core::identifier_string("X"));
 
-    data_expression_list f = param(X);
-    data_expression_list g = atermpp::make_list<data::data_expression>(d);
+    const data::data_expression_list& f = param(X);
+    data::data_expression_list g = { d };
     BOOST_CHECK(f == g);
 
     print(q);
 
-    a = p::join_or(q.begin(), q.end());
-    q1 = p::split_or(a);
+    a = join_or(q.begin(), q.end());
+    q1 = split_or(a);
     BOOST_CHECK(q == q1);
 
     print(q1);
 
-    a = p::join_and(q.begin(), q.end());
-    q1 = p::split_and(a);
+    a = join_and(q.begin(), q.end());
+    q1 = split_and(a);
     BOOST_CHECK(q == q1);
 
     print(q1);
   }
 
   {
-    using namespace pbes_expr_optimized;
-
     pbes_expression a;
-    identifier_string s;
-    data_expression e;
+    core::identifier_string s;
+    data::data_expression e;
     std::set<pbes_expression> q1;
 
-    e = val(z);
-
-    a = p::not_(x);
-    a = p::and_(x, y);
-    a = p::or_(x, y);
-    a = p::imp(x, y);
-    a = p::forall(v, x);
-    a = p::exists(v, x);
+    a = not_(x);
+    a = and_(x, y);
+    a = or_(x, y);
+    a = imp(x, y);
+    a = forall(v, x);
+    a = exists(v, x);
     s = name(X);
-    data_expression_list f = param(X);
-    a = p::join_or(q.begin(), q.end());
-    a = p::join_and(q.begin(), q.end());
-    q1 = p::split_or(a);
-    q1 = p::split_and(a);
+    param(X);
+    a = join_or(q.begin(), q.end());
+    a = join_and(q.begin(), q.end());
+    q1 = split_or(a);
+    q1 = split_and(a);
   }
 }
 
@@ -177,75 +168,75 @@ void test_term_traits()
 
   // and 1
   x = parse_pbes_expression("Y(1) && Y(2)", VARSPEC);
-  z = tr::left(x);
-  z = tr::right(x);
+  z = pbes_system::accessors::left(x);
+  z = pbes_system::accessors::right(x);
 
   // and 2
   x = parse_pbes_expression("val(b && c)", VARSPEC);
   if (tr::is_and(x))
   {
     BOOST_CHECK(false);
-    z = tr::left(x);
-    z = tr::right(x);
+    z = pbes_system::accessors::left(x);
+    z = pbes_system::accessors::right(x);
   }
 
   // or 1
   x = parse_pbes_expression("Y(1) || Y(2)", VARSPEC);
-  z = tr::left(x);
-  z = tr::right(x);
+  z = pbes_system::accessors::left(x);
+  z = pbes_system::accessors::right(x);
 
   // or 2
   x = parse_pbes_expression("val(b || c)", VARSPEC);
   if (tr::is_or(x))
   {
     BOOST_CHECK(false);
-    z = tr::left(x);
-    z = tr::right(x);
+    z = pbes_system::accessors::left(x);
+    z = pbes_system::accessors::right(x);
   }
 
   // imp 1
   x = parse_pbes_expression("Y(1) => !Y(2)", VARSPEC);
-  z = tr::left(x);
-  z = tr::right(x);
+  z = pbes_system::accessors::left(x);
+  z = pbes_system::accessors::right(x);
 
   // imp 2
   x = parse_pbes_expression("val(b => c)", VARSPEC);
   if (tr::is_imp(x))
   {
     BOOST_CHECK(false);
-    z = tr::left(x);
-    z = tr::right(x);
+    z = pbes_system::accessors::left(x);
+    z = pbes_system::accessors::right(x);
   }
 
   // not 1
   x = parse_pbes_expression("!(Y(1) || Y(2))", VARSPEC);
-  z = tr::arg(x);
+  z = pbes_system::accessors::arg(x);
 
   // not 2
   x = parse_pbes_expression("!val(n < 10)", VARSPEC);
-  z = tr::arg(x);
+  z = pbes_system::accessors::arg(x);
 
   // not 3
   x = parse_pbes_expression("val(!(n < 10))", VARSPEC);
   if (tr::is_not(x))
   {
     BOOST_CHECK(false);
-    z = tr::arg(x);
+    z = pbes_system::accessors::arg(x);
   }
 
   // prop var 1
   x = parse_pbes_expression("Y(1)", VARSPEC);
-  e = tr::param(x);
+  e = atermpp::down_cast<propositional_variable_instantiation>(x).parameters();
 
   // forall 1
   x = parse_pbes_expression("forall k:Nat.Y(k)", VARSPEC);
   v = tr::var(x);
-  z = tr::arg(x);
+  z = pbes_system::accessors::arg(x);
 
   // exists 1
   x = parse_pbes_expression("exists k:Nat.Y(k)", VARSPEC);
   v = tr::var(x);
-  z = tr::arg(x);
+  z = pbes_system::accessors::arg(x);
 
 }
 

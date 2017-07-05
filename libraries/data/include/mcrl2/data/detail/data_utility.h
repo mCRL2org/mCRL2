@@ -12,19 +12,19 @@
 #ifndef MCRL2_DATA_DETAIL_DATA_UTILITY_H
 #define MCRL2_DATA_DETAIL_DATA_UTILITY_H
 
+#include <functional>
 #include <algorithm>
 #include <iterator>
 #include <set>
 #include <utility>
-#include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/alias.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/container_sort.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/alias.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2
@@ -36,6 +36,18 @@ namespace data
 namespace detail
 {
 
+/// \brief Returns the sorts of a sequence of parameters.
+template <typename Container>
+data::sort_expression_list parameter_sorts(const Container& parameters)
+{
+  data::sort_expression_list sorts;
+  for (auto const& param: parameters)
+  {
+    sorts.push_front(param.sort());
+  }
+  return atermpp::reverse(sorts);
+}
+
 /// \brief Returns true if the names of the given variables are unique.
 /// \param variables A sequence of data variables
 /// \return True if the names of the given variables are unique.
@@ -44,15 +56,11 @@ inline
 bool unique_names(const VariableContainer& variables)
 {
   std::set<core::identifier_string> variable_names;
-  for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
+  for (auto const& var: variables)
   {
-    variable_names.insert(i->name());
+    variable_names.insert(var.name());
   }
-  if (variable_names.size() != variables.size())
-  {
-    return false;
-  }
-  return true;
+  return variable_names.size() == variables.size();
 }
 
 /// \brief Returns true if the left hand sides of assignments are contained in variables.
@@ -65,9 +73,9 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
 	using utilities::detail::contains;
 
   std::set<variable> v(variables.begin(), variables.end());
-  for (auto i = assignments.begin(); i != assignments.end(); ++i)
+  for (const assignment& a: assignments)
   {
-    if (!contains(v, i->lhs()))
+    if (!contains(v, a.lhs()))
     {
       return false;
     }
@@ -75,53 +83,30 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
   return true;
 }
 
-/// \brief Removes elements from the set s that satisfy predicate f.
-template <typename T, typename UnaryPredicate>
-void set_remove_if(std::set<T>& s, UnaryPredicate f)
-{
-  for (auto i = s.begin(); i != s.end();)
-  {
-    if (f(*i))
-    {
-      s.erase(i++);
-    }
-    else
-    {
-      ++i;
-    }
-  }
-}
-
 /// \brief Returns true if the domain sorts and the codomain sort of the given sort s are contained in sorts.
 /// \param s A sort expression
 /// \param sorts A set of sort expressions
 /// \return True if the sort is contained in <tt>sorts</tt>
 template <typename SortContainer>
-inline bool check_sort(sort_expression s, const SortContainer& sorts)
+inline bool check_sort(const sort_expression& s, const SortContainer& sorts)
 {
-  struct local
-  {
-    static bool is_not_function_sort(atermpp::aterm_appl t)
-    {
-      return is_sort_expression(t) && !is_function_sort(t);
-    }
-  };
+  using utilities::detail::remove_if;
 
   std::set<sort_expression> s_sorts = data::find_sort_expressions(s);
-  set_remove_if(s_sorts, boost::bind(&local::is_not_function_sort, _1));
-  for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
+  remove_if(s_sorts, [](const sort_expression& x) { return !is_function_sort(x); });
+  for (const sort_expression& sort: s_sorts)
   {
-    if (std::find(sorts.begin(), sorts.end(), *i) == sorts.end())
+    if (std::find(sorts.begin(), sorts.end(), sort) == sorts.end())
     {
       // sort *i is not well-typed, a system defined sort or an alias
-      if (!(is_system_defined(*i)) && is_alias(*i))
+      if (!(is_system_defined(sort)) && is_alias(sort))
       {
-        alias sort_alias(*i);
+        alias sort_alias(sort);
 
         if (std::find(sorts.begin(), sorts.end(), sort_alias.name()) == sorts.end())
         {
           // sort_alias.reference() is a basic, structured or container sort
-          sort_expression sort_reference(sort_alias.reference());
+          const sort_expression& sort_reference(sort_alias.reference());
 
           if (std::find(sorts.begin(), sorts.end(), sort_reference) == sorts.end())
           {
@@ -193,11 +178,11 @@ bool check_variable_sorts(const VariableContainer& variables, const SortContaine
 inline
 bool check_variable_names(variable_list const& variables, const std::set<core::identifier_string>& names)
 {
-	using utilities::detail::contains;
+  using utilities::detail::contains;
 
-  for (auto i = variables.begin(); i != variables.end(); ++i)
+  for (const variable& v: variables)
   {
-    if (contains(names, i->name()))
+    if (contains(names, v.name()))
     {
       return false;
     }

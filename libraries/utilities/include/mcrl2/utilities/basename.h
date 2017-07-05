@@ -13,9 +13,10 @@
 #define MCRL2_BASENAME_H
 
 
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <iostream>
+#include "mcrl2/utilities/exception.h"
 
 #ifdef __linux
 #include <unistd.h>
@@ -23,11 +24,10 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#endif //_WIN32
+#endif
 
 #ifdef __APPLE__
-#include <limits.h>		/* PATH_MAX */
-#include <mach-o/dyld.h>/* _NSGetExecutablePath */
+#include <mach-o/dyld.h>
 #endif
 
 namespace mcrl2
@@ -38,7 +38,7 @@ namespace utilities
 
     /// \brief Returns the basename of a tool.
     /// \return A string
-    static std::string get_executable_basename()
+    inline std::string get_executable_basename()
     {
       std::string path;
 #ifdef __linux
@@ -61,14 +61,18 @@ namespace utilities
 #endif // __linux
 
 #ifdef __APPLE__
-	  char pathbuf[PATH_MAX];
-	  uint32_t  bufsize = sizeof(pathbuf);
-	  _NSGetExecutablePath( pathbuf, &bufsize);
- 
+      char* pathbuf = NULL;
+      uint32_t bufsize = 0;
+      _NSGetExecutablePath(pathbuf, &bufsize);
+      pathbuf = new char[bufsize];
+      if (_NSGetExecutablePath(pathbuf, &bufsize) != 0)
+      {
+        throw mcrl2::runtime_error("Could not retrieve path to main executable (_NSGetExecutablePath returned nonzero).");
+      }
       path = pathbuf;
+      delete[] pathbuf;
       std::string::size_type t = path.find_last_of("/");
       path = path.substr(0,t);
-
 #endif //__APPLE__
 
 #ifdef _WIN32
@@ -80,8 +84,8 @@ namespace utilities
 #endif // _WIN32
 
       return path;
-    };
-};
+    }
+}
 
 }
 

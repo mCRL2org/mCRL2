@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#
+# mCRL2 bundle startup script (version @MCRL2_VERSION@).
+#
+# Starts mcrl2-gui if the application is started without any arguments. If the name of a
+# graphical tool is passed as the first argument, then that tool is started instead:
+#
+#   open mCRL2.app --args ltsgraph bla.aut
+#
+# will start "ltsgraph bla.aut" rather than mcrl2-gui. Commandline tools cannot be started
+# in this way, because the standard in/output are redirected by OSX. Starting commandline
+# applications this way can therefore be dangerous, as the user cannot influence the
+# behaviour of such a tool after it is started.
+
+if [ -z $1 ]; then
+  $(dirname $0)/../bin/mcrl2-gui
+else
+  if [[ "@MCRL2_QT_APPS@;" =~ "$1;" && !("$1" =~ ";") ]]; then
+    $(dirname $0)/../bin/$1 ${@:2}
+  fi
+fi

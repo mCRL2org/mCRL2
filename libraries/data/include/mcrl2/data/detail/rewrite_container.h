@@ -12,8 +12,8 @@
 #ifndef MCRL2_DATA_DETAIL_REWRITE_CONTAINER_H
 #define MCRL2_DATA_DETAIL_REWRITE_CONTAINER_H
 
-#include <vector>
 #include "mcrl2/data/rewriter.h"
+#include <vector>
 
 namespace mcrl2
 {

@@ -14,8 +14,8 @@
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/add_binding.h"
+#include "mcrl2/modal_formula/traverser.h"
 
 namespace mcrl2
 {
@@ -31,7 +31,7 @@ namespace action_formulas
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_all_variables_traverser<action_formulas::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<action_formulas::variable_traverser>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -52,7 +52,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<action_formulas::data_expression_traverser, action_formulas::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<action_formulas::data_expression_traverser, action_formulas::add_data_variable_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -63,7 +63,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<action_formulas::data_expression_traverser, action_formulas::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<action_formulas::data_expression_traverser, action_formulas::add_data_variable_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -96,7 +96,7 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
 {
-  data::detail::make_find_identifiers_traverser<action_formulas::identifier_string_traverser>(o)(x);
+  data::detail::make_find_identifiers_traverser<action_formulas::identifier_string_traverser>(o).apply(x);
 }
 
 /// \brief Returns all identifiers that occur in an object
@@ -117,7 +117,7 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_sort_expressions_traverser<action_formulas::sort_expression_traverser>(o)(x);
+  data::detail::make_find_sort_expressions_traverser<action_formulas::sort_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all sort expressions that occur in an object
@@ -138,7 +138,7 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
 {
-  data::detail::make_find_function_symbols_traverser<action_formulas::data_expression_traverser>(o)(x);
+  data::detail::make_find_function_symbols_traverser<action_formulas::data_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all function symbols that occur in an object
@@ -166,7 +166,7 @@ namespace regular_formulas
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_all_variables_traverser<regular_formulas::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<regular_formulas::variable_traverser>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -187,7 +187,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<regular_formulas::data_expression_traverser, regular_formulas::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<regular_formulas::data_expression_traverser, regular_formulas::add_data_variable_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -198,7 +198,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<regular_formulas::data_expression_traverser, regular_formulas::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<regular_formulas::data_expression_traverser, regular_formulas::add_data_variable_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -231,7 +231,7 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
 {
-  data::detail::make_find_identifiers_traverser<regular_formulas::identifier_string_traverser>(o)(x);
+  data::detail::make_find_identifiers_traverser<regular_formulas::identifier_string_traverser>(o).apply(x);
 }
 
 /// \brief Returns all identifiers that occur in an object
@@ -252,7 +252,7 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_sort_expressions_traverser<regular_formulas::sort_expression_traverser>(o)(x);
+  data::detail::make_find_sort_expressions_traverser<regular_formulas::sort_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all sort expressions that occur in an object
@@ -273,7 +273,7 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
 {
-  data::detail::make_find_function_symbols_traverser<regular_formulas::data_expression_traverser>(o)(x);
+  data::detail::make_find_function_symbols_traverser<regular_formulas::data_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all function symbols that occur in an object
@@ -301,7 +301,7 @@ namespace state_formulas
 template <typename T, typename OutputIterator>
 void find_all_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_all_variables_traverser<state_formulas::variable_traverser>(o)(x);
+  data::detail::make_find_all_variables_traverser<state_formulas::variable_traverser>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -322,7 +322,7 @@ std::set<data::variable> find_all_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_variables(const T& x, OutputIterator o)
 {
-  data::detail::make_find_free_variables_traverser<state_formulas::data_expression_traverser, state_formulas::add_data_variable_binding>(o)(x);
+  data::detail::make_find_free_variables_traverser<state_formulas::data_expression_traverser, state_formulas::add_data_variable_binding>(o).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -333,7 +333,7 @@ void find_free_variables(const T& x, OutputIterator o)
 template <typename T, typename OutputIterator, typename VariableContainer>
 void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
 {
-  data::detail::make_find_free_variables_traverser<state_formulas::data_expression_traverser, state_formulas::add_data_variable_binding>(o, bound)(x);
+  data::detail::make_find_free_variables_traverser<state_formulas::data_expression_traverser, state_formulas::add_data_variable_binding>(o, bound).apply(x);
 }
 
 /// \brief Returns all variables that occur in an object
@@ -366,7 +366,7 @@ std::set<data::variable> find_free_variables_with_bound(const T& x, VariableCont
 template <typename T, typename OutputIterator>
 void find_identifiers(const T& x, OutputIterator o)
 {
-  data::detail::make_find_identifiers_traverser<state_formulas::identifier_string_traverser>(o)(x);
+  data::detail::make_find_identifiers_traverser<state_formulas::identifier_string_traverser>(o).apply(x);
 }
 
 /// \brief Returns all identifiers that occur in an object
@@ -387,7 +387,7 @@ std::set<core::identifier_string> find_identifiers(const T& x)
 template <typename T, typename OutputIterator>
 void find_sort_expressions(const T& x, OutputIterator o)
 {
-  data::detail::make_find_sort_expressions_traverser<state_formulas::sort_expression_traverser>(o)(x);
+  data::detail::make_find_sort_expressions_traverser<state_formulas::sort_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all sort expressions that occur in an object
@@ -408,7 +408,7 @@ std::set<data::sort_expression> find_sort_expressions(const T& x)
 template <typename T, typename OutputIterator>
 void find_function_symbols(const T& x, OutputIterator o)
 {
-  data::detail::make_find_function_symbols_traverser<state_formulas::data_expression_traverser>(o)(x);
+  data::detail::make_find_function_symbols_traverser<state_formulas::data_expression_traverser>(o).apply(x);
 }
 
 /// \brief Returns all function symbols that occur in an object
@@ -425,37 +425,17 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 
 namespace detail {
 
-/// \cond INTERNAL_DOCS
-struct nil_traverser: public state_formulas::regular_formula_traverser<nil_traverser>
-{
-  typedef state_formulas::regular_formula_traverser<nil_traverser> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  bool result;
-
-  nil_traverser()
-    : result(false)
-  {}
-
-  void operator()(const regular_formulas::nil&)
-  {
-    result = true;
-  }
-};
-
 // collects state variable names in a set
 struct state_variable_name_traverser: public state_formulas::state_formula_traverser<state_variable_name_traverser>
 {
   typedef state_formulas::state_formula_traverser<state_variable_name_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::set<core::identifier_string> names;
 
-  void operator()(const state_formulas::variable& x)
+  void apply(const state_formulas::variable& x)
   {
     names.insert(x.name());
   }
@@ -467,7 +447,7 @@ struct find_state_variables_traverser: public Traverser<find_state_variables_tra
   typedef Traverser<find_state_variables_traverser<Traverser, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   OutputIterator out;
 
@@ -475,14 +455,10 @@ struct find_state_variables_traverser: public Traverser<find_state_variables_tra
     : out(out_)
   {}
 
-  void operator()(const variable& v)
+  void apply(const variable& v)
   {
     *out = v;
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, class OutputIterator>
@@ -498,7 +474,7 @@ struct find_free_state_variables_traverser: public Binder<Traverser, find_free_s
   typedef Binder<Traverser, find_free_state_variables_traverser<Traverser, Binder, OutputIterator> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::is_bound;
   using super::bound_variables;
   using super::increase_bind_count;
@@ -518,17 +494,13 @@ struct find_free_state_variables_traverser: public Binder<Traverser, find_free_s
   }
 */
 
-  void operator()(const variable& v)
+  void apply(const variable& v)
   {
     if (!is_bound(v.name()))
     {
       *out = v;
     }
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Traverser, template <template <class> class, class> class Binder, class OutputIterator>
@@ -548,23 +520,13 @@ make_find_free_state_variables_traverser(OutputIterator out, const VariableConta
 
 } // namespace detail
 
-/// \brief Returns true if the regular expression nil occurs in the object x
-/// \param[in] x
-template <typename T>
-bool find_nil(const T& x)
-{
-  detail::nil_traverser f;
-  f(x);
-  return f.result;
-}
-
 /// \brief Returns the names of the state variables that occur in x.
 /// \param[in] x A state formula
 inline
 std::set<core::identifier_string> find_state_variable_names(const state_formula& x)
 {
   detail::state_variable_name_traverser f;
-  f(x);
+  f.apply(x);
   return f.names;
 }
 
@@ -575,7 +537,7 @@ std::set<core::identifier_string> find_state_variable_names(const state_formula&
 template <typename T, typename OutputIterator>
 void find_state_variables(const T& x, OutputIterator o)
 {
-  state_formulas::detail::make_find_state_variables_traverser<state_formulas::state_variable_traverser>(o)(x);
+  state_formulas::detail::make_find_state_variables_traverser<state_formulas::state_variable_traverser>(o).apply(x);
 }
 
 /// \brief Returns all state variables that occur in an object
@@ -596,7 +558,7 @@ std::set<state_formulas::variable> find_state_variables(const T& x)
 template <typename T, typename OutputIterator>
 void find_free_state_variables(const T& x, OutputIterator o)
 {
-  state_formulas::detail::make_find_free_state_variables_traverser<state_formulas::state_variable_traverser, state_formulas::add_state_variable_binding>(o)(x);
+  state_formulas::detail::make_find_free_state_variables_traverser<state_formulas::state_variable_traverser, state_formulas::add_state_variable_binding>(o).apply(x);
 }
 
 /// \brief Returns all free state variables that occur in an object

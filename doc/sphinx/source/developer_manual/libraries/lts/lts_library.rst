@@ -58,7 +58,7 @@ information is extracted.
 .. code-block:: c++
 
   #include <string>
-  #include <mcrl2/lts/lts.h>
+  #include "mcrl2/lts/lts.h"
 
   void make_color_lts()
   {
@@ -202,9 +202,14 @@ have been implemented are:
 
   * :cpp:member:`lts_eq_none`:            No reduction
   * :cpp:member:`lts_eq_bisim`:            Strong bisimulation equivalence 
-  * :cpp:member:`lts_eq_branching_bisim`:  Branching bisimulation equivalence
-  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim`: Divergence preserving branching bisimulation equivalence 
-  * :cpp:member:`lts_eq_sim`:              Strong simulation equivalence 
+  * :cpp:member:`lts_eq_branching_bisim`:  Branching bisimulation equivalence, using the traditional O(mn) algorithm
+  * :cpp:member:`lts_eq_branching_bisim_gw`: Branching bisimulation equivalence, using an almost-O(m log n) algorithm [TACAS 2016]
+  * :cpp:member:`lts_eq_branching_bisim_gjkw`: Branching bisimulation equivalence, using an O(m log n) algorithm [Groote/Jansen/Keiren/Wijs, publication planned in 2017]
+  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim`: Divergence preserving branching bisimulation equivalence, using the traditional O(mn) algorithm
+  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_gw`: Divergence preserving branching bisimulation equivalence, using an almost-O(m log n) algorithm [TACAS 2016]
+  * :cpp:member:`lts_eq_divergence_preserving_branching_bisim_gjkw`: Divergence preserving branching bisimulation equivalence, using an O(m log n) algorithm [Groote/Jansen/Keiren/Wijs, publication planned in 2017]
+  * :cpp:member:`lts_eq_sim`:              Strong simulation equivalence
+  * :cpp:member:`lts_eq_ready_sim`:        Strong ready simulation equivalence     
   * :cpp:member:`lts_eq_trace`:            Strong trace equivalence
   * :cpp:member:`lts_eq_weak_trace`:       Weak trace equivalence
   * :cpp:member:`lts_eq_isomorph`:         Isomorphism.
@@ -227,7 +232,8 @@ using the equivalence options mentioned above. But it is also possible to
 use the following preorders. 
 
   * :cpp:member:`lts_pre_none`:             No preorder 
-  * :cpp:member:`lts_pre_sim`:              Strong simulation preorder 
+  * :cpp:member:`lts_pre_sim`:              Strong simulation preorder
+  * :cpp:member:`lts_pre_ready_sim`:        Strong ready simulation preorder     
   * :cpp:member:`lts_pre_trace`:            Strong trace preorder 
   * :cpp:member:`lts_pre_weak_trace`:       Weak trace preorder 
 

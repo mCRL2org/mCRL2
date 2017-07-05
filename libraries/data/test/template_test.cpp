@@ -9,8 +9,8 @@
 /// \file template_test.cpp
 /// \brief Template tests.
 
-#include <iostream>
 #include <boost/test/minimal.hpp>
+#include <iostream>
 
 template <typename Derived>
 class data_traverser

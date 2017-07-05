@@ -34,7 +34,7 @@ std::size_t enumerator_variable_limit<T>::max_enumerator_variables = 1000;
 inline
 void set_enumerator_variable_limit(std::size_t size)
 {
-  enumerator_variable_limit<size_t>::max_enumerator_variables = size;
+  enumerator_variable_limit<std::size_t>::max_enumerator_variables = size;
 }
 
 inline

@@ -12,18 +12,18 @@
 #ifndef MCRL2_PROCESS_PROCESS_EXPRESSION_H
 #define MCRL2_PROCESS_PROCESS_EXPRESSION_H
 
-#include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/precedence.h"
+#include "mcrl2/data/untyped_data_parameter.h"
 #include "mcrl2/process/action_label.h"
+#include "mcrl2/process/communication_expression.h"
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
-#include "mcrl2/process/communication_expression.h"
-#include "mcrl2/process/untyped_action.h"
+#include <set>
 
 namespace mcrl2
 {
@@ -51,6 +51,11 @@ class process_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_ProcExpr(*this));
     }
+
+    /// \brief Constructor.
+    process_expression(const data::untyped_data_parameter& x)
+      : atermpp::aterm_appl(x)
+    {}
 };
 
 /// \brief list of process_expressions
@@ -80,7 +85,7 @@ inline bool is_bounded_init(const atermpp::aterm_appl& x);
 inline bool is_merge(const atermpp::aterm_appl& x);
 inline bool is_left_merge(const atermpp::aterm_appl& x);
 inline bool is_choice(const atermpp::aterm_appl& x);
-inline bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x);
+inline bool is_stochastic_operator(const atermpp::aterm_appl& x);
 inline bool is_untyped_process_assignment(const atermpp::aterm_appl& x);
 
 /// \brief Test for a process_expression expression
@@ -109,8 +114,9 @@ bool is_process_expression(const atermpp::aterm_appl& x)
          process::is_merge(x) ||
          process::is_left_merge(x) ||
          process::is_choice(x) ||
-         process::is_untyped_parameter_identifier(x) ||
-         process::is_untyped_process_assignment(x);
+         process::is_stochastic_operator(x) ||
+         process::is_untyped_process_assignment(x) ||
+         data::is_untyped_data_parameter(x);
 }
 
 // prototype declaration
@@ -118,6 +124,7 @@ std::string pp(const process_expression& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_expression& x)
@@ -185,6 +192,7 @@ std::string pp(const action& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const action& x)
@@ -246,6 +254,7 @@ std::string pp(const process_instance& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_instance& x)
@@ -307,6 +316,7 @@ std::string pp(const process_instance_assignment& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const process_instance_assignment& x)
@@ -353,6 +363,7 @@ std::string pp(const delta& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const delta& x)
@@ -399,6 +410,7 @@ std::string pp(const tau& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const tau& x)
@@ -431,11 +443,11 @@ class sum: public process_expression
     }
 
     /// \brief Constructor.
-    sum(const data::variable_list& bound_variables, const process_expression& operand)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), bound_variables, operand))
+    sum(const data::variable_list& variables, const process_expression& operand)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), variables, operand))
     {}
 
-    const data::variable_list& bound_variables() const
+    const data::variable_list& variables() const
     {
       return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
@@ -460,6 +472,7 @@ std::string pp(const sum& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const sum& x)
@@ -521,6 +534,7 @@ std::string pp(const block& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const block& x)
@@ -582,6 +596,7 @@ std::string pp(const hide& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const hide& x)
@@ -643,6 +658,7 @@ std::string pp(const rename& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const rename& x)
@@ -704,6 +720,7 @@ std::string pp(const comm& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const comm& x)
@@ -765,6 +782,7 @@ std::string pp(const allow& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const allow& x)
@@ -826,6 +844,7 @@ std::string pp(const sync& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const sync& x)
@@ -887,6 +906,7 @@ std::string pp(const at& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const at& x)
@@ -948,6 +968,7 @@ std::string pp(const seq& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const seq& x)
@@ -1009,6 +1030,7 @@ std::string pp(const if_then& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const if_then& x)
@@ -1075,6 +1097,7 @@ std::string pp(const if_then_else& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const if_then_else& x)
@@ -1136,6 +1159,7 @@ std::string pp(const bounded_init& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const bounded_init& x)
@@ -1197,6 +1221,7 @@ std::string pp(const merge& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const merge& x)
@@ -1258,6 +1283,7 @@ std::string pp(const left_merge& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const left_merge& x)
@@ -1319,6 +1345,7 @@ std::string pp(const choice& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const choice& x)
@@ -1333,67 +1360,68 @@ inline void swap(choice& t1, choice& t2)
 }
 
 
-/// \brief An untyped parameter identifier
-class untyped_parameter_identifier: public process_expression
+/// \brief The distribution operator
+class stochastic_operator: public process_expression
 {
   public:
     /// \brief Default constructor.
-    untyped_parameter_identifier()
-      : process_expression(core::detail::default_values::UntypedParamId)
+    stochastic_operator()
+      : process_expression(core::detail::default_values::StochasticOperator)
     {}
 
     /// \brief Constructor.
     /// \param term A term
-    explicit untyped_parameter_identifier(const atermpp::aterm& term)
+    explicit stochastic_operator(const atermpp::aterm& term)
       : process_expression(term)
     {
-      assert(core::detail::check_term_UntypedParamId(*this));
+      assert(core::detail::check_term_StochasticOperator(*this));
     }
 
     /// \brief Constructor.
-    untyped_parameter_identifier(const core::identifier_string& name, const data::data_expression_list& arguments)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedParamId(), name, arguments))
+    stochastic_operator(const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand)
+      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_StochasticOperator(), variables, distribution, operand))
     {}
 
-    /// \brief Constructor.
-    untyped_parameter_identifier(const std::string& name, const data::data_expression_list& arguments)
-      : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedParamId(), core::identifier_string(name), arguments))
-    {}
-
-    const core::identifier_string& name() const
+    const data::variable_list& variables() const
     {
-      return atermpp::down_cast<core::identifier_string>((*this)[0]);
+      return atermpp::down_cast<data::variable_list>((*this)[0]);
     }
 
-    const data::data_expression_list& arguments() const
+    const data::data_expression& distribution() const
     {
-      return atermpp::down_cast<data::data_expression_list>((*this)[1]);
+      return atermpp::down_cast<data::data_expression>((*this)[1]);
+    }
+
+    const process_expression& operand() const
+    {
+      return atermpp::down_cast<process_expression>((*this)[2]);
     }
 };
 
-/// \brief Test for a untyped_parameter_identifier expression
+/// \brief Test for a stochastic_operator expression
 /// \param x A term
-/// \return True if \a x is a untyped_parameter_identifier expression
+/// \return True if \a x is a stochastic_operator expression
 inline
-bool is_untyped_parameter_identifier(const atermpp::aterm_appl& x)
+bool is_stochastic_operator(const atermpp::aterm_appl& x)
 {
-  return x.function() == core::detail::function_symbols::UntypedParamId;
+  return x.function() == core::detail::function_symbols::StochasticOperator;
 }
 
 // prototype declaration
-std::string pp(const untyped_parameter_identifier& x);
+std::string pp(const stochastic_operator& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
-std::ostream& operator<<(std::ostream& out, const untyped_parameter_identifier& x)
+std::ostream& operator<<(std::ostream& out, const stochastic_operator& x)
 {
   return out << process::pp(x);
 }
 
 /// \brief swap overload
-inline void swap(untyped_parameter_identifier& t1, untyped_parameter_identifier& t2)
+inline void swap(stochastic_operator& t1, stochastic_operator& t2)
 {
   t1.swap(t2);
 }
@@ -1451,6 +1479,7 @@ std::string pp(const untyped_process_assignment& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const untyped_process_assignment& x)
@@ -1469,40 +1498,43 @@ inline void swap(untyped_process_assignment& t1, untyped_process_assignment& t2)
 // The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
 
 /// \brief Defines a precedence relation on process expressions
-inline int left_precedence(const choice&)       { return 1; }
-inline int left_precedence(const sum&)          { return 2; }
-inline int left_precedence(const merge&)        { return 3; }
-inline int left_precedence(const left_merge&)   { return 4; }
-inline int left_precedence(const if_then&)      { return 5; }
-inline int left_precedence(const if_then_else&) { return 5; }
-inline int left_precedence(const bounded_init&) { return 6; }
-inline int left_precedence(const seq&)          { return 7; }
-inline int left_precedence(const at&)           { return 8; }
-inline int left_precedence(const sync&)         { return 9; }
+inline int left_precedence(const choice&)              { return 1; }
+inline int left_precedence(const sum&)                 { return 2; }
+inline int left_precedence(const stochastic_operator&) { return 2; }
+inline int left_precedence(const merge&)               { return 3; }
+inline int left_precedence(const left_merge&)          { return 4; }
+inline int left_precedence(const if_then&)             { return 5; }
+inline int left_precedence(const if_then_else&)        { return 5; }
+inline int left_precedence(const bounded_init&)        { return 6; }
+inline int left_precedence(const seq&)                 { return 7; }
+inline int left_precedence(const at&)                  { return 8; }
+inline int left_precedence(const sync&)                { return 9; }
 inline int left_precedence(const process_expression& x)
 {
-       if (is_choice(x))       { return left_precedence(static_cast<const choice&>(x)); }
-  else if (is_sum(x))          { return left_precedence(static_cast<const sum&>(x)); }
-  else if (is_merge(x))        { return left_precedence(static_cast<const merge&>(x)); }
-  else if (is_left_merge(x))   { return left_precedence(static_cast<const left_merge>(x)); }
-  else if (is_if_then(x))      { return left_precedence(static_cast<const if_then&>(x)); }
-  else if (is_if_then_else(x)) { return left_precedence(static_cast<const if_then_else&>(x)); }
-  else if (is_bounded_init(x)) { return left_precedence(static_cast<const bounded_init&>(x)); }
-  else if (is_seq(x))          { return left_precedence(static_cast<const seq&>(x)); }
-  else if (is_at(x))           { return left_precedence(static_cast<const at&>(x)); }
-  else if (is_sync(x))         { return left_precedence(static_cast<const sync&>(x)); }
+       if (is_choice(x))              { return left_precedence(static_cast<const choice&>(x)); }
+  else if (is_sum(x))                 { return left_precedence(static_cast<const sum&>(x)); }
+  else if (is_stochastic_operator(x)) { return left_precedence(static_cast<const stochastic_operator&>(x)); }
+  else if (is_merge(x))               { return left_precedence(static_cast<const merge&>(x)); }
+  else if (is_left_merge(x))          { return left_precedence(static_cast<const left_merge>(x)); }
+  else if (is_if_then(x))             { return left_precedence(static_cast<const if_then&>(x)); }
+  else if (is_if_then_else(x))        { return left_precedence(static_cast<const if_then_else&>(x)); }
+  else if (is_bounded_init(x))        { return left_precedence(static_cast<const bounded_init&>(x)); }
+  else if (is_seq(x))                 { return left_precedence(static_cast<const seq&>(x)); }
+  else if (is_at(x))                  { return left_precedence(static_cast<const at&>(x)); }
+  else if (is_sync(x))                { return left_precedence(static_cast<const sync&>(x)); }
   return core::detail::precedences::max_precedence;
 }
 
 inline int right_precedence(const process_expression& x) { return left_precedence(x); }
 
-inline const process_expression& unary_operand(const sum& x)         { return x.operand(); }
-inline const process_expression& unary_operand(const block& x)       { return x.operand(); }
-inline const process_expression& unary_operand(const hide& x)        { return x.operand(); }
-inline const process_expression& unary_operand(const rename& x)      { return x.operand(); }
-inline const process_expression& unary_operand(const comm& x)        { return x.operand(); }
-inline const process_expression& unary_operand(const allow& x)       { return x.operand(); }
-inline const process_expression& unary_operand(const at& x)          { return x.operand(); }
+inline const process_expression& unary_operand(const sum& x)                 { return x.operand(); }
+inline const process_expression& unary_operand(const stochastic_operator& x) { return x.operand(); }
+inline const process_expression& unary_operand(const block& x)               { return x.operand(); }
+inline const process_expression& unary_operand(const hide& x)                { return x.operand(); }
+inline const process_expression& unary_operand(const rename& x)              { return x.operand(); }
+inline const process_expression& unary_operand(const comm& x)                { return x.operand(); }
+inline const process_expression& unary_operand(const allow& x)               { return x.operand(); }
+inline const process_expression& unary_operand(const at& x)                  { return x.operand(); }
 
 inline const process_expression& binary_left(const sync& x)          { return x.left(); }
 inline const process_expression& binary_right(const sync& x)         { return x.right(); }
@@ -1523,7 +1555,7 @@ std::string pp(const process_expression_vector& x);
 std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 std::string pp(const action_list& x);
 std::string pp(const action_vector& x);
-action normalize_sorts(const action& x, const data::data_specification& dataspec);
+action normalize_sorts(const action& x, const data::sort_specification& sortspec);
 action translate_user_notation(const action& x);
 std::set<data::variable> find_all_variables(const action& x);
 std::set<data::variable> find_free_variables(const action& x);
@@ -1549,57 +1581,7 @@ bool equal_signatures(const action& a, const action& b)
     return false;
   }
 
-  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
-}
-
-/// \brief Represents the name of a multi action
-typedef std::multiset<core::identifier_string> multi_action_name;
-
-/// \brief Represents a set of multi action names
-typedef std::set<multi_action_name> multi_action_name_set;
-
-/// \brief Represents a set of action names
-typedef std::set<core::identifier_string> action_name_set;
-
-/// \brief Pretty print function for a multi action name
-inline
-std::string pp(const multi_action_name& x)
-{
-  std::ostringstream out;
-  if (x.empty())
-  {
-    out << "tau";
-  }
-  else
-  {
-    for (auto i = x.begin(); i != x.end(); ++i)
-    {
-      if (i != x.begin())
-      {
-        out << " | ";
-      }
-      out << core::pp(*i);
-    }
-  }
-  return out.str();
-}
-
-/// \brief Pretty print function for a set of multi action names
-inline
-std::string pp(const multi_action_name_set& A)
-{
-  std::ostringstream out;
-  out << "{";
-  for (auto i = A.begin(); i != A.end(); ++i)
-  {
-    if (i != A.begin())
-    {
-      out << ", ";
-    }
-    out << pp(*i);
-  }
-  out << "}";
-  return out.str();
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), [](const data::data_expression& x, const data::data_expression& y) { return x.sort() == y.sort(); });
 }
 
 } // namespace process
@@ -1615,12 +1597,12 @@ struct hash<mcrl2::process::action>
 {
   std::size_t operator()(const mcrl2::process::action& t) const
   {
-    return std::hash<atermpp::aterm>()(t); 
+    return std::hash<atermpp::aterm>()(t);
   }
 
 };
 
 
-} // namespace std;
+} // namespace std
 
 #endif // MCRL2_PROCESS_PROCESS_EXPRESSION_H

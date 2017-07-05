@@ -1,0 +1,54 @@
+set(MCRL2_TOOLS
+  besinfo
+  bespp
+  diagraphica
+  lps2lts
+  lps2pbes
+  lpsactionrename
+  lpsbinary
+  lpsconfcheck
+  lpsconstelm
+  lpsinfo
+  lpsinvelm
+  lpsparelm
+  lpsparunfold
+  lpspp
+  lpsrewr
+  lpssim
+  lpssumelm
+  lpssuminst
+  lpsuntime
+  lpsxsim
+  lts2lps
+  lts2pbes
+  ltscompare
+  ltsconvert
+  ltsgraph
+  ltsinfo
+  ltspbisim
+  ltsview
+  mcrl2-gui
+  mcrl22lps
+  mcrl2i
+  mcrl2xi
+  pbes2bes
+  pbes2bool
+  pbesconstelm
+  pbesinfo
+  pbesparelm
+  pbespgsolve
+  pbespp
+  pbesrewr
+  pbesstategraph
+  tracepp
+  txt2lps
+  txt2pbes
+  bessolve
+  txt2bes
+  pbesinst
+  lpsbisim2pbes
+)
+
+foreach(TOOL ${MCRL2_TOOLS})
+  add_subdirectory(${TOOL})
+endforeach()

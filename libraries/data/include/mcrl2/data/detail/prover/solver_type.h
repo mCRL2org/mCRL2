@@ -12,9 +12,9 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_SOLVER_TYPE_H
 #define MCRL2_DATA_DETAIL_PROVER_SOLVER_TYPE_H
 
+#include "mcrl2/utilities/exception.h"
 #include <iostream>
 #include <string>
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
 {
@@ -23,10 +23,11 @@ namespace data
 namespace detail
 {
 
-/// \brief The enumaration type smt_solver_type enumerates all available SMT solvers.
+/// \brief The enumeration type smt_solver_type enumerates all available SMT solvers.
 enum smt_solver_type
 {
-  solver_type_cvc
+  solver_type_cvc,
+  solver_type_z3
 };
 
 /// \brief standard conversion from string to solver type
@@ -34,6 +35,7 @@ inline
 smt_solver_type parse_solver_type(const std::string& s)
 {
   if(s == "cvc") return solver_type_cvc;
+  else if(s == "z3") return solver_type_z3;
   else throw mcrl2::runtime_error("unknown solver type " + s);
 }
 
@@ -61,6 +63,7 @@ std::string print_solver_type(const smt_solver_type s)
   switch(s)
   {
     case solver_type_cvc: return "cvc";
+    case solver_type_z3: return "z3";
     default: throw mcrl2::runtime_error("unknown solver type");
   }
 }
@@ -79,6 +82,7 @@ std::string description(const smt_solver_type s)
   switch(s)
   {
     case solver_type_cvc: return "the SMT solver CVC3";
+    case solver_type_z3: return "the SMT solver Z3";
     default: throw mcrl2::runtime_error("unknown solver type");
   }
 }

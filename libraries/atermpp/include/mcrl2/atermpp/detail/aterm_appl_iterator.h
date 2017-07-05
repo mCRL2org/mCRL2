@@ -26,7 +26,7 @@ class term_appl_iterator
     friend class term_appl;
 
   protected:
-    const Term *m_term;
+    const Term* m_term;
     
     /// \brief Constructor.
     /// \param t A pointer of an array of terms over which the iterator will range.
@@ -128,6 +128,22 @@ class term_appl_iterator
     {
       m_term-=n;
       return *this;
+    }
+
+    /// \brief Increase by a constant value.
+    /// \return The iterator incremented by n.
+    term_appl_iterator operator+(ptrdiff_t n) const
+    {
+      term_appl_iterator temp=*this;
+      return temp.m_term+n;
+    }
+
+    /// \brief Decrease by a constant value.
+    /// \return The iterator decremented by n.
+    term_appl_iterator operator-(ptrdiff_t n) const
+    {
+      term_appl_iterator temp=*this;
+      return temp.m_term-n;
     }
 
     /// \brief The negative distance from this to the other iterator.

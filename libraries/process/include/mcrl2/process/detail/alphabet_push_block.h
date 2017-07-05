@@ -12,18 +12,28 @@
 #ifndef MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H
 #define MCRL2_PROCESS_DETAIL_ALPHABET_PUSH_BLOCK_H
 
-#include <map>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/process/detail/alphabet_push_allow.h"
 #include "mcrl2/process/utility.h"
 #include "mcrl2/utilities/detail/container_utility.h"
+#include <map>
 
 namespace mcrl2 {
 
 namespace process {
 
-typedef std::map<process_instance, std::vector<std::pair<std::set<core::identifier_string>, process_instance> > > push_block_map;
+struct push_block_cache
+{
+  std::map<process_instance, std::vector<std::pair<std::set<core::identifier_string>, process_instance> > > equation_cache;
+
+  // Caches the alphabet of pCRL equations
+  std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache;
+
+  push_block_cache(std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache_)
+    : pcrl_equation_cache(pcrl_equation_cache_)
+  {}
+};
 
 namespace block_operations {
 
@@ -49,19 +59,19 @@ std::set<core::identifier_string> set_difference(const std::set<core::identifier
 inline
 std::set<core::identifier_string> rename_inverse(const rename_expression_list& R, const std::set<core::identifier_string>& B)
 {
-  process::detail::rename_inverse_map Rinverse = process::detail::rename_inverse(R);
+  alphabet_operations::rename_inverse_map Rinverse = alphabet_operations::rename_inverse(R);
   std::set<core::identifier_string> result;
-  for (std::set<core::identifier_string>::const_iterator i = B.begin(); i != B.end(); ++i)
+  for (const core::identifier_string& i: B)
   {
-    auto j = Rinverse.find(*i);
+    auto j = Rinverse.find(i);
     if (j != Rinverse.end())
     {
-      std::vector<core::identifier_string> s = Rinverse[*i];
+      std::vector<core::identifier_string> s = Rinverse[i];
       result.insert(s.begin(), s.end());
     }
     else
     {
-      result.insert(*i);
+      result.insert(i);
     }
   }
   return result;
@@ -125,7 +135,7 @@ struct push_block_printer
   std::string print(const process::rename& x, const std::set<core::identifier_string>& B1) const
   {
     std::ostringstream out;
-    auto R = x.rename_set();
+    const auto& R = x.rename_set();
     out << "push_block(" << print(B) << ", rename(" << print(R) << ", " << print(x.operand()) << ")) = "
         << "rename(" << print(R) << ", push_block(" << print(B1) << ", " << print(x.operand()) << "))" << std::endl;
     return out.str();
@@ -149,7 +159,7 @@ std::string print_B(const std::set<core::identifier_string>& B)
   return out.str();
 }
 
-process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::vector<process_equation>& equations, push_block_map& W, data::set_identifier_generator& id_generator);
+process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::vector<process_equation>& equations, push_block_cache& W, data::set_identifier_generator& id_generator);
 
 template <typename Derived>
 struct push_block_builder: public process_expression_builder<Derived>
@@ -157,15 +167,12 @@ struct push_block_builder: public process_expression_builder<Derived>
   typedef process_expression_builder<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
+  using super::update;
 
   // used for computing the alphabet
   std::vector<process_equation>& equations;
-  push_block_map& W;
+  push_block_cache& W;
 
   // the parameter B
   const std::set<core::identifier_string>& B;
@@ -173,7 +180,7 @@ struct push_block_builder: public process_expression_builder<Derived>
   // used for generating process identifiers
   data::set_identifier_generator& id_generator;
 
-  push_block_builder(std::vector<process_equation>& equations_, push_block_map& W_, const std::set<core::identifier_string>& B_, data::set_identifier_generator& id_generator_)
+  push_block_builder(std::vector<process_equation>& equations_, push_block_cache& W_, const std::set<core::identifier_string>& B_, data::set_identifier_generator& id_generator_)
     : equations(equations_), W(W_), B(B_), id_generator(id_generator_)
   {}
 
@@ -182,7 +189,7 @@ struct push_block_builder: public process_expression_builder<Derived>
     return static_cast<Derived&>(*this);
   }
 
-  process::process_expression operator()(const process::action& x)
+  process::process_expression apply(const process::action& x)
   {
     using utilities::detail::contains;
     if (contains(B, x.label().name()))
@@ -195,31 +202,31 @@ struct push_block_builder: public process_expression_builder<Derived>
     }
   }
 
-  process::process_expression operator()(const process::process_instance& x)
+  process::process_expression apply(const process::process_instance& x)
   {
     // Let x = P(e)
     // The corresponding equation is P(d) = p
-    auto i = W.find(x);
-    if (i != W.end())
+    auto i = W.equation_cache.find(x);
+    if (i != W.equation_cache.end())
     {
       const std::vector<std::pair<std::set<core::identifier_string>, process_instance> >& v = i->second;
-      for (auto j = v.begin(); j != v.end(); ++j)
+      for (const auto& j: v)
       {
-        if (B == j->first)
+        if (B == j.first)
         {
-          return j->second;
+          return j.second;
         }
       }
     }
 
     const process_equation& eqn = find_equation(equations, x.identifier());
-    data::variable_list d = eqn.formal_parameters();
+    const data::variable_list& d = eqn.formal_parameters();
     core::identifier_string name = id_generator(x.identifier().name());
     process_identifier P1(name, x.identifier().variables());
     const process_expression& p = eqn.expression();
 
     // Add (P(e), B, P1(e)) to W
-    W[x].push_back(std::make_pair(B, process_instance(P1, x.actual_parameters())));
+    W.equation_cache[x].push_back(std::make_pair(B, process_instance(P1, x.actual_parameters())));
 
     process_expression p1 = push_block(B, p, equations, W, id_generator);
 
@@ -231,30 +238,30 @@ struct push_block_builder: public process_expression_builder<Derived>
     return result;
   }
 
-  process::process_expression operator()(const process::process_instance_assignment& x)
+  process::process_expression apply(const process::process_instance_assignment& x)
   {
     process_instance x1 = expand_assignments(x, equations);
-    return derived()(x1);
+    return derived().apply(x1);
   }
 
-  process::process_expression operator()(const process::block& x)
+  process::process_expression apply(const process::block& x)
   {
     std::set<core::identifier_string> B1 = block_operations::set_union(B, x.block_set());
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
     return push_block(B1, x.operand(), equations, W, id_generator);
   }
 
-  process::process_expression operator()(const process::hide& x)
+  process::process_expression apply(const process::hide& x)
   {
-    core::identifier_string_list I = x.hide_set();
+    const core::identifier_string_list& I = x.hide_set();
     std::set<core::identifier_string> B1 = block_operations::set_difference(B, I);
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
-    return detail::make_hide(I, push_block(B1, x.operand(), equations, W, id_generator));
+    return make_hide(I, push_block(B1, x.operand(), equations, W, id_generator));
   }
 
-  process::process_expression operator()(const process::rename& x)
+  process::process_expression apply(const process::rename& x)
   {
-    rename_expression_list R = x.rename_set();
+    const rename_expression_list& R = x.rename_set();
     std::set<core::identifier_string> B1 = block_operations::rename_inverse(R, B);
     mCRL2log(log::debug) << push_block_printer(B).print(x, B1);
     return process::rename(R, push_block(B1, x.operand(), equations, W, id_generator));
@@ -263,10 +270,10 @@ struct push_block_builder: public process_expression_builder<Derived>
   bool restrict(const core::identifier_string& b, const std::set<core::identifier_string>& B, const communication_expression_list& C) const
   {
     using utilities::detail::contains;
-    for (auto i = C.begin(); i != C.end(); ++i)
+    for (const communication_expression& i: C)
     {
-      core::identifier_string_list gamma = i->action_name().names();
-      core::identifier_string c = i->name();
+      core::identifier_string_list gamma = i.action_name().names();
+      const core::identifier_string& c = i.name();
       if (contains(gamma, b) && !contains(B, c))
       {
         return true;
@@ -288,31 +295,32 @@ struct push_block_builder: public process_expression_builder<Derived>
     return result;
   }
 
-  process::process_expression operator()(const process::comm& x)
+  process::process_expression apply(const process::comm& x)
   {
     std::set<core::identifier_string> B1 = restrict_block(B, x.comm_set());
     process_expression y = push_block(B1, x.operand(), equations, W, id_generator);
-    process_expression result = detail::make_block(core::identifier_string_list(B.begin(), B.end()), detail::make_comm(x.comm_set(), y));
+    process_expression result = make_block(core::identifier_string_list(B.begin(), B.end()), make_comm(x.comm_set(), y));
     mCRL2log(log::debug) << push_block_printer(B).print(x, result);
     return result;
   }
 
-  process::process_expression operator()(const process::allow& x)
+  process::process_expression apply(const process::allow& x)
   {
-    allow_set A(make_name_set(x.allow_set()));
+    allow_set A(alphabet_operations::make_name_set(x.allow_set()));
     core::identifier_string_list B1(B.begin(), B.end());
     allow_set A1(alphabet_operations::block(B1, A.A));
-    detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations, id_generator);
+    detail::push_allow_cache W_allow(id_generator, W.pcrl_equation_cache);
+    detail::push_allow_node node = detail::push_allow(x.operand(), A1, equations, W_allow, true);
     mCRL2log(log::debug) << push_block_printer(B).print(x, A1);
-    return node.m_expression;
+    return node.expression;
   }
 
   // This function is needed because the linearization algorithm does not handle the case 'delta | delta'.
-  process::process_expression operator()(const process::sync& x)
+  process::process_expression apply(const process::sync& x)
   {
-    process_expression left = derived()(x.left());
-    process_expression right = derived()(x.right());
-    return detail::make_sync(left, right);
+    process_expression left = derived().apply(x.left());
+    process_expression right = derived().apply(x.right());
+    return make_sync(left, right);
   }
 };
 
@@ -322,31 +330,33 @@ struct apply_push_block_builder: public Traverser<apply_push_block_builder<Trave
   typedef Traverser<apply_push_block_builder<Traverser> > super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
 
-  apply_push_block_builder(std::vector<process_equation>& equations, push_block_map& W, const std::set<core::identifier_string>& B, data::set_identifier_generator& id_generator)
+  apply_push_block_builder(std::vector<process_equation>& equations, push_block_cache& W, const std::set<core::identifier_string>& B, data::set_identifier_generator& id_generator)
     : super(equations, W, B, id_generator)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 inline
-process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::vector<process_equation>& equations, push_block_map& W, data::set_identifier_generator& id_generator)
+process_expression push_block(const std::set<core::identifier_string>& B, const process_expression& x, std::vector<process_equation>& equations, push_block_cache& W, data::set_identifier_generator& id_generator)
 {
   apply_push_block_builder<push_block_builder> f(equations, W, B, id_generator);
-  return f(x);
+  return f.apply(x);
 }
 
 } // namespace detail
 
 inline
-process_expression push_block(const core::identifier_string_list& B, const process_expression& x, std::vector<process_equation>& equations, data::set_identifier_generator& id_generator)
+process_expression push_block(const core::identifier_string_list& B,
+                              const process_expression& x,
+                              std::vector<process_equation>& equations,
+                              data::set_identifier_generator& id_generator,
+                              std::map<process_identifier, multi_action_name_set>& pcrl_equation_cache
+                             )
 {
   std::set<core::identifier_string> B1(B.begin(), B.end());
-  push_block_map W;
+  push_block_cache W(pcrl_equation_cache);
   return detail::push_block(B1, x, equations, W, id_generator);
 }
 

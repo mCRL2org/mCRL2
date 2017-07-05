@@ -12,16 +12,15 @@
 #ifndef MCRL2_DATA_FIND_EQUALITIES_H
 #define MCRL2_DATA_FIND_EQUALITIES_H
 
-#include <iostream>
-#include <map>
-#include <sstream>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 #include "mcrl2/utilities/exception.h"
+#include <iostream>
+#include <map>
+#include <sstream>
 
 namespace mcrl2 {
 
@@ -57,7 +56,7 @@ struct find_equalities_expression
     }
   }
 
-  void invert()
+  void swap()
   {
     std::swap(equalities, inequalities);
   }
@@ -84,7 +83,7 @@ struct find_equalities_expression
       }
       else
       {
-        i1->second = data::detail::set_intersection(i1->second, i2->second);
+        i1->second = utilities::detail::set_intersection(i1->second, i2->second);
         if (i1->second.empty())
         {
           m1.erase(i1++);
@@ -101,9 +100,9 @@ struct find_equalities_expression
   // replace m1 by the union of m1 and m2
   void map_union(std::map<variable, std::set<data_expression> >& m1, const std::map<variable, std::set<data_expression> >& m2)
   {
-    for (auto i = m2.begin(); i != m2.end(); ++i)
+    for (const auto& i: m2)
     {
-      m1[i->first].insert(i->second.begin(), i->second.end());
+      m1[i.first].insert(i.second.begin(), i.second.end());
     }
   }
 
@@ -119,14 +118,67 @@ struct find_equalities_expression
     map_union(inequalities, other.inequalities);
   }
 
-  void remove_variables(const data::variable_list& variables)
+  bool non_empty_intersection(const data::variable_list& variables, const std::set<data::variable>& V) const
   {
-    for (auto i = variables.begin(); i != variables.end(); ++i)
+    using utilities::detail::contains;
+    for (const data::variable& v: variables)
     {
-      auto const& v = *i;
-      equalities.erase(v);
-      inequalities.erase(v);
+      if (contains(V, v))
+      {
+        return true;
+      }
     }
+    return false;
+  }
+
+  bool must_delete(const data::variable_list& variables, const data::variable& lhs, std::set<data::data_expression>& rhs)
+  {
+    using utilities::detail::contains;
+    using utilities::detail::remove_if;
+    if (contains(variables, lhs))
+    {
+      return true;
+    }
+    remove_if(rhs, [&](const data::data_expression& x) { return non_empty_intersection(variables, data::find_free_variables(x)); });
+    if (rhs.empty())
+    {
+      return true;
+    }
+    return false;
+  }
+
+  void delete_(const data::variable_list& variables)
+  {
+    using utilities::detail::remove_if;
+    remove_if(equalities,   [&](std::pair<const variable, std::set<data_expression> >& p) { return must_delete(variables, p.first, p.second); });
+    remove_if(inequalities, [&](std::pair<const variable, std::set<data_expression> >& p) { return must_delete(variables, p.first, p.second); });
+  }
+
+  // for each entry b = b', b' = b is added too
+  void close(std::map<variable, std::set<data_expression> >& m)
+  {
+    for (auto i = m.begin(); i != m.end(); ++i)
+    {
+      const variable& v = i->first;
+      std::vector<variable> W;
+      for (const data_expression& e: i->second)
+      {
+        if (is_variable(e))
+        {
+          W.push_back(atermpp::down_cast<variable>(e));
+        }
+      }
+      for (const variable& w: W)
+      {
+        m[w].insert(v);
+      }
+    }
+  }
+
+  void close()
+  {
+    close(equalities);
+    close(inequalities);
   }
 };
 
@@ -135,18 +187,18 @@ std::ostream& operator<<(std::ostream& out, const find_equalities_expression& x)
 {
   using core::detail::print_set;
   std::vector<data_expression> result;
-  for (auto i = x.equalities.begin(); i != x.equalities.end(); ++i)
+  for (const auto& i: x.equalities)
   {
-    for (auto j = i->second.begin(); j != i->second.end(); ++j)
+    for (auto j = i.second.begin(); j != i.second.end(); ++j)
     {
-      result.push_back(equal_to(i->first, *j));
+      result.push_back(equal_to(i.first, *j));
     }
   }
-  for (auto i = x.inequalities.begin(); i != x.inequalities.end(); ++i)
+  for (const auto& i: x.inequalities)
   {
-    for (auto j = i->second.begin(); j != i->second.end(); ++j)
+    for (auto j = i.second.begin(); j != i.second.end(); ++j)
     {
-      result.push_back(not_equal_to(i->first, *j));
+      result.push_back(not_equal_to(i.first, *j));
     }
   }
   out << print_set(result);
@@ -159,7 +211,7 @@ struct find_equalities_traverser: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<find_equalities_expression> expression_stack;
 
@@ -205,7 +257,7 @@ struct find_equalities_traverser: public Traverser<Derived>
     return result;
   }
 
-  void operator()(const data::application& x)
+  void apply(const data::application& x)
   {
     if (data::is_equal_to_application(x))
     {
@@ -243,13 +295,13 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else if (sort_bool::is_not_application(x))
     {
-      derived()(sort_bool::arg(x));
-      top().invert();
+      derived().apply(sort_bool::arg(x));
+      top().swap();
     }
     else if (sort_bool::is_and_application(x))
     {
-      derived()(binary_left(x));
-      derived()(binary_right(x));
+      derived().apply(binary_left(x));
+      derived().apply(binary_right(x));
       auto& left = below_top();
       auto const& right = top();
       left.join_and(right);
@@ -257,8 +309,8 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else if (sort_bool::is_or_application(x))
     {
-      derived()(binary_left(x));
-      derived()(binary_right(x));
+      derived().apply(binary_left(x));
+      derived().apply(binary_right(x));
       auto& left = below_top();
       auto const& right = top();
       left.join_or(right);
@@ -266,11 +318,11 @@ struct find_equalities_traverser: public Traverser<Derived>
     }
     else if (sort_bool::is_implies_application(x))
     {
-      derived()(binary_left(x));
-      derived()(binary_right(x));
+      derived().apply(binary_left(x));
+      derived().apply(binary_right(x));
       auto& left = below_top();
       auto const& right = top();
-      left.invert();
+      left.swap();
       left.join_or(right);
       pop();
     }
@@ -295,22 +347,18 @@ struct find_equalities_traverser: public Traverser<Derived>
 
   void leave(const data::abstraction& x)
   {
-    top().remove_variables(x.variables());
+    top().delete_(x.variables());
   }
 
-  void leave(const data::function_symbol& x)
+  void leave(const data::function_symbol&)
   {
     push(find_equalities_expression());
   }
 
-  void leave(const data::where_clause& x)
+  void leave(const data::where_clause&)
   {
     throw mcrl2::runtime_error("not implemented yet!");
   }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
 };
 
 struct find_equalities_traverser_inst: public find_equalities_traverser<data::data_expression_traverser, find_equalities_traverser_inst>
@@ -319,21 +367,59 @@ struct find_equalities_traverser_inst: public find_equalities_traverser<data::da
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 
 } // namespace detail
 
-// N.B. interface is not finished yet
 inline
-std::string find_equalities(const data_expression& x)
+std::map<variable, std::set<data_expression> > find_equalities(const data_expression& x)
 {
   detail::find_equalities_traverser_inst f;
-  f(x);
+  f.apply(x);
   assert(f.expression_stack.size() == 1);
-  std::ostringstream out;
-  out << f.top();
-  return out.str();
+  f.top().close();
+  return f.top().equalities;
+}
+
+inline
+std::map<variable, std::set<data_expression> > find_inequalities(const data_expression& x)
+{
+  detail::find_equalities_traverser_inst f;
+  f.apply(x);
+  assert(f.expression_stack.size() == 1);
+  f.top().close();
+  return f.top().inequalities;
+}
+
+inline
+std::string print_equalities(const std::map<variable, std::set<data_expression> >& equalities)
+{
+  using core::detail::print_set;
+  std::vector<data_expression> result;
+  for (const auto& i: equalities)
+  {
+    for (auto j = i.second.begin(); j != i.second.end(); ++j)
+    {
+      result.push_back(equal_to(i.first, *j));
+    }
+  }
+  return print_set(result);
+}
+
+inline
+std::string print_inequalities(const std::map<variable, std::set<data_expression> >& inequalities)
+{
+  using core::detail::print_set;
+  std::vector<data_expression> result;
+  for (const auto& i: inequalities)
+  {
+    for (auto j = i.second.begin(); j != i.second.end(); ++j)
+    {
+      result.push_back(not_equal_to(i.first, *j));
+    }
+  }
+  return print_set(result);
 }
 
 } // namespace data

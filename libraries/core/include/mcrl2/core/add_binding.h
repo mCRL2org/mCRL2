@@ -12,8 +12,8 @@
 #ifndef MCRL2_CORE_ADD_BINDING_H
 #define MCRL2_CORE_ADD_BINDING_H
 
-#include <set>
 #include "mcrl2/atermpp/container_utility.h"
+#include <set>
 
 namespace mcrl2
 {
@@ -22,15 +22,12 @@ namespace core
 {
 
 /// \brief Traverser that defines functions for maintaining bound variables.
-template <template <class> class Traverser, typename Derived, typename Variable>
-class add_binding : public Traverser<Derived>
+template <template <class> class TraverserOrBuilder, typename Derived, typename Variable>
+class add_binding : public TraverserOrBuilder<Derived>
 {
   public:
-    typedef Traverser<Derived> super;
+    typedef TraverserOrBuilder<Derived> super;
     typedef Variable variable_type;
-    using super::operator();
-    using super::enter;
-    using super::leave;
 
   protected:
     std::multiset<variable_type> m_bound_variables;
@@ -43,7 +40,7 @@ class add_binding : public Traverser<Derived>
 
     /// \brief Add a sequence of variables to the multiset of bound variables.
     template <typename Container>
-    void increase_bind_count(const Container& variables, typename atermpp::enable_if_container<Container, variable_type>::type* = 0)
+    void increase_bind_count(const Container& variables, typename atermpp::enable_if_container<Container, variable_type>::type* = nullptr)
     {
       for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
       {
@@ -59,7 +56,7 @@ class add_binding : public Traverser<Derived>
 
     /// \brief Remove a sequence of variables from the multiset of bound variables.
     template <typename Container>
-    void decrease_bind_count(const Container& variables, typename atermpp::enable_if_container<Container, variable_type>::type* = 0)
+    void decrease_bind_count(const Container& variables, typename atermpp::enable_if_container<Container, variable_type>::type* = nullptr)
     {
       for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
       {

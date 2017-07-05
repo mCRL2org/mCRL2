@@ -16,8 +16,6 @@
 #include <type_traits>
 
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/atermpp/convert.h"
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
@@ -56,129 +54,45 @@ struct builder
   void leave(const T&)
   {}
 
-  // aterm update
   template <typename T>
-  void update(T& x,
-              typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-             )
-  {
-    msg("aterm update");
-    x = static_cast<Derived&>(*this)(x);
-  }
-
-  // non-aterm update
-  template <typename T>
-  void update(T& x,
-              typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-             )
-  {
-    msg("non-aterm update");
-    static_cast<Derived&>(*this)(x);
-  }
-
-  // aterm update copy
-  template <typename T>
-  T update_copy(const T& x,
-                typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-               )
-  {
-    msg("aterm update copy");
-    return atermpp::vertical_cast<T>(static_cast<Derived&>(*this)(x));
-  }
-
-  // non-aterm update copy
-  template <typename T>
-  T& update_copy(T& x,
-                 typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-                )
-  {
-    msg("non-aterm update copy");
-    static_cast<Derived&>(*this)(x);
-    return x;
-  }
-
-  // non-container visit
-  template <typename T>
-  void visit(T&,
-             typename atermpp::disable_if_container<T>::type* = 0
-            )
+  void update(T& x, typename atermpp::disable_if_container<T>::type* = nullptr)
   {
     msg("non-container visit");
-    throw mcrl2::runtime_error("unknown type encountered in builder function!");
+    x = static_cast<Derived*>(this)->apply(x);
   }
 
   // container visit
   template <typename T>
-  void visit(T& x,
-             typename atermpp::enable_if_container<T>::type* = 0
-            )
+  void update(T& x, typename atermpp::enable_if_container<T>::type* = nullptr)
   {
     msg("container visit");
-    for (typename T::iterator i = x.begin(); i != x.end(); ++i)
+    for (auto& v: x)
     {
-      update(*i);
+      static_cast<Derived*>(this)->update(v);
     }
   }
 
   // aterm set visit
   template <typename T>
-  void visit(std::set<T>& x)
+  void update(std::set<T>& x)
   {
-    msg("aterm set visit");
+    msg("set visit");
     std::set<T> result;
-    for (typename std::set<T>::const_iterator i = x.begin(); i != x.end(); ++i)
+    for (T v: x)
     {
-      result.insert(update_copy(*i));
+      static_cast<Derived*>(this)->update(v);
+      result.insert(v);
     }
-    using std::swap;
-    swap(x, result);
-  }
-
-  // non-container visit_copy
-  template <typename T>
-  T visit_copy(const T& x)
-  {
-    msg("non-container visit_copy");
-    throw mcrl2::runtime_error("unknown type encountered in builder function!");
-    return x;
+    result.swap(x);
   }
 
   // term_list visit copy
   template <typename T>
-  atermpp::term_list<T> visit_copy(const atermpp::term_list<T>& x)
+  atermpp::term_list<T> apply(const atermpp::term_list<T>& x)
   {
-    msg("term_list visit_copy");
-    std::vector<T> result;
-    for (typename atermpp::term_list<T>::const_iterator i = x.begin(); i != x.end(); ++i)
-    {
-      result.push_back(atermpp::vertical_cast<T>(static_cast<Derived&>(*this)(*i)));
-    }
-    return atermpp::term_list<T>(result.begin(),result.end());
+    msg("term_list traversal");
+    return atermpp::term_list<T>(x.begin(), x.end(), [&](const T& v) { return atermpp::vertical_cast<T>(static_cast<Derived*>(this)->apply(v)); } );
   }
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#else
-  // aterm traversal
-  template <typename T>
-  T operator()(const T& x,
-               typename std::enable_if< std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-              )
-  {
-    msg("aterm traversal");
-    return visit_copy(x);
-  }
-
-  // non-aterm traversal
-  template <typename T>
-  void operator()(T& x,
-                  typename std::enable_if< !std::is_base_of< atermpp::aterm, T >::value >::type* = 0
-                 )
-  {
-    msg("non aterm traversal");
-    visit(x);
-  }
-#endif
 };
 
 
@@ -192,11 +106,8 @@ class apply_builder: public Builder<apply_builder<Builder> >
 
     using super::enter;
     using super::leave;
-    using super::operator();
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
+    using super::apply;
+    using super::update;
 };
 
 template <template <class> class Builder>
@@ -215,15 +126,12 @@ class apply_builder_arg1: public Builder<apply_builder_arg1<Builder, Arg1> >
   public:
     using super::enter;
     using super::leave;
-    using super::operator();
+    using super::apply;
+    using super::update;
 
     apply_builder_arg1(const Arg1& arg1):
       super(arg1)
     {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Builder, class Arg1>
@@ -241,30 +149,27 @@ struct update_apply_builder: public Builder<update_apply_builder<Builder, Functi
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
+  using super::update;
 
   typedef typename Function::result_type result_type;
   typedef typename Function::argument_type argument_type;
 
-  Function f_;
+  const Function& f_;
 
-  result_type operator()(const argument_type& x)
+  result_type apply(const argument_type& x)
   {
     return f_(x);
   }
 
-  update_apply_builder(Function f)
+  update_apply_builder(const Function& f)
     : f_(f)
   {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
 };
 
 template <template <class> class Builder, class Function>
 update_apply_builder<Builder, Function>
-make_update_apply_builder(Function f)
+make_update_apply_builder(const Function& f)
 {
   return update_apply_builder<Builder, Function>(f);
 }
@@ -273,35 +178,32 @@ make_update_apply_builder(Function f)
 template <template <class> class Builder, class Function, class Arg1>
 class update_apply_builder_arg1: public Builder<update_apply_builder_arg1<Builder, Function, Arg1> >
 {
-    typedef Builder<update_apply_builder_arg1<Builder, Function, Arg1> > super;
+  typedef Builder<update_apply_builder_arg1<Builder, Function, Arg1> > super;
 
-    using super::enter;
-    using super::leave;
-    using super::operator();
+  using super::enter;
+  using super::leave;
+	using super::apply;
+  using super::update;
 
-    typedef typename Function::result_type result_type;
-    typedef typename Function::argument_type argument_type;
+  typedef typename Function::result_type result_type;
+  typedef typename Function::argument_type argument_type;
 
-    Function f_;
+  const Function& f_;
 
-    result_type operator()(const argument_type& x)
-    {
-      return f_(x);
-    }
+  result_type apply(const argument_type& x)
+  {
+    return f_(x);
+  }
 
-    update_apply_builder_arg1(Function f, const Arg1& arg1):
-      super(arg1),
-      f_(f)
-    {}
-
-#ifdef BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
+  update_apply_builder_arg1(const Function& f, const Arg1& arg1):
+    super(arg1),
+    f_(f)
+  {}
 };
 
 template <template <class> class Builder, class Function, class Arg1>
 update_apply_builder_arg1<Builder, Function, Arg1>
-make_update_apply_builder_arg1(Function f)
+make_update_apply_builder_arg1(const Function& f)
 {
   return update_apply_builder_arg1<Builder, Function, Arg1>(f);
 }

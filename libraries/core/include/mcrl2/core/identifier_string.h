@@ -9,14 +9,14 @@
 /// \file mcrl2/core/identifier_string.h
 /// \brief aterm representations of identifier strings.
 
-#ifndef MCRL2_BASIC_IDENTIFIER_STRING_H
-#define MCRL2_BASIC_IDENTIFIER_STRING_H
+#ifndef MCRL2_CORE_IDENTIFIER_STRING_H
+#define MCRL2_CORE_IDENTIFIER_STRING_H
 
-#include <vector>
-#include <iostream>
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/core/detail/function_symbols.h"
+#include <iostream>
+#include <vector>
 
 namespace mcrl2
 {
@@ -40,6 +40,7 @@ std::string pp(const identifier_string& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const identifier_string& x)
@@ -55,17 +56,16 @@ inline void swap(identifier_string& t1, identifier_string& t2)
 //--- end generated class identifier_string ---//
 
 /// \brief Tests if a term is an identifier string.
-/// \param t A term
+/// \param[in] t A term
 /// \return Whether t is an identifier string.
 inline
-bool is_identifier_string(atermpp::aterm t)
+bool is_identifier_string(const atermpp::aterm& t)
 {
   return t.type_is_appl() && atermpp::aterm_appl(t).size() == 0;
 }
 
-/// \brief Tests if a string is empty.
-/// \param t An identifier string
-/// \return Whether t is the empty string.
+/// \brief Provides the empty identifier string.
+/// \return The empty identifier string. 
 inline
 identifier_string empty_identifier_string()
 {
@@ -91,4 +91,4 @@ struct hash<mcrl2::core::identifier_string>
 
 } // namespace std
 
-#endif // MCRL2_BASIC_IDENTIFIER_STRING_H
+#endif // MCRL2_CORE_IDENTIFIER_STRING_H

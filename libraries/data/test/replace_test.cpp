@@ -9,24 +9,22 @@
 /// \file replace_test.cpp
 /// \brief Add your file description here.
 
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <iterator>
 #include <list>
 #include <map>
 #include <vector>
-#include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/substitutions/assignment_sequence_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
 #include "mcrl2/data/substitutions/sequence_sequence_substitution.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
@@ -75,9 +73,9 @@ void test_variable_replace()
   variable x("x", basic_sort("D"));
   variable y("y", basic_sort("D"));
   variable z("z", basic_sort("D"));
-  data_expression e1 = x;
-  data_expression e2 = z;
-  data_expression e3 = y;
+  const data_expression& e1 = x;
+  const data_expression& e2 = z;
+  const data_expression& e3 = y;
   data_expression_vector replacements;
   replacements.push_back(e1);
   replacements.push_back(e2);
@@ -220,7 +218,7 @@ std::vector<data::variable> variable_context()
 inline
 data::data_expression parse_expression(const std::string& text, const std::vector<data::variable>& variables = variable_context())
 {
-  return data::parse_data_expression(text, variables.begin(), variables.end());
+  return data::parse_data_expression(text, variables);
 }
 
 /// \brief Parses a string of the form "b: Bool := v, c: Bool := !w", and adds
@@ -229,15 +227,15 @@ data::mutable_map_substitution<> parse_substitution(const std::string& text, con
 {
   data::mutable_map_substitution<> sigma;
   std::vector<std::string> substitutions = utilities::split(text, ";");
-  for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
+  for (const std::string& substitution: substitutions)
   {
-    std::vector<std::string> words = utilities::regex_split(*i, ":=");
+    std::vector<std::string> words = utilities::regex_split(substitution, ":=");
     if (words.size() != 2)
     {
       continue;
     }
     data::variable v = data::parse_variable(words[0]);
-    data::data_expression e = data::parse_data_expression(words[1], variables.begin(), variables.end());
+    data::data_expression e = data::parse_data_expression(words[1], variables);
     sigma[v] = e;
   }
   return sigma;
@@ -247,10 +245,10 @@ data::mutable_map_substitution<> parse_substitution(const std::string& text, con
 std::set<data::variable> sigma_variables(const data::mutable_map_substitution<>& sigma)
 {
   std::set<data::variable> result;
-  for (mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+  for (const auto& i: sigma)
   {
-    std::set<data::variable> V = data::find_free_variables(i->second);
-    V.erase(i->first);
+    std::set<data::variable> V = data::find_free_variables(i.second);
+    V.erase(i.first);
     result.insert(V.begin(), V.end());
   }
   return result;

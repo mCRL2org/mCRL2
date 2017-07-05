@@ -53,5 +53,5 @@ The requirements on the software of the Generic Driving Actuator were checked.
 Publications
 ------------
 
-[MDC07]_
+.. [MDC07a] Algebraic Software Analysis and Embedded Simulation of a Driving Robot. Leon Merkx, Hans-Martin Duringhof, Pieter Cuijpers. 2007 Summer Computer Simulation Conference (SCSC) in San Diego, CA. Also appeared as `technical report <http://alexandria.tue.nl/repository/books/627278.pdf>`__. See also :ref:`showcase:generic-driving-actuator` and `(DOI) <http://doi.acm.org/10.1145/1357910.1357985>`
 

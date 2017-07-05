@@ -29,9 +29,9 @@ On ``mcrl2build3``, we only run MacOSX and the corresponding builds.
 On each of the other machines, a number of virtual machines is run
 using KVM. Details on the configuration follow. A nice overview of how
 to configure virtual machines on Ubuntu using KVM can be found 
-`here <http://www.howtogeek.com/117635/how-to-install-kvm-and-create-virtual-machines-on-ubuntu/>`_.
+on http://www.howtogeek.com/117635/how-to-install-kvm-and-create-virtual-machines-on-ubuntu/.
 Some notes on managing LVM in Ubuntu are described
-`here <http://www.howtogeek.com/howto/40702/how-to-manage-and-use-lvm-logical-volume-management-in-ubuntu/>`_.
+here (http://www.howtogeek.com/howto/40702/how-to-manage-and-use-lvm-logical-volume-management-in-ubuntu/).
 
 The main system running the Jenkins server is ``mcrl2build1``; on the
 other systems a slave instance of Jenkins is run. We describe the
@@ -58,7 +58,7 @@ First install the following packages:
 The command to install these packages is the following::
 
   sudo apt-get install subversion build-essential clang \
-    libboost1.48-all-dev java7-jdk libqt4-dev cmake python-software-properties \
+    libboost1.48-all-dev java7-jdk libqt5-dev cmake python-software-properties \
     doxygen git graphviz poppler-utils python python-sphinx swig \
     texlive-math-extra texlive-science texlive-latex3 xsltproc
 
@@ -121,8 +121,8 @@ Windows 7
 First install all of the following:
   - Windows SDK 7.1
   - If 64-bit Windows SDK: patch from `KB2280741 <http://support.microsoft.com/kb/2280741>`_
-  - Boost, see instructions in the `user manual <../user_manual/build_instructions/boost.html>`_.
-  - QT, see instructions in the `user manual <../user_manual/build_instructions/prerequisites.html#qt>`_.
+  - Boost, see instructions (`compiling_boost`_).
+  - QT, see instructions (`build_prerequisites_qt`_).
   - SlikSVN (version 1.6.17)
   - CMake
   - Java
@@ -229,7 +229,7 @@ The following then must be installed through macports:
 - Wget
 This can be done using the following command::
 
-  sudo port install boost qt4-mac cmake wget
+  sudo port install boost qt5-mac cmake wget
   
 Finally, create a directory in which Jenkins is run::
 

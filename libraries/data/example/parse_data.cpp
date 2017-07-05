@@ -1,9 +1,9 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cassert>
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/parse.h"
+#include <cassert>
+#include <fstream>
+#include <iostream>
+#include <string>
 
 using namespace mcrl2;
 

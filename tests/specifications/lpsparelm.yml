@@ -1,0 +1,34 @@
+nodes:
+  l1:
+    type: mCRL2Spec
+  l2:
+    type: LPS
+  l3:
+    type: LPS
+  l4:
+    type: PBES
+
+tools:
+  t1:
+    input: [l1]
+    output: [l2]
+    args: [-lstack]
+    name: mcrl22lps
+  t2:
+    input: [l2]
+    output: [l3]
+    args: []
+    name: lpsparelm
+  t3:
+    input: [l2, l3]
+    output: [l4]
+    args: [--bisimulation=branching-bisim]
+    name: lpsbisim2pbes
+  t4:
+    input: [l4]
+    output: []
+    args: []
+    name: pbes2bool
+
+result: |
+  result = t4.value['solution']

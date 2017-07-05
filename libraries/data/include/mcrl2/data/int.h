@@ -420,10 +420,7 @@ namespace mcrl2 {
         return maximum_name;
       }
 
-      ///\brief Constructor for function symbol max
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol maximum
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol maximum(const sort_expression& s0, const sort_expression& s1)
       {
@@ -466,7 +463,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol maximum(maximum_name(), make_function_sort(s0, s1, target_sort));
@@ -521,10 +518,7 @@ namespace mcrl2 {
         return minimum_name;
       }
 
-      ///\brief Constructor for function symbol min
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol minimum
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol minimum(const sort_expression& s0, const sort_expression& s1)
       {
@@ -543,7 +537,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol minimum(minimum_name(), make_function_sort(s0, s1, target_sort));
@@ -654,9 +648,7 @@ namespace mcrl2 {
         return negate_name;
       }
 
-      ///\brief Constructor for function symbol -
-      /// \param s0 A sort expression
-      ///\return Function symbol negate
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol negate(const sort_expression& s0)
       {
@@ -712,9 +704,7 @@ namespace mcrl2 {
         return succ_name;
       }
 
-      ///\brief Constructor for function symbol succ
-      /// \param s0 A sort expression
-      ///\return Function symbol succ
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol succ(const sort_expression& s0)
       {
@@ -733,7 +723,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + to_string(s0));
+          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts " + pp(s0));
         }
 
         function_symbol succ(succ_name(), make_function_sort(s0, target_sort));
@@ -787,9 +777,7 @@ namespace mcrl2 {
         return pred_name;
       }
 
-      ///\brief Constructor for function symbol pred
-      /// \param s0 A sort expression
-      ///\return Function symbol pred
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol pred(const sort_expression& s0)
       {
@@ -808,7 +796,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + to_string(s0));
+          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts " + pp(s0));
         }
 
         function_symbol pred(pred_name(), make_function_sort(s0, target_sort));
@@ -862,10 +850,7 @@ namespace mcrl2 {
         return dub_name;
       }
 
-      ///\brief Constructor for function symbol \@dub
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol dub
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol dub(const sort_expression& s0, const sort_expression& s1)
       {
@@ -880,7 +865,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for dub with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for dub with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol dub(dub_name(), make_function_sort(s0, s1, target_sort));
@@ -935,10 +920,7 @@ namespace mcrl2 {
         return plus_name;
       }
 
-      ///\brief Constructor for function symbol +
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol plus
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol plus(const sort_expression& s0, const sort_expression& s1)
       {
@@ -965,7 +947,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol plus(plus_name(), make_function_sort(s0, s1, target_sort));
@@ -1020,10 +1002,7 @@ namespace mcrl2 {
         return minus_name;
       }
 
-      ///\brief Constructor for function symbol -
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol minus
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol minus(const sort_expression& s0, const sort_expression& s1)
       {
@@ -1080,10 +1059,7 @@ namespace mcrl2 {
         return times_name;
       }
 
-      ///\brief Constructor for function symbol *
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol times
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol times(const sort_expression& s0, const sort_expression& s1)
       {
@@ -1102,7 +1078,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol times(times_name(), make_function_sort(s0, s1, target_sort));
@@ -1157,10 +1133,7 @@ namespace mcrl2 {
         return div_name;
       }
 
-      ///\brief Constructor for function symbol div
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol div
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol div(const sort_expression& s0, const sort_expression& s1)
       {
@@ -1175,7 +1148,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for div with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for div with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol div(div_name(), make_function_sort(s0, s1, target_sort));
@@ -1230,10 +1203,7 @@ namespace mcrl2 {
         return mod_name;
       }
 
-      ///\brief Constructor for function symbol mod
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol mod
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol mod(const sort_expression& s0, const sort_expression& s1)
       {
@@ -1290,10 +1260,7 @@ namespace mcrl2 {
         return exp_name;
       }
 
-      ///\brief Constructor for function symbol exp
-      /// \param s0 A sort expression
-      /// \param s1 A sort expression
-      ///\return Function symbol exp
+      // This function is not intended for public use and therefore not documented in Doxygen.
       inline
       function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
@@ -1312,7 +1279,7 @@ namespace mcrl2 {
         }
         else
         {
-          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + to_string(s0) + ", " + to_string(s1));
+          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts " + pp(s0) + ", " + pp(s1));
         }
 
         function_symbol exp(exp_name(), make_function_sort(s0, s1, target_sort));

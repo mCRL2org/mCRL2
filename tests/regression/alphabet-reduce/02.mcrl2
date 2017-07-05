@@ -1,0 +1,8 @@
+act
+  a,c,b,d;
+
+proc
+  P = b;
+
+init
+  allow({d}, rename({d -> b}, block({a}, P || b)));

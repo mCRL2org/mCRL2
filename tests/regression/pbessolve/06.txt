@@ -1,0 +1,6 @@
+pbes nu X1 = X2 && X1;
+     mu X2 = X1 || X3;
+     nu X3 = X3;
+
+init X1;
+

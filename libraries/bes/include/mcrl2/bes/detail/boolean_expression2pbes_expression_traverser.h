@@ -12,10 +12,10 @@
 #ifndef MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
 #define MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
 
-#include <cassert>
-#include <vector>
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include <cassert>
+#include <vector>
 
 namespace mcrl2
 {
@@ -31,7 +31,7 @@ struct boolean_expression2pbes_expression_traverser: public bes::boolean_express
   typedef bes::boolean_expression_traverser<boolean_expression2pbes_expression_traverser> super;
   typedef core::term_traits<pbes_system::pbes_expression> tr;
 
-  using super::operator();
+  using super::apply;
   using super::enter;
   using super::leave;
 

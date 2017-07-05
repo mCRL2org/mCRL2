@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_STATEGRAPH_RESET_VARIABLES_H
 #define MCRL2_PBES_DETAIL_STATEGRAPH_RESET_VARIABLES_H
 
-#include "boost/bind.hpp"
+#include <functional>
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/builder.h"
 
@@ -26,9 +26,7 @@ namespace detail {
 struct reset_variable_builder: public pbes_expression_builder<reset_variable_builder>
 {
   typedef pbes_expression_builder<reset_variable_builder> super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
+  using super::apply;
 
   std::vector<pbes_expression>::const_iterator i;
 
@@ -36,7 +34,7 @@ struct reset_variable_builder: public pbes_expression_builder<reset_variable_bui
     : i(i_)
   {}
 
-  pbes_expression operator()(const propositional_variable_instantiation& x)
+  pbes_expression apply(const propositional_variable_instantiation& x)
   {
     mCRL2log(log::debug, "stategraph") << "<reset>" << pbes_system::pp(x) << " -> " << pbes_system::pp(*i) << std::endl;
     return *i++;

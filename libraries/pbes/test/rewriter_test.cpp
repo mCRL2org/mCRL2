@@ -14,30 +14,29 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define PBES_REWRITE_TEST_DEBUG
 
+#include "mcrl2/data/detail/parse_substitution.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
+#include "mcrl2/data/substitutions/mutable_map_substitution.h"
+#include "mcrl2/pbes/detail/normalize_and_or.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
+#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
+#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/utilities/detail/test_operation.h"
+#include "mcrl2/utilities/text_utility.h"
+#include <boost/test/minimal.hpp>
 #include <functional>
 #include <iostream>
 #include <set>
 #include <sstream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
-#include "mcrl2/data/detail/parse_substitution.h"
-#include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
-#include "mcrl2/data/substitutions/mutable_map_substitution.h"
-#include "mcrl2/pbes/detail/normalize_and_or.h"
-#include "mcrl2/pbes/detail/data2pbes_rewriter.h"
-#include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
-#include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
-#include "mcrl2/pbes/rewriters/enumerate_quantifiers_rewriter.h"
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/utilities/detail/test_operation.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -311,7 +310,7 @@ void test_enumerate_quantifiers_rewriter()
   test_rewriters(N(R), N(r),  "forall m:Nat. false"                                             , "false");
   test_rewriters(N(R), N(r),  "X && X"                                                          , "X");
   test_rewriters(N(R), N(r),  "val(true)"                                                       , "true");
-  // test_rewriters(N(R), N(r),  "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
+  test_rewriters(N(R), N(r),  "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
   test_rewriters(N(R), N(r),  "exists m:Nat.true"                                               , "true");
   test_rewriters(N(R), N(r),  "forall m:Nat.val(m < 3)"                                         , "false");
   test_rewriters(N(R), N(r),  "exists m:Nat.val(m > 3)"                                         , "true");
@@ -322,6 +321,9 @@ void test_enumerate_quantifiers_rewriter()
   test_rewriters(N(R), N(r),  "forall n: Nat. (val(n < 3) && (exists n: Nat. val(n < 3)))", "false");
   test_rewriters(N(R), N(r),  "Y(n + 1) || forall n: Nat. val(n < 3)", "Y(n + 1)");
   test_rewriters(N(R), N(r),  "forall b: Bool . val(b) || X1(b)", "X1(false)");
+  test_rewriters(N(R), N(r),  "forall n: Nat . val(n > 1)", "false");
+  test_rewriters(N(R), N(r),  "forall n: Nat . val(n > 0)", "false");
+  test_rewriters(N(R), N(r),  "forall p: Pos . val(p > 0)", "true");
 }
 
 template <typename Rewriter1, typename Rewriter2>
@@ -338,7 +340,7 @@ void test_expressions(Rewriter1& R1, std::string expr1, Rewriter2& R2, std::stri
   }
 }
 
-void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, std::string var_decl, std::string sigma, std::string data_spec)
+void test_enumerate_quantifiers_rewriter(const std::string& expr1, const std::string& expr2, const std::string& var_decl, const std::string& sigma, const std::string& data_spec)
 {
   std::cout << "<enumerate_quantifiers_rewriter>" << std::endl;
 
@@ -589,7 +591,7 @@ void test_substitutions3()
   sigma[data::parse_variable("bst3_L:Bool")]         = data::parse_data_expression("false");
   sigma[data::parse_variable("k_L:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("l'_R:Nat")]            = data::parse_data_expression("0");
-  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data::normalize_sorts(data::parse_data_expression("[false, false]"),data_spec);
+  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data::parse_data_expression("[false, false]");
 
   pbes_system::pbes_expression x = r(phi, sigma);
 }

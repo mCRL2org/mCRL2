@@ -1,0 +1,3 @@
+map f: ((Nat -> Bool) # Nat # Bool) -> (Nat-> Bool);
+
+init delta;

@@ -53,7 +53,7 @@ class Testset(object):
           sys.executable, name))
         if stage > 1:
           print('*** Linearizing {}...'.format(name))
-          self.run_tool('mcrl22lps -Dfcbq data/{0}.expanded.mcrl2 data/{0}.lps'.format(name))
+          self.run_tool('mcrl22lps -Dfcb data/{0}.expanded.mcrl2 data/{0}.lps'.format(name))
           for mcf in os.listdir('mucalc'):
             if not mcf.endswith('.mcf') or stage < 3:
               continue

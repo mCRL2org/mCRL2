@@ -12,10 +12,10 @@
 ///       | \/_{i: I} f_i || \/_{j: J} exists v: D_j . ( g_j && X_j(e_j) ).
 ///
 /// DEPRECATED
-#ifndef PPG_VISITOR_H_
-#define PPG_VISITOR_H_
+#ifndef MCRL2_PBES_DETAIL_PPG_VISITOR_H
+#define MCRL2_PBES_DETAIL_PPG_VISITOR_H
 
-#include "bqnf_visitor.h"
+#include "mcrl2/pbes/detail/bqnf_visitor.h"
 
 namespace mcrl2 {
 
@@ -26,8 +26,6 @@ namespace detail {
 class ppg_visitor
   {
   public:
-    typedef pbes_expression term_type;
-    typedef core::term_traits<pbes_expression> tr;
     /// \brief The BQNF visitor type.
     typedef bqnf_visitor bqnf;
 
@@ -42,7 +40,7 @@ class ppg_visitor
     /// \brief Returns a string representation of the type of the root node of the expression.
     /// \param e a PBES expression
     /// \return a string representation of the type of the root node of the expression.
-    static std::string print_brief(const term_type& e)
+    static std::string print_brief(const pbes_expression& e)
     {
       return bqnf::print_brief(e);
     }
@@ -51,7 +49,7 @@ class ppg_visitor
     /// An expression is simple if it does not contain propositional variables.
     /// \param e a PBES expression
     /// \return true if the expression e is a simple expression.
-    virtual bool visit_simple_expression(const term_type& e)
+    virtual bool visit_simple_expression(const pbes_expression& e)
     {
       //std::clog << "visit_simple_expression: " << print_brief(e) << std::endl;
       bool result = is_simple_expression(e);
@@ -61,11 +59,11 @@ class ppg_visitor
     /// \brief Visits a propositional variable expression.
     /// \param e PBES expression
     /// \return true if the expression is a propositional variable or a simple expression.
-    virtual bool visit_propositional_variable(const term_type& e)
+    virtual bool visit_propositional_variable(const pbes_expression& e)
     {
       //std::clog << "visit_propositional_variable: " << print_brief(e) << std::endl;
       bool result = true;
-      if (!(tr::is_prop_var(e) || visit_simple_expression(e))) {
+      if (!(is_propositional_variable_instantiation(e) || visit_simple_expression(e))) {
         //std::clog << "Not a propositional variable or simple expression!" << std::endl;
         result = false;
       }
@@ -75,13 +73,13 @@ class ppg_visitor
     /// \brief Visits a conjunctive expression within an inner existential quantifier expression.
     /// \param e a PBES expression
     /// \return true if the expression e conforms to PPG.
-    virtual bool visit_inner_and(const term_type& e)
+    virtual bool visit_inner_and(const pbes_expression& e)
     {
       //std::clog << "visit_inner_and: " << print_brief(e) << std::endl;
       bool result = true;
-      if (tr::is_and(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+      if (is_and(e)) {
+        pbes_expression l = pbes_system::accessors::left(e);
+        pbes_expression r = pbes_system::accessors::right(e);
         if (visit_simple_expression(l)) {
           result &= visit_inner_and(r);
         } else {
@@ -96,14 +94,14 @@ class ppg_visitor
     /// \brief Visits a bounded existential quantifier expression within a disjunctive expression.
     /// \param e a PBES expression
     /// \return true if the expression e conforms to PPG.
-    virtual bool visit_inner_bounded_exists(const term_type& e)
+    virtual bool visit_inner_bounded_exists(const pbes_expression& e)
     {
       //std::clog << "visit_inner_bounded_exists: " << print_brief(e) << std::endl;
-      term_type qexpr = e;
+      pbes_expression qexpr = e;
       data::variable_list qvars;
-      while (tr::is_exists(qexpr)) {
-        qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+      while (is_exists(qexpr)) {
+        qvars = qvars + quantifier_variables(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
       return visit_inner_and(qexpr);
     }
@@ -111,13 +109,13 @@ class ppg_visitor
     /// \brief Visits a disjunctive expression.
     /// \param e a PBES expression
     /// \return true if the expression e conforms to PPG.
-    virtual bool visit_or(const term_type& e)
+    virtual bool visit_or(const pbes_expression& e)
     {
       //std::clog << "visit_or: " << print_brief(e) << std::endl;
       bool result = true;
-      if (tr::is_or(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+      if (is_or(e)) {
+        pbes_expression l = pbes_system::accessors::left(e);
+        pbes_expression r = pbes_system::accessors::right(e);
         result &= visit_or(l);
         result &= visit_or(r);
       } else {
@@ -129,13 +127,13 @@ class ppg_visitor
     /// \brief Visits a disjunctive expression within an inner universal quantifier expression.
     /// \param e a PBES expression
     /// \return true if the expression e conforms to PPG.
-    virtual bool visit_inner_implies(const term_type& e)
+    virtual bool visit_inner_implies(const pbes_expression& e)
     {
       //std::clog << "visit_inner_implies: " << print_brief(e) << std::endl;
       bool result = true;
-      if (tr::is_or(e) || tr::is_imp(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+      if (is_or(e) || is_imp(e)) {
+        pbes_expression l = pbes_system::accessors::left(e);
+        pbes_expression r = pbes_system::accessors::right(e);
         if (visit_simple_expression(l)) {
           result &= visit_inner_implies(r);
         } else {
@@ -150,14 +148,14 @@ class ppg_visitor
     /// \brief Visits a bounded universal quantifier expression within a conjunctive expression.
     /// \param e a PBES expression
     /// \return true if the expression e conforms to PPG.
-    virtual bool visit_inner_bounded_forall(const term_type& e)
+    virtual bool visit_inner_bounded_forall(const pbes_expression& e)
     {
       //std::clog << "visit_inner_bounded_forall: " << print_brief(e) << std::endl;
-      term_type qexpr = e;
+      pbes_expression qexpr = e;
       data::variable_list qvars;
-      while (tr::is_forall(qexpr)) {
-        qvars = qvars + tr::var(qexpr);
-        qexpr = tr::arg(qexpr);
+      while (is_forall(qexpr)) {
+        qvars = qvars + quantifier_variables(qexpr);
+        qexpr = pbes_system::accessors::arg(qexpr);
       }
       return visit_inner_implies(qexpr);
     }
@@ -165,13 +163,13 @@ class ppg_visitor
     /// \brief Visits a conjunctive expression.
     /// \param e a PBES expression
     /// \return true if the expression e conforms to PPG.
-    virtual bool visit_and(const term_type& e)
+    virtual bool visit_and(const pbes_expression& e)
     {
       //std::clog << "visit_and: " << print_brief(e) << std::endl;
       bool result = true;
-      if (tr::is_and(e)) {
-        term_type l = tr::left(e);
-        term_type r = tr::right(e);
+      if (is_and(e)) {
+        pbes_expression l = pbes_system::accessors::left(e);
+        pbes_expression r = pbes_system::accessors::right(e);
         result &= visit_and(l);
         result &= visit_and(r);
       } else {
@@ -183,21 +181,21 @@ class ppg_visitor
     /// \brief Visits a PPG expression.
     /// \param e a PBES expression
     /// \return true if the expression e is in PPG form.
-    virtual bool visit_ppg_expression(const term_type& e)
+    virtual bool visit_ppg_expression(const pbes_expression& e)
     {
       //std::clog << "visit_ppg_expression." << std::endl;
       bool result = true;
       if (visit_propositional_variable(e)) {
         result = true;
-      } else if (tr::is_and(e)) {
+      } else if (is_and(e)) {
         result &= visit_inner_and(e) || visit_and(e);
-      } else if (tr::is_or(e)) {
+      } else if (is_or(e)) {
         result &= visit_inner_implies(e) || visit_or(e);
-      } else if (tr::is_imp(e)) {
+      } else if (is_imp(e)) {
         result &= visit_inner_implies(e);
-      } else if (tr::is_forall(e)) {
+      } else if (is_forall(e)) {
         result &= visit_inner_bounded_forall(e);
-      } else if (tr::is_exists(e)) {
+      } else if (is_exists(e)) {
         result &= visit_inner_bounded_exists(e);
       } else {
 
@@ -213,4 +211,4 @@ class ppg_visitor
 
 } // namespace mcrl2
 
-#endif /* PPG_VISITOR_H_ */
+#endif // MCRL2_PBES_DETAIL_PPG_VISITOR_H

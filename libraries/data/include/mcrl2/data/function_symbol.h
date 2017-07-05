@@ -15,8 +15,8 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/default_values.h"
 #include "mcrl2/core/index_traits.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/sort_expression.h"
 
 namespace mcrl2
@@ -80,6 +80,7 @@ std::string pp(const function_symbol& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const function_symbol& x)

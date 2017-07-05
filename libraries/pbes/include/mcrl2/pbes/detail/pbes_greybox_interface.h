@@ -10,15 +10,15 @@
 /// \brief The pbes_greybox_interface class provides a wrapper for the
 /// parity_game_generator classes, for use in the PBES explorer.
 
-#ifndef MCRL2_PBES_DETAIL_PBES_GAME_GREYBOX_INTERFACE_H
-#define MCRL2_PBES_DETAIL_PBES_GAME_GREYBOX_INTERFACE_H
+#ifndef MCRL2_PBES_DETAIL_PBES_GREYBOX_INTERFACE_H
+#define MCRL2_PBES_DETAIL_PBES_GREYBOX_INTERFACE_H
 
+#include "mcrl2/pbes/parity_game_generator.h"
+#include "mcrl2/pbes/pbes.h"
 #include <set>
 #include <string>
 #include <utility>
 #include <vector>
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/parity_game_generator.h"
 
 namespace mcrl2 {
 
@@ -99,43 +99,43 @@ namespace detail {
       pbes_expression psi = expand_rhs(phi);
 
       // top_flatten
-      if (tr::is_prop_var(psi))
+      if (is_propositional_variable_instantiation(psi))
       {
         result.insert(psi);
       }
-      else if (tr::is_and(psi))
+      else if (is_and(psi))
       {
-        std::set<pbes_expression> terms = pbes_expr::split_and(psi);
-        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        std::set<pbes_expression> terms = split_and(psi);
+        for (const auto & term : terms)
         {
-          result.insert(*i);
+          result.insert(term);
         }
       }
-      else if (tr::is_or(psi))
+      else if (is_or(psi))
       {
-        std::set<pbes_expression> terms = pbes_expr::split_or(psi);
-        for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+        std::set<pbes_expression> terms = split_or(psi);
+        for (const auto & term : terms)
         {
-          result.insert(*i);
+          result.insert(term);
         }
       }
-      else if (tr::is_true(psi))
+      else if (is_true(psi))
       {
         if (m_true_false_dependencies)
         {
-          result.insert(tr::true_());
+          result.insert(true_());
         }
       }
-      else if (tr::is_false(psi))
+      else if (is_false(psi))
       {
         if (m_true_false_dependencies)
         {
-          result.insert(tr::false_());
+          result.insert(false_());
         }
       }
       else
       {
-        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + pbes_system::pp(psi) + "\n" + to_string(psi)));
+        throw(std::runtime_error("Error in pbes_greybox_interface: unexpected expression " + pbes_system::pp(psi) + "\n" + pp(psi)));
       }
       mCRL2log(log::debug, "pbes_greybox_interface") << print_successors(result);
       return result;
@@ -151,16 +151,16 @@ namespace detail {
     pbes_expression expand_group(const pbes_expression& psi, const pbes_expression& expr)
     {
       // expand the right hand side if needed
-      if (tr::is_prop_var(psi))
+      if (is_propositional_variable_instantiation(psi))
       {
-        const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
+        const pbes_equation& pbes_eqn = *m_pbes_equation_index[atermpp::down_cast<propositional_variable_instantiation>(psi).name()];
 
         mCRL2log(log::debug2, "pbes_greybox_interface") << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << expr << " into ";
 
         pbes_expression result;
 
         data::rewriter::substitution_type sigma;
-        make_substitution(pbes_eqn.variable().parameters(), tr::param(psi),sigma);
+        make_substitution(pbes_eqn.variable().parameters(), atermpp::down_cast<propositional_variable_instantiation>(psi).parameters(),sigma);
         result = pbes_rewriter(expr,sigma);
 
         mCRL2log(log::debug2, "pbes_greybox_interface") << result << std::endl;
@@ -177,9 +177,9 @@ namespace detail {
     {
       std::ostringstream out;
       out << "-- print_successors --" << std::endl;
-      for (std::set<pbes_expression>::const_iterator s = successors.begin(); s != successors.end(); ++s)
+      for (const auto & successor : successors)
       {
-        out << " * " << *s << std::endl;
+        out << " * " << successor << std::endl;
       }
       return out.str();
     }
@@ -202,8 +202,8 @@ namespace detail {
       mCRL2log(log::debug, "pbes_greybox_interface") << "Generating equation for expression "  << phi << " (var = " << var
                                                                                                << ", expr = " << expr << ")" <<std::endl;
 
-      assert(tr::is_prop_var(phi));
-      std::string varname = tr::name(phi);
+      assert(is_propositional_variable_instantiation(phi));
+      std::string varname = atermpp::down_cast<propositional_variable_instantiation>(phi).name();
       // check that varname for current group equals varname.
       if (varname==var)
       {
@@ -211,38 +211,38 @@ namespace detail {
         pbes_expression psi = expand_group(phi, expr);
 
         // top_flatten
-        if (tr::is_prop_var(psi))
+        if (is_propositional_variable_instantiation(psi))
         {
           result.insert(psi);
         }
-        else if (tr::is_and(psi))
+        else if (is_and(psi))
         {
-          std::set<pbes_expression> terms = pbes_expr::split_and(psi);
-          for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+          std::set<pbes_expression> terms = split_and(psi);
+          for (const auto & term : terms)
           {
-            result.insert(*i);
+            result.insert(term);
           }
         }
-        else if (tr::is_or(psi))
+        else if (is_or(psi))
         {
-          std::set<pbes_expression> terms = pbes_expr::split_or(psi);
-          for (std::set<pbes_expression>::iterator i = terms.begin(); i != terms.end(); ++i)
+          std::set<pbes_expression> terms = split_or(psi);
+          for (const auto & term : terms)
           {
-            result.insert(*i);
+            result.insert(term);
           }
         }
-        else if (tr::is_true(psi))
+        else if (is_true(psi))
         {
           if (m_true_false_dependencies)
           {
-            result.insert(tr::true_());
+            result.insert(true_());
           }
         }
-        else if (tr::is_false(psi))
+        else if (is_false(psi))
         {
           if (m_true_false_dependencies)
           {
-            result.insert(tr::false_());
+            result.insert(false_());
           }
         }
         else

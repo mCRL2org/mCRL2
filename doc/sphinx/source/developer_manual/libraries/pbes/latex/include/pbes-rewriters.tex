@@ -72,123 +72,6 @@ x &=&x\rightarrow true \\
 y &=&x\rightarrow x=y,\text{ provided }y\succ x
 \end{eqnarray*}
 
-\subsection{Quantifier Elimination Rewriter}
-
-This section describes a rewriter on predicate formulae that eliminates
-quantifiers. It is based on the following property%
-\begin{equation*}
-\begin{array}{cc}
-\forall _{x:X}.\varphi \equiv \dbigwedge\limits_{y:X}\varphi \lbrack
-x:=y]\quad & \exists _{x:X}.\varphi \equiv \dbigvee\limits_{y:X}\varphi
-\lbrack x:=y],%
-\end{array}%
-\end{equation*}
-
-where the conjunction and disjunction on the right hand sides may be
-infinite. Because of this, the rewriter we describe here is not guaranteed
-to terminate. However, in many practical cases the rewriter can compute a
-finite expression even if the quantifier variables are of infinite sort. An
-example of this is the formula $\forall _{n:\mathbb{N}}.(n>2)\vee X(n)$ that
-can be rewritten into $X(0)\wedge X(1)\wedge X(2)$.
-
-We assume that the sorts of quantifier variables can be enumerated. By this
-we mean the existence of a function $enum$ that maps an arbitrary term $d:D$
-to a finite set of terms $\{d_{1},\cdots ,d_{k}\}$, such that $%
-range(d)=\dbigcup\limits_{i=1\cdots k}range(d_{i})$, where $range(d)$ is the
-set of closed terms obtained from $d$ by substituting values for the free
-variables of $d$. For example, if natural numbers are represented by $%
-S^{n}(0)$, with $S$ a function that expresses the successor of a number,
-then possible enumerations of the term $n$ are $\{0,S(n^{\prime })\}$ and $%
-\{0,S(0),S(S(n^{\prime \prime }))\}$. Let $id$ be the identity function and
-let $\sigma \lbrack d_{1}:=e_{1},\cdots ,d_{n}:=e_{n}]$ be the function $%
-\sigma ^{\prime }$ with $\sigma ^{\prime }(x)=e_{i}$ if $x=d_{i}$ and $%
-\sigma ^{\prime }(x)=\sigma (x)$ otherwise.
-
-A parameter of the \textsc{EliminateQuantifiers }algorithm is a rewriter $R$
-on quantifier free predicate formulae, that is expected to have the
-following properties:%
-\begin{eqnarray*}
-R(\bot ) &=&\bot \\
-(R(t) &=&R(t^{\prime }))\Rightarrow t\simeq t^{\prime }\text{,}
-\end{eqnarray*}%
-where $t\simeq t^{\prime }$ indicates that $t$ and $t^{\prime }$ are
-equivalent. 
-\begin{equation*}
-\begin{tabular}{l}
-\textsc{EliminateQuantifiers(}$Q_{d_{1}:D_{1},\ldots ,d_{n}:D_{n}}.\varphi
-,R $\textsc{)} \\ 
-$\text{\textbf{if }}freevars(R(\varphi ))\cap \{d_{1},\cdots
-,d_{n}\}=\emptyset $ $\text{\textbf{then return }}R(\varphi )$ \\ 
-$V:=\emptyset $ \\ 
-$\text{\textbf{for }}i\in \{1,\ldots ,n\}\text{ \textbf{do }}%
-E_{i}:=\{d_{i}\} $ \\ 
-$\text{\textbf{do}}$ \\ 
-$\qquad \text{\textbf{choose }}e_{k}\in E_{k}$, such that $\mathsf{dvar}%
-(e_{k})\neq \emptyset $ \\ 
-$\qquad E_{k}:=E_{k}\backslash \{e_{k}\}$ \\ 
-$\qquad \text{\textbf{for }}e\in enum(e_{k}):$ \\ 
-$\qquad \qquad W:=\emptyset $ \\ 
-$\qquad \qquad \text{\textbf{for }}\sigma \in \{id[d_{1}:=f_{1},\cdots
-,d_{k-1}:=f_{k-1},d_{k}:=e,d_{k+1}:=f_{k+1},\cdots ,d_{n}:=f_{n}]$ \\ 
-$\qquad \qquad \qquad \wedge f_{i}\in E_{i}\quad (i=1,\cdots ,n)\}:$ \\ 
-$\qquad \qquad \qquad W:=W\cup \{R(\sigma (\varphi )\}$ \\ 
-$\qquad \qquad \text{\textbf{if }}stop_{Q}\in W\text{ \textbf{then return }}%
-stop_{Q}$ \\ 
-$\qquad \qquad V:=V\cup \{w\in W\ |\ \mathsf{dvar}(w)\subset \mathsf{dvar}%
-(\varphi )\}$ \\ 
-$\qquad \qquad \text{\textbf{if }}\{w\in W\ |\ \mathsf{dvar}(w)\varsubsetneq 
-\mathsf{dvar}(\varphi )\}\neq \emptyset $ $\text{\textbf{then }}%
-E_{k}:=E_{k}\cup \{e\}$ \\ 
-$\qquad $\textbf{rof} \\ 
-$\text{\textbf{while }}\forall _{i\in \{1,\ldots ,n\}}.E_{i}\neq \emptyset $
-\\ 
-$\text{\textbf{return} }\dbigoplus\limits_{v\in V}v,$%
-\end{tabular}%
-\end{equation*}%
-where $stop_{Q}=\bot $ and $\dbigoplus =\dbigwedge $ in case $Q=\forall $,
-and where $stop_{Q}=\top $ and $\dbigoplus =\dbigvee $ in case $Q=\exists $
-
-\subsection{OnePointRule Quantifier Elimination}
-
-The OnePointRule Quantifier Elimination rewriter rewrites certain patterns
-of PBES quantifier expressions as follows:%
-\begin{equation*}
-\begin{array}{lll}
-\exists _{x:X}.(x=e)\wedge \varphi & \rightarrow & \varphi \lbrack x:=e] \\ 
-\exists _{x:\mathbb{B}}.x\wedge \varphi & \rightarrow & \varphi \lbrack
-x:=true] \\ 
-\exists _{x:\mathbb{B}}.\lnot x\wedge \varphi & \rightarrow & \varphi
-\lbrack x:=false] \\ 
-\forall _{x:X}.(x\neq e)\vee \varphi & \rightarrow & \varphi \lbrack x:=e]
-\\ 
-\forall _{x:\mathbb{B}}.x\vee \varphi & \rightarrow & \varphi \lbrack
-x:=false] \\ 
-\forall _{x:\mathbb{B}}.\lnot x\vee \varphi & \rightarrow & \varphi \lbrack
-x:=true]%
-\end{array}%
-\end{equation*}%
-Note that it is straightforward to generalize these patterns to quantifier
-expressions as they occur in the mCRL2 toolset ($\exists
-_{x_{1}:X_{1},\cdots ,x_{n}:X_{n}}.\varphi $ and $\forall
-_{x_{1}:X_{1},\cdots ,x_{n}:X_{n}}.\varphi $).
-
-\subsubsection{Preprocessing}
-
-It turns out that the data rewriters in the mCRL2 toolset do not rewrite $%
-\lnot (\varphi =\psi )$ into $\varphi \neq \psi $. Therefore it is useful to
-apply the following as a preprocessing step to data expressions:%
-\begin{equation*}
-\begin{array}{lll}
-\lnot (\varphi _{1}\wedge \cdots \wedge \varphi _{n}) & \rightarrow  & \lnot
-\varphi _{1}\vee \cdots \vee \lnot \varphi _{n} \\ 
-\lnot (\varphi _{1}\vee \cdots \vee \varphi _{n}) & \rightarrow  & \lnot
-\varphi _{1}\wedge \cdots \wedge \lnot \varphi _{n} \\ 
-\lnot (\varphi =\psi ) & \rightarrow  & \varphi \neq \psi  \\ 
-\lnot (\varphi \neq \psi ) & \rightarrow  & \varphi =\psi  \\ 
-\lnot \lnot \varphi  & \rightarrow  & \varphi 
-\end{array}%
-\end{equation*}
-
 \subsection{The predicate formula normal form (PFNF)}
 
 \begin{definition}
@@ -251,11 +134,176 @@ where
 \begin{array}{lll}
 p(\varphi ) & = & \mathsf{Q}_{1}^{\varphi }\cdots \mathsf{Q}_{n^{\varphi
 }}^{\varphi }.~h^{\varphi }\wedge \bigwedge\limits_{i\in I^{\varphi }}\left(
-g_{i}\implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right)  \\ 
+g_{i}\implies \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right) \\ 
 p(\psi ) & = & \mathsf{Q}_{1}^{\psi }\cdots \mathsf{Q}_{n^{\psi }}^{\psi
 }.~h^{\psi }\wedge \bigwedge\limits_{i\in I^{\psi }}\left( g_{i}\implies
 \bigvee\limits_{j\in J_{i}}~X^{j}(e^{j})\right) ,%
 \end{array}%
 \end{equation*}%
 under the assumption that $I^{\varphi }$ and $I^{\psi }$ are disjoint, and $%
-v_{i}^{\varphi }\neq v_{j}^{\psi }$ for all $i,j$.\newpage 
+v_{i}^{\varphi }\neq v_{j}^{\psi }$ for all $i,j$.\newpage
+
+\subsection{OnePointRule Quantifier Elimination}
+
+\subsubsection{Equalities / inequalities}
+
+The function $Eq$ computes a set of equalities and inequalities for an
+expression $\varphi $, such that the following holds:%
+\begin{eqnarray*}
+Eq\left( \varphi \right)  &=&\left( \left\{ b_{1}=e_{1},\cdots
+,b_{n}=e_{n}\right\} ,W\right) \Rightarrow \varphi =\psi \wedge
+\bigwedge\limits_{i=1}^{n}\left( b_{i}=e_{i}\right)  \\
+Eq\left( \varphi \right)  &=&\left( V,\left\{ b_{1}\neq e_{1},\cdots
+,b_{n}\neq e_{n}\right\} \right) \Rightarrow \varphi =\psi \vee
+\bigvee\limits_{i=1}^{n}\left( b_{i}\neq e_{i}\right) 
+\end{eqnarray*}%
+for some expression $\psi $.
+
+The function $Eq$ is inductively defined as follows:
+
+\begin{equation*}
+\begin{array}{lll}
+Eq(b) & = & \left( \left\{ b=true\right\} ,\emptyset \right) \\ 
+Eq(d=e) & = & \left\{ 
+\begin{array}{cc}
+\left( \left\{ d=e\right\} ,\emptyset \right) & \text{if }d\notin FV(e) \\ 
+\left( \emptyset ,\emptyset \right) & \text{otherwise}%
+\end{array}%
+\right. \\ 
+Eq(e=d) & = & Eq(d=e) \\ 
+Eq(d\neq e) & = & \left\{ 
+\begin{array}{cc}
+\left( \emptyset ,\left\{ d\neq e\right\} \right) & \text{if }d\notin FV(e)
+\\ 
+\left( \emptyset ,\emptyset \right) & \text{otherwise}%
+\end{array}%
+\right. \\ 
+Eq(e\neq d) & = & Eq(d\neq e) \\ 
+Eq\left( \lnot \varphi \right) & = & swap\left( Eq\left( \varphi \right)
+\right) \\ 
+Eq\left( \varphi \wedge \psi \right) & = & join\_and\left( \left( Eq\left(
+\varphi \right) ,Eq\left( \psi \right) \right) \right) \\ 
+Eq\left( \varphi \vee \psi \right) & = & join\_or\left( \left( Eq\left(
+\varphi \right) ,Eq\left( \psi \right) \right) \right) \\ 
+Eq\left( \varphi \Rightarrow \psi \right) & = & join\_or\left( \left(
+swap\left( Eq\left( \varphi \right) \right) ,Eq\left( \psi \right) \right)
+\right) \\ 
+Eq\left( \forall x.\varphi \right) & = & delete\left( x,Eq\left( \varphi
+\right) \right) \\ 
+Eq\left( \exists x.\varphi \right) & = & delete\left( x,Eq\left( \varphi
+\right) \right) \\ 
+Eq\left( \varphi \right) & = & \left( \emptyset ,\emptyset \right) \text{
+otherwise}%
+\end{array}%
+\end{equation*}%
+where $b$ is a boolean data variable, $d$ is an arbitrary data variable, $e$
+is a boolean data expression, and%
+\begin{equation*}
+\begin{array}{lll}
+swap\left( \left( V,W\right) \right) & = & \left( W,V\right) \\ 
+join\_and\left( \left( V_{1},W_{1}\right) ,\left( V_{2},W_{2}\right) \right)
+& = & \left( V_{1}\cup V_{2},W_{1}\cap W_{2}\right) \\ 
+join\_or\left( \left( V_{1},W_{1}\right) ,\left( V_{2},W_{2}\right) \right)
+& = & \left( V_{1}\cap V_{2},W_{1}\cup W_{2}\right) \\ 
+delete\left( x,\left( V,W\right) \right) & = & 
+\begin{array}{l}
+\left( V_{1},W_{1}\right) \text{ where} \\ 
+\left\{ 
+\begin{array}{c}
+V_{1}=\left\{ d=e\in V\mid d\neq x\wedge x\notin FV(e)\right\} \\ 
+W_{1}=\left\{ d\neq e\in W\mid d\neq x\wedge x\notin FV(e)\right\}%
+\end{array}%
+\right.%
+\end{array}%
+\end{array}%
+\end{equation*}
+
+\subsubsection{OnePointRule rewriter}
+
+We define the OnePointRule rewriter $R$ inductively as follows:
+
+\begin{equation*}
+\begin{array}{lll}
+R\left( \lnot \varphi \right) & = & \lnot R\left( \varphi \right) \\ 
+R\left( \varphi \wedge \psi \right) & = & R\left( \varphi \right) \wedge
+R\left( \psi \right) \\ 
+R\left( \varphi \vee \psi \right) & = & R\left( \varphi \right) \vee R\left(
+\psi \right) \\ 
+R\left( \varphi \Rightarrow \psi \right) & = & R\left( \varphi \right)
+\Rightarrow R\left( \psi \right) \\ 
+R\left( \forall x.\varphi \right) & = & \left\{ 
+\begin{array}{cc}
+R\left( \varphi \right) \left[ x:=e\right] & \text{if }x\neq e\in W\text{,
+where }\left( V,W\right) =Eq\left( \varphi \right) \\ 
+\forall x.R\left( \varphi \right) & \text{otherwise}%
+\end{array}%
+\right. \\ 
+R\left( \exists x.\varphi \right) & = & \left\{ 
+\begin{array}{cc}
+R\left( \varphi \right) \left[ x:=e\right] & \text{if }x=e\in V\text{, where 
+}\left( V,W\right) =Eq\left( \varphi \right) \\ 
+\exists x.R\left( \varphi \right) & \text{otherwise}%
+\end{array}%
+\right. \\ 
+R\left( \varphi \right) & = & \varphi \text{ otherwise}%
+\end{array}%
+\end{equation*}
+
+\newpage
+
+\subsection{Quantifier Expansion}
+
+\subsubsection{Conjunctions / disjunctions}
+
+The function $CD$ computes a sequence of conjunctions and disjunctions for
+an expression $\varphi $, such that the following holds:%
+\begin{eqnarray*}
+CD\left( \varphi \right) &=&\left( \left[ \varphi _{1},\cdots ,\varphi _{n}%
+\right] ,W\right) \Rightarrow \varphi =\bigwedge\limits_{i=1}^{n}\varphi _{i}
+\\
+CD\left( \varphi \right) &=&\left( V,\left[ \varphi _{1},\cdots ,\varphi _{n}%
+\right] \right) \Rightarrow \varphi =\bigvee\limits_{i=1}^{n}\varphi _{i}.
+\end{eqnarray*}
+
+The function $S$ is inductively defined as follows:
+
+\begin{equation*}
+\begin{array}{lll}
+CD\left( \lnot \varphi \right) & = & negate\left( CD\left( \varphi \right)
+\right) \\ 
+CD\left( \varphi \wedge \psi \right) & = & \left( conjunctions\left(
+CD\left( \varphi \right) \right) \concat conjunctions\left( CD\left( \psi
+\right) \right) ,\emptyset \right) \\ 
+CD\left( \varphi \vee \psi \right) & = & \left( \emptyset
+,disjunctions\left( CD\left( \varphi \right) \right) \concat %
+disjunctions\left( CD\left( \psi \right) \right) \right) \\ 
+CD\left( \varphi \Rightarrow \psi \right) & = & \left( \emptyset
+,disjunctions\left( negate(CD\left( \varphi \right) )\right) \concat %
+disjunctions\left( CD\left( \psi \right) \right) \right) \\ 
+CD\left( \varphi \right) & = & \left( \varphi ,\varphi \right) \text{
+otherwise}%
+\end{array}%
+\end{equation*}%
+with%
+\begin{equation*}
+\begin{array}{lll}
+negate\left( \left( \left[ \varphi _{1},\cdots ,\varphi _{m}\right] ,\left[
+\psi _{1},\cdots ,\psi _{n}\right] \right) \right) & = & \left( \left[ \lnot
+\psi _{1},\cdots ,\lnot \psi _{n}\right] ,\left[ \lnot \varphi _{1},\cdots
+,\lnot \varphi _{m}\right] \right) \\ 
+conjunctions\left( \left( V,W\right) \right) & = & \left\{ 
+\begin{array}{ll}
+V & \text{if }V\neq \emptyset \\ 
+\bigvee\limits_{w\in W}w & \text{otherwise}%
+\end{array}%
+\right. \\ 
+disjunctions\left( \left( V,W\right) \right) & = & \left\{ 
+\begin{array}{ll}
+W & \text{if }W\neq \emptyset \\ 
+\bigwedge\limits_{v\in V}v & \text{otherwise}%
+\end{array}%
+\right.%
+\end{array}%
+\end{equation*}
+
+N.B. This has not been implemented yet.\newpage 

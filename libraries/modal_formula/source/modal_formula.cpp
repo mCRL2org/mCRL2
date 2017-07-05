@@ -11,13 +11,13 @@
 
 #include "mcrl2/modal_formula/algorithms.h"
 #include "mcrl2/modal_formula/find.h"
-#include "mcrl2/modal_formula/monotonicity.h"
+#include "mcrl2/modal_formula/is_monotonous.h"
+#include "mcrl2/modal_formula/is_timed.h"
+#include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
-#include "mcrl2/modal_formula/normalize.h"
 #include "mcrl2/modal_formula/translate_user_notation.h"
 
 namespace mcrl2
@@ -38,7 +38,6 @@ std::string pp(const action_formulas::multi_action& x) { return action_formulas:
 std::string pp(const action_formulas::not_& x) { return action_formulas::pp< action_formulas::not_ >(x); }
 std::string pp(const action_formulas::or_& x) { return action_formulas::pp< action_formulas::or_ >(x); }
 std::string pp(const action_formulas::true_& x) { return action_formulas::pp< action_formulas::true_ >(x); }
-std::string pp(const action_formulas::untyped_multi_action& x) { return action_formulas::pp< action_formulas::untyped_multi_action >(x); }
 std::set<data::variable> find_all_variables(const action_formulas::action_formula& x) { return action_formulas::find_all_variables< action_formulas::action_formula >(x); }
 //--- end generated action_formulas overloads ---//
 
@@ -49,11 +48,11 @@ namespace regular_formulas
 
 //--- start generated regular_formulas overloads ---//
 std::string pp(const regular_formulas::alt& x) { return regular_formulas::pp< regular_formulas::alt >(x); }
-std::string pp(const regular_formulas::nil& x) { return regular_formulas::pp< regular_formulas::nil >(x); }
 std::string pp(const regular_formulas::regular_formula& x) { return regular_formulas::pp< regular_formulas::regular_formula >(x); }
 std::string pp(const regular_formulas::seq& x) { return regular_formulas::pp< regular_formulas::seq >(x); }
 std::string pp(const regular_formulas::trans& x) { return regular_formulas::pp< regular_formulas::trans >(x); }
 std::string pp(const regular_formulas::trans_or_nil& x) { return regular_formulas::pp< regular_formulas::trans_or_nil >(x); }
+std::string pp(const regular_formulas::untyped_regular_formula& x) { return regular_formulas::pp< regular_formulas::untyped_regular_formula >(x); }
 //--- end generated regular_formulas overloads ---//
 
 } // namespace regular_formulas
@@ -76,37 +75,52 @@ std::string pp(const state_formulas::not_& x) { return state_formulas::pp< state
 std::string pp(const state_formulas::nu& x) { return state_formulas::pp< state_formulas::nu >(x); }
 std::string pp(const state_formulas::or_& x) { return state_formulas::pp< state_formulas::or_ >(x); }
 std::string pp(const state_formulas::state_formula& x) { return state_formulas::pp< state_formulas::state_formula >(x); }
+std::string pp(const state_formulas::state_formula_specification& x) { return state_formulas::pp< state_formulas::state_formula_specification >(x); }
 std::string pp(const state_formulas::true_& x) { return state_formulas::pp< state_formulas::true_ >(x); }
 std::string pp(const state_formulas::variable& x) { return state_formulas::pp< state_formulas::variable >(x); }
 std::string pp(const state_formulas::yaled& x) { return state_formulas::pp< state_formulas::yaled >(x); }
 std::string pp(const state_formulas::yaled_timed& x) { return state_formulas::pp< state_formulas::yaled_timed >(x); }
-state_formulas::state_formula normalize_sorts(const state_formulas::state_formula& x, const data::data_specification& dataspec) { return state_formulas::normalize_sorts< state_formulas::state_formula >(x, dataspec); }
+state_formulas::state_formula normalize_sorts(const state_formulas::state_formula& x, const data::sort_specification& sortspec) { return state_formulas::normalize_sorts< state_formulas::state_formula >(x, sortspec); }
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x) { return state_formulas::translate_user_notation< state_formulas::state_formula >(x); }
 std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x) { return state_formulas::find_sort_expressions< state_formulas::state_formula >(x); }
 std::set<data::variable> find_all_variables(const state_formulas::state_formula& x) { return state_formulas::find_all_variables< state_formulas::state_formula >(x); }
 std::set<data::variable> find_free_variables(const state_formulas::state_formula& x) { return state_formulas::find_free_variables< state_formulas::state_formula >(x); }
 std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x) { return state_formulas::find_identifiers< state_formulas::state_formula >(x); }
-bool find_nil(const state_formulas::state_formula& x) { return state_formulas::find_nil< state_formulas::state_formula >(x); }
 //--- end generated state_formulas overloads ---//
 
 namespace algorithms {
 
-state_formula parse_state_formula(std::istream& in, lps::specification& spec)
+state_formula parse_state_formula(std::istream& in, lps::specification& lpsspec)
 {
-  return state_formulas::parse_state_formula(in, spec, true);
+  return state_formulas::parse_state_formula(in, lpsspec);
 }
 
-state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec)
+state_formula parse_state_formula(const std::string& text, lps::specification& lpsspec)
 {
-  return state_formulas::parse_state_formula(formula_text, spec);
+  return state_formulas::parse_state_formula(text, lpsspec);
 }
 
-state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
+state_formula_specification parse_state_formula_specification(std::istream& in)
 {
-  return state_formulas::preprocess_state_formula(formula, spec);
+  return state_formulas::parse_state_formula_specification(in);
 }
 
-bool is_monotonous(state_formula f)
+state_formula_specification parse_state_formula_specification(const std::string& text)
+{
+  return state_formulas::parse_state_formula_specification(text);
+}
+
+state_formula_specification parse_state_formula_specification(std::istream& in, lps::specification& lpsspec)
+{
+  return state_formulas::parse_state_formula_specification(in, lpsspec);
+}
+
+state_formula_specification parse_state_formula_specification(const std::string& text, lps::specification& lpsspec)
+{
+  return state_formulas::parse_state_formula_specification(text, lpsspec);
+}
+
+bool is_monotonous(const state_formula& f)
 {
   return state_formulas::is_monotonous(f);
 }
@@ -121,12 +135,17 @@ bool is_normalized(const state_formula& x)
   return state_formulas::is_normalized(x);
 }
 
+bool is_timed(const state_formula& x)
+{
+  return state_formulas::is_timed(x);
+}
+
 std::set<core::identifier_string> find_state_variable_names(const state_formula& x)
 {
   return state_formulas::find_state_variable_names(x);
 }
 
-} // algorithms
+} // namespace algorithms
 
 } // namespace state_formulas
 

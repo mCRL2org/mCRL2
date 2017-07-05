@@ -12,16 +12,15 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_H
 #define MCRL2_DATA_DATA_EXPRESSION_H
 
-#include "mcrl2/atermpp/detail/utility.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/default_values.h"
-#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/untyped_sort.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/untyped_sort.h"
 #include "mcrl2/utilities/exception.h"
 
 namespace mcrl2
@@ -172,6 +171,7 @@ std::string pp(const data_expression& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const data_expression& x)
@@ -210,7 +210,7 @@ bool is_data_expression(const atermpp::aterm_appl& x)
 /// \note This function uses implementation details of the iterator type
 /// and hence is sometimes efficient than copying all elements of the list.
 template < typename Container >
-inline data_expression_list make_data_expression_list(Container const& r, typename atermpp::enable_if_container< Container, data_expression >::type* = 0)
+inline data_expression_list make_data_expression_list(Container const& r, typename atermpp::enable_if_container< Container, data_expression >::type* = nullptr)
 {
   return data_expression_list(r.begin(),r.end());
 }
@@ -227,6 +227,15 @@ std::set<data::variable> find_all_variables(const data::data_expression_list& x)
 std::set<data::variable> find_free_variables(const data::data_expression& x);
 std::set<data::variable> find_free_variables(const data::data_expression_list& x);
 bool search_variable(const data::data_expression& x, const data::variable& v);
+
+inline
+bool is_constant(const data_expression& x)
+{
+  return find_free_variables(x).empty();
+}
+
+typedef atermpp::term_list<variable> variable_list;
+variable_list free_variables(const data_expression& x);
 
 } // namespace data
 
@@ -273,8 +282,8 @@ application data_expression::operator()(const data_expression& e1, const data_ex
   return application(*this, e1, e2, e3, e4);
 }
 
-}
-}
+} // namespace data
+} // namespace mcrl2
 
 #endif // MCRL2_DATA_DATA_EXPRESSION_H
 

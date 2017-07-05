@@ -11,13 +11,12 @@
 
 #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
+#include "mcrl2/data/optimized_boolean_operators.h"
+#include "mcrl2/data/parse.h"
+#include "mcrl2/pbes/parse.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/optimized_boolean_operators.h"
-#include "mcrl2/data/parse.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
-#include "mcrl2/pbes/parse.h"
 
 using namespace mcrl2;
 
@@ -52,10 +51,8 @@ pbes_system::pbes_expression expr(const std::string& text)
 
 void test_boolean_operators()
 {
-  using namespace utilities;
-
-  BOOST_CHECK(optimized_or(expr("false"), expr("X")) == expr("X"));
-  BOOST_CHECK(optimized_and(expr("false"), expr("X")) == expr("false"));
+  BOOST_CHECK(data::optimized_or(expr("false"), expr("X")) == expr("X"));
+  BOOST_CHECK(data::optimized_and(expr("false"), expr("X")) == expr("false"));
 }
 
 int test_main(int argc, char* argv[])

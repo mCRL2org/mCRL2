@@ -12,9 +12,9 @@
 #ifndef MCRL2_DATA_NORMALIZE_SORTS_H
 #define MCRL2_DATA_NORMALIZE_SORTS_H
 
-#include <functional>
 #include "mcrl2/data/builder.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/sort_specification.h"
+#include <functional>
 
 namespace mcrl2
 {
@@ -27,16 +27,16 @@ namespace detail
 
 struct normalize_sorts_function: public std::unary_function<data::sort_expression, data::sort_expression>
 {
-  /* const data_specification& m_data_spec; */
-  const std::map< sort_expression, sort_expression > &m_normalised_aliases;
+  /* const sort_specification& m_sort_spec; */
+  const std::map< sort_expression, sort_expression >& m_normalised_aliases;
 
-  normalize_sorts_function(const data_specification& data_spec)
-    : m_normalised_aliases(data_spec.sort_alias_map())
+  normalize_sorts_function(const sort_specification& sort_spec)
+    : m_normalised_aliases(sort_spec.sort_alias_map())
   {
   }
 
   ///\brief Normalise sorts.
-  sort_expression operator()(const sort_expression& e)
+  sort_expression operator()(const sort_expression& e) const
   {
     // This routine takes the map m_normalised_aliases which contains pairs of sort expressions
     // <A,B> and takes all these pairs as rewrite rules, which are applied to e using an innermost
@@ -58,9 +58,9 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
       // Rewrite the arguments into normal form.
       std::vector< sort_expression > new_domain;
       sort_expression_list e_domain(function_sort(e).domain());
-      for (sort_expression_list::const_iterator i = e_domain.begin(); i != e_domain.end(); ++i)
+      for (const sort_expression& sort: e_domain)
       {
-        new_domain.push_back(this->operator()(*i));
+        new_domain.push_back(this->operator()(sort));
       }
       new_sort=function_sort(new_domain, this->operator()(function_sort(e).codomain()));
     }
@@ -77,17 +77,17 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
       // Rewrite the argument sorts to normal form.
       std::vector< structured_sort_constructor > new_constructors;
       const structured_sort_constructor_list& e_constructors(structured_sort(e).constructors());
-      for (structured_sort_constructor_list::const_iterator i = e_constructors.begin(); i != e_constructors.end(); ++i)
+      for (const structured_sort_constructor& e_constructor: e_constructors)
       {
-        std::vector< structured_sort_constructor_argument > new_arguments;
-        const structured_sort_constructor_argument_list& i_arguments(i->arguments());
-        for (structured_sort_constructor_argument_list::const_iterator j = i_arguments.begin(); j != i_arguments.end(); ++j)
+        std::vector<structured_sort_constructor_argument> new_arguments;
+        const structured_sort_constructor_argument_list& i_arguments(e_constructor.arguments());
+        for (const structured_sort_constructor_argument& i_argument : i_arguments)
         {
           new_arguments.push_back(structured_sort_constructor_argument(
-                                    j->name(),
-                                    this->operator()(j->sort())));
+                                    i_argument.name(),
+                                    this->operator()(i_argument.sort())));
         }
-        new_constructors.push_back(structured_sort_constructor(i->name(), new_arguments, i->recogniser()));
+        new_constructors.push_back(structured_sort_constructor(e_constructor.name(), new_arguments, e_constructor.recogniser()));
       }
       new_sort=structured_sort(new_constructors);
     }
@@ -99,7 +99,6 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
     {
       new_sort=this->operator()(i2->second); // rewrite the result until normal form.
     }
-    // m_normalised_aliases[e]=new_sort; // recall for later use. Note that e==new_sort is a possibility.
     return new_sort;
   }
 
@@ -107,72 +106,54 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
 
 } // namespace detail
 
-/* template <typename T>
+
+template <typename T>
 void normalize_sorts(T& x,
-                     const data::data_specification& data_spec,
-                     typename std::disable_if<typename std::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                     const data::sort_specification& sort_spec,
+                     typename std::enable_if< !std::is_base_of<atermpp::aterm, T>::value >::type* = nullptr
                     )
 {
   core::make_update_apply_builder<data::sort_expression_builder>
-  (data::detail::normalize_sorts_function(data_spec))(x);
+  (data::detail::normalize_sorts_function(sort_spec)).update(x);
 } 
 
 template <typename T>
 T normalize_sorts(const T& x,
-                  const data::data_specification& data_spec,
-                  typename std::enable_if<typename std::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                  const data::sort_specification& sort_spec,
+                  typename std::enable_if< std::is_base_of<atermpp::aterm, T>::value >::type* = nullptr
                  )
 {
   return core::make_update_apply_builder<data::sort_expression_builder>
-         (data::detail::normalize_sorts_function(data_spec))(x);
-} */
-
-template <typename T>
-void normalize_sorts(T& x,
-                     const data::data_specification& data_spec,
-                     typename std::enable_if< !std::is_base_of<atermpp::aterm, T>::value >::type* = 0
-                    )
-{
-  core::make_update_apply_builder<data::sort_expression_builder>
-  (data::detail::normalize_sorts_function(data_spec))(x);
-} 
-
-template <typename T>
-T normalize_sorts(const T& x,
-                  const data::data_specification& data_spec,
-                  typename std::enable_if< std::is_base_of<atermpp::aterm, T>::value >::type* = 0
-                 )
-{
-  return core::make_update_apply_builder<data::sort_expression_builder>
-         (data::detail::normalize_sorts_function(data_spec))(x);
+         (data::detail::normalize_sorts_function(sort_spec)).apply(x);
 }
 
 /* The functions below are defined as the function normalize_sorts
-   above does not work on other sorts than sort expressions. */
+   above does not work on other sorts than sort expressions. 
 
 inline sort_expression normalize_sorts(const basic_sort& x,
-                                       const data::data_specification& data_spec)
+                                       const data::sort_specification& sort_spec)
 {
-  return normalize_sorts(static_cast<sort_expression>(x),data_spec);
+  return normalize_sorts(static_cast<sort_expression>(x),sort_spec);
 }
 
 inline sort_expression normalize_sorts(const function_sort& x,
-                                       const data::data_specification& data_spec)
+                                       const data::sort_specification& sort_spec)
 {
-  return normalize_sorts(static_cast<sort_expression>(x),data_spec);
+  return normalize_sorts(static_cast<sort_expression>(x),sort_spec);
 }
 
 inline sort_expression normalize_sorts(const container_sort& x,
-                                       const data::data_specification& data_spec)
+                                       const data::sort_specification& sort_spec)
 {
-  return normalize_sorts(static_cast<sort_expression>(x),data_spec);
+  return normalize_sorts(static_cast<sort_expression>(x),sort_spec);
 }
 
 inline sort_expression normalize_sorts(const structured_sort& x,
-                                       const data::data_specification& data_spec)
+                                       const data::sort_specification& sort_spec)
 {
-  return normalize_sorts(static_cast<sort_expression>(x),data_spec);
+  return normalize_sorts(static_cast<sort_expression>(x),sort_spec);
 }
+*/
 
 } // namespace data
 

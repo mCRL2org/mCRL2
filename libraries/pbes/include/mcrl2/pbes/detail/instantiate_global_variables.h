@@ -40,16 +40,15 @@ void instantiate_global_variables(pbes& p)
   data::mutable_map_substitution<> sigma;
   data::representative_generator default_expression_generator(p.data());
   std::set<data::variable> to_be_removed;
-  const std::set<data::variable>& v = p.global_variables();
-  for (std::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (const data::variable& v: p.global_variables())
   {
-    data::data_expression d = default_expression_generator(i->sort());
+    data::data_expression d = default_expression_generator(v.sort());
     if (!d.defined())
     {
-      throw mcrl2::runtime_error("Error in pbes::instantiate_global_variables: could not instantiate " + data::pp(*i));
+      throw mcrl2::runtime_error("Error in pbes::instantiate_global_variables: could not instantiate " + data::pp(v));
     }
-    sigma[*i] = d;
-    to_be_removed.insert(*i);
+    sigma[v] = d;
+    to_be_removed.insert(v);
   }
   pbes_system::replace_free_variables(p.equations(), sigma);
   p.initial_state() = pbes_system::replace_free_variables(p.initial_state(), sigma);

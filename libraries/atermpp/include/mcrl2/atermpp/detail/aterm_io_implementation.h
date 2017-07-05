@@ -21,7 +21,7 @@ namespace atermpp {
 namespace detail {
 
 inline
-std::size_t writeIntToBuf(const size_t val, unsigned char* buf)
+std::size_t writeIntToBuf(const std::size_t val, unsigned char* buf)
 {
   if (val < (1 << 7))
   {
@@ -53,7 +53,7 @@ std::size_t writeIntToBuf(const size_t val, unsigned char* buf)
     return 4;
   }
 
-  if (sizeof(size_t)>4 && val>((size_t)1<<4*sizeof(size_t)))
+  if (sizeof(std::size_t)>4 && val>((std::size_t)1<<4*sizeof(std::size_t)))
   {
     mCRL2log(mcrl2::log::warning) << "losing precision of integers when writing to .baf file" << std::endl;
   }

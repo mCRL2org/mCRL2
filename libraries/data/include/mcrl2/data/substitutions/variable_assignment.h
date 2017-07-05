@@ -12,19 +12,19 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_VARIABLE_ASSIGNMENT_H
 #define MCRL2_DATA_SUBSTITUTIONS_VARIABLE_ASSIGNMENT_H
 
+#include "mcrl2/data/is_simple_substitution.h"
+#include "mcrl2/data/undefined.h"
+#include "mcrl2/utilities/exception.h"
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "mcrl2/data/is_simple_substitution.h"
-#include "mcrl2/data/undefined.h"
-#include "mcrl2/utilities/exception.h"
 
 namespace mcrl2 {
 
 namespace data {
 
-/// \brief Substitution that maps a data expression to a data expression
+/// \brief Substitution that maps a single variable to a data expression
 struct variable_assignment: public std::unary_function<variable, data_expression>
 {
   typedef variable variable_type;
@@ -38,7 +38,7 @@ struct variable_assignment: public std::unary_function<variable, data_expression
     rhs(rhs_)
   {}
 
-  const data_expression& operator()(const variable& x)
+  const data_expression& operator()(const variable& x) const
   {
     if (x == lhs)
     {

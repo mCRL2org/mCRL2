@@ -31,7 +31,7 @@ void test_indexed_set()
   BOOST_CHECK(t.size() == 2);
 
   {
-    indexed_set<atermpp::aterm> t1 = t;
+    const indexed_set<atermpp::aterm>& t1 = t;
   }
   indexed_set<atermpp::aterm> t2 = t;
 

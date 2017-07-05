@@ -12,17 +12,18 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/detail/concepts.h"
+#include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/expression_traits.h"
+#include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/detail/concepts.h"
-#include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/substitutions/mutable_indexed_substitution.h"
 #include "mcrl2/data/substitutions/mutable_map_substitution.h"
@@ -47,9 +48,10 @@ void enumerate(const data_specification& dataspec,
   typedef enumerator_list_element_with_substitution<> enumerator_element;
   typedef enumerator_algorithm_with_iterator<> enumerator_type;
 
+  data::enumerator_identifier_generator id_generator;
   rewriter rewr(dataspec);
-  enumerator_type enumerator(rewr, dataspec, rewr);
-  size_t number_of_solutions = 0;
+  enumerator_type enumerator(rewr, dataspec, rewr, id_generator);
+  std::size_t number_of_solutions = 0;
   mutable_indexed_substitution<> sigma;
   std::deque<enumerator_element> enumerator_deque(1, enumerator_element(variables, expression));
   auto i = enumerator.begin(sigma, enumerator_deque);
@@ -72,7 +74,8 @@ void enumerate(const std::string& dataspec_text,
 {
   data_specification dataspec = parse_data_specification(dataspec_text);
   variable_list variables = parse_variable_list(variable_text, dataspec);
-  data_expression expression = parse_data_expression(expression_text, free_variable_text, dataspec);
+  variable_list free_variables = parse_variable_list(free_variable_text, dataspec);
+  data_expression expression = parse_data_expression(expression_text, free_variables, dataspec);
   enumerate(dataspec, variables, expression, number_of_solutions, more_solutions_possible);
 }
 
@@ -86,10 +89,11 @@ BOOST_AUTO_TEST_CASE(empty_test)
   rewriter rewr(dataspec);
   variable_list variables;
 
-  size_t count = 0;
+  std::size_t count = 0;
+  data::enumerator_identifier_generator id_generator;
 
   // explicit with condition rewr and condition
-  enumerator_type enumerator(rewr, dataspec, rewr);
+  enumerator_type enumerator(rewr, dataspec, rewr, id_generator);
 
   mutable_indexed_substitution<> sigma;
   std::deque<enumerator_element> enumerator_deque(1, enumerator_element(variables, sort_bool::true_()));
@@ -251,9 +255,10 @@ data_expression_vector generate_values(const data_specification& dataspec, const
 
   std::size_t max_internal_variables = 10000;
   data_expression_vector result;
+  data::enumerator_identifier_generator id_generator;
 
   rewriter rewr(dataspec);
-  enumerator_type enumerator(rewr, dataspec, rewr, max_internal_variables);
+  enumerator_type enumerator(rewr, dataspec, rewr, id_generator, max_internal_variables);
   variable v("x", s);
   variable_list variables;
   variables.push_front(v);
@@ -309,10 +314,9 @@ BOOST_AUTO_TEST_CASE(generate_values_test)
     ;
   data_specification dataspec = parse_data_specification(DATASPEC);
 
-  auto const& sorts = dataspec.user_defined_sorts();
-  for (auto i = sorts.begin(); i != sorts.end(); ++i)
+  for (const sort_expression& sort: dataspec.user_defined_sorts())
   {
-    sort_expression s = normalize_sorts(*i,dataspec);
+    sort_expression s = normalize_sorts(sort, dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data_expression_vector v = generate_values(dataspec, s, 10);
     std::clog << " possible values: " << core::detail::print_set(v) << std::endl;
@@ -320,11 +324,9 @@ BOOST_AUTO_TEST_CASE(generate_values_test)
     BOOST_CHECK(no_duplicates(v));
   }
 
-  const alias_vector& aliases = dataspec.user_defined_aliases();
-  for (auto i = aliases.begin(); i != aliases.end(); ++i)
+  for (const alias& a: dataspec.user_defined_aliases())
   {
-    alias a = *i;
-    sort_expression s = normalize_sorts(i->reference(),dataspec);
+    sort_expression s = normalize_sorts(a.reference(),dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data_expression_vector v = generate_values(dataspec, s, 10);
     std::clog << " possible values: " << core::detail::print_set(v) << std::endl;
@@ -351,13 +353,82 @@ BOOST_AUTO_TEST_CASE(constructors_that_are_not_a_normal_form_test)
     ;
   std::string variable_text = "f: FloorID;";
   std::string expression_text = "equal(f, F2)";
-  std::string free_variable_text = variable_text;
+  const std::string& free_variable_text = variable_text;
   std::size_t number_of_solutions = 1;
   bool more_solutions_possible = false;
   enumerate(dataspec_text, variable_text, expression_text, free_variable_text, number_of_solutions, more_solutions_possible);
 }
 
+BOOST_AUTO_TEST_CASE(cannot_enumerate_real_default)
+{
+  typedef data::enumerator_list_element<data_expression> enumerator_element;
+
+  data_expression result = data::sort_bool::true_();
+  data::variable_list v  = { data::variable("r", data::sort_real::real_()) };
+  data_expression phi = parse_data_expression("r == r", v);
+  data::data_specification dataspec;
+  dataspec.add_context_sort(data::sort_real::real_());
+  data::rewriter R(dataspec);
+  data::enumerator_identifier_generator id_generator("x");
+  data::enumerator_algorithm<> E(R, dataspec, R, id_generator, (std::numeric_limits<std::size_t>::max)(), true);
+  std::deque<enumerator_element> P;
+  data::rewriter::substitution_type sigma;
+
+  try
+  {
+    P.push_back(enumerator_element(v, phi));
+    E.next(P, sigma, data::is_not_true());
+    while (!P.empty())
+    {
+      result = data::optimized_and(result, P.front().expression());
+      P.pop_front();
+      if (result == data::sort_bool::false_())
+      {
+        break;
+      }
+      E.next(P, sigma, data::is_not_true());
+    }
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    std::cout << e.what() << std::endl;
+    return;
+  }
+  BOOST_CHECK(false);
+}
+
+BOOST_AUTO_TEST_CASE(cannot_enumerate_real_with_substitution)
+{
+  typedef data::enumerator_list_element_with_substitution<data_expression> enumerator_element;
+
+  data::data_specification dataspec;
+  dataspec.add_context_sort(data::sort_real::real_());
+  data::rewriter R(dataspec);
+  data::variable_list v;
+  v.push_front(data::variable("r", data::sort_real::real_()));
+  data_expression phi = parse_data_expression("r == r", v);
+  data::mutable_indexed_substitution<> sigma;
+  std::size_t max_count = 1000;
+  bool throw_exceptions = true;
+  data::enumerator_identifier_generator id_generator;
+  data::enumerator_algorithm_with_iterator<rewriter, enumerator_element, enumerator_identifier_generator> E(R, dataspec, R, id_generator, max_count, throw_exceptions);
+  std::deque<enumerator_element> P;
+  P.push_back(enumerator_element(v, phi));
+  try {
+    for (auto i = E.begin(sigma, P); i != E.end() ; ++i)
+    {
+      // skip
+    }
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    std::cout << e.what() << std::endl;
+    return;
+  }
+  BOOST_CHECK(false);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

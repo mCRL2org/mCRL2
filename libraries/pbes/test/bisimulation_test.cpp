@@ -1,18 +1,14 @@
-#include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/utilities/test_utilities.h"
-#include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/pbes/bisimulation.h"
-#include "mcrl2/pbes/pbespgsolve.h"
+#include "mcrl2/pbes/detail/pbes2bool.h"
+#include <boost/test/included/unit_test_framework.hpp>
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::log;
-using mcrl2::utilities::collect_after_test_case;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void test_bisimulation(const std::string& s1, const std::string& s2,
                        bool strongly_bisimilar,
@@ -25,8 +21,8 @@ void test_bisimulation(const std::string& s1, const std::string& s2,
   specification spec2;
   if (linearize)
   {
-    spec1 = linearise(s1);
-    spec2 = linearise(s2);
+    spec1 = remove_stochastic_operators(linearise(s1));
+    spec2 = remove_stochastic_operators(linearise(s2));
   }
   else
   {
@@ -37,22 +33,26 @@ void test_bisimulation(const std::string& s1, const std::string& s2,
   std::clog << "Testing strong bisimulation" << std::endl;
   pbes sb  = strong_bisimulation(spec1, spec2);
   BOOST_CHECK(sb.is_well_typed());
-  BOOST_CHECK_EQUAL(pbespgsolve(sb), strongly_bisimilar);
+  bool sb_solution = pbes_system::detail::pbes2bool(sb);
+  BOOST_CHECK(sb_solution == strongly_bisimilar);
 
   std::clog << "Testing branching bisimulation" << std::endl;
   pbes bb  = branching_bisimulation(spec1, spec2);
+  bool bb_solution = pbes_system::detail::pbes2bool(bb);
   BOOST_CHECK(bb.is_well_typed());
-  BOOST_CHECK_EQUAL(pbespgsolve(bb), branching_bisimilar);
+  BOOST_CHECK(bb_solution == branching_bisimilar);
 
   std::clog << "Testing branching simulation" << std::endl;
   pbes bs = branching_simulation_equivalence(spec1, spec2);
+  bool bs_solution = pbes_system::detail::pbes2bool(bs);
   BOOST_CHECK(bs.is_well_typed());
-  BOOST_CHECK_EQUAL(pbespgsolve(bs), branching_similar);
+  BOOST_CHECK(bs_solution == branching_similar);
 
   std::clog << "Testing weak bisimulation" << std::endl;
   pbes wb  = weak_bisimulation(spec1, spec2);
+  bool wb_solution = pbes_system::detail::pbes2bool(wb);
   BOOST_CHECK(wb.is_well_typed());
-  BOOST_CHECK_EQUAL(pbespgsolve(wb), weakly_bisimilar);
+  BOOST_CHECK(wb_solution == weakly_bisimilar);
 }
 
 BOOST_AUTO_TEST_CASE(ABP)
@@ -188,5 +188,5 @@ BOOST_AUTO_TEST_CASE(buffers_explicit_lose)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  return 0;
+  return nullptr;
 }

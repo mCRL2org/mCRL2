@@ -59,12 +59,5 @@
  {"name": "3 Mute leader",
   "MUTE": 1},
  {"name": "3 Mute follower",
-  "MUTE": 2},
- {"name": "3 Resetting leader",
-  "RESET": 1,
-  "ATTEMPTS": 4,
-  "HDR": 1,
-  "TYPE1": "Normal",
-  "TYPE2": "Normal",
-  "TYPE3": "Normal"}
+  "MUTE": 2}
 ] 

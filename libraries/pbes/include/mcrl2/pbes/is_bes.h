@@ -9,8 +9,8 @@
 /// \file pbes/include/mcrl2/pbes/is_bes.h
 /// \brief add your file description here.
 
-#ifndef PBES_INCLUDE_MCRL2_PBES_IS_BES_H
-#define PBES_INCLUDE_MCRL2_PBES_IS_BES_H
+#ifndef MCRL2_PBES_IS_BES_H
+#define MCRL2_PBES_IS_BES_H
 
 #include "mcrl2/pbes/traverser.h"
 
@@ -25,27 +25,13 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
   typedef pbes_expression_traverser<is_bes_traverser> super;
   using super::enter;
   using super::leave;
-  using super::operator();
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc.inc.h"
-#endif
+  using super::apply;
 
   bool result;
 
   is_bes_traverser()
     : result(true)
   {}
-
-  void enter(const not_& /* x */)
-  {
-    result = false;
-  }
-
-  void enter(const imp& /* x */)
-  {
-    result = false;
-  }
 
   void enter(const forall& /* x */)
   {
@@ -55,6 +41,14 @@ struct is_bes_traverser: public pbes_expression_traverser<is_bes_traverser>
   void enter(const exists& /* x */)
   {
     result = false;
+  }
+
+  void enter(const data::data_expression& x)
+  {
+    if (x != data::sort_bool::true_() && x != data::sort_bool::false_())
+    {
+      result = false;
+    }
   }
 
   void enter(const propositional_variable_instantiation& x)
@@ -81,7 +75,7 @@ template <typename T>
 bool is_bes(const T& x)
 {
   is_bes_traverser f;
-  f(x);
+  f.apply(x);
   return f.result;
 }
 
@@ -89,4 +83,4 @@ bool is_bes(const T& x)
 
 } // namespace mcrl2
 
-#endif // PBES_INCLUDE_MCRL2_PBES_IS_BES_H
+#endif // MCRL2_PBES_IS_BES_H

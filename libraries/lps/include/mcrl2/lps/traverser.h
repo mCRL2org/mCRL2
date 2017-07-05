@@ -10,6 +10,7 @@
 /// \brief add your file description here.
 
 // To avoid circular inclusion problems
+
 #ifndef MCRL2_LPS_SPECIFICATION_H
 #include "mcrl2/lps/specification.h"
 #endif
@@ -18,9 +19,9 @@
 #define MCRL2_LPS_TRAVERSER_H
 
 #include "mcrl2/data/traverser.h"
+#include "mcrl2/lps/stochastic_specification.h"
 #include "mcrl2/process/traverser.h"
-#include "mcrl2/process/untyped_action.h"
-#include "mcrl2/lps/untyped_multi_action.h"
+#include "mcrl2/process/untyped_multi_action.h"
 
 namespace mcrl2
 {
@@ -35,78 +36,117 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  void operator()(const lps::deadlock& x)
+  void apply(const lps::deadlock& x)
   {
     static_cast<Derived&>(*this).enter(x);
     if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
+      static_cast<Derived&>(*this).apply(x.time());
     }
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::multi_action& x)
+  void apply(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.actions());
     if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
+      static_cast<Derived&>(*this).apply(x.time());
     }
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::untyped_multi_action& x)
+  void apply(const lps::deadlock_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.deadlock());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::deadlock_summand& x)
+  void apply(const lps::action_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.summation_variables());
-    static_cast<Derived&>(*this)(x.condition());
-    static_cast<Derived&>(*this)(x.deadlock());
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::action_summand& x)
+  void apply(const lps::process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.summation_variables());
-    static_cast<Derived&>(*this)(x.condition());
-    static_cast<Derived&>(*this)(x.multi_action());
-    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).apply(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::process_initializer& x)
+  void apply(const lps::linear_process& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).apply(x.process_parameters());
+    static_cast<Derived&>(*this).apply(x.deadlock_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::linear_process& x)
+  void apply(const lps::specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.process_parameters());
-    static_cast<Derived&>(*this)(x.deadlock_summands());
-    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).apply(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::specification& x)
+  void apply(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.action_labels());
-    static_cast<Derived&>(*this)(x.global_variables());
-    static_cast<Derived&>(*this)(x.process());
-    static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).apply(x.variables());
+    if (x.is_defined()) { static_cast<Derived&>(*this).apply(x.distribution()); }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.assignments());
+    static_cast<Derived&>(*this).apply(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.process_parameters());
+    static_cast<Derived&>(*this).apply(x.deadlock_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).apply(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.assignments());
+    static_cast<Derived&>(*this).apply(x.distribution());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -119,7 +159,7 @@ struct sort_expression_traverser: public add_traverser_sort_expressions<process:
   typedef add_traverser_sort_expressions<process::sort_expression_traverser, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 //--- end generated add_traverser_sort_expressions code ---//
 
@@ -130,73 +170,107 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  void operator()(const lps::deadlock& x)
+  void apply(const lps::deadlock& x)
   {
     static_cast<Derived&>(*this).enter(x);
     if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
+      static_cast<Derived&>(*this).apply(x.time());
     }
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::multi_action& x)
+  void apply(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.actions());
     if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
+      static_cast<Derived&>(*this).apply(x.time());
     }
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::untyped_multi_action& x)
+  void apply(const lps::deadlock_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.deadlock());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::deadlock_summand& x)
+  void apply(const lps::action_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.condition());
-    static_cast<Derived&>(*this)(x.deadlock());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::action_summand& x)
+  void apply(const lps::process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.condition());
-    static_cast<Derived&>(*this)(x.multi_action());
-    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).apply(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::process_initializer& x)
+  void apply(const lps::linear_process& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).apply(x.deadlock_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::linear_process& x)
+  void apply(const lps::specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.deadlock_summands());
-    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).apply(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::specification& x)
+  void apply(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.process());
-    static_cast<Derived&>(*this)(x.initial_process());
+    if (x.is_defined()) { static_cast<Derived&>(*this).apply(x.distribution()); }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.assignments());
+    static_cast<Derived&>(*this).apply(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.deadlock_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).apply(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.assignments());
+    static_cast<Derived&>(*this).apply(x.distribution());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -209,7 +283,7 @@ struct data_expression_traverser: public add_traverser_data_expressions<process:
   typedef add_traverser_data_expressions<process::data_expression_traverser, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 //--- end generated add_traverser_data_expressions code ---//
 
@@ -220,77 +294,115 @@ struct add_traverser_variables: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  void operator()(const lps::deadlock& x)
+  void apply(const lps::deadlock& x)
   {
     static_cast<Derived&>(*this).enter(x);
     if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
+      static_cast<Derived&>(*this).apply(x.time());
     }
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::multi_action& x)
+  void apply(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.actions());
     if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
+      static_cast<Derived&>(*this).apply(x.time());
     }
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::untyped_multi_action& x)
+  void apply(const lps::deadlock_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.deadlock());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::deadlock_summand& x)
+  void apply(const lps::action_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.summation_variables());
-    static_cast<Derived&>(*this)(x.condition());
-    static_cast<Derived&>(*this)(x.deadlock());
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::action_summand& x)
+  void apply(const lps::process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.summation_variables());
-    static_cast<Derived&>(*this)(x.condition());
-    static_cast<Derived&>(*this)(x.multi_action());
-    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).apply(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::process_initializer& x)
+  void apply(const lps::linear_process& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).apply(x.process_parameters());
+    static_cast<Derived&>(*this).apply(x.deadlock_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::linear_process& x)
+  void apply(const lps::specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.process_parameters());
-    static_cast<Derived&>(*this)(x.deadlock_summands());
-    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).apply(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::specification& x)
+  void apply(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.global_variables());
-    static_cast<Derived&>(*this)(x.process());
-    static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).apply(x.variables());
+    if (x.is_defined()) { static_cast<Derived&>(*this).apply(x.distribution()); }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.assignments());
+    static_cast<Derived&>(*this).apply(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.process_parameters());
+    static_cast<Derived&>(*this).apply(x.deadlock_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).apply(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.assignments());
+    static_cast<Derived&>(*this).apply(x.distribution());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -303,7 +415,7 @@ struct variable_traverser: public add_traverser_variables<process::variable_trav
   typedef add_traverser_variables<process::variable_traverser, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 //--- end generated add_traverser_variables code ---//
 
@@ -314,78 +426,117 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  void operator()(const lps::deadlock& x)
+  void apply(const lps::deadlock& x)
   {
     static_cast<Derived&>(*this).enter(x);
     if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
+      static_cast<Derived&>(*this).apply(x.time());
     }
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::multi_action& x)
+  void apply(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.actions());
     if (x.has_time())
     {
-      static_cast<Derived&>(*this)(x.time());
+      static_cast<Derived&>(*this).apply(x.time());
     }
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::untyped_multi_action& x)
+  void apply(const lps::deadlock_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.deadlock());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::deadlock_summand& x)
+  void apply(const lps::action_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.summation_variables());
-    static_cast<Derived&>(*this)(x.condition());
-    static_cast<Derived&>(*this)(x.deadlock());
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::action_summand& x)
+  void apply(const lps::process_initializer& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.summation_variables());
-    static_cast<Derived&>(*this)(x.condition());
-    static_cast<Derived&>(*this)(x.multi_action());
-    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).apply(x.assignments());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::process_initializer& x)
+  void apply(const lps::linear_process& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).apply(x.process_parameters());
+    static_cast<Derived&>(*this).apply(x.deadlock_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::linear_process& x)
+  void apply(const lps::specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.process_parameters());
-    static_cast<Derived&>(*this)(x.deadlock_summands());
-    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).apply(x.initial_process());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::specification& x)
+  void apply(const lps::stochastic_distribution& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.action_labels());
-    static_cast<Derived&>(*this)(x.global_variables());
-    static_cast<Derived&>(*this)(x.process());
-    static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).apply(x.variables());
+    if (x.is_defined()) { static_cast<Derived&>(*this).apply(x.distribution()); }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.summation_variables());
+    static_cast<Derived&>(*this).apply(x.condition());
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.assignments());
+    static_cast<Derived&>(*this).apply(x.distribution());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.process_parameters());
+    static_cast<Derived&>(*this).apply(x.deadlock_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.global_variables());
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).apply(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.assignments());
+    static_cast<Derived&>(*this).apply(x.distribution());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -398,7 +549,7 @@ struct identifier_string_traverser: public add_traverser_identifier_strings<proc
   typedef add_traverser_identifier_strings<process::identifier_string_traverser, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 //--- end generated add_traverser_identifier_strings code ---//
 
@@ -409,34 +560,56 @@ struct add_traverser_action_labels: public Traverser<Derived>
   typedef Traverser<Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
-  void operator()(const lps::multi_action& x)
+  void apply(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.actions());
+    static_cast<Derived&>(*this).apply(x.actions());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::action_summand& x)
+  void apply(const lps::action_summand& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.multi_action());
+    static_cast<Derived&>(*this).apply(x.multi_action());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::linear_process& x)
+  void apply(const lps::linear_process& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).apply(x.action_summands());
     static_cast<Derived&>(*this).leave(x);
   }
 
-  void operator()(const lps::specification& x)
+  void apply(const lps::specification& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.action_labels());
-    static_cast<Derived&>(*this)(x.process());
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.multi_action());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void apply(const lps::stochastic_specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).apply(x.action_labels());
+    static_cast<Derived&>(*this).apply(x.process());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -449,7 +622,7 @@ struct action_label_traverser: public add_traverser_action_labels<process::actio
   typedef add_traverser_action_labels<process::action_label_traverser, Derived> super;
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 };
 //--- end generated add_traverser_action_labels code ---//
 

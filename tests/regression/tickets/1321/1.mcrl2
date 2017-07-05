@@ -1,0 +1,27 @@
+act  a, b, c, d, e;
+
+proc P(m: Nat, n: Nat) =
+        d . P(m = 0, n = 1)
+      + e . P(m = 2, n = 3)
+      + c . b . P(n = 1)
+      + c . b . P(n = 1)
+      + c . b . P()
+      + c . P(n = 1)
+      + c . P(n = 1)
+      + c . P(n = 1)
+      + b . P(n = 1)
+      + c . b . P(n = 1)
+      + c . b . P(n = 1)
+      + c . P(n = 1)
+      + c . b . P(n = 1)
+      + c . b . P(n = 1)
+      + c . b . P(n = 1)
+      + c . b . P(n = 1)
+      + c . P(n = 1)
+ ;
+
+init
+     allow({ a },
+           P(2, 3)
+     );
+

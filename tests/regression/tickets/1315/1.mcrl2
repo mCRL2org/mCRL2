@@ -1,0 +1,21 @@
+act a;
+    b;
+    c;
+    d;
+    e;
+    f;
+    g;
+    h;
+    i;
+
+init
+
+  allow({ a, b, c },
+        comm({
+               d | e -> a,
+               f | g -> b,
+               h | i -> c
+             },
+             rename({g -> a}, e . f) || rename({f -> a}, d . g) || i)
+           );
+

@@ -9,11 +9,11 @@
 /// \file pbes_property_map_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/txt2pbes.h"
+#include <boost/test/minimal.hpp>
 #include <iostream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/detail/pbes_property_map.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

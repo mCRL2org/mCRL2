@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_PFNF_PRINT_H
 #define MCRL2_PBES_DETAIL_PFNF_PRINT_H
 
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/detail/is_pfnf.h"
+#include "mcrl2/pbes/print.h"
 
 namespace mcrl2 {
 
@@ -28,7 +28,7 @@ struct pfnf_printer: public pbes_system::detail::printer<Derived>
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
 
   using super::print_abstraction;
   using super::print_list;
@@ -121,7 +121,7 @@ struct pfnf_printer: public pbes_system::detail::printer<Derived>
     derived().leave(x);
   }
 
-  void operator()(const pbes_system::pbes_expression& x)
+  void apply(const pbes_system::pbes_expression& x)
   {
     derived().enter(x);
     if (is_abstraction(x))
@@ -130,7 +130,7 @@ struct pfnf_printer: public pbes_system::detail::printer<Derived>
     }
     else
     {
-      super::operator()(x);
+      super::apply(x);
     }
     derived().leave(x);
   }
@@ -145,7 +145,7 @@ struct pfnf_stream_printer
   void operator()(const T& x, std::ostream& out)
   {
     core::detail::apply_printer<pbes_system::detail::pfnf_printer> printer(out);
-    printer(x);
+    printer.apply(x);
   }
 };
 

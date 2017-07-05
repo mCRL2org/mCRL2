@@ -9,10 +9,10 @@
 /// \file sequence_test.cpp
 /// \brief Add your file description here.
 
+#include "mcrl2/utilities/sequence.h"
+#include <boost/test/minimal.hpp>
 #include <numeric>
 #include <vector>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/utilities/sequence.h"
 
 using namespace mcrl2;
 

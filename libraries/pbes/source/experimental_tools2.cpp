@@ -12,5 +12,4 @@
 #include "mcrl2/pbes/tools.h"
 
 #include "mcrl2/pbes/tools/complps2pbes.h"
-#include "mcrl2/pbes/tools/pbesstategraph.h"
 #include "mcrl2/pbes/tools/pbesabstract.h"

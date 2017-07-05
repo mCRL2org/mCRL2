@@ -1,0 +1,431 @@
+// Author(s): Jan Friso Groote
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/data/sort_specification.h
+/// \brief This file describes the a sort_specification, 
+//         which contains declared sorts and sort aliases.
+
+#ifndef MCRL2_DATA_SORT_SPECIFICATION_H
+#define MCRL2_DATA_SORT_SPECIFICATION_H
+
+#include "mcrl2/utilities/logger.h"
+
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/sort_expression.h"
+
+#include "mcrl2/data/alias.h"
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/structured_sort.h"
+
+// Predefined datatypes
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/standard.h"
+
+
+namespace mcrl2
+{
+namespace data
+{
+
+/// \cond INTERNAL_DOC
+namespace detail
+{
+
+  template < typename Container, typename T >
+  inline
+  void remove(Container& container, const T& t)
+  {
+    typename Container::iterator i = std::find(container.begin(), container.end(), t);
+    if(i != container.end())
+    {
+      container.erase(i);
+    }
+  } 
+
+} // end namespace detail
+/// \endcond
+
+class sort_specification;
+sort_expression normalize_sorts(const sort_expression& x, const data::sort_specification& sortspec);
+
+class sort_specification
+{
+  protected:
+
+    /// \brief This boolean indicates whether the variables
+    /// m_normalised_constructors, m_mappings, m_equations, m_normalised_sorts,
+    /// m_normalised_aliases are up to date with respect to changes of this sort specification.
+    mutable bool m_normalised_sorts_are_up_to_date;
+
+    /// \brief The variable below indicates whether a surrounding 
+    ///        data specification is up to data with respect to
+    ///        sort normalisation and available sorts. This is set to false if 
+    ///        an alias or a new sort is added.
+    mutable bool m_normalised_data_is_up_to_date;
+
+    /// \brief The basic sorts and structured sorts in the specification.
+    basic_sort_vector m_user_defined_sorts;
+
+    /// \brief Set containing all the sorts, including the system defined ones.
+    mutable std::set<sort_expression> m_normalised_sorts;
+
+    /// \brief The sorts that occur in the context of this data specification.
+    /// The normalised sorts, constructors, mappings and equations are complete
+    /// with respect to these sorts.
+    std::set< sort_expression > m_sorts_in_context;
+    
+    /// \brief The basic sorts and structured sorts in the specification.
+    alias_vector m_user_defined_aliases;
+     
+
+    /// \brief Table containing how sorts should be mapped to normalised sorts.
+    mutable std::map< sort_expression, sort_expression > m_normalised_aliases;
+
+  public:
+
+    /// \brief Default constructor
+    sort_specification()
+     : m_normalised_sorts_are_up_to_date(false),
+       m_normalised_data_is_up_to_date(false)
+    {
+      add_predefined_basic_sorts();
+    }
+
+    sort_specification(const basic_sort_vector& sorts, const alias_vector& aliases)
+     : m_normalised_sorts_are_up_to_date(false),
+       m_normalised_data_is_up_to_date(false)
+    {
+      add_predefined_basic_sorts();
+
+      for(const basic_sort& sort: sorts)
+      {
+        add_sort(sort);
+      }
+      for(const alias& a: aliases)
+      {
+        add_alias(a);
+      }
+    } 
+
+
+    /// \brief Adds a sort to this specification
+    /// \param[in] s A sort expression.
+    void add_sort(const basic_sort& s)
+    {
+      m_user_defined_sorts.push_back(s);
+      import_system_defined_sort(s);
+      sorts_are_not_necessarily_normalised_anymore();
+    }
+
+    /// \brief Adds a sort to this specification, and marks it as system
+    ///        defined
+    ///
+    /// \param[in] s A sort expression.
+    /// \pre s does not yet occur in this specification.
+    /// \post is_system_defined(s) = true
+    /// \note this operation does not invalidate iterators of sorts_const_range
+    void add_system_defined_sort(const sort_expression& s) 
+    {
+      import_system_defined_sort(s);
+      // const sort_expression normalised(normalize_sorts(s,*this));
+      // m_normalised_sorts.insert(normalised);
+    }
+
+    ///\brief Adds the sort s to the context sorts
+    /// \param[in] s a sort expression. It is
+    /// added to m_sorts_in_context. For this sort standard functions are generated
+    /// automatically (if, <,<=,==,!=,>=,>) and if the sort is a standard sort,
+    /// the necessary constructors, mappings and equations are added to the data type.
+    void add_context_sort(const sort_expression& s)
+    {
+      import_system_defined_sort(s);
+      sorts_are_not_necessarily_normalised_anymore();
+    }
+
+    ///\brief Adds the sorts in c to the context sorts
+    /// \param[in] c a container of sort expressions. These are
+    /// added to m_sorts_in_context. For these sorts standard functions are generated
+    /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
+    /// the necessary constructors, mappings and equations are added to the data type.
+    template <typename Container>
+    void add_context_sorts(const Container& c, typename atermpp::enable_if_container<Container>::type* = nullptr)
+    {
+      for(typename Container::const_iterator i=c.begin(); i!=c.end(); ++i)
+      {
+        add_context_sort(*i);
+      }
+    }
+
+    /// \brief Removes sort from the user defined sorts in the specification.
+    /// Note that this does not remove aliases for the sort, and it does not remove
+    /// constructors, mappings and equations, and also keeps the sort as
+    /// defined in the context.
+    /// \param[in] s A sort expression.
+    /// \post s does not occur in this specification.
+    void remove_sort(const sort_expression& s)
+    {
+      detail::remove(m_user_defined_sorts,s);
+      sorts_are_not_necessarily_normalised_anymore();
+    }
+
+    /// \brief Gets the normalised sort declarations including those that are system defined.
+    ///        This is the set with all sorts that occur in a data_specification, or that
+    ///        have been registered as sorts used in the context.
+    ///
+    /// \details The time complexity of this operation is constant, except when
+    ///      the data specification has been changed, in which case it can be that
+    ///      the sorts must be renormalised. This operation is linear in the size of
+    ///      the specification.
+    /// \return The sort normalised using the aliases occurring in this specification,
+    ///         including the built in sorts such as Bool and Nat, and complex
+    ///         sorts that are used in the user defined aliases and sorts, but
+    ///         also that are registered as sorts used in the context of the specification.
+    inline
+    const std::set<sort_expression>& sorts() const
+    {
+      normalise_sort_specification_if_required();
+      return m_normalised_sorts;
+    }
+
+    /// \brief Return the user defined context sorts of the current specification.
+    /// \details Time complexity is constant.
+    /// \return The set with sorts used in the context.
+    const std::set<sort_expression>& context_sorts() const
+    {
+      return m_sorts_in_context;
+    }
+
+    /// \brief Gets all sorts defined by a user (excluding the system defined sorts).
+    ///
+    /// \details The time complexity of this operation is constant.
+    /// \return The user defined sort declaration.
+    inline
+    const basic_sort_vector& user_defined_sorts() const
+    {
+      return m_user_defined_sorts;
+    }
+    
+    /// \brief Adds an alias (new name for a sort) to this specification
+    /// \param[in] a an alias
+    void add_alias(alias const& a)
+    {
+      m_user_defined_aliases.push_back(a);
+      import_system_defined_sort(a.name());
+      import_system_defined_sort(a.reference());
+      sorts_are_not_necessarily_normalised_anymore();
+    }
+
+
+    /// \brief Removes a user defined //alias from specification.
+    /// \details This also removes the defined sort of this alias from the set of user defined sorts.
+    ///          This routine does not check whether the alias, or name was in the user defined sets.
+    void remove_alias(alias const& a)
+    {
+      detail::remove(m_user_defined_sorts, a.name());
+      detail::remove(m_user_defined_aliases, a);
+      sorts_are_not_necessarily_normalised_anymore();
+    }
+
+
+    /// \brief Gets the user defined aliases.
+    /// \details The time complexity is constant.
+    inline
+    const alias_vector& user_defined_aliases() const
+    {
+      return m_user_defined_aliases;
+    }
+
+
+    /// \brief Gets a normalisation mapping that maps each sort to its unique normalised sort
+    /// \details This map is required in functions with the name normalize_sorts.
+    ///    When in a specification sort aliases are used, like sort A=B or
+    ///    sort Tree=struct leaf | node(Tree,Tree) then there are different representations
+    ///    for each sort. The normalisation mapping maps each sort to a unique representant.
+    ///    Moreover, it is this unique sort that it provides in internal mappings.
+    const std::map< sort_expression, sort_expression >& sort_alias_map() const
+    {
+      normalise_sort_specification_if_required();
+      return m_normalised_aliases;
+    }
+
+    bool operator==(const sort_specification& other) const
+    {
+      return m_user_defined_sorts==other.m_user_defined_sorts &&
+             m_sorts_in_context == other.m_sorts_in_context &&
+             m_user_defined_aliases==other.m_user_defined_aliases;
+    }
+
+  // Below are auxiliary functions for this class.
+  protected:
+    void sorts_are_not_necessarily_normalised_anymore() const
+    {
+      m_normalised_sorts_are_up_to_date=false;
+      data_is_not_necessarily_normalised_anymore(); 
+    }
+
+    void data_is_not_necessarily_normalised_anymore() const
+    {
+      m_normalised_data_is_up_to_date=false;
+    }
+
+    void normalise_sort_specification_if_required() const
+    {
+      if (!m_normalised_sorts_are_up_to_date)
+      {
+        m_normalised_sorts_are_up_to_date=true;
+        m_normalised_sorts.clear();
+        reconstruct_m_normalised_aliases();
+        for (const sort_expression& s: m_sorts_in_context)
+        {
+          m_normalised_sorts.insert(normalize_sorts(s,*this));
+        }
+        for (const sort_expression& s: m_user_defined_sorts)
+        {
+          m_normalised_sorts.insert(normalize_sorts(s,*this));
+        }
+        data_is_not_necessarily_normalised_anymore();
+      }
+    }
+
+    void add_predefined_basic_sorts()
+    {
+        add_system_defined_sort(sort_bool::bool_());
+        add_system_defined_sort(sort_pos::pos());
+    }
+
+    template <class CONTAINER>
+    void import_system_defined_sorts(const CONTAINER& sorts)
+    {
+      for(const sort_expression& sort: sorts)
+      {
+        import_system_defined_sort(sort);
+      }
+    }
+
+    ///\brief Adds the system defined sorts in a sequence.
+    ///       The second argument is used to check which sorts are added, to prevent
+    ///       useless repetitions of additions of sorts.
+    /// The function normalise_sorts imports for the given sort_expression sort all sorts, constructors,
+    /// mappings and equations that belong to this sort to the `normalised' sets in this
+    /// data type. E.g. for the sort Nat of natural numbers, it is required that Pos
+    /// (positive numbers) are defined.
+    void import_system_defined_sort(const sort_expression& sort)
+    {
+
+      if (is_untyped_sort(sort) || is_untyped_possible_sorts(sort))
+      {
+        mCRL2log(mcrl2::log::debug) << "Erroneous attempt to insert an untyped sort into the a sort specification\n";
+        return;
+      }
+      // Add an element, and stop if it was already added.
+      if (!m_sorts_in_context.insert(sort).second)
+      {
+        return;
+      }
+
+      sorts_are_not_necessarily_normalised_anymore();
+      // add the sorts on which this sorts depends.
+      if (sort == sort_real::real_())
+      {
+        // Int is required as the rewrite rules of Real rely on it.
+        import_system_defined_sort(sort_int::int_());
+      }
+      else if (sort == sort_int::int_())
+      {
+        // See above, Int requires Nat.
+        import_system_defined_sort(sort_nat::nat());
+      }
+      else if (sort == sort_nat::nat())
+      {
+        // Nat requires NatPair.
+        import_system_defined_sort(sort_nat::natpair());
+      }
+      else if (is_function_sort(sort))
+      {
+        const function_sort& fsort=atermpp::down_cast<function_sort>(sort);
+        import_system_defined_sorts(fsort.domain());
+        import_system_defined_sort(fsort.codomain());
+      }
+      else if (is_container_sort(sort))
+      {
+        const sort_expression element_sort(container_sort(sort).element_sort());
+        // Import the element sort (which may be a complex sort also).
+        import_system_defined_sort(element_sort);
+        if (sort_list::is_list(sort))
+        {
+          import_system_defined_sort(sort_nat::nat()); // Required for lists.
+        }
+        else if (sort_set::is_set(sort))
+        {
+          import_system_defined_sort(sort_fset::fset(element_sort));
+        }
+        else if (sort_fset::is_fset(sort))
+        {
+          // Import the functions from element_sort->Bool.
+          sort_expression_list element_sorts;
+          element_sorts.push_front(element_sort);
+          import_system_defined_sort(function_sort(element_sorts,sort_bool::bool_()));
+        }
+        else if (sort_bag::is_bag(sort))
+        {
+          // Add the sorts Nat and set_(element_sort) to the specification.
+          import_system_defined_sort(sort_nat::nat()); // Required for bags.
+          import_system_defined_sort(sort_set::set_(element_sort));
+          import_system_defined_sort(sort_fbag::fbag(element_sort));
+        }
+        else if (sort_fbag::is_fbag(sort))
+        {
+          import_system_defined_sort(sort_nat::nat()); // Required for bags.
+
+          // Add the function sort element_sort->Nat to the specification
+          sort_expression_list element_sorts ;
+          element_sorts.push_front(element_sort);
+          import_system_defined_sort(function_sort(element_sorts,sort_nat::nat()));
+        }
+      }
+      else if (is_structured_sort(sort))
+      {
+        structured_sort s_sort(sort);
+        function_symbol_vector f(s_sort.constructor_functions(sort));
+        for(const function_symbol& f: s_sort.constructor_functions(sort))
+        {
+          import_system_defined_sort(f.sort());
+        }
+      }
+    }
+    
+    // The function below recalculates m_normalised_aliases, such that
+    // it forms a confluent terminating rewriting system using which
+    // sorts can be normalised.
+    void reconstruct_m_normalised_aliases() const;
+    
+    // The function below checks whether there is an alias loop, e.g. aliases
+    // of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops
+    // through structured sorts are allowed. If a loop is detected, an exception
+    // is thrown.
+    void check_for_alias_loop(
+      const sort_expression& s,
+      std::set<sort_expression> sorts_already_seen,
+      const bool toplevel=true) const;
+
+
+}
+;
+
+} // namespace data
+
+} // namespace mcrl2
+
+#endif // MCRL2_DATA_SORT_SPECIFICATION_H

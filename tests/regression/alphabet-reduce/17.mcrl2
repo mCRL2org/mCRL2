@@ -1,0 +1,1 @@
+init allow({}, (tau + tau) || tau);

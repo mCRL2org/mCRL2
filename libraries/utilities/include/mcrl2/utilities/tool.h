@@ -13,8 +13,8 @@
 #define MCRL2_UTILITIES_TOOL_H
 
 #include <cstdlib>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 #include "mcrl2/utilities/logger.h"
 
@@ -81,13 +81,14 @@ class tool
       if (parser.options.count("timings") > 0)
       {
         m_timing_enabled = true;
+        log::mcrl2_logger::set_report_time_info();
         m_timing_filename = parser.option_argument("timings");
       }
     }
 
     /// \brief Executed only if run would be executed and invoked before run.
     /// \return Whether run should still be executed
-    virtual bool pre_run()
+    virtual bool pre_run(int& /*argc*/, char** /*argv*/)
     {
       return true;
     }
@@ -211,7 +212,7 @@ class tool
           parse_options(parser);
 
           // If pre_run succeeds, then do the actual running.
-          bool result = pre_run();
+          bool result = pre_run(argc, argv);
           if (result)
           {
             // Create timer, and by default measure running time of run()

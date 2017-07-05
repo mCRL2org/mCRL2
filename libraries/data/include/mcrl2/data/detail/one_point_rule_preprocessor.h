@@ -28,7 +28,7 @@ one_point_rule_preprocessor
   {
     if (data::sort_bool::is_not_application(x)) // x == !y
     {
-      data::data_expression y = unary_operand1(x);
+      const data::data_expression& y = unary_operand1(x);
       if (data::sort_bool::is_not_application(y))
       {
         return (*this)(unary_operand1(y));
@@ -37,9 +37,9 @@ one_point_rule_preprocessor
       {
         std::set<data::data_expression> args = data::split_and(y);
         std::vector<data::data_expression> result;
-        for (std::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
+        for (const data::data_expression& arg: args)
         {
-          result.push_back((*this)(data::sort_bool::not_(*i)));
+          result.push_back((*this)(data::sort_bool::not_(arg)));
         }
         return data::join_or(result.begin(), result.end());
       }
@@ -47,9 +47,9 @@ one_point_rule_preprocessor
       {
         std::set<data::data_expression> args = data::split_or(y);
         std::vector<data::data_expression> result;
-        for (std::set<data::data_expression>::iterator i = args.begin(); i != args.end(); ++i)
+        for (const data::data_expression& arg: args)
         {
-          result.push_back((*this)(data::sort_bool::not_(*i)));
+          result.push_back((*this)(data::sort_bool::not_(arg)));
         }
         return data::join_and(result.begin(), result.end());
       }

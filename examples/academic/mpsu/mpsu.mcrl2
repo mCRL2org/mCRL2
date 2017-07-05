@@ -1,6 +1,6 @@
 % This file describes a controller for a simplified Movable Patient
-% Support Unit. It is described in Fokkink, Groote and Reniers,
-% Modelling reactive systems.
+% Support Unit. It is described in J.F. Groote and M.R. Mousavi
+% Modeling and analysis of communicating systems. The MIT Press, 2014.
 %
 % Jan Friso Groote, September, 2006.
 

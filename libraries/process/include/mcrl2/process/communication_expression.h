@@ -13,9 +13,9 @@
 #define MCRL2_PROCESS_COMMUNICATION_EXPRESSION_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/detail/default_values.h"
+#include "mcrl2/core/detail/function_symbols.h"
+#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2
@@ -83,6 +83,7 @@ std::string pp(const communication_expression& x);
 
 /// \brief Outputs the object to a stream
 /// \param out An output stream
+/// \param x Object x
 /// \return The output stream
 inline
 std::ostream& operator<<(std::ostream& out, const communication_expression& x)

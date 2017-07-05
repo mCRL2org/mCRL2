@@ -9,13 +9,13 @@
 /// \file linear_process_conversion_test.cpp
 /// \brief Add your file description here.
 
-#include <set>
-#include <boost/test/minimal.hpp>
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/process/is_linear.h"
-#include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
+#include "mcrl2/process/process_specification.h"
+#include <boost/test/minimal.hpp>
+#include <set>
 
 using namespace mcrl2;
 using namespace mcrl2::process;
@@ -160,7 +160,7 @@ const std::string ABS_SPEC_LINEARIZED =
   ;
 
 // The flag expect_exception should be set for linear processes that cannot be represented by an LPS.
-void test_process(std::string text, bool expect_exception = false)
+void test_process(const std::string& text, bool expect_exception = false)
 {
   process_specification pspec = parse_process_specification(text);
   bool linear = is_linear(pspec, true);

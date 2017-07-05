@@ -13,10 +13,10 @@
 #define MCRL2_ATERMPP_ATERM_LIST_H
 
 #include <cassert>
+#include <initializer_list>
 #include <limits>
 #include <type_traits>
 #include "mcrl2/atermpp/detail/aterm_list_iterator.h"
-#include <boost/iterator/iterator_facade.hpp>
 
 #include "mcrl2/atermpp/detail/aterm_list.h"
 
@@ -39,10 +39,10 @@ class term_list:public aterm
     typedef Term& reference;
 
     /// Const reference to T.
-    typedef const Term &const_reference;
+    typedef const Term& const_reference;
 
     /// An unsigned integral type.
-    typedef size_t size_type;
+    typedef std::size_t size_type;
 
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
@@ -54,20 +54,20 @@ class term_list:public aterm
     typedef term_list_iterator<Term> const_iterator;
 
     /// Default constructor. Creates an empty list.
-    term_list ():aterm(aterm::empty_aterm_list())
+    term_list(): aterm(aterm::static_empty_aterm_list)
     {
     }
 
     /// \brief Copy constructor.
     /// \param t A list.
-    term_list(const term_list<Term> &t):aterm(t)
+    term_list(const term_list<Term>& t):aterm(t)
     {
       assert(!defined() || type_is_list());
     }
 
     /// \brief Explicit construction from an aterm.
     /// \param t An aterm.
-    explicit term_list(const aterm &t):aterm(t)
+    explicit term_list(const aterm& t):aterm(t)
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
@@ -81,29 +81,50 @@ class term_list:public aterm
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
-    term_list(Iter first, Iter last, typename std::enable_if<std::is_convertible<
-                typename boost::iterator_traversal< Iter >::type,
-                boost::random_access_traversal_tag
-              >::value>::type* = 0):
+    explicit term_list(Iter first, Iter last, typename std::enable_if<std::is_base_of<
+                  std::bidirectional_iterator_tag,
+                  typename std::iterator_traits<Iter>::iterator_category
+              >::value>::type* = nullptr):
         aterm(detail::make_list_backward<Term,Iter,
                   detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>()))
     {
       assert(!defined() || type_is_list());
     }
 
-    /// \brief Creates a term_list with the elements from first to last.
-    /// \details It is assumed that the range can be traversed from last to first.
+    /// \brief Creates a term_list with the elements from first to last converting the elements before inserting.
+    /// \details It is assumed that the range can be traversed from last to first. The operator () in the class
+    ///          ATermConverter is applied to each element before inserting it in the list.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     /// \param convert_to_aterm A class with a () operation, which is applied to each element
     ///                   before it is put into the list.
     template <class Iter, class ATermConverter>
-    term_list(Iter first, Iter last, const ATermConverter &convert_to_aterm,
-              typename std::enable_if<std::is_convertible<
-                typename boost::iterator_traversal< Iter >::type,
-                boost::random_access_traversal_tag
+    explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
+              typename std::enable_if<std::is_base_of<
+                std::bidirectional_iterator_tag,
+                typename std::iterator_traits<Iter>::iterator_category
               >::value>::type* = 0):
          aterm(detail::make_list_backward<Term,Iter,ATermConverter>(first, last, convert_to_aterm))
+    {
+      assert(!defined() || type_is_list());
+    }
+
+    /// \brief Creates a term_list with the elements from first to last, converting and filtering the list.
+    /// \details It is assumed that the range can be traversed from last to first. The operator () in the class
+    ///          ATermConverter is applied to each element before inserting it in the list. Elements are only
+    ///          inserted if the operator () of the class ATermFilter yields true when applied to such an element.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param convert_to_aterm A class with a () operation, which is applied to each element
+    ///                   before it is put into the list.
+    /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
+    template <class Iter, class ATermConverter, class ATermFilter>
+    explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter,
+              typename std::enable_if<std::is_base_of<
+                std::bidirectional_iterator_tag,
+                typename std::iterator_traits<Iter>::iterator_category
+              >::value>::type* = 0):
+         aterm(detail::make_list_backward<Term,Iter,ATermConverter,ATermFilter>(first, last, convert_to_aterm, aterm_filter))
     {
       assert(!defined() || type_is_list());
     }
@@ -115,59 +136,89 @@ class term_list:public aterm
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
     template <class Iter>
-             term_list(Iter first, Iter last,
-                       typename std::enable_if< !std::is_convertible<
-                         typename boost::iterator_traversal< Iter >::type,
-                         boost::random_access_traversal_tag
-                       >::value>::type* = 0):
+    explicit term_list(Iter first, Iter last,
+                       typename std::enable_if< !std::is_base_of<
+                         std::bidirectional_iterator_tag,
+                         typename std::iterator_traits<Iter>::iterator_category
+                       >::value>::type* = nullptr):
          aterm(detail::make_list_forward<Term,Iter,detail::do_not_convert_term<Term> >
                                  (first, last, detail::do_not_convert_term<Term>()))
     {
       assert(!defined() || type_is_list());
     }
 
-    /// \brief Creates a term_list from the elements from first to last.
+    /// \brief Creates a term_list from the elements from first to last converting the elements before inserting.
     /// \details The range is traversed from first to last. This requires
     ///           to copy the elements internally, which is less efficient
-    ///           than this function with random access iterators as arguments.
+    ///           than this function with random access iterators as arguments. 
+    ///           The operator () in the class
+    ///           ATermConverter is applied to each element before inserting it in the list.
     /// \param first The start of a range of elements.
     /// \param last The end of a range of elements.
-    ///  \param convert_to_aterm A class with a () operation, whic is applied to each element
+    /// \param convert_to_aterm A class with a () operation, whic is applied to each element
     ///                      before it is put into the list.
     template <class Iter, class  ATermConverter>
-             term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
-                       typename std::enable_if< !std::is_convertible<
-                         typename boost::iterator_traversal< Iter >::type,
-                         boost::random_access_traversal_tag
-                       >::value>::type* = 0):
+    explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm,
+                       typename std::enable_if< !std::is_base_of<
+                         std::random_access_iterator_tag,
+                         typename std::iterator_traits<Iter>::iterator_category
+                       >::value>::type* = nullptr):
          aterm(detail::make_list_forward<Term,Iter,ATermConverter>
                                  (first, last, convert_to_aterm))
     {
       assert(!defined() || type_is_list());
     }
 
+    /// \brief Creates a term_list from the elements from first to last converting and filtering the elements before inserting.
+    /// \details The range is traversed from first to last. This requires
+    ///           to copy the elements internally, which is less efficient
+    ///           than this function with random access iterators as arguments. 
+    ///           The operator () in the class ATermConverter is applied to 
+    ///           each element before inserting it in the list. Elements are only
+    ///           inserted if the operator () of the class ATermFilter yields true when applied to such an element.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param convert_to_aterm A class with a () operation, whic is applied to each element
+    ///                      before it is put into the list.
+    /// \param aterm_filter A class with an operator () that is used to determine whether elements can be inserted in the list.
+    template <class Iter, class  ATermConverter, class ATermFilter>
+    explicit term_list(Iter first, Iter last, const ATermConverter& convert_to_aterm, const ATermFilter& aterm_filter,
+                       typename std::enable_if< !std::is_base_of<
+                         std::random_access_iterator_tag,
+                         typename std::iterator_traits<Iter>::iterator_category
+                       >::value>::type* = nullptr):
+         aterm(detail::make_list_forward<Term,Iter,ATermConverter>
+                                 (first, last, convert_to_aterm, aterm_filter))
+    {
+      assert(!defined() || type_is_list());
+    }
+
+    /// \brief A constructor based on an initializer list.
+    /// \details This constructor is not made explicit to conform to initializer lists in standard containers. 
+    /// \param init The initialiser list.
+    term_list(std::initializer_list<Term> init)
+      : aterm(detail::make_list_backward<Term, 
+                                         typename std::initializer_list<Term>::const_iterator, 
+                                         detail::do_not_convert_term<Term> >
+                  (init.begin(), init.end(), detail::do_not_convert_term<Term>()))
+    {
+      assert(!defined() || type_is_list());
+    }
+
     /// Assigment operator.
     /// \param l A list.
-    term_list<Term> &operator=(const term_list &l)
+    term_list<Term>& operator=(const term_list& l)
     {
       copy_term(l);
       return *this;
     }
 
-    /// \brief Conversion to aterm_list.
-    /// \deprecated
-    /// \return This list as an aterm_list.
-    operator term_list<aterm>() const
-    {
-      return atermpp::down_cast<term_list<aterm> >(*this);
-    }
-
     /// \brief Returns the tail of the list.
     /// \return The tail of the list.
-    const term_list<Term> &tail() const
+    const term_list<Term>& tail() const
     {
       assert(!empty());
-      return (reinterpret_cast<const detail::_aterm_list<Term>*>(m_term))->tail;
+      return (reinterpret_cast<detail::_aterm_list<Term>*>(m_term))->tail;
     }
 
     /// \brief Removes the first element of the list.
@@ -178,21 +229,21 @@ class term_list:public aterm
 
     /// \brief Returns the first element of the list.
     /// \return The term at the head of the list.
-    const Term &front() const
+    const Term& front() const
     {
-      return reinterpret_cast<const detail::_aterm_list<Term>*>(m_term)->head;
+      return reinterpret_cast<detail::_aterm_list<Term>*>(m_term)->head;
     }
 
     /// \brief Inserts a new element at the beginning of the current list.
     /// \param el The term that is added.
-    void push_front(const Term &el);
+    void push_front(const Term& el);
 
     /// \brief Returns the size of the term_list.
     /// \details The complexity of this function is linear in the size of the list.
     /// \return The size of the list.
     size_type size() const
     {
-      size_t size=0;
+      std::size_t size=0;
       for(const_iterator i=begin(); i!=end(); ++i)
       {
         ++size;
@@ -218,14 +269,14 @@ class term_list:public aterm
     /// \return The end of the list.
     const_iterator end() const
     {
-      return const_iterator(detail::static_empty_aterm_list);
+      return const_iterator(aterm::static_empty_aterm_list);
     }
 
     /// \brief Returns the largest possible size of the term_list.
     /// \return The largest possible size of the list.
     size_type max_size() const
     {
-      return (std::numeric_limits<size_t>::max)();
+      return (std::numeric_limits<std::size_t>::max)();
     }
 };
 
@@ -248,7 +299,7 @@ class _aterm_list:public _aterm
     term_list<Term> tail;
 };
 
-static const size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(size_t);
+static const std::size_t TERM_SIZE_LIST = sizeof(detail::_aterm_list<aterm>)/sizeof(std::size_t);
 } // namespace detail
 /// \endcond
 
@@ -263,17 +314,17 @@ typedef term_list<aterm> aterm_list;
 /// \return The reversed list.
 template <typename Term>
 inline
-term_list<Term> reverse(const term_list<Term> &l);
+term_list<Term> reverse(const term_list<Term>& l);
 
 
-/// \brief Returns the list l with one occurrence of the element x removed, or l if x is not present.
+/// \brief Returns the list \a l with one occurrence of the element \a t removed, or \a l if \a t is not present.
 /// \param l A list.
 /// \param t A list element.
-/// \details This operator is linear in the length of the list.
-/// \return The original list where the first occurrence of t has been removed, assuming it is in t.
+/// \details This operation is linear in the length of the list.
+/// \return The original list where the first occurrence of \a t has been removed, assuming it is in \a t.
 template <typename Term>
 inline
-term_list<Term> remove_one_element(const term_list<Term> &l, const Term &t);
+term_list<Term> remove_one_element(const term_list<Term>& l, const Term& t);
 
 
 /// \brief Returns the concatenation of two lists.
@@ -283,7 +334,7 @@ term_list<Term> remove_one_element(const term_list<Term> &l, const Term &t);
 /// \return The concatenation of the lists l followed by m..
 template <typename Term>
 inline
-term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m);
+term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m);
 
 
 /// \brief Returns an element at a certain position in a list
@@ -294,7 +345,7 @@ term_list<Term> operator+(const term_list<Term> &l, const term_list<Term> &m);
 /// \return The element at position i in the list l.
 template <typename Term>
 inline
-const Term &element_at(const term_list<Term> &l, size_t m)
+const Term& element_at(const term_list<Term>& l, std::size_t m)
 {
   assert(l.size()>m);
   typename term_list<Term>::const_iterator i=l.begin();
@@ -310,7 +361,7 @@ const Term &element_at(const term_list<Term> &l, size_t m)
 /// \return The list l with elem appended at the end.
 template <typename Term>
 inline
-term_list<Term> push_back(const term_list<Term> &l, const Term &el);
+term_list<Term> push_back(const term_list<Term>& l, const Term& el);
 
 /// \brief Swaps two term_lists.
 /// \details This operation is more efficient than exchanging terms by an assignment,
@@ -318,24 +369,16 @@ term_list<Term> push_back(const term_list<Term> &l, const Term &el);
 /// \param t1 The first term
 /// \param t2 The second term
 template <class T>
-inline void swap(atermpp::term_list<T> &t1, atermpp::term_list<T> &t2)
+inline void swap(atermpp::term_list<T>& t1, atermpp::term_list<T>& t2)
 {
   t1.swap(t2);
 }
 
-template <class T>
+/* template <class T>
 std::ostream& operator<<(std::ostream& out, const term_list<T>& l)
 {
-  for (auto i = l.begin(); i != l.end(); ++i)
-  {
-    if (i != l.begin())
-    {
-      out << ", ";
-    }
-    out << *i;
-  }
-  return out;
-}
+  return out << static_cast<aterm>(l); 
+} */
 
 } // namespace atermpp
 

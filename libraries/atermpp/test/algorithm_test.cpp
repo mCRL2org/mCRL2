@@ -28,7 +28,7 @@ using namespace atermpp;
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_f
 {
-  bool operator()(aterm_appl t) const
+  bool operator()(const aterm_appl& t) const
   {
     return t.function().name() == "f";
   }
@@ -58,7 +58,7 @@ struct for_each_proc
     : m_names(names)
   {}
 
-  bool operator()(aterm t)
+  bool operator()(const aterm& t)
   {
     if(t.type_is_appl())
     {
@@ -70,7 +70,7 @@ struct for_each_proc
     }
   }
 
-  bool operator()(aterm_appl t)
+  bool operator()(const aterm_appl& t)
   {
     m_names.insert(t.function().name());
     return true;

@@ -29,7 +29,7 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
 
   using super::enter;
   using super::leave;
-  using super::operator();
+  using super::apply;
   using super::print_expression;
   using super::print_unary_operation;
   using super::print_binary_operation;
@@ -40,17 +40,17 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
     return static_cast<Derived&>(*this);
   }
 
-  void operator()(const bes::boolean_equation& x)
+  void apply(const bes::boolean_equation& x)
   {
     derived().enter(x);
     derived().print(x.symbol().is_mu() ? "mu " : "nu ");
-    derived()(x.variable());
+    derived().apply(x.variable());
     derived().print(" = ");
-    derived()(x.formula());
+    derived().apply(x.formula());
     derived().leave(x);
   }
 
-  void operator()(const bes::boolean_equation_system& x)
+  void apply(const bes::boolean_equation_system& x)
   {
     print_list(x.equations(), "pbes\n    ", ";\n\n", ";\n    ");
     derived().print("init ");
@@ -59,52 +59,52 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
     derived().leave(x);
   }
 
-  void operator()(const bes::true_& x)
+  void apply(const bes::true_& x)
   {
     derived().enter(x);
     derived().print("true");
     derived().leave(x);
   }
 
-  void operator()(const bes::false_& x)
+  void apply(const bes::false_& x)
   {
     derived().enter(x);
     derived().print("false");
     derived().leave(x);
   }
 
-  void operator()(const bes::not_& x)
+  void apply(const bes::not_& x)
   {
     derived().enter(x);
     print_unary_operation(x, "!");
     derived().leave(x);
   }
 
-  void operator()(const bes::and_& x)
+  void apply(const bes::and_& x)
   {
     derived().enter(x);
     print_binary_operation(x, " && ");
     derived().leave(x);
   }
 
-  void operator()(const bes::or_& x)
+  void apply(const bes::or_& x)
   {
     derived().enter(x);
     print_binary_operation(x, " || ");
     derived().leave(x);
   }
 
-  void operator()(const bes::imp& x)
+  void apply(const bes::imp& x)
   {
     derived().enter(x);
     print_binary_operation(x, " => ");
     derived().leave(x);
   }
 
-  void operator()(const bes::boolean_variable& x)
+  void apply(const bes::boolean_variable& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    derived().apply(x.name());
     derived().leave(x);
   }
 };
@@ -118,7 +118,7 @@ struct stream_printer
   void operator()(const T& x, std::ostream& out)
   {
     core::detail::apply_printer<bes::detail::printer> printer(out);
-    printer(x);
+    printer.apply(x);
   }
 };
 

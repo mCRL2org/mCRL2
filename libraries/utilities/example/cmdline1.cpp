@@ -9,8 +9,8 @@
 /// \file cmdline1.cpp
 /// \brief CLI example
 
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 
@@ -57,9 +57,9 @@ class my_tool: public tool
       }
 
       std::cout << "--- parser arguments ---" << std::endl;
-      for (command_line_parser::option_map::const_iterator i = parser.options.begin(); i != parser.options.end(); ++i)
+      for (const auto & option : parser.options)
       {
-        std::cout << i->first << " -> " << i->second << std::endl;
+        std::cout << option.first << " -> " << option.second << std::endl;
       }
     }
 

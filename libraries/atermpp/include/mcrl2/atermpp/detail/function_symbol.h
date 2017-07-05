@@ -1,12 +1,19 @@
+// Author(s): Wieger Wesselink, Jan Friso Groote. Based on the aterm library by Paul Klint and others.
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/atermpp/detail/function_symbol.h
+/// \brief A foundational class for function symbols. 
+
 #ifndef DETAIL_FUNCTION_SYMBOL_H
 #define DETAIL_FUNCTION_SYMBOL_H
 
 #include <string>
-
-const size_t FUNCTION_SYMBOL_BLOCK_CLASS=14;
-const size_t FUNCTION_SYMBOL_BLOCK_SIZE=1<<FUNCTION_SYMBOL_BLOCK_CLASS;
-const size_t FUNCTION_SYMBOL_BLOCK_MASK=FUNCTION_SYMBOL_BLOCK_SIZE-1;
-
+#include <unordered_map>
 
 namespace atermpp
 {
@@ -15,44 +22,77 @@ class function_symbol_generator;
 
 namespace detail
 {
-size_t addressf(const function_symbol &t);
+struct constant_function_symbols;
+void initialise_aterm_administration();
+void initialise_function_map_administration();
 
-/* The type _function_symbol is used to store information about function_symbols. */
-struct _function_symbol
+// A function is determined by its name and its arity. 
+class _function_symbol_primary_data
 {
-    size_t arity;
-    _function_symbol* next;
-    mutable size_t reference_count;
-    std::string name;
-    size_t number;
-}; 
+  protected:
+    const std::string m_name;  // The primary data cannot be altered after creation. 
+    const std::size_t m_arity;
 
-extern detail::_function_symbol** function_symbol_index_table;
-extern size_t function_symbol_index_table_number_of_elements;
+  public:
+    _function_symbol_primary_data(const std::string& name, std::size_t arity)
+     : m_name(name), m_arity(arity)
+    {}
 
-bool check_that_the_function_symbol_points_to_memory_containing_a_function(const detail::_function_symbol* f);
+    const std::string& name() const
+    {
+      return m_name;
+    }
 
-inline
-bool is_valid_function_symbol(const detail::_function_symbol* f)
+    std::size_t arity() const
+    {
+      return m_arity;
+    }
+
+    bool operator==(const _function_symbol_primary_data& f) const
+    {
+      return m_arity==f.m_arity && m_name==f.m_name;
+    }
+};
+
+// Each function symbol has a reference count, and sometimes a sequence number
+// as special information. 
+class _function_symbol_auxiliary_data
 {
-  return (f->reference_count>0) && check_that_the_function_symbol_points_to_memory_containing_a_function(f);
-}
+  protected:
+    std::size_t m_reference_count;
+
+  public:
+
+    _function_symbol_auxiliary_data(std::size_t reference_count)
+     : m_reference_count(reference_count)
+    {}
+
+    std::size_t reference_count() const
+    {
+      return m_reference_count;
+    }
+
+    std::size_t& reference_count()
+    {
+      return m_reference_count;
+    }
+};
 
 // set index such that no function symbol exists with the name 'prefix + std::to_string(n)'
 // for all values n >= index
-extern size_t get_sufficiently_large_postfix_index(const std::string& prefix_);
+extern std::size_t get_sufficiently_large_postfix_index(const std::string& prefix_);
 
 // Ugly class, to be replaced by a lambda function.
 struct index_increaser
 {
-  size_t* m_initial_index;
-  size_t* m_index;
+  std::size_t* m_initial_index;
+  std::size_t* m_index;
 
   index_increaser()
-   : m_index(NULL)
+   : m_index(nullptr)
   {}
 
-  index_increaser(size_t& initial_index, size_t& index)
+  index_increaser(std::size_t& initial_index, std::size_t& index)
    : m_initial_index(&initial_index), m_index(&index)
   {}
 
@@ -68,7 +108,7 @@ struct index_increaser
     return *this;
   }
 
-  void operator ()(size_t new_index)
+  void operator ()(std::size_t new_index)
   {
     *m_initial_index=new_index;
     if (*m_index<new_index)
@@ -87,6 +127,64 @@ extern void deregister_function_symbol_prefix_string(const std::string& prefix);
 
 } // namespace detail
 } // namespace atermpp
+
+namespace std
+{
+
+// Specialisation of the standard hash function for _function_symbol.
+template<>
+struct hash<atermpp::detail::_function_symbol_primary_data>
+{
+  std::size_t operator()(const atermpp::detail::_function_symbol_primary_data& f) const
+  {
+    std::hash<std::string> string_hasher;
+    std::size_t h=string_hasher(f.name());
+    return (h ^ f.arity());
+  }
+};
+}
+
+namespace atermpp
+{
+namespace detail
+{
+
+// A function symbol is a pair of essential and auxiliary information, stored in an unordered set.
+typedef std::pair<const _function_symbol_primary_data, _function_symbol_auxiliary_data> _function_symbol;
+
+
+// This is the class to store function symbols. It is just an unordered map.
+class function_symbol_store_class: 
+        public std::unordered_map<detail::_function_symbol_primary_data, 
+                                  detail::_function_symbol_auxiliary_data>
+{
+  protected:
+    bool& m_function_symbol_store_is_defined;
+
+  public:
+  
+    // Constructor. Also initialise other basic aterm data structures.
+    function_symbol_store_class(bool& function_symbol_store_is_defined)
+      : m_function_symbol_store_is_defined(function_symbol_store_is_defined)
+    {
+      if (!m_function_symbol_store_is_defined)
+      {
+        m_function_symbol_store_is_defined=true;
+      }
+    }
+
+    // \brief Destructor. Indicate that the function store does not exist anymore.
+    ~function_symbol_store_class()
+    {
+      m_function_symbol_store_is_defined=false;
+    }
+};
+} // namespace detail
+} // namespace atermpp
+
+
+
+
 
 #endif // DETAIL_FUNCTION_SYMBOL_H
 
