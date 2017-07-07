@@ -33,6 +33,8 @@
 
 MCRL2_VERSION="201707.1"
 UBUNTU_VERSION="1ubuntu1ppa2"
+DEBEMAIL="j.w.wesselink@tue.nl"
+DEBFULLNAME="Wieger Wesselink"
 
 #-----------------------------------------------------------#
 # Setup
@@ -42,8 +44,9 @@ set +x
 MYPWD=`pwd`
 MCRL2_ROOT=../../..
 LTSMIN_DIR=$MYPWD/ltsmin
-MCRL2_RELEASE_DIR=$MYPWD/mcrl2-release-build
-MCRL2_LTSMIN_DIR=$MYPWD/mcrl2-ltsmin-build
+MCRL2_RELEASE_DIR=$MYPWD/mcrl2-release
+MCRL2_TEST_DIR=$MYPWD/mcrl2-test
+MCRL2_LTSMIN_DIR=$MYPWD/mcrl2-ltsmin
 DEBIAN_PACKAGING_DIR=$MYPWD/debian-packaging
 
 function clear_path
@@ -87,8 +90,9 @@ function do_ppa_upload
 }
 
 #-----------------------------------------------------------#
-# Build mCRL2 in release mode
+# Build mcrl2-release
 #-----------------------------------------------------------#
+# N.B. A separate directory is used for building the release, since the MCRL2_ENABLE_TESTS may not be set.
 function build_mcrl2_release
 {
   clear_path
@@ -101,27 +105,42 @@ function build_mcrl2_release
 }
 
 #-----------------------------------------------------------#
+# Build mcrl2-test
+#-----------------------------------------------------------#
+# N.B. A separate directory is used for testing, since the MCRL2_ENABLE_TESTS needs to be set.
+function build_mcrl2_test
+{
+  clear_path
+  rm -rf $MCRL2_TEST_DIR
+  mkdir $MCRL2_TEST_DIR
+  cd $MCRL2_TEST_DIR
+  cmake $MCRL2_ROOT -Wno-dev -DCMAKE_BUILD_TYPE=Release -DMCRL2_ENABLE_EXPERIMENTAL=ON -DMCRL2_MAN_PAGES=ON -DCMAKE_INSTALL_PREFIX="`pwd`/install" -DMCRL2_ENABLE_TESTS=ON
+  make -j8
+  make install
+}
+
+#-----------------------------------------------------------#
 # Test mCRL2 in maintainer mode
 #-----------------------------------------------------------#
 function test_mcrl2_release
 {
   clear_path
-  cd $MCRL2_RELEASE_DIR
-  export PATH=$MCRL2_RELEASE_DIR/install/bin:$PATH
+  cd $MCRL2_TEST_DIR
+  export PATH=$MCRL2_TEST_DIR/install/bin:$PATH
   ctest -j8
 }
 
 #-----------------------------------------------------------#
-# Build mCRL2 for LTSMin
+# Build mcrl2-ltsmin
 #-----------------------------------------------------------#
 function build_mcrl2_ltsmin
 {
   clear_path
   cd $MYPWD
-  rm -rf mcrl2-ltsmin-build
-  mkdir mcrl2-ltsmin-build
-  cd mcrl2-ltsmin-build
-  cmake ../mcrl2 -DCMAKE_INSTALL_PREFIX="`pwd`/install"
+  rm -rf $MCRL2_LTSMIN_DIR
+  mkdir $MCRL2_LTSMIN_DIR
+  cd $MCRL2_LTSMIN_DIR
+  cmake $MCRL2_ROOT -DCMAKE_INSTALL_PREFIX="`pwd`/install"
   make install -j8
 }
 
@@ -130,11 +149,10 @@ function build_mcrl2_ltsmin
 #-----------------------------------------------------------#
 function build_ltsmin
 {
+  unset CADP # Otherwise the LTSMin build may fail
   clear_path
   cd $MYPWD
   rm -rf ltsmin
-  #git clone https://github.com/utwente-fmt/ltsmin ltsmin
-  #cp /home/wieger/svn/mcrl2/examples/industrial/brp/brp.mcrl2 ltsmin/examples
   git clone -b next https://github.com/utwente-fmt/ltsmin.git
   cd ltsmin
   git submodule update --init
@@ -152,8 +170,8 @@ function test_ltsmin
 {
   clear_path
   cd $MYPWD
-  $MCRL2_LTSMIN_DIR/install/bin/mcrl22lps $MCRL2_ROOT/examples/academic/abp/abp.mcrl2 abp.lps
-  $MCRL2_LTSMIN_DIR/install/bin/lps2pbes abp.lps -f$MCRL2_ROOT/examples/modal-formulas/nodeadlock.mcf abp.pbes
+  $MCRL2_LTSMIN_DIR/install/bin/mcrl22lps ../../examples/academic/abp/abp.mcrl2 abp.lps
+  $MCRL2_LTSMIN_DIR/install/bin/lps2pbes abp.lps -f../../examples/modal-formulas/nodeadlock.mcf abp.pbes
   export PATH=$MCRL2_LTSMIN_DIR/install/bin:$PATH
   export LD_LIBRARY_PATH=$MCRL2_LTSMIN_DIR/install/lib/mcrl2:$LD_LIBRARY_PATH
   $LTSMIN_DIR/install/bin/lps2lts-dist abp.lps
@@ -205,8 +223,8 @@ function build_debian_package
   echo "-----------------------------------------------------"
   echo "- Create debian package for $1"
   echo "-----------------------------------------------------"
-  export DEBEMAIL="j.w.wesselink@tue.nl"
-  export DEBFULLNAME="Wieger Wesselink"
+  export DEBEMAIL=$DEBEMAIL
+  export DEBFULLNAME=$DEBFULLNAME
   if [ ! -f ~/pbuilder/$1-base.tgz ]
   then
       pbuilder-dist $1 create
@@ -245,12 +263,13 @@ function test_debian_package
 #build_source_package
 
 #--- Test mcrl2
+#build_mcrl2_test              # optional
 #test_mcrl2_release            # optional
 
 #--- Build + test ltsmin
-# build_mcrl2_ltsmin
-# build_ltsmin
-# test_ltsmin
+#build_mcrl2_ltsmin
+#build_ltsmin
+#test_ltsmin
 
 #--- Build ppa packages
 #prepare_debian_packaging
