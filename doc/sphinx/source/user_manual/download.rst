@@ -5,13 +5,13 @@
 
 .. include:: downloads-release.inc
 .. include:: downloads-nightly.inc
-   
+
 .. _download:
 
 Download the latest release of mCRL2
 ====================================
 
-The mCRL2 toolkit can be run on a number of different platforms. For some 
+The mCRL2 toolkit can be run on a number of different platforms. For some
 platforms, precompiled binaries are available. The table below provides the
 latest release of the toolset.
 
@@ -27,25 +27,17 @@ latest release of the toolset.
    +------------------------+------------------------+
    |Ubuntu                  | |bin_ppa|_             |
    +------------------------+------------------------+
-   |Fedora                  | |bin_fedora64|_        | 
+   |Fedora                  | |bin_fedora64|_        |
    +------------------------+------------------------+
    |Source                  | |src_tgz|_             |
    +------------------------+------------------------+
 
-N.B. The tool lpsxsim fails to load .lps files under Windows. A new version
-of this tool can be downloaded here:  
-http://www.mcrl2.org/download/release/lpsxsim_32bit.zip
-and 
-http://www.mcrl2.org/download/release/lpsxsim_64bit.zip.
-The tool should be run standalone from the directory in which the zip archive is extracted,
-otherwise the Qt libraries may not be found.
 
-  
 Download a nightly build of mCRL2
 =================================
 
 Directly installable packages of the mCRL2 toolset are constructed every night.
-They are available here. 
+They are available here.
 
    +------------------------+-------------------------+
    |Operating system        |Nightly build (|version|)|
