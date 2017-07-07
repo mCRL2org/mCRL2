@@ -233,28 +233,22 @@ inline void split_condition(
   split_condition_aux(e,aux_real_conditions, aux_non_real_conditions);
   assert(aux_non_real_conditions.size()==aux_real_conditions.size() && aux_non_real_conditions.size()>0);
   
-
+  // For every list of real expressions, gather the corresponding non real expressions
+  std::map< data_expression_list, data_expression > non_real_expression_map;
   for(std::vector < data_expression_list >::const_iterator i=aux_real_conditions.begin(), j=aux_non_real_conditions.begin();
               i!=aux_real_conditions.end(); ++i, ++j)
   {
-    bool found=false;
-    std::vector < data_expression >::iterator j_search=non_real_conditions.begin();
-    for(std::vector < data_expression_list >::const_iterator i_search=real_conditions.begin();
-           i_search!=real_conditions.end(); ++i_search, ++j_search)
+    if(non_real_expression_map[*i] == data_expression())
     {
-      assert(j_search!=non_real_conditions.end());
-      if (*i==*i_search)
-      {
-        *j_search=lazy::or_(*j_search,lazy::join_and(j->begin(), j->end()));
-        found=true;
-        break;
-      }
+      non_real_expression_map[*i] = sort_bool::false_();
     }
-    if (!found)
-    {
-      real_conditions.push_back(*i);
-      non_real_conditions.push_back(lazy::join_and(j->begin(), j->end()));
-    }
+    non_real_expression_map[*i] = lazy::or_(non_real_expression_map[*i], lazy::join_and(j->begin(), j->end()));
+  }
+  // Convert the map to a pair of vectors
+  for(const std::pair< data_expression_list, data_expression >& expr_pair: non_real_expression_map)
+  {
+    real_conditions.push_back(expr_pair.first);
+    non_real_conditions.push_back(expr_pair.second);
   }
   assert(non_real_conditions.size()==real_conditions.size() && non_real_conditions.size()>0);
 }
