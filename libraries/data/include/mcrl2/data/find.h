@@ -18,7 +18,6 @@
 #include "mcrl2/data/traverser.h"
 #include "mcrl2/data/variable.h"
 #include <functional>
-#include <functional>
 #include <iterator>
 #include <set>
 
