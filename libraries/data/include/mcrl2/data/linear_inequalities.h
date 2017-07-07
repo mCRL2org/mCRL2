@@ -238,11 +238,11 @@ namespace detail
         {
           if (result_defined)
           {  
-            result=r(real_plus(result,real_times(beta(p.variable_name()),p.factor())));
+            result=rewrite_with_memory(real_plus(result,real_times(beta(p.variable_name()),p.factor())), r);
           }
           else
           {
-            result=r(real_times(beta(p.variable_name()),p.factor()));
+            result=rewrite_with_memory(real_times(beta(p.variable_name()),p.factor()), r);
             result_defined=true;
           }
       
@@ -333,7 +333,7 @@ namespace detail
     lhs_t result;
     for(map_based_lhs_t::const_reverse_iterator i=lhs.rbegin(); i!=lhs.rend(); ++i)
     {
-      result.push_front(variable_with_a_rational_factor(i->first,r(real_divides(i->second,factor))));
+      result.push_front(variable_with_a_rational_factor(i->first, rewrite_with_memory(real_divides(i->second,factor), r)));
     }
     return result;
   }
@@ -372,7 +372,7 @@ namespace detail
     {
       if (p.variable_name()!=v)
       {
-        result.emplace_back(p.variable_name(),r(real_divides(p.factor(),f)));
+        result.emplace_back(p.variable_name(),rewrite_with_memory(real_divides(p.factor(),f), r));
       }
     }
     return lhs_t(result.begin(),result.end());
@@ -666,10 +666,10 @@ class linear_inequality: public atermpp::aterm_appl
       }
       if (is_negative(factor,r))
       {
-        factor=r(real_divides(real_minus_one() ,factor));
+        factor=rewrite_with_memory(real_divides(real_minus_one() ,factor), r);
       }
       
-      *this=linear_inequality(divide(lhs,factor,r),r(real_divides(rhs,factor)),comparison);
+      *this=linear_inequality(divide(lhs,factor,r),rewrite_with_memory(real_divides(rhs,factor), r),comparison);
     }
 
     /// \brief constructor.
@@ -708,10 +708,10 @@ class linear_inequality: public atermpp::aterm_appl
       }
       if (is_negative(factor,r))
       {
-        factor=r(real_times(real_minus_one() ,factor));
+        factor=rewrite_with_memory(real_times(real_minus_one() ,factor), r);
       }
       
-      *this=linear_inequality(detail::map_to_lhs_type(new_lhs,factor,r),r(real_divides(new_rhs,factor)),comparison);
+      *this=linear_inequality(detail::map_to_lhs_type(new_lhs,factor,r),rewrite_with_memory(real_divides(new_rhs,factor), r),comparison);
     }
 
 
@@ -2195,6 +2195,7 @@ inline data_expression rewrite_with_memory(
   if (i==rewrite_hash_table.end())
   {
     data_expression t1=r(t);
+    rewrite_hash_table.insert(std::make_pair(t, t1));
     return t1;
   }
   return i->second;
