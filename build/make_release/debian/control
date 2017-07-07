@@ -1,0 +1,35 @@
+Source: mcrl2
+Section: math
+Priority: extra
+Maintainer: Wieger Wesselink <j.w.wesselink@tue.nl>
+Uploaders: Paul van Tilburg <paulvt@debian.org>
+Build-Depends: debhelper (>= 5),
+ build-essential,
+ cmake,
+ libboost-dev,
+ libgl1-mesa-dev,
+ python-psutil,
+ python-yaml,
+ qt5-default,
+ qtbase5-dev,
+ libqt5opengl5-dev,
+ subversion
+Standards-Version: 3.9.5
+Homepage: http://www.mcrl2.org/
+Vcs-Browser: https://svn.win.tue.nl/viewcvs/MCRL2/packaging/mcrl2/trunk/
+Vcs-Svn: https://svn.win.tue.nl/repos/MCRL2/packaging/mcrl2/trunk/
+
+Package: mcrl2
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: formal specification language toolset
+ mCRL2 stands for micro Common Representation Language 2.  It is a
+ specification language that can be used to specify and analyse the
+ behaviour of distributed systems and protocols and is the successor to
+ muCRL.  Using its accompanying toolset, systems can be analysed and
+ verified automatically.
+ .
+ This toolset supports a collection of tools for linearisation, simulation,
+ state-space exploration and generation and tools to optimise and analyse
+ specifications.  Moreover, state spaces can be manipulated, visualised and
+ analysed.

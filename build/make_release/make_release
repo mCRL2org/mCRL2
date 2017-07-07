@@ -1,0 +1,272 @@
+#!/bin/bash
+#
+# Copyright: Wieger Wesselink <j.w.wesselink@tue.nl> 2014-2017
+#
+# This script is used for building debian packages.
+#
+# Preparation
+# -----------
+# It is assumed that the following environment variables are set:
+#
+# - BOOST_ROOT   the location of Boost
+#
+# Before calling the script, do the following steps:
+#
+# * Update the MCRL2_MAJOR_VERSION variable in the file scripts/MCRL2Version.cmake".
+# * Update the MCRL2_VERSION and UBUNTU_VERSION variables below.
+# * Update the copyright period in the file COPYING."
+# * Make sure that all changes are committed.
+#
+# To speed up pbuilder, one can create a .pbuilderrc configuration file containing:
+#
+# DEB_BUILD_OPTIONS="parallel=8"
+# APTCACHEHARDLINK=no
+#
+# N.B. This script has been modified such that it operates in place on a checked
+# out SVN repository. It has not been used in practice yet!
+#
+# The commands at the end are all commented out. It's a good idea to do the steps
+# incrementally, to make sure everything works. Please make sure to do the optional
+# steps test_debian_package and simulate_ppa_upload before making a call to
+# do_ppa_upload. If these steps fail, it makes no sense to do an upload. After
+# every failed upload attempt the version number needs to be updated.
+
+MCRL2_VERSION="201707.1"
+UBUNTU_VERSION="1ubuntu1ppa2"
+
+#-----------------------------------------------------------#
+# Setup
+#-----------------------------------------------------------#
+set +x
+# N.B. Do not call this variable PWD, since it is overwritten during the LTSMin installation!
+MYPWD=`pwd`
+MCRL2_ROOT=../../..
+LTSMIN_DIR=$MYPWD/ltsmin
+MCRL2_RELEASE_DIR=$MYPWD/mcrl2-release-build
+MCRL2_LTSMIN_DIR=$MYPWD/mcrl2-ltsmin-build
+DEBIAN_PACKAGING_DIR=$MYPWD/debian-packaging
+
+function clear_path
+{
+  PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/cvc3
+}
+
+#-----------------------------------------------------------#
+# Copy the debian packaging files
+#-----------------------------------------------------------#
+function prepare_debian_packaging
+{
+  cd $MYPWD
+  rm -rf $DEBIAN_PACKAGING_DIR
+  mkdir $DEBIAN_PACKAGING_DIR
+  mkdir $DEBIAN_PACKAGING_DIR/mcrl2
+  cp -r debian $DEBIAN_PACKAGING_DIR/mcrl2
+  cp mcrl2-package/mcrl2-$MCRL2_VERSION.tar.gz $DEBIAN_PACKAGING_DIR/mcrl2_$MCRL2_VERSION.orig.tar.gz
+}
+
+#-----------------------------------------------------------#
+# Simulate the PPA upload
+#-----------------------------------------------------------#
+function simulate_ppa_upload
+{
+  cd $MYPWD
+  VERSION="$MCRL2_VERSION-$UBUNTU_VERSION~$1"
+  cd $DEBIAN_PACKAGING_DIR
+  dput -s ppa:mcrl2/release-ppa "mcrl2_${VERSION}_source.changes"
+}
+
+#-----------------------------------------------------------#
+# Do the PPA upload
+#-----------------------------------------------------------#
+function do_ppa_upload
+{
+  cd $MYPWD
+  VERSION="$MCRL2_VERSION-$UBUNTU_VERSION~$1"
+  cd $DEBIAN_PACKAGING_DIR
+  dput ppa:mcrl2/release-ppa "mcrl2_${VERSION}_source.changes"
+}
+
+#-----------------------------------------------------------#
+# Build mCRL2 in release mode
+#-----------------------------------------------------------#
+function build_mcrl2_release
+{
+  clear_path
+  rm -rf $MCRL2_RELEASE_DIR
+  mkdir $MCRL2_RELEASE_DIR
+  cd $MCRL2_RELEASE_DIR
+  cmake $MCRL2_ROOT -Wno-dev -DCMAKE_BUILD_TYPE=Release -DMCRL2_ENABLE_EXPERIMENTAL=ON -DMCRL2_MAN_PAGES=ON -DCMAKE_INSTALL_PREFIX="`pwd`/install"
+  make -j8
+  make install
+}
+
+#-----------------------------------------------------------#
+# Test mCRL2 in maintainer mode
+#-----------------------------------------------------------#
+function test_mcrl2_release
+{
+  clear_path
+  cd $MCRL2_RELEASE_DIR
+  export PATH=$MCRL2_RELEASE_DIR/install/bin:$PATH
+  ctest -j8
+}
+
+#-----------------------------------------------------------#
+# Build mCRL2 for LTSMin
+#-----------------------------------------------------------#
+function build_mcrl2_ltsmin
+{
+  clear_path
+  cd $MYPWD
+  rm -rf mcrl2-ltsmin-build
+  mkdir mcrl2-ltsmin-build
+  cd mcrl2-ltsmin-build
+  cmake ../mcrl2 -DCMAKE_INSTALL_PREFIX="`pwd`/install"
+  make install -j8
+}
+
+#-----------------------------------------------------------#
+# Build LTSMin
+#-----------------------------------------------------------#
+function build_ltsmin
+{
+  clear_path
+  cd $MYPWD
+  rm -rf ltsmin
+  #git clone https://github.com/utwente-fmt/ltsmin ltsmin
+  #cp /home/wieger/svn/mcrl2/examples/industrial/brp/brp.mcrl2 ltsmin/examples
+  git clone -b next https://github.com/utwente-fmt/ltsmin.git
+  cd ltsmin
+  git submodule update --init
+  ./ltsminreconf
+  ./configure --disable-dependency-tracking --without-libddd --without-scoop --without-spins --without-sylvan --with-mcrl2=$MCRL2_LTSMIN_DIR/install --prefix=$LTSMIN_DIR/install CPPFLAGS="-I$BOOST_ROOT -I$MCRL2_LTSMIN_DIR/install/include"
+  export PATH=$MCRL2_LTSMIN_DIR/install/bin:$PATH
+  make
+  make install
+}
+
+#-----------------------------------------------------------#
+# Test LTSMin
+#-----------------------------------------------------------#
+function test_ltsmin
+{
+  clear_path
+  cd $MYPWD
+  $MCRL2_LTSMIN_DIR/install/bin/mcrl22lps $MCRL2_ROOT/examples/academic/abp/abp.mcrl2 abp.lps
+  $MCRL2_LTSMIN_DIR/install/bin/lps2pbes abp.lps -f$MCRL2_ROOT/examples/modal-formulas/nodeadlock.mcf abp.pbes
+  export PATH=$MCRL2_LTSMIN_DIR/install/bin:$PATH
+  export LD_LIBRARY_PATH=$MCRL2_LTSMIN_DIR/install/lib/mcrl2:$LD_LIBRARY_PATH
+  $LTSMIN_DIR/install/bin/lps2lts-dist abp.lps
+  $LTSMIN_DIR/install/bin/lps2lts-mc abp.lps
+  $LTSMIN_DIR/install/bin/lps2lts-seq abp.lps
+  $LTSMIN_DIR/install/bin/lps2lts-sym abp.lps
+  $LTSMIN_DIR/install/bin/pbes2lts-dist abp.pbes
+  $LTSMIN_DIR/install/bin/pbes2lts-mc abp.pbes
+  $LTSMIN_DIR/install/bin/pbes2lts-seq abp.pbes
+  $LTSMIN_DIR/install/bin/pbes2lts-sym abp.pbes
+}
+
+#-----------------------------------------------------------#
+# Tag the release
+#-----------------------------------------------------------#
+function tag_release
+{
+  echo "-------------------------------------------------------------------------------------------------------------------"
+  echo "* Tag the release using the following command:"
+  echo ""
+  echo "svn copy https://svn.win.tue.nl/repos/MCRL2/branches/release https://svn.win.tue.nl/repos/MCRL2/tags/mcrl2-$MCRL2_VERSION"
+  echo "-------------------------------------------------------------------------------------------------------------------"
+  exit
+}
+
+#-----------------------------------------------------------#
+# Build and upload the source package
+#-----------------------------------------------------------#
+function build_source_package
+{
+  cd $MYPWD
+  rm -rf mcrl2-package
+  mkdir mcrl2-package
+  cd mcrl2-package
+  cmake $MCRL2_ROOT -DMCRL2_PACKAGE_RELEASE="ON"
+  make package_source
+  echo "-------------------------------------------------------------------------------------------------------------------"
+  echo "* Upload the package using the following command:"
+  echo ""
+  echo "scp mcrl2-package/mcrl2-$MCRL2_VERSION.tar.gz mcrl2@www.win.tue.nl:www/download/release"
+  echo "-------------------------------------------------------------------------------------------------------------------"
+}
+
+#-----------------------------------------------------------#
+# Build debian package
+#-----------------------------------------------------------#
+function build_debian_package
+{
+  echo "-----------------------------------------------------"
+  echo "- Create debian package for $1"
+  echo "-----------------------------------------------------"
+  export DEBEMAIL="j.w.wesselink@tue.nl"
+  export DEBFULLNAME="Wieger Wesselink"
+  if [ ! -f ~/pbuilder/$1-base.tgz ]
+  then
+      pbuilder-dist $1 create
+  fi
+  cd $DEBIAN_PACKAGING_DIR/mcrl2
+  VERSION="$MCRL2_VERSION-$UBUNTU_VERSION~$1"
+  dch -v $VERSION -D $1
+  debuild -S -sa
+}
+
+#-----------------------------------------------------------#
+# Test debian package
+#-----------------------------------------------------------#
+function test_debian_package
+{
+  echo "-----------------------------------------------------"
+  echo "- Test debian package for $1"
+  echo "-----------------------------------------------------"
+  export DEBEMAIL="j.w.wesselink@tue.nl"
+  export DEBFULLNAME="Wieger Wesselink"
+  if [ ! -f ~/pbuilder/$1-base.tgz ]
+  then
+      pbuilder-dist $1 create
+  fi
+  cd $DEBIAN_PACKAGING_DIR/mcrl2
+  VERSION="$MCRL2_VERSION-$UBUNTU_VERSION~$1"
+  dch -v $VERSION -D $1
+  debuild -S -sa
+  cd ..
+  pbuilder-dist $1 build mcrl2_$VERSION.dsc --buildresult .
+  lintian -i mcrl2_${VERSION}_amd64.deb
+}
+
+#--- Build mcrl2
+#build_mcrl2_release
+#build_source_package
+
+#--- Test mcrl2
+#test_mcrl2_release            # optional
+
+#--- Build + test ltsmin
+# build_mcrl2_ltsmin
+# build_ltsmin
+# test_ltsmin
+
+#--- Build ppa packages
+#prepare_debian_packaging
+#build_debian_package xenial
+#test_debian_package xenial    # optional
+#simulate_ppa_upload xenial    # optional
+#do_ppa_upload xenial
+
+#prepare_debian_packaging
+#build_debian_package yakkety
+#test_debian_package yakkety   # optional
+#simulate_ppa_upload yakkety   # optional
+#do_ppa_upload yakkety
+
+#prepare_debian_packaging
+#build_debian_package zesty
+#test_debian_package zesty     # optional
+#simulate_ppa_upload zesty     # optional
+#do_ppa_upload zesty

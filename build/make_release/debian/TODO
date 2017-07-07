@@ -1,0 +1,7 @@
+mCRL2 Debian packaging ToDo
+===========================
+
+* Split the toolset in GUI and CLI tools?
+* Packate TinyXML++ (3rdparty/ticpp) separately.
+* Get rid of 3rd-party/boost/ completely once build-boost has been updated
+  in Debian.

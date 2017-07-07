@@ -1,0 +1,6 @@
+?package(mcrl2): \
+    needs="X11" \
+    section="Applications/Science/Engineering" \
+    title="mCRL2 GUI" \
+    command="/usr/bin/mcrl2-gui" \
+    hints="Analysis,Verification" 

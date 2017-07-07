@@ -1,0 +1,181 @@
+mcrl2 (201409.1-1) unstable; urgency=low
+
+  * Single core build.
+  * New upstream (bugfix) release.
+
+ -- Wieger Wesselink <j.w.wesselink@tue.nl>  Tue, 16 Dec 2014 13:16:05 +0100
+
+mcrl2 (201409.0-2) UNRELEASED; urgency=medium
+
+  * Revert the build-depend version raise to >= 1.55 on libboost-system-dev;
+    lower it to >= 1.46 to facility building on Ubuntu Precise
+
+ -- Paul van Tilburg <paulvt@debian.org>  Sun, 07 Sep 2014 12:45:24 +0200
+
+mcrl2 (201409.0-1) unstable; urgency=low
+
+  * New upstream release (closes: #716195, #716585)
+  * debian/control:
+    - Bumped standards-version to 3.9.5; no changes required 
+    - Set maintainer to Sjoerd Cranen (for now)
+  * debian/rules:
+    - Remove duplicate build/install
+    - Move examples and manpage to correct directories
+
+ -- Paul van Tilburg <paulvt@debian.org>  Sat, 06 Sep 2014 23:34:26 +0200
+
+mcrl2 (201210.1-1) unstable; urgency=low
+
+  [ Jeroen Keiren ]
+  * New upstream (bugfix) release.
+
+ -- Jeroen Keiren <jkeiren@win.tue.nl>  Fri, 26 Oct 2012 07:50:49 +0200
+
+mcrl2 (201210.0-1) unstable; urgency=low
+
+  [ Jeroen Keiren ]
+  * New upstream release.
+  * debian/control:
+    - Removed wxWidgets dependencies
+    - Removed dependencies to all boost libraries except boost-system
+    - Added qt dependencies
+  * debian/rules:
+    - Removed reference to wxSTC
+  * debian/patches/series,
+    debian/patches/dparser_header_fixes.patch:
+    - Removed patch that was incorporated upstream
+
+  [ Paul van Tilburg ]
+  * Upload to Debian unstable
+
+ -- Paul van Tilburg <paulvt@debian.org>  Fri, 12 Oct 2012 11:35:41 +0200
+
+mcrl2 (201202.0-2) unstable; urgency=low
+
+  [ Jeroen Keiren ]
+  * Bugfix upload (closes: #661092).
+  * debian/patches/series,
+    debian/patches/dparser_header_fixes.patch:
+    - Install headers belonging to dparser in their own directory.
+
+  [ Paul van Tilburg ]
+  * debian/control:
+    - Changed myself to uploaded, made Jeroen maintainer. 
+    - Bumped standards version to 3.9.3. 
+
+ -- Paul van Tilburg <paulvt@debian.org>  Fri, 24 Feb 2012 16:16:02 +0100
+
+mcrl2 (201202.0-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/patches/series,
+    debian/patches/lintian_fixes.patch:
+    - Dropped because it has been incorporated upstream.
+  * debian/rules:
+    - Set MCRL2_PACKAGE_RELEASE, which is required by upstream for
+      proper version numbering.
+  * debian/watch:
+    - Update to the official naming convention used by upstream.
+  * debian/copyright:
+    - Update the copyright period.
+
+ -- Jeroen Keiren <jkeiren@win.tue.nl>  Thu, 16 Feb 2012 15:24:08 +0100
+
+mcrl2 (201107.1-1) unstable; urgency=low
+
+  * New upstream bugfix release:
+    - Fixes infinite loop in lpsconfcheck.
+  * debian/README.source: Removed, the source is no longer cleaned.
+  * debian/TODO: Marked the boost-removal task as done! 
+  * debian/patches/series,
+    debian/patches/lintian_fixes.patch:
+    - Dropped because it has been incorporated upstream.
+  * debian/rules:
+    - No longer set variables CMAKE_C_FLAGS_DEBUG, MCRL2_BUILD_IN_SOURCE,
+      and MCRL2_USE_BOOST_INTERNAL as they are no longer used by the
+      project. 
+  * debian/watch: Updated to also track bugfix releases.
+
+ -- Paul van Tilburg <paulvt@debian.org>  Thu, 20 Oct 2011 15:28:23 +0200
+
+mcrl2 (201107-1) unstable; urgency=low
+
+  * New upstream release (closes: #625156). 
+  * debian/control: 
+    - Bumped standards version to 3.9.2.
+    - Removed the initial "the mCRL2" from the description.
+    - Added a build depend on libgl2ps-dev.
+  * debian/patches:
+    - Removed fix_manpage_generation.patch; fixed upstream. 
+    - Added lintian_fixes.patch to resolve some lintian issues.
+  * debian/rules;
+    - Added targets build-arch and build-indep to comply with (future)
+      policy.
+
+ -- Paul van Tilburg <paulvt@debian.org>  Mon, 18 Jul 2011 16:03:38 +0200
+
+mcrl2 (201103-1) unstable; urgency=low
+
+  * New upstream release (closes: #615678).
+  * Upload to unstable.
+  * debian/patches:
+    - Added fix_manpage_generation.patch to fix macro errors in
+      some man pages (fix from rev. 9060).
+  * debian/rules:
+    - Do man-page generation the right way (enabled MCRL2_MAN_PAGES).
+  * debian/watch: 
+    - Changed the .bz2 suffix into .gz. 
+
+ -- Paul van Tilburg <paulvt@debian.org>  Fri, 25 Mar 2011 09:19:56 +0100
+
+mcrl2 (201103~rc1-0ubuntu1) maverick; urgency=low
+
+  * New upstream release.
+  * debian/control:
+    - Remove unneeded build dependencies of some boost libraries.
+    - Lower required version of boost libraries to 1.37.
+  * debian/rules:
+    - Remove build flags because they were changed upstream.
+ -- Jeroen Keiren <jkeiren@win.tue.nl>  Fri, 11 Mar 2011 07:51:00 +0100
+
+mcrl2 (201007~rc1-1) unstable; urgency=low
+
+  * New upstream release; using this release candidate for Squeeze
+    as recommended by upstream.
+  * debian/control: 
+    - Bumped standards version to 3.9.1; no changes required.
+  * debian/copyright:
+    - Inserted the BSD license verbatim instead of pointing to
+      /usr/share/common-licenses/BSD which is soon to be removed.
+  * debian/menu:
+    - Replaced menu item for SQuADT by one for mCRL2 GUI.
+  * debian/rules:
+    - Added MCRL2_ suffixes to the build flags because this has been
+      changed upstream.
+
+ -- Paul van Tilburg <paulvt@debian.org>  Tue, 03 Aug 2010 12:49:57 +0200
+
+mcrl2 (201001+svn7611-1) unstable; urgency=low
+
+  * New SVN snapshot upload:
+    - Features renaming of sim and xsim to lpssim and lpsxsim 
+      (closes: #573944).
+    - Features renaming of grape to grapemcrl2 (closes: #573943).
+    - Fixes documentation/examples install issue.
+  * debian/control:
+    - Changed build-depends to build against Boost 1.42.
+      Closes: #573844, #577289.
+  * debian/rules:
+    - Removed documentation directory mkdir/mv/rmdir commands from the
+      install target now that this is fixed upstream.
+  * debian/source/format: Switched to source format 3.0 (quilt). 
+
+ -- Paul van Tilburg <paulvt@debian.org>  Sun, 11 Apr 2010 17:18:35 +0200
+
+mcrl2 (201001-1) unstable; urgency=low
+
+  * Initial release (Closes: #460885).
+  * Use a pruned upstream tarball to avoid (a lot of) source duplication by
+    removing 3rd-party/boost.
+
+ -- Paul van Tilburg <paulvt@debian.org>  Tue, 16 Feb 2010 12:50:42 +0200
