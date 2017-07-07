@@ -63,6 +63,18 @@ void test_linear_inequality()
   check(!li.lhs().empty(), "Expected left hand side of '" + pp(expr) + "' not to be empty");
   check(li.transform_to_data_expression() == less_equal(sort_real::times(real_one(), vy), real_zero()), 
     "Expression '" + pp(expr) + "' parsing/output problem " + pp(li.transform_to_data_expression()));
+
+  bool got_exception = false;
+  try
+  {
+    expr = not_equal_to(vx, vy);
+    li = linear_inequality(expr, rewr);
+  }
+  catch(const mcrl2::runtime_error&)
+  {
+    got_exception = true;
+  }
+  check(got_exception, "Expected an exception while parsing x != y.");
 }
 
 void split_conjunction_of_inequalities_set(const data_expression& e, std::vector < linear_inequality >& v, const rewriter& r)
@@ -150,6 +162,24 @@ bool test_application_of_Fourier_Motzkin(const std::string& vars,
   return true;
 }
 
+void test_high_level_fourier_motzkin()
+{
+  data_specification data_spec;
+  data_spec.add_context_sort(sort_real::real_());
+  rewriter rewr(data_spec);
+  variable vx("x", sort_real::real_());
+  variable vy("y", sort_real::real_());
+
+  data_expression expr = sort_bool::and_(equal_to(vx, vy), less(vy, sort_real::real_(2)));
+  variable_list elim_vars({variable("y", sort_real::real_())});
+  data_expression out;
+  variable_list vars_out;
+  fourier_motzkin(expr, elim_vars, out, vars_out, rewr);
+  
+  BOOST_CHECK(vars_out.empty());
+  BOOST_CHECK(out == less(sort_real::times(real_one(), vx), sort_real::real_(2)));
+}
+
 int test_main(int /* argc */, char** /* argv[]*/)
 {
   test_linear_inequality();
@@ -162,6 +192,7 @@ int test_main(int /* argc */, char** /* argv[]*/)
   BOOST_CHECK(test_consistency_of_inequalities("u,t,l:Real;","u + -t <= 1 && -u <= -4 && -u + l < 0 && -u < 0 && -t <= 0 && -l + t <= 0",true));
 
   BOOST_CHECK(test_application_of_Fourier_Motzkin("x,y:Real;", "y:Real;", "-y + x < 0 &&  y < 2", "x>=2"));
+  test_high_level_fourier_motzkin();
   return 0;
 }
 
