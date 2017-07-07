@@ -37,7 +37,10 @@ mark_as_advanced(MCRL2_PACKAGE_RELEASE)
 set(MCRL2_MINOR_VERSION "Unknown")
 find_package(Subversion)
 if(SUBVERSION_FOUND)
-  if(EXISTS "${CMAKE_SOURCE_DIR}/.svn")
+  # Check current directory and up to two parent directories for svn information.
+  # The .svn directory may be two directories higher, when checking out the full tree and
+  # building a branch or a tag.
+  if(EXISTS "${CMAKE_SOURCE_DIR}/.svn" OR EXISTS "${CMAKE_SOURCE_DIR}/../.svn" OR EXISTS "${CMAKE_SOURCE_DIR}/../../.svn")
     # Subversion available: minor revision becomes SVN revision
     Subversion_WC_INFO(${CMAKE_SOURCE_DIR} Project)
     set(MCRL2_MINOR_VERSION ${Project_WC_REVISION})
