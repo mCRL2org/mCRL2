@@ -1,7 +1,6 @@
 include(CMakeParseArguments)
 
 function(_add_library_tests TARGET_NAME)
-  message(WARNING, "<TEST> ${TARGET_NAME}")
   file(GLOB librarytest "test/*.cpp")
   file(GLOB libraryexample "example/*.cpp")
 
