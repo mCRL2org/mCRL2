@@ -3591,7 +3591,9 @@ bool mcrl2::data::data_type_checker::TypeMatchL(
 
 sort_expression mcrl2::data::data_type_checker::UnwindType(const sort_expression& Type) const
 {
-  // I expect that return normalize_sorts(Type,get_sort_specification()); would also do the job.
+  return normalize_sorts(Type,get_sort_specification()); 
+  /* TODO The code below can be removed if the line above does
+     not turn out to be problematic.
   if (is_container_sort(Type))
   {
     const container_sort& cs=down_cast<const container_sort>(Type);
@@ -3623,7 +3625,7 @@ sort_expression mcrl2::data::data_type_checker::UnwindType(const sort_expression
     return Type;
   }
 
-  return Type;
+  return Type; */
 }
 
 variable mcrl2::data::data_type_checker::UnwindType(const variable& v) const
