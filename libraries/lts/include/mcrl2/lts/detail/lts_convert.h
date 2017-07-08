@@ -493,7 +493,9 @@ inline action_label_lts lts_convert_translate_label(const action_label_string& l
   return translate_label_aux(l1, c.m_lts_out.data(), c.m_lts_out.action_labels());
 }
 
-inline void lts_convert_translate_state(const state_label_fsm& state_label_in, state_label_lts& state_label_out, convertor<lts_fsm_base, lts_lts_base>& c)
+inline void lts_convert_translate_state(const state_label_fsm& state_label_in, 
+                                        state_label_lts& state_label_out, 
+                                        convertor<lts_fsm_base, lts_lts_base>& c)
 {
   // If process_parameters are not empty, we use them to check that the sorts of its variables  match.
   std::vector < data::data_expression > state_label;
@@ -503,12 +505,25 @@ inline void lts_convert_translate_state(const state_label_fsm& state_label_in, s
   for (state_label_fsm::const_iterator i=state_label_in.begin(); i!=state_label_in.end(); ++i, ++idx)
   {
     assert(parameters.empty() || parameter_iterator!=parameters.end());
-    const data::data_expression d=data::parse_data_expression(c.m_lts_in.state_element_value(idx,*i),c.m_lts_out.data());
+    data::data_expression d=data::parse_data_expression(c.m_lts_in.state_element_value(idx,*i),c.m_lts_out.data());
     if (!parameters.empty()  && (d.sort()!=parameter_iterator->sort()))
     {
-      throw mcrl2::runtime_error("Sort of parameter " + pp(*parameter_iterator) + ":" +
-                                 pp(parameter_iterator->sort()) + " does not match with that of actual value " +
-                                 pp(d) + ".");
+      try
+      { 
+        /* The type of the parsed expression may not exactly match the expected type.
+           Attempt to match exactly below. 
+           TODO: replace this with a function parse_data_expression_with_expected_type when it exists */
+        data::data_type_checker typechecker(c.m_lts_out.data());
+        data::detail::variable_context variable_context;
+        variable_context.add_context_variables(data::variable_list(), typechecker);
+        d=typechecker.typecheck_data_expression(d, parameter_iterator->sort(), variable_context); 
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        throw mcrl2::runtime_error("Sort of parameter " + pp(*parameter_iterator) + ":" +
+                                   pp(parameter_iterator->sort()) + " does not match with the sort " + pp(d.sort()) +
+                                   " of actual value " + pp(d) + ".\n" + e.what());
+      }
     }
     state_label.push_back(d);
     if (!parameters.empty())
