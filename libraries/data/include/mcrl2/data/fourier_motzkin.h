@@ -293,7 +293,7 @@ inline void fourier_motzkin(const data_expression& e_in,
         }
         result_disjunction_set.insert(partial_result);
       }
-      catch (mcrl2::runtime_error &e)
+      catch (mcrl2::runtime_error& )
       {
         // Something went wrong, most likely that the inequalities in the input were not linear.
         // Return the original expression.

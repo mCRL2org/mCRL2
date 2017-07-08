@@ -105,7 +105,7 @@ MainWindow::~MainWindow()
   mcrl2::log::logger::unregister_output_policy(m_logRelay);
 }
 
-void MainWindow::closeEvent(QCloseEvent */*event*/)
+void MainWindow::closeEvent(QCloseEvent * /*event*/)
 {
   {
     QSettings settings("mCRL2", "LTSView");
