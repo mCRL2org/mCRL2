@@ -20,8 +20,6 @@
 #define MCRL2_LTS_LTS_IO_H
 
 
-// #include <boost/iterator/transform_iterator.hpp>
-
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/io.h"
 #include "mcrl2/lts/transition.h"

@@ -192,7 +192,7 @@ class ltsinfo_tool : public ltsinfo_base
             }
             else 
             { 
-              for(const mcrl2::lts::state_label_lts::single_label& lab: l.state_label(i))
+              for(const mcrl2::lps::state& lab: l.state_label(i))
               { 
                 mCRL2log(info) << i << ": (" << pp(lab) << ").\n";
               }

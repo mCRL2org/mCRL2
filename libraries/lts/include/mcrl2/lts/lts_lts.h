@@ -21,15 +21,15 @@
 
 #include <string>
 #include <vector>
-#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/core/detail/function_symbols.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/process/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lps/state.h"
 #include "mcrl2/lps/probabilistic_data_expression.h"
@@ -47,11 +47,10 @@ namespace lts
              be merged by operations on state spaces, and if so, the sets of labels can easily 
              be joined. 
 */
-class state_label_lts : public atermpp::term_list< atermpp::term_balanced_tree< data::data_expression > >
+class state_label_lts : public atermpp::term_list< lps::state >
 {
   public:
-    typedef atermpp::term_balanced_tree< data::data_expression > single_label;
-    typedef atermpp::term_list< single_label > super;
+    typedef atermpp::term_list< lps::state > super;
 
     /** \brief Default constructor. 
     */
@@ -70,14 +69,14 @@ class state_label_lts : public atermpp::term_list< atermpp::term_balanced_tree< 
     explicit state_label_lts(const CONTAINER& l)
     {
       static_assert(std::is_same<typename CONTAINER::value_type, data::data_expression>::value,"Value type must be a data_expression");
-      this->push_front(single_label(l.begin(),l.size()));
+      this->push_front(lps::state(l.begin(),l.size()));
     }
 
     /** \brief Construct a state label out of a balanced tree of data expressions, representing a state label.
     */
-    explicit state_label_lts(const single_label& l)
+    explicit state_label_lts(const lps::state& l)
     {
-      this->push_front(single_label(l.begin(),l.size()));
+      this->push_front(lps::state(l.begin(),l.size()));
     }
 
     /** \brief Construct a state label out of list of balanced trees of data expressions, representing a state label.
@@ -108,7 +107,7 @@ inline std::string pp(const state_label_lts& label)
     s += "[";
   }
   bool first=true;
-  for(const state_label_lts::single_label& l: label) 
+  for(const lps::state& l: label) 
   {
     if (!first)
     {

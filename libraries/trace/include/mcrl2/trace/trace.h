@@ -19,7 +19,7 @@
 #ifndef _TRACE_H__
 #define _TRACE_H__
 
-#include <iostream>
+// #include <iostream>
 #include <fstream>
 #include <string>
 #include "mcrl2/core/print.h"
@@ -94,7 +94,7 @@ class Trace
     process::action_label_list m_act_decls;
     bool m_data_specification_and_act_decls_are_defined;
 
-    atermpp::function_symbol const& trace_pair() const
+    const atermpp::function_symbol& trace_pair() const
     {
       static atermpp::function_symbol trace_pair = atermpp::function_symbol("pair",2);
       return trace_pair;
@@ -122,7 +122,7 @@ class Trace
     /// and length of trace are set to 0.
     /// \param[in] spec The data specification that is used when parsing multi actions.
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
-    Trace(const mcrl2::data::data_specification &spec, const mcrl2::process::action_label_list &act_decls)
+    Trace(const mcrl2::data::data_specification& spec, const mcrl2::process::action_label_list& act_decls)
       : m_spec(spec),
         m_act_decls(act_decls),
         m_data_specification_and_act_decls_are_defined(true)
@@ -160,8 +160,8 @@ class Trace
     /// \param[in] act_decls An action label list with action declarations that is used to parse multi actions.
     /// \exception mcrl2::runtime_error message in case of failure
     Trace(std::istream& is,
-          const mcrl2::data::data_specification &spec,
-          const mcrl2::process::action_label_list &act_decls,
+          const mcrl2::data::data_specification& spec,
+          const mcrl2::process::action_label_list& act_decls,
           TraceFormat tf = tfUnknown)
       : m_spec(spec),
         m_act_decls(act_decls),
@@ -207,8 +207,8 @@ class Trace
     /// \param[in] tf The format in which the trace was stored. Default: '''tfUnknown'''.
     /// \exception mcrl2::runtime_error message in case of failure
     Trace(std::string const& filename,
-          const mcrl2::data::data_specification &spec,
-          const mcrl2::process::action_label_list &act_decls,
+          const mcrl2::data::data_specification& spec,
+          const mcrl2::process::action_label_list& act_decls,
           TraceFormat tf = tfUnknown)
       : m_spec(spec),
         m_act_decls(act_decls),
@@ -247,7 +247,7 @@ class Trace
       {
         ++pos;
       }
-    }
+    } 
 
     /// \brief Decrease the current position in the trace by one provided the largest position is larger than 0.
     /// \details The initial position corresponds to pos=0.
@@ -317,14 +317,12 @@ class Trace
     /// position 0 is the initial state. If no state is defined at
     /// the next position an exception is thrown.
     /// \return The state at the current position of the trace.
-    const mcrl2::lps::state &nextState() const
+    const mcrl2::lps::state& nextState() const
     {
       assert(actions.size()+1 >= states.size() && pos+1 <=actions.size());
       if (pos>=states.size())
       {
-        std::stringstream ss;
-        ss << "Requesting a non existing state in a trace at position " << pos+1;
-        throw mcrl2::runtime_error(ss.str());
+        throw mcrl2::runtime_error("Requesting a state in a trace at a non existing position " + std::to_string(pos+1) + ".");
       }
       return states[pos+1];
     }
@@ -334,14 +332,12 @@ class Trace
     /// position 0 is the initial state. If no state is defined at
     /// the current position an exception is thrown.
     /// \return The state at the current position of the trace.
-    const mcrl2::lps::state &currentState() const
+    const mcrl2::lps::state& currentState() const
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       if (pos>=states.size())
       {
-        std::stringstream ss;
-        ss << "Requesting a non existing state in a trace at position " << pos;
-        throw mcrl2::runtime_error(ss.str());
+        throw mcrl2::runtime_error("Requesting a state in a trace at a non existing position " + std::to_string(pos) + ".");
       }
       return states[pos];
     }
@@ -399,14 +395,13 @@ class Trace
     /// \details It is necessary that all states at earlier positions are also set.
     /// If not an mcrl2::runtime_error exception is thrown.
     /// \param [in] s The new state.
-    void setState(const mcrl2::lps::state &s)
+    void setState(const mcrl2::lps::state& s)
     {
       assert(actions.size()+1 >= states.size() && pos <=actions.size());
       if (pos>states.size())
       {
-        std::stringstream ss;
-        ss << "Setting a state in a trace at a position " << pos << " where there are no states at earlier positions";
-        throw mcrl2::runtime_error(ss.str());
+        throw mcrl2::runtime_error("Setting a state in a trace at a position " + std::to_string(pos) + 
+                                   " where there are no states at earlier positions.");
       }
 
       if (states.size()==pos)
@@ -467,14 +462,14 @@ class Trace
     /// \param [in] tf The expected format of the trace in the stream (default: tfUnknown).
     /// \exception mcrl2::runtime_error message in case of failure
 
-    void load(std::string const& filename, TraceFormat tf = tfUnknown)
+    void load(const std::string& filename, TraceFormat tf = tfUnknown)
     {
       using std::ifstream;
       ifstream is(filename.c_str(),ifstream::binary|ifstream::in);
 
       if (!is.is_open())
       {
-        throw runtime_error("error loading trace (could not open file)");
+        throw runtime_error("Error loading trace (could not open file " + filename +").");
       }
 
       try
@@ -514,13 +509,9 @@ class Trace
             break;
         }
       }
-      catch (runtime_error err)
+      catch (runtime_error& err)
       {
-        std::string s;
-        s = "error saving trace (";
-        s += err.what();
-        s += ")";
-        throw runtime_error(s);
+        throw runtime_error(std::string("Error saving trace (") + err.what() + ").");
       }
     }
 
@@ -555,12 +546,12 @@ class Trace
 
   private:
 
-    bool isTimedMAct(const atermpp::aterm_appl &t)
+    bool isTimedMAct(const atermpp::aterm_appl& t)
     {
       return t.type_is_appl() && t.function()==trace_pair();
     }
 
-    atermpp::aterm_appl makeTimedMAct(const mcrl2::lps::multi_action &ma)
+    atermpp::aterm_appl makeTimedMAct(const mcrl2::lps::multi_action& ma)
     {
       return atermpp::aterm_appl(trace_pair(),ma.actions(), ma.time());
     }
@@ -579,7 +570,7 @@ class Trace
       is.read(buf,TRACE_MCRL2_MARKER_SIZE);
       if (is.bad())
       {
-        throw runtime_error("could not read from stream");
+        throw runtime_error("Could not read from stream.");
       }
       is.clear();
 
@@ -591,7 +582,7 @@ class Trace
       is.seekg(-is.gcount(),std::ios::cur);
       if (is.fail())
       {
-        throw runtime_error("could set position in stream");
+        throw runtime_error("Could not set position in stream.");
       }
 
       return fmt;
@@ -602,7 +593,7 @@ class Trace
       atermpp::aterm t = atermpp::read_term_from_binary_stream(is);
       if (!t.defined())
       {
-        throw runtime_error("failed to read aterm from stream");
+        throw runtime_error("Failed to read aterm from stream.");
       }
       t = mcrl2::data::detail::add_index(t);
 
@@ -669,7 +660,7 @@ class Trace
         is.getline(buf,MAX_LINE_SIZE);
         if (is.bad())
         {
-          throw mcrl2::runtime_error("error while reading from stream");
+          throw mcrl2::runtime_error("Error while reading from stream.");
         }
         if ((strlen(buf) > 0) && (buf[strlen(buf)-1] == '\r'))
         {
@@ -729,7 +720,7 @@ class Trace
       os.write(TRACE_MCRL2_VERSION,TRACE_MCRL2_VERSION_SIZE);
       if (os.bad())
       {
-        throw runtime_error("could not write to stream");
+        throw runtime_error("Could not write to stream.");
       }
 
       // write trace
@@ -737,7 +728,7 @@ class Trace
       atermpp::write_term_to_binary_stream(t, os);
       if (os.bad())
       {
-        throw runtime_error("could not write to stream");
+        throw runtime_error("Could not write to stream.");
       }
     }
 
@@ -749,7 +740,7 @@ class Trace
         os << std::endl;
         if (os.bad())
         {
-          throw runtime_error("could not write to stream");
+          throw runtime_error("Could not write to stream.");
         }
       }
     }

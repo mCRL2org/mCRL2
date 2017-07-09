@@ -647,7 +647,7 @@ protected:
     for(const data_expression& block: blocks)
     {
       indexed_partition.put(block);
-      result.add_state(lts::state_label_lts(lts::state_label_lts::single_label{rewr(block)}));
+      result.add_state(lts::state_label_lts(lps::state{rewr(block)}));
     }
     atermpp::indexed_set<process::action_list> indexed_actions;
     // tau is always action 0
