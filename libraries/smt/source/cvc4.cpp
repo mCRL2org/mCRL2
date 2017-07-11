@@ -101,7 +101,7 @@ static std::string print_real(const data::data_expression& number)
 {
   assert(data::sort_real::is_creal_application(number));
   data::application application(number);
-  std::string numerator = data::pp(application[0]);
+  std::string numerator = print_int(application[0]);
   std::string denominator = data::pp(application[1]);
   return "(/ " + numerator + " " + denominator + ")";
 }
