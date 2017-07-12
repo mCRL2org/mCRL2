@@ -202,7 +202,7 @@ std::string smt4_data_specification::generate_distinct_assertion(const std::map<
 
 std::string smt4_data_specification::generate_smt_problem(std::string data_specification, std::string variable_declarations, std::string assertions) const
 {
-  return "(set-logic ALL_SUPPORTED)\n" + data_specification + variable_declarations + assertions + "(check-sat)\n";
+  return "(set-logic ALL)\n" + data_specification + variable_declarations + assertions + "(check-sat)\n";
 }
 
 class cvc4_constructed_sort_definition : public constructed_sort_definition
