@@ -318,35 +318,39 @@ inline void fourier_motzkin(const data_expression& e_in,
 /// \author Thomas Neele
 struct fourier_motzkin_sigma: public std::unary_function<data_expression, data_expression>
 {
-
-protected:
-  rewriter rewr;
-
-  const data_expression apply(const abstraction& d, bool negate) const
-  {
-    const variable_list variables = d.variables();
-    const data_expression body = rewr(negate ? sort_bool::not_(d.body()) : d.body());
-
-    variable_list new_variables;
-    data_expression new_body;
-    fourier_motzkin(body, variables, new_body, new_variables, rewr);
-
-    const data_expression& result = negate ? 
-        static_cast<const data_expression&>(forall(new_variables, sort_bool::not_(new_body))) :
-        static_cast<const data_expression&>(exists(new_variables, new_body));
-    return rewr(result);
-  }
-
-public:
-
-  fourier_motzkin_sigma(rewriter rewr_)
-  :  rewr(rewr_)
-  {}
-
-  const data_expression operator()(const data_expression& d) const
-  {
-    return is_forall(d) || is_exists(d) ? apply(atermpp::down_cast<abstraction>(d), is_forall(d)) : d;
-  }
+  
+  protected:
+    rewriter rewr;
+  
+    const data_expression apply(const abstraction& d, bool negate) const
+    {
+      const variable_list variables = d.variables();
+      const data_expression body = rewr(negate ? sort_bool::not_(d.body()) : d.body());
+  
+      variable_list new_variables;
+      data_expression new_body;
+      fourier_motzkin(body, variables, new_body, new_variables, rewr);
+  
+      if (negate)
+      {
+        return rewr(forall(new_variables, sort_bool::not_(new_body)));
+      }
+      else
+      {
+        return rewr(exists(new_variables, new_body));
+      }
+    }
+  
+  public:
+  
+    fourier_motzkin_sigma(const rewriter& rewr_)
+    :  rewr(rewr_)
+    {}
+  
+    const data_expression operator()(const data_expression& d) const
+    {
+      return is_forall(d) || is_exists(d) ? apply(atermpp::down_cast<abstraction>(d), is_forall(d)) : d;
+    }
 };
 
 } // namespace data
