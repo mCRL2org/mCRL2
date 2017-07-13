@@ -20,25 +20,25 @@ namespace smt
 class smt4_data_specification: public basic_data_specification
 {
   public:
-    smt4_data_specification(data::data_specification &data_specification);
+    smt4_data_specification(const data::data_specification& data_specification);
 
-    std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, std::string function_name, data::data_expression_vector arguments) const;
+    std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, const std::string& function_name, const data::data_expression_vector& arguments) const;
     using basic_data_specification::generate_data_expression;
 
-    std::string generate_variable_declaration(std::string type_name, std::string variable_name) const;
+    std::string generate_variable_declaration(const std::string& type_name, const std::string& variable_name) const;
 
     using basic_data_specification::generate_smt_problem;
 
   protected:
-    std::string generate_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression assertion) const;
+    std::string generate_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression& assertion) const;
 
     std::string generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression_list& distinct_terms) const;
 
-    std::string generate_smt_problem(std::string data_specification, std::string variable_declarations, std::string assertions) const;
+    std::string generate_smt_problem(const std::string& variable_declarations, const std::string& assertions) const;
 
-    constructed_sort_definition *create_constructed_sort(data::sort_expression sort, const constructed_sort_definition::constructors_t &constructors);
+    constructed_sort_definition* create_constructed_sort(const data::sort_expression& sort, const constructed_sort_definition::constructors_t& constructors);
 
-    function_definition *create_recursive_function_definition(data::function_symbol function, const data::data_equation_vector& rewrite_rules);
+    function_definition* create_recursive_function_definition(const data::function_symbol& function, const data::data_equation_vector& rewrite_rules);
 };
 
 }

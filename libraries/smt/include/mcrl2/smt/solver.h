@@ -53,7 +53,7 @@ private:
     char output[64];
 
     // check return value
-    if (0 < ::read(pipe_stdout[0], output, 8))
+    if (0 < ::read(pipe_stdout[0], output, 64))
     {
       if (std::strncmp(output, "sat", 3) == 0)
       {
@@ -71,7 +71,8 @@ private:
       }
       else
       {
-        throw mcrl2::runtime_error("Got unexpected response from SMT-solver: " + std::string(output, 256));
+        mCRL2log(error) << "Error when checking satisfiability of \n" << command << std::endl;
+        throw mcrl2::runtime_error("Got unexpected response from SMT-solver: " + std::string(output, 64));
       }
     }
     else
@@ -149,6 +150,7 @@ public:
   {
     signal(SIGPIPE, SIG_IGN);
     initialize_solver();
+    execute(m_spec->generate_data_specification());
   }
 
   ~solver()

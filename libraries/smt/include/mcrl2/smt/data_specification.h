@@ -31,22 +31,22 @@ class data_specification
 {
   public:
     virtual data::set_identifier_generator& identifier_generator() = 0;
-    virtual data::data_expression representative(data::sort_expression sort) = 0;
+    virtual data::data_expression representative(const data::sort_expression& sort) = 0;
 
-    virtual bool is_constructed_sort(data::sort_expression sort) const = 0;
-    virtual bool is_constructor(data::function_symbol function) const = 0;
-    virtual const std::set<data::function_symbol>& constructors(data::sort_expression constructed_sort) const = 0;
-    virtual const data::function_symbol& recogniser_function(data::function_symbol constructor) const = 0;
-    virtual const data::function_symbol& projection_function(data::function_symbol constructor, std::size_t field_index) const = 0;
+    virtual bool is_constructed_sort(const data::sort_expression& sort) const = 0;
+    virtual bool is_constructor(const data::function_symbol& function) const = 0;
+    virtual const std::set<data::function_symbol>& constructors(const data::sort_expression& constructed_sort) const = 0;
+    virtual const data::function_symbol& recogniser_function(const data::function_symbol& constructor) const = 0;
+    virtual const data::function_symbol& projection_function(const data::function_symbol& constructor, const std::size_t& field_index) const = 0;
 
-    virtual std::string generate_sort_name(data::sort_expression sort) const = 0;
+    virtual std::string generate_sort_name(const data::sort_expression& sort) const = 0;
 
-    virtual std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, std::string function_name, data::data_expression_vector arguments) const = 0;
-    virtual std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, data::data_expression expression) const = 0;
+    virtual std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, const std::string& function_name, const data::data_expression_vector& arguments) const = 0;
+    virtual std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, const data::data_expression& expression) const = 0;
 
-    virtual std::string generate_variable_declaration(std::string type_name, std::string variable_name) const = 0;
+    virtual std::string generate_variable_declaration(const std::string& type_name, const std::string& variable_name) const = 0;
 
-    virtual std::string generate_data_specification(std::set<data::sort_expression> required_sorts, std::set<data::function_symbol> required_functions) const = 0;
+    virtual std::string generate_data_specification() const = 0;
 
     virtual std::string generate_smt_problem(const smt_problem& problem) = 0;
 };

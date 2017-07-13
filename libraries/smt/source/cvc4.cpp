@@ -78,23 +78,19 @@ static std::string print_nat(const data::data_expression& number)
   return data::pp(number);
 }
 
-static std::string print_int(data::data_expression number)
+static std::string print_int(const data::data_expression& number)
 {
   assert(data::sort_int::is_cint_application(number) || data::sort_int::is_cneg_application(number));
-  bool negate = false;
   if (data::sort_int::is_cneg_application(number))
   {
     data::application application(number);
     assert(application.size() == 1);
-    number = application[0];
-    negate = true;
+    return "(- " + data::pp(application[0]) + ")";
   }
-  std::string output = data::pp(number);
-  if (negate)
+  else
   {
-    output = "(- " + output + ")";
+    return data::pp(number);
   }
-  return output;
 }
 
 static std::string print_real(const data::data_expression& number)
@@ -106,12 +102,12 @@ static std::string print_real(const data::data_expression& number)
   return "(/ " + numerator + " " + denominator + ")";
 }
 
-static std::shared_ptr<function_definition> make_operator(data_specification *data_specification, const std::string& name)
+static std::shared_ptr<function_definition> make_operator(data_specification* data_specification, const std::string& name)
 {
   return std::shared_ptr<function_definition>(new named_function_definition(data_specification, name));
 }
 
-smt4_data_specification::smt4_data_specification(data::data_specification &data_specification):
+smt4_data_specification::smt4_data_specification(const data::data_specification& data_specification):
   basic_data_specification(data_specification, std::shared_ptr<data::set_identifier_generator>(new cvc4_identifier_generator))
 {
   add_sort_bool(std::shared_ptr<sort_definition>(new sort_definition(this, "Bool")), "true", "false");
@@ -157,7 +153,7 @@ smt4_data_specification::smt4_data_specification(data::data_specification &data_
   add_recursive_functions(data_specification);
 }
 
-std::string smt4_data_specification::generate_data_expression(const std::map<data::variable, std::string>& declared_variables, std::string function_name, data::data_expression_vector arguments) const
+std::string smt4_data_specification::generate_data_expression(const std::map<data::variable, std::string>& declared_variables, const std::string& function_name, const data::data_expression_vector& arguments) const
 {
   if (arguments.empty())
   {
@@ -178,12 +174,12 @@ std::string smt4_data_specification::generate_data_expression(const std::map<dat
   }
 }
 
-std::string smt4_data_specification::generate_variable_declaration(std::string type_name, std::string variable_name) const
+std::string smt4_data_specification::generate_variable_declaration(const std::string& type_name, const std::string& variable_name) const
 {
   return "(declare-fun " + variable_name + " () " + type_name + ")\n";
 }
 
-std::string smt4_data_specification::generate_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression assertion) const
+std::string smt4_data_specification::generate_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression& assertion) const
 {
   return "(assert " + generate_data_expression(declared_variables, assertion) + ")\n";
 }
@@ -200,9 +196,9 @@ std::string smt4_data_specification::generate_distinct_assertion(const std::map<
   return output;
 }
 
-std::string smt4_data_specification::generate_smt_problem(std::string data_specification, std::string variable_declarations, std::string assertions) const
+std::string smt4_data_specification::generate_smt_problem(const std::string& variable_declarations, const std::string& assertions) const
 {
-  return "(set-logic ALL)\n" + data_specification + variable_declarations + assertions + "(check-sat)\n";
+  return variable_declarations + assertions + "(check-sat)\n";
 }
 
 class cvc4_constructed_sort_definition : public constructed_sort_definition
@@ -253,7 +249,7 @@ class cvc4_constructed_sort_definition : public constructed_sort_definition
     }
 };
 
-constructed_sort_definition *smt4_data_specification::create_constructed_sort(data::sort_expression sort, const constructed_sort_definition::constructors_t &constructors)
+constructed_sort_definition *smt4_data_specification::create_constructed_sort(const data::sort_expression& sort, const constructed_sort_definition::constructors_t &constructors)
 {
   return new cvc4_constructed_sort_definition(this, sort, constructors);
 }
@@ -302,7 +298,7 @@ class cvc4_recursive_function_definition : public recursive_function_definition
     }
 };
 
-function_definition *smt4_data_specification::create_recursive_function_definition(data::function_symbol function, const data::data_equation_vector& rewrite_rules)
+function_definition *smt4_data_specification::create_recursive_function_definition(const data::function_symbol& function, const data::data_equation_vector& rewrite_rules)
 {
   return new cvc4_recursive_function_definition(this, function, rewrite_rules);
 }

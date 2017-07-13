@@ -67,6 +67,7 @@ template<class T> std::vector<T> topological_sort(std::map<T, std::set<T> > depe
       dependencies.erase(*i);
     }
     assert(!dependencies.empty());
+    //TODO: SMT2.5 format supports mutually recursive functions
     throw translation_error("Dependency loop trying to resolve dependencies for " + data::pp(dependencies.begin()->first));
   }
   else
@@ -75,14 +76,15 @@ template<class T> std::vector<T> topological_sort(std::map<T, std::set<T> > depe
   }
 }
 
-basic_data_specification::basic_data_specification(data::data_specification &data_specification, std::shared_ptr<data::set_identifier_generator> identifier_generator):
+basic_data_specification::basic_data_specification(const data::data_specification& data_specification, std::shared_ptr<data::set_identifier_generator> identifier_generator):
+  m_data_specification(data_specification),
   m_identifier_generator(identifier_generator),
   m_representative_generator(data_specification)
 {
   find_rewrite_rules(data_specification);
 }
 
-std::string basic_data_specification::generate_data_expression(const std::map<data::variable, std::string>& declared_variables, data::data_expression expression) const
+std::string basic_data_specification::generate_data_expression(const std::map<data::variable, std::string>& declared_variables, const data::data_expression& expression) const
 {
   if (data::is_variable(expression))
   {
@@ -128,12 +130,20 @@ std::string basic_data_specification::generate_data_expression(const std::map<da
   }
 }
 
-std::string basic_data_specification::generate_data_specification(std::set<data::sort_expression> required_sorts, std::set<data::function_symbol> required_functions) const
+std::string basic_data_specification::generate_data_specification() const
 {
   std::queue<data::function_symbol> function_queue;
-  for (std::set<data::function_symbol>::const_iterator i = required_functions.begin(); i != required_functions.end(); i++)
+  for (const std::pair<data::function_symbol, std::shared_ptr<function_definition>>& function: m_functions)
   {
-    function_queue.push(*i);
+    // Check whether the function symbol is actually present in the data specification
+    if(std::find(m_data_specification.mappings().begin(), m_data_specification.mappings().end(), function.first) != m_data_specification.mappings().end())
+    {
+      function_queue.push(function.first);
+    }
+  }
+  for (const data::function_symbol& function: m_data_specification.user_defined_mappings())
+  {
+    function_queue.push(function);
   }
   std::map<data::function_symbol, std::set<data::function_symbol> > function_dependencies;
   while (!function_queue.empty())
@@ -142,32 +152,34 @@ std::string basic_data_specification::generate_data_specification(std::set<data:
     function_queue.pop();
     if (!m_functions.count(function))
     {
-      throw translation_error("Untranslated function " + data::pp(function));
+      throw translation_error("Untranslated function " + atermpp::pp(function));
     }
 
     const std::set<data::function_symbol>& dependencies = m_functions.at(function)->function_dependencies();
     function_dependencies[function] = dependencies;
     function_dependencies[function].erase(function);
+
     for (std::set<data::function_symbol>::const_iterator i = dependencies.begin(); i != dependencies.end(); i++)
     {
-      if (!required_functions.count(*i))
+      if (!function_dependencies.count(*i))
       {
-        required_functions.insert(*i);
         function_queue.push(*i);
       }
-    }
-
-    const std::set<data::sort_expression>& sorts = m_functions.at(function)->sort_dependencies();
-    for (std::set<data::sort_expression>::const_iterator i = sorts.begin(); i != sorts.end(); i++)
-    {
-      required_sorts.insert(*i);
     }
   }
 
   std::queue<data::sort_expression> sort_queue;
-  for (std::set<data::sort_expression>::const_iterator i = required_sorts.begin(); i != required_sorts.end(); i++)
+  for (const std::pair<data::sort_expression, std::shared_ptr<sort_definition>>& sort: m_sorts)
   {
-    sort_queue.push(*i);
+    // Check whether the sort is actually present in the data specification
+    if(std::find(m_data_specification.sorts().begin(), m_data_specification.sorts().end(), sort.first) != m_data_specification.sorts().end())
+    {
+      sort_queue.push(sort.first);
+    }
+  }
+  for (const data::sort_expression& sort: m_data_specification.user_defined_sorts())
+  {
+    sort_queue.push(sort);
   }
   std::map<data::sort_expression, std::set<data::sort_expression> > sort_dependencies;
   while (!sort_queue.empty())
@@ -184,9 +196,8 @@ std::string basic_data_specification::generate_data_specification(std::set<data:
     sort_dependencies[sort].erase(sort);
     for (std::set<data::sort_expression>::const_iterator i = dependencies.begin(); i != dependencies.end(); i++)
     {
-      if (!required_sorts.count(*i))
+      if (!sort_dependencies.count(*i))
       {
-        required_sorts.insert(*i);
         sort_queue.push(*i);
       }
     }
@@ -211,9 +222,6 @@ std::string basic_data_specification::generate_data_specification(std::set<data:
 
 std::string basic_data_specification::generate_smt_problem(const smt_problem& problem)
 {
-  std::set<data::sort_expression> required_sorts;
-  std::set<data::function_symbol> required_functions;
-
   std::string variable_declarations;
   std::string assertions;
 
@@ -239,8 +247,6 @@ std::string basic_data_specification::generate_smt_problem(const smt_problem& pr
     variable_identifiers.insert(name);
     declared_variables[*i] = name;
 
-    required_sorts.insert(i->sort());
-
     if (!m_sorts.count(i->sort()))
     {
       throw translation_error("Untranslated sort " + data::pp(*i));
@@ -250,17 +256,11 @@ std::string basic_data_specification::generate_smt_problem(const smt_problem& pr
 
   for (std::set<data::data_expression>::const_iterator i = problem.assertions().begin(); i != problem.assertions().end(); i++)
   {
-    std::set<data::function_symbol> functions = data::find_function_symbols(*i);
-    required_functions.insert(functions.begin(), functions.end());
-
     assertions += generate_assertion(declared_variables, *i);
   }
 
   for (std::set<data::data_expression_list>::const_iterator i = problem.distinct_assertions().begin(); i != problem.distinct_assertions().end(); i++)
   {
-    std::set<data::function_symbol> functions = data::find_function_symbols(*i);
-    required_functions.insert(functions.begin(), functions.end());
-
     if (i->size() == 0 || i->size() == 1)
     {
       continue;
@@ -269,9 +269,7 @@ std::string basic_data_specification::generate_smt_problem(const smt_problem& pr
     assertions += generate_distinct_assertion(declared_variables, *i);
   }
 
-  std::string data_specification = generate_data_specification(required_sorts, required_functions);
-
-  return generate_smt_problem(data_specification, variable_declarations, assertions);
+  return generate_smt_problem(variable_declarations, assertions);
 }
 
 std::string basic_data_specification::generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression_list& distinct_terms) const

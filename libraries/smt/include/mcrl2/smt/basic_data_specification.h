@@ -34,6 +34,7 @@ namespace smt
 class basic_data_specification: public data_specification
 {
   protected:
+    data::data_specification m_data_specification;
     std::shared_ptr<data::set_identifier_generator> m_identifier_generator;
     data::representative_generator m_representative_generator;
 
@@ -49,7 +50,7 @@ class basic_data_specification: public data_specification
     std::map<data::function_symbol, std::map<std::size_t, data::function_symbol_vector> > m_all_projections;
 
   public:
-    basic_data_specification(data::data_specification &data_specification, std::shared_ptr<data::set_identifier_generator> identifier_generator);
+    basic_data_specification(const data::data_specification& data_specification, std::shared_ptr<data::set_identifier_generator> identifier_generator);
 
     virtual ~basic_data_specification()
     {}
@@ -59,17 +60,17 @@ class basic_data_specification: public data_specification
       return *m_identifier_generator;
     }
 
-    virtual data::data_expression representative(data::sort_expression sort)
+    virtual data::data_expression representative(const data::sort_expression& sort)
     {
       return m_representative_generator(sort);
     }
 
-    bool is_constructed_sort(data::sort_expression sort) const
+    bool is_constructed_sort(const data::sort_expression& sort) const
     {
       return m_constructed_sort_constructors.count(sort) != 0;
     }
 
-    bool is_constructor(data::function_symbol function) const
+    bool is_constructor(const data::function_symbol& function) const
     {
       data::sort_expression codomain;
       if (data::is_function_sort(function.sort()))
@@ -87,34 +88,34 @@ class basic_data_specification: public data_specification
       return constructors(codomain).count(function) != 0;
     }
 
-    const std::set<data::function_symbol>& constructors(data::sort_expression constructed_sort) const
+    const std::set<data::function_symbol>& constructors(const data::sort_expression& constructed_sort) const
     {
       assert(is_constructed_sort(constructed_sort));
       return m_constructed_sort_constructors.at(constructed_sort);
     }
 
-    const data::function_symbol& recogniser_function(data::function_symbol constructor) const
+    const data::function_symbol& recogniser_function(const data::function_symbol& constructor) const
     {
       assert(m_recognisers.count(constructor));
       return m_recognisers.at(constructor);
     }
 
-    const data::function_symbol& projection_function(data::function_symbol constructor, std::size_t field_index) const
+    const data::function_symbol& projection_function(const data::function_symbol& constructor, const std::size_t& field_index) const
     {
       assert(m_projections.count(constructor));
       assert(m_projections.at(constructor).count(field_index));
       return m_projections.at(constructor).at(field_index);
     }
 
-    std::string generate_sort_name(data::sort_expression sort) const
+    std::string generate_sort_name(const data::sort_expression& sort) const
     {
       assert(m_sorts.count(sort));
       return m_sorts.at(sort)->name();
     }
 
-    std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, data::data_expression expression) const;
+    std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, const data::data_expression& expression) const;
 
-    std::string generate_data_specification(std::set<data::sort_expression> required_sorts, std::set<data::function_symbol> required_functions) const;
+    std::string generate_data_specification() const;
 
     std::string generate_smt_problem(const smt_problem& problem);
 
@@ -122,20 +123,20 @@ class basic_data_specification: public data_specification
    * Start of implementation-specific interface
    */
   public:
-    virtual std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, std::string function_name, data::data_expression_vector arguments) const = 0;
+    virtual std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, const std::string& function_name, const data::data_expression_vector& arguments) const = 0;
 
-    virtual std::string generate_variable_declaration(std::string type_name, std::string variable_name) const = 0;
+    virtual std::string generate_variable_declaration(const std::string& type_name, const std::string& variable_name) const = 0;
 
   protected:
-    virtual std::string generate_assertion(const std::map<data::variable, std::string>& declared_variables, data::data_expression assertion) const = 0;
+    virtual std::string generate_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression& assertion) const = 0;
 
     virtual std::string generate_distinct_assertion(const std::map<data::variable, std::string>& declared_variables, const data::data_expression_list& distinct_terms) const;
 
-    virtual std::string generate_smt_problem(std::string data_specification, std::string variable_declarations, std::string assertions) const = 0;
+    virtual std::string generate_smt_problem(const std::string& variable_declarations, const std::string& assertions) const = 0;
 
-    virtual constructed_sort_definition *create_constructed_sort(data::sort_expression sort, const constructed_sort_definition::constructors_t &constructors) = 0;
+    virtual constructed_sort_definition* create_constructed_sort(const data::sort_expression& sort, const constructed_sort_definition::constructors_t &constructors) = 0;
 
-    virtual function_definition *create_recursive_function_definition(data::function_symbol function, const data::data_equation_vector& rewrite_rules) = 0;
+    virtual function_definition* create_recursive_function_definition(const data::function_symbol& function, const data::data_equation_vector& rewrite_rules) = 0;
   /*
    * End of implementation-specific interface
    */
