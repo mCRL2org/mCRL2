@@ -10,7 +10,7 @@
 #define MCRL2_SMT_SOLVER_H
 
 #include <cstring>
-#include <wait.h>
+// #include <wait.h>
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/representative_generator.h"

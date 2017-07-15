@@ -7,7 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file linearise.cpp
-/// \brief Add your file description here.
+/// \brief This file contains code to transform an mCRL2 process
+///        into a linear process. 
 
 /* This file contains the implementation of an mCRL2 lineariser.
 
@@ -18,7 +19,7 @@
    Everybody is free to use this software, provided it is not changed.
 
    In case problems are encountered when using this software, please report
-   them to J.F. Groote, TU/e, Eindhoven, jfg@win.tue.nl
+   them to J.F. Groote, TU/e, Eindhoven, J.F.Groote@tue.nl
 
    This software comes as it is. I.e. the author assumes no responsibility for
    the use of this software.
@@ -37,6 +38,7 @@
 #include "mcrl2/atermpp/indexed_set.h"
 
 // linear process libraries.
+#include "mcrl2/lps/detail/ultimate_delay.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/sumelm.h"
@@ -8331,7 +8333,7 @@ class specification_basic_type
            is not empty. If no communications can take place,
            the original multiaction is delivered, with condition
            true. */
-// std::cerr << "CALCULATE COMMUNICATION " << multiaction << "\n";
+
         const tuple_list multiactionconditionlist=
           makeMultiActionConditionList(
             multiaction,
@@ -8501,26 +8503,23 @@ class specification_basic_type
       return result;
     }
 
-    data_expression getUltimateDelayCondition(
+    lps::detail::ultimate_delay getUltimateDelayCondition(
       const stochastic_action_summand_vector& action_summands,
       const deadlock_summand_vector& deadlock_summands,
-      const variable_list& freevars,
-      const variable& time_variable,
-      variable_list& existentially_quantified_variables)
+      const variable_list& freevars)
     {
-      assert(existentially_quantified_variables.empty());
-
       /* First walk through the summands to see whether
          a summand with condition true that does not refer
          to time exists. In that case the ultimate delay
          condition is true */
 
+      variable time_variable=get_fresh_variable("timevar",sort_real::real_());
       for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
            i!=deadlock_summands.end(); ++i)
       {
         if ((!i->deadlock().has_time()) && (i->condition()==sort_bool::true_()))
         {
-          return sort_bool::true_();
+          return lps::detail::ultimate_delay(time_variable);
         }
       }
 
@@ -8529,7 +8528,7 @@ class specification_basic_type
       {
         if ((!i->multi_action().has_time()) && (i->condition()==sort_bool::true_()))
         {
-          return sort_bool::true_();
+          return lps::detail::ultimate_delay(time_variable);
         }
       }
 
@@ -8541,6 +8540,7 @@ class specification_basic_type
       data_expression_list condition_list;
       std::vector < variable_list> renamings_pars;
       std::vector < data_expression_list> renamings_args;
+      variable_list existentially_quantified_variables;
       for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
            i!=deadlock_summands.end(); ++i)
       {
@@ -8623,7 +8623,7 @@ class specification_basic_type
         mutable_map_substitution<> mutable_sigma(sigma);
         result=lazy::or_(result,data::replace_variables_capture_avoiding(lazy::and_(*i,*j), mutable_sigma, variables_in_rhs_sigma));
       }
-      return result;
+      return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, result);
     }
 
 
@@ -8655,15 +8655,27 @@ class specification_basic_type
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars,
       assignment_list& init,
+      lps::detail::ultimate_delay& ultimate_delay_condition,
       const std::string& hint="")
     {
       stochastic_action_summand_vector result_action_summands;
 
       std::set<data::variable> rhs_variables_sigma;
-      data::mutable_map_substitution<> sigma=make_unique_variables(pars,hint, rhs_variables_sigma);
+      data::mutable_map_substitution<> sigma=make_unique_variables(pars, hint, rhs_variables_sigma);
       const variable_list unique_pars=data::replace_variables(pars, sigma);
 
       init=substitute_assignmentlist(init,pars,true,false, sigma,rhs_variables_sigma);  // Only substitute the variables in the lhs.
+
+      // Remove variables locally bound in the ultimate_delay_condition
+      data::mutable_map_substitution<> local_sigma=sigma;
+      for(const variable& v: ultimate_delay_condition.variables())
+      {
+        local_sigma[v]=v;
+      }
+      ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
+                                                       ultimate_delay_condition.constraint(), 
+                                                       local_sigma,
+                                                       rhs_variables_sigma);  // Only substitute the variables in the lhs.
       for (stochastic_action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
       {
         const stochastic_action_summand smmnd= *s;
@@ -8752,10 +8764,35 @@ class specification_basic_type
 
     /**************** parallel composition ******************************/
 
+
+
+    /// \brief Returns the conjunction of the two delay conditions and the join of the variables, where
+    ///        the variables in delay2 are renamed to avoid conflict with those in delay1. 
+    lps::detail::ultimate_delay combine_ultimate_delays(
+                           const lps::detail::ultimate_delay& delay1, 
+                           const lps::detail::ultimate_delay& delay2)
+    {
+      // Make the bound variables of the second ultimate delay different from those in the first. 
+      variable_list renameable_variables=delay2.variables();
+      mutable_map_substitution<> sigma;
+      std::set<variable> rhs_variables_in_sigma;
+      alphaconvert(renameable_variables, sigma, delay1.variables(), data_expression_list(), rhs_variables_in_sigma);
+      // Additionally map the time variable of the second ultimate delay to that of the first.
+      sigma[delay2.time_var()]=delay1.time_var();
+      rhs_variables_in_sigma.insert(delay2.time_var());
+      data_expression new_constraint = optimized_and(delay1.constraint(),
+                                          data::replace_variables_capture_avoiding(delay2.constraint(),sigma, rhs_variables_in_sigma));
+      variable_list new_existential_variables = delay1.variables()+renameable_variables;
+      
+      // TODO: The new constraint can be simplified, as two conditions sharing the timed variable have been merged. 
+      return lps::detail::ultimate_delay(
+                            delay1.time_var(),
+                            new_existential_variables,
+                            new_constraint);
+    }
+
     void calculate_left_merge_action(
-      const variable& timevar,
-      data_expression& ultimatedelaycondition,
-      const variable_list& ultimate_delay_sumvars1,
+      const lps::detail::ultimate_delay& ultimate_delay_condition,
       const stochastic_action_summand_vector& action_summands1,
       const action_name_multiset_list& allowlist,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
@@ -8764,7 +8801,12 @@ class specification_basic_type
     {
       for (const stochastic_action_summand& summand1: action_summands1)
       {
-        variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
+        variable_list sumvars=ultimate_delay_condition.variables();
+        mutable_map_substitution<> sigma;
+        std::set<variable> variables_in_rhs_of_sigma;
+        alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list(),variables_in_rhs_of_sigma);
+
+        variable_list sumvars1=summand1.summation_variables() + sumvars;
         action_list multiaction1=summand1.multi_action().actions();
         data_expression actiontime1=summand1.multi_action().time();
         data_expression condition1=summand1.condition();
@@ -8785,24 +8827,27 @@ class specification_basic_type
 
           if (!has_time)
           {
-            if (ultimatedelaycondition!=sort_bool::true_())
+            if (ultimate_delay_condition.constraint()!=sort_bool::true_())
             {
-              actiontime1=timevar;
-              sumvars1.push_front(timevar);
-              condition1=lazy::and_(ultimatedelaycondition,condition1);
+              actiontime1=ultimate_delay_condition.time_var();
+              sumvars1.push_front(ultimate_delay_condition.time_var());
+              condition1=lazy::and_(condition1, 
+                                    data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
+                                                                             sigma,
+                                                                             variables_in_rhs_of_sigma));
               has_time=true;
             }
           }
           else
           {
             /* Summand1 has time. Substitute the time expression for
-               timevar in ultimatedelaycondition, and extend the condition */
-            mutable_map_substitution<> sigma;
-            const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime1);
-            sigma[timevar]=actiontime1;
+               timevar in ultimate_delay_condition, and extend the condition */
+            const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
+            sigma[ultimate_delay_condition.time_var()]=actiontime1;
+            variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
             const data_expression intermediateultimatedelaycondition=
-                       data::replace_variables_capture_avoiding(ultimatedelaycondition,sigma,variables_in_rhs_sigma);
-            condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
+                       data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
+            condition1=optimized_and(condition1, intermediateultimatedelaycondition);
           }
 
           condition1=RewriteTerm(condition1);
@@ -8820,9 +8865,7 @@ class specification_basic_type
     }
 
     void calculate_left_merge_deadlock(
-      const variable& timevar,
-      data_expression& ultimatedelaycondition,
-      const variable_list& ultimate_delay_sumvars1,
+      const lps::detail::ultimate_delay& ultimate_delay_condition,
       const deadlock_summand_vector& deadlock_summands1,
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
@@ -8835,31 +8878,39 @@ class specification_basic_type
       {
         for (const deadlock_summand& summand1: deadlock_summands1)
         {
-          variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
+          variable_list sumvars=ultimate_delay_condition.variables();
+          mutable_map_substitution<> sigma;
+          std::set<variable> variables_in_rhs_of_sigma;
+          alphaconvert(sumvars,sigma,summand1.summation_variables(),data_expression_list(),variables_in_rhs_of_sigma);
+
+          variable_list sumvars1=summand1.summation_variables() + sumvars;
           data_expression actiontime1=summand1.deadlock().time();
           data_expression condition1=summand1.condition();
           bool has_time=summand1.deadlock().has_time();
 
           if (!has_time)
           {
-            if (ultimatedelaycondition!=sort_bool::true_())
+            if (ultimate_delay_condition.constraint()!=sort_bool::true_())
             {
-              actiontime1=timevar;
-              sumvars1.push_front(timevar);
-              condition1=lazy::and_(ultimatedelaycondition,condition1);
+              actiontime1=ultimate_delay_condition.time_var();
+              sumvars1.push_front(ultimate_delay_condition.time_var());
+              condition1=optimized_and(condition1, 
+                                       data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
+                                                                                sigma,
+                                                                                variables_in_rhs_of_sigma));
               has_time=true;
             }
           }
           else
           {
             /* Summand1 has time. Substitute the time expression for
-               timevar in ultimatedelaycondition, and extend the condition */
-            mutable_map_substitution<> sigma;
-            const std::set<variable> variables_in_rhs_sigma=find_free_variables(actiontime1);
-            sigma[timevar]=actiontime1;
+               timevar in ultimate_delay_condition, and extend the condition */
+            const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
+            sigma[ultimate_delay_condition.time_var()]=actiontime1;
+            variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
             const data_expression intermediateultimatedelaycondition=
-                        data::replace_variables_capture_avoiding(ultimatedelaycondition, sigma, variables_in_rhs_sigma);
-            condition1=lazy::and_(intermediateultimatedelaycondition,condition1);
+                       data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
+            condition1=optimized_and(condition1, intermediateultimatedelaycondition);
           }
 
           condition1=RewriteTerm(condition1);
@@ -8874,44 +8925,18 @@ class specification_basic_type
     }
 
     void calculate_left_merge(
-      const variable& timevar,
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
-      const stochastic_action_summand_vector& action_summands2,
-      const deadlock_summand_vector& deadlock_summands2,
-      const variable_list& parametersOfsumlist2,
+      const lps::detail::ultimate_delay& ultimate_delay_condition2,
       const action_name_multiset_list& allowlist,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands)
     {
-      variable_list ultimate_delay_sumvars1;
-      data_expression ultimate_delay_condition=
-        (options.ignore_time?data_expression(sort_bool::true_()):
-           getUltimateDelayCondition(action_summands2,deadlock_summands2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
-
-      // The ultimate_delay_condition can be complex. Try to simplify it with a fourier_motzkin reduction.
-      if (!options.ignore_time)
-      { 
-        data_expression simplified_ultimate_delay_condition;
-        variable_list reduced_sumvars;
-        try 
-        {
-          fourier_motzkin(ultimate_delay_condition, ultimate_delay_sumvars1, simplified_ultimate_delay_condition, reduced_sumvars, rewr);
-          swap(simplified_ultimate_delay_condition, ultimate_delay_condition);
-          swap(ultimate_delay_sumvars1, reduced_sumvars);
-        }
-        catch (mcrl2::runtime_error& e)
-        {
-          // Applying Fourier Motzkin failed. Continue working with the old variables. 
-          mCRL2log(mcrl2::log::debug) << "Simplifying a condition using Fourier-Motzkin reduction failed. \n" << e.what() << std::endl;
-        }
-      }
-
-      calculate_left_merge_deadlock(timevar, ultimate_delay_condition, ultimate_delay_sumvars1, deadlock_summands1, 
+      calculate_left_merge_deadlock(ultimate_delay_condition2, deadlock_summands1, 
                                     is_allow, is_block, action_summands, deadlock_summands);
-      calculate_left_merge_action(timevar, ultimate_delay_condition, ultimate_delay_sumvars1, action_summands1, 
+      calculate_left_merge_action(ultimate_delay_condition2, action_summands1, 
                                     allowlist, is_allow, is_block, action_summands);
     }
 
@@ -9152,11 +9177,12 @@ class specification_basic_type
     void combine_summand_lists(
       const stochastic_action_summand_vector& action_summands1,
       const deadlock_summand_vector& deadlock_summands1,
+      const lps::detail::ultimate_delay& ultimate_delay_condition1, 
       const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
+      const lps::detail::ultimate_delay& ultimate_delay_condition2, 
       const variable_list& par1,
       const variable_list& par3,
-      const variable_list& parametersOfsumlist2,
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
@@ -9181,13 +9207,14 @@ class specification_basic_type
       /* first we enumerate the summands of t1 */
 
       action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
-      variable timevar=get_fresh_variable("timevar",sort_real::real_());
-      calculate_left_merge(timevar, action_summands1, deadlock_summands1, action_summands2, deadlock_summands2, 
-                           parametersOfsumlist2, allowlist, is_allow, is_block, action_summands, deadlock_summands);
+      calculate_left_merge(action_summands1, deadlock_summands1, 
+                           ultimate_delay_condition2, allowlist, is_allow, is_block, 
+                           action_summands, deadlock_summands);
 
       /* second we enumerate the summands of sumlist2 */
-      calculate_left_merge(timevar, action_summands2, deadlock_summands2, action_summands1, deadlock_summands1, 
-                           parametersOfsumlist2, allowlist, is_allow, is_block, action_summands, deadlock_summands);
+      calculate_left_merge(action_summands2, deadlock_summands2, 
+                           ultimate_delay_condition1, allowlist, is_allow, is_block, 
+                           action_summands, deadlock_summands);
 
       /* thirdly we enumerate all multi actions*/
 
@@ -9202,11 +9229,13 @@ class specification_basic_type
       const variable_list& pars1,
       const assignment_list& init1,
       const stochastic_distribution& initial_stochastic_distribution1,
+      const lps::detail::ultimate_delay& ultimate_delay_condition1,
       const stochastic_action_summand_vector& action_summands2,
       const deadlock_summand_vector& deadlock_summands2,
       const variable_list& pars2,
       const assignment_list& init2,
       const stochastic_distribution& initial_stochastic_distribution2,
+      const lps::detail::ultimate_delay& ultimate_delay_condition2,
       const action_name_multiset_list& allowlist1,  // This is a list of list of identifierstring.
       const bool is_allow,                          // If is_allow or is_block is set, perform inline allow/block filtering.
       const bool is_block,
@@ -9214,7 +9243,8 @@ class specification_basic_type
       deadlock_summand_vector& deadlock_summands,
       variable_list& pars_result,
       assignment_list& init_result,
-      stochastic_distribution& initial_stochastic_distribution)
+      stochastic_distribution& initial_stochastic_distribution,
+      lps::detail::ultimate_delay& ultimate_delay_condition)
     {
       mCRL2log(mcrl2::log::verbose) <<
             (is_allow ? "- calculating the parallel composition modulo the allow operator: " :
@@ -9229,19 +9259,21 @@ class specification_basic_type
       // those that are constant in both processes.
 
       variable_list pars3;
-      for (variable_list::const_iterator i=pars2.begin(); i!=pars2.end(); ++i)
+      for (const variable& v: pars2)
       {
-        if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
+        if (std::find(pars1.begin(),pars1.end(),v)==pars1.end())
         {
           // *i does not occur in pars1.
-          pars3.push_front(*i);
+          pars3.push_front(v);
         }
       }
 
       pars3=reverse(pars3);
       assert(action_summands.size()==0);
       assert(deadlock_summands.size()==0);
-      combine_summand_lists(action_summands1,deadlock_summands1,action_summands2,deadlock_summands2,pars1,pars3,pars2,allowlist1,is_allow,is_block,action_summands,deadlock_summands);
+      combine_summand_lists(action_summands1,deadlock_summands1,ultimate_delay_condition1,
+                            action_summands2,deadlock_summands2,ultimate_delay_condition2,
+                            pars1,pars3,allowlist1,is_allow,is_block,action_summands,deadlock_summands);
 
       mCRL2log(mcrl2::log::verbose) << action_summands.size() << " actions and " << deadlock_summands.size() << " delta summands.\n";
       pars_result=pars1+pars3;
@@ -9250,6 +9282,10 @@ class specification_basic_type
                                           initial_stochastic_distribution1.variables()+initial_stochastic_distribution2.variables(),
                                           data::sort_real::times(initial_stochastic_distribution1.distribution(),
                                                                  initial_stochastic_distribution2.distribution()));
+      if (!options.ignore_time)
+      {
+        ultimate_delay_condition=combine_ultimate_delays(ultimate_delay_condition1, ultimate_delay_condition2);
+      }
     }
 
     /**************** GENERaTE LPEmCRL **********************************/
@@ -9267,16 +9303,16 @@ class specification_basic_type
       const bool rename_variables,
       variable_list& pars,
       assignment_list& init,
-      stochastic_distribution& initial_stochastic_distribution)
+      stochastic_distribution& initial_stochastic_distribution,
+      lps::detail::ultimate_delay& ultimate_delay_condition)
     {
       if (is_process_instance_assignment(t))
       {
-        generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),regular,pars,init,initial_stochastic_distribution);
+        generateLPEmCRL(action_summands,deadlock_summands,process_instance_assignment(t).identifier(),regular,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         std::size_t n=objectIndex(process_instance_assignment(t).identifier());
         const assignment_list ass=process_instance_assignment(t).assignments();
 
         mutable_map_substitution<> sigma;
-        // std::map<variable,data_expression> sigma;
         std::set<variable> variables_occurring_in_rhs_sigma;
         for (assignment_list::const_iterator i=ass.begin(); i!=ass.end(); ++i)
         {
@@ -9286,6 +9322,10 @@ class specification_basic_type
         }
 
         init=substitute_assignmentlist(init,pars,false,true,sigma,variables_occurring_in_rhs_sigma);
+        ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
+                                                              ultimate_delay_condition.constraint(),
+                                                              sigma,
+                                                              variables_occurring_in_rhs_sigma); 
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9293,13 +9333,13 @@ class specification_basic_type
             (objectdata[n].processstatus==pCRL)||
             (objectdata[n].processstatus==GNFalpha))
         {
-          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,std::string(objectdata[n].objectname));
+          make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,ultimate_delay_condition,std::string(objectdata[n].objectname));   
         }
         else
         {
           if (rename_variables)
           {
-            make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init);
+            make_parameters_and_sum_variables_unique(action_summands,deadlock_summands,pars,init,ultimate_delay_condition);
           }
         }
 
@@ -9316,10 +9356,15 @@ class specification_basic_type
 
           stochastic_specification temporary_spec(data,acts,global_variables,lps,initializer);
           constelm_algorithm < rewriter, stochastic_specification > alg(temporary_spec,rewr);
-          alg.run(true); // Remove constants from the specification, where global variables are
+          
+          // Remove constants from the specification, where global variables are
           // also instantiated if they exist.
-          // Reconstruct the variables from the temporary specification
+          data::mutable_map_substitution<> sigma = alg.compute_constant_parameters(true);
+          alg.remove_parameters(sigma);
 
+          ultimate_delay_condition.constraint()=data::replace_variables(ultimate_delay_condition.constraint(),sigma);
+
+          // Reconstruct the variables from the temporary specification
           init=temporary_spec.initial_process().assignments();
           pars=temporary_spec.process().process_parameters();
 
@@ -9356,21 +9401,22 @@ class specification_basic_type
         stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
         stochastic_action_summand_vector action_summands1, action_summands2;
         deadlock_summand_vector deadlock_summands1, deadlock_summands2;
+        lps::detail::ultimate_delay ultimate_delay_condition1, ultimate_delay_condition2;
         generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(t).left(),
-                              regular,rename_variables,pars1,init1,initial_stochastic_distribution1);
+                              regular,rename_variables,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1);
         generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(t).right(),
-                              regular,true,pars2,init2,initial_stochastic_distribution2);
-        parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,
-                              action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,
+                              regular,true,pars2,init2,initial_stochastic_distribution2,ultimate_delay_condition2);
+        parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1,
+                              action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,ultimate_delay_condition2,
                               action_name_multiset_list(),false,false,
-                              action_summands,deadlock_summands,pars,init,initial_stochastic_distribution);
+                              action_summands,deadlock_summands,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         return;
       }
 
       if (is_hide(t))
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,hide(t).operand(),
-                              regular,rename_variables,pars,init,initial_stochastic_distribution);
+                              regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         hidecomposition(hide(t).hide_set(),action_summands);
         return;
       }
@@ -9386,25 +9432,26 @@ class specification_basic_type
           stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
           stochastic_action_summand_vector action_summands1, action_summands2;
           deadlock_summand_vector deadlock_summands1, deadlock_summands2;
+          lps::detail::ultimate_delay ultimate_delay_condition1, ultimate_delay_condition2;
           generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
-                                regular,rename_variables,pars1,init1,initial_stochastic_distribution1);
+                                regular,rename_variables,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
-                                regular,true,pars2,init2,initial_stochastic_distribution2);
-          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,
-                                action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,
+                                regular,true,pars2,init2,initial_stochastic_distribution2,ultimate_delay_condition2);
+          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1,
+                                action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,ultimate_delay_condition2,
                                 allow(t).allow_set(),true,false,
-                                action_summands,deadlock_summands,pars,init,initial_stochastic_distribution);
+                                action_summands,deadlock_summands,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
           return;
         }
         else if (!options.nodeltaelimination && options.ignore_time && is_comm(par))
         {
           generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
-                                regular,rename_variables,pars,init,initial_stochastic_distribution);
+                                regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
           communicationcomposition(comm(par).comm_set(),allow(t).allow_set(),true,false,action_summands,deadlock_summands);
           return;
         }
 
-        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution);
+        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         allowblockcomposition(allow(t).allow_set(),true,action_summands,deadlock_summands);
         return;
       }
@@ -9420,27 +9467,28 @@ class specification_basic_type
           stochastic_distribution initial_stochastic_distribution1, initial_stochastic_distribution2;
           stochastic_action_summand_vector action_summands1, action_summands2;
           deadlock_summand_vector deadlock_summands1, deadlock_summands2;
+          lps::detail::ultimate_delay ultimate_delay_condition1, ultimate_delay_condition2;
           generateLPEmCRLterm(action_summands1,deadlock_summands1,process::merge(par).left(),
-                                regular,rename_variables,pars1,init1,initial_stochastic_distribution1);
+                                regular,rename_variables,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1);
           generateLPEmCRLterm(action_summands2,deadlock_summands2,process::merge(par).right(),
-                                regular,true,pars2,init2,initial_stochastic_distribution2);
+                                regular,true,pars2,init2,initial_stochastic_distribution2,ultimate_delay_condition2);
           // Encode the actions of the block list in one multi action.
-          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,
-                                action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,
+          parallelcomposition(action_summands1,deadlock_summands1,pars1,init1,initial_stochastic_distribution1,ultimate_delay_condition1,
+                                action_summands2,deadlock_summands2,pars2,init2,initial_stochastic_distribution2,ultimate_delay_condition2,
                                 action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,true,
-                                action_summands,deadlock_summands,pars,init,initial_stochastic_distribution);
+                                action_summands,deadlock_summands,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
           return;
         }
         else if (!options.nodeltaelimination && options.ignore_time && is_comm(par))
         {
           generateLPEmCRLterm(action_summands,deadlock_summands,comm(par).operand(),
-                                regular,rename_variables,pars,init,initial_stochastic_distribution);
+                                regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
           // Encode the actions of the block list in one multi action.
           communicationcomposition(comm(par).comm_set(),action_name_multiset_list( { action_name_multiset(block(t).block_set())} ),false,true,action_summands,deadlock_summands);
           return;
         }
 
-        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution);
+        generateLPEmCRLterm(action_summands,deadlock_summands,par,regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         // Encode the actions of the block list in one multi action.
         allowblockcomposition(action_name_multiset_list({action_name_multiset(block(t).block_set())}),false,action_summands,deadlock_summands);
         return;
@@ -9449,7 +9497,7 @@ class specification_basic_type
       if (is_rename(t))
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,process::rename(t).operand(),
-                              regular,rename_variables,pars,init,initial_stochastic_distribution);
+                              regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         renamecomposition(process::rename(t).rename_set(),action_summands);
         return;
       }
@@ -9457,7 +9505,7 @@ class specification_basic_type
       if (is_comm(t))
       {
         generateLPEmCRLterm(action_summands,deadlock_summands,comm(t).operand(),
-                              regular,rename_variables,pars,init,initial_stochastic_distribution);
+                              regular,rename_variables,pars,init,initial_stochastic_distribution,ultimate_delay_condition);
         communicationcomposition(comm(t).comm_set(),action_name_multiset_list(),false,false,action_summands,deadlock_summands);
         return;
       }
@@ -9467,6 +9515,11 @@ class specification_basic_type
 
     /**************** GENERaTE LPEmCRL **********************************/
 
+    /* The result are a list of action summands, deadlock summand, the parameters of this 
+       linear process and its initial values. A initial stochastic distribution that must
+       precede the initial linear process and the ultimate delay condition of this
+       linear process that can be used or be ignored. */
+
     void generateLPEmCRL(
       stochastic_action_summand_vector& action_summands,
       deadlock_summand_vector& deadlock_summands,
@@ -9474,7 +9527,8 @@ class specification_basic_type
       const bool regular,
       variable_list& pars,
       assignment_list& init,
-      stochastic_distribution& initial_stochastic_distribution)
+      stochastic_distribution& initial_stochastic_distribution,
+      lps::detail::ultimate_delay& ultimate_delay_condition)
     {
       /* If regular=1, then a regular version of the pCRL processes
          must be generated */
@@ -9488,6 +9542,34 @@ class specification_basic_type
       {
         generateLPEpCRL(action_summands,deadlock_summands,procIdDecl,
                                objectdata[n].containstime,regular,pars,init,initial_stochastic_distribution);
+        if (options.ignore_time)
+        {
+          ultimate_delay_condition=lps::detail::ultimate_delay(); 
+        }
+        else
+        {
+          ultimate_delay_condition=getUltimateDelayCondition(action_summands,deadlock_summands,pars);
+
+          // The ultimate_delay_condition can be complex. Try to simplify it with a fourier_motzkin reduction.
+          data_expression simplified_ultimate_delay_condition;
+          variable_list reduced_sumvars;
+          try
+          {
+            fourier_motzkin(ultimate_delay_condition.constraint(), 
+                            ultimate_delay_condition.variables(), 
+                            simplified_ultimate_delay_condition, 
+                            reduced_sumvars, 
+                            rewr);
+            swap(ultimate_delay_condition.constraint(), simplified_ultimate_delay_condition);
+            swap(ultimate_delay_condition.variables(), reduced_sumvars);
+          }
+          catch (mcrl2::runtime_error& e)
+          {
+            // Applying Fourier Motzkin failed. Continue working with the old ultimate delay condition. 
+            mCRL2log(mcrl2::log::debug) << "Simplifying a condition using Fourier-Motzkin reduction failed (I). \n" << e.what() << std::endl;
+          }
+        }
+         
         return;
       }
       /* process is a mCRLdone */
@@ -9496,8 +9578,8 @@ class specification_basic_type
           (objectdata[n].processstatus==mCRL))
       {
         objectdata[n].processstatus=mCRLlin;
-        return generateLPEmCRLterm(action_summands,deadlock_summands,objectdata[n].processbody,
-                                   regular,false,pars,init,initial_stochastic_distribution);
+        return generateLPEmCRLterm(action_summands, deadlock_summands, objectdata[n].processbody,
+                                   regular, false, pars, init, initial_stochastic_distribution, ultimate_delay_condition);
       }
 
       throw mcrl2::runtime_error("laststatus: " + std::to_string(objectdata[n].processstatus));
@@ -11195,7 +11277,8 @@ class specification_basic_type
          first variable in a sequence is always an actionvariable */
       procstorealGNF(init_,options.lin_method!=lmStack);
 
-      generateLPEmCRL(action_summands,deadlock_summands,init_, options.lin_method!=lmStack,parameters,initial_state,initial_stochastic_distribution);
+      lps::detail::ultimate_delay dummy_ultimate_delay_condition;
+      generateLPEmCRL(action_summands,deadlock_summands,init_, options.lin_method!=lmStack,parameters,initial_state,initial_stochastic_distribution,dummy_ultimate_delay_condition);
       allowblockcomposition(action_name_multiset_list({action_name_multiset()}),false,action_summands,deadlock_summands); // This removes superfluous delta summands.
       if (options.final_cluster)
       {
