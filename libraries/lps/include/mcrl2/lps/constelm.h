@@ -110,13 +110,15 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
         R(R_)
     {}
 
-    /// \brief Runs the constelm algorithm
+    /// \brief Computes constant parameters
     /// \param instantiate_global_variables If true, the algorithm is allowed to instantiate free variables
     /// as a side effect
     /// \param ignore_conditions If true, the algorithm is allowed to ignore the conditions in the LPS.
-    void run(bool instantiate_global_variables = false, bool ignore_conditions = false)
+    data::mutable_map_substitution<> compute_constant_parameters(bool instantiate_global_variables = false, bool ignore_conditions = false)
     {
       using utilities::detail::contains;
+
+      data::mutable_map_substitution<> sigma;
 
       m_instantiate_global_variables = instantiate_global_variables;
       m_ignore_conditions = ignore_conditions;
@@ -139,9 +141,6 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       {
         m_index_of[v] = index++;
       }
-
-      // sigma contains substitutions of free variables and process parameters
-      data::mutable_map_substitution<> sigma;
 
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
@@ -211,6 +210,12 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       }
       while (!dG.empty());
 
+      return sigma;
+    }
+
+    /// \brief Applies the substitution computed by compute_constant_parameters
+    void remove_parameters(data::mutable_map_substitution<>& sigma)
+    {
       LOG_CONSTANT_PARAMETERS(sigma, "Removing the following constant parameters:\n");
 
       // N.B. The order of removing constant parameters and rewriting has been reversed
@@ -229,6 +234,16 @@ class constelm_algorithm: public lps::detail::lps_algorithm<Specification>
       // rewrite the specification with substitution sigma
       lps::rewrite(super::m_spec, R, sigma);
     }
+
+    /// \brief Runs the constelm algorithm
+    /// \param instantiate_global_variables If true, the algorithm is allowed to instantiate free variables
+    /// as a side effect
+    /// \param ignore_conditions If true, the algorithm is allowed to ignore the conditions in the LPS.
+    void run(bool instantiate_global_variables = false, bool ignore_conditions = false)
+    {
+      data::mutable_map_substitution<> sigma = compute_constant_parameters(instantiate_global_variables, ignore_conditions);
+      remove_parameters(sigma);
+    };
 };
 
 /// \brief Removes zero or more constant parameters from the specification spec.
