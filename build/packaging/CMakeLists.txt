@@ -229,6 +229,8 @@ if (WIN32)
     "
     COMPONENT Stable)
   endforeach()
+  string(REPLACE "\\" "/" VS_LOCATION $ENV{VSINSTALLDIR})
+  install(FILES ${VS_LOCATION}VC/redist/x64/Microsoft.VC140.CRT/msvcp140.dll DESTINATION bin)
 endif()
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
