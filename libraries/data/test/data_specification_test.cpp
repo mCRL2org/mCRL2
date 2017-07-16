@@ -950,6 +950,20 @@ void test_merge_data_specifications()
   BOOST_CHECK(dataspec1 == dataspec3);
 }
 
+void test_standard_sorts_mappings_functions()
+{
+   std::set < sort_expression > sorts;
+   std::set < function_symbol > constructors;
+   std::set <function_symbol > mappings;
+
+   data_specification spec;
+   spec.get_system_defined_sorts_constructors_and_mappings(sorts, constructors, mappings);
+
+   BOOST_CHECK(sorts.size()==10);
+   BOOST_CHECK(constructors.size()==17);
+   BOOST_CHECK(mappings.size()==225);
+}
+
 int test_main(int argc, char** argv)
 {
   test_bke();
@@ -979,6 +993,8 @@ int test_main(int argc, char** argv)
   test_abuse_of_tail();
 
   test_merge_data_specifications();
+
+  test_standard_sorts_mappings_functions();
 
   return EXIT_SUCCESS;
 }
