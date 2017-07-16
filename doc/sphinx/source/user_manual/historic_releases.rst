@@ -16,6 +16,9 @@ Release 201409.1
 .. |bin_w64_201409.1| replace:: Windows Installer (64-bit)
 .. _bin_w64_201409.1: http://www.mcrl2.org/download/release/mcrl2-201409.1_x86_64.exe
 
+.. |bin_osx_201409.1| replace:: Mac OS X package (64-bit)
+.. _bin_osx_201409.1: http://www.mcrl2.org/download/release/mcrl2-201409.1_x86_64.dmg
+
 .. |bin_ppa_201409.1| replace:: PPA release
 .. _bin_ppa_201409.1: https://launchpad.net/~mcrl2/+archive/release-ppa
 
@@ -26,7 +29,7 @@ Release 201409.1
 .. _src_tgz_201409.1: http://www.mcrl2.org/download/release/mcrl2-201409.1.tar.gz
 
    +------------------------+--------------------------+
-   |Operating system        |Release (|release|)       |
+   |Operating system        | Release (201409.1)       |
    +========================+==========================+
    |Windows                 | |bin_w32_201409.1|_      |
    |                        +--------------------------+
