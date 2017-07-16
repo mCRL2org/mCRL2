@@ -8541,18 +8541,17 @@ class specification_basic_type
       std::vector < variable_list> renamings_pars;
       std::vector < data_expression_list> renamings_args;
       variable_list existentially_quantified_variables;
-      for (deadlock_summand_vector::const_iterator i=deadlock_summands.begin();
-           i!=deadlock_summands.end(); ++i)
+      for (const deadlock_summand& s: deadlock_summands)
       {
         variable_list new_existentially_quantified_variables;
         const data_expression ult_del_condition=
              makesingleultimatedelaycondition(
-                             i->summation_variables(),
+                             s.summation_variables(),
                              freevars,
-                             i->condition(),
-                             i->deadlock().has_time(),
+                             s.condition(),
+                             s.deadlock().has_time(),
                              time_variable,
-                             i->deadlock().time(),
+                             s.deadlock().time(),
                              new_existentially_quantified_variables);
         existentially_quantified_variables=merge_var(
                                              new_existentially_quantified_variables,
@@ -8564,18 +8563,17 @@ class specification_basic_type
         results.push_front(ult_del_condition);
       }
 
-      for (stochastic_action_summand_vector::const_iterator i=action_summands.begin();
-           i!=action_summands.end(); ++i)
+      for (const stochastic_action_summand& s: action_summands)
       {
         variable_list new_existentially_quantified_variables;
         const data_expression ult_del_condition=
              makesingleultimatedelaycondition(
-                             i->summation_variables(),
+                             s.summation_variables(),
                              freevars,
-                             i->condition(),
-                             i->multi_action().has_time(),
+                             s.condition(),
+                             s.multi_action().has_time(),
                              time_variable,
-                             i->multi_action().time(),
+                             s.multi_action().time(),
                              new_existentially_quantified_variables);
         existentially_quantified_variables=merge_var(
                                              new_existentially_quantified_variables,
