@@ -66,12 +66,16 @@ void test_representative_generator()
   BOOST_CHECK(default_expression_generator(basic_sort("D")) ==
               constructors[0].constructor_function(basic_sort("D"))(default_expression_generator(basic_sort("E"))));
 
-  // Check whether the representative of the set of reals is the empty set of reals.
-  BOOST_CHECK(default_expression_generator(container_sort(set_container(),data::sort_real::real_())) ==
-              data::sort_set::constructor(data::sort_real::real_(),
-                                          data::sort_set::false_function(data::sort_real::real_()),
-                                          data::sort_fset::empty(data::sort_real::real_())));
-
+  // Check whether the representative of the set of reals is the empty set of reals, or the set of all reals.
+  // The answer depends on the relative ordering of the false_function and true_function in sets of function symbols.
+  // This in turns depends on the place where these functions end up in the memory. 
+  const data_expression t=default_expression_generator(container_sort(set_container(),data::sort_real::real_()));
+  BOOST_CHECK(t == data::sort_set::constructor(data::sort_real::real_(),
+                                               data::sort_set::false_function(data::sort_real::real_()),
+                                               data::sort_fset::empty(data::sort_real::real_()))  ||
+              t == data::sort_set::constructor(data::sort_real::real_(),
+                                               data::sort_set::true_function(data::sort_real::real_()),
+                                               data::sort_fset::empty(data::sort_real::real_())));
 
 }
 
