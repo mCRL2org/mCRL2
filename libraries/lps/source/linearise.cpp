@@ -8621,7 +8621,7 @@ class specification_basic_type
         mutable_map_substitution<> mutable_sigma(sigma);
         result=lazy::or_(result,data::replace_variables_capture_avoiding(lazy::and_(*i,*j), mutable_sigma, variables_in_rhs_sigma));
       }
-      return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, result);
+      return lps::detail::ultimate_delay(time_variable, existentially_quantified_variables, RewriteTerm(result));
     }
 
 
@@ -9331,13 +9331,6 @@ class specification_basic_type
         }
 
         init=substitute_assignmentlist(init,pars,false,true,sigma,variables_occurring_in_rhs_sigma);
-        if (!options.ignore_time)
-        {
-          ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
-                                                              ultimate_delay_condition.constraint(),
-                                                              sigma,
-                                                              variables_occurring_in_rhs_sigma); 
-        }
 
         // Make the bound variables and parameters in this process unique.
 
