@@ -1,282 +1,236 @@
-Regression testing
-==================
+================================
+Regression testing with TeamCity
+================================
 
 The quality of the mCRL2 toolset is continuously monitored through
-regression tests, which are run automatically in a Jenkins setup.
-The results of the regression tests can be found at `<http://mcrl2build1.win.tue.nl:8080>`_.
+regression tests, which are run automatically in a TeamCity setup.
+The results of the regression tests can be found at `<http://mcrl2build1.win.tue.nl:8111>`_.
+(You will need an account to access it)
 
-Currently there are three builds that are of importance:
-  - *mCRL2* is a continuous build that is run on all supported platforms,
-    in Release and Maintainer mode after every SVN commit to ``trunk``.
-  - *mCRL2-nightly* is a build that is run every night and builds ``trunk``
-    on all supported platforms in Release mode. The resulting builds are packaged, and
-    a snapshot of the website including the packages is uploaded to `<http://dev.mcrl2.org>`_.
-  - *mCRL2-release* is a continuous build that is run after every SVN commit
-    to ``branches/release``. The build is run in Release and Maintainer
-    mode on all supported platforms, and an extended set of tests is
-    run (by setting the flag ``MCRL2_ENABLE_RELEASE_TEST_TARGETS=ON``.
-     
+In TeamCity there are two top-level projects that are of importance:
+
+- *Maintainer* is a continuous build that is run on all supported platforms
+  in Maintainer mode after every SVN commit to ``trunk``.
+- *Nightly* is a build that is run every night and builds ``trunk``
+  on all supported platforms in Release mode. The resulting builds are packaged.
+  Nightly also builds the website including the documentation from the Sphinx sources.
+  When all builds pass, the website, documentation and nightly packages are uploaded to `<http://mcrl2.org>`_.
+
 Setup
------
+=====
 
-The Jenkins build system runs on 4 different machines:
-  - ``mcrl2build1`` (Ubuntu Linux 12.4 LTS)
-  - ``mcrl2build2`` (Ubuntu Linux 12.4 LTS)
-  - ``mcrl2build3`` (Mac OS X, Mac Mini)
-  - ``mcrl2build4`` (Ubuntu Linux 12.4 LTS)
+The TeamCity build system runs on 4 different machines:
+
+- ``mcrl2build1`` (Ubuntu Linux)
+- ``mcrl2build2`` (Ubuntu Linux)
+- ``mcrl2build3`` (Mac OS X, Mac Mini)
+- ``mcrl2build4`` (Ubuntu Linux)
   
 On ``mcrl2build3``, we only run MacOSX and the corresponding builds.
 On each of the other machines, a number of virtual machines is run
-using KVM. Details on the configuration follow. A nice overview of how
-to configure virtual machines on Ubuntu using KVM can be found 
+using KVM. A nice overview of how to configure virtual machines on
+Ubuntu using KVM can be found
 on http://www.howtogeek.com/117635/how-to-install-kvm-and-create-virtual-machines-on-ubuntu/.
 Some notes on managing LVM in Ubuntu are described
 here (http://www.howtogeek.com/howto/40702/how-to-manage-and-use-lvm-logical-volume-management-in-ubuntu/).
 
-The main system running the Jenkins server is ``mcrl2build1``; on the
-other systems a slave instance of Jenkins is run. We describe the
-setup of ``jenkins-slave`` on every platform.
+The main system running the TeamCity server is ``mcrl2build1``.
+On all systems and virtual machines a TeamCity agent is run.
 
-Ubuntu 12.04 LTS
-^^^^^^^^^^^^^^^^
-First install the following packages:
-  - Subversion
-  - Git
-  - Build tools
-  - Clang
-  - Boost developer tools
-  - Java JDK
-  - QT
-  - CMake
-  - Doxygen
-  - Graphviz
-  - Python
-  - Sphinx
-  - TexLive
-  - XsltProc
+==============================
+TeamCity project configuration
+==============================
 
-The command to install these packages is the following::
+In TeamCity, build configurations are contained in projects. Projects can contain other projects in a tree-like structure.
+Projects and build configurations inherit configuration from their parent projects.
 
-  sudo apt-get install subversion build-essential clang \
-    libboost1.48-all-dev java7-jdk libqt5-dev cmake python-software-properties \
-    doxygen git graphviz poppler-utils python python-sphinx swig \
-    texlive-math-extra texlive-science texlive-latex3 xsltproc
+A single project can contain multiple build configurations. Build configurations can be based on templates.
 
-Furthermore, to test with newer GCC versions (4.7 at the time of writing)
-add the PPA repository and install the compiler::
+For the mCRL2 toolset, the TeamCity projects are structured as follows:
 
-  sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-  sudo apt-get update
-  
-Also, you will need to install the python version of DParser manually
-using the following sequence of commands::
+- **Root project** -
+  TeamCity's root project. Has no configuration related to mCRL2.
 
-  cd /usr/local/src
-  sudo git clone git://dparser.git.sourceforge.net/gitroot/dparser/dparser
-  sudo chown `whoami`:users dparser
-  cd dparser
-  make PREFIX=/usr/local
-  sudo make PREFIX=/usr/local install
-  cd python
-  sudo make PREFIX=/usr/local
-  sudo make PREFIX=/usr/local install
-  
-Jenkins-slave can now be installed by copying two simple scripts,
-:download:`jenkins-slave <jenkins/ubuntu/jenkins-slave>`, which is an
-init-script, and :download:`start-jenkins-slave <jenkins/ubuntu/start-jenkins-slave>`,
-which does the actual work. The first one needs to be in the directory
-``/etc/init.d``, the second in ``/usr/local/bin``.
-  
-Fedora 14
-^^^^^^^^^
-First install the following packages:
-  - Java JDK
-  - CMake
-  - GCC
-  - QT
-  - Boost
-  - Doxygen
-  
-This can, e.g., be achieved using::
+- **mCRL2 project** -
+  This project contains the default configuration for all other projects.
+  This project also contains all build configuration templates used in the child projects.
 
-  yum install java cmake gcc gcc-c++ qt qt-devel boost-devel doxygen
-  
-Next create a directory where the builds are stored, and assign it
-to the jenkins user::
+- **Build type level** -
+  These projects contain the configuration specific to the build types *Maintainer* or *Nightly*.
+  On this level, environment variables are configured that configure the correct build types in the CMake files.
+  There is also a *Release* project on this level but this is not used right now.
 
-  sudo mkdir /scratch
-  sudo chown jenkins /scratch
-  
-Install the script
-:download:`start-jenkins-slave <jenkins/fedora/start-jenkins-slave>` to
-``/usr/local/bin``.
+- **Build tool level** -
+  This level contains the configuration for certain build tools, eg. gcc, clang and Visual Studio.
 
-.. warning::
+- **Build platform level** -
+  This level contains the configuration for the different platforms, eg. Ubuntu, Fedora and Windows.
 
-   Currently this script needs to be started manually on boot. A proper
-   solution is desirable.
+The lowest project levels contain one or more build configurations each based on a template.
+The following templates are currently in use for building mCRL2 in the projects:
 
-Windows 7
-^^^^^^^^^
-First install all of the following:
-  - Windows SDK 7.1
-  - If 64-bit Windows SDK: patch from `KB2280741 <http://support.microsoft.com/kb/2280741>`_
-  - Boost, see instructions (`compiling_boost`_).
-  - QT, see instructions (`build_prerequisites_qt`_).
-  - SlikSVN (version 1.6.17)
-  - CMake
-  - Java
-  - Python
-  - `Wget for Windows <http://gnuwin32.sourceforge.net/packages/wget.htm>`_
-  - Notepad++ (optional but convenient)
-  - `NSIS <http://nsis.sourceforge.net/Download>`_
-  
-To get a working Jenkins slave, perform the following steps:
-  #. create a ``Jenkins-slave`` directory, e.g. ``E:\jenkins-slave``, and
-  #. store the file :download:`start-jenkins-slave.bat <jenkins/ubuntu/start-jenkins-slave.bat>` in this directory.
-  #. Add this script to the task scheduler:
-  
-     a. Start -> type "task scheduler";
-     b. select "Task Scheduler Library",
-     c. right click -> "Create basic task", with:
-     
-        - Name "Jenkins slave",
-        - Description "Starts a Jenkins slave".
-        - Trigger "When the computer starts",
-        - Action "Start a program", with script `E:\jenkins-slave\start-jenkins-slave.bat`.
-        - Arguments and start-in can be left blank.
-  
-.. note::
-  
-   Make sure the paths in the script ``start-jenkins-slave.bat`` are
-   correct for the given installation.
+- **Build & Test Unix Fast** -
+  Triggers a build on changes in the mCRL2 repository. Each build consists of 4 steps:
 
-For proper packaging, the redistributable DLLs for the MSVC runtime
-need to be found. Since the Windows SDK and MSVC 2010 express do not
-properly install redistributable DLLs we need to do some work to get
-this working. Perform the following steps:
-  #. Locate the files ``msvc*100*.dll`` (typically ``C:\windows\system32``)
-  #. Create a folder ``C:\Program Files\Common Files\VC\redist\${ARCHITECTURE}\Microsoft.VC100.CRT``
-  #. Copy the dlls to this folder.
-  
-Activating Windows
-""""""""""""""""""
-To activate the Windows installations, the Windows machine needs to be
-added to the TU/e domain. Given that all Windows installations are
-currently on a virtual machine, some work is required. We need to make
-sure that the virtual machines are added to the TU/e network using
-bridging. On the host machine, perform the following steps.
+  - Configure -- runs a CMake configure step
+  - Build -- runs a CMake build step
+  - Test -- executes the tests
+  - CPack -- runs a CPack step
 
-Install the ``bridge-utils`` package::
+  The steps will be explained later.
 
-  sudo apt-get install bridge-utils
- 
-To set up a bridge interface, edit ``/etc/network/interfaces`` and
-replace the existing config with (replace with the values for your network)::
+- **Build & Test Unix Delayed** -
+  Triggers a build on changes in the mCRL2 repository. The build is delayed for 90 minutes to collect
+  multiple changes to the repository. The steps are the same as the Build & Test Unix Fast template.
 
-  auto lo
-  iface lo inet loopback
+- **Build & Test Windows Fast** -
+  Triggers a build on changes in the mCRL2 repository. Has the same 4 steps as the Unix builds and one additional
+  step (before the configure step) to setup the Visual Studio build environment.
 
-  auto eth0
-  iface eth0 inet manual
+Build steps
+===========
 
-  auto br0
-  iface br0 inet dhcp
-        bridge_ports eth0
-	    bridge_stp off
-        bridge_fd 0
-        bridge_maxwait 0
-        
-This will create a virtual interface ``br0``.
+Configure
+---------
 
-Now restart networking::
+The *configure* build step is a Meta-runner_ called ``mcrl2_Conf`` with the following script:
 
-  sudo /etc/init.d/networking restart
-
-If your VM host "freezes" for a few seconds after starting or stopping
-a KVM guest when using bridged networking, it is because a Linux bridge
-will take the hardware address of the lowest numbered interface out of
-all of the connected interface. To work around this, add the following
-to your bridge configuration::
-
-  post-up ip link set br0 address f4:6d:04:08:f1:5f
-
-and replace ``f4:6d:04:08:f1:5f`` with the hardware address of a
-physical ethernet adapter which will always be part of the bridge.
-
-Once the bridge has been configured, the configuration of the virtual
-machine running Windows can be changed such that it uses bridging via
-``br0``. Now follow the standard procedure with BCF to get the hostname
-recognised in the TU/e network, and get the Windows machines integrated
-in the domain for Windows activation. Once the machine has been joined
-to the domain, activation is automatic and immediate.
-
-Mac OS X
-^^^^^^^^
-First install the following packages through the App Store:
-  - XCode
-  - Java runtime
-
-Next install the following through XCode -> Preferences -> Downloads:
-  - XCode command line tools
-  
-Also, install `MacPorts <http://www.macports.org>`_.
-
-The following then must be installed through macports:
-- Boost
-- QT
-- CMake
-- Wget
-This can be done using the following command::
-
-  sudo port install boost qt5-mac cmake wget
-  
-Finally, create a directory in which Jenkins is run::
-
-  sudo mkdir /scratch
-  sudo chown -R jenkins /scratch
-  
-Also save the script :download:`start-jenkins-slave <jenkins/macosx/start-jenkins-slave>`
-to ``/opt/local/bin``.
-
-To install the jenkins slave as a daemon that automatically starts when OSX boots, create
-a launchd configuration file called ``jenkins-slave.plist`` with the following contents::
+.. code:: xml
 
   <?xml version="1.0" encoding="UTF-8"?>
-  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-  <plist version="1.0">
-  <dict>
-    <key>UserName</key>
-    <string>jenkins</string>
-	  <key>Label</key>
-	  <string>jenkins-slave</string>
-	  <key>LastExitStatus</key>
-	  <integer>15</integer>
-	  <key>LimitLoadToSessionType</key>
-	  <string>System</string>
-	  <key>OnDemand</key>
-	  <false/>
-	  <key>PID</key>
-	  <integer>37852</integer>
-	  <key>Program</key>
-	  <string>/opt/local/bin/start-jenkins-slave</string>
-	  <key>StandardOutPath</key>
-	  <string>/scratch/jenkins.log</string>
-	  <key>TimeOut</key>
-	  <integer>30</integer>
-  </dict>
-  </plist>
+  <meta-runner name="Configure">
+    <description>Configure mCRL2</description>
+    <settings>
+      <build-runners>
+        <runner name="CMake Configure" type="jetbrains-cmake-conf">
+          <parameters>
+            <param name="teamcity.build.workingDir" value="build" />
+            <param name="teamcity.step.mode" value="default" />
+            <param name="ui-jetbrains-cmake-conf-additional-cmd-params"><![CDATA[-DCMAKE_BUILD_TYPE=%cfg_buildtype%
+  %cfg_mcrl2_options%
+  %cfg_compiler%]]></param>
+            <param name="ui-jetbrains-cmake-conf-developer-warnings" value="%cfg_developer_warnings%" />
+            <param name="ui-jetbrains-cmake-conf-makefile-generator" value="%cfg_generator%" />
+            <param name="ui-jetbrains-cmake-conf-redirect-stderr" value="true" />
+            <param name="ui-jetbrains-cmake-conf-source-path" value="../src" />
+            <param name="ui-jetbrains-cmake-conf-warn-unused-vars" value="false" />
+          </parameters>
+        </runner>
+      </build-runners>
+      <requirements />
+    </settings>
+  </meta-runner>
 
-Make sure the ``UserName`` corresponds to an existing user on the system. The jenkins-slave
-service can now be started by running (as root)::
+This meta-runner executes the *CMake Configure* build runner from the `TeamCity CMake plugin`_ with additional parameters:
 
-  launchctl load jenkins-slave.plist
+- ``cfg_buildtype`` - CMake build type. Either ``Release`` or ``Maintainer``. Configured on the **Build type level** projects.
+- ``cfg_mcrl2_options`` - Additional mCRL2 build options. For example ``-DMCRL2_ENABLE_EXPERIMENTAL=ON -DMCRL2_ENABLE_DEPRECATED=ON -DMCRL2_SKIP_LONG_TESTS=ON``. Configured on various levels.
+- ``cfg_compiler`` - The compiler to use. For example ``-DCMAKE_C_COMPILER=/usr/bin/gcc-6 -DCMAKE_CXX_COMPILER=/usr/bin/g++-6``. Configured on the **Build tool level** projects.
+- ``cfg_developer_warnings`` - Enable or disable developer warnings. Either ``true`` or ``false``. Configured on the **Build type level** projects.
+- ``cfg_generator`` - Always empty
 
-The service can be stopped and started by::
 
-  launchctl stop jenkins-slave
-  launchctl start jenkins-slave
+Build
+-----
 
-To remove the job altogether, use::
+The *build* build step is a Meta-runner_ called ``mcrl2_BuildTools`` with the following script:
 
-  launchctl remove jenkins-slave
+.. code:: xml
+
+  <?xml version="1.0" encoding="UTF-8"?>
+  <meta-runner name="BuildTools">
+    <description>Build mCRL2 tools</description>
+    <settings>
+      <build-runners>
+        <runner name="CMake build" type="jetbrains-cmake-build">
+          <parameters>
+            <param name="teamcity.build.workingDir" value="build" />
+            <param name="teamcity.step.mode" value="default" />
+            <param name="ui-jetbrains-cmake-build-native-tool-params" value="-j%build_jobs%" />
+            <param name="ui-jetbrains-cmake-build-redirect-stderr" value="true" />
+          </parameters>
+        </runner>
+      </build-runners>
+      <requirements />
+    </settings>
+  </meta-runner>
+
+This meta-runner executes the *CMake Builder* build runner from the `TeamCity CMake plugin`_ with one additional parameter:
+
+- ``build_jobs`` - Number of make jobs (``-j`` argument of make). This parameter is configured in the .ini file of
+  build agents. It is usually configured as one more than the number of CPUs available to the agent.
+
+Test
+----
+
+The *test* build step is a Meta-runner_ called ``mcrl2_Test`` with the following script:
+
+.. code:: xml
+
+  <?xml version="1.0" encoding="UTF-8"?>
+  <meta-runner name="Test">
+    <description>Test mCRL2</description>
+    <settings>
+      <build-runners>
+        <runner name="Test" type="simpleRunner">
+          <parameters>
+            <param name="command.executable" value="ctest" />
+            <param name="command.parameters" value="-T Test --output-on-failure --no-compress-output -j%build_jobs% %test_mcrl2_headertest%" />
+            <param name="teamcity.build.workingDir" value="build" />
+            <param name="teamcity.step.mode" value="default" />
+          </parameters>
+        </runner>
+      </build-runners>
+      <requirements />
+    </settings>
+  </meta-runner>
+
+This meta-runner executes a *simpleRunner* build running built-in into TeamCity executing the ``ctest`` command.
+It has two additional parameters:
+
+- ``build_jobs`` - Number of make jobs (``-j`` argument of make). This parameter is configured in the .ini file of
+  build agents. It is usually configured as one more than the number of CPUs available to the agent.
+- ``test_mcrl2_headertest`` - An additional option used by some projects. This is either empty or contains the
+  string ``-LE headertest``.  Configured on the **Build type level** projects.
+
+CPack
+-----
+
+The *cpack* build step is a command line runner that executes a command line with one configurable parameter.
+
+The executed command is ``cpack``. The command is executed with the arguments ``-G %pack_type%``. This has one
+configurable parameter:
+
+- ``pack_type`` - A string that defines the generator to use. See the CPack documentation for the possible
+  values.  This is configured on the **Build platform level**.
+
+Setup VS Env
+------------
+
+This special build step is only required for Windows builds. It is used to set up the required environment
+variables for Visual Studio. This step executes a windows shell script using the `Command line`_ runner
+
+.. code:: PowerShell
+
+  REM - execute script to update environment
+  IF EXIST "C:\Program Files (x86)\%visual_studio_version%\VC\vcvarsall.bat" (
+    CALL "C:\Program Files (x86)\%visual_studio_version%\VC\vcvarsall.bat" x86_amd64
+  ) ELSE (
+    CALL "C:\Program Files\%visual_studio_version%\VC\vcvarsall.bat" x86
+  )
+
+  REM - make TeamCity update build environment
+  %env.TEAMCITY_CAPTURE_ENV%
+
+The special instruction ``%env.TEAMCITY_CAPTURE_ENV%`` instructs TeamCity to capture the current environment
+and use this for the following build steps.
+
+This script calls the ``vcvarsall.bat`` script supplied by Visual Studio. It contains one configurable parameter:
+
+- ``visual_studio_version`` - A string that contains the installation directory, including the version number,
+  of the Visual Studio installation to use. For example, ``Microsoft Visual Studio 12.0``.
+  Configured on the **Build tool level** projects for Windows platforms.
+
+.. _Meta-runner: https://confluence.jetbrains.com/display/TCD10/Working+with+Meta-Runner
+.. _Command line: https://confluence.jetbrains.com/display/TCD10/Command+Line
+.. _TeamCity CMake plugin: https://confluence.jetbrains.com/display/TW/CMake+Plugin
