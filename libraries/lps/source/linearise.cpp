@@ -8664,16 +8664,19 @@ class specification_basic_type
 
       init=substitute_assignmentlist(init,pars,true,false, sigma,rhs_variables_sigma);  // Only substitute the variables in the lhs.
 
-      // Remove variables locally bound in the ultimate_delay_condition
-      data::mutable_map_substitution<> local_sigma=sigma;
-      for(const variable& v: ultimate_delay_condition.variables())
+      if (!options.ignore_time)
       {
-        local_sigma[v]=v;
-      }
-      ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
+        // Remove variables locally bound in the ultimate_delay_condition
+        data::mutable_map_substitution<> local_sigma=sigma;
+        for(const variable& v: ultimate_delay_condition.variables())
+        {
+          local_sigma[v]=v;
+        }
+        ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
                                                        ultimate_delay_condition.constraint(), 
                                                        local_sigma,
                                                        rhs_variables_sigma);  // Only substitute the variables in the lhs.
+      }
       for (stochastic_action_summand_vector::const_iterator s=action_summands.begin(); s!=action_summands.end(); ++s)
       {
         const stochastic_action_summand smmnd= *s;
@@ -8823,32 +8826,36 @@ class specification_basic_type
             continue;
           }
 
-          if (!has_time)
+          if (!options.ignore_time)
           {
-            if (ultimate_delay_condition.constraint()!=sort_bool::true_())
+            if (!has_time)
             {
-              actiontime1=ultimate_delay_condition.time_var();
-              sumvars1.push_front(ultimate_delay_condition.time_var());
-              condition1=lazy::and_(condition1, 
-                                    data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
-                                                                             sigma,
-                                                                             variables_in_rhs_of_sigma));
-              has_time=true;
+              if (ultimate_delay_condition.constraint()!=sort_bool::true_())
+              {
+                actiontime1=ultimate_delay_condition.time_var();
+                sumvars1.push_front(ultimate_delay_condition.time_var());
+                condition1=lazy::and_(condition1, 
+                                      data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
+                                                                               sigma,
+                                                                               variables_in_rhs_of_sigma));
+                has_time=true;
+              }
             }
-          }
-          else
-          {
-            /* Summand1 has time. Substitute the time expression for
-               timevar in ultimate_delay_condition, and extend the condition */
-            const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
-            sigma[ultimate_delay_condition.time_var()]=actiontime1;
-            variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
-            const data_expression intermediateultimatedelaycondition=
-                       data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
-            condition1=optimized_and(condition1, intermediateultimatedelaycondition);
+            else
+            {
+              /* Summand1 has time. Substitute the time expression for
+                 timevar in ultimate_delay_condition, and extend the condition */
+              const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
+              sigma[ultimate_delay_condition.time_var()]=actiontime1;
+              variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
+              const data_expression intermediateultimatedelaycondition=
+                         data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
+              condition1=optimized_and(condition1, intermediateultimatedelaycondition);
+            }
+
+            condition1=RewriteTerm(condition1);
           }
 
-          condition1=RewriteTerm(condition1);
           if (condition1!=sort_bool::false_())
           {
             action_summands.push_back(stochastic_action_summand(
@@ -8886,32 +8893,36 @@ class specification_basic_type
           data_expression condition1=summand1.condition();
           bool has_time=summand1.deadlock().has_time();
 
-          if (!has_time)
+          if (!options.ignore_time)
           {
-            if (ultimate_delay_condition.constraint()!=sort_bool::true_())
+            if (!has_time)
             {
-              actiontime1=ultimate_delay_condition.time_var();
-              sumvars1.push_front(ultimate_delay_condition.time_var());
-              condition1=optimized_and(condition1, 
-                                       data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
-                                                                                sigma,
-                                                                                variables_in_rhs_of_sigma));
-              has_time=true;
+              if (ultimate_delay_condition.constraint()!=sort_bool::true_())
+              {
+                actiontime1=ultimate_delay_condition.time_var();
+                sumvars1.push_front(ultimate_delay_condition.time_var());
+                condition1=optimized_and(condition1, 
+                                         data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),
+                                                                                  sigma,
+                                                                                  variables_in_rhs_of_sigma));
+                has_time=true;
+              }
             }
-          }
-          else
-          {
-            /* Summand1 has time. Substitute the time expression for
-               timevar in ultimate_delay_condition, and extend the condition */
-            const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
-            sigma[ultimate_delay_condition.time_var()]=actiontime1;
-            variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
-            const data_expression intermediateultimatedelaycondition=
-                       data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
-            condition1=optimized_and(condition1, intermediateultimatedelaycondition);
+            else
+            {
+              /* Summand1 has time. Substitute the time expression for
+                 timevar in ultimate_delay_condition, and extend the condition */
+              const std::set<variable> variables_in_actiontime1=find_free_variables(actiontime1);
+              sigma[ultimate_delay_condition.time_var()]=actiontime1;
+              variables_in_rhs_of_sigma.insert(variables_in_actiontime1.begin(), variables_in_actiontime1.end());
+              const data_expression intermediateultimatedelaycondition=
+                         data::replace_variables_capture_avoiding(ultimate_delay_condition.constraint(),sigma,variables_in_rhs_of_sigma);
+              condition1=optimized_and(condition1, intermediateultimatedelaycondition);
+            }
+
+            condition1=RewriteTerm(condition1);
           }
 
-          condition1=RewriteTerm(condition1);
           if (condition1!=sort_bool::false_() && !options.ignore_time)
           {
             insert_timed_delta_summand(action_summands,
@@ -9320,10 +9331,13 @@ class specification_basic_type
         }
 
         init=substitute_assignmentlist(init,pars,false,true,sigma,variables_occurring_in_rhs_sigma);
-        ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
+        if (!options.ignore_time)
+        {
+          ultimate_delay_condition.constraint()=data::replace_variables_capture_avoiding(
                                                               ultimate_delay_condition.constraint(),
                                                               sigma,
                                                               variables_occurring_in_rhs_sigma); 
+        }
 
         // Make the bound variables and parameters in this process unique.
 
@@ -9360,7 +9374,10 @@ class specification_basic_type
           data::mutable_map_substitution<> sigma = alg.compute_constant_parameters(true);
           alg.remove_parameters(sigma);
 
-          ultimate_delay_condition.constraint()=data::replace_variables(ultimate_delay_condition.constraint(),sigma);
+          if (!options.ignore_time) 
+          {
+            ultimate_delay_condition.constraint()=data::replace_variables(ultimate_delay_condition.constraint(),sigma);
+          }
 
           // Reconstruct the variables from the temporary specification
           init=temporary_spec.initial_process().assignments();
