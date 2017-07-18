@@ -29,6 +29,7 @@ Contents
    - :doc:`packaging`
    - `Bug tracker <https://svn.win.tue.nl/trac/MCRL2/timeline>`_
    - :doc:`testing`
+   - :doc:`testing_old`
    - :doc:`performance/index`
 ..   - `Performance measurements <http://www.mcrl2.org/performance>`_
 
