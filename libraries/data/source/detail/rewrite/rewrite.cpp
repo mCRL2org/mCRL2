@@ -151,7 +151,11 @@ abstraction Rewriter::rewrite_single_lambda(
         new_variables[count]=data::variable(generator("y_"), v.sort());
         assert(occur_check(v, new_variables[count]));
       }
-      else new_variables[count]=v;
+      else 
+      {
+        new_variables[count]=v;
+      }
+      count++;
     }
   }
 
@@ -201,7 +205,7 @@ abstraction Rewriter::rewrite_single_lambda(
       }
     }
   }
-  variable_list new_variable_list(new_variables.rbegin(), new_variables.rend());
+  variable_list new_variable_list(new_variables.begin(), new_variables.end());
   return abstraction(lambda_binder(),new_variable_list,result);
 }
 

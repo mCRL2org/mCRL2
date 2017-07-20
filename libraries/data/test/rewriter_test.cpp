@@ -196,6 +196,19 @@ void simplify_rewriter_test()
   test_rewriters(N(R), N(I), "forall b:Bool. !!b", "forall b:Bool. b");
 }
 
+// The testcase below corresponds to ticket #1426. 
+void test_lambda_expression()
+{
+std::cerr << "LAMBDA EXPRESSION TEST \n";
+  data_specification data_spec;
+  data::rewriter R(data_spec);
+
+  std::string expr1 = "(lambda t: Real. true)(t) && (lambda s1: Pos, t: Real. 1 == s1)(2, u)";
+  std::string expr2 = "false";
+  std::string sigma = "[]";
+  test_expressions(R, expr1, expr2, "t,u: Real;", data_spec, sigma);
+}
+
 int test_main(int argc, char** argv)
 {
   test1();
@@ -204,6 +217,7 @@ int test_main(int argc, char** argv)
   test5();
   one_point_rule_preprocessor_test();
   simplify_rewriter_test();
+  test_lambda_expression();
 
   return 0;
 }
