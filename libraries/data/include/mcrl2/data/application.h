@@ -233,6 +233,71 @@ class transforming_term_appl_prepend_iterator: public term_appl_prepend_iterator
     }
 };
 
+inline bool contains_untyped_sort(const sort_expression& s)
+{
+  if (is_untyped_sort(s))
+  {
+    return true;
+  }
+  if (is_function_sort(s))
+  {
+    const function_sort& fs(s);
+    if (contains_untyped_sort(fs.codomain()))
+    { 
+      return true;
+    }
+    for(const sort_expression& sd: fs.domain())
+    {
+      if (contains_untyped_sort(sd))
+      {
+        return true;
+      }
+    }
+  }
+  if (is_container_sort(s))
+  {
+    if (contains_untyped_sort(atermpp::down_cast<container_sort>(s).element_sort()))
+    {
+      return true;
+    }
+  }
+  assert(is_structured_sort(s) || is_basic_sort(s));
+  return true;
+}
+
+template <class CONTAINER>
+inline bool check_whether_sorts_match(const data_expression& head, const CONTAINER& l)
+{
+  if (contains_untyped_sort(head.sort()))
+  {
+    // Most likely head is a just parsed, untyped object. 
+    return true;
+  }
+  function_sort fs(head.sort());
+  if ((fs.domain().size()==1 && contains_untyped_sort(fs.domain().front())) ||
+      (l.size()==1 && contains_untyped_sort(l.front().sort())))
+  { 
+    // This is most likely an application from or to an Rewritten@@term, used in the jitty rewriter
+    // to indicate that a term is in normal form.
+    return true;
+  }
+  // Check that the sorts of the function domain of the head matches those of the arguments.
+  if (fs.domain().size()!=l.size())
+  {
+    return false;
+  }
+  typename CONTAINER::const_iterator i=l.begin();
+  for(const sort_expression& s: fs.domain())
+  {
+    if (!contains_untyped_sort(i->sort()) && s!=i->sort())
+    {
+      return false;
+    }
+    ++i;
+  }
+  return true;
+}  
+
 } // namespace detail
 
 /// \brief An application of a data expression to a number of arguments
@@ -249,6 +314,7 @@ class application: public data_expression
                 const data_expression& arg1)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(2),head,arg1))
     {
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1})); 
     }
 
     /// \brief Constructor.
@@ -257,6 +323,7 @@ class application: public data_expression
                 const data_expression& arg2)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(3),head,arg1,arg2))
     {
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2})); 
     }
 
     /// \brief Constructor.
@@ -266,6 +333,7 @@ class application: public data_expression
                 const data_expression& arg3)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(4),head,arg1,arg2,arg3))
     {
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3})); 
     }
 
     /// \brief Constructor.
@@ -276,6 +344,7 @@ class application: public data_expression
                 const data_expression& arg4)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(5),head,arg1,arg2,arg3,arg4))
     {
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4})); 
     }
 
     /// \brief Constructor
@@ -287,6 +356,7 @@ class application: public data_expression
                 const data_expression& arg5)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(6),head,arg1,arg2,arg3,arg4,arg5))
     {
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5})); 
     }
 
     /// \brief Constructor
@@ -299,6 +369,7 @@ class application: public data_expression
                 const data_expression& arg6)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(7),head,arg1,arg2,arg3,arg4,arg5,arg6))
     {
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5, arg6})); 
     }
 
     /// \brief Constructor.
@@ -319,6 +390,7 @@ class application: public data_expression
                                          detail::term_appl_prepend_iterator<typename Container::const_iterator>(arguments.end())))
     {
       assert(arguments.size()>0);
+      assert(detail::check_whether_sorts_match(head,arguments));
     }
 
   private:
@@ -358,6 +430,7 @@ class application: public data_expression
                                          detail::term_appl_prepend_iterator<FwdIter>(last)))
     {
       assert(first!=last);
+      assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
     }
 
     /// \brief Constructor.
@@ -373,6 +446,7 @@ class application: public data_expression
     {
       assert(arity>0);
       assert(std::distance(first, last)==arity);
+      assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
     }
 
 
@@ -389,6 +463,7 @@ class application: public data_expression
                                          detail::transforming_term_appl_prepend_iterator<FwdIter, ArgumentConverter>(last,nullptr,convert_arguments)))
     {
       assert(first!=last);
+      assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
     }
 
     /// \brief Get the function at the head of this expression.

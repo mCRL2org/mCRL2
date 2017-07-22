@@ -2294,7 +2294,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
 
     if (i!=DeclaredVars.context().end())
     {
-      TypeA=i->second;
+      TypeA=normalize_sorts(i->second,get_sort_specification());
       TypeADefined=true;
       const sort_expression Type1(UnwindType(TypeA));
       if (is_function_sort(Type1)?(function_sort(Type1).domain().size()==nFactPars):(nFactPars==0))
@@ -2315,7 +2315,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeDN(
       std::map<core::identifier_string,sort_expression>::const_iterator i=DeclaredVars.context().find(Name);
       if (i!=DeclaredVars.context().end())
       {
-        TypeA=i->second;
+        TypeA=normalize_sorts(i->second,get_sort_specification());
         TypeADefined=true;
         sort_expression temp;
         if (!TypeMatchA(TypeA,PosType,temp))
@@ -2613,6 +2613,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
   const bool warn_upcasting,
   const bool print_cast_error) const
 {
+std::cerr << "TRAVERSE CONSTYPE " << DataTerm << "\n";
   //Type checks and transforms DataTerm replacing Unknown datatype with other ones.
   //Returns the type of the term which should match the PosType.
 
@@ -3298,7 +3299,7 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
     const std::map<core::identifier_string,sort_expression>::const_iterator it=DeclaredVars.context().find(Name);
     if (it!=DeclaredVars.context().end())
     {
-      sort_expression Type=it->second;
+      sort_expression Type=normalize_sorts(it->second,get_sort_specification());
       DataTerm=variable(Name,Type);
 
       sort_expression NewType;
@@ -3559,7 +3560,7 @@ void mcrl2::data::data_type_checker::add_constant(const data::function_symbol& f
     throw mcrl2::runtime_error("Attempt to declare a constant with the name that is a built-in identifier (" + core::pp(Name) + ").");
   }
 
-  user_constants[Name]=Sort;
+  user_constants[Name]=normalize_sorts(Sort,get_sort_specification());
 }
 
 
@@ -3592,40 +3593,6 @@ bool mcrl2::data::data_type_checker::TypeMatchL(
 sort_expression mcrl2::data::data_type_checker::UnwindType(const sort_expression& Type) const
 {
   return normalize_sorts(Type,get_sort_specification()); 
-  /* TODO The code below can be removed if the line above does
-     not turn out to be problematic.
-  if (is_container_sort(Type))
-  {
-    const container_sort& cs=down_cast<const container_sort>(Type);
-    return container_sort(cs.container_name(),UnwindType(cs.element_sort()));
-  }
-  if (is_function_sort(Type))
-  {
-    const function_sort& fs=down_cast<function_sort>(Type);
-    sort_expression_list NewArgs;
-    for (sort_expression_list::const_iterator i=fs.domain().begin(); i!=fs.domain().end(); ++i)
-    {
-      NewArgs.push_front(UnwindType(*i));
-    }
-    NewArgs=reverse(NewArgs);
-    return function_sort(NewArgs,UnwindType(fs.codomain()));
-  }
-
-  if (is_basic_sort(Type))
-  {
-    const basic_sort& bs=down_cast<const basic_sort>(Type);
-    // std::map<basic_sort, sort_expression>::const_iterator i=m_aliases.find(bs.name()); if (i==m_aliases.end())
-    for(const alias& a: get_sort_specification().user_defined_aliases())
-    {
-      if (bs==a.name())
-      {
-        return UnwindType(a.reference());
-      }
-    }
-    return Type;
-  }
-
-  return Type; */
 }
 
 variable mcrl2::data::data_type_checker::UnwindType(const variable& v) const
@@ -4076,12 +4043,12 @@ void mcrl2::data::data_type_checker::add_function(const data::function_symbol& f
         throw mcrl2::runtime_error("Double declaration of " + msg + " " + core::pp(Name) + ".");
       }
     }
-    Types = Types + sort_expression_list({ Sort });
-    user_functions[Name]=Types;
+    Types = Types + sort_expression_list({ UnwindType(Sort) });
+    user_functions[Name]=Types; 
   }
   else
   {
-    user_functions[Name] = sort_expression_list({ Sort });
+    user_functions[Name] = sort_expression_list({ UnwindType(Sort) });
   }
 }
 
