@@ -241,7 +241,7 @@ inline bool contains_untyped_sort(const sort_expression& s)
   }
   if (is_function_sort(s))
   {
-    const function_sort& fs(s);
+    const function_sort& fs=atermpp::down_cast<function_sort>(s);
     if (contains_untyped_sort(fs.codomain()))
     { 
       return true;
