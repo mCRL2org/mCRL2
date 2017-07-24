@@ -2613,7 +2613,6 @@ sort_expression mcrl2::data::data_type_checker::TraverseVarConsTypeD(
   const bool warn_upcasting,
   const bool print_cast_error) const
 {
-std::cerr << "TRAVERSE CONSTYPE " << DataTerm << "\n";
   //Type checks and transforms DataTerm replacing Unknown datatype with other ones.
   //Returns the type of the term which should match the PosType.
 
