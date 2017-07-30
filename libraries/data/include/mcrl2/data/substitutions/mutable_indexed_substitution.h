@@ -80,8 +80,12 @@ public:
     /// \param[in] fp a stack of free positions in \a table.
     /// \param[in] b Indication that the variables in \a vars are defined.
     /// \param[in] vars Variables in the rhs of the assignments. 
-    assignment(const variable_type& v, std::vector < substitution_type >& c, std::vector <std::size_t>& table, std::stack<std::size_t>& fp,
-               const bool b, std::set<variable>& vars) :
+    assignment(const variable_type& v, 
+               std::vector < substitution_type >& c, 
+               std::vector <std::size_t>& table, 
+               std::stack<std::size_t>& fp,
+               const bool b, 
+               std::set<variable>& vars) :
       m_variable(v),
       m_container(c),
       m_index_table(table),
@@ -91,8 +95,7 @@ public:
     { }
 
     /// \brief Actual assignment
-    template <typename AssignableToExpression>
-    void operator=(AssignableToExpression const& e)
+    void operator=(const expression_type& e)
     {
       mCRL2log(log::debug2, "substitutions") << "Setting " << m_variable << " := " << e << std::endl;
       assert(e.defined());
