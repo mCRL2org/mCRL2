@@ -205,12 +205,25 @@ class term_list:public aterm
       assert(!defined() || type_is_list());
     }
 
-    /// Assigment operator.
+    /// \brief Assigment operator.
     /// \param l A list.
     term_list<Term>& operator=(const term_list& l)
     {
       copy_term(l);
       return *this;
+    }
+
+    /// \brief Returns an element at position m in a list
+    /// \details This operator is linear in the number m. If m>=length of the list
+    ///          the result is undefined.
+    /// \param m An index. The first element is at position 0.
+    /// \return The element at position i in the list l.
+    const Term& operator[](std::size_t m) const
+    {
+      assert(size()>m);
+      typename term_list<Term>::const_iterator i=begin();
+      for( ; m>0; --m, ++i) {}
+      return *i;
     }
 
     /// \brief Returns the tail of the list.
@@ -317,16 +330,6 @@ inline
 term_list<Term> reverse(const term_list<Term>& l);
 
 
-/// \brief Returns the list \a l with one occurrence of the element \a t removed, or \a l if \a t is not present.
-/// \param l A list.
-/// \param t A list element.
-/// \details This operation is linear in the length of the list.
-/// \return The original list where the first occurrence of \a t has been removed, assuming it is in \a t.
-template <typename Term>
-inline
-term_list<Term> remove_one_element(const term_list<Term>& l, const Term& t);
-
-
 /// \brief Returns the concatenation of two lists.
 /// \param l A list.
 /// \param m A list.
@@ -336,22 +339,6 @@ template <typename Term>
 inline
 term_list<Term> operator+(const term_list<Term>& l, const term_list<Term>& m);
 
-
-/// \brief Returns an element at a certain position in a list
-/// \param l A list
-/// \param m An index. The first element is at position 0.
-/// \details This operator is linear in the number m. If m>=length of the list
-///          the result is undefined.
-/// \return The element at position i in the list l.
-template <typename Term>
-inline
-const Term& element_at(const term_list<Term>& l, std::size_t m)
-{
-  assert(l.size()>m);
-  typename term_list<Term>::const_iterator i=l.begin();
-  for( ; m>0; --m, ++i) {}
-  return *i;
-}
 
 /// \brief Appends a new element at the end of the list. Note
 /// that the complexity of this function is O(n), with n the number of
@@ -372,17 +359,19 @@ template <class T>
 inline void swap(atermpp::term_list<T>& t1, atermpp::term_list<T>& t2)
 {
   t1.swap(t2);
-}
+} 
 
 } // namespace atermpp
 
 
 namespace std
 {
-  /// \brief specialization of the standard std::hash function.
-  template<class Term> 
+  template <class Term> 
   struct hash<atermpp::term_list<Term> >
   {
+    /// \brief A specialization of the standard std::hash function.
+    /// \param l The list for which a hash value is calculated.
+    /// \return A hash value for l. 
     std::size_t operator()(const atermpp::term_list<Term>& l) const
     {
       std::hash<atermpp::aterm> hasher;
