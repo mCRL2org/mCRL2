@@ -31,13 +31,18 @@ namespace data {
 ///          Provided that, given a variable, its index can be computed in O(1)
 ///          time, insertion is O(1) amortized, and lookup is O(1).
 ///          Memory required is O(n) where n is the largest index used.
-template <typename VariableType = data::variable, typename ExpressionSequence = std::vector<data_expression> >
-class mutable_indexed_substitution : public std::unary_function<VariableType, typename ExpressionSequence::value_type>
+template <typename VariableType = data::variable, typename ExpressionType = data_expression >
+class mutable_indexed_substitution : public std::unary_function<VariableType, ExpressionType>
 {
 protected:
+  typedef std::pair <VariableType, ExpressionType> substitution_type;
   /// \brief Internal storage for substitutions.
   /// Required to be a container with random access through [] operator.
-  ExpressionSequence m_container;
+  /// It is essential to store the variable also in the container, as it might be that
+  /// this variable is not used anywhere although it has a valid assignment. This happens
+  /// for instance when the assignment is already parsed, while the expression to which it
+  /// needs to be applied must still be parsed. 
+  std::vector < substitution_type >  m_container;
   std::vector <std::size_t> m_index_table;
   std::stack<std::size_t> m_free_positions;
   bool m_variables_in_rhs_set_is_defined;
@@ -45,15 +50,11 @@ protected:
 
 public:
 
-  /// \brief Friend function to get all identifiers in the substitution
-  template<typename VariableType1, typename ExpressionSequence1>
-  friend std::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution< VariableType1, ExpressionSequence1 >& sigma);
-
   /// \brief Type of variables
   typedef VariableType variable_type;
 
   /// \brief Type of expressions
-  typedef typename ExpressionSequence::value_type expression_type;
+  typedef ExpressionType expression_type;
 
   /// \brief Default constructor
   mutable_indexed_substitution()
@@ -65,7 +66,7 @@ public:
   struct assignment
   {
     const variable_type& m_variable;
-    ExpressionSequence& m_container;
+    std::vector < substitution_type >& m_container;
     std::vector <std::size_t>& m_index_table;
     std::stack<std::size_t>& m_free_positions;
     bool m_variables_in_rhs_set_is_defined;
@@ -79,7 +80,7 @@ public:
     /// \param[in] fp a stack of free positions in \a table.
     /// \param[in] b Indication that the variables in \a vars are defined.
     /// \param[in] vars Variables in the rhs of the assignments. 
-    assignment(const variable_type& v, ExpressionSequence& c, std::vector <std::size_t>& table, std::stack<std::size_t>& fp,
+    assignment(const variable_type& v, std::vector < substitution_type >& c, std::vector <std::size_t>& table, std::stack<std::size_t>& fp,
                const bool b, std::set<variable>& vars) :
       m_variable(v),
       m_container(c),
@@ -120,13 +121,13 @@ public:
           if (m_free_positions.empty())
           {
             m_index_table[i]=m_container.size();
-            m_container.push_back(e);
+            m_container.push_back(substitution_type(m_variable,e));
           }
           else
           {
             j=m_free_positions.top();
             m_index_table[i]=j;
-            m_container[j]=e;
+            m_container[j]=substitution_type(m_variable,e);
             m_free_positions.pop();
           }
         }
@@ -134,7 +135,7 @@ public:
         {
           // The variable was already assigned. Replace the assignment.
           // Note that we do not remove the variables in the term that is replaced.
-          m_container[j]=e;
+          m_container[j]=substitution_type(m_variable,e);
         }
       }
       else
@@ -166,7 +167,7 @@ public:
       {
         // the variable has an assigned value.
         assert(j<m_container.size());
-        return m_container[j];
+        return m_container[j].second;
       }
     }
     // no value assigned to v;
@@ -220,43 +221,6 @@ public:
     return m_container.size()==m_free_positions.size();
   }
 
-protected:
-  /// \brief size of the wrapped container
-  std::size_t size() const
-  {
-    return m_container.size();
-  }
-
-  /// \brief set position i of the wrapped container to e
-  void set(const std::size_t i, const expression_type& e)
-  {
-    m_container[i] = e;
-  }
-
-  /// \brief get the element at position i of the wrapped container
-  const expression_type& get(const std::size_t i) const
-  {
-    assert(i < m_index_table.size());
-    assert(m_index_table[i]!=std::size_t(-1));
-    return m_container[m_index_table[i]];
-  }
-
-  /// \brief Returns the name of the variable with index i. Throws mcrl2::runtime_error if no such variable exists.
-  /// N.B. This is an expensive operation!
-  const core::identifier_string& variable_name(std::size_t i) const
-  {
-    auto& m = core::variable_index_map<variable, variable_key_type>();
-    for (auto& j : m)
-    {
-      if (j.second == i)
-      {
-        const variable_key_type& v = j.first;
-        return atermpp::down_cast<core::identifier_string>(v.first);
-      }
-    }
-    throw mcrl2::runtime_error("mutable_indexed_substitution::variable_name: index does not exist");
-  }
-
 public:
   /// \brief string representation of the substitution. N.B. This is an expensive operation!
   std::string to_string() const
@@ -266,7 +230,8 @@ public:
     result << "[";
     for (std::size_t i = 0; i < m_index_table.size(); ++i)
     {
-      if (m_index_table[i] != std::size_t(-1))
+      const std::size_t j=m_index_table[i];
+      if (j != std::size_t(-1))
       {
         if (first)
         {
@@ -276,7 +241,8 @@ public:
         {
           result << "; ";
         }
-        result << variable_name(i) << " := " << get(i);
+        
+        result << m_container.at(j).first << " := " << m_container.at(j).second;
       }
     }
     result << "]";
@@ -285,8 +251,8 @@ public:
 
 };
 
-template <typename VariableType, typename ExpressionSequence>
-std::ostream& operator<<(std::ostream& out, const mutable_indexed_substitution<VariableType, ExpressionSequence>& sigma)
+template <typename VariableType, typename ExpressionType>
+std::ostream& operator<<(std::ostream& out, const mutable_indexed_substitution<VariableType, ExpressionType>& sigma)
 {
   return out << sigma.to_string();
 }

@@ -97,7 +97,7 @@ void test_indexed_substitution()
 //  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< data_expression > > >));
 //  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_indexed_substitution< variable, std::vector< variable > > >));
 
-  mutable_indexed_substitution< variable, std::vector< data_expression > > s;
+  mutable_indexed_substitution< variable, data_expression > s;
 
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
   BOOST_CHECK(static_cast< variable >(s(y)) != x);
@@ -123,7 +123,7 @@ std::cerr << "RES " << data::replace_free_variables(c + x * y, s) << "\n";
   BOOST_CHECK(data::replace_free_variables(lambda(x,y), s) == lambda(x,c));
 
   // Replacing free variables only
-  mutable_indexed_substitution< variable, std::vector< data_expression > > sb;
+  mutable_indexed_substitution< variable, data_expression > sb;
 
   sb[y] = c;
 

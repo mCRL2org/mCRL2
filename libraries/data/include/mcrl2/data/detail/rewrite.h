@@ -45,7 +45,7 @@ class Rewriter
     // data::set_identifier_generator generator;  //name for variables.
     enumerator_identifier_generator generator;  //name for variables.
 
-    typedef mutable_indexed_substitution<data::variable, std::vector< data::data_expression > > substitution_type;
+    typedef mutable_indexed_substitution<> substitution_type;
 
     used_data_equation_selector data_equation_selector;
     /**

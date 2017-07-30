@@ -46,10 +46,6 @@ public:
   typedef typename AssociativeContainer::const_iterator const_iterator;
   typedef typename AssociativeContainer::iterator iterator;
 
-  template<typename AssociativeContainer1>
-  friend std::set<core::identifier_string> get_identifiers(const mutable_map_substitution< AssociativeContainer1 >& sigma);
-
-
   /// \brief Wrapper class for internal storage and substitution updates using operator()
   struct assignment
   {
