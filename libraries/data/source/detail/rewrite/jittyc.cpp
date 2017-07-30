@@ -1595,7 +1595,7 @@ class RewriterCompilingJitty::ImplementTree
       static std::size_t auxiliary_method_name_index=0;
 
       m_stream << m_padding 
-               << "const data_expression result" << auxiliary_method_name_index << "= auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index << "("
+               << "const data_expression& result" << auxiliary_method_name_index << "= auxiliary_function_to_reduce_bracket_nesting" << auxiliary_method_name_index << "("
                << brackets.current_data_arguments.top() << ");\n";
       m_stream << m_padding 
                << "if (result" << auxiliary_method_name_index << " != data_expression()) { return result" << auxiliary_method_name_index << "; }\n";
@@ -2067,7 +2067,7 @@ public:
         std::size_t arg = match_tree_A(strat.front()).variable_index();
         if (!m_used[arg])
         {
-          m_stream << m_padding << "const data_expression arg" << arg << " = local_rewrite(arg_not_nf" << arg << ");\n";
+          m_stream << m_padding << "const data_expression& arg" << arg << " = local_rewrite(arg_not_nf" << arg << ");\n";
           m_used[arg] = true;
           if (!added_new_parameters_in_brackets)
           {
@@ -2733,7 +2733,7 @@ data_expression RewriterCompilingJitty::rewrite(
   // substitutions, due to the enumerator.
   substitution_type *saved_sigma=global_sigma;
   global_sigma=&sigma;
-  const data_expression result=so_rewr(term);
+  const data_expression& result=so_rewr(term);
   global_sigma=saved_sigma;
   return result;
 }

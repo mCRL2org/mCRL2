@@ -130,6 +130,15 @@ class aterm
       increase_reference_count<true>();
     }
 
+    /// \brief Move constructor.
+    /// \param t Term that is moved to this.
+    /// \details This saves incrementing and decrementing the reference counter
+    ///          to the term that is moved. 
+    aterm(aterm&& t):m_term(t.m_term)
+    { 
+      t.increase_reference_count<true>();
+    } 
+
     /// \brief Assignment operator.
     /// \param t a term to be assigned.
     aterm& operator=(const aterm& t)
