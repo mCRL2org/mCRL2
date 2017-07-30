@@ -42,7 +42,7 @@ protected:
   /// this variable is not used anywhere although it has a valid assignment. This happens
   /// for instance when the assignment is already parsed, while the expression to which it
   /// needs to be applied must still be parsed. 
-  std::vector < substitution_type >  m_container;
+  std::vector < substitution_type > m_container;
   std::vector <std::size_t> m_index_table;
   std::stack<std::size_t> m_free_positions;
   bool m_variables_in_rhs_set_is_defined;
@@ -104,7 +104,8 @@ public:
         // Set a new variable;
         if (m_variables_in_rhs_set_is_defined)
         {
-           m_variables_in_rhs=find_free_variables(e);
+          std::set<variable_type> s=find_free_variables(e);
+          m_variables_in_rhs.insert(s.begin(),s.end());
         }
 
         // Resize container if needed
@@ -157,7 +158,10 @@ public:
   };
 
   /// \brief Application operator; applies substitution to v.
-  const expression_type& operator()(const variable_type& v) const
+  /// \detail This must deliver an expression, and not a reference
+  ///         to an expression, as the expressions are stored in 
+  ///         a vector that can be resized and moved. 
+  const expression_type operator()(const variable_type& v) const
   {
     const std::size_t i = core::index_traits<data::variable, data::variable_key_type, 2>::index(v);
     if (i < m_index_table.size())
@@ -206,7 +210,8 @@ public:
       {
         if (*i != std::size_t(-1))
         {
-          m_variables_in_rhs=find_free_variables(m_container[*i]);
+          std::set<variable_type> s=find_free_variables(m_container[*i]);
+          m_variables_in_rhs.insert(s.begin(),s.end());
         }
       }
       m_variables_in_rhs_set_is_defined=true;
