@@ -18,7 +18,6 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/hash.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2

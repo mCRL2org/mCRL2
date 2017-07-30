@@ -19,7 +19,6 @@
 #include "mcrl2/core/index_traits.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/hash.h"
 #include "mcrl2/data/optimized_boolean_operators.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include <iterator>

@@ -54,9 +54,21 @@ struct hash< std::vector < X > >
     std::size_t hash=0;
     for(const X& x: v)
     {
-      hash ^=  hasher(x) + 0x9e3779b9 + (hash<<6) + (hash>>2);
+      hash = mcrl2::utilities::detail::hash_combine(hash,hasher(x)); 
     }
     return hash;
+  }
+};
+
+template <class X, class Y>
+struct hash< std::pair < X, Y > >
+{
+  std::size_t operator()(const std::pair < X, Y >& p) const
+  {
+    hash<X> hasher1;
+    hash<Y> hasher2;
+    
+    return mcrl2::utilities::detail::hash_combine(hasher1(p.first),hasher2(p.second));
   }
 };
 

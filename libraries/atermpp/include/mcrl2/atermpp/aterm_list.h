@@ -374,13 +374,23 @@ inline void swap(atermpp::term_list<T>& t1, atermpp::term_list<T>& t2)
   t1.swap(t2);
 }
 
-/* template <class T>
-std::ostream& operator<<(std::ostream& out, const term_list<T>& l)
-{
-  return out << static_cast<aterm>(l); 
-} */
-
 } // namespace atermpp
+
+
+namespace std
+{
+  /// \brief specialization of the standard std::hash function.
+  template<class Term> 
+  struct hash<atermpp::term_list<Term> >
+  {
+    std::size_t operator()(const atermpp::term_list<Term>& l) const
+    {
+      std::hash<atermpp::aterm> hasher;
+      return hasher(l); 
+    }
+  }; 
+  
+} // namespace std
 
 #include "mcrl2/atermpp/detail/aterm_list_implementation.h"
 

@@ -9,30 +9,22 @@
 /// \file mcrl2/core/index_traits.h
 /// \brief add your file description here.
 
+
 #ifndef MCRL2_CORE_INDEX_TRAITS_H
 #define MCRL2_CORE_INDEX_TRAITS_H
 
 #include <iostream>
 #include <sstream>
 #include <stack>
+#include <unordered_map>
 #include <stdexcept>
-// #include <boost/config.hpp>
+#include "mcrl2/utilities/hash_utility.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/core/identifier_string.h"
-
-#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
-#include <unordered_map>
-#include <utility>
-#include "mcrl2/atermpp/aterm.h"
-#else
-#include <map>
-#endif
 
 namespace mcrl2 {
 
 namespace core {
-
-#ifdef MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 
 template <typename Variable, typename KeyType>
 std::unordered_map<KeyType, std::size_t>& variable_index_map()
@@ -40,17 +32,6 @@ std::unordered_map<KeyType, std::size_t>& variable_index_map()
   static std::unordered_map<KeyType, std::size_t> m;
   return m;
 }
-
-#else
-
-template <typename Variable, typename KeyType>
-std::map<KeyType, std::size_t>& variable_index_map()
-{
-  static std::map<KeyType, std::size_t> m;
-  return m;
-}
-
-#endif // MCRL2_INDEX_TRAITS_USE_UNORDERED_MAP
 
 template <typename Variable, typename KeyType>
 std::stack<std::size_t>& variable_map_free_numbers()
