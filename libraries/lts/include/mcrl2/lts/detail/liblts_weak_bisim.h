@@ -54,6 +54,9 @@ void weak_bisimulation_reduce(
   reflexive_transitive_tau_closure(l);                        // Apply transitive tau closure to l.
   bisimulation_reduce_gjkw(l, false, false);                  // Apply strong bisimulation to l.
   scc_reduce(l);                                              // Remove tau loops.
+  remove_redundant_transitions(l);                            // Remove transitions s -a-> s' if also s-a->-tau->s' or s-tau->-a->s' is present.
+                                                              // Note that this is correct, because l is reduced modulo strong bisimulation and
+                                                              // does not contain tau loops. 
   if (preserve_divergences)
   {
     unmark_explicit_divergence_transitions(l,divergence_label);

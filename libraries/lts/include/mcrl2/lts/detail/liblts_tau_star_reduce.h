@@ -90,7 +90,7 @@ std::map < std::size_t,
 
 
 template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
-void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS> &l)
+void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>& l)
 // This method assumes there are no tau loops!
 {
   using namespace std;
@@ -136,8 +136,103 @@ void reflexive_transitive_tau_closure(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BAS
 }
 
 
+/// \brief Removes each transition s-a->s' if also transitions s-a->-tau->s' or s-tau->-a->s' are 
+///        present. It uses the hidden_label_map to determine whether transitions are internal. 
 template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
-void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS > &l)
+void remove_redundant_transitions(lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>& l)
+{
+  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::states_size_type state_type;
+  typedef typename lts<STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS>::labels_size_type label_type;
+
+  outgoing_transitions_per_state_t outgoing_transitions=transitions_per_outgoing_state(l.get_transitions());
+  l.clear_transitions();
+  std::set < state_type > states_reachable_in_one_visible_action;
+  std::set < state_type > states_reachable_in_one_hidden_action;
+
+  for(outgoing_transitions_per_state_t::const_iterator i=outgoing_transitions.begin(); i!=outgoing_transitions.end(); ++i)
+  {
+    const state_type from_=from(i);
+    const label_type label_=label(i);
+    const state_type to_=to(i);
+
+    states_reachable_in_one_visible_action.clear();
+    states_reachable_in_one_hidden_action.clear();
+
+    // For every transition from-label->to we calculate the sets { s | from -a->s } and { s | from -tau-> s }.
+    for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(from_);
+                    j!=outgoing_transitions.upper_bound(from_); ++j)
+    {
+      if (l.is_tau(l.apply_hidden_label_map(label(j))))
+      {
+        states_reachable_in_one_hidden_action.insert(to(j));
+      }
+      else if (label_==label(j))
+      {
+        assert(!l.is_tau(l.apply_hidden_label_map(label_)));
+        states_reachable_in_one_visible_action.insert(to(j)); 
+      }
+    }
+
+    // Now check whether to is reachable in one step from one of the two sets constructed above. If no,
+    // insert the transition in l.transitions. 
+    bool found=false;
+    
+    for(const state_type& middle: states_reachable_in_one_hidden_action)
+    {
+      // Find a visible step from state middle to state to, unless label is hidden, in which case we search
+      // a hidden step. 
+      for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(middle);
+                  !found && j!=outgoing_transitions.upper_bound(middle); ++j)
+      {
+        if (l.is_tau(l.apply_hidden_label_map(label_)))
+        { 
+          if (l.is_tau(l.apply_hidden_label_map(label(j))) && to(j)==to_)
+          {
+            assert(!found);
+            found=true; break;
+          }
+        }
+        else // label is visible.
+        {
+          if (label(j)==label_ && to(j)==to_)
+          {
+            assert(!found);
+            found=true; break;
+          }
+        }
+      }
+      if (found) break;
+    }
+    
+    if (!found && !l.is_tau(l.apply_hidden_label_map(label_)))
+    {
+      for(const state_type& middle: states_reachable_in_one_visible_action)
+      {
+        // Find a hidden step from state middle to state to.
+        for(outgoing_transitions_per_state_t::const_iterator j=outgoing_transitions.lower_bound(middle);
+                    !found && j!=outgoing_transitions.upper_bound(middle); ++j)
+        {
+          if (l.is_tau(l.apply_hidden_label_map(label(j))) && to(j)==to_)
+          { 
+            assert(!found);
+            found=true; break;
+          } 
+        }
+        if (found) break;
+      }
+    }
+
+    // If no alternative transition is found, add this transition to l.transitions().
+    if (!found) 
+    {
+      l.add_transition(transition(from_, label_, to_));
+    }
+  }  
+}
+
+
+template < class STATE_LABEL_T, class ACTION_LABEL_T, class LTS_BASE_CLASS >
+void tau_star_reduce(lts< STATE_LABEL_T, ACTION_LABEL_T, LTS_BASE_CLASS >& l)
 // This method assumes there are no tau loops!
 {
   using namespace std;
