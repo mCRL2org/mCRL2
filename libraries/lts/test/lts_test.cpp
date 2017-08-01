@@ -203,8 +203,8 @@ static void tricky_example_for_branching_bisimulation()
   expected.states_bisimulation=2, expected.transitions_bisimulation=3, expected.labels_bisimulation=3;
   expected.states_branching_bisimulation=2, expected.transitions_branching_bisimulation=3, expected.labels_branching_bisimulation=3;
   expected.states_divergence_preserving_branching_bisimulation=2, expected.transitions_divergence_preserving_branching_bisimulation=3, expected.labels_divergence_preserving_branching_bisimulation=3;
-  expected.states_weak_bisimulation=2, expected.transitions_weak_bisimulation=6, expected.labels_weak_bisimulation=3;
-  expected.states_divergence_preserving_weak_bisimulation=2, expected.transitions_divergence_preserving_weak_bisimulation=6, expected.labels_divergence_preserving_weak_bisimulation=4;
+  expected.states_weak_bisimulation=2, expected.transitions_weak_bisimulation=3, expected.labels_weak_bisimulation=3;
+  expected.states_divergence_preserving_weak_bisimulation=2, expected.transitions_divergence_preserving_weak_bisimulation=3, expected.labels_divergence_preserving_weak_bisimulation=4;
   expected.states_simulation=2, expected.transitions_simulation=3, expected.labels_simulation=3;
   expected.states_trace_equivalence=2, expected.transitions_trace_equivalence=3, expected.labels_trace_equivalence=3;
   expected.states_weak_trace_equivalence=2, expected.transitions_weak_trace_equivalence=3, expected.labels_weak_trace_equivalence=3;
@@ -319,7 +319,7 @@ static void reduce_abp()
   expected.states_branching_bisimulation=3, expected.transitions_branching_bisimulation=4, expected.labels_branching_bisimulation=5;
   expected.states_divergence_preserving_branching_bisimulation=6, expected.transitions_divergence_preserving_branching_bisimulation=10, expected.labels_divergence_preserving_branching_bisimulation=5;
   expected.states_weak_bisimulation=3, expected.transitions_weak_bisimulation=4, expected.labels_weak_bisimulation=5;
-  expected.states_divergence_preserving_weak_bisimulation=6, expected.transitions_divergence_preserving_weak_bisimulation=25, expected.labels_divergence_preserving_weak_bisimulation=6;
+  expected.states_divergence_preserving_weak_bisimulation=6, expected.transitions_divergence_preserving_weak_bisimulation=10, expected.labels_divergence_preserving_weak_bisimulation=6;
   expected.states_simulation=24, expected.transitions_simulation=28, expected.labels_simulation=5;
   expected.states_trace_equivalence=19, expected.transitions_trace_equivalence=24, expected.labels_trace_equivalence=5;
   expected.states_weak_trace_equivalence=3, expected.transitions_weak_trace_equivalence=4, expected.labels_weak_trace_equivalence=5;
@@ -401,8 +401,8 @@ static void reduce_peterson()
   expected.states_bisimulation=31, expected.transitions_bisimulation=51, expected.labels_bisimulation=7;
   expected.states_branching_bisimulation=21, expected.transitions_branching_bisimulation=37, expected.labels_branching_bisimulation=7;
   expected.states_divergence_preserving_branching_bisimulation=21, expected.transitions_divergence_preserving_branching_bisimulation=37, expected.labels_divergence_preserving_branching_bisimulation=7;
-  expected.states_weak_bisimulation=19, expected.transitions_weak_bisimulation=57, expected.labels_weak_bisimulation=7;
-  expected.states_divergence_preserving_weak_bisimulation=19, expected.transitions_divergence_preserving_weak_bisimulation=57, expected.labels_divergence_preserving_weak_bisimulation=8;
+  expected.states_weak_bisimulation=19, expected.transitions_weak_bisimulation=33, expected.labels_weak_bisimulation=7;
+  expected.states_divergence_preserving_weak_bisimulation=19, expected.transitions_divergence_preserving_weak_bisimulation=33, expected.labels_divergence_preserving_weak_bisimulation=8;
   expected.states_simulation=31, expected.transitions_simulation=49, expected.labels_simulation=7;
   expected.states_trace_equivalence=34, expected.transitions_trace_equivalence=52, expected.labels_trace_equivalence=7;
   expected.states_weak_trace_equivalence=18, expected.transitions_weak_trace_equivalence=29, expected.labels_weak_trace_equivalence=7;
