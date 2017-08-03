@@ -893,7 +893,7 @@ data_expression RewriterJitty::rewrite(
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif
-  const data_expression t=rewrite_aux(term, sigma);
+  const data_expression& t=rewrite_aux(term, sigma);
   assert(remove_normal_form_function(t)==t);
   return t;
 }

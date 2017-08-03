@@ -1236,8 +1236,9 @@ class RewriterCompilingJitty::ImplementTree
       result_type << "term_not_in_normal_form";
     }
     // A rewritten result is expected.
+    stringstream temp_result_type;
     s << "where_clause(";
-    calc_inner_term(s, w.body(), startarg, nnfvars, true, result_type);
+    calc_inner_term(s, w.body(), startarg, nnfvars, true, temp_result_type);
     s << ",";
     for(std::size_t i = w.assignments().size(); i > 0; --i)
     {
@@ -1247,7 +1248,7 @@ class RewriterCompilingJitty::ImplementTree
     for(assignment_list::const_iterator i = w.assignments().begin(); i != w.assignments().end(); ++i)
     {
       s << ", assignment(this_rewriter->bound_variable_get(" << m_rewriter.bound_variable_index(i->lhs()) << "), ";
-      calc_inner_term(s, i->rhs(), startarg, nnfvars, true, result_type);
+      calc_inner_term(s, i->rhs(), startarg, nnfvars, true, temp_result_type);
       s << "))";
     }
     s << ")";
