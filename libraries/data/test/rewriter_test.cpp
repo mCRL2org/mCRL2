@@ -209,6 +209,27 @@ std::cerr << "LAMBDA EXPRESSION TEST \n";
   test_expressions(R, expr1, expr2, "t,u: Real;", data_spec, sigma);
 }
 
+// The testcase below corresponds to ticket #1428 which indicated
+// that the generated rules for equality were erroneous. Their bound variables were equal
+// f == g = forall x0,x0: Nat. f(x0, x0) == g(x0, x0)
+void test_equality_on_functions()
+{
+  std::string DATA_SPEC1 =
+    "map f,g:Nat#Nat->Nat;\n"
+    "var x,y:Nat; \n"
+    "eqn f(x,y) = x+y;\n"
+    "    g(x,y) = x+x;\n"
+    ;
+
+  data_specification data_spec = parse_data_specification(DATA_SPEC1);
+  data::rewriter R(data_spec);
+
+  std::string expr1 = "f==g";
+  std::string expr2 = "false";
+  std::string sigma = "[]";
+  test_expressions(R, expr1, expr2, "", data_spec, sigma);
+}
+
 int test_main(int argc, char** argv)
 {
   test1();
@@ -218,6 +239,7 @@ int test_main(int argc, char** argv)
   one_point_rule_preprocessor_test();
   simplify_rewriter_test();
   test_lambda_expression();
+  test_equality_on_functions();
 
   return 0;
 }

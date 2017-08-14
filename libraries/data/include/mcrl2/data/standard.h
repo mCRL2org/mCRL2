@@ -425,6 +425,7 @@ inline data_equation_vector standard_generate_equations_code(const sort_expressi
     {
       std::stringstream xs;
       xs << "x" << index;
+      ++index;
       variable x(xs.str(),sort);
       xvars.push_back(x);
     }
