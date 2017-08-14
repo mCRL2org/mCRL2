@@ -18,6 +18,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/anonimyze.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
@@ -586,6 +587,21 @@ struct stategraph_global_command: public pbes_command
   }
 };
 
+/// \brief Anonimizes the identifiers of a PBES
+struct anonimyze_pbes_command: public pbes_command
+{
+  anonimyze_pbes_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : pbes_command("anonimyze", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    pbes_system::anonimyze(pbesspec);
+    pbes_system::save_pbes(pbesspec, output_filename);
+  }
+};
+
 class transform_tool: public rewriter_tool<input_output_tool>
 {
   protected:
@@ -664,6 +680,7 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<is_monotonous_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<stategraph_global_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<stategraph_local_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<anonimyze_pbes_command>(input_filename(), output_filename(), options));
 
       for (const auto& command: commands)
       {

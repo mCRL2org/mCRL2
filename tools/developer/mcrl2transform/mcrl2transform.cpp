@@ -21,6 +21,7 @@
 #include "mcrl2/process/alphabet_efficient.h"
 #include "mcrl2/process/alphabet_new.h"
 #include "mcrl2/process/alphabet_reduce.h"
+#include "mcrl2/process/anonimyze.h"
 #include "mcrl2/process/eliminate_single_usage_equations.h"
 #include "mcrl2/process/eliminate_trivial_equations.h"
 #include "mcrl2/process/eliminate_unused_equations.h"
@@ -299,6 +300,21 @@ struct alphabet_bounded_command: public processcommand
   }
 };
 
+/// \brief Anonimizes the identifiers of a process specification
+struct anonimyze_process_command: public processcommand
+{
+  anonimyze_process_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
+    : processcommand("anonimyze", input_filename, output_filename, options)
+  {}
+
+  void execute()
+  {
+    processcommand::execute();
+    process::anonimyze(procspec);
+    write_text(output_filename, process::pp(procspec));
+  }
+};
+
 class transform_tool: public utilities::tools::input_output_tool
 {
   protected:
@@ -360,6 +376,7 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<alphabet_efficient_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_new_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_bounded_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<anonimyze_process_command>(input_filename(), output_filename(), options));
 
       for (auto i = commands.begin(); i != commands.end(); ++i)
       {
