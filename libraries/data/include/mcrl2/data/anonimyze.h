@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_ANONIMYZE_H
 #define MCRL2_DATA_ANONIMYZE_H
 
+#include <cctype>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/builder.h"
 #include "mcrl2/data/set_identifier_generator.h"
@@ -45,6 +46,13 @@ struct anonimyze_builder: public data::sort_expression_builder<Derived>
   void add_name(const core::identifier_string& name, std::map<core::identifier_string, core::identifier_string>& substitution, const std::string& hint)
   {
     using utilities::detail::has_key;
+
+    // do not rename numeric values
+    if (std::isdigit(std::string(name)[0]))
+    {
+      substitution[name] = name;
+    }
+
     if (!has_key(substitution, name))
     {
       substitution[name] = id_generator(hint);
