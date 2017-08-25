@@ -39,6 +39,10 @@
 
 .. note::
 
+   The new 2017 release is now available. Previous releases can also still be found under the download page. 
+
+.. note::
+
    On Coursera four consecutive courses consisting of approximately 60 lectures provide an introduction into the theory and practical
    use of the mCRL2 toolset. It is based on the book 'Modeling and Analysis of Communicating
    Systems' shown above. The courses are:
