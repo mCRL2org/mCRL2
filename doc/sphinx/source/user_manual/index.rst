@@ -39,7 +39,7 @@
 
 .. note::
 
-   The new 2017 release is now available. Previous releases can also still be found under the download page. 
+   The new 2017 release is now available. Previous releases can still be found via the download page. 
 
 .. note::
 
