@@ -362,7 +362,6 @@ data_expression Rewriter::existential_quantifier_enumeration(
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
                                              enumerator_list_element<>, 
-                                             data::enumerator_identifier_generator, 
                                              data::is_not_false, 
                                              rewriter_wrapper, 
                                              rewriter_wrapper::substitution_type> enumerator_type;
@@ -476,7 +475,6 @@ data_expression Rewriter::universal_quantifier_enumeration(
 
   typedef enumerator_algorithm_with_iterator<rewriter_wrapper, 
                                              enumerator_list_element<>, 
-                                             data::enumerator_identifier_generator, 
                                              data::is_not_true, 
                                              rewriter_wrapper, 
                                              rewriter_wrapper::substitution_type> enumerator_type;

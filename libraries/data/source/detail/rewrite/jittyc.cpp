@@ -823,18 +823,17 @@ match_tree_list RewriterCompilingJitty::create_strategy(const data_equation_list
 {
   typedef std::list<std::size_t> dep_list_t;
   match_tree_list strat;
-
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
   std::vector<std::size_t> arg_use_count(arity, 0);
   std::list<std::pair<data_equation, dep_list_t> > rule_deps;
-  for (data_equation_list::const_iterator it = rules.begin(); it != rules.end(); ++it)
+  for (const data_equation& eq: rules)
   {
-    if (recursive_number_of_args(it->lhs()) <= arity)
+    if (recursive_number_of_args(eq.lhs()) <= arity)
     {
-      rule_deps.push_front(std::make_pair(*it, dep_list_t()));
+      rule_deps.push_front(std::make_pair(eq, dep_list_t()));
       dep_list_t& deps = rule_deps.front().second;
 
-      const std::vector<bool> is_dependent_arg = dep_vars(*it);
+      const std::vector<bool> is_dependent_arg = dep_vars(eq);
       for (std::size_t i = 0; i < is_dependent_arg.size(); i++)
       {
         // Only if needed and not already rewritten
@@ -2512,7 +2511,7 @@ void RewriterCompilingJitty::generate_code(const std::string& filename)
   std::ofstream cpp_file(filename);
   std::stringstream rewr_code;
   std::size_t max_arity = std::max(calc_max_arity(m_data_specification_for_enumeration.constructors()),
-                              calc_max_arity(m_data_specification_for_enumeration.mappings()));
+                                   calc_max_arity(m_data_specification_for_enumeration.mappings()));
 
   // - Store all used function symbols in a vector
   std::vector<function_symbol> function_symbols; 
@@ -2727,6 +2726,7 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
+// std::cerr << "REWRITE " << term << "\n";
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif

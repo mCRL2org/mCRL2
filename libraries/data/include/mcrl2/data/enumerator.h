@@ -87,9 +87,15 @@ data_expression make_if_expression_(std::size_t& function_index,
 
 /// \brief Computes the elements of a finite set sort, and puts them in result. If there are too many elements, false is returned.
 template <class Rewriter, class MutableSubstitution>
-bool compute_finite_set_elements(const container_sort& sort, const data_specification& dataspec, Rewriter datar, MutableSubstitution& sigma, data_expression_vector& result)
+bool compute_finite_set_elements(const container_sort& sort, 
+                                 const data_specification& dataspec, 
+                                 Rewriter datar, MutableSubstitution& sigma, 
+                                 data_expression_vector& result,
+                                 enumerator_identifier_generator& id_generator)
 {
-  data_expression_vector all_element_expressions = enumerate_expressions(sort.element_sort(), dataspec, datar);
+  // TODO: This routine would really benefit from caching the calculated set of elements, as the same set is often generated
+  // over and over again. 
+  data_expression_vector all_element_expressions = enumerate_expressions(sort.element_sort(), dataspec, datar, id_generator);
   if (all_element_expressions.size() >= 32)  // If there are at least 2^32 functions, then enumerating them makes little sense.
   {
     return false;
@@ -107,23 +113,23 @@ bool compute_finite_set_elements(const container_sort& sort, const data_specific
 }
 
 /// \brief Computes the elements of a finite function sort, and puts them in result. If there are too many elements, false is returned.
-template <class IdentifierGenerator, class Rewriter>
+template <class Rewriter>
 bool compute_finite_function_sorts(const function_sort& sort,
-                                   IdentifierGenerator& id_generator,
+                                   enumerator_identifier_generator& id_generator,
                                    const data::data_specification& dataspec,
                                    Rewriter datar,
                                    data_expression_vector& result,
                                    variable_list& function_parameter_list
                                   )
 {
-  data_expression_vector codomain_expressions = enumerate_expressions(sort.codomain(), dataspec, datar);
+  data_expression_vector codomain_expressions = enumerate_expressions(sort.codomain(), dataspec, datar, id_generator);
   std::vector<data_expression_vector> domain_expressions;
   std::size_t total_domain_size = 1;
   variable_vector function_parameters;
 
   for (const sort_expression& s: sort.domain())
   {
-    domain_expressions.push_back(enumerate_expressions(s, dataspec, datar));
+    domain_expressions.push_back(enumerate_expressions(s, dataspec, datar, id_generator));
     total_domain_size = total_domain_size * domain_expressions.back().size();
     function_parameters.push_back(variable(id_generator("x"), s));
   }
@@ -310,7 +316,7 @@ std::ostream& operator<<(std::ostream& out, const enumerator_list_element<Expres
 }
 
 /// \brief An enumerator algorithm that generates solutions of a condition.
-template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter, typename IdentifierGenerator = data::enumerator_identifier_generator>
+template <typename Rewriter = data::rewriter, typename DataRewriter = data::rewriter>
 class enumerator_algorithm
 {
   protected:
@@ -324,7 +330,7 @@ class enumerator_algorithm
     const DataRewriter& datar;
 
     // A name generator
-    IdentifierGenerator& id_generator;
+    enumerator_identifier_generator& id_generator;
 
     /// \brief max_count The enumeration is aborted after max_count iterations
     std::size_t m_max_count;
@@ -428,7 +434,7 @@ class enumerator_algorithm
     enumerator_algorithm(const Rewriter& R_,
                          const data::data_specification& dataspec_,
                          const DataRewriter& datar_,
-                         IdentifierGenerator& id_generator_,
+                         enumerator_identifier_generator& id_generator_,
                          std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                          bool throw_exceptions = false
                        )
@@ -437,7 +443,7 @@ class enumerator_algorithm
 
   private:
     // enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&) = delete;
-    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter, IdentifierGenerator>&)
+    enumerator_algorithm(const enumerator_algorithm<Rewriter, DataRewriter>&)
     {}
 
   public:
@@ -512,7 +518,7 @@ class enumerator_algorithm
         if (dataspec.is_certainly_finite(fset.element_sort()))
         {
           data_expression_vector set_elements;
-          bool result = detail::compute_finite_set_elements(fset, dataspec, datar, sigma, set_elements);
+          bool result = detail::compute_finite_set_elements(fset, dataspec, datar, sigma, set_elements, id_generator);
 
           if (!result)
           {
@@ -622,11 +628,11 @@ class enumerator_algorithm
 };
 
 /// \brief An enumerator algorithm with an iterator interface.
-template <typename Rewriter = data::rewriter, typename EnumeratorListElement = enumerator_list_element_with_substitution<>, typename IdentifierGenerator = data::enumerator_identifier_generator, typename Filter = data::is_not_false, typename DataRewriter = data::rewriter, typename MutableSubstitution = data::mutable_indexed_substitution<> >
-class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, DataRewriter, IdentifierGenerator>
+template <typename Rewriter = data::rewriter, typename EnumeratorListElement = enumerator_list_element_with_substitution<>, typename Filter = data::is_not_false, typename DataRewriter = data::rewriter, typename MutableSubstitution = data::mutable_indexed_substitution<> >
+class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, DataRewriter>
 {
   public:
-    typedef enumerator_algorithm<Rewriter, DataRewriter, IdentifierGenerator> super;
+    typedef enumerator_algorithm<Rewriter, DataRewriter> super;
 
     /// \brief A class to enumerate solutions for terms.
     /// \details Solutions are presented as data_expression_lists of the same length as
@@ -634,7 +640,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
     class iterator: public boost::iterator_facade<iterator, const EnumeratorListElement, boost::forward_traversal_tag>
     {
       protected:
-        enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, IdentifierGenerator, Filter, DataRewriter, MutableSubstitution>* E;
+        enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>* E;
         MutableSubstitution* sigma;
         std::deque<EnumeratorListElement>* P;
         Filter accept;
@@ -647,7 +653,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
         }
 
       public:
-        iterator(enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, IdentifierGenerator, Filter, DataRewriter, MutableSubstitution>* E_,
+        iterator(enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>* E_,
                  std::deque<EnumeratorListElement>* P_,
                  MutableSubstitution* sigma_,
                  Filter accept_ = Filter()
@@ -701,7 +707,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
                 const Rewriter& R,
                 const data::data_specification& dataspec,
                 const DataRewriter& datar,
-                IdentifierGenerator& id_generator,
+                enumerator_identifier_generator& id_generator,
                 std::size_t max_count = (std::numeric_limits<std::size_t>::max)(),
                 bool throw_exceptions = false)
       : super(R, dataspec, datar, id_generator, max_count, throw_exceptions)
@@ -719,7 +725,7 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
       p.expression() = super::R(p.expression(), sigma);
       if (accept(p.expression()))
       {
-        return iterator(const_cast<enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, IdentifierGenerator, Filter, DataRewriter, MutableSubstitution>*>(this), &P, &sigma, accept);
+        return iterator(const_cast<enumerator_algorithm_with_iterator<Rewriter, EnumeratorListElement, Filter, DataRewriter, MutableSubstitution>*>(this), &P, &sigma, accept);
       }
       else
       {
@@ -738,15 +744,18 @@ class enumerator_algorithm_with_iterator: public enumerator_algorithm<Rewriter, 
 /// \param s A sort expression.
 /// \param dataspec The data specification defining the terms of sort \a s.
 /// \param rewr A rewriter to be used to simplify terms and conditions.
+/// \param id_generator An identifier generator used to generate new names for variables.
 /// \details It is assumed that the sort s has only a finite number of elements.
 template <class Rewriter>
-data_expression_vector enumerate_expressions(const sort_expression& s, const data_specification& dataspec, const Rewriter& rewr)
+data_expression_vector enumerate_expressions(const sort_expression& s, 
+                                             const data_specification& dataspec, 
+                                             const Rewriter& rewr, 
+                                             enumerator_identifier_generator& id_generator)
 {
   typedef typename Rewriter::term_type term_type;
   typedef enumerator_list_element_with_substitution<term_type> enumerator_element;
   assert(dataspec.is_certainly_finite(s));
-  enumerator_identifier_generator id_generator;
-  enumerator_algorithm_with_iterator<Rewriter, enumerator_element, enumerator_identifier_generator, is_not_false, Rewriter> E(rewr, dataspec, rewr, id_generator);
+  enumerator_algorithm_with_iterator<Rewriter, enumerator_element, is_not_false, Rewriter> E(rewr, dataspec, rewr, id_generator);
   data_expression_vector result;
   mutable_indexed_substitution<> sigma;
   const variable v("@var@", s);
@@ -759,6 +768,20 @@ data_expression_vector enumerate_expressions(const sort_expression& s, const dat
     result.push_back(sigma(v));
   }
   return result;
+}
+
+/// \brief Returns a vector with all expressions of sort s.
+/// \param s A sort expression.
+/// \param dataspec The data specification defining the terms of sort \a s.
+/// \param rewr A rewriter to be used to simplify terms and conditions.
+/// \details It is assumed that the sort s has only a finite number of elements.
+template <class Rewriter>
+data_expression_vector enumerate_expressions(const sort_expression& s, 
+                                             const data_specification& dataspec, 
+                                             const Rewriter& rewr) 
+{
+  enumerator_identifier_generator id_generator;
+  return enumerate_expressions(s,dataspec, rewr, id_generator);
 }
 
 } // namespace data

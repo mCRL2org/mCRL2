@@ -406,7 +406,7 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
       sigma[v]=v;
     }
 
-    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, data::enumerator_identifier_generator, is_not_zero> enumerator_type;
+    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, is_not_zero> enumerator_type;
     const bool throw_exceptions=true;
     data::enumerator_identifier_generator id_generator;
     enumerator_type enumerator(m_rewriter, m_specification.data(), m_rewriter, id_generator,

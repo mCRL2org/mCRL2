@@ -204,7 +204,7 @@ protected:
     const data_expression& lli, std::set< data_expression >& new_part)
   {
 
-    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, enumerator_identifier_generator, enumerate_filter_print> enumerator_type;
+    typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, enumerate_filter_print> enumerator_type;
     enumerator_identifier_generator id_generator;
     enumerator_type enumerator(rewr, m_spec.data(), rewr, id_generator, (std::numeric_limits<std::size_t>::max)(), true);
 

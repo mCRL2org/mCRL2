@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE(cannot_enumerate_real_with_substitution)
   std::size_t max_count = 1000;
   bool throw_exceptions = true;
   data::enumerator_identifier_generator id_generator;
-  data::enumerator_algorithm_with_iterator<rewriter, enumerator_element, enumerator_identifier_generator> E(R, dataspec, R, id_generator, max_count, throw_exceptions);
+  data::enumerator_algorithm_with_iterator<rewriter, enumerator_element> E(R, dataspec, R, id_generator, max_count, throw_exceptions);
   std::deque<enumerator_element> P;
   P.push_back(enumerator_element(v, phi));
   try {
