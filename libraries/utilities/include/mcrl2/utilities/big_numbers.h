@@ -577,7 +577,6 @@ class big_natural_number
       const int no_of_bits_per_digit=std::numeric_limits<std::size_t>::digits;
 
       big_natural_number divisor;
-      // calculation_buffer_divisor.m_number=std::vector<std::size_t>((m_number.size()-other.m_number.size())+1,0); Inefficient.
       calculation_buffer_divisor.clear();
       for(std::size_t i=0; i< (1+m_number.size())-other.m_number.size(); ++i) { calculation_buffer_divisor.m_number.push_back(0); }
 

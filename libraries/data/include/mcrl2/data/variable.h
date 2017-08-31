@@ -117,5 +117,25 @@ std::set<core::identifier_string> find_identifiers(const data::variable_list& x)
 
 } // namespace mcrl2
 
+
+namespace std 
+{
+
+template<>
+struct hash<mcrl2::data::variable>
+{
+  // Default constructor, required for const qualified hash functions. 
+    hash()
+    {}
+  
+    std::size_t operator()(const mcrl2::data::variable& v) const
+    {
+      const hash<atermpp::aterm> hasher; 
+      return hasher(v);
+    }
+};
+  
+} // namespace std
+
 #endif // MCRL2_DATA_VARIABLE_H
 

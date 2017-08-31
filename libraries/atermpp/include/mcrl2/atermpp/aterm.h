@@ -418,18 +418,6 @@ struct hash<atermpp::aterm>
   }
 };
 
-/// \brief specialization of the standard std::hash function.
-/* template<>
-struct hash<std::pair<atermpp::aterm,atermpp::aterm> >
-{
-  std::size_t operator()(const std::pair<atermpp::aterm, atermpp::aterm>& x) const
-  {
-    // The hashing function below is taken from boost (http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html).
-    std::size_t seed=std::hash<atermpp::aterm>()(x.first);
-    return std::hash<atermpp::aterm>()(x.second) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-  }
-}; */
-
 } // namespace std
 
 
