@@ -408,8 +408,7 @@ const next_state_generator::transition_t::state_probability_list next_state_gene
 
     typedef enumerator_algorithm_with_iterator<rewriter, enumerator_list_element_with_substitution<>, is_not_zero> enumerator_type;
     const bool throw_exceptions=true;
-    data::enumerator_identifier_generator id_generator;
-    enumerator_type enumerator(m_rewriter, m_specification.data(), m_rewriter, id_generator,
+    enumerator_type enumerator(m_rewriter, m_specification.data(), m_rewriter, m_id_generator,
                                data::detail::get_enumerator_variable_limit(), throw_exceptions);
     std::deque<enumerator_list_element_with_substitution<> > enumerator_solution_deque(1,enumerator_list_element_with_substitution<>(dist.variables(), dist.distribution()));
     for(enumerator_type::iterator probabilistic_solution = enumerator.begin(sigma, enumerator_solution_deque);
@@ -451,6 +450,10 @@ void next_state_generator::iterator::increment()
          (!m_cached && m_enumeration_iterator == m_generator->m_enumerator.end())
         )
   {
+    // Here we have to get a new summand. Search through the summands until one is
+    // found of which the condition is not equal to false. As a new summand is started
+    // we can reset the identifier_generator as no local variables are in use. 
+    m_generator->m_id_generator.clear();
     if (m_caching)
     {
       m_summand->enumeration_cache[m_enumeration_cache_key] = m_enumeration_log;
