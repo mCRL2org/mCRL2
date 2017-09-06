@@ -177,7 +177,13 @@ set(CPACK_COMPONENT_EXAMPLES_INSTALL_TYPES Full Default)
 set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
 set(CPACK_RPM_PACKAGE_GROUP "Productivity/Scientific/Other")
 set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
-set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa")
+set(CPACK_RPM_PACKAGE_REQUIRES "gcc")
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
+    "/usr/share/applications"
+    "/usr/share/icons"
+    "/usr/share/man"
+    "/usr/share/man/man1"
+)
 set(CPACK_RPM_PACKAGE_DESCRIPTION
 # -----------------------------------------------------------------------------
 "toolset for the mCRL2 formal specification language
