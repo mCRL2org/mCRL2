@@ -24,7 +24,7 @@ be generated but not saved. The flag --verbose is the verbose flag, such that lp
 progress.
 
 The labelled transition systems can be inspected using graphical tools like :ref:`tool-ltsgraph`,
-:ref: `tool-ltsview` and :ref:`tool-diagraphica`. Using the tool :ref:`tool-ltsconvert` the 
+:ref:`tool-ltsview` and :ref:`tool-diagraphica`. Using the tool :ref:`tool-ltsconvert` the 
 transition systems can be reduced modulo behavioural equivalences. Other tools allow to compare
 labelled transition systems :ref:`tool-ltsconvert`, verify modal formulas :ref:`tool-lts2pbes`, etc.
 
