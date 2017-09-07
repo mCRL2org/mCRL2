@@ -689,11 +689,23 @@ bool Graph::isTau(std::size_t labelindex) const
   return m_transitionLabels[labelindex].is_tau();
 }
 
+void Graph::clear()
+{
+  m_nodes.clear();
+  m_handles.clear();
+  m_edges.clear();
+  m_transitionLabels.clear();
+  m_transitionLabelnodes.clear();
+  m_stateLabels.clear();
+  m_stateLabelnodes.clear();
+}
+
 void Graph::load(const QString& filename, const QVector3D& min,
                  const QVector3D& max)
 {
   lockForWrite(m_lock, GRAPH_LOCK_TRACE);
 
+  clear();
   m_type = mcrl2::lts::detail::guess_format(filename.toUtf8().constData());
   try
   {

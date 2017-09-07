@@ -424,6 +424,11 @@ class Graph
 #endif
 
     /**
+     * @brief Deletes all nodes, handles, edges and labels stored in this graph
+     */
+    void clear();
+
+    /**
      * @brief Loads a graph with random positioning for the nodes.
      * @param filename The file which contains the graph.
      * @param min The minimum coordinates for any node.
