@@ -1,0 +1,6 @@
+% The formula below that player cross, who starts the game of tic-tac-toe,
+% has a finite winning strategy.
+
+mu X.exists i,j:Pos.val(i<=3 && j<=3) && (<put(cross,i,j)>(<win(cross)>true || 
+                        (<true>true && forall k,l:Pos.(val(k<=3 && l<=3) => [put(naught,k,l)]X))))
+
