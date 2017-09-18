@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/anonimyze.h
+/// \file mcrl2/data/anonymize.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_ANONIMYZE_H
-#define MCRL2_DATA_ANONIMYZE_H
+#ifndef MCRL2_DATA_ANONYMIZE_H
+#define MCRL2_DATA_ANONYMIZE_H
 
 #include <cctype>
 #include "mcrl2/core/detail/print_utility.h"
@@ -25,7 +25,7 @@ namespace data {
 namespace detail {
 
 template <typename Derived>
-struct anonimyze_builder: public data::sort_expression_builder<Derived>
+struct anonymize_builder: public data::sort_expression_builder<Derived>
 {
   typedef data::sort_expression_builder<Derived> super;
   using super::enter;
@@ -205,16 +205,16 @@ struct anonimyze_builder: public data::sort_expression_builder<Derived>
   }
 };
 
-struct anonimyze_builder_instance: public anonimyze_builder<anonimyze_builder_instance>
+struct anonymize_builder_instance: public anonymize_builder<anonymize_builder_instance>
 {
 };
 
 } // namespace detail
 
 inline
-void anonimyze(data_specification& dataspec)
+void anonymize(data_specification& dataspec)
 {
-  detail::anonimyze_builder_instance f;
+  detail::anonymize_builder_instance f;
   f.update(dataspec);
   std::cout << dataspec << std::endl;
 }
@@ -223,4 +223,4 @@ void anonimyze(data_specification& dataspec)
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_ANONIMYZE_H
+#endif // MCRL2_DATA_ANONYMIZE_H

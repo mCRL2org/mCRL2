@@ -6,13 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/anonimyze.h
+/// \file mcrl2/pbes/anonymize.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_ANONIMYZE_H
-#define MCRL2_PBES_ANONIMYZE_H
+#ifndef MCRL2_PBES_ANONYMIZE_H
+#define MCRL2_PBES_ANONYMIZE_H
 
-#include "mcrl2/data/anonimyze.h"
+#include "mcrl2/data/anonymize.h"
 #include "mcrl2/pbes/builder.h"
 
 namespace mcrl2 {
@@ -22,9 +22,9 @@ namespace pbes_system {
 namespace detail {
 
 template <typename Derived>
-struct anonimyze_builder: public add_sort_expressions<data::detail::anonimyze_builder, Derived>
+struct anonymize_builder: public add_sort_expressions<data::detail::anonymize_builder, Derived>
 {
-  typedef add_sort_expressions<data::detail::anonimyze_builder, Derived> super;
+  typedef add_sort_expressions<data::detail::anonymize_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::update;
@@ -67,16 +67,16 @@ struct anonimyze_builder: public add_sort_expressions<data::detail::anonimyze_bu
   }
 };
 
-struct anonimyze_builder_instance: public anonimyze_builder<anonimyze_builder_instance>
+struct anonymize_builder_instance: public anonymize_builder<anonymize_builder_instance>
 {
 };
 
 } // namespace detail
 
 inline
-void anonimyze(pbes& pbesspec)
+void anonymize(pbes& pbesspec)
 {
-  detail::anonimyze_builder_instance f;
+  detail::anonymize_builder_instance f;
   f.update(pbesspec);
 }
 
@@ -84,4 +84,4 @@ void anonimyze(pbes& pbesspec)
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_ANONIMYZE_H
+#endif // MCRL2_PBES_ANONYMIZE_H
