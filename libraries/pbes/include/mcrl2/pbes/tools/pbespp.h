@@ -13,6 +13,8 @@
 #define MCRL2_PBES_TOOLS_PBESPP_H
 
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/detail/pfnf_print.h"
+#include "mcrl2/pbes/detail/pfnf_print.h"
 #include "mcrl2/utilities/logger.h"
 #include <fstream>
 
@@ -40,6 +42,10 @@ void pbespp(const std::string& input_filename,
     {
       std::cout << pbes_to_aterm(p);
     }
+    else if(detail::is_pfnf(p))
+    {
+      std::cout << pfnf_pp(p);
+    }
     else
     {
       std::cout << pp(p);
@@ -53,6 +59,10 @@ void pbespp(const std::string& input_filename,
       if (format == core::print_internal)
       {
         out << pbes_to_aterm(p);
+      }
+      else if(detail::is_pfnf(p))
+      {
+        out << pfnf_pp(p);
       }
       else
       {
