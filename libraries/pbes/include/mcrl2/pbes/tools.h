@@ -67,7 +67,8 @@ void pbespareqelm(const std::string& input_filename,
 void pbespp(const std::string& input_filename,
             const std::string& output_filename,
             const utilities::file_format& input_format,
-            core::print_format_type format
+            core::print_format_type format,
+            bool use_pfnf_printer
            );
 
 void txt2pbes(const std::string& input_filename,

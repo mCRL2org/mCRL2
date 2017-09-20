@@ -25,7 +25,8 @@ namespace pbes_system {
 void pbespp(const std::string& input_filename,
             const std::string& output_filename,
             const utilities::file_format& input_format,
-            core::print_format_type format
+            core::print_format_type format,
+            bool use_pfnf_printer
            )
 {
   pbes p;
@@ -42,7 +43,7 @@ void pbespp(const std::string& input_filename,
     {
       std::cout << pbes_to_aterm(p);
     }
-    else if(detail::is_pfnf(p))
+    else if(use_pfnf_printer && detail::is_pfnf(p))
     {
       std::cout << pfnf_pp(p);
     }
@@ -60,7 +61,7 @@ void pbespp(const std::string& input_filename,
       {
         out << pbes_to_aterm(p);
       }
-      else if(detail::is_pfnf(p))
+      else if(use_pfnf_printer && detail::is_pfnf(p))
       {
         out << pfnf_pp(p);
       }
