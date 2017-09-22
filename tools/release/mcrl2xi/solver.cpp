@@ -71,6 +71,7 @@ void Solver::solve(QString specification, QString dataExpression)
       }
 
       std::set<sort_expression> all_sorts=find_sort_expressions(term);
+      find_sort_expressions(m_vars, std::inserter(all_sorts, all_sorts.end()));
       m_data_spec.add_context_sorts(all_sorts);
 
       rewriter rewr(m_data_spec, m_strategy);
@@ -82,13 +83,13 @@ void Solver::solve(QString specification, QString dataExpression)
 
       // Stop when more than 10000 internal variables are required.
       mcrl2::data::enumerator_identifier_generator id_generator;
-      enumerator_type enumerator(rewr, m_data_spec, rewr, id_generator, 10000);
+      enumerator_type enumerator(rewr, m_data_spec, rewr, id_generator, 10000, true);
 
       mutable_indexed_substitution<> sigma;
       std::deque<enumerator_element> enumerator_deque(1, enumerator_element(variable_list(m_vars.begin(),m_vars.end()), term));
       for (enumerator_type::iterator i = enumerator.begin(sigma, enumerator_deque); i != enumerator.end() && !m_abort; ++i)
       {
-        mCRL2log(info) << "Solution found" << std::endl;
+        mCRL2log(verbose) << "Solution found" << std::endl;
 
         QString s('[');
 
