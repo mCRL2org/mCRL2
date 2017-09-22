@@ -116,6 +116,7 @@ class MainWindow : public QMainWindow
     void onFind();
     void onZoomIn();
     void onZoomOut();
+    void onResetZoom();
     void onWrapMode();
     void onResetPerspective();
 
@@ -153,6 +154,7 @@ class MainWindow : public QMainWindow
     FindReplaceDialog *m_findReplaceDialog;   ///< The Find and Replace dialog used
     QPalette m_palette;
     QPoint m_lastErrorPosition;               ///< The last error position that was found in the log
+    int m_zoom_level = 0;
 
     mcrl2::gui::qt::PersistentFileDialog m_fileDialog;
 

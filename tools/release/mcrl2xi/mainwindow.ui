@@ -456,10 +456,7 @@
     <string>Zoom in</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl++</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::WindowShortcut</enum>
+    <string>Ctrl+=</string>
    </property>
   </action>
   <action name="actionZoom_out">
@@ -483,6 +480,7 @@
   <addaction name="actionFind"/>
   <addaction name="actionZoom_in"/>
   <addaction name="actionZoom_out"/>
+  <addaction name="actionReset_zoom"/>
   <addaction name="actionWrap_mode"/>
   <addaction name="actionParse"/>
   <addaction name="actionRewrite"/>

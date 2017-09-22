@@ -51,6 +51,7 @@ MainWindow::MainWindow(QThread *atermThread, mcrl2::data::rewrite_strategy strat
   connect(m_ui.actionFind, SIGNAL(triggered()), this, SLOT(onFind()));
   connect(m_ui.actionZoom_in, SIGNAL(triggered()), this, SLOT(onZoomIn()));
   connect(m_ui.actionZoom_out, SIGNAL(triggered()), this, SLOT(onZoomOut()));
+  connect(m_ui.actionReset_zoom, SIGNAL(triggered()), this, SLOT(onResetZoom()));
 
   connect(m_ui.actionWrap_mode, SIGNAL(triggered()), this, SLOT(onWrapMode()));
   connect(m_ui.actionReset_perspective, SIGNAL(triggered()), this, SLOT(onResetPerspective()));
@@ -292,14 +293,39 @@ void MainWindow::onFind()
 
 void MainWindow::onZoomIn()
 {
-  DocumentWidget *editor = m_ui.documentManager->currentDocument();
-  editor->zoomIn();
+  m_zoom_level++;
+  for(int i = 0; i < m_ui.documentManager->count(); ++i)
+  {
+    DocumentWidget *editor = m_ui.documentManager->getDocument(i);
+    editor->zoomIn();
+  }
 }
 
 void MainWindow::onZoomOut()
 {
-  DocumentWidget *editor = m_ui.documentManager->currentDocument();
-  editor->zoomOut();
+  m_zoom_level--;
+  for(int i = 0; i < m_ui.documentManager->count(); ++i)
+  {
+    DocumentWidget *editor = m_ui.documentManager->getDocument(i);
+    editor->zoomOut();
+  }
+}
+
+void MainWindow::onResetZoom()
+{
+  for(int i = 0; i < m_ui.documentManager->count(); ++i)
+  {
+    DocumentWidget *editor = m_ui.documentManager->getDocument(i);
+    if(m_zoom_level < 0)
+    {
+      editor->zoomIn(-m_zoom_level);
+    }
+    else if(m_zoom_level > 0)
+    {
+      editor->zoomOut(m_zoom_level);
+    }
+  }
+  m_zoom_level = 0;
 }
 
 void MainWindow::onWrapMode()
