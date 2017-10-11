@@ -168,7 +168,7 @@ after this ``c`` and before this ``b``:
 
    [true*.c.!a*.b]false
 
-The action ``b`` may not occur initially an action ``a`` did not happen before it:
+The action ``b`` may not occur unless an action ``a`` happens first:
 
 .. code-block:: mcrl2
 
@@ -187,6 +187,6 @@ reflexive closure ``*`` and transitive closure ``+``, occur:
 .. code-block:: mcrl2
 
    nu X.(<true>true && [true]X)
-   nu X.([c] nu Y.([b]false && (nu Z.(Y && [!a && !b]Z) && [a] nu Z.([c]Y && [!c]Z))) && [!c]X)
-   nu X.([b]false && (nu Y.(X && [!a && !b]Y) && [a] nu Y.([c]X && [!c]Y)))
+   nu X.([c] nu Y.([b]false && [!a]Y) && [true]X)
+   nu X.([b]false && [!a]X)
    mu X.(nu Y.(<a><b><c>Y) || <true>X)
