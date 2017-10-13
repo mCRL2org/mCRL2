@@ -105,7 +105,7 @@ class bessolve_tool: public bes_input_tool<input_tool>
                       .add_value(gauss)
                       .add_value(local_fixed_point),
                       "solve the BES using the specified STRATEGY:", 's');
-      desc.add_option("print-justification", "print justification for solution", 'j');
+      desc.add_option("print-justification", "print justification for solution. Works only with the local fixpoint strategy.", 'j');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -113,6 +113,10 @@ class bessolve_tool: public bes_input_tool<input_tool>
       super::parse_options(parser);
       strategy = parser.option_argument_as<solution_strategy_t>("strategy");
       print_justification = parser.options.count("print-justification") > 0;
+      if (print_justification && strategy!=local_fixed_point)
+      {
+        throw mcrl2::runtime_error("Justifications can only be printed when the solving strategy is lf.");
+      } 
     }
 };
 
