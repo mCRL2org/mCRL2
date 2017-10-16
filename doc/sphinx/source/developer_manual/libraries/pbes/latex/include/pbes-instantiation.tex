@@ -47,6 +47,234 @@ predicate formulae using%
 \end{equation*}%
 \pagebreak
 
+\subsection{Lazy algorithm (structure graph)}
+
+A structure graph is a graph $(V,E)$ with $V$ a set of BES variables. On
+this graph a partial function $r:V\rightarrow \mathbb{N}$ is defined that
+assigns a rank to each node, and a partial function $d:V\rightarrow
+\{\blacktriangle ,\blacktriangledown ,\top ,\bot \}$ is defined that assigns
+a decoration to each node. A structure graph is formally defined using the
+following SOS rules:%
+\begin{equation*}
+\frac{X\in bnd(\mathcal{E})}{\left\langle X,\mathcal{E}\right\rangle
+\pitchfork rank_{\mathcal{E}}(X)}
+\end{equation*}
+
+\begin{equation*}
+\frac{{}}{\left\langle true,\mathcal{E}\right\rangle \top }\qquad \frac{{}}{%
+\left\langle false,\mathcal{E}\right\rangle \bot }
+\end{equation*}%
+\begin{equation*}
+\frac{{}}{\left\langle f\wedge f^{\prime },\mathcal{E}\right\rangle
+\blacktriangle }\qquad \frac{{}}{\left\langle f\vee f^{\prime },\mathcal{E}%
+\right\rangle \blacktriangledown }
+\end{equation*}%
+\begin{equation*}
+\frac{\left\langle f,\mathcal{E}\right\rangle \blacktriangle \quad \lnot
+\left\langle f,\mathcal{E}\right\rangle \pitchfork \quad \left\langle f,%
+\mathcal{E}\right\rangle \rightarrow \left\langle g,\mathcal{E}\right\rangle 
+}{\left\langle f\wedge f^{\prime },\mathcal{E}\right\rangle \rightarrow
+\left\langle g,\mathcal{E}\right\rangle }\qquad \frac{\left\langle f^{\prime
+},\mathcal{E}\right\rangle \blacktriangle \quad \lnot \left\langle f^{\prime
+},\mathcal{E}\right\rangle \pitchfork \quad \left\langle f^{\prime },%
+\mathcal{E}\right\rangle \rightarrow \left\langle g^{\prime },\mathcal{E}%
+\right\rangle }{\left\langle f\wedge f^{\prime },\mathcal{E}\right\rangle
+\rightarrow \left\langle g^{\prime },\mathcal{E}\right\rangle }
+\end{equation*}%
+\begin{equation*}
+\frac{\left\langle f,\mathcal{E}\right\rangle \blacktriangledown \quad \lnot
+\left\langle f,\mathcal{E}\right\rangle \pitchfork \quad \left\langle f,%
+\mathcal{E}\right\rangle \rightarrow \left\langle g,\mathcal{E}\right\rangle 
+}{\left\langle f\vee f^{\prime },\mathcal{E}\right\rangle \rightarrow
+\left\langle g,\mathcal{E}\right\rangle }\qquad \frac{\left\langle f^{\prime
+},\mathcal{E}\right\rangle \blacktriangledown \quad \lnot \left\langle
+f^{\prime },\mathcal{E}\right\rangle \pitchfork \quad \left\langle f^{\prime
+},\mathcal{E}\right\rangle \rightarrow \left\langle g^{\prime },\mathcal{E}%
+\right\rangle }{\left\langle f\vee f^{\prime },\mathcal{E}\right\rangle
+\rightarrow \left\langle g^{\prime },\mathcal{E}\right\rangle }
+\end{equation*}%
+\begin{equation*}
+\frac{\lnot \left\langle f,\mathcal{E}\right\rangle \blacktriangle }{%
+\left\langle f\wedge f^{\prime },\mathcal{E}\right\rangle \rightarrow
+\left\langle f,\mathcal{E}\right\rangle }\qquad \frac{\lnot \left\langle
+f^{\prime },\mathcal{E}\right\rangle \blacktriangle }{\left\langle f\wedge
+f^{\prime },\mathcal{E}\right\rangle \rightarrow \left\langle f^{\prime },%
+\mathcal{E}\right\rangle }
+\end{equation*}%
+\begin{equation*}
+\frac{\lnot \left\langle f,\mathcal{E}\right\rangle \blacktriangledown }{%
+\left\langle f\vee f^{\prime },\mathcal{E}\right\rangle \rightarrow
+\left\langle f,\mathcal{E}\right\rangle }\qquad \frac{\lnot \left\langle
+f^{\prime },\mathcal{E}\right\rangle \blacktriangledown }{\left\langle f\vee
+f^{\prime },\mathcal{E}\right\rangle \rightarrow \left\langle f^{\prime },%
+\mathcal{E}\right\rangle }
+\end{equation*}%
+\begin{equation*}
+\frac{\left\langle f,\mathcal{E}\right\rangle \pitchfork n}{\left\langle
+f\wedge f^{\prime },\mathcal{E}\right\rangle \rightarrow \left\langle f,%
+\mathcal{E}\right\rangle }\qquad \frac{\left\langle f^{\prime },\mathcal{E}%
+\right\rangle \pitchfork n}{\left\langle f\wedge f^{\prime },\mathcal{E}%
+\right\rangle \rightarrow \left\langle f,\mathcal{E}\right\rangle }
+\end{equation*}%
+\begin{equation*}
+\frac{\left\langle f,\mathcal{E}\right\rangle \pitchfork n}{\left\langle
+f\vee f^{\prime },\mathcal{E}\right\rangle \rightarrow \left\langle f,%
+\mathcal{E}\right\rangle }\qquad \frac{\left\langle f^{\prime },\mathcal{E}%
+\right\rangle \pitchfork n}{\left\langle f\vee f^{\prime },\mathcal{E}%
+\right\rangle \rightarrow \left\langle f,\mathcal{E}\right\rangle }
+\end{equation*}%
+\begin{equation*}
+\frac{\sigma X=f\in \mathcal{E}\quad \left\langle f,\mathcal{E}\right\rangle
+\blacktriangle \quad \lnot \left\langle f,\mathcal{E}\right\rangle
+\pitchfork }{\left\langle X,\mathcal{E}\right\rangle \blacktriangle }\qquad 
+\frac{\sigma X=f\in \mathcal{E}\quad \left\langle f,\mathcal{E}\right\rangle
+\blacktriangledown \quad \lnot \left\langle f,\mathcal{E}\right\rangle
+\pitchfork }{\left\langle X,\mathcal{E}\right\rangle \blacktriangledown }
+\end{equation*}%
+\begin{equation*}
+\frac{\sigma X=f\in \mathcal{E}\quad \lnot \left\langle f,\mathcal{E}%
+\right\rangle \blacktriangledown \quad \lnot \left\langle f,\mathcal{E}%
+\right\rangle \blacktriangle }{\left\langle X,\mathcal{E}\right\rangle
+\rightarrow \left\langle f,\mathcal{E}\right\rangle }\qquad \frac{\sigma
+X=f\in \mathcal{E}\quad \left\langle f,\mathcal{E}\right\rangle \pitchfork }{%
+\left\langle X,\mathcal{E}\right\rangle \rightarrow \left\langle f,\mathcal{E%
+}\right\rangle }
+\end{equation*}%
+\begin{equation*}
+\frac{\sigma X=f\in \mathcal{E}\quad \left\langle f,\mathcal{E}\right\rangle
+\rightarrow \left\langle g,\mathcal{E}\right\rangle \quad \left\langle f,%
+\mathcal{E}\right\rangle \blacktriangle \quad \lnot \left\langle f,\mathcal{E%
+}\right\rangle \pitchfork }{\left\langle X,\mathcal{E}\right\rangle
+\rightarrow \left\langle g,\mathcal{E}\right\rangle }
+\end{equation*}%
+\begin{equation*}
+\frac{\sigma X=f\in \mathcal{E}\quad \left\langle f,\mathcal{E}\right\rangle
+\rightarrow \left\langle g,\mathcal{E}\right\rangle \quad \left\langle f,%
+\mathcal{E}\right\rangle \blacktriangledown \quad \lnot \left\langle f,%
+\mathcal{E}\right\rangle \pitchfork }{\left\langle X,\mathcal{E}%
+\right\rangle \rightarrow \left\langle g,\mathcal{E}\right\rangle }
+\end{equation*}%
+First we rewrite that into a more explicit form, and remove the $%
+\left\langle ,\mathcal{E}\right\rangle $ annotation:%
+\begin{equation*}
+\frac{X\in bnd(\mathcal{E})}{X\pitchfork rank_{\mathcal{E}}(X)}
+\end{equation*}
+
+\begin{equation*}
+\frac{{}}{true\top }\qquad \frac{{}}{false\bot }
+\end{equation*}%
+\begin{equation*}
+\frac{{}}{\left( f\wedge f^{\prime }\right) \blacktriangle }\qquad \frac{{}}{%
+\left( f\vee f^{\prime }\right) \blacktriangledown }
+\end{equation*}%
+\begin{equation*}
+\frac{f\rightarrow g}{(f\wedge f^{\prime })\rightarrow g}\qquad \frac{%
+f\rightarrow g}{(f^{\prime }\wedge f)\rightarrow g}
+\end{equation*}%
+\begin{equation*}
+\frac{f\rightarrow g}{(f\vee f^{\prime })\rightarrow g}\qquad \frac{%
+f\rightarrow g}{(f^{\prime }\vee f)\rightarrow g}
+\end{equation*}%
+\begin{equation*}
+\frac{\lnot f\blacktriangle }{f\wedge f^{\prime }\rightarrow f}\qquad \frac{%
+\lnot f^{\prime }\blacktriangle }{f\wedge f^{\prime }\rightarrow f^{\prime }}
+\end{equation*}%
+\begin{equation*}
+\frac{\lnot f\blacktriangledown }{f\vee f^{\prime }\rightarrow f}\qquad 
+\frac{\lnot f^{\prime }\blacktriangledown }{f\vee f^{\prime }\rightarrow
+f^{\prime }}
+\end{equation*}%
+\begin{equation*}
+\frac{{}}{X\wedge f\rightarrow X}\qquad \frac{{}}{f\wedge X\rightarrow X}
+\end{equation*}%
+\begin{equation*}
+\frac{{}}{X\vee f\rightarrow X}\qquad \frac{{}}{f\vee X\rightarrow X}
+\end{equation*}%
+\begin{equation*}
+\frac{\sigma X=f\wedge f^{\prime }\in \mathcal{E}}{X\blacktriangle }\qquad 
+\frac{\sigma X=f\vee f^{\prime }\in \mathcal{E}}{X\blacktriangledown }
+\end{equation*}%
+\begin{equation*}
+\frac{\sigma X=Y\in \mathcal{E}}{X\rightarrow Y}\qquad \frac{\sigma X=\top
+\in \mathcal{E}}{X\rightarrow \top }\qquad \frac{\sigma X=\bot \in \mathcal{E%
+}}{X\rightarrow \bot }
+\end{equation*}%
+\begin{equation*}
+\frac{\sigma X=f\wedge f^{\prime }\in \mathcal{E}\quad f\wedge f^{\prime
+}\rightarrow g}{X\rightarrow g}
+\end{equation*}%
+\begin{equation*}
+\frac{\sigma X=f\vee f^{\prime }\in \mathcal{E}\quad f\vee f^{\prime
+}\rightarrow g}{X\rightarrow g}
+\end{equation*}%
+Note that in this definition separate nodes are created for the left hand
+side $X$ and the right hand side $f$ of each equation $\sigma X=f$ . This is
+undesirable, hence in the implementation below only nodes for each right
+hand side $f$ are created.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Pbes2besStructureGraph(}}\mathcal{E}\text{, }X_{init}(e_{init})%
+\text{, }R\text{, }\rho \text{\textsc{)}} \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}%
+_{i}:=\epsilon  \\ 
+todo:=\{R(X_{init}(e_{init}))\} \\ 
+done:=\emptyset  \\ 
+\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad G:=(\emptyset ,\emptyset ) \\ 
+\qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
+\qquad done:=done\cup \{X_{k}(e)\} \\ 
+\qquad X^{e}:=\rho (X_{k}(e)) \\ 
+\qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
+\qquad G:=G\cup SG(\psi ^{e}) \\ 
+\qquad todo:=todo\cup \{Y(f)\in \mathsf{occ}(\psi ^{e})\ |\ Y(f)\notin done\}
+\\ 
+\text{\textbf{return }}G,%
+\end{array}%
+\end{equation*}%
+\begin{equation*}
+\begin{array}{|c|c|}
+\hline
+\psi  & SG(\psi ) \\ \hline\hline
+true & (\{\psi \},\emptyset ) \\ \hline
+false & (\{\psi \},\emptyset ) \\ \hline
+\psi _{1}\wedge \cdots \wedge \psi _{n} & \left( \{\psi \}\cup \left(
+\bigcup\limits_{i=1}^{n}V_{i}\right) ,\left(
+\bigcup\limits_{i=1}^{n}E_{i}\right) \cup \{(\psi ,v(\psi _{i}))\mid \lnot
+conj(\psi _{i})\}\right)  \\ \hline
+\psi _{1}\vee \cdots \vee \psi _{n} & \left( \{\psi \}\cup \left(
+\bigcup\limits_{i=1}^{n}V_{i}\right) ,\left(
+\bigcup\limits_{i=1}^{n}E_{i}\right) \cup \{(\psi ,v(\psi _{i}))\mid \lnot
+disj(\psi _{i})\}\right)  \\ \hline
+Y & (\{Y,v(Y)\},\{(Y,v(Y))\}) \\ \hline
+\end{array}%
+\end{equation*}%
+where $(V_{i},E_{i})=SG(\psi _{i})$, where $disj$ is defined as%
+\begin{eqnarray*}
+disj(b) &=&false \\
+disj(\varphi \wedge \psi ) &=&true \\
+disj(\varphi \vee \psi ) &=&false \\
+disj(X) &=&false,
+\end{eqnarray*}%
+where $conj$ is defined as%
+\begin{eqnarray*}
+conj(b) &=&false \\
+conj(\varphi \wedge \psi ) &=&false \\
+conj(\varphi \vee \psi ) &=&true \\
+conj(X) &=&false,
+\end{eqnarray*}%
+and where%
+\begin{equation*}
+=\left\{ 
+\begin{array}{ccc}
+v(X)=\psi  &  & \text{if }\sigma X=\psi \text{ is an equation of the BES} \\ 
+v(\psi )=\psi  &  & \text{otherwise}%
+\end{array}%
+\right. 
+\end{equation*}
+
+\newpage
+
 \subsection{Finite algorithm}
 
 Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi
