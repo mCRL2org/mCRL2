@@ -106,10 +106,18 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
+  void apply(const pbes_system::fixpoint_symbol& x)
+  {
+    derived().enter(x);
+    derived().print(x.is_mu() ? "mu" : "nu");
+    derived().leave(x);
+  }
+
   void apply(const pbes_system::pbes_equation& x)
   {
     derived().enter(x);
-    derived().print(x.symbol().is_mu() ? "mu " : "nu ");
+    derived().apply(x.symbol());
+    derived().print(" ");
     derived().apply(x.variable());
     // TODO: change the weird convention of putting the rhs of an equation on a new line
     derived().print(" =\n       ");
