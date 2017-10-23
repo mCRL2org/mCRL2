@@ -346,14 +346,26 @@ inline void lts_convert_translate_state(const state_label_lts& state_label_in, s
 {
   state_label_out.clear();
   std::size_t i=0;
+  state_label_lts local_state_label_in;
   if (state_label_in.size()!=1)
   {
-    throw mcrl2::runtime_error("The state label " + pp(state_label_in) + " consists of " + std::to_string(state_label_in.size()) +
-                               " state vectors and can therefore not be translated to a single state label in .fsm format.");
-
-
+    assert(state_label_in.size()>1);
+    // In this case the state label consists of a list of labels. However, the .fsm format cannot deal
+    // with this, and we take only one of the labels in this list in the translation. 
+    local_state_label_in=state_label_lts(state_label_in[0]);
+    static bool warning_is_already_printed=false; 
+    if (!warning_is_already_printed)
+    { 
+      mCRL2log(log::warning) << "The state label " + pp(state_label_in) + " consists of " + std::to_string(state_label_in.size()) +
+                               " state vectors and all but the first label are ignored. This warning is only printed once. ";
+      warning_is_already_printed=true;
+    }
   }
-  for (const data::data_expression& t: *state_label_in.begin())
+  else
+  {
+    local_state_label_in=state_label_in;
+  }
+  for (const data::data_expression& t: *local_state_label_in.begin())
   {
     std::map <data::data_expression , std::size_t >::const_iterator index=c.state_element_values_sets[i].find(t);
     if (index==c.state_element_values_sets[i].end())
