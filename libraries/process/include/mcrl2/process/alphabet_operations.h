@@ -139,6 +139,7 @@ multi_action_name_set set_intersection(const multi_action_name_set& A1, const mu
   return result;
 }
 
+// Removes elements of A that are a subset of another element.
 inline
 multi_action_name_set remove_subsets(const multi_action_name_set& A)
 {

@@ -321,7 +321,14 @@ allow_set subsets(const allow_set& x)
 {
   allow_set result = x;
   result.A_includes_subsets = true;
-  result.A = alphabet_operations::remove_subsets(result.A);
+  if (result.A.size() <= 1000)
+  {
+    result.A = alphabet_operations::remove_subsets(result.A);
+  }
+  else
+  {
+    mCRL2log(log::debug) << "allow_set::subsets: skipped remove_subsets on a set of " << result.A.size() << " elements." << std::endl;
+  }
   result.establish_invariant();
   return result;
 }
