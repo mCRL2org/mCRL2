@@ -209,8 +209,8 @@ f^{\prime }}
 \end{equation*}%
 Note that in this definition separate nodes are created for the left hand
 side $X$ and the right hand side $f$ of each equation $\sigma X=f$ . This is
-undesirable, hence in the implementation below only nodes for each right
-hand side $f$ are created.%
+undesirable, hence in the implementation below the nodes $X$ and $f$ are
+merged into one node labeled with $X$.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{Pbes2besStructureGraph(}}\mathcal{E}\text{, }X_{init}(e_{init})%
@@ -226,52 +226,57 @@ done:=\emptyset  \\
 \qquad done:=done\cup \{X_{k}(e)\} \\ 
 \qquad X^{e}:=\rho (X_{k}(e)) \\ 
 \qquad \psi ^{e}:=R(\varphi _{k}[d_{k}:=e]) \\ 
-\qquad G:=G\cup SG(\psi ^{e}) \\ 
+\qquad G:=G\cup SG^{0}(X^{e},\psi ^{e}) \\ 
 \qquad todo:=todo\cup \{Y(f)\in \mathsf{occ}(\psi ^{e})\ |\ Y(f)\notin done\}
 \\ 
 \text{\textbf{return }}G,%
 \end{array}%
 \end{equation*}%
+where $SG^{0}$ and $SG^{1}$ are defined as%
 \begin{equation*}
 \begin{array}{|c|c|}
 \hline
-\psi  & SG(\psi ) \\ \hline\hline
+\psi  & SG^{0}(\varphi ,\psi ) \\ \hline\hline
 true & (\{\psi \},\emptyset ) \\ \hline
 false & (\{\psi \},\emptyset ) \\ \hline
-\psi _{1}\wedge \cdots \wedge \psi _{n} & \left( \{\psi \}\cup \left(
-\bigcup\limits_{i=1}^{n}V_{i}\right) ,\left(
-\bigcup\limits_{i=1}^{n}E_{i}\right) \cup \{(\psi ,v(\psi _{i}))\mid \lnot
-conj(\psi _{i})\}\right)  \\ \hline
-\psi _{1}\vee \cdots \vee \psi _{n} & \left( \{\psi \}\cup \left(
-\bigcup\limits_{i=1}^{n}V_{i}\right) ,\left(
-\bigcup\limits_{i=1}^{n}E_{i}\right) \cup \{(\psi ,v(\psi _{i}))\mid \lnot
-disj(\psi _{i})\}\right)  \\ \hline
-Y & (\{Y,v(Y)\},\{(Y,v(Y))\}) \\ \hline
+\psi _{1}\wedge \cdots \wedge \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
+,\psi _{n}\},\{(\varphi ,\psi _{i})\mid \lnot conj(\psi _{i})\}\right) \cup
+\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i},\psi _{i}) \\ \hline
+\psi _{1}\vee \cdots \vee \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
+,\psi _{n}\},\{(\varphi ,\psi _{i})\mid \lnot disj(\psi _{i})\}\right) \cup
+\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i},\psi _{i}) \\ \hline
+Y & (\{\varphi ,\psi \},\{(\varphi ,\psi )\}) \\ \hline
 \end{array}%
 \end{equation*}%
-where $(V_{i},E_{i})=SG(\psi _{i})$, where $disj$ is defined as%
+\begin{equation*}
+\begin{array}{|c|c|}
+\hline
+\psi  & SG^{1}(\varphi ,\psi ) \\ \hline\hline
+true & (\{\psi \},\emptyset ) \\ \hline
+false & (\{\psi \},\emptyset ) \\ \hline
+\psi _{1}\wedge \cdots \wedge \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
+,\psi _{n}\},\{(\varphi ,\psi _{i})\mid \lnot conj(\psi _{i})\}\right) \cup
+\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i},\psi _{i}) \\ \hline
+\psi _{1}\vee \cdots \vee \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
+,\psi _{n}\},\{(\varphi ,\psi _{i})\mid \lnot disj(\psi _{i})\}\right) \cup
+\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i},\psi _{i}) \\ \hline
+Y & (\{\psi \},\emptyset ) \\ \hline
+\end{array}%
+\end{equation*}%
+where $disj$ is defined as%
 \begin{eqnarray*}
 disj(b) &=&false \\
 disj(\varphi \wedge \psi ) &=&true \\
 disj(\varphi \vee \psi ) &=&false \\
 disj(X) &=&false,
 \end{eqnarray*}%
-where $conj$ is defined as%
+and where $conj$ is defined as%
 \begin{eqnarray*}
 conj(b) &=&false \\
 conj(\varphi \wedge \psi ) &=&false \\
 conj(\varphi \vee \psi ) &=&true \\
-conj(X) &=&false,
-\end{eqnarray*}%
-and where%
-\begin{equation*}
-=\left\{ 
-\begin{array}{ccc}
-v(X)=\psi  &  & \text{if }\sigma X=\psi \text{ is an equation of the BES} \\ 
-v(\psi )=\psi  &  & \text{otherwise}%
-\end{array}%
-\right. 
-\end{equation*}
+conj(X) &=&false.
+\end{eqnarray*}
 
 \newpage
 
