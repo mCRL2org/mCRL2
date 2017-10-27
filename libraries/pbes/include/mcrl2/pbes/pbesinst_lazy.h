@@ -39,14 +39,23 @@
 
 namespace std
 {
-template <>
-struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
-{
-  std::size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
+  template <>
+  struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
   {
-    return hash<atermpp::aterm>()(x);
-  }
-};
+    std::size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
+    {
+      return hash<atermpp::aterm>()(x);
+    }
+  };
+
+  template <>
+  struct hash<mcrl2::pbes_system::pbes_expression>
+  {
+    std::size_t operator()(const mcrl2::pbes_system::pbes_expression& x) const
+    {
+      return hash<atermpp::aterm>()(x);
+    }
+  };
 }
 
 namespace mcrl2
@@ -740,7 +749,7 @@ class pbesinst_lazy_algorithm
 
     /// \brief Reports BES equations that are produced by the algorithm.
     /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
-    virtual void report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */) const
+    virtual void report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */)
     {}
 
     inline propositional_variable_instantiation next_todo()

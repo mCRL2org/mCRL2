@@ -237,46 +237,35 @@ where $SG^{0}$ and $SG^{1}$ are defined as%
 \begin{array}{|c|c|}
 \hline
 \psi  & SG^{0}(\varphi ,\psi ) \\ \hline\hline
-true & (\{\psi \},\emptyset ) \\ \hline
-false & (\{\psi \},\emptyset ) \\ \hline
-\psi _{1}\wedge \cdots \wedge \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
-,\psi _{n}\},\{(\varphi ,\psi _{i})\mid \lnot conj(\psi _{i})\}\right) \cup
-\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i},\psi _{i}) \\ \hline
-\psi _{1}\vee \cdots \vee \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
-,\psi _{n}\},\{(\varphi ,\psi _{i})\mid \lnot disj(\psi _{i})\}\right) \cup
-\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i},\psi _{i}) \\ \hline
+true & (\{\varphi \},\emptyset ) \\ \hline
+false & (\{\varphi \},\emptyset ) \\ \hline
 Y & (\{\varphi ,\psi \},\{(\varphi ,\psi )\}) \\ \hline
+\psi _{1}\wedge \cdots \wedge \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
+,\psi _{n}\},\{(\varphi ,\psi _{1}),\cdots ,(\varphi ,\psi _{n})\}\right)
+\cup \bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i}) \\ \hline
+\psi _{1}\vee \cdots \vee \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
+,\psi _{n}\},\{(\varphi ,\psi _{1}),\cdots ,(\varphi ,\psi _{n})\}\right)
+\cup \bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i}) \\ \hline
 \end{array}%
 \end{equation*}%
 \begin{equation*}
 \begin{array}{|c|c|}
 \hline
-\psi  & SG^{1}(\varphi ,\psi ) \\ \hline\hline
+\psi  & SG^{1}(\varphi ) \\ \hline\hline
 true & (\{\psi \},\emptyset ) \\ \hline
 false & (\{\psi \},\emptyset ) \\ \hline
-\psi _{1}\wedge \cdots \wedge \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
-,\psi _{n}\},\{(\varphi ,\psi _{i})\mid \lnot conj(\psi _{i})\}\right) \cup
-\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i},\psi _{i}) \\ \hline
-\psi _{1}\vee \cdots \vee \psi _{n} & \left( \{\varphi ,\psi _{1},\cdots
-,\psi _{n}\},\{(\varphi ,\psi _{i})\mid \lnot disj(\psi _{i})\}\right) \cup
-\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i},\psi _{i}) \\ \hline
 Y & (\{\psi \},\emptyset ) \\ \hline
+\psi _{1}\wedge \cdots \wedge \psi _{n} & \left( \{\psi ,\psi _{1},\cdots
+,\psi _{n}\},\{(\psi ,\psi _{1}),\cdots ,(\psi ,\psi _{n})\}\right) \cup
+\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i}) \\ \hline
+\psi _{1}\vee \cdots \vee \psi _{n} & \left( \{\psi ,\psi _{1},\cdots ,\psi
+_{n}\},\{(\psi ,\psi _{1}),\cdots ,(\psi ,\psi _{n})\}\right) \cup
+\bigcup\limits_{i=1}^{n}SG^{1}(\psi _{i}), \\ \hline
 \end{array}%
 \end{equation*}%
-where $disj$ is defined as%
-\begin{eqnarray*}
-disj(b) &=&false \\
-disj(\varphi \wedge \psi ) &=&true \\
-disj(\varphi \vee \psi ) &=&false \\
-disj(X) &=&false,
-\end{eqnarray*}%
-and where $conj$ is defined as%
-\begin{eqnarray*}
-conj(b) &=&false \\
-conj(\varphi \wedge \psi ) &=&false \\
-conj(\varphi \vee \psi ) &=&true \\
-conj(X) &=&false.
-\end{eqnarray*}
+where we assume that in $\psi _{1}\wedge \cdots \wedge \psi _{n}$ none of
+the $\psi _{i}$ is a conjunction, and in $\psi _{1}\vee \cdots \vee \psi _{n}
+$ none of the $\psi _{i}$ is a disjunction.
 
 \newpage
 
