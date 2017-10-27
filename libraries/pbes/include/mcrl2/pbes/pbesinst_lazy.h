@@ -185,24 +185,46 @@ bool has_key(const Map& m, const typename Map::key_type& x)
 
 struct pbes_equation_index
 {
-  std::unordered_map<core::identifier_string, std::size_t> equation_index;
+  // maps the name of an equation to the pair (i, k) with i the corresponding index of the equation, and k the rank
+  std::unordered_map<core::identifier_string, std::pair<std::size_t, std::size_t> > equation_index;
 
   pbes_equation_index()
   { }
 
   pbes_equation_index(const pbes& p)
   {
+    std::size_t rank = 0;
     auto const& equations = p.equations();
-    for (auto i = equations.begin(); i != equations.end(); ++i)
+    for (std::size_t i = 0; i < equations.size(); i++)
     {
-      equation_index[i->variable().name()] = i - equations.begin();
+      const auto& eqn = equations[i];
+      std::size_t k;
+      if (i == 0)
+      {
+        k = 0;
+      }
+      else
+      {
+        k = (equations[i - 1].symbol() == equations[i].symbol()) ? rank : ++rank;
+      }
+      equation_index.insert({eqn.variable().name(), std::make_pair(i, k)});
     }
   }
 
-  std::size_t operator[](const core::identifier_string& x) const
+  /// \brief Returns the index of the equation of the variable with the given name
+  std::size_t index(const core::identifier_string& name) const
   {
-    auto i = equation_index.find(x);
-    return i->second;
+    auto i = equation_index.find(name);
+    assert (i != equation_index.end());
+    return i->second.first;
+  }
+
+  /// \brief Returns the rank of the equation of the variable with the given name
+  std::size_t rank(const core::identifier_string& name) const
+  {
+    auto i = equation_index.find(name);
+    assert (i != equation_index.end());
+    return i->second.second;
   }
 };
 
@@ -213,14 +235,6 @@ struct find_loop_simplifier
 
   /// \brief Map a variable instantiation to its right hand side.
   const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation;
-
-  /// \brief ranks[i] contains the rank of the i-th equation in the PBES.
-  std::vector<std::size_t> ranks;
-
-  std::size_t get_rank(const propositional_variable_instantiation& X) const
-  {
-    return ranks[equation_index[X.name()]];
-  }
 
   template <bool is_mu>
   bool find_loop_rec(const pbes_expression& expr,
@@ -240,7 +254,7 @@ struct find_loop_simplifier
       {
         return true;
       }
-      else if (get_rank(Y) != rank)
+      else if (equation_index.rank(Y.name()) != rank)
       {
         return false;
       }
@@ -293,7 +307,7 @@ struct find_loop_simplifier
   bool find_loop(pbes_expression expr, propositional_variable_instantiation X) const
   {
     std::unordered_map<propositional_variable_instantiation, bool> visited;
-    return find_loop_rec<is_mu>(expr, X, get_rank(X), visited);
+    return find_loop_rec<is_mu>(expr, X, equation_index.rank(X.name()), visited);
   }
 
   find_loop_simplifier(const std::vector<pbes_equation>& equations,
@@ -302,22 +316,7 @@ struct find_loop_simplifier
                       )
     : equation_index(equation_index_),
       equation(equation_)
-  {
-    // initialize ranks
-    std::size_t rank = 0;
-    ranks.push_back(rank);
-    for (std::size_t i = 1; i < equations.size(); i++)
-    {
-      if (equations[i - 1].symbol() == equations[i].symbol())
-      {
-        ranks.push_back(rank);
-      }
-      else
-      {
-        ranks.push_back(++rank);
-      }
-    }
-  }
+  {}
 
   pbes_expression operator()(const pbes_expression& psi_e, const fixpoint_symbol& symbol, const propositional_variable_instantiation& X_e) const
   {
@@ -739,6 +738,11 @@ class pbesinst_lazy_algorithm
         m_find_loop_simplifier(p.equations(), equation_index, equation)
     {}
 
+    /// \brief Reports BES equations that are produced by the algorithm.
+    /// This function is called for every BES equation X = psi with rank k that is produced. By default it does nothing.
+    virtual void report_equation(const propositional_variable_instantiation& /* X */, const pbes_expression& /* psi */, std::size_t /* k */) const
+    {}
+
     inline propositional_variable_instantiation next_todo()
     {
       if (m_search_strategy == breadth_first)
@@ -770,7 +774,7 @@ class pbesinst_lazy_algorithm
       while (!todo.empty())
       {
         auto const& X_e = next_todo();
-        std::size_t index = equation_index[X_e.name()];
+        std::size_t index = equation_index.index(X_e.name());
 
         const pbes_equation& eqn = m_pbes.equations()[index];
         data::rewriter::substitution_type sigma;
@@ -795,6 +799,7 @@ class pbesinst_lazy_algorithm
 
         // Store the result
         equation[X_e] = psi_e;
+        report_equation(X_e, psi_e, equation_index.rank(X_e.name()));
 
         // optional step (backward substitution)
         backward_substitute(psi_e, X_e, justification, equation); // N.B. modifies equation, justification
@@ -818,7 +823,7 @@ class pbesinst_lazy_algorithm
       for (auto const& p: equation)
       {
         auto const& X_e = p.first;
-        std::size_t index = equation_index[X_e.name()];
+        std::size_t index = equation_index.index(X_e.name());
         auto const& symbol = this->symbol(index);
         auto lhs = propositional_variable(rename(X_e), data::variable_list());
         auto rhs = replace_propositional_variables(equation[X_e], [&](const propositional_variable_instantiation& x)
