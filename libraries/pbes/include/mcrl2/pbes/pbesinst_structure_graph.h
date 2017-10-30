@@ -20,14 +20,14 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-class pbesinst_structure_graph: public pbesinst_lazy_algorithm
+class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
 {
   protected:
     structure_graph m_graph;
 
     void SG0(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k)
     {
-      const auto& vertex_phi = m_graph.insert_variable(X, k);
+      const auto& vertex_phi = m_graph.insert_variable(X, psi, k);
       if (is_true(psi))
       {
         // skip
@@ -38,7 +38,7 @@ class pbesinst_structure_graph: public pbesinst_lazy_algorithm
       }
       else if (is_propositional_variable_instantiation(psi))
       {
-        const auto& vertex_psi = m_graph.insert_variable(atermpp::down_cast<propositional_variable_instantiation>(psi));
+        const auto& vertex_psi = m_graph.insert_variable(psi);
         m_graph.insert_edge(vertex_phi, vertex_psi);
       }
       else if (is_and(psi))
@@ -94,7 +94,7 @@ class pbesinst_structure_graph: public pbesinst_lazy_algorithm
     }
 
   public:
-    pbesinst_structure_graph(
+    pbesinst_structure_graph_algorithm(
          const pbes& p,
          data::rewriter::strategy rewrite_strategy = data::jitty,
          search_strategy search_strategy = breadth_first,
@@ -113,6 +113,26 @@ class pbesinst_structure_graph: public pbesinst_lazy_algorithm
       return m_graph;
     }
 };
+
+inline
+structure_graph pbesinst_structure_graph(const pbes& p,
+                   data::rewriter::strategy rewrite_strategy = data::jitty,
+                   search_strategy search_strategy = breadth_first,
+                   transformation_strategy transformation_strategy = lazy
+                  )
+{
+  if (search_strategy == breadth_first_short)
+  {
+    throw mcrl2::runtime_error("The breadth_first_short option is not supported!");
+  }
+  if (search_strategy == depth_first_short)
+  {
+    throw mcrl2::runtime_error("The depth_first_short option is not supported!");
+  }
+  pbesinst_structure_graph_algorithm algorithm(p, rewrite_strategy, search_strategy, transformation_strategy);
+  algorithm.run();
+  return algorithm.get_graph();
+}
 
 } // namespace pbes_system
 

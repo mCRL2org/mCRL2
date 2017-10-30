@@ -13,6 +13,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <sstream>
 
 #include "mcrl2/bes/io.h"
 #include "mcrl2/core/detail/print_utility.h"
@@ -30,6 +31,7 @@
 #include "mcrl2/pbes/detail/normalize_and_or.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
+#include "mcrl2/pbes/pbesinst_structure_graph.h"
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/data2pbes_rewriter.h"
@@ -317,6 +319,23 @@ struct pbesinst_lazy_command: public pbes_rewriter_command
     pbes_command::execute();
     pbesspec = pbesinst_lazy(pbesspec, strategy, breadth_first, lazy);
     my_save_pbes(pbesspec, output_filename);
+  }
+};
+
+/// \brief Computes a structure graph for a PBES and prints the result.
+struct pbesinst_structure_graph_command: public pbes_rewriter_command
+{
+  pbesinst_structure_graph_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
+    : pbes_rewriter_command("pbesinst-structure-graph", input_filename, output_filename, options, strategy)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    structure_graph G = pbesinst_structure_graph(pbesspec, strategy, breadth_first, lazy);
+    std::ostringstream out;
+    out << G;
+    write_text(output_filename, out.str());
   }
 };
 
@@ -653,6 +672,7 @@ class transform_tool: public rewriter_tool<input_output_tool>
       // PBES algorithms
       add_command(commands, std::make_shared<instantiate_global_variables_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<pbesinst_lazy_command>(input_filename(), output_filename(), options, rewrite_strategy()));
+      add_command(commands, std::make_shared<pbesinst_structure_graph_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<pbesinst_on_the_fly_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<pbesinst_on_the_fly_with_fixed_points_command>(input_filename(), output_filename(), options, rewrite_strategy()));
       add_command(commands, std::make_shared<pbesinst_optimize_command>(input_filename(), output_filename(), options, rewrite_strategy()));
