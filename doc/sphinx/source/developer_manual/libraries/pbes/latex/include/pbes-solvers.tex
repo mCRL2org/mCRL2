@@ -1,0 +1,55 @@
+%TCIDATA{Version=5.50.0.2890}
+%TCIDATA{LaTeXparent=1,1,pbes-implementation-notes.tex}
+                      
+
+\section{PBES solvers}
+
+In this section we describe algorithms for solving PBESs.
+
+\subsection{Recursive procedure for solving structure graphs}
+
+Let $A$ be a set of vertices of a structure graph $(V,E)$. Then we define
+the following algorithms for computing an attractor set of $A$.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{AttractorSetConjunctive(}}V,E,A\text{\textsc{)}} \\ 
+todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
+\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad \text{\textbf{choose }}u\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{u\} \\ 
+\qquad \text{\textbf{if} }attr_{\blacktriangle }(A,u)\text{ \textbf{then}}
+\\ 
+\qquad \qquad A:=A\cup \{u\} \\ 
+\qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
+\text{\textbf{return }}A%
+\end{array}%
+\end{equation*}%
+and%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{AttractorSetDisjunctive(}}V,E,A\text{\textsc{)}} \\ 
+todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
+\text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
+\qquad \text{\textbf{choose }}u\in todo \\ 
+\qquad todo:=todo\ \backslash \ \{u\} \\ 
+\qquad \text{\textbf{if} }attr_{\blacktriangledown }(A,u)\text{ \textbf{then}%
+} \\ 
+\qquad \qquad A:=A\cup \{u\} \\ 
+\qquad \qquad todo:=todo\cup \left( pred(u)\setminus A\right)  \\ 
+\text{\textbf{return }}A%
+\end{array}%
+\end{equation*}%
+where%
+\begin{eqnarray*}
+pred(v) &=&\{u\in V\mid (u,v)\in E\} \\
+succ(u) &=&\{v\in V\mid (u,v)\in E\}
+\end{eqnarray*}
+and where%
+\begin{eqnarray*}
+attr_{\blacktriangle }(A,u) &=&\{\lnot u\blacktriangledown \vee \left( \lnot
+u\blacktriangle \wedge succ(u)\subseteq A\right) \} \\
+attr_{\blacktriangledown }(A,u) &=&\{\lnot u\blacktriangle \vee \left( \lnot
+u\blacktriangledown \wedge succ(u)\subseteq A\right) \}
+\end{eqnarray*}
+
+\newpage 

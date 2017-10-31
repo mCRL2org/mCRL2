@@ -79,17 +79,21 @@ void compute_attractor_set_conjunctive(std::set<const structure_graph::vertex*>&
   std::set<const vertex*> todo;
   for (const vertex* u: A)
   {
-    todo.insert(u->predecessors.begin(), u->predecessors.end());
+    for (const vertex* v: u->predecessors)
+    {
+      if (!contains(A, v))
+      {
+        todo.insert(v);
+      }
+    }
   }
 
   while (!todo.empty())
   {
     const vertex* u = *todo.begin();
     todo.erase(todo.begin());
-    if (contains(A, u))
-    {
-      continue;
-    }
+    assert(!contains(A, u));
+
     if (is_attractor_conjunctive(*u, A))
     {
       A.insert(u);
@@ -115,17 +119,21 @@ void compute_attractor_set_disjunctive(std::set<const structure_graph::vertex*>&
   std::set<const vertex*> todo;
   for (const vertex* u: A)
   {
-    todo.insert(u->predecessors.begin(), u->predecessors.end());
+    for (const vertex* v: u->predecessors)
+    {
+      if (!contains(A, v))
+      {
+        todo.insert(v);
+      }
+    }
   }
 
   while (!todo.empty())
   {
     const vertex* u = *todo.begin();
     todo.erase(todo.begin());
-    if (contains(A, u))
-    {
-      continue;
-    }
+    assert(!contains(A, u));
+
     if (is_attractor_disjunctive(*u, A))
     {
       A.insert(u);
