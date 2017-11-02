@@ -124,9 +124,12 @@ class sort_specification
     /// \param[in] s A sort expression.
     void add_sort(const basic_sort& s)
     {
-      m_user_defined_sorts.push_back(s);
-      import_system_defined_sort(s);
-      sorts_are_not_necessarily_normalised_anymore();
+      if (std::find(m_user_defined_sorts.begin(),m_user_defined_sorts.end(),s)==m_user_defined_sorts.end())
+      {
+        m_user_defined_sorts.push_back(s);
+        import_system_defined_sort(s);
+        sorts_are_not_necessarily_normalised_anymore();
+      }
     }
 
     /// \brief Adds a sort to this specification, and marks it as system
