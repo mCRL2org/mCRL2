@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
+#include <unordered_set>
 #include <unordered_map>
 #include <vector>
 #include "mcrl2/core/detail/print_utility.h"
@@ -25,6 +26,8 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+// Implementation of a structure_graph that supports removal of vertices, by setting
+// the enabled attribute to false.
 class structure_graph
 {
   public:
@@ -40,14 +43,14 @@ class structure_graph
       std::size_t rank;
       mutable std::vector<const vertex*> predecessors;
       mutable std::vector<const vertex*> successors;
-      bool enabled;
+      mutable bool enabled;
 
       vertex(const pbes_expression& formula_ = pbes_expression(),
              decoration_type decoration_ = d_none,
              std::size_t rank_ = data::undefined_index(),
              std::vector<const vertex*> pred_ = std::vector<const vertex*>(),
              std::vector<const vertex*> succ_ = std::vector<const vertex*>(),
-             bool enabled_ = false
+             bool enabled_ = true
             )
         : formula(formula_),
           decoration(decoration_),
@@ -62,7 +65,10 @@ class structure_graph
         std::vector<pbes_expression> result;
         for (const vertex* u: predecessors)
         {
-          result.push_back(u->formula);
+          if (u->enabled)
+          {
+            result.push_back(u->formula);
+          }
         }
         return result;
       }
@@ -72,11 +78,16 @@ class structure_graph
         std::vector<pbes_expression> result;
         for (const vertex* u: successors)
         {
-          result.push_back(u->formula);
+          if (u->enabled)
+          {
+            result.push_back(u->formula);
+          }
         }
         return result;
       }
     };
+
+    typedef std::unordered_set<const vertex*> vertex_set;
 
   protected:
     std::unordered_map<pbes_expression, vertex> m_vertices;
@@ -152,9 +163,19 @@ class structure_graph
       v.predecessors.push_back(&u);
     }
 
-    const std::unordered_map<pbes_expression, vertex>& vertices() const
+    const std::unordered_map<pbes_expression, vertex>& vertex_map() const
     {
       return m_vertices;
+    }
+
+    vertex_set vertices() const
+    {
+      vertex_set result;
+      for (const auto& p: m_vertices)
+      {
+        result.insert(&p.second);
+      }
+      return result;
     }
 
     const vertex& get_vertex(const pbes_expression& x) const
@@ -195,11 +216,11 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex& u)
 }
 
 inline
-std::ostream& operator<<(std::ostream& out, const structure_graph& G)
+std::ostream& operator<<(std::ostream& out, const structure_graph::vertex_set& V)
 {
-  for (const auto& p: G.vertices())
+  for (const structure_graph::vertex* v: V)
   {
-    out << p.second << std::endl;
+    out << *v << std::endl;
   }
   return out;
 }

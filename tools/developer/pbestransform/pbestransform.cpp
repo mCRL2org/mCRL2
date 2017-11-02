@@ -334,7 +334,7 @@ struct pbesinst_structure_graph_command: public pbes_rewriter_command
     pbes_command::execute();
     structure_graph G = pbesinst_structure_graph(pbesspec, strategy, breadth_first, lazy);
     std::ostringstream out;
-    out << G;
+    out << G.vertices();
     write_text(output_filename, out.str());
   }
 };

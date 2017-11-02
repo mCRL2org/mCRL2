@@ -8,11 +8,12 @@ In this section we describe algorithms for solving PBESs.
 
 \subsection{Recursive procedure for solving structure graphs}
 
-Let $A$ be a set of vertices of a structure graph $(V,E)$. Then we define
-the following algorithms for computing an attractor set of $A$.%
+Let $A$ be a set of vertices of a structure graph $G=(V,E,d,r)$. Then we
+define the following algorithms for computing an attractor set of $%
+A\subseteq V$.%
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{AttractorSetConjunctive(}}V,E,A\text{\textsc{)}} \\ 
+\text{\textsc{AttractorSetConjunctive(}}A\text{\textsc{)}} \\ 
 todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}u\in todo \\ 
@@ -27,7 +28,7 @@ todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\
 and%
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{AttractorSetDisjunctive(}}V,E,A\text{\textsc{)}} \\ 
+\text{\textsc{AttractorSetDisjunctive(}}A\text{\textsc{)}} \\ 
 todo:=\bigcup\limits_{u\in A}\left( pred(u)\setminus A\right)  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}u\in todo \\ 
@@ -43,13 +44,65 @@ where%
 \begin{eqnarray*}
 pred(v) &=&\{u\in V\mid (u,v)\in E\} \\
 succ(u) &=&\{v\in V\mid (u,v)\in E\}
-\end{eqnarray*}
+\end{eqnarray*}%
 and where%
 \begin{eqnarray*}
 attr_{\blacktriangle }(A,u) &=&\{\lnot u\blacktriangledown \vee \left( \lnot
 u\blacktriangle \wedge succ(u)\subseteq A\right) \} \\
 attr_{\blacktriangledown }(A,u) &=&\{\lnot u\blacktriangle \vee \left( \lnot
 u\blacktriangledown \wedge succ(u)\subseteq A\right) \}
-\end{eqnarray*}
+\end{eqnarray*}%
+The following algorithm is used to compute a partitioning of $V$ into $%
+\left( W_{\blacktriangle },W_{\blacktriangledown }\right) $ of vertices $%
+W_{\blacktriangle }$ that represent equations evaluating to true and
+vertices $W_{\blacktriangledown }$ that represent equations evaluating to
+false.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{SolveRecursive(}}V\text{\textsc{)}} \\ 
+m:=\min (\{r(v)\mid v\in V\}) \\ 
+h:=\max (\{r(v)\mid v\in V\}) \\ 
+\text{\textbf{if} }V=\emptyset \text{ \textbf{then return }}(\emptyset
+,\emptyset ) \\ 
+\text{\textbf{if }}h=m\wedge even(m)\text{ \textbf{then return} }%
+(V,\emptyset ) \\ 
+\text{\textbf{if }}h=m\wedge odd(m)\text{ \textbf{then return} }(\emptyset
+,V) \\ 
+U:=\{v\in V\mid r(v)=m\} \\ 
+\text{\textbf{if} }even(m)\text{ \textbf{then}} \\ 
+\qquad A:=Attr_{\blacktriangle }\left( U\right)  \\ 
+\qquad \left( W_{\blacktriangle }^{\prime },W_{\blacktriangledown }^{\prime
+}\right) :=\text{\textsc{SolveRecursive(}}V\setminus A\text{)} \\ 
+\qquad \text{\textbf{if}  }W_{\blacktriangledown }^{\prime }=\emptyset \text{
+\textbf{then}} \\ 
+\qquad \qquad \left( W_{\blacktriangle },W_{\blacktriangledown }\right)
+:=\left( A\cup W_{\blacktriangle }^{\prime },\emptyset \right)  \\ 
+\qquad \text{\textbf{else}} \\ 
+\qquad \qquad B:=Attr_{\blacktriangledown }\left( W_{\blacktriangledown
+}^{\prime }\right)  \\ 
+\qquad \qquad \left( W_{\blacktriangle },W_{\blacktriangledown }\right) :=%
+\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
+\qquad \qquad W_{\blacktriangledown }:=W_{\blacktriangledown }\cup B \\ 
+\text{\textbf{else}} \\ 
+\qquad A:=Attr_{\blacktriangledown }\left( U\right)  \\ 
+\qquad \left( W_{\blacktriangle }^{\prime },W_{\blacktriangledown }^{\prime
+}\right) :=\text{\textsc{SolveRecursive(}}V\setminus A\text{)} \\ 
+\qquad \text{\textbf{if} }W_{\blacktriangle }^{\prime }=\emptyset \text{ 
+\textbf{then}} \\ 
+\qquad \qquad \left( W_{\blacktriangle },W_{\blacktriangledown }\right)
+:=Attr_{\blacktriangle }\left( \emptyset ,A\cup W_{\blacktriangledown
+}^{\prime }\right)  \\ 
+\qquad \text{\textbf{else}} \\ 
+\qquad \qquad B:=Attr_{\blacktriangle }\left( W_{\blacktriangle }^{\prime
+}\right)  \\ 
+\qquad \qquad \left( W_{\blacktriangle },W_{\blacktriangledown }\right) :=%
+\text{\textsc{SolveRecursive(}}V\setminus B\text{)} \\ 
+\qquad \qquad W_{\blacktriangle }:=W_{\blacktriangle }\cup B \\ 
+\text{\textbf{return }}\left( W_{\blacktriangle },W_{\blacktriangledown
+}\right) 
+\end{array}%
+\end{equation*}%
+where $Attr_{\blacktriangle }$=\textsc{AttractorSetConjunctive} and $%
+Attr_{\blacktriangledown }$=\textsc{AttractorSetDisjunctive}
 
-\newpage 
+\newpage
