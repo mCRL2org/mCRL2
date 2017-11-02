@@ -222,19 +222,22 @@ class sort_specification
     
     /// \brief Adds an alias (new name for a sort) to this specification
     /// \param[in] a an alias
-    void add_alias(alias const& a)
+    void add_alias(const alias& a)
     {
-      m_user_defined_aliases.push_back(a);
-      import_system_defined_sort(a.name());
-      import_system_defined_sort(a.reference());
-      sorts_are_not_necessarily_normalised_anymore();
+      if (std::find(m_user_defined_aliases.begin(),m_user_defined_aliases.end(),a)==m_user_defined_aliases.end())
+      {
+        m_user_defined_aliases.push_back(a);
+        import_system_defined_sort(a.name());
+        import_system_defined_sort(a.reference());
+        sorts_are_not_necessarily_normalised_anymore();
+      }
     }
 
 
     /// \brief Removes a user defined //alias from specification.
     /// \details This also removes the defined sort of this alias from the set of user defined sorts.
     ///          This routine does not check whether the alias, or name was in the user defined sets.
-    void remove_alias(alias const& a)
+    void remove_alias(const alias& a)
     {
       detail::remove(m_user_defined_sorts, a.name());
       detail::remove(m_user_defined_aliases, a);
