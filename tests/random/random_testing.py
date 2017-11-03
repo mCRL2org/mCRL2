@@ -223,6 +223,10 @@ class PbesstategraphTest(PbesTest):
     def __init__(self, name, settings = dict()):
         super(PbesstategraphTest, self).__init__(name, ymlfile('pbesstategraph'), settings)
 
+class Pbessolve_structure_graphTest(PbesTest):
+    def __init__(self, name, settings = dict()):
+        super(Pbessolve_structure_graphTest, self).__init__(name, ymlfile('pbessolve_structure_graph'), settings)
+
 # N.B does not work due to unknown expressions (F_or)
 class SymbolicExplorationTest(PbesTest):
     def __init__(self, name, settings = dict()):
@@ -299,6 +303,7 @@ available_tests = {
     'pbesinst-alternative_lazy'                   : lambda name, settings: PbesinstTest(name, ['-salternative-lazy'], settings)                    ,
     'pbesinst-finite'                             : lambda name, settings: PbesinstTest(name, ['-sfinite', '-f*(*:Bool)'], settings)               ,
     'pbessolve'                                   : lambda name, settings: PbessolveTest(name, settings)                                           ,
+    'pbessolve-structure-graph'                   : lambda name, settings: Pbessolve_structure_graphTest(name, settings)                           ,
     'pbesstategraph'                              : lambda name, settings: PbesstategraphTest(name, settings)                                      ,
     'bessolve'                                    : lambda name, settings: BessolveTest(name, settings)                                            ,
 }
