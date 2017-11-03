@@ -53,9 +53,11 @@ void generate_reduced_pbesses(const pbes& p, std::size_t depth, const std::strin
     if (pbes_system::is_true(expr))
     {
       replacements.erase(pbes_system::true_());
+      replacements.erase(pbes_system::false_());
     }
     if (pbes_system::is_false(expr))
     {
+      replacements.erase(pbes_system::true_());
       replacements.erase(pbes_system::false_());
     }
 
