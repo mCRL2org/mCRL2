@@ -244,6 +244,7 @@ structure_graph::vertex_set remove_disabled_vertices(const structure_graph::vert
   return result;
 }
 
+// pre: V does not contain nodes with decoration true or false.
 inline
 std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive(structure_graph::vertex_set& V)
 {
@@ -321,6 +322,54 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   return { Wconj, Wdisj };
 }
 
+// Handles nodes with decoration true or false.
+inline
+std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive_extended(structure_graph::vertex_set& V)
+{
+  typedef structure_graph::vertex_set vertex_set;
+  typedef structure_graph::vertex vertex;
+
+  vertex_set Vconj;
+  vertex_set Vdisj;
+
+  // find vertices Vconj with decoration true and Vdisj with decoration false
+  for (const vertex* v: V)
+  {
+    if (v->decoration == structure_graph::d_false)
+    {
+      Vconj.insert(v);
+    }
+    else if (v->decoration == structure_graph::d_true)
+    {
+      Vdisj.insert(v);
+    }
+  }
+
+  // extend Vconj and Vdisj
+  if (!Vconj.empty())
+  {
+    Vconj = compute_attractor_set_conjunctive(Vconj);
+  }
+  if (!Vdisj.empty())
+  {
+    Vconj = compute_attractor_set_conjunctive(Vconj);
+  }
+
+  // default case
+  if (Vconj.empty() && Vdisj.empty())
+  {
+    return solve_recursive(V);
+  }
+  else
+  {
+    vertex_set Wconj;
+    vertex_set Wdisj;
+    vertex_set Vunion = set_union(Vconj, Vdisj);
+    std::tie(Wconj, Wdisj) = solve_recursive(V, Vunion);
+    return std::make_pair(set_union(Wconj, Vconj), set_union(Wdisj, Vdisj));
+  }
+}
+
 inline
 bool solve_structure_graph(const structure_graph& G)
 {
@@ -333,9 +382,9 @@ bool solve_structure_graph(const structure_graph& G)
   {
     mCRL2log(log::verbose) << *v << std::endl;
   }
-  auto p = solve_recursive(V);
-  const vertex_set& Wconj = p.first;
-  const vertex_set& Wdisj = p.second;
+  vertex_set Wconj;
+  vertex_set Wdisj;
+  std::tie(Wconj, Wdisj) = solve_recursive_extended(V);
   const vertex& init = G.initial_vertex();
   mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
   mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wconj) << std::endl;

@@ -141,7 +141,12 @@ void pbesinst_structure_graph(const pbes& p,
   {
     throw mcrl2::runtime_error("The depth_first_short option is not supported!");
   }
-  pbesinst_structure_graph_algorithm algorithm(p, G, rewrite_strategy, search_strategy, transformation_strategy);
+  pbes q = p;
+  if (!is_normalized(q))
+  {
+    algorithms::normalize(q);
+  }
+  pbesinst_structure_graph_algorithm algorithm(q, G, rewrite_strategy, search_strategy, transformation_strategy);
   algorithm.run();
 }
 
