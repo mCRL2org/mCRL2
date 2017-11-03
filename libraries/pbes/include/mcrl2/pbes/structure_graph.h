@@ -126,11 +126,13 @@ class structure_graph
     // don't allow copying, to prevent pointers to vertices being invalidated
     structure_graph(const structure_graph&) = delete;
 
-    // insert the variable corresponding to the equation x = phi; overwrites existing value
+    // insert the variable corresponding to the equation x = phi; overwrites existing value, but leaves pred/succ intact
     const vertex& insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k)
     {
       vertex& u = m_vertices[x];
-      u = vertex(x, get_decoration(psi), k);
+      u.formula = x;
+      u.decoration = get_decoration(psi);
+      u.rank = k;
       return u;
     }
 
@@ -252,6 +254,17 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex_set& V
 }
 
 inline
+std::string pp(const structure_graph& G)
+{
+  std::ostringstream out;
+  for (const structure_graph::vertex* v: G.vertices())
+  {
+    out << *v << std::endl;
+  }
+  return out.str();
+}
+
+inline
 std::string pp(const structure_graph::vertex_set& V, bool display_disabled = true)
 {
   std::vector<std::string> s;
@@ -279,22 +292,14 @@ void check_vertex_set(const structure_graph::vertex_set& V, const std::string& m
     }
     for (const structure_graph::vertex* v: u->predecessors)
     {
-      if (!v->enabled)
-      {
-        continue;
-      }
-      if (!contains(V, v))
+      if (v->enabled && !contains(V, v))
       {
         throw mcrl2::runtime_error("predecessor vertex not found!");
       }
     }
     for (const structure_graph::vertex* v: u->successors)
     {
-      if (!v->enabled)
-      {
-        continue;
-      }
-      if (!contains(V, v))
+      if (v->enabled && !contains(V, v))
       {
         throw mcrl2::runtime_error("successor vertex not found!");
       }

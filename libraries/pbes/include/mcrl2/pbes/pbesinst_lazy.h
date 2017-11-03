@@ -202,21 +202,23 @@ struct pbes_equation_index
 
   pbes_equation_index(const pbes& p)
   {
-    std::size_t rank = 0;
     auto const& equations = p.equations();
+    std::size_t rank;
     for (std::size_t i = 0; i < equations.size(); i++)
     {
       const auto& eqn = equations[i];
-      std::size_t k;
       if (i == 0)
       {
-        k = 0;
+        rank = equations.front().symbol().is_mu() ? 1 : 0;
       }
       else
       {
-        k = (equations[i - 1].symbol() == equations[i].symbol()) ? rank : ++rank;
+        if (equations[i - 1].symbol() != equations[i].symbol())
+        {
+          rank++;
+        }
       }
-      equation_index.insert({eqn.variable().name(), std::make_pair(i, k)});
+      equation_index.insert({eqn.variable().name(), std::make_pair(i, rank)});
     }
   }
 

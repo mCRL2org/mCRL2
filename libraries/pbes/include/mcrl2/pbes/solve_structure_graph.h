@@ -195,19 +195,27 @@ inline
 std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive(structure_graph::vertex_set& V, structure_graph::vertex_set& A)
 {
   // remove A from V
+  std::vector<const structure_graph::vertex*> changed;
   for (const structure_graph::vertex* v: A)
   {
-    v->enabled = false;
+    if (v->enabled)
+    {
+      v->enabled = false;
+      changed.push_back(v);
+    }
   }
 
   auto result = solve_recursive(V);
 
+  std::string VminusA = pp(V, false);
+
   // add A to V
-  for (const structure_graph::vertex* v: A)
+  for (const structure_graph::vertex* v: changed)
   {
     v->enabled = true;
   }
 
+  mCRL2log(log::debug) << "<solve_recursive> V = " << pp(V, false) << " A = " << pp(A) << " V - A = " << VminusA << " Wconj = " << pp(result.first) << " Wdisj = " << pp(result.second) << std::endl;
   return result;
 }
 
@@ -223,72 +231,90 @@ structure_graph::vertex_set set_union(const structure_graph::vertex_set& V, cons
 }
 
 inline
+structure_graph::vertex_set remove_disabled_vertices(const structure_graph::vertex_set& V)
+{
+  structure_graph::vertex_set result;
+  for (const auto& v: V)
+  {
+    if (v->enabled)
+    {
+      result.insert(v);
+    }
+  }
+  return result;
+}
+
+inline
 std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive(structure_graph::vertex_set& V)
 {
   typedef structure_graph::vertex_set vertex_set;
 
-  mCRL2log(log::debug) << "<solve_recursive> V = " << pp(V, false) << std::endl;
-
   vertex_set Wconj;
   vertex_set Wdisj;
+  vertex_set Wconj1;
+  vertex_set Wdisj1;
 
   if (is_empty(V))
   {
-    return { vertex_set(), vertex_set() };
-  }
-  auto q = get_minmax_rank(V);
-  std::size_t m = std::get<0>(q);
-  std::size_t h = std::get<1>(q);
-  const vertex_set& U = std::get<2>(q);
-
-  if (h == m)
-  {
-    if (m % 2 == 0)
-    {
-      return { V, vertex_set() };
-    }
-    else
-    {
-      return { vertex_set(), V };
-    }
-  }
-
-  if (m % 2 != 0)
-  {
-    vertex_set A = compute_attractor_set_conjunctive(U);
-    auto p = solve_recursive(V, A);
-    vertex_set& Wconj1 = p.first;
-    vertex_set& Wdisj1 = p.second;
-    if (is_empty(Wdisj1))
-    {
-      Wconj = set_union(A, Wconj1);
-      Wdisj.clear();
-    }
-    else
-    {
-      vertex_set B = compute_attractor_set_disjunctive(Wdisj1);
-      auto p = solve_recursive(V, B);
-      Wconj = p.first;
-      Wdisj = set_union(Wdisj, B);
-    }
+    Wconj = vertex_set();
+    Wdisj = vertex_set();
   }
   else
   {
-    vertex_set A = compute_attractor_set_disjunctive(U);
-    auto p = solve_recursive(V, A);
-    vertex_set& Wconj1 = p.first;
-    vertex_set& Wdisj1 = p.second;
-    if (is_empty(Wconj1))
+    auto q = get_minmax_rank(V);
+    std::size_t m = std::get<0>(q);
+    std::size_t h = std::get<1>(q);
+    const vertex_set& U = std::get<2>(q);
+    mCRL2log(log::debug) << "U = " << pp(U) << std::endl;
+
+    if (h == m)
     {
-      Wconj.clear();
-      Wdisj = set_union(A, Wdisj1);
+      if (m % 2 == 0)
+      {
+        Wconj = vertex_set();
+        Wdisj = remove_disabled_vertices(V);
+      }
+      else
+      {
+        Wconj = remove_disabled_vertices(V);
+        Wdisj = vertex_set();
+      }
+    }
+    else if (m % 2 != 0)
+    {
+      vertex_set A = compute_attractor_set_conjunctive(U);
+      mCRL2log(log::debug) << "A = " << pp(A) << std::endl;
+      std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
+      if (is_empty(Wdisj1))
+      {
+        Wconj = set_union(A, Wconj1);
+        Wdisj.clear();
+      }
+      else
+      {
+        vertex_set B = compute_attractor_set_disjunctive(Wdisj1);
+        mCRL2log(log::debug) << "B = " << pp(B) << std::endl;
+        std::tie(Wconj, Wdisj) = solve_recursive(V, B);
+        Wdisj = set_union(Wdisj, B);
+      }
     }
     else
     {
-      vertex_set B = compute_attractor_set_conjunctive(Wconj1);
-      auto p = solve_recursive(V, B);
-      Wconj = set_union(Wconj, B);
-      Wdisj = p.second;
+      vertex_set A = compute_attractor_set_disjunctive(U);
+      mCRL2log(log::debug) << "A = " << pp(A) << std::endl;
+      std::tie(Wconj1, Wdisj1) = solve_recursive(V, A);
+      if (is_empty(Wconj1))
+      {
+        Wconj.clear();
+        Wdisj = set_union(A, Wdisj1);
+      }
+      else
+      {
+        vertex_set B = compute_attractor_set_conjunctive(Wconj1);
+        mCRL2log(log::debug) << "B = " << pp(B) << std::endl;
+        std::tie(Wconj, Wdisj) = solve_recursive(V, B);
+        Wconj = set_union(Wconj, B);
+      }
     }
   }
 
@@ -301,18 +327,23 @@ bool solve_structure_graph(const structure_graph& G)
   typedef structure_graph::vertex_set vertex_set;
   typedef structure_graph::vertex vertex;
 
+  mCRL2log(log::verbose) << "--- structure graph ----\n" << std::endl;
   structure_graph::vertex_set V = G.vertices();
+  for (const structure_graph::vertex* v: V)
+  {
+    mCRL2log(log::verbose) << *v << std::endl;
+  }
   auto p = solve_recursive(V);
   const vertex_set& Wconj = p.first;
   const vertex_set& Wdisj = p.second;
   const vertex& init = G.initial_vertex();
-  mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wconj, false) << std::endl;
-  mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wdisj, false) << std::endl;
-  if (contains(Wconj, &init))
+  mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wdisj) << std::endl;
+  mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wconj) << std::endl;
+  if (contains(Wdisj, &init))
   {
     return true;
   }
-  else if (contains(Wdisj, &init))
+  else if (contains(Wconj, &init))
   {
     return false;
   }
