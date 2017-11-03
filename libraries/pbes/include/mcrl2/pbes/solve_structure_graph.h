@@ -332,7 +332,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   vertex_set Vconj;
   vertex_set Vdisj;
 
-  // find vertices Vconj with decoration true and Vdisj with decoration false
+  // find vertices Vconj with decoration false and Vdisj with decoration true
   for (const vertex* v: V)
   {
     if (v->decoration == structure_graph::d_false)
@@ -352,7 +352,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   }
   if (!Vdisj.empty())
   {
-    Vconj = compute_attractor_set_conjunctive(Vconj);
+    Vdisj = compute_attractor_set_disjunctive(Vdisj);
   }
 
   // default case
