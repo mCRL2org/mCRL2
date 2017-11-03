@@ -41,6 +41,7 @@
 #include "mcrl2/pbes/rewriters/quantifiers_inside_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_quantifiers_rewriter.h"
 #include "mcrl2/pbes/rewriters/simplify_rewriter.h"
+#include "mcrl2/pbes/solve_structure_graph.h"
 #include "mcrl2/pbes/stategraph.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
@@ -332,10 +333,35 @@ struct pbesinst_structure_graph_command: public pbes_rewriter_command
   void execute()
   {
     pbes_command::execute();
-    structure_graph G = pbesinst_structure_graph(pbesspec, strategy, breadth_first, lazy);
+    structure_graph G;
+    pbesinst_structure_graph(pbesspec, G, strategy, breadth_first, lazy);
     std::ostringstream out;
     out << G.vertices();
     write_text(output_filename, out.str());
+  }
+};
+
+/// \brief Computes a structure graph for a PBES, solves it, and prints the result.
+struct solve_structure_graph_command: public pbes_rewriter_command
+{
+  solve_structure_graph_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
+    : pbes_rewriter_command("solve-structure-graph", input_filename, output_filename, options, strategy)
+  {}
+
+  void execute()
+  {
+    pbes_command::execute();
+    structure_graph G;
+    pbesinst_structure_graph(pbesspec, G, strategy, breadth_first, lazy);
+    bool result = solve_structure_graph(G);
+    if (result)
+    {
+      write_text(output_filename, "true\n");
+    }
+    else
+    {
+      write_text(output_filename, "false\n");
+    }
   }
 };
 
@@ -701,6 +727,7 @@ class transform_tool: public rewriter_tool<input_output_tool>
       add_command(commands, std::make_shared<stategraph_global_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<stategraph_local_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<anonymize_pbes_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<solve_structure_graph_command>(input_filename(), output_filename(), options, rewrite_strategy()));
 
       for (const auto& command: commands)
       {

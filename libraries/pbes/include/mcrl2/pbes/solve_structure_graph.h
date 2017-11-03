@@ -13,8 +13,10 @@
 #define MCRL2_PBES_SOLVE_STRUCTURE_GRAPH_H
 
 #include <limits>
+#include <sstream>
 #include <unordered_set>
 #include <tuple>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/structure_graph.h"
 
 namespace mcrl2 {
@@ -156,25 +158,38 @@ structure_graph::vertex_set compute_attractor_set_disjunctive(structure_graph::v
 inline
 std::tuple<std::size_t, std::size_t, structure_graph::vertex_set> get_minmax_rank(const structure_graph::vertex_set& V)
 {
+  typedef structure_graph::vertex_set vertex_set;
+  typedef structure_graph::vertex vertex;
+
   std::size_t min_rank = (std::numeric_limits<std::size_t>::max)();
   std::size_t max_rank = 0;
-  structure_graph::vertex_set M; // vertices with minimal rank
-  for (const structure_graph::vertex* v: V)
+  vertex_set M; // vertices with minimal rank
+
+  for (const vertex* v: V)
   {
-    if (v->rank >= min_rank)
+    if (!v->enabled)
     {
-      min_rank = v->rank;
+      continue;
+    }
+    if (v->rank <= min_rank)
+    {
+      if (v->rank < min_rank)
+      {
+        M.clear();
+        min_rank = v->rank;
+      }
       M.insert(v);
     }
-    if (v->rank < max_rank)
+    if (v->rank > max_rank)
     {
       max_rank = v->rank;
     }
   }
-  return std::make_tuple(min_rank, max_rank, M);
+  auto result = std::make_tuple(min_rank, max_rank, M);
+  return result;
 }
 
-std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive(const structure_graph::vertex_set& V);
+std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive(structure_graph::vertex_set& V);
 
 inline
 std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recursive(structure_graph::vertex_set& V, structure_graph::vertex_set& A)
@@ -212,10 +227,12 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
 {
   typedef structure_graph::vertex_set vertex_set;
 
+  mCRL2log(log::debug) << "<solve_recursive> V = " << pp(V, false) << std::endl;
+
   vertex_set Wconj;
   vertex_set Wdisj;
 
-  if (V.empty())
+  if (is_empty(V))
   {
     return { vertex_set(), vertex_set() };
   }
@@ -223,6 +240,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   std::size_t m = std::get<0>(q);
   std::size_t h = std::get<1>(q);
   const vertex_set& U = std::get<2>(q);
+
   if (h == m)
   {
     if (m % 2 == 0)
@@ -235,13 +253,13 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     }
   }
 
-  if (m % 2 == 0)
+  if (m % 2 != 0)
   {
     vertex_set A = compute_attractor_set_conjunctive(U);
     auto p = solve_recursive(V, A);
     vertex_set& Wconj1 = p.first;
     vertex_set& Wdisj1 = p.second;
-    if (Wdisj1.empty())
+    if (is_empty(Wdisj1))
     {
       Wconj = set_union(A, Wconj1);
       Wdisj.clear();
@@ -260,7 +278,7 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
     auto p = solve_recursive(V, A);
     vertex_set& Wconj1 = p.first;
     vertex_set& Wdisj1 = p.second;
-    if (Wconj1.empty())
+    if (is_empty(Wconj1))
     {
       Wconj.clear();
       Wdisj = set_union(A, Wdisj1);
@@ -275,6 +293,30 @@ std::pair<structure_graph::vertex_set, structure_graph::vertex_set> solve_recurs
   }
 
   return { Wconj, Wdisj };
+}
+
+inline
+bool solve_structure_graph(const structure_graph& G)
+{
+  typedef structure_graph::vertex_set vertex_set;
+  typedef structure_graph::vertex vertex;
+
+  structure_graph::vertex_set V = G.vertices();
+  auto p = solve_recursive(V);
+  const vertex_set& Wconj = p.first;
+  const vertex_set& Wdisj = p.second;
+  const vertex& init = G.initial_vertex();
+  mCRL2log(log::verbose) << "vertices corresponding to true " << pp(Wconj, false) << std::endl;
+  mCRL2log(log::verbose) << "vertices corresponding to false " << pp(Wdisj, false) << std::endl;
+  if (contains(Wconj, &init))
+  {
+    return true;
+  }
+  else if (contains(Wdisj, &init))
+  {
+    return false;
+  }
+  throw mcrl2::runtime_error("No solution found in solve_structure_graph!");
 }
 
 } // namespace pbes_system

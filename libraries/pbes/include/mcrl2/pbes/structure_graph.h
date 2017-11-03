@@ -21,6 +21,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/undefined.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/utilities/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -91,6 +92,7 @@ class structure_graph
 
   protected:
     std::unordered_map<pbes_expression, vertex> m_vertices;
+    pbes_expression m_initial_state; // The initial state.
 
     decoration_type get_decoration(const pbes_expression& x) const
     {
@@ -118,6 +120,12 @@ class structure_graph
     }
 
   public:
+    structure_graph()
+    {}
+
+    // don't allow copying, to prevent pointers to vertices being invalidated
+    structure_graph(const structure_graph&) = delete;
+
     // insert the variable corresponding to the equation x = phi; overwrites existing value
     const vertex& insert_variable(const pbes_expression& x, const pbes_expression& psi, std::size_t k)
     {
@@ -187,6 +195,21 @@ class structure_graph
       }
       throw std::runtime_error("vertex " + pp(x) + " not found in structure_graph!");
     }
+
+    pbes_expression& initial_state()
+    {
+      return m_initial_state;
+    }
+
+    const pbes_expression& initial_state() const
+    {
+      return m_initial_state;
+    }
+
+    const vertex& initial_vertex() const
+    {
+      return get_vertex(m_initial_state);
+    }
 };
 
 inline
@@ -220,9 +243,89 @@ std::ostream& operator<<(std::ostream& out, const structure_graph::vertex_set& V
 {
   for (const structure_graph::vertex* v: V)
   {
-    out << *v << std::endl;
+    if (v->enabled)
+    {
+      out << *v << std::endl;
+    }
   }
   return out;
+}
+
+inline
+std::string pp(const structure_graph::vertex_set& V, bool display_disabled = true)
+{
+  std::vector<std::string> s;
+  for (const structure_graph::vertex* v: V)
+  {
+    if (display_disabled || v->enabled)
+    {
+      s.push_back(pbes_system::pp(v->formula));
+    }
+  }
+  return core::detail::print_set(s);
+}
+
+inline
+void check_vertex_set(const structure_graph::vertex_set& V, const std::string& msg = "")
+{
+  using utilities::detail::contains;
+  std::cout << "<check_vertex_set> " << pp(V) << " " << msg << std::endl;
+
+  for (const structure_graph::vertex* u: V)
+  {
+    if (!u->enabled)
+    {
+      continue;
+    }
+    for (const structure_graph::vertex* v: u->predecessors)
+    {
+      if (!v->enabled)
+      {
+        continue;
+      }
+      if (!contains(V, v))
+      {
+        throw mcrl2::runtime_error("predecessor vertex not found!");
+      }
+    }
+    for (const structure_graph::vertex* v: u->successors)
+    {
+      if (!v->enabled)
+      {
+        continue;
+      }
+      if (!contains(V, v))
+      {
+        throw mcrl2::runtime_error("successor vertex not found!");
+      }
+    }
+  }
+}
+
+inline
+bool is_empty(const structure_graph::vertex_set& V)
+{
+  for (const structure_graph::vertex* v: V)
+  {
+    if (v->enabled)
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+inline
+bool all_vertices_enabled(const structure_graph::vertex_set& V)
+{
+  for (const structure_graph::vertex* v: V)
+  {
+    if (!v->enabled)
+    {
+      return false;
+    }
+  }
+  return true;
 }
 
 } // namespace pbes_system

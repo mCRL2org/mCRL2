@@ -20,10 +20,13 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \brief Variant of pbesinst that will compute a structure graph for a PBES.
+/// The result will be put in the structure graph that is passed in the constructor.
 class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
 {
   protected:
-    structure_graph m_graph;
+    structure_graph& m_graph;
+    bool m_initial_state_assigned;
 
     void SG0(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k)
     {
@@ -96,15 +99,23 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
   public:
     pbesinst_structure_graph_algorithm(
          const pbes& p,
+         structure_graph& G,
          data::rewriter::strategy rewrite_strategy = data::jitty,
          search_strategy search_strategy = breadth_first,
          transformation_strategy transformation_strategy = lazy
         )
-      : pbesinst_lazy_algorithm(p, rewrite_strategy, search_strategy, transformation_strategy)
+      : pbesinst_lazy_algorithm(p, rewrite_strategy, search_strategy, transformation_strategy),
+        m_graph(G),
+        m_initial_state_assigned(false)
     {}
 
     void report_equation(const propositional_variable_instantiation& X, const pbes_expression& psi, std::size_t k)
     {
+      if (!m_initial_state_assigned)
+      {
+        m_graph.initial_state() = X;
+        m_initial_state_assigned = true;
+      }
       SG0(X, psi, k);
     }
 
@@ -115,11 +126,12 @@ class pbesinst_structure_graph_algorithm: public pbesinst_lazy_algorithm
 };
 
 inline
-structure_graph pbesinst_structure_graph(const pbes& p,
-                   data::rewriter::strategy rewrite_strategy = data::jitty,
-                   search_strategy search_strategy = breadth_first,
-                   transformation_strategy transformation_strategy = lazy
-                  )
+void pbesinst_structure_graph(const pbes& p,
+                              structure_graph& G,
+                              data::rewriter::strategy rewrite_strategy = data::jitty,
+                              search_strategy search_strategy = breadth_first,
+                              transformation_strategy transformation_strategy = lazy
+                             )
 {
   if (search_strategy == breadth_first_short)
   {
@@ -129,9 +141,8 @@ structure_graph pbesinst_structure_graph(const pbes& p,
   {
     throw mcrl2::runtime_error("The depth_first_short option is not supported!");
   }
-  pbesinst_structure_graph_algorithm algorithm(p, rewrite_strategy, search_strategy, transformation_strategy);
+  pbesinst_structure_graph_algorithm algorithm(p, G, rewrite_strategy, search_strategy, transformation_strategy);
   algorithm.run();
-  return algorithm.get_graph();
 }
 
 } // namespace pbes_system
