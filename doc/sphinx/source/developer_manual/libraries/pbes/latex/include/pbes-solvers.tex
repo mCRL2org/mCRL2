@@ -56,7 +56,8 @@ The following algorithm is used to compute a partitioning of $V$ into $%
 \left( W_{\blacktriangle },W_{\blacktriangledown }\right) $ of vertices $%
 W_{\blacktriangle }$ that represent equations evaluating to false and
 vertices $W_{\blacktriangledown }$ that represent equations evaluating to
-true.%
+true. A precondition of this algorithm is that it contains no nodes with
+decoration $\top $ or $\bot $.%
 \begin{equation*}
 \begin{array}{l}
 \text{\textsc{SolveRecursive(}}V\text{\textsc{)}} \\ 
@@ -104,4 +105,20 @@ U:=\{v\in V\mid r(v)=m\} \\
 where $Attr_{\blacktriangle }$=\textsc{AttractorSetConjunctive} and $%
 Attr_{\blacktriangledown }$=\textsc{AttractorSetDisjunctive}
 
-\newpage
+The algorithm can be extended to sets $V$ containing nodes with decoration $%
+\top $ or $\bot $ as follows:%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{SolveRecursiveExtended(}}V\text{\textsc{)}} \\ 
+V_{\blacktriangle }:=Attr_{\blacktriangle }\left( \{v\in V\mid v\bot
+\}\right)  \\ 
+V_{\blacktriangledown }:=Attr_{\blacktriangledown }\left( \{v\in V\mid v\top
+\}\right)  \\ 
+\left( W_{\blacktriangle },W_{\blacktriangledown }\right) :=\text{\textsc{%
+SolveRecursive(}}V\setminus (V_{\blacktriangle }\cup V_{\blacktriangledown })%
+\text{\textsc{)}} \\ 
+\text{\textbf{return }}\left( W_{\blacktriangle }\cup V_{\blacktriangle
+},W_{\blacktriangledown }\cup V_{\blacktriangledown }\right) 
+\end{array}%
+\end{equation*}%
+\newpage 
