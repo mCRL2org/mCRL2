@@ -199,7 +199,7 @@ bool destructive_compare(LTS_TYPE& l1,
       // Eliminate silent steps and determinise first LTS
       detail::bisimulation_reduce(l1,true,false);
       detail::tau_star_reduce(l1);
-      detail::bisimulation_reduce(l2,false);
+      detail::bisimulation_reduce(l1,false);
       determinise(l1);
 
       // Eliminate silent steps and determinise second LTS
