@@ -37,27 +37,6 @@
 #ifndef MCRL2_PBES_PBESINST_LAZY_H
 #define MCRL2_PBES_PBESINST_LAZY_H
 
-namespace std
-{
-  template <>
-  struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
-  {
-    std::size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
-    {
-      return hash<atermpp::aterm>()(x);
-    }
-  };
-
-  template <>
-  struct hash<mcrl2::pbes_system::pbes_expression>
-  {
-    std::size_t operator()(const mcrl2::pbes_system::pbes_expression& x) const
-    {
-      return hash<atermpp::aterm>()(x);
-    }
-  };
-}
-
 namespace mcrl2
 {
 

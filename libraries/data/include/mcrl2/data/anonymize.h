@@ -15,6 +15,7 @@
 #include <cctype>
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/builder.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/utilities/detail/container_utility.h"
 

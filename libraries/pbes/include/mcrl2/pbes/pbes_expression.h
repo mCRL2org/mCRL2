@@ -1339,6 +1339,29 @@ struct term_traits<pbes_system::pbes_expression>
 
 } // namespace mcrl2
 
+namespace std
+{
+
+  template <>
+  struct hash<mcrl2::pbes_system::pbes_expression>
+  {
+    std::size_t operator()(const mcrl2::pbes_system::pbes_expression& x) const
+    {
+      return hash<atermpp::aterm>()(x);
+    }
+  };
+
+  template <>
+  struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
+  {
+    std::size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
+    {
+      return hash<atermpp::aterm>()(x);
+    }
+  };
+
+} // namespace std
+
 #include "mcrl2/pbes/index_traits.h"
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H

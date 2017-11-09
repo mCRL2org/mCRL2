@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_PBESINST_STRUCTURE_GRAPH_H
 #define MCRL2_PBES_PBESINST_STRUCTURE_GRAPH_H
 
+#include "mcrl2/pbes/algorithms.h"
 #include "mcrl2/pbes/join.h"
 #include "mcrl2/pbes/pbesinst_lazy.h"
 #include "mcrl2/pbes/structure_graph.h"
@@ -142,7 +143,7 @@ void pbesinst_structure_graph(const pbes& p,
     throw mcrl2::runtime_error("The depth_first_short option is not supported!");
   }
   pbes q = p;
-  if (!is_normalized(q))
+  if (!algorithms::is_normalized(q))
   {
     algorithms::normalize(q);
   }

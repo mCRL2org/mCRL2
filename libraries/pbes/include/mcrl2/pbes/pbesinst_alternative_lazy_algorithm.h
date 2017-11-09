@@ -36,18 +36,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace std
-{
-template <>
-struct hash<mcrl2::pbes_system::propositional_variable_instantiation>
-{
-  std::size_t operator()(const mcrl2::pbes_system::propositional_variable_instantiation& x) const
-  {
-    return hash<atermpp::aterm>()(x);
-  }
-};
-} // namespace std
-
 namespace mcrl2
 {
 
@@ -257,7 +245,7 @@ class pbesinst_alternative_lazy_algorithm
     /// \param transformation_strategy A strategy to transform the PBES into a BES.
     /// \param erase_unused_bes_variables An indicator how often unreachable variables must be garbage collected.
     /// \param maximum_todo_size An indication of the maximal size of the stack with explorable
-    ///                          BES variables. If the stack exceeds this size, the ignored variable is set to 
+    ///                          BES variables. If the stack exceeds this size, the ignored variable is set to
     ///                          true or false, depending on the parameter \p approximate_true.
     /// \param approximate_true If true BES variables that are not investigated are set to false. If false
     ///                         these variables are set to true.
@@ -441,7 +429,7 @@ class pbesinst_alternative_lazy_algorithm
       {
         vec.clear();
       }
-      assert(instantiations.size()==0 || instantiations[0].size()==0); 
+      assert(instantiations.size()==0 || instantiations[0].size()==0);
 
 
       std::stack<pbes_expression> stack;
