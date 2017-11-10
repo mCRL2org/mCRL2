@@ -577,7 +577,7 @@ struct absinthe_algorithm
         // Apply sigmaS recursively to s
         //   f:        tail:           List(Nat) -> List(Nat)
         //   result:   generated_tail: List(AbsNat) -> Set(List(AbsNat))
-        const data::function_sort& fs = atermpp::down_cast<data::function_sort>(sigma(s));
+        data::function_sort fs = atermpp::down_cast<data::function_sort>(sigma(s));
         return data::function_symbol(name, data::function_sort(fs.domain(), make_set()(fs.codomain())));
       }
       else if (data::is_container_sort(s))
@@ -606,10 +606,9 @@ struct absinthe_algorithm
       }
       else if (is_function_sort(s))
       {
-        const function_sort fs(s);
-        const sort_expression_list& sl=fs.domain();
-        return function_symbol(name,
-                 function_sort(sort_expression_list(sl.begin(),sl.end(), make_set()), fs.codomain()));
+        const data::function_sort& fs = atermpp::down_cast<data::function_sort>(s);
+        const sort_expression_list& sl = fs.domain();
+        return function_symbol(name, function_sort(sort_expression_list(sl.begin(),sl.end(), make_set()), fs.codomain()));
       }
       else if (is_container_sort(s))
       {
