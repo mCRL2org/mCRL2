@@ -10,6 +10,7 @@
 /// \brief Test the linear_inequality functionality. 
 
 #include "mcrl2/data/fourier_motzkin.h"
+#include "mcrl2/data/join.h"
 #include "mcrl2/data/linear_inequalities.h"
 #include "mcrl2/data/parse.h"
 #include <boost/test/minimal.hpp>
@@ -180,9 +181,84 @@ void test_high_level_fourier_motzkin()
   BOOST_CHECK(out == less(sort_real::times(real_one(), vx), sort_real::real_(2)));
 }
 
+void split_conditions_helper(const std::string& vars,
+                             const std::string& expr,
+                             std::vector< data_expression_list >& real_conditions,
+                             std::vector< data_expression >& non_real_conditions)
+{
+  data_specification data_spec;
+  data_spec.add_context_sort(sort_real::real_());
+  const variable_list variables=parse_variables(vars);
+  const data_expression e_in=parse_data_expression(expr,variables,data_spec);
+
+  data::detail::split_condition(e_in, real_conditions, non_real_conditions);
+}
+
+void test_split_conditions()
+{
+  std::vector < data_expression_list > real_conditions;
+  std::vector < data_expression > non_real_conditions;
+
+  split_conditions_helper("x,y:Real, a,b,c:Bool;", "a && b", real_conditions, non_real_conditions);
+  BOOST_CHECK(real_conditions.size() == 1);
+  BOOST_CHECK(non_real_conditions.size() == 1);
+  BOOST_CHECK(real_conditions[0].size() == 0);
+  BOOST_CHECK(sort_bool::is_and_application(non_real_conditions[0]));
+  real_conditions.clear(); non_real_conditions.clear();
+
+  split_conditions_helper("x,y:Real, a,b,c:Bool;", "(a || b) && c", real_conditions, non_real_conditions);
+  BOOST_CHECK(real_conditions.size() == 1);
+  BOOST_CHECK(non_real_conditions.size() == 1);
+  BOOST_CHECK(real_conditions[0].size() == 0);
+  BOOST_CHECK(sort_bool::is_and_application(non_real_conditions[0]));
+  BOOST_CHECK(sort_bool::is_or_application(sort_bool::left(non_real_conditions[0])));
+  real_conditions.clear(); non_real_conditions.clear();
+
+  split_conditions_helper("x,y:Real, a,b,c:Bool;", "(a || b) && x < 5", real_conditions, non_real_conditions);
+  BOOST_CHECK(real_conditions.size() == 1);
+  BOOST_CHECK(non_real_conditions.size() == 1);
+  BOOST_CHECK(real_conditions[0].size() == 1);
+  BOOST_CHECK(is_less_application(real_conditions[0][0]));
+  BOOST_CHECK(sort_bool::is_or_application(non_real_conditions[0]));
+  real_conditions.clear(); non_real_conditions.clear();
+
+  split_conditions_helper("x,y:Real, a,b,c:Bool;", "(a || b) && (x == 3 || y > 4)", real_conditions, non_real_conditions);
+  BOOST_CHECK(real_conditions.size() == 2);
+  BOOST_CHECK(non_real_conditions.size() == 2);
+  BOOST_CHECK(real_conditions[0].size() == 1);
+  BOOST_CHECK(real_conditions[1].size() == 1);
+  BOOST_CHECK(is_equal_to_application(real_conditions[0][0]));
+  BOOST_CHECK(is_greater_application(real_conditions[1][0]));
+  BOOST_CHECK(non_real_conditions[0] == non_real_conditions[1]);
+  real_conditions.clear(); non_real_conditions.clear();
+
+  split_conditions_helper("x,y:Real, a,b,c:Bool;", "(x == y || y < 0) && (x == 3 || y > 4)", real_conditions, non_real_conditions);
+  BOOST_CHECK(real_conditions.size() == 4);
+  BOOST_CHECK(non_real_conditions.size() == 4);
+  for(int i = 0; i < 4; i++)
+  {
+    BOOST_CHECK(real_conditions[i].size() == 2);
+    BOOST_CHECK(non_real_conditions[i] == sort_bool::true_());
+  }
+  real_conditions.clear(); non_real_conditions.clear();
+
+  split_conditions_helper("x,y:Real, a,b,c:Bool;", "(x == y || a) && (x == 3 || b)", real_conditions, non_real_conditions);
+  BOOST_CHECK(real_conditions.size() == 4);
+  BOOST_CHECK(non_real_conditions.size() == 4);
+  for(int i = 0; i < 4; i++)
+  {
+    std::set< data_expression > split_without_true = split_and(non_real_conditions[i]);
+    split_without_true.erase(sort_bool::true_());
+    BOOST_CHECK(real_conditions[i].size() + split_without_true.size() == 2);
+  }
+  real_conditions.clear(); non_real_conditions.clear();
+}
+
 int test_main(int /* argc */, char** /* argv[]*/)
 {
   test_linear_inequality();
+  test_split_conditions();
+
   BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=4", false));
   BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=2", true));
   BOOST_CHECK(test_consistency_of_inequalities("x:Real;", "x<3  && x>=3", false));

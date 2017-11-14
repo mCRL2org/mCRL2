@@ -108,9 +108,10 @@ inline const data_expression& else_part(const data_expression& e)
 /// \param real_condition Those parts of e with only variables over sort Real.
 /// \param non_real_condition Those parts of e with only variables not of sort Real.
 /// \param negate A boolean variable that indicates whether the result must be negated.
+/// \return True when e contains real variables
 /// \pre The parameter e must be of sort Bool.
 
-static void split_condition_aux(
+static bool split_condition_aux(
   const data_expression& e,
   std::vector < data_expression_list >& real_conditions,
   std::vector < data_expression_list >& non_real_conditions,
@@ -119,100 +120,104 @@ static void split_condition_aux(
   assert(real_conditions.empty());
   assert(non_real_conditions.empty());
 
-  if ((!negate && sort_bool::is_and_application(e))  || (negate && sort_bool::is_or_application(e)))
-  {
-    std::vector < data_expression_list > real_conditions_aux1, non_real_conditions_aux1;
-    split_condition_aux(data::binary_left(atermpp::down_cast<application>(e)),real_conditions_aux1,non_real_conditions_aux1,negate);
-    std::vector < data_expression_list > real_conditions_aux2, non_real_conditions_aux2;
-    split_condition_aux(data::binary_right(atermpp::down_cast<application>(e)),real_conditions_aux2,non_real_conditions_aux2,negate);
-
-    for (std::vector < data_expression_list >::const_iterator
-         i1r=real_conditions_aux1.begin(), i1n=non_real_conditions_aux1.begin() ;
-         i1r!=real_conditions_aux1.end(); ++i1r, ++i1n)
-    {
-      for (std::vector < data_expression_list >::const_iterator
-           i2r=real_conditions_aux2.begin(), i2n=non_real_conditions_aux2.begin() ;
-           i2r!=real_conditions_aux2.end(); ++i2r, ++i2n)
-      {
-        real_conditions.push_back(*i1r + *i2r);
-        non_real_conditions.push_back(*i1n + *i2n);
-      }
-    }
-  }
-  else if ((!negate && sort_bool::is_or_application(e))  || (negate && sort_bool::is_and_application(e)))
-  {
-    split_condition_aux(data::binary_left(atermpp::down_cast<application>(e)),real_conditions,non_real_conditions,negate);
-    std::vector < data_expression_list >
-    real_conditions_aux, non_real_conditions_aux;
-    split_condition_aux(data::binary_right(atermpp::down_cast<application>(e)),real_conditions_aux,non_real_conditions_aux,negate);
-    for (std::vector < data_expression_list >::const_iterator
-         i_r=real_conditions_aux.begin(), i_n=non_real_conditions_aux.begin() ;
-         i_r!=real_conditions_aux.end(); ++i_r, ++i_n)
-    {
-      real_conditions.push_back(*i_r);
-      non_real_conditions.push_back(*i_n);
-    }
-  }
-  else if (sort_bool::is_implies_application(e))
+  // In these three cases, we rewrite the expression and call this function recursively
+  // with the rewritten expression
+  if (sort_bool::is_implies_application(e))
   {
     data_expression rewritten = sort_bool::or_(sort_bool::not_(sort_bool::left(e)), sort_bool::right(e));
-    split_condition_aux(rewritten, real_conditions, non_real_conditions, negate);
+    return split_condition_aux(rewritten, real_conditions, non_real_conditions, negate);
   }
   else if (is_if_application(e))
   {
-    split_condition_aux(sort_bool::or_(sort_bool::and_(condition_part(e),then_part(e)),
+    return split_condition_aux(sort_bool::or_(sort_bool::and_(condition_part(e),then_part(e)),
                                    sort_bool::and_(sort_bool::not_(condition_part(e)),else_part(e))),
                     real_conditions,non_real_conditions,negate);
   }
   else if (sort_bool::is_not_application(e))
   {
-    split_condition_aux(unary_operand(atermpp::down_cast<application>(e)),real_conditions,non_real_conditions,!negate);
+    return split_condition_aux(sort_bool::arg(e),real_conditions,non_real_conditions,!negate);
+  }
+
+  if(sort_bool::is_and_application(e) || sort_bool::is_or_application(e))
+  {
+    // Recursive case
+    std::vector < data_expression_list > real_conditions_aux1, non_real_conditions_aux1;
+    bool left_is_real = split_condition_aux(sort_bool::left(e),real_conditions_aux1,non_real_conditions_aux1,negate);
+    std::vector < data_expression_list > real_conditions_aux2, non_real_conditions_aux2;
+    bool right_is_real = split_condition_aux(sort_bool::right(e),real_conditions_aux2,non_real_conditions_aux2,negate);
+    if(!left_is_real && !right_is_real)
+    {
+      // There are no real variables on either side so we can
+      // just store the expression e in non_real_conditions
+      real_conditions.push_back(data_expression_list());
+      non_real_conditions.push_back(data_expression_list({ negate ? data_expression(sort_bool::not_(e)) : e }));
+    }
+    else if ((!negate && sort_bool::is_and_application(e))  || (negate && sort_bool::is_or_application(e)))
+    {
+      // Combine the recursive results (whis are disjunctiosn of conjunctions)
+      // of the left and right sides of e (which is a conjunction or negated disjunction)
+      // by using the distributivity of && and || to obtain a result
+      // which is again a disjunction of conjuctions.
+      for (std::vector < data_expression_list >::const_iterator
+           i1r=real_conditions_aux1.begin(), i1n=non_real_conditions_aux1.begin() ;
+           i1r!=real_conditions_aux1.end(); ++i1r, ++i1n)
+      {
+        for (std::vector < data_expression_list >::const_iterator
+             i2r=real_conditions_aux2.begin(), i2n=non_real_conditions_aux2.begin() ;
+             i2r!=real_conditions_aux2.end(); ++i2r, ++i2n)
+        {
+          real_conditions.push_back(*i1r + *i2r);
+          non_real_conditions.push_back(*i1n + *i2n);
+        }
+      }
+    }
+    else 
+    {
+      assert((!negate && sort_bool::is_or_application(e))  || (negate && sort_bool::is_and_application(e)));
+
+      // Combine the recursive results of the left and right sides
+      // of the disjunction (or negated conjunction) by concatenating
+      // them.
+      real_conditions.insert(real_conditions.cend(), real_conditions_aux1.begin(), real_conditions_aux1.end());
+      real_conditions.insert(real_conditions.cend(), real_conditions_aux2.begin(), real_conditions_aux2.end());
+      non_real_conditions.insert(non_real_conditions.cend(), non_real_conditions_aux1.begin(), non_real_conditions_aux1.end());
+      non_real_conditions.insert(non_real_conditions.cend(), non_real_conditions_aux2.begin(), non_real_conditions_aux2.end());
+    }
+    return left_is_real || right_is_real;
   }
   else if (is_inequality(e) && (data::binary_left(atermpp::down_cast<application>(e)).sort() == sort_real::real_() || data::binary_right(atermpp::down_cast<application>(e)).sort() == sort_real::real_()))
   {
+    // Base case 1: an inequality over real numbers
     std::set < variable > vars=data::find_all_variables(e);
-    for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
+    for (const variable& v: vars)
     {
-      if (i->sort()!=sort_real::real_())
+      if (v.sort() != sort_real::real_())
       {
         throw  mcrl2::runtime_error("Expression " + data::pp(e) + " contains variable " +
-                                    data::pp(*i) + " not of sort Real.");
+                                    data::pp(v) + " not of sort Real.");
       }
     }
-    if (negate)
-    {
-      real_conditions.push_back(data_expression_list({ negate_inequality(e) }));
-      non_real_conditions.push_back(data_expression_list());
-    }
-    else
-    {
-      real_conditions.push_back(data_expression_list({ e }));
-      non_real_conditions.push_back(data_expression_list());
-    }
+    real_conditions.push_back(data_expression_list({ negate ? negate_inequality(e) : e }));
+    non_real_conditions.push_back(data_expression_list());
+    return true;
   }
   else
   {
+    // Base case 2: an expression not containing real numbers
     // e is assumed to be a non_real expression.
     std::set < variable > vars=data::find_all_variables(e);
-    for (std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
+    for (const variable& v: vars)
     {
-      if (i->sort()==sort_real::real_())
+      if (v.sort() == sort_real::real_())
       {
         throw  mcrl2::runtime_error("Expression " + data::pp(e) + " contains variable " +
-                                    data::pp(*i) + " of sort Real.");
+                                    data::pp(v) + " of sort Real.");
       }
     }
-    if (negate)
-    {
-      non_real_conditions.push_back(data_expression_list({ data_expression(sort_bool::not_(e)) }));
-      real_conditions.push_back(data_expression_list());
-    }
-    else
-    {
-      non_real_conditions.push_back(data_expression_list({ e }));
-      real_conditions.push_back(data_expression_list());
-    }
-  }
+    non_real_conditions.push_back(data_expression_list({ negate ? data_expression(sort_bool::not_(e)) : e }));
+    real_conditions.push_back(data_expression_list());
+    return false;
+  }  
 }
 
 /// \brief This function first splits the given condition e into real conditions and
