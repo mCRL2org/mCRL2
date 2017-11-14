@@ -178,10 +178,10 @@ static bool split_condition_aux(
       // Combine the recursive results of the left and right sides
       // of the disjunction (or negated conjunction) by concatenating
       // them.
-      real_conditions.insert(real_conditions.cend(), real_conditions_aux1.begin(), real_conditions_aux1.end());
-      real_conditions.insert(real_conditions.cend(), real_conditions_aux2.begin(), real_conditions_aux2.end());
-      non_real_conditions.insert(non_real_conditions.cend(), non_real_conditions_aux1.begin(), non_real_conditions_aux1.end());
-      non_real_conditions.insert(non_real_conditions.cend(), non_real_conditions_aux2.begin(), non_real_conditions_aux2.end());
+      real_conditions.insert(real_conditions.end(), real_conditions_aux1.begin(), real_conditions_aux1.end());
+      real_conditions.insert(real_conditions.end(), real_conditions_aux2.begin(), real_conditions_aux2.end());
+      non_real_conditions.insert(non_real_conditions.end(), non_real_conditions_aux1.begin(), non_real_conditions_aux1.end());
+      non_real_conditions.insert(non_real_conditions.end(), non_real_conditions_aux2.begin(), non_real_conditions_aux2.end());
     }
     return left_is_real || right_is_real;
   }
