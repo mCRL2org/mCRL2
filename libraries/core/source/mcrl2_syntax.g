@@ -87,7 +87,7 @@ DataExpr
   | '{' BagEnumEltList '}'                   $left        20     // Bag enumeration
   | '{' VarDecl '|' DataExpr '}'             $left        20     // Set/bag comprehension
   | '{' DataExprList '}'                     $left        20     // Set enumeration
-  | '(' DataExpr ')'                         $left        20     // Brackets
+  | '(' DataExpr ')'                         $left        50     // Brackets
   | DataExpr '[' DataExpr '->' DataExpr ']'  $unary_left  13     // Function update
   | DataExpr '(' DataExprList ')'            $unary_left  13     // Function application
   | '!' DataExpr                             $unary_right 12     // Negation, set complement
@@ -280,7 +280,7 @@ PbesExpr
   :
   DataValExpr                                                  // Boolean data expression
 //| DataExpr                                                     // Boolean data expression
-  | '(' PbesExpr ')'                           $left        30   // Brackets
+  | '(' PbesExpr ')'                           $left        50   // Brackets
   | 'true'                                     $left        30   // True
   | 'false'                                    $left        30   // False
   | Id ( '(' DataExprList ')' )?               $left        30   // Instantiated PBES variable or data application
@@ -298,7 +298,7 @@ ActFrm
   : DataValExpr                                                  // Boolean data expression
 //| DataExpr                                                     // Boolean data expression
   | MultAct                                                      // Multi-action
-  | '(' ActFrm ')'                             $left        30   // Brackets
+  | '(' ActFrm ')'                             $left        50   // Brackets
   | 'true'                                     $left        30   // True
   | 'false'                                    $left        30   // False
   | 'forall' VarsDeclList '.' ActFrm           $unary_right 21   // Universal quantifier
@@ -314,7 +314,7 @@ ActFrm
 
 RegFrm
   : ActFrm                                                       // Action formula
-  | '(' RegFrm ')'                             $left        40   // Brackets
+  | '(' RegFrm ')'                             $left        50   // Brackets
   | RegFrm ('+' $binary_op_left 31) RegFrm                       // Alternative composition
   | RegFrm ('.' $binary_op_right 32) RegFrm                      // Sequential composition
   | RegFrm '*'                                 $unary_right 33   // Iteration
