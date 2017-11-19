@@ -86,7 +86,7 @@ class RewriterCompilingJitty: public Rewriter
 
     rewrite_strategy getStrategy();
 
-    data_expression rewrite(const data_expression &term, substitution_type &sigma);
+    data_expression rewrite(const data_expression& term, substitution_type& sigma);
 
     substitution_type *global_sigma;
 
@@ -94,7 +94,7 @@ class RewriterCompilingJitty: public Rewriter
     // that are used in the compiling rewriter in forall, where and exists.
     std::vector<variable_list> rewriter_binding_variable_lists;
     std::map <variable_list, std::size_t> variable_list_indices1;
-    std::size_t binding_variable_list_index(const variable_list &v);
+    std::size_t binding_variable_list_index(const variable_list& v);
     inline variable_list binding_variable_list_get(const std::size_t i)
     {
       return (rewriter_binding_variable_lists[i]);
@@ -107,7 +107,7 @@ class RewriterCompilingJitty: public Rewriter
     // to prevent double occurrences in the vector.
     std::vector<variable> rewriter_bound_variables;
     std::map <variable, std::size_t> variable_indices0;
-    std::size_t bound_variable_index(const variable &v);
+    std::size_t bound_variable_index(const variable& v);
     variable bound_variable_get(const std::size_t i)
     {
       return (rewriter_bound_variables[i]);
@@ -125,15 +125,15 @@ class RewriterCompilingJitty: public Rewriter
 
     normal_form_cache m_nf_cache;
 
-    uncompiled_library *rewriter_so;
+    std::shared_ptr<uncompiled_library> rewriter_so;
 
     void (*so_rewr_cleanup)();
     data_expression(*so_rewr)(const data_expression&);
 
-    void add_base_nfs(nfs_array &a, const function_symbol &opid, std::size_t arity);
-    void extend_nfs(nfs_array &a, const function_symbol &opid, std::size_t arity);
-    bool opid_is_nf(const function_symbol &opid, std::size_t num_args);
-    void calc_nfs_list(nfs_array &a, const application& args, variable_or_number_list nnfvars);
+    void add_base_nfs(nfs_array& a, const function_symbol& opid, std::size_t arity);
+    void extend_nfs(nfs_array& a, const function_symbol& opid, std::size_t arity);
+    bool opid_is_nf(const function_symbol& opid, std::size_t num_args);
+    void calc_nfs_list(nfs_array& a, const application& args, variable_or_number_list nnfvars);
     bool calc_nfs(const data_expression& t, variable_or_number_list nnfvars);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
@@ -150,7 +150,7 @@ struct rewriter_interface
   std::string caller_toolset_version;
   std::string status;
   RewriterCompilingJitty* rewriter;
-  data_expression (*rewrite_external)(const data_expression &t);
+  data_expression (*rewrite_external)(const data_expression& t);
   void (*rewrite_cleanup)();
 };
 

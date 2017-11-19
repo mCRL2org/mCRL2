@@ -2420,11 +2420,11 @@ void RewriterCompilingJitty::CleanupRewriteSystem()
   {
     so_rewr_cleanup();
   }
-  if (rewriter_so != NULL)
+  /* if (rewriter_so != NULL)
   {
     delete rewriter_so;
     rewriter_so = NULL;
-  }
+  } */
 }
 
 ///
@@ -2616,7 +2616,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     compile_script = "mcrl2compilerewriter";
   }
 
-  rewriter_so = new uncompiled_library(compile_script);
+  rewriter_so = std::shared_ptr<uncompiled_library>(new uncompiled_library(compile_script));
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
 
   jittyc_eqns.clear();
@@ -2726,7 +2726,6 @@ data_expression RewriterCompilingJitty::rewrite(
      const data_expression& term,
      substitution_type& sigma)
 {
-// std::cerr << "REWRITE " << term << "\n";
 #ifdef MCRL2_DISPLAY_REWRITE_STATISTICS
   data::detail::increment_rewrite_count();
 #endif

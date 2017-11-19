@@ -47,6 +47,7 @@ static std::size_t npos()
   return std::size_t(-1);
 }
 
+#ifndef NDEBUG
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_a_variable
 {
@@ -56,7 +57,6 @@ struct is_a_variable
   }
 };
 
-#ifndef NDEBUG
 static
 bool occur_check(const variable& v, const atermpp::aterm_appl& e)
 {
@@ -74,29 +74,6 @@ bool occur_check(const variable& v, const atermpp::aterm_appl& e)
   return true;
 }
 #endif
-
-template <class Rewriter>
-struct rewrite_list_rewriter
-{
-  typename Rewriter::substitution_type& m_sigma;
-  Rewriter& m_rewr;
-
-  rewrite_list_rewriter(typename Rewriter::substitution_type& sigma, Rewriter& rewr):m_sigma(sigma),m_rewr(rewr)
-  {}
-
-  const data_expression operator() (const data_expression& t) const
-  {
-    return m_rewr.rewrite(t,m_sigma);
-  }
-};
-
-data_expression_list Rewriter::rewrite_list(
-     const data_expression_list& terms,
-     substitution_type& sigma)
-{
-  rewrite_list_rewriter<Rewriter> r(sigma,*this);
-  return data_expression_list(terms.begin(),terms.end(),r);
-}
 
 data_expression Rewriter::rewrite_where(
                       const where_clause& term,

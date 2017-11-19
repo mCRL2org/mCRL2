@@ -51,20 +51,11 @@ class basic_rewriter
     /// \brief The rewrite strategies of the rewriter.
     typedef rewrite_strategy strategy;
 
-    /// \brief The rewriter needs to find fresh names for
-    //         variables. This name generator can be used
-    //         for other renaming purposes as well.
-    //  \deprecated Do not use this, as it will be removed.
-    /* data::set_identifier_generator& identifier_generator()
-    {
-      return m_rewriter->identifier_generator();
-    } */
-
   protected:
 
     /// \brief Constructor.
     /// \param[in] r A rewriter
-    basic_rewriter(const std::shared_ptr<detail::Rewriter> & r) :
+    basic_rewriter(const std::shared_ptr<detail::Rewriter>& r) :
       m_rewriter(r)
     {}
 

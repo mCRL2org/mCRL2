@@ -96,7 +96,7 @@ class Rewriter
      * \return The list Terms where each element is replaced by its
      *         normal form.
      **/
-    virtual data_expression_list rewrite_list(const data_expression_list& terms, substitution_type& sigma);
+    /* virtual data_expression_list rewrite_list(const data_expression_list& terms, substitution_type& sigma); */
 
     /** 
      * \brief Provide the rewriter with a () operator, such that it can also
