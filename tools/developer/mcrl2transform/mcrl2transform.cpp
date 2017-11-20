@@ -16,6 +16,7 @@
 
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/process/alphabet.h"
 #include "mcrl2/process/alphabet_bounded.h"
 #include "mcrl2/process/alphabet_efficient.h"
@@ -30,9 +31,12 @@
 #include "mcrl2/process/process_variable_strongly_connected_components.h"
 #include "mcrl2/process/remove_data_parameters.h"
 #include "mcrl2/process/remove_equations.h"
+#include "mcrl2/process/rewrite.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
+using namespace mcrl2::utilities::tools;
+using data::tools::rewriter_tool;
 
 /// \brief Saves text to the file filename, or to stdout if filename equals "-".
 inline
@@ -88,11 +92,11 @@ struct command
   virtual void execute() = 0;
 };
 
-struct processcommand: public command
+struct process_command: public command
 {
   process::process_specification procspec;
 
-  processcommand(const std::string& name,
+  process_command(const std::string& name,
                  const std::string& input_filename,
                  const std::string& output_filename,
                  const std::vector<std::string>& options
@@ -106,61 +110,77 @@ struct processcommand: public command
   }
 };
 
+/// \brief Process command that uses a rewrite strategy
+struct process_rewriter_command: public process_command
+{
+  data::rewrite_strategy strategy;
+
+  process_rewriter_command(const std::string& name,
+                           const std::string& input_filename,
+                           const std::string& output_filename,
+                           const std::vector<std::string>& options,
+                           data::rewrite_strategy strategy_
+                          )
+    : process_command(name, input_filename, output_filename, options),
+      strategy(strategy_)
+  {}
+};
+
 /// \brief Eliminates trivial process equations of the shape P = Q
-struct eliminate_trivial_equations_command: public processcommand
+struct eliminate_trivial_equations_command: public process_command
 {
   eliminate_trivial_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("eliminate-trivial-equations", input_filename, output_filename, options)
+    : process_command("eliminate-trivial-equations", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::eliminate_trivial_equations(procspec);
     write_text(output_filename, process::pp(procspec));
   }
 };
 
 /// \brief Applies a bisimulation reduction to process variables
-struct join_bisimilar_equations_command: public processcommand
+struct join_bisimilar_equations_command: public process_command
 {
   join_bisimilar_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("join-bisimilar-equations", input_filename, output_filename, options)
+    : process_command("join-bisimilar-equations", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::remove_duplicate_equations(procspec);
     write_text(output_filename, process::pp(procspec));
   }
 };
 
 /// \brief Applies alphabet reduction to a process
-struct alphabet_reduce_command: public processcommand
+struct alphabet_reduce_command: public process_command
 {
   alphabet_reduce_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("alphabet-reduce", input_filename, output_filename, options)
+    : process_command("alphabet-reduce", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::alphabet_reduce(procspec, 0);
     write_text(output_filename, process::pp(procspec));
   }
 };
 
 /// \brief Computes strongly connected components of processes
-struct process_scc_command: public processcommand
+struct process_scc_command: public process_command
 {
   process_scc_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("process-scc", input_filename, output_filename, options)
+    : process_command("process-scc", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     for (const std::set<process::process_identifier>& component: process::process_variable_strongly_connected_components(procspec.equations()))
     {
       std::cout << core::detail::print_set(component) << std::endl;
@@ -169,119 +189,119 @@ struct process_scc_command: public processcommand
 };
 
 /// \brief Eliminates equations that are used in a single place
-struct eliminate_single_usage_equations_command: public processcommand
+struct eliminate_single_usage_equations_command: public process_command
 {
   eliminate_single_usage_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("eliminate-single-usage-equations", input_filename, output_filename, options)
+    : process_command("eliminate-single-usage-equations", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::eliminate_single_usage_equations(procspec);
     write_text(output_filename, process::pp(procspec));
   }
 };
 
 /// \brief Eliminates unused equations
-struct eliminate_unused_equations_command: public processcommand
+struct eliminate_unused_equations_command: public process_command
 {
   eliminate_unused_equations_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("eliminate-unused-equations", input_filename, output_filename, options)
+    : process_command("eliminate-unused-equations", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::eliminate_unused_equations(procspec.equations(), procspec.init());
     write_text(output_filename, process::pp(procspec));
   }
 };
 
 /// \brief Prints information about a process specification
-struct process_info_command: public processcommand
+struct process_info_command: public process_command
 {
   process_info_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("process-info", input_filename, output_filename, options)
+    : process_command("process-info", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process_info(procspec);
   }
 };
 
 /// \brief Removes data parameters from a process
-struct remove_data_parameters_command: public processcommand
+struct remove_data_parameters_command: public process_command
 {
   remove_data_parameters_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("remove-data-parameters", input_filename, output_filename, options)
+    : process_command("remove-data-parameters", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     remove_data_parameters(procspec);
     write_text(output_filename, process::pp(procspec));
   }
 };
 
 /// \brief Computes the alphabet of the initial state of a process
-struct alphabet_command: public processcommand
+struct alphabet_command: public process_command
 {
   alphabet_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("alphabet", input_filename, output_filename, options)
+    : process_command("alphabet", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::multi_action_name_set alpha = process::alphabet(procspec.init(), procspec.equations());
     write_text(output_filename, process::pp(alpha));
   }
 };
 
 /// \brief Computes the alphabet of the initial state of a process
-struct alphabet_efficient_command: public processcommand
+struct alphabet_efficient_command: public process_command
 {
   alphabet_efficient_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("alphabet-efficient", input_filename, output_filename, options)
+    : process_command("alphabet-efficient", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::multi_action_name_set alpha = process::alphabet_efficient(procspec.init(), procspec.equations());
     write_text(output_filename, process::pp(alpha));
   }
 };
 
 /// \brief Computes the alphabet of the initial state of a process
-struct alphabet_new_command: public processcommand
+struct alphabet_new_command: public process_command
 {
   alphabet_new_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("alphabet-new", input_filename, output_filename, options)
+    : process_command("alphabet-new", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::multi_action_name_set alpha = process::alphabet_new(procspec.init(), procspec.equations());
     write_text(output_filename, process::pp(alpha));
   }
 };
 
 /// \brief Computes the alphabet of the initial state of a process, if it is an allow
-struct alphabet_bounded_command: public processcommand
+struct alphabet_bounded_command: public process_command
 {
   alphabet_bounded_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("alphabet-bounded", input_filename, output_filename, options)
+    : process_command("alphabet-bounded", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     if (!process::is_allow(procspec.init()))
     {
       std::cout << "Error: expected an allow set!" << std::endl;
@@ -301,24 +321,39 @@ struct alphabet_bounded_command: public processcommand
 };
 
 /// \brief Anonimizes the identifiers of a process specification
-struct anonymize_process_command: public processcommand
+struct anonymize_process_command: public process_command
 {
   anonymize_process_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options)
-    : processcommand("anonymize", input_filename, output_filename, options)
+    : process_command("anonymize", input_filename, output_filename, options)
   {}
 
   void execute()
   {
-    processcommand::execute();
+    process_command::execute();
     process::anonymize(procspec);
     write_text(output_filename, process::pp(procspec));
   }
 };
 
-class transform_tool: public utilities::tools::input_output_tool
+struct rewrite_process_command: public process_rewriter_command
+{
+  rewrite_process_command(const std::string& input_filename, const std::string& output_filename, const std::vector<std::string>& options, data::rewrite_strategy strategy)
+    : process_rewriter_command("rewrite-process", input_filename, output_filename, options, strategy)
+  {}
+
+  void execute()
+  {
+    process_rewriter_command::execute();
+    data::rewriter r(procspec.data(), strategy);
+    process::rewrite(procspec, r);
+    write_text(output_filename, process::pp(procspec));
+  }
+};
+
+class transform_tool: public rewriter_tool<input_output_tool>
 {
   protected:
-    typedef utilities::tools::input_output_tool super;
+    typedef rewriter_tool<input_output_tool> super;
 
     std::string algorithm_and_options;
     int algorithm_number = -1;
@@ -377,6 +412,7 @@ class transform_tool: public utilities::tools::input_output_tool
       add_command(commands, std::make_shared<alphabet_new_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<alphabet_bounded_command>(input_filename(), output_filename(), options));
       add_command(commands, std::make_shared<anonymize_process_command>(input_filename(), output_filename(), options));
+      add_command(commands, std::make_shared<rewrite_process_command>(input_filename(), output_filename(), options, rewrite_strategy()));
 
       for (auto i = commands.begin(); i != commands.end(); ++i)
       {
