@@ -41,14 +41,15 @@ typedef std::vector < sort_expression_list> sort_list_vector;
 ///
 class normal_form_cache
 {
-private:
-  RewriterJitty& m_rewriter;
-  std::set<data_expression> m_lookup;
-public:
-  normal_form_cache(RewriterJitty& rewriter)
-    : m_rewriter(rewriter)
-  { }
-
+  private:
+    RewriterJitty& m_rewriter;
+    std::set<data_expression> m_lookup;
+  public:
+    normal_form_cache(RewriterJitty& rewriter)
+      : m_rewriter(rewriter)
+    { 
+    }
+  
   ///
   /// \brief insert stores the normal form of t in the cache, and returns a string
   ///        that is a C++ representation of the stored normal form. This string can
@@ -80,6 +81,7 @@ class RewriterCompilingJitty: public Rewriter
 {
   public:
     typedef Rewriter::substitution_type substitution_type;
+    typedef data_expression (*rewriter_function)(const application&, RewriterCompilingJitty*);
 
     RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &);
     virtual ~RewriterCompilingJitty();
@@ -88,8 +90,9 @@ class RewriterCompilingJitty: public Rewriter
 
     data_expression rewrite(const data_expression& term, substitution_type& sigma);
 
+    // The variable global_sigma is a temporary store to maintain the substitution 
+    // sigma during rewriting a single term. It is not a variable for public use. 
     substitution_type *global_sigma;
-
     // The data structures below are used to store the variable lists2
     // that are used in the compiling rewriter in forall, where and exists.
     std::vector<variable_list> rewriter_binding_variable_lists;
@@ -107,11 +110,27 @@ class RewriterCompilingJitty: public Rewriter
     // to prevent double occurrences in the vector.
     std::vector<variable> rewriter_bound_variables;
     std::map <variable, std::size_t> variable_indices0;
+   
+    // The following values are used to locate rewrite functions in the tables of
+    // precompiled functions. 
+    //   arity_bound -- The maximum occurring arity + 1
+    //   index_bound -- The maximum occurring index + 1
+    std::size_t arity_bound;
+    std::size_t index_bound;
+
     std::size_t bound_variable_index(const variable& v);
     variable bound_variable_get(const std::size_t i)
     {
       return (rewriter_bound_variables[i]);
     }
+
+    // The two arrays below are intended to contain the precompiled functions used
+    // for rewriting. They are used to find the relevant compiled rewriting code quickly. 
+    std::vector<rewriter_function> functions_when_arguments_are_not_in_normal_form;
+    std::vector<rewriter_function> functions_when_arguments_are_in_normal_form;
+
+    // Standard assignment operator.
+    RewriterCompilingJitty& operator=(const RewriterCompilingJitty& other)=delete;
 
   private:
     class ImplementTree;
@@ -123,12 +142,11 @@ class RewriterCompilingJitty: public Rewriter
     std::map<function_symbol, data_equation_list> jittyc_eqns;
     std::set<function_symbol> m_extra_symbols;
 
+    std::shared_ptr<uncompiled_library> rewriter_so;
     normal_form_cache m_nf_cache;
 
-    std::shared_ptr<uncompiled_library> rewriter_so;
-
     void (*so_rewr_cleanup)();
-    data_expression(*so_rewr)(const data_expression&);
+    data_expression(*so_rewr)(const data_expression&, RewriterCompilingJitty*);
 
     void add_base_nfs(nfs_array& a, const function_symbol& opid, std::size_t arity);
     void extend_nfs(nfs_array& a, const function_symbol& opid, std::size_t arity);
@@ -150,7 +168,7 @@ struct rewriter_interface
   std::string caller_toolset_version;
   std::string status;
   RewriterCompilingJitty* rewriter;
-  data_expression (*rewrite_external)(const data_expression& t);
+  data_expression (*rewrite_external)(const data_expression& t, RewriterCompilingJitty*);
   void (*rewrite_cleanup)();
 };
 

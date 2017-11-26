@@ -42,7 +42,6 @@ namespace detail
 class Rewriter
 {
   public:
-    // data::set_identifier_generator generator;  //name for variables.
     enumerator_identifier_generator generator;  //name for variables.
 
     typedef mutable_indexed_substitution<> substitution_type;
@@ -57,12 +56,11 @@ class Rewriter
           data_equation_selector(eq_selector),
           m_data_specification_for_enumeration(data_spec)
     {
-      /* generator.add_identifiers(data::find_identifiers(data_spec.equations()));
-      generator.add_identifiers(data::find_identifiers(data_spec.sorts()));
-      generator.add_identifiers(data::find_identifiers(data_spec.constructors()));
-      generator.add_identifiers(data::find_identifiers(data_spec.mappings())); */
-
     }
+
+    /** \brief The copy assignment operator is deleted. Copying is not allowed. 
+    **/
+    Rewriter& operator=(const Rewriter& other)=delete;
 
     /** \brief Destructor. */
     virtual ~Rewriter()
@@ -171,7 +169,7 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-Rewriter* createRewriter(
+std::shared_ptr<detail::Rewriter> createRewriter(
              const data_specification& DataSpec,
              const used_data_equation_selector& equations_selector,
              const rewrite_strategy Strategy = jitty);

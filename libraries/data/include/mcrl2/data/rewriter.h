@@ -60,9 +60,10 @@ class basic_rewriter
     {}
 
     /// \brief Copy Constructor
-    basic_rewriter(const basic_rewriter &other) :
-      m_rewriter(other.m_rewriter)
-    {}
+    basic_rewriter(const basic_rewriter& other)=default;
+
+    /// \brief Assignment operator
+    basic_rewriter& operator=(const basic_rewriter& other)=default;
 
     /// \brief Constructor.
     /// \param[in] d A data specification
@@ -72,7 +73,7 @@ class basic_rewriter
     { }
 
     /// \brief Constructor.
-    basic_rewriter(const data_specification & d, const used_data_equation_selector &equation_selector, const strategy s = jitty) :
+    basic_rewriter(const data_specification& d, const used_data_equation_selector& equation_selector, const strategy s = jitty) :
       m_rewriter(detail::createRewriter(d, equation_selector, static_cast< rewrite_strategy >(s)))
     {}
 

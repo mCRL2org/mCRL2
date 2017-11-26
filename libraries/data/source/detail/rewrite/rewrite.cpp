@@ -499,27 +499,26 @@ data_expression Rewriter::universal_quantifier_enumeration(
 }
 
 
-Rewriter* createRewriter(
-            const data_specification& DataSpec,
+std::shared_ptr<Rewriter> createRewriter(
+            const data_specification& data_spec,
             const used_data_equation_selector& equations_selector,
-            const rewrite_strategy Strategy)
+            const rewrite_strategy strategy)
 {
-  switch (Strategy)
+  switch (strategy)
   {
     case jitty:
-      return new RewriterJitty(DataSpec,equations_selector);
+      return std::shared_ptr<Rewriter>(new RewriterJitty(data_spec,equations_selector));
 #ifdef MCRL2_JITTYC_AVAILABLE
     case jitty_compiling:
-      return new RewriterCompilingJitty(DataSpec,equations_selector);
+      return std::shared_ptr<Rewriter>(new RewriterCompilingJitty(data_spec,equations_selector));
 #endif
     case jitty_prover:
-      return new RewriterProver(DataSpec,jitty,equations_selector);
+      return std::shared_ptr<Rewriter>(new RewriterProver(data_spec,jitty,equations_selector));
 #ifdef MCRL2_JITTYC_AVAILABLE
     case jitty_compiling_prover:
-      return new RewriterProver(DataSpec,jitty_compiling,equations_selector);
+      return std::shared_ptr<Rewriter>(new RewriterProver(data_spec,jitty_compiling,equations_selector));
 #endif
-    default:
-      return nullptr;
+    default: throw mcrl2::runtime_error("Cannot create a rewriter using strategy " + pp(strategy) + ".");
   }
 }
 
@@ -598,7 +597,7 @@ void CheckRewriteRule(const data_equation& data_eqn)
   catch (variable& var)
   {
     // This should never occur if data_eqn is a valid data equation
-    mCRL2log(log::error) << "Data Equation: " << data_expression(data_eqn) << std::endl;
+    mCRL2log(log::error) << "Data equation: " << data_expression(data_eqn) << std::endl;
     assert(0);
     throw runtime_error("variable " + pp(var) + " occurs in left-hand side of equation but is not defined (in equation: " + pp(data_eqn) + ")");
   }

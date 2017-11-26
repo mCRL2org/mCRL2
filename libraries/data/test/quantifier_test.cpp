@@ -54,12 +54,13 @@ void quantifier_expression_test(mcrl2::data::rewrite_strategy s)
   quantifier_expression_test("exists x: Bool. x == true || x==false", "true", dataspec, r);
   quantifier_expression_test("forall x:Bool.exists y: Bool. x == y", "true", dataspec, r);
   quantifier_expression_test("exists x: Bool.forall y:Bool.x == y", "false", dataspec, r);
-  quantifier_expression_test("forall b: Bool. b", "false", dataspec, r);
+  quantifier_expression_test("forall b: Bool. b", "false", dataspec, r); 
 
   // tests for Pos / Nat
   dataspec.add_context_sort(sort_nat::nat());
   dataspec.add_context_sort(sort_set::set_(sort_nat::nat()));
   r = rewriter(dataspec, s);
+  quantifier_expression_test("1<2", "true",dataspec, r);
   quantifier_expression_test("exists x: Nat. (  x in {1,2,25,600} && 25 == x )", "true", dataspec, r);
 
   // Rewriter only enumerates up to some bound, check whether it can find small solutions

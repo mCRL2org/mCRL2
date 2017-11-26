@@ -47,11 +47,11 @@
 
 class uncompiled_library : public dynamic_library
 {
-private:
+  private:
     std::list<std::string> m_tempfiles;
     std::string m_compile_script;
 
-public:
+  public:
     uncompiled_library(const std::string& script) : m_compile_script(script) {}
 
     void compile(const std::string& filename) 

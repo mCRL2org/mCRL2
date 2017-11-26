@@ -1,3 +1,14 @@
+// Author(s): Jeroen Keiren, Sjoerd Cranen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/utilities/dynamic_library.h
+
+
 #ifndef __DYNAMIC_LIBRARY_H
 #define __DYNAMIC_LIBRARY_H
 
@@ -86,68 +97,69 @@
   }
 #endif
 
-class dynamic_library {
-private:
-  library_handle m_library;
-  void load() 
-  {
-    if (m_library == NULL)
+class dynamic_library 
+{
+  private:
+    library_handle m_library;
+    void load() 
     {
-      m_library = get_module_handle(m_filename.c_str());
       if (m_library == NULL)
       {
-        std::stringstream s;
-        s << "Could not load library (" << m_filename << "): " << get_last_error();
-        throw std::runtime_error(s.str());
+        m_library = get_module_handle(m_filename.c_str());
+        if (m_library == NULL)
+        {
+          std::stringstream s;
+          s << "Could not load library (" << m_filename << "): " << get_last_error();
+          throw std::runtime_error(s.str());
+        }
       }
     }
-  }
-
-protected:
-  std::string m_filename;
-  void unload() 
-  {
-    if (m_library)
+  
+  protected:
+    std::string m_filename;
+    void unload() 
     {
-      if (!close_module_handle(m_library))
+      if (m_library)
+      {
+        if (!close_module_handle(m_library))
+        {
+          std::stringstream s;
+          s << "Could not close library (" << m_filename << "): " << get_last_error();
+          throw std::runtime_error(s.str());
+        }
+        m_library = NULL;
+      }
+    }
+  
+  public:
+    dynamic_library(const std::string& filename = std::string()) : m_library(0), m_filename(filename) {}
+    virtual ~dynamic_library() 
+    {
+      try
+      {
+        unload();
+      }
+      catch(std::runtime_error& error)
+      {
+        mCRL2log(mcrl2::log::error) << "Error while unloading dynamic library: " << error.what() << std::endl;
+      }
+    }
+  
+    library_proc proc_address(const std::string& name) 
+    {
+      if (m_library == 0)
+      {
+        load();
+      }
+      library_proc result = get_proc_address(m_library, name.c_str());
+      if (result == 0)
       {
         std::stringstream s;
-        s << "Could not close library (" << m_filename << "): " << get_last_error();
+        s << "Could not find proc address (" << m_filename << ":" << name << "): " << get_last_error();
         throw std::runtime_error(s.str());
       }
-      m_library = NULL;
+      return result;
     }
-  }
-
-public:
-  dynamic_library(const std::string &filename = std::string()) : m_library(0), m_filename(filename) {}
-  virtual ~dynamic_library() 
-  {
-    try
-    {
-      unload();
-    }
-    catch(std::runtime_error &error)
-    {
-      mCRL2log(mcrl2::log::error) << "Error while unloading dynamic library: " << error.what() << std::endl;
-    }
-  }
-
-  library_proc proc_address(const std::string &name) 
-  {
-    if (m_library == 0)
-    {
-      load();
-    }
-    library_proc result = get_proc_address(m_library, name.c_str());
-    if (result == 0)
-    {
-      std::stringstream s;
-      s << "Could not find proc address (" << m_filename << ":" << name << "): " << get_last_error();
-      throw std::runtime_error(s.str());
-    }
-    return result;
-  }
 };
 
 #endif // __DYNAMIC_LIBRARY_H

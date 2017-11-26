@@ -34,6 +34,8 @@ class RewriterJitty: public Rewriter
 
     data_expression rewrite(const data_expression &term, substitution_type &sigma);
 
+    RewriterJitty& operator=(const RewriterJitty& other)=delete;
+
   private:
     std::size_t max_vars;
 
