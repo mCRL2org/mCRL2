@@ -2648,7 +2648,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   rewriter_interface interface = { mcrl2::utilities::get_toolset_version(), "Unknown error when loading rewriter.", this, NULL, NULL };
   try
   {
-    init = reinterpret_cast<bool(*)(rewriter_interface*, RewriterCompilingJitty::RewriterCompilingJitty*)>(rewriter_so->proc_address("init"));
+    typedef bool rewrite_function_type(rewriter_interface*, RewriterCompilingJitty*);
+    init = reinterpret_cast<rewrite_function_type*>(rewriter_so->proc_address("init"));
   }
   catch(std::runtime_error& e)
   {
