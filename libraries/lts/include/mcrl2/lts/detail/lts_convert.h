@@ -851,25 +851,23 @@ inline void lts_convert_aux(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& l
   for (std::size_t i=0; i<lts_in.num_action_labels(); ++i)
   {
     lts_out.add_action(lts_convert_translate_label(lts_in.action_label(i),c));
-    /* if (lts_in.is_tau(i))
-    {
-      lts_out.set_tau(i);
-    } */
   }
 
   const std::vector<transition> &trans=lts_in.get_transitions();
-  for (std::vector<transition>::const_iterator r=trans.begin(); r!=trans.end(); ++r)
+  for (const transition& t: trans)
   {
-    lts_out.add_transition(*r);
+    lts_out.add_transition(t);
   }
   lts_out.set_initial_state(lts_in.initial_state());
+
+  lts_out.set_hidden_label_map(lts_in.hidden_label_map());
 }
 
 // ======================  lts -> lts  =============================
 
 template < class STATE_LABEL1, class ACTION_LABEL1, class LTS_BASE1,  class STATE_LABEL2, class ACTION_LABEL2, class LTS_BASE2>
 inline void lts_convert(const lts<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1>& lts_in, 
-                       lts<STATE_LABEL2, ACTION_LABEL2, LTS_BASE2>& lts_out)
+                        lts<STATE_LABEL2, ACTION_LABEL2, LTS_BASE2>& lts_out)
 {
   lts_convert_base_class(static_cast<const LTS_BASE1&>(lts_in), static_cast<LTS_BASE2&>(lts_out));
   lts_convert_aux<STATE_LABEL1, ACTION_LABEL1, LTS_BASE1,STATE_LABEL2, ACTION_LABEL2, LTS_BASE2>(lts_in,lts_out);

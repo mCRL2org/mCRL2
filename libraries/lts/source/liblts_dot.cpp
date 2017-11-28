@@ -71,22 +71,22 @@ void probabilistic_lts_dot_t::save(std::ostream& os) const
       }
     }
   }
-  const std::vector<transition> &trans=get_transitions();
-  for (std::vector<transition>::const_iterator t=trans.begin(); t!=trans.end(); ++t)
+  
+  for (const transition& t: get_transitions())
   {
     if (has_state_info())
     {
-      if (probabilistic_state(t->to()).size()>1)
+      if (probabilistic_state(t.to()).size()>1)
       {
         throw mcrl2::runtime_error("Cannot save probabilistic states in .dot format.");
       }
-      os << state_label(t->from()).name() << "->" << state_label(probabilistic_state(t->to()).begin()->state()).name() << "[label=\"" <<
-         mcrl2::lts::pp(action_label(t->label())) << "\"];" << endl;
+      os << state_label(t.from()).name() << "->" << state_label(probabilistic_state(t.to()).begin()->state()).name() << "[label=\"" <<
+         mcrl2::lts::pp(action_label(t.label())) << "\"];" << endl;
     }
     else
     {
-      os << "S" << t->from() << " -> " << "S" << t->to() << "[label=\"" <<
-         mcrl2::lts::pp(action_label(t->label())) << "\"];" << endl;
+      os << "S" << t.from() << " -> " << "S" << t.to() << "[label=\"" <<
+         mcrl2::lts::pp(action_label(apply_hidden_label_map(t.label()))) << "\"];" << endl;
     }
   }
 

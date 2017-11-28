@@ -289,6 +289,14 @@ class lts: public LTS_BASE
       return m_hidden_label_map;
     }
 
+    /** \brief Sets the hidden label map that tells for each label what its corresponding
+               hidden label is. 
+      * \param[in] m The new hidden label map. */
+    void set_hidden_label_map(const std::map<labels_size_type,labels_size_type>& m)
+    {
+      m_hidden_label_map=m;
+    }
+
     /** \brief Gives for an action label its corresponding hidden action label.
         \param[in] action The index of an action label.
         \return The index of the corresponding action label in which actions are hidden. */

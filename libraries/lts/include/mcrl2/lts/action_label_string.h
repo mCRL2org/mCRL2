@@ -107,12 +107,10 @@ class action_label_string: public std::string
       if (ns.empty())
       {
         assign(tau_action());
-        // return true;
       }
       else
       {
         assign(ns);
-        // return (ns==tau_action);
       }
     }
 

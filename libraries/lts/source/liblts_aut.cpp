@@ -408,7 +408,7 @@ static void write_to_aut(const probabilistic_lts_aut_t& l, ostream& os)
 
   for (const transition& t: l.get_transitions())
   {
-    os << "(" << t.from() << ",\"" << pp(l.action_label(t.label())) << "\",";
+    os << "(" << t.from() << ",\"" << pp(l.action_label(l.apply_hidden_label_map(t.label()))) << "\",";
     write_probabilistic_state(l.probabilistic_state(t.to()),os);
     os << ")" << endl;
   }
