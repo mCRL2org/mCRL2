@@ -99,7 +99,7 @@ namespace detail
   class lts_cache
   {
     protected:
-      const LTS_TYPE& m_l;
+      LTS_TYPE& m_l;
       std::vector<std::vector<state_type> > m_tau_reachable_states;
       std::vector<std::vector<transition> > m_sorted_transitions;
       std::vector<bool> m_divergent;
@@ -108,6 +108,7 @@ namespace detail
     private:
       void calculate_weak_property_cache(const bool weak_reduction)
       {
+        scc_partitioner<LTS_TYPE> strongly_connected_component_partitioner(m_l);
         for(const transition& t: m_l.get_transitions()) 
         {
           assert(t.from()<m_l.num_states());
@@ -116,7 +117,9 @@ namespace detail
             m_tau_reachable_states[t.from()].push_back(t.to());  // There is an outgoing tau. 
           }
           m_sorted_transitions[t.from()].push_back(t);
-          if (m_l.is_tau(m_l.apply_hidden_label_map(t.label())) && t.from()==t.to() && weak_reduction)
+    // The reduction below is only correct if . 
+          if (weak_reduction && m_l.is_tau(m_l.apply_hidden_label_map(t.label())) && 
+              strongly_connected_component_partitioner.in_same_class(t.from(),t.to()))
           {
             m_divergent[t.from()]=true;  // There is a self loop.
           }
@@ -126,7 +129,7 @@ namespace detail
 
     public:
       
-      lts_cache(const LTS_TYPE& l, const bool weak_reduction)
+      lts_cache(/* const */ LTS_TYPE& l, const bool weak_reduction)    /* l is not changed, but the use of the scc partitioner requires l to be non const */
         : m_l(l),
           m_tau_reachable_states(l.num_states()),
           m_sorted_transitions(l.num_states()),
@@ -216,7 +219,7 @@ bool destructive_refinement_checker(
   // A typical example is a.(b+c) which is not weak-failures included n a.tau*.(b+c). The lhs has failure pairs
   // <a,{a}>, <a,{}> while the rhs has only failure pairs <a,{}>, as the state after the a is not stable.
   
-  if (generate_counter_example.is_dummy())  // No counter example is requested. Don't use bisimulation preprocessing.
+  if (generate_counter_example.is_dummy())  // No counter example is requested. We can use bisimulation preprocessing.
   {
     const bool preserve_divergence=weak_reduction && (refinement!=trace);
     l1.clear_state_labels(); 
