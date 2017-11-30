@@ -1182,11 +1182,6 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), equal_to(constructor(s, vf, vb), constructor(s, vg, vc)), if_(equal_to(vf, vg), equal_to(vb, vc), forall(atermpp::make_vector(vd), equal_to(count(s, vd, constructor(s, vf, vb)), count(s, vd, constructor(s, vg, vc)))))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(intersection(s, vx, vy), vx)));
-        result.push_back(data_equation(atermpp::make_vector(vx), union_(s, vx, vx), vx));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, vx, union_(s, vx, vy)), union_(s, vx, vy)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, vx, union_(s, vy, vx)), union_(s, vy, vx)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, union_(s, vx, vy), vx), union_(s, vx, vy)));
-        result.push_back(data_equation(atermpp::make_vector(vx, vy), union_(s, union_(s, vy, vx), vx), union_(s, vy, vx)));
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vf, vg), union_(s, constructor(s, vf, vb), constructor(s, vg, vc)), constructor(s, add_function(s, vf, vg), sort_fbag::join(s, vf, vg, vb, vc))));
         result.push_back(data_equation(atermpp::make_vector(vx), intersection(s, vx, vx), vx));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), intersection(s, vx, intersection(s, vx, vy)), intersection(s, vx, vy)));
