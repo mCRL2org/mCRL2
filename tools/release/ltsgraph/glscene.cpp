@@ -392,8 +392,9 @@ void drawNode(const VertexData& data, const Color3f& line, const Color3f& fill, 
   gl2psLineWidth(0.25);
 }
 
+
 inline
-void drawHint(const VertexData& data, const Color4f& line, bool active)
+void drawWhetherNodeCanBeCollapsedOrExpanded(const VertexData& data, const Color4f& line, bool active)
 {
   glPushAttrib(GL_LINE_BIT);
   glLineWidth(2.5);
@@ -531,13 +532,13 @@ void GLScene::renderNode(GLuint i)
   m_camera.billboard_spherical(node.pos());
   drawNode(m_vertexdata, line, fill, m_graph.hasSelection() && !node.active(), node.is_probabilistic());
 
-  if (m_graph.hasSelection() && node.selected() != 0.0 && !m_graph.isBridge(i) && m_graph.initialState() != i)
+  if (m_graph.hasSelection() && !m_graph.isBridge(i) && m_graph.initialState() != i)
   {
     float s = (fill.r < 0.5 && fill.g < 0.5 && fill.b < 0.5) ? 0.2f : -0.2f;
-    hint = Color4f(fill.r + s, fill.g + s, fill.b + s, node.selected());
+    hint = Color4f(fill.r + s, fill.g + s, fill.b + s, true);
 
     glTranslatef(0, 0, m_size_node * m_camera.pixelsize);
-    drawHint(m_vertexdata, hint, node.active());
+    drawWhetherNodeCanBeCollapsedOrExpanded(m_vertexdata, hint, node.active());
   }
 
   glPopMatrix();
