@@ -300,8 +300,7 @@ struct find_loop_simplifier
     return find_loop_rec<is_mu>(expr, X, equation_index.rank(X.name()), visited);
   }
 
-  find_loop_simplifier(const std::vector<pbes_equation>& equations,
-                       const pbes_equation_index& equation_index_,
+  find_loop_simplifier(const pbes_equation_index& equation_index_,
                        const std::unordered_map<propositional_variable_instantiation, pbes_expression>& equation_
                       )
     : equation_index(equation_index_),
@@ -725,7 +724,7 @@ class pbesinst_lazy_algorithm
         R(datar, p.data()),
         m_search_strategy(search_strategy),
         m_transformation_strategy(transformation_strategy),
-        m_find_loop_simplifier(p.equations(), equation_index, equation)
+        m_find_loop_simplifier(equation_index, equation)
     {}
 
     /// \brief Reports BES equations that are produced by the algorithm.
