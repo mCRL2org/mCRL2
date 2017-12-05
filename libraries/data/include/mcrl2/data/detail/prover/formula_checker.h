@@ -15,7 +15,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
-#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
 
 namespace mcrl2

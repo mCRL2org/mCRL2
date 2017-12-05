@@ -14,7 +14,7 @@
 #include <memory>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 

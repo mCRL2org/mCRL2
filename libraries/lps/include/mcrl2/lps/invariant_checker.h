@@ -19,7 +19,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/exception.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/rewriter.h"

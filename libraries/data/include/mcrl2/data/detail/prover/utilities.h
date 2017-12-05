@@ -12,10 +12,6 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_UTILITIES_H
 #define MCRL2_DATA_DETAIL_PROVER_UTILITIES_H
 
-#include <cmath>
-
-#include "mcrl2/core/detail/function_symbols.h"
-
 namespace mcrl2
 {
 namespace data
@@ -28,7 +24,7 @@ namespace detail
  * \param[in] b the boolean to convert
  * \note for writing to stream consider using std::boolalpha
  **/
-inline const char* bool_to_char_string(bool b)
+inline const std::string bool_to_char_string(bool b)
 {
   return (b) ? "true" : "false";
 }

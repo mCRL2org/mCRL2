@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_INVELM_ALGORITHM_H
 #define MCRL2_LPS_INVELM_ALGORITHM_H
 
-#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"

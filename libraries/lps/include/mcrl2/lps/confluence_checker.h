@@ -16,8 +16,7 @@
 #define MCRL2_LPS_CONFLUENCE_CHECKER_H
 
 #include "mcrl2/core/detail/function_symbols.h"
-#include "mcrl2/data/detail/bdd_prover.h"
-#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/prover/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
 #include "mcrl2/data/detail/prover/solver_type.h"
 #include "mcrl2/data/rewriter.h"
