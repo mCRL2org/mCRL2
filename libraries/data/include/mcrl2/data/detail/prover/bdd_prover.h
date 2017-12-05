@@ -194,7 +194,7 @@ class BDD_Prover: protected rewriter
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    data_expression bdd_down(data_expression a_formula, std::string& a_indent)
+    data_expression bdd_down(const data_expression& a_formula, std::string& a_indent)
     {
       a_indent.append("  ");
 

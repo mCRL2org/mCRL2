@@ -51,7 +51,7 @@ class Manipulator
 
       if (is_abstraction(a_formula))
       {
-        const abstraction t(a_formula);
+        const abstraction& t=atermpp::down_cast<abstraction>(a_formula);
         return abstraction(t.binding_operator(), t.variables(), set_true_auxiliary(t.body(), a_guard, f_set_true));
       }
 
@@ -65,7 +65,18 @@ class Manipulator
         const application& a = atermpp::down_cast<application>(a_guard);
         if (a[1]==a_formula)
         {
-           return a[0];
+           // Perform an occur check. If a[1] occurs in a[0], then replacing a[1] by a[0] leads to 
+           // an infinite growth of a term. An example is the expression -1 * x == -1 && -1 * x == 1.
+           // This will blow up to 1 == -1 * x * x * x * x * x * x without this condition. Noted by
+           // Thomas Neele. December 2017.
+           if (Info::occurs(a[0],a[1]))
+           {
+             return a_formula;
+           }
+           else
+           {
+             return a[0];
+           }
         }
       }
 

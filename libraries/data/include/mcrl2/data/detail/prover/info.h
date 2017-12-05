@@ -104,11 +104,6 @@ class Info
         }
     };
 
-    static bool occurs(const data_expression& t1, const data_expression& t2)
-    {
-      return atermpp::find_if(t1,equals(t2))!=atermpp::aterm_appl();
-    }
-
     bool gamma1(const data_expression& a_term1, const data_expression& a_term2)
     {
       const atermpp::aterm v_operator_1 = get_operator(a_term1);
@@ -246,6 +241,12 @@ class Info
     /// \brief Destructor with no particular functionality.
     ~Info()
     {}
+
+    // Perform an occur check of expression t2 in expression t1.
+    static bool occurs(const data_expression& t1, const data_expression& t2)
+    {
+      return atermpp::find_if(t1,equals(t2))!=atermpp::aterm_appl();
+    }
 
     /// \brief Sets the flag Info::f_reverse.
     void set_reverse(bool a_reverse)
