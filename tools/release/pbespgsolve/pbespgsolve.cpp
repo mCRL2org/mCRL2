@@ -11,6 +11,17 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
+#include "mcrl2/bes/pbes_input_tool.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/bes/pg_parse.h"
+#include "mcrl2/bes/io.h"
+#include "mcrl2/data/rewriter_tool.h"
+#include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/pg/pbespgsolve.h"
+#include "mcrl2/utilities/execution_timer.h"
+#include "mcrl2/utilities/input_tool.h"
+
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -19,18 +30,6 @@
 #include <queue>
 #include <memory>
 #include <cstdio>
-
-#include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/bes/pbes_input_tool.h"
-#include "mcrl2/data/rewriter_tool.h"
-#include "mcrl2/utilities/execution_timer.h"
-
-#include "mcrl2/pbes/pbespgsolve.h"
-#include "mcrl2/pbes/detail/bes_equation_limit.h"
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/bes/pg_parse.h"
-#include "mcrl2/bes/io.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
