@@ -38,5 +38,5 @@ add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-DBOOST_ALL_NO_LIB=1)
 add_definitions(-DWIN32)
 
-# incrase the stack size
+# increase the stack size
 set(CMAKE_EXE_LINKER_FLAGS "/STACK:32000000000 ${CMAKE_EXE_LINKER_FLAGS}")
