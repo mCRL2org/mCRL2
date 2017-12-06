@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     if (argc != 2)
     {
         printf("usage: %s <pbes>\n", argv[0]);
-        return 1;
+        return 0;
     }
 
     std::auto_ptr<LiftingStrategyFactory> lift_strat_factory;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     }
 
     // Print winner:
-    if (pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN)
+    if (pg.winner(solution, goal_v) == PLAYER_EVEN)
         printf("Property holds.\n");
     else
         printf("Property DOES NOT hold.\n");
