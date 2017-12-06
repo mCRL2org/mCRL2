@@ -21,6 +21,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/smt/constructed_sort_definition.h"
 #include "mcrl2/smt/data_specification.h"
+#include "mcrl2/smt/identity_function_definition.h"
 #include "mcrl2/smt/named_function_definition.h"
 #include "mcrl2/smt/pp_function_definition.h"
 #include "mcrl2/smt/sort_definition.h"
@@ -177,14 +178,14 @@ class basic_data_specification: public data_specification
     {
       add_sort_definition(data::sort_nat::nat(), nat_definition);
       m_functions[data::sort_nat::c0()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_nat::nat(), data::sort_nat::c0(), printer));
-      m_functions[data::sort_nat::cnat()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_nat::nat(), data::sort_nat::cnat(), printer));
+      m_functions[data::sort_nat::cnat()] = std::shared_ptr<function_definition>(new identity_function_definition(this));
     }
 
     template<typename Printer>
     void add_sort_int(const std::shared_ptr<sort_definition>& int_definition, Printer printer)
     {
       add_sort_definition(data::sort_int::int_(), int_definition);
-      m_functions[data::sort_int::cint()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_int::int_(), data::sort_int::cint(), printer));
+      m_functions[data::sort_int::cint()] = std::shared_ptr<function_definition>(new identity_function_definition(this));
       m_functions[data::sort_int::cneg()] = std::shared_ptr<function_definition>(new pp_function_definition<Printer>(this, data::sort_int::int_(), data::sort_int::cneg(), printer));
     }
 

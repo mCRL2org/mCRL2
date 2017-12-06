@@ -14,6 +14,7 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/smt/basic_data_specification.h"
+#include "mcrl2/smt/identity_function_definition.h"
 #include "mcrl2/smt/recursive_function_definition.h"
 #include "mcrl2/smt/translation_error.h"
 
@@ -747,19 +748,6 @@ void basic_data_specification::add_numerical_operators(
   data::data_expression real_one = data::sort_real::creal(int_one, pos_one);
   data::data_expression real_half = data::sort_real::divides(pos_one, pos_two);
 
-  class identity_function_definition: public function_definition
-  {
-    public:
-      identity_function_definition(smt::data_specification *data_specification):
-        function_definition(data_specification)
-      {}
-
-      virtual std::string generate_data_expression(const std::map<data::variable, std::string>& declared_variables, data::data_expression_vector arguments) const
-      {
-        assert(arguments.size() == 1);
-        return m_data_specification->generate_data_expression(declared_variables, arguments[0]);
-      }
-  };
   std::shared_ptr<function_definition> identity(new identity_function_definition(this));
 
   add_function_definition(data::less(pos), less);
