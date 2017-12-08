@@ -226,6 +226,14 @@ public:
     }
     return result;
   }
+
+  const bool operator<(const ppg_equation& eq) const
+  {
+    return m_symbol <  eq.m_symbol || 
+           (m_symbol == eq.m_symbol && m_var <  eq.m_var) ||
+           (m_symbol == eq.m_symbol && m_var == eq.m_var && m_is_conjunctive < eq.m_is_conjunctive) ||
+           (m_symbol == eq.m_symbol && m_var == eq.m_var && m_is_conjunctive == eq.m_is_conjunctive && m_summands < eq.m_summands);
+  }
 };
 
 class ppg_pbes

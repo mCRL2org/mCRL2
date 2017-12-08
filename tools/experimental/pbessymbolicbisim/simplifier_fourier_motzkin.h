@@ -13,6 +13,7 @@
 #define MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_FOURIER_MOTZKIN_H
 
 #include "simplifier.h"
+#include "simplifier_finite_domain.h"
 
 namespace mcrl2
 {
@@ -26,6 +27,7 @@ class simplifier_fourier_motzkin : public simplifier
   using super::proving_rewr;
 
 protected:
+  simplifier_finite_domain simpl_discr;
 
   data_expression simplify_expression(const data_expression& expr)
   {
@@ -49,7 +51,7 @@ protected:
         {
           real_con = lazy::and_(real_con, resulting_inequalities[j].transform_to_data_expression());
         }
-        result = lazy::or_(result, lazy::and_(non_real_conditions[i], real_con));
+        result = lazy::or_(result, lazy::and_(simpl_discr.apply(non_real_conditions[i]), real_con));
       }
     }
     // result = proving_rewr(result);
@@ -59,8 +61,9 @@ protected:
   }
 
 public:
-  simplifier_fourier_motzkin(rewriter r, rewriter pr)
+  simplifier_fourier_motzkin(const rewriter& r, const rewriter& pr, const data_specification& dataspec_)
   : super(r, pr)
+  , simpl_discr(r, pr, dataspec_)
   {}
 
 };

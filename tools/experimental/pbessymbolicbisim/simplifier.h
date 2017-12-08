@@ -57,13 +57,13 @@ public:
   {
     data_specification ad_hoc_data = parse_data_specification(
       "var "
-        "a,b,c:Bool;"
+        "a_:Bool;"
         "r1,r2,r3:Real;"
       "eqn "
-        "!a || a = true;"
-        "a || !a = true;"
-        "!a && a = false;"
-        "a && !a = false;"
+        "!a_ || a_ = true;"
+        "a_ || !a_ = true;"
+        "!a_ && a_ = false;"
+        "a_ && !a_ = false;"
 
         "r2 > r3 -> !(r1 < r2) && r1 < r3 = false;"
         "r2 > r3 -> r1 < r3 && !(r1 < r2) = false;"
@@ -227,9 +227,8 @@ simplifier* get_simplifier_instance(const rewriter& rewr, const rewriter& provin
 #ifdef DBM_PACKAGE_AVAILABLE
   return new simplifier_dbm(rewr, proving_rewr, process_parameters, dataspec, lu_map);
 #else
-  return new simplifier_fourier_motzkin(rewr, proving_rewr);
+  return new simplifier_fourier_motzkin(rewr, proving_rewr, dataspec);
   (void) process_parameters;
-  (void) dataspec;
   (void) lu_map;
 #endif
 }

@@ -1,18 +1,11 @@
-link_directories(lib)
 add_mcrl2_tool(pbessymbolicbisim
   SOURCES
     pbessymbolicbisim.cpp
-  INCLUDE
-    include
   DEPENDS
+    mcrl2_pg
     mcrl2_atermpp
     mcrl2_pbes
     mcrl2_lts
     mcrl2_process
     mcrl2_smt
-    dbm
-    io
-    hash
-    base
-    dbmdebug
 )
