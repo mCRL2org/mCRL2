@@ -27,8 +27,9 @@ class shared_mutex
      size_t number_of_shared_users;        // This is the number of shared_users of the critical resource.
 
   public:
+     /// \brief Constructor. 
      shared_mutex()
-      : number_of_readers(0);
+      : number_of_shared_users(0)
      {}
 
      shared_mutex( const shared_mutex& ) = delete;
