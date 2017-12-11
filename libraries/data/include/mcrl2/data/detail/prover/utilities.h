@@ -12,6 +12,8 @@
 #ifndef MCRL2_DATA_DETAIL_PROVER_UTILITIES_H
 #define MCRL2_DATA_DETAIL_PROVER_UTILITIES_H
 
+#include <string>
+
 namespace mcrl2
 {
 namespace data
