@@ -15,6 +15,7 @@
 #define MCRL2_UTILITIES_SHARED_MUTEX_H
 
 #include <mutex>
+#include <cassert>
 
 namespace std
 {
