@@ -12,9 +12,14 @@ function(_add_library_tests TARGET_NAME)
     foreach(test IN ITEMS ${${category}})
       get_filename_component(base ${test} NAME_WE)
       set(testname ${category}_${TARGET_NAME}_${base})
+      set(CMAKE_THREAD_PREFER_PTHREAD TRUE)       # Added by JFG
+      set(THREADS_PREFER_PTHREAD_FLAG TRUE)       # Added by JFG
+      find_package(Threads REQUIRED)              # Added by JFG
+
       add_executable(${testname} EXCLUDE_FROM_ALL ${test})
       set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category})
       target_link_libraries(${testname} ${TARGET_NAME})
+      target_link_libraries(${testname} Threads::Threads)     # Added by JFG
       if(MCRL2_TEST_JITTYC)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
