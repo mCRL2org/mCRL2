@@ -19,7 +19,7 @@ function(_add_library_tests TARGET_NAME)
       add_executable(${testname} EXCLUDE_FROM_ALL ${test})
       set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category})
       target_link_libraries(${testname} ${TARGET_NAME})
-      target_link_libraries(${testname} Threads::Threads)     # Added by JFG
+      target_link_libraries(${testname} pthread)     # Added by JFG
       if(MCRL2_TEST_JITTYC)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
