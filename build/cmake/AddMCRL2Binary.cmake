@@ -19,7 +19,9 @@ function(_add_library_tests TARGET_NAME)
       add_executable(${testname} EXCLUDE_FROM_ALL ${test})
       set_target_properties(${testname} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${category})
       target_link_libraries(${testname} ${TARGET_NAME})
-      target_link_libraries(${testname} pthread)     # Added by JFG
+      if(NOT  MSVC)                               # MSVC does not know nor needs pthread. There should be a more elegant way than an explicit exclusion.
+        target_link_libraries(${testname} pthread)     # Added by JFG
+      endif()
       if(MCRL2_TEST_JITTYC)
         target_compile_definitions(${testname} PUBLIC -DMCRL2_TEST_JITTYC)
       endif()
