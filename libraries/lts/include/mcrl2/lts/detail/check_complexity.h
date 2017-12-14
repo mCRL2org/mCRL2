@@ -131,7 +131,6 @@ class check_complexity
         while_C_contains_a_nontrivial_constellation_2_4 = 0,
         BLOCK_MIN = while_C_contains_a_nontrivial_constellation_2_4,
         Mark_all_states_of_SpB_as_predecessors_2_9,
-        for_all_refinable_blocks_RfnB_is_splitter_2_20,
 
         // If a loop runs over every state of a block exactly once, we simplify
         // the task of updating the counters by making the corresponding loop
@@ -155,10 +154,8 @@ class check_complexity
         // store temporary work.
         refine_bottom_state_3_6l,
         refine_visited_state_3_15,
-        refine_bottom_state_3_6l_s_is_in_SpB,
 
         // temporary state counters (blue):
-        while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l, 
         while_Test_is_not_empty_3_6l_s_is_blue_3_11l,
         while_Blue_contains_unvisited_states_3_15l,
 
@@ -233,7 +230,6 @@ class check_complexity
         TRANS_MIN_TEMPORARY = while_Test_is_not_empty_3_6l_s_is_red_3_9l,
         while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing,
         for_all_s_prime_in_pred_s_setminus_Red_3_18l,
-        if___s_prime_has_no_transition_to_SpC_3_23l,
             // The work in the following counter is assigned to red (new
             // bottom) states if the blue block is smaller!
         if___s_prime_has_transition_to_SpC_3_23l,
@@ -624,8 +620,6 @@ class check_complexity
         /// the relevant unit for counters that are related to the splitter,
         /// which is the constellation `NewC`.  The block size is the unit for
         /// counters that are related to refinements.)
-        /// \param max_C   log2(n) - log2(size of the constellation containing
-        ///                this state)
         /// \param max_B   log2(n) - log2(size of the block containing this
         ///                state)
         /// \param bottom  `true` iff the state to which these counters belong
@@ -636,27 +630,19 @@ class check_complexity
         ///                 printed.  The function should be called through the
         ///                 macro `mCRL2complexity()`, because that macro will
         ///                 print the remainder of the error message is needed.
-        bool no_temporary_work(unsigned char max_C, unsigned char max_B,
-                                                                   bool bottom)
+        bool no_temporary_work(unsigned char max_B, bool bottom)
         {
-            assert(max_C <= max_B);
             for (enum counter_type ctr = STATE_MIN;
-                                    ctr < refine_bottom_state_3_6l_s_is_in_SpB;
+                            ctr < while_Test_is_not_empty_3_6l_s_is_blue_3_11l;
                                            ctr = (enum counter_type) (ctr + 1))
             {
                 assert(counters[ctr - STATE_MIN] <= max_B);
                 counters[ctr - STATE_MIN] = max_B;
             }
-            assert(counters[refine_bottom_state_3_6l_s_is_in_SpB -
-                                                          STATE_MIN] <= max_C);
-            counters[refine_bottom_state_3_6l_s_is_in_SpB - STATE_MIN] = max_C;
-
-            assert(while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l -
-                                    refine_bottom_state_3_6l_s_is_in_SpB == 1);
 
             // temporary state counters must be zero:
             for (enum counter_type ctr =
-                         while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l;
+                                  while_Test_is_not_empty_3_6l_s_is_blue_3_11l;
                                      ctr < for_all_bottom_states_s_in_RfnB_4_8;
                                            ctr = (enum counter_type) (ctr + 1))
             {
@@ -834,8 +820,10 @@ class check_complexity
     /// \param n  size of the state space
     static void init(state_type n)
     {
-        // as debugging measure:
-        // test_work_names();
+        #if 0
+            // as debugging measure:
+            test_work_names();
+        #endif
 
         log_n = ilog2(n);
         assert(0 == sensible_work);     sensible_work = 0;

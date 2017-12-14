@@ -922,18 +922,28 @@ class constln_t
     /// needs postprocessing
     B_to_C_iter_t postprocess_end;
 
+    /// \brief sort key to order constellation-related information
+    /// \details When a constellation is created anew, it it assigned a sort
+    /// key that is lower than the constellation it came from, but never lower
+    /// than the sort key of any other constellation that was lower than the
+    /// original constellation.  This ensures that the order of other
+    /// constellations does not change.
+    const state_type sort_key;
+
     /// \brief constructor
     /// \param begin_ iterator to the first state in the constellation
     /// \param end_   iterator past the last state in the constellation
-    constln_t(permutation_iter_t begin_, permutation_iter_t end_,
-                                                B_to_C_iter_t postprocess_none)
+    constln_t(state_type sort_key_, permutation_iter_t begin_,
+                       permutation_iter_t end_, B_to_C_iter_t postprocess_none)
       : int_end(end_),
         int_begin(begin_),
         nontrivial_next(nullptr),
         postprocess_begin(postprocess_none),
-        postprocess_end(postprocess_none)
+        postprocess_end(postprocess_none),
+        sort_key(sort_key_)
     {
         assert(int_begin < int_end);
+        assert(int_end - int_begin <= sort_key);
     }
 
     /// \brief destructor
@@ -1010,14 +1020,14 @@ class constln_t
     state_type size() const  {  return int_end - int_begin;  }
 
     /// \brief compares two constellations for ordering them
-    /// \details The constellations are ordered according to their positions in
-    /// the permutation array.  This is a suitable order, as constellations may
-    /// be refined, but never swap positions as a whole.  Refining will make
-    /// the new subconstellations compare in the same way to other
-    /// constellations as the original, larger constellation.
+    /// \details Constellations are ordered according to their sort keys.  The
+    /// keys have to be assigned in a way that when a constellation is split,
+    /// the parts are placed where the split constellation was in the order.
+    /// This can be achieved by assigning sort keys that are related to the
+    /// size of the constellation.
     bool operator<(const constln_t& other) const
     {
-        return begin() < other.begin();
+        return sort_key < other.sort_key;
     }
     bool operator> (const constln_t& other) const  {  return other < *this;  }
     bool operator<=(const constln_t& other) const  { return !(other < *this); }
@@ -1039,8 +1049,8 @@ class constln_t
         assert(FirstB->constln() == this);
         assert(LastB->constln() == this);
         assert(postprocess_begin == postprocess_end);
-        // 2.6: Create a new constellation NewC and ...
-        constln_t* const NewC = new constln_t(begin(), end(), postprocess_end);
+
+        constln_t* NewC;
 
         // 2.5: Choose a small splitter block SpB subset of SpC from P,
         //      i.e. |SpB| <= 1/2*|SpC|
@@ -1050,17 +1060,21 @@ class constln_t
         /// block is selected.
         if (FirstB->size() > LastB->size())
         {
+            // 2.6: Create a new constellation NewC
             // 2.6: ... and move SpB from SpC to NewC
+            NewC = new constln_t(sort_key - (LastB->begin() - begin()),
+                                       LastB->begin(), end(), postprocess_end);
             set_end(LastB->begin());
-            NewC->set_begin(end());
             LastB->set_constln(NewC);
             return LastB;
         }
         else
         {
+            // 2.6: Create a new constellation NewC
             // 2.6: ... and move SpB from SpC to NewC
+            NewC = new constln_t(sort_key - (end() - FirstB->end()), begin(),
+                                               FirstB->end(), postprocess_end);
             set_begin(FirstB->end());
-            NewC->set_end(begin());
             FirstB->set_constln(NewC);
             return FirstB;
         }
@@ -1071,8 +1085,9 @@ class constln_t
     std::string debug_id() const
     {
         return "constellation [" +
-            std::to_string(begin() - block_t::permutation_begin()) + "," +
-            std::to_string(end() - block_t::permutation_begin()) + ")";
+                   std::to_string(begin() - block_t::permutation_begin()) +
+                   "," + std::to_string(end() - block_t::permutation_begin()) +
+                   ") (#" + std::to_string(sort_key) + ")";
     }
 #endif
 };
@@ -1282,8 +1297,6 @@ class part_state_t
 
 ///@{
 
-class out_descriptor;
-
 /* pred_entry, succ_entry, and B_to_C_entry contain the data that is stored
 about a transition.  Every transition has one of each data structure; the three
 structures are linked through the iterators (used here as pointers). */
@@ -1292,7 +1305,111 @@ class succ_entry
   public:
     B_to_C_iter_t B_to_C;
     state_info_ptr target;
-    out_descriptor* constln_slice;
+
+  private:
+    /// \brief points to the last or the first transition to the same
+    /// constellation
+    /// \details We need to know, given a transition, which other transitions
+    /// with the same source state and the same goal constellation there are.
+    /// This pointer, in most cases, points to the last transition with the
+    /// same source state and goal constellation, with the exception:  If this
+    /// `succ_entry` is actually the last transition, then the pointer points
+    /// to the first such transition.  In that way, one can find the first and
+    /// the last relevant transition with one or two levels of dereferencing.
+    ///
+    /// The advantage of this pointer is that one does not need to allocate a
+    /// separate data structure containing this information.
+    succ_iter_t int_slice_begin_or_before_end;
+  public:
+
+    succ_iter_t slice_begin_or_before_end()
+    {
+        return int_slice_begin_or_before_end;
+    }
+
+    succ_const_iter_t slice_begin_or_before_end() const
+    {
+        return int_slice_begin_or_before_end;
+    }
+
+    void set_slice_begin_or_before_end(succ_iter_t new_value,
+                                                   bool suppress_print = false)
+    {
+        int_slice_begin_or_before_end = new_value;
+        if (suppress_print)  return;
+        //mCRL2log(log::debug,"bisim_gjkw") << "Set slice_begin_or_before_end "
+        //                     "of " << B_to_C->pred->debug_id() << " to "
+        //                     << new_value->B_to_C->pred->debug_id() << ".\n";
+    }
+
+
+
+    succ_iter_t slice_begin()
+    {
+        if (this < &*int_slice_begin_or_before_end)
+        {
+            assert(&*int_slice_begin_or_before_end->
+                                        int_slice_begin_or_before_end <= this);
+            return int_slice_begin_or_before_end->
+                                                 int_slice_begin_or_before_end;
+        }
+        assert(&*int_slice_begin_or_before_end->int_slice_begin_or_before_end==
+                                                                         this);
+        return int_slice_begin_or_before_end;
+    }
+
+    succ_const_iter_t slice_begin() const
+    {
+        if (this < &*int_slice_begin_or_before_end)
+        {
+            assert(&*int_slice_begin_or_before_end->
+                                        int_slice_begin_or_before_end <= this);
+            return int_slice_begin_or_before_end->
+                                                 int_slice_begin_or_before_end;
+        }
+        assert(&*int_slice_begin_or_before_end->int_slice_begin_or_before_end==
+                                                                         this);
+        return int_slice_begin_or_before_end;
+    }
+
+    static succ_iter_t slice_end(succ_iter_t this_)
+    {
+        if (this_ < this_->int_slice_begin_or_before_end)
+        {
+            assert(this_->int_slice_begin_or_before_end->
+                                       int_slice_begin_or_before_end <= this_);
+            return this_->int_slice_begin_or_before_end + 1;
+        }
+        assert(this_->int_slice_begin_or_before_end->
+                                       int_slice_begin_or_before_end == this_);
+        // The following line requires an iterator but a normal method would
+        // only have a pointer, not an iterator.  That's why we need to jump
+        // through the `static` hoop.
+        return this_ + 1;
+    }
+
+    static succ_const_iter_t slice_end(succ_const_iter_t this_)
+    {
+        if (this_ < this_->int_slice_begin_or_before_end)
+        {
+            assert(this_->int_slice_begin_or_before_end->
+                                       int_slice_begin_or_before_end <= this_);
+            return this_->int_slice_begin_or_before_end + 1;
+        }
+        assert(this_->int_slice_begin_or_before_end->
+                                       int_slice_begin_or_before_end == this_);
+        // The following line requires an iterator but a normal method would
+        // only have a pointer, not an iterator.  That's why we need to jump
+        // through the `static` hoop.
+        return this_ + 1;
+    }
+
+#ifndef NDEBUG
+    /// adds work (for time complexity measurement) to every transition in the
+    /// slice to which `this_` belongs.
+    static void slice_add_work_to_transns(succ_const_iter_t this_,
+             enum check_complexity::counter_type ctr, unsigned char max_value);
+#endif
 };
 
 
@@ -1331,64 +1448,17 @@ class B_to_C_entry
 };
 
 
-/* out_descriptor and B_to_C_descriptor are data types that indicate which
-slice of states belongs together. */
-class out_descriptor
-{
-  private:
-    succ_iter_t int_end, int_begin;
-  public:
-
-    out_descriptor(succ_iter_t iter)
-      : int_end(iter),
-        int_begin(iter)
-    {
-        // assert(int_begin <= int_end);
-    }
-
-    state_type size() const
-    {
-        return int_end - int_begin;
-    }
-
-    succ_iter_t begin()
-    {
-        return int_begin;
-    }
-    succ_const_iter_t begin() const
-    {
-        return int_begin;
-    }
-    void set_begin(succ_iter_t new_begin)
-    {
-        int_begin = new_begin;
-        assert(int_begin <= int_end);
-    }
-    succ_iter_t end()
-    {
-        return int_end;
-    }
-    succ_const_iter_t end() const
-    {
-        return int_end;
-    }
-    void set_end(succ_iter_t new_end)
-    {
-        int_end = new_end;
-        assert(int_begin <= int_end);
-    }
-
-
 #ifndef NDEBUG
     /// adds work (for time complexity measurement) to every transition in the
     /// slice.
-    void add_work_to_transns(enum check_complexity::counter_type ctr,
-                                                       unsigned char max_value)
+    inline void succ_entry::slice_add_work_to_transns(succ_const_iter_t this_,
+              enum check_complexity::counter_type ctr, unsigned char max_value)
     {
-        assert(begin() < end());
-        succ_iter_t iter = begin();
+        succ_const_iter_t iter = this_->slice_begin();
+        succ_const_iter_t end = slice_end(this_);
+        assert(iter < end);
         mCRL2complexity(iter->B_to_C->pred, add_work(ctr, max_value));
-        while (++iter != end())
+        while (++iter != end)
         {
             // treat temporary counters specially
             mCRL2complexity(iter->B_to_C->pred,
@@ -1396,9 +1466,10 @@ class out_descriptor
         }
     }
 #endif
-};
 
 
+/* B_to_C_descriptor is a data type that indicates which slice of states
+belongs together. */
 class B_to_C_descriptor
 {
   public:
@@ -1547,11 +1618,17 @@ class part_trans_t
     {
         assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
         assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
+        assert(succ_entry::slice_end(pos1->succ) ==
+                                            succ_entry::slice_end(pos2->succ));
 
-        // swap contents
-        succ_entry const temp_entry(*pos1->succ);
-        *pos1->succ = *pos2->succ;
-        *pos2->succ = temp_entry;
+        // swap contents, but do not swap slice_begin_or_before_end
+        B_to_C_iter_t const temp_B_to_C(pos1->succ->B_to_C);
+        state_info_ptr const temp_target(pos1->succ->target);
+        pos1->succ->B_to_C = pos2->succ->B_to_C;
+        pos1->succ->target = pos2->succ->target;
+        pos2->succ->B_to_C = temp_B_to_C;
+        pos2->succ->target = temp_target;
         // swap pointers to contents
         succ_iter_t const temp_iter(pos1->succ);
         pos1->succ = pos2->succ;
@@ -1559,6 +1636,9 @@ class part_trans_t
 
         assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
         assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
+        assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
+        assert(succ_entry::slice_end(pos1->succ) ==
+                                            succ_entry::slice_end(pos2->succ));
     }
 
     // *pos1 -> *pos2 -> *pos3 -> *pos1
@@ -1646,9 +1726,6 @@ class part_trans_t
     {
         // B_to_C_descriptors are deallocated when their respective lists are
         // deallocated by destructing the blocks.
-        // out_descriptors do not need to be deallocated individually, but they
-        // are cleared by deleting the constln_slice_pool.
-//        constln_slice_pool.clear();
         B_to_C.clear();
         succ.clear();
         pred.clear();
@@ -1683,7 +1760,7 @@ class part_trans_t
     transitions to OldC.  It returns the boundary between transitions to
     OldC and transitions to NewC in the outgoing transition array of s.
     Its time complexity is O(1 + min { |out_\nottau(s)|, |out_\tau(s)| }). */
-    succ_iter_t split_s_inert_out(state_info_ptr s, constln_t* OldC);
+    bool split_s_inert_out(state_info_ptr s ONLY_IF_DEBUG(, constln_t* OldC) );
 
     /* part_trans_t::make_noninert makes the transition identified by succ_iter
     noninert. */
@@ -2162,9 +2239,9 @@ inline void block_t::SetFromRed(B_to_C_desc_iter_t const new_fromred)
 
 
 /// \brief quick check to find out whether the state has a transition to `SpC`
-/// \details If the current constellation pointer happens to be set to `SpC` or
-/// its successor, the function can quickly find out whether the state has a
-/// transition to `SpC`.
+/// \details If the current constellation pointer happens to be set to `SpC`,
+/// the function can quickly find out whether the state has a transition to
+/// `SpC`.
 /// The function should not be called for the constellation in which the state
 /// resides.
 /// \param SpC constellation of interest
@@ -2182,11 +2259,6 @@ inline bool state_info_entry::surely_has_transition_to(const constln_t* const
     // SpC
     if (current_constln() != succ_end() &&
                                    current_constln()->target->constln() == SpC)
-    {
-        return true;
-    }
-    if (current_constln() != succ_begin() &&
-                                current_constln()[-1].target->constln() == SpC)
     {
         return true;
     }

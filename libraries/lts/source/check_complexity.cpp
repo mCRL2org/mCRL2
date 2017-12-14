@@ -101,7 +101,6 @@ const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
     // block counters
     "2.4: while C contains a nontrivial constellation",
     "2.9: Mark all states of SpB as predecessors",
-    "2.20: for all refinable blocks RfnB (is splitter)",
     "2.10: for all s in SpB",
     "3.29: Move Blue/Red to a new block NewB (set pointers to new block)",
     "3.29: Move Blue/Red to a new block NewB (for all states s in NewB)",
@@ -112,10 +111,8 @@ const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
 
     "3.6l: refine bottom state",
     "3.15: refine visited state",
-    "3.6l: refine bottom state (s is in SpB)",
 
     // temporary state counters (blue):
-    "3.6l: while Test is not empty (s is in SpB, and 3.9l: s is red)",
     "3.6l: while Test is not empty (3.11l: s is blue)",
     "3.15l: while Blue contains unvisited states",
 
@@ -149,8 +146,7 @@ const char *check_complexity::work_names[TRANS_MAX - BLOCK_MIN + 1] =
     "3.6l: while Test is not empty (3.9l: s is red)",
     "3.6l: while Test is not empty (3.9l: s is red) during postprocessing",
     "3.18l: for all s_prime in in(s) \\ Red",
-    "3.23l: if ... s_prime has no transition to SpC (true)",
-    "3.23l: if ... s_prime has no transition to SpC (false)",
+    "3.23l: if ... s_prime has no transition to SpC",
 
     // temporary transition counters (red):
     "3.6r: while FromRed is not empty",
@@ -199,7 +195,6 @@ void check_complexity::test_work_names()
     assert(check_complexity::BLOCK_MIN == i);
     test_work_name(i, while_C_contains_a_nontrivial_constellation_2_4);
     test_work_name(i, Mark_all_states_of_SpB_as_predecessors_2_9);
-    test_work_name(i, for_all_refinable_blocks_RfnB_is_splitter_2_20);
     test_work_name(i, for_all_s_in_SpB_2_10);
     test_work_name(i, Move_Blue_or_Red_to_a_new_block_NewB_pointer_3_29);
     test_work_name(i, Move_Blue_or_Red_to_a_new_block_states_3_29);
@@ -211,10 +206,8 @@ void check_complexity::test_work_names()
     test_work_name(i, Move_Blue_or_Red_to_a_new_block_NewB_swap_3_29);
     test_work_name(i, refine_bottom_state_3_6l);
     test_work_name(i, refine_visited_state_3_15);
-    test_work_name(i, refine_bottom_state_3_6l_s_is_in_SpB);
 
     // temporary state counters (blue):
-    test_work_name(i, while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l); 
     test_work_name(i, while_Test_is_not_empty_3_6l_s_is_blue_3_11l);
     test_work_name(i, while_Blue_contains_unvisited_states_3_15l);
 
@@ -257,7 +250,6 @@ void check_complexity::test_work_names()
     test_work_name(i,
                     while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing);
     test_work_name(i, for_all_s_prime_in_pred_s_setminus_Red_3_18l);
-    test_work_name(i, if___s_prime_has_no_transition_to_SpC_3_23l);
     test_work_name(i, if___s_prime_has_transition_to_SpC_3_23l);
 
     // temporary transition counters (red):

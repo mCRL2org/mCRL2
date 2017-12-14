@@ -50,6 +50,7 @@ public:
     using std::vector<T>::clear;
 
     explicit fixed_vector(size_type n)  :std::vector<T>(n)  {  }
+    explicit fixed_vector(size_type n, T init)  :std::vector<T>(n, init)  {  }
 
 #ifdef NDEBUG
     using std::vector<T>::operator[];

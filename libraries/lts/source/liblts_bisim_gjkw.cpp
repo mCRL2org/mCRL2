@@ -267,7 +267,7 @@ void part_state_t::print_block(const char*const message, const block_t*const B,
                 mCRL2log(log::debug, "bisim_gjkw")
                                << ", inconsistent pointer to state_info_entry";
             }
-            mCRL2log(log::debug, "bisim_gjkw") << "\n";
+            mCRL2log(log::debug, "bisim_gjkw") << '\n';
         }
         while (++begin != end);
     }
@@ -304,7 +304,7 @@ void part_state_t::print_part(const part_trans_t& part_tr) const
             if (B->inert_end() == part_tr.B_to_C_begin())
             {
                 mCRL2log(log::debug, "bisim_gjkw")
-                            << "no transitions to its own constellation.\n";
+                               << "no transitions to its own constellation.\n";
                 assert(B->inert_begin() == B->inert_end());
             }
             else
@@ -373,7 +373,7 @@ void part_state_t::print_trans() const
                 succ_const_iter_t s_iter = succ_constln_iter;
                 // set succ_constln_iter to the end of the transitions to this
                 // constellation
-                succ_constln_iter = succ_constln_iter->constln_slice->end();
+                succ_constln_iter = succ_entry::slice_end(succ_constln_iter);
                 for ( ;s_iter != succ_constln_iter ;++s_iter)
                 {
                     mCRL2log(log::debug, "bisim_gjkw") << "\t\tto "
@@ -388,7 +388,7 @@ void part_state_t::print_trans() const
                         mCRL2log(log::debug, "bisim_gjkw")
                                                       << " <- current_constln";
                     }
-                    mCRL2log(log::debug, "bisim_gjkw") << "\n";
+                    mCRL2log(log::debug, "bisim_gjkw") << '\n';
                     assert(s_iter->B_to_C->pred->succ == s_iter);
                     assert(s_iter->B_to_C->pred->source == &*state_iter);
                 }
@@ -516,8 +516,7 @@ void part_trans_t::split_inert_to_C(block_t* const SpB)
 /// \param SpC        splitter constellation
 /// \param NewC       new constellation, where the transition goes to now
 /// \param first_transition_of_state  This is the first transition of the
-///                                   state, so a new constln_slice has to be
-///                                   allocated.
+///                                   state, so a new constln slice is started.
 /// \param first_transition_of_block  This is the first transition of the
 ///                                   block, so a new B_to_C slice has to be
 ///                                   allocated.
@@ -575,116 +574,40 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
     swap_B_to_C(pred_iter->succ, new_B_to_C_pos->pred->succ);
     new_B_to_C_pos->B_to_C_slice = new_B_to_C_slice;
     // adapt the outgoing transition array:
-    // move the transition to the beginning or the end, depending on the order
-    // of old/new constellation.
+    // move the transition to the beginning
     succ_iter_t const old_out_pos = pred_iter->succ;
     assert(succ.end() > old_out_pos &&
                                old_out_pos->B_to_C->pred->succ == old_out_pos);
-    if (*SpC < *NewC)
+
+    // move to beginning
+    assert(*NewC < *SpC);
+    succ_iter_t const new_out_pos = old_out_pos->slice_begin();
+    succ_iter_t const old_slice_end = succ_entry::slice_end(old_out_pos);
+    swap_out(pred_iter, new_out_pos->B_to_C->pred);
+    // the following assignment might assign an illegal transition if the old
+    // slice becomes empty -- but then it doesn't hurt, because it will be
+    // overwritten below.
+    if (old_slice_end > new_out_pos + 1)
     {
-        //mCRL2log(log::debug, "bisim_gjkw") << "*SpC<*NewC";
-        // move to end. Possibly needs three-way swap.
-        succ_iter_t const new_out_pos = old_out_pos->constln_slice->end() - 1;
-        out_descriptor* new_constln_slice;
-        if (first_transition_of_state)
-        {
-            if (new_out_pos == old_out_pos->constln_slice->begin())
-            {
-                // There was only one transition from pred_iter->source to SpC.
-                // This transition now points to NewC; the out_descriptors do
-                // not have to be changed.
-                const state_info_ptr s = pred_iter->source;
-                if (s->constln() == SpC)
-                {
-                    // swap over the inert transitions
-                    assert(s->inert_succ_begin() == s->inert_succ_end());
-                    assert(s->inert_succ_begin() - 1 == new_out_pos);
-                    s->set_inert_succ_begin_and_end(new_out_pos, new_out_pos);
-                }
-                assert(new_out_pos == old_out_pos);
-                return new_out_pos;
-            }
-            new_constln_slice = new out_descriptor(new_out_pos + 1);
-        }
-        else
-        {
-            new_constln_slice = new_out_pos[1].constln_slice;
-        }
-        new_constln_slice->set_begin(new_constln_slice->begin() - 1);
-        old_out_pos->constln_slice->set_end(old_out_pos->constln_slice->end() -
-                                                                            1);
-        assert(old_out_pos->constln_slice->end()==new_constln_slice->begin());
-        assert(old_out_pos->B_to_C->pred->source->succ_begin() <=
-                                            old_out_pos->constln_slice->end());
-        const state_info_ptr s = pred_iter->source;
-        if (s->constln() == SpC)
-        {
-            // swap over the inert transitions
-            s->set_inert_succ_begin_and_end(s->inert_succ_begin() - 1,
-                                                      s->inert_succ_end() - 1);
-            if (s->inert_succ_begin() != s->inert_succ_end())
-            {
-                // there are inert transitions: 3-way swap needed
-                // *old_out_pos -> *new_out_pos -> *inert_pos -> *old_out_pos
-                swap3_out(pred_iter, new_out_pos->B_to_C->pred,
-                                          s->inert_succ_begin()->B_to_C->pred);
-                assert(s->inert_succ_begin()->target->block == s->block);
-                assert(s->inert_succ_end()[-1].target->block == s->block);
-                assert(s->succ_end() > s->inert_succ_end() &&
-                               *SpC < *s->inert_succ_end()->target->constln());
-                // the old constln_slice cannot become empty because it
-                // contains an inert transition.
-                assert(0 != old_out_pos->constln_slice->size());
-                new_out_pos->constln_slice = new_constln_slice;
-                return new_out_pos;
-            }
-        }
-        // normal swap
-        if (0 == old_out_pos->constln_slice->size())
-        {
-            delete old_out_pos->constln_slice;
-        }
-        swap_out(pred_iter, new_out_pos->B_to_C->pred);
-        new_out_pos->constln_slice = new_constln_slice;
-        return new_out_pos;
+        old_slice_end[-1].set_slice_begin_or_before_end(new_out_pos + 1);
+        assert(old_slice_end - 1 == new_out_pos->slice_begin_or_before_end());
     }
     else
     {
-        //mCRL2log(log::debug, "bisim_gjkw") << "*NewC<*SpC";
-        // move to beginning
-        succ_iter_t const new_out_pos = old_out_pos->constln_slice->begin();
-        out_descriptor* new_constln_slice;
-        if (first_transition_of_state)
-        {
-            if (1 == old_out_pos->constln_slice->size())
-            {
-                // There was only one transition from pred_iter->source to SpC.
-                // This transition now points to NewC; the out_descriptors do
-                // not have to be changed.
-                assert(new_out_pos == old_out_pos);
-                return new_out_pos + 1;
-            }
-            new_constln_slice = new out_descriptor(new_out_pos);
-        }
-        else
-        {
-            new_constln_slice = new_out_pos[-1].constln_slice;
-        }
-        new_constln_slice->set_end(new_constln_slice->end() + 1);
-        old_out_pos->constln_slice->set_begin(
-                                      old_out_pos->constln_slice->begin() + 1);
-        assert(new_constln_slice->end()==old_out_pos->constln_slice->begin());
-        assert(old_out_pos->constln_slice->begin() <=
-                                old_out_pos->B_to_C->pred->source->succ_end());
-        if (0 == old_out_pos->constln_slice->size())
-        {
-            delete old_out_pos->constln_slice;
-        }
-        swap_out(pred_iter, new_out_pos->B_to_C->pred);
-        new_out_pos->constln_slice = new_constln_slice;
-        return new_out_pos + 1;
+        assert(old_slice_end - 1 == new_out_pos);
+        assert(old_slice_end-1==old_slice_end[-1].slice_begin_or_before_end());
     }
-    assert(0 && "unreachable");
+    if (first_transition_of_state)
+    {
+        new_out_pos->set_slice_begin_or_before_end(new_out_pos);
+    }
+    else
+    {
+        assert(pred_iter->source->current_constln() == new_out_pos);
+        new_out_pos->set_slice_begin_or_before_end(
+                                  new_out_pos[-1].slice_begin_or_before_end());
+    }
+    return new_out_pos + 1;
 }
 
 
@@ -692,22 +615,27 @@ succ_iter_t part_trans_t::change_to_C(pred_iter_t const pred_iter,
 /// \details split_s_inert_out splits the outgoing transitions from s to its
 /// own constellation into two:  the inert transitions become transitions to
 /// the new constellation of which s is now part;  the non-inert transitions
-/// remain transitions to OldC.  It returns the boundary between transitions to
-/// OldC and transitions to NewC in the outgoing transition array of s.
+/// remain transitions to OldC.
 /// Its time complexity is O(1 + min { |out_\nottau(s)|, |out_\tau(s)| }).
 /// \param s     state whose outgoing transitions need to be split
 /// \param OldC  old constellation (of which the splitter was a part earlier)
-succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
+/// \result true iff the state also has transitions to OldC
+bool part_trans_t::split_s_inert_out(state_info_ptr s
+                                           ONLY_IF_DEBUG( , constln_t* OldC ) )
 {
     constln_t* NewC = s->constln();
-    assert(*NewC < *OldC || OldC->end() == NewC->begin());
-    assert(*OldC < *NewC || NewC->end() == OldC->begin());
+    assert(*NewC < *OldC);
+    assert(NewC->sort_key + OldC->size() == OldC->sort_key);
+    assert(OldC->end() == NewC->begin() || NewC->end() == OldC->begin());
     succ_iter_t split = s->inert_succ_begin(), to_C_end = s->inert_succ_end();
-    succ_iter_t to_C_begin = s->succ_begin() == to_C_end ? s->succ_begin()
-                                         : to_C_end[-1].constln_slice->begin();
+    assert(s->succ_begin() == to_C_end ||
+                          to_C_end[-1].slice_begin_or_before_end() < to_C_end);
+    succ_iter_t to_C_begin = s->succ_begin() == to_C_end ? to_C_end
+                                    : to_C_end[-1].slice_begin_or_before_end();
         //< If s has no transitions to OldC at all, then to_C_begin may be the
         // beginning of the constln_slice for transitions to another
         // constellation.  We will check that later.
+    bool result = to_C_begin < split;
     assert(to_C_begin <= split);
     assert(split <= to_C_end);
     assert(succ.end() == split || split->B_to_C->pred->succ == split);
@@ -715,153 +643,97 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
     assert(succ.end() == to_C_begin ||
                                  to_C_begin->B_to_C->pred->succ == to_C_begin);
 
-    if (split < to_C_end && to_C_begin < split)
+    if (!result)  ;
+    else if (split < to_C_end)
     {
         // s has both inert and non-inert transitions
         #ifndef NDEBUG
             unsigned char max_counter = check_complexity::log_n -
                                          check_complexity::ilog2(NewC->size());
         #endif
-        if (*NewC < *OldC)
-        {
-            // the out-transitions of s also have to be swapped.
-            // Actually only B_to_C and the target need to be swapped, as the
-            // constln_slices are (still) identical.
-            trans_type swapcount = std::min(to_C_end-split, split-to_C_begin);
-            split = to_C_end - split + to_C_begin;
-            assert(0 != swapcount);
 
-            succ_iter_t pos1 = to_C_begin, pos2 = to_C_end;
-            state_info_ptr temp_target = pos1->target;
-            B_to_C_iter_t temp_B_to_C = pos1->B_to_C;
-            for (;;)
-            {
-                --pos2;
-                mCRL2complexity(pos2->B_to_C->pred, add_work(check_complexity::
+        assert(*NewC < *OldC);
+        // the out-transitions of s also have to be swapped.
+        // Actually only B_to_C and the target need to be swapped, as the
+        // constln_slices are (still) identical.
+        trans_type swapcount = std::min(to_C_end - split, split - to_C_begin);
+        split = to_C_end - split + to_C_begin;
+        assert(0 != swapcount);
+
+        succ_iter_t pos1 = to_C_begin, pos2 = to_C_end;
+        state_info_ptr temp_target = pos1->target;
+        B_to_C_iter_t temp_B_to_C = pos1->B_to_C;
+        for (;;)
+        {
+            --pos2;
+            mCRL2complexity(pos2->B_to_C->pred, add_work(check_complexity::
                    Register_that_inert_transitions_from_s_go_to_NewC_swap_2_17,
                                                                  max_counter));
-                pos1->target = pos2->target;
-                pos1->B_to_C = pos2->B_to_C;
-                pos1->B_to_C->pred->succ = pos1;
-                ++pos1;
-                if (0 == --swapcount)  break;
-                pos2->target = pos1->target;
-                pos2->B_to_C = pos1->B_to_C;
-                pos2->B_to_C->pred->succ = pos2;
-            }
-            pos2->target = temp_target;
-            pos2->B_to_C = temp_B_to_C;
+            pos1->target = pos2->target;
+            pos1->B_to_C = pos2->B_to_C;
+            pos1->B_to_C->pred->succ = pos1;
+            ++pos1;
+            if (0 == --swapcount)  break;
+            pos2->target = pos1->target;
+            pos2->B_to_C = pos1->B_to_C;
             pos2->B_to_C->pred->succ = pos2;
+        }
+        pos2->target = temp_target;
+        pos2->B_to_C = temp_B_to_C;
+        pos2->B_to_C->pred->succ = pos2;
 
-            s->set_inert_succ_begin_and_end(to_C_begin, split);
-            assert(s->succ_begin() == s->inert_succ_begin() ||
+        s->set_inert_succ_begin_and_end(to_C_begin, split);
+        assert(s->succ_begin() == s->inert_succ_begin() ||
                          *s->inert_succ_begin()[-1].target->constln() < *NewC);
-            assert(s->inert_succ_begin()->target->block == s->block);
-            assert(s->inert_succ_end()[-1].target->block == s->block);
-            assert(s->inert_succ_end() < s->succ_end());
-            assert(OldC == s->inert_succ_end()->target->constln());
-        }
-        // create a new constln_slice
-        out_descriptor* new_constln_slice = new out_descriptor(split);
-        // make the smaller part the new slice.
-        if (split - to_C_begin < to_C_end - split)
+        assert(s->inert_succ_begin()->target->block == s->block);
+        assert(s->inert_succ_end()[-1].target->block == s->block);
+        assert(s->inert_succ_end() < s->succ_end());
+        assert(OldC == s->inert_succ_end()->target->constln());
+
+        // set the pointer to the slice for the inert transitions.
+        to_C_end[-1].set_slice_begin_or_before_end(split);
+        split[-1].set_slice_begin_or_before_end(to_C_begin);
+        for (succ_iter_t succ_iter = split - 1; to_C_begin != succ_iter; )
         {
-            new_constln_slice->set_begin(to_C_begin);
-            to_C_begin->constln_slice->set_begin(split);
-            assert(to_C_begin->constln_slice->begin() ==
-                                                     new_constln_slice->end());
-        }
-        else
-        {
-            new_constln_slice->set_end(to_C_end);
-            to_C_begin->constln_slice->set_end(split);
-            assert(new_constln_slice->begin() ==
-                                             to_C_begin->constln_slice->end());
-        }
-        // set the pointer to the slice for the smaller part.
-        #ifndef NDEBUG
-            // the work is always assigned to inert transitions, even if they
-            // are the larger slice.  Therefore we use an additional variable
-            // work_pointer.
-            succ_iter_t work_pointer = s->inert_succ_begin();
-        #endif
-        for (succ_iter_t succ_iter = new_constln_slice->begin();
-                            new_constln_slice->end() != succ_iter; ++succ_iter)
-        {
-            #ifndef NDEBUG
-                mCRL2complexity(work_pointer->B_to_C->pred,
-                   add_work(check_complexity::
+            --succ_iter;
+            mCRL2complexity(succ_iter->B_to_C->pred,
+               add_work(bisim_gjkw::check_complexity::
                    Register_that_inert_transitions_from_s_go_to_NewC_succ_2_17,
                                                                  max_counter));
-                ++work_pointer;
-            #endif
             assert(succ.end() > succ_iter &&
                                    succ_iter->B_to_C->pred->succ == succ_iter);
-            succ_iter->constln_slice = new_constln_slice;
+            succ_iter->set_slice_begin_or_before_end(split - 1);
         }
-        assert(s->inert_succ_end() >= work_pointer);
     }
-    else if (*NewC < *OldC)
+    else if (*to_C_begin->target->constln() > *NewC)
     {
-        if (split < to_C_end)
-        {
-            // s has inert but no non-inert transitions to OldC. All its
-            // transitions to OldC become transitions to NewC.
-            split = to_C_end;
-        }
-        else if (s->succ_begin() < to_C_end)
-        {
-            // s has no inert transitions (but it has noninert ones). It will
-            // not have transitions to NewC.
-            assert(to_C_begin == to_C_end[-1].constln_slice->begin());
-            assert(succ.end() > to_C_begin &&
-                                 to_C_begin->B_to_C->pred->succ == to_C_begin);
-            if (to_C_begin->target->constln() == OldC)
-            {
-                // s has (noninert) transitions to OldC.
-                s->set_inert_succ_begin_and_end(to_C_begin, to_C_begin);
-                assert(s->succ_begin() == s->inert_succ_begin() ||
+        // s has (noninert) transitions to OldC, but no (inert)
+        // transitions to NewC.
+        assert(to_C_begin->target->constln() == OldC);
+        s->set_inert_succ_begin_and_end(to_C_begin, to_C_begin);
+        assert(s->succ_begin() == s->inert_succ_begin() ||
                          *s->inert_succ_begin()[-1].target->constln() < *NewC);
-                assert(s->succ_end() > s->inert_succ_end() &&
+        assert(s->succ_end() > s->inert_succ_end() &&
                                OldC == s->inert_succ_end()->target->constln());
-                split = to_C_begin;
-            }
-            else
-            {
-                // s has no transitions to OldC, but transitions to some
-                // constellation < min(*OldC, *NewC).  to_C_begin is actually
-                // the beginning of another constln_slice.
-                assert(*to_C_begin->target->constln() < *NewC);
-            }
-        }
+        assert(to_C_end == split);
+    }
+    else
+    {
+        // s actually hasn't got transitions to OldC at all, so `result`
+        // should not be true.
+        result = false;
     }
 #ifndef NDEBUG
     if (s->succ_begin() != s->succ_end())
     {
-        assert(s->succ_begin()->constln_slice->begin() == s->succ_begin());
         for (succ_iter_t succ_iter = s->succ_begin(); ; ++succ_iter)
         {
-            assert(succ_iter->constln_slice->begin() <= succ_iter);
-            assert(succ_iter->constln_slice->end() > succ_iter);
             assert(succ_iter->B_to_C->pred->source == s);
             if (s->succ_end() == succ_iter+1)
             {
                 break;
             }
-            if (succ_iter->constln_slice == succ_iter[1].constln_slice)
-            {
-                assert(succ_iter->target->constln() ==
-                                               succ_iter[1].target->constln());
-            }
-            else
-            {
-                assert(succ_iter->constln_slice->end() == succ_iter+1);
-                assert(succ_iter[1].constln_slice->begin() == succ_iter+1);
-                assert(*succ_iter->target->constln() <
-                                              *succ_iter[1].target->constln());
-            }
         }
-        assert(s->succ_end()[-1].constln_slice->end() == s->succ_end());
         assert(s->succ_begin() == s->inert_succ_begin() ||
                          *s->inert_succ_begin()[-1].target->constln() < *NewC);
         assert(s->inert_succ_begin() == s->inert_succ_end() ||
@@ -871,7 +743,7 @@ succ_iter_t part_trans_t::split_s_inert_out(state_info_ptr s, constln_t* OldC)
                               *NewC < *s->inert_succ_end()->target->constln());
     }
 #endif // ifndef NDEBUG
-    return split;
+    return result;
 }
 
 
@@ -1510,7 +1382,7 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                          s->succ_end() == s->current_constln() ||
                                   *s->current_constln()[-1].target->constln() <
                                      *s->current_constln()->target->constln());
-                mCRL2complexity(s, no_temporary_work(max_C, max_B,
+                mCRL2complexity(s, no_temporary_work(max_B,
                                                  s_iter >= B->bottom_begin()));
                 // count reachable constellations
                 state_type nr_of_reachable_constlns = B->to_constln.size();
@@ -1521,9 +1393,12 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                 {
                     for (;;)
                     {
-                        succ_const_iter_t slice_end =
-                                               succ_iter->constln_slice->end();
+                        succ_const_iter_t before_end =
+                                        succ_iter->slice_begin_or_before_end();
+                        succ_const_iter_t slice_end = before_end + 1;
                         assert(succ_iter < slice_end);
+                        assert(before_end->slice_begin_or_before_end() ==
+                                                                    succ_iter);
                         const constln_t* const targetC =
                                                   succ_iter->target->constln();
                         // for all noninert transitions in the constln-slice do
@@ -1538,6 +1413,11 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                             // transition
                             assert(succ_iter->target->block != B);
                             assert(succ_iter->target->constln() == targetC);
+                            if (succ_iter != before_end)
+                            {
+                                assert(succ_iter->slice_begin_or_before_end()==
+                                                                   before_end);
+                            }
                             assert(succ_iter->B_to_C < B->inert_begin() ||
                                           B->inert_end() <= succ_iter->B_to_C);
                             assert(succ_iter->B_to_C->B_to_C_slice->
@@ -1565,6 +1445,11 @@ void part_trans_t::assert_stability(const part_state_t& part_st) const
                             {
                                 // assert some properties of inert transitions
                                 assert(succ_iter->target->block == B);
+                                if (succ_iter != before_end)
+                                {
+                                    assert(before_end ==
+                                       succ_iter->slice_begin_or_before_end());
+                                }
                                 assert(B->inert_begin() <= succ_iter->B_to_C);
                                 assert(succ_iter->B_to_C < B->inert_end());
                                 assert(succ_iter->B_to_C->B_to_C_slice->
@@ -1791,8 +1676,8 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
 
     // initialise blocks and B_to_C slices
     permutation_iter_t begin = part_st.permutation.begin();
-    constln_t* const constln = new constln_t(begin, part_st.permutation.end(),
-                                                         part_tr.B_to_C_end());
+    constln_t* const constln = new constln_t(get_nr_of_states(), begin,
+                              part_st.permutation.end(), part_tr.B_to_C_end());
     if (1 < states_per_block.size())
     {
         constln->make_nontrivial();
@@ -1846,31 +1731,21 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
         // part_st.state_info[s+1].set_pred_begin(part_st.state_info[s].
         //                                                         pred_end());
 
+        succ_iter_t before_end = part_st.state_info[s].succ_begin() +
+                        noninert_out_per_state[s] + inert_out_per_state[s] - 1;
+        part_st.state_info[s].set_succ_end(before_end + 1);
+        part_st.state_info[s].set_current_constln(before_end + 1);
+        part_st.state_info[s].set_inert_succ_begin_and_end(part_st.
+            state_info[s].succ_begin()+noninert_out_per_state[s],before_end+1);
         if (0 != noninert_out_per_state[s] + inert_out_per_state[s])
         {
-            out_descriptor* const s_slice = new out_descriptor(
-                                           part_st.state_info[s].succ_begin());
-            s_slice->set_end(s_slice->end() + noninert_out_per_state[s] +
-                                                       inert_out_per_state[s]);
-            part_st.state_info[s].set_succ_end(s_slice->end());
-            part_st.state_info[s].set_inert_succ_begin_and_end(s_slice->begin()
-                                  + noninert_out_per_state[s], s_slice->end());
-            for (succ_iter_t succ_iter = s_slice->begin();
-                                      s_slice->end() != succ_iter; ++succ_iter)
+            for (succ_iter_t succ_iter = part_st.state_info[s].succ_begin();
+                                          before_end != succ_iter; ++succ_iter)
             {
-                succ_iter->constln_slice = s_slice;
+                succ_iter->set_slice_begin_or_before_end(before_end, true);
             }
-            part_st.state_info[s].set_current_constln(s_slice->end());
-        }
-        else
-        {
-            part_st.state_info[s].set_succ_end(
-                                           part_st.state_info[s].succ_begin());
-            part_st.state_info[s].set_inert_succ_begin_and_end(
-                                           part_st.state_info[s].succ_begin(),
-                                           part_st.state_info[s].succ_begin());
-                part_st.state_info[s].set_current_constln(
-                                           part_st.state_info[s].succ_begin());
+            before_end->set_slice_begin_or_before_end(
+                                     part_st.state_info[s].succ_begin(), true);
         }
 
         if (s < aut.num_states())
@@ -2060,8 +1935,6 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
         for (succ_const_iter_t succ_iter = (*s_iter)->succ_begin();
                                           (*s_iter)->succ_end() != succ_iter; )
         {
-            assert(succ_iter->constln_slice->begin() == succ_iter);
-            assert(succ_iter < succ_iter->constln_slice->end());
             state_type t_eq = succ_iter->target->block->seqnr();
             if (BLOCK_NO_SEQNR != t_eq)
             {
@@ -2075,7 +1948,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
                         // As we do not preserve divergence, we do not add it.
                         // Nor will we add other transitions to the same
                         // constellation.
-                        succ_iter = succ_iter->constln_slice->end();
+                        succ_iter = succ_entry::slice_end(succ_iter);
                         continue;
                     }
                     if (*s_iter != succ_iter->target)
@@ -2111,7 +1984,7 @@ void bisim_partitioner_gjkw_initialise_helper<LTS_TYPE>::
             // Skip over other transitions from the same state to the same
             // constellation -- they would be mapped to the same resulting
             // transition.
-            succ_iter = succ_iter->constln_slice->end();
+            succ_iter = succ_entry::slice_end(succ_iter);
         }
     }
 
@@ -2193,6 +2066,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.7: C := partition C where SpB is removed from SpC and NewC is
         //      added
         bisim_gjkw::block_t* const SpB = SpC->split_off_small_block();
+        bisim_gjkw::constln_t* const NewC = SpB->constln();
         #ifndef NDEBUG
             unsigned char max_counter = bisim_gjkw::check_complexity::log_n -
                               bisim_gjkw::check_complexity::ilog2(SpB->size());
@@ -2206,9 +2080,9 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
 
         assert(nullptr == bisim_gjkw::block_t::get_some_refinable());
         // 2.8: Mark block SpB as refinable
-        if (!SpB->make_refinable())  assert(0 && "SpB was already refinable");
         // 2.9: Mark all states of SpB as predecessors
-        SpB->mark_all_states();
+            // we deviate from the published algorithm: only the states with a
+            // transition to SpC will be marked. SpB will be split separately.
         // 2.17: Register that the transitions from s to inert_out(s) go to
         //       NewC (instead of SpC)
             // (Before we enter the loop, we already adapt the ``B_to_C''
@@ -2217,14 +2091,18 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // 2.10: for all s in SpB do
         mCRL2complexity(SpB, add_work(bisim_gjkw::check_complexity::
                                           for_all_s_in_SpB_2_10, max_counter));
-        for (bisim_gjkw::permutation_iter_t s_iter = SpB->begin();
-                                                SpB->end() != s_iter; ++s_iter)
+            // We have to walk through the states from end to beginning so
+            // we can mark state s if necessary.  Marking will move s to a
+            // position that has already been visited.
+        for (bisim_gjkw::permutation_iter_t s_iter = SpB->end();
+                                                      SpB->begin() != s_iter; )
         {
+            --s_iter;
             bisim_gjkw::state_info_ptr const s = *s_iter;
             // mCRL2complexity(s, ...) -- optimized to the above call.
             // 2.11: for all s_prime in noninert_in(s) do
             for (bisim_gjkw::pred_iter_t pred_iter = s->noninert_pred_begin();
-                            s->noninert_pred_end() != pred_iter; ++pred_iter)
+                              s->noninert_pred_end() != pred_iter; ++pred_iter)
             {
                 mCRL2complexity(pred_iter, add_work(bisim_gjkw::
                               check_complexity::for_all_s_prime_in_pred_s_2_11,
@@ -2242,23 +2120,49 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                 // and
                 // 2.15: Store whether s' still has some transition to SpC\SpB
                 s_prime->set_current_constln(part_tr.change_to_C(pred_iter,
-                              SpC, SpB->constln(), first_transition_of_state,
+                                          SpC, NewC, first_transition_of_state,
                                                    first_transition_of_block));
             // 2.16: end for
             }
             // 2.17: Register that the transitions from s to inert_out(s) go to
             //       NewC (instead of SpC)
                 // (Here, we only adapt the ``succ'' transition array.)
-            // and
-            // 2.18: Store whether s still has some transition to SpC\SpB
-            s->set_current_constln(part_tr.split_s_inert_out(s, SpC));
-            assert(s->succ_begin() == s->current_constln() ||
-                          *s->current_constln()[-1].target->constln() <= *SpC);
-            assert(s->succ_end() == s->current_constln() ||
-                             *SpC <= *s->current_constln()->target->constln());
+            if (part_tr.split_s_inert_out(s ONLY_IF_DEBUG( , SpC ) ))
+            {
+                // 2.18: Store whether s still has some transition to SpC\SpB
+                    // we deviate from the explanation of the published
+                    // algorithm: we store this information by marking states
+                    // with transitions to SpC.
+                SpB->mark(s);
+            }
         // 2.19: end for
         }
-        //mCRL2log(log::debug, "bisim_gjkw") << "\n";
+
+        // second pass through the predecessors to correct the pointers to the
+        // constln_slices
+        for (bisim_gjkw::permutation_iter_t s_iter = SpB->begin();
+                                                SpB->end() != s_iter; ++s_iter)
+        {
+            bisim_gjkw::state_info_ptr const s = *s_iter;
+            for (bisim_gjkw::pred_iter_t pred_iter = s->noninert_pred_begin();
+                              s->noninert_pred_end() != pred_iter; ++pred_iter)
+            {
+                bisim_gjkw::succ_iter_t succ = pred_iter->succ;
+                bisim_gjkw::succ_iter_t before_end =
+                                      pred_iter->source->current_constln() - 1;
+                if (succ != before_end)
+                {
+                    //mCRL2log(log::debug, "bisim_gjkw") << "second pass for "
+                    //               << succ->B_to_C->pred->debug_id() << '\n';
+                    assert(succ < before_end);
+                    assert(succ >= before_end->slice_begin_or_before_end());
+                    assert(succ->slice_begin_or_before_end() ==
+                                      before_end->slice_begin_or_before_end());
+                    succ->set_slice_begin_or_before_end(before_end);
+                }
+            }
+        }
+        //mCRL2log(log::debug, "bisim_gjkw") << '\n';
 
 #ifndef NDEBUG
         // The following tests cannot be executed during the above loops
@@ -2279,14 +2183,8 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
                 assert(s_prime->succ_end() == s_prime->current_constln() ||
                        *SpC <= *s_prime->current_constln()->target->constln());
                     // s_prime must have a transition to the new constellation
-                assert((s_prime->succ_begin() < s_prime->current_constln() &&
-                        *SpB->constln() < *SpC &&
-                        s_prime->current_constln()[-1].target->constln() ==
-                                                             SpB->constln()) ||
-                       (s_prime->succ_end() > s_prime->current_constln() &&
-                        *SpC < *SpB->constln() &&
-                        s_prime->current_constln()->target->constln() ==
-                                                              SpB->constln()));
+                assert(s_prime->succ_begin() < s_prime->current_constln());
+                assert(s_prime->current_constln()[-1].target->constln()==NewC);
                 // check consistency of s_prime->inert_succ_begin() and
                 // s_prime->inert_succ_end()
                 assert(s_prime->succ_begin() == s_prime->inert_succ_begin() ||
@@ -2318,60 +2216,63 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
 
         /*------------------ stabilise the partition again ------------------*/
 
+        // deviation from the published algorithm: we first refine the splitter
+        // according to the marking of states (marked states have a transition
+        // to SpC).
+        if (0 != SpB->marked_size())
+        {
+            if (1 == SpB->size())
+            {
+                // if the block only contains a single state, the refinement
+                // would be trivial anyway (and it cannot find new bottom
+                // states).
+                SpB->set_marked_bottom_begin(SpB->bottom_end());
+            }
+            else
+            {
+                bisim_gjkw::block_t* RedB = refine(SpB, SpC, nullptr, false);
+                if (0 != RedB->unmarked_bottom_size())
+                {
+                    postprocess_new_bottom(RedB);
+                }
+                else
+                {
+                    RedB->set_marked_bottom_begin(RedB->bottom_end());
+                }
+            }
+        }
+
         // 2.20: for all refinable blocks RfnB do
         while (nullptr != bisim_gjkw::block_t::get_some_refinable())
         {
             bisim_gjkw::block_t* const RfnB =
-                                    bisim_gjkw::block_t::get_some_refinable();
+                                     bisim_gjkw::block_t::get_some_refinable();
             //mCRL2log(log::debug, "bisim_gjkw") << "Refining "
             //                                    << RfnB->debug_id() << ".\n";
             // 2.21: Mark block RfnB as non-refinable
             RfnB->make_nonrefinable();
 
             #ifndef NDEBUG
-                if (RfnB == SpB)
-                {
-                    // The work in this loop iteration is ascribed to the
-                    // splitter itself.
-                    mCRL2complexity(RfnB, add_work(
-                                bisim_gjkw::check_complexity::
-                                for_all_refinable_blocks_RfnB_is_splitter_2_20,
-                                                                 max_counter));
-                    assert(nullptr==bisim_gjkw::block_t::get_some_refinable());
-                }
-                else
-                {
-                    // The work in this loop has to be assigned to the B_to_C-
-                    // slice that contains the transitions from RfnB to NewC.
-                    // Note that this is not FromRed, so we have to find it in
-                    // a different way.  First find a marked state:
-                    bisim_gjkw::permutation_iter_t s_mark_iter =
+                // The work in this loop has to be assigned to the B_to_C-
+                // slice that contains the transitions from RfnB to NewC.
+                // Note that this is not FromRed, so we have to find it in a
+                // different way.  First find a marked state:
+                bisim_gjkw::permutation_iter_t s_mark_iter =
                                                    RfnB->marked_bottom_begin();
-                    if (s_mark_iter == RfnB->marked_bottom_end())
-                    {
-                        s_mark_iter = RfnB->marked_nonbottom_begin();
-                        assert(s_mark_iter < RfnB->marked_nonbottom_end());
-                    }
-                    // Now, using the current_constln pointer of s, find a
-                    // transition to NewC (== SpB->constln()).
-                    bisim_gjkw::succ_iter_t to_NewC =
-                                             (*s_mark_iter)->current_constln();
-                    if (*SpC < *SpB->constln())
-                    {
-                        assert(to_NewC < (*s_mark_iter)->succ_end());
-                    }
-                    else
-                    {
-                        --to_NewC;
-                        assert((*s_mark_iter)->succ_begin() <= to_NewC);
-                    }
-                    assert(to_NewC->target->block == SpB);
-                    mCRL2complexity(to_NewC->B_to_C->B_to_C_slice, add_work(
-                                            bisim_gjkw::check_complexity::
-                                            for_all_refinable_blocks_RfnB_2_20,
-                                                                 max_counter));
-                    assert(nullptr!=bisim_gjkw::block_t::get_some_refinable());
+                if (s_mark_iter == RfnB->marked_bottom_end())
+                {
+                    s_mark_iter = RfnB->marked_nonbottom_begin();
+                    assert(s_mark_iter < RfnB->marked_nonbottom_end());
                 }
+                // Now, using the current_constln pointer of s, find a
+                // transition to NewC.
+                bisim_gjkw::succ_iter_t to_NewC =
+                                  std::prev((*s_mark_iter)->current_constln());
+                assert((*s_mark_iter)->succ_begin() <= to_NewC);
+                assert(to_NewC->target->constln() == NewC);
+                mCRL2complexity(to_NewC->B_to_C->B_to_C_slice, add_work(
+                             bisim_gjkw::check_complexity::
+                             for_all_refinable_blocks_RfnB_2_20, max_counter));
             #endif
 
             if (1 == RfnB->size())
@@ -2384,7 +2285,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             }
             // 2.22: <RedB, BlueB> := Refine(RfnB, NewC, {marked states in
             //                                                       RfnB}, {})
-            bisim_gjkw::block_t*RedB=refine(RfnB,SpB->constln(),nullptr,false);
+            bisim_gjkw::block_t* RedB = refine(RfnB, NewC, nullptr, false);
             // 2.23: if RedB contains new bottom states then
             if (0 != RedB->unmarked_bottom_size())
             {
@@ -2413,7 +2314,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
             // 2.26: <RedB, BlueB> := Refine(RedB, SpC\SpB, {}, {transitions
             //                                           from RedB to SpC\SpB})
             RedB = refine(RedB, SpC, RedB->FromRed(SpC), false
-                                           ONLY_IF_DEBUG( , SpB->constln() ) );
+                                                     ONLY_IF_DEBUG( , NewC ) );
             // 2.27: if RedB contains new bottom states then
             if (0 != RedB->unmarked_bottom_size())
             {
@@ -2446,7 +2347,7 @@ void bisim_partitioner_gjkw<LTS_TYPE>::
         // (this happens implicitly, through the bisim_partitioner_gjkw object
         // data)
     mCRL2log(log::verbose) << "number of blocks in the quotient: "
-                                  << bisim_gjkw::block_t::nr_of_blocks << "\n";
+                                  << bisim_gjkw::block_t::nr_of_blocks << '\n';
 }
 
 
@@ -2509,7 +2410,7 @@ struct refine_shared_t {
                 {
                     mCRL2complexity(succ->B_to_C->pred,finalise_work(
                              check_complexity::
-                             if___s_prime_has_no_transition_to_SpC_3_23l,
+                             if___s_prime_has_transition_to_SpC_3_23l,
                              check_complexity::
                              refine_outgoing_transition_3_6_or_23l, max_NewB));
                 }
@@ -2532,14 +2433,6 @@ struct refine_shared_t {
             state_info_ptr s = *i;
             mCRL2complexity(s, cancel_work(check_complexity::
                                    while_Red_contains_unvisited_states_3_15r));
-            // the following counter should only be set for states in the
-            // splitter constellation NewC (== SpB->constln()).  For other
-            // states, no (temporary) work should be assigned to this counter.
-            // Note the test does also work if NewC == nullptr.
-            mCRL2complexity(s, finalise_work(check_complexity::
-                        while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l,
-                        check_complexity::refine_bottom_state_3_6l_s_is_in_SpB,
-                        s->constln() == NewC ? max_NewC : 0));
             for (succ_iter_t succ=s->succ_begin(); s->succ_end()!=succ; ++succ)
             {
                 mCRL2complexity(succ->B_to_C->pred, cancel_work(
@@ -2605,7 +2498,7 @@ struct refine_shared_t {
             {
                 mCRL2complexity(succ->B_to_C->pred, cancel_work(
                                  check_complexity::
-                                 if___s_prime_has_no_transition_to_SpC_3_23l));
+                                 if___s_prime_has_transition_to_SpC_3_23l));
             }
             for (pred_iter_t pred=s->pred_begin(); s->pred_end()!=pred; ++pred)
             {
@@ -2618,8 +2511,6 @@ struct refine_shared_t {
         for (permutation_iter_t i = RedB->begin(); RedB->end() != i; ++i)
         {
             state_info_ptr s = *i;
-            mCRL2complexity(s, cancel_work(check_complexity::
-                       while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l));
             mCRL2complexity(s, finalise_work(check_complexity::
                        while_Red_contains_unvisited_states_3_15r,
                        check_complexity::refine_visited_state_3_15, max_NewB));
@@ -2926,18 +2817,10 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                         --to_SpC;
                         assert(to_SpC->target->constln() == SpC);
                     }
-                    to_SpC->constln_slice->add_work_to_transns(
+                    bisim_gjkw::succ_entry::slice_add_work_to_transns(to_SpC,
                      bisim_gjkw::check_complexity::
                      while_Test_is_not_empty_3_6l_s_is_red_3_9l_postprocessing,
                                                                             1);
-                }
-                else if (nullptr == bisim_gjkw::block_t::get_some_refinable())
-                {
-                    // refine() has been called from line 2.26, and RfnB is
-                    // SpB.  The state has been marked because it is in SpB.
-                    mCRL2complexity(s, add_work(bisim_gjkw::check_complexity::
-                         while_Test_is_not_empty_3_6l_s_is_in_SpB_and_red_3_9l,
-                                                                           1));
                 }
                 else
                 {
@@ -2953,7 +2836,7 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                         --to_NewC;
                         assert(to_NewC->target->constln() != SpC);
                     }
-                    to_NewC->constln_slice->add_work_to_transns(
+                    bisim_gjkw::succ_entry::slice_add_work_to_transns(to_NewC,
                                 bisim_gjkw::check_complexity::
                                 while_Test_is_not_empty_3_6l_s_is_red_3_9l, 1);
                 }
@@ -3071,15 +2954,15 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                                                      begin + (end - begin) / 2;
                         if (*SpC <= *mid->target->constln())
                         {
-                            end = mid->constln_slice->begin();
+                            end = mid->slice_begin();
                         }
                         if (*mid->target->constln() <= *SpC)
                         {
-                            begin = mid->constln_slice->end();
+                            begin = bisim_gjkw::succ_entry::slice_end(mid);
                         }
                         #ifndef NDEBUG
-                            mid->constln_slice->add_work_to_transns(
-                                  bisim_gjkw::check_complexity::
+                            bisim_gjkw::succ_entry::slice_add_work_to_transns(
+                                  mid, bisim_gjkw::check_complexity::
                                   if___s_prime_has_transition_to_SpC_3_23l, 1);
                         #endif
                     }
@@ -3091,19 +2974,6 @@ DEFINE_COROUTINE(bisim_partitioner_gjkw<LTS_TYPE>::, refine_blue,
                              for_all_s_prime_in_pred_s_setminus_Red_3_18l, 1));
                         continue;
                     }
-                    #ifndef NDEBUG
-                        // The work has been assigned to the wrong counter
-                        // above.  Move the work to the correct counter.
-                        for(bisim_gjkw::succ_iter_t iter=s_prime->succ_begin();
-                                           iter != s_prime->succ_end(); ++iter)
-                        {
-                            mCRL2complexity(iter->B_to_C->pred, move_work(
-                               bisim_gjkw::check_complexity::
-                                      if___s_prime_has_transition_to_SpC_3_23l,
-                               bisim_gjkw::check_complexity::
-                               if___s_prime_has_no_transition_to_SpC_3_23l,1));
-                        }
-                    #endif
                 }
             }
             //mCRL2log(log::debug, "bisim_gjkw") << "Non-bottom "
@@ -3474,7 +3344,7 @@ bisim_gjkw::block_t* bisim_partitioner_gjkw<LTS_TYPE>::postprocess_new_bottom(
                                             /* , bisim_gjkw::block_t* BlueB */)
 {
     //mCRL2log(log::debug, "bisim_gjkw") << "Postprocessing "
-    //                                             << RedB->debug_id() << "\n";
+    //                                             << RedB->debug_id() << '\n';
     assert(0 != RedB->unmarked_bottom_size());
     assert(RedB->marked_nonbottom_begin() == RedB->marked_nonbottom_end());
 
@@ -3543,7 +3413,7 @@ Line_4_4:
             assert(0 && "The constellation already was in R");
         }
         //mCRL2log(log::debug, "bisim_gjkw") << "\tcan reach " << C->debug_id()
-        //                                                             << "\n";
+        //                                                             << '\n';
         // 4.6: Register that the transitions from RfnB to C need
         //      postprocessing
         assert(C->postprocess_begin == C->postprocess_end);
@@ -3676,12 +3546,12 @@ Line_4_4:
                                 s->current_constln()->target->constln() == SpC)
                 {
                     #ifndef NDEBUG
-                        s->current_constln()->constln_slice->
-                             add_work_to_transns(bisim_gjkw::check_complexity::
+                        bisim_gjkw::succ_entry::slice_add_work_to_transns(
+                           s->current_constln(), bisim_gjkw::check_complexity::
                                   for_all_old_bottom_states_s_in_RedB_4_15, 1);
                     #endif
-                    s->set_current_constln(s->current_constln()->
-                                                         constln_slice->end());
+                    s->set_current_constln(bisim_gjkw::succ_entry::slice_end(
+                                                        s->current_constln()));
                 }
                 else
                 {
