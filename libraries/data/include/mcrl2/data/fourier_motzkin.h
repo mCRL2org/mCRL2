@@ -299,6 +299,7 @@ inline void fourier_motzkin(const data_expression& e_in,
         // Return the original expression.
         vars_out=vars_in;
         e_out=e_in;
+        return;
       }
     }
   }
@@ -333,11 +334,11 @@ struct fourier_motzkin_sigma: public std::unary_function<data_expression, data_e
   
       if (negate)
       {
-        return rewr(forall(new_variables, sort_bool::not_(new_body)));
+        return rewr(new_variables.empty() ? sort_bool::not_(new_body) : forall(new_variables, sort_bool::not_(new_body)));
       }
       else
       {
-        return rewr(exists(new_variables, new_body));
+        return rewr(new_variables.empty() ? new_body : exists(new_variables, new_body));
       }
     }
   
