@@ -181,6 +181,25 @@ void test_high_level_fourier_motzkin()
   BOOST_CHECK(out == less(sort_real::times(real_one(), vx), sort_real::real_(2)));
 }
 
+void test_high_level_fourier_motzkin_non_linear()
+{
+  data_specification data_spec;
+  data_spec.add_context_sort(sort_real::real_());
+  rewriter rewr(data_spec);
+  variable vx("x", sort_real::real_());
+
+  data_expression expr = less(sort_real::times(vx,vx), sort_real::real_(0));
+  variable_list elim_vars({vx});
+  data_expression out;
+  variable_list vars_out;
+  fourier_motzkin(expr, elim_vars, out, vars_out, rewr);
+  
+  // Fourier Motzkin should fail, because the expression is not linear
+  // Original result should be returned
+  BOOST_CHECK(vars_out == elim_vars);
+  BOOST_CHECK(out == expr);
+}
+
 void split_conditions_helper(const std::string& vars,
                              const std::string& expr,
                              std::vector< data_expression_list >& real_conditions,
@@ -269,6 +288,7 @@ int test_main(int /* argc */, char** /* argv[]*/)
 
   BOOST_CHECK(test_application_of_Fourier_Motzkin("x,y:Real;", "y:Real;", "-y + x < 0 &&  y < 2", "x>=2"));
   test_high_level_fourier_motzkin();
+  test_high_level_fourier_motzkin_non_linear();
   return 0;
 }
 
