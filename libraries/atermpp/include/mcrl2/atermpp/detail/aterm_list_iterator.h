@@ -12,7 +12,6 @@
 #ifndef MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 #define MCRL2_ATERMPP_ATERM_LIST_ITERATOR_H
 
-// #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
@@ -39,10 +38,10 @@ class term_list_iterator
 
     /// \brief Constructor from an aterm which must be a list.
     /// \param l A sequence of terms
-    term_list_iterator(const aterm& l)
-      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(detail::address(l)))
+    term_list_iterator(detail::_aterm* l)
+      : m_list(reinterpret_cast<detail::_aterm_list<Term>*>(l))
     { 
-      assert(l.type_is_list());
+      assert(l->function()==detail::function_adm.AS_LIST || l->function()==detail::function_adm.AS_EMPTY_LIST);
     } 
 
   public:

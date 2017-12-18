@@ -22,6 +22,18 @@ static const std::size_t number_of_threads=1;  // In the sequential toolset this
                                                // as otherwise totally unpredictable behaviour will occur.
                                                // For the parallel atermpp library this ought to work
                                                // properly with larger and large values for number_of_threads. 
+static const std::size_t size_of_terms=10;
+static const std::size_t number_of_terms_to_construct=10000000;
+
+std::size_t term_size(const aterm_appl& t)
+{
+  std::size_t size=1;
+  for(const aterm a: t)
+  {
+    size = size + term_size(atermpp::down_cast<aterm_appl>(a));
+  }
+  return size;
+}
 
 // Function to create and destroy arbitrary terms. 
 void create_and_destroy_many_terms(const std::size_t n)
@@ -33,13 +45,14 @@ void create_and_destroy_many_terms(const std::size_t n)
   {
     t=aterm_appl(f,t,t);
   }
+//  BOOST_CHECK(term_size(t)==2047);
 } 
 
 void aterm_test_thread()
 {
-  for(std::size_t i=0; i<10; ++i)
+  for(std::size_t i=0; i<number_of_terms_to_construct/number_of_threads; ++i)
   {
-    create_and_destroy_many_terms(1000/number_of_threads);
+    create_and_destroy_many_terms(size_of_terms);
   }
 }
 
@@ -61,8 +74,6 @@ int test_main(int , char*[])
     threads.at(i).join(); 
   }
 
-  aterm_test_thread();
-  
   std::cerr << "All " << number_of_threads << " threads are completed.\n";
 
   return 0;
