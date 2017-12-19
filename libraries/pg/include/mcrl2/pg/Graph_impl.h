@@ -9,6 +9,10 @@
 
 // Don't include this directly; include Graph.h instead!
 
+#ifndef MCRL2_PG_GRAPH_IMPL_H 
+#define MCRL2_PG_GRAPH_IMPL_H 
+
+#include "mcrl2/pg/Graph.h"
 #include "mcrl2/pg/DenseMap.h"
 
 #include <unordered_map>
@@ -161,3 +165,5 @@ void StaticGraph::make_subgraph( const StaticGraph &graph,
         predecessor_index_[v] = e;
     }
 }
+
+#endif // MCRL2_PG_GRAPH_IMPL_H

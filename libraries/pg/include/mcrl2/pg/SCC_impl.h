@@ -9,10 +9,17 @@
 
 // Don't include this directly; include SCC.h instead!
 
+
+#ifndef MCRL2_PG_SCC_IMPL_H
+#define MCRL2_PG_SCC_IMPL_H
+
 #include <algorithm>
 #include <vector>
 #include <utility>
 #include <cassert>
+
+#include "mcrl2/pg/Graph.h"
+
 
 /*! Implements Tarjan's algorithm for finding strongly connected components in
     a directed graph.
@@ -162,3 +169,5 @@ private:
     */
     std::vector< std::pair< verti, verti > > stack;
 };
+
+#endif // MCRL2_PG_SCC_IMPL_H

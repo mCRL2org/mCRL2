@@ -34,4 +34,4 @@ void make_attractor_set( const ParityGame &game, ParityGame::Player player,
 
 #include "attractor_impl.h"
 
-#endif /* ndef MCRL2_PG_ATTRACTOR_H */
+#endif /* MCRL2_PG_ATTRACTOR_H */

@@ -9,6 +9,11 @@
 
 // Don't include this directly; include ParityGameSolver.h instead!
 
+#ifndef MCRL2_PG_PARITYGAME_SOLVER_IMPL_H
+#define MCRL2_PG_PARITYGAME_SOLVER_IMPL_H
+
+#include "mcrl2/pg/ParityGameSolver.h"
+
 template<class ForwardIterator>
 void merge_vertex_maps( ForwardIterator begin, ForwardIterator end,
                         const verti *old_map, verti old_map_size )
@@ -19,3 +24,5 @@ void merge_vertex_maps( ForwardIterator begin, ForwardIterator end,
         v = (v < old_map_size) ? old_map[v] : NO_VERTEX;
     }
 }
+
+#endif // MCRL2_PG_PARITYGAME_SOLVER_IMPL_H

@@ -7,7 +7,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef MCRL2_PG_ATTRACTOR_IMPL_H
+#define MCRL2_PG_ATTRACTOR_IMPL_H
+
 #include "mcrl2/pg/attractor.h"
+#include "mcrl2/pg/Graph.h"
+#include "mcrl2/pg/ParityGame_impl.h"
 
 #include <queue>
 
@@ -139,3 +144,5 @@ void make_attractor_set_2( const ParityGame &game, ParityGame::Player player,
         }
     }
 }
+
+#endif // MCRL2_PG_ATTRACTOR_IMPL_H

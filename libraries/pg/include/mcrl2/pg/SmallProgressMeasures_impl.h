@@ -9,8 +9,13 @@
 
 // Don't include this file directly! Include SmallProgressMeasures.h instead.
 
+#ifndef MCRL2_PG_SMALLPROGRESSMEASURES_IMPL_H
+#define MCRL2_PG_SMALLPROGRESSMEASURES_IMPL_H
+
 #include <vector>
 #include <deque>
+
+#include "mcrl2/pg/SmallProgressMeasures.h"
 
 inline int SmallProgressMeasures::vector_cmp(verti v, verti w, int N) const
 {
@@ -158,3 +163,5 @@ void SmallProgressMeasures::set_top(verti v)
     std::size_t prio = game_.priority(v);
     if (prio%2 != p_) decr_M(prio/2);
 }
+
+#endif // MCRL2_PG_SMALLPROGRESSMEASURES_IMPL_H

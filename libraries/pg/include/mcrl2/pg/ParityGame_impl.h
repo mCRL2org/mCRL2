@@ -9,8 +9,13 @@
 
 // Don't include this directly; include ParityGame.h instead!
 
+#ifndef MCRL2_PG_PARITYGAME_IMPL_H
+#define MCRL2_PG_PARITYGAME_IMPL_H
+
 #include <cassert>
 #include <iterator>
+
+#include "mcrl2/pg/ParityGame.h"
 
 template<class ForwardIterator>
 void ParityGame::make_subgame( const ParityGame &game,
@@ -41,3 +46,6 @@ ParityGame::Player ParityGame::winner(const StrategyT &s, verti v) const
     /* A vertex is won by its player iff the player has a strategy for it: */
     return (s[v] != NO_VERTEX) ? player(v) : ParityGame::Player(1 - player(v));
 }
+
+#endif // MCRL2_PG_PARITYGAME_IMPL_H
+

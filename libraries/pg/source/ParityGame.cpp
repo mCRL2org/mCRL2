@@ -8,6 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "mcrl2/pg/ParityGame.h"
+#include "mcrl2/pg/ParityGame_impl.h"
 
 #include <algorithm>
 #include <deque>
