@@ -109,8 +109,8 @@ typedef std::size_t label_type;
 ///   state_info_entries'', typedef state_info_entry (*state_info_ptr)[2];.
 ///   Still, that would allow unsafe pointer juggling.)
 /// - A block_t also contains information about its outgoing inert transitions.
-/// - A state_info_entry also contains information used during trysplit or
-///   process_new_bottom.
+/// - A state_info_entry also contains information used during `refine()` or
+///   `process_new_bottom()`.
 ///@{
 
 namespace bisim_gjkw
@@ -385,6 +385,7 @@ class state_info_entry
   private:
     /// \brief pointer at the first entry in the `state_info` array
     static state_info_const_ptr s_i_begin;
+
     /// \brief pointer past the last actual entry in the `state_info` array
     /// \details `state_info` actually contains an additional entry that is
     /// only used partially, namely to store pointers to the end of the
@@ -409,24 +410,6 @@ static inline void swap_permutation(permutation_iter_t s1,
     (*s1)->pos = s1;
     (*s2)->pos = s2;
 }
-
-/// \brief swap three permutations
-/// \details the entry in the permutation array at *s1 moves to *s2, the entry
-/// at *s2 moves to *s3, and the entry at *s3 moves to *s1.
-static inline void swap3_permutation(permutation_iter_t s1,
-                                permutation_iter_t s2, permutation_iter_t s3)
-{
-    // swap contents of permutation array
-    state_info_ptr temp = *s1;
-    *s1 = *s3;
-    *s3 = *s2;
-    *s2 = temp;
-    // swap pointers to permutation array
-    (*s1)->pos = s1;
-    (*s2)->pos = s2;
-    (*s3)->pos = s3;
-}
-
 
 /// \class block_t
 /// \brief stores information about a block
@@ -943,7 +926,7 @@ class constln_t
         sort_key(sort_key_)
     {
         assert(int_begin < int_end);
-        assert(int_end - int_begin <= sort_key);
+        assert((state_type) (int_end - int_begin) <= sort_key);
     }
 
     /// \brief destructor
@@ -1294,6 +1277,10 @@ class part_state_t
 /// of these arrays.  For the incoming transitions, they contain enough
 /// information; for the outgoing and the B_to_C-transitions, we additionally
 /// use so-called _descriptors_ that show which slice belongs together.
+/// The above was the original design described in our publication
+/// [Groote/Jansen/Keiren/Wijs 2017].  This code reduces the descriptor for the
+/// outgoing transitions to a single pointer, which is stored in the `succ`
+/// array directly.
 
 ///@{
 
@@ -1332,16 +1319,17 @@ class succ_entry
         return int_slice_begin_or_before_end;
     }
 
-    void set_slice_begin_or_before_end(succ_iter_t new_value,
-                                                   bool suppress_print = false)
+    void set_slice_begin_or_before_end(succ_iter_t new_value
+                               ONLY_IF_DEBUG( , bool suppress_print = false ) )
     {
         int_slice_begin_or_before_end = new_value;
-        if (suppress_print)  return;
-        //mCRL2log(log::debug,"bisim_gjkw") << "Set slice_begin_or_before_end "
-        //                     "of " << B_to_C->pred->debug_id() << " to "
-        //                     << new_value->B_to_C->pred->debug_id() << ".\n";
+        #ifndef NDEBUG
+            if (suppress_print)  return;
+            //mCRL2log(log::debug, "bisim_gjkw") << "Set "
+            //      "slice_begin_or_before_end of " << B_to_C->pred->debug_id()
+            //      << " to " << new_value->B_to_C->pred->debug_id() << ".\n";
+        #endif
     }
-
 
 
     succ_iter_t slice_begin()
@@ -1639,31 +1627,6 @@ class part_trans_t
         assert(pos1->succ->slice_begin() == pos2->succ->slice_begin());
         assert(succ_entry::slice_end(pos1->succ) ==
                                             succ_entry::slice_end(pos2->succ));
-    }
-
-    // *pos1 -> *pos2 -> *pos3 -> *pos1
-    void swap3_out(pred_iter_t const pos1, pred_iter_t const pos2,
-                                                        pred_iter_t const pos3)
-    {
-        assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
-        assert(pred.end() > pos3 && pos3->succ->B_to_C->pred == pos3);
-
-        assert(pos1 != pos2 || pos1 == pos3);
-        // swap contents
-        succ_entry const temp_entry(*pos1->succ);
-        *pos1->succ = *pos3->succ;
-        *pos3->succ = *pos2->succ;
-        *pos2->succ = temp_entry;
-        // swap pointers to contents
-        succ_iter_t const temp_iter(pos2->succ);
-        pos2->succ = pos3->succ;
-        pos3->succ = pos1->succ;
-        pos1->succ = temp_iter;
-
-        assert(pred.end() > pos1 && pos1->succ->B_to_C->pred == pos1);
-        assert(pred.end() > pos2 && pos2->succ->B_to_C->pred == pos2);
-        assert(pred.end() > pos3 && pos3->succ->B_to_C->pred == pos3);
     }
 
     void swap_B_to_C(succ_iter_t const pos1, succ_iter_t const pos2)

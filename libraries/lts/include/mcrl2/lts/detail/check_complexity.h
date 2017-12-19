@@ -325,7 +325,7 @@ class check_complexity
         /// the pool of superfluous work.
         /// \param ctr  temporary counter whose work is superfluous
         /// \returns false  iff some counter was too large.  In that case, also
-        ///                 the beginning of an error messae is printed.
+        ///                 the beginning of an error message is printed.
         ///                 The function should be called through the macro
         ///                 `mCRL2complexity()`, because that macro will print
         ///                 the remainder of the error message is needed.
@@ -615,15 +615,12 @@ class check_complexity
         /// for bottom states to 1 so that later no more work can be assigned
         /// to them.
         /// The function additionally ensures that no work counter exceeds its
-        /// maximal allowed value, based on the size of the constellation or
-        /// block of which the state is a member.  (The constellation size is
-        /// the relevant unit for counters that are related to the splitter,
-        /// which is the constellation `NewC`.  The block size is the unit for
-        /// counters that are related to refinements.)
-        /// \param max_B   log2(n) - log2(size of the block containing this
-        ///                state)
-        /// \param bottom  `true` iff the state to which these counters belong
-        ///                is a bottom state
+        /// maximal allowed value, based on the size of the block of which the
+        /// state is a member.
+        /// \param max_B    log2(n) - log2(size of the block containing this
+        ///                 state)
+        /// \param bottom   `true` iff the state to which these counters belong
+        ///                 is a bottom state
         /// \returns false  iff some temporary counter or some bottom-state
         ///                 counter of a non-bottom state was nonzero.  In that
         ///                 case, also the beginning of an error message is
@@ -845,7 +842,7 @@ class check_complexity
     #define mCRL2complexity(unit,call)                                        \
             do                                                                \
             {                                                                 \
-                if (!(unit)->work_counter. call )                             \
+                if (!((unit)->work_counter. call ))                           \
                 {                                                             \
                     mCRL2log(log::error) << (unit)->debug_id() << '\n';       \
                     exit(EXIT_FAILURE);                                       \
@@ -859,7 +856,7 @@ class check_complexity
 
 #else // ifndef NDEBUG
 
-    #define mCRL2complexity(C,call)
+    #define mCRL2complexity(unit,call) /* ignore unit and call */
 
 #endif // ifndef NDEBUG
 

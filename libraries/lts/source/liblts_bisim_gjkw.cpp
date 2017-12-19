@@ -1742,10 +1742,11 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
             for (succ_iter_t succ_iter = part_st.state_info[s].succ_begin();
                                           before_end != succ_iter; ++succ_iter)
             {
-                succ_iter->set_slice_begin_or_before_end(before_end, true);
+                succ_iter->set_slice_begin_or_before_end(before_end
+                                                     ONLY_IF_DEBUG( , true ) );
             }
             before_end->set_slice_begin_or_before_end(
-                                     part_st.state_info[s].succ_begin(), true);
+                  part_st.state_info[s].succ_begin() ONLY_IF_DEBUG( , true ) );
         }
 
         if (s < aut.num_states())
