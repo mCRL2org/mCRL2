@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink, Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -27,6 +27,13 @@ namespace atermpp
 template <typename Term>
 class term_list:public aterm
 {
+  protected:
+    /// constructor for termlists from internally constructed terms delivered as reference.
+    explicit term_list(detail::_aterm* t):aterm(t)
+    {
+      assert(!defined() || type_is_list());
+    }
+
   public:
 
     /// The type of object, T stored in the term_list.

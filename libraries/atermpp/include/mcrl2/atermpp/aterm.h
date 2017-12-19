@@ -108,7 +108,7 @@ class aterm
 
   public: // Should be protected, but this cannot yet be done due to a problem
           // in the compiling rewriter.
-    aterm (detail::_aterm *t):m_term(t)
+    explicit aterm(detail::_aterm *t):m_term(t) 
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
@@ -132,11 +132,10 @@ class aterm
 
     /// \brief Move constructor.
     /// \param t Term that is moved to this.
-    /// \details This saves incrementing and decrementing the reference counter
-    ///          to the term that is moved. 
     aterm(aterm&& t):m_term(t.m_term)
     { 
-      t.increase_reference_count<true>();
+      t.increase_reference_count<true>();  // The use of swap is not possible, 
+                                           // as a term needs to be constructed. 
     } 
 
     /// \brief Assignment operator.

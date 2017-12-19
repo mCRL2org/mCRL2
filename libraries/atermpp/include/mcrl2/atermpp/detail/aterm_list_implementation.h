@@ -30,7 +30,7 @@ const std::size_t max_len_of_short_list=10000;  // The length of a short list. I
 template <class Term>
 void term_list<Term>::push_front(const Term& el)
 {
-   *this = term_list<Term>(detail::term_appl2<aterm>(detail::function_adm.AS_LIST, el, *this));
+   *this = term_list<Term>(detail::term_appl2<aterm>(detail::function_adm.AS_LIST, el, *this));  //TODO This contains one increase of a reference count too many. 
 }
 
 

@@ -459,16 +459,17 @@ static data_expression subst_values(
   {
     for (std::size_t i=0; i<assignment_size; i++)
     {
-      if (t==vars[i])
+      if (atermpp::detail::address(t)==vars[i])
       {
         if (variable_is_a_normal_form[i])
         {
-          return application(this_term_is_in_normal_form(),data_expression(terms[i]));  // Variables that are in normal form get a tag that they are in normal form.
+          // Variables that are in normal form get a tag that they are in normal form.
+          return application(this_term_is_in_normal_form(),atermpp::down_cast<data_expression>(atermpp::aterm(terms[i])));  
         }
-        return data_expression(terms[i]);
+        return atermpp::down_cast<data_expression>(atermpp::aterm(terms[i]));
       }
     }
-    return data_expression(t);
+    return t;
   }
   else if (is_abstraction(t))
   {
@@ -479,9 +480,9 @@ static data_expression subst_values(
     std::set<variable> variables_in_substitution;
     for(std::size_t i=0; i<assignment_size; ++i)
     {
-      std::set<variable> s=find_free_variables(data_expression(terms[i]));
+      std::set<variable> s=find_free_variables(atermpp::down_cast<data_expression>(atermpp::aterm(terms[i])));
       variables_in_substitution.insert(s.begin(),s.end());
-      variables_in_substitution.insert(variable(vars[i]));
+      variables_in_substitution.insert(atermpp::down_cast<variable>(atermpp::aterm(vars[i])));
     }
 
     variable_vector new_variables;
@@ -525,7 +526,7 @@ static data_expression subst_values(
     {
       for(assignment_expression_list::const_iterator it=assignments.begin(); it!=assignments.end(); ++it)
       {
-        assert((*it)[0]!= vars[i]);
+        assert((*it)[0]!= atermpp::aterm(vars[i]));
       }
     }
 #endif
@@ -567,9 +568,9 @@ static bool match_jitty(
 
     for (std::size_t i=0; i<assignment_size; i++)
     {
-      if (p==vars[i])
+      if (atermpp::detail::address(p)==vars[i])
       {
-        return t==terms[i];
+        return atermpp::detail::address(t)==terms[i];
       }
     }
 
@@ -866,7 +867,7 @@ data_expression RewriterJitty::rewrite_aux_function_symbol(
   }
 
   //Construct this potential higher order term.
-  data_expression result=data_expression(op);
+  data_expression result=op;
   std::size_t i = 0;
   sort_expression sort = op.sort();
   while (is_function_sort(sort) && (i < arity))

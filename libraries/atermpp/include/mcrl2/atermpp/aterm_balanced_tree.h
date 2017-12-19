@@ -54,7 +54,7 @@ class term_balanced_tree: public aterm_appl
     }
 
     template < typename ForwardTraversalIterator, class Transformer >
-    detail::_aterm* make_tree(ForwardTraversalIterator& p, const std::size_t size, const Transformer& transformer )
+    detail::_aterm_appl<aterm>* make_tree(ForwardTraversalIterator& p, const std::size_t size, const Transformer& transformer )
     {
       if (size>1)
       {
@@ -62,17 +62,21 @@ class term_balanced_tree: public aterm_appl
         const term_balanced_tree left_tree(make_tree(p, left_size,transformer));
         std::size_t right_size = size >> 1; // size/2 rounded down.
         const term_balanced_tree right_tree(make_tree(p, right_size,transformer));
-        return reinterpret_cast<detail::_aterm*>(detail::term_appl2<term_balanced_tree>(tree_node_function(),left_tree,right_tree));
+        return reinterpret_cast<detail::_aterm_appl<aterm>*>(detail::term_appl2<term_balanced_tree>(tree_node_function(),left_tree,right_tree));
       }
 
       if (size==1)
       {
-        return atermpp::detail::address(transformer(*(p++)));
+        return  reinterpret_cast<detail::_aterm_appl<aterm>*>(atermpp::detail::address(transformer(*(p++))));
       }
 
       assert(size==0);
-      return atermpp::detail::address(empty_tree()); 
+      return reinterpret_cast<detail::_aterm_appl<aterm>*>(atermpp::detail::address(empty_tree())); 
     }
+
+    explicit term_balanced_tree(detail::_aterm_appl<aterm>* t)
+         : term_appl(reinterpret_cast<detail::_aterm_appl<aterm>*>(t))
+    {}
 
   public:
 

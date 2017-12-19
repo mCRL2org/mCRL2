@@ -2245,7 +2245,7 @@ public:
     else
     {
       stringstream ss;
-      ss << "data_expression((atermpp::detail::_aterm*)" << (void*)atermpp::detail::address(opid) << ")";
+      ss << "atermpp::down_cast<data_expression>(atermpp::aterm(reinterpret_cast<atermpp::detail::_aterm*>(" << (void*)atermpp::detail::address(opid) << ")))";
       std::size_t used_arguments = 0;
       m_stream << rewr_function_finish_term(arity, ss.str(), down_cast<function_sort>(opid.sort()), used_arguments) << ";\n";
       assert(used_arguments == arity);
