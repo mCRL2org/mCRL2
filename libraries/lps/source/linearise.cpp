@@ -9568,8 +9568,8 @@ class specification_basic_type
                             simplified_ultimate_delay_condition, 
                             reduced_sumvars, 
                             rewr);
-            swap(ultimate_delay_condition.constraint(), simplified_ultimate_delay_condition);
-            swap(ultimate_delay_condition.variables(), reduced_sumvars);
+            std::swap(ultimate_delay_condition.constraint(), simplified_ultimate_delay_condition);
+            std::swap(ultimate_delay_condition.variables(), reduced_sumvars);
           }
           catch (mcrl2::runtime_error& e)
           {

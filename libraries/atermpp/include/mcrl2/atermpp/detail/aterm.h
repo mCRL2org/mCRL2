@@ -44,62 +44,68 @@ class _aterm
     _aterm* m_next;
 
   public:
-    function_symbol& function() 
+    _aterm()=delete;
+    _aterm(const _aterm &)=delete;
+    _aterm(_aterm &&)=delete;
+    _aterm& operator=(const _aterm&)=delete;
+    _aterm& operator=(_aterm&&)=delete;
+
+    function_symbol& function() noexcept
     {
       return m_function_symbol;
     }
 
-    const function_symbol& function() const
+    const function_symbol& function() const noexcept
     {
       return m_function_symbol;
     }
 
-    void decrease_reference_count()
+    void decrease_reference_count() noexcept
     {
       assert(!reference_count_indicates_is_in_freelist());
       assert(!reference_count_is_zero());
       --m_reference_count;
     } 
 
-    void increase_reference_count()
+    void increase_reference_count() noexcept
     {
       assert(!reference_count_indicates_is_in_freelist());
       ++m_reference_count;
     } 
 
-    void reset_reference_count(const bool check=true)
+    void reset_reference_count(const bool check=true) noexcept
     {
       if (check) assert(reference_count_indicates_is_in_freelist());
       m_reference_count=0;
     } 
 
-    bool reference_count_is_zero() const
+    bool reference_count_is_zero() const noexcept
     {
       return m_reference_count==0;
     } 
 
-    std::size_t reference_count() const 
+    std::size_t reference_count() const noexcept
     {
       return m_reference_count;
     }
 
-    void set_reference_count_indicates_in_freelist(const bool check=true)
+    void set_reference_count_indicates_in_freelist(const bool check=true) noexcept
     {
       if (check) assert(!reference_count_indicates_is_in_freelist());
       m_reference_count=IN_FREE_LIST;
     }
 
-    bool reference_count_indicates_is_in_freelist() const
+    bool reference_count_indicates_is_in_freelist() const noexcept
     {
       return m_reference_count==IN_FREE_LIST;
     }
 
-    _aterm* next() const
+    _aterm* next() const noexcept
     {
       return m_next;
     }
 
-    void set_next(_aterm* n)
+    void set_next(_aterm* n) noexcept
     {
       m_next=n;
     }

@@ -67,15 +67,15 @@ class term_appl: public aterm
 
     /// \brief Copy constructor from an aterm_appl.
     /// \param t The aterm.
-    term_appl (const term_appl& t):aterm(t)
-    {
-      static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
-      static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
-    }
+    term_appl(const term_appl& t) noexcept = default;
+
+    /// \brief Move constructor from an aterm_appl.
+    /// \param t The aterm.
+    term_appl(term_appl&& t) noexcept = default;
 
     /// \brief Explicit constructor from an aterm.
     /// \param t The aterm.
-    explicit term_appl (const aterm& t):aterm(t)
+    explicit term_appl(const aterm& t):aterm(t)
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
@@ -223,14 +223,15 @@ class term_appl: public aterm
       static_assert(sizeof(Term)==sizeof(std::size_t),"Term derived from an aterm must not have extra fields");
     }
 
-    /// \brief The assignment operator
-    /// \param t The assigned term
+    /// \brief The assignment operator.
+    /// \param t The assigned term.
     /// \return A reference to the term to which an assignment took place.
-    term_appl& operator=(const term_appl& t)
-    {
-      copy_term(t);
-      return *this;
-    }
+    term_appl& operator=(const term_appl& t) noexcept = default;
+
+    /// \brief The move assignment operator.
+    /// \param t The assigned term.
+    /// \return A reference to the term to which an assignment took place.
+    term_appl& operator=(term_appl&& t) noexcept = default;
 
     /// \brief Returns the function symbol belonging to an aterm_appl.
     /// \return The function symbol of this term.
@@ -299,7 +300,7 @@ namespace std
 /// \param t1 The first term.
 /// \param t2 The second term.
 template <class T>
-inline void swap(atermpp::term_appl<T>& t1, atermpp::term_appl<T>& t2)
+inline void swap(atermpp::term_appl<T>& t1, atermpp::term_appl<T>& t2) noexcept
 {
   t1.swap(t2);
 }

@@ -29,7 +29,7 @@ class term_list:public aterm
 {
   protected:
     /// constructor for termlists from internally constructed terms delivered as reference.
-    explicit term_list(detail::_aterm* t):aterm(t)
+    explicit term_list(detail::_aterm* t) noexcept :aterm(t)
     {
       assert(!defined() || type_is_list());
     }
@@ -61,20 +61,31 @@ class term_list:public aterm
     typedef term_list_iterator<Term> const_iterator;
 
     /// Default constructor. Creates an empty list.
-    term_list(): aterm(aterm::static_empty_aterm_list)
+    term_list() noexcept 
+      : aterm(aterm::static_empty_aterm_list)
     {
     }
 
     /// \brief Copy constructor.
     /// \param t A list.
-    term_list(const term_list<Term>& t):aterm(t)
+    term_list(const term_list<Term>& t) noexcept 
+      : aterm(t)
+    {
+      assert(!defined() || type_is_list());
+    }
+
+    /// \brief Move constructor.
+    /// \param t A list.
+    term_list(term_list<Term>&& t) noexcept 
+      : aterm(std::move(t))
     {
       assert(!defined() || type_is_list());
     }
 
     /// \brief Explicit construction from an aterm.
     /// \param t An aterm.
-    explicit term_list(const aterm& t):aterm(t)
+    explicit term_list(const aterm& t) noexcept 
+     : aterm(t)
     {
       static_assert(std::is_base_of<aterm, Term>::value,"Term must be derived from an aterm");
       static_assert(sizeof(Term)==sizeof(aterm),"Term derived from an aterm must not have extra fields");
@@ -91,7 +102,7 @@ class term_list:public aterm
     explicit term_list(Iter first, Iter last, typename std::enable_if<std::is_base_of<
                   std::bidirectional_iterator_tag,
                   typename std::iterator_traits<Iter>::iterator_category
-              >::value>::type* = nullptr):
+              >::value>::type* = nullptr) :
         aterm(detail::make_list_backward<Term,Iter,
                   detail::do_not_convert_term<Term> >(first, last,detail::do_not_convert_term<Term>()))
     {
@@ -214,12 +225,12 @@ class term_list:public aterm
 
     /// \brief Assigment operator.
     /// \param l A list.
-    term_list<Term>& operator=(const term_list& l)
-    {
-      copy_term(l);
-      return *this;
-    }
+    term_list<Term>& operator=(const term_list& l) noexcept = default;
 
+    /// \brief Move ssigment operator.
+    /// \param l A list.
+    term_list<Term>& operator=(term_list&& l) noexcept = default;
+    
     /// \brief Returns an element at position m in a list
     /// \details This operator is linear in the number m. If m>=length of the list
     ///          the result is undefined.
@@ -357,34 +368,36 @@ template <typename Term>
 inline
 term_list<Term> push_back(const term_list<Term>& l, const Term& el);
 
+} // namespace atermpp
+
+
+namespace std
+{
+//
 /// \brief Swaps two term_lists.
 /// \details This operation is more efficient than exchanging terms by an assignment,
 ///          as swapping does not require to change the protection of terms.
 /// \param t1 The first term
 /// \param t2 The second term
 template <class T>
-inline void swap(atermpp::term_list<T>& t1, atermpp::term_list<T>& t2)
+inline void swap(atermpp::term_list<T>& t1, atermpp::term_list<T>& t2) noexcept
 {
   t1.swap(t2);
 } 
 
-} // namespace atermpp
-
-
-namespace std
+/// \brief The standard hash class.
+template <class Term> 
+struct hash<atermpp::term_list<Term> >
 {
-  template <class Term> 
-  struct hash<atermpp::term_list<Term> >
+  /// \brief A specialization of the standard std::hash function.
+  /// \param l The list for which a hash value is calculated.
+  /// \return A hash value for l. 
+  std::size_t operator()(const atermpp::term_list<Term>& l) const
   {
-    /// \brief A specialization of the standard std::hash function.
-    /// \param l The list for which a hash value is calculated.
-    /// \return A hash value for l. 
-    std::size_t operator()(const atermpp::term_list<Term>& l) const
-    {
-      std::hash<atermpp::aterm> hasher;
-      return hasher(l); 
-    }
-  }; 
+    std::hash<atermpp::aterm> hasher;
+    return hasher(l); 
+  }
+}; 
   
 } // namespace std
 

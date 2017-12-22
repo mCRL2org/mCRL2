@@ -81,7 +81,7 @@ class aterm
     }
 
     template <bool CHECK>
-    void increase_reference_count()
+    void increase_reference_count() noexcept
     {
       assert(m_term!=nullptr);
       if (CHECK) assert(m_term->reference_count()>0);
@@ -108,7 +108,8 @@ class aterm
 
   public: // Should be protected, but this cannot yet be done due to a problem
           // in the compiling rewriter.
-    explicit aterm(detail::_aterm *t):m_term(t) 
+    explicit aterm(detail::_aterm *t) noexcept 
+      : m_term(t) 
     {
       // Note that reference_count can be 0, as this term can just be constructed,
       // and is now handed over to become a real aterm.
@@ -118,21 +119,24 @@ class aterm
   public:
 
     /// \brief Default constructor.
-    aterm():m_term(static_undefined_aterm)
+    aterm() noexcept
+      : m_term(static_undefined_aterm)
     {
       increase_reference_count<false>();
     }
 
     /// \brief Copy constructor.
     /// \param t Term that is copied.
-    aterm(const aterm& t):m_term(t.m_term)
+    aterm(const aterm& t) noexcept 
+      : m_term(t.m_term)
     {
       increase_reference_count<true>();
     }
 
     /// \brief Move constructor.
     /// \param t Term that is moved to this.
-    aterm(aterm&& t):m_term(t.m_term)
+    aterm(aterm&& t) noexcept 
+      : m_term(t.m_term) 
     { 
       t.increase_reference_count<true>();  // The use of swap is not possible, 
                                            // as a term needs to be constructed. 
@@ -140,7 +144,7 @@ class aterm
 
     /// \brief Assignment operator.
     /// \param t a term to be assigned.
-    aterm& operator=(const aterm& t)
+    aterm& operator=(const aterm& t) noexcept
     {
       copy_term(t);
       return *this;
@@ -148,14 +152,14 @@ class aterm
 
     /// \brief Move assignment operator.
     /// \param t a term to be assigned.
-    aterm& operator=(aterm&& t)
+    aterm& operator=(aterm&& t) noexcept
     {
       swap(t);
       return *this;
     }
 
     /// \brief Destructor.
-    ~aterm ()
+    ~aterm () noexcept
     {
       decrease_reference_count();
     }
@@ -274,7 +278,7 @@ class aterm
     /// \details This operation is more efficient than exchanging terms by an assignment,
     ///          as swapping does not require to change the protection of terms.
     /// \param t The term with which this term is swapped.
-    void swap(aterm& t)
+    void swap(aterm& t) noexcept
     {
       assert(m_term->reference_count()>0);
       assert(t.m_term->reference_count()>0);
@@ -397,7 +401,7 @@ namespace std
 /// \param t2 The second term
 
 template <>
-inline void swap(atermpp::aterm& t1, atermpp::aterm& t2)
+inline void swap(atermpp::aterm& t1, atermpp::aterm& t2) noexcept
 {
   t1.swap(t2);
 }
