@@ -51,7 +51,6 @@ public:
     m_condition = data::sort_bool::true_();
     if(is_or(expr) || is_and(expr))
     {
-      // std::cout << (atermpp::aterm) accessors::left(expr) << std::endl;
       pbes_expression lhs = accessors::left(expr);
       m_condition = atermpp::down_cast<data::data_expression>(pbes2data(lhs));
       if(is_or(expr))
@@ -192,6 +191,12 @@ public:
       propositional_variable_instantiation next_state(m_is_conjunctive ? x_false_name : x_true_name, data::data_expression_list());
       m_summands.push_back(ppg_summand(data::variable_list(), simple_formula, next_state));
     }
+    // Add a summand for X_true or X_false to ensure the underlying BES is in SRF
+    // This extra summand does not change the solution
+    m_summands.push_back(ppg_summand(
+        data::variable_list(),
+        data::sort_bool::true_(),
+        propositional_variable_instantiation(m_is_conjunctive ? x_true_name : x_false_name, data::data_expression_list())));
   }
 
   const fixpoint_symbol& symbol() const

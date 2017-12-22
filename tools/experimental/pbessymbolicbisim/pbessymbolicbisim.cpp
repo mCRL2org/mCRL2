@@ -25,9 +25,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
-// #include "forward_exploration.h"
 #include "symbolic_bisim.h"
-#include "tool_mode.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -42,35 +40,27 @@ class pbessymbolicbisim_tool: public rewriter_tool<input_output_tool>
 protected:
   typedef rewriter_tool<input_output_tool> super;
 
-  std::string m_invariant;
-  running_mode m_mode;
+  std::size_t m_num_refine_steps;
 
   /// Parse the non-default options.
   void parse_options(const command_line_parser& parser)
   {
     super::parse_options(parser);
 
-    m_mode = parser.option_argument_as<running_mode>("mode");
-    if(parser.options.count("invariant") > 0)
+    if(parser.options.count("refine-steps") > 0)
     {
-      m_invariant = parser.option_argument("invariant");
+      m_num_refine_steps = parser.option_argument_as<std::size_t>("refine-steps");
     }
   }
 
   void add_options(interface_description& desc)
   {
     super::add_options(desc);
-    desc.add_option("mode", make_enum_argument<running_mode>("S")
-      .add_value(partition_refinement, true)
-      .add_value(exploration)
-      .add_value(exploration_and_refinement)
-      .add_value(simplify_lps),
-      "execute in the given mode",'m');
     desc.
-    add_option("invariant",
-               make_mandatory_argument("expr"),
-               "add invariant that makes up the only block in the initial partition",
-               'i');
+    add_option("refine-steps",
+               make_mandatory_argument("num"),
+               "perform the given number of refinement steps between each search for a proof graph",
+               'n');
   }
 
 public:
@@ -82,7 +72,7 @@ public:
       "Performs partition refinement on "
       "INFILE and outputs the resulting LTS. "
       "This tool is highly experimental. "),
-      m_invariant("true")
+      m_num_refine_steps(1)
   {}
 
   /// Runs the algorithm.
@@ -101,26 +91,7 @@ public:
     spec.load(in);
     in.close();
 
-    mcrl2::data::data_expression inv;
-    // if(m_mode == exploration || m_mode == exploration_and_refinement)
-    // {
-    //   inv = mcrl2::data::forward_exploration_algorithm<stochastic_specification>(spec, m_rewrite_strategy).run();
-    // }
-    // else
-    // {
-    //   inv = mcrl2::data::lambda(spec.process().process_parameters(), parse_data_expression(m_invariant, spec.process().process_parameters(), spec.data()));
-    // }
-    if(m_mode == partition_refinement || m_mode == exploration_and_refinement)
-    {
-      mcrl2::data::symbolic_bisim_algorithm(spec, inv, m_rewrite_strategy).run();
-    }
-
-    // if(m_mode == simplify_lps)
-    // {
-    //   mCRL2log(verbose) << "Simplifying ..." << std::endl;
-    //   mcrl2::data::simplify_one_by_one(spec);
-    //   save_lps(spec, output_filename());
-    // }
+    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy).run();
 
     return true;
   }

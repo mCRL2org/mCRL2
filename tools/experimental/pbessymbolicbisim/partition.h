@@ -136,6 +136,29 @@ protected:
       );
 
     block1 = simpl.at(phi_k.first)->apply(block1);
+    if(block1 == make_abstraction(lambda_binder(), eq.variable().parameters(), sort_bool::false_()))
+    {
+      // data_expression is_succ =
+      //     rewr(sort_bool::and_(
+      //       make_application(phi_k.second, phi_k.first.parameters()),
+      //       sort_bool::and_(
+      //         cl.condition(),
+      //         rewr(make_application(phi_l.second, cl.new_state().parameters()))
+      //       )
+      //     ))
+      //   ;
+
+      // smt::smt_problem problem;
+      // for(const variable& v: phi_k.first.parameters() + cl.quantification_domain())
+      // {
+      //   problem.add_variable(v);
+      // }
+      // problem.add_assertion(is_succ);
+      // smt::data_specification* spec = new smt::smt4_data_specification(m_spec.data());
+      // std::string smt_instance(spec->generate_data_specification() + "\n" + spec->generate_smt_problem(problem));
+      throw mcrl2::runtime_error("Found an empty block1\n" + pp(phi_k) + "\n" + pp(phi_l) + "\n"
+       + pbes_system::detail::pp(cl, eq.is_conjunctive()));
+    }
     
     // Update the caches and the partition
     refinement_cache.insert(std::make_tuple(phi_k, phi_l, cl));
@@ -159,7 +182,7 @@ protected:
    */
   void update_caches(const block_t& phi_k, const block_t& block1, const block_t& block2)
   {
-    for(std::list< block_t >::const_iterator i = m_proof_blocks.begin(); i != m_other_blocks.end();)
+    for(std::list< block_t >::const_iterator i = m_proof_blocks.begin() != m_proof_blocks.end() ? m_proof_blocks.begin() : m_other_blocks.begin(); i != m_other_blocks.end();)
     {
       const block_t& phi_l1 = *i;
       for(const summand_type_t& cl1: find_equation(phi_l1.first).summands())
@@ -534,24 +557,29 @@ protected:
           continue;
         }
 
+        bool transition_found = false;
         for(const summand_type_t& cl: eq.summands())
         {
           if(transition_exists(src, dest, cl))
           {
             edges.push_back(std::make_pair(node_map[src], node_map[dest]));
             has_outgoing_edge = true;
+            transition_found = true;
             break;
           }
+        }
+        if(previous_result == reachability_cache.end())
+        {
+          // There was no information in this cache yet, so we add it
+          reachability_cache.insert(std::make_pair(std::make_pair(src, dest), transition_found));
         }
       }
 
       if(!has_outgoing_edge)
       {
-        // This node has no outgoing edge
-        // If it is conjunctive, modify it to a winning node for player even
-        // If it is disjunctive, modify it to a losing node for player even
-        edges.push_back(std::make_pair(node_map[src], node_map[src]));
-        node_attributes[node_map[src]].priority = eq.is_conjunctive() ? 0 : 1;
+        // All nodes should have an outgoing edge, since SRF requires
+        // a summand to either X_true or X_false in every right-hand side
+        throw mcrl2::runtime_error("Did not find an outgoing edge for the block " + pp(src));
       }
     }
 
