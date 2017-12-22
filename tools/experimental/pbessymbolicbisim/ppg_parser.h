@@ -21,7 +21,9 @@
 #include "mcrl2/pbes/detail/ppg_rewriter.h"
 #include "mcrl2/pbes/detail/ppg_traverser.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriters/pbes2data_rewriter.h"
+#include "mcrl2/pbes/rewriters/one_point_rule_rewriter.h"
 
 namespace mcrl2
 {
@@ -59,7 +61,6 @@ public:
       }
       expr = accessors::right(expr);
     }
-    // assert(m_condition.sort() == data::sort_bool::bool_());
     assert(is_propositional_variable_instantiation(expr));
     m_new_state = atermpp::down_cast<propositional_variable_instantiation>(expr);
   }
@@ -263,6 +264,10 @@ public:
       q = to_ppg(p);
       assert(is_ppg(q));
     }
+    // Apply the one point rewriter since the ppg rewriter may
+    // leave nested quantification, which this parse doesn't
+    // deal with.
+    pbes_rewrite(q, one_point_rule_rewriter());
     core::identifier_string x_false_name("X_false");
     core::identifier_string x_true_name("X_true");
     for(const pbes_equation& eq: q.equations())
