@@ -43,34 +43,25 @@ class aterm_int: public aterm
     
     /// \brief Copy constructor
     /// \details The aterm must be of type AT_INT.
-    aterm_int(const aterm_int& t) noexcept 
-     : aterm(t) 
-    {
-      assert(t.type_is_int());
-    }
+    aterm_int(const aterm_int&) noexcept = default;
     
     /// \brief Move construct an aterm_int from an aterm.
     /// \details The aterm must be of type AT_INT.
-    aterm_int(const aterm&& t) noexcept 
-     : aterm(std::move(t)) 
-    {
-      assert(t.type_is_int());
-    }
+    aterm_int(aterm_int&&) noexcept = default;
     
     /// \brief Constructor.
     /// \param value An integer value.
     explicit aterm_int(std::size_t value)
      : aterm(detail::aterm_int(value))
-    {
-    }
+    {}
 
     /// \brief Assignment operator.
     /// \param t A term representing an integer.
-    aterm_int& operator=(const aterm_int& t) = default;
+    aterm_int& operator=(const aterm_int&) = default;
 
     /// \brief Move assignment operator.
     /// \param t A term representing an integer.
-    aterm_int& operator=(aterm_int&& t) noexcept = default;
+    aterm_int& operator=(aterm_int&&) noexcept = default;
 
     /// \brief Get the integer value of the aterm_int.
     /// \return The value of the term.

@@ -98,13 +98,25 @@ class term_balanced_tree: public aterm_appl
     /// A signed integral type.
     typedef ptrdiff_t difference_type;
 
-    /// Default constructor. Creates an empty tree.
+    /// \brief Default constructor. Creates an empty tree.
     term_balanced_tree()
       : aterm_appl(empty_tree())
     {}
 
-    /// Construction from aterm
-    explicit term_balanced_tree(const aterm& tree)
+    /// \brief Copy constructor.
+    term_balanced_tree(const term_balanced_tree&) noexcept = default;
+
+    /// \brief Move constructor.
+    term_balanced_tree(term_balanced_tree&&) noexcept = default;
+
+    /// \brief Assignment operator.
+    term_balanced_tree& operator=(const term_balanced_tree&) noexcept = default;
+
+    /// \brief Move assign operator.
+    term_balanced_tree& operator=(term_balanced_tree&&) noexcept = default;
+
+    /// \brief Construction from aterm.
+    explicit term_balanced_tree(const aterm& tree) 
        : aterm_appl(tree)
     {
     }

@@ -127,8 +127,15 @@ class function_symbol
      : function_symbol(name, arity_, true)
     {}
 
-    /// \brief Copy constructor
+    /// \brief Copy constructor.
     function_symbol(const function_symbol& f)
+      : m_function_symbol(f.m_function_symbol)
+    {
+      increase_reference_count<true>();
+    }
+
+    /// \brief Move constructor.
+    function_symbol(function_symbol&& f)
       : m_function_symbol(f.m_function_symbol)
     {
       increase_reference_count<true>();
@@ -143,6 +150,13 @@ class function_symbol
                                   // a short moment when f=f is executed and the reference
                                   // count of f is 1. In that case f is garbage collected.
       m_function_symbol=f.m_function_symbol;
+      return *this;
+    }
+
+    /// \brief Move assignment operator.
+    function_symbol& operator=(function_symbol&& f)
+    {
+      swap(f);
       return *this;
     }
 

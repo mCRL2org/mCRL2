@@ -29,7 +29,7 @@ class aterm_string: public aterm_appl
 
     /// \brief Constructor.
     /// \param t A term without arguments of type appl. The string is given by the function symbol.
-    explicit aterm_string(const aterm &t)
+    explicit aterm_string(const aterm& t)
       : aterm_appl(t)
     {
       assert(size() == 0);
@@ -52,13 +52,21 @@ class aterm_string: public aterm_appl
       assert(size() == 0);
     }
 
+    /// Copy constructor.
+    /// \param t An aterm_string.
+    aterm_string(const aterm_string& t) noexcept = default;
+
+    /// Move constructor.
+    /// \param t An aterm_string.
+    aterm_string(aterm_string&& t) noexcept = default;
+
     /// Assignment operator.
     /// \param t An aterm_string.
-    aterm_string& operator=(const aterm_string &t)
-    {
-      copy_term(t);
-      return *this;
-    }
+    aterm_string& operator=(const aterm_string& t) noexcept = default;
+
+    /// Move assignment operator.
+    /// \param t An aterm_string.
+    aterm_string& operator=(aterm_string&& t) noexcept = default;
 
     /// \brief Conversion operator
     /// \return The term converted to string
@@ -91,7 +99,7 @@ namespace std
 /// \param t2 The second term
 
 template <>
-inline void swap(atermpp::aterm_string &t1, atermpp::aterm_string &t2)
+inline void swap(atermpp::aterm_string& t1, atermpp::aterm_string& t2) noexcept
 {
   t1.swap(t2);
 }

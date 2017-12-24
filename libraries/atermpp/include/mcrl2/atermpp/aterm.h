@@ -65,14 +65,14 @@ class aterm
     static detail::_aterm* static_undefined_aterm;
     static detail::_aterm *static_empty_aterm_list;
 
-    inline std::size_t reference_count() const
+    inline std::size_t reference_count() const noexcept
     {
       assert(m_term!=nullptr);
       assert(m_term->reference_count()>0);
       return m_term->reference_count();
     }
 
-    inline std::size_t decrease_reference_count()
+    inline std::size_t decrease_reference_count() noexcept
     {
       assert(m_term!=nullptr);
       assert(m_term->reference_count()>0);
@@ -88,15 +88,14 @@ class aterm
       m_term->increase_reference_count();
     }
 
-    void copy_term(const aterm& t)
+    void copy_term(const aterm& t) noexcept
     {
       /* It is important that the reference count of m_term is decreased after
          the reference count of t.m_term is increased, as otherwise if the terms are exactly
          the same, the reference count can temporarily become 0. */
-      detail::_aterm* t0=m_term;
+      const_cast<aterm&>(t).increase_reference_count<true>();
+      m_term->decrease_reference_count();
       m_term=t.m_term;
-      increase_reference_count<true>();
-      t0->decrease_reference_count();
     }
 
     // An aterm has a function symbol, which can also be an AS_EMPTY_LIST,
