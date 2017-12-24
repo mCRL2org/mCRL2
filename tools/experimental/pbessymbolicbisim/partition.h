@@ -251,7 +251,6 @@ protected:
     std::vector<pbes_system::detail::ppg_equation>::const_iterator result = std::find_if(m_spec.equations().begin(), m_spec.equations().end(), [&](const equation_type_t& e){return e.variable() == v;});
     if(result == m_spec.equations().end())
     {
-      std::cout << atermpp::pp(v) << std::endl;
       throw mcrl2::runtime_error("Equation for variable " + core::pp(v.name()) + " not found.\naterm: " + atermpp::pp(v));
     }
     return *result;
@@ -646,23 +645,24 @@ public:
   void set_proof(const std::set< verti >& proof_nodes)
   {
     // Move all the blocks to the other set while keeping the order m_proof_block ++ m_other_blocks
-    m_other_blocks.insert(m_other_blocks.begin(), m_proof_blocks.begin(),m_proof_blocks.end());
+    std::list< block_t > all_blocks = m_proof_blocks;
+    all_blocks.insert(all_blocks.end(), m_other_blocks.begin(), m_other_blocks.end());
     m_proof_blocks.clear();
+    m_other_blocks.clear();
 
     // Move the requested blocks to the main set
-    int i = 0;
-    for(std::list< block_t >::const_iterator b = m_other_blocks.cbegin(); b != m_other_blocks.cend(); i++)
+    verti i = 0;
+    for(const block_t& b: all_blocks)
     {
       if(proof_nodes.find(i) != proof_nodes.end())
       {
-        // Block should be moved to main set
-        m_proof_blocks.push_back(*b);
-        b = m_proof_blocks.erase(b);
+        m_proof_blocks.push_back(b);
       }
       else
       {
-        ++b;
+        m_other_blocks.push_back(b);
       }
+      i++;
     }
   }
 
