@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_FOURIER_MOTZKIN_H
 #define MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_FOURIER_MOTZKIN_H
 
+#include "mcrl2/data/detail/linear_inequalities_utilities.h"
+
 #include "simplifier.h"
 #include "simplifier_finite_domain.h"
 
@@ -31,19 +33,26 @@ protected:
 
   data_expression simplify_expression(const data_expression& expr)
   {
+    // Split the expression into two equally sized lists of
+    // expressions over real numbers and expressions over other
+    // data sorts.
     std::vector < data_expression_list > real_conditions;
     std::vector < data_expression > non_real_conditions;
     detail::split_condition(expr, real_conditions, non_real_conditions);
+
     data_expression result = sort_bool::false_();
     for(uint32_t i = 0; i < real_conditions.size(); i++)
     {
       std::vector< linear_inequality > linear_inequalities;
-      for(data_expression_list::const_iterator it = real_conditions[i].begin(); it != real_conditions[i].end(); it++)
+      for(const data_expression& d: real_conditions[i])
       {
-        linear_inequalities.push_back(linear_inequality(*it, rewr));
+        linear_inequalities.push_back(linear_inequality(d, rewr));
       }
       std::vector< linear_inequality > resulting_inequalities;
       remove_redundant_inequalities(linear_inequalities, resulting_inequalities, rewr);
+
+      // If the resulting list of inequalities is false, we don't add it
+      // to the result (which is a disjunction).
       if(!(resulting_inequalities.size() == 1 && resulting_inequalities[0].is_false(rewr)))
       {
         data_expression real_con = sort_bool::true_();
@@ -54,8 +63,6 @@ protected:
         result = lazy::or_(result, lazy::and_(simpl_discr.apply(non_real_conditions[i]), real_con));
       }
     }
-    // result = proving_rewr(result);
-    // result = rewr(result);
 
     return result;
   }

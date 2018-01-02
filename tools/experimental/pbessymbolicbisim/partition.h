@@ -51,8 +51,6 @@ namespace mcrl2
 namespace data
 {
 
-using namespace mcrl2::log;
-
 class dependency_graph_partition
 {
   typedef rewriter::substitution_type substitution_t;
@@ -347,13 +345,10 @@ protected:
   template <typename Container>
   block_t find_initial_block(const Container& blocks, typename atermpp::enable_if_container<Container, block_t>::type* = nullptr)
   {
-    // std::cout << "Searching for initial block" << std::endl;
     for(const block_t& block: blocks)
     {
-      // std::cout << block.first << " - " << rewr(application(block.second, m_spec.initial_state.parameters())) << std::endl;
       if(block.first.name() == m_spec.initial_state().name() && rewr(make_application(block.second, m_spec.initial_state().parameters())) == sort_bool::true_())
       {
-        // std::cout << "Found initial block " << block << std::endl;
         return block;
       }
     }
@@ -435,7 +430,7 @@ protected:
     }
 
 
-    std::cout << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
+    mCRL2log(log::verbose) << RED(THIN) << "Unreachable blocks:" << NORMAL << std::endl;
     int i = 0;
     for(const block_t& block: unreachable)
     {
@@ -451,7 +446,7 @@ protected:
         m_other_blocks.push_front(block);
       }
       // split_logger->mark_deleted(rewr(block));
-      std::cout << "  block " << i << "  " << pp(block) << std::endl;
+      mCRL2log(log::verbose) << "  block " << i << "  " << pp(block) << std::endl;
       i++;
     }
   }
@@ -596,7 +591,7 @@ protected:
     int i = 0;
     for(const block_t& block: blocks)
     {
-      std::cout << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(block) << std::endl;
+      mCRL2log(log::verbose) << YELLOW(THIN) << "  block " << i << "  " << NORMAL << pp(block) << std::endl;
       // detail::BDD2Dot bddwriter;
       // bddwriter.output_bdd(atermpp::down_cast<abstraction>(block).body(), ("block" + std::to_string(i) + ".dot").c_str());
       i++;
@@ -645,9 +640,10 @@ public:
   void set_proof(const std::set< verti >& proof_nodes)
   {
     // Move all the blocks to the other set while keeping the order m_proof_block ++ m_other_blocks
-    std::list< block_t > all_blocks = m_proof_blocks;
+    std::list< block_t > all_blocks;
+    all_blocks.swap(m_proof_blocks);
     all_blocks.insert(all_blocks.end(), m_other_blocks.begin(), m_other_blocks.end());
-    m_proof_blocks.clear();
+    // m_proof_blocks.clear();
     m_other_blocks.clear();
 
     // Move the requested blocks to the main set
@@ -688,14 +684,14 @@ public:
    */
   bool refine_n_steps(std::size_t num_steps)
   {
-    // std::cout << "Initial partition:" << std::endl;
+    // mCRL2log(log::verbose) << "Initial partition:" << std::endl;
     // print_partition(m_proof_blocks);
     std::size_t num_iterations = 0;
     while(refine_step())
     {
-      std::cout << GREEN(THIN) << "Partition proof blocks:" << NORMAL << std::endl;
+      mCRL2log(log::verbose) << GREEN(THIN) << "Partition proof blocks:" << NORMAL << std::endl;
       print_partition(m_proof_blocks);
-      std::cout << GREEN(THIN) << "Partition other blocks:" << NORMAL << std::endl;
+      mCRL2log(log::verbose) << GREEN(THIN) << "Partition other blocks:" << NORMAL << std::endl;
       print_partition(m_other_blocks);
       num_iterations++;
       if(num_steps != 0 && num_iterations >= num_steps)
@@ -704,13 +700,13 @@ public:
       }
       // Check reachability only in m_proof_blocks
       find_reachable_blocks(true);
-      std::cout << "End of a refinement step " << num_iterations << std::endl;
+      mCRL2log(log::verbose) << "End of a refinement step " << num_iterations << std::endl;
     }
     // Check reachability in the full graph
     find_reachable_blocks(false);
     if(num_iterations == 0)
     {
-      std::cout << "Final partition:" << std::endl;
+      mCRL2log(log::verbose) << "Final partition:" << std::endl;
       print_partition(m_proof_blocks);
     }
     // std::set< data_expression > final_partition;

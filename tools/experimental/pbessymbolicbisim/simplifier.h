@@ -24,23 +24,6 @@ namespace mcrl2
 namespace data
 {
 
-core::identifier_string iff_name()
-{
-  static core::identifier_string iff_name = core::identifier_string("<=>");
-  return iff_name;
-}
-
-function_symbol iff()
-{
-  static function_symbol iff(iff_name(), make_function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_bool::bool_()));
-  return iff;
-}
-
-inline application iff(const data_expression& d1, const data_expression& d2)
-{
-  return iff()(d1, d2);
-}
-
 class simplifier
 {
 
@@ -80,8 +63,6 @@ public:
     variable vr1("r1", sort_real::real_());
     variable vr2("r2", sort_real::real_());
     variable vr3("r3", sort_real::real_());
-
-    ad_hoc_data.add_mapping(iff());
 
     //  a && a = a;
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), sort_bool::and_(vb1, vb1), vb1));
@@ -124,12 +105,6 @@ public:
     // Breaks everything when expressions such as -x < 0 are encountered
     // ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vr1), less(vr1,real_zero()), sort_bool::false_()));
 
-    // Rules for bidirectional implication (iff)
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(sort_bool::true_(), vb1), vb1));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::true_()), vb1));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(sort_bool::false_(), vb1), sort_bool::not_(vb1)));
-    ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1), iff(vb1, sort_bool::false_()), sort_bool::not_(vb1)));
-
     // if(a,b,c) = (a && b) || (!a && c);
     ad_hoc_data.add_equation(data_equation(atermpp::make_vector(vb1,vb2,vb3), if_(vb1, vb2, vb3),
       sort_bool::or_(sort_bool::and_(vb1, vb2), sort_bool::and_(sort_bool::not_(vb1), vb3))));
@@ -166,10 +141,10 @@ protected:
 
   virtual data_expression simplify_expression(const data_expression& expr) = 0;
 
-  data_expression apply_data_expression(const data_expression& expr, const mutable_indexed_substitution<> sigma)
+  data_expression apply_data_expression(const data_expression& expr)
   {
     // Rewrite the expression to some kind of normal form using BDDs
-    data_expression rewritten = rewr(proving_rewr(expr,sigma));
+    data_expression rewritten = rewr(proving_rewr(expr));
     // Check the cache
     std::map< data_expression, data_expression >::const_iterator res = cache.find(rewritten);
     if(res != cache.end())
@@ -185,27 +160,26 @@ protected:
     return simpl;
   }
 
-  lambda apply_lambda(const lambda& expr, const mutable_indexed_substitution<> sigma)
+  lambda apply_lambda(const lambda& expr)
   {
-    return lambda(expr.variables(), apply_data_expression(expr.body(), sigma));
+    return lambda(expr.variables(), apply_data_expression(expr.body()));
   }
 
 public:
-  simplifier(rewriter r, rewriter pr)
+  simplifier(const rewriter& r, const rewriter& pr)
   : rewr(r)
   , proving_rewr(pr)
   {}
 
   data_expression apply(const data_expression& expr)
   {
-    const mutable_indexed_substitution<> sigma;
-    return apply(expr, sigma);
+    return is_lambda(expr) ? apply_lambda(expr) : apply_data_expression(expr);
   }
 
-  data_expression apply(const data_expression& expr, const mutable_indexed_substitution<> sigma)
-  {
-    return is_lambda(expr) ? apply_lambda(expr, sigma) : apply_data_expression(expr,sigma);
-  }
+  // data_expression apply(const data_expression& expr, const mutable_indexed_substitution<> sigma)
+  // {
+  //   return is_lambda(expr) ? apply_lambda(expr, sigma) : apply_data_expression(expr,sigma);
+  // }
 };
 
 

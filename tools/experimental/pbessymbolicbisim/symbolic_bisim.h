@@ -41,8 +41,6 @@ namespace mcrl2
 namespace data
 {
 
-using namespace mcrl2::log;
-
 class symbolic_bisim_algorithm
 {
   typedef rewriter::substitution_type substitution_t;
@@ -113,13 +111,13 @@ protected:
 
     // The initial node always has number 0
     // This is guaranteed by dependency_graph_parition::get_reachable_pg()
-    std::cout << "Found a " << (pg.winner(solution, 0) == PLAYER_EVEN ? "positive" : "negative") << " proof graph." << std::endl;
-    std::cout << "Proof graph contains nodes ";
+    mCRL2log(log::verbose) << "Found a " << (pg.winner(solution, 0) == PLAYER_EVEN ? "positive" : "negative") << " proof graph." << std::endl;
+    mCRL2log(log::verbose) << "Proof graph contains nodes ";
     for(const verti& v: proof_graph_nodes)
     {
-      std::cout << v << ", ";
+      mCRL2log(log::verbose) << v << ", ";
     }
-    std::cout << std::endl;
+    mCRL2log(log::verbose) << std::endl;
     return proof_graph_nodes;
   }
 
@@ -204,7 +202,7 @@ protected:
 
     scc_decomposition sccs;
     decompose_graph(pg.graph(), sccs);
-    std::cout << "Found " << sccs.size() << " SCCs." << std::endl;
+    mCRL2log(log::verbose) << "Found " << sccs.size() << " SCCs." << std::endl;
 
     std::set<verti> result;
     for(std::size_t i = 0; i < sccs.size(); ++i)
@@ -248,12 +246,12 @@ protected:
       }
     }
 
-    std::cout << "Sink vertices are ";
+    mCRL2log(log::verbose) << "Sink vertices are ";
     for(const verti& v: result)
     {
-      std::cout << v << ", ";
+      mCRL2log(log::verbose) << v << ", ";
     }
-    std::cout << std::endl;
+    mCRL2log(log::verbose) << std::endl;
   }
 
 public:
@@ -275,13 +273,14 @@ public:
     const std::chrono::time_point<std::chrono::high_resolution_clock> t_start = 
       std::chrono::high_resolution_clock::now();
 
-    std::cout << m_spec << std::endl;
+    mCRL2log(log::verbose) << m_spec << std::endl;
 
     // while the (sub) partition is stable, we have to keep
     // refining and searching for proof graphs
     std::size_t num_iterations = 0;
     double total_pg_time = 0.0;
-    while(!m_partition.refine_n_steps(m_num_refine_steps))
+    player_t latest_winner;
+    do
     {
       const std::chrono::time_point<std::chrono::high_resolution_clock> t_start_pg_solver = 
         std::chrono::high_resolution_clock::now();
@@ -290,21 +289,29 @@ public:
       m_partition.get_reachable_pg(pg);
 
       const ParityGame::Strategy& solution = compute_pg_solution(pg);
-      pg.write_debug(solution, std::cout);
+      if(mCRL2logEnabled(log::verbose))
+      {
+        pg.write_debug(solution, mcrl2::log::mcrl2_logger().get(log::verbose));
+      }
       // compute_sink_subgraphs(pg);
 
-      m_partition.set_proof(compute_subpartition_from_strategy(pg, solution));
+      std::set<verti> proof_graph = compute_subpartition_from_strategy(pg, solution);
+      m_partition.set_proof(proof_graph);
 
       num_iterations++;
-      std::cout << "End of iteration " << num_iterations << std::endl;
+      latest_winner = pg.winner(solution,0);
+      mCRL2log(log::status) << "End of iteration " << num_iterations << ", " << (latest_winner == PLAYER_EVEN ? "positive" : "negative")
+       << " proof graph has size " << proof_graph.size() 
+       << ", total amount of blocks " << (m_partition.get_proof_blocks().size() + m_partition.get_other_blocks().size()) << "\n";
       total_pg_time += std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start_pg_solver).count();
-    }
-    std::cout << "Partition refinement completed in " << 
+    } while(!m_partition.refine_n_steps(m_num_refine_steps));
+    mCRL2log(log::info) << "Partition refinement completed in " << 
         std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << 
         " seconds.\n" << 
         "Time spent on PG solving: " << total_pg_time << " seconds" << std::endl;
 
-    m_partition.save_bes();
+    // m_partition.save_bes();
+    std::cout << (latest_winner == PLAYER_EVEN ? "true" : "false") << std::endl;
   }
 };
 
