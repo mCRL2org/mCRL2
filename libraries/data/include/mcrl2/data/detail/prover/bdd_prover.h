@@ -194,9 +194,8 @@ class BDD_Prover: protected rewriter
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    data_expression bdd_down(const data_expression& a_formula, std::string& a_indent)
+    data_expression bdd_down(const data_expression& a_formula, const std::string& a_indent)
     {
-      a_indent.append("  ");
 
       if (f_time_limit != 0 && (f_deadline - time(nullptr)) <= 0)
       {
@@ -215,7 +214,7 @@ class BDD_Prover: protected rewriter
 
       if (is_abstraction(a_formula))
       {
-        const abstraction a(atermpp::down_cast<abstraction>(a_formula));
+        const abstraction& a = atermpp::down_cast<abstraction>(a_formula);
         return abstraction(a.binding_operator(), a.variables(), bdd_down(a.body(), a_indent));
       }
 
@@ -235,24 +234,24 @@ class BDD_Prover: protected rewriter
         mCRL2log(log::debug) << a_indent << "Smallest guard: " << v_guard << std::endl;
       }
 
+      const std::string extra_indent = a_indent + "  ";
+
       data_expression v_term1 = f_manipulator.set_true(a_formula, v_guard);
       v_term1 = m_rewriter->rewrite(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
-      mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
-      v_term1 = bdd_down(v_term1, a_indent);
-      mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << v_term1 << std::endl;
+      mCRL2log(log::debug) << extra_indent << "True-branch after rewriting and orienting: " << v_term1 << std::endl;
+      v_term1 = bdd_down(v_term1, extra_indent);
+      mCRL2log(log::debug) << extra_indent << "BDD of the true-branch: " << v_term1 << std::endl;
 
       data_expression v_term2 = f_manipulator.set_false(a_formula, v_guard);
       v_term2 = m_rewriter->rewrite(v_term2,bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
-      mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
-      v_term2 = bdd_down(v_term2, a_indent);
-      mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << v_term2 << std::endl;
+      mCRL2log(log::debug) << extra_indent << "False-branch after rewriting and orienting: " << v_term2 << std::endl;
+      v_term2 = bdd_down(v_term2, extra_indent);
+      mCRL2log(log::debug) << extra_indent << "BDD of the false-branch: " << v_term2 << std::endl;
 
       data_expression v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
-
-      a_indent.erase(a_indent.size() - 2);
 
       return v_bdd;
     }
@@ -364,7 +363,11 @@ class BDD_Prover: protected rewriter
       }
       if (is_abstraction(a_formula))
       {
-        return smallest(atermpp::down_cast<abstraction>(a_formula).body());
+        // Guards from within an abstraction may contain
+        // variables that are not bound outside that abstraction.
+        // Therefore, we never return a smallest guard from
+        // within an abstraction.
+        return data_expression();
       }
 
       const std::map < data_expression, data_expression >::const_iterator i = f_smallest.find(a_formula);

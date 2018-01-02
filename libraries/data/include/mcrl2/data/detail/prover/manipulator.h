@@ -116,8 +116,8 @@ class Manipulator
 
       if (is_abstraction(a_formula))
       {
-        const abstraction t(a_formula);
-        return abstraction(t.binding_operator(), t.variables(), set_true_auxiliary(t.body(), a_guard, f_set_false));
+        const abstraction& t=atermpp::down_cast<abstraction>(a_formula);
+        return abstraction(t.binding_operator(), t.variables(), set_false_auxiliary(t.body(), a_guard, f_set_false));
       }
 
       if (a_formula == a_guard)
