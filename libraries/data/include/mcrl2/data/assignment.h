@@ -45,6 +45,12 @@ class assignment_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_WhrDecl(*this));
     }
+
+    /// Move semantics
+    assignment_expression(const assignment_expression&) noexcept = default;
+    assignment_expression(assignment_expression&&) noexcept = default;
+    assignment_expression& operator=(const assignment_expression&) noexcept = default;
+    assignment_expression& operator=(assignment_expression&&) noexcept = default;
 };
 
 /// \brief list of assignment_expressions
@@ -108,6 +114,12 @@ class assignment: public assignment_expression
     assignment(const variable& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_DataVarIdInit(), lhs, rhs))
     {}
+
+    /// Move semantics
+    assignment(const assignment&) noexcept = default;
+    assignment(assignment&&) noexcept = default;
+    assignment& operator=(const assignment&) noexcept = default;
+    assignment& operator=(assignment&&) noexcept = default;
 
     const variable& lhs() const
     {
@@ -199,6 +211,12 @@ class untyped_identifier_assignment: public assignment_expression
     untyped_identifier_assignment(const std::string& lhs, const data_expression& rhs)
       : assignment_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifierAssignment(), core::identifier_string(lhs), rhs))
     {}
+
+    /// Move semantics
+    untyped_identifier_assignment(const untyped_identifier_assignment&) noexcept = default;
+    untyped_identifier_assignment(untyped_identifier_assignment&&) noexcept = default;
+    untyped_identifier_assignment& operator=(const untyped_identifier_assignment&) noexcept = default;
+    untyped_identifier_assignment& operator=(untyped_identifier_assignment&&) noexcept = default;
 
     const core::identifier_string& lhs() const
     {

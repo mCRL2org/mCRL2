@@ -43,6 +43,12 @@ class fixpoint_symbol: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_FixPoint(*this));
     }
+
+    /// Move semantics
+    fixpoint_symbol(const fixpoint_symbol&) noexcept = default;
+    fixpoint_symbol(fixpoint_symbol&&) noexcept = default;
+    fixpoint_symbol& operator=(const fixpoint_symbol&) noexcept = default;
+    fixpoint_symbol& operator=(fixpoint_symbol&&) noexcept = default;
 //--- start user section fixpoint_symbol ---//
     /// \brief Returns the mu symbol.
     /// \return The mu symbol.

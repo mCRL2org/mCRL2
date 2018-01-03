@@ -139,6 +139,12 @@ class data_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_DataExpr(*this));
     }
+
+    /// Move semantics
+    data_expression(const data_expression&) noexcept = default;
+    data_expression(data_expression&&) noexcept = default;
+    data_expression& operator=(const data_expression&) noexcept = default;
+    data_expression& operator=(data_expression&&) noexcept = default;
 //--- start user section data_expression ---//
     application operator()(const data_expression& e) const;
 

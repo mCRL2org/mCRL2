@@ -55,6 +55,12 @@ class boolean_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_BooleanExpression(*this));
     }
+
+    /// Move semantics
+    boolean_expression(const boolean_expression&) noexcept = default;
+    boolean_expression(boolean_expression&&) noexcept = default;
+    boolean_expression& operator=(const boolean_expression&) noexcept = default;
+    boolean_expression& operator=(boolean_expression&&) noexcept = default;
 };
 
 /// \brief list of boolean_expressions
@@ -123,6 +129,12 @@ class true_: public boolean_expression
     {
       assert(core::detail::check_term_BooleanTrue(*this));
     }
+
+    /// Move semantics
+    true_(const true_&) noexcept = default;
+    true_(true_&&) noexcept = default;
+    true_& operator=(const true_&) noexcept = default;
+    true_& operator=(true_&&) noexcept = default;
 };
 
 /// \brief Test for a true expression
@@ -170,6 +182,12 @@ class false_: public boolean_expression
     {
       assert(core::detail::check_term_BooleanFalse(*this));
     }
+
+    /// Move semantics
+    false_(const false_&) noexcept = default;
+    false_(false_&&) noexcept = default;
+    false_& operator=(const false_&) noexcept = default;
+    false_& operator=(false_&&) noexcept = default;
 };
 
 /// \brief Test for a false expression
@@ -222,6 +240,12 @@ class not_: public boolean_expression
     not_(const boolean_expression& operand)
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanNot(), operand))
     {}
+
+    /// Move semantics
+    not_(const not_&) noexcept = default;
+    not_(not_&&) noexcept = default;
+    not_& operator=(const not_&) noexcept = default;
+    not_& operator=(not_&&) noexcept = default;
 
     const boolean_expression& operand() const
     {
@@ -279,6 +303,12 @@ class and_: public boolean_expression
     and_(const boolean_expression& left, const boolean_expression& right)
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanAnd(), left, right))
     {}
+
+    /// Move semantics
+    and_(const and_&) noexcept = default;
+    and_(and_&&) noexcept = default;
+    and_& operator=(const and_&) noexcept = default;
+    and_& operator=(and_&&) noexcept = default;
 
     const boolean_expression& left() const
     {
@@ -342,6 +372,12 @@ class or_: public boolean_expression
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanOr(), left, right))
     {}
 
+    /// Move semantics
+    or_(const or_&) noexcept = default;
+    or_(or_&&) noexcept = default;
+    or_& operator=(const or_&) noexcept = default;
+    or_& operator=(or_&&) noexcept = default;
+
     const boolean_expression& left() const
     {
       return atermpp::down_cast<boolean_expression>((*this)[0]);
@@ -404,6 +440,12 @@ class imp: public boolean_expression
       : boolean_expression(atermpp::aterm_appl(core::detail::function_symbol_BooleanImp(), left, right))
     {}
 
+    /// Move semantics
+    imp(const imp&) noexcept = default;
+    imp(imp&&) noexcept = default;
+    imp& operator=(const imp&) noexcept = default;
+    imp& operator=(imp&&) noexcept = default;
+
     const boolean_expression& left() const
     {
       return atermpp::down_cast<boolean_expression>((*this)[0]);
@@ -449,6 +491,12 @@ class boolean_variable: public boolean_expression
 {
   public:
 
+
+    /// Move semantics
+    boolean_variable(const boolean_variable&) noexcept = default;
+    boolean_variable(boolean_variable&&) noexcept = default;
+    boolean_variable& operator=(const boolean_variable&) noexcept = default;
+    boolean_variable& operator=(boolean_variable&&) noexcept = default;
 
     const core::identifier_string& name() const
     {

@@ -94,6 +94,12 @@ class structured_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortStruct(), structured_sort_constructor_list(constructors.begin(), constructors.end())))
     {}
 
+    /// Move semantics
+    structured_sort(const structured_sort&) noexcept = default;
+    structured_sort(structured_sort&&) noexcept = default;
+    structured_sort& operator=(const structured_sort&) noexcept = default;
+    structured_sort& operator=(structured_sort&&) noexcept = default;
+
     const structured_sort_constructor_list& constructors() const
     {
       return atermpp::down_cast<structured_sort_constructor_list>((*this)[0]);

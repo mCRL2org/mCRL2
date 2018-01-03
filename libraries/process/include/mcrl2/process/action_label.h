@@ -54,6 +54,12 @@ class action_label: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_ActId(), core::identifier_string(name), sorts)
     {}
 
+    /// Move semantics
+    action_label(const action_label&) noexcept = default;
+    action_label(action_label&&) noexcept = default;
+    action_label& operator=(const action_label&) noexcept = default;
+    action_label& operator=(action_label&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

@@ -46,6 +46,12 @@ class untyped_data_parameter: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_UntypedDataParameter(), core::identifier_string(name), arguments)
     {}
 
+    /// Move semantics
+    untyped_data_parameter(const untyped_data_parameter&) noexcept = default;
+    untyped_data_parameter(untyped_data_parameter&&) noexcept = default;
+    untyped_data_parameter& operator=(const untyped_data_parameter&) noexcept = default;
+    untyped_data_parameter& operator=(untyped_data_parameter&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

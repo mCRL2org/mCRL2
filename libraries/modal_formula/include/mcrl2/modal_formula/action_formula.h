@@ -61,6 +61,12 @@ class action_formula: public atermpp::aterm_appl
     action_formula(const process::untyped_multi_action& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// Move semantics
+    action_formula(const action_formula&) noexcept = default;
+    action_formula(action_formula&&) noexcept = default;
+    action_formula& operator=(const action_formula&) noexcept = default;
+    action_formula& operator=(action_formula&&) noexcept = default;
 };
 
 /// \brief list of action_formulas
@@ -138,6 +144,12 @@ class true_: public action_formula
     {
       assert(core::detail::check_term_ActTrue(*this));
     }
+
+    /// Move semantics
+    true_(const true_&) noexcept = default;
+    true_(true_&&) noexcept = default;
+    true_& operator=(const true_&) noexcept = default;
+    true_& operator=(true_&&) noexcept = default;
 };
 
 /// \brief Test for a true expression
@@ -185,6 +197,12 @@ class false_: public action_formula
     {
       assert(core::detail::check_term_ActFalse(*this));
     }
+
+    /// Move semantics
+    false_(const false_&) noexcept = default;
+    false_(false_&&) noexcept = default;
+    false_& operator=(const false_&) noexcept = default;
+    false_& operator=(false_&&) noexcept = default;
 };
 
 /// \brief Test for a false expression
@@ -237,6 +255,12 @@ class not_: public action_formula
     not_(const action_formula& operand)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActNot(), operand))
     {}
+
+    /// Move semantics
+    not_(const not_&) noexcept = default;
+    not_(not_&&) noexcept = default;
+    not_& operator=(const not_&) noexcept = default;
+    not_& operator=(not_&&) noexcept = default;
 
     const action_formula& operand() const
     {
@@ -294,6 +318,12 @@ class and_: public action_formula
     and_(const action_formula& left, const action_formula& right)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActAnd(), left, right))
     {}
+
+    /// Move semantics
+    and_(const and_&) noexcept = default;
+    and_(and_&&) noexcept = default;
+    and_& operator=(const and_&) noexcept = default;
+    and_& operator=(and_&&) noexcept = default;
 
     const action_formula& left() const
     {
@@ -357,6 +387,12 @@ class or_: public action_formula
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActOr(), left, right))
     {}
 
+    /// Move semantics
+    or_(const or_&) noexcept = default;
+    or_(or_&&) noexcept = default;
+    or_& operator=(const or_&) noexcept = default;
+    or_& operator=(or_&&) noexcept = default;
+
     const action_formula& left() const
     {
       return atermpp::down_cast<action_formula>((*this)[0]);
@@ -418,6 +454,12 @@ class imp: public action_formula
     imp(const action_formula& left, const action_formula& right)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActImp(), left, right))
     {}
+
+    /// Move semantics
+    imp(const imp&) noexcept = default;
+    imp(imp&&) noexcept = default;
+    imp& operator=(const imp&) noexcept = default;
+    imp& operator=(imp&&) noexcept = default;
 
     const action_formula& left() const
     {
@@ -481,6 +523,12 @@ class forall: public action_formula
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActForall(), variables, body))
     {}
 
+    /// Move semantics
+    forall(const forall&) noexcept = default;
+    forall(forall&&) noexcept = default;
+    forall& operator=(const forall&) noexcept = default;
+    forall& operator=(forall&&) noexcept = default;
+
     const data::variable_list& variables() const
     {
       return atermpp::down_cast<data::variable_list>((*this)[0]);
@@ -542,6 +590,12 @@ class exists: public action_formula
     exists(const data::variable_list& variables, const action_formula& body)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActExists(), variables, body))
     {}
+
+    /// Move semantics
+    exists(const exists&) noexcept = default;
+    exists(exists&&) noexcept = default;
+    exists& operator=(const exists&) noexcept = default;
+    exists& operator=(exists&&) noexcept = default;
 
     const data::variable_list& variables() const
     {
@@ -605,6 +659,12 @@ class at: public action_formula
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActAt(), operand, time_stamp))
     {}
 
+    /// Move semantics
+    at(const at&) noexcept = default;
+    at(at&&) noexcept = default;
+    at& operator=(const at&) noexcept = default;
+    at& operator=(at&&) noexcept = default;
+
     const action_formula& operand() const
     {
       return atermpp::down_cast<action_formula>((*this)[0]);
@@ -666,6 +726,12 @@ class multi_action: public action_formula
     multi_action(const process::action_list& actions)
       : action_formula(atermpp::aterm_appl(core::detail::function_symbol_ActMultAct(), actions))
     {}
+
+    /// Move semantics
+    multi_action(const multi_action&) noexcept = default;
+    multi_action(multi_action&&) noexcept = default;
+    multi_action& operator=(const multi_action&) noexcept = default;
+    multi_action& operator=(multi_action&&) noexcept = default;
 
     const process::action_list& actions() const
     {

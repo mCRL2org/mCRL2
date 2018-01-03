@@ -38,6 +38,12 @@ class nil: public atermpp::aterm_appl
     {
       assert(core::detail::check_term_Nil(*this));
     }
+
+    /// Move semantics
+    nil(const nil&) noexcept = default;
+    nil(nil&&) noexcept = default;
+    nil& operator=(const nil&) noexcept = default;
+    nil& operator=(nil&&) noexcept = default;
 };
 
 /// \brief list of nils

@@ -59,6 +59,12 @@ class propositional_variable: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_PropVarDecl(), core::identifier_string(name), parameters)
     {}
 
+    /// Move semantics
+    propositional_variable(const propositional_variable&) noexcept = default;
+    propositional_variable(propositional_variable&&) noexcept = default;
+    propositional_variable& operator=(const propositional_variable&) noexcept = default;
+    propositional_variable& operator=(propositional_variable&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

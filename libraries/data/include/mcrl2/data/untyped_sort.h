@@ -36,6 +36,12 @@ class untyped_sort: public sort_expression
     {
       assert(core::detail::check_term_UntypedSortUnknown(*this));
     }
+
+    /// Move semantics
+    untyped_sort(const untyped_sort&) noexcept = default;
+    untyped_sort(untyped_sort&&) noexcept = default;
+    untyped_sort& operator=(const untyped_sort&) noexcept = default;
+    untyped_sort& operator=(untyped_sort&&) noexcept = default;
 };
 
 // prototype declaration

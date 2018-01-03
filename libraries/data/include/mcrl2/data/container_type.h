@@ -39,6 +39,12 @@ class container_type: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_SortConsType(*this));
     }
+
+    /// Move semantics
+    container_type(const container_type&) noexcept = default;
+    container_type(container_type&&) noexcept = default;
+    container_type& operator=(const container_type&) noexcept = default;
+    container_type& operator=(container_type&&) noexcept = default;
 };
 
 /// \brief list of container_types
@@ -83,6 +89,12 @@ class list_container: public container_type
     {
       assert(core::detail::check_term_SortList(*this));
     }
+
+    /// Move semantics
+    list_container(const list_container&) noexcept = default;
+    list_container(list_container&&) noexcept = default;
+    list_container& operator=(const list_container&) noexcept = default;
+    list_container& operator=(list_container&&) noexcept = default;
 };
 
 /// \brief Test for a list_container expression
@@ -130,6 +142,12 @@ class set_container: public container_type
     {
       assert(core::detail::check_term_SortSet(*this));
     }
+
+    /// Move semantics
+    set_container(const set_container&) noexcept = default;
+    set_container(set_container&&) noexcept = default;
+    set_container& operator=(const set_container&) noexcept = default;
+    set_container& operator=(set_container&&) noexcept = default;
 };
 
 /// \brief Test for a set_container expression
@@ -177,6 +195,12 @@ class bag_container: public container_type
     {
       assert(core::detail::check_term_SortBag(*this));
     }
+
+    /// Move semantics
+    bag_container(const bag_container&) noexcept = default;
+    bag_container(bag_container&&) noexcept = default;
+    bag_container& operator=(const bag_container&) noexcept = default;
+    bag_container& operator=(bag_container&&) noexcept = default;
 };
 
 /// \brief Test for a bag_container expression
@@ -224,6 +248,12 @@ class fset_container: public container_type
     {
       assert(core::detail::check_term_SortFSet(*this));
     }
+
+    /// Move semantics
+    fset_container(const fset_container&) noexcept = default;
+    fset_container(fset_container&&) noexcept = default;
+    fset_container& operator=(const fset_container&) noexcept = default;
+    fset_container& operator=(fset_container&&) noexcept = default;
 };
 
 /// \brief Test for a fset_container expression
@@ -271,6 +301,12 @@ class fbag_container: public container_type
     {
       assert(core::detail::check_term_SortFBag(*this));
     }
+
+    /// Move semantics
+    fbag_container(const fbag_container&) noexcept = default;
+    fbag_container(fbag_container&&) noexcept = default;
+    fbag_container& operator=(const fbag_container&) noexcept = default;
+    fbag_container& operator=(fbag_container&&) noexcept = default;
 };
 
 /// \brief Test for a fbag_container expression

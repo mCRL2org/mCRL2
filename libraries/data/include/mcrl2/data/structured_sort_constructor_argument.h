@@ -55,6 +55,12 @@ class structured_sort_constructor_argument: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_StructProj(), core::identifier_string(name), sort)
     {}
 
+    /// Move semantics
+    structured_sort_constructor_argument(const structured_sort_constructor_argument&) noexcept = default;
+    structured_sort_constructor_argument(structured_sort_constructor_argument&&) noexcept = default;
+    structured_sort_constructor_argument& operator=(const structured_sort_constructor_argument&) noexcept = default;
+    structured_sort_constructor_argument& operator=(structured_sort_constructor_argument&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

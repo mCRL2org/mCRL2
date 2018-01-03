@@ -39,6 +39,12 @@ class binder_type: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_BindingOperator(*this));
     }
+
+    /// Move semantics
+    binder_type(const binder_type&) noexcept = default;
+    binder_type(binder_type&&) noexcept = default;
+    binder_type& operator=(const binder_type&) noexcept = default;
+    binder_type& operator=(binder_type&&) noexcept = default;
 };
 
 /// \brief list of binder_types
@@ -83,6 +89,12 @@ class untyped_set_or_bag_comprehension_binder: public binder_type
     {
       assert(core::detail::check_term_UntypedSetBagComp(*this));
     }
+
+    /// Move semantics
+    untyped_set_or_bag_comprehension_binder(const untyped_set_or_bag_comprehension_binder&) noexcept = default;
+    untyped_set_or_bag_comprehension_binder(untyped_set_or_bag_comprehension_binder&&) noexcept = default;
+    untyped_set_or_bag_comprehension_binder& operator=(const untyped_set_or_bag_comprehension_binder&) noexcept = default;
+    untyped_set_or_bag_comprehension_binder& operator=(untyped_set_or_bag_comprehension_binder&&) noexcept = default;
 };
 
 /// \brief Test for a untyped_set_or_bag_comprehension_binder expression
@@ -130,6 +142,12 @@ class set_comprehension_binder: public binder_type
     {
       assert(core::detail::check_term_SetComp(*this));
     }
+
+    /// Move semantics
+    set_comprehension_binder(const set_comprehension_binder&) noexcept = default;
+    set_comprehension_binder(set_comprehension_binder&&) noexcept = default;
+    set_comprehension_binder& operator=(const set_comprehension_binder&) noexcept = default;
+    set_comprehension_binder& operator=(set_comprehension_binder&&) noexcept = default;
 };
 
 /// \brief Test for a set_comprehension_binder expression
@@ -177,6 +195,12 @@ class bag_comprehension_binder: public binder_type
     {
       assert(core::detail::check_term_BagComp(*this));
     }
+
+    /// Move semantics
+    bag_comprehension_binder(const bag_comprehension_binder&) noexcept = default;
+    bag_comprehension_binder(bag_comprehension_binder&&) noexcept = default;
+    bag_comprehension_binder& operator=(const bag_comprehension_binder&) noexcept = default;
+    bag_comprehension_binder& operator=(bag_comprehension_binder&&) noexcept = default;
 };
 
 /// \brief Test for a bag_comprehension_binder expression
@@ -224,6 +248,12 @@ class forall_binder: public binder_type
     {
       assert(core::detail::check_term_Forall(*this));
     }
+
+    /// Move semantics
+    forall_binder(const forall_binder&) noexcept = default;
+    forall_binder(forall_binder&&) noexcept = default;
+    forall_binder& operator=(const forall_binder&) noexcept = default;
+    forall_binder& operator=(forall_binder&&) noexcept = default;
 };
 
 /// \brief Test for a forall_binder expression
@@ -271,6 +301,12 @@ class exists_binder: public binder_type
     {
       assert(core::detail::check_term_Exists(*this));
     }
+
+    /// Move semantics
+    exists_binder(const exists_binder&) noexcept = default;
+    exists_binder(exists_binder&&) noexcept = default;
+    exists_binder& operator=(const exists_binder&) noexcept = default;
+    exists_binder& operator=(exists_binder&&) noexcept = default;
 };
 
 /// \brief Test for a exists_binder expression
@@ -318,6 +354,12 @@ class lambda_binder: public binder_type
     {
       assert(core::detail::check_term_Lambda(*this));
     }
+
+    /// Move semantics
+    lambda_binder(const lambda_binder&) noexcept = default;
+    lambda_binder(lambda_binder&&) noexcept = default;
+    lambda_binder& operator=(const lambda_binder&) noexcept = default;
+    lambda_binder& operator=(lambda_binder&&) noexcept = default;
 };
 
 /// \brief Test for a lambda_binder expression

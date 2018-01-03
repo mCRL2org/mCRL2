@@ -41,6 +41,12 @@ class untyped_sort_variable: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortVariable(), value))
     {}
 
+    /// Move semantics
+    untyped_sort_variable(const untyped_sort_variable&) noexcept = default;
+    untyped_sort_variable(untyped_sort_variable&&) noexcept = default;
+    untyped_sort_variable& operator=(const untyped_sort_variable&) noexcept = default;
+    untyped_sort_variable& operator=(untyped_sort_variable&&) noexcept = default;
+
     const atermpp::aterm_int& value() const
     {
       return atermpp::down_cast<atermpp::aterm_int>((*this)[0]);

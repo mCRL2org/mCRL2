@@ -56,6 +56,12 @@ class state_formula: public atermpp::aterm_appl
     state_formula(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// Move semantics
+    state_formula(const state_formula&) noexcept = default;
+    state_formula(state_formula&&) noexcept = default;
+    state_formula& operator=(const state_formula&) noexcept = default;
+    state_formula& operator=(state_formula&&) noexcept = default;
 //--- start user section state_formula ---//
     /// \brief Returns true if the formula is timed.
     /// \return True if the formula is timed.
@@ -151,6 +157,12 @@ class true_: public state_formula
     {
       assert(core::detail::check_term_StateTrue(*this));
     }
+
+    /// Move semantics
+    true_(const true_&) noexcept = default;
+    true_(true_&&) noexcept = default;
+    true_& operator=(const true_&) noexcept = default;
+    true_& operator=(true_&&) noexcept = default;
 };
 
 /// \brief Test for a true expression
@@ -198,6 +210,12 @@ class false_: public state_formula
     {
       assert(core::detail::check_term_StateFalse(*this));
     }
+
+    /// Move semantics
+    false_(const false_&) noexcept = default;
+    false_(false_&&) noexcept = default;
+    false_& operator=(const false_&) noexcept = default;
+    false_& operator=(false_&&) noexcept = default;
 };
 
 /// \brief Test for a false expression
@@ -250,6 +268,12 @@ class not_: public state_formula
     not_(const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNot(), operand))
     {}
+
+    /// Move semantics
+    not_(const not_&) noexcept = default;
+    not_(not_&&) noexcept = default;
+    not_& operator=(const not_&) noexcept = default;
+    not_& operator=(not_&&) noexcept = default;
 
     const state_formula& operand() const
     {
@@ -307,6 +331,12 @@ class and_: public state_formula
     and_(const state_formula& left, const state_formula& right)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateAnd(), left, right))
     {}
+
+    /// Move semantics
+    and_(const and_&) noexcept = default;
+    and_(and_&&) noexcept = default;
+    and_& operator=(const and_&) noexcept = default;
+    and_& operator=(and_&&) noexcept = default;
 
     const state_formula& left() const
     {
@@ -370,6 +400,12 @@ class or_: public state_formula
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateOr(), left, right))
     {}
 
+    /// Move semantics
+    or_(const or_&) noexcept = default;
+    or_(or_&&) noexcept = default;
+    or_& operator=(const or_&) noexcept = default;
+    or_& operator=(or_&&) noexcept = default;
+
     const state_formula& left() const
     {
       return atermpp::down_cast<state_formula>((*this)[0]);
@@ -431,6 +467,12 @@ class imp: public state_formula
     imp(const state_formula& left, const state_formula& right)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateImp(), left, right))
     {}
+
+    /// Move semantics
+    imp(const imp&) noexcept = default;
+    imp(imp&&) noexcept = default;
+    imp& operator=(const imp&) noexcept = default;
+    imp& operator=(imp&&) noexcept = default;
 
     const state_formula& left() const
     {
@@ -494,6 +536,12 @@ class forall: public state_formula
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateForall(), variables, body))
     {}
 
+    /// Move semantics
+    forall(const forall&) noexcept = default;
+    forall(forall&&) noexcept = default;
+    forall& operator=(const forall&) noexcept = default;
+    forall& operator=(forall&&) noexcept = default;
+
     const data::variable_list& variables() const
     {
       return atermpp::down_cast<data::variable_list>((*this)[0]);
@@ -555,6 +603,12 @@ class exists: public state_formula
     exists(const data::variable_list& variables, const state_formula& body)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateExists(), variables, body))
     {}
+
+    /// Move semantics
+    exists(const exists&) noexcept = default;
+    exists(exists&&) noexcept = default;
+    exists& operator=(const exists&) noexcept = default;
+    exists& operator=(exists&&) noexcept = default;
 
     const data::variable_list& variables() const
     {
@@ -618,6 +672,12 @@ class must: public state_formula
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMust(), formula, operand))
     {}
 
+    /// Move semantics
+    must(const must&) noexcept = default;
+    must(must&&) noexcept = default;
+    must& operator=(const must&) noexcept = default;
+    must& operator=(must&&) noexcept = default;
+
     const regular_formulas::regular_formula& formula() const
     {
       return atermpp::down_cast<regular_formulas::regular_formula>((*this)[0]);
@@ -680,6 +740,12 @@ class may: public state_formula
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMay(), formula, operand))
     {}
 
+    /// Move semantics
+    may(const may&) noexcept = default;
+    may(may&&) noexcept = default;
+    may& operator=(const may&) noexcept = default;
+    may& operator=(may&&) noexcept = default;
+
     const regular_formulas::regular_formula& formula() const
     {
       return atermpp::down_cast<regular_formulas::regular_formula>((*this)[0]);
@@ -736,6 +802,12 @@ class yaled: public state_formula
     {
       assert(core::detail::check_term_StateYaled(*this));
     }
+
+    /// Move semantics
+    yaled(const yaled&) noexcept = default;
+    yaled(yaled&&) noexcept = default;
+    yaled& operator=(const yaled&) noexcept = default;
+    yaled& operator=(yaled&&) noexcept = default;
 };
 
 /// \brief Test for a yaled expression
@@ -789,6 +861,12 @@ class yaled_timed: public state_formula
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateYaledTimed(), time_stamp))
     {}
 
+    /// Move semantics
+    yaled_timed(const yaled_timed&) noexcept = default;
+    yaled_timed(yaled_timed&&) noexcept = default;
+    yaled_timed& operator=(const yaled_timed&) noexcept = default;
+    yaled_timed& operator=(yaled_timed&&) noexcept = default;
+
     const data::data_expression& time_stamp() const
     {
       return atermpp::down_cast<data::data_expression>((*this)[0]);
@@ -840,6 +918,12 @@ class delay: public state_formula
     {
       assert(core::detail::check_term_StateDelay(*this));
     }
+
+    /// Move semantics
+    delay(const delay&) noexcept = default;
+    delay(delay&&) noexcept = default;
+    delay& operator=(const delay&) noexcept = default;
+    delay& operator=(delay&&) noexcept = default;
 };
 
 /// \brief Test for a delay expression
@@ -892,6 +976,12 @@ class delay_timed: public state_formula
     delay_timed(const data::data_expression& time_stamp)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateDelayTimed(), time_stamp))
     {}
+
+    /// Move semantics
+    delay_timed(const delay_timed&) noexcept = default;
+    delay_timed(delay_timed&&) noexcept = default;
+    delay_timed& operator=(const delay_timed&) noexcept = default;
+    delay_timed& operator=(delay_timed&&) noexcept = default;
 
     const data::data_expression& time_stamp() const
     {
@@ -954,6 +1044,12 @@ class variable: public state_formula
     variable(const std::string& name, const data::data_expression_list& arguments)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateVar(), core::identifier_string(name), arguments))
     {}
+
+    /// Move semantics
+    variable(const variable&) noexcept = default;
+    variable(variable&&) noexcept = default;
+    variable& operator=(const variable&) noexcept = default;
+    variable& operator=(variable&&) noexcept = default;
 
     const core::identifier_string& name() const
     {
@@ -1021,6 +1117,12 @@ class nu: public state_formula
     nu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateNu(), core::identifier_string(name), assignments, operand))
     {}
+
+    /// Move semantics
+    nu(const nu&) noexcept = default;
+    nu(nu&&) noexcept = default;
+    nu& operator=(const nu&) noexcept = default;
+    nu& operator=(nu&&) noexcept = default;
 
     const core::identifier_string& name() const
     {
@@ -1093,6 +1195,12 @@ class mu: public state_formula
     mu(const std::string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(atermpp::aterm_appl(core::detail::function_symbol_StateMu(), core::identifier_string(name), assignments, operand))
     {}
+
+    /// Move semantics
+    mu(const mu&) noexcept = default;
+    mu(mu&&) noexcept = default;
+    mu& operator=(const mu&) noexcept = default;
+    mu& operator=(mu&&) noexcept = default;
 
     const core::identifier_string& name() const
     {

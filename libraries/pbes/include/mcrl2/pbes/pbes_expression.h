@@ -66,6 +66,12 @@ class pbes_expression: public atermpp::aterm_appl
     pbes_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// Move semantics
+    pbes_expression(const pbes_expression&) noexcept = default;
+    pbes_expression(pbes_expression&&) noexcept = default;
+    pbes_expression& operator=(const pbes_expression&) noexcept = default;
+    pbes_expression& operator=(pbes_expression&&) noexcept = default;
 };
 
 /// \brief list of pbes_expressions
@@ -126,6 +132,12 @@ class propositional_variable_instantiation: public pbes_expression
 {
   public:
 
+
+    /// Move semantics
+    propositional_variable_instantiation(const propositional_variable_instantiation&) noexcept = default;
+    propositional_variable_instantiation(propositional_variable_instantiation&&) noexcept = default;
+    propositional_variable_instantiation& operator=(const propositional_variable_instantiation&) noexcept = default;
+    propositional_variable_instantiation& operator=(propositional_variable_instantiation&&) noexcept = default;
 
     const core::identifier_string& name() const
     {
@@ -244,6 +256,12 @@ class not_: public pbes_expression
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESNot(), operand))
     {}
 
+    /// Move semantics
+    not_(const not_&) noexcept = default;
+    not_(not_&&) noexcept = default;
+    not_& operator=(const not_&) noexcept = default;
+    not_& operator=(not_&&) noexcept = default;
+
     const pbes_expression& operand() const
     {
       return atermpp::down_cast<pbes_expression>((*this)[0]);
@@ -300,6 +318,12 @@ class and_: public pbes_expression
     and_(const pbes_expression& left, const pbes_expression& right)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESAnd(), left, right))
     {}
+
+    /// Move semantics
+    and_(const and_&) noexcept = default;
+    and_(and_&&) noexcept = default;
+    and_& operator=(const and_&) noexcept = default;
+    and_& operator=(and_&&) noexcept = default;
 
     const pbes_expression& left() const
     {
@@ -363,6 +387,12 @@ class or_: public pbes_expression
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESOr(), left, right))
     {}
 
+    /// Move semantics
+    or_(const or_&) noexcept = default;
+    or_(or_&&) noexcept = default;
+    or_& operator=(const or_&) noexcept = default;
+    or_& operator=(or_&&) noexcept = default;
+
     const pbes_expression& left() const
     {
       return atermpp::down_cast<pbes_expression>((*this)[0]);
@@ -424,6 +454,12 @@ class imp: public pbes_expression
     imp(const pbes_expression& left, const pbes_expression& right)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESImp(), left, right))
     {}
+
+    /// Move semantics
+    imp(const imp&) noexcept = default;
+    imp(imp&&) noexcept = default;
+    imp& operator=(const imp&) noexcept = default;
+    imp& operator=(imp&&) noexcept = default;
 
     const pbes_expression& left() const
     {
@@ -487,6 +523,12 @@ class forall: public pbes_expression
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESForall(), variables, body))
     {}
 
+    /// Move semantics
+    forall(const forall&) noexcept = default;
+    forall(forall&&) noexcept = default;
+    forall& operator=(const forall&) noexcept = default;
+    forall& operator=(forall&&) noexcept = default;
+
     const data::variable_list& variables() const
     {
       return atermpp::down_cast<data::variable_list>((*this)[0]);
@@ -548,6 +590,12 @@ class exists: public pbes_expression
     exists(const data::variable_list& variables, const pbes_expression& body)
       : pbes_expression(atermpp::aterm_appl(core::detail::function_symbol_PBESExists(), variables, body))
     {}
+
+    /// Move semantics
+    exists(const exists&) noexcept = default;
+    exists(exists&&) noexcept = default;
+    exists& operator=(const exists&) noexcept = default;
+    exists& operator=(exists&&) noexcept = default;
 
     const data::variable_list& variables() const
     {

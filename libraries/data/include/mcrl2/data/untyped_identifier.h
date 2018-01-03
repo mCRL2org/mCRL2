@@ -46,6 +46,12 @@ class untyped_identifier: public data_expression
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedIdentifier(), core::identifier_string(name)))
     {}
 
+    /// Move semantics
+    untyped_identifier(const untyped_identifier&) noexcept = default;
+    untyped_identifier(untyped_identifier&&) noexcept = default;
+    untyped_identifier& operator=(const untyped_identifier&) noexcept = default;
+    untyped_identifier& operator=(untyped_identifier&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

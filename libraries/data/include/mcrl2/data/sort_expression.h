@@ -79,6 +79,12 @@ class sort_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_SortExpr(*this));
     }
+
+    /// Move semantics
+    sort_expression(const sort_expression&) noexcept = default;
+    sort_expression(sort_expression&&) noexcept = default;
+    sort_expression& operator=(const sort_expression&) noexcept = default;
+    sort_expression& operator=(sort_expression&&) noexcept = default;
 //--- start user section sort_expression ---//
     /// \brief Returns the target sort of this expression.
     /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort.

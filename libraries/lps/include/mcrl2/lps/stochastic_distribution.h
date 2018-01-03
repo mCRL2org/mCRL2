@@ -41,6 +41,12 @@ class stochastic_distribution: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_Distribution(), variables, distribution)
     {}
 
+    /// Move semantics
+    stochastic_distribution(const stochastic_distribution&) noexcept = default;
+    stochastic_distribution(stochastic_distribution&&) noexcept = default;
+    stochastic_distribution& operator=(const stochastic_distribution&) noexcept = default;
+    stochastic_distribution& operator=(stochastic_distribution&&) noexcept = default;
+
     const data::variable_list& variables() const
     {
       return atermpp::down_cast<data::variable_list>((*this)[0]);

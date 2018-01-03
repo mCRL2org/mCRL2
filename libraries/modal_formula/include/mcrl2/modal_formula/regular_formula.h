@@ -56,6 +56,12 @@ class regular_formula: public atermpp::aterm_appl
     regular_formula(const data::data_expression& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// Move semantics
+    regular_formula(const regular_formula&) noexcept = default;
+    regular_formula(regular_formula&&) noexcept = default;
+    regular_formula& operator=(const regular_formula&) noexcept = default;
+    regular_formula& operator=(regular_formula&&) noexcept = default;
 };
 
 /// \brief list of regular_formulas
@@ -128,6 +134,12 @@ class seq: public regular_formula
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegSeq(), left, right))
     {}
 
+    /// Move semantics
+    seq(const seq&) noexcept = default;
+    seq(seq&&) noexcept = default;
+    seq& operator=(const seq&) noexcept = default;
+    seq& operator=(seq&&) noexcept = default;
+
     const regular_formula& left() const
     {
       return atermpp::down_cast<regular_formula>((*this)[0]);
@@ -189,6 +201,12 @@ class alt: public regular_formula
     alt(const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegAlt(), left, right))
     {}
+
+    /// Move semantics
+    alt(const alt&) noexcept = default;
+    alt(alt&&) noexcept = default;
+    alt& operator=(const alt&) noexcept = default;
+    alt& operator=(alt&&) noexcept = default;
 
     const regular_formula& left() const
     {
@@ -252,6 +270,12 @@ class trans: public regular_formula
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTrans(), operand))
     {}
 
+    /// Move semantics
+    trans(const trans&) noexcept = default;
+    trans(trans&&) noexcept = default;
+    trans& operator=(const trans&) noexcept = default;
+    trans& operator=(trans&&) noexcept = default;
+
     const regular_formula& operand() const
     {
       return atermpp::down_cast<regular_formula>((*this)[0]);
@@ -308,6 +332,12 @@ class trans_or_nil: public regular_formula
     trans_or_nil(const regular_formula& operand)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_RegTransOrNil(), operand))
     {}
+
+    /// Move semantics
+    trans_or_nil(const trans_or_nil&) noexcept = default;
+    trans_or_nil(trans_or_nil&&) noexcept = default;
+    trans_or_nil& operator=(const trans_or_nil&) noexcept = default;
+    trans_or_nil& operator=(trans_or_nil&&) noexcept = default;
 
     const regular_formula& operand() const
     {
@@ -370,6 +400,12 @@ class untyped_regular_formula: public regular_formula
     untyped_regular_formula(const std::string& name, const regular_formula& left, const regular_formula& right)
       : regular_formula(atermpp::aterm_appl(core::detail::function_symbol_UntypedRegFrm(), core::identifier_string(name), left, right))
     {}
+
+    /// Move semantics
+    untyped_regular_formula(const untyped_regular_formula&) noexcept = default;
+    untyped_regular_formula(untyped_regular_formula&&) noexcept = default;
+    untyped_regular_formula& operator=(const untyped_regular_formula&) noexcept = default;
+    untyped_regular_formula& operator=(untyped_regular_formula&&) noexcept = default;
 
     const core::identifier_string& name() const
     {

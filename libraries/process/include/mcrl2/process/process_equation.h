@@ -49,6 +49,12 @@ class process_equation: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_ProcEqn(), identifier, formal_parameters, expression)
     {}
 
+    /// Move semantics
+    process_equation(const process_equation&) noexcept = default;
+    process_equation(process_equation&&) noexcept = default;
+    process_equation& operator=(const process_equation&) noexcept = default;
+    process_equation& operator=(process_equation&&) noexcept = default;
+
     const process_identifier& identifier() const
     {
       return atermpp::down_cast<process_identifier>((*this)[0]);

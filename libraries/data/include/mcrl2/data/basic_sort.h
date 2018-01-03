@@ -54,6 +54,12 @@ class basic_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortId(), core::identifier_string(name)))
     {}
 
+    /// Move semantics
+    basic_sort(const basic_sort&) noexcept = default;
+    basic_sort(basic_sort&&) noexcept = default;
+    basic_sort& operator=(const basic_sort&) noexcept = default;
+    basic_sort& operator=(basic_sort&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

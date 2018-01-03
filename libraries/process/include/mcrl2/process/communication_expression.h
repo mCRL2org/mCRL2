@@ -52,6 +52,12 @@ class communication_expression: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_CommExpr(), action_name, core::identifier_string(name))
     {}
 
+    /// Move semantics
+    communication_expression(const communication_expression&) noexcept = default;
+    communication_expression(communication_expression&&) noexcept = default;
+    communication_expression& operator=(const communication_expression&) noexcept = default;
+    communication_expression& operator=(communication_expression&&) noexcept = default;
+
     const action_name_multiset& action_name() const
     {
       return atermpp::down_cast<action_name_multiset>((*this)[0]);

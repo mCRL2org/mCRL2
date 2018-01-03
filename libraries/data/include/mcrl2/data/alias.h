@@ -45,6 +45,12 @@ class alias: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_SortRef(), name, reference)
     {}
 
+    /// Move semantics
+    alias(const alias&) noexcept = default;
+    alias(alias&&) noexcept = default;
+    alias& operator=(const alias&) noexcept = default;
+    alias& operator=(alias&&) noexcept = default;
+
     const basic_sort& name() const
     {
       return atermpp::down_cast<basic_sort>((*this)[0]);

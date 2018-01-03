@@ -40,6 +40,12 @@ class bdd_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_BddExpression(*this));
     }
+
+    /// Move semantics
+    bdd_expression(const bdd_expression&) noexcept = default;
+    bdd_expression(bdd_expression&&) noexcept = default;
+    bdd_expression& operator=(const bdd_expression&) noexcept = default;
+    bdd_expression& operator=(bdd_expression&&) noexcept = default;
 };
 
 /// \brief list of bdd_expressions
@@ -100,6 +106,12 @@ class true_: public bdd_expression
     {
       assert(core::detail::check_term_BddTrue(*this));
     }
+
+    /// Move semantics
+    true_(const true_&) noexcept = default;
+    true_(true_&&) noexcept = default;
+    true_& operator=(const true_&) noexcept = default;
+    true_& operator=(true_&&) noexcept = default;
 };
 
 /// \brief Test for a true expression
@@ -147,6 +159,12 @@ class false_: public bdd_expression
     {
       assert(core::detail::check_term_BddFalse(*this));
     }
+
+    /// Move semantics
+    false_(const false_&) noexcept = default;
+    false_(false_&&) noexcept = default;
+    false_& operator=(const false_&) noexcept = default;
+    false_& operator=(false_&&) noexcept = default;
 };
 
 /// \brief Test for a false expression
@@ -204,6 +222,12 @@ class if_: public bdd_expression
     if_(const std::string& name, const bdd_expression& left, const bdd_expression& right)
       : bdd_expression(atermpp::aterm_appl(core::detail::function_symbol_BddIf(), core::identifier_string(name), left, right))
     {}
+
+    /// Move semantics
+    if_(const if_&) noexcept = default;
+    if_(if_&&) noexcept = default;
+    if_& operator=(const if_&) noexcept = default;
+    if_& operator=(if_&&) noexcept = default;
 
     const core::identifier_string& name() const
     {

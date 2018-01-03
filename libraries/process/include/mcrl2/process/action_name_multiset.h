@@ -48,6 +48,12 @@ class action_name_multiset: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_MultActName(), names)
     {}
 
+    /// Move semantics
+    action_name_multiset(const action_name_multiset&) noexcept = default;
+    action_name_multiset(action_name_multiset&&) noexcept = default;
+    action_name_multiset& operator=(const action_name_multiset&) noexcept = default;
+    action_name_multiset& operator=(action_name_multiset&&) noexcept = default;
+
     const core::identifier_string_list& names() const
     {
       return atermpp::down_cast<core::identifier_string_list>((*this)[0]);

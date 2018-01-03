@@ -34,6 +34,12 @@ class function_symbol: public data_expression
   public:
 
 
+    /// Move semantics
+    function_symbol(const function_symbol&) noexcept = default;
+    function_symbol(function_symbol&&) noexcept = default;
+    function_symbol& operator=(const function_symbol&) noexcept = default;
+    function_symbol& operator=(function_symbol&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

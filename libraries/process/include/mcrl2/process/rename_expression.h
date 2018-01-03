@@ -52,6 +52,12 @@ class rename_expression: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_RenameExpr(), core::identifier_string(source), core::identifier_string(target))
     {}
 
+    /// Move semantics
+    rename_expression(const rename_expression&) noexcept = default;
+    rename_expression(rename_expression&&) noexcept = default;
+    rename_expression& operator=(const rename_expression&) noexcept = default;
+    rename_expression& operator=(rename_expression&&) noexcept = default;
+
     const core::identifier_string& source() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

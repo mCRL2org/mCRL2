@@ -62,6 +62,12 @@ class data_equation: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_DataEqn(), variable_list(variables.begin(), variables.end()), condition, lhs, rhs)
     {}
 
+    /// Move semantics
+    data_equation(const data_equation&) noexcept = default;
+    data_equation(data_equation&&) noexcept = default;
+    data_equation& operator=(const data_equation&) noexcept = default;
+    data_equation& operator=(data_equation&&) noexcept = default;
+
     const variable_list& variables() const
     {
       return atermpp::down_cast<variable_list>((*this)[0]);

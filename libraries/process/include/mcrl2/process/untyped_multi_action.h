@@ -42,6 +42,12 @@ class untyped_multi_action: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_UntypedMultiAction(), actions)
     {}
 
+    /// Move semantics
+    untyped_multi_action(const untyped_multi_action&) noexcept = default;
+    untyped_multi_action(untyped_multi_action&&) noexcept = default;
+    untyped_multi_action& operator=(const untyped_multi_action&) noexcept = default;
+    untyped_multi_action& operator=(untyped_multi_action&&) noexcept = default;
+
     const data::untyped_data_parameter_list& actions() const
     {
       return atermpp::down_cast<data::untyped_data_parameter_list>((*this)[0]);

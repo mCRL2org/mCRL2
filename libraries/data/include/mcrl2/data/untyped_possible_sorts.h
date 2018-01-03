@@ -49,6 +49,12 @@ class untyped_possible_sorts: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedSortsPossible(), sort_expression_list(sorts.begin(), sorts.end())))
     {}
 
+    /// Move semantics
+    untyped_possible_sorts(const untyped_possible_sorts&) noexcept = default;
+    untyped_possible_sorts(untyped_possible_sorts&&) noexcept = default;
+    untyped_possible_sorts& operator=(const untyped_possible_sorts&) noexcept = default;
+    untyped_possible_sorts& operator=(untyped_possible_sorts&&) noexcept = default;
+
     const sort_expression_list& sorts() const
     {
       return atermpp::down_cast<sort_expression_list>((*this)[0]);

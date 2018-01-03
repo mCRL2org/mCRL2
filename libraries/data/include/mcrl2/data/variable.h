@@ -34,6 +34,12 @@ class variable: public data_expression
   public:
 
 
+    /// Move semantics
+    variable(const variable&) noexcept = default;
+    variable(variable&&) noexcept = default;
+    variable& operator=(const variable&) noexcept = default;
+    variable& operator=(variable&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

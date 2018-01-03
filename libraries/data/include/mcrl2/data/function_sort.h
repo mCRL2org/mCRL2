@@ -57,6 +57,12 @@ class function_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortArrow(), sort_expression_list(domain.begin(), domain.end()), codomain))
     {}
 
+    /// Move semantics
+    function_sort(const function_sort&) noexcept = default;
+    function_sort(function_sort&&) noexcept = default;
+    function_sort& operator=(const function_sort&) noexcept = default;
+    function_sort& operator=(function_sort&&) noexcept = default;
+
     const sort_expression_list& domain() const
     {
       return atermpp::down_cast<sort_expression_list>((*this)[0]);

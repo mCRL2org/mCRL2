@@ -48,6 +48,12 @@ class container_sort: public sort_expression
       : sort_expression(atermpp::aterm_appl(core::detail::function_symbol_SortCons(), container_name, element_sort))
     {}
 
+    /// Move semantics
+    container_sort(const container_sort&) noexcept = default;
+    container_sort(container_sort&&) noexcept = default;
+    container_sort& operator=(const container_sort&) noexcept = default;
+    container_sort& operator=(container_sort&&) noexcept = default;
+
     const container_type& container_name() const
     {
       return atermpp::down_cast<container_type>((*this)[0]);

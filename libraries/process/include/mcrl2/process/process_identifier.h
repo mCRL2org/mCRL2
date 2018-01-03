@@ -35,6 +35,12 @@ class process_identifier: public atermpp::aterm_appl
   public:
 
 
+    /// Move semantics
+    process_identifier(const process_identifier&) noexcept = default;
+    process_identifier(process_identifier&&) noexcept = default;
+    process_identifier& operator=(const process_identifier&) noexcept = default;
+    process_identifier& operator=(process_identifier&&) noexcept = default;
+
     const core::identifier_string& name() const
     {
       return atermpp::down_cast<core::identifier_string>((*this)[0]);

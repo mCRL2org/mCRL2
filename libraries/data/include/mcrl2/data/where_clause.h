@@ -51,6 +51,12 @@ class where_clause: public data_expression
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Whr(), body, assignment_expression_list(declarations.begin(), declarations.end())))
     {}
 
+    /// Move semantics
+    where_clause(const where_clause&) noexcept = default;
+    where_clause(where_clause&&) noexcept = default;
+    where_clause& operator=(const where_clause&) noexcept = default;
+    where_clause& operator=(where_clause&&) noexcept = default;
+
     const data_expression& body() const
     {
       return atermpp::down_cast<data_expression>((*this)[0]);

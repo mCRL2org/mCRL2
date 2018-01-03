@@ -56,6 +56,12 @@ class process_expression: public atermpp::aterm_appl
     process_expression(const data::untyped_data_parameter& x)
       : atermpp::aterm_appl(x)
     {}
+
+    /// Move semantics
+    process_expression(const process_expression&) noexcept = default;
+    process_expression(process_expression&&) noexcept = default;
+    process_expression& operator=(const process_expression&) noexcept = default;
+    process_expression& operator=(process_expression&&) noexcept = default;
 };
 
 /// \brief list of process_expressions
@@ -161,6 +167,12 @@ class action: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Action(), label, arguments))
     {}
 
+    /// Move semantics
+    action(const action&) noexcept = default;
+    action(action&&) noexcept = default;
+    action& operator=(const action&) noexcept = default;
+    action& operator=(action&&) noexcept = default;
+
     const action_label& label() const
     {
       return atermpp::down_cast<action_label>((*this)[0]);
@@ -229,6 +241,12 @@ class process_instance: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Process(), identifier, actual_parameters))
     {}
 
+    /// Move semantics
+    process_instance(const process_instance&) noexcept = default;
+    process_instance(process_instance&&) noexcept = default;
+    process_instance& operator=(const process_instance&) noexcept = default;
+    process_instance& operator=(process_instance&&) noexcept = default;
+
     const process_identifier& identifier() const
     {
       return atermpp::down_cast<process_identifier>((*this)[0]);
@@ -291,6 +309,12 @@ class process_instance_assignment: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_ProcessAssignment(), identifier, assignments))
     {}
 
+    /// Move semantics
+    process_instance_assignment(const process_instance_assignment&) noexcept = default;
+    process_instance_assignment(process_instance_assignment&&) noexcept = default;
+    process_instance_assignment& operator=(const process_instance_assignment&) noexcept = default;
+    process_instance_assignment& operator=(process_instance_assignment&&) noexcept = default;
+
     const process_identifier& identifier() const
     {
       return atermpp::down_cast<process_identifier>((*this)[0]);
@@ -347,6 +371,12 @@ class delta: public process_expression
     {
       assert(core::detail::check_term_Delta(*this));
     }
+
+    /// Move semantics
+    delta(const delta&) noexcept = default;
+    delta(delta&&) noexcept = default;
+    delta& operator=(const delta&) noexcept = default;
+    delta& operator=(delta&&) noexcept = default;
 };
 
 /// \brief Test for a delta expression
@@ -394,6 +424,12 @@ class tau: public process_expression
     {
       assert(core::detail::check_term_Tau(*this));
     }
+
+    /// Move semantics
+    tau(const tau&) noexcept = default;
+    tau(tau&&) noexcept = default;
+    tau& operator=(const tau&) noexcept = default;
+    tau& operator=(tau&&) noexcept = default;
 };
 
 /// \brief Test for a tau expression
@@ -446,6 +482,12 @@ class sum: public process_expression
     sum(const data::variable_list& variables, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sum(), variables, operand))
     {}
+
+    /// Move semantics
+    sum(const sum&) noexcept = default;
+    sum(sum&&) noexcept = default;
+    sum& operator=(const sum&) noexcept = default;
+    sum& operator=(sum&&) noexcept = default;
 
     const data::variable_list& variables() const
     {
@@ -509,6 +551,12 @@ class block: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Block(), block_set, operand))
     {}
 
+    /// Move semantics
+    block(const block&) noexcept = default;
+    block(block&&) noexcept = default;
+    block& operator=(const block&) noexcept = default;
+    block& operator=(block&&) noexcept = default;
+
     const core::identifier_string_list& block_set() const
     {
       return atermpp::down_cast<core::identifier_string_list>((*this)[0]);
@@ -570,6 +618,12 @@ class hide: public process_expression
     hide(const core::identifier_string_list& hide_set, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Hide(), hide_set, operand))
     {}
+
+    /// Move semantics
+    hide(const hide&) noexcept = default;
+    hide(hide&&) noexcept = default;
+    hide& operator=(const hide&) noexcept = default;
+    hide& operator=(hide&&) noexcept = default;
 
     const core::identifier_string_list& hide_set() const
     {
@@ -633,6 +687,12 @@ class rename: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Rename(), rename_set, operand))
     {}
 
+    /// Move semantics
+    rename(const rename&) noexcept = default;
+    rename(rename&&) noexcept = default;
+    rename& operator=(const rename&) noexcept = default;
+    rename& operator=(rename&&) noexcept = default;
+
     const rename_expression_list& rename_set() const
     {
       return atermpp::down_cast<rename_expression_list>((*this)[0]);
@@ -694,6 +754,12 @@ class comm: public process_expression
     comm(const communication_expression_list& comm_set, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Comm(), comm_set, operand))
     {}
+
+    /// Move semantics
+    comm(const comm&) noexcept = default;
+    comm(comm&&) noexcept = default;
+    comm& operator=(const comm&) noexcept = default;
+    comm& operator=(comm&&) noexcept = default;
 
     const communication_expression_list& comm_set() const
     {
@@ -757,6 +823,12 @@ class allow: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Allow(), allow_set, operand))
     {}
 
+    /// Move semantics
+    allow(const allow&) noexcept = default;
+    allow(allow&&) noexcept = default;
+    allow& operator=(const allow&) noexcept = default;
+    allow& operator=(allow&&) noexcept = default;
+
     const action_name_multiset_list& allow_set() const
     {
       return atermpp::down_cast<action_name_multiset_list>((*this)[0]);
@@ -818,6 +890,12 @@ class sync: public process_expression
     sync(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Sync(), left, right))
     {}
+
+    /// Move semantics
+    sync(const sync&) noexcept = default;
+    sync(sync&&) noexcept = default;
+    sync& operator=(const sync&) noexcept = default;
+    sync& operator=(sync&&) noexcept = default;
 
     const process_expression& left() const
     {
@@ -881,6 +959,12 @@ class at: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_AtTime(), operand, time_stamp))
     {}
 
+    /// Move semantics
+    at(const at&) noexcept = default;
+    at(at&&) noexcept = default;
+    at& operator=(const at&) noexcept = default;
+    at& operator=(at&&) noexcept = default;
+
     const process_expression& operand() const
     {
       return atermpp::down_cast<process_expression>((*this)[0]);
@@ -942,6 +1026,12 @@ class seq: public process_expression
     seq(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Seq(), left, right))
     {}
+
+    /// Move semantics
+    seq(const seq&) noexcept = default;
+    seq(seq&&) noexcept = default;
+    seq& operator=(const seq&) noexcept = default;
+    seq& operator=(seq&&) noexcept = default;
 
     const process_expression& left() const
     {
@@ -1005,6 +1095,12 @@ class if_then: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThen(), condition, then_case))
     {}
 
+    /// Move semantics
+    if_then(const if_then&) noexcept = default;
+    if_then(if_then&&) noexcept = default;
+    if_then& operator=(const if_then&) noexcept = default;
+    if_then& operator=(if_then&&) noexcept = default;
+
     const data::data_expression& condition() const
     {
       return atermpp::down_cast<data::data_expression>((*this)[0]);
@@ -1066,6 +1162,12 @@ class if_then_else: public process_expression
     if_then_else(const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_IfThenElse(), condition, then_case, else_case))
     {}
+
+    /// Move semantics
+    if_then_else(const if_then_else&) noexcept = default;
+    if_then_else(if_then_else&&) noexcept = default;
+    if_then_else& operator=(const if_then_else&) noexcept = default;
+    if_then_else& operator=(if_then_else&&) noexcept = default;
 
     const data::data_expression& condition() const
     {
@@ -1134,6 +1236,12 @@ class bounded_init: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_BInit(), left, right))
     {}
 
+    /// Move semantics
+    bounded_init(const bounded_init&) noexcept = default;
+    bounded_init(bounded_init&&) noexcept = default;
+    bounded_init& operator=(const bounded_init&) noexcept = default;
+    bounded_init& operator=(bounded_init&&) noexcept = default;
+
     const process_expression& left() const
     {
       return atermpp::down_cast<process_expression>((*this)[0]);
@@ -1195,6 +1303,12 @@ class merge: public process_expression
     merge(const process_expression& left, const process_expression& right)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Merge(), left, right))
     {}
+
+    /// Move semantics
+    merge(const merge&) noexcept = default;
+    merge(merge&&) noexcept = default;
+    merge& operator=(const merge&) noexcept = default;
+    merge& operator=(merge&&) noexcept = default;
 
     const process_expression& left() const
     {
@@ -1258,6 +1372,12 @@ class left_merge: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_LMerge(), left, right))
     {}
 
+    /// Move semantics
+    left_merge(const left_merge&) noexcept = default;
+    left_merge(left_merge&&) noexcept = default;
+    left_merge& operator=(const left_merge&) noexcept = default;
+    left_merge& operator=(left_merge&&) noexcept = default;
+
     const process_expression& left() const
     {
       return atermpp::down_cast<process_expression>((*this)[0]);
@@ -1320,6 +1440,12 @@ class choice: public process_expression
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_Choice(), left, right))
     {}
 
+    /// Move semantics
+    choice(const choice&) noexcept = default;
+    choice(choice&&) noexcept = default;
+    choice& operator=(const choice&) noexcept = default;
+    choice& operator=(choice&&) noexcept = default;
+
     const process_expression& left() const
     {
       return atermpp::down_cast<process_expression>((*this)[0]);
@@ -1381,6 +1507,12 @@ class stochastic_operator: public process_expression
     stochastic_operator(const data::variable_list& variables, const data::data_expression& distribution, const process_expression& operand)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_StochasticOperator(), variables, distribution, operand))
     {}
+
+    /// Move semantics
+    stochastic_operator(const stochastic_operator&) noexcept = default;
+    stochastic_operator(stochastic_operator&&) noexcept = default;
+    stochastic_operator& operator=(const stochastic_operator&) noexcept = default;
+    stochastic_operator& operator=(stochastic_operator&&) noexcept = default;
 
     const data::variable_list& variables() const
     {
@@ -1453,6 +1585,12 @@ class untyped_process_assignment: public process_expression
     untyped_process_assignment(const std::string& name, const data::untyped_identifier_assignment_list& assignments)
       : process_expression(atermpp::aterm_appl(core::detail::function_symbol_UntypedProcessAssignment(), core::identifier_string(name), assignments))
     {}
+
+    /// Move semantics
+    untyped_process_assignment(const untyped_process_assignment&) noexcept = default;
+    untyped_process_assignment(untyped_process_assignment&&) noexcept = default;
+    untyped_process_assignment& operator=(const untyped_process_assignment&) noexcept = default;
+    untyped_process_assignment& operator=(untyped_process_assignment&&) noexcept = default;
 
     const core::identifier_string& name() const
     {
