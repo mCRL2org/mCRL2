@@ -59,13 +59,11 @@ class function_sort: public sort_expression
 
     const sort_expression_list& domain() const
     {
-      assert(this->function()==core::detail::function_symbol_SortArrow());
       return atermpp::down_cast<sort_expression_list>((*this)[0]);
     }
 
     const sort_expression& codomain() const
     {
-      assert(this->function()==core::detail::function_symbol_SortArrow());
       return atermpp::down_cast<sort_expression>((*this)[1]);
     }
 };
