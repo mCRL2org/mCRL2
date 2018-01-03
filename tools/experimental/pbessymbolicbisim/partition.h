@@ -136,15 +136,17 @@ protected:
     block1 = simpl.at(phi_k.first)->apply(block1);
     if(block1 == make_abstraction(lambda_binder(), eq.variable().parameters(), sort_bool::false_()))
     {
-      // data_expression is_succ =
-      //     rewr(sort_bool::and_(
-      //       make_application(phi_k.second, phi_k.first.parameters()),
-      //       sort_bool::and_(
-      //         cl.condition(),
-      //         rewr(make_application(phi_l.second, cl.new_state().parameters()))
-      //       )
-      //     ))
-      //   ;
+      data_expression is_succ =
+          sort_bool::and_(
+            make_application(phi_k.second, phi_k.first.parameters()),
+            sort_bool::and_(
+              cl.condition(),
+              make_application(phi_l.second, cl.new_state().parameters())
+            )
+          )
+        ;
+      std::cout << is_succ << std::endl;
+      std::cout << simpl.at(phi_k.first)->apply(make_abstraction(lambda_binder(), eq.variable().parameters(),is_succ)) << std::endl;
 
       // smt::smt_problem problem;
       // for(const variable& v: phi_k.first.parameters() + cl.quantification_domain())
@@ -640,10 +642,10 @@ public:
   void set_proof(const std::set< verti >& proof_nodes)
   {
     // Move all the blocks to the other set while keeping the order m_proof_block ++ m_other_blocks
-    std::list< block_t > all_blocks;
-    all_blocks.swap(m_proof_blocks);
+    std::list< block_t > all_blocks = m_proof_blocks;
+    // all_blocks.swap(m_proof_blocks);
     all_blocks.insert(all_blocks.end(), m_other_blocks.begin(), m_other_blocks.end());
-    // m_proof_blocks.clear();
+    m_proof_blocks.clear();
     m_other_blocks.clear();
 
     // Move the requested blocks to the main set

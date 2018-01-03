@@ -175,11 +175,6 @@ public:
   {
     return is_lambda(expr) ? apply_lambda(expr) : apply_data_expression(expr);
   }
-
-  // data_expression apply(const data_expression& expr, const mutable_indexed_substitution<> sigma)
-  // {
-  //   return is_lambda(expr) ? apply_lambda(expr, sigma) : apply_data_expression(expr,sigma);
-  // }
 };
 
 
