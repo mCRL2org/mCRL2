@@ -857,7 +857,17 @@ class Class:
                 result.append(MemberFunction(self.classname(), return_type, name, arg))
         return result
 
-    def expand_text(self, text, parameters = '', constructors = '', member_functions = '', namespace = None):
+    def move_semantics_text(self):
+        text = r'''
+
+    /// Move semantics
+    <CLASSNAME>(const <CLASSNAME>&) noexcept = default;
+    <CLASSNAME>(<CLASSNAME>&&) noexcept = default;
+    <CLASSNAME>& operator=(const <CLASSNAME>&) noexcept = default;
+    <CLASSNAME>& operator=(<CLASSNAME>&&) noexcept = default;'''
+        return re.sub('<CLASSNAME>', self.classname(), text)
+
+    def expand_text(self, text, parameters = '', constructors = '', member_functions = '', namespace = None, move_semantics = ''):
         superclass = self.superclass()
         if superclass == None:
             superclass_declaration = ': public atermpp::aterm_appl'
@@ -880,6 +890,7 @@ class Class:
         if superclass != None:
             text = re.sub('<SUPERCLASS>'  , superclass, text)
         text = re.sub('<MEMBER_FUNCTIONS>', member_functions, text)
+        text = re.sub('<MOVE_SEMANTICS>'  , move_semantics, text)
         return text
 
     # Returns typedefs for term lists and term vectors.
@@ -940,9 +951,15 @@ bool is_%s(const %s& x)
 class <CLASSNAME><SUPERCLASS_DECLARATION>
 {
   public:
-<CONSTRUCTORS><MEMBER_FUNCTIONS><USER_SECTION>
+<CONSTRUCTORS><MOVE_SEMANTICS><MEMBER_FUNCTIONS><USER_SECTION>
 };'''
-            text = self.expand_text(text = text, parameters = ptext, constructors = ctext, member_functions = mtext, namespace = self.namespace())
+            text = self.expand_text(text = text,
+                                    parameters = ptext,
+                                    constructors = ctext,
+                                    member_functions = mtext,
+                                    namespace = self.namespace(),
+                                    move_semantics = self.move_semantics_text()
+                                   )
 
             if 'X' in self.modifiers():
                 text = re.sub('check_term', 'check_rule', text)
@@ -1004,19 +1021,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
         classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
         return classes
-
-    # Returns the member function definitions
-    # def class_member_function_definitions(self, all_classes, namespace = 'core'):
-    #     ptext = ', '.join([p.name() for p in self.constructor.parameters()])
-    #     ctext = '\n\n'.join([x.definition() for x in self.constructors(namespace)])
-    #     mtext = ''.join(['\n\n' + x.definition() for x in self.member_functions(all_classes)])
-    #
-    #     text = r'''<CONSTRUCTORS><MEMBER_FUNCTIONS>'''
-    #     text = self.expand_text(text, ptext, ctext, mtext, namespace)
-    #
-    #     if 'X' in self.modifiers():
-    #         text = re.sub('check_term', 'check_rule', text)
-    #     return text + '\n'
 
     def traverser_function(self, all_classes, dependencies):
         text = r'''void apply(const <CLASS_NAME>& x)
