@@ -53,6 +53,12 @@ class abstraction: public data_expression
       : data_expression(atermpp::aterm_appl(core::detail::function_symbol_Binder(), binding_operator, variable_list(variables.begin(), variables.end()), body))
     {}
 
+    /// Move semantics
+    abstraction(const abstraction&) noexcept = default;
+    abstraction(abstraction&&) noexcept = default;
+    abstraction& operator=(const abstraction&) noexcept = default;
+    abstraction& operator=(abstraction&&) noexcept = default;
+
     const binder_type& binding_operator() const
     {
       return atermpp::down_cast<const binder_type>((*this)[0]);

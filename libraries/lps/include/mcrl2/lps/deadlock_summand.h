@@ -42,6 +42,12 @@ class deadlock_summand: public summand_base
         m_deadlock(delta)
     {}
 
+    /// Move semantics
+    deadlock_summand(const deadlock_summand&) noexcept = default;
+    deadlock_summand(deadlock_summand&&) noexcept = default;
+    deadlock_summand& operator=(const deadlock_summand&) noexcept = default;
+    deadlock_summand& operator=(deadlock_summand&&) noexcept = default;
+
     /// \brief Returns the deadlock of this summand.
     const lps::deadlock& deadlock() const
     {

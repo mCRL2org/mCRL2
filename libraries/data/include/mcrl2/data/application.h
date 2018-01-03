@@ -243,7 +243,7 @@ inline bool contains_untyped_sort(const sort_expression& s)
   {
     const function_sort& fs=atermpp::down_cast<function_sort>(s);
     if (contains_untyped_sort(fs.codomain()))
-    { 
+    {
       return true;
     }
     for(const sort_expression& sd: fs.domain())
@@ -270,13 +270,13 @@ inline bool check_whether_sorts_match(const data_expression& head, const CONTAIN
 {
   if (contains_untyped_sort(head.sort()))
   {
-    // Most likely head is a just parsed, untyped object. 
+    // Most likely head is a just parsed, untyped object.
     return true;
   }
   function_sort fs(head.sort());
   if ((fs.domain().size()==1 && contains_untyped_sort(fs.domain().front())) ||
       (l.size()==1 && contains_untyped_sort(l.front().sort())))
-  { 
+  {
     // This is most likely an application from or to an Rewritten@@term, used in the jitty rewriter
     // to indicate that a term is in normal form.
     return true;
@@ -296,7 +296,7 @@ inline bool check_whether_sorts_match(const data_expression& head, const CONTAIN
     ++i;
   }
   return true;
-}  
+}
 
 } // namespace detail
 
@@ -314,7 +314,7 @@ class application: public data_expression
                 const data_expression& arg1)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(2),head,arg1))
     {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1})); 
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1}));
     }
 
     /// \brief Constructor.
@@ -323,7 +323,7 @@ class application: public data_expression
                 const data_expression& arg2)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(3),head,arg1,arg2))
     {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2})); 
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2}));
     }
 
     /// \brief Constructor.
@@ -333,7 +333,7 @@ class application: public data_expression
                 const data_expression& arg3)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(4),head,arg1,arg2,arg3))
     {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3})); 
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3}));
     }
 
     /// \brief Constructor.
@@ -344,7 +344,7 @@ class application: public data_expression
                 const data_expression& arg4)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(5),head,arg1,arg2,arg3,arg4))
     {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4})); 
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4}));
     }
 
     /// \brief Constructor
@@ -356,7 +356,7 @@ class application: public data_expression
                 const data_expression& arg5)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(6),head,arg1,arg2,arg3,arg4,arg5))
     {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5})); 
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5}));
     }
 
     /// \brief Constructor
@@ -369,7 +369,7 @@ class application: public data_expression
                 const data_expression& arg6)
       : data_expression(atermpp::term_appl<aterm>(core::detail::function_symbol_DataAppl(7),head,arg1,arg2,arg3,arg4,arg5,arg6))
     {
-      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5, arg6})); 
+      assert(detail::check_whether_sorts_match<data_expression_list>(head, {arg1, arg2, arg3, arg4, arg5, arg6}));
     }
 
     /// \brief Constructor.
@@ -465,6 +465,12 @@ class application: public data_expression
       assert(first!=last);
       assert(detail::check_whether_sorts_match(head,data_expression_list(begin(), end())));
     }
+
+    /// Move semantics
+    application(const application&) noexcept = default;
+    application(application&&) noexcept = default;
+    application& operator=(const application&) noexcept = default;
+    application& operator=(application&&) noexcept = default;
 
     /// \brief Get the function at the head of this expression.
     const data_expression& head() const

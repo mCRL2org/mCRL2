@@ -59,6 +59,12 @@ class process_initializer: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::function_symbol_LinearProcessInit(), assignments, stochastic_distribution())
     {}
 
+    /// Move semantics
+    process_initializer(const process_initializer&) noexcept = default;
+    process_initializer(process_initializer&&) noexcept = default;
+    process_initializer& operator=(const process_initializer&) noexcept = default;
+    process_initializer& operator=(process_initializer&&) noexcept = default;
+
     const data::assignment_list& assignments() const
     {
       return atermpp::down_cast<data::assignment_list>((*this)[0]);

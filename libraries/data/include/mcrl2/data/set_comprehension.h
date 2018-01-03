@@ -51,6 +51,12 @@ class set_comprehension: public abstraction
       assert(!variables.empty());
     }
 
+    /// Move semantics
+    set_comprehension(const set_comprehension&) noexcept = default;
+    set_comprehension(set_comprehension&&) noexcept = default;
+    set_comprehension& operator=(const set_comprehension&) noexcept = default;
+    set_comprehension& operator=(set_comprehension&&) noexcept = default;
+
 }; // class set_comprehension
 
 //--- start generated class set_comprehension ---//

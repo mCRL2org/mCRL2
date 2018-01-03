@@ -64,6 +64,12 @@ class lambda: public abstraction
       assert(!variables.empty());
     }
 
+    /// Move semantics
+    lambda(const lambda&) noexcept = default;
+    lambda(lambda&&) noexcept = default;
+    lambda& operator=(const lambda&) noexcept = default;
+    lambda& operator=(lambda&&) noexcept = default;
+
 }; // class lambda
 
 //--- start generated class lambda ---//

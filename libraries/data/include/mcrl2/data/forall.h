@@ -53,6 +53,12 @@ class forall: public abstraction
       assert(!variables.empty());
     }
 
+    /// Move semantics
+    forall(const forall&) noexcept = default;
+    forall(forall&&) noexcept = default;
+    forall& operator=(const forall&) noexcept = default;
+    forall& operator=(forall&&) noexcept = default;
+
 }; // class forall
 
 //--- start generated class forall ---//

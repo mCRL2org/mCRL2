@@ -51,6 +51,12 @@ class untyped_set_or_bag_comprehension: public abstraction
       assert(!variables.empty());
     }
 
+    /// Move semantics
+    untyped_set_or_bag_comprehension(const untyped_set_or_bag_comprehension&) noexcept = default;
+    untyped_set_or_bag_comprehension(untyped_set_or_bag_comprehension&&) noexcept = default;
+    untyped_set_or_bag_comprehension& operator=(const untyped_set_or_bag_comprehension&) noexcept = default;
+    untyped_set_or_bag_comprehension& operator=(untyped_set_or_bag_comprehension&&) noexcept = default;
+
 }; // class untyped_set_or_bag_comprehension
 
 //--- start generated class untyped_set_or_bag_comprehension ---//

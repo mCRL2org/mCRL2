@@ -51,6 +51,12 @@ class bag_comprehension: public abstraction
       assert(!variables.empty());
     }
 
+    /// Move semantics
+    bag_comprehension(const bag_comprehension&) noexcept = default;
+    bag_comprehension(bag_comprehension&&) noexcept = default;
+    bag_comprehension& operator=(const bag_comprehension&) noexcept = default;
+    bag_comprehension& operator=(bag_comprehension&&) noexcept = default;
+
 }; // class bag_comprehension
 
 //--- start generated class bag_comprehension ---//

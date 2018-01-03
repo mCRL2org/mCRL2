@@ -46,6 +46,12 @@ class action_summand: public summand_base
         m_assignments(assignments)
     {}
 
+    /// Move semantics
+    action_summand(const action_summand&) noexcept = default;
+    action_summand(action_summand&&) noexcept = default;
+    action_summand& operator=(const action_summand&) noexcept = default;
+    action_summand& operator=(action_summand&&) noexcept = default;
+
     /// \brief Returns the multi-action of this summand.
     const lps::multi_action& multi_action() const
     {
@@ -156,9 +162,9 @@ bool operator<(const action_summand& x, const action_summand& y)
 inline
 bool operator==(const action_summand& x, const action_summand& y)
 {
-  return x.summation_variables() == y.summation_variables() && 
-         x.condition() == y.condition() && 
-         x.multi_action() == y.multi_action() && 
+  return x.summation_variables() == y.summation_variables() &&
+         x.condition() == y.condition() &&
+         x.multi_action() == y.multi_action() &&
          x.assignments() == y.assignments();
 }
 

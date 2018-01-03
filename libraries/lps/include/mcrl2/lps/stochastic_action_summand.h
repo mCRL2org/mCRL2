@@ -41,6 +41,12 @@ class stochastic_action_summand: public action_summand
       : action_summand(s)
     {}
 
+    /// Move semantics
+    stochastic_action_summand(const stochastic_action_summand&) noexcept = default;
+    stochastic_action_summand(stochastic_action_summand&&) noexcept = default;
+    stochastic_action_summand& operator=(const stochastic_action_summand&) noexcept = default;
+    stochastic_action_summand& operator=(stochastic_action_summand&&) noexcept = default;
+
     /// \brief Returns the distribution of this summand.
     const stochastic_distribution& distribution() const
     {

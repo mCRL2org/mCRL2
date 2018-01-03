@@ -53,6 +53,12 @@ class exists: public abstraction
       assert(!variables.empty());
     }
 
+    /// Move semantics
+    exists(const exists&) noexcept = default;
+    exists(exists&&) noexcept = default;
+    exists& operator=(const exists&) noexcept = default;
+    exists& operator=(exists&&) noexcept = default;
+
 }; // class exists
 
 //--- start generated class exists ---//
