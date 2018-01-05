@@ -17,7 +17,6 @@
 #include "mcrl2/smt/constructed_sort_definition.h"
 #include "mcrl2/smt/data_specification.h"
 #include "mcrl2/smt/named_function_definition.h"
-#include "mcrl2/smt/pp_function_definition.h"
 #include "mcrl2/smt/sort_definition.h"
 
 using namespace mcrl2::log;
@@ -50,19 +49,17 @@ private:
   {
     execute(command);
 
-    char output[64];
+    char output[256];
 
     // check return value
-    if (0 < ::read(pipe_stdout[0], output, 64))
+    if (0 < ::read(pipe_stdout[0], output, 256))
     {
       if (std::strncmp(output, "sat", 3) == 0)
       {
-        mCRL2log(verbose) << "The formula is satisfiable" << std::endl;
         return true;
       }
       else if (std::strncmp(output, "unsat", 5) == 0)
       {
-        mCRL2log(verbose) << "The formula is unsatisfiable" << std::endl;
         return false;
       }
       else if (std::strncmp(output, "unknown", 7) == 0)
@@ -72,7 +69,7 @@ private:
       else
       {
         mCRL2log(error) << "Error when checking satisfiability of \n" << command << std::endl;
-        throw mcrl2::runtime_error("Got unexpected response from SMT-solver: " + std::string(output, 64));
+        throw mcrl2::runtime_error("Got unexpected response from SMT-solver: " + std::string(output, 256));
       }
     }
     else
