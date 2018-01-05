@@ -143,6 +143,10 @@ protected:
 
   data_expression apply_data_expression(const data_expression& expr)
   {
+    if(expr == sort_bool::true_() || expr == sort_bool::false_())
+    {
+      return expr;
+    }
     // Rewrite the expression to some kind of normal form using BDDs
     data_expression rewritten = rewr(proving_rewr(expr));
     // Check the cache
@@ -152,7 +156,16 @@ protected:
       return res->second;
     }
     // Actually simplify the expression using the implementation in one of the subclasses
-    data_expression simpl(simplify_expression(rewritten));
+    data_expression simpl;
+    try
+    {
+      simpl = simplify_expression(rewritten);
+    }
+    catch(const mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error("An exception occured while simplifying the expression " + pp(expr) + 
+        ".\nThe rewritten expression is " + pp(rewritten) + ".\nThe original exception is: " + e.what());
+    }
 
     // Insert the result in the cache, both for the original expression and the expression in normal form
     cache.insert(std::make_pair(rewritten, simpl));

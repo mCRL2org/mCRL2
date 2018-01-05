@@ -254,13 +254,34 @@ protected:
     mCRL2log(log::verbose) << std::endl;
   }
 
+  rewriter make_rewriter(const pbes_system::pbes& spec, const data_specification& dataspec, const rewrite_strategy& st)
+  {
+    std::set<function_symbol> used_functions = pbes_system::find_function_symbols(spec);
+    used_functions.insert(sort_bool::not_());
+    if(used_functions.find(sort_real::creal()) != used_functions.end())
+    {
+      // Specification contains real numbers, so we should add all relevant
+      // function symbols
+      used_functions.insert(less(sort_real::real_()));
+      used_functions.insert(less_equal(sort_real::real_()));
+      used_functions.insert(greater(sort_real::real_()));
+      used_functions.insert(greater_equal(sort_real::real_()));
+      used_functions.insert(equal_to(sort_real::real_()));
+      for(const function_symbol& f: sort_real::real_generate_functions_code())
+      {
+        used_functions.insert(f);
+      }
+    }
+    return rewriter(dataspec, used_data_equation_selector(dataspec, used_functions, spec.global_variables()), st);
+  }
+
 public:
   symbolic_bisim_algorithm(const pbes_system::pbes& spec, const std::size_t& refine_steps, const rewrite_strategy& st = jitty)
-    : rewr(merge_data_specifications(spec.data(),simplifier::norm_rules_spec()),st)
+    : rewr(make_rewriter(spec, merge_data_specifications(spec.data(),simplifier::norm_rules_spec()),st))
 #ifdef MCRL2_JITTYC_AVAILABLE
-    , proving_rewr(spec.data(), st == jitty ? jitty_prover : jitty_compiling_prover)
+    , proving_rewr(make_rewriter(spec, spec.data(), st == jitty ? jitty_prover : jitty_compiling_prover))
 #else
-    , proving_rewr(spec.data(), jitty_prover)
+    , proving_rewr(make_rewriter(spec, spec.data(), jitty_prover))
 #endif
     , m_spec(pbes_system::detail::ppg_pbes(spec).simplify(rewr))
     , m_partition(m_spec,rewr,proving_rewr)

@@ -9,8 +9,8 @@
 /// \file symbolic_bisim.h
 
 
-#ifndef MCRL2_PBESSYMBOLICBISIm_proof_blocks_H
-#define MCRL2_PBESSYMBOLICBISIm_proof_blocks_H
+#ifndef MCRL2_PBESSYMBOLICBISIM_PARTITION_H
+#define MCRL2_PBESSYMBOLICBISIM_PARTITION_H
 
 #include <string>
 #include <queue>
@@ -723,4 +723,4 @@ public:
 } // namespace mcrl2
 
 
-#endif // MCRL2_PBESSYMBOLICBISIm_proof_blocks_H
+#endif // MCRL2_PBESSYMBOLICBISIM_PARTITION_H

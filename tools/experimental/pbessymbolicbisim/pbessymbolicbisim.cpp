@@ -23,22 +23,22 @@
 #include "mcrl2/data/prover_tool.h"
 #include "mcrl2/data/rewriter_tool.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/input_tool.h"
 
 #include "symbolic_bisim.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using mcrl2::data::tools::rewriter_tool;
-using mcrl2::utilities::tools::input_output_tool;
+using mcrl2::utilities::tools::input_tool;
 using namespace mcrl2::log;
 
 
-class pbessymbolicbisim_tool: public rewriter_tool<input_output_tool>
+class pbessymbolicbisim_tool: public rewriter_tool<input_tool>
 {
 
 protected:
-  typedef rewriter_tool<input_output_tool> super;
+  typedef rewriter_tool<input_tool> super;
 
   std::size_t m_num_refine_steps;
 
@@ -82,7 +82,6 @@ public:
   {
     mCRL2log(verbose) << "Parameters of pbessymbolicbisim:" << std::endl;
     mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-    mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
     mCRL2log(verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
 
     mcrl2::pbes_system::pbes spec;
