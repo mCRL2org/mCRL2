@@ -105,7 +105,7 @@ class BDD_Prover: protected rewriter
     Info f_info;
 
     /// \brief A flag that indicates whether or not the formala Prover::f_formula has been processed.
-    bool f_processed;
+    bool f_processed = false;
 
     /// \brief A flag that indicates whether or not the formala Prover::f_formula is a tautology.
     Answer f_tautology;
@@ -125,11 +125,11 @@ class BDD_Prover: protected rewriter
     /// \brief Flag indicating whether or not the result of the comparison between the first two arguments
     /// \brief weighs stronger than the result of the comparison between the second pair of arguments of an
     /// \brief equation, when determining the order of expressions.
-    bool f_reverse;
+    bool f_reverse = true;
 
     /// \brief Flag indicating whether or not the arguments of equality functions are taken into account
     /// \brief when determining the order of expressions.
-    bool f_full;
+    bool f_full = false;
 
     /// \brief A flag indicating whether or not induction on lists is applied.
     bool f_apply_induction;
@@ -164,23 +164,23 @@ class BDD_Prover: protected rewriter
 
       mCRL2log(log::debug) << "Formula: " << f_formula << std::endl;
 
-      f_internal_bdd = f_formula;
+      data_expression intermediate_bdd = f_formula;
 
-      f_internal_bdd = m_rewriter->rewrite(f_internal_bdd,bdd_sigma);
-      f_internal_bdd = f_manipulator.orient(f_internal_bdd);
+      intermediate_bdd = m_rewriter->rewrite(intermediate_bdd,bdd_sigma);
+      intermediate_bdd = f_manipulator.orient(intermediate_bdd);
 
-      mCRL2log(log::debug) << "Formula rewritten and oriented: " << f_internal_bdd << std::endl;
+      mCRL2log(log::debug) << "Formula rewritten and oriented: " << intermediate_bdd << std::endl;
 
-      while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd)
+      while (v_previous_1 != intermediate_bdd && v_previous_2 != intermediate_bdd)
       {
         v_previous_2 = v_previous_1;
-        v_previous_1 = f_internal_bdd;
-        f_internal_bdd = bdd_down(f_internal_bdd);
+        v_previous_1 = intermediate_bdd;
+        intermediate_bdd = bdd_down(intermediate_bdd);
         mCRL2log(log::debug) << "End of iteration." << std::endl;
-        mCRL2log(log::debug) << "Intermediate BDD: " << f_internal_bdd << std::endl;
+        mCRL2log(log::debug) << "Intermediate BDD: " << intermediate_bdd << std::endl;
       }
 
-      f_bdd = f_internal_bdd;
+      f_bdd = intermediate_bdd;
       mCRL2log(log::debug) << "Resulting BDD: " << f_bdd << std::endl;
 
     }
@@ -387,7 +387,7 @@ class BDD_Prover: protected rewriter
         {
           if (v_result!=data_expression())
           {
-            if (f_info.lpo1(v_result, v_small))
+            if (f_info.compare_guard(v_small, v_result) == compare_result_smaller)
             {
               v_result = v_small;
             }
@@ -456,7 +456,6 @@ class BDD_Prover: protected rewriter
   protected:
 
     /// \brief A binary decision diagram in the internal representation of the rewriter.
-    data_expression f_internal_bdd;
     substitution_type bdd_sigma;
 
     /// \brief A binary decision diagram in the internal representation of mCRL2.
@@ -478,21 +477,19 @@ class BDD_Prover: protected rewriter
     ); */
 
     BDD_Prover(
-      mcrl2::data::data_specification const& data_spec,
+      const data_specification& data_spec,
       const used_data_equation_selector& equations_selector,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       smt_solver_type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
-      : 
-        mcrl2::data::rewriter(data_spec, equations_selector, a_rewrite_strategy),
-                       f_manipulator(f_info),
-                       f_info(),
-                       f_induction(data_spec)
+    : rewriter(data_spec, equations_selector, a_rewrite_strategy)
+    , f_manipulator(f_info)
+    , f_bdd_simplifier(a_path_eliminator ? new BDD_Path_Eliminator(a_solver_type) : new BDD_Simplifier())
+    , f_induction(data_spec)
     {
       f_time_limit = a_time_limit;
-      f_processed = false;
 
       switch (a_rewrite_strategy)
       {
@@ -518,22 +515,12 @@ class BDD_Prover: protected rewriter
         }
       }
 
-      f_reverse = true;
-      f_full = true;
       f_apply_induction = a_apply_induction;
       f_info.set_reverse(f_reverse);
       f_info.set_full(f_full);
       mCRL2log(log::debug) << "Flags:" << std::endl
                       << "  Reverse: " << bool_to_char_string(f_reverse) << "," << std::endl
                       << "  Full: " << bool_to_char_string(f_full) << "," << std::endl;
-      if (a_path_eliminator)
-      {
-        f_bdd_simplifier = new BDD_Path_Eliminator(a_solver_type);
-      }
-      else
-      {
-        f_bdd_simplifier = new BDD_Simplifier();
-      }
     }
 
     /// \brief Destructor that destroys the BDD simplifier BDD_Prover::f_bdd_simplifier.

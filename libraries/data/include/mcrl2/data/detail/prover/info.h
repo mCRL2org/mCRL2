@@ -87,23 +87,6 @@ class Info
       return (compare_address(v_operator_1, v_operator_2) == compare_result_bigger) && majo1(a_term1, a_term2, 0);
     }
 
-    class equals // A simple class containing an equality predicate.
-    {
-      private:
-        const atermpp::aterm_appl m_t;
-
-      public:
-        // constructor
-        equals(const data_expression& t1):
-          m_t(t1)
-        {}
-
-        bool operator()(const atermpp::aterm_appl& t) const
-        {
-          return (t==m_t);
-        }
-    };
-
     bool gamma1(const data_expression& a_term1, const data_expression& a_term2)
     {
       const atermpp::aterm v_operator_1 = get_operator(a_term1);
@@ -158,13 +141,17 @@ class Info
 
         v_term1 = get_argument(a_guard, 0);
         v_term2 = get_argument(a_guard, 1);
-        if (is_variable(v_term1) && is_variable(v_term2))
+        if(find_free_variables(v_term1).empty() && is_variable(v_term2))
         {
           return 1;
         }
-        return 2;
+        if (is_variable(v_term1) && is_variable(v_term2))
+        {
+          return 2;
+        }
+        return 3;
       }
-      return 3;
+      return 4;
     }
 
     /// \brief Compares the structure of two guards.
@@ -204,6 +191,21 @@ class Info
       return compare_result_equal;
     }
 
+    Compare_Result compare_term_free_variables(const data_expression& a_term1, const data_expression& a_term2)
+    {
+      bool term1_is_closed = find_free_variables(a_term1).empty();
+      bool term2_is_closed = find_free_variables(a_term2).empty();
+      if(term1_is_closed && !term2_is_closed)
+      {
+        return compare_result_smaller;
+      }
+      if(!term1_is_closed && term2_is_closed)
+      {
+        return compare_result_bigger;
+      }
+      return compare_result_equal;
+    }
+
     /// \brief Compares terms by their type.
     Compare_Result compare_term_type(const data_expression& a_term1, const data_expression& a_term2)
     {
@@ -223,11 +225,11 @@ class Info
     {
       if (occurs(a_term1, a_term2))
       {
-        return compare_result_smaller;
+        return compare_result_bigger;
       }
       if (occurs(a_term2, a_term1))
       {
-        return compare_result_bigger;
+        return compare_result_smaller;
       }
       return compare_result_equal;
     }
@@ -245,7 +247,7 @@ class Info
     // Perform an occur check of expression t2 in expression t1.
     static bool occurs(const data_expression& t1, const data_expression& t2)
     {
-      return atermpp::find_if(t1,equals(t2))!=atermpp::aterm_appl();
+      return atermpp::find_if(t1,[&](const atermpp::aterm_appl& t){return t == t2;}) != atermpp::aterm_appl();
     }
 
     /// \brief Sets the flag Info::f_reverse.
@@ -276,11 +278,14 @@ class Info
     Compare_Result compare_term(const data_expression& a_term1, const data_expression& a_term2)
     {
       return lexico(
-               lexico(
-                 compare_term_occurs(a_term1, a_term2),
-                 compare_term_type(a_term1, a_term2)
-               ),
-               compare_address(a_term1, a_term2)
+                lexico(
+                  lexico(
+                    compare_term_free_variables(a_term1, a_term2),
+                    compare_term_occurs(a_term1, a_term2)
+                  ),
+                  compare_term_type(a_term1, a_term2)
+                ),
+                compare_address(a_term1, a_term2)
              );
     }
 
@@ -304,13 +309,6 @@ class Info
         return alpha1(a_term1, a_term2, 0) || beta1(a_term1, a_term2) || gamma1(a_term1, a_term2);
       }
     }
-
-    /// \brief Indicates whether or not a term has type bool.
-    /// \brief Indicates whether or not a term has type bool.
-    /* bool has_type_bool(const data_expression& a_term)
-    {
-      return a_term.sort()==sort_bool::bool_();
-    } */
 
     /// \brief Returns the number of arguments of the main operator of a term.
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
