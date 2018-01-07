@@ -3,8 +3,10 @@
 Testing
 =======
 
+For tests can be run the python packages yaml and psutil need to be installed. 
+
 Before executing tests, make sure that your build has been configured
-with the value of ``MCRL2_ENABLE_TEST_TARGETS`` set to ``YES`` and that
+with the value of ``MCRL2_ENABLE_TESTS`` set to ``YES`` and that
 the toolset has been compiled.
 
 To conduct the tests specified in the build tree execute::
