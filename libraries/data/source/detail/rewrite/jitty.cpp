@@ -83,12 +83,7 @@ data_expression remove_normal_form_function(const data_expression& t)
       return ta[0];
     }
 
-    std::vector<data_expression> args;
-    for(const data_expression& arg:ta)
-    {
-      args.push_back(remove_normal_form_function(arg));
-    }
-    return application(remove_normal_form_function(ta.head()),args.begin(),args.end());
+    return application(remove_normal_form_function(ta.head()),ta.begin(),ta.end(),remove_normal_form_function);
   }
 
 
