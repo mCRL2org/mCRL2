@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/input_tool.h"
 
+#include "simplifier_mode.h"
 #include "symbolic_bisim.h"
 
 using namespace mcrl2::utilities;
@@ -40,6 +41,7 @@ class pbessymbolicbisim_tool: public rewriter_tool<input_tool>
 protected:
   typedef rewriter_tool<input_tool> super;
 
+  simplifier_mode m_mode;
   std::size_t m_num_refine_steps;
 
   /// Parse the non-default options.
@@ -47,6 +49,7 @@ protected:
   {
     super::parse_options(parser);
 
+    m_mode = parser.option_argument_as<simplifier_mode>("simplifier");
     if(parser.options.count("refine-steps") > 0)
     {
       m_num_refine_steps = parser.option_argument_as<std::size_t>("refine-steps");
@@ -56,8 +59,16 @@ protected:
   void add_options(interface_description& desc)
   {
     super::add_options(desc);
-    desc.
-    add_option("refine-steps",
+    desc.add_option("simplifier", make_enum_argument<simplifier_mode>("S")
+      .add_value(simplify_fm)
+#ifdef DBM_PACKAGE_AVAILABLE
+      .add_value(simplify_dbm)
+#endif
+      .add_value(simplify_finite_domain)
+      .add_value(simplify_identity)
+      .add_value(simplify_auto, true),
+      "set the simplifying strategy for expressions",'s');
+    desc.add_option("refine-steps",
                make_mandatory_argument("num"),
                "perform the given number of refinement steps between each search for a proof graph",
                'n');
@@ -90,7 +101,7 @@ public:
     spec.load(in);
     in.close();
 
-    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy).run();
+    mcrl2::data::symbolic_bisim_algorithm(spec, m_num_refine_steps, m_rewrite_strategy, m_mode).run();
 
     return true;
   }

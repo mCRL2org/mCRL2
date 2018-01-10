@@ -27,14 +27,6 @@
 
 #include "ppg_parser.h"
 #include "partition.h"
-#ifndef DBM_PACKAGE_AVAILABLE
-  #define THIN       "0"
-  #define BOLD       "1"
-  #define GREEN(S)  "\033[" S ";32m"
-  #define YELLOW(S) "\033[" S ";33m"
-  #define RED(S)    "\033[" S ";31m"
-  #define NORMAL    "\033[0;0m"
-#endif
 
 namespace mcrl2
 {
@@ -276,7 +268,7 @@ protected:
   }
 
 public:
-  symbolic_bisim_algorithm(const pbes_system::pbes& spec, const std::size_t& refine_steps, const rewrite_strategy& st = jitty)
+  symbolic_bisim_algorithm(const pbes_system::pbes& spec, const std::size_t& refine_steps, const rewrite_strategy& st = jitty, const simplifier_mode& mode = simplify_auto)
     : rewr(make_rewriter(spec, merge_data_specifications(spec.data(),simplifier::norm_rules_spec()),st))
 #ifdef MCRL2_JITTYC_AVAILABLE
     , proving_rewr(make_rewriter(spec, spec.data(), st == jitty ? jitty_prover : jitty_compiling_prover))
@@ -284,7 +276,7 @@ public:
     , proving_rewr(make_rewriter(spec, spec.data(), jitty_prover))
 #endif
     , m_spec(pbes_system::detail::ppg_pbes(spec).simplify(rewr))
-    , m_partition(m_spec,rewr,proving_rewr)
+    , m_partition(m_spec,rewr,proving_rewr,mode)
     , m_num_refine_steps(refine_steps)
   {}
 
@@ -296,40 +288,57 @@ public:
 
     mCRL2log(log::verbose) << m_spec << std::endl;
 
-    // while the (sub) partition is stable, we have to keep
-    // refining and searching for proof graphs
-    std::size_t num_iterations = 0;
-    double total_pg_time = 0.0;
     player_t latest_winner;
-    do
+    if(m_num_refine_steps != 0)
     {
-      const std::chrono::time_point<std::chrono::high_resolution_clock> t_start_pg_solver = 
-        std::chrono::high_resolution_clock::now();
+      // while the (sub) partition is stable, we have to keep
+      // refining and searching for proof graphs
+      std::size_t num_iterations = 0;
+      double total_pg_time = 0.0;
+      do
+      {
+        const std::chrono::time_point<std::chrono::high_resolution_clock> t_start_pg_solver = 
+          std::chrono::high_resolution_clock::now();
 
+        ParityGame pg;
+        m_partition.get_reachable_pg(pg);
+
+        const ParityGame::Strategy& solution = compute_pg_solution(pg);
+        if(mCRL2logEnabled(log::verbose))
+        {
+          pg.write_debug(solution, mcrl2::log::mcrl2_logger().get(log::verbose));
+        }
+        // compute_sink_subgraphs(pg);
+
+        std::set<verti> proof_graph = compute_subpartition_from_strategy(pg, solution);
+        m_partition.set_proof(proof_graph);
+
+        num_iterations++;
+        latest_winner = pg.winner(solution,0);
+        mCRL2log(log::status) << "End of iteration " << num_iterations << ", " << (latest_winner == PLAYER_EVEN ? "positive" : "negative")
+         << " proof graph has size " << proof_graph.size() 
+         << ", total amount of blocks " << (m_partition.get_proof_blocks().size() + m_partition.get_other_blocks().size()) << "\n";
+        total_pg_time += std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start_pg_solver).count();
+      } while(!m_partition.refine_n_steps(m_num_refine_steps));
+      mCRL2log(log::info) << "Partition refinement completed in " << 
+          std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << 
+          " seconds.\n" << 
+          "Time spent on PG solving: " << total_pg_time << " seconds" << std::endl;
+    }
+    else
+    {
+      m_partition.refine_n_steps(0);
       ParityGame pg;
       m_partition.get_reachable_pg(pg);
 
       const ParityGame::Strategy& solution = compute_pg_solution(pg);
-      if(mCRL2logEnabled(log::verbose))
-      {
-        pg.write_debug(solution, mcrl2::log::mcrl2_logger().get(log::verbose));
-      }
-      // compute_sink_subgraphs(pg);
-
-      std::set<verti> proof_graph = compute_subpartition_from_strategy(pg, solution);
-      m_partition.set_proof(proof_graph);
-
-      num_iterations++;
       latest_winner = pg.winner(solution,0);
-      mCRL2log(log::status) << "End of iteration " << num_iterations << ", " << (latest_winner == PLAYER_EVEN ? "positive" : "negative")
-       << " proof graph has size " << proof_graph.size() 
-       << ", total amount of blocks " << (m_partition.get_proof_blocks().size() + m_partition.get_other_blocks().size()) << "\n";
-      total_pg_time += std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start_pg_solver).count();
-    } while(!m_partition.refine_n_steps(m_num_refine_steps));
-    mCRL2log(log::info) << "Partition refinement completed in " << 
-        std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << 
-        " seconds.\n" << 
-        "Time spent on PG solving: " << total_pg_time << " seconds" << std::endl;
+
+      mCRL2log(log::status) << "Amount of blocks " << m_partition.get_proof_blocks().size() << "\n";
+      mCRL2log(log::info) << "Partition refinement completed in " << 
+          std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t_start).count() << 
+          " seconds.\n" << std::endl;
+    }
 
     // m_partition.save_bes();
     std::cout << (latest_winner == PLAYER_EVEN ? "true" : "false") << std::endl;

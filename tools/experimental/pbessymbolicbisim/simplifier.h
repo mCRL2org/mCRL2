@@ -12,12 +12,12 @@
 #ifndef MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
 #define MCRL2_LPSSYMBOLICBISIM_SIMPLIFIER_H
 
-// #define DBM_PACKAGE_AVAILABLE 1
-
 #include "mcrl2/data/linear_inequalities.h"
 #include "mcrl2/data/merge_data_specifications.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
+
+#include "simplifier_mode.h"
 
 namespace mcrl2
 {
@@ -190,30 +190,8 @@ public:
   }
 };
 
-
-} // namespace mcrl2
-} // namespace data
-
-#ifdef DBM_PACKAGE_AVAILABLE
-  #include "simplifier_dbm.h"
-#else
-  #include "simplifier_fourier_motzkin.h"
-#endif
-
-namespace mcrl2 {
-namespace data{
-
-simplifier* get_simplifier_instance(const rewriter& rewr, const rewriter& proving_rewr, const variable_list& process_parameters, const data_specification& dataspec,
-  const std::map< variable, std::pair<data_expression, data_expression> >& lu_map = std::map< variable, std::pair<data_expression, data_expression> >())
-{
-#ifdef DBM_PACKAGE_AVAILABLE
-  return new simplifier_dbm(rewr, proving_rewr, process_parameters, dataspec, lu_map);
-#else
-  return new simplifier_fourier_motzkin(rewr, proving_rewr, dataspec);
-  (void) process_parameters;
-  (void) lu_map;
-#endif
-}
+simplifier* get_simplifier_instance(const simplifier_mode& mode, const rewriter& rewr, const rewriter& proving_rewr, const variable_list& process_parameters, const data_specification& dataspec,
+  const std::map< variable, std::pair<data_expression, data_expression> >& lu_map = std::map< variable, std::pair<data_expression, data_expression> >());
 
 } // namespace mcrl2
 } // namespace data

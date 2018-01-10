@@ -35,14 +35,12 @@
 #include "mcrl2/utilities/logger.h"
 
 #include "simplifier.h"
-#ifndef DBM_PACKAGE_AVAILABLE
-  #define THIN       "0"
-  #define BOLD       "1"
-  #define GREEN(S)  "\033[" S ";32m"
-  #define YELLOW(S) "\033[" S ";33m"
-  #define RED(S)    "\033[" S ";31m"
-  #define NORMAL    "\033[0;0m"
-#endif
+#define THIN       "0"
+#define BOLD       "1"
+#define GREEN(S)  "\033[" S ";32m"
+#define YELLOW(S) "\033[" S ";33m"
+#define RED(S)    "\033[" S ";31m"
+#define NORMAL    "\033[0;0m"
 #include "ppg_parser.h"
 
 
@@ -613,7 +611,7 @@ protected:
 
 public:
 
-  dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec, const rewriter& r, const rewriter& pr)
+  dependency_graph_partition(const pbes_system::detail::ppg_pbes& spec, const rewriter& r, const rewriter& pr, const simplifier_mode& simpl_mode)
   : m_spec(spec)
   , rewr(r)
   , proving_rewr(pr)
@@ -621,7 +619,7 @@ public:
   {
     for(const equation_type_t& eq: m_spec.equations())
     {
-      simpl.insert(std::make_pair(eq.variable(), get_simplifier_instance(rewr, proving_rewr, eq.variable().parameters(), m_spec.data())));
+      simpl.insert(std::make_pair(eq.variable(), get_simplifier_instance(simpl_mode, rewr, proving_rewr, eq.variable().parameters(), m_spec.data())));
     }
     for(const equation_type_t& eq: m_spec.equations())
     {
@@ -702,6 +700,10 @@ public:
       }
       // Check reachability only in m_proof_blocks
       find_reachable_blocks(true);
+      if(num_steps == 0)
+      {
+        make_bes(m_proof_blocks);
+      }
       mCRL2log(log::verbose) << "End of a refinement step " << num_iterations << std::endl;
     }
     // Check reachability in the full graph
