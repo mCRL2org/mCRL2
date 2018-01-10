@@ -287,7 +287,7 @@ class check_complexity
                                                          __builtin_clzll(size);
             }
         #endif
-        return std::log2(size);
+        return (int) std::log2(size);
     }
 
   private:

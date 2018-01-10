@@ -1731,24 +1731,25 @@ init_transitions(part_state_t& part_st, part_trans_t& part_tr,
         // part_st.state_info[s+1].set_pred_begin(part_st.state_info[s].
         //                                                         pred_end());
 
-        succ_iter_t before_end = part_st.state_info[s].succ_begin() +
-                        noninert_out_per_state[s] + inert_out_per_state[s] - 1;
-        part_st.state_info[s].set_succ_end(before_end + 1);
-        part_st.state_info[s].set_current_constln(before_end + 1);
+        succ_iter_t succ_iter = part_st.state_info[s].succ_begin();
+        succ_iter_t succ_end = succ_iter +
+                            noninert_out_per_state[s] + inert_out_per_state[s];
+        part_st.state_info[s].set_succ_end(succ_end);
+        part_st.state_info[s].set_current_constln(succ_end);
         part_st.state_info[s].set_inert_succ_begin_and_end(part_st.
-            state_info[s].succ_begin()+noninert_out_per_state[s],before_end+1);
-        if (0 != noninert_out_per_state[s] + inert_out_per_state[s])
+            state_info[s].succ_begin() + noninert_out_per_state[s], succ_end);
+        if (succ_iter < succ_end)
         {
-            for (succ_iter_t succ_iter = part_st.state_info[s].succ_begin();
-                                          before_end != succ_iter; ++succ_iter)
+            --succ_end;
+            for (; succ_iter < succ_end; ++succ_iter)
             {
-                succ_iter->set_slice_begin_or_before_end(before_end
+                succ_iter->set_slice_begin_or_before_end(succ_end
                                                      ONLY_IF_DEBUG( , true ) );
             }
-            before_end->set_slice_begin_or_before_end(
+            assert(succ_iter == succ_end);
+            succ_end->set_slice_begin_or_before_end(
                   part_st.state_info[s].succ_begin() ONLY_IF_DEBUG( , true ) );
-        }
-
+        } else  assert(succ_end == succ_iter);
         if (s < aut.num_states())
         {
             // s is not an extra Kripke state.  It is in block 0.
